@@ -76,4 +76,67 @@ function change_feeds_import_feeds_after_import(FeedsSource $source) {
       node_save($node);
     }
   }
+  if ($source->id == 'sku7_code_master') {
+    $query = db_select('node', 'n');
+    $query->join('field_data_field_vehicle', 'v', 'v.entity_id = n.nid');
+    $query->join('field_data_field_loading_date', 'date', 'date.entity_id = n.nid');
+    $query->join('field_data_field_sku7_code', 'sc', 'sc.entity_id = n.nid');
+    $query->join('field_data_field_sku7_code', 'gaisc', 'gaisc.field_sku7_code_value = sc.field_sku7_code_value');
+    $query->join('field_data_field_godown_area_id', 'gai', 'gaisc.entity_id = gai.entity_id');
+    $query->join('field_data_field_sum_of_total_sales_qty', 'stsq', 'stsq.entity_id = n.nid');
+    $query->join('field_data_field_pack_size', 'fps', 'fps.entity_id = gaisc.entity_id');
+    $query->fields('v', array('field_vehicle_value'));
+    $query->fields('date', array('field_loading_date_value'));
+    $query->fields('sc', array('field_sku7_code_value'));
+    $query->fields('gai', array('field_godown_area_id_value'));
+    $query->fields('fps', array('field_pack_size_value'));
+    //$query->fields('stsq', array('field_sum_of_total_sales_qty_value'));
+    $query ->condition('n.type', 'billing_data', '=');
+    $query ->condition('gai.bundle', 'sku7_code_master', '=');
+    $query ->condition('sc.bundle', 'billing_data', '=');
+    //$query ->groupBy('stsq.field_sum_of_total_sales_qty_value');
+    $query->addExpression('SUM(stsq.field_sum_of_total_sales_qty_value)', 'total_sales_qty');
+    $query->addExpression('round(SUM(stsq.field_sum_of_total_sales_qty_value) / field_pack_size_value)', 'cld');
+    $query->addExpression('SUM(stsq.field_sum_of_total_sales_qty_value) - (field_pack_size_value * round(SUM(stsq.field_sum_of_total_sales_qty_value) / field_pack_size_value))', 'eaches');
+    $query ->groupBy('field_vehicle_value,field_loading_date_value,field_sku7_code_value,field_godown_area_id_value');
+    $results = $query->execute()->fetchAll();
+
+    $subquery = db_select($query,'middle');
+    $subquery->fields('middle');
+    $subquery->addExpression('SUM(cld)', 'total_cld');
+    $subquery->addExpression('SUM(eaches)', 'total_eaches');
+    $subquery ->groupBy('field_vehicle_value,field_loading_date_value,field_godown_area_id_value');
+    $results = $subquery->execute()->fetchAll();
+
+    foreach ($results as $key => $val) {
+      if ($val->total_cld > 0 || $val->total_eaches > 0) {
+          global $user;
+          $node = new stdClass();
+          $node->title = $val->field_vehicle_value . format_date(time());
+          $node->type = "picking";
+          node_object_prepare($node); // Sets some defaults. Invokes hook_prepare() and hook_node_prepare().
+          $node->language = LANGUAGE_NONE; // Or e.g. 'en' if locale is enabled
+          $node->uid = $user->uid;
+          $node->status = 1; //(1 or 0): published or not
+          $node->comment = 1; // 0 = comments disabled, 1 = read only, 2 = read/write
+
+          $node->field_picking_van_id[$node->language][0]['value'] = $val->field_vehicle_value;
+          $node->field_picking_loading_date[$node->language][0]['value'] = $val->field_loading_date_value;
+          $node->field_picking_godown_area_id[$node->language][0]['value'] = $val->field_godown_area_id_value;
+     
+          $node->field_pick_units[$node->language][0]['value'] = $val->total_eaches;
+          $node->field_pick_clds[$node->language][0]['value'] = $val->total_cld;
+          $node_copy = $node;
+          if ($val->total_eaches > 0) {
+             $node->field_picking_picking_type[$node->language][0]['value'] = 'Loose';
+             node_save($node);
+          }
+          if ($val->total_cld > 0) {
+             $node_copy->field_picking_picking_type[$node->language][0]['value'] = 'Bulk';
+             node_save($node_copy);
+          }
+      }
+    }
+  }
+
 }
