@@ -76,7 +76,7 @@ function change_feeds_import_feeds_after_import(FeedsSource $source) {
       node_save($node);
     }
   }
-  if ($source->id == 'sku7_code_master') {
+  if ($source->id == 'billing_data') {
     $query = db_select('node', 'n');
     $query->join('field_data_field_vehicle', 'v', 'v.entity_id = n.nid');
     $query->join('field_data_field_loading_date', 'date', 'date.entity_id = n.nid');
