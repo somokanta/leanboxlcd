@@ -1,0 +1,5 @@
+name = Change Feeds Result
+description = After feeds importing do some change like create new nodes.
+package = Custom
+core = 7.x
+
