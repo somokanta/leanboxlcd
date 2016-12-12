@@ -96,7 +96,7 @@ function change_feeds_import_feeds_after_import(FeedsSource $source) {
     $query ->condition('sc.bundle', 'billing_data', '=');
     //$query ->groupBy('stsq.field_sum_of_total_sales_qty_value');
     $query->addExpression('SUM(stsq.field_sum_of_total_sales_qty_value)', 'total_sales_qty');
-    $query->addExpression('round(SUM(stsq.field_sum_of_total_sales_qty_value) / field_pack_size_value)', 'cld');
+    $query->addExpression('floor(SUM(stsq.field_sum_of_total_sales_qty_value) / field_pack_size_value)', 'cld');
     $query->addExpression('SUM(stsq.field_sum_of_total_sales_qty_value) - (field_pack_size_value * round(SUM(stsq.field_sum_of_total_sales_qty_value) / field_pack_size_value))', 'eaches');
     $query ->groupBy('field_vehicle_value,field_loading_date_value,field_sku7_code_value,field_godown_area_id_value');
     $results = $query->execute()->fetchAll();
