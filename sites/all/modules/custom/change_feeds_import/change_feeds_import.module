@@ -141,13 +141,20 @@ function change_feeds_import_feeds_after_import(FeedsSource $source) {
 
 }
 
+function change_feeds_import_feeds_presave($source, $entity, $item) {
+   print_r($entity);print_r($item);exit;
+    $entity->feeds_item->skip = TRUE;
+  }
+}
+
 /**
  * Implements hook_ctools_plugin_directory().
  */
-function change_feeds_null_check_ctools_plugin_directory($owner, $plugin_type){
+function change_feeds_import_ctools_plugin_directory($module, $plugin){
+
   watchdog('owner_null', $owner);
   watchdog('plugin_type_null', $plugin_type);
-  if ($owner == 'feeds_tamper' && $plugin_type == 'plugins') {
-    return 'plugins';
+  if ($module == 'block_plugin') {
+    return 'plugins/' . $plugin;
   }
 }
