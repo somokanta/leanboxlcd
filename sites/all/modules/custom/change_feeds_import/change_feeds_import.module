@@ -142,6 +142,8 @@ function change_feeds_import_feeds_after_import(FeedsSource $source) {
 }
 
 function change_feeds_import_feeds_presave($source, $entity, $item) {
+  dsm($entity);
+  dsm($item);
    //if (empty($entity->feeds_item->field_sum_of_total_sales_qty[LANGUAGE_NONE])) {
      //$entity->feeds_item->skip = TRUE;
   //}
