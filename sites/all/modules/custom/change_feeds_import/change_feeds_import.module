@@ -142,19 +142,19 @@ function change_feeds_import_feeds_after_import(FeedsSource $source) {
 }
 
 function change_feeds_import_feeds_presave($source, $entity, $item) {
-   if (empty($entity->feeds_item->field_sum_of_total_sales_qty[LANGUAGE_NONE])) {
-     $entity->feeds_item->skip = TRUE;
-  }
+   //if (empty($entity->feeds_item->field_sum_of_total_sales_qty[LANGUAGE_NONE])) {
+     //$entity->feeds_item->skip = TRUE;
+  //}
 }
 
 /**
  * Implements hook_ctools_plugin_directory().
  */
-function change_feeds_import_ctools_plugin_directory($module, $plugin){
+//function change_feeds_import_ctools_plugin_directory($module, $plugin){
 
-  watchdog('owner_null', $owner);
-  watchdog('plugin_type_null', $plugin_type);
-  if ($module == 'block_plugin') {
-    return 'plugins/' . $plugin;
-  }
-}
+  //watchdog('owner_null', $owner);
+  //watchdog('plugin_type_null', $plugin_type);
+  //if ($module == 'block_plugin') {
+    //return 'plugins/' . $plugin;
+  //}
+//}
