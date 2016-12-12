@@ -140,3 +140,14 @@ function change_feeds_import_feeds_after_import(FeedsSource $source) {
   }
 
 }
+
+/**
+ * Implements hook_ctools_plugin_directory().
+ */
+function change_feeds_null_check_ctools_plugin_directory($owner, $plugin_type){
+  watchdog('owner_null', $owner);
+  watchdog('plugin_type_null', $plugin_type);
+  if ($owner == 'feeds_tamper' && $plugin_type == 'plugins') {
+    return 'plugins';
+  }
+}
