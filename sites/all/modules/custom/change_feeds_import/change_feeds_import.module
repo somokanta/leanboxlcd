@@ -6,7 +6,6 @@
  * Implements hook_feeds_after_import(FeedsSource $source)
  */
 function change_feeds_import_feeds_after_import(FeedsSource $source) {
-  watchdog('source', $source);
   if ($source->id == 'billing_data') {
     $query = db_select('node', 'n');
     $query->innerjoin('field_data_field_vehicle', 'v', 'v.entity_id = n.nid');
