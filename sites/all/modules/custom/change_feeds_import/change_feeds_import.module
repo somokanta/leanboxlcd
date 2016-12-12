@@ -144,7 +144,7 @@ function change_feeds_import_feeds_after_import(FeedsSource $source) {
 function change_feeds_import_feeds_presave($source, $entity, $item) {
    print_r($entity);print_r($item);exit;
     $entity->feeds_item->skip = TRUE;
-  }
+  
 }
 
 /**
