@@ -140,9 +140,9 @@ function change_feeds_import_feeds_after_import(FeedsSource $source) {
   }
 
 }
-
+ $count =1;
 function change_feeds_import_feeds_presave($source, $entity, $item) {
-  $count =1;
+ 
   if (empty($entity->field_mrp[LANGUAGE_NONE]) || empty($entity->field_tur[LANGUAGE_NONE]) || empty($entity->field_sum_of_total_sales_qty[LANGUAGE_NONE]) || empty($entity->field_sum_of_total_sales_ret_qty[LANGUAGE_NONE]) || empty($entity->field_sum_of_net_sales_qty[LANGUAGE_NONE]) || empty($entity->field_sum_of_sales_free_qty[LANGUAGE_NONE]) || empty($entity->field_sum_of_sales_ret_free_qty[LANGUAGE_NONE]) || empty($entity->field_sum_of_sales_value[LANGUAGE_NONE]) || empty($entity->field_sum_of_sales_ret_value[LANGUAGE_NONE]) || empty($entity->field_sum_of_net_sales_value[LANGUAGE_NONE]) || empty($entity->field_suggested_order_quantity[LANGUAGE_NONE]) || empty($entity->field_actual_order_quantity[LANGUAGE_NONE]) || empty($entity->field_bill_quantity[LANGUAGE_NONE])) {
     dpm($count++);
      $entity->feeds_item->skip = TRUE;
