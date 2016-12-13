@@ -150,7 +150,7 @@ function change_feeds_import_feeds_presave($source, $entity, $item) {
 
   }*/
   if ($entity->type == 'ccfot') {
-    if ($entity->field_bill_quantity[LANGUAGE_NONE] == NULL) {
+    if (empty($entity->field_bill_quantity[LANGUAGE_NONE])) {
         $entity->feeds_item->skip = TRUE;
     }
     if ($entity->field_actual_order_quantity[LANGUAGE_NONE] == NULL) {
