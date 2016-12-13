@@ -167,7 +167,7 @@ function change_feeds_import_feeds_presave($source, $entity, $item) {
   // if ($entity->field_sum_of_sales_value[LANGUAGE_NONE] == NULL) {
   //     $entity->feeds_item->skip = TRUE;
   // }
-  if ($entity->field_mrp[LANGUAGE_NONE] == NULL) {
+  if (empty($entity->field_mrp[LANGUAGE_NONE])) {
       $entity->feeds_item->skip = TRUE;
   }
   // if ($entity->field_tur[LANGUAGE_NONE] == NULL) {
