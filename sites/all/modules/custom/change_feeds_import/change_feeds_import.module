@@ -161,7 +161,7 @@ function change_feeds_import_feeds_presave($source, $entity, $item) {
         $entity->feeds_item->skip = TRUE;
     }
   }
-  if ($entity->type == 'billing_data') {
+  if (($entity->type == 'billing_data') || ($entity->type == 'return_bill')) {
     if ($entity->field_sum_of_net_sales_value[LANGUAGE_NONE] == NULL) {
         $entity->feeds_item->skip = TRUE;
     }
