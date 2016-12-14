@@ -125,16 +125,18 @@ function change_feeds_import_feeds_after_import(FeedsSource $source) {
           $node->field_picking_van_id[$node->language][0]['value'] = $val->field_vehicle_value;
           $node->field_picking_loading_date[$node->language][0]['value'] = $val->field_loading_date_value;
           $node->field_picking_godown_area_id[$node->language][0]['value'] = $val->field_godown_area_id_value;
-     
+          
           $node->field_pick_units[$node->language][0]['value'] = $val->total_eaches;
           $node->field_pick_clds[$node->language][0]['value'] = $val->total_cld;
           $node_copy = $node;
           if ($val->total_eaches > 0) {
              $node->field_picking_picking_type[$node->language][0]['value'] = 'Loose';
+             $node->field_pick_lines[$node->language][0]['value'] = $val->eaches_lines;
              node_save($node);
           }
           if ($val->total_cld > 0) {
              $node_copy->field_picking_picking_type[$node->language][0]['value'] = 'Bulk';
+             $node->field_pick_lines[$node->language][0]['value'] = $val->cld_lines;
              node_save($node_copy);
           }
       }
@@ -143,6 +145,10 @@ function change_feeds_import_feeds_after_import(FeedsSource $source) {
 
 }
 
+/**
+ * 
+ * Implements hook_feeds_presave($source, $entity, $item)
+ */
 
 function change_feeds_import_feeds_presave($source, $entity, $item) {
  
