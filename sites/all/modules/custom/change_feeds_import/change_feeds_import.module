@@ -143,14 +143,13 @@ function change_feeds_import_feeds_after_import(FeedsSource $source) {
 
 
 function change_feeds_import_feeds_presave($source, $entity, $item) {
- dsm($source);
+ 
   /*if (($entity->field_mrp[LANGUAGE_NONE] < 0 && !is_numeric($entity->field_mrp[LANGUAGE_NONE])) || (($entity->field_tur[LANGUAGE_NONE]) < 0 && !is_numeric($entity->field_tur[LANGUAGE_NONE])) || ($entity->field_sum_of_total_sales_qty[LANGUAGE_NONE] < 0 && !is_numeric($entity->field_sum_of_total_sales_qty[LANGUAGE_NONE])) || ($entity->field_sum_of_total_sales_ret_qty[LANGUAGE_NONE] < 0 && !is_numeric($entity->field_sum_of_total_sales_ret_qty[LANGUAGE_NONE])) || ($entity->field_sum_of_net_sales_qty[LANGUAGE_NONE] < 0 && !is_numeric($entity->field_sum_of_net_sales_qty[LANGUAGE_NONE])) || ($entity->field_sum_of_sales_free_qty[LANGUAGE_NONE] < 0 && !is_numeric($entity->field_sum_of_sales_free_qty[LANGUAGE_NONE])) || ($entity->field_sum_of_sales_ret_free_qty[LANGUAGE_NONE] < 0 && !is_numeric($entity->field_sum_of_sales_ret_free_qty[LANGUAGE_NONE])) || ($entity->field_sum_of_sales_value[LANGUAGE_NONE] < 0 && !is_numeric($entity->field_sum_of_sales_value[LANGUAGE_NONE])) || ($entity->field_sum_of_sales_ret_value[LANGUAGE_NONE] < 0 && !is_numeric($entity->field_sum_of_sales_ret_value[LANGUAGE_NONE])) || ($entity->field_sum_of_net_sales_value[LANGUAGE_NONE] < 0 && !is_numeric($entity->field_sum_of_net_sales_value[LANGUAGE_NONE])) || ($entity->field_suggested_order_quantity[LANGUAGE_NONE] < 0 && !is_numeric($entity->field_suggested_order_quantity[LANGUAGE_NONE])) || ($entity->field_actual_order_quantity[LANGUAGE_NONE] < 0 && !is_numeric($entity->field_actual_order_quantity[LANGUAGE_NONE])) || ($entity->field_bill_quantity[LANGUAGE_NONE] < 0 && !is_numeric($entity->field_bill_quantity[LANGUAGE_NONE]))) {
 
       $entity->feeds_item->skip = TRUE;
 
   }*/
   if ($entity->type == 'ccfot') {
-    dsm($entity->type);
     if (empty($entity->field_bill_quantity[LANGUAGE_NONE])) {
         $entity->feeds_item->skip = TRUE;
     }
@@ -194,15 +193,3 @@ function change_feeds_import_feeds_presave($source, $entity, $item) {
     }
   }
 }
-
-/**
- * Implements hook_ctools_plugin_directory().
- */
-//function change_feeds_import_ctools_plugin_directory($module, $plugin){
-
-  //watchdog('owner_null', $owner);
-  //watchdog('plugin_type_null', $plugin_type);
-  //if ($module == 'block_plugin') {
-    //return 'plugins/' . $plugin;
-  //}
-//}
