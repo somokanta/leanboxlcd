@@ -103,6 +103,8 @@ function change_feeds_import_feeds_after_import(FeedsSource $source) {
 
     $subquery = db_select($query,'middle');
     $subquery->fields('middle');
+    $subquery->addExpression('COUNT(cld)', 'cld_lines');
+    $subquery->addExpression('COUNT(eaches)', 'eaches_lines');
     $subquery->addExpression('SUM(cld)', 'total_cld');
     $subquery->addExpression('SUM(eaches)', 'total_eaches');
     $subquery ->groupBy('field_vehicle_value,field_loading_date_value,field_godown_area_id_value');
