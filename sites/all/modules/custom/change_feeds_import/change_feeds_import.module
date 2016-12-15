@@ -201,3 +201,11 @@ function change_feeds_import_feeds_presave($source, $entity, $item) {
     }
   }
 }
+
+
+function change_feeds_import_views_api() {
+  return array(
+    'api' => '3.0',
+    'path' => drupal_get_path('module', 'change_feeds_import') . '/views',
+  );
+}

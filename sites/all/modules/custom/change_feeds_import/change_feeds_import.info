@@ -3,3 +3,5 @@ description = After feeds importing do some change like create new nodes.
 package = Custom
 core = 7.x
 
+files[] = views/handler/custom_for_picking_type.inc
+files[] = views/handler/custom_for_combine_nid.inc
