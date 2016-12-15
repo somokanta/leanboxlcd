@@ -24,18 +24,14 @@ class custom_for_picking_type extends views_handler_field {
   }
 
   function render($data) {
-    dpm($data,"data");
-    if (is_numeric($data->field_field_combined_nid[0]['raw']['value'])) {
-      dpm("1");
+    if (is_numeric($data->_field_data['nid']['entity']->field_combined_nid['und'][0]['value'])) {
       return $data->_field_data['nid']['entity']->field_picking_picking_type['und'][0]['value'];
     }
     else {
-      dpm("2");
-      if ($data->field_field_combined_nid[0]['raw']['value'] == null) {
+      if ($data->_field_data['nid']['entity']->field_combined_nid['und'][0]['value'] == null) {
         return $data->_field_data['nid']['entity']->field_picking_picking_type['und'][0]['value'];
       }
       else {
-        dpm("3");
         return "combined";
       }
     }
