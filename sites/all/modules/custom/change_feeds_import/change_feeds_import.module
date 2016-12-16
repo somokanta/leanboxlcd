@@ -128,7 +128,8 @@ function change_feeds_import_feeds_after_import(FeedsSource $source) {
           
           $node->field_pick_units[$node->language][0]['value'] = $val->total_eaches;
           $node->field_pick_clds[$node->language][0]['value'] = $val->total_cld;
-          $node_copy = $node;
+          $node_copy = clone $node;
+          $node_copy->is_new = true;
           if ($val->total_eaches > 0) {
              $node->field_picking_picking_type[$node->language][0]['value'] = 'Loose';
              $node->field_pick_lines[$node->language][0]['value'] = $val->eaches_lines;
@@ -136,7 +137,7 @@ function change_feeds_import_feeds_after_import(FeedsSource $source) {
           }
           if ($val->total_cld > 0) {
              $node_copy->field_picking_picking_type[$node->language][0]['value'] = 'Bulk';
-             $node->field_pick_lines[$node->language][0]['value'] = $val->cld_lines;
+             $node_copy->field_pick_lines[$node->language][0]['value'] = $val->cld_lines;
              node_save($node_copy);
           }
       }
