@@ -219,5 +219,5 @@ function change_feeds_import_views_api() {
  * Implements hook_feeds_before_import($source, $entity, $item)
  */
 function change_feeds_import_feeds_before_import(FeedsSource $source) {
-  print_r($source); exit;
+  exit;
 }
