@@ -71,6 +71,7 @@ function change_feeds_import_feeds_after_import(FeedsSource $source) {
       $node->field_loading_sheet_line[$node->language][0]['value'] = $distint_sku_count;
       $node->field_bill_lines[$node->language][0]['value'] = $sku_count;
       $node->field_each_units[$node->language][0]['value'] = $total_qty_count;
+      $node->field__party_packingstatus[$node->language][0]['value'] = 0;
 
       $node = node_submit($node); // Prepare node for saving
       node_save($node);
