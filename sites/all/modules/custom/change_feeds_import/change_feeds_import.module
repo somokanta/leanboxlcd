@@ -212,3 +212,12 @@ function change_feeds_import_views_api() {
     'path' => drupal_get_path('module', 'change_feeds_import') . '/views',
   );
 }
+
+
+/**
+ * 
+ * Implements hook_feeds_before_import($source, $entity, $item)
+ */
+function change_feeds_import_feeds_before_import(FeedsSource $source) {
+  dsm($source);
+}
