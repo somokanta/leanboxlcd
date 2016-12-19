@@ -1,12 +1,288 @@
 <?php
 
 /**
+ * Implments hook_menu
+ *
+ */
+function change_feeds_import_menu() {
+
+  // setting form for flat table
+  $items['admin/config/flat-table'] = array(
+    'title' => 'Setting Form For Flat Table',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('change_feeds_import_setting_form'),
+    'access callback' => 'check_if_fr_role_user_admin',
+  );
+
+  return $items;
+}
+
+// check permission for (admin/config/flat-table) Menu
+function check_if_fr_role_user_admin() {
+  global $user;
+  if (in_array('administrator', $user->roles)) {
+    return TRUE;
+  }
+  else {
+    return FALSE;
+  }
+}
+
+// Menu Callback  for (admin/config/flat-table)
+function change_feeds_import_setting_form($form, $form_state) {
+
+  // PARTY PACKING PRODUCTIVITY LINES/Hr
+  $form['party_packing_productivity_lines'] = array(
+    '#type' => 'textfield',
+    '#title' => t('PARTY PACKING PRODUCTIVITY LINES/Hr'),
+    '#default_value' => variable_get('party_packing_productivity_lines', ''),
+    '#required' => TRUE,
+  );
+
+  // PARTY PACKING COMPLIANCE
+  $form['party_packing_compliance'] = array(
+    '#type' => 'textfield',
+    '#title' => t('PARTY PACKING COMPLIANCE'),
+    '#default_value' => variable_get('party_packing_compliance', ''),
+    '#required' => TRUE,
+  );
+
+  // Pick Productivity Pick
+  $form['pick_productivity_pick'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Pick Productivity Pick / Hr'),
+    '#default_value' => variable_get('pick_productivity_pick', ''),
+    '#required' => TRUE,
+  );
+
+  // Picking Compliance
+  $form['picking_compliance'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Picking Compliance'),
+    '#default_value' => variable_get('picking_compliance', ''),
+    '#required' => TRUE,
+  );
+
+  // EGIR End Time Cut-Off 
+  $form['egir_end_time_cutoff'] = array(
+    '#type' => 'textfield',
+    '#title' => t('EGIR End time - Cutoff'),
+    '#default_value' => variable_get('egir_end_time_cutoff', ''),
+    '#required' => TRUE,
+  );
+
+  // Unloading End Time Cutoff
+  $form['unloading_end_time_cutOff'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Unloading End Time - CutOff'),
+    '#default_value' => variable_get('unloading_end_time_cutOff', ''),
+    '#required' => TRUE,
+  );
+
+  return system_settings_form($form);
+}
+
+/**
+ * Implements hook_node_update()
+ */
+function change_feeds_import_node_update($node) {
+  if ($node->type == 'party_packing') { // if Content Type is party packing.
+    $start_time = $node->field_party_packing_start_time['und'][0]['value']; // party packing start time
+    $end_time = $node->field_party_packing_end_time['und'][0]['value']; // party packing end time
+    $party_picking_ld = $node->field_party_packing_loading_date['und'][0]['value']; // party packing loading date
+    $timestamp = strtotime($party_picking_ld);
+    $party_picking_ld_stamp = date("d", $timestamp);
+    ######  logic for MOC ####
+    if ($party_picking_ld_stamp < 21) {
+      $month = date("m", $timestamp);
+      $node->MOC = "MOC" . $month;
+    }
+    else {
+      $newdate = strtotime('+1 month', strtotime($party_picking_ld));
+      $next_month = date("m", $newdate);
+      $node->MOC = "MOC" . $next_month;
+    }
+
+    ##### End MOC logic #######
+    ######  logic for TDP ####
+    if (($party_picking_ld_stamp >= 1) && ($party_picking_ld_stamp <= 10)) {
+      $node->TDP = "TDP2";
+    }
+    elseif (($party_picking_ld_stamp >= 11) && ($party_picking_ld_stamp <= 20)) {
+      $node->TDP = "TDP3";
+    }
+    else {
+      $node->TDP = "TDP1";
+    }
+    ##### End TDP logic #######
+
+    $node->field_party_packing_loading_date['und'][0]['value'] = strtotime($party_picking_ld);
+    $node->field_party_packing_date['und'][0]['value'] = strtotime($node->field_party_packing_date['und'][0]['value']);
+    $node->party_packing_productivity_lines = variable_get('party_packing_productivity_lines', '');
+    $node->party_packing_compliance = variable_get('party_packing_compliance', '');
+    $compliance = variable_get('party_packing_compliance', ''); // value from setting form
+    $compliance_seconds = strtotime("1970-01-01 $compliance UTC"); // value from setting form
+    ######  logic for Compliant ####
+    if ($end_time > $compliance_seconds) {
+      $node->compliance = "Non Compliant";
+    }
+    else {
+      $node->compliance = "Compliant";
+    }
+    ##### End TDP Compliant #######
+
+
+   // insert in flat_party_packing table when node update.(if record is not in table then create new record)
+    db_merge('flat_party_packing')
+        ->key(array('nid' => $node->nid))
+        ->fields(array(
+          'nid' => $node->nid,
+          'vehicle' => $node->field_party_packing_vehicle['und'][0]['value'],
+          'loading_date' => $node->field_party_packing_loading_date['und'][0]['value'],
+          'party_packing_date' => $node->field_party_packing_date['und'][0]['value'],
+          'loading_sheet_line' => $node->field_loading_sheet_line['und'][0]['value'],
+          'bill_lines' => $node->field_bill_lines['und'][0]['value'],
+          'each_units' => $node->field_each_units['und'][0]['value'],
+          'party_packing_start_time' => $start_time,
+          'party_packing_end_time' => $end_time,
+          'supervisor' => $node->field_party_packing_supervisor['und'][0]['value'],
+          'packer_name' => $node->field_party_packer_name['und'][0]['value'],
+          'team_count' => $node->field_party_packer_team_count['und'][0]['value'],
+          'status' => $node->field__party_packingstatus['und'][0]['value'],
+          'productivity_lines' => $node->party_packing_productivity_lines,
+          'party_packing_compliance' => $compliance_seconds,
+          'compliance' => $node->compliance,
+          'tdp' => $node->TDP,
+          'moc' => $node->MOC,
+        ))
+        ->execute();
+  }
+
+  if ($node->type == 'egir') { // if content type is EGIR
+
+    $invoice_date = $node->field_invoice_date['und'][0]['value']; // invoice date
+    $invoice_timestamp = strtotime($invoice_date);
+    $node->field_invoice_date['und'][0]['value'] = $invoice_timestamp;
+
+    $uploading_date = $node->field_unloading_date['und'][0]['value']; // unloading date
+    $uploading_timestamp = strtotime($uploading_date);
+    $node->field_unloading_date['und'][0]['value'] = $uploading_timestamp;
+
+
+    ######### Loagic for MOC #######
+    $uploading_stamp = date("d", $uploading_timestamp);
+    if ($uploading_stamp < 21) {
+      $month = date("m", $uploading_timestamp);
+      $node->MOC = "MOC" . $month;
+    }
+    else {
+      $newdate = strtotime('+1 month', strtotime($uploading_date));
+      $next_month = date("m", $newdate);
+      $node->MOC = "MOC" . $next_month;
+    }
+    ########### End Logic for MOC #######
+
+
+    ######### Loagic for TDP #######
+    if (($uploading_stamp >= 1) && ($uploading_stamp <= 10)) {
+      $node->TDP = "TDP2";
+    }
+    elseif (($uploading_stamp >= 11) && ($uploading_stamp <= 20)) {
+      $node->TDP = "TDP3";
+    }
+    else {
+      $node->TDP = "TDP1";
+    }
+    ########### End Logic for TDP #######
+
+    $egir_date = $node->field_egir_date['und'][0]['value'];
+    $egir_timestamp = strtotime($egir_date);
+    $node->field_egir_date['und'][0]['value'] = $egir_timestamp;
+
+    $node->egir_end_time_cutoff = variable_get('egir_end_time_cutoff', ''); // value from setting form
+    $node->unloading_end_time_cutOff = variable_get('unloading_end_time_cutOff', ''); // value from setting form
+
+    $egir_cutoff = variable_get('egir_end_time_cutoff', '');
+    $egir_cutoff_seconds = strtotime("1970-01-01 $egir_cutoff UTC");
+
+    $egir_end_time = $node->field_egir_end_time['und'][0]['value'];
+    ######  logic for EGIR Compliant ####
+    if ($egir_end_time >= $egir_cutoff_seconds) {
+      $node->egir_end_time_cutoff = "Non Compliant";
+    }
+    else {
+      $node->egir_end_time_cutoff = "Compliant";
+    }
+    ##### End logic for EGIR Compliant #######
+
+    $unloading_cutoff = variable_get('unloading_end_time_cutOff', '');
+    $unloading_cutoff_seconds = strtotime("1970-01-01 $unloading_cutoff UTC");
+
+    $unloading_end_time = $node->field_unloading_end_time['und'][0]['value'];
+     ######  logic for Unloading Compliant ####
+    if ($unloading_end_time >= $unloading_cutoff_seconds) {
+      $node->unloading_end_time_cutOff = "Non Compliant";
+    }
+    else {
+      $node->unloading_end_time_cutOff = "Compliant";
+    }
+    ##### End logic for unloading Compliant #######
+
+    
+    // insert in flat_unloading table when node update.(if record is not in table then create new record)
+    db_merge('flat_unloading')
+        ->key(array('nid' => $node->nid))
+        ->fields(array(
+          'nid' => $node->nid,
+          'invoice_number' => $node->field_invoice_number['und'][0]['value'],
+          'invoice_date' => $node->field_invoice_date['und'][0]['value'],
+          'truck_no' => $node->field_truck_no['und'][0]['value'],
+          'from_location' => $node->field_from_location['und'][0]['value'],
+          'unloading_date' => $node->field_unloading_date['und'][0]['value'],
+          'unloading_start_time' => $node->field_unloading_start_time['und'][0]['value'],
+          'unloading_end_time' => $node->field_unloading_end_time['und'][0]['value'],
+          'status' => $node->field_unloading_status['und'][0]['value'],
+          'egir_date' => $node->field_egir_date['und'][0]['value'],
+          'egir_start_time' => $node->field_egir_start_time['und'][0]['value'],
+          'egir_end_time' => $node->field_egir_end_time['und'][0]['value'],
+          'egir_end_cutoff' => $egir_cutoff_seconds,
+          'unloading_end_cutoff' => $unloading_cutoff_seconds,
+          'tdp' => $node->TDP,
+          'moc' => $node->MOC,
+          'unloading_compliance' => $node->unloading_end_time_cutOff,
+          'egir_complaince' => $node->unloading_end_time_cutOff,
+        ))
+        ->execute();
+  }
+}
+
+/**
+ * 
+ * @param type $node
+ * Implements hook_delete
+ */
+function change_feeds_import_node_delete($node) {
+  // Delete Nid's entry from  party_packing Flat table  on deletion of Party Packing Node
+  if ($node->type == 'party_packing') {
+    db_delete('flat_party_packing')
+        ->condition('nid', $node->nid)
+        ->execute();
+  }
+  // Delete Nid's entry from  party_packing Flat table  on deletion of EGIR Node
+  if ($node->type == 'egir') {
+    db_delete('flat_unloading')
+        ->condition('nid', $node->nid)
+        ->execute();
+  }
+}
+
+/**
  * 
  * @param FeedsSource $source
  * Implements hook_feeds_after_import(FeedsSource $source)
  */
 function change_feeds_import_feeds_after_import(FeedsSource $source) {
-  if ($source->id == 'billing_data') {
+  if ($source->id == 'billing_data') { // if importing through billing_data (create party_packing nodes)
     $query = db_select('node', 'n');
     $query->innerjoin('field_data_field_vehicle', 'v', 'v.entity_id = n.nid');
     $query->innerjoin('field_data_field_loading_date', 'l', 'l.entity_id = n.nid');
@@ -71,13 +347,12 @@ function change_feeds_import_feeds_after_import(FeedsSource $source) {
       $node->field_loading_sheet_line[$node->language][0]['value'] = $distint_sku_count;
       $node->field_bill_lines[$node->language][0]['value'] = $sku_count;
       $node->field_each_units[$node->language][0]['value'] = $total_qty_count;
-      $node->field__party_packingstatus[$node->language][0]['value'] = 0;
 
       $node = node_submit($node); // Prepare node for saving
       node_save($node);
     }
 
-  
+
     $query = db_select('node', 'n');
     $query->join('field_data_field_vehicle', 'v', 'v.entity_id = n.nid');
     $query->join('field_data_field_loading_date', 'date', 'date.entity_id = n.nid');
@@ -92,121 +367,114 @@ function change_feeds_import_feeds_after_import(FeedsSource $source) {
     $query->fields('gai', array('field_godown_area_id_value'));
     $query->fields('fps', array('field_pack_size_value'));
     //$query->fields('stsq', array('field_sum_of_total_sales_qty_value'));
-    $query ->condition('n.type', 'billing_data', '=');
-    $query ->condition('gai.bundle', 'sku7_code_master', '=');
-    $query ->condition('sc.bundle', 'billing_data', '=');
+    $query->condition('n.type', 'billing_data', '=');
+    $query->condition('gai.bundle', 'sku7_code_master', '=');
+    $query->condition('sc.bundle', 'billing_data', '=');
     //$query ->groupBy('stsq.field_sum_of_total_sales_qty_value');
     $query->addExpression('SUM(stsq.field_sum_of_total_sales_qty_value)', 'total_sales_qty');
     $query->addExpression('floor(SUM(stsq.field_sum_of_total_sales_qty_value) / field_pack_size_value)', 'cld');
     $query->addExpression('SUM(stsq.field_sum_of_total_sales_qty_value) - (field_pack_size_value * floor(SUM(stsq.field_sum_of_total_sales_qty_value) / field_pack_size_value))', 'eaches');
-    $query ->groupBy('field_vehicle_value,field_loading_date_value,field_sku7_code_value,field_godown_area_id_value');
+    $query->groupBy('field_vehicle_value,field_loading_date_value,field_sku7_code_value,field_godown_area_id_value');
     $results = $query->execute()->fetchAll();
 
-    $subquery = db_select($query,'middle');
+    $subquery = db_select($query, 'middle');
     $subquery->fields('middle');
     $subquery->addExpression('COUNT(cld)', 'cld_lines');
     $subquery->addExpression('COUNT(eaches)', 'eaches_lines');
     $subquery->addExpression('SUM(cld)', 'total_cld');
     $subquery->addExpression('SUM(eaches)', 'total_eaches');
-    $subquery ->groupBy('field_vehicle_value,field_loading_date_value,field_godown_area_id_value');
+    $subquery->groupBy('field_vehicle_value,field_loading_date_value,field_godown_area_id_value');
     $results = $subquery->execute()->fetchAll();
 
     foreach ($results as $key => $val) {
       if ($val->total_cld > 0 || $val->total_eaches > 0) {
-          global $user;
-          $node = new stdClass();
-          $node->title = $val->field_vehicle_value . format_date(time());
-          $node->type = "picking";
-          node_object_prepare($node); // Sets some defaults. Invokes hook_prepare() and hook_node_prepare().
-          $node->language = LANGUAGE_NONE; // Or e.g. 'en' if locale is enabled
-          $node->uid = $user->uid;
-          $node->status = 1; //(1 or 0): published or not
-          $node->comment = 1; // 0 = comments disabled, 1 = read only, 2 = read/write
+        global $user;
+        $node = new stdClass();
+        $node->title = $val->field_vehicle_value . format_date(time());
+        $node->type = "picking";
+        node_object_prepare($node); // Sets some defaults. Invokes hook_prepare() and hook_node_prepare().
+        $node->language = LANGUAGE_NONE; // Or e.g. 'en' if locale is enabled
+        $node->uid = $user->uid;
+        $node->status = 1; //(1 or 0): published or not
+        $node->comment = 1; // 0 = comments disabled, 1 = read only, 2 = read/write
 
-          $node->field_picking_van_id[$node->language][0]['value'] = $val->field_vehicle_value;
-          $node->field_picking_loading_date[$node->language][0]['value'] = $val->field_loading_date_value;
-          $node->field_picking_godown_area_id[$node->language][0]['value'] = $val->field_godown_area_id_value;
-          
-          $node->field_pick_units[$node->language][0]['value'] = $val->total_eaches;
-          $node->field_pick_clds[$node->language][0]['value'] = $val->total_cld;
-          $node->field_picking_status[$node->language][0]['value'] = 0;
-          $node_copy = clone $node;
-          $node_copy->is_new = true;
-          if ($val->total_eaches > 0) {
-             $node->field_picking_picking_type[$node->language][0]['value'] = 'Loose';
-             $node->field_pick_lines[$node->language][0]['value'] = $val->eaches_lines;
-             $node->field_pick_clds[$node->language][0]['value'] = 0;
-             node_save($node);
-          }
-          if ($val->total_cld > 0) {
-             $node_copy->field_picking_picking_type[$node->language][0]['value'] = 'Bulk';
-             $node_copy->field_pick_lines[$node->language][0]['value'] = $val->cld_lines;
-             $node_copy->field_pick_units[$node->language][0]['value'] = 0;
-             node_save($node_copy);
-          }
+        $node->field_picking_van_id[$node->language][0]['value'] = $val->field_vehicle_value;
+        $node->field_picking_loading_date[$node->language][0]['value'] = $val->field_loading_date_value;
+        $node->field_picking_godown_area_id[$node->language][0]['value'] = $val->field_godown_area_id_value;
+
+        $node->field_pick_units[$node->language][0]['value'] = $val->total_eaches;
+        $node->field_pick_clds[$node->language][0]['value'] = $val->total_cld;
+        $node_copy = $node;
+        if ($val->total_eaches > 0) {
+          $node->field_picking_picking_type[$node->language][0]['value'] = 'Loose';
+          $node->field_pick_lines[$node->language][0]['value'] = $val->eaches_lines;
+          node_save($node);
+        }
+        if ($val->total_cld > 0) {
+          $node_copy->field_picking_picking_type[$node->language][0]['value'] = 'Bulk';
+          $node->field_pick_lines[$node->language][0]['value'] = $val->cld_lines;
+          node_save($node_copy);
+        }
       }
     }
   }
-
 }
 
 /**
  * 
  * Implements hook_feeds_presave($source, $entity, $item)
  */
-
 function change_feeds_import_feeds_presave($source, $entity, $item) {
- 
-  /*if (($entity->field_mrp[LANGUAGE_NONE] < 0 && !is_numeric($entity->field_mrp[LANGUAGE_NONE])) || (($entity->field_tur[LANGUAGE_NONE]) < 0 && !is_numeric($entity->field_tur[LANGUAGE_NONE])) || ($entity->field_sum_of_total_sales_qty[LANGUAGE_NONE] < 0 && !is_numeric($entity->field_sum_of_total_sales_qty[LANGUAGE_NONE])) || ($entity->field_sum_of_total_sales_ret_qty[LANGUAGE_NONE] < 0 && !is_numeric($entity->field_sum_of_total_sales_ret_qty[LANGUAGE_NONE])) || ($entity->field_sum_of_net_sales_qty[LANGUAGE_NONE] < 0 && !is_numeric($entity->field_sum_of_net_sales_qty[LANGUAGE_NONE])) || ($entity->field_sum_of_sales_free_qty[LANGUAGE_NONE] < 0 && !is_numeric($entity->field_sum_of_sales_free_qty[LANGUAGE_NONE])) || ($entity->field_sum_of_sales_ret_free_qty[LANGUAGE_NONE] < 0 && !is_numeric($entity->field_sum_of_sales_ret_free_qty[LANGUAGE_NONE])) || ($entity->field_sum_of_sales_value[LANGUAGE_NONE] < 0 && !is_numeric($entity->field_sum_of_sales_value[LANGUAGE_NONE])) || ($entity->field_sum_of_sales_ret_value[LANGUAGE_NONE] < 0 && !is_numeric($entity->field_sum_of_sales_ret_value[LANGUAGE_NONE])) || ($entity->field_sum_of_net_sales_value[LANGUAGE_NONE] < 0 && !is_numeric($entity->field_sum_of_net_sales_value[LANGUAGE_NONE])) || ($entity->field_suggested_order_quantity[LANGUAGE_NONE] < 0 && !is_numeric($entity->field_suggested_order_quantity[LANGUAGE_NONE])) || ($entity->field_actual_order_quantity[LANGUAGE_NONE] < 0 && !is_numeric($entity->field_actual_order_quantity[LANGUAGE_NONE])) || ($entity->field_bill_quantity[LANGUAGE_NONE] < 0 && !is_numeric($entity->field_bill_quantity[LANGUAGE_NONE]))) {
 
-      $entity->feeds_item->skip = TRUE;
+  /* if (($entity->field_mrp[LANGUAGE_NONE] < 0 && !is_numeric($entity->field_mrp[LANGUAGE_NONE])) || (($entity->field_tur[LANGUAGE_NONE]) < 0 && !is_numeric($entity->field_tur[LANGUAGE_NONE])) || ($entity->field_sum_of_total_sales_qty[LANGUAGE_NONE] < 0 && !is_numeric($entity->field_sum_of_total_sales_qty[LANGUAGE_NONE])) || ($entity->field_sum_of_total_sales_ret_qty[LANGUAGE_NONE] < 0 && !is_numeric($entity->field_sum_of_total_sales_ret_qty[LANGUAGE_NONE])) || ($entity->field_sum_of_net_sales_qty[LANGUAGE_NONE] < 0 && !is_numeric($entity->field_sum_of_net_sales_qty[LANGUAGE_NONE])) || ($entity->field_sum_of_sales_free_qty[LANGUAGE_NONE] < 0 && !is_numeric($entity->field_sum_of_sales_free_qty[LANGUAGE_NONE])) || ($entity->field_sum_of_sales_ret_free_qty[LANGUAGE_NONE] < 0 && !is_numeric($entity->field_sum_of_sales_ret_free_qty[LANGUAGE_NONE])) || ($entity->field_sum_of_sales_value[LANGUAGE_NONE] < 0 && !is_numeric($entity->field_sum_of_sales_value[LANGUAGE_NONE])) || ($entity->field_sum_of_sales_ret_value[LANGUAGE_NONE] < 0 && !is_numeric($entity->field_sum_of_sales_ret_value[LANGUAGE_NONE])) || ($entity->field_sum_of_net_sales_value[LANGUAGE_NONE] < 0 && !is_numeric($entity->field_sum_of_net_sales_value[LANGUAGE_NONE])) || ($entity->field_suggested_order_quantity[LANGUAGE_NONE] < 0 && !is_numeric($entity->field_suggested_order_quantity[LANGUAGE_NONE])) || ($entity->field_actual_order_quantity[LANGUAGE_NONE] < 0 && !is_numeric($entity->field_actual_order_quantity[LANGUAGE_NONE])) || ($entity->field_bill_quantity[LANGUAGE_NONE] < 0 && !is_numeric($entity->field_bill_quantity[LANGUAGE_NONE]))) {
 
-  }*/
+    $entity->feeds_item->skip = TRUE;
+
+    } */
   if ($entity->type == 'ccfot') {
     if (empty($entity->field_bill_quantity[LANGUAGE_NONE])) {
-        $entity->feeds_item->skip = TRUE;
+      $entity->feeds_item->skip = TRUE;
     }
     if ($entity->field_actual_order_quantity[LANGUAGE_NONE] == NULL) {
-        $entity->feeds_item->skip = TRUE;
+      $entity->feeds_item->skip = TRUE;
     }
     if ($entity->field_suggested_order_quantity[LANGUAGE_NONE] == NULL) {
-        $entity->feeds_item->skip = TRUE;
+      $entity->feeds_item->skip = TRUE;
     }
   }
   if (($entity->type == 'billing_data') || ($entity->type == 'return_bill')) {
     if ($entity->field_sum_of_net_sales_value[LANGUAGE_NONE] == NULL) {
-        $entity->feeds_item->skip = TRUE;
+      $entity->feeds_item->skip = TRUE;
     }
     if ($entity->field_sum_of_sales_ret_value[LANGUAGE_NONE] == NULL) {
-        $entity->feeds_item->skip = TRUE;
+      $entity->feeds_item->skip = TRUE;
     }
     if ($entity->field_sum_of_sales_value[LANGUAGE_NONE] == NULL) {
-        $entity->feeds_item->skip = TRUE;
+      $entity->feeds_item->skip = TRUE;
     }
     if ($entity->field_mrp[LANGUAGE_NONE] == NULL) {
-        $entity->feeds_item->skip = TRUE;
+      $entity->feeds_item->skip = TRUE;
     }
     if ($entity->field_tur[LANGUAGE_NONE] == NULL) {
-        $entity->feeds_item->skip = TRUE;
+      $entity->feeds_item->skip = TRUE;
     }
     if ($entity->field_sum_of_total_sales_qty[LANGUAGE_NONE] == NULL) {
-        $entity->feeds_item->skip = TRUE;
+      $entity->feeds_item->skip = TRUE;
     }
     if ($entity->field_sum_of_total_sales_ret_qty[LANGUAGE_NONE] == NULL) {
-        $entity->feeds_item->skip = TRUE;
+      $entity->feeds_item->skip = TRUE;
     }
     if ($entity->field_sum_of_net_sales_qty[LANGUAGE_NONE] == NULL) {
-        $entity->feeds_item->skip = TRUE;
+      $entity->feeds_item->skip = TRUE;
     }
     if ($entity->field_sum_of_sales_free_qty[LANGUAGE_NONE] == NULL) {
-        $entity->feeds_item->skip = TRUE;
+      $entity->feeds_item->skip = TRUE;
     }
     if ($entity->field_sum_of_sales_ret_free_qty[LANGUAGE_NONE] == NULL) {
-        $entity->feeds_item->skip = TRUE;
+      $entity->feeds_item->skip = TRUE;
     }
   }
 }
-
 
 function change_feeds_import_views_api() {
   return array(
@@ -214,15 +482,3 @@ function change_feeds_import_views_api() {
     'path' => drupal_get_path('module', 'change_feeds_import') . '/views',
   );
 }
-
-
-/**
- * 
- * Implements hook_feeds_before_import($source, $entity, $item)
- */
-// function change_feeds_import_feeds_before_import($source, $entity, $item) {
-//   watchdog($source);
-//   watchdog($entity);
-//   watchdog($item);
-//   exit;
-// }

@@ -1,0 +1,219 @@
+<?php
+/*
+ * Implement hook_schema.
+ */
+function change_feeds_import_schema() {
+  $schema['flat_party_packing'] = array(
+    'description' => 'Flat Table for Party Packing data',
+    'fields' => array(
+      'nid' => array(
+        'description' => 'The primary identifier for a data',
+        'type' => 'int',
+        'not null' => TRUE,
+      ),
+      'vehicle' => array(
+        'description' => 'VEHICLE',
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+      'loading_date' => array(
+        'description' => 'LOADING DATE',
+        'type' => 'int',
+        'length' => 32,
+      ),
+      'party_packing_date' => array(
+        'description' => 'PARTY PACKING DATE',
+        'type' => 'int',
+        'length' => 32,
+      ),
+      'loading_sheet_line' => array(
+        'description' => 'LOADING SHEET LINE',
+        'type' => 'int',
+        'length' => 32,
+      ),
+      'bill_lines' => array(
+        'description' => 'BILL LINES',
+        'type' => 'int',
+        'length' => 32,
+      ),
+      'each_units' => array(
+        'description' => 'EACH UNITS',
+        'type' => 'float',
+        'length' => 32,
+      ),
+      'party_packing_start_time' => array(
+        'description' => 'PARTY PACKING START TIME',
+        'type' => 'int',
+        'length' => 32,
+      ),
+      'party_packing_end_time' => array(
+        'description' => 'PARTY PACKING END TIME',
+        'type' => 'int',
+        'length' => 32,
+      ),
+      'supervisor' => array(
+        'description' => 'PARTY PACKING SUPERVISOR',
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+      'packer_name' => array(
+        'description' => 'PARTY PACKER NAME',
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+      'team_count' => array(
+        'description' => 'PARTY PACKER TEAM COUNT',
+        'type' => 'int',
+        'length' => 32,
+      ),
+      'status' => array(
+        'description' => 'Status',
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+      'productivity_lines' => array(
+        'description' => 'PARTY PACKING PRODUCTIVITY LINES',
+        'type' => 'int',
+        'length' => 32,
+      ),
+      
+      'party_packing_compliance' => array(
+        'description' => 'PARTY PACKING COMPLIANCE',
+        'type' => 'int',
+        'length' => 32,
+      ),
+      
+      'compliance' => array(
+        'description' => 'COMPLIANCE',
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+      'tdp' => array(
+        'description' => 'TDP',
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+      'moc' => array(
+        'description' => 'MOC',
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+    ),
+    'primary key' => array('nid'),
+  );
+  
+  $schema['flat_unloading'] = array(
+    'description' => 'Flat Table for Unloading data',
+    'fields' => array(
+      'nid' => array(
+        'description' => 'The primary identifier for a data',
+        'type' => 'int',
+        'not null' => TRUE,
+      ),
+      'invoice_number' => array(
+        'description' => 'Invoice Number',
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+      'invoice_date' => array(
+        'description' => 'Invoice date',
+        'type' => 'int',
+        'length' => 32,
+      ),
+      'truck_no' => array(
+        'description' => 'Truck No',
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+      'from_location' => array(
+        'description' => 'From Location',
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+      'reporting_rs_date' => array(
+        'description' => 'Reporting at RS Date',
+        'type' => 'int',
+        'length' => 32,
+      ),
+      'reporting_rs_time' => array(
+        'description' => 'Reporting at RS Time',
+        'type' => 'float',
+        'length' => 32,
+      ),
+      'unloading_date' => array(
+        'description' => 'Unloading Date',
+        'type' => 'int',
+        'length' => 32,
+      ),
+      'unloading_start_time' => array(
+        'description' => 'Unloading Start Time',
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+      'unloading_end_time' => array(
+        'description' => 'Unloading End Time',
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+      'status' => array(
+        'description' => 'Status',
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+      'egir_date' => array(
+        'description' => 'EGIR Date',
+        'type' => 'int',
+        'length' => 32,
+      ),
+      'egir_start_time' => array(
+        'description' => 'EGIR Start Time',
+        'type' => 'int',
+        'length' => 32,
+      ),
+      'egir_end_time' => array(
+        'description' => 'EGIR End time',
+        'type' => 'int',
+        'length' => 32,
+      ),
+      'egir_end_cutoff' => array(
+        'description' => 'EGIR End time - Cutoff',
+        'type' => 'int',
+        'length' => 32,
+      ),
+      'unloading_end_cutoff' => array(
+        'description' => 'Unloading End Time - CutOff',
+        'type' => 'int',
+        'length' => 32,
+      ),
+      
+      
+      'tdp' => array(
+        'description' => 'TDP',
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+      
+      'moc' => array(
+        'description' => 'MOC',
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+      
+      'unloading_compliance' => array(
+        'description' => 'Unloading Compliance',
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+      
+      'egir_complaince' => array(
+        'description' => 'EGIR Complaince',
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+      
+    ),
+    'primary key' => array('nid'),
+  );
+  
+  return $schema;
+}
