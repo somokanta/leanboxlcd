@@ -102,6 +102,126 @@ function change_feeds_import_schema() {
     'primary key' => array('nid'),
   );
   
+  
+  $schema['flat_picking'] = array(
+    'description' => 'Flat Table for Unloading data',
+    'fields' => array(
+      'nid' => array(
+        'description' => 'The primary identifier for a data',
+        'type' => 'int',
+        'not null' => TRUE,
+      ),
+      'van_id' => array(
+        'description' => 'VAN ID',
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+      'loading_date' => array(
+        'description' => 'Loading Date',
+        'type' => 'int',
+        'length' => 32,
+      ),
+      'godown_area_id' => array(
+        'description' => 'Godown Area ID',
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+      'picking_type' => array(
+        'description' => 'Picking Type',
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+    
+      'picking_date' => array(
+        'description' => 'Picking Date',
+        'type' => 'int',
+        'length' => 32,
+      ),
+    
+      'picking_start_time' => array(
+        'description' => 'Picking Start Time',
+        'type' => 'int',
+        'length' => 32,
+      ),
+      'picking_end_time' => array(
+        'description' => 'Picking End time',
+        'type' => 'int',
+        'length' => 32,
+      ),
+      'pick_lines' => array(
+        'description' => 'PICK LINES',
+        'type' => 'int',
+        'length' => 32,
+      ),
+      'pick_units' => array(
+        'description' => 'PICK UNITS',
+        'type' => 'int',
+        'length' => 32,
+      ),
+      
+      'pick_clds' => array(
+        'description' => 'PICK CLDs',
+        'type' => 'int',
+        'length' => 32,
+      ),
+      'pick_supervisor' => array(
+        'description' => 'PICK SUPERVISOR',
+       'type' => 'varchar',
+        'length' => 255,
+      ),
+      'picker_name' => array(
+        'description' => 'PICKER NAME',
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+      
+      'picking_team_count' => array(
+        'description' => 'PICKING TEAM COUNT',
+       'type' => 'int',
+        'length' => 32,
+      ),
+      
+      'status' => array(
+        'description' => 'Status',
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+      
+       'pick_productivity_pick' => array(
+        'description' => 'Pick Productivity Pick / Hr',
+       'type' => 'int',
+        'length' => 32,
+      ),
+      
+       'picking_compliance' => array(
+        'description' => 'Picking Compliance',
+       'type' => 'int',
+        'length' => 32,
+      ),
+      
+      'moc' => array(
+        'description' => 'MOC',
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+      
+      'tdp' => array(
+        'description' => 'TDP',
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+      
+      'complaince' => array(
+        'description' => 'Complaince',
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+      
+    ),
+    'primary key' => array('nid'),
+  );
+  
+  
   $schema['flat_unloading'] = array(
     'description' => 'Flat Table for Unloading data',
     'fields' => array(
