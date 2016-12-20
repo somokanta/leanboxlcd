@@ -231,7 +231,7 @@ function change_feeds_import_node_update($node) {
           'loading_date' => $node->field_picking_loading_date['und'][0]['value'],
           'godown_area_id' => $node->field_picking_godown_area_id['und'][0]['value'],
           'picking_type' => $node->field_picking_picking_type['und'][0]['value'],
-          'picking_date' => $node->field_picking_picking_date['und'][0]['value'],
+          'picking_date' => $node->field_picking_picking_date['und'][0]['value']?$node->field_picking_picking_date['und'][0]['value'] : 0,
           'picking_start_time' => $start_time,
           'picking_end_time' => $end_time,
           'pick_lines' => $node->field_pick_lines['und'][0]['value'],
