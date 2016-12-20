@@ -424,13 +424,13 @@ function change_feeds_import_node_update($node) {
 
       $net_value = $sum_of_sales_ret_value / $sum_of_sales_value;
       if ($net_value == 0) {
-        $result[$key]['return_type'] = 'NA';
+        $return_type = 'NA';
       }
       elseif ($net_value >= 0.98 && $net_value <= 1.02) {
-        $result[$key]['return_type'] = 'FULL';
+        $return_type = 'FULL';
       }
       else {
-        $result[$key]['return_type'] = 'Partial';
+        $return_type = 'Partial';
       }
       $dispatch_date = $value['field_dispatch_date_value'];
       $endDate = strtotime($dispatch_date);
@@ -483,12 +483,17 @@ function change_feeds_import_node_update($node) {
       $result[$key]['month'] = $billing_loading_month;
       $result[$key]['Week_day'] = $billing_loading_day_text;
       
-      
+      $party_packing_status = $value['field__party_packingstatus_value'];
+      if($party_packing_status  == 2){
+        $status = "Yes";
+      }else{
+        $status = "No";
+      }
       
       
       
       // insert in flat_party_packing table when node update.(if record is not in table then create new record)
-    db_merge('flat_party_packing')
+    db_merge('flat_billing_data')
         ->key(array('nid' => $node->nid))
         ->fields(array(
           'nid' => $node->nid,
@@ -498,13 +503,13 @@ function change_feeds_import_node_update($node) {
           'loading_date' => strtotime($result[$key]['field_loading_date_value']),
           'sum_of_sales_value' => $result[$key]['Sum_of_SALES_VALUE'],
           'sum_of_sales_ret_value' => $result[$key]['Sum_of_SALES_RET_VALUE'],
-          'promised_delivery_date' => $result[$key]['field_promised_delivery_date_value'],
+          'promised_delivery_date' => strtotime($result[$key]['field_promised_delivery_date_value']),
           'dispatch_date' => strtotime($result[$key]['field_dispatch_date_value']),
           'delay_days' => $result[$key]['delay_days'],
           'delay_range' => $result[$key]['delay_range'],
-          'return_type' => $result[$key]['return_type '],
+          'return_type' => $return_type,
           'ideal_party_packing' => $result[$key]['field_party_packing_value'],
-          'actual_party_packing' => $result[$key]['field_bill_number_value'],
+          'actual_party_packing' => $status,
           'day' => $result[$key]['Day'],
           'tdp' => $result[$key]['TDP'],
           'month' => $result[$key]['month'],

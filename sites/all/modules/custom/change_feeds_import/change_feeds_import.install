@@ -391,8 +391,8 @@ function change_feeds_import_schema() {
      ),
      'delay_range' => array(
        'description' => 'Delay Range',
-       'type' => 'int',
-       'length' => 32,
+       'type' => 'varchar',
+       'length' => 255,
      ),
      'return_type' => array(
        'description' => 'Return Type',
