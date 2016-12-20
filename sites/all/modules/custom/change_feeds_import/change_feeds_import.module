@@ -380,7 +380,25 @@ function change_feeds_import_node_delete($node) {
  * Implements hook_feeds_after_import(FeedsSource $source)
  */
 function change_feeds_import_feeds_after_import(FeedsSource $source) {
-  if ($source->id == 'billing_data') { // if importing through billing_data (create party_packing nodes)
+  if ($source->id == 'billing_data') { // if importing through billing_data (create party_packing nodes)  
+    $batch = array(
+      'operations' => array(
+        array('change_feeds_import_create_party_packing', array()),
+        array('change_feeds_import_create_picking', array()),
+        ),
+      'finished' => 'change_feeds_import_finished',
+      'title' => t('Creating Party Packing'),
+      'init_message' => t('Party Packing Batch Creation is starting.'),
+      'progress_message' => t('Processed @current out of @total.'),
+      'error_message' => t('Party Packing Batch Batch has encountered an error.')
+    );
+    batch_set($batch);
+  }
+
+}
+
+function change_feeds_import_create_party_packing(&$context){
+  if (!isset($context['sandbox']['progress'])) {
     $query = db_select('node', 'n');
     $query->innerjoin('field_data_field_vehicle', 'v', 'v.entity_id = n.nid');
     $query->innerjoin('field_data_field_loading_date', 'l', 'l.entity_id = n.nid');
@@ -397,9 +415,17 @@ function change_feeds_import_feeds_after_import(FeedsSource $source) {
     $query->addExpression('count(distinct(s.field_sku7_code_value))', 'unique_count');
     $query->condition('n.type', 'billing_data');
     $result = $query->execute()->fetchAll();
-    global $user;
+    $context['sandbox']['progress'] = 0;
+    $context['sandbox']['current_node'] = 0;
+    $context['sandbox']['max'] = count($result);
+    $context['sandbox']['result'] = $result;
+  }
+  global $user;
+  $res = $context['sandbox']['result'];
 
-    foreach ($result as $key => $val) {
+  for ($i = $context['sandbox']['progress']; $i < $context['sandbox']['progress'] + 50 && $i < $context['sandbox']['max']; $i++){
+      $key = $i;
+      $val = $res[$key];
       $node = new stdClass();
       $node->title = $val->field_vehicle_value . format_date(time());
       $node->type = "party_packing";
@@ -410,16 +436,23 @@ function change_feeds_import_feeds_after_import(FeedsSource $source) {
       $node->comment = 1; // 0 = comments disabled, 1 = read only, 2 = read/write
       $node->field_party_packing_vehicle[$node->language][0]['value'] = $val->field_vehicle_value;
       $node->field_party_packing_loading_date[$node->language][0]['value'] = $val->field_loading_date_value;
-      $node->field_party_packing_date[$node->language][0]['value'] = $val->created;
+      //$node->field_party_packing_date[$node->language][0]['value'] = $val->created;
       $node->field_loading_sheet_line[$node->language][0]['value'] = $val->unique_count;
       $node->field_bill_lines[$node->language][0]['value'] = $val->sku_count;
       $node->field_each_units[$node->language][0]['value'] = $val->total_qty;
 
       $node = node_submit($node); // Prepare node for saving
       node_save($node);
-    }
+  }
+  $context['sandbox']['progress'] += 50;
 
+  if ($context['sandbox']['progress'] != $context['sandbox']['max']) {
+    $context['finished'] = $context['sandbox']['progress'] / $context['sandbox']['max'];
+  }
+}
 
+function change_feeds_import_create_picking(&$context){
+  if (!isset($context['sandbox']['progress'])) {
     $query = db_select('node', 'n');
     $query->join('field_data_field_vehicle', 'v', 'v.entity_id = n.nid');
     $query->join('field_data_field_loading_date', 'date', 'date.entity_id = n.nid');
@@ -442,8 +475,6 @@ function change_feeds_import_feeds_after_import(FeedsSource $source) {
     $query->addExpression('floor(SUM(stsq.field_sum_of_total_sales_qty_value) / field_pack_size_value)', 'cld');
     $query->addExpression('SUM(stsq.field_sum_of_total_sales_qty_value) - (field_pack_size_value * floor(SUM(stsq.field_sum_of_total_sales_qty_value) / field_pack_size_value))', 'eaches');
     $query->groupBy('field_vehicle_value,field_loading_date_value,field_sku7_code_value,field_godown_area_id_value');
-    $results = $query->execute()->fetchAll();
-
     $subquery = db_select($query, 'middle');
     $subquery->fields('middle');
     $subquery->addExpression('COUNT(cld)', 'cld_lines');
@@ -452,10 +483,18 @@ function change_feeds_import_feeds_after_import(FeedsSource $source) {
     $subquery->addExpression('SUM(eaches)', 'total_eaches');
     $subquery->groupBy('field_vehicle_value,field_loading_date_value,field_godown_area_id_value');
     $results = $subquery->execute()->fetchAll();
+    $context['sandbox']['progress'] = 0;
+    $context['sandbox']['current_node'] = 0;
+    $context['sandbox']['max'] = count($results);
+    $context['sandbox']['result'] = $results;
+  }
+  global $user;
+  $res = $context['sandbox']['result'];
 
-    foreach ($results as $key => $val) {
+  for ($i = $context['sandbox']['progress']; $i < $context['sandbox']['progress'] + 50 && $i < $context['sandbox']['max']; $i++){
+      $key = $i;
+      $val = $res[$key];      
       if ($val->total_cld > 0 || $val->total_eaches > 0) {
-        global $user;
         $node = new stdClass();
         $node->title = $val->field_vehicle_value . format_date(time());
         $node->type = "picking";
@@ -483,10 +522,14 @@ function change_feeds_import_feeds_after_import(FeedsSource $source) {
           node_save($node_copy);
         }
       }
-    }
   }
-}
+  $context['sandbox']['progress'] += 50;
 
+  if ($context['sandbox']['progress'] != $context['sandbox']['max']) {
+    $context['finished'] = $context['sandbox']['progress'] / $context['sandbox']['max'];
+  }
+
+}
 /**
  * 
  * Implements hook_feeds_presave($source, $entity, $item)
