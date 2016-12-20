@@ -764,16 +764,14 @@ function change_feeds_import_views_api() {
  * Implements hook_node_presave()
  */
 function change_feeds_import_node_presave($node) {
-
   if ($node->type == 'billing_data') {
     $loading_date = $node->field_loading_date['und'][0]['value'];
     $loading_date_stamp = strtotime($loading_date);
     $billing_loading_month = date("l", strtotime($loading_date));
-
     switch ($billing_loading_month) {
       case "Monday":
         $promised_delivery_date_stamp = strtotime("+2 day", $loading_date_stamp);
-        $promised_delivery_date = date('d-m-Y', $promised_delivery_date_stamp);
+        $promised_delivery_date = date('Y-m-d', $promised_delivery_date_stamp);
         $node->field_promised_delivery_date[LANGUAGE_NONE][0]['value'] = $promised_delivery_date;
         break;
       case "Tuesday":
@@ -783,27 +781,27 @@ function change_feeds_import_node_presave($node) {
         break;
       case "Wednesday":
         $promised_delivery_date_stamp = strtotime("+2 day", $loading_date_stamp);
-        $promised_delivery_date = date('d-m-Y', $promised_delivery_date_stamp);
+        $promised_delivery_date = date('Y-m-d', $promised_delivery_date_stamp);
         $node->field_promised_delivery_date[LANGUAGE_NONE][0]['value'] = $promised_delivery_date;
         break;
       case "Thursday":
         $promised_delivery_date_stamp = strtotime("+2 day", $loading_date_stamp);
-        $promised_delivery_date = date('d-m-Y', $promised_delivery_date_stamp);
+        $promised_delivery_date = date('Y-m-d', $promised_delivery_date_stamp);
         $node->field_promised_delivery_date[LANGUAGE_NONE][0]['value'] = $promised_delivery_date;
         break;
       case "Friday":
         $promised_delivery_date_stamp = strtotime("+3 day", $loading_date_stamp);
-        $promised_delivery_date = date('d-m-Y', $promised_delivery_date_stamp);
+        $promised_delivery_date = date('Y-m-d', $promised_delivery_date_stamp);
         $node->field_promised_delivery_date[LANGUAGE_NONE][0]['value'] = $promised_delivery_date;
         break;
       case "Saturday":
         $promised_delivery_date_stamp = strtotime("+3 day", $loading_date_stamp);
-        $promised_delivery_date = date('d-m-Y', $promised_delivery_date_stamp);
+        $promised_delivery_date = date('Y-m-d', $promised_delivery_date_stamp);
         $node->field_promised_delivery_date[LANGUAGE_NONE][0]['value'] = $promised_delivery_date;
         break;
       case "Sunday":
         $promised_delivery_date_stamp = strtotime("+2 day", $loading_date_stamp);
-        $promised_delivery_date = date('d-m-Y', $promised_delivery_date_stamp);
+        $promised_delivery_date = date('Y-m-d', $promised_delivery_date_stamp);
         $node->field_promised_delivery_date[LANGUAGE_NONE][0]['value'] = $promised_delivery_date;
         break;
     }
