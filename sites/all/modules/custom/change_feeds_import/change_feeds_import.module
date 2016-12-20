@@ -131,15 +131,17 @@ function change_feeds_import_node_update($node) {
     }
     ##### End TDP Compliant #######
     $status = $node->field__party_packingstatus['und'][0]['value'];
-    if($status == 1){
+    if ($status == 1) {
       $status = "In Process";
-    }else if($status == 2){
+    }
+    else if ($status == 2) {
       $status = "Completed";
-    }else{
+    }
+    else {
       $status = "Null";
     }
-    
-    
+
+
     // insert in flat_party_packing table when node update.(if record is not in table then create new record)
     db_merge('flat_party_packing')
         ->key(array('nid' => $node->nid))
@@ -211,14 +213,16 @@ function change_feeds_import_node_update($node) {
     }
     ##### End TDP Compliant #######
     $status = $node->field_picking_status['und'][0]['value'];
-    if($status == 1){
+    if ($status == 1) {
       $status = "In Process";
-    }else if($status == 2){
+    }
+    else if ($status == 2) {
       $status = "Completed";
-    }else{
+    }
+    else {
       $status = "Null";
     }
-    
+
     db_merge('flat_picking')
         ->key(array('nid' => $node->nid))
         ->fields(array(
@@ -242,12 +246,8 @@ function change_feeds_import_node_update($node) {
           'moc' => $node->MOC,
           'tdp' => $node->TDP,
           'complaince' => $node->compliance,
-
         ))
         ->execute();
-    
-    
-    
   }
 
   if ($node->type == 'egir') { // if content type is EGIR
@@ -316,13 +316,15 @@ function change_feeds_import_node_update($node) {
       $node->unloading_end_time_cutOff = "Compliant";
     }
     ##### End logic for unloading Compliant #######
-    
+
     $status = $node->field_unloading_status['und'][0]['value'];
-    if($status == 1){
+    if ($status == 1) {
       $status = "In Process";
-    }else if($status == 2){
+    }
+    else if ($status == 2) {
       $status = "Completed";
-    }else{
+    }
+    else {
       $status = "Null";
     }
     // insert in flat_unloading table when node update.(if record is not in table then create new record)
@@ -346,7 +348,7 @@ function change_feeds_import_node_update($node) {
           'tdp' => $node->TDP,
           'moc' => $node->MOC,
           'unloading_compliance' => $node->unloading_end_time_cutOff,
-          'egir_complaince' =>$node->compliance,
+          'egir_complaince' => $node->compliance,
         ))
         ->execute();
   }
@@ -385,64 +387,33 @@ function change_feeds_import_feeds_after_import(FeedsSource $source) {
     $query->innerjoin('field_data_field_sku7_code', 's', 's.entity_id = n.nid');
     $query->innerjoin('field_data_field_sum_of_total_sales_qty', 't', 't.entity_id = n.nid');
     $query->fields('v', array('field_vehicle_value'));
+    $query->groupBy('v.field_vehicle_value');
     $query->fields('l', array('field_loading_date_value'));
+    $query->groupBy('l.field_loading_date_value');
     $query->fields('s', array('field_sku7_code_value'));
-    $query->fields('t', array('field_sum_of_total_sales_qty_value'));
     $query->fields('n', array('created', 'nid'));
+    $query->addExpression('sum(t.field_sum_of_total_sales_qty_value)', 'total_qty');
+    $query->addExpression('count(s.field_sku7_code_value)', 'sku_count');
+    $query->addExpression('count(distinct(s.field_sku7_code_value))', 'unique_count');
     $query->condition('n.type', 'billing_data');
     $result = $query->execute()->fetchAll();
+    global $user;
 
-    foreach ($result as $key => $value) {
-      $vehicle = $value->field_vehicle_value;
-      $loading_date = $value->field_loading_date_value;
-      $sku = $value->field_sku7_code_value;
-      $total_qty = $value->field_sum_of_total_sales_qty_value;
-      $unique = "unique";
-      $total = "total";
-      $created = $value->created;
-      if (isset($res[$vehicle . "/" . $loading_date . "/" . $created])) {
-        $res[$vehicle . "/" . $loading_date . "/" . $created]['sku_count'] ++;
-        $res[$vehicle . "/" . $loading_date . "/" . $created]['total_count'] += $total_qty;
-        $unique_sku_string = $vehicle . "" . $loading_date . "" . $sku;
-        if ($temp_unique_sku_string != $unique_sku_string) {
-          $res[$vehicle . "/" . $loading_date . "/" . $created]['unique_count'] ++;
-          $temp_unique_sku_string = $vehicle . "" . $loading_date . "" . $sku;
-        }
-      }
-      else {
-        $res[$vehicle . "/" . $loading_date . "/" . $created] = array();
-        $res[$vehicle . "/" . $loading_date . "/" . $created]['sku_count'] = 1;
-        $res[$vehicle . "/" . $loading_date . "/" . $created]['total_count'] = $total_qty;
-        $temp_unique_sku_string = $vehicle . "" . $loading_date . "" . $sku;
-        $res[$vehicle . "/" . $loading_date . "/" . $created]['unique_count'] = 1;
-      }
-    }
-
-    foreach ($res as $key => $val) {
-      global $user;
-      $rr = explode("/", $key);
-      $vehicle = $rr[0];
-      $loading_date = $rr[1];
-      $created_date = date('Y-m-d H:i:s', $rr[2]);
-      $distint_sku_count = $val['unique_count'];
-      $sku_count = $val['sku_count'];
-      $total_qty_count = $val['total_count'];
+    foreach ($result as $key => $val) {
       $node = new stdClass();
-      $node->title = $vehicle . format_date(time());
+      $node->title = $val->field_vehicle_value . format_date(time());
       $node->type = "party_packing";
       node_object_prepare($node); // Sets some defaults. Invokes hook_prepare() and hook_node_prepare().
       $node->language = LANGUAGE_NONE; // Or e.g. 'en' if locale is enabled
       $node->uid = $user->uid;
       $node->status = 1; //(1 or 0): published or not
       $node->comment = 1; // 0 = comments disabled, 1 = read only, 2 = read/write
-      // Term reference (taxonomy) field
-
-      $node->field_party_packing_vehicle[$node->language][0]['value'] = $vehicle;
-      $node->field_party_packing_loading_date[$node->language][0]['value'] = $loading_date;
-      $node->field_party_packing_date[$node->language][0]['value'] = $created_date;
-      $node->field_loading_sheet_line[$node->language][0]['value'] = $distint_sku_count;
-      $node->field_bill_lines[$node->language][0]['value'] = $sku_count;
-      $node->field_each_units[$node->language][0]['value'] = $total_qty_count;
+      $node->field_party_packing_vehicle[$node->language][0]['value'] = $val->field_vehicle_value;
+      $node->field_party_packing_loading_date[$node->language][0]['value'] = $val->field_loading_date_value;
+      $node->field_party_packing_date[$node->language][0]['value'] = $val->created;
+      $node->field_loading_sheet_line[$node->language][0]['value'] = $val->unique_count;
+      $node->field_bill_lines[$node->language][0]['value'] = $val->sku_count;
+      $node->field_each_units[$node->language][0]['value'] = $val->total_qty;
 
       $node = node_submit($node); // Prepare node for saving
       node_save($node);
@@ -578,3 +549,53 @@ function change_feeds_import_views_api() {
     'path' => drupal_get_path('module', 'change_feeds_import') . '/views',
   );
 }
+
+/**
+ * Implements hook_node_presave()
+ */
+//function change_feeds_import_node_presave($node) {
+//
+//  if ($node->type == 'billing_data') {
+//    $loading_date = $node->field_loading_date['und'][0]['value'];
+//    $loading_date_stamp = strtotime($loading_date);
+//    $billing_loading_month = date("l", strtotime($loading_date));
+//
+//    switch ($billing_loading_month) {
+//      case "Monday":
+//        $promised_delivery_date_stamp = strtotime("+2 day", $loading_date_stamp);
+//        $promised_delivery_date = date('d-m-Y', $promised_delivery_date_stamp);
+//        $node->field_promised_delivery_date[LANGUAGE_NONE][0]['value'] = $promised_delivery_date;
+//        break;
+//      case "Tuesday":
+//        $promised_delivery_date_stamp = strtotime("+2 day", $loading_date_stamp);
+//        $promised_delivery_date = date('Y-m-d', $promised_delivery_date_stamp);
+//        $node->field_promised_delivery_date[LANGUAGE_NONE][0]['value'] = $promised_delivery_date;
+//        break;
+//      case "Wednesday":
+//        $promised_delivery_date_stamp = strtotime("+2 day", $loading_date_stamp);
+//        $promised_delivery_date = date('d-m-Y', $promised_delivery_date_stamp);
+//        $node->field_promised_delivery_date[LANGUAGE_NONE][0]['value'] = $promised_delivery_date;
+//        break;
+//      case "Thursday":
+//        $promised_delivery_date_stamp = strtotime("+2 day", $loading_date_stamp);
+//        $promised_delivery_date = date('d-m-Y', $promised_delivery_date_stamp);
+//        $node->field_promised_delivery_date[LANGUAGE_NONE][0]['value'] = $promised_delivery_date;
+//        break;
+//      case "Friday":
+//        $promised_delivery_date_stamp = strtotime("+3 day", $loading_date_stamp);
+//        $promised_delivery_date = date('d-m-Y', $promised_delivery_date_stamp);
+//        $node->field_promised_delivery_date[LANGUAGE_NONE][0]['value'] = $promised_delivery_date;
+//        break;
+//      case "Saturday":
+//        $promised_delivery_date_stamp = strtotime("+3 day", $loading_date_stamp);
+//        $promised_delivery_date = date('d-m-Y', $promised_delivery_date_stamp);
+//        $node->field_promised_delivery_date[LANGUAGE_NONE][0]['value'] = $promised_delivery_date;
+//        break;
+//      case "Sunday":
+//        $promised_delivery_date_stamp = strtotime("+2 day", $loading_date_stamp);
+//        $promised_delivery_date = date('d-m-Y', $promised_delivery_date_stamp);
+//        $node->field_promised_delivery_date[LANGUAGE_NONE][0]['value'] = $promised_delivery_date;
+//        break;
+//    }
+//  }
+//}
