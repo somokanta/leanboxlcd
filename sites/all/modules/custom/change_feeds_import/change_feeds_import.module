@@ -352,6 +352,173 @@ function change_feeds_import_node_update($node) {
         ))
         ->execute();
   }
+
+  if ($node->type == 'billing_data') {
+
+
+    $sub_query1 = db_select('node', 'n');
+    $sub_query1->condition('n.type', "party_packing", '=');
+    $sub_query1->innerjoin('field_data_field_party_packing_vehicle', 'ppv', 'ppv.entity_id = n.nid');
+    $sub_query1->innerjoin('field_data_field_party_packing_loading_date', 'pld', 'pld.entity_id = n.nid');
+    $sub_query1->innerjoin('field_data_field__party_packingstatus', 'pps', 'pps.entity_id = n.nid');
+    $sub_query1->fields('ppv', array('field_party_packing_vehicle_value'));
+    $sub_query1->fields('pld', array('field_party_packing_loading_date_value'));
+    $sub_query1->fields('pps', array('field__party_packingstatus_value'));
+    $sub_query1->fields('n', array('nid'));
+
+    $sub_query2 = db_select('node', 'n');
+    $sub_query2->condition('n.type', "dispatch_data", '=');
+    $sub_query2->innerjoin('field_data_field_vehicle', 'fv', 'fv.entity_id = n.nid');
+    $sub_query2->innerjoin('field_data_field_loading_date', 'fld', 'fld.entity_id = n.nid');
+    $sub_query2->innerjoin('field_data_field_dispatch_date', 'fdd', 'fdd.entity_id = n.nid');
+    $sub_query2->fields('fv', array('field_vehicle_value'));
+    $sub_query2->fields('fld', array('field_loading_date_value'));
+    $sub_query2->fields('fdd', array('field_dispatch_date_value'));
+    $sub_query2->fields('n', array('nid'));
+
+    $type = "billing_data";
+    $query = db_select('node', 'n');
+    $query->condition('n.type', $type, '=');
+    $query->condition('n.nid', $node->nid, '=');
+    $query->innerjoin('field_data_field_bill_number', 'bn', 'bn.entity_id = n.nid');
+    $query->innerjoin('field_data_field_bill_date', 'bd', 'bd.entity_id = n.nid');
+    $query->innerjoin('field_data_field_vehicle', 'v', 'v.entity_id = n.nid');
+    $query->innerjoin('field_data_field_loading_date', 'ld', 'ld.entity_id = n.nid');
+    $query->innerjoin('field_data_field_sum_of_sales_value', 'ssv', 'ssv.entity_id = n.nid');
+    $query->innerjoin('field_data_field_sum_of_sales_ret_value', 'srv', 'srv.entity_id = n.nid');
+    $query->innerjoin('field_data_field_party_code', 'pc', 'pc.entity_id = n.nid');
+    $query->innerjoin('field_data_field_party_code', 'pc2', 'pc2.field_party_code_value = pc.field_party_code_value');
+    $query->innerjoin('field_data_field_pl_group', 'plg', 'pc2.entity_id = plg.entity_id');
+    $query->innerjoin('field_data_field_channel', 'fc', 'pc2.entity_id = fc.entity_id');
+    $query->innerjoin('field_data_field_pl_group', 'plg2', 'plg2.field_pl_group_value = plg.field_pl_group_value');
+    $query->innerjoin('field_data_field_party_packing', 'fpp', 'plg2.entity_id = fpp.entity_id');
+    $query->innerjoin('field_data_field_promised_delivery_date', 'pd', 'pd.entity_id = n.nid');
+    $query->innerjoin('field_data_field_promised_delivery_date', 'pd', 'pd.entity_id = n.nid');
+    $query->fields('bn', array('field_bill_number_value'));
+    $query->groupBy('bn.field_bill_number_value');
+    $query->fields('bd', array('field_bill_date_value'));
+    $query->fields('v', array('field_vehicle_value'));
+    $query->fields('ld', array('field_loading_date_value'));
+    $query->addExpression('SUM(ssv.field_sum_of_sales_value_value)', 'Sum_of_SALES_VALUE');
+    $query->addExpression('SUM(srv.	field_sum_of_sales_ret_value_value)', 'Sum_of_SALES_RET_VALUE');
+    $query->fields('pc', array('field_party_code_value', 'entity_id'));
+    $query->fields('pd', array('field_promised_delivery_date_value'));
+    $query->fields('plg', array('field_pl_group_value'));
+    $query->fields('fc', array('field_channel_value'));
+    $query->fields('fpp', array('field_party_packing_value'));
+    $query->join($sub_query1, 'party_p', 'party_p.field_party_packing_vehicle_value = v.field_vehicle_value and party_p.field_party_packing_loading_date_value = ld.field_loading_date_value');
+    $query->join($sub_query2, 'dd', 'dd.field_vehicle_value = v.field_vehicle_value and dd.field_loading_date_value = ld.field_loading_date_value');
+    $query->fields('dd');
+    $query->fields('party_p');
+    $result = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+
+
+    foreach ($result as $key => $value) {
+      $billing_vehicle = $value['field_vehicle_value'];
+      $billing_loading_date = $value['field_loading_date_value'];
+      $promised_delivery_date = $value['field_promised_delivery_date_value'];
+
+
+      $sum_of_sales_value = $value['Sum_of_SALES_VALUE'];
+      $sum_of_sales_ret_value = $value['Sum_of_SALES_RET_VALUE'];
+
+      $net_value = $sum_of_sales_ret_value / $sum_of_sales_value;
+      if ($net_value == 0) {
+        $result[$key]['return_type'] = 'NA';
+      }
+      elseif ($net_value >= 0.98 && $net_value <= 1.02) {
+        $result[$key]['return_type'] = 'FULL';
+      }
+      else {
+        $result[$key]['return_type'] = 'Partial';
+      }
+      $dispatch_date = $value['field_dispatch_date_value'];
+      $endDate = strtotime($dispatch_date);
+      $promised_delivery_date_stamp = strtotime($promised_delivery_date);
+      $datediff = $endDate - $promised_delivery_date_stamp;
+      $diff = floor($datediff / (60 * 60 * 24));
+      $result[$key]['delay_days'] = $diff;
+
+      if ($diff == 0 || $diff < 0) {
+        $result[$key]['delay_range'] = "N+2";
+      }
+      elseif ($diff == 1) {
+        $result[$key]['delay_range'] = "N+3";
+      }
+      else {
+        $result[$key]['delay_range'] = ">N+2";
+      }
+
+
+      $billing_loading_timestamp = strtotime($billing_loading_date);
+      $billing_loading_day = date("d", $billing_loading_timestamp);
+
+      $result[$key]['Day'] = $billing_loading_day;
+
+
+      ######### Loagic for MOC #######
+      if ($billing_loading_day < 21) {
+        $month = date("m", $billing_loading_timestamp);
+        $result[$key]['MOC'] = "MOC" . $month;
+      }
+      else {
+        $newdate = strtotime('+1 month', strtotime($billing_loading_date));
+        $next_month = date("m", $newdate);
+        $result[$key]['MOC'] = "MOC" . $next_month;
+      }
+      ########### End Logic for MOC #######
+      ######### Loagic for TDP #######
+      if (($billing_loading_day >= 1) && ($billing_loading_day <= 10)) {
+        $result[$key]['TDP'] = "TDP2";
+      }
+      elseif (($billing_loading_day >= 11) && ($billing_loading_day <= 20)) {
+        $result[$key]['TDP'] = "TDP3";
+      }
+      else {
+        $result[$key]['TDP'] = "TDP1";
+      }
+      ########### End Logic for TDP #######
+      $billing_loading_day_text = date("D", $billing_loading_timestamp);
+      $billing_loading_month = date("M", $billing_loading_timestamp);
+      $result[$key]['month'] = $billing_loading_month;
+      $result[$key]['Week_day'] = $billing_loading_day_text;
+      
+      
+      
+      
+      
+      // insert in flat_party_packing table when node update.(if record is not in table then create new record)
+    db_merge('flat_party_packing')
+        ->key(array('nid' => $node->nid))
+        ->fields(array(
+          'nid' => $node->nid,
+          'bill_number' => $result[$key]['field_bill_number_value'],
+          'bill_date' => strtotime($result[$key]['field_bill_date_value']),
+          'vehicle' => $result[$key]['field_vehicle_value'],
+          'loading_date' => strtotime($result[$key]['field_loading_date_value']),
+          'sum_of_sales_value' => $result[$key]['Sum_of_SALES_VALUE'],
+          'sum_of_sales_ret_value' => $result[$key]['Sum_of_SALES_RET_VALUE'],
+          'promised_delivery_date' => $result[$key]['field_promised_delivery_date_value'],
+          'dispatch_date' => strtotime($result[$key]['field_dispatch_date_value']),
+          'delay_days' => $result[$key]['delay_days'],
+          'delay_range' => $result[$key]['delay_range'],
+          'return_type' => $result[$key]['return_type '],
+          'ideal_party_packing' => $result[$key]['field_party_packing_value'],
+          'actual_party_packing' => $result[$key]['field_bill_number_value'],
+          'day' => $result[$key]['Day'],
+          'tdp' => $result[$key]['TDP'],
+          'month' => $result[$key]['month'],
+          'moc' => $result[$key]['MOC'],
+          'week_day' => $result[$key]['Week_day'],
+          'party_code' => $result[$key]['field_party_code_value'],
+          'pl_group' => $result[$key]['field_pl_group_value'],
+          'channel' => $result[$key]['field_channel_value'],
+        ))
+        ->execute();
+    
+    }
+
+  }
 }
 
 /**

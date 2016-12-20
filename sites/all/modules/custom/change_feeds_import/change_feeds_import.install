@@ -335,5 +335,125 @@ function change_feeds_import_schema() {
     'primary key' => array('nid'),
   );
   
+  
+  $schema['flat_billing_data'] = array(
+   'description' => 'Flat Table for Billing data',
+   'fields' => array(
+     'nid' => array(
+       'description' => 'The primary identifier for a data',
+       'type' => 'int',
+       'not null' => TRUE,
+     ),
+     'bill_number' => array(
+       'description' => 'Bill Number',
+       'type' => 'varchar',
+       'length' => 255,
+     ),
+     'bill_date' => array(
+       'description' => 'Bill Date',
+       'type' => 'int',
+       'length' => 32,
+     ),
+     'vehicle' => array(
+       'description' => 'VEHICLE',
+       'type' => 'varchar',
+       'length' => 255,
+     ),
+     'loading_date' => array(
+       'description' => 'LOADING DATE',
+       'type' => 'int',
+       'length' => 32,
+     ),
+     'sum_of_sales_value' => array(
+       'description' => 'Sum Of Sales Value',
+       'type' => 'float',
+       'length' => 32,
+     ),
+     'sum_of_sales_ret_value' => array(
+       'description' => 'Sum Of Sales Ret Value',
+       'type' => 'float',
+       'length' => 32,
+     ),
+     'promised_delivery_date' => array(
+       'description' => 'Promised Delivery Date',
+       'type' => 'int',
+       'length' => 32,
+     ),
+     'dispatch_date' => array(
+       'description' => 'Dispatch Date',
+       'type' => 'int',
+       'length' => 32,
+     ),
+     'delay_days' => array(
+       'description' => 'Delay Days',
+       'type' => 'int',
+       'length' => 32,
+     ),
+     'delay_range' => array(
+       'description' => 'Delay Range',
+       'type' => 'int',
+       'length' => 32,
+     ),
+     'return_type' => array(
+       'description' => 'Return Type',
+       'type' => 'varchar',
+       'length' => 255,
+     ),
+     'ideal_party_packing' => array(
+       'description' => 'Ideal Party Packing',
+       'type' => 'varchar',
+       'length' => 255,
+     ),
+     'actual_party_packing' => array(
+       'description' => 'Actual Party Packing',
+       'type' => 'varchar',
+       'length' => 255,
+     ),
+     'day' => array(
+       'description' => 'Day',
+       'type' => 'varchar',
+       'length' => 255,
+     ),
+     'tdp' => array(
+       'description' => 'TDP',
+       'type' => 'varchar',
+       'length' => 255,
+     ),
+     
+    
+     'moc' => array(
+       'description' => 'MOC',
+       'type' => 'varchar',
+       'length' => 255,
+     ),
+     'week_day' => array(
+       'description' => 'Week Day',
+       'type' => 'varchar',
+       'length' => 255,
+     ),
+     'month' => array(
+       'description' => 'Month',
+       'type' => 'varchar',
+       'length' => 255,
+     ),
+     'party_code' => array(
+       'description' => 'Party Code',
+       'type' => 'varchar',
+       'length' => 255,
+     ),
+     'pl_group' => array(
+       'description' => 'PL Group',
+       'type' => 'varchar',
+       'length' => 255,
+     ),
+     'channel' => array(
+       'description' => 'Channel',
+       'type' => 'varchar',
+       'length' => 255,
+     ),
+   ),
+   'primary key' => array('nid'),
+ );
+  
   return $schema;
 }
