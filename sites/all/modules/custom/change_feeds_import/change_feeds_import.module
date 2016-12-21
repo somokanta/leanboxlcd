@@ -538,12 +538,27 @@ function change_feeds_import_node_delete($node) {
         ->condition('nid', $node->nid)
         ->execute();
   }
-  // Delete Nid's entry from  party_packing Flat table  on deletion of EGIR Node
+  // Delete Nid's entry from  EGIR Flat table  on deletion of EGIR Node
   if ($node->type == 'egir') {
     db_delete('flat_unloading')
         ->condition('nid', $node->nid)
         ->execute();
   }
+  
+  // Delete Nid's entry from  packing Flat table  on deletion of EGIR Node
+  if ($node->type == 'picking') {
+    db_delete('flat_picking')
+        ->condition('nid', $node->nid)
+        ->execute();
+  }
+  
+  // Delete Nid's entry from  OTIF Flat table  on deletion of EGIR Node
+  if ($node->type == 'billing_data') {
+    db_delete('flat_billing_data')
+        ->condition('nid', $node->nid)
+        ->execute();
+  }
+  
 }
 
 /**
