@@ -599,16 +599,27 @@ function change_feeds_import_feeds_after_import(FeedsSource $source) {
     $batch = array(
       'operations' => array(
         array('change_feeds_import_create_party_packing', array()),
-        array('change_feeds_import_create_picking', array()),
-      ),
+        ),
       'finished' => 'change_feeds_import_finished',
       'title' => t('Creating Party Packing'),
       'init_message' => t('Party Packing Batch Creation is starting.'),
       'progress_message' => t('Processed @current out of @total.'),
-      'error_message' => t('Party Packing Batch Batch has encountered an error.')
+      'error_message' => t('Party Packing Batch has encountered an error.')
+    );
+    batch_set($batch);
+    $batch = array(
+      'operations' => array(
+        array('change_feeds_import_create_picking', array()),
+        ),
+      'finished' => 'change_feeds_import_finished',
+      'title' => t('Creating  Picking'),
+      'init_message' => t('Picking Batch Creation is starting.'),
+      'progress_message' => t('Processed @current out of @total.'),
+      'error_message' => t('Picking Batch has encountered an error.')
     );
     batch_set($batch);
   }
+
 }
 
 function change_feeds_import_create_party_packing(&$context) {
@@ -658,23 +669,32 @@ function change_feeds_import_create_party_packing(&$context) {
     $node = node_submit($node); // Prepare node for saving
     node_save($node);
   }
-  $context['sandbox']['progress'] += 50;
+  $context['sandbox']['progress'] = $i;
 
-  if ($context['sandbox']['progress'] != $context['sandbox']['max']) {
+  if ($context['sandbox']['progress'] < $context['sandbox']['max']) {
     $context['finished'] = $context['sandbox']['progress'] / $context['sandbox']['max'];
+  }
+  else {
+    $context['finished'] = 1;
   }
 }
 
-function change_feeds_import_create_picking(&$context) {
+function change_feeds_import_create_picking(&$context){
   if (!isset($context['sandbox']['progress'])) {
-    $query = db_select('node', 'n');
-    $query->join('field_data_field_vehicle', 'v', 'v.entity_id = n.nid');
-    $query->join('field_data_field_loading_date', 'date', 'date.entity_id = n.nid');
-    $query->join('field_data_field_sku7_code', 'sc', 'sc.entity_id = n.nid');
+    $query = db_select('field_data_field_vehicle', 'v');
+    $query->condition('v.bundle', 'billing_data', '=');
+    $query->join('field_data_field_loading_date', 'date', 'date.entity_id = v.entity_id');
+    $query->condition('date.bundle', 'billing_data', '=');
+    $query->join('field_data_field_sku7_code', 'sc', 'sc.entity_id = v.entity_id');
+    $query->condition('sc.bundle', 'billing_data', '=');
     $query->join('field_data_field_sku7_code', 'gaisc', 'gaisc.field_sku7_code_value = sc.field_sku7_code_value');
+    $query->condition('gaisc.bundle', 'sku7_code_master', '=');
     $query->join('field_data_field_godown_area_id', 'gai', 'gaisc.entity_id = gai.entity_id');
-    $query->join('field_data_field_sum_of_total_sales_qty', 'stsq', 'stsq.entity_id = n.nid');
+    $query->condition('gai.bundle', 'sku7_code_master', '=');
+    $query->join('field_data_field_sum_of_total_sales_qty', 'stsq', 'stsq.entity_id = v.entity_id');
+    $query->condition('stsq.bundle', 'billing_data', '=');
     $query->join('field_data_field_pack_size', 'fps', 'fps.entity_id = gaisc.entity_id');
+    $query->condition('fps.bundle', 'sku7_code_master', '=');
     $query->fields('v', array('field_vehicle_value'));
     $query->fields('date', array('field_loading_date_value'));
     $query->fields('sc', array('field_sku7_code_value'));
@@ -724,23 +744,29 @@ function change_feeds_import_create_picking(&$context) {
 
       $node->field_pick_units[$node->language][0]['value'] = $val->total_eaches;
       $node->field_pick_clds[$node->language][0]['value'] = $val->total_cld;
-      $node_copy = $node;
+      $node_copy = clone $node;
+      $node_copy->is_new = true;
       if ($val->total_eaches > 0) {
         $node->field_picking_picking_type[$node->language][0]['value'] = 'Loose';
         $node->field_pick_lines[$node->language][0]['value'] = $val->eaches_lines;
+        $node->field_pick_clds[$node->language][0]['value'] = 0;
         node_save($node);
       }
       if ($val->total_cld > 0) {
         $node_copy->field_picking_picking_type[$node->language][0]['value'] = 'Bulk';
-        $node->field_pick_lines[$node->language][0]['value'] = $val->cld_lines;
+        $node_copy->field_pick_lines[$node->language][0]['value'] = $val->cld_lines;
+        $node_copy->field_pick_units[$node->language][0]['value'] = 0;
         node_save($node_copy);
       }
     }
   }
-  $context['sandbox']['progress'] += 50;
+  $context['sandbox']['progress'] = $i;
 
-  if ($context['sandbox']['progress'] != $context['sandbox']['max']) {
+  if ($context['sandbox']['progress'] < $context['sandbox']['max']) {
     $context['finished'] = $context['sandbox']['progress'] / $context['sandbox']['max'];
+  }
+  else {
+    $context['finished'] = 1;
   }
 }
 
