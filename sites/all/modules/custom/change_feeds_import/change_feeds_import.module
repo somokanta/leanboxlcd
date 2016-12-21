@@ -701,9 +701,9 @@ function change_feeds_import_create_picking(&$context){
     $query->fields('gai', array('field_godown_area_id_value'));
     $query->fields('fps', array('field_pack_size_value'));
     //$query->fields('stsq', array('field_sum_of_total_sales_qty_value'));
-    $query->condition('n.type', 'billing_data', '=');
-    $query->condition('gai.bundle', 'sku7_code_master', '=');
-    $query->condition('sc.bundle', 'billing_data', '=');
+    // $query->condition('n.type', 'billing_data', '=');
+    // $query->condition('gai.bundle', 'sku7_code_master', '=');
+    // $query->condition('sc.bundle', 'billing_data', '=');
     //$query ->groupBy('stsq.field_sum_of_total_sales_qty_value');
     $query->addExpression('SUM(stsq.field_sum_of_total_sales_qty_value)', 'total_sales_qty');
     $query->addExpression('floor(SUM(stsq.field_sum_of_total_sales_qty_value) / field_pack_size_value)', 'cld');
