@@ -744,8 +744,8 @@ function change_feeds_import_create_picking(&$context){
 
       $node->field_pick_units[$node->language][0]['value'] = $val->total_eaches;
       $node->field_pick_clds[$node->language][0]['value'] = $val->total_cld;
-      $node_copy = $node;
-      //$node_copy->is_new = true;
+      $node_copy = clone $node;
+      $node_copy->is_new = true;
       if ($val->total_eaches > 0) {
         $node->field_picking_picking_type[$node->language][0]['value'] = 'Loose';
         $node->field_pick_lines[$node->language][0]['value'] = $val->eaches_lines;
