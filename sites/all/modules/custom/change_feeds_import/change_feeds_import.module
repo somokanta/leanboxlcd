@@ -123,12 +123,18 @@ function change_feeds_import_node_update($node) {
     $compliance = variable_get('party_packing_compliance', ''); // value from setting form
     $compliance_seconds = strtotime("1970-01-01 $compliance UTC"); // value from setting form
     ######  logic for Compliant ####
-    if ($end_time > $compliance_seconds) {
-      $node->compliance = "Non Compliant";
+    if (empty($end_time)) {
+      $node->compliance = "";
     }
     else {
-      $node->compliance = "Compliant";
+      if ($end_time > $compliance_seconds) {
+        $node->compliance = "Non Compliant";
+      }
+      else {
+        $node->compliance = "Compliant";
+      }
     }
+
     ##### End TDP Compliant #######
     $status = $node->field__party_packingstatus['und'][0]['value'];
     if ($status == 1) {
@@ -148,19 +154,19 @@ function change_feeds_import_node_update($node) {
         ->fields(array(
           'nid' => $node->nid,
           'vehicle' => $node->field_party_packing_vehicle['und'][0]['value'],
-          'loading_date' => $node->field_party_packing_loading_date['und'][0]['value']?$node->field_party_packing_loading_date['und'][0]['value']:0,
-          'party_packing_date' => $node->field_party_packing_date['und'][0]['value']?$node->field_party_packing_date['und'][0]['value']:0,
-          'loading_sheet_line' => $node->field_loading_sheet_line['und'][0]['value']?$node->field_loading_sheet_line['und'][0]['value']:0,
-          'bill_lines' => $node->field_bill_lines['und'][0]['value']?$node->field_bill_lines['und'][0]['value']:0,
-          'each_units' => $node->field_each_units['und'][0]['value']?$node->field_each_units['und'][0]['value']:0,
-          'party_packing_start_time' => $start_time?$start_time:0,
-          'party_packing_end_time' => $end_time?$end_time:0,
+          'loading_date' => $node->field_party_packing_loading_date['und'][0]['value'] ? $node->field_party_packing_loading_date['und'][0]['value'] : 0,
+          'party_packing_date' => $node->field_party_packing_date['und'][0]['value'] ? $node->field_party_packing_date['und'][0]['value'] : 0,
+          'loading_sheet_line' => $node->field_loading_sheet_line['und'][0]['value'] ? $node->field_loading_sheet_line['und'][0]['value'] : 0,
+          'bill_lines' => $node->field_bill_lines['und'][0]['value'] ? $node->field_bill_lines['und'][0]['value'] : 0,
+          'each_units' => $node->field_each_units['und'][0]['value'] ? $node->field_each_units['und'][0]['value'] : 0,
+          'party_packing_start_time' => $start_time ? $start_time : 0,
+          'party_packing_end_time' => $end_time ? $end_time : 0,
           'supervisor' => $node->field_party_packing_supervisor['und'][0]['value'],
           'packer_name' => $node->field_party_packer_name['und'][0]['value'],
-          'team_count' => $node->field_party_packer_team_count['und'][0]['value']?$node->field_party_packer_team_count['und'][0]['value']:0,
+          'team_count' => $node->field_party_packer_team_count['und'][0]['value'] ? $node->field_party_packer_team_count['und'][0]['value'] : 0,
           'status' => $status,
-          'productivity_lines' => $node->party_packing_productivity_lines?$node->party_packing_productivity_lines:0,
-          'party_packing_compliance' => $compliance_seconds?$compliance_seconds:0,
+          'productivity_lines' => $node->party_packing_productivity_lines ? $node->party_packing_productivity_lines : 0,
+          'party_packing_compliance' => $compliance_seconds ? $compliance_seconds : 0,
           'compliance' => $node->compliance,
           'tdp' => $node->TDP,
           'moc' => $node->MOC,
@@ -205,12 +211,20 @@ function change_feeds_import_node_update($node) {
     $compliance = variable_get('picking_compliance', '');
     $compliance_seconds = strtotime("1970-01-01 $compliance UTC");
     ######  logic for Compliant ####
-    if ($end_time > $compliance_seconds) {
-      $node->compliance = "Non Compliant";
+    
+    if (empty($end_time)) {
+      $node->compliance = "";
     }
     else {
-      $node->compliance = "Compliant";
+      if ($end_time > $compliance_seconds) {
+        $node->compliance = "Non Compliant";
+      }
+      else {
+        $node->compliance = "Compliant";
+      }
     }
+    
+   
     ##### End TDP Compliant #######
     $status = $node->field_picking_status['und'][0]['value'];
     if ($status == 1) {
@@ -227,22 +241,22 @@ function change_feeds_import_node_update($node) {
         ->key(array('nid' => $node->nid))
         ->fields(array(
           'nid' => $node->nid,
-          'van_id' => $node->field_picking_van_id['und'][0]['value']?$node->field_picking_van_id['und'][0]['value']:0,
-          'loading_date' => $node->field_picking_loading_date['und'][0]['value']?$node->field_picking_loading_date['und'][0]['value']:0,
+          'van_id' => $node->field_picking_van_id['und'][0]['value'] ? $node->field_picking_van_id['und'][0]['value'] : 0,
+          'loading_date' => $node->field_picking_loading_date['und'][0]['value'] ? $node->field_picking_loading_date['und'][0]['value'] : 0,
           'godown_area_id' => $node->field_picking_godown_area_id['und'][0]['value'],
           'picking_type' => $node->field_picking_picking_type['und'][0]['value'],
-          'picking_date' => $node->field_picking_picking_date['und'][0]['value']?$node->field_picking_picking_date['und'][0]['value'] : 0,
-          'picking_start_time' => $start_time?$start_time:0,
-          'picking_end_time' => $end_time?$end_time:0,
-          'pick_lines' => $node->field_pick_lines['und'][0]['value']?$node->field_pick_lines['und'][0]['value']:0,
+          'picking_date' => $node->field_picking_picking_date['und'][0]['value'] ? $node->field_picking_picking_date['und'][0]['value'] : 0,
+          'picking_start_time' => $start_time ? $start_time : 0,
+          'picking_end_time' => $end_time ? $end_time : 0,
+          'pick_lines' => $node->field_pick_lines['und'][0]['value'] ? $node->field_pick_lines['und'][0]['value'] : 0,
           'pick_units' => $node->field_pick_units['und'][0]['value'],
-          'pick_clds' => $node->field_pick_clds['und'][0]['value']?$node->field_pick_clds['und'][0]['value']:0,
+          'pick_clds' => $node->field_pick_clds['und'][0]['value'] ? $node->field_pick_clds['und'][0]['value'] : 0,
           'pick_supervisor' => $node->field_picking_pick_supervisor['und'][0]['value'],
           'picker_name' => $node->field_picking_picker_name['und'][0]['value'],
-          'picking_team_count' => $node->field_picking_picking_team_count['und'][0]['value']?$node->field_picking_picking_team_count['und'][0]['value']:0,
+          'picking_team_count' => $node->field_picking_picking_team_count['und'][0]['value'] ? $node->field_picking_picking_team_count['und'][0]['value'] : 0,
           'status' => $status,
-          'pick_productivity_pick' => $node->pick_productivity_pick?$node->pick_productivity_pick:0,
-          'picking_compliance' => $compliance_seconds?$compliance_seconds:0,
+          'pick_productivity_pick' => $node->pick_productivity_pick ? $node->pick_productivity_pick : 0,
+          'picking_compliance' => $compliance_seconds ? $compliance_seconds : 0,
           'moc' => $node->MOC,
           'tdp' => $node->TDP,
           'complaince' => $node->compliance,
@@ -296,12 +310,21 @@ function change_feeds_import_node_update($node) {
 
     $egir_end_time = $node->field_egir_end_time['und'][0]['value'];
     ######  logic for EGIR Compliant ####
-    if ($egir_end_time >= $egir_cutoff_seconds) {
-      $node->compliance = "Non Compliant";
+   
+    
+    if (empty($egir_end_time)) {
+      $node->compliance = "";
     }
     else {
-      $node->compliance = "Compliant";
+      if ($egir_end_time > $egir_cutoff_seconds) {
+        $node->compliance = "Non Compliant";
+      }
+      else {
+        $node->compliance = "Compliant";
+      }
     }
+    
+   
     ##### End logic for EGIR Compliant #######
 
     $unloading_cutoff = variable_get('unloading_end_time_cutOff', '');
@@ -309,12 +332,19 @@ function change_feeds_import_node_update($node) {
 
     $unloading_end_time = $node->field_unloading_end_time['und'][0]['value'];
     ######  logic for Unloading Compliant ####
-    if ($unloading_end_time >= $unloading_cutoff_seconds) {
-      $node->unloading_end_time_cutOff = "Non Compliant";
+   
+    if (empty($unloading_end_time)) {
+      $node->compliance = "";
     }
     else {
-      $node->unloading_end_time_cutOff = "Compliant";
+      if ($unloading_end_time > $unloading_cutoff_seconds) {
+        $node->compliance = "Non Compliant";
+      }
+      else {
+        $node->compliance = "Compliant";
+      }
     }
+   
     ##### End logic for unloading Compliant #######
 
     $status = $node->field_unloading_status['und'][0]['value'];
@@ -333,18 +363,18 @@ function change_feeds_import_node_update($node) {
         ->fields(array(
           'nid' => $node->nid,
           'invoice_number' => $node->field_invoice_number['und'][0]['value'],
-          'invoice_date' => $node->field_invoice_date['und'][0]['value']?$node->field_invoice_date['und'][0]['value']:0,
+          'invoice_date' => $node->field_invoice_date['und'][0]['value'] ? $node->field_invoice_date['und'][0]['value'] : 0,
           'truck_no' => $node->field_truck_no['und'][0]['value'],
           'from_location' => $node->field_from_location['und'][0]['value'],
-          'unloading_date' => $node->field_unloading_date['und'][0]['value']?$node->field_unloading_date['und'][0]['value']:0,
-          'unloading_start_time' => $node->field_unloading_start_time['und'][0]['value']?$node->field_unloading_start_time['und'][0]['value']:0,
-          'unloading_end_time' => $node->field_unloading_end_time['und'][0]['value']?$node->field_unloading_end_time['und'][0]['value']:0,
+          'unloading_date' => $node->field_unloading_date['und'][0]['value'] ? $node->field_unloading_date['und'][0]['value'] : 0,
+          'unloading_start_time' => $node->field_unloading_start_time['und'][0]['value'] ? $node->field_unloading_start_time['und'][0]['value'] : 0,
+          'unloading_end_time' => $node->field_unloading_end_time['und'][0]['value'] ? $node->field_unloading_end_time['und'][0]['value'] : 0,
           'status' => $status,
-          'egir_date' => $node->field_egir_date['und'][0]['value']?$node->field_egir_date['und'][0]['value']:0,
-          'egir_start_time' => $node->field_egir_start_time['und'][0]['value']?$node->field_egir_start_time['und'][0]['value']:0,
-          'egir_end_time' => $node->field_egir_end_time['und'][0]['value']?$node->field_egir_end_time['und'][0]['value']:0,
-          'egir_end_cutoff' => $egir_cutoff_seconds?$egir_cutoff_seconds:0,
-          'unloading_end_cutoff' => $unloading_cutoff_seconds?$unloading_cutoff_seconds:0,
+          'egir_date' => $node->field_egir_date['und'][0]['value'] ? $node->field_egir_date['und'][0]['value'] : 0,
+          'egir_start_time' => $node->field_egir_start_time['und'][0]['value'] ? $node->field_egir_start_time['und'][0]['value'] : 0,
+          'egir_end_time' => $node->field_egir_end_time['und'][0]['value'] ? $node->field_egir_end_time['und'][0]['value'] : 0,
+          'egir_end_cutoff' => $egir_cutoff_seconds ? $egir_cutoff_seconds : 0,
+          'unloading_end_cutoff' => $unloading_cutoff_seconds ? $unloading_cutoff_seconds : 0,
           'tdp' => $node->TDP,
           'moc' => $node->MOC,
           'unloading_compliance' => $node->unloading_end_time_cutOff,
@@ -482,47 +512,46 @@ function change_feeds_import_node_update($node) {
       $billing_loading_month = date("M", $billing_loading_timestamp);
       $result[$key]['month'] = $billing_loading_month;
       $result[$key]['Week_day'] = $billing_loading_day_text;
-      
+
       $party_packing_status = $value['field__party_packingstatus_value'];
-      if($party_packing_status  == 2){
+      if ($party_packing_status == 2) {
         $status = "Yes";
-      }else{
+      }
+      else {
         $status = "No";
       }
-      
-      
-      
-      // insert in flat_billing_data table when node update.(if record is not in table then create new record)
-    db_merge('flat_billing_data')
-        ->key(array('nid' => $node->nid))
-        ->fields(array(
-          'nid' => $node->nid,
-          'bill_number' => $result[$key]['field_bill_number_value'],
-          'bill_date' => strtotime($result[$key]['field_bill_date_value'])?strtotime($result[$key]['field_bill_date_value']):0,
-          'vehicle' => $result[$key]['field_vehicle_value'],
-          'loading_date' => strtotime($result[$key]['field_loading_date_value'])?strtotime($result[$key]['field_loading_date_value']):0,
-          'sum_of_sales_value' => $result[$key]['Sum_of_SALES_VALUE']?$result[$key]['Sum_of_SALES_VALUE']:0,
-          'sum_of_sales_ret_value' => $result[$key]['Sum_of_SALES_RET_VALUE']?$result[$key]['Sum_of_SALES_RET_VALUE']:0,
-          'promised_delivery_date' => strtotime($result[$key]['field_promised_delivery_date_value'])?strtotime($result[$key]['field_promised_delivery_date_value']):0,
-          'dispatch_date' => strtotime($result[$key]['field_dispatch_date_value'])?strtotime($result[$key]['field_dispatch_date_value']):0,
-          'delay_days' => $result[$key]['delay_days']?$result[$key]['delay_days']:0,
-          'delay_range' => $result[$key]['delay_range'],
-          'return_type' => $return_type,
-          'ideal_party_packing' => $result[$key]['field_party_packing_value'],
-          'actual_party_packing' => $status,
-          'day' => $result[$key]['Day'],
-          'tdp' => $result[$key]['TDP'],
-          'month' => $result[$key]['month'],
-          'moc' => $result[$key]['MOC'],
-          'week_day' => $result[$key]['Week_day'],
-          'party_code' => $result[$key]['field_party_code_value'],
-          'pl_group' => $result[$key]['field_pl_group_value'],
-          'channel' => $result[$key]['field_channel_value'],
-        ))
-        ->execute();
-    
-    }
 
+
+
+      // insert in flat_billing_data table when node update.(if record is not in table then create new record)
+      db_merge('flat_billing_data')
+          ->key(array('nid' => $node->nid))
+          ->fields(array(
+            'nid' => $node->nid,
+            'bill_number' => $result[$key]['field_bill_number_value'],
+            'bill_date' => strtotime($result[$key]['field_bill_date_value']) ? strtotime($result[$key]['field_bill_date_value']) : 0,
+            'vehicle' => $result[$key]['field_vehicle_value'],
+            'loading_date' => strtotime($result[$key]['field_loading_date_value']) ? strtotime($result[$key]['field_loading_date_value']) : 0,
+            'sum_of_sales_value' => $result[$key]['Sum_of_SALES_VALUE'] ? $result[$key]['Sum_of_SALES_VALUE'] : 0,
+            'sum_of_sales_ret_value' => $result[$key]['Sum_of_SALES_RET_VALUE'] ? $result[$key]['Sum_of_SALES_RET_VALUE'] : 0,
+            'promised_delivery_date' => strtotime($result[$key]['field_promised_delivery_date_value']) ? strtotime($result[$key]['field_promised_delivery_date_value']) : 0,
+            'dispatch_date' => strtotime($result[$key]['field_dispatch_date_value']) ? strtotime($result[$key]['field_dispatch_date_value']) : 0,
+            'delay_days' => $result[$key]['delay_days'] ? $result[$key]['delay_days'] : 0,
+            'delay_range' => $result[$key]['delay_range'],
+            'return_type' => $return_type,
+            'ideal_party_packing' => $result[$key]['field_party_packing_value'],
+            'actual_party_packing' => $status,
+            'day' => $result[$key]['Day'],
+            'tdp' => $result[$key]['TDP'],
+            'month' => $result[$key]['month'],
+            'moc' => $result[$key]['MOC'],
+            'week_day' => $result[$key]['Week_day'],
+            'party_code' => $result[$key]['field_party_code_value'],
+            'pl_group' => $result[$key]['field_pl_group_value'],
+            'channel' => $result[$key]['field_channel_value'],
+          ))
+          ->execute();
+    }
   }
 }
 
@@ -544,21 +573,20 @@ function change_feeds_import_node_delete($node) {
         ->condition('nid', $node->nid)
         ->execute();
   }
-  
+
   // Delete Nid's entry from  packing Flat table  on deletion of EGIR Node
   if ($node->type == 'picking') {
     db_delete('flat_picking')
         ->condition('nid', $node->nid)
         ->execute();
   }
-  
+
   // Delete Nid's entry from  OTIF Flat table  on deletion of EGIR Node
   if ($node->type == 'billing_data') {
     db_delete('flat_billing_data')
         ->condition('nid', $node->nid)
         ->execute();
   }
-  
 }
 
 /**
@@ -572,7 +600,7 @@ function change_feeds_import_feeds_after_import(FeedsSource $source) {
       'operations' => array(
         array('change_feeds_import_create_party_packing', array()),
         array('change_feeds_import_create_picking', array()),
-        ),
+      ),
       'finished' => 'change_feeds_import_finished',
       'title' => t('Creating Party Packing'),
       'init_message' => t('Party Packing Batch Creation is starting.'),
@@ -581,10 +609,9 @@ function change_feeds_import_feeds_after_import(FeedsSource $source) {
     );
     batch_set($batch);
   }
-
 }
 
-function change_feeds_import_create_party_packing(&$context){
+function change_feeds_import_create_party_packing(&$context) {
   if (!isset($context['sandbox']['progress'])) {
     $query = db_select('node', 'n');
     $query->innerjoin('field_data_field_vehicle', 'v', 'v.entity_id = n.nid');
@@ -610,26 +637,26 @@ function change_feeds_import_create_party_packing(&$context){
   global $user;
   $res = $context['sandbox']['result'];
 
-  for ($i = $context['sandbox']['progress']; $i < $context['sandbox']['progress'] + 50 && $i < $context['sandbox']['max']; $i++){
-      $key = $i;
-      $val = $res[$key];
-      $node = new stdClass();
-      $node->title = $val->field_vehicle_value . format_date(time());
-      $node->type = "party_packing";
-      node_object_prepare($node); // Sets some defaults. Invokes hook_prepare() and hook_node_prepare().
-      $node->language = LANGUAGE_NONE; // Or e.g. 'en' if locale is enabled
-      $node->uid = $user->uid;
-      $node->status = 1; //(1 or 0): published or not
-      $node->comment = 1; // 0 = comments disabled, 1 = read only, 2 = read/write
-      $node->field_party_packing_vehicle[$node->language][0]['value'] = $val->field_vehicle_value;
-      $node->field_party_packing_loading_date[$node->language][0]['value'] = $val->field_loading_date_value;
-      //$node->field_party_packing_date[$node->language][0]['value'] = $val->created;
-      $node->field_loading_sheet_line[$node->language][0]['value'] = $val->unique_count;
-      $node->field_bill_lines[$node->language][0]['value'] = $val->sku_count;
-      $node->field_each_units[$node->language][0]['value'] = $val->total_qty;
+  for ($i = $context['sandbox']['progress']; $i < $context['sandbox']['progress'] + 50 && $i < $context['sandbox']['max']; $i++) {
+    $key = $i;
+    $val = $res[$key];
+    $node = new stdClass();
+    $node->title = $val->field_vehicle_value . format_date(time());
+    $node->type = "party_packing";
+    node_object_prepare($node); // Sets some defaults. Invokes hook_prepare() and hook_node_prepare().
+    $node->language = LANGUAGE_NONE; // Or e.g. 'en' if locale is enabled
+    $node->uid = $user->uid;
+    $node->status = 1; //(1 or 0): published or not
+    $node->comment = 1; // 0 = comments disabled, 1 = read only, 2 = read/write
+    $node->field_party_packing_vehicle[$node->language][0]['value'] = $val->field_vehicle_value;
+    $node->field_party_packing_loading_date[$node->language][0]['value'] = $val->field_loading_date_value;
+    //$node->field_party_packing_date[$node->language][0]['value'] = $val->created;
+    $node->field_loading_sheet_line[$node->language][0]['value'] = $val->unique_count;
+    $node->field_bill_lines[$node->language][0]['value'] = $val->sku_count;
+    $node->field_each_units[$node->language][0]['value'] = $val->total_qty;
 
-      $node = node_submit($node); // Prepare node for saving
-      node_save($node);
+    $node = node_submit($node); // Prepare node for saving
+    node_save($node);
   }
   $context['sandbox']['progress'] += 50;
 
@@ -638,7 +665,7 @@ function change_feeds_import_create_party_packing(&$context){
   }
 }
 
-function change_feeds_import_create_picking(&$context){
+function change_feeds_import_create_picking(&$context) {
   if (!isset($context['sandbox']['progress'])) {
     $query = db_select('node', 'n');
     $query->join('field_data_field_vehicle', 'v', 'v.entity_id = n.nid');
@@ -678,45 +705,45 @@ function change_feeds_import_create_picking(&$context){
   global $user;
   $res = $context['sandbox']['result'];
 
-  for ($i = $context['sandbox']['progress']; $i < $context['sandbox']['progress'] + 50 && $i < $context['sandbox']['max']; $i++){
-      $key = $i;
-      $val = $res[$key];      
-      if ($val->total_cld > 0 || $val->total_eaches > 0) {
-        $node = new stdClass();
-        $node->title = $val->field_vehicle_value . format_date(time());
-        $node->type = "picking";
-        node_object_prepare($node); // Sets some defaults. Invokes hook_prepare() and hook_node_prepare().
-        $node->language = LANGUAGE_NONE; // Or e.g. 'en' if locale is enabled
-        $node->uid = $user->uid;
-        $node->status = 1; //(1 or 0): published or not
-        $node->comment = 1; // 0 = comments disabled, 1 = read only, 2 = read/write
+  for ($i = $context['sandbox']['progress']; $i < $context['sandbox']['progress'] + 50 && $i < $context['sandbox']['max']; $i++) {
+    $key = $i;
+    $val = $res[$key];
+    if ($val->total_cld > 0 || $val->total_eaches > 0) {
+      $node = new stdClass();
+      $node->title = $val->field_vehicle_value . format_date(time());
+      $node->type = "picking";
+      node_object_prepare($node); // Sets some defaults. Invokes hook_prepare() and hook_node_prepare().
+      $node->language = LANGUAGE_NONE; // Or e.g. 'en' if locale is enabled
+      $node->uid = $user->uid;
+      $node->status = 1; //(1 or 0): published or not
+      $node->comment = 1; // 0 = comments disabled, 1 = read only, 2 = read/write
 
-        $node->field_picking_van_id[$node->language][0]['value'] = $val->field_vehicle_value;
-        $node->field_picking_loading_date[$node->language][0]['value'] = $val->field_loading_date_value;
-        $node->field_picking_godown_area_id[$node->language][0]['value'] = $val->field_godown_area_id_value;
+      $node->field_picking_van_id[$node->language][0]['value'] = $val->field_vehicle_value;
+      $node->field_picking_loading_date[$node->language][0]['value'] = $val->field_loading_date_value;
+      $node->field_picking_godown_area_id[$node->language][0]['value'] = $val->field_godown_area_id_value;
 
-        $node->field_pick_units[$node->language][0]['value'] = $val->total_eaches;
-        $node->field_pick_clds[$node->language][0]['value'] = $val->total_cld;
-        $node_copy = $node;
-        if ($val->total_eaches > 0) {
-          $node->field_picking_picking_type[$node->language][0]['value'] = 'Loose';
-          $node->field_pick_lines[$node->language][0]['value'] = $val->eaches_lines;
-          node_save($node);
-        }
-        if ($val->total_cld > 0) {
-          $node_copy->field_picking_picking_type[$node->language][0]['value'] = 'Bulk';
-          $node->field_pick_lines[$node->language][0]['value'] = $val->cld_lines;
-          node_save($node_copy);
-        }
+      $node->field_pick_units[$node->language][0]['value'] = $val->total_eaches;
+      $node->field_pick_clds[$node->language][0]['value'] = $val->total_cld;
+      $node_copy = $node;
+      if ($val->total_eaches > 0) {
+        $node->field_picking_picking_type[$node->language][0]['value'] = 'Loose';
+        $node->field_pick_lines[$node->language][0]['value'] = $val->eaches_lines;
+        node_save($node);
       }
+      if ($val->total_cld > 0) {
+        $node_copy->field_picking_picking_type[$node->language][0]['value'] = 'Bulk';
+        $node->field_pick_lines[$node->language][0]['value'] = $val->cld_lines;
+        node_save($node_copy);
+      }
+    }
   }
   $context['sandbox']['progress'] += 50;
 
   if ($context['sandbox']['progress'] != $context['sandbox']['max']) {
     $context['finished'] = $context['sandbox']['progress'] / $context['sandbox']['max'];
   }
-
 }
+
 /**
  * 
  * Implements hook_feeds_presave($source, $entity, $item)
