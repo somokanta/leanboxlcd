@@ -111,9 +111,10 @@ function change_feeds_import_node_insert($node) {
     $sub_query2->innerjoin('field_data_field_loading_date', 'fld', 'fld.entity_id = n.nid');
     $sub_query2->fields('n', array('nid'));
     $sub_query2->join($sub_query1, 'bd', 'bd.field_vehicle_value = fv.field_vehicle_value and bd.field_loading_date_value = fld.field_loading_date_value');
+    $sub_query2->fields('bd',array('nid'));
     $billing_result = $sub_query2->execute()->fetchAll(PDO::FETCH_ASSOC);
-    dpm($billing_result,"billing_result"); 
-    $billing_nid = $billing_result[0]['nid'];
+    $billing_nid = $billing_result[0]['bd_nid'];
+    
    ######## logic for Actual Party Packing #########
     $sub_query3 = db_select('node', 'n');
     $sub_query3->condition('n.type', "party_packing", '=');
