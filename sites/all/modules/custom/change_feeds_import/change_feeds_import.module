@@ -110,7 +110,7 @@ function change_feeds_import_node_insert($node) {
 
     $billing_nid = $billing_result[0]['nid'];
     
-   
+   dpm($billing_nid,"billing_nid");
     ######## logic for Actual Party Packing #########
     $sub_query3 = db_select('node', 'n');
     $sub_query3->condition('n.type', "party_packing", '=');
