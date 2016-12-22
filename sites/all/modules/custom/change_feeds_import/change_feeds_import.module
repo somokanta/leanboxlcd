@@ -86,6 +86,7 @@ function change_feeds_import_setting_form($form, $form_state) {
  * Implements hook_node_insert()
  */
 function change_feeds_import_node_insert($node) {
+  dpm($node,"node");
   if ($node->type == 'dispatch_data') {
 
     // logic for when dispatch node is uploading get billing data nid (on basis of vehicle+loading date)
