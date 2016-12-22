@@ -86,6 +86,7 @@ function change_feeds_import_setting_form($form, $form_state) {
  * Implements hook_node_insert()
  */
 function change_feeds_import_node_insert($node) {
+  
   if ($node->type == 'dispatch_data') {
 
     // logic for when dispatch node is uploading get billing data nid (on basis of vehicle+loading date)
@@ -111,8 +112,9 @@ function change_feeds_import_node_insert($node) {
     $sub_query2->fields('n', array('nid'));
     $sub_query2->join($sub_query1, 'bd', 'bd.field_vehicle_value = fv.field_vehicle_value and bd.field_loading_date_value = fld.field_loading_date_value');
     $billing_result = $sub_query2->execute()->fetchAll(PDO::FETCH_ASSOC);
+    dpm($billing_result,"billing_result"); 
     $billing_nid = $billing_result[0]['nid'];
-    ######## logic for Actual Party Packing #########
+   ######## logic for Actual Party Packing #########
     $sub_query3 = db_select('node', 'n');
     $sub_query3->condition('n.type', "party_packing", '=');
     $sub_query3->innerjoin('field_data_field_party_packing_vehicle', 'ppv', 'ppv.entity_id = n.nid');
