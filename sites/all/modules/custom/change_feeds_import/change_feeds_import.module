@@ -89,6 +89,7 @@ function change_feeds_import_node_insert($node) {
   
   if ($node->type == 'dispatch_data') {
 
+    
     // logic for when dispatch node is uploading get billing data nid (on basis of vehicle+loading date)
     
     $sub_query1 = db_select('node', 'n');
@@ -100,8 +101,6 @@ function change_feeds_import_node_insert($node) {
     $sub_query1->fields('fv', array('field_vehicle_value'));
     $sub_query1->fields('fld', array('field_loading_date_value'));
     $sub_query1->fields('n', array('nid'));
-//$result = $sub_query1->execute()->fetchAll(PDO::FETCH_ASSOC);
-//dpm($result, "result");
     
     
     $sub_query2 = db_select('node', 'n');
@@ -116,34 +115,28 @@ function change_feeds_import_node_insert($node) {
     $billing_nid = $billing_result[0]['bd_nid'];
     
    ######## logic for Actual Party Packing #########
-    $sub_query3 = db_select('node', 'n');
-    $sub_query3->condition('n.type', "party_packing", '=');
-    $sub_query3->innerjoin('field_data_field_party_packing_vehicle', 'ppv', 'ppv.entity_id = n.nid');
-    $sub_query3->innerjoin('field_data_field_party_packing_loading_date', 'pld', 'pld.entity_id = n.nid');
-    $sub_query3->innerjoin('field_data_field__party_packingstatus', 'pps', 'pps.entity_id = n.nid');
+    $sub_query3 = db_select('node', 'n1');
+    $sub_query3->condition('n1.type', "party_packing", '=');
+    $sub_query3->innerjoin('field_data_field_party_packing_vehicle', 'ppv', 'ppv.entity_id = n1.nid');
+    $sub_query3->innerjoin('field_data_field_party_packing_loading_date', 'pld', 'pld.entity_id = n1.nid');
+    $sub_query3->innerjoin('field_data_field__party_packingstatus', 'pps', 'pps.entity_id = n1.nid');
     $sub_query3->fields('ppv', array('field_party_packing_vehicle_value'));
     $sub_query3->fields('pld', array('field_party_packing_loading_date_value'));
     $sub_query3->fields('pps', array('field__party_packingstatus_value'));
-    $sub_query3->fields('n', array('nid'));
-    ########  logic for Actual Party Packing  End #######
+    $sub_query3->fields('n1', array('nid'));
     
-    
-    ########  logic for Dispatch Date #######
-    $sub_query4 = db_select('node', 'n');
-    $sub_query4->condition('n.type', "dispatch_data", '=');
-    $sub_query4->innerjoin('field_data_field_vehicle', 'fv', 'fv.entity_id = n.nid');
-    $sub_query4->innerjoin('field_data_field_loading_date', 'fld', 'fld.entity_id = n.nid');
-    $sub_query4->innerjoin('field_data_field_dispatch_date', 'fdd', 'fdd.entity_id = n.nid');
+    $sub_query4 = db_select('node', 'n2');
+    $sub_query4->condition('n2.type', "dispatch_data", '=');
+    $sub_query4->innerjoin('field_data_field_vehicle', 'fv', 'fv.entity_id = n2.nid');
+    $sub_query4->innerjoin('field_data_field_loading_date', 'fld', 'fld.entity_id = n2.nid');
+    $sub_query4->innerjoin('field_data_field_dispatch_date', 'fdd', 'fdd.entity_id = n2.nid');
     $sub_query4->fields('fv', array('field_vehicle_value'));
     $sub_query4->fields('fld', array('field_loading_date_value'));
     $sub_query4->fields('fdd', array('field_dispatch_date_value'));
-    $sub_query4->fields('n', array('nid'));
-    ########  logic for Dispatch Date End #######
+    $sub_query4->fields('n2', array('nid'));
     
-    $type = "billing_data";
     $query = db_select('node', 'n');
-    $query->condition('n.type', $type, '=');
-    $query->condition('n.nid', $billing_nid, '=');
+    $query->condition('n.nid',$billing_nid, '=');
     $query->innerjoin('field_data_field_bill_number', 'bn', 'bn.entity_id = n.nid');
     $query->innerjoin('field_data_field_bill_date', 'bd', 'bd.entity_id = n.nid');
     $query->innerjoin('field_data_field_vehicle', 'v', 'v.entity_id = n.nid');
