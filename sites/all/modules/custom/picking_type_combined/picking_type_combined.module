@@ -1,0 +1,54 @@
+
+<?php
+
+/**
+ * @file
+ * get status combined
+ */
+function picking_type_combined_services_resources() {
+  $resource = array(
+    '#api_version' => 3002
+  );
+  $resource = array(
+    'get-status' => array(
+      'operations' => array(
+        'create' => array(
+          'help' => 'Get Combined Status',
+          'callback' => 'fetch_combined_status',
+          'file' => array(
+            'type' => 'inc',
+            'module' => 'picking_type_combined',
+            'name' => 'combined_pick_type'
+          ),
+          'access callback' => 'get_status_api',
+          'access arguments append' => TRUE,
+          // 'args' => array(
+          //   array(
+          //     'name' => 'from_date_booking',
+          //     'type' => 'string',
+          //     'description' => 'start date',
+          //     'source' => array('data' => 'from_date_booking'),
+          //     'optional' => true,
+          //   ),
+          ),
+        ),
+      ),
+    ),
+  );
+  return $resource;
+}
+
+function picking_type_combined_permission() {
+
+  return array(
+    'picking_type_combined_services' => array(
+      'title' => t('fetch picking status'),
+      'description' => t('get status value as combined')
+    )
+  );
+}
+
+function get_status_api() {
+  global $user;
+  return user_access('picking_type_combined_services', $user);
+}
