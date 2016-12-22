@@ -30,7 +30,7 @@ function picking_type_combined_services_resources() {
           //     'source' => array('data' => 'from_date_booking'),
           //     'optional' => true,
           //   ),
-          ),
+          //),
         ),
       ),
     ),
