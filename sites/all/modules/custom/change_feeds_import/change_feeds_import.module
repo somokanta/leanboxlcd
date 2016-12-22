@@ -86,7 +86,6 @@ function change_feeds_import_setting_form($form, $form_state) {
  * Implements hook_node_insert()
  */
 function change_feeds_import_node_insert($node) {
-  dpm($node,"node");
   if ($node->type == 'dispatch_data') {
 
     // logic for when dispatch node is uploading get billing data nid (on basis of vehicle+loading date)
@@ -102,7 +101,7 @@ function change_feeds_import_node_insert($node) {
 
     $sub_query2 = db_select('node', 'n');
     $sub_query2->condition('n.type', "dispatch_data", '=');
-    $sub_query2->condition('n.nid', 420241, '=');
+    $sub_query2->condition('n.nid', $node->nid, '=');
     $sub_query2->innerjoin('field_data_field_vehicle', 'fv', 'fv.entity_id = n.nid');
     $sub_query2->innerjoin('field_data_field_loading_date', 'fld', 'fld.entity_id = n.nid');
     $sub_query2->fields('n', array('nid'));
@@ -111,7 +110,6 @@ function change_feeds_import_node_insert($node) {
 
     $billing_nid = $billing_result[0]['nid'];
     
-   dpm($billing_nid,"billing_nid");
     ######## logic for Actual Party Packing #########
     $sub_query3 = db_select('node', 'n');
     $sub_query3->condition('n.type', "party_packing", '=');
