@@ -51,6 +51,6 @@ function fetch_combined_status() {
     }
 //dpm(node_load(374590));
 //dsm($results);
-  return json_encode($results);
+  return $results;
 }
 
