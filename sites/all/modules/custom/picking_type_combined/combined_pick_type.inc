@@ -52,7 +52,7 @@ function fetch_combined_status() {
     }
 
     $result['data'] =$result_final;
-    return json_encode($result);
+    return ($result);
 //dpm(node_load(374590));
 //dsm($results);
 }
