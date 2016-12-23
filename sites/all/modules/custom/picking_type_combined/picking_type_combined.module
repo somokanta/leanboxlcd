@@ -21,7 +21,7 @@ function picking_type_combined_services_resources() {
             'name' => 'combined_pick_type'
           ),
           'access callback' => 'get_status_api',
-          'access arguments append' => TRUE,
+          //'access arguments append' => false,
           // 'args' => array(
           //   array(
           //     'name' => 'from_date_booking',
