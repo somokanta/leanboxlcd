@@ -1,6 +1,6 @@
 <?php
 
-function fetch_combined_status($from_date_booking) {
+function fetch_combined_status() {
      
     $query = db_select('node', 'n');
     $query->condition('n.type', 'picking', '=');
@@ -51,6 +51,6 @@ function fetch_combined_status($from_date_booking) {
     }
 //dpm(node_load(374590));
 //dsm($results);
-  return json_encode($results);
+  return 'hii';
 }
 
