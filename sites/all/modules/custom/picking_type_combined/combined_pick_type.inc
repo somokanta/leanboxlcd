@@ -45,7 +45,7 @@ function fetch_combined_status() {
     $results = $query->execute()->fetchAll();
 
     foreach($results as $key => $val) {
-      if(!is_null($val->field_combined_nid_value)) {
+      if(!is_numeric($val->field_combined_nid_value)) {
         $val->field_picking_picking_type_value = 'combined';
       }
     }
