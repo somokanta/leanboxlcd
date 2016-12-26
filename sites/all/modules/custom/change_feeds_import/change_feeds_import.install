@@ -1,4 +1,6 @@
 <?php
+
+
 /*
  * Implement hook_schema.
  */
@@ -95,6 +97,11 @@ function change_feeds_import_schema() {
       ),
       'moc' => array(
         'description' => 'MOC',
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+      'distributor_name' => array(
+        'description' => 'Distributor NAME',
         'type' => 'varchar',
         'length' => 255,
       ),
@@ -216,6 +223,11 @@ function change_feeds_import_schema() {
         'type' => 'varchar',
         'length' => 255,
       ),
+      'distributor_name' => array(
+        'description' => 'Distributor NAME',
+        'type' => 'varchar',
+        'length' => 255,
+      ),
       
     ),
     'primary key' => array('nid'),
@@ -330,8 +342,13 @@ function change_feeds_import_schema() {
         'type' => 'varchar',
         'length' => 255,
       ),
-      
+       'distributor_name' => array(
+        'description' => 'Distributor NAME',
+        'type' => 'varchar',
+        'length' => 255,
+      ),
     ),
+   
     'primary key' => array('nid'),
   );
   
@@ -451,6 +468,11 @@ function change_feeds_import_schema() {
        'type' => 'varchar',
        'length' => 255,
      ),
+     'distributor_name' => array(
+        'description' => 'Distributor NAME',
+        'type' => 'varchar',
+        'length' => 255,
+      ),
    ),
    'primary key' => array('nid'),
  );
