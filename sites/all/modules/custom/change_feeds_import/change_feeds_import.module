@@ -824,13 +824,6 @@ function change_feeds_import_create_picking(&$context) {
  * Implements hook_feeds_presave($source, $entity, $item)
  */
 function change_feeds_import_feeds_presave($source, $entity, $item) {
-
-  /* if (($entity->field_mrp[LANGUAGE_NONE] < 0 && !is_numeric($entity->field_mrp[LANGUAGE_NONE])) || (($entity->field_tur[LANGUAGE_NONE]) < 0 && !is_numeric($entity->field_tur[LANGUAGE_NONE])) || ($entity->field_sum_of_total_sales_qty[LANGUAGE_NONE] < 0 && !is_numeric($entity->field_sum_of_total_sales_qty[LANGUAGE_NONE])) || ($entity->field_sum_of_total_sales_ret_qty[LANGUAGE_NONE] < 0 && !is_numeric($entity->field_sum_of_total_sales_ret_qty[LANGUAGE_NONE])) || ($entity->field_sum_of_net_sales_qty[LANGUAGE_NONE] < 0 && !is_numeric($entity->field_sum_of_net_sales_qty[LANGUAGE_NONE])) || ($entity->field_sum_of_sales_free_qty[LANGUAGE_NONE] < 0 && !is_numeric($entity->field_sum_of_sales_free_qty[LANGUAGE_NONE])) || ($entity->field_sum_of_sales_ret_free_qty[LANGUAGE_NONE] < 0 && !is_numeric($entity->field_sum_of_sales_ret_free_qty[LANGUAGE_NONE])) || ($entity->field_sum_of_sales_value[LANGUAGE_NONE] < 0 && !is_numeric($entity->field_sum_of_sales_value[LANGUAGE_NONE])) || ($entity->field_sum_of_sales_ret_value[LANGUAGE_NONE] < 0 && !is_numeric($entity->field_sum_of_sales_ret_value[LANGUAGE_NONE])) || ($entity->field_sum_of_net_sales_value[LANGUAGE_NONE] < 0 && !is_numeric($entity->field_sum_of_net_sales_value[LANGUAGE_NONE])) || ($entity->field_suggested_order_quantity[LANGUAGE_NONE] < 0 && !is_numeric($entity->field_suggested_order_quantity[LANGUAGE_NONE])) || ($entity->field_actual_order_quantity[LANGUAGE_NONE] < 0 && !is_numeric($entity->field_actual_order_quantity[LANGUAGE_NONE])) || ($entity->field_bill_quantity[LANGUAGE_NONE] < 0 && !is_numeric($entity->field_bill_quantity[LANGUAGE_NONE]))) {
-
-    $entity->feeds_item->skip = TRUE;
-
-    } */
-  
   if ($entity->type == 'egir' || $entity->type == 'billing_data') {
     global $user;
     $entity->uid = $user->uid;
@@ -964,4 +957,28 @@ function change_feeds_import_get_distributor_name($distributor_id) {
   $result = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
   $distributor_name = $result[0]['field_name_value'];
   return $distributor_name;
+}
+
+function change_feeds_import_user_presave(&$edit, $account, $category) {
+  global $user;
+  $roles = $user->roles;
+  if (in_array("Distributor", $roles)) {
+    $uid = $user->uid;
+    $edit['field_distributor']['und'][0]['value'] = $uid;
+  }
+}
+
+function change_feeds_import_form_alter(&$form, &$form_state, $form_id) {
+  if ($form_id == 'user_register_form' || $form_id == 'user_profile_form') {
+    $form['#validate'][] = 'registration_validate';
+    return $form;
+  }
+}
+
+function registration_validate($form, &$form_state) {
+  global $user;
+  $roles = $user->roles;
+  if (in_array("administrator", $roles)) {
+    form_set_error('failed_account', 'administrator can not create account only distributor can create account');
+  }
 }
