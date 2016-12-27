@@ -142,6 +142,7 @@ function change_feeds_import_node_insert($node) {
     $query->innerjoin('field_data_field_vehicle', 'v', 'v.entity_id = n.nid');
     $query->innerjoin('field_data_field_loading_date', 'ld', 'ld.entity_id = n.nid');
     $query->innerjoin('field_data_field_sum_of_sales_value', 'ssv', 'ssv.entity_id = n.nid');
+    $query->innerjoin('field_data_field_distributor_uid', 'dist', 'dist.entity_id = n.nid');
     $query->innerjoin('field_data_field_sum_of_sales_ret_value', 'srv', 'srv.entity_id = n.nid');
     $query->innerjoin('field_data_field_party_code', 'pc', 'pc.entity_id = n.nid');
     $query->innerjoin('field_data_field_party_code', 'pc2', 'pc2.field_party_code_value = pc.field_party_code_value');
@@ -156,6 +157,7 @@ function change_feeds_import_node_insert($node) {
     $query->fields('bd', array('field_bill_date_value'));
     $query->fields('v', array('field_vehicle_value'));
     $query->fields('ld', array('field_loading_date_value'));
+    $query->fields('dist', array('field_distributor_uid_value'));
     $query->addExpression('SUM(ssv.field_sum_of_sales_value_value)', 'Sum_of_SALES_VALUE');
     $query->addExpression('SUM(srv.	field_sum_of_sales_ret_value_value)', 'Sum_of_SALES_RET_VALUE');
     $query->fields('pc', array('field_party_code_value', 'entity_id'));
@@ -249,6 +251,8 @@ function change_feeds_import_node_insert($node) {
       }
 
 
+      $distributor_id = $value['field_distributor_uid_value'];
+      $distributor_name = change_feeds_import_get_distributor_name($distributor_id);
 
       // insert in flat_billing_data table when node update.(if record is not in table then create new record)
       db_merge('flat_billing_data')
@@ -276,6 +280,7 @@ function change_feeds_import_node_insert($node) {
             'party_code' => $result[$key]['field_party_code_value'],
             'pl_group' => $result[$key]['field_pl_group_value'],
             'channel' => $result[$key]['field_channel_value'],
+            'distributor_name' => $distributor_name
           ))
           ->execute();
     }
