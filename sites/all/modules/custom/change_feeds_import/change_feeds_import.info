@@ -5,3 +5,4 @@ core = 7.x
 
 files[] = views/handler/custom_for_picking_type.inc
 files[] = views/handler/custom_for_combine_nid.inc
+files[] = views/handler/order_basepack_handler_custom_field.inc
