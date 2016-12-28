@@ -54,7 +54,7 @@ function fetch_combined_status() {
       // if($val->field_picking_status_value == 2) {
       //   $val->field_picking_status_value = 'Completed';
       // }
-      $result_final[] =  array('godown area id' => $val->field_picking_godown_area_id_value , 'picking type' => $val->field_picking_picking_type_value , 'loading date'=> date("d-m-y", strtotime($val->field_picking_loading_date_value)) , 'van id' => $val->field_picking_van_id_value , 'pick units' => $val->field_pick_units_value, 'pick clds' => $var->field_pick_clds_value, 'pick supervisor' => $val->field_picking_pick_supervisor_value, 'picker name' => $val->field_picking_picker_name_value, 'picking team count' => $val->field_picking_picking_team_count_value, 'status' => $val->field_picking_status_value, 'combined nid' => $val->field_combined_nid_value, 'picking start time' => date( 'g:i A', strtotime($val->field_picking_start_time_value)) , 'nid' => $val->nid);
+      $result_final[] =  array('godown area id' => $val->field_picking_godown_area_id_value , 'picking type' => $val->field_picking_picking_type_value , 'loading date'=> date("d-m-y", strtotime($val->field_picking_loading_date_value)) , 'van id' => $val->field_picking_van_id_value , 'pick units' => $val->field_pick_units_value, 'pick clds' => $var->field_pick_clds_value, 'pick supervisor' => $val->field_picking_pick_supervisor_value, 'picker name' => $val->field_picking_picker_name_value, 'picking team count' => $val->field_picking_picking_team_count_value, 'status' => $val->field_picking_status_value, 'combined nid' => $val->field_combined_nid_value, 'picking start time' => date( 'h:i A', strtotime($val->field_picking_start_time_value)) , 'nid' => $val->nid);
     }
 
     $result['data'] =$result_final;
