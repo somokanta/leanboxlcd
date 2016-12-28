@@ -966,17 +966,17 @@ function change_feeds_import_user_presave(&$edit, $account, $category) {
   }
 }
 
-function change_feeds_import_form_alter(&$form, &$form_state, $form_id) {
-  if ($form_id == 'user_register_form' || $form_id == 'user_profile_form') {
-    $form['#validate'][] = 'registration_validate';
-    return $form;
-  }
-}
-
-function registration_validate($form, &$form_state) {
-  global $user;
-  $roles = $user->roles;
-  if (in_array("administrator", $roles)) {
-    form_set_error('failed_account', 'administrator can not create account only distributor can create account');
-  }
-}
+//function change_feeds_import_form_alter(&$form, &$form_state, $form_id) {
+//  if ($form_id == 'user_register_form' || $form_id == 'user_profile_form') {
+//    $form['#validate'][] = 'registration_validate';
+//    return $form;
+//  }
+//}
+//
+//function registration_validate($form, &$form_state) {
+//  global $user;
+//  $roles = $user->roles;
+//  if (in_array("administrator", $roles)) {
+//    form_set_error('failed_account', 'administrator can not create account only distributor can create account');
+//  }
+//}
