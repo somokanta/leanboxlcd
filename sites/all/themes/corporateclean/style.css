@@ -544,3 +544,16 @@ ul.primary, ul.tabs { clear:both; margin:10px 0 35px 0; white-space: normal }
 ul.primary li, ul.tabs li { padding:10px 0; line-height:130%; }
 
 ul.primary li a, ul.tabs li a { margin:0; padding: 4px 1em; display: inline-block; }
+
+
+
+/**
+ * Show scroll for all views of reports
+ */
+.view-billing-data-report, .view-ccfot-report, .view-channle-master-report, .view-dispatch-data-report,
+ .view-egir-report, .view-godown-master-report , .view-outlet-master-report , .view-part-packing-reportable,
+ .view-party-pack-master , .view-pdd-master , .view-picking-report , .view-pl-group-master-report ,
+ .view-resource-master-report , .view-return-bill-report , .view-sku7-code-master-report
+{
+    overflow-x: scroll;
+}
