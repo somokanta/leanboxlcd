@@ -550,10 +550,10 @@ ul.primary li a, ul.tabs li a { margin:0; padding: 4px 1em; display: inline-bloc
 /**
  * Show scroll for all views of reports
  */
-.view-billing-data-report, .view-ccfot-report, .view-channle-master-report, .view-dispatch-data-report,
- .view-egir-report, .view-godown-master-report , .view-outlet-master-report , .view-part-packing-reportable,
- .view-party-pack-master , .view-pdd-master , .view-picking-report , .view-pl-group-master-report ,
- .view-resource-master-report , .view-return-bill-report , .view-sku7-code-master-report
+.view-Billing-Data-Report, .view-CCFOT-Report, .view-Channle-Master-Report, .view-Dispatch-Data-Report,
+ .view-EGIR-Report, .view-Godown-Master-Report , .view-Outlet-Master-Report , .view-Part-Packing-Report,
+ .view-Party-Pack-Master-Report , .view-PDD-Master-Report , .view-Picking-Report , .view-PL-Group-Master-Report ,
+ .view-Resource-Master-Report , .view-Return-Bill-Report , .view-sku7-Code-Master-Report
 {
     overflow-x: scroll;
 }
