@@ -802,7 +802,7 @@ function change_feeds_import_create_picking(&$context) {
       if ($val->total_cld > 0) {
         $node_copy->field_picking_picking_type[$node->language][0]['value'] = 'Bulk';
         //$node_copy->field_pick_lines[$node->language][0]['value'] = $val->cld_lines;
-        $node_copy->field_pick_lines[$node->language][0]['value'] = $val->cld;
+        $node_copy->field_pick_lines[$node->language][0]['value'] = $val->total_cld;
         $node_copy->field_pick_units[$node->language][0]['value'] = 0;
         node_save($node_copy);
       }
