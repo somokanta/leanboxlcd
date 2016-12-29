@@ -757,7 +757,7 @@ function change_feeds_import_create_picking(&$context) {
     $query->groupBy('field_vehicle_value,field_loading_date_value,field_sku7_code_value,field_godown_area_id_value');
     $subquery = db_select($query, 'middle');
     $subquery->fields('middle');
-    $subquery->addExpression('COUNT(cld)', 'cld_lines');
+    //$subquery->addExpression('COUNT(cld)', 'cld_lines');
     $subquery->addExpression('COUNT(eaches)', 'eaches_lines');
     $subquery->addExpression('SUM(cld)', 'total_cld');
     $subquery->addExpression('SUM(eaches)', 'total_eaches');
@@ -801,7 +801,8 @@ function change_feeds_import_create_picking(&$context) {
       }
       if ($val->total_cld > 0) {
         $node_copy->field_picking_picking_type[$node->language][0]['value'] = 'Bulk';
-        $node_copy->field_pick_lines[$node->language][0]['value'] = $val->cld_lines;
+        //$node_copy->field_pick_lines[$node->language][0]['value'] = $val->cld_lines;
+        $node_copy->field_pick_lines[$node->language][0]['value'] = $val->cld;
         $node_copy->field_pick_units[$node->language][0]['value'] = 0;
         node_save($node_copy);
       }
