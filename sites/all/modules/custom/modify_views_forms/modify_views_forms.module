@@ -1,0 +1,90 @@
+
+<?php
+
+/**
+ * hook_form_alter()
+ */
+function modify_views_forms_form_alter(&$form, &$form_state, $form_id) {
+  if(($form_id == 'editableviews_entity_form_picking_form_editable') || ($form_id == 'editableviews_entity_form_party_pack_form_editable') || ($form_id == 'editableviews_entity_form_unloading_form_editable')) {
+    $query = db_select('field_data_field_resource_name', 'fps');
+    $query->fields('fps', array('field_resource_name_value'));
+    $options = $query->execute()->FetchCol();
+    $options = array_merge(array('-select-'),$options);
+  }
+
+  if($form_id == 'editableviews_entity_form_picking_form_editable') {
+    $count = count($form['node']);
+    $keys = array_keys($form['node']);
+    foreach ($form['node'] as $key => $value) {
+      //dsm($value);
+      $form['node'][$key]['field_picking_pick_supervisor'][LANGUAGE_NONE][0]['value']['#type'] = 'select';
+      $form['node'][$key]['field_picking_pick_supervisor'][LANGUAGE_NONE][0]['value']['#multiple'] = FALSE;
+      $form['node'][$key]['field_picking_pick_supervisor'][LANGUAGE_NONE][0]['value']['#options'] = $options;
+    }
+    //dsm($form);
+    // for($i = 0; $i < $count; $i++) {
+    //   $form['node'][$keys[$i]]['field_picking_pick_supervisor']['#type'] = 'select';
+    //   $form['node'][$keys[$i]]['field_picking_pick_supervisor']['#options'] = $options;
+    // }
+    $array = array('modify_views_forms_form_submit');
+    $form['#validate'] = array_merge($array, $form['#validate']);
+    $form['#validate'] = $array;
+
+  }
+  if($form_id == 'editableviews_entity_form_party_pack_form_editable') {
+    $count = count($form['node']);
+    $keys = array_keys($form['node']);
+    foreach ($form['node'] as $key => $value) {
+      //dsm($value);
+      $form['node'][$key]['field_party_packing_supervisor'][LANGUAGE_NONE][0]['value']['#type'] = 'select';
+      $form['node'][$key]['field_party_packing_supervisor'][LANGUAGE_NONE][0]['value']['#multiple'] = FALSE;
+      $form['node'][$key]['field_party_packing_supervisor'][LANGUAGE_NONE][0]['value']['#options'] = $options;
+    }
+    //dsm($keys);
+    // for($i = 0; $i < $count; $i++) {
+    //   $form['node'][$keys[$i]]['field_party_packing_supervisor']['#type'] = 'select';
+    //   $form['node'][$keys[$i]]['field_party_packing_supervisor']['#options'] = $options;
+    // }
+    //dsm($form);
+  }
+  if($form_id == 'editableviews_entity_form_unloading_form_editable') {
+    $count = count($form['node']);
+    $keys = array_keys($form['node']);
+    foreach ($form['node'] as $key => $value) {
+      //dsm($value);
+      $form['node'][$key]['field_unloading_supervisor'][LANGUAGE_NONE][0]['value']['#type'] = 'select';
+      $form['node'][$key]['field_unloading_supervisor'][LANGUAGE_NONE][0]['value']['#multiple'] = FALSE;
+      $form['node'][$key]['field_unloading_supervisor'][LANGUAGE_NONE][0]['value']['#options'] = $options;
+    }
+    //dsm($keys);
+    // for($i = 0; $i < $count; $i++) {
+    //   $form['node'][$keys[$i]]['field_unloading_supervisor']['#type'] = 'select';
+    //   $form['node'][$keys[$i]]['field_unloading_supervisor']['#options'] = $options;
+    // }
+    //dsm($form);
+  }
+  // if($form_id == 'timefield_field_widget_form') {
+  //   dsm('dssdsdsdsd');
+  // }
+  //dsm($form);
+}
+
+function modify_views_forms_field_widget_form_alter(&$element, &$form_state, $context) {
+  $element['value']['#description'] = t('Enter Value in this format (HH:MM)'); 
+  unset($element['#title']); 
+}
+
+/*function edit_form_validate($entity_type, $entity, &$element, &$form_state) {
+  print_r('hi'); exit;
+  dsm($form_state);
+}*/
+
+/*function edit_form_validate($form, &$form_state) {
+  print_r('hi'); exit;
+  dsm($form_state);
+}*/
+
+/*function editableviews_entity_form_picking_form_editable_validate($form, &$form_state) {
+   print_r('hello'); exit;
+   dsm($form_state);
+}*/
