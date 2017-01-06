@@ -1,9 +1,9 @@
 <?php
 
-
 /*
  * Implement hook_schema.
  */
+
 function change_feeds_import_schema() {
   $schema['flat_party_packing'] = array(
     'description' => 'Flat Table for Party Packing data',
@@ -78,13 +78,11 @@ function change_feeds_import_schema() {
         'type' => 'int',
         'length' => 32,
       ),
-      
       'party_packing_compliance' => array(
         'description' => 'PARTY PACKING COMPLIANCE',
         'type' => 'int',
         'length' => 32,
       ),
-      
       'compliance' => array(
         'description' => 'COMPLIANCE',
         'type' => 'varchar',
@@ -108,8 +106,8 @@ function change_feeds_import_schema() {
     ),
     'primary key' => array('nid'),
   );
-  
-  
+
+
   $schema['flat_picking'] = array(
     'description' => 'Flat Table for Unloading data',
     'fields' => array(
@@ -138,13 +136,11 @@ function change_feeds_import_schema() {
         'type' => 'varchar',
         'length' => 255,
       ),
-    
       'picking_date' => array(
         'description' => 'Picking Date',
         'type' => 'int',
         'length' => 32,
       ),
-    
       'picking_start_time' => array(
         'description' => 'Picking Start Time',
         'type' => 'int',
@@ -165,7 +161,6 @@ function change_feeds_import_schema() {
         'type' => 'int',
         'length' => 32,
       ),
-      
       'pick_clds' => array(
         'description' => 'PICK CLDs',
         'type' => 'int',
@@ -173,7 +168,7 @@ function change_feeds_import_schema() {
       ),
       'pick_supervisor' => array(
         'description' => 'PICK SUPERVISOR',
-       'type' => 'varchar',
+        'type' => 'varchar',
         'length' => 255,
       ),
       'picker_name' => array(
@@ -181,43 +176,36 @@ function change_feeds_import_schema() {
         'type' => 'varchar',
         'length' => 255,
       ),
-      
       'picking_team_count' => array(
         'description' => 'PICKING TEAM COUNT',
-       'type' => 'int',
+        'type' => 'int',
         'length' => 32,
       ),
-      
       'status' => array(
         'description' => 'Status',
         'type' => 'varchar',
         'length' => 255,
       ),
-      
-       'pick_productivity_pick' => array(
+      'pick_productivity_pick' => array(
         'description' => 'Pick Productivity Pick / Hr',
-       'type' => 'int',
+        'type' => 'int',
         'length' => 32,
       ),
-      
-       'picking_compliance' => array(
+      'picking_compliance' => array(
         'description' => 'Picking Compliance',
-       'type' => 'int',
+        'type' => 'int',
         'length' => 32,
       ),
-      
       'moc' => array(
         'description' => 'MOC',
         'type' => 'varchar',
         'length' => 255,
       ),
-      
       'tdp' => array(
         'description' => 'TDP',
         'type' => 'varchar',
         'length' => 255,
       ),
-      
       'complaince' => array(
         'description' => 'Complaince',
         'type' => 'varchar',
@@ -228,12 +216,11 @@ function change_feeds_import_schema() {
         'type' => 'varchar',
         'length' => 255,
       ),
-      
     ),
     'primary key' => array('nid'),
   );
-  
-  
+
+
   $schema['flat_unloading'] = array(
     'description' => 'Flat Table for Unloading data',
     'fields' => array(
@@ -317,165 +304,334 @@ function change_feeds_import_schema() {
         'type' => 'int',
         'length' => 32,
       ),
-      
-      
       'tdp' => array(
         'description' => 'TDP',
         'type' => 'varchar',
         'length' => 255,
       ),
-      
       'moc' => array(
         'description' => 'MOC',
         'type' => 'varchar',
         'length' => 255,
       ),
-      
       'unloading_compliance' => array(
         'description' => 'Unloading Compliance',
         'type' => 'varchar',
         'length' => 255,
       ),
-      
       'egir_complaince' => array(
         'description' => 'EGIR Complaince',
         'type' => 'varchar',
         'length' => 255,
       ),
-       'distributor_name' => array(
+      'distributor_name' => array(
         'description' => 'Distributor NAME',
         'type' => 'varchar',
         'length' => 255,
       ),
     ),
-   
     'primary key' => array('nid'),
   );
-  
-  
+
+
   $schema['flat_billing_data'] = array(
-   'description' => 'Flat Table for Billing data',
-   'fields' => array(
-     'nid' => array(
-       'description' => 'The primary identifier for a data',
-       'type' => 'int',
-       'not null' => TRUE,
-     ),
-     'bill_number' => array(
-       'description' => 'Bill Number',
-       'type' => 'varchar',
-       'length' => 255,
-     ),
-     'bill_date' => array(
-       'description' => 'Bill Date',
-       'type' => 'int',
-       'length' => 32,
-     ),
-     'vehicle' => array(
-       'description' => 'VEHICLE',
-       'type' => 'varchar',
-       'length' => 255,
-     ),
-     'loading_date' => array(
-       'description' => 'LOADING DATE',
-       'type' => 'int',
-       'length' => 32,
-     ),
-     'sum_of_sales_value' => array(
-       'description' => 'Sum Of Sales Value',
-       'type' => 'float',
-       'length' => 32,
-     ),
-     'sum_of_sales_ret_value' => array(
-       'description' => 'Sum Of Sales Ret Value',
-       'type' => 'float',
-       'length' => 32,
-     ),
-     'promised_delivery_date' => array(
-       'description' => 'Promised Delivery Date',
-       'type' => 'int',
-       'length' => 32,
-     ),
-     'dispatch_date' => array(
-       'description' => 'Dispatch Date',
-       'type' => 'int',
-       'length' => 32,
-     ),
-     'delay_days' => array(
-       'description' => 'Delay Days',
-       'type' => 'int',
-       'length' => 32,
-     ),
-     'delay_range' => array(
-       'description' => 'Delay Range',
-       'type' => 'varchar',
-       'length' => 255,
-     ),
-     'return_type' => array(
-       'description' => 'Return Type',
-       'type' => 'varchar',
-       'length' => 255,
-     ),
-     'ideal_party_packing' => array(
-       'description' => 'Ideal Party Packing',
-       'type' => 'varchar',
-       'length' => 255,
-     ),
-     'actual_party_packing' => array(
-       'description' => 'Actual Party Packing',
-       'type' => 'varchar',
-       'length' => 255,
-     ),
-     'day' => array(
-       'description' => 'Day',
-       'type' => 'varchar',
-       'length' => 255,
-     ),
-     'tdp' => array(
-       'description' => 'TDP',
-       'type' => 'varchar',
-       'length' => 255,
-     ),
-     
-    
-     'moc' => array(
-       'description' => 'MOC',
-       'type' => 'varchar',
-       'length' => 255,
-     ),
-     'week_day' => array(
-       'description' => 'Week Day',
-       'type' => 'varchar',
-       'length' => 255,
-     ),
-     'month' => array(
-       'description' => 'Month',
-       'type' => 'varchar',
-       'length' => 255,
-     ),
-     'party_code' => array(
-       'description' => 'Party Code',
-       'type' => 'varchar',
-       'length' => 255,
-     ),
-     'pl_group' => array(
-       'description' => 'PL Group',
-       'type' => 'varchar',
-       'length' => 255,
-     ),
-     'channel' => array(
-       'description' => 'Channel',
-       'type' => 'varchar',
-       'length' => 255,
-     ),
-     'distributor_name' => array(
+    'description' => 'Flat Table for Billing data',
+    'fields' => array(
+      'nid' => array(
+        'description' => 'The primary identifier for a data',
+        'type' => 'int',
+        'not null' => TRUE,
+      ),
+      'bill_number' => array(
+        'description' => 'Bill Number',
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+      'bill_date' => array(
+        'description' => 'Bill Date',
+        'type' => 'int',
+        'length' => 32,
+      ),
+      'vehicle' => array(
+        'description' => 'VEHICLE',
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+      'loading_date' => array(
+        'description' => 'LOADING DATE',
+        'type' => 'int',
+        'length' => 32,
+      ),
+      'sum_of_sales_value' => array(
+        'description' => 'Sum Of Sales Value',
+        'type' => 'float',
+        'length' => 32,
+      ),
+      'sum_of_sales_ret_value' => array(
+        'description' => 'Sum Of Sales Ret Value',
+        'type' => 'float',
+        'length' => 32,
+      ),
+      'promised_delivery_date' => array(
+        'description' => 'Promised Delivery Date',
+        'type' => 'int',
+        'length' => 32,
+      ),
+      'dispatch_date' => array(
+        'description' => 'Dispatch Date',
+        'type' => 'int',
+        'length' => 32,
+      ),
+      'delay_days' => array(
+        'description' => 'Delay Days',
+        'type' => 'int',
+        'length' => 32,
+      ),
+      'delay_range' => array(
+        'description' => 'Delay Range',
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+      'return_type' => array(
+        'description' => 'Return Type',
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+      'ideal_party_packing' => array(
+        'description' => 'Ideal Party Packing',
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+      'actual_party_packing' => array(
+        'description' => 'Actual Party Packing',
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+      'day' => array(
+        'description' => 'Day',
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+      'tdp' => array(
+        'description' => 'TDP',
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+      'moc' => array(
+        'description' => 'MOC',
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+      'week_day' => array(
+        'description' => 'Week Day',
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+      'month' => array(
+        'description' => 'Month',
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+      'party_code' => array(
+        'description' => 'Party Code',
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+      'pl_group' => array(
+        'description' => 'PL Group',
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+      'channel' => array(
+        'description' => 'Channel',
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+      'distributor_name' => array(
         'description' => 'Distributor NAME',
         'type' => 'varchar',
         'length' => 255,
       ),
-   ),
-   'primary key' => array('nid'),
- );
+    ),
+    'primary key' => array('nid'),
+  );
+
+  $schema['stage_billing_data'] = array(
+    'description' => 'Stage Table for Billing data',
+    'fields' => array(
+      'id' => array(
+        'description' => 'The primary identifier for a data',
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'vehicle' => array(
+        'description' => 'VEHICLE',
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+      'loading_date' => array(
+        'description' => 'LOADING DATE',
+        'type' => 'int',
+        'length' => 32,
+      ),
+      'party_code' => array(
+        'description' => 'PARTY_CODE',
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+      'party_name' => array(
+        'description' => 'PARTY_NAME',
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+      'bill_number' => array(
+        'description' => 'BILL_NUMBER',
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+      'bill_date' => array(
+        'description' => 'BILL_DATE',
+        'type' => 'int',
+        'length' => 32,
+      ),
+      'product_name' => array(
+        'description' => 'PRODUCT_NAME',
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+      'sku7_code' => array(
+        'description' => 'SKU7_CODE',
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+      'mrp' => array(
+        'description' => 'MRP',
+        'type' => 'float',
+        'length' => 32,
+      ),
+      'tur' => array(
+        'description' => 'TUR',
+        'type' => 'float',
+        'length' => 32,
+      ),
+      'Sum_of_TOTAL_SALES_QTY' => array(
+        'description' => 'Sum_of_TOTAL_SALES_QTY',
+        'type' => 'int',
+        'length' => 32,
+      ),
+      'Sum_of_TOTAL_SALES_RET_QTY' => array(
+        'description' => 'Sum_of_TOTAL_SALES_RET_QTY',
+        'type' => 'int',
+        'length' => 32,
+      ),
+      'Sum_of_NET_SALES_QTY' => array(
+        'description' => 'Sum_of_NET_SALES_QTY',
+        'type' => 'int',
+        'length' => 32,
+      ),
+      'Sum_of_SALES_FREE_QTY' => array(
+        'description' => 'Sum_of_SALES_FREE_QTY',
+        'type' => 'int',
+        'length' => 32,
+      ),
+      'Sum_of_SALES_RET_FREE_QTY' => array(
+        'description' => 'Sum_of_SALES_RET_FREE_QTY',
+        'type' => 'int',
+        'length' => 32,
+      ),
+      'Sum_of_SALES_VALUE' => array(
+        'description' => 'Sum_of_SALES_VALUE',
+        'type' => 'float',
+        'length' => 32,
+      ),
+      'Sum_of_SALES_RET_VALUE' => array(
+        'description' => 'Sum_of_SALES_RET_VALUE',
+        'type' => 'float',
+        'length' => 32,
+      ),
+      'Sum_of_NET_SALES_VALUE' => array(
+        'description' => 'Sum_of_NET_SALES_VALUE',
+        'type' => 'float',
+        'length' => 32,
+      ),
+      'error' => array(
+        'description' => 'Error',
+        'type' => 'int',
+        'length' => 32,
+      ),
+      'error_id' => array(
+        'description' => 'Error Id',
+        'type' => 'int',
+        'length' => 32,
+      ),
+      'date' => array(
+        'description' => 'DATE AND TIME',
+        'type' => 'int',
+        'length' => 32,
+      ),
+      
+    ),
+    'primary key' => array('id'),
+  );
   
+  
+  
+  $schema['error_billing_data'] = array(
+    'description' => 'Error Table for Billing data',
+    'fields' => array(
+      'id' => array(
+        'description' => 'The primary identifier for a data',
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'file_name' => array(
+        'description' => 'File Name',
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+      'date' => array(
+        'description' => 'DATE AND TIME',
+        'type' => 'int',
+        'length' => 32,
+      ),
+      'total_bill_uploaded' => array(
+        'description' => 'Total Bill Uploaded',
+        'type' => 'int',
+        'length' => 32,
+      ),
+      'total_line_uploaded' => array(
+        'description' => 'Total Lines Uploaded',
+        'type' => 'int',
+        'length' => 32,
+      ),
+      
+      'Sum_of_TOTAL_SALES_QTY' => array(
+        'description' => 'Sum_of_TOTAL_SALES_QTY',
+        'type' => 'int',
+        'length' => 32,
+      ),
+      
+      'error_file' => array(
+        'description' => 'Path Of Error File',
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+      
+      'status' => array(
+        'description' => 'Status',
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+   
+    ),
+    'primary key' => array('id'),
+    'foreign keys' => array(
+      'id_stage_billing_data' => array(
+        'table' => 'stage_billing_data',
+        'columns' => array('id' => 'error_id'),
+      ),
+     ),
+    
+  );
   return $schema;
 }
