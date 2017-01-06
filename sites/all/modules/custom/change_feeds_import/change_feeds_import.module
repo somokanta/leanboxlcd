@@ -1,5 +1,18 @@
 <?php
 
+/*
+ *  hook_permission()
+ */
+
+function change_feeds_import_permission() {
+  return array(
+    'Distributor Upload File' => array(
+      'title' => t('Distributor Upload File'),
+      'description' => t('Distributor Upload File')
+    ),
+  );
+}
+
 /**
  * Implments hook_menu
  *
@@ -12,6 +25,57 @@ function change_feeds_import_menu() {
     'page callback' => 'drupal_get_form',
     'page arguments' => array('change_feeds_import_setting_form'),
     'access callback' => 'check_if_fr_role_user_admin',
+  );
+
+
+  // Upload form for billing data
+  $items['billing_data/import'] = array(
+    'title' => 'Import Billing Data',
+    'description' => 'Import Billing Data Node',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('change_feeds_import_billing_data_form'),
+    'access arguments' => array('Distributor Upload File'),
+    'file' => 'form/upload_billing_data.inc',
+  );
+
+  // error validate confirm screen for data
+  $items['confirm/%'] = array(
+    'title' => 'Confirm Table',
+    'description' => 'Confirm Table',
+    'page callback' => 'change_feeds_import_confirm_content',
+    'page arguments' => array(1),
+    'access arguments' => array('Distributor Upload File'),
+    'file' => 'form/show_confirm_table.inc',
+  );
+  
+  // when validate is clicked
+  $items['validate/%'] = array(
+    'title' => 'Validate Data',
+    'description' => 'Validate Data',
+    'page callback' => 'change_feeds_import_validate_content',
+    'page arguments' => array(1),
+    'access arguments' => array('Distributor Upload File'),
+    'file' => 'form/validate_content.inc',
+  );
+  
+  // when confirm is clicked
+  $items['confirm/create_content/%'] = array(
+    'title' => 'confirm',
+    'description' => 'Confirm to create billing packing and picking contents',
+    'page callback' => 'change_feeds_import_create_confirm_content',
+    'page arguments' => array(2),
+    'access arguments' => array('Distributor Upload File'),
+    'file' => 'form/create_content_on_confirm.inc',
+  );
+
+  // when discard is clicked
+  $items['discard/%'] = array(
+    'title' => 'Discard',
+    'description' => 'Discard Data',
+    'page callback' => 'change_feeds_import_discard_data',
+    'page arguments' => array(1),
+    'access arguments' => array('Distributor Upload File'),
+    'file' => 'form/discard_content.inc',
   );
 
   return $items;
@@ -88,8 +152,6 @@ function change_feeds_import_setting_form($form, $form_state) {
 function change_feeds_import_node_insert($node) {
 
   if ($node->type == 'dispatch_data') {
-
-
     // logic for when dispatch node is uploading get billing data nid (on basis of vehicle+loading date)
 
     $sub_query1 = db_select('node', 'n');
@@ -634,191 +696,6 @@ function change_feeds_import_node_delete($node) {
 
 /**
  * 
- * @param FeedsSource $source
- * Implements hook_feeds_after_import(FeedsSource $source)
- */
-function change_feeds_import_feeds_after_import(FeedsSource $source) {
-  if ($source->id == 'billing_data') { // if importing through billing_data (create party_packing nodes)  
-    $batch = array(
-      'operations' => array(
-        array('change_feeds_import_create_party_packing', array()),
-      ),
-      'finished' => 'change_feeds_import_finished',
-      'title' => t('Creating Party Packing'),
-      'init_message' => t('Party Packing Batch Creation is starting.'),
-      'progress_message' => t('Processed @current out of @total.'),
-      'error_message' => t('Party Packing Batch has encountered an error.')
-    );
-    batch_set($batch);
-    $batch = array(
-      'operations' => array(
-        array('change_feeds_import_create_picking', array()),
-      ),
-      'finished' => 'change_feeds_import_finished',
-      'title' => t('Creating  Picking'),
-      'init_message' => t('Picking Batch Creation is starting.'),
-      'progress_message' => t('Processed @current out of @total.'),
-      'error_message' => t('Picking Batch has encountered an error.')
-    );
-    batch_set($batch);
-  }
-}
-
-function change_feeds_import_create_party_packing(&$context) {
-  if (!isset($context['sandbox']['progress'])) {
-    global $user;
-    $user_id = $user->uid;
-    $distributor_id = change_feeds_import_get_distributor_id($user_id);
-    $query = db_select('node', 'n');
-    $query->innerjoin('field_data_field_vehicle', 'v', 'v.entity_id = n.nid');
-    $query->innerjoin('field_data_field_loading_date', 'l', 'l.entity_id = n.nid');
-    $query->innerjoin('field_data_field_sku7_code', 's', 's.entity_id = n.nid');
-    $query->innerjoin('field_data_field_sum_of_total_sales_qty', 't', 't.entity_id = n.nid');
-    $query->fields('v', array('field_vehicle_value'));
-    $query->groupBy('v.field_vehicle_value');
-    $query->fields('l', array('field_loading_date_value'));
-    $query->groupBy('l.field_loading_date_value');
-    $query->fields('s', array('field_sku7_code_value'));
-    $query->fields('n', array('created', 'nid'));
-    $query->addExpression('sum(t.field_sum_of_total_sales_qty_value)', 'total_qty');
-    $query->addExpression('count(s.field_sku7_code_value)', 'sku_count');
-    $query->addExpression('count(distinct(s.field_sku7_code_value))', 'unique_count');
-    $query->condition('n.type', 'billing_data');
-    $result = $query->execute()->fetchAll();
-    $context['sandbox']['progress'] = 0;
-    $context['sandbox']['current_node'] = 0;
-    $context['sandbox']['max'] = count($result);
-    $context['sandbox']['result'] = $result;
-  }
-  global $user;
-  $res = $context['sandbox']['result'];
-
-  for ($i = $context['sandbox']['progress']; $i < $context['sandbox']['progress'] + 50 && $i < $context['sandbox']['max']; $i++) {
-    $key = $i;
-    $val = $res[$key];
-    $node = new stdClass();
-    $node->title = $val->field_vehicle_value . format_date(time());
-    $node->type = "party_packing";
-    node_object_prepare($node); // Sets some defaults. Invokes hook_prepare() and hook_node_prepare().
-    $node->language = LANGUAGE_NONE; // Or e.g. 'en' if locale is enabled
-    $node->uid = $user->uid;
-    $node->status = 1; //(1 or 0): published or not
-    $node->comment = 1; // 0 = comments disabled, 1 = read only, 2 = read/write
-    $node->field_party_packing_vehicle[$node->language][0]['value'] = $val->field_vehicle_value;
-    $node->field_party_packing_loading_date[$node->language][0]['value'] = $val->field_loading_date_value;
-    //$node->field_party_packing_date[$node->language][0]['value'] = $val->created;
-    $node->field_loading_sheet_line[$node->language][0]['value'] = $val->unique_count;
-    $node->field_bill_lines[$node->language][0]['value'] = $val->sku_count;
-    $node->field_each_units[$node->language][0]['value'] = $val->total_qty;
-    $node->field_distributor_uid['und'][0]['value'] = $distributor_id;
-    $node = node_submit($node); // Prepare node for saving
-    node_save($node);
-  }
-  $context['sandbox']['progress'] = $i;
-
-  if ($context['sandbox']['progress'] < $context['sandbox']['max']) {
-    $context['finished'] = $context['sandbox']['progress'] / $context['sandbox']['max'];
-  }
-  else {
-    $context['finished'] = 1;
-  }
-}
-
-function change_feeds_import_create_picking(&$context) {
-  if (!isset($context['sandbox']['progress'])) {
-    global $user;
-    $user_id = $user->uid;
-    $distributor_id = change_feeds_import_get_distributor_id($user_id);
-    $query = db_select('field_data_field_vehicle', 'v');
-    $query->condition('v.bundle', 'billing_data', '=');
-    $query->join('field_data_field_loading_date', 'date', 'date.entity_id = v.entity_id');
-    $query->condition('date.bundle', 'billing_data', '=');
-    $query->join('field_data_field_sku7_code', 'sc', 'sc.entity_id = v.entity_id');
-    $query->condition('sc.bundle', 'billing_data', '=');
-    $query->join('field_data_field_sku7_code', 'gaisc', 'gaisc.field_sku7_code_value = sc.field_sku7_code_value');
-    $query->condition('gaisc.bundle', 'sku7_code_master', '=');
-    $query->join('field_data_field_godown_area_id', 'gai', 'gaisc.entity_id = gai.entity_id');
-    $query->condition('gai.bundle', 'sku7_code_master', '=');
-    $query->join('field_data_field_sum_of_total_sales_qty', 'stsq', 'stsq.entity_id = v.entity_id');
-    $query->condition('stsq.bundle', 'billing_data', '=');
-    $query->join('field_data_field_pack_size', 'fps', 'fps.entity_id = gaisc.entity_id');
-    $query->condition('fps.bundle', 'sku7_code_master', '=');
-    $query->join('field_data_field_unit_case_units_', 'fucu', 'fucu.entity_id = gaisc.entity_id');
-    $query->condition('fucu.bundle', 'sku7_code_master', '=');
-    $query->fields('v', array('field_vehicle_value'));
-    $query->fields('date', array('field_loading_date_value'));
-    $query->fields('sc', array('field_sku7_code_value'));
-    $query->fields('gai', array('field_godown_area_id_value'));
-    $query->fields('fps', array('field_pack_size_value'));
-    $query->fields('fucu', array('field_unit_case_units__value'));
-    $query->addExpression('SUM(stsq.field_sum_of_total_sales_qty_value)', 'total_sales_qty');
-    $query->addExpression('floor(SUM(stsq.field_sum_of_total_sales_qty_value) / field_unit_case_units__value)', 'cld');
-    $query->addExpression('SUM(stsq.field_sum_of_total_sales_qty_value) - (field_unit_case_units__value * floor(SUM(stsq.field_sum_of_total_sales_qty_value) / field_unit_case_units__value))', 'eaches');
-    $query->groupBy('field_vehicle_value,field_loading_date_value,field_sku7_code_value,field_godown_area_id_value');
-    $subquery = db_select($query, 'middle');
-    $subquery->fields('middle');
-    $subquery->addExpression('COUNT(cld)', 'cld_lines');
-    $subquery->addExpression('COUNT(eaches)', 'eaches_lines');
-    $subquery->addExpression('SUM(cld)', 'total_cld');
-    $subquery->addExpression('SUM(eaches)', 'total_eaches');
-    $subquery->groupBy('field_vehicle_value,field_loading_date_value,field_godown_area_id_value');
-    $results = $subquery->execute()->fetchAll();
-    $context['sandbox']['progress'] = 0;
-    $context['sandbox']['current_node'] = 0;
-    $context['sandbox']['max'] = count($results);
-    $context['sandbox']['result'] = $results;
-  }
-  global $user;
-  $res = $context['sandbox']['result'];
-
-  for ($i = $context['sandbox']['progress']; $i < $context['sandbox']['progress'] + 50 && $i < $context['sandbox']['max']; $i++) {
-    $key = $i;
-    $val = $res[$key];
-    if ($val->total_cld > 0 || $val->total_eaches > 0) {
-      $node = new stdClass();
-      $node->title = $val->field_vehicle_value . format_date(time());
-      $node->type = "picking";
-      node_object_prepare($node); // Sets some defaults. Invokes hook_prepare() and hook_node_prepare().
-      $node->language = LANGUAGE_NONE; // Or e.g. 'en' if locale is enabled
-      $node->uid = $user->uid;
-      $node->status = 1; //(1 or 0): published or not
-      $node->comment = 1; // 0 = comments disabled, 1 = read only, 2 = read/write
-
-      $node->field_picking_van_id[$node->language][0]['value'] = $val->field_vehicle_value;
-      $node->field_picking_loading_date[$node->language][0]['value'] = $val->field_loading_date_value;
-      $node->field_picking_godown_area_id[$node->language][0]['value'] = $val->field_godown_area_id_value;
-
-      $node->field_pick_units[$node->language][0]['value'] = $val->total_eaches;
-      $node->field_pick_clds[$node->language][0]['value'] = $val->total_cld;
-      $node->field_distributor_uid['und'][0]['value'] = $distributor_id;
-      $node_copy = clone $node;
-      $node_copy->is_new = true;
-      if ($val->total_eaches > 0) {
-        $node->field_picking_picking_type[$node->language][0]['value'] = 'Loose';
-        $node->field_pick_lines[$node->language][0]['value'] = $val->eaches_lines;
-        $node->field_pick_clds[$node->language][0]['value'] = 0;
-        node_save($node);
-      }
-      if ($val->total_cld > 0) {
-        $node_copy->field_picking_picking_type[$node->language][0]['value'] = 'Bulk';
-        $node_copy->field_pick_lines[$node->language][0]['value'] = $val->cld_lines;
-        $node_copy->field_pick_units[$node->language][0]['value'] = 0;
-        node_save($node_copy);
-      }
-    }
-  }
-  $context['sandbox']['progress'] = $i;
-
-  if ($context['sandbox']['progress'] < $context['sandbox']['max']) {
-    $context['finished'] = $context['sandbox']['progress'] / $context['sandbox']['max'];
-  }
-  else {
-    $context['finished'] = 1;
-  }
-}
-
-/**
- * 
  * Implements hook_feeds_presave($source, $entity, $item)
  */
 function change_feeds_import_feeds_presave($source, $entity, $item) {
@@ -979,4 +856,22 @@ function registration_validate($form, &$form_state) {
   if (in_array("administrator", $roles)) {
     form_set_error('failed_account', 'administrator can not create account only distributor can create account');
   }
+}
+
+function change_feeds_import_feeds_after_import(FeedsSource $source) {
+  if ($source->id == 'sku7_code_master' || $source->id == 'outlet_master') { // if importing through sku7_code_master OR outlet_master.  
+    global $user;
+    $user_id = $user->uid;
+    $distributor_id = change_feeds_import_get_distributor_id($user_id);
+
+    $status_updated = db_update('error_billing_data') // update status in error_billing_data condition based on (Distributor Id )
+        ->fields(array(
+          'status' => "Validate",
+        ))
+        ->condition('distributor_id', $distributor_id, '=')
+        ->condition('status', 'Error', '=')
+        ->execute();
+    
+  }
+
 }
