@@ -704,6 +704,10 @@ function change_feeds_import_feeds_presave($source, $entity, $item) {
     $entity->uid = $user->uid;
   }
 
+  if($entity->type == 'pdd_master') {
+    global $user;
+    $entity->title = $entity->title.'-'.$user->name;
+  }
 
   if ($entity->type == 'ccfot') {
     if (empty($entity->field_bill_quantity[LANGUAGE_NONE])) {
