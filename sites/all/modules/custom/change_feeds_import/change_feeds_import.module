@@ -699,14 +699,17 @@ function change_feeds_import_node_delete($node) {
  * Implements hook_feeds_presave($source, $entity, $item)
  */
 function change_feeds_import_feeds_presave($source, $entity, $item) {
+  global $user;
   if ($entity->type == 'egir' || $entity->type == 'billing_data') {
-    global $user;
     $entity->uid = $user->uid;
   }
 
   if($entity->type == 'pdd_master') {
-    global $user;
     $entity->title = $entity->title.'-'.$user->name;
+  }
+
+  if($entity->type == 'holiday_master') {
+    $entity->title = $user->name;
   }
 
   if ($entity->type == 'ccfot') {
