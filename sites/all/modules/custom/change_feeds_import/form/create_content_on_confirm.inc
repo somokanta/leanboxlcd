@@ -36,7 +36,7 @@ function change_feeds_import_create_confirm_content($id) {
     $sku_count = $res[$vehicle . "/" . $loading_date]['sku_count'];
     $total_qty_count = $res[$vehicle . "/" . $loading_date]['total_count'];
 
-    $created_date = date("Y-m-d h:i:s", $result['date']);
+    $created_date = date("Y-m-d h:i:s", $value['date']);
     $party_packing_data[$vehicle . "/" . $loading_date]['VEHICLE'] = $vehicle;
     $party_packing_data[$vehicle . "/" . $loading_date]['LOADING_DATE'] = $loading_date;
     $party_packing_data[$vehicle . "/" . $loading_date]['party_packing_date'] = $created_date;
@@ -245,7 +245,7 @@ function change_feeds_import_create_billing_data($billing_data_result, &$context
     $node->language = LANGUAGE_NONE; // Or e.g. 'en' if locale is enabled
     $node->uid = $user->uid;
     $node->status = 1; //(1 or 0): published or not
-    $node->comment = 1; // 0 = comments disabled, 1 = read only, 2 = read/write
+    $node->comment = 0; // 0 = comments disabled, 1 = read only, 2 = read/write
     $node->field_vehicle[$node->language][0]['value'] = $val['vehicle'];
     $node->field_loading_date[$node->language][0]['value'] = $loading_date;
     $node->field_party_code[$node->language][0]['value'] = $val['party_code'];
