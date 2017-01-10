@@ -265,6 +265,7 @@ function change_feeds_import_create_billing_data($billing_data_result, &$context
     $node->field_sum_of_sales_ret_value[$node->language][0]['value'] = $val['Sum_of_SALES_RET_VALUE'];
     $node->field_sum_of_net_sales_value[$node->language][0]['value'] = $val['Sum_of_NET_SALES_VALUE'];
     $node = node_submit($node); // Prepare node for saving
+    dpm($node,"node");
     node_save($node);
   }
   $context['sandbox']['progress'] = $i;
