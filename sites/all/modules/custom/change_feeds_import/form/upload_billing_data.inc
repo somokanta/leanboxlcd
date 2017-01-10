@@ -26,7 +26,7 @@ function change_feeds_import_billing_data_form_validate($form, &$form_state) {
     'file_validate_extensions' => array('csv'),
   ));
   if ($file) {
-    if ($file = file_move($file, 'public://billing')) {
+    if ($file = file_move($file, 'public://')) {
       $form_state['values']['file'] = $file;
     }
     else {
