@@ -66,6 +66,7 @@ function change_feeds_import_billing_data_form_submit($form, &$form_state) {
         $header_check = array_diff($data, $header);
         if (count($header_check) > 0) {
           form_set_error('file', 'Wrong template');
+          drupal_goto('billing_data/import');
         }
       }
       else {
