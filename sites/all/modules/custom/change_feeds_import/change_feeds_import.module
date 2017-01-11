@@ -700,7 +700,7 @@ function change_feeds_import_node_delete($node) {
  */
 function change_feeds_import_feeds_presave($source, $entity, $item) {
   global $user;
-  if ($entity->type == 'egir' || $entity->type == 'billing_data') {
+  if ($entity->type == 'egir' || $entity->type == 'billing_data' || $entity->type == 'outlet_master' || $entity->type == 'sku7_code_master') {
     $entity->uid = $user->uid;
   }
 
