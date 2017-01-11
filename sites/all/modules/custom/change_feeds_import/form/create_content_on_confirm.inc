@@ -193,6 +193,7 @@ function change_feeds_import_create_party_packing($party_packing_data_new, &$con
     $val = $res[$key];
     dpm($val['LOADING_DATE'], "loading_date");
     $loading_date = date("m-d-Y", strtotime($val['LOADING_DATE']));
+    dpm($loading_date, "loading_date1");
     $node = new stdClass();
     $node->title = $val['VEHICLE'] . format_date(time());
     $node->type = "party_packing";
