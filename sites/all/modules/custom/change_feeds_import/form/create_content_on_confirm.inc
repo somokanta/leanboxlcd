@@ -2,13 +2,13 @@
 
 // when confirm button is clicked
 function change_feeds_import_create_confirm_content($id) {
- 
+
   // select data from stage table
   $billing_data_result = db_select('stage_billing_data', 'sbd')
           ->condition('sbd.error_id', $id, '=')
           ->fields('sbd')
           ->execute()->fetchAll(PDO::FETCH_ASSOC);
-  
+
   foreach ($billing_data_result as $key => $value) {
     $vehicle = $value['vehicle'];
     $loading_date = $value['loading_date'];
@@ -70,15 +70,15 @@ function change_feeds_import_create_confirm_content($id) {
   );
   batch_set($batch);
 
-  require_once drupal_get_path('module', 'change_feeds_import').'/form/validate_content.inc';
+  require_once drupal_get_path('module', 'change_feeds_import') . '/form/validate_content.inc';
   $status = "Completed";
   // change status in error billing data
   change_feeds_import_update_data_in_error_billing_table($status, $id);
   $message = "Data is Created Successfully";
   drupal_set_message($message);
   $path = 'public://filter_error.csv';
-  if (file_exists($path) ){
-    drupal_unlink($path);//delete the generated error file
+  if (file_exists($path)) {
+    drupal_unlink($path); //delete the generated error file
   }
   batch_process('/billing_data/import');
 }
@@ -191,8 +191,8 @@ function change_feeds_import_create_party_packing($party_packing_data_new, &$con
   for ($i = $context['sandbox']['progress']; $i < $context['sandbox']['progress'] + 50 && $i < $context['sandbox']['max']; $i++) {
     $key = $i;
     $val = $res[$key];
-
-    $loading_date = date("Y-m-d", strtotime($val['LOADING_DATE']));
+    dpm($val['LOADING_DATE'], "loading_date");
+    $loading_date = date("m-d-Y", strtotime($val['LOADING_DATE']));
     $node = new stdClass();
     $node->title = $val['VEHICLE'] . format_date(time());
     $node->type = "party_packing";
