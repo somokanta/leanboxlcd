@@ -192,7 +192,7 @@ function change_feeds_import_create_party_packing($party_packing_data_new, &$con
     $key = $i;
     $val = $res[$key];
 
-    $loading_date = date("Y-m-d", strtotime($val['LOADING_DATE']));
+    $loading_date = date("m/d/Y", $val['LOADING_DATE']);
     $node = new stdClass();
     $node->title = $val['VEHICLE'] . format_date(time());
     $node->type = "party_packing";
@@ -236,8 +236,8 @@ function change_feeds_import_create_billing_data($billing_data_result, &$context
   for ($i = $context['sandbox']['progress']; $i < $context['sandbox']['progress'] + 50 && $i < $context['sandbox']['max']; $i++) {
     $key = $i;
     $val = $res[$key];
-    $loading_date = date("Y-m-d", strtotime($val['loading_date']));
-    $bill_date = date("Y-m-d", strtotime($val['bill_date']));
+    $loading_date = date("m/d/Y", $val['loading_date']);
+    $bill_date = date("m/d/Y", $val['bill_date']);
 
     $node = new stdClass();
     $node->title = $val['vehicle'] . format_date(time());
