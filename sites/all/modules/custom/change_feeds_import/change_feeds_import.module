@@ -700,6 +700,13 @@ function change_feeds_import_node_delete($node) {
  */
 function change_feeds_import_feeds_presave($source, $entity, $item) {
   global $user;
+  if($entity->type == 'egir') {
+    $egir_start_explode = explode(" ", $entity->field_egir_start_time[LANGUAGE_NONE][0]['value']);
+    $egir_end_explode = explode(" ", $entity->field_egir_end_time[LANGUAGE_NONE][0]['value']);
+    $egir_date_explode = explode(" ", $entity->field_egir_date[LANGUAGE_NONE][0]['value']);
+    $entity->field_egir_start_time[LANGUAGE_NONE][0]['value'] = $egir_date_explode[0].' '.$egir_start_explode[1];
+    $entity->field_egir_end_time[LANGUAGE_NONE][0]['value'] = $egir_date_explode[0].' '.$egir_end_explode[1];
+  }
   if ($entity->type == 'egir' || $entity->type == 'billing_data' || $entity->type == 'outlet_master' || $entity->type == 'sku7_code_master') {
     $entity->uid = $user->uid;
   }
