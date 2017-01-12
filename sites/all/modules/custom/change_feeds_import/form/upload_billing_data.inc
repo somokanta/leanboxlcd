@@ -2,6 +2,15 @@
 
 // upload form for billing data
 function change_feeds_import_billing_data_form($form, $form_state) {
+  global $user;
+  $user_id = $user->uid;
+  $distributor_id = change_feeds_import_get_distributor_id($user_id);
+
+  $did = check_distributor_incompleted_upload($distributor_id);
+  if (!empty($did)) {
+    drupal_goto("confirm/$did");
+  }
+
   $link = l(t('Master Upload Imports'), 'content/master-upload'); // all master upload link.
   $form['template'] = array(
     '#markup' => $link,
@@ -42,7 +51,6 @@ function change_feeds_import_billing_data_form_submit($form, &$form_state) {
   global $user;
   $user_id = $user->uid;
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
-
 
   $file = $form_state['values']['file'];
   $file_name = $file->filename;
@@ -306,11 +314,11 @@ function change_feeds_import_billing_data_form_submit($form, &$form_state) {
       $error_link = "";
       $status = "Confirm";
     }
-    
+
     // insert data in error billing data table 
     change_feeds_import_insert_data_in_error_billing_table($file_name, $date, $bill_uploaded, $total_lines, $sum_of_total_sales_qty, $error_link, $status, $distributor_id);
     $last_id = db_query('SELECT MAX(id) FROM {error_billing_data}')->fetchField();
-    
+
     // insert data in stage billing data table 
     change_feeds_import_insert_data_in_staging_billing_table($pass_data, $last_id, $date);
   }
@@ -395,4 +403,17 @@ function check_bill_number_exist() {
   $query3->fields('bn', array('field_bill_number_value'));
   $bill_result = $query3->execute()->fetchAllKeyed(0, 0);
   return $bill_result;
+}
+
+function check_distributor_incompleted_upload($distributor_id) {
+  $result = db_select('error_billing_data', 'bd')
+      ->fields('bd', array('id'))
+      ->condition('status', 'Completed', '!=')
+      ->condition('status', 'Stopped', '!=')
+      ->condition('distributor_id', $distributor_id, '=')
+      ->execute()
+      ->fetchAssoc();
+
+  $did = $result['id'];
+  return $did;
 }
