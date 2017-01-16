@@ -700,6 +700,7 @@ function change_feeds_import_node_delete($node) {
  */
 function change_feeds_import_feeds_presave($source, $entity, $item) {
   global $user;
+  $entity->uid = $user->uid;
   if($entity->type == 'egir') {
     $egir_start_explode = explode(" ", $entity->field_egir_start_time[LANGUAGE_NONE][0]['value']);
     $egir_end_explode = explode(" ", $entity->field_egir_end_time[LANGUAGE_NONE][0]['value']);
@@ -707,9 +708,9 @@ function change_feeds_import_feeds_presave($source, $entity, $item) {
     $entity->field_egir_start_time[LANGUAGE_NONE][0]['value'] = $egir_date_explode[0].' '.$egir_start_explode[1];
     $entity->field_egir_end_time[LANGUAGE_NONE][0]['value'] = $egir_date_explode[0].' '.$egir_end_explode[1];
   }
-  if ($entity->type == 'egir' || $entity->type == 'billing_data' || $entity->type == 'outlet_master' || $entity->type == 'sku7_code_master') {
-    $entity->uid = $user->uid;
-  }
+  // if ($entity->type == 'egir' || $entity->type == 'billing_data' || $entity->type == 'outlet_master' || $entity->type == 'sku7_code_master') {
+  //   $entity->uid = $user->uid;
+  // }
 
   if($entity->type == 'pdd_master') {
     $entity->title = $entity->title.'-'.$user->name;
@@ -777,53 +778,78 @@ function change_feeds_import_views_api() {
 function change_feeds_import_node_presave($node) {
   $user_id = $node->uid;
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
+
   if ($node->type == 'billing_data') {
-    $loading_date = $node->field_loading_date['und'][0]['value'];
-    $loading_date_stamp = strtotime($loading_date);
-    $billing_loading_month = date("l", strtotime($loading_date));
+    $billing_date = $node->field_bill_date[LANGUAGE_NONE][0]['value'];
+    $billing_date_stamp = strtotime($billing_date);
+    $billing_loading_day = date("l", $billing_date_stamp);
     $node->field_distributor_uid['und'][0]['value'] = $distributor_id;
-    switch ($billing_loading_month) {
-      case "Monday":
-        $promised_delivery_date_stamp = strtotime("+2 day", $loading_date_stamp);
-        $promised_delivery_date = date('Y-m-d', $promised_delivery_date_stamp);
-        $node->field_promised_delivery_date[LANGUAGE_NONE][0]['value'] = $promised_delivery_date;
-        break;
-      case "Tuesday":
-        $promised_delivery_date_stamp = strtotime("+2 day", $loading_date_stamp);
-        $promised_delivery_date = date('Y-m-d', $promised_delivery_date_stamp);
-        $node->field_promised_delivery_date[LANGUAGE_NONE][0]['value'] = $promised_delivery_date;
-        break;
-      case "Wednesday":
-        $promised_delivery_date_stamp = strtotime("+2 day", $loading_date_stamp);
-        $promised_delivery_date = date('Y-m-d', $promised_delivery_date_stamp);
-        $node->field_promised_delivery_date[LANGUAGE_NONE][0]['value'] = $promised_delivery_date;
-        break;
-      case "Thursday":
-        $promised_delivery_date_stamp = strtotime("+2 day", $loading_date_stamp);
-        $promised_delivery_date = date('Y-m-d', $promised_delivery_date_stamp);
-        $node->field_promised_delivery_date[LANGUAGE_NONE][0]['value'] = $promised_delivery_date;
-        break;
-      case "Friday":
-        $promised_delivery_date_stamp = strtotime("+3 day", $loading_date_stamp);
-        $promised_delivery_date = date('Y-m-d', $promised_delivery_date_stamp);
-        $node->field_promised_delivery_date[LANGUAGE_NONE][0]['value'] = $promised_delivery_date;
-        break;
-      case "Saturday":
-        $promised_delivery_date_stamp = strtotime("+3 day", $loading_date_stamp);
-        $promised_delivery_date = date('Y-m-d', $promised_delivery_date_stamp);
-        $node->field_promised_delivery_date[LANGUAGE_NONE][0]['value'] = $promised_delivery_date;
-        break;
-      case "Sunday":
-        $promised_delivery_date_stamp = strtotime("+2 day", $loading_date_stamp);
-        $promised_delivery_date = date('Y-m-d', $promised_delivery_date_stamp);
-        $node->field_promised_delivery_date[LANGUAGE_NONE][0]['value'] = $promised_delivery_date;
-        break;
+
+    /*$query = db_select('node', 'n');
+    $query->condition('n.uid', $distributor_id);
+    $query->condition('n.type', 'pdd_master');
+    $query->leftjoin('field_data_field_day', 'day', 'day.entity_id = n.nid');
+    $query->fields('day', array('field_day_value'));
+    $pdd_day_result = $query->execute()->fetchCol();
+
+    $query = db_select('node', 'n');
+    $query->condition('n.uid', $distributor_id);
+    $query->condition('n.type', 'pdd_master');
+    $query->leftjoin('field_data_field_pdd', 'pdd', 'pdd.entity_id = n.nid');
+    $query->fields('pdd', array('field_pdd_value'));
+    $pdd_value_result = $query->execute()->fetchCol();
+
+    $pdd_result = array_combine($pdd_day_result, $pdd_value_result);*/
+
+    $query = db_select('node', 'n');
+    $query->condition('n.uid', $distributor_id);
+    $query->condition('n.type', 'pdd_master');
+    $query->fields('n', array('nid'));
+    $pdd_value_result = $query->execute()->fetchCol();
+
+    $pdd_data = node_load($pdd_value_result[0]);
+    $pdd_value = $pdd_data->field_pdd[LANGUAGE_NONE][0]['value'];
+    $weekly = $pdd_data->field_day[LANGUAGE_NONE];
+    foreach($weekly as $key => $val) {
+      $weeklyoff[] =  $val['value'];
     }
+
+    $query = db_select('node', 'n');
+    $query->condition('n.uid', $distributor_id);
+    $query->condition('n.type', 'holiday_master');
+    $query->leftjoin('field_data_field_holiday', 'hday', 'hday.entity_id = n.nid');
+    $query->addExpression("DATE_FORMAT(FROM_UNIXTIME(hday.field_holiday_value), '%Y-%m-%d')",'hdate');
+    $holiday_result = $query->execute()->fetchCol();
+
+    $pdd = holiday_get_working_day($billing_date_stamp, $pdd_value, $holiday_result, $weeklyoff);
+    $node->field_promised_delivery_date[LANGUAGE_NONE][0]['value'] = $pdd;
   }
 
   if ($node->type == 'egir') {
     $node->field_distributor_uid['und'][0]['value'] = $distributor_id;
   }
+}
+
+
+function holiday_get_working_day($date_timestamp, $day, $holidays, $weeklyoff) {
+  $date = date('Y-m-d', $date_timestamp);
+
+  while ($day != 0) {
+    $date_timestamp = strtotime('+1 days', $date_timestamp);
+    $date = date('Y-m-d', $date_timestamp);
+    $day_name = date("l", $date_timestamp);
+    if(in_array($date, $holidays)) {
+      
+    }
+    //elseif($weeklyoff == date("l", $date_timestamp)){
+    elseif(in_array($day_name, $weeklyoff)){
+
+    }
+    else {
+      $day--;
+    }
+  }
+  return $date;
 }
 
 function change_feeds_import_get_distributor_id($user_id) {
