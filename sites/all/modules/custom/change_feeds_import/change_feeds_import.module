@@ -785,22 +785,6 @@ function change_feeds_import_node_presave($node) {
     $billing_loading_day = date("l", $billing_date_stamp);
     $node->field_distributor_uid['und'][0]['value'] = $distributor_id;
 
-    /*$query = db_select('node', 'n');
-    $query->condition('n.uid', $distributor_id);
-    $query->condition('n.type', 'pdd_master');
-    $query->leftjoin('field_data_field_day', 'day', 'day.entity_id = n.nid');
-    $query->fields('day', array('field_day_value'));
-    $pdd_day_result = $query->execute()->fetchCol();
-
-    $query = db_select('node', 'n');
-    $query->condition('n.uid', $distributor_id);
-    $query->condition('n.type', 'pdd_master');
-    $query->leftjoin('field_data_field_pdd', 'pdd', 'pdd.entity_id = n.nid');
-    $query->fields('pdd', array('field_pdd_value'));
-    $pdd_value_result = $query->execute()->fetchCol();
-
-    $pdd_result = array_combine($pdd_day_result, $pdd_value_result);*/
-
     $query = db_select('node', 'n');
     $query->condition('n.uid', $distributor_id);
     $query->condition('n.type', 'pdd_master');
