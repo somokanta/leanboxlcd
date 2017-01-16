@@ -790,25 +790,25 @@ function change_feeds_import_node_presave($node) {
     $query->condition('n.type', 'pdd_master');
     $query->fields('n', array('nid'));
     $pdd_value_result = $query->execute()->fetchCol();
-watchdog('pdd_value_result', $pdd_value_result);
+watchdog('my_pdd_value_result', $pdd_value_result);
     $pdd_data = node_load($pdd_value_result[0]);
-watchdog('pdd_data', $pdd_data);
+watchdog('my_pdd_data', $pdd_data);
     $pdd_value = $pdd_data->field_pdd[LANGUAGE_NONE][0]['value'];
     $weekly = $pdd_data->field_day[LANGUAGE_NONE];
     foreach($weekly as $key => $val) {
       $weeklyoff[] =  $val['value'];
     }
-watchdog('weeklyoff', $weeklyoff);
+watchdog('my_weeklyoff', $weeklyoff);
     $query = db_select('node', 'n');
     $query->condition('n.uid', $distributor_id);
     $query->condition('n.type', 'holiday_master');
     $query->leftjoin('field_data_field_holiday', 'hday', 'hday.entity_id = n.nid');
     $query->addExpression("DATE_FORMAT(FROM_UNIXTIME(hday.field_holiday_value), '%Y-%m-%d')",'hdate');
     $holiday_result = $query->execute()->fetchCol();
-watchdog('billing_date_stamp', $billing_date_stamp);
-watchdog('pdd_value', $pdd_value);
-watchdog('holiday_result', $holiday_result);
-watchdog('weeklyoff', $weeklyoff);
+watchdog('my_billing_date_stamp', $billing_date_stamp);
+watchdog('my_pdd_value', $pdd_value);
+watchdog('my_holiday_result', $holiday_result);
+watchdog('my_weeklyoff', $weeklyoff);
     $pdd = holiday_get_working_day($billing_date_stamp, $pdd_value, $holiday_result, $weeklyoff);
     $node->field_promised_delivery_date[LANGUAGE_NONE][0]['value'] = $pdd;
   }
