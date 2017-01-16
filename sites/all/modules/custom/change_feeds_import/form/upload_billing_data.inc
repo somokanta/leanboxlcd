@@ -95,17 +95,19 @@ function billing_data_csv_finished($success, $results, $operations) {
 
 function change_feeds_import_batch_fix_process($file, $party_code_result, $sku_code_result, $bill_result, &$context) {
   if (!isset($context['sandbox']['progress'])) {
-    $context['sandbox']['progrss'] = 0;
+    $context['sandbox']['progress'] = 0;
+    $context['sandbox']['max'] = count(file($file->uri));
     $context['sandbox']['handle'] = fopen($file->uri, "r");
     $context['sandbox']['counter'] = 0;
     $context['sandbox']['error'][0] = array('VEHICLE', 'LOADING_DATE', 'PARTY_CODE', 'PARTY_NAME', 'BILL_NUMBER', 'BILL_DATE', 'PRODUCT_NAME', 'SKU7_CODE', 'MRP', 'TUR', 'Sum of TOTAL_SALES_QTY', 'Sum of TOTAL_SALES_RET_QTY', 'Sum of NET_SALES_QTY', 'Sum of SALES_FREE_QTY', 'Sum of SALES_RET_FREE_QTY', 'Sum of SALES_VALUE', 'Sum of SALES_RET_VALUE', 'Sum of NET_SALES_VALUE');
   }
+  $max = $context['sandbox']['max'];
   $handle = $context['sandbox']['handle'];
   $counter = $context['sandbox']['counter'];
   $error = $context['sandbox']['error'];
 
   if (($handle) !== FALSE) { // take the url of uploaded file
-    for ($i = $context['sandbox']['progrss']; $i < $context['sandbox']['progrss'] + 50; $i++) {
+    for ($i = $context['sandbox']['progress']; $i < $context['sandbox']['progress'] + 50 && $i < $max; $i++) {
       $got_error = 0;
       if (($data = fgetcsv($handle, 0, ",")) !== FALSE) {
         if ($counter == 0) {
@@ -357,14 +359,19 @@ function change_feeds_import_batch_fix_process($file, $party_code_result, $sku_c
         $context['finished'] = 1;
       }
     }
-    $context['sandbox']['progrss'] = $i;
+    $context['sandbox']['progress'] = $i;
     $context['sandbox']['handle'] = $handle;
     $context['sandbox']['counter'] = $counter;
     $context['sandbox']['error'] = $error;
-    
   }
   else {
     form_set_error('file', 'File not readable, Please contact site admin');
+  }
+  if ($context['sandbox']['progress'] < $max) {
+    $context['finished'] = $context['sandbox']['progress'] / $max;
+  }
+  else {
+    $context['finished'] = 1;
   }
 }
 
