@@ -95,24 +95,29 @@ function billing_data_csv_finished($success, $results, $operations) {
 
 function change_feeds_import_batch_fix_process($file, $party_code_result, $sku_code_result, $bill_result, &$context) {
   if (!isset($context['sandbox']['progress'])) {
-    $counter = 0;
-    $got_error = 0;
-    $error = array();
-    $operations = array();
-    $billing_data = array();
-    $party_packing_data = array();
-    $error[0] = $header = array('VEHICLE', 'LOADING_DATE', 'PARTY_CODE', 'PARTY_NAME', 'BILL_NUMBER', 'BILL_DATE', 'PRODUCT_NAME', 'SKU7_CODE', 'MRP', 'TUR', 'Sum of TOTAL_SALES_QTY', 'Sum of TOTAL_SALES_RET_QTY', 'Sum of NET_SALES_QTY', 'Sum of SALES_FREE_QTY', 'Sum of SALES_RET_FREE_QTY', 'Sum of SALES_VALUE', 'Sum of SALES_RET_VALUE', 'Sum of NET_SALES_VALUE');
+    $context['sandbox']['progrss'] = 0;
+    $context['sandbox']['handle'] = fopen($file->uri, "r");
+    $context['sandbox']['counter'] = 0;
+    $context['sandbox']['error'][0] = array('VEHICLE', 'LOADING_DATE', 'PARTY_CODE', 'PARTY_NAME', 'BILL_NUMBER', 'BILL_DATE', 'PRODUCT_NAME', 'SKU7_CODE', 'MRP', 'TUR', 'Sum of TOTAL_SALES_QTY', 'Sum of TOTAL_SALES_RET_QTY', 'Sum of NET_SALES_QTY', 'Sum of SALES_FREE_QTY', 'Sum of SALES_RET_FREE_QTY', 'Sum of SALES_VALUE', 'Sum of SALES_RET_VALUE', 'Sum of NET_SALES_VALUE');
+  }
+  $handle = $context['sandbox']['handle'];
+  $counter = $context['sandbox']['counter'];
+  $error = $context['sandbox']['error'];
 
-    if (($handle = fopen($file->uri, "r")) !== FALSE) { // take the url of uploaded file
-      while (($data = fgetcsv($handle, 0, ",")) !== FALSE) {
+  if (($handle) !== FALSE) { // take the url of uploaded file
+    for ($i = $context['sandbox']['progrss']; $i < $context['sandbox']['progrss'] + 50; $i++) {
+      $got_error = 0;
+      if (($data = fgetcsv($handle, 0, ",")) !== FALSE) {
         if ($counter == 0) {
-          $header_check = array_diff($data, $header);
+          $header_check = array_diff($data, $error[0]);
           if (count($header_check) > 0) {
             form_set_error('file', 'Wrong template');
+            $context['finished'] = 1;
             drupal_goto('billing_data/import');
           }
         }
         else {
+
           $error_bool = 0;
           $vehicle = $data[0];
           $loading_date = $data[1];
@@ -348,7 +353,18 @@ function change_feeds_import_batch_fix_process($file, $party_code_result, $sku_c
         }
         $counter++;
       }
+      else {
+        $context['finished'] = 1;
+      }
     }
+    $context['sandbox']['progrss'] = $i;
+    $context['sandbox']['handle'] = $handle;
+    $context['sandbox']['counter'] = $counter;
+    $context['sandbox']['error'] = $error;
+    
+  }
+  else {
+    form_set_error('file', 'File not readable, Please contact site admin');
   }
 }
 
