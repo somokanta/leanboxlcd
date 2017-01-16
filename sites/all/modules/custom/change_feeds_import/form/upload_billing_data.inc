@@ -71,7 +71,7 @@ function change_feeds_import_billing_data_form_submit($form, &$form_state) {
     while (($data = fgetcsv($handle, 0, ",")) !== FALSE) {
 
       if ($counter == 0) {
-        $header_check = array_diff($data, $header);
+        $header_check = array_diff(array_map('trim',$data), $header);
         if (count($header_check) > 0) {
           form_set_error('file', 'Wrong template');
           drupal_goto('billing_data/import');
