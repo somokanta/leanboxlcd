@@ -49,26 +49,48 @@ function change_feeds_import_create_confirm_content($id) {
     $party_packing_data_new[] = $val;
   }
 
-  // delete data from stage_billing_data.
-  db_delete('stage_billing_data')
-      ->condition('error_id', $id, '=')
-      ->execute();
 
   // 3 btach operation for creating billing , party picking and picking data
   $batch = array(
     'operations' => array(
-      array('change_feeds_import_create_billing_data', array($billing_data_result)),
-      array('change_feeds_import_create_party_packing', array($party_packing_data_new)),
-      array('change_feeds_import_create_picking', array()),
+      array('change_feeds_import_create_billing_data', array($billing_data_result))
     ),
     'finished' => 'change_feeds_import_finished',
     'title' => t('Creating Billing Data'),
     'init_message' => t('Billing Data Batch Creation is starting.'),
-    'progress_message' => t('Processed @current out of @total.'),
+    'progress_message' => t('Processed 0 out of 3.'),
     'error_message' => t('Billing Data Batch has encountered an error.'),
     'file' => drupal_get_path('module', 'change_feeds_import') . '/form/create_content_on_confirm.inc'
   );
   batch_set($batch);
+  $batch = array(
+    'operations' => array(
+      array('change_feeds_import_create_party_packing', array($party_packing_data_new))
+    ),
+    'finished' => 'change_feeds_import_finished',
+    'title' => t('Creating Party Packing Data'),
+    'init_message' => t('Billing Data Batch Creation is starting.'),
+    'progress_message' => t('Processed 1 out of 3.'),
+    'error_message' => t('Party Packing Data Batch has encountered an error.'),
+    'file' => drupal_get_path('module', 'change_feeds_import') . '/form/create_content_on_confirm.inc'
+  );
+  batch_set($batch);
+  $batch = array(
+    'operations' => array(
+      array('change_feeds_import_create_picking', array())
+    ),
+    'finished' => 'change_feeds_import_finished',
+    'title' => t('Creating Picking Data'),
+    'init_message' => t('Picking Data Batch Creation is starting.'),
+    'progress_message' => t('Processed 2 out of 3.'),
+    'error_message' => t('Picking Data Batch has encountered an error.'),
+    'file' => drupal_get_path('module', 'change_feeds_import') . '/form/create_content_on_confirm.inc'
+  );
+  batch_set($batch);
+  // delete data from stage_billing_data.
+  db_delete('stage_billing_data')
+      ->condition('error_id', $id, '=')
+      ->execute();
 
   require_once drupal_get_path('module', 'change_feeds_import').'/form/validate_content.inc';
   $status = "Completed";
@@ -222,8 +244,8 @@ function change_feeds_import_create_party_packing($party_packing_data_new, &$con
 }
 
 function change_feeds_import_create_billing_data($billing_data_result, &$context) {
+  global $user;
   if (!isset($context['sandbox']['progress'])) {
-    global $user;
     $user_id = $user->uid;
     $distributor_id = change_feeds_import_get_distributor_id($user_id);
     $context['sandbox']['progress'] = 0;
@@ -232,7 +254,6 @@ function change_feeds_import_create_billing_data($billing_data_result, &$context
     $context['sandbox']['result'] = $billing_data_result;
   }
   $res = $context['sandbox']['result'];
-  global $user;
   for ($i = $context['sandbox']['progress']; $i < $context['sandbox']['progress'] + 50 && $i < $context['sandbox']['max']; $i++) {
     $key = $i;
     $val = $res[$key];
