@@ -805,6 +805,7 @@ function change_feeds_import_node_presave($node) {
     $query->addExpression("DATE_FORMAT(FROM_UNIXTIME(hday.field_holiday_value), '%Y-%m-%d')",'hdate');
     $holiday_result = $query->execute()->fetchCol();
     $pdd = holiday_get_working_day($billing_date_stamp, $pdd_value, $holiday_result, $weeklyoff);
+    dsm($pdd);
     $node->field_promised_delivery_date[LANGUAGE_NONE][0]['value'] = $pdd;
   }
 
