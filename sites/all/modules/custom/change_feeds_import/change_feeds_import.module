@@ -816,8 +816,9 @@ function change_feeds_import_node_presave($node) {
 
 function holiday_get_working_day($date_timestamp, $day, $holidays, $weeklyoff) {
   $date = date('Y-m-d', $date_timestamp);
-
-  while ($day != 0) {
+  $i = 1;
+  //while ($day != 0) {
+  for($i=1; $i<=2; $i++) {
     $date_timestamp = strtotime('+1 days', $date_timestamp);
     $date = date('Y-m-d', $date_timestamp);
     $day_name = date("l", $date_timestamp);
