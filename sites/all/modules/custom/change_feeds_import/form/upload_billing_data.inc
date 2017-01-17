@@ -75,22 +75,30 @@ function change_feeds_import_billing_data_form_submit($form, &$form_state) {
 }
 
 function billing_data_csv_finished($success, $results, $operations) {
-  $file_name = $_SESSION['billing_file_name'];
-  $distributor_id = $_SESSION['distributor_id'];
-  $date = strtotime(date('Y-m-d H:i:s'));
-  $sum_of_total_sales_qty = $results['sum_of_total_sales_qty'];
-  $bill_unique_count = $results['bill_unique_count'];
-  $bill_uploaded = $bill_unique_count;
-  $total_lines = $results['total_lines'];
-  $error_link = $results['error_link'];
-  $status = $results['status'];
-  $pass_data = $results['pass_data'];
-  // insert data in error billing data table 
-  change_feeds_import_insert_data_in_error_billing_table($file_name, $date, $bill_uploaded, $total_lines, $sum_of_total_sales_qty, $error_link, $status, $distributor_id);
-  $last_id = db_query('SELECT MAX(id) FROM {error_billing_data}')->fetchField();
-  // insert data in stage billing data table 
-  change_feeds_import_insert_data_in_staging_billing_table($pass_data, $last_id, $date);
-  drupal_goto("confirm/" . $last_id);
+  $_SESSION['ddd'] = $results;
+  if (isset($results['wrong_file'])) {
+    $_SESSION['asfas'] = "safs";
+    form_set_error('file', 'Wrong template');
+    drupal_goto('billing_data/import');
+  }
+  else {
+    $file_name = $_SESSION['billing_file_name'];
+    $distributor_id = $_SESSION['distributor_id'];
+    $date = strtotime(date('Y-m-d H:i:s'));
+    $sum_of_total_sales_qty = $results['sum_of_total_sales_qty'];
+    $bill_unique_count = $results['bill_unique_count'];
+    $bill_uploaded = $bill_unique_count;
+    $total_lines = $results['total_lines'];
+    $error_link = $results['error_link'];
+    $status = $results['status'];
+    $pass_data = $results['pass_data'];
+    // insert data in error billing data table 
+    change_feeds_import_insert_data_in_error_billing_table($file_name, $date, $bill_uploaded, $total_lines, $sum_of_total_sales_qty, $error_link, $status, $distributor_id);
+    $last_id = db_query('SELECT MAX(id) FROM {error_billing_data}')->fetchField();
+    // insert data in stage billing data table 
+    change_feeds_import_insert_data_in_staging_billing_table($pass_data, $last_id, $date);
+    drupal_goto("confirm/" . $last_id);
+  }
 }
 
 function change_feeds_import_batch_fix_process($file, $party_code_result, $sku_code_result, $bill_result, &$context) {
@@ -111,11 +119,10 @@ function change_feeds_import_batch_fix_process($file, $party_code_result, $sku_c
       $got_error = 0;
       if (($data = fgetcsv($handle, 0, ",")) !== FALSE) {
         if ($counter == 0) {
-          $header_check = array_diff($data, $error[0]);
+          $header_check = array_diff($data, $context['sandbox']['error'][0]);
           if (count($header_check) > 0) {
-            form_set_error('file', 'Wrong template');
+            $context['results']['wrong_file'] = 1;
             $context['finished'] = 1;
-            drupal_goto('billing_data/import');
           }
         }
         else {
