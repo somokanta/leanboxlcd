@@ -821,6 +821,7 @@ function holiday_get_working_day($date_timestamp, $day, $holidays, $weeklyoff) {
   for($i=1; $i<=2; $i++) {
     $date_timestamp = strtotime('+1 days', $date_timestamp);
     $date = date('Y-m-d', $date_timestamp);
+    watchdog('my_date', $date);
     $day_name = date("l", $date_timestamp);
     if(in_array($date, $holidays)) {
       
