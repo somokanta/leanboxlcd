@@ -807,7 +807,7 @@ dsm($pdd_value);
     $holiday_result = $query->execute()->fetchCol();
 dsm($holiday_result);
     $pdd = holiday_get_working_day($billing_date_stamp, $pdd_value, $holiday_result, $weeklyoff);
-dsm($pdd);
+dsm($pdd);exit;
     $node->field_promised_delivery_date[LANGUAGE_NONE][0]['value'] = $pdd;
   }
 
