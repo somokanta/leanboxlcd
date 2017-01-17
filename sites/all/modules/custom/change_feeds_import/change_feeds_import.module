@@ -790,7 +790,7 @@ function change_feeds_import_node_presave($node) {
     $query->condition('n.type', 'pdd_master');
     $query->fields('n', array('nid'));
     $pdd_value_result = $query->execute()->fetchCol();
-watchdog('pdd_value_result', $pdd_value_result);
+watchdog("pdd_value_result", '<pre>' . print_r( $pdd_value_result, true) . '</pre>');
     $pdd_data = node_load($pdd_value_result[0]);
     $pdd_value = $pdd_data->field_pdd[LANGUAGE_NONE][0]['value'];
     $weekly = $pdd_data->field_day[LANGUAGE_NONE];
@@ -818,7 +818,7 @@ function holiday_get_working_day($date_timestamp, $day, $holidays, $weeklyoff) {
   $date = date('Y-m-d', $date_timestamp);
   $i = 1;
   watchdog('first_day', $date);
-  watchdog('my_day', $day);
+  watchdog("day", '<pre>' . print_r( $day, true) . '</pre>');
   //while ($day != 0) {
   for($i=1; $i<=2; $i++) {
     $date_timestamp = strtotime('+1 days', $date_timestamp);
