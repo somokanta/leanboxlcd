@@ -713,7 +713,8 @@ function change_feeds_import_feeds_presave($source, $entity, $item) {
   // }
 
   if($entity->type == 'pdd_master') {
-    $entity->title = $entity->title.'-'.$user->name;
+    //$entity->title = $entity->title.'-'.$user->name;
+    $entity->title = $user->name;
   }
 
   if($entity->type == 'holiday_master') {
