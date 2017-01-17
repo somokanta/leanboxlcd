@@ -784,28 +784,30 @@ function change_feeds_import_node_presave($node) {
     $billing_date_stamp = strtotime($billing_date);
     $billing_loading_day = date("l", $billing_date_stamp);
     $node->field_distributor_uid['und'][0]['value'] = $distributor_id;
-
+dsm($distributor_id);
     $query = db_select('node', 'n');
     $query->condition('n.uid', $distributor_id);
     $query->condition('n.type', 'pdd_master');
     $query->fields('n', array('nid'));
     $pdd_value_result = $query->execute()->fetchCol();
-
+dsm($pdd_value_result);
     $pdd_data = node_load($pdd_value_result[0]);
     $pdd_value = $pdd_data->field_pdd[LANGUAGE_NONE][0]['value'];
     $weekly = $pdd_data->field_day[LANGUAGE_NONE];
     foreach($weekly as $key => $val) {
       $weeklyoff[] =  $val['value'];
     }
-
+dsm($weeklyoff);
+dsm($pdd_value);
     $query = db_select('node', 'n');
     $query->condition('n.uid', $distributor_id);
     $query->condition('n.type', 'holiday_master');
     $query->leftjoin('field_data_field_holiday', 'hday', 'hday.entity_id = n.nid');
     $query->addExpression("DATE_FORMAT(FROM_UNIXTIME(hday.field_holiday_value), '%Y-%m-%d')",'hdate');
     $holiday_result = $query->execute()->fetchCol();
+dsm($holiday_result);
     $pdd = holiday_get_working_day($billing_date_stamp, $pdd_value, $holiday_result, $weeklyoff);
-    dsm($pdd);
+dsm($pdd);
     $node->field_promised_delivery_date[LANGUAGE_NONE][0]['value'] = $pdd;
   }
 
@@ -817,7 +819,8 @@ function change_feeds_import_node_presave($node) {
 
 function holiday_get_working_day($date_timestamp, $day, $holidays, $weeklyoff) {
   $date = date('Y-m-d', $date_timestamp);
-
+dsm($date);
+dsm($day);
   while ($day != 0) {
     $date_timestamp = strtotime('+1 days', $date_timestamp);
     $date = date('Y-m-d', $date_timestamp);
@@ -825,7 +828,6 @@ function holiday_get_working_day($date_timestamp, $day, $holidays, $weeklyoff) {
     if(in_array($date, $holidays)) {
       
     }
-    //elseif($weeklyoff == date("l", $date_timestamp)){
     elseif(in_array($day_name, $weeklyoff)){
 
     }
