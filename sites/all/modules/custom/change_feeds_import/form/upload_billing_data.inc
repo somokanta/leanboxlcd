@@ -75,9 +75,7 @@ function change_feeds_import_billing_data_form_submit($form, &$form_state) {
 }
 
 function billing_data_csv_finished($success, $results, $operations) {
-  $_SESSION['ddd'] = $results;
   if (isset($results['wrong_file'])) {
-    $_SESSION['asfas'] = "safs";
     form_set_error('file', 'Wrong template');
     drupal_goto('billing_data/import');
   }
