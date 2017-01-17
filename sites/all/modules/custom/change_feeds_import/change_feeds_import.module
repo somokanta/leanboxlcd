@@ -790,7 +790,7 @@ function change_feeds_import_node_presave($node) {
     $query->condition('n.type', 'pdd_master');
     $query->fields('n', array('nid'));
     $pdd_value_result = $query->execute()->fetchCol();
-
+watchdog('pdd_value_result', $pdd_value_result);
     $pdd_data = node_load($pdd_value_result[0]);
     $pdd_value = $pdd_data->field_pdd[LANGUAGE_NONE][0]['value'];
     $weekly = $pdd_data->field_day[LANGUAGE_NONE];
