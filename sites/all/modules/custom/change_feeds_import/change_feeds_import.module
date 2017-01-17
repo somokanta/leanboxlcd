@@ -778,13 +778,14 @@ function change_feeds_import_views_api() {
 function change_feeds_import_node_presave($node) {
   $user_id = $node->uid;
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
-
+watchdog("first_distributor_id", '<pre>' . print_r( $distributor_id, true) . '</pre>');
+watchdog("user_id", '<pre>' . print_r( $user_id, true) . '</pre>');
   if ($node->type == 'billing_data') {
     $billing_date = $node->field_bill_date[LANGUAGE_NONE][0]['value'];
     $billing_date_stamp = strtotime($billing_date);
     $billing_loading_day = date("l", $billing_date_stamp);
     $node->field_distributor_uid['und'][0]['value'] = $distributor_id;
-
+watchdog("distributor_id", '<pre>' . print_r( $distributor_id, true) . '</pre>');
     $query = db_select('node', 'n');
     $query->condition('n.uid', $distributor_id);
     $query->condition('n.type', 'pdd_master');
