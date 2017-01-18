@@ -3055,3 +3055,24 @@ body.adminimal-skin-alternative.adminimal-theme.page-admin-structure-features #e
 .fpa-container .dummy-checkbox {
   display: none !important;
 }
+
+
+/**
+ * Custom
+ */
+
+.views-exposed-form .views-exposed-widget {
+  float: none;
+}
+.views-exposed-form .views-exposed-widget .views-widget > div {
+  display: inline-block;
+  width: 48%;
+  margin: 0 10px 0 0;
+}
+.views-exposed-form .views-exposed-widget .views-widget .container-inline-date .form-text {
+  width: 100%;
+}
+.views-exposed-form .views-exposed-widget .form-submit {
+  margin-top: 1em;
+  margin-bottom: 1em;
+}
