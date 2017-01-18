@@ -20,6 +20,7 @@ function modify_views_forms_form_alter(&$form, &$form_state, $form_id) {
       $form['node'][$key]['field_picking_pick_supervisor'][LANGUAGE_NONE][0]['value']['#type'] = 'select';
       $form['node'][$key]['field_picking_pick_supervisor'][LANGUAGE_NONE][0]['value']['#multiple'] = FALSE;
       $form['node'][$key]['field_picking_pick_supervisor'][LANGUAGE_NONE][0]['value']['#options'] = $multi;
+      $form['node'][$key]['field_picking_pick_supervisor'][LANGUAGE_NONE][0]['value']['#size'] = 3;
     }
   }
   if($form_id == 'editableviews_entity_form_party_pack_form_editable') {
@@ -29,6 +30,7 @@ function modify_views_forms_form_alter(&$form, &$form_state, $form_id) {
       $form['node'][$key]['field_party_packing_supervisor'][LANGUAGE_NONE][0]['value']['#type'] = 'select';
       $form['node'][$key]['field_party_packing_supervisor'][LANGUAGE_NONE][0]['value']['#multiple'] = FALSE;
       $form['node'][$key]['field_party_packing_supervisor'][LANGUAGE_NONE][0]['value']['#options'] = $multi;
+      $form['node'][$key]['field_party_packing_supervisor'][LANGUAGE_NONE][0]['value']['#size'] = 3;
     }
   }
   if($form_id == 'editableviews_entity_form_unloading_form_editable') {
@@ -38,6 +40,7 @@ function modify_views_forms_form_alter(&$form, &$form_state, $form_id) {
       $form['node'][$key]['field_unloading_supervisor'][LANGUAGE_NONE][0]['value']['#type'] = 'select';
       $form['node'][$key]['field_unloading_supervisor'][LANGUAGE_NONE][0]['value']['#multiple'] = FALSE;
       $form['node'][$key]['field_unloading_supervisor'][LANGUAGE_NONE][0]['value']['#options'] = $multi;
+      $form['node'][$key]['field_unloading_supervisor'][LANGUAGE_NONE][0]['value']['#size'] = 3;
     }
   }
 }
