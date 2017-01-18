@@ -11,8 +11,6 @@ function modify_views_forms_form_alter(&$form, &$form_state, $form_id) {
     $options = $query->execute()->FetchCol();
     $options = array_merge(array('-select-'),$options);
     $multi = array_combine($options, $options);
-  }
-  if (in_array($form_id, array('editableviews_entity_form_picking_form_editable', 'editableviews_entity_form_party_pack_form_editable', 'editableviews_entity_form_unloading_form_editable'))) {
     if($form_id == 'editableviews_entity_form_picking_form_editable') {
       $field = 'field_picking_pick_supervisor';
     }
