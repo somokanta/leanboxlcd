@@ -23,9 +23,9 @@ function modify_views_forms_form_alter(&$form, &$form_state, $form_id) {
       $field = 'field_unloading_supervisor';
     }
     foreach ($form['node'] as $key => $value) {
-      $form['node'][$key]['field_unloading_supervisor'][LANGUAGE_NONE][0]['value']['#multiple'] = FALSE;
-      $form['node'][$key]['field_unloading_supervisor'][LANGUAGE_NONE][0]['value']['#options'] = $multi;
-      $form['node'][$key]['field_unloading_supervisor'][LANGUAGE_NONE][0]['value']['#size'] = 3;
+      $form['node'][$key][$field][LANGUAGE_NONE][0]['value']['#multiple'] = FALSE;
+      $form['node'][$key][$field][LANGUAGE_NONE][0]['value']['#options'] = $multi;
+      $form['node'][$key][$field][LANGUAGE_NONE][0]['value']['#size'] = 3;
     }
   }
 }
