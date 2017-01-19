@@ -354,8 +354,8 @@ function change_feeds_import_node_insert($node) {
  */
 function change_feeds_import_node_update($node) {
   if ($node->type == 'party_packing') { // if Content Type is party packing.
-    $start_time = $node->field_party_packing_start_time['und'][0]['value']; // party packing start time
-    $end_time = $node->field_party_packing_end_time['und'][0]['value']; // party packing end time
+    $start_time = strtotime($node->field_party_packing_start_time['und'][0]['value']); // party packing start time
+    $end_time = strtotime($node->field_party_packing_end_time['und'][0]['value']); // party packing end time
     $party_picking_ld = $node->field_party_packing_loading_date['und'][0]['value']; // party packing loading date
     $timestamp = strtotime($party_picking_ld);
     $party_picking_ld_stamp = date("d", $timestamp);
@@ -445,8 +445,8 @@ function change_feeds_import_node_update($node) {
   }
 
   if ($node->type == 'picking') {
-    $start_time = $node->field_picking_start_time['und'][0]['value']; // picking start time
-    $end_time = $node->field_picking_end_time['und'][0]['value']; // picking end time
+    $start_time = strtotime($node->field_picking_start_time['und'][0]['value']); // picking start time
+    $end_time = strtotime($node->field_picking_end_time['und'][0]['value']); // picking end time
     $picking_ld = $node->field_picking_loading_date['und'][0]['value']; // picking loading date
     $timestamp = strtotime($picking_ld);
     $picking_ld_stamp = date("d", $timestamp);
@@ -642,8 +642,8 @@ function change_feeds_import_node_update($node) {
           'truck_no' => $node->field_truck_no['und'][0]['value'],
           'from_location' => $node->field_from_location['und'][0]['value'],
           'unloading_date' => $node->field_unloading_date['und'][0]['value'] ? $node->field_unloading_date['und'][0]['value'] : 0,
-          'unloading_start_time' => $node->field_unloading_start_time['und'][0]['value'] ? $node->field_unloading_start_time['und'][0]['value'] : 0,
-          'unloading_end_time' => $node->field_unloading_end_time['und'][0]['value'] ? $node->field_unloading_end_time['und'][0]['value'] : 0,
+          'unloading_start_time' => strtotime($node->field_unloading_start_time['und'][0]['value']) ? strtotime($node->field_unloading_start_time['und'][0]['value']) : 0,
+          'unloading_end_time' => strtotime($node->field_unloading_end_time['und'][0]['value']) ? strtotime($node->field_unloading_end_time['und'][0]['value']) : 0,
           'status' => $status,
           'egir_date' => $node->field_egir_date['und'][0]['value'] ? $node->field_egir_date['und'][0]['value'] : 0,
           'egir_start_time' => $node->field_egir_start_time['und'][0]['value'] ? $node->field_egir_start_time['und'][0]['value'] : 0,
