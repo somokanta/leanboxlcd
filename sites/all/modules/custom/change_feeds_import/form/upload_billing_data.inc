@@ -116,7 +116,7 @@ function change_feeds_import_batch_fix_process($file, $party_code_result, $sku_c
   $error = $context['sandbox']['error'];
 
   if (($handle) !== FALSE) { // take the url of uploaded file
-    for ($i = $context['sandbox']['progress']; $i < $context['sandbox']['progress'] + 100 && $i < $max; $i++) {
+    for ($i = $context['sandbox']['progress']; $i < $context['sandbox']['progress'] + 50 && $i < $max; $i++) {
       
       if (($data = fgetcsv($handle, 0, ",")) !== FALSE) {
         if ($counter == 0) {
