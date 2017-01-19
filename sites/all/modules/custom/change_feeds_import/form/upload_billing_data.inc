@@ -105,7 +105,10 @@ function change_feeds_import_batch_fix_process($file, $party_code_result, $sku_c
     $context['sandbox']['max'] = count(file($file->uri));
     $context['sandbox']['handle'] = fopen($file->uri, "r");
     $context['sandbox']['counter'] = 0;
-    $context['sandbox']['error'][0] = array('VEHICLE', 'LOADING_DATE', 'PARTY_CODE', 'PARTY_NAME', 'BILL_NUMBER', 'BILL_DATE', 'PRODUCT_NAME', 'SKU7_CODE', 'MRP', 'TUR', 'Sum of TOTAL_SALES_QTY', 'Sum of TOTAL_SALES_RET_QTY', 'Sum of NET_SALES_QTY', 'Sum of SALES_FREE_QTY', 'Sum of SALES_RET_FREE_QTY', 'Sum of SALES_VALUE', 'Sum of SALES_RET_VALUE', 'Sum of NET_SALES_VALUE');
+    $context['sandbox']['error'] = array();
+    $header = array('VEHICLE', 'LOADING_DATE', 'PARTY_CODE', 'PARTY_NAME', 'BILL_NUMBER', 'BILL_DATE', 'PRODUCT_NAME', 'SKU7_CODE', 'MRP', 'TUR', 'Sum of TOTAL_SALES_QTY', 'Sum of TOTAL_SALES_RET_QTY', 'Sum of NET_SALES_QTY', 'Sum of SALES_FREE_QTY', 'Sum of SALES_RET_FREE_QTY', 'Sum of SALES_VALUE', 'Sum of SALES_RET_VALUE', 'Sum of NET_SALES_VALUE');
+    $got_error = 0;
+    
   }
   $max = $context['sandbox']['max'];
   $handle = $context['sandbox']['handle'];
@@ -113,11 +116,11 @@ function change_feeds_import_batch_fix_process($file, $party_code_result, $sku_c
   $error = $context['sandbox']['error'];
 
   if (($handle) !== FALSE) { // take the url of uploaded file
-    for ($i = $context['sandbox']['progress']; $i < $context['sandbox']['progress'] + 50 && $i < $max; $i++) {
-      $got_error = 0;
+    for ($i = $context['sandbox']['progress']; $i < $context['sandbox']['progress'] + 100 && $i < $max; $i++) {
+      
       if (($data = fgetcsv($handle, 0, ",")) !== FALSE) {
         if ($counter == 0) {
-          $header_check = array_diff($data, $context['sandbox']['error'][0]);
+          $header_check = array_diff($data, $header);
           if (count($header_check) > 0) {
             $context['results']['wrong_file'] = 1;
             $context['finished'] = 1;
@@ -319,11 +322,10 @@ function change_feeds_import_batch_fix_process($file, $party_code_result, $sku_c
           }
 
           if ($error_bool) { // if error occured generate error file
-            form_set_error();
-            global $base_url;
             $base_path = getcwd();
             convert_array_to_csv_export($error, $base_path . '/sites/default/files/filter_error.csv');
             $got_error = 1;
+            
           }
           else {
             unset($error[$counter]);
@@ -368,6 +370,7 @@ function change_feeds_import_batch_fix_process($file, $party_code_result, $sku_c
     $context['sandbox']['handle'] = $handle;
     $context['sandbox']['counter'] = $counter;
     $context['sandbox']['error'] = $error;
+    
   }
   else {
     form_set_error('file', 'File not readable, Please contact site admin');
@@ -409,11 +412,11 @@ function change_feeds_import_insert_data_in_staging_billing_table($pass_data, $l
     $stage_billing_data = db_insert('stage_billing_data') // Table name no longer needs {}
         ->fields(array(
           'vehicle' => $data[0],
-          'loading_date' => strtotime($data[1]),
+          'loading_date' => strtotime($data[1])?strtotime($data[1]):0,
           'party_code' => $data[2],
           'party_name' => $data[3],
           'bill_number' => $data[4],
-          'bill_date' => strtotime($data[5]),
+          'bill_date' => strtotime($data[5])?strtotime($data[5]):0,
           'product_name' => $data[6],
           'sku7_code' => $data[7],
           'mrp' => $data[8],
