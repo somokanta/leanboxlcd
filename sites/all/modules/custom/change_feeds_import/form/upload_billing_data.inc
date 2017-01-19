@@ -117,7 +117,6 @@ function change_feeds_import_batch_fix_process($file, $party_code_result, $sku_c
 
   if (($handle) !== FALSE) { // take the url of uploaded file
     for ($i = $context['sandbox']['progress']; $i < $context['sandbox']['progress'] + 50 && $i < $max; $i++) {
-      
       if (($data = fgetcsv($handle, 0, ",")) !== FALSE) {
         if ($counter == 0) {
           $header_check = array_diff($data, $header);
@@ -325,7 +324,7 @@ function change_feeds_import_batch_fix_process($file, $party_code_result, $sku_c
             $base_path = getcwd();
             convert_array_to_csv_export($error, $base_path . '/sites/default/files/filter_error.csv');
             $got_error = 1;
-            
+            $context['results']['total_lines'] = $counter;
           }
           else {
             unset($error[$counter]);
@@ -358,7 +357,7 @@ function change_feeds_import_batch_fix_process($file, $party_code_result, $sku_c
 
           $context['results']['error_link'] = $error_link;
           $context['results']['status'] = $status;
-          $context['results']['total_lines'] = $counter;
+          
         }
         $counter++;
       }
