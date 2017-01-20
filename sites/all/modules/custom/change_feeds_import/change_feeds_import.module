@@ -10,6 +10,10 @@ function change_feeds_import_permission() {
       'title' => t('Distributor Upload File'),
       'description' => t('Distributor Upload File')
     ),
+    'access for api' => array(
+      'title' => t('Access for API'),
+      'description' => t('Permission for required APIs')
+    ),
   );
 }
 

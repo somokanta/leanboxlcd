@@ -20,8 +20,8 @@ function picking_type_combined_services_resources() {
             'module' => 'picking_type_combined',
             'name' => 'combined_pick_type'
           ),
-          'access callback' => 'get_status_api',
-          'access arguments append' => FALSE,
+          //'access callback' => 'get_status_api',
+          'access arguments' => array('access for api'),
           // 'args' => array(
           //   array(
           //     'name' => 'from_date_booking',
