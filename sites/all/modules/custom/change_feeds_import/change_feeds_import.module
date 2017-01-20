@@ -581,7 +581,7 @@ function change_feeds_import_node_update($node) {
     $egir_cutoff = variable_get('egir_end_time_cutoff', '');
     $egir_cutoff_seconds = strtotime("1970-01-01 $egir_cutoff UTC");
 
-    $egir_end_time = $node->field_egir_end_time['und'][0]['value'];
+    $egir_end_time = strtotime($node->field_egir_end_time['und'][0]['value']);
     ######  logic for EGIR Compliant ####
 
 
@@ -603,7 +603,7 @@ function change_feeds_import_node_update($node) {
     $unloading_cutoff = variable_get('unloading_end_time_cutOff', '');
     $unloading_cutoff_seconds = strtotime("1970-01-01 $unloading_cutoff UTC");
 
-    $unloading_end_time = $node->field_unloading_end_time['und'][0]['value'];
+    $unloading_end_time = strtotime($node->field_unloading_end_time['und'][0]['value']);
     ######  logic for Unloading Compliant ####
 
     if (empty($unloading_end_time)) {
@@ -646,8 +646,8 @@ function change_feeds_import_node_update($node) {
           'unloading_end_time' => strtotime($node->field_unloading_end_time['und'][0]['value']) ? strtotime($node->field_unloading_end_time['und'][0]['value']) : 0,
           'status' => $status,
           'egir_date' => $node->field_egir_date['und'][0]['value'] ? $node->field_egir_date['und'][0]['value'] : 0,
-          'egir_start_time' => $node->field_egir_start_time['und'][0]['value'] ? $node->field_egir_start_time['und'][0]['value'] : 0,
-          'egir_end_time' => $node->field_egir_end_time['und'][0]['value'] ? $node->field_egir_end_time['und'][0]['value'] : 0,
+          'egir_start_time' => strtotime($node->field_egir_start_time['und'][0]['value']) ? strtotime($node->field_egir_start_time['und'][0]['value']) : 0,
+          'egir_end_time' => strtotime($node->field_egir_end_time['und'][0]['value']) ? strtotime($node->field_egir_end_time['und'][0]['value']) : 0,
           'egir_end_cutoff' => $egir_cutoff_seconds ? $egir_cutoff_seconds : 0,
           'unloading_end_cutoff' => $unloading_cutoff_seconds ? $unloading_cutoff_seconds : 0,
           'tdp' => $node->TDP,
