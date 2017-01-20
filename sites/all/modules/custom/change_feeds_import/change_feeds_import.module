@@ -809,18 +809,8 @@ function change_feeds_import_node_presave($node) {
     $node->field_promised_delivery_date[LANGUAGE_NONE][0]['value'] = $pdd;
   }
 
-  if ($node->type == 'party_packing') {
-    $node->field_party_packing_start_time[LANGUAGE_NONE][0]['value'] = date("Y-m-d g:i:s" , strtotime(date("Y-m-d", time()) . ' ' . $node->field_party_packing_start_time[LANGUAGE_NONE][0]['value']));
-    $node->field_party_packing_end_time[LANGUAGE_NONE][0]['value'] = date("Y-m-d g:i:s" , strtotime(date("Y-m-d", time()) . ' ' . $node->field_party_packing_end_time[LANGUAGE_NONE][0]['value']));
-  }
-  if ($node->type == 'picking') {
-    $node->field_picking_start_time[LANGUAGE_NONE][0]['value'] = date("Y-m-d g:i:s" , strtotime(date("Y-m-d", time()) . ' ' . $node->field_picking_start_time[LANGUAGE_NONE][0]['value']));
-    $node->field_picking_end_time[LANGUAGE_NONE][0]['value'] = date("Y-m-d g:i:s" , strtotime(date("Y-m-d", time()) . ' ' . $node->field_picking_end_time[LANGUAGE_NONE][0]['value']));
-  }
   if ($node->type == 'egir') {
     $node->field_distributor_uid['und'][0]['value'] = $distributor_id;
-    $node->field_unloading_start_time[LANGUAGE_NONE][0]['value'] = date("Y-m-d g:i:s" , strtotime(date("Y-m-d", time()) . ' ' . $node->field_unloading_start_time[LANGUAGE_NONE][0]['value']));
-    $node->field_unloading_end_time[LANGUAGE_NONE][0]['value'] = date("Y-m-d g:i:s" , strtotime(date("Y-m-d", time()) . ' ' . $node->field_unloading_end_time[LANGUAGE_NONE][0]['value']));
   }
 }
 
