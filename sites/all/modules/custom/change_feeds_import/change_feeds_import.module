@@ -10,10 +10,6 @@ function change_feeds_import_permission() {
       'title' => t('Distributor Upload File'),
       'description' => t('Distributor Upload File')
     ),
-    'access for api' => array(
-      'title' => t('Access for API'),
-      'description' => t('Permission for required APIs')
-    ),
   );
 }
 
@@ -51,7 +47,7 @@ function change_feeds_import_menu() {
     'access arguments' => array('Distributor Upload File'),
     'file' => 'form/show_confirm_table.inc',
   );
-  
+
   // when validate is clicked
   $items['validate/%'] = array(
     'title' => 'Validate Data',
@@ -61,7 +57,7 @@ function change_feeds_import_menu() {
     'access arguments' => array('Distributor Upload File'),
     'file' => 'form/validate_content.inc',
   );
-  
+
   // when confirm is clicked
   $items['confirm/create_content/%'] = array(
     'title' => 'confirm',
@@ -157,16 +153,9 @@ function change_feeds_import_node_insert($node) {
 
   if ($node->type == 'dispatch_data') {
     // logic for when dispatch node is uploading get billing data nid (on basis of vehicle+loading date)
-
-    $sub_query1 = db_select('node', 'n');
-    $sub_query1->condition('n.type', "billing_data", '=');
-    $sub_query1->innerjoin('field_data_field_vehicle', 'fv', 'fv.entity_id = n.nid');
-    $sub_query1->groupBy('fv.field_vehicle_value');
-    $sub_query1->innerjoin('field_data_field_loading_date', 'fld', 'fld.entity_id = n.nid');
-    $sub_query1->groupBy('fld.field_loading_date_value');
-    $sub_query1->fields('fv', array('field_vehicle_value'));
-    $sub_query1->fields('fld', array('field_loading_date_value'));
-    $sub_query1->fields('n', array('nid'));
+    $query = db_select('custom_billing_data', 'cb');
+    $query->fields('cb', array('vehicle', 'loading_date', 'id'));
+    $query->groupBy('vehicle')->groupBy('loading_date');
 
 
     $sub_query2 = db_select('node', 'n');
@@ -175,12 +164,12 @@ function change_feeds_import_node_insert($node) {
     $sub_query2->innerjoin('field_data_field_vehicle', 'fv', 'fv.entity_id = n.nid');
     $sub_query2->innerjoin('field_data_field_loading_date', 'fld', 'fld.entity_id = n.nid');
     $sub_query2->fields('n', array('nid'));
-    $sub_query2->join($sub_query1, 'bd', 'bd.field_vehicle_value = fv.field_vehicle_value and bd.field_loading_date_value = fld.field_loading_date_value');
-    $sub_query2->fields('bd', array('nid'));
+    $sub_query2->join($query, 'bd', 'bd.vehicle = fv.field_vehicle_value and bd.loading_date = fld.field_loading_date_value');
+    $sub_query2->fields('bd', array('id'));
     $billing_result = $sub_query2->execute()->fetchAll(PDO::FETCH_ASSOC);
-    $billing_nid = $billing_result[0]['bd_nid'];
+    $billing_id = $billing_result[0]['id'];
 
-    ######## logic for Actual Party Packing #########
+
     $sub_query3 = db_select('node', 'n1');
     $sub_query3->condition('n1.type', "party_packing", '=');
     $sub_query3->innerjoin('field_data_field_party_packing_vehicle', 'ppv', 'ppv.entity_id = n1.nid');
@@ -201,42 +190,26 @@ function change_feeds_import_node_insert($node) {
     $sub_query4->fields('fdd', array('field_dispatch_date_value'));
     $sub_query4->fields('n2', array('nid'));
 
-    $query = db_select('node', 'n');
-    $query->condition('n.nid', $billing_nid, '=');
-    $query->innerjoin('field_data_field_bill_number', 'bn', 'bn.entity_id = n.nid');
-    $query->innerjoin('field_data_field_bill_date', 'bd', 'bd.entity_id = n.nid');
-    $query->innerjoin('field_data_field_vehicle', 'v', 'v.entity_id = n.nid');
-    $query->innerjoin('field_data_field_loading_date', 'ld', 'ld.entity_id = n.nid');
-    $query->innerjoin('field_data_field_sum_of_sales_value', 'ssv', 'ssv.entity_id = n.nid');
-    $query->innerjoin('field_data_field_distributor_uid', 'dist', 'dist.entity_id = n.nid');
-    $query->innerjoin('field_data_field_sum_of_sales_ret_value', 'srv', 'srv.entity_id = n.nid');
-    $query->innerjoin('field_data_field_party_code', 'pc', 'pc.entity_id = n.nid');
-    $query->innerjoin('field_data_field_party_code', 'pc2', 'pc2.field_party_code_value = pc.field_party_code_value');
+
+    $query = db_select('custom_billing_data', 'cb');
+    $query->condition('cb.id', $billing_id, '=');
+    $query->innerjoin('field_data_field_party_code', 'pc2', 'pc2.field_party_code_value = cb.party_code');
     $query->innerjoin('field_data_field_pl_group', 'plg', 'pc2.entity_id = plg.entity_id');
     $query->innerjoin('field_data_field_channel', 'fc', 'pc2.entity_id = fc.entity_id');
     $query->innerjoin('field_data_field_pl_group', 'plg2', 'plg2.field_pl_group_value = plg.field_pl_group_value');
     $query->innerjoin('field_data_field_party_packing', 'fpp', 'plg2.entity_id = fpp.entity_id');
-    $query->innerjoin('field_data_field_promised_delivery_date', 'pd', 'pd.entity_id = n.nid');
-    $query->innerjoin('field_data_field_promised_delivery_date', 'pd', 'pd.entity_id = n.nid');
-    $query->fields('bn', array('field_bill_number_value'));
-    $query->groupBy('bn.field_bill_number_value');
-    $query->fields('bd', array('field_bill_date_value'));
-    $query->fields('v', array('field_vehicle_value'));
-    $query->fields('ld', array('field_loading_date_value'));
-    $query->fields('dist', array('field_distributor_uid_value'));
-    $query->addExpression('SUM(ssv.field_sum_of_sales_value_value)', 'Sum_of_SALES_VALUE');
-    $query->addExpression('SUM(srv.	field_sum_of_sales_ret_value_value)', 'Sum_of_SALES_RET_VALUE');
-    $query->fields('pc', array('field_party_code_value', 'entity_id'));
-    $query->fields('pd', array('field_promised_delivery_date_value'));
+    $query->fields('cb', array('bill_number', 'bill_date', 'vehicle', 'loading_date', 'Sum_of_SALES_VALUE', 'distributor_id', 'Sum_of_SALES_RET_VALUE', 'party_code', 'promise_date'));
+    $query->groupBy('cb.bill_number');
+    $query->addExpression('SUM(cb.Sum_of_SALES_VALUE)', 'Sum_of_SALES_VALUE');
+    $query->addExpression('SUM(cb.Sum_of_SALES_RET_VALUE)', 'Sum_of_SALES_RET_VALUE');
     $query->fields('plg', array('field_pl_group_value'));
     $query->fields('fc', array('field_channel_value'));
     $query->fields('fpp', array('field_party_packing_value'));
-    $query->join($sub_query3, 'party_p', 'party_p.field_party_packing_vehicle_value = v.field_vehicle_value and party_p.field_party_packing_loading_date_value = ld.field_loading_date_value');
-    $query->join($sub_query4, 'dd', 'dd.field_vehicle_value = v.field_vehicle_value and dd.field_loading_date_value = ld.field_loading_date_value');
+    $query->join($sub_query3, 'party_p', 'party_p.field_party_packing_vehicle_value = cb.vehicle and party_p.field_party_packing_loading_date_value = cb.loading_date');
+    $query->join($sub_query4, 'dd', 'dd.field_vehicle_value = cb.vehicle and dd.field_loading_date_value = cb.loading_date');
     $query->fields('dd');
     $query->fields('party_p');
     $result = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
-
 
     foreach ($result as $key => $value) {
       $billing_vehicle = $value['field_vehicle_value'];
@@ -705,23 +678,23 @@ function change_feeds_import_node_delete($node) {
 function change_feeds_import_feeds_presave($source, $entity, $item) {
   global $user;
   $entity->uid = $user->uid;
-  if($entity->type == 'egir') {
+  if ($entity->type == 'egir') {
     $egir_start_explode = explode(" ", $entity->field_egir_start_time[LANGUAGE_NONE][0]['value']);
     $egir_end_explode = explode(" ", $entity->field_egir_end_time[LANGUAGE_NONE][0]['value']);
     $egir_date_explode = explode(" ", $entity->field_egir_date[LANGUAGE_NONE][0]['value']);
-    $entity->field_egir_start_time[LANGUAGE_NONE][0]['value'] = $egir_date_explode[0].' '.$egir_start_explode[1];
-    $entity->field_egir_end_time[LANGUAGE_NONE][0]['value'] = $egir_date_explode[0].' '.$egir_end_explode[1];
+    $entity->field_egir_start_time[LANGUAGE_NONE][0]['value'] = $egir_date_explode[0] . ' ' . $egir_start_explode[1];
+    $entity->field_egir_end_time[LANGUAGE_NONE][0]['value'] = $egir_date_explode[0] . ' ' . $egir_end_explode[1];
   }
   // if ($entity->type == 'egir' || $entity->type == 'billing_data' || $entity->type == 'outlet_master' || $entity->type == 'sku7_code_master') {
   //   $entity->uid = $user->uid;
   // }
 
-  if($entity->type == 'pdd_master') {
+  if ($entity->type == 'pdd_master') {
     //$entity->title = $entity->title.'-'.$user->name;
     $entity->title = $user->name;
   }
 
-  if($entity->type == 'holiday_master') {
+  if ($entity->type == 'holiday_master') {
     $entity->title = $user->name;
   }
 
@@ -785,32 +758,32 @@ function change_feeds_import_node_presave($node) {
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
 
   if ($node->type == 'billing_data') {
-    $billing_date = $node->field_bill_date[LANGUAGE_NONE][0]['value'];
-    $billing_date_stamp = strtotime($billing_date);
-    $billing_loading_day = date("l", $billing_date_stamp);
-    $node->field_distributor_uid['und'][0]['value'] = $distributor_id;
-
-    $query = db_select('node', 'n');
-    $query->condition('n.uid', $distributor_id);
-    $query->condition('n.type', 'pdd_master');
-    $query->fields('n', array('nid'));
-    $pdd_value_result = $query->execute()->fetchCol();
-
-    $pdd_data = node_load($pdd_value_result[0]);
-    $pdd_value = $pdd_data->field_pdd[LANGUAGE_NONE][0]['value'];
-    $weekly = $pdd_data->field_day[LANGUAGE_NONE];
-    foreach($weekly as $key => $val) {
-      $weeklyoff[] =  $val['value'];
-    }
-
-    $query = db_select('node', 'n');
-    $query->condition('n.uid', $distributor_id);
-    $query->condition('n.type', 'holiday_master');
-    $query->leftjoin('field_data_field_holiday', 'hday', 'hday.entity_id = n.nid');
-    $query->addExpression("DATE_FORMAT(FROM_UNIXTIME(hday.field_holiday_value), '%Y-%m-%d')",'hdate');
-    $holiday_result = $query->execute()->fetchCol();
-    $pdd = holiday_get_working_day($billing_date_stamp, $pdd_value, $holiday_result, $weeklyoff);
-    $node->field_promised_delivery_date[LANGUAGE_NONE][0]['value'] = $pdd;
+//    $billing_date = $node->field_bill_date[LANGUAGE_NONE][0]['value'];
+//    $billing_date_stamp = strtotime($billing_date);
+//    $billing_loading_day = date("l", $billing_date_stamp);
+//    $node->field_distributor_uid['und'][0]['value'] = $distributor_id;
+//
+//    $query = db_select('node', 'n');
+//    $query->condition('n.uid', $distributor_id);
+//    $query->condition('n.type', 'pdd_master');
+//    $query->fields('n', array('nid'));
+//    $pdd_value_result = $query->execute()->fetchCol();
+//
+//    $pdd_data = node_load($pdd_value_result[0]);
+//    $pdd_value = $pdd_data->field_pdd[LANGUAGE_NONE][0]['value'];
+//    $weekly = $pdd_data->field_day[LANGUAGE_NONE];
+//    foreach($weekly as $key => $val) {
+//      $weeklyoff[] =  $val['value'];
+//    }
+//
+//    $query = db_select('node', 'n');
+//    $query->condition('n.uid', $distributor_id);
+//    $query->condition('n.type', 'holiday_master');
+//    $query->leftjoin('field_data_field_holiday', 'hday', 'hday.entity_id = n.nid');
+//    $query->addExpression("DATE_FORMAT(FROM_UNIXTIME(hday.field_holiday_value), '%Y-%m-%d')",'hdate');
+//    $holiday_result = $query->execute()->fetchCol();
+//    $pdd = holiday_get_working_day($billing_date_stamp, $pdd_value, $holiday_result, $weeklyoff);
+//    $node->field_promised_delivery_date[LANGUAGE_NONE][0]['value'] = $pdd;
   }
 
   if ($node->type == 'egir') {
@@ -818,20 +791,19 @@ function change_feeds_import_node_presave($node) {
   }
 }
 
-
 function holiday_get_working_day($date_timestamp, $day, $holidays, $weeklyoff) {
   $date = date('Y-m-d', $date_timestamp);
-  
+
   while ($day != 0) {
     $date_timestamp = strtotime('+1 days', $date_timestamp);
     $date = date('Y-m-d', $date_timestamp);
     watchdog('my_date', $date);
     $day_name = date("l", $date_timestamp);
-    if(in_array($date, $holidays)) {
+    if (in_array($date, $holidays)) {
       
     }
-    elseif(in_array($day_name, $weeklyoff)){
-
+    elseif (in_array($day_name, $weeklyoff)) {
+      
     }
     else {
       $day--;
@@ -899,7 +871,5 @@ function change_feeds_import_feeds_after_import(FeedsSource $source) {
         ->condition('distributor_id', $distributor_id, '=')
         ->condition('status', 'Error', '=')
         ->execute();
-    
   }
-
 }

@@ -16,6 +16,16 @@ function change_feeds_import_discard_data($id) {
       ->condition('error_id', $id, '=')
       ->execute();
 
+   global $user;
+  $user_id = $user->uid;
+  $distributor_id = change_feeds_import_get_distributor_id($user_id);
+  $csv_file = $distributor_id . "_error.csv";
+  
+   $path = "public://billing_data/$csv_file";
+  if (file_exists($path)) {
+    drupal_unlink($path); //delete the generated error file
+  }
+  
   $message = "Data is Discarded Successfully";
   drupal_set_message($message);
   drupal_goto("/billing_data/import");

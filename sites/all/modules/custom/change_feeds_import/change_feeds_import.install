@@ -660,5 +660,133 @@ function change_feeds_import_schema() {
      ),
     
   );
+  
+  
+  
+  $schema['custom_billing_data'] = array(
+    'description' => 'Custom Table for Billing data',
+    'fields' => array(
+      'id' => array(
+        'description' => 'The primary identifier for a data',
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'vehicle' => array(
+        'description' => 'VEHICLE',
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+      'loading_date' => array(
+        'description' => 'LOADING DATE',
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+      'party_code' => array(
+        'description' => 'PARTY_CODE',
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+      'party_name' => array(
+        'description' => 'PARTY_NAME',
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+      'bill_number' => array(
+        'description' => 'BILL_NUMBER',
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+      'bill_date' => array(
+        'description' => 'BILL_DATE',
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+      'product_name' => array(
+        'description' => 'PRODUCT_NAME',
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+      'sku7_code' => array(
+        'description' => 'SKU7_CODE',
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+      'mrp' => array(
+        'description' => 'MRP',
+        'type' => 'float',
+        'length' => 32,
+      ),
+      'tur' => array(
+        'description' => 'TUR',
+        'type' => 'float',
+        'length' => 32,
+      ),
+      'Sum_of_TOTAL_SALES_QTY' => array(
+        'description' => 'Sum_of_TOTAL_SALES_QTY',
+        'type' => 'int',
+        'length' => 32,
+      ),
+      'Sum_of_TOTAL_SALES_RET_QTY' => array(
+        'description' => 'Sum_of_TOTAL_SALES_RET_QTY',
+        'type' => 'int',
+        'length' => 32,
+      ),
+      'Sum_of_NET_SALES_QTY' => array(
+        'description' => 'Sum_of_NET_SALES_QTY',
+        'type' => 'int',
+        'length' => 32,
+      ),
+      'Sum_of_SALES_FREE_QTY' => array(
+        'description' => 'Sum_of_SALES_FREE_QTY',
+        'type' => 'int',
+        'length' => 32,
+      ),
+      'Sum_of_SALES_RET_FREE_QTY' => array(
+        'description' => 'Sum_of_SALES_RET_FREE_QTY',
+        'type' => 'int',
+        'length' => 32,
+      ),
+      'Sum_of_SALES_VALUE' => array(
+        'description' => 'Sum_of_SALES_VALUE',
+        'type' => 'float',
+        'length' => 32,
+      ),
+      'Sum_of_SALES_RET_VALUE' => array(
+        'description' => 'Sum_of_SALES_RET_VALUE',
+        'type' => 'float',
+        'length' => 32,
+      ),
+      'Sum_of_NET_SALES_VALUE' => array(
+        'description' => 'Sum_of_NET_SALES_VALUE',
+        'type' => 'float',
+        'length' => 32,
+      ),
+      'promise_date' => array(
+        'description' => 'Promise Date',
+        'type' => 'int',
+        'length' => 32,
+      ),
+      'distributor_id' => array(
+        'description' => 'Distributor Id',
+        'type' => 'int',
+        'length' => 32,
+      ),
+      'created_date' => array(
+        'description' => 'Created Date',
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+      'updated_date' => array(
+        'description' => 'Updated Date',
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+      
+    ),
+    'primary key' => array('id'),
+  );
+  
+  
+  
   return $schema;
 }

@@ -34,12 +34,23 @@ function change_feeds_import_billing_data_form_validate($form, &$form_state) {
   $file = file_save_upload('file', array(
     'file_validate_extensions' => array('csv'),
   ));
+
+  $header_array_from_xsd = array('VEHICLE', 'LOADING_DATE', 'PARTY_CODE', 'PARTY_NAME', 'BILL_NUMBER', 'BILL_DATE', 'PRODUCT_NAME', 'SKU7_CODE', 'MRP', 'TUR', 'Sum of TOTAL_SALES_QTY', 'Sum of TOTAL_SALES_RET_QTY', 'Sum of NET_SALES_QTY', 'Sum of SALES_FREE_QTY', 'Sum of SALES_RET_FREE_QTY', 'Sum of SALES_VALUE', 'Sum of SALES_RET_VALUE', 'Sum of NET_SALES_VALUE');
   if ($file) {
     if ($file = file_move($file, 'public://')) {
       $form_state['values']['file'] = $file;
+      $filepath = $form_state['values']['file']->uri;
+      $data = array_map("str_getcsv", file($filepath, FILE_SKIP_EMPTY_LINES));
+      $header_from_csv = array_shift($data);
+      if ($header_array_from_xsd != $header_from_csv) {
+        $type = 'error';
+        $message = 'Header mismatch.';
+        form_set_error('file_upload', t($message));
+        // log
+      }
     }
     else {
-      form_set_error('file', t("Failed to write the uploaded file to the site's file folder."));
+      form_set_error('file_upload', t('Failed to write the uploaded file the site\'s file folder.'));
     }
   }
   else {
@@ -60,325 +71,336 @@ function change_feeds_import_billing_data_form_submit($form, &$form_state) {
   $party_code_result = check_party_code_exist_or_not(); // check party code present or not.
   $sku_code_result = check_sku7_code_exist_or_not(); // check sku7 code is present or not.
   $bill_result = check_bill_number_exist(); // check bill number is not exist.
+  $filepath = $file->uri;
 
-  $operations[] = array('change_feeds_import_batch_fix_process', array($file, $party_code_result, $sku_code_result, $bill_result));
+  $max = count(file($file->uri));
+  $datas = array();
+  // Making data as associative array with header.
+  if (($handle = fopen($filepath, "r")) !== FALSE) {
+    $header = fgetcsv($handle, 0, ',', '"');
+
+    while (($row = fgetcsv($handle) ) !== FALSE) {
+
+      $datas[] = array_combine($header, $row);
+    }
+    fclose($handle);
+  }
+
+  $operations = array();
+  $data_chunk = array_chunk($datas, 20);
+  foreach ($data_chunk as $data) {
+    $operations[] = array('change_feeds_import_batch_fix_process', array($max, $data, $distributor_id, $file_name, $party_code_result, $sku_code_result, $bill_result));
+  }
   $batch = array(
-    'operations' => $operations,
     'title' => t('Reading Billing Data Csv'),
+    'operations' => $operations,
+    'init_message' => t("Please wait..."),
+    'progress_message' => t('Processed @current out of @total.'),
+    'error_message' => t('Upload data processing has encountered an error.'),
     'finished' => 'billing_data_csv_finished',
-    'init_message' => t('Batch is starting...'),
-    'error_message' => t('Batch has encountered an error.'),
     'file' => drupal_get_path('module', 'change_feeds_import') . '/form/upload_billing_data.inc',
   );
-
   batch_set($batch);
+//  $operations[] = array('change_feeds_import_batch_fix_process', array($distributor_id, $file, $party_code_result, $sku_code_result, $bill_result));
+//  $batch = array(
+//    'operations' => $operations,
+//    'title' => t('Reading Billing Data Csv'),
+//    'finished' => 'billing_data_csv_finished',
+//    'init_message' => t('Batch is starting...'),
+//    'error_message' => t('Batch has encountered an error.'),
+//    'file' => drupal_get_path('module', 'change_feeds_import') . '/form/upload_billing_data.inc',
+//  );
+//
+//  batch_set($batch);
 }
 
 function billing_data_csv_finished($success, $results, $operations) {
-  if (isset($results['wrong_file'])) {
-    form_set_error('file', 'Wrong template');
-    drupal_goto('billing_data/import');
-  }
-  else {
-    $file_name = $_SESSION['billing_file_name'];
-    $distributor_id = $_SESSION['distributor_id'];
-    $date = strtotime(date('Y-m-d H:i:s'));
+  if ($success) {
+    $_SESSION['hard'] = $results;
+
+    if (!empty($results['error'])) {
+      global $base_url;
+      if (!is_dir($base_url . '/sites/default/files/billing_data')) {
+        mkdir($base_url . '/sites/default/files/billing_data');
+      }
+
+      $base_path = getcwd();
+      $csv_file = $results['csv_file'];
+      $error_link = $base_url . "/sites/default/files/billing_data/$csv_file";
+      $status = "Error";
+      $error = $results['error'];
+      convert_array_to_csv_export($error, $base_path . "/sites/default/files/billing_data/$csv_file");
+      $_SESSION['error_link'] = $error_link;
+    }
+    else {
+      $error_link = "";
+      $status = "Confirm";
+    }
+
     $sum_of_total_sales_qty = $results['sum_of_total_sales_qty'];
     $bill_unique_count = $results['bill_unique_count'];
     $bill_uploaded = $bill_unique_count;
-    $total_lines = $results['total_lines'];
-    $error_link = $results['error_link'];
-    $status = $results['status'];
-    $pass_data = $results['pass_data'];
+    $total_lines = ($results['max'] - 1);
+    $last_id = $results['last_id'];
     // insert data in error billing data table 
-    change_feeds_import_insert_data_in_error_billing_table($file_name, $date, $bill_uploaded, $total_lines, $sum_of_total_sales_qty, $error_link, $status, $distributor_id);
-    $last_id = db_query('SELECT MAX(id) FROM {error_billing_data}')->fetchField();
-    // insert data in stage billing data table 
-    change_feeds_import_insert_data_in_staging_billing_table($pass_data, $last_id, $date);
+    change_feeds_import_update_data_in_error_billing_table($last_id, $bill_uploaded, $total_lines, $sum_of_total_sales_qty, $error_link, $status);
     drupal_goto("confirm/" . $last_id);
+  }
+  else {
+    
   }
 }
 
-function change_feeds_import_batch_fix_process($file, $party_code_result, $sku_code_result, $bill_result, &$context) {
-  if (!isset($context['sandbox']['progress'])) {
-    $context['sandbox']['progress'] = 0;
-    $context['sandbox']['max'] = count(file($file->uri));
-    $context['sandbox']['handle'] = fopen($file->uri, "r");
+function change_feeds_import_update_data_in_error_billing_table($last_id, $bill_uploaded, $total_lines, $sum_of_total_sales_qty, $error_link, $status) {
+  $status_updated = db_update('error_billing_data') // update status in error_billing_data condition based on (Distributor Id )
+      ->fields(array(
+        'total_bill_uploaded' => $bill_uploaded,
+        'total_line_uploaded' => $total_lines,
+        'Sum_of_TOTAL_SALES_QTY' => $sum_of_total_sales_qty,
+        'error_file' => $error_link,
+        'status' => $status,
+      ))
+      ->condition('id', $last_id, '=')
+      ->execute();
+}
+
+function change_feeds_import_batch_fix_process($max, $data, $distributor_id, $file_name, $party_code_result, $sku_code_result, $bill_result, &$context) {
+  if (!isset($context['results']['last_id'])) {
     $context['sandbox']['counter'] = 0;
-    $context['sandbox']['error'] = array();
-    $header = array('VEHICLE', 'LOADING_DATE', 'PARTY_CODE', 'PARTY_NAME', 'BILL_NUMBER', 'BILL_DATE', 'PRODUCT_NAME', 'SKU7_CODE', 'MRP', 'TUR', 'Sum of TOTAL_SALES_QTY', 'Sum of TOTAL_SALES_RET_QTY', 'Sum of NET_SALES_QTY', 'Sum of SALES_FREE_QTY', 'Sum of SALES_RET_FREE_QTY', 'Sum of SALES_VALUE', 'Sum of SALES_RET_VALUE', 'Sum of NET_SALES_VALUE');
-    $got_error = 0;
-    
+    $context['sandbox']['got_error'] = 0;
+    $context['results']['csv_file'] = $distributor_id . "_error.csv";
+
+    $date = strtotime(date('Y-m-d H:i:s'));
+    $bill_uploaded = NULL;
+    $total_lines = NULL;
+    $sum_of_total_sales_qty = NULL;
+    $error_link = NULL;
+    $status = NULL;
+    change_feeds_import_insert_data_in_error_billing_table($file_name, $date, $bill_uploaded, $total_lines, $sum_of_total_sales_qty, $error_link, $status, $distributor_id);
+    $last_id = db_query('SELECT MAX(id) FROM {error_billing_data}')->fetchField();
+    $context['results']['last_id'] = $last_id;
+    $context['results']['max'] = $max;
   }
-  $max = $context['sandbox']['max'];
-  $handle = $context['sandbox']['handle'];
-  $counter = $context['sandbox']['counter'];
-  $error = $context['sandbox']['error'];
+  $last_id = $context['results']['last_id'];
+  $got_error = $context['sandbox']['got_error'];
+  $csv_file = $context['sandbox']['csv_file'];
 
-  if (($handle) !== FALSE) { // take the url of uploaded file
-    for ($i = $context['sandbox']['progress']; $i < $context['sandbox']['progress'] + 50 && $i < $max; $i++) {
-      if (($data = fgetcsv($handle, 0, ",")) !== FALSE) {
-        if ($counter == 0) {
-          $header_check = array_diff($data, $header);
-          if (count($header_check) > 0) {
-            $context['results']['wrong_file'] = 1;
-            $context['finished'] = 1;
-          }
-        }
-        else {
+  foreach ($data as $key => $value) {
 
-          $error_bool = 0;
-          $vehicle = $data[0];
-          $loading_date = $data[1];
-          $total_qty = $data[10];
-          $sku = $data[7];
+    $error_bool = 0;
+    $vehicle = $value['VEHICLE'];
+    $loading_date = $value['LOADING_DATE'];
+    $total_qty = $value['Sum of TOTAL_SALES_QTY'];
+    $sku = $value['SKU7_CODE'];
 
-          $party_code = $data[2];
-          $party_name = $data[3];
-          $bill_number = $data[4];
-          $bill_date = $data[5];
-          $product_name = $data[6];
-          $mrp = $data[8];
-          $tur = $data[9];
-          $sum_of_total_sales_ret_qty = $data[11];
-          $sum_of_net_sales_qty = $data[12];
-          $sum_of_sales_free_qty = $data[13];
-          $sum_of_sales_ret_free_qty = $data[14];
-          $sum_of_sales_value = $data[15];
-          $sum_of_sales_ret_value = $data[16];
-          $sum_of_net_sales_value = $data[17];
+    $party_code = $value['PARTY_CODE'];
+    $party_name = $value['PARTY_NAME'];
+    $bill_number = $value['BILL_NUMBER'];
+    $bill_date = $value['BILL_DATE'];
+    $product_name = $value['PRODUCT_NAME'];
+    $mrp = $value['MRP'];
+    $tur = $value['TUR'];
+    $sum_of_total_sales_ret_qty = $value['Sum of TOTAL_SALES_RET_QTY'];
+    $sum_of_net_sales_qty = $value['Sum of NET_SALES_QTY'];
+    $sum_of_sales_free_qty = $value['Sum of SALES_FREE_QTY'];
+    $sum_of_sales_ret_free_qty = $value['Sum of SALES_RET_FREE_QTY'];
+    $sum_of_sales_value = $value['Sum of SALES_VALUE'];
+    $sum_of_sales_ret_value = $value['Sum of SALES_RET_VALUE'];
+    $sum_of_net_sales_value = $value['Sum of NET_SALES_VALUE'];
 
-          if (empty($vehicle)) {
-            $error[$counter][0] = "vehicle can not be null";
-            $error_bool = 1;
-          }
-          else {
-            $error[$counter][0] = $vehicle;
-          }
+    if (empty($vehicle)) {
+      $error[0] = "vehicle can not be null";
+      $error_bool = 1;
+    }
+    else {
+      $error[0] = $vehicle;
+    }
 
-          if (empty($loading_date)) {
-            $error[$counter][1] = "Loading Date can not be null";
-            $error_bool = 1;
-          }
-          else {
-            $error[$counter][1] = $loading_date;
-          }
+    if (empty($loading_date)) {
+      $error[1] = "Loading Date can not be null";
+      $error_bool = 1;
+    }
+    else {
+      $error[1] = $loading_date;
+    }
 
-          if (empty($party_code)) {
-            $error[$counter][2] = "PARTY_CODE can not be null";
-            $error_bool = 1;
-          }
-          else {
-            if (!array_key_exists($party_code, $party_code_result)) {
-              $error[$counter][2] = $party_code . " PARTY_CODE is not present in PARTY_CODE Master";
-              $error_bool = 1;
-            }
-            else {
-              $error[$counter][2] = $party_code;
-            }
-          }
-
-          if (empty($party_name)) {
-            $error[$counter][3] = "PARTY_NAME can not be null";
-            $error_bool = 1;
-          }
-          else {
-            $error[$counter][3] = $party_name;
-          }
-          if (empty($bill_number)) {
-            $error[$counter][4] = "BILL_NUMBER can not be null";
-            $error_bool = 1;
-          }
-          else {
-            if (array_key_exists($bill_number, $bill_result)) {
-              $error[$counter][4] = $bill_number . " BILL_NUMBER Already exist in Billing Data Table";
-              $error_bool = 1;
-            }
-            else {
-              $error[$counter][4] = $bill_number;
-            }
-          }
-          if (empty($bill_date)) {
-            $error[$counter][5] = "BILL_DATE can not be null";
-            $error_bool = 1;
-          }
-          else {
-            $error[$counter][5] = $bill_date;
-          }
-
-          if (empty($product_name)) {
-            $error[$counter][6] = "PRODUCT_NAME can not be null";
-            $error_bool = 1;
-          }
-          else {
-            $error[$counter][6] = $product_name;
-          }
-          if (empty($sku)) {
-            $error[$counter][7] = "SKU7_CODE can not be null";
-            $error_bool = 1;
-          }
-          else {
-            if (!array_key_exists($sku, $sku_code_result)) {
-              $error[$counter][7] = $sku . " SKU7_CODE is not present in SKU7_CODE Master";
-              $error_bool = 1;
-            }
-            else {
-              $error[$counter][7] = $sku;
-            }
-          }
-          if (empty($mrp)) {
-            $error[$counter][8] = "MRP can not be null";
-            $error_bool = 1;
-          }
-          else {
-            if (!is_numeric($mrp)) {
-              $error[$counter][8] = $mrp . " MRP is not Numeric";
-              $error_bool = 1;
-            }
-            else {
-              $error[$counter][8] = $mrp;
-            }
-          }
-
-          if (empty($tur)) {
-            $error[$counter][9] = "TUR can not be null";
-            $error_bool = 1;
-          }
-          else {
-            if (!is_numeric($tur)) {
-              $error[$counter][9] = $tur . " TUR is not Numeric";
-              $error_bool = 1;
-            }
-            else {
-              $error[$counter][9] = $tur;
-            }
-          }
-
-          if (!is_numeric($total_qty)) {
-            $error[$counter][10] = $total_qty . " Sum of TOTAL_SALES_QTY is not Numeric";
-            $error_bool = 1;
-          }
-          else {
-            $error[$counter][10] = $total_qty;
-            $context['results']['sum_of_total_sales_qty'] += $total_qty;
-          }
-
-          if (!is_numeric($sum_of_total_sales_ret_qty)) {
-            $error[$counter][11] = $sum_of_total_sales_ret_qty . " Sum of TOTAL_SALES_RET_QTY is not Numeric";
-            $error_bool = 1;
-          }
-          else {
-            $error[$counter][11] = $sum_of_total_sales_ret_qty;
-          }
-
-          if (!is_numeric($sum_of_net_sales_qty)) {
-            $error[$counter][12] = $sum_of_net_sales_qty . " Sum of NET_SALES_QTY is not Numeric";
-            $error_bool = 1;
-          }
-          else {
-            $error[$counter][12] = $sum_of_net_sales_qty;
-          }
-
-          if (!is_numeric($sum_of_sales_free_qty)) {
-            $error[$counter][13] = $sum_of_sales_free_qty . " Sum of SALES_FREE_QTY is not Numeric";
-            $error_bool = 1;
-          }
-          else {
-            $error[$counter][13] = $sum_of_sales_free_qty;
-          }
-
-
-          if (!is_numeric($sum_of_sales_ret_free_qty)) {
-            $error[$counter][14] = $sum_of_sales_ret_free_qty . " Sum of SALES_RET_FREE_QTY is not Numeric";
-            $error_bool = 1;
-          }
-          else {
-            $error[$counter][14] = $sum_of_sales_ret_free_qty;
-          }
-
-          if (!is_numeric($sum_of_sales_value)) {
-            $error[$counter][15] = $sum_of_sales_value . " Sum of SALES_VALUE is not Numeric";
-            $error_bool = 1;
-          }
-          else {
-            $error[$counter][15] = $sum_of_sales_value;
-          }
-
-          if (!is_numeric($sum_of_sales_ret_value)) {
-            $error[$counter][16] = $sum_of_sales_ret_value . " Sum of SALES_RET_VALUE is not Numeric";
-            $error_bool = 1;
-          }
-          else {
-            $error[$counter][16] = $sum_of_sales_ret_value;
-          }
-
-          if (!is_numeric($sum_of_net_sales_value)) {
-            $error[$counter][17] = $sum_of_net_sales_value . " Sum of NET_SALES_VALUE is not Numeric";
-            $error_bool = 1;
-          }
-          else {
-            $error[$counter][17] = $sum_of_net_sales_value;
-          }
-
-          if ($error_bool) { // if error occured generate error file
-            $base_path = getcwd();
-            convert_array_to_csv_export($error, $base_path . '/sites/default/files/filter_error.csv');
-            $got_error = 1;
-            $context['results']['total_lines'] = $counter;
-          }
-          else {
-            unset($error[$counter]);
-          }
-
-          $pass_data[$counter]['error_boolean'] = $error_bool;
-          $context['results']['pass_data'][] = $data;
-
-          $bill_number = $data[4];
-          if ($counter != 0) {
-            if (isset($_SESSION[$bill_number])) {
-              // do nothing
-            }
-            else {
-              $res[$bill_number] = array();
-              $_SESSION[$bill_number] = $bill_number;
-              $context['results']['bill_unique_count'] ++;
-            }
-          }
-
-          if ($got_error == 1) {
-            global $base_url;
-            $error_link = $base_url . '/sites/default/files/filter_error.csv';
-            $status = "Error";
-          }
-          else {
-            $error_link = "";
-            $status = "Confirm";
-          }
-
-          $context['results']['error_link'] = $error_link;
-          $context['results']['status'] = $status;
-          
-        }
-        $counter++;
+    if (empty($party_code)) {
+      $error[2] = "PARTY_CODE can not be null";
+      $error_bool = 1;
+    }
+    else {
+      if (!array_key_exists($party_code, $party_code_result)) {
+        $error[2] = $party_code . " PARTY_CODE is not present in PARTY_CODE Master";
+        $error_bool = 1;
       }
       else {
-        $context['finished'] = 1;
+        $error[2] = $party_code;
       }
     }
-    $context['sandbox']['progress'] = $i;
-    $context['sandbox']['handle'] = $handle;
-    $context['sandbox']['counter'] = $counter;
-    $context['sandbox']['error'] = $error;
-    
-  }
-  else {
-    form_set_error('file', 'File not readable, Please contact site admin');
-  }
-  if ($context['sandbox']['progress'] < $max) {
-    $context['finished'] = $context['sandbox']['progress'] / $max;
-  }
-  else {
-    $context['finished'] = 1;
+
+    if (empty($party_name)) {
+      $error[3] = "PARTY_NAME can not be null";
+      $error_bool = 1;
+    }
+    else {
+      $error[3] = $party_name;
+    }
+    if (empty($bill_number)) {
+      $error[4] = "BILL_NUMBER can not be null";
+      $error_bool = 1;
+    }
+    else {
+      if (array_key_exists($bill_number, $bill_result)) {
+        $error[4] = $bill_number . " BILL_NUMBER Already exist in Billing Data Table";
+        $error_bool = 1;
+      }
+      else {
+        $error[4] = $bill_number;
+      }
+    }
+    if (empty($bill_date)) {
+      $error[5] = "BILL_DATE can not be null";
+      $error_bool = 1;
+    }
+    else {
+      $error[5] = $bill_date;
+    }
+
+    if (empty($product_name)) {
+      $error[6] = "PRODUCT_NAME can not be null";
+      $error_bool = 1;
+    }
+    else {
+      $error[6] = $product_name;
+    }
+    if (empty($sku)) {
+      $error[7] = "SKU7_CODE can not be null";
+      $error_bool = 1;
+    }
+    else {
+      if (!array_key_exists($sku, $sku_code_result)) {
+        $error[7] = $sku . " SKU7_CODE is not present in SKU7_CODE Master";
+        $error_bool = 1;
+      }
+      else {
+        $error[7] = $sku;
+      }
+    }
+
+    if (!is_numeric($mrp)) {
+      $error[8] = $mrp . " MRP is not Numeric";
+      $error_bool = 1;
+    }
+    else {
+      $error[8] = $mrp;
+    }
+
+
+    if (!is_numeric($tur)) {
+      $error[9] = $tur . " TUR is not Numeric";
+      $error_bool = 1;
+    }
+    else {
+      $error[9] = $tur;
+    }
+
+
+    if (!is_numeric($total_qty)) {
+      $error[10] = $total_qty . " Sum of TOTAL_SALES_QTY is not Numeric";
+      $error_bool = 1;
+    }
+    else {
+      $error[10] = $total_qty;
+      $context['results']['sum_of_total_sales_qty'] += $total_qty;
+    }
+
+    if (!is_numeric($sum_of_total_sales_ret_qty)) {
+      $error[11] = $sum_of_total_sales_ret_qty . " Sum of TOTAL_SALES_RET_QTY is not Numeric";
+      $error_bool = 1;
+    }
+    else {
+      $error[11] = $sum_of_total_sales_ret_qty;
+    }
+
+    if (!is_numeric($sum_of_net_sales_qty)) {
+      $error[12] = $sum_of_net_sales_qty . " Sum of NET_SALES_QTY is not Numeric";
+      $error_bool = 1;
+    }
+    else {
+      $error[12] = $sum_of_net_sales_qty;
+    }
+
+    if (!is_numeric($sum_of_sales_free_qty)) {
+      $error[13] = $sum_of_sales_free_qty . " Sum of SALES_FREE_QTY is not Numeric";
+      $error_bool = 1;
+    }
+    else {
+      $error[13] = $sum_of_sales_free_qty;
+    }
+
+
+    if (!is_numeric($sum_of_sales_ret_free_qty)) {
+      $error[14] = $sum_of_sales_ret_free_qty . " Sum of SALES_RET_FREE_QTY is not Numeric";
+      $error_bool = 1;
+    }
+    else {
+      $error[14] = $sum_of_sales_ret_free_qty;
+    }
+
+    if (!is_numeric($sum_of_sales_value)) {
+      $error[15] = $sum_of_sales_value . " Sum of SALES_VALUE is not Numeric";
+      $error_bool = 1;
+    }
+    else {
+      $error[15] = $sum_of_sales_value;
+    }
+
+    if (!is_numeric($sum_of_sales_ret_value)) {
+      $error[16] = $sum_of_sales_ret_value . " Sum of SALES_RET_VALUE is not Numeric";
+      $error_bool = 1;
+    }
+    else {
+      $error[16] = $sum_of_sales_ret_value;
+    }
+
+    if (!is_numeric($sum_of_net_sales_value)) {
+      $error[17] = $sum_of_net_sales_value . " Sum of NET_SALES_VALUE is not Numeric";
+      $error_bool = 1;
+    }
+    else {
+      $error[17] = $sum_of_net_sales_value;
+    }
+
+    if ($error_bool) { // if error occured generate error file
+      $context['results']['error'][] = $error;
+      $got_error = 1;
+    }
+    else {
+      unset($error);
+    }
+
+    $error_boolean = $error_bool;
+    $pass_data = $value;
+    if ($counter != 0) {
+      if (isset($_SESSION[$bill_number])) {
+        // do nothing
+      }
+      else {
+        $res[$bill_number] = array();
+        $_SESSION[$bill_number] = $bill_number;
+        $context['results']['bill_unique_count'] ++;
+      }
+    }
+
+
+
+    $context['results']['error_link'] = $error_link;
+    $context['results']['status'] = $status;
+    $context['sandbox']['got_error'] = $got_error;
+    change_feeds_import_insert_data_in_staging_billing_table($pass_data, $error_boolean, $last_id, $date);
+
+    $counter++;
+    $context['results']['total_lines'] = $counter;
   }
 }
 
@@ -406,34 +428,32 @@ function change_feeds_import_insert_data_in_error_billing_table($file_name, $dat
       ->execute();
 }
 
-function change_feeds_import_insert_data_in_staging_billing_table($pass_data, $last_id, $date) {
-  foreach ($pass_data as $data) {
-    $stage_billing_data = db_insert('stage_billing_data') // Table name no longer needs {}
-        ->fields(array(
-          'vehicle' => $data[0],
-          'loading_date' => strtotime($data[1])?strtotime($data[1]):null,
-          'party_code' => $data[2],
-          'party_name' => $data[3],
-          'bill_number' => $data[4],
-          'bill_date' => strtotime($data[5])?strtotime($data[5]):null,
-          'product_name' => $data[6],
-          'sku7_code' => $data[7],
-          'mrp' => $data[8]?$data[8]:null,
-          'tur' => $data[9]?$data[9]:null,
-          'Sum_of_TOTAL_SALES_QTY' => $data[10]?$data[10]:null,
-          'Sum_of_TOTAL_SALES_RET_QTY' => $data[11]?$data[11]:null,
-          'Sum_of_NET_SALES_QTY' => $data[12]?$data[12]:null,
-          'Sum_of_SALES_FREE_QTY' => $data[13]?$data[13]:null,
-          'Sum_of_SALES_RET_FREE_QTY' => $data[14]?$data[14]:null,
-          'Sum_of_SALES_VALUE' => $data[15]?$data[15]:null,
-          'Sum_of_SALES_RET_VALUE' => $data[16]?$data[16]:null,
-          'Sum_of_NET_SALES_VALUE' => $data[17]?$data[17]:null,
-          'error' => $data['error_boolean'],
-          'error_id' => $last_id,
-          'date' => $date,
-        ))
-        ->execute();
-  }
+function change_feeds_import_insert_data_in_staging_billing_table($value, $error_boolean, $last_id, $date) {
+  $stage_billing_data = db_insert('stage_billing_data') // Table name no longer needs {}
+      ->fields(array(
+        'vehicle' => $value['VEHICLE'],
+        'loading_date' => strtotime($value['LOADING_DATE']) ? strtotime($value['LOADING_DATE']) : NULL,
+        'party_code' => $value['PARTY_CODE'],
+        'party_name' => $value['PARTY_NAME'],
+        'bill_number' => $value['BILL_NUMBER'],
+        'bill_date' => strtotime($value['BILL_DATE']) ? strtotime($value['BILL_DATE']) : NULL,
+        'product_name' => $value['PRODUCT_NAME'],
+        'sku7_code' => $value['SKU7_CODE'],
+        'mrp' => $value['MRP'] ? $value['MRP'] : NULL,
+        'tur' => $value['TUR'] ? $value['TUR'] : NULL,
+        'Sum_of_TOTAL_SALES_QTY' => isset($value['Sum of TOTAL_SALES_QTY']) ? $value['Sum of TOTAL_SALES_QTY'] : NULL,
+        'Sum_of_TOTAL_SALES_RET_QTY' => isset($value['Sum of TOTAL_SALES_RET_QTY']) ? $value['Sum of TOTAL_SALES_RET_QTY'] : NULL,
+        'Sum_of_NET_SALES_QTY' => isset($value['Sum of NET_SALES_QTY']) ? $value['Sum of NET_SALES_QTY'] : NULL,
+        'Sum_of_SALES_FREE_QTY' => isset($value['Sum of SALES_FREE_QTY']) ? $value['Sum of SALES_FREE_QTY'] : NULL,
+        'Sum_of_SALES_RET_FREE_QTY' => isset($value['Sum of SALES_RET_FREE_QTY']) ? $value['Sum of SALES_RET_FREE_QTY'] : NULL,
+        'Sum_of_SALES_VALUE' => isset($value['Sum of SALES_VALUE']) ? $value['Sum of SALES_VALUE'] : NULL,
+        'Sum_of_SALES_RET_VALUE' => isset($value['Sum of SALES_RET_VALUE']) ? $value['Sum of SALES_RET_VALUE'] : NULL,
+        'Sum_of_NET_SALES_VALUE' => isset($value['Sum of NET_SALES_VALUE']) ? $value['Sum of NET_SALES_VALUE'] : NULL,
+        'error' => $error_boolean,
+        'error_id' => $last_id,
+        'date' => $date,
+      ))
+      ->execute();
 }
 
 function check_party_code_exist_or_not() {
@@ -454,10 +474,8 @@ function check_sku7_code_exist_or_not() {
 }
 
 function check_bill_number_exist() {
-  $query3 = db_select('node', 'n');
-  $query3->condition('n.type', "billing_data", '=');
-  $query3->join('field_data_field_bill_number', 'bn', 'bn.entity_id = n.nid');
-  $query3->fields('bn', array('field_bill_number_value'));
+  $query3 = db_select('custom_billing_data', 'cb');
+  $query3->fields('cb', array('bill_number'));
   $bill_result = $query3->execute()->fetchAllKeyed(0, 0);
   return $bill_result;
 }

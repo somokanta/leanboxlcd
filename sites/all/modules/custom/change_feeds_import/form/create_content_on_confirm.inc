@@ -2,13 +2,16 @@
 
 // when confirm button is clicked
 function change_feeds_import_create_confirm_content($id) {
- 
+  global $user;
+  $user_id = $user->uid;
+  $distributor_id = change_feeds_import_get_distributor_id($user_id);
+  $csv_file = $distributor_id . "_error.csv";
   // select data from stage table
   $billing_data_result = db_select('stage_billing_data', 'sbd')
           ->condition('sbd.error_id', $id, '=')
           ->fields('sbd')
           ->execute()->fetchAll(PDO::FETCH_ASSOC);
-  
+
   foreach ($billing_data_result as $key => $value) {
     $vehicle = $value['vehicle'];
     $loading_date = $value['loading_date'];
@@ -49,60 +52,98 @@ function change_feeds_import_create_confirm_content($id) {
     $party_packing_data_new[] = $val;
   }
 
+  change_feeds_import_insert_data_in_custom_billing_table($billing_data_result);
 
-  // 3 btach operation for creating billing , party picking and picking data
   $batch = array(
     'operations' => array(
-      array('change_feeds_import_create_billing_data', array($billing_data_result))
+      array('change_feeds_import_create_party_packing', array($party_packing_data_new)),
+      array('change_feeds_import_create_picking', array()),
     ),
     'finished' => 'change_feeds_import_finished',
     'title' => t('Creating Billing Data'),
     'init_message' => t('Billing Data Batch Creation is starting.'),
-    'progress_message' => t('Processed 0 out of 3.'),
+    'progress_message' => t('Processed @current out of @total.'),
     'error_message' => t('Billing Data Batch has encountered an error.'),
     'file' => drupal_get_path('module', 'change_feeds_import') . '/form/create_content_on_confirm.inc'
   );
   batch_set($batch);
-  $batch = array(
-    'operations' => array(
-      array('change_feeds_import_create_party_packing', array($party_packing_data_new))
-    ),
-    'finished' => 'change_feeds_import_finished',
-    'title' => t('Creating Party Packing Data'),
-    'init_message' => t('Billing Data Batch Creation is starting.'),
-    'progress_message' => t('Processed 1 out of 3.'),
-    'error_message' => t('Party Packing Data Batch has encountered an error.'),
-    'file' => drupal_get_path('module', 'change_feeds_import') . '/form/create_content_on_confirm.inc'
-  );
-  batch_set($batch);
-  $batch = array(
-    'operations' => array(
-      array('change_feeds_import_create_picking', array())
-    ),
-    'finished' => 'change_feeds_import_finished',
-    'title' => t('Creating Picking Data'),
-    'init_message' => t('Picking Data Batch Creation is starting.'),
-    'progress_message' => t('Processed 2 out of 3.'),
-    'error_message' => t('Picking Data Batch has encountered an error.'),
-    'file' => drupal_get_path('module', 'change_feeds_import') . '/form/create_content_on_confirm.inc'
-  );
-  batch_set($batch);
-  // delete data from stage_billing_data.
+
+// delete data from stage_billing_data.
   db_delete('stage_billing_data')
       ->condition('error_id', $id, '=')
       ->execute();
 
-  require_once drupal_get_path('module', 'change_feeds_import').'/form/validate_content.inc';
+  require_once drupal_get_path('module', 'change_feeds_import') . '/form/validate_content.inc';
   $status = "Completed";
   // change status in error billing data
   change_feeds_import_update_data_in_error_billing_table($status, $id);
-  $message = "Data is Created Successfully";
-  drupal_set_message($message);
-  $path = 'public://filter_error.csv';
-  if (file_exists($path) ){
-    drupal_unlink($path);//delete the generated error file
+
+  $path = "public://billing_data/$csv_file";
+  if (file_exists($path)) {
+    drupal_unlink($path); //delete the generated error file
   }
   batch_process('/billing_data/import');
+}
+
+function change_feeds_import_insert_data_in_custom_billing_table($billing_data_result) {
+  $created_date = date("m/d/Y");
+  global $user;
+  $user_id = $user->uid;
+  $distributor_id = change_feeds_import_get_distributor_id($user_id);
+
+  /* $query = db_select('node', 'n');
+    $query->condition('n.uid', $distributor_id);
+    $query->condition('n.type', 'pdd_master');
+    $query->fields('n', array('nid'));
+    $pdd_value_result = $query->execute()->fetchCol();
+    $pdd_data = node_load($pdd_value_result[0]);
+    $pdd_value = $pdd_data->field_pdd[LANGUAGE_NONE][0]['value'];
+    $weekly = $pdd_data->field_day[LANGUAGE_NONE];
+    foreach ($weekly as $key => $val) {
+    $weeklyoff[] = $val['value'];
+    }
+
+    $query = db_select('node', 'n');
+    $query->condition('n.uid', $distributor_id);
+    $query->condition('n.type', 'holiday_master');
+    $query->leftjoin('field_data_field_holiday', 'hday', 'hday.entity_id = n.nid');
+    $query->addExpression("DATE_FORMAT(FROM_UNIXTIME(hday.field_holiday_value), '%Y-%m-%d')", 'hdate');
+    $holiday_result = $query->execute()->fetchCol();
+   */
+
+  foreach ($billing_data_result as $key => $data) {
+//    $billing_date_stamp = $data['bill_date'];
+//    $pdd = holiday_get_working_day($billing_date_stamp, $pdd_value, $holiday_result, $weeklyoff);
+// 
+    $loading_date = date("Y-m-d H:i:s", $data['loading_date']);
+    $billing_date = date("Y-m-d H:i:s", $data['bill_date']);
+
+    $stage_billing_data = db_insert('custom_billing_data') // Table name no longer needs {}
+        ->fields(array(
+          'vehicle' => $data['vehicle'],
+          'loading_date' => $loading_date,
+          'party_code' => $data['party_code'],
+          'party_name' => $data['party_name'],
+          'bill_number' => $data['bill_number'],
+          'bill_date' => $billing_date,
+          'product_name' => $data['product_name'],
+          'sku7_code' => $data['sku7_code'],
+          'mrp' => $data['mrp'],
+          'tur' => $data['tur'],
+          'Sum_of_TOTAL_SALES_QTY' => $data['Sum_of_TOTAL_SALES_QTY'],
+          'Sum_of_TOTAL_SALES_RET_QTY' => $data['Sum_of_TOTAL_SALES_RET_QTY'],
+          'Sum_of_NET_SALES_QTY' => $data['Sum_of_NET_SALES_QTY'],
+          'Sum_of_SALES_FREE_QTY' => $data['Sum_of_SALES_FREE_QTY'],
+          'Sum_of_SALES_RET_FREE_QTY' => $data['Sum_of_SALES_RET_FREE_QTY'],
+          'Sum_of_SALES_VALUE' => $data['Sum_of_SALES_VALUE'],
+          'Sum_of_SALES_RET_VALUE' => $data['Sum_of_SALES_RET_VALUE'],
+          'Sum_of_NET_SALES_VALUE' => $data['Sum_of_NET_SALES_VALUE'],
+          //'promise_date'=> $pdd,
+          'distributor_id' => $distributor_id,
+          'created_date' => $created_date,
+        ))
+        ->execute();
+  }
 }
 
 function change_feeds_import_create_picking(&$context) {
@@ -110,39 +151,30 @@ function change_feeds_import_create_picking(&$context) {
     global $user;
     $user_id = $user->uid;
     $distributor_id = change_feeds_import_get_distributor_id($user_id);
-    $query = db_select('field_data_field_vehicle', 'v');
-    $query->condition('v.bundle', 'billing_data', '=');
-    $query->join('field_data_field_loading_date', 'date', 'date.entity_id = v.entity_id');
-    $query->condition('date.bundle', 'billing_data', '=');
-    $query->join('field_data_field_sku7_code', 'sc', 'sc.entity_id = v.entity_id');
-    $query->condition('sc.bundle', 'billing_data', '=');
-    $query->join('field_data_field_sku7_code', 'gaisc', 'gaisc.field_sku7_code_value = sc.field_sku7_code_value');
+    $query = db_select('custom_billing_data', 'cb');
+    $query->join('field_data_field_sku7_code', 'gaisc', 'gaisc.field_sku7_code_value = cb.sku7_code');
     $query->condition('gaisc.bundle', 'sku7_code_master', '=');
     $query->join('field_data_field_godown_area_id', 'gai', 'gaisc.entity_id = gai.entity_id');
     $query->condition('gai.bundle', 'sku7_code_master', '=');
-    $query->join('field_data_field_sum_of_total_sales_qty', 'stsq', 'stsq.entity_id = v.entity_id');
-    $query->condition('stsq.bundle', 'billing_data', '=');
     $query->join('field_data_field_pack_size', 'fps', 'fps.entity_id = gaisc.entity_id');
     $query->condition('fps.bundle', 'sku7_code_master', '=');
     $query->join('field_data_field_unit_case_units_', 'fucu', 'fucu.entity_id = gaisc.entity_id');
     $query->condition('fucu.bundle', 'sku7_code_master', '=');
-    $query->fields('v', array('field_vehicle_value'));
-    $query->fields('date', array('field_loading_date_value'));
-    $query->fields('sc', array('field_sku7_code_value'));
+    $query->fields('cb', array('vehicle', 'loading_date', 'sku7_code'));
     $query->fields('gai', array('field_godown_area_id_value'));
     $query->fields('fps', array('field_pack_size_value'));
     $query->fields('fucu', array('field_unit_case_units__value'));
-    $query->addExpression('SUM(stsq.field_sum_of_total_sales_qty_value)', 'total_sales_qty');
-    $query->addExpression('floor(SUM(stsq.field_sum_of_total_sales_qty_value) / field_unit_case_units__value)', 'cld');
-    $query->addExpression('SUM(stsq.field_sum_of_total_sales_qty_value) - (field_unit_case_units__value * floor(SUM(stsq.field_sum_of_total_sales_qty_value) / field_unit_case_units__value))', 'eaches');
-    $query->groupBy('field_vehicle_value,field_loading_date_value,field_sku7_code_value,field_godown_area_id_value');
+    $query->addExpression('SUM(cb.Sum_of_TOTAL_SALES_QTY)', 'total_sales_qty');
+    $query->addExpression('floor(SUM(cb.Sum_of_TOTAL_SALES_QTY) / field_unit_case_units__value)', 'cld');
+    $query->addExpression('SUM(cb.Sum_of_TOTAL_SALES_QTY) - (field_unit_case_units__value * floor(SUM(cb.Sum_of_TOTAL_SALES_QTY) / field_unit_case_units__value))', 'eaches');
+    $query->groupBy('vehicle,loading_date,sku7_code,field_godown_area_id_value');
     $subquery = db_select($query, 'middle');
     $subquery->fields('middle');
     $subquery->addExpression('COUNT(cld)', 'cld_lines');
     $subquery->addExpression('COUNT(eaches)', 'eaches_lines');
     $subquery->addExpression('SUM(cld)', 'total_cld');
     $subquery->addExpression('SUM(eaches)', 'total_eaches');
-    $subquery->groupBy('field_vehicle_value,field_loading_date_value,field_godown_area_id_value');
+    $subquery->groupBy('vehicle,loading_date,field_godown_area_id_value');
     $results = $subquery->execute()->fetchAll();
     $context['sandbox']['progress'] = 0;
     $context['sandbox']['current_node'] = 0;
@@ -244,8 +276,8 @@ function change_feeds_import_create_party_packing($party_packing_data_new, &$con
 }
 
 function change_feeds_import_create_billing_data($billing_data_result, &$context) {
-  global $user;
   if (!isset($context['sandbox']['progress'])) {
+    global $user;
     $user_id = $user->uid;
     $distributor_id = change_feeds_import_get_distributor_id($user_id);
     $context['sandbox']['progress'] = 0;
@@ -254,6 +286,7 @@ function change_feeds_import_create_billing_data($billing_data_result, &$context
     $context['sandbox']['result'] = $billing_data_result;
   }
   $res = $context['sandbox']['result'];
+  global $user;
   for ($i = $context['sandbox']['progress']; $i < $context['sandbox']['progress'] + 50 && $i < $context['sandbox']['max']; $i++) {
     $key = $i;
     $val = $res[$key];
