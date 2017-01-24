@@ -553,7 +553,7 @@ ul.primary li a, ul.tabs li a { margin:0; padding: 4px 1em; display: inline-bloc
 .view-Billing-Data-Report, .view-CCFOT-Report, .view-Channle-Master-Report, .view-Dispatch-Data-Report,
  .view-EGIR-Report, .view-Godown-Master-Report , .view-Outlet-Master-Report , .view-Part-Packing-Report,
  .view-Party-Pack-Master-Report , .view-PDD-Master-Report , .view-Picking-Report , .view-PL-Group-Master-Report ,
- .view-Resource-Master-Report , .view-Return-Bill-Report , .view-sku7-Code-Master-Report,view-Custom-Billing-Report
+ .view-Resource-Master-Report , .view-Return-Bill-Report , .view-sku7-Code-Master-Report, .view-custom-billing-report
 {
     overflow-x: scroll;
 }
