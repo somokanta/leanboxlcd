@@ -5,7 +5,7 @@
  * hook_form_alter()
  */
 function modify_views_forms_form_alter(&$form, &$form_state, $form_id) {
-  if(($form_id == 'editableviews_entity_form_picking_form_editable') || ($form_id == 'editableviews_entity_form_party_pack_form_editable') || ($form_id == 'editableviews_entity_form_unloading_form_editable')) {
+  if($form_id == 'editableviews-entity-form-picking-form') {
     $query = db_select('field_data_field_resource_name', 'fps');
     $query->fields('fps', array('field_resource_name_value'));
     $options = $query->execute()->FetchCol();
