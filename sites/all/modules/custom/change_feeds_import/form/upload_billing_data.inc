@@ -87,7 +87,7 @@ function change_feeds_import_billing_data_form_submit($form, &$form_state) {
   }
 
   $operations = array();
-  $data_chunk = array_chunk($datas, 20);
+  $data_chunk = array_chunk($datas, 50);
   foreach ($data_chunk as $data) {
     $operations[] = array('change_feeds_import_batch_fix_process', array($max, $data, $distributor_id, $file_name, $party_code_result, $sku_code_result, $bill_result));
   }
@@ -101,17 +101,7 @@ function change_feeds_import_billing_data_form_submit($form, &$form_state) {
     'file' => drupal_get_path('module', 'change_feeds_import') . '/form/upload_billing_data.inc',
   );
   batch_set($batch);
-//  $operations[] = array('change_feeds_import_batch_fix_process', array($distributor_id, $file, $party_code_result, $sku_code_result, $bill_result));
-//  $batch = array(
-//    'operations' => $operations,
-//    'title' => t('Reading Billing Data Csv'),
-//    'finished' => 'billing_data_csv_finished',
-//    'init_message' => t('Batch is starting...'),
-//    'error_message' => t('Batch has encountered an error.'),
-//    'file' => drupal_get_path('module', 'change_feeds_import') . '/form/upload_billing_data.inc',
-//  );
-//
-//  batch_set($batch);
+
 }
 
 function billing_data_csv_finished($success, $results, $operations) {
