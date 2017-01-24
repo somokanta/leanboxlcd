@@ -11,15 +11,15 @@ function modify_views_forms_form_alter(&$form, &$form_state, $form_id) {
     $options = $query->execute()->FetchCol();
     $options = array_merge(array('-select-'),$options);
     $multi = array_combine($options, $options);
-    if($form_id == 'editableviews_entity_form_picking_form_editable') {
+    if($form_id == 'editableviews_entity_form_picking_form') {
       $field = 'field_picking_pick_supervisor';
     }
-    if($form_id == 'editableviews_entity_form_party_pack_form_editable') {
+    /*if($form_id == 'editableviews_entity_form_party_pack_form_editable') {
       $field = 'field_party_packing_supervisor';
     }
     if($form_id == 'editableviews_entity_form_unloading_form_editable') {
       $field = 'field_unloading_supervisor';
-    }
+    }*/
     foreach ($form['node'] as $key => $value) {
       $form['node'][$key][$field][LANGUAGE_NONE][0]['value']['#type'] = 'select';
       $form['node'][$key][$field][LANGUAGE_NONE][0]['value']['#multiple'] = FALSE;
