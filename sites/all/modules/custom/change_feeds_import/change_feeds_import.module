@@ -346,7 +346,7 @@ function change_feeds_import_node_update($node) {
       $next_month = date("m", $newdate);
       $node->MOC = "MOC" . $next_month;
     }
-
+ 
     ##### End MOC logic #######
     ######  logic for TDP ####
     if (($party_picking_ld_stamp >= 1) && ($party_picking_ld_stamp <= 10)) {
@@ -872,4 +872,43 @@ function change_feeds_import_feeds_after_import(FeedsSource $source) {
         ->condition('status', 'Error', '=')
         ->execute();
   }
+}
+
+
+
+
+function change_feeds_import_services_resources() {
+  $android_services_resource = array(
+    '#api_version' => 3002,
+  );
+  $android_services_resource = array(
+    'loading' => array(
+      'actions' => array(
+        'get-details' => array(
+          'help' => 'Get data according party packing or not',
+          'callback' => 'change_feeds_import_check_party_packing_or_not',
+          'args' => array(
+            array(
+              'name' => 'van_type',
+              'type' => 'string',
+              'description' => 'pass param as van_type',
+              'source' => array('data' => 'van_type'),
+              'optional' => FALSE,
+            ),
+            array(
+              'name' => 'nid',
+              'type' => 'string',
+              'description' => 'pass param as nid',
+              'source' => array('data' => 'nid'),
+              'optional' => FALSE,
+            ),
+          ),
+          'access arguments' => array('Distributor Upload File'),
+          'file' => array('type' => 'inc', 'module' => 'change_feeds_import', 'name' => 'includes/change_feeds_import_loading'),
+        ),
+        
+      ),
+    ),
+  );
+  return $android_services_resource;
 }
