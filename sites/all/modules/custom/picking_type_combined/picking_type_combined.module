@@ -21,7 +21,7 @@ function picking_type_combined_services_resources() {
             'name' => 'combined_pick_type'
           ),
           //'access callback' => 'get_status_api',
-          'access arguments' => array('access for api'),
+          'access arguments' => array('access_for_api'),
           // 'args' => array(
           //   array(
           //     'name' => 'from_date_booking',
@@ -44,6 +44,10 @@ function picking_type_combined_permission() {
     'picking_type_combined_services' => array(
       'title' => t('fetch picking status'),
       'description' => t('get status value as combined')
+    )
+    'access_for_api' => array(
+      'title' => t('access_for_api'),
+      'description' => t('Access For Api')
     )
   );
 }
