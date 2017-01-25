@@ -5,6 +5,8 @@
  * hook_form_alter()
  */
 function modify_views_forms_form_alter(&$form, &$form_state, $form_id) {
+  dsm($form);
+  dsm($form_id);
   if(($form_id == 'editableviews-entity-form-picking-report') || ($form_id == 'editableviews-entity-form-party-packing-report') || ($form_id == 'editableviews_entity_form_unloading_form')) {
     $query = db_select('field_data_field_resource_name', 'fps');
     $query->fields('fps', array('field_resource_name_value'));
