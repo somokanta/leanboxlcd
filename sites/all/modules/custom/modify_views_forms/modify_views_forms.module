@@ -5,16 +5,16 @@
  * hook_form_alter()
  */
 function modify_views_forms_form_alter(&$form, &$form_state, $form_id) {
-  if(($form_id == 'editableviews_entity_form_picking_form') || ($form_id == 'editableviews_entity_form_party_pack_form') || ($form_id == 'editableviews_entity_form_unloading_form')) {
+  if(($form_id == 'editableviews_entity_form_picking_report') || ($form_id == 'editableviews_entity_form_unloading_form') || ($form_id == 'editableviews_entity_form_unloading_form')) {
     $query = db_select('field_data_field_resource_name', 'fps');
     $query->fields('fps', array('field_resource_name_value'));
     $options = $query->execute()->FetchCol();
     $options = array_merge(array('-select-'),$options);
     $multi = array_combine($options, $options);
-    if($form_id == 'editableviews_entity_form_picking_form') {
+    if($form_id == 'editableviews_entity_form_picking_report') {
       $field = 'field_picking_pick_supervisor';
     }
-    if($form_id == 'editableviews_entity_form_party_pack_form') {
+    if($form_id == 'editableviews_entity_form_party_packing_report') {
       $field = 'field_party_packing_supervisor';
     }
     if($form_id == 'editableviews_entity_form_unloading_form') {
@@ -31,6 +31,6 @@ function modify_views_forms_form_alter(&$form, &$form_state, $form_id) {
 
 function modify_views_forms_field_widget_form_alter(&$element, &$form_state, $context) {
   if($element['#field_name'] == 'field_picking_start_time' || $element['#field_name'] == 'field_picking_end_time' || $element['#field_name'] == 'field_unloading_start_time' || $element['#field_name'] == 'field_unloading_end_time' || $element['#field_name'] == 'field_party_packing_start_time' || $element['#field_name'] == 'field_party_packing_end_time') {
-    $element['value']['#description'] = t('Enter Value in 24 Hr format (HH:MM)');
+    //$element['value']['#description'] = t('Enter Value in 24 Hr format (HH:MM)');
   }
 }
