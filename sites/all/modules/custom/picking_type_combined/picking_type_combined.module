@@ -44,9 +44,9 @@ function picking_type_combined_permission() {
     'picking_type_combined_services' => array(
       'title' => t('fetch picking status'),
       'description' => t('get status value as combined')
-    )
+    ),
     'access_for_api' => array(
-      'title' => t('access_for_api'),
+      'title' => t('access for api'),
       'description' => t('Access For Api')
     )
   );
