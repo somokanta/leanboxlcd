@@ -87,7 +87,7 @@ function change_feeds_import_billing_data_form_submit($form, &$form_state) {
   }
 
   $operations = array();
-  $data_chunk = array_chunk($datas, 500);
+  $data_chunk = array_chunk($datas, 1000);
   foreach ($data_chunk as $data) {
     $operations[] = array('change_feeds_import_batch_fix_process', array($max, $data, $distributor_id, $file_name, $party_code_result, $sku_code_result, $bill_result));
   }
