@@ -459,6 +459,7 @@ function check_party_code_exist_or_not() {
 function check_sku7_code_exist_or_not() {
   $query2 = db_select('field_data_field_sku7_code', 'sc');
   $query2->fields('sc', array('field_sku7_code_value'));
+  $query2->condition('sc.bundle', 'sku7_code_master', '=');
   $sku_code_result = $query2->execute()->fetchAllKeyed(0, 0);
   return $sku_code_result;
 }
