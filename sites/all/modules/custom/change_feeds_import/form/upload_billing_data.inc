@@ -81,13 +81,17 @@ function change_feeds_import_billing_data_form_submit($form, &$form_state) {
 
     while (($row = fgetcsv($handle) ) !== FALSE) {
 
+      foreach ($row as $key => &$value) {
+        $value = mb_convert_encoding($value, 'UTF-8', 'UTF-8');
+      }
+      
       $datas[] = array_combine($header, $row);
     }
     fclose($handle);
   }
 
   $operations = array();
-  $data_chunk = array_chunk($datas, 50);
+  $data_chunk = array_chunk($datas, 1000);
   foreach ($data_chunk as $data) {
     $operations[] = array('change_feeds_import_batch_fix_process', array($max, $data, $distributor_id, $file_name, $party_code_result, $sku_code_result, $bill_result));
   }
