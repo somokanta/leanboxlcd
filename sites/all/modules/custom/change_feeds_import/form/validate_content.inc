@@ -2,9 +2,7 @@
 
 // when validate is clicked
 function change_feeds_import_validate_content($id) {
-  print 1;
- //require_once drupal_get_path('module', 'change_feeds_import').'/form/upload_billing_data.inc';
-  print 1;
+ require_once drupal_get_path('module', 'change_feeds_import').'/form/upload_billing_data.inc';
 
  // select from stage table which has error = 1 
   $result = db_select('stage_billing_data', 'bd')
@@ -246,6 +244,7 @@ function change_feeds_import_validate_content($id) {
 
     $counter++;
   }
+  print 1;
 
   $bill_uploaded = $bill_unique_count;
   $total_lines = ($counter - 1);
@@ -265,6 +264,7 @@ function change_feeds_import_validate_content($id) {
    // delete data from stage table after confirm clicked and no error occured 
     change_feeds_import_update_data_in_staging_billing_table($result,$id);
   }
+  print 1;
   drupal_goto("confirm/".$id);
   
 }
