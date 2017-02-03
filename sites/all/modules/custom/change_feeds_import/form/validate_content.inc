@@ -2,7 +2,8 @@
 
 // when validate is clicked
 function change_feeds_import_validate_content($id) {
- require_once drupal_get_path('module', 'change_feeds_import').'/form/upload_billing_data.inc';
+  module_load_include('inc', 'change_feeds_import', 'form/upload_billing_data.inc');
+// require_once drupal_get_path('module', 'change_feeds_import').'/form/upload_billing_data.inc';
 
  // select from stage table which has error = 1 
   $result = db_select('stage_billing_data', 'bd')
@@ -16,7 +17,6 @@ function change_feeds_import_validate_content($id) {
   $party_code_result = check_party_code_exist_or_not();
   $sku_code_result = check_sku7_code_exist_or_not();
   $bill_result = check_bill_number_exist();
-  print 1;
   $counter = 0;
   $bill_unique_count = 0;
   $got_error = 0;
