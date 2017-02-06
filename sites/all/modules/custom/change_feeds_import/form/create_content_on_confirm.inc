@@ -52,12 +52,19 @@ function change_feeds_import_create_confirm_content($id) {
     $party_packing_data_new[] = $val;
   }
 
+  $query = db_select('custom_billing_data', 'cb');
+  $query->addExpression('MAX(id)', 'max');
+  $query->condition('distributor_id', $distributor_id);
+  $max_billing_id = $query->execute()->fetchField();
+
+  $max_billing_id = $max_billing_id ? $max_billing_id : 0;
+
   change_feeds_import_insert_data_in_custom_billing_table($billing_data_result);
 
   $batch = array(
     'operations' => array(
       array('change_feeds_import_create_party_packing', array($party_packing_data_new)),
-      array('change_feeds_import_create_picking', array()),
+      array('change_feeds_import_create_picking', array($max_billing_id)),
     ),
     'finished' => 'change_feeds_import_finished',
     'title' => t('Creating Billing Data'),
@@ -146,7 +153,7 @@ function change_feeds_import_insert_data_in_custom_billing_table($billing_data_r
   }
 }
 
-function change_feeds_import_create_picking(&$context) {
+function change_feeds_import_create_picking($max_billing_id, &$context) {
   if (!isset($context['sandbox']['progress'])) {
     global $user;
     $user_id = $user->uid;
@@ -163,17 +170,19 @@ function change_feeds_import_create_picking(&$context) {
     $query->fields('cb', array('sku7_code'));
     $query->addField('cb', 'vehicle', 'field_vehicle_value');
     $query->addField('cb', 'loading_date', 'field_loading_date_value');
-    $query->fields('gai', array('field_godown_area_id_value'));
+    $query->fields('gai', array('field_godown_area_id_value', 'entity_id'));
     $query->fields('fps', array('field_pack_size_value'));
     $query->fields('fucu', array('field_unit_case_units__value'));
     $query->addExpression('SUM(cb.Sum_of_TOTAL_SALES_QTY)', 'total_sales_qty');
     $query->addExpression('floor(SUM(cb.Sum_of_TOTAL_SALES_QTY) / field_unit_case_units__value)', 'cld');
     $query->addExpression('SUM(cb.Sum_of_TOTAL_SALES_QTY) - (field_unit_case_units__value * floor(SUM(cb.Sum_of_TOTAL_SALES_QTY) / field_unit_case_units__value))', 'eaches');
+    $query->condition('cb.distributor_id', $distributor_id);
+    $query->condition('cb.id', $max_billing_id, '>');
     $query->groupBy('field_vehicle_value,field_loading_date_value,sku7_code,field_godown_area_id_value');
     $subquery = db_select($query, 'middle');
     $subquery->fields('middle');
-    $subquery->addExpression('COUNT(cld)', 'cld_lines');
-    $subquery->addExpression('COUNT(eaches)', 'eaches_lines');
+    $subquery->addExpression('SUM(if(cld > 0, 1, 0))', 'cld_lines');
+    $subquery->addExpression('SUM(if(eaches > 0, 1, 0))', 'eaches_lines');
     $subquery->addExpression('SUM(cld)', 'total_cld');
     $subquery->addExpression('SUM(eaches)', 'total_eaches');
     $subquery->groupBy('field_vehicle_value,field_loading_date_value,field_godown_area_id_value');
@@ -276,4 +285,3 @@ function change_feeds_import_create_party_packing($party_packing_data_new, &$con
     $context['finished'] = 1;
   }
 }
-
