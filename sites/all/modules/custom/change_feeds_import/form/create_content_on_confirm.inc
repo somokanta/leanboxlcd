@@ -73,26 +73,16 @@ function change_feeds_import_create_confirm_content($id) {
       ->condition('error_id', $id, '=')
       ->execute();
 
-  //require_once drupal_get_path('module', 'change_feeds_import') . '/form/validate_content.inc';
+  require_once drupal_get_path('module', 'change_feeds_import') . '/form/validate_content.inc';
   $status = "Completed";
   // change status in error billing data
-  change_feeds_import_update_data_in_error_billing_table_for_create($status, $id);
+  change_feeds_import_update_data_in_error_billing_table($status, $id);
 
   $path = "public://billing_data/$csv_file";
   if (file_exists($path)) {
     drupal_unlink($path); //delete the generated error file
   }
   batch_process('/billing_data/import');
-}
-
-function change_feeds_import_update_data_in_error_billing_table_for_create($status, $id) {
-  // change status in error_billing_data
-  $status_updated = db_update('error_billing_data') // Table name no longer needs {}
-      ->fields(array(
-        'status' => $status,
-      ))
-      ->condition('id', $id, '=')
-      ->execute();
 }
 
 function change_feeds_import_insert_data_in_custom_billing_table($billing_data_result) {
