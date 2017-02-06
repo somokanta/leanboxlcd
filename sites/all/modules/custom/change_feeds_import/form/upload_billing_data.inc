@@ -137,15 +137,16 @@ function billing_data_csv_finished($success, $results, $operations) {
     $total_lines = ($results['max'] - 1);
     $last_id = $results['last_id'];
     // insert data in error billing data table 
-    change_feeds_import_update_data_in_error_billing_table($last_id, $bill_uploaded, $total_lines, $sum_of_total_sales_qty, $error_link, $status);
+    change_feeds_import_update_data_in_error_billing_table_after_confirm($last_id, $bill_uploaded, $total_lines, $sum_of_total_sales_qty, $error_link, $status);
+    
     drupal_goto("confirm/" . $last_id);
   }
   else {
-    
+    drupal_set_message('There is Error Occured in batch process');
   }
 }
 
-function change_feeds_import_update_data_in_error_billing_table($last_id, $bill_uploaded, $total_lines, $sum_of_total_sales_qty, $error_link, $status) {
+function change_feeds_import_update_data_in_error_billing_table_after_confirm($last_id, $bill_uploaded, $total_lines, $sum_of_total_sales_qty, $error_link, $status) {
   $status_updated = db_update('error_billing_data') // update status in error_billing_data condition based on (Distributor Id )
       ->fields(array(
         'total_bill_uploaded' => $bill_uploaded,
