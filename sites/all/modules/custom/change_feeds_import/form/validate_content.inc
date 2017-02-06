@@ -2,9 +2,8 @@
 
 // when validate is clicked
 function change_feeds_import_validate_content($id) {
- 
-  // module_load_include('inc', 'change_feeds_import', 'form/upload_billing_data.inc');
-  require_once drupal_get_path('module', 'change_feeds_import').'/form/upload_billing_data.inc';
+  module_load_include('inc', 'change_feeds_import', 'form/upload_billing_data.inc');
+// require_once drupal_get_path('module', 'change_feeds_import').'/form/upload_billing_data.inc';
 
  // select from stage table which has error = 1 
   $result = db_select('stage_billing_data', 'bd')
@@ -245,7 +244,9 @@ function change_feeds_import_validate_content($id) {
 
     $counter++;
   }
-   $bill_uploaded = $bill_unique_count;
+  print 1;
+
+  $bill_uploaded = $bill_unique_count;
   $total_lines = ($counter - 1);
   if ($got_error == 1) {
     global $base_url;
@@ -258,19 +259,17 @@ function change_feeds_import_validate_content($id) {
   }
 
   // change status of error billing data table
-  change_feeds_import_update_data_in_error_billing_table_for_validate($status, $id);
+  change_feeds_import_update_data_in_error_billing_table($status, $id);
   if ($status == "Confirm") {
    // delete data from stage table after confirm clicked and no error occured 
     change_feeds_import_update_data_in_staging_billing_table($result,$id);
   }
-  
-  
+  print 1;
   drupal_goto("confirm/".$id);
- 
   
 }
 
-function change_feeds_import_update_data_in_error_billing_table_for_validate($status, $id) {
+function change_feeds_import_update_data_in_error_billing_table($status, $id) {
   // change status in error_billing_data
   $status_updated = db_update('error_billing_data') // Table name no longer needs {}
       ->fields(array(
