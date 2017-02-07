@@ -22,16 +22,16 @@ function change_feeds_import_create_confirm_content($id) {
       $res[$vehicle . "/" . $loading_date]['sku_count'] ++;
       $res[$vehicle . "/" . $loading_date]['total_count'] += $total_qty;
       $unique_sku_string = $vehicle . "" . $loading_date . "" . $sku;
-      if ($temp_unique_sku_string != $unique_sku_string) {
+      if (!in_array("$unique_sku_string", $temp_unique_sku_string)) {
         $res[$vehicle . "/" . $loading_date]['unique_count'] ++;
-        $temp_unique_sku_string = $vehicle . "" . $loading_date . "" . $sku;
+        $temp_unique_sku_string[] = $vehicle . "" . $loading_date . "" . $sku;
       }
     }
     else {
       $res[$vehicle . "/" . $loading_date] = array();
       $res[$vehicle . "/" . $loading_date]['sku_count'] = 1;
       $res[$vehicle . "/" . $loading_date]['total_count'] = $total_qty;
-      $temp_unique_sku_string = $vehicle . "" . $loading_date . "" . $sku;
+      $temp_unique_sku_string[] = $vehicle . "" . $loading_date . "" . $sku;
       $res[$vehicle . "/" . $loading_date]['unique_count'] = 1;
     }
 
@@ -51,7 +51,6 @@ function change_feeds_import_create_confirm_content($id) {
   foreach ($party_packing_data as $key => $val) {
     $party_packing_data_new[] = $val;
   }
-
   $query = db_select('custom_billing_data', 'cb');
   $query->addExpression('MAX(id)', 'max');
   $query->condition('distributor_id', $distributor_id);
