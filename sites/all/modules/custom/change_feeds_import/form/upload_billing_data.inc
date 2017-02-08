@@ -175,6 +175,8 @@ function change_feeds_import_batch_fix_process($max, $data, $distributor_id, $fi
     $last_id = db_query('SELECT MAX(id) FROM {error_billing_data}')->fetchField();
     $context['results']['last_id'] = $last_id;
     $context['results']['max'] = $max;
+    $context['results']['total_lines'] = 0;
+    $context['results']['bill_unique_count'] = 0;
   }
   $last_id = $context['results']['last_id'];
   $got_error = $context['sandbox']['got_error'];
@@ -376,26 +378,19 @@ function change_feeds_import_batch_fix_process($max, $data, $distributor_id, $fi
 
     $error_boolean = $error_bool;
     $pass_data = $value;
-    if ($counter != 0) {
-      if (isset($_SESSION[$bill_number])) {
-        // do nothing
-      }
-      else {
-        $res[$bill_number] = array();
-        $_SESSION[$bill_number] = $bill_number;
+    if (!isset($context['results']['check_bills'][$bill_number])) {
+      $context['results']['check_bills'][$bill_number] = $bill_number;
+      //$_SESSION[$bill_number] = $bill_number;
         $context['results']['bill_unique_count'] ++;
       }
-    }
-
-
 
     $context['results']['error_link'] = $error_link;
     $context['results']['status'] = $status;
     $context['sandbox']['got_error'] = $got_error;
     change_feeds_import_insert_data_in_staging_billing_table($pass_data, $error_boolean, $last_id, $date);
 
-    $counter++;
-    $context['results']['total_lines'] = $counter;
+    //$counter++;
+    $context['results']['total_lines']++;
   }
 }
 
