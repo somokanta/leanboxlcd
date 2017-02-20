@@ -987,14 +987,15 @@ function change_feeds_import_form_alter(&$form, &$form_state, $form_id) {
     $form['#validate'][] = 'registration_validate';
     return $form;
   }
-  $node = $form_state['node'];
-  if (!isset($node->nid) || isset($node->is_new)) {
-    // This is a new node.
-    if ($form_id == 'product_division_master_node_form' || $form_id == 'pricelist_group_master_node_form') {
-      $form['#submit'][] = 'change_feeds_import_custom_node_add_submit';
+  if(isset($form_state['node'])) {
+    $node = $form_state['node'];
+    if (!isset($node->nid) || isset($node->is_new)) {
+      // This is a new node.
+      if ($form_id == 'product_division_master_node_form' || $form_id == 'pricelist_group_master_node_form') {
+        $form['#submit'][] = 'change_feeds_import_custom_node_add_submit';
+      }
     }
   }
-  
 }
 
 function change_feeds_import_custom_node_add_submit($form, &$form_state) {
