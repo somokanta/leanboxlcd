@@ -76,7 +76,7 @@ function change_feeds_import_create_confirm_content($id) {
     $created_date = date("Y-m-d h:i:s", $value['date']);
     $party_packing_data[$vehicle . "/" . $loading_date]['VEHICLE'] = $vehicle;
     $party_packing_data[$vehicle . "/" . $loading_date]['LOADING_DATE'] = $loading_date;
-    $party_packing_data[$vehicle . "/" . $loading_date]['party_packing_date'] = $created_date;
+//    $party_packing_data[$vehicle . "/" . $loading_date]['party_packing_date'] = $created_date;
     $party_packing_data[$vehicle . "/" . $loading_date]['loading_sheet_line'] = $distint_sku_count;
     $party_packing_data[$vehicle . "/" . $loading_date]['bill_lines'] = $sku_count;
     $party_packing_data[$vehicle . "/" . $loading_date]['each_units'] = $total_qty_count;
@@ -387,7 +387,7 @@ function change_feeds_import_create_party_packing($party_packing_data_new, &$con
     $node->comment = 1; // 0 = comments disabled, 1 = read only, 2 = read/write
     $node->field_party_packing_vehicle[$node->language][0]['value'] = $val['VEHICLE'];
     $node->field_party_packing_loading_date[$node->language][0]['value'] = $loading_date;
-    $node->field_party_packing_date[$node->language][0]['value'] = $val['party_packing_date'];
+//    $node->field_party_packing_date[$node->language][0]['value'] = $val['party_packing_date'];
     $node->field_loading_sheet_line[$node->language][0]['value'] = $val['loading_sheet_line'];
     $node->field_bill_lines[$node->language][0]['value'] = $val['bill_lines'];
     $node->field_each_units[$node->language][0]['value'] = $val['each_units'];
