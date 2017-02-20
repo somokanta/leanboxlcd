@@ -54,6 +54,9 @@ class change_feeds_import_handler_pre_date_ageing extends views_handler_field {
     if (!empty($out_date)) {
       $current_date = time();
       $date_ageing = floor(((($current_date - $out_date) / 60) / 60) / 24);
+      if (empty($date_ageing)) {
+        $date_ageing = 0;
+      }
       return $date_ageing;
     }
     else {
@@ -73,6 +76,9 @@ class change_feeds_import_handler_pen_date_ageing extends views_handler_field {
     if (!empty($out_date)) {
       $current_date = time();
       $date_ageing = floor(((($current_date - $out_date) / 60) / 60) / 24);
+      if (empty($date_ageing)) {
+        $date_ageing = 0;
+      }
       return $date_ageing;
     }
     else {
