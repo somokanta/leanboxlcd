@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the Dispatch Data feature.
+ */
+
+include_once 'dispatch_data.features.inc';

@@ -557,3 +557,28 @@ ul.primary li a, ul.tabs li a { margin:0; padding: 4px 1em; display: inline-bloc
 {
     overflow-x: scroll;
 }
+/*table scroll css for party packing page*/
+.page-party-packing-report [id^='editableviews-entity-form-party-packing-report'] .views-table{
+	width: 960px;
+	overflow: scroll;
+	display: inline-block;
+	height: 600px;
+}
+.page-picking-report [id^='editableviews-entity-form-picking-report'] .views-table{
+	width: 960px;
+	overflow-x:scroll;
+	display: inline-block;
+	height: 600px;
+}
+.page-picking-report [id^='editableviews-entity-form-picking-report'] .views-table .views-field-field-picking-picking-date-editable .fieldset-wrapper label,
+.page-picking-report [id^='editableviews-entity-form-picking-report'] .views-table .views-field-field-picking-picking-date-editable .fieldset-wrapper .description,
+.page-party-packing-report [id^='editableviews-entity-form-party-packing-report'] .views-table .views-field-field-party-packing-date-editable .fieldset-wrapper label,
+.page-party-packing-report [id^='editableviews-entity-form-party-packing-report'] .views-table .views-field-field-party-packing-date-editable .fieldset-wrapper .description,
+.page-unloading-form [id^='editableviews-entity-form-unloading-form'] .views-table .views-field-field-unloading-date-editable .fieldset-wrapper label,
+.page-unloading-form [id^='editableviews-entity-form-unloading-form'] .views-table .views-field-field-unloading-date-editable .fieldset-wrapper .description{
+	display: none;
+}
+
+
+
+/*table scroll css for party packing page*/

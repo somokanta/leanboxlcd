@@ -1,0 +1,19 @@
+
+<?php
+
+/**
+ *  hook_node_presave()
+ *
+ */
+
+function transaction_status_change_node_presave($node) {
+  if(!empty($node->field_picking_start_time['und']) && !empty($node->field_picking_end_time['und'])) {
+    $node->field_picking_status[LANGUAGE_NONE][0]['value'] = 2;
+  }
+  if(!empty($node->field_party_packing_start_time['und']) && !empty($node->field_party_packing_end_time['und'])) {
+    $node->field__party_packingstatus[LANGUAGE_NONE][0]['value'] = 2;
+  }
+  if(!empty($node->field_unloading_start_time['und']) && !empty($node->field_unloading_end_time['und'])) {
+    $node->field_unloading_status[LANGUAGE_NONE][0]['value'] = 2;
+  }
+}

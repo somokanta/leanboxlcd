@@ -45,6 +45,24 @@ function fetch_combined_status() {
     $query->fields('pstart', array('field_picking_start_time_value'));
     $query->fields('pend', array('field_picking_end_time_value'));
     $query->groupBy('field_combined_nid_value');
+
+
+    $from = date('Y-m-d', strtotime('-7 days'));
+    $to = date('Y-m-d');
+    $db_and1 = db_and();
+    $db_and1->where("(DATE_FORMAT(field_picking_loading_date_value, '%Y-%m-%d') >= :from AND DATE_FORMAT(field_picking_loading_date_value, '%Y-%m-%d') <= :to)", array(':from' => $from, ':to' => $to));
+    $db_and1->condition('field_picking_status_value', '1');
+
+    $db_and2 = db_and();
+    $db_and2->where("(DATE_FORMAT(field_picking_loading_date_value, '%Y-%m-%d') = :to)", array(':to' => $to));
+    $db_and2->condition('field_picking_status_value', '2');
+
+    $db_or = db_or();
+    $db_or->condition($db_and1);
+    $db_or->condition($db_and2);
+
+    $query->condition($db_or);
+
     $results = $query->execute()->fetchAll();
 
     foreach($results as $key => $val) {
@@ -63,7 +81,7 @@ function fetch_combined_status() {
       // if($val->field_picking_status_value == 2) {
       //   $val->field_picking_status_value = 'Completed';
       // }
-      $result_final[] =  array('godown area id' => $val->field_picking_godown_area_id_value , 'picking type' => $val->field_picking_picking_type_value , 'loading date'=> date("d-m-y", strtotime($val->field_picking_loading_date_value)) , 'van id' => $val->field_picking_van_id_value , 'pick units' => $val->field_pick_units_value, 'pick clds' => $var->field_pick_clds_value, 'pick supervisor' => $val->field_picking_pick_supervisor_value, 'picker name' => $val->field_picking_picker_name_value, 'picking team count' => $val->field_picking_picking_team_count_value, 'status' => $val->field_picking_status_value, 'combined nid' => $val->field_combined_nid_value, 'picking start time' => $val->field_picking_start_time_value, 'picking end time' => $picking_end_time, 'nid' => $val->nid);
+      $result_final[] =  array('godown area id' => $val->field_picking_godown_area_id_value , 'picking type' => $val->field_picking_picking_type_value , 'loading date'=> date("m/d/y", strtotime($val->field_picking_loading_date_value)) , 'van id' => $val->field_picking_van_id_value , 'pick units' => $val->field_pick_units_value, 'pick clds' => $var->field_pick_clds_value, 'pick supervisor' => $val->field_picking_pick_supervisor_value, 'picker name' => $val->field_picking_picker_name_value, 'picking team count' => $val->field_picking_picking_team_count_value, 'status' => $val->field_picking_status_value, 'combined nid' => $val->field_combined_nid_value, 'picking start time' => $val->field_picking_start_time_value, 'picking end time' => $picking_end_time, 'nid' => $val->nid);
     }
 
     $result['data'] =$result_final;

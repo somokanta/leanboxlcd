@@ -1,15 +1,93 @@
 <?php
 
 function change_feeds_import_views_data_alter(&$data) {
+
   $data['field_data_field_picking_picking_type']['field_picking_picking_type']['field']['handler'] = 'custom_for_picking_type';
   $data['field_data_field_combined_nid']['field_combined_nid']['field']['handler'] = 'custom_for_combine_nid';
+  
+  $data['field_data_field_sales_party_code']['table']['group'] = t('Example table');
+  $data['field_data_field_sales_party_code']['dummy_name'] = array(
+    'title' => t('Example relationship'),
+    'help' => t('Example help'),
+    'relationship' => array(
+      'title' => 'partycode',
+      'base' => 'node', // Table we're joining to.
+      'base field' => 'title', // Field on the joined table.
+      'field' => 'field_sales_party_code_value', // Real field name on the 'foo' table.
+      'handler' => 'views_handler_relationship',
+      'label' => t('party code to outlet master relationship'),
+      'title' => t('party code to outlet master relationship'),
+      'help' => t('More information about relationship.'),
+      'extra' => array(
+       array('field' => 'type', 'value' => 'outlet_master'),
+     ),
+    ),
+  );
+  
+  $data['node']['pre_date_ageing'] = array(
+    'title' => t('Previous Date Ageing'),
+    'help' => t('date difference'),
+    'real field' => 'nid',
+    'field' => array(
+      'handler' => 'change_feeds_import_handler_pre_date_ageing',
+    ),
+  );
+   
+  $data['node']['pen_date_ageing'] = array(
+    'title' => t('Pending Date Ageing'),
+    'help' => t('date difference'),
+    'real field' => 'nid',
+    'field' => array(
+      'handler' => 'change_feeds_import_handler_pen_date_ageing',
+    ),
+  );
+
 }
+
+/**
+ * Field handler to translate a Status into its readable form.
+ */
+class change_feeds_import_handler_pre_date_ageing extends views_handler_field {
+
+  function render($values) {
+    $out_date = $values->field_field_outst_bill_date[0]['raw']['value'];
+    if (!empty($out_date)) {
+      $current_date = time();
+      $date_ageing = floor(((($current_date - $out_date) / 60) / 60) / 24);
+      return $date_ageing;
+    }
+    else {
+      return '-';
+    }
+  }
+}
+
+/**
+ * Field handler to translate a Status into its readable form.
+ */
+class change_feeds_import_handler_pen_date_ageing extends views_handler_field {
+
+  function render($values) {
+   
+    $out_date = $values->custom_billing_data_bill_date;
+    if (!empty($out_date)) {
+      $current_date = time();
+      $date_ageing = floor(((($current_date - $out_date) / 60) / 60) / 24);
+      return $date_ageing;
+    }
+    else {
+      return '-';
+    }
+  }
+}
+
 
 /**
  * Implements hook_views_data().
  */
 function change_feeds_import_views_data() {
   $data = array();
+    
   // Add Example group
   $data['ccfot']['table']['group'] = t('ccfot');
   $data['ccfot']['table']['join'] = array(
@@ -66,13 +144,13 @@ function change_feeds_import_views_data() {
     'title' => t('loading_date'),
     'help' => t('The record loading_date.'),
     'field' => array(
-      'handler' => 'views_handler_field',
+      'handler' => 'views_handler_field_date',
     ),
     'sort' => array(
-      'handler' => 'views_handler_sort',
+      'handler' => 'views_handler_sort_date',
     ),
     'filter' => array(
-      'handler' => 'views_handler_filter_string',
+      'handler' => 'views_handler_filter_date',
     ),
   );
 
@@ -89,14 +167,21 @@ function change_feeds_import_views_data() {
     'filter' => array(
       'handler' => 'views_handler_filter_string',
     ),
+    'relationship' => array(
+      'title' => t('Party code in outlet master'),
+      'help' => t("Party code in outlet master"),
+      'base' => 'node',
+      'base field' => 'title',
+      'handler' => 'views_handler_relationship',
+      'label' => t('Party code in outlet master'),
+      'extra' => array(
+        array('field' => 'type', 'value' => 'outlet_master'),
+      ),
+    ),
   );
-
-
-
-
-  $data['custom_billing_data']['party_name'] = array(
-    'title' => t('party_name'),
-    'help' => t('The record party_name.'),
+  $data['custom_billing_data']['BEAT_NAME'] = array(
+    'title' => t('BEAT_NAME'),
+    'help' => t('The record BEAT_NAME.'),
     'field' => array(
       'handler' => 'views_handler_field',
     ),
@@ -120,12 +205,36 @@ function change_feeds_import_views_data() {
     'filter' => array(
       'handler' => 'views_handler_filter_string',
     ),
+    'relationship' => array(
+      'title' => t('Bill number in sales register'),
+      'help' => t("Bill number in sales register"),
+      'base' => 'node',
+      'base field' => 'title',
+      'handler' => 'views_handler_relationship',
+      'label' => t('Bill number in sales register'),
+      'extra' => array(
+        array('field' => 'type', 'value' => 'sales_register_data'),
+      ),
+    ),
   );
-
 
   $data['custom_billing_data']['bill_date'] = array(
     'title' => t('bill_date'),
     'help' => t('The record bill_date.'),
+    'field' => array(
+      'handler' => 'views_handler_field_date',
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort_date',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_date',
+    ),
+  );
+
+  $data['custom_billing_data']['BASEPACK_CODE'] = array(
+    'title' => t('BASEPACK_CODE'),
+    'help' => t('The record BASEPACK_CODE.'),
     'field' => array(
       'handler' => 'views_handler_field',
     ),
@@ -136,7 +245,6 @@ function change_feeds_import_views_data() {
       'handler' => 'views_handler_filter_string',
     ),
   );
-
 
   $data['custom_billing_data']['product_name'] = array(
     'title' => t('product_name'),
@@ -167,6 +275,61 @@ function change_feeds_import_views_data() {
     ),
   );
 
+  $data['custom_billing_data']['PRICELIST_GROUP'] = array(
+    'title' => t('PRICELIST_GROUP'),
+    'help' => t('The record PRICELIST_GROUP.'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+  );
+
+  $data['custom_billing_data']['PRODUCT_DIVISION'] = array(
+    'title' => t('PRODUCT_DIVISION'),
+    'help' => t('The record PRODUCT_DIVISION.'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+  );
+
+  $data['custom_billing_data']['PRODUCT_CATEGORY'] = array(
+    'title' => t('PRODUCT_CATEGORY'),
+    'help' => t('The record PRODUCT_CATEGORY.'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+  );
+
+  $data['custom_billing_data']['PRODUCT_SUB_CATEGORY'] = array(
+    'title' => t('PRODUCT_SUB_CATEGORY'),
+    'help' => t('The record PRODUCT_SUB_CATEGORY.'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+  );
 
   $data['custom_billing_data']['mrp'] = array(
     'title' => t('mrp'),
@@ -213,19 +376,19 @@ function change_feeds_import_views_data() {
   );
 
 
-  $data['custom_billing_data']['Sum_of_TOTAL_SALES_RET_QTY'] = array(
-    'title' => t('Sum_of_TOTAL_SALES_RET_QTY'),
-    'help' => t('The record Sum_of_TOTAL_SALES_RET_QTY.'),
-    'field' => array(
-      'handler' => 'views_handler_field_numeric',
-    ),
-    'sort' => array(
-      'handler' => 'views_handler_sort',
-    ),
-    'filter' => array(
-      'handler' => 'views_handler_filter_numeric',
-    ),
-  );
+//  $data['custom_billing_data']['Sum_of_TOTAL_SALES_RET_QTY'] = array(
+//    'title' => t('Sum_of_TOTAL_SALES_RET_QTY'),
+//    'help' => t('The record Sum_of_TOTAL_SALES_RET_QTY.'),
+//    'field' => array(
+//      'handler' => 'views_handler_field_numeric',
+//    ),
+//    'sort' => array(
+//      'handler' => 'views_handler_sort',
+//    ),
+//    'filter' => array(
+//      'handler' => 'views_handler_filter_numeric',
+//    ),
+//  );
 
 
   $data['custom_billing_data']['Sum_of_NET_SALES_QTY'] = array(
@@ -258,49 +421,32 @@ function change_feeds_import_views_data() {
   );
 
 
-  $data['custom_billing_data']['Sum_of_SALES_RET_FREE_QTY'] = array(
-    'title' => t('Sum_of_SALES_RET_FREE_QTY'),
-    'help' => t('The record Sum_of_SALES_RET_FREE_QTY.'),
-    'field' => array(
-      'handler' => 'views_handler_field_numeric',
-    ),
-    'sort' => array(
-      'handler' => 'views_handler_sort',
-    ),
-    'filter' => array(
-      'handler' => 'views_handler_filter_numeric',
-    ),
-  );
-
-
-  $data['custom_billing_data']['Sum_of_SALES_VALUE'] = array(
-    'title' => t('Sum_of_SALES_VALUE'),
-    'help' => t('The record Sum_of_SALES_VALUE.'),
-    'field' => array(
-      'handler' => 'views_handler_field_numeric',
-    ),
-    'sort' => array(
-      'handler' => 'views_handler_sort',
-    ),
-    'filter' => array(
-      'handler' => 'views_handler_filter_numeric',
-    ),
-  );
-
-
-  $data['custom_billing_data']['Sum_of_SALES_RET_VALUE'] = array(
-    'title' => t('Sum_of_SALES_RET_VALUE'),
-    'help' => t('The record Sum_of_SALES_RET_VALUE.'),
-    'field' => array(
-      'handler' => 'views_handler_field_numeric',
-    ),
-    'sort' => array(
-      'handler' => 'views_handler_sort',
-    ),
-    'filter' => array(
-      'handler' => 'views_handler_filter_numeric',
-    ),
-  );
+//  $data['custom_billing_data']['Sum_of_SALES_RET_FREE_QTY'] = array(
+//    'title' => t('Sum_of_SALES_RET_FREE_QTY'),
+//    'help' => t('The record Sum_of_SALES_RET_FREE_QTY.'),
+//    'field' => array(
+//      'handler' => 'views_handler_field_numeric',
+//    ),
+//    'sort' => array(
+//      'handler' => 'views_handler_sort',
+//    ),
+//    'filter' => array(
+//      'handler' => 'views_handler_filter_numeric',
+//    ),
+//  );
+//  $data['custom_billing_data']['Sum_of_SALES_RET_VALUE'] = array(
+//    'title' => t('Sum_of_SALES_RET_VALUE'),
+//    'help' => t('The record Sum_of_SALES_RET_VALUE.'),
+//    'field' => array(
+//      'handler' => 'views_handler_field_numeric',
+//    ),
+//    'sort' => array(
+//      'handler' => 'views_handler_sort',
+//    ),
+//    'filter' => array(
+//      'handler' => 'views_handler_filter_numeric',
+//    ),
+//  );
 
 
   $data['custom_billing_data']['Sum_of_NET_SALES_VALUE'] = array(
@@ -317,20 +463,87 @@ function change_feeds_import_views_data() {
     ),
   );
 
-
-
-
-  $data['custom_billing_data']['promise_date'] = array(
-    'title' => t('promise_date'),
-    'help' => t('The record promise_date.'),
+  $data['custom_billing_data']['Sum_of_NET_SALES_CASES'] = array(
+    'title' => t('Sum_of_NET_SALES_CASES'),
+    'help' => t('The record Sum_of_NET_SALES_CASES.'),
     'field' => array(
-      'handler' => 'views_handler_field',
+      'handler' => 'views_handler_field_numeric',
     ),
     'sort' => array(
       'handler' => 'views_handler_sort',
     ),
     'filter' => array(
-      'handler' => 'views_handler_filter_string',
+      'handler' => 'views_handler_filter_numeric',
+    ),
+  );
+
+  $data['custom_billing_data']['Sum_of_NET_SALES_KGS'] = array(
+    'title' => t('Sum_of_NET_SALES_KGS'),
+    'help' => t('The record Sum_of_NET_SALES_KGS.'),
+    'field' => array(
+      'handler' => 'views_handler_field_numeric',
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_numeric',
+    ),
+  );
+
+  $data['custom_billing_data']['Sum_of_SCHEME_DISCOUNT'] = array(
+    'title' => t('Sum_of_SCHEME_DISCOUNT'),
+    'help' => t('The record Sum_of_SCHEME_DISCOUNT.'),
+    'field' => array(
+      'handler' => 'views_handler_field_numeric',
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_numeric',
+    ),
+  );
+
+  $data['custom_billing_data']['Sum_of_OTHER_DISCOUNT'] = array(
+    'title' => t('Sum_of_OTHER_DISCOUNT'),
+    'help' => t('The record Sum_of_OTHER_DISCOUNT.'),
+    'field' => array(
+      'handler' => 'views_handler_field_numeric',
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_numeric',
+    ),
+  );
+
+  $data['custom_billing_data']['Sum_of_TAX_PERCENTAGE'] = array(
+    'title' => t('Sum_of_TAX_PERCENTAGE'),
+    'help' => t('The record Sum_of_TAX_PERCENTAGE.'),
+    'field' => array(
+      'handler' => 'views_handler_field_numeric',
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_numeric',
+    ),
+  );
+
+  $data['custom_billing_data']['promise_date'] = array(
+    'title' => t('promise_date'),
+    'help' => t('The record promise_date.'),
+    'field' => array(
+      'handler' => 'views_handler_field_date',
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort_date',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_date',
     ),
   );
   $data['custom_billing_data']['distributor_id'] = array(
@@ -352,13 +565,13 @@ function change_feeds_import_views_data() {
     'title' => t('created_date'),
     'help' => t('The record created_date.'),
     'field' => array(
-      'handler' => 'views_handler_field',
+      'handler' => 'views_handler_field_date',
     ),
     'sort' => array(
-      'handler' => 'views_handler_sort',
+      'handler' => 'views_handler_sort_date',
     ),
     'filter' => array(
-      'handler' => 'views_handler_filter_string',
+      'handler' => 'views_handler_filter_date',
     ),
   );
 
@@ -366,13 +579,13 @@ function change_feeds_import_views_data() {
     'title' => t('updated_date'),
     'help' => t('The record updated_date.'),
     'field' => array(
-      'handler' => 'views_handler_field',
+      'handler' => 'views_handler_field_date',
     ),
     'sort' => array(
-      'handler' => 'views_handler_sort',
+      'handler' => 'views_handler_sort_date',
     ),
     'filter' => array(
-      'handler' => 'views_handler_filter_string',
+      'handler' => 'views_handler_filter_date',
     ),
   );
 
@@ -393,5 +606,135 @@ function change_feeds_import_views_data() {
     ),
     );
    */
+  $data['custom_billing_data']['bill_value'] = array(
+    'title' => t('Custom bill_value'),
+    'help' => t('Custom bill_value'),
+    'real field' => 'id',
+    'field' => array(
+      'handler' => 'custom_billing_data_bill_value',
+      'click sortable' => FALSE,
+     ),
+  );
+
+  $data['van_cld_data_table']['table']['group'] = t('VAN CLD GROUP');
+  $data['van_cld_data_table']['table']['base'] = array(
+    'title' => t('VAN CLD Data'),
+    'help' => t('Contains records from van_cld_data custom table.'),
+  );
+
+ 
+
+  $data['van_cld_data_table']['vehicle'] = array(
+    'title' => t('Vehicle'),
+    'help' => t('Vehicle'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+  );
+
+  $data['van_cld_data_table']['loading_date'] = array(
+    'title' => t('Loading Date'),
+    'help' => t('Loading Date'),
+    'field' => array(
+      'handler' => 'views_handler_field_date',
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort_date',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_date',
+    ),
+  );
+
+
+  $data['van_cld_data_table']['sku7_code'] = array(
+    'title' => t('SKU7 CODE'),
+    'help' => t('SKU7 CODE'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+  );
+
+
+  $data['van_cld_data_table']['product_name'] = array(
+    'title' => t('Product Name'),
+    'help' => t('Product Name'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+  );
+
+
+  $data['van_cld_data_table']['cld'] = array(
+    'title' => t('CLD'),
+    'help' => t('CLD'),
+    'field' => array(
+      'handler' => 'views_handler_field_numeric',
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_numeric',
+    ),
+  );
+  
+  $data['van_cld_data_table']['mrp'] = array(
+    'title' => t('MRP'),
+    'help' => t('MRP'),
+    'field' => array(
+      'handler' => 'views_handler_field_numeric',
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_numeric',
+    ),
+  );
+  
+  $base_table = 'custom_billing_data';
+  $data[$base_table]['date_filter'] = array(
+    'group' => t('Date'),
+    'title' => t('Date (!base_table)', array('!base_table' => $base_table)),
+    'help' => t('Filter any Views !base_table date field.', array('!base_table' => $base_table)),
+    'filter' => array(
+      'handler' => 'date_views_filter_handler',
+      'empty field name' => t('Undated'),
+      'is date' => TRUE,
+    //'skip base' => $base_table,
+    ),
+  );
+  $base_table2 = "van_cld_data_table";
+  $data[$base_table2]['date_filter'] = array(
+    'group' => t('Date'),
+    'title' => t('Date (!base_table)', array('!base_table' => $base_table2)),
+    'help' => t('Filter any Views !base_table date field.', array('!base_table' => $base_table2)),
+    'filter' => array(
+      'handler' => 'date_views_filter_handler',
+      'empty field name' => t('Undated'),
+      'is date' => TRUE,
+    //'skip base' => $base_table,
+    ),
+  );
+  
   return $data;
 }

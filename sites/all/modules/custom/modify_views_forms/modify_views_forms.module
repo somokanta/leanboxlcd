@@ -5,26 +5,73 @@
  * hook_form_alter()
  */
 function modify_views_forms_form_alter(&$form, &$form_state, $form_id) {
+  // custom validator for node title unique value
+  $node_type = array('hul_code_master', 'pricelist_group_master', 'product_division_master', 'resource_type', 'vehicle_master');
+  if (isset($form['#node']) && !isset($form['#node']->nid) && in_array($form['#node']->type, $node_type)) {
+    $form['#validate'][] = 'node_title_validate';
+  }
+  
   if(($form_id == 'editableviews_entity_form_picking_report') || ($form_id == 'editableviews_entity_form_party_packing_report') || ($form_id == 'editableviews_entity_form_unloading_form')) {
+    
     $query = db_select('field_data_field_resource_name', 'fps');
-    $query->fields('fps', array('field_resource_name_value'));
-    $options = $query->execute()->FetchCol();
-    $options = array_merge(array('-select-'),$options);
-    $multi = array_combine($options, $options);
+    $query->join('field_data_field_resource_type','fst','fst.entity_id = fps.entity_id');
+
     if($form_id == 'editableviews_entity_form_picking_report') {
-      $field = 'field_picking_pick_supervisor';
+      $query->condition('fst.field_resource_type_value', 'PICKING SUPERVISOR');
+      $field_supervisor = 'field_picking_pick_supervisor';
+      $field_count = 'field_picking_picking_team_count';
     }
     if($form_id == 'editableviews_entity_form_party_packing_report') {
-      $field = 'field_party_packing_supervisor';
+      $query->condition('fst.field_resource_type_value', 'PARTY PACKING SUPERVISOR');
+      $field_supervisor = 'field_party_packing_supervisor';
+      $field_count = 'field_party_packer_team_count';
     }
     if($form_id == 'editableviews_entity_form_unloading_form') {
-      $field = 'field_unloading_supervisor';
+      $query->condition('fst.field_resource_type_value', 'Unloading SUPERVISOR');
+      $field_supervisor = 'field_unloading_supervisor';
+      $field_count = 'field_unloading_team_count';
     }
+
+    $query->fields('fps', array('field_resource_name_value'));
+    $options = $query->execute()->FetchCol();
+    $multi_supervisor = array_combine($options, $options);
+    $multi_supervisor = array_merge(array(" "=>'SELECT'),$multi_supervisor);
+    //$count_array = array('1'=>'1','2'=>'2','3'=>'3','4'=>'4','5'=>'5','6'=>'6','7'=>'7','8'=>'8','9'=>'9');
+    $count_array = array(1,2,3,4,5,6,7,8,9);
+    $multi_count = array_merge(array("0"=>'SELECT'), $count_array);
+
+    $query = db_select('field_data_field_resource_name', 'fps');
+    $query->join('field_data_field_resource_type','fst','fst.entity_id = fps.entity_id');
+    if($form_id == 'editableviews_entity_form_picking_report') {
+      $query->condition('fst.field_resource_type_value', 'PICKER NAME');
+      $field_packer = 'field_picking_picker_name';
+    }
+    if($form_id == 'editableviews_entity_form_party_packing_report') {
+      $query->condition('fst.field_resource_type_value', 'PARTY PACKER NAME');
+      $field_packer = 'field_party_packer_name';
+    }
+
+    $query->fields('fps', array('field_resource_name_value'));
+    $options = $query->execute()->FetchCol();
+    $multi_packer = array_combine($options, $options);
+    $multi_packer = array_merge(array(" "=>'SELECT'),$multi_packer);
+    
     foreach ($form['node'] as $key => $value) {
-      $form['node'][$key][$field][LANGUAGE_NONE][0]['value']['#type'] = 'select';
-      $form['node'][$key][$field][LANGUAGE_NONE][0]['value']['#multiple'] = FALSE;
-      $form['node'][$key][$field][LANGUAGE_NONE][0]['value']['#options'] = $multi;
-      $form['node'][$key][$field][LANGUAGE_NONE][0]['value']['#size'] = 1;
+      $form['node'][$key]['field_unloading_date'][LANGUAGE_NONE][0]['#theme_wrappers'] = array();
+      $form['node'][$key][$field_supervisor][LANGUAGE_NONE][0]['value']['#type'] = 'select';
+      $form['node'][$key][$field_supervisor][LANGUAGE_NONE][0]['value']['#multiple'] = FALSE;
+      $form['node'][$key][$field_supervisor][LANGUAGE_NONE][0]['value']['#options'] = $multi_supervisor;
+      $form['node'][$key][$field_supervisor][LANGUAGE_NONE][0]['value']['#size'] = 1;
+      if(($form_id == 'editableviews_entity_form_picking_report') || ($form_id == 'editableviews_entity_form_party_packing_report')) {
+        $form['node'][$key][$field_packer][LANGUAGE_NONE][0]['value']['#type'] = 'select';
+        $form['node'][$key][$field_packer][LANGUAGE_NONE][0]['value']['#multiple'] = FALSE;
+        $form['node'][$key][$field_packer][LANGUAGE_NONE][0]['value']['#options'] = $multi_packer;
+        $form['node'][$key][$field_packer][LANGUAGE_NONE][0]['value']['#size'] = 1;
+      }
+      $form['node'][$key][$field_count][LANGUAGE_NONE][0]['value']['#type'] = 'select';
+      $form['node'][$key][$field_count][LANGUAGE_NONE][0]['value']['#multiple'] = FALSE;
+      $form['node'][$key][$field_count][LANGUAGE_NONE][0]['value']['#options'] = $multi_count;
+      $form['node'][$key][$field_count][LANGUAGE_NONE][0]['value']['#size'] = 1;
     }
   }
 }
@@ -32,5 +79,116 @@ function modify_views_forms_form_alter(&$form, &$form_state, $form_id) {
 function modify_views_forms_field_widget_form_alter(&$element, &$form_state, $context) {
   if($element['#field_name'] == 'field_picking_start_time' || $element['#field_name'] == 'field_picking_end_time' || $element['#field_name'] == 'field_unloading_start_time' || $element['#field_name'] == 'field_unloading_end_time' || $element['#field_name'] == 'field_party_packing_start_time' || $element['#field_name'] == 'field_party_packing_end_time') {
     //$element['value']['#description'] = t('Enter Value in 24 Hr format (HH:MM)');
+  }
+}
+
+/**
+ * Custom validate handler
+ * @param array $form
+ * @param array $form_state
+ */
+function node_title_validate($form, &$form_state) {
+ // dpm($form_state);
+  $title = $form_state['values']['title'];
+  $type = $form_state['values']['type'];
+  $query = db_select('node', 'n');
+  $query->fields('n', array('title'));
+  $query->condition('n.type', $type);
+  $query->condition('n.title', $title);
+  $result = $query->execute()->fetchField();
+  if (!empty($result)) {
+    form_set_error('title', t('This value already exists.Kindly enter unique value'));
+  }
+  
+}
+
+
+/**
+ * 
+ * @param type $vars
+ * @return type
+ */
+function modify_views_forms_date_popup($vars) {
+  dsm('on');
+//  $element = $vars['element'];
+//  $attributes = !empty($element['#wrapper_attributes']) ? $element['#wrapper_attributes'] : array('class' => array());
+//  $attributes['class'][] = 'container-inline-date';
+//  // If there is no description, the floating date elements need some extra padding below them.
+//  $wrapper_attributes = array('class' => array('date-padding'));
+//  if (empty($element['date']['#description'])) {
+//    $wrapper_attributes['class'][] = 'clearfix';
+//  }
+//  // Add an wrapper to mimic the way a single value field works, for ease in using #states.
+//  if (isset($element['#children'])) {
+//    $element['#children'] = '<div id="' . $element['#id'] . '" ' . drupal_attributes($wrapper_attributes) .'>' . $element['#children'] . '</div>';
+//  }
+//  return '<div ' . drupal_attributes($attributes) .'>' . theme('form_element', $element) . '</div>';
+}
+
+
+function modify_views_forms_field_attach_validate($entity_type, $entity, &$errors) {
+
+  if($entity_type == 'node') {
+    if (!empty($entity->field_unloading_start_time)) {
+      foreach ($entity->field_unloading_start_time as $langcode => $items) {
+        foreach ($items as $delta => $item) {
+          if (!empty($item['value']) && !preg_match("/^(?:0?[0-9]|1[0-2]):[0-5][0-9] [AP]M$/", $item['value'])) {   
+            $nid = $entity->nid;
+            form_set_error("node][$nid][field_unloading_start_time][$langcode][$delta][value", 'Please Enter data in 12 Hour Format with (AM/PM) for EXAMPLE 10:10 AM and 10:10 PM');
+          }
+        }
+      }
+    }
+
+    if (!empty($entity->field_unloading_end_time)) {
+      foreach ($entity->field_unloading_end_time as $langcode => $items) {
+        foreach ($items as $delta => $item) {
+          if (!empty($item['value']) && !preg_match("/^(?:0?[0-9]|1[0-2]):[0-5][0-9] [AP]M$/", $item['value'])) {
+            $nid = $entity->nid;
+            form_set_error("node][$nid][field_unloading_end_time][$langcode][$delta][value", 'Please Enter data in 12 Hour Format with (AM/PM) for EXAMPLE 10:10 AM and 10:10 PM');
+          }
+        }
+      }
+    }
+    if (!empty($entity->field_party_packing_start_time)) {
+      foreach ($entity->field_party_packing_start_time as $langcode => $items) {
+        foreach ($items as $delta => $item) {
+          if (!empty($item['value']) && !preg_match("/^(?:0?[0-9]|1[0-2]):[0-5][0-9] [AP]M$/", $item['value'])) {
+            $nid = $entity->nid;
+            form_set_error("node][$nid][field_party_packing_start_time][$langcode][$delta][value", 'Please Enter data in 12 Hour Format with (AM/PM) for EXAMPLE 10:10 AM and 10:10 PM');
+          }
+        }
+      }
+    }
+    if (!empty($entity->field_party_packing_end_time)) {
+      foreach ($entity->field_party_packing_end_time as $langcode => $items) {
+        foreach ($items as $delta => $item) {
+          if (!empty($item['value']) && !preg_match("/^(?:0?[0-9]|1[0-2]):[0-5][0-9] [AP]M$/", $item['value'])) {
+            $nid = $entity->nid;
+            form_set_error("node][$nid][field_party_packing_end_time][$langcode][$delta][value", 'Please Enter data in 12 Hour Format with (am/pm)');
+          }
+        }
+      }
+    }
+    if (!empty($entity->field_picking_start_time)) {
+      foreach ($entity->field_picking_start_time as $langcode => $items) {
+        foreach ($items as $delta => $item) {
+          if (!empty($item['value']) && !preg_match("/^(?:0?[0-9]|1[0-2]):[0-5][0-9] [AP]M$/", $item['value'])) {
+            $nid = $entity->nid;
+            form_set_error("node][$nid][field_picking_start_time][$langcode][$delta][value", 'Please Enter data in 12 Hour Format with (am/pm)');
+          }
+        }
+      }
+    }
+    if (!empty($entity->field_picking_end_time)) {
+      foreach ($entity->field_picking_end_time as $langcode => $items) {
+        foreach ($items as $delta => $item) {
+          if (!empty($item['value']) && !preg_match("/^(?:0?[0-9]|1[0-2]):[0-5][0-9] [AP]M$/", $item['value'])) {
+            $nid = $entity->nid;
+            form_set_error("node][$nid][field_picking_end_time][$langcode][$delta][value", 'Please Enter data in 12 Hour Format with (am/pm)');
+          }
+        }
+      }
+    }
   }
 }

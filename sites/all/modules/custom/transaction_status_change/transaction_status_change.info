@@ -1,0 +1,8 @@
+name = Status change on Transaction pages
+description = On edit of Start time and End time in transactions, change status to Complete
+core = 7.x
+package = custom
+
+
+
+
