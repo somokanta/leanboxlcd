@@ -26,8 +26,8 @@ function change_feeds_import_menu() {
     'page arguments' => array('change_feeds_import_setting_form'),
     'access callback' => 'check_if_fr_role_user_admin',
   );
-  
- // Upload form for sales register data
+
+  // Upload form for sales register data
   $items['outstanding-activity/import'] = array(
     'title' => 'Import Outstanding Activity Data',
     'description' => 'Import Outstanding Activity Node',
@@ -35,7 +35,7 @@ function change_feeds_import_menu() {
     'page arguments' => array('change_feeds_import_outstanding_activity_form'),
     'access arguments' => array('Distributor Upload File'),
     'file' => 'form/outstanding_activity_data.inc',
-  ); 
+  );
 
   $items['outstanding-activity-confirm/%'] = array(
     'title' => 'Outstanding Activity  Confirm Table',
@@ -45,8 +45,8 @@ function change_feeds_import_menu() {
     'access arguments' => array('Distributor Upload File'),
     'file' => 'form/outstanding_activity_data.inc',
   );
-  
-    // when confirm is clicked
+
+  // when confirm is clicked
   $items['outstanding-activity-confirm/create_content/%'] = array(
     'title' => 'confirm',
     'description' => 'Confirm to create Outstanding Activity contents',
@@ -55,8 +55,8 @@ function change_feeds_import_menu() {
     'access arguments' => array('Distributor Upload File'),
     'file' => 'form/outstanding_activity_data.inc',
   );
-  
-    // when discard is clicked
+
+  // when discard is clicked
   $items['outstanding-activity-discard/%'] = array(
     'title' => 'Outstanding Activity delete',
     'description' => 'Outstanding Activity delete Data',
@@ -66,7 +66,7 @@ function change_feeds_import_menu() {
     'file' => 'form/outstanding_activity_data.inc',
   );
 
- // Upload form for sales register data
+  // Upload form for sales register data
   $items['sales-register/import'] = array(
     'title' => 'Import Sales Register Data',
     'description' => 'Import Sales Register Data Node',
@@ -74,7 +74,7 @@ function change_feeds_import_menu() {
     'page arguments' => array('change_feeds_import_sales_register_form'),
     'access arguments' => array('Distributor Upload File'),
     'file' => 'form/sales_register_data.inc',
-  ); 
+  );
 
   $items['sales-confirm/%'] = array(
     'title' => 'Sales Confirm Table',
@@ -84,8 +84,8 @@ function change_feeds_import_menu() {
     'access arguments' => array('Distributor Upload File'),
     'file' => 'form/sales_register_data.inc',
   );
-  
-    // when confirm is clicked
+
+  // when confirm is clicked
   $items['sales-confirm/create_content/%'] = array(
     'title' => 'confirm',
     'description' => 'Confirm to create sales register contents',
@@ -94,8 +94,8 @@ function change_feeds_import_menu() {
     'access arguments' => array('Distributor Upload File'),
     'file' => 'form/sales_register_data.inc',
   );
-  
-    // when discard is clicked
+
+  // when discard is clicked
   $items['sales-discard/%'] = array(
     'title' => 'sales Discard',
     'description' => 'sales Discard Data',
@@ -104,7 +104,7 @@ function change_feeds_import_menu() {
     'access arguments' => array('Distributor Upload File'),
     'file' => 'form/sales_register_data.inc',
   );
-  
+
   // Upload form for billing data
   $items['billing_data/import'] = array(
     'title' => 'Import Billing Data',
@@ -278,8 +278,8 @@ function change_feeds_import_node_insert($node) {
     //$query->fields('cb', array('bill_number', 'bill_date', 'vehicle', 'loading_date', 'Sum_of_SALES_VALUE', 'distributor_id', 'Sum_of_SALES_RET_VALUE', 'party_code', 'promise_date'));
     $query->fields('cb', array('bill_number', 'bill_date', 'vehicle', 'loading_date', 'distributor_id', 'party_code', 'promise_date'));
     $query->groupBy('cb.bill_number');
-   // $query->addExpression('SUM(cb.Sum_of_SALES_VALUE)', 'Sum_of_SALES_VALUE');
-   // $query->addExpression('SUM(cb.Sum_of_SALES_RET_VALUE)', 'Sum_of_SALES_RET_VALUE');
+    // $query->addExpression('SUM(cb.Sum_of_SALES_VALUE)', 'Sum_of_SALES_VALUE');
+    // $query->addExpression('SUM(cb.Sum_of_SALES_RET_VALUE)', 'Sum_of_SALES_RET_VALUE');
     $query->fields('plg', array('field_pl_group_value'));
     $query->fields('fc', array('field_channel_value'));
     $query->fields('fpp', array('field_party_packing_value'));
@@ -295,10 +295,9 @@ function change_feeds_import_node_insert($node) {
       $promised_delivery_date = $value['field_promised_delivery_date_value'];
 
 
-    //  $sum_of_sales_value = $value['Sum_of_SALES_VALUE'];
-    //  $sum_of_sales_ret_value = $value['Sum_of_SALES_RET_VALUE'];
-
-    //  $net_value = $sum_of_sales_ret_value / $sum_of_sales_value;
+      //  $sum_of_sales_value = $value['Sum_of_SALES_VALUE'];
+      //  $sum_of_sales_ret_value = $value['Sum_of_SALES_RET_VALUE'];
+      //  $net_value = $sum_of_sales_ret_value / $sum_of_sales_value;
 //      if ($net_value == 0) {
 //        $return_type = 'NA';
 //      }
@@ -380,13 +379,13 @@ function change_feeds_import_node_insert($node) {
             'bill_date' => strtotime($result[$key]['field_bill_date_value']) ? strtotime($result[$key]['field_bill_date_value']) : 0,
             'vehicle' => $result[$key]['field_vehicle_value'],
             'loading_date' => strtotime($result[$key]['field_loading_date_value']) ? strtotime($result[$key]['field_loading_date_value']) : 0,
-           // 'sum_of_sales_value' => $result[$key]['Sum_of_SALES_VALUE'] ? $result[$key]['Sum_of_SALES_VALUE'] : 0,
-          //  'sum_of_sales_ret_value' => $result[$key]['Sum_of_SALES_RET_VALUE'] ? $result[$key]['Sum_of_SALES_RET_VALUE'] : 0,
+            // 'sum_of_sales_value' => $result[$key]['Sum_of_SALES_VALUE'] ? $result[$key]['Sum_of_SALES_VALUE'] : 0,
+            //  'sum_of_sales_ret_value' => $result[$key]['Sum_of_SALES_RET_VALUE'] ? $result[$key]['Sum_of_SALES_RET_VALUE'] : 0,
             'promised_delivery_date' => strtotime($result[$key]['field_promised_delivery_date_value']) ? strtotime($result[$key]['field_promised_delivery_date_value']) : 0,
             'dispatch_date' => strtotime($result[$key]['field_dispatch_date_value']) ? strtotime($result[$key]['field_dispatch_date_value']) : 0,
             'delay_days' => $result[$key]['delay_days'] ? $result[$key]['delay_days'] : 0,
             'delay_range' => $result[$key]['delay_range'],
-           // 'return_type' => $return_type,
+            // 'return_type' => $return_type,
             'ideal_party_packing' => $result[$key]['field_party_packing_value'],
             'actual_party_packing' => $status,
             'day' => $result[$key]['Day'],
@@ -831,13 +830,46 @@ function change_feeds_import_feeds_presave($source, $entity, $item) {
 
 
   if ($entity->type == 'resource_master') {
-    // watchdog('feed-data5', '<pre>' . print_r($res, 1). '</pre>');
     $resurce_type_value = $entity->field_resource_type[LANGUAGE_NONE][0]['value'];
     $res = modify_views_forms_master_feed_validate($resurce_type_value, 'resource_type');
-    //watchdog('feed-data6', '<pre>' . print_r($resurce_type_value, 1). '</pre>');
     if (empty($res)) {
       drupal_set_message("$resurce_type_value does not exist in Resource type Master", 'error');
       $entity->feeds_item->skip = TRUE;
+    }
+  }
+  if ($entity->type == 'party_pack_master') {
+    $channel = $entity->field_channel[LANGUAGE_NONE][0]['value'];
+    $pl_group = $entity->field_pl_group[LANGUAGE_NONE][0]['value'];
+    $party_packing = $entity->field_party_packing[LANGUAGE_NONE][0]['value'];
+
+    $res2 = modify_views_forms_master_feed_validate($channel, 'channel_master');
+    $res3 = modify_views_forms_master_feed_validate($pl_group, 'pl_group_master');
+    $res4 = check_unique_group_channel_combination($channel, $pl_group);
+    if (empty($res2)) {
+      drupal_set_message("$channel does not exist in Channel Master", 'error');
+      $entity->feeds_item->skip = TRUE;
+    }
+    else if (empty($res3)) {
+      drupal_set_message("$pl_group does not exist in PL Group Master", 'error');
+      $entity->feeds_item->skip = TRUE;
+    }
+    else  if (!empty($res4)) {
+      drupal_set_message("There is already Node present for $channel-$pl_group in Party Pack Master", 'error');
+      $entity->feeds_item->skip = TRUE;
+    }
+    elseif (( (strpos($party_packing, 'y') !== false) || (strpos($party_packing, 'Y') !== false) ) && ($party_packing != "YES")) {
+      drupal_set_message("$party_packing Should be YES", 'error');
+      $entity->feeds_item->skip = TRUE;
+    }
+    elseif ((strpos($party_packing, 'n') !== false) || (strpos($party_packing, 'N') !== false) && ($party_packing != "NO")) {
+      drupal_set_message("$party_packing Should be NO", 'error');
+      $entity->feeds_item->skip = TRUE;
+    }
+    else {
+      if (($party_packing != "YES") && ($party_packing != "NO")) {
+        drupal_set_message("$party_packing Should be YES or NO", 'error');
+        $entity->feeds_item->skip = TRUE;
+      }
     }
   }
 
@@ -889,45 +921,15 @@ function change_feeds_import_views_api() {
  * Implements hook_node_presave()
  */
 function change_feeds_import_node_presave($node) {
-  $user_id = $node->uid;
+  global $user;
+  $user_id = $user->uid;
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
-
-  if ($node->type == 'billing_data') {
-//    $billing_date = $node->field_bill_date[LANGUAGE_NONE][0]['value'];
-//    $billing_date_stamp = strtotime($billing_date);
-//    $billing_loading_day = date("l", $billing_date_stamp);
-//    $node->field_distributor_uid['und'][0]['value'] = $distributor_id;
-//
-//    $query = db_select('node', 'n');
-//    $query->condition('n.uid', $distributor_id);
-//    $query->condition('n.type', 'pdd_master');
-//    $query->fields('n', array('nid'));
-//    $pdd_value_result = $query->execute()->fetchCol();
-//
-//    $pdd_data = node_load($pdd_value_result[0]);
-//    $pdd_value = $pdd_data->field_pdd[LANGUAGE_NONE][0]['value'];
-//    $weekly = $pdd_data->field_day[LANGUAGE_NONE];
-//    foreach($weekly as $key => $val) {
-//      $weeklyoff[] =  $val['value'];
-//    }
-//
-//    $query = db_select('node', 'n');
-//    $query->condition('n.uid', $distributor_id);
-//    $query->condition('n.type', 'holiday_master');
-//    $query->leftjoin('field_data_field_holiday', 'hday', 'hday.entity_id = n.nid');
-//    $query->addExpression("DATE_FORMAT(FROM_UNIXTIME(hday.field_holiday_value), '%Y-%m-%d')",'hdate');
-//    $holiday_result = $query->execute()->fetchCol();
-//    $pdd = holiday_get_working_day($billing_date_stamp, $pdd_value, $holiday_result, $weeklyoff);
-//    $node->field_promised_delivery_date[LANGUAGE_NONE][0]['value'] = $pdd;
-  }
 
   if ($node->type == 'egir') {
     $node->field_distributor_uid['und'][0]['value'] = $distributor_id;
   }
   if (!empty($distributor_id)) {
-    if ($node->type == 'vehicle_master' || $node->type == 'resource_type' || $node->type == 'hul_code_master' || $node->type == 'pricelist_group_master' || $node->type == 'product_division_master') {
-      $node->uid = $distributor_id;
-    }
+    $node->uid = $distributor_id;
   }
 }
 
@@ -987,7 +989,7 @@ function change_feeds_import_form_alter(&$form, &$form_state, $form_id) {
     $form['#validate'][] = 'registration_validate';
     return $form;
   }
-  if(isset($form_state['node'])) {
+  if (isset($form_state['node'])) {
     $node = $form_state['node'];
     if (!isset($node->nid) || isset($node->is_new)) {
       // This is a new node.
@@ -1002,8 +1004,6 @@ function change_feeds_import_custom_node_add_submit($form, &$form_state) {
   change_feeds_import_change_status_of_error_billing_table();
   drupal_set_message("Data is created successfully");
 }
-
-
 
 function registration_validate($form, &$form_state) {
   global $user;
@@ -1082,7 +1082,7 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
     $sub_query->join('field_data_field_bill_value', 'v', 'v.entity_id = n.nid');
     $sub_query->addField('b', 'bill_number', 'bill_number');
     $sub_query->addField('v', 'field_bill_value_value', 'field_bill_value_value');
-    
+
     //$sub_query->addExpression('ifnull(v.field_bill_value_value, 5)', 'field_bill_value_value');
     $sub_query->addExpression('MIN(product_name)', 'minimum');
     $sub_query->groupBy('bill_number');
@@ -1107,4 +1107,21 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
 
     $query->add_field('temp', 'field_bill_value_value');
   }
+}
+
+/**
+ * 
+ * @param type $channel = Party pack master channle
+ * @param type $pl_group = Party pack master group
+ */
+function check_unique_group_channel_combination($channel, $pl_group) {
+  $query = db_select('field_data_field_channel', 'ch');
+  $query->condition('ch.bundle', 'party_pack_master');
+  $query->condition('ch.field_channel_value', $channel, '=');
+  $query->join('field_data_field_pl_group', 'ppmpl', 'ppmpl.entity_id = ch.entity_id');
+  $query->condition('ppmpl.bundle', 'party_pack_master');
+  $query->condition('ppmpl.field_pl_group_value', $pl_group, '=');
+  $query->fields('ppmpl', array('entity_id'));
+  $result = $query->execute()->fetchAllKeyed(0, 0);
+  return $result;
 }
