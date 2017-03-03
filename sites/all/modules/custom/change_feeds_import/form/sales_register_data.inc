@@ -141,21 +141,21 @@ function change_feeds_import_sales_register_batch_fix_process($data, $distributo
         $value['error_message'] .= " Enter correct Bill Date for Bill No " . $value['BILL_NUMBER'] . ".";
       }
     }
-    if (isset($value['BILL_NUMBER'])) {
-      $value['BILL_NUMBER'] = trim($value['BILL_NUMBER']);
-      // Check if bill no already created as a node in content type sales_register_data
-      $title1 = check_node_title_exists($value['BILL_NUMBER'], 'sales_register_data');
-      if (!empty($title1)) {
-       
-        $title2 = check_node_title_exists($value['BILL_NUMBER'], 'sales_register_data', TRUE);
-        if (!empty($title2)) {
-          // will have to ovveride the node in this case
-        }
-        else {
-          $value['error_message'] .= " Bill no " . $value['BILL_NUMBER'] . ' already exist in our system.';
-        }
-      }
-    }
+//    if (isset($value['BILL_NUMBER'])) {
+//      $value['BILL_NUMBER'] = trim($value['BILL_NUMBER']);
+//      // Check if bill no already created as a node in content type sales_register_data
+//      $title1 = check_node_title_exists($value['BILL_NUMBER'], 'sales_register_data');
+//      if (!empty($title1)) {
+//       
+//        $title2 = check_node_title_exists($value['BILL_NUMBER'], 'sales_register_data', TRUE);
+//        if (!empty($title2)) {
+//          // will have to ovveride the node in this case
+//        }
+//        else {
+//          $value['error_message'] .= " Bill no " . $value['BILL_NUMBER'] . ' already exist in our system.';
+//        }
+//      }
+//    }
     if (isset($value['BILL_VALUE'])) {
 
       // Check if bill no already created as a node in content type sales_register_data
