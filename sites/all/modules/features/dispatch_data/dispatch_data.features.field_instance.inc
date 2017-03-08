@@ -273,6 +273,43 @@ function dispatch_data_field_default_field_instances() {
     ),
   );
 
+  // Exported field_instance: 'node-dispatch_data-field_dispatch_status'.
+  $field_instances['node-dispatch_data-field_dispatch_status'] = array(
+    'bundle' => 'dispatch_data',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'list',
+        'settings' => array(),
+        'type' => 'list_default',
+        'weight' => 19,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_dispatch_status',
+    'label' => 'DIspatch_status',
+    'required' => 0,
+    'settings' => array(
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'options',
+      'settings' => array(),
+      'type' => 'options_select',
+      'weight' => 15,
+    ),
+  );
+
   // Exported field_instance: 'node-dispatch_data-field_dispatch_supervisor'.
   $field_instances['node-dispatch_data-field_dispatch_supervisor'] = array(
     'bundle' => 'dispatch_data',
@@ -552,15 +589,61 @@ function dispatch_data_field_default_field_instances() {
     ),
   );
 
+  // Exported field_instance: 'node-hht_master-body'.
+  $field_instances['node-hht_master-body'] = array(
+    'bundle' => 'hht_master',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'hidden',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 0,
+      ),
+      'teaser' => array(
+        'label' => 'hidden',
+        'module' => 'text',
+        'settings' => array(
+          'trim_length' => 600,
+        ),
+        'type' => 'text_summary_or_trimmed',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'body',
+    'label' => 'Body',
+    'required' => FALSE,
+    'settings' => array(
+      'display_summary' => TRUE,
+      'text_processing' => 1,
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'module' => 'text',
+      'settings' => array(
+        'rows' => 20,
+        'summary_rows' => 5,
+      ),
+      'type' => 'text_textarea_with_summary',
+      'weight' => 31,
+    ),
+  );
+
   // Translatables
   // Included for use with string extractors like potx.
   t('BILL_COUNT');
+  t('Body');
   t('CASHIER_NAME');
   t('DISPATCH_BILL_VALUE');
   t('DISPATCH_DATE');
   t('DISPATCH_LOADER_TEAM_COUNT');
   t('DISPATCH_START_TIME');
   t('DISPATCH_SUPERVISOR');
+  t('DIspatch_status');
   t('HHT ID');
   t('Trip Creation Date');
   t('Trip Executon  Date');
