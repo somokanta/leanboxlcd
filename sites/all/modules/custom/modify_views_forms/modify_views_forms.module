@@ -93,6 +93,7 @@ function node_title_validate($form, &$form_state) {
   $type = $form_state['values']['type'];
   $query = db_select('node', 'n');
   $query->fields('n', array('title'));
+  $query->addTag('node_uid');
   $query->condition('n.type', $type);
   $query->condition('n.title', $title);
   $result = $query->execute()->fetchField();

@@ -1,8 +1,11 @@
 <?php
 
 function fetch_combined_status() {
+    global $user;
+    $distributor_id = change_feeds_import_get_distributor_id($user->uid);
      
     $query = db_select('node', 'n');
+    $query->condition('n.uid', $distributor_id, '=');
     $query->condition('n.type', 'picking', '=');
     $query->join('field_data_field_picking_van_id', 'vanid', 'vanid.entity_id = n.nid');
     $query->condition('vanid.bundle', 'picking', '=');

@@ -604,6 +604,103 @@ function leanbox_master_content_types_field_default_field_instances() {
     ),
   );
 
+  // Exported field_instance:
+  // 'node-sales_register_data-field_billing_loading_date'.
+  $field_instances['node-sales_register_data-field_billing_loading_date'] = array(
+    'bundle' => 'sales_register_data',
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'date',
+        'settings' => array(
+          'format_type' => 'long',
+          'fromto' => 'both',
+          'multiple_from' => '',
+          'multiple_number' => '',
+          'multiple_to' => '',
+          'show_remaining_days' => FALSE,
+        ),
+        'type' => 'date_default',
+        'weight' => 8,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_billing_loading_date',
+    'label' => 'billing loading date',
+    'required' => 0,
+    'settings' => array(
+      'default_value' => 'blank',
+      'default_value2' => 'same',
+      'default_value_code' => '',
+      'default_value_code2' => '',
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'date',
+      'settings' => array(
+        'display_all_day' => 0,
+        'increment' => 15,
+        'input_format' => 'm/d/y',
+        'input_format_custom' => '',
+        'label_position' => 'above',
+        'no_fieldset' => 0,
+        'text_parts' => array(),
+        'year_range' => '-3:+3',
+      ),
+      'type' => 'date_popup',
+      'weight' => 39,
+    ),
+  );
+
+  // Exported field_instance: 'node-sales_register_data-field_billing_van'.
+  $field_instances['node-sales_register_data-field_billing_van'] = array(
+    'bundle' => 'sales_register_data',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 9,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_billing_van',
+    'label' => 'billing van',
+    'required' => 0,
+    'settings' => array(
+      'text_processing' => 0,
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'text',
+      'settings' => array(
+        'size' => 60,
+      ),
+      'type' => 'text_textfield',
+      'weight' => 40,
+    ),
+  );
+
   // Exported field_instance: 'node-sales_register_data-field_outst_bill_date'.
   $field_instances['node-sales_register_data-field_outst_bill_date'] = array(
     'bundle' => 'sales_register_data',
@@ -646,6 +743,7 @@ function leanbox_master_content_types_field_default_field_instances() {
       'active' => 1,
       'module' => 'date',
       'settings' => array(
+        'display_all_day' => 0,
         'increment' => 15,
         'input_format' => 'site-wide',
         'input_format_custom' => '',
@@ -742,6 +840,7 @@ function leanbox_master_content_types_field_default_field_instances() {
       'active' => 1,
       'module' => 'date',
       'settings' => array(
+        'display_all_day' => 0,
         'increment' => 15,
         'input_format' => 'site-wide',
         'input_format_custom' => '',
@@ -838,6 +937,7 @@ function leanbox_master_content_types_field_default_field_instances() {
       'active' => 1,
       'module' => 'date',
       'settings' => array(
+        'display_all_day' => 0,
         'increment' => 15,
         'input_format' => 'site-wide',
         'input_format_custom' => '',
@@ -893,6 +993,7 @@ function leanbox_master_content_types_field_default_field_instances() {
       'active' => 1,
       'module' => 'date',
       'settings' => array(
+        'display_all_day' => 0,
         'increment' => 15,
         'input_format' => 'site-wide',
         'input_format_custom' => '',
@@ -903,6 +1004,48 @@ function leanbox_master_content_types_field_default_field_instances() {
       ),
       'type' => 'date_select',
       'weight' => 32,
+    ),
+  );
+
+  // Exported field_instance:
+  // 'node-sales_register_data-field_trip_id_reference'.
+  $field_instances['node-sales_register_data-field_trip_id_reference'] = array(
+    'bundle' => 'sales_register_data',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'node_reference',
+        'settings' => array(),
+        'type' => 'node_reference_default',
+        'weight' => 10,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_trip_id_reference',
+    'label' => 'trip id reference',
+    'required' => 0,
+    'settings' => array(
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'node_reference',
+      'settings' => array(
+        'autocomplete_match' => 'contains',
+        'autocomplete_path' => 'node_reference/autocomplete',
+        'size' => 60,
+      ),
+      'type' => 'node_reference_autocomplete',
+      'weight' => 41,
     ),
   );
 
@@ -1279,6 +1422,9 @@ function leanbox_master_content_types_field_default_field_instances() {
   t('Sales updated date');
   t('Vehicle Type');
   t('Weight in Kgs');
+  t('billing loading date');
+  t('billing van');
+  t('trip id reference');
 
   return $field_instances;
 }

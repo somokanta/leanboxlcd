@@ -46,7 +46,7 @@ function dispatch_data_field_default_field_instances() {
         'size' => 60,
       ),
       'type' => 'text_textfield',
-      'weight' => 33,
+      'weight' => 3,
     ),
   );
 
@@ -86,7 +86,7 @@ function dispatch_data_field_default_field_instances() {
         'size' => 60,
       ),
       'type' => 'text_textfield',
-      'weight' => 36,
+      'weight' => 6,
     ),
   );
 
@@ -126,7 +126,7 @@ function dispatch_data_field_default_field_instances() {
         'size' => 60,
       ),
       'type' => 'text_textfield',
-      'weight' => 34,
+      'weight' => 4,
     ),
   );
 
@@ -172,6 +172,7 @@ function dispatch_data_field_default_field_instances() {
       'active' => 1,
       'module' => 'date',
       'settings' => array(
+        'display_all_day' => 0,
         'increment' => 15,
         'input_format' => 'site-wide',
         'input_format_custom' => '',
@@ -181,7 +182,7 @@ function dispatch_data_field_default_field_instances() {
         'year_range' => '-3:+3',
       ),
       'type' => 'date_text',
-      'weight' => 0,
+      'weight' => 1,
     ),
   );
 
@@ -228,7 +229,7 @@ function dispatch_data_field_default_field_instances() {
       'module' => 'number',
       'settings' => array(),
       'type' => 'number',
-      'weight' => 37,
+      'weight' => 7,
     ),
   );
 
@@ -268,7 +269,7 @@ function dispatch_data_field_default_field_instances() {
         'size' => 60,
       ),
       'type' => 'text_textfield',
-      'weight' => 39,
+      'weight' => 9,
     ),
   );
 
@@ -308,12 +309,53 @@ function dispatch_data_field_default_field_instances() {
         'size' => 60,
       ),
       'type' => 'text_textfield',
-      'weight' => 35,
+      'weight' => 5,
     ),
   );
 
-  // Exported field_instance: 'node-dispatch_data-field_loading_date'.
-  $field_instances['node-dispatch_data-field_loading_date'] = array(
+  // Exported field_instance: 'node-dispatch_data-field_hht_id'.
+  $field_instances['node-dispatch_data-field_hht_id'] = array(
+    'bundle' => 'dispatch_data',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'node_reference',
+        'settings' => array(),
+        'type' => 'node_reference_default',
+        'weight' => 18,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_hht_id',
+    'label' => 'HHT ID',
+    'required' => 0,
+    'settings' => array(
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'node_reference',
+      'settings' => array(
+        'autocomplete_match' => 'contains',
+        'autocomplete_path' => 'node_reference/autocomplete',
+        'size' => 60,
+      ),
+      'type' => 'node_reference_autocomplete',
+      'weight' => 14,
+    ),
+  );
+
+  // Exported field_instance: 'node-dispatch_data-field_trip_creation_date'.
+  $field_instances['node-dispatch_data-field_trip_creation_date'] = array(
     'bundle' => 'dispatch_data',
     'deleted' => 0,
     'description' => '',
@@ -330,7 +372,7 @@ function dispatch_data_field_default_field_instances() {
           'show_remaining_days' => FALSE,
         ),
         'type' => 'date_default',
-        'weight' => 1,
+        'weight' => 14,
       ),
       'teaser' => array(
         'label' => 'above',
@@ -340,9 +382,9 @@ function dispatch_data_field_default_field_instances() {
       ),
     ),
     'entity_type' => 'node',
-    'field_name' => 'field_loading_date',
-    'label' => 'LOADING_DATE',
-    'required' => 1,
+    'field_name' => 'field_trip_creation_date',
+    'label' => 'Trip Creation Date',
+    'required' => 0,
     'settings' => array(
       'default_value' => 'now',
       'default_value2' => 'same',
@@ -354,8 +396,9 @@ function dispatch_data_field_default_field_instances() {
       'active' => 1,
       'module' => 'date',
       'settings' => array(
+        'display_all_day' => 0,
         'increment' => 15,
-        'input_format' => 'm/d/Y - H:i:s',
+        'input_format' => 'site-wide',
         'input_format_custom' => '',
         'label_position' => 'above',
         'no_fieldset' => 0,
@@ -363,12 +406,12 @@ function dispatch_data_field_default_field_instances() {
         'year_range' => '-3:+3',
       ),
       'type' => 'date_text',
-      'weight' => -1,
+      'weight' => 10,
     ),
   );
 
-  // Exported field_instance: 'node-dispatch_data-field_modify_loading_date'.
-  $field_instances['node-dispatch_data-field_modify_loading_date'] = array(
+  // Exported field_instance: 'node-dispatch_data-field_trip_executon_date'.
+  $field_instances['node-dispatch_data-field_trip_executon_date'] = array(
     'bundle' => 'dispatch_data',
     'deleted' => 0,
     'description' => '',
@@ -385,7 +428,7 @@ function dispatch_data_field_default_field_instances() {
           'show_remaining_days' => FALSE,
         ),
         'type' => 'date_default',
-        'weight' => 4,
+        'weight' => 15,
       ),
       'teaser' => array(
         'label' => 'above',
@@ -395,8 +438,8 @@ function dispatch_data_field_default_field_instances() {
       ),
     ),
     'entity_type' => 'node',
-    'field_name' => 'field_modify_loading_date',
-    'label' => 'MODIFY_LOADING_DATE',
+    'field_name' => 'field_trip_executon_date',
+    'label' => 'Trip Executon  Date',
     'required' => 0,
     'settings' => array(
       'default_value' => 'now',
@@ -409,8 +452,9 @@ function dispatch_data_field_default_field_instances() {
       'active' => 1,
       'module' => 'date',
       'settings' => array(
+        'display_all_day' => 0,
         'increment' => 15,
-        'input_format' => 'm/d/Y - H:i:s',
+        'input_format' => 'site-wide',
         'input_format_custom' => '',
         'label_position' => 'above',
         'no_fieldset' => 0,
@@ -418,12 +462,12 @@ function dispatch_data_field_default_field_instances() {
         'year_range' => '-3:+3',
       ),
       'type' => 'date_text',
-      'weight' => 32,
+      'weight' => 11,
     ),
   );
 
-  // Exported field_instance: 'node-dispatch_data-field_modify_vehicle'.
-  $field_instances['node-dispatch_data-field_modify_vehicle'] = array(
+  // Exported field_instance: 'node-dispatch_data-field_trip_id'.
+  $field_instances['node-dispatch_data-field_trip_id'] = array(
     'bundle' => 'dispatch_data',
     'default_value' => NULL,
     'deleted' => 0,
@@ -431,10 +475,15 @@ function dispatch_data_field_default_field_instances() {
     'display' => array(
       'default' => array(
         'label' => 'above',
-        'module' => 'text',
-        'settings' => array(),
-        'type' => 'text_default',
-        'weight' => 3,
+        'module' => 'number',
+        'settings' => array(
+          'decimal_separator' => '.',
+          'prefix_suffix' => TRUE,
+          'scale' => 0,
+          'thousand_separator' => '',
+        ),
+        'type' => 'number_integer',
+        'weight' => 17,
       ),
       'teaser' => array(
         'label' => 'above',
@@ -444,61 +493,22 @@ function dispatch_data_field_default_field_instances() {
       ),
     ),
     'entity_type' => 'node',
-    'field_name' => 'field_modify_vehicle',
-    'label' => 'MODIFY_VEHICLE',
+    'field_name' => 'field_trip_id',
+    'label' => 'Trip ID',
     'required' => 0,
     'settings' => array(
-      'text_processing' => 0,
+      'max' => '',
+      'min' => '',
+      'prefix' => '',
+      'suffix' => '',
       'user_register_form' => FALSE,
     ),
     'widget' => array(
-      'active' => 1,
-      'module' => 'text',
-      'settings' => array(
-        'size' => 60,
-      ),
-      'type' => 'text_textfield',
-      'weight' => 31,
-    ),
-  );
-
-  // Exported field_instance: 'node-dispatch_data-field_vehicle'.
-  $field_instances['node-dispatch_data-field_vehicle'] = array(
-    'bundle' => 'dispatch_data',
-    'default_value' => NULL,
-    'deleted' => 0,
-    'description' => '',
-    'display' => array(
-      'default' => array(
-        'label' => 'above',
-        'module' => 'text',
-        'settings' => array(),
-        'type' => 'text_default',
-        'weight' => 0,
-      ),
-      'teaser' => array(
-        'label' => 'above',
-        'settings' => array(),
-        'type' => 'hidden',
-        'weight' => 0,
-      ),
-    ),
-    'entity_type' => 'node',
-    'field_name' => 'field_vehicle',
-    'label' => 'VEHICLE',
-    'required' => 1,
-    'settings' => array(
-      'text_processing' => 0,
-      'user_register_form' => FALSE,
-    ),
-    'widget' => array(
-      'active' => 1,
-      'module' => 'text',
-      'settings' => array(
-        'size' => 60,
-      ),
-      'type' => 'text_textfield',
-      'weight' => -3,
+      'active' => 0,
+      'module' => 'number',
+      'settings' => array(),
+      'type' => 'number',
+      'weight' => 13,
     ),
   );
 
@@ -538,7 +548,7 @@ function dispatch_data_field_default_field_instances() {
         'size' => 60,
       ),
       'type' => 'text_textfield',
-      'weight' => 38,
+      'weight' => 8,
     ),
   );
 
@@ -551,10 +561,10 @@ function dispatch_data_field_default_field_instances() {
   t('DISPATCH_LOADER_TEAM_COUNT');
   t('DISPATCH_START_TIME');
   t('DISPATCH_SUPERVISOR');
-  t('LOADING_DATE');
-  t('MODIFY_LOADING_DATE');
-  t('MODIFY_VEHICLE');
-  t('VEHICLE');
+  t('HHT ID');
+  t('Trip Creation Date');
+  t('Trip Executon  Date');
+  t('Trip ID');
   t('VEHICLE_NO');
 
   return $field_instances;

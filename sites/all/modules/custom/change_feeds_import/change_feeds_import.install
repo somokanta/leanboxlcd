@@ -959,3 +959,23 @@ function change_feeds_import_update_7103() {
 
   db_create_table('custom_outstanding_data', $schema['custom_data']);
 }
+
+/**
+ *  Implements Hook_Update_N
+ */
+function change_feeds_import_update_7105() {
+  $field = array(
+    'type' => 'int',
+    'unsigned' => TRUE,
+    'description' => 'The {users}uid of the user who created.',
+  );
+  db_add_field('van_cld_data_table', 'distributor_id', $field);
+  
+  $query = db_select('van_cld_data_table', 'v');
+  $query->fields('v');
+  $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+
+  foreach($res as $key => $val) {
+    db_update('van_cld_data_table')->fields(array('distributor_id' => 60))->condition('id', $val['id'] )->execute();
+  }
+}

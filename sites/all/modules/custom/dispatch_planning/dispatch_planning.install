@@ -1,0 +1,31 @@
+<?php
+
+/*
+ * Implement hook_schema.
+ */
+
+function dispatch_planning_schema() {
+
+  $schema['trip_id_sequence'] = array(
+    'description' => 'Sequence for Trip ID',
+    'fields' => array(
+      'id' => array(
+        'description' => 'The primary identifier for a data',
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'next_id' => array(
+        'description' => 'next_id',
+        'type' => 'int',
+      ),
+      'distributor_id' => array(
+        'description' => 'distributor_id',
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+    ),
+    'primary key' => array('id'),
+  );
+
+  return $schema;
+}

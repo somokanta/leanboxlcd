@@ -1,0 +1,14 @@
+diff --git a/sites/all/modules/contrib/date/date_api/date_api_sql.inc b/sites/all/modules/contrib/date/date_api/date_api_sql.inc
+index a95ca4e..07a5f9f 100644
+--- a/sites/all/modules/contrib/date/date_api/date_api_sql.inc
++++ b/sites/all/modules/contrib/date/date_api/date_api_sql.inc
+@@ -203,7 +203,8 @@ class date_sql_handler {
+       case 'mysql':
+         switch ($this->date_type) {
+           case DATE_UNIX:
+-            $field = "FROM_UNIXTIME($field)";
++            $offset = date('Z'); //get server timezone offset
++            $field = "FROM_UNIXTIME($field + $offset)";
+             break;
+ 
+           case DATE_ISO:

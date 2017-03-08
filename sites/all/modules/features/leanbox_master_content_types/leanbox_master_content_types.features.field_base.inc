@@ -52,6 +52,56 @@ function leanbox_master_content_types_field_default_field_bases() {
     'type' => 'text',
   );
 
+  // Exported field_base: 'field_billing_loading_date'.
+  $field_bases['field_billing_loading_date'] = array(
+    'active' => 1,
+    'cardinality' => 1,
+    'deleted' => 0,
+    'entity_types' => array(),
+    'field_name' => 'field_billing_loading_date',
+    'indexes' => array(),
+    'locked' => 0,
+    'module' => 'date',
+    'settings' => array(
+      'cache_count' => 4,
+      'cache_enabled' => 0,
+      'granularity' => array(
+        'day' => 'day',
+        'hour' => 0,
+        'minute' => 0,
+        'month' => 'month',
+        'second' => 0,
+        'year' => 'year',
+      ),
+      'timezone_db' => '',
+      'todate' => '',
+      'tz_handling' => 'none',
+    ),
+    'translatable' => 0,
+    'type' => 'datestamp',
+  );
+
+  // Exported field_base: 'field_billing_van'.
+  $field_bases['field_billing_van'] = array(
+    'active' => 1,
+    'cardinality' => 1,
+    'deleted' => 0,
+    'entity_types' => array(),
+    'field_name' => 'field_billing_van',
+    'indexes' => array(
+      'format' => array(
+        0 => 'format',
+      ),
+    ),
+    'locked' => 0,
+    'module' => 'text',
+    'settings' => array(
+      'max_length' => 255,
+    ),
+    'translatable' => 0,
+    'type' => 'text',
+  );
+
   // Exported field_base: 'field_cabin_breath_in_feet'.
   $field_bases['field_cabin_breath_in_feet'] = array(
     'active' => 1,
@@ -455,6 +505,60 @@ function leanbox_master_content_types_field_default_field_bases() {
     ),
     'translatable' => 0,
     'type' => 'datestamp',
+  );
+
+  // Exported field_base: 'field_trip_id_reference'.
+  $field_bases['field_trip_id_reference'] = array(
+    'active' => 1,
+    'cardinality' => 1,
+    'deleted' => 0,
+    'entity_types' => array(),
+    'field_name' => 'field_trip_id_reference',
+    'indexes' => array(
+      'nid' => array(
+        0 => 'nid',
+      ),
+    ),
+    'locked' => 0,
+    'module' => 'node_reference',
+    'settings' => array(
+      'referenceable_types' => array(
+        'article' => 0,
+        'billing_data' => 0,
+        'ccfot' => 0,
+        'channel_master' => 0,
+        'dispatch_data' => 'dispatch_data',
+        'egir' => 0,
+        'godown_master' => 0,
+        'hht_master' => 0,
+        'holiday_master' => 0,
+        'hul_code_master' => 0,
+        'loading' => 0,
+        'outlet_master' => 0,
+        'outstanding_activity' => 0,
+        'page' => 0,
+        'party_pack_master' => 0,
+        'party_packing' => 0,
+        'pdd_master' => 0,
+        'picking' => 0,
+        'pl_group_master' => 0,
+        'pricelist_group_master' => 0,
+        'product_division_master' => 0,
+        'resource_master' => 0,
+        'resource_type' => 0,
+        'return_bill' => 0,
+        'sales_register_data' => 0,
+        'sku7_code_master' => 0,
+        'vehicle_master' => 0,
+      ),
+      'view' => array(
+        'args' => array(),
+        'display_name' => '',
+        'view_name' => '',
+      ),
+    ),
+    'translatable' => 0,
+    'type' => 'node_reference',
   );
 
   // Exported field_base: 'field_vehicle_type'.

@@ -1,5 +1,7 @@
 <?php
 
+module_load_include('inc', 'change_feeds_import', 'form/upload_billing_data');
+
 // when confirm button is clicked
 function change_feeds_import_create_confirm_content($id) {
   global $user;
@@ -22,8 +24,6 @@ function change_feeds_import_create_confirm_content($id) {
     $pricelist_group = $value['PRICELIST_GROUP'];
     if (isset($res[$vehicle . "/" . $loading_date])) {
       $total_sku = $res[$vehicle . "/" . $loading_date]['sku_count'] ++;
-
-      $bill_value += get_bill_value_from_bill_number($bill_number);
 
       if ($pricelist_group == "PP") {
         $group++;
@@ -50,21 +50,13 @@ function change_feeds_import_create_confirm_content($id) {
         $res[$vehicle . "/" . $loading_date]['unique_count'] ++;
         $temp_unique_sku_string[] = $vehicle . "" . $loading_date . "" . $sku;
       }
-      $unique_bill_number_string = $vehicle . "" . $loading_date . "" . $bill_number;
-      if (!in_array("$unique_bill_number_string", $temp_unique_bill_number_string)) {
-        $res[$vehicle . "/" . $loading_date]['unique_bill_count'] ++;
-        $temp_unique_bill_number_string[] = $vehicle . "" . $loading_date . "" . $bill_number;
-      }
     }
     else {
       $res[$vehicle . "/" . $loading_date] = array();
       $res[$vehicle . "/" . $loading_date]['sku_count'] = 1;
       $res[$vehicle . "/" . $loading_date]['total_count'] = $total_qty;
       $temp_unique_sku_string[] = $vehicle . "" . $loading_date . "" . $sku;
-      $temp_unique_bill_number_string[] = $vehicle . "" . $loading_date . "" . $bill_number;
-      $temp_unique_bill_number_string[] = $vehicle . "" . $loading_date . "" . $bill_number;
       $res[$vehicle . "/" . $loading_date]['unique_count'] = 1;
-      $res[$vehicle . "/" . $loading_date]['unique_bill_count'] = 1;
       if (isset($party_packing_check[$value['party_code']]) ? $party_packing_check[$value['party_code']] : 0 == 1) {
         $party_packing = 1;
         $check = 1;
@@ -80,16 +72,11 @@ function change_feeds_import_create_confirm_content($id) {
       else {
         $group_party_packing = 0;
       }
-
-
-      $bill_value = get_bill_value_from_bill_number($bill_number);
     }
 
     $distint_sku_count = $res[$vehicle . "/" . $loading_date]['unique_count'];
     $sku_count = $res[$vehicle . "/" . $loading_date]['sku_count'];
     $total_qty_count = $res[$vehicle . "/" . $loading_date]['total_count'];
-    $total_bill_value = $bill_value;
-    $distint_bill_count = $res[$vehicle . "/" . $loading_date]['unique_bill_count'];
 
     $created_date = date("Y-m-d h:i:s", $value['date']);
     $party_packing_data[$vehicle . "/" . $loading_date]['VEHICLE'] = $vehicle;
@@ -100,19 +87,12 @@ function change_feeds_import_create_confirm_content($id) {
     $party_packing_data[$vehicle . "/" . $loading_date]['each_units'] = $total_qty_count;
     $party_packing_data[$vehicle . "/" . $loading_date]['party_check'] = $party_packing;
     $party_packing_data[$vehicle . "/" . $loading_date]['party_pack'] = $group_party_packing;
-
-    $dispatch_data[$vehicle . "/" . $loading_date]['VEHICLE'] = $vehicle;
-    $dispatch_data[$vehicle . "/" . $loading_date]['LOADING_DATE'] = $loading_date;
-    $dispatch_data[$vehicle . "/" . $loading_date]['total_bill_value'] = $total_bill_value;
-    $dispatch_data[$vehicle . "/" . $loading_date]['unique_bill_count'] = $distint_bill_count;
   }
 
   foreach ($party_packing_data as $key => $val) {
     $party_packing_data_new[] = $val;
   }
-  foreach ($dispatch_data as $key => $val) {
-    $dispatch_data_new[] = $val;
-  }
+
 
   $query = db_select('custom_billing_data', 'cb');
   $query->addExpression('MAX(id)', 'max');
@@ -126,9 +106,9 @@ function change_feeds_import_create_confirm_content($id) {
   $batch = array(
     'operations' => array(
       array('change_feeds_import_create_party_packing', array($party_packing_data_new)),
-      //array('change_feeds_import_create_dispatch_data', array($dispatch_data_new)),
       array('change_feeds_import_create_picking', array($max_billing_id)),
       array('change_feeds_import_create_van_cld_report', array($max_billing_id)),
+      array('change_feeds_import_create_billing', array($max_billing_id)),
     ),
     'finished' => 'change_feeds_import_finished',
     'title' => t('Creating Billing Data'),
@@ -228,10 +208,12 @@ function change_feeds_import_insert_data_in_custom_billing_table($billing_data_r
 }
 
 function change_feeds_import_create_van_cld_report($max_billing_id, &$context) {
+  global $user;
+  $user_id = $user->uid;
+  $distributor_id = change_feeds_import_get_distributor_id($user_id);
+
   if (!isset($context['sandbox']['progress'])) {
-    global $user;
-    $user_id = $user->uid;
-    $distributor_id = change_feeds_import_get_distributor_id($user_id);
+
     $query = db_select('custom_billing_data', 'cb');
     $query->join('field_data_field_sku7_code', 'gaisc', 'gaisc.field_sku7_code_value = cb.sku7_code');
     $query->condition('gaisc.bundle', 'sku7_code_master', '=');
@@ -249,7 +231,7 @@ function change_feeds_import_create_van_cld_report($max_billing_id, &$context) {
     $context['sandbox']['max'] = count($results);
     $context['sandbox']['result'] = $results;
   }
-  global $user;
+
   $res = $context['sandbox']['result'];
   for ($i = $context['sandbox']['progress']; $i < $context['sandbox']['progress'] + 50 && $i < $context['sandbox']['max']; $i++) {
     $key = $i;
@@ -269,6 +251,7 @@ function change_feeds_import_create_van_cld_report($max_billing_id, &$context) {
             'loading_date' => $loading_date,
             'sku7_code' => $sku7_code,
             'product_name' => $product_name,
+            'distributor_id' => $distributor_id,
             'cld' => $cld,
             'mrp' => $mrp,
           ))
@@ -534,56 +517,45 @@ function get_party_packing_from_party_code($party_code = NULL) {
   return $query->execute()->fetchAllKeyed(0, 1);
 }
 
-function get_bill_value_from_bill_number($bill_number) {
+function change_feeds_import_create_billing($max_billing_id, &$context) {
 
-  $query1 = db_select('node', 'n');
-  $query1->condition('n.type', 'sales_register_data', '=');
-  $query1->join('field_data_field_bill_value', 'bv', 'bv.entity_id = n.nid');
-  $query1->condition('n.title', $bill_number, '=');
-  $query1->fields('bv', array('field_bill_value_value'));
-  $result = $query1->execute()->fetchAll();
-  $bill_value = $result[0]->field_bill_value_value;
-
-  return $bill_value;
-}
-
-function change_feeds_import_create_dispatch_data($dispatch_data_new, &$context) {
   if (!isset($context['sandbox']['progress'])) {
     global $user;
     $user_id = $user->uid;
     $distributor_id = change_feeds_import_get_distributor_id($user_id);
+    $query = db_select('custom_billing_data', 'cb');
+
+    $query->addField('cb', 'bill_number');
+    $query->addField('cb', 'vehicle', 'vehicle');
+    $query->addField('cb', 'loading_date', 'loading_date');
+
+    $query->condition('cb.distributor_id', $distributor_id);
+    $query->condition('cb.id', $max_billing_id, '>');
+
+    $query->groupBy('cb.bill_number');
+
+    $results = $query->execute()->fetchAll();
+
     $context['sandbox']['progress'] = 0;
-    $context['sandbox']['current_node'] = 0;
-    $context['sandbox']['max'] = count($dispatch_data_new);
-    $context['sandbox']['result'] = $dispatch_data_new;
+    $context['sandbox']['max'] = count($results);
+    $context['sandbox']['result'] = $results;
   }
-  $res = $context['sandbox']['result'];
+
   global $user;
+  $res = $context['sandbox']['result'];
   for ($i = $context['sandbox']['progress']; $i < $context['sandbox']['progress'] + 50 && $i < $context['sandbox']['max']; $i++) {
     $key = $i;
     $val = $res[$key];
 
-
-    $loading_date = date("Y-m-d", ($val['LOADING_DATE']));
-    $node = new stdClass();
-    $node->title = $val['VEHICLE'] . format_date(time());
-    $node->type = "dispatch_data";
-    node_object_prepare($node); // Sets some defaults. Invokes hook_prepare() and hook_node_prepare().
-    $node->language = LANGUAGE_NONE; // Or e.g. 'en' if locale is enabled
-    $node->uid = $user->uid;
-    $node->status = 1; //(1 or 0): published or not
-    $node->comment = 1; // 0 = comments disabled, 1 = read only, 2 = read/write
-    $node->field_vehicle[$node->language][0]['value'] = $val['VEHICLE'];
-    $node->field_loading_date[$node->language][0]['value'] = $loading_date;
-    $node->field_modify_vehicle[$node->language][0]['value'] = $val['VEHICLE'];
-    $node->field_modify_loading_date[$node->language][0]['value'] = $loading_date;
-    $node->field_dispatch_bill_value[$node->language][0]['value'] = $val['total_bill_value'];
-    $node->field_bill_count[$node->language][0]['value'] = $val['unique_bill_count'];
-    $node = node_submit($node); // Prepare node for saving
-    node_save($node);
+    $nid = check_node_title_exists($val->bill_number, 'sales_register_data');
+    $node = node_load($nid);
+    if ($node) {
+      $node->field_billing_van[LANGUAGE_NONE][0]['value'] = $val->vehicle;
+      $node->field_billing_loading_date[LANGUAGE_NONE][0]['value'] = $val->loading_date;
+      node_save($node);
+    }
   }
   $context['sandbox']['progress'] = $i;
-
   if ($context['sandbox']['progress'] < $context['sandbox']['max']) {
     $context['finished'] = $context['sandbox']['progress'] / $context['sandbox']['max'];
   }

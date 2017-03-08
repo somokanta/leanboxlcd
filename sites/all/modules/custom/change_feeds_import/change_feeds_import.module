@@ -19,6 +19,30 @@ function change_feeds_import_permission() {
  */
 function change_feeds_import_menu() {
 
+  $items['drs-report'] = array(
+    'title' => 'DRS Report',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('get_data_of_trip_id_form'),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+
+
+   $items['download-pdf/%'] = array(
+    'title' => 'Download PDF',
+    'page callback' => 'download_pdf',
+    'page arguments' => array(1),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+   
+  $items['email/daily-data'] = array(
+    'title' => 'Send Email Of Daily Data',
+    'page callback' => 'send_email_daily_data',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+
   // setting form for flat table
   $items['admin/config/flat-table'] = array(
     'title' => 'Setting Form For Flat Table',
@@ -156,6 +180,183 @@ function change_feeds_import_menu() {
   );
 
   return $items;
+}
+
+function download_pdf($args) {
+    $view_name = "drs_report";
+  $view = views_get_view($view_name, '');
+  $view->set_arguments(array($args));
+  $rendered_html = $view->render();
+  pdf_using_mpdf_api($rendered_html);
+}
+
+function get_data_of_trip_id_form($form, &$form_state) {
+
+  $form['#prefix'] = '<div id="itemlist-div">';
+  $form['#suffix'] = '</div>';
+
+
+
+
+  $form['trip_id'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Trip Id'),
+    '#required' => TRUE,
+  );
+
+  $form['aaa'] = array(
+    '#type' => 'submit',
+    '#value' => t('submit'),
+    '#ajax' => array(
+      'wrapper' => 'itemlist-div',
+      'callback' => 'get_data_of_trip_id_form_submit',
+      'method' => 'replace',
+      'effect' => 'fade',
+    ),
+    '#submit' => array('haddy_submit'),
+  );
+  if (!empty($form_state['abc'])) {
+    $form['hhh'] = array(
+      '#type' => 'markup',
+      '#markup' => $form_state['abc'],
+    );
+    $trip_id = $form_state['values']['trip_id'];
+    $rr = l('Open PDF', "/download-pdf/$trip_id");
+    $form['dowmload_mark'] = array(
+      '#type' => 'markup',
+      '#markup' => $rr,
+    );
+  }
+  return $form;
+}
+
+
+function get_data_of_trip_id_form_submit($form, &$form_state) {
+  return $form;
+}
+
+function haddy_submit($form, &$form_state) {
+  $trip_id = $form_state['values']['trip_id'];
+  $view_name = "drs_report";
+  $view = views_get_view($view_name, '');
+  $view->set_arguments(array($trip_id));
+  $rendered_html = $view->render();
+  $form_state['abc'] = $rendered_html;
+  $form_state['rebuild'] = TRUE;
+}
+
+function send_email_daily_data() {
+  //$todays_date_date = date('Y-m-d 00:00:00');
+  $todays_date_date = "2017-02-21 00:00:00";
+  $party_packing = get_todays_party_packing_created_data($todays_date_date);
+  $picking = get_todays_picking_created_data($todays_date_date);
+  $egir = get_todays_unloading_created_data($todays_date_date);
+  $party_picking_count = $party_packing['packig_count'];
+  $party_picking_comleted = $party_packing['packig_completed'];
+  if (empty($party_picking_comleted)) {
+    $party_picking_comleted = 0;
+  }
+  $party_packing_percentage = round(($party_picking_comleted / $party_picking_count) * 100);
+
+  $picking_count = $picking['pickig_count'];
+  $picking_comleted = $picking['pickig_completed'];
+  if (empty($picking_comleted)) {
+    $picking_comleted = 0;
+  }
+  $picking_percentage = round(($picking_comleted / $picking_count) * 100);
+
+  $egir_count = $egir['egir_count'];
+  $egir_comleted = $egir['egir_completed'];
+  if (empty($egir_comleted)) {
+    $egir_comleted = 0;
+  }
+  $egir_percentage = round(($egir_comleted / $egir_count) * 100);
+
+
+  $params['subject'] = "Daily status";
+  $params['body'] = "Unloading $egir_comleted/$egir_count (Completed/Target)  : $egir_percentage %<br/>"
+      . "Picking $picking_comleted/$picking_count (Completed/Target)  : $picking_percentage %<br/>"
+      . "Party Packing $party_picking_comleted/$party_picking_count (Completed/Target)  : $party_packing_percentage %<br/>";
+
+  $mail_to = "hplord12@gmail.com";
+  drupal_mail('change_feeds_import', 'daily_data', $mail_to, LANGUAGE_NONE, $params);
+  drupal_set_message("emailed successfully");
+}
+
+function change_feeds_import_mail($key, &$message, $params) {
+  switch ($key) {
+    case 'daily_data':
+      $message['subject'] = $params['subject'];
+      $message['body'][] = $params['body'];
+      break;
+  }
+}
+
+function get_todays_party_packing_created_data($loading_date) {
+  $query = db_select('node', 'n');
+  $query->condition('n.type', 'party_packing');
+  $query->join('field_data_field_party_packing_loading_date', 'd', 'd.entity_id = n.nid');
+  $query->condition('d.field_party_packing_loading_date_value', $loading_date, "=");
+  $query->leftjoin('field_data_field__party_packingstatus', 's', 's.entity_id = n.nid');
+  $query->fields('d', array('field_party_packing_loading_date_value'));
+  $query->fields('n', array('nid'));
+  $query->fields('s', array('field__party_packingstatus_value'));
+  $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+  $party_picking_count = count($res);
+  foreach ($res as $key => $value) {
+    $status = $value['field__party_packingstatus_value'];
+    if ($status == 2) {
+      $party_picking_comleted++;
+    }
+  }
+  $party_packing['packig_count'] = $party_picking_count;
+  $party_packing['packig_completed'] = $party_picking_comleted;
+  return $party_packing;
+}
+
+function get_todays_picking_created_data($loading_date) {
+  $query = db_select('node', 'n');
+  $query->condition('n.type', 'picking');
+  $query->join('field_data_field_picking_loading_date', 'd', 'd.entity_id = n.nid');
+  $query->condition('d.field_picking_loading_date_value', $loading_date, "=");
+  $query->leftjoin('field_data_field_picking_status', 's', 's.entity_id = n.nid');
+  $query->fields('d', array('field_picking_loading_date_value'));
+  $query->fields('n', array('nid'));
+  $query->fields('s', array('field_picking_status_value'));
+  $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+  $picking_count = count($res);
+  foreach ($res as $key => $value) {
+    $status = $value['field_picking_status_value'];
+    if ($status == 2) {
+      $picking_comleted++;
+    }
+  }
+
+  $picking['pickig_count'] = $picking_count;
+  $picking['pickig_completed'] = $picking_comleted;
+  return $picking;
+}
+
+function get_todays_unloading_created_data($loading_date) {
+  $query = db_select('node', 'n');
+  $query->condition('n.type', 'egir');
+  $query->join('field_data_field_unloading_date', 'd', 'd.entity_id = n.nid');
+  $query->condition('d.field_unloading_date_value', $loading_date, "=");
+  $query->leftjoin('field_data_field_unloading_status', 's', 's.entity_id = n.nid');
+  $query->fields('d', array('field_unloading_date_value'));
+  $query->fields('n', array('nid'));
+  $query->fields('s', array('field_unloading_status_value'));
+  $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+  $egir_count = count($res);
+  foreach ($res as $key => $value) {
+    $status = $value['field_unloading_status_value'];
+    if ($status == 2) {
+      $egir_comleted++;
+    }
+  }
+  $egir['egir_count'] = $egir_count;
+  $egir['egir_completed'] = $egir_comleted;
+  return $egir;
 }
 
 // check permission for (admin/config/flat-table) Menu
@@ -752,7 +953,10 @@ function change_feeds_import_node_delete($node) {
  * 
  * Implements hook_feeds_presave($source, $entity, $item)
  */
-function change_feeds_import_feeds_presave($source, $entity, $item) {
+function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) {
+
+  require_once drupal_get_path('module', 'change_feeds_import') . '/form/upload_billing_data.inc';
+
   if (!empty($item)) {
     foreach ($item as $key => $value) {
       $item[$key] = mb_convert_encoding($value, 'UTF-8', 'UTF-8');
@@ -763,28 +967,43 @@ function change_feeds_import_feeds_presave($source, $entity, $item) {
   $distributor_id = change_feeds_import_get_distributor_id($user->uid);
   if (!empty($distributor_id)) {
     $entity->uid = $distributor_id;
+    if ($entity->type == 'pdd_master') {
+      $entity->title = $distributor_id;
+    }
+
+    if ($entity->type == 'holiday_master') {
+      $entity->title = $distributor_id;
+    }
   }
   if ($entity->type == 'egir') {
+//    $title = $entity->title;
+//    $res = modify_views_forms_master_feed_validate($entity->title, 'egir');
+//    if (!empty($res)) {
+//      drupal_set_message("$title already exist in EGIR Master", 'error');
+//      $entity->feeds_item->skip = TRUE;
+//    }
     $egir_start_explode = explode(" ", $entity->field_egir_start_time[LANGUAGE_NONE][0]['value']);
     $egir_end_explode = explode(" ", $entity->field_egir_end_time[LANGUAGE_NONE][0]['value']);
     $egir_date_explode = explode(" ", $entity->field_egir_date[LANGUAGE_NONE][0]['value']);
     $entity->field_egir_start_time[LANGUAGE_NONE][0]['value'] = $egir_date_explode[0] . ' ' . $egir_start_explode[1];
     $entity->field_egir_end_time[LANGUAGE_NONE][0]['value'] = $egir_date_explode[0] . ' ' . $egir_end_explode[1];
   }
-  // if ($entity->type == 'egir' || $entity->type == 'billing_data' || $entity->type == 'outlet_master' || $entity->type == 'sku7_code_master') {
-  //   $entity->uid = $user->uid;
-  // }
 
-  if ($entity->type == 'pdd_master') {
-    //$entity->title = $entity->title.'-'.$user->name;
-    $entity->title = $user->name;
+  if ($entity->type == 'return_bill') {
+    $title = $entity->title;
+    $res = modify_views_forms_master_feed_validate($entity->title, 'return_bill');
+    if (!empty($res)) {
+      drupal_set_message("$title already exist in return bill master", 'error');
+      $entity->feeds_item->skip = TRUE;
+    }
   }
-
-  if ($entity->type == 'holiday_master') {
-    $entity->title = $user->name;
-  }
-
   if ($entity->type == 'ccfot') {
+    $title = $entity->title;
+    $res = modify_views_forms_master_feed_validate($entity->title, 'ccfot');
+    if (!empty($res)) {
+      drupal_set_message("$title already exist in ccoft master", 'error');
+      $entity->feeds_item->skip = TRUE;
+    }
     if (empty($entity->field_bill_quantity[LANGUAGE_NONE])) {
       $entity->feeds_item->skip = TRUE;
     }
@@ -844,7 +1063,7 @@ function change_feeds_import_feeds_presave($source, $entity, $item) {
 
     $res2 = modify_views_forms_master_feed_validate($channel, 'channel_master');
     $res3 = modify_views_forms_master_feed_validate($pl_group, 'pl_group_master');
-    $res4 = check_unique_group_channel_combination($channel, $pl_group);
+    $res4 = check_unique_group_channle_combination($channel, $pl_group);
     if (empty($res2)) {
       drupal_set_message("$channel does not exist in Channel Master", 'error');
       $entity->feeds_item->skip = TRUE;
@@ -853,10 +1072,10 @@ function change_feeds_import_feeds_presave($source, $entity, $item) {
       drupal_set_message("$pl_group does not exist in PL Group Master", 'error');
       $entity->feeds_item->skip = TRUE;
     }
-    else  if (!empty($res4)) {
-      drupal_set_message("There is already Node present for $channel-$pl_group in Party Pack Master", 'error');
-      $entity->feeds_item->skip = TRUE;
-    }
+//    else  if (!empty($res4)) {
+//      drupal_set_message("There is already Node present for $channel-$pl_group in Party Pack Master", 'error');
+//      $entity->feeds_item->skip = TRUE;
+//    }
     elseif (( (strpos($party_packing, 'y') !== false) || (strpos($party_packing, 'Y') !== false) ) && ($party_packing != "YES")) {
       drupal_set_message("$party_packing Should be YES", 'error');
       $entity->feeds_item->skip = TRUE;
@@ -870,6 +1089,71 @@ function change_feeds_import_feeds_presave($source, $entity, $item) {
         drupal_set_message("$party_packing Should be YES or NO", 'error');
         $entity->feeds_item->skip = TRUE;
       }
+    }
+  }
+
+  if ($entity->type == 'dispatch_data') {
+    $title = $entity->title;
+    $res = modify_views_forms_master_feed_validate($entity->title, 'dispatch_data');
+    if (!empty($res)) {
+      drupal_set_message("$title already exist in dispatch data", 'error');
+      $entity->feeds_item->skip = TRUE;
+    }
+  }
+  if ($entity->type == 'channel_master') {
+//    $title = $entity->title;
+//    $res = modify_views_forms_master_feed_validate($entity->title, 'channel_master');
+//    if (!empty($res)) {
+//      drupal_set_message("$title already exist in channel master", 'error');
+//      $entity->feeds_item->skip = TRUE;
+//    }
+  }
+  if ($entity->type == 'godown_master') {
+//    $title = $entity->title;
+//    $res = modify_views_forms_master_feed_validate($entity->title, 'godown_master');
+//    if (!empty($res)) {
+//      drupal_set_message("$title already exist in godown master", 'error');
+//      $entity->feeds_item->skip = TRUE;
+//    }
+  }
+  if ($entity->type == 'party_pack_master') {
+//    $title = $entity->title;
+//    $res = modify_views_forms_master_feed_validate($entity->title, 'party_pack_master');
+//    if (!empty($res)) {
+//      drupal_set_message("$title already exist in party pack master", 'error');
+//      $entity->feeds_item->skip = TRUE;
+//    }
+  }
+  if ($entity->type == 'sku7_code_master') {
+//    $title = $entity->title;
+//    $res = modify_views_forms_master_feed_validate($entity->title, 'sku7_code_master');
+//    if (!empty($res)) {
+//      drupal_set_message("$title already exist in sku7 code master", 'error');
+//      $entity->feeds_item->skip = TRUE;
+//    }
+  }
+  if ($entity->type == 'pl_group_master') {
+//    $title = $entity->title;
+//    $res = modify_views_forms_master_feed_validate($entity->title, 'pl_group_master');
+//    if (!empty($res)) {
+//      drupal_set_message("$title already exist in pl group master", 'error');
+//      $entity->feeds_item->skip = TRUE;
+//    }
+  }
+  if ($entity->type == 'vehicle_master') {
+//    $title = $entity->title;
+//    $res = modify_views_forms_master_feed_validate($entity->title, 'vehicle_master');
+//    if (!empty($res)) {
+//      drupal_set_message("$title already exist in vehicle master ", 'error');
+//      $entity->feeds_item->skip = TRUE;
+//    }
+  }
+  if ($entity->type == 'hul_code_master') {
+    $title = $entity->title;
+    $res = modify_views_forms_master_feed_validate($entity->title, 'hul_code_master');
+    if (!empty($res)) {
+      drupal_set_message("$title already exist in hul code master", 'error');
+      $entity->feeds_item->skip = TRUE;
     }
   }
 
@@ -906,6 +1190,7 @@ function modify_views_forms_master_feed_validate($feed_title, $content_type) {
   $query->fields('n', array('title'));
   $query->condition('n.type', $content_type);
   $query->condition('n.title', $feed_title);
+  $query->addTag('node_uid');
   $result = $query->execute()->fetchField();
   return $result;
 }
@@ -1070,7 +1355,20 @@ function change_feeds_import_services_resources() {
 
 function change_feeds_import_views_query_alter(&$view, &$query) {
   // Do the actual join
-  
+  global $user;
+  // Store distributor id in author in each node
+
+  $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+
+  if ($view->base_table == 'node') {
+    $query->add_where(0, 'node.uid', $distributor_id, '=');
+  }
+  if ($view->base_table == 'custom_billing_data') {
+    $query->add_where(0, 'custom_billing_data.distributor_id', $distributor_id, '=');
+  }
+  if ($view->base_table == 'van_cld_data_table') {
+    $query->add_where(0, 'van_cld_data_table.distributor_id', $distributor_id, '=');
+  }
   if ($view->name == 'pending_delivery_outstanding_report') {
     $query->add_field('custom_billing_data', 'bill_number', 'custom_billing_data_bill_number', array('function' => 'groupby'));
     $query->add_groupby('custom_billing_data.bill_number');
@@ -1107,6 +1405,47 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
 
     $query->add_field('temp', 'field_bill_value_value');
   }
+
+
+  if ($view->name == 'drs_report') {
+    $trip_id = $view->args[0];
+    $sub_query = db_select('node', 'n');
+    $sub_query->addTag('node_uid');
+    $sub_query->addField('n', 'title', 'bill_number');
+    $sub_query->join('field_data_field_trip_id_reference', 'tp', 'tp.entity_id = n.nid');
+    $sub_query->join('node', 'dd', 'dd.nid = tp.field_trip_id_reference_nid');
+    $sub_query->condition('dd.title', $trip_id, "=");
+    $sub_query->join('field_data_field_sales_party_code', 'spc', 'spc.entity_id = n.nid');
+    $sub_query->join('field_data_field_party_code', 'opc', 'opc.field_party_code_value = spc.field_sales_party_code_value');
+    $sub_query->join('field_data_field_beat_name', 'bn', 'bn.entity_id = opc.entity_id');
+    $sub_query->addField('bn', 'field_beat_name_value', 'BEAT_NAME');
+    $sub_query->groupBy('BEAT_NAME');
+    //$sub_query->addExpression('ifnull(v.field_bill_value_value, 5)', 'field_bill_value_value');
+    $sub_query->addExpression('MIN(n.title)', 'minimum');
+
+
+
+    $join = new views_join();
+    $join->definition = array('table formula' => $sub_query, 'left_field' => 'title', 'field' => 'bill_number', 'left_table' => 'node');
+    $join->table = 'node';
+    $join->field = 'bill_number';
+    $join->left_table = 'node'; // or wathever table you want to join with
+    $join->left_field = 'title'; // or wathever column you want to join with
+    $join->type = 'LEFT'; // if you want another join type play with this value
+    $join->extra = array(
+      array('field' => 'minimum', 'left_field' => 'title'),
+    );
+
+    // Do the actual join
+    $query->table_queue['temp'] = array(
+      'alias' => 'temp', // I believe this is optional
+      'table' => $sub_query,
+      'relationship' => 'node',
+      'join' => $join,
+    );
+
+    $query->add_field('temp', 'BEAT_NAME');
+  }
 }
 
 /**
@@ -1114,14 +1453,49 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
  * @param type $channel = Party pack master channle
  * @param type $pl_group = Party pack master group
  */
-function check_unique_group_channel_combination($channel, $pl_group) {
+function check_unique_group_channle_combination($channel, $pl_group) {
   $query = db_select('field_data_field_channel', 'ch');
+  $query->join('node', 'n', 'n.nid = ch.entity_id');
   $query->condition('ch.bundle', 'party_pack_master');
   $query->condition('ch.field_channel_value', $channel, '=');
   $query->join('field_data_field_pl_group', 'ppmpl', 'ppmpl.entity_id = ch.entity_id');
   $query->condition('ppmpl.bundle', 'party_pack_master');
   $query->condition('ppmpl.field_pl_group_value', $pl_group, '=');
   $query->fields('ppmpl', array('entity_id'));
+  $query->addTag('node_uid');
   $result = $query->execute()->fetchAllKeyed(0, 0);
   return $result;
+}
+
+/**
+ * implements hook query alter to allow ordering by weight
+ * @param QueryAlterableInterface $query
+ */
+function change_feeds_import_query_node_uid_alter(QueryAlterableInterface $query) {
+
+  global $user;
+  $user_id = $user->uid;
+  $distributor_id = change_feeds_import_get_distributor_id($user_id);
+
+  // altering the dynamic query object having tag => node_uid
+  $query->condition('n.uid', $distributor_id);
+}
+
+/**
+ * Implements hook_feeds_plugins().
+ */
+function change_feeds_import_feeds_plugins() {
+  $path = drupal_get_path('module', 'change_feeds_import') . '/plugins';
+  $info['FeedsNodeCustomProcessor'] = array(
+    'name' => 'Custom Node processor',
+    'description' => 'Create and update nodes.',
+    'help' => 'Create and update nodes from parsed content.',
+    'handler' => array(
+      'parent' => 'FeedsNodeProcessor',
+      'class' => 'FeedsNodeCustomProcessor',
+      'file' => 'FeedsNodeCustomProcessor.inc',
+      'path' => $path,
+    ),
+  );
+  return $info;
 }

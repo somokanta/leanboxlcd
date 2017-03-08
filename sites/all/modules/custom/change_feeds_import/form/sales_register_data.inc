@@ -298,6 +298,7 @@ function change_feeds_import_sales_create_confirm_content($fid) {
 
 function change_feeds_import_create_sales_register_node($sales_data_result, $distributor_id, &$context) {
   if (!empty($sales_data_result)) {
+    $billing_error_validate = FALSE;
     $count = 0;
     foreach ($sales_data_result as $key => $val) {
 
@@ -305,8 +306,10 @@ function change_feeds_import_create_sales_register_node($sales_data_result, $dis
 
         require_once drupal_get_path('module', 'change_feeds_import') . '/form/upload_billing_data.inc';
         // check to update node
+       
         $nid = check_node_title_exists($val['bill_no'], 'sales_register_data');
         if (empty($nid)) {
+          $billing_error_validate = TRUE;
           $node = new stdClass();
           $node->title = $val['bill_no'];
           $node->type = "sales_register_data";
@@ -332,6 +335,10 @@ function change_feeds_import_create_sales_register_node($sales_data_result, $dis
         $count++;
       }
       $fid = $val['fid'];
+    }
+    if ($billing_error_validate) {
+      // Update the status of error billing table to validate
+      change_feeds_import_change_status_of_error_billing_table();
     }
   }
   $context['results']['fid'] = $fid;

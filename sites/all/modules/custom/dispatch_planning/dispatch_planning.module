@@ -1,0 +1,1125 @@
+<?php
+
+function dispatch_planning_menu() {
+
+  $items['admin/dispatch-planning'] = array(
+    'title' => 'Dispatch Planning',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('dispatch_planning_form'),
+    'access arguments' => array('dispatch planning screen'),
+    'type' => MENU_NORMAL_ITEM,
+      // Page callback, etc. need to be added here.
+  );
+  $items['admin/dispatch-planning/form'] = array(
+    'title' => 'Dispatch Planning',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+      // Access callback, page callback, and theme callback will be inherited
+      // from 'admin/config/system/foo', if not specified here to override.
+  );
+  $items['admin/dispatch-planning/delete'] = array(
+    'title' => 'Delete trips',
+    'type' => MENU_LOCAL_TASK,
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('trip_delete_form'),
+    'access arguments' => array('dispatch planning screen'),
+      // Page callback and theme callback will be inherited from
+      // 'admin/config/system/foo', if not specified here to override.
+      // Need to add access callback or access arguments.
+  );
+
+
+  $items['modified-van-autocomplete-callback/%'] = array(
+    'title' => 'Get All Modified Van',
+    'page callback' => 'get_modified_van_from_loading_date',
+    'access callback' => TRUE,
+    'page arguments' => array(1),
+  );
+  $items['bill/autocomplete'] = array(
+    'title' => 'bill_autocomplete',
+    'page callback' => 'bill_autocomplete',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  $items['trip/autocomplete'] = array(
+    'title' => 'trip_id_autocomplete',
+    'page callback' => 'trip_id_autocomplete',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  $items['vehicle/autocomplete'] = array(
+    'title' => 'vehicle_names_autocomplete',
+    'page callback' => 'vehicle_names_autocomplete',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  $items['hht_id/autocomplete'] = array(
+    'title' => 'hht_id_autocomplete',
+    'page callback' => 'hht_id_autocomplete',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  $items['cashier/autocomplete'] = array(
+    'title' => 'cashier_names_autocomplete',
+    'page callback' => 'cashier_names_autocomplete',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+
+
+  return $items;
+}
+
+function dispatch_planning_permission() {
+
+  return array(
+    'dispatch planning screen' => array(
+      'title' => t('dispatch planning screen'),
+      'description' => t('View and operate the dispatch planning screen')
+    ),
+  );
+}
+
+function dispatch_planning_form($form, &$form_state) {
+
+  $form['#prefix'] = '<div id="itemlist-div">';
+  $form['#suffix'] = '</div>';
+
+  $form['#attached']['js'][] = drupal_get_path('module', 'dispatch_planning') . '/js/dispatch_planning_form.js';
+  $form['#attached']['css'][] = drupal_get_path('module', 'dispatch_planning') . '/css/dispatch_planning.css';
+
+  $form['loading_date'] = array(
+    '#prefix' => '<div class="textfield-wrapper">',
+    '#type' => 'date_popup',
+    '#date_format' => 'm/d/y',
+    '#title' => t('Loading date'),
+    '#date_label_position' => '',
+    //'#default_value' => empty($variables['from_date']) ? NULL : format_date($variables['from_date'], $type = 'custom', $format = 'Y-m-d H:i:s'),
+    '#date_year_range' => '-200:+0',
+    '#size' => 30,
+    '#ajax' => array(
+      'event' => 'change',
+      'callback' => 'loading_date_ajax_callback',
+      'wrapper' => 'van-wrapper',
+    ),
+    '#required' => TRUE,
+  );
+
+  $form['van'] = array(
+    '#type' => 'select',
+    '#title' => t('Van'),
+    '#prefix' => '<div id="van-wrapper">',
+    '#suffix' => '</div>',
+    //'#autocomplete_path' => 'modified-van-autocomplete-callback',
+    '#ajax' => array(
+      'event' => 'change',
+      'callback' => 'van_ajax_callback',
+      'wrapper' => 'beat-wrapper',
+    ),
+    '#options' => array(),
+    '#required' => TRUE,
+    '#validated' => TRUE
+  );
+  $form['beat_name'] = array(
+    '#type' => 'select',
+    '#title' => t('Sales Beat'),
+    '#prefix' => '<div id="beat-wrapper">',
+    '#suffix' => '</div>',
+    //'#autocomplete_path' => 'modified-van-autocomplete-callback',
+    '#options' => array('' => 'All'),
+  );
+  if (isset($form_state['triggering_element']) && ($form_state['triggering_element']['#name'] == 'loading_date')) {
+    if (!empty($form_state['values']['loading_date']) && is_string($form_state['values']['loading_date'])) {
+      $form['van']['#options'] = get_modified_van_from_loading_date(strtotime($form_state['values']['loading_date']));
+    }
+  }
+
+  if (isset($form_state['triggering_element']) && ($form_state['triggering_element']['#name'] == 'van')) {
+    if (!empty($form_state['values']['van'])) {
+      $form['beat_name']['#options'] = array('' => 'All') + get_beat_name_from_loading_date_and_van(strtotime($form_state['values']['loading_date']), $form_state['values']['van']);
+    }
+  }
+  $form['van_submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Add Van'),
+    '#ajax' => array(
+      'wrapper' => 'itemlist-div',
+      'callback' => 'custom_ajax_callback',
+      'method' => 'replace',
+      'effect' => 'fade',
+    ),
+    '#validate' => array('van_ajax_validate'),
+    '#submit' => array('van_ajax_submit'),
+    '#limit_validation_errors' => array(array('loading_date'), array('van'), array('beat_name')),
+    '#suffix' => '</div>',
+  );
+
+
+  $form['divider1'] = array(
+    '#markup' => '<div class="or"><span>OR</span></div>',
+  );
+
+  $form['bill_number'] = array(
+    '#prefix' => '<div class="textfield-wrapper">',
+    '#type' => 'textfield',
+    '#title' => t('Bill number'),
+    '#required' => TRUE,
+    '#autocomplete_path' => 'bill/autocomplete'
+  );
+
+  $form['bill_number_submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Add Bill'),
+    '#ajax' => array(
+      'wrapper' => 'itemlist-div',
+      'callback' => 'custom_ajax_callback',
+      'method' => 'replace',
+      'effect' => 'fade',
+    ),
+    '#submit' => array('bill_number_ajax_submit'),
+    '#validate' => array('bill_number_ajax_validate'),
+    '#limit_validation_errors' => array(array('bill_number')),
+    '#suffix' => '</div>',
+  );
+
+//  $form['divider2'] = array(
+//    '#markup' => '<div>----OR----</div>',
+//  );
+//
+//  $form['trip_id'] = array(
+//    '#type' => 'textfield',
+//    '#title' => t('Trip id'),
+//    '#required' => TRUE,
+//    '#autocomplete_path' => 'trip/autocomplete'
+//  );
+//
+//  $form['trip_id_submit'] = array(
+//    '#type' => 'submit',
+//    '#value' => t('Add Trip id'),
+//    '#ajax' => array(
+//      'wrapper' => 'itemlist-div',
+//      'callback' => 'custom_ajax_callback',
+//      'method' => 'replace',
+//      'effect' => 'fade',
+//    ),
+//    '#submit' => array('trip_id_ajax_submit'),
+//    '#validate' => array('trip_id_ajax_validate'),
+//    '#limit_validation_errors' => array(array('trip_id')),
+//  );
+
+
+  if (!isset($form_state['dispatch_planning']['bills'])) {
+    $form_state['dispatch_planning']['bills'] = array();
+  }
+  $options = $form_state['dispatch_planning']['bills'];
+
+  $headers = array(
+    'bill_number' => 'Bill Number',
+    'party_name' => 'Party name',
+    'bill_value' => 'Value',
+    'van_loading_date' => 'Existing Van/Loading Date',
+    //'sequence' => 'Delivery Sequence',
+    //'trip_id' => 'Trip ID',
+    'sales_beat' => 'Sales Beat'
+  );
+
+
+  foreach ($headers as $key => $value) {
+    $sort_options[$key . ':asc'] = $value . ' - Asc';
+    $sort_options[$key . ':desc'] = $value . ' - Desc';
+  }
+
+
+  $form['sort'] = array(
+    '#type' => 'select',
+    '#options' => $sort_options,
+    '#ajax' => array(
+      'wrapper' => 'itemlist-div',
+      'callback' => 'custom_ajax_callback',
+      'method' => 'replace',
+      'effect' => 'fade',
+    ),
+    '#attributes' => array(
+      'class' => array('sort-select', 'element-invisible'),
+    ),
+  );
+
+  if (isset($form_state['triggering_element']) && ($form_state['triggering_element']['#name'] == 'sort')) {
+    $active = explode(':', $form_state['values']['sort']);
+    $form_state['dispatch_planning']['sort_field'] = $active[0];
+    $form_state['dispatch_planning']['sort_order'] = $active[1];
+  }
+
+  if (isset($form_state['dispatch_planning']['sort_field'])) {
+    $active_sort = $form_state['dispatch_planning']['sort_field'];
+  }
+  if (isset($form_state['dispatch_planning']['sort_order'])) {
+    $active_order = $form_state['dispatch_planning']['sort_order'];
+  }
+  if ($active_order == 'asc') {
+    $next_order = 'desc';
+  }
+  elseif ($active_order == 'desc') {
+    $next_order = 'asc';
+  }
+
+  foreach ($headers as $k => $header) {
+    $header_array[$k] = array(
+      'data' => array(
+        '#type' => 'link',
+        '#title' => $header . (($active_sort == $k && $next_order) ? theme('tablesort_indicator', array('style' => $next_order)) : ''),
+        '#href' => '',
+        '#attributes' => array(
+          'class' => ($active_sort == $k) ? array('active', 'header-link') : array('header-link'),
+          'id' => $k,
+          'data-sort' => ($active_sort == $k && $next_order) ? $next_order : '',
+        ),
+        '#options' => array(
+          'html' => true,
+        )
+      ),
+    );
+  }
+
+  if ($options) {
+    if (isset($active_sort)) {
+      $sort = ($active_sort == 'van_loading_date') ? 'van_loading_date_timestamp' : $active_sort;
+      $options = _get_header_sort($options, $sort, $active_order);
+    }
+
+    $form['list_form_items'] = array(
+      '#type' => 'tableselect',
+      '#header' => $header_array,
+      '#options' => $options,
+      '#prefix' => '<div id="table-div">',
+      '#suffix' => '</div>',
+      '#empty' => t('No forms available.'),
+      '#multiple' => TRUE,
+    );
+
+    $form['remove_selected'] = array(
+      '#type' => 'submit',
+      '#value' => t('Remove Checked items'),
+      '#ajax' => array(
+        'wrapper' => 'itemlist-div',
+        'callback' => 'custom_ajax_callback',
+        'method' => 'replace',
+        'effect' => 'fade',
+      ),
+      '#submit' => array('remove_selected_ajax_submit'),
+      '#limit_validation_errors' => array(array('list_form_items')),
+    );
+
+    $form['sequence'] = array('#type' => 'value');
+    $form['header'] = array('#type' => 'value');
+
+    $bill_count = count($options);
+    $bill_value_sum = array_sum(array_map(
+            function($item) {
+          return $item['bill_value'];
+        }, $options)
+    );
+    $form_state['dispatch_planning']['bill_value_sum'] = $bill_value_sum;
+
+    $form['bill_summary'] = array(
+      '#theme' => 'item_list',
+      '#items' => array(
+        'Bill Count : ' . $bill_count,
+        'Bill Value : ' . $bill_value_sum,
+      ),
+    );
+
+    $form['trip_execution_date'] = array(
+      '#prefix' => '<div class="textfield-wrapper bottom-wrapper">',
+      '#type' => 'date_popup',
+      '#date_format' => 'm/d/y',
+      '#title' => t('Trip Execution Date'),
+      '#date_label_position' => '',
+      '#date_year_range' => '-200:+0',
+      '#size' => 30,
+      '#required' => TRUE,
+      '#ajax' => array(
+        'event' => 'change',
+        'callback' => 'trip_execution_date_ajax_callback',
+        'wrapper' => 'hht-id-wrapper',
+      ),
+    );
+
+    $form['hht_id'] = array(
+      '#type' => 'textfield',
+      '#title' => t('HHT ID'),
+      '#required' => TRUE,
+      '#prefix' => '<div id="hht-id-wrapper">',
+      '#suffix' => '</div></div>',
+      '#attributes' => array('readonly' => 'readonly'),
+    );
+
+    if (isset($form_state['triggering_element']) && ($form_state['triggering_element']['#name'] == 'trip_execution_date')) {
+
+      if (!empty($form_state['values']['trip_execution_date']) && is_string($form_state['values']['trip_execution_date'])) {
+        $date = strtotime($form_state['values']['trip_execution_date']);
+        unset($form['hht_id']['#attributes']['readonly']);
+        $form['hht_id']['#autocomplete_path'] = 'hht_id/autocomplete/' . $date;
+      }
+    }
+
+    $form['vehicle_number'] = array(
+      '#prefix' => '<div class="textfield-wrapper bottom-wrapper"><div id="vehicle-wrapper">',
+      '#type' => 'textfield',
+      '#title' => t('Vehicle Number'),
+      '#autocomplete_path' => 'vehicle/autocomplete',
+      '#suffix' => '</div>',
+    );
+
+    $form['cashier'] = array(
+      '#prefix' => '<div id="cashier-wrapper">',
+      '#type' => 'textfield',
+      '#title' => t('Cashier name'),
+      '#autocomplete_path' => 'cashier/autocomplete',
+      '#suffix' => '</div></div>',
+    );
+
+    $form['submit'] = array(
+      '#type' => 'submit',
+      '#value' => 'Save',
+      '#limit_validation_errors' => array(array('trip_execution_date'), array('hht_id'), array('vehicle_number'), array('cashier'), array('list_form_items')),
+      '#submit' => array('dispatch_planning_form_save_submit'),
+      '#validate' => array('dispatch_planning_form_save_validate')
+    );
+  }
+  return $form;
+}
+
+function trip_execution_date_ajax_callback($form, &$form_state) {
+  return $form['hht_id'];
+}
+
+function loading_date_ajax_callback($form, &$form_state) {
+  return $form['van'];
+}
+
+function van_ajax_callback($form, &$form_state) {
+  return $form['beat_name'];
+}
+
+function custom_ajax_callback($form, &$form_state) {
+  return $form;
+}
+
+function van_ajax_validate($form, &$form_state) {
+
+  $van = $form_state['values']['van'];
+
+  if (empty($van)) {
+    form_set_error('van', 'Van number is required');
+  }
+}
+
+function van_ajax_submit(&$form, &$form_state) {
+
+  $van = $form_state['values']['van'];
+  $loading_date = strtotime($form_state['values']['loading_date']);
+  $beat_name = $form_state['values']['beat_name'];
+
+  unset($form_state['input']['loading_date']);
+  unset($form_state['input']['van']);
+  $form['van']['#options'] = array();
+  if (!empty($beat_name)) {
+    $bills = get_bill_info(NULL, $van, $loading_date, $beat_name);
+  }
+  else {
+    $bills = get_bill_info(NULL, $van, $loading_date);
+  }
+  $form_state['dispatch_planning']['bills'] += $bills;
+  $form_state['rebuild'] = TRUE;
+}
+
+function bill_number_ajax_validate($form, &$form_state) {
+  $bill_number = $form_state['values']['bill_number'];
+
+  $query = db_select('node', 'n');
+  $query->condition('n.title', $bill_number);
+  $query->condition('n.type', 'sales_register_data');
+  $query->fields('n', array('title'));
+  $query->addTag('node_distributor_access');
+  $result = $query->execute()->fetchField();
+
+  if (empty($result)) {
+    form_set_error('bill_number', 'Bill number does not exist');
+  }
+}
+
+function bill_number_ajax_submit($form, &$form_state) {
+  $bill_number = $form_state['values']['bill_number'];
+
+  unset($form_state['input']['bill_number']);
+
+  $bill_info = get_bill_info($bill_number);
+  if (!empty($bill_info)) {
+    $form_state['dispatch_planning']['bills'] += $bill_info;
+  }
+
+  $form_state['rebuild'] = TRUE;
+}
+
+//function trip_id_ajax_validate($form, &$form_state) {
+//  $trip_id = $form_state['values']['trip_id'];
+//
+//  $query = db_select('node', 'n');
+//  $query->condition('n.title', $trip_id);
+//  $query->condition('n.type', 'dispatch_data');
+//  $query->fields('n', array('title'));
+//  $query->addTag('node_distributor_access');
+//  $result = $query->execute()->fetchField();
+//
+//  if (empty($result)) {
+//    form_set_error('trip_id', 'Trip ID does not exist');
+//  }
+//}
+//
+//function trip_id_ajax_submit($form, &$form_state) {
+//  $trip_id = $form_state['values']['trip_id'];
+//
+//  unset($form_state['input']['trip_id']);
+//
+//  $bill_info = get_bill_info(NULL, NULL, NULL, $trip_id);
+//  if (!empty($bill_info)) {
+//    $form_state['dispatch_planning']['bills'] += $bill_info;
+//  }
+//
+//  $form_state['rebuild'] = TRUE;
+//}
+
+function remove_selected_ajax_submit($form, &$form_state) {
+
+  $checked = array_filter($form_state['values']['list_form_items']);
+
+  if (!empty($checked)) {
+    $form_state['dispatch_planning']['bills'] = array_diff_key($form_state['dispatch_planning']['bills'], array_flip($checked));
+  }
+  $form_state['rebuild'] = TRUE;
+}
+
+function dispatch_planning_form_save_validate($form, &$form_state) {
+  $rows = $form_state['values']['list_form_items'];
+  $cashier = trim($form_state['values']['cashier']);
+  $vehicle_number = trim($form_state['values']['vehicle_number']);
+  $trip_execution_date = strtotime($form_state['values']['trip_execution_date']);
+  $hht_id = trim($form_state['values']['hht_id']);
+
+  $today = strtotime(date('Y-m-d 00:00:00'));
+
+  if ($trip_execution_date < $today) {
+    form_set_error('trip_execution_date', 'Trip execution date cannot be a previous date');
+  }
+  if (!empty(array_filter($rows))) {
+    form_set_error('list_form_items', 'Please uncheck all rows');
+  }
+
+  if ($hht_id && $trip_execution_date) {
+    if (empty(validate_hht_id($trip_execution_date, $hht_id))) {
+      form_set_error('hht_id', 'HHT id invalid or HHT id already exists for this date');
+    }
+  }
+
+  if (!empty($cashier) && empty(validate_cashier($cashier))) {
+    form_set_error('cashier', 'Please enter a valid cashier');
+  }
+  if (!empty($vehicle_number) && empty(validate_vehicle_number($vehicle_number))) {
+    form_set_error('vehicle_number', 'Please enter a valid vehicle number');
+  }
+}
+
+function dispatch_planning_form_save_submit($form, &$form_state) {
+  $rows = $form_state['values']['list_form_items'];
+  $cashier = trim($form_state['values']['cashier']);
+  $vehicle_number = trim($form_state['values']['vehicle_number']);
+  $trip_execution_date = strtotime($form_state['values']['trip_execution_date']);
+  $hht_id = trim($form_state['values']['hht_id']);
+
+  $dispatch_bill_count = count($rows);
+  $bill_value_sum = $form_state['dispatch_planning']['bill_value_sum'];
+
+  global $user;
+  $user_id = $user->uid;
+  $distributor_id = change_feeds_import_get_distributor_id($user_id);
+
+  $txn = db_transaction();
+
+  $query = db_select('trip_id_sequence', 'ts');
+  $query->forUpdate();
+  $query->addField('ts', 'next_id');
+  $query->condition('ts.distributor_id', $distributor_id);
+  $trip_id = $query->execute()->fetchField();
+
+
+  if ($trip_id) {
+    // Increment the next_value.
+    db_update('trip_id_sequence')
+        ->fields(array('next_id' => $trip_id + 1))
+        ->condition('distributor_id', $distributor_id)
+        ->execute();
+  }
+  else {
+    $trip_id = 1;
+    $insert = db_insert('trip_id_sequence')
+        ->fields(array(
+      'distributor_id' => $distributor_id,
+      'next_id' => $trip_id + 1
+    ));
+    $insert->execute();
+  }
+
+  $node = new stdClass();
+  $node->title = $trip_id;
+  $node->type = "dispatch_data";
+  node_object_prepare($node); // Sets some defaults. Invokes hook_prepare() and hook_node_prepare().
+  $node->language = LANGUAGE_NONE; // Or e.g. 'en' if locale is enabled
+  $node->uid = $user->uid;
+  $node->status = 1; //(1 or 0): published or not
+  $node->comment = 0; // 0 = comments disabled, 1 = read only, 2 = read/write
+  $node->field_bill_count[$node->language][0]['value'] = $dispatch_bill_count;
+  $node->field_dispatch_bill_value[$node->language][0]['value'] = $bill_value_sum;
+  $node->field_cashier_name[$node->language][0]['value'] = $cashier;
+  $node->field_vehicle_no[$node->language][0]['value'] = $vehicle_number;
+  $node->field_trip_id[$node->language][0]['value'] = $trip_id;
+  $node->field_trip_creation_date[$node->language][0]['value'] = strtotime(date('Y/m/d 00:00:00'));
+  $node->field_trip_executon_date[$node->language][0]['value'] = $trip_execution_date;
+  $node->field_hht_id[$node->language][0]['nid'] = get_nid_from_hht_id($hht_id);
+
+  $node = node_submit($node); // Prepare node for saving
+  node_save($node);
+
+  $nid = $node->nid;
+
+  $bill_nids = array_keys($rows);
+
+  foreach ($bill_nids as $value) {
+    $node = node_load($value);
+    $node->field_trip_id_reference[LANGUAGE_NONE][0]['nid'] = $nid;
+    node_save($node);
+  }
+
+  drupal_set_message('Successfully updated. Trip id ' . $trip_id);
+}
+
+function get_bill_info($bill_number, $van = NULL, $loading_date = NULL, $beat_name = NULL, $trip_id = NULL) {
+
+  $query = db_select('node', 'n');
+  $query->leftJoin('field_data_field_bill_value', 'bv', 'n.nid = bv.entity_id');
+  $query->leftJoin('field_dat = a_field_sales_party_code', 'spc', 'n.nid = spc.entity_id');
+  $query->leftJoin('field_data_field_billing_loading_date', 'ld', 'n.nid = ld.entity_id');
+  $query->leftJoin('field_data_field_billing_van', 'v', 'n.nid = v.entity_id');
+  $query->leftJoin('field_data_field_trip_id_reference', 't', 'n.nid = t.entity_id');
+  $query->leftJoin('node', 'nt', 'nt.nid = t.field_trip_id_reference_nid');
+
+  $query->leftJoin('field_data_field_party_code', 'pc', 'pc.field_party_code_value = spc.field_sales_party_code_value');
+  $query->leftJoin('field_data_field_party_name', 'pn', 'pn.entity_id = pc.entity_id');
+  $query->leftJoin('field_data_field_beat_name', 'bn', 'bn.entity_id = pc.entity_id');
+
+
+  $query->addField('n', 'nid', 'nid');
+  $query->addField('n', 'title', 'bill_number');
+
+  $query->addField('pn', 'field_party_name_value', 'party_name');
+  $query->addField('bv', 'field_bill_value_value', 'bill_value');
+
+  //$query->addField('nt', 'title', 'trip_id');
+
+  $query->addExpression("CONCAT_WS(' - ', field_billing_van_value, FROM_UNIXTIME(field_billing_loading_date_value, '%m/%d/%y'))", 'van_loading_date');
+
+
+  $query->addField('bn', 'field_beat_name_value', 'sales_beat');
+
+  $db_or = db_or();
+  $db_or->condition('pc.bundle', 'outlet_master');
+  $db_or->isNull('pc.bundle');
+
+  $query->condition($db_or);
+
+  if (!is_null($bill_number)) {
+    $query->condition('n.title', $bill_number);
+  }
+  if (!is_null($van)) {
+    $query->condition('field_billing_van_value', $van);
+  }
+  if (!is_null($loading_date)) {
+    $query->condition('field_billing_loading_date_value', $loading_date);
+  }
+
+  if (!is_null($trip_id)) {
+    $query->condition('nt.title', $trip_id);
+  }
+  else {
+    $query->isNull('t.field_trip_id_reference_nid');
+    $query->addExpression("CONCAT_WS(' - ', field_billing_van_value, field_billing_loading_date_value)", 'van_loading_date_timestamp');
+  }
+
+  if (!is_null($beat_name)) {
+    $query->condition('field_beat_name_value', $beat_name);
+  }
+
+  $query->condition('n.type', 'sales_register_data');
+  $query->addTag('node_distributor_access');
+
+  $res = $query->execute()->fetchAll(PDO::FETCH_GROUP | PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
+
+
+//  foreach ($res as $key => $value) {
+//    $res[$key]['sequence']['data'] = array(
+//      '#type' => 'textfield',
+//      '#title' => 'Sequence',
+//      '#title_display' => 'invisible',
+//      '#default_value' => '',
+//      '#name' => "sequence[$key]",
+//    );
+//  }
+  return $res;
+}
+
+function get_modified_van_from_loading_date($date, $string) {
+  $result = array();
+//  if (!empty($date) && !empty($string)) {
+//    $query = db_select('field_data_field_billing_van', 'v');
+//    $query->join('field_data_field_billing_loading_date', 'l', 'l.entity_id = v.entity_id');
+//    $query->fields('v', array('field_billing_van_value'));
+//    $query->condition('l.field_billing_loading_date_value', $date);
+//    $query->condition('v.field_billing_van_value', db_like($string) . '%', 'LIKE');
+//    $result = $query->execute()->fetchAllKeyed(0, 0);
+//  }
+//  drupal_json_output($result);
+  if (!empty($date)) {
+    $query = db_select('node', 'n');
+    $query->join('field_data_field_billing_van', 'v', 'v.entity_id = n.nid');
+    $query->join('field_data_field_billing_loading_date', 'l', 'l.entity_id = n.nid');
+    $query->leftJoin('field_data_field_trip_id_reference', 'ft', 'ft.entity_id = n.nid');
+
+    $query->fields('v', array('field_billing_van_value'));
+    $query->condition('l.field_billing_loading_date_value', $date);
+    $query->condition('n.type', 'sales_register_data');
+    $query->isNull('ft.field_trip_id_reference_nid');
+
+    $query->addTag('node_distributor_access');
+
+    $result = $query->execute()->fetchAllKeyed(0, 0);
+  }
+  return $result;
+}
+
+function get_beat_name_from_loading_date_and_van($date, $van) {
+  $result = array();
+  if (!empty($date)) {
+    $query = db_select('node', 'n');
+    $query->join('field_data_field_billing_van', 'v', 'v.entity_id = n.nid');
+    $query->join('field_data_field_billing_loading_date', 'l', 'l.entity_id = n.nid');
+
+    $query->leftJoin('field_data_field_sales_party_code', 'fsp', 'fsp.entity_id = n.nid');
+    $query->leftJoin('field_data_field_party_code', 'fp', 'fp.field_party_code_value = fsp.field_sales_party_code_value');
+    $query->leftJoin('field_data_field_beat_name', 'fb', 'fp.entity_id = fb.entity_id');
+
+    $query->leftJoin('field_data_field_trip_id_reference', 'ft', 'ft.entity_id = n.nid');
+
+    $query->addField('fb', 'field_beat_name_value');
+    $query->condition('v.field_billing_van_value', $van);
+    $query->condition('l.field_billing_loading_date_value', $date);
+    $query->condition('n.type', 'sales_register_data');
+    $query->isNull('ft.field_trip_id_reference_nid');
+
+    $query->addTag('node_distributor_access');
+
+    $result = $query->execute()->fetchAllKeyed(0, 0);
+  }
+  return $result;
+}
+
+function bill_autocomplete($string = '') {
+  $result = array();
+
+  if ($string) {
+    $query = db_select('node', 'n');
+    $query->join('field_data_field_billing_loading_date', 'ld', 'n.nid = ld.entity_id');
+    $query->leftJoin('field_data_field_trip_id_reference', 'ft', 'ft.entity_id = n.nid');
+    $query->condition('n.title', db_like($string) . '%', 'LIKE');
+    $query->condition('n.type', 'sales_register_data');
+    $query->isNull('ft.field_trip_id_reference_nid');
+    $query->fields('n', array('title'));
+    $query->range(0, 15);
+    $query->addTag('node_distributor_access');
+    $result = $query->execute()->fetchAllKeyed(0, 0);
+  }
+
+  drupal_json_output($result);
+}
+
+function trip_id_autocomplete($string = '') {
+  $result = array();
+
+  if ($string) {
+    $query = db_select('node', 'n');
+    $query->condition('n.title', db_like($string) . '%', 'LIKE');
+    $query->condition('n.type', 'dispatch_data');
+    $query->fields('n', array('title'));
+    $query->range(0, 15);
+    $query->addTag('node_distributor_access');
+    $result = $query->execute()->fetchAllKeyed(0, 0);
+  }
+
+  drupal_json_output($result);
+}
+
+function _get_header_sort($array, $field_name, $order) {
+  if ($order == 'asc') {
+    uasort($array, function ($a, $b) use ($field_name) {
+      if ($a[$field_name] == $b[$field_name]) {
+        return 0;
+      }
+      return ($a[$field_name] < $b[$field_name]) ? -1 : 1;
+    });
+  }
+  else {
+    uasort($array, function ($a, $b) use ($field_name) {
+      if ($a[$field_name] == $b[$field_name]) {
+        return 0;
+      }
+      return ($a[$field_name] > $b[$field_name]) ? -1 : 1;
+    });
+  }
+  return $array;
+}
+
+/**
+ * implements hook_query_TAG_NAME_alter()
+ * @param QueryAlterableInterface $query
+ */
+function dispatch_planning_query_node_distributor_access_alter(QueryAlterableInterface $query) {
+  global $user;
+  $user_id = $user->uid;
+  $distributor_id = change_feeds_import_get_distributor_id($user_id);
+  $tables = & $query->getTables();
+
+  foreach ($tables as $alias => $table) {
+    if ($table['table'] == 'node') {
+      $nalias = $alias;
+      break;
+    }
+  }
+  $query->condition("$nalias.uid", $distributor_id);
+}
+
+function cashier_names_autocomplete($string = '') {
+  $result = array();
+
+  if ($string) {
+    $query = db_select('node', 'n');
+    $query->join('field_data_field_resource_type', 'rt', 'rt.entity_id = n.nid');
+    $query->join('field_data_field_resource_name', 'rn', 'rn.entity_id = n.nid');
+    $query->condition('field_resource_name_value', db_like($string) . '%', 'LIKE');
+    $query->range(0, 15);
+
+    $query->condition('field_resource_type_value', 'CASHIER');
+    $query->fields('rn', array('field_resource_name_value'));
+    $query->addTag('node_distributor_access');
+    $result = $query->execute()->fetchAllKeyed(0, 0);
+  }
+
+  drupal_json_output($result);
+}
+
+function vehicle_names_autocomplete($string = '') {
+  $result = array();
+
+  if ($string) {
+    $query = db_select('node', 'n');
+    $query->condition('type', 'vehicle_master');
+    $query->fields('n', array('title'));
+    $query->condition('title', db_like($string) . '%', 'LIKE');
+    $query->range(0, 15);
+    $query->addTag('node_distributor_access');
+    $result = $query->execute()->fetchAllKeyed(0, 0);
+  }
+
+  drupal_json_output($result);
+}
+
+function hht_id_autocomplete($date, $string) {
+  $result = array();
+
+//  if ($string) {
+//    $query = db_select('node', 'n');
+//    $query->condition('type', 'hht_master');
+//    $query->fields('n', array('title'));
+//    $query->condition('title', db_like($string) . '%', 'LIKE');
+//
+//    $query->range(0, 15);
+//    $query->addTag('node_distributor_access');
+//    $result = $query->execute()->fetchAllKeyed(0, 0);
+//  }
+//
+//  if ($date) {
+//    $query = db_select('node', 'n');
+//    $query->condition('type', 'hht_master');
+//    $query->fields('n', array('title'));
+//    $query->leftJoin('field_data_field_hht_id', 'fh', 'fh.field_hht_id_nid = n.nid');
+//    $query->leftJoin('field_data_field_trip_executon_date', 'fd', 'fh.entity_id = fd.entity_id');
+//    $query->condition('field_trip_executon_date_value', $date);
+//    $query->addTag('node_distributor_access');
+//    $res = $query->execute()->fetchAllKeyed(0, 0);
+//
+//    $result = array_diff_key($result, $res);
+//  }
+
+  $query = db_select('node', 'n');
+  $query->condition('n.type', 'hht_master');
+  $query->fields('n', array('title'));
+  $query->condition('n.title', db_like($string) . '%', 'LIKE');
+//$query->addExpression("IF(SUM(field_trip_executon_date_value = '1488220200'), 'Yes', 'No')", 'hola');
+//$query->addExpression("SUM(field_trip_executon_date_value = '1488220200')", 'aaa');
+
+  $query->addExpression("MAX(IF((field_trip_executon_date_value = $date), nt.title, 0))", 'trip_id');
+  $query->leftJoin('field_data_field_hht_id', 'fh', 'fh.field_hht_id_nid = n.nid');
+  $query->leftJoin('node', 'nt', 'nt.nid = fh.entity_id');
+
+  //Dont consider deleted trips
+  $db_or = db_or();
+  $db_or->isNull('nt.status');
+  $db_or->condition('nt.status', 1);
+  $query->condition($db_or);
+
+  $query->leftJoin('field_data_field_trip_executon_date', 'fd', 'fh.entity_id = fd.entity_id');
+  $query->groupBy('n.title');
+  $query->addTag('node_distributor_access');
+  $res = $query->execute()->fetchAll();
+
+  $date_string = date('m/d/Y', $date);
+  foreach ($res as $val) {
+    if ($val->trip_id) {
+      $result[$val->title] = "$val->title ($val->trip_id - $date_string)";
+    }
+    else {
+      $result[$val->title] = $val->title;
+    }
+  }
+
+  drupal_json_output($result);
+}
+
+function validate_hht_id($date, $hht_id) {
+
+  $query = db_select('node', 'n');
+  $query->condition('n.type', 'hht_master');
+
+  $query->leftJoin('field_data_field_hht_id', 'fh', 'fh.field_hht_id_nid = n.nid');
+  $query->leftJoin('field_data_field_trip_executon_date', 'fd', 'fh.entity_id = fd.entity_id');
+  $query->leftJoin('node', 'nt', 'nt.nid = fh.entity_id');
+  $query->fields('fd', array('field_trip_executon_date_value'));
+
+  //Dont consider deleted trips
+  $db_or = db_or();
+  $db_or->isNull('nt.status');
+  $db_or->condition('nt.status', 1);
+  $query->condition($db_or);
+  
+  $query->condition('n.title', $hht_id);
+  $query->addTag('node_distributor_access');
+  $result = $query->execute()->fetchAllKeyed(0, 0);
+
+  if (empty($result) || isset($result[$date])) {
+    return FALSE;
+  }
+  else {
+    return TRUE;
+  }
+}
+
+function get_nid_from_hht_id($hht_id) {
+
+  $query = db_select('node', 'n');
+  $query->fields('n', array('nid'));
+  $query->condition('type', 'hht_master');
+  $query->condition('title', $hht_id);
+  $query->addTag('node_distributor_access');
+  $result = $query->execute()->fetchField();
+
+  return $result;
+}
+
+function validate_cashier($cashier) {
+  $query = db_select('node', 'n');
+  $query->join('field_data_field_resource_type', 'rt', 'rt.entity_id = n.nid');
+  $query->join('field_data_field_resource_name', 'rn', 'rn.entity_id = n.nid');
+  $query->condition('field_resource_name_value', $cashier);
+
+  $query->condition('field_resource_type_value', 'CASHIER');
+  $query->fields('rn', array('field_resource_name_value'));
+  $query->addTag('node_distributor_access');
+  $result = $query->execute()->fetchField();
+
+  return $result;
+}
+
+function validate_vehicle_number($vehicle_number) {
+  $query = db_select('node', 'n');
+  $query->condition('type', 'vehicle_master');
+  $query->fields('n', array('title'));
+  $query->condition('title', $vehicle_number);
+  $query->addTag('node_distributor_access');
+  $result = $query->execute()->fetchField();
+
+  return $result;
+}
+
+function trip_delete_form($form, &$form_state) {
+  $form['#prefix'] = '<div id="itemlist-div">';
+  $form['#suffix'] = '</div>';
+  $form['trip_id'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Trip id'),
+    '#required' => TRUE,
+      //'#autocomplete_path' => 'trip/autocomplete'
+  );
+
+  $form['trip_id_submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Show bills'),
+    '#ajax' => array(
+      'wrapper' => 'itemlist-div',
+      'callback' => 'custom_ajax_callback',
+      'method' => 'replace',
+      'effect' => 'fade',
+    ),
+    '#submit' => array('trip_id_ajax_submit'),
+    '#validate' => array('trip_id_ajax_validate'),
+      //'#limit_validation_errors' => array(array('trip_id')),
+  );
+
+  $header_array = array(
+    'bill_number' => 'Bill Number',
+    'party_name' => 'Party name',
+    'bill_value' => 'Value',
+    'sales_beat' => 'Sales Beat',
+    'van_loading_date' => 'Existing Van/Loading Date',
+      //'sequence' => 'Delivery Sequence',
+      //'trip_id' => 'Trip ID',
+  );
+
+  if (!isset($form_state['dispatch_planning']['bills'])) {
+    $form_state['dispatch_planning']['bills'] = array();
+  }
+  $options = $form_state['dispatch_planning']['bills'];
+
+  if ($options) {
+    $form['list_form_items'] = array(
+      '#theme' => 'table',
+      '#header' => $header_array,
+      '#rows' => $form_state['dispatch_planning']['bills'],
+      '#prefix' => '<div id="table-div">',
+      '#suffix' => '</div>',
+    );
+
+    $form['submit'] = array(
+      '#type' => 'submit',
+      '#value' => 'Delete trip',
+      '#validate' => array('trip_id_ajax_validate'),
+        //'#limit_validation_errors' => array(array('trip_execution_date'), array('hht_id'), array('vehicle_number'), array('cashier'), array('list_form_items')),
+    );
+  }
+  else {
+    if (isset($form_state['values']['trip_id'])) {
+      $form['no_bills'] = array(
+        '#markup' => '<p>No bills attached to the trip</p>',
+      );
+
+      $form['submit'] = array(
+        '#type' => 'submit',
+        '#value' => 'Delete trip',
+        '#validate' => array('trip_id_ajax_validate'),
+          //'#limit_validation_errors' => array(array('trip_execution_date'), array('hht_id'), array('vehicle_number'), array('cashier'), array('list_form_items')),
+      );
+    }
+  }
+
+  return $form;
+}
+
+function trip_id_ajax_validate($form, &$form_state) {
+  $trip_id = $form_state['values']['trip_id'];
+
+  $query = db_select('node', 'n');
+  $query->leftJoin('field_data_field_dispatch_status', 'fs', 'fs.entity_id = n.nid');
+  $db_or = db_or();
+  $db_or->isNull('fs.field_dispatch_status_value');
+  $db_or->condition('fs.field_dispatch_status_value', 0);
+  $query->condition($db_or);
+  $query->condition('n.title', $trip_id);
+  $query->condition('n.type', 'dispatch_data');
+  $query->fields('n', array('title'));
+  $query->condition('status', 1);
+  $query->addTag('node_distributor_access');
+  $result = $query->execute()->fetchField();
+
+  if (empty($result)) {
+    form_set_error('trip_id', 'Trip ID does not exist or is already deleted or is already dispatched');
+  }
+}
+
+function trip_id_ajax_submit($form, &$form_state) {
+  $trip_id = $form_state['values']['trip_id'];
+
+  //unset($form_state['input']['trip_id']);
+
+  $bill_info = get_bill_info(NULL, NULL, NULL, NULL, $trip_id);
+
+  if (!empty($bill_info)) {
+    $form_state['dispatch_planning']['bills'] = $bill_info;
+  }
+  else {
+    $form_state['dispatch_planning']['bills'] = array();
+  }
+
+  $form_state['rebuild'] = TRUE;
+}
+
+function trip_delete_form_submit($form, &$form_state) {
+  $trip_id = $form_state['values']['trip_id'];
+
+  $query = db_select('node', 'n');
+  $query->condition('n.title', $trip_id);
+  $query->condition('n.type', 'dispatch_data');
+  $query->join('field_data_field_trip_id_reference', 'ft', 'ft.field_trip_id_reference_nid = n.nid');
+  $query->fields('n', array('nid'));
+  $query->fields('ft', array('entity_id'));
+  $query->addTag('node_distributor_access');
+  $result = $query->execute()->fetchAll(PDO::FETCH_GROUP);
+
+  $dispatch_nid = key($result);
+
+  foreach ($result[$dispatch_nid] as $value) {
+
+    $node = node_load($value->entity_id);
+
+    if ($node) {
+      $node->field_trip_id_reference = array();
+      node_save($node);
+    }
+  }
+
+  $dispatch_node = node_load($dispatch_nid);
+  if ($dispatch_node) {
+    $dispatch_node->status = 0;
+    node_save($dispatch_node);
+  }
+
+  drupal_set_message('Successfully deleted');
+}
+
+function dispatch_planning_form_views_exposed_form_alter(&$form, &$form_state) {
+  if ($form['#id'] == 'views-exposed-form-billing-report-page') {
+    //Show Yes, No, and All for Trip id field in billing report
+    $form['field_trip_id_reference_nid_op']['#options'] = array(
+      'in' => 'All',
+      'empty' => 'No',
+      'not empty' => 'Yes',
+    );
+
+    $form['field_trip_id_reference_nid']['#access'] = FALSE;
+  }
+}

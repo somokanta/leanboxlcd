@@ -203,7 +203,8 @@ class date_sql_handler {
       case 'mysql':
         switch ($this->date_type) {
           case DATE_UNIX:
-            $field = "FROM_UNIXTIME($field)";
+            $offset = date('Z'); //get server timezone offset
+            $field = "FROM_UNIXTIME($field + $offset)";
             break;
 
           case DATE_ISO:

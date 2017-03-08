@@ -7,3 +7,8 @@ files[] = views/handler/custom_for_picking_type.inc
 files[] = views/handler/custom_for_combine_nid.inc
 files[] = views/handler/order_basepack_handler_custom_field.inc
 files[] = views/handler/custom_billing_data_bill_value.inc
+files[] = views/handler/header_handler_custom_field.inc
+files[] = views/handler/footer_handler_custom_field.inc
+files[] = views/handler/beat_name_handler_custom_field.inc
+; Plugins
+files[] = plugins/FeedsNodeCustomProcessor.inc

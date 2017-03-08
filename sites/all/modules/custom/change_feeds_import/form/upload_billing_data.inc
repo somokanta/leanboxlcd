@@ -412,24 +412,32 @@ function check_party_code_exist_or_not() {
   
   
   $query1 = db_select('field_data_field_party_code', 'pc');
+  $query1->join('node', 'n', 'n.nid = pc.entity_id');
   $query1->join('field_data_field_beat_name', 'bn', 'bn.entity_id = pc.entity_id');
   $query1->condition('pc.bundle', "outlet_master");
   $query1->fields('pc', array('field_party_code_value'));
   $query1->fields('bn', array('field_beat_name_value'));
+  $query1->addTag('node_uid');
   $party_code_result = $query1->execute()->fetchAllKeyed(0, 1);
   return $party_code_result;
 }
 
 function check_sku7_code_exist_or_not() {
   $query2 = db_select('field_data_field_sku7_code', 'sc');
+  $query2->join('node', 'n', 'n.nid = sc.entity_id');
   $query2->fields('sc', array('field_sku7_code_value'));
   $query2->condition('sc.bundle', 'sku7_code_master', '=');
+  $query2->addTag('node_uid');
   $sku_code_result = $query2->execute()->fetchAllKeyed(0, 0);
   return $sku_code_result;
 }
 
 function check_bill_number_exist() {
+  global $user;
+  $user_id = $user->uid;
+  $distributor_id = change_feeds_import_get_distributor_id($user_id);
   $query3 = db_select('custom_billing_data', 'cb');
+  $query3->condition('cb.distributor_id', $distributor_id);
   $query3->fields('cb', array('bill_number'));
   $bill_result = $query3->execute()->fetchAllKeyed(0, 0);
   return $bill_result;
@@ -463,6 +471,7 @@ function check_node_title_exists($title, $type, $sales_data = FALSE) {
   $query1->condition('n.type', $type);
   $query1->condition('n.title', $title);
   $query1->fields('n', array('nid'));
+  $query1->addTag('node_uid');
   if ($sales_data) {
     $date = strtotime(date('Y-m-d'));
     $query1->join('field_data_field_sr_bill_date', 'd', 'd.entity_id = n.nid');
@@ -510,7 +519,7 @@ function get_node_titles($type) {
   $query1 = db_select('node', 'n');
   $query1->condition('n.type', $type, 'IN');
   $query1->fields('n', array('type', 'title'));
-
+  $query1->addTag('node_uid');
   $titles = $query1->execute()->fetchAll();
   foreach ($titles as $k => $v) {
     $result[$v->type][$v->title] = $v->title;

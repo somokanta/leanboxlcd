@@ -1,0 +1,86 @@
+@charset "UTF-8";
+/*Variables*/
+/*End Variables*/
+/*Fonts*/
+/*New fonts - Homepage redesign*/
+@font-face {
+  font-family: 'proximanova-thin';
+  src: url("../fonts/proximanova-thin-webfont.eot");
+  src: local("Γÿ║"), url("../fonts/proximanova-thin-webfont.woff") format("woff"), url("../fonts/proximanova-thin-webfont.ttf") format("truetype"), url("../fonts/proximanova-thin-webfont.svg") format("svg");
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'proxima_nova_light';
+  src: url("../fonts/proxima_nova_light-webfont.eot");
+  src: local("Γÿ║"), url("../fonts/proxima_nova_light-webfont.woff") format("woff"), url("../fonts/proxima_nova_light-webfont.ttf") format("truetype"), url("../fonts/proxima_nova_light-webfont.svg") format("svg");
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'proximanova-reg';
+  src: url("../fonts/proximanova-reg-webfont.eot");
+  src: local("Γÿ║"), url("../fonts/proximanova-reg-webfont.woff") format("woff"), url("../fonts/proximanova-reg-webfont.ttf") format("truetype"), url("../fonts/proximanova-reg-webfont.svg") format("svg");
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'proximanova-sbold';
+  src: url("../fonts/proximanova-sbold-webfont.eot");
+  src: local("Γÿ║"), url("../fonts/proximanova-sbold-webfont.woff") format("woff"), url("../fonts/proximanova-sbold-webfont.ttf") format("truetype"), url("../fonts/proximanova-sbold-webfont.svg") format("svg");
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'proximanova-bold';
+  src: url("../fonts/proximanova-bold-webfont.eot");
+  src: local("Γÿ║"), url("../fonts/proximanova-bold-webfont.woff") format("woff"), url("../fonts/proximanova-bold-webfont.ttf") format("truetype"), url("../fonts/proximanova-bold-webfont.svg") format("svg");
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'proximanova-xbold';
+  src: url("../fonts/proximanova-xbold-webfont.eot");
+  src: local("Γÿ║"), url("../fonts/proximanova-xbold-webfont.woff") format("woff"), url("../fonts/proximanova-xbold-webfont.ttf") format("truetype"), url("../fonts/proximanova-xbold-webfont.svg") format("svg");
+  font-weight: normal;
+  font-style: normal;
+}
+/*End Fonts*/
+/*Mixins*/
+/*Fonts - icomoon & fontawesome*/
+@font-face {
+  font-family: 'icomoon';
+  src: url("../fonts/icomoon.eot?v5y00l");
+  src: url("../fonts/icomoon.eot?v5y00l#iefix") format("embedded-opentype"), url("../fonts/icomoon.ttf?v5y00l") format("truetype"), url("../fonts/icomoon.woff?v5y00l") format("woff"), url("../fonts/icomoon.svg?v5y00l#icomoon") format("svg");
+  font-weight: normal;
+  font-style: normal;
+}
+/* line 15, ../sass/component/_campaign-mixins.scss */
+[class^="icon-"], [class*=" icon-"] {
+  /* use !important to prevent issues with browser extensions that change fonts */
+  font-family: 'icomoon' !important;
+  speak: none;
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+  /* Better Font Rendering =========== */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/*End Fonts - icomoon & fontawesome*/
+/*No margin & padding*/
+/*End No margin & padding*/
+/*Basic transition*/
+/*End Basic transition*/
+/*Dynamic transition*/
+/*End Dynamic transition*/
+/*Flex strech & align item*/
+/*End Flex strech & align item*/
+/*Border radius*/
+/*End Border radius*/
+/*Generic transform*/
+/*Rotate*/
+/*End generic transform*/

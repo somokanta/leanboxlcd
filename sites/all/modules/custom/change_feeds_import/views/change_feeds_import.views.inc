@@ -92,7 +92,40 @@ class change_feeds_import_handler_pen_date_ageing extends views_handler_field {
  * Implements hook_views_data().
  */
 function change_feeds_import_views_data() {
+  
   $data = array();
+  
+  $data['views']['header_area_text_custom'] = array(
+    'title' => t('Header field'),
+    'help' => t('Just a field created for header purposes.'),
+    'area' => array(
+      'handler' => 'header_handler_custom_field',
+    ),
+  );
+  
+  $data['views']['footer_area_text_custom'] = array(
+    'title' => t('Footer field'),
+    'help' => t('Just a field created for footer purposes.'),
+    'area' => array(
+      'handler' => 'footer_handler_custom_field',
+    ),
+  );
+  
+  
+  $data['beat_name']['table']['group'] = t('BEAT NAME');
+  $data['beat_name']['table']['join'] = array(
+    // #global is a special flag which let's a table appear all the time.
+    '#global' => array(),
+  );
+  // Add custom field
+  $data['beat_name']['field_beat_name'] = array(
+    'title' => t('Custom Beat Name Field'),
+    'help' => t('Provides a custom field.'),
+    'field' => array(
+      'handler' => 'beat_name_handler_custom_field',
+    ),
+  );
+  
     
   // Add Example group
   $data['ccfot']['table']['group'] = t('ccfot');
