@@ -1377,11 +1377,11 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
     $sub_query->join('field_data_field_bill_value', 'v', 'v.entity_id = n.nid');
     $sub_query->addField('b', 'bill_number', 'bill_number');
     $sub_query->addField('v', 'field_bill_value_value', 'field_bill_value_value');
-    
-    if(isset($view->exposed_raw_input['date_filter']['min']) && isset($view->exposed_raw_input['date_filter']['max'])){
+
+    if (isset($view->exposed_raw_input['date_filter']['min']) && isset($view->exposed_raw_input['date_filter']['max'])) {
       $min = intval(strtotime($view->exposed_raw_input['date_filter']['min']));
       $max = intval(strtotime($view->exposed_raw_input['date_filter']['max']));
-      
+
       $sub_query->condition('b.loading_date', $min, '>=');
       $sub_query->condition('b.loading_date', $max, '<=');
     }
@@ -1431,15 +1431,15 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
 
 
     $join = new views_join();
-    $join->definition = array('table formula' => $sub_query, 'left_field' => 'title', 'field' => 'bill_number', 'left_table' => 'node');
+    $join->definition = array('table formula' => $sub_query, 'left_field' => 'title', 'field' => 'minimum', 'left_table' => 'node');
     $join->table = 'node';
-    $join->field = 'bill_number';
+    $join->field = 'minimum';
     $join->left_table = 'node'; // or wathever table you want to join with
     $join->left_field = 'title'; // or wathever column you want to join with
     $join->type = 'LEFT'; // if you want another join type play with this value
-    $join->extra = array(
-      array('field' => 'minimum', 'left_field' => 'title'),
-    );
+//    $join->extra = array(
+//      array('field' => 'minimum', 'left_field' => 'title'),
+//    );
 
     // Do the actual join
     $query->table_queue['temp'] = array(
