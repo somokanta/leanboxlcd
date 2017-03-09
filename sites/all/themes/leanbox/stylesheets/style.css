@@ -10349,24 +10349,24 @@ body > .main-container {
 }
 
 /* line 371, ../sass/leanbox-global.scss */
-[id^="trip-delete-form"] .form-item-trip-id, [id^="get-data-of-trip-id-form"] .form-item-trip-id {
+[id^="trip-delete-form"] .form-item-trip-id {
   width: 33.33%;
   float: left;
 }
 /* line 375, ../sass/leanbox-global.scss */
-[id^="trip-delete-form"] .form-item-trip-id label, [id^="trip-delete-form"] .form-item-trip-id input[type="text"], [id^="trip-delete-form"] .form-item-trip-id select, [id^="get-data-of-trip-id-form"] .form-item-trip-id label, [id^="get-data-of-trip-id-form"] .form-item-trip-id input[type="text"], [id^="get-data-of-trip-id-form"] .form-item-trip-id select {
+[id^="trip-delete-form"] .form-item-trip-id label, [id^="trip-delete-form"] .form-item-trip-id input[type="text"], [id^="trip-delete-form"] .form-item-trip-id select {
   width: 100%;
   text-align: left;
 }
 /* line 379, ../sass/leanbox-global.scss */
-[id^="trip-delete-form"] .form-item-trip-id label.error, [id^="trip-delete-form"] .form-item-trip-id input[type="text"].error, [id^="trip-delete-form"] .form-item-trip-id select.error, [id^="get-data-of-trip-id-form"] .form-item-trip-id label.error, [id^="get-data-of-trip-id-form"] .form-item-trip-id input[type="text"].error, [id^="get-data-of-trip-id-form"] .form-item-trip-id select.error {
+[id^="trip-delete-form"] .form-item-trip-id label.error, [id^="trip-delete-form"] .form-item-trip-id input[type="text"].error, [id^="trip-delete-form"] .form-item-trip-id select.error {
   margin-top: 0;
 }
 /* line 385, ../sass/leanbox-global.scss */
-[id^="trip-delete-form"] .btn, [id^="get-data-of-trip-id-form"] .btn {
+[id^="trip-delete-form"] .btn {
   float: left;
   margin-top: 23px;
-  margin-left: -170px;
+  margin-left: 15px;
 }
 
 /* line 393, ../sass/leanbox-global.scss */
@@ -10653,7 +10653,4 @@ form div > a {
 /* line 718, ../sass/leanbox-global.scss */
 .ui-datepicker-calendar tbody tr td {
   padding: 1px !important;
-}
-input#edit-trip-id {
-    width: 50%;
 }
