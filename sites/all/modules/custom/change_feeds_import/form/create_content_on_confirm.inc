@@ -219,7 +219,7 @@ function change_feeds_import_create_van_cld_report($max_billing_id, &$context) {
     $query->condition('gaisc.bundle', 'sku7_code_master', '=');
     $query->join('field_data_field_unit_case_units_', 'fucu', 'fucu.entity_id = gaisc.entity_id');
     $query->condition('fucu.bundle', 'sku7_code_master', '=');
-    $query->fields('cb', array('vehicle', 'loading_date', 'sku7_code', 'product_name', 'Sum_of_TOTAL_SALES_QTY', 'mrp'));
+    $query->fields('cb', array('vehicle', 'loading_date', 'sku7_code', 'product_name', 'Sum_of_TOTAL_SALES_QTY', 'mrp','PRICELIST_GROUP'));
     $query->fields('fucu', array('field_unit_case_units__value'));
     $query->condition('cb.distributor_id', $distributor_id);
     $query->condition('cb.id', $max_billing_id, '>');
@@ -242,6 +242,7 @@ function change_feeds_import_create_van_cld_report($max_billing_id, &$context) {
     $product_name = $val->product_name;
     $cld = $val->cld;
     $mrp = $val->mrp;
+    $pricelist_group =  $val->PRICELIST_GROUP;
 
 
     if ($cld != 0) {
@@ -254,6 +255,7 @@ function change_feeds_import_create_van_cld_report($max_billing_id, &$context) {
             'distributor_id' => $distributor_id,
             'cld' => $cld,
             'mrp' => $mrp,
+            'pricelist_group' =>$pricelist_group,
           ))
           ->execute();
     }

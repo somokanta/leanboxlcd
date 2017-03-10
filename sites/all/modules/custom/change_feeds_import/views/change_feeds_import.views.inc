@@ -750,6 +750,20 @@ function change_feeds_import_views_data() {
     ),
   );
   
+   $data['van_cld_data_table']['pricelist_group'] = array(
+    'title' => t('Pricelist Group'),
+    'help' => t('Pricelist Group'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+  );
+   
   $base_table = 'custom_billing_data';
   $data[$base_table]['date_filter'] = array(
     'group' => t('Date'),

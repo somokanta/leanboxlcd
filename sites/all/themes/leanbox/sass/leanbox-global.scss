@@ -1,12 +1,12 @@
-@import "component/campaign-mixins";
-@import "component/campaign-variables";
+@import 'component/leanbox-variables';
+@import 'component/leanbox-mixins';
 
 /*Generic css*/
 /*Body & Other general elements*/
 body,html {
     border: 0 none;
     color: $base-color;
-    font-family: $proximanova_reg;
+    font-family: $opensans_reg;
     font-size: $basefont-size;
     line-height: $baseline-height;
     max-width: 100%;
@@ -172,9 +172,10 @@ table {
                 color: $black-color;
                 font-weight: 600;
                 vertical-align: middle;
-                font-size: 15px;
+                font-size: 14px;
                 border-bottom: 0px solid #b1afaf;
                 padding: 8px;
+                min-width: 120px;
 
                 a{
                     color: $black-color;
@@ -201,6 +202,7 @@ table {
                 padding: 6px 8px 6px 8px !important;
                 border-left: 0;
                 border-right:0;
+                min-width: 120px;
 
                 &:first-child {
                     border-left: 0;
@@ -217,6 +219,12 @@ table {
                 }
             }
         }
+    }
+}
+
+.ui-datepicker-calendar {
+    th, td {
+        min-width: inherit !important;
     }
 }
 
@@ -324,7 +332,7 @@ header{
             box-shadow: 0 0 9px #e2dfdf;
 
             .container-fluid{
-                max-width: 1200px;
+                /* max-width: 1300px; */
                 width: 96%;
                 margin: 0 auto;
             }
@@ -332,7 +340,7 @@ header{
     }
 
     .container{
-        max-width: 1200px;
+        max-width: 1300px;
         margin: 0 auto;
     }
 
@@ -343,13 +351,54 @@ header{
             }
         }
     }
+    #navbar-collapse {
+        #block-block-1 {
+            float: right;
+            .hul-logo {
+                margin-top: 10px;
+                img {
+                    max-height: 70px;
+                }
+            }
+        }
+        #block-system-user-menu {
+            margin-top: 28px;
+            float: right;
+            margin-right: 20px;
+            .menu {
+                @include no-margin-padding;
+                li {
+                    list-style-type: none;
+                    @include no-margin-padding;
+                    display: inline-block;
+                    &.last {
+                        a {
+                            border-right: 0;
+                        }
+                    }
+                    a {
+                        border-right: 1px solid $border-color;
+                    }
+                }
+            }
+        }
+    }
 }
 
 body{
     >.main-container{
-        max-width: 1200px;
+        /* max-width: 1300px; */
         width: 96%;
         margin: 0 auto;
+        .region-content {
+            form {
+                .form-type-file {
+                    .form-file {
+                        height: auto;
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -367,7 +416,7 @@ body{
     }
 }
 
-[id^="trip-delete-form"]{
+[id^="trip-delete-form"], [id^="get-data-of-trip-id-form"]{
     .form-item-trip-id{
         width: 33.33%;
         float: left;
@@ -378,7 +427,7 @@ body{
 
             &.error{
                 margin-top: 0;
-            }
+            } 
         }
     }
 
@@ -418,7 +467,7 @@ body{
             border-top: 0;
             border-bottom: 0;
             line-height: 32px;
-        }
+        } 
 
         &:before{
             content: "";
@@ -602,6 +651,7 @@ body{
                     input, select, option{
                         margin-right: 0;
                         margin-left: 5px;
+                        width: 100%;
                     }
                 }
 
@@ -612,7 +662,7 @@ body{
                     }
                     div{
                         float: left;
-                        width: auto;
+                        width: 100%;
                     }
                 }
             }
@@ -645,6 +695,33 @@ body{
     }
 }
 
+.page-leanbox-chart-details {
+    .region-content {
+        form {
+            .container-inline-date {
+                width: 25%;
+                display: inline-block;
+                vertical-align: top;
+                .form-item {
+                    .date-padding {
+                        float: none;
+                        .form-item {
+                            .control-label {
+                                display: none;
+                            }
+                        }
+                    }
+                }
+            }
+            #party-packing-submit {
+                width: 25%;
+                display: inline-block;
+                vertical-align: top;
+                padding: 20px 0 0;
+            }            
+        }
+    }
+}
 
 .page-node-add{
     .node-form{
@@ -717,6 +794,22 @@ form{
         tr{
             td{
                 padding: 1px !important;
+            }
+        }
+    }
+}
+
+.region-content{
+    .block-leanbox-dashboard{
+        width: 48%;
+        display: inline-block;
+        vertical-align: top;
+        &.contextual-links-region{
+            width: 50%;
+            float: left;
+
+            div[dir="ltr"]{
+                width: 100% !important;
             }
         }
     }

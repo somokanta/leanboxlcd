@@ -874,15 +874,15 @@ function hht_id_autocomplete($date, $string) {
 //$query->addExpression("IF(SUM(field_trip_executon_date_value = '1488220200'), 'Yes', 'No')", 'hola');
 //$query->addExpression("SUM(field_trip_executon_date_value = '1488220200')", 'aaa');
 
-  $query->addExpression("MAX(IF((field_trip_executon_date_value = $date), nt.title, 0))", 'trip_id');
+  $query->addExpression("MAX(IF((field_trip_executon_date_value = $date AND (nt.status = 1)), nt.title, 0))", 'trip_id');
   $query->leftJoin('field_data_field_hht_id', 'fh', 'fh.field_hht_id_nid = n.nid');
   $query->leftJoin('node', 'nt', 'nt.nid = fh.entity_id');
 
-  //Dont consider deleted trips
-  $db_or = db_or();
-  $db_or->isNull('nt.status');
-  $db_or->condition('nt.status', 1);
-  $query->condition($db_or);
+//  //Dont consider deleted trips
+//  $db_or = db_or();
+//  $db_or->isNull('nt.status');
+//  $db_or->condition('nt.status', 0);
+//  $query->condition($db_or);
 
   $query->leftJoin('field_data_field_trip_executon_date', 'fd', 'fh.entity_id = fd.entity_id');
   $query->groupBy('n.title');
@@ -910,13 +910,15 @@ function validate_hht_id($date, $hht_id) {
   $query->leftJoin('field_data_field_hht_id', 'fh', 'fh.field_hht_id_nid = n.nid');
   $query->leftJoin('field_data_field_trip_executon_date', 'fd', 'fh.entity_id = fd.entity_id');
   $query->leftJoin('node', 'nt', 'nt.nid = fh.entity_id');
-  $query->fields('fd', array('field_trip_executon_date_value'));
+  //$query->fields('fd', array('field_trip_executon_date_value'));
+  
+  $query->addExpression("IF((nt.status = 1), field_trip_executon_date_value, 0)", 'date');
 
-  //Dont consider deleted trips
-  $db_or = db_or();
-  $db_or->isNull('nt.status');
-  $db_or->condition('nt.status', 1);
-  $query->condition($db_or);
+//  //Dont consider deleted trips
+//  $db_or = db_or();
+//  $db_or->isNull('nt.status');
+//  $db_or->condition('nt.status', 0);
+//  $query->condition($db_or);
   
   $query->condition('n.title', $hht_id);
   $query->addTag('node_distributor_access');

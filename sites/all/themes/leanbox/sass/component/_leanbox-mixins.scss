@@ -1,0 +1,105 @@
+/*Mixins*/
+
+/*Fonts - icomoon & fontawesome*/
+@font-face {
+  font-family: 'icomoon';
+  src:  url('../fonts/icomoon.eot?v5y00l');
+  src:  url('../fonts/icomoon.eot?v5y00l#iefix') format('embedded-opentype'),
+    url('../fonts/icomoon.ttf?v5y00l') format('truetype'),
+    url('../fonts/icomoon.woff?v5y00l') format('woff'),
+    url('../fonts/icomoon.svg?v5y00l#icomoon') format('svg');
+  font-weight: normal;
+  font-style: normal;
+}
+
+[class^="icon-"], [class*=" icon-"] {
+  /* use !important to prevent issues with browser extensions that change fonts */
+  font-family: 'icomoon' !important;
+  speak: none;
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+
+  /* Better Font Rendering =========== */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+@mixin base-fa {
+    display: inline-block;
+    font: normal normal normal 14px/1 FontAwesome;
+    font-size: inherit;
+    text-rendering: auto;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+/*End Fonts - icomoon & fontawesome*/
+
+/*No margin & padding*/
+@mixin no-margin-padding {
+  margin: 0;
+  padding: 0;
+}
+/*End No margin & padding*/
+
+/*Basic transition*/
+@mixin base-transition {
+  transition: all 0.5s linear 0s;
+  -moz-transition: all 0.5s linear 0s;
+  -webkit-transition: all 0.5s linear 0s;
+  -o-transition: all 0.5s linear 0s;
+  -ms-transition: all 0.5s linear 0s;
+}
+/*End Basic transition*/
+
+/*Dynamic transition*/
+@mixin different-transition($property, $duration, $effect) {
+  transition: $property $duration $effect 0s; 
+  -moz-transition: $property $duration $effect 0s;
+  -webkit-transition: $property $duration $effect 0s;
+  -o-transition: $property $duration $effect 0s;
+  -ms-transition: $property $duration $effect 0s;
+}
+/*End Dynamic transition*/
+
+/*Flex strech & align item*/
+@mixin flex-strech {
+  display: -webkit-flex;
+  display: flex;
+  -webkit-align-items: stretch;
+  align-items: stretch;  
+}
+
+@mixin flex-verticle-center {
+  display: -webkit-flex;
+  display: flex;
+  -webkit-align-items: center;
+  align-items: center;  
+}
+/*End Flex strech & align item*/
+
+/*Border radius*/
+@mixin border-radius($radius) {
+  border-radius: $radius;
+  -moz-border-radius: $radius;
+  -webkit-border-radius: $radius;
+  -o-border-radius: $radius;
+  -ms-border-radius: $radius;
+}
+/*End Border radius*/
+
+/*Generic transform*/
+@mixin transform($transforms) {
+     -moz-transform: $transforms;
+       -o-transform: $transforms;
+      -ms-transform: $transforms;
+  -webkit-transform: $transforms;
+          transform: $transforms;
+}
+/*Rotate*/
+@mixin rotate ($deg) {
+  @include transform(rotate(#{$deg}deg));
+}
+/*End generic transform*/

@@ -1,0 +1,192 @@
+<?php
+
+/**
+ * Files containing list of custom blocks
+ * having graph data integrated using google chart
+ */
+
+/**
+ * Implements hook_menu
+ */
+function leanbox_dashboard_menu() {
+  $items = array();
+  $items['chart-daterange-filter'] = array(
+    'title' => 'Party Packing',
+    'page callback' => 'party_packing_filter_callback',
+    'access callback' => TRUE,
+  );
+  $items['leanbox-chart-details/%'] = array(
+    'title ' => '',
+    'page callback' => 'leanbox_dashboard_chart_details_callback',
+    'page arguments' => array(1),
+    'access callback' => TRUE,
+    'file path' => drupal_get_path('module', 'leanbox_dashboard'),
+    'file' => '/includes/leanbox_dashboard_chart.inc',
+  );
+
+  return $items;
+}
+
+/**
+ * 
+ */
+function party_packing_filter_callback() {
+  module_load_include('inc', 'leanbox_dashboard', 'includes/leanbox_dashboard');
+  $start_date = $_POST['start_date'];
+  $end_date = $_POST['end_date'];
+  $activity_type = $_POST['activity_type'];
+  $output_data = leanbox_dashboard_chart_query_details($activity_type, $start_date, $end_date);
+  drupal_json_output($output_data);
+}
+
+/**
+ * 
+ */
+function leanbox_dashboard_block_info() {
+  $blocks['party_packing'] = array(
+    'info' => t('Party Packing Chart'),
+    'cache' => DRUPAL_NO_CACHE,
+  );
+  $blocks['picking'] = array(
+    'info' => t('Picking Chart'),
+    'cache' => DRUPAL_NO_CACHE,
+  );
+  $blocks['unloading'] = array(
+    'info' => t('Unloading Chart'),
+    'cache' => DRUPAL_NO_CACHE,
+  );
+  return $blocks;
+}
+
+/**
+ * Implements hook_block_view
+ * 
+ */
+function leanbox_dashboard_block_view($delta = '') {
+  // Include leanbox_dashboard inc file
+  module_load_include('inc', 'leanbox_dashboard', 'includes/leanbox_dashboard');
+  $area_definition = array(
+    'width' => 450,
+    'height' => 300,
+    'ch_left' => 80,
+    'ch_top' => 50,
+    'ch_width' => 250,
+    'ch_height' => 200,
+  );
+  switch ($delta) {
+    case 'party_packing':
+
+      if (arg(1) == 'party_packing') {
+        $area_definition = array(
+          'width' => 700,
+          'height' => 400,
+          'ch_left' => 80,
+          'ch_top' => 50,
+          'ch_width' => 500,
+          'ch_height' => 250,
+        );
+      }
+
+      $block['subject'] = 'Party Packing Chart';
+      $data = leanbox_dashboard_chart_query_details('party_packing');
+      $filter_form = drupal_render(drupal_get_form('leanbox_dashboard_chart_filter_partypack_form'));
+      $block['content'] = array(
+        '#markup' => theme('leanbox_dashboard', array('data' => $filter_form)),
+        '#attached' => array(
+          'js' => array(
+            array(
+              'type' => 'external',
+              'data' => 'https://www.gstatic.com/charts/loader.js'
+            ),
+            drupal_get_path('module', 'leanbox_dashboard') . '/js/leanbox_dashboard_partypackingchart.js',
+            array(
+              'data' => array('leanbox_dashboard' => array('party_packing' => $data, 'area_definition' => $area_definition)),
+              'type' => 'setting'
+            ),
+          ),
+        ),
+      );
+      break;
+
+    case 'picking':
+      
+      if (arg(1) == 'picking') {
+        $area_definition = array(
+          'width' => 700,
+          'height' => 400,
+          'ch_left' => 80,
+          'ch_top' => 50,
+          'ch_width' => 500,
+          'ch_height' => 250,
+        );
+      }
+      $block['subject'] = 'Picking Chart';
+      $data = leanbox_dashboard_chart_query_details('picking');
+
+      $filter_form = drupal_render(drupal_get_form('leanbox_dashboard_chart_filter_picking_form'));
+      $block['content'] = array(
+        '#markup' => theme('leanbox_dashboard', array('data' => $filter_form)),
+        '#attached' => array(
+          'js' => array(
+            array(
+              'type' => 'external',
+              'data' => 'https://www.gstatic.com/charts/loader.js'
+            ),
+            drupal_get_path('module', 'leanbox_dashboard') . '/js/leanbox_dashboard_pickingchart.js',
+            array(
+              'data' => array('leanbox_dashboard' => array('picking' => $data, 'area_definition' => $area_definition)),
+              'type' => 'setting'
+            ),
+          ),
+        ),
+      );
+      break;
+    case 'unloading':
+      
+      if (arg(1) == 'unloading') {
+        $area_definition = array(
+          'width' => 700,
+          'height' => 400,
+          'ch_left' => 80,
+          'ch_top' => 50,
+          'ch_width' => 500,
+          'ch_height' => 250,
+        );
+      }
+      $block['subject'] = 'Unloading Chart';
+      $data = leanbox_dashboard_chart_query_details('unloading');
+
+      $filter_form = drupal_render(drupal_get_form('leanbox_dashboard_chart_filter_unloading_form'));
+      $block['content'] = array(
+        '#markup' => theme('leanbox_dashboard', array('data' => $filter_form)),
+        '#attached' => array(
+          'js' => array(
+            array(
+              'type' => 'external',
+              'data' => 'https://www.gstatic.com/charts/loader.js'
+            ),
+            drupal_get_path('module', 'leanbox_dashboard') . '/js/leanbox_dashboard_unloading.js',
+            array(
+              'data' => array('leanbox_dashboard' => array('unloading' => $data, 'area_definition' => $area_definition)),
+              'type' => 'setting'
+            ),
+          ),
+        ),
+      );
+      break;
+  }
+
+  return $block;
+}
+
+/**
+ * Implements hook_theme
+ */
+function leanbox_dashboard_theme() {
+  return array(
+    'leanbox_dashboard' => array(
+      'template' => 'leanbox-dashboard',
+      'variables' => array('data' => NULL),
+    ),
+  );
+}

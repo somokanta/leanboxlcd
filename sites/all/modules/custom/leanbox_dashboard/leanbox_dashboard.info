@@ -1,0 +1,4 @@
+name = leanbox dashboard
+description = containing list of chart blocks for dashboard.
+package = Custom
+core = 7.x

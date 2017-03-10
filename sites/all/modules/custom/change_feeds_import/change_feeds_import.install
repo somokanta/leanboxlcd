@@ -979,3 +979,18 @@ function change_feeds_import_update_7105() {
     db_update('van_cld_data_table')->fields(array('distributor_id' => 60))->condition('id', $val['id'] )->execute();
   }
 }
+
+
+/**
+ *  Implements Hook_Update_7106
+ */
+function change_feeds_import_update_7106() {
+  
+  db_add_field('van_cld_data_table', 'pricelist_group', array(
+    'type' => 'varchar', 
+    'length' => 255,
+    'default' => 0,
+  ));
+  
+ 
+}
