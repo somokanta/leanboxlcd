@@ -424,8 +424,9 @@ function get_todays_picking_created_data($loading_date) {
   $query->condition('n.type', 'picking');
   $query->join('field_data_field_picking_loading_date', 'd', 'd.entity_id = n.nid');
   $query->condition('d.field_picking_loading_date_value', $loading_date, "=");
-  $query->join('field_data_field_picking_status', 's', 's.entity_id = n.nid');
-  $query->join('field_data_field_picking_godown_area_id', 'g', 'g.entity_id = n.nid');
+  $query->leftjoin('field_data_field_picking_status', 's', 's.entity_id = n.nid');
+  $query->leftjoin('field_data_field_picking_godown_area_id', 'g', 'g.entity_id = n.nid');
+  $query->orderBy('g.field_picking_godown_area_id_value', 'ASC');//ORDER BY created
   $query->join('field_data_field_picking_picking_type', 'pt', 'pt.entity_id = n.nid');
   $query->fields('d', array('field_picking_loading_date_value'));
   $query->fields('n', array('nid'));

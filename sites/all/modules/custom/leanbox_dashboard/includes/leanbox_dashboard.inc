@@ -253,7 +253,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start_date = '',
           if ($loading_date >= $start_date && $loading_date <= $end_date) {
             if ($val['field_picking_godown_area_id_value'] == $data_list) {
 
-              $type = (strtolower($val['field_picking_picking_type_value']) == 'Loose') ? 'loose' : 'bulk';
+              $type = (strtolower($val['field_picking_picking_type_value']));
               if (empty($val['field_picking_status_value'])) {
                 $output[$data_list][$type]['not_start'] += 1;
               }
