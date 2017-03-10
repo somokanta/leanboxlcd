@@ -307,7 +307,7 @@ function send_email_daily_data() {
 
 
 
-  $picking_html = "<h3>Picking Status</h3><table border='1' cellpadding='5' cellspacing='0'  style='color:#000; font-size: 13px; font-family: arial'><th>Godown Area Id</th><th>Picking Type</th><th>Created</th><th>Completed</th><th>Percentage Completion</th>";
+  $picking_html = "<h3>Picking Status</h3><table border='1' cellpadding='5' cellspacing='0'  style='color:#000; font-size: 13px; font-family: arial'><th>Godown Area Id</th><th>Picking Type</th><th>Created</th><th>Completed</th><th>% Completion</th>";
   foreach ($picking as $key => $value) {
 
     $picking_loose = $value['picking_loose'];
