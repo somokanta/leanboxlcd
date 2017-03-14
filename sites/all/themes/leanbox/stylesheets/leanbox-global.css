@@ -220,11 +220,16 @@ ul li a, ul li.leaf a, .block ul li a, .block ul li.leaf a, ol li a, ol li.leaf 
 }
 
 /* line 102, ../sass/leanbox-global.scss */
+body {
+  padding-bottom: 70px;
+}
+
+/* line 106, ../sass/leanbox-global.scss */
 ul.list-inline {
   margin: 0.5em 0 1em;
   padding: 0 0 0 1.0em;
 }
-/* line 106, ../sass/leanbox-global.scss */
+/* line 110, ../sass/leanbox-global.scss */
 ul.list-inline li {
   display: inline-block;
   padding-left: 5px;
@@ -233,17 +238,17 @@ ul.list-inline li {
   list-style-image: none;
 }
 
-/* line 115, ../sass/leanbox-global.scss */
+/* line 119, ../sass/leanbox-global.scss */
 .nav > li > a:hover, .nav > li > a:focus {
   background-color: transparent;
 }
 
-/* line 119, ../sass/leanbox-global.scss */
+/* line 123, ../sass/leanbox-global.scss */
 ul.contextual-links, .block ul.contextual-links, ol.contextual-links {
   margin: 0;
   padding: 0;
 }
-/* line 123, ../sass/leanbox-global.scss */
+/* line 127, ../sass/leanbox-global.scss */
 ul.contextual-links li, ul.contextual-links li.leaf, .block ul.contextual-links li, .block ul.contextual-links li.leaf, ol.contextual-links li, ol.contextual-links li.leaf {
   list-style-image: none;
   list-style-type: none;
@@ -251,44 +256,44 @@ ul.contextual-links li, ul.contextual-links li.leaf, .block ul.contextual-links 
   padding: 0;
 }
 
-/* line 131, ../sass/leanbox-global.scss */
+/* line 135, ../sass/leanbox-global.scss */
 ul.tabs.primary {
   white-space: normal;
 }
 
-/* line 135, ../sass/leanbox-global.scss */
+/* line 139, ../sass/leanbox-global.scss */
 .tabs--primary.nav.nav-tabs {
   margin: 0 0 15px;
 }
-/* line 138, ../sass/leanbox-global.scss */
+/* line 142, ../sass/leanbox-global.scss */
 .tabs--primary.nav.nav-tabs li {
   padding: 0;
 }
-/* line 141, ../sass/leanbox-global.scss */
+/* line 145, ../sass/leanbox-global.scss */
 .tabs--primary.nav.nav-tabs li a {
   padding: 7px 18px;
   color: #666;
 }
-/* line 145, ../sass/leanbox-global.scss */
+/* line 149, ../sass/leanbox-global.scss */
 .tabs--primary.nav.nav-tabs li a.active {
   color: #1e419b;
 }
 
-/* line 153, ../sass/leanbox-global.scss */
+/* line 157, ../sass/leanbox-global.scss */
 .pagination > li {
   display: inline !important;
   list-style-type: none !important;
 }
-/* line 157, ../sass/leanbox-global.scss */
+/* line 161, ../sass/leanbox-global.scss */
 .pagination > li a {
   padding: 6px 12px !important;
 }
 
-/* line 163, ../sass/leanbox-global.scss */
+/* line 167, ../sass/leanbox-global.scss */
 table {
   border: 0;
 }
-/* line 168, ../sass/leanbox-global.scss */
+/* line 172, ../sass/leanbox-global.scss */
 table > thead > tr > th {
   border: 0;
   border-right: 1px solid #ddd;
@@ -301,11 +306,11 @@ table > thead > tr > th {
   padding: 8px;
   min-width: 120px;
 }
-/* line 180, ../sass/leanbox-global.scss */
+/* line 184, ../sass/leanbox-global.scss */
 table > thead > tr > th a {
   color: #000;
 }
-/* line 183, ../sass/leanbox-global.scss */
+/* line 187, ../sass/leanbox-global.scss */
 table > thead > tr > th .img-responsive {
   display: inline-block;
   margin-left: 10px;
@@ -313,11 +318,11 @@ table > thead > tr > th .img-responsive {
   background: #fff;
   box-sizing: content-box;
 }
-/* line 194, ../sass/leanbox-global.scss */
+/* line 198, ../sass/leanbox-global.scss */
 table > tbody {
   border: 0;
 }
-/* line 197, ../sass/leanbox-global.scss */
+/* line 201, ../sass/leanbox-global.scss */
 table > tbody > tr > td {
   border: 1px solid #ddd;
   color: #000;
@@ -328,37 +333,37 @@ table > tbody > tr > td {
   border-right: 0;
   min-width: 120px;
 }
-/* line 207, ../sass/leanbox-global.scss */
+/* line 211, ../sass/leanbox-global.scss */
 table > tbody > tr > td:first-child {
   border-left: 0;
 }
-/* line 211, ../sass/leanbox-global.scss */
+/* line 215, ../sass/leanbox-global.scss */
 table > tbody > tr > td:last-child {
   border-right: 0;
 }
-/* line 217, ../sass/leanbox-global.scss */
+/* line 221, ../sass/leanbox-global.scss */
 table > tbody > tr:last-child td {
   border-bottom: 0;
 }
 
-/* line 226, ../sass/leanbox-global.scss */
+/* line 230, ../sass/leanbox-global.scss */
 .ui-datepicker-calendar th, .ui-datepicker-calendar td {
   min-width: inherit !important;
 }
 
-/* line 234, ../sass/leanbox-global.scss */
+/* line 238, ../sass/leanbox-global.scss */
 .table > thead > tr > th {
   vertical-align: middle;
   border-bottom: 0;
   min-width: 90px;
 }
 
-/* line 245, ../sass/leanbox-global.scss */
+/* line 249, ../sass/leanbox-global.scss */
 .form-autocomplete .dropdown-menu ul, .form-autocomplete .dropdown-menu li {
   list-style: none;
 }
 
-/* line 252, ../sass/leanbox-global.scss */
+/* line 256, ../sass/leanbox-global.scss */
 .label {
   color: #000;
   font-size: 14px;
@@ -368,7 +373,7 @@ table > tbody > tr:last-child td {
 
 /*End Body & Other general elements*/
 /*Buttons & message*/
-/* line 262, ../sass/leanbox-global.scss */
+/* line 266, ../sass/leanbox-global.scss */
 .btn, .btn-default {
   background: none repeat scroll 0 0 #1e419b;
   border: 0 none;
@@ -387,183 +392,188 @@ table > tbody > tr:last-child td {
   z-index: 1;
   font-size: 1.1rem;
 }
-/* line 278, ../sass/leanbox-global.scss */
+/* line 282, ../sass/leanbox-global.scss */
 .btn:hover, .btn:focus, .btn:active, .btn.active, .btn .open .dropdown-toggle.btn-default, .btn-default:hover, .btn-default:focus, .btn-default:active, .btn-default.active, .btn-default .open .dropdown-toggle.btn-default {
   background-color: #000 !important;
   /*!important to override default theme css*/
   color: #fff;
 }
 
-/* line 286, ../sass/leanbox-global.scss */
+/* line 290, ../sass/leanbox-global.scss */
 .btn-default:focus, .btn-default.focus {
   transition: all 0.5s linear 0s;
   background-color: #666;
 }
 
-/* line 291, ../sass/leanbox-global.scss */
+/* line 295, ../sass/leanbox-global.scss */
 a.btn:focus, a.btn:hover {
   transition: all 0.5s linear 0s;
   background-color: #e0b036;
 }
 
-/* line 296, ../sass/leanbox-global.scss */
+/* line 300, ../sass/leanbox-global.scss */
 div.error, table tr.error {
   background-color: transparent;
   color: #a94442;
 }
 
-/* line 301, ../sass/leanbox-global.scss */
+/* line 305, ../sass/leanbox-global.scss */
 .alert {
   padding: 8px;
 }
 
-/* line 305, ../sass/leanbox-global.scss */
+/* line 309, ../sass/leanbox-global.scss */
 input[type="text"], input[type="password"], input[type="email"], select, select.form-select {
   height: 33px;
   line-height: 33px;
   border: 1px solid #ccc;
 }
 
-/* line 312, ../sass/leanbox-global.scss */
+/* line 316, ../sass/leanbox-global.scss */
 .input-group .form-control {
   z-index: 1;
 }
 
-/* line 317, ../sass/leanbox-global.scss */
+/* line 321, ../sass/leanbox-global.scss */
 textarea {
   border: 1px solid #ccc;
   line-height: 18px;
 }
 
-/* line 323, ../sass/leanbox-global.scss */
+/* line 327, ../sass/leanbox-global.scss */
 header.container {
   margin: 0;
 }
-/* line 328, ../sass/leanbox-global.scss */
+/* line 332, ../sass/leanbox-global.scss */
 header#navbar.container-fluid {
   margin-top: 0;
   margin-top: 0;
   background: #FFF;
   box-shadow: 0 0 9px #e2dfdf;
 }
-/* line 334, ../sass/leanbox-global.scss */
+/* line 338, ../sass/leanbox-global.scss */
 header#navbar.container-fluid .container-fluid {
   /* max-width: 1300px; */
   width: 96%;
   margin: 0 auto;
 }
-/* line 342, ../sass/leanbox-global.scss */
+/* line 346, ../sass/leanbox-global.scss */
 header .container {
   max-width: 1300px;
   margin: 0 auto;
 }
-/* line 349, ../sass/leanbox-global.scss */
+/* line 353, ../sass/leanbox-global.scss */
 header .navbar-header .logo img {
   max-height: 75px;
 }
-/* line 355, ../sass/leanbox-global.scss */
+/* line 359, ../sass/leanbox-global.scss */
 header #navbar-collapse #block-block-1 {
   float: right;
 }
-/* line 357, ../sass/leanbox-global.scss */
+/* line 361, ../sass/leanbox-global.scss */
 header #navbar-collapse #block-block-1 .hul-logo {
-  margin-top: 10px;
+  margin: 10px 0;
 }
-/* line 359, ../sass/leanbox-global.scss */
+/* line 363, ../sass/leanbox-global.scss */
 header #navbar-collapse #block-block-1 .hul-logo img {
   max-height: 70px;
 }
-/* line 364, ../sass/leanbox-global.scss */
+/* line 368, ../sass/leanbox-global.scss */
 header #navbar-collapse #block-system-user-menu {
   margin-top: 28px;
   float: right;
   margin-right: 20px;
 }
-/* line 368, ../sass/leanbox-global.scss */
+/* line 372, ../sass/leanbox-global.scss */
 header #navbar-collapse #block-system-user-menu .menu {
   margin: 0;
   padding: 0;
 }
-/* line 370, ../sass/leanbox-global.scss */
+/* line 374, ../sass/leanbox-global.scss */
 header #navbar-collapse #block-system-user-menu .menu li {
   list-style-type: none;
   margin: 0;
   padding: 0;
   display: inline-block;
 }
-/* line 375, ../sass/leanbox-global.scss */
+/* line 379, ../sass/leanbox-global.scss */
 header #navbar-collapse #block-system-user-menu .menu li.last a {
   border-right: 0;
 }
-/* line 379, ../sass/leanbox-global.scss */
+/* line 383, ../sass/leanbox-global.scss */
 header #navbar-collapse #block-system-user-menu .menu li a {
   border-right: 1px solid #adadad;
 }
 
-/* line 389, ../sass/leanbox-global.scss */
+/* line 393, ../sass/leanbox-global.scss */
 body > .main-container {
   /* max-width: 1300px; */
   width: 96%;
   margin: 0 auto;
 }
-/* line 396, ../sass/leanbox-global.scss */
+/* line 400, ../sass/leanbox-global.scss */
 body > .main-container .region-content form .form-type-file .form-file {
   height: auto;
 }
 
-/* line 405, ../sass/leanbox-global.scss */
+/* line 410, ../sass/leanbox-global.scss */
+#table-div .table-responsive {
+  width: 100%;
+}
+
+/* line 415, ../sass/leanbox-global.scss */
 .preview_table {
   width: 100%;
 }
-/* line 408, ../sass/leanbox-global.scss */
+/* line 418, ../sass/leanbox-global.scss */
 .preview_table td {
   padding: 0 8px;
   border: 0;
 }
-/* line 412, ../sass/leanbox-global.scss */
+/* line 422, ../sass/leanbox-global.scss */
 .preview_table td h3 {
   font-weight: normal;
   margin: 2px 0;
 }
 
-/* line 420, ../sass/leanbox-global.scss */
+/* line 430, ../sass/leanbox-global.scss */
 [id^="trip-delete-form"] .form-item-trip-id, [id^="get-data-of-trip-id-form"] .form-item-trip-id {
   width: 33.33%;
   float: left;
 }
-/* line 424, ../sass/leanbox-global.scss */
+/* line 434, ../sass/leanbox-global.scss */
 [id^="trip-delete-form"] .form-item-trip-id label, [id^="trip-delete-form"] .form-item-trip-id input[type="text"], [id^="trip-delete-form"] .form-item-trip-id select, [id^="get-data-of-trip-id-form"] .form-item-trip-id label, [id^="get-data-of-trip-id-form"] .form-item-trip-id input[type="text"], [id^="get-data-of-trip-id-form"] .form-item-trip-id select {
   width: 100%;
   text-align: left;
 }
-/* line 428, ../sass/leanbox-global.scss */
+/* line 438, ../sass/leanbox-global.scss */
 [id^="trip-delete-form"] .form-item-trip-id label.error, [id^="trip-delete-form"] .form-item-trip-id input[type="text"].error, [id^="trip-delete-form"] .form-item-trip-id select.error, [id^="get-data-of-trip-id-form"] .form-item-trip-id label.error, [id^="get-data-of-trip-id-form"] .form-item-trip-id input[type="text"].error, [id^="get-data-of-trip-id-form"] .form-item-trip-id select.error {
   margin-top: 0;
 }
-/* line 434, ../sass/leanbox-global.scss */
+/* line 444, ../sass/leanbox-global.scss */
 [id^="trip-delete-form"] .btn, [id^="get-data-of-trip-id-form"] .btn {
   float: left;
   margin-top: 23px;
   margin-left: 15px;
 }
 
-/* line 442, ../sass/leanbox-global.scss */
+/* line 452, ../sass/leanbox-global.scss */
 [id^="dispatch-planning-form"] .textfield-wrapper {
   margin: 5px -15px 0;
   clear: both;
 }
-/* line 446, ../sass/leanbox-global.scss */
+/* line 456, ../sass/leanbox-global.scss */
 [id^="dispatch-planning-form"] .textfield-wrapper.bottom-wrapper {
   margin-bottom: 10px;
 }
-/* line 451, ../sass/leanbox-global.scss */
+/* line 461, ../sass/leanbox-global.scss */
 [id^="dispatch-planning-form"] .or {
   text-align: center;
   position: relative;
   clear: both;
   margin: 18px 0;
 }
-/* line 457, ../sass/leanbox-global.scss */
+/* line 467, ../sass/leanbox-global.scss */
 [id^="dispatch-planning-form"] .or span {
   display: inline-block;
   background: #666;
@@ -578,7 +588,7 @@ body > .main-container .region-content form .form-type-file .form-file {
   border-bottom: 0;
   line-height: 32px;
 }
-/* line 472, ../sass/leanbox-global.scss */
+/* line 482, ../sass/leanbox-global.scss */
 [id^="dispatch-planning-form"] .or:before {
   content: "";
   position: absolute;
@@ -589,23 +599,23 @@ body > .main-container .region-content form .form-type-file .form-file {
   background: #666;
   z-index: -1;
 }
-/* line 485, ../sass/leanbox-global.scss */
+/* line 495, ../sass/leanbox-global.scss */
 [id^="dispatch-planning-form"] [id^="edit-van-submit"] {
   margin: 0;
   margin-top: 15px;
   float: right;
   margin-right: 15px;
 }
-/* line 492, ../sass/leanbox-global.scss */
+/* line 502, ../sass/leanbox-global.scss */
 [id^="dispatch-planning-form"] [id^="edit-submit"] {
   margin-top: 8px;
 }
-/* line 496, ../sass/leanbox-global.scss */
+/* line 506, ../sass/leanbox-global.scss */
 [id^="dispatch-planning-form"] [id^="edit-bill-number-submit"] {
   float: left;
   margin-top: 22px;
 }
-/* line 503, ../sass/leanbox-global.scss */
+/* line 513, ../sass/leanbox-global.scss */
 [id^="dispatch-planning-form"] .container-inline-date, [id^="dispatch-planning-form"] #van-wrapper, [id^="dispatch-planning-form"] #beat-wrapper, [id^="dispatch-planning-form"] .form-item-bill-number, [id^="dispatch-planning-form"] #hht-id-wrapper, [id^="dispatch-planning-form"] #cashier-wrapper, [id^="dispatch-planning-form"] #vehicle-wrapper {
   width: 33.33%;
   padding: 0 15px;
@@ -613,20 +623,20 @@ body > .main-container .region-content form .form-type-file .form-file {
   display: inline-block;
   vertical-align: top;
 }
-/* line 510, ../sass/leanbox-global.scss */
+/* line 520, ../sass/leanbox-global.scss */
 [id^="dispatch-planning-form"] .container-inline-date label, [id^="dispatch-planning-form"] .container-inline-date input[type="text"], [id^="dispatch-planning-form"] .container-inline-date select, [id^="dispatch-planning-form"] #van-wrapper label, [id^="dispatch-planning-form"] #van-wrapper input[type="text"], [id^="dispatch-planning-form"] #van-wrapper select, [id^="dispatch-planning-form"] #beat-wrapper label, [id^="dispatch-planning-form"] #beat-wrapper input[type="text"], [id^="dispatch-planning-form"] #beat-wrapper select, [id^="dispatch-planning-form"] .form-item-bill-number label, [id^="dispatch-planning-form"] .form-item-bill-number input[type="text"], [id^="dispatch-planning-form"] .form-item-bill-number select, [id^="dispatch-planning-form"] #hht-id-wrapper label, [id^="dispatch-planning-form"] #hht-id-wrapper input[type="text"], [id^="dispatch-planning-form"] #hht-id-wrapper select, [id^="dispatch-planning-form"] #cashier-wrapper label, [id^="dispatch-planning-form"] #cashier-wrapper input[type="text"], [id^="dispatch-planning-form"] #cashier-wrapper select, [id^="dispatch-planning-form"] #vehicle-wrapper label, [id^="dispatch-planning-form"] #vehicle-wrapper input[type="text"], [id^="dispatch-planning-form"] #vehicle-wrapper select {
   width: 100%;
   text-align: left;
 }
-/* line 514, ../sass/leanbox-global.scss */
+/* line 524, ../sass/leanbox-global.scss */
 [id^="dispatch-planning-form"] .container-inline-date label.error, [id^="dispatch-planning-form"] .container-inline-date input[type="text"].error, [id^="dispatch-planning-form"] .container-inline-date select.error, [id^="dispatch-planning-form"] #van-wrapper label.error, [id^="dispatch-planning-form"] #van-wrapper input[type="text"].error, [id^="dispatch-planning-form"] #van-wrapper select.error, [id^="dispatch-planning-form"] #beat-wrapper label.error, [id^="dispatch-planning-form"] #beat-wrapper input[type="text"].error, [id^="dispatch-planning-form"] #beat-wrapper select.error, [id^="dispatch-planning-form"] .form-item-bill-number label.error, [id^="dispatch-planning-form"] .form-item-bill-number input[type="text"].error, [id^="dispatch-planning-form"] .form-item-bill-number select.error, [id^="dispatch-planning-form"] #hht-id-wrapper label.error, [id^="dispatch-planning-form"] #hht-id-wrapper input[type="text"].error, [id^="dispatch-planning-form"] #hht-id-wrapper select.error, [id^="dispatch-planning-form"] #cashier-wrapper label.error, [id^="dispatch-planning-form"] #cashier-wrapper input[type="text"].error, [id^="dispatch-planning-form"] #cashier-wrapper select.error, [id^="dispatch-planning-form"] #vehicle-wrapper label.error, [id^="dispatch-planning-form"] #vehicle-wrapper input[type="text"].error, [id^="dispatch-planning-form"] #vehicle-wrapper select.error {
   margin-top: 0;
 }
-/* line 520, ../sass/leanbox-global.scss */
+/* line 530, ../sass/leanbox-global.scss */
 [id^="dispatch-planning-form"] .form-item-loading-date-date {
   position: relative;
 }
-/* line 522, ../sass/leanbox-global.scss */
+/* line 532, ../sass/leanbox-global.scss */
 [id^="dispatch-planning-form"] .form-item-loading-date-date .ajax-progress-throbber {
   position: absolute;
   top: 50%;
@@ -634,15 +644,15 @@ body > .main-container .region-content form .form-type-file .form-file {
   width: auto;
   margin-top: -9px;
 }
-/* line 532, ../sass/leanbox-global.scss */
+/* line 542, ../sass/leanbox-global.scss */
 [id^="dispatch-planning-form"] .container-inline-date .form-item-loading-date {
   margin: 0;
 }
-/* line 535, ../sass/leanbox-global.scss */
+/* line 545, ../sass/leanbox-global.scss */
 [id^="dispatch-planning-form"] .container-inline-date div {
   width: 100%;
 }
-/* line 541, ../sass/leanbox-global.scss */
+/* line 551, ../sass/leanbox-global.scss */
 [id^="dispatch-planning-form"] #table-div {
   width: 100%;
   clear: both;
@@ -703,98 +713,106 @@ body > .main-container .region-content form .form-type-file .form-file {
 
 } */
 /*End Buttons & message*/
-/* line 606, ../sass/leanbox-global.scss */
+/* line 616, ../sass/leanbox-global.scss */
 .views-exposed-form {
   margin-bottom: 25px;
 }
-/* line 608, ../sass/leanbox-global.scss */
+/* line 618, ../sass/leanbox-global.scss */
 .views-exposed-form .views-exposed-widget {
   width: 25%;
   padding: .6em 1.5em 0 0;
 }
-/* line 612, ../sass/leanbox-global.scss */
+/* line 622, ../sass/leanbox-global.scss */
 .views-exposed-form .views-exposed-widget.views-submit-button {
   clear: both;
 }
-/* line 614, ../sass/leanbox-global.scss */
+/* line 624, ../sass/leanbox-global.scss */
 .views-exposed-form .views-exposed-widget.views-submit-button .btn {
   margin-top: 0;
 }
-/* line 619, ../sass/leanbox-global.scss */
+/* line 629, ../sass/leanbox-global.scss */
 .views-exposed-form .views-exposed-widget.date_field_parent {
   width: 50%;
 }
-/* line 623, ../sass/leanbox-global.scss */
+/* line 633, ../sass/leanbox-global.scss */
 .views-exposed-form .views-exposed-widget.date_field_parent .views-widget > div {
   width: 50%;
   clear: none;
   float: left;
 }
-/* line 628, ../sass/leanbox-global.scss */
+/* line 638, ../sass/leanbox-global.scss */
 .views-exposed-form .views-exposed-widget.date_field_parent .views-widget > div:first-child {
   padding-right: 0.75em;
 }
-/* line 632, ../sass/leanbox-global.scss */
+/* line 642, ../sass/leanbox-global.scss */
 .views-exposed-form .views-exposed-widget.date_field_parent .views-widget > div:nth-child(2) {
   padding-left: 0.75em;
 }
-/* line 640, ../sass/leanbox-global.scss */
+/* line 650, ../sass/leanbox-global.scss */
 .views-exposed-form .views-exposed-widget .views-widget div {
   width: 100%;
 }
-/* line 646, ../sass/leanbox-global.scss */
+/* line 656, ../sass/leanbox-global.scss */
 .views-exposed-form .views-exposed-widget .views-widget .container-inline-date {
   margin-bottom: 15px;
 }
-/* line 651, ../sass/leanbox-global.scss */
+/* line 661, ../sass/leanbox-global.scss */
 .views-exposed-form .views-exposed-widget .views-widget .container-inline-date .form-item input, .views-exposed-form .views-exposed-widget .views-widget .container-inline-date .form-item select, .views-exposed-form .views-exposed-widget .views-widget .container-inline-date .form-item option {
   margin-right: 0;
   margin-left: 5px;
   width: 100%;
 }
-/* line 659, ../sass/leanbox-global.scss */
+/* line 669, ../sass/leanbox-global.scss */
 .views-exposed-form .views-exposed-widget .views-widget .container-inline-date .form-group label {
   float: left;
   width: 33%;
 }
-/* line 663, ../sass/leanbox-global.scss */
+/* line 673, ../sass/leanbox-global.scss */
 .views-exposed-form .views-exposed-widget .views-widget .container-inline-date .form-group div {
   float: left;
   width: 100%;
 }
-/* line 671, ../sass/leanbox-global.scss */
+/* line 678, ../sass/leanbox-global.scss */
+.views-exposed-form .views-exposed-widget .views-widget .container-inline-date .form-group .date-padding {
+  width: 67%;
+}
+/* line 681, ../sass/leanbox-global.scss */
+.views-exposed-form .views-exposed-widget .views-widget .container-inline-date .form-group .date-padding input.form-text {
+  margin-left: 0;
+}
+/* line 689, ../sass/leanbox-global.scss */
 .views-exposed-form .views-exposed-widget .btn {
   margin-top: 22px;
 }
 
-/* line 681, ../sass/leanbox-global.scss */
+/* line 699, ../sass/leanbox-global.scss */
 .pagination > .active > a:hover, .pagination > .active > a:focus {
   background: #1e419b;
 }
-/* line 685, ../sass/leanbox-global.scss */
+/* line 703, ../sass/leanbox-global.scss */
 .pagination > .active span {
   background: #1e419b;
 }
-/* line 692, ../sass/leanbox-global.scss */
+/* line 710, ../sass/leanbox-global.scss */
 .pagination li a, .pagination li span {
   color: #1e419b;
 }
 
-/* line 701, ../sass/leanbox-global.scss */
+/* line 719, ../sass/leanbox-global.scss */
 .page-leanbox-chart-details .region-content form .container-inline-date {
   width: 25%;
   display: inline-block;
   vertical-align: top;
 }
-/* line 706, ../sass/leanbox-global.scss */
+/* line 724, ../sass/leanbox-global.scss */
 .page-leanbox-chart-details .region-content form .container-inline-date .form-item .date-padding {
   float: none;
 }
-/* line 709, ../sass/leanbox-global.scss */
+/* line 727, ../sass/leanbox-global.scss */
 .page-leanbox-chart-details .region-content form .container-inline-date .form-item .date-padding .form-item .control-label {
   display: none;
 }
-/* line 716, ../sass/leanbox-global.scss */
+/* line 734, ../sass/leanbox-global.scss */
 .page-leanbox-chart-details .region-content form #party-packing-submit {
   width: 25%;
   display: inline-block;
@@ -802,72 +820,72 @@ body > .main-container .region-content form .form-type-file .form-file {
   padding: 20px 0 0;
 }
 
-/* line 728, ../sass/leanbox-global.scss */
+/* line 746, ../sass/leanbox-global.scss */
 .page-node-add .node-form .form-group {
   width: 33.33%;
 }
-/* line 731, ../sass/leanbox-global.scss */
+/* line 749, ../sass/leanbox-global.scss */
 .page-node-add .node-form .form-group .form-group {
   width: 100%;
 }
-/* line 735, ../sass/leanbox-global.scss */
+/* line 753, ../sass/leanbox-global.scss */
 .page-node-add .node-form .form-group label, .page-node-add .node-form .form-group .form-textarea-wrapper {
   width: 100%;
 }
-/* line 739, ../sass/leanbox-global.scss */
+/* line 757, ../sass/leanbox-global.scss */
 .page-node-add .node-form .form-group .form-textarea {
   width: 100%;
 }
-/* line 744, ../sass/leanbox-global.scss */
+/* line 762, ../sass/leanbox-global.scss */
 .page-node-add .node-form .form-group .filter-wrapper .filter-help {
   margin-bottom: 12px;
 }
 
-/* line 756, ../sass/leanbox-global.scss */
+/* line 774, ../sass/leanbox-global.scss */
 .view-filters .views-exposed-form .views-widget-filter-field_order_date_value .views-widget [id^="edit-field-order-date-value-min-wrapper"] {
   display: inline-block;
 }
 
-/* line 766, ../sass/leanbox-global.scss */
+/* line 784, ../sass/leanbox-global.scss */
 form div > a {
   display: inline-block;
   margin-bottom: 5px;
 }
 
-/* line 774, ../sass/leanbox-global.scss */
+/* line 792, ../sass/leanbox-global.scss */
 .form-type-file {
   width: 33.33%;
 }
 
-/* line 778, ../sass/leanbox-global.scss */
+/* line 796, ../sass/leanbox-global.scss */
 .feeds-file-info {
   border-right: 0;
 }
 
-/* line 784, ../sass/leanbox-global.scss */
+/* line 802, ../sass/leanbox-global.scss */
 .not-logged-in section ul.nav-tabs, .not-logged-in section [id^="user-login"], .not-logged-in section [id^="user-pass"] {
   width: 38%;
   margin: 0 auto 15px !important;
   float: none;
 }
 
-/* line 795, ../sass/leanbox-global.scss */
+/* line 813, ../sass/leanbox-global.scss */
 .ui-datepicker-calendar tbody tr td {
   padding: 1px !important;
 }
 
-/* line 803, ../sass/leanbox-global.scss */
+/* line 821, ../sass/leanbox-global.scss */
 .region-content .block-leanbox-dashboard {
   width: 48%;
   display: inline-block;
   vertical-align: top;
 }
-/* line 807, ../sass/leanbox-global.scss */
+/* line 825, ../sass/leanbox-global.scss */
 .region-content .block-leanbox-dashboard.contextual-links-region {
   width: 50%;
   float: left;
 }
-/* line 811, ../sass/leanbox-global.scss */
+/* line 829, ../sass/leanbox-global.scss */
 .region-content .block-leanbox-dashboard.contextual-links-region div[dir="ltr"] {
   width: 100% !important;
 }

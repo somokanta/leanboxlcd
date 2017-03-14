@@ -99,6 +99,10 @@ ul, .block ul, ol, .list-inline {
     }
 }
 
+body{
+    padding-bottom: 70px;
+}
+
 ul.list-inline {
     margin: 0.5em 0 1em;
     padding: 0 0 0 1.0em;
@@ -355,7 +359,7 @@ header{
         #block-block-1 {
             float: right;
             .hul-logo {
-                margin-top: 10px;
+                margin: 10px 0;
                 img {
                     max-height: 70px;
                 }
@@ -399,6 +403,12 @@ body{
                 }
             }
         }
+    }
+}
+
+#table-div{
+    .table-responsive{
+        width: 100%;
     }
 }
 
@@ -663,6 +673,14 @@ body{
                     div{
                         float: left;
                         width: 100%;
+                    }
+
+                    .date-padding{
+                        width: 67%;
+
+                        input.form-text{
+                            margin-left: 0;
+                        }
                     }
                 }
             }
