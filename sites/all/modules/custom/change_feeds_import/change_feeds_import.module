@@ -281,7 +281,7 @@ function send_email_daily_data() {
 
   $total_party_packing_count = ($non_pp_count + $pp_count);
   $total_completed_party_packing_count = ($non_pp_completed_count + $pp_completed_count);
-  $total_result_perc = $pp_percentage = round(($total_completed_party_packing_count / $total_party_packing_count) * 100);
+  $total_result_perc  = round(($total_completed_party_packing_count / $total_party_packing_count) * 100);
   $party_packing_html = "<h3>Party Packing Status</h3>
 <h4>PARTY PACKING CHECK : YES</h4><table border='1' cellpadding='5' cellspacing='0'  style='color:#000; font-size: 13px; font-family: arial' ><th>Party Packing</th><th>Created</th><th>Completed</th><th>% Completion</th>
 <tr>
@@ -300,7 +300,7 @@ function send_email_daily_data() {
 <td>Total Result</td>
 <td>$total_party_packing_count</td>
 <td>$total_completed_party_packing_count</td>
-<td>$pp_percentage %</td>
+<td>$total_result_perc %</td>
 </tr>
 </table>";
 
