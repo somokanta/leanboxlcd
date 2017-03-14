@@ -38,7 +38,7 @@ class header_handler_custom_field extends views_handler_field {
 
     if (!empty($result)) {
       $trip_execution_date = $result['field_trip_executon_date_value'];
-      $hht_id = $result['field_hht_id_nid'];
+      $hht_id = $result['title'];
       $vehicle_no = $result['field_vehicle_no_value'];
       $bill_count = $result['field_bill_count_value'];
       $cashier_name = $result['field_cashier_name_value'];
@@ -113,11 +113,13 @@ function get_data_from_trip_id($trip_id) {
   $query1->addTag('node_distributor_access');
   $query1->join('field_data_field_trip_executon_date', 'trip_exe', 'trip_exe.entity_id = n.nid');
   $query1->join('field_data_field_hht_id', 'hht', 'hht.entity_id = n.nid');
+  $query1->join('node', 'dd', 'dd.nid = hht.field_hht_id_nid');
   $query1->join('field_data_field_vehicle_no', 've', 've.entity_id = n.nid');
   $query1->join('field_data_field_bill_count', 'bill', 'bill.entity_id = n.nid');
   $query1->join('field_data_field_cashier_name', 'cash', 'cash.entity_id = n.nid');
   $query1->fields('trip_exe', array('	field_trip_executon_date_value'));
   $query1->fields('hht', array('field_hht_id_nid'));
+  $query1->fields('dd', array('title'));
   $query1->fields('ve', array('field_vehicle_no_value'));
   $query1->fields('bill', array('field_bill_count_value'));
   $query1->fields('cash', array('field_cashier_name_value'));
