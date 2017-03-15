@@ -138,7 +138,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start_date = '',
     $start_date = strtotime($start_date);
   }
   else {
-    // $time = strtotime('-20 days');
+    //$time = strtotime('-60 days');
     $time = strtotime(date('Y-m-d'));
     $start_date = strtotime(date("Y-m-d", $time));
   }
@@ -197,6 +197,9 @@ function leanbox_dashboard_chart_query_details($activity_type, $start_date = '',
       }
 
       foreach ($output as $key => $val) {
+        if ($val['not_start'] == 0 && $val['in_prg'] == 0 && $val['comp'] == 0) {
+          continue;
+        }
         $data1[] = array($key, $val['not_start'], $val['in_prg'], $val['comp']);
       }
     }
@@ -267,9 +270,20 @@ function leanbox_dashboard_chart_query_details($activity_type, $start_date = '',
           }
         }
       }
-
       foreach ($output as $key => $val) {
         foreach ($val as $key1 => $val1) {
+          if ($val1['not_start'] == 0 && $val1['in_prg'] == 0 && $val1['comp'] == 0) {
+            continue;
+          }
+//           if ($val1['not_start'] == 0 ) {
+//            $val1['not_start'] = NULL;
+//          }
+//          else if($val1['in_prg'] == 0 ) {
+//             $val1['in_prg'] = NULL;
+//          }
+//          else if($val1['comp'] == 0) {
+//             $val1['comp'] = NULL;
+//          }
           $data1[] = array($key . ' ' . $key1, $val1['not_start'], $val1['in_prg'], $val1['comp']);
         }
       }
@@ -309,7 +323,12 @@ function leanbox_dashboard_chart_query_details($activity_type, $start_date = '',
           }
         }
       }
-      $output1[] = array('Unloading', $output['not_start'], $output['in_prg'], $output['comp']);
+      if ($output['not_start'] == 0 && $output['in_prg'] == 0 && $output['comp'] == 0) {
+        $output1[] = array('No Result Found for Unloading', 0, 0, 0);
+      }
+      else {
+        $output1[] = array('Unloading', $output['not_start'], $output['in_prg'], $output['comp']);
+      }
     }
     else {
       $output1[] = array('No Result Found for Unloading', 0, 0, 0);
