@@ -1217,7 +1217,7 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
     $resurce_type_value = $entity->field_resource_type[LANGUAGE_NONE][0]['value'];
     $res = modify_views_forms_master_feed_validate($resurce_type_value, 'resource_type');
     if (empty($res)) {
-      drupal_set_message("$resurce_type_value does not exist in Resource type Master", 'error');
+      drupal_set_message("$resurce_type_value does not exist in Resource type", 'error');
       $entity->feeds_item->skip = TRUE;
     }
   }
@@ -1314,12 +1314,12 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
 //    }
   }
   if ($entity->type == 'hul_code_master') {
-    $title = $entity->title;
-    $res = modify_views_forms_master_feed_validate($entity->title, 'hul_code_master');
-    if (!empty($res)) {
-      drupal_set_message("$title already exist in hul code master", 'error');
-      $entity->feeds_item->skip = TRUE;
-    }
+//    $title = $entity->title;
+//    $res = modify_views_forms_master_feed_validate($entity->title, 'hul_code_master');
+//    if (!empty($res)) {
+//      drupal_set_message("$title already exist in hul code master", 'error');
+//      $entity->feeds_item->skip = TRUE;
+//    }
   }
 
   if ($entity->type == 'outlet_master') {
@@ -1380,6 +1380,25 @@ function change_feeds_import_node_presave($node) {
   }
   if (!empty($distributor_id)) {
     $node->uid = $distributor_id;
+  }
+  
+  if(!empty($node->field_picking_start_time['und']) && !empty($node->field_picking_end_time['und'])) {
+    $node->field_picking_status[LANGUAGE_NONE][0]['value'] = 2;
+  }
+  if (!empty($node->field_picking_start_time['und']) && empty($node->field_picking_end_time['und'])) {
+    $node->field_picking_status[LANGUAGE_NONE][0]['value'] = 1;
+  }
+  if(!empty($node->field_party_packing_start_time['und']) && !empty($node->field_party_packing_end_time['und'])) {
+    $node->field__party_packingstatus[LANGUAGE_NONE][0]['value'] = 2;
+  }
+  if(!empty($node->field_party_packing_start_time['und']) && empty($node->field_party_packing_end_time['und'])) {
+    $node->field__party_packingstatus[LANGUAGE_NONE][0]['value'] = 1;
+  }
+  if(!empty($node->field_unloading_start_time['und']) && !empty($node->field_unloading_end_time['und'])) {
+    $node->field_unloading_status[LANGUAGE_NONE][0]['value'] = 2;
+  }
+  if(!empty($node->field_unloading_start_time['und']) && empty($node->field_unloading_end_time['und'])) {
+    $node->field_unloading_status[LANGUAGE_NONE][0]['value'] = 1;
   }
 }
 

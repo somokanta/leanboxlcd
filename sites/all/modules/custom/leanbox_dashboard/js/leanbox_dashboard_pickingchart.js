@@ -67,9 +67,9 @@
 					series: {
 						0: {color: '#e74c3c'},
 						1: {color: '#f39c12'},
-						2: {color: '#27ae60'}
+						2: {color: '#27ae60'},
 					},
-					isStacked: true,
+					isStacked: true,		
 					vAxis: {
 						minValue: 0,
 						maxValue: 7,

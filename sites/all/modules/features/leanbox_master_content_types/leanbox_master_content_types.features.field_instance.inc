@@ -701,6 +701,43 @@ function leanbox_master_content_types_field_default_field_instances() {
     ),
   );
 
+  // Exported field_instance: 'node-sales_register_data-field_delivery_pending'.
+  $field_instances['node-sales_register_data-field_delivery_pending'] = array(
+    'bundle' => 'sales_register_data',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'list',
+        'settings' => array(),
+        'type' => 'list_default',
+        'weight' => 11,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_delivery_pending',
+    'label' => 'Delivery pending',
+    'required' => 0,
+    'settings' => array(
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'options',
+      'settings' => array(),
+      'type' => 'options_select',
+      'weight' => 42,
+    ),
+  );
+
   // Exported field_instance: 'node-sales_register_data-field_outst_bill_date'.
   $field_instances['node-sales_register_data-field_outst_bill_date'] = array(
     'bundle' => 'sales_register_data',
@@ -1405,6 +1442,7 @@ function leanbox_master_content_types_field_default_field_instances() {
   t('Cabin Breath in Feet');
   t('Cabin Length in Feet');
   t('Cabin Width in Feet');
+  t('Delivery pending');
   t('Driver Name');
   t('Driver Phone No');
   t('Hul Lat');

@@ -13,6 +13,7 @@ function dispatch_planning_menu() {
   $items['admin/dispatch-planning/form'] = array(
     'title' => 'Dispatch Planning',
     'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => 0,
       // Access callback, page callback, and theme callback will be inherited
       // from 'admin/config/system/foo', if not specified here to override.
   );
@@ -22,6 +23,19 @@ function dispatch_planning_menu() {
     'page callback' => 'drupal_get_form',
     'page arguments' => array('trip_delete_form'),
     'access arguments' => array('dispatch planning screen'),
+    'weight' => 2,
+      // Page callback and theme callback will be inherited from
+      // 'admin/config/system/foo', if not specified here to override.
+      // Need to add access callback or access arguments.
+  );
+  $items['admin/dispatch-planning/delivery-pending'] = array(
+    'title' => 'Delivery Pending',
+    'type' => MENU_LOCAL_TASK,
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('delivery_pending_form'),
+    'access arguments' => array('dispatch planning screen'),
+    'file' => 'delivery_pending.form.inc',
+    'weight' => 1,
       // Page callback and theme callback will be inherited from
       // 'admin/config/system/foo', if not specified here to override.
       // Need to add access callback or access arguments.
@@ -40,6 +54,15 @@ function dispatch_planning_menu() {
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
+  
+  $items['bill/pending/autocomplete'] = array(
+    'title' => 'bill_autocomplete',
+    'page callback' => 'bill_autocomplete',
+    'page arguments' => array(4, 3),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  
   $items['trip/autocomplete'] = array(
     'title' => 'trip_id_autocomplete',
     'page callback' => 'trip_id_autocomplete',
@@ -595,6 +618,10 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
 
   foreach ($bill_nids as $value) {
     $node = node_load($value);
+    
+    if(isset($node->field_delivery_pending[LANGUAGE_NONE])){
+      $node->field_delivery_pending = array();
+    }
     $node->field_trip_id_reference[LANGUAGE_NONE][0]['nid'] = $nid;
     node_save($node);
   }
@@ -602,13 +629,14 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
   drupal_set_message('Successfully updated. Trip id ' . $trip_id);
 }
 
-function get_bill_info($bill_number, $van = NULL, $loading_date = NULL, $beat_name = NULL, $trip_id = NULL) {
+function get_bill_info($bill_number, $van = NULL, $loading_date = NULL, $beat_name = NULL, $trip_id = NULL, $delivery_pending = NULL) {
 
   $query = db_select('node', 'n');
   $query->leftJoin('field_data_field_bill_value', 'bv', 'n.nid = bv.entity_id');
   $query->leftJoin('field_dat = a_field_sales_party_code', 'spc', 'n.nid = spc.entity_id');
   $query->leftJoin('field_data_field_billing_loading_date', 'ld', 'n.nid = ld.entity_id');
   $query->leftJoin('field_data_field_billing_van', 'v', 'n.nid = v.entity_id');
+  $query->leftJoin('field_data_field_delivery_pending', 'dp', 'n.nid = dp.entity_id');
   $query->leftJoin('field_data_field_trip_id_reference', 't', 'n.nid = t.entity_id');
   $query->leftJoin('node', 'nt', 'nt.nid = t.field_trip_id_reference_nid');
 
@@ -650,8 +678,18 @@ function get_bill_info($bill_number, $van = NULL, $loading_date = NULL, $beat_na
     $query->condition('nt.title', $trip_id);
   }
   else {
-    $query->isNull('t.field_trip_id_reference_nid');
     $query->addExpression("CONCAT_WS(' - ', field_billing_van_value, field_billing_loading_date_value)", 'van_loading_date_timestamp');
+    
+    if (!is_null($delivery_pending)) {
+      $query->isNotNull('t.field_trip_id_reference_nid');
+      $query->addField('dp', 'field_delivery_pending_value', 'field_delivery_pending_value');
+    }
+    else {
+      $db_or2 = db_or();
+      $db_or2->isNull('t.field_trip_id_reference_nid');
+      $db_or2->condition('dp.field_delivery_pending_value', 1);
+      $query->condition($db_or2);
+    }
   }
 
   if (!is_null($beat_name)) {
@@ -691,12 +729,17 @@ function get_modified_van_from_loading_date($date, $string) {
     $query = db_select('node', 'n');
     $query->join('field_data_field_billing_van', 'v', 'v.entity_id = n.nid');
     $query->join('field_data_field_billing_loading_date', 'l', 'l.entity_id = n.nid');
+    $query->leftJoin('field_data_field_delivery_pending', 'dp', 'n.nid = dp.entity_id');
     $query->leftJoin('field_data_field_trip_id_reference', 'ft', 'ft.entity_id = n.nid');
 
     $query->fields('v', array('field_billing_van_value'));
     $query->condition('l.field_billing_loading_date_value', $date);
     $query->condition('n.type', 'sales_register_data');
-    $query->isNull('ft.field_trip_id_reference_nid');
+    
+    $db_or = db_or();
+    $db_or->isNull('ft.field_trip_id_reference_nid');
+    $db_or->condition('dp.field_delivery_pending_value', 1);
+    $query->condition($db_or);
 
     $query->addTag('node_distributor_access');
 
@@ -711,7 +754,7 @@ function get_beat_name_from_loading_date_and_van($date, $van) {
     $query = db_select('node', 'n');
     $query->join('field_data_field_billing_van', 'v', 'v.entity_id = n.nid');
     $query->join('field_data_field_billing_loading_date', 'l', 'l.entity_id = n.nid');
-
+    $query->leftJoin('field_data_field_delivery_pending', 'dp', 'n.nid = dp.entity_id');
     $query->leftJoin('field_data_field_sales_party_code', 'fsp', 'fsp.entity_id = n.nid');
     $query->leftJoin('field_data_field_party_code', 'fp', 'fp.field_party_code_value = fsp.field_sales_party_code_value');
     $query->leftJoin('field_data_field_beat_name', 'fb', 'fp.entity_id = fb.entity_id');
@@ -722,7 +765,11 @@ function get_beat_name_from_loading_date_and_van($date, $van) {
     $query->condition('v.field_billing_van_value', $van);
     $query->condition('l.field_billing_loading_date_value', $date);
     $query->condition('n.type', 'sales_register_data');
-    $query->isNull('ft.field_trip_id_reference_nid');
+    
+    $db_or = db_or();
+    $db_or->isNull('ft.field_trip_id_reference_nid');
+    $db_or->condition('dp.field_delivery_pending_value', 1);
+    $query->condition($db_or);
 
     $query->addTag('node_distributor_access');
 
@@ -731,16 +778,27 @@ function get_beat_name_from_loading_date_and_van($date, $van) {
   return $result;
 }
 
-function bill_autocomplete($string = '') {
+function bill_autocomplete($string = '', $delivery_pending = NULL) {
   $result = array();
 
   if ($string) {
     $query = db_select('node', 'n');
     $query->join('field_data_field_billing_loading_date', 'ld', 'n.nid = ld.entity_id');
     $query->leftJoin('field_data_field_trip_id_reference', 'ft', 'ft.entity_id = n.nid');
+    $query->leftJoin('field_data_field_delivery_pending', 'dp', 'n.nid = dp.entity_id');
     $query->condition('n.title', db_like($string) . '%', 'LIKE');
     $query->condition('n.type', 'sales_register_data');
-    $query->isNull('ft.field_trip_id_reference_nid');
+    
+    if (is_null($delivery_pending)) {
+      $db_or = db_or();
+      $db_or->isNull('ft.field_trip_id_reference_nid');
+      $db_or->condition('dp.field_delivery_pending_value', 1);
+      $query->condition($db_or);
+    }
+    else {
+      $query->isNotNull('ft.field_trip_id_reference_nid');
+    }
+    
     $query->fields('n', array('title'));
     $query->range(0, 15);
     $query->addTag('node_distributor_access');
