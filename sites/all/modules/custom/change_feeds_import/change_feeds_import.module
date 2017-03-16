@@ -257,7 +257,6 @@ function send_email_daily_data() {
   $picking = get_todays_picking_created_data($todays_date_date);
   $egir = get_todays_unloading_created_data($todays_date_date);
 
-
   $non_pp_count = $party_packing['non_pp'];
   if (empty($non_pp_count)) {
     $non_pp_count = 0;
@@ -279,12 +278,7 @@ function send_email_daily_data() {
   if (empty($pp_count)) {
     $pp_count = 0;
   }
-  $non_pp_completed_count = $party_packing['non_pp_completed'];
   $pp_completed_count = $party_packing['pp_completed'];
-
-  if (empty($non_pp_completed_count)) {
-    $non_pp_completed_count = 0;
-  }
   if (empty($pp_completed_count)) {
     $pp_completed_count = 0;
   }
@@ -354,12 +348,10 @@ function send_email_daily_data() {
   
   
   foreach ($picking as $key => $value) {
-
     $picking_loose = $value['picking_loose'];
     if (empty($picking_loose)) {
       $picking_loose = 0;
     }
-
     $picking_loose_comleted = $value['picking_loose_comleted'];
     if (empty($picking_loose_comleted)) {
       $picking_loose_comleted = 0;
@@ -523,7 +515,6 @@ function get_todays_party_packing_created_data($loading_date) {
   $party_packing['non_pp_process'] = $non_pp_process;
   $party_packing['non_pp_pending'] = $non_pp_pending;
   $party_packing['pp'] = $pp;
-  $party_packing['non_pp_completed'] = $non_pp_comleted;
   $party_packing['pp_completed'] = $pp_comleted;
   $party_packing['pp_process'] = $pp_process;
   $party_packing['pp_pending'] = $pp_pending;
@@ -1773,7 +1764,6 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
 //    $join->extra = array(
 //      array('field' => 'minimum', 'left_field' => 'title'),
 //    );
-
     // Do the actual join
     $query->table_queue['temp'] = array(
       'alias' => 'temp', // I believe this is optional
