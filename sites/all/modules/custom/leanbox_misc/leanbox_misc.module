@@ -1,0 +1,31 @@
+<?php
+
+function leanbox_misc_block_info() {
+  $blocks['distributor_name'] = array(
+    'info' => t('Distributor Name'),
+    'cache' => DRUPAL_CACHE_PER_USER
+  );
+  
+  return $blocks;
+}
+
+function leanbox_misc_block_view($delta = '') {
+  switch ($delta) {
+    case 'distributor_name':
+
+      global $user;
+      $user_id = $user->uid;
+      if (!$user_id) {
+        return;
+      }
+      $distributor_id = change_feeds_import_get_distributor_id($user_id);
+      $distributor_name = change_feeds_import_get_distributor_name($distributor_id);
+
+      $block['subject'] = NULL;
+      $block['content'] = array(
+        '#markup' => '<div id="dist-name">' . t($distributor_name) . '</div>',
+      );
+      break;
+  }
+  return $block;
+}

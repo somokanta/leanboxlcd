@@ -153,6 +153,14 @@ ul.tabs.primary {
     }
 }
 
+#dist-name{
+    font-size: 34px;
+    text-align: center;
+    margin-top: 22px;
+    line-height: 38px;
+    color: $base-color;
+}
+
 .pagination {
     > li {
         display: inline!important;
@@ -214,6 +222,19 @@ table {
 
                 &:last-child {
                     border-right: 0;
+                }
+
+                .date-form-element-content-multiline {
+                    padding: 0;
+                    border: 0;
+
+                    .container-inline-date {
+                        .form-item {
+                            input{
+                                width: 104px;
+                            }
+                        }
+                    }
                 }
             }
 
@@ -408,7 +429,7 @@ body{
 
 #table-div{
     .table-responsive{
-        width: 100%;
+        width: 100%; 
     }
 }
 
@@ -454,6 +475,8 @@ body{
         clear: both;
 
         &.bottom-wrapper{
+            display: inline-block;
+            width: 100%;
             margin-bottom: 10px;
         }
     }
