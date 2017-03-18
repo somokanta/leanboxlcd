@@ -2008,6 +2008,7 @@ function change_feeds_import_views_api() {
  * Implements hook_node_presave()
  */
 function change_feeds_import_node_presave($node) {
+
   global $user;
   $user_id = $user->uid;
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
@@ -2017,6 +2018,9 @@ function change_feeds_import_node_presave($node) {
   }
   if (!empty($distributor_id)) {
     $node->uid = $distributor_id;
+  }
+  if (($node->type == 'picking') && ($node->is_new == TRUE)) {
+    $node->field_combined_nid['und'][0]['value'] = $node->created;
   }
 
   if (!empty($node->field_picking_start_time['und']) && !empty($node->field_picking_end_time['und'])) {
@@ -2175,17 +2179,21 @@ function change_feeds_import_services_resources() {
 }
 
 function change_feeds_import_views_query_alter(&$view, &$query) {
+ 
   // Do the actual join
   global $user;
   // Store distributor id in author in each node
-
   $distributor_id = change_feeds_import_get_distributor_id($user->uid);
-  foreach($query->table_queue as $key => $val) {
+  foreach ($query->table_queue as $key => $val) {
     if (($val['table'] == 'node')) {
-      $query->add_where(0, $val['alias'].'.uid', $distributor_id, '=');
+      if (empty($val['join'])) {
+        $query->add_where(0, $val['alias'] . '.uid', $distributor_id, '=');
+      }
+      else {
+        $query->table_queue[$key]['join']->extra[] = array('field' => 'uid', 'value' => $distributor_id);
+      }
     }
   }
- 
   if ($view->base_table == 'custom_billing_data') {
     $query->add_where(0, 'custom_billing_data.distributor_id', $distributor_id, '=');
   }
@@ -2312,7 +2320,6 @@ function change_feeds_import_query_node_uid_alter(QueryAlterableInterface $query
   // altering the dynamic query object having tag => node_uid
   $query->condition('n.uid', $distributor_id);
 }
-
 
 /**
  * Implements hook_feeds_plugins().
