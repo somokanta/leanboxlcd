@@ -251,12 +251,12 @@ function trip_form_submit($form, &$form_state) {
 }
 
 function send_email_daily_data() {
-  
+
   global $user;
   $user_id = $user->uid;
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
   $distributor_name = change_feeds_import_get_distributor_name($distributor_id);
-  
+
   $todays_date_date = date('Y-m-d 00:00:00');
   // $todays_date_date = "2017-02-12 00:00:00"; 
   $party_packing = get_todays_party_packing_created_data($todays_date_date);
@@ -457,10 +457,10 @@ function send_email_daily_data() {
   $from = variable_get('from_email');
   $rr = drupal_mail('change_feeds_import', 'daily_data', $mail_to, LANGUAGE_NONE, $params, $from);
 
-  send_email_productivity_emailer($todays_date_date,$distributor_name);
-  }
+  send_email_productivity_emailer($todays_date_date, $distributor_name);
+}
 
-function send_email_productivity_emailer($todays_date_date,$distributor_name) {
+function send_email_productivity_emailer($todays_date_date, $distributor_name) {
 
   $party_packing = get_productivity_data_for_party_packing($todays_date_date);
 
@@ -524,7 +524,7 @@ function send_email_productivity_emailer($todays_date_date,$distributor_name) {
 
       $total_percentage = ($total_bill_lines / $total_timing);
       $total_percentage = number_format((float) $total_percentage, 2, '.', '');
-      
+
       $all_total_timing += $total_timing;
       $all_total_loding_lines += $total_bill_lines;
 
@@ -753,7 +753,7 @@ function send_email_productivity_emailer($todays_date_date,$distributor_name) {
   $params['body'] = $party_pack_superwise_html . "<br>" . $party_pack_type_wsie_html . "<br>" . $picking_godown_wise_html . "<br>" . $picking_supervisor_wise_html;
 
   // $mail_to = variable_get('to_email');
-   $mail_to = "gaurav@leanbox.in";
+  $mail_to = "gaurav@leanbox.in";
 //  $from = "MIS.HELPDESK@leanbox.in";
   $from = variable_get('from_email');
   drupal_mail('change_feeds_import', 'productivity_status', $mail_to, LANGUAGE_NONE, $params, $from);
@@ -767,8 +767,9 @@ function get_productivity_data_for_picking($todays_date_date) {
   $query->join('field_data_field_picking_loading_date', 'd', 'd.entity_id = n.nid');
   $query->condition('d.field_picking_loading_date_value', $todays_date_date, "=");
   $query->join('field_data_field_picking_godown_area_id', 'gai', 'gai.entity_id = n.nid');
+  $query->orderBy('gai.field_picking_godown_area_id_value', 'ASC');
   $query->join('field_data_field_picking_picking_type', 'pt', 'pt.entity_id = n.nid');
-  $query->join('field_data_field_picking_loading_sheet_line', 'lsl', 'lsl.entity_id = n.nid');
+  $query->join('field_data_field_pick_lines', 'lsl', 'lsl.entity_id = n.nid');
   $query->join('field_data_field_picking_start_time', 'pst', 'pst.entity_id = n.nid');
   $query->join('field_data_field_picking_end_time', 'pet', 'pet.entity_id = n.nid');
   $query->join('field_data_field_picking_status', 'ps', 'ps.entity_id = n.nid');
@@ -777,7 +778,7 @@ function get_productivity_data_for_picking($todays_date_date) {
   $query->join('field_data_field_picking_pick_supervisor', 'pps', 'pps.entity_id = n.nid');
   $query->fields('gai', array('field_picking_godown_area_id_value'));
   $query->fields('pt', array('field_picking_picking_type_value'));
-  $query->fields('lsl', array('field_picking_loading_sheet_line_value'));
+  $query->fields('lsl', array('field_pick_lines_value'));
   $query->fields('pst', array('field_picking_start_time_value'));
   $query->fields('pet', array('field_picking_end_time_value'));
   $query->fields('n', array('nid'));
@@ -785,14 +786,14 @@ function get_productivity_data_for_picking($todays_date_date) {
   $query->fields('tc', array('field_picking_picking_team_count_value'));
   $query->fields('pps', array('field_picking_pick_supervisor_value'));
   $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
-
   foreach ($res as $key => $value) {
+
+
     $start_time = strtotime($value['field_picking_start_time_value']);
     $end_time = strtotime($value['field_picking_end_time_value']);
-    $time_diff = ($end_time - $start_time) / 3600;
+    $time_diff = abs(($end_time - $start_time) / 3600);
     $time_diff = number_format((float) $time_diff, 2, '.', '');
-
-    $loading_line = $value['field_picking_loading_sheet_line_value'];
+    $loading_line = $value['field_pick_lines_value'];
     $team_count = $value['field_picking_picking_team_count_value'];
     $total_time = ($team_count * $time_diff);
     $supervisor = $value['field_picking_pick_supervisor_value'];
@@ -2179,10 +2180,12 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
   // Store distributor id in author in each node
 
   $distributor_id = change_feeds_import_get_distributor_id($user->uid);
-
-  if ($view->base_table == 'node') {
-    $query->add_where(0, 'node.uid', $distributor_id, '=');
+  foreach($query->table_queue as $key => $val) {
+    if (($val['table'] == 'node')) {
+      $query->add_where(0, $val['alias'].'.uid', $distributor_id, '=');
+    }
   }
+ 
   if ($view->base_table == 'custom_billing_data') {
     $query->add_where(0, 'custom_billing_data.distributor_id', $distributor_id, '=');
   }
@@ -2244,8 +2247,10 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
     $sub_query->join('node', 'dd', 'dd.nid = tp.field_trip_id_reference_nid');
     $sub_query->condition('dd.title', $trip_id, "=");
     $sub_query->join('field_data_field_sales_party_code', 'spc', 'spc.entity_id = n.nid');
-    $sub_query->join('field_data_field_party_code', 'opc', 'opc.field_party_code_value = spc.field_sales_party_code_value');
-    $sub_query->join('field_data_field_beat_name', 'bn', 'bn.entity_id = opc.entity_id');
+    $sub_query->join('node', 'nd', 'nd.title = spc.field_sales_party_code_value');
+    $sub_query->condition('nd.type', 'outlet_master', '=');
+    $sub_query->condition('nd.uid', $distributor_id, '=');
+    $sub_query->join('field_data_field_beat_name', 'bn', 'bn.entity_id = nd.nid');
     $sub_query->addField('bn', 'field_beat_name_value', 'BEAT_NAME');
     $sub_query->groupBy('BEAT_NAME');
     //$sub_query->addExpression('ifnull(v.field_bill_value_value, 5)', 'field_bill_value_value');
@@ -2307,6 +2312,7 @@ function change_feeds_import_query_node_uid_alter(QueryAlterableInterface $query
   // altering the dynamic query object having tag => node_uid
   $query->condition('n.uid', $distributor_id);
 }
+
 
 /**
  * Implements hook_feeds_plugins().

@@ -13,7 +13,7 @@ function change_feeds_import_create_confirm_content($id) {
           ->condition('sbd.error_id', $id, '=')
           ->fields('sbd')
           ->execute()->fetchAll(PDO::FETCH_ASSOC);
-  $party_packing_check = get_party_packing_from_party_code();
+  $party_packing_check = get_party_packing_from_party_code(NULL,$distributor_id);
 
   foreach ($billing_data_result as $key => $value) {
     $vehicle = $value['vehicle'];
@@ -217,6 +217,8 @@ function change_feeds_import_create_van_cld_report($max_billing_id, &$context) {
     $query = db_select('custom_billing_data', 'cb');
     $query->join('field_data_field_sku7_code', 'gaisc', 'gaisc.field_sku7_code_value = cb.sku7_code');
     $query->condition('gaisc.bundle', 'sku7_code_master', '=');
+    $query->join('node', 'nd', 'nd.nid = gaisc.entity_id');
+    $query->condition('nd.uid', $distributor_id, '=');
     $query->join('field_data_field_unit_case_units_', 'fucu', 'fucu.entity_id = gaisc.entity_id');
     $query->condition('fucu.bundle', 'sku7_code_master', '=');
     $query->fields('cb', array('vehicle', 'loading_date', 'sku7_code', 'product_name', 'Sum_of_TOTAL_SALES_QTY', 'mrp','PRICELIST_GROUP'));
@@ -278,6 +280,8 @@ function change_feeds_import_create_picking($max_billing_id, &$context) {
     $query = db_select('custom_billing_data', 'cb');
     $query->join('field_data_field_sku7_code', 'gaisc', 'gaisc.field_sku7_code_value = cb.sku7_code');
     $query->condition('gaisc.bundle', 'sku7_code_master', '=');
+    $query->join('node', 'nd', 'nd.nid = gaisc.entity_id');
+    $query->condition('nd.uid', $distributor_id, '=');
 //    $query->join('field_data_field_godown_area_id', 'gai', 'gaisc.entity_id = gai.entity_id');
 //    $query->condition('gai.bundle', 'sku7_code_master', '=');
 //    $query->join('field_data_field_pack_size', 'fps', 'fps.entity_id = gaisc.entity_id');
@@ -497,15 +501,19 @@ function change_feeds_import_create_loading(&$context) {
   }
 }
 
-function get_party_packing_from_party_code($party_code = NULL) {
+function get_party_packing_from_party_code($party_code = NULL,$distributor_id) {
   $query = db_select('field_data_field_party_code', 'pc');
   $query->condition('pc.bundle', 'outlet_master');
+  $query->join('node', 'ouln', 'ouln.nid = pc.entity_id');
+  $query->condition('ouln.uid', $distributor_id, '=');
   $query->join('field_data_field_channel', 'ch', 'ch.entity_id = pc.entity_id');
   $query->condition('ch.bundle', 'outlet_master');
   $query->join('field_data_field_pl_group', 'pl', 'pl.entity_id = pc.entity_id');
   $query->condition('pl.bundle', 'outlet_master');
   $query->join('field_data_field_channel', 'ppmch', 'ch.field_channel_value = ppmch.field_channel_value');
   $query->condition('ppmch.bundle', 'party_pack_master');
+  $query->join('node', 'ppn', 'ppn.nid = ppmch.entity_id');
+  $query->condition('ppn.uid', $distributor_id, '=');
   $query->join('field_data_field_pl_group', 'ppmpl', 'pl.field_pl_group_value = ppmpl.field_pl_group_value and ppmch.entity_id = ppmpl.entity_id');
   $query->condition('ppmch.bundle', 'party_pack_master');
   $query->join('field_data_field_party_packing', 'pp', 'pp.entity_id = ppmpl.entity_id');
