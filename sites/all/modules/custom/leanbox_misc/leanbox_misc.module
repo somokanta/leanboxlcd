@@ -1,11 +1,45 @@
 <?php
 
+function leanbox_misc_menu() {
+  $items['pdd/add'] = array(
+    'title' => 'PDD',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('pdd_add_form'),
+    'access arguments' => array('dispatch planning screen'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'includes/pdd_holiday_master.inc',
+      // Page callback, etc. need to be added here.
+  );
+  $items['pdd/add/pdd'] = array(
+    'title' => 'PDD',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => 0,
+    'file' => 'includes/pdd_holiday_master.inc',
+      // Access callback, page callback, and theme callback will be inherited
+      // from 'admin/config/system/foo', if not specified here to override.
+  );
+  $items['pdd/add/holiday'] = array(
+    'title' => 'Holiday List',
+    'type' => MENU_LOCAL_TASK,
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('holiday_add_form'),
+    'access arguments' => array('dispatch planning screen'),
+    'weight' => 2,
+    'file' => 'includes/pdd_holiday_master.inc',
+      // Page callback and theme callback will be inherited from
+      // 'admin/config/system/foo', if not specified here to override.
+      // Need to add access callback or access arguments.
+  );
+
+  return $items;
+}
+
 function leanbox_misc_block_info() {
   $blocks['distributor_name'] = array(
     'info' => t('Distributor Name'),
     'cache' => DRUPAL_CACHE_PER_USER
   );
-  
+
   return $blocks;
 }
 

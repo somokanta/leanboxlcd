@@ -172,7 +172,7 @@ function change_feeds_import_sales_register_batch_fix_process($data, $distributo
       }
     }
     if (empty($distributor_id)) {
-        $value['error_message'] .= " Please check your Distributor code";
+      $value['error_message'] .= " Please check your Distributor code";
     }
 
     // insert into custom sales table
@@ -306,7 +306,7 @@ function change_feeds_import_create_sales_register_node($sales_data_result, $dis
 
         require_once drupal_get_path('module', 'change_feeds_import') . '/form/upload_billing_data.inc';
         // check to update node
-       
+
         $nid = check_node_title_exists($val['bill_no'], 'sales_register_data');
         if (empty($nid)) {
           $billing_error_validate = TRUE;
@@ -320,6 +320,19 @@ function change_feeds_import_create_sales_register_node($sales_data_result, $dis
           $node->comment = 0; // 0 = comments disabled, 1 = read only, 2 = read/write
 
           $node->field_sr_bill_date[LANGUAGE_NONE][0]['value'] = $val['date'];
+
+          if (isset($context['results']['dates'][$val['date']])) {
+            $pdd = $context['results']['dates'][$val['date']];
+            watchdog('pdd', 'if');
+          }
+          else {
+            $pdd = get_promised_delivery_date($val['date']);
+            $context['results']['dates'][$val['date']] = $pdd;
+            watchdog('pdd', 'else');
+          }
+
+          $node->field_promised_date[LANGUAGE_NONE][0]['value'] = $pdd;
+          
           $node->field_bill_value[LANGUAGE_NONE][0]['value'] = $val['bill_value'];
           $node->field_sales_party_code[LANGUAGE_NONE][0]['value'] = $val['party_code'];
           $node->field_sales_updated_date[LANGUAGE_NONE][0]['value'] = time();
@@ -327,6 +340,23 @@ function change_feeds_import_create_sales_register_node($sales_data_result, $dis
         }
         else {
           $node = node_load($nid);
+
+          if ($node->field_sr_bill_date[LANGUAGE_NONE][0]['value'] != $val['date']) {
+            $node->field_sr_bill_date[LANGUAGE_NONE][0]['value'] = $val['date'];
+
+            if (isset($context['results']['dates'][$val['date']])) {
+              $pdd = $context['results']['dates'][$val['date']];
+              watchdog('pdd', 'i');
+            }
+            else {
+              $pdd = get_promised_delivery_date($val['date']);
+              $context['results']['dates'][$val['date']] = $pdd;
+              watchdog('pdd', 'e');
+            }
+
+            $node->field_promised_date[LANGUAGE_NONE][0]['value'] = $pdd;
+          }
+
           $node->field_bill_value[LANGUAGE_NONE][0]['value'] = $val['bill_value'];
           $node->field_sales_party_code[LANGUAGE_NONE][0]['value'] = $val['party_code'];
           $node->field_sales_updated_date[LANGUAGE_NONE][0]['value'] = time();
@@ -398,4 +428,35 @@ function change_feeds_import_sales_discard_data($fid) {
     }
   }
   drupal_set_message(t('Something went wrong'), 'error');
+}
+
+function get_promised_delivery_date($date) {
+  global $user;
+  $user_id = $user->uid;
+  $distributor_id = change_feeds_import_get_distributor_id($user_id);
+  
+  $query = db_select('node', 'n');
+  $query->condition('n.uid', $distributor_id);
+  $query->condition('n.type', 'pdd_master');
+  $query->fields('n', array('nid'));
+  $pdd_value_result = $query->execute()->fetchField();
+  
+  $pdd_data = node_load($pdd_value_result);
+  $pdd_value = $pdd_data->field_pdd[LANGUAGE_NONE][0]['value'];
+  $weekly = $pdd_data->field_day[LANGUAGE_NONE];
+  foreach ($weekly as $key => $val) {
+    $weeklyoff[] = $val['value'];
+  }
+
+  $query = db_select('node', 'n');
+  $query->condition('n.uid', $distributor_id);
+  $query->condition('n.type', 'holiday_master');
+  $query->leftjoin('field_data_field_holiday', 'hday', 'hday.entity_id = n.nid');
+  $query->addExpression("DATE_FORMAT(FROM_UNIXTIME(hday.field_holiday_value), '%Y-%m-%d')", 'hdate');
+  $holiday_result = $query->execute()->fetchCol();
+
+  $billing_date_stamp = $date;
+  $pdd = holiday_get_working_day($billing_date_stamp, $pdd_value, $holiday_result, $weeklyoff);
+  
+  return strtotime($pdd);
 }

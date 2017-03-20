@@ -891,6 +891,62 @@ function leanbox_master_content_types_field_default_field_instances() {
     ),
   );
 
+  // Exported field_instance: 'node-sales_register_data-field_promised_date'.
+  $field_instances['node-sales_register_data-field_promised_date'] = array(
+    'bundle' => 'sales_register_data',
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'date',
+        'settings' => array(
+          'format_type' => 'long',
+          'fromto' => 'both',
+          'multiple_from' => '',
+          'multiple_number' => '',
+          'multiple_to' => '',
+          'show_remaining_days' => FALSE,
+        ),
+        'type' => 'date_default',
+        'weight' => 12,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_promised_date',
+    'label' => 'Promised date',
+    'required' => 0,
+    'settings' => array(
+      'default_value' => 'blank',
+      'default_value2' => 'same',
+      'default_value_code' => '',
+      'default_value_code2' => '',
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'date',
+      'settings' => array(
+        'display_all_day' => 0,
+        'increment' => 15,
+        'input_format' => 'm/d/y',
+        'input_format_custom' => '',
+        'label_position' => 'above',
+        'no_fieldset' => 0,
+        'text_parts' => array(),
+        'year_range' => '-3:+3',
+      ),
+      'type' => 'date_popup',
+      'weight' => 43,
+    ),
+  );
+
   // Exported field_instance: 'node-sales_register_data-field_sales_party_code'.
   $field_instances['node-sales_register_data-field_sales_party_code'] = array(
     'bundle' => 'sales_register_data',
@@ -1455,6 +1511,7 @@ function leanbox_master_content_types_field_default_field_instances() {
   t('Outstanding updated date');
   t('Pricelist Grp Description');
   t('Product Div Description');
+  t('Promised date');
   t('Resource Description');
   t('Sales party code');
   t('Sales updated date');
