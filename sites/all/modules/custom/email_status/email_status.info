@@ -1,0 +1,4 @@
+name = Email Status
+description = Email Status For All Major Transactions.
+package = Custom
+core = 7.x
