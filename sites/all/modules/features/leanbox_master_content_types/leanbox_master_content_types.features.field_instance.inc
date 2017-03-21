@@ -701,6 +701,43 @@ function leanbox_master_content_types_field_default_field_instances() {
     ),
   );
 
+  // Exported field_instance: 'node-sales_register_data-field_deliver_reason'.
+  $field_instances['node-sales_register_data-field_deliver_reason'] = array(
+    'bundle' => 'sales_register_data',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'taxonomy',
+        'settings' => array(),
+        'type' => 'taxonomy_term_reference_link',
+        'weight' => 16,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_deliver_reason',
+    'label' => 'Deliver Reason',
+    'required' => 0,
+    'settings' => array(
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'options',
+      'settings' => array(),
+      'type' => 'options_select',
+      'weight' => 47,
+    ),
+  );
+
   // Exported field_instance: 'node-sales_register_data-field_delivery_pending'.
   $field_instances['node-sales_register_data-field_delivery_pending'] = array(
     'bundle' => 'sales_register_data',
@@ -735,6 +772,100 @@ function leanbox_master_content_types_field_default_field_instances() {
       'settings' => array(),
       'type' => 'options_select',
       'weight' => 42,
+    ),
+  );
+
+  // Exported field_instance: 'node-sales_register_data-field_delivery_status'.
+  $field_instances['node-sales_register_data-field_delivery_status'] = array(
+    'bundle' => 'sales_register_data',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'taxonomy',
+        'settings' => array(),
+        'type' => 'taxonomy_term_reference_link',
+        'weight' => 15,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_delivery_status',
+    'label' => 'Delivery status',
+    'required' => 0,
+    'settings' => array(
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'options',
+      'settings' => array(),
+      'type' => 'options_select',
+      'weight' => 46,
+    ),
+  );
+
+  // Exported field_instance:
+  // 'node-sales_register_data-field_impact_delivery_date'.
+  $field_instances['node-sales_register_data-field_impact_delivery_date'] = array(
+    'bundle' => 'sales_register_data',
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'date',
+        'settings' => array(
+          'format_type' => 'long',
+          'fromto' => 'both',
+          'multiple_from' => '',
+          'multiple_number' => '',
+          'multiple_to' => '',
+          'show_remaining_days' => FALSE,
+        ),
+        'type' => 'date_default',
+        'weight' => 13,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_impact_delivery_date',
+    'label' => 'Impact Delivery Date',
+    'required' => 0,
+    'settings' => array(
+      'default_value' => 'now',
+      'default_value2' => 'same',
+      'default_value_code' => '',
+      'default_value_code2' => '',
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'date',
+      'settings' => array(
+        'display_all_day' => 0,
+        'increment' => 15,
+        'input_format' => 'm/d/y',
+        'input_format_custom' => '',
+        'label_position' => 'above',
+        'no_fieldset' => 0,
+        'text_parts' => array(),
+        'year_range' => '-3:+3',
+      ),
+      'type' => 'date_popup',
+      'weight' => 44,
     ),
   );
 
@@ -984,6 +1115,52 @@ function leanbox_master_content_types_field_default_field_instances() {
       ),
       'type' => 'text_textfield',
       'weight' => 34,
+    ),
+  );
+
+  // Exported field_instance: 'node-sales_register_data-field_sales_return_amt'.
+  $field_instances['node-sales_register_data-field_sales_return_amt'] = array(
+    'bundle' => 'sales_register_data',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'number',
+        'settings' => array(
+          'decimal_separator' => '.',
+          'prefix_suffix' => TRUE,
+          'scale' => 2,
+          'thousand_separator' => '',
+        ),
+        'type' => 'number_decimal',
+        'weight' => 14,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_sales_return_amt',
+    'label' => 'Sales Return Amt',
+    'required' => 0,
+    'settings' => array(
+      'max' => '',
+      'min' => '',
+      'prefix' => '',
+      'suffix' => '',
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 0,
+      'module' => 'number',
+      'settings' => array(),
+      'type' => 'number',
+      'weight' => 45,
     ),
   );
 
@@ -1498,7 +1675,9 @@ function leanbox_master_content_types_field_default_field_instances() {
   t('Cabin Breath in Feet');
   t('Cabin Length in Feet');
   t('Cabin Width in Feet');
+  t('Deliver Reason');
   t('Delivery pending');
+  t('Delivery status');
   t('Driver Name');
   t('Driver Phone No');
   t('Hul Lat');
@@ -1506,6 +1685,7 @@ function leanbox_master_content_types_field_default_field_instances() {
   t('Hul Street');
   t('Hul Sub Area');
   t('Hul area');
+  t('Impact Delivery Date');
   t('Outstanding Bill Date');
   t('Outstanding Bill Value');
   t('Outstanding updated date');
@@ -1513,6 +1693,7 @@ function leanbox_master_content_types_field_default_field_instances() {
   t('Product Div Description');
   t('Promised date');
   t('Resource Description');
+  t('Sales Return Amt');
   t('Sales party code');
   t('Sales updated date');
   t('Vehicle Type');
