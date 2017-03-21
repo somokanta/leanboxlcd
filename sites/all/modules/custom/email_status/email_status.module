@@ -1,26 +1,26 @@
 <?php
+
 /**
  * Implments hook_menu
  *
  */
 function email_status_menu() {
-   $items['email/daily-data'] = array(
+  $items['email/daily-data'] = array(
     'title' => 'Send Email Of Daily Data',
     'page callback' => 'send_email_daily_data',
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
-   
-    // setting form for Email sender and reciever 
+
+  // setting form for Email sender and reciever 
   $items['admin/config/email-conf'] = array(
     'title' => 'Setting Form For Send Email',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('email_status_email_form'),
     'access callback' => 'check_if_fr_role_user_admin',
   );
-   return $items;
+  return $items;
 }
-
 
 // setting form for email of daily status
 function email_status_email_form($form, $form_state) {
@@ -46,7 +46,6 @@ function email_status_email_form($form, $form_state) {
   return system_settings_form($form);
 }
 
-
 function send_email_daily_data() {
 
   global $user;
@@ -54,8 +53,8 @@ function send_email_daily_data() {
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
   $distributor_name = change_feeds_import_get_distributor_name($distributor_id);
 
-   $todays_date_date = date('Y-m-d 00:00:00');
- // $todays_date_date = "2017-03-17 00:00:00"; 
+  $todays_date_date = date('Y-m-d 00:00:00');
+  // $todays_date_date = "2017-03-17 00:00:00"; 
   $party_packing = get_todays_party_packing_created_data($todays_date_date);
   $picking = get_todays_picking_created_data($todays_date_date);
   $egir = get_todays_unloading_created_data($todays_date_date);
@@ -255,12 +254,70 @@ function send_email_daily_data() {
   $rr = drupal_mail('email_status', 'daily_data', $mail_to, LANGUAGE_NONE, $params, $from);
 
   send_email_productivity_emailer($todays_date_date, $distributor_name);
+  send_email_pl_group_emailer($distributor_name);
+}
+
+function send_email_pl_group_emailer($distributor_name) {
+  global $user;
+  $user_id = $user->uid;
+  $distributor_id = change_feeds_import_get_distributor_id($user_id);
+
+//$todays_date_date = date('Y-m-d 00:00:00');
+  $todays_date_date = "2017-03-17 00:00:00";
+  $todays_date_date_timestamp = strtotime(date($todays_date_date));
+  $current_day = date("d", $todays_date_date_timestamp);
+  $yesterday = strtotime('-1 day', strtotime($todays_date_date));
+  $day_before_yesterday = strtotime('-2 day', strtotime($todays_date_date));
+  if ($current_day == 22) {
+    $this_month = date("m", $todays_date_date_timestamp);
+    $this_date = strtotime(date("Y-$this_month-20 00:00:00"));
+  }
+  elseif ($current_day <= 21) {
+    $old_date = strtotime('-1 month', strtotime($todays_date_date));
+    $last_month = date("m", $old_date);
+    $this_date = strtotime(date("Y-$last_month-21 00:00:00"));
+  }
+  else {
+    $this_month = date("m", $todays_date_date_timestamp);
+    $this_date = strtotime(date("Y-$this_month-21 00:00:00"));
+  }
+
+  $yesterday_html = "<h3>Yesterday</h3>";
+  $yesterday_data = get_yesterday_data_pl_groupwise($day_before_yesterday, $yesterday, $distributor_id);
+  if ($yesterday_data == "No Result Found") {
+    $header = get_header_of_pl_group();
+    $yesterday_rows[] = array("<td colspan='10' style='text-align: center;'> There is No Activity</td>");
+    $yesterday_html .= theme('table', array('header' => $header, 'rows' => $yesterday_rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
+  }
+  else {
+    $yesterday_html .= $yesterday_data;
+  }
+
+  $mtd_html = "<h3>MTD</h3>";
+  $mtd_data .= get_mtd_data_pl_groupwise($this_date, $yesterday, $distributor_id);
+  if ($mtd_data == "No Result Found") {
+    $header = get_header_of_pl_group();
+    $mtd_rows[] = array("<td colspan='10' style='text-align: center;'> There is No Activity</td>");
+    $mtd_html .= theme('table', array('header' => $header, 'rows' => $mtd_rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
+  }
+  else {
+    $mtd_html .= $mtd_data;
+  }
+  
+  $params['subject'] = "PL Group Wise Bill Pendency-$distributor_name";
+  $params['body'] = $yesterday_html . "<br>" . $mtd_html;
+  $mail_to = variable_get('to_email');
+  // $mail_to = "gaurav@leanbox.in";
+// $mail_to = "hplord12@gmail.com";
+//  $from = "MIS.HELPDESK@leanbox.in";
+  $from = variable_get('from_email');
+  drupal_mail('email_status', 'pl_group_status', $mail_to, LANGUAGE_NONE, $params, $from);
+  
 }
 
 function send_email_productivity_emailer($todays_date_date, $distributor_name) {
 
   $party_packing = get_productivity_data_for_party_packing($todays_date_date);
-
   $party_pack_superwise_html = "<h3>Party Packing Supervisorwise (status:Completed)</h3><table border='1' cellpadding='5' cellspacing='0'  style='color:#000; font-size: 13px;font-family: arial'>"
       . "<th>Party Packing Type</th>"
       . "<th>Party Packing Supervisor</th>"
@@ -383,7 +440,7 @@ function send_email_productivity_emailer($todays_date_date, $distributor_name) {
   else {
     $party_pack_type_wsie_html .= "<tr><td>Non-PP</td><td>$total_non_bill</td><td>$total_non_time</td><td>$total_non_perc</td></tr>"
         . "<tr><td>PP</td><td>$total_pp_bill</td><td>$total_pp_time</td><td>$total_pp_perc</td></tr></table>";
-       // . "<tr><td>Total</td><td>$total_time</td><td>$total_bills</td><td>$total_perc</td></tr></table>";
+    // . "<tr><td>Total</td><td>$total_time</td><td>$total_bills</td><td>$total_perc</td></tr></table>";
   }
 
   $picking = get_productivity_data_for_picking($todays_date_date);
@@ -552,15 +609,13 @@ function send_email_productivity_emailer($todays_date_date, $distributor_name) {
   $params['subject'] = "Productivity Progress Status-$distributor_name";
   $params['body'] = $party_pack_type_wsie_html . "<br>" . $party_pack_superwise_html . "<br>" . $picking_godown_wise_html . "<br>" . $picking_supervisor_wise_html;
 
-   $mail_to = variable_get('to_email');
- // $mail_to = "gaurav@leanbox.in";
+  $mail_to = variable_get('to_email');
+  // $mail_to = "gaurav@leanbox.in";
 // $mail_to = "hplord12@gmail.com";
 //  $from = "MIS.HELPDESK@leanbox.in";
   $from = variable_get('from_email');
   drupal_mail('email_status', 'productivity_status', $mail_to, LANGUAGE_NONE, $params, $from);
 }
-
-
 
 function get_todays_party_packing_created_data($loading_date) {
   $query = db_select('node', 'n');
@@ -835,8 +890,6 @@ function get_productivity_data_for_party_packing($todays_date_date) {
   return $party_packing;
 }
 
-
-
 function get_productivity_data_for_picking($todays_date_date) {
   $query = db_select('node', 'n');
   $query->condition('n.type', 'picking');
@@ -864,7 +917,7 @@ function get_productivity_data_for_picking($todays_date_date) {
   $query->fields('tc', array('field_picking_picking_team_count_value'));
   $query->fields('pps', array('field_picking_pick_supervisor_value'));
   $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
-  
+
   foreach ($res as $key => $value) {
 
 
@@ -931,18 +984,92 @@ function get_productivity_data_for_picking($todays_date_date) {
   return $picking;
 }
 
+function get_yesterday_data_pl_groupwise($day_before_yesterday, $yesterday, $distributor_id) {
+  return get_common_data_for_pl_group_datewise($day_before_yesterday, $yesterday, $distributor_id);
+}
 
+function get_mtd_data_pl_groupwise($this_date, $yesterday, $distributor_id) {
+  return get_common_data_for_pl_group_datewise($this_date, $yesterday, $distributor_id);
+}
+
+function get_common_data_for_pl_group_datewise($start_date, $end_date, $distributor_id) {
+  $query = db_select('node', 'n'); 
+  $query->condition('n.type', 'sales_register_data');
+  $query->condition('n.uid', $distributor_id, '=');
+  $query->join('field_data_field_sr_bill_date', 'bd', 'bd.entity_id = n.nid');
+  $query->condition('bd.field_sr_bill_date_value', array($start_date, $end_date), 'BETWEEN');
+  $query->join('field_data_field_bill_value', 'bv', 'bv.entity_id = n.nid');
+  $query->join('field_data_field_sales_party_code', 'pc', 'pc.entity_id = n.nid');
+  $query->join('node', 'oun', 'pc.field_sales_party_code_value = oun.title');
+  $query->condition('oun.type', 'outlet_master');
+  $query->condition('oun.uid', $distributor_id, '=');
+  $query->join('field_data_field_pl_group', 'plg', 'plg.entity_id = oun.nid');
+  $query->groupBy('field_pl_group_value');
+  $query->leftjoin('field_data_field_trip_id_reference', 'ti', 'ti.entity_id = n.nid');
+  $query->leftjoin('node', 'disn', 'disn.nid = ti.field_trip_id_reference_nid');
+  $query->leftjoin('field_data_field_dispatch_status', 'disp_st', 'disp_st.entity_id = disn.nid');
+  $query->addExpression('COUNT(n.title)', 'bill_count');
+  $query->addExpression('SUM(bv.field_bill_value_value)', 'bill_value');
+  $query->addExpression('COUNT(ti.field_trip_id_reference_nid)', 'trip_count');
+  $query->addExpression('SUM(if(ti.field_trip_id_reference_nid IS NOT NULL,field_bill_value_value, 0))', 'trip_sum');
+  $query->addExpression('SUM(if(disp_st.field_dispatch_status_value=1, 1, 0))', 'trip_dispatch_sum');
+  $query->addExpression('SUM(if(disp_st.field_dispatch_status_value=1, field_bill_value_value, 0))', 'trip_dispatch_value');
+  $query->fields('bd', array('field_sr_bill_date_value'));
+  $query->fields('plg', array('field_pl_group_value'));
+  $query->fields('n', array('nid'));
+  $query->fields('disp_st', array('field_dispatch_status_value'));
+  $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+
+  if (!empty($res)) {
+    $header = get_header_of_pl_group();
+
+    foreach ($res as $k => $v) {
+
+      $pl_group = $v['field_pl_group_value'];
+      $trip_created_count_percentage = round(($v['trip_count'] / $v['bill_count']) * 100);
+      $trip_created_value_percentage = round(($v['trip_sum'] / $v['bill_value']) * 100);
+      $dispatch_created_pe_count_rcentage = round(($v['trip_dispatch_sum'] / $v['bill_count']) * 100);
+      $dispatch_created_value_percentage = round(($v['trip_dispatch_value'] / $v['bill_value']) * 100);
+      $rows[] = array($pl_group,
+        $v['bill_count'],
+        $v['bill_value'],
+        $v['trip_count'],
+        $v['trip_sum'],
+        $v['trip_dispatch_sum'],
+        $v['trip_dispatch_value'],
+        $trip_created_count_percentage,
+        $trip_created_value_percentage,
+        $dispatch_created_pe_count_rcentage,
+        $dispatch_created_value_percentage
+      );
+    }
+    $output = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
+  }
+  else {
+    $output = "No Result Found";
+  }
+  return $output;
+}
+
+function get_header_of_pl_group() {
+  $header = array('PL Group', 'Bill Count', 'Bill Value', 'Trip Created Count ', 'Trip Created Value',
+    'Dispatch Count', 'Dispatch Value', 'Trip Created Count % ', 'Trip Created Value%',
+    'Dispatch Count%', 'Dispatch Value%');
+  return $header;
+}
 
 function email_status_mail($key, &$message, $params) {
   switch ($key) {
     case 'daily_data':
-
       $message['subject'] = $params['subject'];
       $message['body'][] = $params['body'];
       break;
 
     case 'productivity_status':
-
+      $message['subject'] = $params['subject'];
+      $message['body'][] = $params['body'];
+      break;
+     case 'pl_group_status':
       $message['subject'] = $params['subject'];
       $message['body'][] = $params['body'];
       break;
