@@ -138,7 +138,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start_date = '',
     $start_date = strtotime($start_date);
   }
   else {
-    //$time = strtotime('-60 days');
+   // $time = strtotime('-60 days');
     $time = strtotime(date('Y-m-d'));
     $start_date = strtotime(date("Y-m-d", $time));
   }

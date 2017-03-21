@@ -481,6 +481,17 @@ function check_node_title_exists($title, $type, $sales_data = FALSE) {
   return $nid;
 }
 
+function leanbox_check_taxonomy_exists_by_name($tname, $vname) {
+  $query1 = db_select('taxonomy_term_data', 't');
+  $query1->join('taxonomy_vocabulary','v','v.vid = t.vid');
+  $query1->condition('t.name', $tname);
+  $query1->condition('v.name', $vname);
+  $query1->fields('t', array('tid'));
+ // $query1->addTag('node_uid');
+  $tid = $query1->execute()->fetchField();
+  return $tid;
+}
+
 function get_csv_file_header() {
   return array(
     'VEHICLE',

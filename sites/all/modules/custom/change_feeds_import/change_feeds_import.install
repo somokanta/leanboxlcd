@@ -994,3 +994,77 @@ function change_feeds_import_update_7106() {
   
  
 }
+
+/**
+ *  Implements Hook_Update_7107
+ */
+function change_feeds_import_update_7107() {
+  
+ $schema['custom_data'] = array(
+    'description' => 'describes the custom table which holds imported sales delivery data',
+    'fields' => array(
+      'id' => array(
+        'description' => t('Unique id'),
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'bill_no' => array(
+        'description' => t('bill_no'),
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+      'impact_del_date' => array(
+        'description' => t('Date'),
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+      'sales_amt' => array(
+        'description' => t('bill_value'),
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+      'partial_full' => array(
+        'description' => t('partial_full'),
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+      'reason' => array(
+        'description' => t('reason'),
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+      'delivery_pending' => array(
+        'description' => t('delivery_pending'),
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+      'error_message' => array(
+        'description' => t('status'),
+        'type' => 'text',
+        'length' => 255,
+      ),
+      'created' => array(
+        'description' => t('Uploaded time'),
+        'type' => 'int',
+      ),
+      'fid' => array(
+        'description' => t('fid'),
+        'type' => 'int',
+      ),
+      'distributor_id' => array(
+        'description' => t('distributor_id'),
+        'type' => 'int',
+      ),
+    ),
+    'primary key' => array('id'),
+    'indexes' => array(
+      'bill_no' => array('bill_no'),
+      'fid' => array('fid'),
+      'distributor_id' => array('distributor_id'),
+    ),
+  );
+
+  db_create_table('custom_sales_delivery', $schema['custom_data']);
+  
+ 
+}

@@ -13,13 +13,13 @@ function leanbox_dashboard_menu() {
   $items['chart-daterange-filter'] = array(
     'title' => 'Party Packing',
     'page callback' => 'party_packing_filter_callback',
-    'access callback' => TRUE,
+    'access arguments' => array('Distributor Upload File'),
   );
   $items['leanbox-chart-details/%'] = array(
     'title ' => '',
     'page callback' => 'leanbox_dashboard_chart_details_callback',
     'page arguments' => array(1),
-    'access callback' => TRUE,
+    'access arguments' => array('Distributor Upload File'),
     'file path' => drupal_get_path('module', 'leanbox_dashboard'),
     'file' => '/includes/leanbox_dashboard_chart.inc',
   );

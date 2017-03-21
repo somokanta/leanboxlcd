@@ -45,6 +45,45 @@ function change_feeds_import_menu() {
     'page arguments' => array('change_feeds_import_setting_form'),
     'access callback' => 'check_if_fr_role_user_admin',
   );
+  
+   // Upload form for sales register data
+  $items['sales-delivery-data/import'] = array(
+    'title' => 'Sales Delivery Data',
+    'description' => 'Import Sales Delivery Data',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('change_feeds_import_sales_delivery_form'),
+    'access arguments' => array('Distributor Upload File'),
+    'file' => 'form/sales_delivery_data.inc',
+  );
+
+  $items['sales-delivery-data-confirm/%'] = array(
+    'title' => 'Sales Delivery Data  Confirm Table',
+    'description' => 'Sales Delivery Data Confirm Table',
+    'page callback' => 'change_feeds_import_sales_delivery_confirm_content',
+    'page arguments' => array(1),
+    'access arguments' => array('Distributor Upload File'),
+    'file' => 'form/sales_delivery_data.inc',
+  );
+
+  // when confirm is clicked
+  $items['sales-delivery-data-confirm/create_content/%'] = array(
+    'title' => 'Sales Delivery content',
+    'description' => 'Sales Delivery Data create node of sales register',
+    'page callback' => 'change_feeds_import_sales_delivery_create_confirm_content',
+    'page arguments' => array(2),
+    'access arguments' => array('Distributor Upload File'),
+    'file' => 'form/sales_delivery_data.inc',
+  );
+
+  // when discard is clicked
+  $items['sales-delivery-data-discard/%'] = array(
+    'title' => 'Sales Delivery data delete',
+    'description' => 'Sales Delivery delete Data',
+    'page callback' => 'change_feeds_import_sales_delivery_discard_data',
+    'page arguments' => array(1),
+    'access arguments' => array('Distributor Upload File'),
+    'file' => 'form/sales_delivery_data.inc',
+  );
 
   // Upload form for sales register data
   $items['outstanding-activity/import'] = array(
