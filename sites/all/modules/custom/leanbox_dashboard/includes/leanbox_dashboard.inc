@@ -11,6 +11,42 @@
  * @param array $form_state
  * @return string
  */
+function leanbox_dashboard_chart_filter_otif_form($form, &$form_state) {
+  $form = array();
+
+  if (arg(1) == 'otif') {
+    $bill_date = leanbox_dashboard_get_default_pdd_date_for_chart();
+    $bill_date = date('Y-m-d', $bill_date);
+    $form['bill_date'] = array(
+      '#type' => 'date_popup',
+      '#title' => t('Billing Date From'),
+      '#required' => TRUE,
+      '#date_format' => 'Y-m-d',
+      '#default_value' => $bill_date,
+    );
+
+    $form['submit'] = array(
+      '#type' => 'submit',
+      '#value' => 'Submit',
+      '#prefix' => '<div id ="otif-submit">',
+      '#suffix' => '</div>',
+      '#attributes' => array('class' => array('otif-submit')),
+    );
+  }
+
+  $form['otif'] = array(
+    '#markup' => '<a href = "/leanbox-chart-details/otif" target = "_blank"><div id="otif_div"></div></a>',
+  );
+
+  return $form;
+}
+
+/**
+ * 
+ * @param array $form
+ * @param array $form_state
+ * @return string
+ */
 function leanbox_dashboard_chart_filter_partypack_form($form, &$form_state) {
   $form = array();
   if (arg(1) == 'party_packing') {
@@ -138,7 +174,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start_date = '',
     $start_date = strtotime($start_date);
   }
   else {
-   // $time = strtotime('-60 days');
+    // $time = strtotime('-60 days');
     $time = strtotime(date('Y-m-d'));
     $start_date = strtotime(date("Y-m-d", $time));
   }
@@ -194,14 +230,14 @@ function leanbox_dashboard_chart_query_details($activity_type, $start_date = '',
           }
         }
       }
-      
+
       $party_pack_flag = FALSE;
       foreach ($output as $key => $val) {
         if ($val['not_start'] == 0 && $val['in_prg'] == 0 && $val['comp'] == 0) {
           continue;
         }
         $party_pack_flag = TRUE;
-        $data1[] = array($key, $val['in_prg'],$val['not_start'], $val['comp']);
+        $data1[] = array($key, $val['in_prg'], $val['not_start'], $val['comp']);
       }
       if ($party_pack_flag == FALSE) {
         $data1[] = array('No Result Found for Party Packing Type', 0, 0, 0);
@@ -335,4 +371,89 @@ function leanbox_dashboard_chart_query_details($activity_type, $start_date = '',
     }
     return $output1;
   }
+}
+
+function leanbox_dashboard_gauge_chart_query_details($type, $bill_date = '') {
+  require_once drupal_get_path('module', 'change_feeds_import') . '/form/upload_billing_data.inc';
+  
+  $output = 0;
+  $uid = $GLOBALS['user']->uid;
+  $uid = change_feeds_import_get_distributor_id($uid);
+  if ($type == 'otif') {
+
+    if (!empty($bill_date)) {
+      $bill_date = strtotime($bill_date);
+    }
+    else {
+      $bill_date = leanbox_dashboard_get_default_pdd_date_for_chart();
+    }
+
+    // Query to calculate total bill value
+    $query = db_select('node', 'n');
+    $query->join('field_data_field_bill_value', 'v', 'v.entity_id = n.nid');
+    $query->join('field_data_field_sr_bill_date', 'b', 'b.entity_id = n.nid');
+    $query->addExpression('SUM(v.field_bill_value_value)', 'bill_value');
+    $query->condition('n.type', 'sales_register_data');
+    $query->condition('b.field_sr_bill_date_value', $bill_date);
+    $query->condition('n.uid', $uid);
+    $total = $query->execute()->fetch(PDO::FETCH_ASSOC);
+
+    // query to calculate total dispatched bill value
+
+    $query = db_select('node', 'n');
+    $query->join('field_data_field_bill_value', 'v', 'v.entity_id = n.nid');
+    $query->fields('v', array('field_bill_value_value'));
+    $query->join('field_data_field_sr_bill_date', 'b', 'b.entity_id = n.nid');
+    $query->join('field_data_field_promised_date', 'pd', 'pd.entity_id = n.nid');
+    $query->fields('pd', array('field_promised_date_value'));
+    $query->join('field_data_field_trip_id_reference', 't', 't.entity_id = n.nid');
+    $query->join('node', 'n1', 't.field_trip_id_reference_nid = n1.nid');
+    $query->join('field_data_field_dispatch_date', 'd1', 'd1.entity_id= n1.nid');
+    $query->fields('d1', array('field_dispatch_date_value'));
+    $query->condition('n.uid', $uid);
+    $query->condition('n1.uid', $uid);
+    $query->condition('n.type', 'sales_register_data');
+    $query->condition('b.field_sr_bill_date_value', $bill_date);
+    $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+    
+    if (!empty($res)) {
+      $total_dis_bill_val = 0;
+      foreach ($res as $key => $val) {
+        $dispatch_date = strtotime($val['field_dispatch_date_value']);
+        $pdd = $val['field_promised_date_value'];
+
+        if (!empty($dispatch_date) && !empty($pdd)) {
+          $date_diff = $pdd - $dispatch_date;
+          if ($date_diff >= 0) {
+            $total_dis_bill_val += $val['field_bill_value_value'];
+          }
+        }
+      }
+
+      $output = round(($total_dis_bill_val / $total['bill_value'] ) * 100);
+      return $output;
+    }
+  }
+  return $output;
+}
+
+/**
+ * logic to calculate bill date
+ * @param string $pdd
+ * @return time in string
+ */
+function leanbox_dashboard_get_default_pdd_date_for_chart($pdd = "4 days") {
+  require_once drupal_get_path('module', 'change_feeds_import') . '/form/upload_billing_data.inc';
+
+  $uid = $GLOBALS['user']->uid;
+  $distributor_id = change_feeds_import_get_distributor_id($user_id);
+  $nid = check_node_title_exists($distributor_id, 'pdd_master');
+
+  if (!empty($nid)) {
+    $node = node_load($nid);
+    $pdd = $node->field_pdd[LANGUAGE_NONE][0]['value'] . " days";
+  }
+  $bill_date = date('Y-m-d');
+  $bill_date = strtotime($bill_date . "-$pdd");
+  return $bill_date;
 }

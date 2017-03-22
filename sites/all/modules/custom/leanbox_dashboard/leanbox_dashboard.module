@@ -32,10 +32,21 @@ function leanbox_dashboard_menu() {
  */
 function party_packing_filter_callback() {
   module_load_include('inc', 'leanbox_dashboard', 'includes/leanbox_dashboard');
-  $start_date = $_POST['start_date'];
-  $end_date = $_POST['end_date'];
+
   $activity_type = $_POST['activity_type'];
-  $output_data = leanbox_dashboard_chart_query_details($activity_type, $start_date, $end_date);
+  if (isset($_POST['start_date'])) {
+    $start_date = $_POST['start_date'];
+  }
+  if (isset($_POST['end_date'])) {
+    $end_date = $_POST['end_date'];
+  }
+  if (isset($_POST['bill_date'])) {
+    $bill_date = $_POST['bill_date'];
+    $output_data = leanbox_dashboard_gauge_chart_query_details($activity_type, $bill_date);
+  }
+  else {
+    $output_data = leanbox_dashboard_chart_query_details($activity_type, $start_date, $end_date);
+  }
   drupal_json_output($output_data);
 }
 
@@ -53,6 +64,10 @@ function leanbox_dashboard_block_info() {
   );
   $blocks['unloading'] = array(
     'info' => t('Unloading Chart'),
+    'cache' => DRUPAL_NO_CACHE,
+  );
+  $blocks['otif'] = array(
+    'info' => t('Otif'),
     'cache' => DRUPAL_NO_CACHE,
   );
   return $blocks;
@@ -87,7 +102,8 @@ function leanbox_dashboard_block_view($delta = '') {
         );
       }
 
-      $block['subject'] = 'Party Packing Chart';
+      $loading_date = date('Y-m-d');
+      $block['subject'] = "Party Packing Progress($loading_date Loading)";
       $data = leanbox_dashboard_chart_query_details('party_packing');
       $filter_form = drupal_render(drupal_get_form('leanbox_dashboard_chart_filter_partypack_form'));
       $block['content'] = array(
@@ -109,7 +125,7 @@ function leanbox_dashboard_block_view($delta = '') {
       break;
 
     case 'picking':
-      
+
       if (arg(1) == 'picking') {
         $area_definition = array(
           'width' => 700,
@@ -119,8 +135,9 @@ function leanbox_dashboard_block_view($delta = '') {
           'ch_width' => 500,
           'ch_height' => 250,
         );
-      }
-      $block['subject'] = 'Picking Chart';
+      } 
+      $loading_date = date('Y-m-d');
+      $block['subject'] = "Picking Progress($loading_date Loading)";
       $data = leanbox_dashboard_chart_query_details('picking');
 
       $filter_form = drupal_render(drupal_get_form('leanbox_dashboard_chart_filter_picking_form'));
@@ -142,7 +159,7 @@ function leanbox_dashboard_block_view($delta = '') {
       );
       break;
     case 'unloading':
-      
+
       if (arg(1) == 'unloading') {
         $area_definition = array(
           'width' => 700,
@@ -153,7 +170,8 @@ function leanbox_dashboard_block_view($delta = '') {
           'ch_height' => 250,
         );
       }
-      $block['subject'] = 'Unloading Chart';
+      $loading_date = date('Y-m-d');
+      $block['subject'] = "Unloading Progress($loading_date Invoice)";
       $data = leanbox_dashboard_chart_query_details('unloading');
 
       $filter_form = drupal_render(drupal_get_form('leanbox_dashboard_chart_filter_unloading_form'));
@@ -168,6 +186,42 @@ function leanbox_dashboard_block_view($delta = '') {
             drupal_get_path('module', 'leanbox_dashboard') . '/js/leanbox_dashboard_unloading.js',
             array(
               'data' => array('leanbox_dashboard' => array('unloading' => $data, 'area_definition' => $area_definition)),
+              'type' => 'setting'
+            ),
+          ),
+        ),
+      );
+      break;
+
+    case 'otif':
+
+      if (arg(1) == 'otif') {
+//        $area_definition = array(
+//          'width' => 700,
+//          'height' => 400,
+//          'ch_left' => 80,
+//          'ch_top' => 50,
+//          'ch_width' => 500,
+//          'ch_height' => 250,
+//        );
+      }
+      $bill_date = leanbox_dashboard_get_default_pdd_date_for_chart();
+      $bill_date = date('Y-m-d', $bill_date);
+      $block['subject'] = "Otif Progress($bill_date Billing)";
+      $data = leanbox_dashboard_gauge_chart_query_details('otif');
+
+      $filter_form = drupal_render(drupal_get_form('leanbox_dashboard_chart_filter_otif_form'));
+      $block['content'] = array(
+        '#markup' => theme('leanbox_dashboard', array('data' => $filter_form)),
+        '#attached' => array(
+          'js' => array(
+            array(
+              'type' => 'external',
+              'data' => 'https://www.gstatic.com/charts/loader.js'
+            ),
+            drupal_get_path('module', 'leanbox_dashboard') . '/js/leanbox_dashboard_otifchart.js',
+            array(
+              'data' => array('leanbox_dashboard' => array('otif' => $data)),
               'type' => 'setting'
             ),
           ),

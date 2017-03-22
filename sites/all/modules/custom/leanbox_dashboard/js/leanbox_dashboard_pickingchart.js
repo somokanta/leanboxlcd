@@ -11,7 +11,7 @@
 
 			var picking_data = Drupal.settings.leanbox_dashboard.picking;
 			var area_definition = Drupal.settings.leanbox_dashboard.area_definition;
-			google.charts.load("current", {packages: ['corechart', 'bar']});
+			google.charts.load("current", {packages: ['gauge','corechart', 'bar']});
 			google.charts.setOnLoadCallback(function () {
 				drawpickingChart(picking_data, area_definition);
 			});
@@ -30,7 +30,6 @@
 						success: function (response) {
 							
 							var area_definition = Drupal.settings.leanbox_dashboard.area_definition;
-							google.charts.load("current", {packages: ['corechart', 'bar']});
 							google.charts.setOnLoadCallback(function () {
 								drawpickingChart(response, area_definition);
 							});
@@ -60,8 +59,8 @@
 				var options = {
 					width: area_definition.width,
 					height: area_definition.height,
-					title: 'Picking Chart',
-					legend: {position: 'right', maxLines: 3},
+					title: '',
+					legend: {position: 'right', maxLines: 3}, 
 					bar: {groupWidth: '40%'},
 					chartArea: {left: area_definition.ch_left, top: area_definition.ch_top, width: area_definition.ch_width, height: area_definition.ch_height},
 					series: {

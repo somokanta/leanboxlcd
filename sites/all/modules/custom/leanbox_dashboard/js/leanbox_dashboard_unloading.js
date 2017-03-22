@@ -11,7 +11,7 @@
 
 			var area_definition = Drupal.settings.leanbox_dashboard.area_definition;
 			var unloading_data = Drupal.settings.leanbox_dashboard.unloading;
-			google.charts.load("current", {packages: ['corechart', 'bar']});
+			google.charts.load("current", {packages: ['gauge','corechart', 'bar']});
 			google.charts.setOnLoadCallback(function () {
 				drawunloadingChart(unloading_data);
 			});
@@ -30,7 +30,6 @@
 						success: function (response) {
 							
 							var area_definition = Drupal.settings.leanbox_dashboard.area_definition;
-							google.charts.load("current", {packages: ['corechart', 'bar']});
 							google.charts.setOnLoadCallback(function () {
 								drawunloadingChart(response);
 							});
@@ -60,7 +59,7 @@
 				var options = {
 					width: area_definition.width,
 					height: area_definition.height,
-					title: 'Unloading Chart',
+					title: '',
 					legend: {position: 'right', maxLines: 3},
 					bar: {groupWidth: '40%'},
 					chartArea: {left: area_definition.ch_left, top: area_definition.ch_top, width: area_definition.ch_width, height: area_definition.ch_height},
@@ -75,9 +74,6 @@
 						maxValue: 7,
 						title: 'Unloading Activity'
 					},
-//					hAxis: {
-//						title: 'Pricelist Group'
-//					},
 				};
 				var chart = new google.visualization.ColumnChart(document.getElementById("unloading_div"));
 				chart.draw(view, options);

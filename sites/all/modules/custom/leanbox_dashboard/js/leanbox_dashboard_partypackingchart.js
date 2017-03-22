@@ -11,7 +11,7 @@
 			
 			var area_definition = Drupal.settings.leanbox_dashboard.area_definition;
 			var party_pack_data = Drupal.settings.leanbox_dashboard.party_packing;
-			google.charts.load("current", {packages: ['corechart', 'bar']});
+			google.charts.load("current", {packages: ['gauge','corechart', 'bar']});
 			google.charts.setOnLoadCallback(function () {
 				drawpartypackingChart(party_pack_data);
 			});
@@ -30,7 +30,6 @@
 						success: function (response) {
 							
 							var area_definition = Drupal.settings.leanbox_dashboard.area_definition;
-							google.charts.load("current", {packages: ['corechart', 'bar']});
 							google.charts.setOnLoadCallback(function () {
 								drawpartypackingChart(response);
 							});
@@ -41,11 +40,7 @@
 			});
 
 			function drawpartypackingChart(party_pack_data) {
-//				var data = google.visualization.arrayToDataTable([
-//					['PriceList Group', 'Not Started', 'In Progress', 'Completed', {role: 'annotation'}],
-//					['NON - PP', party_pack_data.non_pp.not_start, party_pack_data.non_pp.in_prg, party_pack_data.non_pp.comp, ''],
-//					['PP', party_pack_data.pp.not_start, party_pack_data.pp.in_prg, party_pack_data.pp.comp, ''],
-//				]);
+
 	      var data = google.visualization.arrayToDataTable(party_pack_data);
 		
 				var view = new google.visualization.DataView(data);
@@ -66,7 +61,7 @@
 				var options = {
 					width: area_definition.width,
 					height: area_definition.height,
-					title: 'Party Packing Chart',
+					title: '',
 					legend: {position: 'right', maxLines: 3},
 					bar: {groupWidth: '40%'},
 					chartArea: {left: area_definition.ch_left, top: area_definition.ch_top, width: area_definition.ch_width, height: area_definition.ch_height},
