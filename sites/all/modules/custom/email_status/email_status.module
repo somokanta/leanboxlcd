@@ -262,28 +262,30 @@ function send_email_pl_group_emailer($distributor_name) {
   $user_id = $user->uid;
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
 
-//$todays_date_date = date('Y-m-d 00:00:00');
-  $todays_date_date = "2017-03-17 00:00:00";
+ //$todays_date_date = date('Y-m-d');
+ $todays_date_date = "2017-03-20";
+
+ // $todays_date_date = "2017-03-17 00:00:00";
   $todays_date_date_timestamp = strtotime(date($todays_date_date));
   $current_day = date("d", $todays_date_date_timestamp);
   $yesterday = strtotime('-1 day', strtotime($todays_date_date));
-  $day_before_yesterday = strtotime('-2 day', strtotime($todays_date_date));
+  //$day_before_yesterday = strtotime('-2 day', strtotime($todays_date_date));
   if ($current_day == 22) {
     $this_month = date("m", $todays_date_date_timestamp);
-    $this_date = strtotime(date("Y-$this_month-20 00:00:00"));
+    $this_date = $yesterday;
   }
   elseif ($current_day <= 21) {
     $old_date = strtotime('-1 month', strtotime($todays_date_date));
     $last_month = date("m", $old_date);
-    $this_date = strtotime(date("Y-$last_month-21 00:00:00"));
+    $this_date = strtotime(date("Y-$last_month-21"));
   }
   else {
     $this_month = date("m", $todays_date_date_timestamp);
-    $this_date = strtotime(date("Y-$this_month-21 00:00:00"));
+    $this_date = strtotime(date("Y-$this_month-21"));
   }
 
   $yesterday_html = "<h3>Yesterday</h3>";
-  $yesterday_data = get_yesterday_data_pl_groupwise($day_before_yesterday, $yesterday, $distributor_id);
+  $yesterday_data = get_yesterday_data_pl_groupwise($yesterday, $yesterday, $distributor_id);
   if ($yesterday_data == "No Result Found") {
     $header = get_header_of_pl_group();
     $yesterday_rows[] = array("<td colspan='10' style='text-align: center;'> There is No Activity</td>");
@@ -984,8 +986,8 @@ function get_productivity_data_for_picking($todays_date_date) {
   return $picking;
 }
 
-function get_yesterday_data_pl_groupwise($day_before_yesterday, $yesterday, $distributor_id) {
-  return get_common_data_for_pl_group_datewise($day_before_yesterday, $yesterday, $distributor_id);
+function get_yesterday_data_pl_groupwise($yesterday, $yesterday, $distributor_id) {
+  return get_common_data_for_pl_group_datewise($yesterday, $yesterday, $distributor_id);
 }
 
 function get_mtd_data_pl_groupwise($this_date, $yesterday, $distributor_id) {
