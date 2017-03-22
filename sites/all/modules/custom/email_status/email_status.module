@@ -1033,7 +1033,7 @@ function get_common_data_for_pl_group_datewise($start_date, $end_date, $distribu
       $dispatch_created_pe_count_rcentage = round(($v['trip_dispatch_sum'] / $v['bill_count']) * 100);
       $dispatch_created_value_percentage = round(($v['trip_dispatch_value'] / $v['bill_value']) * 100);
       $bill_val = $v['bill_value'];
-      $bill_val = number_format((float) $bill_val, 2, '.', '');
+      $bill_val = round($bill_val);
 
       $rows[] = array($pl_group,
         $v['bill_count'],
