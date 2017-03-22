@@ -1042,10 +1042,10 @@ function get_common_data_for_pl_group_datewise($start_date, $end_date, $distribu
         $v['trip_sum'],
         $v['trip_dispatch_sum'],
         $v['trip_dispatch_value'],
-        $trip_created_count_percentage,
-        $trip_created_value_percentage,
-        $dispatch_created_pe_count_rcentage,
-        $dispatch_created_value_percentage
+        $trip_created_count_percentage." %",
+        $trip_created_value_percentage." %",
+        $dispatch_created_pe_count_rcentage." %",
+        $dispatch_created_value_percentage." %"
       );
     }
     $output = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
