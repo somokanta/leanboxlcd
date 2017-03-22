@@ -998,6 +998,7 @@ function get_common_data_for_pl_group_datewise($start_date, $end_date, $distribu
   $query = db_select('node', 'n'); 
   $query->condition('n.type', 'sales_register_data');
   $query->condition('n.uid', 60, '=');
+  $query->join('field_data_field_billing_van', 'bva', 'bva.entity_id = n.nid');
   $query->join('field_data_field_sr_bill_date', 'bd', 'bd.entity_id = n.nid');
   $query->condition('bd.field_sr_bill_date_value', array($start_date, $end_date), 'BETWEEN');
   $query->join('field_data_field_bill_value', 'bv', 'bv.entity_id = n.nid');
