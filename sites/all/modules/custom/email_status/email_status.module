@@ -255,6 +255,65 @@ function send_email_daily_data() {
 
   send_email_productivity_emailer($todays_date_date, $distributor_name);
   send_email_pl_group_emailer($distributor_name);
+  send_email_channel_emailer($distributor_name);
+}
+
+function send_email_channel_emailer($distributor_name) {
+  global $user;
+  $user_id = $user->uid;
+  $distributor_id = change_feeds_import_get_distributor_id($user_id);
+
+  $todays_date_date = date('Y-m-d');
+  //$todays_date_date = "2017-03-20";
+  // $todays_date_date = "2017-03-17 00:00:00";
+  $todays_date_date_timestamp = strtotime(date($todays_date_date));
+  $current_day = date("d", $todays_date_date_timestamp);
+  $yesterday = strtotime('-1 day', strtotime($todays_date_date));
+  //$day_before_yesterday = strtotime('-2 day', strtotime($todays_date_date));
+  if ($current_day == 22) {
+    $this_month = date("m", $todays_date_date_timestamp);
+    $this_date = $yesterday;
+  }
+  elseif ($current_day <= 21) {
+    $old_date = strtotime('-1 month', strtotime($todays_date_date));
+    $last_month = date("m", $old_date);
+    $this_date = strtotime(date("Y-$last_month-21"));
+  }
+  else {
+    $this_month = date("m", $todays_date_date_timestamp);
+    $this_date = strtotime(date("Y-$this_month-21"));
+  }
+
+  $yesterday_html = "<h3>Yesterday</h3>";
+  $yesterday_data = get_yesterday_data_channel($yesterday, $yesterday, $distributor_id);
+  if ($yesterday_data == "No Result Found") {
+    $header = get_header_of_chhanel();
+    $yesterday_rows[] = array("<td colspan='10' style='text-align: center;'> There is No Activity</td>");
+    $yesterday_html .= theme('table', array('header' => $header, 'rows' => $yesterday_rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
+  }
+  else {
+    $yesterday_html .= $yesterday_data;
+  }
+
+  $mtd_html = "<h3>MTD</h3>";
+  $mtd_data .= get_mtd_data_channel($this_date, $yesterday, $distributor_id);
+  if ($mtd_data == "No Result Found") {
+    $header = get_header_of_chhanel();
+    $mtd_rows[] = array("<td colspan='10' style='text-align: center;'> There is No Activity</td>");
+    $mtd_html .= theme('table', array('header' => $header, 'rows' => $mtd_rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
+  }
+  else {
+    $mtd_html .= $mtd_data;
+  }
+
+  $params['subject'] = "Channel Wise OTIF - $distributor_name";
+  $params['body'] = $yesterday_html . "<br>" . $mtd_html;
+  $mail_to = variable_get('to_email');
+  // $mail_to = "gaurav@leanbox.in";
+// $mail_to = "hplord12@gmail.com";
+//  $from = "MIS.HELPDESK@leanbox.in";
+  $from = variable_get('from_email');
+  drupal_mail('email_status', 'channel_status', $mail_to, LANGUAGE_NONE, $params, $from);
 }
 
 function send_email_pl_group_emailer($distributor_name) {
@@ -262,10 +321,9 @@ function send_email_pl_group_emailer($distributor_name) {
   $user_id = $user->uid;
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
 
- $todays_date_date = date('Y-m-d');
- //$todays_date_date = "2017-03-20";
-
- // $todays_date_date = "2017-03-17 00:00:00";
+  $todays_date_date = date('Y-m-d');
+  //$todays_date_date = "2017-03-20";
+  // $todays_date_date = "2017-03-17 00:00:00";
   $todays_date_date_timestamp = strtotime(date($todays_date_date));
   $current_day = date("d", $todays_date_date_timestamp);
   $yesterday = strtotime('-1 day', strtotime($todays_date_date));
@@ -305,7 +363,7 @@ function send_email_pl_group_emailer($distributor_name) {
   else {
     $mtd_html .= $mtd_data;
   }
-  
+
   $params['subject'] = "PL Group Wise Bill Pendency-$distributor_name";
   $params['body'] = $yesterday_html . "<br>" . $mtd_html;
   $mail_to = variable_get('to_email');
@@ -314,7 +372,6 @@ function send_email_pl_group_emailer($distributor_name) {
 //  $from = "MIS.HELPDESK@leanbox.in";
   $from = variable_get('from_email');
   drupal_mail('email_status', 'pl_group_status', $mail_to, LANGUAGE_NONE, $params, $from);
-  
 }
 
 function send_email_productivity_emailer($todays_date_date, $distributor_name) {
@@ -986,6 +1043,14 @@ function get_productivity_data_for_picking($todays_date_date) {
   return $picking;
 }
 
+function get_yesterday_data_channel($yesterday, $yesterday, $distributor_id) {
+  return get_common_data_for_chhanel_datewise($yesterday, $yesterday, $distributor_id);
+}
+
+function get_mtd_data_channel($this_date, $yesterday, $distributor_id) {
+  return get_common_data_for_chhanel_datewise($this_date, $yesterday, $distributor_id);
+}
+
 function get_yesterday_data_pl_groupwise($yesterday, $yesterday, $distributor_id) {
   return get_common_data_for_pl_group_datewise($yesterday, $yesterday, $distributor_id);
 }
@@ -994,8 +1059,78 @@ function get_mtd_data_pl_groupwise($this_date, $yesterday, $distributor_id) {
   return get_common_data_for_pl_group_datewise($this_date, $yesterday, $distributor_id);
 }
 
+function get_common_data_for_chhanel_datewise($start_date, $end_date, $distributor_id) {
+  $query = db_select('node', 'n');
+  $query->condition('n.type', 'sales_register_data');
+  $query->condition('n.uid', 60, '=');
+  $query->join('field_data_field_billing_van', 'bva', 'bva.entity_id = n.nid');
+  $query->join('field_data_field_sr_bill_date', 'bd', 'bd.entity_id = n.nid');
+  $query->condition('bd.field_sr_bill_date_value', array($start_date, $end_date), 'BETWEEN');
+  $query->join('field_data_field_bill_value', 'bv', 'bv.entity_id = n.nid');
+  $query->join('field_data_field_promised_date', 'pro_date', 'pro_date.entity_id = n.nid');
+  $query->join('field_data_field_sales_party_code', 'pc', 'pc.entity_id = n.nid');
+  $query->join('node', 'oun', 'pc.field_sales_party_code_value = oun.title');
+  $query->condition('oun.type', 'outlet_master');
+  $query->condition('oun.uid', 60, '=');
+  $query->join('field_data_field_channel', 'chan', 'chan.entity_id = oun.nid');
+  $query->groupBy('field_channel_value');
+  $query->leftjoin('field_data_field_trip_id_reference', 'ti', 'ti.entity_id = n.nid');
+  $query->leftjoin('node', 'disn', 'disn.nid = ti.field_trip_id_reference_nid');
+  $query->leftjoin('field_data_field_dispatch_status', 'disp_st', 'disp_st.entity_id = disn.nid');
+  $query->join('field_data_field_dispatch_date', 'disp_date', 'disp_date.entity_id = disn.nid');
+  $query->addExpression('COUNT(n.title)', 'bill_count');
+  $query->addExpression('SUM(bv.field_bill_value_value)', 'bill_value');
+  $query->addExpression('SUM(CASE WHEN (pro_date.field_promised_date_value <= unix_timestamp(disp_date.field_dispatch_date_value) AND disp_st.field_dispatch_status_value =1) THEN 1 ELSE 0 END)', 'n2_counts');
+  $query->addExpression('SUM(CASE WHEN ((pro_date.field_promised_date_value+86400) <= unix_timestamp(disp_date.field_dispatch_date_value) AND disp_st.field_dispatch_status_value =1) THEN 1 ELSE 0 END)', 'n3_counts');
+  $query->addExpression('SUM(CASE WHEN (pro_date.field_promised_date_value <= unix_timestamp(disp_date.field_dispatch_date_value) AND disp_st.field_dispatch_status_value =1) THEN field_bill_value_value ELSE 0 END)', 'n2_value');
+  $query->addExpression('SUM(CASE WHEN ( (pro_date.field_promised_date_value+86400) <= unix_timestamp(disp_date.field_dispatch_date_value) AND disp_st.field_dispatch_status_value =1) THEN field_bill_value_value ELSE 0 END)', 'n3_value');
+  $query->fields('n', array('nid'));
+  $query->fields('bd', array('field_sr_bill_date_value'));
+  $query->fields('chan', array('field_channel_value'));
+//$query->fields('disn', array('nid'));
+  $query->fields('disn', array('nid'));
+  $query->fields('disp_st', array('field_dispatch_status_value'));
+  $query->fields('disp_date', array('field_dispatch_date_value'));
+  $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+
+
+  if (!empty($res)) {
+    $header = get_header_of_chhanel();
+
+    foreach ($res as $k => $v) {
+      $channel = $v['field_channel_value'];
+      $bill_val = $v['bill_value'];
+      $bill_val = round($bill_val);
+
+      $otif_n2_count_perc = round(($v['n2_counts'] / $v['bill_count']) * 100);
+      $otif_n2_value_perc = round(($v['n2_value'] / $v['bill_value']) * 100);
+      $otif_n3_count_perc = round(($v['n3_counts'] / $v['bill_count']) * 100);
+      $otif_n3_value_perc = round(($v['n3_value'] / $v['bill_value']) * 100);
+
+
+      $rows[] = array($channel,
+        $v['bill_count'],
+        $bill_val,
+        $v['n2_counts'],
+        $v['n2_value'],
+        $v['n3_counts'],
+        $v['n3_value'],
+        $otif_n2_count_perc . " %",
+        $otif_n2_value_perc . " %",
+        $otif_n3_count_perc . " %",
+        $otif_n3_value_perc . " %"
+      );
+    }
+    $output = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
+  }
+  else {
+    $output = "No Result Found";
+  }
+  return $output;
+}
+
 function get_common_data_for_pl_group_datewise($start_date, $end_date, $distributor_id) {
-  $query = db_select('node', 'n'); 
+  $query = db_select('node', 'n');
   $query->condition('n.type', 'sales_register_data');
   $query->condition('n.uid', 60, '=');
   $query->join('field_data_field_billing_van', 'bva', 'bva.entity_id = n.nid');
@@ -1043,10 +1178,10 @@ function get_common_data_for_pl_group_datewise($start_date, $end_date, $distribu
         $v['trip_sum'],
         $v['trip_dispatch_sum'],
         $v['trip_dispatch_value'],
-        $trip_created_count_percentage." %",
-        $trip_created_value_percentage." %",
-        $dispatch_created_pe_count_rcentage." %",
-        $dispatch_created_value_percentage." %"
+        $trip_created_count_percentage . " %",
+        $trip_created_value_percentage . " %",
+        $dispatch_created_pe_count_rcentage . " %",
+        $dispatch_created_value_percentage . " %"
       );
     }
     $output = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
@@ -1064,6 +1199,12 @@ function get_header_of_pl_group() {
   return $header;
 }
 
+function get_header_of_chhanel() {
+  $header = array('Channel', 'Bill Count', 'Bill Value', 'Dispatch (N+2) Count ', 'Dispatch (N+2) Value',
+    'Dispatch (N+3) Count', 'Dispatch (N+3) Value', 'OTIF (N+2) Count%', 'OTIF (N+2) Value%',
+    'OTIF (N+3) Count%', 'OTIF (N+3) Value%');
+}
+
 function email_status_mail($key, &$message, $params) {
   switch ($key) {
     case 'daily_data':
@@ -1075,7 +1216,11 @@ function email_status_mail($key, &$message, $params) {
       $message['subject'] = $params['subject'];
       $message['body'][] = $params['body'];
       break;
-     case 'pl_group_status':
+    case 'pl_group_status':
+      $message['subject'] = $params['subject'];
+      $message['body'][] = $params['body'];
+      break;
+    case 'channel_status':
       $message['subject'] = $params['subject'];
       $message['body'][] = $params['body'];
       break;
