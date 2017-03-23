@@ -1203,6 +1203,7 @@ function get_header_of_chhanel() {
   $header = array('Channel', 'Bill Count', 'Bill Value', 'Dispatch (N+2) Count ', 'Dispatch (N+2) Value',
     'Dispatch (N+3) Count', 'Dispatch (N+3) Value', 'OTIF (N+2) Count%', 'OTIF (N+2) Value%',
     'OTIF (N+3) Count%', 'OTIF (N+3) Value%');
+  return $header;
 }
 
 function email_status_mail($key, &$message, $params) {
