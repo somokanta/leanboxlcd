@@ -18,15 +18,18 @@
 			$(".otif-submit").click(function (e) {
 
 				e.preventDefault();
-			  var bill_date = $(this).parent().prev().find("input[name='bill_date[date]']").val();
-				if (bill_date != '') {
+			  var start_date = $(this).parent().prev().prev().find("input[name='start_date[date]']").val();
+				alert(start_date);
+				var end_date = $(this).parent().prev().find("input[name='end_date[date]']").val();
+				alert(end_date);
+				if (start_date != '' && end_date != '') {
 					$.ajax({
 						type: "POST",
 						cache: false, //for Chrome and IE8
 						url: "/chart-daterange-filter",
-						data: {bill_date: bill_date, activity_type: 'otif'},
+						data: {start_date: start_date, end_date: end_date, activity_type: 'otif'},
 						success: function (response) {
-							
+							console.log(response);
 							google.charts.setOnLoadCallback(function () {
 								drawotifChart(response);
 							});
