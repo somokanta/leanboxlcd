@@ -1105,6 +1105,12 @@ function get_common_data_for_chhanel_datewise($start_date, $end_date, $distribut
       $otif_n3_count_perc = round(($v['n3_counts'] / $v['bill_count']) * 100);
       $otif_n3_value_perc = round(($v['n3_value'] / $v['bill_value']) * 100);
 
+      $total_bill_count += $v['bill_count'];
+      $total_bill_val += $bill_val;
+      $total_n2_counts += $v['n2_counts'];
+      $total_n2_value += $v['n2_value'];
+      $total_n3_counts += $v['n3_counts'];
+      $total_n3_value += $v['n3_value'];
 
       $rows[] = array($channel,
         $v['bill_count'],
