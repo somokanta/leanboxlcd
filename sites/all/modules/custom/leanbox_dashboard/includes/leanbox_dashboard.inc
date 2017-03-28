@@ -54,6 +54,86 @@ function leanbox_dashboard_chart_filter_otif_form($form, &$form_state) {
  * @param array $form_state
  * @return string
  */
+function leanbox_dashboard_chart_filter_partypack_productivity_form($form, &$form_state) {
+  $form = array();
+  if (arg(1) == 'party_packing_productivity') {
+    $form['start_date'] = array(
+      '#type' => 'date_popup',
+      '#title' => t('Loading Date From'),
+      '#required' => TRUE,
+      '#date_format' => 'Y-m-d',
+      '#default_value' => date('Y-m-d'),
+    );
+    $form['end_date'] = array(
+      '#type' => 'date_popup',
+      '#title' => t('Loading Date To'),
+      '#required' => TRUE,
+      '#date_format' => 'Y-m-d',
+      '#default_value' => date('Y-m-d'),
+    );
+    $form['submit'] = array(
+      '#type' => 'submit',
+      '#value' => 'Submit',
+      '#prefix' => '<div id ="party-packing-productivity-submit">',
+      '#suffix' => '</div>',
+      '#attributes' => array('class' => array('party-packing-productivity-submit')),
+    );
+  }
+
+  $form['party_packing_productivity'] = array(
+    '#markup' => '<a href = "/leanbox-chart-details/party_packing_productivity" target = "_blank"><div id="party_packing_productivity_div"></div></a>',
+  );
+
+
+  return $form;
+}
+
+/**
+ * 
+ * @param array $form
+ * @param array $form_state
+ * @return string
+ */
+function leanbox_dashboard_chart_filter_picking_productivity_form($form, &$form_state) {
+  $form = array();
+  if (arg(1) == 'picking_productivity') {
+    $form['start_date'] = array(
+      '#type' => 'date_popup',
+      '#title' => t('Loading Date From'),
+      '#required' => TRUE,
+      '#date_format' => 'Y-m-d',
+      '#default_value' => date('Y-m-d'),
+    );
+    $form['end_date'] = array(
+      '#type' => 'date_popup',
+      '#title' => t('Loading Date To'),
+      '#required' => TRUE,
+      '#date_format' => 'Y-m-d',
+      '#default_value' => date('Y-m-d'),
+    );
+    $form['submit'] = array(
+      '#type' => 'submit',
+      '#value' => 'Submit',
+      '#prefix' => '<div id ="picking-productivity-submit">',
+      '#suffix' => '</div>',
+      '#attributes' => array('class' => array('picking-productivity-submit')),
+    );
+  }
+
+  $form['picking_productivity'] = array(
+    '#markup' => '<a href = "/leanbox-chart-details/picking_productivity" target = "_blank"><div id="picking_productivity_div"></div></a>',
+  );
+
+
+  return $form;
+}
+
+/**
+ * 
+ * @param array $form
+ * @param array $form_state
+ * @return string
+ */
 function leanbox_dashboard_chart_filter_partypack_form($form, &$form_state) {
   $form = array();
   if (arg(1) == 'party_packing') {
@@ -215,22 +295,23 @@ function leanbox_dashboard_chart_filter_delivery_form($form, &$form_state) {
  * 
  * @return html
  */
-function leanbox_dashboard_chart_query_details($activity_type, $start_date = '', $end_date = '') {
+function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end = '') {
   global $user;
 // Store distributor id in author in each node
   $distributor_id = change_feeds_import_get_distributor_id($user->uid);
-  if (!empty($start_date)) {
-    $start_date = strtotime($start_date);
+  if (!empty($start)) {
+    $start_date = strtotime($start);
   }
   else {
-// $time = strtotime('-60 days');
+    $start = date('Y-m-d'); // dnt change format as date are stored in same format in db
     $time = strtotime(date('Y-m-d'));
     $start_date = strtotime(date("Y-m-d", $time));
   }
-  if (!empty($end_date)) {
-    $end_date = strtotime($end_date) + 86399;
+  if (!empty($end)) {
+    $end_date = strtotime($end) + 86399;
   }
   else {
+    $end = date('Y-m-d');
     $end_date = strtotime(date('Y-m-d'));
   }
 
@@ -296,6 +377,44 @@ function leanbox_dashboard_chart_query_details($activity_type, $start_date = '',
       $data1[] = array('No Result Found for Party Packing Type', 0, 0, 0);
     }
     return $data1;
+  }
+  else if ($activity_type == 'party_packing_productivity') {
+
+    $party_packing = get_productivity_data_for_party_packing($start, $end, $distributor_id);
+    $data1 = $party_packing['total']['pp_bill_lines'] / $party_packing['total']['pp_time'];
+    if (is_nan($data1) || empty($data1) || $data1 == FALSE) {
+      $data1 = 0;
+    }
+    $data2 = $party_packing['total']['non_pp_bill_lines'] / $party_packing['total']['non_time'];
+    if (is_nan($data2) || empty($data2) || $data2 == FALSE) {
+      $data2 = 0;
+    }
+    $output[] = array('Group', 'Productivity');
+    $output[] = array('PP', $data1);
+    $output[] = array('NON-PP', $data2);
+    return $output;
+  }
+  else if ($activity_type == 'picking_productivity') {
+    
+    $output[] = array('Group', 'Productivity');
+    $picking_data = get_productivity_data_for_picking($start, $end, $distributor_id);
+    
+    if (!empty($picking_data)) {
+    foreach ($picking_data['godown'] as $key => $val) {
+      foreach ($val as $key1 => $val1) {
+        $data = ($val1['loading_sheet_line'] / $val1['total_tme']);
+        if (is_nan($data) || empty($data) || $data == FALSE) {
+          $data = 0;
+        }
+      
+        $output[] = array($key . ' ' . $key1, $data);
+      }
+    }
+    }
+    else {
+      $output[] = array('No data found', 0);
+    }
+    return $output;
   }
   else if ($activity_type == 'picking') {
 
