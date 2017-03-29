@@ -381,11 +381,11 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
   else if ($activity_type == 'party_packing_productivity') {
 
     $party_packing = get_productivity_data_for_party_packing($start, $end, $distributor_id);
-    $data1 = $party_packing['total']['pp_bill_lines'] / $party_packing['total']['pp_time'];
+    $data1 = floor($party_packing['total']['pp_bill_lines'] / $party_packing['total']['pp_time']);
     if (is_nan($data1) || empty($data1) || $data1 == FALSE) {
       $data1 = 0;
     }
-    $data2 = $party_packing['total']['non_pp_bill_lines'] / $party_packing['total']['non_time'];
+    $data2 = floor($party_packing['total']['non_pp_bill_lines'] / $party_packing['total']['non_time']);
     if (is_nan($data2) || empty($data2) || $data2 == FALSE) {
       $data2 = 0;
     }
@@ -402,7 +402,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     if (!empty($picking_data)) {
     foreach ($picking_data['godown'] as $key => $val) {
       foreach ($val as $key1 => $val1) {
-        $data = ($val1['loading_sheet_line'] / $val1['total_tme']);
+        $data = floor($val1['loading_sheet_line'] / $val1['total_tme']);
         if (is_nan($data) || empty($data) || $data == FALSE) {
           $data = 0;
         }

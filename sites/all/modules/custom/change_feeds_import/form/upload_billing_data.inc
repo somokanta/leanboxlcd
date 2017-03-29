@@ -207,6 +207,11 @@ function change_feeds_import_batch_fix_process($max, $data, $distributor_id, $fi
     $bill_number = $value['BILL_NUMBER'];
 
     $error = array();
+
+    if (!isset($context['results']['unique_combination'])) {
+      $context['results']['unique_combination'] = array();
+    }
+
     foreach ($value as $k => $v) {
       $flag = 0;
       $error_text = '';
@@ -217,6 +222,7 @@ function change_feeds_import_batch_fix_process($max, $data, $distributor_id, $fi
         $error_text = "$k can not be null";
       }
       else {
+
         switch ($k) {
           case 'VEHICLE':
             if ($v == "N.A.") {
@@ -249,12 +255,23 @@ function change_feeds_import_batch_fix_process($max, $data, $distributor_id, $fi
             break;
 
           case 'BILL_NUMBER':
+
+            $unique_comb = $value['BILL_NUMBER'] . '-' . $value['SKU7_CODE'];
+
+            if (in_array($unique_comb, $context['results']['unique_combination'])) {
+              $flag = 1;
+              $error_text = "BILL_NUMBER " . $value['BILL_NUMBER'] . " and SKU7_CODE " . $value['SKU7_CODE'] . " is Repeated.  ";
+            }
+            else {
+              $context['results']['unique_combination'][] = $unique_comb;
+            }
+
             if (array_key_exists($v, $context['results']['bill_result'])) {
               $error_text = $v . " BILL_NUMBER Already exist in Billing Data Table";
               $flag = 1;
             }
             if (!isset($context['results']['master_result']['sales_register_data'][$v])) {
-              $error_text = $v . " is not present in SALES_REGISTER Master";
+              $error_text .= $v . " is not present in SALES_REGISTER Master";
               $flag = 1;
             }
 

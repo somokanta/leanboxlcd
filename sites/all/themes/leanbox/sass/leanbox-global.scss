@@ -843,9 +843,26 @@ form{
 
 .region-content{
     .block-leanbox-dashboard{
-        width: 48%;
-        display: inline-block;
-        vertical-align: top;
+        float: left;
+	    width: 31.33%;
+	    display: block;
+	    vertical-align: top;
+	    padding: 10px 0 5px 16px;
+	    box-shadow: 0 0 5px #ccc;
+	    border-radius: 10px;
+	    margin: 1%;
+
+	    &:nth-child(3n+1) {
+		    clear: both;
+		}
+
+        h2.block-title{
+        	line-height: 30px;
+        	padding-right: 8px;
+        	text-overflow: ellipsis;
+        	white-space: nowrap;
+        	overflow: hidden;
+        }
         &.contextual-links-region{
             width: 50%;
             float: left; 
@@ -1024,4 +1041,18 @@ header[id="page-header"]{
             }
         }
     }
+}
+
+@media only screen and (max-width: 1152px) {
+	.region-content {
+		.block-leanbox-dashboard{
+			width: 48%;
+
+			&:nth-child(3n+1){
+				clear: none;
+			}
+		}
+	}
+
+
 }
