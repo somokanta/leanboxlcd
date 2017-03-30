@@ -60,7 +60,7 @@
 					width: area_definition.width,
 					height: area_definition.height,
 					title: '',
-					legend: {position: 'right', maxLines: 3},
+					legend: {position: 'top', maxLines: 3},
             
 					bar: {groupWidth: '40%'},
 					chartArea: {left: area_definition.ch_left, top: area_definition.ch_top, width: area_definition.ch_width, height: area_definition.ch_height},
