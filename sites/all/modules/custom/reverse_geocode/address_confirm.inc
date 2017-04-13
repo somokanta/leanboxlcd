@@ -306,8 +306,10 @@ function area_wise_filter_validate(&$form, &$form_state) {
   $type = $form_state['type'];
   if ($type == "area-view") {
     $area_status = 1;
+  }  $data = "";
+  if(!empty($sales_day) && !empty($van_pl_group) && !empty($area_hook_group)){
+   $data = reverse_geocode_get_data_area_code_wise($sales_day, $van_pl_group, $area_hook_group, $area_status, $type);
   }
-  $data = reverse_geocode_get_data_area_code_wise($sales_day, $van_pl_group, $area_hook_group, $area_status, $type);
 
   if (empty($data)) {
     $message = "No Results Found";
@@ -427,7 +429,9 @@ function reverse_geocode_get_data_area_code_wise($sales_day, $van_pl_group, $are
     $query->fields('hul_long_u', array('field_hul_updated_long_value'));
     $query->join('field_data_field_updated_address', 'new', 'new.entity_id = hul.nid');
     $query->fields('new');
-    
+    $query->fields('fpc', array('field_party_code_value'));
+    $query->fields('fpn', array('field_party_name_value'));
+    $query->fields('fagh', array('field_area_hook_group_hul_value'));
   }
   if (!is_null($area_hook_group)) {
     $query->join('field_data_field_area_hook', 'ah', 'ah.entity_id = n.nid');
@@ -450,9 +454,6 @@ function reverse_geocode_get_data_area_code_wise($sales_day, $van_pl_group, $are
     $query->condition('ppplg.field_van_pl_group_value', $van_pl_group, '=');
     $query->fields('ppplg', array('field_van_pl_group_value'));
   }
-  $query->fields('fpc', array('field_party_code_value'));
-    $query->fields('fpn', array('field_party_name_value'));
-    $query->fields('fagh', array('field_area_hook_group_hul_value'));
   $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
   return $res;
 }
