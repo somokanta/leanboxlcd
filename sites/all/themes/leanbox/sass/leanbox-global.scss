@@ -1008,7 +1008,7 @@ header[id="page-header"]{
                 ul{
                     position: absolute;
                     background: $white-color!important;
-                    width: 500px!important;
+                    width: 750px!important;
                     list-style: none;
                     box-shadow: none;
                     border: 0;
@@ -1053,7 +1053,7 @@ header[id="page-header"]{
         clear: both;
     }
 
-	form[id^="hul-code-form"]{
+	>form {
 		.form-item{
 			width: 48%;
 			float: left; 
@@ -1097,6 +1097,12 @@ header[id="page-header"]{
 			background: #b2e6ff;
 		}
 
+        .selectable-row{
+            th, td{
+                min-width: 50px;
+            }
+        }
+
         table.sticky-header{
             display: none!important;
         }
@@ -1110,8 +1116,6 @@ header[id="page-header"]{
         }
 
         td{
-            min-width: 20px;
-
             table.table-hover{
                 margin-bottom: 0;
             }

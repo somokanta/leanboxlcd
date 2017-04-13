@@ -1060,7 +1060,7 @@ header[id="page-header"] .content > ul li:hover ul {
 header[id="page-header"] .content > ul li ul {
   position: absolute;
   background: #fff !important;
-  width: 500px !important;
+  width: 750px !important;
   list-style: none;
   box-shadow: none;
   border: 0;
@@ -1101,12 +1101,12 @@ header[id="page-header"] .content > ul li ul li:nth-child(odd) {
   clear: both;
 }
 /* line 1057, ../sass/leanbox-global.scss */
-#address-selection-map form[id^="hul-code-form"] .form-item {
+#address-selection-map > form .form-item {
   width: 48%;
   float: left;
 }
 /* line 1061, ../sass/leanbox-global.scss */
-#address-selection-map form[id^="hul-code-form"] .form-item:nth-child(2n) {
+#address-selection-map > form .form-item:nth-child(2n) {
   float: right;
 }
 /* line 1067, ../sass/leanbox-global.scss */
@@ -1148,27 +1148,27 @@ header[id="page-header"] .content > ul li ul li:nth-child(odd) {
 #address-selection-map #table-div tr.selected-row {
   background: #b2e6ff;
 }
-/* line 1100, ../sass/leanbox-global.scss */
+/* line 1101, ../sass/leanbox-global.scss */
+#address-selection-map #table-div .selectable-row th, #address-selection-map #table-div .selectable-row td {
+  min-width: 50px;
+}
+/* line 1106, ../sass/leanbox-global.scss */
 #address-selection-map #table-div table.sticky-header {
   display: none !important;
 }
-/* line 1104, ../sass/leanbox-global.scss */
+/* line 1110, ../sass/leanbox-global.scss */
 #address-selection-map #table-div > .table-responsive {
   overflow: visible;
 }
-/* line 1108, ../sass/leanbox-global.scss */
+/* line 1114, ../sass/leanbox-global.scss */
 #address-selection-map #table-div .cell-details {
   cursor: pointer;
 }
-/* line 1112, ../sass/leanbox-global.scss */
-#address-selection-map #table-div td {
-  min-width: 20px;
-}
-/* line 1115, ../sass/leanbox-global.scss */
+/* line 1119, ../sass/leanbox-global.scss */
 #address-selection-map #table-div td table.table-hover {
   margin-bottom: 0;
 }
-/* line 1120, ../sass/leanbox-global.scss */
+/* line 1124, ../sass/leanbox-global.scss */
 #address-selection-map #table-div .hooover {
   left: inherit;
   position: absolute;
@@ -1180,15 +1180,15 @@ header[id="page-header"] .content > ul li ul li:nth-child(odd) {
   border: 1px solid #000;
   width: auto;
 }
-/* line 1132, ../sass/leanbox-global.scss */
+/* line 1136, ../sass/leanbox-global.scss */
 #address-selection-map #table-div .last_elements {
   bottom: 100%;
 }
-/* line 1136, ../sass/leanbox-global.scss */
+/* line 1140, ../sass/leanbox-global.scss */
 #address-selection-map #table-div .selectable-row {
   position: relative;
 }
-/* line 1140, ../sass/leanbox-global.scss */
+/* line 1144, ../sass/leanbox-global.scss */
 #address-selection-map #table-div .selectable-row > thead > tr, #address-selection-map #table-div .selectable-row > tbody > tr {
   /* >td:first-child, >th:first-child{
   	display: none;
@@ -1202,40 +1202,40 @@ header[id="page-header"] .content > ul li ul li:nth-child(odd) {
        }
    } */
 }
-/* line 1145, ../sass/leanbox-global.scss */
+/* line 1149, ../sass/leanbox-global.scss */
 #address-selection-map #table-div .selectable-row > thead > tr > td:last-child, #address-selection-map #table-div .selectable-row > thead > tr > th:last-child, #address-selection-map #table-div .selectable-row > tbody > tr > td:last-child, #address-selection-map #table-div .selectable-row > tbody > tr > th:last-child {
   width: 90px !important;
   position: relative;
 }
-/* line 1160, ../sass/leanbox-global.scss */
+/* line 1164, ../sass/leanbox-global.scss */
 #address-selection-map #table-div .selectable-row > thead > tr td .control-label, #address-selection-map #table-div .selectable-row > tbody > tr td .control-label {
   padding-left: 0;
 }
-/* line 1163, ../sass/leanbox-global.scss */
+/* line 1167, ../sass/leanbox-global.scss */
 #address-selection-map #table-div .selectable-row > thead > tr td .control-label .form-checkbox, #address-selection-map #table-div .selectable-row > tbody > tr td .control-label .form-checkbox {
   margin-left: 0;
 }
-/* line 1174, ../sass/leanbox-global.scss */
+/* line 1178, ../sass/leanbox-global.scss */
 #address-selection-map #table-div .selectable-row.table-radio > thead > tr > td:first-child, #address-selection-map #table-div .selectable-row.table-radio > thead > tr > th:first-child, #address-selection-map #table-div .selectable-row.table-radio > tbody > tr > td:first-child, #address-selection-map #table-div .selectable-row.table-radio > tbody > tr > th:first-child {
   display: none;
 }
-/* line 1184, ../sass/leanbox-global.scss */
+/* line 1188, ../sass/leanbox-global.scss */
 #address-selection-map #table-div tbody td {
   font-size: 13px;
 }
 
-/* line 1191, ../sass/leanbox-global.scss */
+/* line 1195, ../sass/leanbox-global.scss */
 #map-container {
   width: 63%;
   height: 700px;
   float: right;
   position: static;
 }
-/* line 1197, ../sass/leanbox-global.scss */
+/* line 1201, ../sass/leanbox-global.scss */
 #map-container .leaflet-pane.leaflet-map-pane {
   position: static;
 }
-/* line 1201, ../sass/leanbox-global.scss */
+/* line 1205, ../sass/leanbox-global.scss */
 #map-container #searchBox {
   margin-left: 10px;
   width: 240px;
@@ -1247,11 +1247,11 @@ header[id="page-header"] .content > ul li ul li:nth-child(odd) {
 }
 
 @media only screen and (max-width: 1152px) {
-  /* line 1214, ../sass/leanbox-global.scss */
+  /* line 1218, ../sass/leanbox-global.scss */
   .region-content .block-leanbox-dashboard {
     width: 48%;
   }
-  /* line 1217, ../sass/leanbox-global.scss */
+  /* line 1221, ../sass/leanbox-global.scss */
   .region-content .block-leanbox-dashboard:nth-child(3n+1) {
     clear: none;
   }
