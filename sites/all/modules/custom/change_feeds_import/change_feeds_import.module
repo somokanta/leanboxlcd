@@ -36,8 +36,6 @@ function change_feeds_import_menu() {
     'type' => MENU_CALLBACK,
   );
 
-  
-
   // setting form for flat table
   $items['admin/config/flat-table'] = array(
     'title' => 'Setting Form For Flat Table',
@@ -45,13 +43,52 @@ function change_feeds_import_menu() {
     'page arguments' => array('change_feeds_import_setting_form'),
     'access callback' => 'check_if_fr_role_user_admin',
   );
-  
-   // Upload form for sales register data
+
+ // Upload form for sales register data
+  $items['outlet-area-hook/import'] = array(
+    'title' => 'Outlet Area Hook',
+    'description' => 'Import Outlet Area Hook',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('change_feeds_import_outlet_area_hook_form'),
+    'access arguments' => array('Distributor Upload File'),
+    'file' => 'form/outlet_area_hook.inc',
+  );
+
+  $items['outlet-area-hook-confirm/%'] = array(
+    'title' => 'Outlet Area Hook Confirm Table',
+    'description' => 'Outlet Area Hook Confirm Table',
+    'page callback' => 'change_feeds_import_outlet_area_hook_confirm_content',
+    'page arguments' => array(1),
+    'access arguments' => array('Distributor Upload File'),
+    'file' => 'form/outlet_area_hook.inc',
+  );
+
+  // when confirm is clicked
+  $items['outlet-area-hook-confirm/create_content/%'] = array(
+    'title' => 'Outlet content',
+    'description' => 'Outlet Area Hook create Update node of outlet_master',
+    'page callback' => 'change_feeds_import_outlet_area_hook_create_confirm_content',
+    'page arguments' => array(2),
+    'access arguments' => array('Distributor Upload File'),
+    'file' => 'form/outlet_area_hook.inc',
+  );
+
+  // when discard is clicked
+  $items['outlet-area-hook-discard/%'] = array(
+    'title' => 'Outlet Area Hook delete',
+    'description' => 'Outlet Area Hook Data',
+    'page callback' => 'change_feeds_import_outlet_area_hook_discard_data',
+    'page arguments' => array(1),
+    'access arguments' => array('Distributor Upload File'),
+    'file' => 'form/outlet_area_hook.inc',
+  );
+
+  // Upload form for sales register data
   $items['sales-delivery-data/import'] = array(
     'title' => 'Sales Delivery Data',
     'description' => 'Import Sales Delivery Data',
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('change_feeds_import_sales_delivery_form'),
+    'page arguments' => array('change_feeds_import_outlet_area_hook_form'),
     'access arguments' => array('Distributor Upload File'),
     'file' => 'form/sales_delivery_data.inc',
   );
@@ -285,8 +322,6 @@ function check_if_fr_role_user_admin() {
     return FALSE;
   }
 }
-
-
 
 // Menu Callback  for (admin/config/flat-table)
 function change_feeds_import_setting_form($form, $form_state) {
@@ -907,6 +942,65 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
     $entity->field_egir_end_time[LANGUAGE_NONE][0]['value'] = $egir_date_explode[0] . ' ' . $egir_end_explode[1];
   }
 
+  if ($entity->feeds_item->id == 'outlet_area_hook_mapping') {
+    $title = $entity->title;
+    $res = modify_views_forms_master_feed_validate($entity->title, 'outlet_master');
+    if (empty($res)) {
+      drupal_set_message("$title Party code does not exist in Outlet master", 'error');
+      $entity->feeds_item->skip = TRUE;
+    }
+  }
+
+  if ($entity->feeds_item->id == 'area_hook_master') {
+    $title = $entity->title;
+    $outlet_days = change_feeds_import_get_terms_using_vocubulary('Outlet Days');
+    if (!empty($outlet_days)) {
+      foreach ($outlet_days as $key => $val) {
+        if ($val == 'sunday') {
+          continue; // skip 1 node creation and create only six node form monday to saturday as feeds import creates 1 node by default
+        }
+        $node = new stdClass();
+        $node->title = $title;
+        $node->type = "area_hook_master";
+        node_object_prepare($node); // Sets some defaults. Invokes hook_prepare() and hook_node_prepare().
+        $node->language = LANGUAGE_NONE; // Or e.g. 'en' if locale is enabled
+        $node->uid = $distributor_id;
+        $node->status = 1; //(1 or 0): published or not
+        $node->comment = 0; // 0 = comments disabled, 1 = read only, 2 = read/write
+        $node->field_area_hook_day[LANGUAGE_NONE][0]['tid'] = $key;
+        node_save($node);
+      }
+    }
+  }
+
+  if ($entity->feeds_item->id == 'outlet_sequence') {
+    $title = $entity->title;
+    $res = check_node_title_exists($entity->title, 'outlet_master');
+    if (empty($res)) {
+      drupal_set_message("$title Party code does not exist in Outlet master", 'error');
+      $entity->feeds_item->skip = TRUE;
+    }
+    else {
+      $query= db_select('node', 'n');
+      $query->fields('n', array('nid'));
+      $query->addTag('node_uid');
+      $query->join('field_data_field_hul_code', 'h', 'h.entity_id = n.nid');
+      $query->join('field_data_field_area_hook_group_hul', 'gh', 'gh.entity_id = n.nid');
+      $query->join('node', 'n1');
+      $query->join('field_data_field_hul_status', 's', 's.entity_id = n1.nid');
+      $query->condition('n.nid', $res);
+      $query->condition('n1.type', 'hul_code_master');
+      $query->condition('gh.field_area_hook_group_hul_value', 1);
+      $query->condition('s.field_hul_status_value', 1);
+      $query->condition('n1.uid', $distributor_id);
+      $nid = $query->execute()->fetchField();
+      if (empty($nid)) {
+        drupal_set_message("$title Party code does not have address confirmed or Area Hook Confirmed", 'error');
+        $entity->feeds_item->skip = TRUE;
+      }
+    }
+  }
+
   if ($entity->type == 'return_bill') {
     $title = $entity->title;
     $res = modify_views_forms_master_feed_validate($entity->title, 'return_bill');
@@ -1075,8 +1169,20 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
 //    }
   }
 
-  if ($entity->type == 'outlet_master') {
+  if ($entity->feeds_item->id == 'outlet_master') {
 
+    $sales_day = strtolower($entity->field_sales_day[LANGUAGE_NONE][0]['value']);
+    $delivery_day = strtolower($entity->field_delivery_day[LANGUAGE_NONE][0]['value']);
+    $sales_day_tid = leanbox_check_taxonomy_exists_by_name($sales_day, 'Outlet days');
+    $delivery_day_tid = leanbox_check_taxonomy_exists_by_name($delivery_day, 'Outlet days');
+    if (empty($sales_day_tid)) {
+      drupal_set_message("$sales_day does not exist in Sales Day", 'error');
+      $entity->feeds_item->skip = TRUE;
+    }
+    if (empty($delivery_day_tid)) {
+      drupal_set_message("$delivery_day does not exist in Delivery Day", 'error');
+      $entity->feeds_item->skip = TRUE;
+    }
     $hul_code = $entity->field_hul_code[LANGUAGE_NONE][0]['value'];
     $channel = $entity->field_channel[LANGUAGE_NONE][0]['value'];
     $pl_group = $entity->field_pl_group[LANGUAGE_NONE][0]['value'];
@@ -1224,6 +1330,15 @@ function change_feeds_import_form_alter(&$form, &$form_state, $form_id) {
       }
     }
   }
+  if ($form_id == 'user_register') {
+    drupal_set_title(t('Transaction Platform'));
+  }
+  elseif ($form_id == 'user_pass') {
+    drupal_set_title(t('Transaction Platform'));
+  }
+  elseif ($form_id == 'user_login') {
+    drupal_set_title(t('Transaction Platform'));
+  }
 }
 
 function change_feeds_import_custom_node_add_submit($form, &$form_state) {
@@ -1295,7 +1410,6 @@ function change_feeds_import_services_resources() {
 }
 
 function change_feeds_import_views_query_alter(&$view, &$query) {
- 
   // Do the actual join
   global $user;
   // Store distributor id in author in each node
@@ -1454,4 +1568,17 @@ function change_feeds_import_feeds_plugins() {
     ),
   );
   return $info;
+}
+
+/**
+ * Returns all terms list using vocabulary
+ */
+function change_feeds_import_get_terms_using_vocubulary($vanme) {
+  $res = '';
+  $query = db_select('taxonomy_term_data', 't');
+  $query->join('taxonomy_vocabulary', 'v', 'v.vid = t.vid');
+  $query->condition('v.name', 'Outlet Days');
+  $query->fields('t', array('tid', 'name'));
+  $res = $query->execute()->fetchAllKeyed();
+  return $res;
 }

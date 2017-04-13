@@ -1068,3 +1068,58 @@ function change_feeds_import_update_7107() {
   
  
 }
+
+
+/**
+ *  Implements Hook_Update_7108
+ */
+function change_feeds_import_update_7108() {
+  
+ $schema['custom_data'] = array(
+    'description' => 'describes the custom table which holds imported sales delivery data',
+    'fields' => array(
+      'id' => array(
+        'description' => t('Unique id'),
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'party_code' => array(
+        'description' => t('Party Code'),
+        'type' => 'varchar',
+        'length' => 255,
+      ),   
+      'area_hook' => array(
+        'description' => t('Date'),
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+      'error_message' => array(
+        'description' => t('status'),
+        'type' => 'text',
+        'length' => 255,
+      ),
+      'created' => array(
+        'description' => t('Uploaded time'),
+        'type' => 'int',
+      ),
+      'fid' => array(
+        'description' => t('fid'),
+        'type' => 'int',
+      ),
+      'distributor_id' => array(
+        'description' => t('distributor_id'),
+        'type' => 'int',
+      ),
+    ),
+    'primary key' => array('id'),
+    'indexes' => array(
+      'party_code' => array('party_code'),
+      'fid' => array('fid'),
+      'distributor_id' => array('distributor_id'),
+    ),
+  );
+
+  db_create_table('custom_outlet_area_hook', $schema['custom_data']);
+  
+ 
+}

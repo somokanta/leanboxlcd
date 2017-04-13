@@ -1,0 +1,56 @@
+<?php
+
+
+/**
+ *  Implements Hook_Update_7100
+ */
+function leanbox_dashboard_update_7100() {
+  
+ $schema['custom_data'] = array(
+    'description' => 'describes the custom table which holds imported area hook group data',
+    'fields' => array(
+      'id' => array(
+        'description' => t('Unique id'),
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'area_hook_nid' => array(
+        'description' => t('Area Hook'),
+        'type' => 'varchar',
+        'length' => 255,
+      ),   
+      'grp' => array(
+        'description' => t('Group'),
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+      'error_message' => array(
+        'description' => t('status'),
+        'type' => 'text',
+        'length' => 255,
+      ),
+      'created' => array(
+        'description' => t('Uploaded time'),
+        'type' => 'int',
+      ),
+      'fid' => array(
+        'description' => t('fid'),
+        'type' => 'int',
+      ),
+      'distributor_id' => array(
+        'description' => t('distributor_id'),
+        'type' => 'int',
+      ),
+    ),
+    'primary key' => array('id'),
+    'indexes' => array(
+      'area_hook_nid' => array('area_hook_nid'),
+      'fid' => array('fid'),
+      'distributor_id' => array('distributor_id'),
+    ),
+  );
+
+  db_create_table('custom_area_hook_group', $schema['custom_data']);
+  
+ 
+}

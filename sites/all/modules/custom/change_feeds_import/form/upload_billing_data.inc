@@ -110,12 +110,12 @@ function change_feeds_import_billing_data_form_submit($form, &$form_state) {
     'finished' => 'billing_data_csv_finished',
     'file' => drupal_get_path('module', 'change_feeds_import') . '/form/upload_billing_data.inc',
   );
-  
+
   batch_set($batch);
-  
 }
 
 function billing_data_csv_finished($success, $results, $operations) {
+
   if ($success) {
     $_SESSION['hard'] = $results;
 
@@ -181,25 +181,25 @@ function change_feeds_import_batch_fix_process($max, $data, $distributor_id, $fi
     $error_link = NULL;
     $status = NULL;
     $last_id = change_feeds_import_insert_data_in_error_billing_table($file_name, $date, $bill_uploaded, $total_lines, $sum_of_total_sales_qty, $error_link, $status, $distributor_id);
-        
+
     $context['results']['last_id'] = $last_id;
     $context['results']['max'] = $max;
     $context['results']['total_lines'] = 0;
     $context['results']['bill_unique_count'] = 0;
-    
+
     $context['results']['party_code_result'] = check_party_code_exist_or_not(); // check party code present or not.
     $context['results']['sku_code_result'] = check_sku7_code_exist_or_not(); // check sku7 code is present or not.
     $context['results']['bill_result'] = check_bill_number_exist(); // check bill number is not exist.
     $context['results']['master_result'] = get_node_titles(array('pricelist_group_master', 'product_division_master', 'sales_register_data'));
   }
-    
+
   $last_id = $context['results']['last_id'];
   $csv_file = $context['sandbox']['csv_file'];
-  
+
   $pass_data = array();
 
   foreach ($data as $key => &$value) {
-    
+
     $error_bool = 0;
     $total_qty = $value['Sum of TOTAL_SALES_QTY'];
 
@@ -346,12 +346,11 @@ function change_feeds_import_batch_fix_process($max, $data, $distributor_id, $fi
     }
 
     $pass_data = $value;
-    
-    change_feeds_import_insert_data_in_staging_billing_table($pass_data, $error_bool, $last_id, REQUEST_TIME);
-    
-    $context['results']['total_lines'] ++;
 
-  }  
+    change_feeds_import_insert_data_in_staging_billing_table($pass_data, $error_bool, $last_id, REQUEST_TIME);
+
+    $context['results']['total_lines'] ++;
+  }
 }
 
 function convert_array_to_csv_export($array, $filename) {
@@ -376,7 +375,7 @@ function change_feeds_import_insert_data_in_error_billing_table($file_name, $dat
         'distributor_id' => $distributor_id,
       ))
       ->execute();
-  
+
   return $error_billing_data;
 }
 
@@ -399,12 +398,12 @@ function change_feeds_import_insert_data_in_staging_billing_table($value, $error
         'mrp' => isset($value['MRP']) ? $value['MRP'] : NULL,
         'tur' => isset($value['TUR']) ? $value['TUR'] : NULL,
         'Sum_of_TOTAL_SALES_QTY' => isset($value['Sum of TOTAL_SALES_QTY']) ? $value['Sum of TOTAL_SALES_QTY'] : NULL,
-       // 'Sum_of_TOTAL_SALES_RET_QTY' => isset($value['Sum of TOTAL_SALES_RET_QTY']) ? $value['Sum of TOTAL_SALES_RET_QTY'] : NULL,
+        // 'Sum_of_TOTAL_SALES_RET_QTY' => isset($value['Sum of TOTAL_SALES_RET_QTY']) ? $value['Sum of TOTAL_SALES_RET_QTY'] : NULL,
         'Sum_of_NET_SALES_QTY' => isset($value['Sum of NET_SALES_QTY']) ? $value['Sum of NET_SALES_QTY'] : NULL,
         'Sum_of_SALES_FREE_QTY' => isset($value['Sum of SALES_FREE_QTY']) ? $value['Sum of SALES_FREE_QTY'] : NULL,
-      //  'Sum_of_SALES_RET_FREE_QTY' => isset($value['Sum of SALES_RET_FREE_QTY']) ? $value['Sum of SALES_RET_FREE_QTY'] : NULL,
-      //  'Sum_of_SALES_VALUE' => isset($value['Sum of SALES_VALUE']) ? $value['Sum of SALES_VALUE'] : NULL,
-      //  'Sum_of_SALES_RET_VALUE' => isset($value['Sum of SALES_RET_VALUE']) ? $value['Sum of SALES_RET_VALUE'] : NULL,
+        //  'Sum_of_SALES_RET_FREE_QTY' => isset($value['Sum of SALES_RET_FREE_QTY']) ? $value['Sum of SALES_RET_FREE_QTY'] : NULL,
+        //  'Sum_of_SALES_VALUE' => isset($value['Sum of SALES_VALUE']) ? $value['Sum of SALES_VALUE'] : NULL,
+        //  'Sum_of_SALES_RET_VALUE' => isset($value['Sum of SALES_RET_VALUE']) ? $value['Sum of SALES_RET_VALUE'] : NULL,
         'Sum_of_NET_SALES_VALUE' => isset($value['Sum of NET_SALES_VALUE']) ? $value['Sum of NET_SALES_VALUE'] : NULL,
         'Sum_of_NET_SALES_CASES' => isset($value['Sum of NET_SALES_CASES']) ? $value['Sum of NET_SALES_CASES'] : NULL,
         'Sum_of_NET_SALES_KGS' => isset($value['Sum of NET_SALES_KGS']) ? $value['Sum of NET_SALES_KGS'] : NULL,
@@ -426,8 +425,8 @@ function check_party_code_exist_or_not() {
 //  $query1->fields('n', array('nid'));
 //  $party_code_result = $query1->execute()->fetchAllKeyed(0, 1);
 //  return $party_code_result;
-  
-  
+
+
   $query1 = db_select('field_data_field_party_code', 'pc');
   $query1->join('node', 'n', 'n.nid = pc.entity_id');
   $query1->join('field_data_field_beat_name', 'bn', 'bn.entity_id = pc.entity_id');
@@ -500,11 +499,11 @@ function check_node_title_exists($title, $type, $sales_data = FALSE) {
 
 function leanbox_check_taxonomy_exists_by_name($tname, $vname) {
   $query1 = db_select('taxonomy_term_data', 't');
-  $query1->join('taxonomy_vocabulary','v','v.vid = t.vid');
+  $query1->join('taxonomy_vocabulary', 'v', 'v.vid = t.vid');
   $query1->condition('t.name', $tname);
   $query1->condition('v.name', $vname);
   $query1->fields('t', array('tid'));
- // $query1->addTag('node_uid');
+  // $query1->addTag('node_uid');
   $tid = $query1->execute()->fetchField();
   return $tid;
 }

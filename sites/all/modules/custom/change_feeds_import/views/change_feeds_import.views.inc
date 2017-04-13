@@ -4,7 +4,7 @@ function change_feeds_import_views_data_alter(&$data) {
 
   $data['field_data_field_picking_picking_type']['field_picking_picking_type']['field']['handler'] = 'custom_for_picking_type';
   $data['field_data_field_combined_nid']['field_combined_nid']['field']['handler'] = 'custom_for_combine_nid';
-  
+
   $data['field_data_field_sales_party_code']['table']['group'] = t('Example table');
   $data['field_data_field_sales_party_code']['dummy_name'] = array(
     'title' => t('Example relationship'),
@@ -19,11 +19,30 @@ function change_feeds_import_views_data_alter(&$data) {
       'title' => t('party code to outlet master relationship'),
       'help' => t('More information about relationship.'),
       'extra' => array(
-       array('field' => 'type', 'value' => 'outlet_master'),
-     ),
+        array('field' => 'type', 'value' => 'outlet_master'),
+      ),
     ),
   );
-  
+
+  $data['field_data_field_hul_code']['table']['group'] = t('Hul table');
+  $data['field_data_field_hul_code']['dummy_name1'] = array(
+    'title' => t('Outlet to Hul relationship'),
+    'help' => t('Outlet to Hul relationship'),
+    'relationship' => array(
+      'title' => 'hul_code',
+      'base' => 'node', // Table we're joining to.
+      'base field' => 'title', // Field on the joined table.
+      'field' => 'field_hul_code_value', // Real field name on the 'foo' table.
+      'handler' => 'views_handler_relationship',
+      'label' => t('outlet master to Hul Code relationship'),
+      'title' => t('outlet master to Hul Code relationship'),
+      'help' => t('More information about relationship.'),
+      'extra' => array(
+        array('field' => 'type', 'value' => 'hul_code_master'),
+      ),
+    ),
+  );
+
   $data['node']['pre_date_ageing'] = array(
     'title' => t('Previous Date Ageing'),
     'help' => t('date difference'),
@@ -32,7 +51,6 @@ function change_feeds_import_views_data_alter(&$data) {
       'handler' => 'change_feeds_import_handler_pre_date_ageing',
     ),
   );
-   
   $data['node']['pen_date_ageing'] = array(
     'title' => t('Pending Date Ageing'),
     'help' => t('date difference'),
@@ -42,6 +60,14 @@ function change_feeds_import_views_data_alter(&$data) {
     ),
   );
 
+  $data['node']['pl_van_group'] = array(
+    'title' => t('Pl Van Group'),
+    'help' => t('Pl Van Group in Party Pack Master'),
+    'real field' => 'nid',
+    'field' => array(
+      'handler' => 'change_feeds_import_handler_val_pan_group',
+    ),
+  );
 }
 
 /**
@@ -63,6 +89,7 @@ class change_feeds_import_handler_pre_date_ageing extends views_handler_field {
       return '-';
     }
   }
+
 }
 
 /**
@@ -71,7 +98,7 @@ class change_feeds_import_handler_pre_date_ageing extends views_handler_field {
 class change_feeds_import_handler_pen_date_ageing extends views_handler_field {
 
   function render($values) {
-   
+
     $out_date = $values->custom_billing_data_bill_date;
     if (!empty($out_date)) {
       $current_date = time();
@@ -85,16 +112,40 @@ class change_feeds_import_handler_pen_date_ageing extends views_handler_field {
       return '-';
     }
   }
+
 }
 
+/**
+ * Field handler to translate a Status into its readable form.
+ */
+class change_feeds_import_handler_val_pan_group extends views_handler_field {
+
+  function render($values) {
+    $res = '-';
+    $channel = $values->field_field_channel[0]['raw']['value'];
+    $pl_group = $values->field_field_pl_group[0]['raw']['value'];
+    $query = db_select('node', 'n');
+    $query->join('field_data_field_van_pl_group', 'vpg', 'vpg.entity_id = n.nid');
+    $query->fields('vpg', array('field_van_pl_group_value'));
+    $query->join('field_data_field_pl_group', 'pg', 'pg.entity_id = n.nid');
+    $query->join('field_data_field_channel', 'c',  'c.entity_id = n.nid');
+    $query->condition('pg.field_pl_group_value', $pl_group);
+    $query->condition('c.field_channel_value', $channel);
+    $query->condition('n.type', 'party_pack_master');
+    $query->addTag('node_uid');
+    $res = $query->execute()->fetchField();
+    return $res;
+  }
+
+}
 
 /**
  * Implements hook_views_data().
  */
 function change_feeds_import_views_data() {
-  
+
   $data = array();
-  
+
   $data['views']['header_area_text_custom'] = array(
     'title' => t('Header field'),
     'help' => t('Just a field created for header purposes.'),
@@ -102,7 +153,7 @@ function change_feeds_import_views_data() {
       'handler' => 'header_handler_custom_field',
     ),
   );
-  
+
   $data['views']['footer_area_text_custom'] = array(
     'title' => t('Footer field'),
     'help' => t('Just a field created for footer purposes.'),
@@ -110,8 +161,8 @@ function change_feeds_import_views_data() {
       'handler' => 'footer_handler_custom_field',
     ),
   );
-  
-  
+
+
   $data['beat_name']['table']['group'] = t('BEAT NAME');
   $data['beat_name']['table']['join'] = array(
     // #global is a special flag which let's a table appear all the time.
@@ -125,8 +176,8 @@ function change_feeds_import_views_data() {
       'handler' => 'beat_name_handler_custom_field',
     ),
   );
-  
-    
+
+
   // Add Example group
   $data['ccfot']['table']['group'] = t('ccfot');
   $data['ccfot']['table']['join'] = array(
@@ -652,7 +703,7 @@ function change_feeds_import_views_data() {
     'field' => array(
       'handler' => 'custom_billing_data_bill_value',
       'click sortable' => FALSE,
-     ),
+    ),
   );
 
   $data['van_cld_data_table']['table']['group'] = t('VAN CLD GROUP');
@@ -661,7 +712,7 @@ function change_feeds_import_views_data() {
     'help' => t('Contains records from van_cld_data custom table.'),
   );
 
- 
+
 
   $data['van_cld_data_table']['vehicle'] = array(
     'title' => t('Vehicle'),
@@ -735,7 +786,7 @@ function change_feeds_import_views_data() {
       'handler' => 'views_handler_filter_numeric',
     ),
   );
-  
+
   $data['van_cld_data_table']['mrp'] = array(
     'title' => t('MRP'),
     'help' => t('MRP'),
@@ -749,8 +800,8 @@ function change_feeds_import_views_data() {
       'handler' => 'views_handler_filter_numeric',
     ),
   );
-  
-   $data['van_cld_data_table']['pricelist_group'] = array(
+
+  $data['van_cld_data_table']['pricelist_group'] = array(
     'title' => t('Pricelist Group'),
     'help' => t('Pricelist Group'),
     'field' => array(
@@ -763,7 +814,7 @@ function change_feeds_import_views_data() {
       'handler' => 'views_handler_filter_string',
     ),
   );
-   
+
   $base_table = 'custom_billing_data';
   $data[$base_table]['date_filter'] = array(
     'group' => t('Date'),
@@ -788,6 +839,6 @@ function change_feeds_import_views_data() {
     //'skip base' => $base_table,
     ),
   );
-  
+
   return $data;
 }

@@ -9,12 +9,36 @@
  */
 function leanbox_master_content_types_node_info() {
   $items = array(
+    'area_hook_master' => array(
+      'name' => t('Area Hook Master'),
+      'base' => 'node_content',
+      'description' => '',
+      'has_title' => '1',
+      'title_label' => t('Area Hook'),
+      'help' => '',
+    ),
     'hul_code_master' => array(
       'name' => t('Hul Code Master'),
       'base' => 'node_content',
       'description' => '',
       'has_title' => '1',
       'title_label' => t('Hul Code'),
+      'help' => '',
+    ),
+    'outlet_master' => array(
+      'name' => t('Outlet Master'),
+      'base' => 'node_content',
+      'description' => '',
+      'has_title' => '1',
+      'title_label' => t('Title'),
+      'help' => '',
+    ),
+    'party_pack_master' => array(
+      'name' => t('PARTY PACK Master'),
+      'base' => 'node_content',
+      'description' => '',
+      'has_title' => '1',
+      'title_label' => t('Title'),
       'help' => '',
     ),
     'pricelist_group_master' => array(

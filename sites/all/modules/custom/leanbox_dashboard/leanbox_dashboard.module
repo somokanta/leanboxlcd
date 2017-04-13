@@ -10,6 +10,71 @@
  */
 function leanbox_dashboard_menu() {
   $items = array();
+  
+  // Upload form for sales register data
+  $items['delivery-per-van/import'] = array(
+    'title' => 'Outlets Per Van/Stop Master',
+    'description' => 'Import Outlets Per Van/Stop Master',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('leanbox_dashboard_delivery_per_van_form'),
+    'access arguments' => array('Distributor Upload File'),
+    'file' => 'includes/leanbox_dashboard_deliverypervan.inc',
+  );
+  
+  // Upload form for sales register data
+  $items['area-hook-group/import'] = array(
+    'title' => 'Area Hook Group',
+    'description' => 'Import Area Hook Group',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('leanbox_dashboard_area_hook_group_form'),
+    'access arguments' => array('Distributor Upload File'),
+    'file' => 'includes/leanbox_dashboard_areahookgroup.inc',
+  );
+
+  $items['area-hook-group-confirm/%'] = array(
+    'title' => 'Area Hook Group Confirm Table',
+    'description' => 'Area Hook Group Confirm Table',
+    'page callback' => 'leanbox_dashboard_area_hook_group_confirm_content',
+    'page arguments' => array(1),
+    'access arguments' => array('Distributor Upload File'),
+    'file' => 'includes/leanbox_dashboard_areahookgroup.inc',
+  );
+
+  // when confirm is clicked
+  $items['area-hook-group-confirm/create_content/%'] = array(
+    'title' => 'Area Hook Group',
+    'description' => 'Area Hook Group create Update node of Area Hook Group',
+    'page callback' => 'leanbox_dashboard_area_hook_group_create_confirm_content',
+    'page arguments' => array(2),
+    'access arguments' => array('Distributor Upload File'),
+    'file' => 'includes/leanbox_dashboard_areahookgroup.inc',
+  );
+
+  // when discard is clicked
+  $items['area-hook-group-discard/%'] = array(
+    'title' => 'Area Hook Group delete',
+    'description' => 'deletes area hook group data',
+    'page callback' => 'leanbox_dashboard_area_hook_group_discard_data',
+    'page arguments' => array(1),
+    'access arguments' => array('Distributor Upload File'),
+    'file' => 'includes/leanbox_dashboard_areahookgroup.inc',
+  );
+
+  
+  $items['area-hook-grouping'] = array(
+    'title' => 'Area Hook Grouping',
+    'page callback' => 'leanbox_dashboard_area_hook_grouping_callback',
+    'access arguments' => array('Distributor Upload File'),
+    'file path' => drupal_get_path('module', 'leanbox_dashboard'),
+    'file' => '/includes/leanbox_dashboard_areahook.inc',
+  );
+  $items['area-hook-grouping-download'] = array(
+    'title' => 'Area Hook Grouping Download',
+    'page callback' => 'leanbox_dashboard_area_hook_grouping_download',
+    'access arguments' => array('Distributor Upload File'),
+    'file path' => drupal_get_path('module', 'leanbox_dashboard'),
+    'file' => '/includes/leanbox_dashboard_areahook.inc',
+  );
   $items['chart-daterange-filter'] = array(
     'title' => 'Party Packing',
     'page callback' => 'party_packing_filter_callback',
@@ -361,4 +426,31 @@ function leanbox_dashboard_theme() {
       'variables' => array('data' => NULL),
     ),
   );
+}
+
+/**
+ * Implements hook_preprocess_page
+ * @param type $vars
+ */
+function leanbox_dashboard_preprocess_page(&$vars) {
+  $arg =  drupal_get_path_alias();
+  if ($arg == 'dashboard') {
+    drupal_add_js( drupal_get_path('module', 'leanbox_dashboard') . '/js/leanbox_dashboard.js');
+  }
+}
+
+
+function leanbox_dashboard_get_areahookgroup_entity($title, $day_tid) {
+  $query = db_select('node', 'n');
+  $query->addTag('node_uid');
+  $query->condition('n.type', 'area_hook_master');
+  $query->join('field_data_field_area_hook_day', 'a', 'a.entity_id = n.nid');
+  $query->leftjoin('field_data_field_area_hook_group', 'g', 'g.entity_id = n.nid');
+  
+  $query->condition('a.field_area_hook_day_tid', $day_tid);
+  $query->condition('n.title', $title);
+  $query->fields('g', array('field_area_hook_group_value'));
+  $query->fields('n', array('nid'));
+  $output = $query->execute()->fetch(PDO::FETCH_ASSOC); // list of all area hook
+  return $output;
 }
