@@ -56,6 +56,7 @@ function leanbox_master_content_types_field_default_field_bases() {
         'egir' => 0,
         'godown_master' => 0,
         'hht_master' => 0,
+        'holiday_master' => 0,
         'hul_code_master' => 0,
         'loading' => 0,
         'outlet_master' => 0,
@@ -102,7 +103,7 @@ function leanbox_master_content_types_field_default_field_bases() {
     'settings' => array(
       'allowed_values' => array(
         0 => array(
-          'vocabulary' => 'area_hook_day',
+          'vocabulary' => 'outlet_days',
           'parent' => 0,
         ),
       ),
@@ -130,6 +131,31 @@ function leanbox_master_content_types_field_default_field_bases() {
     ),
     'translatable' => 0,
     'type' => 'text',
+  );
+
+  // Exported field_base: 'field_area_hook_group_hul'.
+  $field_bases['field_area_hook_group_hul'] = array(
+    'active' => 1,
+    'cardinality' => 1,
+    'deleted' => 0,
+    'entity_types' => array(),
+    'field_name' => 'field_area_hook_group_hul',
+    'indexes' => array(
+      'value' => array(
+        0 => 'value',
+      ),
+    ),
+    'locked' => 0,
+    'module' => 'list',
+    'settings' => array(
+      'allowed_values' => array(
+        0 => 'Non-Confirmed',
+        1 => 'Confirmed',
+      ),
+      'allowed_values_function' => '',
+    ),
+    'translatable' => 0,
+    'type' => 'list_text',
   );
 
   // Exported field_base: 'field_beat_name'.
@@ -513,9 +539,11 @@ function leanbox_master_content_types_field_default_field_bases() {
     'module' => 'number',
     'settings' => array(
       'decimal_separator' => '.',
+      'precision' => 14,
+      'scale' => 10,
     ),
     'translatable' => 0,
-    'type' => 'number_float',
+    'type' => 'number_decimal',
   );
 
   // Exported field_base: 'field_hul_long'.
@@ -530,9 +558,11 @@ function leanbox_master_content_types_field_default_field_bases() {
     'module' => 'number',
     'settings' => array(
       'decimal_separator' => '.',
+      'precision' => 14,
+      'scale' => 10,
     ),
     'translatable' => 0,
-    'type' => 'number_float',
+    'type' => 'number_decimal',
   );
 
   // Exported field_base: 'field_hul_status'.
@@ -667,6 +697,21 @@ function leanbox_master_content_types_field_default_field_bases() {
     ),
     'translatable' => 0,
     'type' => 'datestamp',
+  );
+
+  // Exported field_base: 'field_original_address'.
+  $field_bases['field_original_address'] = array(
+    'active' => 1,
+    'cardinality' => 1,
+    'deleted' => 0,
+    'entity_types' => array(),
+    'field_name' => 'field_original_address',
+    'indexes' => array(),
+    'locked' => 0,
+    'module' => 'addressfield',
+    'settings' => array(),
+    'translatable' => 0,
+    'type' => 'addressfield',
   );
 
   // Exported field_base: 'field_outst_bill_date'.
@@ -1131,6 +1176,21 @@ function leanbox_master_content_types_field_default_field_bases() {
     'type' => 'node_reference',
   );
 
+  // Exported field_base: 'field_updated_address'.
+  $field_bases['field_updated_address'] = array(
+    'active' => 1,
+    'cardinality' => 1,
+    'deleted' => 0,
+    'entity_types' => array(),
+    'field_name' => 'field_updated_address',
+    'indexes' => array(),
+    'locked' => 0,
+    'module' => 'addressfield',
+    'settings' => array(),
+    'translatable' => 0,
+    'type' => 'addressfield',
+  );
+
   // Exported field_base: 'field_van_pl_group'.
   $field_bases['field_van_pl_group'] = array(
     'active' => 1,
@@ -1138,18 +1198,12 @@ function leanbox_master_content_types_field_default_field_bases() {
     'deleted' => 0,
     'entity_types' => array(),
     'field_name' => 'field_van_pl_group',
-    'indexes' => array(
-      'format' => array(
-        0 => 'format',
-      ),
-    ),
+    'indexes' => array(),
     'locked' => 0,
-    'module' => 'text',
-    'settings' => array(
-      'max_length' => 255,
-    ),
+    'module' => 'number',
+    'settings' => array(),
     'translatable' => 0,
-    'type' => 'text',
+    'type' => 'number_integer',
   );
 
   // Exported field_base: 'field_vehicle_type'.
