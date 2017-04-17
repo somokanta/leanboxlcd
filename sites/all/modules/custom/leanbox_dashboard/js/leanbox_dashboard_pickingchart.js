@@ -69,10 +69,10 @@
 						1: {color: '#e74c3c'},
 						2: {color: '#27ae60'},
 					},
-					isStacked: true,		
+					isStacked: 'percent',		
 					vAxis: {
 						minValue: 0,
-						maxValue: 7,
+						maxValue: 1,
 						title: 'Picking Activity'
 					},
 					hAxis: {

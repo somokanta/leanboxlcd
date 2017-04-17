@@ -43,7 +43,7 @@ function change_feeds_import_sales_delivery_form_validate($form, &$form_state) {
   ));
 
   $header_array_from_xsd = array(
-    'BILL NUMBER', 'IMPACT DELIVERY DATE', 'SALES RETURN AMT', 'PARTIAL/FULL', 'REASON', 'DELIVERY PENDING'
+    'BILL NUMBER', 'IMPACT DELIVERY DATE', 'SALES DELIVERED AMT', 'PARTIAL/FULL', 'REASON', 'DELIVERY PENDING'
   );
   if ($file) {
     if ($file = file_move($file, 'public://')) {
@@ -120,7 +120,7 @@ function change_feeds_import_sales_delivery_batch_fix_process($data, $distributo
     foreach ($value as $k => $v) {
       $error_text = '';
       $v = trim($v);
-      if ($k == 'SALES RETURN AMT') {
+      if ($k == 'SALES DELIVERED AMT') {
         if (empty($v) && $v !== '0') {
           $value['error_message'] .= $k . " can not be empty for bill no " . $value['BILL NUMBER'] . ".";
         }
@@ -172,10 +172,10 @@ function change_feeds_import_sales_delivery_batch_fix_process($data, $distributo
       }
     }
 
-    if (isset($value['SALES RETURN AMT'])) {
+    if (isset($value['SALES DELIVERED AMT'])) {
 
-      if (!is_numeric($value['SALES RETURN AMT'])) {
-        $value['error_message'] .= $value['SALES RETURN AMT'] . ' should be numeric bill value for bill no ' . $value['BILL_NUMBER'] . '.';
+      if (!is_numeric($value['SALES DELIVERED AMT'])) {
+        $value['error_message'] .= $value['SALES DELIVERED AMT'] . ' should be numeric bill value for bill no ' . $value['BILL_NUMBER'] . '.';
       }
     }
 
@@ -215,7 +215,7 @@ function change_feeds_import_insert_data_in_custom_sales_delivery_table($value, 
       ->fields(array(
         'bill_no' => $value['BILL NUMBER'],
         'impact_del_date' => $value['IMPACT DELIVERY DATE'],
-        'sales_amt' => $value['SALES RETURN AMT'],
+        'sales_amt' => $value['SALES DELIVERED AMT'],
         'partial_full' => $value['PARTIAL/FULL'],
         'reason' => $value['REASON'],
         'delivery_pending' => $value['DELIVERY PENDING'],
