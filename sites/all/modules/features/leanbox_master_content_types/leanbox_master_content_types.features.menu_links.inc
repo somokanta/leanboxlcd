@@ -30,7 +30,6 @@ function leanbox_master_content_types_menu_default_menu_links() {
     'expanded' => 0,
     'weight' => -50,
     'customized' => 1,
-    'parent_identifier' => 'menu-custom-menus_transactions:node/595899',
   );
   // Exported menu link: menu-custom-menus_area-hook-group-import:area-hook-group/import.
   $menu_links['menu-custom-menus_area-hook-group-import:area-hook-group/import'] = array(
@@ -52,7 +51,6 @@ function leanbox_master_content_types_menu_default_menu_links() {
     'expanded' => 0,
     'weight' => 0,
     'customized' => 1,
-    'parent_identifier' => 'menu-custom-menus_master-upload:node/24596',
   );
   // Exported menu link: menu-custom-menus_area-hook-group-report:area-hook-grouping.
   $menu_links['menu-custom-menus_area-hook-group-report:area-hook-grouping'] = array(
@@ -74,7 +72,6 @@ function leanbox_master_content_types_menu_default_menu_links() {
     'expanded' => 0,
     'weight' => 0,
     'customized' => 1,
-    'parent_identifier' => 'menu-custom-menus_master-reports:node/553239',
   );
   // Exported menu link: menu-custom-menus_area-hook-master-import:import/area_hook_master.
   $menu_links['menu-custom-menus_area-hook-master-import:import/area_hook_master'] = array(
@@ -96,7 +93,6 @@ function leanbox_master_content_types_menu_default_menu_links() {
     'expanded' => 0,
     'weight' => 0,
     'customized' => 1,
-    'parent_identifier' => 'menu-custom-menus_master-upload:node/24596',
   );
   // Exported menu link: menu-custom-menus_channel-pl-group-master-report:import/party_pack_master.
   $menu_links['menu-custom-menus_channel-pl-group-master-report:import/party_pack_master'] = array(
@@ -118,7 +114,6 @@ function leanbox_master_content_types_menu_default_menu_links() {
     'expanded' => 0,
     'weight' => -46,
     'customized' => 1,
-    'parent_identifier' => 'menu-custom-menus_master-upload:node/24596',
   );
   // Exported menu link: menu-custom-menus_delivery-per-van-upload:delivery-per-van/import.
   $menu_links['menu-custom-menus_delivery-per-van-upload:delivery-per-van/import'] = array(
@@ -140,7 +135,6 @@ function leanbox_master_content_types_menu_default_menu_links() {
     'expanded' => 0,
     'weight' => 0,
     'customized' => 1,
-    'parent_identifier' => 'menu-custom-menus_master-upload:node/24596',
   );
   // Exported menu link: menu-custom-menus_multiple-address-confirmation:hul-locations-multi.
   $menu_links['menu-custom-menus_multiple-address-confirmation:hul-locations-multi'] = array(
@@ -162,7 +156,6 @@ function leanbox_master_content_types_menu_default_menu_links() {
     'expanded' => 0,
     'weight' => -48,
     'customized' => 1,
-    'parent_identifier' => 'menu-custom-menus_transactions:node/595899',
   );
   // Exported menu link: menu-custom-menus_multiple-area-group-confirmation:area-confirm.
   $menu_links['menu-custom-menus_multiple-area-group-confirmation:area-confirm'] = array(
@@ -184,7 +177,6 @@ function leanbox_master_content_types_menu_default_menu_links() {
     'expanded' => 0,
     'weight' => -47,
     'customized' => 1,
-    'parent_identifier' => 'menu-custom-menus_transactions:node/595899',
   );
   // Exported menu link: menu-custom-menus_outlet-area-hook:outlet-area-hook/import.
   $menu_links['menu-custom-menus_outlet-area-hook:outlet-area-hook/import'] = array(
@@ -206,7 +198,6 @@ function leanbox_master_content_types_menu_default_menu_links() {
     'expanded' => 0,
     'weight' => 0,
     'customized' => 1,
-    'parent_identifier' => 'menu-custom-menus_master-upload:node/24596',
   );
   // Exported menu link: menu-custom-menus_outlet-sequence:import/outlet_sequence.
   $menu_links['menu-custom-menus_outlet-sequence:import/outlet_sequence'] = array(
@@ -228,7 +219,6 @@ function leanbox_master_content_types_menu_default_menu_links() {
     'expanded' => 0,
     'weight' => 0,
     'customized' => 1,
-    'parent_identifier' => 'menu-custom-menus_master-upload:node/24596',
   );
   // Exported menu link: menu-custom-menus_view-area-group-confirmation:area-confirm-view.
   $menu_links['menu-custom-menus_view-area-group-confirmation:area-confirm-view'] = array(
@@ -250,7 +240,6 @@ function leanbox_master_content_types_menu_default_menu_links() {
     'expanded' => 0,
     'weight' => -43,
     'customized' => 1,
-    'parent_identifier' => 'menu-custom-menus_transactions:node/595899',
   );
 
   // Translatables

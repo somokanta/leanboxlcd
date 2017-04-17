@@ -59,7 +59,7 @@ function leanbox_master_content_types_field_default_field_instances() {
     'bundle' => 'area_hook_master',
     'default_value' => array(
       0 => array(
-        'tid' => 22,
+        'tid' => 12,
       ),
     ),
     'deleted' => 0,
@@ -520,116 +520,6 @@ function leanbox_master_content_types_field_default_field_instances() {
     ),
   );
 
-  // Exported field_instance: 'node-hul_code_master-field_original_address'.
-  $field_instances['node-hul_code_master-field_original_address'] = array(
-    'bundle' => 'hul_code_master',
-    'default_value' => NULL,
-    'deleted' => 0,
-    'description' => '',
-    'display' => array(
-      'default' => array(
-        'label' => 'above',
-        'module' => 'addressfield',
-        'settings' => array(
-          'format_handlers' => array(
-            0 => 'address',
-          ),
-          'use_widget_handlers' => 1,
-        ),
-        'type' => 'addressfield_default',
-        'weight' => 8,
-      ),
-      'teaser' => array(
-        'label' => 'above',
-        'settings' => array(),
-        'type' => 'hidden',
-        'weight' => 0,
-      ),
-    ),
-    'entity_type' => 'node',
-    'field_name' => 'field_original_address',
-    'label' => 'Original address',
-    'required' => 0,
-    'settings' => array(
-      'user_register_form' => FALSE,
-    ),
-    'widget' => array(
-      'active' => 1,
-      'module' => 'addressfield',
-      'settings' => array(
-        'available_countries' => array(),
-        'default_country' => 'site_default',
-        'format_handlers' => array(
-          'address' => 'address',
-          'address-optional' => 'address-optional',
-          'address-hide-postal-code' => 0,
-          'address-hide-street' => 0,
-          'address-hide-country' => 0,
-          'organisation' => 0,
-          'name-full' => 0,
-          'name-oneline' => 0,
-        ),
-      ),
-      'type' => 'addressfield_standard',
-      'weight' => 39,
-    ),
-  );
-
-  // Exported field_instance: 'node-hul_code_master-field_updated_address'.
-  $field_instances['node-hul_code_master-field_updated_address'] = array(
-    'bundle' => 'hul_code_master',
-    'default_value' => NULL,
-    'deleted' => 0,
-    'description' => '',
-    'display' => array(
-      'default' => array(
-        'label' => 'above',
-        'module' => 'addressfield',
-        'settings' => array(
-          'format_handlers' => array(
-            0 => 'address',
-          ),
-          'use_widget_handlers' => 1,
-        ),
-        'type' => 'addressfield_default',
-        'weight' => 9,
-      ),
-      'teaser' => array(
-        'label' => 'above',
-        'settings' => array(),
-        'type' => 'hidden',
-        'weight' => 0,
-      ),
-    ),
-    'entity_type' => 'node',
-    'field_name' => 'field_updated_address',
-    'label' => 'Updated address',
-    'required' => 0,
-    'settings' => array(
-      'user_register_form' => FALSE,
-    ),
-    'widget' => array(
-      'active' => 1,
-      'module' => 'addressfield',
-      'settings' => array(
-        'available_countries' => array(),
-        'default_country' => 'site_default',
-        'format_handlers' => array(
-          'address' => 'address',
-          'address-optional' => 'address-optional',
-          'address-hide-postal-code' => 0,
-          'address-hide-street' => 0,
-          'address-hide-country' => 0,
-          'organisation' => 0,
-          'name-full' => 0,
-          'name-oneline' => 0,
-        ),
-      ),
-      'type' => 'addressfield_standard',
-      'weight' => 40,
-    ),
-  );
-
   // Exported field_instance: 'node-outlet_master-field_area_hook'.
   $field_instances['node-outlet_master-field_area_hook'] = array(
     'bundle' => 'outlet_master',
@@ -642,7 +532,7 @@ function leanbox_master_content_types_field_default_field_instances() {
         'module' => 'node_reference',
         'settings' => array(),
         'type' => 'node_reference_default',
-        'weight' => 11,
+        'weight' => 10,
       ),
       'teaser' => array(
         'label' => 'above',
@@ -667,44 +557,7 @@ function leanbox_master_content_types_field_default_field_instances() {
         'size' => 60,
       ),
       'type' => 'node_reference_autocomplete',
-      'weight' => 36,
-    ),
-  );
-
-  // Exported field_instance: 'node-outlet_master-field_area_hook_group_hul'.
-  $field_instances['node-outlet_master-field_area_hook_group_hul'] = array(
-    'bundle' => 'outlet_master',
-    'default_value' => NULL,
-    'deleted' => 0,
-    'description' => '',
-    'display' => array(
-      'default' => array(
-        'label' => 'above',
-        'module' => 'list',
-        'settings' => array(),
-        'type' => 'list_default',
-        'weight' => 12,
-      ),
-      'teaser' => array(
-        'label' => 'above',
-        'settings' => array(),
-        'type' => 'hidden',
-        'weight' => 0,
-      ),
-    ),
-    'entity_type' => 'node',
-    'field_name' => 'field_area_hook_group_hul',
-    'label' => 'Area Hook Group HUl',
-    'required' => 0,
-    'settings' => array(
-      'user_register_form' => FALSE,
-    ),
-    'widget' => array(
-      'active' => 1,
-      'module' => 'options',
-      'settings' => array(),
-      'type' => 'options_select',
-      'weight' => 37,
+      'weight' => 35,
     ),
   );
 
@@ -1085,7 +938,7 @@ function leanbox_master_content_types_field_default_field_instances() {
           'thousand_separator' => '',
         ),
         'type' => 'number_integer',
-        'weight' => 13,
+        'weight' => 11,
       ),
       'teaser' => array(
         'label' => 'above',
@@ -1097,7 +950,7 @@ function leanbox_master_content_types_field_default_field_instances() {
     'entity_type' => 'node',
     'field_name' => 'field_sequence',
     'label' => 'Sequence',
-    'required' => 0,
+    'required' => FALSE,
     'settings' => array(
       'max' => '',
       'min' => '',
@@ -1106,11 +959,10 @@ function leanbox_master_content_types_field_default_field_instances() {
       'user_register_form' => FALSE,
     ),
     'widget' => array(
-      'active' => 0,
       'module' => 'number',
       'settings' => array(),
       'type' => 'number',
-      'weight' => 38,
+      'weight' => 36,
     ),
   );
 
@@ -2772,7 +2624,6 @@ function leanbox_master_content_types_field_default_field_instances() {
   t('Area Hook');
   t('Area Hook Day');
   t('Area Hook Group');
-  t('Area Hook Group HUl');
   t('Beat Name');
   t('Bill Date');
   t('Bill Value');
@@ -2795,7 +2646,6 @@ function leanbox_master_content_types_field_default_field_instances() {
   t('Hul area');
   t('Hul status');
   t('Impact Delivery Date');
-  t('Original address');
   t('Outstanding Bill Date');
   t('Outstanding Bill Value');
   t('Outstanding updated date');
@@ -2812,7 +2662,6 @@ function leanbox_master_content_types_field_default_field_instances() {
   t('Sales party code');
   t('Sales updated date');
   t('Sequence');
-  t('Updated address');
   t('Van Pl Group');
   t('Vehicle Type');
   t('Weight in Kgs');
