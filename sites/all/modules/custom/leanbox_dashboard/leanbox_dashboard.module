@@ -146,6 +146,10 @@ function leanbox_dashboard_block_info() {
     'info' => t('Picking Productivity'),
     'cache' => DRUPAL_NO_CACHE,
   );
+//  $blocks['bills_per_person'] = array(
+//    'info' => t('Bills Delivered Per Person'),
+//    'cache' => DRUPAL_NO_CACHE,
+//  );
   return $blocks;
 }
 
@@ -159,7 +163,7 @@ function leanbox_dashboard_block_view($delta = '') {
   $area_definition = array(
     'width' => 320,
     'height' => 300,
-    'ch_left' => 30,
+    'ch_left' => 50,
     'ch_top' => 50,
     'ch_width' => 290,
     'ch_height' => 200,
@@ -378,16 +382,6 @@ function leanbox_dashboard_block_view($delta = '') {
 
     case 'otif':
 
-      if (arg(1) == 'otif') {
-//        $area_definition = array(
-//          'width' => 700,
-//          'height' => 400,
-//          'ch_left' => 80,
-//          'ch_top' => 50,
-//          'ch_width' => 500,
-//          'ch_height' => 250,
-//        );
-      }
       $bill_date = leanbox_dashboard_get_default_pdd_date_for_chart();
       $bill_date = date('d-m-Y', $bill_date);
       $block['subject'] = "OTIF Value ($bill_date Billing)";
@@ -411,6 +405,42 @@ function leanbox_dashboard_block_view($delta = '') {
         ),
       );
       break;
+    
+     case 'bills_per_person':
+
+      if (arg(1) == 'bills_per_person') {
+        $area_definition = array(
+          'width' => 700,
+          'height' => 400,
+          'ch_left' => 80,
+          'ch_top' => 50,
+          'ch_width' => 500,
+          'ch_height' => 250,
+        );
+      }
+
+      $loading_date = date('d-m-Y');
+      $block['subject'] = "Bills Per Person ($loading_date Loading)";
+      $data = leanbox_dashboard_chart_query_details('bills_per_person');
+      $filter_form = drupal_render(drupal_get_form('leanbox_dashboard_chart_filter_billsperperson_form'));
+      $block['content'] = array(
+        '#markup' => theme('leanbox_dashboard', array('data' => $filter_form)),
+        '#attached' => array(
+          'js' => array(
+            array(
+              'type' => 'external',
+              'data' => 'https://www.gstatic.com/charts/loader.js'
+            ),
+            drupal_get_path('module', 'leanbox_dashboard') . '/js/leanbox_dashboard_billsperpersonchart.js',
+            array(
+              'data' => array('leanbox_dashboard' => array('bills_per_person' => $data, 'area_definition' => $area_definition)),
+              'type' => 'setting'
+            ),
+          ),
+        ),
+      );
+      break;
+
   }
 
   return $block;

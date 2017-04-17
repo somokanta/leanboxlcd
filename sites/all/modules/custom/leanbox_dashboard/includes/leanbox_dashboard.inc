@@ -128,6 +128,49 @@ function leanbox_dashboard_chart_filter_picking_productivity_form($form, &$form_
   return $form;
 }
 
+
+
+/**
+ * 
+ * @param array $form
+ * @param array $form_state
+ * @return string
+ */
+function leanbox_dashboard_chart_filter_billsperperson_form($form, &$form_state) {
+  $form = array();
+  if (arg(1) == 'bills_per_person') {
+    $form['start_date'] = array(
+      '#type' => 'date_popup',
+      '#title' => t('Loading Date From'),
+      '#required' => TRUE,
+      '#date_format' => 'Y-m-d',
+      '#default_value' => date('Y-m-d'),
+    );
+    $form['end_date'] = array(
+      '#type' => 'date_popup',
+      '#title' => t('Loading Date To'),
+      '#required' => TRUE,
+      '#date_format' => 'Y-m-d',
+      '#default_value' => date('Y-m-d'),
+    );
+    $form['submit'] = array(
+      '#type' => 'submit',
+      '#value' => 'Submit',
+      '#prefix' => '<div id ="party-packing-submit">',
+      '#suffix' => '</div>',
+      '#attributes' => array('class' => array('party-packing-submit')),
+    );
+  }
+
+  $form['party_packing'] = array(
+    '#markup' => '<a href = "/leanbox-chart-details/party_packing" target = "_blank"><div id="party_packing_div"></div></a>',
+  );
+
+
+  return $form;
+}
+
+
 /**
  * 
  * @param array $form
