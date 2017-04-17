@@ -88,7 +88,7 @@ function change_feeds_import_menu() {
     'title' => 'Sales Delivery Data',
     'description' => 'Import Sales Delivery Data',
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('change_feeds_import_outlet_area_hook_form'),
+    'page arguments' => array('change_feeds_import_sales_delivery_form'),
     'access arguments' => array('Distributor Upload File'),
     'file' => 'form/sales_delivery_data.inc',
   );
