@@ -11,7 +11,7 @@
 
 			var area_definition = Drupal.settings.leanbox_dashboard.area_definition;
 			var unloading_data = Drupal.settings.leanbox_dashboard.unloading;
-			google.charts.load("current", {packages: ['gauge','corechart', 'bar']});
+			google.charts.load("current", {packages: ['gauge', 'corechart', 'bar']});
 			google.charts.setOnLoadCallback(function () {
 				drawunloadingChart(unloading_data);
 			});
@@ -19,7 +19,7 @@
 			$(".unloading-submit").click(function (e) {
 
 				e.preventDefault();
-			  var start_date = $(this).parent().prev().prev().find("input[name='start_date[date]']").val();
+				var start_date = $(this).parent().prev().prev().find("input[name='start_date[date]']").val();
 				var end_date = $(this).parent().prev().find("input[name='end_date[date]']").val();
 				if (start_date != '' && end_date != '') {
 					$.ajax({
@@ -28,7 +28,7 @@
 						url: "/chart-daterange-filter",
 						data: {start_date: start_date, end_date: end_date, activity_type: 'unloading'},
 						success: function (response) {
-							
+
 							var area_definition = Drupal.settings.leanbox_dashboard.area_definition;
 							google.charts.setOnLoadCallback(function () {
 								drawunloadingChart(response);
@@ -42,16 +42,28 @@
 				var data = google.visualization.arrayToDataTable(unloading_data);
 
 				var view = new google.visualization.DataView(data);
+				var formatPercent = new google.visualization.NumberFormat({
+					pattern: '#,##0.0%'
+				});
 				view.setColumns([0,
-					1, {calc: "stringify",
+					1, {
+						calc: function (dt, row) {
+							return dt.getValue(row, 1) + ' (' + formatPercent.formatValue(dt.getValue(row, 1) / (dt.getValue(row, 1) + dt.getValue(row, 2) + dt.getValue(row, 3))) + ')';
+						},
 						sourceColumn: 1,
 						type: "string",
-						role: "annotation"},
-					2, {calc: "stringify",
+						role: "annotation", },
+					2, {
+						calc: function (dt, row) {
+							return dt.getValue(row, 2) + ' (' + formatPercent.formatValue(dt.getValue(row, 1) / (dt.getValue(row, 1) + dt.getValue(row, 2) + dt.getValue(row, 3))) + ')';
+						},
 						sourceColumn: 2,
 						type: "string",
 						role: "annotation"},
-					3, {calc: "stringify",
+					3, {
+						calc: function (dt, row) {
+							return dt.getValue(row, 3) + ' (' + formatPercent.formatValue(dt.getValue(row, 1) / (dt.getValue(row, 1) + dt.getValue(row, 2) + dt.getValue(row, 3))) + ')';
+						},
 						sourceColumn: 3,
 						type: "string",
 						role: "annotation"},
