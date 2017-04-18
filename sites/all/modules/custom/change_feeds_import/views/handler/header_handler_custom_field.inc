@@ -43,7 +43,7 @@ class header_handler_custom_field extends views_handler_field {
       $bill_count = $result['field_bill_count_value'];
       $cashier_name = $result['field_cashier_name_value'];
 
-      $trip_execution_date = date('m-d-y', $trip_execution_date);
+      $trip_execution_date = date('d/m/y', $trip_execution_date);
 
       return '<table width = "100%" cellspacing = "0" style = "font-size: 13px; color:#000; font-family:arial" cellpadding = "5" border = "0" align = "center" class = "preview_table">
       <tr>
