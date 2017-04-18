@@ -424,7 +424,7 @@ function leanbox_dashboard_block_view($delta = '') {
       }
 
       $loading_date = date('d-m-Y');
-      $block['subject'] = "Bills Per Person ($loading_date Loading)";
+      $block['subject'] = "Bills Per Person ($loading_date Dispatch)";
       $data = leanbox_dashboard_chart_query_details('bills_per_person');
       $filter_form = drupal_render(drupal_get_form('leanbox_dashboard_chart_filter_billsperperson_form'));
       $block['content'] = array(
@@ -460,7 +460,7 @@ function leanbox_dashboard_block_view($delta = '') {
       }
 
       $loading_date = date('d-m-Y');
-      $block['subject'] = "Bills Per Van ($loading_date Loading)";
+      $block['subject'] = "Bills Per Van ($loading_date Dispatch)";
       $data = leanbox_dashboard_chart_query_details('bills_per_van');
       $filter_form = drupal_render(drupal_get_form('leanbox_dashboard_chart_filter_billspervan_form'));
       $block['content'] = array(
