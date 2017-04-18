@@ -46,7 +46,6 @@ function delivery_beat_create_form($form, &$form_state) {
   
   if (!empty($form_state['values']['sales_day'])) {
     $sales_day = $form_state['values']['sales_day'];
-    dpm($rrr = reverse_geocode_get_data_from_sales_day($sales_day, $distributor_id));
     $form['van_pl_group']['#options'] = reverse_geocode_get_data_from_sales_day($sales_day, $distributor_id);
   }
 
@@ -73,14 +72,14 @@ function delivery_beat_create_form($form, &$form_state) {
 
   $rows = $form_state['reverse_geocode']['results'];
   if ($rows) {
-    $header = array('PARTY_CODE', 'PARTY_NAME', 'Beat Name', 'CHANNEL', 'PL_GROUP', 'Sales Day', 'Pl Van Group', 'Area Hook', 'Area Hook Group', 'Sequence', 'Delivery Beat Code');
+    $header = array('nid', 'PARTY_CODE', 'PARTY_NAME', 'Beat Name', 'CHANNEL', 'PL_GROUP', 'Sales Day', 'Pl Van Group', 'Area Hook', 'Area Hook Group', 'Sequence', 'Delivery Beat Code');
     $form['results_container']['table'] = array(
       '#theme' => 'table',
       '#header' => $header,
       '#rows' => $rows,
     );
 
-    $form['filter_submit'] = array(
+    $form['submit'] = array(
       '#type' => 'submit',
       '#value' => t('Submit'),
       '#submit' => array('delivery_beat_form_submit'),
@@ -91,10 +90,11 @@ function delivery_beat_create_form($form, &$form_state) {
 }
 
 function delivery_beat_filters_submit($form, &$form_state) {
-
   $sales_day = $form_state['values']['sales_day'];
+  $van_pl_group = $form_state['values']['van_pl_group'] ? $form_state['values']['van_pl_group'] : NULL;
+  $area_hook_group = $form_state['values']['area_hook_group'] ? $form_state['values']['area_hook_group'] : NULL;
 
-  $results = delivery_beat_create($sales_day);
+  $results = delivery_beat_get_results($sales_day);
 
   $form_state['reverse_geocode']['results'] = $results;
   $form_state['rebuild'] = TRUE;
@@ -127,7 +127,7 @@ function delivery_beat_form_submit($form, &$form_state) {
   batch_set($batch);
 }
 
-function delivery_beat_create($sales_day, $van_pl_group = NULL, $area_hook_group = NULL) {
+function delivery_beat_get_results($sales_day, $van_pl_group = NULL, $area_hook_group = NULL) {
   $query = db_select('node', 'n');
 
   $query->addTag('node_uid');
@@ -167,6 +167,9 @@ function delivery_beat_create($sales_day, $van_pl_group = NULL, $area_hook_group
 
   $query->condition('fc2.bundle', 'party_pack_master');
   $query->condition('fp2.bundle', 'party_pack_master');
+  if(!is_null($van_pl_group)){
+    $query->condition('fvp.field_van_pl_group_value', $van_pl_group);
+  }
   $query->fields('fvp', array('field_van_pl_group_value'));
 
 //Area hook Master
@@ -175,9 +178,11 @@ function delivery_beat_create($sales_day, $van_pl_group = NULL, $area_hook_group
 
   $query->fields('na', array('title'));
   $query->fields('fag', array('field_area_hook_group_value'));
+  if(!is_null($area_hook_group)){
+    $query->condition('fag.field_area_hook_group_value', $area_hook_group);
+  }
 
   $query->fields('fs', array('field_sequence_value'));
-
   $expression = "CONCAT_WS('/',LPAD(field_van_pl_group_value, 2, '0'),field_area_hook_group_value,LPAD(CEIL(field_sequence_value/field_delivery_beats_value), 2, '0'), LPAD(CEIL(field_sequence_value/field_delivery_per_van_value), 2, '0'))";
   $query->addExpression($expression, 'exp');
 
@@ -195,8 +200,18 @@ function delivery_beat_batch_process($data, &$context) {
     $node = node_load($value['nid']);
     if ($node) {
       //Save static delivery beat
-      $node->field_static_delivery_beat_code‎ = $value['exp'];
+      //$node->field_static_delivery_beat_code‎ = $value['exp'];
       node_save($node);
     }
+  }
+}
+
+function delivery_beat_batch_finished($success, $results, $operations) {
+
+  if ($success) {
+    
+  }
+  else {
+    drupal_set_message('Error Occured while updating');
   }
 }
