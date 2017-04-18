@@ -983,11 +983,9 @@ function reverse_geocode_node_presave($node) {
 
 function delivery_beat_create_form($form, &$form_state){
   
-  $sales_day_data = array(
-    'SATURDAY' => 'SATURDAY',
-    'MONDAY' => 'MONDAY'
-  );
-
+  $days = change_feeds_import_get_terms_using_vocubulary('Outlet Days');
+  $sales_day_data = array_combine($days, $days);
+  
   $form['sales_day'] = array(
     '#type' => 'select',
     '#title' => t('Sales Day'),
@@ -997,7 +995,7 @@ function delivery_beat_create_form($form, &$form_state){
       'callback' => 'sales_day_callback',
       'wrapper' => 'address-selection-map',
     ),
-    //'#required' => TRUE,
+    '#required' => TRUE,
   );
 
 
@@ -1069,6 +1067,9 @@ function delivery_beat_filters_ajax(&$form, &$form_state){
   return $form['results_container'];
 }
 
+function delivery_beat_form_submit($form, &$form_state){
+  
+}
 
 function delivery_beat_create($sales_day, $van_pl_group = NULL, $area_hook_group = NULL) {
   $query = db_select('node', 'n');
@@ -1120,6 +1121,7 @@ function delivery_beat_create($sales_day, $van_pl_group = NULL, $area_hook_group
   $query->fields('fs', array('field_sequence_value'));
   $query->addExpression("CONCAT_WS('/',field_van_pl_group_value,field_area_hook_group_value,ROUND(field_sequence_value/field_delivery_beats_value), ROUND(field_sequence_value/field_delivery_per_van_value))", 'exp');
   
+  $query->orderBy('fvp.field_van_pl_group_value');
   $query->orderBy('fag.field_area_hook_group_value');
   $query->orderBy('fs.field_sequence_value');
 
