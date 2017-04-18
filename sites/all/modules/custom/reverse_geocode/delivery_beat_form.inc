@@ -79,7 +79,7 @@ function delivery_beat_create_form($form, &$form_state) {
       '#rows' => $rows,
     );
 
-    $form['submit'] = array(
+    $form['results_container']['submit'] = array(
       '#type' => 'submit',
       '#value' => t('Submit'),
       '#submit' => array('delivery_beat_form_submit'),
