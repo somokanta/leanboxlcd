@@ -196,6 +196,7 @@ function delivery_beat_get_results($sales_day, $van_pl_group = NULL, $area_hook_
 }
 
 function delivery_beat_batch_process($data, &$context) {
+  dpm($data);
   foreach ($data as $key => $value) {
     $node = node_load($value['nid']);
     if ($node) {
