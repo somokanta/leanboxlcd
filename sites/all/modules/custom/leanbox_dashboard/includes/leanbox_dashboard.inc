@@ -692,13 +692,13 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     $query->condition('n.type', 'dispatch_data');
     $query->addTag('node_uid');
     $query->join('field_data_field_dispatch_supervisor', 'su', 'su.entity_id = n.nid');
-    $query->join('field_data_field_dispatch_bill_value', 'v', 'su.entity_id = n.nid');
+    $query->join('field_data_field_bill_count', 'v', 'su.entity_id = n.nid');
     $query->join('field_data_field_dispatch_date', 'd', 'd.entity_id = n.nid');
     $query->join('field_data_field_dispatch_loader_team_count', 'tc', 'tc.entity_id = n.nid');
     $query->fields('d', array('field_dispatch_date_value'));
     $query->fields('su', array('field_dispatch_supervisor_value'));
     $query->addExpression('SUM(tc.field_dispatch_loader_team_count_value)', 'Team_count');
-    $query->addExpression('SUM(v.field_dispatch_bill_value_value)', 'bill_value');
+    $query->addExpression('SUM(v.field_bill_count_value)', 'bill_value');
     $query->groupBy('su.field_dispatch_supervisor_value');
     $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
     $data1[] = array('PriceList Group', 'COUNT');
