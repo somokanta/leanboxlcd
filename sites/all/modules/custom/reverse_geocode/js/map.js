@@ -138,7 +138,7 @@
             $.ajax({
                 type: "GET",
                 //dataType: 'text',
-                url: "reverse-geocode/get",
+                url: "/reverse-geocode/get",
                 async: false,
                 data: {
                     lat: lat,
