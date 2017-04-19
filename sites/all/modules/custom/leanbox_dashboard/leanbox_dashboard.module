@@ -106,6 +106,7 @@ function party_packing_filter_callback() {
     $end_date = $_POST['end_date'];
   }
   if ($activity_type == 'otif') {
+    $activity_type = 'otif_ajax';
     $output_data = leanbox_dashboard_gauge_chart_query_details($activity_type, $start_date, $end_date);
    // $output_data = $output['output'];
    watchdog('output_data', '<pre>'. print_r($output_data, 1). '</pre>');

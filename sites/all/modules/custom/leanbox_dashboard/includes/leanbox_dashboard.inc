@@ -766,12 +766,12 @@ function leanbox_dashboard_gauge_chart_query_details($type, $start_date = '', $e
   $output = 0;
   global $user;
   $mtd_start = $mtd_end = $table = '1';
-  
+
   // Store distributor id in author in each node
   $uid = change_feeds_import_get_distributor_id($user->uid);
   if (!empty($start_date)) {
     $start_date = strtotime($start_date);
-    $mtd_start= $start_date;
+    $mtd_start = $start_date;
   }
   else {
     $start_date = leanbox_dashboard_get_default_pdd_date_for_chart();
@@ -834,9 +834,9 @@ function leanbox_dashboard_gauge_chart_query_details($type, $start_date = '', $e
   }
   $output1['output'] = $output;
 
-  if (arg(1) == 'otif') {
-    
-       watchdog('output_data1', '<pre>'. print_r($output, 1). '</pre>');
+  if (arg(1) == 'otif' || $type = 'otif_ajax') {
+
+    watchdog('output_data1', '<pre>' . print_r($output, 1) . '</pre>');
 
     $todays_date_date = date('Y-m-d');
 
