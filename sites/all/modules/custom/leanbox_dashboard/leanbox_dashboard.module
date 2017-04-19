@@ -10,7 +10,7 @@
  */
 function leanbox_dashboard_menu() {
   $items = array();
-  
+
   // Upload form for sales register data
   $items['delivery-per-van/import'] = array(
     'title' => 'Outlets Per Van/Stop Master',
@@ -20,7 +20,7 @@ function leanbox_dashboard_menu() {
     'access arguments' => array('Distributor Upload File'),
     'file' => 'includes/leanbox_dashboard_deliverypervan.inc',
   );
-  
+
   // Upload form for sales register data
   $items['area-hook-group/import'] = array(
     'title' => 'Area Hook Group',
@@ -60,7 +60,7 @@ function leanbox_dashboard_menu() {
     'file' => 'includes/leanbox_dashboard_areahookgroup.inc',
   );
 
-  
+
   $items['area-hook-grouping'] = array(
     'title' => 'Area Hook Grouping',
     'page callback' => 'leanbox_dashboard_area_hook_grouping_callback',
@@ -108,8 +108,6 @@ function party_packing_filter_callback() {
   if ($activity_type == 'otif') {
     $activity_type = 'otif_ajax';
     $output_data = leanbox_dashboard_gauge_chart_query_details($activity_type, $start_date, $end_date);
-   // $output_data = $output['output'];
-   watchdog('output_data', '<pre>'. print_r($output_data, 1). '</pre>');
   }
   else {
     $output_data = leanbox_dashboard_chart_query_details($activity_type, $start_date, $end_date);
@@ -412,8 +410,8 @@ function leanbox_dashboard_block_view($delta = '') {
         ),
       );
       break;
-    
-     case 'bills_per_person':
+
+    case 'bills_per_person':
 
       if (arg(1) == 'bills_per_person') {
         $area_definition = array(
@@ -447,8 +445,8 @@ function leanbox_dashboard_block_view($delta = '') {
         ),
       );
       break;
-      
-          
+
+
     case 'bills_per_van':
 
       if (arg(1) == 'bills_per_van') {
@@ -483,7 +481,6 @@ function leanbox_dashboard_block_view($delta = '') {
         ),
       );
       break;
-
   }
 
   return $block;
@@ -506,12 +503,11 @@ function leanbox_dashboard_theme() {
  * @param type $vars
  */
 function leanbox_dashboard_preprocess_page(&$vars) {
-  $arg =  drupal_get_path_alias();
+  $arg = drupal_get_path_alias();
   if ($arg == 'dashboard') {
-    drupal_add_js( drupal_get_path('module', 'leanbox_dashboard') . '/js/leanbox_dashboard.js');
+    drupal_add_js(drupal_get_path('module', 'leanbox_dashboard') . '/js/leanbox_dashboard.js');
   }
 }
-
 
 function leanbox_dashboard_get_areahookgroup_entity($title, $day_tid) {
   $query = db_select('node', 'n');
@@ -519,7 +515,7 @@ function leanbox_dashboard_get_areahookgroup_entity($title, $day_tid) {
   $query->condition('n.type', 'area_hook_master');
   $query->join('field_data_field_area_hook_day', 'a', 'a.entity_id = n.nid');
   $query->leftjoin('field_data_field_area_hook_group', 'g', 'g.entity_id = n.nid');
-  
+
   $query->condition('a.field_area_hook_day_tid', $day_tid);
   $query->condition('n.title', $title);
   $query->fields('g', array('field_area_hook_group_value'));

@@ -764,9 +764,9 @@ function leanbox_dashboard_gauge_chart_query_details($type, $start_date = '', $e
 
   $output1 = array();
   $output = 0;
-  global $user;
   $mtd_start = $mtd_end = $table = '1';
 
+  global $user;
   // Store distributor id in author in each node
   $uid = change_feeds_import_get_distributor_id($user->uid);
   if (!empty($start_date)) {
@@ -836,10 +836,7 @@ function leanbox_dashboard_gauge_chart_query_details($type, $start_date = '', $e
 
   if (arg(1) == 'otif' || $type = 'otif_ajax') {
 
-    watchdog('output_data1', '<pre>' . print_r($output, 1) . '</pre>');
-
     $todays_date_date = date('Y-m-d');
-
     $todays_date_date_timestamp = strtotime(date($todays_date_date));
     $current_day = date("d", $todays_date_date_timestamp);
     $yesterday = strtotime('-1 day', strtotime($todays_date_date));
