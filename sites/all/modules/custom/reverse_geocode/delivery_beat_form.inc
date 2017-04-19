@@ -30,8 +30,8 @@ function delivery_beat_create_form($form, &$form_state) {
     '#options' => array(),
     '#ajax' => array(
       'event' => 'change',
-      'callback' => 'delivery_beat_sales_day_ajax_callback',
-      'wrapper' => 'van-pl-wrapper',
+      'callback' => 'delivery_beat_van_pl_group_ajax_callback',
+      'wrapper' => 'area-hook-group-wrapper',
     ),
     '#prefix' => '<div id="van-pl-wrapper">',
     '#suffix' => '</div>'
@@ -43,6 +43,8 @@ function delivery_beat_create_form($form, &$form_state) {
     '#type' => 'select',
     '#title' => t('Area Hook Group'),
     '#options' => array(),
+    '#prefix' => '<div id="area-hook-group-wrapper">',
+    '#suffix' => '</div>'
       //'#required' => TRUE,
   );
 
@@ -136,6 +138,10 @@ function delivery_beat_download_submit($form, &$form_state) {
 
 function delivery_beat_sales_day_ajax_callback(&$form, &$form_state) {
   return $form['van_pl_group'];
+}
+
+function delivery_beat_van_pl_group_ajax_callback(&$form, &$form_state) {
+  return $form['area_hook_group'];
 }
 
 function delivery_beat_filters_ajax(&$form, &$form_state) {
