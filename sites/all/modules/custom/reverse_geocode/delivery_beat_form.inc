@@ -1,11 +1,13 @@
 <?php
+
 module_load_include('inc', 'reverse_geocode', 'address_confirm');
+
 function delivery_beat_create_form($form, &$form_state) {
 
   global $user;
   $user_id = $user->uid;
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
-  
+
   $days = change_feeds_import_get_terms_using_vocubulary('Outlet Days');
   $sales_day_data = array_combine($days, $days);
 
@@ -43,7 +45,7 @@ function delivery_beat_create_form($form, &$form_state) {
     '#options' => array(),
       //'#required' => TRUE,
   );
-  
+
   if (!empty($form_state['values']['sales_day'])) {
     $sales_day = $form_state['values']['sales_day'];
     $form['van_pl_group']['#options'] = reverse_geocode_get_data_from_sales_day($sales_day, $distributor_id);
@@ -71,16 +73,16 @@ function delivery_beat_create_form($form, &$form_state) {
   );
 
   $rows = $form_state['reverse_geocode']['results'];
-  if ($rows) {
+  if (!empty($rows)) {
     $header = array('nid', 'PARTY_CODE', 'PARTY_NAME', 'Beat Name', 'CHANNEL', 'PL_GROUP', 'Sales Day', 'Pl Van Group', 'Area Hook', 'Area Hook Group', 'Sequence', 'Delivery Beat Code');
     $form['results_container']['table'] = array(
       '#theme' => 'table',
       '#header' => $header,
       '#rows' => $rows,
     );
-    $form['download'] = array(
+    $form['results_container']['download'] = array(
       '#type' => 'submit',
-      '#value' => t('Filter'),
+      '#value' => t('Download'),
 //      '#ajax' => array(
 //        'wrapper' => 'delivery-beat-form-wrapper',
 //        'callback' => 'delivery_beat_filters_ajax',
@@ -105,18 +107,25 @@ function delivery_beat_filters_submit($form, &$form_state) {
 
   $results = delivery_beat_get_results($sales_day);
 
-  $form_state['reverse_geocode']['results'] = $results;
+  if (empty($results)) {
+    $form_state['reverse_geocode']['results'] = array();
+    drupal_set_message('No results found', 'error');
+  }
+  else {
+    $form_state['reverse_geocode']['results'] = $results;
+  }
+
   $form_state['rebuild'] = TRUE;
 }
 
-function delivery_beat_download_submit($form, &$form_state){
+function delivery_beat_download_submit($form, &$form_state) {
   $header = array('nid', 'PARTY_CODE', 'PARTY_NAME', 'Beat Name', 'CHANNEL', 'PL_GROUP', 'Sales Day', 'Pl Van Group', 'Area Hook', 'Area Hook Group', 'Sequence', 'Delivery Beat Code');
-  
+
   header('Content-Type: text/csv; charset=utf-8');
   header('Content-Disposition: attachment; filename=RG.csv');
   $fp = fopen('php://output', 'w');
   fputcsv($fp, $header);
-  
+
   $csv_rows = $form_state['reverse_geocode']['results'];
   foreach ($csv_rows as $k => $v) {
     fputcsv($fp, $v);
@@ -125,11 +134,10 @@ function delivery_beat_download_submit($form, &$form_state){
   exit;
 }
 
-
-
-function delivery_beat_sales_day_ajax_callback(&$form, &$form_state){
+function delivery_beat_sales_day_ajax_callback(&$form, &$form_state) {
   return $form['van_pl_group'];
 }
+
 function delivery_beat_filters_ajax(&$form, &$form_state) {
   return $form['results_container'];
 }
@@ -181,12 +189,12 @@ function delivery_beat_get_results($sales_day, $van_pl_group = NULL, $area_hook_
   $query->fields('fc1', array('field_channel_value'));
   $query->fields('fp1', array('field_pl_group_value'));
   $query->fields('fsd', array('field_sales_day_value'));
-  
+
   //Sales Delivery Day Master
   $query->join('node', 'nsd', 'nsd.title = fsd.field_sales_day_value');
   $query->join('field_data_field_day_number', 'fdn', 'fdn.entity_id = nsd.nid');
   $query->condition('nsd.type', 'sales_delivery_day_master');
-  
+
 //HUL code Master
   $query->join('node', 'nh', 'nh.title = fh.field_hul_code_value');
   $query->join('field_data_field_hul_status', 'fhs', 'fhs.entity_id = nh.nid');
@@ -200,7 +208,7 @@ function delivery_beat_get_results($sales_day, $van_pl_group = NULL, $area_hook_
 
   $query->condition('fc2.bundle', 'party_pack_master');
   $query->condition('fp2.bundle', 'party_pack_master');
-  if(!is_null($van_pl_group)){
+  if (!is_null($van_pl_group)) {
     $query->condition('fvp.field_van_pl_group_value', $van_pl_group);
   }
   $query->fields('fvp', array('field_van_pl_group_value'));
@@ -211,7 +219,7 @@ function delivery_beat_get_results($sales_day, $van_pl_group = NULL, $area_hook_
 
   $query->fields('na', array('title'));
   $query->fields('fag', array('field_area_hook_group_value'));
-  if(!is_null($area_hook_group)){
+  if (!is_null($area_hook_group)) {
     $query->condition('fag.field_area_hook_group_value', $area_hook_group);
   }
 
