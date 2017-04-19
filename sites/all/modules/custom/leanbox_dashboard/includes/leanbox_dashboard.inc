@@ -764,21 +764,21 @@ function leanbox_dashboard_gauge_chart_query_details($type, $start_date = '', $e
 
   $output1 = array();
   $output = 0;
-  $mtd_start = $mtd_end = $table = '1';
+  $table = '1';
 
   global $user;
   // Store distributor id in author in each node
   $uid = change_feeds_import_get_distributor_id($user->uid);
   if (!empty($start_date)) {
     $start_date = strtotime($start_date);
-    $mtd_start = $start_date;
+    //$mtd_start = $start_date;
   }
   else {
     $start_date = leanbox_dashboard_get_default_pdd_date_for_chart();
   }
   if (!empty($end_date)) {
     $end_date = strtotime($end_date) + 86399;
-    $mtd_end = $end_date;
+   // $mtd_end = $end_date;
   }
   else {
     $end_date = leanbox_dashboard_get_default_pdd_date_for_chart();
@@ -835,28 +835,28 @@ function leanbox_dashboard_gauge_chart_query_details($type, $start_date = '', $e
   $output1['output'] = $output;
 
   if (arg(1) == 'otif' || $type = 'otif_ajax') {
+//
+//    $todays_date_date = date('Y-m-d');
+//    $todays_date_date_timestamp = strtotime(date($todays_date_date));
+//    $current_day = date("d", $todays_date_date_timestamp);
+//    $yesterday = strtotime('-1 day', strtotime($todays_date_date));
+//
+//    if ($current_day == 22) {
+//      $this_month = date("m", $todays_date_date_timestamp);
+//      $this_date = $yesterday;
+//    }
+//    elseif ($current_day <= 21) {
+//      $old_date = strtotime('-1 month', strtotime($todays_date_date));
+//      $last_month = date("m", $old_date);
+//      $this_date = strtotime(date("Y-$last_month-21"));
+//    }
+//    else {
+//      $this_month = date("m", $todays_date_date_timestamp);
+//      $this_date = strtotime(date("Y-$this_month-21"));
+//    }
 
-    $todays_date_date = date('Y-m-d');
-    $todays_date_date_timestamp = strtotime(date($todays_date_date));
-    $current_day = date("d", $todays_date_date_timestamp);
-    $yesterday = strtotime('-1 day', strtotime($todays_date_date));
-
-    if ($current_day == 22) {
-      $this_month = date("m", $todays_date_date_timestamp);
-      $this_date = $yesterday;
-    }
-    elseif ($current_day <= 21) {
-      $old_date = strtotime('-1 month', strtotime($todays_date_date));
-      $last_month = date("m", $old_date);
-      $this_date = strtotime(date("Y-$last_month-21"));
-    }
-    else {
-      $this_month = date("m", $todays_date_date_timestamp);
-      $this_date = strtotime(date("Y-$this_month-21"));
-    }
-
-    $yesterday_html = "<h3>Yesterday</h3>";
-    $yesterday_data = get_yesterday_data_channel($yesterday, $yesterday, $uid);
+    $yesterday_html = "<h3>Channel Wise Otif</h3>";
+    $yesterday_data = get_yesterday_data_channel($start_date, $end_date, $uid);
     if ($yesterday_data == "No Result Found") {
       $header = get_header_of_chhanel();
       $yesterday_rows[] = array("<td colspan='10' style='text-align: center;'> There is No Activity</td>");
@@ -866,22 +866,7 @@ function leanbox_dashboard_gauge_chart_query_details($type, $start_date = '', $e
       $yesterday_html .= $yesterday_data;
     }
 
-    $mtd_html = "<h3>MTD</h3>";
-    if (!empty($mtd_start) && !empty($mtd_end)) {
-      $this_date = $mtd_start;
-      $yesterday = $mtd_end;
-    }
-    $mtd_data .= get_mtd_data_channel($this_date, $yesterday, $uid);
-    if ($mtd_data == "No Result Found") {
-      $header = get_header_of_chhanel();
-      $mtd_rows[] = array("<td colspan='10' style='text-align: center;'> There is No Activity</td>");
-      $mtd_html .= theme('table', array('header' => $header, 'rows' => $mtd_rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
-    }
-    else {
-      $mtd_html .= $mtd_data;
-    }
-
-    $table = $yesterday_html . "<br>" . $mtd_html;
+    $table = $yesterday_html;
   }
   $output1['table'] = $table;
 
