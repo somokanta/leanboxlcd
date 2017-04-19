@@ -10,7 +10,7 @@
  */
 function leanbox_dashboard_menu() {
   $items = array();
-  
+
   // Upload form for sales register data
   $items['delivery-per-van/import'] = array(
     'title' => 'Outlets Per Van/Stop Master',
@@ -20,7 +20,7 @@ function leanbox_dashboard_menu() {
     'access arguments' => array('Distributor Upload File'),
     'file' => 'includes/leanbox_dashboard_deliverypervan.inc',
   );
-  
+
   // Upload form for sales register data
   $items['area-hook-group/import'] = array(
     'title' => 'Area Hook Group',
@@ -60,7 +60,7 @@ function leanbox_dashboard_menu() {
     'file' => 'includes/leanbox_dashboard_areahookgroup.inc',
   );
 
-  
+
   $items['area-hook-grouping'] = array(
     'title' => 'Area Hook Grouping',
     'page callback' => 'leanbox_dashboard_area_hook_grouping_callback',
@@ -106,6 +106,7 @@ function party_packing_filter_callback() {
     $end_date = $_POST['end_date'];
   }
   if ($activity_type == 'otif') {
+    $activity_type = 'otif_ajax';
     $output_data = leanbox_dashboard_gauge_chart_query_details($activity_type, $start_date, $end_date);
   }
   else {
@@ -289,7 +290,6 @@ function leanbox_dashboard_block_view($delta = '') {
           'ch_height' => 250,
         );
       }
-      //$billing_date = date('d-m-Y');
       $billing_date = strtotime(date('Y-m-d') . "- 7 days");
       $billing_date = date('d-m-Y', $billing_date);
       $block['subject'] = "Return Value % ($billing_date Billing)";
@@ -393,7 +393,7 @@ function leanbox_dashboard_block_view($delta = '') {
 
       $filter_form = drupal_render(drupal_get_form('leanbox_dashboard_chart_filter_otif_form'));
       $block['content'] = array(
-        '#markup' => theme('leanbox_dashboard', array('data' => $filter_form)),
+        '#markup' => theme('leanbox_dashboard', array('data' => $filter_form, 'otif_table' => $data['table'],)),
         '#attached' => array(
           'js' => array(
             array(
@@ -402,15 +402,15 @@ function leanbox_dashboard_block_view($delta = '') {
             ),
             drupal_get_path('module', 'leanbox_dashboard') . '/js/leanbox_dashboard_otifchart.js',
             array(
-              'data' => array('leanbox_dashboard' => array('otif' => $data)),
+              'data' => array('leanbox_dashboard' => array('otif' => $data['output'],)),
               'type' => 'setting'
             ),
           ),
         ),
       );
       break;
-    
-     case 'bills_per_person':
+
+    case 'bills_per_person':
 
       if (arg(1) == 'bills_per_person') {
         $area_definition = array(
@@ -424,7 +424,7 @@ function leanbox_dashboard_block_view($delta = '') {
       }
 
       $loading_date = date('d-m-Y');
-      $block['subject'] = "Bills Per Person ($loading_date Loading)";
+      $block['subject'] = "Bills Per Person ($loading_date Dispatch)";
       $data = leanbox_dashboard_chart_query_details('bills_per_person');
       $filter_form = drupal_render(drupal_get_form('leanbox_dashboard_chart_filter_billsperperson_form'));
       $block['content'] = array(
@@ -444,8 +444,8 @@ function leanbox_dashboard_block_view($delta = '') {
         ),
       );
       break;
-      
-          
+
+
     case 'bills_per_van':
 
       if (arg(1) == 'bills_per_van') {
@@ -460,7 +460,7 @@ function leanbox_dashboard_block_view($delta = '') {
       }
 
       $loading_date = date('d-m-Y');
-      $block['subject'] = "Bills Per Van ($loading_date Loading)";
+      $block['subject'] = "Bills Per Van ($loading_date Dispatch)";
       $data = leanbox_dashboard_chart_query_details('bills_per_van');
       $filter_form = drupal_render(drupal_get_form('leanbox_dashboard_chart_filter_billspervan_form'));
       $block['content'] = array(
@@ -480,7 +480,6 @@ function leanbox_dashboard_block_view($delta = '') {
         ),
       );
       break;
-
   }
 
   return $block;
@@ -493,7 +492,7 @@ function leanbox_dashboard_theme() {
   return array(
     'leanbox_dashboard' => array(
       'template' => 'leanbox-dashboard',
-      'variables' => array('data' => NULL),
+      'variables' => array('data' => NULL, 'otif_table' => NULL),
     ),
   );
 }
@@ -503,12 +502,11 @@ function leanbox_dashboard_theme() {
  * @param type $vars
  */
 function leanbox_dashboard_preprocess_page(&$vars) {
-  $arg =  drupal_get_path_alias();
+  $arg = drupal_get_path_alias();
   if ($arg == 'dashboard') {
-    drupal_add_js( drupal_get_path('module', 'leanbox_dashboard') . '/js/leanbox_dashboard.js');
+    drupal_add_js(drupal_get_path('module', 'leanbox_dashboard') . '/js/leanbox_dashboard.js');
   }
 }
-
 
 function leanbox_dashboard_get_areahookgroup_entity($title, $day_tid) {
   $query = db_select('node', 'n');
@@ -516,7 +514,7 @@ function leanbox_dashboard_get_areahookgroup_entity($title, $day_tid) {
   $query->condition('n.type', 'area_hook_master');
   $query->join('field_data_field_area_hook_day', 'a', 'a.entity_id = n.nid');
   $query->leftjoin('field_data_field_area_hook_group', 'g', 'g.entity_id = n.nid');
-  
+
   $query->condition('a.field_area_hook_day_tid', $day_tid);
   $query->condition('n.title', $title);
   $query->fields('g', array('field_area_hook_group_value'));

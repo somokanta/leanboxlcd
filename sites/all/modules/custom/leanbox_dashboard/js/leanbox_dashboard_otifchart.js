@@ -27,10 +27,10 @@
 						url: "/chart-daterange-filter",
 						data: {start_date: start_date, end_date: end_date, activity_type: 'otif'},
 						success: function (response) {
-							console.log(response);
 							google.charts.setOnLoadCallback(function () {
-								drawotifChart(response);
+								drawotifChart(response.output);
 							});
+							$('#otiftable').html(response.table)
 						},
 					});
 				}

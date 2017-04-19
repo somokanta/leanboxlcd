@@ -745,11 +745,11 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
 
     if (!empty($res)) {
       foreach ($res as $key => $val) {
-          $supervisor = $val['field_dispatch_supervisor_value'];
-          $trip_count = $val['trip_count'];
-          $bill_count_value = $val['bill_count_value'];
-          $count_per_van = ($bill_count_value / $trip_count);
-          $data1[] = array($supervisor, $count_per_van);
+        $supervisor = $val['field_dispatch_supervisor_value'];
+        $trip_count = $val['trip_count'];
+        $bill_count_value = $val['bill_count_value'];
+        $count_per_van = ($bill_count_value / $trip_count);
+        $data1[] = array($supervisor, $count_per_van);
       }
     }
     else {
@@ -762,7 +762,10 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
 function leanbox_dashboard_gauge_chart_query_details($type, $start_date = '', $end_date = '') {
   require_once drupal_get_path('module', 'change_feeds_import') . '/form/upload_billing_data.inc';
 
+  $output1 = array();
   $output = 0;
+  $table = '';
+
   global $user;
   // Store distributor id in author in each node
   $uid = change_feeds_import_get_distributor_id($user->uid);
@@ -826,10 +829,26 @@ function leanbox_dashboard_gauge_chart_query_details($type, $start_date = '', $e
     }
 
     $output = round(($total_dis_bill_val / $total['bill_value'] ) * 100);
-    return $output;
   }
+  $output1['output'] = $output;
 
-  return $output;
+  if (arg(1) == 'otif' || $type == 'otif_ajax') {
+
+    $mtd_html = "<h3>Channel Wise Otif</h3>";
+    $mtd_data .= get_mtd_data_channel($start_date, $end_date, $uid);
+    if ($mtd_data == "No Result Found") {
+      $header = get_header_of_chhanel();
+      $mtd_rows[] = array("<td colspan='10' style='text-align: center;'> There is No Activity</td>");
+      $mtd_html .= theme('table', array('header' => $header, 'rows' => $mtd_rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
+    }
+    else {
+      $mtd_html .= $mtd_data;
+    }
+    $table = $mtd_html;
+  }
+  $output1['table'] = $table;
+
+  return $output1;
 }
 
 /**
