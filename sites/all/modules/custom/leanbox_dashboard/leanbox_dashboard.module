@@ -108,6 +108,7 @@ function party_packing_filter_callback() {
   if ($activity_type == 'otif') {
     $output_data = leanbox_dashboard_gauge_chart_query_details($activity_type, $start_date, $end_date);
    // $output_data = $output['output'];
+   watchdog('<pre>'. print_r($output_data, 1). '</pre>', 'output_data');
   }
   else {
     $output_data = leanbox_dashboard_chart_query_details($activity_type, $start_date, $end_date);
