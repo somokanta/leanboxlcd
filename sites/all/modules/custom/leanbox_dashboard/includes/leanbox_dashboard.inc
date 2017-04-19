@@ -128,8 +128,6 @@ function leanbox_dashboard_chart_filter_picking_productivity_form($form, &$form_
   return $form;
 }
 
-
-
 /**
  * 
  * @param array $form
@@ -156,20 +154,59 @@ function leanbox_dashboard_chart_filter_billsperperson_form($form, &$form_state)
     $form['submit'] = array(
       '#type' => 'submit',
       '#value' => 'Submit',
-      '#prefix' => '<div id ="party-packing-submit">',
+      '#prefix' => '<div id ="bills-person-submit">',
       '#suffix' => '</div>',
-      '#attributes' => array('class' => array('party-packing-submit')),
+      '#attributes' => array('class' => array('bills-person-submit')),
     );
   }
 
-  $form['party_packing'] = array(
-    '#markup' => '<a href = "/leanbox-chart-details/party_packing" target = "_blank"><div id="party_packing_div"></div></a>',
+  $form['bills_per_person'] = array(
+    '#markup' => '<a href = "/leanbox-chart-details/bills_per_person" target = "_blank"><div id="bills_per_person_div"></div></a>',
   );
 
 
   return $form;
 }
 
+/**
+ * 
+ * @param array $form
+ * @param array $form_state
+ * @return string
+ */
+function leanbox_dashboard_chart_filter_billspervan_form($form, &$form_state) {
+  $form = array();
+  if (arg(1) == 'bills_per_van') {
+    $form['start_date'] = array(
+      '#type' => 'date_popup',
+      '#title' => t('Loading Date From'),
+      '#required' => TRUE,
+      '#date_format' => 'Y-m-d',
+      '#default_value' => date('Y-m-d'),
+    );
+    $form['end_date'] = array(
+      '#type' => 'date_popup',
+      '#title' => t('Loading Date To'),
+      '#required' => TRUE,
+      '#date_format' => 'Y-m-d',
+      '#default_value' => date('Y-m-d'),
+    );
+    $form['submit'] = array(
+      '#type' => 'submit',
+      '#value' => 'Submit',
+      '#prefix' => '<div id ="bills-van-submit">',
+      '#suffix' => '</div>',
+      '#attributes' => array('class' => array('bills-van-submit')),
+    );
+  }
+
+  $form['bills_per_van'] = array(
+    '#markup' => '<a href = "/leanbox-chart-details/bills_per_van" target = "_blank"><div id="bills_per_van_div"></div></a>',
+  );
+
+
+  return $form;
+}
 
 /**
  * 
@@ -438,21 +475,21 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     return $output;
   }
   else if ($activity_type == 'picking_productivity') {
-    
+
     $output[] = array('Group', 'Productivity');
     $picking_data = get_productivity_data_for_picking($start, $end, $distributor_id);
-    
+
     if (!empty($picking_data)) {
-    foreach ($picking_data['godown'] as $key => $val) {
-      foreach ($val as $key1 => $val1) {
-        $data = floor($val1['loading_sheet_line'] / $val1['total_tme']);
-        if (is_nan($data) || empty($data) || $data == FALSE) {
-          $data = 0;
+      foreach ($picking_data['godown'] as $key => $val) {
+        foreach ($val as $key1 => $val1) {
+          $data = floor($val1['loading_sheet_line'] / $val1['total_tme']);
+          if (is_nan($data) || empty($data) || $data == FALSE) {
+            $data = 0;
+          }
+
+          $output[] = array($key . ' ' . $key1, $data);
         }
-      
-        $output[] = array($key . ' ' . $key1, $data);
       }
-    }
     }
     else {
       $output[] = array('No data found', 0);
@@ -649,6 +686,88 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     }
 
     return $output;
+  }
+  else if ($activity_type == 'bills_per_person') {
+    $query = db_select('node', 'n');
+    $query->condition('n.type', 'dispatch_data');
+    $query->addTag('node_uid');
+    $query->join('field_data_field_dispatch_supervisor', 'su', 'su.entity_id = n.nid');
+    $query->join('field_data_field_bill_count', 'v', 'su.entity_id = n.nid');
+    $query->join('field_data_field_dispatch_date', 'd', 'd.entity_id = n.nid');
+    $query->join('field_data_field_dispatch_loader_team_count', 'tc', 'tc.entity_id = n.nid');
+    $query->fields('d', array('field_dispatch_date_value'));
+    $query->fields('su', array('field_dispatch_supervisor_value'));
+    $query->addExpression('SUM(tc.field_dispatch_loader_team_count_value)', 'Team_count');
+    $query->addExpression('SUM(v.field_bill_count_value)', 'bill_value');
+    $query->groupBy('su.field_dispatch_supervisor_value');
+    $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+    $data1[] = array('PriceList Group', 'COUNT');
+
+    if (!empty($res)) {
+      $dispatch = FALSE;
+      foreach ($res as $key => $val) {
+
+        $loading_date = strtotime($val['field_dispatch_date_value']);
+
+        if ($loading_date >= $start_date && $loading_date <= $end_date) {
+          $dispatch = TRUE;
+          $supervisor = $val['field_dispatch_supervisor_value'];
+          $team_count = $val['Team_count'];
+          $bill_value = $val['bill_value'];
+          $count_per_person = ($bill_value / $team_count);
+          $data1[] = array($supervisor, $count_per_person);
+        }
+      }
+      if ($dispatch == FALSE) {
+        $data1[] = array('No Result Found for Dispatch', 0);
+      }
+    }
+    else {
+      $data1[] = array('No Result Found for Dispatch', 0);
+    }
+    return $data1;
+  }
+  else if ($activity_type == 'bills_per_van') {
+    $query = db_select('node', 'n');
+    $query->condition('n.type', 'dispatch_data');
+    $query->addTag('node_uid');
+    $query->join('field_data_field_dispatch_supervisor', 'su', 'su.entity_id = n.nid');
+    $query->join('field_data_field_bill_count', 'v', 'su.entity_id = n.nid');
+    $query->join('field_data_field_dispatch_date', 'd', 'd.entity_id = n.nid');
+    $query->join('field_data_field_dispatch_loader_team_count', 'tc', 'tc.entity_id = n.nid');
+    $query->fields('d', array('field_dispatch_date_value'));
+    $query->fields('su', array('field_dispatch_supervisor_value'));
+
+    $query->addExpression('COUNT(n.title)', 'trip_count');
+    $query->addExpression('SUM(v.field_bill_count_value)', 'bill_count_value');
+    $query->groupBy('su.field_dispatch_supervisor_value');
+    $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+
+    $data1[] = array('PriceList Group', 'COUNT');
+
+    if (!empty($res)) {
+      $dispatch = FALSE;
+      foreach ($res as $key => $val) {
+
+        $loading_date = strtotime($val['field_dispatch_date_value']);
+
+        if ($loading_date >= $start_date && $loading_date <= $end_date) {
+          $dispatch = TRUE;
+          $supervisor = $val['field_dispatch_supervisor_value'];
+          $trip_count = $val['trip_count'];
+          $bill_count_value = $val['bill_count_value'];
+          $count_per_van = ($bill_count_value / $trip_count);
+          $data1[] = array($supervisor, $count_per_van);
+        }
+      }
+      if ($dispatch == FALSE) {
+        $data1[] = array('No Result Found for Dispatch', 0);
+      }
+    }
+    else {
+      $data1[] = array('No Result Found for Dispatch', 0);
+    }
+    return $data1;
   }
 }
 
