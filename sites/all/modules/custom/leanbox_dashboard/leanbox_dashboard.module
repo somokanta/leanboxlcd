@@ -106,7 +106,8 @@ function party_packing_filter_callback() {
     $end_date = $_POST['end_date'];
   }
   if ($activity_type == 'otif') {
-    $output_data = leanbox_dashboard_gauge_chart_query_details($activity_type, $start_date, $end_date);
+    $output = leanbox_dashboard_gauge_chart_query_details($activity_type, $start_date, $end_date);
+    $output_data = $output['output'];
   }
   else {
     $output_data = leanbox_dashboard_chart_query_details($activity_type, $start_date, $end_date);
@@ -393,7 +394,7 @@ function leanbox_dashboard_block_view($delta = '') {
 
       $filter_form = drupal_render(drupal_get_form('leanbox_dashboard_chart_filter_otif_form'));
       $block['content'] = array(
-        '#markup' => theme('leanbox_dashboard', array('data' => $filter_form)),
+        '#markup' => theme('leanbox_dashboard', array('data' => $filter_form, 'otif_table' => $data['table'],)),
         '#attached' => array(
           'js' => array(
             array(
@@ -402,7 +403,7 @@ function leanbox_dashboard_block_view($delta = '') {
             ),
             drupal_get_path('module', 'leanbox_dashboard') . '/js/leanbox_dashboard_otifchart.js',
             array(
-              'data' => array('leanbox_dashboard' => array('otif' => $data)),
+              'data' => array('leanbox_dashboard' => array('otif' => $data['output'],)),
               'type' => 'setting'
             ),
           ),
@@ -493,7 +494,7 @@ function leanbox_dashboard_theme() {
   return array(
     'leanbox_dashboard' => array(
       'template' => 'leanbox-dashboard',
-      'variables' => array('data' => NULL),
+      'variables' => array('data' => NULL, 'otif_table' => NULL),
     ),
   );
 }
