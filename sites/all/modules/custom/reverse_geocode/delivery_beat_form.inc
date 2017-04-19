@@ -56,7 +56,6 @@ function delivery_beat_create_form($form, &$form_state) {
   }
 
   if (!empty($form_state['values']['sales_day']) && !empty($form_state['values']['van_pl_group'])) {
-    dpm('22');
     $sales_day = $form_state['values']['sales_day'];
     $van = $form_state['values']['van_pl_group'];
     $form['area_hook_group']['#options'] = reverse_geocode_get_data_for_area_group($sales_day, $van, $distributor_id);
