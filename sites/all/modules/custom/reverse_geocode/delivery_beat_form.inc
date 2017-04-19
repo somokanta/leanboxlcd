@@ -79,11 +79,7 @@ function delivery_beat_create_form($form, &$form_state) {
   $rows = $form_state['reverse_geocode']['results'];
   if (!empty($rows)) {
     $header = array('nid', 'PARTY_CODE', 'PARTY_NAME', 'Beat Name', 'CHANNEL', 'PL_GROUP', 'Sales Day', 'Pl Van Group', 'Area Hook', 'Area Hook Group', 'Sequence', 'Delivery Beat Code');
-    $form['results_container']['table'] = array(
-      '#theme' => 'table',
-      '#header' => $header,
-      '#rows' => $rows,
-    );
+    
     $form['results_container']['download'] = array(
       '#type' => 'submit',
       '#value' => t('Download'),
@@ -98,6 +94,12 @@ function delivery_beat_create_form($form, &$form_state) {
       '#type' => 'submit',
       '#value' => t('Submit'),
       '#submit' => array('delivery_beat_form_submit'),
+    );
+    
+    $form['results_container']['table'] = array(
+      '#theme' => 'table',
+      '#header' => $header,
+      '#rows' => $rows,
     );
   }
 
@@ -232,7 +234,7 @@ function delivery_beat_get_results($sales_day, $van_pl_group = NULL, $area_hook_
   }
 
   $query->fields('fs', array('field_sequence_value'));
-  $expression = "CONCAT_WS('/',fdn.field_day_number_value, LPAD(field_van_pl_group_value, 2, '0'),field_area_hook_group_value,LPAD(CEIL(field_sequence_value/field_delivery_beats_value), 2, '0'), LPAD(CEIL(field_sequence_value/field_delivery_per_van_value), 2, '0'))";
+  $expression = "CONCAT_WS('-',fdn.field_day_number_value, LPAD(field_van_pl_group_value, 2, '0'),field_area_hook_group_value,LPAD(CEIL(field_sequence_value/field_delivery_beats_value), 2, '0'), LPAD(CEIL(field_sequence_value/field_delivery_per_van_value), 2, '0'))";
   $query->addExpression($expression, 'exp');
 
   $query->orderBy('fvp.field_van_pl_group_value');
