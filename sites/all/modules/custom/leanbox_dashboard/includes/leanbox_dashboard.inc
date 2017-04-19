@@ -728,15 +728,18 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     return $data1;
   }
   else if ($activity_type == 'bills_per_van') {
-    $query = db_select('node', 'n');
+   $query = db_select('node', 'n');
     $query->condition('n.type', 'dispatch_data');
     $query->addTag('node_uid');
     $query->join('field_data_field_dispatch_supervisor', 'su', 'su.entity_id = n.nid');
     $query->join('field_data_field_bill_count', 'v', 'su.entity_id = n.nid');
     $query->join('field_data_field_dispatch_date', 'd', 'd.entity_id = n.nid');
     $query->join('field_data_field_dispatch_loader_team_count', 'tc', 'tc.entity_id = n.nid');
-    $query->fields('d', array('field_dispatch_date_value'));
+    //$query->fields('d', array('field_dispatch_date_value'));
     $query->fields('su', array('field_dispatch_supervisor_value'));
+
+    $query->where("(DATE_FORMAT(d.field_dispatch_date_value, '%Y-%m-%d') >= :to)", array(':to' => $start));
+    $query->where("(DATE_FORMAT(d.field_dispatch_date_value, '%Y-%m-%d') <= :to)", array(':to' => $end));
 
     $query->addExpression('COUNT(n.title)', 'trip_count');
     $query->addExpression('SUM(v.field_bill_count_value)', 'bill_count_value');
@@ -746,22 +749,12 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     $data1[] = array('PriceList Group', 'COUNT');
 
     if (!empty($res)) {
-      $dispatch = FALSE;
       foreach ($res as $key => $val) {
-
-        $loading_date = strtotime($val['field_dispatch_date_value']);
-
-        if ($loading_date >= $start_date && $loading_date <= $end_date) {
-          $dispatch = TRUE;
           $supervisor = $val['field_dispatch_supervisor_value'];
           $trip_count = $val['trip_count'];
           $bill_count_value = $val['bill_count_value'];
           $count_per_van = ($bill_count_value / $trip_count);
           $data1[] = array($supervisor, $count_per_van);
-        }
-      }
-      if ($dispatch == FALSE) {
-        $data1[] = array('No Result Found for Dispatch', 0);
       }
     }
     else {
