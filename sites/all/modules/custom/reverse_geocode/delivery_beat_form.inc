@@ -34,8 +34,9 @@ function delivery_beat_create_form($form, &$form_state) {
       'wrapper' => 'area-hook-group-wrapper',
     ),
     '#prefix' => '<div id="van-pl-wrapper">',
-    '#suffix' => '</div>'
+    '#suffix' => '</div>',
       //'#required' => TRUE,
+    "#empty_option" => t('- Select -'),
   );
 
 
@@ -44,8 +45,9 @@ function delivery_beat_create_form($form, &$form_state) {
     '#title' => t('Area Hook Group'),
     '#options' => array(),
     '#prefix' => '<div id="area-hook-group-wrapper">',
-    '#suffix' => '</div>'
+    '#suffix' => '</div>',
       //'#required' => TRUE,
+    "#empty_option" => t('- Select -'),
   );
 
   if (!empty($form_state['values']['sales_day'])) {
@@ -54,6 +56,7 @@ function delivery_beat_create_form($form, &$form_state) {
   }
 
   if (!empty($form_state['values']['sales_day']) && !empty($form_state['values']['van_pl_group'])) {
+    dpm('22');
     $sales_day = $form_state['values']['sales_day'];
     $van = $form_state['values']['van_pl_group'];
     $form['area_hook_group']['#options'] = reverse_geocode_get_data_for_area_group($sales_day, $van, $distributor_id);
@@ -230,7 +233,7 @@ function delivery_beat_get_results($sales_day, $van_pl_group = NULL, $area_hook_
   }
 
   $query->fields('fs', array('field_sequence_value'));
-  $expression = "CONCAT_WS('/',nsd.title, LPAD(field_van_pl_group_value, 2, '0'),field_area_hook_group_value,LPAD(CEIL(field_sequence_value/field_delivery_beats_value), 2, '0'), LPAD(CEIL(field_sequence_value/field_delivery_per_van_value), 2, '0'))";
+  $expression = "CONCAT_WS('/',fdn.field_day_number_value, LPAD(field_van_pl_group_value, 2, '0'),field_area_hook_group_value,LPAD(CEIL(field_sequence_value/field_delivery_beats_value), 2, '0'), LPAD(CEIL(field_sequence_value/field_delivery_per_van_value), 2, '0'))";
   $query->addExpression($expression, 'exp');
 
   $query->orderBy('fvp.field_van_pl_group_value');
