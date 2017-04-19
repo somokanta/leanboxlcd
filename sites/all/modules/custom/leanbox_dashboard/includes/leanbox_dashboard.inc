@@ -763,7 +763,7 @@ function leanbox_dashboard_gauge_chart_query_details($type, $start_date = '', $e
   require_once drupal_get_path('module', 'change_feeds_import') . '/form/upload_billing_data.inc';
 
   $output1 = array();
-  $output1['output'] = 0;
+  $output = 0;
   global $user;
   // Store distributor id in author in each node
   $uid = change_feeds_import_get_distributor_id($user->uid);
