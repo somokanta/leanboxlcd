@@ -765,7 +765,7 @@ function leanbox_dashboard_gauge_chart_query_details($type, $start_date = '', $e
   $output1 = array();
   $output = 0;
   global $user;
-  $mtd_start = $mtd_end = '';
+  $mtd_start = $mtd_end = $table = '1';
   
   // Store distributor id in author in each node
   $uid = change_feeds_import_get_distributor_id($user->uid);
@@ -832,8 +832,12 @@ function leanbox_dashboard_gauge_chart_query_details($type, $start_date = '', $e
 
     $output = round(($total_dis_bill_val / $total['bill_value'] ) * 100);
   }
+  $output1['output'] = $output;
 
   if (arg(1) == 'otif') {
+    
+       watchdog('output_data1', '<pre>'. print_r($output, 1). '</pre>');
+
     $todays_date_date = date('Y-m-d');
 
     $todays_date_date_timestamp = strtotime(date($todays_date_date));
@@ -881,10 +885,8 @@ function leanbox_dashboard_gauge_chart_query_details($type, $start_date = '', $e
     }
 
     $table = $yesterday_html . "<br>" . $mtd_html;
-    $output1['table'] = $table;
   }
-
-  $output1['output'] = $output;
+  $output1['table'] = $table;
 
   return $output1;
 }
