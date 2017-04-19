@@ -835,7 +835,7 @@ function leanbox_dashboard_gauge_chart_query_details($type, $start_date = '', $e
   $output1['output'] = $output;
 
   if (arg(1) == 'otif' || $type = 'otif_ajax') {
-//
+
 //    $todays_date_date = date('Y-m-d');
 //    $todays_date_date_timestamp = strtotime(date($todays_date_date));
 //    $current_day = date("d", $todays_date_date_timestamp);
@@ -854,19 +854,31 @@ function leanbox_dashboard_gauge_chart_query_details($type, $start_date = '', $e
 //      $this_month = date("m", $todays_date_date_timestamp);
 //      $this_date = strtotime(date("Y-$this_month-21"));
 //    }
+//
+//    $yesterday_html = "<h3>Yesterday</h3>";
+//    $yesterday_data = get_yesterday_data_channel($yesterday, $yesterday, $uid);
+//    if ($yesterday_data == "No Result Found") {
+//      $header = get_header_of_chhanel();
+//      $yesterday_rows[] = array("<td colspan='10' style='text-align: center;'> There is No Activity</td>");
+//      $yesterday_html .= theme('table', array('header' => $header, 'rows' => $yesterday_rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
+//    }
+//    else {
+//      $yesterday_html .= $yesterday_data;
+//    }
 
-    $yesterday_html = "<h3>Channel Wise Otif</h3>";
-    $yesterday_data = get_yesterday_data_channel($start_date, $end_date, $uid);
-    if ($yesterday_data == "No Result Found") {
+    $mtd_html = "<h3>Channel Wise Otif</h3>";
+
+    $mtd_data .= get_mtd_data_channel($start_date, $end_date, $uid);
+    if ($mtd_data == "No Result Found") {
       $header = get_header_of_chhanel();
-      $yesterday_rows[] = array("<td colspan='10' style='text-align: center;'> There is No Activity</td>");
-      $yesterday_html .= theme('table', array('header' => $header, 'rows' => $yesterday_rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
+      $mtd_rows[] = array("<td colspan='10' style='text-align: center;'> There is No Activity</td>");
+      $mtd_html .= theme('table', array('header' => $header, 'rows' => $mtd_rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
     }
     else {
-      $yesterday_html .= $yesterday_data;
+      $mtd_html .= $mtd_data;
     }
 
-    $table = $yesterday_html;
+    $table = $mtd_html;
   }
   $output1['table'] = $table;
 
