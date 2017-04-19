@@ -728,11 +728,11 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     return $data1;
   }
   else if ($activity_type == 'bills_per_van') {
-   $query = db_select('node', 'n');
+    $query = db_select('node', 'n');
     $query->condition('n.type', 'dispatch_data');
     $query->addTag('node_uid');
     $query->join('field_data_field_dispatch_supervisor', 'su', 'su.entity_id = n.nid');
-    $query->join('field_data_field_bill_count', 'v', 'su.entity_id = n.nid');
+    $query->join('field_data_field_bill_count', 'v', 'v.entity_id = n.nid');
     $query->join('field_data_field_dispatch_date', 'd', 'd.entity_id = n.nid');
     $query->join('field_data_field_dispatch_loader_team_count', 'tc', 'tc.entity_id = n.nid');
     //$query->fields('d', array('field_dispatch_date_value'));
@@ -750,11 +750,11 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
 
     if (!empty($res)) {
       foreach ($res as $key => $val) {
-          $supervisor = $val['field_dispatch_supervisor_value'];
-          $trip_count = $val['trip_count'];
-          $bill_count_value = $val['bill_count_value'];
-          $count_per_van = ($bill_count_value / $trip_count);
-          $data1[] = array($supervisor, $count_per_van);
+        $supervisor = $val['field_dispatch_supervisor_value'];
+        $trip_count = $val['trip_count'];
+        $bill_count_value = $val['bill_count_value'];
+        $count_per_van = ($bill_count_value / $trip_count);
+        $data1[] = array($supervisor, $count_per_van);
       }
     }
     else {
@@ -767,7 +767,8 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
 function leanbox_dashboard_gauge_chart_query_details($type, $start_date = '', $end_date = '') {
   require_once drupal_get_path('module', 'change_feeds_import') . '/form/upload_billing_data.inc';
 
-  $output = 0;
+  $output1 = array();
+  $output1['output'] = 0;
   global $user;
   // Store distributor id in author in each node
   $uid = change_feeds_import_get_distributor_id($user->uid);
@@ -831,10 +832,60 @@ function leanbox_dashboard_gauge_chart_query_details($type, $start_date = '', $e
     }
 
     $output = round(($total_dis_bill_val / $total['bill_value'] ) * 100);
-    return $output;
+
+    if (arg(1) == 'otif') {
+
+      $todays_date_date = date('Y-m-d');
+      //$todays_date_date = "2017-03-20";
+      // $todays_date_date = "2017-03-17 00:00:00";
+      $todays_date_date_timestamp = strtotime(date($todays_date_date));
+      $current_day = date("d", $todays_date_date_timestamp);
+      $yesterday = strtotime('-1 day', strtotime($todays_date_date));
+      //$day_before_yesterday = strtotime('-2 day', strtotime($todays_date_date));
+      if ($current_day == 22) {
+        $this_month = date("m", $todays_date_date_timestamp);
+        $this_date = $yesterday;
+      }
+      elseif ($current_day <= 21) {
+        $old_date = strtotime('-1 month', strtotime($todays_date_date));
+        $last_month = date("m", $old_date);
+        $this_date = strtotime(date("Y-$last_month-21"));
+      }
+      else {
+        $this_month = date("m", $todays_date_date_timestamp);
+        $this_date = strtotime(date("Y-$this_month-21"));
+      }
+
+      $yesterday_html = "<h3>Yesterday</h3>";
+      $yesterday_data = get_yesterday_data_channel($yesterday, $yesterday, $uid);
+      if ($yesterday_data == "No Result Found") {
+        $header = get_header_of_chhanel();
+        $yesterday_rows[] = array("<td colspan='10' style='text-align: center;'> There is No Activity</td>");
+        $yesterday_html .= theme('table', array('header' => $header, 'rows' => $yesterday_rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
+      }
+      else {
+        $yesterday_html .= $yesterday_data;
+      }
+
+      $mtd_html = "<h3>MTD</h3>";
+      $mtd_data .= get_mtd_data_channel($this_date, $yesterday, $uid);
+      if ($mtd_data == "No Result Found") {
+        $header = get_header_of_chhanel();
+        $mtd_rows[] = array("<td colspan='10' style='text-align: center;'> There is No Activity</td>");
+        $mtd_html .= theme('table', array('header' => $header, 'rows' => $mtd_rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
+      }
+      else {
+        $mtd_html .= $mtd_data;
+      }
+
+      $table = $yesterday_html . "<br>" . $mtd_html;
+      $output1['table'] = $table;
+    }
+    $output1['output'] = $output;
+    return $output1;
   }
 
-  return $output;
+  return $output1;
 }
 
 /**

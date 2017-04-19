@@ -106,7 +106,8 @@ function party_packing_filter_callback() {
     $end_date = $_POST['end_date'];
   }
   if ($activity_type == 'otif') {
-    $output_data = leanbox_dashboard_gauge_chart_query_details($activity_type, $start_date, $end_date);
+    $output = leanbox_dashboard_gauge_chart_query_details($activity_type, $start_date, $end_date);
+    $output_data = $output['output'];
   }
   else {
     $output_data = leanbox_dashboard_chart_query_details($activity_type, $start_date, $end_date);
@@ -402,7 +403,7 @@ function leanbox_dashboard_block_view($delta = '') {
             ),
             drupal_get_path('module', 'leanbox_dashboard') . '/js/leanbox_dashboard_otifchart.js',
             array(
-              'data' => array('leanbox_dashboard' => array('otif' => $data)),
+              'data' => array('leanbox_dashboard' => array('otif' => $data['output'])),
               'type' => 'setting'
             ),
           ),
