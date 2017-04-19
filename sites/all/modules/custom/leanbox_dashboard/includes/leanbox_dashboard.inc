@@ -732,7 +732,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     $query->condition('n.type', 'dispatch_data');
     $query->addTag('node_uid');
     $query->join('field_data_field_dispatch_supervisor', 'su', 'su.entity_id = n.nid');
-    $query->join('field_data_field_bill_count', 'v', 'su.entity_id = n.nid');
+    $query->join('field_data_field_bill_count', 'v', 'v.entity_id = n.nid');
     $query->join('field_data_field_dispatch_date', 'd', 'd.entity_id = n.nid');
     $query->join('field_data_field_dispatch_loader_team_count', 'tc', 'tc.entity_id = n.nid');
     //$query->fields('d', array('field_dispatch_date_value'));
