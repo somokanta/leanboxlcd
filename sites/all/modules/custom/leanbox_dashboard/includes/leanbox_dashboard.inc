@@ -765,16 +765,20 @@ function leanbox_dashboard_gauge_chart_query_details($type, $start_date = '', $e
   $output1 = array();
   $output = 0;
   global $user;
+  $mtd_start = $mtd_end = '';
+  
   // Store distributor id in author in each node
   $uid = change_feeds_import_get_distributor_id($user->uid);
   if (!empty($start_date)) {
     $start_date = strtotime($start_date);
+    $mtd_start= $start_date;
   }
   else {
     $start_date = leanbox_dashboard_get_default_pdd_date_for_chart();
   }
   if (!empty($end_date)) {
     $end_date = strtotime($end_date) + 86399;
+    $mtd_end = $end_date;
   }
   else {
     $end_date = leanbox_dashboard_get_default_pdd_date_for_chart();
@@ -831,12 +835,11 @@ function leanbox_dashboard_gauge_chart_query_details($type, $start_date = '', $e
 
   if (arg(1) == 'otif') {
     $todays_date_date = date('Y-m-d');
-    //$todays_date_date = "2017-03-20";
-    // $todays_date_date = "2017-03-17 00:00:00";
+
     $todays_date_date_timestamp = strtotime(date($todays_date_date));
     $current_day = date("d", $todays_date_date_timestamp);
     $yesterday = strtotime('-1 day', strtotime($todays_date_date));
-    //$day_before_yesterday = strtotime('-2 day', strtotime($todays_date_date));
+
     if ($current_day == 22) {
       $this_month = date("m", $todays_date_date_timestamp);
       $this_date = $yesterday;
@@ -863,6 +866,10 @@ function leanbox_dashboard_gauge_chart_query_details($type, $start_date = '', $e
     }
 
     $mtd_html = "<h3>MTD</h3>";
+    if (!empty($mtd_start) && !empty($mtd_end)) {
+      $this_date = $mtd_start;
+      $yesterday = $mtd_end;
+    }
     $mtd_data .= get_mtd_data_channel($this_date, $yesterday, $uid);
     if ($mtd_data == "No Result Found") {
       $header = get_header_of_chhanel();

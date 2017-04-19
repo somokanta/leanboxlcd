@@ -29,8 +29,9 @@
 						success: function (response) {
 							console.log(response);
 							google.charts.setOnLoadCallback(function () {
-								drawotifChart(response);
+								drawotifChart(response.output);
 							});
+							$('#otiftable').html(response.table)
 						},
 					});
 				}

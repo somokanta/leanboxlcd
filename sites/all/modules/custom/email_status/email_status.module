@@ -262,6 +262,7 @@ function send_email_channel_emailer($distributor_name) {
   global $user;
   $user_id = $user->uid;
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
+  $distributor_id = 60;
 
   $todays_date_date = date('Y-m-d');
   //$todays_date_date = "2017-03-20";
@@ -1076,7 +1077,7 @@ function get_mtd_data_pl_groupwise($this_date, $yesterday, $distributor_id) {
 function get_common_data_for_chhanel_datewise($start_date, $end_date, $distributor_id) {
   $query = db_select('node', 'n');
   $query->condition('n.type', 'sales_register_data');
-  $query->condition('n.uid', 60, '=');
+  $query->condition('n.uid', $distributor_id, '=');
   $query->join('field_data_field_billing_van', 'bva', 'bva.entity_id = n.nid');
   $query->join('field_data_field_sr_bill_date', 'bd', 'bd.entity_id = n.nid');
   $query->condition('bd.field_sr_bill_date_value', array($start_date, $end_date), 'BETWEEN');
@@ -1085,7 +1086,7 @@ function get_common_data_for_chhanel_datewise($start_date, $end_date, $distribut
   $query->join('field_data_field_sales_party_code', 'pc', 'pc.entity_id = n.nid');
   $query->join('node', 'oun', 'pc.field_sales_party_code_value = oun.title');
   $query->condition('oun.type', 'outlet_master');
-  $query->condition('oun.uid', 60, '=');
+  $query->condition('oun.uid', $distributor_id, '=');
   $query->join('field_data_field_channel', 'chan', 'chan.entity_id = oun.nid');
   $query->groupBy('field_channel_value');
   $query->leftjoin('field_data_field_trip_id_reference', 'ti', 'ti.entity_id = n.nid');
