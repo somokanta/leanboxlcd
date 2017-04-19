@@ -738,7 +738,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     //$query->fields('d', array('field_dispatch_date_value'));
     $query->fields('su', array('field_dispatch_supervisor_value'));
 
-    $query->where("(DATE_FORMAT(d.field_dispatch_date_value, '%Y-%m-%d') >= :to)", array(':to' => $start));
+    $query->where("(DATE_FORMAT(d.field_dispatch_date_value, '%Y-%m-%d') >= :start)", array(':start' => $start));
     $query->where("(DATE_FORMAT(d.field_dispatch_date_value, '%Y-%m-%d') <= :to)", array(':to' => $end));
 
     $query->addExpression('COUNT(n.title)', 'trip_count');
