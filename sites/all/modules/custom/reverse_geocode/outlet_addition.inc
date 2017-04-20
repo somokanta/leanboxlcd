@@ -127,9 +127,8 @@ function incremental_outlet_ajax_callback($form, &$form_state) {
 }
 
 function get_all_closest_sequence($van_pl, $area_hook) {
-  $distributor_id = 60;
   $query = db_select('node', 'n');
-  $query->condition('n.uid', $distributor_id, '=');
+  $query->addTag('node_uid');
 //$query->condition('n.title', $tt ,'=');
 //Outlet Master
   $query->join('field_data_field_hul_code', 'fh', 'fh.entity_id = n.nid');
@@ -163,9 +162,8 @@ function get_all_closest_sequence($van_pl, $area_hook) {
 }
 
 function get_closet_result_from_closet_hul_code($closet_outlet_nid) {
-  $distributor_id = 60;
   $query = db_select('node', 'n');
-  $query->condition('n.uid', $distributor_id, '=');
+  $query->addTag('node_uid');
   $query->condition('n.nid', $closet_outlet_nid, '=');
 //Outlet Master
   $query->join('field_data_field_static_delivery_beat_code', 'dbc', 'dbc.entity_id = n.nid');
@@ -199,9 +197,8 @@ function distance($lat1, $lon1, $lat2, $lon2) {
 }
 
 function get_selected_party_code_similar_outlet_data_with_lat_lng($van_pl, $area_hook) {
-  $distributor_id = 60;
   $query = db_select('node', 'n');
-  $query->condition('n.uid', $distributor_id, '=');
+  $query->addTag('node_uid');
 //$query->condition('n.title', $tt ,'=');
 //Outlet Master
   $query->join('field_data_field_channel', 'fc1', 'fc1.entity_id = n.nid');
@@ -250,10 +247,9 @@ function get_selected_party_code_similar_outlet_data_with_lat_lng($van_pl, $area
 }
 
 function get_new_outlet_data() {
-  $distributor_id = 60;
   $query = db_select('node', 'n');
   $query->condition('n.type', 'outlet_master');
-  $query->condition('n.uid', $distributor_id, '=');
+  $query->addTag('node_uid');
 
 // Outlet Master
   $query->join('field_data_field_hul_code', 'fh', 'fh.entity_id = n.nid');
