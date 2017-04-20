@@ -288,6 +288,47 @@ function leanbox_dashboard_chart_filter_picking_form($form, &$form_state) {
   return $form;
 }
 
+
+/**
+ * 
+ * @param array $form
+ * @param array $form_state
+ * @return string
+ */
+function leanbox_dashboard_chart_filter_picking_bulk_form($form, &$form_state) {
+  $form = array();
+
+  if (arg(1) == 'picking_bulk') {
+    $form['start_date'] = array(
+      '#type' => 'date_popup',
+      '#title' => t('Loading Date From'),
+      '#required' => TRUE,
+      '#date_format' => 'Y-m-d',
+      '#default_value' => date('Y-m-d'),
+    );
+    $form['end_date'] = array(
+      '#type' => 'date_popup',
+      '#title' => t('Loading Date To'),
+      '#required' => TRUE,
+      '#date_format' => 'Y-m-d',
+      '#default_value' => date('Y-m-d'),
+    );
+    $form['submit'] = array(
+      '#type' => 'submit',
+      '#value' => 'Submit',
+      '#prefix' => '<div id ="picking-bulk-submit">',
+      '#suffix' => '</div>',
+      '#attributes' => array('class' => array('picking-bulk-submit')),
+    );
+  }
+
+  $form['picking_bulk'] = array(
+    '#markup' => '<a href = "/leanbox-chart-details/picking_bulk" target = "_blank"><div id="picking_bulk_div"></div></a>',
+  );
+
+  return $form;
+}
+
 /**
  * 
  * @param array $form
@@ -564,8 +605,97 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
           if ($val1['not_start'] == 0 && $val1['in_prg'] == 0 && $val1['comp'] == 0) {
             continue;
           }
-          $picking_flag = TRUE;
-          $data1[] = array($key . ' ' . $key1, $val1['in_prg'], $val1['not_start'], $val1['comp']);
+
+          if ($key1 == 'loose') {
+            $picking_flag = TRUE;
+
+            $data1[] = array($key . ' ' . $key1, $val1['in_prg'], $val1['not_start'], $val1['comp']);
+          }
+        }
+      }
+      if ($picking_flag == FALSE) {
+        $data1[] = array('No Result Found for Pricelist Group', 0, 0, 0);
+      }
+    }
+    else {
+      $data1[] = array('No Result Found for Pricelist Group', 0, 0, 0);
+    }
+    return $data1;
+  }
+    else if ($activity_type == 'picking_bulk') {
+
+
+    $query = db_select('field_data_field_picking_godown_area_id', 'g');
+    $query->addExpression('DISTINCT(field_picking_godown_area_id_value)', 'uid_count');
+    $query->condition('g.bundle', 'picking');
+    $list = $query->execute()->fetchCol();
+
+    $query = db_select('node', 'n');
+    $query->fields('n', array('nid'));
+    $query->condition('n.type', 'picking');
+    $query->condition('n.uid', $distributor_id);
+    $query->join('field_data_field_picking_godown_area_id', 'pt', 'pt.entity_id = n.nid');
+    $query->fields('pt', array('field_picking_godown_area_id_value'));
+    $query->leftjoin('field_data_field_picking_status', 's', 's.entity_id = n.nid');
+    $query->fields('s', array('field_picking_status_value'));
+    $query->join('field_data_field_picking_picking_type', 'pp', 'pp.entity_id = n.nid');
+    $query->fields('pp', array('field_picking_picking_type_value'));
+    $query->join('field_data_field_picking_loading_date', 'd', 'd.entity_id = n.nid');
+    $query->fields('d', array('field_picking_loading_date_value'));
+    $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+
+    $data1[] = array('PriceList Group', 'In Progress', 'Not Started', 'Completed');
+    if (!empty($res)) {
+      foreach ($list as $data => $data_list) {
+
+        if (!isset($output[$data_list]['loose'])) {
+          $output[$data_list]['loose'] = array(
+            'not_start' => 0,
+            'in_prg' => 0,
+            'comp' => 0
+          );
+        }
+        if (!isset($output[$data_list]['bulk'])) {
+          $output[$data_list]['bulk'] = array(
+            'not_start' => 0,
+            'in_prg' => 0,
+            'comp' => 0
+          );
+        }
+
+        foreach ($res as $key => $val) {
+          $loading_date = strtotime($val['field_picking_loading_date_value']);
+
+
+          if ($loading_date >= $start_date && $loading_date <= $end_date) {
+            if ($val['field_picking_godown_area_id_value'] == $data_list) {
+
+              $type = (strtolower($val['field_picking_picking_type_value']));
+              if (empty($val['field_picking_status_value'])) {
+                $output[$data_list][$type]['not_start'] += 1;
+              }
+              else if ($val['field_picking_status_value'] == 1) {
+                $output[$data_list][$type]['in_prg'] += 1;
+              }
+              else {
+                $output[$data_list][$type]['comp'] += 1;
+              }
+            }
+          }
+        }
+      }
+      $picking_flag = FALSE;
+      foreach ($output as $key => $val) {
+        foreach ($val as $key1 => $val1) {
+          if ($val1['not_start'] == 0 && $val1['in_prg'] == 0 && $val1['comp'] == 0) {
+            continue;
+          }
+
+          if ($key1 == 'bulk') {
+            $picking_flag = TRUE;
+
+            $data1[] = array($key . ' ' . $key1, $val1['in_prg'], $val1['not_start'], $val1['comp']);
+          }
         }
       }
       if ($picking_flag == FALSE) {
