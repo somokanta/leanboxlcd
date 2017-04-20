@@ -242,7 +242,6 @@ function delivery_beat_get_results($sales_day, $van_pl_group = NULL, $area_hook_
   $query->fields('fs', array('field_sequence_value'));
   $expression = "CONCAT_WS('-',fdn.field_day_number_value, LPAD(fvp.field_van_pl_group_value, 2, '0'),fag.field_area_hook_group_value,sub.title,LPAD(CEIL(fs.field_sequence_value/field_delivery_beats_value), 2, '0'), LPAD(CEIL(fs.field_sequence_value/field_delivery_per_van_value), 2, '0'))";
   $query->addExpression($expression, 'exp');
-  $query->addExpression('FLOOR((fs.field_sequence_value - 1)/field_delivery_beats_value)*field_delivery_beats_value + 1', 'seq');
 
   $query->orderBy('fvp.field_van_pl_group_value');
   $query->orderBy('fag.field_area_hook_group_value');
@@ -271,7 +270,6 @@ function delivery_beat_get_results($sales_day, $van_pl_group = NULL, $area_hook_
   $subquery->where("((fs.field_sequence_value - 1)%10 = 0)");
   
   $query->join($subquery, 'sub', 'sub.field_sequence_value = (FLOOR((fs.field_sequence_value - 1)/field_delivery_beats_value)*field_delivery_beats_value + 1) AND sub.field_channel_value = fc1.field_channel_value AND sub.field_pl_group_value = fp1.field_pl_group_value');
-  $query->fields('sub', array('title'));
 
   $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
 
