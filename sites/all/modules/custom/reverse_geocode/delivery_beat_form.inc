@@ -174,6 +174,10 @@ function delivery_beat_form_submit($form, &$form_state) {
 }
 
 function delivery_beat_get_results($sales_day, $van_pl_group = NULL, $area_hook_group = NULL) {
+  global $user;
+  $user_id = $user->uid;
+  $distributor_id = change_feeds_import_get_distributor_id($user_id);
+  
   $query = db_select('node', 'n');
 
   $query->addTag('node_uid');
@@ -204,10 +208,12 @@ function delivery_beat_get_results($sales_day, $van_pl_group = NULL, $area_hook_
   $query->join('node', 'nsd', 'nsd.title = fsd.field_sales_day_value');
   $query->join('field_data_field_day_number', 'fdn', 'fdn.entity_id = nsd.nid');
   $query->condition('nsd.type', 'sales_delivery_day_master');
+  $query->condition('nsd.uid', $distributor_id, '=');
 
 //HUL code Master
   $query->join('node', 'nh', 'nh.title = fh.field_hul_code_value');
   $query->join('field_data_field_hul_status', 'fhs', 'fhs.entity_id = nh.nid');
+  $query->condition('nh.uid', $distributor_id, '=');
 
 //Party pack Master
   $query->join('field_data_field_channel', 'fc2', 'fc1.field_channel_value = fc2.field_channel_value');
@@ -234,12 +240,36 @@ function delivery_beat_get_results($sales_day, $van_pl_group = NULL, $area_hook_
   }
 
   $query->fields('fs', array('field_sequence_value'));
-  $expression = "CONCAT_WS('-',fdn.field_day_number_value, LPAD(field_van_pl_group_value, 2, '0'),field_area_hook_group_value,LPAD(CEIL(field_sequence_value/field_delivery_beats_value), 2, '0'), LPAD(CEIL(field_sequence_value/field_delivery_per_van_value), 2, '0'))";
+  $expression = "CONCAT_WS('-',fdn.field_day_number_value, LPAD(fvp.field_van_pl_group_value, 2, '0'),fag.field_area_hook_group_value,sub.title,LPAD(CEIL(fs.field_sequence_value/field_delivery_beats_value), 2, '0'), LPAD(CEIL(fs.field_sequence_value/field_delivery_per_van_value), 2, '0'))";
   $query->addExpression($expression, 'exp');
+  $query->addExpression('FLOOR((fs.field_sequence_value - 1)/field_delivery_beats_value)*field_delivery_beats_value + 1', 'seq');
 
   $query->orderBy('fvp.field_van_pl_group_value');
   $query->orderBy('fag.field_area_hook_group_value');
   $query->orderBy('fs.field_sequence_value');
+  
+  
+  $subquery = db_select('node', 'n');
+  $subquery->addTag('node_uid');
+
+  //Outlet Master
+  $subquery->join('field_data_field_sales_day', 'fsd', 'fsd.entity_id = n.nid');
+  $subquery->join('field_data_field_sequence', 'fs', 'fs.entity_id = n.nid');
+  $subquery->join('field_data_field_channel', 'fc1', 'fc1.entity_id = n.nid');
+  $subquery->join('field_data_field_pl_group', 'fp1', 'fp1.entity_id = n.nid');
+  $subquery->join('field_data_field_area_hook', 'fa', 'fa.entity_id = n.nid');
+  $subquery->join('node', 'na', 'na.nid = fa.field_area_hook_nid');
+  $subquery->join('field_data_field_area_hook_group', 'fag', 'fag.entity_id = na.nid');
+  
+  $subquery->condition('fsd.field_sales_day_value', $sales_day);
+  $subquery->fields('na', array('title'));
+  $subquery->fields('fs', array('field_sequence_value'));
+  $subquery->fields('fc1', array('field_channel_value'));
+  $subquery->fields('fp1', array('field_pl_group_value'));
+  $subquery->where("((fs.field_sequence_value - 1)%10 = 0)");
+  
+  $query->join($subquery, 'sub', 'sub.field_sequence_value = (FLOOR((fs.field_sequence_value - 1)/field_delivery_beats_value)*field_delivery_beats_value + 1) AND sub.field_channel_value = fc1.field_channel_value AND sub.field_pl_group_value = fp1.field_pl_group_value');
+  $query->fields('sub', array('title'));
 
   $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
 
@@ -251,7 +281,7 @@ function delivery_beat_batch_process($data, &$context) {
     $node = node_load($value['nid']);
     if ($node) {
       //Save static delivery beat
-      //$node->field_static_delivery_beat_code‎ = $value['exp'];
+      $node->field_static_delivery_beat_code‎ = $value['exp'];
       node_save($node);
     }
   }
