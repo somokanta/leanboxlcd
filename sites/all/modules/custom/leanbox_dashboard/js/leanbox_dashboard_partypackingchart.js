@@ -49,21 +49,21 @@
 				view.setColumns([0,
 					1, {
 						calc: function (dt, row) {
-							return dt.getValue(row, 1) + ' (' + formatPercent.formatValue(dt.getValue(row, 1) / (dt.getValue(row, 1) + dt.getValue(row, 2) + dt.getValue(row, 3))) + ')';
+							return dt.getValue(row, 1) + ' (' + Math.round(formatPercent.formatValue(dt.getValue(row, 1) / (dt.getValue(row, 1) + dt.getValue(row, 2) + dt.getValue(row, 3)))) + ')';
 						},
 						sourceColumn: 1,
 						type: "string",
 						role: "annotation", },
 					2, {
 						calc: function (dt, row) {
-							return dt.getValue(row, 2) + ' (' + formatPercent.formatValue(dt.getValue(row, 2) / (dt.getValue(row, 1) + dt.getValue(row, 2) + dt.getValue(row, 3))) + ')';
+							return dt.getValue(row, 2) + ' (' + Math.round(formatPercent.formatValue(dt.getValue(row, 2) / (dt.getValue(row, 1) + dt.getValue(row, 2) + dt.getValue(row, 3)))) + ')';
 						},
 						sourceColumn: 2,
 						type: "string",
 						role: "annotation"},
 					3, {	
 						calc: function (dt, row) {
-							return dt.getValue(row, 3) + ' (' + formatPercent.formatValue(dt.getValue(row, 3) / (dt.getValue(row, 1) + dt.getValue(row, 2) + dt.getValue(row, 3))) + ')';
+							return dt.getValue(row, 3) + ' (' + Math.round(formatPercent.formatValue(dt.getValue(row, 3) / (dt.getValue(row, 1) + dt.getValue(row, 2) + dt.getValue(row, 3)))) + ')';
 						},
 						sourceColumn: 3,
 						type: "string",
