@@ -3,7 +3,7 @@
 function outlet_addition_form($form, &$form_state) {
   $form['#prefix'] = '<div id="incremental-outlet">';
   $form['#suffix'] = '</div>';
-  
+
   global $user;
   $user_id = $user->uid;
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
@@ -18,7 +18,7 @@ function outlet_addition_form($form, &$form_state) {
 
   // Get newly added outlet which dont have Area Beat Code and Area Hook Cnfrm is done
   $options = get_new_outlet_data($distributor_id);
-  
+
   // This is just adding selected outlet to $option array to show nearest outlet all values.
   if (isset($form_state['close_array'])) {
     $show_array = $form_state['close_array'];
@@ -59,28 +59,27 @@ function outlet_addition_form($form, &$form_state) {
   return $form;
 }
 
-
 // When SUbmit is clicked
 function update_incremental_outlet_submit($form, &$form_state) {
   global $user;
   $user_id = $user->uid;
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
-  
+
   $party_code = $form_state['values']['list_form_items']; // selected party code
   $new_outlet_array = $form_state['incremental_outlet']['options']; // already calculated outlet value.  
   foreach ($new_outlet_array as $key => $value) {
     if ($key == $party_code) {
       $van_pl = $value['field_van_pl_group_value'];
       $area_hook = $value['field_area_hook_group_value'];
-      
+
       // get all node's of outlet master and lat long from hul master which has same pl group and area hook group of selected outlet node.
-      $selected_results = get_selected_party_code_similar_outlet_data_with_lat_lng($van_pl, $area_hook,$distributor_id);
+      $selected_results = get_selected_party_code_similar_outlet_data_with_lat_lng($van_pl, $area_hook, $distributor_id);
       foreach ($selected_results as $k => $v) {
         $lat = $v->field_hul_updated_lat_value;
         $lng = $v->field_hul_updated_long_value;
         $hul_code = $v->nh_title;
         $nid = $v->nid;
-        
+
         $distsnce_in_km = distance($selected_lat, $selected_lng, $lat, $lng);
         $distsnce_in_meter[] = $distsnce_in_km * 1000;
         $distsnce_hul_code_array[] = $hul_code;
@@ -94,16 +93,16 @@ function update_incremental_outlet_submit($form, &$form_state) {
 
 
       // Get result of closest outlet node.
-      $closet_result = get_closet_result_from_closet_hul_code($closet_outlet_nid,$distributor_id);
+      $closet_result = get_closet_result_from_closet_hul_code($closet_outlet_nid, $distributor_id);
       $nearest_outlet_code = $closet_result[0]->title;
       $nearest_outlet_name = $closet_result[0]->field_party_name_value;
       $closest_sales_delivery_beat = $closet_result[0]->field_static_delivery_beat_code_value;
       $closest_sequence = $closet_result[0]->field_sequence_value;
       $nearest_outlet_sequence = $closest_sequence;
-      
-      
+
+
       // logic for finding closest sequence.
-      $get_all_closest_sequence = get_all_closest_sequence($van_pl, $area_hook ,$distributor_id);
+      $get_all_closest_sequence = get_all_closest_sequence($van_pl, $area_hook, $distributor_id);
       $flag = 1;
       while ($flag) {
         $closest_sequence = $closest_sequence + 0.001;
@@ -111,23 +110,24 @@ function update_incremental_outlet_submit($form, &$form_state) {
           $flag = 0;
         }
       }
-      
+
       // saving sequence and static_delivery_beat_code in selected outlet node.
       $selected_nid = $value['nid'];
-      if(!empty($closet_result)){
-       $node = node_load($selected_nid);
-      $node->field_sequence['und'][0]['value'] = $closest_sequence;
-      $node->field_static_delivery_beat_code['und'][0]['value'] = $closest_sales_delivery_beat;
-      node_save($node); 
-      }
-      $closest_array = array('Nearest Outlet Code' => $nearest_outlet_code, 'Nearest Outlet Name' => $nearest_outlet_name,
-        'Nearest Outlet Sequence' => $nearest_outlet_sequence, 'Static Beat Code' => $closest_sales_delivery_beat,
-        'Outlet_Sequence' => $closest_sequence);
+      if (!empty($closet_result)) {
+        $node = node_load($selected_nid);
+        $node->field_sequence['und'][0]['value'] = $closest_sequence;
+        $node->field_static_delivery_beat_code['und'][0]['value'] = $closest_sales_delivery_beat;
+        node_save($node);
 
-      $show_array[$party_code] = $new_outlet_array[$key] + $closest_array;
-      $form_state['close_array'] = $show_array;
-      
-      if(empty($closet_result) && empty($selected_results) ){
+        $closest_array = array('Nearest Outlet Code' => $nearest_outlet_code, 'Nearest Outlet Name' => $nearest_outlet_name,
+          'Nearest Outlet Sequence' => $nearest_outlet_sequence, 'Static Beat Code' => $closest_sales_delivery_beat,
+          'Outlet_Sequence' => $closest_sequence);
+
+        $show_array[$party_code] = $new_outlet_array[$key] + $closest_array;
+        $form_state['close_array'] = $show_array;
+      }
+
+      if (empty($closet_result) && empty($selected_results)) {
         drupal_set_message('No Closest Outlet Found');
       }
       $form_state['rebuild'] = TRUE;
@@ -139,7 +139,7 @@ function incremental_outlet_ajax_callback($form, &$form_state) {
   return $form;
 }
 
-function get_all_closest_sequence($van_pl, $area_hook,$distributor_id) {
+function get_all_closest_sequence($van_pl, $area_hook, $distributor_id) {
   $query = db_select('node', 'n');
   $query->condition('n.uid', $distributor_id, '=');
 //$query->condition('n.title', $tt ,'=');
@@ -174,7 +174,7 @@ function get_all_closest_sequence($van_pl, $area_hook,$distributor_id) {
   return $res;
 }
 
-function get_closet_result_from_closet_hul_code($closet_outlet_nid,$distributor_id) {
+function get_closet_result_from_closet_hul_code($closet_outlet_nid, $distributor_id) {
   $query = db_select('node', 'n');
   $query->condition('n.uid', $distributor_id, '=');
   $query->condition('n.nid', $closet_outlet_nid, '=');
@@ -209,7 +209,7 @@ function distance($lat1, $lon1, $lat2, $lon2) {
   return $km;
 }
 
-function get_selected_party_code_similar_outlet_data_with_lat_lng($van_pl, $area_hook,$distributor_id) {
+function get_selected_party_code_similar_outlet_data_with_lat_lng($van_pl, $area_hook, $distributor_id) {
   $query = db_select('node', 'n');
   $query->condition('n.uid', $distributor_id, '=');
 //$query->condition('n.title', $tt ,'=');
