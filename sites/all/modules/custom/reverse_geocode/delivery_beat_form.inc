@@ -266,6 +266,8 @@ function delivery_beat_get_results($sales_day, $van_pl_group = NULL, $area_hook_
   $subquery->fields('fs', array('field_sequence_value'));
   $subquery->fields('fc1', array('field_channel_value'));
   $subquery->fields('fp1', array('field_pl_group_value'));
+  
+  ############ CHANGE 10 to DYNAMIC####################
   $subquery->where("((fs.field_sequence_value - 1)%10 = 0)");
   
   $query->join($subquery, 'sub', 'sub.field_sequence_value = (FLOOR((fs.field_sequence_value - 1)/field_delivery_beats_value)*field_delivery_beats_value + 1) AND sub.field_channel_value = fc1.field_channel_value AND sub.field_pl_group_value = fp1.field_pl_group_value');
