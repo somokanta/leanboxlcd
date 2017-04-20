@@ -139,14 +139,14 @@ function leanbox_dashboard_chart_filter_billsperperson_form($form, &$form_state)
   if (arg(1) == 'bills_per_person') {
     $form['start_date'] = array(
       '#type' => 'date_popup',
-      '#title' => t('Loading Date From'),
+      '#title' => t('Dispatch Date From'),
       '#required' => TRUE,
       '#date_format' => 'Y-m-d',
       '#default_value' => date('Y-m-d'),
     );
     $form['end_date'] = array(
       '#type' => 'date_popup',
-      '#title' => t('Loading Date To'),
+      '#title' => t('Dispatch Date To'),
       '#required' => TRUE,
       '#date_format' => 'Y-m-d',
       '#default_value' => date('Y-m-d'),
@@ -179,14 +179,14 @@ function leanbox_dashboard_chart_filter_billspervan_form($form, &$form_state) {
   if (arg(1) == 'bills_per_van') {
     $form['start_date'] = array(
       '#type' => 'date_popup',
-      '#title' => t('Loading Date From'),
+      '#title' => t('Dispatch Date From'),
       '#required' => TRUE,
       '#date_format' => 'Y-m-d',
       '#default_value' => date('Y-m-d'),
     );
     $form['end_date'] = array(
       '#type' => 'date_popup',
-      '#title' => t('Loading Date To'),
+      '#title' => t('Dispatch Date To'),
       '#required' => TRUE,
       '#date_format' => 'Y-m-d',
       '#default_value' => date('Y-m-d'),
