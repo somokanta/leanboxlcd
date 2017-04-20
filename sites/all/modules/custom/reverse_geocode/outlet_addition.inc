@@ -3,7 +3,10 @@
 function outlet_addition_form($form, &$form_state) {
   $form['#prefix'] = '<div id="incremental-outlet">';
   $form['#suffix'] = '</div>';
-
+  
+  global $user;
+  $user_id = $user->uid;
+  $distributor_id = change_feeds_import_get_distributor_id($user_id);
 
   $header_array = array('title' => 'New Outlet',
     'field_party_name_value' => 'New Outlet Name', 'field_sales_day_value' => 'New O/L Sales Day',
@@ -14,7 +17,7 @@ function outlet_addition_form($form, &$form_state) {
   );
 
   // Get newly added outlet which dont have Area Beat Code and Area Hook Cnfrm is done
-  $options = get_new_outlet_data();
+  $options = get_new_outlet_data($distributor_id);
   
   // This is just adding selected outlet to $option array to show nearest outlet all values.
   if (isset($form_state['close_array'])) {
@@ -59,6 +62,10 @@ function outlet_addition_form($form, &$form_state) {
 
 // When SUbmit is clicked
 function update_incremental_outlet_submit($form, &$form_state) {
+  global $user;
+  $user_id = $user->uid;
+  $distributor_id = change_feeds_import_get_distributor_id($user_id);
+  
   $party_code = $form_state['values']['list_form_items']; // selected party code
   $new_outlet_array = $form_state['incremental_outlet']['options']; // already calculated outlet value.  
   foreach ($new_outlet_array as $key => $value) {
@@ -67,7 +74,7 @@ function update_incremental_outlet_submit($form, &$form_state) {
       $area_hook = $value['field_area_hook_group_value'];
       
       // get all node's of outlet master and lat long from hul master which has same pl group and area hook group of selected outlet node.
-      $selected_results = get_selected_party_code_similar_outlet_data_with_lat_lng($van_pl, $area_hook);
+      $selected_results = get_selected_party_code_similar_outlet_data_with_lat_lng($van_pl, $area_hook,$distributor_id);
       foreach ($selected_results as $k => $v) {
         $lat = $v->field_hul_updated_lat_value;
         $lng = $v->field_hul_updated_long_value;
@@ -87,7 +94,7 @@ function update_incremental_outlet_submit($form, &$form_state) {
 
 
       // Get result of closest outlet node.
-      $closet_result = get_closet_result_from_closet_hul_code($closet_outlet_nid);
+      $closet_result = get_closet_result_from_closet_hul_code($closet_outlet_nid,$distributor_id);
       $nearest_outlet_code = $closet_result[0]->title;
       $nearest_outlet_name = $closet_result[0]->field_party_name_value;
       $closest_sales_delivery_beat = $closet_result[0]->field_static_delivery_beat_code_value;
@@ -96,7 +103,7 @@ function update_incremental_outlet_submit($form, &$form_state) {
       
       
       // logic for finding closest sequence.
-      $get_all_closest_sequence = get_all_closest_sequence($van_pl, $area_hook);
+      $get_all_closest_sequence = get_all_closest_sequence($van_pl, $area_hook ,$distributor_id);
       $flag = 1;
       while ($flag) {
         $closest_sequence = $closest_sequence + 0.001;
@@ -126,9 +133,9 @@ function incremental_outlet_ajax_callback($form, &$form_state) {
   return $form;
 }
 
-function get_all_closest_sequence($van_pl, $area_hook) {
+function get_all_closest_sequence($van_pl, $area_hook,$distributor_id) {
   $query = db_select('node', 'n');
-  $query->addTag('node_uid');
+  $query->condition('n.uid', $distributor_id, '=');
 //$query->condition('n.title', $tt ,'=');
 //Outlet Master
   $query->join('field_data_field_hul_code', 'fh', 'fh.entity_id = n.nid');
@@ -161,9 +168,9 @@ function get_all_closest_sequence($van_pl, $area_hook) {
   return $res;
 }
 
-function get_closet_result_from_closet_hul_code($closet_outlet_nid) {
+function get_closet_result_from_closet_hul_code($closet_outlet_nid,$distributor_id) {
   $query = db_select('node', 'n');
-  $query->addTag('node_uid');
+  $query->condition('n.uid', $distributor_id, '=');
   $query->condition('n.nid', $closet_outlet_nid, '=');
 //Outlet Master
   $query->join('field_data_field_static_delivery_beat_code', 'dbc', 'dbc.entity_id = n.nid');
@@ -196,9 +203,9 @@ function distance($lat1, $lon1, $lat2, $lon2) {
   return $km;
 }
 
-function get_selected_party_code_similar_outlet_data_with_lat_lng($van_pl, $area_hook) {
+function get_selected_party_code_similar_outlet_data_with_lat_lng($van_pl, $area_hook,$distributor_id) {
   $query = db_select('node', 'n');
-  $query->addTag('node_uid');
+  $query->condition('n.uid', $distributor_id, '=');
 //$query->condition('n.title', $tt ,'=');
 //Outlet Master
   $query->join('field_data_field_channel', 'fc1', 'fc1.entity_id = n.nid');
@@ -247,9 +254,10 @@ function get_selected_party_code_similar_outlet_data_with_lat_lng($van_pl, $area
 }
 
 function get_new_outlet_data() {
+  $distributor_id = 60;
   $query = db_select('node', 'n');
   $query->condition('n.type', 'outlet_master');
-  $query->addTag('node_uid');
+  $query->condition('n.uid', $distributor_id, '=');
 
 // Outlet Master
   $query->join('field_data_field_hul_code', 'fh', 'fh.entity_id = n.nid');
