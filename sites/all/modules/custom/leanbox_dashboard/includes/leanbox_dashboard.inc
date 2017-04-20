@@ -752,8 +752,11 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
         $trip_count = $val['trip_count'];
         $bill_count_value = $val['bill_count_value'];
         $count_per_van = ($bill_count_value / $trip_count);
+        $total_bill_value += $bill_count_value;
+        $total_trip_count += $trip_count;
         $data1[] = array($supervisor, $count_per_van);
       }
+      $data1[] = array('Total', ($total_bill_value / $total_trip_count));
     }
     else {
       $data1[] = array('No Result Found for Dispatch', 0);
