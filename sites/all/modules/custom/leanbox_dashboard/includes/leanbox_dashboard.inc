@@ -713,9 +713,12 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
         $supervisor = $val['field_dispatch_supervisor_value'];
         $team_count = $val['Team_count'];
         $bill_value = $val['bill_value'];
+        $total_bill_value += $bill_value;
+        $total_team_count += $team_count;
         $count_per_person = ($bill_value / $team_count);
         $data1[] = array($supervisor, $count_per_person);
       }
+      $data1[] = array('Total', ($total_bill_value / $total_team_count));
     }
     else {
       $data1[] = array('No Result Found for Dispatch', 0);
