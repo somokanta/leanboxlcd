@@ -50,6 +50,15 @@ function reverse_geocode_menu() {
     'type' => MENU_CALLBACK,
     'file' => 'address_confirm.inc'
   );
+  
+  $items['incremental-outlet'] = array(
+    'title' => 'Incremental Outlet Addition',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('outlet_addition_form'),
+    'access arguments' => array('address confirmation'),
+    'type' => MENU_CALLBACK,
+    'file' => 'outlet_addition.inc'
+  );
 
   $items['sales_person/autocomplete'] = array(
     'title' => 'Autocomplete for Sales Person',
