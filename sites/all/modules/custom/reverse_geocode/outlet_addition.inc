@@ -114,16 +114,22 @@ function update_incremental_outlet_submit($form, &$form_state) {
       
       // saving sequence and static_delivery_beat_code in selected outlet node.
       $selected_nid = $value['nid'];
-      $node = node_load($selected_nid);
+      if(!empty($closet_result)){
+       $node = node_load($selected_nid);
       $node->field_sequence['und'][0]['value'] = $closest_sequence;
       $node->field_static_delivery_beat_code['und'][0]['value'] = $closest_sales_delivery_beat;
-      node_save($node);
+      node_save($node); 
+      }
       $closest_array = array('Nearest Outlet Code' => $nearest_outlet_code, 'Nearest Outlet Name' => $nearest_outlet_name,
         'Nearest Outlet Sequence' => $nearest_outlet_sequence, 'Static Beat Code' => $closest_sales_delivery_beat,
         'Outlet_Sequence' => $closest_sequence);
 
       $show_array[$party_code] = $new_outlet_array[$key] + $closest_array;
       $form_state['close_array'] = $show_array;
+      
+      if(empty($closet_result) && empty($selected_results) ){
+        drupal_set_message('No Closest Outlet Found');
+      }
       $form_state['rebuild'] = TRUE;
     }
   }
