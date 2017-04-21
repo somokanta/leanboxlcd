@@ -221,7 +221,9 @@ function delivery_beat_get_results($sales_day, $van_pl_group = NULL, $area_hook_
   $query->join('field_data_field_van_pl_group', 'fvp', 'fvp.entity_id = fp2.entity_id');
   $query->join('field_data_field_delivery_beats', 'fdb', 'fdb.entity_id = fp2.entity_id');
   $query->join('field_data_field_delivery_per_van', 'fdpv', 'fdpv.entity_id = fp2.entity_id');
+  $query->join('node', 'npp', 'npp.nid = fp2.entity_id');
 
+  $query->condition('npp.uid', $distributor_id, '=');
   $query->condition('fc2.bundle', 'party_pack_master');
   $query->condition('fp2.bundle', 'party_pack_master');
   if (!is_null($van_pl_group)) {
@@ -258,12 +260,14 @@ function delivery_beat_get_results($sales_day, $van_pl_group = NULL, $area_hook_
   $subquery->join('field_data_field_pl_group', 'fp1', 'fp1.entity_id = n.nid');
   $subquery->join('field_data_field_area_hook', 'fa', 'fa.entity_id = n.nid');
   $subquery->join('node', 'na', 'na.nid = fa.field_area_hook_nid');
-  $subquery->join('field_data_field_area_hook_group', 'fag', 'fag.entity_id = na.nid');
+  //$subquery->join('field_data_field_area_hook_group', 'fag', 'fag.entity_id = na.nid');
   
   //Party pack Master
   $subquery->join('field_data_field_channel', 'fc2', 'fc1.field_channel_value = fc2.field_channel_value');
   $subquery->join('field_data_field_pl_group', 'fp2', 'fp2.field_pl_group_value = fp1.field_pl_group_value AND fp2.entity_id=fc2.entity_id');
   $subquery->join('field_data_field_delivery_beats', 'fdb', 'fdb.entity_id = fp2.entity_id');
+  $subquery->join('node', 'npp', 'npp.nid = fp2.entity_id');
+  $subquery->condition('npp.uid', $distributor_id, '=');
   
   $subquery->condition('fsd.field_sales_day_value', $sales_day);
   $subquery->fields('na', array('title'));
