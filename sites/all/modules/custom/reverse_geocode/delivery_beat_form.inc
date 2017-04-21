@@ -111,7 +111,7 @@ function delivery_beat_filters_submit($form, &$form_state) {
   $van_pl_group = $form_state['values']['van_pl_group'] ? $form_state['values']['van_pl_group'] : NULL;
   $area_hook_group = $form_state['values']['area_hook_group'] ? $form_state['values']['area_hook_group'] : NULL;
 
-  $results = delivery_beat_get_results($sales_day);
+  $results = delivery_beat_get_results($sales_day, $van_pl_group, $area_hook_group);
 
   if (empty($results)) {
     $form_state['reverse_geocode']['results'] = array();
