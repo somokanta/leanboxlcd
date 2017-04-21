@@ -260,6 +260,11 @@ function delivery_beat_get_results($sales_day, $van_pl_group = NULL, $area_hook_
   $subquery->join('node', 'na', 'na.nid = fa.field_area_hook_nid');
   $subquery->join('field_data_field_area_hook_group', 'fag', 'fag.entity_id = na.nid');
   
+  //Party pack Master
+  $query->join('field_data_field_channel', 'fc2', 'fc1.field_channel_value = fc2.field_channel_value');
+  $query->join('field_data_field_pl_group', 'fp2', 'fp2.field_pl_group_value = fp1.field_pl_group_value AND fp2.entity_id=fc2.entity_id');
+  $query->join('field_data_field_delivery_beats', 'fdb', 'fdb.entity_id = fp2.entity_id');
+  
   $subquery->condition('fsd.field_sales_day_value', $sales_day);
   $subquery->fields('na', array('title'));
   $subquery->fields('fs', array('field_sequence_value'));
@@ -267,9 +272,9 @@ function delivery_beat_get_results($sales_day, $van_pl_group = NULL, $area_hook_
   $subquery->fields('fp1', array('field_pl_group_value'));
   
   ############ CHANGE 10 to DYNAMIC####################
-  $subquery->where("((fs.field_sequence_value - 1)%10 = 0)");
+  $subquery->where("((fs.field_sequence_value - 1)%(fdb.field_delivery_beats_value) = 0)");
   
-  $query->join($subquery, 'sub', 'sub.field_sequence_value = (FLOOR((fs.field_sequence_value - 1)/field_delivery_beats_value)*field_delivery_beats_value + 1) AND sub.field_channel_value = fc1.field_channel_value AND sub.field_pl_group_value = fp1.field_pl_group_value');
+  $query->join($subquery, 'sub', 'sub.field_sequence_value = (FLOOR((fs.field_sequence_value - 1)/fdb.field_delivery_beats_value)*fdb.field_delivery_beats_value + 1) AND sub.field_channel_value = fc1.field_channel_value AND sub.field_pl_group_value = fp1.field_pl_group_value');
 
   $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
 
