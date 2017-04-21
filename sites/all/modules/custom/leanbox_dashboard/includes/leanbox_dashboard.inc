@@ -139,14 +139,14 @@ function leanbox_dashboard_chart_filter_billsperperson_form($form, &$form_state)
   if (arg(1) == 'bills_per_person') {
     $form['start_date'] = array(
       '#type' => 'date_popup',
-      '#title' => t('Loading Date From'),
+      '#title' => t('Dispatch Date From'),
       '#required' => TRUE,
       '#date_format' => 'Y-m-d',
       '#default_value' => date('Y-m-d'),
     );
     $form['end_date'] = array(
       '#type' => 'date_popup',
-      '#title' => t('Loading Date To'),
+      '#title' => t('Dispatch Date To'),
       '#required' => TRUE,
       '#date_format' => 'Y-m-d',
       '#default_value' => date('Y-m-d'),
@@ -179,14 +179,14 @@ function leanbox_dashboard_chart_filter_billspervan_form($form, &$form_state) {
   if (arg(1) == 'bills_per_van') {
     $form['start_date'] = array(
       '#type' => 'date_popup',
-      '#title' => t('Loading Date From'),
+      '#title' => t('Dispatch Date From'),
       '#required' => TRUE,
       '#date_format' => 'Y-m-d',
       '#default_value' => date('Y-m-d'),
     );
     $form['end_date'] = array(
       '#type' => 'date_popup',
-      '#title' => t('Loading Date To'),
+      '#title' => t('Dispatch Date To'),
       '#required' => TRUE,
       '#date_format' => 'Y-m-d',
       '#default_value' => date('Y-m-d'),
@@ -283,6 +283,46 @@ function leanbox_dashboard_chart_filter_picking_form($form, &$form_state) {
 
   $form['picking'] = array(
     '#markup' => '<a href = "/leanbox-chart-details/picking" target = "_blank"><div id="picking_div"></div></a>',
+  );
+
+  return $form;
+}
+
+/**
+ * 
+ * @param array $form
+ * @param array $form_state
+ * @return string
+ */
+function leanbox_dashboard_chart_filter_picking_bulk_form($form, &$form_state) {
+  $form = array();
+
+  if (arg(1) == 'picking_bulk') {
+    $form['start_date'] = array(
+      '#type' => 'date_popup',
+      '#title' => t('Loading Date From'),
+      '#required' => TRUE,
+      '#date_format' => 'Y-m-d',
+      '#default_value' => date('Y-m-d'),
+    );
+    $form['end_date'] = array(
+      '#type' => 'date_popup',
+      '#title' => t('Loading Date To'),
+      '#required' => TRUE,
+      '#date_format' => 'Y-m-d',
+      '#default_value' => date('Y-m-d'),
+    );
+    $form['submit'] = array(
+      '#type' => 'submit',
+      '#value' => 'Submit',
+      '#prefix' => '<div id ="picking-bulk-submit">',
+      '#suffix' => '</div>',
+      '#attributes' => array('class' => array('picking-bulk-submit')),
+    );
+  }
+
+  $form['picking_bulk'] = array(
+    '#markup' => '<a href = "/leanbox-chart-details/picking_bulk" target = "_blank"><div id="picking_bulk_div"></div></a>',
   );
 
   return $form;
@@ -469,30 +509,33 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     if (is_nan($data2) || empty($data2) || $data2 == FALSE) {
       $data2 = 0;
     }
-    $output[] = array('Group', 'Productivity');
-    $output[] = array('PP', $data1);
-    $output[] = array('NON-PP', $data2);
+    $target_data = leanbox_dashboard_target_value_using_voc_name('productivity target');
+    $output[] = array('Group', 'Productivity', 'Target');
+    $output[] = array('PP', $data1,  (int)$target_data['PP']);
+    $output[] = array('NON-PP', $data2, (int)$target_data['NON-PP']);
     return $output;
   }
   else if ($activity_type == 'picking_productivity') {
 
-    $output[] = array('Group', 'Productivity');
+    $output[] = array('Group', 'Productivity', 'Target');
     $picking_data = get_productivity_data_for_picking($start, $end, $distributor_id);
 
     if (!empty($picking_data)) {
+      $target_data = leanbox_dashboard_target_value_using_voc_name('productivity target');
       foreach ($picking_data['godown'] as $key => $val) {
         foreach ($val as $key1 => $val1) {
           $data = floor($val1['loading_sheet_line'] / $val1['total_tme']);
           if (is_nan($data) || empty($data) || $data == FALSE) {
             $data = 0;
           }
-
-          $output[] = array($key . ' ' . $key1, $data);
+          $label = $key . ' ' . $key1;
+          $label_key = strtolower($label);
+          $output[] = array($label, $data, (int)$target_data[$label_key]);
         }
       }
     }
     else {
-      $output[] = array('No data found', 0);
+      $output[] = array('No data found', 0, 0);
     }
     return $output;
   }
@@ -564,8 +607,97 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
           if ($val1['not_start'] == 0 && $val1['in_prg'] == 0 && $val1['comp'] == 0) {
             continue;
           }
-          $picking_flag = TRUE;
-          $data1[] = array($key . ' ' . $key1, $val1['in_prg'], $val1['not_start'], $val1['comp']);
+
+          if ($key1 == 'loose') {
+            $picking_flag = TRUE;
+
+            $data1[] = array($key . ' ' . $key1, $val1['in_prg'], $val1['not_start'], $val1['comp']);
+          }
+        }
+      }
+      if ($picking_flag == FALSE) {
+        $data1[] = array('No Result Found for Pricelist Group', 0, 0, 0);
+      }
+    }
+    else {
+      $data1[] = array('No Result Found for Pricelist Group', 0, 0, 0);
+    }
+    return $data1;
+  }
+  else if ($activity_type == 'picking_bulk') {
+
+
+    $query = db_select('field_data_field_picking_godown_area_id', 'g');
+    $query->addExpression('DISTINCT(field_picking_godown_area_id_value)', 'uid_count');
+    $query->condition('g.bundle', 'picking');
+    $list = $query->execute()->fetchCol();
+
+    $query = db_select('node', 'n');
+    $query->fields('n', array('nid'));
+    $query->condition('n.type', 'picking');
+    $query->condition('n.uid', $distributor_id);
+    $query->join('field_data_field_picking_godown_area_id', 'pt', 'pt.entity_id = n.nid');
+    $query->fields('pt', array('field_picking_godown_area_id_value'));
+    $query->leftjoin('field_data_field_picking_status', 's', 's.entity_id = n.nid');
+    $query->fields('s', array('field_picking_status_value'));
+    $query->join('field_data_field_picking_picking_type', 'pp', 'pp.entity_id = n.nid');
+    $query->fields('pp', array('field_picking_picking_type_value'));
+    $query->join('field_data_field_picking_loading_date', 'd', 'd.entity_id = n.nid');
+    $query->fields('d', array('field_picking_loading_date_value'));
+    $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+
+    $data1[] = array('PriceList Group', 'In Progress', 'Not Started', 'Completed');
+    if (!empty($res)) {
+      foreach ($list as $data => $data_list) {
+
+        if (!isset($output[$data_list]['loose'])) {
+          $output[$data_list]['loose'] = array(
+            'not_start' => 0,
+            'in_prg' => 0,
+            'comp' => 0
+          );
+        }
+        if (!isset($output[$data_list]['bulk'])) {
+          $output[$data_list]['bulk'] = array(
+            'not_start' => 0,
+            'in_prg' => 0,
+            'comp' => 0
+          );
+        }
+
+        foreach ($res as $key => $val) {
+          $loading_date = strtotime($val['field_picking_loading_date_value']);
+
+
+          if ($loading_date >= $start_date && $loading_date <= $end_date) {
+            if ($val['field_picking_godown_area_id_value'] == $data_list) {
+
+              $type = (strtolower($val['field_picking_picking_type_value']));
+              if (empty($val['field_picking_status_value'])) {
+                $output[$data_list][$type]['not_start'] += 1;
+              }
+              else if ($val['field_picking_status_value'] == 1) {
+                $output[$data_list][$type]['in_prg'] += 1;
+              }
+              else {
+                $output[$data_list][$type]['comp'] += 1;
+              }
+            }
+          }
+        }
+      }
+      $picking_flag = FALSE;
+      foreach ($output as $key => $val) {
+        foreach ($val as $key1 => $val1) {
+          if ($val1['not_start'] == 0 && $val1['in_prg'] == 0 && $val1['comp'] == 0) {
+            continue;
+          }
+
+          if ($key1 == 'bulk') {
+            $picking_flag = TRUE;
+
+            $data1[] = array($key . ' ' . $key1, $val1['in_prg'], $val1['not_start'], $val1['comp']);
+          }
         }
       }
       if ($picking_flag == FALSE) {
@@ -672,7 +804,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
             continue;
           }
           foreach ($val as $key1 => $val1) {
-            $data = ($val1 / $total_bill_value) * 100;
+            $data = (($total_bill_value - $val1) / $total_bill_value) * 100;
             $output[] = array($key, round($data, 2));
           }
         }
@@ -713,9 +845,12 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
         $supervisor = $val['field_dispatch_supervisor_value'];
         $team_count = $val['Team_count'];
         $bill_value = $val['bill_value'];
-        $count_per_person = ($bill_value / $team_count);
+        $total_bill_value += $bill_value;
+        $total_team_count += $team_count;
+        $count_per_person = round($bill_value / $team_count);
         $data1[] = array($supervisor, $count_per_person);
       }
+      $data1[] = array('Total', round($total_bill_value / $total_team_count));
     }
     else {
       $data1[] = array('No Result Found for Dispatch', 0);
@@ -748,9 +883,12 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
         $supervisor = $val['field_dispatch_supervisor_value'];
         $trip_count = $val['trip_count'];
         $bill_count_value = $val['bill_count_value'];
-        $count_per_van = ($bill_count_value / $trip_count);
+        $count_per_van = round($bill_count_value / $trip_count);
+        $total_bill_value += $bill_count_value;
+        $total_trip_count += $trip_count;
         $data1[] = array($supervisor, $count_per_van);
       }
+      $data1[] = array('Total', round($total_bill_value / $total_trip_count));
     }
     else {
       $data1[] = array('No Result Found for Dispatch', 0);
@@ -760,7 +898,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
 }
 
 function leanbox_dashboard_gauge_chart_query_details($type, $start_date = '', $end_date = '') {
-  require_once drupal_get_path('module', 'change_feeds_import') . '/form/upload_billing_data.inc';
+  // require_once drupal_get_path('module', 'change_feeds_import') . '/form/upload_billing_data.inc';
 
   $output1 = array();
   $output = 0;

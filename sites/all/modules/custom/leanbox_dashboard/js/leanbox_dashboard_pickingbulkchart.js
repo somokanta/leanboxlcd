@@ -6,17 +6,17 @@
 
 (function ($) {
 
-	Drupal.behaviors.leanbox_dashboard_picking = {
+	Drupal.behaviors.leanbox_dashboard_picking_bulk = {
 		attach: function (context, settings) {
 
-			var picking_data = Drupal.settings.leanbox_dashboard.picking;
+			var picking_data = Drupal.settings.leanbox_dashboard.picking_bulk;
 			var area_definition = Drupal.settings.leanbox_dashboard.area_definition;
 			google.charts.load("current", {packages: ['gauge', 'corechart', 'bar']});
 			google.charts.setOnLoadCallback(function () {
 				drawpickingChart(picking_data, area_definition);
 			});
 
-			$(".picking-submit").click(function (e) {
+			$(".picking-bulk-submit").click(function (e) {
 
 				e.preventDefault();
 				var start_date = $(this).parent().prev().prev().find("input[name='start_date[date]']").val();
@@ -26,7 +26,7 @@
 						type: "POST",
 						cache: false, //for Chrome and IE8
 						url: "/chart-daterange-filter",
-						data: {start_date: start_date, end_date: end_date, activity_type: 'picking'},
+						data: {start_date: start_date, end_date: end_date, activity_type: 'picking_bulk'},
 						success: function (response) {
 
 							var area_definition = Drupal.settings.leanbox_dashboard.area_definition;
@@ -90,7 +90,7 @@
 						title: 'Pricelist Group'
 					},
 				};
-				var chart = new google.visualization.ColumnChart(document.getElementById('picking_div'));
+				var chart = new google.visualization.ColumnChart(document.getElementById('picking_bulk_div'));
 				chart.draw(view, options);
 			}
 		}

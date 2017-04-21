@@ -10,7 +10,7 @@
 		attach: function (context) {
 			setTimeout(function () {
 				window.location.reload(1);
-			}, 90000); // every 5 minute
+			}, 600000); // every 10 minute
 		}
 	};
 })(jQuery);

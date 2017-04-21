@@ -47,7 +47,10 @@
 						sourceColumn: 1,
 						type: "string",
 						role: "annotation"},
-					
+						2, {calc: "stringify",
+						sourceColumn: 2,
+						type: "string",
+						role: "annotation"},
 				]);
 				var options = {
 					width: area_definition.width,
@@ -69,7 +72,8 @@
 					},
 				};
 				var chart = new google.visualization.ColumnChart(document.getElementById("picking_productivity_div"));
-				chart.draw(view, options);
+			//	chart.draw(view, options);
+			chart.draw(data, google.charts.Bar.convertOptions(options));
 			}
 		}
 	};
