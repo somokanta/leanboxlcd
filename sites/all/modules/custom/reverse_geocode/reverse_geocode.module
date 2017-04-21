@@ -90,10 +90,10 @@ function reverse_geocode_menu() {
   );
   
   $items['delivery-beat'] = array(
-    'title' => 'delivery_beat_create',
+    'title' => 'Create Static delivery beats',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('delivery_beat_create_form'),
-    'access arguments' => array('administer map settings'),
+    'access arguments' => array('address confirmation'),
     'file' => 'delivery_beat_form.inc'
   );
 

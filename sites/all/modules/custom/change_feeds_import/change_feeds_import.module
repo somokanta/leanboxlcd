@@ -1179,15 +1179,15 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
     $sales_day = strtolower($entity->field_sales_day[LANGUAGE_NONE][0]['value']);
     $delivery_day = strtolower($entity->field_delivery_day[LANGUAGE_NONE][0]['value']);
     $sales_day_tid = leanbox_check_taxonomy_exists_by_name($sales_day, 'Outlet days');
-    $delivery_day_tid = leanbox_check_taxonomy_exists_by_name($delivery_day, 'Outlet days');
+    //$delivery_day_tid = leanbox_check_taxonomy_exists_by_name($delivery_day, 'Outlet days');
     if (empty($sales_day_tid)) {
       drupal_set_message("$sales_day does not exist in Sales Day", 'error');
       $entity->feeds_item->skip = TRUE;
     }
-    if (empty($delivery_day_tid)) {
-      drupal_set_message("$delivery_day does not exist in Delivery Day", 'error');
-      $entity->feeds_item->skip = TRUE;
-    }
+//    if (empty($delivery_day_tid)) {
+//      drupal_set_message("$delivery_day does not exist in Delivery Day", 'error');
+//      $entity->feeds_item->skip = TRUE;
+//    }
     $hul_code = $entity->field_hul_code[LANGUAGE_NONE][0]['value'];
     $channel = $entity->field_channel[LANGUAGE_NONE][0]['value'];
     $pl_group = $entity->field_pl_group[LANGUAGE_NONE][0]['value'];
@@ -1204,6 +1204,20 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
     }
     else if (empty($res3)) {
       drupal_set_message("$pl_group does not exist in PL Group Master", 'error');
+      $entity->feeds_item->skip = TRUE;
+    }
+  }
+  if ($entity->feeds_item->id == 'sales_delivery_day_importer') {
+    $sales_day = strtolower($entity->title);
+    $delivery_day = strtolower($entity->field_sales_delivery_day[LANGUAGE_NONE][0]['value']);
+    $sales_day_tid = leanbox_check_taxonomy_exists_by_name($sales_day, 'Outlet days');
+    $delivery_day_tid = leanbox_check_taxonomy_exists_by_name($delivery_day, 'Outlet days');
+    if (empty($sales_day_tid)) {
+      drupal_set_message("$sales_day does not exist in Sales Day", 'error');
+      $entity->feeds_item->skip = TRUE;
+    }
+    if (empty($delivery_day_tid)) {
+      drupal_set_message("$delivery_day does not exist in Delivery Day", 'error');
       $entity->feeds_item->skip = TRUE;
     }
   }
@@ -1321,7 +1335,18 @@ function change_feeds_import_user_presave(&$edit, $account, $category) {
   }
 }
 
+function change_feeds_import_prevent_import_validate($form, $form_state) {
+  if (!isset($form_state['values']['feeds']["FeedsFileFetcher"]['file'])) {
+    form_set_error('upload', t('No new file uploaded'));
+    //return false;
+  }
+}
+
 function change_feeds_import_form_alter(&$form, &$form_state, $form_id) {
+  if ($form_id == 'feeds_import_form') {
+    unset($form['feeds']["FeedsFileFetcher"]['upload']['#file_info']);
+    $form['#validate'][] = 'change_feeds_import_prevent_import_validate';
+  }
   if ($form_id == 'user_register_form' || $form_id == 'user_profile_form') {
     $form['#validate'][] = 'registration_validate';
     return $form;
