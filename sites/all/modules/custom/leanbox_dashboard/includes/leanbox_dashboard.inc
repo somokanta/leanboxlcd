@@ -510,7 +510,6 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
       $data2 = 0;
     }
     $target_data = leanbox_dashboard_target_value_using_voc_name('productivity target');
-    dpm($target_data);
     $output[] = array('Group', 'Productivity', 'Target');
     $output[] = array('PP', $data1,  (int)$target_data['PP']);
     $output[] = array('NON-PP', $data2, (int)$target_data['NON-PP']);
@@ -531,8 +530,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
           }
           $label = $key . ' ' . $key1;
           $label_key = strtolower($label);
-          dpm($label_key, '$label_key');
-          $output[] = array($label, $data, $target_data[$label_key]);
+          $output[] = array($label, $data, (int)$target_data[$label_key]);
         }
       }
     }
