@@ -510,9 +510,9 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     if (is_nan($data2) || empty($data2) || $data2 == FALSE) {
       $data2 = 0;
     }
-    $output[] = array('Group', 'Productivity');
-    $output[] = array('PP', $data1);
-    $output[] = array('NON-PP', $data2);
+    $output[] = array('Group', 'Productivity', 'Target');
+    $output[] = array('PP', $data1, 90);
+    $output[] = array('NON-PP', $data2, 120);
     return $output;
   }
   else if ($activity_type == 'picking_productivity') {
@@ -802,7 +802,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
             continue;
           }
           foreach ($val as $key1 => $val1) {
-            $data = ($val1 / $total_bill_value) * 100;
+            $data = (($total_bill_value - $val1) / $total_bill_value) * 100;
             $output[] = array($key, round($data, 2));
           }
         }
@@ -845,10 +845,10 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
         $bill_value = $val['bill_value'];
         $total_bill_value += $bill_value;
         $total_team_count += $team_count;
-        $count_per_person = ($bill_value / $team_count);
+        $count_per_person = round($bill_value / $team_count);
         $data1[] = array($supervisor, $count_per_person);
       }
-      $data1[] = array('Total', ($total_bill_value / $total_team_count));
+      $data1[] = array('Total', round($total_bill_value / $total_team_count));
     }
     else {
       $data1[] = array('No Result Found for Dispatch', 0);
@@ -881,12 +881,12 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
         $supervisor = $val['field_dispatch_supervisor_value'];
         $trip_count = $val['trip_count'];
         $bill_count_value = $val['bill_count_value'];
-        $count_per_van = ($bill_count_value / $trip_count);
+        $count_per_van = round($bill_count_value / $trip_count);
         $total_bill_value += $bill_count_value;
         $total_trip_count += $trip_count;
         $data1[] = array($supervisor, $count_per_van);
       }
-      $data1[] = array('Total', ($total_bill_value / $total_trip_count));
+      $data1[] = array('Total', round($total_bill_value / $total_trip_count));
     }
     else {
       $data1[] = array('No Result Found for Dispatch', 0);
