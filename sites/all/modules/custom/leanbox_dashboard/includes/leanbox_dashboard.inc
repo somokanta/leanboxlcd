@@ -511,13 +511,13 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     }
     $target_data = leanbox_dashboard_target_value_using_voc_name('productivity target');
     $output[] = array('Group', 'Productivity', 'Target');
-    $output[] = array('PP', $data1, $target_data['PP']);
-    $output[] = array('NON-PP', $data2, $target_data['NON-PP']);
+    $output[] = array('PP', $data1, 120);
+    $output[] = array('NON-PP', $data2, 90);
     return $output;
   }
   else if ($activity_type == 'picking_productivity') {
 
-    $output[] = array('Group', 'Productivity');
+    $output[] = array('Group', 'Productivity', 'Target');
     $picking_data = get_productivity_data_for_picking($start, $end, $distributor_id);
 
     if (!empty($picking_data)) {

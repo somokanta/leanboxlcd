@@ -46,6 +46,10 @@
 						sourceColumn: 1,
 						type: "string",
 						role: "annotation"},
+						2, {calc: "stringify",
+						sourceColumn: 2,
+						type: "string",
+						role: "annotation"},
 				]);
 				var options = {
 					width: area_definition.width,
