@@ -537,7 +537,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
       }
     }
     else {
-      $output[] = array('No data found', 0);
+      $output[] = array('No data found', 0, 0);
     }
     return $output;
   }
