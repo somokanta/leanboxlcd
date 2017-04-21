@@ -529,7 +529,8 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
             $data = 0;
           }
           $label = $key . ' ' . $key1;
-          $output[] = array($label, $data, $target_data[$label]);
+          $label_key = strtolower($label);
+          $output[] = array($label, $data, $target_data[$label_key]);
         }
       }
     }
