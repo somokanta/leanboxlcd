@@ -380,6 +380,7 @@ function leanbox_dashboard_block_view($delta = '') {
               'data' => 'https://www.gstatic.com/charts/loader.js'
             ),
             drupal_get_path('module', 'leanbox_dashboard') . '/js/leanbox_dashboard_partypackingproductivitychart.js',
+          //  drupal_get_path('module', 'leanbox_dashboard') . '/js/leanbox.js',
             array(
               'data' => array('leanbox_dashboard' => array('party_packing_productivity' => $data, 'area_definition' => $area_definition)),
               'type' => 'setting'

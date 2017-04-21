@@ -16,7 +16,7 @@
 			});
 
 			$(".party-packing-productivity-submit").click(function (e) {
-
+alert('hi');
 				e.preventDefault();
 			  var start_date = $(this).parent().prev().prev().find("input[name='start_date[date]']").val();
 				var end_date = $(this).parent().prev().find("input[name='end_date[date]']").val();
@@ -69,7 +69,8 @@
 					},
 				};
 				var chart = new google.visualization.ColumnChart(document.getElementById("party_packing_productivity_div"));
-				chart.draw(view, options);
+				//chart.draw(view, options);
+				chart.draw(data, google.charts.Bar.convertOptions(options));
 			}
 		}
 	};
