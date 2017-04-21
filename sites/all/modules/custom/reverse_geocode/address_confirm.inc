@@ -185,6 +185,12 @@ function area_locations_form($form, &$form_state, $type) {
       "#empty_option" => t('- Select -'),
     );
   }
+  else{
+    $form['dummy'] = array(
+      "#markup" => '<div class="clearance"></div>',
+        //'#required' => TRUE,
+    );
+  }
 
   $form['filter'] = array(
     '#type' => 'submit',
