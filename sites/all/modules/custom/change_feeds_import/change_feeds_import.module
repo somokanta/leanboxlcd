@@ -973,7 +973,9 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
     }
   }
 
-  if ($entity->feeds_item->id == 'outlet_sequence') {
+  if ($entity->feeds_item->id == 'outlet_sequence' || $entity->feeds_item->id == 'user_defined_outlet_sequence') {
+    
+    $import_id = $entity->feeds_item->id;
     $title = $entity->title;
     $res = check_node_title_exists($entity->title, 'outlet_master');
     if (empty($res)) {
@@ -984,6 +986,9 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
       $query= db_select('node', 'n');
       $query->fields('n', array('nid'));
       $query->addTag('node_uid');
+      if($import_id == 'user_defined_outlet_sequence'){
+      $query->join('field_data_field_sequence', 'fs', 'fs.entity_id = n.nid');
+      }
       $query->join('field_data_field_hul_code', 'h', 'h.entity_id = n.nid');
       $query->join('field_data_field_area_hook_group_hul', 'gh', 'gh.entity_id = n.nid');
       $query->join('node', 'n1');

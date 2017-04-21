@@ -306,11 +306,11 @@ function area_wise_filter_validate(&$form, &$form_state) {
   $type = $form_state['type'];
   if ($type == "area-view") {
     $area_status = 1;
-  }  $data = "";
-  if(!empty($sales_day) && !empty($van_pl_group) && !empty($area_hook_group)){
-   $data = reverse_geocode_get_data_area_code_wise($sales_day, $van_pl_group, $area_hook_group, $area_status, $type);
-  }
+  } $data = "";
 
+  if (!empty($sales_day) && !empty($van_pl_group) && !empty($area_hook_group)) {
+    $data = reverse_geocode_get_data_area_code_wise($sales_day, $van_pl_group, $area_hook_group, $area_status, $type);
+  }
   if (empty($data)) {
     $message = "No Results Found";
     unset($form_state['complete form']['list_form_items']);
@@ -368,7 +368,7 @@ function area_wise_filters_submit(&$form, &$form_state) {
     }
 
     if ($type == "area-view") {
-      $no = $sequence;
+      $no = floatval($sequence);
     }
     else {
       $no = $key + 1;
@@ -398,7 +398,6 @@ function reverse_geocode_get_data_area_code_wise($sales_day, $van_pl_group, $are
     $query->join('field_data_field_party_code', 'fpc', 'fpc.entity_id = n.nid');
     $query->join('field_data_field_party_name', 'fpn', 'fpn.entity_id = n.nid');
     $query->leftjoin('field_data_field_area_hook_group_hul', 'fagh', 'fagh.entity_id = n.nid');
-
     if ($type == "area-checkbox") {
       if (!is_null($area_status)) {
         if ($area_status === '0' || $area_status === '1') {
@@ -413,9 +412,26 @@ function reverse_geocode_get_data_area_code_wise($sales_day, $van_pl_group, $are
     else {
       $query->condition('fagh.field_area_hook_group_hul_value', 1, '=');
       $query->fields('fagh', array('field_area_hook_group_hul_value'));
-      $query->join('field_data_field_sequence', 'fsq', 'fsq.entity_id = n.nid');
-      $query->fields('fsq', array('field_sequence_value'));
-      $query->orderBy('fsq.field_sequence_value', 'asc');
+
+      if ($type == "revised-sequence") {
+        
+        $query->leftjoin('field_data_field_revised_sequence_status', 'fss', 'fss.entity_id = n.nid');
+        $query->fields('fss', array('field_revised_sequence_status_value'));
+        $query->join('field_data_field_revised_sequence', 'fsq', 'fsq.entity_id = n.nid');
+        $query->fields('fsq', array('field_revised_sequence_value'));
+        $query->orderBy('fsq.field_revised_sequence_value', 'asc');
+        if (!is_null($area_status)) {
+          if ($area_status === '0' || $area_status === '1') {
+            $query->condition('fss.field_revised_sequence_status_value', $area_status, '=');
+            $query->fields('fss', array('field_revised_sequence_status_value'));
+          }
+        }
+      }
+      else {
+        $query->join('field_data_field_sequence', 'fsq', 'fsq.entity_id = n.nid');
+        $query->fields('fsq', array('field_sequence_value'));
+        $query->orderBy('fsq.field_sequence_value', 'asc');
+      }
     }
 
     $query->join('field_data_field_hul_code', 'hc', 'hc.entity_id = n.nid');
