@@ -16,7 +16,6 @@
 			});
 
 			$(".party-packing-productivity-submit").click(function (e) {
-alert('hi');
 				e.preventDefault();
 			  var start_date = $(this).parent().prev().prev().find("input[name='start_date[date]']").val();
 				var end_date = $(this).parent().prev().find("input[name='end_date[date]']").val();
@@ -45,10 +44,6 @@ alert('hi');
 				view.setColumns([0,
 					1, {calc: "stringify",
 						sourceColumn: 1,
-						type: "string",
-						role: "annotation"},
-					2, {calc: "stringify",
-						sourceColumn: 2,
 						type: "string",
 						role: "annotation"},
 				]);

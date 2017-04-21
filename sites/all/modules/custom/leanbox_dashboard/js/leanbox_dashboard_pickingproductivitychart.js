@@ -69,7 +69,8 @@
 					},
 				};
 				var chart = new google.visualization.ColumnChart(document.getElementById("picking_productivity_div"));
-				chart.draw(view, options);
+			//	chart.draw(view, options);
+			chart.draw(data, google.charts.Bar.convertOptions(options));
 			}
 		}
 	};

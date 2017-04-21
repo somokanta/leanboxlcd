@@ -288,7 +288,6 @@ function leanbox_dashboard_chart_filter_picking_form($form, &$form_state) {
   return $form;
 }
 
-
 /**
  * 
  * @param array $form
@@ -510,9 +509,10 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     if (is_nan($data2) || empty($data2) || $data2 == FALSE) {
       $data2 = 0;
     }
+    $target_data = leanbox_dashboard_target_value_using_voc_name('productivity target');
     $output[] = array('Group', 'Productivity', 'Target');
-    $output[] = array('PP', $data1, 90);
-    $output[] = array('NON-PP', $data2, 120);
+    $output[] = array('PP', $data1, $target_data['PP']);
+    $output[] = array('NON-PP', $data2, $target_data['NON-PP']);
     return $output;
   }
   else if ($activity_type == 'picking_productivity') {
@@ -521,14 +521,15 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     $picking_data = get_productivity_data_for_picking($start, $end, $distributor_id);
 
     if (!empty($picking_data)) {
+      $target_data = leanbox_dashboard_target_value_using_voc_name('productivity target');
       foreach ($picking_data['godown'] as $key => $val) {
         foreach ($val as $key1 => $val1) {
           $data = floor($val1['loading_sheet_line'] / $val1['total_tme']);
           if (is_nan($data) || empty($data) || $data == FALSE) {
             $data = 0;
           }
-
-          $output[] = array($key . ' ' . $key1, $data);
+          $label = $key . ' ' . $key1;
+          $output[] = array($label, $data, $target_data[$label]);
         }
       }
     }
@@ -622,7 +623,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     }
     return $data1;
   }
-    else if ($activity_type == 'picking_bulk') {
+  else if ($activity_type == 'picking_bulk') {
 
 
     $query = db_select('field_data_field_picking_godown_area_id', 'g');
@@ -896,7 +897,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
 }
 
 function leanbox_dashboard_gauge_chart_query_details($type, $start_date = '', $end_date = '') {
-  require_once drupal_get_path('module', 'change_feeds_import') . '/form/upload_billing_data.inc';
+  // require_once drupal_get_path('module', 'change_feeds_import') . '/form/upload_billing_data.inc';
 
   $output1 = array();
   $output = 0;
