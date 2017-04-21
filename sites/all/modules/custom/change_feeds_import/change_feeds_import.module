@@ -1203,11 +1203,11 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
     }
   }
   if ($entity->feeds_item->id == 'sales_delivery_day_master') {
-
+dpm('sdsdsdsd');
     $sales_day = strtolower($entity->title);
     $delivery_day = strtolower($entity->field_sales_delivery_day[LANGUAGE_NONE][0]['value']);
-    $sales_day_tid = leanbox_check_taxonomy_exists_by_name($sales_day, 'Outlet days');
-    $delivery_day_tid = leanbox_check_taxonomy_exists_by_name($delivery_day, 'Outlet days');
+    dpm($sales_day_tid = leanbox_check_taxonomy_exists_by_name($sales_day, 'Outlet days'));
+    dpm($delivery_day_tid = leanbox_check_taxonomy_exists_by_name($delivery_day, 'Outlet days'));
     if (empty($sales_day_tid)) {
       drupal_set_message("$sales_day does not exist in Sales Day", 'error');
       $entity->feeds_item->skip = TRUE;

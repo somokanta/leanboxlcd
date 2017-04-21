@@ -261,9 +261,9 @@ function delivery_beat_get_results($sales_day, $van_pl_group = NULL, $area_hook_
   $subquery->join('field_data_field_area_hook_group', 'fag', 'fag.entity_id = na.nid');
   
   //Party pack Master
-  $query->join('field_data_field_channel', 'fc2', 'fc1.field_channel_value = fc2.field_channel_value');
-  $query->join('field_data_field_pl_group', 'fp2', 'fp2.field_pl_group_value = fp1.field_pl_group_value AND fp2.entity_id=fc2.entity_id');
-  $query->join('field_data_field_delivery_beats', 'fdb', 'fdb.entity_id = fp2.entity_id');
+  $subquery->join('field_data_field_channel', 'fc2', 'fc1.field_channel_value = fc2.field_channel_value');
+  $subquery->join('field_data_field_pl_group', 'fp2', 'fp2.field_pl_group_value = fp1.field_pl_group_value AND fp2.entity_id=fc2.entity_id');
+  $subquery->join('field_data_field_delivery_beats', 'fdb', 'fdb.entity_id = fp2.entity_id');
   
   $subquery->condition('fsd.field_sales_day_value', $sales_day);
   $subquery->fields('na', array('title'));
