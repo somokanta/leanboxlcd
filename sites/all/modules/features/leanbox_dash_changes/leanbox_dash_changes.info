@@ -1,0 +1,11 @@
+name = Leanbox dash changes
+core = 7.x
+package = Features
+version = 7.x-1.0
+dependencies[] = features
+dependencies[] = number
+dependencies[] = taxonomy
+features[features_api][] = api:2
+features[field_base][] = field_target
+features[field_instance][] = taxonomy_term-productivity_target-field_target
+features[taxonomy][] = productivity_target
