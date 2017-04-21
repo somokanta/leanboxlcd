@@ -3,6 +3,7 @@
 function outlet_addition_form($form, &$form_state) {
   $form['#prefix'] = '<div id="incremental-outlet">';
   $form['#suffix'] = '</div>';
+  drupal_add_js(drupal_get_path('module', 'reverse_geocode') . '/js/selectable-row-in-outlet.js', 'file');
 
   global $user;
   $user_id = $user->uid;
@@ -26,7 +27,7 @@ function outlet_addition_form($form, &$form_state) {
   }
 
   $form_state['incremental_outlet']['options'] = $options;
-
+  $class = array('selectable-row', 'table-radio');
   $form['list_form_items'] = array(
     '#type' => 'tableselect',
     '#header' => $header_array,
@@ -35,7 +36,7 @@ function outlet_addition_form($form, &$form_state) {
     '#suffix' => '</div>',
     '#empty' => t('No forms available.'),
     '#multiple' => FALSE,
-    '#attributes' => array('class' => 'abc'),
+    '#attributes' => array('class' => $class),
     '#default_value' => NULL,
   );
 

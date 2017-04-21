@@ -973,7 +973,9 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
     }
   }
 
-  if ($entity->feeds_item->id == 'outlet_sequence') {
+  if ($entity->feeds_item->id == 'outlet_sequence' || $entity->feeds_item->id == 'user_defined_outlet_sequence') {
+    
+    $import_id = $entity->feeds_item->id;
     $title = $entity->title;
     $res = check_node_title_exists($entity->title, 'outlet_master');
     if (empty($res)) {
@@ -984,6 +986,9 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
       $query= db_select('node', 'n');
       $query->fields('n', array('nid'));
       $query->addTag('node_uid');
+      if($import_id == 'user_defined_outlet_sequence'){
+      $query->join('field_data_field_sequence', 'fs', 'fs.entity_id = n.nid');
+      }
       $query->join('field_data_field_hul_code', 'h', 'h.entity_id = n.nid');
       $query->join('field_data_field_area_hook_group_hul', 'gh', 'gh.entity_id = n.nid');
       $query->join('node', 'n1');
@@ -1202,7 +1207,7 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
       $entity->feeds_item->skip = TRUE;
     }
   }
-  if ($entity->feeds_item->id == 'sales_delivery_day_master') {
+  if ($entity->feeds_item->id == 'sales_delivery_day_importer') {
     $sales_day = strtolower($entity->title);
     $delivery_day = strtolower($entity->field_sales_delivery_day[LANGUAGE_NONE][0]['value']);
     $sales_day_tid = leanbox_check_taxonomy_exists_by_name($sales_day, 'Outlet days');
@@ -1330,7 +1335,18 @@ function change_feeds_import_user_presave(&$edit, $account, $category) {
   }
 }
 
+function change_feeds_import_prevent_import_validate($form, $form_state) {
+  if (!isset($form_state['values']['feeds']["FeedsFileFetcher"]['file'])) {
+    form_set_error('upload', t('No new file uploaded'));
+    //return false;
+  }
+}
+
 function change_feeds_import_form_alter(&$form, &$form_state, $form_id) {
+  if ($form_id == 'feeds_import_form') {
+    unset($form['feeds']["FeedsFileFetcher"]['upload']['#file_info']);
+    $form['#validate'][] = 'change_feeds_import_prevent_import_validate';
+  }
   if ($form_id == 'user_register_form' || $form_id == 'user_profile_form') {
     $form['#validate'][] = 'registration_validate';
     return $form;
