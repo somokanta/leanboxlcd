@@ -35,7 +35,7 @@ function revised_sequence_confirm_form($form, &$form_state) {
   $form['#suffix'] = '</div>';
 
 
-  $header_array = array('sr_no' => 'Sequence No', 'party_code' => 'Party Code',
+  $header_array = array('sr_no' => 'Seq. No', 'party_code' => 'Party Code',
     'party_name' => 'Party Name', 'rev_seq_status' => 'Status',
     'details' => ''
   );
@@ -262,7 +262,7 @@ function rev_seq_wise_filters_submit(&$form, &$form_state) {
       'party_name' => $party_name,
       '#attributes' => array('data-lat' => $lat, 'data-lng' => $long, 'data-sr' => $no),
       'rev_seq_status' => $rev_seq_status,
-      'details' => array('data' => array('#markup' => '<a class="cell-details" style="display:none;">Show on Map</a>' . $marker_tooltip)),
+      'details' => array('data' => array('#markup' => '<a class="cell-details" style="display:none;">On Map</a>' . $marker_tooltip)),
     );
   }
   $form_state['reverse_geocode']['rows'] = $options;

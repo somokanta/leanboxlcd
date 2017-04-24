@@ -392,7 +392,7 @@ function area_wise_filters_submit(&$form, &$form_state) {
       'party_name' => array('data' => '<div class="party-name-data">' . $party_name . '</div>', 'class' => 'party-name-cell'),
       '#attributes' => array('data-lat' => $lat, 'data-lng' => $long, 'data-sr' => $no),
       'area_group_status' => array('data' => $hul_status, 'class' => 'status-cell'),
-      'details' => array('data' => array('#markup' => '<a class="cell-details" style="display:none;">Show on Map</a>' . $marker_tooltip), 'class' => 'details-cell'),
+      'details' => array('data' => array('#markup' => '<a class="cell-details" style="display:none;">On Map</a>' . $marker_tooltip), 'class' => 'details-cell'),
     );
   }
   $form_state['reverse_geocode']['rows'] = $options;
