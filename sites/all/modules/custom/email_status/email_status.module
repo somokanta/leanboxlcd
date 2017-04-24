@@ -375,9 +375,9 @@ function send_email_pl_group_emailer($distributor_name) {
   drupal_mail('email_status', 'pl_group_status', $mail_to, LANGUAGE_NONE, $params, $from);
 }
 
-function send_email_productivity_emailer($todays_date_date, $distributor_name) {
+function send_email_productivity_emailer($todays_date_date, $distributor_name, $end_date = FALSE, $chart = FALSE) {
 
-  $party_packing = get_productivity_data_for_party_packing($todays_date_date);
+  $party_packing = get_productivity_data_for_party_packing($todays_date_date, $end_date);
   $party_pack_superwise_html = "<h3>Party Packing Supervisorwise (status:Completed)</h3><table border='1' cellpadding='5' cellspacing='0'  style='color:#000; font-size: 13px;font-family: arial'>"
       . "<th>Party Packing Type</th>"
       . "<th>Party Packing Supervisor</th>"
@@ -674,7 +674,12 @@ function send_email_productivity_emailer($todays_date_date, $distributor_name) {
 // $mail_to = "hplord12@gmail.com";
 //  $from = "MIS.HELPDESK@leanbox.in";
   $from = variable_get('from_email');
-  drupal_mail('email_status', 'productivity_status', $mail_to, LANGUAGE_NONE, $params, $from);
+  if ($chart == TRUE) {
+    return $party_pack_type_wsie_html . "<br>" . $party_pack_superwise_html;
+  }
+  else {
+    drupal_mail('email_status', 'productivity_status', $mail_to, LANGUAGE_NONE, $params, $from);
+  }
 }
 
 function get_todays_party_packing_created_data($loading_date) {

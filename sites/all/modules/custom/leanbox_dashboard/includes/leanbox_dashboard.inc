@@ -513,12 +513,16 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     $output[] = array('Group', 'Productivity', 'Target');
     $output[] = array('PP', $data1,  (int)$target_data['PP']);
     $output[] = array('NON-PP', $data2, (int)$target_data['NON-PP']);
-    return $output;
+    
+    $pp_table = send_email_productivity_emailer($start, $distributor_name, $end, TRUE);
+    $output1['output'] = $output;
+    $output1['table'] = $pp_table;
+    return $output1;
   }
   else if ($activity_type == 'picking_productivity') {
 
     $output[] = array('Group', 'Productivity', 'Target');
-    $picking_data = get_productivity_data_for_picking($start, $end, $distributor_id);
+    $picking_data = get_productivity_data_for_picking($start_date, $end_date, $distributor_id);
 
     if (!empty($picking_data)) {
       $target_data = leanbox_dashboard_target_value_using_voc_name('productivity target');
@@ -793,7 +797,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
           }
 
           if ($key1 == $val2['field_delivery_status_tid']) {
-            $data[$val1]['data'] += $val2['field_sales_return_amt_value'];
+            $data[$val1]['data'] += ($val2['field_bill_value_value'] - $val2['field_sales_return_amt_value']);
           }
         }
       }
@@ -804,8 +808,8 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
             continue;
           }
           foreach ($val as $key1 => $val1) {
-            $data = (($total_bill_value - $val1) / $total_bill_value) * 100;
-            $output[] = array($key, round($data, 2));
+            $data1 = (($val1) / $total_bill_value) * 100;
+            $output[] = array($key, round($data1, 2));
           }
         }
       }
