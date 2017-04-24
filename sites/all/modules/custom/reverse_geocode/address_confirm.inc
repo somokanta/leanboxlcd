@@ -43,28 +43,45 @@ function sales_day_callback($form, &$form_state) {
 }
 
 function reverse_geocode_get_data_from_sales_day($sales_day, $distributor_id) {
+//  $query = db_select('node', 'n');
+//  $query->condition('n.type', 'outlet_master');
+//  $query->condition('n.uid', $distributor_id, '=');
+//  if (!is_null($sales_day)) {
+//    $query->join('field_data_field_sales_day', 'sd', 'sd.entity_id = n.nid');
+//    $query->condition('sd.field_sales_day_value', $sales_day, '=');
+//  }
+//  $query->join('field_data_field_channel', 'ch', 'ch.entity_id = n.nid');
+//  $query->condition('ch.bundle', 'outlet_master');
+//  $query->join('field_data_field_pl_group', 'pl', 'pl.entity_id = n.nid');
+//  $query->condition('pl.bundle', 'outlet_master');
+//  $query->join('field_data_field_channel', 'ppmch', 'ch.field_channel_value = ppmch.field_channel_value');
+//  $query->condition('ppmch.bundle', 'party_pack_master');
+//  $query->join('node', 'ppn', 'ppn.nid = ppmch.entity_id');
+//  $query->condition('ppn.uid', $distributor_id, '=');
+//  $query->join('field_data_field_pl_group', 'ppmpl', 'pl.field_pl_group_value = ppmpl.field_pl_group_value and ppmch.entity_id = ppmpl.entity_id');
+//  $query->condition('ppmch.bundle', 'party_pack_master');
+//  $query->join('field_data_field_van_pl_group', 'ppplg', 'ppmpl.entity_id = ppplg.entity_id');
+//  $query->fields('ppplg', array('field_van_pl_group_value'));
+//  $res = $query->execute()->fetchallkeyed(0, 0);
+//
+//  return $res;
+  
+  
   $query = db_select('node', 'n');
-  $query->condition('n.type', 'outlet_master');
-  $query->condition('n.uid', $distributor_id, '=');
-  if (!is_null($sales_day)) {
-    $query->join('field_data_field_sales_day', 'sd', 'sd.entity_id = n.nid');
-    $query->condition('sd.field_sales_day_value', $sales_day, '=');
-  }
-  $query->join('field_data_field_channel', 'ch', 'ch.entity_id = n.nid');
-  $query->condition('ch.bundle', 'outlet_master');
-  $query->join('field_data_field_pl_group', 'pl', 'pl.entity_id = n.nid');
-  $query->condition('pl.bundle', 'outlet_master');
-  $query->join('field_data_field_channel', 'ppmch', 'ch.field_channel_value = ppmch.field_channel_value');
-  $query->condition('ppmch.bundle', 'party_pack_master');
-  $query->join('node', 'ppn', 'ppn.nid = ppmch.entity_id');
-  $query->condition('ppn.uid', $distributor_id, '=');
-  $query->join('field_data_field_pl_group', 'ppmpl', 'pl.field_pl_group_value = ppmpl.field_pl_group_value and ppmch.entity_id = ppmpl.entity_id');
-  $query->condition('ppmch.bundle', 'party_pack_master');
-  $query->join('field_data_field_van_pl_group', 'ppplg', 'ppmpl.entity_id = ppplg.entity_id');
-  $query->fields('ppplg', array('field_van_pl_group_value'));
-  $res = $query->execute()->fetchallkeyed(0, 0);
+  $query->addTag('node_uid');
 
-  return $res;
+  //Outlet Master
+  $query->join('field_data_field_area_hook', 'fa', 'fa.entity_id = n.nid');
+  
+  //Area hook Group Master
+  $query->join('node', 'na', 'na.nid = fa.field_area_hook_nid');
+  $query->join('field_data_field_area_hook_group', 'fag', 'fag.entity_id = na.nid');
+
+  $query->fields('na', array('title'));
+  $query->fields('fag', array('field_area_hook_group_value'));
+  if (!is_null($area_hook_group)) {
+    $query->condition('fag.field_area_hook_group_value', $area_hook_group);
+  }
 }
 
 function reverse_geocode_get_data_for_area_group($sales_day, $van_pl_group, $distributor_id) {

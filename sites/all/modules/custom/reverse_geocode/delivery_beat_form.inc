@@ -242,7 +242,8 @@ function delivery_beat_get_results($sales_day, $van_pl_group = NULL, $area_hook_
   }
 
   $query->fields('fs', array('field_sequence_value'));
-  $expression = "CONCAT_WS('-',fdn.field_day_number_value, LPAD(fvp.field_van_pl_group_value, 2, '0'),fag.field_area_hook_group_value,sub.title,LPAD(CEIL(fs.field_sequence_value/field_delivery_beats_value), 2, '0'), LPAD(CEIL(fs.field_sequence_value/field_delivery_per_van_value), 2, '0'))";
+  $expression = "CONCAT_WS('-',LPAD(fdn.field_day_number_value, 2, '0'), LPAD(fvp.field_van_pl_group_value, 2, '0'),fag.field_area_hook_group_value,sub.title,LPAD(CEIL(fs.field_sequence_value/field_delivery_beats_value), 3, '0'))";
+  
   $query->addExpression($expression, 'exp');
 
   $query->orderBy('fvp.field_van_pl_group_value');
