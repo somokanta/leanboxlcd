@@ -7,6 +7,7 @@
                 $this = $(this);
                 $this.siblings().removeClass("selected-row");
                 $this.addClass("selected-row");
+                $this.find("input.selectable-row").prop("checked", true).trigger("change");
             });
 
         }
