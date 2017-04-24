@@ -28,18 +28,7 @@ function outlet_addition_form($form, &$form_state) {
 
   $form_state['incremental_outlet']['options'] = $options;
   $class = array('selectable-row', 'table-radio');
-  $form['list_form_items'] = array(
-    '#type' => 'tableselect',
-    '#header' => $header_array,
-    '#options' => $options,
-    '#prefix' => '<div id="table-div">',
-    '#suffix' => '</div>',
-    '#empty' => t('No forms available.'),
-    '#multiple' => FALSE,
-    '#attributes' => array('class' => $class),
-    '#default_value' => NULL,
-  );
-
+  
   $form['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Confirm Incremental Outlet'),
@@ -57,6 +46,19 @@ function outlet_addition_form($form, &$form_state) {
     ),
     '#id' => 'incremental-outlet-confirm',
   );
+  
+  $form['list_form_items'] = array(
+    '#type' => 'tableselect',
+    '#header' => $header_array,
+    '#options' => $options,
+    '#prefix' => '<div id="table-div">',
+    '#suffix' => '</div>',
+    '#empty' => t('No forms available.'),
+    '#multiple' => FALSE,
+    '#attributes' => array('class' => $class),
+    '#default_value' => NULL,
+  );
+
   return $form;
 }
 
