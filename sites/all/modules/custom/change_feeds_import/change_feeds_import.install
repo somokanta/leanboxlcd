@@ -970,37 +970,34 @@ function change_feeds_import_update_7105() {
     'description' => 'The {users}uid of the user who created.',
   );
   db_add_field('van_cld_data_table', 'distributor_id', $field);
-  
+
   $query = db_select('van_cld_data_table', 'v');
   $query->fields('v');
   $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
 
-  foreach($res as $key => $val) {
-    db_update('van_cld_data_table')->fields(array('distributor_id' => 60))->condition('id', $val['id'] )->execute();
+  foreach ($res as $key => $val) {
+    db_update('van_cld_data_table')->fields(array('distributor_id' => 60))->condition('id', $val['id'])->execute();
   }
 }
-
 
 /**
  *  Implements Hook_Update_7106
  */
 function change_feeds_import_update_7106() {
-  
+
   db_add_field('van_cld_data_table', 'pricelist_group', array(
-    'type' => 'varchar', 
+    'type' => 'varchar',
     'length' => 255,
     'default' => 0,
   ));
-  
- 
 }
 
 /**
  *  Implements Hook_Update_7107
  */
 function change_feeds_import_update_7107() {
-  
- $schema['custom_data'] = array(
+
+  $schema['custom_data'] = array(
     'description' => 'describes the custom table which holds imported sales delivery data',
     'fields' => array(
       'id' => array(
@@ -1065,17 +1062,14 @@ function change_feeds_import_update_7107() {
   );
 
   db_create_table('custom_sales_delivery', $schema['custom_data']);
-  
- 
 }
-
 
 /**
  *  Implements Hook_Update_7108
  */
 function change_feeds_import_update_7108() {
-  
- $schema['custom_data'] = array(
+
+  $schema['custom_data'] = array(
     'description' => 'describes the custom table which holds imported sales delivery data',
     'fields' => array(
       'id' => array(
@@ -1087,7 +1081,7 @@ function change_feeds_import_update_7108() {
         'description' => t('Party Code'),
         'type' => 'varchar',
         'length' => 255,
-      ),   
+      ),
       'area_hook' => array(
         'description' => t('Date'),
         'type' => 'varchar',
@@ -1120,6 +1114,61 @@ function change_feeds_import_update_7108() {
   );
 
   db_create_table('custom_outlet_area_hook', $schema['custom_data']);
-  
- 
+}
+
+/**
+ *  Implements Hook_Update_7109
+ */
+function change_feeds_import_update_7109() {
+
+  $schema['day_van_area_data'] = array(
+    'description' => 'describes the custom table which holds imported Day Vanl Pl Group Area Group data',
+    'fields' => array(
+      'id' => array(
+        'description' => t('Unique id'),
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'error_message' => array(
+        'description' => t('status'),
+        'type' => 'text',
+        'length' => 255,
+      ),
+      'created' => array(
+        'description' => t('Uploaded time'),
+        'type' => 'int',
+      ),
+      'fid' => array(
+        'description' => t('fid'),
+        'type' => 'int',
+      ),
+      'distributor_id' => array(
+        'description' => t('distributor_id'),
+        'type' => 'int',
+      ),
+      'van_pl_grp' => array(
+        'description' => t('Van Pl Group'),
+        'type' => 'text',
+        'length' => 255,
+      ),
+      'sales_day' => array(
+        'description' => t('Sales Day'),
+        'type' => 'text',
+        'length' => 255,
+      ),
+      'area_hook' => array(
+        'description' => t('Area Hook'),
+        'type' => 'text',
+        'length' => 255,
+      ),
+      'area_hook_grp' => array(
+        'description' => t('Area Hook Group'),
+        'type' => 'text',
+        'length' => 255,
+      ),
+    ),
+    'primary key' => array('id'),
+  );
+
+  db_create_table('day_van_area_data', $schema['day_van_area_data']);
 }

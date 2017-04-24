@@ -44,7 +44,7 @@ function change_feeds_import_menu() {
     'access callback' => 'check_if_fr_role_user_admin',
   );
 
- // Upload form for sales register data
+  // Upload form for sales register data
   $items['outlet-area-hook/import'] = array(
     'title' => 'Outlet Area Hook',
     'description' => 'Import Outlet Area Hook',
@@ -92,6 +92,8 @@ function change_feeds_import_menu() {
     'access arguments' => array('Distributor Upload File'),
     'file' => 'form/sales_delivery_data.inc',
   );
+  
+  
 
   $items['sales-delivery-data-confirm/%'] = array(
     'title' => 'Sales Delivery Data  Confirm Table',
@@ -171,6 +173,16 @@ function change_feeds_import_menu() {
     'file' => 'form/sales_register_data.inc',
   );
 
+  // Upload form for Sales Day-Van Pl Group Area Grouping.
+  $items['day-van-area/import'] = array(
+    'title' => 'Day-Van Pl Group Area Grouping',
+    'description' => 'Import Sales Day-Van Pl Group Area Grouping Data',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('change_feeds_import_day_van_area_form'),
+    'access arguments' => array('Distributor Upload File'),
+    'file' => 'form/day_van_area_data.inc',
+  );
+  
   $items['sales-confirm/%'] = array(
     'title' => 'Sales Confirm Table',
     'description' => 'Sales Register Confirm Table',
@@ -178,6 +190,15 @@ function change_feeds_import_menu() {
     'page arguments' => array(1),
     'access arguments' => array('Distributor Upload File'),
     'file' => 'form/sales_register_data.inc',
+  );
+  
+  $items['day-van-area-confirm/%'] = array(
+    'title' => 'Day-Van-Area Confirm Table',
+    'description' => 'Day-Van-Area Confirm Table',
+    'page callback' => 'change_feeds_import_day_van_area_confirm_content',
+    'page arguments' => array(1),
+    'access arguments' => array('Distributor Upload File'),
+    'file' => 'form/day_van_area_data.inc',
   );
 
   // when confirm is clicked
@@ -190,6 +211,17 @@ function change_feeds_import_menu() {
     'file' => 'form/sales_register_data.inc',
   );
 
+  
+  // when confirm is clicked
+  $items['day-van-area-confirm/create_content/%'] = array(
+    'title' => 'confirm',
+    'description' => 'Confirm to Day-Van-Area contents',
+    'page callback' => 'change_feeds_import_day_van_area_create_confirm_content',
+    'page arguments' => array(2),
+    'access arguments' => array('Distributor Upload File'),
+    'file' => 'form/day_van_area_data.inc',
+  );
+  
   // when discard is clicked
   $items['sales-discard/%'] = array(
     'title' => 'sales Discard',
@@ -198,6 +230,16 @@ function change_feeds_import_menu() {
     'page arguments' => array(1),
     'access arguments' => array('Distributor Upload File'),
     'file' => 'form/sales_register_data.inc',
+  );
+  
+   // when discard is clicked
+  $items['day-van-area-discard/%'] = array(
+    'title' => 'Day-Van-Area Discard',
+    'description' => 'Day-Van-Area Discard Data',
+    'page callback' => 'change_feeds_import_day_van_area_discard_data',
+    'page arguments' => array(1),
+    'access arguments' => array('Distributor Upload File'),
+    'file' => 'form/day_van_area_data.inc',
   );
 
   // Upload form for billing data
@@ -973,8 +1015,18 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
     }
   }
 
+  if ($entity->feeds_item->id == 'area_hook_group_master') {
+    $area_id = $entity->field_area_hook_group_id['und'][0]['value'];
+    $area_array = check_area_id_exists($area_id);
+    if (!empty($area_array)) {
+      if ($area_id_bool = in_array($area_id, $area_array)) {
+        drupal_set_message("$area_id Area Id Already exist in Area Hook Master", 'error');
+        $entity->feeds_item->skip = TRUE;
+      }
+    }
+  }
   if ($entity->feeds_item->id == 'outlet_sequence' || $entity->feeds_item->id == 'user_defined_outlet_sequence') {
-    
+
     $import_id = $entity->feeds_item->id;
     $title = $entity->title;
     $res = check_node_title_exists($entity->title, 'outlet_master');
@@ -983,11 +1035,11 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
       $entity->feeds_item->skip = TRUE;
     }
     else {
-      $query= db_select('node', 'n');
+      $query = db_select('node', 'n');
       $query->fields('n', array('nid'));
       $query->addTag('node_uid');
-      if($import_id == 'user_defined_outlet_sequence'){
-      $query->join('field_data_field_sequence', 'fs', 'fs.entity_id = n.nid');
+      if ($import_id == 'user_defined_outlet_sequence') {
+        $query->join('field_data_field_sequence', 'fs', 'fs.entity_id = n.nid');
       }
       $query->join('field_data_field_hul_code', 'h', 'h.entity_id = n.nid');
       $query->join('field_data_field_area_hook_group_hul', 'gh', 'gh.entity_id = n.nid');
@@ -1481,14 +1533,14 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
         $sub_query->condition('b.loading_date', $max, '<=');
       }
     }
-    if($view->name == 'impact_delivery_report_2'){
+    if ($view->name == 'impact_delivery_report_2') {
       if (isset($view->exposed_raw_input['date_filter']['min']) && isset($view->exposed_raw_input['date_filter']['max'])) {
         $min = intval(strtotime($view->exposed_raw_input['date_filter']['min']));
         $max = intval(strtotime($view->exposed_raw_input['date_filter']['max']));
-        
+
         $sub_query->join('field_data_field_trip_id_reference', 'ftr', 'ftr.entity_id=n.nid');
         $sub_query->join('field_data_field_trip_executon_date', 'fd', 'ftr.field_trip_id_reference_nid=fd.entity_id');
-        
+
         $sub_query->condition('fd.field_trip_executon_date_value', $min, '>=');
         $sub_query->condition('fd.field_trip_executon_date_value', $max, '<=');
       }
@@ -1625,4 +1677,17 @@ function change_feeds_import_get_terms_using_vocubulary($vanme) {
   $query->fields('t', array('tid', 'name'));
   $res = $query->execute()->fetchAllKeyed();
   return $res;
+}
+
+/**
+ * Return Area Id From Master
+ */
+function check_area_id_exists($title) {
+  $query = db_select('node', 'n');
+  $query->condition('n.type', "area_hook_group_master", '=');
+  $query->join('field_data_field_area_hook_group_id', 'agi', 'agi.entity_id = n.nid');
+  $query->fields('agi', array('field_area_hook_group_id_value'));
+  $query->addTag('node_uid');
+  $area_id = $query->execute()->fetchAllKeyed(0, 0);
+  return $area_id;
 }
