@@ -514,7 +514,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     $output[] = array('PP', $data1,  (int)$target_data['PP']);
     $output[] = array('NON-PP', $data2, (int)$target_data['NON-PP']);
     
-    $pp_table = send_email_productivity_emailer1($start, $distributor_name, $end, TRUE);
+    $pp_table = send_email_productivity_emailer($start, $distributor_name, $end, TRUE);
     $output1['output'] = $output;
     $output1['table'] = $pp_table;
     return $output1;
@@ -522,7 +522,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
   else if ($activity_type == 'picking_productivity') {
 
     $output[] = array('Group', 'Productivity', 'Target');
-    $picking_data = get_productivity_data_for_picking($start, $end, $distributor_id);
+    $picking_data = get_productivity_data_for_picking($start_date, $end_date, $distributor_id);
 
     if (!empty($picking_data)) {
       $target_data = leanbox_dashboard_target_value_using_voc_name('productivity target');
