@@ -1276,7 +1276,7 @@ header[id="page-header"] .content > ul li ul li:nth-child(odd) {
 /* line 1269, ../sass/leanbox-global.scss */
 [id^="delivery-beat-create-form"] .form-item, [id^="delivery-beat-create-form"] #van-pl-wrapper, [id^="delivery-beat-create-form"] #area-hook-group-wrapper {
   float: left;
-  width: 48%;
+  width: 24%;
   margin-right: 10px;
   margin-bottom: 15px;
 }
