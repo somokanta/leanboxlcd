@@ -373,7 +373,7 @@ function change_feeds_import_day_van_area_finished($success, $results, $operatio
     }
 
     if ($created_count != 0) {
-      drupal_set_message(t("$created_count node was updated"));
+      drupal_set_message(t("$created_count node was Created"));
     }
     if ($updated_count != 0) {
       drupal_set_message(t("$updated_count node was updated"));
