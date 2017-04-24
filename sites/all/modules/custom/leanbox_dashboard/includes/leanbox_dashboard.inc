@@ -522,7 +522,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
   else if ($activity_type == 'picking_productivity') {
 
     $output[] = array('Group', 'Productivity', 'Target');
-    $picking_data = get_productivity_data_for_picking($start_date, $end_date, $distributor_id);
+    $picking_data = get_productivity_data_for_picking($start, $end, $distributor_id);
 
     if (!empty($picking_data)) {
       $target_data = leanbox_dashboard_target_value_using_voc_name('productivity target');
@@ -928,6 +928,8 @@ function leanbox_dashboard_gauge_chart_query_details($type, $start_date = '', $e
   $query = db_select('node', 'n');
   $query->join('field_data_field_bill_value', 'v', 'v.entity_id = n.nid');
   $query->join('field_data_field_sr_bill_date', 'b', 'b.entity_id = n.nid');
+  $query->join('field_data_field_promised_date', 'pro_date', 'pro_date.entity_id = n.nid');
+  $query->join('field_data_field_billing_van', 'bva', 'bva.entity_id = n.nid');
   $query->addExpression('SUM(v.field_bill_value_value)', 'bill_value');
   $query->condition('n.type', 'sales_register_data');
   if (!empty($start_date) && !empty($end_date)) {
