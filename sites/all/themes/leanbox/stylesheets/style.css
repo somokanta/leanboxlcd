@@ -11180,18 +11180,47 @@ header[id="page-header"] .content > ul li ul li:nth-child(odd) {
   min-width: 111px;
 }
 
-/* line 1268, ../sass/leanbox-global.scss */
+/* line 1269, ../sass/leanbox-global.scss */
+[id^="delivery-beat-create-form"] .form-item, [id^="delivery-beat-create-form"] #van-pl-wrapper, [id^="delivery-beat-create-form"] #area-hook-group-wrapper {
+  float: left;
+  width: 48%;
+  margin-right: 10px;
+  margin-bottom: 15px;
+}
+/* line 1275, ../sass/leanbox-global.scss */
+[id^="delivery-beat-create-form"] .form-item .form-item, [id^="delivery-beat-create-form"] #van-pl-wrapper .form-item, [id^="delivery-beat-create-form"] #area-hook-group-wrapper .form-item {
+  margin-bottom: 0;
+  float: none;
+  width: auto;
+  margin-right: 0;
+}
+/* line 1283, ../sass/leanbox-global.scss */
+[id^="delivery-beat-create-form"] .form-submit {
+  margin: 20px 10px;
+}
+/* line 1287, ../sass/leanbox-global.scss */
+[id^="delivery-beat-create-form"] .table-responsive {
+  clear: both;
+  width: 100%;
+  max-height: 420px;
+  min-height: 400px;
+  box-sizing: border-box;
+  padding-bottom: 250px;
+  overflow: auto;
+}
+
+/* line 1298, ../sass/leanbox-global.scss */
 #map-container {
   width: 63%;
   height: 700px;
   float: right;
   position: static;
 }
-/* line 1274, ../sass/leanbox-global.scss */
+/* line 1304, ../sass/leanbox-global.scss */
 #map-container .leaflet-pane.leaflet-map-pane {
   position: static;
 }
-/* line 1278, ../sass/leanbox-global.scss */
+/* line 1308, ../sass/leanbox-global.scss */
 #map-container #searchBox {
   margin-left: 10px;
   width: 240px;
@@ -11203,11 +11232,11 @@ header[id="page-header"] .content > ul li ul li:nth-child(odd) {
 }
 
 @media only screen and (max-width: 1152px) {
-  /* line 1291, ../sass/leanbox-global.scss */
+  /* line 1321, ../sass/leanbox-global.scss */
   .region-content .block-leanbox-dashboard {
     width: 48%;
   }
-  /* line 1294, ../sass/leanbox-global.scss */
+  /* line 1324, ../sass/leanbox-global.scss */
   .region-content .block-leanbox-dashboard:nth-child(3n+1) {
     clear: none;
   }

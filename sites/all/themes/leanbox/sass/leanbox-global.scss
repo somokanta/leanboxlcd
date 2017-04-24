@@ -1265,6 +1265,36 @@ header[id="page-header"] {
   }
 }
 
+[id^="delivery-beat-create-form"] {
+  .form-item, #van-pl-wrapper, #area-hook-group-wrapper {
+    float: left;
+    width: 48%;
+    margin-right: 10px;
+    margin-bottom: 15px;
+
+    .form-item {
+      margin-bottom: 0;
+      float: none;
+      width: auto;
+      margin-right: 0;
+    }
+  }
+
+  .form-submit {
+    margin: 20px 10px;
+  }
+
+  .table-responsive {
+    clear: both;
+    width: 100%;
+    max-height: 420px;
+    min-height: 400px;
+    box-sizing: border-box;
+    padding-bottom: 250px;
+    overflow: auto;
+  }
+}
+
 #map-container {
   width: 63%;
   height: 700px;
