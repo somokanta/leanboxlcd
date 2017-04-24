@@ -513,7 +513,11 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     $output[] = array('Group', 'Productivity', 'Target');
     $output[] = array('PP', $data1,  (int)$target_data['PP']);
     $output[] = array('NON-PP', $data2, (int)$target_data['NON-PP']);
-    return $output;
+    
+    $pp_table = send_email_productivity_emailer1($start, $distributor_name, $end, TRUE);
+    $output1['output'] = $output;
+    $output1['table'] = $pp_table;
+    return $output1;
   }
   else if ($activity_type == 'picking_productivity') {
 
