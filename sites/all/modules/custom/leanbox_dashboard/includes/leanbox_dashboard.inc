@@ -793,22 +793,18 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
           }
 
           if ($key1 == $val2['field_delivery_status_tid']) {
-            $data[$val1]['data'] += $val2['field_sales_return_amt_value'];
-           // $data[$val1]['total'] += $val2['field_bill_value_value'];
+            $data[$val1]['data'] += ($val2['field_bill_value_value'] - $val2['field_sales_return_amt_value']);
           }
         }
       }
 
       if (!empty($total_bill_value)) {
-        dpm($total_bill_value, '$total_bill_value');
         foreach ($data as $key => $val) {
           if ($key == 'OK') {
             continue;
           }
           foreach ($val as $key1 => $val1) {
-            dpm($key, '$key');
-            dpm($val1, 'val1');
-            $data1 = (($total_bill_value - $val1) / $total_bill_value) * 100;
+            $data1 = (($val1) / $total_bill_value) * 100;
             $output[] = array($key, round($data1, 2));
           }
         }
