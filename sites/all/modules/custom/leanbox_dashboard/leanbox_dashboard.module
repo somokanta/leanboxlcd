@@ -372,7 +372,7 @@ function leanbox_dashboard_block_view($delta = '') {
       $data = leanbox_dashboard_chart_query_details('party_packing_productivity');
       $filter_form = drupal_render(drupal_get_form('leanbox_dashboard_chart_filter_partypack_productivity_form'));
       $block['content'] = array(
-        '#markup' => theme('leanbox_dashboard', array('data' => $filter_form)),
+        '#markup' => theme('leanbox_dashboard', array('data' => $filter_form, 'otif_table' => $data['table'])),
         '#attached' => array(
           'js' => array(
             array(
@@ -380,9 +380,8 @@ function leanbox_dashboard_block_view($delta = '') {
               'data' => 'https://www.gstatic.com/charts/loader.js'
             ),
             drupal_get_path('module', 'leanbox_dashboard') . '/js/leanbox_dashboard_partypackingproductivitychart.js',
-          //  drupal_get_path('module', 'leanbox_dashboard') . '/js/leanbox.js',
             array(
-              'data' => array('leanbox_dashboard' => array('party_packing_productivity' => $data, 'area_definition' => $area_definition)),
+              'data' => array('leanbox_dashboard' => array('party_packing_productivity' => $data['output'], 'area_definition' => $area_definition)),
               'type' => 'setting'
             ),
           ),
@@ -565,10 +564,14 @@ function leanbox_dashboard_get_areahookgroup_entity($title, $day_tid) {
 }
 
 function leanbox_dashboard_target_value_using_voc_name($vname) {
+  $uid = $GLOBALS['user']->uid;
+  $distributor_id = change_feeds_import_get_distributor_id($uid);
   $query1 = db_select('taxonomy_term_data', 't');
   $query1->join('taxonomy_vocabulary', 'v', 'v.vid = t.vid');
   $query1->join('field_data_field_target', 'tr', 'tr.entity_id = t.tid');
+  $query1->join('field_data_field_target_distributor', 'd', 'd.entity_id = t.tid');
   $query1->condition('v.name', 'productivity target');
+  $query1->condition('d.field_target_distributor_uid', $distributor_id);
   $query1->fields('t', array('name'));
   $query1->fields('tr', array('field_target_value'));
   $target = $query1->execute()->fetchAllKeyed(0, 1);

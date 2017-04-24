@@ -317,12 +317,15 @@ function hul_code_form($form, &$form_state, $type) {
   $form['#prefix'] = '<div id="address-selection-map">';
   $form['#suffix'] = '</div>';
 
-  $header_array = array('sr_no' => 'Sr No', 'party_code' => 'Party Code',
+  $header_array = array(
+    'sr_no' => array('data' => 'Sr No', 'class' => 'sr-cell'), 
+    'party_code' => array('data'=>'Party Code', 'class' => 'party-code-cell'),
     //'lat' => 'Latitude', 
     //'lng' => 'Longitude',
-    'party_name' => 'Party Name', 'status' => 'Status',
+    'party_name' => array('data'=>'Party Name', 'class' => 'party-name-cell'),
+    'status' => array('data'=>'Status', 'class' => 'status-cell'),
     //'address' => array('data' => 'Address', 'class' => array('cell-tooltip')),
-    'details' => '',
+    'details' => array('data'=>'', 'class' => 'details-cell'),
   );
 
   $pl_group_data = reverse_geocode_get_data_from_outlet_master($sales_day = NULL, "pl_group", $beat_name = NULL, $distributor_id);
@@ -725,15 +728,15 @@ function party_filters_submit(&$form, &$form_state) {
     //$address = theme('table', array('header' => $header, 'rows' => $rows, 'sticky' => FALSE));
 
     $options[$party_code] = array(
-      'sr_no' => $key + 1,
-      'party_code' => $party_code,
+      'sr_no' => array('data' => $key + 1, 'class' => 'sr-cell'),
+      'party_code' => array('data' => $party_code, 'class' => 'party-code-cell'),
       //'lat' => $lat,
       //'lng' => $long,
-      'party_name' => $party_name,
+      'party_name' => array('data' => '<div class="party-name-data">' . $party_name . '</div>', 'class' => 'party-name-cell'),
       '#attributes' => array('data-lat' => $lat, 'data-lng' => $long, 'data-sr' => $key + 1),
-      'status' => $hul_status,
+      'status' => array('data' => $hul_status, 'class' => 'status-cell'),
       //'details' => array('data' => '<a class="cell-details">Details</a>' . $address),
-      'details' => array('data' => array('#theme' => 'table', '#header' => $header, '#rows' => $rows, '#sticky' => FALSE, '#prefix' => '<a class="cell-details">Details</a>', '#attributes' => array('class' => array('cell-hide')))),
+      'details' => array('data' => array('#theme' => 'table', '#header' => $header, '#rows' => $rows, '#sticky' => FALSE, '#prefix' => '<a class="cell-details">Details</a>', '#attributes' => array('class' => array('cell-hide'))), 'class' => 'details-cell'),
     );
     if ($type == 'multi') {
       $marker_tooltip = '<div class="cell-address cell-hide"><table>'

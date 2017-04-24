@@ -150,15 +150,21 @@ function area_locations_form($form, &$form_state, $type) {
   $form_state['type'] = $type;
 
   if ($type == "area-checkbox") {
-    $header_array = array('sr_no' => 'Sr No', 'party_code' => 'Party Code',
-      'party_name' => 'Party Name', 'area_group_status' => 'Status',
-      'details' => ''
+    $header_array = array(
+      'sr_no' => array('data' => 'Sr No', 'class' => 'sr-cell'),
+      'party_code' => array('data' => 'Party Code', 'class' => 'party-code-cell'),
+      'party_name' => array('data' => 'Party Name', 'class' => 'party-name-cell'),
+      'area_group_status' => array('data' => 'Status', 'class' => 'status-cell'),
+      'details' => array('data' => '', 'class' => 'details-cell'),
     );
   }
   else {
-    $header_array = array('sr_no' => 'Sequence No', 'party_code' => 'Party Code',
-      'party_name' => 'Party Name', 'area_group_status' => 'Status',
-      'details' => ''
+    $header_array = array(
+      'sr_no' => array('data' => 'Sequence No', 'class' => 'sr-cell'),
+      'party_code' => array('data' => 'Party Code', 'class' => 'party-code-cell'),
+      'party_name' => array('data' => 'Party Name', 'class' => 'party-name-cell'),
+      'area_group_status' => array('data' => 'Status', 'class' => 'status-cell'),
+      'details' => array('data' => '', 'class' => 'details-cell'),
     );
   }
 
@@ -420,12 +426,12 @@ function area_wise_filters_submit(&$form, &$form_state) {
     }
 
     $options[$party_code] = array(
-      'sr_no' => $no,
-      'party_code' => $party_code,
-      'party_name' => $party_name,
+      'sr_no' => array('data' => $no, 'class' => 'sr-cell'),
+      'party_code' => array('data' => $party_code, 'class' => 'party-code-cell'),
+      'party_name' => array('data' => '<div class="party-name-data">' . $party_name . '</div>', 'class' => 'party-name-cell'),
       '#attributes' => array('data-lat' => $lat, 'data-lng' => $long, 'data-sr' => $no),
-      'area_group_status' => $hul_status,
-      'details' => array('data' => array('#markup' => '<a class="cell-details" style="display:none;">Show on Map</a>' . $marker_tooltip)),
+      'area_group_status' => array('data' => $hul_status, 'class' => 'status-cell'),
+      'details' => array('data' => array('#markup' => '<a class="cell-details" style="display:none;">On Map</a>' . $marker_tooltip), 'class' => 'details-cell'),
     );
   }
   $form_state['reverse_geocode']['rows'] = $options;
