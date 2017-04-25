@@ -1,5 +1,7 @@
 <?php
 /**
  * @file
- * Drupal needs this blank file.
+ * Code for the Leanbox dash changes feature.
  */
+
+include_once 'leanbox_dash_changes.features.inc';
