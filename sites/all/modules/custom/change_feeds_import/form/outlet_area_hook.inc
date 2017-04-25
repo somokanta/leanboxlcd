@@ -304,7 +304,7 @@ function change_feeds_import_outlet_area_hook_node($sales_data_result, $distribu
           $sales_day = $node->field_sales_day['und'][0]['value']; // Sales Day from Outlet Master
           $ol_channel = $node->field_channel['und'][0]['value']; // Channle from Outlet Master
           $ol_pl_grp = $node->field_pl_group['und'][0]['value']; // PL Grp from Outlet Master
-          $van_pl_grp = get_van_pl_grp_from_hannel_pl_grp($ol_channel, $ol_pl_grp); // VAN PL GRP from Party Pack Master
+          $van_pl_grp = get_van_pl_grp_from_hannel_pl_grp($ol_channel, $ol_pl_grp,$distributor_id); // VAN PL GRP from Party Pack Master
 
           // get nid of Day-van-pl-grp-area-hook master using sales_day , Van_PL_Grp , and Area_Hook
           $day_van_area_nid = get_nid_from_master_using_sales_day_van_grp_area_hook($sales_day,$van_pl_grp,$area_hook);
@@ -379,11 +379,7 @@ function change_feeds_import_outlet_area_hook_discard_data($fid) {
   drupal_set_message(t('Something went wrong'), 'error');
 }
 
-function get_van_pl_grp_from_hannel_pl_grp($ol_channel, $ol_pl_grp) {
-  global $user;
-  $user_id = $user->uid;
-  $distributor_id = change_feeds_import_get_distributor_id($user_id);
-
+function get_van_pl_grp_from_hannel_pl_grp($ol_channel, $ol_pl_grp,$distributor_id) {
   $query = db_select('node', 'n');
   $query->condition('n.type', 'outlet_master');
   $query->addTag('node_uid');
