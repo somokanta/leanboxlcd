@@ -178,6 +178,12 @@ function delivery_beat_get_results($sales_day, $van_pl_group = NULL, $area_hook_
   $user_id = $user->uid;
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
   
+  $nid = check_node_title_exists($distributor_id, 'van_stop_master');
+  if ($nid) {
+    $node = node_load($nid);
+    $stop_size = $node->field_stop_size[LANGUAGE_NONE][0]['value'];
+  }
+  
   $query = db_select('node', 'n');
 
   $query->addTag('node_uid');
@@ -258,7 +264,7 @@ function delivery_beat_get_results($sales_day, $van_pl_group = NULL, $area_hook_
       . "LPAD(ppplg.field_dva_van_pl_group_value, 2, '0'),"
       . "fagi.field_area_hook_group_id_value,"
       . "sub.area,"
-      . "LPAD(CEIL(fs.field_revised_sequence_value/10), 3, '0')"
+      . "LPAD(CEIL(fs.field_revised_sequence_value/$stop_size), 3, '0')"
       . ")";
   
   $query->addExpression($expression, 'exp');
@@ -302,9 +308,9 @@ function delivery_beat_get_results($sales_day, $van_pl_group = NULL, $area_hook_
   $subquery->addExpression('COALESCE(addr.field_updated_address_sub_premise, addr.field_updated_address_dependent_locality, addr.field_updated_address_locality)', 'area');
   
   ############ CHANGE 10 to DYNAMIC####################
-  $subquery->where("((fs.field_revised_sequence_value - 1)%(10) = 0)");
+  $subquery->where("((fs.field_revised_sequence_value - 1)%($stop_size) = 0)");
   
-  $query->join($subquery, 'sub', 'sub.field_revised_sequence_value = (FLOOR((fs.field_revised_sequence_value - 1)/10)*10 + 1) AND sub.field_dva_van_pl_group_value = ppplg.field_dva_van_pl_group_value');
+  $query->join($subquery, 'sub', "sub.field_revised_sequence_value = (FLOOR((fs.field_revised_sequence_value - 1)/$stop_size)*$stop_size + 1) AND sub.field_dva_van_pl_group_value = ppplg.field_dva_van_pl_group_value");
 
   $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
 
