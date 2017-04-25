@@ -43,59 +43,98 @@ function sales_day_callback($form, &$form_state) {
 }
 
 function reverse_geocode_get_data_from_sales_day($sales_day, $distributor_id) {
+//  $query = db_select('node', 'n');
+//  $query->condition('n.type', 'outlet_master');
+//  $query->condition('n.uid', $distributor_id, '=');
+//  if (!is_null($sales_day)) {
+//    $query->join('field_data_field_sales_day', 'sd', 'sd.entity_id = n.nid');
+//    $query->condition('sd.field_sales_day_value', $sales_day, '=');
+//  }
+//  $query->join('field_data_field_channel', 'ch', 'ch.entity_id = n.nid');
+//  $query->condition('ch.bundle', 'outlet_master');
+//  $query->join('field_data_field_pl_group', 'pl', 'pl.entity_id = n.nid');
+//  $query->condition('pl.bundle', 'outlet_master');
+//  $query->join('field_data_field_channel', 'ppmch', 'ch.field_channel_value = ppmch.field_channel_value');
+//  $query->condition('ppmch.bundle', 'party_pack_master');
+//  $query->join('node', 'ppn', 'ppn.nid = ppmch.entity_id');
+//  $query->condition('ppn.uid', $distributor_id, '=');
+//  $query->join('field_data_field_pl_group', 'ppmpl', 'pl.field_pl_group_value = ppmpl.field_pl_group_value and ppmch.entity_id = ppmpl.entity_id');
+//  $query->condition('ppmch.bundle', 'party_pack_master');
+//  $query->join('field_data_field_van_pl_group', 'ppplg', 'ppmpl.entity_id = ppplg.entity_id');
+//  $query->fields('ppplg', array('field_van_pl_group_value'));
+//  $res = $query->execute()->fetchallkeyed(0, 0);
+//
+//  return $res;
+  
+  ##### NEW LOGIC ##############################
   $query = db_select('node', 'n');
-  $query->condition('n.type', 'outlet_master');
-  $query->condition('n.uid', $distributor_id, '=');
-  if (!is_null($sales_day)) {
-    $query->join('field_data_field_sales_day', 'sd', 'sd.entity_id = n.nid');
-    $query->condition('sd.field_sales_day_value', $sales_day, '=');
-  }
-  $query->join('field_data_field_channel', 'ch', 'ch.entity_id = n.nid');
-  $query->condition('ch.bundle', 'outlet_master');
-  $query->join('field_data_field_pl_group', 'pl', 'pl.entity_id = n.nid');
-  $query->condition('pl.bundle', 'outlet_master');
-  $query->join('field_data_field_channel', 'ppmch', 'ch.field_channel_value = ppmch.field_channel_value');
-  $query->condition('ppmch.bundle', 'party_pack_master');
-  $query->join('node', 'ppn', 'ppn.nid = ppmch.entity_id');
-  $query->condition('ppn.uid', $distributor_id, '=');
-  $query->join('field_data_field_pl_group', 'ppmpl', 'pl.field_pl_group_value = ppmpl.field_pl_group_value and ppmch.entity_id = ppmpl.entity_id');
-  $query->condition('ppmch.bundle', 'party_pack_master');
-  $query->join('field_data_field_van_pl_group', 'ppplg', 'ppmpl.entity_id = ppplg.entity_id');
-  $query->fields('ppplg', array('field_van_pl_group_value'));
-  $res = $query->execute()->fetchallkeyed(0, 0);
+  $query->addTag('node_uid');
 
+  //Outlet Master
+  $query->join('field_data_field_area_hook', 'fa', 'fa.entity_id = n.nid');
+
+  //Day-Van-PL-Gp-Area Hook Master
+  $query->join('node', 'na', 'na.nid = fa.field_area_hook_nid');
+  $query->join('field_data_field_dva_van_pl_group', 'fv', 'fv.entity_id = na.nid');
+  if (!is_null($sales_day)) {
+    $query->join('field_data_field_dva_sales_day', 'sd', 'sd.entity_id = na.nid');
+    $query->condition('sd.field_dva_sales_day_value', $sales_day, '=');
+  }
+  $query->fields('fv', array('field_dva_van_pl_group_value'));
+
+  $res = $query->execute()->fetchallkeyed(0, 0);
   return $res;
 }
 
 function reverse_geocode_get_data_for_area_group($sales_day, $van_pl_group, $distributor_id) {
+//  $query = db_select('node', 'n');
+//  $query->condition('n.type', 'party_pack_master');
+//  $query->condition('n.uid', $distributor_id, '=');
+//  $query->join('field_data_field_van_pl_group', 'ppplg', 'n.nid = ppplg.entity_id');
+//  $query->condition('ppplg.field_van_pl_group_value', $van_pl_group, '=');
+//  $query->join('field_data_field_channel', 'ch', 'ch.entity_id = n.nid');
+//  $query->condition('ch.bundle', 'party_pack_master');
+//  $query->join('field_data_field_pl_group', 'ppmpl', 'ppmpl.entity_id = n.nid');
+//  $query->condition('ppmpl.bundle', 'party_pack_master');
+//  $query->join('field_data_field_channel', 'ppmch', 'ch.field_channel_value = ppmch.field_channel_value');
+//  $query->condition('ppmch.bundle', 'outlet_master');
+////$query->fields('ppmch', array('field_channel_value'));
+//  $query->join('node', 'oo', 'oo.nid = ppmch.entity_id');
+//  $query->condition('oo.type', 'outlet_master');
+//  $query->condition('oo.uid', $distributor_id, '=');
+//  $query->join('field_data_field_pl_group', 'outpl', 'ppmpl.field_pl_group_value = outpl.field_pl_group_value and ppmch.entity_id = outpl.entity_id');
+//  $query->condition('ppmch.bundle', 'outlet_master');
+////$query->fields('outpl', array('field_pl_group_value'));
+//  if (!is_null($sales_day)) {
+//    $query->join('field_data_field_sales_day', 'sd', 'sd.entity_id = oo.nid');
+//    $query->condition('sd.field_sales_day_value', $sales_day, '=');
+//  }
+//  $query->join('field_data_field_area_hook', 'ah', 'ah.entity_id = oo.nid');
+////$query->fields('ah', array('field_area_hook_nid'));
+//  $query->join('node', 'ag', 'ag.nid = ah.field_area_hook_nid');
+//  $query->condition('ag.uid', $distributor_id, '=');
+//  $query->join('field_data_field_area_hook_group', 'agr', 'agr.entity_id = ag.nid');
+//  $query->fields('agr', array('field_area_hook_group_value'));
+//  $res = $query->execute()->fetchallkeyed(0, 0);
+//  return $res;
+  
+  ##### NEW LOGIC ##############################
   $query = db_select('node', 'n');
-  $query->condition('n.type', 'party_pack_master');
-  $query->condition('n.uid', $distributor_id, '=');
-  $query->join('field_data_field_van_pl_group', 'ppplg', 'n.nid = ppplg.entity_id');
-  $query->condition('ppplg.field_van_pl_group_value', $van_pl_group, '=');
-  $query->join('field_data_field_channel', 'ch', 'ch.entity_id = n.nid');
-  $query->condition('ch.bundle', 'party_pack_master');
-  $query->join('field_data_field_pl_group', 'ppmpl', 'ppmpl.entity_id = n.nid');
-  $query->condition('ppmpl.bundle', 'party_pack_master');
-  $query->join('field_data_field_channel', 'ppmch', 'ch.field_channel_value = ppmch.field_channel_value');
-  $query->condition('ppmch.bundle', 'outlet_master');
-//$query->fields('ppmch', array('field_channel_value'));
-  $query->join('node', 'oo', 'oo.nid = ppmch.entity_id');
-  $query->condition('oo.type', 'outlet_master');
-  $query->condition('oo.uid', $distributor_id, '=');
-  $query->join('field_data_field_pl_group', 'outpl', 'ppmpl.field_pl_group_value = outpl.field_pl_group_value and ppmch.entity_id = outpl.entity_id');
-  $query->condition('ppmch.bundle', 'outlet_master');
-//$query->fields('outpl', array('field_pl_group_value'));
+  $query->addTag('node_uid');
+
+  //Outlet Master
+  $query->join('field_data_field_area_hook', 'fa', 'fa.entity_id = n.nid');
+
+  //Day-Van-PL-Gp-Area Hook Master
+  $query->join('node', 'na', 'na.nid = fa.field_area_hook_nid');
+  $query->join('field_data_field_dva_van_pl_group', 'fv', 'fv.entity_id = na.nid');
+  $query->join('field_data_field_dva_area_hook_group_name', 'agr', 'agr.entity_id = na.nid');
   if (!is_null($sales_day)) {
-    $query->join('field_data_field_sales_day', 'sd', 'sd.entity_id = oo.nid');
-    $query->condition('sd.field_sales_day_value', $sales_day, '=');
+    $query->join('field_data_field_dva_sales_day', 'sd', 'sd.entity_id = na.nid');
+    $query->condition('sd.field_dva_sales_day_value', $sales_day, '=');
   }
-  $query->join('field_data_field_area_hook', 'ah', 'ah.entity_id = oo.nid');
-//$query->fields('ah', array('field_area_hook_nid'));
-  $query->join('node', 'ag', 'ag.nid = ah.field_area_hook_nid');
-  $query->condition('ag.uid', $distributor_id, '=');
-  $query->join('field_data_field_area_hook_group', 'agr', 'agr.entity_id = ag.nid');
-  $query->fields('agr', array('field_area_hook_group_value'));
+  $query->condition('fv.field_dva_van_pl_group_value', $van_pl_group, '=');
+  $query->fields('agr', array('field_dva_area_hook_group_name_value'));
   $res = $query->execute()->fetchallkeyed(0, 0);
   return $res;
 }
@@ -403,84 +442,78 @@ function reverse_geocode_get_data_area_code_wise($sales_day, $van_pl_group, $are
   $query = db_select('node', 'n');
   $query->condition('n.type', 'outlet_master');
   $query->addTag('node_uid');
-  if (!is_null($sales_day)) {
-    $query->join('field_data_field_sales_day', 'sd', 'sd.entity_id = n.nid');
-    $query->condition('sd.field_sales_day_value', $sales_day, '=');
-    $query->fields('sd', array('field_sales_day_value'));
-    $query->join('field_data_field_party_code', 'fpc', 'fpc.entity_id = n.nid');
-    $query->join('field_data_field_party_name', 'fpn', 'fpn.entity_id = n.nid');
-    $query->leftjoin('field_data_field_area_hook_group_hul', 'fagh', 'fagh.entity_id = n.nid');
-    if ($type == "area-checkbox") {
+
+  $query->join('field_data_field_area_hook', 'fa', 'fa.entity_id = n.nid');
+  $query->join('node', 'na', 'na.nid = fa.field_area_hook_nid');
+
+  $query->join('field_data_field_party_code', 'fpc', 'fpc.entity_id = n.nid');
+  $query->join('field_data_field_party_name', 'fpn', 'fpn.entity_id = n.nid');
+  $query->leftjoin('field_data_field_area_hook_group_hul', 'fagh', 'fagh.entity_id = n.nid');
+  if ($type == "area-checkbox") {
+    if (!is_null($area_status)) {
+      if ($area_status === '0' || $area_status === '1') {
+        $query->condition('fagh.field_area_hook_group_hul_value', $area_status, '=');
+        $query->fields('fagh', array('field_area_hook_group_hul_value'));
+      }
+    }
+
+    $query->orderBy('hul_lat_u.field_hul_updated_lat_value', 'asc');
+    $query->orderBy('hul_long_u.field_hul_updated_long_value', 'asc');
+  }
+  else {
+    $query->condition('fagh.field_area_hook_group_hul_value', 1, '=');
+    $query->fields('fagh', array('field_area_hook_group_hul_value'));
+
+    if ($type == "revised-sequence") {
+
+      $query->leftjoin('field_data_field_revised_sequence_status', 'fss', 'fss.entity_id = n.nid');
+      $query->fields('fss', array('field_revised_sequence_status_value'));
+      $query->join('field_data_field_revised_sequence', 'fsq', 'fsq.entity_id = n.nid');
+      $query->fields('fsq', array('field_revised_sequence_value'));
+      $query->orderBy('fsq.field_revised_sequence_value', 'asc');
       if (!is_null($area_status)) {
         if ($area_status === '0' || $area_status === '1') {
-          $query->condition('fagh.field_area_hook_group_hul_value', $area_status, '=');
-          $query->fields('fagh', array('field_area_hook_group_hul_value'));
+          $query->condition('fss.field_revised_sequence_status_value', $area_status, '=');
+          $query->fields('fss', array('field_revised_sequence_status_value'));
         }
       }
-
-      $query->orderBy('hul_lat_u.field_hul_updated_lat_value', 'asc');
-      $query->orderBy('hul_long_u.field_hul_updated_long_value', 'asc');
     }
     else {
-      $query->condition('fagh.field_area_hook_group_hul_value', 1, '=');
-      $query->fields('fagh', array('field_area_hook_group_hul_value'));
-
-      if ($type == "revised-sequence") {
-        
-        $query->leftjoin('field_data_field_revised_sequence_status', 'fss', 'fss.entity_id = n.nid');
-        $query->fields('fss', array('field_revised_sequence_status_value'));
-        $query->join('field_data_field_revised_sequence', 'fsq', 'fsq.entity_id = n.nid');
-        $query->fields('fsq', array('field_revised_sequence_value'));
-        $query->orderBy('fsq.field_revised_sequence_value', 'asc');
-        if (!is_null($area_status)) {
-          if ($area_status === '0' || $area_status === '1') {
-            $query->condition('fss.field_revised_sequence_status_value', $area_status, '=');
-            $query->fields('fss', array('field_revised_sequence_status_value'));
-          }
-        }
-      }
-      else {
-        $query->join('field_data_field_sequence', 'fsq', 'fsq.entity_id = n.nid');
-        $query->fields('fsq', array('field_sequence_value'));
-        $query->orderBy('fsq.field_sequence_value', 'asc');
-      }
+      $query->join('field_data_field_sequence', 'fsq', 'fsq.entity_id = n.nid');
+      $query->fields('fsq', array('field_sequence_value'));
+      $query->orderBy('fsq.field_sequence_value', 'asc');
     }
+  }
 
-    $query->join('field_data_field_hul_code', 'hc', 'hc.entity_id = n.nid');
-    $query->fields('hc', array('field_hul_code_value'));
-    $query->join('node', 'hul', 'hc.field_hul_code_value = hul.title');
-    $query->condition('hul.type', 'hul_code_master');
-    $query->addTag('node_uid');
-    $query->Join('field_data_field_hul_updated_lat', 'hul_lat_u', 'hul_lat_u.entity_id = hul.nid');
-    $query->fields('hul_lat_u', array('field_hul_updated_lat_value'));
-    $query->Join('field_data_field_hul_updated_long', 'hul_long_u', 'hul_long_u.entity_id = hul.nid');
-    $query->fields('hul_long_u', array('field_hul_updated_long_value'));
-    $query->join('field_data_field_updated_address', 'new', 'new.entity_id = hul.nid');
-    $query->fields('new');
-    $query->fields('fpc', array('field_party_code_value'));
-    $query->fields('fpn', array('field_party_name_value'));
-    $query->fields('fagh', array('field_area_hook_group_hul_value'));
+  $query->join('field_data_field_hul_code', 'hc', 'hc.entity_id = n.nid');
+  $query->fields('hc', array('field_hul_code_value'));
+  $query->join('node', 'hul', 'hc.field_hul_code_value = hul.title');
+  $query->condition('hul.type', 'hul_code_master');
+  $query->addTag('node_uid');
+  $query->Join('field_data_field_hul_updated_lat', 'hul_lat_u', 'hul_lat_u.entity_id = hul.nid');
+  $query->fields('hul_lat_u', array('field_hul_updated_lat_value'));
+  $query->Join('field_data_field_hul_updated_long', 'hul_long_u', 'hul_long_u.entity_id = hul.nid');
+  $query->fields('hul_long_u', array('field_hul_updated_long_value'));
+  $query->join('field_data_field_updated_address', 'new', 'new.entity_id = hul.nid');
+  $query->fields('new');
+  $query->fields('fpc', array('field_party_code_value'));
+  $query->fields('fpn', array('field_party_name_value'));
+  $query->fields('fagh', array('field_area_hook_group_hul_value'));
+
+  if (!is_null($sales_day)) {
+    $query->join('field_data_field_dva_sales_day', 'sd', 'sd.entity_id = na.nid');
+    $query->condition('sd.field_dva_sales_day_value', $sales_day, '=');
+    
   }
   if (!is_null($area_hook_group)) {
-    $query->join('field_data_field_area_hook', 'ah', 'ah.entity_id = n.nid');
-    $query->join('field_data_field_area_hook_group', 'agr', 'agr.entity_id = ah.field_area_hook_nid');
-    $query->condition('agr.field_area_hook_group_value', $area_hook_group, '=');
+    $query->join('field_data_field_dva_area_hook_group_name', 'agr', 'agr.entity_id = na.nid');
+    $query->condition('agr.field_dva_area_hook_group_name_value', $area_hook_group, '=');
   }
 
   if (!is_null($van_pl_group)) {
-    $query->join('field_data_field_channel', 'ch', 'ch.entity_id = n.nid');
-    $query->condition('ch.bundle', 'outlet_master');
-    $query->join('field_data_field_pl_group', 'pl', 'pl.entity_id = n.nid');
-    $query->condition('pl.bundle', 'outlet_master');
-    $query->join('field_data_field_channel', 'ppmch', 'ch.field_channel_value = ppmch.field_channel_value');
-    $query->condition('ppmch.bundle', 'party_pack_master');
-    $query->join('node', 'ppn', 'ppn.nid = ppmch.entity_id');
-    $query->addTag('node_uid');
-    $query->join('field_data_field_pl_group', 'ppmpl', 'pl.field_pl_group_value = ppmpl.field_pl_group_value and ppmch.entity_id = ppmpl.entity_id');
-    $query->condition('ppmch.bundle', 'party_pack_master');
-    $query->join('field_data_field_van_pl_group', 'ppplg', 'ppn.nid = ppplg.entity_id');
-    $query->condition('ppplg.field_van_pl_group_value', $van_pl_group, '=');
-    $query->fields('ppplg', array('field_van_pl_group_value'));
+    $query->join('field_data_field_dva_van_pl_group', 'ppplg', 'na.nid = ppplg.entity_id');
+    $query->condition('ppplg.field_dva_van_pl_group_value', $van_pl_group, '=');
+    $query->fields('ppplg', array('field_dva_van_pl_group_value'));
   }
   $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
   return $res;
