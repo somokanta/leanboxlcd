@@ -503,7 +503,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
 
     $pp_table = '';
     $party_packing = get_productivity_data_for_party_packing($start, $end, $distributor_id);
-    if (!empty($picking_data)) {
+    if (!empty($party_packing)) {
       $data1 = floor($party_packing['total']['pp_bill_lines'] / $party_packing['total']['pp_time']);
       if (is_nan($data1) || empty($data1) || $data1 == FALSE) {
         $data1 = 0;
