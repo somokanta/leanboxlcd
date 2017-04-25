@@ -11,15 +11,15 @@
 function leanbox_dashboard_menu() {
   $items = array();
 
-  // Upload form for sales register data
-  $items['delivery-per-van/import'] = array(
-    'title' => 'Outlets Per Van/Stop Master',
-    'description' => 'Import Outlets Per Van/Stop Master',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('leanbox_dashboard_delivery_per_van_form'),
-    'access arguments' => array('Distributor Upload File'),
-    'file' => 'includes/leanbox_dashboard_deliverypervan.inc',
-  );
+//  // Upload form for sales register data
+//  $items['delivery-per-van/import'] = array(
+//    'title' => 'Outlets Per Van/Stop Master',
+//    'description' => 'Import Outlets Per Van/Stop Master',
+//    'page callback' => 'drupal_get_form',
+//    'page arguments' => array('leanbox_dashboard_delivery_per_van_form'),
+//    'access arguments' => array('Distributor Upload File'),
+//    'file' => 'includes/leanbox_dashboard_deliverypervan.inc',
+//  );
 
   // Upload form for sales register data
   $items['area-hook-group/import'] = array(

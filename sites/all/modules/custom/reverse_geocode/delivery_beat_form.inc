@@ -178,6 +178,7 @@ function delivery_beat_get_results($sales_day, $van_pl_group = NULL, $area_hook_
   $user_id = $user->uid;
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
   
+  $stop_size = 10;
   $nid = check_node_title_exists($distributor_id, 'van_stop_master');
   if ($nid) {
     $node = node_load($nid);

@@ -34,7 +34,7 @@ function leanbox_misc_menu() {
   $items['van-stop-master'] = array(
     'title' => 'Outlets Per Van/Stop Master',
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('van_stop_master'),
+    'page arguments' => array('van_stop_master_form'),
     'access arguments' => array('dispatch planning screen'),
     'type' => MENU_NORMAL_ITEM,
   );
