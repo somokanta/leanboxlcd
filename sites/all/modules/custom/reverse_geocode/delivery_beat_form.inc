@@ -174,6 +174,8 @@ function delivery_beat_form_submit($form, &$form_state) {
 }
 
 function delivery_beat_get_results($sales_day, $van_pl_group = NULL, $area_hook_group = NULL) {
+  require_once drupal_get_path('module', 'change_feeds_import') . '/form/upload_billing_data.inc';
+  
   global $user;
   $user_id = $user->uid;
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
