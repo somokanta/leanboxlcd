@@ -419,6 +419,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
   global $user;
 // Store distributor id in author in each node
   $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+  $distributor_name = change_feeds_import_get_distributor_name($distributor_id);
   if (!empty($start)) {
     $start_date = strtotime($start);
   }
@@ -512,17 +513,18 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     }
     $target_data = leanbox_dashboard_target_value_using_voc_name('productivity target');
     $output[] = array('Group', 'Productivity', 'Target');
-    $output[] = array('PP', $data1,  (int)$target_data['PP']);
-    $output[] = array('NON-PP', $data2, (int)$target_data['NON-PP']);
+    $output[] = array('PP', $data1, (int) $target_data['PP']);
+    $output[] = array('NON-PP', $data2, (int) $target_data['NON-PP']);
     $output1['output'] = $output;
-    
-    if (arg(1) == 'party_packing_productivity' || $ajax_type == 'party_packing_ajax') {
 
-    $pp_table = send_email_productivity_emailer($start, $distributor_name, $end, TRUE, 'party_packing');
-      }
-       $output1['table'] = $pp_table;
+    if (arg(1) == 'party_packing_productivity' || $ajax_type == 'party_packing_ajax') {
+      $pp_table = send_email_productivity_emailer($start, $distributor_name, $end, TRUE, 'party_packing');
+    }
+    
+    $output1['table'] = $pp_table;
     return $output1;
   }
+  
   else if ($activity_type == 'picking_productivity') {
 
     $pp_table = '';
@@ -539,22 +541,23 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
           }
           $label = $key . ' ' . $key1;
           $label_key = strtolower($label);
-          $output[] = array($label, $data, (int)$target_data[$label_key]);
+          $output[] = array($label, $data, (int) $target_data[$label_key]);
         }
       }
     }
     else {
       $output[] = array('No data found', 0, 0);
     }
-    
-        if (arg(1) == 'picking_productivity' || $ajax_type == 'picking_ajax') {
 
-    $pp_table = send_email_productivity_emailer($start, $distributor_name, $end, TRUE, 'picking');
-        }
+    if (arg(1) == 'picking_productivity' || $ajax_type == 'picking_ajax') {
+      $pp_table = send_email_productivity_emailer($start, $distributor_name, $end, TRUE, 'picking');
+    }
+    
     $output1['output'] = $output;
     $output1['table'] = $pp_table;
     return $output1;
   }
+  
   else if ($activity_type == 'picking') {
 
 
