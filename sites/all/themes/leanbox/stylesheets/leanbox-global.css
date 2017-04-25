@@ -1121,6 +1121,6 @@ header[id="page-header"] .content > ul li ul li:nth-child(odd) {
   border: 1px solid #ddd !important;
 }
 /* line 1084, ../sass/leanbox-global.scss */
-.pp-typewise table td, .pp-superwise-table table td {
+.pp-typewise table td, .pp-typewise table tbody, .pp-superwise-table table td, .pp-superwise-table table tbody {
   border: 0 !important;
 }
