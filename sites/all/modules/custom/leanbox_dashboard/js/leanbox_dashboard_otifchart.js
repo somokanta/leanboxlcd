@@ -30,7 +30,7 @@
 							google.charts.setOnLoadCallback(function () {
 								drawotifChart(response.output);
 							});
-							$('#otiftable').html(response.table)
+							$('#otiftable').html(response.table);
 						},
 					});
 				}

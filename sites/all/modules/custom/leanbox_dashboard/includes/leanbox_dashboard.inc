@@ -514,7 +514,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     $output[] = array('PP', $data1,  (int)$target_data['PP']);
     $output[] = array('NON-PP', $data2, (int)$target_data['NON-PP']);
     
-    $pp_table = send_email_productivity_emailer($start, $distributor_name, $end, TRUE);
+    $pp_table = send_email_productivity_emailer($start, $distributor_name, $end, TRUE, 'party_packing');
     $output1['output'] = $output;
     $output1['table'] = $pp_table;
     return $output1;
@@ -541,7 +541,11 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     else {
       $output[] = array('No data found', 0, 0);
     }
-    return $output;
+    
+    $pp_table = send_email_productivity_emailer($start, $distributor_name, $end, TRUE, 'picking');
+    $output1['output'] = $output;
+    $output1['table'] = $pp_table;
+    return $output1;
   }
   else if ($activity_type == 'picking') {
 

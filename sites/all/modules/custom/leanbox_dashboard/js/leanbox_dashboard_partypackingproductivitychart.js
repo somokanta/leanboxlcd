@@ -31,7 +31,7 @@
 								drawpartypackingproductivityChart(response.output);
 							});
 							
-							$('#otiftable').html(response.table)
+							$('#otiftable').html(response.table);
 						},
 					});
 				}

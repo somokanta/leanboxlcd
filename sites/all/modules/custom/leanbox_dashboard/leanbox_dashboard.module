@@ -407,7 +407,7 @@ function leanbox_dashboard_block_view($delta = '') {
       $data = leanbox_dashboard_chart_query_details('picking_productivity');
       $filter_form = drupal_render(drupal_get_form('leanbox_dashboard_chart_filter_picking_productivity_form'));
       $block['content'] = array(
-        '#markup' => theme('leanbox_dashboard', array('data' => $filter_form)),
+        '#markup' => theme('leanbox_dashboard', array('data' => $filter_form, 'otif_table' => $data['table'])),
         '#attached' => array(
           'js' => array(
             array(
@@ -416,7 +416,7 @@ function leanbox_dashboard_block_view($delta = '') {
             ),
             drupal_get_path('module', 'leanbox_dashboard') . '/js/leanbox_dashboard_pickingproductivitychart.js',
             array(
-              'data' => array('leanbox_dashboard' => array('picking_productivity' => $data, 'area_definition' => $area_definition)),
+              'data' => array('leanbox_dashboard' => array('picking_productivity' => $data['output'], 'area_definition' => $area_definition)),
               'type' => 'setting'
             ),
           ),

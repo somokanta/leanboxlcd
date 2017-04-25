@@ -29,8 +29,9 @@
 						success: function (response) {
 							var area_definition = Drupal.settings.leanbox_dashboard.area_definition;
 							google.charts.setOnLoadCallback(function () {
-								drawpickingproductivityChart(response);
+								drawpickingproductivityChart(response.output);
 							});
+							$('#otiftable').html(response.table);
 						},
 					});
 				}
