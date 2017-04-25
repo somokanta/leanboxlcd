@@ -415,7 +415,7 @@ function leanbox_dashboard_chart_filter_delivery_form($form, &$form_state) {
  * 
  * @return html
  */
-function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end = '') {
+function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end = '', $ajax_type = '') {
   global $user;
 // Store distributor id in author in each node
   $distributor_id = change_feeds_import_get_distributor_id($user->uid);
@@ -500,6 +500,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
   }
   else if ($activity_type == 'party_packing_productivity') {
 
+    $pp_table = '';
     $party_packing = get_productivity_data_for_party_packing($start, $end, $distributor_id);
     $data1 = floor($party_packing['total']['pp_bill_lines'] / $party_packing['total']['pp_time']);
     if (is_nan($data1) || empty($data1) || $data1 == FALSE) {
@@ -513,14 +514,18 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     $output[] = array('Group', 'Productivity', 'Target');
     $output[] = array('PP', $data1,  (int)$target_data['PP']);
     $output[] = array('NON-PP', $data2, (int)$target_data['NON-PP']);
-    
-    $pp_table = send_email_productivity_emailer($start, $distributor_name, $end, TRUE, 'party_packing');
     $output1['output'] = $output;
-    $output1['table'] = $pp_table;
+    
+    if (arg(1) == 'party_packing_productivity' || $ajax_type == 'party_packing_ajax') {
+
+    $pp_table = send_email_productivity_emailer($start, $distributor_name, $end, TRUE, 'party_packing');
+      }
+       $output1['table'] = $pp_table;
     return $output1;
   }
   else if ($activity_type == 'picking_productivity') {
 
+    $pp_table = '';
     $output[] = array('Group', 'Productivity', 'Target');
     $picking_data = get_productivity_data_for_picking($start, $end, $distributor_id);
 
@@ -542,7 +547,10 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
       $output[] = array('No data found', 0, 0);
     }
     
+        if (arg(1) == 'picking_productivity' || $ajax_type == 'picking_ajax') {
+
     $pp_table = send_email_productivity_emailer($start, $distributor_name, $end, TRUE, 'picking');
+        }
     $output1['output'] = $output;
     $output1['table'] = $pp_table;
     return $output1;

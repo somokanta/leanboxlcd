@@ -110,7 +110,14 @@ function party_packing_filter_callback() {
     $output_data = leanbox_dashboard_gauge_chart_query_details($activity_type, $start_date, $end_date);
   }
   else {
-    $output_data = leanbox_dashboard_chart_query_details($activity_type, $start_date, $end_date);
+    switch ($activity_type) {
+      case 'party_packing' : $ajax_type = 'party_packing_ajax';
+        break;
+       case 'picking' : $ajax_type = 'picking_ajax';
+        break;
+      default:  $ajax_type = '';
+    }
+    $output_data = leanbox_dashboard_chart_query_details($activity_type, $start_date, $end_date, $ajax_type);
   }
   drupal_json_output($output_data);
 }
