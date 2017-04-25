@@ -503,28 +503,32 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
 
     $pp_table = '';
     $party_packing = get_productivity_data_for_party_packing($start, $end, $distributor_id);
-    $data1 = floor($party_packing['total']['pp_bill_lines'] / $party_packing['total']['pp_time']);
-    if (is_nan($data1) || empty($data1) || $data1 == FALSE) {
-      $data1 = 0;
+    if (!empty($picking_data)) {
+      $data1 = floor($party_packing['total']['pp_bill_lines'] / $party_packing['total']['pp_time']);
+      if (is_nan($data1) || empty($data1) || $data1 == FALSE) {
+        $data1 = 0;
+      }
+      $data2 = floor($party_packing['total']['non_pp_bill_lines'] / $party_packing['total']['non_time']);
+      if (is_nan($data2) || empty($data2) || $data2 == FALSE) {
+        $data2 = 0;
+      }
+      $target_data = leanbox_dashboard_target_value_using_voc_name('productivity target');
+      $output[] = array('Group', 'Productivity', 'Target');
+      $output[] = array('PP', $data1, (int) $target_data['PP']);
+      $output[] = array('NON-PP', $data2, (int) $target_data['NON-PP']);
     }
-    $data2 = floor($party_packing['total']['non_pp_bill_lines'] / $party_packing['total']['non_time']);
-    if (is_nan($data2) || empty($data2) || $data2 == FALSE) {
-      $data2 = 0;
+    else {
+      $output[] = array('No data found', 0, 0);
     }
-    $target_data = leanbox_dashboard_target_value_using_voc_name('productivity target');
-    $output[] = array('Group', 'Productivity', 'Target');
-    $output[] = array('PP', $data1, (int) $target_data['PP']);
-    $output[] = array('NON-PP', $data2, (int) $target_data['NON-PP']);
     $output1['output'] = $output;
 
     if (arg(1) == 'party_packing_productivity' || $ajax_type == 'party_packing_ajax') {
       $pp_table = send_email_productivity_emailer($start, $distributor_name, $end, TRUE, 'party_packing');
     }
-    
+
     $output1['table'] = $pp_table;
     return $output1;
   }
-  
   else if ($activity_type == 'picking_productivity') {
 
     $pp_table = '';
@@ -552,12 +556,11 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     if (arg(1) == 'picking_productivity' || $ajax_type == 'picking_ajax') {
       $pp_table = send_email_productivity_emailer($start, $distributor_name, $end, TRUE, 'picking');
     }
-    
+
     $output1['output'] = $output;
     $output1['table'] = $pp_table;
     return $output1;
   }
-  
   else if ($activity_type == 'picking') {
 
 
