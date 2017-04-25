@@ -1065,20 +1065,24 @@ header[id="page-header"] {
 }
 
 /*table theming  for leanbox chart details*/
-.pp-typewise, .pp-superwise-table {
+.pp-typewise, .pp-superwise-table { 
     width: 75%;
-    border: 1px solid #ccc;
+    border: 1px solid #ddd;
 
     tbody {
-        border: 1px solid #ccc;
+        border: 1px solid #ddd;
     }
 
     th {
         text-align: left;
         padding: 10px;
-
+    }
+    td {
+            border: 1px solid #ddd !important;
+    }
+    table {
         td {
-            border: 0;
+            border: 0 !important;
         }
     }
 }

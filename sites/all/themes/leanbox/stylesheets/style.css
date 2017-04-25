@@ -11012,11 +11012,11 @@ header[id="page-header"] .content > ul li ul li:nth-child(odd) {
 /* line 1068, ../sass/leanbox-global.scss */
 .pp-typewise, .pp-superwise-table {
   width: 75%;
-  border: 1px solid #ccc;
+  border: 1px solid #ddd;
 }
 /* line 1072, ../sass/leanbox-global.scss */
 .pp-typewise tbody, .pp-superwise-table tbody {
-  border: 1px solid #ccc;
+  border: 1px solid #ddd;
 }
 /* line 1076, ../sass/leanbox-global.scss */
 .pp-typewise th, .pp-superwise-table th {
@@ -11024,6 +11024,10 @@ header[id="page-header"] .content > ul li ul li:nth-child(odd) {
   padding: 10px;
 }
 /* line 1080, ../sass/leanbox-global.scss */
-.pp-typewise th td, .pp-superwise-table th td {
-  border: 0;
+.pp-typewise td, .pp-superwise-table td {
+  border: 1px solid #ddd !important;
+}
+/* line 1084, ../sass/leanbox-global.scss */
+.pp-typewise table td, .pp-superwise-table table td {
+  border: 0 !important;
 }
