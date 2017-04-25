@@ -207,7 +207,6 @@ function delivery_beat_get_results($sales_day, $van_pl_group = NULL, $area_hook_
   
   //Area hook Master
   $query->join('node', 'na', 'na.nid = fa.field_area_hook_nid');
-  $query->join('field_data_field_area_hook_group', 'fag', 'fag.entity_id = na.nid');
 
   $query->join('field_data_field_dva_sales_day', 'sd', 'sd.entity_id = na.nid');
   $query->condition('sd.field_dva_sales_day_value', $sales_day, '=');
@@ -277,10 +276,8 @@ function delivery_beat_get_results($sales_day, $van_pl_group = NULL, $area_hook_
   $subquery->join('field_data_field_revised_sequence', 'fs', 'fs.entity_id = n.nid');
   $subquery->join('field_data_field_area_hook', 'fa', 'fa.entity_id = n.nid');
   $subquery->join('node', 'na', 'na.nid = fa.field_area_hook_nid');
-  //$subquery->join('field_data_field_area_hook_group', 'fag', 'fag.entity_id = na.nid');
   
   $subquery->join('node', 'na', 'na.nid = fa.field_area_hook_nid');
-  $subquery->join('field_data_field_area_hook_group', 'fag', 'fag.entity_id = na.nid');
   $subquery->join('field_data_field_dva_sales_day', 'sd', 'sd.entity_id = na.nid');
   $subquery->condition('sd.field_dva_sales_day_value', $sales_day, '=');
   $subquery->join('field_data_field_dva_van_pl_group', 'ppplg', 'na.nid = ppplg.entity_id');

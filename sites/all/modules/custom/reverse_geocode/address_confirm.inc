@@ -385,7 +385,7 @@ function area_wise_filters_submit(&$form, &$form_state) {
   foreach ($data as $key => $val) {
     $lat = $val['field_hul_updated_lat_value'];
     $long = $val['field_hul_updated_long_value'];
-    $party_code = $val['field_party_code_value'];
+    $party_code = $val['title'];
     $party_name = $val['field_party_name_value'];
     $hul_status = $val['field_area_hook_group_hul_value'];
 
@@ -439,14 +439,14 @@ function area_wise_filters_submit(&$form, &$form_state) {
 }
 
 function reverse_geocode_get_data_area_code_wise($sales_day, $van_pl_group, $area_hook_group, $area_status, $type) {
+  global $user;
+  $user_id = $user->uid;
+  $distributor_id = change_feeds_import_get_distributor_id($user_id);
+  
   $query = db_select('node', 'n');
   $query->condition('n.type', 'outlet_master');
   $query->addTag('node_uid');
 
-  $query->join('field_data_field_area_hook', 'fa', 'fa.entity_id = n.nid');
-  $query->join('node', 'na', 'na.nid = fa.field_area_hook_nid');
-
-  $query->join('field_data_field_party_code', 'fpc', 'fpc.entity_id = n.nid');
   $query->join('field_data_field_party_name', 'fpn', 'fpn.entity_id = n.nid');
   $query->leftjoin('field_data_field_area_hook_group_hul', 'fagh', 'fagh.entity_id = n.nid');
   if ($type == "area-checkbox") {
@@ -486,19 +486,23 @@ function reverse_geocode_get_data_area_code_wise($sales_day, $van_pl_group, $are
   }
 
   $query->join('field_data_field_hul_code', 'hc', 'hc.entity_id = n.nid');
-  $query->fields('hc', array('field_hul_code_value'));
   $query->join('node', 'hul', 'hc.field_hul_code_value = hul.title');
+  $query->fields('hc', array('field_hul_code_value'));
+  $query->condition('hul.uid', $distributor_id, '=');
   $query->condition('hul.type', 'hul_code_master');
-  $query->addTag('node_uid');
+  
   $query->Join('field_data_field_hul_updated_lat', 'hul_lat_u', 'hul_lat_u.entity_id = hul.nid');
   $query->fields('hul_lat_u', array('field_hul_updated_lat_value'));
   $query->Join('field_data_field_hul_updated_long', 'hul_long_u', 'hul_long_u.entity_id = hul.nid');
   $query->fields('hul_long_u', array('field_hul_updated_long_value'));
   $query->join('field_data_field_updated_address', 'new', 'new.entity_id = hul.nid');
   $query->fields('new');
-  $query->fields('fpc', array('field_party_code_value'));
+  $query->fields('n', array('title'));
   $query->fields('fpn', array('field_party_name_value'));
   $query->fields('fagh', array('field_area_hook_group_hul_value'));
+  
+  $query->join('field_data_field_area_hook', 'fa', 'fa.entity_id = n.nid');
+  $query->join('node', 'na', 'na.nid = fa.field_area_hook_nid');
 
   if (!is_null($sales_day)) {
     $query->join('field_data_field_dva_sales_day', 'sd', 'sd.entity_id = na.nid');
@@ -513,7 +517,6 @@ function reverse_geocode_get_data_area_code_wise($sales_day, $van_pl_group, $are
   if (!is_null($van_pl_group)) {
     $query->join('field_data_field_dva_van_pl_group', 'ppplg', 'na.nid = ppplg.entity_id');
     $query->condition('ppplg.field_dva_van_pl_group_value', $van_pl_group, '=');
-    $query->fields('ppplg', array('field_dva_van_pl_group_value'));
   }
   $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
   return $res;
