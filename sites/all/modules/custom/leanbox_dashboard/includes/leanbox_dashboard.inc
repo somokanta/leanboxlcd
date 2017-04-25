@@ -520,13 +520,14 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     else {
       $output[] = array('No data found', 0, 0);
     }
-    $output1['output'] = $output;
 
     if (arg(1) == 'party_packing_productivity' || $ajax_type == 'party_packing_ajax') {
       $pp_table = send_email_productivity_emailer($start, $distributor_name, $end, TRUE, 'party_packing');
     }
 
+    $output1['output'] = $output;
     $output1['table'] = $pp_table;
+    dpm($output1, 'output2');
     return $output1;
   }
   else if ($activity_type == 'picking_productivity') {
@@ -559,6 +560,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
 
     $output1['output'] = $output;
     $output1['table'] = $pp_table;
+    dpm($output1, 'output1');
     return $output1;
   }
   else if ($activity_type == 'picking') {
