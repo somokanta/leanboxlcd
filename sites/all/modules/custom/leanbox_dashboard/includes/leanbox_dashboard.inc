@@ -503,6 +503,8 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
 
     $pp_table = '';
     $party_packing = get_productivity_data_for_party_packing($start, $end, $distributor_id);
+    $output[] = array('Group', 'Productivity', 'Target');
+    
     if (!empty($party_packing)) {
       $data1 = floor($party_packing['total']['pp_bill_lines'] / $party_packing['total']['pp_time']);
       if (is_nan($data1) || empty($data1) || $data1 == FALSE) {
@@ -513,7 +515,6 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
         $data2 = 0;
       }
       $target_data = leanbox_dashboard_target_value_using_voc_name('productivity target');
-      $output[] = array('Group', 'Productivity', 'Target');
       $output[] = array('PP', $data1, (int) $target_data['PP']);
       $output[] = array('NON-PP', $data2, (int) $target_data['NON-PP']);
     }
@@ -527,7 +528,6 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
 
     $output1['output'] = $output;
     $output1['table'] = $pp_table;
-    dpm($output1, 'output2');
     return $output1;
   }
   else if ($activity_type == 'picking_productivity') {
@@ -560,7 +560,6 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
 
     $output1['output'] = $output;
     $output1['table'] = $pp_table;
-    dpm($output1, 'output1');
     return $output1;
   }
   else if ($activity_type == 'picking') {
