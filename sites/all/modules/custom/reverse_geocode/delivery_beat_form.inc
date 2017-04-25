@@ -184,7 +184,7 @@ function delivery_beat_get_results($sales_day, $van_pl_group = NULL, $area_hook_
 
   //Outlet Master
   $query->join('field_data_field_sales_day', 'fsd', 'fsd.entity_id = n.nid');
-  $query->join('field_data_field_sequence', 'fs', 'fs.entity_id = n.nid');
+  $query->join('field_data_field_revised_sequence', 'fs', 'fs.entity_id = n.nid');
   $query->join('field_data_field_channel', 'fc1', 'fc1.entity_id = n.nid');
   $query->join('field_data_field_pl_group', 'fp1', 'fp1.entity_id = n.nid');
   $query->join('field_data_field_area_hook', 'fa', 'fa.entity_id = n.nid');
@@ -203,6 +203,28 @@ function delivery_beat_get_results($sales_day, $van_pl_group = NULL, $area_hook_
   $query->fields('fc1', array('field_channel_value'));
   $query->fields('fp1', array('field_pl_group_value'));
   $query->fields('fsd', array('field_sales_day_value'));
+  
+  
+  //Area hook Master
+  $query->join('node', 'na', 'na.nid = fa.field_area_hook_nid');
+
+  $query->join('field_data_field_dva_sales_day', 'sd', 'sd.entity_id = na.nid');
+  $query->condition('sd.field_dva_sales_day_value', $sales_day, '=');
+
+  $query->join('field_data_field_dva_area_hook_group_name', 'agr', 'agr.entity_id = na.nid');
+  $query->join('field_data_field_dva_van_pl_group', 'ppplg', 'na.nid = ppplg.entity_id');
+  $query->fields('ppplg', array('field_dva_van_pl_group_value'));
+  if (!is_null($area_hook_group)) {
+    $query->condition('agr.field_dva_area_hook_group_name_value', $area_hook_group, '=');
+  }
+  if (!is_null($van_pl_group)) {
+    $query->condition('ppplg.field_dva_van_pl_group_value', $van_pl_group, '=');
+  }
+  
+  $query->join('node', 'nag', 'agr.field_dva_area_hook_group_name_value = nag.title');
+  $query->join('field_data_field_area_hook_group_id', 'fagi', 'fagi.entity_id = nag.nid');
+  $query->condition('nag.type', 'area_hook_group_master');
+  $query->condition('nag.uid', $distributor_id, '=');
 
   //Sales Delivery Day Master
   $query->join('node', 'nsd', 'nsd.title = fsd.field_sales_day_value');
@@ -216,38 +238,34 @@ function delivery_beat_get_results($sales_day, $van_pl_group = NULL, $area_hook_
   $query->condition('nh.uid', $distributor_id, '=');
 
 //Party pack Master
-  $query->join('field_data_field_channel', 'fc2', 'fc1.field_channel_value = fc2.field_channel_value');
-  $query->join('field_data_field_pl_group', 'fp2', 'fp2.field_pl_group_value = fp1.field_pl_group_value AND fp2.entity_id=fc2.entity_id');
-  $query->join('field_data_field_van_pl_group', 'fvp', 'fvp.entity_id = fp2.entity_id');
-  $query->join('field_data_field_delivery_beats', 'fdb', 'fdb.entity_id = fp2.entity_id');
-  $query->join('field_data_field_delivery_per_van', 'fdpv', 'fdpv.entity_id = fp2.entity_id');
-  $query->join('node', 'npp', 'npp.nid = fp2.entity_id');
+  //$query->join('field_data_field_channel', 'fc2', 'fc1.field_channel_value = fc2.field_channel_value');
+  //$query->join('field_data_field_pl_group', 'fp2', 'fp2.field_pl_group_value = fp1.field_pl_group_value AND fp2.entity_id=fc2.entity_id');
+  //$query->join('field_data_field_van_pl_group', 'fvp', 'fvp.entity_id = fp2.entity_id');
+  //$query->join('field_data_field_delivery_beats', 'fdb', 'fdb.entity_id = fp2.entity_id');
+  //$query->join('field_data_field_delivery_per_van', 'fdpv', 'fdpv.entity_id = fp2.entity_id');
+  //$query->join('node', 'npp', 'npp.nid = fp2.entity_id');
 
-  $query->condition('npp.uid', $distributor_id, '=');
-  $query->condition('fc2.bundle', 'party_pack_master');
-  $query->condition('fp2.bundle', 'party_pack_master');
-  if (!is_null($van_pl_group)) {
-    $query->condition('fvp.field_van_pl_group_value', $van_pl_group);
-  }
-  $query->fields('fvp', array('field_van_pl_group_value'));
+  //$query->condition('npp.uid', $distributor_id, '=');
+  //$query->condition('fc2.bundle', 'party_pack_master');
+  //$query->condition('fp2.bundle', 'party_pack_master');
+  //$query->fields('fvp', array('field_van_pl_group_value'));
 
-//Area hook Master
-  $query->join('node', 'na', 'na.nid = fa.field_area_hook_nid');
-  $query->join('field_data_field_area_hook_group', 'fag', 'fag.entity_id = na.nid');
 
-  $query->fields('na', array('title'));
-  $query->fields('fag', array('field_area_hook_group_value'));
-  if (!is_null($area_hook_group)) {
-    $query->condition('fag.field_area_hook_group_value', $area_hook_group);
-  }
 
-  $query->fields('fs', array('field_sequence_value'));
-  $expression = "CONCAT_WS('-',fdn.field_day_number_value, LPAD(fvp.field_van_pl_group_value, 2, '0'),fag.field_area_hook_group_value,sub.title,LPAD(CEIL(fs.field_sequence_value/field_delivery_beats_value), 2, '0'), LPAD(CEIL(fs.field_sequence_value/field_delivery_per_van_value), 2, '0'))";
+  $query->fields('fs', array('field_revised_sequence_value'));
+  $expression = "CONCAT_WS('-',"
+      . "LPAD(fdn.field_day_number_value, 2, '0'), "
+      . "LPAD(ppplg.field_dva_van_pl_group_value, 2, '0'),"
+      . "fagi.field_area_hook_group_id_value,"
+      . "sub.area,"
+      . "LPAD(CEIL(fs.field_revised_sequence_value/10), 3, '0')"
+      . ")";
+  
   $query->addExpression($expression, 'exp');
 
-  $query->orderBy('fvp.field_van_pl_group_value');
-  $query->orderBy('fag.field_area_hook_group_value');
-  $query->orderBy('fs.field_sequence_value');
+  $query->orderBy('ppplg.field_dva_van_pl_group_value');
+  $query->orderBy('agr.field_dva_area_hook_group_name_value');
+  $query->orderBy('fs.field_revised_sequence_value');
   
   
   $subquery = db_select('node', 'n');
@@ -255,30 +273,38 @@ function delivery_beat_get_results($sales_day, $van_pl_group = NULL, $area_hook_
 
   //Outlet Master
   $subquery->join('field_data_field_sales_day', 'fsd', 'fsd.entity_id = n.nid');
-  $subquery->join('field_data_field_sequence', 'fs', 'fs.entity_id = n.nid');
-  $subquery->join('field_data_field_channel', 'fc1', 'fc1.entity_id = n.nid');
-  $subquery->join('field_data_field_pl_group', 'fp1', 'fp1.entity_id = n.nid');
+  $subquery->join('field_data_field_revised_sequence', 'fs', 'fs.entity_id = n.nid');
   $subquery->join('field_data_field_area_hook', 'fa', 'fa.entity_id = n.nid');
   $subquery->join('node', 'na', 'na.nid = fa.field_area_hook_nid');
-  //$subquery->join('field_data_field_area_hook_group', 'fag', 'fag.entity_id = na.nid');
+  
+  $subquery->join('node', 'na', 'na.nid = fa.field_area_hook_nid');
+  $subquery->join('field_data_field_dva_sales_day', 'sd', 'sd.entity_id = na.nid');
+  $subquery->condition('sd.field_dva_sales_day_value', $sales_day, '=');
+  $subquery->join('field_data_field_dva_van_pl_group', 'ppplg', 'na.nid = ppplg.entity_id');
+  
+  
+  //HUL Code Master
+  $subquery->join('field_data_field_hul_code', 'hc', 'hc.entity_id = n.nid');
+  $subquery->join('node', 'hul', 'hc.field_hul_code_value = hul.title');
+  $subquery->condition('hul.type', 'hul_code_master');
+  $subquery->condition('hul.uid', $distributor_id, '=');
+  $subquery->join('field_data_field_updated_address', 'addr', 'addr.entity_id = hul.nid');
   
   //Party pack Master
-  $subquery->join('field_data_field_channel', 'fc2', 'fc1.field_channel_value = fc2.field_channel_value');
-  $subquery->join('field_data_field_pl_group', 'fp2', 'fp2.field_pl_group_value = fp1.field_pl_group_value AND fp2.entity_id=fc2.entity_id');
-  $subquery->join('field_data_field_delivery_beats', 'fdb', 'fdb.entity_id = fp2.entity_id');
-  $subquery->join('node', 'npp', 'npp.nid = fp2.entity_id');
-  $subquery->condition('npp.uid', $distributor_id, '=');
+  //$subquery->join('field_data_field_channel', 'fc2', 'fc1.field_channel_value = fc2.field_channel_value');
+  //$subquery->join('field_data_field_pl_group', 'fp2', 'fp2.field_pl_group_value = fp1.field_pl_group_value AND fp2.entity_id=fc2.entity_id');
+  //$subquery->join('field_data_field_delivery_beats', 'fdb', 'fdb.entity_id = fp2.entity_id');
+  //$subquery->join('node', 'npp', 'npp.nid = fp2.entity_id');
+  //$subquery->condition('npp.uid', $distributor_id, '=');
   
-  $subquery->condition('fsd.field_sales_day_value', $sales_day);
-  $subquery->fields('na', array('title'));
-  $subquery->fields('fs', array('field_sequence_value'));
-  $subquery->fields('fc1', array('field_channel_value'));
-  $subquery->fields('fp1', array('field_pl_group_value'));
+  $subquery->fields('ppplg', array('field_dva_van_pl_group_value'));
+  $subquery->fields('fs', array('field_revised_sequence_value'));
+  $subquery->addExpression('COALESCE(addr.field_updated_address_sub_premise, addr.field_updated_address_dependent_locality, addr.field_updated_address_locality)', 'area');
   
   ############ CHANGE 10 to DYNAMIC####################
-  $subquery->where("((fs.field_sequence_value - 1)%(fdb.field_delivery_beats_value) = 0)");
+  $subquery->where("((fs.field_revised_sequence_value - 1)%(10) = 0)");
   
-  $query->join($subquery, 'sub', 'sub.field_sequence_value = (FLOOR((fs.field_sequence_value - 1)/fdb.field_delivery_beats_value)*fdb.field_delivery_beats_value + 1) AND sub.field_channel_value = fc1.field_channel_value AND sub.field_pl_group_value = fp1.field_pl_group_value');
+  $query->join($subquery, 'sub', 'sub.field_revised_sequence_value = (FLOOR((fs.field_revised_sequence_value - 1)/10)*10 + 1) AND sub.field_dva_van_pl_group_value = ppplg.field_dva_van_pl_group_value');
 
   $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
 

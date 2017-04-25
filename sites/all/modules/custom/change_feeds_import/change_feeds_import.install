@@ -1172,3 +1172,16 @@ function change_feeds_import_update_7109() {
 
   db_create_table('day_van_area_data', $schema['day_van_area_data']);
 }
+
+
+/**
+ *  Implements Hook_Update_7110
+ */
+function change_feeds_import_update_7110() {
+
+  db_add_field('custom_outlet_area_hook', 'uploded_area_hook', array(
+    'type' => 'varchar',
+    'length' => 255,
+    'default' => 0,
+  ));
+}
