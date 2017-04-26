@@ -356,9 +356,10 @@ function change_feeds_import_sales_delivery_node($sales_data_result, $distributo
           else {
             $node->field_delivery_pending[LANGUAGE_NONE][0]['value'] = $val['delivery_pending'];
           }
-          field_attach_update('node', $node);
-          entity_get_controller('node')->resetCache(array($nid));
-          taxonomy_node_update($node);
+          node_save($node);
+//          field_attach_update('node', $node);
+//          entity_get_controller('node')->resetCache(array($nid));
+//          taxonomy_node_update($node);
           
           $count++;
         }
