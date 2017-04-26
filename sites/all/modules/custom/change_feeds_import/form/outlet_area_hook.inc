@@ -299,13 +299,17 @@ function change_feeds_import_outlet_area_hook_node($sales_data_result, $distribu
         }
         else {
           $area_hook = $val['uploded_area_hook']; // Uploaded Area Hook
+          dpm($area_hook,"area_hook");
           $node = node_load($nid);
           $sales_day = $node->field_sales_day['und'][0]['value']; // Sales Day from Outlet Master
+          dpm($sales_day,"sales_day");
           $ol_channel = $node->field_channel['und'][0]['value']; // Channle from Outlet Master
           $ol_pl_grp = $node->field_pl_group['und'][0]['value']; // PL Grp from Outlet Master
           $van_pl_grp = get_van_pl_grp_from_hannel_pl_grp($ol_channel, $ol_pl_grp,$distributor_id); // VAN PL GRP from Party Pack Master
+          dpm($van_pl_grp,"van_pl_grp");
           // get nid of Day-van-pl-grp-area-hook master using sales_day , Van_PL_Grp , and Area_Hook
           $day_van_area_nid = get_nid_from_master_using_sales_day_van_grp_area_hook($sales_day,$van_pl_grp,$area_hook);
+          dpm($day_van_area_nid,"day_van_area_nid");
           // assign above nid to area hook which is in Outlet Master
           $node->field_area_hook['und'][0]['nid'] = 724174;
           field_attach_update('node', $node);
