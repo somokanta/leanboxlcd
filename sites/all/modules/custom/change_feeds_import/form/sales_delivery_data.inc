@@ -297,7 +297,7 @@ function change_feeds_import_sales_delivery_create_confirm_content($fid) {
           ->execute()->fetchAll(PDO::FETCH_ASSOC);
 
   $operations = array();
-  $data_chunk = array_chunk($sales_data_result, 100);
+  $data_chunk = array_chunk($sales_data_result, 200);
   foreach ($data_chunk as $data) {
     $operations[] = array('change_feeds_import_sales_delivery_node', array($data, $distributor_id));
   }
@@ -318,11 +318,11 @@ function change_feeds_import_sales_delivery_create_confirm_content($fid) {
 function change_feeds_import_sales_delivery_node($sales_data_result, $distributor_id, &$context) {
   if (!empty($sales_data_result)) {
     $count = 0;
+    require_once drupal_get_path('module', 'change_feeds_import') . '/form/upload_billing_data.inc';
     foreach ($sales_data_result as $key => $val) {
 
       if (!empty($val['bill_no']) && empty($val['error_message'])) {
 
-        require_once drupal_get_path('module', 'change_feeds_import') . '/form/upload_billing_data.inc';
         // check to update node
         $nid = check_node_title_exists($val['bill_no'], 'sales_register_data');
         if (empty($nid)) {
@@ -345,22 +345,9 @@ function change_feeds_import_sales_delivery_node($sales_data_result, $distributo
           field_attach_update('node', $node);
           entity_get_controller('node')->resetCache(array($nid));
           taxonomy_node_update($node);
-
-
-//          $node = node_load($nid);
-//          $node->field_impact_delivery_date[LANGUAGE_NONE][0]['value'] = $val['impact_del_date'];
-//          $node->field_sales_return_amt[LANGUAGE_NONE][0]['value'] = $val['sales_amt'];
-//          $node->field_delivery_status[LANGUAGE_NONE][0]['tid'] = $val['partial_full']; 
-//          $node->field_deliver_reason[LANGUAGE_NONE][0]['tid'] = $val['reason'];
-//          if (empty($val['delivery_pending'])) {
-//            $node->field_delivery_pending = array();
-//          }
-//          else {
-//            $node->field_delivery_pending[LANGUAGE_NONE][0]['value'] = $val['delivery_pending'];
-//          }
-//          node_save($node);
+          
+          $count++;
         }
-        $count++;
       }
       $fid = $val['fid'];
     }
