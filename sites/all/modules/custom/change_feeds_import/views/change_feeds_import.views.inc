@@ -24,6 +24,27 @@ function change_feeds_import_views_data_alter(&$data) {
     ),
   );
 
+  
+  $data['field_data_field_dva_area_hook_group_name']['table']['group'] = t('Area Hook Grp Name');
+  $data['field_data_field_dva_area_hook_group_name']['area_hook_grp'] = array(
+    'title' => t('Area Hook Grp relationship'),
+    'help' => t('Area Hook Grp help'),
+    'relationship' => array(
+      'title' => 'area_hook_grp',
+      'base' => 'node', // Table we're joining to.
+      'base field' => 'title', // Field on the joined table.
+      'field' => 'field_dva_area_hook_group_name_value', // Real field name on the 'foo' table.
+      'handler' => 'views_handler_relationship',
+      'label' => t('Area Hook Grp Name to Area Hook Grp  master relationship'),
+      'title' => t('Area Hook Grp Name to Area Hook Grp  master relationship'),
+      'help' => t('More information about relationship.'),
+      'extra' => array(
+        array('field' => 'type', 'value' => 'area_hook_group_master'),
+      ),
+    ),
+  );
+  
+  
   $data['field_data_field_hul_code']['table']['group'] = t('Hul table');
   $data['field_data_field_hul_code']['dummy_name1'] = array(
     'title' => t('Outlet to Hul relationship'),
