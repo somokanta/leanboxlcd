@@ -297,7 +297,7 @@ function change_feeds_import_sales_delivery_create_confirm_content($fid) {
           ->execute()->fetchAll(PDO::FETCH_ASSOC);
 
   $operations = array();
-  $data_chunk = array_chunk($sales_data_result, 500);
+  $data_chunk = array_chunk($sales_data_result, 200);
   foreach ($data_chunk as $data) {
     $operations[] = array('change_feeds_import_sales_delivery_node', array($data, $distributor_id));
   }
