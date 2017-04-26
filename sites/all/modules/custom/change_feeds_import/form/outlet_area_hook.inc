@@ -311,7 +311,7 @@ function change_feeds_import_outlet_area_hook_node($sales_data_result, $distribu
           $day_van_area_nid = get_nid_from_master_using_sales_day_van_grp_area_hook($sales_day,$van_pl_grp,$area_hook);
           dpm($day_van_area_nid,"day_van_area_nid");
           // assign above nid to area hook which is in Outlet Master
-          $node->field_area_hook['und'][0]['nid'] = $day_van_area_nid;
+          $node->field_area_hook['und'][0]['nid'] = 724174;
           field_attach_update('node', $node);
           entity_get_controller('node')->resetCache(array($nid));
 
