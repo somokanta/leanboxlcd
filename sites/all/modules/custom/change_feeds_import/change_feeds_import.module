@@ -92,8 +92,8 @@ function change_feeds_import_menu() {
     'access arguments' => array('Distributor Upload File'),
     'file' => 'form/sales_delivery_data.inc',
   );
-  
-  
+
+
 
   $items['sales-delivery-data-confirm/%'] = array(
     'title' => 'Sales Delivery Data  Confirm Table',
@@ -182,7 +182,7 @@ function change_feeds_import_menu() {
     'access arguments' => array('Distributor Upload File'),
     'file' => 'form/day_van_area_data.inc',
   );
-  
+
   $items['sales-confirm/%'] = array(
     'title' => 'Sales Confirm Table',
     'description' => 'Sales Register Confirm Table',
@@ -191,7 +191,7 @@ function change_feeds_import_menu() {
     'access arguments' => array('Distributor Upload File'),
     'file' => 'form/sales_register_data.inc',
   );
-  
+
   $items['day-van-area-confirm/%'] = array(
     'title' => 'Day-Van-Area Confirm Table',
     'description' => 'Day-Van-Area Confirm Table',
@@ -211,7 +211,7 @@ function change_feeds_import_menu() {
     'file' => 'form/sales_register_data.inc',
   );
 
-  
+
   // when confirm is clicked
   $items['day-van-area-confirm/create_content/%'] = array(
     'title' => 'confirm',
@@ -221,7 +221,7 @@ function change_feeds_import_menu() {
     'access arguments' => array('Distributor Upload File'),
     'file' => 'form/day_van_area_data.inc',
   );
-  
+
   // when discard is clicked
   $items['sales-discard/%'] = array(
     'title' => 'sales Discard',
@@ -231,8 +231,8 @@ function change_feeds_import_menu() {
     'access arguments' => array('Distributor Upload File'),
     'file' => 'form/sales_register_data.inc',
   );
-  
-   // when discard is clicked
+
+  // when discard is clicked
   $items['day-van-area-discard/%'] = array(
     'title' => 'Day-Van-Area Discard',
     'description' => 'Day-Van-Area Discard Data',
@@ -1690,4 +1690,62 @@ function check_area_id_exists($title) {
   $query->addTag('node_uid');
   $area_id = $query->execute()->fetchAllKeyed(0, 0);
   return $area_id;
+}
+
+function change_feeds_import_form_views_exposed_form_alter(&$form, &$form_state) {
+  if ($form['#id'] == 'views-exposed-form-Outlet-Master-Report-page') {
+
+
+    $van_pl_options = get_van_pl('van', NULL, NULL);
+    $select = array('' => '- Any -');
+
+    $sales_day_options = get_van_pl(NULL, 'day', NULL);
+    $select = array('' => '- Any -');
+
+    $area_grp_name_options = get_van_pl(NULL, NULL, 'name');
+    $select = array('' => '- Any -');
+
+
+    $van_pl_options = $select + $van_pl_options;
+    $sales_day_options = $select + $sales_day_options;
+    $area_grp_name_options = $select + $area_grp_name_options;
+
+    $form['field_dva_van_pl_group_value']['#type'] = 'select';
+    $form['field_dva_van_pl_group_value']['#size'] = null;
+    $form['field_dva_van_pl_group_value']['#options'] = $van_pl_options;
+    $form['field_dva_van_pl_group_value']['#validated'] = TRUE;
+
+    $form['field_dva_sales_day_value']['#type'] = 'select';
+    $form['field_dva_sales_day_value']['#size'] = null;
+    $form['field_dva_sales_day_value']['#options'] = $sales_day_options;
+    $form['field_dva_sales_day_value']['#validated'] = TRUE;
+
+
+    $form['field_dva_area_hook_group_name_value']['#type'] = 'select';
+    $form['field_dva_area_hook_group_name_value']['#size'] = null;
+    $form['field_dva_area_hook_group_name_value']['#options'] = $area_grp_name_options;
+    $form['field_dva_area_hook_group_name_value']['#validated'] = TRUE;
+  }
+}
+
+function get_van_pl($van, $day, $name) {
+  $query = db_select('node', 'n');
+  $query->condition('n.type', 'day_van_pl_gp_area_hook_grouping');
+  $query->addTag('node_uid');
+
+  if (!is_null($van)) {
+    $query->join('field_data_field_dva_van_pl_group', 'ppplg', 'ppplg.entity_id = n.nid');
+    $query->fields('ppplg', array('field_dva_van_pl_group_value'));
+  }
+  if (!is_null($day)) {
+    $query->join('field_data_field_dva_sales_day', 'dsd', 'dsd.entity_id = n.nid');
+    $query->fields('dsd', array('field_dva_sales_day_value'));
+  }
+  if (!is_null($name)) {
+    $query->join('field_data_field_dva_area_hook_group_name', 'gn', 'gn.entity_id = n.nid');
+    $query->fields('gn', array('field_dva_area_hook_group_name_value'));
+  }
+
+  $pl_van = $query->execute()->fetchAllKeyed(0, 0);
+  return $pl_van;
 }
