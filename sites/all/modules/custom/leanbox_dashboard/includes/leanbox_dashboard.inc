@@ -1041,7 +1041,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
           }
         }
 
-        $fail_count = $total - $success_count;
+        $fail_count = $total_cont - $success_count;
         $data[] = array('result', $success_count, $fail_count);
       }
       else {
@@ -1098,7 +1098,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
           }
         }
 
-        $fail_count = $total - $success_count;
+        $fail_count = $total_cont - $success_count;
         $data[] = array('result', $success_count, $fail_count);
       }
       else {
