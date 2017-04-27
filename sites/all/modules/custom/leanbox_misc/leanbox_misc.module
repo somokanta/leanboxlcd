@@ -143,8 +143,8 @@ function van_stop_master_form_submit($form, &$form_state) {
 
     $node->field_stop_size[LANGUAGE_NONE][0]['value'] = $form_state['values']['stop_size'];
     $node->field_del_per_van[LANGUAGE_NONE][0]['value'] = $form_state['values']['delivery_per_van'];
-    $node->field_picking_finish_time[LANGUAGE_NONE][0]['value'] = $form_state['values']['picking_finish_time'];;
-    $node->field_pp_finish_time[LANGUAGE_NONE][0]['value'] = $form_state['values']['pp_finish_time'];;
+    $node->field_picking_finish_time[LANGUAGE_NONE][0]['value'] = $form_state['values']['picking_finish_time'];
+    $node->field_pp_finish_time[LANGUAGE_NONE][0]['value'] = $form_state['values']['pp_finish_time'];
 
     node_save($node);
   }
@@ -153,8 +153,8 @@ function van_stop_master_form_submit($form, &$form_state) {
 
     $node->field_stop_size[LANGUAGE_NONE][0]['value'] = $form_state['values']['stop_size'];
     $node->field_del_per_van[LANGUAGE_NONE][0]['value'] = $form_state['values']['delivery_per_van'];
-    $node->field_picking_finish_time[LANGUAGE_NONE][0]['value'] = $form_state['values']['picking_finish_time'];;
-    $node->field_pp_finish_time[LANGUAGE_NONE][0]['value'] = $form_state['values']['pp_finish_time'];;
+    $node->field_picking_finish_time[LANGUAGE_NONE][0]['value'] = $form_state['values']['picking_finish_time'];
+    $node->field_pp_finish_time[LANGUAGE_NONE][0]['value'] = $form_state['values']['pp_finish_time'];
 
     node_save($node);
   }

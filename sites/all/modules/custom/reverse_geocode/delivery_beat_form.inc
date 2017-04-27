@@ -333,7 +333,7 @@ function delivery_beat_batch_process($data, &$context) {
     $node = node_load($value['nid']);
     if ($node) {
       //Save static delivery beat
-      $node->field_static_delivery_beat_code‎ = $value['exp'];
+      $node->field_static_delivery_beat_code[LANGUAGE_NONE][0]['value'] = $value['exp'];
       node_save($node);
     }
   }
