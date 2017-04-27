@@ -79,6 +79,8 @@ function update_incremental_outlet_submit($form, &$form_state) {
       $van_pl = $value['field_dva_van_pl_group_value'];
       $area_hook = $value['field_dva_area_hook_group_name_value'];
 
+      dpm($van_pl,"van_pl");
+      dpm($area_hook,"area_hook");
       // get all node's of outlet master and lat long from hul master which has same pl group and area hook group of selected outlet node.
       $selected_results = get_selected_party_code_similar_outlet_data_with_lat_lng($van_pl, $area_hook, $distributor_id);
       dpm($selected_results,"selected_results");
