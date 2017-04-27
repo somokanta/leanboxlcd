@@ -238,7 +238,7 @@ function get_selected_party_code_similar_outlet_data_with_lat_lng($van_pl, $area
   $query->groupBy('agr.field_dva_area_hook_group_name_value');
 
   $query->join('field_data_field_dva_van_pl_group', 'ppplg', 'na.nid = ppplg.entity_id');
-  $query->condition('ppplg.field_dva_van_pl_group_value', $van_pl_group, '=');
+  $query->condition('ppplg.field_dva_van_pl_group_value', $van_pl, '=');
 
 
 
