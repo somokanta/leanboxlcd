@@ -111,16 +111,13 @@ function delivery_beat_filters_submit($form, &$form_state) {
   $van_pl_group = $form_state['values']['van_pl_group'] ? $form_state['values']['van_pl_group'] : NULL;
   $area_hook_group = $form_state['values']['area_hook_group'] ? $form_state['values']['area_hook_group'] : NULL;
 
-  watchdog('aaaa', 'start');
   $results = delivery_beat_get_results($sales_day, $van_pl_group, $area_hook_group);
 
   if (empty($results)) {
-    watchdog('aaaa', 'Empty');
     $form_state['reverse_geocode']['results'] = array();
     drupal_set_message('No results found', 'error');
   }
   else {
-    watchdog('aaaa', 'non empty');
     $form_state['reverse_geocode']['results'] = $results;
   }
 
@@ -242,7 +239,7 @@ function delivery_beat_get_results($sales_day, $van_pl_group = NULL, $area_hook_
   $query->condition('nag.uid', $distributor_id, '=');
 
   //Sales Delivery Day Master
-  $query->join('node', 'nsd', 'nsd.title = fsd.field_sales_day_value');
+  $query->join('node', 'nsd', 'nsd.title = sd.field_dva_sales_day_value');
   $query->join('field_data_field_day_number', 'fdn', 'fdn.entity_id = nsd.nid');
   $query->condition('nsd.type', 'sales_delivery_day_master');
   $query->condition('nsd.uid', $distributor_id, '=');
