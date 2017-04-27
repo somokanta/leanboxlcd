@@ -222,15 +222,19 @@ function delivery_beat_get_results($sales_day, $van_pl_group = NULL, $area_hook_
 
   $query->join('field_data_field_dva_area_hook_group_name', 'agr', 'agr.entity_id = na.nid');
   $query->join('field_data_field_dva_van_pl_group', 'ppplg', 'na.nid = ppplg.entity_id');
+  $query->join('field_data_field_dva_area_hook', 'ah', 'ah.entity_id = na.nid');
   
   $query->fields('sd', array('field_dva_sales_day_value'));
   $query->fields('ppplg', array('field_dva_van_pl_group_value'));
-  if (!is_null($area_hook_group)) {
-    $query->condition('agr.field_dva_area_hook_group_name_value', $area_hook_group, '=');
-  }
+  
+  $query->fields('ah', array('field_dva_area_hook_value'));
   $query->fields('agr', array('field_dva_area_hook_group_name_value'));
+  
   if (!is_null($van_pl_group)) {
     $query->condition('ppplg.field_dva_van_pl_group_value', $van_pl_group, '=');
+  }
+  if (!is_null($area_hook_group)) {
+    $query->condition('agr.field_dva_area_hook_group_name_value', $area_hook_group, '=');
   }
   
   $query->join('node', 'nag', 'agr.field_dva_area_hook_group_name_value = nag.title');
@@ -292,6 +296,7 @@ function delivery_beat_get_results($sales_day, $van_pl_group = NULL, $area_hook_
   $subquery->join('field_data_field_dva_sales_day', 'sd', 'sd.entity_id = na.nid');
   $subquery->condition('sd.field_dva_sales_day_value', $sales_day, '=');
   $subquery->join('field_data_field_dva_van_pl_group', 'ppplg', 'na.nid = ppplg.entity_id');
+  $subquery->join('field_data_field_dva_area_hook_group_name', 'agr', 'agr.entity_id = na.nid');
   
   
   //HUL Code Master
@@ -309,6 +314,7 @@ function delivery_beat_get_results($sales_day, $van_pl_group = NULL, $area_hook_
   //$subquery->condition('npp.uid', $distributor_id, '=');
   
   $subquery->fields('ppplg', array('field_dva_van_pl_group_value'));
+  $subquery->fields('agr', array('field_dva_area_hook_group_name_value'));
   $subquery->fields('fs', array('field_revised_sequence_value'));
   $subquery->addExpression("COALESCE(NULLIF(addr.field_updated_address_sub_premise, ''), NULLIF(addr.field_updated_address_dependent_locality, ''), NULLIF(addr.field_updated_address_locality, ''))", 'area');
   
