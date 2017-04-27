@@ -273,8 +273,8 @@ function delivery_beat_get_results($sales_day, $van_pl_group = NULL, $area_hook_
       . "LPAD(fdn.field_day_number_value, 2, '0'), "
       . "LPAD(ppplg.field_dva_van_pl_group_value, 2, '0'),"
       . "fagi.field_area_hook_group_id_value,"
-      . "sub.area,"
-      . "LPAD(CEIL(fs.field_revised_sequence_value/$stop_size), 3, '0')"
+      . "LPAD(CEIL(fs.field_revised_sequence_value/$stop_size), 3, '0'),"
+      . "sub.area"
       . ")";
   
   $query->addExpression($expression, 'exp');
@@ -321,7 +321,7 @@ function delivery_beat_get_results($sales_day, $van_pl_group = NULL, $area_hook_
   ############ CHANGE 10 to DYNAMIC####################
   $subquery->where("((fs.field_revised_sequence_value - 1)%($stop_size) = 0)");
   
-  $query->join($subquery, 'sub', "sub.field_revised_sequence_value = (FLOOR((fs.field_revised_sequence_value - 1)/$stop_size)*$stop_size + 1) AND sub.field_dva_van_pl_group_value = ppplg.field_dva_van_pl_group_value");
+  $query->join($subquery, 'sub', "sub.field_revised_sequence_value = (FLOOR((fs.field_revised_sequence_value - 1)/$stop_size)*$stop_size + 1) AND sub.field_dva_van_pl_group_value = ppplg.field_dva_van_pl_group_value AND sub.field_dva_area_hook_group_name_value = agr.field_dva_area_hook_group_name_value");
 
   $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
 
