@@ -220,7 +220,6 @@ function rev_seq_wise_filters_submit(&$form, &$form_state) {
   $van_pl_group = $form_state['values']['van_pl_group'];
   $area_hook_group = $form_state['values']['area_hook_group'];
   $data = $form_state['values']['area_hook_data'];
-  dpm($data,"data");
   $type = "revised-sequence";
 
   foreach ($data as $key => $val) {
