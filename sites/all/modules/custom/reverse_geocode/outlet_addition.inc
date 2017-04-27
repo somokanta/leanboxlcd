@@ -316,6 +316,7 @@ function get_new_outlet_data() {
   //Outlet Master
   $query->join('field_data_field_hul_code', 'fh', 'fh.entity_id = n.nid');
   $query->leftjoin('field_data_field_static_delivery_beat_code', 'dbc', 'dbc.entity_id = n.nid');
+  $query->isNull('dbc.field_static_delivery_beat_code_value');
   $query->leftjoin('field_data_field_area_hook_group_hul', 'fagh', 'fagh.entity_id = n.nid');
   $query->join('field_data_field_party_name', 'fp', 'fp.entity_id = n.nid');
   
