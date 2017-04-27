@@ -310,7 +310,7 @@ function delivery_beat_get_results($sales_day, $van_pl_group = NULL, $area_hook_
   
   $subquery->fields('ppplg', array('field_dva_van_pl_group_value'));
   $subquery->fields('fs', array('field_revised_sequence_value'));
-  $subquery->addExpression('COALESCE(addr.field_updated_address_sub_premise, addr.field_updated_address_dependent_locality, addr.field_updated_address_locality)', 'area');
+  $subquery->addExpression("COALESCE(NULLIF(addr.field_updated_address_sub_premise, ''), NULLIF(addr.field_updated_address_dependent_locality, ''), NULLIF(addr.field_updated_address_locality, ''))", 'area');
   
   ############ CHANGE 10 to DYNAMIC####################
   $subquery->where("((fs.field_revised_sequence_value - 1)%($stop_size) = 0)");
