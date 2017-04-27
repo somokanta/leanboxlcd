@@ -11,6 +11,86 @@
  * @param array $form_state
  * @return string
  */
+function leanbox_dashboard_chart_filter_pp_ota_form($form, &$form_state) {
+  $form = array();
+  if (arg(1) == 'pp_ota') {
+    $form['start_date'] = array(
+      '#type' => 'date_popup',
+      '#title' => t('Loading Date From'),
+      '#required' => TRUE,
+      '#date_format' => 'Y-m-d',
+      '#default_value' => date('Y-m-d'),
+    );
+    $form['end_date'] = array(
+      '#type' => 'date_popup',
+      '#title' => t('Loading Date To'),
+      '#required' => TRUE,
+      '#date_format' => 'Y-m-d',
+      '#default_value' => date('Y-m-d'),
+    );
+    $form['submit'] = array(
+      '#type' => 'submit',
+      '#value' => 'Submit',
+      '#prefix' => '<div id ="pp-ota-submit">',
+      '#suffix' => '</div>',
+      '#attributes' => array('class' => array('pp-ota-submit')),
+    );
+  }
+
+  $form['pp_ota'] = array(
+    '#markup' => '<a href = "/leanbox-chart-details/pp_ota" target = "_blank"><div id="pp_ota_div"></div></a>',
+  );
+
+
+  return $form;
+}
+
+/**
+ * 
+ * @param array $form
+ * @param array $form_state
+ * @return string
+ */
+function leanbox_dashboard_chart_filter_picking_ota_form($form, &$form_state) {
+  $form = array();
+  if (arg(1) == 'picking_ota') {
+    $form['start_date'] = array(
+      '#type' => 'date_popup',
+      '#title' => t('Loading Date From'),
+      '#required' => TRUE,
+      '#date_format' => 'Y-m-d',
+      '#default_value' => date('Y-m-d'),
+    );
+    $form['end_date'] = array(
+      '#type' => 'date_popup',
+      '#title' => t('Loading Date To'),
+      '#required' => TRUE,
+      '#date_format' => 'Y-m-d',
+      '#default_value' => date('Y-m-d'),
+    );
+    $form['submit'] = array(
+      '#type' => 'submit',
+      '#value' => 'Submit',
+      '#prefix' => '<div id ="picking-ota-submit">',
+      '#suffix' => '</div>',
+      '#attributes' => array('class' => array('picking-ota-submit')),
+    );
+  }
+
+  $form['picking_ota'] = array(
+    '#markup' => '<a href = "/leanbox-chart-details/picking_ota" target = "_blank"><div id="picking_ota_div"></div></a>',
+  );
+
+
+  return $form;
+}
+
+/**
+ * 
+ * @param array $form
+ * @param array $form_state
+ * @return string
+ */
 function leanbox_dashboard_chart_filter_otif_form($form, &$form_state) {
   $form = array();
 
@@ -504,7 +584,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     $pp_table = '';
     $party_packing = get_productivity_data_for_party_packing($start, $end, $distributor_id);
     $output[] = array('Group', 'Productivity', 'Target');
-    
+
     if (!empty($party_packing)) {
       $data1 = floor($party_packing['total']['pp_bill_lines'] / $party_packing['total']['pp_time']);
       if (is_nan($data1) || empty($data1) || $data1 == FALSE) {
@@ -917,6 +997,120 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
       $data1[] = array('No Result Found for Dispatch', 0);
     }
     return $data1;
+  }
+  else if ($activity_type == 'pp_ota') {
+    $query = db_select('node', 'n');
+    $query->addTag('node_uid');
+    $query->condition('n.type', 'party_packing');
+    $query->join('field_data_field_party_packing_loading_date', 'l', 'l.entity_id = n.nid');
+    $query->join('field_data_field_party_packing_date', 'pcd', 'pcd.entity_id = n.nid');
+    $query->fields('l', array('field_party_packing_loading_date_value'));
+    $query->fields('pcd', array('field_party_packing_date_value'));
+
+    $query->join('field_data_field__party_packingstatus', 'ps', 'ps.entity_id = n.nid');
+    $query->join('field_data_field_party_packing_end_time', 'ppt', 'ppt.entity_id = n.nid');
+    $query->fields('ppt', array('field_party_packing_end_time_value'));
+    $query->fields('ps', array('field__party_packingstatus_value'));
+//$query->condition('ps.field__party_packingstatus_value', 2); // completed
+
+    $query->where("(DATE_FORMAT(l.field_party_packing_loading_date_value, '%Y-%m-%d') >= :start)", array(':start' => $start));
+    $query->where("(DATE_FORMAT(l.field_party_packing_loading_date_value, '%Y-%m-%d') <= :to)", array(':to' => $end));
+    $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+    $data[] = array('PriceList Group', 'Success', 'Fail');
+
+    $query = db_select('node', 'n');
+    $query->addTag('node_uid');
+    $query->condition('n.type', 'van_stop_master');
+    $query->join('field_data_field_pp_finish_time', 'pp', 'pp.entity_id = n.nid');
+    $query->fields('pp', array('field_pp_finish_time_value'));
+    $dis_time = $query->execute()->fetchField();
+
+    if (!empty($dis_time)) {
+      if (!empty($res)) {
+
+        $total_cont = count($res);
+        $dis_on_time = strtotime(date("H:i", strtotime($dis_time)));
+        $success_count = 0;
+        foreach ($res as $key => $val) {
+          $pp_on_time = strtotime(date("H:i", strtotime($val['field_party_packing_end_time_value'])));
+
+          if (($val['field_party_packing_loading_date_value'] == $val['field_party_packing_date_value']) && ($val['field__party_packingstatus_value'] == 2)) {
+            if ($pp_on_time <= $dis_on_time) {
+              $success_count ++;
+            }
+          }
+        }
+
+        $fail_count = $total - $success_count;
+        $data[] = array('result', $success_count, $fail_count);
+      }
+      else {
+        $data[] = array('No Result Found', 0, 0);
+        // $data[] = array('', 0);
+      }
+    }
+    else {
+      $data[] = array('No Finish Time Found', 0, 0);
+      //$data[] = array('', 0);
+    }
+    return $data;
+  }
+  else if ($activity_type == 'picking_ota') {
+    $query = db_select('node', 'n');
+    $query->addTag('node_uid');
+    $query->condition('n.type', 'picking');
+    $query->join('field_data_field_picking_loading_date', 'l', 'l.entity_id = n.nid');
+    $query->join('field_data_field_picking_picking_date', 'pcd', 'pcd.entity_id = n.nid');
+    $query->fields('l', array('field_picking_loading_date_value'));
+    $query->fields('pcd', array('field_picking_picking_date_value'));
+
+    $query->join('field_data_field_picking_status', 'ps', 'ps.entity_id = n.nid');
+    $query->join('field_data_field_picking_end_time', 'ppt', 'ppt.entity_id = n.nid');
+    $query->fields('ppt', array('field_picking_end_time_value'));
+    $query->fields('ps', array('field_picking_status_value'));
+//$query->condition('ps.field_picking_status_value', 2); // completed
+
+    $query->where("(DATE_FORMAT(l.field_picking_loading_date_value, '%Y-%m-%d') >= :start)", array(':start' => $start));
+    $query->where("(DATE_FORMAT(l.field_picking_loading_date_value, '%Y-%m-%d') <= :to)", array(':to' => $end));
+    $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+    $data[] = array('PriceList Group', 'Success', 'Fail');
+
+    $query = db_select('node', 'n');
+    $query->addTag('node_uid');
+    $query->condition('n.type', 'van_stop_master');
+    $query->join('field_data_field_picking_finish_time', 'pp', 'pp.entity_id = n.nid');
+    $query->fields('pp', array('field_picking_finish_time_value'));
+    $dis_time = $query->execute()->fetchField();
+
+    if (!empty($dis_time)) {
+      if (!empty($res)) {
+
+        $total_cont = count($res);
+        $dis_on_time = strtotime(date("H:i", strtotime($dis_time)));
+        $success_count = 0;
+        foreach ($res as $key => $val) {
+          $pp_on_time = strtotime(date("H:i", strtotime($val['field_picking_end_time_value'])));
+
+          if (($val['field_picking_loading_date_value'] == $val['field_picking_picking_date_value']) && ($val['field_picking_status_value'] == 2)) {
+            if ($pp_on_time <= $dis_on_time) {
+              $success_count ++;
+            }
+          }
+        }
+
+        $fail_count = $total - $success_count;
+        $data[] = array('result', $success_count, $fail_count);
+      }
+      else {
+        $data[] = array('No Result Found', 0, 0);
+        // $data[] = array('', 0);
+      }
+    }
+    else {
+      $data[] = array('No Finish Time Found', 0, 0);
+      //$data[] = array('', 0);
+    }
+    return $data;
   }
 }
 
