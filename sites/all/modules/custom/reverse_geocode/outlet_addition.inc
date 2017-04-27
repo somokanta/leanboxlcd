@@ -81,6 +81,7 @@ function update_incremental_outlet_submit($form, &$form_state) {
 
       // get all node's of outlet master and lat long from hul master which has same pl group and area hook group of selected outlet node.
       $selected_results = get_selected_party_code_similar_outlet_data_with_lat_lng($van_pl, $area_hook, $distributor_id);
+      dpm($selected_results,"selected_results");
       foreach ($selected_results as $k => $v) {
         $lat = $v->field_hul_updated_lat_value;
         $lng = $v->field_hul_updated_long_value;
@@ -101,6 +102,7 @@ function update_incremental_outlet_submit($form, &$form_state) {
 
       // Get result of closest outlet node.
       $closet_result = get_closet_result_from_closet_hul_code($closet_outlet_nid, $distributor_id);
+      dpm($closet_result,"closet_result");
       $nearest_outlet_code = $closet_result[0]->title;
       $nearest_outlet_name = $closet_result[0]->field_party_name_value;
       $closest_sales_delivery_beat = $closet_result[0]->field_static_delivery_beat_code_value;
@@ -121,6 +123,7 @@ function update_incremental_outlet_submit($form, &$form_state) {
       // saving sequence and static_delivery_beat_code in selected outlet node.
       $selected_nid = $value['nid'];
       if (!empty($closet_result)) {
+        dpm("111");
         $node = node_load($selected_nid);
         $node->field_sequence['und'][0]['value'] = $closest_sequence;
         $node->field_static_delivery_beat_code['und'][0]['value'] = $closest_sales_delivery_beat;
