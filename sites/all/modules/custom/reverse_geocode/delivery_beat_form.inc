@@ -111,13 +111,16 @@ function delivery_beat_filters_submit($form, &$form_state) {
   $van_pl_group = $form_state['values']['van_pl_group'] ? $form_state['values']['van_pl_group'] : NULL;
   $area_hook_group = $form_state['values']['area_hook_group'] ? $form_state['values']['area_hook_group'] : NULL;
 
+  watchdog('aaaa', 'start');
   $results = delivery_beat_get_results($sales_day, $van_pl_group, $area_hook_group);
 
   if (empty($results)) {
+    watchdog('aaaa', 'Empty');
     $form_state['reverse_geocode']['results'] = array();
     drupal_set_message('No results found', 'error');
   }
   else {
+    watchdog('aaaa', 'non empty');
     $form_state['reverse_geocode']['results'] = $results;
   }
 
