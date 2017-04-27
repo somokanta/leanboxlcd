@@ -1046,12 +1046,10 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
       }
       else {
         $data[] = array('No Result Found', 0, 0);
-        // $data[] = array('', 0);
       }
     }
     else {
       $data[] = array('No Finish Time Found', 0, 0);
-      //$data[] = array('', 0);
     }
     return $data;
   }
@@ -1103,19 +1101,16 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
       }
       else {
         $data[] = array('No Result Found', 0, 0);
-        // $data[] = array('', 0);
       }
     }
     else {
       $data[] = array('No Finish Time Found', 0, 0);
-      //$data[] = array('', 0);
     }
     return $data;
   }
 }
 
 function leanbox_dashboard_gauge_chart_query_details($type, $start_date = '', $end_date = '') {
-  // require_once drupal_get_path('module', 'change_feeds_import') . '/form/upload_billing_data.inc';
 
   $output1 = array();
   $output = 0;
