@@ -1016,7 +1016,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     $query->where("(DATE_FORMAT(l.field_party_packing_loading_date_value, '%Y-%m-%d') >= :start)", array(':start' => $start));
     $query->where("(DATE_FORMAT(l.field_party_packing_loading_date_value, '%Y-%m-%d') <= :to)", array(':to' => $end));
     $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
-    $data[] = array('PriceList Group', 'Success', 'Fail');
+    $data[] = array('PriceList Group', 'Fail', 'Success');
 
     $query = db_select('node', 'n');
     $query->addTag('node_uid');
@@ -1042,7 +1042,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
         }
 
         $fail_count = $total_cont - $success_count;
-        $data[] = array('result', $success_count, $fail_count);
+        $data[] = array('result', $fail_count, $success_count);
       }
       else {
         $data[] = array('No Result Found', 0, 0);
@@ -1071,7 +1071,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     $query->where("(DATE_FORMAT(l.field_picking_loading_date_value, '%Y-%m-%d') >= :start)", array(':start' => $start));
     $query->where("(DATE_FORMAT(l.field_picking_loading_date_value, '%Y-%m-%d') <= :to)", array(':to' => $end));
     $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
-    $data[] = array('PriceList Group', 'Success', 'Fail');
+    $data[] = array('PriceList Group', 'Fail', 'Success');
 
     $query = db_select('node', 'n');
     $query->addTag('node_uid');
@@ -1097,7 +1097,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
         }
 
         $fail_count = $total_cont - $success_count;
-        $data[] = array('result', $success_count, $fail_count);
+        $data[] = array('result', $fail_count, $success_count);
       }
       else {
         $data[] = array('No Result Found', 0, 0);
