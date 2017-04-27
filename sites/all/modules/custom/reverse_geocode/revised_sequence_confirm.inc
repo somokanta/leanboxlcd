@@ -220,12 +220,13 @@ function rev_seq_wise_filters_submit(&$form, &$form_state) {
   $van_pl_group = $form_state['values']['van_pl_group'];
   $area_hook_group = $form_state['values']['area_hook_group'];
   $data = $form_state['values']['area_hook_data'];
+  dpm($data,"data");
   $type = "revised-sequence";
 
   foreach ($data as $key => $val) {
     $lat = $val['field_hul_updated_lat_value'];
     $long = $val['field_hul_updated_long_value'];
-    $party_code = $val['field_party_code_value'];
+    $party_code = $val['title'];
     $party_name = $val['field_party_name_value'];
     $rev_seq_status = $val['field_revised_sequence_status_value'];
     $sequence = $val['field_revised_sequence_value'];
