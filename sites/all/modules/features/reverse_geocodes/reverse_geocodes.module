@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the reverse_geocode feature.
+ */
+
+include_once 'reverse_geocodes.features.inc';

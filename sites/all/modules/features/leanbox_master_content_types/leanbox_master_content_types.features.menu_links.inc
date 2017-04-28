@@ -28,7 +28,7 @@ function leanbox_master_content_types_menu_default_menu_links() {
     'external' => 0,
     'has_children' => 0,
     'expanded' => 0,
-    'weight' => 0,
+    'weight' => -50,
     'customized' => 1,
     'parent_identifier' => 'menu-custom-menus_master-reports:node/553239',
   );
@@ -50,29 +50,7 @@ function leanbox_master_content_types_menu_default_menu_links() {
     'external' => 0,
     'has_children' => 0,
     'expanded' => 0,
-    'weight' => 0,
-    'customized' => 1,
-    'parent_identifier' => 'menu-custom-menus_master-upload:node/24596',
-  );
-  // Exported menu link: menu-custom-menus_outlet-sequence:import/outlet_sequence.
-  $menu_links['menu-custom-menus_outlet-sequence:import/outlet_sequence'] = array(
-    'menu_name' => 'menu-custom-menus',
-    'link_path' => 'import/outlet_sequence',
-    'router_path' => 'import/%',
-    'link_title' => 'Outlet Sequence',
-    'options' => array(
-      'attributes' => array(
-        'title' => '',
-      ),
-      'alter' => TRUE,
-      'identifier' => 'menu-custom-menus_outlet-sequence:import/outlet_sequence',
-    ),
-    'module' => 'menu',
-    'hidden' => 0,
-    'external' => 0,
-    'has_children' => 0,
-    'expanded' => 0,
-    'weight' => 0,
+    'weight' => -42,
     'customized' => 1,
     'parent_identifier' => 'menu-custom-menus_master-upload:node/24596',
   );
@@ -81,7 +59,6 @@ function leanbox_master_content_types_menu_default_menu_links() {
   // Included for use with string extractors like potx.
   t('Area Hook Group Report');
   t('Outlet Area Hook');
-  t('Outlet Sequence');
 
   return $menu_links;
 }

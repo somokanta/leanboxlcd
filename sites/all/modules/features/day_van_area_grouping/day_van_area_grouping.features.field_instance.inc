@@ -51,47 +51,6 @@ function day_van_area_grouping_field_default_field_instances() {
     ),
   );
 
-  // Exported field_instance:
-  // 'node-area_hook_group_master-field_area_hook_group_name'.
-  $field_instances['node-area_hook_group_master-field_area_hook_group_name'] = array(
-    'bundle' => 'area_hook_group_master',
-    'default_value' => NULL,
-    'deleted' => 0,
-    'description' => '',
-    'display' => array(
-      'default' => array(
-        'label' => 'above',
-        'module' => 'text',
-        'settings' => array(),
-        'type' => 'text_default',
-        'weight' => 1,
-      ),
-      'teaser' => array(
-        'label' => 'above',
-        'settings' => array(),
-        'type' => 'hidden',
-        'weight' => 0,
-      ),
-    ),
-    'entity_type' => 'node',
-    'field_name' => 'field_area_hook_group_name',
-    'label' => 'Area Hook Group Name',
-    'required' => 0,
-    'settings' => array(
-      'text_processing' => 0,
-      'user_register_form' => FALSE,
-    ),
-    'widget' => array(
-      'active' => 1,
-      'module' => 'text',
-      'settings' => array(
-        'size' => 60,
-      ),
-      'type' => 'text_textfield',
-      'weight' => 32,
-    ),
-  );
-
   // Exported field_instance: 'node-day_van_pl_gp_area_hook_grouping-body'.
   $field_instances['node-day_van_pl_gp_area_hook_grouping-body'] = array(
     'bundle' => 'day_van_pl_gp_area_hook_grouping',
@@ -269,10 +228,15 @@ function day_van_area_grouping_field_default_field_instances() {
     'display' => array(
       'default' => array(
         'label' => 'above',
-        'module' => 'text',
-        'settings' => array(),
-        'type' => 'text_default',
-        'weight' => 2,
+        'module' => 'number',
+        'settings' => array(
+          'decimal_separator' => '.',
+          'prefix_suffix' => TRUE,
+          'scale' => 0,
+          'thousand_separator' => '',
+        ),
+        'type' => 'number_integer',
+        'weight' => 5,
       ),
       'teaser' => array(
         'label' => 'above',
@@ -286,6 +250,138 @@ function day_van_area_grouping_field_default_field_instances() {
     'label' => 'DVA Van PL Group',
     'required' => 0,
     'settings' => array(
+      'max' => '',
+      'min' => '',
+      'prefix' => '',
+      'suffix' => '',
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 0,
+      'module' => 'number',
+      'settings' => array(),
+      'type' => 'number',
+      'weight' => 36,
+    ),
+  );
+
+  // Exported field_instance: 'node-sales_delivery_day_master-body'.
+  $field_instances['node-sales_delivery_day_master-body'] = array(
+    'bundle' => 'sales_delivery_day_master',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'hidden',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 0,
+      ),
+      'teaser' => array(
+        'label' => 'hidden',
+        'module' => 'text',
+        'settings' => array(
+          'trim_length' => 600,
+        ),
+        'type' => 'text_summary_or_trimmed',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'body',
+    'label' => 'Body',
+    'required' => FALSE,
+    'settings' => array(
+      'display_summary' => TRUE,
+      'text_processing' => 1,
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'module' => 'text',
+      'settings' => array(
+        'rows' => 20,
+        'summary_rows' => 5,
+      ),
+      'type' => 'text_textarea_with_summary',
+      'weight' => 31,
+    ),
+  );
+
+  // Exported field_instance: 'node-sales_delivery_day_master-field_day_number'.
+  $field_instances['node-sales_delivery_day_master-field_day_number'] = array(
+    'bundle' => 'sales_delivery_day_master',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'number',
+        'settings' => array(
+          'decimal_separator' => '.',
+          'prefix_suffix' => TRUE,
+          'scale' => 0,
+          'thousand_separator' => '',
+        ),
+        'type' => 'number_integer',
+        'weight' => 2,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_day_number',
+    'label' => 'Day number',
+    'required' => 0,
+    'settings' => array(
+      'max' => '',
+      'min' => '',
+      'prefix' => '',
+      'suffix' => '',
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 0,
+      'module' => 'number',
+      'settings' => array(),
+      'type' => 'number',
+      'weight' => 33,
+    ),
+  );
+
+  // Exported field_instance:
+  // 'node-sales_delivery_day_master-field_sales_delivery_day'.
+  $field_instances['node-sales_delivery_day_master-field_sales_delivery_day'] = array(
+    'bundle' => 'sales_delivery_day_master',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 1,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_sales_delivery_day',
+    'label' => 'Sales delivery day',
+    'required' => 0,
+    'settings' => array(
       'text_processing' => 0,
       'user_register_form' => FALSE,
     ),
@@ -296,19 +392,20 @@ function day_van_area_grouping_field_default_field_instances() {
         'size' => 60,
       ),
       'type' => 'text_textfield',
-      'weight' => 33,
+      'weight' => 32,
     ),
   );
 
   // Translatables
   // Included for use with string extractors like potx.
   t('Area Hook Group ID');
-  t('Area Hook Group Name');
   t('Body');
   t('DVA Area Hook');
   t('DVA Area Hook Group Name');
   t('DVA Sales Day');
   t('DVA Van PL Group');
+  t('Day number');
+  t('Sales delivery day');
 
   return $field_instances;
 }

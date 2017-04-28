@@ -31,25 +31,19 @@ function day_van_area_grouping_field_default_field_bases() {
     'type' => 'text',
   );
 
-  // Exported field_base: 'field_area_hook_group_name'.
-  $field_bases['field_area_hook_group_name'] = array(
+  // Exported field_base: 'field_day_number'.
+  $field_bases['field_day_number'] = array(
     'active' => 1,
     'cardinality' => 1,
     'deleted' => 0,
     'entity_types' => array(),
-    'field_name' => 'field_area_hook_group_name',
-    'indexes' => array(
-      'format' => array(
-        0 => 'format',
-      ),
-    ),
+    'field_name' => 'field_day_number',
+    'indexes' => array(),
     'locked' => 0,
-    'module' => 'text',
-    'settings' => array(
-      'max_length' => 255,
-    ),
+    'module' => 'number',
+    'settings' => array(),
     'translatable' => 0,
-    'type' => 'text',
+    'type' => 'number_integer',
   );
 
   // Exported field_base: 'field_dva_area_hook'.
@@ -122,6 +116,21 @@ function day_van_area_grouping_field_default_field_bases() {
     'deleted' => 0,
     'entity_types' => array(),
     'field_name' => 'field_dva_van_pl_group',
+    'indexes' => array(),
+    'locked' => 0,
+    'module' => 'number',
+    'settings' => array(),
+    'translatable' => 0,
+    'type' => 'number_integer',
+  );
+
+  // Exported field_base: 'field_sales_delivery_day'.
+  $field_bases['field_sales_delivery_day'] = array(
+    'active' => 1,
+    'cardinality' => 1,
+    'deleted' => 0,
+    'entity_types' => array(),
+    'field_name' => 'field_sales_delivery_day',
     'indexes' => array(
       'format' => array(
         0 => 'format',

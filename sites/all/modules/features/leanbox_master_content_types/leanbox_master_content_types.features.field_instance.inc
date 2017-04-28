@@ -988,6 +988,90 @@ function leanbox_master_content_types_field_default_field_instances() {
     ),
   );
 
+  // Exported field_instance: 'node-outlet_master-field_revised_sequence'.
+  $field_instances['node-outlet_master-field_revised_sequence'] = array(
+    'bundle' => 'outlet_master',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'number',
+        'settings' => array(
+          'decimal_separator' => '.',
+          'prefix_suffix' => TRUE,
+          'scale' => 2,
+          'thousand_separator' => '',
+        ),
+        'type' => 'number_decimal',
+        'weight' => 15,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_revised_sequence',
+    'label' => 'Revised Sequence',
+    'required' => 0,
+    'settings' => array(
+      'max' => '',
+      'min' => '',
+      'prefix' => '',
+      'suffix' => '',
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 0,
+      'module' => 'number',
+      'settings' => array(),
+      'type' => 'number',
+      'weight' => 40,
+    ),
+  );
+
+  // Exported field_instance:
+  // 'node-outlet_master-field_revised_sequence_status'.
+  $field_instances['node-outlet_master-field_revised_sequence_status'] = array(
+    'bundle' => 'outlet_master',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'list',
+        'settings' => array(),
+        'type' => 'list_default',
+        'weight' => 16,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_revised_sequence_status',
+    'label' => 'Revised Sequence Status',
+    'required' => 0,
+    'settings' => array(
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'options',
+      'settings' => array(),
+      'type' => 'options_select',
+      'weight' => 41,
+    ),
+  );
+
   // Exported field_instance: 'node-outlet_master-field_sales_day'.
   $field_instances['node-outlet_master-field_sales_day'] = array(
     'bundle' => 'outlet_master',
@@ -1081,10 +1165,10 @@ function leanbox_master_content_types_field_default_field_instances() {
         'settings' => array(
           'decimal_separator' => '.',
           'prefix_suffix' => TRUE,
-          'scale' => 0,
+          'scale' => 2,
           'thousand_separator' => '',
         ),
-        'type' => 'number_integer',
+        'type' => 'number_decimal',
         'weight' => 13,
       ),
       'teaser' => array(
@@ -1111,6 +1195,47 @@ function leanbox_master_content_types_field_default_field_instances() {
       'settings' => array(),
       'type' => 'number',
       'weight' => 38,
+    ),
+  );
+
+  // Exported field_instance:
+  // 'node-outlet_master-field_static_delivery_beat_code'.
+  $field_instances['node-outlet_master-field_static_delivery_beat_code'] = array(
+    'bundle' => 'outlet_master',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 14,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_static_delivery_beat_code',
+    'label' => 'Static Delivery Beat Code',
+    'required' => 0,
+    'settings' => array(
+      'text_processing' => 0,
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'text',
+      'settings' => array(
+        'size' => 60,
+      ),
+      'type' => 'text_textfield',
+      'weight' => 39,
     ),
   );
 
@@ -1151,98 +1276,6 @@ function leanbox_master_content_types_field_default_field_instances() {
       ),
       'type' => 'text_textfield',
       'weight' => -3,
-    ),
-  );
-
-  // Exported field_instance: 'node-party_pack_master-field_delivery_beats'.
-  $field_instances['node-party_pack_master-field_delivery_beats'] = array(
-    'bundle' => 'party_pack_master',
-    'default_value' => NULL,
-    'deleted' => 0,
-    'description' => '',
-    'display' => array(
-      'default' => array(
-        'label' => 'above',
-        'module' => 'number',
-        'settings' => array(
-          'decimal_separator' => '.',
-          'prefix_suffix' => TRUE,
-          'scale' => 0,
-          'thousand_separator' => '',
-        ),
-        'type' => 'number_integer',
-        'weight' => 5,
-      ),
-      'teaser' => array(
-        'label' => 'above',
-        'settings' => array(),
-        'type' => 'hidden',
-        'weight' => 0,
-      ),
-    ),
-    'entity_type' => 'node',
-    'field_name' => 'field_delivery_beats',
-    'label' => 'Delivery Beats',
-    'required' => 0,
-    'settings' => array(
-      'max' => '',
-      'min' => '',
-      'prefix' => '',
-      'suffix' => '',
-      'user_register_form' => FALSE,
-    ),
-    'widget' => array(
-      'active' => 0,
-      'module' => 'number',
-      'settings' => array(),
-      'type' => 'number',
-      'weight' => 33,
-    ),
-  );
-
-  // Exported field_instance: 'node-party_pack_master-field_delivery_per_van'.
-  $field_instances['node-party_pack_master-field_delivery_per_van'] = array(
-    'bundle' => 'party_pack_master',
-    'default_value' => NULL,
-    'deleted' => 0,
-    'description' => '',
-    'display' => array(
-      'default' => array(
-        'label' => 'above',
-        'module' => 'number',
-        'settings' => array(
-          'decimal_separator' => '.',
-          'prefix_suffix' => TRUE,
-          'scale' => 0,
-          'thousand_separator' => '',
-        ),
-        'type' => 'number_integer',
-        'weight' => 4,
-      ),
-      'teaser' => array(
-        'label' => 'above',
-        'settings' => array(),
-        'type' => 'hidden',
-        'weight' => 0,
-      ),
-    ),
-    'entity_type' => 'node',
-    'field_name' => 'field_delivery_per_van',
-    'label' => 'Delivery Per Van',
-    'required' => 0,
-    'settings' => array(
-      'max' => '',
-      'min' => '',
-      'prefix' => '',
-      'suffix' => '',
-      'user_register_form' => FALSE,
-    ),
-    'widget' => array(
-      'active' => 0,
-      'module' => 'number',
-      'settings' => array(),
-      'type' => 'number',
-      'weight' => 32,
     ),
   );
 
@@ -2788,9 +2821,7 @@ function leanbox_master_content_types_field_default_field_instances() {
   t('Cabin Length in Feet');
   t('Cabin Width in Feet');
   t('Deliver Reason');
-  t('Delivery Beats');
   t('Delivery Day');
-  t('Delivery Per Van');
   t('Delivery pending');
   t('Delivery status');
   t('Driver Name');
@@ -2813,11 +2844,14 @@ function leanbox_master_content_types_field_default_field_instances() {
   t('Product Div Description');
   t('Promised date');
   t('Resource Description');
+  t('Revised Sequence');
+  t('Revised Sequence Status');
   t('Sales Day');
   t('Sales Return Amt');
   t('Sales party code');
   t('Sales updated date');
   t('Sequence');
+  t('Static Delivery Beat Code');
   t('Updated address');
   t('Van Pl Group');
   t('Vehicle Type');
