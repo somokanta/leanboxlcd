@@ -25,14 +25,6 @@ function day_van_area_grouping_node_info() {
       'title_label' => t('Title'),
       'help' => '',
     ),
-    'sales_delivery_day_master' => array(
-      'name' => t('Sales Delivery Day Master'),
-      'base' => 'node_content',
-      'description' => '',
-      'has_title' => '1',
-      'title_label' => t('Title'),
-      'help' => '',
-    ),
   );
   drupal_alter('node_info', $items);
   return $items;
