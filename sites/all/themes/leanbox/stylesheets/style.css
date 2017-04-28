@@ -11223,46 +11223,52 @@ header[id="page-header"] .content > ul li ul li:nth-child(odd) {
   line-height: 32px;
   padding: 5px 10px;
 }
+/* line 1311, ../sass/leanbox-global.scss */
+#map-container .search-cancel {
+  position: absolute;
+  right: 2px;
+  top: 7px;
+}
 
 @media only screen and (max-width: 1152px) {
-  /* line 1314, ../sass/leanbox-global.scss */
+  /* line 1320, ../sass/leanbox-global.scss */
   .region-content .block-leanbox-dashboard {
     width: 48%;
   }
-  /* line 1317, ../sass/leanbox-global.scss */
+  /* line 1323, ../sass/leanbox-global.scss */
   .region-content .block-leanbox-dashboard:nth-child(3n+1) {
     clear: none;
   }
 }
 /*table theming  for leanbox chart details*/
-/* line 1325, ../sass/leanbox-global.scss */
+/* line 1331, ../sass/leanbox-global.scss */
 .pp-typewise, .pp-superwise-table {
   width: 75%;
   border: 1px solid #ddd;
 }
-/* line 1329, ../sass/leanbox-global.scss */
+/* line 1335, ../sass/leanbox-global.scss */
 .pp-typewise tbody, .pp-superwise-table tbody {
   border: 1px solid #ddd;
 }
-/* line 1333, ../sass/leanbox-global.scss */
+/* line 1339, ../sass/leanbox-global.scss */
 .pp-typewise th, .pp-superwise-table th {
   text-align: left;
   padding: 10px;
 }
-/* line 1338, ../sass/leanbox-global.scss */
+/* line 1344, ../sass/leanbox-global.scss */
 .pp-typewise td, .pp-superwise-table td {
   border: 1px solid #ddd !important;
 }
-/* line 1343, ../sass/leanbox-global.scss */
+/* line 1349, ../sass/leanbox-global.scss */
 .pp-typewise table td, .pp-typewise table tbody, .pp-superwise-table table td, .pp-superwise-table table tbody {
   border: 0 !important;
 }
 
-/* line 1354, ../sass/leanbox-global.scss */
+/* line 1360, ../sass/leanbox-global.scss */
 .tooltipster-base .tooltipster-content tr th:last-child, .tooltipster-base .tooltipster-content tr td:last-child {
   border-right: 0;
 }
-/* line 1360, ../sass/leanbox-global.scss */
+/* line 1366, ../sass/leanbox-global.scss */
 .tooltipster-base .tooltipster-content td, .tooltipster-base .tooltipster-content th {
   padding: 5px;
   border-bottom: 1px solid #777;
