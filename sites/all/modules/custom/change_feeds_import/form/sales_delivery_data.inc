@@ -297,7 +297,7 @@ function change_feeds_import_sales_delivery_create_confirm_content($fid) {
           ->execute()->fetchAll(PDO::FETCH_ASSOC);
 
   $operations = array();
-  $data_chunk = array_chunk($sales_data_result, 100);
+  $data_chunk = array_chunk($sales_data_result, 1000);
   foreach ($data_chunk as $data) {
     $operations[] = array('change_feeds_import_sales_delivery_node', array($data, $distributor_id));
   }
@@ -315,22 +315,35 @@ function change_feeds_import_sales_delivery_create_confirm_content($fid) {
   batch_process('outstanding-activity/import');
 }
 
+/**
+ * 
+ * @param type $type
+ * @return type
+ */
+function get_node_titles_by_type($type) {
+  $query1 = db_select('node', 'n');
+  $query1->condition('n.type', $type);
+  $query1->fields('n', array('title','nid'));
+  $query1->addTag('node_uid');
+  $nids = $query1->execute()->fetchAllKeyed(0,1);
+  return $nids;
+}
+
 function change_feeds_import_sales_delivery_node($sales_data_result, $distributor_id, &$context) {
   if (!empty($sales_data_result)) {
     $count = 0;
+    $node_titles = get_node_titles_by_type('sales_register_data');
     foreach ($sales_data_result as $key => $val) {
 
       if (!empty($val['bill_no']) && empty($val['error_message'])) {
 
-        require_once drupal_get_path('module', 'change_feeds_import') . '/form/upload_billing_data.inc';
         // check to update node
-        $nid = check_node_title_exists($val['bill_no'], 'sales_register_data');
-        if (empty($nid)) {
+        if (!array_key_exists($val['bill_no'], $node_titles)) {
 
           // we dont have to create new node here
         }
         else {
-
+          $nid = $node_titles[$val['bill_no']];
           $node = node_load($nid);
           $node->field_impact_delivery_date[LANGUAGE_NONE][0]['value'] = $val['impact_del_date'];
           $node->field_sales_return_amt[LANGUAGE_NONE][0]['value'] = $val['sales_amt'];
@@ -342,25 +355,13 @@ function change_feeds_import_sales_delivery_node($sales_data_result, $distributo
           else {
             $node->field_delivery_pending[LANGUAGE_NONE][0]['value'] = $val['delivery_pending'];
           }
-          field_attach_update('node', $node);
-          entity_get_controller('node')->resetCache(array($nid));
-          taxonomy_node_update($node);
-
-
-//          $node = node_load($nid);
-//          $node->field_impact_delivery_date[LANGUAGE_NONE][0]['value'] = $val['impact_del_date'];
-//          $node->field_sales_return_amt[LANGUAGE_NONE][0]['value'] = $val['sales_amt'];
-//          $node->field_delivery_status[LANGUAGE_NONE][0]['tid'] = $val['partial_full']; 
-//          $node->field_deliver_reason[LANGUAGE_NONE][0]['tid'] = $val['reason'];
-//          if (empty($val['delivery_pending'])) {
-//            $node->field_delivery_pending = array();
-//          }
-//          else {
-//            $node->field_delivery_pending[LANGUAGE_NONE][0]['value'] = $val['delivery_pending'];
-//          }
-//          node_save($node);
+          node_save($node);
+//          field_attach_update('node', $node);
+//          entity_get_controller('node')->resetCache(array($nid));
+//          taxonomy_node_update($node);
+          
+          $count++;
         }
-        $count++;
       }
       $fid = $val['fid'];
     }

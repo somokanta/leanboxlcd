@@ -53,12 +53,23 @@
                 marker[sr].mk.bounce(3);
             })
             
-            selectableRow.find('a.cell-details').hover(function() {
-                $(this).siblings('.table-responsive').find('.cell-hide').toggleClass('hooover');
+//            selectableRow.find('a.cell-details').hover(function() {
+//                $(this).siblings('.table-responsive').find('.cell-hide').toggleClass('hooover');
+//            })
+
+            selectableRow.find('a.cell-details').mouseenter(function() {
+                var content = $(this).siblings('.table-responsive').find('.cell-hide').html();
+                $(this).tooltipster({
+                    content: content,
+                    contentAsHTML: true,
+                    functionAfter: function(origin) {
+                        origin.tooltipster('destroy');
+                    }
+                }).tooltipster('show')
             })
 
         }
-    };
+    };    
 }(jQuery));
 
 

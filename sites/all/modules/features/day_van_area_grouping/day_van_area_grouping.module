@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the Day_Van_Area_Grouping feature.
+ */
+
+include_once 'day_van_area_grouping.features.inc';

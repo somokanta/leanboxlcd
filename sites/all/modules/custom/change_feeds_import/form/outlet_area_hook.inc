@@ -139,10 +139,11 @@ function change_feeds_import_outlet_area_hook_batch_fix_process($data, $distribu
     }
     if (isset($value['AREA HOOK']) && !empty($nid)) {
       $value['AREA HOOK'] = trim($value['AREA HOOK']);
+      $value['uploaded_area_hook'] = $value['AREA HOOK'];
       $node = node_load($nid);
       $tname = $node->field_sales_day['und'][0]['value'];
       $tname = strtolower($tname); // lower the case as we have lowercase value stored in db
-      
+
       if (empty($tname)) {
         $value['error_message'] .= " Sales day is empty for party code  " . $value['PARTY CODE'] . ' in outlet Master.';
       }
@@ -155,9 +156,8 @@ function change_feeds_import_outlet_area_hook_batch_fix_process($data, $distribu
         $query->condition('n.title', $value['AREA HOOK']);
         $query->addTag('node_uid'); // no need of this condition as nid condition is given
         $query->condition('n.type', 'area_hook_master');
-        $query->condition('s.field_area_hook_day_tid', $sales_day_tid);
+        // $query->condition('s.field_area_hook_day_tid', $sales_day_tid);
         $res = $query->execute()->fetchField();
-
         if (empty($res)) {
           $value['error_message'] .= " Area Hook " . $value['AREA HOOK'] . ' Does not exist in our system.';
         }
@@ -184,7 +184,6 @@ function outlet_area_hook_csv_finished($success, $results, $operations) {
 }
 
 function change_feeds_import_insert_data_in_custom_outlet_area_hook_table($value, $fid, $distributor_id) {
-
   $sales_data = db_insert('custom_outlet_area_hook') // Table name no longer needs {}
       ->fields(array(
         'party_code' => $value['PARTY CODE'],
@@ -193,6 +192,7 @@ function change_feeds_import_insert_data_in_custom_outlet_area_hook_table($value
         'error_message' => $value['error_message'],
         'fid' => $fid,
         'distributor_id' => $distributor_id,
+        'uploded_area_hook' => $value['uploaded_area_hook'],
       ))
       ->execute();
 }
@@ -298,11 +298,19 @@ function change_feeds_import_outlet_area_hook_node($sales_data_result, $distribu
           // we dont have to create new node here
         }
         else {
+          $area_hook = $val['uploded_area_hook']; // Uploaded Area Hook
           $node = node_load($nid);
-          $node->field_area_hook['und'][0]['nid'] = $val['area_hook'];
+          $sales_day = $node->field_sales_day['und'][0]['value']; // Sales Day from Outlet Master
+          $ol_channel = $node->field_channel['und'][0]['value']; // Channle from Outlet Master
+          $ol_pl_grp = $node->field_pl_group['und'][0]['value']; // PL Grp from Outlet Master
+          $van_pl_grp = get_van_pl_grp_from_hannel_pl_grp($ol_channel, $ol_pl_grp,$distributor_id); // VAN PL GRP from Party Pack Master
+          // get nid of Day-van-pl-grp-area-hook master using sales_day , Van_PL_Grp , and Area_Hook
+          $day_van_area_nid = get_nid_from_master_using_sales_day_van_grp_area_hook($sales_day,$van_pl_grp,$area_hook);
+          // assign above nid to area hook which is in Outlet Master
+          $node->field_area_hook['und'][0]['nid'] = $day_van_area_nid;
           field_attach_update('node', $node);
           entity_get_controller('node')->resetCache(array($nid));
-          
+
           $count++;
         }
       }
@@ -366,4 +374,41 @@ function change_feeds_import_outlet_area_hook_discard_data($fid) {
     }
   }
   drupal_set_message(t('Something went wrong'), 'error');
+}
+
+function get_van_pl_grp_from_hannel_pl_grp($ol_channel, $ol_pl_grp,$distributor_id) {
+  $query = db_select('node', 'n');
+  $query->condition('n.type', 'outlet_master');
+  $query->addTag('node_uid');
+  $query->join('field_data_field_channel', 'ch', 'ch.entity_id = n.nid');
+  $query->condition('ch.field_channel_value', $ol_channel);
+  $query->condition('ch.bundle', 'outlet_master');
+  $query->join('field_data_field_pl_group', 'pl', 'pl.entity_id = n.nid');
+  $query->condition('pl.field_pl_group_value', $ol_pl_grp);
+  $query->condition('pl.bundle', 'outlet_master');
+  $query->join('field_data_field_channel', 'ppmch', 'ch.field_channel_value = ppmch.field_channel_value');
+  $query->condition('ppmch.bundle', 'party_pack_master');
+  $query->join('node', 'ppn', 'ppn.nid = ppmch.entity_id');
+  $query->condition('ppn.uid', $distributor_id, '=');
+  $query->join('field_data_field_pl_group', 'ppmpl', 'pl.field_pl_group_value = ppmpl.field_pl_group_value and ppmch.entity_id = ppmpl.entity_id');
+  $query->condition('ppmch.bundle', 'party_pack_master');
+  $query->join('field_data_field_van_pl_group', 'ppplg', 'ppn.nid = ppplg.entity_id');
+  $query->fields('ppplg', array('field_van_pl_group_value'));
+  $van_pl_grp = $query->execute()->fetchField();
+  return $van_pl_grp;
+}
+
+function get_nid_from_master_using_sales_day_van_grp_area_hook($sales_day, $van_pl_grp, $area_hook) {
+  $query = db_select('node', 'n');
+  $query->condition('n.type', 'day_van_pl_gp_area_hook_grouping');
+  $query->addTag('node_uid');
+  $query->join('field_data_field_dva_area_hook', 'ah', 'ah.entity_id = n.nid');
+  $query->condition('ah.field_dva_area_hook_value', $area_hook, '=');
+  $query->join('field_data_field_dva_van_pl_group', 'ppplg', 'ppplg.entity_id = n.nid');
+  $query->condition('ppplg.field_dva_van_pl_group_value', $van_pl_grp, '=');
+  $query->join('field_data_field_dva_sales_day', 'sd', 'sd.entity_id = n.nid');
+  $query->condition('sd.field_dva_sales_day_value', $sales_day, '=');
+  $query->fields('n', array('nid'));
+  $nid = $query->execute()->fetchField();
+  return $nid;
 }

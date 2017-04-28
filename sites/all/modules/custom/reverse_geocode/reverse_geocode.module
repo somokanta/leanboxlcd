@@ -50,6 +50,23 @@ function reverse_geocode_menu() {
     'type' => MENU_CALLBACK,
     'file' => 'address_confirm.inc'
   );
+  
+  $items['incremental-outlet'] = array(
+    'title' => 'Incremental Outlet Addition',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('outlet_addition_form'),
+    'access arguments' => array('address confirmation'),
+    'type' => MENU_CALLBACK,
+    'file' => 'outlet_addition.inc'
+  );
+  
+  $items['revised-sequence-confirm'] = array(
+    'title' => 'Revised Sequence Confirm',
+    'page callback' => 'outlet_addition',
+    'access arguments' => array('address confirmation'),
+    'type' => MENU_CALLBACK,
+    'file' => 'revised_sequence_confirm.inc'
+  );
 
   $items['sales_person/autocomplete'] = array(
     'title' => 'Autocomplete for Sales Person',
@@ -71,7 +88,15 @@ function reverse_geocode_menu() {
     'page arguments' => array('reverse_geocode_map_configuration'),
     'access arguments' => array('administer map settings'),
   );
-
+  
+  $items['delivery-beat'] = array(
+    'title' => 'Create Static delivery beats',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('delivery_beat_create_form'),
+    'access arguments' => array('address confirmation'),
+    'file' => 'delivery_beat_form.inc'
+  );
+  
   return $items;
 }
 
@@ -199,12 +224,15 @@ function show_locations() {
   $url = arg(2);
 
   $license_key = variable_get('mapmyindia_map_key', '98thppnrdg3vpp7xupfg9eotrl2rliqu');
-  $google_key = variable_get('google_places_key', 'AIzaSyBUpfJiBx6AmZY6vPa4nyYjOmU1kSsHxSQ');
+  $google_key = variable_get('google_places_key', 'AIzaSyCtEWjYMDT0sAoyyfdMEDI5QyoGY7aqHVw');
   drupal_add_js("https://apis.mapmyindia.com/advancedmaps/v1/$license_key/map_load?v=0.1", 'external');
   drupal_add_js("https://maps.googleapis.com/maps/api/js?key=$google_key&libraries=places", 'external');
   drupal_add_js(drupal_get_path('module', 'reverse_geocode') . '/js/selectable-row.js', 'file');
   drupal_add_js(drupal_get_path('module', 'reverse_geocode') . '/js/leaflet.smoothmarkerbouncing.js', 'file');
-
+  
+  drupal_add_js(drupal_get_path('module', 'reverse_geocode') . '/js/tooltipster.bundle.min.js', 'file');
+  drupal_add_css(drupal_get_path('module', 'reverse_geocode') . '/css/tooltipster.bundle.min.css', 'file');
+  
   if ($url == "multiple") {
     drupal_add_js(drupal_get_path('module', 'reverse_geocode') . '/js/multi-map.js', 'file');
     $type = "multi";
@@ -292,12 +320,15 @@ function hul_code_form($form, &$form_state, $type) {
   $form['#prefix'] = '<div id="address-selection-map">';
   $form['#suffix'] = '</div>';
 
-  $header_array = array('sr_no' => 'Sr No', 'party_code' => 'Party Code',
+  $header_array = array(
+    'sr_no' => array('data' => 'Sr No', 'class' => 'sr-cell'), 
+    'party_code' => array('data'=>'Party Code', 'class' => 'party-code-cell'),
     //'lat' => 'Latitude', 
     //'lng' => 'Longitude',
-    'party_name' => 'Party Name', 'status' => 'Status',
+    'party_name' => array('data'=>'Party Name', 'class' => 'party-name-cell'),
+    'status' => array('data'=>'Status', 'class' => 'status-cell'),
     //'address' => array('data' => 'Address', 'class' => array('cell-tooltip')),
-    'details' => '',
+    'details' => array('data'=>'', 'class' => 'details-cell'),
   );
 
   $pl_group_data = reverse_geocode_get_data_from_outlet_master($sales_day = NULL, "pl_group", $beat_name = NULL, $distributor_id);
@@ -700,15 +731,15 @@ function party_filters_submit(&$form, &$form_state) {
     //$address = theme('table', array('header' => $header, 'rows' => $rows, 'sticky' => FALSE));
 
     $options[$party_code] = array(
-      'sr_no' => $key + 1,
-      'party_code' => $party_code,
+      'sr_no' => array('data' => $key + 1, 'class' => 'sr-cell'),
+      'party_code' => array('data' => $party_code, 'class' => 'party-code-cell'),
       //'lat' => $lat,
       //'lng' => $long,
-      'party_name' => $party_name,
+      'party_name' => array('data' => '<div class="party-name-data">' . $party_name . '</div>', 'class' => 'party-name-cell'),
       '#attributes' => array('data-lat' => $lat, 'data-lng' => $long, 'data-sr' => $key + 1),
-      'status' => $hul_status,
+      'status' => array('data' => $hul_status, 'class' => 'status-cell'),
       //'details' => array('data' => '<a class="cell-details">Details</a>' . $address),
-      'details' => array('data' => array('#theme' => 'table', '#header' => $header, '#rows' => $rows, '#sticky' => FALSE, '#prefix' => '<a class="cell-details">Details</a>', '#attributes' => array('class' => array('cell-hide')))),
+      'details' => array('data' => array('#theme' => 'table', '#header' => $header, '#rows' => $rows, '#sticky' => FALSE, '#prefix' => '<a class="cell-details">Details</a>', '#attributes' => array('class' => array('cell-hide'))), 'class' => 'details-cell'),
     );
     if ($type == 'multi') {
       $marker_tooltip = '<div class="cell-address cell-hide"><table>'
