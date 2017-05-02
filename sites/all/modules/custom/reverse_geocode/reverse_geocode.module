@@ -232,7 +232,7 @@ function show_locations() {
   
   drupal_add_js(drupal_get_path('module', 'reverse_geocode') . '/js/tooltipster.bundle.min.js', 'file');
   drupal_add_css(drupal_get_path('module', 'reverse_geocode') . '/css/tooltipster.bundle.min.css', 'file');
-  
+
   if ($url == "multiple") {
     drupal_add_js(drupal_get_path('module', 'reverse_geocode') . '/js/multi-map.js', 'file');
     $type = "multi";

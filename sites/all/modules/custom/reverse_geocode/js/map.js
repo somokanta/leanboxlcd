@@ -87,13 +87,78 @@
             },
             onAdd: function() {
 
-                var element = document.createElement("input");
+                this._map = map;
+                this._container = L.DomUtil.create('div', 'leaflet-control-search');
+                this._input = this._createInput('Search', 'search-input');
+                this._cancel = this._createCancel('Cancel', 'search-cancel');
 
-                element.id = "searchBox";
-                element.placeholder = "Enter a Location";
+                return this._container;
 
-                return element;
-            }
+            },
+            cancel: function() {
+                this._input.value = '';
+                //this._handleKeypress({keyCode: 8});//simulate backspace keypress
+                //this._input.size = this._inputMinSize;
+                this._input.focus();
+                this._cancel.style.display = 'none';
+                //this._hideTooltip();
+                return this;
+            },
+            _createInput: function(text, className) {
+                var label = L.DomUtil.create('label', className, this._container);
+                var input = L.DomUtil.create('input', className, this._container);
+                input.type = 'text';
+                input.autocomplete = 'off';
+                input.autocorrect = 'off';
+                input.autocapitalize = 'off';
+                //input.style.display = 'none';
+                input.role = 'search';
+                input.id = 'searchBox';
+
+                label.htmlFor = input.id;
+                label.style.display = 'none';
+                label.value = text;
+
+                L.DomEvent
+                        .disableClickPropagation(input)
+                        .on(input, 'keydown', this._handleKeypress, this);
+
+                return input;
+            },
+            _createCancel: function(title, className) {
+                var cancel = L.DomUtil.create('a', className, this._container);
+                cancel.href = '#';
+                cancel.title = title;
+                cancel.style.display = 'none';
+                cancel.innerHTML = "<span>&otimes;</span>";//imageless(see css)
+
+                L.DomEvent
+                        .on(cancel, 'click', L.DomEvent.stop, this)
+                        .on(cancel, 'click', this.cancel, this);
+
+                return cancel;
+            },
+            _handleKeypress: function(e) {	//run _input keyup event
+
+                switch (e.keyCode)
+                {
+                    case  8://Backspace
+                    case 45://Insert
+                    case 46://Delete
+                        break;
+
+                    default://All keys
+
+                        if (this._input.value.length)
+                            this._cancel.style.display = 'block';
+                        else
+                            this._cancel.style.display = 'none';
+                }
+
+                //this._handleAutoresize();
+            },
+
+
         });
 
         (new GoogleSearch).addTo(map);
@@ -130,7 +195,7 @@
             //map.fitBounds(group.getBounds());
 
         });
-
+        
 
         /*function to get Json response from the url*/
         function getUrlResult(lat, lng) {

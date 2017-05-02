@@ -323,12 +323,10 @@ function change_feeds_import_create_sales_register_node($sales_data_result, $dis
 
           if (isset($context['results']['dates'][$val['date']])) {
             $pdd = $context['results']['dates'][$val['date']];
-            watchdog('pdd', 'if');
           }
           else {
             $pdd = get_promised_delivery_date($val['date']);
             $context['results']['dates'][$val['date']] = $pdd;
-            watchdog('pdd', 'else');
           }
 
           $node->field_promised_date[LANGUAGE_NONE][0]['value'] = $pdd;
@@ -341,21 +339,19 @@ function change_feeds_import_create_sales_register_node($sales_data_result, $dis
         else {
           $node = node_load($nid);
 
-          if ($node->field_sr_bill_date[LANGUAGE_NONE][0]['value'] != $val['date']) {
+          //if ($node->field_sr_bill_date[LANGUAGE_NONE][0]['value'] != $val['date']) {
             $node->field_sr_bill_date[LANGUAGE_NONE][0]['value'] = $val['date'];
 
             if (isset($context['results']['dates'][$val['date']])) {
               $pdd = $context['results']['dates'][$val['date']];
-              watchdog('pdd', 'i');
             }
             else {
               $pdd = get_promised_delivery_date($val['date']);
               $context['results']['dates'][$val['date']] = $pdd;
-              watchdog('pdd', 'e');
             }
 
             $node->field_promised_date[LANGUAGE_NONE][0]['value'] = $pdd;
-          }
+          //}
 
           $node->field_bill_value[LANGUAGE_NONE][0]['value'] = $val['bill_value'];
           $node->field_sales_party_code[LANGUAGE_NONE][0]['value'] = $val['party_code'];
