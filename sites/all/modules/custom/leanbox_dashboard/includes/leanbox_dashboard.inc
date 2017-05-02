@@ -1250,6 +1250,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
 
 // Query to calculate total bill value
     $query = db_select('node', 'n');
+    $query->fields('n');
     $query->join('field_data_field_sr_bill_date', 'b', 'b.entity_id = n.nid');
     $query->join('field_data_field_promised_date', 'pro_date', 'pro_date.entity_id = n.nid');
     $query->join('field_data_field_billing_van', 'bva', 'bva.entity_id = n.nid');
