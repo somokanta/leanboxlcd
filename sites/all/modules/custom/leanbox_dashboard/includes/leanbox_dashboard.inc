@@ -1259,7 +1259,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
       $query->condition('b.field_sr_bill_date_value', array($start_date, $end_date), 'BETWEEN');
     }
     $query->condition('n.uid', $uid);
-    $total = $query->execute()->rowCount();
+    $total_cont = $query->execute()->rowCount();
 
 // query to calculate total dispatched bill value
 
@@ -1280,7 +1280,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     if (!empty($start_date) && !empty($end_date)) {
       $query->condition('b.field_sr_bill_date_value', array($start_date, $end_date), 'BETWEEN');
     }
-    $total_cont = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+    $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
 
 
     $data[] = array('PriceList Group', 'Fail', 'Success');
