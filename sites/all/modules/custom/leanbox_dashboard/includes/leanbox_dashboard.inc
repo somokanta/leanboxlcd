@@ -903,7 +903,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
 
       if (!empty($total_bill_value)) {
         foreach ($data as $key => $val) {
-          if ($key == 'OK') {
+          if ($key == 'Delivered') {
             continue;
           }
           foreach ($val as $key1 => $val1) {

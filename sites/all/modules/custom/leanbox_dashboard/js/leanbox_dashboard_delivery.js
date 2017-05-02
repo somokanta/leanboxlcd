@@ -60,7 +60,7 @@
 					vAxis: {
 						minValue: 0,
 						maxValue: 7,
-						title: ''
+						title: 'Percentage'
 					},
 					hAxis: {
 						title: 'Return Type'
