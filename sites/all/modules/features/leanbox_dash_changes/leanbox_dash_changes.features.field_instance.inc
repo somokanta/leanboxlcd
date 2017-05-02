@@ -100,6 +100,46 @@ function leanbox_dash_changes_field_default_field_instances() {
     ),
   );
 
+  // Exported field_instance: 'node-van_stop_master-field_otif_finish_time'.
+  $field_instances['node-van_stop_master-field_otif_finish_time'] = array(
+    'bundle' => 'van_stop_master',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 6,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_otif_finish_time',
+    'label' => 'otif finish time',
+    'required' => 0,
+    'settings' => array(
+      'text_processing' => 0,
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'text',
+      'settings' => array(
+        'size' => 60,
+      ),
+      'type' => 'text_textfield',
+      'weight' => 37,
+    ),
+  );
+
   // Exported field_instance: 'node-van_stop_master-field_picking_finish_time'.
   $field_instances['node-van_stop_master-field_picking_finish_time'] = array(
     'bundle' => 'van_stop_master',
@@ -226,6 +266,47 @@ function leanbox_dash_changes_field_default_field_instances() {
     ),
   );
 
+  // Exported field_instance:
+  // 'node-van_stop_master-field_unloading_finish_time'.
+  $field_instances['node-van_stop_master-field_unloading_finish_time'] = array(
+    'bundle' => 'van_stop_master',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 5,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_unloading_finish_time',
+    'label' => 'Unloading finish time',
+    'required' => 0,
+    'settings' => array(
+      'text_processing' => 0,
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'text',
+      'settings' => array(
+        'size' => 60,
+      ),
+      'type' => 'text_textfield',
+      'weight' => 36,
+    ),
+  );
+
   // Exported field_instance: 'taxonomy_term-productivity_target-field_target'.
   $field_instances['taxonomy_term-productivity_target-field_target'] = array(
     'bundle' => 'productivity_target',
@@ -311,6 +392,8 @@ function leanbox_dash_changes_field_default_field_instances() {
   t('Stop size');
   t('Target');
   t('Target Distributor');
+  t('Unloading finish time');
+  t('otif finish time');
 
   return $field_instances;
 }
