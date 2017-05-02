@@ -1699,7 +1699,9 @@ function change_feeds_import_form_views_exposed_form_alter(&$form, &$form_state)
     $van_pl_options = get_van_pl('van', NULL, NULL);
     $select = array('' => '- Any -');
 
-    $sales_day_options = get_van_pl(NULL, 'day', NULL);
+    $days = change_feeds_import_get_terms_using_vocubulary('Outlet Days');
+    $sales_day_options = array_combine($days, $days);
+
     $select = array('' => '- Any -');
 
     $area_grp_name_options = get_van_pl(NULL, NULL, 'name');
@@ -1715,10 +1717,10 @@ function change_feeds_import_form_views_exposed_form_alter(&$form, &$form_state)
     $form['field_dva_van_pl_group_value']['#options'] = $van_pl_options;
     $form['field_dva_van_pl_group_value']['#validated'] = TRUE;
 
-    $form['field_dva_sales_day_value']['#type'] = 'select';
-    $form['field_dva_sales_day_value']['#size'] = null;
-    $form['field_dva_sales_day_value']['#options'] = $sales_day_options;
-    $form['field_dva_sales_day_value']['#validated'] = TRUE;
+    $form['field_sales_day_value']['#type'] = 'select';
+    $form['field_sales_day_value']['#size'] = null;
+    $form['field_sales_day_value']['#options'] = $sales_day_options;
+    $form['field_sales_day_value']['#validated'] = TRUE;
 
 
     $form['field_dva_area_hook_group_name_value']['#type'] = 'select';
