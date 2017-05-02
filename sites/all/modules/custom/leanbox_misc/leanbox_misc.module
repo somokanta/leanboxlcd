@@ -86,6 +86,8 @@ function van_stop_master_form($form, &$form_state) {
     $delivery_per_van = $node->field_del_per_van[LANGUAGE_NONE][0]['value'];
     $pp_finish_time = $node->field_pp_finish_time[LANGUAGE_NONE][0]['value'];
     $picking_finish_time = $node->field_picking_finish_time[LANGUAGE_NONE][0]['value'];
+    $unloading_finish_time = $node->field_unloading_finish_time[LANGUAGE_NONE][0]['value'];
+    $otif_finish_time = $node->field_otif_finish_time[LANGUAGE_NONE][0]['value'];
   }
 
   $form['stop_size'] = array(
@@ -117,6 +119,18 @@ function van_stop_master_form($form, &$form_state) {
     '#required' => TRUE,
     '#default_value' => $picking_finish_time,
   );
+  $form['unloading_finish_time'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Unloading finish time'),
+    '#required' => TRUE,
+    '#default_value' => $unloading_finish_time,
+  );
+  $form['otif_finish_time'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Otif finish time'),
+    '#required' => TRUE,
+    '#default_value' => $otif_finish_time,
+  );
 
   $form['submit'] = array(
     '#type' => 'submit',
@@ -145,6 +159,8 @@ function van_stop_master_form_submit($form, &$form_state) {
     $node->field_del_per_van[LANGUAGE_NONE][0]['value'] = $form_state['values']['delivery_per_van'];
     $node->field_picking_finish_time[LANGUAGE_NONE][0]['value'] = $form_state['values']['picking_finish_time'];
     $node->field_pp_finish_time[LANGUAGE_NONE][0]['value'] = $form_state['values']['pp_finish_time'];
+    $node->field_unloading_finish_time[LANGUAGE_NONE][0]['value'] = $form_state['values']['unloading_finish_time'];
+    $node->field_otif_finish_time[LANGUAGE_NONE][0]['value'] = $form_state['values']['otif_finish_time'];
 
     node_save($node);
   }
@@ -155,6 +171,8 @@ function van_stop_master_form_submit($form, &$form_state) {
     $node->field_del_per_van[LANGUAGE_NONE][0]['value'] = $form_state['values']['delivery_per_van'];
     $node->field_picking_finish_time[LANGUAGE_NONE][0]['value'] = $form_state['values']['picking_finish_time'];
     $node->field_pp_finish_time[LANGUAGE_NONE][0]['value'] = $form_state['values']['pp_finish_time'];
+    $node->field_unloading_finish_time[LANGUAGE_NONE][0]['value'] = $form_state['values']['unloading_finish_time'];
+    $node->field_otif_finish_time[LANGUAGE_NONE][0]['value'] = $form_state['values']['otif_finish_time'];
 
     node_save($node);
   }
