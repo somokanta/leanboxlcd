@@ -1003,15 +1003,15 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     $query->addTag('node_uid');
     $query->condition('n.type', 'party_packing');
     $query->join('field_data_field_party_packing_loading_date', 'l', 'l.entity_id = n.nid');
-    $query->join('field_data_field_party_packing_date', 'pcd', 'pcd.entity_id = n.nid');
+    $query->leftjoin('field_data_field_party_packing_check', 'pc', 'pc.entity_id = n.nid');
+    $query->condition('pc.field_party_packing_check_value', 1); // 1 => YES
+    $query->leftjoin('field_data_field_party_packing_date', 'pcd', 'pcd.entity_id = n.nid');
     $query->fields('l', array('field_party_packing_loading_date_value'));
     $query->fields('pcd', array('field_party_packing_date_value'));
-
-    $query->join('field_data_field__party_packingstatus', 'ps', 'ps.entity_id = n.nid');
-    $query->join('field_data_field_party_packing_end_time', 'ppt', 'ppt.entity_id = n.nid');
+    $query->leftjoin('field_data_field__party_packingstatus', 'ps', 'ps.entity_id = n.nid');
+    $query->leftjoin('field_data_field_party_packing_end_time', 'ppt', 'ppt.entity_id = n.nid');
     $query->fields('ppt', array('field_party_packing_end_time_value'));
     $query->fields('ps', array('field__party_packingstatus_value'));
-//$query->condition('ps.field__party_packingstatus_value', 2); // completed
 
     $query->where("(DATE_FORMAT(l.field_party_packing_loading_date_value, '%Y-%m-%d') >= :start)", array(':start' => $start));
     $query->where("(DATE_FORMAT(l.field_party_packing_loading_date_value, '%Y-%m-%d') <= :to)", array(':to' => $end));
@@ -1042,7 +1042,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
         }
 
         $fail_count = $total_cont - $success_count;
-        $data[] = array('result', $fail_count, $success_count);
+        $data[] = array('Result', $fail_count, $success_count);
       }
       else {
         $data[] = array('No Result Found', 0, 0);
@@ -1058,12 +1058,12 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     $query->addTag('node_uid');
     $query->condition('n.type', 'picking');
     $query->join('field_data_field_picking_loading_date', 'l', 'l.entity_id = n.nid');
-    $query->join('field_data_field_picking_picking_date', 'pcd', 'pcd.entity_id = n.nid');
+    $query->leftjoin('field_data_field_picking_picking_date', 'pcd', 'pcd.entity_id = n.nid');
     $query->fields('l', array('field_picking_loading_date_value'));
     $query->fields('pcd', array('field_picking_picking_date_value'));
 
-    $query->join('field_data_field_picking_status', 'ps', 'ps.entity_id = n.nid');
-    $query->join('field_data_field_picking_end_time', 'ppt', 'ppt.entity_id = n.nid');
+    $query->leftjoin('field_data_field_picking_status', 'ps', 'ps.entity_id = n.nid');
+    $query->leftjoin('field_data_field_picking_end_time', 'ppt', 'ppt.entity_id = n.nid');
     $query->fields('ppt', array('field_picking_end_time_value'));
     $query->fields('ps', array('field_picking_status_value'));
 //$query->condition('ps.field_picking_status_value', 2); // completed
