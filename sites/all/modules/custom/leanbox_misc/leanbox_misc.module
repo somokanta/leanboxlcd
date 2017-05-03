@@ -218,14 +218,14 @@ function van_stop_master_form_submit($form, &$form_state) {
     $node->field_pp_finish_time[LANGUAGE_NONE][0]['value'] = $form_state['values']['pp_finish_time'];
     $node->field_unloading_finish_time[LANGUAGE_NONE][0]['value'] = $form_state['values']['unloading_finish_time'];
     $node->field_otif_finish_time[LANGUAGE_NONE][0]['value'] = $form_state['values']['otif_finish_time'];
-    $node->field_dets_bulk[LANGUAGE_NONE][0]['value'] = $form_state['values']['otif_finish_time'];
-    $node->field_dets_loose[LANGUAGE_NONE][0]['value'] = $form_state['values']['otif_finish_time'];
-    $node->field_fnb_bulk[LANGUAGE_NONE][0]['value'] = $form_state['values']['otif_finish_time'];
-    $node->field_fnb_loose[LANGUAGE_NONE][0]['value'] = $form_state['values']['otif_finish_time'];
-    $node->field_non_pp[LANGUAGE_NONE][0]['value'] = $form_state['values']['otif_finish_time'];
-    $node->field_pp[LANGUAGE_NONE][0]['value'] = $form_state['values']['otif_finish_time'];
-    $node->field_pp_bulk[LANGUAGE_NONE][0]['value'] = $form_state['values']['otif_finish_time'];
-    $node->field_pp_loose[LANGUAGE_NONE][0]['value'] = $form_state['values']['otif_finish_time'];
+    $node->field_dets_bulk[LANGUAGE_NONE][0]['value'] = $form_state['values']['field_dets_bulk'];
+    $node->field_dets_loose[LANGUAGE_NONE][0]['value'] = $form_state['values']['field_dets_loose'];
+    $node->field_fnb_bulk[LANGUAGE_NONE][0]['value'] = $form_state['values']['field_fnb_bulk'];
+    $node->field_fnb_loose[LANGUAGE_NONE][0]['value'] = $form_state['values']['field_fnb_loose'];
+    $node->field_non_pp[LANGUAGE_NONE][0]['value'] = $form_state['values']['field_non_pp'];
+    $node->field_pp[LANGUAGE_NONE][0]['value'] = $form_state['values']['field_pp'];
+    $node->field_pp_bulk[LANGUAGE_NONE][0]['value'] = $form_state['values']['field_pp_bulk'];
+    $node->field_pp_loose[LANGUAGE_NONE][0]['value'] = $form_state['values']['field_pp_loose'];
 
 
     node_save($node);
@@ -239,14 +239,14 @@ function van_stop_master_form_submit($form, &$form_state) {
     $node->field_pp_finish_time[LANGUAGE_NONE][0]['value'] = $form_state['values']['pp_finish_time'];
     $node->field_unloading_finish_time[LANGUAGE_NONE][0]['value'] = $form_state['values']['unloading_finish_time'];
     $node->field_otif_finish_time[LANGUAGE_NONE][0]['value'] = $form_state['values']['otif_finish_time'];
-    $node->field_dets_bulk[LANGUAGE_NONE][0]['value'] = $form_state['values']['otif_finish_time'];
-    $node->field_dets_loose[LANGUAGE_NONE][0]['value'] = $form_state['values']['otif_finish_time'];
-    $node->field_fnb_bulk[LANGUAGE_NONE][0]['value'] = $form_state['values']['otif_finish_time'];
-    $node->field_fnb_loose[LANGUAGE_NONE][0]['value'] = $form_state['values']['otif_finish_time'];
-    $node->field_non_pp[LANGUAGE_NONE][0]['value'] = $form_state['values']['otif_finish_time'];
-    $node->field_pp[LANGUAGE_NONE][0]['value'] = $form_state['values']['otif_finish_time'];
-    $node->field_pp_bulk[LANGUAGE_NONE][0]['value'] = $form_state['values']['otif_finish_time'];
-    $node->field_pp_loose[LANGUAGE_NONE][0]['value'] = $form_state['values']['otif_finish_time'];
+    $node->field_dets_bulk[LANGUAGE_NONE][0]['value'] = $form_state['values']['field_dets_bulk'];
+    $node->field_dets_loose[LANGUAGE_NONE][0]['value'] = $form_state['values']['field_dets_loose'];
+    $node->field_fnb_bulk[LANGUAGE_NONE][0]['value'] = $form_state['values']['field_fnb_bulk'];
+    $node->field_fnb_loose[LANGUAGE_NONE][0]['value'] = $form_state['values']['field_fnb_loose'];
+    $node->field_non_pp[LANGUAGE_NONE][0]['value'] = $form_state['values']['field_non_pp'];
+    $node->field_pp[LANGUAGE_NONE][0]['value'] = $form_state['values']['field_pp'];
+    $node->field_pp_bulk[LANGUAGE_NONE][0]['value'] = $form_state['values']['field_pp_bulk'];
+    $node->field_pp_loose[LANGUAGE_NONE][0]['value'] = $form_state['values']['field_pp_loose'];
 
     node_save($node);
   }
