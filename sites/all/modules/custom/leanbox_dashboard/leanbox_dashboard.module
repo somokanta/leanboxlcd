@@ -729,14 +729,35 @@ function leanbox_dashboard_get_areahookgroup_entity($title, $day_tid) {
 function leanbox_dashboard_target_value_using_voc_name($vname) {
   $uid = $GLOBALS['user']->uid;
   $distributor_id = change_feeds_import_get_distributor_id($uid);
-  $query1 = db_select('taxonomy_term_data', 't');
-  $query1->join('taxonomy_vocabulary', 'v', 'v.vid = t.vid');
-  $query1->join('field_data_field_target', 'tr', 'tr.entity_id = t.tid');
-  $query1->join('field_data_field_target_distributor', 'd', 'd.entity_id = t.tid');
-  $query1->condition('v.name', 'productivity target');
-  $query1->condition('d.field_target_distributor_uid', $distributor_id);
-  $query1->fields('t', array('name'));
-  $query1->fields('tr', array('field_target_value'));
-  $target = $query1->execute()->fetchAllKeyed(0, 1);
+  $query1 = db_select('node', 'n');
+  $query1->leftjoin('field_data_field_dets_bulk', 'v', 'v.entity_id = n.nid');
+  $query1->leftjoin('field_data_field_dets_loose', 'l', 'v.entity_id = n.nid');
+  $query1->leftjoin('field_data_field_fnb_bulk', 'fv', 'fv.entity_id = n.nid');
+  $query1->leftjoin('field_data_field_fnb_loose', 'fl', 'fl.entity_id = n.nid');
+  $query1->leftjoin('field_data_field_non_pp', 'np', 'np.entity_id = n.nid');
+  $query1->leftjoin('field_data_field_pp', 'pp', 'pp.entity_id = n.nid');
+  $query1->leftjoin('field_data_field_pp_bulk', 'pb', 'pb.entity_id = n.nid');
+  $query1->leftjoin('field_data_field_pp_loose', 'pl', 'pl.entity_id = n.nid');
+  $query1->fields('v', array('field_dets_bulk_value'));
+  $query1->fields('l', array('field_dets_loose_value'));
+  $query1->fields('fv', array('field_fnb_bulk_value'));
+  $query1->fields('fl', array('field_fnb_loose_value'));
+  $query1->fields('np', array('field_non_pp_value'));
+  $query1->fields('pp', array('field_pp_value'));
+  $query1->fields('pb', array('field_pp_bulk_value'));
+  $query1->fields('pl', array('field_pp_loose_value'));
+  $query1->condition('n.uid', $distributor_id);
+  $query1->condition('n.type', 'van_stop_master');
+  $res = $query1->execute()->fetch(PDO::FETCH_ASSOC);
+
+  $target['dets bulk'] = $res['field_dets_bulk_value'];
+  $target['dets loose'] = $res['field_dets_loose_value'];
+  $target['fnb bulk'] = $res['field_fnb_bulk_value'];
+  $target['fnb loose'] = $res['field_fnb_loose_value'];
+  $target['NON-PP'] = $res['field_non_pp_value'];
+  $target['PP'] = $res['field_pp_value'];
+  $target['pp bulk'] = $res['field_pp_bulk_value'];
+  $target['pp loose'] = $res['field_pp_loose_value'];
+
   return $target;
 }
