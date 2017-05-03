@@ -927,6 +927,7 @@ function reverse_geocode_update_hul_lat_lng($hul_code, $lat, $lng) {
  * Implements hook_node_presave()
  */
 function reverse_geocode_node_presave($node) {
+  /*
   if ($node->type == 'hul_code_master') {
     $og_hul_lat = $node->original->field_hul_lat['und'][0]['value'];
     $og_hul_long = $node->original->field_hul_long['und'][0]['value'];
@@ -1003,4 +1004,6 @@ function reverse_geocode_node_presave($node) {
       }
     }
   }
+   * 
+   */
 }
