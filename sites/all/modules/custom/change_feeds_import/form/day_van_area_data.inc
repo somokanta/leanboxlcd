@@ -392,8 +392,8 @@ function update_area_hook_group_for_outlets($sales_day, $van_pl_grp, $area_hook,
   $query->join('field_data_field_sales_day', 'fsd', 'fsd.entity_id = n.nid');
   $query->condition('fsd.field_sales_day_value', $sales_day);
   
-  $query->join('field_data_field_outlet_area_hook', 'fsd', 'fsd.entity_id = n.nid');
-  $query->condition('fsd.field_outlet_area_hook_value', $area_hook);
+  $query->join('field_data_field_outlet_area_hook', 'fa', 'fa.entity_id = n.nid');
+  $query->condition('fa.field_outlet_area_hook_value', $area_hook);
   
   $query->condition('n.type', 'outlet_master');
   $query->addTag('node_uid');
