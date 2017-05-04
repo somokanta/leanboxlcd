@@ -985,35 +985,9 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
   }
 
   if ($entity->feeds_item->id == 'outlet_area_hook_mapping') {
-    $title = $entity->title;
-    $res = modify_views_forms_master_feed_validate($entity->title, 'outlet_master');
-    if (empty($res)) {
-      drupal_set_message("$title Party code does not exist in Outlet master", 'error');
-      $entity->feeds_item->skip = TRUE;
-    }
+   // we have custom upload for outlet area hook
   }
 
-  if ($entity->feeds_item->id == 'area_hook_master') {
-    $title = $entity->title;
-    $outlet_days = change_feeds_import_get_terms_using_vocubulary('Outlet Days');
-    if (!empty($outlet_days)) {
-      foreach ($outlet_days as $key => $val) {
-        if ($val == 'sunday') {
-          continue; // skip 1 node creation and create only six node form monday to saturday as feeds import creates 1 node by default
-        }
-        $node = new stdClass();
-        $node->title = $title;
-        $node->type = "area_hook_master";
-        node_object_prepare($node); // Sets some defaults. Invokes hook_prepare() and hook_node_prepare().
-        $node->language = LANGUAGE_NONE; // Or e.g. 'en' if locale is enabled
-        $node->uid = $distributor_id;
-        $node->status = 1; //(1 or 0): published or not
-        $node->comment = 0; // 0 = comments disabled, 1 = read only, 2 = read/write
-        $node->field_area_hook_day[LANGUAGE_NONE][0]['tid'] = $key;
-        node_save($node);
-      }
-    }
-  }
 
   if ($entity->feeds_item->id == 'area_hook_group_master') {
     $area_id = $entity->field_area_hook_group_id['und'][0]['value'];
