@@ -387,7 +387,11 @@ function change_feeds_import_day_van_area_finished($success, $results, $operatio
 }
 
 function update_area_hook_group_for_outlets($sales_day, $van_pl_grp, $area_hook, $dva_nid){
-  
+  global $user;
+  $user_id = $user->uid;
+  $distributor_id = change_feeds_import_get_distributor_id($user_id);
+
+
   $query = db_select('node', 'n');
   $query->join('field_data_field_sales_day', 'fsd', 'fsd.entity_id = n.nid');
   $query->condition('fsd.field_sales_day_value', $sales_day);
