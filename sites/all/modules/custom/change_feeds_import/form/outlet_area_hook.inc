@@ -146,7 +146,7 @@ function change_feeds_import_outlet_area_hook_batch_fix_process($data, $distribu
         $query->condition('n2.uid', $distributor_id);
         $query->join('node', 'n2', 'fh.field_hul_code_value = n2.title');
         $query->join('field_data_field_hul_status', 'sta', 'sta.entity_id = n2.nid');
-        $query->fields('fh2', array('field_hul_status_value'));
+        $query->fields('sta', array('field_hul_status_value'));
 
         $status = $query->execute()->fetchField();
 
