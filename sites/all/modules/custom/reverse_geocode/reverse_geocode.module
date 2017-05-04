@@ -232,7 +232,7 @@ function show_locations() {
   
   drupal_add_js(drupal_get_path('module', 'reverse_geocode') . '/js/tooltipster.bundle.min.js', 'file');
   drupal_add_css(drupal_get_path('module', 'reverse_geocode') . '/css/tooltipster.bundle.min.css', 'file');
-  
+
   if ($url == "multiple") {
     drupal_add_js(drupal_get_path('module', 'reverse_geocode') . '/js/multi-map.js', 'file');
     $type = "multi";
@@ -864,12 +864,19 @@ function reverse_geocode_update_hul_status($hul_code) {
 }
 
 function reverse_geocode_get_hul_code_from_party_code($party_code) {
+  global $user;
+  $user_id = $user->uid;
+  $distributor_id = change_feeds_import_get_distributor_id($user_id);
+  
   $query = db_select('node', 'n');
   $query->join('field_data_field_hul_code', 'fh', 'fh.entity_id = n.nid');
 
   $query->join('field_data_field_hul_code', 'fh2', 'fh.field_hul_code_value = fh2.field_hul_code_value');
   $query->condition('n.title', $party_code);
   $query->condition('n.type', 'outlet_master');
+  $query->condition('n.uid', $distributor_id);
+  $query->condition('n2.uid', $distributor_id);
+  
   $query->join('node', 'n2', 'fh2.entity_id = n2.nid');
   $query->fields('fh2', array('field_hul_code_value'));
   $query->fields('n2', array('title'));

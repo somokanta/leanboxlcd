@@ -751,13 +751,19 @@ function get_modified_van_from_loading_date($date, $string) {
 function get_beat_name_from_loading_date_and_van($date, $van) {
   $result = array();
   if (!empty($date)) {
+
+    global $user;
+    $user_id = $user->uid;
+    $distributor_id = change_feeds_import_get_distributor_id($user_id);
     $query = db_select('node', 'n');
     $query->join('field_data_field_billing_van', 'v', 'v.entity_id = n.nid');
     $query->join('field_data_field_billing_loading_date', 'l', 'l.entity_id = n.nid');
     $query->leftJoin('field_data_field_delivery_pending', 'dp', 'n.nid = dp.entity_id');
     $query->leftJoin('field_data_field_sales_party_code', 'fsp', 'fsp.entity_id = n.nid');
-    $query->leftJoin('field_data_field_party_code', 'fp', 'fp.field_party_code_value = fsp.field_sales_party_code_value');
-    $query->leftJoin('field_data_field_beat_name', 'fb', 'fp.entity_id = fb.entity_id');
+    $query->join('node', 'no', 'no.title = fsp.field_sales_party_code_value');
+    $query->leftJoin('field_data_field_beat_name', 'fb', 'no.nid = fb.entity_id');
+    $query->condition('no.uid', $distributor_id);
+    $query->condition('no.type', 'outlet_master');
 
     $query->leftJoin('field_data_field_trip_id_reference', 'ft', 'ft.entity_id = n.nid');
 
@@ -765,7 +771,7 @@ function get_beat_name_from_loading_date_and_van($date, $van) {
     $query->condition('v.field_billing_van_value', $van);
     $query->condition('l.field_billing_loading_date_value', $date);
     $query->condition('n.type', 'sales_register_data');
-    
+
     $db_or = db_or();
     $db_or->isNull('ft.field_trip_id_reference_nid');
     $db_or->condition('dp.field_delivery_pending_value', 1);
