@@ -134,7 +134,28 @@ function change_feeds_import_outlet_area_hook_batch_fix_process($data, $distribu
         $value['error_message'] .= $value['PARTY CODE'] . ' Party code does not exist in Outlet master.';
       }
       else {
-        $value['PARTY CODE'] = $nid;
+        global $user;
+        $user_id = $user->uid;
+        $distributor_id = change_feeds_import_get_distributor_id($user_id);
+
+        $query = db_select('node', 'n');
+        $query->join('field_data_field_hul_code', 'fh', 'fh.entity_id = n.nid');
+        $query->condition('n.title', $value['PARTY CODE']);
+        $query->condition('n.type', 'outlet_master');
+        $query->condition('n.uid', $distributor_id);
+        $query->condition('n2.uid', $distributor_id);
+        $query->join('node', 'n2', 'fh.field_hul_code_value = n2.title');
+        $query->join('field_data_field_hul_status', 'sta', 'sta.entity_id = n2.nid');
+        $query->fields('fh2', array('field_hul_status_value'));
+
+        $status = $query->execute()->fetchField();
+
+        if ($status) {
+          $value['PARTY CODE'] = $nid;
+        }
+        else {
+          $value['error_message'] .= $value['PARTY CODE'] . ' Address is not confirmed.';
+        }
       }
     }
     if (isset($value['AREA HOOK']) && !empty($nid)) {
@@ -149,10 +170,10 @@ function change_feeds_import_outlet_area_hook_batch_fix_process($data, $distribu
       }
       else {
         $sales_day_tid = leanbox_check_taxonomy_exists_by_name($tname, 'Outlet days');
-
+        
         $query = db_select('node', 'n');
         $query->fields('n', array('nid'));
-        $query->join('field_data_field_area_hook_day', 's', 's.entity_id = n.nid');
+        //$query->join('field_data_field_area_hook_day', 's', 's.entity_id = n.nid');
         $query->condition('n.title', $value['AREA HOOK']);
         $query->addTag('node_uid'); // no need of this condition as nid condition is given
         $query->condition('n.type', 'area_hook_master');

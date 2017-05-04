@@ -142,7 +142,7 @@ function change_feeds_import_day_van_area_batch_fix_process($data, $distributor_
 
           case 'Van_PL_Group':
             if (!is_numeric($van_pl_group)) {
-              $value['error_message'] .= " Van PlGroup " . $value['BILL_NUMBER'] . ' should have numeric bill value.  ';
+              $value['error_message'] .= " Van PlGroup " . $value['Van_PL_Group'] . ' should have numeric value.  ';
             }
             break;
           case 'Area Hook':
@@ -280,7 +280,7 @@ function change_feeds_import_day_van_area_create_confirm_content($fid) {
           ->execute()->fetchAll(PDO::FETCH_ASSOC);
 
   $operations = array();
-  $data_chunk = array_chunk($day_van_area_data_result, 100);
+  $data_chunk = array_chunk($day_van_area_data_result, 5);
   foreach ($data_chunk as $data) {
     $operations[] = array('change_feeds_import_create_day_van_area_register_node', array($data, $distributor_id));
   }
@@ -327,13 +327,15 @@ function change_feeds_import_create_day_van_area_register_node($day_van_area_dat
           $node->field_dva_area_hook[LANGUAGE_NONE][0]['value'] = $area_hook;
           $node->field_dva_area_hook_group_name[LANGUAGE_NONE][0]['value'] = $area_hook_grp;
           node_save($node);
+          
+          update_area_hook_group_for_outlets($sales_day, $van_pl_grp, $area_hook, $node->nid);
           $created_count++;
         }
         else {
           $node = node_load($nid);
-          $node->field_dva_sales_day[LANGUAGE_NONE][0]['value'] = $sales_day;
-          $node->field_dva_van_pl_group[LANGUAGE_NONE][0]['value'] = $van_pl_grp;
-          $node->field_dva_area_hook[LANGUAGE_NONE][0]['value'] = $area_hook;
+          //$node->field_dva_sales_day[LANGUAGE_NONE][0]['value'] = $sales_day;
+          //$node->field_dva_van_pl_group[LANGUAGE_NONE][0]['value'] = $van_pl_grp;
+          //$node->field_dva_area_hook[LANGUAGE_NONE][0]['value'] = $area_hook;
           $node->field_dva_area_hook_group_name[LANGUAGE_NONE][0]['value'] = $area_hook_grp;
           node_save($node);
           $updated_count++;
@@ -381,5 +383,41 @@ function change_feeds_import_day_van_area_finished($success, $results, $operatio
   }
   else {
     drupal_set_message('There is Error Occured in batch process');
+  }
+}
+
+function update_area_hook_group_for_outlets($sales_day, $van_pl_grp, $area_hook, $dva_nid){
+  
+  $query = db_select('node', 'n');
+  $query->join('field_data_field_sales_day', 'fsd', 'fsd.entity_id = n.nid');
+  $query->condition('fsd.field_sales_day_value', $sales_day);
+  
+  $query->join('field_data_field_outlet_area_hook', 'fsd', 'fsd.entity_id = n.nid');
+  $query->condition('fsd.field_outlet_area_hook_value', $area_hook);
+  
+  $query->condition('n.type', 'outlet_master');
+  $query->addTag('node_uid');
+  $query->join('field_data_field_channel', 'ch', 'ch.entity_id = n.nid');
+  $query->join('field_data_field_pl_group', 'pl', 'pl.entity_id = n.nid');
+  $query->join('field_data_field_channel', 'ppmch', 'ch.field_channel_value = ppmch.field_channel_value');
+  $query->condition('ppmch.bundle', 'party_pack_master');
+  $query->join('node', 'ppn', 'ppn.nid = ppmch.entity_id');
+  $query->condition('ppn.uid', $distributor_id, '=');
+  $query->join('field_data_field_pl_group', 'ppmpl', 'pl.field_pl_group_value = ppmpl.field_pl_group_value and ppmch.entity_id = ppmpl.entity_id');
+  $query->condition('ppmch.bundle', 'party_pack_master');
+  $query->join('field_data_field_van_pl_group', 'ppplg', 'ppn.nid = ppplg.entity_id');
+  $query->condition('ppplg.field_van_pl_group_value', $van_pl_grp);
+  
+  $query->fields('n', array('nid'));
+  $res = $query->execute()->fetchCol();
+  
+  foreach ($res as $nid) {
+    $node = node_load($nid);
+
+    $node->field_area_hook['und'][0]['nid'] = $dva_nid;
+    field_attach_presave('node', $node);
+    field_attach_update('node', $node);
+
+    entity_get_controller('node')->resetCache(array($nid));
   }
 }
