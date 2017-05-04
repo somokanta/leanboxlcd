@@ -162,7 +162,7 @@ function change_feeds_import_outlet_area_hook_batch_fix_process($data, $distribu
           $value['error_message'] .= " Area Hook " . $value['AREA HOOK'] . ' Does not exist in our system.';
         }
         else {
-          $value['AREA HOOK'] = $res;
+         // $value['AREA HOOK'] = $value['AREA HOOK'];
         }
       }
     }
@@ -300,14 +300,13 @@ function change_feeds_import_outlet_area_hook_node($sales_data_result, $distribu
         else {
           $area_hook = $val['uploded_area_hook']; // Uploaded Area Hook
           $node = node_load($nid);
-          $sales_day = $node->field_sales_day['und'][0]['value']; // Sales Day from Outlet Master
-          $ol_channel = $node->field_channel['und'][0]['value']; // Channle from Outlet Master
-          $ol_pl_grp = $node->field_pl_group['und'][0]['value']; // PL Grp from Outlet Master
-          $van_pl_grp = get_van_pl_grp_from_hannel_pl_grp($ol_channel, $ol_pl_grp,$distributor_id); // VAN PL GRP from Party Pack Master
-          // get nid of Day-van-pl-grp-area-hook master using sales_day , Van_PL_Grp , and Area_Hook
-          $day_van_area_nid = get_nid_from_master_using_sales_day_van_grp_area_hook($sales_day,$van_pl_grp,$area_hook);
-          // assign above nid to area hook which is in Outlet Master
-          $node->field_area_hook['und'][0]['nid'] = $day_van_area_nid;
+//          $sales_day = $node->field_sales_day['und'][0]['value']; // Sales Day from Outlet Master
+//          $ol_channel = $node->field_channel['und'][0]['value']; // Channle from Outlet Master
+//          $ol_pl_grp = $node->field_pl_group['und'][0]['value']; // PL Grp from Outlet Master
+//          $van_pl_grp = get_van_pl_grp_from_hannel_pl_grp($ol_channel, $ol_pl_grp,$distributor_id); // VAN PL GRP from Party Pack Master
+//          $day_van_area_nid = get_nid_from_master_using_sales_day_van_grp_area_hook($sales_day,$van_pl_grp,$area_hook);
+
+          $node->field_outlet_area_hook['und'][0]['value'] = $area_hook;
           field_attach_update('node', $node);
           entity_get_controller('node')->resetCache(array($nid));
 
