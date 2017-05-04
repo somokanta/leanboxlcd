@@ -416,6 +416,7 @@ function update_area_hook_group_for_outlets($sales_day, $van_pl_grp, $area_hook,
   $res = $query->execute()->fetchCol();
   
   foreach ($res as $nid) {
+    watchdog('aaaa', $nid . '  ' . $dva_nid);
     $node = node_load($nid);
 
     $node->field_area_hook['und'][0]['nid'] = $dva_nid;
