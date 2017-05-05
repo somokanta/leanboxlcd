@@ -1614,14 +1614,14 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
     );
 
     // Do the actual join
-    $query->table_queue['temp'] = array(
-      'alias' => 'temp', // I believe this is optional
-      'table' => $sub_query,
-      'relationship' => 'van_pl',
-      'join' => $join,
-    );
-
-    $query->add_field('temp', 'van_pl_group');
+//    $query->table_queue['temp'] = array(
+//      'alias' => 'temp', // I believe this is optional
+//      'table' => $sub_query,
+//      'relationship' => 'van_pl',
+//      'join' => $join,
+//    );
+//
+//    $query->add_field('temp', 'van_pl_group');
   }
 }
 
