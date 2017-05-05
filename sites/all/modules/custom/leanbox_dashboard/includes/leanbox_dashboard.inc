@@ -1352,11 +1352,8 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
   else if ($activity_type == 'outlet_status') {
     
     $header = array(
-      array('data' => 'Outlet Count',),
-      array('data' => 'Address confirmed',),
-      array('data' => 'Area Hook Confirmation',),
-      array('data' => 'User Defined Seq Confirmation'),
-      array('data' => 'Static Deliver Beat',),
+      array('data' => 'Status',),
+      array('data' => 'Count',),
     );
     $query = db_select('node', 'n');
     $query->join('field_data_field_hul_code', 'h', 'h.entity_id = n.nid');
@@ -1376,7 +1373,27 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     $query->condition('n.type', 'outlet_master');
     $query->condition('n1.type', 'hul_code_master');
     
-    $rows = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+    $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+
+    $row [] = 'Outlet Count';
+    $row [] = $res->mcoupon_franchisee_code;
+    $rows [0] = $row;
+    
+    $row [] = 'Address confirmed';
+    $row [] = $res->address;
+    $rows [1] = $row;
+
+    $row [] = 'Area Hook Confirmation';
+    $row [] = $res->ahg;
+    $rows [2] = $row;
+
+    $row [] = 'User Defined Seq Confirmation';
+    $row [] = $res->revised_seq;
+    $rows [3] = $row;
+
+    $row [] = 'Static Deliver Beat';
+    $row [] = $res->beat;
+    $rows [4] = $row;
     $output = theme('table', array('header' => $header, 'rows' => $rows));
     return $output;
   }
