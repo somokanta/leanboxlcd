@@ -1137,7 +1137,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     return $data;
   }
   else if ($activity_type == 'picking_ota') {
-  $query = db_select('node', 'n');
+    $query = db_select('node', 'n');
     $query->addTag('node_uid');
     $query->condition('n.type', 'picking');
     $query->join('field_data_field_picking_loading_date', 'l', 'l.entity_id = n.nid');
@@ -1161,8 +1161,6 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     $query->where("(DATE_FORMAT(l.field_picking_loading_date_value, '%Y-%m-%d') >= :start)", array(':start' => $start));
     $query->where("(DATE_FORMAT(l.field_picking_loading_date_value, '%Y-%m-%d') <= :to)", array(':to' => $end));
     $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
-
-    dpm($res);
 
     $data[] = array('PriceList Group', 'Fail', 'Success');
 
