@@ -1586,6 +1586,19 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
 
     $query->add_field('temp', 'BEAT_NAME');
   }
+  
+  if($view->name == 'Outlet_Master_Report'){
+    dpm($view);
+    dpm($query);
+    
+    $join = new views_join();
+    $join->definition = array('table formula' => $sub_query, 'left_field' => 'title', 'field' => 'minimum', 'left_table' => 'node');
+    $join->table = 'node';
+    $join->field = 'minimum';
+    $join->left_table = 'node'; // or wathever table you want to join with
+    $join->left_field = 'title'; // or wathever column you want to join with
+    $join->type = 'LEFT';
+  }
 }
 
 /**
