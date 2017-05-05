@@ -248,7 +248,7 @@ function delivery_beat_get_results($sales_day, $van_pl_group = NULL, $area_hook_
   
   //VAN PL Group Stop Master
   $query->join('node', 'nv', 'nv.title = ppplg.field_dva_van_pl_group_value');
-  $query->join('field_data_field_stops_per_van', 'fsv', 'fsv.entity_id = nv.nid');
+  $query->join('field_data_field_deliveries_per_stop', 'fsv', 'fsv.entity_id = nv.nid');
   $query->condition('nv.uid', $distributor_id, '=');
 
 //Party pack Master
@@ -271,7 +271,7 @@ function delivery_beat_get_results($sales_day, $van_pl_group = NULL, $area_hook_
       . "LPAD(fdn.field_day_number_value, 2, '0'), "
       . "LPAD(ppplg.field_dva_van_pl_group_value, 2, '0'),"
       . "fagi.field_area_hook_group_id_value,"
-      . "LPAD(CEIL(fs.field_revised_sequence_value/fsv.field_stops_per_van_value), 3, '0'),"
+      . "LPAD(CEIL(fs.field_revised_sequence_value/fsv.field_deliveries_per_stop_value), 3, '0'),"
       . "sub.area"
       . ")";
   
@@ -308,7 +308,7 @@ function delivery_beat_get_results($sales_day, $van_pl_group = NULL, $area_hook_
   
   //VAN PL Group Stop Master
   $subquery->join('node', 'nv', 'nv.title = ppplg.field_dva_van_pl_group_value');
-  $subquery->join('field_data_field_stops_per_van', 'fsv', 'fsv.entity_id = nv.nid');
+  $subquery->join('field_data_field_deliveries_per_stop', 'fsv', 'fsv.entity_id = nv.nid');
   $subquery->condition('nv.uid', $distributor_id, '=');
   
   //Party pack Master
@@ -324,9 +324,9 @@ function delivery_beat_get_results($sales_day, $van_pl_group = NULL, $area_hook_
   $subquery->addExpression("COALESCE(NULLIF(addr.field_updated_address_sub_premise, ''), NULLIF(addr.field_updated_address_dependent_locality, ''), NULLIF(addr.field_updated_address_locality, ''))", 'area');
   
   ############ CHANGE 10 to DYNAMIC####################
-  $subquery->where("((fs.field_revised_sequence_value - 1)%(fsv.field_stops_per_van_value) = 0)");
+  $subquery->where("((fs.field_revised_sequence_value - 1)%(fsv.field_deliveries_per_stop_value) = 0)");
   
-  $query->join($subquery, 'sub', "sub.field_revised_sequence_value = (FLOOR((fs.field_revised_sequence_value - 1)/fsv.field_stops_per_van_value)*fsv.field_stops_per_van_value + 1) AND sub.field_dva_van_pl_group_value = ppplg.field_dva_van_pl_group_value AND sub.field_dva_area_hook_group_name_value = agr.field_dva_area_hook_group_name_value");
+  $query->join($subquery, 'sub', "sub.field_revised_sequence_value = (FLOOR((fs.field_revised_sequence_value - 1)/fsv.field_deliveries_per_stop_value)*fsv.field_deliveries_per_stop_value + 1) AND sub.field_dva_van_pl_group_value = ppplg.field_dva_van_pl_group_value AND sub.field_dva_area_hook_group_name_value = agr.field_dva_area_hook_group_name_value");
 
   $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
 
