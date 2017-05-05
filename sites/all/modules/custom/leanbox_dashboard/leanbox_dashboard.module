@@ -693,6 +693,9 @@ function leanbox_dashboard_block_view($delta = '') {
       $loading_date = date('d-m-Y');
       $block['subject'] = "Outlet Status";
       $data = leanbox_dashboard_chart_query_details('outlet_status');
+      $block['content'] = array(
+        '#markup' => theme('leanbox_dashboard', array('data' => $data)),
+        );
       break;
   }
 
