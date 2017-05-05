@@ -1137,7 +1137,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     return $data;
   }
   else if ($activity_type == 'picking_ota') {
-  $query = db_select('node', 'n');
+    $query = db_select('node', 'n');
     $query->addTag('node_uid');
     $query->condition('n.type', 'picking');
     $query->join('field_data_field_picking_loading_date', 'l', 'l.entity_id = n.nid');
@@ -1162,8 +1162,6 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     $query->where("(DATE_FORMAT(l.field_picking_loading_date_value, '%Y-%m-%d') <= :to)", array(':to' => $end));
     $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
 
-    dpm($res);
-
     $data[] = array('PriceList Group', 'Fail', 'Success');
 
     $query = db_select('node', 'n');
@@ -1183,7 +1181,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
           if (($val['field_picking_loading_date_value'] == $val['field_picking_picking_date_value']) && ($val['field_picking_status_value'] == 2)) {
             $count = 0;
             $time = explode(',', $val['time']);
-            dpm($time, 'time');
+
             foreach ($time as $key1 => $val1) {
               $pp_on_time = strtotime(date("H:i", strtotime($val1['field_picking_end_time_value'])));
 
@@ -1209,6 +1207,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     else {
       $data[] = array('No Finish Time Found', 0, 0);
     }
+
     return $data;
   }
   else if ($activity_type == 'unloading_ota') {
@@ -1216,12 +1215,12 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     $query->addTag('node_uid');
     $query->condition('n.type', 'egir');
     $query->join('field_data_field_egir_date', 'l', 'l.entity_id = n.nid');
-    $query->join('field_data_field_unloading_date', 'pcd', 'pcd.entity_id = n.nid');
+    $query->leftjoin('field_data_field_unloading_date', 'pcd', 'pcd.entity_id = n.nid');
     $query->fields('l', array('field_egir_date_value'));
     $query->fields('pcd', array('field_unloading_date_value'));
 
-    $query->join('field_data_field_unloading_status', 'ps', 'ps.entity_id = n.nid');
-    $query->join('field_data_field_unloading_end_time', 'ppt', 'ppt.entity_id = n.nid');
+    $query->leftjoin('field_data_field_unloading_status', 'ps', 'ps.entity_id = n.nid');
+    $query->leftjoin('field_data_field_unloading_end_time', 'ppt', 'ppt.entity_id = n.nid');
     $query->fields('ppt', array('field_unloading_end_time_value'));
     $query->fields('ps', array('field_unloading_status_value'));
 
