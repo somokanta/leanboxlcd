@@ -1181,7 +1181,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
           if (($val['field_picking_loading_date_value'] == $val['field_picking_picking_date_value']) && ($val['field_picking_status_value'] == 2)) {
             $count = 0;
             $time = explode(',', $val['time']);
-            dpm($time, 'time');
+
             foreach ($time as $key1 => $val1) {
               $pp_on_time = strtotime(date("H:i", strtotime($val1['field_picking_end_time_value'])));
 
@@ -1207,6 +1207,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     else {
       $data[] = array('No Finish Time Found', 0, 0);
     }
+
     return $data;
   }
   else if ($activity_type == 'unloading_ota') {
