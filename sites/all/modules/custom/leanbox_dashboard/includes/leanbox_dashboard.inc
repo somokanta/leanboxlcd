@@ -1375,25 +1375,26 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     
     $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
 
-    $row [] = 'Outlet Count';
-    $row [] = $res->mcoupon_franchisee_code;
-    $rows [0] = $row;
+    $row1 [] = 'Outlet Count';
+    $row1 [] = $res->outlet;
+    $rows [0] = $row1;
     
-    $row [] = 'Address confirmed';
-    $row [] = $res->address;
-    $rows [1] = $row;
+    $row2 [] = 'Address confirmed';
+    $row2 [] = $res->address;
+    $rows [1] = $row2;
 
-    $row [] = 'Area Hook Confirmation';
-    $row [] = $res->ahg;
-    $rows [2] = $row;
+    $row3 [] = 'Area Hook Confirmation';
+    $row3 [] = $res->ahg;
+    $rows [2] = $row3;
 
-    $row [] = 'User Defined Seq Confirmation';
-    $row [] = $res->revised_seq;
-    $rows [3] = $row;
+    $row4 [] = 'User Defined Seq Confirmation';
+    $row4 [] = $res->revised_seq;
+    $rows [3] = $row4;
 
-    $row [] = 'Static Deliver Beat';
-    $row [] = $res->beat;
-    $rows [4] = $row;
+    $row5 [] = 'Static Deliver Beat';
+    $row5 [] = $res->beat;
+    $rows [4] = $row5;
+    
     $output = theme('table', array('header' => $header, 'rows' => $rows));
     return $output;
   }
