@@ -1137,23 +1137,33 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     return $data;
   }
   else if ($activity_type == 'picking_ota') {
-    $query = db_select('node', 'n');
+  $query = db_select('node', 'n');
     $query->addTag('node_uid');
     $query->condition('n.type', 'picking');
     $query->join('field_data_field_picking_loading_date', 'l', 'l.entity_id = n.nid');
     $query->leftjoin('field_data_field_picking_picking_date', 'pcd', 'pcd.entity_id = n.nid');
+    $query->leftjoin('field_data_field_picking_status', 'ps', 'ps.entity_id = n.nid');
+
     $query->fields('l', array('field_picking_loading_date_value'));
     $query->fields('pcd', array('field_picking_picking_date_value'));
 
-    $query->leftjoin('field_data_field_picking_status', 'ps', 'ps.entity_id = n.nid');
-    $query->leftjoin('field_data_field_picking_end_time', 'ppt', 'ppt.entity_id = n.nid');
-    $query->fields('ppt', array('field_picking_end_time_value'));
-    $query->fields('ps', array('field_picking_status_value'));
-//$query->condition('ps.field_picking_status_value', 2); // completed
+    $query->leftjoin('field_data_field_picking_picking_type', 'pt', 'pt.entity_id = n.nid');
+    $query->leftjoin('field_data_field_picking_van_id', 'v', 'v.entity_id = n.nid');
+    $query->leftjoin('field_data_field_picking_end_time', 'e', 'e.entity_id = n.nid');
 
+    $query->fields('ps', array('field_picking_status_value'));
+    $query->fields('e', array('field_picking_end_time_value'));
+    $query->fields('v', array('field_picking_van_id_value'));
+    $query->addExpression('GROUP_CONCAT(e.field_picking_end_time_value)', 'time');
+    $query->groupBy('v.field_picking_van_id_value');
+    $query->groupBy('l.field_picking_loading_date_value');
+    $query->condition('pt.field_picking_picking_type_value', 'Loose');
     $query->where("(DATE_FORMAT(l.field_picking_loading_date_value, '%Y-%m-%d') >= :start)", array(':start' => $start));
     $query->where("(DATE_FORMAT(l.field_picking_loading_date_value, '%Y-%m-%d') <= :to)", array(':to' => $end));
     $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+
+    dpm($res);
+
     $data[] = array('PriceList Group', 'Fail', 'Success');
 
     $query = db_select('node', 'n');
@@ -1170,15 +1180,25 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
         $dis_on_time = strtotime(date("H:i", strtotime($dis_time)));
         $success_count = 0;
         foreach ($res as $key => $val) {
-          $pp_on_time = strtotime(date("H:i", strtotime($val['field_picking_end_time_value'])));
-
           if (($val['field_picking_loading_date_value'] == $val['field_picking_picking_date_value']) && ($val['field_picking_status_value'] == 2)) {
-            if ($pp_on_time <= $dis_on_time) {
+            $count = 0;
+            $time = explode(',', $val['time']);
+            dpm($time, 'time');
+            foreach ($time as $key1 => $val1) {
+              $pp_on_time = strtotime(date("H:i", strtotime($val1['field_picking_end_time_value'])));
+
+              if ($pp_on_time <= $dis_on_time) {
+                $count = 1;
+              }
+              else {
+                $count = 0;
+              }
+            }
+            if ($count == 1) {
               $success_count ++;
             }
           }
         }
-
         $fail_count = $total_cont - $success_count;
         $data[] = array('result', $fail_count, $success_count);
       }
