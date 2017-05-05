@@ -1373,7 +1373,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     $query->condition('n.type', 'outlet_master');
     $query->condition('n1.type', 'hul_code_master');
     
-    $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+    $res = $query->execute()->fetch();
 
     $row1 [] = 'Outlet Count';
     $row1 [] = $res->outlet;
