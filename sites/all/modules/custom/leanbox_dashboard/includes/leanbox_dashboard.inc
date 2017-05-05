@@ -1215,12 +1215,12 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     $query->addTag('node_uid');
     $query->condition('n.type', 'egir');
     $query->join('field_data_field_egir_date', 'l', 'l.entity_id = n.nid');
-    $query->join('field_data_field_unloading_date', 'pcd', 'pcd.entity_id = n.nid');
+    $query->leftjoin('field_data_field_unloading_date', 'pcd', 'pcd.entity_id = n.nid');
     $query->fields('l', array('field_egir_date_value'));
     $query->fields('pcd', array('field_unloading_date_value'));
 
-    $query->join('field_data_field_unloading_status', 'ps', 'ps.entity_id = n.nid');
-    $query->join('field_data_field_unloading_end_time', 'ppt', 'ppt.entity_id = n.nid');
+    $query->leftjoin('field_data_field_unloading_status', 'ps', 'ps.entity_id = n.nid');
+    $query->leftjoin('field_data_field_unloading_end_time', 'ppt', 'ppt.entity_id = n.nid');
     $query->fields('ppt', array('field_unloading_end_time_value'));
     $query->fields('ps', array('field_unloading_status_value'));
 
