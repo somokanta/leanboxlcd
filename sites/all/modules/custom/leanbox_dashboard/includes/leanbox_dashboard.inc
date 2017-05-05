@@ -1277,7 +1277,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     if (!empty($start_date) && !empty($end_date)) {
       $query->condition('b.field_sr_bill_date_value', array($start_date, $end_date), 'BETWEEN');
     }
-    $query->condition('n.uid', $uid);
+    $query->condition('n.uid', $distributor_id);
     $total_cont = $query->execute()->rowCount();
 
 // query to calculate total dispatched bill value
@@ -1293,8 +1293,8 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     $query->join('field_data_field_dispatch_start_time', 'st', 'st.entity_id = n1.nid');
     $query->fields('st', array('field_dispatch_start_time_value'));
     $query->fields('d1', array('field_dispatch_date_value'));
-    $query->condition('n.uid', $uid);
-    $query->condition('n1.uid', $uid);
+    $query->condition('n.uid', $distributor_id);
+    $query->condition('n1.uid', $distributor_id);
     $query->condition('n.type', 'sales_register_data');
     if (!empty($start_date) && !empty($end_date)) {
       $query->condition('b.field_sr_bill_date_value', array($start_date, $end_date), 'BETWEEN');
@@ -1347,6 +1347,38 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
       $data[] = array('No Finish Time Found', 0, 0);
     }
     return $data;
+  }
+  
+  else if ($activity_type == 'outlet_status') {
+    
+    $header = array(
+      array('data' => 'Outlet Count',),
+      array('data' => 'Address confirmed',),
+      array('data' => 'Area Hook Confirmation',),
+      array('data' => 'User Defined Seq Confirmation'),
+      array('data' => 'Static Deliver Beat',),
+    );
+    $query = db_select('node', 'n');
+    $query->join('field_data_field_hul_code', 'h', 'h.entity_id = n.nid');
+    $query->join('node', 'n1', 'h.field_hul_code_value = n1.title');
+    $query->leftjoin('field_data_field_hul_status', 'hs', 'hs.entity_id = n1.nid');
+    $query->leftjoin('field_data_field_area_hook_group_hul', 't', 't.entity_id = n.nid');
+    $query->leftjoin('field_data_field_static_delivery_beat_code', 'd1', 'd1.entity_id= n.nid');
+    $query->leftjoin('field_data_field_revised_sequence_status', 'st', 'st.entity_id = n.nid');
+    $query->addExpression('COUNT(n.nid)', 'outlet');
+
+    $query->addExpression('SUM(if((hs.field_hul_status_value = 1), 1, 0))', 'address');
+    $query->addExpression('SUM(if((t.field_area_hook_group_hul_value), 1, 0))', 'ahg');
+    $query->addExpression('SUM(if((st.field_revised_sequence_status_value = 1), 1, 0))', 'revised_seq');
+    $query->addExpression('COUNT(d1.field_static_delivery_beat_code_value)', 'beat');
+    $query->condition('n.uid', $distributor_id);
+    $query->condition('n1.uid', $distributor_id);
+    $query->condition('n.type', 'outlet_master');
+    $query->condition('n1.type', 'hul_code_master');
+    
+    $rows = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+    $output = theme('table', array('header' => $header, 'rows' => $rows));
+    return $output;
   }
 }
 

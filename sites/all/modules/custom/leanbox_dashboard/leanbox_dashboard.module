@@ -182,6 +182,10 @@ function leanbox_dashboard_block_info() {
     'info' => t('Dispatch On Time Adherence'),
     'cache' => DRUPAL_NO_CACHE,
   );
+  $blocks['outlet_status'] = array(
+    'info' => t('Outlet Status'),
+    'cache' => DRUPAL_NO_CACHE,
+  );
   return $blocks;
 }
 
@@ -613,8 +617,8 @@ function leanbox_dashboard_block_view($delta = '') {
         ),
       );
       break;
-      
-      case 'unloading_ota':
+
+    case 'unloading_ota':
 
       if (arg(1) == 'unloading_ota') {
         $area_definition = array(
@@ -648,8 +652,8 @@ function leanbox_dashboard_block_view($delta = '') {
         ),
       );
       break;
-      
-       case 'dispatch_ota':
+
+    case 'dispatch_ota':
 
       if (arg(1) == 'dispatch_ota') {
         $area_definition = array(
@@ -682,6 +686,13 @@ function leanbox_dashboard_block_view($delta = '') {
           ),
         ),
       );
+      break;
+
+    case 'outlet_status':
+
+      $loading_date = date('d-m-Y');
+      $block['subject'] = "Outlet Status";
+      $data = leanbox_dashboard_chart_query_details('outlet_status');
       break;
   }
 
