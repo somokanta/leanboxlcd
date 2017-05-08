@@ -26,7 +26,7 @@ class views_handler_field_van_pl_group extends views_handler_field {
     $query->fields('ppplg', array('field_van_pl_group_value'));
     $van_pl_grp = $query->execute()->fetchField();
 
-    $values->van_pl_grp = $van_pl_grp;
+    $values->van_pl_group = $van_pl_grp;
 
     return $van_pl_grp;
   }
