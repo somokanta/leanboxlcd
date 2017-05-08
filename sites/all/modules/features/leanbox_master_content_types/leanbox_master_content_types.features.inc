@@ -73,6 +73,14 @@ function leanbox_master_content_types_node_info() {
       'title_label' => t('Bill Number'),
       'help' => '',
     ),
+    'van_pl_group_master' => array(
+      'name' => t('VAN Pl group master'),
+      'base' => 'node_content',
+      'description' => '',
+      'has_title' => '1',
+      'title_label' => t('Title'),
+      'help' => '',
+    ),
     'vehicle_master' => array(
       'name' => t('Vehicle Master'),
       'base' => 'node_content',

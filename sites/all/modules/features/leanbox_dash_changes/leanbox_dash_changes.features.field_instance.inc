@@ -100,6 +100,236 @@ function leanbox_dash_changes_field_default_field_instances() {
     ),
   );
 
+  // Exported field_instance: 'node-van_stop_master-field_dets_bulk'.
+  $field_instances['node-van_stop_master-field_dets_bulk'] = array(
+    'bundle' => 'van_stop_master',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'number',
+        'settings' => array(
+          'decimal_separator' => '.',
+          'prefix_suffix' => TRUE,
+          'scale' => 0,
+          'thousand_separator' => '',
+        ),
+        'type' => 'number_integer',
+        'weight' => 7,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_dets_bulk',
+    'label' => 'dets bulk',
+    'required' => 0,
+    'settings' => array(
+      'max' => '',
+      'min' => '',
+      'prefix' => '',
+      'suffix' => '',
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 0,
+      'module' => 'number',
+      'settings' => array(),
+      'type' => 'number',
+      'weight' => 38,
+    ),
+  );
+
+  // Exported field_instance: 'node-van_stop_master-field_dets_loose'.
+  $field_instances['node-van_stop_master-field_dets_loose'] = array(
+    'bundle' => 'van_stop_master',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'number',
+        'settings' => array(
+          'decimal_separator' => '.',
+          'prefix_suffix' => TRUE,
+          'scale' => 0,
+          'thousand_separator' => '',
+        ),
+        'type' => 'number_integer',
+        'weight' => 8,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_dets_loose',
+    'label' => 'dets loose',
+    'required' => 0,
+    'settings' => array(
+      'max' => '',
+      'min' => '',
+      'prefix' => '',
+      'suffix' => '',
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 0,
+      'module' => 'number',
+      'settings' => array(),
+      'type' => 'number',
+      'weight' => 39,
+    ),
+  );
+
+  // Exported field_instance: 'node-van_stop_master-field_fnb_bulk'.
+  $field_instances['node-van_stop_master-field_fnb_bulk'] = array(
+    'bundle' => 'van_stop_master',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'number',
+        'settings' => array(
+          'decimal_separator' => '.',
+          'prefix_suffix' => TRUE,
+          'scale' => 0,
+          'thousand_separator' => '',
+        ),
+        'type' => 'number_integer',
+        'weight' => 9,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_fnb_bulk',
+    'label' => 'fnb bulk',
+    'required' => 0,
+    'settings' => array(
+      'max' => '',
+      'min' => '',
+      'prefix' => '',
+      'suffix' => '',
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 0,
+      'module' => 'number',
+      'settings' => array(),
+      'type' => 'number',
+      'weight' => 40,
+    ),
+  );
+
+  // Exported field_instance: 'node-van_stop_master-field_fnb_loose'.
+  $field_instances['node-van_stop_master-field_fnb_loose'] = array(
+    'bundle' => 'van_stop_master',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'number',
+        'settings' => array(
+          'decimal_separator' => '.',
+          'prefix_suffix' => TRUE,
+          'scale' => 0,
+          'thousand_separator' => '',
+        ),
+        'type' => 'number_integer',
+        'weight' => 10,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_fnb_loose',
+    'label' => 'fnb loose',
+    'required' => 0,
+    'settings' => array(
+      'max' => '',
+      'min' => '',
+      'prefix' => '',
+      'suffix' => '',
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 0,
+      'module' => 'number',
+      'settings' => array(),
+      'type' => 'number',
+      'weight' => 41,
+    ),
+  );
+
+  // Exported field_instance: 'node-van_stop_master-field_non_pp'.
+  $field_instances['node-van_stop_master-field_non_pp'] = array(
+    'bundle' => 'van_stop_master',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'number',
+        'settings' => array(
+          'decimal_separator' => '.',
+          'prefix_suffix' => TRUE,
+          'scale' => 0,
+          'thousand_separator' => '',
+        ),
+        'type' => 'number_integer',
+        'weight' => 11,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_non_pp',
+    'label' => 'NON-PP',
+    'required' => 0,
+    'settings' => array(
+      'max' => '',
+      'min' => '',
+      'prefix' => '',
+      'suffix' => '',
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 0,
+      'module' => 'number',
+      'settings' => array(),
+      'type' => 'number',
+      'weight' => 42,
+    ),
+  );
+
   // Exported field_instance: 'node-van_stop_master-field_otif_finish_time'.
   $field_instances['node-van_stop_master-field_otif_finish_time'] = array(
     'bundle' => 'van_stop_master',
@@ -180,6 +410,98 @@ function leanbox_dash_changes_field_default_field_instances() {
     ),
   );
 
+  // Exported field_instance: 'node-van_stop_master-field_pp'.
+  $field_instances['node-van_stop_master-field_pp'] = array(
+    'bundle' => 'van_stop_master',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'number',
+        'settings' => array(
+          'decimal_separator' => '.',
+          'prefix_suffix' => TRUE,
+          'scale' => 0,
+          'thousand_separator' => '',
+        ),
+        'type' => 'number_integer',
+        'weight' => 12,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_pp',
+    'label' => 'PP',
+    'required' => 0,
+    'settings' => array(
+      'max' => '',
+      'min' => '',
+      'prefix' => '',
+      'suffix' => '',
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 0,
+      'module' => 'number',
+      'settings' => array(),
+      'type' => 'number',
+      'weight' => 43,
+    ),
+  );
+
+  // Exported field_instance: 'node-van_stop_master-field_pp_bulk'.
+  $field_instances['node-van_stop_master-field_pp_bulk'] = array(
+    'bundle' => 'van_stop_master',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'number',
+        'settings' => array(
+          'decimal_separator' => '.',
+          'prefix_suffix' => TRUE,
+          'scale' => 0,
+          'thousand_separator' => '',
+        ),
+        'type' => 'number_integer',
+        'weight' => 13,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_pp_bulk',
+    'label' => 'pp bulk',
+    'required' => 0,
+    'settings' => array(
+      'max' => '',
+      'min' => '',
+      'prefix' => '',
+      'suffix' => '',
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 0,
+      'module' => 'number',
+      'settings' => array(),
+      'type' => 'number',
+      'weight' => 44,
+    ),
+  );
+
   // Exported field_instance: 'node-van_stop_master-field_pp_finish_time'.
   $field_instances['node-van_stop_master-field_pp_finish_time'] = array(
     'bundle' => 'van_stop_master',
@@ -217,6 +539,52 @@ function leanbox_dash_changes_field_default_field_instances() {
       ),
       'type' => 'text_textfield',
       'weight' => 34,
+    ),
+  );
+
+  // Exported field_instance: 'node-van_stop_master-field_pp_loose'.
+  $field_instances['node-van_stop_master-field_pp_loose'] = array(
+    'bundle' => 'van_stop_master',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'number',
+        'settings' => array(
+          'decimal_separator' => '.',
+          'prefix_suffix' => TRUE,
+          'scale' => 0,
+          'thousand_separator' => '',
+        ),
+        'type' => 'number_integer',
+        'weight' => 14,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_pp_loose',
+    'label' => 'pp loose',
+    'required' => 0,
+    'settings' => array(
+      'max' => '',
+      'min' => '',
+      'prefix' => '',
+      'suffix' => '',
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 0,
+      'module' => 'number',
+      'settings' => array(),
+      'type' => 'number',
+      'weight' => 45,
     ),
   );
 
@@ -387,13 +755,21 @@ function leanbox_dash_changes_field_default_field_instances() {
   // Included for use with string extractors like potx.
   t('Body');
   t('Del per van');
+  t('NON-PP');
+  t('PP');
   t('PP finish time');
   t('Picking finish time');
   t('Stop size');
   t('Target');
   t('Target Distributor');
   t('Unloading finish time');
+  t('dets bulk');
+  t('dets loose');
+  t('fnb bulk');
+  t('fnb loose');
   t('otif finish time');
+  t('pp bulk');
+  t('pp loose');
 
   return $field_instances;
 }
