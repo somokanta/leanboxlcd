@@ -275,7 +275,7 @@ function delivery_beat_get_results($sales_day, $van_pl_group = NULL, $area_hook_
       . "sub.area"
       . ")";
   
-  $expression = "SUBSTRING($expression,1,30)";
+  //$expression = "SUBSTRING($expression,1,30)";
   
   $query->addExpression($expression, 'exp');
 
