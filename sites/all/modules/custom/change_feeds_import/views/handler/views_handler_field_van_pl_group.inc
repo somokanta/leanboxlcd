@@ -23,9 +23,11 @@ class views_handler_field_van_pl_group extends views_handler_field {
   $query->join('field_data_field_van_pl_group', 'ppplg', 'n.nid = ppplg.entity_id');
   $query->condition('n.type', 'party_pack_master');
   $query->condition('n.type', 'party_pack_master');
-  $query->condition('.type', 'party_pack_master');
+  $query->condition('n.type', 'party_pack_master');
   $query->fields('ppplg', array('field_van_pl_group_value'));
-  $van_pl_grp = $query->execute()->fetchField();
+  //$van_pl_grp = $query->execute()->fetchField();
+  
+  return '00';
   
   }
 }
