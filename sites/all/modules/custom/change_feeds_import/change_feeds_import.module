@@ -1764,22 +1764,28 @@ function change_feeds_import_form_views_exposed_form_alter(&$form, &$form_state)
     $van_pl_options = $select + $van_pl_options;
     $sales_day_options = $select + $sales_day_options;
     $area_grp_name_options = $select + $area_grp_name_options;
+    
+    
+    if (isset($form['field_dva_van_pl_group_value'])) {
+      $form['field_dva_van_pl_group_value']['#type'] = 'select';
+      $form['field_dva_van_pl_group_value']['#size'] = null;
+      $form['field_dva_van_pl_group_value']['#options'] = $van_pl_options;
+      $form['field_dva_van_pl_group_value']['#validated'] = TRUE;
+    }
 
-    $form['field_dva_van_pl_group_value']['#type'] = 'select';
-    $form['field_dva_van_pl_group_value']['#size'] = null;
-    $form['field_dva_van_pl_group_value']['#options'] = $van_pl_options;
-    $form['field_dva_van_pl_group_value']['#validated'] = TRUE;
+    if (isset($form['field_sales_day_value'])) {
+      $form['field_sales_day_value']['#type'] = 'select';
+      $form['field_sales_day_value']['#size'] = null;
+      $form['field_sales_day_value']['#options'] = $sales_day_options;
+      $form['field_sales_day_value']['#validated'] = TRUE;
+    }
 
-    $form['field_sales_day_value']['#type'] = 'select';
-    $form['field_sales_day_value']['#size'] = null;
-    $form['field_sales_day_value']['#options'] = $sales_day_options;
-    $form['field_sales_day_value']['#validated'] = TRUE;
-
-
-    $form['field_dva_area_hook_group_name_value']['#type'] = 'select';
-    $form['field_dva_area_hook_group_name_value']['#size'] = null;
-    $form['field_dva_area_hook_group_name_value']['#options'] = $area_grp_name_options;
-    $form['field_dva_area_hook_group_name_value']['#validated'] = TRUE;
+    if (isset($form['field_dva_area_hook_group_name_value'])) {
+      $form['field_dva_area_hook_group_name_value']['#type'] = 'select';
+      $form['field_dva_area_hook_group_name_value']['#size'] = null;
+      $form['field_dva_area_hook_group_name_value']['#options'] = $area_grp_name_options;
+      $form['field_dva_area_hook_group_name_value']['#validated'] = TRUE;
+    }
   }
 }
 

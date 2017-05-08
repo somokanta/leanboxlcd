@@ -82,8 +82,8 @@ function van_stop_master_form($form, &$form_state) {
 
   if ($nid) {
     $node = node_load($nid);
-    $stop_size = $node->field_stop_size[LANGUAGE_NONE][0]['value'];
-    $delivery_per_van = $node->field_del_per_van[LANGUAGE_NONE][0]['value'];
+    //$stop_size = $node->field_stop_size[LANGUAGE_NONE][0]['value'];
+    //$delivery_per_van = $node->field_del_per_van[LANGUAGE_NONE][0]['value'];
     $pp_finish_time = $node->field_pp_finish_time[LANGUAGE_NONE][0]['value'];
     $picking_finish_time = $node->field_picking_finish_time[LANGUAGE_NONE][0]['value'];
     $unloading_finish_time = $node->field_unloading_finish_time[LANGUAGE_NONE][0]['value'];
@@ -98,21 +98,21 @@ function van_stop_master_form($form, &$form_state) {
     $field_pp_loose = $node->field_pp_loose[LANGUAGE_NONE][0]['value'];
   }
 
-  $form['stop_size'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Stop size'),
-    '#required' => TRUE,
-    '#element_validate' => array('element_validate_integer_positive'),
-    '#default_value' => $stop_size,
-  );
-  
-  $form['delivery_per_van'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Delivery per Van'),
-    '#required' => TRUE,
-    '#element_validate' => array('element_validate_integer_positive'),
-    '#default_value' => $delivery_per_van,
-  );
+//  $form['stop_size'] = array(
+//    '#type' => 'textfield',
+//    '#title' => t('Stop size'),
+//    '#required' => TRUE,
+//    '#element_validate' => array('element_validate_integer_positive'),
+//    '#default_value' => $stop_size,
+//  );
+//  
+//  $form['delivery_per_van'] = array(
+//    '#type' => 'textfield',
+//    '#title' => t('Delivery per Van'),
+//    '#required' => TRUE,
+//    '#element_validate' => array('element_validate_integer_positive'),
+//    '#default_value' => $delivery_per_van,
+//  );
   
   $form['pp_finish_time'] = array(
     '#type' => 'textfield',
@@ -212,8 +212,8 @@ function van_stop_master_form_submit($form, &$form_state) {
     $node->status = 1; //(1 or 0): published or not
     $node->comment = 0; // 0 = comments disabled, 1 = read only, 2 = read/write
 
-    $node->field_stop_size[LANGUAGE_NONE][0]['value'] = $form_state['values']['stop_size'];
-    $node->field_del_per_van[LANGUAGE_NONE][0]['value'] = $form_state['values']['delivery_per_van'];
+    //$node->field_stop_size[LANGUAGE_NONE][0]['value'] = $form_state['values']['stop_size'];
+    //$node->field_del_per_van[LANGUAGE_NONE][0]['value'] = $form_state['values']['delivery_per_van'];
     $node->field_picking_finish_time[LANGUAGE_NONE][0]['value'] = $form_state['values']['picking_finish_time'];
     $node->field_pp_finish_time[LANGUAGE_NONE][0]['value'] = $form_state['values']['pp_finish_time'];
     $node->field_unloading_finish_time[LANGUAGE_NONE][0]['value'] = $form_state['values']['unloading_finish_time'];
@@ -233,8 +233,8 @@ function van_stop_master_form_submit($form, &$form_state) {
   else {
     $node = node_load($form_state['leanbox_misc']['nid']);
 
-    $node->field_stop_size[LANGUAGE_NONE][0]['value'] = $form_state['values']['stop_size'];
-    $node->field_del_per_van[LANGUAGE_NONE][0]['value'] = $form_state['values']['delivery_per_van'];
+    //$node->field_stop_size[LANGUAGE_NONE][0]['value'] = $form_state['values']['stop_size'];
+    //$node->field_del_per_van[LANGUAGE_NONE][0]['value'] = $form_state['values']['delivery_per_van'];
     $node->field_picking_finish_time[LANGUAGE_NONE][0]['value'] = $form_state['values']['picking_finish_time'];
     $node->field_pp_finish_time[LANGUAGE_NONE][0]['value'] = $form_state['values']['pp_finish_time'];
     $node->field_unloading_finish_time[LANGUAGE_NONE][0]['value'] = $form_state['values']['unloading_finish_time'];
