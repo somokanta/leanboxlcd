@@ -1179,20 +1179,21 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
         $success_count = 0;
         foreach ($res as $key => $val) {
           if (($val['field_picking_loading_date_value'] == $val['field_picking_picking_date_value']) && ($val['field_picking_status_value'] == 2)) {
-            $count = 0;
+            $count = FALSE;
             $time = explode(',', $val['time']);
 
             foreach ($time as $key1 => $val1) {
               $pp_on_time = strtotime(date("H:i", strtotime($val1['field_picking_end_time_value'])));
 
               if ($pp_on_time <= $dis_on_time) {
-                $count = 1;
+                $count = TRUE;
               }
               else {
-                $count = 0;
+                $count = FALSE;
+                break;
               }
             }
-            if ($count == 1) {
+            if ($count == TRUE) {
               $success_count ++;
             }
           }
