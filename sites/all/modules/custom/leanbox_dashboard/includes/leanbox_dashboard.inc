@@ -1183,7 +1183,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
             $time = explode(',', $val['time']);
 
             foreach ($time as $key1 => $val1) {
-              $pp_on_time = strtotime(date("H:i", strtotime($val1['field_picking_end_time_value'])));
+              $pp_on_time = strtotime(date("H:i", strtotime($val['field_picking_end_time_value'])));
 
               if ($pp_on_time <= $dis_on_time) {
                 $count = TRUE;
