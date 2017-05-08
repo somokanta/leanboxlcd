@@ -1588,30 +1588,28 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
   }
   
   if($view->name == 'Outlet_Master_Report'){
-    //dpm($view);
-    dpm($query);
     
-    $sub_query = db_select('node', 'n');
-    $sub_query->addTag('node_uid');
-    
-    $sub_query->join('field_data_field_channel', 'fc', 'fc.entity_id = n.nid');
-    $sub_query->join('field_data_field_pl_group', 'fp', 'fp.entity_id = n.nid');
-    $sub_query->join('field_data_field_van_pl_group', 'fv', 'fv.entity_id = n.nid');
-    
-    $sub_query->addField('fc', 'field_channel_value', 'channel');
-    $sub_query->addField('fp', 'field_pl_group_value', 'pl_group');
-    $sub_query->addField('fv', 'field_van_pl_group_value', 'van_pl_group');
-    
-    $join = new views_join();
-    $join->definition = array('table formula' => $sub_query, 'left_field' => 'field_data_field_channel_node_entity_type', 'field' => 'channel', 'left_table' => 'node');
-    $join->left_table = 'node'; // or wathever table you want to join with
-    $join->table = 'node';
-    $join->field = 'channel';
-    $join->left_field = 'field_data_field_channel_node_entity_type'; // or wathever column you want to join with
-    $join->type = 'LEFT'; // if you want another join type play with this value
-    $join->extra = array(
-      array('field' => 'pl_group', 'left_field' => 'field_data_field_pl_group_node_entity_type'),
-    );
+//    $sub_query = db_select('node', 'n');
+//    $sub_query->addTag('node_uid');
+//    
+//    $sub_query->join('field_data_field_channel', 'fc', 'fc.entity_id = n.nid');
+//    $sub_query->join('field_data_field_pl_group', 'fp', 'fp.entity_id = n.nid');
+//    $sub_query->join('field_data_field_van_pl_group', 'fv', 'fv.entity_id = n.nid');
+//    
+//    $sub_query->addField('fc', 'field_channel_value', 'channel');
+//    $sub_query->addField('fp', 'field_pl_group_value', 'pl_group');
+//    $sub_query->addField('fv', 'field_van_pl_group_value', 'van_pl_group');
+//    
+//    $join = new views_join();
+//    $join->definition = array('table formula' => $sub_query, 'left_field' => 'field_data_field_channel_node_entity_type', 'field' => 'channel', 'left_table' => 'node');
+//    $join->left_table = 'node'; // or wathever table you want to join with
+//    $join->table = 'node';
+//    $join->field = 'channel';
+//    $join->left_field = 'field_data_field_channel_node_entity_type'; // or wathever column you want to join with
+//    $join->type = 'LEFT'; // if you want another join type play with this value
+//    $join->extra = array(
+//      array('field' => 'pl_group', 'left_field' => 'field_data_field_pl_group_node_entity_type'),
+//    );
 
     // Do the actual join
 //    $query->table_queue['temp'] = array(

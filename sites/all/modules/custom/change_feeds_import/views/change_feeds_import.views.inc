@@ -878,6 +878,18 @@ function change_feeds_import_views_data() {
     //'skip base' => $base_table,
     ),
   );
+  
+  
+  ############ VAN-PL GRoup in Oulet master
+  $data['node']['van_pl_group'] = array(
+    'title' => t('van pl group'),
+    'help' => t('van pl group From outlet master'),
+    'real field' => 'nid',
+    'field' => array(
+      'handler' => 'views_handler_field_van_pl_group',
+      'click sortable' => FALSE,
+     ),
+  );
 
   return $data;
 }
