@@ -18,10 +18,10 @@ function leanbox_dashboard_menu() {
   );
 
   $categories = array(
-    1 => 'Progress',
-    2 => 'Metrics',
-    3 => 'Productivity',
-    4 => 'ota',
+    'Progress' => 'Progress',
+    'Metrics' => 'Metrics',
+    'Productivity' => 'Productivity',
+    'ota' => 'On-Time Adherence',
   );
 
   $items['dashboard/Progress'] = array(
@@ -32,11 +32,11 @@ function leanbox_dashboard_menu() {
   );
 
   foreach ($categories as $k => $v) {
-    $items['dashboard/' . $v] = array(
+    $items['dashboard/' . $k] = array(
       'title' => $v,
       'access arguments' => array('Distributor Upload File'),
       'type' => MENU_LOCAL_TASK,
-      'weight' => $k,
+      //'weight' => $k,
     );
   }
   
