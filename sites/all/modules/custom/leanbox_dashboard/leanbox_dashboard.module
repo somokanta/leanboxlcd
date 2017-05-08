@@ -30,13 +30,14 @@ function leanbox_dashboard_menu() {
     'weight' => 0,
     'access arguments' => array('Distributor Upload File'),
   );
-
+  
+  $d = 0;
   foreach ($categories as $k => $v) {
     $items['dashboard/' . $k] = array(
       'title' => $v,
       'access arguments' => array('Distributor Upload File'),
       'type' => MENU_LOCAL_TASK,
-      //'weight' => $k,
+      'weight' => $d++,
     );
   }
   
