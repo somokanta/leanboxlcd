@@ -1154,7 +1154,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     $query->fields('ps', array('field_picking_status_value'));
     $query->fields('e', array('field_picking_end_time_value'));
     $query->fields('v', array('field_picking_van_id_value'));
-    $query->addExpression('GROUP_CONCAT(e.field_picking_end_time_value)', 'time');
+    $query->addExpression('GROUP_CONCAT(IFNULL(e.field_picking_end_time_value, 0))', 'time');
     $query->groupBy('v.field_picking_van_id_value');
     $query->groupBy('l.field_picking_loading_date_value');
     $query->condition('pt.field_picking_picking_type_value', 'Loose');
@@ -1183,9 +1183,9 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
             $time = explode(',', $val['time']);
 
             foreach ($time as $key1 => $val1) {
-              $pp_on_time = strtotime(date("H:i", strtotime($val['field_picking_end_time_value'])));
+              $pp_on_time = strtotime(date("H:i", strtotime($val1)));
 
-              if ($pp_on_time <= $dis_on_time) {
+              if (($pp_on_time <= $dis_on_time) && ($val1 != 0)) {
                 $count = TRUE;
               }
               else {
