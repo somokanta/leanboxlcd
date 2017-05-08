@@ -1154,7 +1154,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     $query->fields('ps', array('field_picking_status_value'));
     $query->fields('e', array('field_picking_end_time_value'));
     $query->fields('v', array('field_picking_van_id_value'));
-    $query->addExpression('GROUP_CONCAT(IFNULL(e.field_picking_end_time_value, NULL))', 'time');
+    $query->addExpression('GROUP_CONCAT(IFNULL(e.field_picking_end_time_value, 0))', 'time');
     $query->groupBy('v.field_picking_van_id_value');
     $query->groupBy('l.field_picking_loading_date_value');
     $query->condition('pt.field_picking_picking_type_value', 'Loose');
