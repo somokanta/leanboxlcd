@@ -111,11 +111,6 @@ function change_feeds_import_area_hook_grp_form_submit($form, &$form_state) {
 function change_feeds_import_area_hook_grp_batch_fix_process($data, $distributor_id, $file_name, $fid, &$context) {
   if (!isset($context['results']['last_id'])) {
     $context['results']['last_id'] = "set";
-    $res = check_area_hook_grp_master_exist_or_not(); // check unique combination of area name and area id exist or not
-    foreach ($res as $k => $v) {
-      $all_nodes[$k . '-' . $v] = $k . '-' . $v;
-    }
-    $context['results']['area_hook_grp_master_result'] = $all_nodes;
   }
   // require_once drupal_get_path('module', 'change_feeds_import') . '/form/upload_billing_data.inc';
 
@@ -123,7 +118,8 @@ function change_feeds_import_area_hook_grp_batch_fix_process($data, $distributor
   foreach ($data as $key => $value) {
     $area_name = $value['Area Hook Group Name'];
     $area_id = $value['Area Hook Group Id'];
-
+    
+    
     foreach ($value as $k => $v) {
       $v = trim($v);
       if (empty($v) && $v !== '0') {
@@ -132,6 +128,18 @@ function change_feeds_import_area_hook_grp_batch_fix_process($data, $distributor
       }
     }
 
+    $area_array = check_area_id_exists($area_id);
+    if (!empty($area_array)) {
+      if ($area_id_bool = in_array($area_id, $area_array)) {
+        $value['error_message'] .= "$area_id Area Id Already exist in Area Hook Master";
+      }
+    }
+    
+     if (isset($area_id_array[$area_id])) {
+        $value['error_message'] .= "$area_id Area Id Already exist in File";
+      }
+      $area_id_array[$area_id] = $area_id;
+      
     $check = $area_name . '-' . $area_id;
     if (in_array($check, $context['results']['area_hook_grp_master_result'])) {
       $value['error_message'] .= "Duplicate Record occured for Area Hook Group Name=$area_name and Area Hook Group Id = $area_id";
