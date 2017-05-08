@@ -1185,3 +1185,51 @@ function change_feeds_import_update_7110() {
     'default' => 0,
   ));
 }
+
+
+/**
+ *  Implements Hook_Update_7111
+ */
+function change_feeds_import_update_7111() {
+
+  $schema['area_hook_grp_master'] = array(
+    'description' => 'Describes the custom table which holds imported Area Hook Group Master data',
+    'fields' => array(
+      'id' => array(
+        'description' => t('Unique id'),
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'error_message' => array(
+        'description' => t('status'),
+        'type' => 'text',
+        'length' => 255,
+      ),
+      'created' => array(
+        'description' => t('Uploaded time'),
+        'type' => 'int',
+      ),
+      'fid' => array(
+        'description' => t('fid'),
+        'type' => 'int',
+      ),
+      'area_name' => array(
+        'description' => t('Area Name'),
+        'type' => 'text',
+        'length' => 255,
+      ),
+      'area_id' => array(
+        'description' => t('Area id'),
+        'type' => 'text',
+        'length' => 255,
+      ),
+      'distributor_id' => array(
+        'description' => t('distributor_id'),
+        'type' => 'int',
+      ),
+    ),
+    'primary key' => array('id'),
+  );
+
+  db_create_table('area_hook_grp_master', $schema['area_hook_grp_master']);
+}

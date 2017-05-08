@@ -173,15 +173,7 @@ function change_feeds_import_menu() {
     'file' => 'form/sales_register_data.inc',
   );
 
-  // Upload form for Sales Day-Van Pl Group Area Grouping.
-  $items['day-van-area/import'] = array(
-    'title' => 'Day-Van Pl Group Area Grouping',
-    'description' => 'Import Sales Day-Van Pl Group Area Grouping Data',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('change_feeds_import_day_van_area_form'),
-    'access arguments' => array('Distributor Upload File'),
-    'file' => 'form/day_van_area_data.inc',
-  );
+  
 
   $items['sales-confirm/%'] = array(
     'title' => 'Sales Confirm Table',
@@ -192,14 +184,7 @@ function change_feeds_import_menu() {
     'file' => 'form/sales_register_data.inc',
   );
 
-  $items['day-van-area-confirm/%'] = array(
-    'title' => 'Day-Van-Area Confirm Table',
-    'description' => 'Day-Van-Area Confirm Table',
-    'page callback' => 'change_feeds_import_day_van_area_confirm_content',
-    'page arguments' => array(1),
-    'access arguments' => array('Distributor Upload File'),
-    'file' => 'form/day_van_area_data.inc',
-  );
+  
 
   // when confirm is clicked
   $items['sales-confirm/create_content/%'] = array(
@@ -211,7 +196,76 @@ function change_feeds_import_menu() {
     'file' => 'form/sales_register_data.inc',
   );
 
+   // when discard is clicked
+  $items['sales-discard/%'] = array(
+    'title' => 'sales Discard',
+    'description' => 'sales Discard Data',
+    'page callback' => 'change_feeds_import_sales_discard_data',
+    'page arguments' => array(1),
+    'access arguments' => array('Distributor Upload File'),
+    'file' => 'form/sales_register_data.inc',
+  );
 
+  
+  // Upload form for Area Hook Group Master.
+  $items['area-hook-grp/import'] = array(
+    'title' => 'Area Hook Group Master',
+    'description' => 'Import Area Hook Group Master Data',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('change_feeds_import_area_hook_grp_form'),
+    'access arguments' => array('Distributor Upload File'),
+    'file' => 'form/area_hook_grp_data.inc',
+  );
+  
+  
+  $items['area-hook-grp-confirm/%'] = array(
+    'title' => 'Area Hook Group Master Confirm Table',
+    'description' => 'Area Hook Group Master Confirm Table',
+    'page callback' => 'change_feeds_import_area_hook_grp_confirm_content',
+    'page arguments' => array(1),
+    'access arguments' => array('Distributor Upload File'),
+    'file' => 'form/area_hook_grp_data.inc',
+  );
+  
+  // when confirm is clicked
+  $items['area-hook-grp-confirm/create_content/%'] = array(
+    'title' => 'confirm',
+    'description' => 'Confirm to Area Hook Group Master contents',
+    'page callback' => 'change_feeds_import_area_hook_grp_create_confirm_content',
+    'page arguments' => array(2),
+    'access arguments' => array('Distributor Upload File'),
+    'file' => 'form/area_hook_grp_data.inc',
+  );
+
+  // when discard is clicked
+  $items['area-hook-grp-discard/%'] = array(
+    'title' => 'Area Hook Group Master Discard',
+    'description' => 'Area Hook Group Master Discard Data',
+    'page callback' => 'change_feeds_import_area_hook_grp_discard_data',
+    'page arguments' => array(1),
+    'access arguments' => array('Distributor Upload File'),
+    'file' => 'form/area_hook_grp_data.inc',
+  );
+  
+  // Upload form for Sales Day-Van Pl Group Area Grouping.
+  $items['day-van-area/import'] = array(
+    'title' => 'Day-Van Pl Group Area Grouping',
+    'description' => 'Import Sales Day-Van Pl Group Area Grouping Data',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('change_feeds_import_day_van_area_form'),
+    'access arguments' => array('Distributor Upload File'),
+    'file' => 'form/day_van_area_data.inc',
+  );
+  
+  $items['day-van-area-confirm/%'] = array(
+    'title' => 'Day-Van-Area Confirm Table',
+    'description' => 'Day-Van-Area Confirm Table',
+    'page callback' => 'change_feeds_import_day_van_area_confirm_content',
+    'page arguments' => array(1),
+    'access arguments' => array('Distributor Upload File'),
+    'file' => 'form/day_van_area_data.inc',
+  );
+  
   // when confirm is clicked
   $items['day-van-area-confirm/create_content/%'] = array(
     'title' => 'confirm',
@@ -220,16 +274,6 @@ function change_feeds_import_menu() {
     'page arguments' => array(2),
     'access arguments' => array('Distributor Upload File'),
     'file' => 'form/day_van_area_data.inc',
-  );
-
-  // when discard is clicked
-  $items['sales-discard/%'] = array(
-    'title' => 'sales Discard',
-    'description' => 'sales Discard Data',
-    'page callback' => 'change_feeds_import_sales_discard_data',
-    'page arguments' => array(1),
-    'access arguments' => array('Distributor Upload File'),
-    'file' => 'form/sales_register_data.inc',
   );
 
   // when discard is clicked
