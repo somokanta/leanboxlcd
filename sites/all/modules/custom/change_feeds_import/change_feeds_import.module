@@ -173,15 +173,7 @@ function change_feeds_import_menu() {
     'file' => 'form/sales_register_data.inc',
   );
 
-  // Upload form for Sales Day-Van Pl Group Area Grouping.
-  $items['day-van-area/import'] = array(
-    'title' => 'Day-Van Pl Group Area Grouping',
-    'description' => 'Import Sales Day-Van Pl Group Area Grouping Data',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('change_feeds_import_day_van_area_form'),
-    'access arguments' => array('Distributor Upload File'),
-    'file' => 'form/day_van_area_data.inc',
-  );
+  
 
   $items['sales-confirm/%'] = array(
     'title' => 'Sales Confirm Table',
@@ -192,14 +184,7 @@ function change_feeds_import_menu() {
     'file' => 'form/sales_register_data.inc',
   );
 
-  $items['day-van-area-confirm/%'] = array(
-    'title' => 'Day-Van-Area Confirm Table',
-    'description' => 'Day-Van-Area Confirm Table',
-    'page callback' => 'change_feeds_import_day_van_area_confirm_content',
-    'page arguments' => array(1),
-    'access arguments' => array('Distributor Upload File'),
-    'file' => 'form/day_van_area_data.inc',
-  );
+  
 
   // when confirm is clicked
   $items['sales-confirm/create_content/%'] = array(
@@ -211,7 +196,76 @@ function change_feeds_import_menu() {
     'file' => 'form/sales_register_data.inc',
   );
 
+   // when discard is clicked
+  $items['sales-discard/%'] = array(
+    'title' => 'sales Discard',
+    'description' => 'sales Discard Data',
+    'page callback' => 'change_feeds_import_sales_discard_data',
+    'page arguments' => array(1),
+    'access arguments' => array('Distributor Upload File'),
+    'file' => 'form/sales_register_data.inc',
+  );
 
+  
+  // Upload form for Area Hook Group Master.
+  $items['area-hook-grp/import'] = array(
+    'title' => 'Area Hook Group Master',
+    'description' => 'Import Area Hook Group Master Data',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('change_feeds_import_area_hook_grp_form'),
+    'access arguments' => array('Distributor Upload File'),
+    'file' => 'form/area_hook_grp_data.inc',
+  );
+  
+  
+  $items['area-hook-grp-confirm/%'] = array(
+    'title' => 'Area Hook Group Master Confirm Table',
+    'description' => 'Area Hook Group Master Confirm Table',
+    'page callback' => 'change_feeds_import_area_hook_grp_confirm_content',
+    'page arguments' => array(1),
+    'access arguments' => array('Distributor Upload File'),
+    'file' => 'form/area_hook_grp_data.inc',
+  );
+  
+  // when confirm is clicked
+  $items['area-hook-grp-confirm/create_content/%'] = array(
+    'title' => 'confirm',
+    'description' => 'Confirm to Area Hook Group Master contents',
+    'page callback' => 'change_feeds_import_area_hook_grp_create_confirm_content',
+    'page arguments' => array(2),
+    'access arguments' => array('Distributor Upload File'),
+    'file' => 'form/area_hook_grp_data.inc',
+  );
+
+  // when discard is clicked
+  $items['area-hook-grp-discard/%'] = array(
+    'title' => 'Area Hook Group Master Discard',
+    'description' => 'Area Hook Group Master Discard Data',
+    'page callback' => 'change_feeds_import_area_hook_grp_discard_data',
+    'page arguments' => array(1),
+    'access arguments' => array('Distributor Upload File'),
+    'file' => 'form/area_hook_grp_data.inc',
+  );
+  
+  // Upload form for Sales Day-Van Pl Group Area Grouping.
+  $items['day-van-area/import'] = array(
+    'title' => 'Day-Van Pl Group Area Grouping',
+    'description' => 'Import Sales Day-Van Pl Group Area Grouping Data',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('change_feeds_import_day_van_area_form'),
+    'access arguments' => array('Distributor Upload File'),
+    'file' => 'form/day_van_area_data.inc',
+  );
+  
+  $items['day-van-area-confirm/%'] = array(
+    'title' => 'Day-Van-Area Confirm Table',
+    'description' => 'Day-Van-Area Confirm Table',
+    'page callback' => 'change_feeds_import_day_van_area_confirm_content',
+    'page arguments' => array(1),
+    'access arguments' => array('Distributor Upload File'),
+    'file' => 'form/day_van_area_data.inc',
+  );
+  
   // when confirm is clicked
   $items['day-van-area-confirm/create_content/%'] = array(
     'title' => 'confirm',
@@ -220,16 +274,6 @@ function change_feeds_import_menu() {
     'page arguments' => array(2),
     'access arguments' => array('Distributor Upload File'),
     'file' => 'form/day_van_area_data.inc',
-  );
-
-  // when discard is clicked
-  $items['sales-discard/%'] = array(
-    'title' => 'sales Discard',
-    'description' => 'sales Discard Data',
-    'page callback' => 'change_feeds_import_sales_discard_data',
-    'page arguments' => array(1),
-    'access arguments' => array('Distributor Upload File'),
-    'file' => 'form/sales_register_data.inc',
   );
 
   // when discard is clicked
@@ -985,35 +1029,9 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
   }
 
   if ($entity->feeds_item->id == 'outlet_area_hook_mapping') {
-    $title = $entity->title;
-    $res = modify_views_forms_master_feed_validate($entity->title, 'outlet_master');
-    if (empty($res)) {
-      drupal_set_message("$title Party code does not exist in Outlet master", 'error');
-      $entity->feeds_item->skip = TRUE;
-    }
+   // we have custom upload for outlet area hook
   }
 
-  if ($entity->feeds_item->id == 'area_hook_master') {
-    $title = $entity->title;
-    $outlet_days = change_feeds_import_get_terms_using_vocubulary('Outlet Days');
-    if (!empty($outlet_days)) {
-      foreach ($outlet_days as $key => $val) {
-        if ($val == 'sunday') {
-          continue; // skip 1 node creation and create only six node form monday to saturday as feeds import creates 1 node by default
-        }
-        $node = new stdClass();
-        $node->title = $title;
-        $node->type = "area_hook_master";
-        node_object_prepare($node); // Sets some defaults. Invokes hook_prepare() and hook_node_prepare().
-        $node->language = LANGUAGE_NONE; // Or e.g. 'en' if locale is enabled
-        $node->uid = $distributor_id;
-        $node->status = 1; //(1 or 0): published or not
-        $node->comment = 0; // 0 = comments disabled, 1 = read only, 2 = read/write
-        $node->field_area_hook_day[LANGUAGE_NONE][0]['tid'] = $key;
-        node_save($node);
-      }
-    }
-  }
 
   if ($entity->feeds_item->id == 'area_hook_group_master') {
     $area_id = $entity->field_area_hook_group_id['und'][0]['value'];
@@ -1711,22 +1729,28 @@ function change_feeds_import_form_views_exposed_form_alter(&$form, &$form_state)
     $van_pl_options = $select + $van_pl_options;
     $sales_day_options = $select + $sales_day_options;
     $area_grp_name_options = $select + $area_grp_name_options;
+    
+    
+    if (isset($form['field_dva_van_pl_group_value'])) {
+      $form['field_dva_van_pl_group_value']['#type'] = 'select';
+      $form['field_dva_van_pl_group_value']['#size'] = null;
+      $form['field_dva_van_pl_group_value']['#options'] = $van_pl_options;
+      $form['field_dva_van_pl_group_value']['#validated'] = TRUE;
+    }
 
-    $form['field_dva_van_pl_group_value']['#type'] = 'select';
-    $form['field_dva_van_pl_group_value']['#size'] = null;
-    $form['field_dva_van_pl_group_value']['#options'] = $van_pl_options;
-    $form['field_dva_van_pl_group_value']['#validated'] = TRUE;
+    if (isset($form['field_sales_day_value'])) {
+      $form['field_sales_day_value']['#type'] = 'select';
+      $form['field_sales_day_value']['#size'] = null;
+      $form['field_sales_day_value']['#options'] = $sales_day_options;
+      $form['field_sales_day_value']['#validated'] = TRUE;
+    }
 
-    $form['field_sales_day_value']['#type'] = 'select';
-    $form['field_sales_day_value']['#size'] = null;
-    $form['field_sales_day_value']['#options'] = $sales_day_options;
-    $form['field_sales_day_value']['#validated'] = TRUE;
-
-
-    $form['field_dva_area_hook_group_name_value']['#type'] = 'select';
-    $form['field_dva_area_hook_group_name_value']['#size'] = null;
-    $form['field_dva_area_hook_group_name_value']['#options'] = $area_grp_name_options;
-    $form['field_dva_area_hook_group_name_value']['#validated'] = TRUE;
+    if (isset($form['field_dva_area_hook_group_name_value'])) {
+      $form['field_dva_area_hook_group_name_value']['#type'] = 'select';
+      $form['field_dva_area_hook_group_name_value']['#size'] = null;
+      $form['field_dva_area_hook_group_name_value']['#options'] = $area_grp_name_options;
+      $form['field_dva_area_hook_group_name_value']['#validated'] = TRUE;
+    }
   }
 }
 

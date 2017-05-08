@@ -1305,7 +1305,14 @@ header[id="page-header"] {
     border: 1px solid #8c8c8c;
     height: 32px;
     line-height: 32px;
-    padding: 5px 10px;
+    padding: 5px 20px 5px 10px;
+  }
+
+  .search-cancel {
+    position: absolute;
+    right: 5px;
+    top: 1px;
+    font-size: 19px;
   }
 }
 

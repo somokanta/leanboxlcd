@@ -10,6 +10,28 @@
 function leanbox_master_content_types_menu_default_menu_links() {
   $menu_links = array();
 
+  // Exported menu link: menu-custom-menus_area-hook-group-master:area-hook-grp/import.
+  $menu_links['menu-custom-menus_area-hook-group-master:area-hook-grp/import'] = array(
+    'menu_name' => 'menu-custom-menus',
+    'link_path' => 'area-hook-grp/import',
+    'router_path' => 'area-hook-grp/import',
+    'link_title' => 'Area Hook Group Master',
+    'options' => array(
+      'attributes' => array(
+        'title' => '',
+      ),
+      'alter' => TRUE,
+      'identifier' => 'menu-custom-menus_area-hook-group-master:area-hook-grp/import',
+    ),
+    'module' => 'menu',
+    'hidden' => 0,
+    'external' => 0,
+    'has_children' => 0,
+    'expanded' => 0,
+    'weight' => -50,
+    'customized' => 1,
+    'parent_identifier' => 'menu-custom-menus_master-upload:node/24596',
+  );
   // Exported menu link: menu-custom-menus_area-hook-group-report:area-hook-grouping.
   $menu_links['menu-custom-menus_area-hook-group-report:area-hook-grouping'] = array(
     'menu_name' => 'menu-custom-menus',
@@ -51,28 +73,6 @@ function leanbox_master_content_types_menu_default_menu_links() {
     'has_children' => 0,
     'expanded' => 0,
     'weight' => -45,
-    'customized' => 1,
-    'parent_identifier' => 'menu-custom-menus_master-upload:node/24596',
-  );
-  // Exported menu link: menu-custom-menus_lean-outlet-sequence:import/outlet_sequence.
-  $menu_links['menu-custom-menus_lean-outlet-sequence:import/outlet_sequence'] = array(
-    'menu_name' => 'menu-custom-menus',
-    'link_path' => 'import/outlet_sequence',
-    'router_path' => 'import/%',
-    'link_title' => 'Lean Outlet Sequence',
-    'options' => array(
-      'attributes' => array(
-        'title' => '',
-      ),
-      'alter' => TRUE,
-      'identifier' => 'menu-custom-menus_lean-outlet-sequence:import/outlet_sequence',
-    ),
-    'module' => 'menu',
-    'hidden' => 0,
-    'external' => 0,
-    'has_children' => 0,
-    'expanded' => 0,
-    'weight' => -46,
     'customized' => 1,
     'parent_identifier' => 'menu-custom-menus_master-upload:node/24596',
   );
@@ -142,6 +142,28 @@ function leanbox_master_content_types_menu_default_menu_links() {
     'customized' => 1,
     'parent_identifier' => 'menu-custom-menus_master-upload:node/24596',
   );
+  // Exported menu link: menu-custom-menus_van-pl-group-stop-importer:import/van_pl_group_stop_importer.
+  $menu_links['menu-custom-menus_van-pl-group-stop-importer:import/van_pl_group_stop_importer'] = array(
+    'menu_name' => 'menu-custom-menus',
+    'link_path' => 'import/van_pl_group_stop_importer',
+    'router_path' => 'import/%',
+    'link_title' => 'VAN Pl group stop importer',
+    'options' => array(
+      'attributes' => array(
+        'title' => '',
+      ),
+      'alter' => TRUE,
+      'identifier' => 'menu-custom-menus_van-pl-group-stop-importer:import/van_pl_group_stop_importer',
+    ),
+    'module' => 'menu',
+    'hidden' => 0,
+    'external' => 0,
+    'has_children' => 0,
+    'expanded' => 0,
+    'weight' => 0,
+    'customized' => 1,
+    'parent_identifier' => 'menu-custom-menus_master-upload:node/24596',
+  );
   // Exported menu link: menu-custom-menus_van-stop-master:van-stop-master.
   $menu_links['menu-custom-menus_van-stop-master:van-stop-master'] = array(
     'menu_name' => 'menu-custom-menus',
@@ -167,12 +189,13 @@ function leanbox_master_content_types_menu_default_menu_links() {
 
   // Translatables
   // Included for use with string extractors like potx.
+  t('Area Hook Group Master');
   t('Area Hook Group Report');
   t('Day-Van-PL-Gp-Area Hook Grouping');
-  t('Lean Outlet Sequence');
   t('Outlet Area Hook');
   t('Static Beat Creation');
   t('User Defined Outlet Sequence');
+  t('VAN Pl group stop importer');
   t('Van-Stop Master');
 
   return $menu_links;

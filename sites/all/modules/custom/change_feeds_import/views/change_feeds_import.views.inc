@@ -44,6 +44,24 @@ function change_feeds_import_views_data_alter(&$data) {
     ),
   );
   
+  $data['field_data_field_dva_sales_day']['table']['group'] = t('Sales Day');
+  $data['field_data_field_dva_sales_day']['sales_day'] = array(
+    'title' => t('Sales Day'),
+    'relationship' => array(
+      'title' => 'Sales Day master relationship',
+      'base' => 'node', // Table we're joining to.
+      'base field' => 'title', // Field on the joined table.
+      'field' => 'field_dva_sales_day_value', // Real field name on the 'foo' table.
+      'handler' => 'views_handler_relationship',
+      'label' => t('Sales day to Sales delivery day master relationship'),
+      'title' => t('Sales day to Sales delivery day  master relationship'),
+      'help' => t('More information about relationship.'),
+      'extra' => array(
+        array('field' => 'type', 'value' => 'sales_delivery_day_master'),
+      ),
+    ),
+  );
+  
   
   $data['field_data_field_hul_code']['table']['group'] = t('Hul table');
   $data['field_data_field_hul_code']['dummy_name1'] = array(
@@ -859,6 +877,27 @@ function change_feeds_import_views_data() {
       'is date' => TRUE,
     //'skip base' => $base_table,
     ),
+  );
+  
+  
+  ############ VAN-PL GRoup in Oulet master
+  $data['node']['van_pl_group'] = array(
+    'title' => t('van pl group'),
+    'help' => t('van pl group From outlet master'),
+    'real field' => 'nid',
+    'field' => array(
+      'handler' => 'views_handler_field_van_pl_group',
+      'click sortable' => FALSE,
+     ),
+  );
+  $data['node']['outlets_per_van'] = array(
+    'title' => t('outlets per van'),
+    'help' => t('outlets per van From van pl group'),
+    'real field' => 'nid',
+    'field' => array(
+      'handler' => 'views_handler_field_outlets_per_van',
+      'click sortable' => FALSE,
+     ),
   );
 
   return $data;

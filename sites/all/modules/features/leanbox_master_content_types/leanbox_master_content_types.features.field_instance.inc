@@ -868,6 +868,46 @@ function leanbox_master_content_types_field_default_field_instances() {
     ),
   );
 
+  // Exported field_instance: 'node-outlet_master-field_outlet_area_hook'.
+  $field_instances['node-outlet_master-field_outlet_area_hook'] = array(
+    'bundle' => 'outlet_master',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 17,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_outlet_area_hook',
+    'label' => 'Outlet Area Hook',
+    'required' => 0,
+    'settings' => array(
+      'text_processing' => 0,
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'text',
+      'settings' => array(
+        'size' => 60,
+      ),
+      'type' => 'text_textfield',
+      'weight' => 42,
+    ),
+  );
+
   // Exported field_instance: 'node-outlet_master-field_party_code'.
   $field_instances['node-outlet_master-field_party_code'] = array(
     'bundle' => 'outlet_master',
@@ -2458,6 +2498,143 @@ function leanbox_master_content_types_field_default_field_instances() {
     ),
   );
 
+  // Exported field_instance: 'node-van_pl_group_master-body'.
+  $field_instances['node-van_pl_group_master-body'] = array(
+    'bundle' => 'van_pl_group_master',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'hidden',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 0,
+      ),
+      'teaser' => array(
+        'label' => 'hidden',
+        'module' => 'text',
+        'settings' => array(
+          'trim_length' => 600,
+        ),
+        'type' => 'text_summary_or_trimmed',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'body',
+    'label' => 'Body',
+    'required' => FALSE,
+    'settings' => array(
+      'display_summary' => TRUE,
+      'text_processing' => 1,
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'module' => 'text',
+      'settings' => array(
+        'rows' => 20,
+        'summary_rows' => 5,
+      ),
+      'type' => 'text_textarea_with_summary',
+      'weight' => 31,
+    ),
+  );
+
+  // Exported field_instance:
+  // 'node-van_pl_group_master-field_deliveries_per_stop'.
+  $field_instances['node-van_pl_group_master-field_deliveries_per_stop'] = array(
+    'bundle' => 'van_pl_group_master',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'number',
+        'settings' => array(
+          'decimal_separator' => '.',
+          'prefix_suffix' => TRUE,
+          'scale' => 0,
+          'thousand_separator' => '',
+        ),
+        'type' => 'number_integer',
+        'weight' => 2,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_deliveries_per_stop',
+    'label' => 'Deliveries per stop',
+    'required' => 0,
+    'settings' => array(
+      'max' => '',
+      'min' => '',
+      'prefix' => '',
+      'suffix' => '',
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 0,
+      'module' => 'number',
+      'settings' => array(),
+      'type' => 'number',
+      'weight' => 33,
+    ),
+  );
+
+  // Exported field_instance: 'node-van_pl_group_master-field_stops_per_van'.
+  $field_instances['node-van_pl_group_master-field_stops_per_van'] = array(
+    'bundle' => 'van_pl_group_master',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'number',
+        'settings' => array(
+          'decimal_separator' => '.',
+          'prefix_suffix' => TRUE,
+          'scale' => 0,
+          'thousand_separator' => '',
+        ),
+        'type' => 'number_integer',
+        'weight' => 1,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_stops_per_van',
+    'label' => 'Stops per Van',
+    'required' => 0,
+    'settings' => array(
+      'max' => '',
+      'min' => '',
+      'prefix' => '',
+      'suffix' => '',
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 0,
+      'module' => 'number',
+      'settings' => array(),
+      'type' => 'number',
+      'weight' => 32,
+    ),
+  );
+
   // Exported field_instance: 'node-vehicle_master-body'.
   $field_instances['node-vehicle_master-body'] = array(
     'bundle' => 'vehicle_master',
@@ -2821,6 +2998,7 @@ function leanbox_master_content_types_field_default_field_instances() {
   t('Cabin Length in Feet');
   t('Cabin Width in Feet');
   t('Deliver Reason');
+  t('Deliveries per stop');
   t('Delivery Day');
   t('Delivery pending');
   t('Delivery status');
@@ -2833,6 +3011,7 @@ function leanbox_master_content_types_field_default_field_instances() {
   t('Hul status');
   t('Impact Delivery Date');
   t('Original address');
+  t('Outlet Area Hook');
   t('Outstanding Bill Date');
   t('Outstanding Bill Value');
   t('Outstanding updated date');
@@ -2852,6 +3031,7 @@ function leanbox_master_content_types_field_default_field_instances() {
   t('Sales updated date');
   t('Sequence');
   t('Static Delivery Beat Code');
+  t('Stops per Van');
   t('Updated address');
   t('Van Pl Group');
   t('Vehicle Type');

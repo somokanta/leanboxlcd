@@ -346,6 +346,21 @@ function leanbox_master_content_types_field_default_field_bases() {
     'type' => 'taxonomy_term_reference',
   );
 
+  // Exported field_base: 'field_deliveries_per_stop'.
+  $field_bases['field_deliveries_per_stop'] = array(
+    'active' => 1,
+    'cardinality' => 1,
+    'deleted' => 0,
+    'entity_types' => array(),
+    'field_name' => 'field_deliveries_per_stop',
+    'indexes' => array(),
+    'locked' => 0,
+    'module' => 'number',
+    'settings' => array(),
+    'translatable' => 0,
+    'type' => 'number_integer',
+  );
+
   // Exported field_base: 'field_delivery_day'.
   $field_bases['field_delivery_day'] = array(
     'active' => 1,
@@ -686,6 +701,27 @@ function leanbox_master_content_types_field_default_field_bases() {
     'settings' => array(),
     'translatable' => 0,
     'type' => 'addressfield',
+  );
+
+  // Exported field_base: 'field_outlet_area_hook'.
+  $field_bases['field_outlet_area_hook'] = array(
+    'active' => 1,
+    'cardinality' => 1,
+    'deleted' => 0,
+    'entity_types' => array(),
+    'field_name' => 'field_outlet_area_hook',
+    'indexes' => array(
+      'format' => array(
+        0 => 'format',
+      ),
+    ),
+    'locked' => 0,
+    'module' => 'text',
+    'settings' => array(
+      'max_length' => 255,
+    ),
+    'translatable' => 0,
+    'type' => 'text',
   );
 
   // Exported field_base: 'field_outst_bill_date'.
@@ -1163,6 +1199,21 @@ function leanbox_master_content_types_field_default_field_bases() {
     ),
     'translatable' => 0,
     'type' => 'text',
+  );
+
+  // Exported field_base: 'field_stops_per_van'.
+  $field_bases['field_stops_per_van'] = array(
+    'active' => 1,
+    'cardinality' => 1,
+    'deleted' => 0,
+    'entity_types' => array(),
+    'field_name' => 'field_stops_per_van',
+    'indexes' => array(),
+    'locked' => 0,
+    'module' => 'number',
+    'settings' => array(),
+    'translatable' => 0,
+    'type' => 'number_integer',
   );
 
   // Exported field_base: 'field_trip_id_reference'.

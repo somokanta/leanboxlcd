@@ -54,6 +54,16 @@ function leanbox_master_content_types_user_default_permissions() {
     'module' => 'node',
   );
 
+  // Exported permission: 'create van_pl_group_master content'.
+  $permissions['create van_pl_group_master content'] = array(
+    'name' => 'create van_pl_group_master content',
+    'roles' => array(
+      'Distributor' => 'Distributor',
+      'Uploader' => 'Uploader',
+    ),
+    'module' => 'node',
+  );
+
   // Exported permission: 'create vehicle_master content'.
   $permissions['create vehicle_master content'] = array(
     'name' => 'create vehicle_master content',
@@ -140,6 +150,16 @@ function leanbox_master_content_types_user_default_permissions() {
       'Distributor' => 'Distributor',
       'Uploader' => 'Uploader',
       'administrator' => 'administrator',
+    ),
+    'module' => 'node',
+  );
+
+  // Exported permission: 'delete own van_pl_group_master content'.
+  $permissions['delete own van_pl_group_master content'] = array(
+    'name' => 'delete own van_pl_group_master content',
+    'roles' => array(
+      'Distributor' => 'Distributor',
+      'Uploader' => 'Uploader',
     ),
     'module' => 'node',
   );
@@ -234,6 +254,16 @@ function leanbox_master_content_types_user_default_permissions() {
     'module' => 'node',
   );
 
+  // Exported permission: 'edit own van_pl_group_master content'.
+  $permissions['edit own van_pl_group_master content'] = array(
+    'name' => 'edit own van_pl_group_master content',
+    'roles' => array(
+      'Distributor' => 'Distributor',
+      'Uploader' => 'Uploader',
+    ),
+    'module' => 'node',
+  );
+
   // Exported permission: 'edit own vehicle_master content'.
   $permissions['edit own vehicle_master content'] = array(
     'name' => 'edit own vehicle_master content',
@@ -243,6 +273,26 @@ function leanbox_master_content_types_user_default_permissions() {
       'administrator' => 'administrator',
     ),
     'module' => 'node',
+  );
+
+  // Exported permission: 'import van_pl_group_stop_importer feeds'.
+  $permissions['import van_pl_group_stop_importer feeds'] = array(
+    'name' => 'import van_pl_group_stop_importer feeds',
+    'roles' => array(
+      'Distributor' => 'Distributor',
+      'Uploader' => 'Uploader',
+    ),
+    'module' => 'feeds',
+  );
+
+  // Exported permission: 'unlock van_pl_group_stop_importer feeds'.
+  $permissions['unlock van_pl_group_stop_importer feeds'] = array(
+    'name' => 'unlock van_pl_group_stop_importer feeds',
+    'roles' => array(
+      'Distributor' => 'Distributor',
+      'Uploader' => 'Uploader',
+    ),
+    'module' => 'feeds',
   );
 
   return $permissions;
