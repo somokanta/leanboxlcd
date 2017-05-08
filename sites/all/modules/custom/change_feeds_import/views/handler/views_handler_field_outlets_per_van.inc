@@ -21,7 +21,7 @@ class views_handler_field_outlets_per_van extends views_handler_field {
     $query->join('field_data_field_stops_per_van', 'fsv', 'fsv.entity_id = n.nid');
     $query->condition('n.type', 'van_pl_group_master');
     $query->condition('n.title', $van_pl_group);
-    $query->fields('fsv', array('field_stops_per_van'));
+    $query->fields('fsv', array('field_stops_per_van_value'));
     $stops_per_van = $query->execute()->fetchField();
 
     return ($seq/$stops_per_van);
