@@ -11,15 +11,35 @@
 function leanbox_dashboard_menu() {
   $items = array();
 
-//  // Upload form for sales register data
-//  $items['delivery-per-van/import'] = array(
-//    'title' => 'Outlets Per Van/Stop Master',
-//    'description' => 'Import Outlets Per Van/Stop Master',
-//    'page callback' => 'drupal_get_form',
-//    'page arguments' => array('leanbox_dashboard_delivery_per_van_form'),
-//    'access arguments' => array('Distributor Upload File'),
-//    'file' => 'includes/leanbox_dashboard_deliverypervan.inc',
-//  );
+  $items['dashboard'] = array(
+    'page callback' => 'leanbox_dashboard_listing_page',
+    'access arguments' => array('Distributor Upload File'),
+    'type' => MENU_NORMAL_ITEM,
+  );
+
+  $categories = array(
+    1 => 'Progress',
+    2 => 'Metrics',
+    3 => 'Productivity',
+    4 => 'ota',
+  );
+
+  $items['dashboard/Progress'] = array(
+    'title' => 'Progress',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => 0,
+    'access arguments' => array('Distributor Upload File'),
+  );
+
+  foreach ($categories as $k => $v) {
+    $items['dashboard/' . $v] = array(
+      'title' => $v,
+      'access arguments' => array('Distributor Upload File'),
+      'type' => MENU_LOCAL_TASK,
+      'weight' => $k,
+    );
+  }
+  
   // Upload form for sales register data
   $items['area-hook-group/import'] = array(
     'title' => 'Area Hook Group',
@@ -89,6 +109,14 @@ function leanbox_dashboard_menu() {
   );
 
   return $items;
+}
+
+/**
+ * 
+ * @return string
+ */
+function leanbox_dashboard_listing_page() {
+  return '';
 }
 
 /**
