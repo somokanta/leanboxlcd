@@ -12,7 +12,7 @@
 class views_handler_field_outlets_per_van extends views_handler_field {
 
   function render($values) {
-    
+    dpm($values);
     $van_pl_group = $values->van_pl_group;
     $seq = $values->_field_data[$this->field_alias]['entity']->field_revised_sequence['und'][0]['value'];
     
@@ -24,7 +24,7 @@ class views_handler_field_outlets_per_van extends views_handler_field {
     $query->fields('fsv', array('field_stops_per_van_value'));
     $stops_per_van = $query->execute()->fetchField();
 
-    return ($seq/$stops_per_van);
+    return ceil($seq/$stops_per_van);
   }
 
 }
