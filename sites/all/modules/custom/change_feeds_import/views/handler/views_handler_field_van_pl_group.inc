@@ -12,8 +12,6 @@
 class views_handler_field_van_pl_group extends views_handler_field {
 
   function render($values) {
-
-    dpm($values);
     $channel = $values->_field_data[$this->field_alias]['entity']->field_channel['und'][0]['value'];
     $pl_group = $values->_field_data[$this->field_alias]['entity']->field_pl_group['und'][0]['value'];
 
