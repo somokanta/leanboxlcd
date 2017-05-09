@@ -514,15 +514,13 @@ function reverse_geocode_get_data_area_code_wise($sales_day, $van_pl_group, $are
     $query->condition('sd.field_dva_sales_day_value', $sales_day, '=');
   }
   
-  if (!is_null($area_hook_group)) {
+  if (!empty($area_hook_group)) {
     $query->join('field_data_field_dva_area_hook_group_name', 'agr', 'agr.entity_id = na.nid');
     $query->condition('agr.field_dva_area_hook_group_name_value', $area_hook_group, '=');
   }
   
-  
-
   $query->join('field_data_field_dva_van_pl_group', 'ppplg', 'na.nid = ppplg.entity_id');
-  if (!is_null($van_pl_group)) {
+  if (!empty($van_pl_group)) {
     $query->condition('ppplg.field_dva_van_pl_group_value', $van_pl_group, '=');
   }
   if ($type == "revised-sequence") {
@@ -533,7 +531,7 @@ function reverse_geocode_get_data_area_code_wise($sales_day, $van_pl_group, $are
     
     $query->where("CEIL(fss.field_revised_sequence_status_value/fsv.field_stops_per_van_value)=$original_van");
   }
-
+ 
 
   $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
   return $res;
