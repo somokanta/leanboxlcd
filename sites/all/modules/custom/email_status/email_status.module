@@ -501,7 +501,10 @@ function send_email_productivity_emailer($todays_date_date, $distributor_name, $
         . "<th>Picking Type</th>"
         . "<th>Sum - Loading Sheet Line</th>"
         . "<th>Sum - Time Duration</th>"
-        . "<th>Productivity</th>";
+        . "<th>Productivity</th>"
+        . "<th>Target</th>";
+    
+      $target_data = leanbox_dashboard_target_value_using_voc_name('productivity target');
 
     foreach ($picking as $key => $value) {
 
@@ -526,6 +529,11 @@ function send_email_productivity_emailer($todays_date_date, $distributor_name, $
             else {
               $picking_godown_wise_html .="<td><table class = 'pp-count'><td><tr>$percentage</tr></td></table></td><tr></tr><td></td>";
             }
+            
+            $label = $ke . ' ' . $k;
+            $label_key = strtolower($label);
+            $picking_godown_wise_html .="<td><table class = 'pp-count'><td><tr> $target_data[$label_key]</tr></td></table></td><tr></tr><td></td>";
+            
             $total_timing += $timing;
             $total_loding_lines += $loding_lines;
             $all_godown_total_timing += $timing;
