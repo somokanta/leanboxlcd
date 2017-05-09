@@ -466,7 +466,7 @@ dpm("12");
     $query->orderBy('hul_long_u.field_hul_updated_long_value', 'asc');
   }
   else {
-    if (!isset($area_status)) {
+    if (!is_null($area_status)) {
       if ($area_status == '0' || $area_status == '1') {
         $query->condition('fagh.field_area_hook_group_hul_value', $area_status, '=');
         $query->fields('fagh', array('field_area_hook_group_hul_value'));
