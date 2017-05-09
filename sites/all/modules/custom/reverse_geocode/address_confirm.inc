@@ -214,14 +214,17 @@ function area_locations_form($form, &$form_state, $type) {
   );
   if (!empty($form_state['values']['sales_day'])) {
     $sales_day = $form_state['values']['sales_day'];
-    $rrr = reverse_geocode_get_data_from_sales_day($sales_day, $distributor_id);
-    $form['van_pl_group']['#options'] = reverse_geocode_get_data_from_sales_day($sales_day, $distributor_id);
+    $sales_day_data = reverse_geocode_get_data_from_sales_day($sales_day, $distributor_id);
+    $select = array('' => '- Any -');
+    $form['van_pl_group']['#options'] = $select+$sales_day_data;
   }
 
   if (!empty($form_state['values']['sales_day']) && !empty($form_state['values']['van_pl_group'])) {
     $sales_day = $form_state['values']['sales_day'];
     $van = $form_state['values']['van_pl_group'];
-    $form['area_hook_group']['#options'] = reverse_geocode_get_data_for_area_group($sales_day, $van, $distributor_id);
+    $mixed_data = reverse_geocode_get_data_for_area_group($sales_day, $van, $distributor_id);
+    $select = array('' => '- Any -');
+    $form['area_hook_group']['#options'] = $select + $mixed_data;
   }
 
 //  if ($type == "area-view") {
