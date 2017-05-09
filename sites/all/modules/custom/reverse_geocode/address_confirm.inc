@@ -357,7 +357,9 @@ function filter_area_wise($form, &$form_state) {
 function area_wise_filter_validate(&$form, &$form_state) {
   $sales_day = $form_state['values']['sales_day'];
   $van_pl_group = $form_state['values']['van_pl_group'];
+  dpm($van_pl_group,"van_pl_group1");
   $area_hook_group = $form_state['values']['area_hook_group'];
+  dpm($area_hook_group,"area_hook_group1");
   $area_status = $form_state['values']['area_status'];
   $type = $form_state['type'];
    $data = "";
@@ -445,6 +447,7 @@ function reverse_geocode_get_data_area_code_wise($sales_day, $van_pl_group, $are
   global $user;
   $user_id = $user->uid;
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
+dpm("12");
   $query = db_select('node', 'n');
   $query->condition('n.type', 'outlet_master');
   $query->addTag('node_uid');
@@ -509,6 +512,9 @@ function reverse_geocode_get_data_area_code_wise($sales_day, $van_pl_group, $are
 
   $query->join('field_data_field_area_hook', 'fa', 'fa.entity_id = n.nid');
   $query->join('node', 'na', 'na.nid = fa.field_area_hook_nid');
+dpm($area_hook_group,"area_hook_group");
+dpm($van_pl_group,"van_pl_group");
+dpm("22");
   if (!is_null($sales_day)) {
     $query->join('field_data_field_dva_sales_day', 'sd', 'sd.entity_id = na.nid');
     $query->condition('sd.field_dva_sales_day_value', $sales_day, '=');
