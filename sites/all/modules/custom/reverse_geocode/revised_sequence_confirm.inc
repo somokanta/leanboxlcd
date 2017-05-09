@@ -96,7 +96,6 @@ function revised_sequence_confirm_form($form, &$form_state) {
   );
 
   if (!empty($form_state['values']['sales_day'])) {
-    dpm('11');
     $sales_day = $form_state['values']['sales_day'];
     $rrr = reverse_geocode_get_data_from_sales_day($sales_day, $distributor_id);
     $form['van_pl_group']['#options'] = reverse_geocode_get_data_from_sales_day($sales_day, $distributor_id);
@@ -337,10 +336,10 @@ function reverse_geocode_get_data_for_original_van($sales_day, $van_pl_group, $a
 
   //VAN PL Group Stop Master
   $query->join('node', 'nv', 'nv.title = fv.field_dva_van_pl_group_value');
-  $query->join('field_data_field_deliveries_per_stop', 'fsv', 'fsv.entity_id = nv.nid');
+  $query->join('field_data_field_stops_per_van', 'fsv', 'fsv.entity_id = nv.nid');
   $query->condition('nv.uid', $distributor_id, '=');
 
-  $query->addExpression('CEIL(field_revised_sequence_value/field_deliveries_per_stop_value)');
+  $query->addExpression('CEIL(field_revised_sequence_value/field_stops_per_van_value)');
   $query->orderBy('field_revised_sequence_value');
 
   $res = $query->execute()->fetchallkeyed(0, 0);
