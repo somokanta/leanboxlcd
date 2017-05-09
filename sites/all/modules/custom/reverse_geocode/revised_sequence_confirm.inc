@@ -330,8 +330,10 @@ function reverse_geocode_get_data_for_original_van($sales_day, $van_pl_group, $a
   $query->join('node', 'na', 'na.nid = fa.field_area_hook_nid');
   $query->join('field_data_field_dva_van_pl_group', 'fv', 'fv.entity_id = na.nid');
   $query->join('field_data_field_dva_sales_day', 'sd', 'sd.entity_id = na.nid');
+  $query->join('field_data_field_dva_area_hook_group_name', 'ag', 'ag.entity_id = na.nid');
   $query->condition('sd.field_dva_sales_day_value', $sales_day, '=');
   $query->condition('fv.field_dva_van_pl_group_value', $van_pl_group, '=');
+  $query->condition('ag.field_dva_area_hook_group_name_value', $area_hook_group, '=');
 
   //VAN PL Group Stop Master
   $query->join('node', 'nv', 'nv.title = fv.field_dva_van_pl_group_value');
