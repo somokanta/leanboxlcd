@@ -352,9 +352,7 @@ function area_wise_filter_validate(&$form, &$form_state) {
   $area_hook_group = $form_state['values']['area_hook_group'];
   $area_status = $form_state['values']['area_status'];
   $type = $form_state['type'];
-  if ($type == "area-view") {
-    $area_status = 1;
-  } $data = "";
+   $data = "";
 
   if (!empty($sales_day) && !empty($van_pl_group) && !empty($area_hook_group)) {
     $data = reverse_geocode_get_data_area_code_wise($sales_day, $van_pl_group, $area_hook_group, $area_status, $type);
