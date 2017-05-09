@@ -317,7 +317,7 @@ function reverse_geocode_update_revised_sequence_status($code) {
   }
 }
 
-function reverse_geocode_get_data_for_original_van($sales_day, $van, $area_hook_group, $distributor_id) {
+function reverse_geocode_get_data_for_original_van($sales_day, $van_pl_group, $area_hook_group, $distributor_id) {
   $query = db_select('node', 'n');
   $query->addTag('node_uid');
 
@@ -338,7 +338,8 @@ function reverse_geocode_get_data_for_original_van($sales_day, $van, $area_hook_
   $query->join('field_data_field_deliveries_per_stop', 'fsv', 'fsv.entity_id = nv.nid');
   $query->condition('nv.uid', $distributor_id, '=');
 
-  $query->addExpression('field_revised_sequence_value/field_deliveries_per_stop_value');
+  $query->addExpression('CEIL(field_revised_sequence_value/field_deliveries_per_stop_value)');
+  $query->orderBy('field_revised_sequence_value');
 
   $res = $query->execute()->fetchallkeyed(0, 0);
   return $res;
