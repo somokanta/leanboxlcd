@@ -151,7 +151,7 @@ function area_hook_wise_locations_form($form, &$form_state, $type) {
     '#options' => $sales_day_data,
     '#ajax' => array(
       'event' => 'change',
-      'callback' => 'sales_day_callback_new_new',
+      'callback' => 'sales_day_callback_new',
       'wrapper' => 'address-selection-map',
     ),
     '#required' => TRUE,
