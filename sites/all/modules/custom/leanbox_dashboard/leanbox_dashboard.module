@@ -252,7 +252,7 @@ function leanbox_dashboard_block_view($delta = '') {
       }
 
       $loading_date = date('d-m-Y');
-      $block['subject'] = "Party Packing Progress ($loading_date Loading)";
+      $block['subject'] = "Party Packing Van Progress ($loading_date Loading)";
       $data = leanbox_dashboard_chart_query_details('party_packing');
       $filter_form = drupal_render(drupal_get_form('leanbox_dashboard_chart_filter_partypack_form'));
       $block['content'] = array(
@@ -286,7 +286,7 @@ function leanbox_dashboard_block_view($delta = '') {
         );
       }
       $loading_date = date('d-m-Y');
-      $block['subject'] = "Picking Progress Loose ($loading_date Loading)";
+      $block['subject'] = "Picking Progress Task Loose ($loading_date Loading)";
       $data = leanbox_dashboard_chart_query_details('picking');
 
       $filter_form = drupal_render(drupal_get_form('leanbox_dashboard_chart_filter_picking_form'));
@@ -321,7 +321,7 @@ function leanbox_dashboard_block_view($delta = '') {
         );
       }
       $loading_date = date('d-m-Y');
-      $block['subject'] = "Picking Progress Bulk ($loading_date Loading)";
+      $block['subject'] = "Picking Progress Task Bulk ($loading_date Loading)";
       $data = leanbox_dashboard_chart_query_details('picking_bulk');
 
       $filter_form = drupal_render(drupal_get_form('leanbox_dashboard_chart_filter_picking_bulk_form'));
