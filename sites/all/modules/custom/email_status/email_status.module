@@ -376,6 +376,7 @@ function send_email_pl_group_emailer($distributor_name) {
 }
 
 function send_email_productivity_emailer($todays_date_date, $distributor_name, $end_date = FALSE, $chart = FALSE, $type = '') {
+ $target_data = leanbox_dashboard_target_value_using_voc_name('productivity target');
 
   if (( $chart == TRUE && $type == 'party_packing' ) || ( $chart == FALSE )) {
     $party_packing = get_productivity_data_for_party_packing($todays_date_date, $end_date);
@@ -429,6 +430,12 @@ function send_email_productivity_emailer($todays_date_date, $distributor_name, $
             else {
               $party_pack_superwise_html .="<td><table class = 'pp-count'><td><tr>$percentage</tr></td></table></td><tr></tr><td></td>";
             }
+               
+            $label = $ke . ' ' . $k;
+            $label_key = strtolower($label);
+            $picking_godown_wise_html .="<td><table class = 'pp-count'><td><tr> $target_data[$label_key]</tr></td></table></td><tr></tr><td></td>";
+            
+            
             $total_timing += $time;
             $total_bill_lines += $bill_lines;
           }
@@ -472,15 +479,21 @@ function send_email_productivity_emailer($todays_date_date, $distributor_name, $
         . "<th>Party Packing Type</th>"
         . "<th>Sum - Bill Line</th>"
         . "<th>Sum - Total Time</th>"
-        . "<th>Productivity</th>";
+        . "<th>Productivity</th>"
+        . "<th>Target</th>";
 
 
     if (empty($total_bills) && empty($total_time)) {
       $party_pack_type_wsie_html .= "<tr><td colspan='4' style='text-align: center;'> There is No Activity for today's Date</td></tr></table>";
     }
     else {
-      $party_pack_type_wsie_html .= "<tr><td>Non-PP</td><td>$total_non_bill</td><td>$total_non_time</td><td>$total_non_perc</td></tr>"
-          . "<tr><td>PP</td><td>$total_pp_bill</td><td>$total_pp_time</td><td>$total_pp_perc</td></tr></table>";
+      $non_pp_target = $target_data['Non-PP'];
+      $pp_target = $target_data['Non-PP'];
+
+      $party_pack_type_wsie_html .= "<tr><td>Non-PP</td><td>$total_non_bill</td><td>$total_non_time</td><td>$total_non_perc</td><td>$non_pp_target</td></tr>"
+          . "<tr><td>PP</td><td>$total_pp_bill</td><td>$total_pp_time</td><td>$total_pp_perc</td>"
+          . "<td>$pp_target</td>"
+          . "</tr></table>";
     }
   }
   
@@ -504,8 +517,7 @@ function send_email_productivity_emailer($todays_date_date, $distributor_name, $
         . "<th>Productivity</th>"
         . "<th>Target</th>";
     
-      $target_data = leanbox_dashboard_target_value_using_voc_name('productivity target');
-
+     
     foreach ($picking as $key => $value) {
 
       if ($key == "godown") {
