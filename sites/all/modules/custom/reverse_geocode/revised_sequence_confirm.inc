@@ -89,13 +89,11 @@ function revised_sequence_confirm_form($form, &$form_state) {
     '#options' => array(),
   );
 
-  if (isset($form_state['triggering_element']) && ($form_state['triggering_element']['#name'] == 'sales_day')) {
   if (!empty($form_state['values']['sales_day'])) {
     dpm('11');
     $sales_day = $form_state['values']['sales_day'];
     $rrr = reverse_geocode_get_data_from_sales_day($sales_day, $distributor_id);
     $form['van_pl_group']['#options'] = reverse_geocode_get_data_from_sales_day($sales_day, $distributor_id);
-  }
   }
 
   if (!empty($form_state['values']['sales_day']) && !empty($form_state['values']['van_pl_group'])) {
@@ -106,7 +104,8 @@ function revised_sequence_confirm_form($form, &$form_state) {
   if (!empty($form_state['values']['sales_day']) && !empty($form_state['values']['van_pl_group']) && !empty($form_state['values']['area_hook_group'])) {
     $sales_day = $form_state['values']['sales_day'];
     $van = $form_state['values']['van_pl_group'];
-    $form['area_hook_group']['#options'] = reverse_geocode_get_data_for_area_group($sales_day, $van, $distributor_id);
+    $area_hook_group = $form_state['values']['area_hook_group'];
+    $form['original_van']['#options'] = reverse_geocode_get_data_for_original_van($sales_day, $van, $area_hook_group, $distributor_id);
   }
 
   $area_status = array(0 => "Non-Confirmed", 1 => "Confirmed");
@@ -116,6 +115,11 @@ function revised_sequence_confirm_form($form, &$form_state) {
     '#options' => $area_status,
     "#empty_option" => t('- Select -'),
   );
+  $form['dummy'] = array(
+      "#markup" => '<div class="clearance"></div>',
+        //'#required' => TRUE,
+    );
+  
   $form['filter'] = array(
     '#type' => 'submit',
     '#value' => t('Filter'),
@@ -305,4 +309,31 @@ function reverse_geocode_update_revised_sequence_status($code) {
     $node->field_revised_sequence_status['und'][0]['value'] = 1;
     node_save($node);
   }
+}
+
+function reverse_geocode_get_data_for_original_van($sales_day, $van, $area_hook_group, $distributor_id) {
+  $query = db_select('node', 'n');
+  $query->addTag('node_uid');
+
+  //Outlet Master
+  $query->join('field_data_field_area_hook', 'fa', 'fa.entity_id = n.nid');
+
+  $query->join('field_data_field_revised_sequence', 'fs', 'fs.entity_id = n.nid');
+
+  //Day-Van-PL-Gp-Area Hook Master
+  $query->join('node', 'na', 'na.nid = fa.field_area_hook_nid');
+  $query->join('field_data_field_dva_van_pl_group', 'fv', 'fv.entity_id = na.nid');
+  $query->join('field_data_field_dva_sales_day', 'sd', 'sd.entity_id = na.nid');
+  $query->condition('sd.field_dva_sales_day_value', $sales_day, '=');
+  $query->condition('fv.field_dva_van_pl_group_value', $van_pl_group, '=');
+
+  //VAN PL Group Stop Master
+  $query->join('node', 'nv', 'nv.title = ppplg.field_dva_van_pl_group_value');
+  $query->join('field_data_field_deliveries_per_stop', 'fsv', 'fsv.entity_id = nv.nid');
+  $query->condition('nv.uid', $distributor_id, '=');
+
+  $query->addExpression('field_revised_sequence_value/field_deliveries_per_stop_value');
+
+  $res = $query->execute()->fetchallkeyed(0, 0);
+  return $res;
 }
