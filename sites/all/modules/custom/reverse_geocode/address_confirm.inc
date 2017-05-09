@@ -65,7 +65,6 @@ function reverse_geocode_get_data_from_sales_day($sales_day, $distributor_id) {
 //  $res = $query->execute()->fetchallkeyed(0, 0);
 //
 //  return $res;
-  
   ##### NEW LOGIC ##############################
   $query = db_select('node', 'n');
   $query->addTag('node_uid');
@@ -117,7 +116,6 @@ function reverse_geocode_get_data_for_area_group($sales_day, $van_pl_group, $dis
 //  $query->fields('agr', array('field_area_hook_group_value'));
 //  $res = $query->execute()->fetchallkeyed(0, 0);
 //  return $res;
-  
   ##### NEW LOGIC ##############################
   $query = db_select('node', 'n');
   $query->addTag('node_uid');
@@ -221,21 +219,20 @@ function area_locations_form($form, &$form_state, $type) {
     $form['area_hook_group']['#options'] = reverse_geocode_get_data_for_area_group($sales_day, $van, $distributor_id);
   }
 
-  if ($type == "area-checkbox") {
-    $area_status = array(0 => "Non-Confirmed", 1 => "Confirmed");
-    $form['area_status'] = array(
-      '#type' => 'select',
-      '#title' => t('status'),
-      '#options' => $area_status,
-      "#empty_option" => t('- Select -'),
-    );
-  }
-  else{
-    $form['dummy'] = array(
-      "#markup" => '<div class="clearance"></div>',
-        //'#required' => TRUE,
-    );
-  }
+//  if ($type == "area-view") {
+//    $form['dummy'] = array(
+//      "#markup" => '<div class="clearance"></div>',
+//        //'#required' => TRUE,
+//    );
+//    
+//  }
+  $area_status = array(0 => "Non-Confirmed", 1 => "Confirmed");
+  $form['area_status'] = array(
+    '#type' => 'select',
+    '#title' => t('status'),
+    '#options' => $area_status,
+    "#empty_option" => t('- Select -'),
+  );
 
   $form['filter'] = array(
     '#type' => 'submit',
@@ -442,7 +439,7 @@ function reverse_geocode_get_data_area_code_wise($sales_day, $van_pl_group, $are
   global $user;
   $user_id = $user->uid;
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
-  
+
   $query = db_select('node', 'n');
   $query->condition('n.type', 'outlet_master');
   $query->addTag('node_uid');
@@ -461,8 +458,12 @@ function reverse_geocode_get_data_area_code_wise($sales_day, $van_pl_group, $are
     $query->orderBy('hul_long_u.field_hul_updated_long_value', 'asc');
   }
   else {
-    $query->condition('fagh.field_area_hook_group_hul_value', 1, '=');
-    $query->fields('fagh', array('field_area_hook_group_hul_value'));
+    if (!is_null($area_status)) {
+      if ($area_status == '0' || $area_status == '1') {
+        $query->condition('fagh.field_area_hook_group_hul_value', $area_status, '=');
+        $query->fields('fagh', array('field_area_hook_group_hul_value'));
+      }
+    }
 
     if ($type == "revised-sequence") {
 
@@ -490,7 +491,7 @@ function reverse_geocode_get_data_area_code_wise($sales_day, $van_pl_group, $are
   $query->fields('hc', array('field_hul_code_value'));
   $query->condition('hul.uid', $distributor_id, '=');
   $query->condition('hul.type', 'hul_code_master');
-  
+
   $query->Join('field_data_field_hul_updated_lat', 'hul_lat_u', 'hul_lat_u.entity_id = hul.nid');
   $query->fields('hul_lat_u', array('field_hul_updated_lat_value'));
   $query->Join('field_data_field_hul_updated_long', 'hul_long_u', 'hul_long_u.entity_id = hul.nid');
@@ -500,14 +501,13 @@ function reverse_geocode_get_data_area_code_wise($sales_day, $van_pl_group, $are
   $query->fields('n', array('title'));
   $query->fields('fpn', array('field_party_name_value'));
   $query->fields('fagh', array('field_area_hook_group_hul_value'));
-  
+
   $query->join('field_data_field_area_hook', 'fa', 'fa.entity_id = n.nid');
   $query->join('node', 'na', 'na.nid = fa.field_area_hook_nid');
 
   if (!is_null($sales_day)) {
     $query->join('field_data_field_dva_sales_day', 'sd', 'sd.entity_id = na.nid');
     $query->condition('sd.field_dva_sales_day_value', $sales_day, '=');
-    
   }
   if (!is_null($area_hook_group)) {
     $query->join('field_data_field_dva_area_hook_group_name', 'agr', 'agr.entity_id = na.nid');
