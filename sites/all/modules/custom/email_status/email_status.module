@@ -539,12 +539,12 @@ function send_email_productivity_emailer($todays_date_date, $distributor_name, $
               $picking_godown_wise_html .="<td><table class = 'pp-count'><td><tr>$percentage</tr></td></table></td>";
             }
             else {
-              $picking_godown_wise_html .="<td><table class = 'pp-count'><td><tr>$percentage</tr></td></table></td><tr></tr><td></td>";
+              $picking_godown_wise_html .="<td><table class = 'pp-count'><td><tr>$percentage</tr></td></table></td>";
             }
             
             $label = $ke . ' ' . $k;
             $label_key = strtolower($label);
-            $picking_godown_wise_html .="<td><table class = 'pp-target'><td><tr> $target_data[$label_key]</tr></td></table></td><tr></tr><td></td>";
+            $picking_godown_wise_html .="<td><table class = 'pp-target'><td><tr> $target_data[$label_key]</tr></td></table></td></tr>";
             
             $total_timing += $timing;
             $total_loding_lines += $loding_lines;
