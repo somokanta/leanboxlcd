@@ -86,17 +86,24 @@ function revised_sequence_confirm_form($form, &$form_state) {
     '#type' => 'select',
     '#title' => t('Original Van'),
     // '#default_value' => isset($form_state['values']['sales_day']) ? $form_state['values']['sales_day'] : NULL,
-    '#options' => array('1' => '1', '2' => '2'),
+    '#options' => array(),
   );
-  
+
+  if (isset($form_state['triggering_element']) && ($form_state['triggering_element']['#name'] == 'sales_day')) {
   if (!empty($form_state['values']['sales_day'])) {
     dpm('11');
     $sales_day = $form_state['values']['sales_day'];
     $rrr = reverse_geocode_get_data_from_sales_day($sales_day, $distributor_id);
     $form['van_pl_group']['#options'] = reverse_geocode_get_data_from_sales_day($sales_day, $distributor_id);
   }
+  }
 
   if (!empty($form_state['values']['sales_day']) && !empty($form_state['values']['van_pl_group'])) {
+    $sales_day = $form_state['values']['sales_day'];
+    $van = $form_state['values']['van_pl_group'];
+    $form['area_hook_group']['#options'] = reverse_geocode_get_data_for_area_group($sales_day, $van, $distributor_id);
+  }
+  if (!empty($form_state['values']['sales_day']) && !empty($form_state['values']['van_pl_group']) && !empty($form_state['values']['area_hook_group'])) {
     $sales_day = $form_state['values']['sales_day'];
     $van = $form_state['values']['van_pl_group'];
     $form['area_hook_group']['#options'] = reverse_geocode_get_data_for_area_group($sales_day, $van, $distributor_id);
