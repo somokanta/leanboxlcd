@@ -170,7 +170,7 @@ function area_hook_wise_locations_form($form, &$form_state, $type) {
       'callback' => 'sales_day_callback_new',
       'wrapper' => 'address-selection-map',
     ),
-    '#required' => TRUE,
+   
   );
 
 
@@ -181,17 +181,22 @@ function area_hook_wise_locations_form($form, &$form_state, $type) {
 //    '#suffix' => '</div>',
     // '#default_value' => isset($form_state['values']['sales_day']) ? $form_state['values']['sales_day'] : NULL,
     '#options' => array(),
-    '#required' => TRUE,
+    
   );
   if (!empty($form_state['values']['sales_day'])) {
     $sales_day = $form_state['values']['sales_day'];
-    $form['van_pl_group']['#options'] = reverse_geocode_get_data_from_sales_day_new($sales_day, $distributor_id);
+    $select = array('' => '- Any -');
+    $sales_day_data = reverse_geocode_get_data_from_sales_day_new($sales_day, $distributor_id);;
+    $form['van_pl_group']['#options'] = $select+$sales_day_data;
   }
 
   if (!empty($form_state['values']['sales_day']) && !empty($form_state['values']['van_pl_group'])) {
     $sales_day = $form_state['values']['sales_day'];
     $van = $form_state['values']['van_pl_group'];
-    $form['area_hook']['#options'] = reverse_geocode_get_data_for_area_hook($sales_day, $van, $distributor_id);
+    
+    $mixed_data = reverse_geocode_get_data_for_area_hook($sales_day, $van, $distributor_id);
+    $select = array('' => '- Any -');
+    $form['area_hook']['#options'] = $select+$mixed_data;
   }
 
 
@@ -359,12 +364,12 @@ function reverse_geocode_get_data_area_code_wise_new($sales_day, $van_pl_group, 
     $query->join('field_data_field_sales_day', 'sd', 'sd.entity_id = n.nid');
     $query->condition('sd.field_sales_day_value', $sales_day, '=');
   }
-  if (!is_null($area_hook)) {
+  if (!empty($area_hook)) {
     $query->join('field_data_field_outlet_area_hook', 'oah', 'oah.entity_id = n.nid');
     $query->condition('oah.field_outlet_area_hook_value', $area_hook, '=');
   }
 
-  if (!is_null($van_pl_group)) {
+  if (!empty($van_pl_group)) {
     $query->join('field_data_field_channel', 'ch', 'ch.entity_id = n.nid');
     $query->condition('ch.bundle', 'outlet_master');
     $query->join('field_data_field_pl_group', 'pl', 'pl.entity_id = n.nid');
