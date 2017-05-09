@@ -52,7 +52,7 @@ function reverse_geocode_menu() {
   );
   
   
-  $items['area-confirm-view'] = array(
+  $items['area-hook-confirm-view'] = array(
     'title' => 'Area Hook Group Wise Outlets',
     'page callback' => 'show_area_hook_wise_locations',
     'access arguments' => array('address confirmation'),
