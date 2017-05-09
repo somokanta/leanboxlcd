@@ -219,24 +219,6 @@ function area_hook_wise_locations_form($form, &$form_state, $type) {
   }
   $options = $form_state['reverse_geocode']['rows'];
   if ($options) {
-    $form['submit'] = array(
-      '#type' => 'submit',
-      '#value' => t('Confirm Area Hook Gp'),
-      '#submit' => array('update_status_new_submit'),
-      '#ajax' => array(
-        'wrapper' => 'address-selection-map',
-        'callback' => 'area_hook_new_ajax_callback',
-        'method' => 'replace',
-        'effect' => 'fade',
-      ),
-      '#states' => array(
-        'visible' => array(
-          ':input[name^="list_form_items"]' => array('checked' => TRUE),
-        ),
-      ),
-      '#id' => 'area-hook-confirm',
-    );
-
 
     $multiple = TRUE;
     $class = array('selectable-row', 'table-checkbox');
