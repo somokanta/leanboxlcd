@@ -1441,6 +1441,45 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     $output = theme('table', array('header' => $header, 'rows' => $rows));
     return $output;
   }
+  
+  
+  if ($activity_type == 'bill_pendency') {
+    $output1 = array();
+    $output = 0;
+    $table = '';
+
+    $pp_table = '';
+    $output[] = array('Group', 'Productivity', 'Target');
+    $picking_data = get_productivity_data_for_picking($start, $end, $distributor_id);
+
+    if (!empty($picking_data)) {
+      $target_data = leanbox_dashboard_target_value_using_voc_name('productivity target');
+      foreach ($picking_data['godown'] as $key => $val) {
+        foreach ($val as $key1 => $val1) {
+          $data = floor($val1['loading_sheet_line'] / $val1['total_tme']);
+          if (is_nan($data) || empty($data) || $data == FALSE) {
+            $data = 0;
+          }
+          $label = $key . ' ' . $key1;
+          $label_key = strtolower($label);
+          $output[] = array($label, $data, (int) $target_data[$label_key]);
+        }
+      }
+    }
+    else {
+      $output[] = array('No data found', 0, 0);
+    }
+
+    if (arg(1) == 'bill_pendency' || $ajax_type == 'bill_pendency_ajax') {
+      $pp_table = send_email_productivity_emailer($start, $distributor_name, $end, TRUE, 'picking');
+    }
+
+    $output1['output'] = $output;
+    $output1['table'] = $pp_table;
+    return $output1;
+
+    
+  }
 }
 
 function leanbox_dashboard_gauge_chart_query_details($type, $start_date = '', $end_date = '') {

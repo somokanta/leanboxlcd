@@ -145,6 +145,9 @@ function party_packing_filter_callback() {
     else if ($activity_type == 'picking_productivity') {
       $ajax_type = 'picking_ajax';
     }
+    else if ($activity_type == 'bill_pendency') {
+      $ajax_type = 'bill_pendency_ajax';
+    }
 
     $output_data = leanbox_dashboard_chart_query_details($activity_type, $start_date, $end_date, $ajax_type);
   }
