@@ -487,8 +487,8 @@ function send_email_productivity_emailer($todays_date_date, $distributor_name, $
       $party_pack_type_wsie_html .= "<tr><td colspan='4' style='text-align: center;'> There is No Activity for today's Date</td></tr></table>";
     }
     else {
-      $non_pp_target = $target_data['Non-PP'];
-      $pp_target = $target_data['Non-PP'];
+      $non_pp_target = $target_data['NON-PP'];
+      $pp_target = $target_data['PP'];
 
       $party_pack_type_wsie_html .= "<tr><td>Non-PP</td><td>$total_non_bill</td><td>$total_non_time</td><td>$total_non_perc</td><td>$non_pp_target</td></tr>"
           . "<tr><td>PP</td><td>$total_pp_bill</td><td>$total_pp_time</td><td>$total_pp_perc</td>"
