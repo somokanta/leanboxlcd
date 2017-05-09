@@ -535,16 +535,16 @@ function send_email_productivity_emailer($todays_date_date, $distributor_name, $
             $picking_godown_wise_html .="<td><table class = 'pp-sp'><td><tr>$k</tr></td></table></td>";
             $picking_godown_wise_html .="<td><table class = 'pp-bill'><td><tr>$loding_lines</tr></td></table></td>";
             $picking_godown_wise_html .="<td><table class = 'pp-time'><td><tr>$timing</tr></td></table></td>";
-            if ($godown_counter == $godown_count) {
-              $picking_godown_wise_html .="<td><table class = 'pp-count'><td><tr>$percentage</tr></td></table></td>";
-            }
-            else {
-              $picking_godown_wise_html .="<td><table class = 'pp-count'><td><tr>$percentage</tr></td></table></td>";
-            }
+            $picking_godown_wise_html .="<td><table class = 'pp-count'><td><tr>$percentage</tr></td></table></td>";
             
             $label = $ke . ' ' . $k;
             $label_key = strtolower($label);
-            $picking_godown_wise_html .="<td><table class = 'pp-target'><td><tr> $target_data[$label_key]</tr></td></table></td></tr>";
+             if ($godown_counter == $godown_count) {
+              $picking_godown_wise_html .="<td><table class = 'pp-target'><td><tr>$target_data[$label_key]</tr></td></table></td>";
+            }
+            else {
+              $picking_godown_wise_html .="<td><table class = 'pp-target'><td><tr>$target_data[$label_key]</tr></td></table></td><tr></tr><td></td>";
+            }
             
             $total_timing += $timing;
             $total_loding_lines += $loding_lines;
