@@ -158,7 +158,7 @@ function area_locations_form($form, &$form_state, $type) {
   }
   else {
     $header_array = array(
-      'sr_no' => array('data' => 'Sr No', 'class' => 'sr-cell'),
+      'sr_no' => array('data' => 'Sequence No', 'class' => 'sr-cell'),
       'party_code' => array('data' => 'Party Code', 'class' => 'party-code-cell'),
       'party_name' => array('data' => 'Party Name', 'class' => 'party-name-cell'),
       'area_group_status' => array('data' => 'Status', 'class' => 'status-cell'),
@@ -181,11 +181,6 @@ function area_locations_form($form, &$form_state, $type) {
     '#required' => TRUE,
   );
 
-  if ($type == "area-view") {
-    $required = FALSE;
-  }else{
-    $required = TRUE;
-  }
 
   $form['van_pl_group'] = array(
     '#type' => 'select',
@@ -199,7 +194,7 @@ function area_locations_form($form, &$form_state, $type) {
       'callback' => 'sales_day_callback',
       'wrapper' => 'address-selection-map',
     ),
-    '#required' => $required,
+    '#required' => TRUE,
   );
 
 
@@ -210,30 +205,21 @@ function area_locations_form($form, &$form_state, $type) {
 //    '#suffix' => '</div>',
     // '#default_value' => isset($form_state['values']['sales_day']) ? $form_state['values']['sales_day'] : NULL,
     '#options' => array(),
-    '#required' => $required,
+    '#required' => TRUE,
   );
   if (!empty($form_state['values']['sales_day'])) {
     $sales_day = $form_state['values']['sales_day'];
-    $sales_day_data = reverse_geocode_get_data_from_sales_day($sales_day, $distributor_id);
-    $select = array('' => '- Any -');
-    $form['van_pl_group']['#options'] = $select+$sales_day_data;
+    $rrr = reverse_geocode_get_data_from_sales_day($sales_day, $distributor_id);
+    $form['van_pl_group']['#options'] = reverse_geocode_get_data_from_sales_day($sales_day, $distributor_id);
   }
 
   if (!empty($form_state['values']['sales_day']) && !empty($form_state['values']['van_pl_group'])) {
     $sales_day = $form_state['values']['sales_day'];
     $van = $form_state['values']['van_pl_group'];
-    $mixed_data = reverse_geocode_get_data_for_area_group($sales_day, $van, $distributor_id);
-    $select = array('' => '- Any -');
-    $form['area_hook_group']['#options'] = $select + $mixed_data;
+    $form['area_hook_group']['#options'] = reverse_geocode_get_data_for_area_group($sales_day, $van, $distributor_id);
   }
 
-//  if ($type == "area-view") {
-//    $form['dummy'] = array(
-//      "#markup" => '<div class="clearance"></div>',
-//        //'#required' => TRUE,
-//    );
-//    
-//  }
+  if ($type == "area-checkbox") {
   $area_status = array(0 => "Non-Confirmed", 1 => "Confirmed");
   $form['area_status'] = array(
     '#type' => 'select',
@@ -241,6 +227,13 @@ function area_locations_form($form, &$form_state, $type) {
     '#options' => $area_status,
     "#empty_option" => t('- Select -'),
   );
+  }
+  else{
+    $form['dummy'] = array(
+      "#markup" => '<div class="clearance"></div>',
+        //'#required' => TRUE,
+    );
+  }
 
   $form['filter'] = array(
     '#type' => 'submit',
@@ -360,9 +353,11 @@ function area_wise_filter_validate(&$form, &$form_state) {
   $area_hook_group = $form_state['values']['area_hook_group'];
   $area_status = $form_state['values']['area_status'];
   $type = $form_state['type'];
-   $data = "";
+  if ($type == "area-view") {
+    $area_status = 1;
+  } $data = "";
 
-  if (!empty($sales_day)) {
+  if (!empty($sales_day) && !empty($van_pl_group) && !empty($area_hook_group)) {
     $data = reverse_geocode_get_data_area_code_wise($sales_day, $van_pl_group, $area_hook_group, $area_status, $type);
   }
   if (empty($data)) {
@@ -445,6 +440,7 @@ function reverse_geocode_get_data_area_code_wise($sales_day, $van_pl_group, $are
   global $user;
   $user_id = $user->uid;
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
+  
   $query = db_select('node', 'n');
   $query->condition('n.type', 'outlet_master');
   $query->addTag('node_uid');
@@ -463,12 +459,8 @@ function reverse_geocode_get_data_area_code_wise($sales_day, $van_pl_group, $are
     $query->orderBy('hul_long_u.field_hul_updated_long_value', 'asc');
   }
   else {
-    if (!is_null($area_status)) {
-      if ($area_status == '0' || $area_status == '1') {
-        $query->condition('fagh.field_area_hook_group_hul_value', $area_status, '=');
+    $query->condition('fagh.field_area_hook_group_hul_value', 1, '=');
         $query->fields('fagh', array('field_area_hook_group_hul_value'));
-      }
-    }
 
     if ($type == "revised-sequence") {
 
@@ -513,14 +505,13 @@ function reverse_geocode_get_data_area_code_wise($sales_day, $van_pl_group, $are
     $query->join('field_data_field_dva_sales_day', 'sd', 'sd.entity_id = na.nid');
     $query->condition('sd.field_dva_sales_day_value', $sales_day, '=');
   }
-  
-  if (!empty($area_hook_group)) {
+  if (!is_null($area_hook_group)) {
     $query->join('field_data_field_dva_area_hook_group_name', 'agr', 'agr.entity_id = na.nid');
     $query->condition('agr.field_dva_area_hook_group_name_value', $area_hook_group, '=');
   }
   
   $query->join('field_data_field_dva_van_pl_group', 'ppplg', 'na.nid = ppplg.entity_id');
-  if (!empty($van_pl_group)) {
+  if (!is_null($van_pl_group)) {
     $query->condition('ppplg.field_dva_van_pl_group_value', $van_pl_group, '=');
   }
   if ($type == "revised-sequence") {
