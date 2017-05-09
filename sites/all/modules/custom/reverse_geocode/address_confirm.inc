@@ -443,7 +443,7 @@ function area_wise_filters_submit(&$form, &$form_state) {
   $form_state['rebuild'] = TRUE;
 }
 
-function reverse_geocode_get_data_area_code_wise($sales_day, $van_pl_group, $area_hook_group, $area_status, $type) {
+function reverse_geocode_get_data_area_code_wise($sales_day, $van_pl_group, $area_hook_group, $area_status, $type, $original_van) {
   global $user;
   $user_id = $user->uid;
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
@@ -525,10 +525,20 @@ function reverse_geocode_get_data_area_code_wise($sales_day, $van_pl_group, $are
   
   dpm($van_pl_group,"van_pl_group");
 
+  $query->join('field_data_field_dva_van_pl_group', 'ppplg', 'na.nid = ppplg.entity_id');
   if (!is_null($van_pl_group)) {
-    $query->join('field_data_field_dva_van_pl_group', 'ppplg', 'na.nid = ppplg.entity_id');
     $query->condition('ppplg.field_dva_van_pl_group_value', $van_pl_group, '=');
   }
+  if ($type == "revised-sequence") {
+    //VAN PL Group Stop Master
+    $query->join('node', 'nv', 'nv.title = ppplg.field_dva_van_pl_group_value');
+    $query->join('field_data_field_stops_per_van', 'fsv', 'fsv.entity_id = nv.nid');
+    $query->condition('nv.uid', $distributor_id, '=');
+    
+    $query->where("CEIL(fss.field_revised_sequence_status_value/fsv.field_stops_per_van_value)=$original_van");
+  }
+
+
   $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
   return $res;
 }
