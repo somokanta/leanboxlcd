@@ -92,6 +92,7 @@ function revised_sequence_confirm_form($form, &$form_state) {
     '#title' => t('Original Van'),
     // '#default_value' => isset($form_state['values']['sales_day']) ? $form_state['values']['sales_day'] : NULL,
     '#options' => array(),
+    "#empty_option" => t('- Select -'),
   );
 
   if (!empty($form_state['values']['sales_day'])) {
@@ -333,7 +334,7 @@ function reverse_geocode_get_data_for_original_van($sales_day, $van, $area_hook_
   $query->condition('fv.field_dva_van_pl_group_value', $van_pl_group, '=');
 
   //VAN PL Group Stop Master
-  $query->join('node', 'nv', 'nv.title = ppplg.field_dva_van_pl_group_value');
+  $query->join('node', 'nv', 'nv.title = fv.field_dva_van_pl_group_value');
   $query->join('field_data_field_deliveries_per_stop', 'fsv', 'fsv.entity_id = nv.nid');
   $query->condition('nv.uid', $distributor_id, '=');
 
