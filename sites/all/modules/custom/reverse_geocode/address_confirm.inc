@@ -529,7 +529,7 @@ function reverse_geocode_get_data_area_code_wise($sales_day, $van_pl_group, $are
     $query->join('field_data_field_stops_per_van', 'fsv', 'fsv.entity_id = nv.nid');
     $query->condition('nv.uid', $distributor_id, '=');
     
-    $query->where("CEIL(fss.field_revised_sequence_status_value/fsv.field_stops_per_van_value)=$original_van");
+    $query->where("CEIL(fsq.field_revised_sequence_value/fsv.field_stops_per_van_value)=$original_van");
   }
  
 
