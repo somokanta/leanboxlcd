@@ -372,15 +372,14 @@ function reverse_geocode_get_data_area_code_wise_new($sales_day, $van_pl_group, 
   $query->fields('fpn', array('field_party_name_value'));
   $query->fields('fagh', array('field_area_hook_group_hul_value'));
 
-  $query->join('field_data_field_area_hook', 'fa', 'fa.entity_id = n.nid');
-  $query->join('node', 'na', 'na.nid = fa.field_area_hook_nid');
+
   if (!is_null($sales_day)) {
-    $query->join('field_data_field_dva_sales_day', 'sd', 'sd.entity_id = na.nid');
-    $query->condition('sd.field_dva_sales_day_value', $sales_day, '=');
+    $query->join('field_data_field_sales_day', 'sd', 'sd.entity_id = n.nid');
+    $query->condition('sd.field_sales_day_value', $sales_day, '=');
   }
   if (!is_null($area_hook)) {
-    $query->join('field_data_field_outlet_area_hook', 'oah', 'oah.entity_id = na.nid');
-    $query->condition('agr.field_outlet_area_hook_value', $area_hook, '=');
+    $query->join('field_data_field_outlet_area_hook', 'oah', 'oah.entity_id = n.nid');
+    $query->condition('oah.field_outlet_area_hook_value', $area_hook, '=');
   }
 
   if (!is_null($van_pl_group)) {
