@@ -459,7 +459,7 @@ function reverse_geocode_get_data_area_code_wise($sales_day, $van_pl_group, $are
   }
   else {
     if (!is_null($area_status)) {
-      if ($area_status == '0' || $area_status == '1') {
+      if ($area_status === '0' || $area_status === '1') {
         $query->condition('fagh.field_area_hook_group_hul_value', $area_status, '=');
         $query->fields('fagh', array('field_area_hook_group_hul_value'));
       }
