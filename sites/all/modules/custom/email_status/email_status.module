@@ -484,7 +484,7 @@ function send_email_productivity_emailer($todays_date_date, $distributor_name, $
 
 
     if (empty($total_bills) && empty($total_time)) {
-      $party_pack_type_wsie_html .= "<tr><td colspan='4' style='text-align: center;'> There is No Activity for today's Date</td></tr></table>";
+      $party_pack_type_wsie_html .= "<tr><td colspan='5' style='text-align: center;'> There is No Activity for today's Date</td></tr></table>";
     }
     else {
       $non_pp_target = $target_data['NON-PP'];
@@ -601,7 +601,7 @@ function send_email_productivity_emailer($todays_date_date, $distributor_name, $
     }
     $picking_supervisor_wise_html .= "</tr></table>";
     if (empty($all_godown_total_loding_lines) && empty($all_godown_total_timing)) {
-      $picking_godown_wise_html .= "<tr><td colspan='5' style='text-align: center;'> There is No Activity for today's Date</td></tr>";
+      $picking_godown_wise_html .= "<tr><td colspan='6' style='text-align: center;'> There is No Activity for today's Date</td></tr>";
     }
     $picking_godown_wise_html .= "</tr></table>";
   }
