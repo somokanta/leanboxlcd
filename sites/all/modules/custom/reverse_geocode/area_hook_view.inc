@@ -185,6 +185,7 @@ function area_hook_wise_locations_form($form, &$form_state, $type) {
   );
   if (!empty($form_state['values']['sales_day'])) {
     $sales_day = $form_state['values']['sales_day'];
+    dpm(reverse_geocode_get_data_from_sales_day_new($sales_day, $distributor_id));
     $form['van_pl_group']['#options'] = reverse_geocode_get_data_from_sales_day_new($sales_day, $distributor_id);
   }
 
