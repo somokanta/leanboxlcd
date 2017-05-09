@@ -515,10 +515,13 @@ function reverse_geocode_get_data_area_code_wise($sales_day, $van_pl_group, $are
     $query->join('field_data_field_dva_sales_day', 'sd', 'sd.entity_id = na.nid');
     $query->condition('sd.field_dva_sales_day_value', $sales_day, '=');
   }
+  dpm($area_hook_group,"area_hook_group");
   if (!is_null($area_hook_group)) {
     $query->join('field_data_field_dva_area_hook_group_name', 'agr', 'agr.entity_id = na.nid');
     $query->condition('agr.field_dva_area_hook_group_name_value', $area_hook_group, '=');
   }
+  
+  dpm($van_pl_group,"van_pl_group");
 
   if (!is_null($van_pl_group)) {
     $query->join('field_data_field_dva_van_pl_group', 'ppplg', 'na.nid = ppplg.entity_id');
