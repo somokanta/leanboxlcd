@@ -531,7 +531,7 @@ function reverse_geocode_get_data_area_code_wise($sales_day, $van_pl_group, $are
     
     $query->where("CEIL(fss.field_revised_sequence_status_value/fsv.field_stops_per_van_value)=$original_van");
   }
-
+ 
 
   $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
   return $res;
