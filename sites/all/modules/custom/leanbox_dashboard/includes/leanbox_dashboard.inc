@@ -5,6 +5,48 @@
  *  defined in for custom block
  */
 
+
+/**
+ * 
+ * @param array $form
+ * @param array $form_state
+ * @return array
+ */
+function leanbox_dashboard_chart_filter_bill_pendency_form($form, &$form_state) {
+  $form = array();
+  if (arg(1) == 'bill_pendency') {
+    $form['start_date'] = array(
+      '#type' => 'date_popup',
+      '#title' => t('Billing Date From'),
+      '#required' => TRUE,
+      '#date_format' => 'Y-m-d',
+      '#default_value' => date('Y-m-d', strtotime("-1 days")),
+    );
+    $form['end_date'] = array(
+      '#type' => 'date_popup',
+      '#title' => t('Billing Date To'),
+      '#required' => TRUE,
+      '#date_format' => 'Y-m-d',
+      '#default_value' => date('Y-m-d', strtotime("-1 days")),
+    );
+
+    $form['submit'] = array(
+      '#type' => 'submit',
+      '#value' => 'Submit',
+      '#prefix' => '<div id ="bill-pendency-submit">',
+      '#suffix' => '</div>',
+      '#attributes' => array('class' => array('bill-pendency-submit')),
+    );
+  }
+
+  $form['bill_pendency'] = array(
+    '#markup' => '<a href = "/leanbox-chart-details/bill_pendency" target = "_blank"><div id="bill_pendency_div"></div></a>',
+  );
+
+
+  return $form;
+}
+
 /**
  * 
  * @param array $form

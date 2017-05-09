@@ -597,7 +597,7 @@ function send_email_productivity_emailer($todays_date_date, $distributor_name, $
     $all_godown_total_perc = ($all_godown_total_loding_lines / $all_godown_total_timing);
     $all_godown_total_perc = number_format((float) $all_godown_total_perc, 2, '.', '');
     if (empty($all_godown_total_loding_lines) && empty($all_godown_total_timing)) {
-      $picking_supervisor_wise_html .= "<tr><td colspan='5' style='text-align: center;'> There is No Activity for today's Date</td></tr>";
+      $picking_supervisor_wise_html .= "<tr><td colspan='6' style='text-align: center;'> There is No Activity for today's Date</td></tr>";
     }
     $picking_supervisor_wise_html .= "</tr></table>";
     if (empty($all_godown_total_loding_lines) && empty($all_godown_total_timing)) {
