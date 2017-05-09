@@ -158,7 +158,7 @@ function area_locations_form($form, &$form_state, $type) {
   }
   else {
     $header_array = array(
-      'sr_no' => array('data' => 'Sequence No', 'class' => 'sr-cell'),
+      'sr_no' => array('data' => 'Sr No', 'class' => 'sr-cell'),
       'party_code' => array('data' => 'Party Code', 'class' => 'party-code-cell'),
       'party_name' => array('data' => 'Party Name', 'class' => 'party-name-cell'),
       'area_group_status' => array('data' => 'Status', 'class' => 'status-cell'),
@@ -181,6 +181,11 @@ function area_locations_form($form, &$form_state, $type) {
     '#required' => TRUE,
   );
 
+  if ($type == "area-view") {
+    $required = FALSE;
+  }else{
+    $required = TRUE;
+  }
 
   $form['van_pl_group'] = array(
     '#type' => 'select',
@@ -194,7 +199,7 @@ function area_locations_form($form, &$form_state, $type) {
       'callback' => 'sales_day_callback',
       'wrapper' => 'address-selection-map',
     ),
-    '#required' => TRUE,
+    '#required' => $required,
   );
 
 
@@ -205,7 +210,7 @@ function area_locations_form($form, &$form_state, $type) {
 //    '#suffix' => '</div>',
     // '#default_value' => isset($form_state['values']['sales_day']) ? $form_state['values']['sales_day'] : NULL,
     '#options' => array(),
-    '#required' => TRUE,
+    '#required' => $required,
   );
   if (!empty($form_state['values']['sales_day'])) {
     $sales_day = $form_state['values']['sales_day'];
