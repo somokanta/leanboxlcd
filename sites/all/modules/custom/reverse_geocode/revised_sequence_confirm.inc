@@ -78,6 +78,11 @@ function revised_sequence_confirm_form($form, &$form_state) {
 //    '#prefix' => '<div id="address-selection-map">',
 //    '#suffix' => '</div>',
     // '#default_value' => isset($form_state['values']['sales_day']) ? $form_state['values']['sales_day'] : NULL,
+    '#ajax' => array(
+      'event' => 'change',
+      'callback' => 'rev_sales_day_callback',
+      'wrapper' => 'address-selection-map',
+    ),
     '#options' => array(),
     '#required' => TRUE,
   );
