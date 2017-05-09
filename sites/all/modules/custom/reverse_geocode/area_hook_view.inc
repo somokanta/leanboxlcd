@@ -170,7 +170,7 @@ function area_hook_wise_locations_form($form, &$form_state, $type) {
       'callback' => 'sales_day_callback_new',
       'wrapper' => 'address-selection-map',
     ),
-    '#required' => TRUE,
+   
   );
 
 
@@ -181,18 +181,22 @@ function area_hook_wise_locations_form($form, &$form_state, $type) {
 //    '#suffix' => '</div>',
     // '#default_value' => isset($form_state['values']['sales_day']) ? $form_state['values']['sales_day'] : NULL,
     '#options' => array(),
-    '#required' => TRUE,
+    
   );
   if (!empty($form_state['values']['sales_day'])) {
     $sales_day = $form_state['values']['sales_day'];
-    dpm(reverse_geocode_get_data_from_sales_day_new($sales_day, $distributor_id));
-    $form['van_pl_group']['#options'] = reverse_geocode_get_data_from_sales_day_new($sales_day, $distributor_id);
+    $select = array('' => '- Any -');
+    $sales_day_data = reverse_geocode_get_data_from_sales_day_new($sales_day, $distributor_id);;
+    $form['van_pl_group']['#options'] = $select+$sales_day_data;
   }
 
   if (!empty($form_state['values']['sales_day']) && !empty($form_state['values']['van_pl_group'])) {
     $sales_day = $form_state['values']['sales_day'];
     $van = $form_state['values']['van_pl_group'];
-    $form['area_hook']['#options'] = reverse_geocode_get_data_for_area_hook($sales_day, $van, $distributor_id);
+    
+    $mixed_data = reverse_geocode_get_data_for_area_hook($sales_day, $van, $distributor_id);
+    $select = array('' => '- Any -');
+    $form['area_hook']['#options'] = $select+$mixed_data;
   }
 
 
@@ -220,24 +224,6 @@ function area_hook_wise_locations_form($form, &$form_state, $type) {
   }
   $options = $form_state['reverse_geocode']['rows'];
   if ($options) {
-      $form['submit'] = array(
-        '#type' => 'submit',
-        '#value' => t('Confirm Area Hook Gp'),
-        '#submit' => array('update_status_new_submit'),
-        '#ajax' => array(
-          'wrapper' => 'address-selection-map',
-          'callback' => 'area_hook_new_ajax_callback',
-          'method' => 'replace',
-          'effect' => 'fade',
-        ),
-        '#states' => array(
-          'visible' => array(
-            ':input[name^="list_form_items"]' => array('checked' => TRUE),
-          ),
-        ),
-        '#id' => 'area-hook-confirm',
-      );
-   
 
     $multiple = TRUE;
     $class = array('selectable-row', 'table-checkbox');
@@ -255,8 +241,6 @@ function area_hook_wise_locations_form($form, &$form_state, $type) {
   }
   return $form;
 }
-
-
 
 function filter_area_wise_new($form, &$form_state) {
   $commands[] = ajax_command_replace('#address-selection-map', render($form));
@@ -276,15 +260,10 @@ function filter_area_wise_new($form, &$form_state) {
 function area_wise_filter_new_validate(&$form, &$form_state) {
   $sales_day = $form_state['values']['sales_day'];
   $van_pl_group = $form_state['values']['van_pl_group'];
-  $area_hook_group = $form_state['values']['area_hook_group'];
-  $area_status = $form_state['values']['area_status'];
-  $type = $form_state['type'];
-  if ($type == "area-view") {
-    $area_status = 1;
-  } $data = "";
-
-  if (!empty($sales_day) && !empty($van_pl_group) && !empty($area_hook_group)) {
-    $data = reverse_geocode_get_data_area_code_wise_new($sales_day, $van_pl_group, $area_hook_group, $area_status, $type);
+  $area_hook = $form_state['values']['area_hook'];
+  $data = "";
+  if (!empty($sales_day)) {
+    $data = reverse_geocode_get_data_area_code_wise_new($sales_day, $van_pl_group, $area_hook);
   }
   if (empty($data)) {
     $message = "No Results Found";
@@ -301,7 +280,7 @@ function area_hook_wise_filters_submit(&$form, &$form_state) {
   unset($form_state['input']['list_form_items']);
   $sales_day = $form_state['values']['sales_day'];
   $van_pl_group = $form_state['values']['van_pl_group'];
-  $area_hook_group = $form_state['values']['area_hook_group'];
+  $area_hook = $form_state['values']['area_hook'];
   $data = $form_state['values']['area_hook_data'];
   $type = $form_state['type'];
 
@@ -312,10 +291,6 @@ function area_hook_wise_filters_submit(&$form, &$form_state) {
     $party_code = $val['title'];
     $party_name = $val['field_party_name_value'];
     $hul_status = $val['field_area_hook_group_hul_value'];
-
-    if ($type == "area-view") {
-      $sequence = $val['field_sequence_value'];
-    }
 
     $new_city = $val['field_updated_address_sub_administrative_area'];
     $new_district = $val['field_updated_address_premise'];
@@ -341,14 +316,8 @@ function area_hook_wise_filters_submit(&$form, &$form_state) {
     elseif ($hul_status == "1") {
       $hul_status = "Confirmed";
     }
-
-    if ($type == "area-view") {
-      $no = floatval($sequence);
-    }
-    else {
-      $no = $key + 1;
-    }
-
+    $no = $key + 1;
+    
     $options[$party_code] = array(
       'sr_no' => array('data' => $no, 'class' => 'sr-cell'),
       'party_code' => array('data' => $party_code, 'class' => 'party-code-cell'),
@@ -362,7 +331,7 @@ function area_hook_wise_filters_submit(&$form, &$form_state) {
   $form_state['rebuild'] = TRUE;
 }
 
-function reverse_geocode_get_data_area_code_wise_new($sales_day, $van_pl_group, $area_hook_group, $area_status, $type, $original_van) {
+function reverse_geocode_get_data_area_code_wise_new($sales_day, $van_pl_group, $area_hook) {
   global $user;
   $user_id = $user->uid;
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
@@ -370,45 +339,8 @@ function reverse_geocode_get_data_area_code_wise_new($sales_day, $van_pl_group, 
   $query = db_select('node', 'n');
   $query->condition('n.type', 'outlet_master');
   $query->addTag('node_uid');
-
   $query->join('field_data_field_party_name', 'fpn', 'fpn.entity_id = n.nid');
   $query->leftjoin('field_data_field_area_hook_group_hul', 'fagh', 'fagh.entity_id = n.nid');
-  if ($type == "area-checkbox") {
-    if (!is_null($area_status)) {
-      if ($area_status === '0' || $area_status === '1') {
-        $query->condition('fagh.field_area_hook_group_hul_value', $area_status, '=');
-        $query->fields('fagh', array('field_area_hook_group_hul_value'));
-      }
-    }
-
-    $query->orderBy('hul_lat_u.field_hul_updated_lat_value', 'asc');
-    $query->orderBy('hul_long_u.field_hul_updated_long_value', 'asc');
-  }
-  else {
-    $query->condition('fagh.field_area_hook_group_hul_value', 1, '=');
-    $query->fields('fagh', array('field_area_hook_group_hul_value'));
-
-    if ($type == "revised-sequence") {
-
-      $query->leftjoin('field_data_field_revised_sequence_status', 'fss', 'fss.entity_id = n.nid');
-      $query->fields('fss', array('field_revised_sequence_status_value'));
-      $query->join('field_data_field_revised_sequence', 'fsq', 'fsq.entity_id = n.nid');
-      $query->fields('fsq', array('field_revised_sequence_value'));
-      $query->orderBy('fsq.field_revised_sequence_value', 'asc');
-      if (!is_null($area_status)) {
-        if ($area_status === '0' || $area_status === '1') {
-          $query->condition('fss.field_revised_sequence_status_value', $area_status, '=');
-          $query->fields('fss', array('field_revised_sequence_status_value'));
-        }
-      }
-    }
-    else {
-      $query->join('field_data_field_sequence', 'fsq', 'fsq.entity_id = n.nid');
-      $query->fields('fsq', array('field_sequence_value'));
-      $query->orderBy('fsq.field_sequence_value', 'asc');
-    }
-  }
-
   $query->join('field_data_field_hul_code', 'hc', 'hc.entity_id = n.nid');
   $query->join('node', 'hul', 'hc.field_hul_code_value = hul.title');
   $query->fields('hc', array('field_hul_code_value'));
@@ -420,33 +352,36 @@ function reverse_geocode_get_data_area_code_wise_new($sales_day, $van_pl_group, 
   $query->Join('field_data_field_hul_updated_long', 'hul_long_u', 'hul_long_u.entity_id = hul.nid');
   $query->fields('hul_long_u', array('field_hul_updated_long_value'));
   $query->join('field_data_field_updated_address', 'new', 'new.entity_id = hul.nid');
+  $query->orderBy('hul_lat_u.field_hul_updated_lat_value', 'asc');
+  $query->orderBy('hul_long_u.field_hul_updated_long_value', 'asc');
   $query->fields('new');
   $query->fields('n', array('title'));
   $query->fields('fpn', array('field_party_name_value'));
   $query->fields('fagh', array('field_area_hook_group_hul_value'));
 
-  $query->join('field_data_field_area_hook', 'fa', 'fa.entity_id = n.nid');
-  $query->join('node', 'na', 'na.nid = fa.field_area_hook_nid');
+
   if (!is_null($sales_day)) {
-    $query->join('field_data_field_dva_sales_day', 'sd', 'sd.entity_id = na.nid');
-    $query->condition('sd.field_dva_sales_day_value', $sales_day, '=');
+    $query->join('field_data_field_sales_day', 'sd', 'sd.entity_id = n.nid');
+    $query->condition('sd.field_sales_day_value', $sales_day, '=');
   }
-  if (!is_null($area_hook_group)) {
-    $query->join('field_data_field_dva_area_hook_group_name', 'agr', 'agr.entity_id = na.nid');
-    $query->condition('agr.field_dva_area_hook_group_name_value', $area_hook_group, '=');
+  if (!empty($area_hook)) {
+    $query->join('field_data_field_outlet_area_hook', 'oah', 'oah.entity_id = n.nid');
+    $query->condition('oah.field_outlet_area_hook_value', $area_hook, '=');
   }
 
-  $query->join('field_data_field_dva_van_pl_group', 'ppplg', 'na.nid = ppplg.entity_id');
-  if (!is_null($van_pl_group)) {
-    $query->condition('ppplg.field_dva_van_pl_group_value', $van_pl_group, '=');
-  }
-  if ($type == "revised-sequence") {
-    //VAN PL Group Stop Master
-    $query->join('node', 'nv', 'nv.title = ppplg.field_dva_van_pl_group_value');
-    $query->join('field_data_field_stops_per_van', 'fsv', 'fsv.entity_id = nv.nid');
-    $query->condition('nv.uid', $distributor_id, '=');
-
-    $query->where("CEIL(fsq.field_revised_sequence_value/fsv.field_stops_per_van_value)=$original_van");
+  if (!empty($van_pl_group)) {
+    $query->join('field_data_field_channel', 'ch', 'ch.entity_id = n.nid');
+    $query->condition('ch.bundle', 'outlet_master');
+    $query->join('field_data_field_pl_group', 'pl', 'pl.entity_id = n.nid');
+    $query->condition('pl.bundle', 'outlet_master');
+    $query->join('field_data_field_channel', 'ppmch', 'ch.field_channel_value = ppmch.field_channel_value');
+    $query->condition('ppmch.bundle', 'party_pack_master');
+    $query->join('node', 'ppn', 'ppn.nid = ppmch.entity_id');
+    $query->condition('ppn.uid', $distributor_id, '=');
+    $query->join('field_data_field_pl_group', 'ppmpl', 'pl.field_pl_group_value = ppmpl.field_pl_group_value and ppmch.entity_id = ppmpl.entity_id');
+    $query->condition('ppmch.bundle', 'party_pack_master');
+    $query->join('field_data_field_van_pl_group', 'vplgp', 'ppn.nid = vplgp.entity_id');
+    $query->condition('vplgp.field_van_pl_group_value', $van_pl_group, '=');
   }
 
 
