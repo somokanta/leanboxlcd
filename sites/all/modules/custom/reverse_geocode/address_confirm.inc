@@ -466,7 +466,7 @@ dpm("12");
     $query->orderBy('hul_long_u.field_hul_updated_long_value', 'asc');
   }
   else {
-    if (!is_null($area_status)) {
+    if (!isset($area_status)) {
       if ($area_status == '0' || $area_status == '1') {
         $query->condition('fagh.field_area_hook_group_hul_value', $area_status, '=');
         $query->fields('fagh', array('field_area_hook_group_hul_value'));
@@ -520,7 +520,7 @@ dpm("22");
     $query->condition('sd.field_dva_sales_day_value', $sales_day, '=');
   }
   
-  if (!is_null($area_hook_group)) {
+  if (!isset($area_hook_group)) {
     $query->join('field_data_field_dva_area_hook_group_name', 'agr', 'agr.entity_id = na.nid');
     $query->condition('agr.field_dva_area_hook_group_name_value', $area_hook_group, '=');
   }
@@ -528,7 +528,7 @@ dpm("22");
   
 
   $query->join('field_data_field_dva_van_pl_group', 'ppplg', 'na.nid = ppplg.entity_id');
-  if (!is_null($van_pl_group)) {
+  if (!isset($van_pl_group)) {
     $query->condition('ppplg.field_dva_van_pl_group_value', $van_pl_group, '=');
   }
   if ($type == "revised-sequence") {
