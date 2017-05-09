@@ -81,7 +81,16 @@ function revised_sequence_confirm_form($form, &$form_state) {
     '#options' => array(),
     '#required' => TRUE,
   );
+  
+  $form['original_van'] = array(
+    '#type' => 'select',
+    '#title' => t('Original Van'),
+    // '#default_value' => isset($form_state['values']['sales_day']) ? $form_state['values']['sales_day'] : NULL,
+    '#options' => array('1' => '1', '2' => '2'),
+  );
+  
   if (!empty($form_state['values']['sales_day'])) {
+    dpm('11');
     $sales_day = $form_state['values']['sales_day'];
     $rrr = reverse_geocode_get_data_from_sales_day($sales_day, $distributor_id);
     $form['van_pl_group']['#options'] = reverse_geocode_get_data_from_sales_day($sales_day, $distributor_id);
@@ -182,10 +191,11 @@ function rev_seq_wise_filter_validate(&$form, &$form_state) {
   $van_pl_group = $form_state['values']['van_pl_group'];
   $area_hook_group = $form_state['values']['area_hook_group'];
   $area_status = $form_state['values']['rev_seq_status'];
+  $original_van = $form_state['values']['original_van'];
   $data = "";
   $type = "revised-sequence";
   if (!empty($sales_day) && !empty($van_pl_group) && !empty($area_hook_group)) {
-    $data = reverse_geocode_get_data_area_code_wise($sales_day, $van_pl_group, $area_hook_group, $area_status, $type);
+    $data = reverse_geocode_get_data_area_code_wise($sales_day, $van_pl_group, $area_hook_group, $area_status, $type, $original_van);
   }
 
   if (empty($data)) {
