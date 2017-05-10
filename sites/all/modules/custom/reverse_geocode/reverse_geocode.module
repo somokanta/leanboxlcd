@@ -1019,4 +1019,41 @@ function reverse_geocode_node_presave($node) {
       }
     }
   }
+  
+  elseif ($node->type == 'outlet_master') {
+    module_load_include('inc', 'change_feeds_import', 'outlet_area_hook');
+    
+    $original_day = $node->original->field_sales_day[LANGUAGE_NONE][0]['value'];
+    $updated_day = $node->field_sales_day[LANGUAGE_NONE][0]['value'];
+
+    $original_area_hook = $node->original->field_outlet_area_hook[LANGUAGE_NONE][0]['value'];
+    $updated_area_hook = $node->field_outlet_area_hook[LANGUAGE_NONE][0]['value'];
+
+
+    if (!empty($original_area_hook) && !empty($original_day)) {
+
+      if ($original_day !== $updated_day || $original_area_hook !== $updated_area_hook) {
+
+        $channel = $node->field_channel['und'][0]['value'];
+        $pl_group = $node->field_pl_group['und'][0]['value'];
+
+        $query = db_select('node', 'n');
+        $query->addTag('node_uid');
+        $query->join('field_data_field_channel', 'ppmch', 'ppmch.entity_id = n.nid');
+        $query->join('field_data_field_pl_group', 'ppmpl', 'ppmpl.entity_id = n.nid');
+        $query->join('field_data_field_van_pl_group', 'ppplg', 'n.nid = ppplg.entity_id');
+        $query->condition('n.type', 'party_pack_master');
+        $query->condition('ppmch.field_channel_value', $channel);
+        $query->condition('ppmpl.field_pl_group_value', $pl_group);
+        $query->fields('ppplg', array('field_van_pl_group_value'));
+        $van_pl_grp = $query->execute()->fetchField();
+
+        $day_van_area_nid = get_nid_from_master_using_sales_day_van_grp_area_hook($updated_day, $van_pl_grp, $updated_area_hook);
+        
+        if($day_van_area_nid){
+          $node->field_area_hook[LANGUAGE_NONE][0]['nid'] = $day_van_area_nid;
+        }
+      }
+    }
+  }
 }
