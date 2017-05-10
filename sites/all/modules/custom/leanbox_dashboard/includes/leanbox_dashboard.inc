@@ -1013,6 +1013,9 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
         else if ($sales_ret > 1 && $sales_ret < 99) {
           $data['Partial Delivery']['data'] += $sales_ret;
         }
+        else {
+          continue;
+        }
       }
 
       if (!empty($total_bill_value)) {
@@ -1437,6 +1440,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     
     $query = db_select('node', 'n');
     $query->join('field_data_field_sr_bill_date', 'b', 'b.entity_id = n.nid');
+    $query->join('field_data_field_billing_van', 'bva', 'bva.entity_id = n.nid');
     $query->leftjoin('field_data_field_trip_id_reference', 't', 't.entity_id = n.nid');
     $query->condition('n.uid', $distributor_id);
     $query->condition('n.type', 'sales_register_data');
