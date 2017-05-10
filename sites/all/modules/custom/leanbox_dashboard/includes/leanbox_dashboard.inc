@@ -1451,7 +1451,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     $output1 = array();
 
     $pp_table = '';
-    $data[] = array('Group', 'Dispatched', 'Total');
+    $data[] = array('Group', 'Dispatched', 'Non-Dispatched');
     
     $query = db_select('node', 'n');
     $query->join('field_data_field_sr_bill_date', 'b', 'b.entity_id = n.nid');
@@ -1459,7 +1459,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     $query->condition('n.uid', $distributor_id);
     $query->condition('n.type', 'sales_register_data');
     $query->addExpression('COUNT(n.nid)', 'total_count');
-    $query->addExpression('ifnull(COUNT(t.field_trip_id_reference_nid), 0)', 'trip_count');
+    $query->addExpression('ifnull(COUNT(t.field_trip_id_reference_nid), 0)', 'non_trip_count');
     if (!empty($start_date) && !empty($end_date)) {
       $query->condition('b.field_sr_bill_date_value', array($start_date, $end_date), 'BETWEEN');
     }
@@ -1467,8 +1467,9 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
 
     if (!empty($res)) {
       $total_count = $res['total_count'];
-      $dispatched_count = $total_count - $res['trip_count'];
-      $data[] = array('result', (int)$dispatched_count, (int)$total_count);
+      $non_dis_count = $res['non_trip_count'];
+      $dispatched_count = $total_count - $non_dis_count;
+      $data[] = array('result', (int)$dispatched_count, (int)$non_dis_count);
     }
     else {
       $data[] = array('No data found', 0, 0);
