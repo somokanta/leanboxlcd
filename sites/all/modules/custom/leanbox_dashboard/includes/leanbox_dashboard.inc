@@ -983,18 +983,9 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
 // code for delivery
   else if ($activity_type == 'delivery') {
 
-//    $query = db_select('taxonomy_term_data', 't');
-//    $query->join('taxonomy_vocabulary', 'v', 'v.vid = t.vid');
-//    $query->fields('t', array('tid', 'name'));
-//    $query->condition('v.name', 'Delivery Status');
-//    $res1 = $query->execute()->fetchAllKeyed(0, 1);
-
-
     $query = db_select('node', 'n');
     $query->condition('n.type', 'sales_register_data');
     $query->condition('n.uid', $distributor_id);
-  //  $query->leftjoin('field_data_field_delivery_status', 's', 's.entity_id = n.nid');
-  //  $query->fields('s', array('field_delivery_status_tid'));
     $query->join('field_data_field_sr_bill_date', 'i', 'i.entity_id = n.nid');
     if (!empty($start_date) && !empty($end_date)) {
       $query->condition('i.field_sr_bill_date_value', array($start_date, $end_date), 'BETWEEN');
@@ -1013,25 +1004,17 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
       $total_bill_value += $val2['field_bill_value_value'];
     }
     if (!empty($res2)) {
-        foreach ($res2 as $key2 => $val2) {
-//          if (!isset($data[$val1]['data'])) {
-//            $data[$val1]['data'] = 0;
-//          }
+      foreach ($res2 as $key2 => $val2) {
 
-//          if ($key1 == $val2['field_delivery_status_tid']) {
-//            $data[$val1]['data'] += ($val2['field_bill_value_value'] - $val2['field_sales_return_amt_value']);
-//          }
-          $sales_ret = ($val2['field_bill_value_value'] / $val2['field_sales_return_amt_value']) * 100;
-          switch($sales_ret) {
-           
-            case 0-1 : $data['Full Return']['data'] += $sales_ret;
-              break;
-            case 1-99 : $data['Partial Delivery']['data'] += $sales_ret;
-              break;
-          }
+        $sales_ret = ($val2['field_sales_return_amt_value'] / $val2['field_bill_value_value']) * 100;
+        if ($sales_ret <= 1) {
+          $data['Full Return']['data'] += $sales_ret;
         }
-      
-dpm($data, '$data');
+        else if ($sales_ret > 1 && $sales_ret < 99) {
+          $data['Partial Delivery']['data'] += $sales_ret;
+        }
+      }
+
       if (!empty($total_bill_value)) {
         foreach ($data as $key => $val) {
           foreach ($val as $key1 => $val1) {
