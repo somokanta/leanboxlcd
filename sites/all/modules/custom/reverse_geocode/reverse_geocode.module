@@ -44,7 +44,7 @@ function reverse_geocode_menu() {
   );
   
   $items['area-confirm-view'] = array(
-    'title' => 'View Area Hook Group wise Outlets Sequencez',
+    'title' => 'View Area Hook Group wise Original O/Ls Seq',
     'page callback' => 'show_area_locations',
     'access arguments' => array('address confirmation'),
     'type' => MENU_CALLBACK,
