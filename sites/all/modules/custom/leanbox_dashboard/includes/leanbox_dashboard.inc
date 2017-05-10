@@ -630,15 +630,14 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
   }
   else {
     $start = date('Y-m-d'); // dnt change format as date are stored in same format in db
-    $time = strtotime(date('Y-m-d'));
-    $start_date = strtotime(date("Y-m-d", $time));
+    $start_date = strtotime(date("Y-m-d"));
   }
   if (!empty($end)) {
     $end_date = strtotime($end) + 86399;
   }
   else {
     $end = date('Y-m-d');
-    $end_date = strtotime(date('Y-m-d'));
+    $end_date = strtotime(date('Y-m-d')) + 86399;
   }
 
   if ($activity_type == 'party_packing') {
@@ -1445,15 +1444,12 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
   
   if ($activity_type == 'bill_pendency') {
     $output1 = array();
-    $output = 0;
-    $table = '';
 
     $pp_table = '';
-    $output[] = array('Group', 'Dispatched', 'Total');
+    $data[] = array('Group', 'Dispatched', 'Total');
     
     $query = db_select('node', 'n');
     $query->join('field_data_field_sr_bill_date', 'b', 'b.entity_id = n.nid');
-    $query->fields('n', array('nid'));
     $query->leftjoin('field_data_field_trip_id_reference', 't', 't.entity_id = n.nid');
     $query->condition('n.uid', $distributor_id);
     $query->condition('n.type', 'sales_register_data');
@@ -1462,22 +1458,22 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     if (!empty($start_date) && !empty($end_date)) {
       $query->condition('b.field_sr_bill_date_value', array($start_date, $end_date), 'BETWEEN');
     }
-    $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
-   
+    $res = $query->execute()->fetch(PDO::FETCH_ASSOC);
+
     if (!empty($res)) {
       $total_count = $res['total_count'];
       $dispatched_count = $total_count - $res['trip_count'];
-      $output[] = array('result', $dispatched_count, $total_count);
+      $data[] = array('result', (int)$dispatched_count, (int)$total_count);
     }
     else {
-      $output[] = array('No data found', 0, 0);
+      $data[] = array('No data found', 0, 0);
     }
 
     if (arg(1) == 'bill_pendency' || $ajax_type == 'bill_pendency_ajax') {
       $pp_table = get_mtd_data_pl_groupwise($start, $end, $distributor_id);
     }
 
-    $output1['output'] = $output;
+    $output1['output'] = $data;
     $output1['table'] = $pp_table;
     return $output1;
 

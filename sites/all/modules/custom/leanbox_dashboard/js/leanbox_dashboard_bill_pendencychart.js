@@ -11,6 +11,7 @@
 
 			var area_definition = Drupal.settings.leanbox_dashboard.area_definition;
 			var party_pack_data = Drupal.settings.leanbox_dashboard.bill_pendency;
+			console.log(party_pack_data);
 			google.charts.load("current", {packages: ['gauge', 'corechart', 'bar']});
 			google.charts.setOnLoadCallback(function () {
 				drawpartypackingChart(party_pack_data);
@@ -31,8 +32,9 @@
 
 							var area_definition = Drupal.settings.leanbox_dashboard.area_definition;
 							google.charts.setOnLoadCallback(function () {
-								drawpartypackingChart(response);
+								drawpartypackingChart(response.output);
 							});
+							$('#otiftable').html(response.table);
 						},
 					});
 				}
@@ -42,22 +44,18 @@
 			function drawpartypackingChart(party_pack_data) {
 
 				var data = google.visualization.arrayToDataTable(party_pack_data);
-				var formatPercent = new google.visualization.NumberFormat({
-					pattern: '#,##0.0%'
-				});
+//				var formatPercent = new google.visualization.NumberFormat({
+//					pattern: '#,##0.0%'
+//				});
 				var view = new google.visualization.DataView(data);
 				view.setColumns([0,
-					1, {
-						calc: function (dt, row) {
-							return dt.getValue(row, 1) + ' (' + parseFloat(formatPercent.formatValue(dt.getValue(row, 1) / (dt.getValue(row, 1) + dt.getValue(row, 2)))).toFixed(0) + '%)';
-						},
+					1,
+					{calc: "stringify",
 						sourceColumn: 1,
 						type: "string",
-						role: "annotation", },
-					2, {
-						calc: function (dt, row) {
-							return dt.getValue(row, 2) + ' (' + parseFloat(formatPercent.formatValue(dt.getValue(row, 2) / (dt.getValue(row, 1) + dt.getValue(row, 2)))).toFixed(0) + '%)';
-						},
+						role: "annotation"},
+					2,
+					{calc: "stringify",
 						sourceColumn: 2,
 						type: "string",
 						role: "annotation"},
@@ -67,17 +65,16 @@
 					height: area_definition.height,
 					title: '',
 					legend: {position: 'top', maxLines: 3},
-					bar: {groupWidth: '60%'},
+					bar: {groupWidth: '40%'},
 					chartArea: {left: area_definition.ch_left, top: area_definition.ch_top, width: area_definition.ch_width, height: area_definition.ch_height},
 					series: {
 						0: {color: '#f39c12'},
-						1: {color: '#e74c3c'},
-						2: {color: '#27ae60'}
+						1: {color: '#27ae60'},
 					},
-					isStacked: 'percent',
+					isStacked: 'true',
 					vAxis: {
 						minValue: 0,
-						maxValue: 1,
+						maxValue: 7,
 						title: 'Result'
 					},
 					hAxis: {
