@@ -1013,15 +1013,14 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
       $total_bill_value += $val2['field_bill_value_value'];
     }
     if (!empty($res2)) {
-      foreach ($res1 as $key1 => $val1) {
         foreach ($res2 as $key2 => $val2) {
-          if (!isset($data[$val1]['data'])) {
-            $data[$val1]['data'] = 0;
-          }
+//          if (!isset($data[$val1]['data'])) {
+//            $data[$val1]['data'] = 0;
+//          }
 
-          if ($key1 == $val2['field_delivery_status_tid']) {
-            $data[$val1]['data'] += ($val2['field_bill_value_value'] - $val2['field_sales_return_amt_value']);
-          }
+//          if ($key1 == $val2['field_delivery_status_tid']) {
+//            $data[$val1]['data'] += ($val2['field_bill_value_value'] - $val2['field_sales_return_amt_value']);
+//          }
           $sales_ret = ($val2['field_bill_value_value'] / $val2['field_sales_return_amt_value']) * 100;
           switch($sales_ret) {
            
@@ -1031,8 +1030,8 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
               break;
           }
         }
-      }
-
+      
+dpm($data, '$data');
       if (!empty($total_bill_value)) {
         foreach ($data as $key => $val) {
           foreach ($val as $key1 => $val1) {
@@ -1451,7 +1450,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     $output1 = array();
 
     $pp_table = '';
-    $data[] = array('Group', 'Dispatched', 'Non-Dispatched');
+    $data[] = array('Group', 'Non-Dispatched', 'Dispatched');
     
     $query = db_select('node', 'n');
     $query->join('field_data_field_sr_bill_date', 'b', 'b.entity_id = n.nid');
@@ -1469,7 +1468,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
       $total_count = $res['total_count'];
       $non_dis_count = $res['non_trip_count'];
       $dispatched_count = $total_count - $non_dis_count;
-      $data[] = array('result', (int)$dispatched_count, (int)$non_dis_count);
+      $data[] = array('result', (int)$non_dis_count, (int)$dispatched_count);
     }
     else {
       $data[] = array('No data found', 0, 0);
