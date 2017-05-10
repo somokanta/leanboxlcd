@@ -630,15 +630,14 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
   }
   else {
     $start = date('Y-m-d'); // dnt change format as date are stored in same format in db
-    $time = strtotime(date('Y-m-d'));
-    $start_date = strtotime(date("Y-m-d", $time));
+    $start_date = strtotime(date("Y-m-d"));
   }
   if (!empty($end)) {
     $end_date = strtotime($end) + 86399;
   }
   else {
     $end = date('Y-m-d');
-    $end_date = strtotime(date('Y-m-d'));
+    $end_date = strtotime(date('Y-m-d')) + 86399;
   }
 
   if ($activity_type == 'party_packing') {
@@ -1464,7 +1463,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     if (!empty($res)) {
       $total_count = $res['total_count'];
       $dispatched_count = $total_count - $res['trip_count'];
-      $data[] = array('result', $dispatched_count, $total_count);
+      $data[] = array('result', (int)$dispatched_count, (int)$total_count);
     }
     else {
       $data[] = array('No data found', 0, 0);
