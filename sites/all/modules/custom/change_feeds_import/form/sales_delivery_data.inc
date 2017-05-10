@@ -43,7 +43,7 @@ function change_feeds_import_sales_delivery_form_validate($form, &$form_state) {
   ));
 
   $header_array_from_xsd = array(
-    'BILL NUMBER', 'IMPACT DELIVERY DATE', 'SALES DELIVERED AMT', 'PARTIAL/FULL', 'REASON', 'DELIVERY PENDING'
+    'BILL NUMBER', 'IMPACT DELIVERY DATE', 'SALES DELIVERED AMT', 'REASON', 'DELIVERY PENDING'
   );
   if ($file) {
     if ($file = file_move($file, 'public://')) {
@@ -147,18 +147,18 @@ function change_feeds_import_sales_delivery_batch_fix_process($data, $distributo
         $value['error_message'] .= " Bill no " . $value['BILL NUMBER'] . ' Does not exist in our system.';
       }
     }
-    if (isset($value['PARTIAL/FULL'])) {
-      $value['PARTIAL/FULL'] = trim($value['PARTIAL/FULL']);
-      // Check if bill no already created as a node in content type sales_register_data
-      $partial_full_tid = leanbox_check_taxonomy_exists_by_name($value['PARTIAL/FULL'], 'Delivery Status');
-
-      if (empty($partial_full_tid)) {
-        $value['error_message'] .= " PARTIAL/FULL " . $value['PARTIAL/FULL'] . ' Does not exist for ' . $value['BILL NUMBER'] . '.';
-      }
-      else {
-        $value['PARTIAL/FULL'] = $partial_full_tid;
-      }
-    }
+//    if (isset($value['PARTIAL/FULL'])) {
+//      $value['PARTIAL/FULL'] = trim($value['PARTIAL/FULL']);
+//      // Check if bill no already created as a node in content type sales_register_data
+//      $partial_full_tid = leanbox_check_taxonomy_exists_by_name($value['PARTIAL/FULL'], 'Delivery Status');
+//
+//      if (empty($partial_full_tid)) {
+//        $value['error_message'] .= " PARTIAL/FULL " . $value['PARTIAL/FULL'] . ' Does not exist for ' . $value['BILL NUMBER'] . '.';
+//      }
+//      else {
+//        $value['PARTIAL/FULL'] = $partial_full_tid;
+//      }
+//    }
     if (isset($value['REASON'])) {
       $value['REASON'] = trim($value['REASON']);
       // Check if bill no already created as a node in content type sales_register_data
@@ -216,7 +216,7 @@ function change_feeds_import_insert_data_in_custom_sales_delivery_table($value, 
         'bill_no' => $value['BILL NUMBER'],
         'impact_del_date' => $value['IMPACT DELIVERY DATE'],
         'sales_amt' => $value['SALES DELIVERED AMT'],
-        'partial_full' => $value['PARTIAL/FULL'],
+        'partial_full' => '',
         'reason' => $value['REASON'],
         'delivery_pending' => $value['DELIVERY PENDING'],
         'created' => time(),
@@ -347,7 +347,7 @@ function change_feeds_import_sales_delivery_node($sales_data_result, $distributo
           $node = node_load($nid);
           $node->field_impact_delivery_date[LANGUAGE_NONE][0]['value'] = $val['impact_del_date'];
           $node->field_sales_return_amt[LANGUAGE_NONE][0]['value'] = $val['sales_amt'];
-          $node->field_delivery_status[LANGUAGE_NONE][0]['tid'] = $val['partial_full'];
+        //  $node->field_delivery_status[LANGUAGE_NONE][0]['tid'] = $val['partial_full'];
           $node->field_deliver_reason[LANGUAGE_NONE][0]['tid'] = $val['reason'];
           if (empty($val['delivery_pending'])) {
             $node->field_delivery_pending = array();
@@ -356,9 +356,6 @@ function change_feeds_import_sales_delivery_node($sales_data_result, $distributo
             $node->field_delivery_pending[LANGUAGE_NONE][0]['value'] = $val['delivery_pending'];
           }
           node_save($node);
-//          field_attach_update('node', $node);
-//          entity_get_controller('node')->resetCache(array($nid));
-//          taxonomy_node_update($node);
           
           $count++;
         }

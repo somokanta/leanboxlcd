@@ -983,18 +983,18 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
 // code for delivery
   else if ($activity_type == 'delivery') {
 
-    $query = db_select('taxonomy_term_data', 't');
-    $query->join('taxonomy_vocabulary', 'v', 'v.vid = t.vid');
-    $query->fields('t', array('tid', 'name'));
-    $query->condition('v.name', 'Delivery Status');
-    $res1 = $query->execute()->fetchAllKeyed(0, 1);
+//    $query = db_select('taxonomy_term_data', 't');
+//    $query->join('taxonomy_vocabulary', 'v', 'v.vid = t.vid');
+//    $query->fields('t', array('tid', 'name'));
+//    $query->condition('v.name', 'Delivery Status');
+//    $res1 = $query->execute()->fetchAllKeyed(0, 1);
 
 
     $query = db_select('node', 'n');
     $query->condition('n.type', 'sales_register_data');
     $query->condition('n.uid', $distributor_id);
-    $query->leftjoin('field_data_field_delivery_status', 's', 's.entity_id = n.nid');
-    $query->fields('s', array('field_delivery_status_tid'));
+  //  $query->leftjoin('field_data_field_delivery_status', 's', 's.entity_id = n.nid');
+  //  $query->fields('s', array('field_delivery_status_tid'));
     $query->join('field_data_field_sr_bill_date', 'i', 'i.entity_id = n.nid');
     if (!empty($start_date) && !empty($end_date)) {
       $query->condition('i.field_sr_bill_date_value', array($start_date, $end_date), 'BETWEEN');
@@ -1022,14 +1022,19 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
           if ($key1 == $val2['field_delivery_status_tid']) {
             $data[$val1]['data'] += ($val2['field_bill_value_value'] - $val2['field_sales_return_amt_value']);
           }
+          $sales_ret = ($val2['field_bill_value_value'] / $val2['field_sales_return_amt_value']) * 100;
+          switch($sales_ret) {
+           
+            case 0-1 : $data['Full Return']['data'] += $sales_ret;
+              break;
+            case 1-99 : $data['Partial Delivery']['data'] += $sales_ret;
+              break;
+          }
         }
       }
 
       if (!empty($total_bill_value)) {
         foreach ($data as $key => $val) {
-          if ($key == 'Delivered') {
-            continue;
-          }
           foreach ($val as $key1 => $val1) {
             $data1 = (($val1) / $total_bill_value) * 100;
             $output[] = array($key, round($data1, 2));
@@ -1470,7 +1475,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     }
 
     if (arg(1) == 'bill_pendency' || $ajax_type == 'bill_pendency_ajax') {
-      $pp_table = get_mtd_data_pl_groupwise($start, $end, $distributor_id);
+      $pp_table = get_mtd_data_pl_groupwise($start_date, $end_date, $distributor_id);
     }
 
     $output1['output'] = $data;
