@@ -1028,11 +1028,17 @@ function reverse_geocode_node_presave($node) {
 
     $original_area_hook = $node->original->field_outlet_area_hook[LANGUAGE_NONE][0]['value'];
     $updated_area_hook = $node->field_outlet_area_hook[LANGUAGE_NONE][0]['value'];
+    
+    $original_channel = $node->original->field_channel[LANGUAGE_NONE][0]['value'];
+    $updated_channel = $node->field_channel[LANGUAGE_NONE][0]['value'];
+    
+    $original_pl_group = $node->original->field_pl_group[LANGUAGE_NONE][0]['value'];
+    $updated_pl_group = $node->field_pl_group[LANGUAGE_NONE][0]['value'];
 
 
-    if (!empty($original_area_hook) && !empty($original_day)) {
+    if (!empty($original_area_hook) && !empty($original_day) && !empty($original_channel) && !empty($original_pl_group)) {
 
-      if ($original_day !== $updated_day || $original_area_hook !== $updated_area_hook) {
+      if ($original_day !== $updated_day || $original_area_hook !== $updated_area_hook || $original_channel !== $updated_channel || $original_pl_group !== $updated_pl_group) {
 
         $channel = $node->field_channel['und'][0]['value'];
         $pl_group = $node->field_pl_group['und'][0]['value'];
