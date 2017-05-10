@@ -43,9 +43,9 @@
 			function drawpartypackingChart(party_pack_data) {
 
 				var data = google.visualization.arrayToDataTable(party_pack_data);
-				var formatPercent = new google.visualization.NumberFormat({
-					pattern: '#,##0.0%'
-				});
+//				var formatPercent = new google.visualization.NumberFormat({
+//					pattern: '#,##0.0%'
+//				});
 				var view = new google.visualization.DataView(data);
 				view.setColumns([0,
 					1,
@@ -64,17 +64,17 @@
 					height: area_definition.height,
 					title: '',
 					legend: {position: 'top', maxLines: 3},
-					bar: {groupWidth: '60%'},
+					bar: {groupWidth: '40%'},
 					chartArea: {left: area_definition.ch_left, top: area_definition.ch_top, width: area_definition.ch_width, height: area_definition.ch_height},
 					series: {
 						0: {color: '#f39c12'},
 						1: {color: '#e74c3c'},
-						2: {color: '#27ae60'}
+					//	2: {color: '#27ae60'}
 					},
 					isStacked: 'true',
 					vAxis: {
 						minValue: 0,
-						maxValue: 1,
+						maxValue: 7,
 						title: 'Result'
 					},
 					hAxis: {
