@@ -1463,7 +1463,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     if (!empty($res)) {
       $total_count = $res['total_count'];
       $dispatched_count = $total_count - $res['trip_count'];
-      $data[] = array('result', (int)$dispatched_count, (int)$total_count);
+      $data[] = array('result', (string)$dispatched_count, (string)$total_count);
     }
     else {
       $data[] = array('No data found', 0, 0);
