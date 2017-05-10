@@ -32,8 +32,9 @@
 
 							var area_definition = Drupal.settings.leanbox_dashboard.area_definition;
 							google.charts.setOnLoadCallback(function () {
-								drawpartypackingChart(response);
+								drawpartypackingChart(response.output);
 							});
+							$('#otiftable').html(response.table);
 						},
 					});
 				}
