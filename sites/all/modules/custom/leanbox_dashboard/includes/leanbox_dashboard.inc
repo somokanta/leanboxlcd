@@ -1463,7 +1463,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
       $query->condition('b.field_sr_bill_date_value', array($start_date, $end_date), 'BETWEEN');
     }
     $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
-   
+   dpm($res, '$res');
     if (!empty($res)) {
       $total_count = $res['total_count'];
       $dispatched_count = $total_count - $res['trip_count'];
@@ -1479,6 +1479,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
 
     $output1['output'] = $output;
     $output1['table'] = $pp_table;
+    dpm($output1, '$output1');
     return $output1;
 
     
