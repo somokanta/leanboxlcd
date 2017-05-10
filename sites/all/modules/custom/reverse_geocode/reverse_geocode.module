@@ -1021,7 +1021,7 @@ function reverse_geocode_node_presave($node) {
   }
   
   elseif ($node->type == 'outlet_master') {
-    module_load_include('inc', 'change_feeds_import', 'outlet_area_hook');
+    module_load_include('inc', 'change_feeds_import', 'form/outlet_area_hook');
     
     $original_day = $node->original->field_sales_day[LANGUAGE_NONE][0]['value'];
     $updated_day = $node->field_sales_day[LANGUAGE_NONE][0]['value'];
