@@ -1327,8 +1327,11 @@ function change_feeds_import_node_presave($node) {
   if ($node->type == 'egir') {
     $node->field_distributor_uid['und'][0]['value'] = $distributor_id;
   }
-  if (!empty($distributor_id)) {
-    $node->uid = $distributor_id;
+  
+  if ($node->type != 'user_manual') {
+    if (!empty($distributor_id)) {
+      $node->uid = $distributor_id;
+    }
   }
   if (($node->type == 'picking') && ($node->is_new == TRUE)) {
     $node->field_combined_nid['und'][0]['value'] = $node->created;
@@ -1514,6 +1517,8 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
   global $user;
   // Store distributor id in author in each node
   $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+  
+  dpm($query);
   foreach ($query->table_queue as $key => $val) {
     if (($val['table'] == 'node')) {
       if (empty($val['join'])) {
