@@ -1445,8 +1445,6 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
   
   if ($activity_type == 'bill_pendency') {
     $output1 = array();
-    $output = 0;
-    $table = '';
 
     $pp_table = '';
     $output[] = array('Group', 'Dispatched', 'Total');
