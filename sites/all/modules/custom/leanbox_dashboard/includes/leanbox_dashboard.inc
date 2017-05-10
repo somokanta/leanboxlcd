@@ -1453,7 +1453,6 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     
     $query = db_select('node', 'n');
     $query->join('field_data_field_sr_bill_date', 'b', 'b.entity_id = n.nid');
-    $query->fields('n', array('nid'));
     $query->leftjoin('field_data_field_trip_id_reference', 't', 't.entity_id = n.nid');
     $query->condition('n.uid', $distributor_id);
     $query->condition('n.type', 'sales_register_data');
@@ -1462,8 +1461,8 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     if (!empty($start_date) && !empty($end_date)) {
       $query->condition('b.field_sr_bill_date_value', array($start_date, $end_date), 'BETWEEN');
     }
-    $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
-   dpm($res, '$res');
+    $res = $query->execute()->fetch(PDO::FETCH_ASSOC);
+
     if (!empty($res)) {
       $total_count = $res['total_count'];
       $dispatched_count = $total_count - $res['trip_count'];
@@ -1479,7 +1478,6 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
 
     $output1['output'] = $output;
     $output1['table'] = $pp_table;
-    dpm($output1, '$output1');
     return $output1;
 
     
