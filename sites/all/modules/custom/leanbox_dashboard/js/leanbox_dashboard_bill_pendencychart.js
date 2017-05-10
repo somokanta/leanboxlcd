@@ -71,7 +71,7 @@
 						1: {color: '#e74c3c'},
 						2: {color: '#27ae60'}
 					},
-					isStacked: 'stacked',
+					isStacked: 'true',
 					vAxis: {
 						minValue: 0,
 						maxValue: 1,
