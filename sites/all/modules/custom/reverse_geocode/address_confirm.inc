@@ -219,7 +219,7 @@ function area_locations_form($form, &$form_state, $type) {
     $form['area_hook_group']['#options'] = reverse_geocode_get_data_for_area_group($sales_day, $van, $distributor_id);
   }
 
-  if ($type == "area-checkbox") {
+
   $area_status = array(0 => "Non-Confirmed", 1 => "Confirmed");
   $form['area_status'] = array(
     '#type' => 'select',
@@ -227,13 +227,7 @@ function area_locations_form($form, &$form_state, $type) {
     '#options' => $area_status,
     "#empty_option" => t('- Select -'),
   );
-  }
-  else{
-    $form['dummy'] = array(
-      "#markup" => '<div class="clearance"></div>',
-        //'#required' => TRUE,
-    );
-  }
+  
 
   $form['filter'] = array(
     '#type' => 'submit',
@@ -353,9 +347,7 @@ function area_wise_filter_validate(&$form, &$form_state) {
   $area_hook_group = $form_state['values']['area_hook_group'];
   $area_status = $form_state['values']['area_status'];
   $type = $form_state['type'];
-  if ($type == "area-view") {
-    $area_status = 1;
-  } $data = "";
+  $data = "";
 
   if (!empty($sales_day) && !empty($van_pl_group) && !empty($area_hook_group)) {
     $data = reverse_geocode_get_data_area_code_wise($sales_day, $van_pl_group, $area_hook_group, $area_status, $type);
@@ -459,8 +451,13 @@ function reverse_geocode_get_data_area_code_wise($sales_day, $van_pl_group, $are
     $query->orderBy('hul_long_u.field_hul_updated_long_value', 'asc');
   }
   else {
-    $query->condition('fagh.field_area_hook_group_hul_value', 1, '=');
+     if (!is_null($area_status)) {
+      if ($area_status === '0' || $area_status === '1') {
+        $query->condition('fagh.field_area_hook_group_hul_value', $area_status, '=');
         $query->fields('fagh', array('field_area_hook_group_hul_value'));
+      }
+    }
+    
 
     if ($type == "revised-sequence") {
 
