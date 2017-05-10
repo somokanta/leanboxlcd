@@ -77,6 +77,10 @@ function delivery_beat_create_form($form, &$form_state) {
   );
 
   $rows = $form_state['reverse_geocode']['results'];
+  
+  foreach($rows as $key => $value){
+    $rows[$key]['exp'] = substr($value['exp'], 0, 30);
+  }
   if (!empty($rows)) {
     $header = array('nid', 'PARTY_CODE', 'PARTY_NAME', 'Beat Name', 'CHANNEL', 'PL_GROUP', 'Sales Day', 'Pl Van Group', 'Area Hook', 'Area Hook Group', 'Sequence', 'Delivery Beat Code');
     
@@ -134,6 +138,7 @@ function delivery_beat_download_submit($form, &$form_state) {
 
   $csv_rows = $form_state['reverse_geocode']['results'];
   foreach ($csv_rows as $k => $v) {
+    $v['exp'] = substr($v['exp'], 0, 30);
     fputcsv($fp, $v);
   }
   fclose($fp);
