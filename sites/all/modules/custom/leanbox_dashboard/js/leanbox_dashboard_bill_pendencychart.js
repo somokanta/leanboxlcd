@@ -48,17 +48,13 @@
 				});
 				var view = new google.visualization.DataView(data);
 				view.setColumns([0,
-					1, {
-						calc: function (dt, row) {
-							return dt.getValue(row, 1) + ' (' + parseFloat(formatPercent.formatValue(dt.getValue(row, 1) / (dt.getValue(row, 1) + dt.getValue(row, 2)))).toFixed(0) + '%)';
-						},
+					1,
+					{calc: "stringify",
 						sourceColumn: 1,
 						type: "string",
-						role: "annotation", },
-					2, {
-						calc: function (dt, row) {
-							return dt.getValue(row, 2) + ' (' + parseFloat(formatPercent.formatValue(dt.getValue(row, 2) / (dt.getValue(row, 1) + dt.getValue(row, 2)))).toFixed(0) + '%)';
-						},
+						role: "annotation"},
+					2,
+					{calc: "stringify",
 						sourceColumn: 2,
 						type: "string",
 						role: "annotation"},
@@ -75,7 +71,7 @@
 						1: {color: '#e74c3c'},
 						2: {color: '#27ae60'}
 					},
-					isStacked: 'percent',
+					isStacked: 'stacked',
 					vAxis: {
 						minValue: 0,
 						maxValue: 1,
