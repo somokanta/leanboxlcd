@@ -1005,6 +1005,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     }
     if (!empty($res2)) {
       foreach ($res2 as $key2 => $val2) {
+        if (!empty($val2['field_sales_return_amt_value'])) {
 
         $sales_ret = (( $val2['field_bill_value_value'] - $val2['field_sales_return_amt_value']) / $val2['field_bill_value_value']) * 100;
         if ($sales_ret >= 99) {
@@ -1015,6 +1016,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
         }
         else {
           continue;
+        }
         }
       }
 
