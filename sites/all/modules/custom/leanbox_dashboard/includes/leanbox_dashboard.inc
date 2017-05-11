@@ -1020,7 +1020,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
         }
       }
 
-      if (!empty($total_bill_value)) {
+      if (!empty($total_bill_value) && !empty($data)) {
         foreach ($data as $key => $val) {
           foreach ($val as $key1 => $val1) {
             $data1 = (($val1) / $total_bill_value) * 100;
