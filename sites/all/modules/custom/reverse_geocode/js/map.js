@@ -64,6 +64,7 @@
         
         marker.on('dragend', function(event) {
             var marker = event.target;
+            marker.closePopup();
             marker.unbindPopup();
             
         });
@@ -168,34 +169,47 @@
 
         searchBox.addListener('places_changed', function() {
             
-            console.log(searchBox);
-            console.log(input.value);
-            var places = searchBox.getPlaces();
-            if (places.length == 0) {
-                return;
+            var searchtext = input.value.trim();
+
+            if (/^(\-?\d+(\.\d+)?),\s*(\-?\d+(\.\d+)?)$/.test(searchtext)) {
+                var latlong = searchtext.split(',');
+                var lat = latlong[0].trim();
+                var long = latlong[1].trim();
+                
+                updateMarker([lat, long]);
+
             }
+            else {
+                var places = searchBox.getPlaces();
+                if (places.length == 0) {
+                    return;
+                }
 
-            var group = L.featureGroup();
+                var group = L.featureGroup();
 
-            places.forEach(function(place) {
+                places.forEach(function(place) {
 
-                // Create a marker for each place.
-                console.log(places);
-                console.log(place.geometry.location.lat() + " / " + place.geometry.location.lng());
+                    // Create a marker for each place.
+                    console.log(places);
+                    console.log(place.geometry.location.lat() + " / " + place.geometry.location.lng());
 //                    var marker = L.marker([
 //                        place.geometry.location.lat(),
 //                        place.geometry.location.lng()
 //                    ]);
 //                    group.addLayer(marker);
 
-                updateMarker([
-                    place.geometry.location.lat(),
-                    place.geometry.location.lng()
-                ]);
-            });
+                    updateMarker([
+                        place.geometry.location.lat(),
+                        place.geometry.location.lng()
+                    ]);
+                });
 
-            //group.addTo(map);
-            //map.fitBounds(group.getBounds());
+                //group.addTo(map);
+                //map.fitBounds(group.getBounds()); 
+            }
+
+
+
 
         });
         
