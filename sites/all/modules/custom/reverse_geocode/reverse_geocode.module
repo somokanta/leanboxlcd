@@ -950,10 +950,6 @@ function reverse_geocode_node_presave($node) {
     $new_hul_lat = $node->field_hul_lat['und'][0]['value'];
     $new_hul_long = $node->field_hul_long['und'][0]['value'];
 
-    dpm($og_hul_lat, "og_hul_lat");
-    dpm($og_hul_long, "og_hul_long");
-    dpm($new_hul_lat, "new_hul_lat");
-    dpm($new_hul_long, "new_hul_long");
     if ($node->is_new) {
       $node->field_hul_status['und'][0]['value'] = 0;
     }
@@ -965,17 +961,12 @@ function reverse_geocode_node_presave($node) {
     }
 
     if (!empty($og_hul_lat) && !empty($og_hul_long)) {
-      dpm("1111");
       if (($new_hul_lat != $og_hul_lat) || ($new_hul_long != $og_hul_long)) {
-        dpm("2222");
         $street = $node->field_original_address['und'][0]['sub_premise'];
         $locality = $node->field_original_address['und'][0]['locality'];
         $sublocality = $node->field_original_address['und'][0]['dependent_locality'];
         $poi = $node->field_original_address['und'][0]['data'];
 
-        dpm($street, "street");
-        dpm($locality, "locality");
-        dpm($sublocality, "sublocality");
 
         if (!empty($street) || !empty($locality) || !empty($sublocality) || !empty($poi)) {
           $result = reverse_geocode_results($new_hul_lat, $new_hul_long);
