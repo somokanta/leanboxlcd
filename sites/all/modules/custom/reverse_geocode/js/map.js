@@ -169,7 +169,7 @@
         searchBox.addListener('places_changed', function() {
             
             console.log(searchBox);
-            console.log(searchBox.value);
+            console.log(input.value);
             var places = searchBox.getPlaces();
             if (places.length == 0) {
                 return;
