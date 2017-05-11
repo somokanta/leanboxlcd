@@ -1009,10 +1009,10 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
 
         $sales_ret = (( $val2['field_bill_value_value'] - $val2['field_sales_return_amt_value']) / $val2['field_bill_value_value']) * 100;
         if ($sales_ret >= 99) {
-          $data['Full Return']['data'] += $sales_ret;
+          $data['Full Return']['data'] += $val2['field_bill_value_value'] - $val2['field_sales_return_amt_value'];
         }
         else if ($sales_ret > 1 && $sales_ret < 99) {
-          $data['Partial Delivery']['data'] += $sales_ret;
+          $data['Partial Delivery']['data'] += $val2['field_bill_value_value'] - $val2['field_sales_return_amt_value'];
         }
         else {
           continue;
