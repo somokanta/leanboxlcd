@@ -33,6 +33,7 @@
             zoom = zoom || 17;
             
             marker.setLatLng(position);
+            marker.closePopup();
             marker.unbindPopup();
             
             var latLngs = [marker.getLatLng()];
