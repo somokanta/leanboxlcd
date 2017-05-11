@@ -30,8 +30,8 @@ function leanbox_dashboard_menu() {
     'weight' => 0,
     'access arguments' => array('Distributor Upload File'),
   );
-  
-  $d = 0;
+
+  $d = 1;
   foreach ($categories as $k => $v) {
     $items['dashboard/' . $k] = array(
       'title' => $v,
@@ -40,7 +40,7 @@ function leanbox_dashboard_menu() {
       'weight' => $d++,
     );
   }
-  
+
   // Upload form for sales register data
   $items['area-hook-group/import'] = array(
     'title' => 'Area Hook Group',
@@ -145,6 +145,9 @@ function party_packing_filter_callback() {
     else if ($activity_type == 'picking_productivity') {
       $ajax_type = 'picking_ajax';
     }
+    else if ($activity_type == 'bill_pendency') {
+      $ajax_type = 'bill_pendency_ajax';
+    }
 
     $output_data = leanbox_dashboard_chart_query_details($activity_type, $start_date, $end_date, $ajax_type);
   }
@@ -215,6 +218,10 @@ function leanbox_dashboard_block_info() {
     'info' => t('Outlet Status'),
     'cache' => DRUPAL_NO_CACHE,
   );
+  $blocks['bill_pendency'] = array(
+    'info' => t('Bill Pendency'),
+    'cache' => DRUPAL_NO_CACHE,
+  );
   return $blocks;
 }
 
@@ -248,7 +255,7 @@ function leanbox_dashboard_block_view($delta = '') {
       }
 
       $loading_date = date('d-m-Y');
-      $block['subject'] = "Party Packing Progress ($loading_date Loading)";
+      $block['subject'] = "Party Packing Van Progress ($loading_date Loading)";
       $data = leanbox_dashboard_chart_query_details('party_packing');
       $filter_form = drupal_render(drupal_get_form('leanbox_dashboard_chart_filter_partypack_form'));
       $block['content'] = array(
@@ -282,7 +289,7 @@ function leanbox_dashboard_block_view($delta = '') {
         );
       }
       $loading_date = date('d-m-Y');
-      $block['subject'] = "Picking Progress Loose ($loading_date Loading)";
+      $block['subject'] = "Picking Progress Task Loose ($loading_date Loading)";
       $data = leanbox_dashboard_chart_query_details('picking');
 
       $filter_form = drupal_render(drupal_get_form('leanbox_dashboard_chart_filter_picking_form'));
@@ -317,7 +324,7 @@ function leanbox_dashboard_block_view($delta = '') {
         );
       }
       $loading_date = date('d-m-Y');
-      $block['subject'] = "Picking Progress Bulk ($loading_date Loading)";
+      $block['subject'] = "Picking Progress Task Bulk ($loading_date Loading)";
       $data = leanbox_dashboard_chart_query_details('picking_bulk');
 
       $filter_form = drupal_render(drupal_get_form('leanbox_dashboard_chart_filter_picking_bulk_form'));
@@ -480,6 +487,41 @@ function leanbox_dashboard_block_view($delta = '') {
       );
       break;
 
+    case 'bill_pendency':
+
+      if (arg(1) == 'bill_pendency') {
+        $area_definition = array(
+          'width' => 700,
+          'height' => 400,
+          'ch_left' => 80,
+          'ch_top' => 50,
+          'ch_width' => 500,
+          'ch_height' => 250,
+        );
+      }
+
+      $loading_date = date('d-m-Y', strtotime("-1 days"));
+      $block['subject'] = "Bill Pendency ($loading_date Billing)";
+      $data = leanbox_dashboard_chart_query_details('bill_pendency');
+      $filter_form = drupal_render(drupal_get_form('leanbox_dashboard_chart_filter_bill_pendency_form'));
+      $block['content'] = array(
+        '#markup' => theme('leanbox_dashboard', array('data' => $filter_form, 'otif_table' => $data['table'])),
+        '#attached' => array(
+          'js' => array(
+            array(
+              'type' => 'external',
+              'data' => 'https://www.gstatic.com/charts/loader.js'
+            ),
+            drupal_get_path('module', 'leanbox_dashboard') . '/js/leanbox_dashboard_bill_pendencychart.js',
+            array(
+              'data' => array('leanbox_dashboard' => array('bill_pendency' => $data['output'], 'area_definition' => $area_definition)),
+              'type' => 'setting'
+            ),
+          ),
+        ),
+      );
+      break;
+
     case 'otif':
 
       $bill_date = leanbox_dashboard_get_default_pdd_date_for_chart();
@@ -626,7 +668,7 @@ function leanbox_dashboard_block_view($delta = '') {
       }
 
       $loading_date = date('d-m-Y');
-      $block['subject'] = "Picking On Time Adherence ($loading_date Dispatch)";
+      $block['subject'] = "Picking On Time Adherence VAN Loose ($loading_date Loading)";
       $data = leanbox_dashboard_chart_query_details('picking_ota');
       $filter_form = drupal_render(drupal_get_form('leanbox_dashboard_chart_filter_picking_ota_form'));
       $block['content'] = array(
@@ -661,7 +703,7 @@ function leanbox_dashboard_block_view($delta = '') {
       }
 
       $loading_date = date('d-m-Y');
-      $block['subject'] = "Unloading On Time Adherence ($loading_date Egir)";
+      $block['subject'] = "Unloading On Time Adherence ($loading_date EGIR)";
       $data = leanbox_dashboard_chart_query_details('unloading_ota');
       $filter_form = drupal_render(drupal_get_form('leanbox_dashboard_chart_filter_unloading_ota_form'));
       $block['content'] = array(
@@ -724,7 +766,7 @@ function leanbox_dashboard_block_view($delta = '') {
       $data = leanbox_dashboard_chart_query_details('outlet_status');
       $block['content'] = array(
         '#markup' => theme('leanbox_dashboard', array('data' => $data)),
-        );
+      );
       break;
   }
 

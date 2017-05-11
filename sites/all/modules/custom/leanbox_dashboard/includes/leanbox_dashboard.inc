@@ -5,6 +5,48 @@
  *  defined in for custom block
  */
 
+
+/**
+ * 
+ * @param array $form
+ * @param array $form_state
+ * @return array
+ */
+function leanbox_dashboard_chart_filter_bill_pendency_form($form, &$form_state) {
+  $form = array();
+  if (arg(1) == 'bill_pendency') {
+    $form['start_date'] = array(
+      '#type' => 'date_popup',
+      '#title' => t('Billing Date From'),
+      '#required' => TRUE,
+      '#date_format' => 'Y-m-d',
+      '#default_value' => date('Y-m-d', strtotime("-1 days")),
+    );
+    $form['end_date'] = array(
+      '#type' => 'date_popup',
+      '#title' => t('Billing Date To'),
+      '#required' => TRUE,
+      '#date_format' => 'Y-m-d',
+      '#default_value' => date('Y-m-d', strtotime("-1 days")),
+    );
+
+    $form['submit'] = array(
+      '#type' => 'submit',
+      '#value' => 'Submit',
+      '#prefix' => '<div id ="bill-pendency-submit">',
+      '#suffix' => '</div>',
+      '#attributes' => array('class' => array('bill-pendency-submit')),
+    );
+  }
+
+  $form['bill_pendency'] = array(
+    '#markup' => '<a href = "/leanbox-chart-details/bill_pendency" target = "_blank"><div id="bill_pendency_div"></div></a>',
+  );
+
+
+  return $form;
+}
+
 /**
  * 
  * @param array $form
@@ -588,15 +630,14 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
   }
   else {
     $start = date('Y-m-d'); // dnt change format as date are stored in same format in db
-    $time = strtotime(date('Y-m-d'));
-    $start_date = strtotime(date("Y-m-d", $time));
+    $start_date = strtotime(date("Y-m-d"));
   }
   if (!empty($end)) {
     $end_date = strtotime($end) + 86399;
   }
   else {
     $end = date('Y-m-d');
-    $end_date = strtotime(date('Y-m-d'));
+    $end_date = strtotime(date('Y-m-d')) + 86399;
   }
 
   if ($activity_type == 'party_packing') {
@@ -942,18 +983,9 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
 // code for delivery
   else if ($activity_type == 'delivery') {
 
-    $query = db_select('taxonomy_term_data', 't');
-    $query->join('taxonomy_vocabulary', 'v', 'v.vid = t.vid');
-    $query->fields('t', array('tid', 'name'));
-    $query->condition('v.name', 'Delivery Status');
-    $res1 = $query->execute()->fetchAllKeyed(0, 1);
-
-
     $query = db_select('node', 'n');
     $query->condition('n.type', 'sales_register_data');
     $query->condition('n.uid', $distributor_id);
-    $query->leftjoin('field_data_field_delivery_status', 's', 's.entity_id = n.nid');
-    $query->fields('s', array('field_delivery_status_tid'));
     $query->join('field_data_field_sr_bill_date', 'i', 'i.entity_id = n.nid');
     if (!empty($start_date) && !empty($end_date)) {
       $query->condition('i.field_sr_bill_date_value', array($start_date, $end_date), 'BETWEEN');
@@ -972,23 +1004,22 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
       $total_bill_value += $val2['field_bill_value_value'];
     }
     if (!empty($res2)) {
-      foreach ($res1 as $key1 => $val1) {
-        foreach ($res2 as $key2 => $val2) {
-          if (!isset($data[$val1]['data'])) {
-            $data[$val1]['data'] = 0;
-          }
+      foreach ($res2 as $key2 => $val2) {
 
-          if ($key1 == $val2['field_delivery_status_tid']) {
-            $data[$val1]['data'] += ($val2['field_bill_value_value'] - $val2['field_sales_return_amt_value']);
-          }
+        $sales_ret = (( $val2['field_bill_value_value'] - $val2['field_sales_return_amt_value']) / $val2['field_bill_value_value']) * 100;
+        if ($sales_ret <= 1) {
+          $data['Full Return']['data'] += $sales_ret;
+        }
+        else if ($sales_ret > 1 && $sales_ret < 99) {
+          $data['Partial Delivery']['data'] += $sales_ret;
+        }
+        else {
+          continue;
         }
       }
 
       if (!empty($total_bill_value)) {
         foreach ($data as $key => $val) {
-          if ($key == 'Delivered') {
-            continue;
-          }
           foreach ($val as $key1 => $val1) {
             $data1 = (($val1) / $total_bill_value) * 100;
             $output[] = array($key, round($data1, 2));
@@ -1398,6 +1429,47 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     
     $output = theme('table', array('header' => $header, 'rows' => $rows));
     return $output;
+  }
+  
+  
+  if ($activity_type == 'bill_pendency') {
+    $output1 = array();
+
+    $pp_table = '';
+    $data[] = array('Group', 'Non-Dispatched', 'Dispatched');
+    
+    $query = db_select('node', 'n');
+    $query->join('field_data_field_sr_bill_date', 'b', 'b.entity_id = n.nid');
+    $query->join('field_data_field_billing_van', 'bva', 'bva.entity_id = n.nid');
+    $query->leftjoin('field_data_field_trip_id_reference', 't', 't.entity_id = n.nid');
+    $query->condition('n.uid', $distributor_id);
+    $query->condition('n.type', 'sales_register_data');
+    $query->addExpression('COUNT(n.nid)', 'total_count');
+    $query->addExpression('ifnull(COUNT(t.field_trip_id_reference_nid), 0)', 'non_trip_count');
+    if (!empty($start_date) && !empty($end_date)) {
+      $query->condition('b.field_sr_bill_date_value', array($start_date, $end_date), 'BETWEEN');
+    }
+    $res = $query->execute()->fetch(PDO::FETCH_ASSOC);
+
+    if (!empty($res)) {
+      $total_count = $res['total_count'];
+      $non_dis_count = $res['non_trip_count'];
+      $dispatched_count = $total_count - $non_dis_count;
+      $data[] = array('result', (int)$non_dis_count, (int)$dispatched_count);
+    }
+    else {
+      $data[] = array('No data found', 0, 0);
+    }
+
+    if (arg(1) == 'bill_pendency' || $ajax_type == 'bill_pendency_ajax') {
+      $pp_table = get_mtd_data_pl_groupwise($start_date, $end_date, $distributor_id);
+    }
+
+    $output1['output'] = $data;
+    $output1['table'] = $pp_table;
+    return $output1;
+
+    
   }
 }
 

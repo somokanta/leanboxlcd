@@ -376,6 +376,7 @@ function send_email_pl_group_emailer($distributor_name) {
 }
 
 function send_email_productivity_emailer($todays_date_date, $distributor_name, $end_date = FALSE, $chart = FALSE, $type = '') {
+ $target_data = leanbox_dashboard_target_value_using_voc_name('productivity target');
 
   if (( $chart == TRUE && $type == 'party_packing' ) || ( $chart == FALSE )) {
     $party_packing = get_productivity_data_for_party_packing($todays_date_date, $end_date);
@@ -429,6 +430,12 @@ function send_email_productivity_emailer($todays_date_date, $distributor_name, $
             else {
               $party_pack_superwise_html .="<td><table class = 'pp-count'><td><tr>$percentage</tr></td></table></td><tr></tr><td></td>";
             }
+               
+            $label = $ke . ' ' . $k;
+            $label_key = strtolower($label);
+            $picking_godown_wise_html .="<td><table class = 'pp-count'><td><tr> $target_data[$label_key]</tr></td></table></td><tr></tr><td></td>";
+            
+            
             $total_timing += $time;
             $total_bill_lines += $bill_lines;
           }
@@ -472,15 +479,21 @@ function send_email_productivity_emailer($todays_date_date, $distributor_name, $
         . "<th>Party Packing Type</th>"
         . "<th>Sum - Bill Line</th>"
         . "<th>Sum - Total Time</th>"
-        . "<th>Productivity</th>";
+        . "<th>Productivity</th>"
+        . "<th>Target</th>";
 
 
     if (empty($total_bills) && empty($total_time)) {
-      $party_pack_type_wsie_html .= "<tr><td colspan='4' style='text-align: center;'> There is No Activity for today's Date</td></tr></table>";
+      $party_pack_type_wsie_html .= "<tr><td colspan='5' style='text-align: center;'> There is No Activity for today's Date</td></tr></table>";
     }
     else {
-      $party_pack_type_wsie_html .= "<tr><td>Non-PP</td><td>$total_non_bill</td><td>$total_non_time</td><td>$total_non_perc</td></tr>"
-          . "<tr><td>PP</td><td>$total_pp_bill</td><td>$total_pp_time</td><td>$total_pp_perc</td></tr></table>";
+      $non_pp_target = $target_data['NON-PP'];
+      $pp_target = $target_data['PP'];
+
+      $party_pack_type_wsie_html .= "<tr><td>Non-PP</td><td>$total_non_bill</td><td>$total_non_time</td><td>$total_non_perc</td><td>$non_pp_target</td></tr>"
+          . "<tr><td>PP</td><td>$total_pp_bill</td><td>$total_pp_time</td><td>$total_pp_perc</td>"
+          . "<td>$pp_target</td>"
+          . "</tr></table>";
     }
   }
   
@@ -501,8 +514,10 @@ function send_email_productivity_emailer($todays_date_date, $distributor_name, $
         . "<th>Picking Type</th>"
         . "<th>Sum - Loading Sheet Line</th>"
         . "<th>Sum - Time Duration</th>"
-        . "<th>Productivity</th>";
-
+        . "<th>Productivity</th>"
+        . "<th>Target</th>";
+    
+     
     foreach ($picking as $key => $value) {
 
       if ($key == "godown") {
@@ -520,12 +535,17 @@ function send_email_productivity_emailer($todays_date_date, $distributor_name, $
             $picking_godown_wise_html .="<td><table class = 'pp-sp'><td><tr>$k</tr></td></table></td>";
             $picking_godown_wise_html .="<td><table class = 'pp-bill'><td><tr>$loding_lines</tr></td></table></td>";
             $picking_godown_wise_html .="<td><table class = 'pp-time'><td><tr>$timing</tr></td></table></td>";
-            if ($godown_counter == $godown_count) {
-              $picking_godown_wise_html .="<td><table class = 'pp-count'><td><tr>$percentage</tr></td></table></td>";
+            $picking_godown_wise_html .="<td><table class = 'pp-count'><td><tr>$percentage</tr></td></table></td>";
+            
+            $label = $ke . ' ' . $k;
+            $label_key = strtolower($label);
+             if ($godown_counter == $godown_count) {
+              $picking_godown_wise_html .="<td><table class = 'pp-target'><td><tr>$target_data[$label_key]</tr></td></table></td>";
             }
             else {
-              $picking_godown_wise_html .="<td><table class = 'pp-count'><td><tr>$percentage</tr></td></table></td><tr></tr><td></td>";
+              $picking_godown_wise_html .="<td><table class = 'pp-target'><td><tr>$target_data[$label_key]</tr></td></table></td><tr></tr><td></td>";
             }
+            
             $total_timing += $timing;
             $total_loding_lines += $loding_lines;
             $all_godown_total_timing += $timing;
@@ -577,11 +597,11 @@ function send_email_productivity_emailer($todays_date_date, $distributor_name, $
     $all_godown_total_perc = ($all_godown_total_loding_lines / $all_godown_total_timing);
     $all_godown_total_perc = number_format((float) $all_godown_total_perc, 2, '.', '');
     if (empty($all_godown_total_loding_lines) && empty($all_godown_total_timing)) {
-      $picking_supervisor_wise_html .= "<tr><td colspan='5' style='text-align: center;'> There is No Activity for today's Date</td></tr>";
+      $picking_supervisor_wise_html .= "<tr><td colspan='6' style='text-align: center;'> There is No Activity for today's Date</td></tr>";
     }
     $picking_supervisor_wise_html .= "</tr></table>";
     if (empty($all_godown_total_loding_lines) && empty($all_godown_total_timing)) {
-      $picking_godown_wise_html .= "<tr><td colspan='5' style='text-align: center;'> There is No Activity for today's Date</td></tr>";
+      $picking_godown_wise_html .= "<tr><td colspan='6' style='text-align: center;'> There is No Activity for today's Date</td></tr>";
     }
     $picking_godown_wise_html .= "</tr></table>";
   }
@@ -1092,10 +1112,10 @@ function get_common_data_for_chhanel_datewise($start_date, $end_date, $distribut
   return $output;
 }
 
-function get_common_data_for_pl_group_datewise($start_date, $end_date, $distributor_id) {
+function get_common_data_for_pl_group_datewise($start_date, $end_date, $distributor_id = 60) {
   $query = db_select('node', 'n');
   $query->condition('n.type', 'sales_register_data');
-  $query->condition('n.uid', 60, '=');
+  $query->condition('n.uid', $distributor_id, '=');
   $query->join('field_data_field_billing_van', 'bva', 'bva.entity_id = n.nid');
   $query->join('field_data_field_sr_bill_date', 'bd', 'bd.entity_id = n.nid');
   $query->condition('bd.field_sr_bill_date_value', array($start_date, $end_date), 'BETWEEN');
@@ -1103,7 +1123,7 @@ function get_common_data_for_pl_group_datewise($start_date, $end_date, $distribu
   $query->join('field_data_field_sales_party_code', 'pc', 'pc.entity_id = n.nid');
   $query->join('node', 'oun', 'pc.field_sales_party_code_value = oun.title');
   $query->condition('oun.type', 'outlet_master');
-  $query->condition('oun.uid', 60, '=');
+  $query->condition('oun.uid', $distributor_id, '=');
   $query->join('field_data_field_pl_group', 'plg', 'plg.entity_id = oun.nid');
   $query->groupBy('field_pl_group_value');
   $query->leftjoin('field_data_field_trip_id_reference', 'ti', 'ti.entity_id = n.nid');
