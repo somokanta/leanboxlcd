@@ -12,7 +12,7 @@ function reverse_geocode_menu() {
     'access callback' => TRUE,
     'type' => MENU_NORMAL_ITEM,
   );
-  
+
   $items['address/confirm'] = array(
     'title' => 'Address Confirmation',
     'type' => MENU_NORMAL_ITEM,
@@ -42,7 +42,7 @@ function reverse_geocode_menu() {
     'type' => MENU_CALLBACK,
     'file' => 'address_confirm.inc'
   );
-  
+
   $items['area-confirm-view'] = array(
     'title' => 'View Area Hook Group wise Original O/Ls Seq',
     'page callback' => 'show_area_locations',
@@ -50,8 +50,8 @@ function reverse_geocode_menu() {
     'type' => MENU_CALLBACK,
     'file' => 'address_confirm.inc'
   );
-  
-   
+
+
   $items['area-hook-confirm-view'] = array(
     'title' => 'Area Hook Group Wise Outlets',
     'page callback' => 'show_area_hook_wise_locations',
@@ -59,7 +59,7 @@ function reverse_geocode_menu() {
     'type' => MENU_CALLBACK,
     'file' => 'area_hook_view.inc'
   );
-  
+
   $items['incremental-outlet'] = array(
     'title' => 'Incremental Outlet Addition',
     'page callback' => 'drupal_get_form',
@@ -68,7 +68,7 @@ function reverse_geocode_menu() {
     'type' => MENU_CALLBACK,
     'file' => 'outlet_addition.inc'
   );
-  
+
   $items['revised-sequence-confirm'] = array(
     'title' => 'Revised Sequence Confirm',
     'page callback' => 'outlet_addition',
@@ -97,7 +97,7 @@ function reverse_geocode_menu() {
     'page arguments' => array('reverse_geocode_map_configuration'),
     'access arguments' => array('administer map settings'),
   );
-  
+
   $items['delivery-beat'] = array(
     'title' => 'Create Static delivery beats',
     'page callback' => 'drupal_get_form',
@@ -105,7 +105,7 @@ function reverse_geocode_menu() {
     'access arguments' => array('address confirmation'),
     'file' => 'delivery_beat_form.inc'
   );
-  
+
   return $items;
 }
 
@@ -238,7 +238,7 @@ function show_locations() {
   drupal_add_js("https://maps.googleapis.com/maps/api/js?key=$google_key&libraries=places", 'external');
   drupal_add_js(drupal_get_path('module', 'reverse_geocode') . '/js/selectable-row.js', 'file');
   drupal_add_js(drupal_get_path('module', 'reverse_geocode') . '/js/leaflet.smoothmarkerbouncing.js', 'file');
-  
+
   drupal_add_js(drupal_get_path('module', 'reverse_geocode') . '/js/tooltipster.bundle.min.js', 'file');
   drupal_add_css(drupal_get_path('module', 'reverse_geocode') . '/css/tooltipster.bundle.min.css', 'file');
 
@@ -330,14 +330,14 @@ function hul_code_form($form, &$form_state, $type) {
   $form['#suffix'] = '</div>';
 
   $header_array = array(
-    'sr_no' => array('data' => 'Sr No', 'class' => 'sr-cell'), 
-    'party_code' => array('data'=>'Party Code', 'class' => 'party-code-cell'),
+    'sr_no' => array('data' => 'Sr No', 'class' => 'sr-cell'),
+    'party_code' => array('data' => 'Party Code', 'class' => 'party-code-cell'),
     //'lat' => 'Latitude', 
     //'lng' => 'Longitude',
-    'party_name' => array('data'=>'Party Name', 'class' => 'party-name-cell'),
-    'status' => array('data'=>'Status', 'class' => 'status-cell'),
+    'party_name' => array('data' => 'Party Name', 'class' => 'party-name-cell'),
+    'status' => array('data' => 'Status', 'class' => 'status-cell'),
     //'address' => array('data' => 'Address', 'class' => array('cell-tooltip')),
-    'details' => array('data'=>'', 'class' => 'details-cell'),
+    'details' => array('data' => '', 'class' => 'details-cell'),
   );
 
   $pl_group_data = reverse_geocode_get_data_from_outlet_master($sales_day = NULL, "pl_group", $beat_name = NULL, $distributor_id);
@@ -583,7 +583,7 @@ function reverse_geocode_get_data_hul_code_wise($sales_day, $pl_group, $sales_pe
   $query->condition('hul.type', 'hul_code_master');
   $query->condition('hul.uid', $distributor_id, '=');
   $query->leftJoin('field_data_field_hul_status', 'hul_st', 'hul_st.entity_id = hul.nid');
-  
+
   $query->leftJoin('field_data_field_hul_updated_lat', 'hul_lat_u', 'hul_lat_u.entity_id = hul.nid');
   $query->fields('hul_lat_u', array('field_hul_updated_lat_value'));
   $query->leftJoin('field_data_field_hul_updated_long', 'hul_long_u', 'hul_long_u.entity_id = hul.nid');
@@ -598,12 +598,12 @@ function reverse_geocode_get_data_hul_code_wise($sales_day, $pl_group, $sales_pe
     }
   }
   else {
-    
+
     //Show results having lat/lng
     $query->isNotNull('hul_lat.field_hul_lat_value');
     $query->isNotNull('hul_long.field_hul_long_value');
     $query->condition('hul_st.field_hul_status_value', 0, '=');
-    
+
     //Order results on basis of Lat/lng
     $query->orderBy('hul_lat.field_hul_lat_value', 'asc');
     $query->orderBy('hul_long.field_hul_long_value', 'asc');
@@ -876,7 +876,7 @@ function reverse_geocode_get_hul_code_from_party_code($party_code) {
   global $user;
   $user_id = $user->uid;
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
-  
+
   $query = db_select('node', 'n');
   $query->join('field_data_field_hul_code', 'fh', 'fh.entity_id = n.nid');
 
@@ -885,7 +885,7 @@ function reverse_geocode_get_hul_code_from_party_code($party_code) {
   $query->condition('n.type', 'outlet_master');
   $query->condition('n.uid', $distributor_id);
   $query->condition('n2.uid', $distributor_id);
-  
+
   $query->join('node', 'n2', 'fh2.entity_id = n2.nid');
   $query->fields('fh2', array('field_hul_code_value'));
   $query->fields('n2', array('title'));
@@ -950,10 +950,10 @@ function reverse_geocode_node_presave($node) {
     $new_hul_lat = $node->field_hul_lat['und'][0]['value'];
     $new_hul_long = $node->field_hul_long['und'][0]['value'];
 
-    dpm($og_hul_lat,"og_hul_lat");
-    dpm($og_hul_long,"og_hul_long");
-    dpm($new_hul_lat,"new_hul_lat");
-    dpm($new_hul_long,"new_hul_long");
+    dpm($og_hul_lat, "og_hul_lat");
+    dpm($og_hul_long, "og_hul_long");
+    dpm($new_hul_lat, "new_hul_lat");
+    dpm($new_hul_long, "new_hul_long");
     if ($node->is_new) {
       $node->field_hul_status['und'][0]['value'] = 0;
     }
@@ -967,19 +967,17 @@ function reverse_geocode_node_presave($node) {
     if (!empty($og_hul_lat) && !empty($og_hul_long)) {
       dpm("1111");
       if (($new_hul_lat != $og_hul_lat) || ($new_hul_long != $og_hul_long)) {
-       dpm("2222");
+        dpm("2222");
         $street = $node->field_original_address['und'][0]['sub_premise'];
         $locality = $node->field_original_address['und'][0]['locality'];
         $sublocality = $node->field_original_address['und'][0]['dependent_locality'];
         $poi = $node->field_original_address['und'][0]['data'];
 
-        dpm($street,"street");
-        dpm($locality,"locality");
-        dpm($sublocality,"sublocality");
-        dpm($poi,"poi");
+        dpm($street, "street");
+        dpm($locality, "locality");
+        dpm($sublocality, "sublocality");
 
-        if (!empty($street) && !empty($locality) && !empty($sublocality) && !empty($poi)) {
-          dpm("333");
+        if (!empty($street) || !empty($locality) || !empty($sublocality) || !empty($poi)) {
           $result = reverse_geocode_results($new_hul_lat, $new_hul_long);
           $decoded_data = json_decode($result);
           $decoded_result = $decoded_data->results;
@@ -1026,22 +1024,27 @@ function reverse_geocode_node_presave($node) {
             $node->field_hul_updated_long['und'][0]['value'] = $node->field_hul_long['und'][0]['value'];
           }
         }
+        else {
+          if ($hul_status == 0) {
+            $node->field_hul_updated_lat['und'][0]['value'] = $node->field_hul_lat['und'][0]['value'];
+            $node->field_hul_updated_long['und'][0]['value'] = $node->field_hul_long['und'][0]['value'];
+          }
+        }
       }
     }
   }
-  
   elseif ($node->type == 'outlet_master') {
     module_load_include('inc', 'change_feeds_import', 'form/outlet_area_hook');
-    
+
     $original_day = $node->original->field_sales_day[LANGUAGE_NONE][0]['value'];
     $updated_day = $node->field_sales_day[LANGUAGE_NONE][0]['value'];
 
     $original_area_hook = $node->original->field_outlet_area_hook[LANGUAGE_NONE][0]['value'];
     $updated_area_hook = $node->field_outlet_area_hook[LANGUAGE_NONE][0]['value'];
-    
+
     $original_channel = $node->original->field_channel[LANGUAGE_NONE][0]['value'];
     $updated_channel = $node->field_channel[LANGUAGE_NONE][0]['value'];
-    
+
     $original_pl_group = $node->original->field_pl_group[LANGUAGE_NONE][0]['value'];
     $updated_pl_group = $node->field_pl_group[LANGUAGE_NONE][0]['value'];
 
@@ -1065,8 +1068,8 @@ function reverse_geocode_node_presave($node) {
         $van_pl_grp = $query->execute()->fetchField();
 
         $day_van_area_nid = get_nid_from_master_using_sales_day_van_grp_area_hook($updated_day, $van_pl_grp, $updated_area_hook);
-        
-        if($day_van_area_nid){
+
+        if ($day_van_area_nid) {
           $node->field_area_hook[LANGUAGE_NONE][0]['nid'] = $day_van_area_nid;
         }
       }
