@@ -344,7 +344,9 @@ function change_feeds_import_sales_delivery_node($sales_data_result, $distributo
         }
         else {
           $nid = $node_titles[$val['bill_no']];
+          
           $node = node_load($nid);
+          if (!empty($node)) {
           $node->field_impact_delivery_date[LANGUAGE_NONE][0]['value'] = $val['impact_del_date'];
           $node->field_sales_return_amt[LANGUAGE_NONE][0]['value'] = $val['sales_amt'];
         //  $node->field_delivery_status[LANGUAGE_NONE][0]['tid'] = $val['partial_full'];
@@ -358,6 +360,7 @@ function change_feeds_import_sales_delivery_node($sales_data_result, $distributo
           node_save($node);
           
           $count++;
+          }
         }
       }
       $fid = $val['fid'];

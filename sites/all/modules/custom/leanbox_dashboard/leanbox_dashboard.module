@@ -502,7 +502,7 @@ function leanbox_dashboard_block_view($delta = '') {
 
       $loading_date = date('d-m-Y', strtotime("-1 days"));
       $block['subject'] = "Bill Pendency ($loading_date Billing)";
-      $data = leanbox_dashboard_chart_query_details('bill_pendency');
+      $data = leanbox_dashboard_chart_query_details('bill_pendency', $loading_date, $loading_date);
       $filter_form = drupal_render(drupal_get_form('leanbox_dashboard_chart_filter_bill_pendency_form'));
       $block['content'] = array(
         '#markup' => theme('leanbox_dashboard', array('data' => $filter_form, 'otif_table' => $data['table'])),
