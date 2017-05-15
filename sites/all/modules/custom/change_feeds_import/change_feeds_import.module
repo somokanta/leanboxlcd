@@ -417,6 +417,7 @@ function get_data_of_trip_id_2_form($form, &$form_state) {
   $form['trip_id'] = array(
     '#type' => 'textfield',
     '#title' => t('Trip Id'),
+    '#size' => 10, 
     '#required' => TRUE,
   );
 
