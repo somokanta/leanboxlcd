@@ -11277,3 +11277,7 @@ header[id="page-header"] .content > ul li ul li:nth-child(odd) {
   word-wrap: break-word;
   border-right: 1px solid #777;
 }
+
+#drs-report2{
+ width: 20%;
+}
