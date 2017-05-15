@@ -1,3 +1,4 @@
+<?php
 require_once '/data/docroot/dev.leanbox.in' . '/sites/all/modules/custom/reverse_geocode/directions-api-clients-route-optimization-master/php/SwaggerClient-php/autoload.php';
 
 $array['vehicles'][] = array('vehicle_id' => 'a1', 'start_address' => array('location_id' => 'a1', 'lon' => 12, 'lat' => 78));
@@ -20,3 +21,5 @@ try {
 } catch (Exception $e) {
     echo 'Exception when calling VrpApi->postVrp: ', $e->getMessage(), PHP_EOL;
 }
+
+?>
