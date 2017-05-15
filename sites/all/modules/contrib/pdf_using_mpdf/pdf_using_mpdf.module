@@ -109,6 +109,7 @@ function _pdf_using_mpdf_generator($html, $filename = NULL) {
     'A2' => array('w' => 420, 'h' => 594),
     'A3' => array('w' => 297, 'h' => 420),
     'A4' => array('w' => 210, 'h' => 297),
+    'A4test' => array('w' => 297, 'h' => 210),
     'A5' => array('w' => 148, 'h' => 210),
     'A6' => array('w' => 105, 'h' => 148),
     'A7' => array('w' => 74, 'h' => 105),
