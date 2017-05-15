@@ -21,12 +21,6 @@ function change_feeds_import_sales_delivery_form($form, $form_state) {
     $html .= '<li>' . $val . '</li>';
   }
 
-  $form['reason'] = array(
-    '#type' => 'item',
-    '#markup' => $html,
-    '#title' => t('Delivery Reason'),
-  );
-   
   $form['file'] = array(
     '#type' => 'file',
     '#title' => t('Choose a CSV file for Sales Delivery data upload'),
@@ -42,7 +36,12 @@ function change_feeds_import_sales_delivery_form($form, $form_state) {
     '#value' => t('Upload'),
   );
 
-
+  $form['reason'] = array(
+    '#type' => 'item',
+    '#markup' => $html,
+    '#title' => t('Valid Delivery Reason'),
+  );
+   
 
   return $form;
 }
