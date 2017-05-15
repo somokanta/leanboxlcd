@@ -419,6 +419,7 @@ function get_data_of_trip_id_2_form($form, &$form_state) {
     '#title' => t('Trip Id'),
     '#size' => 10, 
     '#required' => TRUE,
+    '#id'=>'drs-report2'
   );
 
   $form['submit'] = array(
