@@ -607,7 +607,7 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
   foreach ($res as $val) {
     
     if (!empty($val->lat) && !empty($val->lng)) {
-      $params['services'][] = array('id' => $val->nid, 'address' => array('location_id' => $val->nid, 'lon' => $val->lng, 'lat' => $val->lat));
+      $params['services'][] = array('id' => $val->nid, 'address' => array('location_id' => $val->nid, 'lon' => (double)$val->lng, 'lat' => (double)$val->lat));
     }
 
     if (is_null($val->sequence)) {
