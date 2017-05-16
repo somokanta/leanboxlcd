@@ -570,7 +570,7 @@ function leanbox_dashboard_block_view($delta = '') {
             ),
             drupal_get_path('module', 'leanbox_dashboard') . '/js/leanbox_dashboard_otif_trends_chart.js',
             array(
-              'data' => array('leanbox_dashboard' => array('otif' => $data['output'],)),
+              'data' => array('leanbox_dashboard' => array('otif_trends' => $data['output'],)),
               'type' => 'setting'
             ),
           ),
