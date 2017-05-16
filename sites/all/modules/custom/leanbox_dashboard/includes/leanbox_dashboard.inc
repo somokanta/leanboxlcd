@@ -1636,7 +1636,7 @@ function leanbox_dashboard_gauge_chart_query_details($type, $start_date = '', $e
 function leanbox_dashboard_otif_trends_chart_query_details($type, $start_date = '', $end_date = '') {
 
   $output1 = array();
-  $output = 0;
+  $output[] = array('Day', 'Otif Value');
   $table = '';
 
   global $user;
@@ -1671,9 +1671,6 @@ function leanbox_dashboard_otif_trends_chart_query_details($type, $start_date = 
   $query->addExpression('SUM(v.field_bill_value_value)', 'bill_sum');
   $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
 
-  $output[] = array('Day', 'Otif Value');
-  
- 
   if (!empty($res)) {
     foreach ($res as $key => $val) {
       $bill_date_str = $val['field_sr_bill_date_value'];
@@ -1681,6 +1678,9 @@ function leanbox_dashboard_otif_trends_chart_query_details($type, $start_date = 
       $bill_date = date('Y-m-d', $bill_date_str);
       $output[] = array($bill_date, round(($total_dis_bill_val / $val['bill_sum'] ) * 100));
     }   
+  }
+  else {
+    $output[] = array('No Data found', 0);
   }
   
   $output1['output'] = $output;
