@@ -565,6 +565,8 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
   $bill_value_sum = $form_state['dispatch_planning']['bill_value_sum'];
   
   $bill_nids = array_keys($rows);
+  
+  dpm($bill_nids);
 
   global $user;
   $user_id = $user->uid;
@@ -596,6 +598,8 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
   $query->addField('flong', 'field_hul_updated_long_value', 'lng');
 
   $res = $query->execute()->fetchAll();
+  
+  dpm($res);
 
   $bill_count = count($res);
   $sequence = $no_area = 0;
