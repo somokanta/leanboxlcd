@@ -40,7 +40,7 @@
 
 			function drawotifChart(otif) {
 
-        var data = google.visualization.arrayToDataTable([otif]);
+        var data = google.visualization.arrayToDataTable(otif);
 
         var options = {
 					curveType: 'function',
