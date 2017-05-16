@@ -581,7 +581,7 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
   $query->leftJoin('field_data_field_area_hook', 'fa', 'fa.entity_id = no.nid');
 
   $query->leftJoin('field_data_field_hul_code', 'fh', 'fh.entity_id = no.nid');
-  $query->join('node', 'hul', "fh.field_hul_code_value = hul.title AND hul.type = 'outlet_master' AND hul.uid = $distributor_id");
+  $query->join('node', 'hul', "fh.field_hul_code_value = hul.title AND hul.type = 'hul_code_master' AND hul.uid = $distributor_id");
   $query->leftJoin('field_data_field_hul_updated_lat', 'flat', 'flat.entity_id = hul.nid');
   $query->leftJoin('field_data_field_hul_updated_long', 'flong', 'flong.entity_id = hul.nid');
 
