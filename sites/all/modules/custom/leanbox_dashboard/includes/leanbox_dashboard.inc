@@ -1681,7 +1681,7 @@ function leanbox_dashboard_otif_trends_chart_query_details($type, $start_date = 
     }   
   }
   else {
-    $output[] = array('No Data found', 0);
+    $output[] = array('No Data found', (int)0);
   }
   
   $output1['output'] = $output;
