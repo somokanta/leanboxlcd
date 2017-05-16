@@ -259,6 +259,50 @@ function leanbox_dashboard_chart_filter_otif_form($form, &$form_state) {
  * @param array $form_state
  * @return array
  */
+function leanbox_dashboard_chart_filter_otif_trends_form($form, &$form_state) {
+  $form = array();
+
+  if (arg(1) == 'otif_trends') {
+    $bill_date = leanbox_dashboard_get_default_pdd_date_for_chart();
+    $bill_date = date('Y-m-d', $bill_date);
+    $form['start_date'] = array(
+      '#type' => 'date_popup',
+      '#title' => t('Billing Date From'),
+      '#required' => TRUE,
+      '#date_format' => 'Y-m-d',
+      '#default_value' => $bill_date,
+    );
+    $form['end_date'] = array(
+      '#type' => 'date_popup',
+      '#title' => t('Billing Date To'),
+      '#required' => TRUE,
+      '#date_format' => 'Y-m-d',
+      '#default_value' => $bill_date,
+    );
+
+    $form['submit'] = array(
+      '#type' => 'submit',
+      '#value' => 'Submit',
+      '#prefix' => '<div id ="otif-trends-submit">',
+      '#suffix' => '</div>',
+      '#attributes' => array('class' => array('otif-trends-submit')),
+    );
+  }
+
+  $form['otif_trends'] = array(
+    '#markup' => '<a href = "/leanbox-chart-details/otif_trends" target = "_blank"><div id="otif-trends_div"></div></a>',
+  );
+
+  return $form;
+}
+
+
+/**
+ * 
+ * @param array $form
+ * @param array $form_state
+ * @return array
+ */
 function leanbox_dashboard_chart_filter_partypack_productivity_form($form, &$form_state) {
   $form = array();
   if (arg(1) == 'party_packing_productivity') {
