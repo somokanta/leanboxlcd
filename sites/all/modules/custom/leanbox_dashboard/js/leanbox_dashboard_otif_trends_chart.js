@@ -10,6 +10,7 @@
 		attach: function (context, settings) {
 			
 			var otif = Drupal.settings.leanbox_dashboard.otif_trends;
+			var area_definition = Drupal.settings.leanbox_dashboard.area_definition;
 			console.log(otif);
       google.charts.load('current', {'packages':['gauge','corechart', 'bar']});
 			google.charts.setOnLoadCallback(function () {
@@ -28,6 +29,8 @@
 						url: "/chart-daterange-filter",
 						data: {start_date: start_date, end_date: end_date, activity_type: 'otif_trends'},
 						success: function (response) {
+							var area_definition = Drupal.settings.leanbox_dashboard.area_definition;
+							
 							google.charts.setOnLoadCallback(function () {
 								drawotifChart(response.output);
 							});
@@ -43,8 +46,11 @@
         var data = google.visualization.arrayToDataTable(otif);
 
         var options = {
+					width: area_definition.width,
+					height: area_definition.height,
+					chartArea: {left: area_definition.ch_left, top: area_definition.ch_top, width: area_definition.ch_width, height: area_definition.ch_height},
 					curveType: 'function',
-          title: 'OTIF Trends',
+          title: '',
 					legend: {position: 'top', maxLines: 3},
         };
 
