@@ -577,6 +577,8 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
   $query->leftJoin('field_data_field_area_hook', 'fa', 'fa.entity_id = no.nid');
 
   $query->leftJoin('field_data_field_hul_code', 'fh', 'fh.entity_id = no.nid');
+  $query->leftJoin('field_data_field_hul_updated_lat', 'flat', 'lat.entity_id = no.nid');
+  $query->leftJoin('field_data_field_hul_updated_long', 'flong', 'long.entity_id = no.nid');
 
 
   $query->addField('n', 'nid');
@@ -587,15 +589,22 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
   $query->addField('no', 'title', 'party_code');
   $query->addField('fs', 'field_revised_sequence_value', 'sequence');
   $query->addField('fa', 'field_area_hook_nid', 'area_hook');
+  
+  $query->addField('flat', 'field_hul_updated_lat_value', 'lat');
+  $query->addField('flong', 'field_hul_updated_long_value', 'long');
 
   $res = $query->execute()->fetchAll();
 
   $bill_count = count($res);
-  $sequence = 0;
+  $sequence = $no_area = 0;
   foreach ($res as $val) {
+    
+    if (!empty($val->lat) && !empty($val->long)) {
+      $params['services'][] = array('id' => $val->nid, 'address' => array('location_id' => $val->nid, 'lon' => $val->lat, 'lat' => $val->long));
+    }
 
-    if (!is_null($val->sequence)) {
-      $sequence ++;
+    if (is_null($val->sequence)) {
+      $no_sequence = 1;
     }
 
     if (is_null($val->area_hook)) {
@@ -610,6 +619,32 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
   dpm($no_area, '$no_area');
   dpm($sequence, '$sequence');
 
+  if($no_area || $no_sequence || count($area_hook) > 1){
+    
+    $array['vehicles'][] = array('vehicle_id' => 'origin', 'start_address' => array('location_id' => 'origin', 'lon' => 12, 'lat' => 78), 'return_to_depot' => true);
+    $post_result = graphhopper_postvrp_api($params);
+    
+    if($post_result->job_id){
+      $job_id = $post_result->job_id;
+      
+      $solution = graphhopper_solution_api($job_id);
+      
+      if($solution->status == 'finished'){
+        
+        $data = $solution->solution->routes->activities;
+        
+        $i = 1;
+        foreach ($data as $key => $value) {
+          if($value->type == 'service'){
+            $bill_sequence_array[$value->location_id] = $i;
+            $i ++;
+          }
+        }
+      }
+    }
+  }
+  dpm($bill_sequence_array);
+  
   return;
   ##############################################################################
 
