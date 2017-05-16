@@ -598,7 +598,7 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
       $sequence ++;
     }
 
-    if (!is_null($val->area_hook)) {
+    if (is_null($val->area_hook)) {
       $no_area = 1;
     }
     else {
