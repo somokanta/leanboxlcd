@@ -561,6 +561,8 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
 
   $dispatch_bill_count = count($rows);
   $bill_value_sum = $form_state['dispatch_planning']['bill_value_sum'];
+  
+  $bill_nids = array_keys($rows);
 
   global $user;
   $user_id = $user->uid;
@@ -580,7 +582,7 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
   $query->addField('n', 'nid');
   $query->condition('n.uid', $distributor_id);
   $query->addField('n', 'title', 'bill_number');
-  $query->condition('n.title', $rows, 'IN');
+  $query->condition('n.nid', $bill_nids, 'IN');
 
   $query->addField('no', 'title', 'party_code');
   $query->addField('fs', 'field_revised_sequence_value', 'sequence');
