@@ -1,5 +1,7 @@
 <?php
 
+require_once DRUPAL_ROOT .  '/sites/all/modules/custom/reverse_geocode/directions-api-clients-route-optimization-master/php/SwaggerClient-php/autoload.php';
+
 function dispatch_planning_menu() {
 
   $items['admin/dispatch-planning'] = array(
@@ -563,6 +565,8 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
   $bill_value_sum = $form_state['dispatch_planning']['bill_value_sum'];
   
   $bill_nids = array_keys($rows);
+  
+  dpm($bill_nids);
 
   global $user;
   $user_id = $user->uid;
@@ -577,8 +581,9 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
   $query->leftJoin('field_data_field_area_hook', 'fa', 'fa.entity_id = no.nid');
 
   $query->leftJoin('field_data_field_hul_code', 'fh', 'fh.entity_id = no.nid');
-  $query->leftJoin('field_data_field_hul_updated_lat', 'flat', 'flat.entity_id = no.nid');
-  $query->leftJoin('field_data_field_hul_updated_long', 'flong', 'flong.entity_id = no.nid');
+  $query->join('node', 'hul', "fh.field_hul_code_value = hul.title AND hul.type = 'outlet_master' AND hul.uid = $distributor_id");
+  $query->leftJoin('field_data_field_hul_updated_lat', 'flat', 'flat.entity_id = hul.nid');
+  $query->leftJoin('field_data_field_hul_updated_long', 'flong', 'flong.entity_id = hul.nid');
 
 
   $query->addField('n', 'nid');
@@ -594,6 +599,8 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
   $query->addField('flong', 'field_hul_updated_long_value', 'lng');
 
   $res = $query->execute()->fetchAll();
+  
+  dpm($res);
 
   $bill_count = count($res);
   $sequence = $no_area = 0;
@@ -621,13 +628,16 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
 
   if($no_area || $no_sequence || count($area_hook) > 1){
     
-    $array['vehicles'][] = array('vehicle_id' => 'origin', 'start_address' => array('location_id' => 'origin', 'lon' => 12, 'lat' => 78), 'return_to_depot' => true);
+    $params['vehicles'][] = array('vehicle_id' => 'origin', 'start_address' => array('location_id' => 'origin', 'lon' => 12, 'lat' => 78), 'return_to_depot' => true);
     $post_result = graphhopper_postvrp_api($params);
-    
+    dpm($params);
+    dpm($post_result);
     if($post_result->job_id){
       $job_id = $post_result->job_id;
       
       $solution = graphhopper_solution_api($job_id);
+      
+      dpm($solution);
       
       if($solution->status == 'finished'){
         
@@ -715,7 +725,7 @@ function get_bill_info($bill_number, $van = NULL, $loading_date = NULL, $beat_na
 
   $query = db_select('node', 'n');
   $query->leftJoin('field_data_field_bill_value', 'bv', 'n.nid = bv.entity_id');
-  $query->leftJoin('field_dat = a_field_sales_party_code', 'spc', 'n.nid = spc.entity_id');
+  $query->leftJoin('field_data_field_sales_party_code', 'spc', 'n.nid = spc.entity_id');
   $query->leftJoin('field_data_field_billing_loading_date', 'ld', 'n.nid = ld.entity_id');
   $query->leftJoin('field_data_field_billing_van', 'v', 'n.nid = v.entity_id');
   $query->leftJoin('field_data_field_delivery_pending', 'dp', 'n.nid = dp.entity_id');
