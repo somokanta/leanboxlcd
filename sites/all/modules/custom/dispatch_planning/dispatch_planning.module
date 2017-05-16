@@ -566,6 +566,51 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
   $user_id = $user->uid;
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
 
+  ##############################################################################
+  $query = db_select('node', 'n');
+  $query->leftJoin('field_data_field_sales_party_code', 'spc', 'n.nid = spc.entity_id');
+
+  $query->leftJoin('node', 'no', "no.title = spc.field_sales_party_code_value AND no.type = outlet_master AND no.uid = $distributor_id");
+  $query->leftJoin('field_data_field_revised_sequence', 'fs', 'fs.entity_id = pc.entity_id');
+  $query->leftJoin('field_data_field_area_hook', 'fa', 'fa.entity_id = pc.entity_id');
+
+  $query->leftJoin('field_data_field_hul_code', 'fh', 'fh.entity_id = pc.entity_id');
+
+
+  $query->addField('n', 'nid');
+  $query->condition('n.uid', $distributor_id);
+  $query->addField('n', 'title', 'bill_number');
+  $query->condition('n.title', $rows, 'IN');
+
+  $query->addField('pn', 'field_party_name_value', 'party_name');
+  $query->addField('fs', 'field_revised_sequence_value', 'sequence');
+  $query->addField('fa', 'field_area_hook_value', 'area_hook');
+
+  $res = $query->execute()->fetchAll();
+
+  $bill_count = count($res);
+  $sequence = 0;
+  foreach ($res as $val) {
+
+    if (!is_null($val->sequence)) {
+      $sequence ++;
+    }
+
+    if (!is_null($val->area_hook)) {
+      $no_area = 1;
+    }
+    else {
+      $area_hook[$val->area_hook] = $val->area_hook;
+    }
+  }
+
+  dpm($area_hook, '$area_hook');
+  dpm($no_area, '$no_area');
+  dpm($sequence, '$sequence');
+
+  return;
+  ##############################################################################
+
   $txn = db_transaction();
 
   $query = db_select('trip_id_sequence', 'ts');

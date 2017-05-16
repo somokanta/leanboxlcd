@@ -26,7 +26,7 @@
  * Do not edit the class manually.
  */
 
-namespace graphhopper;
+namespace Swagger\Client\graphhopper;
 
 use \Swagger\Client\ApiClient;
 use \Swagger\Client\ApiException;
