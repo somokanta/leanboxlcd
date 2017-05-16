@@ -577,8 +577,8 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
   $query->leftJoin('field_data_field_area_hook', 'fa', 'fa.entity_id = no.nid');
 
   $query->leftJoin('field_data_field_hul_code', 'fh', 'fh.entity_id = no.nid');
-  $query->leftJoin('field_data_field_hul_updated_lat', 'flat', 'lat.entity_id = no.nid');
-  $query->leftJoin('field_data_field_hul_updated_long', 'flong', 'long.entity_id = no.nid');
+  $query->leftJoin('field_data_field_hul_updated_lat', 'flat', 'flat.entity_id = no.nid');
+  $query->leftJoin('field_data_field_hul_updated_long', 'flong', 'flong.entity_id = no.nid');
 
 
   $query->addField('n', 'nid');
