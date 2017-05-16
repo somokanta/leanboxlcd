@@ -45,6 +45,7 @@
         var options = {
 					curveType: 'function',
           title: 'OTIF Trends',
+					legend: {position: 'top', maxLines: 3},
         };
 
        // var chart = new google.visualization.Gauge(document.getElementById('otif_div'));

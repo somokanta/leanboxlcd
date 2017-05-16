@@ -586,7 +586,7 @@ function leanbox_dashboard_block_view($delta = '') {
       $bill_date = date('d-m-Y', $bill_date);
       $block['subject'] = "OTIF Day Wise ($bill_date Billing)";
       $data = leanbox_dashboard_otif_trends_chart_query_details('otif_trends');
-dpm($data, '$data');
+
       $filter_form = drupal_render(drupal_get_form('leanbox_dashboard_chart_filter_otif_trends_form'));
       $block['content'] = array(
         '#markup' => theme('leanbox_dashboard', array('data' => $filter_form, 'otif_table' => $data['table'],)),
