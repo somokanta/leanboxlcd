@@ -14,7 +14,7 @@
 			console.log(otif);
       google.charts.load('current', {'packages':['gauge','corechart', 'bar']});
 			google.charts.setOnLoadCallback(function () {
-				drawotifChart(otif);
+				drawotifChart(otif, area_definition);
 			});
 
 			$(".otif-trends-submit").click(function (e) {
@@ -32,7 +32,7 @@
 							var area_definition = Drupal.settings.leanbox_dashboard.area_definition;
 							
 							google.charts.setOnLoadCallback(function () {
-								drawotifChart(response.output);
+								drawotifChart(response.output, area_definition);
 							});
 							$('#otiftable').html(response.table);
 						},
@@ -41,7 +41,7 @@
 				
 			});
 
-			function drawotifChart(otif) {
+			function drawotifChart(otif, area_definition) {
 
         var data = google.visualization.arrayToDataTable(otif);
 
