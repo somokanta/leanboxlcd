@@ -1086,8 +1086,8 @@ function graphhopper_postvrp_api($params) {
   catch (Exception $e) {
     echo 'Exception when calling VrpApi->postVrp: ', $e->getMessage(), PHP_EOL;
   }
-
-  return json_decode($result);
+dpm($result, 'response');
+  return $result;
 }
 
 function graphhopper_solution_api($job_id) {
@@ -1107,7 +1107,7 @@ function graphhopper_solution_api($job_id) {
     echo 'Exception when calling SolutionApi->getSolution: ', $e->getMessage(), PHP_EOL;
   }
 
-  return json_decode($result);
+  return $result;
 }
 
 
