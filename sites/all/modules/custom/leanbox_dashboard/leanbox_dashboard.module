@@ -113,7 +113,7 @@ function leanbox_dashboard_menu() {
 }
 
 /**
- * 
+ * Callback function for dashboard page
  * @return string
  */
 function leanbox_dashboard_listing_page() {
@@ -220,6 +220,10 @@ function leanbox_dashboard_block_info() {
   );
   $blocks['bill_pendency'] = array(
     'info' => t('Bill Pendency'),
+    'cache' => DRUPAL_NO_CACHE,
+  );
+  $blocks['otif_trends'] = array(
+    'info' => t('Otif Day Wise Trends'),
     'cache' => DRUPAL_NO_CACHE,
   );
   return $blocks;
@@ -539,6 +543,32 @@ function leanbox_dashboard_block_view($delta = '') {
               'data' => 'https://www.gstatic.com/charts/loader.js'
             ),
             drupal_get_path('module', 'leanbox_dashboard') . '/js/leanbox_dashboard_otifchart.js',
+            array(
+              'data' => array('leanbox_dashboard' => array('otif' => $data['output'],)),
+              'type' => 'setting'
+            ),
+          ),
+        ),
+      );
+      break;
+    
+    case 'otif_trends':
+
+      $bill_date = leanbox_dashboard_get_default_pdd_date_for_chart();
+      $bill_date = date('d-m-Y', $bill_date);
+      $block['subject'] = "OTIF Day Wise ($bill_date Billing)";
+      $data = leanbox_dashboard_otif_trends_chart_query_details('otif_trends');
+
+      $filter_form = drupal_render(drupal_get_form('leanbox_dashboard_chart_filter_otif_form'));
+      $block['content'] = array(
+        '#markup' => theme('leanbox_dashboard', array('data' => $filter_form, 'otif_table' => $data['table'],)),
+        '#attached' => array(
+          'js' => array(
+            array(
+              'type' => 'external',
+              'data' => 'https://www.gstatic.com/charts/loader.js'
+            ),
+            drupal_get_path('module', 'leanbox_dashboard') . '/js/leanbox_dashboard_otif_trends_chart.js',
             array(
               'data' => array('leanbox_dashboard' => array('otif' => $data['output'],)),
               'type' => 'setting'
