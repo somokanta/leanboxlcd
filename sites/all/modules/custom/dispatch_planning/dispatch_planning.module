@@ -1,5 +1,7 @@
 <?php
 
+require_once DRUPAL_ROOT .  '/sites/all/modules/custom/reverse_geocode/directions-api-clients-route-optimization-master/php/SwaggerClient-php/autoload.php';
+
 function dispatch_planning_menu() {
 
   $items['admin/dispatch-planning'] = array(
