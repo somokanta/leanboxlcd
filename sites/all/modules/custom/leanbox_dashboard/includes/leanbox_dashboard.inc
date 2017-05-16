@@ -290,7 +290,7 @@ function leanbox_dashboard_chart_filter_otif_trends_form($form, &$form_state) {
   }
 
   $form['otif_trends'] = array(
-    '#markup' => '<a href = "/leanbox-chart-details/otif_trends" target = "_blank"><div id="otif-trends_div"></div></a>',
+    '#markup' => '<a href = "/leanbox-chart-details/otif_trends" target = "_blank"><div id="otif_trends_div"></div></a>',
   );
 
   return $form;
