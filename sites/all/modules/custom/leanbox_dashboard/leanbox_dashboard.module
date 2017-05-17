@@ -164,11 +164,11 @@ function party_packing_filter_callback() {
       break;
 
     case 'picking_productivity' :
-      $ajax_type = 'party_packing_ajax';
+      $ajax_type = 'picking_ajax';
       break;
 
     case 'bill_pendency' :
-      $ajax_type = 'party_packing_ajax';
+      $ajax_type = 'bill_pendency_ajax';
       break;
 
     case 'otif_trends' :
@@ -581,6 +581,17 @@ function leanbox_dashboard_block_view($delta = '') {
       break;
     
     case 'otif_trends':
+      
+        if (arg(1) == 'otif_trends') {
+        $area_definition = array(
+          'width' => 700,
+          'height' => 400,
+          'ch_left' => 80,
+          'ch_top' => 50,
+          'ch_width' => 500,
+          'ch_height' => 250,
+        );
+      }
 
       $bill_date = leanbox_dashboard_get_default_pdd_date_for_chart();
       $bill_date = date('d-m-Y', $bill_date);
