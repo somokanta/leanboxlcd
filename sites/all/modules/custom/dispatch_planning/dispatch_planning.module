@@ -649,7 +649,7 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
           $i = 1;
           foreach ($data as $key => $value) {
             if ($value->getType() == 'service') {
-              $bill_sequence_array[$value->getLocation_id()] = $i;
+              $bill_sequence_array[$value->getLocationId()] = $i;
               $i ++;
             }
           }
