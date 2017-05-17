@@ -639,7 +639,7 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
       
       dpm($resp);
       
-      if($resp->getStatus() == 'finished'){
+      if($resp && $resp->getStatus() == 'finished'){
         
         $solution = $resp->getSolution();
         dpm($solution);
