@@ -628,7 +628,7 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
 
   if($no_area || $no_sequence || count($area_hook) > 1){
     
-    $params['vehicles'][] = array('vehicle_id' => 'origin', 'start_address' => array('location_id' => 'origin', 'lon' => 78, 'lat' => 19), 'return_to_depot' => true);
+    $params['vehicles'][] = array('vehicle_id' => 'origin', 'start_address' => array('location_id' => 'origin', 'lon' => 72.99, 'lat' => 19.2), 'return_to_depot' => false);
     $post_result = graphhopper_postvrp_api($params);
     dpm($params);
     dpm($post_result);
