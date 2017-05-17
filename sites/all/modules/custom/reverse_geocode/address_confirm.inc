@@ -511,7 +511,7 @@ function reverse_geocode_get_data_area_code_wise($sales_day, $van_pl_group, $are
   if (!is_null($van_pl_group)) {
     $query->condition('ppplg.field_dva_van_pl_group_value', $van_pl_group, '=');
   }
-  if ($type == "revised-sequence") {
+  if ($type == "revised-sequence" && !empty($original_van)) {
     //VAN PL Group Stop Master
     $query->join('node', 'nv', 'nv.title = ppplg.field_dva_van_pl_group_value');
     $query->join('field_data_field_stops_per_van', 'fsv', 'fsv.entity_id = nv.nid');
