@@ -641,8 +641,10 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
       if ($solution) {
         if ($solution->getStatus() == 'finished') {
 
-          $data = $solution->getSolution()->getRoutes()->activities;
-          dpm($data);
+          $routes = $solution->getSolution()->getRoutes();
+          
+          $data = $routes[0]->activities;
+          dpm($solution->getSolution()->getRoutes());
 
           $i = 1;
           foreach ($data as $key => $value) {
