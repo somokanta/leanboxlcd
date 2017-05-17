@@ -1687,18 +1687,18 @@ function leanbox_dashboard_otif_trends_chart_query_details($type, $start_date = 
   $output1['output'] = $output;
 
   if (arg(1) == 'otif_trends' || $type == 'otif_ajax') {
-
-    $mtd_html = "<h3>Channel Wise Otif</h3>";
-    $mtd_data .= get_mtd_data_channel($start_date, $end_date, $uid);
-    if ($mtd_data == "No Result Found") {
-      $header = get_header_of_chhanel();
-      $mtd_rows[] = array("<td colspan='10' style='text-align: center;'> There is No Activity</td>");
-      $mtd_html .= theme('table', array('header' => $header, 'rows' => $mtd_rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
-    }
-    else {
-      $mtd_html .= $mtd_data;
-    }
-    $table = $mtd_html;
+//
+//    $mtd_html = "<h3>Channel Wise Otif</h3>";
+//    $mtd_data .= get_mtd_data_channel($start_date, $end_date, $uid);
+//    if ($mtd_data == "No Result Found") {
+//      $header = get_header_of_chhanel();
+//      $mtd_rows[] = array("<td colspan='10' style='text-align: center;'> There is No Activity</td>");
+//      $mtd_html .= theme('table', array('header' => $header, 'rows' => $mtd_rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
+//    }
+//    else {
+//      $mtd_html .= $mtd_data;
+//    }
+//    $table = $mtd_html;
   }
   $output1['table'] = $table;
 
