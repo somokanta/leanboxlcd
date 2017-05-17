@@ -635,15 +635,14 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
     $job_id = $post_result->getJobId();
     if($job_id){
       
-      $resp = graphhopper_solution_api($job_id);
+      $solution = graphhopper_solution_api($job_id);
       
-      dpm($resp);
-      if ($resp) {
-        if ($resp->getStatus() == 'finished') {
+      dpm($solution);
+      if ($solution) {
+        if ($solution->getStatus() == 'finished') {
 
-          $solution = $resp->getSolution();
-          dpm($solution);
-          $data = $solution->routes->activities;
+          $data = $resp->getSolution()->getRoutes()->getActivities();
+          dpm($data);
 
           $i = 1;
           foreach ($data as $key => $value) {
