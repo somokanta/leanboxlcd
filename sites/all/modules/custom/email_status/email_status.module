@@ -375,11 +375,11 @@ function send_email_pl_group_emailer($distributor_name) {
   drupal_mail('email_status', 'pl_group_status', $mail_to, LANGUAGE_NONE, $params, $from);
 }
 
-function send_email_productivity_emailer($todays_date_date, $distributor_name, $end_date = FALSE, $chart = FALSE, $type = '') {
+function send_email_productivity_emailer($todays_date_date, $distributor_name, $end_date = FALSE, $chart = FALSE, $type = '', $distributor_id = 60) {
  $target_data = leanbox_dashboard_target_value_using_voc_name('productivity target');
 
   if (( $chart == TRUE && $type == 'party_packing' ) || ( $chart == FALSE )) {
-    $party_packing = get_productivity_data_for_party_packing($todays_date_date, $end_date);
+    $party_packing = get_productivity_data_for_party_packing($todays_date_date, $end_date, $distributor_id);
     $party_pack_superwise_html = "<h3>Party Packing Supervisorwise (status:Completed)</h3><table class = 'pp-superwise-table' border='1' cellpadding='5' cellspacing='0'  style='color:#000; font-size: 13px;font-family: arial'>"
         . "<th>Party Packing Type</th>"
         . "<th>Party Packing Supervisor</th>"
@@ -499,7 +499,7 @@ function send_email_productivity_emailer($todays_date_date, $distributor_name, $
   
   if (( $chart == TRUE && $type == 'picking' ) || ( $chart == FALSE )) {
 
-    $picking = get_productivity_data_for_picking($todays_date_date, $end_date);
+    $picking = get_productivity_data_for_picking($todays_date_date, $end_date, $distributor_id);
     $picking_supervisor_wise_html = "<h3>Pick Supervisorwise (status:Completed)</h3><table class = 'pp-superwise-table' border='1' cellpadding='5' cellspacing='0'  style='color:#000; font-size: 13px;font-family: arial'>"
         . "<th>Pick Supervisor</th>"
         . "<th>Godown Area Id</th>"
