@@ -164,11 +164,11 @@ function party_packing_filter_callback() {
       break;
 
     case 'picking_productivity' :
-      $ajax_type = 'party_packing_ajax';
+      $ajax_type = 'picking_ajax';
       break;
 
     case 'bill_pendency' :
-      $ajax_type = 'party_packing_ajax';
+      $ajax_type = 'bill_pendency_ajax';
       break;
 
     case 'otif_trends' :
