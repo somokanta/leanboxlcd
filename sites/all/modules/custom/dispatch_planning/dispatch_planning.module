@@ -644,7 +644,7 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
           $routes = $solution->getSolution()->getRoutes();
           
           $data = $routes[0]->getActivities();
-          dpm($solution->getSolution()->getRoutes());
+          dpm($data);
 
           $i = 1;
           foreach ($data as $key => $value) {
