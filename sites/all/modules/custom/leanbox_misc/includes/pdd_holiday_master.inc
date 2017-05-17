@@ -21,7 +21,7 @@ function pdd_add_form($form, &$form_state) {
   $form['weekly_off'] = array(
     '#type' => 'textfield',
     '#title' => t('Weekly Off (Enter comma separated days of the week)'),
-    '#required' => TRUE,
+    //'#required' => TRUE,
     '#description' => 'Enter comma separated days of the week (eg: "Monday, Tuesday")',
     '#default_value' => $weekly_off,
   );
@@ -45,24 +45,27 @@ function pdd_add_form($form, &$form_state) {
 function pdd_add_form_validate($form, &$form_state) {
   $weekly_off = $form_state['values']['weekly_off'];
 
-  $days = array(
-    'Sunday' => 'Sunday',
-    'Monday' => 'Monday',
-    'Tuesday' => 'Tuesday',
-    'Wednesday' => 'Wednesday',
-    'Thursday' => 'Thursday',
-    'Friday' => 'Friday',
-    'Saturday' => 'Saturday',
-  );
+  if (!empty($weekly_off)) {
 
-  $entered_days = explode(',', $weekly_off);
+    $days = array(
+      'Sunday' => 'Sunday',
+      'Monday' => 'Monday',
+      'Tuesday' => 'Tuesday',
+      'Wednesday' => 'Wednesday',
+      'Thursday' => 'Thursday',
+      'Friday' => 'Friday',
+      'Saturday' => 'Saturday',
+    );
 
-  $entered_days = array_map('trim', $entered_days);
-  $form_state['values']['entered_days'] = $entered_days;
+    $entered_days = explode(',', $weekly_off);
 
-  foreach ($entered_days as $day) {
-    if (!isset($days[$day])) {
-      form_set_error('weekly_off', t('Enter correct comma seperated days'));
+    $entered_days = array_map('trim', $entered_days);
+    $form_state['values']['entered_days'] = $entered_days;
+
+    foreach ($entered_days as $day) {
+      if (!isset($days[$day])) {
+        form_set_error('weekly_off', t('Enter correct comma seperated days'));
+      }
     }
   }
 }
