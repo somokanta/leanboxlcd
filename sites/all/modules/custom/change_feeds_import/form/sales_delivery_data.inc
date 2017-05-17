@@ -16,6 +16,10 @@ function change_feeds_import_sales_delivery_form($form, $form_state) {
   if (!empty($fid)) {
     drupal_goto("sales-delivery-data-confirm/$fid");
   }
+  $data = leanbox_dashboard_all_value_using_voc_name('Delivery Reason');
+  foreach($data as $val) {
+    $html .= '<li>' . $val . '</li>';
+  }
 
   $form['file'] = array(
     '#type' => 'file',
@@ -32,7 +36,16 @@ function change_feeds_import_sales_delivery_form($form, $form_state) {
     '#value' => t('Upload'),
   );
 
-
+  $form['delivery_pending'] = array(
+    '#type' => 'item',
+    '#title' => t('Please mention "Yes" to declare bills for Delivery Pending in "Delivery Pending" Column while upload.'),
+  );
+  $form['reason'] = array(
+    '#type' => 'item',
+    '#markup' => $html,
+    '#title' => t('Valid Delivery Reason'),
+  );
+   
 
   return $form;
 }

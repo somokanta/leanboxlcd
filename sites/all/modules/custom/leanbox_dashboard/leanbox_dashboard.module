@@ -113,7 +113,7 @@ function leanbox_dashboard_menu() {
 }
 
 /**
- * 
+ * Callback function for dashboard page
  * @return string
  */
 function leanbox_dashboard_listing_page() {
@@ -127,29 +127,57 @@ function party_packing_filter_callback() {
   module_load_include('inc', 'leanbox_dashboard', 'includes/leanbox_dashboard');
   $start_date = $end_date = '';
   $activity_type = $_POST['activity_type'];
+  $ajax_type = '';
+
   if (isset($_POST['start_date'])) {
     $start_date = $_POST['start_date'];
   }
   if (isset($_POST['end_date'])) {
     $end_date = $_POST['end_date'];
   }
-  if ($activity_type == 'otif') {
-    $activity_type = 'otif_ajax';
-    $output_data = leanbox_dashboard_gauge_chart_query_details($activity_type, $start_date, $end_date);
-  }
-  else {
-    $ajax_type = '';
-    if ($activity_type == 'party_packing_productivity') {
-      $ajax_type = 'party_packing_ajax';
-    }
-    else if ($activity_type == 'picking_productivity') {
-      $ajax_type = 'picking_ajax';
-    }
-    else if ($activity_type == 'bill_pendency') {
-      $ajax_type = 'bill_pendency_ajax';
-    }
+//  if ($activity_type == 'otif') {
+//    $activity_type = 'otif_ajax';
+//    $output_data = leanbox_dashboard_gauge_chart_query_details($activity_type, $start_date, $end_date);
+//  }
+//  else {
+//    
+//    if ($activity_type == 'party_packing_productivity') {
+//      $ajax_type = 'party_packing_ajax';
+//    }
+//    else if ($activity_type == 'picking_productivity') {
+//      $ajax_type = 'picking_ajax';
+//    }
+//    else if ($activity_type == 'bill_pendency') {
+//      $ajax_type = 'bill_pendency_ajax';
+//    }
+//
+//    $output_data = leanbox_dashboard_chart_query_details($activity_type, $start_date, $end_date, $ajax_type);
+//  }
+  switch ($activity_type) {
+    case 'otif' :
+      $activity_type = 'otif_ajax';
+      $output_data = leanbox_dashboard_gauge_chart_query_details($activity_type, $start_date, $end_date);
+      break;
 
-    $output_data = leanbox_dashboard_chart_query_details($activity_type, $start_date, $end_date, $ajax_type);
+    case 'party_packing_productivity' :
+      $ajax_type = 'party_packing_ajax';
+      break;
+
+    case 'picking_productivity' :
+      $ajax_type = 'party_packing_ajax';
+      break;
+
+    case 'bill_pendency' :
+      $ajax_type = 'party_packing_ajax';
+      break;
+
+    case 'otif_trends' :
+      $activity_type = 'otif_ajax';
+      $output_data = leanbox_dashboard_otif_trends_chart_query_details($activity_type, $start_date, $end_date);
+      break;
+
+    default:
+      $output_data = leanbox_dashboard_chart_query_details($activity_type, $start_date, $end_date, $ajax_type);
   }
   drupal_json_output($output_data);
 }
@@ -220,6 +248,10 @@ function leanbox_dashboard_block_info() {
   );
   $blocks['bill_pendency'] = array(
     'info' => t('Bill Pendency'),
+    'cache' => DRUPAL_NO_CACHE,
+  );
+  $blocks['otif_trends'] = array(
+    'info' => t('Otif Day Wise Trends'),
     'cache' => DRUPAL_NO_CACHE,
   );
   return $blocks;
@@ -547,6 +579,32 @@ function leanbox_dashboard_block_view($delta = '') {
         ),
       );
       break;
+    
+    case 'otif_trends':
+
+      $bill_date = leanbox_dashboard_get_default_pdd_date_for_chart();
+      $bill_date = date('d-m-Y', $bill_date);
+      $block['subject'] = "OTIF Day Wise ($bill_date Billing)";
+      $data = leanbox_dashboard_otif_trends_chart_query_details('otif_trends');
+
+      $filter_form = drupal_render(drupal_get_form('leanbox_dashboard_chart_filter_otif_trends_form'));
+      $block['content'] = array(
+        '#markup' => theme('leanbox_dashboard', array('data' => $filter_form, 'otif_table' => $data['table'],)),
+        '#attached' => array(
+          'js' => array(
+            array(
+              'type' => 'external',
+              'data' => 'https://www.gstatic.com/charts/loader.js'
+            ),
+            drupal_get_path('module', 'leanbox_dashboard') . '/js/leanbox_dashboard_otif_trends_chart.js',
+            array(
+              'data' => array('leanbox_dashboard' => array('otif_trends' => $data['output'], 'area_definition' => $area_definition)),
+              'type' => 'setting'
+            ),
+          ),
+        ),
+      );
+      break;
 
     case 'bills_per_person':
 
@@ -844,5 +902,19 @@ function leanbox_dashboard_target_value_using_voc_name($vname) {
   $target['pp bulk'] = $res['field_pp_bulk_value'];
   $target['pp loose'] = $res['field_pp_loose_value'];
 
+  return $target;
+}
+
+/**
+ * 
+ * @param type $vname
+ * @return array
+ */
+function leanbox_dashboard_all_value_using_voc_name($vname) {
+  $query1 = db_select('taxonomy_term_data', 't');
+  $query1->join('taxonomy_vocabulary', 'v', 'v.vid = t.vid');
+  $query1->condition('v.name', $vname);
+  $query1->fields('t', array('tid', 'name'));
+  $target = $query1->execute()->fetchAllKeyed(0, 1);
   return $target;
 }
