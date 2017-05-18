@@ -402,6 +402,10 @@ function dispatch_planning_form($form, &$form_state) {
       '#autocomplete_path' => 'cashier/autocomplete',
       '#suffix' => '</div></div>',
     );
+    $form['skip_sequencing'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Check this to skip sequencing of bills'),
+    );
 
     $form['submit'] = array(
       '#type' => 'submit',
@@ -525,11 +529,19 @@ function remove_selected_ajax_submit($form, &$form_state) {
 }
 
 function dispatch_planning_form_save_validate($form, &$form_state) {
+  global $user;
+  $user_id = $user->uid;
+  $distributor_id = change_feeds_import_get_distributor_id($user_id);
+  
   $rows = $form_state['values']['list_form_items'];
   $cashier = trim($form_state['values']['cashier']);
   $vehicle_number = trim($form_state['values']['vehicle_number']);
   $trip_execution_date = strtotime($form_state['values']['trip_execution_date']);
   $hht_id = trim($form_state['values']['hht_id']);
+  
+  $skip_sequencing = $form_state['values']['skip_sequencing'];
+  
+  $bill_nids = array_keys($rows);
 
   $today = strtotime(date('Y-m-d 00:00:00'));
 
@@ -552,26 +564,7 @@ function dispatch_planning_form_save_validate($form, &$form_state) {
   if (!empty($vehicle_number) && empty(validate_vehicle_number($vehicle_number))) {
     form_set_error('vehicle_number', 'Please enter a valid vehicle number');
   }
-}
-
-function dispatch_planning_form_save_submit($form, &$form_state) {
-  $rows = $form_state['values']['list_form_items'];
-  $cashier = trim($form_state['values']['cashier']);
-  $vehicle_number = trim($form_state['values']['vehicle_number']);
-  $trip_execution_date = strtotime($form_state['values']['trip_execution_date']);
-  $hht_id = trim($form_state['values']['hht_id']);
-
-  $dispatch_bill_count = count($rows);
-  $bill_value_sum = $form_state['dispatch_planning']['bill_value_sum'];
   
-  $bill_nids = array_keys($rows);
-  
-  dpm($bill_nids);
-
-  global $user;
-  $user_id = $user->uid;
-  $distributor_id = change_feeds_import_get_distributor_id($user_id);
-
   ##############################################################################
   $query = db_select('node', 'n');
   $query->leftJoin('field_data_field_sales_party_code', 'spc', 'n.nid = spc.entity_id');
@@ -600,8 +593,6 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
 
   $res = $query->execute()->fetchAll();
   
-  dpm($res);
-
   $bill_count = count($res);
   $sequence = $no_area = 0;
   foreach ($res as $val) {
@@ -626,41 +617,76 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
   dpm($no_area, '$no_area');
   dpm($sequence, '$sequence');
 
-  if($no_area || $no_sequence || count($area_hook) > 1){
+  $bill_sequence_array = array();
+  if(($no_area || $no_sequence || count($area_hook) > 1) && !$skip_sequencing){
     
-    $params['vehicles'][] = array('vehicle_id' => 'origin', 'start_address' => array('location_id' => 'origin', 'lon' => 72.99, 'lat' => 19.2), 'return_to_depot' => false);
+    $origin_lat = 19.2;
+    $origin_long = 72.99;
+    
+    $params['vehicles'][] = array('vehicle_id' => 'origin', 'start_address' => array('location_id' => 'origin', 'lon' => $origin_long, 'lat' => $origin_lat), 'return_to_depot' => false);
     $post_result = graphhopper_postvrp_api($params);
     dpm($params);
-    dpm($post_result);
-    $job_id = $post_result->getJobId();
-    if($job_id){
-      
-      $solution = graphhopper_solution_api($job_id);
-      
-      dpm($solution);
-      if ($solution) {
-        if ($solution->getStatus() == 'finished') {
+    if ($post_result) {
+      $job_id = $post_result->getJobId();
+      if ($job_id) {
 
-          $routes = $solution->getSolution()->getRoutes();
-          
-          $data = $routes[0]->getActivities();
-          dpm($data);
+        for ($i = 0; $i <= 10; $i++) {
+          $solution = graphhopper_solution_api($job_id);
+          if ($solution) {
+            if ($solution->getStatus() == 'finished') {
 
-          $i = 1;
-          foreach ($data as $key => $value) {
-            if ($value->getType() == 'service') {
-              $bill_sequence_array[$value->getLocationId()] = $i;
-              $i ++;
+              $routes = $solution->getSolution()->getRoutes();
+
+              $data = $routes[0]->getActivities();
+
+              $i = 1;
+              foreach ($data as $key => $value) {
+                if ($value->getType() == 'service') {
+                  $bill_sequence_array[$value->getLocationId()] = $i;
+                  $i ++;
+                }
+              }
+              break;
             }
           }
+          sleep(0.5); // this should halt for 3 seconds for every loop
         }
       }
     }
+    
+    if ($bill_sequence_array) {
+      $form_state['dispatch_planning']['bill_sequence_array'] = $bill_sequence_array;
+    }
+    else {
+      form_set_error('form', 'An error occured while generating sequence');
+    }
   }
-  dpm($bill_sequence_array);
-  
-  return;
   ##############################################################################
+}
+
+function dispatch_planning_form_save_submit($form, &$form_state) {
+  $rows = $form_state['values']['list_form_items'];
+  $cashier = trim($form_state['values']['cashier']);
+  $vehicle_number = trim($form_state['values']['vehicle_number']);
+  $trip_execution_date = strtotime($form_state['values']['trip_execution_date']);
+  $hht_id = trim($form_state['values']['hht_id']);
+
+  $dispatch_bill_count = count($rows);
+  $bill_value_sum = $form_state['dispatch_planning']['bill_value_sum'];
+  
+  $bill_nids = array_keys($rows);
+  
+  global $user;
+  $user_id = $user->uid;
+  $distributor_id = change_feeds_import_get_distributor_id($user_id);
+
+  if (isset($form_state['dispatch_planning']['bill_sequence_array']) && !empty($form_state['dispatch_planning']['bill_sequence_array'])) {
+    dpm($form_state['dispatch_planning']['bill_sequence_array'], 'New sequence');
+    $bill_sequence = $form_state['dispatch_planning']['bill_sequence_array'];
+    $seq_flag = 1;
+  }
+
+  return;
 
   $txn = db_transaction();
 
@@ -718,6 +744,10 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
     if(isset($node->field_delivery_pending[LANGUAGE_NONE])){
       $node->field_delivery_pending = array();
     }
+    if($seq_flag){
+      $node->field_bill_sequence[LANGUAGE_NONE][0]['value'] = $bill_sequence[$value];
+    }
+    
     $node->field_trip_id_reference[LANGUAGE_NONE][0]['nid'] = $nid;
     node_save($node);
   }
