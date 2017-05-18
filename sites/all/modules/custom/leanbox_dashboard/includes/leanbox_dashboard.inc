@@ -1690,7 +1690,7 @@ function leanbox_dashboard_otif_trends_chart_query_details($type, $start_date = 
         $total_dis_bill_val = _get_otif_details_using_bill_date($bill_date_str, $channel, $uid);
         $bill_date = date('Y-m-d', $bill_date_str);
         $otif_val = round(($total_dis_bill_val / $val['bill_sum'] ) * 100);
-        $row[] = array($bill_date, (int) $otif_val);
+        $row[] = $otif_val;
       }
       $rows[] = $row;
     }
