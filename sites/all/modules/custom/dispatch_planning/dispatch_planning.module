@@ -410,7 +410,7 @@ function dispatch_planning_form($form, &$form_state) {
     $form['submit'] = array(
       '#type' => 'submit',
       '#value' => 'Save',
-      '#limit_validation_errors' => array(array('trip_execution_date'), array('hht_id'), array('vehicle_number'), array('cashier'), array('list_form_items')),
+      '#limit_validation_errors' => array(array('trip_execution_date'), array('hht_id'), array('vehicle_number'), array('cashier'), array('list_form_items'), array('skip_sequencing')),
       '#submit' => array('dispatch_planning_form_save_submit'),
       '#validate' => array('dispatch_planning_form_save_validate')
     );
@@ -665,7 +665,7 @@ function dispatch_planning_form_save_validate($form, &$form_state) {
       $form_state['dispatch_planning']['bill_sequence_array'] = $bill_sequence_array;
     }
     else {
-      form_set_error('form', 'An error occured while generating sequence');
+      form_set_error('list_form_items', 'An error occured while generating sequence');
     }
   }
   ##############################################################################
