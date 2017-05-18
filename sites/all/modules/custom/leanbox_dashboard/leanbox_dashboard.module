@@ -576,7 +576,7 @@ function leanbox_dashboard_block_view($delta = '') {
 
       $filter_form = drupal_render(drupal_get_form('leanbox_dashboard_chart_filter_otif_trends_form'));
       $block['content'] = array(
-        '#markup' => $data,
+        '#markup' => theme('leanbox_dashboard', array('data' => $filter_form, 'otif_table' => $data,)),
         '#attached' => array(
           'js' => array(
             drupal_get_path('module', 'leanbox_dashboard') . '/js/leanbox_dashboard_otif_trends_chart.js',
