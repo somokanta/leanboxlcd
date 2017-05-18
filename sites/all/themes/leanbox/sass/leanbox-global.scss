@@ -153,6 +153,16 @@ ul.tabs.primary {
   }
 }
 
+.breadcrumb {
+  li {
+    &.active {
+      &::before {
+        display: none;
+      }
+    }
+  }
+}
+
 #dist-name {
   font-size: 34px;
   text-align: center;
@@ -1373,3 +1383,33 @@ header[id="page-header"] {
     }
   }
 }
+
+// Dashboard pages
+.page-dashboard {
+  .tabs--primary.nav.nav-tabs {
+    margin-bottom: 0;
+
+    li {
+      &.active {
+        a {
+          background-color: #f5f5f5;
+          color: #000;
+        }
+      }
+
+      a {
+        font-size: 16px;
+      }
+    }
+  }
+
+  .region-content {
+    background-color: #f5f5f5;
+    overflow: hidden;
+    border-left: 1px solid #ddd;
+    border-right: 1px solid #ddd;
+    border-bottom: 1px solid #ddd;
+  }
+}
+
+// End Dashboard pages
