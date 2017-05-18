@@ -1084,7 +1084,7 @@ function graphhopper_postvrp_api($params) {
     $result = $api_instance->postVrp($key, $body);
   }
   catch (Exception $e) {
-     watchdog('graphhopper_error', 'Exception when calling VrpApi->postVrp: '. $e->getResponseBody());
+     watchdog('graphhopper_error', 'Exception when calling VrpApi->postVrp: '. $e->getMessage());
   }
   return $result;
 }
@@ -1103,7 +1103,7 @@ function graphhopper_solution_api($job_id) {
     $result = $api_instance->getSolution($key, $job_id);
   }
   catch (Exception $e) {
-    watchdog('graphhopper_error', 'Exception when calling SolutionApi->getSolution: '. $e->getResponseBody());
+    watchdog('graphhopper_error', 'Exception when calling SolutionApi->getSolution: '. $e->getMessage());
   }
 
   return $result;

@@ -693,8 +693,6 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
     $seq_flag = 1;
   }
 
-  return;
-
   $txn = db_transaction();
 
   $query = db_select('trip_id_sequence', 'ts');
