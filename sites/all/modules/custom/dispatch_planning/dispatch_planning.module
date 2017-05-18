@@ -656,7 +656,7 @@ function dispatch_planning_form_save_validate($form, &$form_state) {
               break;
             }
           }
-          sleep(0.5); // this should halt for 3 seconds for every loop
+          sleep(0.5); // this should halt for 500 ms for every loop
         }
       }
     }

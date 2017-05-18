@@ -1069,14 +1069,14 @@ function reverse_geocode_node_presave($node) {
 }
 
 function graphhopper_postvrp_api($params) {
+  $key = variable_get('graphhopper_api_key', '6c0a903a-4698-42cd-aac0-52d6f5c7ee0a');
 
-  Swagger\Client\Configuration::getDefaultConfiguration()->setApiKey('key', '6c0a903a-4698-42cd-aac0-52d6f5c7ee0a');
+  Swagger\Client\Configuration::getDefaultConfiguration()->setApiKey('key', $key);
 
 // Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
 // Swagger\Client\Configuration::getDefaultConfiguration()->setApiKeyPrefix('key', 'Bearer');
 
   $api_instance = new Swagger\Client\graphhopper\VrpApi();
-  $key = "6c0a903a-4698-42cd-aac0-52d6f5c7ee0a"; // string | your API key
 
   $body = new \Swagger\Client\Model\Request($params); // \Swagger\Client\Model\Request | Request object that contains the problem to be solved
 
@@ -1084,28 +1084,26 @@ function graphhopper_postvrp_api($params) {
     $result = $api_instance->postVrp($key, $body);
   }
   catch (Exception $e) {
-    echo 'Exception when calling VrpApi->postVrp: ', $e->getMessage(), PHP_EOL;
+     watchdog('graphhopper_error', 'Exception when calling VrpApi->postVrp: '. $e->getMessage());
   }
-dpm($result, 'response');
   return $result;
 }
 
 function graphhopper_solution_api($job_id) {
+  $key = variable_get('graphhopper_api_key', '6c0a903a-4698-42cd-aac0-52d6f5c7ee0a');
 
-  Swagger\Client\Configuration::getDefaultConfiguration()->setApiKey('key', '6c0a903a-4698-42cd-aac0-52d6f5c7ee0a');
+  Swagger\Client\Configuration::getDefaultConfiguration()->setApiKey('key', $key);
 
 // Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
 // Swagger\Client\Configuration::getDefaultConfiguration()->setApiKeyPrefix('key', 'Bearer');
 
   $api_instance = new Swagger\Client\graphhopper\SolutionApi();
-  $key = "6c0a903a-4698-42cd-aac0-52d6f5c7ee0a"; // string | your API key
 
   try {
     $result = $api_instance->getSolution($key, $job_id);
   }
   catch (Exception $e) {
-    dpm($e->getResponseBody());
-    echo 'Exception when calling SolutionApi->getSolution: ', $e->getMessage(), PHP_EOL;
+    watchdog('graphhopper_error', 'Exception when calling SolutionApi->getSolution: '. $e->getResponseBody());
   }
 
   return $result;
