@@ -1115,7 +1115,7 @@ function graphhopper_solution_api($job_id) {
 
 /**
  * Implements hook_node_access().
- */
+ 
 function reverse_geocode_node_access($node, $op, $account) {
   $type = is_string($node) ? $node : $node->type;
 
@@ -1141,4 +1141,4 @@ function reverse_geocode_node_access($node, $op, $account) {
   }
 
   return NODE_ACCESS_IGNORE;
-}
+}*/
