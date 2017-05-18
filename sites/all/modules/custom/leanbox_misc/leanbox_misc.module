@@ -196,12 +196,14 @@ function van_stop_master_form($form, &$form_state) {
     '#title' => t('Distributor Lattitude'),
     '#required' => TRUE,
     '#default_value' => $field_distributor_latitude,
+    '#element_validate' => array('element_validate_number'),
   );
   $form['field_distributor_longitude'] = array(
     '#type' => 'textfield',
     '#title' => t('Distributor Longitude'),
     '#required' => TRUE,
     '#default_value' => $field_distributor_longitude,
+    '#element_validate' => array('element_validate_number'),
   );
   $form['field_enable_routing'] = array(
     '#type' => 'checkbox',
