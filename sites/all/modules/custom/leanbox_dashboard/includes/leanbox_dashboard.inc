@@ -1635,10 +1635,6 @@ function leanbox_dashboard_gauge_chart_query_details($type, $start_date = '', $e
  */
 function leanbox_dashboard_otif_trends_chart_query_details($type, $start_date = '', $end_date = '') {
 
-  $output1 = array();
-  $output[] = array('Day', 'Otif Value');
-  $table = '';
-
   global $user;
   // Store distributor id in author in each node
   $uid = change_feeds_import_get_distributor_id($user->uid);
@@ -1655,7 +1651,13 @@ function leanbox_dashboard_otif_trends_chart_query_details($type, $start_date = 
     $end_date = leanbox_dashboard_get_default_pdd_date_for_chart();
   }
 
-  // Query to calculate total bill value
+  // 
+  $query = db_select('node', 'n');
+  $query->join('field_data_field_channel', 'c', 'c.entity_id = n.nid');
+  $query->fields('c', array('field_channel_value'));
+  $query->condition('n.type', 'channel_master');
+  $query->condition('n.uid', $uid);
+  $channel_list = $query->execute()->fetchAllKeyed(0,0);
 
   $query = db_select('node', 'n');
   $query->join('field_data_field_bill_value', 'v', 'v.entity_id = n.nid');
@@ -1672,37 +1674,38 @@ function leanbox_dashboard_otif_trends_chart_query_details($type, $start_date = 
   $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
 
   if (!empty($res)) {
+
+    $header[] = 'Channel';
     foreach ($res as $key => $val) {
-      $bill_date_str = $val['field_sr_bill_date_value'];
-      $total_dis_bill_val = _get_otif_details_using_bill_date($bill_date_str, $uid);
-      $bill_date = date('Y-m-d', $bill_date_str);
-      $otif_val = round(($total_dis_bill_val / $val['bill_sum'] ) * 100);
-      $output[] = array($bill_date, (int)$otif_val);
-    }   
+      // prepare header
+      $date = date('Y-m-d', $val['field_sr_bill_date_value']);
+      $header[$date] = $date;
+    }
+    foreach ($channel_list as $channel) {
+      $row = array();
+      $row[] = $channel;
+      foreach ($res as $key => $val) {
+        $bill_date_str = $val['field_sr_bill_date_value'];
+
+        $total_dis_bill_val = _get_otif_details_using_bill_date($bill_date_str, $channel, $uid);
+        $bill_date = date('Y-m-d', $bill_date_str);
+        $otif_val = round(($total_dis_bill_val / $val['bill_sum'] ) * 100);
+        $row[] = $otif_val;
+      }
+      $rows[] = $row;
+    }
+    
+    $output = theme('table', array(
+      'header' => $header,
+      'rows' => $rows,
+      'attributes' => array('width' => '100%')
+    ));
   }
   else {
-    $output[] = array('No Data found', 0);
+    $output = 'No Data found';
   }
-  
-  $output1['output'] = $output;
 
-  if (arg(1) == 'otif_trends' || $type == 'otif_ajax') {
-//
-//    $mtd_html = "<h3>Channel Wise Otif</h3>";
-//    $mtd_data .= get_mtd_data_channel($start_date, $end_date, $uid);
-//    if ($mtd_data == "No Result Found") {
-//      $header = get_header_of_chhanel();
-//      $mtd_rows[] = array("<td colspan='10' style='text-align: center;'> There is No Activity</td>");
-//      $mtd_html .= theme('table', array('header' => $header, 'rows' => $mtd_rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
-//    }
-//    else {
-//      $mtd_html .= $mtd_data;
-//    }
-//    $table = $mtd_html;
-  }
-  $output1['table'] = $table;
-
-  return $output1;
+  return $output;
 }
 
 /**
@@ -1732,7 +1735,7 @@ function leanbox_dashboard_get_default_pdd_date_for_chart($pdd = "1 days") {
  * @param type $uid
  * @return type
  */
-function _get_otif_details_using_bill_date($bill_date, $uid) {
+function _get_otif_details_using_bill_date($bill_date, $channel, $uid) {
   $total_dis_bill_val = 0;
   if (!empty($bill_date)) {
     $query = db_select('node', 'n');
@@ -1747,6 +1750,12 @@ function _get_otif_details_using_bill_date($bill_date, $uid) {
     $query->join('node', 'n1', 't.field_trip_id_reference_nid = n1.nid');
     $query->join('field_data_field_dispatch_date', 'd1', 'd1.entity_id= n1.nid');
     $query->fields('d1', array('field_dispatch_date_value'));
+    $query->join('field_data_field_sales_party_code', 'pc', 'pc.entity_id = n.nid');
+    $query->join('node', 'oun', 'pc.field_sales_party_code_value = oun.title');
+    $query->join('field_data_field_channel', 'chan', 'chan.entity_id = oun.nid');
+    $query->condition('oun.type', 'outlet_master');
+    $query->condition('chan.field_channel_value', $channel);
+    $query->condition('oun.uid', $uid);
     $query->condition('n.uid', $uid);
     $query->condition('n1.uid', $uid);
     $query->condition('b.field_sr_bill_date_value', $bill_date);
