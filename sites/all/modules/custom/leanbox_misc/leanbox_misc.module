@@ -206,7 +206,7 @@ function van_stop_master_form($form, &$form_state) {
   $form['field_enable_routing'] = array(
     '#type' => 'checkbox',
     '#title' => t('Enable Routing'),
-    '#required' => TRUE,
+    //'#required' => TRUE,
     '#default_value' => $field_enable_routing,
   );
 
