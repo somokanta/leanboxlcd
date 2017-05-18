@@ -632,7 +632,7 @@ function dispatch_planning_form_save_validate($form, &$form_state) {
       $job_id = $post_result->getJobId();
       if ($job_id) {
 
-        for ($i = 0; $i <= 10; $i++) {
+        for ($j = 0; $j < 10; $j++) {
           $solution = graphhopper_solution_api($job_id);
           if ($solution) {
             if ($solution->getStatus() == 'finished') {
