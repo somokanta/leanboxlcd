@@ -616,13 +616,18 @@ function dispatch_planning_form_save_validate($form, &$form_state) {
   dpm($area_hook, '$area_hook');
   dpm($no_area, '$no_area');
   dpm($sequence, '$sequence');
+  
+  $conf_nid = $form_state['leanbox_misc']['nid'] = check_node_title_exists($distributor_id, 'van_stop_master');
+  if ($conf_nid) {
+    $node = node_load($conf_nid);
+    $origin_lat = $node->field_distributor_latitude[LANGUAGE_NONE][0]['value'];
+    $origin_long = $node->field_distributor_longitude[LANGUAGE_NONE][0]['value'];
+    $enable_routing = $node->field_enable_routing[LANGUAGE_NONE][0]['value'];
+  }
 
   $bill_sequence_array = array();
-  if(($no_area || $no_sequence || count($area_hook) > 1) && !$skip_sequencing){
-    
-    $origin_lat = 19.2;
-    $origin_long = 72.99;
-    
+  if(($no_area || $no_sequence || count($area_hook) > 1) && !$skip_sequencing && $origin_lat && $origin_long && $enable_routing){
+        
     $params['vehicles'][] = array('vehicle_id' => 'origin', 'start_address' => array('location_id' => 'origin', 'lon' => $origin_long, 'lat' => $origin_lat), 'return_to_depot' => false);
     $post_result = graphhopper_postvrp_api($params);
     dpm($params);
