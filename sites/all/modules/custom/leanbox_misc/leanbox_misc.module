@@ -96,6 +96,9 @@ function van_stop_master_form($form, &$form_state) {
     $field_pp = $node->field_pp[LANGUAGE_NONE][0]['value'];
     $field_pp_bulk = $node->field_pp_bulk[LANGUAGE_NONE][0]['value'];
     $field_pp_loose = $node->field_pp_loose[LANGUAGE_NONE][0]['value'];
+    $field_distributor_latitude = $node->field_distributor_latitude[LANGUAGE_NONE][0]['value'];
+    $field_distributor_longitude = $node->field_distributor_longitude[LANGUAGE_NONE][0]['value'];
+    $field_enable_routing = $node->field_enable_routing[LANGUAGE_NONE][0]['value'];
   }
 
 //  $form['stop_size'] = array(
@@ -188,6 +191,24 @@ function van_stop_master_form($form, &$form_state) {
     '#required' => TRUE,
     '#default_value' => $field_pp_loose,
   );
+  $form['field_distributor_latitude'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Distributor Lattitude'),
+    '#required' => TRUE,
+    '#default_value' => $field_distributor_latitude,
+  );
+  $form['field_distributor_longitude'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Distributor Longitude'),
+    '#required' => TRUE,
+    '#default_value' => $field_distributor_longitude,
+  );
+  $form['field_enable_routing'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Enable Routing'),
+    '#required' => TRUE,
+    '#default_value' => $field_enable_routing,
+  );
 
   $form['submit'] = array(
     '#type' => 'submit',
@@ -226,6 +247,9 @@ function van_stop_master_form_submit($form, &$form_state) {
     $node->field_pp[LANGUAGE_NONE][0]['value'] = $form_state['values']['field_pp'];
     $node->field_pp_bulk[LANGUAGE_NONE][0]['value'] = $form_state['values']['field_pp_bulk'];
     $node->field_pp_loose[LANGUAGE_NONE][0]['value'] = $form_state['values']['field_pp_loose'];
+    $node->field_distributor_latitude[LANGUAGE_NONE][0]['value'] = $form_state['values']['field_distributor_latitude'];
+    $node->field_distributor_longitude[LANGUAGE_NONE][0]['value'] = $form_state['values']['field_distributor_longitude'];
+    $node->field_enable_routing[LANGUAGE_NONE][0]['value'] = $form_state['values']['field_enable_routing'];
 
 
     node_save($node);
@@ -247,7 +271,9 @@ function van_stop_master_form_submit($form, &$form_state) {
     $node->field_pp[LANGUAGE_NONE][0]['value'] = $form_state['values']['field_pp'];
     $node->field_pp_bulk[LANGUAGE_NONE][0]['value'] = $form_state['values']['field_pp_bulk'];
     $node->field_pp_loose[LANGUAGE_NONE][0]['value'] = $form_state['values']['field_pp_loose'];
-
+    $node->field_distributor_latitude[LANGUAGE_NONE][0]['value'] = $form_state['values']['field_distributor_latitude'];
+    $node->field_distributor_longitude[LANGUAGE_NONE][0]['value'] = $form_state['values']['field_distributor_longitude'];
+    $node->field_enable_routing[LANGUAGE_NONE][0]['value'] = $form_state['values']['field_enable_routing'];
     node_save($node);
   }
 }
