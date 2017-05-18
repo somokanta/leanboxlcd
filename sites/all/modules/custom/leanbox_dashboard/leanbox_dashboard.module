@@ -135,24 +135,7 @@ function party_packing_filter_callback() {
   if (isset($_POST['end_date'])) {
     $end_date = $_POST['end_date'];
   }
-//  if ($activity_type == 'otif') {
-//    $activity_type = 'otif_ajax';
-//    $output_data = leanbox_dashboard_gauge_chart_query_details($activity_type, $start_date, $end_date);
-//  }
-//  else {
-//    
-//    if ($activity_type == 'party_packing_productivity') {
-//      $ajax_type = 'party_packing_ajax';
-//    }
-//    else if ($activity_type == 'picking_productivity') {
-//      $ajax_type = 'picking_ajax';
-//    }
-//    else if ($activity_type == 'bill_pendency') {
-//      $ajax_type = 'bill_pendency_ajax';
-//    }
-//
-//    $output_data = leanbox_dashboard_chart_query_details($activity_type, $start_date, $end_date, $ajax_type);
-//  }
+
   switch ($activity_type) {
     case 'otif' :
       $activity_type = 'otif_ajax';
@@ -585,17 +568,6 @@ function leanbox_dashboard_block_view($delta = '') {
       break;
     
     case 'otif_trends':
-      
-        if (arg(1) == 'otif_trends') {
-        $area_definition = array(
-          'width' => 700,
-          'height' => 400,
-          'ch_left' => 80,
-          'ch_top' => 50,
-          'ch_width' => 500,
-          'ch_height' => 250,
-        );
-      }
 
       $bill_date = leanbox_dashboard_get_default_pdd_date_for_chart();
       $bill_date = date('d-m-Y', $bill_date);
@@ -604,18 +576,14 @@ function leanbox_dashboard_block_view($delta = '') {
 
       $filter_form = drupal_render(drupal_get_form('leanbox_dashboard_chart_filter_otif_trends_form'));
       $block['content'] = array(
-        '#markup' => theme('leanbox_dashboard', array('data' => $filter_form, 'otif_table' => $data['table'],)),
+        '#markup' => $data,
         '#attached' => array(
           'js' => array(
-            array(
-              'type' => 'external',
-              'data' => 'https://www.gstatic.com/charts/loader.js'
-            ),
             drupal_get_path('module', 'leanbox_dashboard') . '/js/leanbox_dashboard_otif_trends_chart.js',
-            array(
-              'data' => array('leanbox_dashboard' => array('otif_trends' => $data['output'], 'area_definition' => $area_definition)),
-              'type' => 'setting'
-            ),
+//            array(
+//              'data' => array('leanbox_dashboard' => array('otif_trends' => $data,)),
+//              'type' => 'setting'
+//            ),
           ),
         ),
       );
