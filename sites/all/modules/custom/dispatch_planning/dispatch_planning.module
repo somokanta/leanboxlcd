@@ -615,10 +615,6 @@ function dispatch_planning_form_save_validate($form, &$form_state) {
     }
   }
 
-  dpm($area_hook, '$area_hook');
-  dpm($no_area, '$no_area');
-  dpm($sequence, '$sequence');
-  
   $conf_nid = $form_state['leanbox_misc']['nid'] = check_node_title_exists($distributor_id, 'van_stop_master');
   if ($conf_nid) {
     $node = node_load($conf_nid);
@@ -632,7 +628,6 @@ function dispatch_planning_form_save_validate($form, &$form_state) {
         
     $params['vehicles'][] = array('vehicle_id' => 'origin', 'start_address' => array('location_id' => 'origin', 'lon' => (double)$origin_long, 'lat' => (double)$origin_lat), 'return_to_depot' => false);
     $post_result = graphhopper_postvrp_api($params);
-    dpm($params);
     if ($post_result) {
       $job_id = $post_result->getJobId();
       if ($job_id) {
@@ -688,7 +683,6 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
 
   if (isset($form_state['dispatch_planning']['bill_sequence_array']) && !empty($form_state['dispatch_planning']['bill_sequence_array'])) {
-    dpm($form_state['dispatch_planning']['bill_sequence_array'], 'New sequence');
     $bill_sequence = $form_state['dispatch_planning']['bill_sequence_array'];
     $seq_flag = 1;
   }

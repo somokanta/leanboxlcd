@@ -1103,7 +1103,6 @@ function graphhopper_solution_api($job_id) {
     $result = $api_instance->getSolution($key, $job_id);
   }
   catch (Exception $e) {
-    dpm($e->getResponseBody());
     watchdog('graphhopper_error', 'Exception when calling SolutionApi->getSolution: '. $e->getMessage());
   }
 
