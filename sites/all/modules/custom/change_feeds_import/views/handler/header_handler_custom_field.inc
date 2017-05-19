@@ -38,13 +38,18 @@ class header_handler_custom_field extends views_handler_field {
     $result = get_data_from_trip_id($trip_id);
 
     if (!empty($result)) {
-      dpm($result,"result");
       $trip_execution_date = $result['field_trip_executon_date_value'];
       $hht_id = $result['title'];
       $vehicle_no = $result['field_vehicle_no_value'];
       $bill_count = $result['field_bill_count_value'];
       $cashier_name = $result['field_cashier_name_value'];
-
+      $seq_method = $result['field_sequence_method_value'];
+      
+      if($seq_method == "0" || empty($seq_method)){
+        $sequence = "MANUAL";
+      }else{
+        $sequence = "API";
+      }
       $trip_execution_date = date('d/m/y', $trip_execution_date);
 
       return '<table width = "100%" cellspacing = "0" style = "font-size: 13px; color:#000; font-family:arial" cellpadding = "5" border = "0" align = "center" class = "preview_table">
@@ -93,8 +98,8 @@ class header_handler_custom_field extends views_handler_field {
       <td align = "left" style="color:#666">'.$vehicle_no.'</td>
       <td></td>
       <td></td>
-      <td></td>
-      <td></td>
+      <td>Seq Method</td>
+      <td align = "left" style="color:#666">'.$sequence.'</td>
       <td></td>
       </tr>
       </tbody>
@@ -119,6 +124,8 @@ function get_data_from_trip_id($trip_id) {
   $query1->join('field_data_field_vehicle_no', 've', 've.entity_id = n.nid');
   $query1->join('field_data_field_bill_count', 'bill', 'bill.entity_id = n.nid');
   $query1->join('field_data_field_cashier_name', 'cash', 'cash.entity_id = n.nid');
+  $query1->leftjoin('field_data_field_sequence_method', 'sm', 'sm.entity_id = n.nid');
+  $query1->fields('sm', array('	field_sequence_method_value'));
   $query1->fields('trip_exe', array('	field_trip_executon_date_value'));
   $query1->fields('hht', array('field_hht_id_nid'));
   $query1->fields('dd', array('title'));
