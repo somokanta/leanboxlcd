@@ -1314,6 +1314,7 @@ function trip_delete_form_submit($form, &$form_state) {
 
     if ($node) {
       $node->field_trip_id_reference = array();
+      $node->field_bill_sequence = array();
       node_save($node);
     }
   }
