@@ -9,7 +9,9 @@
 	Drupal.behaviors.leanbox_dashboard_otif_trends = {
 		attach: function (context, settings) {
 
-      $('#block-leanbox-dashboard-otif-trends #otiftable').css('height', '291px');
+			$('#otif_trends_div').css('height', '291px');
+			var response = Drupal.settings.leanbox_dashboard.otif_trends;
+			$('#otif_trends_div').html(response);
 			$(".otif-trends-submit").click(function (e) {
 
 				e.preventDefault();
@@ -22,7 +24,7 @@
 						url: "/chart-daterange-filter",
 						data: {start_date: start_date, end_date: end_date, activity_type: 'otif_trends'},
 						success: function (response) {
-							$('#otiftable').html(response);
+							$('#otif_trends_div').html(response);
 						},
 					});
 				}
