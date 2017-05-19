@@ -165,7 +165,7 @@ function party_packing_filter_callback() {
     default:
       $output_data = leanbox_dashboard_chart_query_details($activity_type, $start_date, $end_date, $ajax_type);
   }
-  
+
   drupal_json_output($output_data);
 }
 
@@ -574,7 +574,7 @@ function leanbox_dashboard_block_view($delta = '') {
         ),
       );
       break;
-    
+
     case 'otif_trends':
 
       $bill_date = leanbox_dashboard_get_default_pdd_date_for_chart();
@@ -592,28 +592,28 @@ function leanbox_dashboard_block_view($delta = '') {
         ),
       );
       break;
-    
+
     case 'bills_per_van_trends':
 
       $loading_date = date('d-m-Y');
       $block['subject'] = "Bills Per Van DayWise($loading_date Dispatch)";
       $data = leanbox_dashboard_chart_query_details('bills_per_van_trends');
-dpm($data, '$data');
+      dpm($data, '$data');
       $filter_form = drupal_render(drupal_get_form('leanbox_dashboard_chart_filter_bills_per_van_trends_form'));
       $block['content'] = array(
         '#markup' => theme('leanbox_dashboard', array('data' => $filter_form)),
         '#attached' => array(
           'js' => array(
             drupal_get_path('module', 'leanbox_dashboard') . '/js/leanbox_dashboard_bills_per_van_trends_chart.js',
-          ),
-          array(
-            'data' => array('leanbox_dashboard' => array('bills_per_van_trends' => $data,)),
-            'type' => 'setting'
+            array(
+              'data' => array('leanbox_dashboard' => array('bills_per_van_trends' => $data,)),
+              'type' => 'setting'
+            ),
           ),
         ),
       );
       break;
-    
+
     case 'bills_per_person_trends':
 
       $loading_date = date('d-m-Y');
@@ -626,10 +626,10 @@ dpm($data, '$data');
         '#attached' => array(
           'js' => array(
             drupal_get_path('module', 'leanbox_dashboard') . '/js/leanbox_dashboard_bills_per_person_trends_chart.js',
-          ),
-          array(
-            'data' => array('leanbox_dashboard' => array('bills_per_person_trends' => $data,)),
-            'type' => 'setting'
+            array(
+              'data' => array('leanbox_dashboard' => array('bills_per_person_trends' => $data,)),
+              'type' => 'setting'
+            ),
           ),
         ),
       );
