@@ -8,7 +8,8 @@
 
 	Drupal.behaviors.leanbox_dashboard_bills_per_person_trends = {
 		attach: function (context, settings) {
-
+      
+			$('#block-leanbox-dashboard-bills-per-person-trends #otiftable').css('height', '291px');
 			$(".bills-per-person-trends-submit").click(function (e) {
 
 				e.preventDefault();

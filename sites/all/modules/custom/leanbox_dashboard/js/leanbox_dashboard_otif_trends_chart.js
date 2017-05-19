@@ -9,6 +9,7 @@
 	Drupal.behaviors.leanbox_dashboard_otif_trends = {
 		attach: function (context, settings) {
 
+      $('#block-leanbox-dashboard-otif-trends #otiftable').css('height', '291px');
 			$(".otif-trends-submit").click(function (e) {
 
 				e.preventDefault();

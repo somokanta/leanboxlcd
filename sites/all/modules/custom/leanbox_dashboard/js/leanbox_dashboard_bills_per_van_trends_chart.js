@@ -8,7 +8,8 @@
 
 	Drupal.behaviors.leanbox_dashboard_bills_per_van_trends = {
 		attach: function (context, settings) {
-
+			
+      $('#block-leanbox-dashboard-bills-per-van-trends #otiftable').css('height', '291px');
 			$(".bills-per-van-trends-submit").click(function (e) {
 
 				e.preventDefault();
