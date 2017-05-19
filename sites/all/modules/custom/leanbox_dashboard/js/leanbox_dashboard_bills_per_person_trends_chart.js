@@ -9,7 +9,9 @@
 	Drupal.behaviors.leanbox_dashboard_bills_per_person_trends = {
 		attach: function (context, settings) {
       
-			$('#block-leanbox-dashboard-bills-per-person-trends #otiftable').css('height', '291px');
+			$('#bills_per_person_trends').css('height', '291px');
+			var response = Drupal.settings.leanbox_dashboard.bills_per_person_trends;
+			$('#bills_per_person_trends').html(response);
 			$(".bills-per-person-trends-submit").click(function (e) {
 
 				e.preventDefault();
@@ -22,7 +24,7 @@
 						url: "/chart-daterange-filter",
 						data: {start_date: start_date, end_date: end_date, activity_type: 'bills_per_person_trends'},
 						success: function (response) {
-							$('#otiftable').html(response);
+							$('#bills_per_person_trends').html(response);
 						},
 					});
 				}
