@@ -6,11 +6,11 @@
 
 (function ($) {
 
-	Drupal.behaviors.leanbox_dashboard_otif_trends = {
+	Drupal.behaviors.leanbox_dashboard_bills_per_person_trends = {
 		attach: function (context, settings) {
-
-      $('#block-leanbox-dashboard-otif-trends #otiftable').css('height', '291px');
-			$(".otif-trends-submit").click(function (e) {
+      
+			$('#block-leanbox-dashboard-bills-per-person-trends #otiftable').css('height', '291px');
+			$(".bills-per-person-trends-submit").click(function (e) {
 
 				e.preventDefault();
 			  var start_date = $(this).parent().prev().prev().find("input[name='start_date[date]']").val();
@@ -20,7 +20,7 @@
 						type: "POST",
 						cache: false, //for Chrome and IE8
 						url: "/chart-daterange-filter",
-						data: {start_date: start_date, end_date: end_date, activity_type: 'otif_trends'},
+						data: {start_date: start_date, end_date: end_date, activity_type: 'bills_per_person_trends'},
 						success: function (response) {
 							$('#otiftable').html(response);
 						},

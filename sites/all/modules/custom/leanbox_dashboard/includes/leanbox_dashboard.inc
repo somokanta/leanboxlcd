@@ -12,6 +12,92 @@
  * @param array $form_state
  * @return array
  */
+function leanbox_dashboard_chart_filter_bills_per_person_trends_form($form, &$form_state) {
+  $form = array();
+
+  if (arg(1) == 'bills_per_person_trends') {
+    $bill_date = date('Y-m-d');
+    $form['start_date'] = array(
+      '#type' => 'date_popup',
+      '#title' => t('Dispatch Date From'),
+      '#required' => TRUE,
+      '#date_format' => 'Y-m-d',
+      '#default_value' => $bill_date,
+    );
+    $form['end_date'] = array(
+      '#type' => 'date_popup',
+      '#title' => t('Dispatch Date To'),
+      '#required' => TRUE,
+      '#date_format' => 'Y-m-d',
+      '#default_value' => $bill_date,
+    );
+
+    $form['submit'] = array(
+      '#type' => 'submit',
+      '#value' => 'Submit',
+      '#prefix' => '<div id ="bills-per-person-trends-submit">',
+      '#suffix' => '</div>',
+      '#attributes' => array('class' => array('bills-per-person-trends-submit')),
+    );
+  }
+
+  $form['bills_per_person_trends'] = array(
+    '#markup' => '<a href = "/leanbox-chart-details/bills_per_person_trends" target = "_blank"><div id="bills_per_person_trends_div"></div></a>',
+  );
+
+  return $form;
+}
+
+
+/**
+ * 
+ * @param array $form
+ * @param array $form_state
+ * @return array
+ */
+function leanbox_dashboard_chart_filter_bills_per_van_trends_form($form, &$form_state) {
+  $form = array();
+
+  if (arg(1) == 'bills_per_van_trends') {
+    $bill_date = date('Y-m-d');
+    $form['start_date'] = array(
+      '#type' => 'date_popup',
+      '#title' => t('Dispatch Date From'),
+      '#required' => TRUE,
+      '#date_format' => 'Y-m-d',
+      '#default_value' => $bill_date,
+    );
+    $form['end_date'] = array(
+      '#type' => 'date_popup',
+      '#title' => t('Dispatch Date To'),
+      '#required' => TRUE,
+      '#date_format' => 'Y-m-d',
+      '#default_value' => $bill_date,
+    );
+
+    $form['submit'] = array(
+      '#type' => 'submit',
+      '#value' => 'Submit',
+      '#prefix' => '<div id ="bills-per-van-trends-submit">',
+      '#suffix' => '</div>',
+      '#attributes' => array('class' => array('bills-per-van-trends-submit')),
+    );
+  }
+
+  $form['bills_per_van_trends'] = array(
+    '#markup' => '<a href = "/leanbox-chart-details/bills_per_van_trends" target = "_blank"><div id="bills_per_van_trends_div"></div></a>',
+  );
+
+  return $form;
+}
+
+
+/**
+ * 
+ * @param array $form
+ * @param array $form_state
+ * @return array
+ */
 function leanbox_dashboard_chart_filter_bill_pendency_form($form, &$form_state) {
   $form = array();
   if (arg(1) == 'bill_pendency') {
@@ -1120,6 +1206,55 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     }
     return $data1;
   }
+  else if ($activity_type == 'bills_per_person_trends') {
+    $query = db_select('node', 'n');
+    $query->condition('n.type', 'dispatch_data');
+    $query->addTag('node_uid');
+    $query->join('field_data_field_bill_count', 'v', 'v.entity_id = n.nid');
+    $query->join('field_data_field_dispatch_date', 'd', 'd.entity_id = n.nid');
+    $query->join('field_data_field_dispatch_loader_team_count', 'tc', 'tc.entity_id = n.nid');
+    $query->fields('d', array('field_dispatch_date_value'));
+    $query->addExpression('SUM(tc.field_dispatch_loader_team_count_value)', 'Team_count');
+    $query->addExpression('SUM(v.field_bill_count_value)', 'bill_value');
+    $query->groupBy('d.field_dispatch_date_value');
+
+    $query->where("(DATE_FORMAT(d.field_dispatch_date_value, '%Y-%m-%d') >= :start)", array(':start' => $start));
+    $query->where("(DATE_FORMAT(d.field_dispatch_date_value, '%Y-%m-%d') <= :to)", array(':to' => $end));
+
+    $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+
+    if (!empty($res)) {
+      $header[] = 'Channel';
+      $row[] = 'Bills Per Person';
+      foreach ($res as $key => $val) {
+
+        // prepare header
+        $date = $val['field_dispatch_date_value'];
+        $header[$date] = $date;
+
+        $trip_count = $val['Team_count'];
+        $bill_count_value = $val['bill_value'];
+
+        $total_bill_value += $bill_count_value;
+        $total_trip_count += $trip_count;
+        $row[] = round($bill_count_value / $trip_count);
+      }
+      $header[] = 'Total';
+
+      // add total column
+      $row[] = round($total_bill_value / $total_trip_count);
+      $rows[] = $row;
+      $output = theme('table', array(
+        'header' => $header,
+        'rows' => $rows,
+        'attributes' => array('width' => '100%')
+      ));
+    }
+    else {
+      $output = 'No Result Found for Dispatch';
+    }
+    return $output;
+  }
   else if ($activity_type == 'bills_per_van') {
     $query = db_select('node', 'n');
     $query->condition('n.type', 'dispatch_data');
@@ -1157,6 +1292,56 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
       $data1[] = array('No Result Found for Dispatch', 0);
     }
     return $data1;
+  }
+  else if ($activity_type == 'bills_per_van_trends') {
+    $query = db_select('node', 'n');
+    $query->condition('n.type', 'dispatch_data');
+    $query->addTag('node_uid');
+    $query->join('field_data_field_bill_count', 'v', 'v.entity_id = n.nid');
+    $query->join('field_data_field_dispatch_date', 'd', 'd.entity_id = n.nid');
+    $query->join('field_data_field_dispatch_loader_team_count', 'tc', 'tc.entity_id = n.nid');
+    $query->fields('d', array('field_dispatch_date_value'));
+
+    $query->where("(DATE_FORMAT(d.field_dispatch_date_value, '%Y-%m-%d') >= :start)", array(':start' => $start));
+    $query->where("(DATE_FORMAT(d.field_dispatch_date_value, '%Y-%m-%d') <= :to)", array(':to' => $end));
+
+    $query->addExpression('COUNT(n.title)', 'trip_count');
+    $query->addExpression('SUM(v.field_bill_count_value)', 'bill_count_value');
+    $query->groupBy('d.field_dispatch_date_value');
+    $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+
+    if (!empty($res)) {
+      $header[] = 'Channel';
+      $row[] = 'Bills Per Van';
+      foreach ($res as $key => $val) {
+
+        // prepare header
+        $date = $val['field_dispatch_date_value'];
+        $header[$date] = $date;
+
+        $trip_count = $val['trip_count'];
+        $bill_count_value = $val['bill_count_value'];
+
+        $total_bill_value += $bill_count_value;
+        $total_trip_count += $trip_count;
+        $row[] = round($bill_count_value / $trip_count);
+      }
+      $header[] = 'Total';
+
+      // add total column
+      $row[] = round($total_bill_value / $total_trip_count);
+      $rows[] = $row;
+
+      $output = theme('table', array(
+        'header' => $header,
+        'rows' => $rows,
+        'attributes' => array('width' => '100%')
+      ));
+    }
+    else {
+       $output = 'No Result Found for Dispatch';
+    }
+    return $output;
   }
   else if ($activity_type == 'pp_ota') {
     $query = db_select('node', 'n');
@@ -1760,9 +1945,7 @@ function _get_otif_details_using_bill_date($bill_date, $channel, $uid) {
     $query->condition('n1.uid', $uid);
     $query->condition('b.field_sr_bill_date_value', $bill_date);
     $query->condition('n.type', 'sales_register_data');
-    if (!empty($start_date) && !empty($end_date)) {
-      $query->condition('b.field_sr_bill_date_value', array($start_date, $end_date), 'BETWEEN');
-    }
+
     $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
 
 

@@ -241,6 +241,14 @@ function leanbox_dashboard_block_info() {
     'info' => t('Otif Day Wise Trends'),
     'cache' => DRUPAL_NO_CACHE,
   );
+  $blocks['bills_per_van_trends'] = array(
+    'info' => t('Bills Per Van Day Wise Trends'),
+    'cache' => DRUPAL_NO_CACHE,
+  );
+  $blocks['bills_per_person_trends'] = array(
+    'info' => t('Bills Per Person Day Wise Trends'),
+    'cache' => DRUPAL_NO_CACHE,
+  );
   return $blocks;
 }
 
@@ -580,10 +588,40 @@ function leanbox_dashboard_block_view($delta = '') {
         '#attached' => array(
           'js' => array(
             drupal_get_path('module', 'leanbox_dashboard') . '/js/leanbox_dashboard_otif_trends_chart.js',
-//            array(
-//              'data' => array('leanbox_dashboard' => array('otif_trends' => $data,)),
-//              'type' => 'setting'
-//            ),
+          ),
+        ),
+      );
+      break;
+    
+    case 'bills_per_van_trends':
+
+      $loading_date = date('d-m-Y');
+      $block['subject'] = "Bills Per Van DayWise($loading_date Dispatch)";
+      $data = leanbox_dashboard_chart_query_details('bills_per_van_trends');
+
+      $filter_form = drupal_render(drupal_get_form('leanbox_dashboard_chart_filter_bills_per_van_trends_form'));
+      $block['content'] = array(
+        '#markup' => theme('leanbox_dashboard', array('data' => $filter_form, 'otif_table' => $data,)),
+        '#attached' => array(
+          'js' => array(
+            drupal_get_path('module', 'leanbox_dashboard') . '/js/leanbox_dashboard_bills_per_van_trends_chart.js',
+          ),
+        ),
+      );
+      break;
+    
+    case 'bills_per_person_trends':
+
+      $loading_date = date('d-m-Y');
+      $block['subject'] = "Bills Per Person DayWise($loading_date Dispatch)";
+      $data = leanbox_dashboard_chart_query_details('bills_per_person_trends');
+
+      $filter_form = drupal_render(drupal_get_form('leanbox_dashboard_chart_filter_bills_per_person_trends_form'));
+      $block['content'] = array(
+        '#markup' => theme('leanbox_dashboard', array('data' => $filter_form, 'otif_table' => $data,)),
+        '#attached' => array(
+          'js' => array(
+            drupal_get_path('module', 'leanbox_dashboard') . '/js/leanbox_dashboard_bills_per_person_trends_chart.js',
           ),
         ),
       );
