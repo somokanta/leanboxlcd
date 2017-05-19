@@ -24,7 +24,10 @@ class custom_for_bill_sequence extends views_handler_field {
   }
 
   function render($data) {
-    dpm($data,"data");
+    $seq = $data->_field_data['nid']['entity']->field_bill_sequence['und'][0]['value'];
+    if ($seq == "0" || empty($seq)) {
+      return "NA";
+    }
   }
 
 }
