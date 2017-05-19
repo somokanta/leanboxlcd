@@ -595,6 +595,8 @@ function dispatch_planning_form_save_validate($form, &$form_state) {
 
   $res = $query->execute()->fetchAll();
   
+  dpm($res);
+  
   $bill_count = count($res);
   $sequence = $no_area = 0;
   foreach ($res as $val) {
@@ -750,6 +752,7 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
   $bill_nids = array_keys($rows);
   
   $sequence_array = $form_state['dispatch_planning']['sequence_array'];
+  dpm($sequence_array);
 
   foreach ($bill_nids as $value) {
     $node = node_load($value);
