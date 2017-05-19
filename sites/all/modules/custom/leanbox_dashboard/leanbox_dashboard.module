@@ -604,7 +604,7 @@ function leanbox_dashboard_block_view($delta = '') {
         '#markup' => theme('leanbox_dashboard', array('data' => $filter_form, 'otif_table' => $data,)),
         '#attached' => array(
           'js' => array(
-            drupal_get_path('module', 'leanbox_dashboard') . '/js/leanbox_dashboard_otif_trends_chart.js',
+            drupal_get_path('module', 'leanbox_dashboard') . '/js/leanbox_dashboard_bills_per_van_trends_chart.js',
           ),
         ),
       );
@@ -621,7 +621,7 @@ function leanbox_dashboard_block_view($delta = '') {
         '#markup' => theme('leanbox_dashboard', array('data' => $filter_form, 'otif_table' => $data,)),
         '#attached' => array(
           'js' => array(
-            drupal_get_path('module', 'leanbox_dashboard') . '/js/leanbox_dashboard_otif_trends_chart.js',
+            drupal_get_path('module', 'leanbox_dashboard') . '/js/leanbox_dashboard_bills_per_person_trends_chart.js',
           ),
         ),
       );
