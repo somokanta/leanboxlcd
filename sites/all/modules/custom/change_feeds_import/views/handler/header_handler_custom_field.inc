@@ -25,6 +25,7 @@ class header_handler_custom_field extends views_handler_field {
 
   function render($empty = FALSE) {
 
+    dpm($this,"this");
     global $user;
     $user_id = $user->uid;
     $total_result = $this->view->result;
