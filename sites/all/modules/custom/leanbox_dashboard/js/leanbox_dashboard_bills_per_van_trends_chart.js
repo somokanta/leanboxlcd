@@ -11,6 +11,7 @@
 			
       $('#bills_per_van_trends_div').css('height', '291px');
 			var response = Drupal.settings.leanbox_dashboard.bills_per_van_trends;
+			console.log(response);
 			$('#bills_per_van_trends_div').html(response);
 			$(".bills-per-van-trends-submit").click(function (e) {
 

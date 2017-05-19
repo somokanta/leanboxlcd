@@ -598,7 +598,7 @@ function leanbox_dashboard_block_view($delta = '') {
       $loading_date = date('d-m-Y');
       $block['subject'] = "Bills Per Van DayWise($loading_date Dispatch)";
       $data = leanbox_dashboard_chart_query_details('bills_per_van_trends');
-
+dpm($data, '$data');
       $filter_form = drupal_render(drupal_get_form('leanbox_dashboard_chart_filter_bills_per_van_trends_form'));
       $block['content'] = array(
         '#markup' => theme('leanbox_dashboard', array('data' => $filter_form)),
