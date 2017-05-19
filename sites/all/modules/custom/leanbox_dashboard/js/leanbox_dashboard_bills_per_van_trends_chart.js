@@ -9,9 +9,9 @@
 	Drupal.behaviors.leanbox_dashboard_bills_per_van_trends = {
 		attach: function (context, settings) {
 			
-      $('#bills_per_van_trends').css('height', '291px');
+      $('#bills_per_van_trends_div').css('height', '291px');
 			var response = Drupal.settings.leanbox_dashboard.bills_per_van_trends;
-			$('#bills_per_van_trends').html(response);
+			$('#bills_per_van_trends_div').html(response);
 			$(".bills-per-van-trends-submit").click(function (e) {
 
 				e.preventDefault();
@@ -24,7 +24,7 @@
 						url: "/chart-daterange-filter",
 						data: {start_date: start_date, end_date: end_date, activity_type: 'bills_per_van_trends'},
 						success: function (response) {
-							$('#bills_per_van_trends').html(response);
+							$('#bills_per_van_trends_div').html(response);
 						},
 					});
 				}
