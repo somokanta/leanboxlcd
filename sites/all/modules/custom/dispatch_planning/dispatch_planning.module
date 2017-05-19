@@ -758,9 +758,12 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
       $node->field_delivery_pending = array();
     }
     if($seq_flag){
+      dpm('1');
+      dpm($bill_sequence);
       $node->field_bill_sequence[LANGUAGE_NONE][0]['value'] = $bill_sequence[$value];
     }
     else{
+      dpm('2');
       if(isset($sequence_array[$value]) && !empty($sequence_array[$value])){
         $node->field_bill_sequence[LANGUAGE_NONE][0]['value'] = $sequence_array[$value];
       }
