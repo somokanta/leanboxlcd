@@ -28,7 +28,7 @@ class custom_for_bill_sequence extends views_handler_field {
     if ($seq == "0" || empty($seq)) {
       return "NA";
     }else{
-      return $seq;
+      return "";
     }
   }
 
