@@ -599,7 +599,7 @@ function leanbox_dashboard_block_view($delta = '') {
       $block['subject'] = "Bills Per Van DayWise($loading_date Dispatch)";
       $data = leanbox_dashboard_chart_query_details('bills_per_van_trends');
 
-      $filter_form = drupal_render(drupal_get_form('leanbox_dashboard_chart_filter_otif_trends_form'));
+      $filter_form = drupal_render(drupal_get_form('leanbox_dashboard_chart_filter_bills_per_van_trends_form'));
       $block['content'] = array(
         '#markup' => theme('leanbox_dashboard', array('data' => $filter_form, 'otif_table' => $data,)),
         '#attached' => array(
@@ -616,7 +616,7 @@ function leanbox_dashboard_block_view($delta = '') {
       $block['subject'] = "Bills Per Person DayWise($loading_date Dispatch)";
       $data = leanbox_dashboard_chart_query_details('bills_per_person_trends');
 
-      $filter_form = drupal_render(drupal_get_form('leanbox_dashboard_chart_filter_otif_trends_form'));
+      $filter_form = drupal_render(drupal_get_form('leanbox_dashboard_chart_filter_bills_per_person_trends_form'));
       $block['content'] = array(
         '#markup' => theme('leanbox_dashboard', array('data' => $filter_form, 'otif_table' => $data,)),
         '#attached' => array(

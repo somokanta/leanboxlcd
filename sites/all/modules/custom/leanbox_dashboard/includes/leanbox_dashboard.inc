@@ -1224,7 +1224,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
 
     if (!empty($res)) {
-       $header[] = 'Channel';
+      $header[] = 'Channel';
       $row[] = 'Bills Per Person';
       foreach ($res as $key => $val) {
 
@@ -1250,7 +1250,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
       ));
     }
     else {
-      $data1[] = array('No Result Found for Dispatch', 0);
+      $output = 'No Result Found for Dispatch';
     }
     return $data1;
   }
