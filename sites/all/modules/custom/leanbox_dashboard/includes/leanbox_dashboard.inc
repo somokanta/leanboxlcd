@@ -1232,8 +1232,8 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
         $date = $val['field_dispatch_date_value'];
         $header[$date] = $date;
 
-        $trip_count = $val['trip_count'];
-        $bill_count_value = $val['bill_count_value'];
+        $trip_count = $val['Team_count'];
+        $bill_count_value = $val['bill_value'];
 
         $total_bill_value += $bill_count_value;
         $total_trip_count += $trip_count;
@@ -1241,7 +1241,8 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
       }
       $header[] = 'Total';
 
-      $rows[] = round($total_bill_value / $total_trip_count);
+      // add total column
+      $row[] = round($total_bill_value / $total_trip_count);
       $rows[] = $row;
       $output = theme('table', array(
         'header' => $header,
@@ -1318,7 +1319,6 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
         $date = $val['field_dispatch_date_value'];
         $header[$date] = $date;
 
-        $supervisor = $val['field_dispatch_supervisor_value'];
         $trip_count = $val['trip_count'];
         $bill_count_value = $val['bill_count_value'];
 
@@ -1328,7 +1328,8 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
       }
       $header[] = 'Total';
 
-      $rows[] = round($total_bill_value / $total_trip_count);
+      // add total column
+      $row[] = round($total_bill_value / $total_trip_count);
       $rows[] = $row;
 
       $output = theme('table', array(
@@ -1338,7 +1339,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
       ));
     }
     else {
-       $output = 'No Data found';
+       $output = 'No Result Found for Dispatch';
     }
     return $output;
   }
