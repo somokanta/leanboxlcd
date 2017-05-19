@@ -734,6 +734,13 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
   $node->field_trip_creation_date[$node->language][0]['value'] = strtotime(date('Y/m/d 00:00:00'));
   $node->field_trip_executon_date[$node->language][0]['value'] = $trip_execution_date;
   $node->field_hht_id[$node->language][0]['nid'] = get_nid_from_hht_id($hht_id);
+  
+  if($seq_flag){
+    $node->field_sequence_method[$node->language][0]['value'] = 1;
+  }
+  else{
+    $node->field_sequence_method[$node->language][0]['value'] = 0;
+  }
 
   $node = node_submit($node); // Prepare node for saving
   node_save($node);
@@ -754,7 +761,7 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
       $node->field_bill_sequence[LANGUAGE_NONE][0]['value'] = $bill_sequence[$value];
     }
     else{
-      if($sequence_array){
+      if(isset($sequence_array[$value]) && !empty($sequence_array[$value])){
         $node->field_bill_sequence[LANGUAGE_NONE][0]['value'] = $sequence_array[$value];
       }
     }
