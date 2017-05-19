@@ -25,7 +25,7 @@ class header_handler_custom_field extends views_handler_field {
 
   function render($empty = FALSE) {
 
-    dpm($this,"this");
+    
     global $user;
     $user_id = $user->uid;
     $total_result = $this->view->result;
@@ -38,6 +38,7 @@ class header_handler_custom_field extends views_handler_field {
     $result = get_data_from_trip_id($trip_id);
 
     if (!empty($result)) {
+      dpm($result,"result");
       $trip_execution_date = $result['field_trip_executon_date_value'];
       $hht_id = $result['title'];
       $vehicle_no = $result['field_vehicle_no_value'];
