@@ -6,7 +6,7 @@
 
 (function ($) {
 
-	Drupal.behaviors.leanbox_dashboard_bills_per_van_trends = {
+	Drupal.behaviors.leanbox_dashboard_bills_per_person_trends = {
 		attach: function (context, settings) {
 
 			$(".bills-per-person-trends-submit").click(function (e) {
@@ -19,7 +19,7 @@
 						type: "POST",
 						cache: false, //for Chrome and IE8
 						url: "/chart-daterange-filter",
-						data: {start_date: start_date, end_date: end_date, activity_type: 'bills_per_van_trends'},
+						data: {start_date: start_date, end_date: end_date, activity_type: 'bills_per_person_trends'},
 						success: function (response) {
 							$('#otiftable').html(response);
 						},

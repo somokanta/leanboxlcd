@@ -1252,7 +1252,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     else {
       $output = 'No Result Found for Dispatch';
     }
-    return $data1;
+    return $output;
   }
   else if ($activity_type == 'bills_per_van') {
     $query = db_select('node', 'n');
