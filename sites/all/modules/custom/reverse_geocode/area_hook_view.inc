@@ -166,24 +166,24 @@ function area_hook_wise_locations_form($form, &$form_state, $type) {
 //    '#suffix' => '</div>',
     // '#default_value' => isset($form_state['values']['sales_day']) ? $form_state['values']['sales_day'] : NULL,
     '#options' => array(),
-    '#ajax' => array(
-      'event' => 'change',
-      'callback' => 'sales_day_callback_new',
-      'wrapper' => 'address-selection-map',
-    ),
+//    '#ajax' => array(
+//      'event' => 'change',
+//      'callback' => 'sales_day_callback_new',
+//      'wrapper' => 'address-selection-map',
+//    ),
    
   );
 
 
-  $form['area_hook'] = array(
-    '#type' => 'select',
-    '#title' => t('Area Hook'),
-//    '#prefix' => '<div id="address-selection-map">',
-//    '#suffix' => '</div>',
-    // '#default_value' => isset($form_state['values']['sales_day']) ? $form_state['values']['sales_day'] : NULL,
-    '#options' => array(),
-    
-  );
+//  $form['area_hook'] = array(
+//    '#type' => 'select',
+//    '#title' => t('Area Hook'),
+////    '#prefix' => '<div id="address-selection-map">',
+////    '#suffix' => '</div>',
+//    // '#default_value' => isset($form_state['values']['sales_day']) ? $form_state['values']['sales_day'] : NULL,
+//    '#options' => array(),
+//    
+//  );
   if (!empty($form_state['values']['sales_day'])) {
     $sales_day = $form_state['values']['sales_day'];
     $select = array('' => '- Any -');
@@ -191,14 +191,14 @@ function area_hook_wise_locations_form($form, &$form_state, $type) {
     $form['van_pl_group']['#options'] = $select+$sales_day_data;
   }
 
-  if (!empty($form_state['values']['sales_day']) && !empty($form_state['values']['van_pl_group'])) {
-    $sales_day = $form_state['values']['sales_day'];
-    $van = $form_state['values']['van_pl_group'];
-    
-    $mixed_data = reverse_geocode_get_data_for_area_hook($sales_day, $van, $distributor_id);
-    $select = array('' => '- Any -');
-    $form['area_hook']['#options'] = $select+$mixed_data;
-  }
+//  if (!empty($form_state['values']['sales_day']) && !empty($form_state['values']['van_pl_group'])) {
+//    $sales_day = $form_state['values']['sales_day'];
+//    $van = $form_state['values']['van_pl_group'];
+//    
+//    $mixed_data = reverse_geocode_get_data_for_area_hook($sales_day, $van, $distributor_id);
+//    $select = array('' => '- Any -');
+//    $form['area_hook']['#options'] = $select+$mixed_data;
+//  }
 
 
   $form['dummy'] = array(
