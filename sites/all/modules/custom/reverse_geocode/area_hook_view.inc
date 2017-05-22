@@ -177,6 +177,7 @@ function area_hook_wise_locations_form($form, &$form_state, $type) {
   $form['area_hook'] = array(
     '#type' => 'select',
     '#title' => t('Area Hook'),
+    '#multiple' => TRUE,
 //    '#prefix' => '<div id="address-selection-map">',
 //    '#suffix' => '</div>',
     // '#default_value' => isset($form_state['values']['sales_day']) ? $form_state['values']['sales_day'] : NULL,
@@ -261,6 +262,7 @@ function area_wise_filter_new_validate(&$form, &$form_state) {
   $sales_day = $form_state['values']['sales_day'];
   $van_pl_group = $form_state['values']['van_pl_group'];
   $area_hook = $form_state['values']['area_hook'];
+  dpm($area_hook,"area_hook");
   $data = "";
   if (!empty($sales_day)) {
     $data = reverse_geocode_get_data_area_code_wise_new($sales_day, $van_pl_group, $area_hook);
