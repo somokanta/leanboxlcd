@@ -292,7 +292,7 @@ function area_hook_wise_filters_submit(&$form, &$form_state) {
     $long = $val['field_hul_updated_long_value'];
     $party_code = $val['title'];
     $area_hook = $val['field_outlet_area_hook_value'];
-    $a = $val['field_party_name_value'];
+    $party_name = $val['field_party_name_value'];
     $hul_status = $val['field_area_hook_group_hul_value'];
 
     $new_city = $val['field_updated_address_sub_administrative_area'];
