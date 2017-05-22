@@ -368,7 +368,7 @@ function reverse_geocode_get_data_area_code_wise_new($sales_day, $van_pl_group, 
   }
   if (!empty($area_hook)) {
     $query->join('field_data_field_outlet_area_hook', 'oah', 'oah.entity_id = n.nid');
-    $query->condition('oah.field_outlet_area_hook_value', $area_hook, '=');
+    $query->condition('oah.field_outlet_area_hook_value', $area_hook, 'IN');
   }
 
   if (!empty($van_pl_group)) {
