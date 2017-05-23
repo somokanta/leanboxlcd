@@ -8,7 +8,7 @@ function show_area_hook_wise_locations() {
   drupal_add_js("https://maps.googleapis.com/maps/api/js?key=$google_key&libraries=places", 'external');
   drupal_add_js(drupal_get_path('module', 'reverse_geocode') . '/js/selectable-row.js', 'file');
   drupal_add_js(drupal_get_path('module', 'reverse_geocode') . '/js/leaflet.smoothmarkerbouncing.js', 'file');
-  drupal_add_js(drupal_get_path('module', 'reverse_geocode') . '/js/multi-map.js', 'file');
+  drupal_add_js(drupal_get_path('module', 'reverse_geocode') . '/js/multi-map-view.js', 'file');
 
   $form = drupal_render(drupal_get_form('area_hook_wise_locations_form', $type));
   $result['map-container'] = array(
@@ -336,7 +336,7 @@ function area_hook_wise_filters_submit(&$form, &$form_state) {
         $options[$area_hook] = array(
       'area_hook' => array('data' => $area_hook, 'class' => 'area-hook-cell'),
       'outlet_count' => array('data' => $outlet_count, 'class' => 'outlet-count-cell'),
-      '#attributes' => array('data-count' => $outlet_count),
+      '#attributes' => array('data-area' => $area_hook),
     );
   }
   $form_state['reverse_geocode']['rows'] = $options;
