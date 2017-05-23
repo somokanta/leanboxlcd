@@ -788,7 +788,7 @@ function get_lat_long_from_area_hook() {
   echo $result;
 }
 
-function lat_lng_results1($area_hook){
+function lat_lng_results($area_hook){
   global $user;
   $user_id = $user->uid;
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
