@@ -36,7 +36,8 @@ var marker = {};
 
 
         /*function to make number appear on marker*/
-        function mapmyindia_number_on_marker(lat,lng ,key) {
+        function mapmyindia_number_on_marker(lat,lng ,key ,closet_tr) {
+            var tr = closet_tr;
             var checked_lat = lat;
             var checked_lng = lng;
             var sr = key;
@@ -124,7 +125,7 @@ var marker = {};
                        var  lat = value.field_hul_updated_lat_value;
                        var  lng = value.field_hul_updated_long_value;
                        
-                       mapmyindia_number_on_marker(lat,lng ,key);
+                       mapmyindia_number_on_marker(lat,lng ,key,closet_tr);
                     });
 
                     
