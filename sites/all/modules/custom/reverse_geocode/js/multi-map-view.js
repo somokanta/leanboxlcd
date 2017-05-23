@@ -90,14 +90,9 @@ var data;
 
 
         /*function to remove  markers from map*/
-        function mapmyindia_removeMarker($rr) {
-            var tr = $rr.closest('tr');
-
-            tr.find('.cell-details').hide();
-            var sr = tr.attr('data-sr');
-            map.removeLayer(marker[sr].mk);
-
-            delete marker[sr];
+        function mapmyindia_removeMarker(area_hook) {
+            map.removeLayer(marker[area_hook].mk);
+            delete marker[area_hook];
         }
 
         function mapmyindia_array_of_location_fit_into_bound() {
@@ -151,7 +146,7 @@ var data;
                 }
             } else {
                 
-                mapmyindia_removeMarker($(this));
+                mapmyindia_removeMarker(area_hook);
 
             }
 
