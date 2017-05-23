@@ -1520,20 +1520,18 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     $query->addTag('node_uid');
     $query->condition('n.type', 'egir');
     $query->join('field_data_field_egir_date', 'l', 'l.entity_id = n.nid');
-    $query->leftjoin('field_data_field_unloading_date', 'pcd', 'pcd.entity_id = n.nid');
+  //  $query->leftjoin('field_data_field_unloading_date', 'pcd', 'pcd.entity_id = n.nid');
     $query->fields('l', array('field_egir_date_value'));
-    $query->fields('pcd', array('field_unloading_date_value'));
+  //  $query->fields('pcd', array('field_unloading_date_value'));
 
-    $query->leftjoin('field_data_field_unloading_status', 'ps', 'ps.entity_id = n.nid');
-    $query->leftjoin('field_data_field_unloading_end_time', 'ppt', 'ppt.entity_id = n.nid');
-    $query->fields('ppt', array('field_unloading_end_time_value'));
-    $query->fields('ps', array('field_unloading_status_value'));
+  //  $query->leftjoin('field_data_field_unloading_status', 'ps', 'ps.entity_id = n.nid');
+  //  $query->leftjoin('field_data_field_unloading_end_time', 'ppt', 'ppt.entity_id = n.nid');
+  //  $query->fields('ppt', array('field_unloading_end_time_value'));
+  //  $query->fields('ps', array('field_unloading_status_value'));
 
     $query->where("(DATE_FORMAT(l.field_egir_date_value, '%Y-%m-%d') >= :start)", array(':start' => $start));
     $query->where("(DATE_FORMAT(l.field_egir_date_value, '%Y-%m-%d') <= :to)", array(':to' => $end));
     $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
-
-    $data[] = array('PriceList Group', 'Fail', 'Success');
 
     $query = db_select('node', 'n');
     $query->addTag('node_uid');
@@ -2067,6 +2065,7 @@ function _get_unloading_daywise_trends_data($bill_date, $dis_time) {
   $query = db_select('node', 'n');
   $query->addTag('node_uid');
   $query->condition('n.type', 'egir');
+  $query->join('field_data_field_egir_date', 'l', 'l.entity_id = n.nid');
   $query->leftjoin('field_data_field_unloading_date', 'pcd', 'pcd.entity_id = n.nid');
   $query->fields('pcd', array('field_unloading_date_value'));
 
