@@ -125,6 +125,7 @@ var marker = {};
 
                     $.each(data, function (key, value) {
                         console.log(value,"value");
+                        console.log(value.field_hul_updated_lat_value,"latttt");
                         console.log(key,"key");
                     });
 
