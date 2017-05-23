@@ -134,7 +134,7 @@ var data;
                 },
                 success: function (result) {
                     var data = JSON.parse(result);
-                    custom_ajax_func(data, closet_tr, sales_day, pl_grp, area_hook);
+                    custom_ajax_func(data);
                 }
             });
 
