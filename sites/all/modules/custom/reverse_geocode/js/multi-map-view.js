@@ -120,8 +120,8 @@ var marker = {};
                     area_hook: area_hook,
                 },
                 success: function(result) {
-                    var jsondata = JSON.parse(result);
-                    console.log(jsondata,"jsondata");
+                    
+                    console.log(result,"result");
                     
                 }
             });
