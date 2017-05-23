@@ -117,9 +117,12 @@ var marker = {};
                     area_hook: area_hook,
                 },
                 success: function (result) {
+                    console.log(result, "result");
                     var data = JSON.parse(result);
+                    console.log(data, "data");
 
                     $.each(data, function (key, value) {
+                        console.log(value,"value");
                        var  lat = value.field_hul_updated_lat_value;
                        var  lng = value.field_hul_updated_long_value;
                        
