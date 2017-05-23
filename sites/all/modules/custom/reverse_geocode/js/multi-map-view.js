@@ -82,7 +82,7 @@ var data;
 
 
             
-            console.log(marker[area_hook],"abcd");
+            console.log(marker,"abcd");
         }
 
 
