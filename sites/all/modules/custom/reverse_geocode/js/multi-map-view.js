@@ -123,8 +123,9 @@ var marker = {};
                     var data = JSON.parse(result);
                     console.log(data, "data");
 
-                    $.each(data, function (value) {
+                    $.each(data, function (key, value) {
                         console.log(value,"value");
+                        console.log(key,"key");
                     });
 
                     
