@@ -48,8 +48,6 @@ var data;
             var postion = new L.LatLng(checked_lat, checked_lng);/*WGS location object*/
 
             
-            if (marker[area_hook] === undefined) {
-
 
                 $.ajax({
                     type: "GET",
@@ -64,7 +62,7 @@ var data;
                         var text = result;
                         var mk = addMarker(postion, icon, text);
                         marker[area_hook] = {mk: mk};
-                       // marker[area_hook].push({mk : mk});
+                        marker[area_hook].mk =+ mk;
                         if (checked_lat > max_lat || max_lat == undefined) {
                             max_lat = checked_lat;
                         }
@@ -85,37 +83,7 @@ var data;
 
 
 
-            }else{
-                $.ajax({
-                    type: "GET",
-                    //dataType: 'text',
-                    url: "/get/address",
-                    async: false,
-                    data: {
-                        nid: nid,
-                    },
-                    success: function (result) {
-                        console.log(result, "result");
-                        var text = result;
-                        var mk = addMarker(postion, icon, text);
-                       marker[area_hook][key] = mk;
-                        if (checked_lat > max_lat || max_lat == undefined) {
-                            max_lat = checked_lat;
-                        }
-                        if (checked_lat < min_lat || min_lat == undefined) {
-                            min_lat = checked_lat;
-                        }
-                        if (checked_lng > max_lng || max_lng == undefined) {
-                            max_lng = checked_lng;
-                        }
-                        if (checked_lng < min_lng || min_lng == undefined) {
-                            min_lng = checked_lng;
-                        }
-
-                        mapmyindia_array_of_location_fit_into_bound();
-                    }
-                });
-            }
+            
             console.log(marker[area_hook],"abcd");
         }
 
