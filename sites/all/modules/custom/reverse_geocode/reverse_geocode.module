@@ -875,6 +875,9 @@ function lat_lng_results($area_hook) {
   $query->orderBy('hul_long_u.field_hul_updated_long_value', 'asc');
   $query->fields('hul', array('nid'));
   $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+  
+  array_unshift($res,"");
+  unset($res[0]);
   echo json_encode($res);
 }
 
