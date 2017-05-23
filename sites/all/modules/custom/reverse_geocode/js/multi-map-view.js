@@ -56,7 +56,6 @@ var data;
                     nid: nid,
                 },
                 success: function (result) {
-                    console.log(result, "result");
                     var text = result;
                     var mk = addMarker(postion, icon, text);
                     marker[nid] = {mk: mk};
@@ -77,8 +76,6 @@ var data;
                 }
             });
 
-            console.log(nid, "nid");
-            console.log(marker, "abcd");
         }
 
 
@@ -144,6 +141,9 @@ var data;
                         mapmyindia_number_on_marker(lat, lng, key, closet_tr, nid, area_hook);
                     } else {
                         mapmyindia_removeMarker(nid);
+                         max_lat = undefined;
+                         max_lng = undefined;
+                        
                     }
 
                 });
