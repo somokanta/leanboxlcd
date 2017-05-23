@@ -13,11 +13,11 @@ var marker = {};
 
         map = new MapmyIndia.Map('map-container', {center: centre, zoomControl: true, hybrid: true, search: false});
         map.setView([default_lat, default_lng], 5);
-        
+
         L.Marker.setBouncingOptions({
             bounceHeight: 40, // height of the bouncing
             bounceSpeed: 50, // bouncing speed coefficient
-            contractHeight : 1,
+            contractHeight: 1,
         });
 
         function addMarker(position, icon, text) {
@@ -29,7 +29,7 @@ var marker = {};
                 //   mk.bindPopup(title);
             }
             mk.bindPopup(text);
-            
+
             map.addLayer(mk);
             return mk;
         }
@@ -41,18 +41,18 @@ var marker = {};
             var checked_lat = tr.attr('data-lat');
             var checked_lng = tr.attr('data-lng');
             var sr = tr.attr('data-sr');
-            
+
             tr.find('.cell-details').show();
-            
+
             var icon_path = window.location.origin + '/sites/all/themes/leanbox/images/map-marker.png';
             var icon = L.divIcon({className: 'my-div-icon', html: "<img style='position:relative;width:35px;height:35px' src=" + icon_path + '><span style="position: absolute;left: 0.8em;right: 1em;top: 5px;bottom:3em;font-size:12px;font-weight:bold;width: 17px;color:black;display: inline-block;height: 17px;text-align: center;line-height: 17px;" class="my-div-span">' + (sr) + '</span>', iconSize: [10, 10], popupAnchor: [12, -10]});/*function that creates a div over a icon and display content on the div*/
             var postion = new L.LatLng(checked_lat, checked_lng);/*WGS location object*/
 
 
             if (marker[sr] === undefined) {
-                
+
                 var text = tr.find('.cell-address').html();
-                
+
                 var mk = addMarker(postion, icon, text);
                 marker[sr] = {mk: mk};
                 if (checked_lat > max_lat || max_lat == undefined) {
@@ -76,7 +76,7 @@ var marker = {};
         /*function to remove  markers from map*/
         function mapmyindia_removeMarker($rr) {
             var tr = $rr.closest('tr');
-            
+
             tr.find('.cell-details').hide();
             var sr = tr.attr('data-sr');
             map.removeLayer(marker[sr].mk);
@@ -109,8 +109,8 @@ var marker = {};
         $(document).on('change', 'input[name^=list_form_items]', function () {
             var closet_tr = $(this).closest("tr");
             var area_hook = closet_tr.attr('data-area');
-            
-            
+
+
             $.ajax({
                 type: "GET",
                 //dataType: 'text',
@@ -119,18 +119,17 @@ var marker = {};
                 data: {
                     area_hook: area_hook,
                 },
-                success: function(result) {
-                    console.log(result,"result");
-                    
+                success: function (result) {
+                    var data = result;
+                    console.log(data, "data");
                 }
             });
-            
-            
-//            if ($(this).prop('checked')) {
-//                mapmyindia_number_on_marker($(this));
-//            } else {
-//                mapmyindia_removeMarker($(this));
-//            }
+
+            $.each(data, function (i, val) {
+                console.log(i, "iiii");
+                console.log(val, "vallllll");
+            });
+
         });
 
 
