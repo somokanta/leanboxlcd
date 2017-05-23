@@ -778,17 +778,14 @@ function party_filters_submit(&$form, &$form_state) {
 function get_reverse_geocode_from_lat_long() {
   $lat = $_GET['lat'];
   $lng = $_GET['lng'];
-
   $result = reverse_geocode_results($lat, $lng);
-
   echo $result;
 }
 
 function get_lat_long_from_area_hook() {
   $area_hook = $_GET['area_hook'];
-  echo $area_hook;
- // $result = lat_lng_results($area_hook);
- // echo $result;
+  $result = lat_lng_results($area_hook);
+  echo $result;
 }
 
 function lat_lng_results1($area_hook){
