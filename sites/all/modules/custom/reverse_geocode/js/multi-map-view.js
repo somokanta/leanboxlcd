@@ -125,7 +125,7 @@ var data;
                     area_hook: area_hook,
                 },
                 success: function (result) {
-                    console.log(result,"result");
+                    console.log(result, "result");
                     var data = JSON.parse(result);
                     custom_ajax_func(data, area_hook);
                 }
@@ -142,9 +142,7 @@ var data;
                         mapmyindia_number_on_marker(lat, lng, key, closet_tr, nid, area_hook);
                     } else {
                         mapmyindia_removeMarker(nid);
-                         max_lat = undefined;
-                         max_lng = undefined;
-                        
+                         max_lat = max_lng = min_lat = min_lng = undefined;
                     }
 
                 });
