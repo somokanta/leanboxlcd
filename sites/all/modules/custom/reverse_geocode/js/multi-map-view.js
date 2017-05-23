@@ -120,7 +120,7 @@ var marker = {};
                     area_hook: area_hook,
                 },
                 success: function (result) {
-                    var data = result;
+                    var data = JSON.parse(result);
                     console.log(data, "data");
 
                     $.each(data, function (key, value) {
