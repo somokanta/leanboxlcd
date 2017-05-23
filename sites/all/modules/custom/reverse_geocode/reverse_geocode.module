@@ -819,19 +819,16 @@ function address_results($nid) {
   $query->orderBy('hul_long_u.field_hul_updated_long_value', 'asc');
 
   $query->join('field_data_field_hul_code', 'hc', 'hc.field_hul_code_value = n.title');
-  $query->condition('hc.uid', $distributor_id, '=');
-  $query->join('field_data_field_party_name', 'fpn', 'fpn.entity_id = hc.entity_id');
-  $query->fields('fpn', array('field_party_name_value'));
-  $query->join('field_data_field_party_code', 'fpc', 'fpc.entity_id = hc.entity_id');
-  $query->fields('fpc', array('field_party_code_value'));
+  $query->join('node', 'ouln', 'ouln.nid = hc.entity_id');
+  $query->condition('ouln.uid', $distributor_id, '=');
+  $query->fields('ouln', array('title'));
   $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
-  
-  
+
+
   foreach ($res as $key => $val) {
     $lat = $val['field_hul_updated_lat_value'];
     $long = $val['field_hul_updated_long_value'];
-    $party_code = $val['field_party_code_value'];
-    $party_name = $val['field_party_name_value'];
+    $party_code = $val['title'];
 
     $new_city = $val['field_updated_address_sub_administrative_area'];
     $new_street = $val['field_updated_address_sub_premise'];
@@ -849,7 +846,7 @@ function address_results($nid) {
         . '<tr><td style="white-space:nowrap;color:#222">Lat/Long</td><td>' . $new_lat_long . '</td></tr>'
         . '</table></div>';
   }
-  
+
   return $marker_tooltip;
 }
 
