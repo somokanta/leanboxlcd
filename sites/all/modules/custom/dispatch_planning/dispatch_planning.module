@@ -593,8 +593,10 @@ function dispatch_planning_form_save_validate($form, &$form_state) {
   $query->addField('flat', 'field_hul_updated_lat_value', 'lat');
   $query->addField('flong', 'field_hul_updated_long_value', 'lng');
   
-  $query->orderBy('-fa.field_area_hook_nid', 'DESC');
-  $query->orderBy('-fs.field_revised_sequence_value', 'DESC');
+  $query->orderBy('ISNULL(fa.field_area_hook_nid)');
+  $query->orderBy('fa.field_area_hook_nid');
+  $query->orderBy('ISNULL(fs.field_revised_sequence_value)');
+  $query->orderBy('fs.field_revised_sequence_value');
 
   $res = $query->execute()->fetchAll();
   
