@@ -37,67 +37,55 @@ var data;
 
 
         /*function to make number appear on marker*/
-        function mapmyindia_number_on_marker(lat, lng, key, closet_tr, nid) {
-            console.log(nid,"nid");
+        function mapmyindia_number_on_marker(lat, lng, key, closet_tr, nid, area_hook) {
             var tr = closet_tr;
             var checked_lat = lat;
             var checked_lng = lng;
-            var sr = key;
 
             var icon_path = window.location.origin + '/sites/all/themes/leanbox/images/map-marker.png';
-            var icon = L.divIcon({className: 'my-div-icon', html: "<img style='position:relative;width:35px;height:35px' src=" + icon_path + '><span style="position: absolute;left: 0.8em;right: 1em;top: 5px;bottom:3em;font-size:12px;font-weight:bold;width: 17px;color:black;display: inline-block;height: 17px;text-align: center;line-height: 17px;" class="my-div-span">' + (sr) + '</span>', iconSize: [10, 10], popupAnchor: [12, -10]});/*function that creates a div over a icon and display content on the div*/
+            var icon = L.divIcon({className: 'my-div-icon', html: "<img style='position:relative;width:35px;height:35px' src=" + icon_path + '><span style="position: absolute;left: 0.8em;right: 1em;top: 5px;bottom:3em;font-size:12px;font-weight:bold;width: 17px;color:black;display: inline-block;height: 17px;text-align: center;line-height: 17px;" class="my-div-span"></span>', iconSize: [10, 10], popupAnchor: [12, -10]});/*function that creates a div over a icon and display content on the div*/
             var postion = new L.LatLng(checked_lat, checked_lng);/*WGS location object*/
 
 
-            if (marker[sr] === undefined) {
-
-
-                $.ajax({
-                    type: "GET",
-                    //dataType: 'text',
-                    url: "/get/address",
-                    async: false,
-                    data: {
-                        nid: nid,
-                    },
-                    success: function (result) {
-                        console.log(result,"result");
-                        var text = result;
-                        var mk = addMarker(postion, icon, text);
-                        marker[sr] = {mk: mk};
-                        if (checked_lat > max_lat || max_lat == undefined) {
-                            max_lat = checked_lat;
-                        }
-                        if (checked_lat < min_lat || min_lat == undefined) {
-                            min_lat = checked_lat;
-                        }
-                        if (checked_lng > max_lng || max_lng == undefined) {
-                            max_lng = checked_lng;
-                        }
-                        if (checked_lng < min_lng || min_lng == undefined) {
-                            min_lng = checked_lng;
-                        }
-
-                        mapmyindia_array_of_location_fit_into_bound();
+            $.ajax({
+                type: "GET",
+                //dataType: 'text',
+                url: "/get/address",
+                async: false,
+                data: {
+                    nid: nid,
+                },
+                success: function (result) {
+                    var text = result;
+                    var mk = addMarker(postion, icon, text);
+                    marker[nid] = {mk: mk};
+                    if (checked_lat > max_lat || max_lat == undefined) {
+                        max_lat = checked_lat;
                     }
-                });
+                    if (checked_lat < min_lat || min_lat == undefined) {
+                        min_lat = checked_lat;
+                    }
+                    if (checked_lng > max_lng || max_lng == undefined) {
+                        max_lng = checked_lng;
+                    }
+                    if (checked_lng < min_lng || min_lng == undefined) {
+                        min_lng = checked_lng;
+                    }
+                    console.log(max_lat,"max_lat");
+                    console.log(min_lat,"min_lat");
+                    console.log(max_lng,"max_lng");
+                    console.log(min_lng,"min_lng");
+                    mapmyindia_array_of_location_fit_into_bound();
+                }
+            });
 
-
-
-
-            }
         }
 
 
         /*function to remove  markers from map*/
-        function mapmyindia_removeMarker($rr) {
-            var tr = $rr.closest('tr');
-
-            tr.find('.cell-details').hide();
-            var sr = tr.attr('data-sr');
-            map.removeLayer(marker[sr].mk);
-
-            delete marker[sr];
+        function mapmyindia_removeMarker(nid) {
+            map.removeLayer(marker[nid].mk);
+            delete marker[nid];
         }
 
         function mapmyindia_array_of_location_fit_into_bound() {
@@ -116,15 +104,21 @@ var data;
 
 
 
-        $(document).on('click', '.select-all .form-checkbox', function () {
-            $("input:checkbox[name^=list_form_items]").each(function () {
-                $(this).trigger("change");
-            });
-        });
+//        $(document).on('click', '.select-all .form-checkbox', function () {
+//            $("input:checkbox[name^=list_form_items]").each(function () {
+//                $(this).trigger("change");
+//            });
+//        });
 
         $(document).on('change', 'input[name^=list_form_items]', function () {
             var closet_tr = $(this).closest("tr");
             var area_hook = closet_tr.attr('data-area');
+
+            if ($(this).prop('checked')) {
+                var checked = 1;
+            } else {
+                var checked = 0;
+            }
             $.ajax({
                 type: "GET",
                 //dataType: 'text',
@@ -134,24 +128,36 @@ var data;
                     area_hook: area_hook,
                 },
                 success: function (result) {
+                    console.log(result, "result");
                     var data = JSON.parse(result);
-                    custom_ajax_func(data);
+                    custom_ajax_func(data, area_hook);
                 }
             });
 
 
-            function custom_ajax_func(data) {
-                console.log(data,"data");
+            function custom_ajax_func(data, area_hook) {
                 $.each(data, function (key, value) {
                     var lat = value.field_hul_updated_lat_value;
                     var lng = value.field_hul_updated_long_value;
                     var nid = value.nid;
-                    mapmyindia_number_on_marker(lat, lng, key, closet_tr, nid);
+
+                    if (checked == 1) {
+                        mapmyindia_number_on_marker(lat, lng, key, closet_tr, nid, area_hook);
+                    } else {
+                        mapmyindia_removeMarker(nid);
+                         max_lat = max_lng = min_lat = min_lng = undefined;
+                    }
+
                 });
             }
 
 
+
+
+
         });
+
+
 
 
 
