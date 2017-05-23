@@ -48,7 +48,6 @@ var data;
             var postion = new L.LatLng(checked_lat, checked_lng);/*WGS location object*/
 
             console.log(marker[area_hook],"abcd");
-            if (marker[area_hook] === undefined) {
 
 
                 $.ajax({
@@ -85,7 +84,6 @@ var data;
 
 
 
-            }
         }
 
 
