@@ -248,7 +248,12 @@ function leanbox_dashboard_block_info() {
   $blocks['bills_per_person_trends'] = array(
     'info' => t('Bills Per Person Day Wise Trends'),
     'cache' => DRUPAL_NO_CACHE,
+  ); 
+  $blocks['unloading_daywise_trends'] = array(
+    'info' => t('Bills Unloading Day Wise Trends'),
+    'cache' => DRUPAL_NO_CACHE,
   );
+  
   return $blocks;
 }
 
@@ -808,6 +813,27 @@ function leanbox_dashboard_block_view($delta = '') {
             drupal_get_path('module', 'leanbox_dashboard') . '/js/leanbox_dashboard_unloading_ota.js',
             array(
               'data' => array('leanbox_dashboard' => array('unloading_ota' => $data, 'area_definition' => $area_definition)),
+              'type' => 'setting'
+            ),
+          ),
+        ),
+      );
+      break;
+
+    case 'unloading_daywise_trends':
+      
+      $loading_date = date('d-m-Y');
+      $block['subject'] = "Unloading DayWise($loading_date EGIR)";
+      $data = leanbox_dashboard_chart_query_details('unloading_daywise_trends');
+
+      $filter_form = drupal_render(drupal_get_form('leanbox_dashboard_chart_filter_unloading_daywise_trends_form'));
+      $block['content'] = array(
+        '#markup' => theme('leanbox_dashboard', array('data' => $filter_form)),
+        '#attached' => array(
+          'js' => array(
+            drupal_get_path('module', 'leanbox_dashboard') . '/js/leanbox_dashboard_unloading_daywise_trends_chart.js',
+            array(
+              'data' => array('leanbox_dashboard' => array('unloading_daywise_trends' => $data,)),
               'type' => 'setting'
             ),
           ),
