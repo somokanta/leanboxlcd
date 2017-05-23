@@ -109,13 +109,30 @@ var marker = {};
         $(document).on('change', 'input[name^=list_form_items]', function () {
             var closet_tr = $(this).closest("tr");
             var area_hook = closet_tr.attr('data-area');
+            
+            
+            $.ajax({
+                type: "GET",
+                //dataType: 'text',
+                url: "/get/lat-lng",
+                async: false,
+                data: {
+                    area_hook: area_hook,
+                },
+                success: function(result) {
+                    var jsondata = JSON.parse(result);
+                    console.log(jsondata,"jsondata");
+                    
+                }
+            });
+            
             console.log(area_hook,"area_hook");
             
-            if ($(this).prop('checked')) {
-                mapmyindia_number_on_marker($(this));
-            } else {
-                mapmyindia_removeMarker($(this));
-            }
+//            if ($(this).prop('checked')) {
+//                mapmyindia_number_on_marker($(this));
+//            } else {
+//                mapmyindia_removeMarker($(this));
+//            }
         });
 
 
