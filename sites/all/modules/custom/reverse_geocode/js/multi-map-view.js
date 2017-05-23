@@ -47,7 +47,7 @@ var data;
             var icon = L.divIcon({className: 'my-div-icon', html: "<img style='position:relative;width:35px;height:35px' src=" + icon_path + '><span style="position: absolute;left: 0.8em;right: 1em;top: 5px;bottom:3em;font-size:12px;font-weight:bold;width: 17px;color:black;display: inline-block;height: 17px;text-align: center;line-height: 17px;" class="my-div-span"></span>', iconSize: [10, 10], popupAnchor: [12, -10]});/*function that creates a div over a icon and display content on the div*/
             var postion = new L.LatLng(checked_lat, checked_lng);/*WGS location object*/
 
-
+            console.log(marker[area_hook],"abcd");
             if (marker[area_hook] === undefined) {
 
 
