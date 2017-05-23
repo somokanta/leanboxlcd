@@ -786,8 +786,9 @@ function get_reverse_geocode_from_lat_long() {
 
 function get_lat_long_from_area_hook() {
   $area_hook = $_GET['area_hook'];
-  $result = lat_lng_results($area_hook);
-  echo $result;
+  echo $area_hook;
+ // $result = lat_lng_results($area_hook);
+ // echo $result;
 }
 
 function lat_lng_results($area_hook){
