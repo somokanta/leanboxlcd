@@ -266,9 +266,7 @@ function area_wise_filter_new_validate(&$form, &$form_state) {
  // $area_hook = $form_state['values']['area_hook'];
   $data = "";
   if (!empty($sales_day)) {
-    dpm("11");
     $data = reverse_geocode_get_data_area_code_wise_new($sales_day, $van_pl_group);
-    dpm($data,"data");
   }
   if (empty($data)) {
     $message = "No Results Found";
@@ -335,7 +333,7 @@ function area_hook_wise_filters_submit(&$form, &$form_state) {
 //      'details' => array('data' => array('#markup' => '<a class="cell-details" style="display:none;">On Map</a>' . $marker_tooltip), 'class' => 'details-cell'),
 //    );
     
-        $options[$party_code] = array(
+        $options[$area_hook] = array(
       'area_hook' => array('data' => $area_hook, 'class' => 'area-hook-cell'),
       'outlet_count' => array('data' => $outlet_count, 'class' => 'outlet-count-cell'),
       '#attributes' => array('data-count' => $outlet_count),
