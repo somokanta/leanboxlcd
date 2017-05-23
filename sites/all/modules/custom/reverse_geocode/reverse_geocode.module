@@ -850,7 +850,7 @@ function address_results($nid) {
         . '</table></div>';
   }
   
-  echo $marker_tooltip;
+  return $marker_tooltip;
 }
 
 function lat_lng_results($area_hook) {
