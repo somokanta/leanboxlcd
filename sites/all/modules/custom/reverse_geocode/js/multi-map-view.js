@@ -38,6 +38,7 @@ var data;
 
         /*function to make number appear on marker*/
         function mapmyindia_number_on_marker(lat, lng, key, closet_tr, nid) {
+            console.log(nid,"nid");
             var tr = closet_tr;
             var checked_lat = lat;
             var checked_lng = lng;
@@ -140,6 +141,7 @@ var data;
 
 
             function custom_ajax_func(data) {
+                console.log(data,"data");
                 $.each(data, function (key, value) {
                     var lat = value.field_hul_updated_lat_value;
                     var lng = value.field_hul_updated_long_value;
