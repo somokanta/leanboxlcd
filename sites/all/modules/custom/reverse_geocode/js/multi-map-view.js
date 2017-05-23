@@ -93,7 +93,11 @@ var data;
         function mapmyindia_removeMarker(area_hook) {
             console.log(area_hook,"area_hook");
             console.log(marker,"marker");
-            map.removeLayer(marker[area_hook].mk);
+            
+            $.each(marker, function (key, value) {
+                var tt = value.mk;
+                map.removeLayer(marker[area_hook].tt);
+            });
             delete marker[area_hook];
         }
 
