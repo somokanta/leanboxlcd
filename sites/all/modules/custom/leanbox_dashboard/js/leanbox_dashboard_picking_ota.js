@@ -70,6 +70,7 @@
 //						role: "annotation"},
 				]);
 				var options = {
+					sliceVisibilityThreshold:0,
 					width: area_definition.width,
 					height: area_definition.height,
 					title: '',
