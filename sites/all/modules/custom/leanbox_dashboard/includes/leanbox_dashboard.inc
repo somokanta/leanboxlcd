@@ -2058,8 +2058,8 @@ function _get_otif_details_using_bill_date($bill_date, $channel, $uid) {
 
 function _get_unloading_daywise_trends_data($bill_date, $dis_time) {
   $data = array();
-  $data['success'] = 0;
-  $data['fail'] = 0;
+  $data['success_count'] = 0;
+  $data['fail_count'] = 0;
   
   $query = db_select('node', 'n');
   $query->addTag('node_uid');
@@ -2091,8 +2091,8 @@ function _get_unloading_daywise_trends_data($bill_date, $dis_time) {
     }
 
     $fail_count = $total_cont - $success_count;
-    $data['success'] = $success_count;
-    $data['fail'] = $fail_count;
+    $data['success_count'] = $success_count;
+    $data['fail_count'] = $fail_count;
   }
 
   return $data;
