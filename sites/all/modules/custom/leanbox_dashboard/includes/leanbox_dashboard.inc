@@ -1537,9 +1537,6 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
         $row1[] = 'Success';
         $row2[] = 'Fail';
 
-        $total_cont = count($res);
-        $dis_on_time = strtotime(date("H:i", strtotime($dis_time)));
-        $success_count = 0;
         foreach ($res as $key => $val) {
           $bill_date = $val['field_egir_date_value'];
           $date_str = strtotime($bill_date);
@@ -1548,7 +1545,6 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
           $array = _get_unloading_daywise_trends_data($bill_date, $dis_time);
           $success_count = $array['success_count'];
           $fail_count = $array['fail_count'];
-          $fail_count = $total_cont - $success_count;
           $row1[] = $success_count;
           $row2[] = $fail_count;
         }
