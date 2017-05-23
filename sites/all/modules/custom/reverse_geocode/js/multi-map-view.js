@@ -36,13 +36,10 @@ var marker = {};
 
 
         /*function to make number appear on marker*/
-        function mapmyindia_number_on_marker($ss) {
-            var tr = $ss.closest('tr');
-            var checked_lat = tr.attr('data-lat');
-            var checked_lng = tr.attr('data-lng');
-            var sr = tr.attr('data-sr');
-
-            tr.find('.cell-details').show();
+        function mapmyindia_number_on_marker(lat,lng ,key) {
+            var checked_lat = lat;
+            var checked_lng = lng;
+            var sr = key;
 
             var icon_path = window.location.origin + '/sites/all/themes/leanbox/images/map-marker.png';
             var icon = L.divIcon({className: 'my-div-icon', html: "<img style='position:relative;width:35px;height:35px' src=" + icon_path + '><span style="position: absolute;left: 0.8em;right: 1em;top: 5px;bottom:3em;font-size:12px;font-weight:bold;width: 17px;color:black;display: inline-block;height: 17px;text-align: center;line-height: 17px;" class="my-div-span">' + (sr) + '</span>', iconSize: [10, 10], popupAnchor: [12, -10]});/*function that creates a div over a icon and display content on the div*/
@@ -110,7 +107,6 @@ var marker = {};
             var closet_tr = $(this).closest("tr");
             var area_hook = closet_tr.attr('data-area');
 
-
             $.ajax({
                 type: "GET",
                 //dataType: 'text',
@@ -125,8 +121,10 @@ var marker = {};
 
                     $.each(data, function (key, value) {
                         console.log(value,"value");
-                        console.log(value.field_hul_updated_lat_value,"latttt");
-                        console.log(key,"key");
+                       var  lat = value.field_hul_updated_lat_value;
+                       var  lng = value.field_hul_updated_long_value;
+                       
+                       mapmyindia_number_on_marker(lat,lng ,key);
                     });
 
                     
