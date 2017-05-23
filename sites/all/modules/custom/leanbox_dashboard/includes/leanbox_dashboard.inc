@@ -12,6 +12,48 @@
  * @param array $form_state
  * @return array
  */
+function leanbox_dashboard_chart_filter_unloading_daywise_trends_form($form, &$form_state) {
+  $form = array();
+
+  if (arg(1) == 'unloading_daywise_trends') {
+    $bill_date = date('Y-m-d');
+    $form['start_date'] = array(
+      '#type' => 'date_popup',
+      '#title' => t('EGIR Date From'),
+      '#required' => TRUE,
+      '#date_format' => 'Y-m-d',
+      '#default_value' => $bill_date,
+    );
+    $form['end_date'] = array(
+      '#type' => 'date_popup',
+      '#title' => t('EGIR Date To'),
+      '#required' => TRUE,
+      '#date_format' => 'Y-m-d',
+      '#default_value' => $bill_date,
+    );
+
+    $form['submit'] = array(
+      '#type' => 'submit',
+      '#value' => 'Submit',
+      '#prefix' => '<div id ="unloading-daywise-trends-submit">',
+      '#suffix' => '</div>',
+      '#attributes' => array('class' => array('unloading-daywise-trends-submit')),
+    );
+  }
+
+  $form['unloading_daywise_trends'] = array(
+    '#markup' => '<a href = "/leanbox-chart-details/unloading_daywise_trends" target = "_blank"><div id="unloading_daywise_trends_div"></div></a>',
+  );
+
+  return $form;
+}
+
+/**
+ * 
+ * @param array $form
+ * @param array $form_state
+ * @return array
+ */
 function leanbox_dashboard_chart_filter_bills_per_person_trends_form($form, &$form_state) {
   $form = array();
 
@@ -1473,6 +1515,61 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
 
     return $data;
   }
+   else if ($activity_type == 'unloading_daywise_trends') {
+    $query = db_select('node', 'n');
+    $query->addTag('node_uid');
+    $query->condition('n.type', 'egir');
+    $query->join('field_data_field_egir_date', 'l', 'l.entity_id = n.nid');
+    $query->leftjoin('field_data_field_unloading_date', 'pcd', 'pcd.entity_id = n.nid');
+    $query->fields('l', array('field_egir_date_value'));
+    $query->fields('pcd', array('field_unloading_date_value'));
+
+    $query->leftjoin('field_data_field_unloading_status', 'ps', 'ps.entity_id = n.nid');
+    $query->leftjoin('field_data_field_unloading_end_time', 'ppt', 'ppt.entity_id = n.nid');
+    $query->fields('ppt', array('field_unloading_end_time_value'));
+    $query->fields('ps', array('field_unloading_status_value'));
+
+    $query->where("(DATE_FORMAT(l.field_egir_date_value, '%Y-%m-%d') >= :start)", array(':start' => $start));
+    $query->where("(DATE_FORMAT(l.field_egir_date_value, '%Y-%m-%d') <= :to)", array(':to' => $end));
+    $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+
+    $data[] = array('PriceList Group', 'Fail', 'Success');
+
+    $query = db_select('node', 'n');
+    $query->addTag('node_uid');
+    $query->condition('n.type', 'van_stop_master');
+    $query->join('field_data_field_unloading_finish_time', 'pp', 'pp.entity_id = n.nid');
+    $query->fields('pp', array('field_unloading_finish_time_value'));
+    $dis_time = $query->execute()->fetchField();
+
+    if (!empty($dis_time)) {
+      if (!empty($res)) {
+
+        $total_cont = count($res);
+        $dis_on_time = strtotime(date("H:i", strtotime($dis_time)));
+        $success_count = 0;
+        foreach ($res as $key => $val) {
+          $bill_date = $val['field_egir_date_value'];
+          $header[$bill_date] = $bill_date;
+
+          $array = _get_unloading_daywise_trends_data($bill_date, $dis_time);
+          $success_count = $array['success_count'];
+          $fail_count = $array['fail_count'];
+          $fail_count = $total_cont - $success_count;
+          $row['success'][] = $success_count;
+          $row['fail'][] = $fail_count;
+        }
+        $rows[] = $row;
+      }
+      else {
+        $data = 'No Result found';
+      }
+    }
+    else {
+      $data = 'No Result found. Kindly Check unloading finish time';
+    }
+    return $data;
+  }
   else if ($activity_type == 'unloading_ota') {
     $query = db_select('node', 'n');
     $query->addTag('node_uid');
@@ -1874,7 +1971,7 @@ function leanbox_dashboard_otif_trends_chart_query_details($type, $start_date = 
 
         $total_dis_bill_val = _get_otif_details_using_bill_date($bill_date_str, $channel, $uid);
         $bill_date = date('Y-m-d', $bill_date_str);
-        $otif_val = round(($total_dis_bill_val / $val['bill_sum'] ) * 100);
+        $otif_val = round($total_dis_bill_val);
         $row[] = $otif_val;
       }
       $rows[] = $row;
@@ -1948,8 +2045,9 @@ function _get_otif_details_using_bill_date($bill_date, $channel, $uid) {
 
     $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
 
-
+    $channel_bill_val = 0;
     foreach ($res as $key => $val) {
+      $channel_bill_val += $val['field_bill_value_value'];
       $dispatch_date = strtotime($val['field_dispatch_date_value']);
       $pdd = $val['field_promised_date_value'];
 
@@ -1961,5 +2059,43 @@ function _get_otif_details_using_bill_date($bill_date, $channel, $uid) {
       }
     }
   }
-  return $total_dis_bill_val;
+  return ($total_dis_bill_val / $channel_bill_val) * 100;
+}
+
+function _get_unloading_daywise_trends_data($bill_date, $dis_time) {
+  $data = array();
+  $query = db_select('node', 'n');
+  $query->addTag('node_uid');
+  $query->condition('n.type', 'egir');
+  $query->leftjoin('field_data_field_unloading_date', 'pcd', 'pcd.entity_id = n.nid');
+  $query->fields('pcd', array('field_unloading_date_value'));
+
+  $query->leftjoin('field_data_field_unloading_status', 'ps', 'ps.entity_id = n.nid');
+  $query->leftjoin('field_data_field_unloading_end_time', 'ppt', 'ppt.entity_id = n.nid');
+  $query->fields('ppt', array('field_unloading_end_time_value'));
+  $query->fields('ps', array('field_unloading_status_value'));
+  $query->where("(DATE_FORMAT(l.field_egir_date_value, '%Y-%m-%d') = :to)", array(':to' => $bill_date));
+  $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+
+  if (!empty($res)) {
+
+    $total_cont = count($res);
+    $dis_on_time = strtotime(date("H:i", strtotime($dis_time)));
+    $success_count = 0;
+    foreach ($res as $key => $val) {
+      $pp_on_time = strtotime(date("H:i", strtotime($val['field_unloading_end_time_value'])));
+
+      if (($bill_date == $val['field_unloading_date_value']) && ($val['field_unloading_status_value'] == 2)) {
+        if ($pp_on_time <= $dis_on_time) {
+          $success_count ++;
+        }
+      }
+    }
+
+    $fail_count = $total_cont - $success_count;
+    $data['success'] = $success_count;
+    $data['fail'] = $fail_count; 
+  }
+  
+  return $data;
 }
