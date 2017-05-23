@@ -167,11 +167,11 @@ function area_hook_wise_locations_form($form, &$form_state, $type) {
 //    '#suffix' => '</div>',
     // '#default_value' => isset($form_state['values']['sales_day']) ? $form_state['values']['sales_day'] : NULL,
     '#options' => array(),
-    '#ajax' => array(
-      'event' => 'change',
-      'callback' => 'sales_day_callback_new',
-      'wrapper' => 'address-selection-map',
-    ),
+//    '#ajax' => array(
+//      'event' => 'change',
+//      'callback' => 'sales_day_callback_new',
+//      'wrapper' => 'address-selection-map',
+//    ),
    
   );
 
