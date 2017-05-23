@@ -266,7 +266,9 @@ function area_wise_filter_new_validate(&$form, &$form_state) {
  // $area_hook = $form_state['values']['area_hook'];
   $data = "";
   if (!empty($sales_day)) {
+    dpm("11");
     $data = reverse_geocode_get_data_area_code_wise_new($sales_day, $van_pl_group);
+    dpm($data,"data");
   }
   if (empty($data)) {
     $message = "No Results Found";
