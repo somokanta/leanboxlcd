@@ -77,10 +77,6 @@ var data;
                 }
             });
 
-
-
-
-
             console.log(marker, "abcd");
         }
 
@@ -117,6 +113,11 @@ var data;
             var closet_tr = $(this).closest("tr");
             var area_hook = closet_tr.attr('data-area');
 
+            if ($(this).prop('checked')) {
+                var checked = 1;
+            } else {
+                var checked = 0;
+            }
             $.ajax({
                 type: "GET",
                 //dataType: 'text',
@@ -138,9 +139,11 @@ var data;
                     var lng = value.field_hul_updated_long_value;
                     var nid = value.nid;
 
-                    if ($(this).prop('checked')) {
+                    if (checked == 1) {
+                        console.log("iffff");
                         mapmyindia_number_on_marker(lat, lng, key, closet_tr, nid, area_hook);
                     } else {
+                        console.log("elseeeeee");
                         mapmyindia_removeMarker(nid);
                     }
 
