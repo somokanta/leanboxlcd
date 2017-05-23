@@ -38,7 +38,6 @@ var data;
 
         /*function to make number appear on marker*/
         function mapmyindia_number_on_marker(lat, lng, key, closet_tr, nid,area_hook) {
-            console.log(nid, "nid");
             var tr = closet_tr;
             var checked_lat = lat;
             var checked_lng = lng;
@@ -46,7 +45,6 @@ var data;
             var icon_path = window.location.origin + '/sites/all/themes/leanbox/images/map-marker.png';
             var icon = L.divIcon({className: 'my-div-icon', html: "<img style='position:relative;width:35px;height:35px' src=" + icon_path + '><span style="position: absolute;left: 0.8em;right: 1em;top: 5px;bottom:3em;font-size:12px;font-weight:bold;width: 17px;color:black;display: inline-block;height: 17px;text-align: center;line-height: 17px;" class="my-div-span"></span>', iconSize: [10, 10], popupAnchor: [12, -10]});/*function that creates a div over a icon and display content on the div*/
             var postion = new L.LatLng(checked_lat, checked_lng);/*WGS location object*/
-
             
 
                 $.ajax({
@@ -61,7 +59,7 @@ var data;
                         console.log(result, "result");
                         var text = result;
                         var mk = addMarker(postion, icon, text);
-                        marker[area_hook] = {mk: mk};
+                        marker[area_hook][nid] = {mk: mk};
                         if (checked_lat > max_lat || max_lat == undefined) {
                             max_lat = checked_lat;
                         }
