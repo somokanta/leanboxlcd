@@ -292,28 +292,28 @@ function area_hook_wise_filters_submit(&$form, &$form_state) {
     
     $area_hook = $val['field_outlet_area_hook_value'];
     $outlet_count = $val['Count'];
-    $lat = $val['field_hul_updated_lat_value'];
-    $long = $val['field_hul_updated_long_value'];
-    $party_code = $val['title'];
-    $party_name = $val['field_party_name_value'];
-    $hul_status = $val['field_area_hook_group_hul_value'];
-
-    $new_city = $val['field_updated_address_sub_administrative_area'];
-    $new_district = $val['field_updated_address_premise'];
-    $new_street = $val['field_updated_address_sub_premise'];
-    $new_locality = $val['field_updated_address_locality'];
-    $new_sublocality = $val['field_updated_address_dependent_locality'];
-    $new_poi = $val['field_updated_address_data'];
-    $new_lat_long = !empty($lat) ? $lat . ',' . $long : '';
-
-    $marker_tooltip = '<div class="cell-address cell-hide"><table>'
-        . '<tr><td style="white-space:nowrap;color:#222">Party code</td><td>' . $party_code . '</td></tr>'
-        . '<tr><td style="white-space:nowrap;color:#222">Locality</td><td>' . $new_locality . '</td></tr>'
-        . '<tr><td style="white-space:nowrap;color:#222">Sub Locality</td><td>' . $new_sublocality . '</td></tr>'
-        . '<tr><td style="white-space:nowrap;color:#222">Street</td><td>' . $new_street . '</td></tr>'
-        . '<tr><td style="white-space:nowrap;color:#222">POI</td><td>' . $new_poi . '</td></tr>'
-        . '<tr><td style="white-space:nowrap;color:#222">Lat/Long</td><td>' . $new_lat_long . '</td></tr>'
-        . '</table></div>';
+//    $lat = $val['field_hul_updated_lat_value'];
+//    $long = $val['field_hul_updated_long_value'];
+//    $party_code = $val['title'];
+//    $party_name = $val['field_party_name_value'];
+//    $hul_status = $val['field_area_hook_group_hul_value'];
+//
+//    $new_city = $val['field_updated_address_sub_administrative_area'];
+//    $new_district = $val['field_updated_address_premise'];
+//    $new_street = $val['field_updated_address_sub_premise'];
+//    $new_locality = $val['field_updated_address_locality'];
+//    $new_sublocality = $val['field_updated_address_dependent_locality'];
+//    $new_poi = $val['field_updated_address_data'];
+//    $new_lat_long = !empty($lat) ? $lat . ',' . $long : '';
+//
+//    $marker_tooltip = '<div class="cell-address cell-hide"><table>'
+//        . '<tr><td style="white-space:nowrap;color:#222">Party code</td><td>' . $party_code . '</td></tr>'
+//        . '<tr><td style="white-space:nowrap;color:#222">Locality</td><td>' . $new_locality . '</td></tr>'
+//        . '<tr><td style="white-space:nowrap;color:#222">Sub Locality</td><td>' . $new_sublocality . '</td></tr>'
+//        . '<tr><td style="white-space:nowrap;color:#222">Street</td><td>' . $new_street . '</td></tr>'
+//        . '<tr><td style="white-space:nowrap;color:#222">POI</td><td>' . $new_poi . '</td></tr>'
+//        . '<tr><td style="white-space:nowrap;color:#222">Lat/Long</td><td>' . $new_lat_long . '</td></tr>'
+//        . '</table></div>';
 //
 //
 //    if ($hul_status == "0") {
@@ -351,26 +351,26 @@ function reverse_geocode_get_data_area_code_wise_new($sales_day, $van_pl_group) 
   $query = db_select('node', 'n');
   $query->condition('n.type', 'outlet_master');
   $query->addTag('node_uid');
-  $query->join('field_data_field_party_name', 'fpn', 'fpn.entity_id = n.nid');
-  $query->leftjoin('field_data_field_area_hook_group_hul', 'fagh', 'fagh.entity_id = n.nid');
-  $query->join('field_data_field_hul_code', 'hc', 'hc.entity_id = n.nid');
-  $query->join('node', 'hul', 'hc.field_hul_code_value = hul.title');
-  $query->fields('hc', array('field_hul_code_value'));
-  $query->condition('hul.uid', $distributor_id, '=');
-  $query->condition('hul.type', 'hul_code_master');
-
-  $query->Join('field_data_field_hul_updated_lat', 'hul_lat_u', 'hul_lat_u.entity_id = hul.nid');
-  $query->fields('hul_lat_u', array('field_hul_updated_lat_value'));
-  $query->Join('field_data_field_hul_updated_long', 'hul_long_u', 'hul_long_u.entity_id = hul.nid');
-  $query->fields('hul_long_u', array('field_hul_updated_long_value'));
-  $query->join('field_data_field_updated_address', 'new', 'new.entity_id = hul.nid');
-  $query->orderBy('hul_lat_u.field_hul_updated_lat_value', 'asc');
-  $query->orderBy('hul_long_u.field_hul_updated_long_value', 'asc');
-  $query->fields('new');
-  $query->fields('n', array('title'));
-  $query->fields('fpn', array('field_party_name_value'));
-  $query->fields('fagh', array('field_area_hook_group_hul_value'));
-
+//  $query->join('field_data_field_party_name', 'fpn', 'fpn.entity_id = n.nid');
+//  $query->leftjoin('field_data_field_area_hook_group_hul', 'fagh', 'fagh.entity_id = n.nid');
+//  $query->join('field_data_field_hul_code', 'hc', 'hc.entity_id = n.nid');
+//  $query->join('node', 'hul', 'hc.field_hul_code_value = hul.title');
+//  $query->fields('hc', array('field_hul_code_value'));
+//  $query->condition('hul.uid', $distributor_id, '=');
+//  $query->condition('hul.type', 'hul_code_master');
+//
+//  $query->Join('field_data_field_hul_updated_lat', 'hul_lat_u', 'hul_lat_u.entity_id = hul.nid');
+//  $query->fields('hul_lat_u', array('field_hul_updated_lat_value'));
+//  $query->Join('field_data_field_hul_updated_long', 'hul_long_u', 'hul_long_u.entity_id = hul.nid');
+//  $query->fields('hul_long_u', array('field_hul_updated_long_value'));
+//  $query->join('field_data_field_updated_address', 'new', 'new.entity_id = hul.nid');
+//  $query->orderBy('hul_lat_u.field_hul_updated_lat_value', 'asc');
+//  $query->orderBy('hul_long_u.field_hul_updated_long_value', 'asc');
+//  $query->fields('new');
+//  $query->fields('n', array('title'));
+//  $query->fields('fpn', array('field_party_name_value'));
+//  $query->fields('fagh', array('field_area_hook_group_hul_value'));
+//
 
   if (!is_null($sales_day)) {
     $query->join('field_data_field_sales_day', 'sd', 'sd.entity_id = n.nid');
