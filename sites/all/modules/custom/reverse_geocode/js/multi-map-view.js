@@ -125,6 +125,7 @@ var data;
                     area_hook: area_hook,
                 },
                 success: function (result) {
+                    console.log(result,"result");
                     var data = JSON.parse(result);
                     custom_ajax_func(data, area_hook);
                 }
