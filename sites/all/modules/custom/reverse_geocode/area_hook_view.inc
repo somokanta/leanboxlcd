@@ -346,6 +346,10 @@ function area_hook_wise_filters_submit(&$form, &$form_state) {
 }
 
 function reverse_geocode_get_data_area_code_wise_new($sales_day, $van_pl_group) {
+  global $user;
+  $user_id = $user->uid;
+  $distributor_id = change_feeds_import_get_distributor_id($user_id);
+  
   $query = db_select('node', 'n');
   $query->condition('n.type', 'outlet_master');
   $query->addTag('node_uid');
