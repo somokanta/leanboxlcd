@@ -576,7 +576,7 @@ function dispatch_planning_form_save_validate($form, &$form_state) {
   $query->leftJoin('field_data_field_area_hook', 'fa', 'fa.entity_id = no.nid');
 
   $query->leftJoin('field_data_field_hul_code', 'fh', 'fh.entity_id = no.nid');
-  $query->join('node', 'hul', "fh.field_hul_code_value = hul.title AND hul.type = 'hul_code_master' AND hul.uid = $distributor_id");
+  $query->leftJoin('node', 'hul', "fh.field_hul_code_value = hul.title AND hul.type = 'hul_code_master' AND hul.uid = $distributor_id");
   $query->leftJoin('field_data_field_hul_updated_lat', 'flat', 'flat.entity_id = hul.nid');
   $query->leftJoin('field_data_field_hul_updated_long', 'flong', 'flong.entity_id = hul.nid');
 
@@ -592,12 +592,20 @@ function dispatch_planning_form_save_validate($form, &$form_state) {
   
   $query->addField('flat', 'field_hul_updated_lat_value', 'lat');
   $query->addField('flong', 'field_hul_updated_long_value', 'lng');
+  
+  $query->orderBy('fa.field_area_hook_nid');
+  $query->orderBy('fs.field_revised_sequence_value');
 
   $res = $query->execute()->fetchAll();
   
   $bill_count = count($res);
   $sequence = $no_area = 0;
+  
+  $s = 1;
   foreach ($res as $val) {
+    
+    $manual_drs_sequence[$val->nid] = $s;
+    $s++;
     
     if (!empty($val->lat) && !empty($val->lng)) {
       $params['services'][] = array('id' => $val->nid, 'address' => array('location_id' => $val->nid, 'lon' => (double)$val->lng, 'lat' => (double)$val->lat));
@@ -649,7 +657,7 @@ function dispatch_planning_form_save_validate($form, &$form_state) {
               $i = 1;
               foreach ($data as $key => $value) {
                 if ($value->getType() == 'service') {
-                  $bill_sequence_array[$value->getLocationId()] = $i;
+                  $bill_sequence_array[$i] = $value->getLocationId();
                   $i ++;
                 }
               }
@@ -661,13 +669,15 @@ function dispatch_planning_form_save_validate($form, &$form_state) {
       }
     }
     
-    if ($bill_sequence_array) {
+    if (!empty($bill_sequence_array)) {
       $form_state['dispatch_planning']['bill_sequence_array'] = $bill_sequence_array;
     }
     else {
       form_set_error('list_form_items', 'An error occured while generating sequence');
     }
   }
+  
+  $form_state['dispatch_planning']['manual_drs_sequence'] = $manual_drs_sequence;
   ##############################################################################
 }
 
@@ -750,24 +760,53 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
   $bill_nids = array_keys($rows);
   
   $sequence_array = $form_state['dispatch_planning']['sequence_array'];
+  $manual_drs_sequence = $form_state['dispatch_planning']['manual_drs_sequence'];
+  
+  if ($seq_flag) {
+    foreach ($bill_sequence as $key => $value) {
+      $node = node_load($value);
 
-  foreach ($bill_nids as $value) {
-    $node = node_load($value);
-    
-    if(isset($node->field_delivery_pending[LANGUAGE_NONE])){
-      $node->field_delivery_pending = array();
+      $node->field_bill_sequence[LANGUAGE_NONE][0]['value'] = $key;
+      $node->field_drs_sequence[LANGUAGE_NONE][0]['value'] = $key;
+      
+      if (isset($node->field_delivery_pending[LANGUAGE_NONE])) {
+        $node->field_delivery_pending = array();
+      }
+      $node->field_trip_id_reference[LANGUAGE_NONE][0]['nid'] = $nid;
+      node_save($node);
     }
-    if($seq_flag){
-      $node->field_bill_sequence[LANGUAGE_NONE][0]['value'] = $bill_sequence[$value];
-    }
-    else{
-      if(isset($sequence_array[$value]) && !empty($sequence_array[$value])){
-        $node->field_bill_sequence[LANGUAGE_NONE][0]['value'] = $sequence_array[$value];
+
+    $diff = array_diff($bill_nids, $bill_sequence);
+    if (!empty($diff)) {
+      foreach ($diff as $value) {
+        $node = node_load($value);
+
+        $node->field_drs_sequence[LANGUAGE_NONE][0]['value'] = ++$key;
+
+        if (isset($node->field_delivery_pending[LANGUAGE_NONE])) {
+          $node->field_delivery_pending = array();
+        }
+        $node->field_trip_id_reference[LANGUAGE_NONE][0]['nid'] = $nid;
+        node_save($node);
       }
     }
-    
-    $node->field_trip_id_reference[LANGUAGE_NONE][0]['nid'] = $nid;
-    node_save($node);
+  }
+  else {
+    foreach ($bill_nids as $value) {
+      $node = node_load($value);
+
+      
+      if (isset($sequence_array[$value]) && !empty($sequence_array[$value])) {
+        $node->field_bill_sequence[LANGUAGE_NONE][0]['value'] = $sequence_array[$value];
+      }
+      $node->field_drs_sequence[LANGUAGE_NONE][0]['value'] = $manual_drs_sequence[$value];
+
+      if (isset($node->field_delivery_pending[LANGUAGE_NONE])) {
+        $node->field_delivery_pending = array();
+      }
+      $node->field_trip_id_reference[LANGUAGE_NONE][0]['nid'] = $nid;
+      node_save($node);
+    }
   }
 
   drupal_set_message('Successfully updated. Trip id ' . $trip_id);
@@ -1308,6 +1347,9 @@ function trip_delete_form_submit($form, &$form_state) {
 
     if ($node) {
       $node->field_trip_id_reference = array();
+      $node->field_bill_sequence = array();
+      $node->field_drs_sequence = array();
+      
       node_save($node);
     }
   }
