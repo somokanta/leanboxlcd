@@ -120,13 +120,11 @@ var marker = {};
                     area_hook: area_hook,
                 },
                 success: function(result) {
-                    
                     console.log(result,"result");
                     
                 }
             });
             
-            console.log(area_hook,"area_hook");
             
 //            if ($(this).prop('checked')) {
 //                mapmyindia_number_on_marker($(this));

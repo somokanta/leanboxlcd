@@ -816,7 +816,7 @@ function lat_lng_results($area_hook){
   $query->orderBy('hul_long_u.field_hul_updated_long_value', 'asc');
 
   $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
-  echo json_encode($data);
+  echo json_encode($res);
   
 }
 function reverse_geocode_results($lat, $lng) {
