@@ -37,19 +37,19 @@ var data;
 
 
         /*function to make number appear on marker*/
-        function mapmyindia_number_on_marker(lat, lng, key, closet_tr, nid) {
-            console.log(nid,"nid");
+        function mapmyindia_number_on_marker(lat, lng, key, closet_tr, nid,area_hook) {
+            console.log(nid, "nid");
             var tr = closet_tr;
             var checked_lat = lat;
             var checked_lng = lng;
             var sr = key;
 
             var icon_path = window.location.origin + '/sites/all/themes/leanbox/images/map-marker.png';
-            var icon = L.divIcon({className: 'my-div-icon', html: "<img style='position:relative;width:35px;height:35px' src=" + icon_path + '><span style="position: absolute;left: 0.8em;right: 1em;top: 5px;bottom:3em;font-size:12px;font-weight:bold;width: 17px;color:black;display: inline-block;height: 17px;text-align: center;line-height: 17px;" class="my-div-span">' + (sr) + '</span>', iconSize: [10, 10], popupAnchor: [12, -10]});/*function that creates a div over a icon and display content on the div*/
+            var icon = L.divIcon({className: 'my-div-icon', html: "<img style='position:relative;width:35px;height:35px' src=" + icon_path + '><span style="position: absolute;left: 0.8em;right: 1em;top: 5px;bottom:3em;font-size:12px;font-weight:bold;width: 17px;color:black;display: inline-block;height: 17px;text-align: center;line-height: 17px;" class="my-div-span"></span>', iconSize: [10, 10], popupAnchor: [12, -10]});/*function that creates a div over a icon and display content on the div*/
             var postion = new L.LatLng(checked_lat, checked_lng);/*WGS location object*/
 
 
-            if (marker[sr] === undefined) {
+            if (marker[area_hook] === undefined) {
 
 
                 $.ajax({
@@ -61,7 +61,7 @@ var data;
                         nid: nid,
                     },
                     success: function (result) {
-                        console.log(result,"result");
+                        console.log(result, "result");
                         var text = result;
                         var mk = addMarker(postion, icon, text);
                         marker[sr] = {mk: mk};
@@ -125,33 +125,40 @@ var data;
         $(document).on('change', 'input[name^=list_form_items]', function () {
             var closet_tr = $(this).closest("tr");
             var area_hook = closet_tr.attr('data-area');
-            $.ajax({
-                type: "GET",
-                //dataType: 'text',
-                url: "/get/lat-lng",
-                async: false,
-                data: {
-                    area_hook: area_hook,
-                },
-                success: function (result) {
-                    var data = JSON.parse(result);
-                    custom_ajax_func(data);
-                }
-            });
-
-
-            function custom_ajax_func(data) {
-                console.log(data,"data");
-                $.each(data, function (key, value) {
-                    var lat = value.field_hul_updated_lat_value;
-                    var lng = value.field_hul_updated_long_value;
-                    var nid = value.nid;
-                    mapmyindia_number_on_marker(lat, lng, key, closet_tr, nid);
+            if ($(this).prop('checked')) {
+                $.ajax({
+                    type: "GET",
+                    //dataType: 'text',
+                    url: "/get/lat-lng",
+                    async: false,
+                    data: {
+                        area_hook: area_hook,
+                    },
+                    success: function (result) {
+                        var data = JSON.parse(result);
+                        custom_ajax_func(data,area_hook);
+                    }
                 });
+
+
+                function custom_ajax_func(data,area_hook) {
+                    $.each(data, function (key, value) {
+                        var lat = value.field_hul_updated_lat_value;
+                        var lng = value.field_hul_updated_long_value;
+                        var nid = value.nid;
+                        mapmyindia_number_on_marker(lat, lng, key, closet_tr, nid,area_hook);
+                    });
+                }
+            } else {
+                
+                mapmyindia_removeMarker($(this));
+
             }
 
 
         });
+
+
 
 
 
