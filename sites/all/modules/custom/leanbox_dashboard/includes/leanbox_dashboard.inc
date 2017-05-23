@@ -1550,7 +1550,8 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
         }
         $rows[] = $row1;
         $rows[] = $row2;
-
+dpm($header, 'header');
+dpm($rows, '$rows');
         $output = theme('table', array(
           'header' => $header,
           'rows' => $rows,
@@ -2057,6 +2058,9 @@ function _get_otif_details_using_bill_date($bill_date, $channel, $uid) {
 
 function _get_unloading_daywise_trends_data($bill_date, $dis_time) {
   $data = array();
+  $data['success'] = 0;
+  $data['fail'] = 0;
+  
   $query = db_select('node', 'n');
   $query->addTag('node_uid');
   $query->condition('n.type', 'egir');
