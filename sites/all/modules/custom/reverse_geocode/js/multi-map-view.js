@@ -77,6 +77,7 @@ var data;
                 }
             });
 
+            console.log(nid, "nid");
             console.log(marker, "abcd");
         }
 
@@ -140,10 +141,8 @@ var data;
                     var nid = value.nid;
 
                     if (checked == 1) {
-                        console.log("iffff");
                         mapmyindia_number_on_marker(lat, lng, key, closet_tr, nid, area_hook);
                     } else {
-                        console.log("elseeeeee");
                         mapmyindia_removeMarker(nid);
                     }
 
