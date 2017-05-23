@@ -62,7 +62,7 @@ var data;
                         console.log(result, "result");
                         var text = result;
                         var mk = addMarker(postion, icon, text);
-                        marker[area_hook] = {mk: mk};
+                      //  marker[area_hook] = {mk: mk};
                         marker[area_hook]["mk"] = mk;
                         if (checked_lat > max_lat || max_lat == undefined) {
                             max_lat = checked_lat;
