@@ -1,4 +1,5 @@
 var marker = {};
+var data;
 (function ($) {
 
     $(document).ready(function () {
@@ -36,7 +37,7 @@ var marker = {};
 
 
         /*function to make number appear on marker*/
-        function mapmyindia_number_on_marker(lat,lng ,key ,closet_tr) {
+        function mapmyindia_number_on_marker(lat, lng, key, closet_tr, nid) {
             var tr = closet_tr;
             var checked_lat = lat;
             var checked_lng = lng;
@@ -49,24 +50,40 @@ var marker = {};
 
             if (marker[sr] === undefined) {
 
-                var text = tr.find('.cell-address').html();
 
-                var mk = addMarker(postion, icon, text);
-                marker[sr] = {mk: mk};
-                if (checked_lat > max_lat || max_lat == undefined) {
-                    max_lat = checked_lat;
-                }
-                if (checked_lat < min_lat || min_lat == undefined) {
-                    min_lat = checked_lat;
-                }
-                if (checked_lng > max_lng || max_lng == undefined) {
-                    max_lng = checked_lng;
-                }
-                if (checked_lng < min_lng || min_lng == undefined) {
-                    min_lng = checked_lng;
-                }
+                $.ajax({
+                    type: "GET",
+                    //dataType: 'text',
+                    url: "/get/address",
+                    async: false,
+                    data: {
+                        nid: nid,
+                    },
+                    success: function (result) {
+                        console.log(result,"result");
+                        var text = result;
+                        var mk = addMarker(postion, icon, text);
+                        marker[sr] = {mk: mk};
+                        if (checked_lat > max_lat || max_lat == undefined) {
+                            max_lat = checked_lat;
+                        }
+                        if (checked_lat < min_lat || min_lat == undefined) {
+                            min_lat = checked_lat;
+                        }
+                        if (checked_lng > max_lng || max_lng == undefined) {
+                            max_lng = checked_lng;
+                        }
+                        if (checked_lng < min_lng || min_lng == undefined) {
+                            min_lng = checked_lng;
+                        }
 
-                mapmyindia_array_of_location_fit_into_bound();
+                        mapmyindia_array_of_location_fit_into_bound();
+                    }
+                });
+
+
+
+
             }
         }
 
@@ -107,7 +124,6 @@ var marker = {};
         $(document).on('change', 'input[name^=list_form_items]', function () {
             var closet_tr = $(this).closest("tr");
             var area_hook = closet_tr.attr('data-area');
-
             $.ajax({
                 type: "GET",
                 //dataType: 'text',
@@ -117,22 +133,20 @@ var marker = {};
                     area_hook: area_hook,
                 },
                 success: function (result) {
-                    console.log(result, "result");
                     var data = JSON.parse(result);
-                    console.log(data, "data");
-
-                    $.each(data, function (key, value) {
-                        console.log(value,"value");
-                       var  lat = value.field_hul_updated_lat_value;
-                       var  lng = value.field_hul_updated_long_value;
-                       
-                       mapmyindia_number_on_marker(lat,lng ,key,closet_tr);
-                    });
-
-                    
+                    custom_ajax_func(data, closet_tr, sales_day, pl_grp, area_hook);
                 }
             });
 
+
+            function custom_ajax_func(data) {
+                $.each(data, function (key, value) {
+                    var lat = value.field_hul_updated_lat_value;
+                    var lng = value.field_hul_updated_long_value;
+                    var nid = value.nid;
+                    mapmyindia_number_on_marker(lat, lng, key, closet_tr, nid);
+                });
+            }
 
 
         });
