@@ -42,7 +42,6 @@ var data;
             var tr = closet_tr;
             var checked_lat = lat;
             var checked_lng = lng;
-            var sr = key;
 
             var icon_path = window.location.origin + '/sites/all/themes/leanbox/images/map-marker.png';
             var icon = L.divIcon({className: 'my-div-icon', html: "<img style='position:relative;width:35px;height:35px' src=" + icon_path + '><span style="position: absolute;left: 0.8em;right: 1em;top: 5px;bottom:3em;font-size:12px;font-weight:bold;width: 17px;color:black;display: inline-block;height: 17px;text-align: center;line-height: 17px;" class="my-div-span"></span>', iconSize: [10, 10], popupAnchor: [12, -10]});/*function that creates a div over a icon and display content on the div*/
@@ -64,7 +63,7 @@ var data;
                         console.log(result, "result");
                         var text = result;
                         var mk = addMarker(postion, icon, text);
-                        marker[sr] = {mk: mk};
+                        marker[area_hook] = {mk: mk};
                         if (checked_lat > max_lat || max_lat == undefined) {
                             max_lat = checked_lat;
                         }
@@ -117,11 +116,11 @@ var data;
 
 
 
-        $(document).on('click', '.select-all .form-checkbox', function () {
-            $("input:checkbox[name^=list_form_items]").each(function () {
-                $(this).trigger("change");
-            });
-        });
+//        $(document).on('click', '.select-all .form-checkbox', function () {
+//            $("input:checkbox[name^=list_form_items]").each(function () {
+//                $(this).trigger("change");
+//            });
+//        });
 
         $(document).on('change', 'input[name^=list_form_items]', function () {
             var closet_tr = $(this).closest("tr");
