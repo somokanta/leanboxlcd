@@ -71,7 +71,10 @@ var data;
                     if (checked_lng < min_lng || min_lng == undefined) {
                         min_lng = checked_lng;
                     }
-
+                    console.log(max_lat,"max_lat");
+                    console.log(min_lat,"min_lat");
+                    console.log(max_lng,"max_lng");
+                    console.log(min_lng,"min_lng");
                     mapmyindia_array_of_location_fit_into_bound();
                 }
             });
