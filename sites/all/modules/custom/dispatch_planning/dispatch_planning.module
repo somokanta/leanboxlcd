@@ -598,6 +598,11 @@ function dispatch_planning_form_save_validate($form, &$form_state) {
 
   $res = $query->execute()->fetchAll();
   
+  dpm($res);
+  form_set_error('list_form_items', 'testttt');
+  return;
+  
+  
   $bill_count = count($res);
   $sequence = $no_area = 0;
   
