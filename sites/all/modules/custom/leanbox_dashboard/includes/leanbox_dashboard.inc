@@ -5,7 +5,6 @@
  *  defined in for custom block
  */
 
-
 /**
  * 
  * @param array $form
@@ -90,7 +89,6 @@ function leanbox_dashboard_chart_filter_bills_per_person_trends_form($form, &$fo
   return $form;
 }
 
-
 /**
  * 
  * @param array $form
@@ -132,7 +130,6 @@ function leanbox_dashboard_chart_filter_bills_per_van_trends_form($form, &$form_
 
   return $form;
 }
-
 
 /**
  * 
@@ -423,7 +420,6 @@ function leanbox_dashboard_chart_filter_otif_trends_form($form, &$form_state) {
 
   return $form;
 }
-
 
 /**
  * 
@@ -1179,16 +1175,16 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
       foreach ($res2 as $key2 => $val2) {
         if ($val2['field_sales_return_amt_value'] != NULL) {
 
-        $sales_ret = (( $val2['field_bill_value_value'] - $val2['field_sales_return_amt_value']) / $val2['field_bill_value_value']) * 100;
-        if ($sales_ret >= 99) {
-          $data['Full Return']['data'] += $val2['field_bill_value_value'] - $val2['field_sales_return_amt_value'];
-        }
-        else if ($sales_ret > 1 && $sales_ret < 99) {
-          $data['Partial Delivery']['data'] += $val2['field_bill_value_value'] - $val2['field_sales_return_amt_value'];
-        }
-        else {
-          continue;
-        }
+          $sales_ret = (( $val2['field_bill_value_value'] - $val2['field_sales_return_amt_value']) / $val2['field_bill_value_value']) * 100;
+          if ($sales_ret >= 99) {
+            $data['Full Return']['data'] += $val2['field_bill_value_value'] - $val2['field_sales_return_amt_value'];
+          }
+          else if ($sales_ret > 1 && $sales_ret < 99) {
+            $data['Partial Delivery']['data'] += $val2['field_bill_value_value'] - $val2['field_sales_return_amt_value'];
+          }
+          else {
+            continue;
+          }
         }
       }
 
@@ -1272,7 +1268,8 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
 
         // prepare header
         $date = $val['field_dispatch_date_value'];
-        $header[$date] = $date;
+        $date_str = strtotime($date);
+        $header[$date] = date('Y-m-d', $date_str);
 
         $trip_count = $val['Team_count'];
         $bill_count_value = $val['bill_value'];
@@ -1359,7 +1356,8 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
 
         // prepare header
         $date = $val['field_dispatch_date_value'];
-        $header[$date] = $date;
+        $date_str = strtotime($date);
+        $header[$date] = date('Y-m-d', $date_str);
 
         $trip_count = $val['trip_count'];
         $bill_count_value = $val['bill_count_value'];
@@ -1381,7 +1379,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
       ));
     }
     else {
-       $output = 'No Result Found for Dispatch';
+      $output = 'No Result Found for Dispatch';
     }
     return $output;
   }
@@ -1515,19 +1513,12 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
 
     return $data;
   }
-   else if ($activity_type == 'unloading_daywise_trends') {
+  else if ($activity_type == 'unloading_daywise_trends') {
     $query = db_select('node', 'n');
     $query->addTag('node_uid');
     $query->condition('n.type', 'egir');
     $query->join('field_data_field_egir_date', 'l', 'l.entity_id = n.nid');
-  //  $query->leftjoin('field_data_field_unloading_date', 'pcd', 'pcd.entity_id = n.nid');
     $query->fields('l', array('field_egir_date_value'));
-  //  $query->fields('pcd', array('field_unloading_date_value'));
-
-  //  $query->leftjoin('field_data_field_unloading_status', 'ps', 'ps.entity_id = n.nid');
-  //  $query->leftjoin('field_data_field_unloading_end_time', 'ppt', 'ppt.entity_id = n.nid');
-  //  $query->fields('ppt', array('field_unloading_end_time_value'));
-  //  $query->fields('ps', array('field_unloading_status_value'));
 
     $query->where("(DATE_FORMAT(l.field_egir_date_value, '%Y-%m-%d') >= :start)", array(':start' => $start));
     $query->where("(DATE_FORMAT(l.field_egir_date_value, '%Y-%m-%d') <= :to)", array(':to' => $end));
@@ -1542,31 +1533,42 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
 
     if (!empty($dis_time)) {
       if (!empty($res)) {
+        $header[] = 'Date';
+        $row1[] = 'Success';
+        $row2[] = 'Fail';
 
         $total_cont = count($res);
         $dis_on_time = strtotime(date("H:i", strtotime($dis_time)));
         $success_count = 0;
         foreach ($res as $key => $val) {
           $bill_date = $val['field_egir_date_value'];
-          $header[$bill_date] = $bill_date;
+          $date_str = strtotime($bill_date);
+          $header[$bill_date] = date('Y-m-d', $date_str);
 
           $array = _get_unloading_daywise_trends_data($bill_date, $dis_time);
           $success_count = $array['success_count'];
           $fail_count = $array['fail_count'];
           $fail_count = $total_cont - $success_count;
-          $row['success'][] = $success_count;
-          $row['fail'][] = $fail_count;
+          $row1[] = $success_count;
+          $row2[] = $fail_count;
         }
-        $rows[] = $row;
+        $rows[] = $row1;
+        $rows[] = $row2;
+
+        $output = theme('table', array(
+          'header' => $header,
+          'rows' => $rows,
+          'attributes' => array('width' => '100%')
+        ));
       }
       else {
-        $data = 'No Result found';
+        $output = 'No Result found';
       }
     }
     else {
-      $data = 'No Result found. Kindly Check unloading finish time';
+      $output = 'No Result found. Kindly Check unloading finish time';
     }
-    return $data;
+    return $output;
   }
   else if ($activity_type == 'unloading_ota') {
     $query = db_select('node', 'n');
@@ -1706,9 +1708,8 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     }
     return $data;
   }
-  
   else if ($activity_type == 'outlet_status') {
-    
+
     $header = array(
       array('data' => 'Status',),
       array('data' => 'Count',),
@@ -1730,13 +1731,13 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     $query->condition('n1.uid', $distributor_id);
     $query->condition('n.type', 'outlet_master');
     $query->condition('n1.type', 'hul_code_master');
-    
+
     $res = $query->execute()->fetch();
 
     $row1 [] = 'Outlet Count';
     $row1 [] = $res->outlet;
     $rows [0] = $row1;
-    
+
     $row2 [] = 'Address confirmed';
     $row2 [] = $res->address;
     $rows [1] = $row2;
@@ -1752,18 +1753,18 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     $row5 [] = 'Static Deliver Beat';
     $row5 [] = $res->beat;
     $rows [4] = $row5;
-    
+
     $output = theme('table', array('header' => $header, 'rows' => $rows));
     return $output;
   }
-  
-  
+
+
   if ($activity_type == 'bill_pendency') {
     $output1 = array();
 
     $pp_table = '';
     $data[] = array('Group', 'Non-Dispatched', 'Dispatched');
-    
+
     $query = db_select('node', 'n');
     $query->join('field_data_field_sr_bill_date', 'b', 'b.entity_id = n.nid');
     $query->join('field_data_field_billing_van', 'bva', 'bva.entity_id = n.nid');
@@ -1784,8 +1785,8 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
       $total_count = $res['total_count'];
       $dispatched_count = $res['trip_dispatch_sum'];
       $non_dis_count = $total_count - $dispatched_count;
-      
-      $data[] = array('result', (int)$non_dis_count, (int)$dispatched_count);
+
+      $data[] = array('result', (int) $non_dis_count, (int) $dispatched_count);
     }
     else {
       $data[] = array('No data found', 0, 0);
@@ -1798,8 +1799,6 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     $output1['output'] = $data;
     $output1['table'] = $pp_table;
     return $output1;
-
-    
   }
 }
 
@@ -1937,7 +1936,7 @@ function leanbox_dashboard_otif_trends_chart_query_details($type, $start_date = 
   $query->fields('c', array('field_channel_value'));
   $query->condition('n.type', 'channel_master');
   $query->condition('n.uid', $uid);
-  $channel_list = $query->execute()->fetchAllKeyed(0,0);
+  $channel_list = $query->execute()->fetchAllKeyed(0, 0);
 
   $query = db_select('node', 'n');
   $query->join('field_data_field_bill_value', 'v', 'v.entity_id = n.nid');
@@ -1974,7 +1973,7 @@ function leanbox_dashboard_otif_trends_chart_query_details($type, $start_date = 
       }
       $rows[] = $row;
     }
-    
+
     $output = theme('table', array(
       'header' => $header,
       'rows' => $rows,
@@ -2093,8 +2092,8 @@ function _get_unloading_daywise_trends_data($bill_date, $dis_time) {
 
     $fail_count = $total_cont - $success_count;
     $data['success'] = $success_count;
-    $data['fail'] = $fail_count; 
+    $data['fail'] = $fail_count;
   }
-  
+
   return $data;
 }
