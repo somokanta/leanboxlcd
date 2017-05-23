@@ -95,7 +95,8 @@ var data;
             console.log(marker,"markerarea_hook");
             
             $.each(marker, function (key, value) {
-                map.removeLayer(marker.key);
+                var tt = value.mk;
+                map.removeLayer(marker.tt);
             });
             delete marker[area_hook];
         }
