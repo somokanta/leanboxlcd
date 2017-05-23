@@ -122,15 +122,17 @@ var marker = {};
                 success: function (result) {
                     var data = result;
                     console.log(data, "data");
+
+                    $.each(data, function (key, value) {
+                        console.log(value,"value");
+                        console.log(key,"key");
+                    });
+
                     
-                    $.each(data, function (i, val) {
-                console.log(i, "iiii");
-                console.log(val, "vallllll");
-            });
                 }
             });
 
-            
+
 
         });
 
