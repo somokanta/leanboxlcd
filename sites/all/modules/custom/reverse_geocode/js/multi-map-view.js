@@ -136,8 +136,6 @@ var data;
                 complete: function () {
                     $('#area-load').hide();
                 },
-                
-
             });
 
             function custom_ajax_func(data, area_hook) {
@@ -175,7 +173,7 @@ var data;
     Drupal.behaviors.selectableRows1 = {
         attach: function (context, settings) {
             $('#area-load').hide();
-
+            $('.select-all').find('.form-checkbox').addClass('test');
 //            var selectableRow = $("table.selectable-row tbody").children();
 //            selectableRow.click(function() {
 //                $this = $(this);
