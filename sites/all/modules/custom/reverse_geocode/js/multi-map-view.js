@@ -71,10 +71,7 @@ var data;
                     if (checked_lng < min_lng || min_lng == undefined) {
                         min_lng = checked_lng;
                     }
-                    console.log(max_lat, "max_lat");
-                    console.log(min_lat, "min_lat");
-                    console.log(max_lng, "max_lng");
-                    console.log(min_lng, "min_lng");
+                    
                     mapmyindia_array_of_location_fit_into_bound();
                 }
             });
@@ -120,7 +117,7 @@ var data;
             var area_hook = closet_tr.attr('data-area');
 
             if ($(this).prop('checked')) {
-
+               console.log("11111111111");
                 $('.ajax-loader').bind('ajaxStart', function () {
                     $(this).show();
                 }).bind('ajaxStop', function () {
@@ -140,7 +137,6 @@ var data;
                     area_hook: area_hook,
                 },
                 success: function (result) {
-                    console.log(result, "result");
                     var data = JSON.parse(result);
                     custom_ajax_func(data, area_hook);
                 }
