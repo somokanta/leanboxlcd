@@ -1519,12 +1519,13 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     $query->condition('n.type', 'egir');
     $query->join('field_data_field_egir_date', 'l', 'l.entity_id = n.nid');
     $query->fields('l', array('field_egir_date_value'));
-
+    $query->groupBy('l.field_egir_date_value');
     $query->where("(DATE_FORMAT(l.field_egir_date_value, '%Y-%m-%d') >= :start)", array(':start' => $start));
     $query->where("(DATE_FORMAT(l.field_egir_date_value, '%Y-%m-%d') <= :to)", array(':to' => $end));
     $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+    watchdog('start','<pre>' . print_r($start, TRUE) . '</pre>');
+    watchdog('end','<pre>' . print_r($end, TRUE) . '</pre>');
     watchdog('res1','<pre>' . print_r($res, TRUE) . '</pre>');
-    
     $query = db_select('node', 'n');
     $query->addTag('node_uid');
     $query->condition('n.type', 'van_stop_master');
