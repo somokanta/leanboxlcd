@@ -71,10 +71,10 @@ var data;
                     if (checked_lng < min_lng || min_lng == undefined) {
                         min_lng = checked_lng;
                     }
-                    console.log(max_lat,"max_lat");
-                    console.log(min_lat,"min_lat");
-                    console.log(max_lng,"max_lng");
-                    console.log(min_lng,"min_lng");
+                    console.log(max_lat, "max_lat");
+                    console.log(min_lat, "min_lat");
+                    console.log(max_lng, "max_lng");
+                    console.log(min_lng, "min_lng");
                     mapmyindia_array_of_location_fit_into_bound();
                 }
             });
@@ -111,6 +111,16 @@ var data;
 //        });
 
         $(document).on('change', 'input[name^=list_form_items]', function () {
+
+            $('.ajax-loader')
+                    .hide()  // Hide it initially
+                    .ajaxStart(function () {
+                        $(this).show();
+                    })
+                    .ajaxStop(function () {
+                        $(this).hide();
+                    });
+
             var closet_tr = $(this).closest("tr");
             var area_hook = closet_tr.attr('data-area');
 
@@ -145,7 +155,7 @@ var data;
                         mapmyindia_number_on_marker(lat, lng, key, closet_tr, nid, area_hook);
                     } else {
                         mapmyindia_removeMarker(nid);
-                         max_lat = max_lng = min_lat = min_lng = undefined;
+                        max_lat = max_lng = min_lat = min_lng = undefined;
                     }
 
                 });
