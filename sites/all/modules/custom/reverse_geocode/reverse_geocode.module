@@ -91,6 +91,20 @@ function reverse_geocode_menu() {
     'type' => MENU_CALLBACK,
   );
 
+  $items['get/lat-lng'] = array(
+    'title' => 'Get Lat Lng',
+    'page callback' => 'get_lat_long_from_area_hook',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['get/address'] = array(
+    'title' => 'Get Lat Lng',
+    'page callback' => 'get_address_from_hul_node',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+
   $items['admin/config/maps'] = array(
     'title' => 'Setting Form Map APIs',
     'page callback' => 'drupal_get_form',
@@ -330,14 +344,14 @@ function hul_code_form($form, &$form_state, $type) {
   $form['#suffix'] = '</div>';
 
   $header_array = array(
-    'sr_no' => array('data' => 'Sr No', 'class' => 'sr-cell'), 
-    'party_code' => array('data'=>'Party Code', 'class' => 'party-code-cell'),
+    'sr_no' => array('data' => 'Sr No', 'class' => 'sr-cell'),
+    'party_code' => array('data' => 'Party Code', 'class' => 'party-code-cell'),
     //'lat' => 'Latitude', 
     //'lng' => 'Longitude',
-    'party_name' => array('data'=>'Party Name', 'class' => 'party-name-cell'),
-    'status' => array('data'=>'Status', 'class' => 'status-cell'),
+    'party_name' => array('data' => 'Party Name', 'class' => 'party-name-cell'),
+    'status' => array('data' => 'Status', 'class' => 'status-cell'),
     //'address' => array('data' => 'Address', 'class' => array('cell-tooltip')),
-    'details' => array('data'=>'', 'class' => 'details-cell'),
+    'details' => array('data' => '', 'class' => 'details-cell'),
   );
 
   $pl_group_data = reverse_geocode_get_data_from_outlet_master($sales_day = NULL, "pl_group", $beat_name = NULL, $distributor_id);
@@ -771,10 +785,101 @@ function party_filters_submit(&$form, &$form_state) {
 function get_reverse_geocode_from_lat_long() {
   $lat = $_GET['lat'];
   $lng = $_GET['lng'];
-
   $result = reverse_geocode_results($lat, $lng);
-
   echo $result;
+}
+
+function get_lat_long_from_area_hook() {
+  $area_hook = $_GET['area_hook'];
+  $result = lat_lng_results($area_hook);
+  echo $result;
+}
+
+function get_address_from_hul_node() {
+  $nid = $_GET['nid'];
+  $result = address_results($nid);
+  echo $result;
+}
+
+function address_results($nid) {
+  global $user;
+  $user_id = $user->uid;
+  $distributor_id = change_feeds_import_get_distributor_id($user_id);
+  $query = db_select('node', 'n');
+  $query->condition('n.type', 'hul_code_master');
+  $query->condition('n.nid', $nid, '=');
+  $query->addTag('node_uid');
+  $query->Join('field_data_field_hul_updated_lat', 'hul_lat_u', 'hul_lat_u.entity_id = n.nid');
+  $query->fields('hul_lat_u', array('field_hul_updated_lat_value'));
+  $query->Join('field_data_field_hul_updated_long', 'hul_long_u', 'hul_long_u.entity_id = n.nid');
+  $query->fields('hul_long_u', array('field_hul_updated_long_value'));
+  $query->join('field_data_field_updated_address', 'new', 'new.entity_id = n.nid');
+  $query->fields('new');
+  $query->orderBy('hul_lat_u.field_hul_updated_lat_value', 'asc');
+  $query->orderBy('hul_long_u.field_hul_updated_long_value', 'asc');
+
+  $query->join('field_data_field_hul_code', 'hc', 'hc.field_hul_code_value = n.title');
+  $query->join('node', 'ouln', 'ouln.nid = hc.entity_id');
+  $query->condition('ouln.uid', $distributor_id, '=');
+  $query->fields('ouln', array('title'));
+  $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+
+
+  foreach ($res as $key => $val) {
+    $lat = $val['field_hul_updated_lat_value'];
+    $long = $val['field_hul_updated_long_value'];
+    $party_code = $val['title'];
+
+    $new_city = $val['field_updated_address_sub_administrative_area'];
+    $new_street = $val['field_updated_address_sub_premise'];
+    $new_locality = $val['field_updated_address_locality'];
+    $new_sublocality = $val['field_updated_address_dependent_locality'];
+    $new_poi = $val['field_updated_address_data'];
+    $new_lat_long = !empty($lat) ? $lat . ',' . $long : '';
+
+    $marker_tooltip = '<div class="cell-address cell-hide"><table>'
+        . '<tr><td style="white-space:nowrap;color:#222">Party code</td><td>' . $party_code . '</td></tr>'
+        . '<tr><td style="white-space:nowrap;color:#222">Locality</td><td>' . $new_locality . '</td></tr>'
+        . '<tr><td style="white-space:nowrap;color:#222">Sub Locality</td><td>' . $new_sublocality . '</td></tr>'
+        . '<tr><td style="white-space:nowrap;color:#222">Street</td><td>' . $new_street . '</td></tr>'
+        . '<tr><td style="white-space:nowrap;color:#222">POI</td><td>' . $new_poi . '</td></tr>'
+        . '<tr><td style="white-space:nowrap;color:#222">Lat/Long</td><td>' . $new_lat_long . '</td></tr>'
+        . '</table></div>';
+  }
+
+  return $marker_tooltip;
+}
+
+function lat_lng_results($area_hook) {
+  global $user;
+  $user_id = $user->uid;
+  $distributor_id = change_feeds_import_get_distributor_id($user_id);
+  $query = db_select('node', 'n');
+  $query->condition('n.type', 'outlet_master');
+  $query->addTag('node_uid');
+  if (!empty($area_hook)) {
+    $query->join('field_data_field_outlet_area_hook', 'oah', 'oah.entity_id = n.nid');
+    $query->condition('oah.field_outlet_area_hook_value', $area_hook, '=');
+  }
+  $query->join('field_data_field_hul_code', 'hc', 'hc.entity_id = n.nid');
+  $query->join('node', 'hul', 'hc.field_hul_code_value = hul.title');
+  $query->condition('hul.uid', $distributor_id, '=');
+  $query->condition('hul.type', 'hul_code_master');
+
+  $query->Join('field_data_field_hul_updated_lat', 'hul_lat_u', 'hul_lat_u.entity_id = hul.nid');
+  $query->fields('hul_lat_u', array('field_hul_updated_lat_value'));
+  $query->Join('field_data_field_hul_updated_long', 'hul_long_u', 'hul_long_u.entity_id = hul.nid');
+  $query->fields('hul_long_u', array('field_hul_updated_long_value'));
+  $query->join('field_data_field_updated_address', 'new', 'new.entity_id = hul.nid');
+  $query->orderBy('hul_lat_u.field_hul_updated_lat_value', 'asc');
+  $query->orderBy('hul_long_u.field_hul_updated_long_value', 'asc');
+  $query->fields('hul', array('nid'));
+  $query->groupBy('hul.nid');
+  $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+  
+  array_unshift($res,"");
+  unset($res[0]);
+  echo json_encode($res);
 }
 
 function reverse_geocode_results($lat, $lng) {
@@ -962,7 +1067,6 @@ function reverse_geocode_node_presave($node) {
 
     if (!empty($og_hul_lat) && !empty($og_hul_long)) {
       if (($new_hul_lat != $og_hul_lat) || ($new_hul_long != $og_hul_long)) {
-
         $street = $node->field_original_address['und'][0]['sub_premise'];
         $locality = $node->field_original_address['und'][0]['locality'];
         $sublocality = $node->field_original_address['und'][0]['dependent_locality'];
@@ -1060,11 +1164,53 @@ function reverse_geocode_node_presave($node) {
         $van_pl_grp = $query->execute()->fetchField();
 
         $day_van_area_nid = get_nid_from_master_using_sales_day_van_grp_area_hook($updated_day, $van_pl_grp, $updated_area_hook);
-        
-        if($day_van_area_nid){
+
+        if ($day_van_area_nid) {
           $node->field_area_hook[LANGUAGE_NONE][0]['nid'] = $day_van_area_nid;
         }
       }
     }
   }
 }
+
+function graphhopper_postvrp_api($params) {
+  $key = variable_get('graphhopper_api_key', '6c0a903a-4698-42cd-aac0-52d6f5c7ee0a');
+
+  Swagger\Client\Configuration::getDefaultConfiguration()->setApiKey('key', $key);
+
+// Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+// Swagger\Client\Configuration::getDefaultConfiguration()->setApiKeyPrefix('key', 'Bearer');
+
+  $api_instance = new Swagger\Client\graphhopper\VrpApi();
+
+  $body = new \Swagger\Client\Model\Request($params); // \Swagger\Client\Model\Request | Request object that contains the problem to be solved
+
+  try {
+    $result = $api_instance->postVrp($key, $body);
+  }
+  catch (Exception $e) {
+    watchdog('graphhopper_error', 'Exception when calling VrpApi->postVrp: ' . $e->getMessage());
+  }
+  return $result;
+}
+
+function graphhopper_solution_api($job_id) {
+  $key = variable_get('graphhopper_api_key', '6c0a903a-4698-42cd-aac0-52d6f5c7ee0a');
+
+  Swagger\Client\Configuration::getDefaultConfiguration()->setApiKey('key', $key);
+
+// Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
+// Swagger\Client\Configuration::getDefaultConfiguration()->setApiKeyPrefix('key', 'Bearer');
+
+  $api_instance = new Swagger\Client\graphhopper\SolutionApi();
+
+  try {
+    $result = $api_instance->getSolution($key, $job_id);
+  }
+  catch (Exception $e) {
+    watchdog('graphhopper_error', 'Exception when calling SolutionApi->getSolution: ' . $e->getMessage());
+  }
+
+  return $result;
+}
+

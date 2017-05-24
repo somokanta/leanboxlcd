@@ -1,7 +1,6 @@
 <?php
 
 function change_feeds_import_views_data_alter(&$data) {
-
   $data['field_data_field_picking_picking_type']['field_picking_picking_type']['field']['handler'] = 'custom_for_picking_type';
   $data['field_data_field_combined_nid']['field_combined_nid']['field']['handler'] = 'custom_for_combine_nid';
 
@@ -213,6 +212,21 @@ function change_feeds_import_views_data() {
     'help' => t('Provides a custom field.'),
     'field' => array(
       'handler' => 'beat_name_handler_custom_field',
+    ),
+  );
+  
+  
+  $data['bill_sequence']['table']['group'] = t('Bill Sequence');
+  $data['bill_sequence']['table']['join'] = array(
+    // #global is a special flag which let's a table appear all the time.
+    '#global' => array(),
+  );
+  // Add custom field
+  $data['bill_sequence']['field_bill_sequence'] = array(
+    'title' => t('Custom Bill Sequence'),
+    'help' => t('Provides a custom field.'),
+    'field' => array(
+      'handler' => 'custom_for_bill_sequence',
     ),
   );
 

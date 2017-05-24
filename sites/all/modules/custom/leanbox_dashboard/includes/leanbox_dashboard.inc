@@ -1547,20 +1547,19 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
           $success_count = $array['success_count'];
           $fail_count = $array['fail_count'];
           $total_count = $success_count + $fail_count;
-          
+
           $row1[] = $success_count;
           $row2[] = $fail_count;
-          
+
           $row11[] = ($success_count / $total_count ) * 100;
           $row22[] = ($fail_count / $total_count ) * 100;
-          
         }
         $rows[] = $row1;
         $rows[] = $row2;
         $perc_rows[] = $row11;
         $perc_rows[] = $row22;
 
-        $output .= '<br/><span> Unloading Data Count</span><br/>';
+        $output .= '<br/><span> Unloading Data Count</span><br/><br/>';
         $output .= theme('table', array(
           'header' => $header,
           'rows' => $rows,
@@ -1947,6 +1946,7 @@ function leanbox_dashboard_otif_trends_chart_query_details($type, $start_date = 
   $query = db_select('node', 'n');
   $query->join('field_data_field_channel', 'c', 'c.entity_id = n.nid');
   $query->fields('c', array('field_channel_value'));
+  $query->orderBy('c.field_channel_value', 'ASC');
   $query->condition('n.type', 'channel_master');
   $query->condition('n.uid', $uid);
   $channel_list = $query->execute()->fetchAllKeyed(0, 0);
@@ -1973,19 +1973,30 @@ function leanbox_dashboard_otif_trends_chart_query_details($type, $start_date = 
       $date = date('Y-m-d', $val['field_sr_bill_date_value']);
       $header[$date] = $date;
     }
+
     foreach ($channel_list as $channel) {
+      $total_otif_val = 0;
       $row = array();
       $row[] = $channel;
       foreach ($res as $key => $val) {
         $bill_date_str = $val['field_sr_bill_date_value'];
 
         $total_dis_bill_val = _get_otif_details_using_bill_date($bill_date_str, $channel, $uid);
-        $bill_date = date('Y-m-d', $bill_date_str);
+        $total_otif_val[$bill_date_str] += $total_dis_bill_val;
+        //$bill_date = date('Y-m-d', $bill_date_str);
         $otif_val = round($total_dis_bill_val);
         $row[] = $otif_val;
       }
+
       $rows[] = $row;
     }
+    
+    $row = array();
+    $row[] = 'Total';
+    foreach ($total_otif_val as $key => $val) {
+      $row[] = $val;
+    }
+    $rows[] = $row;
 
     $output = theme('table', array(
       'header' => $header,
@@ -2076,7 +2087,7 @@ function _get_unloading_daywise_trends_data($bill_date, $dis_time) {
   $data = array();
   $data['success_count'] = 0;
   $data['fail_count'] = 0;
-  
+
   $query = db_select('node', 'n');
   $query->addTag('node_uid');
   $query->condition('n.type', 'egir');
@@ -2088,7 +2099,8 @@ function _get_unloading_daywise_trends_data($bill_date, $dis_time) {
   $query->leftjoin('field_data_field_unloading_end_time', 'ppt', 'ppt.entity_id = n.nid');
   $query->fields('ppt', array('field_unloading_end_time_value'));
   $query->fields('ps', array('field_unloading_status_value'));
-  $query->where("(DATE_FORMAT(l.field_egir_date_value, '%Y-%m-%d') = :to)", array(':to' => $bill_date));
+  $query->where("(DATE_FORMAT(l.field_egir_date_value, '%Y-%m-%d') >= :start)", array(':start' => $bill_date));
+  $query->where("(DATE_FORMAT(l.field_egir_date_value, '%Y-%m-%d') <= :to)", array(':to' => $bill_date));
   $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
 
   if (!empty($res)) {
