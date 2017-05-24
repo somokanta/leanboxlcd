@@ -223,7 +223,7 @@ function area_hook_wise_locations_form($form, &$form_state, $type) {
 
   $img = '<img src="/sites/all/themes/leanbox/images/ajax-loader.gif" alt="Loading">';
   $form['ajax_loader'] = array(
-    "#markup" => "<div id='loading'>$img</div>",
+    "#markup" => "<div id='area-load'>$img</div>",
       //'#required' => TRUE,
   );
 

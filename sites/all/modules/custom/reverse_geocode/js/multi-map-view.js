@@ -124,7 +124,7 @@ var data;
             }
 
             console.log("222222");
-            $('#loading').show();
+            $('#area-load').show();
             $.ajax({
                 type: "GET",
                 //dataType: 'text',
@@ -139,7 +139,7 @@ var data;
                 },
                 complete: function (result) {
                     console.log("333333");
-                    $('#loading').hide();
+                    $('#area-load').hide();
                 }
 
 
@@ -181,7 +181,7 @@ var data;
     Drupal.behaviors.selectableRows1 = {
         attach: function (context, settings) {
 console.log("4444444");
-            $('#loading').hide();
+            $('#area-load').hide();
 
 //            var selectableRow = $("table.selectable-row tbody").children();
 //            selectableRow.click(function() {
