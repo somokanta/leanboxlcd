@@ -391,6 +391,49 @@ function dispatch_data_field_default_field_instances() {
     ),
   );
 
+  // Exported field_instance: 'node-dispatch_data-field_sequence_method'.
+  $field_instances['node-dispatch_data-field_sequence_method'] = array(
+    'bundle' => 'dispatch_data',
+    'default_value' => array(
+      0 => array(
+        'value' => 0,
+      ),
+    ),
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'list',
+        'settings' => array(),
+        'type' => 'list_default',
+        'weight' => 20,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_sequence_method',
+    'label' => 'Sequence Method',
+    'required' => 0,
+    'settings' => array(
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'options',
+      'settings' => array(
+        'display_label' => 0,
+      ),
+      'type' => 'options_onoff',
+      'weight' => 16,
+    ),
+  );
+
   // Exported field_instance: 'node-dispatch_data-field_trip_creation_date'.
   $field_instances['node-dispatch_data-field_trip_creation_date'] = array(
     'bundle' => 'dispatch_data',
@@ -645,6 +688,7 @@ function dispatch_data_field_default_field_instances() {
   t('DISPATCH_SUPERVISOR');
   t('DIspatch_status');
   t('HHT ID');
+  t('Sequence Method');
   t('Trip Creation Date');
   t('Trip Executon  Date');
   t('Trip ID');

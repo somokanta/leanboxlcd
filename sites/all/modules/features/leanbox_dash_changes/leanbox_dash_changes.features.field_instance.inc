@@ -192,6 +192,142 @@ function leanbox_dash_changes_field_default_field_instances() {
     ),
   );
 
+  // Exported field_instance: 'node-van_stop_master-field_distributor_latitude'.
+  $field_instances['node-van_stop_master-field_distributor_latitude'] = array(
+    'bundle' => 'van_stop_master',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'number',
+        'settings' => array(
+          'decimal_separator' => '.',
+          'prefix_suffix' => TRUE,
+          'scale' => 2,
+          'thousand_separator' => '',
+        ),
+        'type' => 'number_decimal',
+        'weight' => 15,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_distributor_latitude',
+    'label' => 'Distributor latitude',
+    'required' => 0,
+    'settings' => array(
+      'max' => '',
+      'min' => '',
+      'prefix' => '',
+      'suffix' => '',
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 0,
+      'module' => 'number',
+      'settings' => array(),
+      'type' => 'number',
+      'weight' => 46,
+    ),
+  );
+
+  // Exported field_instance:
+  // 'node-van_stop_master-field_distributor_longitude'.
+  $field_instances['node-van_stop_master-field_distributor_longitude'] = array(
+    'bundle' => 'van_stop_master',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'number',
+        'settings' => array(
+          'decimal_separator' => '.',
+          'prefix_suffix' => TRUE,
+          'scale' => 2,
+          'thousand_separator' => '',
+        ),
+        'type' => 'number_decimal',
+        'weight' => 16,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_distributor_longitude',
+    'label' => 'Distributor longitude',
+    'required' => 0,
+    'settings' => array(
+      'max' => '',
+      'min' => '',
+      'prefix' => '',
+      'suffix' => '',
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 0,
+      'module' => 'number',
+      'settings' => array(),
+      'type' => 'number',
+      'weight' => 47,
+    ),
+  );
+
+  // Exported field_instance: 'node-van_stop_master-field_enable_routing'.
+  $field_instances['node-van_stop_master-field_enable_routing'] = array(
+    'bundle' => 'van_stop_master',
+    'default_value' => array(
+      0 => array(
+        'value' => 0,
+      ),
+    ),
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'list',
+        'settings' => array(),
+        'type' => 'list_default',
+        'weight' => 17,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_enable_routing',
+    'label' => 'Enable routing',
+    'required' => 0,
+    'settings' => array(
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'options',
+      'settings' => array(
+        'display_label' => 0,
+      ),
+      'type' => 'options_onoff',
+      'weight' => 48,
+    ),
+  );
+
   // Exported field_instance: 'node-van_stop_master-field_fnb_bulk'.
   $field_instances['node-van_stop_master-field_fnb_bulk'] = array(
     'bundle' => 'van_stop_master',
@@ -755,6 +891,9 @@ function leanbox_dash_changes_field_default_field_instances() {
   // Included for use with string extractors like potx.
   t('Body');
   t('Del per van');
+  t('Distributor latitude');
+  t('Distributor longitude');
+  t('Enable routing');
   t('NON-PP');
   t('PP');
   t('PP finish time');
