@@ -71,7 +71,7 @@ var data;
                     if (checked_lng < min_lng || min_lng == undefined) {
                         min_lng = checked_lng;
                     }
-                    
+
                     mapmyindia_array_of_location_fit_into_bound();
                 }
             });
@@ -107,23 +107,22 @@ var data;
 //            });
 //        });
 
-        $('.ajax-loader').hide();
+
 
         $(document).on('change', 'input[name^=list_form_items]', function () {
 
-
+            $('.ajax-loader').bind('ajaxStart', function () {
+              //  $(this).show();
+                $('.ajax-loader').css('display','block');
+            }).bind('ajaxStop', function () {
+               // $(this).hide();
+                $('.ajax-loader').css('display','none');
+            });
 
             var closet_tr = $(this).closest("tr");
             var area_hook = closet_tr.attr('data-area');
 
             if ($(this).prop('checked')) {
-               console.log("11111111111");
-                $('.ajax-loader').bind('ajaxStart', function () {
-                    $(this).show();
-                }).bind('ajaxStop', function () {
-                    $(this).hide();
-                });
-
                 var checked = 1;
             } else {
                 var checked = 0;
