@@ -50,31 +50,31 @@ function leanbox_master_content_types_menu_default_menu_links() {
     'external' => 0,
     'has_children' => 0,
     'expanded' => 0,
-    'weight' => -50,
+    'weight' => -48,
     'customized' => 1,
     'parent_identifier' => 'menu-custom-menus_master-reports:node/553239',
   );
-  // Exported menu link: menu-custom-menus_day-van-pl-gp-area-hook-grouping:day-van-area/import.
-  $menu_links['menu-custom-menus_day-van-pl-gp-area-hook-grouping:day-van-area/import'] = array(
+  // Exported menu link: menu-custom-menus_drs-printout-2:drs-report2.
+  $menu_links['menu-custom-menus_drs-printout-2:drs-report2'] = array(
     'menu_name' => 'menu-custom-menus',
-    'link_path' => 'day-van-area/import',
-    'router_path' => 'day-van-area/import',
-    'link_title' => 'Day-Van-PL-Gp-Area Hook Grouping',
+    'link_path' => 'drs-report2',
+    'router_path' => 'drs-report2',
+    'link_title' => 'DRS Printout-2',
     'options' => array(
       'attributes' => array(
         'title' => '',
       ),
       'alter' => TRUE,
-      'identifier' => 'menu-custom-menus_day-van-pl-gp-area-hook-grouping:day-van-area/import',
+      'identifier' => 'menu-custom-menus_drs-printout-2:drs-report2',
     ),
     'module' => 'menu',
     'hidden' => 0,
     'external' => 0,
     'has_children' => 0,
     'expanded' => 0,
-    'weight' => -45,
+    'weight' => -48,
     'customized' => 1,
-    'parent_identifier' => 'menu-custom-menus_master-upload:node/24596',
+    'parent_identifier' => 'menu-custom-menus_transaction-report:node/648810',
   );
   // Exported menu link: menu-custom-menus_outlet-area-hook:outlet-area-hook/import.
   $menu_links['menu-custom-menus_outlet-area-hook:outlet-area-hook/import'] = array(
@@ -116,7 +116,7 @@ function leanbox_master_content_types_menu_default_menu_links() {
     'external' => 0,
     'has_children' => 0,
     'expanded' => 0,
-    'weight' => -43,
+    'weight' => -41,
     'customized' => 1,
     'parent_identifier' => 'menu-custom-menus_transactions:node/595899',
   );
@@ -142,61 +142,15 @@ function leanbox_master_content_types_menu_default_menu_links() {
     'customized' => 1,
     'parent_identifier' => 'menu-custom-menus_master-upload:node/24596',
   );
-  // Exported menu link: menu-custom-menus_van-pl-group-stop-importer:import/van_pl_group_stop_importer.
-  $menu_links['menu-custom-menus_van-pl-group-stop-importer:import/van_pl_group_stop_importer'] = array(
-    'menu_name' => 'menu-custom-menus',
-    'link_path' => 'import/van_pl_group_stop_importer',
-    'router_path' => 'import/%',
-    'link_title' => 'VAN Pl group stop importer',
-    'options' => array(
-      'attributes' => array(
-        'title' => '',
-      ),
-      'alter' => TRUE,
-      'identifier' => 'menu-custom-menus_van-pl-group-stop-importer:import/van_pl_group_stop_importer',
-    ),
-    'module' => 'menu',
-    'hidden' => 0,
-    'external' => 0,
-    'has_children' => 0,
-    'expanded' => 0,
-    'weight' => 0,
-    'customized' => 1,
-    'parent_identifier' => 'menu-custom-menus_master-upload:node/24596',
-  );
-  // Exported menu link: menu-custom-menus_van-stop-master:van-stop-master.
-  $menu_links['menu-custom-menus_van-stop-master:van-stop-master'] = array(
-    'menu_name' => 'menu-custom-menus',
-    'link_path' => 'van-stop-master',
-    'router_path' => 'van-stop-master',
-    'link_title' => 'Van-Stop Master',
-    'options' => array(
-      'attributes' => array(
-        'title' => '',
-      ),
-      'alter' => TRUE,
-      'identifier' => 'menu-custom-menus_van-stop-master:van-stop-master',
-    ),
-    'module' => 'menu',
-    'hidden' => 0,
-    'external' => 0,
-    'has_children' => 0,
-    'expanded' => 0,
-    'weight' => -31,
-    'customized' => 1,
-    'parent_identifier' => 'menu-custom-menus_master-upload:node/24596',
-  );
 
   // Translatables
   // Included for use with string extractors like potx.
   t('Area Hook Group Master');
   t('Area Hook Group Report');
-  t('Day-Van-PL-Gp-Area Hook Grouping');
+  t('DRS Printout-2');
   t('Outlet Area Hook');
   t('Static Beat Creation');
   t('User Defined Outlet Sequence');
-  t('VAN Pl group stop importer');
-  t('Van-Stop Master');
 
   return $menu_links;
 }

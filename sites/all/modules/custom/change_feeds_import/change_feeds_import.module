@@ -1675,7 +1675,7 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
   }
 
 
-  if ($view->name == 'drs_report' || $view->name == 'drs_report2') {
+  if ($view->name == 'drs_report') {
     $trip_id = $view->args[0];
     $sub_query = db_select('node', 'n');
     $sub_query->addTag('node_uid');
