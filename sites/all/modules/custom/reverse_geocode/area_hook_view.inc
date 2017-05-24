@@ -244,6 +244,7 @@ function area_hook_wise_locations_form($form, &$form_state, $type) {
       '#multiple' => $multiple,
       '#attributes' => array('class' => $class),
       '#default_value' => NULL,
+      '#js_select' => FALSE,
     );
   }
   return $form;

@@ -11304,7 +11304,3 @@ header[id="page-header"] .content > ul li ul li:nth-child(odd) {
   border-right: 1px solid #ddd;
   border-bottom: 1px solid #ddd;
 }
-
-.hide-all {
-    display: none;
-}

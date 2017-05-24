@@ -173,7 +173,6 @@ var data;
     Drupal.behaviors.selectableRows1 = {
         attach: function (context, settings) {
             $('#area-load').hide();
-            $('.select-all').find('.form-checkbox').addClass('hide-all');
 //            var selectableRow = $("table.selectable-row tbody").children();
 //            selectableRow.click(function() {
 //                $this = $(this);
