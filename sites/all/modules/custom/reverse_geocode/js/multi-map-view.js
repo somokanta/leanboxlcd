@@ -111,10 +111,13 @@ var data;
 
         $(document).on('change', 'input[name^=list_form_items]', function () {
 
+console.log("1111111");
             $('.ajax-loader').bind('ajaxStart', function () {
+                console.log("2222222222");
               //  $(this).show();
                 $('.ajax-loader').css('display','block');
             }).bind('ajaxStop', function () {
+                console.log("333333");
                // $(this).hide();
                 $('.ajax-loader').css('display','none');
             });
