@@ -133,6 +133,9 @@ var data;
                     var data = JSON.parse(result);
                     custom_ajax_func(data, area_hook);
                 },
+                complete: function (result) {
+                    $('#area-load').hide();
+                },
                 
 
             });
