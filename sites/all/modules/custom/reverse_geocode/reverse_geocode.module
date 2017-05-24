@@ -1189,7 +1189,6 @@ function graphhopper_postvrp_api($params) {
     $result = $api_instance->postVrp($key, $body);
   }
   catch (Exception $e) {
-    dpm($e->getResponseBody());
     watchdog('graphhopper_error', 'Exception when calling VrpApi->postVrp: ' . $e->getMessage());
   }
   return $result;
