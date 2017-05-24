@@ -111,7 +111,7 @@ var data;
 
         $(document).on('change', 'input[name^=list_form_items]', function () {
 
-
+            $('#area-load').show();
             var closet_tr = $(this).closest("tr");
             var area_hook = closet_tr.attr('data-area');
 
@@ -171,7 +171,7 @@ var data;
 (function ($) {
     Drupal.behaviors.selectableRows1 = {
         attach: function (context, settings) {
-            
+            $('#area-load').hide();
 
 //            var selectableRow = $("table.selectable-row tbody").children();
 //            selectableRow.click(function() {
