@@ -221,6 +221,11 @@ function area_hook_wise_locations_form($form, &$form_state, $type) {
     '#id' => 'area-filter',
   );
 
+  $img = '<img src="/sites/all/themes/leanbox/images/ajax-loader.gif" alt="Loading">';
+  $form['ajax_loader'] = array(
+    "#markup" => "<div class='ajax-loader'>$img</div>",
+      //'#required' => TRUE,
+  );
 
   if (!isset($form_state['reverse_geocode']['rows'])) {
     $form_state['reverse_geocode']['rows'] = array();
