@@ -122,6 +122,9 @@ var data;
             } else {
                 var checked = 0;
             }
+
+            console.log("222222");
+            $('#loading').show();
             $.ajax({
                 type: "GET",
                 //dataType: 'text',
@@ -133,7 +136,14 @@ var data;
                 success: function (result) {
                     var data = JSON.parse(result);
                     custom_ajax_func(data, area_hook);
+                },
+                complete: function (result) {
+                    console.log("333333");
+                    $('#loading').hide();
                 }
+
+
+
             });
 
 
