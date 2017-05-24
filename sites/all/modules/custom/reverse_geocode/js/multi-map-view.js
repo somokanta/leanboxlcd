@@ -1,10 +1,10 @@
 var marker = {};
 var data;
+var $myDiv;
 (function ($) {
 
     $(document).ready(function () {
 
-        var $myDiv = $("#area-load");
         var default_lat = 20.5937;
         var default_lng = 78.9629;
         var max_lat;
@@ -114,7 +114,7 @@ var data;
 
             console.log("1111111");
 
-
+            var $myDiv = $("#area-load");
             var closet_tr = $(this).closest("tr");
             var area_hook = closet_tr.attr('data-area');
 
