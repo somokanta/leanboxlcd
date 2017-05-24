@@ -113,14 +113,6 @@ var data;
 
             console.log("1111111");
 
-            $('.ajax-loader')
-                    .ajaxStart(function () {
-                        console.log("2222222222");
-                        $(this).show();
-                    }).ajaxStop(function () {
-                console.log("333333");
-                $(this).hide();
-            });
 
             var closet_tr = $(this).closest("tr");
             var area_hook = closet_tr.attr('data-area');
@@ -145,6 +137,14 @@ var data;
             });
 
 
+            $('#loading').ajaxStart(function () {
+                console.log("2222222222");
+                $(this).show();
+            });
+            $('#loading').ajaxStop(function () {
+                console.log("333333");
+                $(this).hide();
+            });
             function custom_ajax_func(data, area_hook) {
                 $.each(data, function (key, value) {
                     var lat = value.field_hul_updated_lat_value;
@@ -180,7 +180,7 @@ var data;
     Drupal.behaviors.selectableRows1 = {
         attach: function (context, settings) {
 
-            $('.ajax-loader').hide();
+            $('#loading').hide();
 
 //            var selectableRow = $("table.selectable-row tbody").children();
 //            selectableRow.click(function() {
