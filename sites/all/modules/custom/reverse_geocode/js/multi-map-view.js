@@ -118,9 +118,9 @@ var data;
                         console.log("2222222222");
                         $(this).show();
                     }).ajaxStop(function () {
-                        console.log("333333");
-                        $(this).hide();
-                    });
+                console.log("333333");
+                $(this).hide();
+            });
 
             var closet_tr = $(this).closest("tr");
             var area_hook = closet_tr.attr('data-area');
@@ -180,6 +180,7 @@ var data;
     Drupal.behaviors.selectableRows1 = {
         attach: function (context, settings) {
 
+            $('.ajax-loader').hide();
 
 //            var selectableRow = $("table.selectable-row tbody").children();
 //            selectableRow.click(function() {
