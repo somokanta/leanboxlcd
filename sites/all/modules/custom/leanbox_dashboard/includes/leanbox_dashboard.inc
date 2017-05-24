@@ -1541,7 +1541,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
         foreach ($res as $key => $val) {
           $bill_date = $val['field_egir_date_value'];
           $date_str = strtotime($bill_date);
-          $header[$bill_date] = date('Y-m-d', $date_str);
+          $header[$bill_date] = $bill_date = date('Y-m-d', $date_str);
 
           $array = _get_unloading_daywise_trends_data($bill_date, $dis_time);
           $success_count = $array['success_count'];
