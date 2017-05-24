@@ -1975,7 +1975,7 @@ function leanbox_dashboard_otif_trends_chart_query_details($type, $start_date = 
     }
 
     foreach ($channel_list as $channel) {
-      $total_otif_val = 0;
+
       $row = array();
       $row[] = $channel;
       foreach ($res as $key => $val) {
@@ -1990,7 +1990,6 @@ function leanbox_dashboard_otif_trends_chart_query_details($type, $start_date = 
 
       $rows[] = $row;
     }
-    
     $row = array();
     $row[] = 'Total';
     foreach ($total_otif_val as $key => $val) {
@@ -2110,8 +2109,8 @@ function _get_unloading_daywise_trends_data($bill_date, $dis_time) {
     $success_count = 0;
     foreach ($res as $key => $val) {
       $pp_on_time = strtotime(date("H:i", strtotime($val['field_unloading_end_time_value'])));
-
-      if (($bill_date == $val['field_unloading_date_value']) && ($val['field_unloading_status_value'] == 2)) {
+      $un_date = date('Y-m-d', strtotime($val['field_unloading_date_value']));
+      if (($bill_date == $un_date) && ($val['field_unloading_status_value'] == 2)) {
         if ($pp_on_time <= $dis_on_time) {
           $success_count ++;
         }
