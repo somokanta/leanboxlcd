@@ -1550,8 +1550,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
         }
         $rows[] = $row1;
         $rows[] = $row2;
-dpm($header, 'header');
-dpm($rows, '$rows');
+
         $output = theme('table', array(
           'header' => $header,
           'rows' => $rows,
