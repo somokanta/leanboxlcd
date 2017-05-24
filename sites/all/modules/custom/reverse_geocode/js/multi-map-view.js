@@ -125,7 +125,7 @@ var data;
                 type: "GET",
                 //dataType: 'text',
                 url: "/get/lat-lng",
-                async: false,
+                async: true,
                 data: {
                     area_hook: area_hook,
                 },
@@ -133,9 +133,9 @@ var data;
                     var data = JSON.parse(result);
                     custom_ajax_func(data, area_hook);
                 },
-//                complete: function () {
-//                    $('#area-load').hide();
-//                },
+                complete: function () {
+                    $('#area-load').hide();
+                },
                 
 
             });
