@@ -1975,7 +1975,7 @@ function leanbox_dashboard_otif_trends_chart_query_details($type, $start_date = 
     }
 
     foreach ($channel_list as $channel) {
-      $total_otif_val = 0;
+
       $row = array();
       $row[] = $channel;
       foreach ($res as $key => $val) {
@@ -1990,7 +1990,7 @@ function leanbox_dashboard_otif_trends_chart_query_details($type, $start_date = 
 
       $rows[] = $row;
     }
-    
+    watchdog('$total_otif_val', '<pre>' . print_r($total_otif_val, TRUE) . '</pre>');
     $row = array();
     $row[] = 'Total';
     foreach ($total_otif_val as $key => $val) {
