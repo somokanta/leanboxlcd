@@ -4,6 +4,7 @@ var data;
 
     $(document).ready(function () {
 
+        var $myDiv = $("#area-load");
         var default_lat = 20.5937;
         var default_lng = 78.9629;
         var max_lat;
@@ -124,7 +125,7 @@ var data;
             }
 
             console.log("222222");
-            $('#area-load').show();
+            $myDiv.show();
             $.ajax({
                 type: "GET",
                 //dataType: 'text',
@@ -139,7 +140,7 @@ var data;
                 },
                 complete: function (result) {
                     console.log("333333");
-                    $('#area-load').hide();
+                    $myDiv.hide();
                 }
 
 
@@ -180,7 +181,7 @@ var data;
 (function ($) {
     Drupal.behaviors.selectableRows1 = {
         attach: function (context, settings) {
-console.log("4444444");
+            console.log("4444444");
             $('#area-load').hide();
 
 //            var selectableRow = $("table.selectable-row tbody").children();
