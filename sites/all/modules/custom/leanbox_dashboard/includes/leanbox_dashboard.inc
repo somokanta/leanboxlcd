@@ -1523,7 +1523,8 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     $query->where("(DATE_FORMAT(l.field_egir_date_value, '%Y-%m-%d') >= :start)", array(':start' => $start));
     $query->where("(DATE_FORMAT(l.field_egir_date_value, '%Y-%m-%d') <= :to)", array(':to' => $end));
     $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
-
+    watchdog('res1','<pre>' . print_r($res, TRUE) . '</pre>');
+    
     $query = db_select('node', 'n');
     $query->addTag('node_uid');
     $query->condition('n.type', 'van_stop_master');
@@ -1550,8 +1551,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
         }
         $rows[] = $row1;
         $rows[] = $row2;
-dpm($header, 'header');
-dpm($rows, '$rows');
+
         $output = theme('table', array(
           'header' => $header,
           'rows' => $rows,
@@ -1565,6 +1565,8 @@ dpm($rows, '$rows');
     else {
       $output = 'No Result found. Kindly Check unloading finish time';
     }
+        watchdog('$output','<pre>' . print_r($output, TRUE) . '</pre>');
+
     return $output;
   }
   else if ($activity_type == 'unloading_ota') {
