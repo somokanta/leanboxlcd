@@ -1552,7 +1552,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
           $row2[] = $fail_count;
           
           $row11[] = ($success_count / $total_count ) * 100;
-          $row11[] = ($fail_count / $total_count ) * 100;
+          $row22[] = ($fail_count / $total_count ) * 100;
           
         }
         $rows[] = $row1;
