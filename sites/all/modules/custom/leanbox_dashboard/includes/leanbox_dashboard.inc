@@ -1556,8 +1556,8 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
         }
         $rows[] = $row1;
         $rows[] = $row2;
-        $perc_rows[] = $row11;
-        $perc_rows[] = $row22;
+        $perc_rows[] = round($row11, 2);
+        $perc_rows[] = round($row22, 2);
 
         $output .= '<br/><span> Unloading Data Count</span><br/><br/>';
         $output .= theme('table', array(
