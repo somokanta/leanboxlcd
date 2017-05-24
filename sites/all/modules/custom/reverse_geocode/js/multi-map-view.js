@@ -110,18 +110,15 @@ var data;
 //            });
 //        });
 
-        $('.ajax-loader')
-                .hide()  // Hide it initially
-                .ajaxStart(function () {
-                    $(this).show();
-                })
-                .ajaxStop(function () {
-                    $(this).hide();
-                });
-
+        $('#ajax-loader').hide();
+        
         $(document).on('change', 'input[name^=list_form_items]', function () {
 
-
+            $('.ajax-loader').bind('ajaxStart', function () {
+                $(this).show();
+            }).bind('ajaxStop', function () {
+                $(this).hide();
+            });
 
             var closet_tr = $(this).closest("tr");
             var area_hook = closet_tr.attr('data-area');
