@@ -1551,13 +1551,13 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
           $row1[] = $success_count;
           $row2[] = $fail_count;
 
-          $row11[] = ($success_count / $total_count ) * 100;
-          $row22[] = ($fail_count / $total_count ) * 100;
+          $row11[] = round((($success_count / $total_count ) * 100), 2);
+          $row22[] = round((($fail_count / $total_count ) * 100), 2);
         }
         $rows[] = $row1;
         $rows[] = $row2;
-        $perc_rows[] = round($row11, 2);
-        $perc_rows[] = round($row22, 2);
+        $perc_rows[] = $row11;
+        $perc_rows[] = $row22;
 
         $output .= '<br/><span> Unloading Data Count</span><br/><br/>';
         $output .= theme('table', array(
