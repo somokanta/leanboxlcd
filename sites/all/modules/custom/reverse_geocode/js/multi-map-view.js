@@ -110,7 +110,7 @@ var data;
 //            });
 //        });
 
-        $('#ajax-loader').hide();
+        $('.ajax-loader').hide();
         
         $(document).on('change', 'input[name^=list_form_items]', function () {
 
