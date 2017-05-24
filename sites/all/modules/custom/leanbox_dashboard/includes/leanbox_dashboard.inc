@@ -1534,8 +1534,9 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     if (!empty($dis_time)) {
       if (!empty($res)) {
         $header[] = 'Date';
-        $row1[] = 'Success';
-        $row2[] = 'Fail';
+        $row1[] = $row11[] = 'Success';
+        $row2[] = $row22[] = 'Fail';
+
 
         foreach ($res as $key => $val) {
           $bill_date = $val['field_egir_date_value'];
@@ -1545,15 +1546,30 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
           $array = _get_unloading_daywise_trends_data($bill_date, $dis_time);
           $success_count = $array['success_count'];
           $fail_count = $array['fail_count'];
+          $total_count = $success_count + $fail_count;
+          
           $row1[] = $success_count;
           $row2[] = $fail_count;
+          
+          $row11[] = ($success_count / $total_count ) * 100;
+          $row11[] = ($fail_count / $total_count ) * 100;
+          
         }
         $rows[] = $row1;
         $rows[] = $row2;
+        $perc_rows[] = $row11;
+        $perc_rows[] = $row22;
 
-        $output = theme('table', array(
+        $output .= '<br/><span> Unloading Data Count</span><br/>';
+        $output .= theme('table', array(
           'header' => $header,
           'rows' => $rows,
+          'attributes' => array('width' => '100%')
+        ));
+        $output .= '<br/><br/><span> Unloading Data Percentage</span><br/><br/>';
+        $output .= theme('table', array(
+          'header' => $header,
+          'rows' => $perc_rows,
           'attributes' => array('width' => '100%')
         ));
       }
