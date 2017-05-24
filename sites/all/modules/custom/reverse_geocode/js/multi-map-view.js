@@ -111,8 +111,6 @@ var data;
 
         $(document).on('change', 'input[name^=list_form_items]', function () {
 
-            console.log("1111111");
-
 
             var closet_tr = $(this).closest("tr");
             var area_hook = closet_tr.attr('data-area');
@@ -123,8 +121,6 @@ var data;
                 var checked = 0;
             }
 
-            console.log("222222");
-            $('#area-load').show();
             $.ajax({
                 type: "GET",
                 //dataType: 'text',
@@ -137,12 +133,7 @@ var data;
                     var data = JSON.parse(result);
                     custom_ajax_func(data, area_hook);
                 },
-                complete: function (result) {
-                    console.log("333333");
-                    $('#area-load').hide();
-                }
-
-
+                
 
             });
 
@@ -180,8 +171,7 @@ var data;
 (function ($) {
     Drupal.behaviors.selectableRows1 = {
         attach: function (context, settings) {
-console.log("4444444");
-            $('#area-load').hide();
+            
 
 //            var selectableRow = $("table.selectable-row tbody").children();
 //            selectableRow.click(function() {
