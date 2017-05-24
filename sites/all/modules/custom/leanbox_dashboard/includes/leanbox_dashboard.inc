@@ -1519,7 +1519,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     $query->condition('n.type', 'egir');
     $query->join('field_data_field_egir_date', 'l', 'l.entity_id = n.nid');
     $query->fields('l', array('field_egir_date_value'));
-
+    $query->groupBy('l.field_egir_date_value');
     $query->where("(DATE_FORMAT(l.field_egir_date_value, '%Y-%m-%d') >= :start)", array(':start' => $start));
     $query->where("(DATE_FORMAT(l.field_egir_date_value, '%Y-%m-%d') <= :to)", array(':to' => $end));
     $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
@@ -1534,8 +1534,9 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     if (!empty($dis_time)) {
       if (!empty($res)) {
         $header[] = 'Date';
-        $row1[] = 'Success';
-        $row2[] = 'Fail';
+        $row1[] = $row11[] = 'Success';
+        $row2[] = $row22[] = 'Fail';
+
 
         foreach ($res as $key => $val) {
           $bill_date = $val['field_egir_date_value'];
@@ -1545,16 +1546,30 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
           $array = _get_unloading_daywise_trends_data($bill_date, $dis_time);
           $success_count = $array['success_count'];
           $fail_count = $array['fail_count'];
+          $total_count = $success_count + $fail_count;
+          
           $row1[] = $success_count;
           $row2[] = $fail_count;
+          
+          $row11[] = ($success_count / $total_count ) * 100;
+          $row22[] = ($fail_count / $total_count ) * 100;
+          
         }
         $rows[] = $row1;
         $rows[] = $row2;
-dpm($header, 'header');
-dpm($rows, '$rows');
-        $output = theme('table', array(
+        $perc_rows[] = $row11;
+        $perc_rows[] = $row22;
+
+        $output .= '<br/><span> Unloading Data Count</span><br/>';
+        $output .= theme('table', array(
           'header' => $header,
           'rows' => $rows,
+          'attributes' => array('width' => '100%')
+        ));
+        $output .= '<br/><br/><span> Unloading Data Percentage</span><br/><br/>';
+        $output .= theme('table', array(
+          'header' => $header,
+          'rows' => $perc_rows,
           'attributes' => array('width' => '100%')
         ));
       }
@@ -1565,6 +1580,7 @@ dpm($rows, '$rows');
     else {
       $output = 'No Result found. Kindly Check unloading finish time';
     }
+
     return $output;
   }
   else if ($activity_type == 'unloading_ota') {
