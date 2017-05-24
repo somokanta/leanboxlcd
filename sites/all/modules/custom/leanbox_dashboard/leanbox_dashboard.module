@@ -165,7 +165,7 @@ function party_packing_filter_callback() {
     default:
       $output_data = leanbox_dashboard_chart_query_details($activity_type, $start_date, $end_date, $ajax_type);
   }
-
+        watchdog('$output_data','<pre>' . print_r($output_data, TRUE) . '</pre>');
   drupal_json_output($output_data);
 }
 
