@@ -37,18 +37,17 @@ var data;
 
 
         /*function to make number appear on marker*/
-        function mapmyindia_number_on_marker(lat, lng, key, closet_tr, nid, area_hook) {
+        function mapmyindia_number_on_marker(lat, lng, key, closet_tr, nid, area_hook,randomColor) {
             var tr = closet_tr;
             var checked_lat = lat;
             var checked_lng = lng;
 
-          //  var icon_path = window.location.origin + '/sites/all/themes/leanbox/images/map-marker.png';
-         //  var icon = L.divIcon({className: 'my-div-icon', html: "<img style='position:relative;width:35px;height:35px' src=" + icon_path + '>', iconSize: [10, 10], popupAnchor: [12, -10]});/*function that creates a div over a icon and display content on the div*/
-           
-            var randomColor = '#' + Math.floor(Math.random() * 16777215).toString(16);
-          //  var icon = L.divIcon({className: 'my-div-icon', html: "<div class='pin'  style='width:30px;height:30px;position:absolute;border-radius:50% 50% 50% 0;background:#fff;transform:rotate(-45deg);left:50%;top:50%;margin:-20px 0 0 -20px;'></div>'"});/*function that creates a div over a icon and display content on the div*/
-            var icon = L.divIcon({className: 'my-div-icon', html: "<div class='pin'  style='width:30px;height:30px;position:absolute;border-radius:50% 50% 50% 0;background:"+randomColor+";transform:rotate(-45deg);left:50%;top:50%;margin:-20px 0 0 -20px;'></div>"});
+            //  var icon_path = window.location.origin + '/sites/all/themes/leanbox/images/map-marker.png';
+            //  var icon = L.divIcon({className: 'my-div-icon', html: "<img style='position:relative;width:35px;height:35px' src=" + icon_path + '>', iconSize: [10, 10], popupAnchor: [12, -10]});/*function that creates a div over a icon and display content on the div*/
 
+            
+
+            var icon = L.divIcon({className: 'my-div-icon', html: "<div class='pin'  style='width:30px;height:30px;position:absolute;border-radius:50% 50% 50% 0;background:" + randomColor + ";transform:rotate(-45deg);left:50%;top:50%;margin:-20px 0 0 -20px;'></div>"});
             var postion = new L.LatLng(checked_lat, checked_lng);/*WGS location object*/
 
 
@@ -144,13 +143,15 @@ var data;
             });
 
             function custom_ajax_func(data, area_hook) {
+               var randomColor = '#' + Math.floor(Math.random() * 16777215).toString(16);
+
                 $.each(data, function (key, value) {
                     var lat = value.field_hul_updated_lat_value;
                     var lng = value.field_hul_updated_long_value;
                     var nid = value.nid;
 
                     if (checked == 1) {
-                        mapmyindia_number_on_marker(lat, lng, key, closet_tr, nid, area_hook);
+                        mapmyindia_number_on_marker(lat, lng, key, closet_tr, nid, area_hook,randomColor);
                     } else {
                         mapmyindia_removeMarker(nid);
                         max_lat = max_lng = min_lat = min_lng = undefined;
