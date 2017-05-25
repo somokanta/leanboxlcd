@@ -345,7 +345,7 @@ function area_hook_wise_filters_submit(&$form, &$form_state) {
       'area_hook' => array('data' => $area_hook, 'class' => 'area-hook-cell'),
       'outlet_count' => array('data' => $outlet_count, 'class' => 'outlet-count-cell'),
       'color' => array('data' => $color, 'class' => 'color-cell'),    
-      '#attributes' => array('data-area' => $area_hook),
+      '#attributes' => array('data-area' => $area_hook,'data-day' => $sales_day,'data-pl-grp' => $van_pl_group),
     );
   }
   $form_state['reverse_geocode']['rows'] = $options;

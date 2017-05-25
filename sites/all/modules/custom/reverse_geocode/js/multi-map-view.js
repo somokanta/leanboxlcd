@@ -117,6 +117,8 @@ var data;
             $('#area-load').show();
             var closet_tr = $(this).closest("tr");
             var area_hook = closet_tr.attr('data-area');
+            var sales_day = closet_tr.attr('data-day');
+            var van_pl_group = closet_tr.attr('data-pl-grp');
 
             if ($(this).prop('checked')) {
                 var checked = 1;
@@ -130,6 +132,8 @@ var data;
                 url: "/get/lat-lng",
                 data: {
                     area_hook: area_hook,
+                    sales_day: sales_day,
+                    van_pl_group: van_pl_group,
                 },
                 success: function (result) {
                     var data = JSON.parse(result);
