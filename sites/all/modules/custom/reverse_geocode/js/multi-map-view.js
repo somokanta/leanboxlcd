@@ -146,7 +146,6 @@ var data;
                var randomColor = '#' + Math.floor(Math.random() * 16777215).toString(16);
                area_hook = area_hook.replace(/\s/g, '');
                 var area_css = '.'+area_hook;
-               console.log(area_css,"area_css");
                $(area_css).css('background-color', randomColor);
                $(area_css).width(50).height(10);
                 $.each(data, function (key, value) {
@@ -157,6 +156,10 @@ var data;
                     if (checked == 1) {
                         mapmyindia_number_on_marker(lat, lng, key, closet_tr, nid, area_hook,randomColor);
                     } else {
+                        
+                        $(area_css).css("background-color", ""); 
+                        $(area_css).height('');
+                        $(area_css).width('');
                         mapmyindia_removeMarker(nid);
                         max_lat = max_lng = min_lat = min_lng = undefined;
                     }
