@@ -359,7 +359,7 @@ function reverse_geocode_get_data_area_code_wise_new($sales_day, $van_pl_group) 
   
   $query = db_select('node', 'n');
   $query->condition('n.type', 'outlet_master');
-  $query->addTag('node_uid');
+  $query->addTag('node_uid'); 
 //  $query->join('field_data_field_party_name', 'fpn', 'fpn.entity_id = n.nid');
 //  $query->leftjoin('field_data_field_area_hook_group_hul', 'fagh', 'fagh.entity_id = n.nid');
 //  $query->join('field_data_field_hul_code', 'hc', 'hc.entity_id = n.nid');

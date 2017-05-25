@@ -114,7 +114,7 @@ var data;
 
         $(document).on('change', 'input[name^=list_form_items]', function () {
 
-            $('#area-load').show();
+            $('#area-load').show(); 
             var closet_tr = $(this).closest("tr");
             var area_hook = closet_tr.attr('data-area');
             var sales_day = closet_tr.attr('data-day');

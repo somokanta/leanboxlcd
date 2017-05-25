@@ -894,7 +894,7 @@ if (!empty($van_pl_group)) {
   $query->join('field_data_field_updated_address', 'new', 'new.entity_id = hul.nid');
   $query->orderBy('hul_lat_u.field_hul_updated_lat_value', 'asc');
   $query->orderBy('hul_long_u.field_hul_updated_long_value', 'asc');
-  $query->fields('hul', array('nid'));
+  $query->fields('hul', array('nid')); 
   $query->groupBy('hul.nid');
   $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
   
