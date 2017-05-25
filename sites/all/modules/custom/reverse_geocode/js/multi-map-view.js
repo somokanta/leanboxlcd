@@ -137,6 +137,7 @@ var data;
                 },
                 success: function (result) {
                     var data = JSON.parse(result);
+                    console.log(data,"data");
                     custom_ajax_func(data, area_hook);
                 },
                 complete: function () {
