@@ -55,7 +55,6 @@ var data;
                 type: "GET",
                 //dataType: 'text',
                 url: "/get/address",
-                async: false,
                 data: {
                     nid: nid,
                 },
