@@ -145,6 +145,7 @@ var data;
             function custom_ajax_func(data, area_hook) {
                var randomColor = '#' + Math.floor(Math.random() * 16777215).toString(16);
                $('.color-change').css('background-color', randomColor);
+               $(".color-change").width(10).height(50);
                 $.each(data, function (key, value) {
                     var lat = value.field_hul_updated_lat_value;
                     var lng = value.field_hul_updated_long_value;
