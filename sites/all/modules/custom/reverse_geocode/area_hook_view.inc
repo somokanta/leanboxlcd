@@ -141,6 +141,7 @@ function area_hook_wise_locations_form($form, &$form_state, $type) {
    // 'details' => array('data' => '', 'class' => 'details-cell'),
     'area_hook' => array('data' => 'Area Hook', 'class' => 'area-hook-cell'),
     'outlet_count' => array('data' => 'Count', 'class' => 'outlet-count-cell'),
+    'color' => array('data' => 'color', 'class' => 'color-cell'),
   );
 
 
@@ -338,10 +339,13 @@ function area_hook_wise_filters_submit(&$form, &$form_state) {
 //      'details' => array('data' => array('#markup' => '<a class="cell-details" style="display:none;">On Map</a>' . $marker_tooltip), 'class' => 'details-cell'),
 //    );
     
+    $class = str_replace(' ', '', $area_hook);
+    $color = "<div class=$class></div>";
         $options[$area_hook] = array(
       'area_hook' => array('data' => $area_hook, 'class' => 'area-hook-cell'),
       'outlet_count' => array('data' => $outlet_count, 'class' => 'outlet-count-cell'),
-      '#attributes' => array('data-area' => $area_hook),
+      'color' => array('data' => $color, 'class' => 'color-cell'),    
+      '#attributes' => array('data-area' => $area_hook,'data-day' => $sales_day,'data-pl-grp' => $van_pl_group),
     );
   }
   $form_state['reverse_geocode']['rows'] = $options;
@@ -355,7 +359,7 @@ function reverse_geocode_get_data_area_code_wise_new($sales_day, $van_pl_group) 
   
   $query = db_select('node', 'n');
   $query->condition('n.type', 'outlet_master');
-  $query->addTag('node_uid');
+  $query->addTag('node_uid'); 
 //  $query->join('field_data_field_party_name', 'fpn', 'fpn.entity_id = n.nid');
 //  $query->leftjoin('field_data_field_area_hook_group_hul', 'fagh', 'fagh.entity_id = n.nid');
 //  $query->join('field_data_field_hul_code', 'hc', 'hc.entity_id = n.nid');

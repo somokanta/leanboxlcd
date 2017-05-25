@@ -1167,10 +1167,23 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     $output[0] = array('Sales Delivery', 'Return %');
     $total_bill_value = 0;
 
-    foreach ($res2 as $key2 => $val2) {
-      // calculate the sum of bill value for all bills for given day
-      $total_bill_value += $val2['field_bill_value_value'];
+    // Calculate sum of bill from custom billing data without tax
+    $query = db_select('custom_billing_data', 'bd');
+    $query->condition('bd.distributor_id', $distributor_id);
+    if (!empty($start_date) && !empty($end_date)) {
+      $query->condition('bd.bill_date', array($start_date, $end_date), 'BETWEEN');
     }
+    $query->join('node', 'n', 'bd.bill_number = n.title');
+    $query->condition('n.type', 'sales_register_data');
+    $query->condition('n.uid', $distributor_id);
+    $query->join('field_data_field_sales_return_amt', 'r', 'r.entity_id = n.nid');
+
+    $query->addExpression('SUM(bd.Sum_of_NET_SALES_VALUE)', 'sum');
+//$query->groupBy('bd.bill_number');
+//$query->addExpression('COUNT(bd.bill_number)', 'bill_number');
+    $res3 = $query->execute()->fetchField();
+    $total_bill_value = round($res3);
+ 
     if (!empty($res2)) {
       foreach ($res2 as $key2 => $val2) {
         if ($val2['field_sales_return_amt_value'] != NULL) {
@@ -1551,8 +1564,8 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
           $row1[] = $success_count;
           $row2[] = $fail_count;
 
-          $row11[] = round((($success_count / $total_count ) * 100), 2);
-          $row22[] = round((($fail_count / $total_count ) * 100), 2);
+          $row11[] = round((($success_count / $total_count ) * 100), 2) . '%';
+          $row22[] = round((($fail_count / $total_count ) * 100), 2) . '%';
         }
         $rows[] = $row1;
         $rows[] = $row2;
@@ -1993,7 +2006,7 @@ function leanbox_dashboard_otif_trends_chart_query_details($type, $start_date = 
     $row = array();
     $row[] = 'Total';
     foreach ($total_otif_val as $key => $val) {
-      $row[] = $val;
+      $row[] = round($val);
     }
     $rows[] = $row;
 

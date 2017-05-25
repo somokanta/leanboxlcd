@@ -791,7 +791,9 @@ function get_reverse_geocode_from_lat_long() {
 
 function get_lat_long_from_area_hook() {
   $area_hook = $_GET['area_hook'];
-  $result = lat_lng_results($area_hook);
+  $sales_day = $_GET['sales_day'];
+  $van_pl_group = $_GET['van_pl_group'];
+  $result = lat_lng_results($area_hook,$sales_day,$van_pl_group);
   echo $result;
 }
 
@@ -850,7 +852,7 @@ function address_results($nid) {
   return $marker_tooltip;
 }
 
-function lat_lng_results($area_hook) {
+function lat_lng_results($area_hook,$sales_day,$van_pl_group) {
   global $user;
   $user_id = $user->uid;
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
@@ -861,6 +863,25 @@ function lat_lng_results($area_hook) {
     $query->join('field_data_field_outlet_area_hook', 'oah', 'oah.entity_id = n.nid');
     $query->condition('oah.field_outlet_area_hook_value', $area_hook, '=');
   }
+  if (!empty($sales_day)) {
+    $query->join('field_data_field_sales_day', 'sd', 'sd.entity_id = n.nid');
+    $query->condition('sd.field_sales_day_value', $sales_day, '=');
+    $query->fields('sd', array('field_sales_day_value'));
+  }
+if (!empty($van_pl_group)) {
+    $query->join('field_data_field_channel', 'ch', 'ch.entity_id = n.nid');
+    $query->condition('ch.bundle', 'outlet_master');
+    $query->join('field_data_field_pl_group', 'pl', 'pl.entity_id = n.nid');
+    $query->condition('pl.bundle', 'outlet_master');
+    $query->join('field_data_field_channel', 'ppmch', 'ch.field_channel_value = ppmch.field_channel_value');
+    $query->condition('ppmch.bundle', 'party_pack_master');
+    $query->join('node', 'ppn', 'ppn.nid = ppmch.entity_id');
+    $query->condition('ppn.uid', $distributor_id, '=');
+    $query->join('field_data_field_pl_group', 'ppmpl', 'pl.field_pl_group_value = ppmpl.field_pl_group_value and ppmch.entity_id = ppmpl.entity_id');
+    $query->condition('ppmch.bundle', 'party_pack_master');
+    $query->join('field_data_field_van_pl_group', 'vplgp', 'ppn.nid = vplgp.entity_id');
+    $query->condition('vplgp.field_van_pl_group_value', $van_pl_group, '=');
+  }
   $query->join('field_data_field_hul_code', 'hc', 'hc.entity_id = n.nid');
   $query->join('node', 'hul', 'hc.field_hul_code_value = hul.title');
   $query->condition('hul.uid', $distributor_id, '=');
@@ -870,10 +891,10 @@ function lat_lng_results($area_hook) {
   $query->fields('hul_lat_u', array('field_hul_updated_lat_value'));
   $query->Join('field_data_field_hul_updated_long', 'hul_long_u', 'hul_long_u.entity_id = hul.nid');
   $query->fields('hul_long_u', array('field_hul_updated_long_value'));
-  $query->join('field_data_field_updated_address', 'new', 'new.entity_id = hul.nid');
+  //$query->join('field_data_field_updated_address', 'new', 'new.entity_id = hul.nid');
   $query->orderBy('hul_lat_u.field_hul_updated_lat_value', 'asc');
   $query->orderBy('hul_long_u.field_hul_updated_long_value', 'asc');
-  $query->fields('hul', array('nid'));
+  $query->fields('hul', array('nid')); 
   $query->groupBy('hul.nid');
   $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
   
