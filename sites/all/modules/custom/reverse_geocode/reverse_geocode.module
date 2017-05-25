@@ -891,7 +891,7 @@ if (!empty($van_pl_group)) {
   $query->fields('hul_lat_u', array('field_hul_updated_lat_value'));
   $query->Join('field_data_field_hul_updated_long', 'hul_long_u', 'hul_long_u.entity_id = hul.nid');
   $query->fields('hul_long_u', array('field_hul_updated_long_value'));
-  $query->join('field_data_field_updated_address', 'new', 'new.entity_id = hul.nid');
+  //$query->join('field_data_field_updated_address', 'new', 'new.entity_id = hul.nid');
   $query->orderBy('hul_lat_u.field_hul_updated_lat_value', 'asc');
   $query->orderBy('hul_long_u.field_hul_updated_long_value', 'asc');
   $query->fields('hul', array('nid')); 
