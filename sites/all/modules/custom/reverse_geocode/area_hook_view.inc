@@ -141,6 +141,7 @@ function area_hook_wise_locations_form($form, &$form_state, $type) {
    // 'details' => array('data' => '', 'class' => 'details-cell'),
     'area_hook' => array('data' => 'Area Hook', 'class' => 'area-hook-cell'),
     'outlet_count' => array('data' => 'Count', 'class' => 'outlet-count-cell'),
+    'color' => array('data' => 'color', 'class' => 'color-cell'),
   );
 
 
@@ -338,9 +339,11 @@ function area_hook_wise_filters_submit(&$form, &$form_state) {
 //      'details' => array('data' => array('#markup' => '<a class="cell-details" style="display:none;">On Map</a>' . $marker_tooltip), 'class' => 'details-cell'),
 //    );
     
+    $color = '<span class="color-change"></span>'
         $options[$area_hook] = array(
       'area_hook' => array('data' => $area_hook, 'class' => 'area-hook-cell'),
       'outlet_count' => array('data' => $outlet_count, 'class' => 'outlet-count-cell'),
+      'color' => array('data' => $color, 'class' => 'color-cell'),    
       '#attributes' => array('data-area' => $area_hook),
     );
   }
