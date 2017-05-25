@@ -129,7 +129,6 @@ var data;
                 type: "GET",
                 //dataType: 'text',
                 url: "/get/lat-lng",
-                async: true,
                 data: {
                     area_hook: area_hook,
                 },
