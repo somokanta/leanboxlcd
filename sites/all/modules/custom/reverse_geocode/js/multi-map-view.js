@@ -114,7 +114,7 @@ var data;
 
         $(document).on('change', 'input[name^=list_form_items]', function () {
 
-            $('#area-load').show(); 
+            $('#area-load').show();
             var closet_tr = $(this).closest("tr");
             var area_hook = closet_tr.attr('data-area');
             var sales_day = closet_tr.attr('data-day');
@@ -137,7 +137,7 @@ var data;
                 },
                 success: function (result) {
                     var data = JSON.parse(result);
-                    console.log(data,"data");
+                    console.log(data, "data");
                     custom_ajax_func(data, area_hook);
                 },
                 complete: function () {
@@ -146,11 +146,19 @@ var data;
             });
 
             function custom_ajax_func(data, area_hook) {
-                var randomColor = getRandomColor();
-                area_hook = area_hook.replace(/\s/g, '');
-                var area_css = '.' + area_hook;
-                $(area_css).css('background-color', randomColor);
-                $(area_css).width(50).height(10);
+
+                if (Object.getOwnPropertyNames(data).length !== 0) {
+                    //is empty
+                    var randomColor = getRandomColor();
+                    area_hook = area_hook.replace(/\s/g, '');
+                    var area_css = '.' + area_hook;
+                    $(area_css).css('background-color', randomColor);
+                    $(area_css).width(50).height(10);
+                }else{
+                    randomColor = "";
+                }
+
+
                 $.each(data, function (key, value) {
                     var lat = value.field_hul_updated_lat_value;
                     var lng = value.field_hul_updated_long_value;
@@ -159,7 +167,6 @@ var data;
                     if (checked == 1) {
                         mapmyindia_number_on_marker(lat, lng, key, closet_tr, nid, area_hook, randomColor);
                     } else {
-
                         $(area_css).css("background-color", "");
                         $(area_css).height('');
                         $(area_css).width('');
