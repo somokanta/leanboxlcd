@@ -144,7 +144,8 @@ var data;
 
             function custom_ajax_func(data, area_hook) {
                var randomColor = '#' + Math.floor(Math.random() * 16777215).toString(16);
-               var area_css = '.'+area_hook;
+               area_hook = area_hook.replace(/\s/g, '');
+                var area_css = '.'+area_hook;
                console.log(area_css,"area_css");
                $(area_css).css('background-color', randomColor);
                $(area_css).width(50).height(10);
