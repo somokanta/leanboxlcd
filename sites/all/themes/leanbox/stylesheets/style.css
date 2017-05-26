@@ -11323,5 +11323,5 @@ For markers on map
 
 //Hide default Mapmyindia search
 .srch_dv {
-    display: none;
+    display: none !important;
 }
