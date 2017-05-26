@@ -11305,7 +11305,6 @@ header[id="page-header"] .content > ul li ul li:nth-child(odd) {
   border-bottom: 1px solid #ddd;
 }
 
-
 /*
 For markers on map
 */
@@ -11320,4 +11319,11 @@ For markers on map
     left: 50%;
     margin-top: -7px;
     margin-left: -7px;
+}
+
+/*
+Hide default Mapmyindia search
+*/
+.srch_dv {
+    display: none !important;
 }
