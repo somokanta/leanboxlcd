@@ -1,21 +1,17 @@
-var map = null;
 (function($) {
     $(document).ready(function() {
-        
-        
         var marker;
         var default_lat = 20.5937;
         var default_lng = 78.9629;
         var centre = new L.LatLng(default_lat, default_lng);
         var url_result;
-        map = new MapmyIndia.Map('map-container', {center: centre, zoomControl: true, hybrid: true, search:false});
+        map = new MapmyIndia.Map('map-container', {center: centre, zoomControl: true, hybrid: true, /*search:false*/});
         /*1.create a MapmyIndia Map by simply calling new MapmyIndia.Map() and passsing it at the minimum div object, all others are optional...
          2.all leaflet mapping functions can be called simply on the L object
          3.MapmyIndia may extend and in future modify the customised/forked Leaflet object to enhance mapping functionality for developers, which will be clearly documented in the MapmyIndia API documentation section.*/
         //var marker = L.marker(centre).addTo(map);/**--add marker at the centre of map--**/
         //marker.bindPopup('Hello World');
-        map = map_o[0];
-console.log(map);
+
         addMarker(centre, '', "Draggable marker sample", true);
 
 
@@ -27,7 +23,6 @@ console.log(map);
             
             marker = new L.Marker(position, {draggable: true, title: title, icon: myIcon});
             //marker.bindPopup("Loading...");
-            console.log(map);
             map.addLayer(marker);
             map.setView(marker.getLatLng(), 5);
         }
