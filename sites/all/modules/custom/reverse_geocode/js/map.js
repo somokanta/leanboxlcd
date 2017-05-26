@@ -26,6 +26,7 @@ var map = null;
             
             marker = new L.Marker(position, {draggable: true, title: title, icon: myIcon});
             //marker.bindPopup("Loading...");
+            console.log(map);
             map.addLayer(marker);
             map.setView(marker.getLatLng(), 5);
         }
