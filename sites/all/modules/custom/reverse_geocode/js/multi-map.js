@@ -11,7 +11,7 @@ var marker = {};
         var min_lng;
         var centre = new L.LatLng(default_lat, default_lng);
 
-        map = new MapmyIndia.Map('map-container', {center: centre, zoomControl: true, hybrid: true, search: true});
+        map = new MapmyIndia.Map('map-container', {center: centre, zoomControl: true, hybrid: true, search: false});
         map.setView([default_lat, default_lng], 5);
         
         L.Marker.setBouncingOptions({
