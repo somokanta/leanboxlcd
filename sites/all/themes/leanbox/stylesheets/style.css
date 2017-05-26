@@ -11321,7 +11321,9 @@ For markers on map
     margin-left: -7px;
 }
 
-//Hide default Mapmyindia search
+/*
+Hide default Mapmyindia search
+*/
 .srch_dv {
     display: none !important;
 }
