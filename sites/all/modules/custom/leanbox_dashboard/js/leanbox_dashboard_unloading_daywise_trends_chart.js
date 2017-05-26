@@ -16,9 +16,7 @@
 
 				e.preventDefault();
 			  var start_date = $(this).parent().prev().prev().find("input[name='start_date[date]']").val();
-				console.log(start_date);
 				var end_date = $(this).parent().prev().find("input[name='end_date[date]']").val();
-				console.log(end_date);
 				if (start_date != '' && end_date != '') {
 					$.ajax({
 						type: "POST",
