@@ -14,6 +14,7 @@ var map = null;
          3.MapmyIndia may extend and in future modify the customised/forked Leaflet object to enhance mapping functionality for developers, which will be clearly documented in the MapmyIndia API documentation section.*/
         //var marker = L.marker(centre).addTo(map);/**--add marker at the centre of map--**/
         //marker.bindPopup('Hello World');
+        map = map_o[0];
 console.log(map);
         addMarker(centre, '', "Draggable marker sample", true);
 
