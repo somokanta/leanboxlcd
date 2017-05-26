@@ -1,8 +1,8 @@
-
+var map = null;
 (function($) {
     $(document).ready(function() {
         
-        var map = null;
+        
         var marker;
         var default_lat = 20.5937;
         var default_lng = 78.9629;
