@@ -639,8 +639,8 @@ function trip_filters_submit($form, &$form_state) {
   foreach ($data as $key => $val) {
     $lat = $val['field_hul_lat_value'];
     $lng = $val['field_hul_long_value'];
-    $hul_nid = $val['hul_nid'];
-    dpm($hul_nid,"nid");
+    $hul_nid = $val['nid'];
+    dpm($hul_nid,"hul_nid");
 
     $street = $val['field_original_address_sub_premise'];
     $locality = $val['field_original_address_locality'];
@@ -655,18 +655,18 @@ function trip_filters_submit($form, &$form_state) {
         $decoded_result = $decoded_data->results;
         dpm($decoded_result,"decoded_result");
 
-        $decoded_city = $decoded_result[0]->city;
-        $decoded_district = $decoded_result[0]->district;
-        $decoded_state = $decoded_result[0]->state;
-        $decoded_pin = $decoded_result[0]->pincode;
-        $decoded_street = $decoded_result[0]->street;
-        $decoded_house_name = $decoded_result[0]->houseName;
-        $decoded_locality = $decoded_result[0]->locality;
-        $decoded_sublocality = $decoded_result[0]->subLocality;
-        $decoded_poi = $decoded_result[0]->poi;
-        $decoded_village = $decoded_result[0]->village;
-        $decoded_formatted_address = $decoded_result[0]->formatted_address;
-        $node = node_load($hul_nid);
+//        $decoded_city = $decoded_result[0]->city;
+//        $decoded_district = $decoded_result[0]->district;
+//        $decoded_state = $decoded_result[0]->state;
+//        $decoded_pin = $decoded_result[0]->pincode;
+//        $decoded_street = $decoded_result[0]->street;
+//        $decoded_house_name = $decoded_result[0]->houseName;
+//        $decoded_locality = $decoded_result[0]->locality;
+//        $decoded_sublocality = $decoded_result[0]->subLocality;
+//        $decoded_poi = $decoded_result[0]->poi;
+//        $decoded_village = $decoded_result[0]->village;
+//        $decoded_formatted_address = $decoded_result[0]->formatted_address;
+      //  $node = node_load($hul_nid);
         dpm($node,"node");
 //        $node->field_original_address['und'][0]['administrative_area'] = $decoded_state;
 //        $node->field_original_address['und'][0]['sub_administrative_area'] = $decoded_city;
