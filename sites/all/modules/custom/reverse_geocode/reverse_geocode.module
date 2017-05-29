@@ -636,6 +636,8 @@ function trip_filters_submit($form, &$form_state) {
   unset($form_state['input']['list_form_items']);
   $trip_id = $form_state['values']['trip_id'];
   $data = $form_state['values']['trip_data'];
+  
+  dpm($data,"data");
   foreach ($data as $key => $val) {
     $lat = $val['field_hul_lat_value'];
     $lng = $val['field_hul_long_value'];
@@ -666,7 +668,7 @@ function trip_filters_submit($form, &$form_state) {
 //        $decoded_poi = $decoded_result[0]->poi;
 //        $decoded_village = $decoded_result[0]->village;
 //        $decoded_formatted_address = $decoded_result[0]->formatted_address;
-      //  $node = node_load($hul_nid);
+        $node = node_load($hul_nid);
         dpm($node,"node");
 //        $node->field_original_address['und'][0]['administrative_area'] = $decoded_state;
 //        $node->field_original_address['und'][0]['sub_administrative_area'] = $decoded_city;
@@ -680,7 +682,7 @@ function trip_filters_submit($form, &$form_state) {
 //        $node->field_original_address['und'][0]['name_line'] = $decoded_village;
 //        $node->field_original_address['und'][0]['country'] = "IN";
 //        $node->field_original_address['und'][0]['data'] = $decoded_poi;
-        node_save($node);
+     //   node_save($node);
       }
     }
 
