@@ -555,6 +555,7 @@ function reverse_geocode_trip_wise_form($form, &$form_state) {
     $form_state['reverse_geocode']['rows'] = array();
   }
   $options = $form_state['reverse_geocode']['rows'];
+  dpm($options,"options");
   if ($options) {
 
     $multiple = FALSE;
