@@ -39,8 +39,11 @@ function reverse_geocode_menu() {
   $items['address/confirm/trip-wise'] = array(
     'title' => 'Tripwise Address Confirmation',
     'type' => MENU_NORMAL_ITEM,
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('reverse_geocode_trip_wise_form'),
+    
+    'page callback' => 'show_locations',
+    'access arguments' => array('address confirmation'),
+    //'page callback' => 'drupal_get_form',
+    //'page arguments' => array('reverse_geocode_trip_wise_form'),
     'access arguments' => array('address confirmation'),
       // Page callback, etc. need to be added here.
   );
@@ -270,13 +273,24 @@ function show_locations() {
     drupal_add_js(drupal_get_path('module', 'reverse_geocode') . '/js/multi-map.js', 'file');
     $type = "multi";
   }
+  else if ($url == "trip-wise") {
+    drupal_add_js(drupal_get_path('module', 'reverse_geocode') . '/js/map.js', 'file');
+    //drupal_add_css(drupal_get_path('module', 'reverse_geocode') . '/css/map.css');
+  }
   else {
     drupal_add_js(drupal_get_path('module', 'reverse_geocode') . '/js/map.js', 'file');
     //drupal_add_css(drupal_get_path('module', 'reverse_geocode') . '/css/map.css');
     $type = "single";
   }
 
-  $form = drupal_render(drupal_get_form('hul_code_form', $type));
+  if ($url == "trip-wise"){
+      $form = drupal_render(drupal_get_form('reverse_geocode_trip_wise_form', $type));
+
+  }else{
+      $form = drupal_render(drupal_get_form('hul_code_form', $type));
+
+  }
+    
   $result['map-container'] = array(
     '#markup' => '<div id="map-container"></div>',
   );
@@ -516,17 +530,7 @@ function hul_code_form($form, &$form_state, $type) {
 }
 
 function reverse_geocode_trip_wise_form($form, &$form_state) {
-  $license_key = variable_get('mapmyindia_map_key', '98thppnrdg3vpp7xupfg9eotrl2rliqu');
-  $google_key = variable_get('google_places_key', 'AIzaSyCtEWjYMDT0sAoyyfdMEDI5QyoGY7aqHVw');
-  drupal_add_js("https://apis.mapmyindia.com/advancedmaps/v1/$license_key/map_load?v=0.1", 'external');
-  drupal_add_js("https://maps.googleapis.com/maps/api/js?key=$google_key&libraries=places", 'external');
-  drupal_add_js(drupal_get_path('module', 'reverse_geocode') . '/js/selectable-row.js', 'file');
-  drupal_add_js(drupal_get_path('module', 'reverse_geocode') . '/js/leaflet.smoothmarkerbouncing.js', 'file');
-
-  drupal_add_js(drupal_get_path('module', 'reverse_geocode') . '/js/tooltipster.bundle.min.js', 'file');
-  drupal_add_css(drupal_get_path('module', 'reverse_geocode') . '/css/tooltipster.bundle.min.css', 'file');
-
-  drupal_add_js(drupal_get_path('module', 'reverse_geocode') . '/js/map.js', 'file');
+  
   $header_array = array(
     'sr_no' => array('data' => 'Sr No', 'class' => 'sr-cell'),
     'party_code' => array('data' => 'Party Code', 'class' => 'party-code-cell'),
@@ -607,10 +611,6 @@ function reverse_geocode_trip_wise_form($form, &$form_state) {
     );
   }
 
-
-  $result['map-container'] = array(
-    '#markup' => '<div id="map-container"></div>',
-  );
 
 
   return $form;
