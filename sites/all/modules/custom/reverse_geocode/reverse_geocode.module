@@ -640,6 +640,7 @@ function trip_filters_submit($form, &$form_state) {
     $lat = $val['field_hul_lat_value'];
     $lng = $val['field_hul_long_value'];
     $hul_nid = $val['hul_nid'];
+    dpm($hul_nid,"nid");
 
     $street = $val['field_original_address_sub_premise'];
     $locality = $val['field_original_address_locality'];
@@ -650,7 +651,10 @@ function trip_filters_submit($form, &$form_state) {
       if (empty($street) && empty($locality) && empty($sublocality) && empty($poi)) {
         $result = reverse_geocode_results($lat, $lng);
         $decoded_data = json_decode($result);
+        dpm($decoded_data,"decoded_data");
         $decoded_result = $decoded_data->results;
+        dpm($decoded_result,"decoded_result");
+
         $decoded_city = $decoded_result[0]->city;
         $decoded_district = $decoded_result[0]->district;
         $decoded_state = $decoded_result[0]->state;
@@ -662,8 +666,7 @@ function trip_filters_submit($form, &$form_state) {
         $decoded_poi = $decoded_result[0]->poi;
         $decoded_village = $decoded_result[0]->village;
         $decoded_formatted_address = $decoded_result[0]->formatted_address;
-       dpm($hul_nid,"hul_nid");
-      //  $node = node_load($hul_nid);
+        $node = node_load($hul_nid);
         dpm($node,"node");
 //        $node->field_original_address['und'][0]['administrative_area'] = $decoded_state;
 //        $node->field_original_address['und'][0]['sub_administrative_area'] = $decoded_city;
@@ -1585,9 +1588,6 @@ function reverse_geocode_get_data_trip_wise($trip_id) {
 
   $query->join('field_data_field_party_code', 'pc', 'pc.entity_id = nd.nid');
   $query->join('field_data_field_party_name', 'pn', 'pn.entity_id = nd.nid');
-
-
-
 
   $query->join('field_data_field_hul_code', 'hc', 'hc.entity_id = nd.nid');
   $query->join('node', 'hul', 'hc.field_hul_code_value = hul.title');
