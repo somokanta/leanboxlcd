@@ -35,6 +35,16 @@ function reverse_geocode_menu() {
     'weight' => 1,
   );
 
+
+  $items['address/confirm/trip-wise'] = array(
+    'title' => 'Tripwise Address Confirmation',
+    'type' => MENU_NORMAL_ITEM,
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('reverse_geocode_trip_wise_form'),
+    'access arguments' => array('address confirmation'),
+      // Page callback, etc. need to be added here.
+  );
+
   $items['area-confirm'] = array(
     'title' => 'Area Hook Group Confirmation',
     'page callback' => 'show_area_locations',
@@ -505,6 +515,298 @@ function hul_code_form($form, &$form_state, $type) {
   return $form;
 }
 
+function reverse_geocode_trip_wise_form($form, &$form_state) {
+
+  drupal_add_js(drupal_get_path('module', 'reverse_geocode') . '/js/map.js', 'file');
+  $header_array = array(
+    'sr_no' => array('data' => 'Sr No', 'class' => 'sr-cell'),
+    'party_code' => array('data' => 'Party Code', 'class' => 'party-code-cell'),
+    'party_name' => array('data' => 'Party Name', 'class' => 'party-name-cell'),
+    'status' => array('data' => 'Status', 'class' => 'status-cell'),
+    'details' => array('data' => '', 'class' => 'details-cell'),
+  );
+
+  $form['#prefix'] = '<div id="address-selection-map">';
+  $form['#suffix'] = '</div>';
+
+  $form['trip_id'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Trip Id'),
+    '#required' => TRUE,
+  );
+
+
+  $form['filter'] = array(
+    '#type' => 'submit',
+    '#value' => t('Filter'),
+    '#ajax' => array(
+      'wrapper' => 'address-selection-map',
+      'callback' => 'map_ajax_callback1',
+      'method' => 'replace',
+      'effect' => 'fade',
+    ),
+    '#validate' => array('trip_filter_validate'),
+    '#submit' => array('trip_filters_submit'),
+    '#id' => 'filter',
+  );
+
+
+  if (!isset($form_state['reverse_geocode']['rows'])) {
+    $form_state['reverse_geocode']['rows'] = array();
+  }
+  $options = $form_state['reverse_geocode']['rows'];
+  if ($options) {
+
+    $multiple = FALSE;
+    $class = array('selectable-row', 'table-radio');
+
+    $form['list_form_items'] = array(
+      '#type' => 'tableselect',
+      '#header' => $header_array,
+      '#options' => $options,
+      '#prefix' => '<div id="table-div">',
+      '#suffix' => '</div>',
+      '#empty' => t('No forms available.'),
+      '#multiple' => $multiple,
+      '#attributes' => array('class' => $class),
+      '#default_value' => NULL,
+    );
+
+    $form['lat'] = array(
+      '#type' => 'hidden',
+    );
+    $form['lng'] = array(
+      '#type' => 'hidden',
+    );
+
+
+    $form['submit'] = array(
+      '#type' => 'submit',
+      '#value' => t('Confirm Address'),
+      '#submit' => array('trip_wise_form_submit'),
+      '#ajax' => array(
+        'wrapper' => 'address-selection-map',
+        'callback' => 'map_ajax_callback',
+        'method' => 'replace',
+        'effect' => 'fade',
+      ),
+      '#states' => array(
+        'visible' => array(
+          ':input[name^="list_form_items"]' => array('checked' => TRUE),
+        ),
+      ),
+      '#id' => 'confirm-add',
+    );
+  }
+
+
+
+
+
+  return $form;
+}
+
+function trip_filter_validate($form, &$form_state) {
+  $trip_id = $form_state['values']['trip_id'];
+  if (empty($trip_id)) {
+    form_set_error('trip_id', 'Trip Id is required');
+  }
+  $data = reverse_geocode_get_data_trip_wise($trip_id);
+  if (empty($data)) {
+    $message = "No Results Found";
+    unset($form_state['complete form']['list_form_items']);
+    unset($form_state['complete form']['submit']);
+    form_set_error('trip_id_msg', $message);
+  }
+  else {
+    $form_state['values']['trip_data'] = $data;
+  }
+}
+
+function trip_filters_submit($form, &$form_state) {
+  unset($form_state['input']['list_form_items']);
+  $trip_id = $form_state['values']['trip_id'];
+  $data = $form_state['trip_data'];
+  foreach ($data as $key => $val) {
+    $lat = $val['field_hul_lat_value'];
+    $lng = $val['field_hul_long_value'];
+    $hul_nid = $val['hul_nid'];
+
+
+    $street = $val['field_original_address_sub_premise'];
+    $locality = $val['field_original_address_locality'];
+    $sublocality = $val['field_original_address_dependent_locality'];
+    $poi = $val['field_original_address_data'];
+
+    if (!empty($lat) && !empty($lng)) {
+      if (empty($street) && empty($locality) && empty($sublocality) && empty($poi)) {
+        $result = reverse_geocode_results($lat, $lng);
+        $decoded_data = json_decode($result);
+        $decoded_result = $decoded_data->results;
+        $decoded_city = $decoded_result[0]->city;
+        $decoded_district = $decoded_result[0]->district;
+        $decoded_state = $decoded_result[0]->state;
+        $decoded_pin = $decoded_result[0]->pincode;
+        $decoded_street = $decoded_result[0]->street;
+        $decoded_house_name = $decoded_result[0]->houseName;
+        $decoded_locality = $decoded_result[0]->locality;
+        $decoded_sublocality = $decoded_result[0]->subLocality;
+        $decoded_poi = $decoded_result[0]->poi;
+        $decoded_village = $decoded_result[0]->village;
+        $decoded_formatted_address = $decoded_result[0]->formatted_address;
+
+        $node = node_load($hul_nid);
+        $node->field_original_address['und'][0]['administrative_area'] = $decoded_state;
+        $node->field_original_address['und'][0]['sub_administrative_area'] = $decoded_city;
+        $node->field_original_address['und'][0]['locality'] = $decoded_locality;
+        $node->field_original_address['und'][0]['dependent_locality'] = $decoded_sublocality;
+        $node->field_original_address['und'][0]['postal_code'] = $decoded_pin;
+        $node->field_original_address['und'][0]['thoroughfare'] = $decoded_formatted_address;
+        $node->field_original_address['und'][0]['premise'] = $decoded_district;
+        $node->field_original_address['und'][0]['sub_premise'] = $decoded_street;
+        $node->field_original_address['und'][0]['organisation_name'] = $decoded_house_name;
+        $node->field_original_address['und'][0]['name_line'] = $decoded_village;
+        $node->field_original_address['und'][0]['country'] = "IN";
+        $node->field_original_address['und'][0]['data'] = $decoded_poi;
+        node_save($node);
+      }
+    }
+
+    $header = array('Attributes', 'Original', 'New');
+    foreach ($data as $key => $val) {
+      $party_code = $val['field_party_code_value'];
+      $lat = $val['field_hul_updated_lat_value'];
+      $long = $val['field_hul_updated_long_value'];
+
+      $old_lat = $val['field_hul_lat_value'];
+      $old_long = $val['field_hul_long_value'];
+
+      $beat_name = $val['field_beat_name_value'];
+      $party_name = $val['field_party_name_value'];
+      $hul_status = $val['field_hul_status_value'];
+      if ($hul_status == "0") {
+        $hul_status = "Non-Confirmed";
+      }
+      elseif ($hul_status == "1") {
+        $hul_status = "Confirmed";
+      }
+
+      $old_city = $val['field_original_address_sub_administrative_area'];
+      $old_district = $val['field_original_address_premise'];
+      $old_state = $val['field_original_address_administrative_area'];
+      $old_pin = $val['field_original_address_postal_code'];
+      $old_street = $val['field_original_address_sub_premise'];
+      $old_house_name = $val['field_original_address_organisation_name'];
+      $old_locality = $val['field_original_address_locality'];
+      $old_sublocality = $val['field_original_address_dependent_locality'];
+      $old_poi = $val['field_original_address_data'];
+      $old_village = $val['field_original_address_name_line'];
+      $old_formatted_address = $val['field_original_address_thoroughfare'];
+
+      $new_city = $val['field_updated_address_sub_administrative_area'];
+      $new_district = $val['field_updated_address_premise'];
+      $new_state = $val['field_updated_address_administrative_area'];
+      $new_pin = $val['field_updated_address_postal_code'];
+      $new_street = $val['field_updated_address_sub_premise'];
+      $new_house_name = $val['field_updated_address_organisation_name'];
+      $new_locality = $val['field_updated_address_locality'];
+      $new_sublocality = $val['field_updated_address_dependent_locality'];
+      $new_poi = $val['field_updated_address_data'];
+      $new_village = $val['field_updated_address_name_line'];
+      $new_formatted_address = $val['field_updated_address_thoroughfare'];
+
+
+      $rows = array();
+
+      $rows[] = array('Locality', $old_locality, $new_locality);
+      $rows[] = array('Sub Locality', $old_sublocality, $new_sublocality);
+      $rows[] = array('Street', $old_street, $new_street);
+      $rows[] = array('POI', $old_poi, $new_poi);
+
+
+      $old_lat_long = !empty($old_lat) ? $old_lat . ',' . $old_long : '';
+      $lat_long = !empty($lat) ? $lat . ' / ' . $long : '';
+      $rows[] = array('Lat/Long', $old_lat_long, $lat_long);
+
+      //$address = theme('table', array('header' => $header, 'rows' => $rows, 'sticky' => FALSE));
+
+      $options[$party_code] = array(
+        'sr_no' => array('data' => $key + 1, 'class' => 'sr-cell'),
+        'party_code' => array('data' => $party_code, 'class' => 'party-code-cell'),
+        'party_name' => array('data' => '<div class="party-name-data">' . $party_name . '</div>', 'class' => 'party-name-cell'),
+        '#attributes' => array('data-lat' => $lat, 'data-lng' => $long, 'data-sr' => $key + 1),
+        'status' => array('data' => $hul_status, 'class' => 'status-cell'),
+        'details' => array('data' => array('#theme' => 'table', '#header' => $header, '#rows' => $rows, '#sticky' => FALSE, '#prefix' => '<a class="cell-details">Details</a>', '#attributes' => array('class' => array('cell-hide'))), 'class' => 'details-cell'),
+      );
+    }
+
+    $form_state['reverse_geocode']['rows'] = $options;
+    $form_state['rebuild'] = TRUE;
+  }
+}
+
+function trip_wise_form_submit($form, &$form_state) {
+  $party_code = $form_state['values']['list_form_items'];
+  $lat = $form_state['values']['lat'];
+  $lng = $form_state['values']['lng'];
+  $type = $form_state['type'];
+  if ($type == "single") {
+    //Get Related party codes to this selected party code
+    $result = reverse_geocode_get_hul_code_from_party_code($party_code);
+
+    $hul_code = key($result);
+    //Update the address attributes in the database
+    foreach ($result[$hul_code] as $val) {
+      $party_codes[] = $val->title;
+    }
+    $attributes = reverse_geocode_update_hul_lat_lng($hul_code, $lat, $lng);
+    if (!empty($attributes)) {
+
+      foreach ($party_codes as $party_code) {
+
+        if (isset($form_state['reverse_geocode']['rows'][$party_code])) {
+          //$form_state['reverse_geocode']['rows'][$party_code]['lat'] = $lat;
+          //$form_state['reverse_geocode']['rows'][$party_code]['lng'] = $lng;
+          $form_state['reverse_geocode']['rows'][$party_code]['status'] = 'Confirmed';
+          $form_state['reverse_geocode']['rows'][$party_code]['#attributes'] = array('data-lat' => $lat, 'data-lng' => $lng);
+
+          $rows = $form_state['reverse_geocode']['rows'][$party_code]['details']['data']['#rows'];
+
+          $rows[0][2] = $attributes['locality'];
+          $rows[1][2] = $attributes['subLocality'];
+          $rows[2][2] = $attributes['street'];
+          $rows[3][2] = $attributes['poi'];
+          $rows[4][2] = $lat . ' / ' . $lng;
+
+          $form_state['reverse_geocode']['rows'][$party_code]['details']['data']['#rows'] = $rows;
+        }
+      }
+      drupal_set_message('Successfully updated');
+    }
+    else {
+      drupal_set_message('Error occured while updating', 'error');
+    }
+  }
+  else {
+
+    foreach ($party_code as $code) {
+      $result = reverse_geocode_get_hul_code_from_party_code($code);
+      $hul_code = key($result);
+      reverse_geocode_update_hul_status($hul_code);
+
+      if (isset($form_state['reverse_geocode']['rows'][$code])) {
+        unset($form_state['reverse_geocode']['rows'][$code]);
+      }
+    }
+
+    $i = 0;
+    foreach ($form_state['reverse_geocode']['rows'] as $key => &$value) {
+      $value['sr_no'] = $value['#attributes']['data-sr'] = ++$i;
+    }
+  }
+  $form_state['rebuild'] = TRUE;
+}
+
 function map_ajax_callback1($form, &$form_state) {
 
   $commands[] = ajax_command_replace('#address-selection-map', render($form));
@@ -793,7 +1095,7 @@ function get_lat_long_from_area_hook() {
   $area_hook = $_GET['area_hook'];
   $sales_day = $_GET['sales_day'];
   $van_pl_group = $_GET['van_pl_group'];
-  $result = lat_lng_results($area_hook,$sales_day,$van_pl_group);
+  $result = lat_lng_results($area_hook, $sales_day, $van_pl_group);
   echo $result;
 }
 
@@ -852,7 +1154,7 @@ function address_results($nid) {
   return $marker_tooltip;
 }
 
-function lat_lng_results($area_hook,$sales_day,$van_pl_group) {
+function lat_lng_results($area_hook, $sales_day, $van_pl_group) {
   global $user;
   $user_id = $user->uid;
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
@@ -868,7 +1170,7 @@ function lat_lng_results($area_hook,$sales_day,$van_pl_group) {
     $query->condition('sd.field_sales_day_value', $sales_day, '=');
     $query->fields('sd', array('field_sales_day_value'));
   }
-if (!empty($van_pl_group)) {
+  if (!empty($van_pl_group)) {
     $query->join('field_data_field_channel', 'ch', 'ch.entity_id = n.nid');
     $query->condition('ch.bundle', 'outlet_master');
     $query->join('field_data_field_pl_group', 'pl', 'pl.entity_id = n.nid');
@@ -894,11 +1196,11 @@ if (!empty($van_pl_group)) {
   //$query->join('field_data_field_updated_address', 'new', 'new.entity_id = hul.nid');
   $query->orderBy('hul_lat_u.field_hul_updated_lat_value', 'asc');
   $query->orderBy('hul_long_u.field_hul_updated_long_value', 'asc');
-  $query->fields('hul', array('nid')); 
+  $query->fields('hul', array('nid'));
   $query->groupBy('hul.nid');
   $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
-  
-  array_unshift($res,"");
+
+  array_unshift($res, "");
   unset($res[0]);
   echo json_encode($res);
 }
@@ -1264,3 +1566,63 @@ function reverse_geocode_node_access($node, $op, $account) {
 
   return NODE_ACCESS_IGNORE;
 }
+
+
+
+function reverse_geocode_get_data_trip_wise($trip_id){
+global $user;
+$user_id = $user->uid;
+$distributor_id = change_feeds_import_get_distributor_id($user_id);
+
+$query = db_select('node', 'n');
+$query->condition('n.type', 'sales_register_data');
+$query->addTag('node_uid');
+$query->join('field_data_field_drs_sequence', 'drs_se', 'drs_se.entity_id = n.nid');
+$query->join('field_data_field_bill_sequence', 'drs_bse', 'drs_bse.entity_id = n.nid');
+
+$query->join('field_data_field_trip_id_reference', 'tr', 'tr.entity_id = n.nid');
+$query->Join('node', 'nt', 'nt.nid = tr.field_trip_id_reference_nid');
+$query->condition('nt.title', $trip_id);
+$query->condition('nt.uid', $distributor_id, '=');
+
+$query->join('field_data_field_sales_party_code', 'spc', 'spc.entity_id = n.nid');
+$query->condition('spc.bundle', 'sales_register_data');
+$query->join('node', 'nd', 'nd.title = spc.field_sales_party_code_value');
+$query->condition('nd.type', 'outlet_master', '=');
+$query->condition('nd.uid', $distributor_id, '=');
+
+$query->join('field_data_field_party_code', 'pc', 'pc.entity_id = nd.nid');
+$query->join('field_data_field_party_name', 'pn', 'pn.entity_id = nd.nid');
+
+
+
+
+$query->join('field_data_field_hul_code', 'hc', 'hc.entity_id = nd.nid');
+$query->join('node', 'hul', 'hc.field_hul_code_value = hul.title');
+$query->condition('hul.type', 'hul_code_master');
+$query->condition('hul.uid', $distributor_id, '=');
+
+$query->leftJoin('field_data_field_hul_updated_lat', 'hul_lat_u', 'hul_lat_u.entity_id = hul.nid');
+$query->leftJoin('field_data_field_hul_updated_long', 'hul_long_u', 'hul_long_u.entity_id = hul.nid');
+
+$query->leftJoin('field_data_field_hul_lat', 'hul_lat', 'hul_lat.entity_id = hul.nid');
+$query->leftJoin('field_data_field_hul_long', 'hul_long', 'hul_long.entity_id = hul.nid');
+
+$query->leftjoin('field_data_field_original_address', 'od', 'od.entity_id = hul.nid');
+$query->leftjoin('field_data_field_updated_address', 'new', 'new.entity_id = hul.nid');
+
+$query->fields('drs_se', array('field_drs_sequence_value'));
+$query->fields('drs_bse', array('field_bill_sequence_value'));
+$query->fields('pc', array('field_party_code_value'));
+$query->fields('pn', array('field_party_name_value'));
+$query->fields('hul_lat_u', array('field_hul_updated_lat_value'));
+$query->fields('hul_long_u', array('field_hul_updated_long_value'));
+$query->fields('hul_lat', array('field_hul_lat_value'));
+$query->fields('hul_long', array('field_hul_long_value'));
+$query->fields('od');
+$query->fields('new');
+$query->fields('hul', array('nid'));
+$res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+return $res;
+}
+
