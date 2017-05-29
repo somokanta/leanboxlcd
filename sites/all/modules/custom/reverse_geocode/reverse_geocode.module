@@ -556,7 +556,7 @@ function reverse_geocode_trip_wise_form($form, &$form_state) {
     dpm($options,"options");
   }
   $options = $form_state['reverse_geocode']['rows'];
-  
+   dpm($options,"options1");
   if ($options) {
 
     $multiple = FALSE;
@@ -744,7 +744,7 @@ function trip_filters_submit($form, &$form_state) {
       );
     }
 
-    dpm($options,"options");
+    dpm($options,"options2");
     $form_state['reverse_geocode']['rows'] = $options;
     $form_state['rebuild'] = TRUE;
   }
