@@ -1158,6 +1158,8 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     if (!empty($start_date) && !empty($end_date)) {
       $query->condition('i.field_sr_bill_date_value', array($start_date, $end_date), 'BETWEEN');
     }
+    $query->join('custom_billing_data', 'bd', 'bd.bill_number = n.title');
+    $query->groupBy('bd.bill_number');
     $query->join('field_data_field_bill_value', 'b', 'b.entity_id = n.nid');
     $query->leftjoin('field_data_field_sales_return_amt', 'r', 'r.entity_id = n.nid');
     $query->fields('b', array('field_bill_value_value'));
@@ -1969,6 +1971,12 @@ function leanbox_dashboard_otif_trends_chart_query_details($type, $start_date = 
   $query->join('field_data_field_sr_bill_date', 'b', 'b.entity_id = n.nid');
   $query->fields('b', array('field_sr_bill_date_value'));
   $query->join('field_data_field_billing_van', 'bva', 'bva.entity_id = n.nid');
+  
+  $query->join('field_data_field_promised_date', 'pd', 'pd.entity_id = n.nid');
+  $query->join('field_data_field_trip_id_reference', 't', 't.entity_id = n.nid');
+  $query->join('node', 'n1', 't.field_trip_id_reference_nid = n1.nid');
+  $query->join('field_data_field_dispatch_date', 'd1', 'd1.entity_id= n1.nid');
+  
   $query->condition('n.uid', $uid);
   $query->condition('n.type', 'sales_register_data');
   if (!empty($start_date) && !empty($end_date)) {
