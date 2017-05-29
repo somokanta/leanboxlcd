@@ -608,7 +608,9 @@ function reverse_geocode_trip_wise_form($form, &$form_state) {
   }
 
 
-
+  $result['map-container'] = array(
+    '#markup' => '<div id="map-container"></div>',
+  );
 
 
   return $form;
