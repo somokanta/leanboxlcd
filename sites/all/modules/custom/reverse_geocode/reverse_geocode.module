@@ -640,14 +640,17 @@ function trip_filters_submit($form, &$form_state) {
     $lat = $val['field_hul_lat_value'];
     $lng = $val['field_hul_long_value'];
     $hul_nid = $val['nid'];
-
+    dpm($hul_nid,"hul_nid");
     $street = $val['field_original_address_sub_premise'];
     $locality = $val['field_original_address_locality'];
     $sublocality = $val['field_original_address_dependent_locality'];
     $poi = $val['field_original_address_data'];
 
     if (!empty($lat) && !empty($lng)) {
+      dpm($lat,"lat");
+      dpm($lng,"lng");
       if (empty($street) && empty($locality) && empty($sublocality) && empty($poi)) {
+        dpm("1111111");
         $result = reverse_geocode_results($lat, $lng);
         $decoded_data = json_decode($result);
         $decoded_result = $decoded_data->results;
