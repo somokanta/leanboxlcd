@@ -636,13 +636,10 @@ function trip_filters_submit($form, &$form_state) {
   unset($form_state['input']['list_form_items']);
   $trip_id = $form_state['values']['trip_id'];
   $data = $form_state['values']['trip_data'];
-  
-  dpm($data,"data");
   foreach ($data as $key => $val) {
     $lat = $val['field_hul_lat_value'];
     $lng = $val['field_hul_long_value'];
     $hul_nid = $val['nid'];
-    dpm($hul_nid,"hul_nid");
 
     $street = $val['field_original_address_sub_premise'];
     $locality = $val['field_original_address_locality'];
