@@ -771,13 +771,8 @@ function trip_wise_form_submit($form, &$form_state) {
     foreach ($party_codes as $party_code) {
 
       if (isset($form_state['reverse_geocode']['rows'][$party_code])) {
-        //$form_state['reverse_geocode']['rows'][$party_code]['lat'] = $lat;
-        //$form_state['reverse_geocode']['rows'][$party_code]['lng'] = $lng;
-        $form_state['reverse_geocode']['rows'][$party_code]['status'] = 'Confirmed';
         $form_state['reverse_geocode']['rows'][$party_code]['#attributes'] = array('data-lat' => $lat, 'data-lng' => $lng);
-
         $rows = $form_state['reverse_geocode']['rows'][$party_code]['details']['data']['#rows'];
-
         $rows[0][2] = $attributes['locality'];
         $rows[1][2] = $attributes['subLocality'];
         $rows[2][2] = $attributes['street'];
@@ -1272,9 +1267,7 @@ function update_lat_lng_submit(&$form, &$form_state) {
 
     $i = 0;
     foreach ($form_state['reverse_geocode']['rows'] as $key => &$value) {
-      dpm($key,"key");
-      dpm($value,"$value");
-      //$value['sr_no'] = $value['#attributes']['data-sr'] = ++$i;
+      $value['sr_no'] = $value['#attributes']['data-sr'] = ++$i;
     }
   }
   $form_state['rebuild'] = TRUE;
