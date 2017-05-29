@@ -644,35 +644,35 @@ function trip_filters_submit($form, &$form_state) {
 
     if (!empty($lat) && !empty($lng)) {
       if (empty($street) && empty($locality) && empty($sublocality) && empty($poi)) {
-        $result = reverse_geocode_results($lat, $lng);
-        $decoded_data = json_decode($result);
-        $decoded_result = $decoded_data->results;
-        $decoded_city = $decoded_result[0]->city;
-        $decoded_district = $decoded_result[0]->district;
-        $decoded_state = $decoded_result[0]->state;
-        $decoded_pin = $decoded_result[0]->pincode;
-        $decoded_street = $decoded_result[0]->street;
-        $decoded_house_name = $decoded_result[0]->houseName;
-        $decoded_locality = $decoded_result[0]->locality;
-        $decoded_sublocality = $decoded_result[0]->subLocality;
-        $decoded_poi = $decoded_result[0]->poi;
-        $decoded_village = $decoded_result[0]->village;
-        $decoded_formatted_address = $decoded_result[0]->formatted_address;
-
-        $node = node_load($hul_nid);
-        $node->field_original_address['und'][0]['administrative_area'] = $decoded_state;
-        $node->field_original_address['und'][0]['sub_administrative_area'] = $decoded_city;
-        $node->field_original_address['und'][0]['locality'] = $decoded_locality;
-        $node->field_original_address['und'][0]['dependent_locality'] = $decoded_sublocality;
-        $node->field_original_address['und'][0]['postal_code'] = $decoded_pin;
-        $node->field_original_address['und'][0]['thoroughfare'] = $decoded_formatted_address;
-        $node->field_original_address['und'][0]['premise'] = $decoded_district;
-        $node->field_original_address['und'][0]['sub_premise'] = $decoded_street;
-        $node->field_original_address['und'][0]['organisation_name'] = $decoded_house_name;
-        $node->field_original_address['und'][0]['name_line'] = $decoded_village;
-        $node->field_original_address['und'][0]['country'] = "IN";
-        $node->field_original_address['und'][0]['data'] = $decoded_poi;
-        node_save($node);
+//        $result = reverse_geocode_results($lat, $lng);
+//        $decoded_data = json_decode($result);
+//        $decoded_result = $decoded_data->results;
+//        $decoded_city = $decoded_result[0]->city;
+//        $decoded_district = $decoded_result[0]->district;
+//        $decoded_state = $decoded_result[0]->state;
+//        $decoded_pin = $decoded_result[0]->pincode;
+//        $decoded_street = $decoded_result[0]->street;
+//        $decoded_house_name = $decoded_result[0]->houseName;
+//        $decoded_locality = $decoded_result[0]->locality;
+//        $decoded_sublocality = $decoded_result[0]->subLocality;
+//        $decoded_poi = $decoded_result[0]->poi;
+//        $decoded_village = $decoded_result[0]->village;
+//        $decoded_formatted_address = $decoded_result[0]->formatted_address;
+//
+//        $node = node_load($hul_nid);
+//        $node->field_original_address['und'][0]['administrative_area'] = $decoded_state;
+//        $node->field_original_address['und'][0]['sub_administrative_area'] = $decoded_city;
+//        $node->field_original_address['und'][0]['locality'] = $decoded_locality;
+//        $node->field_original_address['und'][0]['dependent_locality'] = $decoded_sublocality;
+//        $node->field_original_address['und'][0]['postal_code'] = $decoded_pin;
+//        $node->field_original_address['und'][0]['thoroughfare'] = $decoded_formatted_address;
+//        $node->field_original_address['und'][0]['premise'] = $decoded_district;
+//        $node->field_original_address['und'][0]['sub_premise'] = $decoded_street;
+//        $node->field_original_address['und'][0]['organisation_name'] = $decoded_house_name;
+//        $node->field_original_address['und'][0]['name_line'] = $decoded_village;
+//        $node->field_original_address['und'][0]['country'] = "IN";
+//        $node->field_original_address['und'][0]['data'] = $decoded_poi;
+//        node_save($node);
       }
     }
 
