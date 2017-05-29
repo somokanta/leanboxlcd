@@ -284,7 +284,7 @@ function show_locations() {
   }
 
   if ($url == "trip-wise"){
-      $form = drupal_render(drupal_get_form('reverse_geocode_trip_wise_form', $type));
+      $form = drupal_render(drupal_get_form('reverse_geocode_trip_wise_form'));
 
   }else{
       $form = drupal_render(drupal_get_form('hul_code_form', $type));
