@@ -698,7 +698,7 @@ function trip_filters_submit($form, &$form_state) {
       else {
         $seq = "";
       }
-      $sr_no = $val['field_bill_sequence_value'];
+      $sr_no = (int)($val['field_bill_sequence_value']);
 
 
       $old_city = $val['field_original_address_sub_administrative_area'];
