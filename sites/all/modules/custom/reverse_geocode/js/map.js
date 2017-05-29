@@ -6,11 +6,7 @@
         var default_lng = 78.9629;
         var centre = new L.LatLng(default_lat, default_lng);
         var url_result;
-
         map = new MapmyIndia.Map('map-container', {center: centre, zoomControl: true, hybrid: true, search:false});
-
-        map = new MapmyIndia.Map('map-container', {center: centre, zoomControl: true, hybrid: true, search:true});
-
         /*1.create a MapmyIndia Map by simply calling new MapmyIndia.Map() and passsing it at the minimum div object, all others are optional...
          2.all leaflet mapping functions can be called simply on the L object
          3.MapmyIndia may extend and in future modify the customised/forked Leaflet object to enhance mapping functionality for developers, which will be clearly documented in the MapmyIndia API documentation section.*/
