@@ -662,8 +662,8 @@ function trip_filters_submit($form, &$form_state) {
         $decoded_poi = $decoded_result[0]->poi;
         $decoded_village = $decoded_result[0]->village;
         $decoded_formatted_address = $decoded_result[0]->formatted_address;
-
-        $node = node_load($hul_nid);
+       dpm($hul_nid,"hul_nid");
+      //  $node = node_load($hul_nid);
         dpm($node,"node");
 //        $node->field_original_address['und'][0]['administrative_area'] = $decoded_state;
 //        $node->field_original_address['und'][0]['sub_administrative_area'] = $decoded_city;
