@@ -522,7 +522,6 @@ function reverse_geocode_trip_wise_form($form, &$form_state) {
     'sr_no' => array('data' => 'Sr No', 'class' => 'sr-cell'),
     'party_code' => array('data' => 'Party Code', 'class' => 'party-code-cell'),
     'party_name' => array('data' => 'Party Name', 'class' => 'party-name-cell'),
-    'status' => array('data' => 'Status', 'class' => 'status-cell'),
     'details' => array('data' => '', 'class' => 'details-cell'),
   );
 
@@ -687,13 +686,7 @@ function trip_filters_submit($form, &$form_state) {
 
       $beat_name = $val['field_beat_name_value'];
       $party_name = $val['field_party_name_value'];
-      $hul_status = $val['field_hul_status_value'];
-      if ($hul_status == "0") {
-        $hul_status = "Non-Confirmed";
-      }
-      elseif ($hul_status == "1") {
-        $hul_status = "Confirmed";
-      }
+      
 
       $old_city = $val['field_original_address_sub_administrative_area'];
       $old_district = $val['field_original_address_premise'];
@@ -739,7 +732,6 @@ function trip_filters_submit($form, &$form_state) {
         'party_code' => array('data' => $party_code, 'class' => 'party-code-cell'),
         'party_name' => array('data' => '<div class="party-name-data">' . $party_name . '</div>', 'class' => 'party-name-cell'),
         '#attributes' => array('data-lat' => $lat, 'data-lng' => $long, 'data-sr' => $key + 1),
-        'status' => array('data' => $hul_status, 'class' => 'status-cell'),
         'details' => array('data' => array('#theme' => 'table', '#header' => $header, '#rows' => $rows, '#sticky' => FALSE, '#prefix' => '<a class="cell-details">Details</a>', '#attributes' => array('class' => array('cell-hide'))), 'class' => 'details-cell'),
       );
     }
