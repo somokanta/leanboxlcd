@@ -757,7 +757,6 @@ function trip_wise_form_submit($form, &$form_state) {
   $party_code = $form_state['values']['list_form_items'];
   $lat = $form_state['values']['lat'];
   $lng = $form_state['values']['lng'];
-  $type = $form_state['type'];
   //Get Related party codes to this selected party code
   $result = reverse_geocode_get_hul_code_from_party_code($party_code);
 
@@ -1273,7 +1272,9 @@ function update_lat_lng_submit(&$form, &$form_state) {
 
     $i = 0;
     foreach ($form_state['reverse_geocode']['rows'] as $key => &$value) {
-      $value['sr_no'] = $value['#attributes']['data-sr'] = ++$i;
+      dpm($key,"key");
+      dpm($value,"$value");
+      //$value['sr_no'] = $value['#attributes']['data-sr'] = ++$i;
     }
   }
   $form_state['rebuild'] = TRUE;
