@@ -535,6 +535,7 @@ function reverse_geocode_trip_wise_form($form, &$form_state) {
     'sr_no' => array('data' => 'Sr No', 'class' => 'sr-cell'),
     'party_code' => array('data' => 'Party Code', 'class' => 'party-code-cell'),
     'party_name' => array('data' => 'Party Name', 'class' => 'party-name-cell'),
+    'seq' => array('data' => 'Seq', 'class' => 'seq-cell'),
     'details' => array('data' => '', 'class' => 'details-cell'),
   );
 
@@ -641,8 +642,7 @@ function trip_filters_submit($form, &$form_state) {
     $lat = $val['field_hul_lat_value'];
     $lng = $val['field_hul_long_value'];
     $hul_nid = $val['hul_nid'];
-
-
+    
     $street = $val['field_original_address_sub_premise'];
     $locality = $val['field_original_address_locality'];
     $sublocality = $val['field_original_address_dependent_locality'];
@@ -691,9 +691,11 @@ function trip_filters_submit($form, &$form_state) {
       $old_lat = $val['field_hul_lat_value'];
       $old_long = $val['field_hul_long_value'];
 
-      $beat_name = $val['field_beat_name_value'];
       $party_name = $val['field_party_name_value'];
 
+      $sequence= (int)($val['field_drs_sequence_value']);
+      $sr_no = $val['field_bill_sequence_value'];
+    
 
       $old_city = $val['field_original_address_sub_administrative_area'];
       $old_district = $val['field_original_address_premise'];
@@ -735,10 +737,11 @@ function trip_filters_submit($form, &$form_state) {
       //$address = theme('table', array('header' => $header, 'rows' => $rows, 'sticky' => FALSE));
 
       $options[$party_code] = array(
-        'sr_no' => array('data' => $key + 1, 'class' => 'sr-cell'),
+        'sr_no' => array('data' => $sr_no, 'class' => 'sr-cell'),
         'party_code' => array('data' => $party_code, 'class' => 'party-code-cell'),
         'party_name' => array('data' => '<div class="party-name-data">' . $party_name . '</div>', 'class' => 'party-name-cell'),
-        '#attributes' => array('data-lat' => $lat, 'data-lng' => $long, 'data-sr' => $key + 1),
+        'seq' => array('data' => $sequence, 'class' => 'seq-cell'),
+        '#attributes' => array('data-lat' => $lat, 'data-lng' => $long, 'data-sr' => $sr_no),
         'details' => array('data' => array('#theme' => 'table', '#header' => $header, '#rows' => $rows, '#sticky' => FALSE, '#prefix' => '<a class="cell-details">Details</a>', '#attributes' => array('class' => array('cell-hide'))), 'class' => 'details-cell'),
       );
     }
@@ -753,7 +756,6 @@ function trip_wise_form_submit($form, &$form_state) {
   $lat = $form_state['values']['lat'];
   $lng = $form_state['values']['lng'];
   $type = $form_state['type'];
-  if ($type == "single") {
     //Get Related party codes to this selected party code
     $result = reverse_geocode_get_hul_code_from_party_code($party_code);
 
@@ -789,24 +791,8 @@ function trip_wise_form_submit($form, &$form_state) {
     else {
       drupal_set_message('Error occured while updating', 'error');
     }
-  }
-  else {
 
-    foreach ($party_code as $code) {
-      $result = reverse_geocode_get_hul_code_from_party_code($code);
-      $hul_code = key($result);
-      reverse_geocode_update_hul_status($hul_code);
-
-      if (isset($form_state['reverse_geocode']['rows'][$code])) {
-        unset($form_state['reverse_geocode']['rows'][$code]);
-      }
-    }
-
-    $i = 0;
-    foreach ($form_state['reverse_geocode']['rows'] as $key => &$value) {
-      $value['sr_no'] = $value['#attributes']['data-sr'] = ++$i;
-    }
-  }
+ 
   $form_state['rebuild'] = TRUE;
 }
 
