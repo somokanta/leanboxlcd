@@ -516,6 +516,15 @@ function hul_code_form($form, &$form_state, $type) {
 }
 
 function reverse_geocode_trip_wise_form($form, &$form_state) {
+  $license_key = variable_get('mapmyindia_map_key', '98thppnrdg3vpp7xupfg9eotrl2rliqu');
+  $google_key = variable_get('google_places_key', 'AIzaSyCtEWjYMDT0sAoyyfdMEDI5QyoGY7aqHVw');
+  drupal_add_js("https://apis.mapmyindia.com/advancedmaps/v1/$license_key/map_load?v=0.1", 'external');
+  drupal_add_js("https://maps.googleapis.com/maps/api/js?key=$google_key&libraries=places", 'external');
+  drupal_add_js(drupal_get_path('module', 'reverse_geocode') . '/js/selectable-row.js', 'file');
+  drupal_add_js(drupal_get_path('module', 'reverse_geocode') . '/js/leaflet.smoothmarkerbouncing.js', 'file');
+
+  drupal_add_js(drupal_get_path('module', 'reverse_geocode') . '/js/tooltipster.bundle.min.js', 'file');
+  drupal_add_css(drupal_get_path('module', 'reverse_geocode') . '/css/tooltipster.bundle.min.css', 'file');
 
   drupal_add_js(drupal_get_path('module', 'reverse_geocode') . '/js/map.js', 'file');
   $header_array = array(
@@ -552,10 +561,8 @@ function reverse_geocode_trip_wise_form($form, &$form_state) {
 
   if (!isset($form_state['reverse_geocode']['rows'])) {
     $form_state['reverse_geocode']['rows'] = array();
-    dpm($options,"options");
   }
   $options = $form_state['reverse_geocode']['rows'];
-   dpm($options,"options1");
   if ($options) {
 
     $multiple = FALSE;
@@ -613,7 +620,6 @@ function trip_filter_validate($form, &$form_state) {
     form_set_error('trip_id', 'Trip Id is required');
   }
   $data = reverse_geocode_get_data_trip_wise($trip_id);
-  dpm($data,"data");
   if (empty($data)) {
     $message = "No Results Found";
     unset($form_state['complete form']['list_form_items']);
@@ -629,7 +635,6 @@ function trip_filters_submit($form, &$form_state) {
   unset($form_state['input']['list_form_items']);
   $trip_id = $form_state['values']['trip_id'];
   $data = $form_state['values']['trip_data'];
-  dpm($data,"data_submit");
   foreach ($data as $key => $val) {
     $lat = $val['field_hul_lat_value'];
     $lng = $val['field_hul_long_value'];
@@ -643,8 +648,8 @@ function trip_filters_submit($form, &$form_state) {
 
     if (!empty($lat) && !empty($lng)) {
       if (empty($street) && empty($locality) && empty($sublocality) && empty($poi)) {
-//        $result = reverse_geocode_results($lat, $lng);
-//        $decoded_data = json_decode($result);
+        $result = reverse_geocode_results($lat, $lng);
+        $decoded_data = json_decode($result);
 //        $decoded_result = $decoded_data->results;
 //        $decoded_city = $decoded_result[0]->city;
 //        $decoded_district = $decoded_result[0]->district;
@@ -686,7 +691,7 @@ function trip_filters_submit($form, &$form_state) {
 
       $beat_name = $val['field_beat_name_value'];
       $party_name = $val['field_party_name_value'];
-      
+
 
       $old_city = $val['field_original_address_sub_administrative_area'];
       $old_district = $val['field_original_address_premise'];
@@ -736,7 +741,6 @@ function trip_filters_submit($form, &$form_state) {
       );
     }
 
-    dpm($options,"options2");
     $form_state['reverse_geocode']['rows'] = $options;
     $form_state['rebuild'] = TRUE;
   }
@@ -1564,62 +1568,59 @@ function reverse_geocode_node_access($node, $op, $account) {
   return NODE_ACCESS_IGNORE;
 }
 
+function reverse_geocode_get_data_trip_wise($trip_id) {
+  global $user;
+  $user_id = $user->uid;
+  $distributor_id = change_feeds_import_get_distributor_id($user_id);
 
+  $query = db_select('node', 'n');
+  $query->condition('n.type', 'sales_register_data');
+  $query->addTag('node_uid');
+  $query->join('field_data_field_drs_sequence', 'drs_se', 'drs_se.entity_id = n.nid');
+  $query->join('field_data_field_bill_sequence', 'drs_bse', 'drs_bse.entity_id = n.nid');
 
-function reverse_geocode_get_data_trip_wise($trip_id){
-global $user;
-$user_id = $user->uid;
-$distributor_id = change_feeds_import_get_distributor_id($user_id);
+  $query->join('field_data_field_trip_id_reference', 'tr', 'tr.entity_id = n.nid');
+  $query->Join('node', 'nt', 'nt.nid = tr.field_trip_id_reference_nid');
+  $query->condition('nt.title', $trip_id);
+  $query->condition('nt.uid', $distributor_id, '=');
 
-$query = db_select('node', 'n');
-$query->condition('n.type', 'sales_register_data');
-$query->addTag('node_uid');
-$query->join('field_data_field_drs_sequence', 'drs_se', 'drs_se.entity_id = n.nid');
-$query->join('field_data_field_bill_sequence', 'drs_bse', 'drs_bse.entity_id = n.nid');
+  $query->join('field_data_field_sales_party_code', 'spc', 'spc.entity_id = n.nid');
+  $query->condition('spc.bundle', 'sales_register_data');
+  $query->join('node', 'nd', 'nd.title = spc.field_sales_party_code_value');
+  $query->condition('nd.type', 'outlet_master', '=');
+  $query->condition('nd.uid', $distributor_id, '=');
 
-$query->join('field_data_field_trip_id_reference', 'tr', 'tr.entity_id = n.nid');
-$query->Join('node', 'nt', 'nt.nid = tr.field_trip_id_reference_nid');
-$query->condition('nt.title', $trip_id);
-$query->condition('nt.uid', $distributor_id, '=');
-
-$query->join('field_data_field_sales_party_code', 'spc', 'spc.entity_id = n.nid');
-$query->condition('spc.bundle', 'sales_register_data');
-$query->join('node', 'nd', 'nd.title = spc.field_sales_party_code_value');
-$query->condition('nd.type', 'outlet_master', '=');
-$query->condition('nd.uid', $distributor_id, '=');
-
-$query->join('field_data_field_party_code', 'pc', 'pc.entity_id = nd.nid');
-$query->join('field_data_field_party_name', 'pn', 'pn.entity_id = nd.nid');
+  $query->join('field_data_field_party_code', 'pc', 'pc.entity_id = nd.nid');
+  $query->join('field_data_field_party_name', 'pn', 'pn.entity_id = nd.nid');
 
 
 
 
-$query->join('field_data_field_hul_code', 'hc', 'hc.entity_id = nd.nid');
-$query->join('node', 'hul', 'hc.field_hul_code_value = hul.title');
-$query->condition('hul.type', 'hul_code_master');
-$query->condition('hul.uid', $distributor_id, '=');
+  $query->join('field_data_field_hul_code', 'hc', 'hc.entity_id = nd.nid');
+  $query->join('node', 'hul', 'hc.field_hul_code_value = hul.title');
+  $query->condition('hul.type', 'hul_code_master');
+  $query->condition('hul.uid', $distributor_id, '=');
 
-$query->leftJoin('field_data_field_hul_updated_lat', 'hul_lat_u', 'hul_lat_u.entity_id = hul.nid');
-$query->leftJoin('field_data_field_hul_updated_long', 'hul_long_u', 'hul_long_u.entity_id = hul.nid');
+  $query->leftJoin('field_data_field_hul_updated_lat', 'hul_lat_u', 'hul_lat_u.entity_id = hul.nid');
+  $query->leftJoin('field_data_field_hul_updated_long', 'hul_long_u', 'hul_long_u.entity_id = hul.nid');
 
-$query->leftJoin('field_data_field_hul_lat', 'hul_lat', 'hul_lat.entity_id = hul.nid');
-$query->leftJoin('field_data_field_hul_long', 'hul_long', 'hul_long.entity_id = hul.nid');
+  $query->leftJoin('field_data_field_hul_lat', 'hul_lat', 'hul_lat.entity_id = hul.nid');
+  $query->leftJoin('field_data_field_hul_long', 'hul_long', 'hul_long.entity_id = hul.nid');
 
-$query->leftjoin('field_data_field_original_address', 'od', 'od.entity_id = hul.nid');
-$query->leftjoin('field_data_field_updated_address', 'new', 'new.entity_id = hul.nid');
+  $query->leftjoin('field_data_field_original_address', 'od', 'od.entity_id = hul.nid');
+  $query->leftjoin('field_data_field_updated_address', 'new', 'new.entity_id = hul.nid');
 
-$query->fields('drs_se', array('field_drs_sequence_value'));
-$query->fields('drs_bse', array('field_bill_sequence_value'));
-$query->fields('pc', array('field_party_code_value'));
-$query->fields('pn', array('field_party_name_value'));
-$query->fields('hul_lat_u', array('field_hul_updated_lat_value'));
-$query->fields('hul_long_u', array('field_hul_updated_long_value'));
-$query->fields('hul_lat', array('field_hul_lat_value'));
-$query->fields('hul_long', array('field_hul_long_value'));
-$query->fields('od');
-$query->fields('new');
-$query->fields('hul', array('nid'));
-$res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
-return $res;
+  $query->fields('drs_se', array('field_drs_sequence_value'));
+  $query->fields('drs_bse', array('field_bill_sequence_value'));
+  $query->fields('pc', array('field_party_code_value'));
+  $query->fields('pn', array('field_party_name_value'));
+  $query->fields('hul_lat_u', array('field_hul_updated_lat_value'));
+  $query->fields('hul_long_u', array('field_hul_updated_long_value'));
+  $query->fields('hul_lat', array('field_hul_lat_value'));
+  $query->fields('hul_long', array('field_hul_long_value'));
+  $query->fields('od');
+  $query->fields('new');
+  $query->fields('hul', array('nid'));
+  $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+  return $res;
 }
-
