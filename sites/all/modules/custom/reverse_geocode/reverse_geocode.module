@@ -629,7 +629,7 @@ function trip_filter_validate($form, &$form_state) {
 function trip_filters_submit($form, &$form_state) {
   unset($form_state['input']['list_form_items']);
   $trip_id = $form_state['values']['trip_id'];
-  $data = $form_state['trip_data'];
+  $data = $form_state['values']['trip_data'];
   dpm($data,"data_submit");
   foreach ($data as $key => $val) {
     $lat = $val['field_hul_lat_value'];
