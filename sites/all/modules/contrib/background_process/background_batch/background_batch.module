@@ -172,7 +172,6 @@ function _background_batch_process($id = NULL) {
     return drupal_access_denied();
   }
 
-
   // Register database update for the end of processing.
   drupal_register_shutdown_function('_batch_shutdown');
 
@@ -216,6 +215,9 @@ function _background_batch_process($id = NULL) {
   if ($percentage < 100) {
     background_process_keepalive($id);
   }
+  elseif (!empty($batch['background_process'])) {
+    _batch_finished();
+  }
 }
 
 /**
@@ -250,7 +252,11 @@ function background_batch_process_batch($redirect = NULL, $url = 'batch', $redir
       'theme' => $GLOBALS['theme_key'],
       'redirect_callback' => $redirect_callback,
     );
+
     $batch += $process_info;
+
+    // Add information that this is a background process batch.
+    $batch['background_process'] = TRUE;
 
     // The batch is now completely built. Allow other modules to make changes
     // to the batch so that it is easier to reuse batch processes in other
@@ -374,4 +380,3 @@ class BackgroundBatchContext extends ArrayObject {
     return parent::offsetSet($name, $value);
   }
 }
-
