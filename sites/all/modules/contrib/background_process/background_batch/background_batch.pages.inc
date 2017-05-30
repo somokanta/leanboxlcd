@@ -92,6 +92,12 @@ function background_batch_page() {
   $batch =& batch_get();
   $batch = unserialize($data);
 
+  // Use standard batch callback if this is not a background batch.
+  if (empty($batch['background_process'])) {
+    module_load_include('inc', 'system', 'system.admin');
+    return system_batch_page();
+  }
+
   // Check if the current user owns (has access to) this batch.
   global $user;
   if ($batch['uid'] != $user->uid) {
