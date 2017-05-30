@@ -2001,10 +2001,10 @@ function leanbox_dashboard_otif_trends_chart_query_details($type, $start_date = 
       $row[] = $channel;
       foreach ($res as $key => $val) {
         $bill_date_str = $val['field_sr_bill_date_value'];
-
-        $total_dis_bill_val = _get_otif_details_using_bill_date($bill_date_str, $channel, $uid);
-        $total_otif_val[$bill_date_str] += $total_dis_bill_val;
-        //$bill_date = date('Y-m-d', $bill_date_str);
+        $array = _get_otif_details_using_bill_date($bill_date_str, $channel, $uid);
+        $total_dis_bill_val =  ($array['total_dis_bill_val'] /  $array['channel_bill_val']) * 100; 
+        $total_otif_val[$bill_date_str]['ota_val'] += $array['total_dis_bill_val'];
+        $total_otif_val[$bill_date_str]['bill_val'] += $array['channel_bill_val'];
         $otif_val = round($total_dis_bill_val);
         $row[] = $otif_val;
       }
@@ -2014,7 +2014,7 @@ function leanbox_dashboard_otif_trends_chart_query_details($type, $start_date = 
     $row = array();
     $row[] = 'Total';
     foreach ($total_otif_val as $key => $val) {
-      $row[] = round($val);
+      $row[] = round(($val['ota_val'] / $val['bill_val']) * 100);
     }
     $rows[] = $row;
 
@@ -2059,7 +2059,8 @@ function leanbox_dashboard_get_default_pdd_date_for_chart($pdd = "1 days") {
  * @return type
  */
 function _get_otif_details_using_bill_date($bill_date, $channel, $uid) {
-  $total_dis_bill_val = 0;
+  $total_dis_bill_val = $channel_bill_val = 0;
+  
   if (!empty($bill_date)) {
     $query = db_select('node', 'n');
     $query->join('field_data_field_bill_value', 'v', 'v.entity_id = n.nid');
@@ -2100,7 +2101,9 @@ function _get_otif_details_using_bill_date($bill_date, $channel, $uid) {
       }
     }
   }
-  return ($total_dis_bill_val / $channel_bill_val) * 100;
+  $array['total_dis_bill_val'] = $total_dis_bill_val;
+  $array['channel_bill_val'] = $channel_bill_val;
+  return $array;
 }
 
 function _get_unloading_daywise_trends_data($bill_date, $dis_time) {
