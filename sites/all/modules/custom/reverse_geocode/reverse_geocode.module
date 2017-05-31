@@ -273,7 +273,7 @@ function show_locations() {
     $type = "multi";
   }
   else if ($url == "trip-wise") {
-    drupal_add_js(drupal_get_path('module', 'reverse_geocode') . '/js/map.js', 'file');
+    drupal_add_js(drupal_get_path('module', 'reverse_geocode') . '/js/multi-map.js', 'file');
     //drupal_add_css(drupal_get_path('module', 'reverse_geocode') . '/css/map.css');
   }
   else {
@@ -568,9 +568,9 @@ function reverse_geocode_trip_wise_form($form, &$form_state) {
   $options = $form_state['reverse_geocode']['rows'];
   if ($options) {
 
-    $multiple = FALSE;
-    $class = array('selectable-row', 'table-radio');
-
+    $multiple = TRUE;
+    $class = array('selectable-row', 'table-checkbox');
+    
     $form['list_form_items'] = array(
       '#type' => 'tableselect',
       '#header' => $header_array,
@@ -678,7 +678,7 @@ function trip_filters_submit($form, &$form_state) {
       }
     }
 
-    $header = array('Attributes', 'Original', 'New');
+ //   $header = array('Attributes', 'Original', 'New');
     foreach ($data as $key => $val) {
       $party_code = $val['field_party_code_value'];
       $lat = $val['field_hul_updated_lat_value'];
@@ -724,7 +724,7 @@ function trip_filters_submit($form, &$form_state) {
       $new_formatted_address = $val['field_updated_address_thoroughfare'];
 
 
-      $rows = array();
+/*      $rows = array();
 
       $rows[] = array('Locality', $old_locality, $new_locality);
       $rows[] = array('Sub Locality', $old_sublocality, $new_sublocality);
@@ -735,16 +735,26 @@ function trip_filters_submit($form, &$form_state) {
       $old_lat_long = !empty($old_lat) ? $old_lat . ',' . $old_long : '';
       $lat_long = !empty($lat) ? $lat . ' / ' . $long : '';
       $rows[] = array('Lat/Long', $old_lat_long, $lat_long);
-
+*/
       //$address = theme('table', array('header' => $header, 'rows' => $rows, 'sticky' => FALSE));
 
+      $marker_tooltip = '<div class="cell-address cell-hide"><table>'
+          . '<tr><td style="white-space:nowrap;color:#222">Party code</td><td>' . $party_code . '</td></tr>'
+          . '<tr><td style="white-space:nowrap;color:#222">Party Name</td><td>' . $party_name . '</td></tr>'
+          . '<tr><td style="white-space:nowrap;color:#222">Locality</td><td>' . $old_locality . '</td></tr>'
+          . '<tr><td style="white-space:nowrap;color:#222">Sub Locality</td><td>' . $old_sublocality . '</td></tr>'
+          . '<tr><td style="white-space:nowrap;color:#222">Street</td><td>' . $old_street . '</td></tr>'
+          . '<tr><td style="white-space:nowrap;color:#222">POI</td><td>' . $old_poi . '</td></tr>'
+          . '<tr><td style="white-space:nowrap;color:#222">Lat/Long</td><td>' . $old_lat_long . '</td></tr>'
+          . '</table></div>';
+      
       $options[$party_code] = array(
         'sr_no' => array('data' => $sr_no, 'class' => 'sr-cell'),
         'party_code' => array('data' => $party_code, 'class' => 'party-code-cell'),
         'party_name' => array('data' => '<div class="party-name-data">' . $party_name . '</div>', 'class' => 'party-name-cell'),
         'seq' => array('data' => $seq, 'class' => 'seq-cell'),
         '#attributes' => array('data-lat' => $lat, 'data-lng' => $long, 'data-sr' => $sr_no),
-        'details' => array('data' => array('#theme' => 'table', '#header' => $header, '#rows' => $rows, '#sticky' => FALSE, '#prefix' => '<a class="cell-details">Details</a>', '#attributes' => array('class' => array('cell-hide'))), 'class' => 'details-cell'),
+        'details' => array('data' => array('#markup' => '<a class="cell-details" style="display:none;">On Map</a>' . $marker_tooltip)),
       );
     }
 
