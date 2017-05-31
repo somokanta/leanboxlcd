@@ -472,7 +472,7 @@ function hul_code_form($form, &$form_state, $type) {
     '#submit' => array('party_filters_submit'),
     '#id' => 'filter',
   //  '#limit_validation_errors' => array(array('hul_status'), array('beat_name'), array('pl_group'), array('sales_day')),
-    '#limit_validation_errors' => array(),
+ //   '#limit_validation_errors' => array(),
   );
 
   if (!isset($form_state['reverse_geocode']['rows'])) {
