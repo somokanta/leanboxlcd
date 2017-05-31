@@ -37,7 +37,7 @@ function reverse_geocode_menu() {
 
 
   $items['address/confirm/trip-wise'] = array(
-    'title' => 'Tripwise Address Confirmation',
+    'title' => 'View Trip On Map',
     'type' => MENU_NORMAL_ITEM,
     'page callback' => 'show_locations',
     'access arguments' => array('address confirmation'),
@@ -591,23 +591,23 @@ function reverse_geocode_trip_wise_form($form, &$form_state) {
     );
 
 
-    $form['submit'] = array(
-      '#type' => 'submit',
-      '#value' => t('Confirm Address'),
-      '#submit' => array('trip_wise_form_submit'),
-      '#ajax' => array(
-        'wrapper' => 'address-selection-map',
-        'callback' => 'map_ajax_callback',
-        'method' => 'replace',
-        'effect' => 'fade',
-      ),
-      '#states' => array(
-        'visible' => array(
-          ':input[name^="list_form_items"]' => array('checked' => TRUE),
-        ),
-      ),
-      '#id' => 'confirm-add',
-    );
+//    $form['submit'] = array(
+//      '#type' => 'submit',
+//      '#value' => t('Confirm Address'),
+//      '#submit' => array('trip_wise_form_submit'),
+//      '#ajax' => array(
+//        'wrapper' => 'address-selection-map',
+//        'callback' => 'map_ajax_callback',
+//        'method' => 'replace',
+//        'effect' => 'fade',
+//      ),
+//      '#states' => array(
+//        'visible' => array(
+//          ':input[name^="list_form_items"]' => array('checked' => TRUE),
+//        ),
+//      ),
+//      '#id' => 'confirm-add',
+//    );
   }
 
 
@@ -753,6 +753,7 @@ function trip_filters_submit($form, &$form_state) {
   }
 }
 
+/*
 function trip_wise_form_submit($form, &$form_state) {
   $party_code = $form_state['values']['list_form_items'];
   $lat = $form_state['values']['lat'];
@@ -791,7 +792,7 @@ function trip_wise_form_submit($form, &$form_state) {
 
   $form_state['rebuild'] = TRUE;
 }
-
+*/
 function map_ajax_callback1($form, &$form_state) {
 
   $commands[] = ajax_command_replace('#address-selection-map', render($form));
