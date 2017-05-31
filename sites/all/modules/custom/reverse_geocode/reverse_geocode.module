@@ -839,7 +839,7 @@ function map_ajax_callback($form, &$form_state) {
 
 function party_filter_validate(&$form, &$form_state) {
   $van = $form_state['values']['beat_name'];
-
+ dpm("111");
   if (empty($van)) {
     form_set_error('beat_name', 'Beat Name is required');
   }
