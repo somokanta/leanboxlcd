@@ -838,9 +838,7 @@ function map_ajax_callback($form, &$form_state) {
 
 function party_filter_validate(&$form, &$form_state) {
   $van = $form_state['values']['beat_name'];
- dpm("111");
   if (empty($van)) {
-    dpm("222");
     form_set_error('beat_name', 'Beat Name is required');
   }
   $sales_day = $form_state['values']['sales_day'];
@@ -851,7 +849,6 @@ function party_filter_validate(&$form, &$form_state) {
   $type = $form_state['type'];
   $data = reverse_geocode_get_data_hul_code_wise($sales_day, $pl_group, $sales_person, $hul_status, $beat_name, $type);
   if (empty($data)) {
-     dpm("333");
     $message = "No Results Found";
     unset($form_state['complete form']['list_form_items']);
     unset($form_state['complete form']['submit']);
