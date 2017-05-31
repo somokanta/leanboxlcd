@@ -732,12 +732,12 @@ function trip_filters_submit($form, &$form_state) {
       $rows[] = array('POI', $old_poi, $new_poi);
 
 
-      $old_lat_long = !empty($old_lat) ? $old_lat . ',' . $old_long : '';
       $lat_long = !empty($lat) ? $lat . ' / ' . $long : '';
       $rows[] = array('Lat/Long', $old_lat_long, $lat_long);
 */
       //$address = theme('table', array('header' => $header, 'rows' => $rows, 'sticky' => FALSE));
 
+      $old_lat_long = !empty($old_lat) ? $old_lat . ',' . $old_long : '';
       $marker_tooltip = '<div class="cell-address cell-hide"><table>'
           . '<tr><td style="white-space:nowrap;color:#222">Party code</td><td>' . $party_code . '</td></tr>'
           . '<tr><td style="white-space:nowrap;color:#222">Party Name</td><td>' . $party_name . '</td></tr>'
