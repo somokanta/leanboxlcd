@@ -749,11 +749,11 @@ function trip_filters_submit($form, &$form_state) {
           . '</table></div>';
       
       $options[$party_code] = array(
-        'sr_no' => array('data' => $sr_no, 'class' => 'sr-cell'),
+        'sr_no' => array('data' => $key + 1, 'class' => 'sr-cell'),
         'party_code' => array('data' => $party_code, 'class' => 'party-code-cell'),
         'party_name' => array('data' => '<div class="party-name-data">' . $party_name . '</div>', 'class' => 'party-name-cell'),
         'seq' => array('data' => $seq, 'class' => 'seq-cell'),
-        '#attributes' => array('data-lat' => $lat, 'data-lng' => $long, 'data-sr' => $sr_no),
+        '#attributes' => array('data-lat' => $lat, 'data-lng' => $long, 'data-sr' => $key + 1),
         'details' => array('data' => array('#markup' => '<a class="cell-details" style="display:none;">On Map</a>' . $marker_tooltip)),
       );
     }
