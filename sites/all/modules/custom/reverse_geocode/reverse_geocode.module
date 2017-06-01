@@ -1571,7 +1571,7 @@ function reverse_geocode_get_data_trip_wise($trip_id) {
   $query->condition('n.type', 'sales_register_data');
   $query->addTag('node_uid');
   $query->join('field_data_field_drs_sequence', 'drs_se', 'drs_se.entity_id = n.nid');
-  $query->join('field_data_field_bill_sequence', 'drs_bse', 'drs_bse.entity_id = n.nid');
+  $query->leftjoin('field_data_field_bill_sequence', 'drs_bse', 'drs_bse.entity_id = n.nid');
 
   $query->join('field_data_field_trip_id_reference', 'tr', 'tr.entity_id = n.nid');
   $query->Join('node', 'nt', 'nt.nid = tr.field_trip_id_reference_nid');
