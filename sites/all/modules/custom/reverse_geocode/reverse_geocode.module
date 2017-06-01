@@ -1601,7 +1601,7 @@ function reverse_geocode_get_data_trip_wise($trip_id) {
   $query->leftjoin('field_data_field_original_address', 'od', 'od.entity_id = hul.nid');
   $query->leftjoin('field_data_field_updated_address', 'new', 'new.entity_id = hul.nid');
 
-  $query->orderBy('drs_bse.field_bill_sequence_value', 'asc');
+  $query->orderBy('drs_se.field_drs_sequence_value', 'asc');
 
   $query->fields('drs_se', array('field_drs_sequence_value'));
   $query->fields('drs_bse', array('field_bill_sequence_value'));
