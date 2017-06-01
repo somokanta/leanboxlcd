@@ -1532,3 +1532,58 @@ function graphhopper_solution_api($job_id) {
   return $result;
 }
 
+function reverse_geocode_get_data_trip_wise($trip_id) {
+  global $user;
+  $user_id = $user->uid;
+  $distributor_id = change_feeds_import_get_distributor_id($user_id);
+
+  $query = db_select('node', 'n');
+  $query->condition('n.type', 'sales_register_data');
+  $query->addTag('node_uid');
+  $query->leftjoin('field_data_field_drs_sequence', 'drs_se', 'drs_se.entity_id = n.nid');
+  $query->leftjoin('field_data_field_bill_sequence', 'drs_bse', 'drs_bse.entity_id = n.nid');
+
+  $query->join('field_data_field_trip_id_reference', 'tr', 'tr.entity_id = n.nid');
+  $query->Join('node', 'nt', 'nt.nid = tr.field_trip_id_reference_nid');
+  $query->condition('nt.title', $trip_id);
+  $query->condition('nt.uid', $distributor_id, '=');
+
+  $query->join('field_data_field_sales_party_code', 'spc', 'spc.entity_id = n.nid');
+  $query->condition('spc.bundle', 'sales_register_data');
+  $query->join('node', 'nd', 'nd.title = spc.field_sales_party_code_value');
+  $query->condition('nd.type', 'outlet_master', '=');
+  $query->condition('nd.uid', $distributor_id, '=');
+
+  $query->join('field_data_field_party_code', 'pc', 'pc.entity_id = nd.nid');
+  $query->join('field_data_field_party_name', 'pn', 'pn.entity_id = nd.nid');
+
+  $query->join('field_data_field_hul_code', 'hc', 'hc.entity_id = nd.nid');
+  $query->join('node', 'hul', 'hc.field_hul_code_value = hul.title');
+  $query->condition('hul.type', 'hul_code_master');
+  $query->condition('hul.uid', $distributor_id, '=');
+
+  $query->leftJoin('field_data_field_hul_updated_lat', 'hul_lat_u', 'hul_lat_u.entity_id = hul.nid');
+  $query->leftJoin('field_data_field_hul_updated_long', 'hul_long_u', 'hul_long_u.entity_id = hul.nid');
+
+  $query->leftJoin('field_data_field_hul_lat', 'hul_lat', 'hul_lat.entity_id = hul.nid');
+  $query->leftJoin('field_data_field_hul_long', 'hul_long', 'hul_long.entity_id = hul.nid');
+
+  $query->leftjoin('field_data_field_original_address', 'od', 'od.entity_id = hul.nid');
+  $query->leftjoin('field_data_field_updated_address', 'new', 'new.entity_id = hul.nid');
+
+  $query->orderBy('drs_se.field_drs_sequence_value', 'asc');
+
+  $query->fields('drs_se', array('field_drs_sequence_value'));
+  $query->fields('drs_bse', array('field_bill_sequence_value'));
+  $query->fields('pc', array('field_party_code_value'));
+  $query->fields('pn', array('field_party_name_value'));
+  $query->fields('hul_lat_u', array('field_hul_updated_lat_value'));
+  $query->fields('hul_long_u', array('field_hul_updated_long_value'));
+  $query->fields('hul_lat', array('field_hul_lat_value'));
+  $query->fields('hul_long', array('field_hul_long_value'));
+  $query->fields('od');
+  $query->fields('new');
+  $query->fields('hul', array('nid'));
+  $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+  return $res;
+}
