@@ -18,6 +18,13 @@ function change_feeds_import_permission() {
  *
  */
 function change_feeds_import_menu() {
+  $items = array();
+  $items['impact-delivery-job'] = array(
+    'title' => 'DRS Report',
+    'page callback' => 'impact_delivery_job',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
 
   $items['drs-report'] = array(
     'title' => 'DRS Report',
@@ -1894,4 +1901,52 @@ function get_van_pl($van, $day, $name) {
 
   $pl_van = $query->execute()->fetchAllKeyed(0, 0);
   return $pl_van;
+}
+
+
+
+/**
+ * 
+ * @param type $batch
+ * @param type $batch_redirect
+ */
+function change_feeds_import_views_data_export_batch_alter(&$batch, &$batch_redirect) {
+ // $view = views_get_view($batch['view_name']);
+dpm($batch, 'batch');
+  $views_names = array('impact_delivery_report', ); //  Download files for this Views only
+  if (in_array($batch['view_name'], $views_names)) {
+    //dsm($batch,"batch");
+   // $batch['operations'][] = array(
+   //   'change_feeds_import_views_data_export_batch_finish', array($batch['eid'], $batch['view_name']),
+   // );
+  }
+}
+
+
+/**
+ * 
+ * Implements Additional Batch Process to Save Export All views Data Into Files
+ */
+function  change_feeds_import_views_data_export_batch_finish($eid, $view_name) {
+  $export = views_data_export_get($eid);
+  $view = views_data_export_view_retrieve($eid);
+  // Allow Dump Creation for Export 2 Only to avoid Overriding
+  if ($view->localization_plugin->view->current_display == 'views_data_export_2') {
+    $view->set_display($export->view_display_id);
+    $view->display_handler->batched_execution_state = $export;
+    $view->display_handler->remove_index();
+    $file_name = 'public://' . $view_name . '.csv';
+
+    $temp_file = $view->display_handler->outputfile_path();
+    file_unmanaged_copy($temp_file, $file_name, FILE_EXISTS_REPLACE);
+  }
+}
+
+/**
+ * 
+ */
+function impact_delivery_job() {
+  $date = date('m/d/y', strtotime("-1 days"));
+  $url = "http://dev.leanbox.in/impact-delivery-report/export?date_filter[min][date]=". $date ."&date_filter[max][date]=" . $date;
+  
 }

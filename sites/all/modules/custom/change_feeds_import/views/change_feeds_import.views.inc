@@ -265,6 +265,7 @@ function change_feeds_import_views_data() {
     'filter' => array(
       'handler' => 'views_handler_filter_numeric',
     ),
+
   );
 
 
@@ -293,6 +294,9 @@ function change_feeds_import_views_data() {
       'handler' => 'views_handler_sort_date',
     ),
     'filter' => array(
+      'handler' => 'views_handler_filter_date',
+    ),
+    'argument' => array(
       'handler' => 'views_handler_filter_date',
     ),
   );
