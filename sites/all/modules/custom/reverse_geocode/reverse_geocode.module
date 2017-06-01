@@ -688,15 +688,15 @@ function trip_filters_submit($form, &$form_state) {
       $old_long = $val['field_hul_long_value'];
 
       $party_name = $val['field_party_name_value'];
-
-      $sequence = (int) ($val['field_drs_sequence_value']);
+      $sequence = (int) ($val['field_bill_sequence_value']);
       if ($sequence == "0" || empty($sequence)) {
         $seq = "NA";
       }
       else {
         $seq = "";
       }
-      $sr_no = (int)($val['field_bill_sequence_value']);
+      
+      $sr_no = (int)($val['field_drs_sequence_value']);
 
 
       $old_city = $val['field_original_address_sub_administrative_area'];
@@ -749,11 +749,11 @@ function trip_filters_submit($form, &$form_state) {
           . '</table></div>';
       
       $options[$party_code] = array(
-        'sr_no' => array('data' => $key + 1, 'class' => 'sr-cell'),
+        'sr_no' => array('data' => $sr_no, 'class' => 'sr-cell'),
         'party_code' => array('data' => $party_code, 'class' => 'party-code-cell'),
         'party_name' => array('data' => '<div class="party-name-data">' . $party_name . '</div>', 'class' => 'party-name-cell'),
         'seq' => array('data' => $seq, 'class' => 'seq-cell'),
-        '#attributes' => array('data-lat' => $lat, 'data-lng' => $long, 'data-sr' => $key + 1),
+        '#attributes' => array('data-lat' => $lat, 'data-lng' => $long, 'data-sr' => $sr_no),
         'details' => array('data' => array('#markup' => '<a class="cell-details" style="display:none;">On Map</a>' . $marker_tooltip)),
       );
     }
