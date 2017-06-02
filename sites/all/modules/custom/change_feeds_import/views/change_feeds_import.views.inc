@@ -200,6 +200,23 @@ function change_feeds_import_views_data() {
     ),
   );
 
+  
+  
+  $data['sequence_method']['table']['group'] = t('Dispatch Sequence Method');
+  $data['sequence_method']['table']['join'] = array(
+    // #global is a special flag which let's a table appear all the time.
+    '#global' => array(),
+  );
+  // Add custom field
+  $data['sequence_method']['field_sequence_method'] = array(
+    'title' => t('Custom Sequence Method Field'),
+    'help' => t('Provides a Custom Sequence Method Field.'),
+    'field' => array(
+      'handler' => 'sequence_method_handler_custom_field',
+    ),
+  );
+  
+  
 
   $data['beat_name']['table']['group'] = t('BEAT NAME');
   $data['beat_name']['table']['join'] = array(

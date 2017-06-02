@@ -737,7 +737,7 @@ function trip_filters_submit($form, &$form_state) {
 */
       //$address = theme('table', array('header' => $header, 'rows' => $rows, 'sticky' => FALSE));
 
-      $old_lat_long = !empty($old_lat) ? $old_lat . ',' . $old_long : '';
+      $old_lat_long = !empty($old_lat) ? $lat . ',' . $long : '';
       $marker_tooltip = '<div class="cell-address cell-hide"><table>'
           . '<tr><td style="white-space:nowrap;color:#222">Party code</td><td>' . $party_code . '</td></tr>'
           . '<tr><td style="white-space:nowrap;color:#222">Party Name</td><td>' . $party_name . '</td></tr>'
@@ -1617,3 +1617,5 @@ function reverse_geocode_get_data_trip_wise($trip_id) {
   $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
   return $res;
 }
+
+  
