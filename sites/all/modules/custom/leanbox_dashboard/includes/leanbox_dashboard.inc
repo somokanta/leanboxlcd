@@ -1464,7 +1464,8 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     $query->addfield('chan', 'field_channel_value', 'channel');
     $query->addfield('plg', 'field_pl_group_value', 'pl_group');
     $query->addExpression('SUM(bl.Sum_of_NET_SALES_VALUE)', 'sales_value');
-
+    $query->leftjoin('field_impact_delivery_date', 'idl', 'idl.entity_id =  n.nid');
+    $query->addfield('idl', 'impact_delivery_date_value', 'impact_date');
 
     if (!empty($start_date) && !empty($end_date)) {
       $query->condition('bl.bill_date', array($start_date, $end_date), 'BETWEEN');
@@ -1480,6 +1481,10 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     $query->addExpression('(bv.field_bill_value_value - r.field_sales_return_amt_value)', 'return_value');
     $query->addfield('dr', 'field_deliver_reason_tid', 'deliver_reason');
 
+    
+     $query->leftjoin('field_field_delivery_pending', 'dp', 'dp.entity_id =  n.nid');
+    $query->addfield('dp', 'field_delivery_pending_value', 'delivery_pending');
+    
     $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
 
 
@@ -1491,10 +1496,12 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
         array('data' => 'CHANNEL',),
         array('data' => 'PL GROUP',),
         array('data' => 'Sum of NET_SALES_VALUE'),
+        array('data' => 'IMPACT DATE'),
         array('data' => 'SALES DELIVERED AMT',),
         array('data' => 'SALES RETURNED AMT',),
         array('data' => 'STATUS',),
         array('data' => 'REASON',),
+        array('data' => 'DELIVERY PENDING',),
       );
       foreach ($res as $key => $val) {
         $data['bill_no'] = $val['bill_number'];
@@ -1502,7 +1509,8 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
         $data['party_code'] = $val['party_code'];
         $data['channel'] = $val['channel'];
         $data['pl_group'] = $val['pl_group'];
-        $data['sales_value'] = $val['sales_value'];
+        $data['sales_value'] = round($val['sales_value']);
+        $data['impact_date'] = round($val['impact_date']);
         $data['delivered_value'] = $val['delivered_value'];
 
         $data['return_value'] = $val['return_value'];
@@ -1527,6 +1535,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
           $data['status'] = 'NA';
         }
         $data['reason'] = $name;
+        $data['delivery_pending'] = $val['delivery_pending'];
       }
 
       $rows[] = $data;
