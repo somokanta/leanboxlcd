@@ -95,6 +95,48 @@ function leanbox_dashboard_chart_filter_bills_per_person_trends_form($form, &$fo
  * @param array $form_state
  * @return array
  */
+function leanbox_dashboard_chart_filter_sales_delivery_table_form($form, &$form_state) {
+  $form = array();
+
+  if (arg(1) == 'sales_delivery_table') {
+    $bill_date = date('Y-m-d');
+    $form['start_date'] = array(
+      '#type' => 'date_popup',
+      '#title' => t('Bill Date From'),
+      '#required' => TRUE,
+      '#date_format' => 'Y-m-d',
+      '#default_value' => $bill_date,
+    );
+    $form['end_date'] = array(
+      '#type' => 'date_popup',
+      '#title' => t('Dispatch Date To'),
+      '#required' => TRUE,
+      '#date_format' => 'Y-m-d',
+      '#default_value' => $bill_date,
+    );
+
+    $form['submit'] = array(
+      '#type' => 'submit',
+      '#value' => 'Submit',
+      '#prefix' => '<div id ="sales-delivery-table-submit">',
+      '#suffix' => '</div>',
+      '#attributes' => array('class' => array('sales-delivery-table-submit')),
+    );
+  }
+
+  $form['sales_delivery_table'] = array(
+    '#markup' => '<a href = "/leanbox-chart-details/sales_delivery_table" target = "_blank"><div id="sales_delivery_table_div"></div></a>',
+  );
+
+  return $form;
+}
+
+/**
+ * 
+ * @param array $form
+ * @param array $form_state
+ * @return array
+ */
 function leanbox_dashboard_chart_filter_bills_per_van_trends_form($form, &$form_state) {
   $form = array();
 
@@ -1395,6 +1437,117 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     }
     else {
       $output = 'No Result Found for Dispatch';
+    }
+    return $output;
+  }
+  else if ($activity_type == 'sales_delivery_table') {
+    $data = array();
+
+    $query = db_select('custom_billing_data', 'bl');
+    $query->condition('bl.distributor_id', $distributor_id);
+    $query->fields('bl', array('bill_number', 'bill_date', 'party_code'));
+
+// sales register
+    $query->join('node', 'n', 'bl.bill_number = n.title');
+    $query->condition('n.type', 'sales_register_data');
+    $query->condition('n.uid', $distributor_id);
+    $query->join('field_data_field_sales_party_code', 'sp', 'sp.entity_id = n.nid');
+
+
+// outlet_master
+    $query->join('node', 'ot', 'ot.title = sp.field_sales_party_code_value');
+    $query->condition('ot.type', 'outlet_master');
+    $query->condition('ot.uid', $distributor_id);
+    $query->join('field_data_field_channel', 'chan', 'chan.entity_id = ot.nid');
+    $query->join('field_data_field_pl_group', 'plg', 'plg.entity_id = ot.nid');
+
+    $query->addfield('chan', 'field_channel_value', 'channel');
+    $query->addfield('plg', 'field_pl_group_value', 'pl_group');
+    $query->addExpression('SUM(bl.Sum_of_NET_SALES_VALUE)', 'sales_value');
+    $query->leftjoin('field_data_field_impact_delivery_date', 'idl', 'idl.entity_id =  n.nid');
+    $query->addfield('idl', 'field_impact_delivery_date_value', 'impact_date');
+
+    if (!empty($start_date) && !empty($end_date)) {
+      $query->condition('bl.bill_date', array($start_date, $end_date), 'BETWEEN');
+    }
+    $query->join('field_data_field_sales_return_amt', 'r', 'r.entity_id = n.nid');
+    $query->addfield('r', 'field_sales_return_amt_value', 'delivered_value');
+
+    $query->groupBy('bl.bill_number');
+
+    $query->join('field_data_field_bill_value', 'bv', 'bv.entity_id = n.nid');
+    $query->addfield('bv', 'field_bill_value_value', 'bill_value');
+    $query->leftjoin('field_data_field_deliver_reason', 'dr', 'dr.entity_id = n.nid');
+    $query->addExpression('(bv.field_bill_value_value - r.field_sales_return_amt_value)', 'return_value');
+    $query->addfield('dr', 'field_deliver_reason_tid', 'deliver_reason');
+
+    
+     $query->leftjoin('field_data_field_delivery_pending', 'dp', 'dp.entity_id =  n.nid');
+    $query->addfield('dp', 'field_delivery_pending_value', 'delivery_pending');
+    
+    $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+
+
+    if (!empty($res)) {
+      $header = array(
+        array('data' => 'BILL NUMBER',),
+        array('data' => 'BILL DATE',),
+        array('data' => 'PARTY CODE',),
+        array('data' => 'CHANNEL',),
+        array('data' => 'PL GROUP',),
+        array('data' => 'Sum of NET_SALES_VALUE'),
+        array('data' => 'IMPACT DATE'),
+        array('data' => 'SALES DELIVERED AMT',),
+        array('data' => 'SALES RETURNED AMT',),
+        array('data' => 'STATUS',),
+        array('data' => 'REASON',),
+        array('data' => 'DELIVERY PENDING',),
+      );
+      foreach ($res as $key => $val) {
+        $data['bill_no'] = $val['bill_number'];
+        $data['bill_date'] = $val['bill_date'];
+        $data['party_code'] = $val['party_code'];
+        $data['channel'] = $val['channel'];
+        $data['pl_group'] = $val['pl_group'];
+        $data['sales_value'] = round($val['sales_value']);
+        $data['impact_date'] = date('Y-m-d',($val['impact_date']));
+        $data['delivered_value'] = $val['delivered_value'];
+
+        $data['return_value'] = $val['return_value'];
+
+        $sales_ret = (($val['return_value'] / $val['bill_value']) * 100);
+        $reason_tid = $val['deliver_reason'];
+        if (!empty($reason_tid)) {
+          $term = taxonomy_term_load($reason_tid);
+          $name = $term->name;
+        }
+        else {
+          $name = 'NA';
+        }
+
+        if ($sales_ret >= 99) {
+          $data['status'] = 'Full';
+        }
+        else if ($sales_ret > 1 && $sales_ret < 99) {
+          $data['status'] = 'Partial';
+        }
+        else {
+          $data['status'] = 'NA';
+        }
+        $data['reason'] = $name;
+        $data['delivery_pending'] = $val['delivery_pending'];
+      }
+
+      $rows[] = $data;
+
+      $output = theme('table', array(
+        'header' => $header,
+        'rows' => $rows,
+        'attributes' => array('width' => '100%')
+      ));
+    }
+    else {
+      $output = 'No Result Found';
     }
     return $output;
   }
