@@ -1464,7 +1464,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     $query->addfield('chan', 'field_channel_value', 'channel');
     $query->addfield('plg', 'field_pl_group_value', 'pl_group');
     $query->addExpression('SUM(bl.Sum_of_NET_SALES_VALUE)', 'sales_value');
-    $query->leftjoin('field_impact_delivery_date', 'idl', 'idl.entity_id =  n.nid');
+    $query->leftjoin('field_data_field_impact_delivery_date', 'idl', 'idl.entity_id =  n.nid');
     $query->addfield('idl', 'impact_delivery_date_value', 'impact_date');
 
     if (!empty($start_date) && !empty($end_date)) {
