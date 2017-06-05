@@ -1482,7 +1482,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     $query->addfield('dr', 'field_deliver_reason_tid', 'deliver_reason');
 
     
-     $query->leftjoin('field_field_delivery_pending', 'dp', 'dp.entity_id =  n.nid');
+     $query->leftjoin('field_data_field_delivery_pending', 'dp', 'dp.entity_id =  n.nid');
     $query->addfield('dp', 'field_delivery_pending_value', 'delivery_pending');
     
     $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
