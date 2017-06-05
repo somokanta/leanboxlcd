@@ -1536,9 +1536,8 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
         }
         $data['reason'] = $name;
         $data['delivery_pending'] = $val['delivery_pending'];
+        $rows[] = $data;
       }
-
-      $rows[] = $data;
 
       $output = theme('table', array(
         'header' => $header,
