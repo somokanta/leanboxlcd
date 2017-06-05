@@ -1510,7 +1510,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
         $data['channel'] = $val['channel'];
         $data['pl_group'] = $val['pl_group'];
         $data['sales_value'] = round($val['sales_value']);
-        $data['impact_date'] = round($val['impact_date']);
+        $data['impact_date'] = date('Y-m-d',($val['impact_date']));
         $data['delivered_value'] = $val['delivered_value'];
 
         $data['return_value'] = $val['return_value'];
