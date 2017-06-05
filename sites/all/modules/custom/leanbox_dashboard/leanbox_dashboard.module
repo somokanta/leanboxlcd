@@ -252,7 +252,10 @@ function leanbox_dashboard_block_info() {
     'info' => t('Bills Unloading Day Wise Trends'),
     'cache' => DRUPAL_NO_CACHE,
   );
-  
+  $blocks['sales_delivery_table'] = array(
+    'info' => t('Sales Delivery Table'),
+    'cache' => DRUPAL_NO_CACHE,
+  );
   return $blocks;
 }
 
@@ -602,6 +605,27 @@ function leanbox_dashboard_block_view($delta = '') {
       );
       break;
 
+    case 'sales_delivery_table':
+
+      $loading_date = date('d-m-Y');
+      $block['subject'] = "Sales Delivery Table($loading_date Bill)";
+      $data = leanbox_dashboard_chart_query_details('sales_delivery_table');
+
+      $filter_form = drupal_render(drupal_get_form('leanbox_dashboard_chart_filter_sales_delivery_table_form'));
+      $block['content'] = array(
+        '#markup' => theme('leanbox_dashboard', array('data' => $filter_form)),
+        '#attached' => array(
+          'js' => array(
+            drupal_get_path('module', 'leanbox_dashboard') . '/js/leanbox_dashboard_sales_delivery_table_chart.js',
+            array(
+              'data' => array('leanbox_dashboard' => array('sales_delivery_table' => $data,)),
+              'type' => 'setting'
+            ),
+          ),
+        ),
+      );
+      break;
+
     case 'bills_per_van_trends':
 
       $loading_date = date('d-m-Y');
@@ -622,7 +646,6 @@ function leanbox_dashboard_block_view($delta = '') {
         ),
       );
       break;
-
     case 'bills_per_person_trends':
 
       $loading_date = date('d-m-Y');
