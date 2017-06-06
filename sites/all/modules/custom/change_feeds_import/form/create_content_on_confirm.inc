@@ -137,6 +137,12 @@ function change_feeds_import_create_confirm_content($id) {
   background_batch_process_batch('/billing_data/import');
 }
 
+
+function change_feeds_import_finished($success, $results, $operations) {
+  watchdog('custom_batch', "1222222222");
+  drupal_set_message("success");
+}
+
 function change_feeds_import_insert_data_in_custom_billing_table($billing_data_result) {
   $created_date = time();
   global $user;
