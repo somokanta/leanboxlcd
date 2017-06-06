@@ -1470,7 +1470,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     if (!empty($start_date) && !empty($end_date)) {
       $query->condition('bl.bill_date', array($start_date, $end_date), 'BETWEEN');
     }
-    $query->join('field_data_field_sales_return_amt', 'r', 'r.entity_id = n.nid');
+    $query->leftjoin('field_data_field_sales_return_amt', 'r', 'r.entity_id = n.nid');
     $query->addfield('r', 'field_sales_return_amt_value', 'delivered_value');
 
     $query->groupBy('bl.bill_number');
@@ -1478,11 +1478,10 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     $query->join('field_data_field_bill_value', 'bv', 'bv.entity_id = n.nid');
     $query->addfield('bv', 'field_bill_value_value', 'bill_value');
     $query->leftjoin('field_data_field_deliver_reason', 'dr', 'dr.entity_id = n.nid');
-    $query->addExpression('(bv.field_bill_value_value - r.field_sales_return_amt_value)', 'return_value');
+   // $query->addExpression('(bv.field_bill_value_value - r.field_sales_return_amt_value)', 'return_value');
     $query->addfield('dr', 'field_deliver_reason_tid', 'deliver_reason');
 
-    
-     $query->leftjoin('field_data_field_delivery_pending', 'dp', 'dp.entity_id =  n.nid');
+    $query->leftjoin('field_data_field_delivery_pending', 'dp', 'dp.entity_id =  n.nid');
     $query->addfield('dp', 'field_delivery_pending_value', 'delivery_pending');
     
     $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
@@ -1504,16 +1503,23 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
         array('data' => 'DELIVERY PENDING',),
       );
       foreach ($res as $key => $val) {
+        $data = array();
         $data['bill_no'] = $val['bill_number'];
-        $data['bill_date'] = $val['bill_date'];
+        $data['bill_date'] = date('Y-m-d',$val['bill_date']);
         $data['party_code'] = $val['party_code'];
         $data['channel'] = $val['channel'];
         $data['pl_group'] = $val['pl_group'];
         $data['sales_value'] = round($val['sales_value']);
         $data['impact_date'] = date('Y-m-d',($val['impact_date']));
-        $data['delivered_value'] = $val['delivered_value'];
+        $data['delivered_value'] = !empty($val['delivered_value']) ? round($val['delivered_value']) : 'NA';
 
-        $data['return_value'] = $val['return_value'];
+        if ($data['delivered_value'] == 'NA') {
+           $data['return_value']  = 'NA';
+        }
+        else {
+          $data['return_value'] = $data['sales_value'] - $data['delivered_value'];
+        }
+        
 
         $sales_ret = (($val['return_value'] / $val['bill_value']) * 100);
         $reason_tid = $val['deliver_reason'];
@@ -1525,10 +1531,10 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
           $name = 'NA';
         }
 
-        if ($sales_ret >= 99) {
+        if (($sales_ret >= 99) && ($data['return_value'] != 'NA')) {
           $data['status'] = 'Full';
         }
-        else if ($sales_ret > 1 && $sales_ret < 99) {
+        else if (($sales_ret > 1 && $sales_ret < 99) && ($data['return_value'] != 'NA')) {
           $data['status'] = 'Partial';
         }
         else {
