@@ -488,8 +488,6 @@ function delete_billing_form($form, &$form_state) {
       );
     }
 
-
-
     $form['data'] = array(
       '#type' => 'markup',
       '#markup' => $msg,
@@ -567,7 +565,7 @@ function delete_billing_form_submit($form, &$form_state) {
   $pass = "";
   // get data from custom table for selected date and user (custom_billing_data).
   $billing_data = get_custom_data($pass, $start_date, $end_date, $user);
-  $billing_count = count($billing_data, "billing_data");
+  $billing_count = count($billing_data);
   $pass = "sales";
   // get data from Sales register's node's for selected date and user (custom_billing_data).
   $sales_data = get_custom_data($pass, $start_date, $end_date, $user);
