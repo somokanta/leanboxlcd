@@ -641,7 +641,7 @@ function dispatch_planning_form_save_validate($form, &$form_state) {
   $bill_sequence_array = array();
   if(($no_area || $no_sequence || count($area_hook) > 1) && !$skip_sequencing && $origin_lat && $origin_long && $enable_routing){
         
-    $params['vehicles'][] = array('vehicle_id' => 'origin', 'start_address' => array('location_id' => 'origin', 'lon' => (double)$origin_long, 'lat' => (double)$origin_lat), 'return_to_depot' => false);
+    $params['vehicles'][] = array('vehicle_id' => 'origin', 'start_address' => array('location_id' => 'origin', 'lon' => (double)$origin_long, 'lat' => (double)$origin_lat), 'return_to_depot' => true);
     $post_result = graphhopper_postvrp_api($params);
     if ($post_result) {
       $job_id = $post_result->getJobId();
