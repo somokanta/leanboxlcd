@@ -445,7 +445,6 @@ function delete_billing_form($form, &$form_state) {
   $form['datetime'] = array(
     '#type' => 'date_popup',
     '#required' => TRUE,
-    '#title' => t('Select Date'),
     '#date_format' => 'd-m-Y h:i A',
     '#date_year_range' => '-0:+1',
     '#required' => TRUE,
