@@ -512,19 +512,13 @@ function check_records_submit($form, &$form_state) {
   $user = $form_state['values']['user'];
   $pass = "";
   // get data from custom table for selected date and user (custom_billing_data).
-  dpm($start_date,"start_date");
-  dpm($end_date,"end_date");
-  dpm($user,"user");
   $billing_data = get_custom_data($pass, $start_date, $end_date, $user);
-  dpm($billing_data,"billing_data");
   if (!empty($billing_data)) {
-    $billing_count = count($billing_data, "billing_data");
+    $billing_count = count($billing_data);
   }
   else {
     $billing_count = "empty";
   }
-
-
   $form_state['values']['billing_count'] = $billing_count;
   $form_state['rebuild'] = TRUE;
 }
