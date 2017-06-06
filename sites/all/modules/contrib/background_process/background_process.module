@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * This module implements a framework for calling funtions in the background.
@@ -16,6 +15,7 @@
  *
  * @todo Add functionality for killing keep alive requests?
  */
+
 include 'BackgroundProcess.class.php';
 
 define('BACKGROUND_PROCESS_SERVICE_TIMEOUT', 0);
@@ -140,7 +140,7 @@ function background_process_cron() {
     if (time() >= $_SERVER['REQUEST_TIME'] + $expire) {
       break;
     }
-    $result = db_query_range("SELECT handle, start_stamp FROM {background_process} WHERE start_stamp < :start AND exec_status = :status", 0, 10, array(
+    $result = db_query_range("SELECT handle, start_stamp FROM {background_process} WHERE start_stamp < :start AND exec_status = :status", 0, 10, array( 
       ':start' => $time - variable_get('background_process_cleanup_age_running', BACKGROUND_PROCESS_CLEANUP_AGE_RUNNING),
       ':status' => BACKGROUND_PROCESS_STATUS_RUNNING
     ));
@@ -338,7 +338,7 @@ function _background_process_queue($item) {
       background_process_current_handle($oldhandle);
       background_process_update_status(rawurldecode($handle), BACKGROUND_PROCESS_STATUS_QUEUED);
       throw $e;
-    }
+    } 
   }
 }
 
@@ -528,13 +528,13 @@ function background_process_service_execute($handle, $return = FALSE) {
   try {
     $old_db = db_set_active('background_process');
     $claimed = db_update('background_process')
-        ->fields(array(
-          'start_stamp' => sprintf("%.06f", $process->start_stamp),
-          'exec_status' => BACKGROUND_PROCESS_STATUS_RUNNING,
-        ))
-        ->condition('handle', $handle)
-        ->condition('exec_status', array(BACKGROUND_PROCESS_STATUS_LOCKED, BACKGROUND_PROCESS_STATUS_QUEUED), 'IN')
-        ->execute();
+                 ->fields(array(
+                   'start_stamp' => sprintf("%.06f", $process->start_stamp),
+                   'exec_status' => BACKGROUND_PROCESS_STATUS_RUNNING,
+                 ))
+                 ->condition('handle', $handle)
+                 ->condition('exec_status', array(BACKGROUND_PROCESS_STATUS_LOCKED, BACKGROUND_PROCESS_STATUS_QUEUED), 'IN')
+                 ->execute();
     db_set_active($old_db);
     if ($claimed) {
       $process->exec_status = BACKGROUND_PROCESS_STATUS_RUNNING;
@@ -690,14 +690,14 @@ function background_process_set_process($handle, $callback, $uid, $args, $token)
   try {
     $old_db = db_set_active('background_process');
     $result = db_update('background_process')
-        ->fields(array(
-          'callback' => $callback,
-          'args' => $args,
-          'uid' => $uid,
-          'token' => $token
-        ))
-        ->condition('handle', $handle)
-        ->execute();
+      ->fields(array(
+        'callback' => $callback,
+        'args' => $args,
+        'uid' => $uid,
+        'token' => $token
+      ))
+      ->condition('handle', $handle)
+      ->execute();
     db_set_active($old_db);
     return $result;
   }
@@ -719,12 +719,12 @@ function background_process_lock_process($handle, $status = BACKGROUND_PROCESS_S
   try {
     $old_db = db_set_active('background_process');
     db_insert('background_process')
-        ->fields(array(
-          'handle' => $handle,
-          'start_stamp' => sprintf("%.06f", microtime(TRUE)),
-          'exec_status' => $status,
-        ))
-        ->execute();
+      ->fields(array(
+        'handle' => $handle,
+        'start_stamp' => sprintf("%.06f", microtime(TRUE)),
+        'exec_status' => $status,
+      ))
+      ->execute();
     db_set_active($old_db);
     _background_process_ensure_cleanup($handle);
     return TRUE;
@@ -740,9 +740,9 @@ function background_process_lock_process($handle, $status = BACKGROUND_PROCESS_S
  */
 function background_process_update_status($handle, $status) {
   db_update('background_process')
-      ->fields(array('exec_status' => $status))
-      ->condition('handle', $handle)
-      ->execute();
+    ->fields(array('exec_status' => $status))
+    ->condition('handle', $handle)
+    ->execute();
 }
 
 /**
@@ -757,10 +757,10 @@ function background_process_get_process($handle) {
   try {
     $old_db = db_set_active('background_process');
     $result = db_select('background_process', 'bp')
-        ->fields('bp', array('handle', 'callback', 'args', 'uid', 'token', 'service_host', 'start_stamp', 'exec_status'))
-        ->condition('handle', $handle)
-        ->execute()
-        ->fetchObject();
+      ->fields('bp', array('handle', 'callback', 'args', 'uid', 'token', 'service_host', 'start_stamp', 'exec_status'))
+      ->condition('handle', $handle)
+      ->execute()
+      ->fetchObject();
     db_set_active($old_db);
   }
   catch (Exception $e) {
@@ -788,7 +788,7 @@ function background_process_get_process($handle) {
 function background_process_get_processes($status = NULL) {
   $old_db = db_set_active('background_process');
   $result = db_select('background_process', 'bp')
-      ->fields('bp', array('handle', 'callback', 'args', 'uid', 'token', 'service_host', 'start_stamp', 'exec_status'));
+    ->fields('bp', array('handle', 'callback', 'args', 'uid', 'token', 'service_host', 'start_stamp', 'exec_status'));
   if (isset($status)) {
     $result = $result->condition('bp.status', $status);
   }
@@ -818,14 +818,14 @@ function background_process_remove_process($handle, $start = NULL) {
   $old_db = db_set_active('background_process');
   if (isset($start)) {
     $result = db_delete('background_process')
-        ->condition('handle', $handle)
-        ->condition('start_stamp', sprintf("%.06f", $start), '=')
-        ->execute();
+      ->condition('handle', $handle)
+      ->condition('start_stamp', sprintf("%.06f", $start), '=')
+      ->execute();
   }
   else {
     $result = db_delete('background_process')
-        ->condition('handle', $handle)
-        ->execute();
+      ->condition('handle', $handle)
+      ->execute();
   }
   db_set_active($old_db);
   return $result;
@@ -863,11 +863,11 @@ function background_process_set_service_host($handle, $service_host) {
   try {
     $old_db = db_set_active('background_process');
     $result = db_update('background_process')
-        ->fields(array(
-          'service_host' => $service_host ? $service_host : '',
-        ))
-        ->condition('handle', $handle)
-        ->execute();
+           ->fields(array(
+             'service_host' => $service_host ? $service_host : '',
+           ))
+           ->condition('handle', $handle)
+           ->execute();
     db_set_active($old_db);
     return $result;
   }
@@ -987,9 +987,7 @@ function background_process_build_request($url, $service_hostname = NULL, $optio
 
   $url = url($url, $options);
   $parsed = parse_url($url);
-  // $host = !empty($service_host['http_host']) ? $service_host['http_host'] : (isset($parsed['host']) ? $parsed['host'] : NULL);
-  $host = !empty($service_host['http_host']) ? $service_host['http_host'] : (isset($parsed['host']) ? (isset($parsed['port']) ? ($parsed['host'] . ':' . $parsed['port']) : $parsed['host']) : NULL);
-
+  $host = !empty($service_host['http_host']) ? $service_host['http_host'] : (isset($parsed['host']) ? $parsed['host'] : NULL);
   $headers = _background_process_request_headers();
   $headers = _background_process_filter_headers($headers);
   $headers['Host'] = $host;
@@ -1123,6 +1121,7 @@ function background_process_http_request_initiate(&$result) {
     // server's ability to make outgoing HTTP requests the next time that
     // requirements checking is performed.
     // See system_requirements()
+
     // @fixme Disabled for Background Process
     // variable_set('drupal_http_request_fails', TRUE);
 
@@ -1174,17 +1173,12 @@ function background_process_http_request_initiate(&$result) {
   $result->request = $request;
   // Calculate how much time is left of the original timeout value.
   $timeout = $options['timeout'] - timer_read(__FUNCTION__) / 1000;
-//  if ($timeout > 0) {
-//    stream_set_timeout($fp, floor($timeout), floor(1000000 * fmod($timeout, 1)));
-//    fwrite($fp, $request);
-//    stream_set_blocking($fp, 0);
-//  }
   if ($timeout > 0) {
     stream_set_timeout($fp, floor($timeout), floor(1000000 * fmod($timeout, 1)));
     fwrite($fp, $request);
     stream_set_blocking($fp, 0);
-    sleep(1);
   }
+
 
   if (!empty($options['blocking'])) {
     return background_process_http_request_get_response($result);
@@ -1337,7 +1331,7 @@ function background_process_http_request_get_response(&$result) {
       }
       elseif ($options['max_redirects']) {
         // Redirect to the new location.
-        $options['max_redirects'] --;
+        $options['max_redirects']--;
         $result = background_process_http_request($location, $options);
         if (empty($result->error)) {
           background_process_http_request_get_response($result);
@@ -1544,14 +1538,14 @@ function _background_process_secure_url($url) {
  *   URL
  */
 function _background_process_unparse_url($parsed_url) {
-  $scheme = isset($parsed_url['scheme']) ? $parsed_url['scheme'] . '://' : '';
-  $host = isset($parsed_url['host']) ? $parsed_url['host'] : '';
-  $port = isset($parsed_url['port']) ? ':' . $parsed_url['port'] : '';
-  $user = isset($parsed_url['user']) ? $parsed_url['user'] : '';
-  $pass = isset($parsed_url['pass']) ? ':' . $parsed_url['pass'] : '';
-  $pass = ($user || $pass) ? "$pass@" : '';
-  $path = isset($parsed_url['path']) ? $parsed_url['path'] : '';
-  $query = isset($parsed_url['query']) ? '?' . $parsed_url['query'] : '';
+  $scheme   = isset($parsed_url['scheme']) ? $parsed_url['scheme'] . '://' : '';
+  $host     = isset($parsed_url['host']) ? $parsed_url['host'] : '';
+  $port     = isset($parsed_url['port']) ? ':' . $parsed_url['port'] : '';
+  $user     = isset($parsed_url['user']) ? $parsed_url['user'] : '';
+  $pass     = isset($parsed_url['pass']) ? ':' . $parsed_url['pass']  : '';
+  $pass     = ($user || $pass) ? "$pass@" : '';
+  $path     = isset($parsed_url['path']) ? $parsed_url['path'] : '';
+  $query    = isset($parsed_url['query']) ? '?' . $parsed_url['query'] : '';
   $fragment = isset($parsed_url['fragment']) ? '#' . $parsed_url['fragment'] : '';
   return "$scheme$user$pass$host$port$path$query$fragment";
 }
