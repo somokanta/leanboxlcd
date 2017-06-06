@@ -1532,14 +1532,19 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
         }
 
         if (($sales_ret >= 99) && ($data['return_value'] != 'NA')) {
-          $data['status'] = 'Full';
+          $data['status'] = 'Full RETURN';
         }
         else if (($sales_ret > 1 && $sales_ret < 99) && ($data['return_value'] != 'NA')) {
-          $data['status'] = 'Partial';
+          $data['status'] = 'PARTIAL RETURN';
+        }
+        else if (($sales_ret <= 1) && ($data['return_value'] != 'NA')){
+          $data['status'] = 'FULL DELIVERED';
         }
         else {
           $data['status'] = 'NA';
         }
+        
+        // reason and delivery pending below
         $data['reason'] = $name;
         $data['delivery_pending'] = $val['delivery_pending'];
         $rows[] = $data;
