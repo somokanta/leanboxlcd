@@ -10,6 +10,10 @@ function change_feeds_import_permission() {
       'title' => t('Distributor Upload File'),
       'description' => t('Distributor Upload File')
     ),
+    'Delete Billing Data' => array(
+      'title' => t('Delete Billing Data'),
+      'description' => t('Delete Billing Data')
+    ),
   );
 }
 
@@ -19,6 +23,17 @@ function change_feeds_import_permission() {
  */
 function change_feeds_import_menu() {
   $items = array();
+
+
+  // Manually Delete Billing Data
+  $items['delete-billing-data'] = array(
+    'title' => 'Delete Billing Data',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('delete_billing_form'),
+    'access arguments' => array('Distributor Upload File'),
+    'type' => MENU_CALLBACK,
+  );
+
   $items['impact-delivery-job'] = array(
     'title' => 'DRS Report',
     'page callback' => 'impact_delivery_job',
@@ -33,6 +48,7 @@ function change_feeds_import_menu() {
     'access arguments' => array('Distributor Upload File'),
     'type' => MENU_CALLBACK,
   );
+
 
 
   $items['download-pdf/%'] = array(
@@ -371,6 +387,7 @@ function download_pdf($args) {
   $rendered_html = $view->render();
   pdf_using_mpdf_api($rendered_html);
 }
+
 function download_pdf2($args) {
   $view_name = "drs_report2";
   $view = views_get_view($view_name, '');
@@ -585,7 +602,7 @@ function get_data_of_trip_id_2_form($form, &$form_state) {
     '#title' => t('Trip Id'),
     '#size' => 10, 
     '#required' => TRUE,
-    '#id'=>'drs-report2'
+    '#id' => 'drs-report2'
   );
 
   $form['submit'] = array(
@@ -621,7 +638,6 @@ function get_data_of_trip_id_form_submit($form, &$form_state) {
 function get_data_of_trip_id_2_form_submit($form, &$form_state) {
   return $form;
 }
-
 
 function trip_2_form_submit($form, &$form_state) {
   $trip_id = $form_state['values']['trip_id'];
@@ -1905,7 +1921,6 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
 //    $join->extra = array(
 //      array('field' => 'pl_group', 'left_field' => 'field_data_field_pl_group_node_entity_type'),
 //    );
-
     // Do the actual join
 //    $query->table_queue['temp'] = array(
 //      'alias' => 'temp', // I believe this is optional
