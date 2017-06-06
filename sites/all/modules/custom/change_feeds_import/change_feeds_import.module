@@ -30,7 +30,7 @@ function change_feeds_import_menu() {
     'title' => 'Delete Billing Data',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('delete_billing_form'),
-    'access arguments' => array('Distributor Upload File'),
+    'access arguments' => array('Delete Billing Data'),
     'type' => MENU_CALLBACK,
   );
 
