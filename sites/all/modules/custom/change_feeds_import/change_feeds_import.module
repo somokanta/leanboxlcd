@@ -58,8 +58,8 @@ function change_feeds_import_menu() {
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
-  
-  
+
+
   $items['drs-report2'] = array(
     'title' => 'DRS Report',
     'page callback' => 'drupal_get_form',
@@ -214,7 +214,7 @@ function change_feeds_import_menu() {
     'file' => 'form/sales_register_data.inc',
   );
 
-  
+
 
   $items['sales-confirm/%'] = array(
     'title' => 'Sales Confirm Table',
@@ -225,7 +225,7 @@ function change_feeds_import_menu() {
     'file' => 'form/sales_register_data.inc',
   );
 
-  
+
 
   // when confirm is clicked
   $items['sales-confirm/create_content/%'] = array(
@@ -237,7 +237,7 @@ function change_feeds_import_menu() {
     'file' => 'form/sales_register_data.inc',
   );
 
-   // when discard is clicked
+  // when discard is clicked
   $items['sales-discard/%'] = array(
     'title' => 'sales Discard',
     'description' => 'sales Discard Data',
@@ -247,7 +247,7 @@ function change_feeds_import_menu() {
     'file' => 'form/sales_register_data.inc',
   );
 
-  
+
   // Upload form for Area Hook Group Master.
   $items['area-hook-grp/import'] = array(
     'title' => 'Area Hook Group Master',
@@ -257,8 +257,8 @@ function change_feeds_import_menu() {
     'access arguments' => array('Distributor Upload File'),
     'file' => 'form/area_hook_grp_data.inc',
   );
-  
-  
+
+
   $items['area-hook-grp-confirm/%'] = array(
     'title' => 'Area Hook Group Master Confirm Table',
     'description' => 'Area Hook Group Master Confirm Table',
@@ -267,7 +267,7 @@ function change_feeds_import_menu() {
     'access arguments' => array('Distributor Upload File'),
     'file' => 'form/area_hook_grp_data.inc',
   );
-  
+
   // when confirm is clicked
   $items['area-hook-grp-confirm/create_content/%'] = array(
     'title' => 'confirm',
@@ -287,7 +287,7 @@ function change_feeds_import_menu() {
     'access arguments' => array('Distributor Upload File'),
     'file' => 'form/area_hook_grp_data.inc',
   );
-  
+
   // Upload form for Sales Day-Van Pl Group Area Grouping.
   $items['day-van-area/import'] = array(
     'title' => 'Day-Van Pl Group Area Grouping',
@@ -297,7 +297,7 @@ function change_feeds_import_menu() {
     'access arguments' => array('Distributor Upload File'),
     'file' => 'form/day_van_area_data.inc',
   );
-  
+
   $items['day-van-area-confirm/%'] = array(
     'title' => 'Day-Van-Area Confirm Table',
     'description' => 'Day-Van-Area Confirm Table',
@@ -306,7 +306,7 @@ function change_feeds_import_menu() {
     'access arguments' => array('Distributor Upload File'),
     'file' => 'form/day_van_area_data.inc',
   );
-  
+
   // when confirm is clicked
   $items['day-van-area-confirm/create_content/%'] = array(
     'title' => 'confirm',
@@ -441,14 +441,16 @@ function get_data_of_trip_id_form($form, &$form_state) {
  */
 function delete_billing_form($form, &$form_state) {
 
+  $form['#prefix'] = '<div id="itemlist-div">';
+  $form['#suffix'] = '</div>';
+
   // selected date for deleting data of billing data by admin
-  $form['datetime'] = array(
+  $form['to_date'] = array(
     '#type' => 'date_popup',
-    '#required' => TRUE,
     '#date_format' => 'd-m-Y h:i A',
-    '#date_year_range' => '-0:+1',
     '#required' => TRUE,
   );
+
 
   $users = get_list_of_users(); // get all registerd users.
   // Here admin can choose user
@@ -456,17 +458,94 @@ function delete_billing_form($form, &$form_state) {
     '#type' => 'select',
     '#title' => t('User'),
     '#options' => $users,
-    '#required' => TRUE,
+      //  '#required' => TRUE,
   );
 
 
-  $form['submit'] = array(
+  $form['check'] = array(
     '#type' => 'submit',
-    '#value' => t('submit'),
-    '#submit' => array('delete_billing_form_submit'),
+    '#value' => t('Check Records'),
+    '#ajax' => array(
+      'wrapper' => 'itemlist-div',
+      'callback' => 'ajax_form_submit',
+      'method' => 'replace',
+      'effect' => 'fade',
+    ),
+    '#submit' => array('check_records_submit'),
   );
+
+  if (!empty($form_state['values']['billing_count'])) {
+    $billing_count = $form_state['values']['billing_count'];
+    if ($billing_count == "empty") {
+      $msg = "There is no data to delete";
+    }
+    else {
+      $msg = "No of Record Going To Delete $billing_count";
+      $form['submit'] = array(
+        '#type' => 'submit',
+        '#value' => t('Delete'),
+        '#submit' => array('delete_billing_form_submit'),
+      );
+    }
+
+
+
+    $form['data'] = array(
+      '#type' => 'markup',
+      '#markup' => $msg,
+    );
+  }
+
+
 
   return $form;
+}
+
+/**
+ * 
+ * @param type $form
+ * @param type $form_state
+ */
+function check_records_submit($form, &$form_state) {
+  $start_date = strtotime($form_state['values']['to_date']);
+  $end_date = strtotime(date("d.m.Y", time() + 120));
+  $user = $form_state['values']['user'];
+  $pass = "";
+  // get data from custom table for selected date and user (custom_billing_data).
+  $billing_data = get_custom_data($pass, $start_date, $end_date, $user);
+  if (!empty($billing_data)) {
+    $billing_count = count($billing_data, "billing_data");
+  }
+  else {
+    $billing_count = "empty";
+  }
+
+
+  $form_state['values']['billing_count'] = $billing_count;
+  $form_state['rebuild'] = TRUE;
+}
+
+/**
+ * 
+ * @param type $form
+ * @param type $form_state
+ * @return type
+ */
+function ajax_form_submit($form, &$form_state) {
+  return $form;
+}
+
+/**
+ * 
+ * @param type $element
+ * @param type $form_state
+ * @param type $context
+ */
+function change_feeds_import_date_popup_process_alter(&$element, &$form_state, $context) {
+  if ($element['#name'] == 'to_date') {
+    $element['date']['#title'] = "Date";
+    $element['time']['#title'] = "Time";
+  }
 }
 
 // get all registerd users.
@@ -483,14 +562,14 @@ function get_list_of_users() {
  * @param type $form_state
  */
 function delete_billing_form_submit($form, &$form_state) {
-  $start_date = strtotime($form_state['values']['datetime']);
-  $end_date = strtotime(date("d.m.Y", time() + 86400));
-  $user = $form_state['values']['user'];
 
+  $start_date = strtotime($form_state['values']['to_date']);
+  $end_date = strtotime(date("d.m.Y", time() + 120));
+  $user = $form_state['values']['user'];
   $pass = "";
   // get data from custom table for selected date and user (custom_billing_data).
   $billing_data = get_custom_data($pass, $start_date, $end_date, $user);
-
+  $billing_count = count($billing_data, "billing_data");
   $pass = "sales";
   // get data from Sales register's node's for selected date and user (custom_billing_data).
   $sales_data = get_custom_data($pass, $start_date, $end_date, $user);
@@ -503,11 +582,11 @@ function delete_billing_form_submit($form, &$form_state) {
         ->condition('id', $id)
         ->execute();
   }
-  
+
   // update data(billing_van,billing_loading_date) from Sales register's node's for selected date and user (custom_billing_data).
   if (!empty($sales_data)) {
     foreach ($sales_data as $key => $val) {
-      
+
       // check Sales Register's node exist or not
       $nid = check_node_title_exists_sales_register_data($val['bill_number'], $user);
       $node = node_load($nid);
@@ -533,6 +612,7 @@ function delete_billing_form_submit($form, &$form_state) {
       node_delete($nid);
     }
   }
+  drupal_set_message("successfully Deleted $billing_count Records");
 }
 
 /**
@@ -577,7 +657,7 @@ function get_custom_data($pass, $start_date, $end_date, $user) {
 /**
  * 
  * @param type $type = Party Packing Or Picking
-* @param type $start_date = Start date
+ * @param type $start_date = Start date
  * @param type $end_date = End Date
  * @param type $user = Node created by user
  * @return type
@@ -600,7 +680,7 @@ function get_data_of_trip_id_2_form($form, &$form_state) {
   $form['trip_id'] = array(
     '#type' => 'textfield',
     '#title' => t('Trip Id'),
-    '#size' => 10, 
+    '#size' => 10,
     '#required' => TRUE,
     '#id' => 'drs-report2'
   );
@@ -1290,7 +1370,7 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
   }
 
   if ($entity->feeds_item->id == 'outlet_area_hook_mapping') {
-   // we have custom upload for outlet area hook
+    // we have custom upload for outlet area hook
   }
 
 
@@ -1588,7 +1668,7 @@ function change_feeds_import_node_presave($node) {
   if ($node->type == 'egir') {
     $node->field_distributor_uid['und'][0]['value'] = $distributor_id;
   }
-  
+
   if ($node->type != 'user_manual') {
     if (!empty($distributor_id)) {
       $node->uid = $distributor_id;
@@ -1694,6 +1774,7 @@ function change_feeds_import_form_alter(&$form, &$form_state, $form_id) {
       }
     }
   }
+
   if ($form_id == 'user_register') {
     drupal_set_title(t('Transaction Platform'));
   }
@@ -1778,7 +1859,7 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
   global $user;
   // Store distributor id in author in each node
   $distributor_id = change_feeds_import_get_distributor_id($user->uid);
-  
+
   if ($view->name != 'user_manual') {
     foreach ($query->table_queue as $key => $val) {
       if (($val['table'] == 'node')) {
@@ -1897,9 +1978,9 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
 
     $query->add_field('temp', 'BEAT_NAME');
   }
-  
-  if($view->name == 'Outlet_Master_Report'){
-    
+
+  if ($view->name == 'Outlet_Master_Report') {
+
 //    $sub_query = db_select('node', 'n');
 //    $sub_query->addTag('node_uid');
 //    
@@ -2030,8 +2111,8 @@ function change_feeds_import_form_views_exposed_form_alter(&$form, &$form_state)
     $van_pl_options = $select + $van_pl_options;
     $sales_day_options = $select + $sales_day_options;
     $area_grp_name_options = $select + $area_grp_name_options;
-    
-    
+
+
     if (isset($form['field_dva_van_pl_group_value'])) {
       $form['field_dva_van_pl_group_value']['#type'] = 'select';
       $form['field_dva_van_pl_group_value']['#size'] = null;
@@ -2077,52 +2158,49 @@ function get_van_pl($van, $day, $name) {
   return $pl_van;
 }
 
-
-
 /**
  * 
  * @param type $batch
  * @param type $batch_redirect
  */
-/**function change_feeds_import_views_data_export_batch_alter(&$batch, &$batch_redirect) {
+/* * function change_feeds_import_views_data_export_batch_alter(&$batch, &$batch_redirect) {
   // $view = views_get_view($batch['view_name']);
   $views_names = array('impact_delivery_report',); //  Download files for this Views only
   if (in_array($batch['view_name'], $views_names)) {
 
   if (($batch['view_name'] == 'impact_delivery_report')) {
-      watchdog('ajax data', '<pre>'. print_r($batch, TRUE). '</pre>');
+  watchdog('ajax data', '<pre>'. print_r($batch, TRUE). '</pre>');
 
-    //dsm($batch,"batch");
-    $batch['operations'][] = array(
-      'change_feeds_import_views_data_export_batch_finish', array($batch['eid'], $batch['view_name']),
-    );
+  //dsm($batch,"batch");
+  $batch['operations'][] = array(
+  'change_feeds_import_views_data_export_batch_finish', array($batch['eid'], $batch['view_name']),
+  );
   }
-}*/
-
+  } */
 
 /**
  * 
  * Implements Additional Batch Process to Save Export All views Data Into Files
  */
-function  change_feeds_import_views_data_export_batch_finish($eid, $view_name) {
+function change_feeds_import_views_data_export_batch_finish($eid, $view_name) {
   $export = views_data_export_get($eid);
   $data = array();
   $view = views_data_export_view_retrieve($eid);
-  watchdog('ajaxview1', '<pre>'. print_r($data, TRUE). '</pre>');
+  watchdog('ajaxview1', '<pre>' . print_r($data, TRUE) . '</pre>');
   // Allow Dump Creation for Export 2 Only to avoid Overriding
   //if ($view->localization_plugin->view->current_display == 'views_data_export_2') {
-    $view->set_display($export->view_display_id);
-    $view->display_handler->batched_execution_state = $export;
-    $view->display_handler->remove_index();
-    $file_name = 'public://' . $view_name . '.csv';
+  $view->set_display($export->view_display_id);
+  $view->display_handler->batched_execution_state = $export;
+  $view->display_handler->remove_index();
+  $file_name = 'public://' . $view_name . '.csv';
 
-    $temp_file = $view->display_handler->outputfile_path();
-    $uri_path = file_unmanaged_copy($temp_file, $file_name, FILE_EXISTS_REPLACE);
-    
-      $files = file_load_multiple(array(), array('uri' => $uri_path));
-  watchdog('ajaxpath', '<pre>'. print_r($files, TRUE). '</pre>');
-    
- // }
+  $temp_file = $view->display_handler->outputfile_path();
+  $uri_path = file_unmanaged_copy($temp_file, $file_name, FILE_EXISTS_REPLACE);
+
+  $files = file_load_multiple(array(), array('uri' => $uri_path));
+  watchdog('ajaxpath', '<pre>' . print_r($files, TRUE) . '</pre>');
+
+  // }
 }
 
 /**
@@ -2130,6 +2208,5 @@ function  change_feeds_import_views_data_export_batch_finish($eid, $view_name) {
  */
 function impact_delivery_job() {
   $date = date('m/d/y', strtotime("-1 days"));
-  $url = "http://dev.leanbox.in/impact-delivery-report/export?date_filter[min][date]=". $date ."&date_filter[max][date]=" . $date;
-  
+  $url = "http://dev.leanbox.in/impact-delivery-report/export?date_filter[min][date]=" . $date . "&date_filter[max][date]=" . $date;
 }
