@@ -506,7 +506,7 @@ function delete_billing_form($form, &$form_state) {
  */
 function check_records_submit($form, &$form_state) {
   $start_date = strtotime($form_state['values']['to_date']);
-  $end_date = $start_date + 90;
+  $end_date = $start_date + 120;
   $user = $form_state['values']['user'];
   $pass = "";
   // get data from custom table for selected date and user (custom_billing_data).
@@ -560,7 +560,7 @@ function get_list_of_users() {
 function delete_billing_form_submit($form, &$form_state) {
 
   $start_date = strtotime($form_state['values']['to_date']);
-  $end_date = $start_date + 90;
+  $end_date = $start_date + 120;
   $user = $form_state['values']['user'];
   $pass = "";
   // get data from custom table for selected date and user (custom_billing_data).
