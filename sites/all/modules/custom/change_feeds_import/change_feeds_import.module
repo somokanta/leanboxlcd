@@ -508,11 +508,15 @@ function delete_billing_form($form, &$form_state) {
  */
 function check_records_submit($form, &$form_state) {
   $start_date = strtotime($form_state['values']['to_date']);
-  $end_date = strtotime(date("d.m.Y", time() + 120));
+  $end_date = $start_date + 120;
   $user = $form_state['values']['user'];
   $pass = "";
   // get data from custom table for selected date and user (custom_billing_data).
+  dpm($start_date,"start_date");
+  dpm($end_date,"end_date");
+  dpm($user,"user");
   $billing_data = get_custom_data($pass, $start_date, $end_date, $user);
+  dpm($billing_data,"billing_data");
   if (!empty($billing_data)) {
     $billing_count = count($billing_data, "billing_data");
   }
