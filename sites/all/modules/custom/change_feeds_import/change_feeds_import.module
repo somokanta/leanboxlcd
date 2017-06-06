@@ -480,7 +480,7 @@ function delete_billing_form($form, &$form_state) {
       $msg = "There is no data to delete";
     }
     else {
-      $msg = "No of Record Going To Delete $billing_count";
+      $msg = "NUmber of Record Going To Delete = $billing_count";
       $form['submit'] = array(
         '#type' => 'submit',
         '#value' => t('Delete'),
