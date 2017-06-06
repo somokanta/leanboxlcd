@@ -460,7 +460,7 @@ function delete_billing_form($form, &$form_state) {
   $form['submit'] = array(
     '#type' => 'submit',
     '#value' => t('submit'),
-    '#submit' => array('xyz_form_submit'),
+    '#submit' => array('delete_billing_form_submit'),
   );
 
   return $form;
