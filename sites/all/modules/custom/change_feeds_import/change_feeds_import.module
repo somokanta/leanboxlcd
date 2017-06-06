@@ -2084,7 +2084,6 @@ function get_van_pl($van, $day, $name) {
  */
 function change_feeds_import_views_data_export_batch_alter(&$batch, &$batch_redirect) {
   // $view = views_get_view($batch['view_name']);
-  dpm($batch, 'batch');
   $views_names = array('impact_delivery_report',); //  Download files for this Views only
   if (in_array($batch['view_name'], $views_names)) {
     //dsm($batch,"batch");

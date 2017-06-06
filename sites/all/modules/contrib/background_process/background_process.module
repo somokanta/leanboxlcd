@@ -987,7 +987,9 @@ function background_process_build_request($url, $service_hostname = NULL, $optio
 
   $url = url($url, $options);
   $parsed = parse_url($url);
-  $host = !empty($service_host['http_host']) ? $service_host['http_host'] : (isset($parsed['host']) ? $parsed['host'] : NULL);
+ // $host = !empty($service_host['http_host']) ? $service_host['http_host'] : (isset($parsed['host']) ? $parsed['host'] : NULL);
+  $host = !empty($service_host['http_host']) ? $service_host['http_host'] : (isset($parsed['host']) ? (isset($parsed['port'])? ($parsed['host'].':'.$parsed['port']) : $parsed['host']) : NULL);
+  
   $headers = _background_process_request_headers();
   $headers = _background_process_filter_headers($headers);
   $headers['Host'] = $host;
