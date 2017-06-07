@@ -1366,7 +1366,6 @@ function reverse_geocode_update_hul_lat_lng($hul_code, $lat, $lng) {
  * Implements hook_node_presave()
  */
 function reverse_geocode_node_presave($node) {
-  dpm($node, 'node');
   if ($node->type == 'hul_code_master') {
     $og_hul_lat = $node->original->field_hul_lat['und'][0]['value'];
     $og_hul_long = $node->original->field_hul_long['und'][0]['value'];
@@ -1484,9 +1483,12 @@ function reverse_geocode_node_presave($node) {
         // remove nid
         $node->field_area_hook = array();
         // empty status
-        $node->field_area_hook_group_hul = array();
+        $node->field_area_hook_group_hul[LANGUAGE_NONE][0]['value'] = 0;
         // empty beat code
         $node->field_static_delivery_beat_code = array();
+        $node->field_sequence = array();
+        $node->field_revised_sequence = array();
+        $node->field_revised_sequence_status[LANGUAGE_NONE][0]['value'] = 0;
         
         if ($day_van_area_nid) {
           $node->field_area_hook[LANGUAGE_NONE][0]['nid'] = $day_van_area_nid;
