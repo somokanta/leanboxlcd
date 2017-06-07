@@ -109,7 +109,7 @@ function leanbox_dashboard_chart_filter_sales_delivery_table_form($form, &$form_
     );
     $form['end_date'] = array(
       '#type' => 'date_popup',
-      '#title' => t('Dispatch Date To'),
+      '#title' => t('Bill Date To'),
       '#required' => TRUE,
       '#date_format' => 'Y-m-d',
       '#default_value' => $bill_date,
@@ -1521,7 +1521,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
         }
         
 
-        $sales_ret = (($val['return_value'] / $val['bill_value']) * 100);
+        $sales_ret = (($data['return_value']  /  $data['sales_value'] ) * 100);
         $reason_tid = $val['deliver_reason'];
         if (!empty($reason_tid)) {
           $term = taxonomy_term_load($reason_tid);
@@ -1532,14 +1532,19 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
         }
 
         if (($sales_ret >= 99) && ($data['return_value'] != 'NA')) {
-          $data['status'] = 'Full';
+          $data['status'] = 'Full RETURN';
         }
         else if (($sales_ret > 1 && $sales_ret < 99) && ($data['return_value'] != 'NA')) {
-          $data['status'] = 'Partial';
+          $data['status'] = 'PARTIAL RETURN';
+        }
+        else if (($sales_ret <= 1) && ($data['return_value'] != 'NA')){
+          $data['status'] = 'FULL DELIVERED';
         }
         else {
           $data['status'] = 'NA';
         }
+        
+        // reason and delivery pending below
         $data['reason'] = $name;
         $data['delivery_pending'] = $val['delivery_pending'];
         $rows[] = $data;

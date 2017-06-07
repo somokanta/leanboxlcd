@@ -1466,7 +1466,6 @@ function reverse_geocode_node_presave($node) {
     if (!empty($original_day) && !empty($original_channel) && !empty($original_pl_group)) {
 
       if ($original_day !== $updated_day || $original_area_hook !== $updated_area_hook || $original_channel !== $updated_channel || $original_pl_group !== $updated_pl_group) {
-
         $channel = $node->field_channel['und'][0]['value'];
         $pl_group = $node->field_pl_group['und'][0]['value'];
 
@@ -1480,12 +1479,22 @@ function reverse_geocode_node_presave($node) {
         $query->condition('ppmpl.field_pl_group_value', $pl_group);
         $query->fields('ppplg', array('field_van_pl_group_value'));
         $van_pl_grp = $query->execute()->fetchField();
-
         $day_van_area_nid = get_nid_from_master_using_sales_day_van_grp_area_hook($updated_day, $van_pl_grp, $updated_area_hook);
-
+         
+        // remove nid
+        $node->field_area_hook = array();
+        // empty status
+        $node->field_area_hook_group_hul[LANGUAGE_NONE][0]['value'] = 0;
+        // empty beat code
+        $node->field_static_delivery_beat_code = array();
+        $node->field_sequence = array();
+        $node->field_revised_sequence = array();
+        $node->field_revised_sequence_status[LANGUAGE_NONE][0]['value'] = 0;
+        
         if ($day_van_area_nid) {
           $node->field_area_hook[LANGUAGE_NONE][0]['nid'] = $day_van_area_nid;
         }
+
       }
     }
   }
