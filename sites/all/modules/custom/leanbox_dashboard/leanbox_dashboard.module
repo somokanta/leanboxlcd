@@ -1093,19 +1093,22 @@ function leanbox_dashboard_chart_filter_sales_delivery_report_form_submit($form,
 
 function leanbox_dashboard_sales_delivery_table_callback() {
   $output = leanbox_dashboard_sales_delivery_table();
+  $output1 = $output['output'];
   $param = $_GET;
   unset($param['q']);
-  if ($output !== 'No Result Found') {
-    $output .= l(t('XLS'), 'sales-delivery-table/export', array('query' => array($param)));
+  if ($output['status']) {
+    $data['start_date'] = $param['start_date'];
+    $data['end_date'] = $param['end_date'];
+    $output1 .= l(t('XLS'), 'sales-delivery-table/export', array('query' => array($data)));
   }
-  return $output;
+  return $output1;
 }
 function leanbox_dashboard_sales_delivery_table_export() {
   $file = "SalesDelivery.xls";
   $table = leanbox_dashboard_sales_delivery_table();
   header("Content-type: application/vnd.ms-excel");
   header("Content-Disposition: attachment; filename=$file");
-  echo $table;
+  echo $table['output'];
 }
 
 function leanbox_dashboard_sales_delivery_table() {
@@ -1243,9 +1246,13 @@ function leanbox_dashboard_sales_delivery_table() {
         'attributes' => array('width' => '100%')
       ));
       $output .= theme('pager');
+      $output1['status'] = TRUE;
+      $output1['output'] = $output;
     }
     else {
-      $output .= 'No Result Found';
+      $output .= 'No Result Found ';
+      $output1['status'] = FALSE;
+      $output1['output'] = $output;
     }
-    return $output;
+    return $output1;
 }
