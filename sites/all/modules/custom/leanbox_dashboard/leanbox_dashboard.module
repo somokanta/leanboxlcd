@@ -1206,7 +1206,7 @@ function leanbox_dashboard_sales_delivery_table($export = FALSE) {
       $data['impact_date'] = date('Y-m-d', ($val['impact_date']));
       $data['delivered_value'] = is_null($val['delivered_value']) ? 'NA' : round($val['delivered_value']);
 
-      if ($data['delivered_value'] == 'NA') {
+      if ($data['delivered_value'] === 'NA') {
         $data['return_value'] = 'NA';
       }
       else {
