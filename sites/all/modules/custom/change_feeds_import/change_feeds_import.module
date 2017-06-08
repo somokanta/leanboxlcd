@@ -1857,7 +1857,9 @@ function change_feeds_import_query_alter(QueryAlterableInterface $query) {
     $query->groupBy('field_sales_day_value');
     $query->groupBy('field_beat_name_value');
     $query->groupBy('field_area_hook_nid');
-    $query->addExpression('SUM(if(field_sales_day_value != 1, 1, 0))', 'ddddd');
+   // $query->addExpression('SUM(if(field_sales_day_value != 1, 1, 0))', 'ddddd');
+    
+    $query->add_field(NULL, "SUM(1)", "ddddd", array('aggregate' => TRUE));
    // $query->add_field('ddddd', 'fedef');
 
   }
@@ -1869,23 +1871,6 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
   // Store distributor id in author in each node
   $distributor_id = change_feeds_import_get_distributor_id($user->uid);
 
-  if ($view->name == 'van_planning_report_test') {
- //   $query->add_groupby('field_area_hook_nid','field_sales_day_value','field_beat_name');
-  
-//    $query->add_field('node', 'field_beat_name_value', 'field_data_field_beat_name_node_entity_type', array('function' => 'groupby'));
-//    $query->add_groupby('node.field_beat_name_value');
-//    
-//    $query->add_field('field_data_field_sales_day', 'field_sales_day', 'sales_day', array('function' => 'groupby'));
-//    $query->add_groupby('field_data_field_sales_day.field_sales_day_value');
-//    
-//    $query->add_field('field_data_field_beat_name', 'field_beat_name', 'beat_name', array('function', groupby));
-//    $query->add_groupby('field_data_field_beat_name.field_beat_name');
-//    
-//    
-//    $query->add_field('custom_billing_data', 'bill_number', 'custom_billing_data_bill_number', array('function' => 'groupby'));
-//    $query->add_groupby('custom_billing_data.bill_number');
-    
-  }
   if ($view->name != 'user_manual') {
     foreach ($query->table_queue as $key => $val) {
       if (($val['table'] == 'node')) {
