@@ -233,6 +233,23 @@ function change_feeds_import_views_data() {
   );
   
   
+  $data['records']['table']['group'] = t('Records');
+  $data['records']['table']['join'] = array(
+    // #global is a special flag which let's a table appear all the time.
+    '#global' => array(),
+  );
+  // Add custom field
+  $data['records']['total_rec'] = array(
+    'title' => t('Custom Total Record Field'),
+    'help' => t('Provides a custom total record field.'),
+    'field' => array(
+      'handler' => 'total_rec_handler_custom_field',
+    ),
+  );
+  
+  
+  
+  
   $data['bill_sequence']['table']['group'] = t('Bill Sequence');
   $data['bill_sequence']['table']['join'] = array(
     // #global is a special flag which let's a table appear all the time.
