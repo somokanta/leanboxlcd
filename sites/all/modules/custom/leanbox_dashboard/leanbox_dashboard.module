@@ -1034,14 +1034,14 @@ function leanbox_dashboard_chart_filter_sales_delivery_report_form($form, &$form
     '#title' => t('Bill Date From'),
     '#required' => TRUE,
     '#date_format' => 'Y-m-d',
-    '#default_value' => $bill_date,
+    '#default_value' => $start_date,
   );
   $form['end_date'] = array(
     '#type' => 'date_popup',
     '#title' => t('Bill Date To'),
     '#required' => TRUE,
     '#date_format' => 'Y-m-d',
-    '#default_value' => $bill_date,
+    '#default_value' => $end_date,
   );
 
   $form['submit'] = array(
@@ -1131,8 +1131,12 @@ function leanbox_dashboard_sales_delivery_table($export = FALSE) {
 
 
   $data = array();
-
-  $query = db_select('custom_billing_data', 'bl')->extend('pagerDefault')->limit(10);
+  if ($export) {
+    $query = db_select('custom_billing_data', 'bl');
+  }
+  else {
+    $query = db_select('custom_billing_data', 'bl')->extend('pagerDefault')->limit(10);
+  }
   $query->condition('bl.distributor_id', $distributor_id);
   $query->fields('bl', array('bill_number', 'bill_date', 'party_code'));
 
