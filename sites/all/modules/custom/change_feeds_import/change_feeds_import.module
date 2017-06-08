@@ -1857,11 +1857,8 @@ function change_feeds_import_query_alter(QueryAlterableInterface $query) {
     $query->groupBy('field_sales_day_value');
     $query->groupBy('field_beat_name_value');
     $query->groupBy('field_area_hook_nid');
-   // $query->addExpression('SUM(if(field_sales_day_value != 1, 1, 0))', 'ddddd');
-  // $query->addField('bn', 'field_beat_name_value', 'BEAT_NAME');
-
-    $query->addField(NULL, "SUM(if(field_sales_day_value != 1, 1, 0))", "ddddd", array('aggregate' => TRUE));
-   // $query->add_field('ddddd', 'fedef');
+    $query->addExpression('SUM(if(field_sales_day_value != 1, 1, 0))', 'ddddd');
+    $sub_query->addField(NULL, 'ddddd', 'tryhhh');
 
   }
 }
