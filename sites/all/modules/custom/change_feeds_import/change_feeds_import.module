@@ -1866,8 +1866,14 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
   // Store distributor id in author in each node
   $distributor_id = change_feeds_import_get_distributor_id($user->uid);
 
- 
-  
+
+  if ($view->name == 'test') {
+    foreach ($query->fields as $key => $field) {
+      $query->fields[$key]['aggregate'] = TRUE;
+    }
+    $query->add_groupby('field_sales_day_value');
+  }
+
   if ($view->name != 'user_manual') {
     foreach ($query->table_queue as $key => $val) {
       if (($val['table'] == 'node')) {
