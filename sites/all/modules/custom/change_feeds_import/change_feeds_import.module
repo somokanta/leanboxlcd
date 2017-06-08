@@ -1853,7 +1853,7 @@ function change_feeds_import_services_resources() {
 function change_feeds_import_query_alter(QueryAlterableInterface $query) {
   $view_name = 'van_planning_report_test';
   if ($query->hasTag('views_' . $view_name)) {
-    $query->groupBy('field_beat_name');
+    $query->groupBy('field_beat_name_value');
   }
 }
 
