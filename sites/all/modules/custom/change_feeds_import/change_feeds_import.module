@@ -1854,8 +1854,8 @@ function change_feeds_import_query_alter(QueryAlterableInterface $query) {
   $view_name = 'van_planning_report_test';
   if ($query->hasTag('views_' . $view_name)) {
     $query->groupBy('field_beat_name_value');
-  //  $query->groupBy('field_sales_day');
     $query->groupBy('field_area_hook_nid');
+    $query->groupBy('field_sales_day_value');
   }
 }
 
