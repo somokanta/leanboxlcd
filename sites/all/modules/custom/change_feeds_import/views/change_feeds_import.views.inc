@@ -951,6 +951,16 @@ function change_feeds_import_views_data() {
       'click sortable' => FALSE,
      ),
   );
+  
+  $data['node']['outlets_per_van_planning'] = array(
+    'title' => t('outlets per van planning'),
+    'help' => t('outlets per van From van pl group for van planning'),
+    'real field' => 'nid',
+    'field' => array(
+      'handler' => 'views_handler_field_outlets_per_van_planning',
+      'click sortable' => FALSE,
+     ),
+  );
 
   return $data;
 }
