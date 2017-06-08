@@ -14,5 +14,6 @@ files[] = views/handler/beat_name_handler_custom_field.inc
 files[] = views/handler/views_handler_field_van_pl_group.inc
 files[] = views/handler/views_handler_field_outlets_per_van.inc
 files[] = views/handler/sequence_method_handler_custom_field.inc
+files[] = views/handler/total_rec_handler_custom_field.inc
 ; Plugins
 files[] = plugins/FeedsNodeCustomProcessor.inc
