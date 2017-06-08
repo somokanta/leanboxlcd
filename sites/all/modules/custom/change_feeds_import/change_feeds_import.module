@@ -1870,8 +1870,8 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
   if ($view->name == 'test') {
     foreach ($query->fields as $key => $field) {
       
-      dpm($key,"key");
       if($key == "field_data_field_sales_day_node_entity_type"){
+       dpm($key,"key");
        $query->fields[$key]['aggregate'] = TRUE;
        $query->add_groupby('field_data_field_sales_day.field_sales_day_value');
 
