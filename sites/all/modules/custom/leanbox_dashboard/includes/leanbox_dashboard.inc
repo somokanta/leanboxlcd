@@ -1220,7 +1220,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     $query->join('node', 'n', 'bd.bill_number = n.title');
     $query->condition('n.type', 'sales_register_data');
     $query->condition('n.uid', $distributor_id);
-    $query->join('field_data_field_sales_return_amt', 'r', 'r.entity_id = n.nid');
+    $query->leftjoin('field_data_field_sales_return_amt', 'r', 'r.entity_id = n.nid');
 
     $query->addExpression('SUM(bd.Sum_of_NET_SALES_VALUE)', 'sum');
 //$query->groupBy('bd.bill_number');
@@ -1443,7 +1443,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
   else if ($activity_type == 'sales_delivery_table') {
     $data = array();
 
-    $query = db_select('custom_billing_data', 'bl');
+    $query = db_select('custom_billing_data', 'bl')->extend('pagerDefault')->limit(10);
     $query->condition('bl.distributor_id', $distributor_id);
     $query->fields('bl', array('bill_number', 'bill_date', 'party_code'));
 
@@ -1531,13 +1531,13 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
           $name = 'NA';
         }
 
-        if (($sales_ret >= 99) && ($data['return_value'] != 'NA')) {
+        if (($sales_ret >= 99) && ($data['return_value'] !== 'NA')) {
           $data['status'] = 'Full RETURN';
         }
-        else if (($sales_ret > 1 && $sales_ret < 99) && ($data['return_value'] != 'NA')) {
+        else if (($sales_ret > 1 && $sales_ret < 99) && ($data['return_value'] !== 'NA')) {
           $data['status'] = 'PARTIAL RETURN';
         }
-        else if (($sales_ret <= 1) && ($data['return_value'] != 'NA')){
+        else if (($sales_ret <= 1) && ($data['return_value'] !== 'NA')){
           $data['status'] = 'FULL DELIVERED';
         }
         else {
@@ -1555,6 +1555,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
         'rows' => $rows,
         'attributes' => array('width' => '100%')
       ));
+      $output .= theme('pager');
     }
     else {
       $output = 'No Result Found';
