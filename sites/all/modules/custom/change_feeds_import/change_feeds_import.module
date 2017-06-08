@@ -1868,10 +1868,10 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
 
 
   if ($view->name == 'test') {
-    foreach ($query->fields as $key => $field) {
-      $query->fields[$key]['aggregate'] = TRUE;
-    }
-    $query->add_groupby('field_sales_day_value');
+//    foreach ($query->fields as $key => $field) {
+//      $query->fields[$key]['aggregate'] = TRUE;
+//    }
+//    $query->add_groupby('field_sales_day_value');
   }
 
   if ($view->name != 'user_manual') {
