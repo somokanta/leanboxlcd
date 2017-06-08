@@ -22,7 +22,7 @@ function leanbox_dashboard_menu() {
     'page callback' => 'leanbox_dashboard_sales_delivery_table_export',
     'access arguments' => array('Distributor Upload File'),
   );
-   
+
   $items['dashboard'] = array(
     'page callback' => 'leanbox_dashboard_listing_page',
     'access arguments' => array('Distributor Upload File'),
@@ -259,7 +259,7 @@ function leanbox_dashboard_block_info() {
   $blocks['bills_per_person_trends'] = array(
     'info' => t('Bills Per Person Day Wise Trends'),
     'cache' => DRUPAL_NO_CACHE,
-  ); 
+  );
   $blocks['unloading_daywise_trends'] = array(
     'info' => t('Bills Unloading Day Wise Trends'),
     'cache' => DRUPAL_NO_CACHE,
@@ -270,7 +270,6 @@ function leanbox_dashboard_block_info() {
   );
   return $blocks;
 }
-
 
 /**
  * Implements hook_block_view
@@ -856,7 +855,7 @@ function leanbox_dashboard_block_view($delta = '') {
       break;
 
     case 'unloading_daywise_trends':
-      
+
       $loading_date = date('d-m-Y');
       $block['subject'] = "Unloading DayWise($loading_date EGIR)";
       $data = leanbox_dashboard_chart_query_details('unloading_daywise_trends');
@@ -1103,15 +1102,16 @@ function leanbox_dashboard_sales_delivery_table_callback() {
   }
   return $output1;
 }
+
 function leanbox_dashboard_sales_delivery_table_export() {
   $file = "SalesDelivery.xls";
-  $table = leanbox_dashboard_sales_delivery_table();
+  $table = leanbox_dashboard_sales_delivery_table(TRUE);
   header("Content-type: application/vnd.ms-excel");
   header("Content-Disposition: attachment; filename=$file");
   echo $table['output'];
 }
 
-function leanbox_dashboard_sales_delivery_table() {
+function leanbox_dashboard_sales_delivery_table($export = FALSE) {
   global $user;
   // Store distributor id in author in each node
   $distributor_id = change_feeds_import_get_distributor_id($user->uid);
@@ -1128,131 +1128,144 @@ function leanbox_dashboard_sales_delivery_table() {
   else {
     $end_date = strtotime(date('Y-m-d')) + 86399;
   }
-  
-    // render form
-    $output = drupal_render(drupal_get_form('leanbox_dashboard_chart_filter_sales_delivery_report_form'));
-    $data = array();
 
-    $query = db_select('custom_billing_data', 'bl')->extend('pagerDefault')->limit(10);
-    $query->condition('bl.distributor_id', $distributor_id);
-    $query->fields('bl', array('bill_number', 'bill_date', 'party_code'));
+
+  $data = array();
+
+  $query = db_select('custom_billing_data', 'bl')->extend('pagerDefault')->limit(10);
+  $query->condition('bl.distributor_id', $distributor_id);
+  $query->fields('bl', array('bill_number', 'bill_date', 'party_code'));
 
 // sales register
-    $query->join('node', 'n', 'bl.bill_number = n.title');
-    $query->condition('n.type', 'sales_register_data');
-    $query->condition('n.uid', $distributor_id);
-    $query->join('field_data_field_sales_party_code', 'sp', 'sp.entity_id = n.nid');
+  $query->join('node', 'n', 'bl.bill_number = n.title');
+  $query->condition('n.type', 'sales_register_data');
+  $query->condition('n.uid', $distributor_id);
+  $query->join('field_data_field_sales_party_code', 'sp', 'sp.entity_id = n.nid');
 
 
 // outlet_master
-    $query->join('node', 'ot', 'ot.title = sp.field_sales_party_code_value');
-    $query->condition('ot.type', 'outlet_master');
-    $query->condition('ot.uid', $distributor_id);
-    $query->join('field_data_field_channel', 'chan', 'chan.entity_id = ot.nid');
-    $query->join('field_data_field_pl_group', 'plg', 'plg.entity_id = ot.nid');
+  $query->join('node', 'ot', 'ot.title = sp.field_sales_party_code_value');
+  $query->condition('ot.type', 'outlet_master');
+  $query->condition('ot.uid', $distributor_id);
+  $query->join('field_data_field_channel', 'chan', 'chan.entity_id = ot.nid');
+  $query->join('field_data_field_pl_group', 'plg', 'plg.entity_id = ot.nid');
 
-    $query->addfield('chan', 'field_channel_value', 'channel');
-    $query->addfield('plg', 'field_pl_group_value', 'pl_group');
-    $query->addExpression('SUM(bl.Sum_of_NET_SALES_VALUE)', 'sales_value');
-    $query->leftjoin('field_data_field_impact_delivery_date', 'idl', 'idl.entity_id =  n.nid');
-    $query->addfield('idl', 'field_impact_delivery_date_value', 'impact_date');
+  $query->addfield('chan', 'field_channel_value', 'channel');
+  $query->addfield('plg', 'field_pl_group_value', 'pl_group');
+  $query->addExpression('SUM(bl.Sum_of_NET_SALES_VALUE)', 'sales_value');
+  $query->leftjoin('field_data_field_impact_delivery_date', 'idl', 'idl.entity_id =  n.nid');
+  $query->addfield('idl', 'field_impact_delivery_date_value', 'impact_date');
 
-    if (!empty($start_date) && !empty($end_date)) {
-      $query->condition('bl.bill_date', array($start_date, $end_date), 'BETWEEN');
-    }
-    $query->leftjoin('field_data_field_sales_return_amt', 'r', 'r.entity_id = n.nid');
-    $query->addfield('r', 'field_sales_return_amt_value', 'delivered_value');
+  if (!empty($start_date) && !empty($end_date)) {
+    $query->condition('bl.bill_date', array($start_date, $end_date), 'BETWEEN');
+  }
+  $query->leftjoin('field_data_field_sales_return_amt', 'r', 'r.entity_id = n.nid');
+  $query->addfield('r', 'field_sales_return_amt_value', 'delivered_value');
 
-    $query->groupBy('bl.bill_number');
+  $query->groupBy('bl.bill_number');
 
-    $query->join('field_data_field_bill_value', 'bv', 'bv.entity_id = n.nid');
-    $query->addfield('bv', 'field_bill_value_value', 'bill_value');
-    $query->leftjoin('field_data_field_deliver_reason', 'dr', 'dr.entity_id = n.nid');
-   // $query->addExpression('(bv.field_bill_value_value - r.field_sales_return_amt_value)', 'return_value');
-    $query->addfield('dr', 'field_deliver_reason_tid', 'deliver_reason');
+  $query->join('field_data_field_bill_value', 'bv', 'bv.entity_id = n.nid');
+  $query->addfield('bv', 'field_bill_value_value', 'bill_value');
+  $query->leftjoin('field_data_field_deliver_reason', 'dr', 'dr.entity_id = n.nid');
+  // $query->addExpression('(bv.field_bill_value_value - r.field_sales_return_amt_value)', 'return_value');
+  $query->addfield('dr', 'field_deliver_reason_tid', 'deliver_reason');
 
-    $query->leftjoin('field_data_field_delivery_pending', 'dp', 'dp.entity_id =  n.nid');
-    $query->addfield('dp', 'field_delivery_pending_value', 'delivery_pending');
-    
-    $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+  $query->leftjoin('field_data_field_delivery_pending', 'dp', 'dp.entity_id =  n.nid');
+  $query->addfield('dp', 'field_delivery_pending_value', 'delivery_pending');
+
+  $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
 
 
-    if (!empty($res)) {
-      $header = array(
-        array('data' => 'BILL NUMBER',),
-        array('data' => 'BILL DATE',),
-        array('data' => 'PARTY CODE',),
-        array('data' => 'CHANNEL',),
-        array('data' => 'PL GROUP',),
-        array('data' => 'Sum of NET_SALES_VALUE'),
-        array('data' => 'IMPACT DATE'),
-        array('data' => 'SALES DELIVERED AMT',),
-        array('data' => 'SALES RETURNED AMT',),
-        array('data' => 'STATUS',),
-        array('data' => 'REASON',),
-        array('data' => 'DELIVERY PENDING',),
-      );
-      foreach ($res as $key => $val) {
-        $data = array();
-        $data['bill_no'] = $val['bill_number'];
-        $data['bill_date'] = date('Y-m-d',$val['bill_date']);
-        $data['party_code'] = $val['party_code'];
-        $data['channel'] = $val['channel'];
-        $data['pl_group'] = $val['pl_group'];
-        $data['sales_value'] = round($val['sales_value']);
-        $data['impact_date'] = date('Y-m-d',($val['impact_date']));
-        $data['delivered_value'] = !empty($val['delivered_value']) ? round($val['delivered_value']) : 'NA';
+  if (!empty($res)) {
+    $header = array(
+      array('data' => 'BILL NUMBER',),
+      array('data' => 'BILL DATE',),
+      array('data' => 'PARTY CODE',),
+      array('data' => 'CHANNEL',),
+      array('data' => 'PL GROUP',),
+      array('data' => 'Sum of NET_SALES_VALUE'),
+      array('data' => 'IMPACT DATE'),
+      array('data' => 'SALES DELIVERED AMT',),
+      array('data' => 'SALES RETURNED AMT',),
+      array('data' => 'STATUS',),
+      array('data' => 'REASON',),
+      array('data' => 'DELIVERY PENDING',),
+    );
+    foreach ($res as $key => $val) {
+      $data = array();
+      $data['bill_no'] = $val['bill_number'];
+      $data['bill_date'] = date('Y-m-d', $val['bill_date']);
+      $data['party_code'] = $val['party_code'];
+      $data['channel'] = $val['channel'];
+      $data['pl_group'] = $val['pl_group'];
+      $data['sales_value'] = round($val['sales_value']);
+      $data['impact_date'] = date('Y-m-d', ($val['impact_date']));
+      $data['delivered_value'] = !empty($val['delivered_value']) ? round($val['delivered_value']) : 'NA';
 
-        if ($data['delivered_value'] == 'NA') {
-           $data['return_value']  = 'NA';
-        }
-        else {
-          $data['return_value'] = $data['sales_value'] - $data['delivered_value'];
-        }
-        
-
-        $sales_ret = (($data['return_value']  /  $data['sales_value'] ) * 100);
-        $reason_tid = $val['deliver_reason'];
-        if (!empty($reason_tid)) {
-          $term = taxonomy_term_load($reason_tid);
-          $name = $term->name;
-        }
-        else {
-          $name = 'NA';
-        }
-
-        if (($sales_ret >= 99) && ($data['return_value'] !== 'NA')) {
-          $data['status'] = 'Full RETURN';
-        }
-        else if (($sales_ret > 1 && $sales_ret < 99) && ($data['return_value'] !== 'NA')) {
-          $data['status'] = 'PARTIAL RETURN';
-        }
-        else if (($sales_ret <= 1) && ($data['return_value'] !== 'NA')){
-          $data['status'] = 'FULL DELIVERED';
-        }
-        else {
-          $data['status'] = 'NA';
-        }
-        
-        // reason and delivery pending below
-        $data['reason'] = $name;
-        $data['delivery_pending'] = $val['delivery_pending'];
-        $rows[] = $data;
+      if ($data['delivered_value'] == 'NA') {
+        $data['return_value'] = 'NA';
+      }
+      else {
+        $data['return_value'] = $data['sales_value'] - $data['delivered_value'];
       }
 
+
+      $sales_ret = (($data['return_value'] / $data['sales_value'] ) * 100);
+      $reason_tid = $val['deliver_reason'];
+      if (!empty($reason_tid)) {
+        $term = taxonomy_term_load($reason_tid);
+        $name = $term->name;
+      }
+      else {
+        $name = 'NA';
+      }
+
+      if (($sales_ret >= 99) && ($data['return_value'] !== 'NA')) {
+        $data['status'] = 'Full RETURN';
+      }
+      else if (($sales_ret > 1 && $sales_ret < 99) && ($data['return_value'] !== 'NA')) {
+        $data['status'] = 'PARTIAL RETURN';
+      }
+      else if (($sales_ret <= 1) && ($data['return_value'] !== 'NA')) {
+        $data['status'] = 'FULL DELIVERED';
+      }
+      else {
+        $data['status'] = 'NA';
+      }
+
+      // reason and delivery pending below
+      $data['reason'] = $name;
+      $data['delivery_pending'] = $val['delivery_pending'];
+      $rows[] = $data;
+    }
+    if ($export) {
+      $output = theme('table', array(
+        'header' => $header,
+        'rows' => $rows,
+        'attributes' => array('width' => '100%')
+      ));
+    }
+    else {
+      // render form
+      $output = drupal_render(drupal_get_form('leanbox_dashboard_chart_filter_sales_delivery_report_form'));
       $output .= theme('table', array(
         'header' => $header,
         'rows' => $rows,
         'attributes' => array('width' => '100%')
       ));
       $output .= theme('pager');
-      $output1['status'] = TRUE;
-      $output1['output'] = $output;
     }
-    else {
-      $output .= 'No Result Found ';
-      $output1['status'] = FALSE;
-      $output1['output'] = $output;
-    }
-    return $output1;
+
+
+    $output1['status'] = TRUE;
+    $output1['output'] = $output;
+  }
+  else {
+    // render form
+    $output = drupal_render(drupal_get_form('leanbox_dashboard_chart_filter_sales_delivery_report_form'));
+    $output .= 'No Result Found ';
+    $output1['status'] = FALSE;
+    $output1['output'] = $output;
+  }
+  return $output1;
 }
