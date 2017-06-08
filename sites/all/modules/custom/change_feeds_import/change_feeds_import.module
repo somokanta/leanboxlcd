@@ -1856,6 +1856,9 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
   // Store distributor id in author in each node
   $distributor_id = change_feeds_import_get_distributor_id($user->uid);
 
+  if ($view->name == 'van_planning_report_test') {
+    $query->add_groupby('field_area_hook_nid','field_sales_day_value','field_beat_name');
+  }
   if ($view->name != 'user_manual') {
     foreach ($query->table_queue as $key => $val) {
       if (($val['table'] == 'node')) {
