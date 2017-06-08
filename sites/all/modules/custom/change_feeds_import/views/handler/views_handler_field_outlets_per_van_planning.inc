@@ -12,7 +12,9 @@
 class views_handler_field_outlets_per_van_planning extends views_handler_field {
 
   function render($values) {
+    dpm($values,"values");
     $van_pl_group = $values->field_dva_van_pl_group[0]['raw']['value'];
+    dpm($van_pl_group,"van_pl_group");
     $seq = $values->_field_data[$this->field_alias]['entity']->field_revised_sequence['und'][0]['value'];
     
     $query = db_select('node', 'n');
