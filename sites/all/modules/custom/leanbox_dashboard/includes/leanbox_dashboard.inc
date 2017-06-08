@@ -1206,7 +1206,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     $query->leftjoin('field_data_field_sales_return_amt', 'r', 'r.entity_id = n.nid');
     $query->fields('b', array('field_bill_value_value'));
     $query->fields('r', array('field_sales_return_amt_value'));
-    $query->fields('bd', array('Sum_of_NET_SALES_VALUE'));
+    $query->addExpression('SUM(bd.Sum_of_NET_SALES_VALUE)', 'sales_value');
     $res2 = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
 
     $output[0] = array('Sales Delivery', 'Return %');
@@ -1233,12 +1233,12 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
       foreach ($res2 as $key2 => $val2) {
         if ($val2['field_sales_return_amt_value'] != NULL) {
 
-          $sales_ret = (( $val2['Sum_of_NET_SALES_VALUE'] - $val2['field_sales_return_amt_value']) / $val2['Sum_of_NET_SALES_VALUE']) * 100;
+          $sales_ret = (( $val2['sales_value'] - $val2['field_sales_return_amt_value']) / $val2['sales_value']) * 100;
           if ($sales_ret >= 99) {
-            $data['Full Return']['data'] += $val2['Sum_of_NET_SALES_VALUE'] - $val2['field_sales_return_amt_value'];
+            $data['Full Return']['data'] += $val2['sales_value'] - $val2['field_sales_return_amt_value'];
           }
           else if ($sales_ret > 1 && $sales_ret < 99) {
-            $data['Partial Delivery']['data'] += $val2['Sum_of_NET_SALES_VALUE'] - $val2['field_sales_return_amt_value'];
+            $data['Partial Delivery']['data'] += $val2['sales_value'] - $val2['field_sales_return_amt_value'];
           }
           else {
             continue;
