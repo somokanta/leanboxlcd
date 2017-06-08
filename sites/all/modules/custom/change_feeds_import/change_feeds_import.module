@@ -1850,7 +1850,7 @@ function change_feeds_import_services_resources() {
   return $android_services_resource;
 }
 
-function assessforce_assessment_query_alter(QueryAlterableInterface $query) {
+function change_feeds_import_query_alter(QueryAlterableInterface $query) {
   $view_name = 'van_planning_report_test';
   if ($query->hasTag('views_' . $view_name)) {
     $query->groupBy('field_beat_name');
