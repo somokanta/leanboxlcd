@@ -1095,7 +1095,9 @@ function leanbox_dashboard_sales_delivery_table_callback() {
   $output = leanbox_dashboard_sales_delivery_table();
   $param = $_GET;
   unset($param['q']);
-  $output .= l(t('XLS'), 'sales-delivery-table/export', array('query' => array($param)));
+  if ($output !== 'No Result Found') {
+    $output .= l(t('XLS'), 'sales-delivery-table/export', array('query' => array($param)));
+  }
   return $output;
 }
 function leanbox_dashboard_sales_delivery_table_export() {
@@ -1112,13 +1114,13 @@ function leanbox_dashboard_sales_delivery_table() {
   $distributor_id = change_feeds_import_get_distributor_id($user->uid);
 
   if (isset($_GET['start_date'])) {
-    $start_date = strtotime($start);
+    $start_date = strtotime($_GET['start_date']);
   }
   else {
     $start_date = strtotime(date("Y-m-d"));
   }
   if (isset($_GET['end_date'])) {
-    $end_date = strtotime($end) + 86399;
+    $end_date = strtotime($_GET['end_date']) + 86399;
   }
   else {
     $end_date = strtotime(date('Y-m-d')) + 86399;
