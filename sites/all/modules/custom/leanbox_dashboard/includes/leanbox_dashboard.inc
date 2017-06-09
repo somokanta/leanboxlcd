@@ -2150,7 +2150,7 @@ function leanbox_dashboard_otif_trends_chart_query_details($type, $start_date = 
   }
   $query->groupBy('b.field_sr_bill_date_value');
   $query->addExpression('SUM(v.field_bill_value_value)', 'bill_sum');
-  $res = $query->execute()->$query->execute()->fetchAllKeyed(0,1);
+  $res = $query->execute()->fetchAllKeyed(0,1);
 
   if (!empty($res)) {
 
