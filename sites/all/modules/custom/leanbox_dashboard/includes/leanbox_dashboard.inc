@@ -2178,8 +2178,8 @@ function leanbox_dashboard_otif_trends_chart_query_details($type, $start_date = 
     }
     $row = array();
     $row[] = 'Total';
-    foreach ($total_otif_val as $key => $val) {
-      $row[] = round(($val['ota_val'] / $val['bill_val']) * 100);
+    foreach ($total_otif_val as $key => $val1) {
+      $row[] = round(($val1['ota_val'] / $val['bill_sum']) * 100);
     }
     $rows[] = $row;
 
