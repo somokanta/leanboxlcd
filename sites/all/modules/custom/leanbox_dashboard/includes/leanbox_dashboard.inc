@@ -1197,10 +1197,11 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     $query->condition('n.type', 'sales_register_data');
     $query->condition('n.uid', $distributor_id);
     $query->join('field_data_field_sr_bill_date', 'i', 'i.entity_id = n.nid');
-    if (!empty($start_date) && !empty($end_date)) {
-      $query->condition('i.field_sr_bill_date_value', array($start_date, $end_date), 'BETWEEN');
-    }
+
     $query->join('custom_billing_data', 'bd', 'bd.bill_number = n.title');
+    if (!empty($start_date) && !empty($end_date)) {
+      $query->condition('bd.bill_date', array($start_date, $end_date), 'BETWEEN');
+    }
     $query->groupBy('bd.bill_number');
     $query->join('field_data_field_bill_value', 'b', 'b.entity_id = n.nid');
     $query->leftjoin('field_data_field_sales_return_amt', 'r', 'r.entity_id = n.nid');
