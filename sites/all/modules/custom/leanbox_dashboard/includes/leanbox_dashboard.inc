@@ -2136,7 +2136,7 @@ function leanbox_dashboard_otif_trends_chart_query_details($type, $start_date = 
   $query->join('field_data_field_sr_bill_date', 'b', 'b.entity_id = n.nid');
   $query->fields('b', array('field_sr_bill_date_value'));
   $query->join('field_data_field_billing_van', 'bva', 'bva.entity_id = n.nid');
-//  
+  
 //  $query->join('field_data_field_promised_date', 'pd', 'pd.entity_id = n.nid');
 //  $query->join('field_data_field_trip_id_reference', 't', 't.entity_id = n.nid');
 //  $query->join('node', 'n1', 't.field_trip_id_reference_nid = n1.nid');
@@ -2149,14 +2149,14 @@ function leanbox_dashboard_otif_trends_chart_query_details($type, $start_date = 
   }
   $query->groupBy('b.field_sr_bill_date_value');
   $query->addExpression('SUM(v.field_bill_value_value)', 'bill_sum');
-  $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+  $res = $query->execute()->fetchAllKeyed(0,1);
 
   if (!empty($res)) {
 
     $header[] = 'Channel';
     foreach ($res as $key => $val) {
       // prepare header
-      $date = date('Y-m-d', $val['field_sr_bill_date_value']);
+      $date = date('Y-m-d', $key);
       $header[$date] = $date;
     }
 
@@ -2165,11 +2165,12 @@ function leanbox_dashboard_otif_trends_chart_query_details($type, $start_date = 
       $row = array();
       $row[] = $channel;
       foreach ($res as $key => $val) {
-        $bill_date_str = $val['field_sr_bill_date_value'];
+        $bill_date_str = $key;
         $array = _get_otif_details_using_bill_date($bill_date_str, $channel, $uid);
         $total_dis_bill_val =  ($array['total_dis_bill_val'] /  $array['channel_bill_val']) * 100; 
         $total_otif_val[$bill_date_str]['ota_val'] += $array['total_dis_bill_val'];
         $total_otif_val[$bill_date_str]['bill_val'] += $array['channel_bill_val'];
+        
         $otif_val = round($total_dis_bill_val);
         $row[] = $otif_val;
       }
@@ -2179,7 +2180,7 @@ function leanbox_dashboard_otif_trends_chart_query_details($type, $start_date = 
     $row = array();
     $row[] = 'Total';
     foreach ($total_otif_val as $key => $val1) {
-      $row[] = round(($val1['ota_val'] / $val['bill_sum']) * 100);
+      $row[] = round(($val1['ota_val'] / $res[$key]) * 100);
     }
     $rows[] = $row;
 
