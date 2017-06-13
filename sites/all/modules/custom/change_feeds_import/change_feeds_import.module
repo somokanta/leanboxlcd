@@ -34,9 +34,15 @@ function change_feeds_import_menu() {
     'type' => MENU_CALLBACK,
   );
 
-  $items['impact-delivery-job'] = array(
-    'title' => 'DRS Report',
-    'page callback' => 'impact_delivery_job',
+  $items['impact-delivery-cron'] = array(
+    'title' => 'Impact Delivery Report',
+    'page callback' => 'impact_delivery_cron',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+    $items['impact-delivery-partypack-cron'] = array(
+    'title' => 'Partypack cron Report',
+    'page callback' => 'impact_delivery_partypack_cron',
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
@@ -1866,9 +1872,7 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
   // Store distributor id in author in each node
   $distributor_id = change_feeds_import_get_distributor_id($user->uid);
 
-
-
-  if ($view->name != 'user_manual') {
+  if (($view->name != 'user_manual') || ($view->name != 'impact_delivery_cron_2') || ($view->name != 'impact_party_master')) {
     foreach ($query->table_queue as $key => $val) {
       if (($val['table'] == 'node')) {
         if (empty($val['join'])) {
@@ -2171,20 +2175,18 @@ function get_van_pl($van, $day, $name) {
  * @param type $batch
  * @param type $batch_redirect
  */
-/* * function change_feeds_import_views_data_export_batch_alter(&$batch, &$batch_redirect) {
+function change_feeds_import_views_data_export_batch_alter(&$batch, &$batch_redirect) {
   // $view = views_get_view($batch['view_name']);
-  $views_names = array('impact_delivery_report',); //  Download files for this Views only
+  $views_names = array('impact_delivery_cron_2', 'impact_party_master'); //  Download files for this Views only
   if (in_array($batch['view_name'], $views_names)) {
 
-  if (($batch['view_name'] == 'impact_delivery_report')) {
-  watchdog('ajax data', '<pre>'. print_r($batch, TRUE). '</pre>');
+    watchdog('ajax data', '<pre>' . print_r($batch, TRUE) . '</pre>');
 
-  //dsm($batch,"batch");
-  $batch['operations'][] = array(
-  'change_feeds_import_views_data_export_batch_finish', array($batch['eid'], $batch['view_name']),
-  );
+    $batch['operations'][] = array(
+      'change_feeds_import_views_data_export_batch_finish', array($batch['eid'], $batch['view_name']),
+    );
   }
-  } */
+}
 
 /**
  * 
@@ -2194,27 +2196,48 @@ function change_feeds_import_views_data_export_batch_finish($eid, $view_name) {
   $export = views_data_export_get($eid);
   $data = array();
   $view = views_data_export_view_retrieve($eid);
-  watchdog('ajaxview1', '<pre>' . print_r($data, TRUE) . '</pre>');
+ watchdog('cron', '<pre>' . print_r(array(), TRUE) . '</pre>');
   // Allow Dump Creation for Export 2 Only to avoid Overriding
-  //if ($view->localization_plugin->view->current_display == 'views_data_export_2') {
-  $view->set_display($export->view_display_id);
-  $view->display_handler->batched_execution_state = $export;
-  $view->display_handler->remove_index();
-  $file_name = 'public://' . $view_name . '.csv';
+  if ($view_name == 'impact_delivery_cron_2') {
+    watchdog('cron 2', '<pre>' . print_r(array(), TRUE) . '</pre>');
+    $view->set_display($export->view_display_id);
+    $view->display_handler->batched_execution_state = $export;
+    $view->display_handler->remove_index();
+    // Naming of file below
+    $file_name = 'public://' . $view_name . '.csv';
+    $temp_file = $view->display_handler->outputfile_path();
+    $uri_path = file_unmanaged_copy($temp_file, $file_name, FILE_EXISTS_REPLACE);
 
-  $temp_file = $view->display_handler->outputfile_path();
-  $uri_path = file_unmanaged_copy($temp_file, $file_name, FILE_EXISTS_REPLACE);
+    $files = file_load_multiple(array(), array('uri' => $uri_path));
+  }
+  else {
+    $view->set_display($export->view_display_id);
+    $view->display_handler->batched_execution_state = $export;
+    $view->display_handler->remove_index();
+    // Naming of file below
+    $file_name = 'public://' . $view_name . '.csv';
+    $temp_file = $view->display_handler->outputfile_path();
+    $uri_path = file_unmanaged_copy($temp_file, $file_name, FILE_EXISTS_REPLACE);
 
-  $files = file_load_multiple(array(), array('uri' => $uri_path));
-  watchdog('ajaxpath', '<pre>' . print_r($files, TRUE) . '</pre>');
-
-  // }
+    $files = file_load_multiple(array(), array('uri' => $uri_path));
+  }
 }
 
 /**
  * 
  */
-function impact_delivery_job() {
+function impact_delivery_cron() {
   $date = date('m/d/y', strtotime("-1 days"));
-  $url = "http://dev.leanbox.in/impact-delivery-report/export?date_filter[min][date]=" . $date . "&date_filter[max][date]=" . $date;
+ // $url = "http://dev.leanbox.in/impact-delivery-report/export?date_filter[min][date]=" . $date . "&date_filter[max][date]=" . $date;
+  $param['date_filter[min][date]'] = $date;
+  $param['date_filter[max][date]'] = $date;
+
+  drupal_goto('impact-delivery-cron2/export', array('query' => $param));
+}
+
+/**
+ * 
+ */
+function impact_delivery_partypack_cron() {
+  drupal_goto('impact-party-master/export');
 }
