@@ -2177,7 +2177,10 @@ function get_van_pl($van, $day, $name) {
  */
 function change_feeds_import_views_data_export_batch_alter(&$batch, &$batch_redirect) {
   // $view = views_get_view($batch['view_name']);
+  
   $views_names = array('impact_delivery_cron_2', 'impact_party_master'); //  Download files for this Views only
+  
+  watchdog('hook_alter batch', '<pre>' . print_r(array(), TRUE) . '</pre>');
   if (in_array($batch['view_name'], $views_names)) {
 
     watchdog('ajax data', '<pre>' . print_r($batch, TRUE) . '</pre>');
