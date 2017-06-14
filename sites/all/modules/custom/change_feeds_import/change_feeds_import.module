@@ -2199,17 +2199,22 @@ function change_feeds_import_views_data_export_batch_finish($eid, $view_name) {
   $export = views_data_export_get($eid);
   $data = array();
   $view = views_data_export_view_retrieve($eid);
- watchdog('cron', '<pre>' . print_r(array(), TRUE) . '</pre>');
+  watchdog('cron', '<pre>' . print_r(array(), TRUE) . '</pre>');
   // Allow Dump Creation for Export 2 Only to avoid Overriding
+  $date = date('Ymdhis', strtotime("+1 days"));
+   
   if ($view_name == 'impact_delivery_cron_2') {
     watchdog('cron 2', '<pre>' . print_r(array(), TRUE) . '</pre>');
     $view->set_display($export->view_display_id);
     $view->display_handler->batched_execution_state = $export;
     $view->display_handler->remove_index();
     // Naming of file below
-    $file_name = 'public://' . $view_name . '.csv';
+
+    $file_name = 'TP2IMPACT_DELIVERY_' . $date . '.csv';
+
+    $file_uri = 'public://TP2IMPACT_DELIVERY/' . $file_name;
     $temp_file = $view->display_handler->outputfile_path();
-    $uri_path = file_unmanaged_copy($temp_file, $file_name, FILE_EXISTS_REPLACE);
+    $uri_path = file_unmanaged_copy($temp_file, $file_uri, FILE_EXISTS_REPLACE);
 
     $files = file_load_multiple(array(), array('uri' => $uri_path));
   }
@@ -2218,20 +2223,25 @@ function change_feeds_import_views_data_export_batch_finish($eid, $view_name) {
     $view->display_handler->batched_execution_state = $export;
     $view->display_handler->remove_index();
     // Naming of file below
-    $file_name = 'public://' . $view_name . '.csv';
+   
+    $file_name = 'TP2IMPACT_DELIVERY_' . $date . '.csv';
+
+    $file_uri = 'public://' . $file_name;
     $temp_file = $view->display_handler->outputfile_path();
-    $uri_path = file_unmanaged_copy($temp_file, $file_name, FILE_EXISTS_REPLACE);
+    $uri_path = file_unmanaged_copy($temp_file, $file_uri, FILE_EXISTS_REPLACE);
 
     $files = file_load_multiple(array(), array('uri' => $uri_path));
   }
+  
+ // _send_file_using_sftp($file_name, $file_uri);
 }
 
 /**
  * 
  */
 function impact_delivery_cron() {
-  $date = date('m/d/y', strtotime("-1 days"));
- // $url = "http://dev.leanbox.in/impact-delivery-report/export?date_filter[min][date]=" . $date . "&date_filter[max][date]=" . $date;
+  $date = date('m/d/y', strtotime("+1 days"));
+
   $param['date_filter[min][date]'] = $date;
   $param['date_filter[max][date]'] = $date;
 
@@ -2243,4 +2253,37 @@ function impact_delivery_cron() {
  */
 function impact_delivery_partypack_cron() {
   drupal_goto('impact-party-master/export');
+}
+
+
+function _send_file_using_sftp($file_name, $file_uri) {
+  if (!empty($file_name) && !empty($file_uri)) {
+    $strServer = "103.233.76.251";  // ip address
+    $strServerPort = 22;
+    $strServerUsername = "sftpuser03";
+    $strServerPassword = "Techub123#";
+    // $dest_file = "C:\SFTP_ROOT\sftpuser03";
+    $csv_filename = 'impact_delivery_report.csv';
+    $csv_filename = $file_name;
+    $csv_realfilename = drupal_realpath($file_uri);
+
+    //Send file via sftp to server
+    //connect to server
+    $resConnection = ssh2_connect($strServer, $strServerPort);
+
+    if (ssh2_auth_password($resConnection, $strServerUsername, $strServerPassword)) {
+      //Initialize SFTP subsystem
+
+      $output = ssh2_scp_send($resConnection, $csv_realfilename, 'Processed/' . $file_name);
+    }
+    else {
+      $data['error'] = 'File was not sent';
+      $data['file_name'] = $file_name;
+      $data['file_uri'] = $file_uri;
+      watchdog('File error', '<pre>' . print_r($data, TRUE) . '</pre>');
+    }
+  }
+  else {
+    return '';
+  }
 }
