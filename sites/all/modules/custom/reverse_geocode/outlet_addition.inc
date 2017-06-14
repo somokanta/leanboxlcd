@@ -93,7 +93,7 @@ function outlet_addition_form($form, &$form_state) {
   $form_state['incremental_outlet']['options'] = $options;
   $class = array('selectable-row', 'table-radio');
 
-  if (!empty($rows)) {
+  if (!empty($options)) {
 
     $header_array = array('title' => 'New Outlet',
       'field_party_name_value' => 'New Outlet Name',
