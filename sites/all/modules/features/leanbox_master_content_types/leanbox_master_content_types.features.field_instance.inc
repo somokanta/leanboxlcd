@@ -179,6 +179,46 @@ function leanbox_master_content_types_field_default_field_instances() {
     ),
   );
 
+  // Exported field_instance: 'node-hul_code_master-field_hul_address'.
+  $field_instances['node-hul_code_master-field_hul_address'] = array(
+    'bundle' => 'hul_code_master',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 15,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_hul_address',
+    'label' => 'Hul Address',
+    'required' => 0,
+    'settings' => array(
+      'text_processing' => 0,
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'text',
+      'settings' => array(
+        'size' => 60,
+      ),
+      'type' => 'text_textfield',
+      'weight' => 48,
+    ),
+  );
+
   // Exported field_instance: 'node-hul_code_master-field_hul_area'.
   $field_instances['node-hul_code_master-field_hul_area'] = array(
     'bundle' => 'hul_code_master',
@@ -308,6 +348,46 @@ function leanbox_master_content_types_field_default_field_instances() {
       'settings' => array(),
       'type' => 'number',
       'weight' => 46,
+    ),
+  );
+
+  // Exported field_instance: 'node-hul_code_master-field_hul_phone_no'.
+  $field_instances['node-hul_code_master-field_hul_phone_no'] = array(
+    'bundle' => 'hul_code_master',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 14,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_hul_phone_no',
+    'label' => 'Hul Phone No',
+    'required' => 0,
+    'settings' => array(
+      'text_processing' => 0,
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'text',
+      'settings' => array(
+        'size' => 60,
+      ),
+      'type' => 'text_textfield',
+      'weight' => 47,
     ),
   );
 
@@ -1189,6 +1269,86 @@ function leanbox_master_content_types_field_default_field_instances() {
       ),
       'type' => 'text_textfield',
       'weight' => 33,
+    ),
+  );
+
+  // Exported field_instance: 'node-outlet_master-field_salesman'.
+  $field_instances['node-outlet_master-field_salesman'] = array(
+    'bundle' => 'outlet_master',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 18,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_salesman',
+    'label' => 'Salesman',
+    'required' => 0,
+    'settings' => array(
+      'text_processing' => 0,
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'text',
+      'settings' => array(
+        'size' => 60,
+      ),
+      'type' => 'text_textfield',
+      'weight' => 43,
+    ),
+  );
+
+  // Exported field_instance: 'node-outlet_master-field_salesman_code'.
+  $field_instances['node-outlet_master-field_salesman_code'] = array(
+    'bundle' => 'outlet_master',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 19,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_salesman_code',
+    'label' => 'Salesman Code',
+    'required' => 0,
+    'settings' => array(
+      'text_processing' => 0,
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'text',
+      'settings' => array(
+        'size' => 60,
+      ),
+      'type' => 'text_textfield',
+      'weight' => 44,
     ),
   );
 
@@ -3075,6 +3235,40 @@ function leanbox_master_content_types_field_default_field_instances() {
     ),
   );
 
+  // Exported field_instance: 'user-user-field_rs_code'.
+  $field_instances['user-user-field_rs_code'] = array(
+    'bundle' => 'user',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 3,
+      ),
+    ),
+    'entity_type' => 'user',
+    'field_name' => 'field_rs_code',
+    'label' => 'Rs Code',
+    'required' => 0,
+    'settings' => array(
+      'text_processing' => 0,
+      'user_register_form' => 0,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'text',
+      'settings' => array(
+        'size' => 60,
+      ),
+      'type' => 'text_textfield',
+      'weight' => 10,
+    ),
+  );
+
   // Translatables
   // Included for use with string extractors like potx.
   t('Area Hook');
@@ -3099,6 +3293,8 @@ function leanbox_master_content_types_field_default_field_instances() {
   t('Driver Name');
   t('Driver Phone No');
   t('HUL_Code');
+  t('Hul Address');
+  t('Hul Phone No');
   t('Hul Street');
   t('Hul Sub Area');
   t('Hul area');
@@ -3119,10 +3315,13 @@ function leanbox_master_content_types_field_default_field_instances() {
   t('Resource Description');
   t('Revised Sequence');
   t('Revised Sequence Status');
+  t('Rs Code');
   t('Sales Day');
   t('Sales Return Amt');
   t('Sales party code');
   t('Sales updated date');
+  t('Salesman');
+  t('Salesman Code');
   t('Sequence');
   t('Static Delivery Beat Code');
   t('Stops per Van');

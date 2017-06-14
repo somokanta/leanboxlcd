@@ -116,7 +116,7 @@ function leanbox_master_content_types_menu_default_menu_links() {
     'external' => 0,
     'has_children' => 0,
     'expanded' => 0,
-    'weight' => -41,
+    'weight' => -42,
     'customized' => 1,
     'parent_identifier' => 'menu-custom-menus_transactions:node/595899',
   );
