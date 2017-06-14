@@ -73,9 +73,7 @@ function update_incremental_outlet_submit($form, &$form_state) {
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
 
   $party_code = $form_state['values']['list_form_items']; // selected party code
-  dpm($party_code,"party_code");
   $new_outlet_array = $form_state['incremental_outlet']['options']; // already calculated outlet value.  
-  dpm($new_outlet_array,"new_outlet_array");
   foreach ($new_outlet_array as $key => $value) {
     if ($key == $party_code) {
       $van_pl = $value['field_dva_van_pl_group_value'];
@@ -83,7 +81,6 @@ function update_incremental_outlet_submit($form, &$form_state) {
 
       // get all node's of outlet master and lat long from hul master which has same pl group and area hook group of selected outlet node.
       $selected_results = get_selected_party_code_similar_outlet_data_with_lat_lng($van_pl, $area_hook, $distributor_id);
-      dpm($selected_results,"selected_results");
       foreach ($selected_results as $k => $v) {
         $lat = $v->field_hul_updated_lat_value;
         $lng = $v->field_hul_updated_long_value;
@@ -95,16 +92,12 @@ function update_incremental_outlet_submit($form, &$form_state) {
         $distsnce_hul_code_array[] = $hul_code;
         $distsnce_nid_array[] = $nid;
       }
-     dpm($distsnce_in_meter,"distsnce_in_meter");
       $index = array_keys($distsnce_in_meter, min($distsnce_in_meter));
       $index_id = $index[0];
       $closet_hul_code = $distsnce_hul_code_array[$index_id];
       $closet_outlet_nid = $distsnce_nid_array[$index_id];
-     dpm($closet_hul_code,"closet_hul_code");
-     dpm($closet_outlet_nid,"closet_outlet_nid");
       // Get result of closest outlet node.
       $closet_result = get_closet_result_from_closet_hul_code($closet_outlet_nid, $distributor_id);
-      dpm($closet_result,"closet_result");
       $nearest_outlet_code = $closet_result[0]->title;
       $nearest_outlet_name = $closet_result[0]->field_party_name_value;
       $closest_sales_delivery_beat = $closet_result[0]->field_static_delivery_beat_code_value;
@@ -114,11 +107,9 @@ function update_incremental_outlet_submit($form, &$form_state) {
 
       // logic for finding closest sequence.
       $get_all_closest_sequence = get_all_closest_sequence($van_pl, $area_hook, $distributor_id);
-      dpm($get_all_closest_sequence,"get_all_closest_sequence");
       $flag = 1;
       while ($flag) {
         $closest_sequence = $closest_sequence + 0.001;
-        dpm($closest_sequence,"closest_sequenceee");
         if (!isset($get_all_closest_sequence["$closest_sequence"])) {
           $flag = 0;
         }
