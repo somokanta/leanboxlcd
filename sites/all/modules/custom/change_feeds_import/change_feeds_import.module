@@ -2214,6 +2214,10 @@ function change_feeds_import_views_data_export_batch_finish($eid, $view_name) {
 
     $file_uri = 'public://TP2IMPACT_DELIVERY/' . $file_name;
     $temp_file = $view->display_handler->outputfile_path();
+    
+    // create directory if not exist
+    file_prepare_directory('public://TP2IMPACT_DELIVERY', FILE_CREATE_DIRECTORY);
+    
     $uri_path = file_unmanaged_copy($temp_file, $file_uri, FILE_EXISTS_REPLACE);
 
     $files = file_load_multiple(array(), array('uri' => $uri_path));
@@ -2224,10 +2228,14 @@ function change_feeds_import_views_data_export_batch_finish($eid, $view_name) {
     $view->display_handler->remove_index();
     // Naming of file below
    
-    $file_name = 'TP2IMPACT_DELIVERY_' . $date . '.csv';
+    $file_name = 'TP2IMPACT_PARTYMASTER_' . $date . '.csv';
 
-    $file_uri = 'public://' . $file_name;
+    $file_uri = 'public://TP2IMPACT_PARTYMASTER/' . $file_name;
     $temp_file = $view->display_handler->outputfile_path();
+    
+    // create directory if not exist
+    file_prepare_directory('public://TP2IMPACT_PARTYMASTER', FILE_CREATE_DIRECTORY);
+    
     $uri_path = file_unmanaged_copy($temp_file, $file_uri, FILE_EXISTS_REPLACE);
 
     $files = file_load_multiple(array(), array('uri' => $uri_path));
