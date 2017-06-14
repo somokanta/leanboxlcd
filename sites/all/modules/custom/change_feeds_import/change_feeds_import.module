@@ -2216,7 +2216,8 @@ function change_feeds_import_views_data_export_batch_finish($eid, $view_name) {
     $temp_file = $view->display_handler->outputfile_path();
     
     // create directory if not exist
-    file_prepare_directory('public://TP2IMPACT_DELIVERY', FILE_CREATE_DIRECTORY);
+    $dir = 'public://TP2IMPACT_DELIVERY';
+    file_prepare_directory($dir, FILE_CREATE_DIRECTORY);
     
     $uri_path = file_unmanaged_copy($temp_file, $file_uri, FILE_EXISTS_REPLACE);
 
@@ -2234,7 +2235,8 @@ function change_feeds_import_views_data_export_batch_finish($eid, $view_name) {
     $temp_file = $view->display_handler->outputfile_path();
     
     // create directory if not exist
-    file_prepare_directory('public://TP2IMPACT_PARTYMASTER', FILE_CREATE_DIRECTORY);
+    $dir = 'public://TP2IMPACT_PARTYMASTER';
+    file_prepare_directory($dir, FILE_CREATE_DIRECTORY);
     
     $uri_path = file_unmanaged_copy($temp_file, $file_uri, FILE_EXISTS_REPLACE);
 
