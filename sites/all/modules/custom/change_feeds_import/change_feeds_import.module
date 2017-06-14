@@ -2089,8 +2089,8 @@ function change_feeds_import_form_views_exposed_form_alter(&$form, &$form_state)
     $van_pl_options = $select + $van_pl_options;
     $sales_day_options = $select + $sales_day_options;
     $area_grp_name_options = $select + $area_grp_name_options;
-    
-    
+
+
     if (isset($form['field_dva_van_pl_group_value'])) {
       $form['field_dva_van_pl_group_value']['#type'] = 'select';
       $form['field_dva_van_pl_group_value']['#size'] = null;
@@ -2146,10 +2146,10 @@ function change_feeds_import_views_data_export_batch_alter(&$batch, &$batch_redi
   
   $views_names = array('impact_delivery_cron_2', 'impact_party_master'); //  Download files for this Views only
   
-  watchdog('hook_alter batch', '<pre>' . print_r($batch, TRUE) . '</pre>');
+  // watchdog('hook_alter batch', '<pre>' . print_r($batch, TRUE) . '</pre>');
   if (in_array($batch['view_name'], $views_names)) {
 
-    watchdog('ajax data', '<pre>' . print_r($batch, TRUE) . '</pre>');
+   // watchdog('ajax data', '<pre>' . print_r($batch, TRUE) . '</pre>');
 
     $batch['operations'][] = array(
       'change_feeds_import_views_data_export_batch_finish', array($batch['eid'], $batch['view_name']),
@@ -2165,12 +2165,12 @@ function change_feeds_import_views_data_export_batch_finish($eid, $view_name) {
   $export = views_data_export_get($eid);
   $data = array();
   $view = views_data_export_view_retrieve($eid);
-  watchdog('cron', '<pre>' . print_r(array(), TRUE) . '</pre>');
+  //watchdog('cron', '<pre>' . print_r(array(), TRUE) . '</pre>');
   // Allow Dump Creation for Export 2 Only to avoid Overriding
   $date = date('Ymdhis', strtotime("+1 days"));
    
   if ($view_name == 'impact_delivery_cron_2') {
-    watchdog('cron 2', '<pre>' . print_r(array(), TRUE) . '</pre>');
+    // watchdog('cron 2', '<pre>' . print_r(array(), TRUE) . '</pre>');
     $view->set_display($export->view_display_id);
     $view->display_handler->batched_execution_state = $export;
     $view->display_handler->remove_index();
@@ -2209,7 +2209,7 @@ function change_feeds_import_views_data_export_batch_finish($eid, $view_name) {
     $files = file_load_multiple(array(), array('uri' => $uri_path));
   }
   
- // _send_file_using_sftp($file_name, $file_uri);
+  _send_file_using_sftp($file_name, $file_uri);
 }
 
 /**
