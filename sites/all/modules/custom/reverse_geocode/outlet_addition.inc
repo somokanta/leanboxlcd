@@ -231,8 +231,6 @@ function update_incremental_outlet_submit($form, &$form_state) {
   global $user;
   $user_id = $user->uid;
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
-
-  dpm($form_state['values'],"valuesssss");
   $party_code = $form_state['values']['list_form_items']; // selected party code
   $new_outlet_array = $form_state['incremental_outlet']['options']; // already calculated outlet value.  
   foreach ($new_outlet_array as $key => $value) {
