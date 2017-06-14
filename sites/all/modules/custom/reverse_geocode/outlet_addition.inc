@@ -179,12 +179,12 @@ function increamental_outlet_get_results($sales_day, $van_pl_group, $area_hook_g
   //Area hook Master
   $query->join('node', 'na', 'na.nid = fa.field_area_hook_nid');
 
-  $query->join('field_data_field_dva_sales_day', 'sd', 'sd.entity_id = na.nid');
+$query->join('field_data_field_dva_sales_day', 'sd', 'sd.entity_id = na.nid');
   $query->condition('sd.field_dva_sales_day_value', $sales_day, '=');
   $query->join('field_data_field_dva_area_hook_group_name', 'agr', 'agr.entity_id = na.nid');
-  $query->condition('agr.field_dva_area_hook_group_name_value', $van_pl_group, '=');
+  $query->condition('agr.field_dva_area_hook_group_name_value', $area_hook_group, '=');
   $query->join('field_data_field_dva_van_pl_group', 'ppplg', 'na.nid = ppplg.entity_id');
-  $query->condition('ppplg.field_dva_van_pl_group_value', $area_hook_group, '=');
+  $query->condition('ppplg.field_dva_van_pl_group_value',  $van_pl_group, '=');
 
 
 //HUL code Master
