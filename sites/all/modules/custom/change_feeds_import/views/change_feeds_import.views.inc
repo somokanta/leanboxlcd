@@ -22,7 +22,24 @@ function change_feeds_import_views_data_alter(&$data) {
       ),
     ),
   );
-
+  $data['custom_billing_data']['table']['group'] = t('Example table');
+  $data['custom_billing_data']['dummy_name1'] = array(
+    'title' => t('rs code relationship'),
+    'help' => t('rs code help'),
+    'relationship' => array(
+      'title' => 'rs code',
+      'base' => 'Users', // Table we're joining to.
+      'base field' => 'uid', // Field on the joined table.
+      'field' => 'distributor_id', // Real field name on the 'foo' table.
+      'handler' => 'views_handler_relationship',
+      'label' => t('Billing dis id to user relationship'),
+      'title' => t('Billing dis id to user relationship'),
+      'help' => t('More information about relationship.'),
+//      'extra' => array(
+//        array('field' => 'type', 'value' => 'outlet_master'),
+//      ),
+    ),
+  );
   
   $data['field_data_field_dva_area_hook_group_name']['table']['group'] = t('Area Hook Grp Name');
   $data['field_data_field_dva_area_hook_group_name']['area_hook_grp'] = array(
