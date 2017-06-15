@@ -1872,7 +1872,7 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
   // Store distributor id in author in each node
   $distributor_id = change_feeds_import_get_distributor_id($user->uid);
 
-  if (($view->name != 'user_manual') || ($view->name != 'impact_delivery_cron_2') || ($view->name != 'impact_party_master')) {
+  if (($view->name != 'user_manual') && ($view->name != 'impact_delivery_cron_2') && ($view->name != 'impact_party_master')) {
     foreach ($query->table_queue as $key => $val) {
       if (($val['table'] == 'node')) {
         if (empty($val['join'])) {
@@ -1884,7 +1884,7 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
       }
     }
   }
-  if ($view->base_table == 'custom_billing_data') {
+  if ($view->base_table == 'custom_billing_data' && ($view->name != 'impact_delivery_cron_2')) {
     $query->add_where(0, 'custom_billing_data.distributor_id', $distributor_id, '=');
   }
   if ($view->base_table == 'van_cld_data_table') {
