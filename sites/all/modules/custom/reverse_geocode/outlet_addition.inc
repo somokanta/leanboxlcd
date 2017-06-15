@@ -103,8 +103,8 @@ function outlet_addition_form($form, &$form_state) {
       'Nearest Outlet Code' => 'Nearest Outlet Code',
       'Nearest Outlet Name' => 'Nearest Outlet Name',
       'Nearest Outlet Sequence' => 'Nearest Outlet Sequence',
-      'Static Beat Code' => 'Static Beat Code',
-      'Outlet_Sequence' => 'Outlet Sequence',
+      'Static Beat Code' => 'New O/L Static Beat Code',
+      'Outlet_Sequence' => 'New Outlet Sequence',
     );
 
     $form['results_container']['submit'] = array(
