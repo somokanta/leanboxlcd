@@ -152,15 +152,17 @@ function change_feeds_import_sales_register_batch_fix_process($data, $distributo
         $value['error_message'] .= " Enter correct Bill Date for Bill No " . $value['BILL_NUMBER'] . ".";
       }
       else {
-        $date = date("Y-m-d", strtotime($value['BILL_DATE']) );;
-        dpm($date,"date");
-        $check_date = strtotime($date);
-        dpm($check_date,"check_date");
+        dpm($value['BILL_DATE'], "value['BILL_DATE']");
+        $date = str_replace('/', '-', $value['BILL_DATE']);
+        dpm($date, "date");
+        $check_date = strtotime(date('Y-m-d', strtotime($date)));
+        dpm($check_date, "check_date");
         $from = strtotime(date('Y-m-d', strtotime("-2 days")));
-        dpm($from,"from");
+        dpm($from, "from");
         $to = strtotime(date('Y-m-d'));
-        dpm($to,"to");
+        dpm($to, "to");
         if (($check_date >= $from) && ($check_date <= $to)) {
+          
         }
         else {
           $value['error_message'] .= "Hardik Enter correct Bill Date for Bill No " . $value['BILL_NUMBER'] . ".";
