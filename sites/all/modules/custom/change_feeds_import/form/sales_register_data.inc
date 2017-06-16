@@ -124,7 +124,7 @@ function change_feeds_import_sales_register_batch_fix_process($data, $distributo
       $error_text = '';
       $v = trim($v);
       if ($k == 'BILL_VALUE') {
-        if (empty($v) && $v !== '0') {
+        if (empty($v) && $v != '0') {
           $value['error_message'] .= $k . " can not be empty for bill no " . $value['BILL_NUMBER'] . ".";
         }
       }
