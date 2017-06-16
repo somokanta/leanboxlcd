@@ -81,7 +81,7 @@ function change_feeds_import_sales_register_form_submit($form, &$form_state) {
   $query->join('field_data_field_no_of_days_for_sales_reg', 'no_da', 'no_da.entity_id = n.nid');
   $query->fields('no_da', array('field_no_of_days_for_sales_reg_value'));
   $query->addTag('node_uid');
-  $days = $query->execute()->fetchAll(0, 0);
+  $days = $query->execute()->fetchAll();
   $no_of_days = $days[0]->field_no_of_days_for_sales_reg_value;
   
   $file = $form_state['values']['file'];
