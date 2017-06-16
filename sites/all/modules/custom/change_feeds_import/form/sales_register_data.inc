@@ -163,10 +163,10 @@ function change_feeds_import_sales_register_batch_fix_process($data, $distributo
         $to = strtotime(date('Y-m-d'));
         dpm($to, "to");
         if (($check_date >= $from) && ($check_date <= $to)) {
-          
+          // do nothing
         }
         else {
-          $value['error_message'] .= "Hardik Enter correct Bill Date for Bill No " . $value['BILL_NUMBER'] . ".";
+          $value['error_message'] .= "Enter correct Bill Date for Bill No " . $value['BILL_NUMBER'] . ".";
         }
       }
     }
