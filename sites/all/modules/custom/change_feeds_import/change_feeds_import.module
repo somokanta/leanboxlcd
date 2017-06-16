@@ -1585,11 +1585,11 @@ dpm("111");
     
     if (empty($ph_no)) {
       drupal_set_message("Hul Phone No Can Not Be Null", 'error');
-    //  $entity->feeds_item->skip = TRUE;
+      $entity->feeds_item->skip = TRUE;
     }
     if (empty($hul_address)) {
       drupal_set_message("Hul Address Can Not Be Null", 'error');
-     // $entity->feeds_item->skip = TRUE;
+      $entity->feeds_item->skip = TRUE;
     }
 
   }
