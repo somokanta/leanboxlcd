@@ -1582,10 +1582,12 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
     $hul_address = $entity->field_hul_address[LANGUAGE_NONE][0]['value'];
     
     if (empty($ph_no)) {
+      dpm("123");
       drupal_set_message("Hul Phone No Can Not Be Null", 'error',FALSE);
       $entity->feeds_item->skip = TRUE;
     }
     if (empty($hul_address)) {
+       dpm("456");
       drupal_set_message("Hul Address Can Not Be Null", 'error',FALSE);
       $entity->feeds_item->skip = TRUE;
     }
