@@ -73,6 +73,17 @@ function change_feeds_import_sales_register_form_submit($form, &$form_state) {
   global $user;
   $user_id = $user->uid;
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
+
+
+  $query = db_select('node', 'n');
+  $query->condition('n.type', 'van_stop_master');
+  $query->condition('n.title', $distributor_id);
+  $query->join('field_data_field_no_of_days_for_sales_reg', 'no_da', 'no_da.entity_id = n.nid');
+  $query->fields('no_da', array('field_no_of_days_for_sales_reg_value'));
+  $query->addTag('node_uid');
+  $days = $query->execute()->fetchAll(0, 0);
+  $no_of_days = $days[0]->field_no_of_days_for_sales_reg_value;
+  
   $file = $form_state['values']['file'];
   $file_name = $file->filename;
   $fid = $file->fid;
@@ -97,7 +108,7 @@ function change_feeds_import_sales_register_form_submit($form, &$form_state) {
   $operations = array();
   $data_chunk = array_chunk($datas, 1000);
   foreach ($data_chunk as $data) {
-    $operations[] = array('change_feeds_import_sales_register_batch_fix_process', array($data, $distributor_id, $file_name, $fid));
+    $operations[] = array('change_feeds_import_sales_register_batch_fix_process', array($data, $distributor_id, $file_name, $fid,$no_of_days));
   }
   $batch = array(
     'title' => t('Reading sales Data Csv'),
@@ -111,7 +122,7 @@ function change_feeds_import_sales_register_form_submit($form, &$form_state) {
   batch_set($batch);
 }
 
-function change_feeds_import_sales_register_batch_fix_process($data, $distributor_id, $file_name, $fid, &$context) {
+function change_feeds_import_sales_register_batch_fix_process($data, $distributor_id, $file_name, $fid,$no_of_days, &$context) {
   if (empty($distributor_id)) {
     drupal_set_message(t('Please check your Distributor code'), 'error');
   }
@@ -139,6 +150,16 @@ function change_feeds_import_sales_register_batch_fix_process($data, $distributo
       $value['BILL_DATE'] = strtotime($value['BILL_DATE']);
       if (empty($value['BILL_DATE'])) {
         $value['error_message'] .= " Enter correct Bill Date for Bill No " . $value['BILL_NUMBER'] . ".";
+      }else{
+        $check_date = strtotime($value['BILL_DATE']);
+        
+        $from = strtotime("-$no_of_days day");
+        $to = strtotime(date("Y/m/d"));
+        
+        if(!($check_date >= $from) && !($check_date <= $from)){
+          $value['error_message'] .= " Enter correct Bill Date for Bill No " . $value['BILL_NUMBER'] . ".";
+
+        }
       }
     }
 //    if (isset($value['BILL_NUMBER'])) {
@@ -163,14 +184,14 @@ function change_feeds_import_sales_register_batch_fix_process($data, $distributo
         $value['error_message'] .= " Bill no " . $value['BILL_NUMBER'] . ' should have numeric bill value.';
       }
     }
-    if (isset($value['PARTY_CODE'])) {
-      $value['PARTY_CODE'] = trim($value['PARTY_CODE']);
-      // Check if PARTY_CODE doesnt exist in outlet master
-      $party_code = check_node_title_exists($value['PARTY_CODE'], 'outlet_master');
-      if (empty($party_code)) {
-        $value['error_message'] .= " Party code " . $value['PARTY_CODE'] . ' does not exist in our system.';
-      }
-    }
+//    if (isset($value['PARTY_CODE'])) {
+//      $value['PARTY_CODE'] = trim($value['PARTY_CODE']);
+//      // Check if PARTY_CODE doesnt exist in outlet master
+//      $party_code = check_node_title_exists($value['PARTY_CODE'], 'outlet_master');
+//      if (empty($party_code)) {
+//        $value['error_message'] .= " Party code " . $value['PARTY_CODE'] . ' does not exist in our system.';
+//      }
+//    }
     if (empty($distributor_id)) {
       $value['error_message'] .= " Please check your Distributor code";
     }
@@ -330,7 +351,7 @@ function change_feeds_import_create_sales_register_node($sales_data_result, $dis
           }
 
           $node->field_promised_date[LANGUAGE_NONE][0]['value'] = $pdd;
-          
+
           $node->field_bill_value[LANGUAGE_NONE][0]['value'] = $val['bill_value'];
           $node->field_sales_party_code[LANGUAGE_NONE][0]['value'] = $val['party_code'];
           $node->field_sales_updated_date[LANGUAGE_NONE][0]['value'] = time();
@@ -340,17 +361,17 @@ function change_feeds_import_create_sales_register_node($sales_data_result, $dis
           $node = node_load($nid);
 
           //if ($node->field_sr_bill_date[LANGUAGE_NONE][0]['value'] != $val['date']) {
-            $node->field_sr_bill_date[LANGUAGE_NONE][0]['value'] = $val['date'];
+          $node->field_sr_bill_date[LANGUAGE_NONE][0]['value'] = $val['date'];
 
-            if (isset($context['results']['dates'][$val['date']])) {
-              $pdd = $context['results']['dates'][$val['date']];
-            }
-            else {
-              $pdd = get_promised_delivery_date($val['date']);
-              $context['results']['dates'][$val['date']] = $pdd;
-            }
+          if (isset($context['results']['dates'][$val['date']])) {
+            $pdd = $context['results']['dates'][$val['date']];
+          }
+          else {
+            $pdd = get_promised_delivery_date($val['date']);
+            $context['results']['dates'][$val['date']] = $pdd;
+          }
 
-            $node->field_promised_date[LANGUAGE_NONE][0]['value'] = $pdd;
+          $node->field_promised_date[LANGUAGE_NONE][0]['value'] = $pdd;
           //}
 
           $node->field_bill_value[LANGUAGE_NONE][0]['value'] = $val['bill_value'];
@@ -430,13 +451,13 @@ function get_promised_delivery_date($date) {
   global $user;
   $user_id = $user->uid;
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
-  
+
   $query = db_select('node', 'n');
   $query->condition('n.uid', $distributor_id);
   $query->condition('n.type', 'pdd_master');
   $query->fields('n', array('nid'));
   $pdd_value_result = $query->execute()->fetchField();
-  
+
   $pdd_data = node_load($pdd_value_result);
   $pdd_value = $pdd_data->field_pdd[LANGUAGE_NONE][0]['value'];
   $weekly = $pdd_data->field_day[LANGUAGE_NONE];
@@ -453,6 +474,6 @@ function get_promised_delivery_date($date) {
 
   $billing_date_stamp = $date;
   $pdd = holiday_get_working_day($billing_date_stamp, $pdd_value, $holiday_result, $weeklyoff);
-  
+
   return strtotime($pdd);
 }
