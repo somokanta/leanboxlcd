@@ -1579,24 +1579,19 @@ dpm("111");
 //    }
   }
   if ($entity->type == 'hul_code_master') {
-//    dpm("222");
-//    $ph_no = $entity->field_hul_phone_no[LANGUAGE_NONE][0]['value'];
-//    $hul_address = $entity->field_hul_address[LANGUAGE_NONE][0]['value'];
-//    
-//    if (empty($ph_no)) {
-//      drupal_set_message("Hul Phone No Can Not Be Null", 'error');
-//      $entity->feeds_item->skip = TRUE;
-//    }
-//    if (empty($hul_address)) {
-//      drupal_set_message("Hul Address Can Not Be Null", 'error');
-//      $entity->feeds_item->skip = TRUE;
-//    }
-//    $title = $entity->title;
-//    $res = modify_views_forms_master_feed_validate($entity->title, 'hul_code_master');
-//    if (!empty($res)) {
-//      drupal_set_message("$title already exist in hul code master", 'error');
-//      $entity->feeds_item->skip = TRUE;
-//    }
+    dpm("222");
+    $ph_no = $entity->field_hul_phone_no[LANGUAGE_NONE][0]['value'];
+    $hul_address = $entity->field_hul_address[LANGUAGE_NONE][0]['value'];
+    
+    if (empty($ph_no)) {
+      drupal_set_message("Hul Phone No Can Not Be Null", 'error');
+      $entity->feeds_item->skip = TRUE;
+    }
+    if (empty($hul_address)) {
+      drupal_set_message("Hul Address Can Not Be Null", 'error');
+      $entity->feeds_item->skip = TRUE;
+    }
+
   }
 
   if ($entity->feeds_item->id == 'outlet_master') {
