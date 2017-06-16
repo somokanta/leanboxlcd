@@ -79,14 +79,12 @@ function van_stop_master_form($form, &$form_state) {
   $user_id = $user->uid;
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
   $nid = $form_state['leanbox_misc']['nid'] = check_node_title_exists($distributor_id, 'van_stop_master');
-  dpm($nid, "nid");
 
   if ($nid) {
     $node = node_load($nid);
     //$stop_size = $node->field_stop_size[LANGUAGE_NONE][0]['value'];
     //$delivery_per_van = $node->field_del_per_van[LANGUAGE_NONE][0]['value'];
     $pp_finish_time = $node->field_pp_finish_time[LANGUAGE_NONE][0]['value'];
-    dpm($pp_finish_time, "pp_finish_time");
     $picking_finish_time = $node->field_picking_finish_time[LANGUAGE_NONE][0]['value'];
     $unloading_finish_time = $node->field_unloading_finish_time[LANGUAGE_NONE][0]['value'];
     $otif_finish_time = $node->field_otif_finish_time[LANGUAGE_NONE][0]['value'];
