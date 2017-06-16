@@ -1337,7 +1337,6 @@ function change_feeds_import_node_delete($node) {
  */
 function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) {
   require_once drupal_get_path('module', 'change_feeds_import') . '/form/upload_billing_data.inc';
-dpm("eweww");
   if (!empty($item)) {
     foreach ($item as $key => $value) {
       $item[$key] = mb_convert_encoding($value, 'UTF-8', 'UTF-8');
@@ -1582,12 +1581,10 @@ dpm("eweww");
     $hul_address = $entity->field_hul_address[LANGUAGE_NONE][0]['value'];
     
     if (empty($ph_no)) {
-      dpm("123");
       drupal_set_message("Hul Phone No Can Not Be Null", 'error',FALSE);
       $entity->feeds_item->skip = TRUE;
     }
     if (empty($hul_address)) {
-       dpm("456");
       drupal_set_message("Hul Address Can Not Be Null", 'error',FALSE);
       $entity->feeds_item->skip = TRUE;
     }
