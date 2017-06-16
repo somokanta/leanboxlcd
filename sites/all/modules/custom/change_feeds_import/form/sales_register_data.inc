@@ -152,10 +152,7 @@ function change_feeds_import_sales_register_batch_fix_process($data, $distributo
         $value['error_message'] .= " Enter correct Bill Date for Bill No " . $value['BILL_NUMBER'] . ".";
       }
       else {
-        dpm($value['BILL_DATE'], "value['BILL_DATE']");
-        $date = str_replace('/', '-', $value['BILL_DATE']);
-        dpm($date, "date");
-        $check_date = strtotime(date('Y-m-d', strtotime($date)));
+        $check_date = $value['BILL_DATE'];
         dpm($check_date, "check_date");
         $from = strtotime(date('Y-m-d', strtotime("-2 days")));
         dpm($from, "from");
