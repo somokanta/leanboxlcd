@@ -1601,6 +1601,19 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
       drupal_set_message("$sales_day does not exist in Sales Day", 'error');
       $entity->feeds_item->skip = TRUE;
     }
+    
+    $salesman = $entity->field_salesman[LANGUAGE_NONE][0]['value'];
+    $salesman_code = $entity->field_salesman_code[LANGUAGE_NONE][0]['value'];
+    
+    if (empty($salesman)) {
+      drupal_set_message("Salesman Can Not Be Null", 'error',FALSE);
+      $entity->feeds_item->skip = TRUE;
+    }
+    if (empty($salesman_code)) {
+      drupal_set_message("Salesman Code Can Not Be Null", 'error',FALSE);
+      $entity->feeds_item->skip = TRUE;
+    }
+    
 //    if (empty($delivery_day_tid)) {
 //      drupal_set_message("$delivery_day does not exist in Delivery Day", 'error');
 //      $entity->feeds_item->skip = TRUE;
