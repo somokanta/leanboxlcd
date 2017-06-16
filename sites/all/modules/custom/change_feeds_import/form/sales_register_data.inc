@@ -83,7 +83,7 @@ function change_feeds_import_sales_register_form_submit($form, &$form_state) {
   $query->addTag('node_uid');
   $days = $query->execute()->fetchAll();
   $no_of_days = $days[0]->field_no_of_days_for_sales_reg_value;
-  
+
   $file = $form_state['values']['file'];
   $file_name = $file->filename;
   $fid = $file->fid;
@@ -108,7 +108,7 @@ function change_feeds_import_sales_register_form_submit($form, &$form_state) {
   $operations = array();
   $data_chunk = array_chunk($datas, 1000);
   foreach ($data_chunk as $data) {
-    $operations[] = array('change_feeds_import_sales_register_batch_fix_process', array($data, $distributor_id, $file_name, $fid,$no_of_days));
+    $operations[] = array('change_feeds_import_sales_register_batch_fix_process', array($data, $distributor_id, $file_name, $fid, $no_of_days));
   }
   $batch = array(
     'title' => t('Reading sales Data Csv'),
@@ -122,7 +122,7 @@ function change_feeds_import_sales_register_form_submit($form, &$form_state) {
   batch_set($batch);
 }
 
-function change_feeds_import_sales_register_batch_fix_process($data, $distributor_id, $file_name, $fid,$no_of_days, &$context) {
+function change_feeds_import_sales_register_batch_fix_process($data, $distributor_id, $file_name, $fid, $no_of_days, &$context) {
   if (empty($distributor_id)) {
     drupal_set_message(t('Please check your Distributor code'), 'error');
   }
@@ -150,15 +150,20 @@ function change_feeds_import_sales_register_batch_fix_process($data, $distributo
       $value['BILL_DATE'] = strtotime($value['BILL_DATE']);
       if (empty($value['BILL_DATE'])) {
         $value['error_message'] .= " Enter correct Bill Date for Bill No " . $value['BILL_NUMBER'] . ".";
-      }else{
-        $check_date = strtotime($value['BILL_DATE']);
-        
-        $from = strtotime("-$no_of_days day");
-        $to = strtotime(date("Y/m/d"));
-        
-        if(!($check_date >= $from) && !($check_date <= $from)){
-          $value['error_message'] .= " Enter correct Bill Date for Bill No " . $value['BILL_NUMBER'] . ".";
-
+      }
+      else {
+        $date = date("Y-m-d", strtotime($value['BILL_DATE']) );;
+        dpm($date,"date");
+        $check_date = strtotime($date);
+        dpm($check_date,"check_date");
+        $from = strtotime(date('Y-m-d', strtotime("-2 days")));
+        dpm($from,"from");
+        $to = strtotime(date('Y-m-d'));
+        dpm($to,"to");
+        if (($check_date >= $from) && ($check_date <= $to)) {
+        }
+        else {
+          $value['error_message'] .= "Hardik Enter correct Bill Date for Bill No " . $value['BILL_NUMBER'] . ".";
         }
       }
     }
