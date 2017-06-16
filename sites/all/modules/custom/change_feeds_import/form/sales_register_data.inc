@@ -147,7 +147,9 @@ function change_feeds_import_sales_register_batch_fix_process($data, $distributo
     }
 
     if (isset($value['BILL_DATE'])) {
+      dpm($value['BILL_DATE'],"billl");
       $value['BILL_DATE'] = strtotime($value['BILL_DATE']);
+       dpm($value['BILL_DATE'],"billl_datee");
       if (empty($value['BILL_DATE'])) {
         $value['error_message'] .= " Enter correct Bill Date for Bill No " . $value['BILL_NUMBER'] . ".";
       }
