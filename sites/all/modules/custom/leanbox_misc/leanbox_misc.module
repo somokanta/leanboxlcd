@@ -79,12 +79,14 @@ function van_stop_master_form($form, &$form_state) {
   $user_id = $user->uid;
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
   $nid = $form_state['leanbox_misc']['nid'] = check_node_title_exists($distributor_id, 'van_stop_master');
+  dpm($nid, "nid");
 
   if ($nid) {
     $node = node_load($nid);
     //$stop_size = $node->field_stop_size[LANGUAGE_NONE][0]['value'];
     //$delivery_per_van = $node->field_del_per_van[LANGUAGE_NONE][0]['value'];
     $pp_finish_time = $node->field_pp_finish_time[LANGUAGE_NONE][0]['value'];
+    dpm($pp_finish_time, "pp_finish_time");
     $picking_finish_time = $node->field_picking_finish_time[LANGUAGE_NONE][0]['value'];
     $unloading_finish_time = $node->field_unloading_finish_time[LANGUAGE_NONE][0]['value'];
     $otif_finish_time = $node->field_otif_finish_time[LANGUAGE_NONE][0]['value'];
@@ -227,7 +229,6 @@ function van_stop_master_form($form, &$form_state) {
     '#type' => 'submit',
     '#value' => t('Save'),
     '#validate' => array('sales_bill_date_validate'),
-    '#limit_validation_errors' => array(array('no_of_days')),
   );
 
   return $form;
@@ -235,8 +236,8 @@ function van_stop_master_form($form, &$form_state) {
 
 function sales_bill_date_validate($form, &$form_state) {
   $no_of_days = $form_state['values']['no_of_days'];
-  if(!is_numeric($no_of_days)){
-   form_set_error('no_of_days', "Enter Correct  Integer Value");
+  if (!is_numeric($no_of_days)) {
+    form_set_error('no_of_days', "Enter Correct  Integer Value");
   }
 }
 
