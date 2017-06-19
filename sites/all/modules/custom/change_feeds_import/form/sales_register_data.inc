@@ -147,10 +147,10 @@ function change_feeds_import_sales_register_batch_fix_process($data, $distributo
     }
 
     if (isset($value['BILL_DATE'])) {
-      $value['BILL_DATE'] = str_replace('/', '-', $value['BILL_DATE']);
-      $date_arr = explode('-', $value['BILL_DATE']);
-      $converted_date = $date_arr[2] . '-' . $date_arr[1] . '-' . $date_arr[0];
-      $value['BILL_DATE'] = strtotime($converted_date);
+     // $value['BILL_DATE'] = str_replace('/', '-', $value['BILL_DATE']);
+     // $date_arr = explode('-', $value['BILL_DATE']);
+     // $converted_date = $date_arr[2] . '-' . $date_arr[1] . '-' . $date_arr[0];
+      $value['BILL_DATE'] = strtotime($value['BILL_DATE']);
       if (empty($value['BILL_DATE'])) {
         $value['error_message'] .= " Enter correct Bill Date for Bill No " . $value['BILL_NUMBER'] . ".";
       }
