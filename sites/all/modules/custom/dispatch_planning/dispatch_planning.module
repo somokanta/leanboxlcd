@@ -816,6 +816,9 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
 
 function get_bill_info($bill_number, $van = NULL, $loading_date = NULL, $beat_name = NULL, $trip_id = NULL, $delivery_pending = NULL) {
 
+  global $user;
+  $user_id = $user->uid;
+  $distributor_id = change_feeds_import_get_distributor_id($user_id);
   $query = db_select('node', 'n');
   $query->leftJoin('field_data_field_bill_value', 'bv', 'n.nid = bv.entity_id');
   $query->leftJoin('field_data_field_sales_party_code', 'spc', 'n.nid = spc.entity_id');
@@ -826,8 +829,13 @@ function get_bill_info($bill_number, $van = NULL, $loading_date = NULL, $beat_na
   $query->leftJoin('node', 'nt', 'nt.nid = t.field_trip_id_reference_nid');
 
   $query->leftJoin('field_data_field_party_code', 'pc', 'pc.field_party_code_value = spc.field_sales_party_code_value');
-  $query->leftJoin('field_data_field_party_name', 'pn', 'pn.entity_id = pc.entity_id');
-  $query->leftJoin('field_data_field_beat_name', 'bn', 'bn.entity_id = pc.entity_id');
+  $query->leftJoin('field_data_field_party_code', 'ppc', 'pc.field_party_code_value = ppc.field_party_code_value');
+  $query->condition('ppc.bundle', 'outlet_master');
+  $query->join('node', 'oun', 'oun.nid = ppc.entity_id');
+  $query->condition('oun.uid', $distributor_id, '=');
+
+  $query->leftJoin('field_data_field_party_name', 'pn', 'pn.entity_id = oun.nid');
+  $query->leftJoin('field_data_field_beat_name', 'bn', 'bn.entity_id = oun.nid');
 
 
   $query->addField('n', 'nid', 'nid');

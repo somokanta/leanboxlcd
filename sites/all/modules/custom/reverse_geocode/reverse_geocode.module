@@ -737,7 +737,7 @@ function trip_filters_submit($form, &$form_state) {
 */
       //$address = theme('table', array('header' => $header, 'rows' => $rows, 'sticky' => FALSE));
 
-      $old_lat_long = !empty($old_lat) ? $lat . ',' . $long : '';
+      $old_lat_long = !empty($old_lat) ? $old_lat . ',' . $old_long : '';
       $marker_tooltip = '<div class="cell-address cell-hide"><table>'
           . '<tr><td style="white-space:nowrap;color:#222">Party code</td><td>' . $party_code . '</td></tr>'
           . '<tr><td style="white-space:nowrap;color:#222">Party Name</td><td>' . $party_name . '</td></tr>'
@@ -1464,6 +1464,7 @@ function reverse_geocode_node_presave($node) {
 
 
     if (!empty($original_day) && !empty($original_channel) && !empty($original_pl_group)) {
+
       if ($original_day !== $updated_day || $original_area_hook !== $updated_area_hook || $original_channel !== $updated_channel || $original_pl_group !== $updated_pl_group) {
         $channel = $node->field_channel['und'][0]['value'];
         $pl_group = $node->field_pl_group['und'][0]['value'];

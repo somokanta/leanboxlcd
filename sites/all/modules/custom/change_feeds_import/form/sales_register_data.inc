@@ -189,14 +189,14 @@ function change_feeds_import_sales_register_batch_fix_process($data, $distributo
         $value['error_message'] .= " Bill no " . $value['BILL_NUMBER'] . ' should have numeric bill value.';
       }
     }
-//    if (isset($value['PARTY_CODE'])) {
-//      $value['PARTY_CODE'] = trim($value['PARTY_CODE']);
-//      // Check if PARTY_CODE doesnt exist in outlet master
-//      $party_code = check_node_title_exists($value['PARTY_CODE'], 'outlet_master');
-//      if (empty($party_code)) {
-//        $value['error_message'] .= " Party code " . $value['PARTY_CODE'] . ' does not exist in our system.';
-//      }
-//    }
+    if (isset($value['PARTY_CODE'])) {
+      $value['PARTY_CODE'] = trim($value['PARTY_CODE']);
+      // Check if PARTY_CODE doesnt exist in outlet master
+      $party_code = check_node_title_exists($value['PARTY_CODE'], 'outlet_master');
+      if (empty($party_code)) {
+        $value['error_message'] .= " Party code " . $value['PARTY_CODE'] . ' does not exist in our system.';
+      }
+    }
     if (empty($distributor_id)) {
       $value['error_message'] .= " Please check your Distributor code";
     }
@@ -456,13 +456,13 @@ function get_promised_delivery_date($date) {
   global $user;
   $user_id = $user->uid;
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
-
+  
   $query = db_select('node', 'n');
   $query->condition('n.uid', $distributor_id);
   $query->condition('n.type', 'pdd_master');
   $query->fields('n', array('nid'));
   $pdd_value_result = $query->execute()->fetchField();
-
+  
   $pdd_data = node_load($pdd_value_result);
   $pdd_value = $pdd_data->field_pdd[LANGUAGE_NONE][0]['value'];
   $weekly = $pdd_data->field_day[LANGUAGE_NONE];
@@ -479,6 +479,6 @@ function get_promised_delivery_date($date) {
 
   $billing_date_stamp = $date;
   $pdd = holiday_get_working_day($billing_date_stamp, $pdd_value, $holiday_result, $weeklyoff);
-
+  
   return strtotime($pdd);
 }
