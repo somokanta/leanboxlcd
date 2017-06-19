@@ -160,7 +160,7 @@ function change_feeds_import_sales_register_batch_fix_process($data, $distributo
 
         $check_date = $value['BILL_DATE'];
         dpm($check_date, "check_date");
-        $from = strtotime(date('Y-m-d', strtotime("-2 days")));
+        $from = strtotime(date('Y-m-d', strtotime("-$no_of_days days")));
         dpm($from, "from");
         $to = strtotime(date('Y-m-d'));
         dpm($to, "to");
