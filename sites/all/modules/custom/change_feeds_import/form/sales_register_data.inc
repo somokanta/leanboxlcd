@@ -73,6 +73,17 @@ function change_feeds_import_sales_register_form_submit($form, &$form_state) {
   global $user;
   $user_id = $user->uid;
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
+
+
+  $query = db_select('node', 'n');
+  $query->condition('n.type', 'van_stop_master');
+  $query->condition('n.title', $distributor_id);
+  $query->join('field_data_field_no_of_days_for_sales_reg', 'no_da', 'no_da.entity_id = n.nid');
+  $query->fields('no_da', array('field_no_of_days_for_sales_reg_value'));
+  $query->addTag('node_uid');
+  $days = $query->execute()->fetchAll();
+  $no_of_days = $days[0]->field_no_of_days_for_sales_reg_value;
+
   $file = $form_state['values']['file'];
   $file_name = $file->filename;
   $fid = $file->fid;
@@ -97,7 +108,7 @@ function change_feeds_import_sales_register_form_submit($form, &$form_state) {
   $operations = array();
   $data_chunk = array_chunk($datas, 1000);
   foreach ($data_chunk as $data) {
-    $operations[] = array('change_feeds_import_sales_register_batch_fix_process', array($data, $distributor_id, $file_name, $fid));
+    $operations[] = array('change_feeds_import_sales_register_batch_fix_process', array($data, $distributor_id, $file_name, $fid, $no_of_days));
   }
   $batch = array(
     'title' => t('Reading sales Data Csv'),
@@ -111,7 +122,7 @@ function change_feeds_import_sales_register_form_submit($form, &$form_state) {
   batch_set($batch);
 }
 
-function change_feeds_import_sales_register_batch_fix_process($data, $distributor_id, $file_name, $fid, &$context) {
+function change_feeds_import_sales_register_batch_fix_process($data, $distributor_id, $file_name, $fid, $no_of_days, &$context) {
   if (empty($distributor_id)) {
     drupal_set_message(t('Please check your Distributor code'), 'error');
   }
@@ -124,8 +135,8 @@ function change_feeds_import_sales_register_batch_fix_process($data, $distributo
       $error_text = '';
       $v = trim($v);
       if ($k == 'BILL_VALUE') {
-        if (empty($v) && $v !== '0') {
-          $value['error_message'] .= $k . " can not be empty for bill no " . $value['BILL_NUMBER'] . ".";
+        if (empty($v) || $v <= '0') {
+          $value['error_message'] .= $k . " can not be empty or 0(Zero) or less than0(Zero) for bill no " . $value['BILL_NUMBER'] . ".";
         }
       }
       else {
@@ -136,9 +147,24 @@ function change_feeds_import_sales_register_batch_fix_process($data, $distributo
     }
 
     if (isset($value['BILL_DATE'])) {
+     // $value['BILL_DATE'] = str_replace('/', '-', $value['BILL_DATE']);
+     // $date_arr = explode('-', $value['BILL_DATE']);
+     // $converted_date = $date_arr[2] . '-' . $date_arr[1] . '-' . $date_arr[0];
       $value['BILL_DATE'] = strtotime($value['BILL_DATE']);
       if (empty($value['BILL_DATE'])) {
         $value['error_message'] .= " Enter correct Bill Date for Bill No " . $value['BILL_NUMBER'] . ".";
+      }
+      else {
+
+        $check_date = $value['BILL_DATE'];
+        $from = strtotime(date('Y-m-d', strtotime("-$no_of_days days")));
+        $to = strtotime(date('Y-m-d'));
+        if (($check_date >= $from) && ($check_date <= $to)) {
+          // do nothing
+        }
+        else {
+          $value['error_message'] .= "Enter correct Bill Date for Bill No " . $value['BILL_NUMBER'] . ".";
+        }
       }
     }
 //    if (isset($value['BILL_NUMBER'])) {
@@ -330,7 +356,7 @@ function change_feeds_import_create_sales_register_node($sales_data_result, $dis
           }
 
           $node->field_promised_date[LANGUAGE_NONE][0]['value'] = $pdd;
-          
+
           $node->field_bill_value[LANGUAGE_NONE][0]['value'] = $val['bill_value'];
           $node->field_sales_party_code[LANGUAGE_NONE][0]['value'] = $val['party_code'];
           $node->field_sales_updated_date[LANGUAGE_NONE][0]['value'] = time();
@@ -340,17 +366,17 @@ function change_feeds_import_create_sales_register_node($sales_data_result, $dis
           $node = node_load($nid);
 
           //if ($node->field_sr_bill_date[LANGUAGE_NONE][0]['value'] != $val['date']) {
-            $node->field_sr_bill_date[LANGUAGE_NONE][0]['value'] = $val['date'];
+          $node->field_sr_bill_date[LANGUAGE_NONE][0]['value'] = $val['date'];
 
-            if (isset($context['results']['dates'][$val['date']])) {
-              $pdd = $context['results']['dates'][$val['date']];
-            }
-            else {
-              $pdd = get_promised_delivery_date($val['date']);
-              $context['results']['dates'][$val['date']] = $pdd;
-            }
+          if (isset($context['results']['dates'][$val['date']])) {
+            $pdd = $context['results']['dates'][$val['date']];
+          }
+          else {
+            $pdd = get_promised_delivery_date($val['date']);
+            $context['results']['dates'][$val['date']] = $pdd;
+          }
 
-            $node->field_promised_date[LANGUAGE_NONE][0]['value'] = $pdd;
+          $node->field_promised_date[LANGUAGE_NONE][0]['value'] = $pdd;
           //}
 
           $node->field_bill_value[LANGUAGE_NONE][0]['value'] = $val['bill_value'];

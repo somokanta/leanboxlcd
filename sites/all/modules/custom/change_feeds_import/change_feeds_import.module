@@ -1336,9 +1336,7 @@ function change_feeds_import_node_delete($node) {
  * Implements hook_feeds_presave($source, $entity, $item)
  */
 function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) {
-
   require_once drupal_get_path('module', 'change_feeds_import') . '/form/upload_billing_data.inc';
-
   if (!empty($item)) {
     foreach ($item as $key => $value) {
       $item[$key] = mb_convert_encoding($value, 'UTF-8', 'UTF-8');
@@ -1579,12 +1577,18 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
 //    }
   }
   if ($entity->type == 'hul_code_master') {
-//    $title = $entity->title;
-//    $res = modify_views_forms_master_feed_validate($entity->title, 'hul_code_master');
-//    if (!empty($res)) {
-//      drupal_set_message("$title already exist in hul code master", 'error');
-//      $entity->feeds_item->skip = TRUE;
-//    }
+    $ph_no = $entity->field_hul_phone_no[LANGUAGE_NONE][0]['value'];
+    $hul_address = $entity->field_hul_address[LANGUAGE_NONE][0]['value'];
+    
+    if (empty($ph_no)) {
+      drupal_set_message("Hul Phone No Can Not Be Null", 'error',FALSE);
+      $entity->feeds_item->skip = TRUE;
+    }
+    if (empty($hul_address)) {
+      drupal_set_message("Hul Address Can Not Be Null", 'error',FALSE);
+      $entity->feeds_item->skip = TRUE;
+    }
+
   }
 
   if ($entity->feeds_item->id == 'outlet_master') {
@@ -1597,6 +1601,19 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
       drupal_set_message("$sales_day does not exist in Sales Day", 'error');
       $entity->feeds_item->skip = TRUE;
     }
+    
+    $salesman = $entity->field_salesman[LANGUAGE_NONE][0]['value'];
+    $salesman_code = $entity->field_salesman_code[LANGUAGE_NONE][0]['value'];
+    
+    if (empty($salesman)) {
+      drupal_set_message("Salesman Can Not Be Null", 'error',FALSE);
+      $entity->feeds_item->skip = TRUE;
+    }
+    if (empty($salesman_code)) {
+      drupal_set_message("Salesman Code Can Not Be Null", 'error',FALSE);
+      $entity->feeds_item->skip = TRUE;
+    }
+    
 //    if (empty($delivery_day_tid)) {
 //      drupal_set_message("$delivery_day does not exist in Delivery Day", 'error');
 //      $entity->feeds_item->skip = TRUE;

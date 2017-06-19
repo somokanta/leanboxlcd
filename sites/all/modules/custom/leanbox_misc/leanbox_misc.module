@@ -99,6 +99,7 @@ function van_stop_master_form($form, &$form_state) {
     $field_distributor_latitude = $node->field_distributor_latitude[LANGUAGE_NONE][0]['value'];
     $field_distributor_longitude = $node->field_distributor_longitude[LANGUAGE_NONE][0]['value'];
     $field_enable_routing = $node->field_enable_routing[LANGUAGE_NONE][0]['value'];
+    $no_of_days = $node->field_no_of_days_for_sales_reg[LANGUAGE_NONE][0]['value'];
   }
 
 //  $form['stop_size'] = array(
@@ -116,14 +117,16 @@ function van_stop_master_form($form, &$form_state) {
 //    '#element_validate' => array('element_validate_integer_positive'),
 //    '#default_value' => $delivery_per_van,
 //  );
-  
+
+
+
   $form['pp_finish_time'] = array(
     '#type' => 'textfield',
     '#title' => t('PP finish time'),
     '#required' => TRUE,
     '#default_value' => $pp_finish_time,
   );
-  
+
   $form['picking_finish_time'] = array(
     '#type' => 'textfield',
     '#title' => t('Picking finish time'),
@@ -142,7 +145,7 @@ function van_stop_master_form($form, &$form_state) {
     '#required' => TRUE,
     '#default_value' => $otif_finish_time,
   );
-  
+
   $form['field_dets_bulk'] = array(
     '#type' => 'textfield',
     '#title' => t('Dets Bulk'),
@@ -212,12 +215,28 @@ function van_stop_master_form($form, &$form_state) {
     '#default_value' => $field_enable_routing,
   );
 
+  $form['no_of_days'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Sales Register Min Bill Date'),
+    '#required' => TRUE,
+    '#default_value' => $no_of_days,
+  );
+
+
   $form['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Save'),
+    '#validate' => array('sales_bill_date_validate'),
   );
 
   return $form;
+}
+
+function sales_bill_date_validate($form, &$form_state) {
+  $no_of_days = $form_state['values']['no_of_days'];
+  if (!is_numeric($no_of_days)) {
+    form_set_error('no_of_days', "Enter Correct  Integer Value");
+  }
 }
 
 function van_stop_master_form_submit($form, &$form_state) {
@@ -234,7 +253,6 @@ function van_stop_master_form_submit($form, &$form_state) {
     $node->uid = $distributor_id;
     $node->status = 1; //(1 or 0): published or not
     $node->comment = 0; // 0 = comments disabled, 1 = read only, 2 = read/write
-
     //$node->field_stop_size[LANGUAGE_NONE][0]['value'] = $form_state['values']['stop_size'];
     //$node->field_del_per_van[LANGUAGE_NONE][0]['value'] = $form_state['values']['delivery_per_van'];
     $node->field_picking_finish_time[LANGUAGE_NONE][0]['value'] = $form_state['values']['picking_finish_time'];
@@ -252,8 +270,7 @@ function van_stop_master_form_submit($form, &$form_state) {
     $node->field_distributor_latitude[LANGUAGE_NONE][0]['value'] = $form_state['values']['field_distributor_latitude'];
     $node->field_distributor_longitude[LANGUAGE_NONE][0]['value'] = $form_state['values']['field_distributor_longitude'];
     $node->field_enable_routing[LANGUAGE_NONE][0]['value'] = $form_state['values']['field_enable_routing'];
-
-
+    $node->field_no_of_days_for_sales_reg[LANGUAGE_NONE][0]['value'] = $form_state['values']['no_of_days'];
     node_save($node);
   }
   else {
@@ -276,6 +293,7 @@ function van_stop_master_form_submit($form, &$form_state) {
     $node->field_distributor_latitude[LANGUAGE_NONE][0]['value'] = $form_state['values']['field_distributor_latitude'];
     $node->field_distributor_longitude[LANGUAGE_NONE][0]['value'] = $form_state['values']['field_distributor_longitude'];
     $node->field_enable_routing[LANGUAGE_NONE][0]['value'] = $form_state['values']['field_enable_routing'];
+    $node->field_no_of_days_for_sales_reg[LANGUAGE_NONE][0]['value'] = $form_state['values']['no_of_days'];
     node_save($node);
   }
 }
