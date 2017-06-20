@@ -135,7 +135,7 @@ function change_feeds_import_views_data_alter(&$data) {
     ),
   );
   
-  $data['custom_billing_data']['Sum_of_NET_SALES_VALUE'] = array(
+  $data['custom_billing_data']['SUM_OF_NET_SALES_VALUE'] = array(
     'title' => t('Sum_of_NET_SALES_VALUE'),
     'help' => t('custom billing data'),
    // 'real field' => 'nid',
