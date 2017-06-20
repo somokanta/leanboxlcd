@@ -135,7 +135,7 @@ function change_feeds_import_views_data_alter(&$data) {
     ),
   );
   
-  $data['custom_billing_data']['SUM_OF_NET_SALES_VALUE'] = array(
+  $data['custom_billing_data']['Sum_of_NET_SALES_VALUE'] = array(
     'title' => t('Sum_of_NET_SALES_VALUE'),
     'help' => t('custom billing data'),
    // 'real field' => 'nid',
@@ -167,7 +167,7 @@ class change_feeds_import_handler_Sum_of_NET_SALES_VALUE extends views_handler_f
 
   function render($values) {
 
-    $sales_value = round($values->custom_billing_data_SUM_OF_NET_SALES_VALUE, 2);
+    $sales_value = round($values->custom_billing_data_sum_of_net_sales_value, 2);
     return $sales_value;
   }
 
