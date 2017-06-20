@@ -593,8 +593,10 @@ function delete_billing_form_submit($form, &$form_state) {
       $nid = check_node_title_exists_sales_register_data($val['bill_number'], $user);
       $node = node_load($nid);
       if ($node) {
-        $node->field_billing_van[LANGUAGE_NONE][0]['value'] = NULL;
-        $node->field_billing_loading_date[LANGUAGE_NONE][0]['value'] = NULL;
+//        $node->field_billing_van[LANGUAGE_NONE][0]['value'] = NULL;
+//        $node->field_billing_loading_date[LANGUAGE_NONE][0]['value'] = NULL;
+        $node->field_billing_van = array();
+        $node->field_billing_loading_date = array();
         node_save($node);
       }
     }
