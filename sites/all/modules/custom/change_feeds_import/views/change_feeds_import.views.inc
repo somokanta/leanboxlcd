@@ -106,6 +106,54 @@ function change_feeds_import_views_data_alter(&$data) {
       'handler' => 'change_feeds_import_handler_val_pan_group',
     ),
   );
+  
+  // custom billing table
+  
+  $data['custom_billing_data']['tur'] = array(
+    'title' => t('tur'),
+    'help' => t('custom billing data - tur'),
+  //  'real field' => 'nid',
+    'field' => array(
+      'handler' => 'change_feeds_import_handler_tur',
+    ),
+  );
+  
+  $data['custom_billing_data']['Sum_of_NET_SALES_VALUE'] = array(
+    'title' => t('Sum_of_NET_SALES_VALUE'),
+    'help' => t('custom billing data'),
+   // 'real field' => 'nid',
+    'field' => array(
+      'handler' => 'change_feeds_import_handler_Sum_of_NET_SALES_VALUE',
+    ),
+  );
+}
+
+
+/**
+ * Field handler to translate a Status into its readable form.
+ */
+class change_feeds_import_handler_tur extends views_handler_field {
+
+  function render($values) {
+
+    $tur = round($values->custom_billing_data_tur, 2);
+    return $tur;
+  }
+
+}
+
+
+/**
+ * Field handler to translate a Status into its readable form.
+ */
+class change_feeds_import_handler_Sum_of_NET_SALES_VALUE extends views_handler_field {
+
+  function render($values) {
+
+    $sales_value = round($values->custom_billing_data_sum_of_net_sales_value, 2);
+    return $sales_value;
+  }
+
 }
 
 /**
@@ -299,6 +347,7 @@ function change_feeds_import_views_data() {
     'filter' => array(
       'handler' => 'views_handler_filter_numeric',
     ),
+
   );
 
 
