@@ -167,7 +167,7 @@ class change_feeds_import_handler_Sum_of_NET_SALES_VALUE extends views_handler_f
 
   function render($values) {
 
-    $sales_value = round($values->custom_billing_data_Sum_of_NET_SALES_VALUE, 2);
+    $sales_value = round($values->custom_billing_data_SUM_OF_NET_SALES_VALUE, 2);
     return $sales_value;
   }
 
