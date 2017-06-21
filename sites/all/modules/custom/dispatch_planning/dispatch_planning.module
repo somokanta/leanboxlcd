@@ -580,6 +580,10 @@ function dispatch_planning_form_save_validate($form, &$form_state) {
   $query->leftJoin('field_data_field_hul_updated_lat', 'flat', 'flat.entity_id = hul.nid');
   $query->leftJoin('field_data_field_hul_updated_long', 'flong', 'flong.entity_id = hul.nid');
 
+  $query->leftJoin('node', 'ndvp', 'ndvp.nid = fa.field_area_hook_nid');
+  $query->leftJoin('field_data_field_dva_sales_day', 'da', 'da.entity_id = ndvp.nid');
+  $query->leftJoin('field_data_field_dva_van_pl_group', 'fv', 'fv.entity_id = ndvp.nid');
+  $query->leftJoin('field_data_field_dva_area_hook_group_name', 'gn', 'gn.entity_id = ndvp.nid');
 
   $query->addField('n', 'nid');
   $query->condition('n.uid', $distributor_id);
@@ -593,8 +597,12 @@ function dispatch_planning_form_save_validate($form, &$form_state) {
   $query->addField('flat', 'field_hul_updated_lat_value', 'lat');
   $query->addField('flong', 'field_hul_updated_long_value', 'lng');
   
-  $query->orderBy('ISNULL(fa.field_area_hook_nid)');
-  $query->orderBy('fa.field_area_hook_nid');
+  $query->orderBy('ISNULL(da.field_dva_sales_day_value)');
+  $query->orderBy('da.field_dva_sales_day_value');
+  $query->orderBy('ISNULL(fv.field_dva_van_pl_group_value)');
+  $query->orderBy('fv.field_dva_van_pl_group_value');
+  $query->orderBy('ISNULL(gn.field_dva_area_hook_group_name_value)');
+  $query->orderBy('gn.field_dva_area_hook_group_name_value');
   $query->orderBy('ISNULL(fs.field_revised_sequence_value)');
   $query->orderBy('fs.field_revised_sequence_value');
 
