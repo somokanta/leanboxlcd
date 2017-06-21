@@ -1039,14 +1039,12 @@ function leanbox_dashboard_chart_filter_sales_delivery_report_form($form, &$form
   $form['start_date'] = array(
     '#type' => 'date_popup',
     '#title' => t('Bill Date From'),
-    '#required' => TRUE,
     '#date_format' => 'Y-m-d',
     '#default_value' => $start_date,
   );
   $form['end_date'] = array(
     '#type' => 'date_popup',
     '#title' => t('Bill Date To'),
-    '#required' => TRUE,
     '#date_format' => 'Y-m-d',
     '#default_value' => $end_date,
   );
@@ -1055,7 +1053,7 @@ function leanbox_dashboard_chart_filter_sales_delivery_report_form($form, &$form
     '#title' => t('Bill Number'),
     '#required' => FALSE,
     '#default_value' => $bill_no,
-    '#maxlength' => 30,
+    '#maxlength' => 20,
   );
 
   $form['submit'] = array(
