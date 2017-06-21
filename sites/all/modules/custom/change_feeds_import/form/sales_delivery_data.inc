@@ -38,7 +38,7 @@ function change_feeds_import_sales_delivery_form($form, $form_state) {
 
   $form['delivery_pending'] = array(
     '#type' => 'item',
-    '#title' => t('Please mention "Yes" to declare bills for Delivery Pending in "Delivery Pending" Column while upload.'),
+    '#title' => t('Take "SALES DELIVERED AMT" Value from "Sum of NET_SALES_VALUE" from Sales Pivot Report. Please mention "Yes" to declare bills for Delivery Pending in "Delivery Pending" Column while upload.'),
   );
   $form['reason'] = array(
     '#type' => 'item',
