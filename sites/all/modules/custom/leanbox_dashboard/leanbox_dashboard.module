@@ -1053,7 +1053,7 @@ function leanbox_dashboard_chart_filter_sales_delivery_report_form($form, &$form
     '#title' => t('Bill Number'),
     '#required' => FALSE,
     '#default_value' => $bill_no,
-    '#maxlength' => 20,
+    '#size' => 20,
   );
 
   $form['submit'] = array(
