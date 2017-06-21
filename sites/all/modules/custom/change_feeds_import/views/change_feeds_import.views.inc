@@ -109,29 +109,30 @@ function change_feeds_import_views_data_alter(&$data) {
   
   // custom billing table
   
-  $data['custom_billing_data']['tur'] = array(
-    'title' => t('tur'),
-    'help' => t('custom billing data - tur'),
-  //  'real field' => 'nid',
-    'field' => array(
-      'handler' => 'change_feeds_import_handler_tur',
-    ),
-  );
-  
-  $data['custom_billing_data']['Sum_of_NET_SALES_VALUE'] = array(
-    'title' => t('Sum_of_NET_SALES_VALUE'),
-    'help' => t('custom billing data'),
-   // 'real field' => 'nid',
-    'field' => array(
-      'handler' => 'change_feeds_import_handler_Sum_of_NET_SALES_VALUE',
-    ),
-  );
+//  $data['custom_billing_data']['tur'] = array(
+//    'title' => t('tur'),
+//    'help' => t('custom billing data - tur'),
+//  //  'real field' => 'nid',
+//    'field' => array(
+//      'handler' => 'change_feeds_import_handler_tur',
+//    ),
+//  );
+//  
+//  $data['custom_billing_data']['Sum_of_NET_SALES_VALUE'] = array(
+//    'title' => t('Sum_of_NET_SALES_VALUE'),
+//    'help' => t('custom billing data'),
+//   // 'real field' => 'nid',
+//    'field' => array(
+//      'handler' => 'change_feeds_import_handler_Sum_of_NET_SALES_VALUE',
+//    ),
+//  );
 }
 
 
 /**
  * Field handler to translate a Status into its readable form.
  */
+/**
 class change_feeds_import_handler_tur extends views_handler_field {
 
   function render($values) {
@@ -144,12 +145,13 @@ class change_feeds_import_handler_tur extends views_handler_field {
     return $tur;
   }
 
-}
+}*/
 
 
 /**
  * Field handler to translate a Status into its readable form.
  */
+/**
 class change_feeds_import_handler_Sum_of_NET_SALES_VALUE extends views_handler_field {
 
   function render($values) {
@@ -162,7 +164,7 @@ class change_feeds_import_handler_Sum_of_NET_SALES_VALUE extends views_handler_f
     return $sales_value;
   }
 
-}
+}*/
 
 /**
  * Field handler to translate a Status into its readable form.
