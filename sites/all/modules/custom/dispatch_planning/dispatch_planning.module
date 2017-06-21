@@ -584,6 +584,7 @@ function dispatch_planning_form_save_validate($form, &$form_state) {
   $query->leftJoin('field_data_field_dva_sales_day', 'da', 'da.entity_id = ndvp.nid');
   $query->leftJoin('field_data_field_dva_van_pl_group', 'fv', 'fv.entity_id = ndvp.nid');
   $query->leftJoin('field_data_field_dva_area_hook_group_name', 'gn', 'gn.entity_id = ndvp.nid');
+  $query->addField('gn', 'field_dva_area_hook_group_name_value', 'area_hook_group_name');
 
   $query->addField('n', 'nid');
   $query->condition('n.uid', $distributor_id);
@@ -634,6 +635,14 @@ function dispatch_planning_form_save_validate($form, &$form_state) {
     else {
       $area_hook[$val->area_hook] = $val->area_hook;
     }
+    
+    if (is_null($val->area_hook_group_name)) {
+      $area_hook_group_name = 1;
+    }
+    else {
+      $area_hook_group_name[$val->area_hook_group_name] = $val->area_hook_group_name;
+    }
+    
   }
   
   $form_state['dispatch_planning']['sequence_array'] = $sequence_array;
@@ -647,7 +656,7 @@ function dispatch_planning_form_save_validate($form, &$form_state) {
   }
 
   $bill_sequence_array = array();
-  if(($no_area || $no_sequence || count($area_hook) > 1) && !$skip_sequencing && $origin_lat && $origin_long && $enable_routing){
+  if(($no_area || $no_sequence || $area_hook_group_name || count($area_hook_group_name) > 1) && !$skip_sequencing && $origin_lat && $origin_long && $enable_routing){
         
     $params['vehicles'][] = array('vehicle_id' => 'origin', 'start_address' => array('location_id' => 'origin', 'lon' => (double)$origin_long, 'lat' => (double)$origin_lat), 'return_to_depot' => true);
     $post_result = graphhopper_postvrp_api($params);
