@@ -153,7 +153,11 @@ class change_feeds_import_handler_tur extends views_handler_field {
 
   function render($values) {
 
-    $tur = round($values->custom_billing_data_tur, 2);
+    if (!empty($values->custom_billing_data_tur)) {
+      $tur = $values->custom_billing_data_tur;
+      $tur = round($tur, 2);
+    }
+
     return $tur;
   }
 
@@ -167,7 +171,11 @@ class change_feeds_import_handler_Sum_of_NET_SALES_VALUE extends views_handler_f
 
   function render($values) {
 
-    $sales_value = round($values->custom_billing_data_sum_of_net_sales_value, 2);
+    if (!empty($values->custom_billing_data_sum_of_net_sales_value)) {
+      $sales_value = $values->custom_billing_data_sum_of_net_sales_value;
+      $sales_value = round($sales_value, 2);
+    }
+
     return $sales_value;
   }
 
