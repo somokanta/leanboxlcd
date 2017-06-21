@@ -846,9 +846,9 @@ function get_bill_info($bill_number, $van = NULL, $loading_date = NULL, $beat_na
   $query->leftJoin('node', 'nt', 'nt.nid = t.field_trip_id_reference_nid');
 
   $query->leftJoin('field_data_field_party_code', 'pc', 'pc.field_party_code_value = spc.field_sales_party_code_value');
-  $query->leftJoin('field_data_field_party_code', 'ppc', 'pc.field_party_code_value = ppc.field_party_code_value');
-  $query->condition('ppc.bundle', 'outlet_master');
-  $query->join('node', 'oun', 'oun.nid = ppc.entity_id');
+ // $query->leftJoin('field_data_field_party_code', 'ppc', 'pc.field_party_code_value = ppc.field_party_code_value');
+  $query->condition('pc.bundle', 'outlet_master');
+  $query->join('node', 'oun', 'oun.nid = pc.entity_id');
   $query->condition('oun.uid', $distributor_id, '=');
 
   $query->leftJoin('field_data_field_party_name', 'pn', 'pn.entity_id = oun.nid');
