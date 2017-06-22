@@ -205,7 +205,7 @@ function update_incremental_outlet_submit($form, &$form_state) {
       $nearest_outlet_code = $closet_result[0]->title;
       $nearest_outlet_name = $closet_result[0]->field_party_name_value;
       $closest_sales_delivery_beat = $closet_result[0]->field_static_delivery_beat_code_value;
-      $closest_sequence = $closet_result[0]->field_sequence_value;
+      $closest_sequence = $closet_result[0]->field_revised_sequence_value;
       $nearest_outlet_sequence = $closest_sequence;
 
 
@@ -224,6 +224,7 @@ function update_incremental_outlet_submit($form, &$form_state) {
       if (!empty($closet_result)) {
         $node = node_load($selected_nid);
         $node->field_sequence['und'][0]['value'] = $closest_sequence;
+        $node->field_revised_sequence['und'][0]['value'] = $closest_sequence;
         $node->field_static_delivery_beat_code['und'][0]['value'] = $closest_sales_delivery_beat;
         node_save($node);
 
