@@ -406,7 +406,7 @@ function increamental_outlet_get_results($sales_day, $van_pl_group, $area_hook_g
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
 
   $query = db_select('node', 'n');
-
+  $query->condition('n.type', 'outlet_master');
   $query->addTag('node_uid');
 
   //Outlet Master
@@ -415,13 +415,11 @@ function increamental_outlet_get_results($sales_day, $van_pl_group, $area_hook_g
   $query->isNull('dbc.field_static_delivery_beat_code_value');
   $query->leftjoin('field_data_field_area_hook_group_hul', 'fagh', 'fagh.entity_id = n.nid');
   $query->join('field_data_field_party_name', 'fp', 'fp.entity_id = n.nid');
-
-  $query->condition('n.type', 'outlet_master');
   $query->join('field_data_field_area_hook', 'fa', 'fa.entity_id = n.nid');
+  $query->join('field_data_field_revised_sequence', 'rs', 'rs.entity_id = n.nid');
 
   //Area hook Master
   $query->join('node', 'na', 'na.nid = fa.field_area_hook_nid');
-
   $query->join('field_data_field_dva_sales_day', 'sd', 'sd.entity_id = na.nid');
   $query->condition('sd.field_dva_sales_day_value', $sales_day, '=');
   $query->join('field_data_field_dva_area_hook_group_name', 'agr', 'agr.entity_id = na.nid');
