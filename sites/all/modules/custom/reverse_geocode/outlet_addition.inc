@@ -324,6 +324,7 @@ function get_selected_party_code_similar_outlet_data_with_lat_lng($van_pl, $area
   $query->join('field_data_field_area_hook', 'fa', 'fa.entity_id = n.nid');
   $query->join('field_data_field_hul_code', 'fh', 'fh.entity_id = n.nid');
   $query->join('field_data_field_static_delivery_beat_code', 'dbc2', 'dbc2.entity_id = n.nid');
+  $query->join('field_data_field_revised_sequence', 'frsq', 'frsq.entity_id = n.nid');
   $query->isNotNull('dbc2.field_static_delivery_beat_code_value');
 
   $query->join('field_data_field_area_hook_group_hul', 'faconf', 'faconf.entity_id = n.nid');
