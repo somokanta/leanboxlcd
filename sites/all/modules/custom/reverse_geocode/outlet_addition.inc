@@ -284,9 +284,12 @@ function get_closet_result_from_closet_hul_code($closet_outlet_nid, $distributor
   $query->join('field_data_field_static_delivery_beat_code', 'dbc', 'dbc.entity_id = n.nid');
   $query->join('field_data_field_party_name', 'fp', 'fp.entity_id = n.nid');
   $query->join('field_data_field_sequence', 'fsq', 'fsq.entity_id = n.nid');
+  $query->join('field_data_field_revised_sequence', 'frsq', 'frsq.entity_id = n.nid');
+
   $query->fields('fp', array('field_party_name_value'));
   $query->fields('dbc', array('field_static_delivery_beat_code_value'));
   $query->fields('fsq', array('field_sequence_value'));
+  $query->fields('frsq', array('field_revised_sequence_value'));
   $query->fields('n', array('title'));
   $res = $query->execute()->fetchAll();
   return $res;
