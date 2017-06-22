@@ -205,7 +205,7 @@ function update_incremental_outlet_submit($form, &$form_state) {
       $nearest_outlet_code = $closet_result[0]->title;
       $nearest_outlet_name = $closet_result[0]->field_party_name_value;
       $closest_sales_delivery_beat = $closet_result[0]->field_static_delivery_beat_code_value;
-      $closest_sequence = $closet_result[0]->field_sequence_value;
+      $closest_sequence = $closet_result[0]->field_revised_sequence_value;
       $nearest_outlet_sequence = $closest_sequence;
 
 
@@ -224,6 +224,7 @@ function update_incremental_outlet_submit($form, &$form_state) {
       if (!empty($closet_result)) {
         $node = node_load($selected_nid);
         $node->field_sequence['und'][0]['value'] = $closest_sequence;
+        $node->field_revised_sequence['und'][0]['value'] = $closest_sequence;
         $node->field_static_delivery_beat_code['und'][0]['value'] = $closest_sales_delivery_beat;
         node_save($node);
 
@@ -283,9 +284,12 @@ function get_closet_result_from_closet_hul_code($closet_outlet_nid, $distributor
   $query->join('field_data_field_static_delivery_beat_code', 'dbc', 'dbc.entity_id = n.nid');
   $query->join('field_data_field_party_name', 'fp', 'fp.entity_id = n.nid');
   $query->join('field_data_field_sequence', 'fsq', 'fsq.entity_id = n.nid');
+  $query->join('field_data_field_revised_sequence', 'frsq', 'frsq.entity_id = n.nid');
+
   $query->fields('fp', array('field_party_name_value'));
   $query->fields('dbc', array('field_static_delivery_beat_code_value'));
   $query->fields('fsq', array('field_sequence_value'));
+  $query->fields('frsq', array('field_revised_sequence_value'));
   $query->fields('n', array('title'));
   $res = $query->execute()->fetchAll();
   return $res;
@@ -406,7 +410,7 @@ function increamental_outlet_get_results($sales_day, $van_pl_group, $area_hook_g
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
 
   $query = db_select('node', 'n');
-
+  $query->condition('n.type', 'outlet_master');
   $query->addTag('node_uid');
 
   //Outlet Master
@@ -415,13 +419,11 @@ function increamental_outlet_get_results($sales_day, $van_pl_group, $area_hook_g
   $query->isNull('dbc.field_static_delivery_beat_code_value');
   $query->leftjoin('field_data_field_area_hook_group_hul', 'fagh', 'fagh.entity_id = n.nid');
   $query->join('field_data_field_party_name', 'fp', 'fp.entity_id = n.nid');
-
-  $query->condition('n.type', 'outlet_master');
   $query->join('field_data_field_area_hook', 'fa', 'fa.entity_id = n.nid');
+  $query->join('field_data_field_revised_sequence', 'rs', 'rs.entity_id = n.nid');
 
   //Area hook Master
   $query->join('node', 'na', 'na.nid = fa.field_area_hook_nid');
-
   $query->join('field_data_field_dva_sales_day', 'sd', 'sd.entity_id = na.nid');
   $query->condition('sd.field_dva_sales_day_value', $sales_day, '=');
   $query->join('field_data_field_dva_area_hook_group_name', 'agr', 'agr.entity_id = na.nid');
@@ -439,6 +441,7 @@ function increamental_outlet_get_results($sales_day, $van_pl_group, $area_hook_g
 
   $query->fields('n', array('title'));
   $query->fields('fp', array('field_party_name_value'));
+  $query->fields('rs', array('field_revised_sequence_value'));
   $query->fields('sd', array('field_dva_sales_day_value'));
   $query->fields('ppplg', array('field_dva_van_pl_group_value'));
   $query->fields('agr', array('field_dva_area_hook_group_name_value'));
