@@ -420,7 +420,7 @@ function increamental_outlet_get_results($sales_day, $van_pl_group, $area_hook_g
   $query->leftjoin('field_data_field_area_hook_group_hul', 'fagh', 'fagh.entity_id = n.nid');
   $query->join('field_data_field_party_name', 'fp', 'fp.entity_id = n.nid');
   $query->join('field_data_field_area_hook', 'fa', 'fa.entity_id = n.nid');
-  $query->join('field_data_field_revised_sequence', 'rs', 'rs.entity_id = n.nid');
+ // $query->join('field_data_field_revised_sequence', 'rs', 'rs.entity_id = n.nid');
 
   //Area hook Master
   $query->join('node', 'na', 'na.nid = fa.field_area_hook_nid');
@@ -441,7 +441,7 @@ function increamental_outlet_get_results($sales_day, $van_pl_group, $area_hook_g
 
   $query->fields('n', array('title'));
   $query->fields('fp', array('field_party_name_value'));
-  $query->fields('rs', array('field_revised_sequence_value'));
+ // $query->fields('rs', array('field_revised_sequence_value'));
   $query->fields('sd', array('field_dva_sales_day_value'));
   $query->fields('ppplg', array('field_dva_van_pl_group_value'));
   $query->fields('agr', array('field_dva_area_hook_group_name_value'));
