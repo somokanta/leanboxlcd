@@ -1019,8 +1019,20 @@ function leanbox_dashboard_all_value_using_voc_name($vname) {
  * @return array
  */
 function leanbox_dashboard_chart_filter_sales_delivery_report_form($form, &$form_state) {
-  $form = array();
 
+  $bill_no = '';
+  if (isset($_GET['bill_no']) && !empty($_GET['bill_no'])) {
+    $bill_no = $_GET['bill_no'];
+  }
+  
+  if (isset($_GET['delivered_amt'])) {
+    $delivered_amt = $_GET['delivered_amt'];
+  }
+  else {
+    $delivered_amt = 'all';
+  }
+
+  
   if (isset($_GET['start_date'])) {
     $start_date = $_GET['start_date'];
   }
@@ -1035,7 +1047,6 @@ function leanbox_dashboard_chart_filter_sales_delivery_report_form($form, &$form
     $end_date = date('Y-m-d');
   }
   
-  $bill_date = date('Y-m-d');
   $form['start_date'] = array(
     '#type' => 'date_popup',
     '#title' => t('Bill Date From'),
@@ -1055,19 +1066,27 @@ function leanbox_dashboard_chart_filter_sales_delivery_report_form($form, &$form
     '#default_value' => $bill_no,
     '#size'=> 20,
   );
+  $form['delivered_amt'] = array(
+    '#type' => 'radios',
+    '#title' => t('Delivered Amt'),
+    '#required' => FALSE,
+    '#options' => array('all' => 'All', 'na' => 'NA'),
+    '#default_value' => $delivered_amt,
+    '#size'=> 20,
+  );
 
   $form['submit'] = array(
     '#type' => 'submit',
     '#value' => 'Submit',
-    '#prefix' => '<div id ="sales-delivery-table-submit">',
-    '#suffix' => '</div>',
-    '#attributes' => array('class' => array('sales-delivery-table-submit')),
+   // '#prefix' => '<div id ="sales-delivery-table-submit">',
+   // '#suffix' => '</div>',
+   // '#attributes' => array('class' => array('sales-delivery-table-submit')),
   );
 
 
-  $form['sales_delivery_table'] = array(
-    '#markup' => '<a href = "/leanbox-chart-details/sales_delivery_table" target = "_blank"><div id="sales_delivery_table_div"></div></a>',
-  );
+//  $form['sales_delivery_table'] = array(
+//    '#markup' => '<a href = "/leanbox-chart-details/sales_delivery_table" target = "_blank"><div id="sales_delivery_table_div"></div></a>',
+//  );
 
   return $form;
 }
@@ -1078,13 +1097,13 @@ function leanbox_dashboard_chart_filter_sales_delivery_report_form($form, &$form
  * @param array $form_state
  * @return array
  */
-function leanbox_dashboard_chart_filter_sales_delivery_report_form_validate($form, &$form_state) {
+//function leanbox_dashboard_chart_filter_sales_delivery_report_form_validate($form, &$form_state) {
 //  $start_date = $form_state['values']['start_date'];
 //  $end_date = $form_state['values']['end_date'];
 //  if (empty($start_date) || empty($end_date)) {
 //    form_set_error('form', t('Kinldy Select Date Filter'));
 //  }
-}
+//}
 
 /**
  * submit handler
@@ -1096,6 +1115,7 @@ function leanbox_dashboard_chart_filter_sales_delivery_report_form_submit($form,
   $param['start_date'] = $form_state['values']['start_date'];
   $param['end_date'] = $form_state['values']['end_date'];
   $param['bill_no'] = $form_state['values']['bill_no'];
+  $param['delivered_amt'] = $form_state['values']['delivered_amt'];
 
   drupal_goto('sales-delivery-table', array('query' => $param));
 }
@@ -1110,24 +1130,21 @@ function leanbox_dashboard_sales_delivery_table_callback() {
   $param = $_GET;
   unset($param['q']);
   if ($output['status']) {
-    
+
     $data = array();
     if (isset($param['start_date'])) {
-      if (!empty($param['start_date'])) {
-        $data['start_date'] = $param['start_date'];
-      }
+      $data['start_date'] = $param['start_date'];
     }
-    
-     if (isset($param['end_date'])) {
-      if (!empty($param['end_date'])) {
-        $data['end_date'] = $param['end_date'];
-      }
+
+    if (isset($param['end_date'])) {
+      $data['end_date'] = $param['end_date'];
     }
 
     if (isset($param['bill_no'])) {
-      if (!empty($param['bill_no'])) {
-        $data['bill_no'] = $param['bill_no'];
-      }
+      $data['bill_no'] = $param['bill_no'];
+    }
+    if (isset($param['delivered_amt'])) {
+      $data['delivered_amt'] = $param['delivered_amt'];
     }
     $output1 .= l(t('XLS'), 'sales-delivery-table/export', array('query' => array($data)));
   }
@@ -1170,11 +1187,14 @@ function leanbox_dashboard_sales_delivery_table($export = FALSE) {
   }
   
   
+  if (isset($_GET['delivered_amt'])) {
+    $delivered_amt = $_GET['delivered_amt'];
+  }
+
   $bill_no = '';
   if (isset($_GET['bill_no'])) {
     $bill_no = $_GET['bill_no'];
   }
-
 
   $data = array();
   if ($export) {
@@ -1216,11 +1236,15 @@ function leanbox_dashboard_sales_delivery_table($export = FALSE) {
   $query->leftjoin('field_data_field_sales_return_amt', 'r', 'r.entity_id = n.nid');
   $query->addfield('r', 'field_sales_return_amt_value', 'delivered_value');
 
+  if ($delivered_amt == 'na') {
+    $query->isNull('r.field_sales_return_amt_value');
+  }
   $query->groupBy('bl.bill_number');
 
   $query->join('field_data_field_bill_value', 'bv', 'bv.entity_id = n.nid');
   $query->addfield('bv', 'field_bill_value_value', 'bill_value');
   $query->leftjoin('field_data_field_deliver_reason', 'dr', 'dr.entity_id = n.nid');
+  $query->leftjoin('taxonomy_term_data', 'dt', 'dt.tid = dr.field_deliver_reason_tid');
   // $query->addExpression('(bv.field_bill_value_value - r.field_sales_return_amt_value)', 'return_value');
   $query->addfield('dr', 'field_deliver_reason_tid', 'deliver_reason');
 
