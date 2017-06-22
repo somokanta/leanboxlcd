@@ -1244,7 +1244,6 @@ function leanbox_dashboard_sales_delivery_table($export = FALSE) {
   $query->join('field_data_field_bill_value', 'bv', 'bv.entity_id = n.nid');
   $query->addfield('bv', 'field_bill_value_value', 'bill_value');
   $query->leftjoin('field_data_field_deliver_reason', 'dr', 'dr.entity_id = n.nid');
-  $query->leftjoin('taxonomy_term_data', 'dt', 'dt.tid = dr.field_deliver_reason_tid');
   // $query->addExpression('(bv.field_bill_value_value - r.field_sales_return_amt_value)', 'return_value');
   $query->addfield('dr', 'field_deliver_reason_tid', 'deliver_reason');
 
