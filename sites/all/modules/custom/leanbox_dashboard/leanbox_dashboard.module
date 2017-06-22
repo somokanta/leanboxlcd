@@ -1053,7 +1053,7 @@ function leanbox_dashboard_chart_filter_sales_delivery_report_form($form, &$form
     '#title' => t('Bill Number'),
     '#required' => FALSE,
     '#default_value' => $bill_no,
-    '#size' => 20,
+    '#size'=> 20,
   );
 
   $form['submit'] = array(
@@ -1073,17 +1073,17 @@ function leanbox_dashboard_chart_filter_sales_delivery_report_form($form, &$form
 }
 
 /**
- * submit handler
+ * validate handler
  * @param array $form
  * @param array $form_state
  * @return array
  */
 function leanbox_dashboard_chart_filter_sales_delivery_report_form_validate($form, &$form_state) {
-  $start_date = $form_state['values']['start_date'];
-  $end_date = $form_state['values']['end_date'];
-  if (empty($start_date) || empty($end_date)) {
-    form_set_error('form', t('Kinldy Select Date Filter'));
-  }
+//  $start_date = $form_state['values']['start_date'];
+//  $end_date = $form_state['values']['end_date'];
+//  if (empty($start_date) || empty($end_date)) {
+//    form_set_error('form', t('Kinldy Select Date Filter'));
+//  }
 }
 
 /**

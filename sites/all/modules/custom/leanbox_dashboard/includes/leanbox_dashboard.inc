@@ -1799,7 +1799,8 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
         foreach ($res as $key => $val) {
           $pp_on_time = strtotime(date("H:i", strtotime($val['field_unloading_end_time_value'])));
 
-          if (($val['field_egir_date_value'] == $val['field_unloading_date_value']) && ($val['field_unloading_status_value'] == 2)) {
+          //if (($val['field_egir_date_value'] == $val['field_unloading_date_value']) && ($val['field_unloading_status_value'] == 2)) {
+          if ($val['field_unloading_status_value'] == 2) {
             if ($pp_on_time <= $dis_on_time) {
               $success_count ++;
             }
