@@ -438,6 +438,7 @@ function increamental_outlet_get_results($sales_day, $van_pl_group, $area_hook_g
 
   $query->fields('n', array('title'));
   $query->fields('fp', array('field_party_name_value'));
+  $query->fields('rs', array('field_revised_sequence_value'));
   $query->fields('sd', array('field_dva_sales_day_value'));
   $query->fields('ppplg', array('field_dva_van_pl_group_value'));
   $query->fields('agr', array('field_dva_area_hook_group_name_value'));
