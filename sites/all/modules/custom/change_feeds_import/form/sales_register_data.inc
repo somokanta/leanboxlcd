@@ -345,7 +345,7 @@ function change_feeds_import_create_sales_register_node($sales_data_result, $dis
           $node->status = 1; //(1 or 0): published or not
           $node->comment = 0; // 0 = comments disabled, 1 = read only, 2 = read/write
 
-          $node->field_sr_bill_date[LANGUAGE_NONE][0]['value'] = $val['date'];
+          $node->field_sr_new_bill_date[LANGUAGE_NONE][0]['value'] = $val['date'];
 
           if (isset($context['results']['dates'][$val['date']])) {
             $pdd = $context['results']['dates'][$val['date']];
@@ -366,7 +366,7 @@ function change_feeds_import_create_sales_register_node($sales_data_result, $dis
           $node = node_load($nid);
 
           //if ($node->field_sr_bill_date[LANGUAGE_NONE][0]['value'] != $val['date']) {
-          $node->field_sr_bill_date[LANGUAGE_NONE][0]['value'] = $val['date'];
+          $node->field_sr_new_bill_date[LANGUAGE_NONE][0]['value'] = $val['date'];
 
           if (isset($context['results']['dates'][$val['date']])) {
             $pdd = $context['results']['dates'][$val['date']];
