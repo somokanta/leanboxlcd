@@ -403,6 +403,7 @@ function update_billing_data() {
     'init_message' => t('Billing Data Batch Creation is starting.'),
     'progress_message' => t('Processed @current out of @total.'),
     'error_message' => t('Billing Data Batch has encountered an error.'),
+    'file' => drupal_get_path('module', 'change_feeds_import')
   );
   batch_set($batch);
   return "12";
