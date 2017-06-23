@@ -1,4 +1,5 @@
 <?php
+ module_load_include('inc', 'change_feeds_import', 'form/upload_billing_data');
 
 /*
  *  hook_permission()
@@ -394,7 +395,6 @@ function change_feeds_import_menu() {
 }
 
 function update_billing_data() {
-   module_load_include('inc', 'change_feeds_import', 'form/upload_billing_data');
   $batch = array(
     'operations' => array(
       array('change_feeds_import_update_billing', array()),
