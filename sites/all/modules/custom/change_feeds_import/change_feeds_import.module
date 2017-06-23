@@ -431,7 +431,7 @@ function change_feeds_import_update_billing(&$context) {
   $query->addField('cb', 'bill_date', 'bill_date');
   $query->range($progress, $limit);
   $results = $query->execute()->fetchAll();
-  dpm($results, "results");
+  dpm($context['sandbox']['progress'], "progress");
   for ($i = $context['sandbox']['progress']; $i < $context['sandbox']['progress'] + 50 && $i < $context['sandbox']['max']; $i++) {
     $key = $i;
     $val = $results[$key];
@@ -445,9 +445,11 @@ function change_feeds_import_update_billing(&$context) {
   }
   $context['sandbox']['progress'] = $i;
   if ($context['sandbox']['progress'] < $context['sandbox']['max']) {
+    dpm("111111111");
     $context['finished'] = $context['sandbox']['progress'] / $context['sandbox']['max'];
   }
   else {
+    dpm("2222222222222");
     $context['finished'] = 1;
   }
 }
