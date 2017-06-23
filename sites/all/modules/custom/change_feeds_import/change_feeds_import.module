@@ -24,6 +24,13 @@ function change_feeds_import_permission() {
 function change_feeds_import_menu() {
   $items = array();
 
+  $items['update-billing-data'] = array(
+    'title' => 'Update Billing Data',
+    'page callback' => 'update_billing_data',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+
 
   // Manually Delete Billing Data
   $items['delete-billing-data'] = array(
@@ -40,7 +47,7 @@ function change_feeds_import_menu() {
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
-    $items['impact-delivery-partypack-cron'] = array(
+  $items['impact-delivery-partypack-cron'] = array(
     'title' => 'Partypack cron Report',
     'page callback' => 'impact_delivery_partypack_cron',
     'access callback' => TRUE,
@@ -384,6 +391,61 @@ function change_feeds_import_menu() {
   );
 
   return $items;
+}
+
+function update_billing_data() {
+  $batch = array(
+    'operations' => array(
+      array('change_feeds_import_update_billing', array($max_billing_id)),
+    ),
+    'finished' => 'change_feeds_import_finished',
+    'title' => t('Creating Billing Data'),
+    'init_message' => t('Billing Data Batch Creation is starting.'),
+    'progress_message' => t('Processed @current out of @total.'),
+    'error_message' => t('Billing Data Batch has encountered an error.'),
+  );
+  batch_set($batch);
+}
+
+function change_feeds_import_update_billing(&$context) {
+
+  if (!isset($context['sandbox']['progress'])) {
+    $query = db_select('custom_billing_data', 'cb');
+    $query->addField('cb', 'bill_number');
+    $results = $query->execute();
+    $num = $results->rowCount();
+    $context['sandbox']['progress'] = 0;
+    $context['sandbox']['max'] = count($num);
+  }
+
+  $limit = 50;
+  $progress = $context['sandbox']['progress'];
+  // With each pass through the callback, retrieve the next group of nids.
+  $query = db_select('custom_billing_data', 'cb');
+  $query->addField('cb', 'bill_number');
+  $query->addField('cb', 'bill_date', 'bill_date');
+  $query->range($progress, $limit);
+  $results = $query->execute()->fetchAll();
+
+  for ($i = $context['sandbox']['progress']; $i < $context['sandbox']['progress'] + 50 && $i < $context['sandbox']['max']; $i++) {
+    $key = $i;
+    $val = $results[$key];
+
+    $nid = check_node_title_exists($val->bill_number, 'sales_register_data');
+    $node = node_load($nid);
+    if ($node) {
+      //$node->field_sr_bill_date[LANGUAGE_NONE][0]['value'] = $val->bill_date;
+      
+      // node_save($node);
+    }
+  }
+  $context['sandbox']['progress'] = $i;
+  if ($context['sandbox']['progress'] < $context['sandbox']['max']) {
+    $context['finished'] = $context['sandbox']['progress'] / $context['sandbox']['max'];
+  }
+  else {
+    $context['finished'] = 1;
+  }
 }
 
 function download_pdf($args) {
@@ -1582,16 +1644,15 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
   if ($entity->type == 'hul_code_master') {
     $ph_no = $entity->field_hul_phone_no[LANGUAGE_NONE][0]['value'];
     $hul_address = $entity->field_hul_address[LANGUAGE_NONE][0]['value'];
-    
+
     if (empty($ph_no)) {
-      drupal_set_message("Hul Phone No Can Not Be Null", 'error',FALSE);
+      drupal_set_message("Hul Phone No Can Not Be Null", 'error', FALSE);
       $entity->feeds_item->skip = TRUE;
     }
     if (empty($hul_address)) {
-      drupal_set_message("Hul Address Can Not Be Null", 'error',FALSE);
+      drupal_set_message("Hul Address Can Not Be Null", 'error', FALSE);
       $entity->feeds_item->skip = TRUE;
     }
-
   }
 
   if ($entity->feeds_item->id == 'outlet_master') {
@@ -1604,19 +1665,19 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
       drupal_set_message("$sales_day does not exist in Sales Day", 'error');
       $entity->feeds_item->skip = TRUE;
     }
-    
+
     $salesman = $entity->field_salesman[LANGUAGE_NONE][0]['value'];
     $salesman_code = $entity->field_salesman_code[LANGUAGE_NONE][0]['value'];
-    
+
     if (empty($salesman)) {
-      drupal_set_message("Salesman Can Not Be Null", 'error',FALSE);
+      drupal_set_message("Salesman Can Not Be Null", 'error', FALSE);
       $entity->feeds_item->skip = TRUE;
     }
     if (empty($salesman_code)) {
-      drupal_set_message("Salesman Code Can Not Be Null", 'error',FALSE);
+      drupal_set_message("Salesman Code Can Not Be Null", 'error', FALSE);
       $entity->feeds_item->skip = TRUE;
     }
-    
+
 //    if (empty($delivery_day_tid)) {
 //      drupal_set_message("$delivery_day does not exist in Delivery Day", 'error');
 //      $entity->feeds_item->skip = TRUE;
@@ -1881,7 +1942,7 @@ function change_feeds_import_query_alter(QueryAlterableInterface $query) {
   if ($query->hasTag('views_' . $view_name)) {
     $query->groupBy('field_sales_day_value');
     $query->groupBy('field_static_delivery_beat_code_value');
-   // $query->groupBy('field_area_hook_nid');
+    // $query->groupBy('field_area_hook_nid');
     $query->addExpression('SUM(if(field_sales_day_value != 1, 1, 0))', 'total_rec');
   }
 }
@@ -2197,13 +2258,12 @@ function get_van_pl($van, $day, $name) {
  */
 function change_feeds_import_views_data_export_batch_alter(&$batch, &$batch_redirect) {
   // $view = views_get_view($batch['view_name']);
-  
+
   $views_names = array('impact_delivery_cron_2', 'impact_party_master'); //  Download files for this Views only
-  
   // watchdog('hook_alter batch', '<pre>' . print_r($batch, TRUE) . '</pre>');
   if (in_array($batch['view_name'], $views_names)) {
 
-   // watchdog('ajax data', '<pre>' . print_r($batch, TRUE) . '</pre>');
+    // watchdog('ajax data', '<pre>' . print_r($batch, TRUE) . '</pre>');
 
     $batch['operations'][] = array(
       'change_feeds_import_views_data_export_batch_finish', array($batch['eid'], $batch['view_name']),
@@ -2222,7 +2282,7 @@ function change_feeds_import_views_data_export_batch_finish($eid, $view_name) {
   //watchdog('cron', '<pre>' . print_r(array(), TRUE) . '</pre>');
   // Allow Dump Creation for Export 2 Only to avoid Overriding
   $date = date('Ymdhis', strtotime("+1 days"));
-   
+
   if ($view_name == 'impact_delivery_cron_2') {
     // watchdog('cron 2', '<pre>' . print_r(array(), TRUE) . '</pre>');
     $view->set_display($export->view_display_id);
@@ -2234,11 +2294,11 @@ function change_feeds_import_views_data_export_batch_finish($eid, $view_name) {
 
     $file_uri = 'public://TP2IMPACT_DELIVERY/' . $file_name;
     $temp_file = $view->display_handler->outputfile_path();
-    
+
     // create directory if not exist
     $dir = 'public://TP2IMPACT_DELIVERY';
     file_prepare_directory($dir, FILE_CREATE_DIRECTORY);
-    
+
     $uri_path = file_unmanaged_copy($temp_file, $file_uri, FILE_EXISTS_REPLACE);
 
     $files = file_load_multiple(array(), array('uri' => $uri_path));
@@ -2248,21 +2308,21 @@ function change_feeds_import_views_data_export_batch_finish($eid, $view_name) {
     $view->display_handler->batched_execution_state = $export;
     $view->display_handler->remove_index();
     // Naming of file below
-   
+
     $file_name = 'TP2IMPACT_PARTYMASTER_' . $date . '.csv';
 
     $file_uri = 'public://TP2IMPACT_PARTYMASTER/' . $file_name;
     $temp_file = $view->display_handler->outputfile_path();
-    
+
     // create directory if not exist
     $dir = 'public://TP2IMPACT_PARTYMASTER';
     file_prepare_directory($dir, FILE_CREATE_DIRECTORY);
-    
+
     $uri_path = file_unmanaged_copy($temp_file, $file_uri, FILE_EXISTS_REPLACE);
 
     $files = file_load_multiple(array(), array('uri' => $uri_path));
   }
-  
+
   _send_file_using_sftp($file_name, $file_uri);
 }
 
@@ -2284,7 +2344,6 @@ function impact_delivery_cron() {
 function impact_delivery_partypack_cron() {
   drupal_goto('impact-party-master/export');
 }
-
 
 function _send_file_using_sftp($file_name, $file_uri) {
   if (!empty($file_name) && !empty($file_uri)) {
