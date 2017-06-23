@@ -597,6 +597,7 @@ function delete_billing_form_submit($form, &$form_state) {
 //        $node->field_billing_loading_date[LANGUAGE_NONE][0]['value'] = NULL;
         $node->field_billing_van = array();
         $node->field_billing_loading_date = array();
+        $node->field_sr_bill_date = array();
         node_save($node);
       }
     }
