@@ -544,6 +544,8 @@ function change_feeds_import_create_billing($max_billing_id, &$context) {
     $query->addField('cb', 'bill_number');
     $query->addField('cb', 'vehicle', 'vehicle');
     $query->addField('cb', 'loading_date', 'loading_date');
+    $query->addField('cb', 'bill_date', 'bill_date');
+
 
     $query->condition('cb.distributor_id', $distributor_id);
     $query->condition('cb.id', $max_billing_id, '>');
@@ -568,6 +570,7 @@ function change_feeds_import_create_billing($max_billing_id, &$context) {
     if ($node) {
       $node->field_billing_van[LANGUAGE_NONE][0]['value'] = $val->vehicle;
       $node->field_billing_loading_date[LANGUAGE_NONE][0]['value'] = $val->loading_date;
+      $node->field_sr_bill_date[LANGUAGE_NONE][0]['value'] = $val->bill_date;
       node_save($node);
     }
   }
