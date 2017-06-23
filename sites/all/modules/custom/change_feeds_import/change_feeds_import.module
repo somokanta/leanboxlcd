@@ -418,6 +418,7 @@ function change_feeds_import_update_billing(&$context) {
     $query->addField('cb', 'bill_number');
     $results = $query->execute();
     $num = $results->rowCount();
+    dpm($num,"num");
     $context['sandbox']['progress'] = 0;
     $context['sandbox']['max'] = count($num);
   }
