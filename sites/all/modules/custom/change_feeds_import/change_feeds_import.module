@@ -418,7 +418,7 @@ function change_feeds_import_update_billing(&$context) {
     $query->addField('cb', 'bill_number');
     $results = $query->execute();
     $num = $results->rowCount();
-    dpm($num,"num");
+    dpm($num, "num");
     $context['sandbox']['progress'] = 0;
     $context['sandbox']['max'] = count($num);
   }
@@ -431,7 +431,7 @@ function change_feeds_import_update_billing(&$context) {
   $query->addField('cb', 'bill_date', 'bill_date');
   $query->range($progress, $limit);
   $results = $query->execute()->fetchAll();
-
+  dpm($results, "results");
   for ($i = $context['sandbox']['progress']; $i < $context['sandbox']['progress'] + 50 && $i < $context['sandbox']['max']; $i++) {
     $key = $i;
     $val = $results[$key];
@@ -440,7 +440,6 @@ function change_feeds_import_update_billing(&$context) {
     $node = node_load($nid);
     if ($node) {
       //$node->field_sr_bill_date[LANGUAGE_NONE][0]['value'] = $val->bill_date;
-      
       // node_save($node);
     }
   }
