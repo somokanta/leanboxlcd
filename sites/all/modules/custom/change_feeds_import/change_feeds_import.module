@@ -405,6 +405,7 @@ function update_billing_data() {
     'error_message' => t('Billing Data Batch has encountered an error.'),
   );
   batch_set($batch);
+  return "12";
 }
 
 function change_feeds_import_update_billing(&$context) {
