@@ -394,6 +394,7 @@ function change_feeds_import_menu() {
 }
 
 function update_billing_data() {
+   module_load_include('inc', 'change_feeds_import', 'form/upload_billing_data');
   $batch = array(
     'operations' => array(
       array('change_feeds_import_update_billing', array()),
@@ -412,8 +413,6 @@ function update_billing_data() {
 function change_feeds_import_update_billing(&$context) {
 
   if (!isset($context['sandbox']['progress'])) {
-    module_load_include('inc', 'change_feeds_import', 'form/upload_billing_data');
-
     $query = db_select('custom_billing_data', 'cb');
     $query->addField('cb', 'bill_number');
     $results = $query->execute();
