@@ -396,9 +396,9 @@ function change_feeds_import_menu() {
 function update_billing_data() {
   $batch = array(
     'operations' => array(
-      array('change_feeds_import_update_billing', array($max_billing_id)),
+      array('change_feeds_import_update_billing', array()),
     ),
-    'finished' => 'change_feeds_import_finished',
+    'finished' => 'change_feeds_import_update',
     'title' => t('Creating Billing Data'),
     'init_message' => t('Billing Data Batch Creation is starting.'),
     'progress_message' => t('Processed @current out of @total.'),
