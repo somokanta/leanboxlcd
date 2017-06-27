@@ -222,8 +222,9 @@ function update_incremental_outlet_submit($form, &$form_state) {
         $distsnce_hul_code_array[] = $hul_code;
         $distsnce_nid_array[] = $nid;
       }
+      
       dpm($distsnce_in_meter, "distsnce_in_meter");
-
+      dpm($distsnce_nid_array, "distsnce_nid_array");
       $index = array_keys($distsnce_in_meter, min($distsnce_in_meter));
       dpm($index, "index");
       $index_id = $index[0];
