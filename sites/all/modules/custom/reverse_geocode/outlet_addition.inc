@@ -142,7 +142,7 @@ function outlet_addition_form($form, &$form_state) {
       ),
       '#states' => array(
         'visible' => array(
-          ':input[name^="list_form_items"]' => array('checked' => false),
+          ':button[id="incremental-outlet-confirm"]' => array('clicked' => true),
         ),
       ),
       '#id' => 'incremental-outlet-confirm-data',
@@ -201,7 +201,6 @@ function update_incremental_outlet_submit($form, &$form_state) {
   $user_id = $user->uid;
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
   $party_code = $form_state['values']['list_form_items']; // selected party code
-  dpm($party_code,"party_code");
   
   $new_outlet_array = $form_state['incremental_outlet']['options']; // already calculated outlet value.  
   foreach ($new_outlet_array as $key => $value) {
