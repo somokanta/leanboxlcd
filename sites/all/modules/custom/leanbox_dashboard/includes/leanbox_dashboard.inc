@@ -998,7 +998,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     $query->fields('d', array('field_picking_loading_date_value'));
     $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
 
-    $data1[] = array('PriceList Group', 'In Progress', 'Not Started', 'Completed');
+    $data1[] = array('PriceList Group', 'Not Started', 'In Progress', 'Completed');
     if (!empty($res)) {
       foreach ($list as $data => $data_list) {
 
@@ -1048,7 +1048,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
           if ($key1 == 'loose') {
             $picking_flag = TRUE;
 
-            $data1[] = array($key . ' ' . $key1, $val1['in_prg'], $val1['not_start'], $val1['comp']);
+            $data1[] = array($key . ' ' . $key1, $val1['not_start'], $val1['in_prg'], $val1['comp']);
           }
         }
       }
