@@ -107,7 +107,7 @@ function outlet_addition_form($form, &$form_state) {
       'Outlet_Sequence' => 'New Outlet Sequence',
     );
 
-    $form['results_container']['submit'] = array(
+    $form['results_container']['submit_data'] = array(
       '#type' => 'submit',
       '#value' => t('Confirm Incremental Outlet'),
       '#submit' => array('update_incremental_outlet_submit_data_in_database'),
@@ -122,7 +122,7 @@ function outlet_addition_form($form, &$form_state) {
           ':input[name^="check_submit"]' => array('clicked' => TRUE),
         ),
       ),
-      '#id' => 'incremental-outlet-confirm',
+      '#id' => 'incremental-outlet-confirm-data',
     );
     
     
