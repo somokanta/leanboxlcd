@@ -207,6 +207,11 @@ function update_incremental_outlet_submit($form, &$form_state) {
     if ($key == $party_code) {
       $van_pl = $value['field_dva_van_pl_group_value'];
       $area_hook = $value['field_dva_area_hook_group_name_value'];
+
+      $selected_lat_lng = get_selected_lat_lng($party_code, $distributor_id);
+      $selected_lat = $selected_lat_lng[0]->field_hul_updated_lat_value;
+      $selected_lng = $selected_lat_lng[0]->field_hul_updated_long_value;
+      
       // get all node's of outlet master and lat long from hul master which has same pl group and area hook group of selected outlet node.
       $selected_results = get_selected_party_code_similar_outlet_data_with_lat_lng($van_pl, $area_hook, $distributor_id);
       dpm($selected_results, "selected_results");
@@ -216,18 +221,18 @@ function update_incremental_outlet_submit($form, &$form_state) {
         $hul_code = $v->title;
         $nid = $v->nid;
 
-        dpm($nid,"nid");
-        dpm($selected_lat,"selected_lat");
-        dpm($selected_lng,"selected_lng");
-        dpm($lat,"lat");
-        dpm($lng,"lng");
+        dpm($nid, "nid");
+        dpm($selected_lat, "selected_lat");
+        dpm($selected_lng, "selected_lng");
+        dpm($lat, "lat");
+        dpm($lng, "lng");
         $distsnce_in_km = distance($selected_lat, $selected_lng, $lat, $lng);
         dpm($distsnce_in_km, "distsnce_in_km");
         $distsnce_in_meter[] = $distsnce_in_km * 1000;
         $distsnce_hul_code_array[] = $hul_code;
         $distsnce_nid_array[] = $nid;
       }
-      
+
       dpm($distsnce_in_meter, "distsnce_in_meter");
       $index = array_keys($distsnce_in_meter, min($distsnce_in_meter));
       dpm($index, "index");
@@ -281,6 +286,25 @@ function update_incremental_outlet_submit($form, &$form_state) {
       $form_state['rebuild'] = TRUE;
     }
   }
+}
+
+function get_selected_lat_lng($party_code, $distributor_id) {
+  $query = db_select('node', 'n');
+  $query->condition('n.uid', $distributor_id, '=');
+  $query->condition('n.title', $party_code, '=');
+
+//Outlet Master
+  $query->join('field_data_field_hul_code', 'fh', 'fh.entity_id = n.nid');
+  $query->condition('n.type', 'outlet_master');
+//HUL code Master
+  $query->join('node', 'nh', 'nh.title = fh.field_hul_code_value');
+  $query->Join('field_data_field_hul_updated_lat', 'hul_lat_u', 'hul_lat_u.entity_id = nh.nid');
+  $query->fields('hul_lat_u', array('field_hul_updated_lat_value'));
+  $query->Join('field_data_field_hul_updated_long', 'hul_long_u', 'hul_long_u.entity_id = nh.nid');
+  $query->fields('hul_long_u', array('field_hul_updated_long_value'));
+  $query->condition('nh.uid', $distributor_id, '=');
+  $res = $query->execute()->fetchAll();
+  return $res;
 }
 
 function incremental_outlet_ajax_callback($form, &$form_state) {
