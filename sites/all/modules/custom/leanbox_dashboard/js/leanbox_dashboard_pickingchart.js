@@ -39,7 +39,17 @@
 			});
 
 			function drawpickingChart(picking_data, area_definition) {
-				var data = google.visualization.arrayToDataTable(picking_data);
+				var data = google.visualization.arrayToDataTable([
+       ['Employee Name', 'Salary'],
+       ['Mike', 56], // Format as "22,500".
+       ['Bob', 35000],
+       ['Alice', 44000],
+       ['Frank', 27000],
+       ['Floyd', 92000],
+       ['Fritz', 18500]
+			 ['Floyd1', 92000],
+       ['Fritz1', 18500]
+      ]);
 
 				var view = new google.visualization.DataView(data);
 				var formatPercent = new google.visualization.NumberFormat({
