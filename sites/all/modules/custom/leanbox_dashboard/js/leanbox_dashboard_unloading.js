@@ -91,7 +91,7 @@
 				};
 				var chart = new google.visualization.ColumnChart(document.getElementById("unloading_div"));
 				//chart.draw(view, options);
-				chart.draw(data, google.charts.Bar.convertOptions(options));
+				chart.draw(view, google.charts.Bar.convertOptions(options));
 			}
 		}
 	};
