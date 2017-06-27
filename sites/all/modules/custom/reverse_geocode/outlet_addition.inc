@@ -198,6 +198,8 @@ function increamental_outlet_filters_submit(&$form, &$form_state) {
 // When SUbmit is clicked
 function update_incremental_outlet_submit($form, &$form_state) {
   $triggered_button = $form_state['triggering_element']['#name'];
+  dpm($triggered_button,"triggered_button");
+  dpm($form_state,"form_state");
   global $user;
   $user_id = $user->uid;
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
