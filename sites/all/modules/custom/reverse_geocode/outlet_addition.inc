@@ -237,6 +237,8 @@ function update_incremental_outlet_submit($form, &$form_state) {
         $node->field_sequence['und'][0]['value'] = $closest_sequence;
         $node->field_revised_sequence['und'][0]['value'] = $closest_sequence;
         $node->field_static_delivery_beat_code['und'][0]['value'] = $closest_sales_delivery_beat;
+        $node->field_revised_sequence_status['und'][0]['value'] = 1;
+
         node_save($node);
 
         $closest_array = array('Nearest Outlet Code' => $nearest_outlet_code, 'Nearest Outlet Name' => $nearest_outlet_name,
