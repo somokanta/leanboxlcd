@@ -202,6 +202,12 @@ function update_incremental_outlet_submit($form, &$form_state) {
   $user_id = $user->uid;
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
   $party_code = $form_state['values']['list_form_items']; // selected party code
+  if ($triggered_button == "submit_data") {
+    if(empty($party_code)){
+      form_set_error('select_party_code', 'Please Select Checked Party Code and then Confirm');
+    }
+  }
+  
   $new_outlet_array = $form_state['incremental_outlet']['options']; // already calculated outlet value.  
   foreach ($new_outlet_array as $key => $value) {
     if ($key == $party_code) {
