@@ -268,7 +268,8 @@ function get_all_closest_sequence($van_pl, $area_hook_group, $distributor_id) {
 
   $query->join('field_data_field_area_hook_group_hul', 'faconf', 'faconf.entity_id = n.nid');
   $query->condition('faconf.field_area_hook_group_hul_value', 1);
-  $query->join('field_data_field_sequence', 'fsq', 'fsq.entity_id = n.nid');
+ // $query->join('field_data_field_sequence', 'fsq', 'fsq.entity_id = n.nid');
+  $query->join('field_data_field_revised_sequence', 'fsq', 'fsq.entity_id = n.nid');
   $query->condition('n.type', 'outlet_master');
 
   //Area hook Group Master
@@ -279,7 +280,7 @@ function get_all_closest_sequence($van_pl, $area_hook_group, $distributor_id) {
   $query->join('field_data_field_dva_van_pl_group', 'ppplg', 'na.nid = ppplg.entity_id');
   $query->condition('ppplg.field_dva_van_pl_group_value', $van_pl, '=');
 
-  $query->fields('fsq', array('field_sequence_value'));
+  $query->fields('fsq', array('field_revised_sequence_value'));
   $res = $query->execute()->fetchAllKeyed(0, 0);
   return $res;
 }
