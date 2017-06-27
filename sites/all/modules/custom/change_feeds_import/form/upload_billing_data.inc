@@ -172,7 +172,7 @@ function change_feeds_import_update_data_in_error_billing_table_after_confirm($l
 
 function change_feeds_import_batch_fix_process($max, $data, $distributor_id, $file_name, $party_code_result, $sku_code_result, $bill_result, $master_result, &$context) {
   if (!isset($context['results']['last_id'])) {
-    $context['results']['csv_file'] = $distributor_id . "_error.csv";
+    $context['results']['csv_file'] = $distributor_id . "_" . time() . "_error.csv";
 
     $date = time();
     $bill_uploaded = NULL;

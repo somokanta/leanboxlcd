@@ -80,18 +80,23 @@
 						1: {color: '#e74c3c'},
 						2: {color: '#27ae60'},
 					},
-					isStacked: 'percent',
+					//isStacked: 'percent',
 					vAxis: {
 						minValue: 0,
 						maxValue: 1,
 						title: 'Picking Activity'
 					},
 					hAxis: {
-						title: 'Pricelist Group'
+						title: 'Pricelist Group',
+						direction: -1,
+						textPosition: 'out',
+						slantedText: true,
+						slantedTextAngle: 90 // here you can even use 180
 					},
 				};
 				var chart = new google.visualization.ColumnChart(document.getElementById('picking_div'));
-				chart.draw(view, options);
+				//chart.draw(view, options);
+				chart.draw(view, google.charts.Bar.convertOptions(options));
 			}
 		}
 	};
