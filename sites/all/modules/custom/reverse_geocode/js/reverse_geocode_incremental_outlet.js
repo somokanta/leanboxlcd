@@ -7,9 +7,8 @@
                 console.log("check clickeddd");
                 $('#incremental-outlet-confirm-data').show();
             });
-               $("input[name^='list_form_items']").click(function() {
-                   console.log("radion clickeddd");
-                console.log("radion");
+            $('input[type="radio"]').click(function() {
+                console.log("radion clickeddd");
                 $('#incremental-outlet-confirm-data').hide();
             });
         }
