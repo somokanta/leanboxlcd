@@ -25,7 +25,7 @@
 					$.ajax({
 						type: "POST",
 						cache: false, //for Chrome and IE8
-						url: "/chart-daterange-filter",
+						url: "/leanbox_dev/chart-daterange-filter",
 						data: {start_date: start_date, end_date: end_date, activity_type: 'unloading'},
 						success: function (response) {
 
@@ -88,7 +88,8 @@
 					},
 				};
 				var chart = new google.visualization.ColumnChart(document.getElementById("unloading_div"));
-				chart.draw(view, options);
+				//chart.draw(view, options);
+				chart.draw(data, google.charts.Bar.convertOptions(options));
 			}
 		}
 	};
