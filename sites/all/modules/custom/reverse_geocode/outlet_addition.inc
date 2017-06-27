@@ -216,6 +216,11 @@ function update_incremental_outlet_submit($form, &$form_state) {
         $hul_code = $v->title;
         $nid = $v->nid;
 
+        dpm($nid,"nid");
+        dpm($selected_lat,"selected_lat");
+        dpm($selected_lng,"selected_lng");
+        dpm($lat,"lat");
+        dpm($lng,"lng");
         $distsnce_in_km = distance($selected_lat, $selected_lng, $lat, $lng);
         dpm($distsnce_in_km, "distsnce_in_km");
         $distsnce_in_meter[] = $distsnce_in_km * 1000;
@@ -224,7 +229,6 @@ function update_incremental_outlet_submit($form, &$form_state) {
       }
       
       dpm($distsnce_in_meter, "distsnce_in_meter");
-      dpm($distsnce_nid_array, "distsnce_nid_array");
       $index = array_keys($distsnce_in_meter, min($distsnce_in_meter));
       dpm($index, "index");
       $index_id = $index[0];
