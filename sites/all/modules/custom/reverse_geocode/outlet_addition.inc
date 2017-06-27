@@ -140,11 +140,7 @@ function outlet_addition_form($form, &$form_state) {
         'method' => 'replace',
         'effect' => 'fade',
       ),
-      '#states' => array(
-        'visible' => array(
-          ':input[name^="list_form_items"]' => array('checked' => TRUE),
-        ),
-      ),
+      
       '#id' => 'incremental-outlet-confirm-data',
     );
 
