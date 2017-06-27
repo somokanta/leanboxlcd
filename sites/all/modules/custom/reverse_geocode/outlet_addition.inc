@@ -237,8 +237,6 @@ function update_incremental_outlet_submit($form, &$form_state) {
         $node->field_sequence['und'][0]['value'] = $closest_sequence;
         $node->field_revised_sequence['und'][0]['value'] = $closest_sequence;
         $node->field_static_delivery_beat_code['und'][0]['value'] = $closest_sales_delivery_beat;
-        $node->field_area_hook_group_hul['und'][0]['value'] = 1;
-
         node_save($node);
 
         $closest_array = array('Nearest Outlet Code' => $nearest_outlet_code, 'Nearest Outlet Name' => $nearest_outlet_name,
@@ -435,6 +433,8 @@ function increamental_outlet_get_results($sales_day, $van_pl_group, $area_hook_g
   $query->leftjoin('field_data_field_area_hook_group_hul', 'fagh', 'fagh.entity_id = n.nid');
   $query->join('field_data_field_party_name', 'fp', 'fp.entity_id = n.nid');
   $query->join('field_data_field_area_hook', 'fa', 'fa.entity_id = n.nid');
+  $query->join('field_data_field_area_hook_group_hul', 'faconf', 'faconf.entity_id = n.nid');
+  $query->condition('faconf.field_area_hook_group_hul_value', 1);
   // $query->join('field_data_field_revised_sequence', 'rs', 'rs.entity_id = n.nid');
   //Area hook Master
   $query->join('node', 'na', 'na.nid = fa.field_area_hook_nid');
@@ -450,6 +450,8 @@ function increamental_outlet_get_results($sales_day, $van_pl_group, $area_hook_g
   $query->join('node', 'nh', 'nh.title = fh.field_hul_code_value');
   $query->Join('field_data_field_hul_updated_lat', 'hul_lat_u', 'hul_lat_u.entity_id = nh.nid');
   $query->Join('field_data_field_hul_updated_long', 'hul_long_u', 'hul_long_u.entity_id = nh.nid');
+  $query->join('field_data_field_hul_status', 'fhs', 'fhs.entity_id = nh.nid');
+  $query->condition('fhs.field_hul_status_value', 1);
   $query->condition('nh.uid', $distributor_id, '=');
 
 
