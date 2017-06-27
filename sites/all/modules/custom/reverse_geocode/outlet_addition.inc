@@ -110,6 +110,7 @@ function outlet_addition_form($form, &$form_state) {
     $form['results_container']['submit'] = array(
       '#type' => 'submit',
       '#value' => t('Confirm Incremental Outlet'),
+      '#attributes' => array('name' => 'check_submit'),
       '#submit' => array('update_incremental_outlet_submit'),
       '#ajax' => array(
         'wrapper' => 'incremental-outlet',
