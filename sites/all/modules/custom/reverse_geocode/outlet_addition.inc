@@ -110,7 +110,7 @@ function outlet_addition_form($form, &$form_state) {
     $form['results_container']['submit_data'] = array(
       '#type' => 'submit',
       '#value' => t('Confirm Incremental Outlet'),
-      '#submit' => array('update_incremental_outlet_submit_data_in_database'),
+      '#submit' => array('update_incremental_outlet_submit'),
       '#ajax' => array(
         'wrapper' => 'incremental-outlet',
         'callback' => 'incremental_outlet_ajax_callback',
@@ -119,7 +119,7 @@ function outlet_addition_form($form, &$form_state) {
       ),
       '#states' => array(
         'visible' => array(
-          ':input[name="check_submit"]' => array('clicked' => TRUE),
+          ':input[name^="list_form_items"]' => array('checked' => TRUE),
         ),
       ),
       '#id' => 'incremental-outlet-confirm-data',
@@ -194,6 +194,7 @@ function increamental_outlet_filters_submit(&$form, &$form_state) {
 
 // When SUbmit is clicked
 function update_incremental_outlet_submit($form, &$form_state) {
+  dpm($form_state,"form_state");
   global $user;
   $user_id = $user->uid;
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
