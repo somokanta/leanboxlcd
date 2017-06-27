@@ -185,7 +185,6 @@ function update_incremental_outlet_submit($form, &$form_state) {
       $area_hook = $value['field_dva_area_hook_group_name_value'];
       // get all node's of outlet master and lat long from hul master which has same pl group and area hook group of selected outlet node.
       $selected_results = get_selected_party_code_similar_outlet_data_with_lat_lng($van_pl, $area_hook, $distributor_id);
-      dpm($selected_results, "selected_results");
       foreach ($selected_results as $k => $v) {
         $lat = $v->field_hul_updated_lat_value;
         $lng = $v->field_hul_updated_long_value;
@@ -201,10 +200,8 @@ function update_incremental_outlet_submit($form, &$form_state) {
       $index_id = $index[0];
       $closet_hul_code = $distsnce_hul_code_array[$index_id];
       $closet_outlet_nid = $distsnce_nid_array[$index_id];
-      dpm($closet_outlet_nid, "closet_outlet_nid");
       // Get result of closest outlet node.
       $closet_result = get_closet_result_from_closet_hul_code($closet_outlet_nid, $distributor_id);
-      dpm($closet_result, "closet_result");
 
       $nearest_outlet_code = $closet_result[0]->title;
       $nearest_outlet_name = $closet_result[0]->field_party_name_value;
@@ -212,20 +209,12 @@ function update_incremental_outlet_submit($form, &$form_state) {
       $closest_sequence = $closet_result[0]->field_revised_sequence_value;
       $nearest_outlet_sequence = $closest_sequence;
 
-      dpm($closest_sequence, "closest_sequence");
-
-      dpm($van_pl, "van_pl");
-      dpm($area_hook, "area_hook");
       // logic for finding closest sequence.
       $get_all_closest_sequence = get_all_closest_sequence($van_pl, $area_hook, $distributor_id);
-      dpm($get_all_closest_sequence, "get_all_closest_sequence");
       $flag = 1;
       while ($flag) {
-        dpm("1111");
         $closest_sequence = $closest_sequence + 0.001;
-        dpm($closest_sequence, "closest_sequence111");
         if (!isset($get_all_closest_sequence["$closest_sequence"])) {
-          dpm("222");
           $flag = 0;
         }
       }
