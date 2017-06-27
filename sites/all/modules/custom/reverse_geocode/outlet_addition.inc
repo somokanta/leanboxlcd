@@ -160,6 +160,7 @@ function outlet_addition_form($form, &$form_state) {
       '#default_value' => NULL,
     );
   }
+ drupal_add_js(drupal_get_path('module', 'reverse_geocode') . '/js/reverse_geocode_incremental_outlet.js');
 
   return $form;
 }
