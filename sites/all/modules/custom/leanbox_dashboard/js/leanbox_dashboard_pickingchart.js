@@ -39,7 +39,17 @@
 			});
 
 			function drawpickingChart(picking_data, area_definition) {
-				var data = google.visualization.arrayToDataTable(picking_data);
+				var data = google.visualization.arrayToDataTable([
+       ['Employee Name', 'Salary'],
+       ['Mike', 56], // Format as "22,500".
+       ['Bob', 35000],
+       ['Alice', 44000],
+       ['Frank', 27000],
+       ['Floyd', 92000],
+       ['Fritz', 18500]
+			 ['Floyd1', 92000],
+       ['Fritz1', 18500]
+      ]);
 
 				var view = new google.visualization.DataView(data);
 				var formatPercent = new google.visualization.NumberFormat({
@@ -67,31 +77,77 @@
 						sourceColumn: 3,
 						type: "string",
 						role: "annotation"},
+						4, {
+						calc: function (dt, row) {
+							return dt.getValue(row, 3) + ' (' +  parseFloat(formatPercent.formatValue(dt.getValue(row, 3) / (dt.getValue(row, 1) + dt.getValue(row, 2) + dt.getValue(row, 3)))).toFixed(0) + '%)';
+						},
+						sourceColumn: 4,
+						type: "string",
+						role: "annotation"},
+						5, {
+						calc: function (dt, row) {
+							return dt.getValue(row, 3) + ' (' +  parseFloat(formatPercent.formatValue(dt.getValue(row, 3) / (dt.getValue(row, 1) + dt.getValue(row, 2) + dt.getValue(row, 3)))).toFixed(0) + '%)';
+						},
+						sourceColumn: 5,
+						type: "string",
+						role: "annotation"},
+						6, {
+						calc: function (dt, row) {
+							return dt.getValue(row, 3) + ' (' +  parseFloat(formatPercent.formatValue(dt.getValue(row, 3) / (dt.getValue(row, 1) + dt.getValue(row, 2) + dt.getValue(row, 3)))).toFixed(0) + '%)';
+						},
+						sourceColumn: 6,
+						type: "string",
+						role: "annotation"},
+						7, {
+						calc: function (dt, row) {
+							return dt.getValue(row, 3) + ' (' +  parseFloat(formatPercent.formatValue(dt.getValue(row, 3) / (dt.getValue(row, 1) + dt.getValue(row, 2) + dt.getValue(row, 3)))).toFixed(0) + '%)';
+						},
+						sourceColumn: 7,
+						type: "string",
+						role: "annotation"},
+						8, {
+						calc: function (dt, row) {
+							return dt.getValue(row, 3) + ' (' +  parseFloat(formatPercent.formatValue(dt.getValue(row, 3) / (dt.getValue(row, 1) + dt.getValue(row, 2) + dt.getValue(row, 3)))).toFixed(0) + '%)';
+						},
+						sourceColumn: 8,
+						type: "string",
+						role: "annotation"},
 				]);
 				var options = {
 					width: area_definition.width,
 					height: area_definition.height,
 					title: '',
-					legend: {position: 'top', maxLines: 3},
+					legend: {position: 'top', maxLines: 8},
 					bar: {groupWidth: '60%'},
 					chartArea: {left: area_definition.ch_left, top: area_definition.ch_top, width: area_definition.ch_width, height: area_definition.ch_height},
 					series: {
-						0: {color: '#f39c12'},
-						1: {color: '#e74c3c'},
+						0: {color: '#e74c3c'},
+						1: {color: '#f39c12'},
 						2: {color: '#27ae60'},
+						3: {color: '#27ae60'},
+						4: {color: '#27ae60'},
+						5: {color: '#27ae60'},
+						6: {color: '#27ae60'},
+						7: {color: '#27ae60'},
+						8: {color: '#27ae60'},
 					},
-					isStacked: 'percent',
+					//isStacked: 'percent',
 					vAxis: {
 						minValue: 0,
 						maxValue: 1,
 						title: 'Picking Activity'
 					},
 					hAxis: {
-						title: 'Pricelist Group'
+						title: 'Pricelist Group',
+						direction: -1,
+						textPosition: 'out',
+						slantedText: true,
+						slantedTextAngle: 90 // here you can even use 180
 					},
 				};
 				var chart = new google.visualization.ColumnChart(document.getElementById('picking_div'));
-				chart.draw(view, options);
+				//chart.draw(view, options);
+				chart.draw(view, google.charts.Bar.convertOptions(options));
 			}
 		}
 	};

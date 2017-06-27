@@ -87,11 +87,6 @@
 						title: 'Unloading Activity',
 						 // format: "percent",
 					},
-					hAxis: {
-        direction:-1,
-        slantedText:true,
-        slantedTextAngle:90 // here you can even use 180
-    },
 				};
 				var chart = new google.visualization.ColumnChart(document.getElementById("unloading_div"));
 				//chart.draw(view, options);
