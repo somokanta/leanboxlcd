@@ -86,7 +86,7 @@
 						minValue: 0,
 						maxValue: 1,
 						title: 'Unloading Activity',
-						  format: "percent",
+						 // format: "percent",
 					},
 				};
 				var chart = new google.visualization.ColumnChart(document.getElementById("unloading_div"));
