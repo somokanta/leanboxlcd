@@ -77,11 +77,11 @@
 					bar: {groupWidth: '40%'},
 					chartArea: {left: area_definition.ch_left, top: area_definition.ch_top, width: area_definition.ch_width, height: area_definition.ch_height},
 					series: {
-						0: {color: '#f39c12'},
-						1: {color: '#e74c3c'},
+						0: {color: '#e74c3c'},
+						1: {color: '#f39c12'},
 						2: {color: '#27ae60'}
 					},
-					isStacked: 'percent',
+					//isStacked: 'percent',
 					vAxis: {
 						minValue: 0,
 						maxValue: 1,
@@ -92,7 +92,8 @@
 					},
 				};
 				var chart = new google.visualization.ColumnChart(document.getElementById("party_packing_div"));
-				chart.draw(view, options);
+				//chart.draw(view, options);
+					chart.draw(view, google.charts.Bar.convertOptions(options));
 			}
 		}
 	};
