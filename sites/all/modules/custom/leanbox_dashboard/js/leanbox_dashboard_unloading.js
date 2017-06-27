@@ -81,13 +81,17 @@
 						2: {color: '#27ae60'}
 					},
 				//	isStacked: 'percent',
-				format :  '#\'%\'',
 					vAxis: {
 						minValue: 0,
 						maxValue: 1,
 						title: 'Unloading Activity',
 						 // format: "percent",
 					},
+					hAxis: {
+        direction:-1,
+        slantedText:true,
+        slantedTextAngle:90 // here you can even use 180
+    },
 				};
 				var chart = new google.visualization.ColumnChart(document.getElementById("unloading_div"));
 				//chart.draw(view, options);
