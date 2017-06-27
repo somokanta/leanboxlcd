@@ -1157,7 +1157,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     $query->fields('d', array('field_egir_date_value'));
     $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
 
-    $output1[0] = array('PriceList Group', 'In Progress', 'Not Started', 'Completed');
+    $output1[0] = array('PriceList Group', 'Not Started', 'In Progress', 'Completed');
     $output['not_start'] = $output['in_prg'] = $output['comp'] = 0;
     if (!empty($res)) {
       foreach ($res as $key => $val) {
@@ -1180,7 +1180,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
         $output1[] = array('No Result Found for Unloading', 0, 0, 0);
       }
       else {
-        $output1[] = array('Unloading', $output['in_prg'], $output['not_start'], $output['comp']);
+        $output1[] = array('Unloading', $output['not_start'], $output['in_prg'], $output['comp']);
       }
     }
     else {
