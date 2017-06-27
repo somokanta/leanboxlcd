@@ -107,25 +107,9 @@ function outlet_addition_form($form, &$form_state) {
       'Outlet_Sequence' => 'New Outlet Sequence',
     );
 
-    $form['results_container']['submit_data'] = array(
-      '#type' => 'submit',
-      '#value' => t('Confirm Incremental Outlet'),
-      '#submit' => array('update_incremental_outlet_submit'),
-      '#ajax' => array(
-        'wrapper' => 'incremental-outlet',
-        'callback' => 'incremental_outlet_ajax_callback',
-        'method' => 'replace',
-        'effect' => 'fade',
-      ),
-      '#states' => array(
-        'visible' => array(
-          ':input[name^="list_form_items"]' => array('checked' => TRUE),
-        ),
-      ),
-      '#id' => 'incremental-outlet-confirm-data',
-    );
-    
-    
+
+
+
     $form['results_container']['submit'] = array(
       '#type' => 'submit',
       '#value' => t('Check Closest Incremental Outlet'),
@@ -143,6 +127,25 @@ function outlet_addition_form($form, &$form_state) {
         ),
       ),
       '#id' => 'incremental-outlet-confirm',
+    );
+
+    $form['results_container']['submit_data'] = array(
+      '#type' => 'submit',
+      '#value' => t('Confirm Incremental Outlet'),
+      '#attributes' => array('name' => 'submit_data'),
+      '#submit' => array('update_incremental_outlet_submit'),
+      '#ajax' => array(
+        'wrapper' => 'incremental-outlet',
+        'callback' => 'incremental_outlet_ajax_callback',
+        'method' => 'replace',
+        'effect' => 'fade',
+      ),
+      '#states' => array(
+        'visible' => array(
+          ':input[name^="list_form_items"]' => array('checked' => TRUE),
+        ),
+      ),
+      '#id' => 'incremental-outlet-confirm-data',
     );
 
     $form['results_container']['list_form_items'] = array(
@@ -194,7 +197,7 @@ function increamental_outlet_filters_submit(&$form, &$form_state) {
 
 // When SUbmit is clicked
 function update_incremental_outlet_submit($form, &$form_state) {
-  dpm($form_state,"form_state");
+  $triggered_button = $form_state['triggering_element']['#name'];
   global $user;
   $user_id = $user->uid;
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
@@ -243,11 +246,14 @@ function update_incremental_outlet_submit($form, &$form_state) {
       // saving sequence and static_delivery_beat_code in selected outlet node.
       $selected_nid = $value['nid'];
       if (!empty($closet_result)) {
-//        $node = node_load($selected_nid);
-//        $node->field_sequence['und'][0]['value'] = $closest_sequence;
-//        $node->field_revised_sequence['und'][0]['value'] = $closest_sequence;
-//        $node->field_static_delivery_beat_code['und'][0]['value'] = $closest_sales_delivery_beat;
-//        node_save($node);
+
+        if ($triggered_button == "submit_data") {
+          $node = node_load($selected_nid);
+          $node->field_sequence['und'][0]['value'] = $closest_sequence;
+          $node->field_revised_sequence['und'][0]['value'] = $closest_sequence;
+          $node->field_static_delivery_beat_code['und'][0]['value'] = $closest_sales_delivery_beat;
+          node_save($node);
+        }
 
         $closest_array = array('Nearest Outlet Code' => $nearest_outlet_code, 'Nearest Outlet Name' => $nearest_outlet_name,
           'Nearest Outlet Sequence' => $nearest_outlet_sequence, 'Static Beat Code' => $closest_sales_delivery_beat,
