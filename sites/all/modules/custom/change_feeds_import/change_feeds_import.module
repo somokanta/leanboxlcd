@@ -1,5 +1,6 @@
 <?php
- module_load_include('inc', 'change_feeds_import', 'form/upload_billing_data');
+
+module_load_include('inc', 'change_feeds_import', 'form/upload_billing_data');
 
 /*
  *  hook_permission()
@@ -2187,6 +2188,7 @@ function check_area_id_exists($title) {
 }
 
 function change_feeds_import_form_views_exposed_form_alter(&$form, &$form_state) {
+  dpm($form, "form");
   if ($form['#id'] == 'views-exposed-form-Outlet-Master-Report-page') {
 
 
@@ -2228,6 +2230,82 @@ function change_feeds_import_form_views_exposed_form_alter(&$form, &$form_state)
       $form['field_dva_area_hook_group_name_value']['#validated'] = TRUE;
     }
   }
+
+
+  if ($form['#id'] == 'views-exposed-form-Outlet-Master-Report-page') {
+
+
+    $van_pl_options = get_van_pl('van', NULL, NULL);
+    $select = array('' => '- Any -');
+
+    $days = change_feeds_import_get_terms_using_vocubulary('Outlet Days');
+    $sales_day_options = array_combine($days, $days);
+
+    $select = array('' => '- Any -');
+
+    $area_grp_name_options = get_van_pl(NULL, NULL, 'name');
+    $select = array('' => '- Any -');
+
+
+    $van_pl_options = $select + $van_pl_options;
+    $sales_day_options = $select + $sales_day_options;
+    $area_grp_name_options = $select + $area_grp_name_options;
+
+
+    $salesman = get_all_salesman_data("salesman", NULL);
+    $salesman_code = get_all_salesman_data(NULL, "slaesman_code");
+    if (isset($form['field_dva_van_pl_group_value'])) {
+      $form['field_dva_van_pl_group_value']['#type'] = 'select';
+      $form['field_dva_van_pl_group_value']['#size'] = null;
+      $form['field_dva_van_pl_group_value']['#options'] = $van_pl_options;
+      $form['field_dva_van_pl_group_value']['#validated'] = TRUE;
+    }
+
+    if (isset($form['field_sales_day_value'])) {
+      $form['field_sales_day_value']['#type'] = 'select';
+      $form['field_sales_day_value']['#size'] = null;
+      $form['field_sales_day_value']['#options'] = $sales_day_options;
+      $form['field_sales_day_value']['#validated'] = TRUE;
+    }
+
+    if (isset($form['field_dva_area_hook_group_name_value'])) {
+      $form['field_dva_area_hook_group_name_value']['#type'] = 'select';
+      $form['field_dva_area_hook_group_name_value']['#size'] = null;
+      $form['field_dva_area_hook_group_name_value']['#options'] = $area_grp_name_options;
+      $form['field_dva_area_hook_group_name_value']['#validated'] = TRUE;
+    }
+
+    if (isset($form['field_data_field_salesman'])) {
+      $form['field_data_field_salesman']['#type'] = 'select';
+      $form['field_data_field_salesman']['#size'] = null;
+      $form['field_data_field_salesman']['#options'] = $salesman;
+      $form['field_data_field_salesman']['#validated'] = TRUE;
+    }
+
+
+    if (isset($form['field_salesman_code_value'])) {
+      $form['field_salesman_code_value']['#type'] = 'select';
+      $form['field_salesman_code_value']['#size'] = null;
+      $form['field_salesman_code_value']['#options'] = $salesman_code;
+      $form['field_salesman_code_value']['#validated'] = TRUE;
+    }
+  }
+}
+
+function get_all_salesman_data($salesman, $salesman_code) {
+  $query = db_select('node', 'n');
+  $query->condition('n.type', 'outlet_master');
+  $query->addTag('node_uid');
+  if (!is_null($salesman)) {
+    $query->join('field_data_field_salesman', 'fs', 'fs.entity_id = n.nid');
+    $query->fields('fs', array('field_salesman_value'));
+  }
+  if (!is_null($salesman_code)) {
+    $query->join('field_data_field_salesman_code', 'fsc', 'fsc.entity_id = n.nid');
+    $query->fields('fsc', array('field_salesman_code_value'));
+  }
+  $results = $query->execute()->fetchAllKeyed(0, 0);
+  return $results;
 }
 
 function get_van_pl($van, $day, $name) {
