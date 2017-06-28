@@ -32,6 +32,13 @@ function change_feeds_import_menu() {
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
+  
+  $items['update-billing-data-thankyou'] = array(
+    'title' => 'Update Billing Data Thankyou',
+    'page callback' => 'update_billing_data_thankyou',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
 
 
   // Manually Delete Billing Data
@@ -395,6 +402,11 @@ function change_feeds_import_menu() {
   return $items;
 }
 
+function update_billing_data_thankyou(){
+  drupal_set_message("Thankyou updation is completed");
+  return "";
+}
+
 function update_billing_data() {
   $batch = array(
     'operations' => array(
@@ -428,17 +440,18 @@ function change_feeds_import_update_billing(&$context) {
   $query = db_select('custom_billing_data', 'cb');
   $query->addField('cb', 'bill_number');
   $query->addField('cb', 'bill_date', 'bill_date');
+  $query->addField('cb', 'distributor_id', 'distributor_id');
   $query->range($progress, $limit);
   $results = $query->execute()->fetchAll();
   for ($i = $context['sandbox']['progress']; $i < $context['sandbox']['progress'] + 50 && $i < $context['sandbox']['max']; $i++) {
     $key = $i;
     $val = $results[$key];
 
-    $nid = check_node_title_exists($val->bill_number, 'sales_register_data');
+    $nid = check_node_title_exists_for_update($val->bill_number,$val->distributor_id);
     $node = node_load($nid);
     if ($node) {
-      //$node->field_sr_bill_date[LANGUAGE_NONE][0]['value'] = $val->bill_date;
-      // node_save($node);
+      $node->field_sr_bill_date[LANGUAGE_NONE][0]['value'] = $val->bill_date;
+       node_save($node);
     }
   }
   $context['sandbox']['progress'] = $i;
@@ -450,6 +463,15 @@ function change_feeds_import_update_billing(&$context) {
   }
 }
 
+function check_node_title_exists_for_update($bill_number,$distributor_id){
+  $query1 = db_select('node', 'n');
+  $query1->condition('n.type', 'sales_register_data');
+  $query1->condition('n.title', $bill_number);
+  $query1->condition('n.uid', $distributor_id);
+  $query1->fields('n', array('nid'));
+  $nid = $query1->execute()->fetchField();
+  return $nid;
+}
 function download_pdf($args) {
   $view_name = "drs_report";
   $view = views_get_view($view_name, '');
