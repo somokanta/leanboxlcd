@@ -41,33 +41,33 @@
 			function drawpickingChart(picking_data, area_definition) {
 				var data = google.visualization.arrayToDataTable(picking_data);
 console.log(picking_data);
-				var view = new google.visualization.DataView(data);
-				var formatPercent = new google.visualization.NumberFormat({
-					pattern: '#,##0.0%'
-				});
-				view.setColumns([0,
-					1, {
-						calc: function (dt, row) {
-							return dt.getValue(row, 1) + ' (' +  parseFloat(formatPercent.formatValue(dt.getValue(row, 1) / (dt.getValue(row, 1) + dt.getValue(row, 2) + dt.getValue(row, 3)))).toFixed(0) + '%)';
-						},
-						sourceColumn: 1,
-						type: "string",
-						role: "annotation", },
-					2, {
-						calc: function (dt, row) {
-							return dt.getValue(row, 2) + ' (' +  parseFloat(formatPercent.formatValue(dt.getValue(row, 2) / (dt.getValue(row, 1) + dt.getValue(row, 2) + dt.getValue(row, 3)))).toFixed(0) + '%)';
-						},
-						sourceColumn: 2,
-						type: "string",
-						role: "annotation"},
-					3, {
-						calc: function (dt, row) {
-							return dt.getValue(row, 3) + ' (' +  parseFloat(formatPercent.formatValue(dt.getValue(row, 3) / (dt.getValue(row, 1) + dt.getValue(row, 2) + dt.getValue(row, 3)))).toFixed(0) + '%)';
-						},
-						sourceColumn: 3,
-						type: "string",
-						role: "annotation"},
-				]);
+//				var view = new google.visualization.DataView(data);
+//				var formatPercent = new google.visualization.NumberFormat({
+//					pattern: '#,##0.0%'
+//				});
+//				view.setColumns([0,
+//					1, {
+//						calc: function (dt, row) {
+//							return dt.getValue(row, 1) + ' (' +  parseFloat(formatPercent.formatValue(dt.getValue(row, 1) / (dt.getValue(row, 1) + dt.getValue(row, 2) + dt.getValue(row, 3)))).toFixed(0) + '%)';
+//						},
+//						sourceColumn: 1,
+//						type: "string",
+//						role: "annotation", },
+//					2, {
+//						calc: function (dt, row) {
+//							return dt.getValue(row, 2) + ' (' +  parseFloat(formatPercent.formatValue(dt.getValue(row, 2) / (dt.getValue(row, 1) + dt.getValue(row, 2) + dt.getValue(row, 3)))).toFixed(0) + '%)';
+//						},
+//						sourceColumn: 2,
+//						type: "string",
+//						role: "annotation"},
+//					3, {
+//						calc: function (dt, row) {
+//							return dt.getValue(row, 3) + ' (' +  parseFloat(formatPercent.formatValue(dt.getValue(row, 3) / (dt.getValue(row, 1) + dt.getValue(row, 2) + dt.getValue(row, 3)))).toFixed(0) + '%)';
+//						},
+//						sourceColumn: 3,
+//						type: "string",
+//						role: "annotation"},
+//				]);
 				var options = {
 					width: area_definition.width,
 					height: area_definition.height,
