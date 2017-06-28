@@ -32,7 +32,7 @@ function change_feeds_import_menu() {
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
-  
+
   $items['update-billing-data-thankyou'] = array(
     'title' => 'Update Billing Data Thankyou',
     'page callback' => 'update_billing_data_thankyou',
@@ -402,7 +402,7 @@ function change_feeds_import_menu() {
   return $items;
 }
 
-function update_billing_data_thankyou(){
+function update_billing_data_thankyou() {
   drupal_set_message("Thankyou updation is completed");
   return "";
 }
@@ -447,11 +447,13 @@ function change_feeds_import_update_billing(&$context) {
     $key = $i;
     $val = $results[$key];
 
-    $nid = check_node_title_exists_for_update($val->bill_number,$val->distributor_id);
+    $nid = check_node_title_exists_for_update($val->bill_number, $val->distributor_id);
     $node = node_load($nid);
     if ($node) {
       $node->field_sr_bill_date[LANGUAGE_NONE][0]['value'] = $val->bill_date;
-       node_save($node);
+      node_save($node);
+      $context['finished'] = 1;
+      break;
     }
   }
   $context['sandbox']['progress'] = $i;
@@ -463,7 +465,7 @@ function change_feeds_import_update_billing(&$context) {
   }
 }
 
-function check_node_title_exists_for_update($bill_number,$distributor_id){
+function check_node_title_exists_for_update($bill_number, $distributor_id) {
   $query1 = db_select('node', 'n');
   $query1->condition('n.type', 'sales_register_data');
   $query1->condition('n.title', $bill_number);
@@ -472,6 +474,7 @@ function check_node_title_exists_for_update($bill_number,$distributor_id){
   $nid = $query1->execute()->fetchField();
   return $nid;
 }
+
 function download_pdf($args) {
   $view_name = "drs_report";
   $view = views_get_view($view_name, '');
