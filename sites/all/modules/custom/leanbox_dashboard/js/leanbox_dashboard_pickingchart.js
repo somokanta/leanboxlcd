@@ -40,7 +40,7 @@
 
 			function drawpickingChart(picking_data, area_definition) {
 				var data = google.visualization.arrayToDataTable(picking_data);
-
+console.log(picking_data);
 				var view = new google.visualization.DataView(data);
 				var formatPercent = new google.visualization.NumberFormat({
 					pattern: '#,##0.0%'
@@ -72,7 +72,7 @@
 					width: area_definition.width,
 					height: area_definition.height,
 					title: '',
-					legend: {position: 'top', maxLines: 3},
+					legend: {position: 'top', maxLines: 7},
 					bar: {groupWidth: '60%'},
 					  annotations: {
           alwaysOutside: true,
@@ -101,7 +101,7 @@
 					//isStacked: 'percent',
 					vAxis: {
 						minValue: 0,
-						maxValue: 1,
+						maxValue: 7,
 						title: 'Picking Activity'
 					},
 					hAxis: {
