@@ -426,8 +426,12 @@ function update_billing_data() {
 function change_feeds_import_update_billing(&$context) {
 
   if (!isset($context['sandbox']['progress'])) {
+    $rr = strtotime(date('Y-m-d', strtotime('last month')));
+    $rr1 = time();
     $query = db_select('custom_billing_data', 'cb');
     $query->addField('cb', 'bill_number');
+    $query->condition('cb.created_date', array($rr, $rr1), 'BETWEEN');
+
     $results = $query->execute();
     $num = $results->rowCount();
     $context['sandbox']['progress'] = 0;
