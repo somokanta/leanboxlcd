@@ -2188,7 +2188,6 @@ function check_area_id_exists($title) {
 }
 
 function change_feeds_import_form_views_exposed_form_alter(&$form, &$form_state) {
-  dpm($form, "form");
   if ($form['#id'] == 'views-exposed-form-Outlet-Master-Report-page') {
 
 
@@ -2253,7 +2252,11 @@ function change_feeds_import_form_views_exposed_form_alter(&$form, &$form_state)
 
 
     $salesman = get_all_salesman_data("salesman", NULL);
+    dpm($salesman,"salesman");
+    $salesman = $select + $salesman;
     $salesman_code = get_all_salesman_data(NULL, "slaesman_code");
+    dpm($salesman_code,"salesman_code");
+    $salesman_code = $select + $salesman_code;
     if (isset($form['field_dva_van_pl_group_value'])) {
       $form['field_dva_van_pl_group_value']['#type'] = 'select';
       $form['field_dva_van_pl_group_value']['#size'] = null;
