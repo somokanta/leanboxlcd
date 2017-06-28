@@ -1050,9 +1050,9 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
 
           if ($key1 == 'loose') {
             $picking_flag = TRUE;
-            $not_start = $val['not_start'];
+            $not_start = $val1['not_start'];
             $in_prg = $val1['in_prg'];
-            $comp = $val['comp'];
+            $comp = $val1['comp'];
             $data1[] = array($key . ' ' . $key1, $not_start, "$not_start", $in_prg, "$in_prg", $comp, "$comp");
           }
         }
