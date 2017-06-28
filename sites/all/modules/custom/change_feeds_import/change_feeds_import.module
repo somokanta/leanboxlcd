@@ -2252,10 +2252,8 @@ function change_feeds_import_form_views_exposed_form_alter(&$form, &$form_state)
 
 
     $salesman = get_all_salesman_data("salesman", NULL);
-    dpm($salesman,"salesman");
     $salesman = $select + $salesman;
     $salesman_code = get_all_salesman_data(NULL, "slaesman_code");
-    dpm($salesman_code,"salesman_code");
     $salesman_code = $select + $salesman_code;
     if (isset($form['field_dva_van_pl_group_value'])) {
       $form['field_dva_van_pl_group_value']['#type'] = 'select';
@@ -2278,11 +2276,11 @@ function change_feeds_import_form_views_exposed_form_alter(&$form, &$form_state)
       $form['field_dva_area_hook_group_name_value']['#validated'] = TRUE;
     }
 
-    if (isset($form['field_data_field_salesman'])) {
-      $form['field_data_field_salesman']['#type'] = 'select';
-      $form['field_data_field_salesman']['#size'] = null;
-      $form['field_data_field_salesman']['#options'] = $salesman;
-      $form['field_data_field_salesman']['#validated'] = TRUE;
+    if (isset($form['field_salesman_value'])) {
+      $form['field_salesman_value']['#type'] = 'select';
+      $form['field_salesman_value']['#size'] = null;
+      $form['field_salesman_value']['#options'] = $salesman;
+      $form['field_salesman_value']['#validated'] = TRUE;
     }
 
 
