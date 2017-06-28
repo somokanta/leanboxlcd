@@ -74,6 +74,24 @@
 					title: '',
 					legend: {position: 'top', maxLines: 3},
 					bar: {groupWidth: '60%'},
+					  annotations: {
+          alwaysOutside: true,
+          textStyle: {
+            fontSize: 12,
+            auraColor: 'none',
+            color: '#555'
+          },
+          boxStyle: {
+            stroke: '#ccc',
+            strokeWidth: 1,
+            gradient: {
+              color1: '#f3e5f5',
+              color2: '#f3e5f5',
+              x1: '0%', y1: '0%',
+              x2: '100%', y2: '100%'
+            }
+          }
+        },
 					chartArea: {left: area_definition.ch_left, top: area_definition.ch_top, width: area_definition.ch_width, height: area_definition.ch_height},
 					series: {
 						0: {color: '#e74c3c'},
