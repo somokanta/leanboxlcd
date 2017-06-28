@@ -1062,6 +1062,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     else {
       $data1[] = array('No Result Found for Pricelist Group', 0, 0, 0);
     }
+    dpm($data1, '$data1');
     return $data1;
   }
   else if ($activity_type == 'picking_bulk') {
