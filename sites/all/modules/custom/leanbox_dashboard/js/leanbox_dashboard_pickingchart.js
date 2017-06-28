@@ -94,9 +94,11 @@
 						slantedTextAngle: 90 // here you can even use 180
 					},
 				};
-				var chart = new google.visualization.ColumnChart(document.getElementById('picking_div'));
+				//var chart = new google.visualization.ColumnChart(document.getElementById('picking_div'));
 				//chart.draw(view, options);
-				chart.draw(view, google.charts.Bar.convertOptions(options));
+				//chart.draw(view, google.charts.Bar.convertOptions(options));
+				var materialChart = new google.charts.Bar(document.getElementById('picking_div'));
+      materialChart.draw(data, options);
 			}
 		}
 	};
