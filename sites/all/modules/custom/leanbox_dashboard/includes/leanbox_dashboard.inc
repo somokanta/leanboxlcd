@@ -998,7 +998,10 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     $query->fields('d', array('field_picking_loading_date_value'));
     $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
 
-    $data1[] = array('PriceList Group', 'Not Started', "1", 'In Progress',"2",  'Completed', "3");
+    $obj = new stdClass();
+    $obj->type = 'string';
+    $obj->role = 'annotation';
+    $data1[] = array('PriceList Group', 'Not Started', $obj, 'In Progress', $obj,  'Completed', $obj);
     if (!empty($res)) {
       foreach ($list as $data => $data_list) {
 
