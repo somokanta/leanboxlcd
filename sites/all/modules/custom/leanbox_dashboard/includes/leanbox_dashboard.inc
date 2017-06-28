@@ -866,7 +866,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     $query->fields('d', array('field_party_packing_loading_date_value'));
     $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
 
-    $data1[] = array('PriceList Group', 'In Progress', 'Not Started', 'Completed');
+    $data1[] = array('PriceList Group', 'Not Started', 'In Progress', 'Completed');
     if (!empty($res)) {
       $field = field_info_field('field_party_packing_type');
       $allowed_values = list_allowed_values($field);
@@ -902,7 +902,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
           continue;
         }
         $party_pack_flag = TRUE;
-        $data1[] = array($key, $val['in_prg'], $val['not_start'], $val['comp']);
+        $data1[] = array($key, $val['not_start'], $val['in_prg'], $val['comp']);
       }
       if ($party_pack_flag == FALSE) {
         $data1[] = array('No Result Found for Party Packing Type', 0, 0, 0);
@@ -998,7 +998,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     $query->fields('d', array('field_picking_loading_date_value'));
     $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
 
-    $data1[] = array('PriceList Group', 'In Progress', 'Not Started', 'Completed');
+    $data1[] = array('PriceList Group', 'Not Started', 'In Progress', 'Completed');
     if (!empty($res)) {
       foreach ($list as $data => $data_list) {
 
@@ -1048,7 +1048,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
           if ($key1 == 'loose') {
             $picking_flag = TRUE;
 
-            $data1[] = array($key . ' ' . $key1, $val1['in_prg'], $val1['not_start'], $val1['comp']);
+            $data1[] = array($key . ' ' . $key1, $val1['not_start'], $val1['in_prg'], $val1['comp']);
           }
         }
       }
@@ -1083,7 +1083,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     $query->fields('d', array('field_picking_loading_date_value'));
     $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
 
-    $data1[] = array('PriceList Group', 'In Progress', 'Not Started', 'Completed');
+    $data1[] = array('PriceList Group', 'Not Started', 'In Progress', 'Completed');
     if (!empty($res)) {
       foreach ($list as $data => $data_list) {
 
@@ -1133,7 +1133,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
           if ($key1 == 'bulk') {
             $picking_flag = TRUE;
 
-            $data1[] = array($key . ' ' . $key1, $val1['in_prg'], $val1['not_start'], $val1['comp']);
+            $data1[] = array($key . ' ' . $key1, $val1['not_start'], $val1['in_prg'], $val1['comp']);
           }
         }
       }
@@ -1157,7 +1157,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     $query->fields('d', array('field_egir_date_value'));
     $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
 
-    $output1[0] = array('PriceList Group', 'In Progress', 'Not Started', 'Completed');
+    $output1[0] = array('PriceList Group', 'Not Started', 'In Progress', 'Completed');
     $output['not_start'] = $output['in_prg'] = $output['comp'] = 0;
     if (!empty($res)) {
       foreach ($res as $key => $val) {
@@ -1180,7 +1180,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
         $output1[] = array('No Result Found for Unloading', 0, 0, 0);
       }
       else {
-        $output1[] = array('Unloading', $output['in_prg'], $output['not_start'], $output['comp']);
+        $output1[] = array('Unloading', $output['not_start'], $output['in_prg'], $output['comp']);
       }
     }
     else {
