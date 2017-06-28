@@ -1,5 +1,7 @@
 <?php
 
+module_load_include('inc', 'change_feeds_import', 'form/upload_billing_data');
+
 /*
  *  hook_permission()
  */
@@ -23,6 +25,20 @@ function change_feeds_import_permission() {
  */
 function change_feeds_import_menu() {
   $items = array();
+
+  $items['update-billing-data'] = array(
+    'title' => 'Update Billing Data',
+    'page callback' => 'update_billing_data',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['update-billing-data-thankyou'] = array(
+    'title' => 'Update Billing Data Thankyou',
+    'page callback' => 'update_billing_data_thankyou',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
 
 
   // Manually Delete Billing Data
@@ -384,6 +400,81 @@ function change_feeds_import_menu() {
   );
 
   return $items;
+}
+
+function update_billing_data_thankyou() {
+  drupal_set_message("Thankyou updation is completed");
+  return "";
+}
+
+function update_billing_data() {
+  $batch = array(
+    'operations' => array(
+      array('change_feeds_import_update_billing', array()),
+    ),
+    'finished' => 'change_feeds_import_update',
+    'title' => t('Creating Billing Data'),
+    'init_message' => t('Billing Data Batch Creation is starting.'),
+    'progress_message' => t('Processed @current out of @total.'),
+    'error_message' => t('Billing Data Batch has encountered an error.'),
+    'file' => drupal_get_path('module', 'change_feeds_import')
+  );
+  batch_set($batch);
+  batch_process('update-billing-data-thankyou');
+}
+
+function change_feeds_import_update_billing(&$context) {
+
+  if (!isset($context['sandbox']['progress'])) {
+    $rr = strtotime(date('Y-m-d', strtotime('last month')));
+    $rr1 = time();
+    $query = db_select('custom_billing_data', 'cb');
+    $query->addField('cb', 'bill_number');
+    $query->condition('cb.created_date', array($rr, $rr1), 'BETWEEN');
+
+    $results = $query->execute();
+    $num = $results->rowCount();
+    $context['sandbox']['progress'] = 0;
+    $context['sandbox']['max'] = $num;
+  }
+
+  $limit = 500;
+  $progress = $context['sandbox']['progress'];
+  // With each pass through the callback, retrieve the next group of nids.
+  $query = db_select('custom_billing_data', 'cb');
+  $query->addField('cb', 'bill_number');
+  $query->addField('cb', 'bill_date', 'bill_date');
+  $query->addField('cb', 'distributor_id', 'distributor_id');
+  $query->range($progress, $limit);
+  $results = $query->execute()->fetchAll();
+  for ($i = $context['sandbox']['progress']; $i < $context['sandbox']['progress'] + 50 && $i < $context['sandbox']['max']; $i++) {
+    $key = $i;
+    $val = $results[$key];
+
+    $nid = check_node_title_exists_for_update($val->bill_number, $val->distributor_id);
+    $node = node_load($nid);
+    if ($node) {
+      $node->field_sr_bill_date[LANGUAGE_NONE][0]['value'] = $val->bill_date;
+      node_save($node);
+    }
+  }
+  $context['sandbox']['progress'] = $i;
+  if ($context['sandbox']['progress'] < $context['sandbox']['max']) {
+    $context['finished'] = $context['sandbox']['progress'] / $context['sandbox']['max'];
+  }
+  else {
+    $context['finished'] = 1;
+  }
+}
+
+function check_node_title_exists_for_update($bill_number, $distributor_id) {
+  $query1 = db_select('node', 'n');
+  $query1->condition('n.type', 'sales_register_data');
+  $query1->condition('n.title', $bill_number);
+  $query1->condition('n.uid', $distributor_id);
+  $query1->fields('n', array('nid'));
+  $nid = $query1->execute()->fetchField();
+  return $nid;
 }
 
 function download_pdf($args) {
@@ -1582,16 +1673,15 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
   if ($entity->type == 'hul_code_master') {
     $ph_no = $entity->field_hul_phone_no[LANGUAGE_NONE][0]['value'];
     $hul_address = $entity->field_hul_address[LANGUAGE_NONE][0]['value'];
-    
+
     if (empty($ph_no)) {
-      drupal_set_message("Hul Phone No Can Not Be Null", 'error',FALSE);
+      drupal_set_message("Hul Phone No Can Not Be Null", 'error', FALSE);
       $entity->feeds_item->skip = TRUE;
     }
     if (empty($hul_address)) {
-      drupal_set_message("Hul Address Can Not Be Null", 'error',FALSE);
+      drupal_set_message("Hul Address Can Not Be Null", 'error', FALSE);
       $entity->feeds_item->skip = TRUE;
     }
-
   }
 
   if ($entity->feeds_item->id == 'outlet_master') {
@@ -2165,7 +2255,6 @@ function change_feeds_import_views_data_export_batch_alter(&$batch, &$batch_redi
   // $view = views_get_view($batch['view_name']);
   
   $views_names = array('impact_delivery_cron_2', 'impact_party_master'); //  Download files for this Views only
-  
   // watchdog('hook_alter batch', '<pre>' . print_r($batch, TRUE) . '</pre>');
   if (in_array($batch['view_name'], $views_names)) {
 
@@ -2250,7 +2339,6 @@ function impact_delivery_cron() {
 function impact_delivery_partypack_cron() {
   drupal_goto('impact-party-master/export');
 }
-
 
 function _send_file_using_sftp($file_name, $file_uri) {
   if (!empty($file_name) && !empty($file_uri)) {
