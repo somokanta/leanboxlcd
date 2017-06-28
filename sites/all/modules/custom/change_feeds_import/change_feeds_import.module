@@ -438,7 +438,7 @@ function change_feeds_import_update_billing(&$context) {
     $context['sandbox']['max'] = $num;
   }
 
-  $limit = 50;
+  $limit = 500;
   $progress = $context['sandbox']['progress'];
   // With each pass through the callback, retrieve the next group of nids.
   $query = db_select('custom_billing_data', 'cb');
