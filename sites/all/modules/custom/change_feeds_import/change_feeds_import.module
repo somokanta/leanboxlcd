@@ -56,7 +56,7 @@ function change_feeds_import_menu() {
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
-  $items['impact-delivery-partypack-cron'] = array(
+    $items['impact-delivery-partypack-cron'] = array(
     'title' => 'Partypack cron Report',
     'page callback' => 'impact_delivery_partypack_cron',
     'access callback' => TRUE,
