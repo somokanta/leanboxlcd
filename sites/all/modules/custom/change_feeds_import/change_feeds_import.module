@@ -420,7 +420,7 @@ function update_billing_data() {
     'file' => drupal_get_path('module', 'change_feeds_import')
   );
   batch_set($batch);
-  batch_process('drs-report');
+  batch_process('update-billing-data-thankyou');
 }
 
 function change_feeds_import_update_billing(&$context) {
