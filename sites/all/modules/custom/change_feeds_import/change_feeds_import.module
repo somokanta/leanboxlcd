@@ -452,8 +452,6 @@ function change_feeds_import_update_billing(&$context) {
     if ($node) {
       $node->field_sr_bill_date[LANGUAGE_NONE][0]['value'] = $val->bill_date;
       node_save($node);
-      $context['finished'] = 1;
-      break;
     }
   }
   $context['sandbox']['progress'] = $i;
