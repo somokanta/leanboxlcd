@@ -103,7 +103,6 @@ function routing_settings_form($form, &$form_state) {
   $form['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Save'),
-    '#validate' => array('sales_bill_date_validate'),
   );
 
   return $form;
@@ -159,7 +158,6 @@ function van_stop_master_form($form, &$form_state) {
     $field_pp_loose = $node->field_pp_loose[LANGUAGE_NONE][0]['value'];
     $field_distributor_latitude = $node->field_distributor_latitude[LANGUAGE_NONE][0]['value'];
     $field_distributor_longitude = $node->field_distributor_longitude[LANGUAGE_NONE][0]['value'];
-    $field_enable_routing = $node->field_enable_routing[LANGUAGE_NONE][0]['value'];
     $no_of_days = $node->field_no_of_days_for_sales_reg[LANGUAGE_NONE][0]['value'];
   }
 
@@ -269,12 +267,6 @@ function van_stop_master_form($form, &$form_state) {
     '#default_value' => $field_distributor_longitude,
     '#element_validate' => array('element_validate_number'),
   );
-  $form['field_enable_routing'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Enable Routing'),
-    //'#required' => TRUE,
-    '#default_value' => $field_enable_routing,
-  );
 
   $form['no_of_days'] = array(
     '#type' => 'textfield',
@@ -330,7 +322,6 @@ function van_stop_master_form_submit($form, &$form_state) {
     $node->field_pp_loose[LANGUAGE_NONE][0]['value'] = $form_state['values']['field_pp_loose'];
     $node->field_distributor_latitude[LANGUAGE_NONE][0]['value'] = $form_state['values']['field_distributor_latitude'];
     $node->field_distributor_longitude[LANGUAGE_NONE][0]['value'] = $form_state['values']['field_distributor_longitude'];
-    $node->field_enable_routing[LANGUAGE_NONE][0]['value'] = $form_state['values']['field_enable_routing'];
     $node->field_no_of_days_for_sales_reg[LANGUAGE_NONE][0]['value'] = $form_state['values']['no_of_days'];
     node_save($node);
   }
@@ -353,7 +344,6 @@ function van_stop_master_form_submit($form, &$form_state) {
     $node->field_pp_loose[LANGUAGE_NONE][0]['value'] = $form_state['values']['field_pp_loose'];
     $node->field_distributor_latitude[LANGUAGE_NONE][0]['value'] = $form_state['values']['field_distributor_latitude'];
     $node->field_distributor_longitude[LANGUAGE_NONE][0]['value'] = $form_state['values']['field_distributor_longitude'];
-    $node->field_enable_routing[LANGUAGE_NONE][0]['value'] = $form_state['values']['field_enable_routing'];
     $node->field_no_of_days_for_sales_reg[LANGUAGE_NONE][0]['value'] = $form_state['values']['no_of_days'];
     node_save($node);
   }
