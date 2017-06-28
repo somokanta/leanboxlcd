@@ -98,7 +98,7 @@
 				//chart.draw(view, options);
 				//chart.draw(view, google.charts.Bar.convertOptions(options));
 				var materialChart = new google.charts.Bar(document.getElementById('picking_div'));
-      materialChart.draw(data, options);
+      materialChart.draw(view, options);
 			}
 		}
 	};
