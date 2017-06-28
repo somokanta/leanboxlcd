@@ -1354,6 +1354,7 @@ function leanbox_dashboard_sales_delivery_table($export = FALSE) {
  * @param type $form_id
  */
 function leanbox_dashboard_form_alter(&$form, &$form_state, $form_id) {
+  
   if ($form_id == 'feeds_import_form' && $form['#importer_id'] == 'resource_master') {
     $list = '<Ol><b>RESOURCE TYPE</b>'
         . '<li>DISPATCH SUPERVISOR</li>'
@@ -1363,7 +1364,7 @@ function leanbox_dashboard_form_alter(&$form, &$form_state, $form_id) {
         . '<li>PICKER NAME</li>'
         . '<li>PICKING SUPERVISOR</li>'
         . '<li>UNLOADING SUPERVISOR</li></Ol>';
-    $form['feeds']['FeedsCSVParser']['help'] = array(
+    $form['feeds']['FeedsCSVParser']['help'][] = array(
       '#markup' => $list,
     );
   }
