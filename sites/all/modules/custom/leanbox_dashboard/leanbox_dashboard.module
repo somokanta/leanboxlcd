@@ -280,11 +280,11 @@ function leanbox_dashboard_block_view($delta = '') {
   module_load_include('inc', 'leanbox_dashboard', 'includes/leanbox_dashboard');
   $area_definition = array(
     'width' => 550,
-    'height' => 370,
+    'height' => 300,
     'ch_left' => 50,
     'ch_top' => 50,
     'ch_width' => 450,
-    'ch_height' => 270,
+    'ch_height' => 200,
   );
   switch ($delta) {
     case 'party_packing':
