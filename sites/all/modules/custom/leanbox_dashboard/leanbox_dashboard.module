@@ -279,11 +279,11 @@ function leanbox_dashboard_block_view($delta = '') {
   // Include leanbox_dashboard inc file
   module_load_include('inc', 'leanbox_dashboard', 'includes/leanbox_dashboard');
   $area_definition = array(
-    'width' => 500,
+    'width' => 600,
     'height' => 300,
     'ch_left' => 50,
     'ch_top' => 50,
-    'ch_width' => 400,
+    'ch_width' => 500,
     'ch_height' => 200,
   );
   switch ($delta) {
