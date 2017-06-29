@@ -24,7 +24,6 @@ class views_handler_bill_count_trip_report extends views_handler_field {
   }
 
   function render($data) {
-  dpm($data,"data");
   return 1;
   }
 
