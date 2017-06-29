@@ -856,16 +856,17 @@ form {
 .region-content {
   .block-leanbox-dashboard {
     float: left;
-    width: 31.33%;
+    width: 46%;
     display: block;
     vertical-align: top;
     padding: 10px 0 5px 16px;
     box-shadow: 0 0 5px #ccc;
     border-radius: 10px;
     margin: 1%;
+    height: 370px;
 
     &:nth-child(3n+1) {
-      clear: both;
+      
     }
 
     h2.block-title {
@@ -1409,6 +1410,7 @@ header[id="page-header"] {
     border-left: 1px solid #ddd;
     border-right: 1px solid #ddd;
     border-bottom: 1px solid #ddd;
+    text-align: center
   }
 }
 
