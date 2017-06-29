@@ -16,6 +16,7 @@ files[] = views/handler/views_handler_field_outlets_per_van.inc
 files[] = views/handler/sequence_method_handler_custom_field.inc
 files[] = views/handler/total_rec_handler_custom_field.inc
 files[] = views/handler/views_handler_field_outlets_per_van_planning.inc
-
+files[] = views/handler/views_handler_bill_count_trip_report.inc
+files[] = views/handler/views_handler_bill_value_trip_report.inc
 ; Plugins
 files[] = plugins/FeedsNodeCustomProcessor.inc
