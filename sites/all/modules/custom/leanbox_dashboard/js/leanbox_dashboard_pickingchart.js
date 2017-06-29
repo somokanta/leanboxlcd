@@ -104,14 +104,14 @@
 						maxValue: 7,
 						title: 'Picking Activity'
 					},
-					hAxis: {
-						title: 'Pricelist Group',
-						direction: -1,
-						textPosition: 'out',
-						slantedText: true,
-						slantedTextAngle: 90 // here you can even use 180
-					},
-					bars: 'horizontal',
+//					hAxis: {
+//						title: 'Pricelist Group',
+//						direction: -1,
+//						textPosition: 'out',
+//						slantedText: true,
+//						slantedTextAngle: 90 // here you can even use 180
+//					},
+//					bars: 'horizontal',
 				};
 				var chart = new google.visualization.ColumnChart(document.getElementById('picking_div'));
 				//chart.draw(view, options);
