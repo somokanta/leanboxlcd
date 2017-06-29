@@ -30,11 +30,19 @@ function leanbox_misc_menu() {
       // 'admin/config/system/foo', if not specified here to override.
       // Need to add access callback or access arguments.
   );
-    
+
   $items['van-stop-master'] = array(
     'title' => 'Outlets Per Van/Stop Master',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('van_stop_master_form'),
+    'access arguments' => array('dispatch planning screen'),
+    'type' => MENU_NORMAL_ITEM,
+  );
+
+  $items['routing-settings'] = array(
+    'title' => 'Routing Settings',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('routing_settings_form'),
     'access arguments' => array('dispatch planning screen'),
     'type' => MENU_NORMAL_ITEM,
   );
@@ -72,6 +80,58 @@ function leanbox_misc_block_view($delta = '') {
   return $block;
 }
 
+function routing_settings_form($form, &$form_state) {
+  require_once drupal_get_path('module', 'change_feeds_import') . '/form/upload_billing_data.inc';
+
+  global $user;
+  $user_id = $user->uid;
+  $distributor_id = change_feeds_import_get_distributor_id($user_id);
+  $nid = $form_state['leanbox_misc']['nid'] = check_node_title_exists($distributor_id, 'van_stop_master');
+
+  if ($nid) {
+    $node = node_load($nid);
+    $field_enable_routing = $node->field_enable_routing[LANGUAGE_NONE][0]['value'];
+  }
+
+  $form['field_enable_routing'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Enable Routing'),
+    //'#required' => TRUE,
+    '#default_value' => $field_enable_routing,
+  );
+
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save'),
+  );
+
+  return $form;
+}
+
+function routing_settings_form_submit($form, &$form_state) {
+  global $user;
+  $user_id = $user->uid;
+  $distributor_id = change_feeds_import_get_distributor_id($user_id);
+
+  if (empty($form_state['leanbox_misc']['nid'])) {
+    $node = new stdClass();
+    $node->title = $distributor_id;
+    $node->type = "van_stop_master";
+    node_object_prepare($node); // Sets some defaults. Invokes hook_prepare() and hook_node_prepare().
+    $node->language = LANGUAGE_NONE; // Or e.g. 'en' if locale is enabled
+    $node->uid = $distributor_id;
+    $node->status = 1; //(1 or 0): published or not
+    $node->comment = 0; // 0 = comments disabled, 1 = read only, 2 = read/write
+    $node->field_enable_routing[LANGUAGE_NONE][0]['value'] = $form_state['values']['field_enable_routing'];
+    node_save($node);
+  }
+  else {
+    $node = node_load($form_state['leanbox_misc']['nid']);
+    $node->field_enable_routing[LANGUAGE_NONE][0]['value'] = $form_state['values']['field_enable_routing'];
+    node_save($node);
+  }
+}
+
 function van_stop_master_form($form, &$form_state) {
   require_once drupal_get_path('module', 'change_feeds_import') . '/form/upload_billing_data.inc';
 
@@ -98,7 +158,6 @@ function van_stop_master_form($form, &$form_state) {
     $field_pp_loose = $node->field_pp_loose[LANGUAGE_NONE][0]['value'];
     $field_distributor_latitude = $node->field_distributor_latitude[LANGUAGE_NONE][0]['value'];
     $field_distributor_longitude = $node->field_distributor_longitude[LANGUAGE_NONE][0]['value'];
-    $field_enable_routing = $node->field_enable_routing[LANGUAGE_NONE][0]['value'];
     $no_of_days = $node->field_no_of_days_for_sales_reg[LANGUAGE_NONE][0]['value'];
   }
 
@@ -208,12 +267,6 @@ function van_stop_master_form($form, &$form_state) {
     '#default_value' => $field_distributor_longitude,
     '#element_validate' => array('element_validate_number'),
   );
-  $form['field_enable_routing'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Enable Routing'),
-    //'#required' => TRUE,
-    '#default_value' => $field_enable_routing,
-  );
 
   $form['no_of_days'] = array(
     '#type' => 'textfield',
@@ -269,7 +322,6 @@ function van_stop_master_form_submit($form, &$form_state) {
     $node->field_pp_loose[LANGUAGE_NONE][0]['value'] = $form_state['values']['field_pp_loose'];
     $node->field_distributor_latitude[LANGUAGE_NONE][0]['value'] = $form_state['values']['field_distributor_latitude'];
     $node->field_distributor_longitude[LANGUAGE_NONE][0]['value'] = $form_state['values']['field_distributor_longitude'];
-    $node->field_enable_routing[LANGUAGE_NONE][0]['value'] = $form_state['values']['field_enable_routing'];
     $node->field_no_of_days_for_sales_reg[LANGUAGE_NONE][0]['value'] = $form_state['values']['no_of_days'];
     node_save($node);
   }
@@ -292,7 +344,6 @@ function van_stop_master_form_submit($form, &$form_state) {
     $node->field_pp_loose[LANGUAGE_NONE][0]['value'] = $form_state['values']['field_pp_loose'];
     $node->field_distributor_latitude[LANGUAGE_NONE][0]['value'] = $form_state['values']['field_distributor_latitude'];
     $node->field_distributor_longitude[LANGUAGE_NONE][0]['value'] = $form_state['values']['field_distributor_longitude'];
-    $node->field_enable_routing[LANGUAGE_NONE][0]['value'] = $form_state['values']['field_enable_routing'];
     $node->field_no_of_days_for_sales_reg[LANGUAGE_NONE][0]['value'] = $form_state['values']['no_of_days'];
     node_save($node);
   }
