@@ -893,7 +893,12 @@ form div > a {
   padding: 1px !important;
 }
 
-/* line 857, ../sass/leanbox-global.scss */
+/* line 855, ../sass/leanbox-global.scss */
+#block-leanbox-dashboard-outlet-status {
+  text-align: left;
+}
+
+/* line 859, ../sass/leanbox-global.scss */
 .region-content .block-leanbox-dashboard {
   float: left;
   width: 46%;
@@ -905,7 +910,7 @@ form div > a {
   margin: 1%;
   height: 370px;
 }
-/* line 872, ../sass/leanbox-global.scss */
+/* line 874, ../sass/leanbox-global.scss */
 .region-content .block-leanbox-dashboard h2.block-title {
   line-height: 30px;
   padding-right: 8px;
@@ -913,27 +918,27 @@ form div > a {
   white-space: nowrap;
   overflow: hidden;
 }
-/* line 880, ../sass/leanbox-global.scss */
+/* line 882, ../sass/leanbox-global.scss */
 .region-content .block-leanbox-dashboard.contextual-links-region {
   width: 50%;
   float: left;
 }
-/* line 884, ../sass/leanbox-global.scss */
+/* line 886, ../sass/leanbox-global.scss */
 .region-content .block-leanbox-dashboard.contextual-links-region div[dir="ltr"] {
   width: 100% !important;
 }
 
-/* line 891, ../sass/leanbox-global.scss */
+/* line 893, ../sass/leanbox-global.scss */
 header[id="page-header"] {
   position: relative;
   height: 32px;
   margin-bottom: 15px;
 }
-/* line 896, ../sass/leanbox-global.scss */
+/* line 898, ../sass/leanbox-global.scss */
 header[id="page-header"] #block-system-user-menu {
   float: right;
 }
-/* line 899, ../sass/leanbox-global.scss */
+/* line 901, ../sass/leanbox-global.scss */
 header[id="page-header"] #block-system-user-menu li {
   list-style: none !important;
   display: inline-block;
@@ -941,15 +946,15 @@ header[id="page-header"] #block-system-user-menu li {
   margin: 0;
   margin-top: 6px;
 }
-/* line 906, ../sass/leanbox-global.scss */
+/* line 908, ../sass/leanbox-global.scss */
 header[id="page-header"] #block-system-user-menu li a {
   padding: 0 5px !important;
 }
-/* line 911, ../sass/leanbox-global.scss */
+/* line 913, ../sass/leanbox-global.scss */
 header[id="page-header"] #block-system-user-menu li + li {
   border-left: 1px solid #ccc;
 }
-/* line 916, ../sass/leanbox-global.scss */
+/* line 918, ../sass/leanbox-global.scss */
 header[id="page-header"] .menu_overlay {
   background: none;
   position: fixed;
@@ -960,7 +965,7 @@ header[id="page-header"] .menu_overlay {
   left: 0;
   z-index: 999;
 }
-/* line 927, ../sass/leanbox-global.scss */
+/* line 929, ../sass/leanbox-global.scss */
 header[id="page-header"] .explore_menu {
   float: left;
   line-height: 32px;
@@ -973,7 +978,7 @@ header[id="page-header"] .explore_menu {
   background-size: 19px;
   padding-left: 42px;
 }
-/* line 940, ../sass/leanbox-global.scss */
+/* line 942, ../sass/leanbox-global.scss */
 header[id="page-header"] .menu_dropdown {
   position: absolute;
   top: 100%;
@@ -984,19 +989,19 @@ header[id="page-header"] .menu_dropdown {
   box-shadow: 0 3px 10px -1px #ccc;
   width: auto;
 }
-/* line 951, ../sass/leanbox-global.scss */
+/* line 953, ../sass/leanbox-global.scss */
 header[id="page-header"] ul, header[id="page-header"] li {
   list-style: none;
   margin: 0;
   padding: 0;
 }
-/* line 958, ../sass/leanbox-global.scss */
+/* line 960, ../sass/leanbox-global.scss */
 header[id="page-header"] .content > ul {
   width: 250px;
   position: relative;
   list-style: none !important;
 }
-/* line 963, ../sass/leanbox-global.scss */
+/* line 965, ../sass/leanbox-global.scss */
 header[id="page-header"] .content > ul li {
   width: 100%;
   background: #fff;
@@ -1007,11 +1012,11 @@ header[id="page-header"] .content > ul li {
   border-bottom: 1px solid #ccc;
   border-top: 0 !important;
 }
-/* line 973, ../sass/leanbox-global.scss */
+/* line 975, ../sass/leanbox-global.scss */
 header[id="page-header"] .content > ul li.leaf {
   padding: 0;
 }
-/* line 977, ../sass/leanbox-global.scss */
+/* line 979, ../sass/leanbox-global.scss */
 header[id="page-header"] .content > ul li .caret {
   border-left: 7px solid;
   border-bottom: 8px solid transparent;
@@ -1019,7 +1024,7 @@ header[id="page-header"] .content > ul li .caret {
   float: right;
   position: relative;
 }
-/* line 984, ../sass/leanbox-global.scss */
+/* line 986, ../sass/leanbox-global.scss */
 header[id="page-header"] .content > ul li .caret:before {
   content: "";
   position: absolute;
@@ -1029,29 +1034,29 @@ header[id="page-header"] .content > ul li .caret:before {
   border-bottom: 8px solid transparent;
   border-top: 8px solid transparent;
 }
-/* line 995, ../sass/leanbox-global.scss */
+/* line 997, ../sass/leanbox-global.scss */
 header[id="page-header"] .content > ul li:hover, header[id="page-header"] .content > ul li:focus {
   background: #e8e8e8;
 }
-/* line 999, ../sass/leanbox-global.scss */
+/* line 1001, ../sass/leanbox-global.scss */
 header[id="page-header"] .content > ul li:hover .caret:before, header[id="page-header"] .content > ul li:focus .caret:before {
   border-left: 7px solid #e8e8e8;
   border-bottom: 8px solid transparent;
   border-top: 8px solid transparent;
 }
-/* line 1007, ../sass/leanbox-global.scss */
+/* line 1009, ../sass/leanbox-global.scss */
 header[id="page-header"] .content > ul li a {
   padding: 13px 15px;
   text-shadow: none;
 }
-/* line 1013, ../sass/leanbox-global.scss */
+/* line 1015, ../sass/leanbox-global.scss */
 header[id="page-header"] .content > ul li:hover ul {
   display: block;
   top: 0 !important;
   left: 250px !important;
   background: #e8e8e8 !important;
 }
-/* line 1021, ../sass/leanbox-global.scss */
+/* line 1023, ../sass/leanbox-global.scss */
 header[id="page-header"] .content > ul li ul {
   position: absolute;
   background: #fff !important;
@@ -1064,7 +1069,7 @@ header[id="page-header"] .content > ul li ul {
   box-shadow: 0 3px 10px -1px #ccc;
   border-radius: 0 !important;
 }
-/* line 1033, ../sass/leanbox-global.scss */
+/* line 1035, ../sass/leanbox-global.scss */
 header[id="page-header"] .content > ul li ul li {
   float: left;
   list-style: none !important;
@@ -1073,64 +1078,64 @@ header[id="page-header"] .content > ul li ul li {
   margin: 0 10px;
   background: #e8e8e8 !important;
 }
-/* line 1041, ../sass/leanbox-global.scss */
+/* line 1043, ../sass/leanbox-global.scss */
 header[id="page-header"] .content > ul li ul li:hover {
   background: #fbfbfb !important;
 }
-/* line 1045, ../sass/leanbox-global.scss */
+/* line 1047, ../sass/leanbox-global.scss */
 header[id="page-header"] .content > ul li ul li:nth-child(even) {
   margin-left: 5px;
 }
-/* line 1049, ../sass/leanbox-global.scss */
+/* line 1051, ../sass/leanbox-global.scss */
 header[id="page-header"] .content > ul li ul li:nth-child(odd) {
   margin-right: 5px;
 }
 
-/* line 1059, ../sass/leanbox-global.scss */
+/* line 1061, ../sass/leanbox-global.scss */
 #address-selection-map {
   width: 35%;
   float: left;
 }
-/* line 1063, ../sass/leanbox-global.scss */
+/* line 1065, ../sass/leanbox-global.scss */
 #address-selection-map .clearance {
   clear: both;
 }
-/* line 1068, ../sass/leanbox-global.scss */
+/* line 1070, ../sass/leanbox-global.scss */
 #address-selection-map > form .form-item {
   width: 48%;
   float: left;
 }
-/* line 1072, ../sass/leanbox-global.scss */
+/* line 1074, ../sass/leanbox-global.scss */
 #address-selection-map > form .form-item:nth-child(2n) {
   float: right;
 }
-/* line 1078, ../sass/leanbox-global.scss */
+/* line 1080, ../sass/leanbox-global.scss */
 #address-selection-map .cell-hide {
   left: -10000px;
   position: absolute;
   display: none;
 }
-/* line 1084, ../sass/leanbox-global.scss */
+/* line 1086, ../sass/leanbox-global.scss */
 #address-selection-map .hooover {
   left: 1109px;
   margin-top: 38px;
   z-index: 9999;
 }
-/* line 1090, ../sass/leanbox-global.scss */
+/* line 1092, ../sass/leanbox-global.scss */
 #address-selection-map tr {
   position: relative;
 }
-/* line 1094, ../sass/leanbox-global.scss */
+/* line 1096, ../sass/leanbox-global.scss */
 #address-selection-map .a1 {
   border: 1px solid Black;
   width: 395px;
   background-color: #f9f9f9;
 }
-/* line 1100, ../sass/leanbox-global.scss */
+/* line 1102, ../sass/leanbox-global.scss */
 #address-selection-map .a2 {
   padding: 8px 0 0 210px !important;
 }
-/* line 1104, ../sass/leanbox-global.scss */
+/* line 1106, ../sass/leanbox-global.scss */
 #address-selection-map #table-div {
   clear: both;
   width: 100%;
@@ -1139,31 +1144,31 @@ header[id="page-header"] .content > ul li ul li:nth-child(odd) {
   box-sizing: border-box;
   overflow: auto;
 }
-/* line 1112, ../sass/leanbox-global.scss */
+/* line 1114, ../sass/leanbox-global.scss */
 #address-selection-map #table-div tr.selected-row {
   background: #b2e6ff;
 }
-/* line 1117, ../sass/leanbox-global.scss */
+/* line 1119, ../sass/leanbox-global.scss */
 #address-selection-map #table-div .selectable-row th, #address-selection-map #table-div .selectable-row td {
   min-width: 50px;
 }
-/* line 1122, ../sass/leanbox-global.scss */
+/* line 1124, ../sass/leanbox-global.scss */
 #address-selection-map #table-div table.sticky-header {
   display: none !important;
 }
-/* line 1126, ../sass/leanbox-global.scss */
+/* line 1128, ../sass/leanbox-global.scss */
 #address-selection-map #table-div > .table-responsive {
   overflow: visible;
 }
-/* line 1130, ../sass/leanbox-global.scss */
+/* line 1132, ../sass/leanbox-global.scss */
 #address-selection-map #table-div .cell-details {
   cursor: pointer;
 }
-/* line 1135, ../sass/leanbox-global.scss */
+/* line 1137, ../sass/leanbox-global.scss */
 #address-selection-map #table-div td table.table-hover {
   margin-bottom: 0;
 }
-/* line 1140, ../sass/leanbox-global.scss */
+/* line 1142, ../sass/leanbox-global.scss */
 #address-selection-map #table-div .hooover {
   left: inherit;
   position: absolute;
@@ -1175,15 +1180,15 @@ header[id="page-header"] .content > ul li ul li:nth-child(odd) {
   border: 1px solid #000;
   width: auto;
 }
-/* line 1152, ../sass/leanbox-global.scss */
+/* line 1154, ../sass/leanbox-global.scss */
 #address-selection-map #table-div .last_elements {
   bottom: 100%;
 }
-/* line 1156, ../sass/leanbox-global.scss */
+/* line 1158, ../sass/leanbox-global.scss */
 #address-selection-map #table-div .selectable-row {
   position: relative;
 }
-/* line 1160, ../sass/leanbox-global.scss */
+/* line 1162, ../sass/leanbox-global.scss */
 #address-selection-map #table-div .selectable-row > thead > tr, #address-selection-map #table-div .selectable-row > tbody > tr {
   /* >td:first-child, >th:first-child{
     display: none;
@@ -1197,44 +1202,44 @@ header[id="page-header"] .content > ul li ul li:nth-child(odd) {
        }
    } */
 }
-/* line 1165, ../sass/leanbox-global.scss */
+/* line 1167, ../sass/leanbox-global.scss */
 #address-selection-map #table-div .selectable-row > thead > tr > td:last-child, #address-selection-map #table-div .selectable-row > thead > tr > th:last-child, #address-selection-map #table-div .selectable-row > tbody > tr > td:last-child, #address-selection-map #table-div .selectable-row > tbody > tr > th:last-child {
   width: 90px !important;
   position: relative;
 }
-/* line 1180, ../sass/leanbox-global.scss */
+/* line 1182, ../sass/leanbox-global.scss */
 #address-selection-map #table-div .selectable-row > thead > tr td .control-label, #address-selection-map #table-div .selectable-row > tbody > tr td .control-label {
   padding-left: 0;
 }
-/* line 1183, ../sass/leanbox-global.scss */
+/* line 1185, ../sass/leanbox-global.scss */
 #address-selection-map #table-div .selectable-row > thead > tr td .control-label .form-checkbox, #address-selection-map #table-div .selectable-row > tbody > tr td .control-label .form-checkbox {
   margin-left: 0;
 }
-/* line 1194, ../sass/leanbox-global.scss */
+/* line 1196, ../sass/leanbox-global.scss */
 #address-selection-map #table-div .selectable-row.table-radio > thead > tr > td:first-child, #address-selection-map #table-div .selectable-row.table-radio > thead > tr > th:first-child, #address-selection-map #table-div .selectable-row.table-radio > tbody > tr > td:first-child, #address-selection-map #table-div .selectable-row.table-radio > tbody > tr > th:first-child {
   display: none;
 }
-/* line 1201, ../sass/leanbox-global.scss */
+/* line 1203, ../sass/leanbox-global.scss */
 #address-selection-map #table-div .selectable-row .party-code-cell {
   min-width: 90px;
 }
-/* line 1206, ../sass/leanbox-global.scss */
+/* line 1208, ../sass/leanbox-global.scss */
 #address-selection-map #table-div .selectable-row .party-name-cell .party-name-data {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   width: 105px;
 }
-/* line 1214, ../sass/leanbox-global.scss */
+/* line 1216, ../sass/leanbox-global.scss */
 #address-selection-map #table-div .selectable-row .status-cell {
   min-width: 111px;
 }
-/* line 1220, ../sass/leanbox-global.scss */
+/* line 1222, ../sass/leanbox-global.scss */
 #address-selection-map #table-div tbody td {
   font-size: 13px;
 }
 
-/* line 1229, ../sass/leanbox-global.scss */
+/* line 1231, ../sass/leanbox-global.scss */
 #incremental-outlet form #table-div {
   clear: both;
   width: 100%;
@@ -1244,49 +1249,49 @@ header[id="page-header"] .content > ul li ul li:nth-child(odd) {
   padding-bottom: 250px;
   overflow: auto;
 }
-/* line 1241, ../sass/leanbox-global.scss */
+/* line 1243, ../sass/leanbox-global.scss */
 #incremental-outlet form .selectable-row tr.selected-row {
   background: #b2e6ff;
 }
-/* line 1246, ../sass/leanbox-global.scss */
+/* line 1248, ../sass/leanbox-global.scss */
 #incremental-outlet form .selectable-row tr th:first-child, #incremental-outlet form .selectable-row tr td:first-child {
   display: none;
 }
-/* line 1252, ../sass/leanbox-global.scss */
+/* line 1254, ../sass/leanbox-global.scss */
 #incremental-outlet form .selectable-row .party-code-cell {
   min-width: 90px;
 }
-/* line 1257, ../sass/leanbox-global.scss */
+/* line 1259, ../sass/leanbox-global.scss */
 #incremental-outlet form .selectable-row .party-name-cell .party-name-data {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   width: 105px;
 }
-/* line 1265, ../sass/leanbox-global.scss */
+/* line 1267, ../sass/leanbox-global.scss */
 #incremental-outlet form .selectable-row .status-cell {
   min-width: 111px;
 }
 
-/* line 1273, ../sass/leanbox-global.scss */
+/* line 1275, ../sass/leanbox-global.scss */
 [id^="delivery-beat-create-form"] .form-item, [id^="delivery-beat-create-form"] #van-pl-wrapper, [id^="delivery-beat-create-form"] #area-hook-group-wrapper {
   float: left;
   width: 24%;
   margin-right: 10px;
   margin-bottom: 15px;
 }
-/* line 1279, ../sass/leanbox-global.scss */
+/* line 1281, ../sass/leanbox-global.scss */
 [id^="delivery-beat-create-form"] .form-item .form-item, [id^="delivery-beat-create-form"] #van-pl-wrapper .form-item, [id^="delivery-beat-create-form"] #area-hook-group-wrapper .form-item {
   margin-bottom: 0;
   float: none;
   width: auto;
   margin-right: 0;
 }
-/* line 1287, ../sass/leanbox-global.scss */
+/* line 1289, ../sass/leanbox-global.scss */
 [id^="delivery-beat-create-form"] .form-submit {
   margin: 20px 10px;
 }
-/* line 1291, ../sass/leanbox-global.scss */
+/* line 1293, ../sass/leanbox-global.scss */
 [id^="delivery-beat-create-form"] .table-responsive {
   clear: both;
   width: 100%;
@@ -1297,18 +1302,18 @@ header[id="page-header"] .content > ul li ul li:nth-child(odd) {
   overflow: auto;
 }
 
-/* line 1302, ../sass/leanbox-global.scss */
+/* line 1304, ../sass/leanbox-global.scss */
 #map-container {
   width: 63%;
   height: 700px;
   float: right;
   position: static;
 }
-/* line 1308, ../sass/leanbox-global.scss */
+/* line 1310, ../sass/leanbox-global.scss */
 #map-container .leaflet-pane.leaflet-map-pane {
   position: static;
 }
-/* line 1312, ../sass/leanbox-global.scss */
+/* line 1314, ../sass/leanbox-global.scss */
 #map-container #searchBox {
   margin-left: 10px;
   width: 240px;
@@ -1318,7 +1323,7 @@ header[id="page-header"] .content > ul li ul li:nth-child(odd) {
   line-height: 32px;
   padding: 5px 20px 5px 10px;
 }
-/* line 1322, ../sass/leanbox-global.scss */
+/* line 1324, ../sass/leanbox-global.scss */
 #map-container .search-cancel {
   position: absolute;
   right: 5px;
@@ -1327,44 +1332,44 @@ header[id="page-header"] .content > ul li ul li:nth-child(odd) {
 }
 
 @media only screen and (max-width: 1152px) {
-  /* line 1332, ../sass/leanbox-global.scss */
+  /* line 1334, ../sass/leanbox-global.scss */
   .region-content .block-leanbox-dashboard {
     width: 48%;
   }
-  /* line 1335, ../sass/leanbox-global.scss */
+  /* line 1337, ../sass/leanbox-global.scss */
   .region-content .block-leanbox-dashboard:nth-child(3n+1) {
     clear: none;
   }
 }
 /*table theming  for leanbox chart details*/
-/* line 1343, ../sass/leanbox-global.scss */
+/* line 1345, ../sass/leanbox-global.scss */
 .pp-typewise, .pp-superwise-table {
   width: 75%;
   border: 1px solid #ddd;
 }
-/* line 1347, ../sass/leanbox-global.scss */
+/* line 1349, ../sass/leanbox-global.scss */
 .pp-typewise tbody, .pp-superwise-table tbody {
   border: 1px solid #ddd;
 }
-/* line 1351, ../sass/leanbox-global.scss */
+/* line 1353, ../sass/leanbox-global.scss */
 .pp-typewise th, .pp-superwise-table th {
   text-align: left;
   padding: 10px;
 }
-/* line 1356, ../sass/leanbox-global.scss */
+/* line 1358, ../sass/leanbox-global.scss */
 .pp-typewise td, .pp-superwise-table td {
   border: 1px solid #ddd !important;
 }
-/* line 1361, ../sass/leanbox-global.scss */
+/* line 1363, ../sass/leanbox-global.scss */
 .pp-typewise table td, .pp-typewise table tbody, .pp-superwise-table table td, .pp-superwise-table table tbody {
   border: 0 !important;
 }
 
-/* line 1372, ../sass/leanbox-global.scss */
+/* line 1374, ../sass/leanbox-global.scss */
 .tooltipster-base .tooltipster-content tr th:last-child, .tooltipster-base .tooltipster-content tr td:last-child {
   border-right: 0;
 }
-/* line 1378, ../sass/leanbox-global.scss */
+/* line 1380, ../sass/leanbox-global.scss */
 .tooltipster-base .tooltipster-content td, .tooltipster-base .tooltipster-content th {
   padding: 5px;
   border-bottom: 1px solid #777;
@@ -1373,20 +1378,20 @@ header[id="page-header"] .content > ul li ul li:nth-child(odd) {
   border-right: 1px solid #777;
 }
 
-/* line 1390, ../sass/leanbox-global.scss */
+/* line 1392, ../sass/leanbox-global.scss */
 .page-dashboard .tabs--primary.nav.nav-tabs {
   margin-bottom: 0;
 }
-/* line 1395, ../sass/leanbox-global.scss */
+/* line 1397, ../sass/leanbox-global.scss */
 .page-dashboard .tabs--primary.nav.nav-tabs li.active a {
   background-color: #f5f5f5;
   color: #000;
 }
-/* line 1401, ../sass/leanbox-global.scss */
+/* line 1403, ../sass/leanbox-global.scss */
 .page-dashboard .tabs--primary.nav.nav-tabs li a {
   font-size: 16px;
 }
-/* line 1407, ../sass/leanbox-global.scss */
+/* line 1409, ../sass/leanbox-global.scss */
 .page-dashboard .region-content {
   background-color: #f5f5f5;
   overflow: hidden;
