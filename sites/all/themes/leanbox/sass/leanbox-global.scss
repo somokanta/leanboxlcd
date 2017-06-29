@@ -865,7 +865,7 @@ form {
     margin: 1%;
 
     &:nth-child(3n+1) {
-      clear: both;
+      
     }
 
     h2.block-title {
@@ -1409,6 +1409,7 @@ header[id="page-header"] {
     border-left: 1px solid #ddd;
     border-right: 1px solid #ddd;
     border-bottom: 1px solid #ddd;
+    text-align: center
   }
 }
 

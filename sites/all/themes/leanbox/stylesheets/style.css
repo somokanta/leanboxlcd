@@ -10811,10 +10811,6 @@ form div > a {
   border-radius: 10px;
   margin: 1%;
 }
-/* line 867, ../sass/leanbox-global.scss */
-.region-content .block-leanbox-dashboard:nth-child(3n+1) {
-  clear: both;
-}
 /* line 871, ../sass/leanbox-global.scss */
 .region-content .block-leanbox-dashboard h2.block-title {
   line-height: 30px;
@@ -11303,4 +11299,5 @@ header[id="page-header"] .content > ul li ul li:nth-child(odd) {
   border-left: 1px solid #ddd;
   border-right: 1px solid #ddd;
   border-bottom: 1px solid #ddd;
+  text-align: center;
 }
