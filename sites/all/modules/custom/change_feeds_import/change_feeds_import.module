@@ -426,7 +426,7 @@ function update_billing_data() {
 function change_feeds_import_update_billing(&$context) {
 
   if (!isset($context['sandbox']['progress'])) {
-    $rr = strtotime(date('Y-m-d', strtotime('last month')));
+    $rr = strtotime(date('Y-m-d', strtotime('last day')));
     $rr1 = time();
     $query = db_select('custom_billing_data', 'cb');
     $query->addField('cb', 'bill_number');
@@ -447,7 +447,7 @@ function change_feeds_import_update_billing(&$context) {
   $query->addField('cb', 'distributor_id', 'distributor_id');
   $query->range($progress, $limit);
   $results = $query->execute()->fetchAll();
-  for ($i = $context['sandbox']['progress']; $i < $context['sandbox']['progress'] + 50 && $i < $context['sandbox']['max']; $i++) {
+  for ($i = $context['sandbox']['progress']; $i < $context['sandbox']['progress'] + 500 && $i < $context['sandbox']['max']; $i++) {
     $key = $i;
     $val = $results[$key];
 
