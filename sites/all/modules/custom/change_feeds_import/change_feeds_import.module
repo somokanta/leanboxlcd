@@ -431,10 +431,8 @@ function change_feeds_import_update_billing(&$context) {
     $query = db_select('custom_billing_data', 'cb');
     $query->addField('cb', 'bill_number');
     $query->condition('cb.created_date', array($rr, $rr1), 'BETWEEN');
-
     $results = $query->execute();
     $num = $results->rowCount();
-    dpm($num, "num");
     $context['sandbox']['progress'] = 0;
     $context['sandbox']['max'] = $num;
   }
@@ -451,16 +449,13 @@ function change_feeds_import_update_billing(&$context) {
   $query->condition('cb.created_date', array($rr, $rr1), 'BETWEEN');
   $query->range($progress, $limit);
   $results = $query->execute()->fetchAll();
-  dpm($results, "results");
   for ($i = $context['sandbox']['progress']; $i < $context['sandbox']['progress'] + 500 && $i < $context['sandbox']['max']; $i++) {
     $key = $i;
     $val = $results[$key];
 
     $nid = check_node_title_exists_for_update($val->bill_number, $val->distributor_id);
-    dpm($nid,"nid");
     $node = node_load($nid);
     if ($node) {
-      dpm("123");
       $node->field_sr_bill_date[LANGUAGE_NONE][0]['value'] = $val->bill_date;
       node_save($node);
     }
@@ -470,7 +465,6 @@ function change_feeds_import_update_billing(&$context) {
     $context['finished'] = $context['sandbox']['progress'] / $context['sandbox']['max'];
   }
   else {
-    dpm("completed");
     $context['finished'] = 1;
   }
 }
