@@ -24,8 +24,14 @@ class views_handler_bill_value_trip_report extends views_handler_field {
   }
 
   function render($data) {
-  dpm($data,"data");
-  return 1;
+    $van = $data->field_field_billing_van[0]['raw']['value'];
+    dpm($van, "van");
+    $trip_id = $data->node_title;
+    dpm($trip_id, "trip_id");
+    $loading_date = $data->field_field_billing_loading_date[0]['raw']['value'];
+    dpm($loading_date, "loading_date");
+
+    return 1;
   }
 
 }
