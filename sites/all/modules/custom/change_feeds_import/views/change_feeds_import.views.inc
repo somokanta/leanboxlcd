@@ -1037,5 +1037,29 @@ function change_feeds_import_views_data() {
      ),
   );
 
+  
+  ########### Bill Count and Bill value for Dispatch Data Content type and Trip vs Van Report ##########
+  
+  $data['node']['bill_count_trip_report'] = array(
+    'title' => t('Bill Count Trip Report'),
+    'help' => t('Bill Count Trip Report'),
+    'real field' => 'nid',
+    'field' => array(
+      'handler' => 'views_handler_bill_count_trip_report',
+      'click sortable' => FALSE,
+     ),
+  );
+  
+  
+  $data['node']['bill_value_trip_report'] = array(
+    'title' => t('Bill Value Trip Report'),
+    'help' => t('Bill Value Trip Report'),
+    'real field' => 'nid',
+    'field' => array(
+      'handler' => 'views_handler_bill_value_trip_report',
+      'click sortable' => FALSE,
+     ),
+  );
+  
   return $data;
 }
