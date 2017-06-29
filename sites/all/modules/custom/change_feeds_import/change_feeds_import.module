@@ -451,7 +451,7 @@ function change_feeds_import_update_billing(&$context) {
   $query->condition('cb.created_date', array($rr, $rr1), 'BETWEEN');
   $query->range($progress, $limit);
   $results = $query->execute()->fetchAll();
-  dpm($num, "num");
+  dpm($results, "results");
   for ($i = $context['sandbox']['progress']; $i < $context['sandbox']['progress'] + 500 && $i < $context['sandbox']['max']; $i++) {
     $key = $i;
     $val = $results[$key];
