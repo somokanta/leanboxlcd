@@ -45,24 +45,24 @@
 				var formatPercent = new google.visualization.NumberFormat({
 					pattern: '#,##0.0%'
 				});
-				view.setColumns([0,
+				view.setColumns([   0,
 					1, {
 						calc: function (dt, row) {
-							return dt.getValue(row, 1) + ' (' +  parseFloat(formatPercent.formatValue(dt.getValue(row, 1) / (dt.getValue(row, 1) + dt.getValue(row, 2) + dt.getValue(row, 3)))).toFixed(0) + '%)';
+							return dt.getValue(row, 1) + '(' +  parseFloat(formatPercent.formatValue(dt.getValue(row, 1) / (dt.getValue(row, 1) + dt.getValue(row, 2) + dt.getValue(row, 3)))).toFixed(0) + '%)';
 						},
 						sourceColumn: 1,
 						type: "string",
 						role: "annotation", },
 					2, {
 						calc: function (dt, row) {
-							return dt.getValue(row, 2) + ' (' +  parseFloat(formatPercent.formatValue(dt.getValue(row, 2) / (dt.getValue(row, 1) + dt.getValue(row, 2) + dt.getValue(row, 3)))).toFixed(0) + '%)';
+							return dt.getValue(row, 2) + '(' +  parseFloat(formatPercent.formatValue(dt.getValue(row, 2) / (dt.getValue(row, 1) + dt.getValue(row, 2) + dt.getValue(row, 3)))).toFixed(0) + '%)';
 						},
 						sourceColumn: 2,
 						type: "string",
 						role: "annotation"},
 					3, {
 						calc: function (dt, row) {
-							return dt.getValue(row, 3) + ' (' +  parseFloat(formatPercent.formatValue(dt.getValue(row, 3) / (dt.getValue(row, 1) + dt.getValue(row, 2) + dt.getValue(row, 3)))).toFixed(0) + '%)';
+							return dt.getValue(row, 3) + '(' +  parseFloat(formatPercent.formatValue(dt.getValue(row, 3) / (dt.getValue(row, 1) + dt.getValue(row, 2) + dt.getValue(row, 3)))).toFixed(0) + '%)';
 						},
 						sourceColumn: 3,
 						type: "string",
@@ -73,7 +73,7 @@
 					height: area_definition.height,
 					title: '',
 					legend: {position: 'top', maxLines: 3},
-					bar: {groupWidth: '40%'},
+					bar: {groupWidth: '100%'},
 					chartArea: {left: area_definition.ch_left, top: area_definition.ch_top, width: area_definition.ch_width, height: area_definition.ch_height},
 					series: {
 						0: {color: '#e74c3c'},

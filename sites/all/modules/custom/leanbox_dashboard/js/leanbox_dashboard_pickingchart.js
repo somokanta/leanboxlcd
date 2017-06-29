@@ -40,58 +40,58 @@
 
 			function drawpickingChart(picking_data, area_definition) {
 				var data = google.visualization.arrayToDataTable(picking_data);
-console.log(picking_data);
-//				var view = new google.visualization.DataView(data);
-//				var formatPercent = new google.visualization.NumberFormat({
-//					pattern: '#,##0.0%'
-//				});
-//				view.setColumns([0,
-//					1, {
-//						calc: function (dt, row) {
-//							return dt.getValue(row, 1) + ' (' +  parseFloat(formatPercent.formatValue(dt.getValue(row, 1) / (dt.getValue(row, 1) + dt.getValue(row, 2) + dt.getValue(row, 3)))).toFixed(0) + '%)';
-//						},
-//						sourceColumn: 1,
-//						type: "string",
-//						role: "annotation", },
-//					2, {
-//						calc: function (dt, row) {
-//							return dt.getValue(row, 2) + ' (' +  parseFloat(formatPercent.formatValue(dt.getValue(row, 2) / (dt.getValue(row, 1) + dt.getValue(row, 2) + dt.getValue(row, 3)))).toFixed(0) + '%)';
-//						},
-//						sourceColumn: 2,
-//						type: "string",
-//						role: "annotation"},
-//					3, {
-//						calc: function (dt, row) {
-//							return dt.getValue(row, 3) + ' (' +  parseFloat(formatPercent.formatValue(dt.getValue(row, 3) / (dt.getValue(row, 1) + dt.getValue(row, 2) + dt.getValue(row, 3)))).toFixed(0) + '%)';
-//						},
-//						sourceColumn: 3,
-//						type: "string",
-//						role: "annotation"},
-//				]);
+
+				var view = new google.visualization.DataView(data);
+				var formatPercent = new google.visualization.NumberFormat({
+					pattern: '#,##0.0%'
+				});
+				view.setColumns([0,
+					1, {
+						calc: function (dt, row) {
+							return dt.getValue(row, 1) + '(' +  parseFloat(formatPercent.formatValue(dt.getValue(row, 1) / (dt.getValue(row, 1) + dt.getValue(row, 2) + dt.getValue(row, 3)))).toFixed(0) + '%)';
+						},
+						sourceColumn: 1,
+						type: "string",
+						role: "annotation", },
+					2, {
+						calc: function (dt, row) {
+							return dt.getValue(row, 2) + '(' +  parseFloat(formatPercent.formatValue(dt.getValue(row, 2) / (dt.getValue(row, 1) + dt.getValue(row, 2) + dt.getValue(row, 3)))).toFixed(0) + '%)';
+						},
+						sourceColumn: 2,
+						type: "string",
+						role: "annotation"},
+					3, {
+						calc: function (dt, row) {
+							return dt.getValue(row, 3) + '(' +  parseFloat(formatPercent.formatValue(dt.getValue(row, 3) / (dt.getValue(row, 1) + dt.getValue(row, 2) + dt.getValue(row, 3)))).toFixed(0) + '%)';
+						},
+						sourceColumn: 3,
+						type: "string",
+						role: "annotation"},
+				]);
 				var options = {
 					width: area_definition.width,
 					height: area_definition.height,
 					title: '',
 					legend: {position: 'top', maxLines: 7},
-					bar: {groupWidth: '60%'},
-					  annotations: {
-          alwaysOutside: true,
-          textStyle: {
-            fontSize: 12,
-            auraColor: 'none',
-            color: '#555'
-          },
-          boxStyle: {
-            stroke: '#ccc',
-            strokeWidth: 1,
-            gradient: {
-              color1: '#f3e5f5',
-              color2: '#f3e5f5',
-              x1: '0%', y1: '0%',
-              x2: '100%', y2: '100%'
-            }
-          }
-        },
+					bar: {groupWidth: '100%'},
+//					  annotations: {
+//          alwaysOutside: true,
+//          textStyle: {
+//            fontSize: 12,
+//            auraColor: 'none',
+//            color: '#555'
+//          },
+//          boxStyle: {
+//            stroke: '#ccc',
+//            strokeWidth: 1,
+//            gradient: {
+//              color1: '#f3e5f5',
+//              color2: '#f3e5f5',
+//              x1: '0%', y1: '0%',
+//              x2: '100%', y2: '100%'
+//            }
+//          }
+//        },
 					chartArea: {left: area_definition.ch_left, top: area_definition.ch_top, width: area_definition.ch_width, height: area_definition.ch_height},
 					series: {
 						0: {color: '#e74c3c'},
@@ -113,11 +113,11 @@ console.log(picking_data);
 					},
 					bars: 'horizontal',
 				};
-				//var chart = new google.visualization.ColumnChart(document.getElementById('picking_div'));
+				var chart = new google.visualization.ColumnChart(document.getElementById('picking_div'));
 				//chart.draw(view, options);
-				//chart.draw(view, google.charts.Bar.convertOptions(options));
-				var materialChart = new google.charts.Bar(document.getElementById('picking_div'));
-      materialChart.draw(data, options);
+				chart.draw(view, google.charts.Bar.convertOptions(options));
+//				var materialChart = new google.charts.Bar(document.getElementById('picking_div'));
+//      materialChart.draw(data, options);
 			}
 		}
 	};
