@@ -56,7 +56,7 @@ function change_feeds_import_menu() {
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
-    $items['impact-delivery-partypack-cron'] = array(
+  $items['impact-delivery-partypack-cron'] = array(
     'title' => 'Partypack cron Report',
     'page callback' => 'impact_delivery_partypack_cron',
     'access callback' => TRUE,
@@ -434,6 +434,7 @@ function change_feeds_import_update_billing(&$context) {
 
     $results = $query->execute();
     $num = $results->rowCount();
+    dpm($num, "num");
     $context['sandbox']['progress'] = 0;
     $context['sandbox']['max'] = $num;
   }
@@ -441,19 +442,25 @@ function change_feeds_import_update_billing(&$context) {
   $limit = 500;
   $progress = $context['sandbox']['progress'];
   // With each pass through the callback, retrieve the next group of nids.
+  $rr = strtotime(date('Y-m-d', strtotime('last month')));
+  $rr1 = time();
   $query = db_select('custom_billing_data', 'cb');
   $query->addField('cb', 'bill_number');
   $query->addField('cb', 'bill_date', 'bill_date');
   $query->addField('cb', 'distributor_id', 'distributor_id');
+  $query->condition('cb.created_date', array($rr, $rr1), 'BETWEEN');
   $query->range($progress, $limit);
   $results = $query->execute()->fetchAll();
+  dpm($num, "num");
   for ($i = $context['sandbox']['progress']; $i < $context['sandbox']['progress'] + 500 && $i < $context['sandbox']['max']; $i++) {
     $key = $i;
     $val = $results[$key];
 
     $nid = check_node_title_exists_for_update($val->bill_number, $val->distributor_id);
+    dpm($nid,"nid");
     $node = node_load($nid);
     if ($node) {
+      dpm("123");
       $node->field_sr_bill_date[LANGUAGE_NONE][0]['value'] = $val->bill_date;
       node_save($node);
     }
@@ -463,6 +470,7 @@ function change_feeds_import_update_billing(&$context) {
     $context['finished'] = $context['sandbox']['progress'] / $context['sandbox']['max'];
   }
   else {
+    dpm("completed");
     $context['finished'] = 1;
   }
 }
