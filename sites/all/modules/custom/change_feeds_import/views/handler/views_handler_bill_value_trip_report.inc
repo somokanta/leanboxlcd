@@ -25,13 +25,22 @@ class views_handler_bill_value_trip_report extends views_handler_field {
 
   function render($data) {
     $van = $data->field_field_billing_van[0]['raw']['value'];
-    dpm($van, "van");
     $trip_id = $data->node_title;
-    dpm($trip_id, "trip_id");
     $loading_date = $data->field_field_billing_loading_date[0]['raw']['value'];
-    dpm($loading_date, "loading_date");
-
-    return 1;
+    $query1 = db_select('node', 'n');
+    $query1->condition('n.type', 'sales_register_data');
+    $query1->join('field_data_field_bill_value', 'bval', 'bval.entity_id = n.nid');
+    $query1->join('field_data_field_billing_van', 'bv', 'bv.entity_id = n.nid');
+    $query1->condition('bv.field_billing_van_value', $van);
+    $query1->join('field_data_field_billing_loading_date', 'bld', 'bld.entity_id = n.nid');
+    $query1->condition('bld.field_billing_loading_date_value', $loading_date);
+    $query1->join('field_data_field_trip_id_reference', 'tr', 'tr.entity_id = n.nid');
+    $query1->leftjoin('node', 'disn', 'disn.nid = tr.field_trip_id_reference_nid');
+    $query1->condition('disn.title', $trip_id);
+    $query1->groupBy('tr.field_trip_id_reference_nid');
+    $query1->addExpression('SUM(bval.field_bill_value_value)', 'total_bill_val');
+    $value = $query1->execute()->fetchField();
+    return $value;
   }
 
 }
