@@ -283,7 +283,7 @@ function leanbox_dashboard_block_view($delta = '') {
     'height' => 300,
     'ch_left' => 50,
     'ch_top' => 50,
-    'ch_width' => 290,
+    'ch_width' => 400,
     'ch_height' => 200,
   );
   switch ($delta) {
