@@ -1041,9 +1041,11 @@ function get_common_data_for_chhanel_datewise($start_date, $end_date, $distribut
   $query->addExpression('COUNT(n.title)', 'bill_count');
   $query->addExpression('SUM(bv.field_bill_value_value)', 'bill_value');
   $query->addExpression('SUM(CASE WHEN (unix_timestamp(disp_date.field_dispatch_date_value) <= pro_date.field_promised_date_value AND disp_st.field_dispatch_status_value =1) THEN 1 ELSE 0 END)', 'n2_counts');
-  $query->addExpression('SUM(CASE WHEN (unix_timestamp(disp_date.field_dispatch_date_value) <= (pro_date.field_promised_date_value+86400) AND disp_st.field_dispatch_status_value =1) THEN 1 ELSE 0 END)', 'n3_counts');
+  // $query->addExpression('SUM(CASE WHEN (unix_timestamp(disp_date.field_dispatch_date_value) <= (pro_date.field_promised_date_value+86400) AND disp_st.field_dispatch_status_value =1) THEN 1 ELSE 0 END)', 'n3_counts');
+  $query->addExpression('SUM(CASE WHEN (unix_timestamp(disp_date.field_dispatch_date_value) > (pro_date.field_promised_date_value) AND ((disp_date.field_dispatch_date_value - pro_date.field_promised_date_value) <= 86400) AND disp_st.field_dispatch_status_value =1) THEN 1 ELSE 0 END)', 'n3_counts');
   $query->addExpression('SUM(CASE WHEN (unix_timestamp(disp_date.field_dispatch_date_value) <= pro_date.field_promised_date_value AND disp_st.field_dispatch_status_value =1) THEN field_bill_value_value ELSE 0 END)', 'n2_value');
-  $query->addExpression('SUM(CASE WHEN (unix_timestamp(disp_date.field_dispatch_date_value) <= (pro_date.field_promised_date_value+86400) AND disp_st.field_dispatch_status_value =1) THEN field_bill_value_value ELSE 0 END)', 'n3_value');
+  // $query->addExpression('SUM(CASE WHEN (unix_timestamp(disp_date.field_dispatch_date_value) <= (pro_date.field_promised_date_value+86400) AND disp_st.field_dispatch_status_value =1) THEN field_bill_value_value ELSE 0 END)', 'n3_value');
+  $query->addExpression('SUM(CASE WHEN (unix_timestamp(disp_date.field_dispatch_date_value) > (pro_date.field_promised_date_value) AND ((disp_date.field_dispatch_date_value - pro_date.field_promised_date_value) <= 86400) AND disp_st.field_dispatch_status_value =1) THEN field_bill_value_value ELSE 0 END)', 'n3_value');
   $query->fields('n', array('nid'));
   $query->fields('bd', array('field_sr_bill_date_value'));
   $query->fields('chan', array('field_channel_value'));
