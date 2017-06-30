@@ -1125,6 +1125,10 @@ function get_common_data_for_chhanel_datewise($start_date, $end_date, $distribut
       $total_n2_value,
       $total_n3_counts,
       $total_n3_value,
+      
+      $total_n4_counts,
+      $total_n4_value,
+      
       $total_otif_n2_count_perc . " %",
       $total_otif_n2_value_perc . " %",
       $total_otif_n3_count_perc . " %",
