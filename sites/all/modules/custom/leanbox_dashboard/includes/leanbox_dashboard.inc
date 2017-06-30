@@ -1785,12 +1785,12 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
 
     $data[] = array('PriceList Group', 'Fail', 'Success');
 
-    $query = db_select('node', 'n');
-    $query->addTag('node_uid');
-    $query->condition('n.type', 'van_stop_master');
-    $query->join('field_data_field_unloading_finish_time', 'pp', 'pp.entity_id = n.nid');
-    $query->fields('pp', array('field_unloading_finish_time_value'));
-    $dis_time = $query->execute()->fetchField();
+//    $query = db_select('node', 'n');
+//    $query->addTag('node_uid');
+//    $query->condition('n.type', 'van_stop_master');
+//    $query->join('field_data_field_unloading_finish_time', 'pp', 'pp.entity_id = n.nid');
+//    $query->fields('pp', array('field_unloading_finish_time_value'));
+    $dis_time = leanbox_dashboard_van_stop_master();
 
     if (!empty($dis_time)) {
       if (!empty($res)) {

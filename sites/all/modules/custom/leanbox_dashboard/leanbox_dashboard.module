@@ -763,7 +763,8 @@ function leanbox_dashboard_block_view($delta = '') {
       }
 
       $loading_date = date('d-m-Y');
-      $block['subject'] = "Party Packing On Time Adherence ($loading_date Loading)";
+      $dis_time = leanbox_dashboard_van_stop_master();
+      $block['subject'] = "Party Packing OTA ($loading_date Loading) Target : $dis_time ";
       $data = leanbox_dashboard_chart_query_details('pp_ota');
       $filter_form = drupal_render(drupal_get_form('leanbox_dashboard_chart_filter_pp_ota_form'));
       $block['content'] = array(
@@ -798,7 +799,8 @@ function leanbox_dashboard_block_view($delta = '') {
       }
 
       $loading_date = date('d-m-Y');
-      $block['subject'] = "Picking On Time Adherence VAN Loose ($loading_date Loading)";
+      $dis_time = leanbox_dashboard_van_stop_master();
+      $block['subject'] = "Picking OTA VAN Loose ($loading_date Loading) Target : $dis_time";
       $data = leanbox_dashboard_chart_query_details('picking_ota');
       $filter_form = drupal_render(drupal_get_form('leanbox_dashboard_chart_filter_picking_ota_form'));
       $block['content'] = array(
@@ -833,7 +835,8 @@ function leanbox_dashboard_block_view($delta = '') {
       }
 
       $loading_date = date('d-m-Y');
-      $block['subject'] = "Unloading On Time Adherence ($loading_date EGIR)";
+      $dis_time = leanbox_dashboard_van_stop_master();
+      $block['subject'] = "Unloading OTA ($loading_date EGIR) Target: $dis_time ";
       $data = leanbox_dashboard_chart_query_details('unloading_ota');
       $filter_form = drupal_render(drupal_get_form('leanbox_dashboard_chart_filter_unloading_ota_form'));
       $block['content'] = array(
@@ -889,7 +892,8 @@ function leanbox_dashboard_block_view($delta = '') {
       }
 
       $loading_date = date('d-m-Y');
-      $block['subject'] = "Dispatch On Time Adherence ($loading_date Dispatch)";
+      $dis_time = leanbox_dashboard_van_stop_master();
+      $block['subject'] = "Dispatch OTA ($loading_date Dispatch) Target : $dis_time ";
       $data = leanbox_dashboard_chart_query_details('dispatch_ota');
       $filter_form = drupal_render(drupal_get_form('leanbox_dashboard_chart_filter_dispatch_ota_form'));
       $block['content'] = array(
@@ -1368,4 +1372,15 @@ function leanbox_dashboard_form_alter(&$form, &$form_state, $form_id) {
       '#markup' => $list,
     );
   }
+}
+
+
+function leanbox_dashboard_van_stop_master() {
+    $query = db_select('node', 'n');
+    $query->addTag('node_uid');
+    $query->condition('n.type', 'van_stop_master');
+    $query->join('field_data_field_unloading_finish_time', 'pp', 'pp.entity_id = n.nid');
+    $query->fields('pp', array('field_unloading_finish_time_value'));
+    $dis_time = $query->execute()->fetchField();
+    return $dis_time;
 }
