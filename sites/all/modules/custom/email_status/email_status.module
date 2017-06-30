@@ -1110,7 +1110,7 @@ function get_common_data_for_chhanel_datewise($start_date, $end_date, $distribut
     $output = "No Result Found";
   }
   if (!empty($res)) {
-    $header = get_header_of_chhanel();
+    $header = get_header_of_chhanel(TRUE);
     $total_otif_n2_count_perc = round(($total_n2_counts / $total_bill_count) * 100);
     $total_otif_n2_value_perc = round(($total_n2_value / $total_bill_val) * 100);
     $total_otif_n3_count_perc = round(($total_n3_counts / $total_bill_count) * 100);
