@@ -66,10 +66,10 @@
 					vAxis: {
 						minValue: 0,
 						maxValue: 7,
-						title: 'Picking Productivity'
+						title: 'Loading Lines/ManHr'
 					},
 					hAxis: {
-						title: 'Picking Productivity'
+						title: 'Section Wise'
 					},
 				};
 				var chart = new google.visualization.ColumnChart(document.getElementById("picking_productivity_div"));

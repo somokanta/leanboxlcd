@@ -88,7 +88,7 @@
 						title: 'Party Packing Activity'
 					},
 					hAxis: {
-						title: 'Party Packing Activity'
+						title: ''
 					},
 				};
 				var chart = new google.visualization.ColumnChart(document.getElementById("party_packing_div"));

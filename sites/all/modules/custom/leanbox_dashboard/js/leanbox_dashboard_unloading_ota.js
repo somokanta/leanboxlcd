@@ -85,10 +85,10 @@
 					vAxis: {
 						minValue: 0,
 						maxValue: 1,
-						title: 'Unloading Activity'
+						title: 'Percentage'
 					},
 					hAxis: {
-						title: 'Unloading On Time Adherence'
+						title: 'Unloading OTA Invoice Basic'
 					},
 				};
 				var chart = new google.visualization.ColumnChart(document.getElementById("unloading_ota_div"));

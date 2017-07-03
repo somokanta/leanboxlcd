@@ -73,7 +73,7 @@
 					height: area_definition.height,
 					title: '',
 					legend: {position: 'top', maxLines: 3},
-					bar: {groupWidth: '100%'},
+					bar: {groupWidth: '40%'},
 					chartArea: {left: area_definition.ch_left, top: area_definition.ch_top, width: area_definition.ch_width, height: area_definition.ch_height},
 					series: {
 						0: {color: '#e74c3c'},
@@ -87,7 +87,7 @@
 						title: 'Picking Activity'
 					},
 					hAxis: {
-						title: 'Pricelist Group'
+						title: ''
 					},
 				};
 				var chart = new google.visualization.ColumnChart(document.getElementById('picking_bulk_div'));

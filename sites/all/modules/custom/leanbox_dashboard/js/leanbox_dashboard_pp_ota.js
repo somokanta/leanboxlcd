@@ -85,10 +85,10 @@
 					vAxis: {
 						minValue: 0,
 						maxValue: 1,
-						title: 'Party Packing Activity'
+						title: 'Percentage'
 					},
 					hAxis: {
-						title: 'Party Packing On Time Adherence'
+						title: 'Party Packing OTA-Van Basis'
 					},
 				};
 				var chart = new google.visualization.ColumnChart(document.getElementById("pp_ota_div"));

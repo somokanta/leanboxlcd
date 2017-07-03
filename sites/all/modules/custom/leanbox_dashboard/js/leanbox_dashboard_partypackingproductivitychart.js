@@ -66,10 +66,10 @@
 					vAxis: {
 						minValue: 0,
 						maxValue: 7,
-						title: 'Party Packing Productivity'
+						title: 'Bill Lines/ManHr'
 					},
 					hAxis: {
-						title: 'Party Packing Productivity'
+						title: 'Section Wise'
 					},
 				};
 				var chart = new google.visualization.ColumnChart(document.getElementById("party_packing_productivity_div"));

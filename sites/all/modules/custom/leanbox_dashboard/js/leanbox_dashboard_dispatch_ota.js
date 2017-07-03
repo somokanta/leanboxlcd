@@ -88,7 +88,7 @@
 						title: 'Percentage'
 					},
 					hAxis: {
-						title: 'On Time Dispatch Adherence'
+						title: 'Dispatch OTA-Bill Basis'
 					},
 				};
 				var chart = new google.visualization.ColumnChart(document.getElementById("dispatch_ota_div"));

@@ -85,10 +85,10 @@
 					vAxis: {
 						minValue: 0,
 						maxValue: 1,
-						title: 'Picking Activity'
+						title: 'Percentage'
 					},
 					hAxis: {
-						title: 'Picking Activity On Time Adherence'
+						title: 'Picking OTA-Van Basis'
 					},
 				};
 				var chart = new google.visualization.ColumnChart(document.getElementById("picking_ota_div"));

@@ -30,10 +30,10 @@ function leanbox_dashboard_menu() {
   );
 
   $categories = array(
-    'Progress' => 'Progress',
+    'Progress' => 'Current Day Progress',
     'Metrics' => 'Metrics',
     'Productivity' => 'Productivity',
-    'ota' => 'On-Time Adherence',
+    'ota' => 'Process-On-Time Adherence',
   );
 
   $items['dashboard/Progress'] = array(
@@ -301,7 +301,7 @@ function leanbox_dashboard_block_view($delta = '') {
       }
 
       $loading_date = date('d-m-Y');
-      $block['subject'] = "Party Packing Van Progress ($loading_date Loading)";
+      $block['subject'] = "Party Packing Progress ($loading_date)";
       $data = leanbox_dashboard_chart_query_details('party_packing');
       $filter_form = drupal_render(drupal_get_form('leanbox_dashboard_chart_filter_partypack_form'));
       $block['content'] = array(
@@ -335,7 +335,7 @@ function leanbox_dashboard_block_view($delta = '') {
         );
       }
       $loading_date = date('d-m-Y');
-      $block['subject'] = "Picking Progress Task Loose ($loading_date Loading)";
+      $block['subject'] = "Loose Picking Progress ($loading_date)";
       $data = leanbox_dashboard_chart_query_details('picking');
 
       $filter_form = drupal_render(drupal_get_form('leanbox_dashboard_chart_filter_picking_form'));
@@ -370,7 +370,7 @@ function leanbox_dashboard_block_view($delta = '') {
         );
       }
       $loading_date = date('d-m-Y');
-      $block['subject'] = "Picking Progress Task Bulk ($loading_date Loading)";
+      $block['subject'] = "Bulk Picking Progress ($loading_date)";
       $data = leanbox_dashboard_chart_query_details('picking_bulk');
 
       $filter_form = drupal_render(drupal_get_form('leanbox_dashboard_chart_filter_picking_bulk_form'));
@@ -404,8 +404,8 @@ function leanbox_dashboard_block_view($delta = '') {
           'ch_height' => 250,
         );
       }
-      $loading_date = date('d-m-Y');
-      $block['subject'] = "Unloading Progress ($loading_date Invoice)";
+      // $loading_date = date('d-m-Y');
+      $block['subject'] = "Unloading Progress (% Invoices)";
       $data = leanbox_dashboard_chart_query_details('unloading');
 
       $filter_form = drupal_render(drupal_get_form('leanbox_dashboard_chart_filter_unloading_form'));
@@ -547,7 +547,7 @@ function leanbox_dashboard_block_view($delta = '') {
       }
 
       $loading_date = date('d-m-Y', strtotime("-1 days"));
-      $block['subject'] = "Bill Pendency ($loading_date Billing)";
+      $block['subject'] = "Dispatch Pendency ($loading_date Billing)";
       $data = leanbox_dashboard_chart_query_details('bill_pendency', $loading_date, $loading_date);
       $filter_form = drupal_render(drupal_get_form('leanbox_dashboard_chart_filter_bill_pendency_form'));
       $block['content'] = array(
@@ -572,7 +572,7 @@ function leanbox_dashboard_block_view($delta = '') {
 
       $bill_date = leanbox_dashboard_get_default_pdd_date_for_chart();
       $bill_date = date('d-m-Y', $bill_date);
-      $block['subject'] = "OTIF Value ($bill_date Billing)";
+      $block['subject'] = "OTIF Dispatch Value ($bill_date Billing)";
       $data = leanbox_dashboard_gauge_chart_query_details('otif');
 
       $filter_form = drupal_render(drupal_get_form('leanbox_dashboard_chart_filter_otif_form'));
@@ -598,7 +598,7 @@ function leanbox_dashboard_block_view($delta = '') {
 
       $bill_date = leanbox_dashboard_get_default_pdd_date_for_chart();
       $bill_date = date('d-m-Y', $bill_date);
-      $block['subject'] = "OTIF Day Wise ($bill_date Billing)";
+      $block['subject'] = "OTIF Dispact Value Day Wise ($bill_date Billing)";
       $data = leanbox_dashboard_otif_trends_chart_query_details('otif_trends');
 
       $filter_form = drupal_render(drupal_get_form('leanbox_dashboard_chart_filter_otif_trends_form'));
@@ -763,7 +763,7 @@ function leanbox_dashboard_block_view($delta = '') {
       }
 
       $loading_date = date('d-m-Y');
-      $dis_time = leanbox_dashboard_van_stop_master();
+      $dis_time = leanbox_dashboard_van_stop_master('field_pp_finish_time');
       $block['subject'] = "Party Packing OTA ($loading_date Loading) Target : $dis_time ";
       $data = leanbox_dashboard_chart_query_details('pp_ota');
       $filter_form = drupal_render(drupal_get_form('leanbox_dashboard_chart_filter_pp_ota_form'));
@@ -799,7 +799,7 @@ function leanbox_dashboard_block_view($delta = '') {
       }
 
       $loading_date = date('d-m-Y');
-      $dis_time = leanbox_dashboard_van_stop_master();
+      $dis_time = leanbox_dashboard_van_stop_master('field_picking_finish_time');
       $block['subject'] = "Picking OTA VAN Loose ($loading_date Loading) Target : $dis_time";
       $data = leanbox_dashboard_chart_query_details('picking_ota');
       $filter_form = drupal_render(drupal_get_form('leanbox_dashboard_chart_filter_picking_ota_form'));
@@ -835,7 +835,7 @@ function leanbox_dashboard_block_view($delta = '') {
       }
 
       $loading_date = date('d-m-Y');
-      $dis_time = leanbox_dashboard_van_stop_master();
+      $dis_time = leanbox_dashboard_van_stop_master('field_unloading_finish_time');
       $block['subject'] = "Unloading OTA ($loading_date EGIR) Target: $dis_time ";
       $data = leanbox_dashboard_chart_query_details('unloading_ota');
       $filter_form = drupal_render(drupal_get_form('leanbox_dashboard_chart_filter_unloading_ota_form'));
@@ -891,9 +891,11 @@ function leanbox_dashboard_block_view($delta = '') {
         );
       }
 
-      $loading_date = date('d-m-Y');
-      $dis_time = leanbox_dashboard_van_stop_master();
-      $block['subject'] = "Dispatch OTA ($loading_date Dispatch) Target : $dis_time ";
+      $bill_date = leanbox_dashboard_get_default_pdd_date_for_chart();
+      $loading_date = date('Y-m-d', $bill_date);
+      //$loading_date = date('d-m-Y') - "1 days";
+      $dis_time = leanbox_dashboard_van_stop_master('field_otif_finish_time');
+      $block['subject'] = "Dispatch OTA ($loading_date Billing) Target : $dis_time ";
       $data = leanbox_dashboard_chart_query_details('dispatch_ota');
       $filter_form = drupal_render(drupal_get_form('leanbox_dashboard_chart_filter_dispatch_ota_form'));
       $block['content'] = array(
@@ -1375,12 +1377,12 @@ function leanbox_dashboard_form_alter(&$form, &$form_state, $form_id) {
 }
 
 
-function leanbox_dashboard_van_stop_master() {
+function leanbox_dashboard_van_stop_master($field_name) {
     $query = db_select('node', 'n');
     $query->addTag('node_uid');
     $query->condition('n.type', 'van_stop_master');
-    $query->join('field_data_field_unloading_finish_time', 'pp', 'pp.entity_id = n.nid');
-    $query->fields('pp', array('field_unloading_finish_time_value'));
+    $query->join("field_data_". $field_name, 'pp', 'pp.entity_id = n.nid');
+    $query->fields('pp', array($field_name. "_value"));
     $dis_time = $query->execute()->fetchField();
     return $dis_time;
 }
