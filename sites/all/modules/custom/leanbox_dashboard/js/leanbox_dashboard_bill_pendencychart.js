@@ -69,7 +69,7 @@
 					height: area_definition.height,
 					title: '',
 					legend: {position: 'top', maxLines: 3},
-					bar: {groupWidth: '60%'},
+					bar: {groupWidth: '40%'},
 					chartArea: {left: area_definition.ch_left, top: area_definition.ch_top, width: area_definition.ch_width, height: area_definition.ch_height},
 					series: {
 						0: {color: '#ec3c10'},
@@ -82,7 +82,7 @@
 						title: 'Result'
 					},
 					hAxis: {
-						title: 'Bill Pendency'
+						title: ''
 					},
 				};
 				var chart = new google.visualization.ColumnChart(document.getElementById("bill_pendency_div"));

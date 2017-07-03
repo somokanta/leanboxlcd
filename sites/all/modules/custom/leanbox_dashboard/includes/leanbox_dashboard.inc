@@ -1374,7 +1374,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     $query->groupBy('su.field_dispatch_supervisor_value');
     $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
 
-    $data1[] = array('PriceList Group', 'COUNT');
+    $data1[] = array('PriceList Group', '');
 
     if (!empty($res)) {
       foreach ($res as $key => $val) {
@@ -1790,7 +1790,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
 //    $query->condition('n.type', 'van_stop_master');
 //    $query->join('field_data_field_unloading_finish_time', 'pp', 'pp.entity_id = n.nid');
 //    $query->fields('pp', array('field_unloading_finish_time_value'));
-    $dis_time = leanbox_dashboard_van_stop_master();
+    $dis_time = leanbox_dashboard_van_stop_master('field_unloading_finish_time');
 
     if (!empty($dis_time)) {
       if (!empty($res)) {

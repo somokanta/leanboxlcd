@@ -73,7 +73,7 @@
 					height: area_definition.height,
 					title: '',
 					legend: {position: 'top', maxLines: 7},
-					bar: {groupWidth: '100%'},
+					bar: {groupWidth: '40%'},
 //					  annotations: {
 //          alwaysOutside: true,
 //          textStyle: {
