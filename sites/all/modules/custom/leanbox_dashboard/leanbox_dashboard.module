@@ -598,7 +598,7 @@ function leanbox_dashboard_block_view($delta = '') {
 
       $bill_date = leanbox_dashboard_get_default_pdd_date_for_chart();
       $bill_date = date('d-m-Y', $bill_date);
-      $block['subject'] = "OTIF Dispact Value Day Wise ($bill_date Billing)";
+      $block['subject'] = "OTIF Dispatch Value Day Wise ($bill_date Billing)";
       $data = leanbox_dashboard_otif_trends_chart_query_details('otif_trends');
 
       $filter_form = drupal_render(drupal_get_form('leanbox_dashboard_chart_filter_otif_trends_form'));
@@ -892,7 +892,7 @@ function leanbox_dashboard_block_view($delta = '') {
       }
 
       $bill_date = leanbox_dashboard_get_default_pdd_date_for_chart();
-      $loading_date = date('Y-m-d', $bill_date);
+      $loading_date = date('d-m-Y', $bill_date);
       //$loading_date = date('d-m-Y') - "1 days";
       $dis_time = leanbox_dashboard_van_stop_master('field_otif_finish_time');
       $block['subject'] = "Dispatch OTA ($loading_date Billing) Target : $dis_time ";
