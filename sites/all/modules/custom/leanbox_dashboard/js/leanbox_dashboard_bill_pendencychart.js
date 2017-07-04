@@ -75,7 +75,7 @@
 						0: {color: '#ec3c10'},
 						1: {color: '#27ae60'},
 					},
-					isStacked: 'percent',
+					// isStacked: 'percent',
 					vAxis: {
 						minValue: 0,
 						maxValue: 1,
