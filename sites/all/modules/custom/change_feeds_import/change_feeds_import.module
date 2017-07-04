@@ -2010,6 +2010,7 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
   if ($view->name == 'impact_delivery_report' || $view->name == 'impact_delivery_report_2') {
     $sub_query = db_select('custom_billing_data', 'b');
     $sub_query->join('node', 'n', 'n.title = b.bill_number');
+    $sub_query->condition('n.uid', $distributor_id);
     $sub_query->join('field_data_field_bill_value', 'v', 'v.entity_id = n.nid');
     $sub_query->addField('b', 'bill_number', 'bill_number');
     $sub_query->addField('v', 'field_bill_value_value', 'field_bill_value_value');
