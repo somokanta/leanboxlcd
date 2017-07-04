@@ -79,14 +79,15 @@
 					vAxis: {
 						minValue: 0,
 						maxValue: 1,
-						title: 'Result'
+						title: 'Bill Count'
 					},
 					hAxis: {
 						title: ''
 					},
 				};
 				var chart = new google.visualization.ColumnChart(document.getElementById("bill_pendency_div"));
-				chart.draw(view, options);
+				//chart.draw(view, options);
+				chart.draw(view, google.charts.Bar.convertOptions(options));
 			}
 		}
 	};

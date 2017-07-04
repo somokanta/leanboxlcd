@@ -84,7 +84,7 @@
 					vAxis: {
 						minValue: 0,
 						maxValue: 1,
-						title: 'Picking Activity'
+						title: 'Task Count'
 					},
 					hAxis: {
 						title: ''
