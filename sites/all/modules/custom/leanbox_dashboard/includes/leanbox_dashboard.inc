@@ -1982,7 +1982,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
       $dispatched_count = $res['trip_dispatch_sum'];
       $non_dis_count = $total_count - $dispatched_count;
 
-      $data[] = array('result', (int) $non_dis_count, (int) $dispatched_count);
+      $data[] = array('', (int) $non_dis_count, (int) $dispatched_count);
     }
     else {
       $data[] = array('No data found', 0, 0);
