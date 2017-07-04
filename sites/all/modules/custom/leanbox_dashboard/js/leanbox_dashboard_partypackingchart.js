@@ -85,7 +85,7 @@
 					vAxis: {
 						minValue: 0,
 						maxValue: 1,
-						title: 'Party Packing Activity'
+						title: 'Van Count'
 					},
 					hAxis: {
 						title: ''

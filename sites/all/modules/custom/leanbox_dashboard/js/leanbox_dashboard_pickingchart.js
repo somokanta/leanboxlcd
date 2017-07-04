@@ -102,7 +102,7 @@
 					vAxis: {
 						minValue: 0,
 						maxValue: 7,
-						title: 'Picking Activity'
+						title: 'Task Count'
 					},
 //					hAxis: {
 //						title: 'Pricelist Group',
