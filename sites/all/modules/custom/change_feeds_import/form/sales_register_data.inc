@@ -174,12 +174,11 @@ function change_feeds_import_sales_register_batch_fix_process($data, $distributo
     if (isset($value['BILL_NUMBER'])) {
       $unique_comb = $value['BILL_NUMBER'];
       if (in_array($unique_comb, $context['results']['unique_combination'])) {
-              $flag = 1;
-              $error_text = "BILL_NUMBER " . $value['BILL_NUMBER'] . " is Repeated.  ";
-            }
-            else {
-              $context['results']['unique_combination'][] = $unique_comb;
-            }
+        $value['error_message'] .= "BILL_NUMBER " . $value['BILL_NUMBER'] . " is Repeated.  ";
+      }
+      else {
+        $context['results']['unique_combination'][] = $unique_comb;
+      }
     }
 //      $value['BILL_NUMBER'] = trim($value['BILL_NUMBER']);
 //      // Check if bill no already created as a node in content type sales_register_data
