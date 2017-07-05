@@ -129,6 +129,10 @@ function change_feeds_import_sales_register_batch_fix_process($data, $distributo
   require_once drupal_get_path('module', 'change_feeds_import') . '/form/upload_billing_data.inc';
 
   $value['error_message'] = '';
+  if (!isset($context['results']['unique_combination'])) {
+    $context['results']['unique_combination'] = array();
+  }
+
   foreach ($data as $key => $value) {
 
     foreach ($value as $k => $v) {
@@ -167,7 +171,15 @@ function change_feeds_import_sales_register_batch_fix_process($data, $distributo
         }
       }
     }
-//    if (isset($value['BILL_NUMBER'])) {
+    if (isset($value['BILL_NUMBER'])) {
+      $unique_comb = $value['BILL_NUMBER'];
+      if (in_array($unique_comb, $context['results']['unique_combination'])) {
+        $value['error_message'] .= "BILL_NUMBER " . $value['BILL_NUMBER'] . " is Repeated.  ";
+      }
+      else {
+        $context['results']['unique_combination'][] = $unique_comb;
+      }
+    }
 //      $value['BILL_NUMBER'] = trim($value['BILL_NUMBER']);
 //      // Check if bill no already created as a node in content type sales_register_data
 //      $title1 = check_node_title_exists($value['BILL_NUMBER'], 'sales_register_data');

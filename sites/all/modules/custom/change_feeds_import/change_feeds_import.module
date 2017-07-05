@@ -56,7 +56,7 @@ function change_feeds_import_menu() {
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
-    $items['impact-delivery-partypack-cron'] = array(
+  $items['impact-delivery-partypack-cron'] = array(
     'title' => 'Partypack cron Report',
     'page callback' => 'impact_delivery_partypack_cron',
     'access callback' => TRUE,
@@ -663,11 +663,11 @@ function delete_billing_form_submit($form, &$form_state) {
   $user = $form_state['values']['user'];
   $pass = "";
   // get data from custom table for selected date and user (custom_billing_data).
-  $billing_data = get_custom_data($pass, $start_date, $end_date, $user);
+  $billing_data = $sales_data  =  get_custom_data($pass, $start_date, $end_date, $user);
   $billing_count = count($billing_data);
   $pass = "sales";
   // get data from Sales register's node's for selected date and user (custom_billing_data).
-  $sales_data = get_custom_data($pass, $start_date, $end_date, $user);
+  // $sales_data = get_custom_data($pass, $start_date, $end_date, $user);
 
 
   // delete data from custom table for selected date and user (custom_billing_data).
@@ -1696,19 +1696,19 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
       drupal_set_message("$sales_day does not exist in Sales Day", 'error');
       $entity->feeds_item->skip = TRUE;
     }
-    
+
     $salesman = $entity->field_salesman[LANGUAGE_NONE][0]['value'];
     $salesman_code = $entity->field_salesman_code[LANGUAGE_NONE][0]['value'];
-    
+
     if (empty($salesman)) {
-      drupal_set_message("Salesman Can Not Be Null", 'error',FALSE);
+      drupal_set_message("Salesman Can Not Be Null", 'error', FALSE);
       $entity->feeds_item->skip = TRUE;
     }
     if (empty($salesman_code)) {
-      drupal_set_message("Salesman Code Can Not Be Null", 'error',FALSE);
+      drupal_set_message("Salesman Code Can Not Be Null", 'error', FALSE);
       $entity->feeds_item->skip = TRUE;
     }
-    
+
 //    if (empty($delivery_day_tid)) {
 //      drupal_set_message("$delivery_day does not exist in Delivery Day", 'error');
 //      $entity->feeds_item->skip = TRUE;
@@ -1784,7 +1784,7 @@ function change_feeds_import_node_presave($node) {
   }
 
   if ($node->type != 'user_manual') {
-    if (!empty($distributor_id)) {
+    if (!empty($distributor_id) && ($node->is_new == TRUE)) {
       $node->uid = $distributor_id;
     }
   }
@@ -1973,7 +1973,7 @@ function change_feeds_import_query_alter(QueryAlterableInterface $query) {
   if ($query->hasTag('views_' . $view_name)) {
     $query->groupBy('field_sales_day_value');
     $query->groupBy('field_static_delivery_beat_code_value');
-   // $query->groupBy('field_area_hook_nid');
+    // $query->groupBy('field_area_hook_nid');
     $query->addExpression('SUM(if(field_sales_day_value != 1, 1, 0))', 'total_rec');
   }
 }
