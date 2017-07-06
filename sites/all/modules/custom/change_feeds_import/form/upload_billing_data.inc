@@ -48,12 +48,17 @@ function change_feeds_import_billing_data_form_validate($form, &$form_state) {
       $form_state['values']['file'] = $file;
       $filepath = $form_state['values']['file']->uri;
       $data = array_map("str_getcsv", file($filepath, FILE_SKIP_EMPTY_LINES));
+      if (count($data) > 10000) {
+        form_set_error('file_upload', t($message));
+      }
+      else {
       $header_from_csv = array_shift($data);
       if ($header_array_from_xsd != $header_from_csv) {
         $type = 'error';
         $message = 'Header mismatch.';
         form_set_error('file_upload', t($message));
         // log
+      }
       }
     }
     else {
