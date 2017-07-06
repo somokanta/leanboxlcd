@@ -2392,7 +2392,7 @@ function change_feeds_import_views_data_export_batch_finish($eid, $view_name) {
   $view = views_data_export_view_retrieve($eid);
   //watchdog('cron', '<pre>' . print_r(array(), TRUE) . '</pre>');
   // Allow Dump Creation for Export 2 Only to avoid Overriding
-  $date = date('Ymdhis', strtotime("+1 days"));
+  $date = date('Ymd');
 
   if ($view_name == 'impact_delivery_cron_2') {
     // watchdog('cron 2', '<pre>' . print_r(array(), TRUE) . '</pre>');
