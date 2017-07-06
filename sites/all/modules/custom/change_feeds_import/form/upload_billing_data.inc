@@ -55,6 +55,11 @@ function change_feeds_import_billing_data_form_validate($form, &$form_state) {
         form_set_error('file_upload', t($message));
         // log
       }
+      if (count($data) > 10001) {
+        // Count includes header count as well
+        $message = 'File Row Count should not be greater than 10000';
+        form_set_error('file_upload', t($message));
+      }
     }
     else {
       form_set_error('file_upload', t('Failed to write the uploaded file the site\'s file folder.'));
