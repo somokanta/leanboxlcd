@@ -2358,8 +2358,8 @@ function change_feeds_import_views_data_export_batch_finish($eid, $view_name) {
   $view = views_data_export_view_retrieve($eid);
   //watchdog('cron', '<pre>' . print_r(array(), TRUE) . '</pre>');
   // Allow Dump Creation for Export 2 Only to avoid Overriding
-  $date = date('Ymdhis', strtotime("+1 days"));
-   
+  $date = date('Ymd');
+
   if ($view_name == 'impact_delivery_cron_2') {
     // watchdog('cron 2', '<pre>' . print_r(array(), TRUE) . '</pre>');
     $view->set_display($export->view_display_id);
@@ -2371,11 +2371,11 @@ function change_feeds_import_views_data_export_batch_finish($eid, $view_name) {
 
     $file_uri = 'public://TP2IMPACT_DELIVERY/' . $file_name;
     $temp_file = $view->display_handler->outputfile_path();
-    
+
     // create directory if not exist
     $dir = 'public://TP2IMPACT_DELIVERY';
     file_prepare_directory($dir, FILE_CREATE_DIRECTORY);
-    
+
     $uri_path = file_unmanaged_copy($temp_file, $file_uri, FILE_EXISTS_REPLACE);
 
     $files = file_load_multiple(array(), array('uri' => $uri_path));
@@ -2385,21 +2385,21 @@ function change_feeds_import_views_data_export_batch_finish($eid, $view_name) {
     $view->display_handler->batched_execution_state = $export;
     $view->display_handler->remove_index();
     // Naming of file below
-   
+
     $file_name = 'TP2IMPACT_PARTYMASTER_' . $date . '.csv';
 
     $file_uri = 'public://TP2IMPACT_PARTYMASTER/' . $file_name;
     $temp_file = $view->display_handler->outputfile_path();
-    
+
     // create directory if not exist
     $dir = 'public://TP2IMPACT_PARTYMASTER';
     file_prepare_directory($dir, FILE_CREATE_DIRECTORY);
-    
+
     $uri_path = file_unmanaged_copy($temp_file, $file_uri, FILE_EXISTS_REPLACE);
 
     $files = file_load_multiple(array(), array('uri' => $uri_path));
   }
-  
+
   _send_file_using_sftp($file_name, $file_uri);
 }
 
@@ -2440,7 +2440,7 @@ function _send_file_using_sftp($file_name, $file_uri) {
     if (ssh2_auth_password($resConnection, $strServerUsername, $strServerPassword)) {
       //Initialize SFTP subsystem
 
-      $output = ssh2_scp_send($resConnection, $csv_realfilename, 'Processed/' . $file_name);
+      $output = ssh2_scp_send($resConnection, $csv_realfilename, $file_name);
     }
     else {
       $data['error'] = 'File was not sent';
