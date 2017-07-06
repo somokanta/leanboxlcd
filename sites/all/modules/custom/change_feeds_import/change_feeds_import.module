@@ -2474,7 +2474,7 @@ function _send_file_using_sftp($file_name, $file_uri) {
     if (ssh2_auth_password($resConnection, $strServerUsername, $strServerPassword)) {
       //Initialize SFTP subsystem
 
-      $output = ssh2_scp_send($resConnection, $csv_realfilename, 'Processed/' . $file_name);
+      $output = ssh2_scp_send($resConnection, $csv_realfilename, $file_name);
     }
     else {
       $data['error'] = 'File was not sent';
