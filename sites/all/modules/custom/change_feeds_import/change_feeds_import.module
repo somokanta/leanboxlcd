@@ -2385,9 +2385,9 @@ function change_feeds_import_views_data_export_batch_alter(&$batch, &$batch_redi
     );
 
     batch_set($new_batch);
-    $new_batch = & batch_get();
+    $new_batch =& batch_get();
     $new_batch['progressive'] = FALSE;
-    $new_batch['start_stamp'] = time();
+    $new_batch['timestamp'] = time();
     // Process the batch using background batch.
     background_batch_process_batch('');
 
