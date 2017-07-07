@@ -56,7 +56,7 @@ function change_feeds_import_sales_delivery_form_validate($form, &$form_state) {
   ));
 
   $header_array_from_xsd = array(
-    'BILL NUMBER', 'IMPACT DELIVERY DATE', 'SALES DELIVERED AMT', 'REASON', 'DELIVERY PENDING'
+    'BILL NUMBER', 'SALES DELIVERED AMT', 'DELIVERY PENDING'
   );
   if ($file) {
     if ($file = file_move($file, 'public://')) {
@@ -145,12 +145,12 @@ function change_feeds_import_sales_delivery_batch_fix_process($data, $distributo
       }
     }
 
-    if (isset($value['IMPACT DELIVERY DATE'])) {
-      $value['IMPACT DELIVERY DATE'] = strtotime($value['IMPACT DELIVERY DATE']);
-      if (empty($value['IMPACT DELIVERY DATE'])) {
-        $value['error_message'] .= " Enter correct Bill Date for Bill No " . $value['BILL NUMBER'] . ".";
-      }
-    }
+//    if (isset($value['IMPACT DELIVERY DATE'])) {
+//      $value['IMPACT DELIVERY DATE'] = strtotime($value['IMPACT DELIVERY DATE']);
+//      if (empty($value['IMPACT DELIVERY DATE'])) {
+//        $value['error_message'] .= " Enter correct Bill Date for Bill No " . $value['BILL NUMBER'] . ".";
+//      }
+//    }
     if (isset($value['BILL NUMBER'])) {
       $value['BILL NUMBER'] = trim($value['BILL NUMBER']);
       // Check if bill no already created as a node in content type sales_register_data
@@ -172,18 +172,18 @@ function change_feeds_import_sales_delivery_batch_fix_process($data, $distributo
 //        $value['PARTIAL/FULL'] = $partial_full_tid;
 //      }
 //    }
-    if (isset($value['REASON'])) {
-      $value['REASON'] = trim($value['REASON']);
-      // Check if bill no already created as a node in content type sales_register_data
-      $reason_tid = leanbox_check_taxonomy_exists_by_name($value['REASON'], 'Delivery Reason');
-
-      if (empty($reason_tid)) {
-        $value['error_message'] .= " REASON " . $value['REASON'] . ' Does not exist for bill no ' . $value['BILL NUMBER'] . '.';
-      }
-      else {
-        $value['REASON'] = $reason_tid;
-      }
-    }
+//    if (isset($value['REASON'])) {
+//      $value['REASON'] = trim($value['REASON']);
+//      // Check if bill no already created as a node in content type sales_register_data
+//      $reason_tid = leanbox_check_taxonomy_exists_by_name($value['REASON'], 'Delivery Reason');
+//
+//      if (empty($reason_tid)) {
+//        $value['error_message'] .= " REASON " . $value['REASON'] . ' Does not exist for bill no ' . $value['BILL NUMBER'] . '.';
+//      }
+//      else {
+//        $value['REASON'] = $reason_tid;
+//      }
+//    }
 
     if (isset($value['SALES DELIVERED AMT'])) {
 
@@ -227,10 +227,12 @@ function change_feeds_import_insert_data_in_custom_sales_delivery_table($value, 
   $sales_data = db_insert('custom_sales_delivery') // Table name no longer needs {}
       ->fields(array(
         'bill_no' => $value['BILL NUMBER'],
-        'impact_del_date' => $value['IMPACT DELIVERY DATE'],
+       // 'impact_del_date' => $value['IMPACT DELIVERY DATE'],
+        'impact_del_date' => time(),
         'sales_amt' => $value['SALES DELIVERED AMT'],
         'partial_full' => '',
-        'reason' => $value['REASON'],
+       // 'reason' => $value['REASON'],
+        'reason' =>'',
         'delivery_pending' => $value['DELIVERY PENDING'],
         'created' => time(),
         'error_message' => $value['error_message'],
@@ -360,10 +362,10 @@ function change_feeds_import_sales_delivery_node($sales_data_result, $distributo
           
           $node = node_load($nid);
           if (!empty($node)) {
-          $node->field_impact_delivery_date[LANGUAGE_NONE][0]['value'] = $val['impact_del_date'];
+         // $node->field_impact_delivery_date[LANGUAGE_NONE][0]['value'] = $val['impact_del_date'];
           $node->field_sales_return_amt[LANGUAGE_NONE][0]['value'] = $val['sales_amt'];
         //  $node->field_delivery_status[LANGUAGE_NONE][0]['tid'] = $val['partial_full'];
-          $node->field_deliver_reason[LANGUAGE_NONE][0]['tid'] = $val['reason'];
+         // $node->field_deliver_reason[LANGUAGE_NONE][0]['tid'] = $val['reason'];
           if (empty($val['delivery_pending'])) {
             $node->field_delivery_pending = array();
           }
