@@ -11,10 +11,10 @@ function change_feeds_import_billing_data_form($form, $form_state) {
     drupal_goto("confirm/$did");
   }
 
-  $link = l(t('Master Upload Imports'), 'content/master-upload'); // all master upload link.
-  $form['template'] = array(
-    '#markup' => $link,
-  );
+//  $link = l(t('Master Upload Imports'), 'content/master-upload'); // all master upload link.
+//  $form['template'] = array(
+//    '#markup' => $link,
+//  );
 
   $form['file'] = array(
     '#type' => 'file',
