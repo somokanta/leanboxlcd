@@ -2334,17 +2334,30 @@ function get_van_pl($van, $day, $name) {
  * @param type $batch_redirect
  */
 function change_feeds_import_views_data_export_batch_alter(&$batch, &$batch_redirect) {
-  // $view = views_get_view($batch['view_name']);
-  
+
   $views_names = array('impact_delivery_cron_2', 'impact_party_master'); //  Download files for this Views only
-  // watchdog('hook_alter batch', '<pre>' . print_r($batch, TRUE) . '</pre>');
+
   if (in_array($batch['view_name'], $views_names)) {
+    $new_batch = $batch;
 
-   // watchdog('ajax data', '<pre>' . print_r($batch, TRUE) . '</pre>');
+    $view_name = $new_batch['view_name'];
+    $display_id = $new_batch['display_id'];
 
-    $batch['operations'][] = array(
-      'change_feeds_import_views_data_export_batch_finish', array($batch['eid'], $batch['view_name']),
+    // We actually never return from the drupal_alter, but
+    // use drush's batch system to run the same batch
+    // Add a final callback
+    $new_batch['operations'][] = array(
+      'change_feeds_import_views_data_export_batch_finish', array($new_batch['eid'], $new_batch['view_name']),
     );
+
+    batch_set($new_batch);
+    $new_batch = & batch_get();
+    $new_batch['progressive'] = FALSE;
+    // Process the batch using background batch.
+    background_batch_process_batch();
+
+    // Instruct the view display plugin that it shouldn't set a batch.
+    $batch = array();
   }
 }
 
@@ -2358,7 +2371,7 @@ function change_feeds_import_views_data_export_batch_finish($eid, $view_name) {
   $view = views_data_export_view_retrieve($eid);
   //watchdog('cron', '<pre>' . print_r(array(), TRUE) . '</pre>');
   // Allow Dump Creation for Export 2 Only to avoid Overriding
-  $date = date('Ymd');
+  $date = date('Ymdhis') . '_' . date('dmY', strtotime("+1 days"));
 
   if ($view_name == 'impact_delivery_cron_2') {
     // watchdog('cron 2', '<pre>' . print_r(array(), TRUE) . '</pre>');
