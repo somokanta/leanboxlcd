@@ -2354,7 +2354,7 @@ function change_feeds_import_views_data_export_batch_alter(&$batch, &$batch_redi
     $new_batch = & batch_get();
     $new_batch['progressive'] = FALSE;
     // Process the batch using background batch.
-    background_batch_process_batch();
+    background_batch_process_batch('');
 
     // Instruct the view display plugin that it shouldn't set a batch.
     $batch = array();
