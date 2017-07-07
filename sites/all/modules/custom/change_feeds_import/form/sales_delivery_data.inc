@@ -163,7 +163,7 @@ function change_feeds_import_sales_delivery_batch_fix_process($data, $distributo
       $title = check_billing_date_empty($value['BILL NUMBER'], 'sales_register_data');
 
       if (empty($title)) {
-        $value['error_message'] .= " Bill Date for " . $value['BILL NUMBER'] . ' Does not exist in our system.Kindlu upload Billing data';
+        $value['error_message'] .= " Bill Date for " . $value['BILL NUMBER'] . ' Does not exist in our system.Kindly upload Billing data';
       }
       
       
