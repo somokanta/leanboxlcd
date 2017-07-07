@@ -502,6 +502,17 @@ function check_node_title_exists($title, $type, $sales_data = FALSE) {
   return $nid;
 }
 
+function check_billing_date_empty($title, $type) {
+  $query1 = db_select('node', 'n');
+  $query1->condition('n.type', $type);
+  $query1->condition('n.title', $title);
+  $query1->fields('n', array('nid'));
+  $query1->addTag('node_uid');
+  $query1->join('field_data_field_sr_bill_date', 'd', 'd.entity_id = n.nid');
+  $nid = $query1->execute()->fetchField();
+  return $nid;
+}
+
 function leanbox_check_taxonomy_exists_by_name($tname, $vname) {
   $query1 = db_select('taxonomy_term_data', 't');
   $query1->join('taxonomy_vocabulary', 'v', 'v.vid = t.vid');
