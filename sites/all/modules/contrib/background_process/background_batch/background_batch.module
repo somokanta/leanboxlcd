@@ -215,7 +215,7 @@ function _background_batch_process($id = NULL) {
   if ($percentage < 100) {
     background_process_keepalive($id);
   }
-  elseif (!empty($batch['background_process'])) {
+  else {
     _batch_finished();
   }
 }
