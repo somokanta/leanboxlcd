@@ -274,6 +274,7 @@ function change_feeds_import_create_van_cld_report($max_billing_id, &$context) {
     $context['finished'] = $context['sandbox']['progress'] / $context['sandbox']['max'];
   }
   else {
+    watchdog('semi_final', 'semi_final');
     $context['finished'] = 1;
   }
 }
@@ -376,7 +377,7 @@ function change_feeds_import_create_picking($max_billing_id, &$context) {
   else {
 
     watchdog('picking16', 'picking16');
-    _batch_finished();
+    $context['finished'] = 1;
   }
 }
 
