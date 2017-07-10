@@ -134,11 +134,12 @@ function change_feeds_import_create_confirm_content($id) {
     drupal_unlink($path); //delete the generated error file
   }
   batch_process('/billing_data/import');
- // background_batch_process_batch('/billing_data/import');
+  background_batch_process_batch('/billing_data/import');
 }
 
 
 function change_feeds_import_finished($success, $results, $operations) {
+  watchdog("finished", "finished");
   drupal_set_message("Successfully Created Content");
 }
 
