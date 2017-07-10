@@ -13,7 +13,7 @@ function change_feeds_import_create_confirm_content($id) {
           ->condition('sbd.error_id', $id, '=')
           ->fields('sbd')
           ->execute()->fetchAll(PDO::FETCH_ASSOC);
-  $party_packing_check = get_party_packing_from_party_code(NULL,$distributor_id);
+  $party_packing_check = get_party_packing_from_party_code(NULL, $distributor_id);
 
   foreach ($billing_data_result as $key => $value) {
     $vehicle = $value['vehicle'];
@@ -133,11 +133,10 @@ function change_feeds_import_create_confirm_content($id) {
   if (file_exists($path)) {
     drupal_unlink($path); //delete the generated error file
   }
- // batch_process('/billing_data/import');
- // background_batch_process_batch('/billing_data/import');
+  // batch_process('/billing_data/import');
+  // background_batch_process_batch('/billing_data/import');
   background_batch_process_batch('/billing_data/import');
 }
-
 
 function change_feeds_import_finished($success, $results, $operations) {
   drupal_set_message("Successfully Created Content");
@@ -228,7 +227,7 @@ function change_feeds_import_create_van_cld_report($max_billing_id, &$context) {
     $query->condition('nd.uid', $distributor_id, '=');
     $query->join('field_data_field_unit_case_units_', 'fucu', 'fucu.entity_id = gaisc.entity_id');
     $query->condition('fucu.bundle', 'sku7_code_master', '=');
-    $query->fields('cb', array('vehicle', 'loading_date', 'sku7_code', 'product_name', 'Sum_of_TOTAL_SALES_QTY', 'mrp','PRICELIST_GROUP'));
+    $query->fields('cb', array('vehicle', 'loading_date', 'sku7_code', 'product_name', 'Sum_of_TOTAL_SALES_QTY', 'mrp', 'PRICELIST_GROUP'));
     $query->fields('fucu', array('field_unit_case_units__value'));
     $query->condition('cb.distributor_id', $distributor_id);
     $query->condition('cb.id', $max_billing_id, '>');
@@ -251,7 +250,7 @@ function change_feeds_import_create_van_cld_report($max_billing_id, &$context) {
     $product_name = $val->product_name;
     $cld = $val->cld;
     $mrp = $val->mrp;
-    $pricelist_group =  $val->PRICELIST_GROUP;
+    $pricelist_group = $val->PRICELIST_GROUP;
 
 
     if ($cld != 0) {
@@ -264,7 +263,7 @@ function change_feeds_import_create_van_cld_report($max_billing_id, &$context) {
             'distributor_id' => $distributor_id,
             'cld' => $cld,
             'mrp' => $mrp,
-            'pricelist_group' =>$pricelist_group,
+            'pricelist_group' => $pricelist_group,
           ))
           ->execute();
     }
@@ -370,9 +369,12 @@ function change_feeds_import_create_picking($max_billing_id, &$context) {
   $context['sandbox']['progress'] = $i;
   if ($context['sandbox']['progress'] < $context['sandbox']['max']) {
     $context['finished'] = $context['sandbox']['progress'] / $context['sandbox']['max'];
+    watchdog('picking13', 'picking13');
   }
   else {
-    $context['finished'] = 1;
+
+    watchdog('picking14', 'picking14');
+    _batch_finished();
   }
 }
 
@@ -512,7 +514,7 @@ function change_feeds_import_create_loading(&$context) {
   }
 }
 
-function get_party_packing_from_party_code($party_code = NULL,$distributor_id) {
+function get_party_packing_from_party_code($party_code = NULL, $distributor_id) {
   $query = db_select('field_data_field_party_code', 'pc');
   $query->condition('pc.bundle', 'outlet_master');
   $query->join('node', 'ouln', 'ouln.nid = pc.entity_id');
