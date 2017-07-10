@@ -380,6 +380,7 @@ function change_feeds_import_create_picking($max_billing_id, &$context) {
 }
 
 function change_feeds_import_create_party_packing($party_packing_data_new, &$context) {
+   watchdog('startpicking', 'startpicking');
   if (!isset($context['sandbox']['progress'])) {
     watchdog('packing', 'packing');
     global $user;
