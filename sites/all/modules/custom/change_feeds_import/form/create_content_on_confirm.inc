@@ -418,7 +418,8 @@ function change_feeds_import_create_party_packing($party_packing_data_new, &$con
     $context['finished'] = $context['sandbox']['progress'] / $context['sandbox']['max'];
   }
   else {
-    $context['finished'] = 1;
+    //$context['finished'] = 1;
+    _batch_finished();
   }
 }
 
