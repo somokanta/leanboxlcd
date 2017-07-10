@@ -279,6 +279,7 @@ function change_feeds_import_create_van_cld_report($max_billing_id, &$context) {
 }
 
 function change_feeds_import_create_picking($max_billing_id, &$context) {
+  watchdog('startpicking', 'startpicking');
   if (!isset($context['sandbox']['progress'])) {
     watchdog('picking', 'picking');
     global $user;
@@ -380,7 +381,7 @@ function change_feeds_import_create_picking($max_billing_id, &$context) {
 }
 
 function change_feeds_import_create_party_packing($party_packing_data_new, &$context) {
-   watchdog('startpicking', 'startpicking');
+   watchdog('startpacking', 'startpacking');
   if (!isset($context['sandbox']['progress'])) {
     watchdog('packing', 'packing');
     global $user;
