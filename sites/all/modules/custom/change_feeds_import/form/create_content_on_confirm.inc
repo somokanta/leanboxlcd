@@ -428,8 +428,7 @@ function change_feeds_import_create_party_packing($party_packing_data_new, &$con
   }
   else {
     watchdog('party_packing', 'party_packing');
-    //$context['finished'] = 1;
-    _batch_finished();
+    $context['finished'] = 1;
   }
 }
 
