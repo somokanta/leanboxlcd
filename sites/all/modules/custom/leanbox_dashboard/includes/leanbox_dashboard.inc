@@ -1201,6 +1201,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     $query->join('field_data_field_sr_bill_date', 'i', 'i.entity_id = n.nid');
 
     $query->join('custom_billing_data', 'bd', 'bd.bill_number = n.title');
+    $query->condition('bd.distributor_id', $distributor_id);
     if (!empty($start_date) && !empty($end_date)) {
       $query->condition('bd.bill_date', array($start_date, $end_date), 'BETWEEN');
     }
