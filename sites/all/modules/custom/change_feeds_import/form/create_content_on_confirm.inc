@@ -590,6 +590,7 @@ function change_feeds_import_create_billing($max_billing_id, &$context) {
     $context['finished'] = $context['sandbox']['progress'] / $context['sandbox']['max'];
   }
   else {
+    watchdog("final","final");
     $context['finished'] = 1;
   }
 }
