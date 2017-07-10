@@ -379,7 +379,7 @@ function change_feeds_import_create_picking($max_billing_id, &$context) {
 
 function change_feeds_import_create_party_packing($party_packing_data_new, &$context) {
   if (!isset($context['sandbox']['progress'])) {
-    watchdog('party_packing0', 'party_packing0');
+    watchdog('packing', 'packing');
     global $user;
     $user_id = $user->uid;
     $distributor_id = change_feeds_import_get_distributor_id($user_id);
@@ -417,8 +417,9 @@ function change_feeds_import_create_party_packing($party_packing_data_new, &$con
     node_save($node);
   }
   $context['sandbox']['progress'] = $i;
-
+  watchdog('packing1', 'packing1');
   if ($context['sandbox']['progress'] < $context['sandbox']['max']) {
+    watchdog('packing2', 'packing2');
     $context['finished'] = $context['sandbox']['progress'] / $context['sandbox']['max'];
   }
   else {
