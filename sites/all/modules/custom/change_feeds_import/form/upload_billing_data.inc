@@ -217,129 +217,129 @@ function change_feeds_import_batch_fix_process($max, $data, $distributor_id, $fi
       $context['results']['unique_combination'] = array();
     }
 
-    foreach ($value as $k => $v) {
-      $flag = 0;
-      $error_text = '';
-
-      $v = trim($v);
-      if (empty($v) && $v !== '0') {
-        $flag = 1;
-        $error_text = "$k can not be null";
-      }
-      else {
-
-        switch ($k) {
-          case 'VEHICLE':
-            if ($v == "N.A.") {
-              $error_text = $v . " Invalid Vehicle";
-              $flag = 1;
-            }
-            break;
-
-          case 'PARTY_CODE':
-            if (!array_key_exists($v, $context['results']['party_code_result'])) {
-              $error_text = $v . " PARTY_CODE is not present in PARTY_CODE Master";
-              $flag = 1;
-            }
-            break;
-
-          case 'BEAT_NAME':
-            if (!empty($party_code)) {
-              if ($context['results']['party_code_result'][$party_code] != $v) {
-                $error_text = $v . " BEAT_NAME does not match with OUTLET_MASTER";
-                $flag = 1;
-              }
-            }
-            break;
-          case 'SKU7_CODE':
-            if (!array_key_exists($v, $context['results']['sku_code_result'])) {
-              $error_text = $v . " SKU7_CODE is not present in SKU7_CODE Master";
-              $flag = 1;
-            }
-
-            break;
-
-          case 'BILL_NUMBER':
-
-            $unique_comb = $value['BILL_NUMBER'] . '-' . $value['SKU7_CODE'];
-
-            if (in_array($unique_comb, $context['results']['unique_combination'])) {
-              $flag = 1;
-              $error_text = "BILL_NUMBER " . $value['BILL_NUMBER'] . " and SKU7_CODE " . $value['SKU7_CODE'] . " is Repeated.  ";
-            }
-            else {
-              $context['results']['unique_combination'][] = $unique_comb;
-            }
-
-            if (array_key_exists($v, $context['results']['bill_result'])) {
-              $error_text = $v . " BILL_NUMBER Already exist in Billing Data Table";
-              $flag = 1;
-            }
-            if (!isset($context['results']['master_result']['sales_register_data'][$v])) {
-              $error_text .= $v . " is not present in SALES_REGISTER Master";
-              $flag = 1;
-            }
-
-            break;
-
-          case 'PRICELIST_GROUP':
-            if (!isset($context['results']['master_result']['pricelist_group_master'][$v])) {
-              $error_text = $v . " is not present in PRICELIST_GROUP Master";
-              $flag = 1;
-            }
-
-            break;
-
-          case 'PRODUCT_DIVISION':
-            if (!isset($context['results']['master_result']['product_division_master'][$v])) {
-              $error_text = $v . " is not present in PRODUCT_DIVISION Master";
-              $flag = 1;
-            }
-
-            break;
-
-          case 'BILL_DATE':
-          case 'LOADING_DATE':
-            if (empty(strtotime($v))) {
-              $flag = 1;
-              $error_text = "$v Not a valid date";
-            }
-
-            break;
-
-          case 'MRP':
-          case 'TUR':
-            if (!is_numeric($v)) {
-              $flag = 1;
-              $error_text = "$v in $k Should be numeric";
-            }
-
-            break;
-          default:
-            break;
-        }
-
-        if (strstr($k, 'Sum') !== FALSE) {
-          if (!is_numeric($v)) {
-            $flag = 1;
-            $error_text = "$v in $k Should be numeric";
-          }
-          else {
-            if ($k == 'Sum of TOTAL_SALES_QTY') {
-              $context['results']['sum_of_total_sales_qty'] += $total_qty;
-            }
-          }
-        }
-      }
-
-      if ($flag) {
-        $error[$k] = $error_text;
-        $error_bool = 1;
-      }
-      else {
-        $error[$k] = $v;
-      }
-    }
+//    foreach ($value as $k => $v) {
+//      $flag = 0;
+//      $error_text = '';
+//
+//      $v = trim($v);
+//      if (empty($v) && $v !== '0') {
+//        $flag = 1;
+//        $error_text = "$k can not be null";
+//      }
+//      else {
+//
+//        switch ($k) {
+//          case 'VEHICLE':
+//            if ($v == "N.A.") {
+//              $error_text = $v . " Invalid Vehicle";
+//              $flag = 1;
+//            }
+//            break;
+//
+//          case 'PARTY_CODE':
+//            if (!array_key_exists($v, $context['results']['party_code_result'])) {
+//              $error_text = $v . " PARTY_CODE is not present in PARTY_CODE Master";
+//              $flag = 1;
+//            }
+//            break;
+//
+//          case 'BEAT_NAME':
+//            if (!empty($party_code)) {
+//              if ($context['results']['party_code_result'][$party_code] != $v) {
+//                $error_text = $v . " BEAT_NAME does not match with OUTLET_MASTER";
+//                $flag = 1;
+//              }
+//            }
+//            break;
+//          case 'SKU7_CODE':
+//            if (!array_key_exists($v, $context['results']['sku_code_result'])) {
+//              $error_text = $v . " SKU7_CODE is not present in SKU7_CODE Master";
+//              $flag = 1;
+//            }
+//
+//            break;
+//
+//          case 'BILL_NUMBER':
+//
+//            $unique_comb = $value['BILL_NUMBER'] . '-' . $value['SKU7_CODE'];
+//
+//            if (in_array($unique_comb, $context['results']['unique_combination'])) {
+//              $flag = 1;
+//              $error_text = "BILL_NUMBER " . $value['BILL_NUMBER'] . " and SKU7_CODE " . $value['SKU7_CODE'] . " is Repeated.  ";
+//            }
+//            else {
+//              $context['results']['unique_combination'][] = $unique_comb;
+//            }
+//
+//            if (array_key_exists($v, $context['results']['bill_result'])) {
+//              $error_text = $v . " BILL_NUMBER Already exist in Billing Data Table";
+//              $flag = 1;
+//            }
+//            if (!isset($context['results']['master_result']['sales_register_data'][$v])) {
+//              $error_text .= $v . " is not present in SALES_REGISTER Master";
+//              $flag = 1;
+//            }
+//
+//            break;
+//
+//          case 'PRICELIST_GROUP':
+//            if (!isset($context['results']['master_result']['pricelist_group_master'][$v])) {
+//              $error_text = $v . " is not present in PRICELIST_GROUP Master";
+//              $flag = 1;
+//            }
+//
+//            break;
+//
+//          case 'PRODUCT_DIVISION':
+//            if (!isset($context['results']['master_result']['product_division_master'][$v])) {
+//              $error_text = $v . " is not present in PRODUCT_DIVISION Master";
+//              $flag = 1;
+//            }
+//
+//            break;
+//
+//          case 'BILL_DATE':
+//          case 'LOADING_DATE':
+//            if (empty(strtotime($v))) {
+//              $flag = 1;
+//              $error_text = "$v Not a valid date";
+//            }
+//
+//            break;
+//
+//          case 'MRP':
+//          case 'TUR':
+//            if (!is_numeric($v)) {
+//              $flag = 1;
+//              $error_text = "$v in $k Should be numeric";
+//            }
+//
+//            break;
+//          default:
+//            break;
+//        }
+//
+//        if (strstr($k, 'Sum') !== FALSE) {
+//          if (!is_numeric($v)) {
+//            $flag = 1;
+//            $error_text = "$v in $k Should be numeric";
+//          }
+//          else {
+//            if ($k == 'Sum of TOTAL_SALES_QTY') {
+//              $context['results']['sum_of_total_sales_qty'] += $total_qty;
+//            }
+//          }
+//        }
+//      }
+//
+//      if ($flag) {
+//        $error[$k] = $error_text;
+//        $error_bool = 1;
+//      }
+//      else {
+//        $error[$k] = $v;
+//      }
+//    }
 
     if ($error_bool) { // if error occured generate error file
       $context['results']['error'][] = $error;
