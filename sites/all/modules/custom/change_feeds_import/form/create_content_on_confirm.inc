@@ -280,6 +280,7 @@ function change_feeds_import_create_van_cld_report($max_billing_id, &$context) {
 
 function change_feeds_import_create_picking($max_billing_id, &$context) {
   if (!isset($context['sandbox']['progress'])) {
+    watchdog('picking', 'picking');
     global $user;
     $user_id = $user->uid;
     $distributor_id = change_feeds_import_get_distributor_id($user_id);
@@ -326,8 +327,9 @@ function change_feeds_import_create_picking($max_billing_id, &$context) {
     $context['sandbox']['max'] = count($results);
     $context['sandbox']['result'] = $results;
   }
+  watchdog('picking13', 'picking13');
   global $user;
-  watchdog('picking12', 'picking12');
+  watchdog('picking14', 'picking14');
   $res = $context['sandbox']['result'];
   for ($i = $context['sandbox']['progress']; $i < $context['sandbox']['progress'] + 50 && $i < $context['sandbox']['max']; $i++) {
     $key = $i;
@@ -368,11 +370,11 @@ function change_feeds_import_create_picking($max_billing_id, &$context) {
   $context['sandbox']['progress'] = $i;
   if ($context['sandbox']['progress'] < $context['sandbox']['max']) {
     $context['finished'] = $context['sandbox']['progress'] / $context['sandbox']['max'];
-    watchdog('picking13', 'picking13');
+    watchdog('picking15', 'picking15');
   }
   else {
 
-    watchdog('picking14', 'picking14');
+    watchdog('picking16', 'picking16');
     _batch_finished();
   }
 }
