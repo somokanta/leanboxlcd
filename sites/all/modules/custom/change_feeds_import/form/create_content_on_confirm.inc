@@ -281,6 +281,7 @@ function change_feeds_import_create_van_cld_report($max_billing_id, &$context) {
 
 function change_feeds_import_create_picking($max_billing_id, &$context) {
   if (!isset($context['sandbox']['progress'])) {
+    watchdog('picking', 'picking');
     global $user;
     $user_id = $user->uid;
     $distributor_id = change_feeds_import_get_distributor_id($user_id);
@@ -328,6 +329,7 @@ function change_feeds_import_create_picking($max_billing_id, &$context) {
     $context['sandbox']['result'] = $results;
   }
   global $user;
+  watchdog('picking12', 'picking12');
   $res = $context['sandbox']['result'];
   for ($i = $context['sandbox']['progress']; $i < $context['sandbox']['progress'] + 50 && $i < $context['sandbox']['max']; $i++) {
     $key = $i;
@@ -418,6 +420,7 @@ function change_feeds_import_create_party_packing($party_packing_data_new, &$con
     $context['finished'] = $context['sandbox']['progress'] / $context['sandbox']['max'];
   }
   else {
+    watchdog('party_packing', 'party_packing');
     //$context['finished'] = 1;
     _batch_finished();
   }
