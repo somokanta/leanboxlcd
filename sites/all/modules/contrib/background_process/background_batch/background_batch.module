@@ -215,7 +215,7 @@ function _background_batch_process($id = NULL) {
   if ($percentage < 100) {
     background_process_keepalive($id);
   }
-  else {
+  elseif (!empty($batch['background_process'])) {
     _batch_finished();
   }
 }
@@ -302,7 +302,7 @@ function background_batch_process_batch($redirect = NULL, $url = 'batch', $redir
     // Redirect for processing.
     $function = $batch['redirect_callback'];
     if (function_exists($function)) {
-       $function($batch['url'], array('query' => array('op' => 'start', 'id' => $batch['id'])));
+      // $function($batch['url'], array('query' => array('op' => 'start', 'id' => $batch['id'])));
     }
   }
   background_process_start('_background_batch_process_callback', $batch);
