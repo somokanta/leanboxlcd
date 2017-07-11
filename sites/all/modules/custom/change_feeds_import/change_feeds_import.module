@@ -2014,8 +2014,11 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
       $next_day_end = $next_day + 86399;
 
       $sub_query->join('node', 'n', 'n.title = b.bill_number' AND 'b.distributor_id = n.uid');
-      $sub_query->condition('b.loading_date', $next_day, '>=');
-      $sub_query->condition('b.loading_date', $next_day_end, '<=');
+      $sub_query->join('field_data_field_trip_id_reference', 'ftr', 'ftr.entity_id=n.nid');
+      $sub_query->join('field_data_field_trip_executon_date', 'fd', 'ftr.field_trip_id_reference_nid=fd.entity_id');
+
+      $sub_query->condition('fd.field_trip_executon_date_value', $next_day, '>=');
+      $sub_query->condition('fd.field_trip_executon_date_value', $next_day_end, '<=');
     }
     else {
       $sub_query->join('node', 'n', 'n.title = b.bill_number');
@@ -2036,12 +2039,11 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
         $sub_query->condition('b.loading_date', $max, '<=');
       }
     }
-    if ($view->name == 'impact_delivery_report_2' || $view->name == 'impact_delivery_cron_2') {
+    if ($view->name == 'impact_delivery_report_2') {
       if (isset($view->exposed_raw_input['date_filter']['min']) && isset($view->exposed_raw_input['date_filter']['max'])) {
         $min = intval(strtotime($view->exposed_raw_input['date_filter']['min']));
         $max = intval(strtotime($view->exposed_raw_input['date_filter']['max']));
-dpm($min, '$min');
-dpm($max, '$max');
+
         $sub_query->join('field_data_field_trip_id_reference', 'ftr', 'ftr.entity_id=n.nid');
         $sub_query->join('field_data_field_trip_executon_date', 'fd', 'ftr.field_trip_id_reference_nid=fd.entity_id');
 
