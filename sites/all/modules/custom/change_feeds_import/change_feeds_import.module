@@ -2405,12 +2405,12 @@ function change_feeds_import_views_data_export_batch_finish($eid, $view_name) {
   $export = views_data_export_get($eid);
   $data = array();
   $view = views_data_export_view_retrieve($eid);
-  //watchdog('cron', '<pre>' . print_r(array(), TRUE) . '</pre>');
+  watchdog('cron', '<pre>' . print_r(array(), TRUE) . '</pre>');
   // Allow Dump Creation for Export 2 Only to avoid Overriding
   $date = date('Ymdhis') . '_' . date('dmY', strtotime("+1 days"));
 
   if ($view_name == 'impact_delivery_cron_2') {
-    // watchdog('cron 2', '<pre>' . print_r(array(), TRUE) . '</pre>');
+     watchdog('cron 2', '<pre>' . print_r(array(), TRUE) . '</pre>');
     $view->set_display($export->view_display_id);
     $view->display_handler->batched_execution_state = $export;
     $view->display_handler->remove_index();
