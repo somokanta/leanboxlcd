@@ -2007,7 +2007,7 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
     $query->add_groupby('custom_billing_data.bill_number');
   }
 
-  if ($view->name == 'impact_delivery_report' || $view->name == 'impact_delivery_report_2') {
+  if ($view->name == 'impact_delivery_report' || $view->name == 'impact_delivery_report_2' || $view->name == 'impact_delivery_cron_2') {
     $sub_query = db_select('custom_billing_data', 'b');
     $sub_query->join('node', 'n', 'n.title = b.bill_number');
     $sub_query->condition('b.distributor_id', $distributor_id);
@@ -2368,32 +2368,37 @@ function get_van_pl($van, $day, $name) {
  * @param type $batch_redirect
  */
 function change_feeds_import_views_data_export_batch_alter(&$batch, &$batch_redirect) {
+  watchdog('cron1', '<pre>' . print_r(array(), TRUE) . '</pre>');
 
   $views_names = array('impact_delivery_cron_2', 'impact_party_master'); //  Download files for this Views only
 
   if (in_array($batch['view_name'], $views_names)) {
-    $new_batch = $batch;
-
-    $view_name = $new_batch['view_name'];
-    $display_id = $new_batch['display_id'];
-
-    // We actually never return from the drupal_alter, but
-    // use drush's batch system to run the same batch
-    // Add a final callback
-    $new_batch['operations'][] = array(
-      'change_feeds_import_views_data_export_batch_finish', array($new_batch['eid'], $new_batch['view_name']),
+//    $new_batch = $batch;
+//
+//    $view_name = $new_batch['view_name'];
+//    $display_id = $new_batch['display_id'];
+//
+//    // We actually never return from the drupal_alter, but
+//    // use drush's batch system to run the same batch
+//    // Add a final callback
+//    $new_batch['operations'][] = array(
+//      'change_feeds_import_views_data_export_batch_finish', array($new_batch['eid'], $new_batch['view_name']),
+//    );
+//
+//    batch_set($new_batch);
+//    $new_batch =& batch_get();
+//    $new_batch['progressive'] = FALSE;
+//   // $new_batch['timestamp'] = time();
+//    // Process the batch using background batch.
+//    //background_batch_process_batch('');
+//    drush_backend_batch_process();
+//
+//    // Instruct the view display plugin that it shouldn't set a batch.
+//    $batch = array();
+     $batch['operations'][] = array(
+      'change_feeds_import_views_data_export_batch_finish', array($batch['eid'], $batch['view_name']),
     );
-
-    batch_set($new_batch);
-    $new_batch =& batch_get();
-    $new_batch['progressive'] = FALSE;
-   // $new_batch['timestamp'] = time();
-    // Process the batch using background batch.
-    //background_batch_process_batch('');
-    drush_backend_batch_process();
-
-    // Instruct the view display plugin that it shouldn't set a batch.
-    $batch = array();
+    
   }
 }
 
@@ -2405,12 +2410,12 @@ function change_feeds_import_views_data_export_batch_finish($eid, $view_name) {
   $export = views_data_export_get($eid);
   $data = array();
   $view = views_data_export_view_retrieve($eid);
-  watchdog('cron', '<pre>' . print_r(array(), TRUE) . '</pre>');
+  watchdog('cron2', '<pre>' . print_r(array(), TRUE) . '</pre>');
   // Allow Dump Creation for Export 2 Only to avoid Overriding
   $date = date('Ymdhis') . '_' . date('dmY', strtotime("+1 days"));
 
   if ($view_name == 'impact_delivery_cron_2') {
-     watchdog('cron 2', '<pre>' . print_r(array(), TRUE) . '</pre>');
+     watchdog('cron3', '<pre>' . print_r(array(), TRUE) . '</pre>');
     $view->set_display($export->view_display_id);
     $view->display_handler->batched_execution_state = $export;
     $view->display_handler->remove_index();
