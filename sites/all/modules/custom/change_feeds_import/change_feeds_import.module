@@ -2010,6 +2010,13 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
   if ($view->name == 'impact_delivery_report' || $view->name == 'impact_delivery_report_2' || $view->name == 'impact_delivery_cron_2') {
     $sub_query = db_select('custom_billing_data', 'b');
     if ($view->name == 'impact_delivery_cron_2') {
+      $query1 = db_select('users', 'u');
+      $query1->fields('u', array('uid'));
+      $query1->join('field_data_field_idd', 'd1', 'd1.entity_id= u.uid');
+      $query1->condition('u.status', 1);
+      $query1->condition('d1.field_idd_value', 1);
+      $dis_ids = $query1->execute()->fetchCol();
+
       $next_day = strtotime(date('Y-m-d' , strtotime("+1 days")));
       $next_day_end = $next_day + 86399;
 
@@ -2019,6 +2026,8 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
 
       $sub_query->condition('fd.field_trip_executon_date_value', $next_day, '>=');
       $sub_query->condition('fd.field_trip_executon_date_value', $next_day_end, '<=');
+      $sub_query->condition('b.distributor_id', $dis_ids, 'IN');
+      $sub_query->condition('n.uid', $dis_ids, 'IN');
     }
     else {
       $sub_query->join('node', 'n', 'n.title = b.bill_number');
