@@ -2013,7 +2013,7 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
       $next_day = strtotime(date('Y-m-d' , strtotime("+1 days")));
       $next_day_end = $next_day + 86399;
 
-      $sub_query->join('node', 'n', 'n.title = b.bill_number' AND 'b.distributor_id = n.uid');
+      $sub_query->join('node', 'n', 'n.title = b.bill_number AND b.distributor_id = n.uid');
       $sub_query->join('field_data_field_trip_id_reference', 'ftr', 'ftr.entity_id=n.nid');
       $sub_query->join('field_data_field_trip_executon_date', 'fd', 'ftr.field_trip_id_reference_nid=fd.entity_id');
 
