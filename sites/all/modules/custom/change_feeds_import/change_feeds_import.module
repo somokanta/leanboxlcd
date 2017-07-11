@@ -2026,8 +2026,8 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
 
       $sub_query->condition('fd.field_trip_executon_date_value', $next_day, '>=');
       $sub_query->condition('fd.field_trip_executon_date_value', $next_day_end, '<=');
-      $sub_query->condition('b.distributor_id', 'IN', $dis_ids);
-      $sub_query->condition('n.uid', 'IN', $dis_ids);
+      $sub_query->condition('b.distributor_id', $dis_ids, 'IN');
+      $sub_query->condition('n.uid', $dis_ids, 'IN');
     }
     else {
       $sub_query->join('node', 'n', 'n.title = b.bill_number');
