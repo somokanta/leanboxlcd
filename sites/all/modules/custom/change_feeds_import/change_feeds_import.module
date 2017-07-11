@@ -2010,9 +2010,12 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
   if ($view->name == 'impact_delivery_report' || $view->name == 'impact_delivery_report_2' || $view->name == 'impact_delivery_cron_2') {
     $sub_query = db_select('custom_billing_data', 'b');
     if ($view->name == 'impact_delivery_cron_2') {
+      $next_day = strtotime(date('Y-m-d' , strtotime("+1 days")));
+      $next_day_end = $next_day + 86399;
+
       $sub_query->join('node', 'n', 'n.title = b.bill_number' AND 'b.distributor_id = n.uid');
-      $sub_query->condition('b.loading_date', $min, '>=');
-      $sub_query->condition('b.loading_date', $max, '<=');
+      $sub_query->condition('b.loading_date', $next_day, '>=');
+      $sub_query->condition('b.loading_date', $next_day_end, '<=');
     }
     else {
       $sub_query->join('node', 'n', 'n.title = b.bill_number');
