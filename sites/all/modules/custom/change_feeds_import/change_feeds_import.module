@@ -2387,9 +2387,10 @@ function change_feeds_import_views_data_export_batch_alter(&$batch, &$batch_redi
     batch_set($new_batch);
     $new_batch =& batch_get();
     $new_batch['progressive'] = FALSE;
-    $new_batch['timestamp'] = time();
+   // $new_batch['timestamp'] = time();
     // Process the batch using background batch.
-    background_batch_process_batch('');
+    //background_batch_process_batch('');
+    drush_backend_batch_process();
 
     // Instruct the view display plugin that it shouldn't set a batch.
     $batch = array();
