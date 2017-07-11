@@ -2415,7 +2415,7 @@ function change_feeds_import_views_data_export_batch_finish($eid, $view_name) {
   $date = date('Ymdhis') . '_' . date('dmY', strtotime("+1 days"));
 
   if ($view_name == 'impact_delivery_cron_2') {
-     watchdog('cron3', '<pre>' . print_r(array(), TRUE) . '</pre>');
+    watchdog('impact_delivery', '<pre>' . print_r(array(), TRUE) . '</pre>');
     $view->set_display($export->view_display_id);
     $view->display_handler->batched_execution_state = $export;
     $view->display_handler->remove_index();
@@ -2435,6 +2435,7 @@ function change_feeds_import_views_data_export_batch_finish($eid, $view_name) {
     $files = file_load_multiple(array(), array('uri' => $uri_path));
   }
   else {
+    watchdog('PARTYMASTER', '<pre>' . print_r(array(), TRUE) . '</pre>');
     $view->set_display($export->view_display_id);
     $view->display_handler->batched_execution_state = $export;
     $view->display_handler->remove_index();
