@@ -2395,7 +2395,7 @@ function change_feeds_import_views_data_export_batch_alter(&$batch, &$batch_redi
 //
 //    // Instruct the view display plugin that it shouldn't set a batch.
 //    $batch = array();
-     $batch['operations'][] = array(
+    $batch['operations'][] = array(
       'change_feeds_import_views_data_export_batch_finish', array($batch['eid'], $batch['view_name']),
     );
     
