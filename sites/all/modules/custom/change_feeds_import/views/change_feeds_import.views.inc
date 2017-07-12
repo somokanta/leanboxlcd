@@ -124,6 +124,13 @@ function change_feeds_import_views_data_alter(&$data) {
       'handler' => 'change_feeds_import_handler_val_pan_group',
     ),
   );
+  
+   $data['custom_billing']['table']['group'] = t('Custom');
+   $data['custom_billing']['table']['join'] = array(
+     // #global is a special flag which let's a table appear all the time.
+     '#global' => array(),
+   );
+   
 //  
 //   $data['custom_billing_data']['custom_drs_sequence'] = array(
 //    'title' => t('Custom DRS Sequence'),
@@ -141,7 +148,7 @@ function change_feeds_import_views_data_alter(&$data) {
 //      'handler' => 'change_feeds_import_handler_custom_party_code',
 //    ),
 //  );
-     $data['node']['custom_party_name'] = array(
+     $data['custom_billing']['custom_party_name'] = array(
     'title' => t('Custom Party Name'),
     'help' => t('Custom Party Name in Outlet Master'),
    // 'real field' => 'nid',
