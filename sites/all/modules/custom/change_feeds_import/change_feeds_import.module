@@ -2076,6 +2076,7 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
     $join->type = 'LEFT'; // if you want another join type play with this value
     $join->extra = array(
       array('field' => 'minimum', 'left_field' => 'sku7_code'),
+      array('field' => 'distributor_id', 'left_field' => 'distributor_id'),
     );
 
     // Do the actual join
