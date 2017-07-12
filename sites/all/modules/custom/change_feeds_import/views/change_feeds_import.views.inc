@@ -141,7 +141,7 @@ function change_feeds_import_views_data_alter(&$data) {
 //      'handler' => 'change_feeds_import_handler_custom_party_code',
 //    ),
 //  );
-     $data['custom_billing_data']['custom_party_name'] = array(
+     $data['node']['custom_party_name'] = array(
     'title' => t('Custom Party Name'),
     'help' => t('Custom Party Name in Outlet Master'),
    // 'real field' => 'nid',
@@ -335,20 +335,17 @@ class change_feeds_import_handler_custom_party_name extends views_handler_field 
 
   function render($values) {
     dpm($values, 'values');
-   // $res = '-';
-//    $channel = $values->field_field_channel[0]['raw']['value'];
-//    $pl_group = $values->field_field_pl_group[0]['raw']['value'];
-//    $query = db_select('node', 'n');
-//    $query->join('field_data_field_van_pl_group', 'vpg', 'vpg.entity_id = n.nid');
-//    $query->fields('vpg', array('field_van_pl_group_value'));
-//    $query->join('field_data_field_pl_group', 'pg', 'pg.entity_id = n.nid');
-//    $query->join('field_data_field_channel', 'c',  'c.entity_id = n.nid');
-//    $query->condition('pg.field_pl_group_value', $pl_group);
-//    $query->condition('c.field_channel_value', $channel);
-//    $query->condition('n.type', 'party_pack_master');
-//    $query->addTag('node_uid');
-//    $res = $query->execute()->fetchField();
-    $res = '';
+
+    $party_code = $values->custom_billing_data_party_code;
+    $dis_id = $values->custom_billing_data_distributor_id;
+
+    $query = db_select('node', 'n');
+    $query->join('field_data_field_party_name', 'n', 'n.entity_id = n.nid');
+    $query->fields('n', array('field_party_name_value'));
+
+    $query->condition('n.type', 'outlet_master');
+    $query->condition('n.distributor_id', $dis_id);
+    $res = $query->execute()->fetchField();
     return $res;
   }
 
