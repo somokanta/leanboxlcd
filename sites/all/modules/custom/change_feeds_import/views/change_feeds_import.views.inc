@@ -19,10 +19,28 @@ function change_feeds_import_views_data_alter(&$data) {
       'help' => t('More information about relationship.'),
       'extra' => array(
         array('field' => 'type', 'value' => 'outlet_master'),
+        
       ),
     ),
   );
-
+  $data['custom_billing_data']['table']['group'] = t('Example table');
+  $data['custom_billing_data']['dummy_name1'] = array(
+    'title' => t('rs code relationship'),
+    'help' => t('rs code help'),
+    'relationship' => array(
+      'title' => 'rs code',
+      'base' => 'Users', // Table we're joining to.
+      'base field' => 'uid', // Field on the joined table.
+      'field' => 'distributor_id', // Real field name on the 'foo' table.
+      'handler' => 'views_handler_relationship',
+      'label' => t('Billing dis id to user relationship'),
+      'title' => t('Billing dis id to user relationship'),
+      'help' => t('More information about relationship.'),
+//      'extra' => array(
+//        array('field' => 'type', 'value' => 'outlet_master'),
+//      ),
+    ),
+  );
   
   $data['field_data_field_dva_area_hook_group_name']['table']['group'] = t('Area Hook Grp Name');
   $data['field_data_field_dva_area_hook_group_name']['area_hook_grp'] = array(
@@ -101,9 +119,41 @@ function change_feeds_import_views_data_alter(&$data) {
   $data['node']['pl_van_group'] = array(
     'title' => t('Pl Van Group'),
     'help' => t('Pl Van Group in Party Pack Master'),
-    'real field' => 'nid',
+   // 'real field' => 'nid',
     'field' => array(
       'handler' => 'change_feeds_import_handler_val_pan_group',
+    ),
+  );
+  
+   $data['custom_billing']['table']['group'] = t('Custom');
+   $data['custom_billing']['table']['join'] = array(
+     // #global is a special flag which let's a table appear all the time.
+     '#global' => array(),
+   );
+   
+  
+   $data['custom_billing']['custom_drs_sequence'] = array(
+    'title' => t('Custom DRS Sequence'),
+    'help' => t('Custom DRS Sequence in sales register'),
+   // 'real field' => 'nid',
+    'field' => array(
+      'handler' => 'billing_data_custom_drs_sequence',
+    ),
+  );
+    $data['custom_billing']['custom_hul_code'] = array(
+    'title' => t('Custom HUL code'),
+    'help' => t('Custom HUL Code in Outlet Master'),
+   // 'real field' => 'nid',
+    'field' => array(
+      'handler' => 'billing_data_custom_hul_code',
+    ),
+  );
+     $data['custom_billing']['custom_party_name'] = array(
+    'title' => t('Custom Party Name'),
+    'help' => t('Custom Party Name in Outlet Master'),
+   // 'real field' => 'nid',
+    'field' => array(
+      'handler' => 'billing_data_custom_party_name',
     ),
   );
   
@@ -234,6 +284,7 @@ class change_feeds_import_handler_val_pan_group extends views_handler_field {
   }
 
 }
+
 
 /**
  * Implements hook_views_data().
@@ -386,6 +437,9 @@ function change_feeds_import_views_data() {
       'handler' => 'views_handler_sort_date',
     ),
     'filter' => array(
+      'handler' => 'views_handler_filter_date',
+    ),
+    'argument' => array(
       'handler' => 'views_handler_filter_date',
     ),
   );
