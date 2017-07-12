@@ -8,7 +8,7 @@
 /**
  * Provides a custom views field.
  */
-class custom_for_bill_sequence extends views_handler_field {
+class billing_data_custom_party_name extends views_handler_field {
 
   function option_definition() {
     $options = parent::option_definition();
