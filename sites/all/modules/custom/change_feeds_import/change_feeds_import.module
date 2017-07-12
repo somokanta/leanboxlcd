@@ -2063,7 +2063,10 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
 
     //$sub_query->addExpression('ifnull(v.field_bill_value_value, 5)', 'field_bill_value_value');
     $sub_query->addExpression('MIN(sku7_code)', 'minimum');
-    $sub_query->groupBy('bill_number');
+    $sub_query->groupBy('b.bill_number');
+    if ($view->name == 'impact_delivery_cron_2') {
+      $sub_query->groupBy('b.distributor_id');
+    }
     $join = new views_join();
     $join->definition = array('table formula' => $sub_query, 'left_field' => 'bill_number', 'field' => 'bill_number', 'left_table' => 'custom_billing_data');
     $join->left_table = 'custom_billing_data'; // or wathever table you want to join with
