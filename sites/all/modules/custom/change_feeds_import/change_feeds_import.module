@@ -2038,6 +2038,7 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
     $sub_query->join('field_data_field_bill_value', 'v', 'v.entity_id = n.nid');
     $sub_query->addField('b', 'bill_number', 'bill_number');
     $sub_query->addField('v', 'field_bill_value_value', 'field_bill_value_value');
+    $sub_query->addField('b', 'distributor_id', 'distributor_id');
 
     if ($view->name == 'impact_delivery_report') {
       if (isset($view->exposed_raw_input['date_filter']['min']) && isset($view->exposed_raw_input['date_filter']['max'])) {
@@ -2078,6 +2079,8 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
       array('field' => 'minimum', 'left_field' => 'sku7_code'),
       array('field' => 'distributor_id', 'left_field' => 'distributor_id'),
     );
+
+    $join->extra_type = 'AND';
 
     // Do the actual join
     $query->table_queue['temp'] = array(
