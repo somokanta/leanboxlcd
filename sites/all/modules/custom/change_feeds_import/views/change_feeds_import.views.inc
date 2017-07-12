@@ -124,23 +124,23 @@ function change_feeds_import_views_data_alter(&$data) {
       'handler' => 'change_feeds_import_handler_val_pan_group',
     ),
   );
-  
-   $data['custom_billing_data']['custom_drs_sequence'] = array(
-    'title' => t('Custom DRS Sequence'),
-    'help' => t('Custom DRS Sequence in sales register'),
-   // 'real field' => 'nid',
-    'field' => array(
-      'handler' => 'change_feeds_import_handler_custom_drs_sequence',
-    ),
-  );
-    $data['custom_billing_data']['custom_party_code'] = array(
-    'title' => t('Custom Party code'),
-    'help' => t('Custom Party Code in Outlet Master'),
-   // 'real field' => 'nid',
-    'field' => array(
-      'handler' => 'change_feeds_import_handler_custom_party_code',
-    ),
-  );
+//  
+//   $data['custom_billing_data']['custom_drs_sequence'] = array(
+//    'title' => t('Custom DRS Sequence'),
+//    'help' => t('Custom DRS Sequence in sales register'),
+//   // 'real field' => 'nid',
+//    'field' => array(
+//      'handler' => 'change_feeds_import_handler_custom_drs_sequence',
+//    ),
+//  );
+//    $data['custom_billing_data']['custom_party_code'] = array(
+//    'title' => t('Custom Party code'),
+//    'help' => t('Custom Party Code in Outlet Master'),
+//   // 'real field' => 'nid',
+//    'field' => array(
+//      'handler' => 'change_feeds_import_handler_custom_party_code',
+//    ),
+//  );
      $data['custom_billing_data']['custom_party_name'] = array(
     'title' => t('Custom Party Name'),
     'help' => t('Custom Party Name in Outlet Master'),
@@ -335,7 +335,7 @@ class change_feeds_import_handler_custom_party_name extends views_handler_field 
 
   function render($values) {
     dpm($values, 'values');
-    $res = '-';
+   // $res = '-';
 //    $channel = $values->field_field_channel[0]['raw']['value'];
 //    $pl_group = $values->field_field_pl_group[0]['raw']['value'];
 //    $query = db_select('node', 'n');
