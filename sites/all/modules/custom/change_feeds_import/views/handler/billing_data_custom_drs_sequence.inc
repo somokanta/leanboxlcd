@@ -8,7 +8,7 @@
 /**
  * Provides a custom views field.
  */
-class billing_data_custom_party_name extends views_handler_field {
+class billing_data_custom_drs_sequence extends views_handler_field {
 
   function option_definition() {
     $options = parent::option_definition();
@@ -24,16 +24,16 @@ class billing_data_custom_party_name extends views_handler_field {
   }
 
   function render($values) {
-    $party_code = $values->custom_billing_data_party_code;
+    $bill_number = $values->custom_billing_data_bill_number;
     $dis_id = $values->custom_billing_data_distributor_id;
 
     $query = db_select('node', 'n');
-    $query->join('field_data_field_party_name', 'p', 'p.entity_id = n.nid');
-    $query->fields('p', array('field_party_name_value'));
+    $query->join('field_data_field_drs_sequence', 'h', 'h.entity_id = n.nid');
+    $query->fields('h', array('field_drs_sequence_value'));
 
-    $query->condition('n.type', 'outlet_master');
+    $query->condition('n.type', 'sales_register_data');
     $query->condition('n.uid', $dis_id);
-    $query->condition('n.title', $party_code);
+    $query->condition('n.title', $bill_number);
     $res = $query->execute()->fetchField();
     return $res;
   }
