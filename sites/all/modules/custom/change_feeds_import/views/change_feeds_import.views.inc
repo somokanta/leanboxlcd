@@ -153,7 +153,7 @@ function change_feeds_import_views_data_alter(&$data) {
     'help' => t('Custom Party Name in Outlet Master'),
    // 'real field' => 'nid',
     'field' => array(
-      'handler' => 'change_feeds_import_handler_custom_party_name',
+      'handler' => 'billing_data_custom_party_name',
     ),
   );
   
@@ -338,25 +338,24 @@ class change_feeds_import_handler_custom_party_code extends views_handler_field 
 /**
  * Field handler to translate a Status into its readable form.
  */
-class change_feeds_import_handler_custom_party_name extends views_handler_field {
-
-  function render($values) {
-    dpm($values, 'values');
-
-    $party_code = $values->custom_billing_data_party_code;
-    $dis_id = $values->custom_billing_data_distributor_id;
-
-    $query = db_select('node', 'n');
-    $query->join('field_data_field_party_name', 'n', 'n.entity_id = n.nid');
-    $query->fields('n', array('field_party_name_value'));
-
-    $query->condition('n.type', 'outlet_master');
-    $query->condition('n.distributor_id', $dis_id);
-    $res = $query->execute()->fetchField();
-    return $res;
-  }
-
-}
+//class billing_data_custom_party_name extends views_handler_field {
+//
+//  function render($values) {
+//
+//    $party_code = $values->custom_billing_data_party_code;
+//    $dis_id = $values->custom_billing_data_distributor_id;
+//
+//    $query = db_select('node', 'n');
+//    $query->join('field_data_field_party_name', 'n', 'n.entity_id = n.nid');
+//    $query->fields('n', array('field_party_name_value'));
+//
+//    $query->condition('n.type', 'outlet_master');
+//    $query->condition('n.distributor_id', $dis_id);
+//    $res = $query->execute()->fetchField();
+//    return $res;
+//  }
+//
+//}
 
 /**
  * Implements hook_views_data().
