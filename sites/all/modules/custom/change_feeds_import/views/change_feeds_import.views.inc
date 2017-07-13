@@ -466,7 +466,7 @@ function change_feeds_import_views_data() {
       'label' => t('Party code in outlet master'),
       'extra' => array(
         array('field' => 'type', 'value' => 'outlet_master'),
-        array('field' => 'uid', 'value' => 'distributor_id'),
+        array('field' => 'uid', 'left_field' => 'distributor_id'),
       ),
     ),
   );
@@ -505,7 +505,7 @@ function change_feeds_import_views_data() {
       'label' => t('Bill number in sales register'),
       'extra' => array(
         array('field' => 'type', 'value' => 'sales_register_data'),
-        array('field' => 'uid', 'value' => 'distributor_id'),
+        array('field' => 'uid', 'left_field' => 'distributor_id'),
       ),
     ),
   );
