@@ -1450,17 +1450,17 @@ function reverse_geocode_node_presave($node) {
   elseif ($node->type == 'outlet_master') {
     module_load_include('inc', 'change_feeds_import', 'form/outlet_area_hook');
 
-    $original_day = $node->original->field_sales_day[LANGUAGE_NONE][0]['value'];
-    $updated_day = $node->field_sales_day[LANGUAGE_NONE][0]['value'];
+    $original_day = strtolower($node->original->field_sales_day[LANGUAGE_NONE][0]['value']);
+    $updated_day = strtolower($node->field_sales_day[LANGUAGE_NONE][0]['value']);
 
-    $original_area_hook = $node->original->field_outlet_area_hook[LANGUAGE_NONE][0]['value'];
-    $updated_area_hook = $node->field_outlet_area_hook[LANGUAGE_NONE][0]['value'];
+    $original_area_hook = strtolower($node->original->field_outlet_area_hook[LANGUAGE_NONE][0]['value']);
+    $updated_area_hook = strtolower($node->field_outlet_area_hook[LANGUAGE_NONE][0]['value']);
 
-    $original_channel = $node->original->field_channel[LANGUAGE_NONE][0]['value'];
-    $updated_channel = $node->field_channel[LANGUAGE_NONE][0]['value'];
+    $original_channel = strtolower($node->original->field_channel[LANGUAGE_NONE][0]['value']);
+    $updated_channel = strtolower($node->field_channel[LANGUAGE_NONE][0]['value']);
 
-    $original_pl_group = $node->original->field_pl_group[LANGUAGE_NONE][0]['value'];
-    $updated_pl_group = $node->field_pl_group[LANGUAGE_NONE][0]['value'];
+    $original_pl_group = strtolower($node->original->field_pl_group[LANGUAGE_NONE][0]['value']);
+    $updated_pl_group = strtolower($node->field_pl_group[LANGUAGE_NONE][0]['value']);
 
 
     if (!empty($original_day) && !empty($original_channel) && !empty($original_pl_group)) {
@@ -1495,6 +1495,52 @@ function reverse_geocode_node_presave($node) {
           $node->field_area_hook[LANGUAGE_NONE][0]['nid'] = $day_van_area_nid;
         }
 
+      }
+    }
+  }
+  
+  else if ($node->type == 'party_pack_master') {
+    module_load_include('inc', 'change_feeds_import', 'form/outlet_area_hook');
+    $original_van = ($node->original->field_van_pl_group[LANGUAGE_NONE][0]['value']);
+    $updated_van = ($node->field_van_pl_group[LANGUAGE_NONE][0]['value']);
+
+    if (!empty($original_van)) {
+      if ($original_van !== $updated_van) {
+        $channel = $node->field_channel[LANGUAGE_NONE][0]['value'];
+        $pl_group = $node->field_pl_group[LANGUAGE_NONE][0]['value'];
+
+        $query = db_select('node', 'n');
+        $query->addTag('node_uid');
+        $query->join('field_data_field_channel', 'ppmch', 'ppmch.entity_id = n.nid');
+        $query->join('field_data_field_pl_group', 'ppmpl', 'ppmpl.entity_id = n.nid');
+        $query->condition('n.type', 'outlet_master');
+        $query->condition('ppmch.field_channel_value', $channel);
+        $query->condition('ppmpl.field_pl_group_value', $pl_group);
+        $query->fields('n', array('nid'));
+        $data = $query->execute()->fetchAllKeyed();
+
+        foreach ($data as $nid) {
+          $node = node_load($nid);
+          $sales_day = $node->field_sales_day[LANGUAGE_NONE][0]['value'];
+          $area_hook = $node->field_outlet_area_hook[LANGUAGE_NONE][0]['value'];
+
+          $day_van_area_nid = get_nid_from_master_using_sales_day_van_grp_area_hook($sales_day, $updated_van, $area_hook);
+
+          // remove nid
+          $node->field_area_hook = array();
+          // empty status
+          $node->field_area_hook_group_hul[LANGUAGE_NONE][0]['value'] = 0;
+          // empty beat code
+          $node->field_static_delivery_beat_code = array();
+          $node->field_sequence = array();
+          $node->field_revised_sequence = array();
+          $node->field_revised_sequence_status[LANGUAGE_NONE][0]['value'] = 0;
+
+          if ($day_van_area_nid) {
+            $node->field_area_hook[LANGUAGE_NONE][0]['nid'] = $day_van_area_nid;
+          }
+          node_save($node);
+        }
       }
     }
   }
@@ -1596,3 +1642,5 @@ function reverse_geocode_get_data_trip_wise($trip_id) {
   $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
   return $res;
 }
+
+  
