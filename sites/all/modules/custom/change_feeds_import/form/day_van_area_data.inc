@@ -146,6 +146,8 @@ function change_feeds_import_day_van_area_batch_fix_process($data, $distributor_
             }
             break;
           case 'Area Hook':
+            dpm(strtolower($v),"vvv");
+            dpm($context['results']['area_hook_result'],"result");
             if (!array_key_exists(strtolower($v), $context['results']['area_hook_result'])) {
               $value['error_message'] .= $v . " Area Hook is not present in Area Hook Group Master.  ";
             }
