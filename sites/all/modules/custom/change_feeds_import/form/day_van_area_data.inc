@@ -114,6 +114,7 @@ function change_feeds_import_day_van_area_batch_fix_process($data, $distributor_
   if (!isset($context['results']['last_id'])) {
     $context['results']['last_id'] = "set";
     $context['results']['area_hook_result'] = check_area_exist_or_not(); // check sku7 code is present or not.
+    $context['results']['area_name_result'] = check_area_name_exist_or_not(); // check sku7 code is present or not.
   }
   require_once drupal_get_path('module', 'change_feeds_import') . '/form/upload_billing_data.inc';
 
@@ -146,10 +147,16 @@ function change_feeds_import_day_van_area_batch_fix_process($data, $distributor_
             }
             break;
           case 'Area Hook':
-            if (!array_key_exists($v, $context['results']['area_hook_result'])) {
+            if (!array_key_exists(strtolower($v), $context['results']['area_hook_result'])) {
               $value['error_message'] .= $v . " Area Hook is not present in Area Hook Group Master.  ";
             }
             break;
+            case 'Area Hook Group Name':
+            if (!array_key_exists(strtolower($v), $context['results']['area_name_result'])) {
+              $value['error_message'] .= $v . " Area Hook Group Name is not present in Area Hook Group Master.  ";
+            }
+            break;
+            
           default:
             break;
         }
@@ -190,8 +197,19 @@ function change_feeds_import_insert_data_in_day_van_area_data_table($value, $fid
 
 function check_area_exist_or_not() {
   $query = db_select('node', 'n');
-  $query->fields('n', array('title'));
+  $query->addExpression('LOWER(n.title)', 'title');
+  //$query->fields('n', array('title'));
   $query->condition('n.type', 'area_hook_master');
+  $query->addTag('node_uid');
+  $result = $query->execute()->fetchAllKeyed(0, 0);
+  return $result;
+}
+
+function check_area_name_exist_or_not() {
+  $query = db_select('node', 'n');
+  $query->addExpression('LOWER(n.title)', 'title');
+//$query->fields('n', array('title'));
+  $query->condition('n.type', 'area_hook_group_master');
   $query->addTag('node_uid');
   $result = $query->execute()->fetchAllKeyed(0, 0);
   return $result;
@@ -327,7 +345,7 @@ function change_feeds_import_create_day_van_area_register_node($day_van_area_dat
           $node->field_dva_area_hook[LANGUAGE_NONE][0]['value'] = $area_hook;
           $node->field_dva_area_hook_group_name[LANGUAGE_NONE][0]['value'] = $area_hook_grp;
           node_save($node);
-          
+
           update_area_hook_group_for_outlets($sales_day, $van_pl_grp, $area_hook, $node->nid);
           $created_count++;
         }
