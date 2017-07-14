@@ -117,22 +117,28 @@ function change_feeds_import_day_van_area_batch_fix_process($data, $distributor_
   }
   require_once drupal_get_path('module', 'change_feeds_import') . '/form/upload_billing_data.inc';
 
+  dpm("111");
   $value['error_message'] = '';
   foreach ($data as $key => $value) {
+    dpm("222");
     $sales_day = $value['Sales Day'];
     $van_pl_group = $value['Van_PL_Group'];
     $area_hook = $value['Area Hook'];
     $area_grp_name = $value['Area Hook Group Name'];
 
     foreach ($value as $k => $v) {
+      dpm("333");
       $v = trim($v);
       if (empty($v) && $v !== '0') {
+        dpm("444");
         $flag = 1;
         $value['error_message'] .= "$k can not be null.  ";
       }
       else {
+        dpm("555");
         switch ($k) {
           case 'Sales Day':
+            dpm("666");
             $day = strtolower($v);
             $sales_day_tid = leanbox_check_taxonomy_exists_by_name($day, 'Outlet days');
             if (empty($sales_day_tid)) {
@@ -141,11 +147,13 @@ function change_feeds_import_day_van_area_batch_fix_process($data, $distributor_
             break;
 
           case 'Van_PL_Group':
+            dpm("777");
             if (!is_numeric($van_pl_group)) {
               $value['error_message'] .= " Van PlGroup " . $value['Van_PL_Group'] . ' should have numeric value.  ';
             }
             break;
           case 'Area Hook':
+            dpm("888");
             dpm(strtolower($v),"vvv");
             dpm($context['results']['area_hook_result'],"result");
             if (!array_key_exists(strtolower($v), $context['results']['area_hook_result'])) {
