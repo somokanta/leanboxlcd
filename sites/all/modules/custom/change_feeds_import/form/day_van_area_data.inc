@@ -114,31 +114,26 @@ function change_feeds_import_day_van_area_batch_fix_process($data, $distributor_
   if (!isset($context['results']['last_id'])) {
     $context['results']['last_id'] = "set";
     $context['results']['area_hook_result'] = check_area_exist_or_not(); // check sku7 code is present or not.
+    $context['results']['area_name_result'] = check_area_name_exist_or_not(); // check sku7 code is present or not.
   }
   require_once drupal_get_path('module', 'change_feeds_import') . '/form/upload_billing_data.inc';
 
-  dpm("111");
   $value['error_message'] = '';
   foreach ($data as $key => $value) {
-    dpm("222");
     $sales_day = $value['Sales Day'];
     $van_pl_group = $value['Van_PL_Group'];
     $area_hook = $value['Area Hook'];
     $area_grp_name = $value['Area Hook Group Name'];
 
     foreach ($value as $k => $v) {
-      dpm("333");
       $v = trim($v);
       if (empty($v) && $v !== '0') {
-        dpm("444");
         $flag = 1;
         $value['error_message'] .= "$k can not be null.  ";
       }
       else {
-        dpm("555");
         switch ($k) {
           case 'Sales Day':
-            dpm("666");
             $day = strtolower($v);
             $sales_day_tid = leanbox_check_taxonomy_exists_by_name($day, 'Outlet days');
             if (empty($sales_day_tid)) {
@@ -147,19 +142,21 @@ function change_feeds_import_day_van_area_batch_fix_process($data, $distributor_
             break;
 
           case 'Van_PL_Group':
-            dpm("777");
             if (!is_numeric($van_pl_group)) {
               $value['error_message'] .= " Van PlGroup " . $value['Van_PL_Group'] . ' should have numeric value.  ';
             }
             break;
           case 'Area Hook':
-            dpm("888");
-            dpm(strtolower($v),"vvv");
-            dpm($context['results']['area_hook_result'],"result");
             if (!array_key_exists(strtolower($v), $context['results']['area_hook_result'])) {
               $value['error_message'] .= $v . " Area Hook is not present in Area Hook Group Master.  ";
             }
             break;
+            case 'Area Hook Group Name':
+            if (!array_key_exists(strtolower($v), $context['results']['area_name_result'])) {
+              $value['error_message'] .= $v . " Area Hook Group Name is not present in Area Hook Group Master.  ";
+            }
+            break;
+            
           default:
             break;
         }
@@ -203,6 +200,16 @@ function check_area_exist_or_not() {
   $query->addExpression('LOWER(n.title)', 'title');
   //$query->fields('n', array('title'));
   $query->condition('n.type', 'area_hook_master');
+  $query->addTag('node_uid');
+  $result = $query->execute()->fetchAllKeyed(0, 0);
+  return $result;
+}
+
+function check_area_name_exist_or_not() {
+  $query = db_select('node', 'n');
+  $query->addExpression('LOWER(n.title)', 'title');
+//$query->fields('n', array('title'));
+  $query->condition('n.type', 'area_hook_group_master');
   $query->addTag('node_uid');
   $result = $query->execute()->fetchAllKeyed(0, 0);
   return $result;
@@ -338,7 +345,7 @@ function change_feeds_import_create_day_van_area_register_node($day_van_area_dat
           $node->field_dva_area_hook[LANGUAGE_NONE][0]['value'] = $area_hook;
           $node->field_dva_area_hook_group_name[LANGUAGE_NONE][0]['value'] = $area_hook_grp;
           node_save($node);
-          
+
           update_area_hook_group_for_outlets($sales_day, $van_pl_grp, $area_hook, $node->nid);
           $created_count++;
         }
@@ -397,7 +404,7 @@ function change_feeds_import_day_van_area_finished($success, $results, $operatio
   }
 }
 
-function update_area_hook_group_for_outlets($sales_day, $van_pl_grp, $area_hook, $dva_nid){
+function update_area_hook_group_for_outlets($sales_day, $van_pl_grp, $area_hook, $dva_nid) {
   global $user;
   $user_id = $user->uid;
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
@@ -406,10 +413,10 @@ function update_area_hook_group_for_outlets($sales_day, $van_pl_grp, $area_hook,
   $query = db_select('node', 'n');
   $query->join('field_data_field_sales_day', 'fsd', 'fsd.entity_id = n.nid');
   $query->condition('fsd.field_sales_day_value', $sales_day);
-  
+
   $query->join('field_data_field_outlet_area_hook', 'fa', 'fa.entity_id = n.nid');
   $query->condition('fa.field_outlet_area_hook_value', $area_hook);
-  
+
   $query->condition('n.type', 'outlet_master');
   $query->addTag('node_uid');
   $query->join('field_data_field_channel', 'ch', 'ch.entity_id = n.nid');
@@ -422,10 +429,10 @@ function update_area_hook_group_for_outlets($sales_day, $van_pl_grp, $area_hook,
   $query->condition('ppmch.bundle', 'party_pack_master');
   $query->join('field_data_field_van_pl_group', 'ppplg', 'ppn.nid = ppplg.entity_id');
   $query->condition('ppplg.field_van_pl_group_value', $van_pl_grp);
-  
+
   $query->fields('n', array('nid'));
   $res = $query->execute()->fetchCol();
-  
+
   foreach ($res as $nid) {
     watchdog('aaaa', $nid . '  ' . $dva_nid);
     $node = node_load($nid);
