@@ -146,7 +146,7 @@ function change_feeds_import_day_van_area_batch_fix_process($data, $distributor_
             }
             break;
           case 'Area Hook':
-            if (!array_key_exists(strtolower($v), strtolower($context['results']['area_hook_result']))) {
+            if (!array_key_exists(strtolower($v), $context['results']['area_hook_result'])) {
               $value['error_message'] .= $v . " Area Hook is not present in Area Hook Group Master.  ";
             }
             break;
@@ -190,7 +190,8 @@ function change_feeds_import_insert_data_in_day_van_area_data_table($value, $fid
 
 function check_area_exist_or_not() {
   $query = db_select('node', 'n');
-  $query->fields('n', array('title'));
+  $query->addExpression('LOWER(n.title)', 'title');
+  //$query->fields('n', array('title'));
   $query->condition('n.type', 'area_hook_master');
   $query->addTag('node_uid');
   $result = $query->execute()->fetchAllKeyed(0, 0);
