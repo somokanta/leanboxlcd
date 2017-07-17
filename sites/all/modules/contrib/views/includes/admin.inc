@@ -4300,6 +4300,7 @@ function views_ui_config_item_form($form, &$form_state) {
       // this item.
       $relationships = $view->display_handler->get_option('relationships');
       $relationship_options = array();
+dpm($relationships, '$relationship_options1');
 
       foreach ($relationships as $relationship) {
         // relationships can't link back to self. But also, due to ordering,
@@ -4322,6 +4323,7 @@ function views_ui_config_item_form($form, &$form_state) {
           $relationship_options[$relationship['id']] = $relationship_handler->label();
         }
       }
+dpm($relationship_options, '$relationship_options11');
 
       if (!empty($relationship_options)) {
         // Make sure the existing relationship is even valid. If not, force
