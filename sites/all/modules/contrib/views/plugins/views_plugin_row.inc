@@ -61,7 +61,7 @@ class views_plugin_row extends views_plugin {
 
       foreach ($relationships as $relationship) {
         $relationship_handler = views_get_handler($relationship['table'], $relationship['field'], 'relationship');
-
+dpm($relationship_handler, '$relationship_handler');
         // If this relationship is valid for this type, add it to the list.
         $data = views_fetch_data($relationship['table']);
         $base = $data[$relationship['field']]['relationship']['base'];
@@ -70,7 +70,7 @@ class views_plugin_row extends views_plugin {
           $relationship_options[$relationship['id']] = $relationship_handler->label();
         }
       }
-
+dpm($relationship_options, '$relationship_options');
       if (!empty($relationship_options)) {
         $relationship_options = array_merge(array('none' => t('Do not use a relationship')), $relationship_options);
         $rel = empty($this->options['relationship']) ? 'none' : $this->options['relationship'];
