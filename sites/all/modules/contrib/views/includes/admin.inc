@@ -4308,7 +4308,9 @@ dpm($relationships, '$relationship_options1');
         if ($type == 'relationship' && $id == $relationship['id']) {
           break;
         }
+        dpm($relationship, '$relationship_table');
         $relationship_handler = views_get_handler($relationship['table'], $relationship['field'], 'relationship');
+        dpm($relationship_handler, '$relationship_handler$relationship_handler');
         // ignore invalid/broken relationships.
         if (empty($relationship_handler)) {
           continue;
