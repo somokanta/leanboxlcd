@@ -4280,6 +4280,7 @@ function views_ui_config_item_form($form, &$form_state) {
     views_ajax_error(t('Invalid display id @display', array('@display' => $display_id)));
   }
   $item = $view->get_item($display_id, $type, $id);
+  dpm($item, 'item');
 
   if ($item) {
     $handler = $view->display_handler->get_handler($type, $id);
