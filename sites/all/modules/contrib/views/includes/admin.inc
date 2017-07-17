@@ -4280,7 +4280,6 @@ function views_ui_config_item_form($form, &$form_state) {
     views_ajax_error(t('Invalid display id @display', array('@display' => $display_id)));
   }
   $item = $view->get_item($display_id, $type, $id);
-  dpm($item, 'item');
 
   if ($item) {
     $handler = $view->display_handler->get_handler($type, $id);
@@ -4301,7 +4300,6 @@ function views_ui_config_item_form($form, &$form_state) {
       // this item.
       $relationships = $view->display_handler->get_option('relationships');
       $relationship_options = array();
-dpm($relationships, '$relationship_options1');
 
       foreach ($relationships as $relationship) {
         // relationships can't link back to self. But also, due to ordering,
@@ -4309,9 +4307,7 @@ dpm($relationships, '$relationship_options1');
         if ($type == 'relationship' && $id == $relationship['id']) {
           break;
         }
-        dpm($relationship, '$relationship_table');
         $relationship_handler = views_get_handler($relationship['table'], $relationship['field'], 'relationship');
-        dpm($relationship_handler, '$relationship_handler$relationship_handler');
         // ignore invalid/broken relationships.
         if (empty($relationship_handler)) {
           continue;
@@ -4321,13 +4317,11 @@ dpm($relationships, '$relationship_options1');
         $data = views_fetch_data($relationship['table']);
         $base = $data[$relationship['field']]['relationship']['base'];
         $base_fields = views_fetch_fields($base, $form_state['type'], $view->display_handler->use_group_by());
-        dpm($base_fields, '$base_fields');
         if (isset($base_fields[$item['table'] . '.' . $item['field']])) {
           $relationship_handler->init($view, $relationship);
           $relationship_options[$relationship['id']] = $relationship_handler->label();
         }
       }
-dpm($relationship_options, '$relationship_options11');
 
       if (!empty($relationship_options)) {
         // Make sure the existing relationship is even valid. If not, force
