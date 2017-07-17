@@ -4321,6 +4321,7 @@ dpm($relationships, '$relationship_options1');
         $data = views_fetch_data($relationship['table']);
         $base = $data[$relationship['field']]['relationship']['base'];
         $base_fields = views_fetch_fields($base, $form_state['type'], $view->display_handler->use_group_by());
+        dpm($base_fields, '$base_fields');
         if (isset($base_fields[$item['table'] . '.' . $item['field']])) {
           $relationship_handler->init($view, $relationship);
           $relationship_options[$relationship['id']] = $relationship_handler->label();
