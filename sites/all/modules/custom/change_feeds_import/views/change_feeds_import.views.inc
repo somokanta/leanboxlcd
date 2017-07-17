@@ -81,7 +81,7 @@ function change_feeds_import_views_data_alter(&$data) {
   
   
   $data['field_data_field_hul_code']['table']['group'] = t('Hul table');
-  $data['field_data_field_hul_code']['dummy_name1'] = array(
+  $data['field_data_field_hul_code']['hul_code'] = array(
     'title' => t('Outlet to Hul relationship'),
     'help' => t('Outlet to Hul relationship'),
     'relationship' => array(
