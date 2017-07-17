@@ -89,7 +89,8 @@ function change_feeds_import_views_data_alter(&$data) {
       'base' => 'node', // Table we're joining to.
       'base field' => 'title', // Field on the joined table.
       'field' => 'field_hul_code_value', // Real field name on the 'foo' table.
-      'handler' => 'views_handler_relationship',
+     // 'handler' => 'views_handler_relationship',
+       'handler' => 'references_handler_relationship',
       'label' => t('outlet master to Hul Code relationship'),
       'title' => t('outlet master to Hul Code relationship'),
       'help' => t('More information about relationship.'),
