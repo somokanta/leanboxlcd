@@ -1375,9 +1375,13 @@ function leanbox_dashboard_form_alter(&$form, &$form_state, $form_id) {
     dpm($form, 'form');
     if (isset($form['field__party_packingstatus_value'])) {
       $form['field__party_packingstatus_value']['#options']['empty'] = t('Empty');
+      $form['field__party_packingstatus_value_op']['#options'] = array('or' => 'Is One Of');
+      $form['field__party_packingstatus_value_op']['#default_value'] = 'or';
     }
     if (isset($form['field_dispatch_status_value'])) {
       $form['field_dispatch_status_value']['#options']['empty'] = t('Empty');
+      $form['field_dispatch_status_value_op']['#options'] = array('or' => 'Is One Of');
+      $form['field_dispatch_status_value_op']['#default_value'] = 'or';
     }
     array_unshift($form['#submit'], 'mymodule_exposed_form_submit');
   }
