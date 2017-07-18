@@ -1539,7 +1539,7 @@ function reverse_geocode_node_presave($node) {
           if ($day_van_area_nid) {
             $node->field_area_hook[LANGUAGE_NONE][0]['nid'] = $day_van_area_nid;
           }
-          node_save($node);
+         // node_save($node);
         }
       }
     }
