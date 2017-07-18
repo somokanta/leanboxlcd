@@ -1990,7 +1990,7 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
   $distributor_id = change_feeds_import_get_distributor_id($user->uid);
 
   if (($view->name == 'impact_party_master')) {
-    $query->table_queue['node_field_data_field_hul_code']['join']->extra[] = array('field' => 'type', 'value' => 'abc');
+    $query->table_queue['node_field_data_field_hul_code']['join']->extra[] = array('field' => 'uid', 'left_field' => 'node,uid');
     dpm($query, "query");
   }
 
