@@ -1977,7 +1977,7 @@ function change_feeds_import_query_alter(QueryAlterableInterface $query) {
 
   $view_name = 'impact_party_master';
   if ($query->hasTag('views_' . $view_name)) {
-    dpm($query, "query");
+    dpm($query, "query"); 
     $query->add_where(1, 'node.uid', 'node_field_data_field_hul_code.uid', '=');
   }
 }
