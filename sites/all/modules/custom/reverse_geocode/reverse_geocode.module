@@ -1520,26 +1520,26 @@ function reverse_geocode_node_presave($node) {
         $data = $query->execute()->fetchAllKeyed();
 
         foreach ($data as $nid) {
-          $node = node_load($nid);
-          $sales_day = $node->field_sales_day[LANGUAGE_NONE][0]['value'];
-          $area_hook = $node->field_outlet_area_hook[LANGUAGE_NONE][0]['value'];
+          $node1 = node_load($nid);
+          $sales_day = $node1->field_sales_day[LANGUAGE_NONE][0]['value'];
+          $area_hook = $node1->field_outlet_area_hook[LANGUAGE_NONE][0]['value'];
 
           $day_van_area_nid = get_nid_from_master_using_sales_day_van_grp_area_hook($sales_day, $updated_van, $area_hook);
 
           // remove nid
-          $node->field_area_hook = array();
+          $node1->field_area_hook = array();
           // empty status
-          $node->field_area_hook_group_hul[LANGUAGE_NONE][0]['value'] = 0;
+          $node1->field_area_hook_group_hul[LANGUAGE_NONE][0]['value'] = 0;
           // empty beat code
-          $node->field_static_delivery_beat_code = array();
-          $node->field_sequence = array();
-          $node->field_revised_sequence = array();
-          $node->field_revised_sequence_status[LANGUAGE_NONE][0]['value'] = 0;
+          $node1->field_static_delivery_beat_code = array();
+          $node1->field_sequence = array();
+          $node1->field_revised_sequence = array();
+          $node1->field_revised_sequence_status[LANGUAGE_NONE][0]['value'] = 0;
 
           if ($day_van_area_nid) {
-            $node->field_area_hook[LANGUAGE_NONE][0]['nid'] = $day_van_area_nid;
+            $node1->field_area_hook[LANGUAGE_NONE][0]['nid'] = $day_van_area_nid;
           }
-         // node_save($node);
+          node_save($node1);
         }
       }
     }
