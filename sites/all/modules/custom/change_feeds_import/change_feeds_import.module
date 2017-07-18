@@ -1975,10 +1975,10 @@ function change_feeds_import_query_alter(QueryAlterableInterface $query) {
     $query->addExpression('SUM(if(field_sales_day_value != 1, 1, 0))', 'total_rec');
   }
 
-  $view_name = 'impact_party_master';
-  if ($query->hasTag('views_' . $view_name)) {
-    $query->condition('node.uid', 'node_field_data_field_hul_code.uid');
-  }
+//  $view_name = 'impact_party_master';
+//  if ($query->hasTag('views_' . $view_name)) {
+//    $query->condition('node.uid', 'node_field_data_field_hul_code.uid');
+//  }
 }
 
 function change_feeds_import_views_query_alter(&$view, &$query) {
