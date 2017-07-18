@@ -1499,51 +1499,51 @@ function reverse_geocode_node_presave($node) {
     }
   }
   
-  else if ($node->type == 'party_pack_master') {
-    module_load_include('inc', 'change_feeds_import', 'form/outlet_area_hook');
-    $original_van = ($node->original->field_van_pl_group[LANGUAGE_NONE][0]['value']);
-    $updated_van = ($node->field_van_pl_group[LANGUAGE_NONE][0]['value']);
-
-    if (!empty($original_van)) {
-      if ($original_van !== $updated_van) {
-        $channel = $node->field_channel[LANGUAGE_NONE][0]['value'];
-        $pl_group = $node->field_pl_group[LANGUAGE_NONE][0]['value'];
-
-        $query = db_select('node', 'n');
-        $query->addTag('node_uid');
-        $query->join('field_data_field_channel', 'ppmch', 'ppmch.entity_id = n.nid');
-        $query->join('field_data_field_pl_group', 'ppmpl', 'ppmpl.entity_id = n.nid');
-        $query->condition('n.type', 'outlet_master');
-        $query->condition('ppmch.field_channel_value', $channel);
-        $query->condition('ppmpl.field_pl_group_value', $pl_group);
-        $query->fields('n', array('nid'));
-        $data = $query->execute()->fetchAllKeyed();
-
-        foreach ($data as $nid) {
-          $node1 = node_load($nid);
-          $sales_day = $node1->field_sales_day[LANGUAGE_NONE][0]['value'];
-          $area_hook = $node1->field_outlet_area_hook[LANGUAGE_NONE][0]['value'];
-
-          $day_van_area_nid = get_nid_from_master_using_sales_day_van_grp_area_hook($sales_day, $updated_van, $area_hook);
-
-          // remove nid
-          $node1->field_area_hook = array();
-          // empty status
-          $node1->field_area_hook_group_hul[LANGUAGE_NONE][0]['value'] = 0;
-          // empty beat code
-          $node1->field_static_delivery_beat_code = array();
-          $node1->field_sequence = array();
-          $node1->field_revised_sequence = array();
-          $node1->field_revised_sequence_status[LANGUAGE_NONE][0]['value'] = 0;
-
-          if ($day_van_area_nid) {
-            $node1->field_area_hook[LANGUAGE_NONE][0]['nid'] = $day_van_area_nid;
-          }
-          node_save($node1);
-        }
-      }
-    }
-  }
+//  else if ($node->type == 'party_pack_master') {
+//    module_load_include('inc', 'change_feeds_import', 'form/outlet_area_hook');
+//    $original_van = ($node->original->field_van_pl_group[LANGUAGE_NONE][0]['value']);
+//    $updated_van = ($node->field_van_pl_group[LANGUAGE_NONE][0]['value']);
+//
+//    if (!empty($original_van)) {
+//      if ($original_van !== $updated_van) {
+//        $channel = $node->field_channel[LANGUAGE_NONE][0]['value'];
+//        $pl_group = $node->field_pl_group[LANGUAGE_NONE][0]['value'];
+//
+//        $query = db_select('node', 'n');
+//        $query->addTag('node_uid');
+//        $query->join('field_data_field_channel', 'ppmch', 'ppmch.entity_id = n.nid');
+//        $query->join('field_data_field_pl_group', 'ppmpl', 'ppmpl.entity_id = n.nid');
+//        $query->condition('n.type', 'outlet_master');
+//        $query->condition('ppmch.field_channel_value', $channel);
+//        $query->condition('ppmpl.field_pl_group_value', $pl_group);
+//        $query->fields('n', array('nid'));
+//        $data = $query->execute()->fetchAllKeyed();
+//
+//        foreach ($data as $nid) {
+//          $node1 = node_load($nid);
+//          $sales_day = $node1->field_sales_day[LANGUAGE_NONE][0]['value'];
+//          $area_hook = $node1->field_outlet_area_hook[LANGUAGE_NONE][0]['value'];
+//
+//          $day_van_area_nid = get_nid_from_master_using_sales_day_van_grp_area_hook($sales_day, $updated_van, $area_hook);
+//
+//          // remove nid
+//          $node1->field_area_hook = array();
+//          // empty status
+//          $node1->field_area_hook_group_hul[LANGUAGE_NONE][0]['value'] = 0;
+//          // empty beat code
+//          $node1->field_static_delivery_beat_code = array();
+//          $node1->field_sequence = array();
+//          $node1->field_revised_sequence = array();
+//          $node1->field_revised_sequence_status[LANGUAGE_NONE][0]['value'] = 0;
+//
+//          if ($day_van_area_nid) {
+//            $node1->field_area_hook[LANGUAGE_NONE][0]['nid'] = $day_van_area_nid;
+//          }
+//          node_save($node1);
+//        }
+//      }
+//    }
+//  }
 }
 
 function graphhopper_postvrp_api($params) {
