@@ -1495,9 +1495,10 @@ function reverse_geocode_node_presave($node) {
           $node->field_area_hook[LANGUAGE_NONE][0]['nid'] = $day_van_area_nid;
         }
 
-      }
+      } 
     }
   }
+  
   
 //  else if ($node->type == 'party_pack_master') {
 //    module_load_include('inc', 'change_feeds_import', 'form/outlet_area_hook');
