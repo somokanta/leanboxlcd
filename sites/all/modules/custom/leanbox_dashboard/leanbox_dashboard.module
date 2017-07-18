@@ -1354,12 +1354,12 @@ function leanbox_dashboard_sales_delivery_table($export = FALSE) {
 }
 
 function mymodule_exposed_form_submit(&$form, &$form_state) { 
-  dpm($form_state['values'], 'values');
-//  if (!empty($form_state['values']['myfield']['-ALL-'])) {
-//    $options = $form['myfield']['#options'];
-//    unset($options['-ALL-']);
-//    $form_state['values']['myfield'] = $options;
-//  }
+  //dpm($form_state['values'], 'values');
+  if (!empty($form_state['values']['field_dispatch_status_value'] == 'empty')) {
+  //  $options = $form['myfield']['#options'];
+  //  unset($options['-ALL-']);
+    $form_state['values']['field_dispatch_status_value_op'] = 'empty';
+  }
 }
 
 /**
@@ -1381,7 +1381,7 @@ function leanbox_dashboard_form_alter(&$form, &$form_state, $form_id) {
     if(isset($form['field_dispatch_status_value'])) {
       $form['field_dispatch_status_value']['#options']['empty'] = t('Empty');
     }
-        array_unshift($form['#submit'], 'mymodule_exposed_form_submit');
+    array_unshift($form['#submit'], 'mymodule_exposed_form_submit');
 
   }
   
