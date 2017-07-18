@@ -1360,6 +1360,18 @@ function leanbox_dashboard_sales_delivery_table($export = FALSE) {
  * @param type $form_id
  */
 function leanbox_dashboard_form_alter(&$form, &$form_state, $form_id) {
+ // dpm($form, 'form');
+ // dpm($form_state, 'state');
+ // dpm($form_id, 'id');
+  if($form_id = 'views_exposed_form') {
+    if(isset($form['field__party_packingstatus_value'])) {
+      $form['field__party_packingstatus_value']['#option'][''] = t('Empty');
+      
+    }	
+    if(isset($form['field_dispatch_status_value'])) {
+      $form['field_dispatch_status_value']['#option'][''] = t('Empty');
+    }
+  }
   
   if ($form_id == 'feeds_import_form' && $form['#importer_id'] == 'resource_master') {
     $list = '<Ol><b>RESOURCE TYPE</b>'
