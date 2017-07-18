@@ -1981,6 +1981,8 @@ function change_feeds_import_query_alter(QueryAlterableInterface $query) {
     $query->table_queue['field_data_field_hul_code']['join']->extra[] = array('field' => 'uid', 'value' => 'node.uid');
 
   }
+      dpm($query,"query");
+
 }
 
 function change_feeds_import_views_query_alter(&$view, &$query) {
