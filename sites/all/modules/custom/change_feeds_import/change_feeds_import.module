@@ -663,13 +663,11 @@ function delete_billing_form_submit($form, &$form_state) {
   $user = $form_state['values']['user'];
   $pass = "";
   // get data from custom table for selected date and user (custom_billing_data).
-  $billing_data = $sales_data  =  get_custom_data($pass, $start_date, $end_date, $user);
+  $billing_data = $sales_data = get_custom_data($pass, $start_date, $end_date, $user);
   $billing_count = count($billing_data);
   $pass = "sales";
   // get data from Sales register's node's for selected date and user (custom_billing_data).
   // $sales_data = get_custom_data($pass, $start_date, $end_date, $user);
-
-
   // delete data from custom table for selected date and user (custom_billing_data).
   foreach ($billing_data as $key => $val) {
     $id = $val['id'];
@@ -1976,6 +1974,12 @@ function change_feeds_import_query_alter(QueryAlterableInterface $query) {
     // $query->groupBy('field_area_hook_nid');
     $query->addExpression('SUM(if(field_sales_day_value != 1, 1, 0))', 'total_rec');
   }
+
+  $view_name = 'impact_party_master';
+  if ($query->hasTag('views_' . $view_name)) {
+    dpm($query, "query");
+    $query->add_where(1, 'node.uid', 'node_field_data_field_hul_code.uid', '=');
+  }
 }
 
 function change_feeds_import_views_query_alter(&$view, &$query) {
@@ -2017,7 +2021,7 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
       $query1->condition('d1.field_idd_value', 1);
       $dis_ids = $query1->execute()->fetchCol();
 
-      $next_day = strtotime(date('Y-m-d' , strtotime("+1 days")));
+      $next_day = strtotime(date('Y-m-d', strtotime("+1 days")));
       $next_day_end = $next_day + 86399;
 
       $sub_query->join('node', 'n', 'n.title = b.bill_number AND b.distributor_id = n.uid');
@@ -2027,7 +2031,7 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
       $sub_query->condition('fd.field_trip_executon_date_value', $next_day, '>=');
       $sub_query->condition('fd.field_trip_executon_date_value', $next_day_end, '<=');
       $sub_query->condition('b.distributor_id', $dis_ids, 'IN');
-     // $sub_query->condition('n.uid', $dis_ids, 'IN');
+      // $sub_query->condition('n.uid', $dis_ids, 'IN');
     }
     else {
       $sub_query->join('node', 'n', 'n.title = b.bill_number');
@@ -2428,7 +2432,6 @@ function change_feeds_import_views_data_export_batch_alter(&$batch, &$batch_redi
     $batch['operations'][] = array(
       'change_feeds_import_views_data_export_batch_finish', array($batch['eid'], $batch['view_name']),
     );
-    
   }
 }
 
