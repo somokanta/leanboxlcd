@@ -1366,11 +1366,11 @@ function leanbox_dashboard_form_alter(&$form, &$form_state, $form_id) {
   if($form_id = 'views_exposed_form') {
    // dpm($form, 'form');
     if(isset($form['field__party_packingstatus_value'])) {
-      $form['field__party_packingstatus_value']['#options'][NULL] = t('Empty');
+      $form['field__party_packingstatus_value']['#options']['empty'] = t('Empty');
       
     }	
     if(isset($form['field_dispatch_status_value'])) {
-      $form['field_dispatch_status_value']['#options'][NULL] = t('Empty');
+      $form['field_dispatch_status_value']['#options']['empty'] = t('Empty');
     }
   }
   
