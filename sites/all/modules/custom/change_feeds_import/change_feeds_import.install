@@ -1236,11 +1236,11 @@ function change_feeds_import_update_7111() {
  *  Implements Hook_Update_7114
  */
 function change_feeds_import_update_7114() {
-  db_change_field('field_data_field_party_packer_team_count', 'field_party_packer_team_count_value', 'field_party_packer_team_count_value', 
-    array(
-      'description' => 'PARTY PACKER TEAM COUNT',
-      'type' => 'decimal',
-      'not null' => FALSE,
-    )
+  db_change_field('field_data_field_party_packer_team_count', 'field_party_packer_team_count_value', 'field_party_packer_team_count_value', array(
+    'type' => 'decimal',
+    'precision' => 16,
+    'scale' => 2,
+    'not null' => TRUE,
+      )
   );
 }
