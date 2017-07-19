@@ -1382,7 +1382,7 @@ function leanbox_dashboard_form_alter(&$form, &$form_state, $form_id) {
       $form['field_dispatch_status_value']['#options']['empty'] = t('Empty');
       //$form['field_dispatch_status_value_op']['#options'] = array('or' => 'Is One Of');
       $form['field_dispatch_status_value_op']['#access'] = FALSE;
-            $form['field_dispatch_status_value_op']['#value'] = 'ttt';
+         //  $form['field_dispatch_status_value_op']['#value'] = 'ttt';
 
     }
     array_unshift($form['#submit'], 'mymodule_exposed_form_submit');
