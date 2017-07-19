@@ -1671,6 +1671,9 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
 //    }
   }
   if ($entity->type == 'hul_code_master') {
+    
+    $title = $entity->title[LANGUAGE_NONE][0]['value'];
+    dpm($title,"title");
     $ph_no = $entity->field_hul_phone_no[LANGUAGE_NONE][0]['value'];
     $hul_address = $entity->field_hul_address[LANGUAGE_NONE][0]['value'];
 
