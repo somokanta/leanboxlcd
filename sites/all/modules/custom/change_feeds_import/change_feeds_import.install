@@ -1240,7 +1240,6 @@ function change_feeds_import_update_7114() {
     'type' => 'decimal',
     'precision' => 16,
     'scale' => 2,
-    'not null' => TRUE,
       )
   );
 }
