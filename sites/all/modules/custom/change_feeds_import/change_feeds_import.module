@@ -1989,7 +1989,7 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
   // Store distributor id in author in each node
   $distributor_id = change_feeds_import_get_distributor_id($user->uid);
 
-  if (($view->name != 'user_manual') && ($view->name != 'impact_delivery_cron_2') && ($view->name != 'impact_party_master')) {
+  if (($view->name != 'user_manual') && ($view->name != 'impact_delivery_cron_2') && ($view->name != 'impact_party_master') && ($view->name != 'hul_code_distributor_wise')) {
     foreach ($query->table_queue as $key => $val) {
       if (($val['table'] == 'node')) {
         if (empty($val['join'])) {
