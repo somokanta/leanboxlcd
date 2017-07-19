@@ -1233,9 +1233,9 @@ function change_feeds_import_update_7111() {
 }
 
 /**
- *  Implements Hook_Update_7114
+ *  Implements Hook_Update_7115
  */
-function change_feeds_import_update_7114() {
+function change_feeds_import_update_7115() {
   
   $new_field = array(
     'type' => 'decimal',
