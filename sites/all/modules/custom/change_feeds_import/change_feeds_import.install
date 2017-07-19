@@ -1173,7 +1173,6 @@ function change_feeds_import_update_7109() {
   db_create_table('day_van_area_data', $schema['day_van_area_data']);
 }
 
-
 /**
  *  Implements Hook_Update_7110
  */
@@ -1185,7 +1184,6 @@ function change_feeds_import_update_7110() {
     'default' => 0,
   ));
 }
-
 
 /**
  *  Implements Hook_Update_7111
@@ -1232,4 +1230,21 @@ function change_feeds_import_update_7111() {
   );
 
   db_create_table('area_hook_grp_master', $schema['area_hook_grp_master']);
+}
+
+/**
+ *  Implements Hook_Update_7111
+ */
+function change_feeds_import_update_7112() {
+  db_query("UPDATE {field_party_packer_team_count} SET type = 'number_decimal' WHERE field_name = 'field_party_packer_team_count'");
+//  db_change_field('field_data_field_party_packer_team_count', 'field_party_packer_team_count_value', 'field_party_packer_team_count_value', array(
+//    'type' => 'numeric',
+//    'precision' => '10',
+//    'scale' => '2',
+//  ));
+//  db_change_field('field_revision_field_party_packer_team_count', 'field_party_packer_team_count_value', 'field_party_packer_team_count_value', array(
+//    'type' => 'numeric',
+//    'precision' => '10',
+//    'scale' => '2',
+//  ));
 }
