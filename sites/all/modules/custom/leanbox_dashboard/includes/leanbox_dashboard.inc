@@ -2084,7 +2084,7 @@ function leanbox_dashboard_gauge_chart_query_details($type, $start_date = '', $e
   }
   $output1['output'] = $output;
 
-  if (arg(1) == 'otif' || $type == 'otif_ajax') {
+  if (arg(1) == 'otif' && $type == 'otif_ajax') {
 
     $mtd_html = "<h3>Channel Wise Otif</h3>";
     $mtd_data .= get_mtd_data_channel($start_date, $end_date, $uid);
