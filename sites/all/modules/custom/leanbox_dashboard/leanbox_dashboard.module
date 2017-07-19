@@ -1355,7 +1355,6 @@ function leanbox_dashboard_sales_delivery_table($export = FALSE) {
 
 function mymodule_exposed_form_submit(&$form, &$form_state) { 
   if (isset($form_state['values']['field_dispatch_status_value']) && ($form_state['values']['field_dispatch_status_value'] == 'empty')) {
-    //dpm($form_state['values']);
     $form_state['values']['field_dispatch_status_value_op'] = 'empty';
   }
   if (isset($form_state['values']['field__party_packingstatus_value']) && ($form_state['values']['field__party_packingstatus_value'] == 'empty')) {
@@ -1372,6 +1371,7 @@ function mymodule_exposed_form_submit(&$form, &$form_state) {
 function leanbox_dashboard_form_alter(&$form, &$form_state, $form_id) {
 
   if ($form_id = 'views_exposed_form') {
+    dpm($form, 'form');
     if (isset($form['field__party_packingstatus_value'])) {
       $form['field__party_packingstatus_value']['#options']['empty'] = t('Empty');
       // $form['field__party_packingstatus_value_op']['#options'] = array('or' => 'Is One Of');
