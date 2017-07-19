@@ -1671,7 +1671,6 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
 //    }
   }
   if ($entity->type == 'hul_code_master') {
-    dpm($entity,"entity");
     $title = $entity->title;
     $all_title = check_hul_code_exist();
     if (array_key_exists($title,$all_title)){
