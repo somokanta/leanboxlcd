@@ -1353,6 +1353,21 @@ function leanbox_dashboard_sales_delivery_table($export = FALSE) {
   return $output1;
 }
 
+function leanbox_dashboard_exposed_form_submit(&$form, &$form_state) { 
+  if (isset($form_state['values']['field_dispatch_status_value']) && ($form_state['values']['field_dispatch_status_value'] == 'empty')) {
+    $form_state['values']['field_dispatch_status_value_op'] = 'empty';
+  }
+  if (isset($form_state['values']['field__party_packingstatus_value']) && ($form_state['values']['field__party_packingstatus_value'] == 'empty')) {
+    $form_state['values']['field__party_packingstatus_value_op'] = 'empty';
+  } 
+  if (isset($form_state['values']['field_picking_status_value']) && ($form_state['values']['field_picking_status_value'] == 'empty')) {
+    $form_state['values']['field_picking_status_value_op'] = 'empty';
+  }
+  if (isset($form_state['values']['field_unloading_status_value']) && ($form_state['values']['field_unloading_status_value'] == 'empty')) {
+    $form_state['values']['field_unloading_status_value_op'] = 'empty';
+  }
+}
+
 /**
  * 
  * @param string $form
@@ -1360,7 +1375,44 @@ function leanbox_dashboard_sales_delivery_table($export = FALSE) {
  * @param type $form_id
  */
 function leanbox_dashboard_form_alter(&$form, &$form_state, $form_id) {
-  
+
+  if ($form_id = 'views_exposed_form') {
+    
+    // party packing
+    if (isset($form['field__party_packingstatus_value'])) {
+      $form['field__party_packingstatus_value']['#options']['empty'] = t('Empty');
+    }
+     if (isset($form['field__party_packingstatus_value_op'])) {
+      $form['field__party_packingstatus_value_op']['#options'] = array('or' => 'Is One Of');
+    }
+    
+    // dispatch
+    if (isset($form['field_dispatch_status_value'])) {
+      $form['field_dispatch_status_value']['#options']['empty'] = t('Empty');
+    }
+    if (isset($form['field_dispatch_status_value_op'])) {
+      $form['field_dispatch_status_value_op']['#options'] = array('or' => 'Is One Of');
+    }
+    
+    // picking
+    if (isset($form['field_picking_status_value'])) {
+      $form['field_picking_status_value']['#options']['empty'] = t('Empty');
+    }
+    if (isset($form['field_picking_status_value_op'])) {
+      $form['field_picking_status_value_op']['#options'] = array('or' => 'Is One Of');
+    }
+    
+    // EGIR or 
+    if (isset($form['field_unloading_status_value'])) {
+      $form['field_unloading_status_value']['#options']['empty'] = t('Empty');
+    }
+    if (isset($form['field_unloading_status_value_op'])) {
+      $form['field_unloading_status_value_op']['#options'] = array('or' => 'Is One Of');
+    }
+    
+    array_unshift($form['#submit'], 'leanbox_dashboard_exposed_form_submit');
+  }
+
   if ($form_id == 'feeds_import_form' && $form['#importer_id'] == 'resource_master') {
     $list = '<Ol><b>RESOURCE TYPE</b>'
         . '<li>DISPATCH SUPERVISOR</li>'
