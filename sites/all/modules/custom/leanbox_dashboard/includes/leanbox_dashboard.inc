@@ -391,14 +391,14 @@ function leanbox_dashboard_chart_filter_otif_form($form, &$form_state) {
     $bill_date = date('Y-m-d', $bill_date);
     $form['start_date'] = array(
       '#type' => 'date_popup',
-      '#title' => t(''),
+      '#title' => t('From'),
       '#required' => TRUE,
       '#date_format' => 'Y-m-d',
       '#default_value' => $bill_date,
     );
     $form['end_date'] = array(
       '#type' => 'date_popup',
-      '#title' => t(''),
+      '#title' => t('To'),
       '#required' => TRUE,
       '#date_format' => 'Y-m-d',
       '#default_value' => $bill_date,
@@ -796,14 +796,14 @@ function leanbox_dashboard_chart_filter_delivery_form($form, &$form_state) {
     $billing_date = date('Y-m-d', $billing_date);
     $form['start_date'] = array(
       '#type' => 'date_popup',
-      '#title' => t(''),
+      '#title' => t('From'),
       '#required' => TRUE,
       '#date_format' => 'Y-m-d',
       '#default_value' => $billing_date,
     );
     $form['end_date'] = array(
       '#type' => 'date_popup',
-      '#title' => t(''),
+      '#title' => t('To'),
       '#required' => TRUE,
       '#date_format' => 'Y-m-d',
       '#default_value' => $billing_date,
