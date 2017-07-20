@@ -23,7 +23,7 @@ function modify_views_forms_form_alter(&$form, &$form_state, $form_id) {
     }
     if($form_id == 'editableviews_entity_form_party_packing_report') {
       $query->condition('fst.field_resource_type_value', 'PARTY PACKING SUPERVISOR');
-      //$field_supervisor = 'field_party_packing_supervisor';
+      $field_supervisor = 'field_party_packing_supervisor';
      // $field_count = 'field_party_packer_team_count';
     }
     if($form_id == 'editableviews_entity_form_unloading_form') {
@@ -37,8 +37,8 @@ function modify_views_forms_form_alter(&$form, &$form_state, $form_id) {
     $multi_supervisor = array_combine($options, $options);
     $multi_supervisor = array_merge(array(" "=>'SELECT'),$multi_supervisor);
     //$count_array = array('1'=>'1','2'=>'2','3'=>'3','4'=>'4','5'=>'5','6'=>'6','7'=>'7','8'=>'8','9'=>'9');
-//    $count_array = array(1,2,3,4,5,6,7,8,9);
-//    $multi_count = array_merge(array("0"=>'SELECT'), $count_array);
+    $count_array = array(1,2,3,4,5,6,7,8,9);
+    $multi_count = array_merge(array("0"=>'SELECT'), $count_array);
 
     $query = db_select('field_data_field_resource_name', 'fps');
     $query->join('field_data_field_resource_type','fst','fst.entity_id = fps.entity_id');
@@ -48,7 +48,7 @@ function modify_views_forms_form_alter(&$form, &$form_state, $form_id) {
     }
     if($form_id == 'editableviews_entity_form_party_packing_report') {
       $query->condition('fst.field_resource_type_value', 'PARTY PACKER NAME');
-      //$field_packer = 'field_party_packer_name';
+      $field_packer = 'field_party_packer_name';
     }
 
     $query->fields('fps', array('field_resource_name_value'));
@@ -68,10 +68,10 @@ function modify_views_forms_form_alter(&$form, &$form_state, $form_id) {
         $form['node'][$key][$field_packer][LANGUAGE_NONE][0]['value']['#options'] = $multi_packer;
         $form['node'][$key][$field_packer][LANGUAGE_NONE][0]['value']['#size'] = 1;
       }
-      $form['node'][$key][$field_count][LANGUAGE_NONE][0]['value']['#type'] = 'select';
-      $form['node'][$key][$field_count][LANGUAGE_NONE][0]['value']['#multiple'] = FALSE;
-      $form['node'][$key][$field_count][LANGUAGE_NONE][0]['value']['#options'] = $multi_count;
-      $form['node'][$key][$field_count][LANGUAGE_NONE][0]['value']['#size'] = 1;
+//      $form['node'][$key][$field_count][LANGUAGE_NONE][0]['value']['#type'] = 'select';
+//      $form['node'][$key][$field_count][LANGUAGE_NONE][0]['value']['#multiple'] = FALSE;
+//      $form['node'][$key][$field_count][LANGUAGE_NONE][0]['value']['#options'] = $multi_count;
+//      $form['node'][$key][$field_count][LANGUAGE_NONE][0]['value']['#size'] = 1;
     }
   }
 }
