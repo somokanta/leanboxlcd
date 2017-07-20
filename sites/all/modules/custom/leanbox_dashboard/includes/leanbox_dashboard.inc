@@ -386,19 +386,19 @@ function leanbox_dashboard_chart_filter_picking_ota_form($form, &$form_state) {
 function leanbox_dashboard_chart_filter_otif_form($form, &$form_state) {
   $form = array();
 
-  if (arg(1) == 'otif') {
+ // if (arg(1) == 'otif') {
     $bill_date = leanbox_dashboard_get_default_pdd_date_for_chart();
     $bill_date = date('Y-m-d', $bill_date);
     $form['start_date'] = array(
       '#type' => 'date_popup',
-      '#title' => t('Billing Date From'),
+      '#title' => t('From'),
       '#required' => TRUE,
       '#date_format' => 'Y-m-d',
       '#default_value' => $bill_date,
     );
     $form['end_date'] = array(
       '#type' => 'date_popup',
-      '#title' => t('Billing Date To'),
+      '#title' => t('To'),
       '#required' => TRUE,
       '#date_format' => 'Y-m-d',
       '#default_value' => $bill_date,
@@ -411,7 +411,7 @@ function leanbox_dashboard_chart_filter_otif_form($form, &$form_state) {
       '#suffix' => '</div>',
       '#attributes' => array('class' => array('otif-submit')),
     );
-  }
+ // }
 
   $form['otif'] = array(
     '#markup' => '<a href = "/leanbox-chart-details/otif" target = "_blank"><div id="otif_div"></div></a>',
@@ -791,19 +791,19 @@ function leanbox_dashboard_chart_filter_unloading_form($form, &$form_state) {
  */
 function leanbox_dashboard_chart_filter_delivery_form($form, &$form_state) {
   $form = array();
-  if (arg(1) == 'delivery') {
+ // if (arg(1) == 'delivery') {
     $billing_date = strtotime(date('Y-m-d') . "- 7 days");
     $billing_date = date('Y-m-d', $billing_date);
     $form['start_date'] = array(
       '#type' => 'date_popup',
-      '#title' => t('Bill Date From'),
+      '#title' => t('From'),
       '#required' => TRUE,
       '#date_format' => 'Y-m-d',
       '#default_value' => $billing_date,
     );
     $form['end_date'] = array(
       '#type' => 'date_popup',
-      '#title' => t('Bill Date To'),
+      '#title' => t('To'),
       '#required' => TRUE,
       '#date_format' => 'Y-m-d',
       '#default_value' => $billing_date,
@@ -815,7 +815,7 @@ function leanbox_dashboard_chart_filter_delivery_form($form, &$form_state) {
       '#suffix' => '</div>',
       '#attributes' => array('class' => array('delivery-submit')),
     );
-  }
+  //}
 
 
   $form['unloading'] = array(
@@ -2084,7 +2084,7 @@ function leanbox_dashboard_gauge_chart_query_details($type, $start_date = '', $e
   }
   $output1['output'] = $output;
 
-  if (arg(1) == 'otif' || $type == 'otif_ajax') {
+  if (arg(1) == 'otif' && $type == 'otif_ajax') {
 
     $mtd_html = "<h3>Channel Wise Otif</h3>";
     $mtd_data .= get_mtd_data_channel($start_date, $end_date, $uid);

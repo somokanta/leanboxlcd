@@ -865,7 +865,7 @@ form {
     box-shadow: 0 0 5px #ccc;
     border-radius: 10px;
     margin: 1%;
-    height: 370px;
+    height: 420px;
 
     &:nth-child(3n+1) {
       
@@ -877,6 +877,7 @@ form {
       text-overflow: ellipsis;
       white-space: nowrap;
       overflow: hidden;
+      margin-bottom: 5px;
     }
 
     &.contextual-links-region {
@@ -885,6 +886,42 @@ form {
 
       div[dir="ltr"] {
         width: 100% !important;
+      }
+    }
+  }
+  #leanbox-dashboard-chart-filter-otif-form, #leanbox-dashboard-chart-filter-delivery-form {
+    .container-inline-date{
+      width: auto;
+      display: inline-block;
+      .date-padding {
+        float: none;
+        display: inline-block;
+        .control-label{
+          display: none;
+        }
+        input{
+          width: 100px;
+        }
+      }
+      .control-label{
+          vertical-align: top;
+          margin: 8px 0 0 0;
+      }
+    }
+    #otif-submit, #delivery-submit{
+        width: 80px;
+        display: inline-block;
+        button {
+            margin: 10px 10px 0 0;
+            padding: 6px 15px;
+        }
+    }
+    a {
+      width: 100%;
+      #otif_div, #delivery_div {
+          margin: 10px 0 0 0;
+          text-align: center;
+          display: inline-block;
       }
     }
   }
