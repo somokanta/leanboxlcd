@@ -1671,10 +1671,10 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
 //    }
   }
   if ($entity->type == 'hul_code_master') {
-    $title = $entity->title;  
+    $title = $entity->title;
     $all_title = check_hul_code_exist();
     if (array_key_exists($title,$all_title)){
-      drupal_set_message("HulCode Is alredy Present in System", 'error', FALSE);
+      drupal_set_message("HulCode Is Alredy Present in System", 'error', FALSE);
       $entity->feeds_item->skip = TRUE;
     }
     $ph_no = $entity->field_hul_phone_no[LANGUAGE_NONE][0]['value'];
