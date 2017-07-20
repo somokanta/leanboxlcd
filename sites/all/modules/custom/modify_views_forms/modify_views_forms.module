@@ -23,7 +23,7 @@ function modify_views_forms_form_alter(&$form, &$form_state, $form_id) {
     }
     if($form_id == 'editableviews_entity_form_party_packing_report') {
       $query->condition('fst.field_resource_type_value', 'PARTY PACKING SUPERVISOR');
-      $field_supervisor = 'field_party_packing_supervisor';
+      //$field_supervisor = 'field_party_packing_supervisor';
      // $field_count = 'field_party_packer_team_count';
     }
     if($form_id == 'editableviews_entity_form_unloading_form') {
@@ -48,7 +48,7 @@ function modify_views_forms_form_alter(&$form, &$form_state, $form_id) {
     }
     if($form_id == 'editableviews_entity_form_party_packing_report') {
       $query->condition('fst.field_resource_type_value', 'PARTY PACKER NAME');
-      $field_packer = 'field_party_packer_name';
+      //$field_packer = 'field_party_packer_name';
     }
 
     $query->fields('fps', array('field_resource_name_value'));
