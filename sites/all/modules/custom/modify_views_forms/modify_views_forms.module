@@ -37,8 +37,8 @@ function modify_views_forms_form_alter(&$form, &$form_state, $form_id) {
     $multi_supervisor = array_combine($options, $options);
     $multi_supervisor = array_merge(array(" "=>'SELECT'),$multi_supervisor);
     //$count_array = array('1'=>'1','2'=>'2','3'=>'3','4'=>'4','5'=>'5','6'=>'6','7'=>'7','8'=>'8','9'=>'9');
-    $count_array = array(1,2,3,4,5,6,7,8,9);
-    $multi_count = array_merge(array("0"=>'SELECT'), $count_array);
+//    $count_array = array(1,2,3,4,5,6,7,8,9);
+//    $multi_count = array_merge(array("0"=>'SELECT'), $count_array);
 
     $query = db_select('field_data_field_resource_name', 'fps');
     $query->join('field_data_field_resource_type','fst','fst.entity_id = fps.entity_id');
