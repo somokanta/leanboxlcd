@@ -1232,17 +1232,4 @@ function change_feeds_import_update_7111() {
   db_create_table('area_hook_grp_master', $schema['area_hook_grp_master']);
 }
 
-/**
- *  Implements Hook_Update_7115
- */
-function change_feeds_import_update_7115() {
-  
-  $new_field = array(
-    'type' => 'decimal',
-    'precision' => 16,
-    'scale' => 2,
-    'not null' => FALSE,
-  );
-  db_change_field('field_data_field_party_packer_team_count', 'field_party_packer_team_count_value', 'field_party_packer_team_count_value', $new_field);
-  
-}
+

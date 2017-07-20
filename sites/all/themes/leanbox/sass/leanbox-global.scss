@@ -865,7 +865,7 @@ form {
     box-shadow: 0 0 5px #ccc;
     border-radius: 10px;
     margin: 1%;
-    height: 370px;
+    height: 420px;
 
     &:nth-child(3n+1) {
       
@@ -885,6 +885,33 @@ form {
 
       div[dir="ltr"] {
         width: 100% !important;
+      }
+    }
+  }
+  #leanbox-dashboard-chart-filter-otif-form, #leanbox-dashboard-chart-filter-delivery-form {
+    .container-inline-date{
+      width: auto;
+      display: inline-block;
+      .date-padding {
+        .control-label{
+          display: none;
+        }
+        input{
+          width: 100px;
+        }
+      }
+    }
+    #otif-submit, #delivery-submit{
+        width: 80px;
+        display: inline-block;
+        button {
+            margin: 10px 10px 0 0;
+        }
+    }
+    a {
+      #otif_div, #delivery_div {
+          text-align: center;
+          display: inline-block;
       }
     }
   }
