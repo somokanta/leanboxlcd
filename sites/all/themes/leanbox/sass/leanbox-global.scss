@@ -877,6 +877,7 @@ form {
       text-overflow: ellipsis;
       white-space: nowrap;
       overflow: hidden;
+      margin-bottom: 5px;
     }
 
     &.contextual-links-region {
@@ -893,6 +894,8 @@ form {
       width: auto;
       display: inline-block;
       .date-padding {
+        float: none;
+        display: inline-block;
         .control-label{
           display: none;
         }
@@ -900,16 +903,23 @@ form {
           width: 100px;
         }
       }
+      .control-label{
+          vertical-align: top;
+          margin: 8px 0 0 0;
+      }
     }
     #otif-submit, #delivery-submit{
         width: 80px;
         display: inline-block;
         button {
             margin: 10px 10px 0 0;
+            padding: 6px 15px;
         }
     }
     a {
+      width: 100%;
       #otif_div, #delivery_div {
+          margin: 10px 0 0 0;
           text-align: center;
           display: inline-block;
       }
