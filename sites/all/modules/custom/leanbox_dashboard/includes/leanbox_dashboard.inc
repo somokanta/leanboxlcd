@@ -2084,15 +2084,15 @@ function leanbox_dashboard_gauge_chart_query_details($type, $start_date = '', $e
   }
   $output1['output'] = $output;
   
-  $arg= arg(0);
-  $arg_array['r'] = $arg;
-      watchdog('arg','<pre>' . print_r($arg_array, TRUE) . '</pre>');
+//  $arg= arg(0);
+//  $arg_array['r'] = $arg;
+//      watchdog('arg','<pre>' . print_r($arg_array, TRUE) . '</pre>');
 
-  if(empty($arg)) {
+  //if(empty($arg)) {
     $arg_array = explode( '/', $type);
     $arg = $arg_array[3];
     watchdog('arg1','<pre>' . print_r($arg_array, TRUE) . '</pre>');
-  }
+  //}
  
   if ($arg !== 'dashboard') {
 
