@@ -10,12 +10,13 @@
  */
 function leanbox_dashboard_menu() {
   $items = array();
-
+  
   $items['sales-delivery-table'] = array(
     'title' => 'Sales Delivery Report',
     'access arguments' => array('Distributor Upload File'),
     'page callback' => 'leanbox_dashboard_sales_delivery_table_callback',
   );
+    
   $items['sales-delivery-table/export'] = array(
     'title' => 'Sales Delivery Report Export',
     'description' => 'Sales Delivery Report Export',
@@ -150,7 +151,7 @@ function party_packing_filter_callback() {
 
   switch ($activity_type) {
     case 'otif' :
-      $activity_type = 'otif_ajax';
+      $activity_type = $_POST['url'];
       $output_data = leanbox_dashboard_gauge_chart_query_details($activity_type, $start_date, $end_date);
       break;
 
@@ -1438,3 +1439,4 @@ function leanbox_dashboard_van_stop_master($field_name) {
     $dis_time = $query->execute()->fetchField();
     return $dis_time;
 }
+
