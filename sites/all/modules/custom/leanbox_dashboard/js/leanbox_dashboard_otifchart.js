@@ -26,7 +26,7 @@
 						type: "POST",
 						cache: false, //for Chrome and IE8
 						url: "/chart-daterange-filter",
-						data: {start_date: start_date, end_date: end_date, activity_type: 'otif', url: 'url'},
+						data: {start_date: start_date, end_date: end_date, activity_type: 'otif', url: url},
 						success: function (response) {
 							google.charts.setOnLoadCallback(function () {
 								drawotifChart(response.output);
