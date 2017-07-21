@@ -2083,7 +2083,7 @@ function leanbox_dashboard_gauge_chart_query_details($type, $start_date = '', $e
     $output = round(($total_dis_bill_val / $total['bill_value'] ) * 100);
   }
   $output1['output'] = $output;
-  $arg= $_GET['q'];
+  $arg= current_path();
   $arg0 = explode( '/', $arg);
   watchdog('arg','<pre>' . print_r($arg0, TRUE) . '</pre>');
 
