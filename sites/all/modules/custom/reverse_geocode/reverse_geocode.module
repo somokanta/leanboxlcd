@@ -1495,7 +1495,12 @@ function reverse_geocode_node_presave($node) {
           $node->field_area_hook[LANGUAGE_NONE][0]['nid'] = $day_van_area_nid;
         }
 
-      }
+      } 
+    }
+  }
+  else if ($node->type == 'dispatch_data') {
+    if (!empty($node->field_dispatch_date[LANGUAGE_NONE][0]['value'])) {    
+      $node->field_dispatch_status[LANGUAGE_NONE][0]['value'] = 1;
     }
   }
   
