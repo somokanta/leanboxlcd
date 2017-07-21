@@ -2085,6 +2085,7 @@ function leanbox_dashboard_gauge_chart_query_details($type, $start_date = '', $e
   $output1['output'] = $output;
   $arg= $_GET['q'];
   $arg0 = explode( '/', $arg);
+  watchdog('arg','<pre>' . print_r($arg0, TRUE) . '</pre>');
 
   if ($arg0[0] != 'dashboard') {
 
