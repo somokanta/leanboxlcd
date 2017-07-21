@@ -2083,11 +2083,10 @@ function leanbox_dashboard_gauge_chart_query_details($type, $start_date = '', $e
     $output = round(($total_dis_bill_val / $total['bill_value'] ) * 100);
   }
   $output1['output'] = $output;
-  $ra['r'] = $_GET['q'];
-  
-  watchdog('arg','<pre>' . print_r($ra, TRUE) . '</pre>');
+  $arg= $_GET['q'];
+  $arg0 = explode( '/', $arg);
 
-  if ($_GET['q'] != 'dashboard') {
+  if ($arg0[0] != 'dashboard') {
 
     $mtd_html = "<h3>Channel Wise Otif</h3>";
     $mtd_data .= get_mtd_data_channel($start_date, $end_date, $uid);
