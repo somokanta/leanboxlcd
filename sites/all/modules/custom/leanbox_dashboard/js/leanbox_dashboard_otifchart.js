@@ -20,7 +20,7 @@
 				e.preventDefault();
 			  var start_date = $(this).parent().prev().prev().find("input[name='start_date[date]']").val();
 				var end_date = $(this).parent().prev().find("input[name='end_date[date]']").val();
-				var url = window.location.href; console.log(f);
+				var url = window.location.href;
 				if (start_date != '' && end_date != '') {
 					$.ajax({
 						type: "POST",
