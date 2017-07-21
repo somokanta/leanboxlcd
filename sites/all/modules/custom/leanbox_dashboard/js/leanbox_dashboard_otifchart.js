@@ -20,12 +20,13 @@
 				e.preventDefault();
 			  var start_date = $(this).parent().prev().prev().find("input[name='start_date[date]']").val();
 				var end_date = $(this).parent().prev().find("input[name='end_date[date]']").val();
+				var url = window.location.href; console.log(f);
 				if (start_date != '' && end_date != '') {
 					$.ajax({
 						type: "POST",
 						cache: false, //for Chrome and IE8
 						url: "/chart-daterange-filter",
-						data: {start_date: start_date, end_date: end_date, activity_type: 'otif'},
+						data: {start_date: start_date, end_date: end_date, activity_type: 'otif', url: 'url'},
 						success: function (response) {
 							google.charts.setOnLoadCallback(function () {
 								drawotifChart(response.output);
