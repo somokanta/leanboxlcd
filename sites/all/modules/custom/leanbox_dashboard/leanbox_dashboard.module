@@ -152,7 +152,7 @@ function party_packing_filter_callback() {
   switch ($activity_type) {
     case 'otif' :
       $activity_type = $_POST['url'];
-      $output_data = leanbox_dashboard_gauge_chart_query_details($activity_type, $start_date, $end_date);
+      $output_data = leanbox_dashboard_gauge_chart_query_details($activity_type, $start_date, $end_date, FALSE);
       break;
 
     case 'party_packing_productivity' :
