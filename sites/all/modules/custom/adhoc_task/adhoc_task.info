@@ -1,0 +1,4 @@
+name = Adhoc Task
+description = Adhoc Task.
+package = Custom
+core = 7.x
