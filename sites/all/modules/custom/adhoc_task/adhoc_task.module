@@ -4,7 +4,7 @@
  * 
  * @return type
  */
-function email_status_menu() {
+function adhoc_task_menu() {
   $items['email/duplicate-data'] = array(
     'title' => 'Send Email Of Duplicate Data',
     'page callback' => 'send_email_duplicate_data',
