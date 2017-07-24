@@ -30,7 +30,7 @@ function send_email_duplicate_data() {
   foreach ($users as $key => $val) {
     $uid = $val['uid'];
     $distributor_id = change_feeds_import_get_distributor_id($uid);
-    $rs_code = change_feeds_import_get_rs_code($distributor_id);
+    $hul_username = change_feeds_import_get_hul_user_name($distributor_id);
     $query = db_select('custom_billing_data', 'cb');
     $query->condition('cb.distributor_id', $uid, '=');
     $query->condition('cb.created_date', array($start, $end), 'BETWEEN');
@@ -43,7 +43,7 @@ function send_email_duplicate_data() {
       $distributor_id = $value->distributor_id;
       if (isset($res[$bill . "-" . $sku . "-" . $distributor_id])) {
         // $id[$bill . "-" . $sku . "-" . $distributor_id . "-" . $k] = $value->id;
-        $count[$distributor_id . "-" . $rs_code][] = $value->id;
+        $count[$distributor_id . "-" . $hul_username][] = $value->id;
       }
       $res[$bill . "-" . $sku . "-" . $distributor_id] = array();
     }
@@ -77,14 +77,14 @@ function send_email_duplicate_data() {
  * @param type $distributor_id
  * @return type
  */
-function change_feeds_import_get_rs_code($distributor_id) {
+function change_feeds_import_get_hul_user_name($distributor_id) {
   $query = db_select('users', 'u');
   $query->condition('u.uid', $distributor_id, '=');
-  $query->join('field_data_field_rs_code', 'rs', 'rs.entity_id = u.uid');
-  $query->fields('rs', array('field_rs_code_value'));
+  $query->join('field_data_field_third_party_username', 'pu', 'pu.entity_id = u.uid');
+  $query->fields('pu', array('field_third_party_username_value'));
   $result = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
-  $rs_code = $result[0]['field_rs_code_value'];
-  return $rs_code;
+  $hul_username = $result[0]['field_third_party_username_value'];
+  return $hul_username;
 }
 
 /**
