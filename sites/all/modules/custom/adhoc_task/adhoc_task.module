@@ -24,11 +24,12 @@ function send_email_duplicate_data() {
   $start = strtotime(date('Y-m-d', strtotime("-7 days")));
 
   $query = db_select('users', 'u');
-  $query->fields('u', array('uid'));
+  $query->fields('u', array('uid','name'));
   $users = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
 
   foreach ($users as $key => $val) {
     $uid = $val['uid'];
+    $name = $val['name'];
     $distributor_id = change_feeds_import_get_distributor_id($uid);
     $hul_username = change_feeds_import_get_hul_user_name($distributor_id);
     $query = db_select('custom_billing_data', 'cb');
@@ -44,7 +45,7 @@ function send_email_duplicate_data() {
       $created_date = date('d/m/Y',$value->created_date);
       if (isset($res[$bill . "-" . $sku . "-" . $distributor_id])) {
         // $id[$bill . "-" . $sku . "-" . $distributor_id . "-" . $k] = $value->id;
-        $count[$distributor_id . "-" . $hul_username. "-" . $created_date][] = $value->id;
+        $count[$distributor_id . "-" . $hul_username. "-" . $created_date. "-" .$name][] = $value->id;
       }
       $res[$bill . "-" . $sku . "-" . $distributor_id] = array();
     }
@@ -53,10 +54,10 @@ function send_email_duplicate_data() {
   foreach ($count as $key => $val) {
     $counts = count($val);
     $data = explode("-", $key);
-    $rows[] = array($data[0], $data[1], $data[2], $counts);
+     $rows[] = array($data[3], $data[0], $data[1], $data[2], $counts);
   }
 
-  $header = array('UID', 'RS Code', 'Date', 'Bill Count');
+  $header = array('Name','UID', 'RS Code', 'Date','Bill Count');
   if (empty($rows)) {
     $rows[] = array("<td colspan='4' style='text-align: center;'> There is No Duplicate Records Found</td>");
   }
@@ -65,8 +66,8 @@ function send_email_duplicate_data() {
   $html .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
   $params['subject'] = "Duplicate Record Details";
   $params['body'] = $html;
-// $mail_to = "gaurav@leanbox.in";
-  $mail_to = "hplord12@gmail.com";
+ $mail_to = "gaurav@leanbox.in";
+//  $mail_to = "hplord12@gmail.com";
   $from = "MIS.HELPDESK@leanbox.in";
   drupal_mail('adhoc_task', 'duplicate_data', $mail_to, LANGUAGE_NONE, $params, $from);
 }
