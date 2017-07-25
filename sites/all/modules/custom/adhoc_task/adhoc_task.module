@@ -66,8 +66,8 @@ function send_email_duplicate_data() {
   $html .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
   $params['subject'] = "Duplicate Record Details";
   $params['body'] = $html;
-// $mail_to = "gaurav@leanbox.in";
-  $mail_to = "hplord12@gmail.com";
+ $mail_to = "gaurav@leanbox.in";
+ // $mail_to = "hplord12@gmail.com";
   $from = "MIS.HELPDESK@leanbox.in";
   drupal_mail('adhoc_task', 'duplicate_data', $mail_to, LANGUAGE_NONE, $params, $from);
 }
