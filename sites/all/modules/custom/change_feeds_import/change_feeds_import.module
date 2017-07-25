@@ -2544,6 +2544,8 @@ function _send_file_using_sftp($file_name, $file_uri) {
   watchdog('$file_name', '<pre>' . print_r($file_name, TRUE) . '</pre>');
 
       $output = ssh2_scp_send($resConnection, $csv_realfilename, $file_name);
+      ssh2_exec($resConnection,'exit');
+      
       if($output)
       watchdog('$file_name$output', '<pre>' . print_r(var_dump($output), TRUE) . '</pre>');
 

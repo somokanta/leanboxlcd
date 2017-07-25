@@ -34,16 +34,17 @@ function send_email_duplicate_data() {
     $query = db_select('custom_billing_data', 'cb');
     $query->condition('cb.distributor_id', $uid, '=');
     $query->condition('cb.created_date', array($start, $end), 'BETWEEN');
-    $query->fields('cb', array('bill_number', 'sku7_code', 'id', 'distributor_id'));
+    $query->fields('cb', array('bill_number', 'sku7_code', 'id', 'distributor_id','created_date'));
     $results = $query->execute()->fetchAll();
 
     foreach ($results as $k => $value) {
       $bill = $value->bill_number;
       $sku = $value->sku7_code;
       $distributor_id = $value->distributor_id;
+      $created_date = date('d/m/Y',$value->created_date);
       if (isset($res[$bill . "-" . $sku . "-" . $distributor_id])) {
         // $id[$bill . "-" . $sku . "-" . $distributor_id . "-" . $k] = $value->id;
-        $count[$distributor_id . "-" . $hul_username][] = $value->id;
+        $count[$distributor_id . "-" . $hul_username. "-" . $created_date][] = $value->id;
       }
       $res[$bill . "-" . $sku . "-" . $distributor_id] = array();
     }
@@ -52,24 +53,22 @@ function send_email_duplicate_data() {
   foreach ($count as $key => $val) {
     $counts = count($val);
     $data = explode("-", $key);
-    $rows[] = array($data[0], $data[1], $counts);
+    $rows[] = array($data[0], $data[1], $data[2], $counts);
   }
 
-  $header = array('UID', 'RS Code', 'Bill Count');
+  $header = array('UID', 'RS Code', 'Date', 'Bill Count');
   if (empty($rows)) {
     $rows[] = array("<td colspan='4' style='text-align: center;'> There is No Duplicate Records Found</td>");
   }
 
   $html = "<h3>Duplicate Records Details</h3>";
   $html .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
-  dpm($html, "html");
   $params['subject'] = "Duplicate Record Details";
   $params['body'] = $html;
 // $mail_to = "gaurav@leanbox.in";
   $mail_to = "hplord12@gmail.com";
   $from = "MIS.HELPDESK@leanbox.in";
   drupal_mail('adhoc_task', 'duplicate_data', $mail_to, LANGUAGE_NONE, $params, $from);
-  return "success";
 }
 
 /**
