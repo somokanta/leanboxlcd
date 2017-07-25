@@ -1,0 +1,102 @@
+<?php
+
+/**
+ * 
+ * @return type
+ */
+function adhoc_task_menu() {
+  $items['email/duplicate-data'] = array(
+    'title' => 'Send Email Of Duplicate Data',
+    'page callback' => 'send_email_duplicate_data',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+
+  return $items;
+}
+
+/**
+ * 
+ * @return string
+ */
+function send_email_duplicate_data() {
+  $end = time();
+  $start = strtotime(date('Y-m-d', strtotime("-7 days")));
+
+  $query = db_select('users', 'u');
+  $query->fields('u', array('uid'));
+  $users = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+
+  foreach ($users as $key => $val) {
+    $uid = $val['uid'];
+    $distributor_id = change_feeds_import_get_distributor_id($uid);
+    $hul_username = change_feeds_import_get_hul_user_name($distributor_id);
+    $query = db_select('custom_billing_data', 'cb');
+    $query->condition('cb.distributor_id', $uid, '=');
+    $query->condition('cb.created_date', array($start, $end), 'BETWEEN');
+    $query->fields('cb', array('bill_number', 'sku7_code', 'id', 'distributor_id','created_date'));
+    $results = $query->execute()->fetchAll();
+
+    foreach ($results as $k => $value) {
+      $bill = $value->bill_number;
+      $sku = $value->sku7_code;
+      $distributor_id = $value->distributor_id;
+      $created_date = date('d/m/Y',$value->created_date);
+      if (isset($res[$bill . "-" . $sku . "-" . $distributor_id])) {
+        // $id[$bill . "-" . $sku . "-" . $distributor_id . "-" . $k] = $value->id;
+        $count[$distributor_id . "-" . $hul_username. "-" . $created_date][] = $value->id;
+      }
+      $res[$bill . "-" . $sku . "-" . $distributor_id] = array();
+    }
+  }
+
+  foreach ($count as $key => $val) {
+    $counts = count($val);
+    $data = explode("-", $key);
+    $rows[] = array($data[0], $data[1], $data[2], $counts);
+  }
+
+  $header = array('UID', 'RS Code', 'Date', 'Bill Count');
+  if (empty($rows)) {
+    $rows[] = array("<td colspan='4' style='text-align: center;'> There is No Duplicate Records Found</td>");
+  }
+
+  $html = "<h3>Duplicate Records Details</h3>";
+  $html .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
+  $params['subject'] = "Duplicate Record Details";
+  $params['body'] = $html;
+// $mail_to = "gaurav@leanbox.in";
+  $mail_to = "hplord12@gmail.com";
+  $from = "MIS.HELPDESK@leanbox.in";
+  drupal_mail('adhoc_task', 'duplicate_data', $mail_to, LANGUAGE_NONE, $params, $from);
+}
+
+/**
+ * 
+ * @param type $distributor_id
+ * @return type
+ */
+function change_feeds_import_get_hul_user_name($distributor_id) {
+  $query = db_select('users', 'u');
+  $query->condition('u.uid', $distributor_id, '=');
+  $query->join('field_data_field_third_party_username', 'pu', 'pu.entity_id = u.uid');
+  $query->fields('pu', array('field_third_party_username_value'));
+  $result = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+  $hul_username = $result[0]['field_third_party_username_value'];
+  return $hul_username;
+}
+
+/**
+ * 
+ * @param type $key
+ * @param type $message
+ * @param type $params
+ */
+function adhoc_task_mail($key, &$message, $params) {
+  switch ($key) {
+    case 'duplicate_data':
+      $message['subject'] = $params['subject'];
+      $message['body'][] = $params['body'];
+      break;
+  }
+}
