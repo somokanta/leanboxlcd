@@ -2527,17 +2527,12 @@ function impact_delivery_partypack_cron() {
 }
 
 function _send_file_using_sftp($file_name, $file_uri) {
-    watchdog('file_name', '<pre>' . print_r($file_name, TRUE) . '</pre>');
-  watchdog('file_uri', '<pre>' . print_r($file_uri, TRUE) . '</pre>');
-
   if (!empty($file_name) && !empty($file_uri)) {
     $strServer = "103.233.76.251";  // ip address
     $strServerPort = 22;
     $strServerUsername = "sftpuser03";
     $strServerPassword = "Techub123#";
-    // $dest_file = "C:\SFTP_ROOT\sftpuser03";
-    $csv_filename = 'impact_delivery_report.csv';
-    $csv_filename = $file_name;
+    
     $csv_realfilename = drupal_realpath($file_uri);
 
     //Send file via sftp to server
@@ -2546,8 +2541,6 @@ function _send_file_using_sftp($file_name, $file_uri) {
 
     if (ssh2_auth_password($resConnection, $strServerUsername, $strServerPassword)) {
       //Initialize SFTP subsystem
-  watchdog('$csv_realfilename', '<pre>' . print_r($csv_realfilename, TRUE) . '</pre>');
-  watchdog('$file_name', '<pre>' . print_r($file_name, TRUE) . '</pre>');
 
       $output = ssh2_scp_send($resConnection, $csv_realfilename, $file_name);
       ssh2_exec($resConnection,'exit');
