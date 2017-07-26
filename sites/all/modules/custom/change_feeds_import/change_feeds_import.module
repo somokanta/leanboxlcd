@@ -2560,3 +2560,18 @@ function _send_file_using_sftp($file_name, $file_uri) {
     return '';
   }
 }
+
+/**
+ * 
+ * @param type $file_name
+ * @param type $file_uri
+ * If above function "_send_file_using_sftp" will not work then
+ *  We can move the file directly thought the linux command 
+ */
+function _send_file_using_shellexec($file_name, $file_uri) {
+  if (!empty($file_name) && !empty($file_uri)) {
+    $csv_realfilename = drupal_realpath($file_uri);
+    $command = 'sshpass -p "Techub123#" scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -r ' . $csv_realfilename . ' sftpuser03@103.233.76.251:/';
+    shell_exec($command);
+  }
+}
