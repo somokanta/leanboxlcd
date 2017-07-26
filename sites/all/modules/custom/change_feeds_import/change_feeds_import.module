@@ -26,9 +26,9 @@ function change_feeds_import_permission() {
 function change_feeds_import_menu() {
   $items = array();
 
-  $items['update-billing-data-1'] = array(
-    'title' => 'Update Billing Data',
-    'page callback' => 'update_billing_data1',
+  $items['sales-return-data'] = array(
+    'title' => 'Sales Return Data',
+    'page callback' => 'sales_return_data',
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
@@ -408,7 +408,7 @@ function change_feeds_import_menu() {
   return $items;
 }
 
-function update_billing_data1() {
+function sales_return_data() {
   global $user;
 // Store distributor id in author in each node
   $distributor_id = change_feeds_import_get_distributor_id($user->uid);
