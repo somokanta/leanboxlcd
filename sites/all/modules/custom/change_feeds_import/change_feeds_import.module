@@ -2504,7 +2504,8 @@ function change_feeds_import_views_data_export_batch_finish($eid, $view_name) {
     $files = file_load_multiple(array(), array('uri' => $uri_path));
   }
 
-  _send_file_using_sftp($file_name, $file_uri);
+  //_send_file_using_sftp($file_name, $file_uri);
+  _send_file_using_shellexec($file_name, $file_uri);
 }
 
 /**
