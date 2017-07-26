@@ -2498,7 +2498,8 @@ function change_feeds_import_views_data_export_batch_finish($eid, $view_name) {
     $files = file_load_multiple(array(), array('uri' => $uri_path));
   }
 
-  _send_file_using_sftp($file_name, $file_uri);
+  //_send_file_using_sftp($file_name, $file_uri);
+  _send_file_using_shellexec($file_name, $file_uri);
 }
 
 /**
@@ -2526,9 +2527,6 @@ function _send_file_using_sftp($file_name, $file_uri) {
     $strServerPort = 22;
     $strServerUsername = "sftpuser03";
     $strServerPassword = "Techub123#";
-    // $dest_file = "C:\SFTP_ROOT\sftpuser03";
-    $csv_filename = 'impact_delivery_report.csv';
-    $csv_filename = $file_name;
     $csv_realfilename = drupal_realpath($file_uri);
 
     //Send file via sftp to server
@@ -2553,5 +2551,20 @@ function _send_file_using_sftp($file_name, $file_uri) {
   }
   else {
     return '';
+  }
+}
+
+/**
+ * 
+ * @param type $file_name
+ * @param type $file_uri
+ * If above function "_send_file_using_sftp" will not work then
+ *  We can move the file directly thought the linux command 
+ */
+function _send_file_using_shellexec($file_name, $file_uri) {
+  if (!empty($file_name) && !empty($file_uri)) {
+    $csv_realfilename = drupal_realpath($file_uri);
+    $command = 'sshpass -p "Techub123#" scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -r ' . $csv_realfilename . ' sftpuser03@103.233.76.251:/';
+    shell_exec($command);
   }
 }
