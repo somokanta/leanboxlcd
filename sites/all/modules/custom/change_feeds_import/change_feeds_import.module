@@ -409,9 +409,6 @@ function change_feeds_import_menu() {
 }
 
 function sales_return_data() {
-  global $user;
-// Store distributor id in author in each node
-  $distributor_id = change_feeds_import_get_distributor_id($user->uid);
   $start_date = strtotime("2017-7-15");
   $end_date = strtotime("2017-7-16");
   
@@ -424,7 +421,9 @@ function sales_return_data() {
 }
 
 function change_feeds_import_get_return_query($start_date, $end_date, $data) {
-  
+  global $user;
+  // Store distributor id in author in each node
+  $distributor_id = change_feeds_import_get_distributor_id($user->uid);
   $subquery = db_select('custom_billing_data', 'bd');
   $subquery->condition('bd.distributor_id', $distributor_id);
   if (!empty($start_date) && !empty($end_date)) {
