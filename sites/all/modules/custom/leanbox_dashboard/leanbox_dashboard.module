@@ -1603,15 +1603,15 @@ function change_feeds_import_get_return_query($start_date, $end_date, $data) {
   $query->leftjoin('field_data_field_sales_return_amt', 'r', 'r.entity_id = n.nid');
 
   if ($data == 'value') {
-    $query->addExpression('SUM(CASE WHEN  (((b.field_bill_value_value -  r.field_sales_return_amt_value) / b.field_bill_value_value ) >= 99) THEN (b.field_bill_value_value -  r.field_sales_return_amt_value) ELSE 0 END)', 'full_return');
-    $query->addExpression('SUM(CASE WHEN  ((((b.field_bill_value_value -  r.field_sales_return_amt_value) / b.field_bill_value_value ) <= 99)  AND  (((b.field_bill_value_value -  r.field_sales_return_amt_value) / b.field_bill_value_value ) >= 1) ) THEN (b.field_bill_value_value -  r.field_sales_return_amt_value) ELSE 0 END)', 'partial_return');
-    $query->addExpression('SUM(CASE WHEN  (r.field_sales_return_amt_value IS NULL) THEN field_bill_value_value ELSE 0 END)', 'null_value');
+    $query->addExpression('SUM(CASE WHEN  (((bd.sales_value -  r.field_sales_return_amt_value) / bd.sales_value ) >= 99) THEN (bd.sales_value -  r.field_sales_return_amt_value) ELSE 0 END)', 'full_return');
+    $query->addExpression('SUM(CASE WHEN  ((((bd.sales_value -  r.field_sales_return_amt_value) / bd.sales_value ) <= 99)  AND  (((bd.sales_value -  r.field_sales_return_amt_value) / bd.sales_value ) >= 1) ) THEN (bd.sales_value -  r.field_sales_return_amt_value) ELSE 0 END)', 'partial_return');
+    $query->addExpression('SUM(CASE WHEN  (r.field_sales_return_amt_value IS NULL) THEN bd.sales_value ELSE 0 END)', 'null_value');
 
     //$query->addExpression('SUM(CASE WHEN  (((b.field_bill_value_value -  r.field_sales_return_amt_value) / b.field_bill_value_value ) <= 1) THEN (b.field_bill_value_value -  r.field_sales_return_amt_value) ELSE 0 END)', 'full_delivery');
   }
   else {
-    $query->addExpression('SUM(CASE WHEN  (((b.field_bill_value_value -  r.field_sales_return_amt_value) / b.field_bill_value_value ) >= 99) THEN 1 ELSE 0 END)', 'full_return');
-    $query->addExpression('SUM(CASE WHEN  ((((b.field_bill_value_value -  r.field_sales_return_amt_value) / b.field_bill_value_value ) <= 99)  AND  (((b.field_bill_value_value -  r.field_sales_return_amt_value) / b.field_bill_value_value ) >= 1) ) THEN 1 ELSE 0 END)', 'partial_return');
+    $query->addExpression('SUM(CASE WHEN  (((bd.sales_value -  r.field_sales_return_amt_value) / bd.sales_value ) >= 99) THEN 1 ELSE 0 END)', 'full_return');
+    $query->addExpression('SUM(CASE WHEN  ((((bd.sales_value -  r.field_sales_return_amt_value) / bd.sales_value ) <= 99)  AND  (((bd.sales_value -  r.field_sales_return_amt_value) / bd.sales_value ) >= 1) ) THEN 1 ELSE 0 END)', 'partial_return');
     $query->addExpression('SUM(CASE WHEN  (r.field_sales_return_amt_value IS NULL) THEN 1 ELSE 0 END)', 'null_value');
 
     //$query->addExpression('SUM(CASE WHEN  (((b.field_bill_value_value -  r.field_sales_return_amt_value) / b.field_bill_value_value ) <= 1) THEN 1 ELSE 0 END)', 'full_delivery');
