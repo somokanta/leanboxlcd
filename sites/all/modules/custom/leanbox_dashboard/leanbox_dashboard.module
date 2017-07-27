@@ -1644,14 +1644,14 @@ function change_feeds_import_get_return_query($start_date, $end_date, $data) {
   
   foreach ($res2 as $channel => $info) {
     $row = array();
-    $total_vert = 0;
+    $total_vert = array();
 
     $row[] = $channel;
     foreach ($info as $key1 => $val1) {
       $total_horz = 0;
       foreach ($val1 as $key2 => $val2) {
         // calculate total vertically
-        $total_vert[$key1] += $val2;
+        $total_vert[$key2] += $val2;
         if (($key2 == 'full_return') || ($key2 == 'partial_return')) {
           // calculate total => full + partial
           $total_horz += $val2;
@@ -1659,6 +1659,7 @@ function change_feeds_import_get_return_query($start_date, $end_date, $data) {
         $row[] = round((($val2 / $total_bill_value) * 100), 2);
       }
       $row[] = round((($total_horz / $total_bill_value) * 100), 2);
+      $total_vert[$key1] += $total_horz;
     }
     $rows[] = $row;
   }
