@@ -1453,12 +1453,12 @@ function leanbox_dashboard_van_stop_master($field_name) {
  */
 function sales_return_data_callback() {
   $output = drupal_render(drupal_get_form('sales_return_data_table_form'));
-  if (isset($_GET['start_date']) && isset($_GET['end_date'])) {
+ // if (isset($_GET['start_date']) && isset($_GET['end_date'])) {
     $output .= sales_return_data();
-  }
-  else {
-    $output .= '<b>Please Apply Date Filter to view result</b>';
-  }
+ // }
+//  else {
+//    $output .= '<b>Please Apply Date Filter to view result</b>';
+//  }
   return $output;
 }
 
@@ -1469,8 +1469,16 @@ function sales_return_data_table_form($form, &$form_state) {
   if (isset($_GET['start_date'])) {
     $start_date = $_GET['start_date'];
   }
+  else {
+    $start_date = strtotime(date('Y-m-d') . "- 7 days");
+    $start_date = date('Y-m-d', $start_date);
+  }
   if (isset($_GET['end_date'])) {
     $end_date = $_GET['end_date'];
+  }
+  else {
+    $end_date = strtotime(date('Y-m-d') . "- 7 days");
+    $end_date = date('Y-m-d', $end_date);
   }
 
   $form['start_date'] = array(
