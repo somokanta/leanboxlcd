@@ -1520,7 +1520,7 @@ function sales_return_data_table_form_submit($form, &$form_state) {
     $filters['end_date'] = $form_state['values']['end_date'];
   }
   else {
-    drupal_set_message("From date should not be greater than current date", 'error');
+    drupal_set_message("End date should not be greater than current date", 'error');
   }
   $date1 = date_create($filters['end_date']);
   $date2 = date_create($filters['start_date']);
@@ -1561,6 +1561,30 @@ function change_feeds_import_get_return_query($start_date, $end_date, $data) {
   global $user;
   // Store distributor id in author in each node
   $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+
+  // Calculate sum of bill from custom billing data without tax
+  $query = db_select('custom_billing_data', 'bd');
+  $query->condition('bd.distributor_id', $distributor_id);
+  if (!empty($start_date) && !empty($end_date)) {
+    $query->condition('bd.bill_date', array($start_date, $end_date), 'BETWEEN');
+  }
+  $query->join('node', 'n', 'bd.bill_number = n.title');
+  $query->condition('n.type', 'sales_register_data');
+  $query->condition('n.uid', $distributor_id);
+  $query->leftjoin('field_data_field_sales_return_amt', 'r', 'r.entity_id = n.nid');
+
+  if ($data == 'value') {
+    $query->addExpression('SUM(bd.Sum_of_NET_SALES_VALUE)', 'sum');
+  }
+  else {
+    $query->groupBy('bd.bill_number');
+    $query->addExpression('COUNT(bd.bill_number)', 'bill_number');
+  }
+  
+  $res3 = $query->execute()->fetchField();
+  $total_bill_value = round($res3);
+
+
   $subquery = db_select('custom_billing_data', 'bd');
   $subquery->condition('bd.distributor_id', $distributor_id);
   if (!empty($start_date) && !empty($end_date)) {
@@ -1614,6 +1638,7 @@ function change_feeds_import_get_return_query($start_date, $end_date, $data) {
   $header['full_return'] = 'FULL';
   $header['partial_return'] = 'PARTIAL';
   $header['na'] = 'NA';
+  $header['total'] = 'TOTAL (Full + Partial)';
   
   
   
@@ -1622,9 +1647,14 @@ function change_feeds_import_get_return_query($start_date, $end_date, $data) {
 
     $row[] = $channel;
     foreach ($info as $key1 => $val1) {
+      $total = 0;
       foreach ($val1 as $key2 => $val2) {
-        $row[] = $val2;
+        if (($key2 == 'full_return') || ($key2 == 'partial_return')) {
+          $total += $val2;
+        }
+        $row[] = round((($val2 / $total_bill_value) * 100), 2);
       }
+      $row[] = round((($total / $total_bill_value) * 100), 2);
     }
     $rows[] = $row;
   }
