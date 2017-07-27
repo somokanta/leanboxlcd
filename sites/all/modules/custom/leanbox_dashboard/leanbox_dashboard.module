@@ -1482,18 +1482,18 @@ function sales_return_data_table_form($form, &$form_state) {
   }
 
   $form['start_date'] = array(
-    '#title' => 'From Date',
+    '#title' => 'From',
     '#type' => 'date_popup',
     '#date_format' => 'Y-m-d',
-    '#date_year_range' => '-10:+0',
+    '#date_year_range' => '-5:+0',
     '#default_value' => $start_date,
     '#required' => TRUE,
   );
   $form['end_date'] = array(
-    '#title' => 'To Date',
+    '#title' => 'To',
     '#type' => 'date_popup',
     '#date_format' => 'Y-m-d',
-    '#date_year_range' => '-10:+0',
+    '#date_year_range' => '-5:+0',
     '#default_value' => $end_date,
     '#required' => TRUE,
   );
@@ -1539,11 +1539,15 @@ function sales_return_data() {
   if (isset($_GET['start_date'])) {
     $start_date = strtotime($_GET['start_date']);
   }
+  else {
+    $start_date = strtotime(date('Y-m-d') . "- 7 days");
+  }
   if (isset($_GET['end_date'])) {
     $end_date = strtotime($_GET['end_date']) + 86399; //+ 86399; //adding 23:59:59 hours to end date
   }
- // $start_date = strtotime("2017-7-15");
- // $end_date = strtotime("2017-7-16");
+  else {
+    $end_date = strtotime(date('Y-m-d') . "- 7 days");
+  }
   
   $output .= change_feeds_import_get_return_query($start_date, $end_date, 'value');
   $output .= '</br></br></br>';
