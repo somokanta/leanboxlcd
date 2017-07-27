@@ -1577,8 +1577,7 @@ function change_feeds_import_get_return_query($start_date, $end_date, $data) {
     $query->addExpression('SUM(bd.Sum_of_NET_SALES_VALUE)', 'sum');
   }
   else {
-    $query->groupBy('bd.bill_number');
-    $query->addExpression('COUNT(bd.bill_number)', 'bill_number');
+    $query->addExpression('COUNT(DISTINCT(bd.bill_number))', 'bill_number');
   }
   
   $res3 = $query->execute()->fetchField();
@@ -1641,10 +1640,9 @@ function change_feeds_import_get_return_query($start_date, $end_date, $data) {
   $header['total'] = 'TOTAL (Full + Partial)';
   
   
-  
+  $total_vert = array();
   foreach ($res2 as $channel => $info) {
     $row = array();
-    $total_vert = array();
 
     $row[] = $channel;
     foreach ($info as $key1 => $val1) {
