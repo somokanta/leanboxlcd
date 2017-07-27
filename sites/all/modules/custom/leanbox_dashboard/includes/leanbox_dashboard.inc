@@ -819,7 +819,7 @@ function leanbox_dashboard_chart_filter_delivery_form($form, &$form_state) {
 
 
   $form['unloading'] = array(
-    '#markup' => '<a href = "/leanbox-chart-details/delivery"><div id="delivery_div"></div></a>',
+    '#markup' => '<a href = "/sales-return-data"><div id="delivery_div"></div></a>',
   );
 
   return $form;

@@ -26,12 +26,6 @@ function change_feeds_import_permission() {
 function change_feeds_import_menu() {
   $items = array();
 
-  $items['sales-return-data'] = array(
-    'title' => 'Sales Return Data',
-    'page callback' => 'sales_return_data',
-    'access callback' => TRUE,
-    'type' => MENU_CALLBACK,
-  );
   $items['update-billing-data'] = array(
     'title' => 'Update Billing Data',
     'page callback' => 'update_billing_data',
@@ -407,99 +401,6 @@ function change_feeds_import_menu() {
 
   return $items;
 }
-
-function sales_return_data() {
-  $start_date = strtotime("2017-7-15");
-  $end_date = strtotime("2017-7-16");
-  
-  $output .= change_feeds_import_get_return_query($start_date, $end_date, 'value');
-  $output .= '</br></br></br>';
-  $output .= change_feeds_import_get_return_query($start_date, $end_date, 'count');
-
-  
-  return $output;
-}
-
-function change_feeds_import_get_return_query($start_date, $end_date, $data) {
-  global $user;
-  // Store distributor id in author in each node
-  $distributor_id = change_feeds_import_get_distributor_id($user->uid);
-  $subquery = db_select('custom_billing_data', 'bd');
-  $subquery->condition('bd.distributor_id', $distributor_id);
-  if (!empty($start_date) && !empty($end_date)) {
-    $subquery->condition('bd.bill_date', array($start_date, $end_date), 'BETWEEN');
-  }
-  $subquery->groupBy('bd.bill_number');
-  $subquery->addfield('bd', 'bill_number', 'bill_number');
-  $subquery->addExpression('SUM(bd.Sum_of_NET_SALES_VALUE)', 'sales_value');
-
-  $query = db_select('node', 'n');
-  $query->condition('n.type', 'sales_register_data');
-  $query->condition('n.uid', $distributor_id);
-  $query->join($subquery, 'bd', 'n.title=bd.bill_number');
-
-  $query->join('field_data_field_sr_bill_date', 'i', 'i.entity_id = n.nid');
-  $query->join('field_data_field_bill_value', 'b', 'b.entity_id = n.nid');
-  $query->leftjoin('field_data_field_sales_return_amt', 'r', 'r.entity_id = n.nid');
-
-  if ($data == 'value') {
-    $query->addExpression('SUM(CASE WHEN  (((b.field_bill_value_value -  r.field_sales_return_amt_value) / b.field_bill_value_value ) >= 99) THEN (b.field_bill_value_value -  r.field_sales_return_amt_value) ELSE 0 END)', 'full_return');
-    $query->addExpression('SUM(CASE WHEN  ((((b.field_bill_value_value -  r.field_sales_return_amt_value) / b.field_bill_value_value ) <= 99)  AND  (((b.field_bill_value_value -  r.field_sales_return_amt_value) / b.field_bill_value_value ) >= 1) ) THEN (b.field_bill_value_value -  r.field_sales_return_amt_value) ELSE 0 END)', 'partial_return');
-    $query->addExpression('SUM(CASE WHEN  (r.field_sales_return_amt_value IS NULL) THEN field_bill_value_value ELSE 0 END)', 'null_value');
-
-    //$query->addExpression('SUM(CASE WHEN  (((b.field_bill_value_value -  r.field_sales_return_amt_value) / b.field_bill_value_value ) <= 1) THEN (b.field_bill_value_value -  r.field_sales_return_amt_value) ELSE 0 END)', 'full_delivery');
-  }
-  else {
-    $query->addExpression('SUM(CASE WHEN  (((b.field_bill_value_value -  r.field_sales_return_amt_value) / b.field_bill_value_value ) >= 99) THEN 1 ELSE 0 END)', 'full_return');
-    $query->addExpression('SUM(CASE WHEN  ((((b.field_bill_value_value -  r.field_sales_return_amt_value) / b.field_bill_value_value ) <= 99)  AND  (((b.field_bill_value_value -  r.field_sales_return_amt_value) / b.field_bill_value_value ) >= 1) ) THEN 1 ELSE 0 END)', 'partial_return');
-    $query->addExpression('SUM(CASE WHEN  (r.field_sales_return_amt_value IS NULL) THEN 1 ELSE 0 END)', 'null_value');
-
-    //$query->addExpression('SUM(CASE WHEN  (((b.field_bill_value_value -  r.field_sales_return_amt_value) / b.field_bill_value_value ) <= 1) THEN 1 ELSE 0 END)', 'full_delivery');
-  }
-
-  $query->join('field_data_field_sales_party_code', 'pc', 'pc.entity_id = n.nid');
-  $query->join('node', 'oun', 'pc.field_sales_party_code_value = oun.title');
-  $query->condition('oun.type', 'outlet_master');
-  $query->condition('oun.uid', $distributor_id, '=');
-  $query->join('field_data_field_channel', 'chan', 'chan.entity_id = oun.nid');
-  $query->fields('chan', array('field_channel_value'));
-  $query->groupBy('field_channel_value');
-  //  $query->addField('bd', 'sales_value', 'sales_value');
-  //  $res2 = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
-  $res2 = $query->execute()->fetchAll(PDO::FETCH_GROUP | PDO::FETCH_ASSOC);
-  
-  if($data = 'value') {
-    $header['value'] = 'VALUE WISE';
-  }
-  else {
-     $header['value'] = 'COUNT WISE';
-  }
-  $header['full_return'] = 'FULL';
-  $header['partial_return'] = 'PARTIAL';
-  $header['na'] = 'NA';
-  
-  
-  
-  foreach ($res2 as $channel => $info) {
-    $row = array();
-
-    $row[] = $channel;
-    foreach ($info as $key1 => $val1) {
-      foreach ($val1 as $key2 => $val2) {
-        $row[] = $val2;
-      }
-    }
-    $rows[] = $row;
-  }
-
-  $output = theme('table', array(
-    'header' => $header,
-    'rows' => $rows,
-    'attributes' => array('width' => '100%')
-  ));
-  return $output;
-}
-
 
 function update_billing_data_thankyou() {
   drupal_set_message("Thankyou updation is completed");

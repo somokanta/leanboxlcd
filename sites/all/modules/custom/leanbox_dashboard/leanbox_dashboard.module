@@ -11,6 +11,12 @@
 function leanbox_dashboard_menu() {
   $items = array();
   
+  $items['sales-return-data'] = array(
+    'title' => 'Sales Return Data',
+    'page callback' => 'sales_return_data_callback',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
   $items['sales-delivery-table'] = array(
     'title' => 'Sales Delivery Report',
     'access arguments' => array('Distributor Upload File'),
@@ -1438,5 +1444,196 @@ function leanbox_dashboard_van_stop_master($field_name) {
     $query->fields('pp', array($field_name. "_value"));
     $dis_time = $query->execute()->fetchField();
     return $dis_time;
+}
+
+
+/**
+ * Menu Callback for sales-return-data
+ * @return string
+ */
+function sales_return_data_callback() {
+  $output = drupal_render(drupal_get_form('sales_return_data_table_form'));
+ // if (isset($_GET['start_date']) && isset($_GET['end_date'])) {
+    $output .= sales_return_data();
+ // }
+//  else {
+//    $output .= '<b>Please Apply Date Filter to view result</b>';
+//  }
+  return $output;
+}
+
+
+function sales_return_data_table_form($form, &$form_state) {
+  $form = array();
+  $start_date = $end_date = '';
+  if (isset($_GET['start_date'])) {
+    $start_date = $_GET['start_date'];
+  }
+  else {
+    $start_date = strtotime(date('Y-m-d') . "- 7 days");
+    $start_date = date('Y-m-d', $start_date);
+  }
+  if (isset($_GET['end_date'])) {
+    $end_date = $_GET['end_date'];
+  }
+  else {
+    $end_date = strtotime(date('Y-m-d') . "- 7 days");
+    $end_date = date('Y-m-d', $end_date);
+  }
+
+  $form['start_date'] = array(
+    '#title' => 'From',
+    '#type' => 'date_popup',
+    '#date_format' => 'Y-m-d',
+    '#date_year_range' => '-5:+0',
+    '#default_value' => $start_date,
+    '#required' => TRUE,
+  );
+  $form['end_date'] = array(
+    '#title' => 'To',
+    '#type' => 'date_popup',
+    '#date_format' => 'Y-m-d',
+    '#date_year_range' => '-5:+0',
+    '#default_value' => $end_date,
+    '#required' => TRUE,
+  );
+
+  $form['submit-value'] = array(
+    '#type' => 'submit',
+    '#value' => 'submit',
+  );
+  return $form;
+}
+/*
+ * For Submit handler for Promotion Level 1
+ */
+function sales_return_data_table_form_submit($form, &$form_state) {
+  $time = date('Y-m-d', time());
+  $filters = '';
+  if (isset($form_state['values']['start_date']) && $form_state['values']['start_date'] <= $time) {
+    $filters['start_date'] = $form_state['values']['start_date'];
+  }
+  else {
+    drupal_set_message("From date should not be greater than current date", 'error');
+  }
+  if (isset($form_state['values']['end_date'])&& $form_state['values']['end_date'] <= $time) {
+    $filters['end_date'] = $form_state['values']['end_date'];
+  }
+  else {
+    drupal_set_message("From date should not be greater than current date", 'error');
+  }
+  $date1 = date_create($filters['end_date']);
+  $date2 = date_create($filters['start_date']);
+  $diff = date_diff($date1, $date2);
+  if ($diff->days > 31) {
+    drupal_set_message("You Can Not Select the Date range of more than 1 month", 'error');
+  }
+  $url = $_GET['q'];
+  drupal_goto($url, array('query' => $filters));
+}
+
+
+
+function sales_return_data() {
+  $output = $start_date = $end_date = '';
+  if (isset($_GET['start_date'])) {
+    $start_date = strtotime($_GET['start_date']);
+  }
+  else {
+    $start_date = strtotime(date('Y-m-d') . "- 7 days");
+  }
+  if (isset($_GET['end_date'])) {
+    $end_date = strtotime($_GET['end_date']) + 86399; //+ 86399; //adding 23:59:59 hours to end date
+  }
+  else {
+    $end_date = strtotime(date('Y-m-d') . "- 7 days");
+  }
+  
+  $output .= change_feeds_import_get_return_query($start_date, $end_date, 'value');
+  $output .= '</br></br></br>';
+  $output .= change_feeds_import_get_return_query($start_date, $end_date, 'count');
+
+  
+  return $output;
+}
+
+function change_feeds_import_get_return_query($start_date, $end_date, $data) {
+  global $user;
+  // Store distributor id in author in each node
+  $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+  $subquery = db_select('custom_billing_data', 'bd');
+  $subquery->condition('bd.distributor_id', $distributor_id);
+  if (!empty($start_date) && !empty($end_date)) {
+    $subquery->condition('bd.bill_date', array($start_date, $end_date), 'BETWEEN');
+  }
+  $subquery->groupBy('bd.bill_number');
+  $subquery->addfield('bd', 'bill_number', 'bill_number');
+  $subquery->addExpression('SUM(bd.Sum_of_NET_SALES_VALUE)', 'sales_value');
+
+  $query = db_select('node', 'n');
+  $query->condition('n.type', 'sales_register_data');
+  $query->condition('n.uid', $distributor_id);
+  $query->join($subquery, 'bd', 'n.title=bd.bill_number');
+
+  $query->join('field_data_field_sr_bill_date', 'i', 'i.entity_id = n.nid');
+  $query->join('field_data_field_bill_value', 'b', 'b.entity_id = n.nid');
+  $query->leftjoin('field_data_field_sales_return_amt', 'r', 'r.entity_id = n.nid');
+
+  if ($data == 'value') {
+    $query->addExpression('SUM(CASE WHEN  (((b.field_bill_value_value -  r.field_sales_return_amt_value) / b.field_bill_value_value ) >= 99) THEN (b.field_bill_value_value -  r.field_sales_return_amt_value) ELSE 0 END)', 'full_return');
+    $query->addExpression('SUM(CASE WHEN  ((((b.field_bill_value_value -  r.field_sales_return_amt_value) / b.field_bill_value_value ) <= 99)  AND  (((b.field_bill_value_value -  r.field_sales_return_amt_value) / b.field_bill_value_value ) >= 1) ) THEN (b.field_bill_value_value -  r.field_sales_return_amt_value) ELSE 0 END)', 'partial_return');
+    $query->addExpression('SUM(CASE WHEN  (r.field_sales_return_amt_value IS NULL) THEN field_bill_value_value ELSE 0 END)', 'null_value');
+
+    //$query->addExpression('SUM(CASE WHEN  (((b.field_bill_value_value -  r.field_sales_return_amt_value) / b.field_bill_value_value ) <= 1) THEN (b.field_bill_value_value -  r.field_sales_return_amt_value) ELSE 0 END)', 'full_delivery');
+  }
+  else {
+    $query->addExpression('SUM(CASE WHEN  (((b.field_bill_value_value -  r.field_sales_return_amt_value) / b.field_bill_value_value ) >= 99) THEN 1 ELSE 0 END)', 'full_return');
+    $query->addExpression('SUM(CASE WHEN  ((((b.field_bill_value_value -  r.field_sales_return_amt_value) / b.field_bill_value_value ) <= 99)  AND  (((b.field_bill_value_value -  r.field_sales_return_amt_value) / b.field_bill_value_value ) >= 1) ) THEN 1 ELSE 0 END)', 'partial_return');
+    $query->addExpression('SUM(CASE WHEN  (r.field_sales_return_amt_value IS NULL) THEN 1 ELSE 0 END)', 'null_value');
+
+    //$query->addExpression('SUM(CASE WHEN  (((b.field_bill_value_value -  r.field_sales_return_amt_value) / b.field_bill_value_value ) <= 1) THEN 1 ELSE 0 END)', 'full_delivery');
+  }
+
+  $query->join('field_data_field_sales_party_code', 'pc', 'pc.entity_id = n.nid');
+  $query->join('node', 'oun', 'pc.field_sales_party_code_value = oun.title');
+  $query->condition('oun.type', 'outlet_master');
+  $query->condition('oun.uid', $distributor_id, '=');
+  $query->join('field_data_field_channel', 'chan', 'chan.entity_id = oun.nid');
+  $query->fields('chan', array('field_channel_value'));
+  $query->groupBy('field_channel_value');
+  //  $query->addField('bd', 'sales_value', 'sales_value');
+  //  $res2 = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+  $res2 = $query->execute()->fetchAll(PDO::FETCH_GROUP | PDO::FETCH_ASSOC);
+  
+  if($data == 'value') {
+    $header['value'] = 'VALUE WISE';
+  }
+  else {
+     $header['value'] = 'COUNT WISE';
+  }
+  $header['full_return'] = 'FULL';
+  $header['partial_return'] = 'PARTIAL';
+  $header['na'] = 'NA';
+  
+  
+  
+  foreach ($res2 as $channel => $info) {
+    $row = array();
+
+    $row[] = $channel;
+    foreach ($info as $key1 => $val1) {
+      foreach ($val1 as $key2 => $val2) {
+        $row[] = $val2;
+      }
+    }
+    $rows[] = $row;
+  }
+
+  $output = theme('table', array(
+    'header' => $header,
+    'rows' => $rows,
+    'attributes' => array('width' => '100%')
+  ));
+  return $output;
 }
 
