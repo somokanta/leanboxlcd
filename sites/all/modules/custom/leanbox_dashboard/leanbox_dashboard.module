@@ -1663,11 +1663,11 @@ function change_feeds_import_get_return_query($start_date, $end_date, $data) {
     $rows[] = $row;
   }
   
-  $row[] = 'TOTAL';
+  $row1[] = 'TOTAL';
   foreach ($total_vert as $total_val) {
-    $row[] = round((($total_val / $total_bill_value) * 100), 2);
+    $row1[] = round((($total_val / $total_bill_value) * 100), 2);
   }
-  $rows[] = $row;
+  $rows[] = $row1;
 
   $output = theme('table', array(
     'header' => $header,
