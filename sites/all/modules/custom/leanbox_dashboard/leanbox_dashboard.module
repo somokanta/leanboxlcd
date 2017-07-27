@@ -1660,14 +1660,14 @@ function change_feeds_import_get_return_query($start_date, $end_date, $data) {
       }
       $row[] = round((($total_horz / $total_bill_value) * 100), 2);
     }
-    
-    $row[] = 'TOTAL';
-    foreach ($total_vert as $total_val) {
-      $row[] = round((($total_val / $total_bill_value) * 100), 2);
-    }
-
     $rows[] = $row;
   }
+  
+  $row[] = 'TOTAL';
+  foreach ($total_vert as $total_val) {
+    $row[] = round((($total_val / $total_bill_value) * 100), 2);
+  }
+  $rows[] = $row;
 
   $output = theme('table', array(
     'header' => $header,
