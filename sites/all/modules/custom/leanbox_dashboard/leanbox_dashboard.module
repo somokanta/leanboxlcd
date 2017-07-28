@@ -1655,9 +1655,9 @@ function change_feeds_import_get_return_query($start_date, $end_date, $data) {
           // calculate total => full + partial
           $total_horz += $val2;
         }
-        $row[] = round((($val2 / $total_bill_value) * 100), 2);
+        $row[] = round((($val2 / $total_bill_value) * 100), 2) . ' %';
       }
-      $row[] = round((($total_horz / $total_bill_value) * 100), 2);
+      $row[] = round((($total_horz / $total_bill_value) * 100), 2) . ' %';
       $total_vert['total_horz'] += $total_horz;
     }
     $rows[] = $row;
@@ -1665,7 +1665,7 @@ function change_feeds_import_get_return_query($start_date, $end_date, $data) {
   
   $row1[] = 'TOTAL';
   foreach ($total_vert as $total_val) {
-    $row1[] = round((($total_val / $total_bill_value) * 100), 2);
+    $row1[] = round((($total_val / $total_bill_value) * 100), 2) . ' %';
   }
   $rows[] = $row1;
 
