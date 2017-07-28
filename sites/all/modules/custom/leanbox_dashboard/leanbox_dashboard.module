@@ -1630,15 +1630,15 @@ function change_feeds_import_get_return_query($start_date, $end_date, $data) {
   $res2 = $query->execute()->fetchAll(PDO::FETCH_GROUP | PDO::FETCH_ASSOC);
   
   if($data == 'value') {
-    $header['value'] = 'VALUE WISE';
+    $header['value'] = 'VALUE WISE %';
   }
   else {
-     $header['value'] = 'COUNT WISE';
+     $header['value'] = 'COUNT WISE %';
   }
-  $header['full_return'] = 'FULL';
-  $header['partial_return'] = 'PARTIAL';
-  $header['na'] = 'NA';
-  $header['total'] = 'TOTAL (Full + Partial)';
+  $header['full_return'] = 'FULL %';
+  $header['partial_return'] = 'PARTIAL %';
+  $header['na'] = 'NA %';
+  $header['total'] = 'TOTAL (Full + Partial) %';
   
   
   $total_vert = array();
