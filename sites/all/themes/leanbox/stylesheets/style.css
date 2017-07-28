@@ -10996,7 +10996,7 @@ header[id="page-header"] .content > ul li:hover .caret:before, header[id="page-h
   border-top: 8px solid transparent;
 }
 /* line 1046, ../sass/leanbox-global.scss */
-header[id="page-header"] .content > ul li a {
+header[id="page-header"] .content > ul li a, header[id="page-header"] .content > ul li span {
   padding: 13px 15px;
   text-shadow: none;
 }
