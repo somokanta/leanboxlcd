@@ -55,9 +55,10 @@ function change_feeds_import_billing_data_form_validate($form, &$form_state) {
         form_set_error('file_upload', t($message));
         // log
       }
-      if (count($data) > 10001) {
+      dpm($data,"data");
+      if (count($data) > 15001) {
         // Count includes header count as well
-        $message = 'File Row Count should not be greater than 10000';
+        $message = 'File Row Count should not be greater than 15000';
         form_set_error('file_upload', t($message));
       }
     }
