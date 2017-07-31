@@ -66,7 +66,6 @@ function change_feeds_import_billing_data_form_validate($form, &$form_state) {
         }
         
         foreach ($data as $key => $value) {
-          dpm("1");
           $bill_no = $value[4];
           $sku = $value[7];
           $unique_comb = $bill_no.$sku;
