@@ -69,12 +69,10 @@ function change_feeds_import_billing_data_form_validate($form, &$form_state) {
           $bill_no = $value[4];
           $sku = $value[7];
           $unique_comb = $bill_no.$sku;
-          dpm($res['unique_combination'],"unique1");
           if(array_key_exists($unique_comb, $res['unique_combination'])){
-            form_set_error('duplicate_data', t('Duplicate Data Found Please Remove Duplicate Data and Upload Again.'));
+            form_set_error('duplicate_data', t('Duplicate Data Found , Please Remove Duplicate Data and Upload Again.'));
           }
           $res['unique_combination'][$unique_comb] = $unique_comb;
-          dpm($res['unique_combination'],"unique2");
         }
       }
     }
