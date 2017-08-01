@@ -1561,7 +1561,7 @@ function dispatch_planning_check_api_authentication($node_uid) {
 function dispatch_planning_views_api() {
   return array(
     'api' => 3,
-    'path' => drupal_get_path('module', 'views/dispatch_planning'),
+    'path' => drupal_get_path('module', 'dispatch_planning') . '/views'
   );
 }
 
