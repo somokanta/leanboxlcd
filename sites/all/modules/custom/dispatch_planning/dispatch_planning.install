@@ -40,37 +40,40 @@ function dispatch_planning_update_7101() {
       'id' => array(
         'description' => t('Id Primary Key'),
         'type' => 'serial',
-        'not null' => TRUE,
       ),
       'request_data' => array(
         'description' => t('API Details'),
         'type' => 'text',
-        'not null' => TRUE,
       ),
       'response_data' => array(
         'description' => t('API Details'),
         'type' => 'text',
-        'not null' => TRUE,
       ),
       'request_time' => array(
         'description' => t('API Request time'),
-        'type' => 'varchar',
+        'type' => 'int',
         'not null' => TRUE,
+        'default' => 0,
       ),
       'trip_id' => array(
         'description' => t('Trip Id'),
         'type' => 'varchar',
+        'length' => 25,
         'not null' => TRUE,
+        'default' => '',
       ),
       'api_type' => array(
         'description' => t('API Type'),
         'type' => 'varchar',
+        'length' => 25,
         'not null' => TRUE,
+        'default' => '',
       ),
     ),
     'indexes' => array(
       'trip_id' => array('trip_id'),
     ),
+    'primary key' => array('id'),
   );
 
   db_create_table('dispatch_planning_api_log', $schema['dispatch_planning_api_log']);
