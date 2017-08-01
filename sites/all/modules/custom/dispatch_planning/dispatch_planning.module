@@ -709,9 +709,9 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
 
   $dispatch_bill_count = count($rows);
   $bill_value_sum = $form_state['dispatch_planning']['bill_value_sum'];
-  
+
   $bill_nids = array_keys($rows);
-  
+
   global $user;
   $user_id = $user->uid;
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
@@ -733,14 +733,14 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
   if ($trip_id) {
     // Increment the next_value.
     db_update('trip_id_sequence')
-        ->fields(array('next_id' => $trip_id + 1))
-        ->condition('distributor_id', $distributor_id)
-        ->execute();
+      ->fields(array('next_id' => $trip_id + 1))
+      ->condition('distributor_id', $distributor_id)
+      ->execute();
   }
   else {
     $trip_id = 1;
     $insert = db_insert('trip_id_sequence')
-        ->fields(array(
+      ->fields(array(
       'distributor_id' => $distributor_id,
       'next_id' => $trip_id + 1
     ));
@@ -763,11 +763,11 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
   $node->field_trip_creation_date[$node->language][0]['value'] = strtotime(date('Y/m/d 00:00:00'));
   $node->field_trip_executon_date[$node->language][0]['value'] = $trip_execution_date;
   $node->field_hht_id[$node->language][0]['nid'] = get_nid_from_hht_id($hht_id);
-  
-  if($seq_flag){
+
+  if ($seq_flag) {
     $node->field_sequence_method[$node->language][0]['value'] = 1;
   }
-  else{
+  else {
     $node->field_sequence_method[$node->language][0]['value'] = 0;
   }
 
@@ -777,30 +777,33 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
   $nid = $node->nid;
 
   $bill_nids = array_keys($rows);
-  
+
   $sequence_array = $form_state['dispatch_planning']['sequence_array'];
   $manual_drs_sequence = $form_state['dispatch_planning']['manual_drs_sequence'];
-  
+
   // Start Dispatch API here
   $api_data = array();
-  
+
   if ($seq_flag) {
-    
+
     foreach ($bill_sequence as $key => $value) {
-      
+
       $node = node_load($value);
 
       $node->field_bill_sequence[LANGUAGE_NONE][0]['value'] = $key;
       $node->field_drs_sequence[LANGUAGE_NONE][0]['value'] = $key;
-      
+
       if (isset($node->field_delivery_pending[LANGUAGE_NONE])) {
         $node->field_delivery_pending = array();
       }
       $node->field_trip_id_reference[LANGUAGE_NONE][0]['nid'] = $nid;
       node_save($node);
-     
+
       // get api data here
-      $api_data[] = dispatch_planning_sales_reg_api($api_data, $value, $node, $trip_execution_date, $hht_id, $cashier, $trip_id);
+      $api_authentication_flag = dispatch_planning_check_api_authentication($node->uid);
+      if (!empty($api_authentication_flag)) {
+        $api_data[] = dispatch_planning_sales_reg_api($value, $node, $trip_execution_date, $hht_id, $cashier, $trip_id);
+      }
     }
 
     $diff = array_diff($bill_nids, $bill_sequence);
@@ -815,9 +818,12 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
         }
         $node->field_trip_id_reference[LANGUAGE_NONE][0]['nid'] = $nid;
         node_save($node);
-        
+
         // get api data here
-        $api_data[] = dispatch_planning_sales_reg_api($api_data, $value, $node, $trip_execution_date, $hht_id, $cashier, $trip_id);
+        $api_authentication_flag = dispatch_planning_check_api_authentication($node->uid);
+        if (!empty($api_authentication_flag)) {
+          $api_data[] = dispatch_planning_sales_reg_api($value, $node, $trip_execution_date, $hht_id, $cashier, $trip_id);
+        }
       }
     }
   }
@@ -825,7 +831,7 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
     foreach ($bill_nids as $value) {
       $node = node_load($value);
 
-      
+
       if (isset($sequence_array[$value]) && !empty($sequence_array[$value])) {
         $node->field_bill_sequence[LANGUAGE_NONE][0]['value'] = $sequence_array[$value];
       }
@@ -836,13 +842,31 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
       }
       $node->field_trip_id_reference[LANGUAGE_NONE][0]['nid'] = $nid;
       node_save($node);
-      
+
       // get api data here
-      $api_data[] = dispatch_planning_sales_reg_api($api_data, $value, $node, $trip_execution_date, $hht_id, $cashier, $trip_id);
+      $api_authentication_flag = dispatch_planning_check_api_authentication($node->uid);
+      if (!empty($api_authentication_flag)) {
+        $api_data[] = dispatch_planning_sales_reg_api($value, $node, $trip_execution_date, $hht_id, $cashier, $trip_id);
+      }
     }
   }
-  
+
   // Call Dispatch API Here
+  if (!empty($api_data)) {
+
+    $json_api_data = json_encode($api_data);
+    // request log
+    $api_type = 'dispatch_planning';
+    $sql_ins_id = dispatch_planning_api_log($api_data, $trip_id, $api_type);
+
+    $request_headers = array('Content-Type' => 'application/json');
+    $order_api_url = 'https://staging.fareye.co/api/v1/job?api_key=l1S6xa5mnxUXDuqv12q7lerLBL9l1ICq';
+    $options = array('headers' => $request_headers, 'method' => 'POST', 'data' => $json_api_data);
+    $response_data = drupal_http_request($order_api_url, $options);
+
+    // create response log entry
+    dispatch_planning_api_log_update($response_data, $sql_ins_id);
+  }
 
   drupal_set_message('Successfully updated. Trip id ' . $trip_id);
 }
@@ -1419,44 +1443,54 @@ function dispatch_planning_form_views_exposed_form_alter(&$form, &$form_state) {
   }
 }
 
+/**
+ * 
+ * @param type $value
+ * @param type $node
+ * @param type $trip_execution_date
+ * @param type $hht_id
+ * @param type $cashier
+ * @param type $trip_id
+ * @return array
+ */
+function dispatch_planning_sales_reg_api($value, $node, $trip_execution_date, $hht_id, $cashier, $trip_id) {
 
-function dispatch_planning_sales_reg_api($api_data, $value, $node, $trip_execution_date, $hht_id, $cashier, $trip_id) {
-   
-      // get billing data details
-      $node_uid = $node->uid;
-      $bill_number = $node->title;
-      $vehicle = $node->field_billing_van[LANGUAGE_NONE][0]['value'];
-      $bill_date = $node->field_sr_bill_date[LANGUAGE_NONE][0]['value'];
-      $bill_value = $node->field_bill_value[LANGUAGE_NONE][0]['value'];
-      $party_code = $node->field_sales_party_code[LANGUAGE_NONE][0]['value'];
-      $store_sequence = $node->field_drs_sequence[LANGUAGE_NONE][0]['value'];
-      
-      $billing_data_details = dispatch_planning_get_billing_data($node_uid, $bill_number);
-      $outlet_data_details = dispatch_planning_get_outlet_data($node_uid, $party_code);
-      
-      $api_data[$value]['jobType'] = 'delivery1';  // Hardcoded as suggested by gaurav
-      $reference_no = $node_uid . '_' . $bill_number;
-      $api_data[$value]['referenceNo'] = $reference_no;
-      $api_data[$value]['date'] = $trip_execution_date;
-      $api_data[$value]['city'] = 'ABC';
-      $api_data[$value]['hub'] = $node_uid;
-      $api_data[$value]['fieldExecutive'] = $hht_id;
-      $api_data[$value]['fieldExecutiveName'] = $cashier;
-      $api_data[$value]['seqSelected'] = $store_sequence;  // drs sequence
-      $api_data[$value]['jobData']['item_details'] = $billing_data_details; // array
-      $api_data[$value]['bill_number'] = $bill_number;
-      $api_data[$value]['runsheet_number'] = $trip_id;
-      
-      $api_data[$value]['beat_name'] = $outlet_data_details['field_beat_name_value'];  // beat name in outlet
-      //  $api_data[$value]['store_sequence_no'] = '';
-      $api_data[$value]['party_name'] = $outlet_data_details['field_party_name_value']; // party name in outlet
-      $api_data[$value]['vehicle'] = $vehicle;
-      $api_data[$value]['party_hll_code'] = $outlet_data_details['field_hul_code_value']; // hul code in outlet
-      $api_data[$value]['bill_value'] = $bill_value;
-      $api_data[$value]['locality'] = 'ABCD_locality';  // Hardcoded as suggested by gaurav
-      $api_data[$value]['party_code'] = $party_code;
-      $api_data[$value]['bill_date'] = $bill_date;
-      return $api_data;
+  $api_data = array();
+  // get billing data details
+  $node_uid = $node->uid;
+  $bill_number = $node->title;
+  $vehicle = $node->field_billing_van[LANGUAGE_NONE][0]['value'];
+  $bill_date = $node->field_sr_bill_date[LANGUAGE_NONE][0]['value'];
+  $bill_value = $node->field_bill_value[LANGUAGE_NONE][0]['value'];
+  $party_code = $node->field_sales_party_code[LANGUAGE_NONE][0]['value'];
+  $store_sequence = $node->field_drs_sequence[LANGUAGE_NONE][0]['value'];
+
+  $billing_data_details = dispatch_planning_get_billing_data($node_uid, $bill_number);
+  $outlet_data_details = dispatch_planning_get_outlet_data($node_uid, $party_code);
+
+  $api_data[$value]['jobType'] = 'delivery1';  // Hardcoded as suggested by gaurav
+  $reference_no = $node_uid . '_' . $bill_number;
+  $api_data[$value]['referenceNo'] = $reference_no;
+  $api_data[$value]['date'] = $trip_execution_date;
+  $api_data[$value]['city'] = 'ABC';
+  $api_data[$value]['hub'] = $node_uid;
+  $api_data[$value]['fieldExecutive'] = $hht_id;
+  $api_data[$value]['fieldExecutiveName'] = $cashier;
+
+  $api_data[$value]['jobData']['vehicle'] = $vehicle;
+  $api_data[$value]['jobData']['party_hll_code'] = $outlet_data_details['field_hul_code_value']; // hul code in outlet
+  $api_data[$value]['jobData']['bill_value'] = $bill_value;
+  $api_data[$value]['jobData']['item_details'] = $billing_data_details; // array
+  $api_data[$value]['jobData']['bill_date'] = $bill_date;
+  $api_data[$value]['jobData']['locality'] = 'ABCD_locality';  // Hardcoded as suggested by gaurav  
+  $api_data[$value]['jobData']['store_sequence_no'] = $store_sequence;  // drs sequence
+  $api_data[$value]['jobData']['party_name'] = $outlet_data_details['field_party_name_value']; // party name in outlet
+  $api_data[$value]['jobData']['beat_name'] = $outlet_data_details['field_beat_name_value'];  // beat name in outlet
+  $api_data[$value]['jobData']['party_code'] = $party_code;
+  $api_data[$value]['jobData']['bill_number'] = $bill_number;
+  $api_data[$value]['jobData']['runsheet_number'] = $trip_id;
+
+  return $api_data;
 }
 
 /**
@@ -1467,7 +1501,13 @@ function dispatch_planning_sales_reg_api($api_data, $value, $node, $trip_executi
  */
 function dispatch_planning_get_billing_data($node_uid, $bill_number) {
   $query = db_select('custom_billing_data', 'bd');
-  $query->fields('bd', array('tur', 'mrp', 'Sum_of_NET_SALES_CASES', 'Sum _of_NET_SALES_QTY', 'product_name', 'sku7_code', 'Sum_of_NET_SALES_KGS', 'Sum_of_NET_SALES_VALUE'));
+  $query->fields('bd', array('tur', 'mrp', 'product_name'));
+  $query->addfield('bd', 'Sum_of_NET_SALES_CASES', 'sum_net_sales_cases');
+  $query->addfield('bd', 'Sum_of_NET_SALES_QTY', 'sum_net_sales_quantity');
+  $query->addfield('bd', 'sku7_code', 'sku_code');
+  $query->addfield('bd', 'Sum_of_NET_SALES_KGS', 'sum_net_sales_kgs');
+  $query->addfield('bd', 'Sum_of_NET_SALES_VALUE', 'sum_net_sales_value');
+
   $query->condition('bd.distributor_id', $node_uid);
   $query->condition('bd.bill_number', $bill_number);
   $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
@@ -1498,4 +1538,58 @@ function dispatch_planning_get_outlet_data($node_uid, $party_code) {
 
   $res = $query->execute()->fetch(PDO::FETCH_ASSOC);
   return $res;
+}
+
+/**
+ * 
+ * @param type $node_uid
+ * @return string
+ */
+function dispatch_planning_check_api_authentication($node_uid) {
+  $query = db_select('field_data_field_dispatch_planing_api', 'dp');
+  $query->fields('dp', array('entity_id'));
+  $query->condition('dp.field_dispatch_planing_api_value', 1);
+  $query->condition('dp.entity_id', $node_uid);
+  $res = $query->execute()->fetchField();
+  return $res;
+}
+
+
+/**
+ * Implements of hook_views_api().
+ */
+function dispatch_planning_views_api() {
+  return array(
+    'api' => 3,
+    'path' => drupal_get_path('module', 'dispatch_planning'),
+  );
+}
+
+/**
+ * 
+ * @param type $json_api_data
+ */
+function dispatch_planning_api_log($json_api_data, $trip_id, $api_type) {
+  $sql_ins_id = db_insert('dispatch_planning_api_log')
+    ->fields(array(
+      'trip_id' => $trip_id,
+      'request_data' => serialize($data),
+      'api_type' => $api_type, // pass vraiable defined in oxigen wallet configuratation form
+      'request_time' => time(),
+    ))
+    ->execute();
+  return $sql_ins_id;
+}
+
+/**
+ * 
+ * @param type $json_api_data 
+ */
+function dispatch_planning_api_log_update($response_data, $sql_ins_id) {
+  db_update('bbd_oxigen_log')
+    ->fields(array(
+      'response_data' => serialize($response_data),
+    ))
+    ->condition('id', $sql_ins_id, '=')
+    ->execute();
 }

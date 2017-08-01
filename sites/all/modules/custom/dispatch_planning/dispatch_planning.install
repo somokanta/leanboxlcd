@@ -29,3 +29,49 @@ function dispatch_planning_schema() {
 
   return $schema;
 }
+
+/**
+ * Create new database table {dispatch_planning_api_log}.
+ */
+function dispatch_planning_update_7101() {
+  $schema['dispatch_planning_api_log'] = array(
+    'description' => 'describes Api log for Dispatch planning',
+    'fields' => array(
+      'id' => array(
+        'description' => t('Id Primary Key'),
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'request_data' => array(
+        'description' => t('API Details'),
+        'type' => 'text',
+        'not null' => TRUE,
+      ),
+      'response_data' => array(
+        'description' => t('API Details'),
+        'type' => 'text',
+        'not null' => TRUE,
+      ),
+      'request_time' => array(
+        'description' => t('API Request time'),
+        'type' => 'varchar',
+        'not null' => TRUE,
+      ),
+      'trip_id' => array(
+        'description' => t('Trip Id'),
+        'type' => 'varchar',
+        'not null' => TRUE,
+      ),
+      'api_type' => array(
+        'description' => t('API Type'),
+        'type' => 'varchar',
+        'not null' => TRUE,
+      ),
+    ),
+    'indexes' => array(
+      'trip_id' => array('trip_id'),
+    ),
+  );
+
+  db_create_table('dispatch_planning_api_log', $schema['dispatch_planning_api_log']);
+}
