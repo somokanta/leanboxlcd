@@ -102,6 +102,22 @@ function dispatch_planning_views_data() {
       'click sortable' => TRUE,
     ),
   );
+  //Response Data of API
+  $data['dispatch_planning_api_log']['api_success'] = array(
+    'title' => t('API Success'),
+    'help' => t('API Success'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+  
 
   return $data;
 }

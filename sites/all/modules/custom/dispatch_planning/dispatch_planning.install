@@ -33,7 +33,7 @@ function dispatch_planning_schema() {
 /**
  * Create new database table {dispatch_planning_api_log}.
  */
-function dispatch_planning_update_7101() {
+function dispatch_planning_update_7102() {
   $schema['dispatch_planning_api_log'] = array(
     'description' => 'describes Api log for Dispatch planning',
     'fields' => array(
@@ -68,6 +68,13 @@ function dispatch_planning_update_7101() {
         'length' => 25,
         'not null' => TRUE,
         'default' => '',
+      ),
+      'api_success' => array(
+        'description' => t('API Success'),
+        'type' => 'int',
+        'length'=>1,
+        'not null' => TRUE,
+        'default' => 0,
       ),
     ),
     'indexes' => array(

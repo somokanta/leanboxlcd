@@ -855,7 +855,6 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
 
   // Call Dispatch API Here
   if (!empty($api_data)) {
-    dpm($api_data,'$api_data');
     $json_api_data = json_encode($api_data);
     // request log
     $api_type = 'dispatch_planning';
@@ -865,9 +864,12 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
     $order_api_url = 'https://staging.fareye.co/api/v1/job?api_key=l1S6xa5mnxUXDuqv12q7lerLBL9l1ICq';
     $options = array('headers' => $request_headers, 'method' => 'POST', 'data' => $json_api_data);
     $response_data = drupal_http_request($order_api_url, $options);
-    dpm($response_data , '$response_data');
+    
+    $response_data = $response_data->data;
+    $api_success = json_decode($response_data);
+    $api_success = ($api_success->failCount == 0) ? 1 : 0;
     // create response log entry
-    dispatch_planning_api_log_update($response_data->data, $sql_ins_id);
+    dispatch_planning_api_log_update($response_data, $sql_ins_id , $api_success);
   }
 
   drupal_set_message('Successfully updated. Trip id ' . $trip_id);
@@ -1460,6 +1462,7 @@ function dispatch_planning_sales_reg_api($value, $node, $trip_execution_date, $h
   $api_data = array();
   // get billing data details
   $node_uid = $node->uid;
+  $rs_code = dispatch_planning_get_rscode_using_uid($node_uid);
   $bill_number = $node->title;
   $vehicle = $node->field_billing_van[LANGUAGE_NONE][0]['value'];
   $bill_date = date('Y-m-d', $node->field_sr_bill_date[LANGUAGE_NONE][0]['value']);
@@ -1471,14 +1474,13 @@ function dispatch_planning_sales_reg_api($value, $node, $trip_execution_date, $h
   $outlet_data_details = dispatch_planning_get_outlet_data($node_uid, $party_code);
 
   $api_data['jobType'] = 'delivery1';  // Hardcoded as suggested by gaurav
-  $reference_no = $node_uid . '_' . $bill_number;
+  $reference_no = $rs_code . '_' . $bill_number;
   $api_data['referenceNo'] = $reference_no;
   $api_data['date'] = date('Y-m-d',$trip_execution_date);
   $api_data['city'] = 'ABC';
-  //$api_data['hub'] = $node_uid;
-  $api_data['hub'] = 'TEST';
-  //$api_data['fieldExecutive'] = $hht_id;
-  $api_data['fieldExecutive'] = 'test_lean';
+  //$api_data['hub'] = $rs_code;
+  $api_data['hub'] = '100006';
+  $api_data['fieldExecutive'] = $hht_id;
   $api_data['fieldExecutiveName'] = $cashier;
 
   $api_data['jobData']['vehicle'] = $vehicle;
@@ -1589,11 +1591,25 @@ function dispatch_planning_api_log($json_api_data, $trip_id, $api_type) {
  * 
  * @param $response_data (json_decode), $sql_ins_id (serial id)
  */
-function dispatch_planning_api_log_update($response_data, $sql_ins_id) {
+function dispatch_planning_api_log_update($response_data, $sql_ins_id, $api_success) {
   db_update('dispatch_planning_api_log')
     ->fields(array(
       'response_data' => $response_data,
+      'api_success' => $api_success
     ))
     ->condition('id', $sql_ins_id, '=')
     ->execute();
+}
+
+/**
+ * 
+ * @param type $uid
+ * @return string
+ */
+function dispatch_planning_get_rscode_using_uid($uid) {
+  $query = db_select('field_data_field_third_party_username', 'rs');
+  $query->condition('rs.entity_id', $uid);
+  $query->fields('rs', array('field_third_party_username_value'));
+  $res = $query->execute()->fetchField();
+  return $res;
 }
