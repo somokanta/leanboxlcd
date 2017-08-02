@@ -823,6 +823,7 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
        // $api_authentication_flag = dispatch_planning_check_api_authentication($node->uid);
        // if (!empty($api_authentication_flag)) {
           $api_data[] = dispatch_planning_sales_reg_api($value, $node, $trip_execution_date, $hht_id, $cashier, $trip_id);
+
        // }
       }
     }
@@ -847,25 +848,26 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
      // $api_authentication_flag = dispatch_planning_check_api_authentication($node->uid);
      // if (!empty($api_authentication_flag)) {
         $api_data[] = dispatch_planning_sales_reg_api($value, $node, $trip_execution_date, $hht_id, $cashier, $trip_id);
+
      // }
     }
   }
 
   // Call Dispatch API Here
   if (!empty($api_data)) {
-
+    dpm($api_data,'$api_data');
     $json_api_data = json_encode($api_data);
     // request log
     $api_type = 'dispatch_planning';
-    $sql_ins_id = dispatch_planning_api_log($api_data, $trip_id, $api_type);
+    $sql_ins_id = dispatch_planning_api_log($json_api_data, $trip_id, $api_type);
 
     $request_headers = array('Content-Type' => 'application/json');
     $order_api_url = 'https://staging.fareye.co/api/v1/job?api_key=l1S6xa5mnxUXDuqv12q7lerLBL9l1ICq';
     $options = array('headers' => $request_headers, 'method' => 'POST', 'data' => $json_api_data);
     $response_data = drupal_http_request($order_api_url, $options);
-
+    dpm($response_data , '$response_data');
     // create response log entry
-    dispatch_planning_api_log_update($response_data, $sql_ins_id);
+    dispatch_planning_api_log_update($response_data->data, $sql_ins_id);
   }
 
   drupal_set_message('Successfully updated. Trip id ' . $trip_id);
@@ -1460,7 +1462,7 @@ function dispatch_planning_sales_reg_api($value, $node, $trip_execution_date, $h
   $node_uid = $node->uid;
   $bill_number = $node->title;
   $vehicle = $node->field_billing_van[LANGUAGE_NONE][0]['value'];
-  $bill_date = $node->field_sr_bill_date[LANGUAGE_NONE][0]['value'];
+  $bill_date = date('Y-m-d', $node->field_sr_bill_date[LANGUAGE_NONE][0]['value']);
   $bill_value = $node->field_bill_value[LANGUAGE_NONE][0]['value'];
   $party_code = $node->field_sales_party_code[LANGUAGE_NONE][0]['value'];
   $store_sequence = $node->field_drs_sequence[LANGUAGE_NONE][0]['value'];
@@ -1468,27 +1470,29 @@ function dispatch_planning_sales_reg_api($value, $node, $trip_execution_date, $h
   $billing_data_details = dispatch_planning_get_billing_data($node_uid, $bill_number);
   $outlet_data_details = dispatch_planning_get_outlet_data($node_uid, $party_code);
 
-  $api_data[$value]['jobType'] = 'delivery1';  // Hardcoded as suggested by gaurav
+  $api_data['jobType'] = 'delivery1';  // Hardcoded as suggested by gaurav
   $reference_no = $node_uid . '_' . $bill_number;
-  $api_data[$value]['referenceNo'] = $reference_no;
-  $api_data[$value]['date'] = $trip_execution_date;
-  $api_data[$value]['city'] = 'ABC';
-  $api_data[$value]['hub'] = $node_uid;
-  $api_data[$value]['fieldExecutive'] = $hht_id;
-  $api_data[$value]['fieldExecutiveName'] = $cashier;
+  $api_data['referenceNo'] = $reference_no;
+  $api_data['date'] = date('Y-m-d',$trip_execution_date);
+  $api_data['city'] = 'ABC';
+  //$api_data['hub'] = $node_uid;
+  $api_data['hub'] = 'TEST';
+  //$api_data['fieldExecutive'] = $hht_id;
+  $api_data['fieldExecutive'] = 'test_lean';
+  $api_data['fieldExecutiveName'] = $cashier;
 
-  $api_data[$value]['jobData']['vehicle'] = $vehicle;
-  $api_data[$value]['jobData']['party_hll_code'] = $outlet_data_details['field_hul_code_value']; // hul code in outlet
-  $api_data[$value]['jobData']['bill_value'] = $bill_value;
-  $api_data[$value]['jobData']['item_details'] = $billing_data_details; // array
-  $api_data[$value]['jobData']['bill_date'] = $bill_date;
-  $api_data[$value]['jobData']['locality'] = 'ABCD_locality';  // Hardcoded as suggested by gaurav  
-  $api_data[$value]['jobData']['store_sequence_no'] = $store_sequence;  // drs sequence
-  $api_data[$value]['jobData']['party_name'] = $outlet_data_details['field_party_name_value']; // party name in outlet
-  $api_data[$value]['jobData']['beat_name'] = $outlet_data_details['field_beat_name_value'];  // beat name in outlet
-  $api_data[$value]['jobData']['party_code'] = $party_code;
-  $api_data[$value]['jobData']['bill_number'] = $bill_number;
-  $api_data[$value]['jobData']['runsheet_number'] = $trip_id;
+  $api_data['jobData']['vehicle'] = $vehicle;
+  $api_data['jobData']['party_hll_code'] = $outlet_data_details['field_hul_code_value']; // hul code in outlet
+  $api_data['jobData']['bill_value'] = $bill_value;
+  $api_data['jobData']['item_details'] = $billing_data_details; // array
+  $api_data['jobData']['bill_date'] = $bill_date;
+  $api_data['jobData']['locality'] = 'ABCD_locality';  // Hardcoded as suggested by gaurav  
+  $api_data['jobData']['store_sequence_no'] = $store_sequence;  // drs sequence
+  $api_data['jobData']['party_name'] = $outlet_data_details['field_party_name_value']; // party name in outlet
+  $api_data['jobData']['beat_name'] = $outlet_data_details['field_beat_name_value'];  // beat name in outlet
+  $api_data['jobData']['party_code'] = $party_code;
+  $api_data['jobData']['bill_number'] = $bill_number;
+  $api_data['jobData']['runsheet_number'] = $trip_id;
 
   return $api_data;
 }
@@ -1573,7 +1577,7 @@ function dispatch_planning_api_log($json_api_data, $trip_id, $api_type) {
   $sql_ins_id = db_insert('dispatch_planning_api_log')
     ->fields(array(
       'trip_id' => $trip_id,
-      'request_data' => serialize($data),
+      'request_data' => $json_api_data,
       'api_type' => $api_type, // pass vraiable defined in oxigen wallet configuratation form
       'request_time' => time(),
     ))
@@ -1583,12 +1587,12 @@ function dispatch_planning_api_log($json_api_data, $trip_id, $api_type) {
 
 /**
  * 
- * @param type $json_api_data 
+ * @param $response_data (json_decode), $sql_ins_id (serial id)
  */
 function dispatch_planning_api_log_update($response_data, $sql_ins_id) {
   db_update('dispatch_planning_api_log')
     ->fields(array(
-      'response_data' => serialize($response_data),
+      'response_data' => $response_data,
     ))
     ->condition('id', $sql_ins_id, '=')
     ->execute();
