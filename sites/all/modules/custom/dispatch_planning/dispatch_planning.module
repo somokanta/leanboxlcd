@@ -105,6 +105,10 @@ function dispatch_planning_permission() {
       'title' => t('dispatch planning screen-rs-admin'),
       'description' => t('View and operate for only Rs-admin Role')
     ),
+    'only-rs-admin-with-distributor' => array(
+      'title' => t('only-rs-admin-with-distributor'),
+      'description' => t('View data for only Rs-admin and Distributor Role')
+    ),
   );
 }
 
