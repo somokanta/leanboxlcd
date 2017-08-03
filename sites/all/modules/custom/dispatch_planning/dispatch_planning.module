@@ -101,6 +101,10 @@ function dispatch_planning_permission() {
       'title' => t('dispatch planning screen'),
       'description' => t('View and operate the dispatch planning screen')
     ),
+    'dispatch planning screen-rs-admin' => array(
+      'title' => t('dispatch planning screen-rs-admin'),
+      'description' => t('View and operate for only Rs-admin Role')
+    ),
   );
 }
 
