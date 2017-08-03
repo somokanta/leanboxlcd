@@ -12,6 +12,10 @@ function change_feeds_import_permission() {
       'title' => t('Distributor Upload File'),
       'description' => t('Distributor Upload File')
     ),
+    'Distributor Upload File DFE and RS admin wise' => array(
+      'title' => t('Distributor Upload File DFE and RS admin wise'),
+      'description' => t('Distributor Upload File DFE and RS admin wise')
+    ),
     'Delete Billing Data' => array(
       'title' => t('Delete Billing Data'),
       'description' => t('Delete Billing Data')
@@ -276,7 +280,7 @@ function change_feeds_import_menu() {
     'description' => 'Import Area Hook Group Master Data',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('change_feeds_import_area_hook_grp_form'),
-    'access arguments' => array('Distributor Upload File'),
+    'access arguments' => array('Distributor Upload File DFE and RS admin wise'),
     'file' => 'form/area_hook_grp_data.inc',
   );
 
