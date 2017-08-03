@@ -129,7 +129,7 @@ function reverse_geocode_menu() {
     'page callback' => 'drupal_get_form',
     'page arguments' => array('delivery_beat_create_form'),
    // 'access arguments' => array('address confirmation'),
-    'access arguments' => array('only-rs-admin-with-distributor'),
+    'access arguments' => array('only-rs-admin-with existing data'),
     'file' => 'delivery_beat_form.inc'
   );
 

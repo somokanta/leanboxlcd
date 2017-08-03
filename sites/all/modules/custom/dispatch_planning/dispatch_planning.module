@@ -109,6 +109,10 @@ function dispatch_planning_permission() {
       'title' => t('only-rs-admin-with-distributor'),
       'description' => t('View data for only Rs-admin and Distributor Role')
     ),
+    'only-rs-admin-with existing data' => array(
+      'title' => t('only-rs-admin-with existing data'),
+      'description' => t('only-rs-admin-with existing data')
+    ),
   );
 }
 
