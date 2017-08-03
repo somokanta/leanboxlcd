@@ -88,5 +88,5 @@ function dispatch_planning_update_7102() {
 }
 
 function dispatch_planning_update_7103() {
-  db_change_field('dispatch_planning_api_log', 'request_data', 'request_data', array('type' => 'mediumtext'));
+  db_change_field('dispatch_planning_api_log', 'request_data', 'request_data', array('type' => 'text','size'=>'medium'));
 }
