@@ -86,3 +86,7 @@ function dispatch_planning_update_7102() {
 
   db_create_table('dispatch_planning_api_log', $schema['dispatch_planning_api_log']);
 }
+
+function dispatch_planning_update_7103() {
+  db_change_field('dispatch_planning_api_log', 'request_data', 'request_data', array('type' => 'mediumtext'));
+}
