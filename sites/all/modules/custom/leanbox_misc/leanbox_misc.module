@@ -5,7 +5,7 @@ function leanbox_misc_menu() {
     'title' => 'PDD',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('pdd_add_form'),
-    'access arguments' => array('dispatch planning screen'),
+    'access arguments' => array('only-rs-admin-with-distributor'),
     'type' => MENU_NORMAL_ITEM,
     'file' => 'includes/pdd_holiday_master.inc',
       // Page callback, etc. need to be added here.
