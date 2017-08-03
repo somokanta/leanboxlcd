@@ -40,6 +40,7 @@ function dispatch_planning_update_7102() {
       'id' => array(
         'description' => t('Id Primary Key'),
         'type' => 'serial',
+        'not null' => TRUE,
       ),
       'request_data' => array(
         'description' => t('API Details'),
