@@ -15,7 +15,7 @@
 				drawpartypackingChart(party_pack_data);
 			});
 
-			$(".bill-pendency-submit").click(function (e) {
+			$(".mobile-return-submit").click(function (e) {
 
 				e.preventDefault();
 				var start_date = $(this).parent().prev().prev().find("input[name='start_date[date]']").val();
