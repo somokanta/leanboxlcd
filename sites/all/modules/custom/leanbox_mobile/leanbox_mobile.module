@@ -243,8 +243,13 @@ function leanbox_mobile_chart_query_details($activity_type, $start = '', $end = 
     }
 
     $output[] = array('PriceList Group', 'value');
+    if(!empty($array)) {
     foreach ($array as $key => $val) {
       $output[] = array($key, round($val));
+    }
+    }
+    else {
+      $output[] = array('No Result', 0);
     }
   }
   return $output;
