@@ -126,6 +126,7 @@ function leanbox_mobile_block_view($delta = '') {
       );
       break;
   }
+  return $block;
 }
 
 function leanbox_mobile_chart_filter_return_form($form, &$form_state) {
