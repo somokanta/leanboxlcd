@@ -103,7 +103,9 @@ function leanbox_mobile_block_view($delta = '') {
         );
       }
       $billing_date = strtotime(date('Y-m-d') . "-1 days");
-      $billing_date = date('Y-m-d', $billing_date);
+      $billing_date_end = $billing_date + 86399;
+      $bill_date = date('Y-m-d', $billing_date);
+      $bill_date_end = date('Y-m-d', $billing_date_end);
       $block['subject'] = "Return Value ($bill_date Billing)";
       $data = leanbox_mobile_chart_query_details('mobile_return_graph');
 
@@ -118,7 +120,7 @@ function leanbox_mobile_block_view($delta = '') {
             ),
             drupal_get_path('module', 'leanbox_mobile') . '/js/leanbox_mobile_returnchart.js',
             array(
-              'data' => array('leanbox_dashboard' => array('otif' => $data['output'],)),
+              'data' => array('leanbox_mobile' => array('returnchart' => $data['output'],)),
               'type' => 'setting'
             ),
           ),
@@ -134,7 +136,7 @@ function leanbox_mobile_chart_filter_return_form($form, &$form_state) {
   
 //  if (arg(1) == 'mobile_return_graph') {
     $billing_date = strtotime(date('Y-m-d') . "-1 days");
-    $bill_date = date('d-m-Y', $billing_date);
+    $bill_date = date('Y-m-d', $billing_date);
     $form['start_date'] = array(
       '#type' => 'date_popup',
       '#title' => t('From'),

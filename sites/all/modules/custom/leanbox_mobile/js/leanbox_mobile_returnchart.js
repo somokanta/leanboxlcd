@@ -9,8 +9,7 @@
 	Drupal.behaviors.leanbox_dashboard_returnchart = {
 		attach: function (context, settings) {
 
-			var area_definition = Drupal.settings.leanbox_dashboard.area_definition;
-			var party_pack_data = Drupal.settings.leanbox_dashboard.returnchart;
+			var party_pack_data = Drupal.settings.leanbox_mobile.returnchart;
 			google.charts.load("current", {packages: ['gauge', 'corechart', 'bar']});
 			google.charts.setOnLoadCallback(function () {
 				drawpartypackingChart(party_pack_data);
@@ -29,7 +28,6 @@
 						data: {start_date: start_date, end_date: end_date, activity_type: 'mobile_return_graph'},
 						success: function (response) {
 
-							var area_definition = Drupal.settings.leanbox_dashboard.area_definition;
 							google.charts.setOnLoadCallback(function () {
 								drawpartypackingChart(response.output);
 							});
