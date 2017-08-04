@@ -24,7 +24,7 @@
 					$.ajax({
 						type: "POST",
 						cache: false, //for Chrome and IE8
-						url: "/chart-daterange-filter",
+						url: "/leanbox-mobile-filter",
 						data: {start_date: start_date, end_date: end_date, activity_type: 'mobile_return_graph'},
 						success: function (response) {
 
