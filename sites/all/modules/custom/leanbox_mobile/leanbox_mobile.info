@@ -1,0 +1,4 @@
+name = leanbox Mobile
+description = containing list of mobile api returned data for dashboard.
+package = Custom
+core = 7.x
