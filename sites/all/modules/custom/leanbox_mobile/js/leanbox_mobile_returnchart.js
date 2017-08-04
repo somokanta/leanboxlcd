@@ -6,7 +6,7 @@
 
 (function ($) {
 
-	Drupal.behaviors.leanbox_dashboard_returnchart = {
+	Drupal.behaviors.leanbox_mobile_returnchart = {
 		attach: function (context, settings) {
 
 			var party_pack_data = Drupal.settings.leanbox_mobile.returnchart;

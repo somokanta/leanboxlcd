@@ -43,7 +43,10 @@ function leanbox_mobile_date_filter_callback() {
 
   switch ($activity_type) {
     case 'mobile_return_graph' :
-      $output_data = leanbox_mobile_chart_query_details($activity_type, $start_date, $end_date);
+      $output_data = leanbox_mobile_chart_query_details($activity_type, $start_date, $end_date, 'Partial Delivery');
+      break;
+    case 'mobile_full_return_graph' :
+      $output_data = leanbox_mobile_chart_query_details($activity_type, $start_date, $end_date, 'Full Return');
       break;
     
      default:

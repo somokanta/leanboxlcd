@@ -25,7 +25,7 @@
 						type: "POST",
 						cache: false, //for Chrome and IE8
 						url: "/leanbox-mobile-filter",
-						data: {start_date: start_date, end_date: end_date, activity_type: 'mobile_return_graph'},
+						data: {start_date: start_date, end_date: end_date, activity_type: 'mobile_full_return_graph'},
 						success: function (response) {
 
 							google.charts.setOnLoadCallback(function () {
