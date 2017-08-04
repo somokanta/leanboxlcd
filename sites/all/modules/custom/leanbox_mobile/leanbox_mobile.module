@@ -46,6 +46,7 @@ function leanbox_mobile_date_filter_callback() {
       $output_data = leanbox_mobile_chart_query_details($activity_type, $start_date, $end_date, 'Partial Delivery');
       break;
     case 'mobile_full_return_graph' :
+      $activity_type = 'mobile_return_graph';
       $output_data = leanbox_mobile_chart_query_details($activity_type, $start_date, $end_date, 'Full Return');
       break;
     
@@ -304,7 +305,7 @@ function leanbox_mobile_chart_query_details($activity_type, $start = '', $end = 
   }
 
   // code for delivery
-  if ($activity_type == 'mobile_return_graph') {
+  //if ($activity_type == 'mobile_return_graph') {
 
     $subquery = db_select('custom_billing_data', 'bd');
     $subquery->condition('bd.distributor_id', $distributor_id);
@@ -346,6 +347,6 @@ function leanbox_mobile_chart_query_details($activity_type, $start = '', $end = 
     else {
       $output[] = array('No Result', 0);
     }
-  }
+ // }
   return $output;
 }
