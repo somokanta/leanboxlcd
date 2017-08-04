@@ -29,9 +29,8 @@
 						success: function (response) {
 
 							google.charts.setOnLoadCallback(function () {
-								drawpartypackingChart(response.output);
+								drawpartypackingChart(response);
 							});
-							$('#googlechart').html(response.table);
 						},
 					});
 				}
