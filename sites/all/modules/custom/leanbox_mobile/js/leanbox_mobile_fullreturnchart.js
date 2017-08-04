@@ -6,10 +6,11 @@
 
 (function ($) {
 
-	Drupal.behaviors.leanbox_dashboard_returnchart = {
+	Drupal.behaviors.leanbox_dashboard_fullreturnchart = {
 		attach: function (context, settings) {
 
 			var party_pack_data = Drupal.settings.leanbox_mobile.returnchart;
+			google.charts.load("current", {packages: ['gauge', 'corechart', 'bar']});
 			google.charts.setOnLoadCallback(function () {
 				drawpartypackingChart(party_pack_data);
 			});
