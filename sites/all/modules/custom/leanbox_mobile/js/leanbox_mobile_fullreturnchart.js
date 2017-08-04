@@ -6,7 +6,7 @@
 
 (function ($) {
 
-	Drupal.behaviors.leanbox_dashboard_fullreturnchart = {
+	Drupal.behaviors.leanbox_mobile_fullreturnchart = {
 		attach: function (context, settings) {
 
 			var party_pack_data = Drupal.settings.leanbox_mobile.returnchart;
@@ -25,7 +25,7 @@
 						type: "POST",
 						cache: false, //for Chrome and IE8
 						url: "/leanbox-mobile-filter",
-						data: {start_date: start_date, end_date: end_date, activity_type: 'mobile_full_return_div'},
+						data: {start_date: start_date, end_date: end_date, activity_type: 'mobile_return_graph'},
 						success: function (response) {
 
 							google.charts.setOnLoadCallback(function () {
@@ -49,7 +49,7 @@
 					//legend: {position: 'top', maxLines: 3},
 
 				};
-				var chart = new google.visualization.PieChart(document.getElementById("mobile_return_div"));
+				var chart = new google.visualization.PieChart(document.getElementById("mobile_full_return_div"));
 				chart.draw(view, options);
 				//chart.draw(view, google.charts.Bar.convertOptions(options));
 			}
