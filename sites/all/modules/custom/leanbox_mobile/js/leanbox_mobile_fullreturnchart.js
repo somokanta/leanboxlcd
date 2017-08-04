@@ -10,7 +10,6 @@
 		attach: function (context, settings) {
 
 			var party_pack_data = Drupal.settings.leanbox_mobile.returnchart;
-			google.charts.load("current", {packages: [ 'corechart']});
 			google.charts.setOnLoadCallback(function () {
 				drawpartypackingChart(party_pack_data);
 			});
