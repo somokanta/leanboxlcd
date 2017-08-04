@@ -249,7 +249,7 @@ function leanbox_mobile_chart_query_details($activity_type, $start = '', $end = 
     }
     }
     else {
-      $output[] = array('No Result', 0);
+      $output[] = array('No Result', 1);
     }
   }
   return $output;
