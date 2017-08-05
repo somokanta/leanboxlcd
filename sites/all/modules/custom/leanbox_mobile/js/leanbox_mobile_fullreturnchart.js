@@ -9,7 +9,7 @@
 	Drupal.behaviors.leanbox_mobile_fullreturnchart = {
 		attach: function (context, settings) {
 
-			var party_pack_data = Drupal.settings.leanbox_mobile.returnchart;
+			var party_pack_data = Drupal.settings.leanbox_mobile.fullreturnchart;
 			google.charts.load("current", {packages: ['gauge', 'corechart', 'bar']});
 			google.charts.setOnLoadCallback(function () {
 				drawpartypackingChart(party_pack_data);
