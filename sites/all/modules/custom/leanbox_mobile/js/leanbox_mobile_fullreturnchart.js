@@ -52,8 +52,8 @@
           sliceVisibilityThreshold: 0,
 					title: '',
 					is3D: true,
-				  chartArea:{left:60,top:20,width:'100%',height:'75%'}
-					//legend: {position: 'top', maxLines: 3},
+				  chartArea:{left:60,top:20,width:'100%',height:'75%'},
+					legend: {position: 'top'},
 
 				};
 				var chart = new google.visualization.PieChart(document.getElementById("mobile_full_return_div"));
