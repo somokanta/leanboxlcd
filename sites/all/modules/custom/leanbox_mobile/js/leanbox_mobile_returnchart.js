@@ -50,7 +50,8 @@
 					height: area_definition.height,
 					title: '',
 					is3D: true,
-          sliceVisibilityThreshold: 0
+          sliceVisibilityThreshold: 0,
+					chartArea:{left:20,top:0,width:'75%',height:'75%'}
 				};
 				var chart = new google.visualization.PieChart(document.getElementById("mobile_return_div"));
 				chart.draw(view, options);
