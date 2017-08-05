@@ -86,7 +86,7 @@ function leanbox_mobile_block_info() {
  */
 function leanbox_mobile_block_view($delta = '') {
   $area_definition = array(
-    'width' => 550,
+    'width' => 300,
     'height' => 300,
   );
   switch ($delta) {
