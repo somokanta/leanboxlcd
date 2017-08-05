@@ -85,33 +85,33 @@ function leanbox_mobile_block_info() {
  * 
  */
 function leanbox_mobile_block_view($delta = '') {
-  $area_definition = array(
-    'width' => 550,
-    'height' => 300,
-    'ch_left' => 50,
-    'ch_top' => 50,
-    'ch_width' => 450,
-    'ch_height' => 200,
-  );
+//  $area_definition = array(
+//    'width' => 550,
+//    'height' => 300,
+//    'ch_left' => 50,
+//    'ch_top' => 50,
+//    'ch_width' => 450,
+//    'ch_height' => 200,
+//  );
   switch ($delta) {
 
     case 'mobile_return_graph':
-      if (arg(1) == 'mobile-return-graph') {
-        $area_definition = array(
-          'width' => 700,
-          'height' => 400,
-          'ch_left' => 80,
-          'ch_top' => 50,
-          'ch_width' => 500,
-          'ch_height' => 250,
-        );
-      }
+//      if (arg(1) == 'mobile_return_graph') {
+//        $area_definition = array(
+//          'width' => 700,
+//          'height' => 400,
+//          'ch_left' => 80,
+//          'ch_top' => 50,
+//          'ch_width' => 500,
+//          'ch_height' => 250,
+//        );
+//      }
       $billing_date = strtotime(date('Y-m-d') . "-1 days");
       $billing_date_end = $billing_date + 86399;
       $bill_date = date('Y-m-d', $billing_date);
       $bill_date_end = date('Y-m-d', $billing_date_end);
       $block['subject'] = "Return Value ($bill_date Billing)";
-      $data = leanbox_mobile_chart_query_details($billing_date, $billing_date_end, 'Partial Delivery');
+      $data = leanbox_mobile_chart_query_details($bill_date, $bill_date_end, 'Partial Delivery');
 
       $filter_form = drupal_render(drupal_get_form('leanbox_mobile_chart_filter_return_form'));
       $block['content'] = array(
@@ -134,22 +134,22 @@ function leanbox_mobile_block_view($delta = '') {
 
 
     case 'mobile_full_return_graph':
-      if (arg(1) == 'mobile-full-return-graph') {
-        $area_definition = array(
-          'width' => 700,
-          'height' => 400,
-          'ch_left' => 80,
-          'ch_top' => 50,
-          'ch_width' => 500,
-          'ch_height' => 250,
-        );
-      }
+//      if (arg(1) == 'mobile_full_return_graph') {
+//        $area_definition = array(
+//          'width' => 700,
+//          'height' => 400,
+//          'ch_left' => 80,
+//          'ch_top' => 50,
+//          'ch_width' => 500,
+//          'ch_height' => 250,
+//        );
+//      }
       $billing_date = strtotime(date('Y-m-d') . "-1 days");
       $billing_date_end = $billing_date + 86399;
       $bill_date = date('Y-m-d', $billing_date);
       $bill_date_end = date('Y-m-d', $billing_date_end);
       $block['subject'] = "Return Value ($bill_date Billing)";
-      $data = leanbox_mobile_chart_query_details($billing_date, $billing_date_end, 'Full Return');
+      $data = leanbox_mobile_chart_query_details($bill_date, $bill_date_end, 'Full Return');
 
       $filter_form = drupal_render(drupal_get_form('leanbox_mobile_chart_filter_full_return_form'));
       $block['content'] = array(
@@ -210,7 +210,7 @@ function leanbox_mobile_chart_filter_return_form($form, &$form_state) {
   // }
 
   $form['unloading_daywise_trends'] = array(
-    '#markup' => '<a href = "/leanbox-mobile-chart-details/mobile-return-graph" target = "_blank"><div id="mobile_return_div"></div></a>',
+    '#markup' => '<a href = "/leanbox-mobile-chart-details/mobile_return_graph" target = "_blank"><div id="mobile_return_div"></div></a>',
   );
 
   return $form;
@@ -253,7 +253,7 @@ function leanbox_mobile_chart_filter_full_return_form($form, &$form_state) {
   // }
 
   $form['unloading_daywise_trends'] = array(
-    '#markup' => '<a href = "/leanbox-mobile-chart-details/mobile-full-return-graph" target = "_blank"><div id="mobile_full_return_div"></div></a>',
+    '#markup' => '<a href = "/leanbox-mobile-chart-details/mobile_full_return_graph" target = "_blank"><div id="mobile_full_return_div"></div></a>',
   );
 
   return $form;
