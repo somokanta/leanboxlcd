@@ -10,6 +10,8 @@
 		attach: function (context, settings) {
 
 			var party_pack_data = Drupal.settings.leanbox_mobile.fullreturnchart;
+			var area_definition = Drupal.settings.leanbox_mobile.area_definition;
+
 			google.charts.load("current", {packages: ['gauge', 'corechart', 'bar']});
 			google.charts.setOnLoadCallback(function () {
 				drawpartypackingChart(party_pack_data);
@@ -27,6 +29,7 @@
 						url: "/leanbox-mobile-filter",
 						data: {start_date: start_date, end_date: end_date, activity_type: 'mobile_full_return_graph'},
 						success: function (response) {
+		          var area_definition = Drupal.settings.leanbox_mobile.area_definition;
 
 							google.charts.setOnLoadCallback(function () {
 								drawpartypackingChart(response);
@@ -44,7 +47,9 @@
 				var view = new google.visualization.DataView(data);
 	
 				var options = {
-
+					width: area_definition.width,
+					height: area_definition.height,
+          sliceVisibilityThreshold: 0,
 					title: '',
 					//legend: {position: 'top', maxLines: 3},
 

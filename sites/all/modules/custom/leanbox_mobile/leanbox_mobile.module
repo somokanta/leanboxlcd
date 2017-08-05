@@ -85,27 +85,19 @@ function leanbox_mobile_block_info() {
  * 
  */
 function leanbox_mobile_block_view($delta = '') {
-//  $area_definition = array(
-//    'width' => 550,
-//    'height' => 300,
-//    'ch_left' => 50,
-//    'ch_top' => 50,
-//    'ch_width' => 450,
-//    'ch_height' => 200,
-//  );
+  $area_definition = array(
+    'width' => 550,
+    'height' => 300,
+  );
   switch ($delta) {
 
     case 'mobile_return_graph':
-//      if (arg(1) == 'mobile_return_graph') {
-//        $area_definition = array(
-//          'width' => 700,
-//          'height' => 400,
-//          'ch_left' => 80,
-//          'ch_top' => 50,
-//          'ch_width' => 500,
-//          'ch_height' => 250,
-//        );
-//      }
+      if (arg(1) == 'mobile_return_graph') {
+        $area_definition = array(
+          'width' => 700,
+          'height' => 400,
+        );
+      }
       $billing_date = strtotime(date('Y-m-d') . "-1 days");
       $billing_date_end = $billing_date + 86399;
       $bill_date = date('Y-m-d', $billing_date);
@@ -124,7 +116,7 @@ function leanbox_mobile_block_view($delta = '') {
             ),
             drupal_get_path('module', 'leanbox_mobile') . '/js/leanbox_mobile_returnchart.js',
             array(
-              'data' => array('leanbox_mobile' => array('returnchart' => $data,)),
+              'data' => array('leanbox_mobile' => array('returnchart' => $data, 'area_definition' => $area_definition)),
               'type' => 'setting'
             ),
           ),
@@ -134,16 +126,16 @@ function leanbox_mobile_block_view($delta = '') {
 
 
     case 'mobile_full_return_graph':
-//      if (arg(1) == 'mobile_full_return_graph') {
-//        $area_definition = array(
-//          'width' => 700,
-//          'height' => 400,
-//          'ch_left' => 80,
-//          'ch_top' => 50,
-//          'ch_width' => 500,
-//          'ch_height' => 250,
-//        );
-//      }
+      if (arg(1) == 'mobile_full_return_graph') {
+        $area_definition = array(
+          'width' => 700,
+          'height' => 400,
+          'ch_left' => 80,
+          'ch_top' => 50,
+          'ch_width' => 500,
+          'ch_height' => 250,
+        );
+      }
       $billing_date = strtotime(date('Y-m-d') . "-1 days");
       $billing_date_end = $billing_date + 86399;
       $bill_date = date('Y-m-d', $billing_date);
@@ -162,7 +154,7 @@ function leanbox_mobile_block_view($delta = '') {
             ),
             drupal_get_path('module', 'leanbox_mobile') . '/js/leanbox_mobile_fullreturnchart.js',
             array(
-              'data' => array('leanbox_mobile' => array('fullreturnchart' => $data,)),
+              'data' => array('leanbox_mobile' => array('fullreturnchart' => $data, 'area_definition' => $area_definition)),
               'type' => 'setting'
             ),
           ),
@@ -337,7 +329,7 @@ function leanbox_mobile_chart_query_details($start = '', $end = '', $field_condi
     }
   }
   else {
-    $output[] = array('No Result', 1);
+    $output[] = array('', 0);
   }
   // }
   return $output;
