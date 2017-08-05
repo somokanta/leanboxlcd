@@ -51,6 +51,7 @@
 					height: area_definition.height,
           sliceVisibilityThreshold: 0,
 					title: '',
+					is3D: true,
 					//legend: {position: 'top', maxLines: 3},
 
 				};
