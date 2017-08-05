@@ -124,7 +124,7 @@ function leanbox_mobile_block_view($delta = '') {
             ),
             drupal_get_path('module', 'leanbox_mobile') . '/js/leanbox_mobile_returnchart.js',
             array(
-              'data' => array('leanbox_mobile' => array('fullreturnchart' => $data,)),
+              'data' => array('leanbox_mobile' => array('returnchart' => $data,)),
               'type' => 'setting'
             ),
           ),
@@ -162,7 +162,7 @@ function leanbox_mobile_block_view($delta = '') {
             ),
             drupal_get_path('module', 'leanbox_mobile') . '/js/leanbox_mobile_fullreturnchart.js',
             array(
-              'data' => array('leanbox_mobile' => array('returnchart' => $data,)),
+              'data' => array('leanbox_mobile' => array('fullreturnchart' => $data,)),
               'type' => 'setting'
             ),
           ),
