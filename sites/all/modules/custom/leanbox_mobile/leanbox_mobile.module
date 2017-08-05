@@ -115,7 +115,7 @@ function leanbox_mobile_block_view($delta = '') {
 
       $filter_form = drupal_render(drupal_get_form('leanbox_mobile_chart_filter_return_form'));
       $block['content'] = array(
-        '#markup' => theme('leanbox_dashboard', array('data' => $filter_form,)),
+        '#markup' => theme('leanbox_mobile', array('data' => $filter_form,)),
         '#attached' => array(
           'js' => array(
             array(
