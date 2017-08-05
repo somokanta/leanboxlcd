@@ -52,7 +52,7 @@
           sliceVisibilityThreshold: 0,
 					title: '',
 					is3D: true,
-				  chartArea:{left:60,top:0,width:'100%',height:'75%'}
+				  chartArea:{left:60,top:20,width:'100%',height:'75%'}
 					//legend: {position: 'top', maxLines: 3},
 
 				};
