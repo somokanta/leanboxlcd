@@ -367,7 +367,10 @@ function change_feeds_import_batch_fix_process($max, $data, $distributor_id, $fi
 
     $pass_data = $value;
 
-    change_feeds_import_insert_data_in_staging_billing_table($pass_data, $error_bool, $last_id, REQUEST_TIME);
+    try{
+      change_feeds_import_insert_data_in_staging_billing_table($pass_data, $error_bool, $last_id, REQUEST_TIME);
+    } catch (Exception $ex) {
+    }
 
     $context['results']['total_lines'] ++;
   }
