@@ -120,9 +120,9 @@ function change_feeds_import_create_confirm_content($id) {
   batch_set($batch);
 
 // delete data from stage_billing_data.
-  db_delete('stage_billing_data')
-      ->condition('error_id', $id, '=')
-      ->execute();
+//  db_delete('stage_billing_data')
+//      ->condition('error_id', $id, '=')
+//      ->execute();
 
   require_once drupal_get_path('module', 'change_feeds_import') . '/form/validate_content.inc';
   $status = "Completed";

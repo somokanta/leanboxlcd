@@ -1232,4 +1232,13 @@ function change_feeds_import_update_7111() {
   db_create_table('area_hook_grp_master', $schema['area_hook_grp_master']);
 }
 
-
+/**
+ *  Implements Hook_Update_7112
+ */
+function change_feeds_import_update_7112() {
+  $fields = array("bill_number", "sku7_code", "error_id");
+  $table = "stage_billing_data";
+  $name = "check_duplicate_in_stage";
+  db_add_unique_key($table, $name, $fields);
+  //db_drop_unique_key($table, $name)
+}
