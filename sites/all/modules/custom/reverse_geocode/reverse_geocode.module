@@ -1500,26 +1500,22 @@ function reverse_geocode_node_presave($node) {
     }
   }
   else if ($node->type == 'dispatch_data') {
-    dpm("12");
     if (!empty($node->field_dispatch_date[LANGUAGE_NONE][0]['value'])) {
-      dpm("34");
       $node->field_dispatch_status[LANGUAGE_NONE][0]['value'] = 1;
       $nid = $node->nid;
-      dpm($nid, "nid");
       $dispatch_date = strtotime($node->field_dispatch_date[LANGUAGE_NONE][0]['value']);
       $query = db_select('node', 'n');
       $query->condition('n.type', 'sales_register_data');
       $query->join('field_data_field_promised_date', 'pro_date', 'pro_date.entity_id = n.nid');
       $query->join('field_data_field_trip_id_reference', 'ti', 'ti.entity_id = n.nid');
       $query->condition('ti.field_trip_id_reference_nid', $nid);
-      $query->fields('n', array('title'));
+      $query->fields('n', array('nid'));
       $query->fields('pro_date', array('field_promised_date_value'));
       $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
-      dpm($res, "res");
       foreach ($res as $key => $val) {
         $promised_date = $val['field_promised_date_value'];
         $nid = $val['nid'];
-        dpm($nid, "nid12");
+        dpm($nid,"nid");
         if ($dispatch_date <= $promised_date) {
           $n_value = "N+2";
         }
@@ -1530,9 +1526,9 @@ function reverse_geocode_node_presave($node) {
           $n_value = "N+4";
         }
 
-//        $node = node_load($nid);
-//        $node->	field_dispatch_n_value[LANGUAGE_NONE][0]['value'] = $n_value;
-//        node_save($node);
+        $node = node_load($nid);
+        $node->	field_dispatch_n_value[LANGUAGE_NONE][0]['value'] = $n_value;
+        node_save($node);
       }
     }
   }
