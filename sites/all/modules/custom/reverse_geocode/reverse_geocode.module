@@ -1515,7 +1515,6 @@ function reverse_geocode_node_presave($node) {
       foreach ($res as $key => $val) {
         $promised_date = $val['field_promised_date_value'];
         $nid = $val['nid'];
-        dpm($nid,"nid");
         if ($dispatch_date <= $promised_date) {
           $n_value = "N+2";
         }
