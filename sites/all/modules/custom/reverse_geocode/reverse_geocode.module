@@ -1518,7 +1518,7 @@ function reverse_geocode_node_presave($node) {
       foreach ($res as $key => $val) {
         $promised_date = $val['field_promised_date_value'];
         $nid = $val['nid'];
-
+        dpm($nid,"nid");
         if($dispatch_date <= $promised_date) {
          $n_value =  "N+2";
         }
@@ -1529,9 +1529,9 @@ function reverse_geocode_node_presave($node) {
          $n_value =  "N+4";
         }
         
-        $node = node_load($nid);
-        $node->	field_dispatch_n_value[LANGUAGE_NONE][0]['value'] = $n_value;
-        node_save($node);
+//        $node = node_load($nid);
+//        $node->	field_dispatch_n_value[LANGUAGE_NONE][0]['value'] = $n_value;
+//        node_save($node);
       }
     }
   }
