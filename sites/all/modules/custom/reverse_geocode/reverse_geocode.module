@@ -1505,6 +1505,7 @@ function reverse_geocode_node_presave($node) {
       dpm("34");
       $node->field_dispatch_status[LANGUAGE_NONE][0]['value'] = 1;
       $nid = $node->nid;
+      dpm($nid, "nid");
       $dispatch_date = strtotime($node->field_dispatch_date[LANGUAGE_NONE][0]['value']);
       $query = db_select('node', 'n');
       $query->condition('n.type', 'sales_register_data');
@@ -1514,21 +1515,21 @@ function reverse_geocode_node_presave($node) {
       $query->fields('n', array('title'));
       $query->fields('pro_date', array('field_promised_date_value'));
       $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
-
+      dpm($res, "res");
       foreach ($res as $key => $val) {
         $promised_date = $val['field_promised_date_value'];
         $nid = $val['nid'];
-        dpm($nid,"nid");
-        if($dispatch_date <= $promised_date) {
-         $n_value =  "N+2";
+        dpm($nid, "nid12");
+        if ($dispatch_date <= $promised_date) {
+          $n_value = "N+2";
         }
-        elseif(  ($dispatch_date > $promised_date) && (  ($dispatch_date - $promised_date) <= 86400)   ) {
-         $n_value =  "N+3";
+        elseif (($dispatch_date > $promised_date) && ( ($dispatch_date - $promised_date) <= 86400)) {
+          $n_value = "N+3";
         }
-        elseif(  ($dispatch_date > $promised_date) && (  ($dispatch_date - $promised_date) > 86400)   ) {
-         $n_value =  "N+4";
+        elseif (($dispatch_date > $promised_date) && ( ($dispatch_date - $promised_date) > 86400)) {
+          $n_value = "N+4";
         }
-        
+
 //        $node = node_load($nid);
 //        $node->	field_dispatch_n_value[LANGUAGE_NONE][0]['value'] = $n_value;
 //        node_save($node);
