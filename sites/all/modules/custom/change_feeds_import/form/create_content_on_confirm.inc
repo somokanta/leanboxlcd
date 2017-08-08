@@ -13,6 +13,14 @@ function change_feeds_import_create_confirm_content($id) {
           ->condition('sbd.error_id', $id, '=')
           ->fields('sbd')
           ->execute()->fetchAll(PDO::FETCH_ASSOC);
+  
+  try{
+   change_feeds_import_insert_data_in_custom_billing_table($billing_data_result);
+  } catch (Exception $ex) {
+
+  }
+
+  
   $party_packing_check = get_party_packing_from_party_code(NULL,$distributor_id);
 
   foreach ($billing_data_result as $key => $value) {
@@ -101,8 +109,7 @@ function change_feeds_import_create_confirm_content($id) {
 
   $max_billing_id = $max_billing_id ? $max_billing_id : 0;
 
-  change_feeds_import_insert_data_in_custom_billing_table($billing_data_result);
-
+  
   $batch = array(
     'operations' => array(
       array('change_feeds_import_create_party_packing', array($party_packing_data_new)),
@@ -119,10 +126,10 @@ function change_feeds_import_create_confirm_content($id) {
   );
   batch_set($batch);
 
-// delete data from stage_billing_data.
-//  db_delete('stage_billing_data')
-//      ->condition('error_id', $id, '=')
-//      ->execute();
+ //delete data from stage_billing_data.
+  db_delete('stage_billing_data')
+      ->condition('error_id', $id, '=')
+      ->execute();
 
   require_once drupal_get_path('module', 'change_feeds_import') . '/form/validate_content.inc';
   $status = "Completed";
