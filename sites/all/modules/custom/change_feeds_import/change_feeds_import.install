@@ -1242,3 +1242,14 @@ function change_feeds_import_update_7112() {
   db_add_unique_key($table, $name, $fields);
   //db_drop_unique_key($table, $name)
 }
+
+/**
+ *  Implements Hook_Update_7113
+ */
+function change_feeds_import_update_7113() {
+  $fields = array("bill_number", "sku7_code", "distributor_id");
+  $table = "custom_billing_data";
+  $name = "check_duplicate_in_live";
+  db_add_unique_key($table, $name, $fields);
+  //db_drop_unique_key($table, $name);
+}
