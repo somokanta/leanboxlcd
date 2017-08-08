@@ -128,7 +128,8 @@ function reverse_geocode_menu() {
     'title' => 'Create Static delivery beats',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('delivery_beat_create_form'),
-    'access arguments' => array('address confirmation'),
+    // 'access arguments' => array('address confirmation'),
+    'access arguments' => array('only-rs-admin-with existing data'),
     'file' => 'delivery_beat_form.inc'
   );
 
@@ -1590,6 +1591,36 @@ function graphhopper_solution_api($job_id) {
   }
 
   return $result;
+}
+
+/**
+ * Implements hook_node_access().
+ */
+function reverse_geocode_node_access($node, $op, $account) {
+  $type = is_string($node) ? $node : $node->type;
+
+  $user_id = $account->uid;
+  $distributor_id = change_feeds_import_get_distributor_id($user_id);
+
+  if (in_array($type, node_permissions_get_configured_types())) {
+    if ($op == 'create' && user_access('create ' . $type . ' content', $account)) {
+      return NODE_ACCESS_ALLOW;
+    }
+
+    if ($op == 'update') {
+      if (user_access('edit any ' . $type . ' content', $account) || (user_access('edit own ' . $type . ' content', $account) && ($distributor_id == $node->uid))) {
+        return NODE_ACCESS_ALLOW;
+      }
+    }
+
+    if ($op == 'delete') {
+      if (user_access('delete any ' . $type . ' content', $account) || (user_access('delete own ' . $type . ' content', $account) && ($distributor_id == $node->uid))) {
+        return NODE_ACCESS_ALLOW;
+      }
+    }
+  }
+
+  return NODE_ACCESS_IGNORE;
 }
 
 function reverse_geocode_get_data_trip_wise($trip_id) {

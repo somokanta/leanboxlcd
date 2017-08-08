@@ -11,7 +11,6 @@
 
 			var area_definition = Drupal.settings.leanbox_dashboard.area_definition;
 			var party_pack_data = Drupal.settings.leanbox_dashboard.bill_pendency;
-			console.log(party_pack_data);
 			google.charts.load("current", {packages: ['gauge', 'corechart', 'bar']});
 			google.charts.setOnLoadCallback(function () {
 				drawpartypackingChart(party_pack_data);

@@ -12,6 +12,10 @@ function change_feeds_import_permission() {
       'title' => t('Distributor Upload File'),
       'description' => t('Distributor Upload File')
     ),
+    'Distributor Upload File DFE and RS admin wise' => array(
+      'title' => t('Distributor Upload File DFE and RS admin wise'),
+      'description' => t('Distributor Upload File DFE and RS admin wise')
+    ),
     'Delete Billing Data' => array(
       'title' => t('Delete Billing Data'),
       'description' => t('Delete Billing Data')
@@ -113,7 +117,7 @@ function change_feeds_import_menu() {
     'description' => 'Import Outlet Area Hook',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('change_feeds_import_outlet_area_hook_form'),
-    'access arguments' => array('Distributor Upload File'),
+    'access arguments' => array('Distributor Upload File DFE and RS admin wise'),
     'file' => 'form/outlet_area_hook.inc',
   );
 
@@ -276,7 +280,7 @@ function change_feeds_import_menu() {
     'description' => 'Import Area Hook Group Master Data',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('change_feeds_import_area_hook_grp_form'),
-    'access arguments' => array('Distributor Upload File'),
+    'access arguments' => array('Distributor Upload File DFE and RS admin wise'),
     'file' => 'form/area_hook_grp_data.inc',
   );
 
@@ -668,8 +672,6 @@ function delete_billing_form_submit($form, &$form_state) {
   $pass = "sales";
   // get data from Sales register's node's for selected date and user (custom_billing_data).
   // $sales_data = get_custom_data($pass, $start_date, $end_date, $user);
-
-
   // delete data from custom table for selected date and user (custom_billing_data).
   foreach ($billing_data as $key => $val) {
     $id = $val['id'];
@@ -1992,10 +1994,6 @@ function change_feeds_import_query_alter(QueryAlterableInterface $query) {
     $query->addExpression('SUM(if(field_sales_day_value != 1, 1, 0))', 'total_rec');
   }
 
-//  $view_name = 'impact_party_master';
-//  if ($query->hasTag('views_' . $view_name)) {
-//    $query->condition('node.uid', 'node_field_data_field_hul_code.uid');
-//  }
 }
 
 function change_feeds_import_views_query_alter(&$view, &$query) {
@@ -2547,7 +2545,6 @@ function _send_file_using_sftp($file_name, $file_uri) {
       
       if($output)
       watchdog('$file_name$output', '<pre>' . print_r(var_dump($output), TRUE) . '</pre>');
-
     }
     else {
       $data['error'] = 'File was not sent';

@@ -985,114 +985,125 @@ header[id="page-header"] {
     z-index: 9999;
     box-shadow: 0 3px 10px -1px #ccc;
     width: auto;
+    .menu {
+      width: 250px;
+      position: relative;
+      list-style: none !important;
+      li {
+            width: 100%;
+            background: #fff;
+            position: relative;
+            list-style: none !important;
+            padding: 0;
+            border-radius: 0;
+            border-bottom: 1px solid #ccc;
+            border-top: 0 !important;
+            display: list-item;
+            cursor: pointer;
+            background-color: #e8e8e8;
+            span, a {
+              padding: 13px 15px;
+              text-shadow: none;
+              display: list-item;
+                &:hover{
+                      background: #dcdbdb !important;
+                }
+            }
+            &:hover{
+              ul {
+                position: absolute;
+                top: 0;
+                left: 250px;
+                display: block;
+                background: #e8e8e8 !important;
+                height: 100%;
+                border: 0;
+                background-color: transparent;
+                min-width: inherit;
+                margin-top: 0;
+                padding-top: 0;
+                li{
+                  float: left;
+                  list-style: none !important;
+                  width: 230px;
+                  box-sizing: border-box !important;
+                  margin: 0;
+                  background: #e8e8e8 !important;
+                  span, a{
+                    margin: 0!important;
+                    border-bottom: 1px solid #ccc;
+                    color: #000;
+                    &:hover{
+                          background: #dcdbdb !important;
+                    }
+                  }
+                  &:hover {
+                        ul {
+                          display: block;
+                          left: 230px;
+                          margin: 0;
+                          li {
+                              margin: 0;
+                              width: 250px;
+                              background-color: #e8e8e8;
+                              a { 
+                                margin: 0 !important;
+                                border-bottom: 1px solid #ccc;
+                                color: #000;
+                              }
+                              ul{
+                                  display: none;
+                              }
+                              &:hover{
+                                ul{
+                                  left: 250px;
+                                  display: block;
+                                }
+                              }
+                          }
+                          .last{
+                            a{
+                              border-bottom: none;
+                            }
+                          }
+                        }
+                  }
+                  ul {
+                    display: none;
+                  }
+                }
+              }              
+            }
+            ul {
+                    position: absolute;
+                    top: 0;
+                    right: 0;
+                    z-index: 1000;
+                    display: none;
+                    float: none;
+                    min-width: 160px;
+                    padding: 5px 0;
+                    margin: 2px 0 0;
+                    list-style: none;
+                    font-size: 14px;
+                    text-align: left;
+                    background-color: #fff;
+                    border: 1px solid #ccc;
+                    border: 1px solid rgba(0, 0, 0, 0.15);
+                    border-radius: 4px;
+                    -webkit-box-shadow: 0 6px 12px rgba(0, 0, 0, 0.175);
+                    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.175);
+                    background-clip: padding-box;
+            }
+        }
+     }
   }
-
   ul, li {
     list-style: none;
     margin: 0;
     padding: 0;
   }
 
-  .content {
-    > ul {
-      width: 250px;
-      position: relative;
-      list-style: none !important;
-
-      li {
-        width: 100%;
-        background: $white-color;
-        position: static;
-        list-style: none !important;
-        padding: 0;
-        border-radius: 0;
-        border-bottom: 1px solid #ccc;
-        border-top: 0 !important;
-
-        &.leaf {
-          padding: 0;
-        }
-
-        .caret {
-          border-left: 7px solid;
-          border-bottom: 8px solid transparent;
-          border-top: 8px solid transparent;
-          float: right;
-          position: relative;
-
-          &:before {
-            content: "";
-            position: absolute;
-            top: -8px;
-            left: -9px;
-            border-left: 7px solid #fff;
-            border-bottom: 8px solid transparent;
-            border-top: 8px solid transparent;
-          }
-        }
-
-        &:hover, &:focus {
-          background: #e8e8e8;
-
-          .caret {
-            &:before {
-              border-left: 7px solid #e8e8e8;
-              border-bottom: 8px solid transparent;
-              border-top: 8px solid transparent;
-            }
-          }
-        }
-
-        a {
-          padding: 13px 15px;
-          text-shadow: none;
-        }
-
-        &:hover {
-          ul {
-            display: block;
-            top: 0 !important;
-            left: 250px !important;
-            background: #e8e8e8 !important;
-          }
-        }
-
-        ul {
-          position: absolute;
-          background: $white-color !important;
-          width: 750px !important;
-          list-style: none;
-          box-shadow: none;
-          border: 0;
-          height: 100%;
-          background: #e8e8e8;
-          box-shadow: 0 3px 10px -1px #ccc;
-          border-radius: 0 !important;
-
-          li {
-            float: left;
-            list-style: none !important;
-            width: 230px;
-            box-sizing: border-box !important;
-            margin: 0 10px;
-            background: #e8e8e8 !important;
-
-            &:hover {
-              background: #fbfbfb !important;
-            }
-
-            &:nth-child(even) {
-              margin-left: 5px;
-            }
-
-            &:nth-child(odd) {
-              margin-right: 5px;
-            }
-          }
-        }
-      }
-    }
-  }
 }
 
 #address-selection-map {
