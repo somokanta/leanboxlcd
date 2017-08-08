@@ -14,12 +14,7 @@ function change_feeds_import_create_confirm_content($id) {
           ->fields('sbd')
           ->execute()->fetchAll(PDO::FETCH_ASSOC);
   
-  try{
    change_feeds_import_insert_data_in_custom_billing_table($billing_data_result);
-  } catch (Exception $ex) {
-
-  }
-
   
   $party_packing_check = get_party_packing_from_party_code(NULL,$distributor_id);
 
@@ -181,8 +176,8 @@ function change_feeds_import_insert_data_in_custom_billing_table($billing_data_r
 // 
     $loading_date = strtotime($data['loading_date']);
     $billing_date = strtotime($data['bill_date']);
-
-    $stage_billing_data = db_insert('custom_billing_data') // Table name no longer needs {}
+    try {
+      $stage_billing_data = db_insert('custom_billing_data') // Table name no longer needs {}
         ->fields(array(
           'vehicle' => $data['vehicle'],
           'loading_date' => $loading_date,
@@ -217,6 +212,10 @@ function change_feeds_import_insert_data_in_custom_billing_table($billing_data_r
           'created_date' => $created_date,
         ))
         ->execute();
+    }
+    catch (Exception $ex) {
+      
+    }
   }
 }
 
