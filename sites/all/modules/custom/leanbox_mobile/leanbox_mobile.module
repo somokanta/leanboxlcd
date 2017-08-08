@@ -22,6 +22,12 @@ function leanbox_mobile_menu() {
     'page arguments' => array(1),
     'access arguments' => array('Distributor Upload File'),
   );
+  $items['leanbox-dispatch-return-data'] = array(
+    'title' => 'Fetch Return Data By Cron',
+    'page callback' => 'leanbox_mobile_dispatch_return_data_by_cron',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
   return $items;
 }
 
@@ -333,4 +339,76 @@ function leanbox_mobile_chart_query_details($start = '', $end = '', $field_condi
   }
   // }
   return $output;
+}
+
+/**
+ * Fetch data from third party server
+ */
+function leanbox_mobile_dispatch_return_data_by_cron() {
+  $import_file = 'IMPACT2TP_' . date("dmY", strtotime(" -1 day")) . '.csv';
+  $command = 'sshpass -p "Techub123#" scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -r sftpuser03@103.233.76.251:/impact2tp/' . $import_file . ' /data/docroot/dev.leanbox.in/sites/default/files/TP2IMPACT_RETURN/';
+  $return = shell_exec($command);
+  $file_uri = '/var/www/html/leanboxdev/sites/all/modules/custom/dispatch_planning/'.$import_file;
+  leanbox_mobile_save_return_data_from_cron($file_uri);
+}
+/**
+ * 
+ * @param type $file_uri
+ */
+function leanbox_mobile_save_return_data_from_cron($csv_uri) {
+  //$csv_uri = '/var/www/html/leanboxdev/sites/all/modules/custom/dispatch_planning/IMPACT.csv';
+  $handle = fopen($csv_uri, 'r');
+
+//Create header --- column name to insert
+  $row = fgetcsv($handle);
+  $columns = array();
+  foreach ($row as $i => $header) {
+    $columns[$i] = trim($header);
+  }
+
+  while (($row = fgetcsv($handle, 1024, ",")) !== FALSE) {
+    $record = array();
+    foreach ($row as $i => $field) {
+      $record[$columns[$i]] = $field;
+    }
+
+//RS Code,	BILL_NUMBER,	Sum of NET_SALES_VALUE,	Bill Value,
+//	RETURN VALUE,	PAYMENT TYPE,	DELIVERY OUTCOME,	REASON ENTRY,	UPDATE DATE
+
+    $node = new stdClass();
+    $node->title = $record['BILL_NUMBER'];
+    $node->type = "impact_cron_mobile_data";
+    node_object_prepare($node); // Sets some defaults. Invokes hook_prepare() and hook_node_prepare().
+    $node->language = LANGUAGE_NONE; // Or e.g. 'en' if locale is enabled
+    $node->status = 1; //(1 or 0): published or not
+    $node->comment = 0; // 0 = comments disabled, 1 = read only, 2 = read/write
+    
+    $node->uid = leanbox_mobile_get_uid_using_rscode($record['RS Code']);
+
+    $node->field_sum_of_net_sales_bill_wise[LANGUAGE_NONE][0]['value'] = $record['Sum of NET_SALES_VALUE'];
+    $node->field_mobile_bill_value[LANGUAGE_NONE][0]['value'] = $record['Bill Value'];
+    $node->field_mobile_return_value[LANGUAGE_NONE][0]['value'] = $record['RETURN VALUE'];
+    $node->field_payment_type[LANGUAGE_NONE][0]['value'] = $record['PAYMENT TYPE'];
+    $node->field_delivery_outcome[LANGUAGE_NONE][0]['value'] = $record['DELIVERY OUTCOME'];
+    $node->field_reason_entry[LANGUAGE_NONE][0]['value'] = $record['REASON ENTRY'];
+    $node->field_mobile_update_date[LANGUAGE_NONE][0]['value'] = strtotime($record['UPDATE DATE']);
+    
+
+    $node = node_submit($node); // Prepare node for saving
+    node_save($node);
+    
+  }
+  fclose($handle);
+}
+
+/**
+ * 
+ * @param type $rs_code
+ */
+function leanbox_mobile_get_uid_using_rscode($rs_code) {
+  $query = db_select('field_data_field_third_party_username', 'tp');
+  $query->condition('tp.field_third_party_username_value', $rs_code);
+  $query->fields('tp', array('entity_id'));
+  $result = $query->execute()->fetchField();
+  return $result;
 }
