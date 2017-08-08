@@ -10806,7 +10806,7 @@ form div > a {
 }
 
 /* line 859, ../sass/leanbox-global.scss */
-.region-content .block-leanbox-dashboard {
+.region-content .block-leanbox-dashboard, .region-content .block-leanbox-mobile {
   float: left;
   width: 46%;
   display: block;
@@ -10818,7 +10818,7 @@ form div > a {
   height: 420px;
 }
 /* line 874, ../sass/leanbox-global.scss */
-.region-content .block-leanbox-dashboard h2.block-title {
+.region-content .block-leanbox-dashboard h2.block-title, .region-content .block-leanbox-mobile h2.block-title {
   line-height: 30px;
   padding-right: 8px;
   text-overflow: ellipsis;
@@ -10827,53 +10827,53 @@ form div > a {
   margin-bottom: 5px;
 }
 /* line 883, ../sass/leanbox-global.scss */
-.region-content .block-leanbox-dashboard.contextual-links-region {
+.region-content .block-leanbox-dashboard.contextual-links-region, .region-content .block-leanbox-mobile.contextual-links-region {
   width: 50%;
   float: left;
 }
 /* line 887, ../sass/leanbox-global.scss */
-.region-content .block-leanbox-dashboard.contextual-links-region div[dir="ltr"] {
+.region-content .block-leanbox-dashboard.contextual-links-region div[dir="ltr"], .region-content .block-leanbox-mobile.contextual-links-region div[dir="ltr"] {
   width: 100% !important;
 }
 /* line 893, ../sass/leanbox-global.scss */
-.region-content #leanbox-dashboard-chart-filter-otif-form .container-inline-date, .region-content #leanbox-dashboard-chart-filter-delivery-form .container-inline-date {
+.region-content #leanbox-dashboard-chart-filter-otif-form .container-inline-date, .region-content #leanbox-dashboard-chart-filter-delivery-form .container-inline-date, .region-content #leanbox-mobile-chart-filter-return-form .container-inline-date, .region-content #leanbox-mobile-chart-filter-full-return-form .container-inline-date {
   width: auto;
   display: inline-block;
 }
 /* line 896, ../sass/leanbox-global.scss */
-.region-content #leanbox-dashboard-chart-filter-otif-form .container-inline-date .date-padding, .region-content #leanbox-dashboard-chart-filter-delivery-form .container-inline-date .date-padding {
+.region-content #leanbox-dashboard-chart-filter-otif-form .container-inline-date .date-padding, .region-content #leanbox-dashboard-chart-filter-delivery-form .container-inline-date .date-padding, .region-content #leanbox-mobile-chart-filter-return-form .container-inline-date .date-padding, .region-content #leanbox-mobile-chart-filter-full-return-form .container-inline-date .date-padding {
   float: none;
   display: inline-block;
 }
 /* line 899, ../sass/leanbox-global.scss */
-.region-content #leanbox-dashboard-chart-filter-otif-form .container-inline-date .date-padding .control-label, .region-content #leanbox-dashboard-chart-filter-delivery-form .container-inline-date .date-padding .control-label {
+.region-content #leanbox-dashboard-chart-filter-otif-form .container-inline-date .date-padding .control-label, .region-content #leanbox-dashboard-chart-filter-delivery-form .container-inline-date .date-padding .control-label, .region-content #leanbox-mobile-chart-filter-return-form .container-inline-date .date-padding .control-label, .region-content #leanbox-mobile-chart-filter-full-return-form .container-inline-date .date-padding .control-label {
   display: none;
 }
 /* line 902, ../sass/leanbox-global.scss */
-.region-content #leanbox-dashboard-chart-filter-otif-form .container-inline-date .date-padding input, .region-content #leanbox-dashboard-chart-filter-delivery-form .container-inline-date .date-padding input {
+.region-content #leanbox-dashboard-chart-filter-otif-form .container-inline-date .date-padding input, .region-content #leanbox-dashboard-chart-filter-delivery-form .container-inline-date .date-padding input, .region-content #leanbox-mobile-chart-filter-return-form .container-inline-date .date-padding input, .region-content #leanbox-mobile-chart-filter-full-return-form .container-inline-date .date-padding input {
   width: 100px;
 }
 /* line 906, ../sass/leanbox-global.scss */
-.region-content #leanbox-dashboard-chart-filter-otif-form .container-inline-date .control-label, .region-content #leanbox-dashboard-chart-filter-delivery-form .container-inline-date .control-label {
+.region-content #leanbox-dashboard-chart-filter-otif-form .container-inline-date .control-label, .region-content #leanbox-dashboard-chart-filter-delivery-form .container-inline-date .control-label, .region-content #leanbox-mobile-chart-filter-return-form .container-inline-date .control-label, .region-content #leanbox-mobile-chart-filter-full-return-form .container-inline-date .control-label {
   vertical-align: top;
   margin: 8px 0 0 0;
 }
 /* line 911, ../sass/leanbox-global.scss */
-.region-content #leanbox-dashboard-chart-filter-otif-form #otif-submit, .region-content #leanbox-dashboard-chart-filter-otif-form #delivery-submit, .region-content #leanbox-dashboard-chart-filter-delivery-form #otif-submit, .region-content #leanbox-dashboard-chart-filter-delivery-form #delivery-submit {
+.region-content #leanbox-dashboard-chart-filter-otif-form #otif-submit, .region-content #leanbox-dashboard-chart-filter-otif-form #delivery-submit, .region-content #leanbox-dashboard-chart-filter-otif-form #mobile-return-submit, .region-content #leanbox-dashboard-chart-filter-otif-form #mobile-full-return-submit, .region-content #leanbox-dashboard-chart-filter-delivery-form #otif-submit, .region-content #leanbox-dashboard-chart-filter-delivery-form #delivery-submit, .region-content #leanbox-dashboard-chart-filter-delivery-form #mobile-return-submit, .region-content #leanbox-dashboard-chart-filter-delivery-form #mobile-full-return-submit, .region-content #leanbox-mobile-chart-filter-return-form #otif-submit, .region-content #leanbox-mobile-chart-filter-return-form #delivery-submit, .region-content #leanbox-mobile-chart-filter-return-form #mobile-return-submit, .region-content #leanbox-mobile-chart-filter-return-form #mobile-full-return-submit, .region-content #leanbox-mobile-chart-filter-full-return-form #otif-submit, .region-content #leanbox-mobile-chart-filter-full-return-form #delivery-submit, .region-content #leanbox-mobile-chart-filter-full-return-form #mobile-return-submit, .region-content #leanbox-mobile-chart-filter-full-return-form #mobile-full-return-submit {
   width: 80px;
   display: inline-block;
 }
 /* line 914, ../sass/leanbox-global.scss */
-.region-content #leanbox-dashboard-chart-filter-otif-form #otif-submit button, .region-content #leanbox-dashboard-chart-filter-otif-form #delivery-submit button, .region-content #leanbox-dashboard-chart-filter-delivery-form #otif-submit button, .region-content #leanbox-dashboard-chart-filter-delivery-form #delivery-submit button {
+.region-content #leanbox-dashboard-chart-filter-otif-form #otif-submit button, .region-content #leanbox-dashboard-chart-filter-otif-form #delivery-submit button, .region-content #leanbox-dashboard-chart-filter-otif-form #mobile-return-submit button, .region-content #leanbox-dashboard-chart-filter-otif-form #mobile-full-return-submit button, .region-content #leanbox-dashboard-chart-filter-delivery-form #otif-submit button, .region-content #leanbox-dashboard-chart-filter-delivery-form #delivery-submit button, .region-content #leanbox-dashboard-chart-filter-delivery-form #mobile-return-submit button, .region-content #leanbox-dashboard-chart-filter-delivery-form #mobile-full-return-submit button, .region-content #leanbox-mobile-chart-filter-return-form #otif-submit button, .region-content #leanbox-mobile-chart-filter-return-form #delivery-submit button, .region-content #leanbox-mobile-chart-filter-return-form #mobile-return-submit button, .region-content #leanbox-mobile-chart-filter-return-form #mobile-full-return-submit button, .region-content #leanbox-mobile-chart-filter-full-return-form #otif-submit button, .region-content #leanbox-mobile-chart-filter-full-return-form #delivery-submit button, .region-content #leanbox-mobile-chart-filter-full-return-form #mobile-return-submit button, .region-content #leanbox-mobile-chart-filter-full-return-form #mobile-full-return-submit button {
   margin: 10px 10px 0 0;
   padding: 6px 15px;
 }
 /* line 919, ../sass/leanbox-global.scss */
-.region-content #leanbox-dashboard-chart-filter-otif-form a, .region-content #leanbox-dashboard-chart-filter-delivery-form a {
+.region-content #leanbox-dashboard-chart-filter-otif-form a, .region-content #leanbox-dashboard-chart-filter-delivery-form a, .region-content #leanbox-mobile-chart-filter-return-form a, .region-content #leanbox-mobile-chart-filter-full-return-form a {
   width: 100%;
 }
 /* line 921, ../sass/leanbox-global.scss */
-.region-content #leanbox-dashboard-chart-filter-otif-form a #otif_div, .region-content #leanbox-dashboard-chart-filter-otif-form a #delivery_div, .region-content #leanbox-dashboard-chart-filter-delivery-form a #otif_div, .region-content #leanbox-dashboard-chart-filter-delivery-form a #delivery_div {
+.region-content #leanbox-dashboard-chart-filter-otif-form a #otif_div, .region-content #leanbox-dashboard-chart-filter-otif-form a #delivery_div, .region-content #leanbox-dashboard-chart-filter-otif-form a #mobile_return_div, .region-content #leanbox-dashboard-chart-filter-otif-form a #mobile_full_return_div, .region-content #leanbox-dashboard-chart-filter-delivery-form a #otif_div, .region-content #leanbox-dashboard-chart-filter-delivery-form a #delivery_div, .region-content #leanbox-dashboard-chart-filter-delivery-form a #mobile_return_div, .region-content #leanbox-dashboard-chart-filter-delivery-form a #mobile_full_return_div, .region-content #leanbox-mobile-chart-filter-return-form a #otif_div, .region-content #leanbox-mobile-chart-filter-return-form a #delivery_div, .region-content #leanbox-mobile-chart-filter-return-form a #mobile_return_div, .region-content #leanbox-mobile-chart-filter-return-form a #mobile_full_return_div, .region-content #leanbox-mobile-chart-filter-full-return-form a #otif_div, .region-content #leanbox-mobile-chart-filter-full-return-form a #delivery_div, .region-content #leanbox-mobile-chart-filter-full-return-form a #mobile_return_div, .region-content #leanbox-mobile-chart-filter-full-return-form a #mobile_full_return_div {
   margin: 10px 0 0 0;
   text-align: center;
   display: inline-block;
