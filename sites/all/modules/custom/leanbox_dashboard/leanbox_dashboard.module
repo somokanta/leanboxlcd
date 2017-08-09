@@ -41,7 +41,7 @@ function leanbox_dashboard_menu() {
     'Metrics' => 'Metrics',
     'Productivity' => 'Productivity',
     'ota' => 'Process-On-Time Adherence',
-    'Dispatch' => 'Dispatch',
+    //'Dispatch' => 'Dispatch',
   );
 
   $items['dashboard/Progress'] = array(
