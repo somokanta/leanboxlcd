@@ -1800,7 +1800,7 @@ function change_feeds_import_node_presave($node) {
     $node->field_distributor_uid['und'][0]['value'] = $distributor_id;
   }
 
-  if ($node->type != 'user_manual') {
+  if ($node->type != 'user_manual' && $node->type != 'impact_cron_mobile_data') {
     if (!empty($distributor_id) && ($node->is_new == TRUE)) {
       $node->uid = $distributor_id;
     }
