@@ -57,7 +57,9 @@
 					bar: {groupWidth: '40%'},
 					chartArea: {left: area_definition.ch_left, top: area_definition.ch_top, width: area_definition.ch_width, height: area_definition.ch_height},
 					series: {
-						2: {color: '#ff0000'},
+							0: {color: '#ec3c10'},
+						1: {color: '#27ae60'},
+						2: {color: 'red'},
 					},
 					vAxis: {
 						minValue: 0,
