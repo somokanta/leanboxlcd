@@ -1090,7 +1090,7 @@ function leanbox_dashboard_chart_filter_sales_delivery_report_form($form, &$form
     '#type' => 'radios',
     '#title' => t('Delivered Amt'),
     '#required' => FALSE,
-    '#options' => array('all' => 'All', 'na' => 'NA'),
+    '#options' => array('all' => 'All', 'na' => 'Bill Not Uploaded'),
     '#default_value' => $delivered_amt,
     '#size'=> 20,
   );
@@ -1327,7 +1327,7 @@ function leanbox_dashboard_sales_delivery_table($export = FALSE) {
         $data['status'] = 'FULL DELIVERED';
       }
       else {
-        $data['status'] = 'NA';
+        $data['status'] = 'Bill Not Uploaded';
       }
 
       // reason and delivery pending below
