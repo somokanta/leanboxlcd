@@ -1,4 +1,4 @@
-<div id="googlechart">
+<div id="columnchart">
   <?php print_r(($data)) ?>
 </div>
 <div id="blocktable">

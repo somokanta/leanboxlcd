@@ -1498,6 +1498,7 @@ function dispatch_planning_sales_reg_api($value, $node, $trip_execution_date, $h
 
   $api_data['jobData']['vehicle'] = $vehicle;
   $api_data['jobData']['party_hll_code'] = $outlet_data_details['field_hul_code_value']; // hul code in outlet
+  $api_data['jobData']['lat_long'] = $outlet_data_details['field_hul_updated_lat_value'] . ',' . $outlet_data_details['field_hul_updated_long_value'];
   $api_data['jobData']['bill_value'] = $bill_value;
   $api_data['jobData']['item_details'] = $billing_data_details; // array
   $api_data['jobData']['bill_date'] = $bill_date;
@@ -1526,6 +1527,7 @@ function dispatch_planning_get_billing_data($node_uid, $bill_number) {
   $query->addfield('bd', 'sku7_code', 'sku_code');
   $query->addfield('bd', 'Sum_of_NET_SALES_KGS', 'sum_net_sales_kgs');
   $query->addfield('bd', 'Sum_of_NET_SALES_VALUE', 'sum_net_sales_value');
+  $query->addfield('bd', 'product_name', 'sku_description');
 
   $query->condition('bd.distributor_id', $node_uid);
   $query->condition('bd.bill_number', $bill_number);
@@ -1547,10 +1549,14 @@ function dispatch_planning_get_outlet_data($node_uid, $party_code) {
   $query->join('field_data_field_hul_code', 'hc', 'hc.entity_id = n.nid');
   $query->join('field_data_field_party_name', 'pn', 'pn.entity_id = n.nid');
   $query->join('field_data_field_beat_name', 'bn', 'bn.entity_id = n.nid');
+  $query->join('field_data_field_hul_updated_lat', 'hl', 'hl.entity_id = n.nid');
+  $query->join('field_data_field_hul_updated_long', 'ul', 'ul.entity_id = n.nid');
 
   $query->fields('bn', array('field_beat_name_value'));
   $query->fields('pn', array('field_party_name_value'));
   $query->fields('hc', array('field_hul_code_value'));
+  $query->fields('hl', array('field_hul_updated_lat_value'));
+  $query->fields('ul', array('field_hul_updated_long_value'));
 
   $query->condition('n.type', 'outlet_master');
   $query->condition('n.title', $party_code);
