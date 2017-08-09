@@ -1644,7 +1644,7 @@ function change_feeds_import_get_return_query($start_date, $end_date, $data) {
   }
   $header['full_return'] = 'FULL %';
   $header['partial_return'] = 'PARTIAL %';
-  $header['na'] = 'NA %';
+  $header['na'] = 'Bills Not Uploaded %';
   $header['total'] = 'TOTAL (Full + Partial) %';
   
   
