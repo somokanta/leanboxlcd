@@ -1,0 +1,409 @@
+<?php
+
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+
+/**
+ * Implements hook_menu
+ */
+function leanbox_mobile_menu() {
+  $items = array();
+  $items['leanbox-mobile-filter'] = array(
+    'title' => '',
+    'page callback' => 'leanbox_mobile_date_filter_callback',
+    'access arguments' => array('Distributor Upload File'),
+  );
+  $items['leanbox-mobile-chart-details/%'] = array(
+    'title ' => '',
+    'page callback' => 'leanbox_mobile_chart_details_callback',
+    'page arguments' => array(1),
+    'access arguments' => array('Distributor Upload File'),
+  );
+  $items['leanbox-dispatch-return-data'] = array(
+    'title' => 'Fetch Return Data By Cron',
+    'page callback' => 'leanbox_mobile_dispatch_return_data_by_cron',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  return $items;
+}
+
+/**
+ * 
+ */
+function leanbox_mobile_date_filter_callback() {
+
+  $start_date = $end_date = '';
+  $activity_type = $_POST['activity_type'];
+
+  if (isset($_POST['start_date'])) {
+    $start_date = $_POST['start_date'];
+  }
+  if (isset($_POST['end_date'])) {
+    $end_date = $_POST['end_date'];
+  }
+
+  switch ($activity_type) {
+    case 'mobile_return_graph' :
+      $output_data = leanbox_mobile_chart_query_details($start_date, $end_date, 'Partial Delivery');
+      break;
+    case 'mobile_full_return_graph' :
+      $output_data = leanbox_mobile_chart_query_details($start_date, $end_date, 'Full Return');
+      break;
+
+    default:
+      $output_data = leanbox_mobile_chart_query_details($activity_type, $start_date, $end_date);
+  }
+  drupal_json_output($output_data);
+}
+
+/**
+ * 
+ * @param text $arg
+ * @return html
+ */
+function leanbox_mobile_chart_details_callback($arg) {
+  $block = module_invoke('leanbox_mobile', 'block_view', $arg);
+  $output = render($block['content']);
+  return $output;
+}
+
+/**
+ * 
+ */
+function leanbox_mobile_block_info() {
+  $blocks['mobile_return_graph'] = array(
+    'info' => t('Mobile Partial Return Chart'),
+    'cache' => DRUPAL_NO_CACHE,
+  );
+  $blocks['mobile_full_return_graph'] = array(
+    'info' => t('Mobile Full Return Chart'),
+    'cache' => DRUPAL_NO_CACHE,
+  );
+  return $blocks;
+}
+
+/**
+ * Implements hook_block_view
+ * 
+ */
+function leanbox_mobile_block_view($delta = '') {
+  $area_definition = array(
+    'width' => 300,
+    'height' => 300,
+  );
+  switch ($delta) {
+
+    case 'mobile_return_graph':
+      if (arg(1) == 'mobile_return_graph') {
+        $area_definition = array(
+          'width' => 700,
+          'height' => 400,
+        );
+      }
+      $billing_date = strtotime(date('Y-m-d') . "-1 days");
+      $billing_date_end = $billing_date + 86399;
+      $bill_date = date('Y-m-d', $billing_date);
+      $bill_date_end = date('Y-m-d', $billing_date_end);
+      $block['subject'] = "Return Value ($bill_date Billing)";
+      $data = leanbox_mobile_chart_query_details($bill_date, $bill_date_end, 'Partial Delivery');
+
+      $filter_form = drupal_render(drupal_get_form('leanbox_mobile_chart_filter_return_form'));
+      $block['content'] = array(
+        '#markup' => theme('leanbox_mobile', array('data' => $filter_form,)),
+        '#attached' => array(
+          'js' => array(
+            array(
+              'type' => 'external',
+              'data' => 'https://www.gstatic.com/charts/loader.js'
+            ),
+            drupal_get_path('module', 'leanbox_mobile') . '/js/leanbox_mobile_returnchart.js',
+            array(
+              'data' => array('leanbox_mobile' => array('returnchart' => $data, 'area_definition' => $area_definition)),
+              'type' => 'setting'
+            ),
+          ),
+        ),
+      );
+      break;
+
+
+    case 'mobile_full_return_graph':
+      if (arg(1) == 'mobile_full_return_graph') {
+        $area_definition = array(
+          'width' => 700,
+          'height' => 400,
+          'ch_left' => 80,
+          'ch_top' => 50,
+          'ch_width' => 500,
+          'ch_height' => 250,
+        );
+      }
+      $billing_date = strtotime(date('Y-m-d') . "-1 days");
+      $billing_date_end = $billing_date + 86399;
+      $bill_date = date('Y-m-d', $billing_date);
+      $bill_date_end = date('Y-m-d', $billing_date_end);
+      $block['subject'] = "Return Value ($bill_date Billing)";
+      $data = leanbox_mobile_chart_query_details($bill_date, $bill_date_end, 'Full Return');
+
+      $filter_form = drupal_render(drupal_get_form('leanbox_mobile_chart_filter_full_return_form'));
+      $block['content'] = array(
+        '#markup' => theme('leanbox_mobile', array('data' => $filter_form,)),
+        '#attached' => array(
+          'js' => array(
+            array(
+              'type' => 'external',
+              'data' => 'https://www.gstatic.com/charts/loader.js'
+            ),
+            drupal_get_path('module', 'leanbox_mobile') . '/js/leanbox_mobile_fullreturnchart.js',
+            array(
+              'data' => array('leanbox_mobile' => array('fullreturnchart' => $data, 'area_definition' => $area_definition)),
+              'type' => 'setting'
+            ),
+          ),
+        ),
+      );
+      break;
+  }
+  return $block;
+}
+
+/**
+ * 
+ * @param type $form
+ * @param type $form_state
+ * @return array
+ */
+function leanbox_mobile_chart_filter_return_form($form, &$form_state) {
+  $form = array();
+
+//  if (arg(1) == 'mobile_return_graph') {
+  $billing_date = strtotime(date('Y-m-d') . "-1 days");
+  $bill_date = date('Y-m-d', $billing_date);
+  $form['start_date'] = array(
+    '#type' => 'date_popup',
+    '#title' => t('From'),
+    '#required' => TRUE,
+    '#date_format' => 'Y-m-d',
+    '#default_value' => $bill_date,
+  );
+  $form['end_date'] = array(
+    '#type' => 'date_popup',
+    '#title' => t('To'),
+    '#required' => TRUE,
+    '#date_format' => 'Y-m-d',
+    '#default_value' => $bill_date,
+  );
+
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => 'Submit',
+    '#prefix' => '<div id ="mobile-return-submit">',
+    '#suffix' => '</div>',
+    '#attributes' => array('class' => array('mobile-return-submit')),
+  );
+  // }
+
+  $form['unloading_daywise_trends'] = array(
+    '#markup' => '<a href = "/leanbox-mobile-chart-details/mobile_return_graph" target = "_blank"><div id="mobile_return_div"></div></a>',
+  );
+
+  return $form;
+}
+
+/**
+ * 
+ * @param type $form
+ * @param type $form_state
+ * @return array
+ */
+function leanbox_mobile_chart_filter_full_return_form($form, &$form_state) {
+  $form = array();
+
+//  if (arg(1) == 'mobile_return_graph') {
+  $billing_date = strtotime(date('Y-m-d') . "-1 days");
+  $bill_date = date('Y-m-d', $billing_date);
+  $form['start_date'] = array(
+    '#type' => 'date_popup',
+    '#title' => t('From'),
+    '#required' => TRUE,
+    '#date_format' => 'Y-m-d',
+    '#default_value' => $bill_date,
+  );
+  $form['end_date'] = array(
+    '#type' => 'date_popup',
+    '#title' => t('To'),
+    '#required' => TRUE,
+    '#date_format' => 'Y-m-d',
+    '#default_value' => $bill_date,
+  );
+
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => 'Submit',
+    '#prefix' => '<div id ="mobile-full-return-submit">',
+    '#suffix' => '</div>',
+    '#attributes' => array('class' => array('mobile-full-return-submit')),
+  );
+  // }
+
+  $form['unloading_daywise_trends'] = array(
+    '#markup' => '<a href = "/leanbox-mobile-chart-details/mobile_full_return_graph" target = "_blank"><div id="mobile_full_return_div"></div></a>',
+  );
+
+  return $form;
+}
+
+/**
+ * Implements hook_theme
+ */
+function leanbox_mobile_theme() {
+  return array(
+    'leanbox_mobile' => array(
+      'template' => 'leanbox-mobile',
+      'variables' => array('data' => NULL, 'blocktable' => NULL),
+    ),
+  );
+}
+
+/**
+ * Callback function for chart block
+ * 
+ * @return html
+ */
+function leanbox_mobile_chart_query_details($start = '', $end = '', $field_condition) {
+  global $user;
+  // Store distributor id in author in each node
+  $output = array();
+  $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+  if (!empty($start)) {
+    $start_date = strtotime($start);
+  }
+  else {
+    $start = date('Y-m-d'); // dnt change format as date are stored in same format in db
+    $start_date = strtotime(date("Y-m-d"));
+  }
+  if (!empty($end)) {
+    $end_date = strtotime($end) + 86399;
+  }
+  else {
+    $end = date('Y-m-d');
+    $end_date = strtotime(date('Y-m-d')) + 86399;
+  }
+
+  // code for delivery
+  //if ($activity_type == 'mobile_return_graph') {
+
+  $subquery = db_select('custom_billing_data', 'bd');
+  $subquery->condition('bd.distributor_id', $distributor_id);
+  if (!empty($start_date) && !empty($end_date)) {
+    $subquery->condition('bd.bill_date', array($start_date, $end_date), 'BETWEEN');
+  }
+  $subquery->groupBy('bd.bill_number');
+  $subquery->addfield('bd', 'bill_number', 'bill_number');
+  $subquery->addfield('bd', 'distributor_id', 'distributor_id');
+  $subquery->addExpression('SUM(bd.Sum_of_NET_SALES_VALUE)', 'sales_value');
+
+  $query = db_select('node', 'n');
+  $query->fields('n');
+  $query->condition('n.type', 'impact_cron_mobile_data');
+  $query->addTag('node_uid');
+  $query->join($subquery, 'bd', 'n.title = bd.bill_number AND n.uid = bd.distributor_id');
+
+  $query->join('field_data_field_mobile_return_value', 'r', 'r.entity_id = n.nid');
+  $query->join('field_data_field_reason_entry', 're', 're.entity_id = n.nid');
+  $query->join('field_data_field_delivery_outcome', 'do', 'do.entity_id = n.nid');
+  $query->condition('do.field_delivery_outcome_value', $field_condition);
+
+  $query->fields('re', array('field_reason_entry_value'));
+  $query->addExpression('(bd.sales_value - r.field_mobile_return_value_value)', 'return_amt');
+
+  $query->groupBy('bd.bill_number');
+  $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+
+  foreach ($res as $key => $val) {
+    $array[$val['field_reason_entry_value']] += $val['return_amt'];
+  }
+
+  $output[] = array('PriceList Group', 'value');
+  if (!empty($array)) {
+    foreach ($array as $key => $val) {
+      $output[] = array($key, round($val));
+    }
+  }
+  else {
+    $output[] = array('No Result', 1);
+  }
+  // }
+  return $output;
+}
+
+/**
+ * Fetch data from third party server
+ */
+function leanbox_mobile_dispatch_return_data_by_cron() {
+  $import_file = 'IMPACT2TP_' . date("dmY", strtotime(" -1 day")) . '.csv';
+  $command = 'sshpass -p "Techub123#" scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -r sftpuser03@103.233.76.251:/impact2tp/' . $import_file . ' /data/docroot/dev.leanbox.in/sites/default/files/TP2IMPACT_RETURN/';
+  $return = shell_exec($command);
+  $file_uri = '/data/docroot/dev.leanbox.in/sites/default/files/TP2IMPACT_RETURN/'.$import_file;
+  leanbox_mobile_save_return_data_from_cron($file_uri);
+}
+/**
+ * 
+ * @param type $file_uri
+ */
+function leanbox_mobile_save_return_data_from_cron($csv_uri) {
+  $handle = fopen($csv_uri, 'r');
+  if ($handle) {
+//Create header --- column name to insert
+    $row = fgetcsv($handle);
+    $columns = array();
+    foreach ($row as $i => $header) {
+      $columns[$i] = trim($header);
+    }
+
+    while (($row = fgetcsv($handle, 1024, ",")) !== FALSE) {
+      $record = array();
+      foreach ($row as $i => $field) {
+        $record[$columns[$i]] = $field;
+      }
+
+      $node = new stdClass();
+      $node->title = $record['BILL_NUMBER'];
+      $node->type = "impact_cron_mobile_data";
+      node_object_prepare($node); // Sets some defaults. Invokes hook_prepare() and hook_node_prepare().
+      $node->language = LANGUAGE_NONE; // Or e.g. 'en' if locale is enabled
+      $node->status = 1; //(1 or 0): published or not
+      $node->comment = 0; // 0 = comments disabled, 1 = read only, 2 = read/write
+
+      $node->uid = ($rs_uid = leanbox_mobile_get_uid_using_rscode($record['RS Code'])) ? $rs_uid : 0;
+
+      $node->field_sum_of_net_sales_bill_wise[LANGUAGE_NONE][0]['value'] = $record['Sum of NET_SALES_VALUE'];
+      $node->field_mobile_bill_value[LANGUAGE_NONE][0]['value'] = $record['Bill Value'];
+      $node->field_mobile_return_value[LANGUAGE_NONE][0]['value'] = $record['RETURN VALUE'];
+      $node->field_payment_type[LANGUAGE_NONE][0]['value'] = $record['PAYMENT TYPE'];
+      $node->field_delivery_outcome[LANGUAGE_NONE][0]['value'] = $record['DELIVERY OUTCOME'];
+      $node->field_reason_entry[LANGUAGE_NONE][0]['value'] = $record['REASON ENTRY'];
+      $node->field_mobile_update_date[LANGUAGE_NONE][0]['value'] = strtotime($record['UPDATE DATE']);
+
+      $node = node_submit($node); // Prepare node for saving
+      node_save($node);
+    }
+    fclose($handle);
+  }
+}
+
+/**
+ * 
+ * @param type $rs_code
+ */
+function leanbox_mobile_get_uid_using_rscode($rs_code) {
+  $query = db_select('field_data_field_third_party_username', 'tp');
+  $query->condition('tp.field_third_party_username_value', $rs_code);
+  $query->fields('tp', array('entity_id'));
+  $result = $query->execute()->fetchField();
+  return $result;
+}
