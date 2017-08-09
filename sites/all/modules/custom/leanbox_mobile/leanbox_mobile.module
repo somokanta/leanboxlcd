@@ -346,9 +346,10 @@ function leanbox_mobile_chart_query_details($start = '', $end = '', $field_condi
  */
 function leanbox_mobile_dispatch_return_data_by_cron() {
   $import_file = 'IMPACT2TP_' . date("dmY", strtotime(" -1 day")) . '.csv';
-  $command = 'sshpass -p "Techub123#" scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -r sftpuser03@103.233.76.251:/impact2tp/' . $import_file . ' /data/docroot/dev.leanbox.in/sites/default/files/TP2IMPACT_RETURN/';
+  $file_path_url = getcwd();
+  $command = 'sshpass -p "Techub123#" scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -r sftpuser03@103.233.76.251:/impact2tp/' . $import_file . ' ' . $file_path_url . '/sites/default/files/TP2IMPACT_RETURN/';
   $return = shell_exec($command);
-  $file_uri = '/data/docroot/dev.leanbox.in/sites/default/files/TP2IMPACT_RETURN/'.$import_file;
+  $file_uri = $file_path_url . '/sites/default/files/TP2IMPACT_RETURN/'.$import_file;
   leanbox_mobile_save_return_data_from_cron($file_uri);
 }
 /**
