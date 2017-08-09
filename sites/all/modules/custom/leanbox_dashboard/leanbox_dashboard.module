@@ -41,6 +41,7 @@ function leanbox_dashboard_menu() {
     'Metrics' => 'Metrics',
     'Productivity' => 'Productivity',
     'ota' => 'Process-On-Time Adherence',
+    'Dispatch' => 'Dispatch',
   );
 
   $items['dashboard/Progress'] = array(
@@ -49,6 +50,12 @@ function leanbox_dashboard_menu() {
     'weight' => 0,
     'access arguments' => array('Distributor Upload File'),
   );
+  $items['Dispatch1'] = array(
+    'page callback' => 'leanbox_dashboard_listing_page',
+    'access arguments' => array('Distributor Upload File'),
+    'type' => MENU_NORMAL_ITEM,
+  );
+
 
   $d = 1;
   foreach ($categories as $k => $v) {
@@ -1637,7 +1644,7 @@ function change_feeds_import_get_return_query($start_date, $end_date, $data) {
   }
   $header['full_return'] = 'FULL %';
   $header['partial_return'] = 'PARTIAL %';
-  $header['na'] = 'NA %';
+  $header['na'] = 'Bills Not Uploaded %';
   $header['total'] = 'TOTAL (Full + Partial) %';
   
   

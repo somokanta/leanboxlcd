@@ -1236,7 +1236,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     if (!empty($res2)) {
       foreach ($res2 as $key2 => $val2) {
         if ($val2['field_sales_return_amt_value'] == NULL) {
-          $data['NA']['data'] += $val2['sales_value'];
+          $data['Bills Not Uploaded']['data'] += $val2['sales_value'];
         }
         else {
           $sales_ret = (( $val2['sales_value'] - $val2['field_sales_return_amt_value']) / $val2['sales_value']) * 100;
