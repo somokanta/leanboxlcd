@@ -856,7 +856,7 @@ form {
     text-align: left;
 }
 .region-content {
-  .block-leanbox-dashboard {
+  .block-leanbox-dashboard, .block-leanbox-mobile {
     float: left;
     width: 46%;
     display: block;
@@ -889,7 +889,7 @@ form {
       }
     }
   }
-  #leanbox-dashboard-chart-filter-otif-form, #leanbox-dashboard-chart-filter-delivery-form {
+  #leanbox-dashboard-chart-filter-otif-form, #leanbox-dashboard-chart-filter-delivery-form, #leanbox-mobile-chart-filter-return-form, #leanbox-mobile-chart-filter-full-return-form {
     .container-inline-date{
       width: auto;
       display: inline-block;
@@ -908,7 +908,7 @@ form {
           margin: 8px 0 0 0;
       }
     }
-    #otif-submit, #delivery-submit{
+    #otif-submit, #delivery-submit, #mobile-return-submit, #mobile-full-return-submit{
         width: 80px;
         display: inline-block;
         button {
@@ -918,7 +918,7 @@ form {
     }
     a {
       width: 100%;
-      #otif_div, #delivery_div {
+      #otif_div, #delivery_div, #mobile_return_div, #mobile_full_return_div {
           margin: 10px 0 0 0;
           text-align: center;
           display: inline-block;
