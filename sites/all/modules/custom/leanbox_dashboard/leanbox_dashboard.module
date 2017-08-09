@@ -453,7 +453,7 @@ function leanbox_dashboard_block_view($delta = '') {
           'ch_height' => 250,
         );
       }
-      $billing_date = strtotime(date('Y-m-d') . "-7 days");
+      $billing_date = strtotime(date('Y-m-d') . "- 7 days");
       $billing_date = date('d-m-Y', $billing_date);
       $block['subject'] = "Return Value % ($billing_date Billing)";
       $data = leanbox_dashboard_chart_query_details('delivery', $billing_date, $billing_date);

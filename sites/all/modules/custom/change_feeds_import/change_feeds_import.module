@@ -667,7 +667,7 @@ function delete_billing_form_submit($form, &$form_state) {
   $user = $form_state['values']['user'];
   $pass = "";
   // get data from custom table for selected date and user (custom_billing_data).
-  $billing_data = $sales_data = get_custom_data($pass, $start_date, $end_date, $user);
+  $billing_data = $sales_data  =  get_custom_data($pass, $start_date, $end_date, $user);
   $billing_count = count($billing_data);
   $pass = "sales";
   // get data from Sales register's node's for selected date and user (custom_billing_data).
@@ -1675,7 +1675,7 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
 //    }
   }
   if ($entity->type == 'hul_code_master') {
-    $title = $entity->title; 
+    $title = $entity->title;
     $all_title = check_hul_code_exist();
     if (array_key_exists($title,$all_title)){
       drupal_set_message("HulCode Is Alredy Present in System", 'error', FALSE);
@@ -2035,7 +2035,7 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
       $query1->condition('d1.field_idd_value', 1);
       $dis_ids = $query1->execute()->fetchCol();
 
-      $next_day = strtotime(date('Y-m-d', strtotime("+1 days")));
+      $next_day = strtotime(date('Y-m-d' , strtotime("+1 days")));
       $next_day_end = $next_day + 86399;
 
       $sub_query->join('node', 'n', 'n.title = b.bill_number AND b.distributor_id = n.uid');
@@ -2045,7 +2045,7 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
       $sub_query->condition('fd.field_trip_executon_date_value', $next_day, '>=');
       $sub_query->condition('fd.field_trip_executon_date_value', $next_day_end, '<=');
       $sub_query->condition('b.distributor_id', $dis_ids, 'IN');
-      // $sub_query->condition('n.uid', $dis_ids, 'IN');
+     // $sub_query->condition('n.uid', $dis_ids, 'IN');
     }
     else {
       $sub_query->join('node', 'n', 'n.title = b.bill_number');

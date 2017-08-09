@@ -404,7 +404,7 @@ function change_feeds_import_day_van_area_finished($success, $results, $operatio
   }
 }
 
-function update_area_hook_group_for_outlets($sales_day, $van_pl_grp, $area_hook, $dva_nid) {
+function update_area_hook_group_for_outlets($sales_day, $van_pl_grp, $area_hook, $dva_nid){
   global $user;
   $user_id = $user->uid;
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
@@ -413,10 +413,10 @@ function update_area_hook_group_for_outlets($sales_day, $van_pl_grp, $area_hook,
   $query = db_select('node', 'n');
   $query->join('field_data_field_sales_day', 'fsd', 'fsd.entity_id = n.nid');
   $query->condition('fsd.field_sales_day_value', $sales_day);
-
+  
   $query->join('field_data_field_outlet_area_hook', 'fa', 'fa.entity_id = n.nid');
   $query->condition('fa.field_outlet_area_hook_value', $area_hook);
-
+  
   $query->condition('n.type', 'outlet_master');
   $query->addTag('node_uid');
   $query->join('field_data_field_channel', 'ch', 'ch.entity_id = n.nid');
@@ -429,10 +429,10 @@ function update_area_hook_group_for_outlets($sales_day, $van_pl_grp, $area_hook,
   $query->condition('ppmch.bundle', 'party_pack_master');
   $query->join('field_data_field_van_pl_group', 'ppplg', 'ppn.nid = ppplg.entity_id');
   $query->condition('ppplg.field_van_pl_group_value', $van_pl_grp);
-
+  
   $query->fields('n', array('nid'));
   $res = $query->execute()->fetchCol();
-
+  
   foreach ($res as $nid) {
     watchdog('aaaa', $nid . '  ' . $dva_nid);
     $node = node_load($nid);

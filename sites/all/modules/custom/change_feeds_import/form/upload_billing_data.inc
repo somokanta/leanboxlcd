@@ -351,7 +351,7 @@ function change_feeds_import_batch_fix_process($max, $data, $distributor_id, $fi
         $error[$k] = $error_text;
         $error_bool = 1;
       }
-       else {
+      else {
         $error[$k] = $v;
       }
     }
@@ -360,7 +360,7 @@ function change_feeds_import_batch_fix_process($max, $data, $distributor_id, $fi
       $context['results']['error'][] = $error;
     }
 
-     if (!isset($context['results']['check_bills'][$bill_number])) {
+    if (!isset($context['results']['check_bills'][$bill_number])) {
       $context['results']['check_bills'][$bill_number] = $bill_number;
       $context['results']['bill_unique_count'] ++;
     }
@@ -371,8 +371,9 @@ function change_feeds_import_batch_fix_process($max, $data, $distributor_id, $fi
       change_feeds_import_insert_data_in_staging_billing_table($pass_data, $error_bool, $last_id, REQUEST_TIME);
     } catch (Exception $ex) {
     }
+
     $context['results']['total_lines'] ++;
-  } 
+  }
 }
 
 function convert_array_to_csv_export($array, $filename) {
@@ -385,7 +386,7 @@ function convert_array_to_csv_export($array, $filename) {
 }
 
 function change_feeds_import_insert_data_in_error_billing_table($file_name, $date, $bill_uploaded, $total_lines, $sum_of_total_sales_qty, $error_link, $status, $distributor_id) {
-       $error_billing_data = db_insert('error_billing_data') // Table name no longer needs {}
+  $error_billing_data = db_insert('error_billing_data') // Table name no longer needs {}
       ->fields(array(
         'file_name' => $file_name,
         'date' => $date,

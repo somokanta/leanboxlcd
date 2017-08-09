@@ -571,7 +571,7 @@ function reverse_geocode_trip_wise_form($form, &$form_state) {
 
     $multiple = TRUE;
     $class = array('selectable-row', 'table-checkbox');
-
+    
     $form['list_form_items'] = array(
       '#type' => 'tableselect',
       '#header' => $header_array,
@@ -679,7 +679,7 @@ function trip_filters_submit($form, &$form_state) {
       }
     }
 
-    //   $header = array('Attributes', 'Original', 'New');
+ //   $header = array('Attributes', 'Original', 'New');
     foreach ($data as $key => $val) {
       $party_code = $val['field_party_code_value'];
       $lat = $val['field_hul_updated_lat_value'];
@@ -696,8 +696,8 @@ function trip_filters_submit($form, &$form_state) {
       else {
         $seq = "";
       }
-
-      $sr_no = (int) ($val['field_drs_sequence_value']);
+      
+      $sr_no = (int)($val['field_drs_sequence_value']);
 
 
       $old_city = $val['field_original_address_sub_administrative_area'];
@@ -725,17 +725,17 @@ function trip_filters_submit($form, &$form_state) {
       $new_formatted_address = $val['field_updated_address_thoroughfare'];
 
 
-      /*      $rows = array();
+/*      $rows = array();
 
-        $rows[] = array('Locality', $old_locality, $new_locality);
-        $rows[] = array('Sub Locality', $old_sublocality, $new_sublocality);
-        $rows[] = array('Street', $old_street, $new_street);
-        $rows[] = array('POI', $old_poi, $new_poi);
+      $rows[] = array('Locality', $old_locality, $new_locality);
+      $rows[] = array('Sub Locality', $old_sublocality, $new_sublocality);
+      $rows[] = array('Street', $old_street, $new_street);
+      $rows[] = array('POI', $old_poi, $new_poi);
 
 
-        $lat_long = !empty($lat) ? $lat . ' / ' . $long : '';
-        $rows[] = array('Lat/Long', $old_lat_long, $lat_long);
-       */
+      $lat_long = !empty($lat) ? $lat . ' / ' . $long : '';
+      $rows[] = array('Lat/Long', $old_lat_long, $lat_long);
+*/
       //$address = theme('table', array('header' => $header, 'rows' => $rows, 'sticky' => FALSE));
 
       $old_lat_long = !empty($old_lat) ? $old_lat . ',' . $old_long : '';
@@ -748,7 +748,7 @@ function trip_filters_submit($form, &$form_state) {
           . '<tr><td style="white-space:nowrap;color:#222">POI</td><td>' . $old_poi . '</td></tr>'
           . '<tr><td style="white-space:nowrap;color:#222">Lat/Long</td><td>' . $old_lat_long . '</td></tr>'
           . '</table></div>';
-
+      
       $options[$party_code] = array(
         'sr_no' => array('data' => $sr_no, 'class' => 'sr-cell'),
         'party_code' => array('data' => $party_code, 'class' => 'party-code-cell'),
@@ -765,7 +765,7 @@ function trip_filters_submit($form, &$form_state) {
 }
 
 /*
-  function trip_wise_form_submit($form, &$form_state) {
+function trip_wise_form_submit($form, &$form_state) {
   $party_code = $form_state['values']['list_form_items'];
   $lat = $form_state['values']['lat'];
   $lng = $form_state['values']['lng'];
@@ -775,36 +775,35 @@ function trip_filters_submit($form, &$form_state) {
   $hul_code = key($result);
   //Update the address attributes in the database
   foreach ($result[$hul_code] as $val) {
-  $party_codes[] = $val->title;
+    $party_codes[] = $val->title;
   }
   $attributes = reverse_geocode_update_hul_lat_lng($hul_code, $lat, $lng);
   if (!empty($attributes)) {
 
-  foreach ($party_codes as $party_code) {
+    foreach ($party_codes as $party_code) {
 
-  if (isset($form_state['reverse_geocode']['rows'][$party_code])) {
-  $form_state['reverse_geocode']['rows'][$party_code]['#attributes'] = array('data-lat' => $lat, 'data-lng' => $lng);
-  $rows = $form_state['reverse_geocode']['rows'][$party_code]['details']['data']['#rows'];
-  $rows[0][2] = $attributes['locality'];
-  $rows[1][2] = $attributes['subLocality'];
-  $rows[2][2] = $attributes['street'];
-  $rows[3][2] = $attributes['poi'];
-  $rows[4][2] = $lat . ' / ' . $lng;
+      if (isset($form_state['reverse_geocode']['rows'][$party_code])) {
+        $form_state['reverse_geocode']['rows'][$party_code]['#attributes'] = array('data-lat' => $lat, 'data-lng' => $lng);
+        $rows = $form_state['reverse_geocode']['rows'][$party_code]['details']['data']['#rows'];
+        $rows[0][2] = $attributes['locality'];
+        $rows[1][2] = $attributes['subLocality'];
+        $rows[2][2] = $attributes['street'];
+        $rows[3][2] = $attributes['poi'];
+        $rows[4][2] = $lat . ' / ' . $lng;
 
-  $form_state['reverse_geocode']['rows'][$party_code]['details']['data']['#rows'] = $rows;
-  }
-  }
-  drupal_set_message('Successfully updated');
+        $form_state['reverse_geocode']['rows'][$party_code]['details']['data']['#rows'] = $rows;
+      }
+    }
+    drupal_set_message('Successfully updated');
   }
   else {
-  drupal_set_message('Error occured while updating', 'error');
+    drupal_set_message('Error occured while updating', 'error');
   }
 
 
   $form_state['rebuild'] = TRUE;
-  }
- */
-
+}
+*/
 function map_ajax_callback1($form, &$form_state) {
 
   $commands[] = ajax_command_replace('#address-selection-map', render($form));
@@ -1482,7 +1481,7 @@ function reverse_geocode_node_presave($node) {
         $query->fields('ppplg', array('field_van_pl_group_value'));
         $van_pl_grp = $query->execute()->fetchField();
         $day_van_area_nid = get_nid_from_master_using_sales_day_van_grp_area_hook($updated_day, $van_pl_grp, $updated_area_hook);
-
+         
         // remove nid
         $node->field_area_hook = array();
         // empty status
@@ -1492,15 +1491,16 @@ function reverse_geocode_node_presave($node) {
         $node->field_sequence = array();
         $node->field_revised_sequence = array();
         $node->field_revised_sequence_status[LANGUAGE_NONE][0]['value'] = 0;
-
+        
         if ($day_van_area_nid) {
           $node->field_area_hook[LANGUAGE_NONE][0]['nid'] = $day_van_area_nid;
         }
-      }
+
+      } 
     }
   }
   else if ($node->type == 'dispatch_data') {
-    if (!empty($node->field_dispatch_date[LANGUAGE_NONE][0]['value'])) {
+    if (!empty($node->field_dispatch_date[LANGUAGE_NONE][0]['value'])) {    
       $node->field_dispatch_status[LANGUAGE_NONE][0]['value'] = 1;
       $nid = $node->nid;
       $dispatch_date = strtotime($node->field_dispatch_date[LANGUAGE_NONE][0]['value']);
@@ -1705,3 +1705,5 @@ function reverse_geocode_get_data_trip_wise($trip_id) {
   $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
   return $res;
 }
+
+  

@@ -721,9 +721,9 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
 
   $dispatch_bill_count = count($rows);
   $bill_value_sum = $form_state['dispatch_planning']['bill_value_sum'];
-
+  
   $bill_nids = array_keys($rows);
-
+  
   global $user;
   $user_id = $user->uid;
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
@@ -745,14 +745,14 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
   if ($trip_id) {
     // Increment the next_value.
     db_update('trip_id_sequence')
-      ->fields(array('next_id' => $trip_id + 1))
-      ->condition('distributor_id', $distributor_id)
-      ->execute();
+        ->fields(array('next_id' => $trip_id + 1))
+        ->condition('distributor_id', $distributor_id)
+        ->execute();
   }
   else {
     $trip_id = 1;
     $insert = db_insert('trip_id_sequence')
-      ->fields(array(
+        ->fields(array(
       'distributor_id' => $distributor_id,
       'next_id' => $trip_id + 1
     ));
@@ -775,11 +775,11 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
   $node->field_trip_creation_date[$node->language][0]['value'] = strtotime(date('Y/m/d 00:00:00'));
   $node->field_trip_executon_date[$node->language][0]['value'] = $trip_execution_date;
   $node->field_hht_id[$node->language][0]['nid'] = get_nid_from_hht_id($hht_id);
-
-  if ($seq_flag) {
+  
+  if($seq_flag){
     $node->field_sequence_method[$node->language][0]['value'] = 1;
   }
-  else {
+  else{
     $node->field_sequence_method[$node->language][0]['value'] = 0;
   }
 
@@ -789,7 +789,7 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
   $nid = $node->nid;
 
   $bill_nids = array_keys($rows);
-
+  
   $sequence_array = $form_state['dispatch_planning']['sequence_array'];
   $manual_drs_sequence = $form_state['dispatch_planning']['manual_drs_sequence'];
 
