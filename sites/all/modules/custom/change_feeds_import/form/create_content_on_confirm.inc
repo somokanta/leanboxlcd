@@ -14,7 +14,7 @@ function change_feeds_import_create_confirm_content($id) {
           ->fields('sbd')
           ->execute()->fetchAll(PDO::FETCH_ASSOC);
   
-   change_feeds_import_insert_data_in_custom_billing_table($billing_data_result);
+   
   
   $party_packing_check = get_party_packing_from_party_code(NULL,$distributor_id);
 
@@ -104,6 +104,7 @@ function change_feeds_import_create_confirm_content($id) {
 
   $max_billing_id = $max_billing_id ? $max_billing_id : 0;
 
+  change_feeds_import_insert_data_in_custom_billing_table($billing_data_result);
   
   $batch = array(
     'operations' => array(
