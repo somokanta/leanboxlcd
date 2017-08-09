@@ -108,7 +108,7 @@ function leanbox_mobile_block_view($delta = '') {
       $billing_date_end = $billing_date + 86399;
       $bill_date = date('Y-m-d', $billing_date);
       $bill_date_end = date('Y-m-d', $billing_date_end);
-      $block['subject'] = "Return Value ($bill_date Billing)";
+      $block['subject'] = "Partial Return Analysis Value ($bill_date Billing)";
       $data = leanbox_mobile_chart_query_details($bill_date, $bill_date_end, 'Partial Delivery');
 
       $filter_form = drupal_render(drupal_get_form('leanbox_mobile_chart_filter_return_form'));
@@ -146,7 +146,7 @@ function leanbox_mobile_block_view($delta = '') {
       $billing_date_end = $billing_date + 86399;
       $bill_date = date('Y-m-d', $billing_date);
       $bill_date_end = date('Y-m-d', $billing_date_end);
-      $block['subject'] = "Return Value ($bill_date Billing)";
+      $block['subject'] = "Full Return Analysis Value ($bill_date Billing)";
       $data = leanbox_mobile_chart_query_details($bill_date, $bill_date_end, 'Full Return');
 
       $filter_form = drupal_render(drupal_get_form('leanbox_mobile_chart_filter_full_return_form'));
@@ -345,10 +345,11 @@ function leanbox_mobile_chart_query_details($start = '', $end = '', $field_condi
  * Fetch data from third party server
  */
 function leanbox_mobile_dispatch_return_data_by_cron() {
-  $import_file = 'IMPACT2TP_' . date("dmY", strtotime(" -1 day")) . '.csv';
-  $command = 'sshpass -p "Techub123#" scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -r sftpuser03@103.233.76.251:/impact2tp/' . $import_file . ' /data/docroot/dev.leanbox.in/sites/default/files/TP2IMPACT_RETURN/';
+  $import_file = 'IMPACT2TP_' . date("dmY") . '.csv';
+  $file_path_url = getcwd();
+  $command = 'sshpass -p "Techub123#" scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -r sftpuser03@103.233.76.251:/impact2tp/' . $import_file . ' ' . $file_path_url . '/sites/default/files/TP2IMPACT_RETURN/';
   $return = shell_exec($command);
-  $file_uri = '/data/docroot/dev.leanbox.in/sites/default/files/TP2IMPACT_RETURN/'.$import_file;
+  $file_uri = $file_path_url . '/sites/default/files/TP2IMPACT_RETURN/'.$import_file;
   leanbox_mobile_save_return_data_from_cron($file_uri);
 }
 /**
