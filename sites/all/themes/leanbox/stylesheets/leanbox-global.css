@@ -909,6 +909,7 @@ form div > a {
   border-radius: 10px;
   margin: 1%;
   height: 420px;
+  text-align: center;
 }
 /* line 874, ../sass/leanbox-global.scss */
 .region-content .block-leanbox-dashboard h2.block-title, .region-content .block-leanbox-mobile h2.block-title {

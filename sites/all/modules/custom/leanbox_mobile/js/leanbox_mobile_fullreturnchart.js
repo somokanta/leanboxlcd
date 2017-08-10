@@ -52,7 +52,7 @@
           sliceVisibilityThreshold: 0,
 					title: '',
 					is3D: true,
-				  chartArea:{left:30,top:20,width:'100%',height:'75%'},
+				  chartArea:{left:30,top:20,width:'100%',height:'100%'},
 					legend: {position: 'right'},
 
 				};

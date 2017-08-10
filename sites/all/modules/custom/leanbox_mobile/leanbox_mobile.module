@@ -92,7 +92,7 @@ function leanbox_mobile_block_info() {
  */
 function leanbox_mobile_block_view($delta = '') {
   $area_definition = array(
-    'width' => 300,
+    'width' => 400,
     'height' => 300,
   );
   switch ($delta) {
@@ -296,22 +296,45 @@ function leanbox_mobile_chart_query_details($start = '', $end = '', $field_condi
 
   // code for delivery
   //if ($activity_type == 'mobile_return_graph') {
+//
+//  $subquery = db_select('custom_billing_data', 'bd');
+//  $subquery->condition('bd.distributor_id', $distributor_id);
+//  if (!empty($start_date) && !empty($end_date)) {
+//    $subquery->condition('bd.bill_date', array($start_date, $end_date), 'BETWEEN');
+//  }
+//  $subquery->groupBy('bd.bill_number');
+//  $subquery->addfield('bd', 'bill_number', 'bill_number');
+//  $subquery->addfield('bd', 'distributor_id', 'distributor_id');
+//  $subquery->addExpression('SUM(bd.Sum_of_NET_SALES_VALUE)', 'sales_value');
+//
+//  $query = db_select('node', 'n');
+//  $query->fields('n');
+//  $query->condition('n.type', 'impact_cron_mobile_data');
+//  $query->addTag('node_uid');
+//  $query->join($subquery, 'bd', 'n.title = bd.bill_number AND n.uid = bd.distributor_id');
+//
+//  $query->join('field_data_field_mobile_return_value', 'r', 'r.entity_id = n.nid');
+//  $query->join('field_data_field_reason_entry', 're', 're.entity_id = n.nid');
+//  $query->join('field_data_field_delivery_outcome', 'do', 'do.entity_id = n.nid');
+//  $query->condition('do.field_delivery_outcome_value', $field_condition);
+//
+//  $query->fields('re', array('field_reason_entry_value'));
+//  $query->addExpression('(bd.sales_value - r.field_mobile_return_value_value)', 'return_amt');
+//
+//  $query->groupBy('bd.bill_number');
+//  $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
 
-  $subquery = db_select('custom_billing_data', 'bd');
-  $subquery->condition('bd.distributor_id', $distributor_id);
-  if (!empty($start_date) && !empty($end_date)) {
-    $subquery->condition('bd.bill_date', array($start_date, $end_date), 'BETWEEN');
-  }
-  $subquery->groupBy('bd.bill_number');
-  $subquery->addfield('bd', 'bill_number', 'bill_number');
-  $subquery->addfield('bd', 'distributor_id', 'distributor_id');
-  $subquery->addExpression('SUM(bd.Sum_of_NET_SALES_VALUE)', 'sales_value');
-
+ 
   $query = db_select('node', 'n');
-  $query->fields('n');
   $query->condition('n.type', 'impact_cron_mobile_data');
   $query->addTag('node_uid');
-  $query->join($subquery, 'bd', 'n.title = bd.bill_number AND n.uid = bd.distributor_id');
+  $query->join('node', 'n1', 'n1.title = n.title AND n.uid = n1.uid');
+  $query->condition('n1.type', 'sales_register_data');
+  $query->join('field_data_field_sr_bill_date','sr', 'sr.entity_id = n1.nid');
+  if (!empty($start_date) && !empty($end_date)) {
+    $query->condition('sr.field_sr_bill_date_value', array($start_date, $end_date), 'BETWEEN');
+  }
+  $query->join('field_data_field_sum_of_net_sales_bill_wise', 'ns1', 'ns1.entity_id = n.nid');
 
   $query->join('field_data_field_mobile_return_value', 'r', 'r.entity_id = n.nid');
   $query->join('field_data_field_reason_entry', 're', 're.entity_id = n.nid');
@@ -319,19 +342,15 @@ function leanbox_mobile_chart_query_details($start = '', $end = '', $field_condi
   $query->condition('do.field_delivery_outcome_value', $field_condition);
 
   $query->fields('re', array('field_reason_entry_value'));
-  $query->addExpression('(bd.sales_value - r.field_mobile_return_value_value)', 'return_amt');
+  $query->fields('ns1', array('field_sum_of_net_sales_bill_wise_value'));
 
-  $query->groupBy('bd.bill_number');
-  $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
-
-  foreach ($res as $key => $val) {
-    $array[$val['field_reason_entry_value']] += $val['return_amt'];
-  }
-
+  $query->groupBy('re.field_reason_entry_value');
+  $array = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+  
   $output[] = array('PriceList Group', 'value');
   if (!empty($array)) {
     foreach ($array as $key => $val) {
-      $output[] = array($key, round($val));
+      $output[] = array($val['field_reason_entry_value'], round($val['field_sum_of_net_sales_bill_wise_value']));
     }
   }
   else {
