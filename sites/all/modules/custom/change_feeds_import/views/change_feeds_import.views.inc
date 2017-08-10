@@ -79,6 +79,26 @@ function change_feeds_import_views_data_alter(&$data) {
     ),
   );
   
+    
+  //$data['field_data_field_dva_sales_day']['table']['group'] = t('Sales Day');
+  $data['node']['title'] = array(
+    'title' => t('mobile_return_analysis_relationship'),
+    'relationship' => array(
+      'title' => 'mobile return analysis relationship',
+      'base' => 'node', // Table we're joining to.
+      'base field' => 'title', // Field on the joined table.
+      'field' => 'title', // Real field name on the 'foo' table.
+      'handler' => 'views_handler_relationship',
+      'label' => t('Title from sales register to Title from impact_cron_mobile_data relationship'),
+      'title' => t('Title from sales register to Title from impact_cron_mobile_data relationship'),
+      'help' => t('Title from sales register to Title from impact_cron_mobile_data relationship.'),
+      'extra' => array(
+        array('field' => 'type', 'value' => 'sales_register_data'),
+        array('left_field' => 'type', 'value' => 'impact_cron_mobile_data'),
+      ),
+    ),
+  );
+  
   
   $data['field_data_field_hul_code']['table']['group'] = t('Hul table');
   $data['field_data_field_hul_code']['field_hul_code'] = array(
