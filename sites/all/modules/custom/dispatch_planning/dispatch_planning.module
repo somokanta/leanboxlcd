@@ -1492,8 +1492,8 @@ function dispatch_planning_sales_reg_api($value, $node, $trip_execution_date, $h
   $api_data['date'] = date('Y-m-d',$trip_execution_date);
   $api_data['city'] = 'ABC';
   //$api_data['hub'] = $rs_code;
-  $api_data['hub'] = '100006';
-  $api_data['fieldExecutive'] = $hht_id;
+  $api_data['hub'] = '100006'; // need to remove when moving to HUL
+  $api_data['fieldExecutive'] = $rs_code . '_' . $hht_id;
   $api_data['fieldExecutiveName'] = $cashier;
 
   $api_data['jobData']['vehicle'] = $vehicle;
