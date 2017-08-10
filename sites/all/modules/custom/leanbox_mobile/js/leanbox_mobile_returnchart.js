@@ -51,7 +51,7 @@
 					title: '',
 					is3D: true,
           sliceVisibilityThreshold: 0,
-					chartArea:{left:30,top:20,width:'100%',height:'75%'},
+					chartArea:{left:30,top:20,width:'100%',height:'100%'},
 					legend: {position: 'right'},
 				};
 				var chart = new google.visualization.PieChart(document.getElementById("mobile_return_div"));

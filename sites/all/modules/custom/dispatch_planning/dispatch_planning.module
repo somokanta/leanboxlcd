@@ -1485,7 +1485,14 @@ function dispatch_planning_sales_reg_api($value, $node, $trip_execution_date, $h
 
   $billing_data_details = dispatch_planning_get_billing_data($node_uid, $bill_number);
   $outlet_data_details = dispatch_planning_get_outlet_data($node_uid, $party_code);
-
+  
+  if (empty($outlet_data_details['field_hul_updated_lat_value'])) {
+    $outlet_data_details['field_hul_updated_lat_value'] = 0;
+  } 
+  if (empty($outlet_data_details['field_hul_updated_long_value'])) {
+    $outlet_data_details['field_hul_updated_long_value'] = 0;
+  }
+  
   $api_data['jobType'] = 'delivery1';  // Hardcoded as suggested by gaurav
   $reference_no = $rs_code . '_' . $bill_number;
   $api_data['referenceNo'] = $reference_no;
@@ -1546,11 +1553,11 @@ function dispatch_planning_get_outlet_data($node_uid, $party_code) {
   $query->condition('n.type', 'outlet_master');
   $query->condition('n.uid', $node_uid);
   //$query->join('field_data_field_sales_party_code', 'pc', 'pc.field_sales_party_code_value = n.title');
-  $query->join('field_data_field_hul_code', 'hc', 'hc.entity_id = n.nid');
-  $query->join('field_data_field_party_name', 'pn', 'pn.entity_id = n.nid');
-  $query->join('field_data_field_beat_name', 'bn', 'bn.entity_id = n.nid');
-  $query->join('field_data_field_hul_updated_lat', 'hl', 'hl.entity_id = n.nid');
-  $query->join('field_data_field_hul_updated_long', 'ul', 'ul.entity_id = n.nid');
+  $query->leftjoin('field_data_field_hul_code', 'hc', 'hc.entity_id = n.nid');
+  $query->leftjoin('field_data_field_party_name', 'pn', 'pn.entity_id = n.nid');
+  $query->leftjoin('field_data_field_beat_name', 'bn', 'bn.entity_id = n.nid');
+  $query->leftjoin('field_data_field_hul_updated_lat', 'hl', 'hl.entity_id = n.nid');
+  $query->leftjoin('field_data_field_hul_updated_long', 'ul', 'ul.entity_id = n.nid');
 
   $query->fields('bn', array('field_beat_name_value'));
   $query->fields('pn', array('field_party_name_value'));
