@@ -81,9 +81,7 @@ function change_feeds_import_views_data_alter(&$data) {
   
     
   //$data['field_data_field_dva_sales_day']['table']['group'] = t('Sales Day');
-  $data['node']['title'] = array(
-    'title' => t('mobile_return_analysis_relationship'),
-    'relationship' => array(
+  $data['node']['title']['relationship'][] = array(
       'title' => 'mobile return analysis relationship',
       'base' => 'node', // Table we're joining to.
       'base field' => 'title', // Field on the joined table.
@@ -96,7 +94,6 @@ function change_feeds_import_views_data_alter(&$data) {
         array('field' => 'type', 'value' => 'sales_register_data'),
         array('left_field' => 'type', 'value' => 'impact_cron_mobile_data'),
       ),
-    ),
   );
   
   
