@@ -81,7 +81,8 @@ function change_feeds_import_views_data_alter(&$data) {
   
     
   //$data['field_data_field_dva_sales_day']['table']['group'] = t('Sales Day');
-  $data['node']['title']['relationship'][] = array(
+  dpm($data['node']['title']['relationship'], 'relation');
+  $data['node']['title']['relationship'] = array(
       'title' => 'mobile return analysis relationship',
       'base' => 'node', // Table we're joining to.
       'base field' => 'title', // Field on the joined table.
