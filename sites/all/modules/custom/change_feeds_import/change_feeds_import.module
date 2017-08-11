@@ -1926,7 +1926,7 @@ function registration_validate($form, &$form_state) {
   global $user;
   $roles = $user->roles;
   if (in_array("administrator", $roles)) {
-    form_set_error('failed_account', 'administrator can not create account only distributor can create account');
+    //  form_set_error('failed_account', 'administrator can not create account only distributor can create account');
   }
 }
 
