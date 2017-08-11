@@ -90,7 +90,6 @@ function change_feeds_import_views_data_alter(&$data) {
       'title' => t('Title from sales register to Title from impact_cron_mobile_data relationship'),
       'help' => t('Title from sales register to Title from impact_cron_mobile_data relationship.'),
       'extra' => array(
-        array('field' => 'type', 'value' => 'sales_register_data'),
         array('field' => 'type', 'value' => 'impact_cron_mobile_data'),
       ),
   );
