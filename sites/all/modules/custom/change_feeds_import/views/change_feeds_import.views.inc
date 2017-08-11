@@ -86,11 +86,11 @@ function change_feeds_import_views_data_alter(&$data) {
       'base field' => 'title', // Field on the joined table.
       'field' => 'title', // Real field name on the 'foo' table.
       'handler' => 'views_handler_relationship',
-      'label' => t('Title from sales register to Title from impact_cron_mobile_data relationship'),
-      'title' => t('Title from sales register to Title from impact_cron_mobile_data relationship'),
-      'help' => t('Title from sales register to Title from impact_cron_mobile_data relationship.'),
+      'label' => t('Title In impact_cron_mobile_data to Title in sales_register_data relationship'),
+      'title' => t('Title In impact_cron_mobile_data to Title in sales_register_data relationship'),
+      'help' => t('Title In impact_cron_mobile_data to Title in sales_register_data relationship.'),
       'extra' => array(
-        array('field' => 'type', 'value' => 'impact_cron_mobile_data'),
+        array('field' => 'type', 'value' => 'sales_register_data'),
       ),
   );
   
