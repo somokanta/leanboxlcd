@@ -342,7 +342,7 @@ function leanbox_mobile_chart_query_details($start = '', $end = '', $field_condi
   $query->condition('do.field_delivery_outcome_value', $field_condition);
 
   $query->fields('re', array('field_reason_entry_value'));
-  $query->fields('ns1', array('field_sum_of_net_sales_bill_wise_value'));
+  $query->addExpression('SUM(ns1.field_sum_of_net_sales_bill_wise_value)', 'net_sales');
 
   $query->groupBy('re.field_reason_entry_value');
   $array = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
@@ -350,7 +350,7 @@ function leanbox_mobile_chart_query_details($start = '', $end = '', $field_condi
   $output[] = array('PriceList Group', 'value');
   if (!empty($array)) {
     foreach ($array as $key => $val) {
-      $output[] = array($val['field_reason_entry_value'], round($val['field_sum_of_net_sales_bill_wise_value']));
+      $output[] = array($val['field_reason_entry_value'], round($val['net_sales']));
     }
   }
   else {
