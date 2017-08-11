@@ -2031,7 +2031,7 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
       $query1 = db_select('users', 'u');
       $query1->fields('u', array('uid'));
       $query1->join('field_data_field_idd', 'd1', 'd1.entity_id= u.uid');
-      $query1->condition('u.status', 1);
+
       $query1->condition('d1.field_idd_value', 1);
       $dis_ids = $query1->execute()->fetchCol();
 
