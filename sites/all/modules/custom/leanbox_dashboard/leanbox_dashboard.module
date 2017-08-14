@@ -1438,7 +1438,10 @@ function leanbox_dashboard_form_alter(&$form, &$form_state, $form_id) {
 
          $form['field_distributor']['#states'] = array(
           'visible' => array(
-            ':input[name="roles[6]"]' => array('checked' => TRUE),
+            ':input[name="roles[7]"]' => array('checked' => TRUE),
+          ),
+          array(
+            ':input[name="roles[8]"]' => array('checked' => TRUE),
           ),
         );
         $form['field_distributor']['#type'] = 'select'; 
