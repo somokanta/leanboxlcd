@@ -107,10 +107,10 @@ function change_feeds_import_create_confirm_content($id) {
   
   $batch = array(
     'operations' => array(
+      array('change_feeds_import_create_billing', array($max_billing_id)),
       array('change_feeds_import_create_party_packing', array($party_packing_data_new)),
       array('change_feeds_import_create_picking', array($max_billing_id)),
       array('change_feeds_import_create_van_cld_report', array($max_billing_id)),
-      array('change_feeds_import_create_billing', array($max_billing_id)),
     ),
     'finished' => 'change_feeds_import_finished',
     'title' => t('Creating Billing Data'),
