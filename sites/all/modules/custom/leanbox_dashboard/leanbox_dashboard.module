@@ -1421,8 +1421,8 @@ function leanbox_dashboard_form_alter(&$form, &$form_state, $form_id) {
   $roles = $user->roles;
   if ($form_id == 'user_register_form') {
     if (in_array("hul_admin", $roles)) {
-      dpm($form, 'form11');
-      $form['field_distributor']['#access'] = FALSE;
+      //dpm($form, 'form11');
+      //$form['field_distributor']['#access'] = FALSE;
       $role_names = array('RS Operator', 'DFE', 'RS Admin');
       foreach ($form['account']['roles']['#options'] as $rid => $rname) {
         if (!in_array($rname, $role_names)) {
@@ -1435,12 +1435,7 @@ function leanbox_dashboard_form_alter(&$form, &$form_state, $form_id) {
         'callback' => 'city_ajax_callback',
         'method' => 'replace',
       );
-         $form['account']['roles']['#states'] = array(
-          'visible' => array(
-            ':input[name="pay_method[' . $key . ']"]' => array('checked' => TRUE),
-          ),
-        );
-         
+
          $form['field_distributor']['#states'] = array(
           'visible' => array(
             ':input[name="roles[6]"]' => array('checked' => TRUE),
