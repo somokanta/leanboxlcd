@@ -1421,7 +1421,7 @@ function leanbox_dashboard_form_alter(&$form, &$form_state, $form_id) {
   $roles = $user->roles;
   if ($form_id == 'user_register_form') {
     if (in_array("hul_admin", $roles)) {
-      //dpm($form, 'form11');
+      dpm($form, 'form11');
       //$form['field_distributor']['#access'] = FALSE;
       $role_names = array('RS Operator', 'DFE', 'RS Admin');
       foreach ($form['account']['roles']['#options'] as $rid => $rname) {
@@ -1437,16 +1437,16 @@ function leanbox_dashboard_form_alter(&$form, &$form_state, $form_id) {
 //      );
 
          $form['field_distributor']['#states'] = array(
-          'visible' => array(
-            ':input[name="roles[7]"]' => array('checked' => TRUE),
-          ),
-          array(
-            ':input[name="roles[8]"]' => array('checked' => TRUE),
-          ),
-        );
-        $form['field_distributor']['#type'] = 'select'; 
-        $form['field_distributor']['#options'] = array(0=>0, 1=>1);
-         
+        'visible' =>
+        array(
+          ':input[name="roles[7]"]' => array('checked' => TRUE),
+        ),
+        array(
+          ':input[name="roles[8]"]' => array('checked' => TRUE),
+        ),
+      );
+      //$form['field_distributor']['#type'] = 'select';
+      //$form['field_distributor']['#options'] = array(0 => 0, 1 => 1);
     }
   }
 
