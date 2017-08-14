@@ -1389,7 +1389,8 @@ function leanbox_dashboard_exposed_form_submit(&$form, &$form_state) {
  * @param type $form_id
  */
 function leanbox_dashboard_form_alter(&$form, &$form_state, $form_id) {
-  
+  global $user;
+  $roles = $user->roles;
   if ($form_id == 'user_register_form') {
       if (in_array("hul_admin", $roles)) {
         dpm($form, 'form');
