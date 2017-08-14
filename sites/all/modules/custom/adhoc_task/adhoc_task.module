@@ -11,7 +11,12 @@ function adhoc_task_menu() {
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
-
+  $items['email/bill_date_miss_in_sales_register'] = array(
+    'title' => 'Email For Billing Date missing in Sales register',
+    'page callback' => 'bill_date_missing_in_sales_register',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
   return $items;
 }
 
@@ -99,5 +104,79 @@ function adhoc_task_mail($key, &$message, $params) {
       $message['subject'] = $params['subject'];
       $message['body'][] = $params['body'];
       break;
+    case 'bill_date_missing':
+      $message['subject'] = $params['subject'];
+      $message['body'][] = $params['body'];
+      break;
   }
+}
+
+
+/**
+ * 
+ * @return string
+ */
+function bill_date_missing_in_sales_register() {
+  $end = time();
+  $start = strtotime("-1 days midnight");;
+/**
+ * dpm(db_query("select count(DISTINCT(bill_number)) from custom_billing_data where created_date >'1502217000' ")->FetchAll());
+//209640
+  $start = '1502217000';
+$end = time();
+    $query = db_select('custom_billing_data', 'cb');
+    $query->condition('cb.created_date', array($start, $end), 'BETWEEN');
+    $query->addExpression('DISTINCT(bill_number)','bill_number');
+    $results = $query->execute()->fetchAll();
+dpm($results);
+
+ */
+  $query = db_select('users', 'u');
+  $query->fields('u', array('uid','name'));
+  $users = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+
+  foreach ($users as $key => $val) {
+    $uid = $val['uid'];
+    $name = $val['name'];
+    $distributor_id = change_feeds_import_get_distributor_id($uid);
+    $hul_username = change_feeds_import_get_hul_user_name($distributor_id);
+    $query = db_select('custom_billing_data', 'cb');
+    $query->condition('cb.distributor_id', $uid, '=');
+    $query->condition('cb.created_date', array($start, $end), 'BETWEEN');
+    $query->fields('cb', array('bill_number', 'sku7_code', 'id', 'distributor_id','created_date'));
+    $results = $query->execute()->fetchAll();
+
+    foreach ($results as $k => $value) {
+      $bill = $value->bill_number;
+      $sku = $value->sku7_code;
+      $distributor_id = $value->distributor_id;
+      $created_date = date('d/m/Y',$value->created_date);
+      if (isset($res[$bill . "-" . $sku . "-" . $distributor_id])) {
+        // $id[$bill . "-" . $sku . "-" . $distributor_id . "-" . $k] = $value->id;
+        $count[$distributor_id . "-" . $hul_username. "-" . $created_date. "-" .$name][] = $value->id;
+      }
+      $res[$bill . "-" . $sku . "-" . $distributor_id] = array();
+    }
+  }
+
+  foreach ($count as $key => $val) {
+    $counts = count($val);
+    $data = explode("-", $key);
+     $rows[] = array($data[3], $data[0], $data[1], $data[2], $counts);
+  }
+
+  
+  $header = array('RS Name','Bill Count in Customer Billing', 'Count in Sales Register Where Bill Date is Blank');
+  if (empty($rows)) {
+    $rows[] = array("<td colspan='4' style='text-align: center;'> There is No Duplicate Records Found</td>");
+  }
+
+  $html = "<h3>Billing Date is Missed in Sales Register</h3>";
+  $html .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('border' => '1', 'cellpadding' => '3', 'cellspacing' => '0')));
+  $params['subject'] = "Billing Date is missed in Sales Register";
+  $params['body'] = $html;
+  //$mail_to = "gaurav@leanbox.in,kusha@leanbox.in,deepak@leanbox.in";
+  $mail_to = "abhishek.r@iksula.com";
+  $from = "MIS.HELPDESK@leanbox.in";
+  drupal_mail('adhoc_task', 'bill_date_missing', $mail_to, LANGUAGE_NONE, $params, $from);
 }
