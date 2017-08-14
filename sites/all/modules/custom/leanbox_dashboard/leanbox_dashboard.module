@@ -1383,6 +1383,42 @@ function leanbox_dashboard_exposed_form_submit(&$form, &$form_state) {
 }
 
 /**
+ * Implements hook_user_insert
+ * @global type $user
+ * @param type $edit
+ * @param type $account
+ * @param type $category
+ */
+function leanbox_dashboard_user_insert(&$edit, $account, $category) {
+  global $user;
+  $roles = $user->roles;
+  if (in_array("hul_admin", $roles)) {
+    dpm($account, '$account');
+   // $uid = $user->uid;
+   // $edit['field_distributor']['und'][0]['value'] = $uid;
+  }
+}
+
+/**
+ * Implements hook_user_presave
+ * @global type $user
+ * @param type $edit
+ * @param type $account
+ * @param type $category
+ */
+function leanbox_dashboard_user_presave(&$edit, $account, $category) {
+  global $user;
+  $roles = $user->roles;
+  if (in_array("hul_admin", $roles)) {
+    dpm($account, '$account');
+   // $uid = $user->uid;
+   // $edit['field_distributor']['und'][0]['value'] = $uid;
+  }
+}
+
+
+
+/**
  * 
  * @param string $form
  * @param type $form_state
@@ -1394,6 +1430,7 @@ function leanbox_dashboard_form_alter(&$form, &$form_state, $form_id) {
   if ($form_id == 'user_register_form') {
       if (in_array("hul_admin", $roles)) {
         dpm($form, 'form');
+        $form['field_distributor']['#access'] = FALSE;
       }
   }
 
