@@ -1429,12 +1429,12 @@ function leanbox_dashboard_form_alter(&$form, &$form_state, $form_id) {
           unset($form['account']['roles']['#options'][$rid]);
         }
       }
-      $form['account']['roles']['#ajax'] = array(
-        'event' => 'focusout',
-        'wrapper' => 'squadron-wrapper',
-        'callback' => 'city_ajax_callback',
-        'method' => 'replace',
-      );
+//      $form['account']['roles']['#ajax'] = array(
+//        'event' => 'focusout',
+//        'wrapper' => 'squadron-wrapper',
+//        'callback' => 'city_ajax_callback',
+//        'method' => 'replace',
+//      );
 
          $form['field_distributor']['#states'] = array(
           'visible' => array(
