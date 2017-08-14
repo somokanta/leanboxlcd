@@ -1448,7 +1448,8 @@ function leanbox_dashboard_form_alter(&$form, &$form_state, $form_id) {
         )
       );
       $form['field_distributor']['und'][0]['value']['#type'] = 'select';
-      $form['field_distributor']['und'][0]['value']['#options'] = array(0 => 0, 1 => 1);
+      $form['field_distributor']['und'][0]['value']['#options'] = array(0 => '0', 1 => '1');
+       $form['field_distributor']['und'][0]['value']['#default_value'] =1;
     }
   }
 
