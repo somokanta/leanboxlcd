@@ -1389,6 +1389,12 @@ function leanbox_dashboard_exposed_form_submit(&$form, &$form_state) {
  * @param type $form_id
  */
 function leanbox_dashboard_form_alter(&$form, &$form_state, $form_id) {
+  
+  if ($form_id == 'user_register_form') {
+      if (in_array("hul_admin", $roles)) {
+        dpm($form, 'form');
+      }
+  }
 
   if ($form_id = 'views_exposed_form') {
     
