@@ -1393,9 +1393,8 @@ function leanbox_dashboard_user_insert(&$edit, $account, $category) {
   global $user;
   $roles = $user->roles;
   if (in_array("hul_admin", $roles)) {
-    dpm($account, '$account');
-   // $uid = $user->uid;
-   // $edit['field_distributor']['und'][0]['value'] = $uid;
+    $uid = $account->uid;
+    $edit['field_distributor']['und'][0]['value'] = $uid;
   }
 }
 
@@ -1407,13 +1406,6 @@ function leanbox_dashboard_user_insert(&$edit, $account, $category) {
  * @param type $category
  */
 function leanbox_dashboard_user_presave(&$edit, $account, $category) {
-  global $user;
-  $roles = $user->roles;
-  if (in_array("hul_admin", $roles)) {
-    dpm($account, '$account');
-   // $uid = $user->uid;
-   // $edit['field_distributor']['und'][0]['value'] = $uid;
-  }
 }
 
 
@@ -1429,9 +1421,18 @@ function leanbox_dashboard_form_alter(&$form, &$form_state, $form_id) {
   $roles = $user->roles;
   if ($form_id == 'user_register_form') {
       if (in_array("hul_admin", $roles)) {
-        dpm($form, 'form');
+        dpm($form, 'form11');
         $form['field_distributor']['#access'] = FALSE;
+        $role_names = array('RS Operator', 'DFE', 'RS Admin');
+        foreach($form['account']['roles']['#options'] as $rid => $rname) {
+          dpm($rid, 'rid');
+          dpm($rname, 'name');
+                if (!in_array($rname, $role_names)) {
+                  unset($form['account']['roles']['#options'][$rid]);
+                }
+        }
       }
+      
   }
 
   if ($form_id = 'views_exposed_form') {
