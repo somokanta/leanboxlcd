@@ -1675,12 +1675,12 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
 //    }
   }
   if ($entity->type == 'hul_code_master') {
-    $title = $entity->title;
-    $all_title = check_hul_code_exist();
-    if (array_key_exists($title,$all_title)){
-      drupal_set_message("HulCode Is Alredy Present in System", 'error', FALSE);
-      $entity->feeds_item->skip = TRUE;
-    }
+//    $title = $entity->title;
+//    $all_title = check_hul_code_exist();
+//    if (array_key_exists($title,$all_title)){
+//      drupal_set_message("HulCode Is Alredy Present in System", 'error', FALSE);
+//      $entity->feeds_item->skip = TRUE;
+//    }
     $ph_no = $entity->field_hul_phone_no[LANGUAGE_NONE][0]['value'];
     $hul_address = $entity->field_hul_address[LANGUAGE_NONE][0]['value'];
 
@@ -2023,7 +2023,7 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
       $query1 = db_select('users', 'u');
       $query1->fields('u', array('uid'));
       $query1->join('field_data_field_idd', 'd1', 'd1.entity_id= u.uid');
-      $query1->condition('u.status', 1);
+
       $query1->condition('d1.field_idd_value', 1);
       $dis_ids = $query1->execute()->fetchCol();
 
