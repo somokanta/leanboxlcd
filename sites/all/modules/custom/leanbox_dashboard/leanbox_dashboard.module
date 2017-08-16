@@ -1414,12 +1414,12 @@ function leanbox_dashboard_user_insert(&$edit, $account, $category) {
 function leanbox_dashboard_user_presave(&$edit, $account, $category) {
   dpm($account, '$account');
   $roles = $account->roles;
-  if (in_array(8, $account) || in_array(7, $roles)) {
-//    $dis_id = $account->field_distributor['und'][0]['value'];
-//    $user_details = leanbox_dashboard_get_username_and_rs_code($dis_id);
-//    dpm($user_details, '$user_details');
-//    $edit['field_name']['und'][0]['value'] = $user_details['field_name_value'];
-//    $edit['field_third_party_username']['und'][0]['value'] = $user_details['field_third_party_username_value'];
+  if (in_array(8, $roles) || in_array(7, $roles)) {
+    $dis_id = $account->field_distributor['und'][0]['value'];
+    $user_details = leanbox_dashboard_get_username_and_rs_code($dis_id);
+    dpm($user_details, '$user_details');
+    $edit['field_name']['und'][0]['value'] = $user_details['field_name_value'];
+    $edit['field_third_party_username']['und'][0]['value'] = $user_details['field_third_party_username_value'];
   }
 }
 
