@@ -1466,7 +1466,7 @@ function leanbox_dashboard_form_alter(&$form, &$form_state, $form_id) {
           unset($form['account']['roles']['#options'][$rid]);
         }
       }
-
+unset($form['field_distributor']);
       $form['field_distributor']['#states'] = array(
         'visible' =>
         array(
@@ -1489,13 +1489,13 @@ function leanbox_dashboard_form_alter(&$form, &$form_state, $form_id) {
         ),
       );
 
-      $form['field_distributor']['und'][0]['value']['#type'] = 'select';
-      $form['field_distributor']['und'][0]['value']['#required'] = TRUE;
+      $form['field_distributor']['#type'] = 'select';
+      $form['field_distributor']['#required'] = TRUE;
       // get all dis list
       $all_distributor_list = leanbox_dashboard_get_all_distributor();
       $all_distributor_list['none'] = 'NONE';
-      $form['field_distributor']['und'][0]['value']['#options'] = $all_distributor_list;
-      $form['field_distributor']['und'][0]['value']['#default_value'] = isset($form['#user']->field_distributor['und'][0]['safe_value'])?  $form['#user']->field_distributor['und'][0]['safe_value'] : 'none';
+      $form['field_distributor']['#options'] = $all_distributor_list;
+      $form['field_distributor']['#default_value'] = isset($form['#user']->field_distributor['und'][0]['safe_value'])?  $form['#user']->field_distributor['und'][0]['safe_value'] : 'none';
     }
   }
 
