@@ -1406,20 +1406,41 @@ function leanbox_dashboard_user_insert(&$edit, $account, $category) {
  * @param type $category
  */
 function leanbox_dashboard_user_presave(&$edit, $account, $category) {
+  dpm($account, 'acc');
+  dpm($edit, '$edit');
+  $dis_id = $account->field_distributor;
+  $user_details = leanbox_dashboard_get_username_and_rs_code($dis_id);
 }
 
-
+/**
+ * 
+ * @return type
+ */
 function leanbox_dashboard_get_all_distributor() {
   $query = db_select('users', 'u');
   $query->join('users_roles', 'uro', 'uro.uid = u.uid');
   $query->join('role', 'ro', 'ro.rid = uro.rid');
-
   $query->fields('u', array('uid', 'name'));
   $query->condition('ro.name', 'RS Operator');
   $res = $query->execute()->fetchAllKeyed(0,1);
   return $res;
 }
 
+/**
+ * 
+ * @param type $dis_id
+ * @return array
+ */
+function leanbox_dashboard_get_username_and_rs_code($dis_id) {
+  $query = db_select('field_data_field_distributor', 'ds');
+  $query->condition('ds.field_distributor_value', $dis_id);
+  $query->join('field_data_field_name', 'na', 'na.entity_id = ds.entity_id');
+  $query->join('field_data_field_third_party_username', 'rs', 'rs.entity_id = ds.entity_id');
+  $query->fields('na', array('field_name_value'));
+  $query->fields('rs', array('field_third_party_username_value'));
+  $res = $query->execute()->fetch(PDO::FETCH_ASSOC);
+  return $res;
+}
 
 /**
  * 
@@ -1432,8 +1453,7 @@ function leanbox_dashboard_form_alter(&$form, &$form_state, $form_id) {
   $roles = $user->roles;
   if ($form_id == 'user_register_form' || $form_id == 'user_profile_form') {
     if (in_array("hul_admin", $roles)) {
-      dpm($form, 'form11');
-      //$form['field_distributor']['#access'] = FALSE;
+
       $role_names = array('RS Operator', 'DFE', 'RS Admin');
       foreach ($form['account']['roles']['#options'] as $rid => $rname) {
         if (!in_array($rname, $role_names)) {
