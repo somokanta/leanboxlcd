@@ -1396,6 +1396,7 @@ function leanbox_dashboard_user_presave(&$edit, $account, $category) {
   dpm($edit, 'edit');
   if (in_array(6, $roles)) {
     $uid = $account->uid;
+    dpm($uid, '$uid');
     $edit['field_distributor']['und'][0]['value'] = $uid;
   }
   if (in_array(8, $account) || in_array(7, $roles)) {
