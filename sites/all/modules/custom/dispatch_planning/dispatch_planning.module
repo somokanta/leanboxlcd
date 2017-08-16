@@ -797,14 +797,11 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
   $api_data = array();
 
   if ($seq_flag) {
-
     foreach ($bill_sequence as $key => $value) {
-
       $node = node_load($value);
 
       $node->field_bill_sequence[LANGUAGE_NONE][0]['value'] = $key;
       $node->field_drs_sequence[LANGUAGE_NONE][0]['value'] = $key;
-
       if (isset($node->field_delivery_pending[LANGUAGE_NONE])) {
         $node->field_delivery_pending = array();
       }
@@ -1417,7 +1414,7 @@ function trip_delete_form_submit($form, &$form_state) {
   $query->condition('n.title', $trip_id);
   $query->condition('n.type', 'dispatch_data');
   $query->join('field_data_field_trip_id_reference', 'ft', 'ft.field_trip_id_reference_nid = n.nid');
-  $query->join('field_data_field_dispatch_n_value', 'nv', 'nv.entity_id = ft.entity_id');
+  $query->leftjoin('field_data_field_dispatch_n_value', 'nv', 'nv.entity_id = ft.entity_id');
   $query->fields('n', array('nid'));
   $query->fields('ft', array('entity_id'));
   $query->addTag('node_distributor_access');
