@@ -1391,7 +1391,7 @@ function leanbox_dashboard_exposed_form_submit(&$form, &$form_state) {
  */
 function leanbox_dashboard_user_insert(&$edit, $account, $category) {
   $roles = $account->roles;
-     // dpm($account, 'insert $account');
+  dpm($account, 'insert $account');
 
   if (in_array(6, $roles)) {
     $uid = $account->uid;
