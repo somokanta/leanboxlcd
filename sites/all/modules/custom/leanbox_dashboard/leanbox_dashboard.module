@@ -1481,6 +1481,7 @@ function leanbox_dashboard_form_alter(&$form, &$form_state, $form_id) {
       $all_distributor_list['none'] = 'NONE';
       $form['field_distributor']['und'][0]['value']['#options'] = $all_distributor_list;
       dpm($form->field_distributor['und'][0]['safe_value'], 'safe_value');
+      dpm($form, 'form');
       $form['field_distributor']['und'][0]['value']['#default_value'] = isset($form->field_distributor['und'][0]['safe_value'])?  $form->field_distributor['und'][0]['safe_value'] : 'none';
     }
   }
