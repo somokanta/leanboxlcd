@@ -1394,13 +1394,13 @@ function leanbox_dashboard_user_insert(&$edit, $account, $category) {
 
   if (in_array(6, $roles)) {
     $uid = $account->uid;
-    $account->field_distributor['und'][0]['value'] = $uid;
+    //$account->field_distributor['und'][0]['value'] = $uid;
    // field_attach_update('user', $account);
    // entity_get_controller('user')->resetCache(array($account->uid));
-    $user_data = user_load($uid);
-     $user_data->field_distributor['und'][0]['value'] = $uid;
-     user_save($user_data);
-    
+//    $user_data = user_load($uid);
+//     $user_data->field_distributor['und'][0]['value'] = $uid;
+//     user_save($user_data);
+//    
   }
 }
 
