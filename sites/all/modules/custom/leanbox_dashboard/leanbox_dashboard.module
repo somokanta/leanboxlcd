@@ -1394,12 +1394,12 @@ function leanbox_dashboard_user_insert(&$edit, $account, $category) {
 
   if (in_array(6, $roles)) {
     $uid = $account->uid;
-//    $account->field_distributor['und'][0]['value'] = $uid;
-//    field_attach_update('user', $account);
-//    entity_get_controller('user')->resetCache(array($account->uid));
-    $user_data = user_load($uid);
-     $user_data->field_distributor['und'][0]['value'] = $uid;
-     user_save($user_data);
+    $account->field_distributor['und'][0]['value'] = $uid;
+    field_attach_update('user', $account);
+    entity_get_controller('user')->resetCache(array($account->uid));
+//    $user_data = user_load($uid);
+//     $user_data->field_distributor['und'][0]['value'] = $uid;
+//     user_save($user_data);
 //    
   }
 }
@@ -1414,7 +1414,7 @@ function leanbox_dashboard_user_insert(&$edit, $account, $category) {
 function leanbox_dashboard_user_presave(&$edit, $account, $category) {
   dpm($account, '$account');
   $roles = $account->roles;
-  if (in_array(8, $roles) || in_array(7, $roles)) {
+  if (!empty($roles[7]) || !empty($roles[8])) {
     $dis_id = $account->field_distributor['und'][0]['value'];
     $user_details = leanbox_dashboard_get_username_and_rs_code($dis_id);
     dpm($user_details, '$user_details');
