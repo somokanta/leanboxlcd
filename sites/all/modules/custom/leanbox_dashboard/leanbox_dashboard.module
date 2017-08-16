@@ -1500,6 +1500,9 @@ function leanbox_dashboard_form_alter(&$form, &$form_state, $form_id) {
       $all_distributor_list['none'] = 'NONE';
       $form['field_distributor']['und'][0]['value']['#options'] = $all_distributor_list;
       $form['field_distributor']['und'][0]['value']['#default_value'] = isset($form['#user']->field_distributor['und'][0]['safe_value'])?  $form['#user']->field_distributor['und'][0]['safe_value'] : 'none';
+      $form['field_distributor']['und'][0]['value']['#default_value'] = isset($form['#user']->field_name['und'][0]['safe_value'])?  $form['#user']->field_name['und'][0]['safe_value'] : 0;
+      $form['field_distributor']['und'][0]['value']['#default_value'] = isset($form['#user']->field_third_party_username['und'][0]['safe_value'])?  $form['#user']->field_third_party_username['und'][0]['safe_value'] : 0;
+
     }
   }
 
