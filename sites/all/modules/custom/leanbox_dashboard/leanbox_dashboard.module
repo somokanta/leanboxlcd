@@ -1492,6 +1492,7 @@ function leanbox_dashboard_form_alter(&$form, &$form_state, $form_id) {
 
       $form['field_distributor']['und'][0]['value']['#type'] = 'select';
       $form['field_distributor']['und'][0]['value']['#required'] = TRUE;
+      $form['field_distributor']['#attributes']['class'] = array('field-type-list-text', 'field-name-field-distributor', 'field-widget-options-select');
       // get all dis list
       $all_distributor_list = leanbox_dashboard_get_all_distributor();
       $all_distributor_list['none'] = 'NONE';
