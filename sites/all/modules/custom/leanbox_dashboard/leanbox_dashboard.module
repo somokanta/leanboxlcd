@@ -1406,10 +1406,12 @@ function leanbox_dashboard_user_insert(&$edit, $account, $category) {
  * @param type $category
  */
 function leanbox_dashboard_user_presave(&$edit, $account, $category) {
-  dpm($account, 'acc');
-  dpm($edit, '$edit');
-  $dis_id = $account->field_distributor;
+  //dpm($account, 'acc');
+  //dpm($edit, '$edit');
+  $dis_id = $account->field_distributor['und'][0]['value'];
   $user_details = leanbox_dashboard_get_username_and_rs_code($dis_id);
+  $edit['field_name']['und'][0]['value'] = $user_details['field_name_value'];
+  $edit['field_third_party_username']['und'][0]['value'] = $user_details['field_third_party_username_value'];
 }
 
 /**
