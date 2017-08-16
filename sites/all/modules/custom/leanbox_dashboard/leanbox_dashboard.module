@@ -1390,8 +1390,8 @@ function leanbox_dashboard_exposed_form_submit(&$form, &$form_state) {
  * @param type $category
  */
 function leanbox_dashboard_user_insert(&$edit, $account, $category) {
-  global $user;
-  $roles = $user->roles;
+  $roles = $account->roles;
+  dpm($account, 'insert hook roles');
   if (in_array(6, $roles)) {
     $uid = $account->uid;
     $edit['field_distributor']['und'][0]['value'] = $uid;
@@ -1406,12 +1406,13 @@ function leanbox_dashboard_user_insert(&$edit, $account, $category) {
  * @param type $category
  */
 function leanbox_dashboard_user_presave(&$edit, $account, $category) {
-  //dpm($account, 'acc');
-  //dpm($edit, '$edit');
-  $dis_id = $account->field_distributor['und'][0]['value'];
-  $user_details = leanbox_dashboard_get_username_and_rs_code($dis_id);
-  $edit['field_name']['und'][0]['value'] = $user_details['field_name_value'];
-  $edit['field_third_party_username']['und'][0]['value'] = $user_details['field_third_party_username_value'];
+  $roles = $account->roles;
+  if (in_array(8, $account) || in_array(7, $roles)) {
+    $dis_id = $account->field_distributor['und'][0]['value'];
+    $user_details = leanbox_dashboard_get_username_and_rs_code($dis_id);
+    $edit['field_name']['und'][0]['value'] = $user_details['field_name_value'];
+    $edit['field_third_party_username']['und'][0]['value'] = $user_details['field_third_party_username_value'];
+  }
 }
 
 /**
