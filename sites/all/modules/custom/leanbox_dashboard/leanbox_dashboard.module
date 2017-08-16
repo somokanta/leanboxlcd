@@ -1482,14 +1482,14 @@ function leanbox_dashboard_form_alter(&$form, &$form_state, $form_id) {
         )
       );
    dpm($form, 'form');
-      $form['field_name']['und'][0]['value']['#states'] = array(
+      $form['field_name']['#states'] = array(
         'visible' => array(
-          ':input[name="name="roles[6]"]' => array('checked' => TRUE),
+          ':input[name="roles[6]"]' => array('checked' => TRUE),
         ),
       );
       $form['field_third_party_username']['#states'] = array(
         'visible' => array(
-          ':input[name="name="roles[6]"]' => array('checked' => TRUE),
+          ':input[name="roles[6]"]' => array('checked' => TRUE),
         ),
       );
 
