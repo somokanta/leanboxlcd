@@ -1397,10 +1397,7 @@ function leanbox_dashboard_user_insert(&$edit, $account, $category) {
     $account->field_distributor['und'][0]['value'] = $uid;
     field_attach_update('user', $account);
     entity_get_controller('user')->resetCache(array($account->uid));
-//    $user_data = user_load($uid);
-//     $user_data->field_distributor['und'][0]['value'] = $uid;
-//     user_save($user_data);
-//    
+
   }
 }
 
@@ -1481,7 +1478,6 @@ function leanbox_dashboard_form_alter(&$form, &$form_state, $form_id) {
           )
         )
       );
-   dpm($form, 'form');
       $form['field_name']['#states'] = array(
         'visible' => array(
           ':input[name="roles[6]"]' => array('checked' => TRUE),
@@ -1500,9 +1496,6 @@ function leanbox_dashboard_form_alter(&$form, &$form_state, $form_id) {
       $all_distributor_list['none'] = 'NONE';
       $form['field_distributor']['und'][0]['value']['#options'] = $all_distributor_list;
       $form['field_distributor']['und'][0]['value']['#default_value'] = isset($form['#user']->field_distributor['und'][0]['safe_value'])?  $form['#user']->field_distributor['und'][0]['safe_value'] : 'none';
-      $form['field_name']['und'][0]['value']['#default_value'] = isset($form['#user']->field_name['und'][0]['safe_value'])?  $form['#user']->field_name['und'][0]['safe_value'] : 0;
-      $form['field_third_party_username']['und'][0]['value']['#default_value'] = isset($form['#user']->field_third_party_username['und'][0]['safe_value'])?  $form['#user']->field_third_party_username['und'][0]['safe_value'] : 0;
-
     }
   }
 
