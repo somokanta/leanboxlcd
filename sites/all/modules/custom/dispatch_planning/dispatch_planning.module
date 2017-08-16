@@ -792,14 +792,12 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
   
   $sequence_array = $form_state['dispatch_planning']['sequence_array'];
   $manual_drs_sequence = $form_state['dispatch_planning']['manual_drs_sequence'];
-  
   if ($seq_flag) {
     foreach ($bill_sequence as $key => $value) {
       $node = node_load($value);
 
       $node->field_bill_sequence[LANGUAGE_NONE][0]['value'] = $key;
       $node->field_drs_sequence[LANGUAGE_NONE][0]['value'] = $key;
-      
       if (isset($node->field_delivery_pending[LANGUAGE_NONE])) {
         $node->field_delivery_pending = array();
       }
@@ -826,7 +824,6 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
     foreach ($bill_nids as $value) {
       $node = node_load($value);
 
-      
       if (isset($sequence_array[$value]) && !empty($sequence_array[$value])) {
         $node->field_bill_sequence[LANGUAGE_NONE][0]['value'] = $sequence_array[$value];
       }
@@ -1373,6 +1370,7 @@ function trip_delete_form_submit($form, &$form_state) {
   $query->condition('n.title', $trip_id);
   $query->condition('n.type', 'dispatch_data');
   $query->join('field_data_field_trip_id_reference', 'ft', 'ft.field_trip_id_reference_nid = n.nid');
+  $query->join('field_data_field_dispatch_n_value', 'nv', 'nv.entity_id = ft.entity_id');
   $query->fields('n', array('nid'));
   $query->fields('ft', array('entity_id'));
   $query->addTag('node_distributor_access');
@@ -1388,7 +1386,7 @@ function trip_delete_form_submit($form, &$form_state) {
       $node->field_trip_id_reference = array();
       $node->field_bill_sequence = array();
       $node->field_drs_sequence = array();
-      
+      $node->field_dispatch_n_value = array();
       node_save($node);
     }
   }

@@ -1675,12 +1675,12 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
 //    }
   }
   if ($entity->type == 'hul_code_master') {
-    $title = $entity->title;
-    $all_title = check_hul_code_exist();
-    if (array_key_exists($title,$all_title)){
-      drupal_set_message("HulCode Is Alredy Present in System", 'error', FALSE);
-      $entity->feeds_item->skip = TRUE;
-    }
+//    $title = $entity->title;
+//    $all_title = check_hul_code_exist();
+//    if (array_key_exists($title,$all_title)){
+//      drupal_set_message("HulCode Is Alredy Present in System", 'error', FALSE);
+//      $entity->feeds_item->skip = TRUE;
+//    }
     $ph_no = $entity->field_hul_phone_no[LANGUAGE_NONE][0]['value'];
     $hul_address = $entity->field_hul_address[LANGUAGE_NONE][0]['value'];
 
@@ -1871,14 +1871,6 @@ function change_feeds_import_get_distributor_name($distributor_id) {
   return $distributor_name;
 }
 
-function change_feeds_import_user_presave(&$edit, $account, $category) {
-  global $user;
-  $roles = $user->roles;
-  if (in_array("Distributor", $roles)) {
-    $uid = $user->uid;
-    $edit['field_distributor']['und'][0]['value'] = $uid;
-  }
-}
 
 function change_feeds_import_prevent_import_validate($form, $form_state) {
   if (!isset($form_state['values']['feeds']["FeedsFileFetcher"]['file'])) {
