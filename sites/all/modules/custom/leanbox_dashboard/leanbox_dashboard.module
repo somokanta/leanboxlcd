@@ -1392,8 +1392,7 @@ function leanbox_dashboard_exposed_form_submit(&$form, &$form_state) {
 function leanbox_dashboard_user_insert(&$edit, $account, $category) {
   global $user;
   $roles = $user->roles;
-  dpm($account, '$account');
-  if (in_array("hul_admin", $roles)) {
+  if (in_array(6, $roles)) {
     $uid = $account->uid;
     $edit['field_distributor']['und'][0]['value'] = $uid;
   }
