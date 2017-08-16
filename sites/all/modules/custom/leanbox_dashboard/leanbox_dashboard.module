@@ -1480,9 +1480,10 @@ function leanbox_dashboard_form_alter(&$form, &$form_state, $form_id) {
       $all_distributor_list = leanbox_dashboard_get_all_distributor();
       $all_distributor_list['none'] = 'NONE';
       $form['field_distributor']['und'][0]['value']['#options'] = $all_distributor_list;
-      $user_id = $user->uid;
-      $distributor_id = change_feeds_import_get_distributor_id($user_id);
-      $form['field_distributor']['und'][0]['value']['#default_value'] = !empty($key = array_search($distributor_id, $all_distributor_list ))?  $key : 'none';
+      $user_name = $user->name;
+      // $distributor_id = change_feeds_import_get_distributor_id($user_id);
+      
+      $form['field_distributor']['und'][0]['value']['#default_value'] = !empty($key = array_search($user_name, $all_distributor_list ))?  $key : 'none';
     }
   }
 
