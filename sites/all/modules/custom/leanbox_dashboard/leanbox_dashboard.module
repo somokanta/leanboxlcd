@@ -1462,6 +1462,7 @@ function leanbox_dashboard_form_alter(&$form, &$form_state, $form_id) {
           unset($form['account']['roles']['#options'][$rid]);
         }
       }
+      dpm($form['field_distributor']['und'][0]['value'], 'dis');
 
       $form['field_distributor']['#states'] = array(
         'visible' =>
