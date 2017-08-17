@@ -52,8 +52,8 @@ function update_sales_register_nodes(&$context) {
     $key = $i;
     $val = $res[$key];
     dpm($val,"val");
-    $nid = $val->nid;
-    $dispatch_date = strtotime($val->field_dispatch_date_value);
+    $nid = $val['nid'];
+    $dispatch_date = strtotime($val['field_dispatch_date_value']);
     dpm($nid,"nid");
     dpm($dispatch_date,"dispatch_date");
 //    $query = db_select('node', 'n');
