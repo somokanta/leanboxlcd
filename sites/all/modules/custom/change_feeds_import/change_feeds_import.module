@@ -1918,7 +1918,7 @@ function registration_validate($form, &$form_state) {
   global $user;
   $roles = $user->roles;
   if (in_array("administrator", $roles)) {
-    form_set_error('failed_account', 'administrator can not create account only distributor can create account');
+    //  form_set_error('failed_account', 'administrator can not create account only distributor can create account');
   }
 }
 
@@ -1994,7 +1994,7 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
   // Store distributor id in author in each node
   $distributor_id = change_feeds_import_get_distributor_id($user->uid);
 
-  if (($view->name != 'user_manual') && ($view->name != 'impact_delivery_cron_2') && ($view->name != 'impact_party_master') && ($view->name != 'hul_code_distributor_wise')) {
+  if (($view->name != 'user_manual') && ($view->name != 'impact_delivery_cron_2') && ($view->name != 'impact_delivery_cron_evening_2') && ($view->name != 'impact_party_master') && ($view->name != 'hul_code_distributor_wise')) {
     foreach ($query->table_queue as $key => $val) {
       if (($val['table'] == 'node')) {
         if (empty($val['join'])) {
@@ -2006,7 +2006,7 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
       }
     }
   }
-  if ($view->base_table == 'custom_billing_data' && ($view->name != 'impact_delivery_cron_2')) {
+  if ($view->base_table == 'custom_billing_data' && ($view->name != 'impact_delivery_cron_2') && ($view->name != 'impact_delivery_cron_evening_2')) {
     $query->add_where(0, 'custom_billing_data.distributor_id', $distributor_id, '=');
   }
   if ($view->base_table == 'van_cld_data_table') {
@@ -2017,18 +2017,21 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
     $query->add_groupby('custom_billing_data.bill_number');
   }
 
-  if ($view->name == 'impact_delivery_report' || $view->name == 'impact_delivery_report_2' || $view->name == 'impact_delivery_cron_2') {
+  if ($view->name == 'impact_delivery_report' || $view->name == 'impact_delivery_report_2' || $view->name == 'impact_delivery_cron_2'  || $view->name == 'impact_delivery_cron_evening_2') {
     $sub_query = db_select('custom_billing_data', 'b');
-    if ($view->name == 'impact_delivery_cron_2') {
+    if ($view->name == 'impact_delivery_cron_2' || $view->name == 'impact_delivery_cron_evening_2') {
       $query1 = db_select('users', 'u');
       $query1->fields('u', array('uid'));
       $query1->join('field_data_field_idd', 'd1', 'd1.entity_id= u.uid');
 
       $query1->condition('d1.field_idd_value', 1);
       $dis_ids = $query1->execute()->fetchCol();
-
-     // $next_day = strtotime(date('Y-m-d' , strtotime("+1 days")));
-      $next_day = strtotime(date('Y-m-d'));
+      if ($view->name == 'impact_delivery_cron_evening_2') {
+        $next_day = strtotime(date('Y-m-d' , strtotime("+1 days")));
+      }
+      if ($view->name == 'impact_delivery_cron_2') {
+        $next_day = strtotime(date('Y-m-d'));
+      }
       $next_day_end = $next_day + 86399;
 
       $sub_query->join('node', 'n', 'n.title = b.bill_number AND b.distributor_id = n.uid');
@@ -2076,7 +2079,7 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
     //$sub_query->addExpression('ifnull(v.field_bill_value_value, 5)', 'field_bill_value_value');
     $sub_query->addExpression('MIN(sku7_code)', 'minimum');
     $sub_query->groupBy('b.bill_number');
-    if ($view->name == 'impact_delivery_cron_2') {
+    if ($view->name == 'impact_delivery_cron_2' || $view->name == 'impact_delivery_cron_evening_2') {
       $sub_query->groupBy('b.distributor_id');
     }
     $join = new views_join();
@@ -2411,31 +2414,10 @@ function get_van_pl($van, $day, $name) {
 function change_feeds_import_views_data_export_batch_alter(&$batch, &$batch_redirect) {
   watchdog('cron1', '<pre>' . print_r(array(), TRUE) . '</pre>');
 
-  $views_names = array('impact_delivery_cron_2', 'impact_party_master'); //  Download files for this Views only
+  $views_names = array('impact_delivery_cron_2', 'impact_party_master', 'impact_delivery_cron_evening_2'); //  Download files for this Views only
 
   if (in_array($batch['view_name'], $views_names)) {
-//    $new_batch = $batch;
-//
-//    $view_name = $new_batch['view_name'];
-//    $display_id = $new_batch['display_id'];
-//
-//    // We actually never return from the drupal_alter, but
-//    // use drush's batch system to run the same batch
-//    // Add a final callback
-//    $new_batch['operations'][] = array(
-//      'change_feeds_import_views_data_export_batch_finish', array($new_batch['eid'], $new_batch['view_name']),
-//    );
-//
-//    batch_set($new_batch);
-//    $new_batch =& batch_get();
-//    $new_batch['progressive'] = FALSE;
-//   // $new_batch['timestamp'] = time();
-//    // Process the batch using background batch.
-//    //background_batch_process_batch('');
-//    drush_backend_batch_process();
-//
-//    // Instruct the view display plugin that it shouldn't set a batch.
-//    $batch = array();
+
     $batch['operations'][] = array(
       'change_feeds_import_views_data_export_batch_finish', array($batch['eid'], $batch['view_name']),
     );
@@ -2454,7 +2436,7 @@ function change_feeds_import_views_data_export_batch_finish($eid, $view_name) {
   // Allow Dump Creation for Export 2 Only to avoid Overriding
   $date = date('Ymdhis') . '_' . date('dmY', strtotime("+1 days"));
 
-  if ($view_name == 'impact_delivery_cron_2') {
+  if ($view_name == 'impact_delivery_cron_2' || $view_name == 'impact_delivery_cron_evening_2') {
     watchdog('impact_delivery', '<pre>' . print_r(array(), TRUE) . '</pre>');
     $view->set_display($export->view_display_id);
     $view->display_handler->batched_execution_state = $export;
