@@ -1482,7 +1482,7 @@ function leanbox_dashboard_form_alter(&$form, &$form_state, $form_id) {
 
       
       $all_distributor_list = leanbox_dashboard_get_all_distributor();
-      $all_distributor_list['none'] = 'NONE';
+      $all_distributor_list['none'] = 'select';
       $form['field_distributor']['und'][0]['value']['#type'] = 'hidden';
       $form['field_distributor_custom']['#type'] = 'select';
       $form['field_distributor_custom']['#required'] = TRUE;
@@ -1554,7 +1554,11 @@ function leanbox_dashboard_form_alter(&$form, &$form_state, $form_id) {
   }
 }
 
-
+/**
+ * Validate Handler for user_register_form
+ * @param type $form
+ * @param array $form_state
+ */
 function leanbox_dashboard_user_register_validate($form, &$form_state) {
   $roles = $form_state['values']['roles'];
   if (!empty($roles[6])) {
