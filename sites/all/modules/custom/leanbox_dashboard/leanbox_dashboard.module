@@ -1426,7 +1426,9 @@ function leanbox_dashboard_get_all_distributor() {
   $query = db_select('users', 'u');
   $query->join('users_roles', 'uro', 'uro.uid = u.uid');
   $query->join('role', 'ro', 'ro.rid = uro.rid');
-  $query->fields('u', array('uid', 'name'));
+  $query->fields('u', array('uid'));
+  $query->leftjoin('field_data_field_name', 'fna', 'fna.entity_id = u.uid');
+  $query->addExpression("concat(u.name ,' (', fna.field_name_value,')')", 'sum');
   $query->condition('ro.name', 'RS Operator');
   $res = $query->execute()->fetchAllKeyed(0,1);
   return $res;
