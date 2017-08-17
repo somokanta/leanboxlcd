@@ -113,7 +113,7 @@ function update_sales_register() {
   );
 
   batch_set($batch);
-  batch_process('/billing_data/import');
+  batch_process('/update-sales-register-thankyou');
 }
 
 /**
