@@ -60,31 +60,31 @@ function update_sales_register_nodes(&$context) {
     $val = $res[$key];
     $nid = $val['nid'];
     $dispatch_date = strtotime($val['field_dispatch_date_value']);
-//    $query = db_select('node', 'n');
-//    $query->condition('n.type', 'sales_register_data');
-//    $query->join('field_data_field_promised_date', 'pro_date', 'pro_date.entity_id = n.nid');
-//    $query->join('field_data_field_trip_id_reference', 'ti', 'ti.entity_id = n.nid');
-//    $query->condition('ti.field_trip_id_reference_nid', $nid);
-//    $query->fields('n', array('nid'));
-//    $query->fields('pro_date', array('field_promised_date_value'));
-//    $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
-//    foreach ($res as $key => $val) {
-//      $promised_date = $val['field_promised_date_value'];
-//      $nid = $val['nid'];
-//      if ($dispatch_date <= $promised_date) {
-//        $n_value = "N+2";
-//      }
-//      elseif (($dispatch_date > $promised_date) && ( ($dispatch_date - $promised_date) <= 86400)) {
-//        $n_value = "N+3";
-//      }
-//      elseif (($dispatch_date > $promised_date) && ( ($dispatch_date - $promised_date) > 86400)) {
-//        $n_value = "N+4";
-//      }
-//
-//      $node = node_load($nid);
-//      $node->field_dispatch_n_value[LANGUAGE_NONE][0]['value'] = $n_value;
-//      node_save($node);
-//    }
+    $query = db_select('node', 'n');
+    $query->condition('n.type', 'sales_register_data');
+    $query->join('field_data_field_promised_date', 'pro_date', 'pro_date.entity_id = n.nid');
+    $query->join('field_data_field_trip_id_reference', 'ti', 'ti.entity_id = n.nid');
+    $query->condition('ti.field_trip_id_reference_nid', $nid);
+    $query->fields('n', array('nid'));
+    $query->fields('pro_date', array('field_promised_date_value'));
+    $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+    foreach ($res as $key => $val) {
+      $promised_date = $val['field_promised_date_value'];
+      $nid = $val['nid'];
+      if ($dispatch_date <= $promised_date) {
+        $n_value = "N+2";
+      }
+      elseif (($dispatch_date > $promised_date) && ( ($dispatch_date - $promised_date) <= 86400)) {
+        $n_value = "N+3";
+      }
+      elseif (($dispatch_date > $promised_date) && ( ($dispatch_date - $promised_date) > 86400)) {
+        $n_value = "N+4";
+      }
+
+      $node = node_load($nid);
+      $node->field_dispatch_n_value[LANGUAGE_NONE][0]['value'] = $n_value;
+      node_save($node);
+    }
   }
   $context['sandbox']['progress'] = $i;
   if ($context['sandbox']['progress'] < $context['sandbox']['max']) {
