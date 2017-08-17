@@ -26,7 +26,7 @@ function adhoc_task_menu() {
   );
 
   $items['update-sales-register-thankyou'] = array(
-    'title' => 'update-sales-register-thankyou',
+    'title' => 'Thankyou',
     'page callback' => 'update_sales_register_thankyou',
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
