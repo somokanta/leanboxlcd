@@ -17,7 +17,95 @@ function adhoc_task_menu() {
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
+
+  $items['update-sales-register'] = array(
+    'title' => 'update-sales-register',
+    'page callback' => 'update_sales_register',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
   return $items;
+}
+
+function update_sales_register_node_finished($success, $results, $operations) {
+  drupal_set_message("Thankyou");
+}
+
+function update_sales_register_nodes(&$context) {
+
+  if (!isset($context['sandbox']['progress'])) {
+    $query = db_select('node', 'n');
+    $query->condition('n.type', 'dispatch_data');
+    $query->join('field_data_field_dispatch_date', 'dd', 'dd.entity_id = n.nid');
+    $query->fields('n', array('nid'));
+    $query->fields('dd', array('field_dispatch_date_value'));
+    $results = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+
+    $context['sandbox']['progress'] = 0;
+    $context['sandbox']['max'] = count($results);
+    $context['sandbox']['result'] = $results;
+  }
+
+  global $user;
+  $res = $context['sandbox']['result'];
+  for ($i = $context['sandbox']['progress']; $i < $context['sandbox']['progress'] + 50 && $i < $context['sandbox']['max']; $i++) {
+    $key = $i;
+    $val = $res[$key];
+
+    $nid = $val->nid;
+    $dispatch_date = strtotime($val->field_dispatch_date_value);
+    dpm($nid,"nid");
+    dpm($dispatch_date,"dispatch_date");
+//    $query = db_select('node', 'n');
+//    $query->condition('n.type', 'sales_register_data');
+//    $query->join('field_data_field_promised_date', 'pro_date', 'pro_date.entity_id = n.nid');
+//    $query->join('field_data_field_trip_id_reference', 'ti', 'ti.entity_id = n.nid');
+//    $query->condition('ti.field_trip_id_reference_nid', $nid);
+//    $query->fields('n', array('nid'));
+//    $query->fields('pro_date', array('field_promised_date_value'));
+//    $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+//    foreach ($res as $key => $val) {
+//      $promised_date = $val['field_promised_date_value'];
+//      $nid = $val['nid'];
+//      if ($dispatch_date <= $promised_date) {
+//        $n_value = "N+2";
+//      }
+//      elseif (($dispatch_date > $promised_date) && ( ($dispatch_date - $promised_date) <= 86400)) {
+//        $n_value = "N+3";
+//      }
+//      elseif (($dispatch_date > $promised_date) && ( ($dispatch_date - $promised_date) > 86400)) {
+//        $n_value = "N+4";
+//      }
+//
+//      $node = node_load($nid);
+//      $node->field_dispatch_n_value[LANGUAGE_NONE][0]['value'] = $n_value;
+//      node_save($node);
+//    }
+  }
+  $context['sandbox']['progress'] = $i;
+  if ($context['sandbox']['progress'] < $context['sandbox']['max']) {
+    $context['finished'] = $context['sandbox']['progress'] / $context['sandbox']['max'];
+  }
+  else {
+    $context['finished'] = 1;
+  }
+}
+
+function update_sales_register() {
+  $batch = array(
+    'title' => t('Update Sales Register Nodes'),
+    'operations' => array(
+      array('update_sales_register_nodes', array()),
+    ),
+    'init_message' => t("Batch is starting."),
+    'progress_message' => t('Processed @current out of @total.'),
+    'error_message' => t('Upload data processing has encountered an error.'),
+    'finished' => 'update_sales_register_node_finished',
+    'file' => drupal_get_path('module', 'change_feeds_import') . '/form/upload_billing_data.inc',
+  );
+
+  batch_set($batch);
+  batch_process('/billing_data/import');
 }
 
 /**
@@ -29,7 +117,7 @@ function send_email_duplicate_data() {
   $start = strtotime(date('Y-m-d', strtotime("-7 days")));
 
   $query = db_select('users', 'u');
-  $query->fields('u', array('uid','name'));
+  $query->fields('u', array('uid', 'name'));
   $users = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
 
   foreach ($users as $key => $val) {
@@ -40,17 +128,17 @@ function send_email_duplicate_data() {
     $query = db_select('custom_billing_data', 'cb');
     $query->condition('cb.distributor_id', $uid, '=');
     $query->condition('cb.created_date', array($start, $end), 'BETWEEN');
-    $query->fields('cb', array('bill_number', 'sku7_code', 'id', 'distributor_id','created_date'));
+    $query->fields('cb', array('bill_number', 'sku7_code', 'id', 'distributor_id', 'created_date'));
     $results = $query->execute()->fetchAll();
 
     foreach ($results as $k => $value) {
       $bill = $value->bill_number;
       $sku = $value->sku7_code;
       $distributor_id = $value->distributor_id;
-      $created_date = date('d/m/Y',$value->created_date);
+      $created_date = date('d/m/Y', $value->created_date);
       if (isset($res[$bill . "-" . $sku . "-" . $distributor_id])) {
         // $id[$bill . "-" . $sku . "-" . $distributor_id . "-" . $k] = $value->id;
-        $count[$distributor_id . "-" . $hul_username. "-" . $created_date. "-" .$name][] = $value->id;
+        $count[$distributor_id . "-" . $hul_username . "-" . $created_date . "-" . $name][] = $value->id;
       }
       $res[$bill . "-" . $sku . "-" . $distributor_id] = array();
     }
@@ -59,10 +147,10 @@ function send_email_duplicate_data() {
   foreach ($count as $key => $val) {
     $counts = count($val);
     $data = explode("-", $key);
-     $rows[] = array($data[3], $data[0], $data[1], $data[2], $counts);
+    $rows[] = array($data[3], $data[0], $data[1], $data[2], $counts);
   }
 
-  $header = array('Name','UID', 'RS Code', 'Date','Bill Count');
+  $header = array('Name', 'UID', 'RS Code', 'Date', 'Bill Count');
   if (empty($rows)) {
     $rows[] = array("<td colspan='4' style='text-align: center;'> There is No Duplicate Records Found</td>");
   }
@@ -72,7 +160,7 @@ function send_email_duplicate_data() {
   $params['subject'] = "Duplicate Record Details";
   $params['body'] = $html;
   $mail_to = "gaurav@leanbox.in,kusha@leanbox.in,deepak@leanbox.in";
- // $mail_to = "hplord12@gmail.com";
+  // $mail_to = "hplord12@gmail.com";
   $from = "MIS.HELPDESK@leanbox.in";
   drupal_mail('adhoc_task', 'duplicate_data', $mail_to, LANGUAGE_NONE, $params, $from);
 }
@@ -111,28 +199,28 @@ function adhoc_task_mail($key, &$message, $params) {
   }
 }
 
-
 /**
  * 
  * @return string
  */
 function bill_date_missing_in_sales_register() {
   $end = time();
-  $start = strtotime("-1 days midnight");;
-/**
- * dpm(db_query("select count(DISTINCT(bill_number)) from custom_billing_data where created_date >'1502217000' ")->FetchAll());
-//209640
-  $start = '1502217000';
-$end = time();
+  $start = strtotime("-1 days midnight");
+  ;
+  /**
+   * dpm(db_query("select count(DISTINCT(bill_number)) from custom_billing_data where created_date >'1502217000' ")->FetchAll());
+    //209640
+    $start = '1502217000';
+    $end = time();
     $query = db_select('custom_billing_data', 'cb');
     $query->condition('cb.created_date', array($start, $end), 'BETWEEN');
     $query->addExpression('DISTINCT(bill_number)','bill_number');
     $results = $query->execute()->fetchAll();
-dpm($results);
+    dpm($results);
 
- */
+   */
   $query = db_select('users', 'u');
-  $query->fields('u', array('uid','name'));
+  $query->fields('u', array('uid', 'name'));
   $users = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
 
   foreach ($users as $key => $val) {
@@ -143,17 +231,17 @@ dpm($results);
     $query = db_select('custom_billing_data', 'cb');
     $query->condition('cb.distributor_id', $uid, '=');
     $query->condition('cb.created_date', array($start, $end), 'BETWEEN');
-    $query->fields('cb', array('bill_number', 'sku7_code', 'id', 'distributor_id','created_date'));
+    $query->fields('cb', array('bill_number', 'sku7_code', 'id', 'distributor_id', 'created_date'));
     $results = $query->execute()->fetchAll();
 
     foreach ($results as $k => $value) {
       $bill = $value->bill_number;
       $sku = $value->sku7_code;
       $distributor_id = $value->distributor_id;
-      $created_date = date('d/m/Y',$value->created_date);
+      $created_date = date('d/m/Y', $value->created_date);
       if (isset($res[$bill . "-" . $sku . "-" . $distributor_id])) {
         // $id[$bill . "-" . $sku . "-" . $distributor_id . "-" . $k] = $value->id;
-        $count[$distributor_id . "-" . $hul_username. "-" . $created_date. "-" .$name][] = $value->id;
+        $count[$distributor_id . "-" . $hul_username . "-" . $created_date . "-" . $name][] = $value->id;
       }
       $res[$bill . "-" . $sku . "-" . $distributor_id] = array();
     }
@@ -162,11 +250,11 @@ dpm($results);
   foreach ($count as $key => $val) {
     $counts = count($val);
     $data = explode("-", $key);
-     $rows[] = array($data[3], $data[0], $data[1], $data[2], $counts);
+    $rows[] = array($data[3], $data[0], $data[1], $data[2], $counts);
   }
 
-  
-  $header = array('RS Name','Bill Count in Customer Billing', 'Count in Sales Register Where Bill Date is Blank');
+
+  $header = array('RS Name', 'Bill Count in Customer Billing', 'Count in Sales Register Where Bill Date is Blank');
   if (empty($rows)) {
     $rows[] = array("<td colspan='4' style='text-align: center;'> There is No Duplicate Records Found</td>");
   }
