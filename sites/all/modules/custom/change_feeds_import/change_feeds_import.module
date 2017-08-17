@@ -2027,7 +2027,8 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
       $query1->condition('d1.field_idd_value', 1);
       $dis_ids = $query1->execute()->fetchCol();
 
-      $next_day = strtotime(date('Y-m-d' , strtotime("+1 days")));
+     // $next_day = strtotime(date('Y-m-d' , strtotime("+1 days")));
+      $next_day = strtotime(date('Y-m-d'));
       $next_day_end = $next_day + 86399;
 
       $sub_query->join('node', 'n', 'n.title = b.bill_number AND b.distributor_id = n.uid');
