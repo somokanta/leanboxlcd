@@ -24,6 +24,13 @@ function adhoc_task_menu() {
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
+
+  $items['update-sales-register-thankyou'] = array(
+    'title' => 'update-sales-register-thankyou',
+    'page callback' => 'update_sales_register_thankyou',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
   return $items;
 }
 
@@ -51,11 +58,8 @@ function update_sales_register_nodes(&$context) {
   for ($i = $context['sandbox']['progress']; $i < $context['sandbox']['progress'] + 50 && $i < $context['sandbox']['max']; $i++) {
     $key = $i;
     $val = $res[$key];
-    dpm($val,"val");
     $nid = $val['nid'];
     $dispatch_date = strtotime($val['field_dispatch_date_value']);
-    dpm($nid,"nid");
-    dpm($dispatch_date,"dispatch_date");
 //    $query = db_select('node', 'n');
 //    $query->condition('n.type', 'sales_register_data');
 //    $query->join('field_data_field_promised_date', 'pro_date', 'pro_date.entity_id = n.nid');
@@ -89,6 +93,10 @@ function update_sales_register_nodes(&$context) {
   else {
     $context['finished'] = 1;
   }
+}
+
+function update_sales_register_thankyou() {
+  return "";
 }
 
 function update_sales_register() {
