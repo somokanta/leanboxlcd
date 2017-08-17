@@ -51,7 +51,7 @@ function update_sales_register_nodes(&$context) {
   for ($i = $context['sandbox']['progress']; $i < $context['sandbox']['progress'] + 50 && $i < $context['sandbox']['max']; $i++) {
     $key = $i;
     $val = $res[$key];
-
+    dpm($val,"val");
     $nid = $val->nid;
     $dispatch_date = strtotime($val->field_dispatch_date_value);
     dpm($nid,"nid");
