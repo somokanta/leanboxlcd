@@ -1459,7 +1459,9 @@ function leanbox_dashboard_form_alter(&$form, &$form_state, $form_id) {
   global $user;
   $roles = $user->roles;
   if ($form_id == 'user_register_form' || $form_id == 'user_profile_form') {
+    
     if (in_array("hul_admin", $roles)) {
+      $form['#validate'][] = 'leanbox_dashboard_user_register_validate';
 
       $role_names = array('RS Operator', 'DFE', 'RS Admin');
       foreach ($form['account']['roles']['#options'] as $rid => $rname) {
@@ -1468,17 +1470,6 @@ function leanbox_dashboard_form_alter(&$form, &$form_state, $form_id) {
         }
       }
 
-      $form['field_distributor']['#states'] = array(
-        'visible' =>
-        array(
-          array(
-            ':input[name="roles[7]"]' => array('checked' => TRUE),
-          ),
-          array(
-            ':input[name="roles[8]"]' => array('checked' => TRUE),
-          )
-        )
-      );
       $form['field_name']['#states'] = array(
         'visible' => array(
           ':input[name="roles[6]"]' => array('checked' => TRUE),
@@ -1490,16 +1481,24 @@ function leanbox_dashboard_form_alter(&$form, &$form_state, $form_id) {
         ),
       );
 
-      $form['field_distributor']['und'][0]['value']['#type'] = 'select';
-      // $form['field_distributor']['und'][0]['value']['#multiple'] = FALSE;
-      $form['field_distributor']['und'][0]['value']['#required'] = TRUE;
-      // $form['field_distributor']['#tree'] = TRUE;
-      //$form['field_distributor']['#attributes']['class'] = array('field-type-list-text', 'field-name-field-distributor', 'field-widget-options-select');
-      // get all dis list
+      
       $all_distributor_list = leanbox_dashboard_get_all_distributor();
       $all_distributor_list['none'] = 'NONE';
+      $form['field_distributor']['und'][0]['value']['#type'] = 'select';
+      $form['field_distributor']['und'][0]['value']['#required'] = TRUE;
       $form['field_distributor']['und'][0]['value']['#options'] = $all_distributor_list;
       $form['field_distributor']['und'][0]['value']['#default_value'] = isset($form['#user']->field_distributor['und'][0]['safe_value'])?  $form['#user']->field_distributor['und'][0]['safe_value'] : 'none';
+      $form['field_distributor']['#states'] = array(
+        'visible' =>
+        array(
+          array(
+            ':input[name="roles[7]"]' => array('checked' => TRUE),
+          ),
+          array(
+            ':input[name="roles[8]"]' => array('checked' => TRUE),
+          )
+        )
+      );
     }
   }
 
@@ -1555,6 +1554,11 @@ function leanbox_dashboard_form_alter(&$form, &$form_state, $form_id) {
   }
 }
 
+
+function leanbox_dashboard_user_register_validate($form, &$form_state) {
+  dpm($form_state, '$form_state');
+  form_set_error('form', 'error');
+}
 
 function leanbox_dashboard_van_stop_master($field_name) {
     $query = db_select('node', 'n');
