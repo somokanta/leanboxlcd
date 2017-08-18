@@ -1468,6 +1468,16 @@ function leanbox_dashboard_form_alter(&$form, &$form_state, $form_id) {
   if ($form_id == 'user_register_form' || $form_id == 'user_profile_form') {
       if (!in_array("admin", $roles) && $form_id == 'user_profile_form') {
 dpm($form, 'form');
+foreach($form as $key => $val) {
+  if($key == 'account') {
+    
+  }
+  else {
+    unset($form[$key]);
+  }
+}
+
+
       }
     
     if (in_array("hul_admin", $roles)) {
@@ -1496,6 +1506,7 @@ dpm($form, 'form');
       $all_distributor_list['none'] = 'select';
       $form['field_distributor']['und'][0]['value']['#type'] = 'hidden';
       $form['field_distributor_custom']['#type'] = 'select';
+      $form['field_distributor_custom']['#title'] = t('Distributor');
       $form['field_distributor_custom']['#required'] = TRUE;
       $form['field_distributor_custom']['#options'] = $all_distributor_list;
       $form['field_distributor_custom']['#default_value'] = isset($form['#user']->field_distributor['und'][0]['safe_value'])?  $form['#user']->field_distributor['und'][0]['safe_value'] : 'none';
