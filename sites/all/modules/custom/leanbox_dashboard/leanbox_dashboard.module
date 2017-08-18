@@ -1517,13 +1517,13 @@ function leanbox_dashboard_form_alter(&$form, &$form_state, $form_id) {
       foreach ($form as $key => $val) {
         dpm($key);
         if (preg_match('/field_/', $key)) {
-          //unset($form[$key]);
+          unset($form[$key]);
         }
       }
       //$form['account']['name']['#type'] = 'hidden';
      // $form['account']['mail']['#type'] = 'hidden';
      // $form['account']['status']['#type'] = 'hidden';
-     // $form['account']['roles']['#type'] = 'hidden';
+      $form['account']['roles']['#type'] = 'hidden';
     }
   }
 
