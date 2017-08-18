@@ -1515,11 +1515,11 @@ function leanbox_dashboard_form_alter(&$form, &$form_state, $form_id) {
     // This should be at the end of if condition As it will also hide your custom added field then
     if (!in_array("administrator", $roles) && $form_id == 'user_profile_form') {
       foreach ($form as $key => $val) {
-        dpm($key);
         if (preg_match('/field_/', $key)) {
           unset($form[$key]);
         }
       }
+      dpm($form['account']);
       $form['account']['name']['#attributes'] = array('readonly' => 'readonly');
       $form['account']['mail']['#attributes'] = array('readonly' => 'readonly');
       $form['account']['status']['#attributes'] = array('readonly' => 'readonly');
