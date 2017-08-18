@@ -1457,21 +1457,6 @@ function leanbox_dashboard_get_username_and_rs_code($dis_id) {
 }
 
 
-/**
- * 
- * @global type $user
- * @param string $edit
- * @param type $account
- */
-function leanbox_dashboard_user_login(&$edit, $account) {
-  global $user;
-  $roles = $user->roles;
-  dpm($roles);
-  if (in_array("hul_admin", $roles)) {
-   $_GET['destination'] = 'distributor-group';
-  }
-}
-
 
 /**
  * 
@@ -1482,11 +1467,6 @@ function leanbox_dashboard_user_login(&$edit, $account) {
 function leanbox_dashboard_form_alter(&$form, &$form_state, $form_id) {
   global $user;
   $roles = $user->roles;
-  if ($form_id == 'user_login') {
-    if (in_array("hul_admin", $roles)) {
-      $form['#redirect'] = 'distributor-group';
-    }
-  }
   if ($form_id == 'user_register_form' || $form_id == 'user_profile_form') {
 
     if (in_array("hul_admin", $roles)) {
