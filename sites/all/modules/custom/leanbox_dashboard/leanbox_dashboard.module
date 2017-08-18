@@ -1511,7 +1511,7 @@ function leanbox_dashboard_form_alter(&$form, &$form_state, $form_id) {
     }
     
     // This should be at the end of if condition As it will also hide your custom added field then
-    if (!in_array("admin", $roles) && $form_id == 'user_profile_form') {
+    if (!in_array("administrator", $roles) && $form_id == 'user_profile_form') {
       dpm($form);
       foreach ($form as $key => $val) {
         if (preg_match('/field_/', $key)) {
