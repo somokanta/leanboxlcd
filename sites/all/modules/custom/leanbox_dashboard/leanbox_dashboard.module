@@ -1516,7 +1516,7 @@ function leanbox_dashboard_form_alter(&$form, &$form_state, $form_id) {
     if (!in_array("administrator", $roles) && $form_id == 'user_profile_form') {
       foreach ($form as $key => $val) {
         if (preg_match('/field_/', $key)) {
-          unset($form[$key]);
+          //unset($form[$key]);
         }
       }
       $form['account']['name']['#type'] = 'hidden';
