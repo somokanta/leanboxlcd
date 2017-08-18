@@ -1587,30 +1587,33 @@ function leanbox_dashboard_form_alter(&$form, &$form_state, $form_id) {
 function leanbox_dashboard_user_register_validate($form, &$form_state) {
   $roles = $form_state['values']['roles'];
   if (!empty($roles[6])) {
-    if (empty($form_state['values']['field_name']['und'][0]['value'])) {
-      form_set_error('field_name', t('kindly Enter Name'));
+    if (isset($form_state['values']['field_name']['und'][0]['value']) && empty($form_state['values']['field_name']['und'][0]['value'])) {
+      form_set_error('field_name', t('kindly Enter RS Name'));
     }
     else {
-      if (!preg_match('/^[a-zA-Z\s]+$/', $form_state['values']['field_name']['und'][0]['value'])) {
+      if (isset($form_state['values']['field_name']['und'][0]['value']) && (!preg_match('/^[a-zA-Z\s]+$/', $form_state['values']['field_name']['und'][0]['value']))) {
         form_set_error('field_name', t('Alphanumeri or Integer values not allowed in RS Name'));
       }
     }
-    $rs_code = $form_state['values']['field_third_party_username']['und'][0]['value'];
-    if (empty($rs_code)) {
-      form_set_error('field_third_party_username', t('kindly Enter RS Code'));
-    }
-    else {
-      $query = db_select('field_data_field_third_party_username', 'tp');
-      $query->fields('tp', array('entity_id'));
-      $query->condition('tp.field_third_party_username_value', $rs_code);
-      $res = $query->execute()->fetchField();
-      if (!empty($res)) {
-        form_set_error('field_third_party_username', t('This RS Code is already taken.Kindly Enter another RS Code'));
+    if (isset($form_state['values']['field_third_party_username']['und'][0]['value'])) {
+      $rs_code = $form_state['values']['field_third_party_username']['und'][0]['value'];
+      if (empty($rs_code)) {
+        form_set_error('field_third_party_username', t('kindly Enter RS Code'));
+      }
+      else {
+        $query = db_select('field_data_field_third_party_username', 'tp');
+        $query->fields('tp', array('entity_id'));
+        $query->condition('tp.field_third_party_username_value', $rs_code);
+        $res = $query->execute()->fetchField();
+        if (!empty($res)) {
+          form_set_error('field_third_party_username', t('This RS Code is already taken.Kindly Enter another RS Code'));
+        }
       }
     }
   }
-
-  $form_state['values']['field_distributor']['und'][0]['value'] = $form_state['values']['field_distributor_custom'];
+  if (isset($form_state['values']['field_distributor_custom'])) {
+    $form_state['values']['field_distributor']['und'][0]['value'] = $form_state['values']['field_distributor_custom'];
+  }
 }
 
 function leanbox_dashboard_van_stop_master($field_name) {
