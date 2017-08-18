@@ -1482,6 +1482,11 @@ function leanbox_dashboard_user_login(&$edit, $account) {
 function leanbox_dashboard_form_alter(&$form, &$form_state, $form_id) {
   global $user;
   $roles = $user->roles;
+  if ($form_id == 'user_login') {
+    if (in_array("hul_admin", $roles)) {
+      $form['#redirect'] = 'distributor-group';
+    }
+  }
   if ($form_id == 'user_register_form' || $form_id == 'user_profile_form') {
 
     if (in_array("hul_admin", $roles)) {
