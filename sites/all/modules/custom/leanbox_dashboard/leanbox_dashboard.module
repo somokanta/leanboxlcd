@@ -1520,10 +1520,10 @@ function leanbox_dashboard_form_alter(&$form, &$form_state, $form_id) {
           unset($form[$key]);
         }
       }
-      $form['account']['name']['#type'] = 'hidden';
-      $form['account']['mail']['#type'] = 'hidden';
-      $form['account']['status']['#type'] = 'hidden';
-      $form['account']['roles']['#attributes'] = array('style' => 'display:none;');
+      $form['account']['name']['#attributes'] = array('readonly' => 'readonly');
+      $form['account']['mail']['#attributes'] = array('readonly' => 'readonly');
+      $form['account']['status']['#attributes'] = array('readonly' => 'readonly');
+      $form['account']['roles']['#attributes'] = array('readonly' => 'readonly');
     }
   }
 
