@@ -1466,20 +1466,6 @@ function leanbox_dashboard_form_alter(&$form, &$form_state, $form_id) {
   global $user;
   $roles = $user->roles;
   if ($form_id == 'user_register_form' || $form_id == 'user_profile_form') {
-  
-    if (!in_array("admin", $roles) && $form_id == 'user_profile_form') {
-      foreach ($form as $key => $val) {
-        if ($key == 'account') {
-          unset($form['account']['name']);
-          unset($form['account']['mail']);
-          unset($form['account']['status']);
-          unset($form['account']['roles']);
-        }
-        else {
-          unset($form[$key]);
-        }
-      }
-    }
 
     if (in_array("hul_admin", $roles)) {
       $form['#validate'][] = 'leanbox_dashboard_user_register_validate';
@@ -1522,6 +1508,21 @@ function leanbox_dashboard_form_alter(&$form, &$form_state, $form_id) {
           )
         )
       );
+    }
+    
+    // This should be at the end of if condition As it will also hide your custom added field then
+    if (!in_array("admin", $roles) && $form_id == 'user_profile_form') {
+      foreach ($form as $key => $val) {
+        if ($key == 'account') {
+          unset($form['account']['name']);
+          unset($form['account']['mail']);
+          unset($form['account']['status']);
+          unset($form['account']['roles']);
+        }
+        else {
+          unset($form[$key]);
+        }
+      }
     }
   }
 
