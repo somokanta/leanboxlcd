@@ -1514,18 +1514,14 @@ function leanbox_dashboard_form_alter(&$form, &$form_state, $form_id) {
     if (!in_array("admin", $roles) && $form_id == 'user_profile_form') {
       dpm($form);
       foreach ($form as $key => $val) {
-        if ($key != '#submit' && $key != 'action') {
-          if ($key == 'account') {
-            unset($form['account']['name']);
-            unset($form['account']['mail']);
-            unset($form['account']['status']);
-            unset($form['account']['roles']);
-          }
-          else {
-            unset($form[$key]);
-          }
+        if (preg_match('field_', $key)) {
+          unset($form[$key]);
         }
       }
+      unset($form['account']['name']);
+      unset($form['account']['mail']);
+      unset($form['account']['status']);
+      unset($form['account']['roles']);
     }
   }
 
