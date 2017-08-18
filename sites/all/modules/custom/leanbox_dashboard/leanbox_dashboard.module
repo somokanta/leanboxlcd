@@ -1588,8 +1588,18 @@ function leanbox_dashboard_user_register_validate($form, &$form_state) {
     if (empty($form_state['values']['field_name']['und'][0]['value'])) {
       form_set_error('field_name', t('kindly Enter Name'));
     }
-    if (empty($form_state['values']['field_third_party_username']['und'][0]['value'])) {
-      form_set_error('field_name', t('kindly Enter RS Code'));
+    $rs_code = $form_state['values']['field_third_party_username']['und'][0]['value'];
+    if (empty($rs_code)) {
+      form_set_error('field_third_party_username', t('kindly Enter RS Code'));
+    }
+    else {
+      $query = db_select('field_data_field_third_party_username', 'tp');
+      $query->fields('tp', array('entity_id'));
+      $query->condition('tp.field_third_party_username_value', $rs_code);
+      $res = $query->execute()->fetchField();
+      if (!empty($res)) {
+        form_set_error('field_third_party_username', t('This RS Code is already taken.Kindly Enter another RS Code'));
+      }
     }
   }
   $form_state['values']['field_distributor']['und'][0]['value'] = $form_state['values']['field_distributor_custom'];
