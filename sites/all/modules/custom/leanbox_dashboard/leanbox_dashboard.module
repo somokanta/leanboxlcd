@@ -967,7 +967,46 @@ function leanbox_dashboard_preprocess_page(&$vars) {
   }
   dpm($vars, 'vars');
   if (in_array("hul_admin", $roles)) {
-    
+    unset($vars['tabs']);
+  }
+
+  if (!in_array("admin", $roles)) {
+    if (isset($vars['page']['content']['system_main']['#user']->field_name)) {
+      unset($vars['page']['content']['system_main']['#user']->field_name);
+    }
+    if (isset($vars['page']['content']['system_main']['#user']->field_distributor)) {
+      unset($vars['page']['content']['system_main']['#user']->field_distributor);
+    }
+    if (isset($vars['page']['content']['system_main']['#user']->field_ipc)) {
+      unset($vars['page']['content']['system_main']['#user']->field_ipc);
+    }
+    if (isset($vars['page']['content']['system_main']['#user']->field_idd)) {
+      unset($vars['page']['content']['system_main']['#user']->field_idd);
+    }
+    if (isset($vars['page']['content']['system_main']['#user']->field_third_party_username)) {
+      unset($vars['page']['content']['system_main']['#user']->field_third_party_username);
+    }
+     if (isset($vars['page']['content']['system_main']['#user']->name)) {
+      unset($vars['page']['content']['system_main']['#user']->name);
+    }
+     if (isset($vars['page']['content']['system_main']['#user']->mail)) {
+      unset($vars['page']['content']['system_main']['#user']->mail);
+    }
+     if (isset($vars['page']['content']['system_main']['#user']->status)) {
+      unset($vars['page']['content']['system_main']['#user']->status);
+    }
+     if (isset($vars['page']['content']['system_main']['#user']->picture)) {
+      unset($vars['page']['content']['system_main']['#user']->picture);
+    }
+     if (isset($vars['page']['content']['system_main']['#user']->roles)) {
+      unset($vars['page']['content']['system_main']['#user']->roles);
+    }
+     if (isset($vars['page']['content']['system_main']['#user']->data)) { // plaintext email only option
+      unset($vars['page']['content']['system_main']['#user']->data);
+    }
+//     if (isset($vars['page']['content']['system_main']['#user']->field_third_party_username)) {
+//      unset($vars['page']['content']['system_main']['#user']->field_third_party_username);
+//    } 
   }
 }
 
