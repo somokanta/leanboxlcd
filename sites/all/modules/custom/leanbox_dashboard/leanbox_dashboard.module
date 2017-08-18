@@ -1519,7 +1519,6 @@ function leanbox_dashboard_form_alter(&$form, &$form_state, $form_id) {
           unset($form[$key]);
         }
       }
-      dpm($form['account']);
       $form['account']['name']['#attributes'] = array('readonly' => 'readonly');
       $form['account']['mail']['#attributes'] = array('readonly' => 'readonly');
       $form['account']['status']['#attributes'] =  array('style' => 'display:none');
