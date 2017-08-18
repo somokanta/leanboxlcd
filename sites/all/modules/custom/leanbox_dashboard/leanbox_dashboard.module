@@ -1479,6 +1479,7 @@ function leanbox_dashboard_form_alter(&$form, &$form_state, $form_id) {
         }
       }
 
+      $form['field_name']['und'][0]['value']['#rules'] = array('alpha');
       $form['field_name']['#states'] = array(
         'visible' => array(
           ':input[name="roles[6]"]' => array('checked' => TRUE),
