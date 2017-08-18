@@ -1479,7 +1479,6 @@ function leanbox_dashboard_form_alter(&$form, &$form_state, $form_id) {
         }
       }
 
-      $form['field_name']['und'][0]['value']['#rules'] = array('alpha');
       $form['field_name']['#states'] = array(
         'visible' => array(
           ':input[name="roles[6]"]' => array('checked' => TRUE),
@@ -1590,6 +1589,11 @@ function leanbox_dashboard_user_register_validate($form, &$form_state) {
     if (empty($form_state['values']['field_name']['und'][0]['value'])) {
       form_set_error('field_name', t('kindly Enter Name'));
     }
+    else {
+      if (!preg_match('/^[0-9]+$/', $form_state['values']['field_name']['und'][0]['value'])) {
+        form_set_error('field_namel', t('Alphanumeri or Integer values not allowed'));
+      }
+    }
     $rs_code = $form_state['values']['field_third_party_username']['und'][0]['value'];
     if (empty($rs_code)) {
       form_set_error('field_third_party_username', t('kindly Enter RS Code'));
@@ -1604,6 +1608,7 @@ function leanbox_dashboard_user_register_validate($form, &$form_state) {
       }
     }
   }
+
   $form_state['values']['field_distributor']['und'][0]['value'] = $form_state['values']['field_distributor_custom'];
 }
 
