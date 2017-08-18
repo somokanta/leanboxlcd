@@ -1456,6 +1456,22 @@ function leanbox_dashboard_get_username_and_rs_code($dis_id) {
   return $res;
 }
 
+
+/**
+ * 
+ * @global type $user
+ * @param string $edit
+ * @param type $account
+ */
+function leanbox_dashboard_user_login(&$edit, $account) {
+  global $user;
+  $roles = $user->roles;
+  if (in_array("hul_admin", $roles)) {
+   $edit['redirect'] = 'distributor-group';
+  }
+}
+
+
 /**
  * 
  * @param string $form
