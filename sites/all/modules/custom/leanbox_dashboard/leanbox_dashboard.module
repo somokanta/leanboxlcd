@@ -965,48 +965,8 @@ function leanbox_dashboard_preprocess_page(&$vars) {
   if ($arg == 'dashboard') {
     drupal_add_js(drupal_get_path('module', 'leanbox_dashboard') . '/js/leanbox_dashboard.js');
   }
-  dpm($vars, 'vars');
   if (in_array("hul_admin", $roles)) {
     unset($vars['tabs']);
-  }
-
-  if (!in_array("admin", $roles)) {
-    if (isset($vars['page']['content']['system_main']['field_name'])) {
-      unset($vars['page']['content']['system_main']['field_name']);
-    }
-    if (isset($vars['page']['content']['system_main']['field_distributor'])) {
-      unset($vars['page']['content']['system_main']['field_distributor']);
-    }
-    if (isset($vars['page']['content']['system_main']['field_ipc'])) {
-      unset($vars['page']['content']['system_main']['field_ipc']);
-    }
-    if (isset($vars['page']['content']['system_main']['field_idd'])) {
-      unset($vars['page']['content']['system_main']['field_idd']);
-    }
-    if (isset($vars['page']['content']['system_main']['field_third_party_username'])) {
-      unset($vars['page']['content']['system_main']['field_third_party_username']);
-    }
-     if (isset($vars['page']['content']['system_main']['#user']->name)) {
-      unset($vars['page']['content']['system_main']['#user']->name);
-    }
-     if (isset($vars['page']['content']['system_main']['account']['mail'])) {
-      unset($vars['page']['content']['system_main']['account']['mail']);
-    }
-     if (isset($vars['page']['content']['system_main']['account']['status'])) {
-      unset($vars['page']['content']['system_main']['account']['status']);
-    }
-     if (isset($vars['page']['content']['system_main']['account']['picture'])) {
-      unset($vars['page']['content']['system_main']['account']['picture']);
-    }
-     if (isset($vars['page']['content']['system_main']['account']['roles'])) {
-      unset($vars['page']['content']['system_main']['account']['roles']);
-    }
-     if (isset($vars['page']['content']['system_main']['account']['data'])) { // plaintext email only option
-      unset($vars['page']['content']['system_main']['account']['data']);
-    }
-//     if (isset($vars['page']['content']['system_main']['#user']->field_third_party_username)) {
-//      unset($vars['page']['content']['system_main']['#user']->field_third_party_username);
-//    } 
   }
 }
 
@@ -1503,6 +1463,9 @@ function leanbox_dashboard_form_alter(&$form, &$form_state, $form_id) {
   global $user;
   $roles = $user->roles;
   if ($form_id == 'user_register_form' || $form_id == 'user_profile_form') {
+      if (!in_array("admin", $roles) && $form_id == 'user_profile_form') {
+dpm($form, 'form');
+      }
     
     if (in_array("hul_admin", $roles)) {
       $form['#validate'][] = 'leanbox_dashboard_user_register_validate';
