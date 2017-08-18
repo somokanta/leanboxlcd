@@ -1590,8 +1590,8 @@ function leanbox_dashboard_user_register_validate($form, &$form_state) {
       form_set_error('field_name', t('kindly Enter Name'));
     }
     else {
-      if (preg_match('/^[0-9]+$/', $form_state['values']['field_name']['und'][0]['value'])) {
-        form_set_error('field_namel', t('Alphanumeri or Integer values not allowed'));
+      if (!preg_match('/^[a-zA-Z\s]+$/', $form_state['values']['field_name']['und'][0]['value'])) {
+        form_set_error('field_name', t('Alphanumeri or Integer values not allowed in RS Name'));
       }
     }
     $rs_code = $form_state['values']['field_third_party_username']['und'][0]['value'];
