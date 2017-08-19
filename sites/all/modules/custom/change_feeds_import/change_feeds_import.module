@@ -2434,7 +2434,14 @@ function change_feeds_import_views_data_export_batch_finish($eid, $view_name) {
   $view = views_data_export_view_retrieve($eid);
   watchdog('cron2', '<pre>' . print_r(array(), TRUE) . '</pre>');
   // Allow Dump Creation for Export 2 Only to avoid Overriding
-  $date = date('Ymdhis') . '_' . date('dmY', strtotime("+1 days"));
+  
+  // change file name for file sent in mornings
+  if ($view_name == 'impact_delivery_cron_2' || $view_name == 'impact_party_master_morning') {
+    $date = date('Ymdhis') . '_' . date('dmY');
+  }
+  else {
+    $date = date('Ymdhis') . '_' . date('dmY', strtotime("+1 days"));
+  }
 
   if ($view_name == 'impact_delivery_cron_2' || $view_name == 'impact_delivery_cron_evening_2') {
     watchdog('impact_delivery', '<pre>' . print_r(array(), TRUE) . '</pre>');
