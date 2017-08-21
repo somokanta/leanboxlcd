@@ -105,31 +105,31 @@ function change_feeds_import_create_confirm_content($id) {
   $max_billing_id = $max_billing_id ? $max_billing_id : 0;
 
   change_feeds_import_insert_data_in_custom_billing_table($billing_data_result);
-  dpm($max_billing_id,"max_billing_id");
   $operations = array();
+  
   $create_billing_data = change_feeds_import_create_billing_data($max_billing_id);
-  dpm($create_billing_data,"create_billing_data");
   $create_billing_data_chunk = array_chunk($create_billing_data, 1000);
   foreach ($create_billing_data_chunk as $data) {
     $operations[] = array('change_feeds_import_create_billing', array($data));
   }
 
   $create_picking_data = change_feeds_import_create_picking_data($max_billing_id);
-  dpm($create_picking_data,"create_picking_data");
   $create_picking_data_chunk = array_chunk($create_picking_data, 1000);
   foreach ($create_picking_data_chunk as $data) {
     $operations[] = array('change_feeds_import_create_picking', array($data));
   }
 
   $van_cld_report_data = change_feeds_import_create_van_cld_report_data($max_billing_id);
-  dpm($van_cld_report_data,"van_cld_report_data");
   $van_cld_report_data_chunk = array_chunk($van_cld_report_data, 1000);
   foreach ($van_cld_report_data_chunk as $data) {
     $operations[] = array('change_feeds_import_create_van_cld_report', array($data));
   }
-  dpm($party_packing_data_new,"party_packing_data_new");
-  $operations[] = array('change_feeds_import_create_party_packing', array($party_packing_data_new));
-
+  
+  $party_packing_data_new_chunk = array_chunk($party_packing_data_new, 1000);
+  foreach ($party_packing_data_new_chunk as $data) {
+    $operations[] = array('change_feeds_import_create_party_packing', array($data));
+  }
+ 
   $batch = array(
     'operations' => $operations,
     'finished' => 'change_feeds_import_finished',
@@ -175,7 +175,6 @@ function change_feeds_import_create_billing_data($max_billing_id) {
   $query->condition('cb.id', $max_billing_id, '>');
 
   $query->groupBy('cb.bill_number');
-
   $results = $query->execute()->fetchAll();
   return $results;
 }
@@ -405,46 +404,36 @@ function change_feeds_import_create_party_packing($party_packing_data_new, &$con
     $user_id = $user->uid;
     $distributor_id = change_feeds_import_get_distributor_id($user_id);
     $context['sandbox']['progress'] = 0;
-    $context['sandbox']['current_node'] = 0;
-    $context['sandbox']['max'] = count($party_packing_data_new);
-    $context['sandbox']['result'] = $party_packing_data_new;
   }
-  $res = $context['sandbox']['result'];
   global $user;
-  for ($i = $context['sandbox']['progress']; $i < $context['sandbox']['progress'] + 50 && $i < $context['sandbox']['max']; $i++) {
-    $key = $i;
-    $val = $res[$key];
-
-
-    $loading_date = date("Y-m-d", ($val['LOADING_DATE']));
+  
+  foreach ($data as $key => &$value) {
+    dpm($value,"value");
+   /* $loading_date = date("Y-m-d", ($value['LOADING_DATE']));
     $node = new stdClass();
-    $node->title = $val['VEHICLE'] . format_date(time());
+    $node->title = $value['VEHICLE'] . format_date(time());
     $node->type = "party_packing";
     node_object_prepare($node); // Sets some defaults. Invokes hook_prepare() and hook_node_prepare().
     $node->language = LANGUAGE_NONE; // Or e.g. 'en' if locale is enabled
     $node->uid = $user->uid;
     $node->status = 1; //(1 or 0): published or not
     $node->comment = 1; // 0 = comments disabled, 1 = read only, 2 = read/write
-    $node->field_party_packing_vehicle[$node->language][0]['value'] = $val['VEHICLE'];
+    $node->field_party_packing_vehicle[$node->language][0]['value'] = $value['VEHICLE'];
     $node->field_party_packing_loading_date[$node->language][0]['value'] = $loading_date;
     //$node->field_party_packing_date[$node->language][0]['value'] = $val['party_packing_date'];
     $node->field_loading_sheet_line[$node->language][0]['value'] = $val['loading_sheet_line'];
-    $node->field_bill_lines[$node->language][0]['value'] = $val['bill_lines'];
-    $node->field_each_units[$node->language][0]['value'] = $val['each_units'];
+    $node->field_bill_lines[$node->language][0]['value'] = $value['bill_lines'];
+    $node->field_each_units[$node->language][0]['value'] = $value['each_units'];
     $node->field_distributor_uid['und'][0]['value'] = $distributor_id ? $distributor_id : 0;
-    $node->field_party_packing_check['und'][0]['value'] = $val['party_check'];
-    $node->field_party_packing_type['und'][0]['value'] = $val['party_pack'];
+    $node->field_party_packing_check['und'][0]['value'] = $value['party_check'];
+    $node->field_party_packing_type['und'][0]['value'] = $value['party_pack'];
     $node = node_submit($node); // Prepare node for saving
     node_save($node);
+    */
   }
-  $context['sandbox']['progress'] = $i;
-
-  if ($context['sandbox']['progress'] < $context['sandbox']['max']) {
-    $context['finished'] = $context['sandbox']['progress'] / $context['sandbox']['max'];
-  }
-  else {
-    $context['finished'] = 1;
-  }
+  
+  
+ 
 }
 
 ############## IN PROGRESS FUNCTION ##################
