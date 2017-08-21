@@ -408,8 +408,7 @@ function change_feeds_import_create_party_packing($data, &$context) {
   global $user;
   
   foreach ($data as $key => &$value) {
-    dpm($value,"value");
-   /* $loading_date = date("Y-m-d", ($value['LOADING_DATE']));
+    $loading_date = date("Y-m-d", ($value['LOADING_DATE']));
     $node = new stdClass();
     $node->title = $value['VEHICLE'] . format_date(time());
     $node->type = "party_packing";
@@ -429,7 +428,6 @@ function change_feeds_import_create_party_packing($data, &$context) {
     $node->field_party_packing_type['und'][0]['value'] = $value['party_pack'];
     $node = node_submit($node); // Prepare node for saving
     node_save($node);
-    */
   }
   
   
