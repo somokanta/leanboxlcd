@@ -125,7 +125,9 @@ function change_feeds_import_create_confirm_content($id) {
     $operations[] = array('change_feeds_import_create_van_cld_report', array($data));
   }
   
+  dpm($party_packing_data_new,"party_packing_data_new");
   $party_packing_data_new_chunk = array_chunk($party_packing_data_new, 1000);
+  dpm($party_packing_data_new_chunk,"party_packing_data_new_chunk");
   foreach ($party_packing_data_new_chunk as $data) {
     $operations[] = array('change_feeds_import_create_party_packing', array($data));
   }
