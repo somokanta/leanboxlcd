@@ -231,7 +231,7 @@ function change_feeds_import_batch_fix_process($max, $data, $distributor_id, $fi
     if (!isset($context['results']['unique_combination'])) {
       $context['results']['unique_combination'] = array();
     }
-
+/*
     foreach ($value as $k => $v) {
       $flag = 0;
       $error_text = '';
@@ -355,7 +355,7 @@ function change_feeds_import_batch_fix_process($max, $data, $distributor_id, $fi
         $error[$k] = $v;
       }
     }
-
+*/
     if ($error_bool) { // if error occured generate error file
       $context['results']['error'][] = $error;
     }

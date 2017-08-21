@@ -13,10 +13,10 @@ function change_feeds_import_create_confirm_content($id) {
           ->condition('sbd.error_id', $id, '=')
           ->fields('sbd')
           ->execute()->fetchAll(PDO::FETCH_ASSOC);
-  
-   
-  
-  $party_packing_check = get_party_packing_from_party_code(NULL,$distributor_id);
+
+
+
+  $party_packing_check = get_party_packing_from_party_code(NULL, $distributor_id);
 
   foreach ($billing_data_result as $key => $value) {
     $vehicle = $value['vehicle'];
@@ -105,14 +105,30 @@ function change_feeds_import_create_confirm_content($id) {
   $max_billing_id = $max_billing_id ? $max_billing_id : 0;
 
   change_feeds_import_insert_data_in_custom_billing_table($billing_data_result);
-  
+
+  $operations = array();
+
+  $create_billing_data = change_feeds_import_create_billing_data($max_billing_id);
+  $create_billing_data_chunk = array_chunk($create_billing_data, 1000);
+  foreach ($create_billing_data_chunk as $data) {
+    $operations[] = array('change_feeds_import_create_billing', array($data));
+  }
+
+  $create_picking_data = change_feeds_import_create_picking_data($max_billing_id);
+  $create_picking_data_chunk = array_chunk($create_picking_data, 1000);
+  foreach ($create_picking_data_chunk as $data) {
+    $operations[] = array('change_feeds_import_create_picking', array($data));
+  }
+
+  $van_cld_report_data = change_feeds_import_create_van_cld_report_data($max_billing_id);
+  $van_cld_report_data_chunk = array_chunk($van_cld_report_data, 1000);
+  foreach ($van_cld_report_data_chunk as $data) {
+    $operations[] = array('change_feeds_import_create_van_cld_report', array($data));
+  }
+  $operations[] = array('change_feeds_import_create_party_packing', array($party_packing_data_new));
+
   $batch = array(
-    'operations' => array(
-      array('change_feeds_import_create_billing', array($max_billing_id)),
-      array('change_feeds_import_create_party_packing', array($party_packing_data_new)),
-      array('change_feeds_import_create_picking', array($max_billing_id)),
-      array('change_feeds_import_create_van_cld_report', array($max_billing_id)),
-    ),
+    'operations' => $operations,
     'finished' => 'change_feeds_import_finished',
     'title' => t('Creating Billing Data'),
     'init_message' => t('Billing Data Batch Creation is starting.'),
@@ -122,7 +138,7 @@ function change_feeds_import_create_confirm_content($id) {
   );
   batch_set($batch);
 
- //delete data from stage_billing_data.
+  //delete data from stage_billing_data.
   db_delete('stage_billing_data')
       ->condition('error_id', $id, '=')
       ->execute();
@@ -137,9 +153,98 @@ function change_feeds_import_create_confirm_content($id) {
     drupal_unlink($path); //delete the generated error file
   }
   batch_process('/billing_data/import');
- // background_batch_process_batch('/billing_data/import');
+  // background_batch_process_batch('/billing_data/import');
 }
 
+function change_feeds_import_create_billing_data($max_billing_id) {
+  global $user;
+  $user_id = $user->uid;
+  $distributor_id = change_feeds_import_get_distributor_id($user_id);
+  $query = db_select('custom_billing_data', 'cb');
+
+  $query->addField('cb', 'bill_number');
+  $query->addField('cb', 'vehicle', 'vehicle');
+  $query->addField('cb', 'loading_date', 'loading_date');
+  $query->addField('cb', 'bill_date', 'bill_date');
+
+
+  $query->condition('cb.distributor_id', $distributor_id);
+  $query->condition('cb.id', $max_billing_id, '>');
+
+  $query->groupBy('cb.bill_number');
+
+  $results = $query->execute()->fetchAll();
+  return $results;
+}
+
+function change_feeds_import_create_picking_data($max_billing_id) {
+  global $user;
+  $user_id = $user->uid;
+  $distributor_id = change_feeds_import_get_distributor_id($user_id);
+  $query = db_select('custom_billing_data', 'cb');
+  $query->join('field_data_field_sku7_code', 'gaisc', 'gaisc.field_sku7_code_value = cb.sku7_code');
+  $query->condition('gaisc.bundle', 'sku7_code_master', '=');
+  $query->join('node', 'nd', 'nd.nid = gaisc.entity_id');
+  $query->condition('nd.uid', $distributor_id, '=');
+//    $query->join('field_data_field_godown_area_id', 'gai', 'gaisc.entity_id = gai.entity_id');
+//    $query->condition('gai.bundle', 'sku7_code_master', '=');
+//    $query->join('field_data_field_pack_size', 'fps', 'fps.entity_id = gaisc.entity_id');
+//    $query->condition('fps.bundle', 'sku7_code_master', '=');
+  $query->join('field_data_field_unit_case_units_', 'fucu', 'fucu.entity_id = gaisc.entity_id');
+  $query->condition('fucu.bundle', 'sku7_code_master', '=');
+  $query->fields('cb', array('sku7_code'));
+  $query->addField('cb', 'vehicle', 'field_vehicle_value');
+  $query->addField('cb', 'loading_date', 'field_loading_date_value');
+  $query->addField('cb', 'PRICELIST_GROUP', 'PRICELIST_GROUP');
+  //$query->fields('gai', array('field_godown_area_id_value'));
+  //$query->fields('fps', array('field_pack_size_value'));
+  $query->fields('fucu', array('field_unit_case_units__value'));
+  $query->addExpression('SUM(cb.Sum_of_TOTAL_SALES_QTY)', 'total_sales_qty');
+  $query->addExpression('floor(SUM(cb.Sum_of_TOTAL_SALES_QTY) / field_unit_case_units__value)', 'cld');
+  $query->addExpression('SUM(cb.Sum_of_TOTAL_SALES_QTY) - (field_unit_case_units__value * floor(SUM(cb.Sum_of_TOTAL_SALES_QTY) / field_unit_case_units__value))', 'eaches');
+
+  $query->condition('cb.distributor_id', $distributor_id);
+  $query->condition('cb.id', $max_billing_id, '>');
+
+  $query->groupBy('field_vehicle_value,field_loading_date_value,sku7_code,PRICELIST_GROUP');
+  $subquery = db_select($query, 'middle');
+  $subquery->fields('middle');
+  //$subquery->addExpression('COUNT(cld)', 'cld_lines');
+  //$subquery->addExpression('COUNT(eaches)', 'eaches_lines');
+
+  $subquery->addExpression('SUM(if(cld > 0, 1, 0))', 'cld_lines');
+  $subquery->addExpression('SUM(if(eaches > 0, 1, 0))', 'eaches_lines');
+
+  $subquery->addExpression('SUM(cld)', 'total_cld');
+  $subquery->addExpression('SUM(eaches)', 'total_eaches');
+  $subquery->groupBy('field_vehicle_value,field_loading_date_value,PRICELIST_GROUP');
+  $results = $subquery->execute()->fetchAll();
+  return $results;
+}
+
+function change_feeds_import_create_van_cld_report_data($max_billing_id) {
+  global $user;
+  $user_id = $user->uid;
+  $distributor_id = change_feeds_import_get_distributor_id($user_id);
+
+  $query = db_select('custom_billing_data', 'cb');
+  $query->join('field_data_field_sku7_code', 'gaisc', 'gaisc.field_sku7_code_value = cb.sku7_code');
+  $query->condition('gaisc.bundle', 'sku7_code_master', '=');
+  $query->join('node', 'nd', 'nd.nid = gaisc.entity_id');
+  $query->condition('nd.uid', $distributor_id, '=');
+  $query->join('field_data_field_unit_case_units_', 'fucu', 'fucu.entity_id = gaisc.entity_id');
+  $query->condition('fucu.bundle', 'sku7_code_master', '=');
+  $query->fields('cb', array('vehicle', 'loading_date', 'sku7_code', 'product_name', 'Sum_of_TOTAL_SALES_QTY', 'mrp', 'PRICELIST_GROUP'));
+  $query->fields('fucu', array('field_unit_case_units__value'));
+  $query->condition('cb.distributor_id', $distributor_id);
+  $query->condition('cb.id', $max_billing_id, '>');
+  $query->addExpression('floor(SUM(Sum_of_TOTAL_SALES_QTY) / field_unit_case_units__value)', 'cld');
+  $query->addExpression('SUM(cb.Sum_of_TOTAL_SALES_QTY) - (field_unit_case_units__value * floor(SUM(Sum_of_TOTAL_SALES_QTY) / field_unit_case_units__value))', 'eaches');
+  $query->groupBy('vehicle,loading_date,sku7_code');
+  $results = $query->execute()->fetchAll();
+
+  return $results;
+}
 
 function change_feeds_import_finished($success, $results, $operations) {
   drupal_set_message("Successfully Created Content");
@@ -179,40 +284,40 @@ function change_feeds_import_insert_data_in_custom_billing_table($billing_data_r
     $billing_date = strtotime($data['bill_date']);
     try {
       $stage_billing_data = db_insert('custom_billing_data') // Table name no longer needs {}
-        ->fields(array(
-          'vehicle' => $data['vehicle'],
-          'loading_date' => $loading_date,
-          'party_code' => $data['party_code'],
-          'BEAT_NAME' => $data['BEAT_NAME'],
-          'bill_number' => $data['bill_number'],
-          'bill_date' => $billing_date,
-          'BASEPACK_CODE' => $data['BASEPACK_CODE'],
-          'product_name' => $data['product_name'],
-          'sku7_code' => $data['sku7_code'],
-          'PRICELIST_GROUP' => $data['PRICELIST_GROUP'],
-          'PRODUCT_DIVISION' => $data['PRODUCT_DIVISION'],
-          'PRODUCT_CATEGORY' => $data['PRODUCT_CATEGORY'],
-          'PRODUCT_SUB_CATEGORY' => $data['PRODUCT_SUB_CATEGORY'],
-          'mrp' => $data['mrp'],
-          'tur' => $data['tur'],
-          'Sum_of_TOTAL_SALES_QTY' => $data['Sum_of_TOTAL_SALES_QTY'],
-          //  'Sum_of_TOTAL_SALES_RET_QTY' => $data['Sum_of_TOTAL_SALES_RET_QTY'],
-          'Sum_of_NET_SALES_QTY' => $data['Sum_of_NET_SALES_QTY'],
-          'Sum_of_SALES_FREE_QTY' => $data['Sum_of_SALES_FREE_QTY'],
-          //  'Sum_of_SALES_RET_FREE_QTY' => $data['Sum_of_SALES_RET_FREE_QTY'],
-          //  'Sum_of_SALES_VALUE' => $data['Sum_of_SALES_VALUE'],
-          //  'Sum_of_SALES_RET_VALUE' => $data['Sum_of_SALES_RET_VALUE'],
-          'Sum_of_NET_SALES_VALUE' => $data['Sum_of_NET_SALES_VALUE'],
-          'Sum_of_NET_SALES_CASES' => $data['Sum_of_NET_SALES_CASES'],
-          'Sum_of_NET_SALES_KGS' => $data['Sum_of_NET_SALES_KGS'],
-          'Sum_of_SCHEME_DISCOUNT' => $data['Sum_of_SCHEME_DISCOUNT'],
-          'Sum_of_OTHER_DISCOUNT' => $data['Sum_of_OTHER_DISCOUNT'],
-          'Sum_of_TAX_PERCENTAGE' => $data['Sum_of_TAX_PERCENTAGE'],
-          //'promise_date'=> $pdd,
-          'distributor_id' => $distributor_id,
-          'created_date' => $created_date,
-        ))
-        ->execute();
+          ->fields(array(
+            'vehicle' => $data['vehicle'],
+            'loading_date' => $loading_date,
+            'party_code' => $data['party_code'],
+            'BEAT_NAME' => $data['BEAT_NAME'],
+            'bill_number' => $data['bill_number'],
+            'bill_date' => $billing_date,
+            'BASEPACK_CODE' => $data['BASEPACK_CODE'],
+            'product_name' => $data['product_name'],
+            'sku7_code' => $data['sku7_code'],
+            'PRICELIST_GROUP' => $data['PRICELIST_GROUP'],
+            'PRODUCT_DIVISION' => $data['PRODUCT_DIVISION'],
+            'PRODUCT_CATEGORY' => $data['PRODUCT_CATEGORY'],
+            'PRODUCT_SUB_CATEGORY' => $data['PRODUCT_SUB_CATEGORY'],
+            'mrp' => $data['mrp'],
+            'tur' => $data['tur'],
+            'Sum_of_TOTAL_SALES_QTY' => $data['Sum_of_TOTAL_SALES_QTY'],
+            //  'Sum_of_TOTAL_SALES_RET_QTY' => $data['Sum_of_TOTAL_SALES_RET_QTY'],
+            'Sum_of_NET_SALES_QTY' => $data['Sum_of_NET_SALES_QTY'],
+            'Sum_of_SALES_FREE_QTY' => $data['Sum_of_SALES_FREE_QTY'],
+            //  'Sum_of_SALES_RET_FREE_QTY' => $data['Sum_of_SALES_RET_FREE_QTY'],
+            //  'Sum_of_SALES_VALUE' => $data['Sum_of_SALES_VALUE'],
+            //  'Sum_of_SALES_RET_VALUE' => $data['Sum_of_SALES_RET_VALUE'],
+            'Sum_of_NET_SALES_VALUE' => $data['Sum_of_NET_SALES_VALUE'],
+            'Sum_of_NET_SALES_CASES' => $data['Sum_of_NET_SALES_CASES'],
+            'Sum_of_NET_SALES_KGS' => $data['Sum_of_NET_SALES_KGS'],
+            'Sum_of_SCHEME_DISCOUNT' => $data['Sum_of_SCHEME_DISCOUNT'],
+            'Sum_of_OTHER_DISCOUNT' => $data['Sum_of_OTHER_DISCOUNT'],
+            'Sum_of_TAX_PERCENTAGE' => $data['Sum_of_TAX_PERCENTAGE'],
+            //'promise_date'=> $pdd,
+            'distributor_id' => $distributor_id,
+            'created_date' => $created_date,
+          ))
+          ->execute();
     }
     catch (Exception $ex) {
       
@@ -220,35 +325,14 @@ function change_feeds_import_insert_data_in_custom_billing_table($billing_data_r
   }
 }
 
-function change_feeds_import_create_van_cld_report($max_billing_id, &$context) {
-  global $user;
-  $user_id = $user->uid;
-  $distributor_id = change_feeds_import_get_distributor_id($user_id);
-
+function change_feeds_import_create_van_cld_report($data, &$context) {
   if (!isset($context['sandbox']['progress'])) {
-
-    $query = db_select('custom_billing_data', 'cb');
-    $query->join('field_data_field_sku7_code', 'gaisc', 'gaisc.field_sku7_code_value = cb.sku7_code');
-    $query->condition('gaisc.bundle', 'sku7_code_master', '=');
-    $query->join('node', 'nd', 'nd.nid = gaisc.entity_id');
-    $query->condition('nd.uid', $distributor_id, '=');
-    $query->join('field_data_field_unit_case_units_', 'fucu', 'fucu.entity_id = gaisc.entity_id');
-    $query->condition('fucu.bundle', 'sku7_code_master', '=');
-    $query->fields('cb', array('vehicle', 'loading_date', 'sku7_code', 'product_name', 'Sum_of_TOTAL_SALES_QTY', 'mrp','PRICELIST_GROUP'));
-    $query->fields('fucu', array('field_unit_case_units__value'));
-    $query->condition('cb.distributor_id', $distributor_id);
-    $query->condition('cb.id', $max_billing_id, '>');
-    $query->addExpression('floor(SUM(Sum_of_TOTAL_SALES_QTY) / field_unit_case_units__value)', 'cld');
-    $query->addExpression('SUM(cb.Sum_of_TOTAL_SALES_QTY) - (field_unit_case_units__value * floor(SUM(Sum_of_TOTAL_SALES_QTY) / field_unit_case_units__value))', 'eaches');
-    $query->groupBy('vehicle,loading_date,sku7_code');
-    $results = $query->execute()->fetchAll();
     $context['sandbox']['progress'] = 0;
-    $context['sandbox']['max'] = count($results);
-    $context['sandbox']['result'] = $results;
   }
-
-  $res = $context['sandbox']['result'];
-  for ($i = $context['sandbox']['progress']; $i < $context['sandbox']['progress'] + 50 && $i < $context['sandbox']['max']; $i++) {
+  foreach ($data as $key => &$value) {
+    dpm($value, "value");
+  }
+  /* for ($i = $context['sandbox']['progress']; $i < $context['sandbox']['progress'] + 50 && $i < $context['sandbox']['max']; $i++) {
     $key = $i;
     $val = $res[$key];
     $vehicle = $val->vehicle;
@@ -257,127 +341,71 @@ function change_feeds_import_create_van_cld_report($max_billing_id, &$context) {
     $product_name = $val->product_name;
     $cld = $val->cld;
     $mrp = $val->mrp;
-    $pricelist_group =  $val->PRICELIST_GROUP;
+    $pricelist_group = $val->PRICELIST_GROUP;
 
 
     if ($cld != 0) {
-      $stage_billing_data = db_insert('van_cld_data_table') // Table name no longer needs {}
-          ->fields(array(
-            'vehicle' => $vehicle,
-            'loading_date' => $loading_date,
-            'sku7_code' => $sku7_code,
-            'product_name' => $product_name,
-            'distributor_id' => $distributor_id,
-            'cld' => $cld,
-            'mrp' => $mrp,
-            'pricelist_group' =>$pricelist_group,
-          ))
-          ->execute();
+    $stage_billing_data = db_insert('van_cld_data_table') // Table name no longer needs {}
+    ->fields(array(
+    'vehicle' => $vehicle,
+    'loading_date' => $loading_date,
+    'sku7_code' => $sku7_code,
+    'product_name' => $product_name,
+    'distributor_id' => $distributor_id,
+    'cld' => $cld,
+    'mrp' => $mrp,
+    'pricelist_group' => $pricelist_group,
+    ))
+    ->execute();
     }
-  }
-  $context['sandbox']['progress'] = $i;
-
-  if ($context['sandbox']['progress'] < $context['sandbox']['max']) {
-    $context['finished'] = $context['sandbox']['progress'] / $context['sandbox']['max'];
-  }
-  else {
-    $context['finished'] = 1;
-  }
+    }
+   */
 }
 
-function change_feeds_import_create_picking($max_billing_id, &$context) {
+function change_feeds_import_create_picking($data, &$context) {
   if (!isset($context['sandbox']['progress'])) {
-    global $user;
-    $user_id = $user->uid;
-    $distributor_id = change_feeds_import_get_distributor_id($user_id);
-    $query = db_select('custom_billing_data', 'cb');
-    $query->join('field_data_field_sku7_code', 'gaisc', 'gaisc.field_sku7_code_value = cb.sku7_code');
-    $query->condition('gaisc.bundle', 'sku7_code_master', '=');
-    $query->join('node', 'nd', 'nd.nid = gaisc.entity_id');
-    $query->condition('nd.uid', $distributor_id, '=');
-//    $query->join('field_data_field_godown_area_id', 'gai', 'gaisc.entity_id = gai.entity_id');
-//    $query->condition('gai.bundle', 'sku7_code_master', '=');
-//    $query->join('field_data_field_pack_size', 'fps', 'fps.entity_id = gaisc.entity_id');
-//    $query->condition('fps.bundle', 'sku7_code_master', '=');
-    $query->join('field_data_field_unit_case_units_', 'fucu', 'fucu.entity_id = gaisc.entity_id');
-    $query->condition('fucu.bundle', 'sku7_code_master', '=');
-    $query->fields('cb', array('sku7_code'));
-    $query->addField('cb', 'vehicle', 'field_vehicle_value');
-    $query->addField('cb', 'loading_date', 'field_loading_date_value');
-    $query->addField('cb', 'PRICELIST_GROUP', 'PRICELIST_GROUP');
-    //$query->fields('gai', array('field_godown_area_id_value'));
-    //$query->fields('fps', array('field_pack_size_value'));
-    $query->fields('fucu', array('field_unit_case_units__value'));
-    $query->addExpression('SUM(cb.Sum_of_TOTAL_SALES_QTY)', 'total_sales_qty');
-    $query->addExpression('floor(SUM(cb.Sum_of_TOTAL_SALES_QTY) / field_unit_case_units__value)', 'cld');
-    $query->addExpression('SUM(cb.Sum_of_TOTAL_SALES_QTY) - (field_unit_case_units__value * floor(SUM(cb.Sum_of_TOTAL_SALES_QTY) / field_unit_case_units__value))', 'eaches');
-
-    $query->condition('cb.distributor_id', $distributor_id);
-    $query->condition('cb.id', $max_billing_id, '>');
-
-    $query->groupBy('field_vehicle_value,field_loading_date_value,sku7_code,PRICELIST_GROUP');
-    $subquery = db_select($query, 'middle');
-    $subquery->fields('middle');
-    //$subquery->addExpression('COUNT(cld)', 'cld_lines');
-    //$subquery->addExpression('COUNT(eaches)', 'eaches_lines');
-
-    $subquery->addExpression('SUM(if(cld > 0, 1, 0))', 'cld_lines');
-    $subquery->addExpression('SUM(if(eaches > 0, 1, 0))', 'eaches_lines');
-
-    $subquery->addExpression('SUM(cld)', 'total_cld');
-    $subquery->addExpression('SUM(eaches)', 'total_eaches');
-    $subquery->groupBy('field_vehicle_value,field_loading_date_value,PRICELIST_GROUP');
-    $results = $subquery->execute()->fetchAll();
     $context['sandbox']['progress'] = 0;
-    $context['sandbox']['current_node'] = 0;
-    $context['sandbox']['max'] = count($results);
-    $context['sandbox']['result'] = $results;
   }
-  global $user;
-  $res = $context['sandbox']['result'];
-  for ($i = $context['sandbox']['progress']; $i < $context['sandbox']['progress'] + 50 && $i < $context['sandbox']['max']; $i++) {
+  foreach ($data as $key => &$value) {
+    dpm($value, "value");
+  }
+  /* for ($i = $context['sandbox']['progress']; $i < $context['sandbox']['progress'] + 50 && $i < $context['sandbox']['max']; $i++) {
     $key = $i;
     $val = $res[$key];
     if ($val->total_cld > 0 || $val->total_eaches > 0) {
-      $node = new stdClass();
-      $node->title = $val->field_vehicle_value . format_date(time());
-      $node->type = "picking";
-      node_object_prepare($node); // Sets some defaults. Invokes hook_prepare() and hook_node_prepare().
-      $node->language = LANGUAGE_NONE; // Or e.g. 'en' if locale is enabled
-      $node->uid = $user->uid;
-      $node->status = 1; //(1 or 0): published or not
-      $node->comment = 1; // 0 = comments disabled, 1 = read only, 2 = read/write
+    $node = new stdClass();
+    $node->title = $val->field_vehicle_value . format_date(time());
+    $node->type = "picking";
+    node_object_prepare($node); // Sets some defaults. Invokes hook_prepare() and hook_node_prepare().
+    $node->language = LANGUAGE_NONE; // Or e.g. 'en' if locale is enabled
+    $node->uid = $user->uid;
+    $node->status = 1; //(1 or 0): published or not
+    $node->comment = 1; // 0 = comments disabled, 1 = read only, 2 = read/write
 
-      $node->field_picking_van_id[$node->language][0]['value'] = $val->field_vehicle_value;
-      $node->field_picking_loading_date[$node->language][0]['value'] = date("Y-m-d H:i:s", $val->field_loading_date_value);
-      $node->field_picking_godown_area_id[$node->language][0]['value'] = $val->PRICELIST_GROUP;
+    $node->field_picking_van_id[$node->language][0]['value'] = $val->field_vehicle_value;
+    $node->field_picking_loading_date[$node->language][0]['value'] = date("Y-m-d H:i:s", $val->field_loading_date_value);
+    $node->field_picking_godown_area_id[$node->language][0]['value'] = $val->PRICELIST_GROUP;
 
-      $node->field_pick_units[$node->language][0]['value'] = $val->total_eaches;
-      $node->field_pick_clds[$node->language][0]['value'] = $val->total_cld;
-      $node->field_distributor_uid['und'][0]['value'] = $distributor_id;
-      $node_copy = clone $node;
-      $node_copy->is_new = true;
-      if ($val->total_eaches > 0) {
-        $node->field_picking_picking_type[$node->language][0]['value'] = 'Loose';
-        $node->field_pick_lines[$node->language][0]['value'] = $val->eaches_lines;
-        $node->field_pick_clds[$node->language][0]['value'] = 0;
-        node_save($node);
-      }
-      if ($val->total_cld > 0) {
-        $node_copy->field_picking_picking_type[$node->language][0]['value'] = 'Bulk';
-        $node_copy->field_pick_lines[$node->language][0]['value'] = $val->cld_lines;
-        $node_copy->field_pick_units[$node->language][0]['value'] = 0;
-        node_save($node_copy);
-      }
+    $node->field_pick_units[$node->language][0]['value'] = $val->total_eaches;
+    $node->field_pick_clds[$node->language][0]['value'] = $val->total_cld;
+    $node->field_distributor_uid['und'][0]['value'] = $distributor_id;
+    $node_copy = clone $node;
+    $node_copy->is_new = true;
+    if ($val->total_eaches > 0) {
+    $node->field_picking_picking_type[$node->language][0]['value'] = 'Loose';
+    $node->field_pick_lines[$node->language][0]['value'] = $val->eaches_lines;
+    $node->field_pick_clds[$node->language][0]['value'] = 0;
+    node_save($node);
     }
-  }
-  $context['sandbox']['progress'] = $i;
-  if ($context['sandbox']['progress'] < $context['sandbox']['max']) {
-    $context['finished'] = $context['sandbox']['progress'] / $context['sandbox']['max'];
-  }
-  else {
-    $context['finished'] = 1;
-  }
+    if ($val->total_cld > 0) {
+    $node_copy->field_picking_picking_type[$node->language][0]['value'] = 'Bulk';
+    $node_copy->field_pick_lines[$node->language][0]['value'] = $val->cld_lines;
+    $node_copy->field_pick_units[$node->language][0]['value'] = 0;
+    node_save($node_copy);
+    }
+    }
+    }
+   */
 }
 
 function change_feeds_import_create_party_packing($party_packing_data_new, &$context) {
@@ -514,7 +542,7 @@ function change_feeds_import_create_loading(&$context) {
   }
 }
 
-function get_party_packing_from_party_code($party_code = NULL,$distributor_id) {
+function get_party_packing_from_party_code($party_code = NULL, $distributor_id) {
   $query = db_select('field_data_field_party_code', 'pc');
   $query->condition('pc.bundle', 'outlet_master');
   $query->join('node', 'ouln', 'ouln.nid = pc.entity_id');
@@ -540,52 +568,27 @@ function get_party_packing_from_party_code($party_code = NULL,$distributor_id) {
   return $query->execute()->fetchAllKeyed(0, 1);
 }
 
-function change_feeds_import_create_billing($max_billing_id, &$context) {
+function change_feeds_import_create_billing($data, &$context) {
 
   if (!isset($context['sandbox']['progress'])) {
-    global $user;
-    $user_id = $user->uid;
-    $distributor_id = change_feeds_import_get_distributor_id($user_id);
-    $query = db_select('custom_billing_data', 'cb');
-
-    $query->addField('cb', 'bill_number');
-    $query->addField('cb', 'vehicle', 'vehicle');
-    $query->addField('cb', 'loading_date', 'loading_date');
-    $query->addField('cb', 'bill_date', 'bill_date');
-
-
-    $query->condition('cb.distributor_id', $distributor_id);
-    $query->condition('cb.id', $max_billing_id, '>');
-
-    $query->groupBy('cb.bill_number');
-
-    $results = $query->execute()->fetchAll();
-
     $context['sandbox']['progress'] = 0;
-    $context['sandbox']['max'] = count($results);
-    $context['sandbox']['result'] = $results;
   }
 
-  global $user;
-  $res = $context['sandbox']['result'];
-  for ($i = $context['sandbox']['progress']; $i < $context['sandbox']['progress'] + 50 && $i < $context['sandbox']['max']; $i++) {
+  foreach ($data as $key => &$value) {
+    dpm($value, "value");
+  }
+  /* for ($i = $context['sandbox']['progress']; $i < $context['sandbox']['progress'] + 50 && $i < $context['sandbox']['max']; $i++) {
     $key = $i;
     $val = $res[$key];
 
     $nid = check_node_title_exists($val->bill_number, 'sales_register_data');
     $node = node_load($nid);
     if ($node) {
-      $node->field_billing_van[LANGUAGE_NONE][0]['value'] = $val->vehicle;
-      $node->field_billing_loading_date[LANGUAGE_NONE][0]['value'] = $val->loading_date;
-      $node->field_sr_bill_date[LANGUAGE_NONE][0]['value'] = $val->bill_date;
-      node_save($node);
+    $node->field_billing_van[LANGUAGE_NONE][0]['value'] = $val->vehicle;
+    $node->field_billing_loading_date[LANGUAGE_NONE][0]['value'] = $val->loading_date;
+    $node->field_sr_bill_date[LANGUAGE_NONE][0]['value'] = $val->bill_date;
+    node_save($node);
     }
-  }
-  $context['sandbox']['progress'] = $i;
-  if ($context['sandbox']['progress'] < $context['sandbox']['max']) {
-    $context['finished'] = $context['sandbox']['progress'] / $context['sandbox']['max'];
-  }
-  else {
-    $context['finished'] = 1;
-  }
+    }
+    ) */
 }
