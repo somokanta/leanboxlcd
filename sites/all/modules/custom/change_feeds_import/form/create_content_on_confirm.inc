@@ -398,7 +398,7 @@ function change_feeds_import_create_picking($data, &$context) {
   }
 }
 
-function change_feeds_import_create_party_packing($party_packing_data_new, &$context) {
+function change_feeds_import_create_party_packing($data, &$context) {
   if (!isset($context['sandbox']['progress'])) {
     global $user;
     $user_id = $user->uid;
