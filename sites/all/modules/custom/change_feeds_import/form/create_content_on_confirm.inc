@@ -125,7 +125,9 @@ function change_feeds_import_create_confirm_content($id) {
     $operations[] = array('change_feeds_import_create_van_cld_report', array($data));
   }
   
+  dpm($party_packing_data_new,"party_packing_data_new");
   $party_packing_data_new_chunk = array_chunk($party_packing_data_new, 1000);
+  dpm($party_packing_data_new_chunk,"party_packing_data_new_chunk");
   foreach ($party_packing_data_new_chunk as $data) {
     $operations[] = array('change_feeds_import_create_party_packing', array($data));
   }
@@ -408,8 +410,7 @@ function change_feeds_import_create_party_packing($data, &$context) {
   global $user;
   
   foreach ($data as $key => &$value) {
-    dpm($value,"value");
-   /* $loading_date = date("Y-m-d", ($value['LOADING_DATE']));
+    $loading_date = date("Y-m-d", ($value['LOADING_DATE']));
     $node = new stdClass();
     $node->title = $value['VEHICLE'] . format_date(time());
     $node->type = "party_packing";
@@ -429,7 +430,6 @@ function change_feeds_import_create_party_packing($data, &$context) {
     $node->field_party_packing_type['und'][0]['value'] = $value['party_pack'];
     $node = node_submit($node); // Prepare node for saving
     node_save($node);
-    */
   }
   
   
