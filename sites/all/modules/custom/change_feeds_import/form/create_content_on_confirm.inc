@@ -109,22 +109,26 @@ function change_feeds_import_create_confirm_content($id) {
   $operations = array();
 
   $create_billing_data = change_feeds_import_create_billing_data($max_billing_id);
+  dpm($max_billing_id,"max_billing_id");
   $create_billing_data_chunk = array_chunk($create_billing_data, 1000);
   foreach ($create_billing_data_chunk as $data) {
     $operations[] = array('change_feeds_import_create_billing', array($data));
   }
 
   $create_picking_data = change_feeds_import_create_picking_data($max_billing_id);
+  dpm($create_picking_data,"create_picking_data");
   $create_picking_data_chunk = array_chunk($create_picking_data, 1000);
   foreach ($create_picking_data_chunk as $data) {
     $operations[] = array('change_feeds_import_create_picking', array($data));
   }
 
   $van_cld_report_data = change_feeds_import_create_van_cld_report_data($max_billing_id);
+  dpm($van_cld_report_data,"van_cld_report_data");
   $van_cld_report_data_chunk = array_chunk($van_cld_report_data, 1000);
   foreach ($van_cld_report_data_chunk as $data) {
     $operations[] = array('change_feeds_import_create_van_cld_report', array($data));
   }
+  dpm($party_packing_data_new,"party_packing_data_new");
   $operations[] = array('change_feeds_import_create_party_packing', array($party_packing_data_new));
 
   $batch = array(
@@ -330,36 +334,30 @@ function change_feeds_import_create_van_cld_report($data, &$context) {
     $context['sandbox']['progress'] = 0;
   }
   foreach ($data as $key => &$value) {
-    dpm($value, "value");
-  }
-  /* for ($i = $context['sandbox']['progress']; $i < $context['sandbox']['progress'] + 50 && $i < $context['sandbox']['max']; $i++) {
-    $key = $i;
-    $val = $res[$key];
-    $vehicle = $val->vehicle;
-    $loading_date = $val->loading_date;
-    $sku7_code = $val->sku7_code;
-    $product_name = $val->product_name;
-    $cld = $val->cld;
-    $mrp = $val->mrp;
-    $pricelist_group = $val->PRICELIST_GROUP;
+    $vehicle = $value->vehicle;
+    $loading_date = $value->loading_date;
+    $sku7_code = $value->sku7_code;
+    $product_name = $value->product_name;
+    $cld = $value->cld;
+    $mrp = $value->mrp;
+    $pricelist_group = $value->PRICELIST_GROUP;
 
 
     if ($cld != 0) {
-    $stage_billing_data = db_insert('van_cld_data_table') // Table name no longer needs {}
-    ->fields(array(
-    'vehicle' => $vehicle,
-    'loading_date' => $loading_date,
-    'sku7_code' => $sku7_code,
-    'product_name' => $product_name,
-    'distributor_id' => $distributor_id,
-    'cld' => $cld,
-    'mrp' => $mrp,
-    'pricelist_group' => $pricelist_group,
-    ))
-    ->execute();
+      $stage_billing_data = db_insert('van_cld_data_table') // Table name no longer needs {}
+          ->fields(array(
+            'vehicle' => $vehicle,
+            'loading_date' => $loading_date,
+            'sku7_code' => $sku7_code,
+            'product_name' => $product_name,
+            'distributor_id' => $distributor_id,
+            'cld' => $cld,
+            'mrp' => $mrp,
+            'pricelist_group' => $pricelist_group,
+          ))
+          ->execute();
     }
-    }
-   */
+  }
 }
 
 function change_feeds_import_create_picking($data, &$context) {
@@ -367,45 +365,39 @@ function change_feeds_import_create_picking($data, &$context) {
     $context['sandbox']['progress'] = 0;
   }
   foreach ($data as $key => &$value) {
-    dpm($value, "value");
+    if ($value->total_cld > 0 || $value->total_eaches > 0) {
+      $node = new stdClass();
+      $node->title = $value->field_vehicle_value . format_date(time());
+      $node->type = "picking";
+      node_object_prepare($node); // Sets some defaults. Invokes hook_prepare() and hook_node_prepare().
+      $node->language = LANGUAGE_NONE; // Or e.g. 'en' if locale is enabled
+      $node->uid = $user->uid;
+      $node->status = 1; //(1 or 0): published or not
+      $node->comment = 1; // 0 = comments disabled, 1 = read only, 2 = read/write
+
+      $node->field_picking_van_id[$node->language][0]['value'] = $value->field_vehicle_value;
+      $node->field_picking_loading_date[$node->language][0]['value'] = date("Y-m-d H:i:s", $value->field_loading_date_value);
+      $node->field_picking_godown_area_id[$node->language][0]['value'] = $value->PRICELIST_GROUP;
+
+      $node->field_pick_units[$node->language][0]['value'] = $value->total_eaches;
+      $node->field_pick_clds[$node->language][0]['value'] = $value->total_cld;
+      $node->field_distributor_uid['und'][0]['value'] = $distributor_id;
+      $node_copy = clone $node;
+      $node_copy->is_new = true;
+      if ($value->total_eaches > 0) {
+        $node->field_picking_picking_type[$node->language][0]['value'] = 'Loose';
+        $node->field_pick_lines[$node->language][0]['value'] = $value->eaches_lines;
+        $node->field_pick_clds[$node->language][0]['value'] = 0;
+        node_save($node);
+      }
+      if ($value->total_cld > 0) {
+        $node_copy->field_picking_picking_type[$node->language][0]['value'] = 'Bulk';
+        $node_copy->field_pick_lines[$node->language][0]['value'] = $value->cld_lines;
+        $node_copy->field_pick_units[$node->language][0]['value'] = 0;
+        node_save($node_copy);
+      }
+    }
   }
-  /* for ($i = $context['sandbox']['progress']; $i < $context['sandbox']['progress'] + 50 && $i < $context['sandbox']['max']; $i++) {
-    $key = $i;
-    $val = $res[$key];
-    if ($val->total_cld > 0 || $val->total_eaches > 0) {
-    $node = new stdClass();
-    $node->title = $val->field_vehicle_value . format_date(time());
-    $node->type = "picking";
-    node_object_prepare($node); // Sets some defaults. Invokes hook_prepare() and hook_node_prepare().
-    $node->language = LANGUAGE_NONE; // Or e.g. 'en' if locale is enabled
-    $node->uid = $user->uid;
-    $node->status = 1; //(1 or 0): published or not
-    $node->comment = 1; // 0 = comments disabled, 1 = read only, 2 = read/write
-
-    $node->field_picking_van_id[$node->language][0]['value'] = $val->field_vehicle_value;
-    $node->field_picking_loading_date[$node->language][0]['value'] = date("Y-m-d H:i:s", $val->field_loading_date_value);
-    $node->field_picking_godown_area_id[$node->language][0]['value'] = $val->PRICELIST_GROUP;
-
-    $node->field_pick_units[$node->language][0]['value'] = $val->total_eaches;
-    $node->field_pick_clds[$node->language][0]['value'] = $val->total_cld;
-    $node->field_distributor_uid['und'][0]['value'] = $distributor_id;
-    $node_copy = clone $node;
-    $node_copy->is_new = true;
-    if ($val->total_eaches > 0) {
-    $node->field_picking_picking_type[$node->language][0]['value'] = 'Loose';
-    $node->field_pick_lines[$node->language][0]['value'] = $val->eaches_lines;
-    $node->field_pick_clds[$node->language][0]['value'] = 0;
-    node_save($node);
-    }
-    if ($val->total_cld > 0) {
-    $node_copy->field_picking_picking_type[$node->language][0]['value'] = 'Bulk';
-    $node_copy->field_pick_lines[$node->language][0]['value'] = $val->cld_lines;
-    $node_copy->field_pick_units[$node->language][0]['value'] = 0;
-    node_save($node_copy);
-    }
-    }
-    }
-   */
 }
 
 function change_feeds_import_create_party_packing($party_packing_data_new, &$context) {
@@ -575,20 +567,13 @@ function change_feeds_import_create_billing($data, &$context) {
   }
 
   foreach ($data as $key => &$value) {
-    dpm($value, "value");
-  }
-  /* for ($i = $context['sandbox']['progress']; $i < $context['sandbox']['progress'] + 50 && $i < $context['sandbox']['max']; $i++) {
-    $key = $i;
-    $val = $res[$key];
-
-    $nid = check_node_title_exists($val->bill_number, 'sales_register_data');
+    $nid = check_node_title_exists($value->bill_number, 'sales_register_data');
     $node = node_load($nid);
     if ($node) {
-    $node->field_billing_van[LANGUAGE_NONE][0]['value'] = $val->vehicle;
-    $node->field_billing_loading_date[LANGUAGE_NONE][0]['value'] = $val->loading_date;
-    $node->field_sr_bill_date[LANGUAGE_NONE][0]['value'] = $val->bill_date;
-    node_save($node);
+      $node->field_billing_van[LANGUAGE_NONE][0]['value'] = $value->vehicle;
+      $node->field_billing_loading_date[LANGUAGE_NONE][0]['value'] = $value->loading_date;
+      $node->field_sr_bill_date[LANGUAGE_NONE][0]['value'] = $value->bill_date;
+      node_save($node);
     }
-    }
-    ) */
+  }
 }
