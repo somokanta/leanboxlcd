@@ -105,11 +105,10 @@ function change_feeds_import_create_confirm_content($id) {
   $max_billing_id = $max_billing_id ? $max_billing_id : 0;
 
   change_feeds_import_insert_data_in_custom_billing_table($billing_data_result);
-
-  $operations = array();
-
-  $create_billing_data = change_feeds_import_create_billing_data($max_billing_id);
   dpm($max_billing_id,"max_billing_id");
+  $operations = array();
+  $create_billing_data = change_feeds_import_create_billing_data($max_billing_id);
+  dpm($create_billing_data,"create_billing_data");
   $create_billing_data_chunk = array_chunk($create_billing_data, 1000);
   foreach ($create_billing_data_chunk as $data) {
     $operations[] = array('change_feeds_import_create_billing', array($data));
