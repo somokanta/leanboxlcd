@@ -362,6 +362,7 @@ function change_feeds_import_create_picking($data, &$context) {
   if (!isset($context['sandbox']['progress'])) {
     $context['sandbox']['progress'] = 0;
   }
+  global $user;
   foreach ($data as $key => &$value) {
     if ($value->total_cld > 0 || $value->total_eaches > 0) {
       $node = new stdClass();
