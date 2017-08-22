@@ -331,6 +331,9 @@ function change_feeds_import_create_van_cld_report($data, &$context) {
   if (!isset($context['sandbox']['progress'])) {
     $context['sandbox']['progress'] = 0;
   }
+  global $user;
+  $user_id = $user->uid;
+  $distributor_id = change_feeds_import_get_distributor_id($user_id);
   foreach ($data as $key => &$value) {
     $vehicle = $value->vehicle;
     $loading_date = $value->loading_date;
@@ -363,6 +366,8 @@ function change_feeds_import_create_picking($data, &$context) {
     $context['sandbox']['progress'] = 0;
   }
   global $user;
+  $user_id = $user->uid;
+  $distributor_id = change_feeds_import_get_distributor_id($user_id);
   foreach ($data as $key => &$value) {
     if ($value->total_cld > 0 || $value->total_eaches > 0) {
       $node = new stdClass();
@@ -401,12 +406,11 @@ function change_feeds_import_create_picking($data, &$context) {
 
 function change_feeds_import_create_party_packing($data, &$context) {
   if (!isset($context['sandbox']['progress'])) {
+    $context['sandbox']['progress'] = 0;
+  }
     global $user;
     $user_id = $user->uid;
     $distributor_id = change_feeds_import_get_distributor_id($user_id);
-    $context['sandbox']['progress'] = 0;
-  }
-  global $user;
   
   foreach ($data as $key => &$value) {
     $loading_date = date("Y-m-d", ($value['LOADING_DATE']));
