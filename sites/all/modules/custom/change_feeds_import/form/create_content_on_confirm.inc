@@ -108,24 +108,24 @@ function change_feeds_import_create_confirm_content($id) {
   $operations = array();
   
   $create_billing_data = change_feeds_import_create_billing_data($max_billing_id);
-  $create_billing_data_chunk = array_chunk($create_billing_data, 1000);
+  $create_billing_data_chunk = array_chunk($create_billing_data, 1500);
   foreach ($create_billing_data_chunk as $data) {
     $operations[] = array('change_feeds_import_create_billing', array($data));
   }
 
   $create_picking_data = change_feeds_import_create_picking_data($max_billing_id);
-  $create_picking_data_chunk = array_chunk($create_picking_data, 1000);
+  $create_picking_data_chunk = array_chunk($create_picking_data, 1500);
   foreach ($create_picking_data_chunk as $data) {
     $operations[] = array('change_feeds_import_create_picking', array($data));
   }
 
   $van_cld_report_data = change_feeds_import_create_van_cld_report_data($max_billing_id);
-  $van_cld_report_data_chunk = array_chunk($van_cld_report_data, 1000);
+  $van_cld_report_data_chunk = array_chunk($van_cld_report_data, 1500);
   foreach ($van_cld_report_data_chunk as $data) {
     $operations[] = array('change_feeds_import_create_van_cld_report', array($data));
   }
   
-  $party_packing_data_new_chunk = array_chunk($party_packing_data_new, 1000);
+  $party_packing_data_new_chunk = array_chunk($party_packing_data_new, 1500);
   foreach ($party_packing_data_new_chunk as $data) {
     $operations[] = array('change_feeds_import_create_party_packing', array($data));
   }
