@@ -419,8 +419,8 @@ function change_feeds_import_create_party_packing($data, &$context) {
     $node->comment = 1; // 0 = comments disabled, 1 = read only, 2 = read/write
     $node->field_party_packing_vehicle[$node->language][0]['value'] = $value['VEHICLE'];
     $node->field_party_packing_loading_date[$node->language][0]['value'] = $loading_date;
-    //$node->field_party_packing_date[$node->language][0]['value'] = $val['party_packing_date'];
-    $node->field_loading_sheet_line[$node->language][0]['value'] = $val['loading_sheet_line'];
+    //$node->field_party_packing_date[$node->language][0]['value'] = $value['party_packing_date'];
+    $node->field_loading_sheet_line[$node->language][0]['value'] = $value['loading_sheet_line'];
     $node->field_bill_lines[$node->language][0]['value'] = $value['bill_lines'];
     $node->field_each_units[$node->language][0]['value'] = $value['each_units'];
     $node->field_distributor_uid['und'][0]['value'] = $distributor_id ? $distributor_id : 0;
