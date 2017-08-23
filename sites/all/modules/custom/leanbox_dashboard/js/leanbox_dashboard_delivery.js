@@ -63,8 +63,6 @@
 						title: 'Percentage'
 					},
 					hAxis: {
-												 2: {style: {color: 'red'}
-    },
 						title: 'Return Type'
 					},
 				};

@@ -1467,21 +1467,7 @@ function leanbox_dashboard_get_username_and_rs_code($dis_id) {
   return $res;
 }
 
-/**
- * 
- */
-function  leanbox_dashboard_user_login(&$edit, $account) {
-   dpm($account, '$account');
-   if (in_array('hul_admin', $account->roles)) {
-      drupal_set_message('true');
-     $_GET['destination'] = 'distributor-group';
-   }
-   else {
-            drupal_set_message('false');
 
-     $_GET['destination'] = 'dashboard';
-   }
-}
 
 /**
  * 
