@@ -96,7 +96,7 @@ function change_feeds_import_views_data_alter(&$data) {
   
   
   $data['field_data_field_hul_code']['table']['group'] = t('Hul table');
-  $data['field_data_field_hul_code']['field_hul_code'] = array(
+  $data['field_data_field_hul_code']['dummy_name1'] = array(
     'title' => t('Outlet to Hul relationship'),
     'help' => t('Outlet to Hul relationship'),
     'relationship' => array(
@@ -105,7 +105,6 @@ function change_feeds_import_views_data_alter(&$data) {
       'base field' => 'title', // Field on the joined table.
       'field' => 'field_hul_code_value', // Real field name on the 'foo' table.
       'handler' => 'views_handler_relationship',
-      //'handler' => 'views_handler_relationship_entity_reverse',
       'label' => t('outlet master to Hul Code relationship'),
       'title' => t('outlet master to Hul Code relationship'),
       'help' => t('More information about relationship.'),
