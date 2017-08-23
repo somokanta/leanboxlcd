@@ -809,10 +809,10 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
       node_save($node);
 
       // get api data here
-     // $api_authentication_flag = dispatch_planning_check_api_authentication($node->uid);
-     // if (!empty($api_authentication_flag)) {
+      $api_authentication_flag = dispatch_planning_check_api_authentication($node->uid);
+      if (!empty($api_authentication_flag)) {
         $api_data[] = dispatch_planning_sales_reg_api($value, $node, $trip_execution_date, $hht_id, $cashier, $trip_id);
-    //  }
+      }
     }
 
     $diff = array_diff($bill_nids, $bill_sequence);
@@ -829,11 +829,11 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
         node_save($node);
 
         // get api data here
-       // $api_authentication_flag = dispatch_planning_check_api_authentication($node->uid);
-       // if (!empty($api_authentication_flag)) {
+        $api_authentication_flag = dispatch_planning_check_api_authentication($node->uid);
+        if (!empty($api_authentication_flag)) {
           $api_data[] = dispatch_planning_sales_reg_api($value, $node, $trip_execution_date, $hht_id, $cashier, $trip_id);
 
-       // }
+        }
       }
     }
   }
@@ -854,11 +854,11 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
       node_save($node);
 
       // get api data here
-     // $api_authentication_flag = dispatch_planning_check_api_authentication($node->uid);
-     // if (!empty($api_authentication_flag)) {
+      $api_authentication_flag = dispatch_planning_check_api_authentication($node->uid);
+      if (!empty($api_authentication_flag)) {
         $api_data[] = dispatch_planning_sales_reg_api($value, $node, $trip_execution_date, $hht_id, $cashier, $trip_id);
 
-     // }
+      }
     }
   }
 
