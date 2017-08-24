@@ -179,7 +179,7 @@ function dispatch_planning_views_data() {
       'handler' => 'views_handler_argument_string',
     ),
   );
-  // jobType
+  // referenceNo
   $data['dispatch_planning_api_data']['referenceNo'] = array(
     'title' => t('referenceNo'),
     'help' => t('referenceNo'),
@@ -197,7 +197,7 @@ function dispatch_planning_views_data() {
       'handler' => 'views_handler_argument_string',
     ),
   );
-  // jobType
+  // date
   $data['dispatch_planning_api_data']['date'] = array(
     'title' => t('date'),
     'help' => t('date'),
@@ -215,7 +215,7 @@ function dispatch_planning_views_data() {
       'handler' => 'views_handler_argument_string',
     ),
   );
-  // jobType
+  // city
   $data['dispatch_planning_api_data']['city'] = array(
     'title' => t('city'),
     'help' => t('city'),
@@ -233,7 +233,7 @@ function dispatch_planning_views_data() {
       'handler' => 'views_handler_argument_string',
     ),
   );
-  // jobType
+  // hub
   $data['dispatch_planning_api_data']['hub'] = array(
     'title' => t('hub'),
     'help' => t('hub'),
@@ -251,7 +251,7 @@ function dispatch_planning_views_data() {
       'handler' => 'views_handler_argument_string',
     ),
   );
-  // jobType
+  // fieldExecutive
   $data['dispatch_planning_api_data']['fieldExecutive'] = array(
     'title' => t('fieldExecutive'),
     'help' => t('fieldExecutive'),
@@ -269,7 +269,7 @@ function dispatch_planning_views_data() {
       'handler' => 'views_handler_argument_string',
     ),
   );
-  // jobType
+  // fieldExecutiveName
   $data['dispatch_planning_api_data']['fieldExecutiveName'] = array(
     'title' => t('fieldExecutiveName'),
     'help' => t('fieldExecutiveName'),
@@ -287,7 +287,7 @@ function dispatch_planning_views_data() {
       'handler' => 'views_handler_argument_string',
     ),
   );
-
+// vehicle
   $data['dispatch_planning_api_data']['vehicle'] = array(
     'title' => t('vehicle'),
     'help' => t('vehicle'),
@@ -305,6 +305,7 @@ function dispatch_planning_views_data() {
       'handler' => 'views_handler_argument_string',
     ),
   );
+  //party_hll_code
   $data['dispatch_planning_api_data']['party_hll_code'] = array(
     'title' => t('party_hll_code'),
     'help' => t('party_hll_code'),
@@ -322,6 +323,7 @@ function dispatch_planning_views_data() {
       'handler' => 'views_handler_argument_string',
     ),
   );
+  //lat_longlatitude
   $data['dispatch_planning_api_data']['lat_longlatitude'] = array(
     'title' => t('lat_longlatitude'),
     'help' => t('lat_longlatitude'),
@@ -339,6 +341,7 @@ function dispatch_planning_views_data() {
       'handler' => 'views_handler_argument_string',
     ),
   );
+  //lat_longlongitude
   $data['dispatch_planning_api_data']['lat_longlongitude'] = array(
     'title' => t('lat_longlongitude'),
     'help' => t('lat_longlongitude'),
@@ -356,6 +359,7 @@ function dispatch_planning_views_data() {
       'handler' => 'views_handler_argument_string',
     ),
   );
+  //bill_value
   $data['dispatch_planning_api_data']['bill_value'] = array(
     'title' => t('bill_value'),
     'help' => t('bill_value'),
@@ -373,6 +377,7 @@ function dispatch_planning_views_data() {
       'handler' => 'views_handler_argument_string',
     ),
   );
+  //bill_date
   $data['dispatch_planning_api_data']['bill_date'] = array(
     'title' => t('bill_date'),
     'help' => t('bill_date'),
@@ -390,6 +395,7 @@ function dispatch_planning_views_data() {
       'handler' => 'views_handler_argument_string',
     ),
   );
+  //locality
   $data['dispatch_planning_api_data']['locality'] = array(
     'title' => t('locality'),
     'help' => t('locality'),
@@ -407,6 +413,7 @@ function dispatch_planning_views_data() {
       'handler' => 'views_handler_argument_string',
     ),
   );
+  //store_sequence_no
   $data['dispatch_planning_api_data']['store_sequence_no'] = array(
     'title' => t('store_sequence_no'),
     'help' => t('store_sequence_no'),
@@ -424,6 +431,7 @@ function dispatch_planning_views_data() {
       'handler' => 'views_handler_argument_string',
     ),
   );
+  //party_name
   $data['dispatch_planning_api_data']['party_name'] = array(
     'title' => t('party_name'),
     'help' => t('party_name'),
@@ -441,6 +449,7 @@ function dispatch_planning_views_data() {
       'handler' => 'views_handler_argument_string',
     ),
   );
+  //beat_name
   $data['dispatch_planning_api_data']['beat_name'] = array(
     'title' => t('beat_name'),
     'help' => t('beat_name'),
@@ -458,6 +467,7 @@ function dispatch_planning_views_data() {
       'handler' => 'views_handler_argument_string',
     ),
   );
+  //party_code
   $data['dispatch_planning_api_data']['party_code'] = array(
     'title' => t('party_code'),
     'help' => t('party_code'),
@@ -475,6 +485,7 @@ function dispatch_planning_views_data() {
       'handler' => 'views_handler_argument_string',
     ),
   );
+  //bill_number
   $data['dispatch_planning_api_data']['bill_number'] = array(
     'title' => t('bill_number'),
     'help' => t('bill_number'),
@@ -492,6 +503,7 @@ function dispatch_planning_views_data() {
       'handler' => 'views_handler_argument_string',
     ),
   );
+  //runsheet_number
   $data['dispatch_planning_api_data']['runsheet_number'] = array(
     'title' => t('runsheet_number'),
     'help' => t('runsheet_number'),
@@ -521,6 +533,7 @@ function dispatch_planning_views_data() {
     'title' => t('Dispatch planning items details'),
     'help' => t("unique identifiers for items data"),
   );
+  //tur
   $data['dispatch_planning_item_details']['tur'] = array(
     'title' => t('tur'),
     'help' => t('tur'),
@@ -538,6 +551,7 @@ function dispatch_planning_views_data() {
       'handler' => 'views_handler_argument_string',
     ),
   );
+  //mrp
   $data['dispatch_planning_item_details']['mrp'] = array(
     'title' => t('mrp'),
     'help' => t('mrp'),
@@ -555,6 +569,7 @@ function dispatch_planning_views_data() {
       'handler' => 'views_handler_argument_string',
     ),
   );
+  //product_name
   $data['dispatch_planning_item_details']['product_name'] = array(
     'title' => t('product_name'),
     'help' => t('product_name'),
@@ -572,6 +587,7 @@ function dispatch_planning_views_data() {
       'handler' => 'views_handler_argument_string',
     ),
   );
+  //sum_net_sales_cases
   $data['dispatch_planning_item_details']['sum_net_sales_cases'] = array(
     'title' => t('sum_net_sales_cases'),
     'help' => t('sum_net_sales_cases'),
@@ -589,6 +605,7 @@ function dispatch_planning_views_data() {
       'handler' => 'views_handler_argument_string',
     ),
   );
+  //sum_net_sales_quantity
   $data['dispatch_planning_item_details']['sum_net_sales_quantity'] = array(
     'title' => t('sum_net_sales_quantity'),
     'help' => t('sum_net_sales_quantity'),
@@ -606,6 +623,7 @@ function dispatch_planning_views_data() {
       'handler' => 'views_handler_argument_string',
     ),
   );
+  //sku_code
   $data['dispatch_planning_item_details']['sku_code'] = array(
     'title' => t('sku_code'),
     'help' => t('sku_code'),
@@ -623,6 +641,7 @@ function dispatch_planning_views_data() {
       'handler' => 'views_handler_argument_string',
     ),
   );
+  //sum_net_sales_kgs
   $data['dispatch_planning_item_details']['sum_net_sales_kgs'] = array(
     'title' => t('sum_net_sales_kgs'),
     'help' => t('sum_net_sales_kgs'),
@@ -640,6 +659,7 @@ function dispatch_planning_views_data() {
       'handler' => 'views_handler_argument_string',
     ),
   );
+  //sum_net_sales_value
   $data['dispatch_planning_item_details']['sum_net_sales_value'] = array(
     'title' => t('sum_net_sales_value'),
     'help' => t('sum_net_sales_value'),
@@ -657,6 +677,7 @@ function dispatch_planning_views_data() {
       'handler' => 'views_handler_argument_string',
     ),
   );
+  //sku_description
   $data['dispatch_planning_item_details']['sku_description'] = array(
     'title' => t('sku_description'),
     'help' => t('sku_description'),
@@ -674,6 +695,7 @@ function dispatch_planning_views_data() {
       'handler' => 'views_handler_argument_string',
     ),
   );
+  //trip_bill_reference - forgain key - define reletionship
   $data['dispatch_planning_item_details']['trip_bill_reference'] = array(
     'title' => t('Dispatch planning items id'),
     'help' => t('Dispatch planning items id.'),
