@@ -12,7 +12,7 @@ function api_dispatch_uri_setting_form($form, &$form_state) {
     '#title' => t('Dispatch planning uri API settings'),
     '#description' => t('Eg.https://uri.com/key=?=182'),
     '#default_value' => variable_get('dispatch_uri_settings'),
-    '#size' => 10,
+    //'#size' => 10,
   );
   return system_settings_form($form);
 }
