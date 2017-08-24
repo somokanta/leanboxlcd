@@ -1398,7 +1398,7 @@ function superfish_styles($display = 'list', $style = NULL) {
       $output = array($files[$style]->uri => array('type' => 'file', 'weight' => 500));
     }
     else {
-      watchdog('page not found', 'Cannot find the required files for the Superfish \'%style\' style.', array('%style' => $style), WATCHDOG_WARNING);
+      //watchdog('page not found', 'Cannot find the required files for the Superfish \'%style\' style.', array('%style' => $style), WATCHDOG_WARNING);
       $output = '';
     }
   }
@@ -1546,13 +1546,13 @@ function superfish_library($type = NULL, $name = NULL, $action = 'add') {
               return TRUE;
             }
             else {
-              watchdog('page not found', '%file', array('%file' => $directory . '/' . $name), WATCHDOG_ERROR);
+              //watchdog('page not found', '%file', array('%file' => $directory . '/' . $name), WATCHDOG_ERROR);
               return FALSE;
             }
           }
         }
         if (!$in_library) {
-          watchdog('page not found', '%path missing from Superfish library configuration, please add it immediately.', array('%path' => $directory . '/' . $name), WATCHDOG_WARNING, l(t('Superfish library configuration'), 'admin/config/user-interface/superfish'));
+          //watchdog('page not found', '%path missing from Superfish library configuration, please add it immediately.', array('%path' => $directory . '/' . $name), WATCHDOG_WARNING, l(t('Superfish library configuration'), 'admin/config/user-interface/superfish'));
           return FALSE;
         }
         break;
@@ -1566,7 +1566,7 @@ function superfish_library($type = NULL, $name = NULL, $action = 'add') {
               return TRUE;
             }
             else {
-              watchdog('page not found', '%directory/superfish.css', array('%directory' => $directory), WATCHDOG_WARNING);
+              //watchdog('page not found', '%directory/superfish.css', array('%directory' => $directory), WATCHDOG_WARNING);
               return FALSE;
             }
             break;
@@ -1578,7 +1578,7 @@ function superfish_library($type = NULL, $name = NULL, $action = 'add') {
               return TRUE;
             }
             else {
-              watchdog('page not found', '%directory/superfish-%name.css', array('%directory' => $directory, '%name' => $name), WATCHDOG_WARNING);
+              //watchdog('page not found', '%directory/superfish-%name.css', array('%directory' => $directory, '%name' => $name), WATCHDOG_WARNING);
               return FALSE;
             }
             break;
@@ -1623,11 +1623,11 @@ function superfish_library($type = NULL, $name = NULL, $action = 'add') {
               }
               // If the required file did not exist in the library files list.
               if (empty($output)) {
-                watchdog('page not found', '%name cannot be found.', array('%name' => $name), WATCHDOG_WARNING);
+                //watchdog('page not found', '%name cannot be found.', array('%name' => $name), WATCHDOG_WARNING);
               }
             }
             else {
-              watchdog('page not found', '%directory/superfish.js', array('%directory' => $directory), WATCHDOG_ERROR);
+              //watchdog('page not found', '%directory/superfish.js', array('%directory' => $directory), WATCHDOG_ERROR);
             }
         }
         break;
