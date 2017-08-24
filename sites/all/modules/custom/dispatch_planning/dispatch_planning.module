@@ -42,7 +42,15 @@ function dispatch_planning_menu() {
       // 'admin/config/system/foo', if not specified here to override.
       // Need to add access callback or access arguments.
   );
-
+  $items['admin/dispatch-planning/api-url'] = array(
+    'title' => 'API URL',
+    'type' => MENU_LOCAL_TASK,
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('api_dispatch_uri_setting_form'),
+    'access arguments' => array('dispatch planning api url'),
+    'file' => 'api_dispatch_uri_setting_form.inc',
+    'weight' => 3,
+  );
 
   $items['modified-van-autocomplete-callback/%'] = array(
     'title' => 'Get All Modified Van',
@@ -117,6 +125,10 @@ function dispatch_planning_permission() {
       'title' => t('only-rs-admin-with existing data'),
       'description' => t('only-rs-admin-with existing data')
     ),
+    'dispatch planning api url' => array(
+      'title' => t('dispatch planning api url'),
+      'description' => t('dispatch planning api url'),
+    ),
   );
 }
 /**
@@ -138,7 +150,7 @@ function dispatch_planning_cron_callback() {
       $sql_ins_id = $val['id'];
 
       $request_headers = array('Content-Type' => 'application/json');
-      $order_api_url = 'https://staging.fareye.co/api/v1/job?api_key=l1S6xa5mnxUXDuqv12q7lerLBL9l1ICq';
+      $order_api_url = variable_get('dispatch_uri_settings');
       $options = array('headers' => $request_headers, 'method' => 'POST', 'data' => $json_api_data);
       $response_data = drupal_http_request($order_api_url, $options);
 
