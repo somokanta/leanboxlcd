@@ -70,7 +70,7 @@ function change_feeds_import_billing_data_form_validate($form, &$form_state) {
           $sku = $value[7];
           $unique_comb = $bill_no . $sku;
           if (array_key_exists($unique_comb, $res['unique_combination'])) {
-          //  form_set_error('duplicate_data', t('Duplicate Data Found , Please Remove Duplicate Data and Upload Again.'));
+            form_set_error('duplicate_data', t('Duplicate Data Found , Please Remove Duplicate Data and Upload Again.'));
           }
           $res['unique_combination'][$unique_comb] = $unique_comb;
         }
@@ -231,7 +231,7 @@ function change_feeds_import_batch_fix_process($max, $data, $distributor_id, $fi
     if (!isset($context['results']['unique_combination'])) {
       $context['results']['unique_combination'] = array();
     }
-/*
+
     foreach ($value as $k => $v) {
       $flag = 0;
       $error_text = '';
@@ -355,7 +355,7 @@ function change_feeds_import_batch_fix_process($max, $data, $distributor_id, $fi
         $error[$k] = $v;
       }
     }
-*/
+
     if ($error_bool) { // if error occured generate error file
       $context['results']['error'][] = $error;
     }
