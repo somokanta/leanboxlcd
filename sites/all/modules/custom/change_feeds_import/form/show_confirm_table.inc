@@ -30,7 +30,8 @@ function change_feeds_import_confirm_content($id) {
     $rows['action'] = $discard_link;
   }elseif($status == "Validate"){
     drupal_set_message('Validate Functionality is removed temporarily. Please discard and upload full data!!.','error');
-    $error_link = ""; 
+    //$error_link = ""; 
+    $error_link = l(t('Error file'), $result['error_file']);
     //$action_link = l(t('Validate'), 'validate/' . $id);
     $rows['error_file'] = $error_link;
     //$rows['action'] = $action_link.'/'.$discard_link;
