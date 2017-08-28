@@ -170,7 +170,8 @@ function billing_data_csv_finished($success, $results, $operations) {
     // insert data in error billing data table 
     change_feeds_import_update_data_in_error_billing_table_after_confirm($last_id, $bill_uploaded, $total_lines, $sum_of_total_sales_qty, $error_link, $status);
 
-    drupal_goto("confirm/" . $last_id);
+    //drupal_goto("confirm/" . $last_id);
+    $_GET['destination'] = "confirm/" . $last_id;
   }
   else {
     drupal_set_message('There is Error Occured in batch process');
