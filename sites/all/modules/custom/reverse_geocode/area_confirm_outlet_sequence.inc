@@ -36,12 +36,12 @@ function area_confirm_outlet_sequence_form($form, &$form_state) {
 
 
   $header_array = array('sr_no' => 'Seq. No', 'party_code' => 'Party Code',
-    'party_name' => 'Party Name');
+    'party_name' => 'Party Name','original_seq' => 'Original Seq');
 
   $form['sales_day'] = array(
     '#type' => 'select',
     '#title' => t('Sales Day'),
-     '#options' => $sales_day_data,
+    '#options' => $sales_day_data,
     '#ajax' => array(
       'event' => 'change',
       'callback' => 'area_confirm_outlet_sequence_callback',
@@ -75,7 +75,7 @@ function area_confirm_outlet_sequence_form($form, &$form_state) {
     '#options' => array(),
     '#required' => TRUE,
   );
-  
+
 
   if (!empty($form_state['values']['sales_day'])) {
     $sales_day = $form_state['values']['sales_day'];
@@ -90,10 +90,10 @@ function area_confirm_outlet_sequence_form($form, &$form_state) {
   }
 
   $form['dummy'] = array(
-      "#markup" => '<div class="clearance"></div>',
-        //'#required' => TRUE,
-    );
-  
+    "#markup" => '<div class="clearance"></div>',
+    //'#required' => TRUE,
+  );
+
   $form['filter'] = array(
     '#type' => 'submit',
     '#value' => t('Filter'),
@@ -161,9 +161,9 @@ function filter_area_confirm_outlet_sequence_wise($form, &$form_state) {
     (
     // The command will be used in our JavaScript file (see next section)
     'command' => 'filter_clicked',
-      // We pass the value that the user selected in the select element to our
-      // JavaScript function:
-      //'selectedValue' => 123,
+    // We pass the value that the user selected in the select element to our
+    // JavaScript function:
+    //'selectedValue' => 123,
   );
   $commands[] = ajax_command_prepend('#address-selection-map', theme('status_messages'));
   // And finally, we will return all of our commands to the system to be executed:
@@ -177,9 +177,10 @@ function filter_area_confirm_outlet_sequence_wise_validate(&$form, &$form_state)
   $area_hook_group = $form_state['values']['area_hook_group'];
 
   $data = "";
-  $type = "revised-sequence";
+  $type = "filter-sequence-api";
+  $area_status = 1;
   if (!empty($sales_day) && !empty($van_pl_group) && !empty($area_hook_group)) {
-    $data = reverse_geocode_get_data_area_code_wise($sales_day, $van_pl_group, $area_hook_group, $area_status, $type, $original_van);
+    $data = area_confirm_outlet_sequence_get_data_area_code_wise($sales_day, $van_pl_group, $area_hook_group, $area_status, $type);
   }
 
   if (empty($data)) {
@@ -199,9 +200,9 @@ function area_confirm_outlet_sequence_ajax_callback($form, &$form_state) {
     (
     // The command will be used in our JavaScript file (see next section)
     'command' => 'filter_clicked',
-      // We pass the value that the user selected in the select element to our
-      // JavaScript function:
-      //'selectedValue' => 123,
+    // We pass the value that the user selected in the select element to our
+    // JavaScript function:
+    //'selectedValue' => 123,
   );
   $commands[] = ajax_command_prepend('#address-selection-map', theme('status_messages'));
   // And finally, we will return all of our commands to the system to be executed:
@@ -220,9 +221,9 @@ function filter_area_confirm_outlet_sequence_wise_submit(&$form, &$form_state) {
     $lat = $val['field_hul_updated_lat_value'];
     $long = $val['field_hul_updated_long_value'];
     $party_code = $val['title'];
-    $party_name = $val['field_party_name_value'];
-    $rev_seq_status = $val['field_revised_sequence_status_value'];
-    $sequence = $val['field_revised_sequence_value'];
+    $party_name = $val['field_party_name_value']; 
+    $rev_seq_status = $val['field_area_hook_group_hul_value'];
+    $sequence = $val['field_sequence_value'];
     $new_city = $val['field_updated_address_sub_administrative_area'];
     $new_district = $val['field_updated_address_premise'];
     $new_street = $val['field_updated_address_sub_premise'];
@@ -232,13 +233,13 @@ function filter_area_confirm_outlet_sequence_wise_submit(&$form, &$form_state) {
     $new_lat_long = !empty($lat) ? $lat . ',' . $long : '';
 
     $marker_tooltip = '<div class="cell-address cell-hide"><table>'
-        . '<tr><td style="white-space:nowrap;color:#222">Party code</td><td>' . $party_code . '</td></tr>'
-        . '<tr><td style="white-space:nowrap;color:#222">Locality</td><td>' . $new_locality . '</td></tr>'
-        . '<tr><td style="white-space:nowrap;color:#222">Sub Locality</td><td>' . $new_sublocality . '</td></tr>'
-        . '<tr><td style="white-space:nowrap;color:#222">Street</td><td>' . $new_street . '</td></tr>'
-        . '<tr><td style="white-space:nowrap;color:#222">POI</td><td>' . $new_poi . '</td></tr>'
-        . '<tr><td style="white-space:nowrap;color:#222">Lat/Long</td><td>' . $new_lat_long . '</td></tr>'
-        . '</table></div>';
+      . '<tr><td style="white-space:nowrap;color:#222">Party code</td><td>' . $party_code . '</td></tr>'
+      . '<tr><td style="white-space:nowrap;color:#222">Locality</td><td>' . $new_locality . '</td></tr>'
+      . '<tr><td style="white-space:nowrap;color:#222">Sub Locality</td><td>' . $new_sublocality . '</td></tr>'
+      . '<tr><td style="white-space:nowrap;color:#222">Street</td><td>' . $new_street . '</td></tr>'
+      . '<tr><td style="white-space:nowrap;color:#222">POI</td><td>' . $new_poi . '</td></tr>'
+      . '<tr><td style="white-space:nowrap;color:#222">Lat/Long</td><td>' . $new_lat_long . '</td></tr>'
+      . '</table></div>';
 
 
     if ($rev_seq_status == "0") {
@@ -249,13 +250,14 @@ function filter_area_confirm_outlet_sequence_wise_submit(&$form, &$form_state) {
     }
 
     $no = floatval($sequence);
-    
+    $modified_sequence = floatval($sequence);
+
     $options[$party_code] = array(
       'sr_no' => $no,
       'party_code' => $party_code,
       'party_name' => $party_name,
       '#attributes' => array('data-lat' => $lat, 'data-lng' => $long, 'data-sr' => $no),
-      'rev_seq_status' => $rev_seq_status,
+      'original_seq' => $modified_sequence,
       'details' => array('data' => array('#markup' => '<a class="cell-details" style="display:none;">On Map</a>' . $marker_tooltip)),
     );
   }
@@ -263,12 +265,76 @@ function filter_area_confirm_outlet_sequence_wise_submit(&$form, &$form_state) {
   $form_state['rebuild'] = TRUE;
 }
 
+function area_confirm_outlet_sequence_get_data_area_code_wise($sales_day, $van_pl_group, $area_hook_group, $area_status, $type) {
+  global $user;
+  $user_id = $user->uid;
+  $distributor_id = change_feeds_import_get_distributor_id($user_id);
+
+  $query = db_select('node', 'n');
+  $query->condition('n.type', 'outlet_master');
+  $query->addTag('node_uid');
+
+  $query->join('field_data_field_party_name', 'fpn', 'fpn.entity_id = n.nid');
+  $query->leftjoin('field_data_field_area_hook_group_hul', 'fagh', 'fagh.entity_id = n.nid');
+
+  if (!is_null($area_status)) {
+    if ($area_status === '0' || $area_status === '1') {
+      $query->condition('fagh.field_area_hook_group_hul_value', $area_status, '=');
+      $query->fields('fagh', array('field_area_hook_group_hul_value'));
+    }
+  }
+
+  $query->join('field_data_field_sequence', 'fsq', 'fsq.entity_id = n.nid');
+  $query->fields('fsq', array('field_sequence_value'));
+  $query->orderBy('fsq.field_sequence_value', 'asc');
+
+
+  $query->join('field_data_field_hul_code', 'hc', 'hc.entity_id = n.nid');
+  $query->join('node', 'hul', 'hc.field_hul_code_value = hul.title');
+  $query->fields('hc', array('field_hul_code_value'));
+  $query->condition('hul.uid', $distributor_id, '=');
+  $query->condition('hul.type', 'hul_code_master');
+
+  $query->Join('field_data_field_hul_updated_lat', 'hul_lat_u', 'hul_lat_u.entity_id = hul.nid');
+  $query->fields('hul_lat_u', array('field_hul_updated_lat_value'));
+  $query->Join('field_data_field_hul_updated_long', 'hul_long_u', 'hul_long_u.entity_id = hul.nid');
+  $query->fields('hul_long_u', array('field_hul_updated_long_value'));
+  $query->join('field_data_field_updated_address', 'new', 'new.entity_id = hul.nid');
+  $query->fields('new');
+  $query->fields('n', array('title'));
+  $query->fields('fpn', array('field_party_name_value'));
+  $query->fields('fagh', array('field_area_hook_group_hul_value'));
+
+  $query->join('field_data_field_area_hook', 'fa', 'fa.entity_id = n.nid');
+  $query->join('node', 'na', 'na.nid = fa.field_area_hook_nid');
+  if (!is_null($sales_day)) {
+    $query->join('field_data_field_dva_sales_day', 'sd', 'sd.entity_id = na.nid');
+    $query->condition('sd.field_dva_sales_day_value', $sales_day, '=');
+  }
+  if (!is_null($area_hook_group)) {
+    $query->join('field_data_field_dva_area_hook_group_name', 'agr', 'agr.entity_id = na.nid');
+    $query->condition('agr.field_dva_area_hook_group_name_value', $area_hook_group, '=');
+  }
+
+  $query->join('field_data_field_dva_van_pl_group', 'ppplg', 'na.nid = ppplg.entity_id');
+  if (!is_null($van_pl_group)) {
+    $query->condition('ppplg.field_dva_van_pl_group_value', $van_pl_group, '=');
+  }
+
+  $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+  dpm($res);
+  return $res;
+}
+
+
+
 function update_area_confirm_outlet_sequence(&$form, &$form_state) {
- 
+
   $party_code = $form_state['values']['list_form_items'];
+  dpm($party_code);
   foreach ($party_code as $code) {
-    update_area_confirm_outlet_sequence_status($code); 
-      $form_state['reverse_geocode']['rows'][$code]['rev_seq_status'] = 'Confirmed';
+    //update_area_confirm_outlet_sequence_status($code);
+    $form_state['reverse_geocode']['rows'][$code]['rev_seq_status'] = 'Confirmed';
   }
   unset($form_state['input']['list_form_items']);
   $form_state['rebuild'] = TRUE;
@@ -283,3 +349,4 @@ function update_area_confirm_outlet_sequence_status($code) {
     node_save($node);
   }
 }
+
