@@ -31,6 +31,12 @@ function adhoc_task_menu() {
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
+  $items['email/weekly-billing-report'] = array(
+    'title' => 'Weekly Billing report',
+    'page callback' => 'weekly_billing_report_callback',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
   return $items;
 }
 
@@ -275,4 +281,100 @@ function bill_date_missing_in_sales_register() {
   $mail_to = "abhishek.r@iksula.com";
   $from = "MIS.HELPDESK@leanbox.in";
   drupal_mail('adhoc_task', 'bill_date_missing', $mail_to, LANGUAGE_NONE, $params, $from);
+}
+
+/**
+ * Below code is for billing report
+ * Page callback for weekly report
+ */
+function weekly_billing_report_callback() {
+  $rid = get_role_by_name('RS Operator');
+  $query = db_select('users', 'u');
+  $query->fields('u', array('uid', 'name'));
+  $query->innerJoin('users_roles', 'r', 'r.uid = u.uid');
+  $query->condition('r.rid', $rid);
+  $query->condition('u.uid', 1, '>');
+  $query->orderBy('u.name');
+  $users = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+  $timestamp = strtotime(date("Y-m-d"));
+  $row = $rows = [];
+  $header = ['Customer'];
+  $html .= get_weekly_data_header($timestamp);   
+  foreach ($users as $key => $val) {
+    $uid = $val['uid'];
+    $name = $val['name'];
+    $distributor_id = change_feeds_import_get_distributor_id($uid);
+    $hul_username = get_hul_rs_name($distributor_id);
+    $flag_n_plus_two = FALSE;
+    $html .= get_weekly_report_data($timestamp, $distributor_id, $flag_n_plus_two, $hul_username);
+    $flag_n_plus_two = TRUE;
+    $html .= get_weekly_report_data($timestamp, $distributor_id, $flag_n_plus_two, $hul_username);
+    
+  }
+  $hmtl .= '</table>'; 
+  return $html;
+}
+/**
+ *  get weekly data header
+ */
+function get_weekly_data_header($timestamp) {
+  $html .= '<table><tr>';
+  $html .= '<th> Customer</th>';
+  for ($i = 0; $i < 10; $i++) {
+    $html .= '<th>' . date('Y-m-d', $timestamp) . '</th>';
+  }
+  $html .= '</tr>';
+  return $html;
+}
+/**
+ * @param type $distributor_id
+ * @return string
+ */
+function get_hul_rs_name($distributor_id) {
+  $query = db_select('users', 'u');
+  $query->condition('u.uid', $distributor_id, '=');
+  $query->join('field_data_field_name', 'nm', 'nm.entity_id = u.uid');
+  $query->join('field_data_field_third_party_username', 'pu', 'pu.entity_id = u.uid');
+  $query->fields('nm', array('field_name_value'));
+  $query->fields('pu', array('field_third_party_username_value'));
+  $result = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+  $hul_username = $result[0]['field_third_party_username_value'] . ' : ' .$result[0]['field_name_value'];
+  return $hul_username;
+}
+
+/**
+ * Function to get weekly report data for today's date to 10 days before
+ */
+function get_weekly_report_data($timestamp, $distributor_id, $flag_n_plus_two, $hul_username) {
+  $html .= '<tr>';
+  for ($i = 1; $i < 11; $i++) {
+    $query = db_select('node', 'n');
+    $query->join('field_data_field_sr_bill_date', 'sr', 'sr.entity_id = n.nid');
+    $query->join('field_data_field_bill_value', 'bv', 'bv.entity_id = n.nid');
+    if ($flag_n_plus_two) {
+      $query->join('field_data_field_dispatch_n_value', 'di', 'di.entity_id = n.nid'); 
+    }
+    $query->condition('sr.field_sr_bill_date_value', $timestamp);
+    $query->condition('n.uid', $distributor_id);
+    $query->condition('n.type', 'sales_register_data');
+    if ($flag_n_plus_two) {
+      $query->condition('di.field_dispatch_n_value_value', 'N+2'); 
+    }
+    $query->addExpression('COUNT(sr.field_sr_bill_date_value)', 'count');
+    $query->addExpression('SUM(bv.field_bill_value_value)', 'sum');
+    $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+    $timestamp -= 24 * 3600;
+    foreach($res as $v) {
+     $result_arr[$hul_username][] = array('count' => $v['count'] , 'sum' => $v['sum']);
+    }
+  }
+  $i = 1; 
+  foreach ($result_arr as $k => $val) {
+      $html .= '<td>' . $k .'</td>';
+      foreach ($val as $value) {
+        $html .= '<td>' . 'count: ' .$value['count'] .' /sum:'. $value['sum']  .'</td>';
+      }
+  }
+  $html .=  '</tr>';
+  return $html;
 }
