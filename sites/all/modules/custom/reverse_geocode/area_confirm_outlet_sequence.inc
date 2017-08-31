@@ -161,9 +161,6 @@ function filter_area_confirm_outlet_sequence_wise($form, &$form_state) {
     (
     // The command will be used in our JavaScript file (see next section)
     'command' => 'filter_clicked',
-    // We pass the value that the user selected in the select element to our
-    // JavaScript function:
-    //'selectedValue' => 123,
   );
   $commands[] = ajax_command_prepend('#address-selection-map', theme('status_messages'));
   // And finally, we will return all of our commands to the system to be executed:
@@ -200,9 +197,6 @@ function area_confirm_outlet_sequence_ajax_callback($form, &$form_state) {
     (
     // The command will be used in our JavaScript file (see next section)
     'command' => 'filter_clicked',
-    // We pass the value that the user selected in the select element to our
-    // JavaScript function:
-    //'selectedValue' => 123,
   );
   $commands[] = ajax_command_prepend('#address-selection-map', theme('status_messages'));
   // And finally, we will return all of our commands to the system to be executed:
@@ -215,7 +209,6 @@ function filter_area_confirm_outlet_sequence_wise_submit(&$form, &$form_state) {
   $van_pl_group = $form_state['values']['van_pl_group'];
   $area_hook_group = $form_state['values']['area_hook_group'];
   $data = $form_state['values']['area_hook_data'];
-  $type = "revised-sequence";
 
   foreach ($data as $key => $val) {
     $lat = $val['field_hul_updated_lat_value'];
@@ -377,7 +370,6 @@ function area_confirm_outlet_sequence_api(&$form, &$form_state) {
   $van_pl_group = $form_state['values']['van_pl_group'];
   $area_hook_group = $form_state['values']['area_hook_group'];
   $data = $form_state['values']['area_hook_data'];
-  $type = "revised-sequence";
 
   /**
    * Have run the API and show date on the fly and on the save button have to save the field
@@ -385,12 +377,10 @@ function area_confirm_outlet_sequence_api(&$form, &$form_state) {
   foreach ($data as $key => $val) {
     $lat = $val['field_hul_updated_lat_value'];
     $long = $val['field_hul_updated_long_value'];
-    //$sequence = $val['field_sequence_value'];
     $Locations[$key]['LocationName'] = $key;
     $Locations[$key]['Latitude'] = $lat;
     $Locations[$key]['Longitude'] = $long;
   }
-
 
   $parameters['AppId'] = "cdaccfeb03474c87ad9d1275e5877209";
   $parameters['RouteType'] = 'RoundTrip';
@@ -405,31 +395,28 @@ function area_confirm_outlet_sequence_api(&$form, &$form_state) {
   //dpm($request_data);
   $response_data = $client->GetStopOpt($request_data);
   //dpm($response_data);
-
- ################SHORT THE ARRAY in sequence################### 
+  ################SHORT THE ARRAY in sequence################### 
   if ($response_data->GetStopOptResult->ErrorCode === 0) {
     $response_array = $response_data->GetStopOptResult->OutputLocations->Location;
-//    $lat = $response_data->GetStopOptResult->OutputLocations->Location[0]->Latitude;
-//    $long = $response_data->GetStopOptResult->OutputLocations->Location[2]->Longitude;
-//    $locname_key = $response_data->GetStopOptResult->OutputLocations->Location[2]->LocationName;
-//    
+//    $lat = $response_data->GetStopOptResult->OutputLocations->Location[0]->Latitude; 
     foreach ($response_array as $k => $v) {
       foreach ($data as $key => $val) {
         if ($key == $v->LocationName) {
           $data_modified[$k] = $val;
-          $data_modified[$k]['modified_sequence_value'] = $val['field_sequence_value'] ;
-          $data_modified[$k]['field_sequence_value'] = $k;
+          $data_modified[$k]['modified_sequence_value'] = $val['field_sequence_value'];
+          $data_modified[$k]['field_sequence_value'] = $k + 1;
         }
       }
     }
+    $data = $data_modified; // now modified original data
   }
   else {
     dpm("Error Occured while API call!!");
   }
   //dpm($data,'$data');
-    //dpm($data_modified,'$data_modified');
+  //dpm($data_modified,'$data_modified');
 ####################API call end###################################3 
-    $data = $data_modified;
+
   foreach ($data as $key => $val) {
     $lat = $val['field_hul_updated_lat_value'];
     $long = $val['field_hul_updated_long_value'];
@@ -437,7 +424,12 @@ function area_confirm_outlet_sequence_api(&$form, &$form_state) {
     $party_name = $val['field_party_name_value'];
     $rev_seq_status = $val['field_area_hook_group_hul_value'];
     $sequence = $val['field_sequence_value'];
-    $modified_sequence = $val['modified_sequence_value']; // newly added for modified sequence
+    if ($response_data->GetStopOptResult->ErrorCode === 0) {
+      $modified_sequence = $val['modified_sequence_value']; // newly added for modified sequence
+    }
+    else {
+      $modified_sequence = $sequence;
+    }
     $new_city = $val['field_updated_address_sub_administrative_area'];
     $new_district = $val['field_updated_address_premise'];
     $new_street = $val['field_updated_address_sub_premise'];
