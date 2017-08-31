@@ -36,7 +36,7 @@ function area_confirm_outlet_sequence_form($form, &$form_state) {
 
 
   $header_array = array('sr_no' => 'Seq. No', 'party_code' => 'Party Code',
-    'party_name' => 'Party Name','original_seq' => 'Original Seq');
+    'party_name' => 'Party Name', 'original_seq' => 'Original Seq');
 
   $form['sales_day'] = array(
     '#type' => 'select',
@@ -117,8 +117,8 @@ function area_confirm_outlet_sequence_form($form, &$form_state) {
 
     $form['submit'] = array(
       '#type' => 'submit',
-      '#value' => t('Confirm Sequence'),
-      '#submit' => array('update_area_confirm_outlet_sequence'),
+      '#value' => t('Run Sequence API'),
+      '#submit' => array('area_confirm_outlet_sequence_api'),
       '#ajax' => array(
         'wrapper' => 'address-selection-map',
         'callback' => 'area_confirm_outlet_sequence_ajax_callback',
@@ -221,7 +221,7 @@ function filter_area_confirm_outlet_sequence_wise_submit(&$form, &$form_state) {
     $lat = $val['field_hul_updated_lat_value'];
     $long = $val['field_hul_updated_long_value'];
     $party_code = $val['title'];
-    $party_name = $val['field_party_name_value']; 
+    $party_name = $val['field_party_name_value'];
     $rev_seq_status = $val['field_area_hook_group_hul_value'];
     $sequence = $val['field_sequence_value'];
     $new_city = $val['field_updated_address_sub_administrative_area'];
@@ -322,31 +322,159 @@ function area_confirm_outlet_sequence_get_data_area_code_wise($sales_day, $van_p
   }
 
   $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
-  dpm($res);
   return $res;
 }
 
-
-
-function update_area_confirm_outlet_sequence(&$form, &$form_state) {
+/*
+  function update_area_confirm_outlet_sequence(&$form, &$form_state) {
 
   $party_code = $form_state['values']['list_form_items'];
   dpm($party_code);
   foreach ($party_code as $code) {
-    //update_area_confirm_outlet_sequence_status($code);
-    $form_state['reverse_geocode']['rows'][$code]['rev_seq_status'] = 'Confirmed';
+  //update_area_confirm_outlet_sequence_status($code);
+  $form_state['reverse_geocode']['rows'][$code]['rev_seq_status'] = 'Confirmed';
   }
   unset($form_state['input']['list_form_items']);
   $form_state['rebuild'] = TRUE;
-}
+  }
 
-function update_area_confirm_outlet_sequence_status($code) {
+  function update_area_confirm_outlet_sequence_status($code) {
   module_load_include('inc', 'change_feeds_import', 'form/upload_billing_data');
   $nid = check_node_title_exists($code, 'outlet_master');
   if ($nid) {
-    $node = node_load($nid);
-    $node->field_revised_sequence_status['und'][0]['value'] = 1;
-    node_save($node);
+  $node = node_load($nid);
+  $node->field_revised_sequence_status['und'][0]['value'] = 1;
+  node_save($node);
   }
-}
+  }
+ * 
+ */
 
+function area_confirm_outlet_sequence_api(&$form, &$form_state) {
+  $sales_day = $form_state['values']['sales_day'];
+  $van_pl_group = $form_state['values']['van_pl_group'];
+  $area_hook_group = $form_state['values']['area_hook_group'];
+
+  $data = "";
+  $type = "filter-sequence-api";
+  $area_status = 1;
+  if (!empty($sales_day) && !empty($van_pl_group) && !empty($area_hook_group)) {
+    $data = area_confirm_outlet_sequence_get_data_area_code_wise($sales_day, $van_pl_group, $area_hook_group, $area_status, $type);
+  }
+
+  if (empty($data)) {
+    $message = "No Results Found";
+    unset($form_state['complete form']['list_form_items']);
+    unset($form_state['complete form']['submit']);
+    form_set_error('area_hook_group', $message);
+  }
+  else {
+    $form_state['values']['area_hook_data'] = $data;
+  }
+
+  unset($form_state['input']['list_form_items']);
+  $sales_day = $form_state['values']['sales_day'];
+  $van_pl_group = $form_state['values']['van_pl_group'];
+  $area_hook_group = $form_state['values']['area_hook_group'];
+  $data = $form_state['values']['area_hook_data'];
+  $type = "revised-sequence";
+
+  /**
+   * Have run the API and show date on the fly and on the save button have to save the field
+   */
+  foreach ($data as $key => $val) {
+    $lat = $val['field_hul_updated_lat_value'];
+    $long = $val['field_hul_updated_long_value'];
+    //$sequence = $val['field_sequence_value'];
+    $Locations[$key]['LocationName'] = $key;
+    $Locations[$key]['Latitude'] = $lat;
+    $Locations[$key]['Longitude'] = $long;
+  }
+
+
+  $parameters['AppId'] = "cdaccfeb03474c87ad9d1275e5877209";
+  $parameters['RouteType'] = 'RoundTrip';
+  $parameters['StartLocation'] = $Locations[0]['LocationName'];
+  $parameters['EndLocation'] = $Locations[0]['LocationName'];
+
+
+  $optimizer_routesavvy_url = variable_get('optimizer_routesavvy_url', 'http://optimizer.routesavvy.com/OnTerraStopOpt.svc?wsdl');
+  $client = new SoapClient($optimizer_routesavvy_url);
+  $request_data['Locations']['Location'] = $Locations;
+  $request_data['Parameters'] = $parameters;
+  //dpm($request_data);
+  $response_data = $client->GetStopOpt($request_data);
+  //dpm($response_data);
+
+ ################SHORT THE ARRAY in sequence################### 
+  if ($response_data->GetStopOptResult->ErrorCode === 0) {
+    $response_array = $response_data->GetStopOptResult->OutputLocations->Location;
+//    $lat = $response_data->GetStopOptResult->OutputLocations->Location[0]->Latitude;
+//    $long = $response_data->GetStopOptResult->OutputLocations->Location[2]->Longitude;
+//    $locname_key = $response_data->GetStopOptResult->OutputLocations->Location[2]->LocationName;
+//    
+    foreach ($response_array as $k => $v) {
+      foreach ($data as $key => $val) {
+        if ($key == $v->LocationName) {
+          $data_modified[$k] = $val;
+          $data_modified[$k]['modified_sequence_value'] = $val['field_sequence_value'] ;
+          $data_modified[$k]['field_sequence_value'] = $k;
+        }
+      }
+    }
+  }
+  else {
+    dpm("Error Occured while API call!!");
+  }
+  //dpm($data,'$data');
+    //dpm($data_modified,'$data_modified');
+####################API call end###################################3 
+    $data = $data_modified;
+  foreach ($data as $key => $val) {
+    $lat = $val['field_hul_updated_lat_value'];
+    $long = $val['field_hul_updated_long_value'];
+    $party_code = $val['title'];
+    $party_name = $val['field_party_name_value'];
+    $rev_seq_status = $val['field_area_hook_group_hul_value'];
+    $sequence = $val['field_sequence_value'];
+    $modified_sequence = $val['modified_sequence_value']; // newly added for modified sequence
+    $new_city = $val['field_updated_address_sub_administrative_area'];
+    $new_district = $val['field_updated_address_premise'];
+    $new_street = $val['field_updated_address_sub_premise'];
+    $new_locality = $val['field_updated_address_locality'];
+    $new_sublocality = $val['field_updated_address_dependent_locality'];
+    $new_poi = $val['field_updated_address_data'];
+    $new_lat_long = !empty($lat) ? $lat . ',' . $long : '';
+
+    $marker_tooltip = '<div class="cell-address cell-hide"><table>'
+      . '<tr><td style="white-space:nowrap;color:#222">Party code</td><td>' . $party_code . '</td></tr>'
+      . '<tr><td style="white-space:nowrap;color:#222">Locality</td><td>' . $new_locality . '</td></tr>'
+      . '<tr><td style="white-space:nowrap;color:#222">Sub Locality</td><td>' . $new_sublocality . '</td></tr>'
+      . '<tr><td style="white-space:nowrap;color:#222">Street</td><td>' . $new_street . '</td></tr>'
+      . '<tr><td style="white-space:nowrap;color:#222">POI</td><td>' . $new_poi . '</td></tr>'
+      . '<tr><td style="white-space:nowrap;color:#222">Lat/Long</td><td>' . $new_lat_long . '</td></tr>'
+      . '</table></div>';
+
+
+    if ($rev_seq_status == "0") {
+      $rev_seq_status = "Non-Confirmed";
+    }
+    elseif ($rev_seq_status == "1") {
+      $rev_seq_status = "Confirmed";
+    }
+
+    $no = floatval($sequence);
+    $modified_sequence = floatval($modified_sequence);
+
+    $options[$party_code] = array(
+      'sr_no' => $no,
+      'party_code' => $party_code,
+      'party_name' => $party_name,
+      '#attributes' => array('data-lat' => $lat, 'data-lng' => $long, 'data-sr' => $no),
+      'original_seq' => $modified_sequence,
+      'details' => array('data' => array('#markup' => '<a class="cell-details" style="display:none;">On Map</a>' . $marker_tooltip)),
+    );
+  }
+  $form_state['reverse_geocode']['rows'] = $options;
+  $form_state['rebuild'] = TRUE;
+}
