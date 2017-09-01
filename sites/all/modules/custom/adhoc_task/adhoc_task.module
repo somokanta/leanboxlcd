@@ -311,12 +311,15 @@ function weekly_billing_report_callback() {
   $html = get_html_for_weekly_report($bill_flag, $flag_n_plus_two, $users);
   $bill_flag = 'count_bill_value';
   $flag_n_plus_two = FALSE;
+  $html .= "\n";
   $html .= get_html_for_weekly_report($bill_flag, $flag_n_plus_two, $users);
   $bill_flag = 'count_bill_n+2';
   $flag_n_plus_two = TRUE;
+  $html .= "\n";
   $html .= get_html_for_weekly_report($bill_flag, $flag_n_plus_two, $users);
   $bill_flag = 'count_value_n+2';
   $flag_n_plus_two = TRUE;
+  $html .= "\n";
   $html .= get_html_for_weekly_report($bill_flag, $flag_n_plus_two, $users);
   $params['subject'] = "Weekly Billing Report";
   $params['body'] = $html;
