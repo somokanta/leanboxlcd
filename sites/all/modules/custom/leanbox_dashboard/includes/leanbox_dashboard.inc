@@ -924,11 +924,10 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
       $total_bill_count = $res['total_count'];
       $total_impact_bill_count = $res1['total_count'];
 
-      //$data[] = array('1', $total_bill_count, $total_impact_bill_count);
-      $data[] = array('1', 1, 1);
+      $data[] = array('', "$total_bill_count", "$total_impact_bill_count");
     }
     else {
-      $data[] = array('No data found', 0, 0);
+      $data[] = array('No data found', '0', '0');
     }
 
 //    if (arg(1) == 'bill_pendency' || $ajax_type == 'bill_pendency_ajax') {
