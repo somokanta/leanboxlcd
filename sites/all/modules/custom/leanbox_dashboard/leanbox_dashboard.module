@@ -282,6 +282,10 @@ function leanbox_dashboard_block_info() {
     'info' => t('Sales Delivery Table'),
     'cache' => DRUPAL_NO_CACHE,
   );
+  $blocks['adoption_graph'] = array(
+    'info' => t('Adoption Graph'),
+    'cache' => DRUPAL_NO_CACHE,
+  );
   return $blocks;
 }
 
@@ -301,6 +305,42 @@ function leanbox_dashboard_block_view($delta = '') {
     'ch_height' => 200,
   );
   switch ($delta) {
+  case 'adoption_graph':
+
+      if (arg(1) == 'adoption_graph') {
+        $area_definition = array(
+          'width' => 700,
+          'height' => 400,
+          'ch_left' => 80,
+          'ch_top' => 50,
+          'ch_width' => 500,
+          'ch_height' => 250,
+        );
+      }
+      $billing_date = strtotime(date('Y-m-d') . "- 2 days");
+      $billing_date = date('d-m-Y', $billing_date);
+      $block['subject'] = "Adoption Value % ($billing_date Billing)";
+      $data = leanbox_dashboard_chart_query_details('adoption_graph', $billing_date, $billing_date);
+
+      $filter_form = drupal_render(drupal_get_form('leanbox_dashboard_chart_filter_adoption_form'));
+      $block['content'] = array(
+        '#markup' => theme('leanbox_dashboard', array('data' => $filter_form)),
+        '#attached' => array(
+          'js' => array(
+            array(
+              'type' => 'external',
+              'data' => 'https://www.gstatic.com/charts/loader.js'
+            ),
+            drupal_get_path('module', 'leanbox_dashboard') . '/js/leanbox_dashboard_adoption.js',
+            array(
+              'data' => array('leanbox_dashboard' => array('adoption_graph' => $data, 'area_definition' => $area_definition)),
+              'type' => 'setting'
+            ),
+          ),
+        ),
+      );
+      break;
+      
     case 'party_packing':
 
       if (arg(1) == 'party_packing') {
