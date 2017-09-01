@@ -39,6 +39,8 @@
 
 			function drawpickingChart(delivery_data, area_definition) {
                             console.log(delivery_data);
+                                                        console.log(area_definition);
+
 				var data = google.visualization.arrayToDataTable(delivery_data);
 
 				var options = {
@@ -48,7 +50,7 @@
 					legend: {position: 'top', maxLines: 3},
             
 					bar: {groupWidth: '40%'},
-					chartArea: {left: area_definition.ch_left, top: area_definition.ch_top, width: area_definition.ch_width, height: area_definition.ch_height},
+					//chartArea: {left: area_definition.ch_left, top: area_definition.ch_top, width: area_definition.ch_width, height: area_definition.ch_height},
 
 					vAxis: {
 						minValue: 0,
