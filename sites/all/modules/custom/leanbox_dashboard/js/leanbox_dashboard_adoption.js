@@ -73,7 +73,8 @@
 					},
 				};
 				var chart = new google.visualization.ColumnChart(document.getElementById('adoption_graph_div'));
-				chart.draw(view, options);
+				//chart.draw(view, options);
+                                chart.draw(view, google.charts.Bar.convertOptions(options));
 			}
 		}
 	};
