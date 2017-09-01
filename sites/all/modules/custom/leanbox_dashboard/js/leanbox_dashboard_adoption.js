@@ -41,19 +41,6 @@
                             console.log(delivery_data);
 				var data = google.visualization.arrayToDataTable(delivery_data);
 
-				var view = new google.visualization.DataView(data);
-//				view.setColumns([0,
-//					1,
-//					{calc: "stringify",
-//						sourceColumn: 1,
-//						type: "string",
-//						role: "annotation"},
-//                                        2,
-//					{calc: "stringify",
-//						sourceColumn: 2,
-//						type: "string",
-//						role: "annotation"},
-//				]);
 				var options = {
 					width: area_definition.width,
 					height: area_definition.height,
@@ -73,8 +60,7 @@
 					},
 				};
 				var chart = new google.visualization.ColumnChart(document.getElementById('adoption_graph_div'));
-				//chart.draw(view, options);
-                                chart.draw(view, google.charts.Bar.convertOptions(options));
+				chart.draw(data, options);
 			}
 		}
 	};
