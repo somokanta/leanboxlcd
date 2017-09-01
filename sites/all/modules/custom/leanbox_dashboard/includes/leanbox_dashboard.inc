@@ -935,7 +935,6 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
 //    }
 
     $output1 = $data;
-    dpm($output1, 'output');
     return $output1;
   }
   
