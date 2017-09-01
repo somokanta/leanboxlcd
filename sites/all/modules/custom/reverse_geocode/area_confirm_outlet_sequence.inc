@@ -133,7 +133,7 @@ function area_confirm_outlet_sequence_form($form, &$form_state) {
       '#id' => 'area-hook-confirm',
     );
 
-    if ($form_state['reverse_geocode']['rows_save']==2) {
+    if ($form_state['reverse_geocode']['rows_save']) {
       $form['submit'] = array(
         '#type' => 'submit',
         '#value' => t('Save Sequence'),
@@ -457,20 +457,23 @@ function area_confirm_outlet_sequence_api(&$form, &$form_state) {
 
 function area_confirm_outlet_sequence_save(&$form, &$form_state) {
   $party_code = $form_state['values']['list_form_items'];
+  $sequence_no = 1;
   foreach ($party_code as $code => $val) {
-    update_area_confirm_outlet_sequence_status($code);
+    update_area_confirm_outlet_sequence_status($code , $sequence_no);
+    $form_state['reverse_geocode']['rows'][$code]['original_seq'] = $sequence_no;
+    $sequence_no ++;  
   }
   unset($form_state['input']['list_form_items']);
   unset($form_state['reverse_geocode']['rows_save']);
   $form_state['rebuild'] = TRUE;
 }
 
-function update_area_confirm_outlet_sequence_status($code) {
+function update_area_confirm_outlet_sequence_status($code , $sequence_no) {
   module_load_include('inc', 'change_feeds_import', 'form/upload_billing_data');
   $nid = check_node_title_exists($code, 'outlet_master');
   if ($nid) {
     $node = node_load($nid);
-    $node->field_sequence['und'][0]['value'] = 1;
+    $node->field_sequence['und'][0]['value'] = $sequence_no;
    // node_save($node);
   }
 }
