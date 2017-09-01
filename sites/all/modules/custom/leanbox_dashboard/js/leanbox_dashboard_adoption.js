@@ -38,6 +38,7 @@
 			});
 
 			function drawpickingChart(delivery_data, area_definition) {
+                            console.log(delivery_data);
 				var data = google.visualization.arrayToDataTable(delivery_data);
 
 				var view = new google.visualization.DataView(data);
@@ -65,10 +66,10 @@
 					vAxis: {
 						minValue: 0,
 						maxValue: 7,
-						title: 'Percentage'
+						title: 'Count'
 					},
 					hAxis: {
-						title: 'Return Type'
+						title: ''
 					},
 				};
 				var chart = new google.visualization.ColumnChart(document.getElementById('adoption_graph_div'));
