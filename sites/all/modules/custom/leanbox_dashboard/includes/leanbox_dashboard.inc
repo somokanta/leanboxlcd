@@ -925,6 +925,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
       $total_impact_bill_count = $res1['total_count'];
 
       $data[] = array('1', $total_bill_count, $total_impact_bill_count);
+      $data[] = array('1', 1, 1);
     }
     else {
       $data[] = array('No data found', 0, 0);
