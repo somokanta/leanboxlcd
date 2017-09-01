@@ -210,6 +210,9 @@ function adhoc_task_mail($key, &$message, $params) {
       $message['subject'] = $params['subject'];
       $message['body'][] = $params['body'];
       break;
+    case 'weekly_billing_report': 
+      $message['subject'] = $params['subject'];
+      $message['body'][] = $params['body'];
   }
 }
 
@@ -288,6 +291,31 @@ function bill_date_missing_in_sales_register() {
  * Page callback for weekly report
  */
 function weekly_billing_report_callback() {
+  $bill_flag = 'count_bill';
+  $flag_n_plus_two = FALSE;
+  $html = get_html_for_weekly_report($bill_flag , $flag_n_plus_two);
+  $bill_flag = 'count_bill_value';
+  $flag_n_plus_two = FALSE;  
+  $html .= get_html_for_weekly_report($bill_flag, $flag_n_plus_two);
+  $bill_flag = 'count_bill_n+2';
+  $flag_n_plus_two = TRUE;
+  $html .= get_html_for_weekly_report($bill_flag, $flag_n_plus_two);
+  $bill_flag = 'count_value_n+2';
+  $flag_n_plus_two = TRUE;
+  $html .= get_html_for_weekly_report($bill_flag, $flag_n_plus_two);  
+  $params['subject'] = "Weekly Billing Report";
+  $params['body'] = $html;
+  //$mail_to = "gaurav@leanbox.in,kusha@leanbox.in,deepak@leanbox.in";
+  $mail_to = "sandip.auti11@gmail.com";
+  $from = "MIS.HELPDESK@leanbox.in";
+  drupal_mail('adhoc_task', 'weekly_billing_report', $mail_to, LANGUAGE_NONE, $params, $from);
+  return $html;
+}
+
+/**
+ * get html for weekly report
+ */
+function get_html_for_weekly_report($bill_flag, $flag_n_plus_two) {
   $rid = get_role_by_name('RS Operator');
   $query = db_select('users', 'u');
   $query->fields('u', array('uid', 'name'));
@@ -297,19 +325,26 @@ function weekly_billing_report_callback() {
   $query->orderBy('u.name');
   $users = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
   $timestamp = strtotime(date("Y-m-d"));
-  $row = $rows = [];
-  $header = ['Customer'];
+  if ($bill_flag == 'count_bill') {
+    $caption = 'No. of bills uploaded on TP';
+  }
+  else if ($bill_flag == 'count_bill_value') {
+     $caption = 'Value of bills uploaded on TP';
+  }
+  else if ($bill_flag == 'count_bill_n+2') {
+    $caption = 'No of bills dispatched on TP corresponding to the following bill date on N+2';
+  }
+  else {
+    $caption = 'Value of bills dispatched on TP corresponding to the following bill date on N+2';
+  }
+  $html .= '<table><caption><h2> '. $caption.'</h2></caption>';
   $html .= get_weekly_data_header($timestamp);   
   foreach ($users as $key => $val) {
     $uid = $val['uid'];
     $name = $val['name'];
     $distributor_id = change_feeds_import_get_distributor_id($uid);
     $hul_username = get_hul_rs_name($distributor_id);
-    $flag_n_plus_two = FALSE;
-    $html .= get_weekly_report_data($timestamp, $distributor_id, $flag_n_plus_two, $hul_username);
-    $flag_n_plus_two = TRUE;
-    $html .= get_weekly_report_data($timestamp, $distributor_id, $flag_n_plus_two, $hul_username);
-    
+    $html .= get_weekly_report_data($timestamp, $distributor_id, $flag_n_plus_two, $hul_username, $bill_flag);
   }
   $hmtl .= '</table>'; 
   return $html;
@@ -318,7 +353,7 @@ function weekly_billing_report_callback() {
  *  get weekly data header
  */
 function get_weekly_data_header($timestamp) {
-  $html .= '<table><tr>';
+  $html .= '<tr>';
   $html .= '<th> Customer</th>';
   for ($i = 0; $i < 10; $i++) {
     $html .= '<th>' . date('Y-m-d', $timestamp) . '</th>';
@@ -345,7 +380,7 @@ function get_hul_rs_name($distributor_id) {
 /**
  * Function to get weekly report data for today's date to 10 days before
  */
-function get_weekly_report_data($timestamp, $distributor_id, $flag_n_plus_two, $hul_username) {
+function get_weekly_report_data($timestamp, $distributor_id, $flag_n_plus_two, $hul_username , $bill_flag) {
   $html .= '<tr>';
   for ($i = 1; $i < 11; $i++) {
     $query = db_select('node', 'n');
@@ -368,11 +403,22 @@ function get_weekly_report_data($timestamp, $distributor_id, $flag_n_plus_two, $
      $result_arr[$hul_username][] = array('count' => $v['count'] , 'sum' => $v['sum']);
     }
   }
-  $i = 1; 
+  
   foreach ($result_arr as $k => $val) {
       $html .= '<td>' . $k .'</td>';
       foreach ($val as $value) {
-        $html .= '<td>' . 'count: ' .$value['count'] .' /sum:'. $value['sum']  .'</td>';
+        if ($bill_flag == 'count_bill' || $bill_flag == 'count_bill_n+2') {
+          $html .= '<td>' . $value['count'] .'</td>';
+        }
+        else {
+          if (!empty($value['sum'])) {
+            $html .= '<td>' . $value['sum'] .'</td>';
+          }
+          else {
+            $value['sum'] = 0;
+            $html .= '<td>' . $value['sum'] .'</td>';
+          }
+        }
       }
   }
   $html .=  '</tr>';
