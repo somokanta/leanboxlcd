@@ -311,15 +311,12 @@ function weekly_billing_report_callback() {
   $html = get_html_for_weekly_report($bill_flag, $flag_n_plus_two, $users);
   $bill_flag = 'count_bill_value';
   $flag_n_plus_two = FALSE;
-  $html .= "\n";
   $html .= get_html_for_weekly_report($bill_flag, $flag_n_plus_two, $users);
   $bill_flag = 'count_bill_n+2';
   $flag_n_plus_two = TRUE;
-  $html .= "\n";
   $html .= get_html_for_weekly_report($bill_flag, $flag_n_plus_two, $users);
   $bill_flag = 'count_value_n+2';
   $flag_n_plus_two = TRUE;
-  $html .= "\n";
   $html .= get_html_for_weekly_report($bill_flag, $flag_n_plus_two, $users);
   $params['subject'] = "Weekly Billing Report";
   $params['body'] = $html;
@@ -348,7 +345,7 @@ function get_html_for_weekly_report($bill_flag, $flag_n_plus_two, $users) {
   else {
     $caption = 'Value of bills dispatched on TP corresponding to the following bill date on N+2';
   }
-  $html .= '<table  border="1" "cellpadding" = "3", "cellspacing" = "0"><caption><h2> ' . $caption . '</h2></caption>';
+  $html .= '<table  border="1" "cellpadding" = "1", "cellspacing" = "0"><caption><h2> ' . $caption . '</h2></caption>';
   $html .= get_weekly_data_header($timestamp);
   foreach ($users as $key => $val) {
     $uid = $val['uid'];
@@ -356,7 +353,7 @@ function get_html_for_weekly_report($bill_flag, $flag_n_plus_two, $users) {
     $hul_username = $val['field_third_party_username_value'] . ' : ' . $val['field_name_value'];
     $html .= get_weekly_report_data($timestamp, $distributor_id, $flag_n_plus_two, $hul_username, $bill_flag);
   }
-  $hmtl .= '</table>';
+  $html .= '</table>';
   return $html;
 }
 
