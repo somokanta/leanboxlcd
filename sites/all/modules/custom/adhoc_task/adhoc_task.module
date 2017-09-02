@@ -34,10 +34,21 @@ function adhoc_task_menu() {
   $items['email/weekly-billing-report'] = array(
     'title' => 'Weekly Billing report',
     'page callback' => 'weekly_billing_report_callback',
-    'access callback' => TRUE,
+    'access arguments' => array('weekly report permission'),
     'type' => MENU_CALLBACK,
   );
   return $items;
+}
+/**
+ * Implement hook_permission
+ */
+function adhoc_task_permission() {
+  return array(
+    'weekly report permission' => array(
+      'title' => 'Weekly report permission',
+      'description' => 'weekly report permission'
+    ),
+  );
 }
 
 function update_sales_register_node_finished($success, $results, $operations) {
@@ -287,10 +298,92 @@ function bill_date_missing_in_sales_register() {
 }
 
 /**
+ *  callback for weekly report menu
+ */
+function weekly_report_form($form, &$form_state) {
+  if (isset($_GET['from_date'])) {
+    $from_date = $_GET['from_date'];
+  }
+  else {
+    $from_date = date('Y-m-d');
+  }
+  if (isset($_GET['to_date'])) {
+    $to_date = $_GET['to_date'];
+  }
+  else {
+    $to_date = date('Y-m-d');
+  }
+  $form['from_date'] = array(
+    '#type' => 'date_popup',
+    '#title' => 'From date',
+    '#description' => 'Select from date to generate report',
+    '#require' => TRUE,
+    '#date_label_position' => 'within',
+    '#date_format' => 'Y-m-d',
+    '#default_value' => $from_date,
+  );
+  $form['to_date'] = array(
+    '#type' => 'date_popup',
+    '#title' => 'To date',
+    '#description' => 'Select to date to generate report',
+    '#require' => TRUE,
+    '#date_label_position' => 'within',
+    '#date_format' => 'Y-m-d',
+    '#default_value' => $to_date,
+  );
+//  $form['email_id'] = array (
+//    '#type' => 'textfield',
+//    '#title' => 'Enter email id to send report data',
+//    '#description' => 'Enter email id eg: xyz@gmail.com',
+//    '#default_value' => "sandip.auti@iksulaops.com",
+//  );
+  $form['save'] = array(
+    '#type' => 'submit',
+    '#value' => 'Save'
+  );
+  return $form;
+}
+
+/**
+ * submit handler for weekly_report_form 
+ */
+function weekly_report_form_submit($form, &$form_state) {
+  $from_date = $form_state['values']['from_date'];
+  $to_date = $form_state['values']['to_date'];
+  if ($form_state['values']["op"] == "Save")
+   drupal_goto('email/weekly-billing-report', array('query' => array('from_date' => $from_date, 'to_date' => $to_date)));
+}
+/**
+ * Form validate
+ */
+function weekly_report_form_validate($form, &$form_state) {
+  $from_date = $form_state['values']['from_date'];
+  $to_date = $form_state['values']['to_date']; 
+  $datediff = strtotime($to_date) - strtotime($from_date);
+  $num_days = $datediff / (60 * 60 * 24);
+  if ($num_days < 0) {
+   form_set_error('form', 'Please select valid To and From date'); 
+  }
+  if ($num_days > 10) {
+   form_set_error('form', 'Date range should not be greater than 10');  
+  }
+  drupal_goto('email/weekly-billing-report', array('query' => array('from_date' => $from_date, 'to_date' => $to_date)));
+}
+/**
  * Below code is for billing report
  * Page callback for weekly report
  */
 function weekly_billing_report_callback() {
+   if (isset($_GET['from_date'])) {
+    $from_date = $_GET['from_date'];
+  }
+  if (isset($_GET['to_date'])) {
+    $to_date = $_GET['to_date'];
+  }
+  $datediff = strtotime($to_date) - strtotime($from_date);
+  $num_days = $datediff / (60 * 60 * 24);
+  $timestamp = strtotime($from_date);  
+  $html .= drupal_render(drupal_get_form('weekly_report_form'));
   $rid = get_role_by_name('RS Operator');
   $query = db_select('users', 'u');
   $query->fields('u', array('uid'));
@@ -308,31 +401,36 @@ function weekly_billing_report_callback() {
 
   $bill_flag = 'count_bill';
   $flag_n_plus_two = FALSE;
-  $html = get_html_for_weekly_report($bill_flag, $flag_n_plus_two, $users);
+  $html .= get_html_for_weekly_report($bill_flag, $flag_n_plus_two, $users, $timestamp, $num_days);
   $bill_flag = 'count_bill_value';
   $flag_n_plus_two = FALSE;
-  $html .= get_html_for_weekly_report($bill_flag, $flag_n_plus_two, $users);
+  $html .= get_html_for_weekly_report($bill_flag, $flag_n_plus_two, $users, $timestamp , $num_days);
   $bill_flag = 'count_bill_n+2';
   $flag_n_plus_two = TRUE;
-  $html .= get_html_for_weekly_report($bill_flag, $flag_n_plus_two, $users);
+  $html .= get_html_for_weekly_report($bill_flag, $flag_n_plus_two, $users, $timestamp , $num_days);
   $bill_flag = 'count_value_n+2';
   $flag_n_plus_two = TRUE;
-  $html .= get_html_for_weekly_report($bill_flag, $flag_n_plus_two, $users);
+  $html .= get_html_for_weekly_report($bill_flag, $flag_n_plus_two, $users, $timestamp , $num_days);
   $params['subject'] = "Weekly Billing Report";
   $params['body'] = $html;
   //$mail_to = "gaurav@leanbox.in,kusha@leanbox.in,deepak@leanbox.in";
   $mail_to = "sandip.auti11@gmail.com";
   $from = "MIS.HELPDESK@leanbox.in";
-  drupal_mail('adhoc_task', 'weekly_billing_report', $mail_to, LANGUAGE_NONE, $params, $from);
+  //drupal_mail('adhoc_task', 'weekly_billing_report', $mail_to, LANGUAGE_NONE, $params, $from);
   return $html;
 }
 
 /**
  * get html for weekly report
  */
-function get_html_for_weekly_report($bill_flag, $flag_n_plus_two, $users) {
-
-  $timestamp = strtotime(date("Y-m-d"));
+function get_html_for_weekly_report($bill_flag, $flag_n_plus_two, $users, $timestamp , $num_days) {
+ if ($num_days < 0) {
+   return; 
+ }
+ if($num_days >  10) {
+   return; 
+ }
+  $timestamp = $timestamp;
   if ($bill_flag == 'count_bill') {
     $caption = 'No. of bills uploaded on TP';
   }
@@ -346,12 +444,12 @@ function get_html_for_weekly_report($bill_flag, $flag_n_plus_two, $users) {
     $caption = 'Value of bills dispatched on TP corresponding to the following bill date on N+2';
   }
   $html .= '<table  border="1" "cellpadding" = "1", "cellspacing" = "0"><caption><h2> ' . $caption . '</h2></caption>';
-  $html .= get_weekly_data_header($timestamp);
+  $html .= get_weekly_data_header($timestamp, $num_days);
   foreach ($users as $key => $val) {
     $uid = $val['uid'];
     $distributor_id = $val['field_distributor_value'];
     $hul_username = $val['field_third_party_username_value'] . ' : ' . $val['field_name_value'];
-    $html .= get_weekly_report_data($timestamp, $distributor_id, $flag_n_plus_two, $hul_username, $bill_flag);
+    $html .= get_weekly_report_data($timestamp, $distributor_id, $flag_n_plus_two, $hul_username, $bill_flag, $num_days);
   }
   $html .= '</table>';
   return $html;
@@ -360,12 +458,12 @@ function get_html_for_weekly_report($bill_flag, $flag_n_plus_two, $users) {
 /**
  *  get weekly data header
  */
-function get_weekly_data_header($timestamp) {
+function get_weekly_data_header($timestamp,$num_days) {
   $html .= '<tr>';
   $html .= '<th> Customer</th>';
-  for ($i = 0; $i < 10; $i++) {
+  for ($i = 0; $i <= $num_days; $i++) {
     $html .= '<th>' . date('Y-m-d', $timestamp) . '</th>';
-    $timestamp -= 24 * 3600;
+    $timestamp += 24 * 3600;
   }
   $html .= '</tr>';
   return $html;
@@ -374,9 +472,9 @@ function get_weekly_data_header($timestamp) {
 /**
  * Function to get weekly report data for today's date to 10 days before
  */
-function get_weekly_report_data($timestamp, $distributor_id, $flag_n_plus_two, $hul_username, $bill_flag) {
+function get_weekly_report_data($timestamp, $distributor_id, $flag_n_plus_two, $hul_username, $bill_flag, $num_days) {
   $html .= '<tr>';
-  for ($i = 0; $i < 10; $i++) {
+  for ($i = 0; $i <= $num_days; $i++) {
     $query = db_select('node', 'n');
     $query->join('field_data_field_sr_bill_date', 'sr', 'sr.entity_id = n.nid');
     $query->join('field_data_field_bill_value', 'bv', 'bv.entity_id = n.nid');
@@ -394,7 +492,7 @@ function get_weekly_report_data($timestamp, $distributor_id, $flag_n_plus_two, $
     $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
     $result_arr[$hul_username][] = $res[0];
     
-    $timestamp -= 24 * 3600;
+    $timestamp += 24 * 3600;
         
   }
 
