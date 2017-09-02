@@ -25,7 +25,24 @@ function adhoc_task_menu() {
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
+  $items['email/weekly-billing-report'] = array(
+    'title' => 'Weekly Billing report',
+    'page callback' => 'weekly_billing_report_callback',
+    'access arguments' => array('weekly report permission'),
+    'type' => MENU_CALLBACK,
+  );
   return $items;
+}
+/**
+ * Implement hook_permission
+ */
+function adhoc_task_permission() {
+  return array(
+    'weekly report permission' => array(
+      'title' => 'Weekly report permission',
+      'description' => 'weekly report permission'
+    ),
+  );
 }
 
 function update_sales_register_node_finished($success, $results, $operations) {
@@ -119,7 +136,7 @@ function send_email_duplicate_data() {
   $start = strtotime(date('Y-m-d', strtotime("-7 days")));
 
   $query = db_select('users', 'u');
-  $query->fields('u', array('uid','name'));
+  $query->fields('u', array('uid', 'name'));
   $users = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
 
   foreach ($users as $key => $val) {
@@ -130,17 +147,17 @@ function send_email_duplicate_data() {
     $query = db_select('custom_billing_data', 'cb');
     $query->condition('cb.distributor_id', $uid, '=');
     $query->condition('cb.created_date', array($start, $end), 'BETWEEN');
-    $query->fields('cb', array('bill_number', 'sku7_code', 'id', 'distributor_id','created_date'));
+    $query->fields('cb', array('bill_number', 'sku7_code', 'id', 'distributor_id', 'created_date'));
     $results = $query->execute()->fetchAll();
 
     foreach ($results as $k => $value) {
       $bill = $value->bill_number;
       $sku = $value->sku7_code;
       $distributor_id = $value->distributor_id;
-      $created_date = date('d/m/Y',$value->created_date);
+      $created_date = date('d/m/Y', $value->created_date);
       if (isset($res[$bill . "-" . $sku . "-" . $distributor_id])) {
         // $id[$bill . "-" . $sku . "-" . $distributor_id . "-" . $k] = $value->id;
-        $count[$distributor_id . "-" . $hul_username. "-" . $created_date. "-" .$name][] = $value->id;
+        $count[$distributor_id . "-" . $hul_username . "-" . $created_date . "-" . $name][] = $value->id;
       }
       $res[$bill . "-" . $sku . "-" . $distributor_id] = array();
     }
@@ -149,10 +166,10 @@ function send_email_duplicate_data() {
   foreach ($count as $key => $val) {
     $counts = count($val);
     $data = explode("-", $key);
-     $rows[] = array($data[3], $data[0], $data[1], $data[2], $counts);
+    $rows[] = array($data[3], $data[0], $data[1], $data[2], $counts);
   }
 
-  $header = array('Name','UID', 'RS Code', 'Date','Bill Count');
+  $header = array('Name', 'UID', 'RS Code', 'Date', 'Bill Count');
   if (empty($rows)) {
     $rows[] = array("<td colspan='4' style='text-align: center;'> There is No Duplicate Records Found</td>");
   }
@@ -162,7 +179,7 @@ function send_email_duplicate_data() {
   $params['subject'] = "Duplicate Record Details";
   $params['body'] = $html;
   $mail_to = "gaurav@leanbox.in,kusha@leanbox.in,deepak@leanbox.in";
- // $mail_to = "hplord12@gmail.com";
+  // $mail_to = "hplord12@gmail.com";
   $from = "MIS.HELPDESK@leanbox.in";
   drupal_mail('adhoc_task', 'duplicate_data', $mail_to, LANGUAGE_NONE, $params, $from);
 }
@@ -194,5 +211,300 @@ function adhoc_task_mail($key, &$message, $params) {
       $message['subject'] = $params['subject'];
       $message['body'][] = $params['body'];
       break;
+    case 'bill_date_missing':
+      $message['subject'] = $params['subject'];
+      $message['body'][] = $params['body'];
+      break;
+    case 'weekly_billing_report':
+      $message['subject'] = $params['subject'];
+      $message['body'][] = $params['body'];
   }
+}
+
+/**
+ * 
+ * @return string
+ */
+function bill_date_missing_in_sales_register() {
+  $end = time();
+  $start = strtotime("-1 days midnight");
+  ;
+  /**
+   * dpm(db_query("select count(DISTINCT(bill_number)) from custom_billing_data where created_date >'1502217000' ")->FetchAll());
+    //209640
+    $start = '1502217000';
+    $end = time();
+    $query = db_select('custom_billing_data', 'cb');
+    $query->condition('cb.created_date', array($start, $end), 'BETWEEN');
+    $query->addExpression('DISTINCT(bill_number)','bill_number');
+    $results = $query->execute()->fetchAll();
+    dpm($results);
+
+   */
+  $query = db_select('users', 'u');
+  $query->fields('u', array('uid', 'name'));
+  $users = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+
+  foreach ($users as $key => $val) {
+    $uid = $val['uid'];
+    $name = $val['name'];
+    $distributor_id = change_feeds_import_get_distributor_id($uid);
+    $hul_username = change_feeds_import_get_hul_user_name($distributor_id);
+    $query = db_select('custom_billing_data', 'cb');
+    $query->condition('cb.distributor_id', $uid, '=');
+    $query->condition('cb.created_date', array($start, $end), 'BETWEEN');
+    $query->fields('cb', array('bill_number', 'sku7_code', 'id', 'distributor_id', 'created_date'));
+    $results = $query->execute()->fetchAll();
+
+    foreach ($results as $k => $value) {
+      $bill = $value->bill_number;
+      $sku = $value->sku7_code;
+      $distributor_id = $value->distributor_id;
+      $created_date = date('d/m/Y', $value->created_date);
+      if (isset($res[$bill . "-" . $sku . "-" . $distributor_id])) {
+        // $id[$bill . "-" . $sku . "-" . $distributor_id . "-" . $k] = $value->id;
+        $count[$distributor_id . "-" . $hul_username . "-" . $created_date . "-" . $name][] = $value->id;
+      }
+      $res[$bill . "-" . $sku . "-" . $distributor_id] = array();
+    }
+  }
+
+  foreach ($count as $key => $val) {
+    $counts = count($val);
+    $data = explode("-", $key);
+    $rows[] = array($data[3], $data[0], $data[1], $data[2], $counts);
+  }
+
+
+  $header = array('RS Name', 'Bill Count in Customer Billing', 'Count in Sales Register Where Bill Date is Blank');
+  if (empty($rows)) {
+    $rows[] = array("<td colspan='4' style='text-align: center;'> There is No Duplicate Records Found</td>");
+  }
+
+  $html = "<h3>Billing Date is Missed in Sales Register</h3>";
+  $html .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('border' => '1', 'cellpadding' => '3', 'cellspacing' => '0')));
+  $params['subject'] = "Billing Date is missed in Sales Register";
+  $params['body'] = $html;
+  //$mail_to = "gaurav@leanbox.in,kusha@leanbox.in,deepak@leanbox.in";
+  $mail_to = "abhishek.r@iksula.com";
+  $from = "MIS.HELPDESK@leanbox.in";
+  drupal_mail('adhoc_task', 'bill_date_missing', $mail_to, LANGUAGE_NONE, $params, $from);
+}
+
+/**
+ *  callback for weekly report menu
+ */
+function weekly_report_form($form, &$form_state) {
+  if (isset($_GET['from_date'])) {
+    $from_date = $_GET['from_date'];
+  }
+
+  if (isset($_GET['to_date'])) {
+    $to_date = $_GET['to_date'];
+  }
+
+  $form['from_date'] = array(
+    '#type' => 'date_popup',
+    '#title' => 'From date',
+    '#description' => 'Select from date to generate report',
+    '#require' => TRUE,
+    '#date_label_position' => 'within',
+    '#date_format' => 'Y-m-d',
+    '#default_value' => $from_date,
+  );
+  $form['to_date'] = array(
+    '#type' => 'date_popup',
+    '#title' => 'To date',
+    '#description' => 'Select to date to generate report',
+    '#require' => TRUE,
+    '#date_label_position' => 'within',
+    '#date_format' => 'Y-m-d',
+    '#default_value' => $to_date,
+  );
+//  $form['email_id'] = array (
+//    '#type' => 'textfield',
+//    '#title' => 'Enter email id to send report data',
+//    '#description' => 'Enter email id eg: xyz@gmail.com',
+//    '#default_value' => "sandip.auti@iksulaops.com",
+//  );
+  $form['save'] = array(
+    '#type' => 'submit',
+    '#value' => 'Save'
+  );
+  return $form;
+}
+
+/**
+ * submit handler for weekly_report_form 
+ */
+function weekly_report_form_submit($form, &$form_state) {
+  $from_date = $form_state['values']['from_date'];
+  $to_date = $form_state['values']['to_date'];
+  if ($form_state['values']["op"] == "Save")
+   drupal_goto('email/weekly-billing-report', array('query' => array('from_date' => $from_date, 'to_date' => $to_date)));
+}
+/**
+ * Form validate
+ */
+function weekly_report_form_validate($form, &$form_state) {
+  $from_date = $form_state['values']['from_date'];
+  $to_date = $form_state['values']['to_date']; 
+  $datediff = strtotime($to_date) - strtotime($from_date);
+  $num_days = $datediff / (60 * 60 * 24);
+  if ($num_days < 0) {
+   form_set_error('form', 'Please select valid To and From date'); 
+  }
+  if ($num_days > 10) {
+   form_set_error('form', 'Date range should not be greater than 10');  
+  }
+  drupal_goto('email/weekly-billing-report', array('query' => array('from_date' => $from_date, 'to_date' => $to_date)));
+}
+/**
+ * Below code is for billing report
+ * Page callback for weekly report
+ */
+function weekly_billing_report_callback() {
+   if (isset($_GET['from_date'])) {
+    $from_date = $_GET['from_date'];
+  }
+  if (isset($_GET['to_date'])) {
+    $to_date = $_GET['to_date'];
+  }
+  if(!$from_date && !$to_date){
+    return drupal_render(drupal_get_form('weekly_report_form'));
+  }
+  $datediff = strtotime($to_date) - strtotime($from_date);
+  $num_days = $datediff / (60 * 60 * 24);
+  $timestamp = strtotime($from_date);  
+  $html .= drupal_render(drupal_get_form('weekly_report_form'));
+  $rid = get_role_by_name('RS Operator');
+  $query = db_select('users', 'u');
+  $query->fields('u', array('uid'));
+  $query->innerJoin('users_roles', 'r', 'r.uid = u.uid');
+  $query->innerjoin('field_data_field_distributor', 'd', 'd.entity_id = u.uid');
+  $query->fields('d', array('field_distributor_value'));
+  $query->join('field_data_field_name', 'nm', 'nm.entity_id = u.uid');
+  $query->join('field_data_field_third_party_username', 'pu', 'pu.entity_id = u.uid');
+  $query->fields('nm', array('field_name_value'));
+  $query->fields('pu', array('field_third_party_username_value'));
+  $query->condition('r.rid', $rid);
+  $query->condition('u.uid', 1, '>');
+  $query->orderBy('u.name');
+  $users = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+
+  $bill_flag = 'count_bill';
+  $flag_n_plus_two = FALSE;
+  $html .= get_html_for_weekly_report($bill_flag, $flag_n_plus_two, $users, $timestamp, $num_days);
+  $bill_flag = 'count_bill_value';
+  $flag_n_plus_two = FALSE;
+  $html .= get_html_for_weekly_report($bill_flag, $flag_n_plus_two, $users, $timestamp , $num_days);
+  $bill_flag = 'count_bill_n+2';
+  $flag_n_plus_two = TRUE;
+  $html .= get_html_for_weekly_report($bill_flag, $flag_n_plus_two, $users, $timestamp , $num_days);
+  $bill_flag = 'count_value_n+2';
+  $flag_n_plus_two = TRUE;
+  $html .= get_html_for_weekly_report($bill_flag, $flag_n_plus_two, $users, $timestamp , $num_days);
+  $params['subject'] = "Weekly Billing Report";
+  $params['body'] = $html;
+  //$mail_to = "gaurav@leanbox.in,kusha@leanbox.in,deepak@leanbox.in";
+  $mail_to = "sandip.auti11@gmail.com";
+  $from = "MIS.HELPDESK@leanbox.in";
+  //drupal_mail('adhoc_task', 'weekly_billing_report', $mail_to, LANGUAGE_NONE, $params, $from);
+  return $html;
+}
+
+/**
+ * get html for weekly report
+ */
+function get_html_for_weekly_report($bill_flag, $flag_n_plus_two, $users, $timestamp , $num_days) {
+ if ($num_days < 0) {
+   return; 
+ }
+ if($num_days >  10) {
+   return; 
+ }
+  $timestamp = $timestamp;
+  if ($bill_flag == 'count_bill') {
+    $caption = 'No. of bills uploaded on TP';
+  }
+  else if ($bill_flag == 'count_bill_value') {
+    $caption = 'Value of bills uploaded on TP';
+  }
+  else if ($bill_flag == 'count_bill_n+2') {
+    $caption = 'No of bills dispatched on TP corresponding to the following bill date on N+2';
+  }
+  else {
+    $caption = 'Value of bills dispatched on TP corresponding to the following bill date on N+2';
+  }
+  $html .= '<table  border="1" "cellpadding" = "1", "cellspacing" = "0"><caption><h2> ' . $caption . '</h2></caption>';
+  $html .= get_weekly_data_header($timestamp, $num_days);
+  foreach ($users as $key => $val) {
+    $uid = $val['uid'];
+    $distributor_id = $val['field_distributor_value'];
+    $hul_username = $val['field_third_party_username_value'] . ' : ' . $val['field_name_value'];
+    $html .= get_weekly_report_data($timestamp, $distributor_id, $flag_n_plus_two, $hul_username, $bill_flag, $num_days);
+  }
+  $html .= '</table>';
+  return $html;
+}
+
+/**
+ *  get weekly data header
+ */
+function get_weekly_data_header($timestamp,$num_days) {
+  $html .= '<tr>';
+  $html .= '<th> Customer</th>';
+  for ($i = 0; $i <= $num_days; $i++) {
+    $html .= '<th>' . date('Y-m-d', $timestamp) . '</th>';
+    $timestamp += 24 * 3600;
+  }
+  $html .= '</tr>';
+  return $html;
+}
+
+/**
+ * Function to get weekly report data for today's date to 10 days before
+ */
+function get_weekly_report_data($timestamp, $distributor_id, $flag_n_plus_two, $hul_username, $bill_flag, $num_days) {
+  $html .= '<tr>';
+  for ($i = 0; $i <= $num_days; $i++) {
+    $query = db_select('node', 'n');
+    $query->join('field_data_field_sr_bill_date', 'sr', 'sr.entity_id = n.nid');
+    $query->join('field_data_field_bill_value', 'bv', 'bv.entity_id = n.nid');
+    if ($flag_n_plus_two) {
+      $query->join('field_data_field_dispatch_n_value', 'di', 'di.entity_id = n.nid');
+    }
+    $query->condition('sr.field_sr_bill_date_value', $timestamp);
+    $query->condition('n.uid', $distributor_id);
+    $query->condition('n.type', 'sales_register_data');
+    if ($flag_n_plus_two) {
+      $query->condition('di.field_dispatch_n_value_value', 'N+2');
+    }
+    $query->addExpression('COUNT(sr.field_sr_bill_date_value)', 'count');
+    $query->addExpression('SUM(bv.field_bill_value_value)', 'sum');
+    $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+    $result_arr[$hul_username][] = $res[0];
+    
+    $timestamp += 24 * 3600;
+        
+  }
+
+  foreach ($result_arr as $k => $val) {
+    $html .= '<td>' . $k . '</td>';
+    foreach ($val as $value) {
+      if ($bill_flag == 'count_bill' || $bill_flag == 'count_bill_n+2') {
+        $html .= '<td>' . $value['count'] . '</td>';
+      }
+      else {
+        if (!empty($value['sum'])) {
+          $html .= '<td>' . $value['sum'] . '</td>';
+        }
+        else {
+          $html .= '<td>' . 0 . '</td>';
+        }
+      }
+    }
+  }
+  $html .= '</tr>';
+  return $html;
 }
