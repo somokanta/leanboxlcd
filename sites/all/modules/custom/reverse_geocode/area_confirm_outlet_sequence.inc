@@ -191,6 +191,13 @@ function filter_area_confirm_outlet_sequence_wise_validate(&$form, &$form_state)
   $data = "";
   $type = "filter-sequence-api";
   $area_status = 1;
+  global $user;
+  $user_id = $user->uid;
+  $distributor_id = change_feeds_import_get_distributor_id($user_id);
+  $nid = check_node_title_exists($distributor_id, 'van_stop_master');
+  if (!$nid) {
+    form_set_error('area_hook_group', 'Please create Van Stop Master for routing sequence');
+  }
   if (!empty($sales_day) && !empty($van_pl_group) && !empty($area_hook_group)) {
     $data = area_confirm_outlet_sequence_get_data_area_code_wise($sales_day, $van_pl_group, $area_hook_group, $area_status, $type);
   }
@@ -359,18 +366,35 @@ function area_confirm_outlet_sequence_api(&$form, &$form_state) {
   /**
    * Have run the API and show date on the fly and on the save button have to save the field
    */
+  
+  global $user;
+  $user_id = $user->uid;
+  $distributor_id = change_feeds_import_get_distributor_id($user_id);
+  $nid = check_node_title_exists($distributor_id, 'van_stop_master');
+
+  if ($nid) {
+    $node = node_load($nid);
+  }
+
+  $start_lat = $node->field_distributor_latitude['und'][0]['value'];
+  $start_long = $node->field_distributor_longitude['und'][0]['value'];
+  $start_name = 'start';
+
+  $Locations[0]['LocationName'] = 'START';
+  $Locations[0]['Latitude'] = $start_lat;
+  $Locations[0]['Longitude'] = $start_long;
+
   foreach ($data as $key => $val) {
     $lat = $val['field_hul_updated_lat_value'];
     $long = $val['field_hul_updated_long_value'];
-    $Locations[$key]['LocationName'] = $key.'#'.$val['title'];
-    $Locations[$key]['Latitude'] = $lat;
-    $Locations[$key]['Longitude'] = $long;
+    $Locations[$key + 1]['LocationName'] = $key.'#'.$val['title'];
+    $Locations[$key + 1]['Latitude'] = $lat;
+    $Locations[$key + 1]['Longitude'] = $long;
   }
-
   $parameters['AppId'] = "cdaccfeb03474c87ad9d1275e5877209";
-  $parameters['RouteType'] = 'RoundTrip';
+  $parameters['RouteType'] = variable_get('api_routetype','FixedStartOpenEnd'); //RoundTrip
   $parameters['StartLocation'] = $Locations[0]['LocationName'];
-  $parameters['EndLocation'] = $Locations[0]['LocationName'];
+  //$parameters['EndLocation'] = $Locations[0]['LocationName'];
 
 
   $optimizer_routesavvy_url = variable_get('optimizer_routesavvy_url', 'http://optimizer.routesavvy.com/OnTerraStopOpt.svc?wsdl');
@@ -383,21 +407,20 @@ function area_confirm_outlet_sequence_api(&$form, &$form_state) {
     $response_array = $response_data->GetStopOptResult->OutputLocations->Location;
 //    $lat = $response_data->GetStopOptResult->OutputLocations->Location[0]->Latitude; 
     foreach ($response_array as $k => $v) {
+      $_response_name = explode('#',$v->LocationName);
       foreach ($data as $key => $val) {
-        $_response_name = explode('#',$v->LocationName);
-        if ($key == $_response_name[0]) {
-          $data_modified[$k] = $val;
-          $data_modified[$k]['modified_sequence_value'] = $val['field_sequence_value'];
-          $data_modified[$k]['field_sequence_value'] = $k + 1;
+        if ($key == $_response_name[0] && $_response_name[0] != 'START') {
+          $data_modified[$k-1] = $val;
+          $data_modified[$k-1]['modified_sequence_value'] = $val['field_sequence_value'];
+          $data_modified[$k-1]['field_sequence_value'] = $k;
         }
       }
     }
     $data = $data_modified; // now modified original data
-    
     $form_state['reverse_geocode']['rows_save'] = 1;
   }
   else {
-    drupal_set_message("Error Occured while API call!!");
+    drupal_set_message($response_data->GetStopOptResult->OutputMessage.' (API ERROR)');
   }
 ####################API call end###################################3 
 
@@ -474,6 +497,6 @@ function update_area_confirm_outlet_sequence_status($code , $sequence_no) {
   if ($nid) {
     $node = node_load($nid);
     $node->field_sequence['und'][0]['value'] = $sequence_no;
-    node_save($node);
+    //node_save($node);
   }
 }
