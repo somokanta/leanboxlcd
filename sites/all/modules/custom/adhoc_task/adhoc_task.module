@@ -376,7 +376,7 @@ function weekly_billing_report_callback() {
   if (isset($_GET['to_date'])) {
     $to_date = $_GET['to_date'];
   }
-  if($from_date && $to_date){
+  if(!$from_date && !$to_date){
     return ;
   }
   $datediff = strtotime($to_date) - strtotime($from_date);
