@@ -304,15 +304,11 @@ function weekly_report_form($form, &$form_state) {
   if (isset($_GET['from_date'])) {
     $from_date = $_GET['from_date'];
   }
-  else {
-    $from_date = date('Y-m-d');
-  }
+
   if (isset($_GET['to_date'])) {
     $to_date = $_GET['to_date'];
   }
-  else {
-    $to_date = date('Y-m-d');
-  }
+
   $form['from_date'] = array(
     '#type' => 'date_popup',
     '#title' => 'From date',
@@ -379,6 +375,9 @@ function weekly_billing_report_callback() {
   }
   if (isset($_GET['to_date'])) {
     $to_date = $_GET['to_date'];
+  }
+  if($from_date && $to_date){
+    return ;
   }
   $datediff = strtotime($to_date) - strtotime($from_date);
   $num_days = $datediff / (60 * 60 * 24);
