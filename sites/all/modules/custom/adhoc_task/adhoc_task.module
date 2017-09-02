@@ -377,7 +377,7 @@ function weekly_billing_report_callback() {
     $to_date = $_GET['to_date'];
   }
   if(!$from_date && !$to_date){
-    return ;
+    return drupal_render(drupal_get_form('weekly_report_form'));
   }
   $datediff = strtotime($to_date) - strtotime($from_date);
   $num_days = $datediff / (60 * 60 * 24);
