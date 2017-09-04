@@ -898,7 +898,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     $output1 = array();
 
     $pp_table = '';
-    $data[] = array('Group', 'Sales Register Count', 'Impact Bill Count');
+    $data[] = array('Group', 'TP Bill Count', 'Impact Entered Bill Count');
 
     $query = db_select('node', 'n');
     $query->addExpression('COUNT(n.nid)', 'total_count');
