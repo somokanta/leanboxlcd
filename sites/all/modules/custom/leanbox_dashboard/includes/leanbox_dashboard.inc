@@ -5,6 +5,49 @@
  *  defined in for custom block
  */
 
+
+/**
+ * 
+ * @param array $form
+ * @param array $form_state
+ * @return array
+ */
+function leanbox_dashboard_chart_filter_adoption_form($form, &$form_state) {
+  $form = array();
+
+  if (arg(1) == 'adoption_graph') {
+    $bill_date = date('Y-m-d');
+    $form['start_date'] = array(
+      '#type' => 'date_popup',
+      '#title' => t('Bill Date From'),
+      '#required' => TRUE,
+      '#date_format' => 'Y-m-d',
+      '#default_value' => $bill_date,
+    );
+    $form['end_date'] = array(
+      '#type' => 'date_popup',
+      '#title' => t('Bill Date To'),
+      '#required' => TRUE,
+      '#date_format' => 'Y-m-d',
+      '#default_value' => $bill_date,
+    );
+
+    $form['submit'] = array(
+      '#type' => 'submit',
+      '#value' => 'Submit',
+      '#prefix' => '<div id ="adoption-graph-submit">',
+      '#suffix' => '</div>',
+      '#attributes' => array('class' => array('adoption-graph-submit')),
+    );
+  }
+
+  $form['adoption_graph'] = array(
+    '#markup' => '<a href = "/leanbox-chart-details/adoption_graph" target = "_blank"><div id="adoption_graph_div"></div></a>',
+  );
+
+  return $form;
+}
+
 /**
  * 
  * @param array $form
@@ -850,6 +893,51 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     $end_date = strtotime(date('Y-m-d')) + 86399;
   }
 
+  
+   if ($activity_type == 'adoption_graph') {
+    $output1 = array();
+
+    $pp_table = '';
+    $data[] = array('Group', 'TP Bill Count', 'Impact Entered Bill Count');
+
+    $query = db_select('node', 'n');
+    $query->addExpression('COUNT(n.nid)', 'total_count');
+    $query->condition('n.type', 'sales_register_data');
+    $query->condition('n.uid', $distributor_id);
+    $query->join('field_data_field_sr_bill_date', 'b', 'b.entity_id = n.nid');
+    if (!empty($start_date) && !empty($end_date)) {
+      $query->condition('b.field_sr_bill_date_value', array($start_date, $end_date), 'BETWEEN');
+    }
+    $res = $query->execute()->fetch(PDO::FETCH_ASSOC);
+    
+    $query = db_select('node', 'n');
+    $query->addExpression('COUNT(n.nid)', 'total_count');
+    $query->condition('n.type', 'impact_cron_mobile_data');
+    $query->condition('n.uid', $distributor_id);
+    $query->join('field_data_field_mobile_update_date', 'b', 'b.entity_id = n.nid');
+    if (!empty($start_date) && !empty($end_date)) {
+      $query->condition('b.field_mobile_update_date_value', array($start_date, $end_date), 'BETWEEN');
+    }
+    $res1 = $query->execute()->fetch(PDO::FETCH_ASSOC);
+
+    if (!empty($res) && !empty($res1)) {
+      $total_bill_count = $res['total_count'];
+      $total_impact_bill_count = $res1['total_count'];
+
+      $data[] = array('', (int) $total_bill_count, (int) $total_impact_bill_count);
+    }
+    else {
+      $data[] = array('No data found', 0, 0);
+    }
+
+//    if (arg(1) == 'bill_pendency' || $ajax_type == 'bill_pendency_ajax') {
+//      $pp_table = get_mtd_data_pl_groupwise($start_date, $end_date, $distributor_id);
+//    }
+
+    $output1 = $data;
+    return $output1;
+  }
+  
   if ($activity_type == 'party_packing') {
 
     $query = db_select('node', 'n');
