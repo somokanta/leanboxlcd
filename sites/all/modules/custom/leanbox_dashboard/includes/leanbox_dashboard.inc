@@ -914,9 +914,9 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     $query->addExpression('COUNT(n.nid)', 'total_count');
     $query->condition('n.type', 'impact_cron_mobile_data');
     $query->condition('n.uid', $distributor_id);
-    $query->join('field_data_field_mobile_update_date', 'b', 'b.entity_id = n.nid');
+    $query->join('field_data_field_mobile_bill_date', 'b', 'b.entity_id = n.nid');
     if (!empty($start_date) && !empty($end_date)) {
-      $query->condition('b.field_mobile_update_date_value', array($start_date, $end_date), 'BETWEEN');
+      $query->condition('b.field_mobile_bill_date_value', array($start_date, $end_date), 'BETWEEN');
     }
     $res1 = $query->execute()->fetch(PDO::FETCH_ASSOC);
 

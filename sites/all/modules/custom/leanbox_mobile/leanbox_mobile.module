@@ -408,6 +408,7 @@ function leanbox_mobile_save_return_data_from_cron($csv_uri) {
       $node->field_delivery_outcome[LANGUAGE_NONE][0]['value'] = $record['DELIVERY OUTCOME'];
       $node->field_reason_entry[LANGUAGE_NONE][0]['value'] = $record['REASON ENTRY'];
       $node->field_mobile_update_date[LANGUAGE_NONE][0]['value'] = strtotime($record['UPDATE DATE']);
+      $node->field_mobile_bill_date[LANGUAGE_NONE][0]['value'] = strtotime($record['BILL DATE']);
 
       $node = node_submit($node); // Prepare node for saving
       node_save($node);
