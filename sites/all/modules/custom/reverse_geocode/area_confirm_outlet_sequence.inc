@@ -300,8 +300,11 @@ function area_confirm_outlet_sequence_get_data_area_code_wise($sales_day, $van_p
 
   $query->leftjoin('field_data_field_sequence', 'fsq', 'fsq.entity_id = n.nid');
   $query->fields('fsq', array('field_sequence_value'));
-  $query->orderBy('fsq.field_sequence_value', 'asc');
+  //$query->orderBy('fsq.field_sequence_value', 'asc');
 
+  // Newly added below two line and above one commented
+  $query->orderBy('hul_lat_u.field_hul_updated_lat_value', 'asc');
+  $query->orderBy('hul_long_u.field_hul_updated_long_value', 'asc');
 
   $query->join('field_data_field_hul_code', 'hc', 'hc.entity_id = n.nid');
   $query->join('node', 'hul', 'hc.field_hul_code_value = hul.title');
