@@ -298,7 +298,7 @@ function area_confirm_outlet_sequence_get_data_area_code_wise($sales_day, $van_p
     }
   }
 
-  $query->join('field_data_field_sequence', 'fsq', 'fsq.entity_id = n.nid');
+  $query->leftjoin('field_data_field_sequence', 'fsq', 'fsq.entity_id = n.nid');
   $query->fields('fsq', array('field_sequence_value'));
   $query->orderBy('fsq.field_sequence_value', 'asc');
 
@@ -497,6 +497,6 @@ function update_area_confirm_outlet_sequence_status($code , $sequence_no) {
   if ($nid) {
     $node = node_load($nid);
     $node->field_sequence['und'][0]['value'] = $sequence_no;
-    node_save($node);
+    //node_save($node);
   }
 }
