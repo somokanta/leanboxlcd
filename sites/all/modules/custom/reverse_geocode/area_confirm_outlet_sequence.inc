@@ -263,7 +263,7 @@ function filter_area_confirm_outlet_sequence_wise_submit(&$form, &$form_state) {
       $rev_seq_status = "Confirmed";
     }
 
-    $no = floatval($sequence);
+    $no = $key + 1;
     $modified_sequence = floatval($sequence);
 
     $options[$party_code] = array(
@@ -462,7 +462,8 @@ function area_confirm_outlet_sequence_api(&$form, &$form_state) {
       $rev_seq_status = "Confirmed";
     }
 
-    $no = floatval($sequence);
+    //$no = floatval($sequence); //Commented because in some case sequence is blank
+    $no = $key + 1;
     $modified_sequence = floatval($modified_sequence);
 
     $options[$party_code] = array(
