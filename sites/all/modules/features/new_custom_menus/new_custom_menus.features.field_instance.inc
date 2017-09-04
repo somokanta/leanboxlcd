@@ -96,6 +96,63 @@ function new_custom_menus_field_default_field_instances() {
   );
 
   // Exported field_instance:
+  // 'node-impact_cron_mobile_data-field_mobile_bill_date'.
+  $field_instances['node-impact_cron_mobile_data-field_mobile_bill_date'] = array(
+    'bundle' => 'impact_cron_mobile_data',
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'date',
+        'settings' => array(
+          'format_type' => 'long',
+          'fromto' => 'both',
+          'multiple_from' => '',
+          'multiple_number' => '',
+          'multiple_to' => '',
+          'show_remaining_days' => FALSE,
+        ),
+        'type' => 'date_default',
+        'weight' => 8,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_mobile_bill_date',
+    'label' => 'Mobile Bill date',
+    'required' => 0,
+    'settings' => array(
+      'default_value' => 'now',
+      'default_value2' => 'same',
+      'default_value_code' => '',
+      'default_value_code2' => '',
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'date',
+      'settings' => array(
+        'display_all_day' => 0,
+        'increment' => 15,
+        'input_format' => 'm/d/y',
+        'input_format_custom' => '',
+        'label_position' => 'above',
+        'no_fieldset' => 0,
+        'text_parts' => array(),
+        'year_range' => '-3:+3',
+      ),
+      'type' => 'date_popup',
+      'weight' => 39,
+    ),
+  );
+
+  // Exported field_instance:
   // 'node-impact_cron_mobile_data-field_mobile_bill_value'.
   $field_instances['node-impact_cron_mobile_data-field_mobile_bill_value'] = array(
     'bundle' => 'impact_cron_mobile_data',
@@ -376,6 +433,7 @@ function new_custom_menus_field_default_field_instances() {
   // Translatables
   // Included for use with string extractors like potx.
   t('Body');
+  t('Mobile Bill date');
   t('delivery outcome');
   t('mobile Bill Value');
   t('mobile return value');
