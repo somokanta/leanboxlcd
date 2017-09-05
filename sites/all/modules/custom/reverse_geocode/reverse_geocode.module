@@ -1456,7 +1456,34 @@ function reverse_geocode_node_presave($node) {
       }
     }
   }
-  elseif ($node->type == 'outlet_master') {
+  else if (($node->type == 'sales_register_data') && !($node->is_new)) {
+
+      $original_pdd = strtolower($node->original->field_promised_date[LANGUAGE_NONE][0]['value']);
+      $updated_pdd = strtolower($node->field_promised_date[LANGUAGE_NONE][0]['value']);
+      $trip_nid = $node->field_trip_id_reference[LANGUAGE_NONE][0]['nid'];
+      if ($original_pdd !== $updated_pdd) {
+         $query = db_select('node', 'n');
+         $query->condition('n.type', 'dispatch_data');
+         $query->join('field_data_field_dispatch_date', 'disp_date', 'disp_date.entity_id = n.nid');
+         $query->condition('n.nid', $trip_nid);
+         $query->fields('disp_date', array('field_dispatch_date_value'));
+         $disp_date = $query->execute()->fetchField();
+         if (!empty($disp_date)) {
+            $dispatch_date = $disp_date;
+            if ($dispatch_date <= $updated_pdd) {
+               $n_value = "N+2";
+            }
+            elseif (($dispatch_date > $updated_pdd) && ( ($dispatch_date - $updated_pdd) <= 86400)) {
+               $n_value = "N+3";
+            }
+            elseif (($dispatch_date > $updated_pdd) && ( ($dispatch_date - $updated_pdd) > 86400)) {
+               $n_value = "N+4";
+            }
+            $node->field_dispatch_n_value[LANGUAGE_NONE][0]['value'] = $n_value;
+         }
+      }
+   }
+   elseif ($node->type == 'outlet_master') {
     module_load_include('inc', 'change_feeds_import', 'form/outlet_area_hook');
 
     $original_day = strtolower($node->original->field_sales_day[LANGUAGE_NONE][0]['value']);
@@ -1533,9 +1560,9 @@ function reverse_geocode_node_presave($node) {
           $n_value = "N+4";
         }
 
-        $node = node_load($nid);
-        $node->	field_dispatch_n_value[LANGUAGE_NONE][0]['value'] = $n_value;
-        node_save($node);
+        $sales_node = node_load($nid);
+        $sales_node->	field_dispatch_n_value[LANGUAGE_NONE][0]['value'] = $n_value;
+        node_save($sales_node);
       }
     }
   }
