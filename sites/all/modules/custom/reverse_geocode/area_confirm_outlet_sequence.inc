@@ -35,8 +35,8 @@ function area_confirm_outlet_sequence_form($form, &$form_state) {
   $form['#suffix'] = '</div>';
 
 
-  $header_array = array('sr_no' => 'Seq. No', 'party_code' => 'Party Code',
-    'party_name' => 'Party Name', 'original_seq' => 'Original Seq');
+  $header_array = array('sr_no' => array('data' => 'Seq. No', 'class' => 'sr-cell'), 'party_code' => array('data' => 'Party Code', 'class' => 'party-code-cell'),
+    'party_name' => array('data' => 'Party Name', 'class' => 'party-name-cell'), 'original_seq' => array('data' => 'Original Seq', 'class' => 'original-seq-cell'), 'details' => array('data' => '', 'class' => 'details-cell'));
 
   $form['sales_day'] = array(
     '#type' => 'select',
@@ -267,13 +267,14 @@ function filter_area_confirm_outlet_sequence_wise_submit(&$form, &$form_state) {
     $modified_sequence = floatval($sequence);
 
     $options[$party_code] = array(
-      'sr_no' => $no,
-      'party_code' => $party_code,
-      'party_name' => $party_name,
+      'sr_no' => array('data' => $no, 'class' => 'sr-cell'),
+      'party_code' => array('data' => $party_code, 'class' => 'party-code-cell'),
+      'party_name' => array('data' => '<div class="party-name-data">' . $party_name . '</div>', 'class' => 'party-name-cell'),
       '#attributes' => array('data-lat' => $lat, 'data-lng' => $long, 'data-sr' => $no),
-      'original_seq' => $modified_sequence,
-      'details' => array('data' => array('#markup' => '<a class="cell-details" style="display:none;">On Map</a>' . $marker_tooltip)),
+      'original_seq' => array('data' => $modified_sequence, 'class' => 'original_seq-cell'),
+      'details' => array('data' => array('#markup' => '<a class="cell-details" style="display:none;">On Map</a>' . $marker_tooltip), 'class' => 'details-cell'),
     );
+        
   }
   $form_state['reverse_geocode']['rows'] = $options;
   $form_state['rebuild'] = TRUE;
@@ -470,13 +471,14 @@ function area_confirm_outlet_sequence_api(&$form, &$form_state) {
     $modified_sequence = floatval($modified_sequence);
 
     $options[$party_code] = array(
-      'sr_no' => $no,
-      'party_code' => $party_code,
-      'party_name' => $party_name,
+      'sr_no' => array('data' => $no, 'class' => 'sr-cell'),
+      'party_code' => array('data' => $party_code, 'class' => 'party-code-cell'),
+      'party_name' => array('data' => '<div class="party-name-data">' . $party_name . '</div>', 'class' => 'party-name-cell'),
       '#attributes' => array('data-lat' => $lat, 'data-lng' => $long, 'data-sr' => $no),
-      'original_seq' => $modified_sequence,
-      'details' => array('data' => array('#markup' => '<a class="cell-details" style="display:none;">On Map</a>' . $marker_tooltip)),
+      'original_seq' => array('data' => $modified_sequence, 'class' => 'original_seq-cell'),
+      'details' => array('data' => array('#markup' => '<a class="cell-details" style="display:none;">On Map</a>' . $marker_tooltip), 'class' => 'details-cell'),
     );
+    
   }
   $form_state['reverse_geocode']['rows'] = $options;
   $form_state['rebuild'] = TRUE;
