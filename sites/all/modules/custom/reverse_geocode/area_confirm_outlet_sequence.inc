@@ -478,7 +478,6 @@ function area_confirm_outlet_sequence_api(&$form, &$form_state) {
       'original_seq' => array('data' => $modified_sequence, 'class' => 'original_seq-cell'),
       'details' => array('data' => array('#markup' => '<a class="cell-details" style="display:none;">On Map</a>' . $marker_tooltip), 'class' => 'details-cell'),
     );
-    
   }
   $form_state['reverse_geocode']['rows'] = $options;
   $form_state['rebuild'] = TRUE;
