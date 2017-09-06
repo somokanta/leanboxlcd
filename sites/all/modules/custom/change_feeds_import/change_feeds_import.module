@@ -2182,6 +2182,12 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
 //
 //    $query->add_field('temp', 'van_pl_group');
   }
+  // This code is only for hul_admin role
+  if ($view->name == 'channel_master_central_report' || $view->name == 'central_picking_report' || $view->name == 'central_party_pack_report' || $view->name == 'central_unloading_form' || $view->name == 'central_mobile_return_analysis') {
+    unset($query->where[0]['conditions'][0]);
+    $values = fetch_rs_field_data();
+    $query->add_where(0,'node.uid',$values,'IN'); 
+  }
 }
 
 /**
@@ -2553,4 +2559,16 @@ function _send_file_using_shellexec($file_name, $file_uri) {
     $command = 'sshpass -p "Techub123#" scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -r ' . $csv_realfilename . ' sftpuser03@103.233.76.251:/';
     shell_exec($command);
   }
+}
+
+/**
+ * Function to get user id of distributor
+ */
+function fetch_rs_field_data() {
+  $query = db_select('users', 'u');
+  $query->join('field_data_field_rs_view_report', 'rs', 'u.uid = rs.entity_id');
+  $query->fields('u', array('uid'));
+  $query->condition('rs.field_rs_view_report_value', 1, '=');
+  $result = $query->execute()->fetchAllKeyed(0, 0);
+  return $result;
 }
