@@ -2567,7 +2567,8 @@ function _send_file_using_shellexec($file_name, $file_uri) {
 function fetch_rs_field_data() {
   $query = db_select('users', 'u');
   $query->join('field_data_field_rs_view_report', 'rs', 'u.uid = rs.entity_id');
-  $query->fields('u', array('uid'));
+  $query->join('field_data_field_distributor', 'ds', 'u.uid = ds.entity_id');
+  $query->fields('ds', array('field_distributor_value'));
   $query->condition('rs.field_rs_view_report_value', 1, '=');
   $result = $query->execute()->fetchAllKeyed(0, 0);
   return $result;
