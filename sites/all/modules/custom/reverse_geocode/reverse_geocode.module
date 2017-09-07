@@ -1462,7 +1462,7 @@ function reverse_geocode_node_presave($node) {
       $updated_bill_date = $node->field_sr_bill_date[LANGUAGE_NONE][0]['value'];
       if ($original_bill_date !== $updated_bill_date) {
          module_load_include('inc', 'change_feeds_import', 'form/sales_register_data');
-         $pdd = get_promised_delivery_date($val['date']);
+         $pdd = get_promised_delivery_date($updated_bill_date);
          $node->field_promised_date[LANGUAGE_NONE][0]['value'] = $pdd;
       }
       // code for updating dispatch N value on updating pdd
