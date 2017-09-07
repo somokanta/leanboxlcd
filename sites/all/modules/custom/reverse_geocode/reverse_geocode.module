@@ -1375,6 +1375,7 @@ function reverse_geocode_update_hul_lat_lng($hul_code, $lat, $lng) {
  * Implements hook_node_presave()
  */
 function reverse_geocode_node_presave($node) {
+   //dpm($node);
   if ($node->type == 'hul_code_master') {
     $og_hul_lat = $node->original->field_hul_lat['und'][0]['value'];
     $og_hul_long = $node->original->field_hul_long['und'][0]['value'];
@@ -1469,7 +1470,7 @@ function reverse_geocode_node_presave($node) {
          $query->fields('disp_date', array('field_dispatch_date_value'));
          $disp_date = $query->execute()->fetchField();
          if (!empty($disp_date)) {
-            $dispatch_date = $disp_date;
+            $dispatch_date = strtotime($disp_date);
             if ($dispatch_date <= $updated_pdd) {
                $n_value = "N+2";
             }
