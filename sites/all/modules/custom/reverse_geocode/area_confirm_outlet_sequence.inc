@@ -264,17 +264,16 @@ function filter_area_confirm_outlet_sequence_wise_submit(&$form, &$form_state) {
     }
 
     $no = $key + 1;
-    $modified_sequence = floatval($sequence);
+    $original_sequence = floatval($sequence);
 
     $options[$party_code] = array(
       'sr_no' => array('data' => $no, 'class' => 'sr-cell'),
       'party_code' => array('data' => $party_code, 'class' => 'party-code-cell'),
       'party_name' => array('data' => '<div class="party-name-data">' . $party_name . '</div>', 'class' => 'party-name-cell'),
       '#attributes' => array('data-lat' => $lat, 'data-lng' => $long, 'data-sr' => $no),
-      'original_seq' => array('data' => $modified_sequence, 'class' => 'original_seq-cell'),
+      'original_seq' => array('data' => $original_sequence, 'class' => 'original_seq-cell'),
       'details' => array('data' => array('#markup' => '<a class="cell-details" style="display:none;">On Map</a>' . $marker_tooltip), 'class' => 'details-cell'),
     );
-        
   }
   $form_state['reverse_geocode']['rows'] = $options;
   $form_state['rebuild'] = TRUE;
@@ -302,7 +301,6 @@ function area_confirm_outlet_sequence_get_data_area_code_wise($sales_day, $van_p
   $query->leftjoin('field_data_field_sequence', 'fsq', 'fsq.entity_id = n.nid');
   $query->fields('fsq', array('field_sequence_value'));
   //$query->orderBy('fsq.field_sequence_value', 'asc');
-
   // Newly added below two line and above one commented
   $query->orderBy('hul_lat_u.field_hul_updated_lat_value', 'asc');
   $query->orderBy('hul_long_u.field_hul_updated_long_value', 'asc');
@@ -370,7 +368,6 @@ function area_confirm_outlet_sequence_api(&$form, &$form_state) {
   /**
    * Have run the API and show date on the fly and on the save button have to save the field
    */
-  
   global $user;
   $user_id = $user->uid;
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
@@ -382,49 +379,102 @@ function area_confirm_outlet_sequence_api(&$form, &$form_state) {
 
   $start_lat = $node->field_distributor_latitude['und'][0]['value'];
   $start_long = $node->field_distributor_longitude['und'][0]['value'];
-  $start_name = 'start';
+  $start_name = 'START';
 
-  $Locations[0]['LocationName'] = 'START';
-  $Locations[0]['Latitude'] = $start_lat;
-  $Locations[0]['Longitude'] = $start_long;
+  $enable_api = variable_get('api_enable_integration', 'routesavvy'); //routific
+  $api_call_success = 0;
+  
+  if ($enable_api === 'routesavvy') {
+    $Locations[0]['LocationName'] = $start_name;
+    $Locations[0]['Latitude'] = $start_lat;
+    $Locations[0]['Longitude'] = $start_long;
 
-  foreach ($data as $key => $val) {
-    $lat = $val['field_hul_updated_lat_value'];
-    $long = $val['field_hul_updated_long_value'];
-    $Locations[$key + 1]['LocationName'] = $key.'#'.$val['title'];
-    $Locations[$key + 1]['Latitude'] = $lat;
-    $Locations[$key + 1]['Longitude'] = $long;
-  }
-  $parameters['AppId'] = "cdaccfeb03474c87ad9d1275e5877209";
-  $parameters['RouteType'] = variable_get('api_routetype','FixedStartOpenEnd'); //RoundTrip
-  $parameters['StartLocation'] = $Locations[0]['LocationName'];
-  //$parameters['EndLocation'] = $Locations[0]['LocationName'];
+    foreach ($data as $key => $val) {
+      $Locations[$key + 1]['LocationName'] = $key . '#' . $val['title'];
+      $Locations[$key + 1]['Latitude'] = $val['field_hul_updated_lat_value'];
+      $Locations[$key + 1]['Longitude'] = $val['field_hul_updated_long_value'];
+    }
+    $parameters['AppId'] = "cdaccfeb03474c87ad9d1275e5877209";
+    $parameters['RouteType'] = variable_get('api_routesavvy_routetype', 'FixedStartOpenEnd'); //RoundTrip
+    $parameters['StartLocation'] = $Locations[0]['LocationName'];
+    //$parameters['EndLocation'] = $Locations[0]['LocationName'];
 
 
-  $optimizer_routesavvy_url = variable_get('optimizer_routesavvy_url', 'http://optimizer.routesavvy.com/OnTerraStopOpt.svc?wsdl');
-  $client = new SoapClient($optimizer_routesavvy_url);
-  $request_data['Locations']['Location'] = $Locations;
-  $request_data['Parameters'] = $parameters;
-  $response_data = $client->GetStopOpt($request_data);
-  ################SHORT THE ARRAY in sequence################### 
-  if ($response_data->GetStopOptResult->ErrorCode === 0) {
-    $response_array = $response_data->GetStopOptResult->OutputLocations->Location;
+    $optimizer_routesavvy_url = variable_get('api_routesavvy_url', 'http://optimizer.routesavvy.com/OnTerraStopOpt.svc?wsdl');
+    $client = new SoapClient($optimizer_routesavvy_url);
+    $request_data['Locations']['Location'] = $Locations;
+    $request_data['Parameters'] = $parameters;
+    $response_data = $client->GetStopOpt($request_data);
+    ################SHORT THE ARRAY in sequence################### 
+    if ($response_data->GetStopOptResult->ErrorCode === 0) {
+      $api_call_success = 1;
+      $response_array = $response_data->GetStopOptResult->OutputLocations->Location;
 //    $lat = $response_data->GetStopOptResult->OutputLocations->Location[0]->Latitude; 
-    foreach ($response_array as $k => $v) {
-      $_response_name = explode('#',$v->LocationName);
-      foreach ($data as $key => $val) {
-        if ($key == $_response_name[0] && $_response_name[0] != 'START') {
-          $data_modified[$k-1] = $val;
-          $data_modified[$k-1]['modified_sequence_value'] = $val['field_sequence_value'];
-          $data_modified[$k-1]['field_sequence_value'] = $k;
+      foreach ($response_array as $k => $v) {
+        $_response_name = explode('#', $v->LocationName);
+        foreach ($data as $key => $val) {
+          if ($key == $_response_name[0] && $_response_name[0] != 'START') {
+            $data_modified[$k - 1] = $val;
+            $data_modified[$k - 1]['original_sequence'] = $val['field_sequence_value'];
+            $data_modified[$k - 1]['field_sequence_value'] = $k;
+          }
         }
       }
+      $data = $data_modified; // now modified original data
+      $form_state['reverse_geocode']['rows_save'] = 1;
     }
-    $data = $data_modified; // now modified original data
-    $form_state['reverse_geocode']['rows_save'] = 1;
+    else {
+      drupal_set_message($response_data->GetStopOptResult->OutputMessage . ' (API ERROR)');
+    }
   }
-  else {
-    drupal_set_message($response_data->GetStopOptResult->OutputMessage.' (API ERROR)');
+
+  if ($enable_api === 'routific') {
+
+    $Locations['fleet']['hul_vehicle']['start_location'] = array(
+      "id" => "hul_outlet",
+      "name" => $start_name,
+      "lat" => $start_lat,
+      "lng" => $start_long
+    );
+
+    foreach ($data as $key => $val) {
+      $Locations['visits'][$key + 1]['location']['name'] = $key . '#' . $val['title'];
+      $Locations['visits'][$key + 1]['location']['lat'] = $val['field_hul_updated_lat_value'];
+      $Locations['visits'][$key + 1]['location']['lng'] = $val['field_hul_updated_long_value'];
+    }
+
+
+    $Locations_data = json_encode($Locations);
+    $authorization = 'bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1ODgzOWY4ZjYyZmQyMzkzMGE4NjQwYjEiLCJpYXQiOjE1MDQ2Nzg4NTl9.AzJLVp6HDk6lbXCWxI1T8Y7US6R0panNjkY5B-pkdqg';
+    $request_headers = array('Content-Type' => 'application/json', 'Authorization' => $authorization);
+    $roitufic_api_url = variable_get('api_routific_url', 'https://api.routific.com/v1/vrp');
+    $routific_options = array('headers' => $request_headers, 'method' => 'POST', 'data' => $Locations_data);
+
+    $response_data = drupal_http_request($roitufic_api_url, $routific_options);
+
+    ################SHORT THE ARRAY in sequence################### 
+
+    $response_data = json_decode($response_data->data);
+
+    if ($response_data->status == 'success') {
+      $api_call_success = 1;
+      $response_array = $response_data->solution->hul_vehicle;
+      foreach ($response_array as $k => $v) {
+        $_response_name = explode('#', $v->location_name);
+        foreach ($data as $key => $val) {
+          if ($key == $_response_name[0] && $_response_name[0] != 'START') {
+            $data_modified[$k - 1] = $val;
+            $data_modified[$k - 1]['original_sequence'] = $val['field_sequence_value'];
+            $data_modified[$k - 1]['field_sequence_value'] = $k;
+          }
+        }
+      }
+      $data = $data_modified; // now modified original data
+      $form_state['reverse_geocode']['rows_save'] = 1;
+    }
+    else {
+      drupal_set_message($response_data->error . ' (API ERROR)');
+    }
   }
 ####################API call end###################################3 
 
@@ -435,11 +485,11 @@ function area_confirm_outlet_sequence_api(&$form, &$form_state) {
     $party_name = $val['field_party_name_value'];
     $rev_seq_status = $val['field_area_hook_group_hul_value'];
     $sequence = $val['field_sequence_value'];
-    if ($response_data->GetStopOptResult->ErrorCode === 0) {
-      $modified_sequence = $val['modified_sequence_value']; // newly added for modified sequence
+    if ($api_call_success) {
+      $original_sequence = $val['original_sequence']; // newly added for modified sequence
     }
     else {
-      $modified_sequence = $sequence;
+      $original_sequence = $sequence;
     }
     $new_city = $val['field_updated_address_sub_administrative_area'];
     $new_district = $val['field_updated_address_premise'];
@@ -468,14 +518,14 @@ function area_confirm_outlet_sequence_api(&$form, &$form_state) {
 
     //$no = floatval($sequence); //Commented because in some case sequence is blank
     $no = $key + 1;
-    $modified_sequence = floatval($modified_sequence);
+    $original_sequence = floatval($original_sequence);
 
     $options[$party_code] = array(
       'sr_no' => array('data' => $no, 'class' => 'sr-cell'),
       'party_code' => array('data' => $party_code, 'class' => 'party-code-cell'),
       'party_name' => array('data' => '<div class="party-name-data">' . $party_name . '</div>', 'class' => 'party-name-cell'),
       '#attributes' => array('data-lat' => $lat, 'data-lng' => $long, 'data-sr' => $no),
-      'original_seq' => array('data' => $modified_sequence, 'class' => 'original_seq-cell'),
+      'original_seq' => array('data' => $original_sequence, 'class' => 'original_seq-cell'),
       'details' => array('data' => array('#markup' => '<a class="cell-details" style="display:none;">On Map</a>' . $marker_tooltip), 'class' => 'details-cell'),
     );
   }
@@ -487,16 +537,16 @@ function area_confirm_outlet_sequence_save(&$form, &$form_state) {
   $party_code = $form_state['values']['list_form_items'];
   $sequence_no = 1;
   foreach ($party_code as $code => $val) {
-    update_area_confirm_outlet_sequence_status($code , $sequence_no);
+    update_area_confirm_outlet_sequence_status($code, $sequence_no);
     $form_state['reverse_geocode']['rows'][$code]['original_seq'] = $sequence_no;
-    $sequence_no ++;  
+    $sequence_no ++;
   }
   unset($form_state['input']['list_form_items']);
   unset($form_state['reverse_geocode']['rows_save']);
   $form_state['rebuild'] = TRUE;
 }
 
-function update_area_confirm_outlet_sequence_status($code , $sequence_no) {
+function update_area_confirm_outlet_sequence_status($code, $sequence_no) {
   module_load_include('inc', 'change_feeds_import', 'form/upload_billing_data');
   $nid = check_node_title_exists($code, 'outlet_master');
   if ($nid) {
