@@ -1457,8 +1457,16 @@ function reverse_geocode_node_presave($node) {
       }
     }
   }
-  else if (($node->type == 'sales_register_data') && !($node->is_new)) {
-
+   else if (($node->type == 'sales_register_data') && !($node->is_new)) {
+      // code for updating Pdd N value on updating pdd
+      $original_bill_date = strtolower($node->original->field_sr_bill_date[LANGUAGE_NONE][0]['value']);
+      $updated_bill_date = strtolower($node->field_sr_bill_date[LANGUAGE_NONE][0]['value']);
+      if ($original_bill_date !== $updated_bill_date) {
+         module_load_include('inc', 'change_feeds_import', 'form/sales_register_data');
+         $pdd = get_promised_delivery_date($val['date']);
+         $node->field_promised_date[LANGUAGE_NONE][0]['value'] = $pdd;
+      }
+      // code for updating dispatch N value on updating pdd
       $original_pdd = strtolower($node->original->field_promised_date[LANGUAGE_NONE][0]['value']);
       $updated_pdd = strtolower($node->field_promised_date[LANGUAGE_NONE][0]['value']);
       $trip_nid = $node->field_trip_id_reference[LANGUAGE_NONE][0]['nid'];
