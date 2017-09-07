@@ -2186,7 +2186,9 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
   if ($view->name == 'channel_master_central_report' || $view->name == 'central_picking_report' || $view->name == 'central_party_pack_report' || $view->name == 'central_unloading_form' || $view->name == 'central_mobile_return_analysis') {
     unset($query->where[0]['conditions'][0]);
     $values = fetch_rs_field_data();
-    $query->add_where(0,'node.uid',$values,'IN'); 
+    if (!empty($values)) {
+      $query->add_where(0,'node.uid',$values,'IN'); 
+    }
   }
 }
 
