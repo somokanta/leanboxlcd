@@ -1675,12 +1675,12 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
 //    }
   }
   if ($entity->type == 'hul_code_master') {
-//    $title = $entity->title;
-//    $all_title = check_hul_code_exist();
-//    if (array_key_exists($title,$all_title)){
-//      drupal_set_message("HulCode Is Alredy Present in System", 'error', FALSE);
-//      $entity->feeds_item->skip = TRUE;
-//    }
+    $title = $entity->title;
+    $existing_uid = check_hul_code_exist($title);
+    if (!empty($existing_uid) && ($existing_uid != $distributor_id)) {
+      drupal_set_message("You can not update hul_code_master cause same title is already uploaded by another user", 'error', FALSE);
+      $entity->feeds_item->skip = TRUE;
+    }
     $ph_no = $entity->field_hul_phone_no[LANGUAGE_NONE][0]['value'];
     $hul_address = $entity->field_hul_address[LANGUAGE_NONE][0]['value'];
 
@@ -1756,13 +1756,17 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
   }
 }
 
-
-
-function check_hul_code_exist(){
+/**
+ * 
+ * @param type $title
+ * @return string
+ */
+function check_hul_code_exist($title){
   $query = db_select('node', 'n');
   $query->condition('n.type', 'hul_code_master');
-  $query->fields('n', array('title'));
-  $results = $query->execute()->fetchAllKeyed(0, 0);
+  $query->fields('n', array('uid'));
+  $query->condition('n.title', $title);
+  $results = $query->execute()->fetchField();
   return $results;
 }
 /**
