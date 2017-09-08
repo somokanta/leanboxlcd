@@ -383,8 +383,8 @@ function area_confirm_outlet_sequence_api(&$form, &$form_state) {
 
   $enable_api = variable_get('api_enable_integration', 'routesavvy'); //routific
   $api_call_success = 0;
-  
   if ($enable_api === 'routesavvy') {
+    dpm("inside".$enable_api);
     $Locations[0]['LocationName'] = $start_name;
     $Locations[0]['Latitude'] = $start_lat;
     $Locations[0]['Longitude'] = $start_long;
@@ -396,6 +396,7 @@ function area_confirm_outlet_sequence_api(&$form, &$form_state) {
     }
     $parameters['AppId'] = "cdaccfeb03474c87ad9d1275e5877209";
     $parameters['RouteType'] = variable_get('api_routesavvy_routetype', 'FixedStartOpenEnd'); //RoundTrip
+    dpm($parameters['RouteType']);
     $parameters['StartLocation'] = $Locations[0]['LocationName'];
     //$parameters['EndLocation'] = $Locations[0]['LocationName'];
 
@@ -429,21 +430,21 @@ function area_confirm_outlet_sequence_api(&$form, &$form_state) {
   }
 
   if ($enable_api === 'routific') {
-
+    dpm("inside".$enable_api);
+    foreach ($data as $key => $val) {
+      $Locations['visits'][$key + 1]['location']['name'] = $key . '#' . $val['title'];
+      $Locations['visits'][$key + 1]['location']['lat'] = $val['field_hul_updated_lat_value'];
+      $Locations['visits'][$key + 1]['location']['lng'] = $val['field_hul_updated_long_value'];
+    }
+    
     $Locations['fleet']['hul_vehicle']['start_location'] = array(
       "id" => "hul_outlet",
       "name" => $start_name,
       "lat" => $start_lat,
       "lng" => $start_long
     );
-
-    foreach ($data as $key => $val) {
-      $Locations['visits'][$key + 1]['location']['name'] = $key . '#' . $val['title'];
-      $Locations['visits'][$key + 1]['location']['lat'] = $val['field_hul_updated_lat_value'];
-      $Locations['visits'][$key + 1]['location']['lng'] = $val['field_hul_updated_long_value'];
-    }
-
-
+        
+    $Locations['options']['shortest_distance'] = true;
     $Locations_data = json_encode($Locations);
     $authorization = 'bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1ODgzOWY4ZjYyZmQyMzkzMGE4NjQwYjEiLCJpYXQiOjE1MDQ2Nzg4NTl9.AzJLVp6HDk6lbXCWxI1T8Y7US6R0panNjkY5B-pkdqg';
     $request_headers = array('Content-Type' => 'application/json', 'Authorization' => $authorization);
