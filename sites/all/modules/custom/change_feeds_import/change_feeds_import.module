@@ -1678,7 +1678,7 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
     $title = $entity->title;
     $existing_uid = check_hul_code_exist($title);
     if (!empty($existing_uid) && ($existing_uid != $distributor_id)) {
-      drupal_set_message("You can not update hul_code_master cause same title is already uploaded by another user", 'error', FALSE);
+      drupal_set_message("You can not update hul_code_master because same title is already uploaded by another distributor", 'error', FALSE);
       $entity->feeds_item->skip = TRUE;
     }
     $ph_no = $entity->field_hul_phone_no[LANGUAGE_NONE][0]['value'];
