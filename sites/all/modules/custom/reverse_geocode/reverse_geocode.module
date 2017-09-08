@@ -62,7 +62,7 @@ function reverse_geocode_menu() {
     'type' => MENU_CALLBACK,
     'file' => 'address_confirm.inc'
   );
-  
+
 
   $items['area-hook-confirm-view'] = array(
     'title' => 'Area Hook Group Wise Outlets',
@@ -1375,7 +1375,6 @@ function reverse_geocode_update_hul_lat_lng($hul_code, $lat, $lng) {
  * Implements hook_node_presave()
  */
 function reverse_geocode_node_presave($node) {
-   //dpm($node);
   if ($node->type == 'hul_code_master') {
     $og_hul_lat = $node->original->field_hul_lat['und'][0]['value'];
     $og_hul_long = $node->original->field_hul_long['und'][0]['value'];
@@ -1457,10 +1456,18 @@ function reverse_geocode_node_presave($node) {
       }
     }
   }
-  else if (($node->type == 'sales_register_data') && !($node->is_new)) {
-
-      $original_pdd = strtolower($node->original->field_promised_date[LANGUAGE_NONE][0]['value']);
-      $updated_pdd = strtolower($node->field_promised_date[LANGUAGE_NONE][0]['value']);
+   else if (($node->type == 'sales_register_data') && !($node->is_new)) {
+      // code for updating Pdd value on updating bill Date
+      $original_bill_date = $node->original->field_sr_bill_date[LANGUAGE_NONE][0]['value'];
+      $updated_bill_date = $node->field_sr_bill_date[LANGUAGE_NONE][0]['value'];
+      if ($original_bill_date !== $updated_bill_date) {
+         module_load_include('inc', 'change_feeds_import', 'form/sales_register_data');
+         $pdd = get_promised_delivery_date($updated_bill_date);
+         $node->field_promised_date[LANGUAGE_NONE][0]['value'] = $pdd;
+      }
+      // code for updating dispatch N value on updating pdd
+      $original_pdd = $node->original->field_promised_date[LANGUAGE_NONE][0]['value'];
+      $updated_pdd = $node->field_promised_date[LANGUAGE_NONE][0]['value'];
       $trip_nid = $node->field_trip_id_reference[LANGUAGE_NONE][0]['nid'];
       if ($original_pdd !== $updated_pdd) {
          $query = db_select('node', 'n');
