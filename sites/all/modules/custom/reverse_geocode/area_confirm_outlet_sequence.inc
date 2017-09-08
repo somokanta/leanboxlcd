@@ -477,7 +477,15 @@ function area_confirm_outlet_sequence_api(&$form, &$form_state) {
     }
   }
 ####################API call end###################################3 
-
+  // to show hul outlet lat long
+  $options['hul_outlet'] = array(
+    'sr_no' => array('data' => 0, 'class' => 'sr-cell'),
+    'party_code' => array('data' => 'Outlet Location', 'class' => 'party-code-cell'),
+    'party_name' => array('data' => '<div class="party-name-data">' . 'Outlet Location' . '</div>', 'class' => 'party-name-cell'),
+    '#attributes' => array('data-lat' => $start_lat, 'data-lng' => $start_long, 'data-sr' => 0),
+    'original_seq' => array('data' => $original_sequence, 'class' => 'original_seq-cell'),
+    'details' => array('data' => array('#markup' => '<a class="cell-details" style="display:none;">On Map</a>' . ' '), 'class' => 'details-cell'),
+  );
   foreach ($data as $key => $val) {
     $lat = $val['field_hul_updated_lat_value'];
     $long = $val['field_hul_updated_long_value'];
@@ -537,9 +545,11 @@ function area_confirm_outlet_sequence_save(&$form, &$form_state) {
   $party_code = $form_state['values']['list_form_items'];
   $sequence_no = 1;
   foreach ($party_code as $code => $val) {
-    update_area_confirm_outlet_sequence_status($code, $sequence_no);
-    $form_state['reverse_geocode']['rows'][$code]['original_seq'] = $sequence_no;
-    $sequence_no ++;
+    if ($code !== 'hul_outlet') {
+      update_area_confirm_outlet_sequence_status($code, $sequence_no);
+      $form_state['reverse_geocode']['rows'][$code]['original_seq'] = $sequence_no;
+      $sequence_no ++;
+    }
   }
   unset($form_state['input']['list_form_items']);
   unset($form_state['reverse_geocode']['rows_save']);
