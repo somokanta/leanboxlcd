@@ -11,7 +11,7 @@ function modify_views_forms_form_alter(&$form, &$form_state, $form_id) {
     $form['#validate'][] = 'node_title_validate';
   }
 
-  if(($form_id == 'editableviews_entity_form_picking_report') || ($form_id == 'editableviews_entity_form_party_packing_report') || ($form_id == 'editableviews_entity_form_unloading_form') || ($form_id == 'editableviews_entity_form_dispatch_data_report1')) {
+  if(($form_id == 'editableviews_entity_form_picking_report') || ($form_id == 'editableviews_entity_form_party_packing_report') || ($form_id == 'editableviews_entity_form_unloading_form') || ($form_id == 'editableviews_entity_form_dispatch_data_report')) {
         
     $query = db_select('field_data_field_resource_name', 'fps');
     $query->join('field_data_field_resource_type','fst','fst.entity_id = fps.entity_id');
