@@ -115,9 +115,9 @@ function area_confirm_outlet_sequence_form($form, &$form_state) {
   $options = $form_state['reverse_geocode']['rows'];
   if ($options) {
 
-    $form['submit'] = array(
+    $form['routific_submit'] = array(
       '#type' => 'submit',
-      '#value' => t('Run Sequence API'),
+      '#value' => t('Routific API'),
       '#submit' => array('area_confirm_outlet_sequence_api'),
       '#ajax' => array(
         'wrapper' => 'address-selection-map',
@@ -130,11 +130,28 @@ function area_confirm_outlet_sequence_form($form, &$form_state) {
         ':input[name^="list_form_items"]' => array('checked' => TRUE),
         ),
         ), */
-      '#id' => 'area-hook-confirm',
+      '#id' => 'area-hook-routific',
+    );
+    $form['routesavvy_submit'] = array(
+      '#type' => 'submit',
+      '#value' => t('RouteSavvy API'),
+      '#submit' => array('area_confirm_outlet_sequence_api'),
+      '#ajax' => array(
+        'wrapper' => 'address-selection-map',
+        'callback' => 'area_confirm_outlet_sequence_ajax_callback',
+        'method' => 'replace',
+        'effect' => 'fade',
+      ),
+      /* '#states' => array(
+        'visible' => array(
+        ':input[name^="list_form_items"]' => array('checked' => TRUE),
+        ),
+        ), */
+      '#id' => 'area-hook-routesavvy',
     );
 
     if ($form_state['reverse_geocode']['rows_save']) {
-      $form['submit'] = array(
+      $form['save_submit'] = array(
         '#type' => 'submit',
         '#value' => t('Save Sequence'),
         '#submit' => array('area_confirm_outlet_sequence_save'),
@@ -184,6 +201,7 @@ function filter_area_confirm_outlet_sequence_wise($form, &$form_state) {
 
 function filter_area_confirm_outlet_sequence_wise_validate(&$form, &$form_state) {
   unset($form_state['reverse_geocode']['rows_save']);
+  unset($form_state['reverse_geocode']['filterd_rows']);
   $sales_day = $form_state['values']['sales_day'];
   $van_pl_group = $form_state['values']['van_pl_group'];
   $area_hook_group = $form_state['values']['area_hook_group'];
@@ -345,14 +363,16 @@ function area_confirm_outlet_sequence_api(&$form, &$form_state) {
   $sales_day = $form_state['values']['sales_day'];
   $van_pl_group = $form_state['values']['van_pl_group'];
   $area_hook_group = $form_state['values']['area_hook_group'];
-
   $data = "";
   $type = "filter-sequence-api";
   $area_status = 1;
-  if (!empty($sales_day) && !empty($van_pl_group) && !empty($area_hook_group)) {
-    $data = area_confirm_outlet_sequence_get_data_area_code_wise($sales_day, $van_pl_group, $area_hook_group, $area_status, $type);
+  if (!isset($form_state['reverse_geocode']['filterd_rows'])) {
+    if (!empty($sales_day) && !empty($van_pl_group) && !empty($area_hook_group)) {
+      $data = area_confirm_outlet_sequence_get_data_area_code_wise($sales_day, $van_pl_group, $area_hook_group, $area_status, $type);
+    }
+  }else{
+   $data = $form_state['reverse_geocode']['filterd_rows'];
   }
-
   if (empty($data)) {
     $message = "No Results Found";
     unset($form_state['complete form']['list_form_items']);
@@ -381,10 +401,8 @@ function area_confirm_outlet_sequence_api(&$form, &$form_state) {
   $start_long = $node->field_distributor_longitude['und'][0]['value'];
   $start_name = 'START';
 
-  $enable_api = variable_get('api_enable_integration', 'routesavvy'); //routific
   $api_call_success = 0;
-  if ($enable_api === 'routesavvy') {
-    dpm("inside".$enable_api);
+  if ($form_state['values']['op'] == 'RouteSavvy API') {
     $Locations[0]['LocationName'] = $start_name;
     $Locations[0]['Latitude'] = $start_lat;
     $Locations[0]['Longitude'] = $start_long;
@@ -396,7 +414,7 @@ function area_confirm_outlet_sequence_api(&$form, &$form_state) {
     }
     $parameters['AppId'] = "cdaccfeb03474c87ad9d1275e5877209";
     $parameters['RouteType'] = variable_get('api_routesavvy_routetype', 'FixedStartOpenEnd'); //RoundTrip
-    dpm($parameters['RouteType']);
+    drupal_set_message("Route Type: " . $parameters['RouteType']);
     $parameters['StartLocation'] = $Locations[0]['LocationName'];
     //$parameters['EndLocation'] = $Locations[0]['LocationName'];
 
@@ -414,7 +432,7 @@ function area_confirm_outlet_sequence_api(&$form, &$form_state) {
       foreach ($response_array as $k => $v) {
         $_response_name = explode('#', $v->LocationName);
         foreach ($data as $key => $val) {
-          if ($key == $_response_name[0] && $_response_name[0] != 'START') {
+          if ($key == $_response_name[0] && $_response_name[0] !== 'START') {
             $data_modified[$k - 1] = $val;
             $data_modified[$k - 1]['original_sequence'] = $val['field_sequence_value'];
             $data_modified[$k - 1]['field_sequence_value'] = $k;
@@ -428,22 +446,20 @@ function area_confirm_outlet_sequence_api(&$form, &$form_state) {
       drupal_set_message($response_data->GetStopOptResult->OutputMessage . ' (API ERROR)');
     }
   }
-
-  if ($enable_api === 'routific') {
-    dpm("inside".$enable_api);
+  if ($form_state['values']['op'] == 'Routific API') {
     foreach ($data as $key => $val) {
       $Locations['visits'][$key + 1]['location']['name'] = $key . '#' . $val['title'];
       $Locations['visits'][$key + 1]['location']['lat'] = $val['field_hul_updated_lat_value'];
       $Locations['visits'][$key + 1]['location']['lng'] = $val['field_hul_updated_long_value'];
     }
-    
+
     $Locations['fleet']['hul_vehicle']['start_location'] = array(
       "id" => "hul_outlet",
       "name" => $start_name,
       "lat" => $start_lat,
       "lng" => $start_long
     );
-        
+
     $Locations['options']['shortest_distance'] = true;
     $Locations_data = json_encode($Locations);
     $authorization = 'bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1ODgzOWY4ZjYyZmQyMzkzMGE4NjQwYjEiLCJpYXQiOjE1MDQ2Nzg4NTl9.AzJLVp6HDk6lbXCWxI1T8Y7US6R0panNjkY5B-pkdqg';
@@ -456,14 +472,16 @@ function area_confirm_outlet_sequence_api(&$form, &$form_state) {
     ################SHORT THE ARRAY in sequence################### 
 
     $response_data = json_decode($response_data->data);
-
+    if ($response_data->num_unserved) {
+      dpm($response_data->unserved);
+    }
     if ($response_data->status == 'success') {
       $api_call_success = 1;
       $response_array = $response_data->solution->hul_vehicle;
       foreach ($response_array as $k => $v) {
         $_response_name = explode('#', $v->location_name);
         foreach ($data as $key => $val) {
-          if ($key == $_response_name[0] && $_response_name[0] != 'START') {
+          if ($key == $_response_name[0] && $_response_name[0] !== 'START') {
             $data_modified[$k - 1] = $val;
             $data_modified[$k - 1]['original_sequence'] = $val['field_sequence_value'];
             $data_modified[$k - 1]['field_sequence_value'] = $k;
@@ -487,6 +505,8 @@ function area_confirm_outlet_sequence_api(&$form, &$form_state) {
     'original_seq' => array('data' => $original_sequence, 'class' => 'original_seq-cell'),
     'details' => array('data' => array('#markup' => '<a class="cell-details" style="display:none;">On Map</a>' . ' '), 'class' => 'details-cell'),
   );
+
+  $form_state['reverse_geocode']['filterd_rows'] = $data;
   foreach ($data as $key => $val) {
     $lat = $val['field_hul_updated_lat_value'];
     $long = $val['field_hul_updated_long_value'];
