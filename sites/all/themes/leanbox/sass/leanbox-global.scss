@@ -431,7 +431,22 @@ header {
     }
   }
 }
-
+    .tickets {
+      position: absolute;
+      right: 10px;
+      top: 40px;
+      padding: 10px 41px;
+      background-color: #1f497d;
+      color: #fff;
+      font-size: 20px;
+      font-weight: 500;
+      border: 5px solid #385d8a;
+      border-radius: 5px;
+      z-index: 9;
+      &:hover {
+          color: #fff;
+      }
+    } 
 body {
   > .main-container {
     /* max-width: 1300px; */
