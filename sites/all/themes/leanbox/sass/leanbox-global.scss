@@ -433,17 +433,15 @@ header {
 }
     .tickets {
       position: absolute;
-      right: 10px;
+      right: 27px;
       top: 40px;
-      padding: 10px 41px;
-      background-color: #1f497d;
+      padding: 7px 39px;
+      background-color: #1e419b;
       color: #fff;
-      font-size: 20px;
+      font-size: 14px;
       font-weight: 500;
-      border: 5px solid #385d8a;
-      border-radius: 5px;
       z-index: 9;
-      &:hover {
+      &:hover, &:focus {
           color: #fff;
       }
     } 
