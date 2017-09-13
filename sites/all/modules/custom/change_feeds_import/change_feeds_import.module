@@ -1443,6 +1443,90 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
   global $user;
   // Store distributor id in author in each node
   $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+// Add presave/alter code for van stop master uploader
+  if ($entity->feeds_item->id == 'target_master_import') {
+    $dis_id = leanbox_mobile_get_distributor_using_rscode($entity->title);
+    if (!empty($dis_id)) {
+      $entity->title = $dis_id; // storing dis id here
+      $entity->uid = $dis_id;   // storing dis id in author
+    }
+    else {
+      drupal_set_message("Please enter correct Rs Code $node_title", 'error');
+      $entity->feeds_item->skip = TRUE;
+    }
+    $del_size = $entity->field_del_per_van['und'][0]['value'];
+    if (!is_numeric($del_size)) {
+      drupal_set_message("Please enter numaric value for Del per van", 'error');
+      $entity->feeds_item->skip = TRUE;
+    }
+    $dets_bulk = $entity->field_dets_bulk['und'][0]['value'];
+    if (!is_numeric($dets_bulk)) {
+      drupal_set_message("Please enter numaric value for Dets bulk", 'error');
+      $entity->feeds_item->skip = TRUE;
+    }
+    $dets_loose = $entity->field_dets_loose['und'][0]['value'];
+    if (!is_numeric($dets_loose)) {
+      drupal_set_message("Please enter numaric value for Dets loose", 'error');
+      $entity->feeds_item->skip = TRUE;
+    }
+    $fnb_bulk = $entity->field_fnb_bulk['und'][0]['value'];
+    if (!is_numeric($fnb_bulk)) {
+      drupal_set_message("Please enter numaric value for FNB Bulk", 'error');
+      $entity->feeds_item->skip = TRUE;
+    }
+    $fnb_loose = $entity->field_fnb_loose['und'][0]['value'];
+    if (!is_numeric($fnb_loose)) {
+      drupal_set_message("Please enter numaric value for FNB Loose", 'error');
+      $entity->feeds_item->skip = TRUE;
+    }
+    $non_pp = $entity->field_non_pp['und'][0]['value'];
+    if (!is_numeric($non_pp)) {
+      drupal_set_message("Please enter numaric value for NON-PP", 'error');
+      $entity->feeds_item->skip = TRUE;
+    }
+    $pp = $entity->field_pp['und'][0]['value'];
+    if (!is_numeric($pp)) {
+      drupal_set_message("Please enter numaric value for PP", 'error');
+      $entity->feeds_item->skip = TRUE;
+    }
+    $pp_bulk = $entity->field_pp_bulk['und'][0]['value'];
+    if (!is_numeric($pp_bulk)) {
+      drupal_set_message("Please enter numaric value for PP Bulk", 'error');
+      $entity->feeds_item->skip = TRUE;
+    }
+    $pp_loose = $entity->field_pp_loose['und'][0]['value'];
+    if (!is_numeric($pp_loose)) {
+      drupal_set_message("Please enter numaric value for PP Loose", 'error');
+      $entity->feeds_item->skip = TRUE;
+    }
+    $stop_size= $entity->field_stop_size['und'][0]['value'];
+    if (!is_numeric($stop_size)) {
+      drupal_set_message("Please enter numaric value for Stop size", 'error');
+      $entity->feeds_item->skip = TRUE;
+    }
+    $no_day = $entity->field_no_of_days_for_sales_reg['und'][0]['value'];
+    if (!is_numeric($no_day)) {
+      drupal_set_message("Please enter numaric value for No of Days For Sales Reg", 'error');
+      $entity->feeds_item->skip = TRUE;
+    }
+    $pp_finish_time = $entity->field_pp_finish_time['und'][0]['value'];
+    if (!empty($pp_finish_time)) {
+     $entity->field_pp_finish_time['und'][0]['value'] = date('h:i A', strtotime($pp_finish_time));
+    }
+    $picking_finish_time = $entity->field_picking_finish_time['und'][0]['value'];
+    if (!empty($picking_finish_time)) {
+     $entity->field_picking_finish_time['und'][0]['value'] = date('h:i A', strtotime($picking_finish_time));
+    }
+    $unloading_finish_time = $entity->field_unloading_finish_time['und'][0]['value'];
+    if (!empty($unloading_finish_time)) {
+     $entity->field_unloading_finish_time['und'][0]['value'] = date('h:i A', strtotime($unloading_finish_time));
+    }
+    $otf_finish_time = $entity->field_otif_finish_time['und'][0]['value'];
+    if (!empty($otf_finish_time)) {
+     $entity->field_otif_finish_time['und'][0]['value'] = date('h:i A', strtotime($otf_finish_time));
+    }
+  }
+
   if (!empty($distributor_id)) {
     $entity->uid = $distributor_id;
     if ($entity->type == 'pdd_master') {
@@ -2248,6 +2332,17 @@ function change_feeds_import_feeds_plugins() {
       'parent' => 'FeedsNodeProcessor',
       'class' => 'FeedsNodeCustomProcessor',
       'file' => 'FeedsNodeCustomProcessor.inc',
+      'path' => $path,
+    ),
+  );
+  $info['FeedsNodeTargetMasterProcessor'] = array(
+    'name' => 'Target Master Node processor',
+    'description' => 'Create and update nodes.',
+    'help' => 'Create and update nodes from parsed content.',
+    'handler' => array(
+      'parent' => 'FeedsNodeProcessor',
+      'class' => 'FeedsNodeTargetMasterProcessor',
+      'file' => 'FeedsNodeTargetMasterProcessor.inc',
       'path' => $path,
     ),
   );
