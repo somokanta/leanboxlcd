@@ -1583,8 +1583,28 @@ function leanbox_dashboard_form_alter(&$form, &$form_state, $form_id) {
   }
 
   if ($form_id = 'views_exposed_form') {
-    
-    // party packing
+     
+      // rs code filter
+      if (isset($form['field_third_party_username_value'])) {
+         $query = db_select('field_data_field_third_party_username', 't');
+         $query->fields('t', array('field_third_party_username_value'));
+         $res = $query->execute()->fetchAllKeyed(0, 0);
+         $res[''] = t('-Any-');
+
+         if (isset($_GET['field_third_party_username_value'])) {
+            $rs_default_value = $_GET['field_third_party_username_value'];
+         }
+         else {
+            $rs_default_value = '';
+         }
+         $form['field_third_party_username_value']['#type'] = 'select';
+         $form['field_third_party_username_value']['#options'] = $res;
+         $form['field_third_party_username_value']['#multiple'] = FALSE;
+         $form['field_third_party_username_value']['#size'] = 0;
+         $form['field_third_party_username_value']['#default_value'] = $rs_default_value;
+      }
+
+      // party packing
     if (isset($form['field__party_packingstatus_value'])) {
       $form['field__party_packingstatus_value']['#options']['empty'] = t('Empty');
     }
