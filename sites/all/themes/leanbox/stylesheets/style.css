@@ -11394,3 +11394,56 @@ header[id="page-header"] ul, header[id="page-header"] li {
   border-bottom: 1px solid #ddd;
   text-align: center;
 }
+
+/* line 1483, ../sass/leanbox-global.scss */
+#views-exposed-form-central-bill-trip-page #edit-title-wrapper, #views-exposed-form-central-bill-trip-page #edit-title-1-wrapper, #views-exposed-form-central-bill-trip-page #edit-field-billing-van-value-wrapper, #views-exposed-form-central-bill-trip-page #edit-field-sales-party-code-value-wrapper {
+  width: 280px;
+  padding-bottom: 10px;
+}
+/* line 1487, ../sass/leanbox-global.scss */
+#views-exposed-form-central-bill-trip-page #edit-field-sr-bill-date-value-wrapper, #views-exposed-form-central-bill-trip-page #edit-field-billing-loading-date-value-wrapper, #views-exposed-form-central-bill-trip-page #edit-field-trip-executon-date-value-wrapper {
+  padding-bottom: 10px;
+  width: 430px;
+}
+/* line 1490, ../sass/leanbox-global.scss */
+#views-exposed-form-central-bill-trip-page #edit-field-sr-bill-date-value-wrapper #edit-field-sr-bill-date-value-min-wrapper, #views-exposed-form-central-bill-trip-page #edit-field-sr-bill-date-value-wrapper #edit-field-sr-bill-date-value-max-wrapper, #views-exposed-form-central-bill-trip-page #edit-field-sr-bill-date-value-wrapper #edit-field-billing-loading-date-value-min-wrapper, #views-exposed-form-central-bill-trip-page #edit-field-sr-bill-date-value-wrapper #edit-field-billing-loading-date-value-max-wrapper, #views-exposed-form-central-bill-trip-page #edit-field-sr-bill-date-value-wrapper #edit-field-trip-executon-date-value-min-wrapper, #views-exposed-form-central-bill-trip-page #edit-field-sr-bill-date-value-wrapper #edit-field-trip-executon-date-value-max-wrapper, #views-exposed-form-central-bill-trip-page #edit-field-billing-loading-date-value-wrapper #edit-field-sr-bill-date-value-min-wrapper, #views-exposed-form-central-bill-trip-page #edit-field-billing-loading-date-value-wrapper #edit-field-sr-bill-date-value-max-wrapper, #views-exposed-form-central-bill-trip-page #edit-field-billing-loading-date-value-wrapper #edit-field-billing-loading-date-value-min-wrapper, #views-exposed-form-central-bill-trip-page #edit-field-billing-loading-date-value-wrapper #edit-field-billing-loading-date-value-max-wrapper, #views-exposed-form-central-bill-trip-page #edit-field-billing-loading-date-value-wrapper #edit-field-trip-executon-date-value-min-wrapper, #views-exposed-form-central-bill-trip-page #edit-field-billing-loading-date-value-wrapper #edit-field-trip-executon-date-value-max-wrapper, #views-exposed-form-central-bill-trip-page #edit-field-trip-executon-date-value-wrapper #edit-field-sr-bill-date-value-min-wrapper, #views-exposed-form-central-bill-trip-page #edit-field-trip-executon-date-value-wrapper #edit-field-sr-bill-date-value-max-wrapper, #views-exposed-form-central-bill-trip-page #edit-field-trip-executon-date-value-wrapper #edit-field-billing-loading-date-value-min-wrapper, #views-exposed-form-central-bill-trip-page #edit-field-trip-executon-date-value-wrapper #edit-field-billing-loading-date-value-max-wrapper, #views-exposed-form-central-bill-trip-page #edit-field-trip-executon-date-value-wrapper #edit-field-trip-executon-date-value-min-wrapper, #views-exposed-form-central-bill-trip-page #edit-field-trip-executon-date-value-wrapper #edit-field-trip-executon-date-value-max-wrapper {
+  width: 100%;
+  padding: 0;
+}
+/* line 1494, ../sass/leanbox-global.scss */
+#views-exposed-form-central-bill-trip-page #edit-field-sr-bill-date-value-wrapper #edit-field-sr-bill-date-value-min, #views-exposed-form-central-bill-trip-page #edit-field-sr-bill-date-value-wrapper #edit-field-billing-loading-date-value-min, #views-exposed-form-central-bill-trip-page #edit-field-sr-bill-date-value-wrapper #edit-field-trip-executon-date-value-min, #views-exposed-form-central-bill-trip-page #edit-field-sr-bill-date-value-wrapper #edit-field-sr-bill-date-value-max, #views-exposed-form-central-bill-trip-page #edit-field-sr-bill-date-value-wrapper #edit-field-billing-loading-date-value-max, #views-exposed-form-central-bill-trip-page #edit-field-sr-bill-date-value-wrapper #edit-field-trip-executon-date-value-max, #views-exposed-form-central-bill-trip-page #edit-field-billing-loading-date-value-wrapper #edit-field-sr-bill-date-value-min, #views-exposed-form-central-bill-trip-page #edit-field-billing-loading-date-value-wrapper #edit-field-billing-loading-date-value-min, #views-exposed-form-central-bill-trip-page #edit-field-billing-loading-date-value-wrapper #edit-field-trip-executon-date-value-min, #views-exposed-form-central-bill-trip-page #edit-field-billing-loading-date-value-wrapper #edit-field-sr-bill-date-value-max, #views-exposed-form-central-bill-trip-page #edit-field-billing-loading-date-value-wrapper #edit-field-billing-loading-date-value-max, #views-exposed-form-central-bill-trip-page #edit-field-billing-loading-date-value-wrapper #edit-field-trip-executon-date-value-max, #views-exposed-form-central-bill-trip-page #edit-field-trip-executon-date-value-wrapper #edit-field-sr-bill-date-value-min, #views-exposed-form-central-bill-trip-page #edit-field-trip-executon-date-value-wrapper #edit-field-billing-loading-date-value-min, #views-exposed-form-central-bill-trip-page #edit-field-trip-executon-date-value-wrapper #edit-field-trip-executon-date-value-min, #views-exposed-form-central-bill-trip-page #edit-field-trip-executon-date-value-wrapper #edit-field-sr-bill-date-value-max, #views-exposed-form-central-bill-trip-page #edit-field-trip-executon-date-value-wrapper #edit-field-billing-loading-date-value-max, #views-exposed-form-central-bill-trip-page #edit-field-trip-executon-date-value-wrapper #edit-field-trip-executon-date-value-max {
+  width: 85px;
+  margin-left: 10px;
+}
+/* line 1499, ../sass/leanbox-global.scss */
+#views-exposed-form-central-bill-trip-page #edit-field-trip-id-reference-nid-wrapper {
+  clear: both;
+}
+/* line 1501, ../sass/leanbox-global.scss */
+#views-exposed-form-central-bill-trip-page #edit-field-trip-id-reference-nid-wrapper label {
+  display: block;
+}
+/* line 1504, ../sass/leanbox-global.scss */
+#views-exposed-form-central-bill-trip-page #edit-field-trip-id-reference-nid-wrapper .views-operator, #views-exposed-form-central-bill-trip-page #edit-field-trip-id-reference-nid-wrapper .views-widget {
+  width: 48%;
+  display: inline-block;
+}
+/* line 1509, ../sass/leanbox-global.scss */
+#views-exposed-form-central-bill-trip-page #edit-field-delivery-pending-value-wrapper {
+  width: 140px;
+}
+/* line 1512, ../sass/leanbox-global.scss */
+#views-exposed-form-central-bill-trip-page #edit-field-channel-value-wrapper {
+  width: 120px;
+}
+/* line 1516, ../sass/leanbox-global.scss */
+#views-exposed-form-central-bill-trip-page #edit-field-billing-van-value-1-wrapper .views-operator, #views-exposed-form-central-bill-trip-page #edit-field-billing-van-value-1-wrapper .views-widget, #views-exposed-form-central-bill-trip-page #edit-field-billing-van-value-1-wrapper .views-operator, #views-exposed-form-central-bill-trip-page #edit-field-billing-van-value-1-wrapper .views-widget {
+  width: 44%;
+  display: inline-block;
+  vertical-align: top;
+  margin-right: 10px;
+}
+/* line 1523, ../sass/leanbox-global.scss */
+#views-exposed-form-central-bill-trip-page #edit-field-third-party-username-value-wrapper {
+  width: 140px;
+}
