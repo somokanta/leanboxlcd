@@ -425,9 +425,9 @@ function leanbox_mobile_get_distributor_using_rscode($rs_code) {
   $query = db_select('field_data_field_third_party_username', 'tp');
   $query->condition('tp.field_third_party_username_value', $rs_code);
   $query->join('field_data_field_distributor', 'd', 'd.entity_id = tp.entity_id');
-  $query->join('users_roles', 'ur', 'ur.uid = tp.entity_id');
-  $query->join('role', 'r', 'r.rid = ur.rid');
-  $query->condition('r.name', 'RS Operator');
+  //$query->join('users_roles', 'ur', 'ur.uid = tp.entity_id');
+  //$query->join('role', 'r', 'r.rid = ur.rid');
+  // $query->condition('r.name', 'RS Operator');
   $query->fields('d', array('field_distributor_value'));
   $result = $query->execute()->fetchField();
   return $result;
