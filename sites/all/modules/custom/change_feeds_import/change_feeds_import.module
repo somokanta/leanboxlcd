@@ -1434,6 +1434,7 @@ function change_feeds_import_node_delete($node) {
  * Implements hook_feeds_presave($source, $entity, $item)
  */
 function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) {
+  dsm($item);
   require_once drupal_get_path('module', 'change_feeds_import') . '/form/upload_billing_data.inc';
   if (!empty($item)) {
     foreach ($item as $key => $value) {
@@ -1454,60 +1455,13 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
       drupal_set_message("Please enter correct Rs Code $node_title", 'error');
       $entity->feeds_item->skip = TRUE;
     }
-    $del_size = $entity->field_del_per_van['und'][0]['value'];
-    if (!is_numeric($del_size)) {
-      drupal_set_message("Please enter numaric value for Del per van", 'error');
-      $entity->feeds_item->skip = TRUE;
-    }
-    $dets_bulk = $entity->field_dets_bulk['und'][0]['value'];
-    if (!is_numeric($dets_bulk)) {
-      drupal_set_message("Please enter numaric value for Dets bulk", 'error');
-      $entity->feeds_item->skip = TRUE;
-    }
-    $dets_loose = $entity->field_dets_loose['und'][0]['value'];
-    if (!is_numeric($dets_loose)) {
-      drupal_set_message("Please enter numaric value for Dets loose", 'error');
-      $entity->feeds_item->skip = TRUE;
-    }
-    $fnb_bulk = $entity->field_fnb_bulk['und'][0]['value'];
-    if (!is_numeric($fnb_bulk)) {
-      drupal_set_message("Please enter numaric value for FNB Bulk", 'error');
-      $entity->feeds_item->skip = TRUE;
-    }
-    $fnb_loose = $entity->field_fnb_loose['und'][0]['value'];
-    if (!is_numeric($fnb_loose)) {
-      drupal_set_message("Please enter numaric value for FNB Loose", 'error');
-      $entity->feeds_item->skip = TRUE;
-    }
-    $non_pp = $entity->field_non_pp['und'][0]['value'];
-    if (!is_numeric($non_pp)) {
-      drupal_set_message("Please enter numaric value for NON-PP", 'error');
-      $entity->feeds_item->skip = TRUE;
-    }
-    $pp = $entity->field_pp['und'][0]['value'];
-    if (!is_numeric($pp)) {
-      drupal_set_message("Please enter numaric value for PP", 'error');
-      $entity->feeds_item->skip = TRUE;
-    }
-    $pp_bulk = $entity->field_pp_bulk['und'][0]['value'];
-    if (!is_numeric($pp_bulk)) {
-      drupal_set_message("Please enter numaric value for PP Bulk", 'error');
-      $entity->feeds_item->skip = TRUE;
-    }
-    $pp_loose = $entity->field_pp_loose['und'][0]['value'];
-    if (!is_numeric($pp_loose)) {
-      drupal_set_message("Please enter numaric value for PP Loose", 'error');
-      $entity->feeds_item->skip = TRUE;
-    }
-    $stop_size= $entity->field_stop_size['und'][0]['value'];
-    if (!is_numeric($stop_size)) {
-      drupal_set_message("Please enter numaric value for Stop size", 'error');
-      $entity->feeds_item->skip = TRUE;
-    }
-    $no_day = $entity->field_no_of_days_for_sales_reg['und'][0]['value'];
-    if (!is_numeric($no_day)) {
-      drupal_set_message("Please enter numaric value for No of Days For Sales Reg", 'error');
-      $entity->feeds_item->skip = TRUE;
+    foreach ($item as $k => $val) {
+      if ($k == 'stop size' || $k == 'del per van' || $k == 'dets bulk' || $k == 'dets loose' || $k == 'fnb bulk' || $k == 'fnb loose' || $k == 'non-pp' || $k == 'pp' || $k == 'pp bulk' || $k == 'pp loose' || $k == 'no of days for sales reg') {
+        if (!is_numeric($val)) {
+          drupal_set_message("Please enter numaric value for $k", 'error');
+          $entity->feeds_item->skip = TRUE;
+        }
+      }
     }
     $pp_finish_time = $entity->field_pp_finish_time['und'][0]['value'];
     if (!empty($pp_finish_time)) {
