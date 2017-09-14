@@ -1481,7 +1481,7 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
         $entity->feeds_item->skip = TRUE;
       }
       else {
-        $entity->field_picking_finish_time['und'][0]['value'] = date('h:i A', strtotime($picking_finish_time));
+        $entity->field_picking_finish_time['und'][0]['value'] = date('h:i A', $picking_finish_time);
       }
     }
     $unloading_finish_time = $entity->field_unloading_finish_time['und'][0]['value'];
@@ -1492,7 +1492,7 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
         $entity->feeds_item->skip = TRUE;
       }
       else {
-        $entity->field_unloading_finish_time['und'][0]['value'] = date('h:i A', strtotime($unloading_finish_time));
+        $entity->field_unloading_finish_time['und'][0]['value'] = date('h:i A', $unloading_finish_time);
       }
     }
     $otf_finish_time = $entity->field_otif_finish_time['und'][0]['value'];
@@ -1503,7 +1503,7 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
         $entity->feeds_item->skip = TRUE;
       }
       else {
-        $entity->field_otif_finish_time['und'][0]['value'] = date('h:i A', strtotime($otf_finish_time));
+        $entity->field_otif_finish_time['und'][0]['value'] = date('h:i A', $otf_finish_time);
       }
     }
   }
