@@ -1461,6 +1461,12 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
           $entity->feeds_item->skip = TRUE;
         }
       }
+      if ($k == 'PP finish time' || $k == 'Picking finish time' || $k == 'Unloading finish time' || $k == 'otif finish time') {
+        if (is_string($val)) {
+          drupal_set_message("Please enter correct value for $k", 'error');
+          $entity->feeds_item->skip = TRUE;
+        }
+      }
     }
     $pp_finish_time = $entity->field_pp_finish_time['und'][0]['value'];
     if (!empty($pp_finish_time)) {
