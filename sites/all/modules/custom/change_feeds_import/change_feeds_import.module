@@ -1461,28 +1461,50 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
           $entity->feeds_item->skip = TRUE;
         }
       }
-      if ($k == 'PP finish time' || $k == 'Picking finish time' || $k == 'Unloading finish time' || $k == 'otif finish time') {
-        if (is_string($val)) {
-          drupal_set_message("Please enter correct value for $k", 'error');
-          $entity->feeds_item->skip = TRUE;
-        }
-      }
     }
     $pp_finish_time = $entity->field_pp_finish_time['und'][0]['value'];
     if (!empty($pp_finish_time)) {
-     $entity->field_pp_finish_time['und'][0]['value'] = date('h:i A', strtotime($pp_finish_time));
+      $pp_finish_time = strtotime($pp_finish_time);
+      if (empty($pp_finish_time)) {
+        drupal_set_message("Please enter correct value for PP finish time", 'error');
+        $entity->feeds_item->skip = TRUE;
+      }
+      else {
+        $entity->field_pp_finish_time['und'][0]['value'] = date('h:i A', $pp_finish_time);
+      }
     }
     $picking_finish_time = $entity->field_picking_finish_time['und'][0]['value'];
     if (!empty($picking_finish_time)) {
-     $entity->field_picking_finish_time['und'][0]['value'] = date('h:i A', strtotime($picking_finish_time));
+      $picking_finish_time = strtotime($picking_finish_time);
+      if (empty($picking_finish_time)) {
+        drupal_set_message("Please enter correct value for Picking finish time", 'error');
+        $entity->feeds_item->skip = TRUE;
+      }
+      else {
+        $entity->field_picking_finish_time['und'][0]['value'] = date('h:i A', strtotime($picking_finish_time));
+      }
     }
     $unloading_finish_time = $entity->field_unloading_finish_time['und'][0]['value'];
     if (!empty($unloading_finish_time)) {
-     $entity->field_unloading_finish_time['und'][0]['value'] = date('h:i A', strtotime($unloading_finish_time));
+      $unloading_finish_time = strtotime($unloading_finish_time);
+      if (empty($unloading_finish_time)) {
+        drupal_set_message("Please enter correct value for Unloading finish time", 'error');
+        $entity->feeds_item->skip = TRUE;
+      }
+      else {
+        $entity->field_unloading_finish_time['und'][0]['value'] = date('h:i A', strtotime($unloading_finish_time));
+      }
     }
     $otf_finish_time = $entity->field_otif_finish_time['und'][0]['value'];
     if (!empty($otf_finish_time)) {
-     $entity->field_otif_finish_time['und'][0]['value'] = date('h:i A', strtotime($otf_finish_time));
+      $otf_finish_time = strtotime($otf_finish_time);
+      if (empty($otf_finish_time)) {
+        drupal_set_message("Please enter correct value for otif finish time", 'error');
+        $entity->feeds_item->skip = TRUE;
+      }
+      else {
+        $entity->field_otif_finish_time['und'][0]['value'] = date('h:i A', strtotime($otf_finish_time));
+      }
     }
   }
 
