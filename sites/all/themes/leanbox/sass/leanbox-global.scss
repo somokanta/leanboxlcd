@@ -1512,7 +1512,10 @@ header[id="page-header"] {
   #edit-field-channel-value-wrapper {
     width: 120px;
   }
-  #edit-field-billing-van-value-1-wrapper , #edit-field-billing-van-value-1-wrapper {
+  #edit-field-billing-van-value-1-wrapper {
+    label {
+    width: 100%;
+  }
     .views-operator,  .views-widget {
       width: 44%;
       display: inline-block;
