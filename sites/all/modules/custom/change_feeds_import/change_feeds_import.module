@@ -1455,7 +1455,7 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
       $entity->feeds_item->skip = TRUE;
     }
     foreach ($item as $k => $val) {
-      if ($k == 'stop size' || $k == 'del per van' || $k == 'dets bulk' || $k == 'dets loose' || $k == 'fnb bulk' || $k == 'fnb loose' || $k == 'non-pp' || $k == 'pp' || $k == 'pp bulk' || $k == 'pp loose' || $k == 'no of days for sales reg') {
+      if ($k == 'stop size' || $k == 'del per van' || $k == 'dets bulk' || $k == 'dets loose' || $k == 'fnb bulk' || $k == 'fnb loose' || $k == 'non-pp' || $k == 'pp' || $k == 'pp bulk' || $k == 'pp loose' || $k == 'Sales reg days') {
         if (!is_numeric($val)) {
           drupal_set_message("Please enter numaric value for $k", 'error');
           $entity->feeds_item->skip = TRUE;
