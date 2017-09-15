@@ -2099,92 +2099,56 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
  */
 function leanbox_dashboard_gauge_chart_query_details($type, $start_date = '', $end_date = '', $data = TRUE) {
 
-  $output1 = array();
-  $output = 0;
-  $table = '';
+   $output1 = array();
+   $output = 0;
+   $table = '';
 
-  global $user;
-  // Store distributor id in author in each node
-  $uid = change_feeds_import_get_distributor_id($user->uid);
-  if (!empty($start_date)) {
-    $start_date = strtotime($start_date);
-  }
-  else {
-    $start_date = leanbox_dashboard_get_default_pdd_date_for_chart();
-  }
-  if (!empty($end_date)) {
-    $end_date = strtotime($end_date) + 86399;
-  }
-  else {
-    $end_date = leanbox_dashboard_get_default_pdd_date_for_chart();
-  }
+   global $user;
+   // Store distributor id in author in each node
+   $uid = change_feeds_import_get_distributor_id($user->uid);
+   if (!empty($start_date)) {
+      $start_date = strtotime($start_date);
+   }
+   else {
+      $start_date = leanbox_dashboard_get_default_pdd_date_for_chart();
+   }
+   if (!empty($end_date)) {
+      $end_date = strtotime($end_date) + 86399;
+   }
+   else {
+      $end_date = leanbox_dashboard_get_default_pdd_date_for_chart();
+   }
 
-// Query to calculate total bill value
-  $query = db_select('node', 'n');
-  $query->join('field_data_field_bill_value', 'v', 'v.entity_id = n.nid');
-  $query->join('field_data_field_sr_bill_date', 'b', 'b.entity_id = n.nid');
-  $query->join('field_data_field_promised_date', 'pro_date', 'pro_date.entity_id = n.nid');
-  $query->join('field_data_field_billing_van', 'bva', 'bva.entity_id = n.nid');
-  $query->addExpression('SUM(v.field_bill_value_value)', 'bill_value');
-  $query->condition('n.type', 'sales_register_data');
-  if (!empty($start_date) && !empty($end_date)) {
-    $query->condition('b.field_sr_bill_date_value', array($start_date, $end_date), 'BETWEEN');
-  }
-  $query->condition('n.uid', $uid);
-  $total = $query->execute()->fetch(PDO::FETCH_ASSOC);
+   $query = db_select('node', 'n');
+   $query->join('field_data_field_bill_value', 'v', 'v.entity_id = n.nid');
+   $query->join('field_data_field_sr_bill_date', 'b', 'b.entity_id = n.nid');
+   //$query->join('field_data_field_promised_date', 'pro_date', 'pro_date.entity_id = n.nid');
+   $query->join('field_data_field_billing_van', 'bva', 'bva.entity_id = n.nid');
 
-// query to calculate total dispatched bill value
+   $query->addExpression('SUM(v.field_bill_value_value)', 'bill_value');
+   $query->join('field_data_field_dispatch_n_value', 'd1', 'd1.entity_id = n.nid');
+   $query->addExpression('SUM(CASE WHEN (d1.field_dispatch_n_value_value = \'N+2\') THEN field_bill_value_value ELSE 0 END)', 'bill_value1');
 
-  $query = db_select('node', 'n');
-  $query->join('field_data_field_bill_value', 'v', 'v.entity_id = n.nid');
-  $query->fields('v', array('field_bill_value_value'));
-  $query->join('field_data_field_sr_bill_date', 'b', 'b.entity_id = n.nid');
-  $query->join('field_data_field_promised_date', 'pd', 'pd.entity_id = n.nid');
-  $query->fields('pd', array('field_promised_date_value'));
-  $query->join('field_data_field_billing_van', 'bva', 'bva.entity_id = n.nid');
-  $query->join('field_data_field_trip_id_reference', 't', 't.entity_id = n.nid');
-  $query->join('node', 'n1', 't.field_trip_id_reference_nid = n1.nid');
-  $query->join('field_data_field_dispatch_date', 'd1', 'd1.entity_id= n1.nid');
-  $query->fields('d1', array('field_dispatch_date_value'));
-  $query->condition('n.uid', $uid);
-  $query->condition('n1.uid', $uid);
-  $query->condition('n.type', 'sales_register_data');
-  if (!empty($start_date) && !empty($end_date)) {
-    $query->condition('b.field_sr_bill_date_value', array($start_date, $end_date), 'BETWEEN');
-  }
-  $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+   $query->condition('n.type', 'sales_register_data');
+   if (!empty($start_date) && !empty($end_date)) {
+     $query->condition('b.field_sr_bill_date_value', array($start_date, $end_date), 'BETWEEN');
+   }
+   $query->condition('n.uid', $uid);
+   $total = $query->execute()->fetch(PDO::FETCH_ASSOC);
 
-  if (!empty($res)) {
-    $total_dis_bill_val = 0;
-    foreach ($res as $key => $val) {
-      $dispatch_date = strtotime($val['field_dispatch_date_value']);
-      $pdd = $val['field_promised_date_value'];
+   $output = round(($total['bill_value1'] / $total['bill_value'] ) * 100);
+   $output1['output'] = $output;
 
-      if (!empty($dispatch_date) && !empty($pdd)) {
-        $date_diff = $pdd - $dispatch_date;
-        if ($date_diff >= 0) {
-          $total_dis_bill_val += $val['field_bill_value_value'];
-        }
-      }
-    }
+   if ($data) {
+      $arg = arg(0);
+   }
+   else {
+      $arg_array['r'] = $type;
+      $arg_array = explode('/', $type);
+      $arg = $arg_array[3];
+   }
 
-    $output = round(($total_dis_bill_val / $total['bill_value'] ) * 100);
-  }
-  $output1['output'] = $output;
-  
-
-  if($data) {
-    $arg= arg(0);
-  }
-  else {
-  $arg_array['r'] = $type;
-
-    $arg_array = explode( '/', $type);
-    $arg = $arg_array[3];
-
-  }
- 
-  if ($arg !== 'dashboard') {
+   if ($arg !== 'dashboard') {
 
     $mtd_html = "<h3>Channel Wise Otif</h3>";
     $mtd_data .= get_mtd_data_channel($start_date, $end_date, $uid);

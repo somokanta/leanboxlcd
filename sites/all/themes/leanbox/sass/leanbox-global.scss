@@ -1478,3 +1478,53 @@ header[id="page-header"] {
 }
 
 // End Dashboard pages
+
+#views-exposed-form-central-bill-trip-page  {
+  #edit-title-wrapper, #edit-title-1-wrapper, #edit-field-billing-van-value-wrapper, #edit-field-sales-party-code-value-wrapper {
+    width: 280px;
+    padding-bottom: 10px;
+  }
+  #edit-field-sr-bill-date-value-wrapper, #edit-field-billing-loading-date-value-wrapper, #edit-field-trip-executon-date-value-wrapper {
+    padding-bottom: 10px;
+    width: 430px;
+    #edit-field-sr-bill-date-value-min-wrapper, #edit-field-sr-bill-date-value-max-wrapper, #edit-field-billing-loading-date-value-min-wrapper, #edit-field-billing-loading-date-value-max-wrapper, #edit-field-trip-executon-date-value-min-wrapper, #edit-field-trip-executon-date-value-max-wrapper{
+      width: 100%;
+      padding: 0;
+    }
+      #edit-field-sr-bill-date-value-min, #edit-field-billing-loading-date-value-min, #edit-field-trip-executon-date-value-min, #edit-field-sr-bill-date-value-max, #edit-field-billing-loading-date-value-max, #edit-field-trip-executon-date-value-max {
+        width: 85px;
+        margin-left: 10px;
+    }
+  }
+  #edit-field-trip-id-reference-nid-wrapper {
+    clear: both;
+    label {
+      display: block;
+    }
+    .views-operator, .views-widget {
+      width: 48%;
+      display: inline-block;
+    }
+  }
+  #edit-field-delivery-pending-value-wrapper {
+    width: 140px;
+  }
+  #edit-field-channel-value-wrapper {
+    width: 120px;
+  }
+  #edit-field-billing-van-value-1-wrapper {
+    label {
+    width: 100%;
+  }
+    .views-operator,  .views-widget {
+      width: 44%;
+      display: inline-block;
+      vertical-align: top;
+      margin-right: 2px;
+    }
+  }
+#edit-field-third-party-username-value-wrapper {
+    width: 140px;
+  }
+
+}
