@@ -1026,7 +1026,6 @@ function get_common_data_for_chhanel_datewise($start_date, $end_date, $distribut
   $query->join('field_data_field_sr_bill_date', 'bd', 'bd.entity_id = n.nid');
   $query->condition('bd.field_sr_bill_date_value', array($start_date, $end_date), 'BETWEEN');
   $query->join('field_data_field_bill_value', 'bv', 'bv.entity_id = n.nid');
-  $query->join('field_data_field_promised_date', 'pro_date', 'pro_date.entity_id = n.nid');
   $query->join('field_data_field_sales_party_code', 'pc', 'pc.entity_id = n.nid');
   $query->join('node', 'oun', 'pc.field_sales_party_code_value = oun.title');
   $query->condition('oun.type', 'outlet_master');
@@ -1034,20 +1033,17 @@ function get_common_data_for_chhanel_datewise($start_date, $end_date, $distribut
   $query->join('field_data_field_channel', 'chan', 'chan.entity_id = oun.nid');
   $query->groupBy('field_channel_value');
   $query->orderBy('chan.field_channel_value', 'ASC');
-  $query->leftjoin('field_data_field_trip_id_reference', 'ti', 'ti.entity_id = n.nid');
-  $query->leftjoin('node', 'disn', 'disn.nid = ti.field_trip_id_reference_nid');
-  $query->leftjoin('field_data_field_dispatch_status', 'disp_st', 'disp_st.entity_id = disn.nid');
-  $query->leftjoin('field_data_field_dispatch_date', 'disp_date', 'disp_date.entity_id = disn.nid');
+
   $query->addExpression('COUNT(n.title)', 'bill_count');
   $query->addExpression('SUM(bv.field_bill_value_value)', 'bill_value');
   $query->join('field_data_field_dispatch_n_value', 'd1', 'd1.entity_id = n.nid');
   
-  // bill count
+  // bill counts
   $query->addExpression('SUM(CASE WHEN (d1.field_dispatch_n_value_value = \'N+2\') THEN 1 ELSE 0 END)', 'n2_counts');
   $query->addExpression('SUM(CASE WHEN (d1.field_dispatch_n_value_value = \'N+3\') THEN 1 ELSE 0 END)', 'n3_counts');
   $query->addExpression('SUM(CASE WHEN (d1.field_dispatch_n_value_value = \'N+4\') THEN 1 ELSE 0 END)', 'n4_counts');
 
-  // bill value
+  // bill values
   $query->addExpression('SUM(CASE WHEN (d1.field_dispatch_n_value_value = \'N+2\') THEN field_bill_value_value ELSE 0 END)', 'n2_value');
   $query->addExpression('SUM(CASE WHEN (d1.field_dispatch_n_value_value = \'N+3\') THEN field_bill_value_value ELSE 0 END)', 'n3_value');
   $query->addExpression('SUM(CASE WHEN (d1.field_dispatch_n_value_value = \'N+4\') THEN field_bill_value_value ELSE 0 END)', 'n4_value');
@@ -1055,12 +1051,8 @@ function get_common_data_for_chhanel_datewise($start_date, $end_date, $distribut
   $query->fields('n', array('nid'));
   $query->fields('bd', array('field_sr_bill_date_value'));
   $query->fields('chan', array('field_channel_value'));
-//$query->fields('disn', array('nid'));
-  $query->fields('disn', array('nid'));
-  $query->fields('disp_st', array('field_dispatch_status_value'));
-  $query->fields('disp_date', array('field_dispatch_date_value'));
-  $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
 
+  $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
 
   if (!empty($res)) {
     foreach ($res as $k => $v) {
