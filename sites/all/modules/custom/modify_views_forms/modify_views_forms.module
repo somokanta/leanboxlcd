@@ -10,12 +10,16 @@ function modify_views_forms_form_alter(&$form, &$form_state, $form_id) {
   if (isset($form['#node']) && !isset($form['#node']->nid) && in_array($form['#node']->type, $node_type)) {
     $form['#validate'][] = 'node_title_validate';
   }
-  
-  if(($form_id == 'editableviews_entity_form_picking_report') || ($form_id == 'editableviews_entity_form_party_packing_report') || ($form_id == 'editableviews_entity_form_unloading_form')) {
-    
+
+  if(($form_id == 'editableviews_entity_form_picking_report') || ($form_id == 'editableviews_entity_form_party_packing_report') || ($form_id == 'editableviews_entity_form_unloading_form') || ($form_id == 'editableviews_entity_form_dispatch_data_report')) {
+    // fetching supervisior on the basis of logged in users distributor id
+    global $user;
+    // Fetching distributor id  from each node
+    $distributor_id = change_feeds_import_get_distributor_id($user->uid);    
     $query = db_select('field_data_field_resource_name', 'fps');
     $query->join('field_data_field_resource_type','fst','fst.entity_id = fps.entity_id');
-
+    $query->join('node','n', 'n.nid = fps.entity_id');
+    $query->condition('n.uid', $distributor_id);
     if($form_id == 'editableviews_entity_form_picking_report') {
       $query->condition('fst.field_resource_type_value', 'PICKING SUPERVISOR');
       $field_supervisor = 'field_picking_pick_supervisor';
@@ -31,6 +35,10 @@ function modify_views_forms_form_alter(&$form, &$form_state, $form_id) {
       $field_supervisor = 'field_unloading_supervisor';
      // $field_count = 'field_unloading_team_count';
     }
+    if ($form_id == 'editableviews_entity_form_dispatch_data_report') {
+      $query->condition('fst.field_resource_type_value', 'Dispatch SUPERVISOR');
+      $field_supervisor = 'field_dispatch_supervisor';
+    }
 
     $query->fields('fps', array('field_resource_name_value'));
     $options = $query->execute()->FetchCol();
@@ -42,6 +50,8 @@ function modify_views_forms_form_alter(&$form, &$form_state, $form_id) {
 
     $query = db_select('field_data_field_resource_name', 'fps');
     $query->join('field_data_field_resource_type','fst','fst.entity_id = fps.entity_id');
+    $query->join('node','n', 'n.nid = fps.entity_id');
+    $query->condition('n.uid', $distributor_id);
     if($form_id == 'editableviews_entity_form_picking_report') {
       $query->condition('fst.field_resource_type_value', 'PICKER NAME');
       $field_packer = 'field_picking_picker_name';
@@ -49,6 +59,10 @@ function modify_views_forms_form_alter(&$form, &$form_state, $form_id) {
     if($form_id == 'editableviews_entity_form_party_packing_report') {
       $query->condition('fst.field_resource_type_value', 'PARTY PACKER NAME');
       $field_packer = 'field_party_packer_name';
+    }
+    if ($form_id == 'editableviews_entity_form_dispatch_data_report') {
+      $query->condition('fst.field_resource_type_value', 'CASHIER NAME');
+      $field_packer = 'field_cashier_name';
     }
 
     $query->fields('fps', array('field_resource_name_value'));
@@ -62,7 +76,12 @@ function modify_views_forms_form_alter(&$form, &$form_state, $form_id) {
       $form['node'][$key][$field_supervisor][LANGUAGE_NONE][0]['value']['#multiple'] = FALSE;
       $form['node'][$key][$field_supervisor][LANGUAGE_NONE][0]['value']['#options'] = $multi_supervisor;
       $form['node'][$key][$field_supervisor][LANGUAGE_NONE][0]['value']['#size'] = 1;
-      if(($form_id == 'editableviews_entity_form_picking_report') || ($form_id == 'editableviews_entity_form_party_packing_report')) {
+      $form['node'][$key]['field_dispatch_supervisor'][LANGUAGE_NONE][0]['#theme_wrappers'] = array();
+      $form['node'][$key][$field_supervisor][LANGUAGE_NONE][0]['value']['#type'] = 'select';
+      $form['node'][$key][$field_supervisor][LANGUAGE_NONE][0]['value']['#multiple'] = FALSE;
+      $form['node'][$key][$field_supervisor][LANGUAGE_NONE][0]['value']['#options'] = $multi_supervisor;
+      $form['node'][$key][$field_supervisor][LANGUAGE_NONE][0]['value']['#size'] = 1;
+      if(($form_id == 'editableviews_entity_form_picking_report') || ($form_id == 'editableviews_entity_form_party_packing_report') || ($form_id == 'editableviews_entity_form_dispatch_data_report')) {
         $form['node'][$key][$field_packer][LANGUAGE_NONE][0]['value']['#type'] = 'select';
         $form['node'][$key][$field_packer][LANGUAGE_NONE][0]['value']['#multiple'] = FALSE;
         $form['node'][$key][$field_packer][LANGUAGE_NONE][0]['value']['#options'] = $multi_packer;
