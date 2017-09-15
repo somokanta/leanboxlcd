@@ -1868,10 +1868,11 @@ function change_feeds_import_node_presave($node) {
   if ($node->type == 'egir') {
     $node->field_distributor_uid['und'][0]['value'] = $distributor_id;
   }
-
-  if ($node->type != 'user_manual' && $node->type != 'impact_cron_mobile_data') {
-    if (!empty($distributor_id) && ($node->is_new == TRUE)) {
-      $node->uid = $distributor_id;
+  if (in_array('hul_admin', $users->roles)) {
+    if ($node->type != 'user_manual' && $node->type != 'impact_cron_mobile_data') {
+      if (!empty($distributor_id) && ($node->is_new == TRUE)) {
+        $node->uid = $distributor_id;
+      }
     }
   }
   if (($node->type == 'picking') && ($node->is_new == TRUE)) {
