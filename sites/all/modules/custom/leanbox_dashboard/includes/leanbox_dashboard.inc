@@ -2321,8 +2321,8 @@ function _get_otif_details_using_bill_date($bill_date, $channel, $uid) {
   }
 
 
-  $array['total_dis_bill_val'] = $res['bill_value'];
-  $array['channel_bill_val'] = $res['n2_value'];
+  $array['total_dis_bill_val'] = $res['n2_value'];
+  $array['channel_bill_val'] = $res['bill_value'];
   return $array;
 }
 
