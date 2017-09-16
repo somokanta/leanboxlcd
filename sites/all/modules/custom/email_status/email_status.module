@@ -1033,7 +1033,9 @@ function get_common_data_for_chhanel_datewise($start_date, $end_date, $distribut
   $query->join('field_data_field_channel', 'chan', 'chan.entity_id = oun.nid');
   $query->groupBy('field_channel_value');
   $query->orderBy('chan.field_channel_value', 'ASC');
-
+  $query->leftjoin('field_data_field_trip_id_reference', 'ti', 'ti.entity_id = n.nid');
+  $query->leftjoin('node', 'disn', 'disn.nid = ti.field_trip_id_reference_nid');
+  $query->leftjoin('field_data_field_dispatch_date', 'disp_date', 'disp_date.entity_id = disn.nid');
   $query->addExpression('COUNT(n.title)', 'bill_count');
   $query->addExpression('SUM(bv.field_bill_value_value)', 'bill_value');
   $query->leftjoin('field_data_field_dispatch_n_value', 'd1', 'd1.entity_id = n.nid');
@@ -1041,12 +1043,12 @@ function get_common_data_for_chhanel_datewise($start_date, $end_date, $distribut
   // bill counts
   $query->addExpression('SUM(CASE WHEN (d1.field_dispatch_n_value_value = \'N+2\') THEN 1 ELSE 0 END)', 'n2_counts');
   $query->addExpression('SUM(CASE WHEN (d1.field_dispatch_n_value_value = \'N+3\') THEN 1 ELSE 0 END)', 'n3_counts');
-  $query->addExpression('SUM(CASE WHEN (d1.field_dispatch_n_value_value = \'N+4\') THEN 1 ELSE 0 END)', 'n4_counts');
+  $query->addExpression('SUM(CASE WHEN (disp_date.field_dispatch_date_value IS NULL) OR ((d1.field_dispatch_n_value_value = \'N+4\')) THEN 1 ELSE 0 END)', 'n4_counts');
 
   // bill values
   $query->addExpression('SUM(CASE WHEN (d1.field_dispatch_n_value_value = \'N+2\') THEN field_bill_value_value ELSE 0 END)', 'n2_value');
   $query->addExpression('SUM(CASE WHEN (d1.field_dispatch_n_value_value = \'N+3\') THEN field_bill_value_value ELSE 0 END)', 'n3_value');
-  $query->addExpression('SUM(CASE WHEN (d1.field_dispatch_n_value_value = \'N+4\') THEN field_bill_value_value ELSE 0 END)', 'n4_value');
+  $query->addExpression('SUM(CASE WHEN (disp_date.field_dispatch_date_value IS NULL) OR ((d1.field_dispatch_n_value_value = \'N+4\')) THEN field_bill_value_value ELSE 0 END)', 'n4_value');
   
   $query->fields('n', array('nid'));
   $query->fields('bd', array('field_sr_bill_date_value'));
