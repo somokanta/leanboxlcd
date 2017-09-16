@@ -1586,8 +1586,12 @@ function leanbox_dashboard_form_alter(&$form, &$form_state, $form_id) {
      
       // rs code filter
       if (isset($form['field_third_party_username_value'])) {
+         $values = fetch_rs_field_data();
          $query = db_select('field_data_field_third_party_username', 't');
          $query->fields('t', array('field_third_party_username_value'));
+         if (!empty($values)) {
+           $query->condition('t.entity_id', $values, 'IN');
+         }
          $res = $query->execute()->fetchAllKeyed(0, 0);
          $res[''] = t('-Any-');
 
