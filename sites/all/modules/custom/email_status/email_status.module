@@ -1036,7 +1036,7 @@ function get_common_data_for_chhanel_datewise($start_date, $end_date, $distribut
 
   $query->addExpression('COUNT(n.title)', 'bill_count');
   $query->addExpression('SUM(bv.field_bill_value_value)', 'bill_value');
-  $query->join('field_data_field_dispatch_n_value', 'd1', 'd1.entity_id = n.nid');
+  $query->leftjoin('field_data_field_dispatch_n_value', 'd1', 'd1.entity_id = n.nid');
   
   // bill counts
   $query->addExpression('SUM(CASE WHEN (d1.field_dispatch_n_value_value = \'N+2\') THEN 1 ELSE 0 END)', 'n2_counts');

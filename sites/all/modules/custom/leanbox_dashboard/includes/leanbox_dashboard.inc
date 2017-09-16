@@ -2126,7 +2126,7 @@ function leanbox_dashboard_gauge_chart_query_details($type, $start_date = '', $e
    $query->join('field_data_field_billing_van', 'bva', 'bva.entity_id = n.nid');
 
    $query->addExpression('SUM(v.field_bill_value_value)', 'bill_value');
-   $query->join('field_data_field_dispatch_n_value', 'd1', 'd1.entity_id = n.nid');
+   $query->leftjoin('field_data_field_dispatch_n_value', 'd1', 'd1.entity_id = n.nid');
    $query->addExpression('SUM(CASE WHEN (d1.field_dispatch_n_value_value = \'N+2\') THEN field_bill_value_value ELSE 0 END)', 'bill_value1');
 
    $query->condition('n.type', 'sales_register_data');
@@ -2302,7 +2302,7 @@ function _get_otif_details_using_bill_date($bill_date, $channel, $uid) {
      $query = db_select('node', 'n');
     $query->join('field_data_field_bill_value', 'v', 'v.entity_id = n.nid');
     $query->join('field_data_field_sr_bill_date', 'b', 'b.entity_id = n.nid');
-    $query->join('field_data_field_dispatch_n_value', 'd1', 'd1.entity_id = n.nid');
+    $query->leftjoin('field_data_field_dispatch_n_value', 'd1', 'd1.entity_id = n.nid');
     // bill value and n2_value
     $query->addExpression('SUM(v.field_bill_value_value)', 'bill_value');
     $query->addExpression('SUM(CASE WHEN (d1.field_dispatch_n_value_value = \'N+2\') THEN field_bill_value_value ELSE 0 END)', 'n2_value');
