@@ -1449,6 +1449,35 @@ function reverse_geocode_node_presave($node) {
     }
   }
    else if (($node->type == 'sales_register_data') && !($node->is_new)) {
+      // code for One Time Updating Dispatch N Value
+      $dispatch_value = $node->field_dispatch_n_value[LANGUAGE_NONE][0]['value'];
+      
+      if (empty($dispatch_value)) {
+      $updated_pdd = $node->field_promised_date[LANGUAGE_NONE][0]['value'];
+      $trip_nid = $node->field_trip_id_reference[LANGUAGE_NONE][0]['nid'];
+  
+         $query = db_select('node', 'n');
+         $query->condition('n.type', 'dispatch_data');
+         $query->join('field_data_field_dispatch_date', 'disp_date', 'disp_date.entity_id = n.nid');
+         $query->condition('n.nid', $trip_nid);
+         $query->fields('disp_date', array('field_dispatch_date_value'));
+         $disp_date = $query->execute()->fetchField();
+         if (!empty($disp_date)) {
+            $dispatch_date = strtotime($disp_date);
+            if ($dispatch_date <= $updated_pdd) {
+               $n_value = "N+2";
+            }
+            elseif (($dispatch_date > $updated_pdd) && ( ($dispatch_date - $updated_pdd) <= 86400)) {
+               $n_value = "N+3";
+            }
+            elseif (($dispatch_date > $updated_pdd) && ( ($dispatch_date - $updated_pdd) > 86400)) {
+               $n_value = "N+4";
+            }
+            $node->field_dispatch_n_value[LANGUAGE_NONE][0]['value'] = $n_value;
+         }
+      } 
+      
+      
       // code for updating Pdd value on updating bill Date
       $original_bill_date = $node->original->field_sr_bill_date[LANGUAGE_NONE][0]['value'];
       $updated_bill_date = $node->field_sr_bill_date[LANGUAGE_NONE][0]['value'];
