@@ -2068,7 +2068,7 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
     'central_picking_report' ,  'central_party_pack_report',  'central_unloading_form', 
     'central_mobile_return_analysis', 'user_manual',  'hul_impact_delete', 'impact_delivery_cron_2', 
     'impact_delivery_cron_evening_2', 'impact_party_master', 'impact_party_master_morning',
-    'hul_code_distributor_wise', 'van_stop_master_report');
+    'hul_code_distributor_wise', 'van_stop_master_report', 'update_sales_register_party_code');
 
    if (!in_array($view->name, $views_array)) {
     foreach ($query->table_queue as $key => $val) {
