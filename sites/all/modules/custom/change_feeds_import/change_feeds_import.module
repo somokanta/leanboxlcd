@@ -2663,18 +2663,18 @@ function fetch_rs_field_data() {
   return $result;
 }
 /**
- * Alter feeds import form for target master import
+ * Implement hook_form_FORM_ID_alter()
  * @param type $form
  * @param type $form_state
  */
-
-function change_feeds_import_form_feeds_import_form_alter(&$form, $form_state) {
-  if (arg(1) == 'target_master_import') {
+function change_feeds_import_form_feeds_import_form_alter(&$form, $form_state, $form_id) {
+  if ($form['#importer_id'] == 'target_master_import') {
     $form['feeds']['download_template'] = array(
-    '#type' => 'link',
-    '#title' => t('Download target master'),
-    '#href' => 'central-van-stop-master-report-download',
-    '#weight' => -10,
+      '#type' => 'link',
+      '#title' => t('Download target master'),
+      '#href' => 'central-van-stop-master-report-download',
+      '#weight' => -10,
     );
   }
 }
+
