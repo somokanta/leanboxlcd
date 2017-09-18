@@ -2662,3 +2662,15 @@ function fetch_rs_field_data() {
   $result = $query->execute()->fetchAllKeyed(0, 0);
   return $result;
 }
+
+
+function change_feeds_import_form_feeds_import_form_alter(&$form, $form_state) {
+  if (arg(1) == 'target_master_import') {
+    $form['feeds']['download_template'] = array(
+    '#type' => 'link',
+    '#title' => t('Download a template'),
+    '#href' => 'central-van-stop-master-report-download',
+    '#weight' => -10,
+    );
+  }
+}
