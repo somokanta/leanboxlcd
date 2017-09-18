@@ -2672,7 +2672,7 @@ function change_feeds_import_form_feeds_import_form_alter(&$form, $form_state) {
   if (arg(1) == 'target_master_import') {
     $form['feeds']['download_template'] = array(
     '#type' => 'link',
-    '#title' => t('Download target template'),
+    '#title' => t('Download target master'),
     '#href' => 'central-van-stop-master-report-download',
     '#weight' => -10,
     );
