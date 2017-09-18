@@ -132,6 +132,7 @@ function change_feeds_import_billing_data_form_submit($form, &$form_state) {
   );
 
   batch_set($batch);
+  background_batch_process_batch('node/1');
 }
 
 function billing_data_csv_finished($success, $results, $operations) {
