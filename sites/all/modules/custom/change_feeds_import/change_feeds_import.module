@@ -2662,7 +2662,11 @@ function fetch_rs_field_data() {
   $result = $query->execute()->fetchAllKeyed(0, 0);
   return $result;
 }
-
+/**
+ * Alter feeds import form for target master import
+ * @param type $form
+ * @param type $form_state
+ */
 
 function change_feeds_import_form_feeds_import_form_alter(&$form, $form_state) {
   if (arg(1) == 'target_master_import') {
