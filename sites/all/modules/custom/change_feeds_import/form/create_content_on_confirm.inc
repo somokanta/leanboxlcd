@@ -160,11 +160,11 @@ function change_feeds_import_create_confirm_content($id) {
     drupal_unlink($path); //delete the generated error file
   }
   dpm("batch set");
-  //batch_process('/billing_data/import');
-  $batch =& batch_get();
-  $batch['progressive'] = FALSE;
+  batch_process('/billing_data/import');
+  //$batch =& batch_get();
+  //$batch['progressive'] = FALSE;
   //background_batch_process_batch('/billing_data/import');
-  drush_backend_batch_process();
+  //drush_backend_batch_process();
   dpm("batch end");
 }
 function drush_backend_batch_process($command = 'batch-process', $args = array(), $options = array()) {
