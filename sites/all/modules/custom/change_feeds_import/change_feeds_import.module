@@ -159,7 +159,16 @@ function change_feeds_import_menu() {
     'access arguments' => array('Distributor Upload File'),
     'file' => 'form/sales_delivery_data.inc',
   );
-
+  
+ // Upload form for sales register data
+  $items['sales-delivery-data1/import'] = array(
+    'title' => 'Sales Delivery Data',
+    'description' => 'Import Sales Delivery Data',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('change_feeds_import_sales_delivery1_form'),
+    'access arguments' => array('Distributor Upload File'),
+    'file' => 'form/sales_delivery_data.inc',
+  );
 
 
   $items['sales-delivery-data-confirm/%'] = array(
