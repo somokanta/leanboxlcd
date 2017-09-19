@@ -122,6 +122,7 @@ function background_batch_library() {
  */
 function _background_batch_operation($operation, &$context) {
   dsm($operation);
+  dsm($context);
   // Steal context and trap finished variable
   $fine_progress = !empty($context['sandbox']['background_batch_fine_progress']);
   if ($fine_progress) {
