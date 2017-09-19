@@ -110,7 +110,6 @@ function change_feeds_import_sales_delivery1_form_submit($form, &$form_state) {
       $query->leftjoin('field_data_field_dispatch_n_value', 'd_date', 'd_date.entity_id = n.nid');
       $query->isNull('d_date.field_dispatch_n_value_value');
       $query->join('field_data_field_trip_id_reference', 'ti', 'ti.entity_id = n.nid');
-      $query->range($start, $start + 100);
       $query->fields('n', array('nid'));
       $datas = $query->execute()->fetchAllKeyed(0, 0);
    
