@@ -2,6 +2,135 @@
 
 // upload form for billing data
 
+function change_feeds_import_sales_delivery1_form($form, $form_state) {
+  global $user;
+  $user_id = $user->uid;
+  $distributor_id = change_feeds_import_get_distributor_id($user_id);
+
+  // check distributor incompleted upload
+  $query = db_select('custom_sales_delivery', 'sd');
+  $query->condition('sd.distributor_id', $distributor_id, '=');
+  $query->fields('sd', array('fid'));
+  $fid = $query->execute()->fetchField();
+
+  if (!empty($fid)) {
+    drupal_goto("sales-delivery-data-confirm/$fid");
+  }
+  $data = leanbox_dashboard_all_value_using_voc_name('Delivery Reason');
+  foreach($data as $val) {
+    $html .= '<li>' . $val . '</li>';
+  }
+
+  $form['file'] = array(
+    '#type' => 'file',
+    '#title' => t('Choose a CSV file for Sales Delivery data upload'),
+  );
+  $form['template_download'] = array(
+    '#type' => 'markup',
+    '#prefix' => '<div id="template_wrapper">',
+    '#suffix' => '</div>',
+    '#markup' => l("Download Template", drupal_get_path('module', 'change_feeds_import') . '/sales_delivery_upload_template.csv'),
+  );
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Upload'),
+  );
+
+  $form['delivery_pending'] = array(
+    '#type' => 'item',
+    '#title' => t('Take "SALES DELIVERED AMT" Value from "Sum of NET_SALES_VALUE" from Sales Pivot Report. Please mention "Yes" to declare bills for Delivery Pending in "Delivery Pending" Column while upload.'),
+  );
+  $form['reason'] = array(
+    '#type' => 'item',
+    '#markup' => $html,
+    '#title' => t('Valid Delivery Reason'),
+  );
+   
+
+  return $form;
+}
+
+function change_feeds_import_sales_delivery1_form_validate($form, &$form_state) {
+  $file = file_save_upload('file', array(
+    'file_validate_extensions' => array('csv'),
+  ));
+
+  $header_array_from_xsd = array(
+    'BILL NUMBER', 'SALES DELIVERED AMT', 'DELIVERY PENDING'
+  );
+  if ($file) {
+    if ($file = file_move($file, 'public://')) {
+      $form_state['values']['file'] = $file;
+      $filepath = $form_state['values']['file']->uri;
+      $data = array_map("str_getcsv", file($filepath, FILE_SKIP_EMPTY_LINES));
+      $header_from_csv = array_shift($data);
+      if ($header_array_from_xsd != $header_from_csv) {
+        $type = 'error';
+        $message = 'Header mismatch.';
+        form_set_error('file_upload', t($message));
+      }
+    }
+    else {
+      form_set_error('file_upload', t('Failed to write the uploaded file the site\'s file folder.'));
+    }
+  }
+  else {
+    form_set_error('file', t('No file was uploaded.'));
+  }
+}
+
+function change_feeds_import_sales_delivery1_form_submit($form, &$form_state) {
+  global $user;
+  $user_id = $user->uid;
+  $distributor_id = change_feeds_import_get_distributor_id($user_id);
+  $file = $form_state['values']['file'];
+  $file_name = $file->filename;
+  $fid = $file->fid;
+  $filepath = $file->uri;
+
+  $datas = array();
+  // Making data as associative array with header.
+  if (($handle = fopen($filepath, "r")) !== FALSE) {
+    $header = fgetcsv($handle, 0, ',', '"');
+
+    while (($row = fgetcsv($handle) ) !== FALSE) {
+
+      foreach ($row as $key => &$value) {
+        $value = mb_convert_encoding($value, 'UTF-8', 'UTF-8');
+      }
+
+      $datas[] = array_combine($header, $row);
+    }
+    fclose($handle);
+  }
+
+   $operations = array();
+      $query = db_select('node', 'n');
+      $query->condition('n.type', 'sales_register_data');
+      $query->leftjoin('field_data_field_dispatch_n_value', 'd_date', 'd_date.entity_id = n.nid');
+      $query->isNull('d_date.field_dispatch_n_value_value');
+      $query->join('field_data_field_trip_id_reference', 'ti', 'ti.entity_id = n.nid');
+      $query->range($start, $start + 100);
+      $query->fields('n', array('nid'));
+      $datas = $query->execute()->fetchAllKeyed(0, 0);
+   
+   $data_chunk = array_chunk($datas, 1000);
+   foreach ($data_chunk as $data) {
+    $operations[] = array('change_feeds_import_sales_delivery_batch_fix_process1', array($data, $distributor_id, $file_name, $fid));
+  }
+  $batch = array(
+    'title' => t('Reading Delivery data Csv'),
+    'operations' => $operations,
+    'init_message' => t("Please wait..."),
+    'progress_message' => t('Processed @current out of @total.'),
+    'error_message' => t('Upload data processing has encountered an error.'),
+    'finished' => 'sales_delivery_data_csv_finished',
+    'file' => drupal_get_path('module', 'change_feeds_import') . '/form/sales_delivery_data.inc',
+  );
+  batch_set($batch);
+}
+
+
 function change_feeds_import_sales_delivery_form($form, $form_state) {
   global $user;
   $user_id = $user->uid;
@@ -104,9 +233,19 @@ function change_feeds_import_sales_delivery_form_submit($form, &$form_state) {
     fclose($handle);
   }
 
-  $operations = array();
-  $data_chunk = array_chunk($datas, 1000);
-  foreach ($data_chunk as $data) {
+   $operations = array();
+   if (arg(0) === 'sales-delivery-data1') {
+      $query = db_select('node', 'n');
+      $query->condition('n.type', 'sales_register_data');
+      $query->leftjoin('field_data_field_dispatch_n_value', 'd_date', 'd_date.entity_id = n.nid');
+      $query->isNull('d_date.field_dispatch_n_value_value');
+      $query->join('field_data_field_trip_id_reference', 'ti', 'ti.entity_id = n.nid');
+      $query->range($start, $start + 100);
+      $query->fields('n', array('nid'));
+      $datas = $query->execute()->fetchAllKeyed(0, 0);
+   }
+   $data_chunk = array_chunk($datas, 1000);
+   foreach ($data_chunk as $data) {
     $operations[] = array('change_feeds_import_sales_delivery_batch_fix_process', array($data, $distributor_id, $file_name, $fid));
   }
   $batch = array(
@@ -125,6 +264,17 @@ function change_feeds_import_sales_delivery_batch_fix_process($data, $distributo
   if (empty($distributor_id)) {
     drupal_set_message(t('Please check your Distributor code'), 'error');
   }
+  dpm($_SERVER['HTTP_REFERER'], 'HTTP_REFERER');
+  if (arg(0) === 'sales-delivery-data1') {
+      foreach ($data as $key => $value) {
+      dpm($value, 'nid');
+      $node = node_load($value);
+      node_save($node);
+        break;
+      }
+    
+  }
+  else {
   require_once drupal_get_path('module', 'change_feeds_import') . '/form/upload_billing_data.inc';
 
   $value['error_message'] = '';
@@ -218,6 +368,22 @@ function change_feeds_import_sales_delivery_batch_fix_process($data, $distributo
 
     $context['results']['fid'] = $fid;
   }
+  }
+}
+
+
+
+function change_feeds_import_sales_delivery_batch_fix_process1($data, $distributor_id, $file_name, $fid, &$context) {
+  if (empty($distributor_id)) {
+    drupal_set_message(t('Please check your Distributor code'), 'error');
+  }
+      foreach ($data as $key => $value) {
+      $node = node_load($value);
+      node_save($node);
+        break;
+      }
+
+ $context['results']['fid'] = 1;
 }
 
 function sales_delivery_data_csv_finished($success, $results, $operations) {
