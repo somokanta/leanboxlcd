@@ -113,10 +113,10 @@ function change_feeds_import_sales_delivery1_form_submit($form, &$form_state) {
     $query->join('node', 'disn', 'disn.nid = ti.field_trip_id_reference_nid');
     $query->join('field_data_field_dispatch_date', 'disp_st', 'disp_st.entity_id = disn.nid');
     $query->fields('n', array('nid'));
-      $query->range(0, 10000);
+      $query->range(0, 50000);
       $datas = $query->execute()->fetchAllKeyed(0, 0);
    
-   $data_chunk = array_chunk($datas, 100);
+   $data_chunk = array_chunk($datas, 400);
    foreach ($data_chunk as $data) {
     $operations[] = array('change_feeds_import_sales_delivery_batch_fix_process1', array($data, $distributor_id, $file_name, $fid));
   }
@@ -236,16 +236,7 @@ function change_feeds_import_sales_delivery_form_submit($form, &$form_state) {
   }
 
    $operations = array();
-   if (arg(0) === 'sales-delivery-data1') {
-      $query = db_select('node', 'n');
-      $query->condition('n.type', 'sales_register_data');
-      $query->leftjoin('field_data_field_dispatch_n_value', 'd_date', 'd_date.entity_id = n.nid');
-      $query->isNull('d_date.field_dispatch_n_value_value');
-      $query->join('field_data_field_trip_id_reference', 'ti', 'ti.entity_id = n.nid');
-      $query->range($start, $start + 100);
-      $query->fields('n', array('nid'));
-      $datas = $query->execute()->fetchAllKeyed(0, 0);
-   }
+
    $data_chunk = array_chunk($datas, 1000);
    foreach ($data_chunk as $data) {
     $operations[] = array('change_feeds_import_sales_delivery_batch_fix_process', array($data, $distributor_id, $file_name, $fid));
@@ -266,17 +257,7 @@ function change_feeds_import_sales_delivery_batch_fix_process($data, $distributo
   if (empty($distributor_id)) {
     drupal_set_message(t('Please check your Distributor code'), 'error');
   }
-  dpm($_SERVER['HTTP_REFERER'], 'HTTP_REFERER');
-  if (arg(0) === 'sales-delivery-data1') {
-      foreach ($data as $key => $value) {
-      dpm($value, 'nid');
-      $node = node_load($value);
-      node_save($node);
-        break;
-      }
-    
-  }
-  else {
+
   require_once drupal_get_path('module', 'change_feeds_import') . '/form/upload_billing_data.inc';
 
   $value['error_message'] = '';
@@ -370,7 +351,7 @@ function change_feeds_import_sales_delivery_batch_fix_process($data, $distributo
 
     $context['results']['fid'] = $fid;
   }
-  }
+  
 }
 
 
