@@ -15,5 +15,5 @@ drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
 
 dsm($_SERVER['argv'][1]);
 dsm("hello");
-
+watchdog('mine', "helloooooo".$_SERVER['argv'][1]);
 ?>
