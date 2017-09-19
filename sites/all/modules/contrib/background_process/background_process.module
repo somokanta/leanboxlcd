@@ -387,6 +387,7 @@ function background_process_generate_handle($callback) {
  *   Handle on success, FALSE on failure
  */
 function background_process_start($callback /* [, $var [, $... ]] */) {
+  dpm("batch started");
   $process = new BackgroundProcess();
   $args = func_get_args();
   array_splice($args, 0, 1);
