@@ -93,6 +93,7 @@ function background_batch_page() {
   $batch = unserialize($data);
 
   // Use standard batch callback if this is not a background batch.
+  print($batch['background_process']);exit();
   if (empty($batch['background_process'])) {
     module_load_include('inc', 'system', 'system.admin');
     return system_batch_page();
