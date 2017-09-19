@@ -105,19 +105,20 @@ function background_batch_page() {
   }
 
   $op = isset($_REQUEST['op']) ? $_REQUEST['op'] : '';
-  switch ($op) {
-    case 'start':
-      return _background_batch_page_start();
-    case 'do':
-      return _background_batch_page_do_js();
-    case 'do_nojs':
-      return _background_batch_page_do_nojs();
-    case 'finished':
-      progress_remove_progress('_background_batch:' . $id);
-      return _batch_finished();
-    default:
-      drupal_goto('admin/config/system/batch/overview');
-  }
+  return _background_batch_page_do_nojs();
+//  switch ($op) {
+//    case 'start':
+//      return _background_batch_page_start();
+//    case 'do':
+//      return _background_batch_page_do_js();
+//    case 'do_nojs':
+//      return _background_batch_page_do_nojs();
+//    case 'finished':
+//      progress_remove_progress('_background_batch:' . $id);
+//      return _batch_finished();
+//    default:
+//      drupal_goto('admin/config/system/batch/overview');
+//  }
 }
 
 /**
