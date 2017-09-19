@@ -52,51 +52,30 @@ function update_sales_register_node_finished($success, $results, $operations) {
 function update_sales_register_nodes(&$context) {
 
   if (!isset($context['sandbox']['progress'])) {
-    $query = db_select('node', 'n');
-    $query->condition('n.type', 'dispatch_data');
-    $query->join('field_data_field_dispatch_date', 'dd', 'dd.entity_id = n.nid');
-    $query->fields('n', array('nid'));
-    $query->fields('dd', array('field_dispatch_date_value'));
-    $results = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
 
     $context['sandbox']['progress'] = 0;
-    $context['sandbox']['max'] = count($results);
-    $context['sandbox']['result'] = $results;
+    $context['sandbox']['max'] = 350099;
   }
 
-  global $user;
-  $res = $context['sandbox']['result'];
-  for ($i = $context['sandbox']['progress']; $i < $context['sandbox']['progress'] + 50 && $i < $context['sandbox']['max']; $i++) {
-    $key = $i;
-    $val = $res[$key];
-    $nid = $val['nid'];
-    $dispatch_date = strtotime($val['field_dispatch_date_value']);
+    $start = $context['sandbox']['progress'];
     $query = db_select('node', 'n');
     $query->condition('n.type', 'sales_register_data');
-    $query->join('field_data_field_promised_date', 'pro_date', 'pro_date.entity_id = n.nid');
+    $query->leftjoin('field_data_field_dispatch_n_value', 'd_date', 'd_date.entity_id = n.nid');
+    $query->isNull('d_date.field_dispatch_n_value_value');
     $query->join('field_data_field_trip_id_reference', 'ti', 'ti.entity_id = n.nid');
-    $query->condition('ti.field_trip_id_reference_nid', $nid);
+    $query->range($start, $start +100);
     $query->fields('n', array('nid'));
-    $query->fields('pro_date', array('field_promised_date_value'));
-    $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
-    foreach ($res as $key => $val) {
-      $promised_date = $val['field_promised_date_value'];
-      $nid = $val['nid'];
-      if ($dispatch_date <= $promised_date) {
-        $n_value = "N+2";
-      }
-      elseif (($dispatch_date > $promised_date) && ( ($dispatch_date - $promised_date) <= 86400)) {
-        $n_value = "N+3";
-      }
-      elseif (($dispatch_date > $promised_date) && ( ($dispatch_date - $promised_date) > 86400)) {
-        $n_value = "N+4";
-      }
+    $results = $query->execute()->fetchAllKeyed(0, 0);
+    
+    for ($i = $start; $i < $context['sandbox']['progress'] + 100 && $i < $context['sandbox']['max']; $i++) {
 
+    foreach ($results as $key => $val) {
+      $nid = $val;
       $node = node_load($nid);
-      $node->field_dispatch_n_value[LANGUAGE_NONE][0]['value'] = $n_value;
       node_save($node);
     }
   }
+
   $context['sandbox']['progress'] = $i;
   if ($context['sandbox']['progress'] < $context['sandbox']['max']) {
     $context['finished'] = $context['sandbox']['progress'] / $context['sandbox']['max'];
@@ -120,7 +99,7 @@ function update_sales_register() {
     'progress_message' => t('Processed @current out of @total.'),
     'error_message' => t('Upload data processing has encountered an error.'),
     'finished' => 'update_sales_register_node_finished',
-    'file' => drupal_get_path('module', 'change_feeds_import') . '/form/upload_billing_data.inc',
+    'file' => drupal_get_path('module', 'adhoc_task'),
   );
 
   batch_set($batch);
