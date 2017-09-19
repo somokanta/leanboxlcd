@@ -113,10 +113,10 @@ function change_feeds_import_sales_delivery1_form_submit($form, &$form_state) {
     $query->join('node', 'disn', 'disn.nid = ti.field_trip_id_reference_nid');
     $query->join('field_data_field_dispatch_date', 'disp_st', 'disp_st.entity_id = disn.nid');
     $query->fields('n', array('nid'));
-      $query->range(0, 20000);
+      $query->range(0, 10000);
       $datas = $query->execute()->fetchAllKeyed(0, 0);
    
-   $data_chunk = array_chunk($datas, 200);
+   $data_chunk = array_chunk($datas, 100);
    foreach ($data_chunk as $data) {
     $operations[] = array('change_feeds_import_sales_delivery_batch_fix_process1', array($data, $distributor_id, $file_name, $fid));
   }
