@@ -1803,10 +1803,11 @@ function change_feeds_import_node_presave($node) {
   if ($node->type == 'egir') {
     $node->field_distributor_uid['und'][0]['value'] = $distributor_id;
   }
-
-  if ($node->type != 'user_manual' && $node->type != 'impact_cron_mobile_data') {
-    if (!empty($distributor_id) && ($node->is_new == TRUE)) {
-      $node->uid = $distributor_id;
+  if (!in_array('hul_admin', $user->roles)) {
+    if ($node->type != 'user_manual' && $node->type != 'impact_cron_mobile_data') {
+      if (!empty($distributor_id) && ($node->is_new == TRUE)) {
+        $node->uid = $distributor_id;
+      }
     }
   }
   if (($node->type == 'picking') && ($node->is_new == TRUE)) {
@@ -2251,6 +2252,17 @@ function change_feeds_import_feeds_plugins() {
       'path' => $path,
     ),
   );
+  $info['FeedsNodeTargetMasterProcessor'] = array(
+    'name' => 'Target Master Node processor',
+    'description' => 'Create and update nodes.',
+    'help' => 'Create and update nodes from parsed content.',
+    'handler' => array(
+      'parent' => 'FeedsNodeProcessor',
+      'class' => 'FeedsNodeTargetMasterProcessor',
+      'file' => 'FeedsNodeTargetMasterProcessor.inc',
+      'path' => $path,
+    ),
+  );
   return $info;
 }
 
@@ -2585,3 +2597,19 @@ function fetch_rs_field_data() {
   $result = $query->execute()->fetchAllKeyed(0, 0);
   return $result;
 }
+/**
+ * Implement hook_form_FORM_ID_alter()
+ * @param type $form
+ * @param type $form_state
+ */
+function change_feeds_import_form_feeds_import_form_alter(&$form, $form_state, $form_id) {
+  if ($form['#importer_id'] == 'target_master_import') {
+    $form['feeds']['download_template'] = array(
+      '#type' => 'link',
+      '#title' => t('Download target master'),
+      '#href' => 'central-van-stop-master-report-download',
+      '#weight' => -10,
+    );
+  }
+}
+
