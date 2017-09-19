@@ -70,6 +70,7 @@ function background_batch_menu_alter(&$items) {
  * Steal the operation and hook into context data.
  */
 function background_batch_batch_alter(&$batch) {
+  dsm($batch);
   if ($batch['progressive'] && $batch['url'] == 'batch') {
     foreach ($batch['sets'] as &$set) {
       if (!empty($set['operations'])) {
@@ -80,6 +81,7 @@ function background_batch_batch_alter(&$batch) {
     }
     $batch['timestamp'] = microtime(TRUE);
   }
+  dsm($batch);
   // In order to make this batch session independend we save the owner UID.
   global $user;
   $batch['uid'] = $user->uid;
