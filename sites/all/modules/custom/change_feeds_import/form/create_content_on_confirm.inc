@@ -167,6 +167,16 @@ function change_feeds_import_create_confirm_content($id) {
   drush_backend_batch_process();
   dpm("batch end");
 }
+function drush_backend_batch_process($command = 'batch-process', $args = array(), $options = array()) {
+  // Command line options to pass to the command.
+  global $user;
+  if ($user->uid) {
+    $options['u'] = $user->uid;
+  }
+
+  drush_include_engine('drupal', 'batch', drush_drupal_major_version());
+  _drush_backend_batch_process($command, $args, $options);
+}
 
 function change_feeds_import_create_billing_data($max_billing_id) {
   global $user;
