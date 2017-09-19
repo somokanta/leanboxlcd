@@ -163,7 +163,8 @@ function change_feeds_import_create_confirm_content($id) {
   //batch_process('/billing_data/import');
   $batch =& batch_get();
   $batch['progressive'] = FALSE;
-  background_batch_process_batch('/billing_data/import');
+  //background_batch_process_batch('/billing_data/import');
+  drush_backend_batch_process();
   dpm("batch end");
 }
 
