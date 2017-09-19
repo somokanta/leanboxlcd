@@ -163,7 +163,7 @@ function change_feeds_import_create_confirm_content($id) {
   
   //$batch =& batch_get();
   //$batch['progressive'] = FALSE;
-//  batch_process('/billing_data/import');
+  batch_process('/billing_data/import');
   //background_batch_process_batch('/billing_data/import');
   //drush_backend_batch_process();
   dpm("batch end");
@@ -445,6 +445,7 @@ function change_feeds_import_create_party_packing($data, &$context) {
     $node->field_party_packing_type['und'][0]['value'] = $value['party_pack'];
     $node = node_submit($node); // Prepare node for saving
     node_save($node);
+    dpm($node,'node');
   }
   
   drupal_set_message("Created Party Packing");
