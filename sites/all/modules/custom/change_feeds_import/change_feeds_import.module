@@ -1443,6 +1443,71 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
   global $user;
   // Store distributor id in author in each node
   $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+// Add presave/alter code for van stop master uploader
+  if ($entity->feeds_item->id == 'target_master_import') {
+    $dis_id = leanbox_mobile_get_distributor_using_rscode($entity->title);
+    if (!empty($dis_id)) {
+      $entity->title = $dis_id; // storing dis id here
+      $entity->uid = $dis_id;   // storing dis id in author
+    }
+    else {
+      drupal_set_message("Please enter correct Rs Code $node_title", 'error');
+      $entity->feeds_item->skip = TRUE;
+    }
+    foreach ($item as $k => $val) {
+      if ($k == 'stop size' || $k == 'del per van' || $k == 'dets bulk' || $k == 'dets loose' || $k == 'fnb bulk' || $k == 'fnb loose' || $k == 'non-pp' || $k == 'pp' || $k == 'pp bulk' || $k == 'pp loose' || $k == 'Sales reg days') {
+        if (!is_numeric($val)) {
+          drupal_set_message("Please enter numaric value for $k", 'error');
+          $entity->feeds_item->skip = TRUE;
+        }
+      }
+    }
+    $pp_finish_time = $entity->field_pp_finish_time['und'][0]['value'];
+    if (!empty($pp_finish_time)) {
+      $pp_finish_time = strtotime($pp_finish_time);
+      if (empty($pp_finish_time)) {
+        drupal_set_message("Please enter correct value for PP finish time", 'error');
+        $entity->feeds_item->skip = TRUE;
+      }
+      else {
+        $entity->field_pp_finish_time['und'][0]['value'] = date('h:i A', $pp_finish_time);
+      }
+    }
+    $picking_finish_time = $entity->field_picking_finish_time['und'][0]['value'];
+    if (!empty($picking_finish_time)) {
+      $picking_finish_time = strtotime($picking_finish_time);
+      if (empty($picking_finish_time)) {
+        drupal_set_message("Please enter correct value for Picking finish time", 'error');
+        $entity->feeds_item->skip = TRUE;
+      }
+      else {
+        $entity->field_picking_finish_time['und'][0]['value'] = date('h:i A', $picking_finish_time);
+      }
+    }
+    $unloading_finish_time = $entity->field_unloading_finish_time['und'][0]['value'];
+    if (!empty($unloading_finish_time)) {
+      $unloading_finish_time = strtotime($unloading_finish_time);
+      if (empty($unloading_finish_time)) {
+        drupal_set_message("Please enter correct value for Unloading finish time", 'error');
+        $entity->feeds_item->skip = TRUE;
+      }
+      else {
+        $entity->field_unloading_finish_time['und'][0]['value'] = date('h:i A', $unloading_finish_time);
+      }
+    }
+    $otf_finish_time = $entity->field_otif_finish_time['und'][0]['value'];
+    if (!empty($otf_finish_time)) {
+      $otf_finish_time = strtotime($otf_finish_time);
+      if (empty($otf_finish_time)) {
+        drupal_set_message("Please enter correct value for otif finish time", 'error');
+        $entity->feeds_item->skip = TRUE;
+      }
+      else {
+        $entity->field_otif_finish_time['und'][0]['value'] = date('h:i A', $otf_finish_time);
+      }
+    }
+  }
+
   if (!empty($distributor_id)) {
     $entity->uid = $distributor_id;
     if ($entity->type == 'pdd_master') {
