@@ -380,7 +380,6 @@ function change_feeds_import_sales_delivery_batch_fix_process1($data, $distribut
       foreach ($data as $key => $value) {
       $node = node_load($value);
       node_save($node);
-        break;
       }
 
  $context['results']['fid'] = 1;
