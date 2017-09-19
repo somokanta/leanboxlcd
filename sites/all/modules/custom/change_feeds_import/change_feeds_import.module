@@ -387,12 +387,12 @@ function change_feeds_import_menu() {
   $items['confirm/create_content/%'] = array(
     'title' => 'confirm',
     'description' => 'Confirm to create billing packing and picking contents',
-    'page callback' => 'change_feeds_import_create_confirm_content',
-   // 'page callback' => 'change_feeds_import_create_confirm_content_test',
+    //'page callback' => 'change_feeds_import_create_confirm_content',
+    'page callback' => 'change_feeds_import_create_confirm_content_test',
     'page arguments' => array(2),
     'access arguments' => array('Distributor Upload File'),
-    'file' => 'form/create_content_on_confirm.inc',
-   // 'file' => 'change_feeds_import.drush.inc',
+    //'file' => 'form/create_content_on_confirm.inc',
+    'file' => 'change_feeds_import.drush.inc',
   );
 
   // when discard is clicked
