@@ -1589,12 +1589,14 @@ function leanbox_dashboard_form_alter(&$form, &$form_state, $form_id) {
          $values = fetch_rs_field_data();
          $query = db_select('field_data_field_third_party_username', 't');
          $query->fields('t', array('field_third_party_username_value'));
+         $query->leftjoin('field_data_field_name', 'n', 'n.entity_id = t.entity_id');
+         $query->addExpression("concat(t.field_third_party_username_value ,' : ', n.field_name_value)", 'name');
          if (!empty($values)) {
            $query->condition('t.entity_id', $values, 'IN');
          }
-         $res = $query->execute()->fetchAllKeyed(0, 0);
+         $res = $query->execute()->fetchAllKeyed(0, 1);
          $res[''] = t('-Any-');
-
+      
          if (isset($_GET['field_third_party_username_value'])) {
             $rs_default_value = $_GET['field_third_party_username_value'];
          }
