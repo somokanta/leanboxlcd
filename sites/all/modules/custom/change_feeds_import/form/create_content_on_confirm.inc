@@ -108,28 +108,24 @@ function change_feeds_import_create_confirm_content($id) {
   $operations = array();
   
   $create_billing_data = change_feeds_import_create_billing_data($max_billing_id);
-  dpm($create_billing_data);
-  $create_billing_data_chunk = array_chunk($create_billing_data, 1000);
+  $create_billing_data_chunk = array_chunk($create_billing_data, 1500);
   foreach ($create_billing_data_chunk as $data) {
     $operations[] = array('change_feeds_import_create_billing', array($data));
   }
 
   $create_picking_data = change_feeds_import_create_picking_data($max_billing_id);
-  dpm($create_picking_data);
-  $create_picking_data_chunk = array_chunk($create_picking_data, 1000);
+  $create_picking_data_chunk = array_chunk($create_picking_data, 1500);
   foreach ($create_picking_data_chunk as $data) {
     $operations[] = array('change_feeds_import_create_picking', array($data));
   }
 
   $van_cld_report_data = change_feeds_import_create_van_cld_report_data($max_billing_id);
-  dpm($van_cld_report_data);
-  $van_cld_report_data_chunk = array_chunk($van_cld_report_data, 1000);
+  $van_cld_report_data_chunk = array_chunk($van_cld_report_data, 1500);
   foreach ($van_cld_report_data_chunk as $data) {
     $operations[] = array('change_feeds_import_create_van_cld_report', array($data));
   }
   
-  $party_packing_data_new_chunk = array_chunk($party_packing_data_new, 1000);
-  dpm($party_packing_data_new_chunk);
+  $party_packing_data_new_chunk = array_chunk($party_packing_data_new, 1500);
   foreach ($party_packing_data_new_chunk as $data) {
     $operations[] = array('change_feeds_import_create_party_packing', array($data));
   }
@@ -149,7 +145,7 @@ function change_feeds_import_create_confirm_content($id) {
   db_delete('stage_billing_data')
       ->condition('error_id', $id, '=')
       ->execute();
- dpm("deleted");
+
   require_once drupal_get_path('module', 'change_feeds_import') . '/form/validate_content.inc';
   $status = "Completed";
   // change status in error billing data
@@ -164,9 +160,7 @@ function change_feeds_import_create_confirm_content($id) {
   //$batch =& batch_get();
   //$batch['progressive'] = FALSE;
   batch_process('/billing_data/import');
-  //background_batch_process_batch('/billing_data/import');
-  //drush_backend_batch_process();
-  dpm("batch end");
+  // background_batch_process_batch('/billing_data/import');
 }
 
 function change_feeds_import_create_billing_data($max_billing_id) {
@@ -445,7 +439,6 @@ function change_feeds_import_create_party_packing($data, &$context) {
     $node->field_party_packing_type['und'][0]['value'] = $value['party_pack'];
     $node = node_submit($node); // Prepare node for saving
     node_save($node);
-    dpm($node,'node');
   }
   
   drupal_set_message("Created Party Packing");
@@ -565,8 +558,7 @@ function get_party_packing_from_party_code($party_code = NULL, $distributor_id) 
 }
 
 function change_feeds_import_create_billing($data, &$context) {
-dpm("create billing");
-watchdog("testing", "inside create billing entered");
+
   if (!isset($context['sandbox']['progress'])) {
     $context['sandbox']['progress'] = 0;
   }

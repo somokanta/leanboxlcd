@@ -237,7 +237,7 @@ function _background_batch_process($id = NULL) {
  */
 function background_batch_process_batch($redirect = NULL, $url = 'batch', $redirect_callback = 'drupal_goto') {
   $batch =& batch_get();
-dpm('called inside');
+
   drupal_theme_initialize();
 
   if (isset($batch)) {
