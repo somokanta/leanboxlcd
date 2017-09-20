@@ -23,6 +23,10 @@ drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
 
 	watchdog('cron_test', "helloooooo".$_SERVER['argv'][1]);
 	watchdog('cron_test', '<pre>' . print_r($user, TRUE) . '</pre>');
+        
+        module_load_include('inc', 'change_feeds_import', 'form/create_content_on_confirm');
+        module_load_include('inc', 'change_feeds_import', 'form/upload_billing_data');
+        //change_feeds_import_create_confirm_content(456);
 
 	if (user_is_logged_in()) {
 		module_load_include('pages.inc', 'user', 'user');

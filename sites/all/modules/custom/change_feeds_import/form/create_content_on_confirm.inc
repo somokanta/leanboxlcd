@@ -155,7 +155,6 @@ function change_feeds_import_create_confirm_content($id) {
   if (file_exists($path)) {
     drupal_unlink($path); //delete the generated error file
   }
-  dpm("batch set");
   
   //$batch =& batch_get();
   //$batch['progressive'] = FALSE;
