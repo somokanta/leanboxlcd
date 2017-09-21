@@ -105,17 +105,22 @@ function change_feeds_import_sales_delivery1_form_submit($form, &$form_state) {
   }
 
    $operations = array();
-      $query = db_select('node', 'n');
-    $query->condition('n.type', 'sales_register_data');
-    $query->leftjoin('field_data_field_dispatch_n_value', 'd_date', 'd_date.entity_id = n.nid');
-    $query->isNull('d_date.field_dispatch_n_value_value');
-    $query->join('field_data_field_trip_id_reference', 'ti', 'ti.entity_id = n.nid');
-    $query->join('node', 'disn', 'disn.nid = ti.field_trip_id_reference_nid');
-    $query->join('field_data_field_dispatch_date', 'disp_st', 'disp_st.entity_id = disn.nid');
-    $query->fields('n', array('nid'));
-      $query->range(0, 10000);
-      $datas = $query->execute()->fetchAllKeyed(0, 0);
    
+   $start_date = strtotime('1-09-2017');
+   $end_date = strtotime('21-09-2017');
+
+   $query = db_select('node', 'n');
+   $query->join('field_data_field_sr_bill_date', 'i', 'i.entity_id = n.nid');
+   $query->condition('n.type', 'sales_register_data');
+   $query->leftjoin('field_data_field_party_code_reference', 'ti', 'ti.entity_id = n.nid');
+   $query->isNull('ti.field_party_code_reference_nid');
+   if (!empty($start_date) && !empty($end_date)) {
+      $query->condition('i.field_sr_bill_date_value', array($start_date, $end_date), 'BETWEEN');
+   }
+   $query->fields('n', array('nid'));
+   $query->range(0, 10000);
+   $datas = $query->execute()->fetchAllKeyed(0, 0);
+
    $data_chunk = array_chunk($datas, 100);
    foreach ($data_chunk as $data) {
     $operations[] = array('change_feeds_import_sales_delivery_batch_fix_process1', array($data, $distributor_id, $file_name, $fid));
