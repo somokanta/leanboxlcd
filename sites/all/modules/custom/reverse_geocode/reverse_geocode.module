@@ -1367,6 +1367,28 @@ function reverse_geocode_update_hul_lat_lng($hul_code, $lat, $lng) {
  * Implements hook_node_presave()
  */
 function reverse_geocode_node_presave($node) {
+   
+  // store reference for party code from outlet master type if node created.
+  if ($node->type == 'sales_register_data') {
+   
+     if(!empty($node->field_sales_party_code['und'][0]['value']) && empty($node->field_party_code_reference['und'][0]['nid'])) {
+        // write a logic here to fetch same distributors party code reference 
+        // and store here in node
+        
+        $party_code = $node->field_sales_party_code['und'][0]['value'];
+        $node_author = $node->uid;
+        $query = db_select('node', 'n');
+        $query->fields('n', array('nid'));
+        $query->condition('n.type', 'outlet_master');
+        $query->join('field_data_field_party_code', 'p', 'p.entity_id = n.nid');
+        $query->condition('field_party_code_value', $party_code);
+        $query->condition('n.uid', $node_author);
+        $outlet_nid = $query->execute()->fetchField();
+        if (!empty($outlet_nid)) {
+          $node->field_party_code_reference['und'][0]['nid'] = $outlet_nid;
+        }     
+     }
+  } 
   if ($node->type == 'hul_code_master') {
     $og_hul_lat = $node->original->field_hul_lat['und'][0]['value'];
     $og_hul_long = $node->original->field_hul_long['und'][0]['value'];
