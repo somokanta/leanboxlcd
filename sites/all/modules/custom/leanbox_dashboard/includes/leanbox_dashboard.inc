@@ -15,37 +15,37 @@
 function leanbox_dashboard_chart_filter_adoption_form($form, &$form_state) {
   $form = array();
 
-  if (arg(1) == 'adoption_graph') {
-    $bill_date = date('Y-m-d');
-    $form['start_date'] = array(
-      '#type' => 'date_popup',
-      '#title' => t('Bill Date From'),
-      '#required' => TRUE,
-      '#date_format' => 'Y-m-d',
-      '#default_value' => $bill_date,
-    );
-    $form['end_date'] = array(
-      '#type' => 'date_popup',
-      '#title' => t('Bill Date To'),
-      '#required' => TRUE,
-      '#date_format' => 'Y-m-d',
-      '#default_value' => $bill_date,
-    );
+   //if (arg(1) == 'adoption_graph') {
+   $bill_date = date('Y-m-d');
+   $form['start_date'] = array(
+     '#type' => 'date_popup',
+     '#title' => t('Bill Date From'),
+     '#required' => TRUE,
+     '#date_format' => 'Y-m-d',
+     '#default_value' => $bill_date,
+   );
+   $form['end_date'] = array(
+     '#type' => 'date_popup',
+     '#title' => t('Bill Date To'),
+     '#required' => TRUE,
+     '#date_format' => 'Y-m-d',
+     '#default_value' => $bill_date,
+   );
 
-    $form['submit'] = array(
-      '#type' => 'submit',
-      '#value' => 'Submit',
-      '#prefix' => '<div id ="adoption-graph-submit">',
-      '#suffix' => '</div>',
-      '#attributes' => array('class' => array('adoption-graph-submit')),
-    );
-  }
+   $form['submit'] = array(
+     '#type' => 'submit',
+     '#value' => 'Submit',
+     '#prefix' => '<div id ="adoption-graph-submit">',
+     '#suffix' => '</div>',
+     '#attributes' => array('class' => array('adoption-graph-submit')),
+   );
+   // }
 
-  $form['adoption_graph'] = array(
-    '#markup' => '<a href = "/leanbox-chart-details/adoption_graph" target = "_blank"><div id="adoption_graph_div"></div></a>',
-  );
+   $form['adoption_graph'] = array(
+     '#markup' => '<a href = "/leanbox-chart-details/adoption_graph" target = "_blank"><div id="adoption_graph_div"></div></a>',
+   );
 
-  return $form;
+   return $form;
 }
 
 /**
