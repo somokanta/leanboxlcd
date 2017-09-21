@@ -1748,7 +1748,7 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
 //      $entity->feeds_item->skip = TRUE;
 //    }
   }
-  if ($entity->type == 'hul_code_master') {
+  if ($entity->feeds_item->id == 'hul_code_master') {
     $title = $entity->title;
     $existing_uid = check_hul_code_exist($title);
     if (!empty($existing_uid) && ($existing_uid != $distributor_id)) {
@@ -1825,6 +1825,29 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
     }
     if (empty($delivery_day_tid)) {
       drupal_set_message("$delivery_day does not exist in Delivery Day", 'error');
+      $entity->feeds_item->skip = TRUE;
+    }
+  }
+  
+  // Validate Payment Terms Importer
+  if ($entity->feeds_item->id == 'payment_terms') {
+    $title = $entity->title;
+    $existing_hul_code = check_hul_code_exist($title);
+    // HUl Code Master node is updated for existing hul code.
+    // No new node will be created.
+    if (empty($existing_hul_code)) {
+      drupal_set_message("You can not update payment term because hul code- .'$entity->title'. does not exists.", 'error');
+      $entity->feeds_item->skip = TRUE;
+    }
+    // check the character limit of "Payment Term" field.
+    $max_payment_term_character_limit = strlen($entity->field_payment_terms[LANGUAGE_NONE][0]['value']);
+    if($max_payment_term_character_limit != 2) {
+      drupal_set_message("The character limit of payment term of hul code- .'$entity->title'. should be 2.", 'error');
+      $entity->feeds_item->skip = TRUE;
+    }
+    // check the integer value of "Credit Days" field.
+    if(is_int($entity->field_credit_days[LANGUAGE_NONE][0]['value']) || $entity->field_credit_days[LANGUAGE_NONE][0]['value'] < 0) {
+      drupal_set_message("The credit days of hul code- .'$entity->title'. should be integer.", 'error');
       $entity->feeds_item->skip = TRUE;
     }
   }
