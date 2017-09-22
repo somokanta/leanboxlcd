@@ -10854,44 +10854,44 @@ form div > a {
   width: 100% !important;
 }
 /* line 906, ../sass/leanbox-global.scss */
-.region-content #leanbox-dashboard-chart-filter-otif-form .container-inline-date, .region-content #leanbox-dashboard-chart-filter-delivery-form .container-inline-date, .region-content #leanbox-mobile-chart-filter-return-form .container-inline-date, .region-content #leanbox-mobile-chart-filter-full-return-form .container-inline-date {
+.region-content #leanbox-dashboard-chart-filter-otif-form .container-inline-date, .region-content #leanbox-dashboard-chart-filter-delivery-form .container-inline-date, .region-content #leanbox-mobile-chart-filter-return-form .container-inline-date, .region-content #leanbox-mobile-chart-filter-full-return-form .container-inline-date, .region-content #leanbox-dashboard-chart-filter-adoption-form .container-inline-date {
   width: auto;
   display: inline-block;
 }
 /* line 909, ../sass/leanbox-global.scss */
-.region-content #leanbox-dashboard-chart-filter-otif-form .container-inline-date .date-padding, .region-content #leanbox-dashboard-chart-filter-delivery-form .container-inline-date .date-padding, .region-content #leanbox-mobile-chart-filter-return-form .container-inline-date .date-padding, .region-content #leanbox-mobile-chart-filter-full-return-form .container-inline-date .date-padding {
+.region-content #leanbox-dashboard-chart-filter-otif-form .container-inline-date .date-padding, .region-content #leanbox-dashboard-chart-filter-delivery-form .container-inline-date .date-padding, .region-content #leanbox-mobile-chart-filter-return-form .container-inline-date .date-padding, .region-content #leanbox-mobile-chart-filter-full-return-form .container-inline-date .date-padding, .region-content #leanbox-dashboard-chart-filter-adoption-form .container-inline-date .date-padding {
   float: none;
   display: inline-block;
 }
 /* line 912, ../sass/leanbox-global.scss */
-.region-content #leanbox-dashboard-chart-filter-otif-form .container-inline-date .date-padding .control-label, .region-content #leanbox-dashboard-chart-filter-delivery-form .container-inline-date .date-padding .control-label, .region-content #leanbox-mobile-chart-filter-return-form .container-inline-date .date-padding .control-label, .region-content #leanbox-mobile-chart-filter-full-return-form .container-inline-date .date-padding .control-label {
+.region-content #leanbox-dashboard-chart-filter-otif-form .container-inline-date .date-padding .control-label, .region-content #leanbox-dashboard-chart-filter-delivery-form .container-inline-date .date-padding .control-label, .region-content #leanbox-mobile-chart-filter-return-form .container-inline-date .date-padding .control-label, .region-content #leanbox-mobile-chart-filter-full-return-form .container-inline-date .date-padding .control-label, .region-content #leanbox-dashboard-chart-filter-adoption-form .container-inline-date .date-padding .control-label {
   display: none;
 }
 /* line 915, ../sass/leanbox-global.scss */
-.region-content #leanbox-dashboard-chart-filter-otif-form .container-inline-date .date-padding input, .region-content #leanbox-dashboard-chart-filter-delivery-form .container-inline-date .date-padding input, .region-content #leanbox-mobile-chart-filter-return-form .container-inline-date .date-padding input, .region-content #leanbox-mobile-chart-filter-full-return-form .container-inline-date .date-padding input {
+.region-content #leanbox-dashboard-chart-filter-otif-form .container-inline-date .date-padding input, .region-content #leanbox-dashboard-chart-filter-delivery-form .container-inline-date .date-padding input, .region-content #leanbox-mobile-chart-filter-return-form .container-inline-date .date-padding input, .region-content #leanbox-mobile-chart-filter-full-return-form .container-inline-date .date-padding input, .region-content #leanbox-dashboard-chart-filter-adoption-form .container-inline-date .date-padding input {
   width: 100px;
 }
 /* line 919, ../sass/leanbox-global.scss */
-.region-content #leanbox-dashboard-chart-filter-otif-form .container-inline-date .control-label, .region-content #leanbox-dashboard-chart-filter-delivery-form .container-inline-date .control-label, .region-content #leanbox-mobile-chart-filter-return-form .container-inline-date .control-label, .region-content #leanbox-mobile-chart-filter-full-return-form .container-inline-date .control-label {
+.region-content #leanbox-dashboard-chart-filter-otif-form .container-inline-date .control-label, .region-content #leanbox-dashboard-chart-filter-delivery-form .container-inline-date .control-label, .region-content #leanbox-mobile-chart-filter-return-form .container-inline-date .control-label, .region-content #leanbox-mobile-chart-filter-full-return-form .container-inline-date .control-label, .region-content #leanbox-dashboard-chart-filter-adoption-form .container-inline-date .control-label {
   vertical-align: top;
   margin: 8px 0 0 0;
 }
 /* line 924, ../sass/leanbox-global.scss */
-.region-content #leanbox-dashboard-chart-filter-otif-form #otif-submit, .region-content #leanbox-dashboard-chart-filter-otif-form #delivery-submit, .region-content #leanbox-dashboard-chart-filter-otif-form #mobile-return-submit, .region-content #leanbox-dashboard-chart-filter-otif-form #mobile-full-return-submit, .region-content #leanbox-dashboard-chart-filter-delivery-form #otif-submit, .region-content #leanbox-dashboard-chart-filter-delivery-form #delivery-submit, .region-content #leanbox-dashboard-chart-filter-delivery-form #mobile-return-submit, .region-content #leanbox-dashboard-chart-filter-delivery-form #mobile-full-return-submit, .region-content #leanbox-mobile-chart-filter-return-form #otif-submit, .region-content #leanbox-mobile-chart-filter-return-form #delivery-submit, .region-content #leanbox-mobile-chart-filter-return-form #mobile-return-submit, .region-content #leanbox-mobile-chart-filter-return-form #mobile-full-return-submit, .region-content #leanbox-mobile-chart-filter-full-return-form #otif-submit, .region-content #leanbox-mobile-chart-filter-full-return-form #delivery-submit, .region-content #leanbox-mobile-chart-filter-full-return-form #mobile-return-submit, .region-content #leanbox-mobile-chart-filter-full-return-form #mobile-full-return-submit {
+.region-content #leanbox-dashboard-chart-filter-otif-form #otif-submit, .region-content #leanbox-dashboard-chart-filter-otif-form #delivery-submit, .region-content #leanbox-dashboard-chart-filter-otif-form #mobile-return-submit, .region-content #leanbox-dashboard-chart-filter-otif-form #mobile-full-return-submit, .region-content #leanbox-dashboard-chart-filter-otif-form #adoption-graph-submit, .region-content #leanbox-dashboard-chart-filter-delivery-form #otif-submit, .region-content #leanbox-dashboard-chart-filter-delivery-form #delivery-submit, .region-content #leanbox-dashboard-chart-filter-delivery-form #mobile-return-submit, .region-content #leanbox-dashboard-chart-filter-delivery-form #mobile-full-return-submit, .region-content #leanbox-dashboard-chart-filter-delivery-form #adoption-graph-submit, .region-content #leanbox-mobile-chart-filter-return-form #otif-submit, .region-content #leanbox-mobile-chart-filter-return-form #delivery-submit, .region-content #leanbox-mobile-chart-filter-return-form #mobile-return-submit, .region-content #leanbox-mobile-chart-filter-return-form #mobile-full-return-submit, .region-content #leanbox-mobile-chart-filter-return-form #adoption-graph-submit, .region-content #leanbox-mobile-chart-filter-full-return-form #otif-submit, .region-content #leanbox-mobile-chart-filter-full-return-form #delivery-submit, .region-content #leanbox-mobile-chart-filter-full-return-form #mobile-return-submit, .region-content #leanbox-mobile-chart-filter-full-return-form #mobile-full-return-submit, .region-content #leanbox-mobile-chart-filter-full-return-form #adoption-graph-submit, .region-content #leanbox-dashboard-chart-filter-adoption-form #otif-submit, .region-content #leanbox-dashboard-chart-filter-adoption-form #delivery-submit, .region-content #leanbox-dashboard-chart-filter-adoption-form #mobile-return-submit, .region-content #leanbox-dashboard-chart-filter-adoption-form #mobile-full-return-submit, .region-content #leanbox-dashboard-chart-filter-adoption-form #adoption-graph-submit {
   width: 80px;
   display: inline-block;
 }
 /* line 927, ../sass/leanbox-global.scss */
-.region-content #leanbox-dashboard-chart-filter-otif-form #otif-submit button, .region-content #leanbox-dashboard-chart-filter-otif-form #delivery-submit button, .region-content #leanbox-dashboard-chart-filter-otif-form #mobile-return-submit button, .region-content #leanbox-dashboard-chart-filter-otif-form #mobile-full-return-submit button, .region-content #leanbox-dashboard-chart-filter-delivery-form #otif-submit button, .region-content #leanbox-dashboard-chart-filter-delivery-form #delivery-submit button, .region-content #leanbox-dashboard-chart-filter-delivery-form #mobile-return-submit button, .region-content #leanbox-dashboard-chart-filter-delivery-form #mobile-full-return-submit button, .region-content #leanbox-mobile-chart-filter-return-form #otif-submit button, .region-content #leanbox-mobile-chart-filter-return-form #delivery-submit button, .region-content #leanbox-mobile-chart-filter-return-form #mobile-return-submit button, .region-content #leanbox-mobile-chart-filter-return-form #mobile-full-return-submit button, .region-content #leanbox-mobile-chart-filter-full-return-form #otif-submit button, .region-content #leanbox-mobile-chart-filter-full-return-form #delivery-submit button, .region-content #leanbox-mobile-chart-filter-full-return-form #mobile-return-submit button, .region-content #leanbox-mobile-chart-filter-full-return-form #mobile-full-return-submit button {
+.region-content #leanbox-dashboard-chart-filter-otif-form #otif-submit button, .region-content #leanbox-dashboard-chart-filter-otif-form #delivery-submit button, .region-content #leanbox-dashboard-chart-filter-otif-form #mobile-return-submit button, .region-content #leanbox-dashboard-chart-filter-otif-form #mobile-full-return-submit button, .region-content #leanbox-dashboard-chart-filter-otif-form #adoption-graph-submit button, .region-content #leanbox-dashboard-chart-filter-delivery-form #otif-submit button, .region-content #leanbox-dashboard-chart-filter-delivery-form #delivery-submit button, .region-content #leanbox-dashboard-chart-filter-delivery-form #mobile-return-submit button, .region-content #leanbox-dashboard-chart-filter-delivery-form #mobile-full-return-submit button, .region-content #leanbox-dashboard-chart-filter-delivery-form #adoption-graph-submit button, .region-content #leanbox-mobile-chart-filter-return-form #otif-submit button, .region-content #leanbox-mobile-chart-filter-return-form #delivery-submit button, .region-content #leanbox-mobile-chart-filter-return-form #mobile-return-submit button, .region-content #leanbox-mobile-chart-filter-return-form #mobile-full-return-submit button, .region-content #leanbox-mobile-chart-filter-return-form #adoption-graph-submit button, .region-content #leanbox-mobile-chart-filter-full-return-form #otif-submit button, .region-content #leanbox-mobile-chart-filter-full-return-form #delivery-submit button, .region-content #leanbox-mobile-chart-filter-full-return-form #mobile-return-submit button, .region-content #leanbox-mobile-chart-filter-full-return-form #mobile-full-return-submit button, .region-content #leanbox-mobile-chart-filter-full-return-form #adoption-graph-submit button, .region-content #leanbox-dashboard-chart-filter-adoption-form #otif-submit button, .region-content #leanbox-dashboard-chart-filter-adoption-form #delivery-submit button, .region-content #leanbox-dashboard-chart-filter-adoption-form #mobile-return-submit button, .region-content #leanbox-dashboard-chart-filter-adoption-form #mobile-full-return-submit button, .region-content #leanbox-dashboard-chart-filter-adoption-form #adoption-graph-submit button {
   margin: 10px 10px 0 0;
   padding: 6px 15px;
 }
 /* line 932, ../sass/leanbox-global.scss */
-.region-content #leanbox-dashboard-chart-filter-otif-form a, .region-content #leanbox-dashboard-chart-filter-delivery-form a, .region-content #leanbox-mobile-chart-filter-return-form a, .region-content #leanbox-mobile-chart-filter-full-return-form a {
+.region-content #leanbox-dashboard-chart-filter-otif-form a, .region-content #leanbox-dashboard-chart-filter-delivery-form a, .region-content #leanbox-mobile-chart-filter-return-form a, .region-content #leanbox-mobile-chart-filter-full-return-form a, .region-content #leanbox-dashboard-chart-filter-adoption-form a {
   width: 100%;
 }
 /* line 934, ../sass/leanbox-global.scss */
-.region-content #leanbox-dashboard-chart-filter-otif-form a #otif_div, .region-content #leanbox-dashboard-chart-filter-otif-form a #delivery_div, .region-content #leanbox-dashboard-chart-filter-otif-form a #mobile_return_div, .region-content #leanbox-dashboard-chart-filter-otif-form a #mobile_full_return_div, .region-content #leanbox-dashboard-chart-filter-delivery-form a #otif_div, .region-content #leanbox-dashboard-chart-filter-delivery-form a #delivery_div, .region-content #leanbox-dashboard-chart-filter-delivery-form a #mobile_return_div, .region-content #leanbox-dashboard-chart-filter-delivery-form a #mobile_full_return_div, .region-content #leanbox-mobile-chart-filter-return-form a #otif_div, .region-content #leanbox-mobile-chart-filter-return-form a #delivery_div, .region-content #leanbox-mobile-chart-filter-return-form a #mobile_return_div, .region-content #leanbox-mobile-chart-filter-return-form a #mobile_full_return_div, .region-content #leanbox-mobile-chart-filter-full-return-form a #otif_div, .region-content #leanbox-mobile-chart-filter-full-return-form a #delivery_div, .region-content #leanbox-mobile-chart-filter-full-return-form a #mobile_return_div, .region-content #leanbox-mobile-chart-filter-full-return-form a #mobile_full_return_div {
+.region-content #leanbox-dashboard-chart-filter-otif-form a #otif_div, .region-content #leanbox-dashboard-chart-filter-otif-form a #delivery_div, .region-content #leanbox-dashboard-chart-filter-otif-form a #mobile_return_div, .region-content #leanbox-dashboard-chart-filter-otif-form a #mobile_full_return_div, .region-content #leanbox-dashboard-chart-filter-otif-form a #adoption_graph_div, .region-content #leanbox-dashboard-chart-filter-delivery-form a #otif_div, .region-content #leanbox-dashboard-chart-filter-delivery-form a #delivery_div, .region-content #leanbox-dashboard-chart-filter-delivery-form a #mobile_return_div, .region-content #leanbox-dashboard-chart-filter-delivery-form a #mobile_full_return_div, .region-content #leanbox-dashboard-chart-filter-delivery-form a #adoption_graph_div, .region-content #leanbox-mobile-chart-filter-return-form a #otif_div, .region-content #leanbox-mobile-chart-filter-return-form a #delivery_div, .region-content #leanbox-mobile-chart-filter-return-form a #mobile_return_div, .region-content #leanbox-mobile-chart-filter-return-form a #mobile_full_return_div, .region-content #leanbox-mobile-chart-filter-return-form a #adoption_graph_div, .region-content #leanbox-mobile-chart-filter-full-return-form a #otif_div, .region-content #leanbox-mobile-chart-filter-full-return-form a #delivery_div, .region-content #leanbox-mobile-chart-filter-full-return-form a #mobile_return_div, .region-content #leanbox-mobile-chart-filter-full-return-form a #mobile_full_return_div, .region-content #leanbox-mobile-chart-filter-full-return-form a #adoption_graph_div, .region-content #leanbox-dashboard-chart-filter-adoption-form a #otif_div, .region-content #leanbox-dashboard-chart-filter-adoption-form a #delivery_div, .region-content #leanbox-dashboard-chart-filter-adoption-form a #mobile_return_div, .region-content #leanbox-dashboard-chart-filter-adoption-form a #mobile_full_return_div, .region-content #leanbox-dashboard-chart-filter-adoption-form a #adoption_graph_div {
   margin: 10px 0 0 0;
   text-align: center;
   display: inline-block;
@@ -11396,58 +11396,71 @@ header[id="page-header"] ul, header[id="page-header"] li {
 }
 
 /* line 1483, ../sass/leanbox-global.scss */
-#views-exposed-form-central-bill-trip-page #edit-title-wrapper, #views-exposed-form-central-bill-trip-page #edit-title-1-wrapper, #views-exposed-form-central-bill-trip-page #edit-field-billing-van-value-wrapper, #views-exposed-form-central-bill-trip-page #edit-field-sales-party-code-value-wrapper {
-  width: 280px;
-  padding-bottom: 10px;
+#edit-field-third-party-username-value-wrapper label {
+  padding-top: 25px;
+  padding-right: 10%;
 }
 /* line 1487, ../sass/leanbox-global.scss */
+#edit-field-third-party-username-value-wrapper .views-widget {
+  display: inline-block;
+  margin-top: 1%;
+  vertical-align: middle;
+  width: 50%;
+}
+
+/* line 1497, ../sass/leanbox-global.scss */
+#views-exposed-form-central-bill-trip-page #edit-title-wrapper, #views-exposed-form-central-bill-trip-page #edit-title-1-wrapper, #views-exposed-form-central-bill-trip-page #edit-field-billing-van-value-wrapper, #views-exposed-form-central-bill-trip-page #edit-field-sales-party-code-value-wrapper {
+  width: 23%;
+  padding-bottom: 10px;
+}
+/* line 1501, ../sass/leanbox-global.scss */
 #views-exposed-form-central-bill-trip-page #edit-field-sr-bill-date-value-wrapper, #views-exposed-form-central-bill-trip-page #edit-field-billing-loading-date-value-wrapper, #views-exposed-form-central-bill-trip-page #edit-field-trip-executon-date-value-wrapper {
   padding-bottom: 10px;
-  width: 430px;
+  width: 30%;
 }
-/* line 1490, ../sass/leanbox-global.scss */
+/* line 1504, ../sass/leanbox-global.scss */
 #views-exposed-form-central-bill-trip-page #edit-field-sr-bill-date-value-wrapper #edit-field-sr-bill-date-value-min-wrapper, #views-exposed-form-central-bill-trip-page #edit-field-sr-bill-date-value-wrapper #edit-field-sr-bill-date-value-max-wrapper, #views-exposed-form-central-bill-trip-page #edit-field-sr-bill-date-value-wrapper #edit-field-billing-loading-date-value-min-wrapper, #views-exposed-form-central-bill-trip-page #edit-field-sr-bill-date-value-wrapper #edit-field-billing-loading-date-value-max-wrapper, #views-exposed-form-central-bill-trip-page #edit-field-sr-bill-date-value-wrapper #edit-field-trip-executon-date-value-min-wrapper, #views-exposed-form-central-bill-trip-page #edit-field-sr-bill-date-value-wrapper #edit-field-trip-executon-date-value-max-wrapper, #views-exposed-form-central-bill-trip-page #edit-field-billing-loading-date-value-wrapper #edit-field-sr-bill-date-value-min-wrapper, #views-exposed-form-central-bill-trip-page #edit-field-billing-loading-date-value-wrapper #edit-field-sr-bill-date-value-max-wrapper, #views-exposed-form-central-bill-trip-page #edit-field-billing-loading-date-value-wrapper #edit-field-billing-loading-date-value-min-wrapper, #views-exposed-form-central-bill-trip-page #edit-field-billing-loading-date-value-wrapper #edit-field-billing-loading-date-value-max-wrapper, #views-exposed-form-central-bill-trip-page #edit-field-billing-loading-date-value-wrapper #edit-field-trip-executon-date-value-min-wrapper, #views-exposed-form-central-bill-trip-page #edit-field-billing-loading-date-value-wrapper #edit-field-trip-executon-date-value-max-wrapper, #views-exposed-form-central-bill-trip-page #edit-field-trip-executon-date-value-wrapper #edit-field-sr-bill-date-value-min-wrapper, #views-exposed-form-central-bill-trip-page #edit-field-trip-executon-date-value-wrapper #edit-field-sr-bill-date-value-max-wrapper, #views-exposed-form-central-bill-trip-page #edit-field-trip-executon-date-value-wrapper #edit-field-billing-loading-date-value-min-wrapper, #views-exposed-form-central-bill-trip-page #edit-field-trip-executon-date-value-wrapper #edit-field-billing-loading-date-value-max-wrapper, #views-exposed-form-central-bill-trip-page #edit-field-trip-executon-date-value-wrapper #edit-field-trip-executon-date-value-min-wrapper, #views-exposed-form-central-bill-trip-page #edit-field-trip-executon-date-value-wrapper #edit-field-trip-executon-date-value-max-wrapper {
   width: 100%;
   padding: 0;
 }
-/* line 1494, ../sass/leanbox-global.scss */
+/* line 1508, ../sass/leanbox-global.scss */
 #views-exposed-form-central-bill-trip-page #edit-field-sr-bill-date-value-wrapper #edit-field-sr-bill-date-value-min, #views-exposed-form-central-bill-trip-page #edit-field-sr-bill-date-value-wrapper #edit-field-billing-loading-date-value-min, #views-exposed-form-central-bill-trip-page #edit-field-sr-bill-date-value-wrapper #edit-field-trip-executon-date-value-min, #views-exposed-form-central-bill-trip-page #edit-field-sr-bill-date-value-wrapper #edit-field-sr-bill-date-value-max, #views-exposed-form-central-bill-trip-page #edit-field-sr-bill-date-value-wrapper #edit-field-billing-loading-date-value-max, #views-exposed-form-central-bill-trip-page #edit-field-sr-bill-date-value-wrapper #edit-field-trip-executon-date-value-max, #views-exposed-form-central-bill-trip-page #edit-field-billing-loading-date-value-wrapper #edit-field-sr-bill-date-value-min, #views-exposed-form-central-bill-trip-page #edit-field-billing-loading-date-value-wrapper #edit-field-billing-loading-date-value-min, #views-exposed-form-central-bill-trip-page #edit-field-billing-loading-date-value-wrapper #edit-field-trip-executon-date-value-min, #views-exposed-form-central-bill-trip-page #edit-field-billing-loading-date-value-wrapper #edit-field-sr-bill-date-value-max, #views-exposed-form-central-bill-trip-page #edit-field-billing-loading-date-value-wrapper #edit-field-billing-loading-date-value-max, #views-exposed-form-central-bill-trip-page #edit-field-billing-loading-date-value-wrapper #edit-field-trip-executon-date-value-max, #views-exposed-form-central-bill-trip-page #edit-field-trip-executon-date-value-wrapper #edit-field-sr-bill-date-value-min, #views-exposed-form-central-bill-trip-page #edit-field-trip-executon-date-value-wrapper #edit-field-billing-loading-date-value-min, #views-exposed-form-central-bill-trip-page #edit-field-trip-executon-date-value-wrapper #edit-field-trip-executon-date-value-min, #views-exposed-form-central-bill-trip-page #edit-field-trip-executon-date-value-wrapper #edit-field-sr-bill-date-value-max, #views-exposed-form-central-bill-trip-page #edit-field-trip-executon-date-value-wrapper #edit-field-billing-loading-date-value-max, #views-exposed-form-central-bill-trip-page #edit-field-trip-executon-date-value-wrapper #edit-field-trip-executon-date-value-max {
   width: 85px;
   margin-left: 10px;
 }
-/* line 1499, ../sass/leanbox-global.scss */
+/* line 1513, ../sass/leanbox-global.scss */
 #views-exposed-form-central-bill-trip-page #edit-field-trip-id-reference-nid-wrapper {
   clear: both;
 }
-/* line 1501, ../sass/leanbox-global.scss */
+/* line 1515, ../sass/leanbox-global.scss */
 #views-exposed-form-central-bill-trip-page #edit-field-trip-id-reference-nid-wrapper label {
   display: block;
 }
-/* line 1504, ../sass/leanbox-global.scss */
+/* line 1518, ../sass/leanbox-global.scss */
 #views-exposed-form-central-bill-trip-page #edit-field-trip-id-reference-nid-wrapper .views-operator, #views-exposed-form-central-bill-trip-page #edit-field-trip-id-reference-nid-wrapper .views-widget {
   width: 48%;
   display: inline-block;
 }
-/* line 1509, ../sass/leanbox-global.scss */
+/* line 1523, ../sass/leanbox-global.scss */
 #views-exposed-form-central-bill-trip-page #edit-field-delivery-pending-value-wrapper {
   width: 140px;
 }
-/* line 1512, ../sass/leanbox-global.scss */
+/* line 1526, ../sass/leanbox-global.scss */
 #views-exposed-form-central-bill-trip-page #edit-field-channel-value-wrapper {
   width: 120px;
 }
-/* line 1516, ../sass/leanbox-global.scss */
+/* line 1530, ../sass/leanbox-global.scss */
 #views-exposed-form-central-bill-trip-page #edit-field-billing-van-value-1-wrapper label {
   width: 100%;
 }
-/* line 1519, ../sass/leanbox-global.scss */
+/* line 1533, ../sass/leanbox-global.scss */
 #views-exposed-form-central-bill-trip-page #edit-field-billing-van-value-1-wrapper .views-operator, #views-exposed-form-central-bill-trip-page #edit-field-billing-van-value-1-wrapper .views-widget {
   width: 44%;
   display: inline-block;
   vertical-align: top;
   margin-right: 2px;
 }
-/* line 1526, ../sass/leanbox-global.scss */
+/* line 1540, ../sass/leanbox-global.scss */
 #views-exposed-form-central-bill-trip-page #edit-field-third-party-username-value-wrapper {
   width: 140px;
 }
