@@ -169,7 +169,7 @@ function change_feeds_import_create_billing_data($max_billing_id) {
   $query->addField('cb', 'vehicle', 'vehicle');
   $query->addField('cb', 'loading_date', 'loading_date');
   $query->addField('cb', 'bill_date', 'bill_date');
-
+  $query->addExpression('SUM(cb.Sum_of_NET_SALES_VALUE)', 'sum_net_sales_value');
 
   $query->condition('cb.distributor_id', $distributor_id);
   $query->condition('cb.id', $max_billing_id, '>');
@@ -564,6 +564,8 @@ function change_feeds_import_create_billing($data, &$context) {
       $node->field_billing_van[LANGUAGE_NONE][0]['value'] = $value->vehicle;
       $node->field_billing_loading_date[LANGUAGE_NONE][0]['value'] = $value->loading_date;
       $node->field_sr_bill_date[LANGUAGE_NONE][0]['value'] = $value->bill_date;
+      // sum of net sales value from custom_billing_data to sales register
+      $node->field_bill_net_sales‎['und'][0]['value'] = round($value->sum_net_sales_value, 2);
       node_save($node);
     }
   }
