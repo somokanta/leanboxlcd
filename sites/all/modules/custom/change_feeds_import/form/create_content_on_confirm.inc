@@ -258,7 +258,7 @@ function change_feeds_import_finished($success, $results, $operations) {
     // $message .= theme('item_list', $results);  // D6 syntax
     $message .= theme('item_list', array('items' => $results));
     drupal_set_message($message);
-    dsm(1);
+    drupal_set_message("mmmm 1");
   }
   else {
     drupal_set_message('Error Occure while uploading billing data. Please Contact HUL HELP DESK', 'error');
@@ -274,12 +274,12 @@ function change_feeds_import_finished($success, $results, $operations) {
     if (!array_key_exists('party_packing', $results)) {
       drupal_set_message('Party Packing Not Create', 'error');
     }
-    dsm(2);
+    drupal_set_message("mmmm 2");
   }
 
 
   if (!$success || !array_key_exists('billing', $results) || !array_key_exists('picking', $results) || !array_key_exists('van', $results) || !array_key_exists('party_packing', $results)) {
-    dsm(3);
+    drupal_set_message("mmmm 3");
     // An error occurred.
     // $operations contains the operations that remained unprocessed.
     global $user;
@@ -300,7 +300,7 @@ function change_feeds_import_finished($success, $results, $operations) {
     $from = "MIS.HELPDESK@leanbox.in";
     drupal_mail('adhoc_task', 'bill_date_missing', $mail_to, LANGUAGE_NONE, $params, $from);
   }
-  dsm($success,4);
+  drupal_set_message("mmmm 4 $success");
 }
 
 function change_feeds_import_insert_data_in_custom_billing_table($billing_data_result) {
