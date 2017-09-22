@@ -2097,7 +2097,6 @@ function central_sales_delivery_table($export = FALSE) {
 
   $query->leftjoin('field_data_field_delivery_pending', 'dp', 'dp.entity_id =  n.nid');
   $query->addfield('dp', 'field_delivery_pending_value', 'delivery_pending');
-  dpq($query);
   $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
 
   if (!empty($res)) {
