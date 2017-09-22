@@ -1748,7 +1748,7 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
 //      $entity->feeds_item->skip = TRUE;
 //    }
   }
-  if ($entity->type == 'hul_code_master') {
+  if ($entity->feeds_item->id == 'hul_code_master') {
     $title = $entity->title;
     $existing_uid = check_hul_code_exist($title);
     if (!empty($existing_uid) && ($existing_uid != $distributor_id)) {
@@ -1826,6 +1826,39 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
     if (empty($delivery_day_tid)) {
       drupal_set_message("$delivery_day does not exist in Delivery Day", 'error');
       $entity->feeds_item->skip = TRUE;
+    }
+  }
+  
+  // Validate Payment Terms Importer
+  if ($entity->feeds_item->id == 'payment_terms') {
+    $title = $entity->title;
+    //$existing_hul_code = check_hul_code_exist($title);
+    $res = check_node_title_exists($title, 'hul_code_master');
+    // HUl Code Master node is updated for existing hul code.
+    // No new node will be created.
+    if (empty($res)) {
+      drupal_set_message("You can not update payment term because hul code- .'$entity->title'. does not exists.", 'error');
+      $entity->feeds_item->skip = TRUE;
+    }
+    // check the character limit of "Payment Term" field.
+    $max_payment_term_character_limit = strlen($entity->field_payment_terms[LANGUAGE_NONE][0]['value']);
+    if($max_payment_term_character_limit != 2) {
+      drupal_set_message("The character limit of payment term of hul code- .'$entity->title'. should be 2.", 'error');
+      $entity->feeds_item->skip = TRUE;
+    }
+    // check the integer value of "Credit Days" field.
+    $credit_days = $entity->field_credit_days[LANGUAGE_NONE][0]['value'];
+    if(!is_numeric($credit_days)) {
+      drupal_set_message("The credit days of hul code- .'$entity->title'. should be numeric.", 'error');
+      $entity->feeds_item->skip = TRUE;
+    }
+    else{
+      $whole_number = floor($credit_days);
+      $fraction = ($credit_days - $whole_number);
+      if(($fraction != 0) || ($credit_days < 0)) {
+        drupal_set_message("The credit days of hul code- .'$entity->title'. should be integer.", 'error');
+        $entity->feeds_item->skip = TRUE;
+      }
     }
   }
 }
@@ -2077,7 +2110,7 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
     'central_picking_report' ,  'central_party_pack_report',  'central_unloading_form', 
     'central_mobile_return_analysis', 'user_manual',  'hul_impact_delete', 'impact_delivery_cron_2', 
     'impact_delivery_cron_evening_2', 'impact_party_master', 'impact_party_master_morning',
-    'hul_code_distributor_wise', 'van_stop_master_report', 'update_sales_register_party_code');
+    'hul_code_distributor_wise', 'van_stop_master_report', 'update_sales_register_party_code', 'payment_terms_view');
 
    if (!in_array($view->name, $views_array)) {
     foreach ($query->table_queue as $key => $val) {
