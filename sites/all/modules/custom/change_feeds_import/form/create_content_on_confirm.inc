@@ -261,9 +261,18 @@ function change_feeds_import_finished($success, $results, $operations) {
     
     // An error occurred.
     // $operations contains the operations that remained unprocessed.
-    $error_operation = reset($operations);
-    $message = t('An error occurred while processing %error_operation with arguments: @arguments', array('%error_operation' => $error_operation[0], '@arguments' => print_r($error_operation[1], TRUE)));
+    global $user;
+    $user_id = $user->uid;
+    $distributor_id = change_feeds_import_get_distributor_id($user_id);
+    $batch =& batch_get();
+    $batch_id = $batch['id'];
     
+    $message = "For Distributor: $distributor_id and Batch Id $batch_id \n".
+    $message .= theme('item_list', array('items' => $results));  
+    
+    $error_operation = reset($operations);
+    $message .= t('An error occurred while processing %error_operation with arguments: @arguments', array('%error_operation' => $error_operation[0], '@arguments' => print_r($error_operation[1], TRUE)));
+
     $params['subject'] = "Batch Proccess Billing Upload Error";
     $params['body'] = $message;
     $mail_to = "abhishek.r@iksula.com";
