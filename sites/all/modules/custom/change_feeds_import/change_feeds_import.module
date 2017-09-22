@@ -1832,10 +1832,11 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
   // Validate Payment Terms Importer
   if ($entity->feeds_item->id == 'payment_terms') {
     $title = $entity->title;
-    $existing_hul_code = check_hul_code_exist($title);
+    //$existing_hul_code = check_hul_code_exist($title);
+    $res = check_node_title_exists($title, 'hul_code_master');
     // HUl Code Master node is updated for existing hul code.
     // No new node will be created.
-    if (empty($existing_hul_code)) {
+    if (empty($res)) {
       drupal_set_message("You can not update payment term because hul code- .'$entity->title'. does not exists.", 'error');
       $entity->feeds_item->skip = TRUE;
     }
