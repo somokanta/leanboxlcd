@@ -134,7 +134,7 @@ function change_feeds_import_create_confirm_content($id) {
     'operations' => $operations,
     'finished' => 'change_feeds_import_finished',
     'title' => t('Creating Billing Data'),
-    'init_message' => t('Billing Data Batch Creation is starting.'),
+    'init_message' => t('Uploading...'),
     'progress_message' => t('Processed @current out of @total.'),
     'error_message' => t('Billing Data Batch has encountered an error.'),
     'file' => drupal_get_path('module', 'change_feeds_import') . '/form/create_content_on_confirm.inc'
@@ -258,35 +258,26 @@ function change_feeds_import_finished($success, $results, $operations) {
     // $message .= theme('item_list', $results);  // D6 syntax
     $message .= theme('item_list', array('items' => $results));
     drupal_set_message($message);
+  }
+  else {
+    drupal_set_message('Error Occure while uploading billing data. Please Contact HUL HELP DESK', 'error');
+    $message .= theme('item_list', array('items' => $results));
+    drupal_set_message($message);
     
     // An error occurred.
     // $operations contains the operations that remained unprocessed.
     global $user;
     $user_id = $user->uid;
     $distributor_id = change_feeds_import_get_distributor_id($user_id);
-    $batch =& batch_get();
+    $batch = & batch_get();
     $batch_id = $batch['id'];
-    
-    $message = "For Distributor: $distributor_id and Batch Id $batch_id \n".
-    $message .= theme('item_list', array('items' => $results));  
-    
+
+    $message = "For Distributor: $distributor_id and Batch Id $batch_id \n" .
+    $message .= theme('item_list', array('items' => $results));
+
     $error_operation = reset($operations);
     $message .= t('An error occurred while processing %error_operation with arguments: @arguments', array('%error_operation' => $error_operation[0], '@arguments' => print_r($error_operation[1], TRUE)));
 
-    $params['subject'] = "Batch Proccess Billing Upload Error";
-    $params['body'] = $message;
-    $mail_to = "abhishek.r@iksula.com";
-    $from = "MIS.HELPDESK@leanbox.in";
-    drupal_mail('adhoc_task', 'bill_date_missing', $mail_to, LANGUAGE_NONE, $params, $from);
-  }
-  else {
-    drupal_set_message('Error Occure while uploading billing data. Please Contact HUL HELP DESK','error');
-    
-    // An error occurred.
-    // $operations contains the operations that remained unprocessed.
-    $error_operation = reset($operations);
-    $message = t('An error occurred while processing %error_operation with arguments: @arguments', array('%error_operation' => $error_operation[0], '@arguments' => print_r($error_operation[1], TRUE)));
-    
     $params['subject'] = "Batch Proccess Billing Upload Error";
     $params['body'] = $message;
     $mail_to = "abhishek.r@iksula.com";
