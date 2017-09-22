@@ -255,7 +255,6 @@ function change_feeds_import_finished($success, $results, $operations) {
   if ($success) {
     //drupal_set_message("Successfully Created Content");
     $message = t('Successfully Created Content');
-    // $message .= theme('item_list', $results);  // D6 syntax
     $message .= theme('item_list', array('items' => $results));
     drupal_set_message($message);
   }
