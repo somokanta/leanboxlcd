@@ -258,12 +258,28 @@ function change_feeds_import_finished($success, $results, $operations) {
     // $message .= theme('item_list', $results);  // D6 syntax
     $message .= theme('item_list', array('items' => $results));
     drupal_set_message($message);
+    dsm(1);
   }
   else {
     drupal_set_message('Error Occure while uploading billing data. Please Contact HUL HELP DESK', 'error');
-    $message .= theme('item_list', array('items' => $results));
-    drupal_set_message($message);
-    
+    if (!array_key_exists('billing', $results)) {
+      drupal_set_message('Billing Not Create', 'error');
+    }
+    if (!array_key_exists('picking', $results)) {
+      drupal_set_message('Picking Not Create', 'error');
+    }
+    if (!array_key_exists('van', $results)) {
+      drupal_set_message('Van Not Create', 'error');
+    }
+    if (!array_key_exists('party_packing', $results)) {
+      drupal_set_message('Party Packing Not Create', 'error');
+    }
+    dsm(2);
+  }
+
+
+  if (!$success || !array_key_exists('billing', $results) || !array_key_exists('picking', $results) || !array_key_exists('van', $results) || !array_key_exists('party_packing', $results)) {
+    dsm(3);
     // An error occurred.
     // $operations contains the operations that remained unprocessed.
     global $user;
@@ -273,7 +289,7 @@ function change_feeds_import_finished($success, $results, $operations) {
     $batch_id = $batch['id'];
 
     $message = "For Distributor: $distributor_id and Batch Id $batch_id \n" .
-    $message .= theme('item_list', array('items' => $results));
+      $message .= theme('item_list', array('items' => $results));
 
     $error_operation = reset($operations);
     $message .= t('An error occurred while processing %error_operation with arguments: @arguments', array('%error_operation' => $error_operation[0], '@arguments' => print_r($error_operation[1], TRUE)));
@@ -284,6 +300,7 @@ function change_feeds_import_finished($success, $results, $operations) {
     $from = "MIS.HELPDESK@leanbox.in";
     drupal_mail('adhoc_task', 'bill_date_missing', $mail_to, LANGUAGE_NONE, $params, $from);
   }
+  dsm($success,4);
 }
 
 function change_feeds_import_insert_data_in_custom_billing_table($billing_data_result) {
