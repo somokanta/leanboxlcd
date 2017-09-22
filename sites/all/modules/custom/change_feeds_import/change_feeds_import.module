@@ -1847,11 +1847,17 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
     }
     // check the integer value of "Credit Days" field.
     $credit_days = $entity->field_credit_days[LANGUAGE_NONE][0]['value'];
-    $whole_number = floor($credit_days);
-    $fraction = ($credit_days - $whole_number);
-    if(($fraction != 0) || ($credit_days < 0)) {
-      drupal_set_message("The credit days of hul code- .'$entity->title'. should be integer.", 'error');
+    if(!is_numeric($credit_days)) {
+      drupal_set_message("The credit days of hul code- .'$entity->title'. should be numeric.", 'error');
       $entity->feeds_item->skip = TRUE;
+    }
+    else{
+      $whole_number = floor($credit_days);
+      $fraction = ($credit_days - $whole_number);
+      if(($fraction != 0) || ($credit_days < 0)) {
+        drupal_set_message("The credit days of hul code- .'$entity->title'. should be integer.", 'error');
+        $entity->feeds_item->skip = TRUE;
+      }
     }
   }
 }
