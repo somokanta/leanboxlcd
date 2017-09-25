@@ -105,6 +105,33 @@ function change_feeds_import_create_confirm_content($id) {
   $max_billing_id = $max_billing_id ? $max_billing_id : 0;
 
   change_feeds_import_insert_data_in_custom_billing_table($billing_data_result);
+
+  /**
+   * Debugging
+   */
+    $mail_query = db_select('custom_billing_data', 'cb');
+    $mail_query->addExpression('MAX(id)', 'max');
+    $mail_query->condition('distributor_id', $distributor_id);
+    $mail_max_billing_id = $mail_query->execute()->fetchField();
+    
+    $mail_row_diff = $mail_max_billing_id - $max_billing_id;
+    $mail_stage_row_count = count($billing_data_result);
+    
+    if ($mail_row_diff != $mail_stage_row_count) {
+      $message = "Stgaing table row count: $mail_stage_row_count. Prev max custome billing id: $max_billing_id.";
+      $message .= "After insert max id: $mail_max_billing_id. Diff: $mail_row_diff ";
+      $message .= "error billing data table id: $id. Distributor ID: $distributor_id ";
+      
+      $params['subject'] = "Batch Proccess Billing Upload count Mismatch";
+      $params['body'] = $message;
+      $mail_to = "abhishek.r@iksula.com";
+      $from = "MIS.HELPDESK@leanbox.in";
+      drupal_mail('adhoc_task', 'bill_date_missing', $mail_to, LANGUAGE_NONE, $params, $from);
+    }
+  /**
+   * Debugging END
+   */    
+    
   $operations = array();
   
   $create_billing_data = change_feeds_import_create_billing_data($max_billing_id);
@@ -260,20 +287,20 @@ function change_feeds_import_finished($success, $results, $operations) {
   }
   else {
     drupal_set_message('Error Occure while uploading billing data. Please Contact HUL HELP DESK', 'error');
-    if (!array_key_exists('billing', $results)) {
-      drupal_set_message('Billing Not Create', 'error');
-    }
-    if (!array_key_exists('picking', $results)) {
-      drupal_set_message('Picking Not Create', 'error');
-    }
-    if (!array_key_exists('van', $results)) {
-      drupal_set_message('Van Not Create', 'error');
-    }
-    if (!array_key_exists('party_packing', $results)) {
-      drupal_set_message('Party Packing Not Create', 'error');
-    }
   }
-
+  
+  if (!array_key_exists('billing', $results)) {
+    drupal_set_message('Billing Not Create. Please Contact HUL HELP DESK.', 'error');
+  }
+  if (!array_key_exists('picking', $results)) {
+    drupal_set_message('Picking Not Create. Please Contact HUL HELP DESK.', 'error');
+  }
+  if (!array_key_exists('van', $results)) {
+    drupal_set_message('Van Not Create. Please Contact HUL HELP DESK.', 'error');
+  }
+  if (!array_key_exists('party_packing', $results)) {
+    drupal_set_message('Party Packing Not Create. Please Contact HUL HELP DESK.', 'error');
+  }
 
   if (!$success || !array_key_exists('billing', $results) || !array_key_exists('picking', $results) || !array_key_exists('van', $results) || !array_key_exists('party_packing', $results)) {
     // An error occurred.
