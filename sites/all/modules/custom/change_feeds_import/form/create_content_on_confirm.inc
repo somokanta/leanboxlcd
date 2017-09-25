@@ -110,16 +110,18 @@ function change_feeds_import_create_confirm_content($id) {
    * Debugging
    */
     $mail_query = db_select('custom_billing_data', 'cb');
-    $mail_query->addExpression('MAX(id)', 'max');
+    $mail_query->addExpression('count(id)', 'max');
     $mail_query->condition('distributor_id', $distributor_id);
-    $mail_max_billing_id = $mail_query->execute()->fetchField();
+    $mail_query->condition('id', $max_billing_id,'>');
+    $mail_row_diff = $mail_query->execute()->fetchField();
     
-    $mail_row_diff = $mail_max_billing_id - $max_billing_id;
     $mail_stage_row_count = count($billing_data_result);
-    
-    if ($mail_row_diff != $mail_stage_row_count) {
-      $message = "Stgaing table row count: $mail_stage_row_count. Prev max custome billing id: $max_billing_id.";
-      $message .= "After insert max id: $mail_max_billing_id. Diff: $mail_row_diff ";
+    dsm($mail_row_diff,'$mail_row_diff');
+    dsm($mail_stage_row_count,'$mail_stage_row_count');
+    //if ($mail_row_diff != $mail_stage_row_count) {
+      $message = "Stgaing table row count: $mail_stage_row_count.";
+      $message .= "Prev max custome billing id: $max_billing_id.";
+      $message .= "After insert, count of inserted id: $mail_row_diff.";
       $message .= "error billing data table id: $id. Distributor ID: $distributor_id ";
       
       $params['subject'] = "Batch Proccess Billing Upload count Mismatch";
@@ -127,7 +129,7 @@ function change_feeds_import_create_confirm_content($id) {
       $mail_to = "abhishek.r@iksula.com";
       $from = "MIS.HELPDESK@leanbox.in";
       drupal_mail('adhoc_task', 'bill_date_missing', $mail_to, LANGUAGE_NONE, $params, $from);
-    }
+    //}
   /**
    * Debugging END
    */    
