@@ -1584,8 +1584,25 @@ function reverse_geocode_node_presave($node) {
 
       } 
     }
-  }
-  else if ($node->type == 'dispatch_data') {
+    
+    // code for Updating hul_code_reference field in outlet master type
+      $hul_code_reference = $node->field_hul_code_reference[LANGUAGE_NONE][0]['nid'];
+
+      if (empty($hul_code_reference)) {
+         $hul_code_data = $node->field_hul_code[LANGUAGE_NONE][0]['value'];
+         if (!empty($hul_code_data)) {
+            $query = db_select('node', 'n');
+            $query->condition('n.type', 'hul_code_master');
+            $query->condition('n.title', $hul_code_data);
+            $query->fields('n', array('nid'));
+            $hul_nid = $query->execute()->fetchField();
+            if (!empty($hul_nid)) {
+               $node->field_hul_code_reference[LANGUAGE_NONE][0]['nid'] = $hul_nid;
+            }
+         }
+      }
+   }
+   else if ($node->type == 'dispatch_data') {
     if (!empty($node->field_dispatch_date[LANGUAGE_NONE][0]['value'])) {    
       $node->field_dispatch_status[LANGUAGE_NONE][0]['value'] = 1;
       $nid = $node->nid;
