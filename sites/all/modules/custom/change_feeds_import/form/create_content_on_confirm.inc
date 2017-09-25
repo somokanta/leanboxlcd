@@ -109,7 +109,6 @@ function change_feeds_import_create_confirm_content($id) {
   
   $create_billing_data = change_feeds_import_create_billing_data($max_billing_id);
   $create_billing_data_chunk = array_chunk($create_billing_data, 1500);
-  dpm($create_billing_data, '$create_billing_data');
 
   $create_billing_data_chunk = array_chunk($create_billing_data, 750);
   foreach ($create_billing_data_chunk as $data) {
@@ -618,14 +617,12 @@ function change_feeds_import_create_billing($data, &$context) {
     $nid = check_node_title_exists($value->bill_number, 'sales_register_data');
     $node = node_load($nid);
     if ($node) {
-       dpm($value, 'value in foreach');
       $node->field_billing_van[LANGUAGE_NONE][0]['value'] = $value->vehicle;
       $node->field_billing_loading_date[LANGUAGE_NONE][0]['value'] = $value->loading_date;
       $node->field_sr_bill_date[LANGUAGE_NONE][0]['value'] = $value->bill_date;
       $node->field_bill_net_sales[LANGUAGE_NONE][0]['value'] = round($value->sum_net_sales_value, 2);
       // sum of net sales value from custom_billing_data to sales register
       node_save($node);
-      dpm($node, 'node');
     }
   }
   $context['results']['billing'] = 'Billing Created';
