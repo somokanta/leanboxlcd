@@ -618,8 +618,8 @@ function change_feeds_import_create_billing($data, &$context) {
       $node->field_billing_van[LANGUAGE_NONE][0]['value'] = $value->vehicle;
       $node->field_billing_loading_date[LANGUAGE_NONE][0]['value'] = $value->loading_date;
       $node->field_sr_bill_date[LANGUAGE_NONE][0]['value'] = $value->bill_date;
+      $node->field_bill_net_sales[LANGUAGE_NONE][0]['value'] = round($value->sum_net_sales_value, 2);
       // sum of net sales value from custom_billing_data to sales register
-      $node->field_bill_net_sales‎['und'][0]['value'] = round($value->sum_net_sales_value, 2);
       node_save($node);
     }
   }
