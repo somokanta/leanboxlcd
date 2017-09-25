@@ -752,12 +752,12 @@ function dispatch_planning_form_save_validate($form, &$form_state) {
       }
     }
     
-    if (!empty($bill_sequence_array)) {
-      $form_state['dispatch_planning']['bill_sequence_array'] = $bill_sequence_array;
-    }
-    else {
-      form_set_error('list_form_items', 'An error occured while generating sequence');
-    }
+//    if (!empty($bill_sequence_array)) {
+//      $form_state['dispatch_planning']['bill_sequence_array'] = $bill_sequence_array;
+//    }
+//    else {
+//      form_set_error('list_form_items', 'An error occured while generating sequence');
+//    }
   }
   
   $form_state['dispatch_planning']['manual_drs_sequence'] = $manual_drs_sequence;
@@ -1570,6 +1570,10 @@ function dispatch_planning_sales_reg_api($value, $node, $trip_execution_date, $h
   $api_data['jobData']['bill_number'] = $bill_number;
   $api_data['jobData']['runsheet_number'] = $trip_id;
   /**
+   * Insert data into PTL configuration table
+   */
+  ptl_configuration_data_insert($api_data);
+  /**
    * Insert data into dispatch_planning_api_data table
    */
   $id = dispatch_planning_api_data($api_data);
@@ -1759,4 +1763,34 @@ function dispatch_planning_get_rscode_using_uid($uid) {
   $query->fields('rs', array('field_third_party_username_value'));
   $res = $query->execute()->fetchField();
   return $res;
+}
+
+/**
+ * function for  ptl_configuration_data_insert($api_data);
+ */
+function ptl_configuration_data_insert($api_data) {
+  if (!empty($api_data)) {
+    if (!empty($api_data['jobData']['item_details'])) {
+      foreach ($api_data['jobData']['item_details'] as $item_data) {
+        $query = db_insert('ptl_data_configuration');
+        $fields = array(
+          'ptl_job' => $api_data['jobData']['vehicle'] . '-' . $api_data['date'],
+          'trip_id' => $api_data['jobData']['runsheet_number'],
+          'vehicle' => $api_data['jobData']['vehicle'],
+          'bill_number' => $api_data['jobData']['bill_number'],
+          'loading_date' => $api_data['date'],
+          'sequence_no' => $api_data['jobData']['store_sequence_no'],
+          'basepack_code' => $api_data['hub'],
+          'sku_code' => $item_data['sku_code'],
+          'product_name' => $item_data['product_name'],
+          'MRP' => $item_data['mrp'],
+          'TUR' => $item_data['tur'],
+          'sum_sales_qty' => $item_data['sum_net_sales_quantity']
+        );
+        $query->fields($fields);
+        $result_id = $query->execute();
+        return $result_id;
+      }
+    }
+  }
 }
