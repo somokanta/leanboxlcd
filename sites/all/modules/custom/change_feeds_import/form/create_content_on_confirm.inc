@@ -116,9 +116,7 @@ function change_feeds_import_create_confirm_content($id) {
     $mail_row_diff = $mail_query->execute()->fetchField();
     
     $mail_stage_row_count = count($billing_data_result);
-    dsm($mail_row_diff,'$mail_row_diff');
-    dsm($mail_stage_row_count,'$mail_stage_row_count');
-    //if ($mail_row_diff != $mail_stage_row_count) {
+    if ($mail_row_diff != $mail_stage_row_count) {
       $message = "Stgaing table row count: $mail_stage_row_count.";
       $message .= "Prev max custome billing id: $max_billing_id.";
       $message .= "After insert, count of inserted id: $mail_row_diff.";
@@ -129,7 +127,7 @@ function change_feeds_import_create_confirm_content($id) {
       $mail_to = "abhishek.r@iksula.com";
       $from = "MIS.HELPDESK@leanbox.in";
       drupal_mail('adhoc_task', 'bill_date_missing', $mail_to, LANGUAGE_NONE, $params, $from);
-    //}
+    }
   /**
    * Debugging END
    */    
