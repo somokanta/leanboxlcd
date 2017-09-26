@@ -103,9 +103,12 @@ function change_feeds_import_create_confirm_content($id) {
   $max_billing_id = $query->execute()->fetchField();
 
   $max_billing_id = $max_billing_id ? $max_billing_id : 0;
-
-  change_feeds_import_insert_data_in_custom_billing_table($billing_data_result);
-
+  
+  $return_true = change_feeds_import_insert_data_in_custom_billing_table($billing_data_result);
+  if($return_true){
+    sleep(4); // this should halt for 4s. 
+  }
+  
   /**
    * Debugging
    */
@@ -398,6 +401,7 @@ function change_feeds_import_insert_data_in_custom_billing_table($billing_data_r
       
     }
   }
+  return true;
 }
 
 function change_feeds_import_create_van_cld_report($data, &$context) {
