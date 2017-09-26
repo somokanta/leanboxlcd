@@ -902,7 +902,7 @@ form {
       }
     }
   }
-  #leanbox-dashboard-chart-filter-otif-form, #leanbox-dashboard-chart-filter-delivery-form, #leanbox-mobile-chart-filter-return-form, #leanbox-mobile-chart-filter-full-return-form {
+  #leanbox-dashboard-chart-filter-otif-form, #leanbox-dashboard-chart-filter-delivery-form, #leanbox-mobile-chart-filter-return-form, #leanbox-mobile-chart-filter-full-return-form, #leanbox-dashboard-chart-filter-adoption-form {
     .container-inline-date{
       width: auto;
       display: inline-block;
@@ -921,7 +921,7 @@ form {
           margin: 8px 0 0 0;
       }
     }
-    #otif-submit, #delivery-submit, #mobile-return-submit, #mobile-full-return-submit{
+    #otif-submit, #delivery-submit, #mobile-return-submit, #mobile-full-return-submit, #adoption-graph-submit{
         width: 80px;
         display: inline-block;
         button {
@@ -931,7 +931,7 @@ form {
     }
     a {
       width: 100%;
-      #otif_div, #delivery_div, #mobile_return_div, #mobile_full_return_div {
+      #otif_div, #delivery_div, #mobile_return_div, #mobile_full_return_div, #adoption_graph_div {
           margin: 10px 0 0 0;
           text-align: center;
           display: inline-block;
@@ -1478,15 +1478,29 @@ header[id="page-header"] {
 }
 
 // End Dashboard pages
+// page central impact return analysis
+#edit-field-third-party-username-value-wrapper {
+    label {
+      padding-top: 25px;
+      padding-right: 10%;
+  }
+    .views-widget {
+      display: inline-block;
+      margin-top: 1%;
+      vertical-align: middle;
+      width: 50%;
+  }
+}
+//end page central impact return analysis
 
 #views-exposed-form-central-bill-trip-page  {
   #edit-title-wrapper, #edit-title-1-wrapper, #edit-field-billing-van-value-wrapper, #edit-field-sales-party-code-value-wrapper {
-    width: 280px;
+    width: 23%;
     padding-bottom: 10px;
   }
   #edit-field-sr-bill-date-value-wrapper, #edit-field-billing-loading-date-value-wrapper, #edit-field-trip-executon-date-value-wrapper {
     padding-bottom: 10px;
-    width: 430px;
+    width: 30%;
     #edit-field-sr-bill-date-value-min-wrapper, #edit-field-sr-bill-date-value-max-wrapper, #edit-field-billing-loading-date-value-min-wrapper, #edit-field-billing-loading-date-value-max-wrapper, #edit-field-trip-executon-date-value-min-wrapper, #edit-field-trip-executon-date-value-max-wrapper{
       width: 100%;
       padding: 0;
