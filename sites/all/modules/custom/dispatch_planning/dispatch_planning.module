@@ -913,7 +913,7 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
       }
       $ptl_authentication_flag = ptl_check_api_authentication($node->uid);
       
-      if (!empty($api_authentication_flag)) {
+      if (!empty($ptl_authentication_flag)) {
         $ptl_data[] = ptl_sales_reg_api_data($value, $node, $trip_execution_date, $hht_id, $cashier, $trip_id);
 
       }
