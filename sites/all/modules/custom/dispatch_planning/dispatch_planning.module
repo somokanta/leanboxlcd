@@ -911,6 +911,12 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
         $api_data[] = dispatch_planning_sales_reg_api($value, $node, $trip_execution_date, $hht_id, $cashier, $trip_id);
 
       }
+      $ptl_authentication_flag = ptl_check_api_authentication($node->uid);
+      
+      if (!empty($ptl_authentication_flag)) {
+        $ptl_data[] = ptl_sales_reg_api_data($value, $node, $trip_execution_date, $hht_id, $cashier, $trip_id);
+
+      }
     }
   }
 
@@ -1579,6 +1585,67 @@ function dispatch_planning_sales_reg_api($value, $node, $trip_execution_date, $h
   dispatch_planning_item_details($billing_data_details, $id);
   return $api_data;
 }
+/**
+ * @param type $value
+ * @param type $node
+ * @param type $trip_execution_date
+ * @param type $hht_id
+ * @param type $cashier
+ * @param type $trip_id
+ */
+function ptl_sales_reg_api_data($value, $node, $trip_execution_date, $hht_id, $cashier, $trip_id) {
+  $api_data = array();
+  // get billing data details
+  $node_uid = $node->uid;
+  $rs_code = dispatch_planning_get_rscode_using_uid($node_uid);
+  $bill_number = $node->title;
+  $vehicle = $node->field_billing_van[LANGUAGE_NONE][0]['value'];
+  $bill_date = date('Y-m-d', $node->field_sr_bill_date[LANGUAGE_NONE][0]['value']);
+  $bill_value = $node->field_bill_value[LANGUAGE_NONE][0]['value'];
+  $party_code = $node->field_sales_party_code[LANGUAGE_NONE][0]['value'];
+  $store_sequence = $node->field_drs_sequence[LANGUAGE_NONE][0]['value'];
+
+  $billing_data_details = dispatch_planning_get_billing_data($node_uid, $bill_number);
+  $outlet_data_details = dispatch_planning_get_outlet_data($node_uid, $party_code);
+  
+  if (empty($outlet_data_details['field_hul_updated_lat_value'])) {
+    $outlet_data_details['field_hul_updated_lat_value'] = 0;
+  } 
+  if (empty($outlet_data_details['field_hul_updated_long_value'])) {
+    $outlet_data_details['field_hul_updated_long_value'] = 0;
+  }
+  
+  $api_data['jobType'] = 'delivery1';  // Hardcoded as suggested by gaurav
+  $reference_no = $rs_code . '_' . $bill_number;
+  $api_data['referenceNo'] = $reference_no;
+  $api_data['date'] = date('Y-m-d',$trip_execution_date);
+  $api_data['city'] = 'ABC';
+  //$api_data['hub'] = $rs_code;
+  $api_data['hub'] = '100006'; // need to remove when moving to HUL
+  $api_data['fieldExecutive'] = $rs_code . '_' . $hht_id;
+  $api_data['fieldExecutiveName'] = $cashier;
+
+  $api_data['jobData']['vehicle'] = $vehicle;
+  $api_data['jobData']['party_hll_code'] = $outlet_data_details['field_hul_code_value']; // hul code in outlet
+  //$api_data['jobData']['lat_long'] = $outlet_data_details['field_hul_updated_lat_value'] . ',' . $outlet_data_details['field_hul_updated_long_value'];
+  $api_data['jobData']['lat_long']['lat_longLatitude'] = $outlet_data_details['field_hul_updated_lat_value'];
+  $api_data['jobData']['lat_long']['lat_longLongitude'] = $outlet_data_details['field_hul_updated_long_value'];
+  $api_data['jobData']['bill_value'] = $bill_value;
+  $api_data['jobData']['item_details'] = $billing_data_details; // array
+  $api_data['jobData']['bill_date'] = $bill_date;
+  $api_data['jobData']['locality'] = 'ABCD_locality';  // Hardcoded as suggested by gaurav  
+  $api_data['jobData']['store_sequence_no'] = $store_sequence;  // drs sequence
+  $api_data['jobData']['party_name'] = $outlet_data_details['field_party_name_value']; // party name in outlet
+  $api_data['jobData']['beat_name'] = $outlet_data_details['field_beat_name_value'];  // beat name in outlet
+  $api_data['jobData']['party_code'] = $party_code;
+  $api_data['jobData']['bill_number'] = $bill_number;
+  $api_data['jobData']['runsheet_number'] = $trip_id;
+  /**
+   * Insert data into PTL configuration table
+   */
+  ptl_configuration_data_insert($api_data);
+  return $ptl_data;
+}
 
 /*
  * Insert data into dispatch_planning_api_data table
@@ -1706,6 +1773,19 @@ function dispatch_planning_check_api_authentication($node_uid) {
   return $res;
 }
 
+/**
+ * 
+ * @param type $node_uid
+ * @return string
+ */
+function ptl_check_api_authentication($node_uid) {
+  $query = db_select('field_data_field_ptl_data_configuration', 'tp');
+  $query->fields('tp', array('entity_id'));
+  $query->condition('tp.field_ptl_data_configuration_value', 1);
+  $query->condition('tp.entity_id', $node_uid);
+  $res = $query->execute()->fetchField();
+  return $res;
+}
 
 /**
  * Implements of hook_views_api().
@@ -1759,4 +1839,34 @@ function dispatch_planning_get_rscode_using_uid($uid) {
   $query->fields('rs', array('field_third_party_username_value'));
   $res = $query->execute()->fetchField();
   return $res;
+}
+
+/**
+ * function for  ptl_configuration_data_insert($api_data);
+ */
+function ptl_configuration_data_insert($api_data) {
+  if (!empty($api_data)) {
+    if (!empty($api_data['jobData']['item_details'])) {
+      foreach ($api_data['jobData']['item_details'] as $item_data) {
+        $query = db_insert('ptl_data_configuration');
+        $fields = array(
+          'ptl_job' => $api_data['jobData']['vehicle'] . '-' . $api_data['date'],
+          'trip_id' => $api_data['jobData']['runsheet_number'],
+          'vehicle' => $api_data['jobData']['vehicle'],
+          'bill_number' => $api_data['jobData']['bill_number'],
+          'loading_date' => $api_data['date'], // Confusion here about loading date
+          'sequence_no' => $api_data['jobData']['store_sequence_no'],
+          'basepack_code' => $api_data['hub'], // Confusion about base pack code
+          'sku_code' => $item_data['sku_code'],
+          'product_name' => $item_data['product_name'],
+          'MRP' => $item_data['mrp'],
+          'TUR' => $item_data['tur'],
+          'sum_sales_qty' => $item_data['sum_net_sales_quantity']
+        );
+        $query->fields($fields);
+        $result_id = $query->execute();
+        return $result_id;
+      }
+    }
+  }
 }

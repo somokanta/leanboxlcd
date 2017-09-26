@@ -103,12 +103,10 @@ function change_feeds_import_create_confirm_content($id) {
   $max_billing_id = $query->execute()->fetchField();
 
   $max_billing_id = $max_billing_id ? $max_billing_id : 0;
-  dpm(time(),11);
+  sleep(5); // this should halt for 5s. 
   $return_true = change_feeds_import_insert_data_in_custom_billing_table($billing_data_result);
   if($return_true){
-    dpm(time(),12);
-    sleep(3); // this should halt for 3s. 
-    dpm(time(),13);
+    sleep(4); // this should halt for 4s. 
   }
   
   /**

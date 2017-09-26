@@ -716,5 +716,254 @@ function dispatch_planning_views_data() {
       'label' => t('id'),
     ),
   );
+  // Adding custom handler for PTL Report data
+  $data['ptl_data_configuration']['table'] = array(
+    'group' => t('PTL data configuration'),
+    'title' => t('PTL data configuration'),
+    'help' => t('PTL data configuration.'),
+  );
+
+  // Define this as a base table.
+  $data['ptl_data_configuration']['table']['base'] = array(
+    'field' => 'id',
+    'title' => t('PTL data configuration'),
+    'help' => t("unique identifiers."),
+    // 'weight' => -10,
+  );
+  // ptl_job
+  $data['ptl_data_configuration']['ptl_job'] = array(
+    'title' => t('ptl_job'),
+    'help' => t('Ptl Job'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+  // 	trip_id
+  $data['ptl_data_configuration']['	trip_id'] = array(
+    'title' => t('trip_id'),
+    'help' => t('Trip ID'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+  // vehicle
+  $data['ptl_data_configuration']['vehicle'] = array(
+    'title' => t('vehicle'),
+    'help' => t('vehicle'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+  // bill_number
+  $data['ptl_data_configuration']['bill_number'] = array(
+    'title' => t('bill_number'),
+    'help' => t('bill_number'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+  // loading_date
+  $data['ptl_data_configuration']['loading_date'] = array(
+    'title' => t('loading_date'),
+    'help' => t('loading_date'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+  // sequence_no
+  $data['ptl_data_configuration']['sequence_no'] = array(
+    'title' => t('sequence_no'),
+    'help' => t('sequence_no'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+  // basepack_code
+  $data['ptl_data_configuration']['basepack_code'] = array(
+    'title' => t('basepack_code'),
+    'help' => t('basepack_code'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+  // sku_code
+  $data['ptl_data_configuration']['sku_code'] = array(
+    'title' => t('sku_code'),
+    'help' => t('sku_code'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+  // fieldExecutive
+  $data['ptl_data_configuration']['fieldExecutive'] = array(
+    'title' => t('fieldExecutive'),
+    'help' => t('fieldExecutive'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+  // product_name
+  $data['ptl_data_configuration']['product_name'] = array(
+    'title' => t('product_name'),
+    'help' => t('product_name'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+  // MRP
+  $data['ptl_data_configuration']['MRP'] = array(
+    'title' => t('MRP'),
+    'help' => t('MRP'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+  // TUR
+  $data['ptl_data_configuration']['TUR'] = array(
+    'title' => t('TUR'),
+    'help' => t('TUR'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+  // sum_sales_qty
+  $data['ptl_data_configuration']['sum_sales_qty'] = array(
+    'title' => t('sum_sales_qty'),
+    'help' => t('sum_sales_qty'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+  
   return $data;
 }
