@@ -752,12 +752,12 @@ function dispatch_planning_form_save_validate($form, &$form_state) {
       }
     }
     
-//    if (!empty($bill_sequence_array)) {
-//      $form_state['dispatch_planning']['bill_sequence_array'] = $bill_sequence_array;
-//    }
-//    else {
-//      form_set_error('list_form_items', 'An error occured while generating sequence');
-//    }
+    if (!empty($bill_sequence_array)) {
+      $form_state['dispatch_planning']['bill_sequence_array'] = $bill_sequence_array;
+    }
+    else {
+      form_set_error('list_form_items', 'An error occured while generating sequence');
+    }
   }
   
   $form_state['dispatch_planning']['manual_drs_sequence'] = $manual_drs_sequence;
