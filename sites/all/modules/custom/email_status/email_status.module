@@ -246,9 +246,9 @@ function send_email_daily_data() {
   $params['subject'] = "Operations Progress Status - $distributor_name";
   $params['body'] = $egir_html . "<br>" . $party_packing_html . "<br>" . $picking_html;
 
-  $mail_to = "dhirendra.mishra@iksula.com";
-  $mail_to = "abhishek.r@iksula.com";
-  $mail_to = "shruti.a@iksulaops.com";
+//  $mail_to = "dhirendra.mishra@iksula.com";
+//  $mail_to = "abhishek.r@iksula.com";
+//  $mail_to = "shruti.a@iksulaops.com";
   $mail_to = variable_get('to_email');
   $from = "MIS.HELPDESK@leanbox.in";
   $from = variable_get('from_email');
@@ -311,9 +311,9 @@ function send_email_channel_emailer($distributor_name) {
   $params['subject'] = "Channel Wise OTIF - $distributor_name";
   $params['body'] = $yesterday_html . "<br>" . $mtd_html;
   $mail_to = variable_get('to_email');
-  $mail_to = "dhirendra.mishra@iksula.com";
-  $mail_to = "abhishek.r@iksula.com";
-  $mail_to = "shruti.a@iksulaops.com";
+//  $mail_to = "dhirendra.mishra@iksula.com";
+//  $mail_to = "abhishek.r@iksula.com";
+//  $mail_to = "shruti.a@iksulaops.com";
   $from = "MIS.HELPDESK@leanbox.in";
   $from = variable_get('from_email');
   drupal_mail('email_status', 'channel_status', $mail_to, LANGUAGE_NONE, $params, $from);
@@ -370,9 +370,9 @@ function send_email_pl_group_emailer($distributor_name) {
   $params['subject'] = "PL Group Wise Bill Pendency-$distributor_name";
   $params['body'] = $yesterday_html . "<br>" . $mtd_html;
   $mail_to = variable_get('to_email');
-  $mail_to = "dhirendra.mishra@iksula.com";
-  $mail_to = "abhishek.r@iksula.com";
-  $mail_to = "shruti.a@iksulaops.com";
+//  $mail_to = "dhirendra.mishra@iksula.com";
+//  $mail_to = "abhishek.r@iksula.com";
+//  $mail_to = "shruti.a@iksulaops.com";
   $from = variable_get('from_email');
   drupal_mail('email_status', 'pl_group_status', $mail_to, LANGUAGE_NONE, $params, $from);
 }
