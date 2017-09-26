@@ -115,6 +115,7 @@ function change_feeds_import_sales_delivery1_form_submit($form, &$form_state) {
    $query->isNull('ti.field_hul_code_reference_nid');
 
    $query->fields('n', array('nid'));
+   $query->range(0, 10000);
    $datas = $query->execute()->fetchAllKeyed(0, 0);
 
    $data_chunk = array_chunk($datas, 100);
