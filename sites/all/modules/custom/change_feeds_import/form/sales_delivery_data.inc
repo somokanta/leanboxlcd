@@ -110,15 +110,11 @@ function change_feeds_import_sales_delivery1_form_submit($form, &$form_state) {
    $end_date = strtotime('21-09-2017');
 
    $query = db_select('node', 'n');
-   $query->join('field_data_field_sr_bill_date', 'i', 'i.entity_id = n.nid');
-   $query->condition('n.type', 'sales_register_data');
-   $query->leftjoin('field_data_field_party_code_reference', 'ti', 'ti.entity_id = n.nid');
-   $query->isNull('ti.field_party_code_reference_nid');
-   if (!empty($start_date) && !empty($end_date)) {
-      $query->condition('i.field_sr_bill_date_value', array($start_date, $end_date), 'BETWEEN');
-   }
+   $query->condition('n.type', 'outlet_master');
+   $query->leftjoin('field_data_field_hul_code_reference', 'ti', 'ti.entity_id = n.nid');
+   $query->isNull('ti.field_hul_code_reference_nid');
+
    $query->fields('n', array('nid'));
-   $query->range(0, 10000);
    $datas = $query->execute()->fetchAllKeyed(0, 0);
 
    $data_chunk = array_chunk($datas, 100);
