@@ -1880,7 +1880,6 @@ function ptl_configuration_data_insert($api_data) {
         );
         $query->fields($fields);
         $result_id = $query->execute();
-        return $result_id;
       }
     }
   }
