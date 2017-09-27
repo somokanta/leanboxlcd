@@ -7,6 +7,16 @@ function change_feeds_import_create_confirm_content($id) {
   global $user;
   $user_id = $user->uid;
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
+  
+  /*$query = db_select('custom_billing_data', 'cb');
+  $query->addExpression('MAX(id)', 'max');
+  $query->condition('distributor_id', $distributor_id);
+  $max_billing_id = $query->execute()->fetchField();
+  */
+  
+  $max_billing_id = db_query("select id from custom_billing_data where distributor_id = $distributor_id order by id desc limit 1")->fetchField();
+  $max_billing_id = $max_billing_id ? $max_billing_id : 0;
+  
   $csv_file = $distributor_id . "_error.csv";
   // select data from stage table
   $billing_data_result = db_select('stage_billing_data', 'sbd')
@@ -96,20 +106,9 @@ function change_feeds_import_create_confirm_content($id) {
     $party_packing_data_new[] = $val;
   }
 
-
-  $query = db_select('custom_billing_data', 'cb');
-  $query->addExpression('MAX(id)', 'max');
-  $query->condition('distributor_id', $distributor_id);
-  $max_billing_id = $query->execute()->fetchField();
-  
-  
-  $max_billing_id_db_query = db_query("select id from custom_billing_data where distributor_id = $distributor_id order by id desc limit 1")->fetchField();
-  
-  $max_billing_id = $max_billing_id ? $max_billing_id : 0;
-  sleep(5); // this should halt for 5s. 
   $return_true = change_feeds_import_insert_data_in_custom_billing_table($billing_data_result);
   if($return_true){
-    sleep(4); // this should halt for 4s. 
+    sleep(3); // this should halt for 4s. 
   }
   
   /**
