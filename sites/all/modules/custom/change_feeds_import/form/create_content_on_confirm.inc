@@ -105,7 +105,8 @@ function change_feeds_import_create_confirm_content($id) {
   foreach ($party_packing_data as $key => $val) {
     $party_packing_data_new[] = $val;
   }
-
+  
+  sleep(3); // this should halt for 3s. 
   $return_true = change_feeds_import_insert_data_in_custom_billing_table($billing_data_result);
   if($return_true){
     sleep(3); // this should halt for 3s. 
