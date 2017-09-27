@@ -151,13 +151,16 @@ function change_feeds_import_create_confirm_content($id) {
     $operations[] = array('change_feeds_import_create_picking', array($data));
   }
   
-  $create_pick_confirm_data = change_feeds_import_create_pick_confirm_data($max_billing_id);
-  $create_pick_confirm_data_chunk = array_chunk($create_pick_confirm_data, 750);
-  foreach ($create_pick_confirm_data_chunk as $data) {
-    $operations[] = array('change_feeds_import_create_pick_confirm', array($data));
-  }
+  $roles = $user->roles;
+   if (in_array("leanbox", $roles)) {
+      $create_pick_confirm_data = change_feeds_import_create_pick_confirm_data($max_billing_id);
+      $create_pick_confirm_data_chunk = array_chunk($create_pick_confirm_data, 750);
+      foreach ($create_pick_confirm_data_chunk as $data) {
+         $operations[] = array('change_feeds_import_create_pick_confirm', array($data));
+      }
+   }
 
-  $van_cld_report_data = change_feeds_import_create_van_cld_report_data($max_billing_id);
+   $van_cld_report_data = change_feeds_import_create_van_cld_report_data($max_billing_id);
   $van_cld_report_data_chunk = array_chunk($van_cld_report_data, 750);
   foreach ($van_cld_report_data_chunk as $data) {
     $operations[] = array('change_feeds_import_create_van_cld_report', array($data));
