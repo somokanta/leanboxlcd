@@ -807,7 +807,7 @@ function dispatch_planning_views_data() {
     'title' => t('loading_date'),
     'help' => t('loading_date'),
     'field' => array(
-      'handler' => 'views_handler_field',
+      'handler' => 'views_handler_field_date',
       'click sortable' => TRUE,
     ),
     'sort' => array(
