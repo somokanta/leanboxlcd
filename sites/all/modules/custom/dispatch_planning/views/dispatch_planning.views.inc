@@ -749,7 +749,7 @@ function dispatch_planning_views_data() {
     ),
   );
   // 	trip_id
-  $data['ptl_data_configuration']['	trip_id'] = array(
+  $data['ptl_data_configuration']['trip_id'] = array(
     'title' => t('trip_id'),
     'help' => t('Trip ID'),
     'field' => array(
