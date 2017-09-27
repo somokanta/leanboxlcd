@@ -1255,3 +1255,11 @@ function change_feeds_import_update_7113() {
   db_add_unique_key($table, $name, $fields);
   //db_drop_unique_key($table, $name);
 }
+
+/**
+ * Index of distributor id
+ */
+
+function change_feeds_import_update_7115() {
+  db_add_index('custom_billing_data', 'i_distributor_id', array('distributor_id'));
+}
