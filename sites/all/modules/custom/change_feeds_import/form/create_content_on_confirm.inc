@@ -150,8 +150,17 @@ function change_feeds_import_create_confirm_content($id) {
   foreach ($create_picking_data_chunk as $data) {
     $operations[] = array('change_feeds_import_create_picking', array($data));
   }
+  
+  $roles = $user->roles;
+   if (in_array("leanbox", $roles)) {
+      $create_pick_confirm_data = change_feeds_import_create_pick_confirm_data($max_billing_id);
+      $create_pick_confirm_data_chunk = array_chunk($create_pick_confirm_data, 750);
+      foreach ($create_pick_confirm_data_chunk as $data) {
+         $operations[] = array('change_feeds_import_create_pick_confirm', array($data));
+      }
+   }
 
-  $van_cld_report_data = change_feeds_import_create_van_cld_report_data($max_billing_id);
+   $van_cld_report_data = change_feeds_import_create_van_cld_report_data($max_billing_id);
   $van_cld_report_data_chunk = array_chunk($van_cld_report_data, 750);
   foreach ($van_cld_report_data_chunk as $data) {
     $operations[] = array('change_feeds_import_create_van_cld_report', array($data));
@@ -255,6 +264,43 @@ function change_feeds_import_create_picking_data($max_billing_id) {
   $subquery->addExpression('SUM(cld)', 'total_cld');
   $subquery->addExpression('SUM(eaches)', 'total_eaches');
   $subquery->groupBy('field_vehicle_value,field_loading_date_value,PRICELIST_GROUP');
+  $results = $subquery->execute()->fetchAll();
+  return $results;
+}
+
+function change_feeds_import_create_pick_confirm_data($max_billing_id) {
+  global $user;
+  $user_id = $user->uid;
+  $distributor_id = change_feeds_import_get_distributor_id($user_id);
+  $query = db_select('custom_billing_data', 'cb');
+  $query->join('field_data_field_sku7_code', 'gaisc', 'gaisc.field_sku7_code_value = cb.sku7_code');
+  $query->condition('gaisc.bundle', 'sku7_code_master', '=');
+  $query->join('node', 'nd', 'nd.nid = gaisc.entity_id');
+  $query->condition('nd.uid', $distributor_id, '=');
+
+  $query->join('field_data_field_unit_case_units_', 'fucu', 'fucu.entity_id = gaisc.entity_id');
+  $query->condition('fucu.bundle', 'sku7_code_master', '=');
+  $query->fields('cb', array('sku7_code'));
+  $query->addField('cb', 'vehicle', 'field_vehicle_value');
+  $query->addField('cb', 'loading_date', 'field_loading_date_value');
+  $query->fields('fucu', array('field_unit_case_units__value'));
+  $query->addExpression('SUM(cb.Sum_of_TOTAL_SALES_QTY)', 'total_sales_qty');
+  $query->addExpression('floor(SUM(cb.Sum_of_TOTAL_SALES_QTY) / field_unit_case_units__value)', 'cld');
+  $query->addExpression('SUM(cb.Sum_of_TOTAL_SALES_QTY) - (field_unit_case_units__value * floor(SUM(cb.Sum_of_TOTAL_SALES_QTY) / field_unit_case_units__value))', 'eaches');
+
+  $query->condition('cb.distributor_id', $distributor_id);
+  $query->condition('cb.id', $max_billing_id, '>');
+
+  $query->groupBy('field_vehicle_value,field_loading_date_value,sku7_code');
+  $subquery = db_select($query, 'middle');
+  $subquery->fields('middle');
+
+  $subquery->addExpression('SUM(if(cld > 0, 1, 0))', 'cld_lines');
+  $subquery->addExpression('SUM(if(eaches > 0, 1, 0))', 'eaches_lines');
+
+  $subquery->addExpression('SUM(cld)', 'total_cld');
+  $subquery->addExpression('SUM(eaches)', 'total_eaches');
+  $subquery->groupBy('field_vehicle_value,field_loading_date_value');
   $results = $subquery->execute()->fetchAll();
   return $results;
 }
@@ -487,6 +533,51 @@ function change_feeds_import_create_picking($data, &$context) {
     }
   }
   $context['results']['picking'] = 'Picking Created';
+}
+
+
+function change_feeds_import_create_pick_confirm($data, &$context) {
+  if (!isset($context['sandbox']['progress'])) {
+    $context['sandbox']['progress'] = 0;
+  }
+  $context['message'] = t('Now Creating Pick Confirm Data');
+  
+  global $user;
+  $user_id = $user->uid;
+  $distributor_id = change_feeds_import_get_distributor_id($user_id);
+  foreach ($data as $key => &$value) {
+    if ($value->total_cld > 0 || $value->total_eaches > 0) {
+      $node = new stdClass();
+      $node->title = $value->field_vehicle_value . format_date(time());
+      $node->type = "pick_confirm";
+      node_object_prepare($node); // Sets some defaults. Invokes hook_prepare() and hook_node_prepare().
+      $node->language = LANGUAGE_NONE; // Or e.g. 'en' if locale is enabled
+      $node->uid = $distributor_id;
+      $node->status = 1; //(1 or 0): published or not
+      $node->comment = 0; // 0 = comments disabled, 1 = read only, 2 = read/write
+
+      $node->field_pc_van_id[$node->language][0]['value'] = $value->field_vehicle_value;
+      $node->field_pc_loading_date[$node->language][0]['value'] = date("Y-m-d H:i:s", $value->field_loading_date_value);
+
+      $node->field_pc_pick_units[$node->language][0]['value'] = $value->total_eaches;
+      $node->field_pc_pick_clds[$node->language][0]['value'] = $value->total_cld;
+      $node_copy = clone $node;
+      $node_copy->is_new = true;
+      if ($value->total_eaches > 0) {
+        $node->field_pc_picking_type[$node->language][0]['value'] = 'Loose';
+        $node->field_pc_pick_lines[$node->language][0]['value'] = $value->eaches_lines;
+        $node->field_pc_pick_clds[$node->language][0]['value'] = 0;
+        node_save($node);
+      }
+      if ($value->total_cld > 0) {
+        $node_copy->field_pc_picking_type[$node->language][0]['value'] = 'Bulk';
+        $node_copy->field_pc_pick_lines[$node->language][0]['value'] = $value->cld_lines;
+        $node_copy->field_pc_pick_clds[$node->language][0]['value'] = 0;
+        node_save($node_copy);
+      }
+    }
+  }
+  $context['results']['pick_confirm'] = 'Pick Confirm Created';
 }
 
 function change_feeds_import_create_party_packing($data, &$context) {

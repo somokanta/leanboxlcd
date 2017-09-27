@@ -20,17 +20,7 @@ function picking_type_combined_services_resources() {
             'module' => 'picking_type_combined',
             'name' => 'combined_pick_type'
           ),
-          //'access callback' => 'get_status_api',
           'access arguments' => array('access_for_api'),
-          // 'args' => array(
-          //   array(
-          //     'name' => 'from_date_booking',
-          //     'type' => 'string',
-          //     'description' => 'start date',
-          //     'source' => array('data' => 'from_date_booking'),
-          //     'optional' => true,
-          //   ),
-          //),
         ),
       ),
     ),
@@ -40,13 +30,7 @@ function picking_type_combined_services_resources() {
         'create' => array(
           'help' => 'Listing of Pick Confirm',
           'callback' => '_get_list_picking_confirm_data',
-//          'file' => array(
-//            'type' => 'inc',
-//            'module' => 'picking_type_combined',
-//            'name' => 'combined_pick_type'
-//          ),
           'access arguments' => array('access_for_api'),
-
         ),
       ),
     ),
@@ -82,8 +66,6 @@ function _get_list_picking_confirm_data() {
    global $user;
    $distributor_id = change_feeds_import_get_distributor_id($user->uid);
 
-   $distributor_id = 23466; // for testing 
-
    $query = db_select('node', 'n');
    $query->condition('n.uid', $distributor_id, '=');
    $query->condition('n.type', 'pick_confirm', '=');
@@ -91,8 +73,6 @@ function _get_list_picking_confirm_data() {
    $query->condition('vanid.bundle', 'pick_confirm', '=');
    $query->join('field_data_field_pc_picking_type', 'ptype', 'ptype.entity_id = n.nid');
    $query->condition('ptype.bundle', 'pick_confirm', '=');
-   //$query->join('field_data_field_picking_godown_area_id', 'goid', 'goid.entity_id = n.nid');
-   //$query->condition('goid.bundle', 'pick_confirm', '=');
    $query->join('field_data_field_pc_loading_date', 'ldate', 'ldate.entity_id = n.nid');
    $query->condition('ldate.bundle', 'pick_confirm', '=');
    $query->join('field_data_field_pc_pick_units', 'punits', 'punits.entity_id = n.nid');
