@@ -306,7 +306,7 @@ class FeedsCSVParser extends FeedsParser {
     drupal_add_http_header('Cache-Control', $cache_control);
     drupal_add_http_header('Content-Disposition', $content_disposition);
     drupal_add_http_header('Content-type', $content_type);
-
+    ob_clean();
     print implode($sep, $columns);
   }
 

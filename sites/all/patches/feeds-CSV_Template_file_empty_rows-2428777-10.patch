@@ -1,0 +1,12 @@
+diff --git a/plugins/FeedsCSVParser.inc b/plugins/FeedsCSVParser.inc
+index 073a56d..b5eb568 100644
+--- a/plugins/FeedsCSVParser.inc
++++ b/plugins/FeedsCSVParser.inc
+@@ -306,7 +306,7 @@
+     drupal_add_http_header('Cache-Control', $cache_control);
+     drupal_add_http_header('Content-Disposition', $content_disposition);
+     drupal_add_http_header('Content-type', $content_type);
+-
++    ob_clean();
+     print implode($sep, $columns);
+   }
