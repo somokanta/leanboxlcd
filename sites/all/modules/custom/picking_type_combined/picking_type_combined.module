@@ -34,6 +34,22 @@ function picking_type_combined_services_resources() {
         ),
       ),
     ),
+    
+     'data-list' => array(
+      'operations' => array(
+        'create' => array(
+          'help' => 'Listing of Pick Confirm',
+          'callback' => '_get_list_picking_confirm_data',
+//          'file' => array(
+//            'type' => 'inc',
+//            'module' => 'picking_type_combined',
+//            'name' => 'combined_pick_type'
+//          ),
+          'access arguments' => array('access_for_api'),
+
+        ),
+      ),
+    ),
   );
   return $resource;
 }
@@ -55,4 +71,105 @@ function picking_type_combined_permission() {
 function get_status_api() {
   global $user;
   return user_access('picking_type_combined_services', $user);
+}
+
+/**
+ * 
+ * @global type $user
+ * @return type
+ */
+function _get_list_picking_confirm_data() {
+   global $user;
+   $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+
+   $distributor_id = 23466; // for testing 
+
+   $query = db_select('node', 'n');
+   $query->condition('n.uid', $distributor_id, '=');
+   $query->condition('n.type', 'pick_confirm', '=');
+   $query->join('field_data_field_pc_van_id', 'vanid', 'vanid.entity_id = n.nid');
+   $query->condition('vanid.bundle', 'pick_confirm', '=');
+   $query->join('field_data_field_pc_picking_type', 'ptype', 'ptype.entity_id = n.nid');
+   $query->condition('ptype.bundle', 'pick_confirm', '=');
+   //$query->join('field_data_field_picking_godown_area_id', 'goid', 'goid.entity_id = n.nid');
+   //$query->condition('goid.bundle', 'pick_confirm', '=');
+   $query->join('field_data_field_pc_loading_date', 'ldate', 'ldate.entity_id = n.nid');
+   $query->condition('ldate.bundle', 'pick_confirm', '=');
+   $query->join('field_data_field_pc_pick_units', 'punits', 'punits.entity_id = n.nid');
+   $query->condition('punits.bundle', 'pick_confirm', '=');
+   $query->join('field_data_field_pc_pick_clds', 'pclds', 'pclds.entity_id = n.nid');
+   $query->condition('pclds.bundle', 'pick_confirm', '=');
+   $query->join('field_data_field_pc_pick_supervisor', 'psuper', 'psuper.entity_id = n.nid');
+   $query->condition('psuper.bundle', 'pick_confirm', '=');
+   $query->join('field_data_field_pc_combined_nid', 'cid', 'cid.entity_id = n.nid');
+   $query->condition('cid.bundle', 'pick_confirm', '=');
+   $query->join('field_data_field_pc_picker_name', 'picker', 'picker.entity_id = n.nid');
+   $query->condition('picker.bundle', 'pick_confirm', '=');
+   $query->join('field_data_field_pc_team_count', 'tcount', 'tcount.entity_id = n.nid');
+   $query->condition('tcount.bundle', 'pick_confirm', '=');
+   $query->join('field_data_field_pc_status', 'pstatus', 'pstatus.entity_id = n.nid');
+   $query->condition('pstatus.bundle', 'pick_confirm', '=');
+   $query->join('field_data_field_pc_start_time', 'pstart', 'pstart.entity_id = n.nid');
+   $query->leftJoin('field_data_field_pc_end_time', 'pend', 'pend.entity_id = n.nid');
+   $query->fields('n', array('nid'));
+   $query->fields('vanid', array('field_pc_van_id_value'));
+   $query->fields('ptype', array('field_pc_picking_type_value'));
+   $query->fields('ldate', array('field_pc_loading_date_value'));
+   $query->fields('punits', array('field_pc_pick_units_value'));
+   $query->fields('pclds', array('field_pc_pick_clds_value'));
+   $query->fields('psuper', array('field_pc_pick_supervisor_value'));
+   $query->fields('cid', array('field_pc_combined_nid_value'));
+   $query->fields('picker', array('field_pc_picker_name_value'));
+   $query->fields('tcount', array('field_pc_team_count_value'));
+   $query->fields('pstatus', array('field_pc_status_value'));
+   $query->fields('pstart', array('field_pc_start_time_value'));
+   $query->fields('pend', array('field_pc_end_time_value'));
+   $query->groupBy('field_pc_combined_nid_value');
+
+
+   $from = date('Y-m-d', strtotime('-7 days'));
+   $to = date('Y-m-d');
+   $db_and1 = db_and();
+   $db_and1->where("(DATE_FORMAT(field_pc_loading_date_value, '%Y-%m-%d') >= :from AND DATE_FORMAT(field_pc_loading_date_value, '%Y-%m-%d') <= :to)", array(':from' => $from, ':to' => $to));
+   $db_and1->condition('field_pc_status_value', '1');
+
+   $db_and2 = db_and();
+   $db_and2->where("(DATE_FORMAT(field_pc_loading_date_value, '%Y-%m-%d') = :to)", array(':to' => $to));
+   $db_and2->condition('field_pc_status_value', '2');
+
+   $db_or = db_or();
+   $db_or->condition($db_and1);
+   $db_or->condition($db_and2);
+
+   $query->condition($db_or);
+
+   $results = $query->execute()->fetchAll();
+
+   foreach ($results as $key => $val) {
+      if (!is_numeric($val->field_pc_combined_nid_value)) {
+         $val->field_pc_picking_type_value = 'combined';
+      }
+      if (empty($val->field_pc_end_time_value)) {
+         $picking_end_time = '';
+      }
+      else {
+         $picking_end_time = $val->field_pc_end_time_value;
+      }
+    
+      $result_final[] = array('picking type' => $val->field_pc_picking_type_value,
+        'loading date' => date("m/d/y", strtotime($val->field_pc_loading_date_value)),
+        'van id' => $val->field_pc_van_id_value,
+        'pick units' => $val->field_pc_pick_units_value,
+        'pick clds' => $var->field_pc_pick_clds_value,
+        'pick supervisor' => $val->field_pc_pick_supervisor_value,
+        'picker name' => $val->field_pc_picker_name_value,
+        'picking team count' => $val->field_pc_team_count_value,
+        'status' => $val->field_pc_status_value,
+        'combined nid' => $val->field_pc_combined_nid_value,
+        'picking start time' => $val->field_pc_start_time_value,
+        'picking end time' => $picking_end_time, 'nid' => $val->nid);
+   }
+
+   $result['data'] = $result_final;
+   return $result;
 }

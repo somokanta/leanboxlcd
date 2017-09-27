@@ -1916,6 +1916,20 @@ function change_feeds_import_node_presave($node) {
       }
     }
   }
+
+  // PICK CONFIRM TYPE
+  if (($node->type == 'pick_confirm') && ($node->is_new == TRUE)) {
+    //$node->field_pc_combined_nid['und'][0]['value'] = $node->created;
+  }
+
+  if (!empty($node->field_pc_start_time['und']) && !empty($node->field_pc_end_time['und'])) {
+    $node->field_pc_status[LANGUAGE_NONE][0]['value'] = 2;
+  }
+  if (!empty($node->field_pc_start_time['und']) && empty($node->field_pc_end_time['und'])) {
+    $node->field_pc_status[LANGUAGE_NONE][0]['value'] = 1;
+  }
+  
+  // PICKING TYPE
   if (($node->type == 'picking') && ($node->is_new == TRUE)) {
     $node->field_combined_nid['und'][0]['value'] = $node->created;
   }
