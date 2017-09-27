@@ -7,6 +7,16 @@ function change_feeds_import_create_confirm_content($id) {
   global $user;
   $user_id = $user->uid;
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
+  
+  /*$query = db_select('custom_billing_data', 'cb');
+  $query->addExpression('MAX(id)', 'max');
+  $query->condition('distributor_id', $distributor_id);
+  $max_billing_id = $query->execute()->fetchField();
+  */
+  
+  $max_billing_id = db_query("select id from custom_billing_data where distributor_id = $distributor_id order by id desc limit 1")->fetchField();
+  $max_billing_id = $max_billing_id ? $max_billing_id : 0;
+  
   $csv_file = $distributor_id . "_error.csv";
   // select data from stage table
   $billing_data_result = db_select('stage_billing_data', 'sbd')
@@ -96,17 +106,9 @@ function change_feeds_import_create_confirm_content($id) {
     $party_packing_data_new[] = $val;
   }
 
-
-  $query = db_select('custom_billing_data', 'cb');
-  $query->addExpression('MAX(id)', 'max');
-  $query->condition('distributor_id', $distributor_id);
-  $max_billing_id = $query->execute()->fetchField();
-
-  $max_billing_id = $max_billing_id ? $max_billing_id : 0;
-  sleep(5); // this should halt for 5s. 
   $return_true = change_feeds_import_insert_data_in_custom_billing_table($billing_data_result);
   if($return_true){
-    sleep(4); // this should halt for 4s. 
+    sleep(3); // this should halt for 3s. 
   }
   
   /**
@@ -134,7 +136,7 @@ function change_feeds_import_create_confirm_content($id) {
   /**
    * Debugging END
    */    
-    
+  $billing_data_result = NULL; // better memory optimisation (it contents large data)
   $operations = array();
   
   $create_billing_data = change_feeds_import_create_billing_data($max_billing_id);
@@ -287,22 +289,22 @@ function change_feeds_import_finished($success, $results, $operations) {
     $message = t('Successfully Created Content');
     $message .= theme('item_list', array('items' => $results));
     drupal_set_message($message);
+    
+    if (!array_key_exists('billing', $results)) {
+      drupal_set_message('Billing Not Create. Please Contact HUL HELP DESK.', 'error');
+    }
+    if (!array_key_exists('picking', $results)) {
+      drupal_set_message('Picking Not Create. Please Contact HUL HELP DESK.', 'error');
+    }
+    if (!array_key_exists('van', $results)) {
+      drupal_set_message('Van Not Create. Please Contact HUL HELP DESK.', 'error');
+    }
+    if (!array_key_exists('party_packing', $results)) {
+      drupal_set_message('Party Packing Not Create. Please Contact HUL HELP DESK.', 'error');
+    }
   }
   else {
     drupal_set_message('Error Occure while uploading billing data. Please Contact HUL HELP DESK', 'error');
-  }
-  
-  if (!array_key_exists('billing', $results)) {
-    drupal_set_message('Billing Not Create. Please Contact HUL HELP DESK.', 'error');
-  }
-  if (!array_key_exists('picking', $results)) {
-    drupal_set_message('Picking Not Create. Please Contact HUL HELP DESK.', 'error');
-  }
-  if (!array_key_exists('van', $results)) {
-    drupal_set_message('Van Not Create. Please Contact HUL HELP DESK.', 'error');
-  }
-  if (!array_key_exists('party_packing', $results)) {
-    drupal_set_message('Party Packing Not Create. Please Contact HUL HELP DESK.', 'error');
   }
 
   if (!$success || !array_key_exists('billing', $results) || !array_key_exists('picking', $results) || !array_key_exists('van', $results) || !array_key_exists('party_packing', $results)) {
