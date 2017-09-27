@@ -153,7 +153,7 @@ function change_feeds_import_create_confirm_content($id) {
     $operations[] = array('change_feeds_import_create_picking', array($data));
   }
 
-  $van_cld_report_data = change_feeds_import_create_van_cld_report_data(999999999);
+  $van_cld_report_data = change_feeds_import_create_van_cld_report_data($max_billing_id);
   $van_cld_report_data_chunk = array_chunk($van_cld_report_data, 750);
   foreach ($van_cld_report_data_chunk as $data) {
     $operations[] = array('change_feeds_import_create_van_cld_report', array($data));
