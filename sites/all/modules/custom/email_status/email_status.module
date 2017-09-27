@@ -48,16 +48,17 @@ function email_status_email_form($form, $form_state) {
 
 function send_email_daily_data() {
 
-  global $user;
-  $user_id = $user->uid;
-  $distributor_id = change_feeds_import_get_distributor_id($user_id);
+  //global $user;
+  //$user_id = $user->uid;
+  //$distributor_id = change_feeds_import_get_distributor_id($user_id);
+  $distributor_id = 23466;
   $distributor_name = change_feeds_import_get_distributor_name($distributor_id);
 
   $todays_date_date = date('Y-m-d 00:00:00');
   // $todays_date_date = "2017-03-17 00:00:00"; 
-  $party_packing = get_todays_party_packing_created_data($todays_date_date);
-  $picking = get_todays_picking_created_data($todays_date_date);
-  $egir = get_todays_unloading_created_data($todays_date_date);
+  $party_packing = get_todays_party_packing_created_data($todays_date_date, $distributor_id);
+  $picking = get_todays_picking_created_data($todays_date_date, $distributor_id);
+  $egir = get_todays_unloading_created_data($todays_date_date, $distributor_id);
 
   $non_pp_count = $party_packing['non_pp'];
   if (empty($non_pp_count)) {
@@ -250,20 +251,20 @@ function send_email_daily_data() {
 //  $mail_to = "abhishek.r@iksula.com";
 //  $mail_to = "shruti.a@iksulaops.com";
   $mail_to = variable_get('to_email');
-  $from = "MIS.HELPDESK@leanbox.in";
+  //$from = "MIS.HELPDESK@leanbox.in";
   $from = variable_get('from_email');
   $rr = drupal_mail('email_status', 'daily_data', $mail_to, LANGUAGE_NONE, $params, $from);
 
-  send_email_productivity_emailer($todays_date_date, $distributor_name);
-  send_email_pl_group_emailer($distributor_name);
-  send_email_channel_emailer($distributor_name);
+  send_email_productivity_emailer($todays_date_date, $distributor_name, $distributor_id);
+  send_email_pl_group_emailer($distributor_name, $distributor_id);
+  send_email_channel_emailer($distributor_name, $distributor_id);
 }
 
-function send_email_channel_emailer($distributor_name) {
-  global $user;
-  $user_id = $user->uid;
-  $distributor_id = change_feeds_import_get_distributor_id($user_id);
-  $distributor_id = 60;
+function send_email_channel_emailer($distributor_name, $distributor_id = 60) {
+//  global $user;
+//  $user_id = $user->uid;
+//  $distributor_id = change_feeds_import_get_distributor_id($user_id);
+//  $distributor_id = 60;
 
   $todays_date_date = date('Y-m-d');
   //$todays_date_date = "2017-03-20";
@@ -314,15 +315,15 @@ function send_email_channel_emailer($distributor_name) {
 //  $mail_to = "dhirendra.mishra@iksula.com";
 //  $mail_to = "abhishek.r@iksula.com";
 //  $mail_to = "shruti.a@iksulaops.com";
-  $from = "MIS.HELPDESK@leanbox.in";
+  //$from = "MIS.HELPDESK@leanbox.in";
   $from = variable_get('from_email');
   drupal_mail('email_status', 'channel_status', $mail_to, LANGUAGE_NONE, $params, $from);
 }
 
-function send_email_pl_group_emailer($distributor_name) {
-  global $user;
-  $user_id = $user->uid;
-  $distributor_id = change_feeds_import_get_distributor_id($user_id);
+function send_email_pl_group_emailer($distributor_name, $distributor_id = 60) {
+  //global $user;
+  //$user_id = $user->uid;
+  //$distributor_id = change_feeds_import_get_distributor_id($user_id);
 
   $todays_date_date = date('Y-m-d');
   //$todays_date_date = "2017-03-20";
@@ -625,11 +626,11 @@ function send_email_productivity_emailer($todays_date_date, $distributor_name, $
   }
 }
 
-function get_todays_party_packing_created_data($loading_date) {
+function get_todays_party_packing_created_data($loading_date, $distributor_id = 60) {
   $query = db_select('node', 'n');
   $query->condition('n.type', 'party_packing');
   $query->join('field_data_field_distributor', 'fd', 'fd.entity_id = n.uid');
-  $query->condition('fd.entity_id', 60, '=');
+  $query->condition('fd.entity_id', $distributor_id, '=');
   $query->join('field_data_field_party_packing_loading_date', 'd', 'd.entity_id = n.nid');
   $query->condition('d.field_party_packing_loading_date_value', $loading_date, "=");
   $query->leftjoin('field_data_field__party_packingstatus', 's', 's.entity_id = n.nid');
@@ -685,11 +686,11 @@ function get_todays_party_packing_created_data($loading_date) {
   return $party_packing;
 }
 
-function get_todays_picking_created_data($loading_date) {
+function get_todays_picking_created_data($loading_date, $distributor_id = 60) {
   $query = db_select('node', 'n');
   $query->condition('n.type', 'picking');
   $query->join('field_data_field_distributor', 'fd', 'fd.entity_id = n.uid');
-  $query->condition('fd.entity_id', 60, '=');
+  $query->condition('fd.entity_id', $distributor_id, '=');
   $query->join('field_data_field_picking_loading_date', 'd', 'd.entity_id = n.nid');
   $query->condition('d.field_picking_loading_date_value', $loading_date, "=");
   $query->leftjoin('field_data_field_picking_status', 's', 's.entity_id = n.nid');
@@ -767,11 +768,11 @@ function get_todays_picking_created_data($loading_date) {
   return $picking;
 }
 
-function get_todays_unloading_created_data($loading_date) {
+function get_todays_unloading_created_data($loading_date, $distributor_id = 60) {
   $query = db_select('node', 'n');
   $query->condition('n.type', 'egir');
   $query->join('field_data_field_distributor', 'fd', 'fd.entity_id = n.uid');
-  $query->condition('fd.entity_id', 60, '=');
+  $query->condition('fd.entity_id', $distributor_id, '=');
   $query->leftjoin('field_data_field_egir_date', 'd', 'd.entity_id = n.nid');
   $query->condition('d.field_egir_date_value', $loading_date, "=");
   $query->leftjoin('field_data_field_unloading_status', 's', 's.entity_id = n.nid');
