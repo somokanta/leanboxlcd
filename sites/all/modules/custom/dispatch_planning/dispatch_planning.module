@@ -988,7 +988,8 @@ function get_bill_info($bill_number, $van = NULL, $loading_date = NULL, $beat_na
 
   //$query->addField('nt', 'title', 'trip_id');
 
-  $query->addExpression("CONCAT_WS(' - ', field_billing_van_value, FROM_UNIXTIME(field_billing_loading_date_value, '%m/%d/%y'))", 'van_loading_date');
+  //$query->addExpression("CONCAT_WS(' - ', field_billing_van_value, FROM_UNIXTIME(field_billing_loading_date_value, '%m/%d/%y'))", 'van_loading_date');
+   $query->addExpression("CONCAT_WS(' - ', field_billing_van_value, DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(field_billing_loading_date_value),'+00:00','+05:30'), '%m/%d/%y'))", 'van_loading_date');
 
 
   $query->addField('bn', 'field_beat_name_value', 'sales_beat');
