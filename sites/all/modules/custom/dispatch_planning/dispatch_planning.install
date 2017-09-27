@@ -385,10 +385,10 @@ function dispatch_planning_update_7107() {
       ),
       'loading_date' => array(
         'description' => t('LOADING_DATE'),
-        'type' => 'varchar',
-        'length' => 25,
+        'type' => 'int',
+        'length' => 32,
         'not null' => TRUE,
-        'default' => '',
+        'default' => 0,
       ),
       'sequence_no' => array(
         'description' => t('SEQUENCE No'),
