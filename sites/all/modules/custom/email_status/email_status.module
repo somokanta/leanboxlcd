@@ -48,7 +48,7 @@ function email_status_email_form($form, $form_state) {
 
 function send_email_daily_data() {
 
-  global $user;
+  //global $user;
   //$user_id = $user->uid;
   //$distributor_id = change_feeds_import_get_distributor_id($user_id);
   $distributor_id = 23466;
