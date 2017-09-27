@@ -1902,45 +1902,48 @@ function change_feeds_import_views_api() {
  */
 function change_feeds_import_node_presave($node) {
 
-  global $user;
-  $user_id = $user->uid;
-  $distributor_id = change_feeds_import_get_distributor_id($user_id);
+global $user;
+   $user_id = $user->uid;
+   $distributor_id = change_feeds_import_get_distributor_id($user_id);
 
-  if ($node->type == 'egir') {
-    $node->field_distributor_uid['und'][0]['value'] = $distributor_id;
-  }
-  if (!in_array('hul_admin', $user->roles)) {
-    if ($node->type != 'user_manual' && $node->type != 'impact_cron_mobile_data') {
-      if (!empty($distributor_id) && ($node->is_new == TRUE)) {
-        $node->uid = $distributor_id;
+   if ($node->type == 'egir') {
+      $node->field_distributor_uid['und'][0]['value'] = $distributor_id;
+   }
+   if (!in_array('hul_admin', $user->roles)) {
+      if ($node->type != 'user_manual' && $node->type != 'impact_cron_mobile_data') {
+         if (!empty($distributor_id) && ($node->is_new == TRUE)) {
+            $node->uid = $distributor_id;
+         }
       }
-    }
-  }
+   }
 
-  // PICK CONFIRM TYPE
-  if (($node->type == 'pick_confirm') && ($node->is_new == TRUE)) {
-    //$node->field_pc_combined_nid['und'][0]['value'] = $node->created;
-  }
+   // PICK CONFIRM TYPE
+   if ($node->type == 'pick_confirm') {
 
-  if (!empty($node->field_pc_start_time['und']) && !empty($node->field_pc_end_time['und'])) {
-    $node->field_pc_status[LANGUAGE_NONE][0]['value'] = 2;
-  }
-  if (!empty($node->field_pc_start_time['und']) && empty($node->field_pc_end_time['und'])) {
-    $node->field_pc_status[LANGUAGE_NONE][0]['value'] = 1;
-  }
-  
-  // PICKING TYPE
-  if (($node->type == 'picking') && ($node->is_new == TRUE)) {
-    $node->field_combined_nid['und'][0]['value'] = $node->created;
-  }
+      if (!empty($node->field_pc_start_time['und']) && !empty($node->field_pc_end_time['und'])) {
+         $node->field_pc_status[LANGUAGE_NONE][0]['value'] = 2;
+      }
+      if (!empty($node->field_pc_start_time['und']) && empty($node->field_pc_end_time['und'])) {
+         $node->field_pc_status[LANGUAGE_NONE][0]['value'] = 1;
+      }
+   }
 
-  if (!empty($node->field_picking_start_time['und']) && !empty($node->field_picking_end_time['und'])) {
-    $node->field_picking_status[LANGUAGE_NONE][0]['value'] = 2;
-  }
-  if (!empty($node->field_picking_start_time['und']) && empty($node->field_picking_end_time['und'])) {
-    $node->field_picking_status[LANGUAGE_NONE][0]['value'] = 1;
-  }
-  if (!empty($node->field_party_packing_start_time['und']) && !empty($node->field_party_packing_end_time['und'])) {
+   // PICKING TYPE
+   if ($node->type == 'picking') {
+
+      if ($node->is_new == TRUE) {
+         $node->field_combined_nid['und'][0]['value'] = $node->created;
+      }
+
+      if (!empty($node->field_picking_start_time['und']) && !empty($node->field_picking_end_time['und'])) {
+         $node->field_picking_status[LANGUAGE_NONE][0]['value'] = 2;
+      }
+      if (!empty($node->field_picking_start_time['und']) && empty($node->field_picking_end_time['und'])) {
+         $node->field_picking_status[LANGUAGE_NONE][0]['value'] = 1;
+      }
+   }
+
+   if (!empty($node->field_party_packing_start_time['und']) && !empty($node->field_party_packing_end_time['und'])) {
     $node->field__party_packingstatus[LANGUAGE_NONE][0]['value'] = 2;
   }
   if (!empty($node->field_party_packing_start_time['und']) && empty($node->field_party_packing_end_time['und'])) {
