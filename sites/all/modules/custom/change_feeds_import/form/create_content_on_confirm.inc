@@ -292,7 +292,7 @@ function change_feeds_import_finished($success, $results, $operations) {
     $message .= theme('item_list', array('items' => $results));
     drupal_set_message($message);
     
-    if (!array_key_exists('billings', $results)) {
+    if (!array_key_exists('billing', $results)) {
       drupal_set_message('Billing Not Create. Please Contact HUL HELP DESK.', 'error');
     }
     if (!array_key_exists('picking', $results)) {
