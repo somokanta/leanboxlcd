@@ -108,7 +108,7 @@ function change_feeds_import_create_confirm_content($id) {
 
   $return_true = change_feeds_import_insert_data_in_custom_billing_table($billing_data_result);
   if($return_true){
-    sleep(3); // this should halt for 4s. 
+    sleep(3); // this should halt for 3s. 
   }
   
   /**
@@ -124,7 +124,6 @@ function change_feeds_import_create_confirm_content($id) {
     if ($mail_row_diff != $mail_stage_row_count) {
       $message = "Stgaing table row count: $mail_stage_row_count.";
       $message .= "Prev max custome billing id: $max_billing_id.";
-      $message .= "Prev max custome billing id by db query: $max_billing_id_db_query.";
       $message .= "After insert, count of inserted id: $mail_row_diff.";
       $message .= "error billing data table id: $id. Distributor ID: $distributor_id ";
       
@@ -137,7 +136,7 @@ function change_feeds_import_create_confirm_content($id) {
   /**
    * Debugging END
    */    
-    
+  $billing_data_result = NULL; // better memory optimisation (it contents large data)
   $operations = array();
   
   $create_billing_data = change_feeds_import_create_billing_data($max_billing_id);
