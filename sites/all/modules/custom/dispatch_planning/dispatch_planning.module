@@ -1632,7 +1632,7 @@ function ptl_sales_reg_api_data($value, $node, $trip_execution_date, $hht_id, $c
   $api_data['jobType'] = 'delivery1';  // Hardcoded as suggested by gaurav
   $reference_no = $rs_code . '_' . $bill_number;
   $api_data['referenceNo'] = $reference_no;
-  $api_data['date'] = date('Y-m-d',$trip_execution_date);
+  $api_data['date'] = date('d-m-Y',$trip_execution_date);
   $api_data['city'] = 'ABC';
   //$api_data['hub'] = $rs_code;
   $api_data['hub'] = '100006'; // need to remove when moving to HUL
