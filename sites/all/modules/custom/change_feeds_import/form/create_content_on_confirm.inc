@@ -127,7 +127,7 @@ function change_feeds_import_create_confirm_content($id) {
       $message .= "Prev max custome billing id: $max_billing_id_new.";
       $message .= "After insert, count of inserted id: $mail_row_diff.";
       $message .= "error billing data table id: $id. Distributor ID: $distributor_id ";
-      
+      $message .= "Actual First inserted id: $return_true ";
       $params['subject'] = "Batch Proccess Billing Upload count Mismatch";
       $params['body'] = $message;
       $mail_to = "abhishek.r@iksula.com";
@@ -379,6 +379,7 @@ function change_feeds_import_finished($success, $results, $operations) {
 
 function change_feeds_import_insert_data_in_custom_billing_table($billing_data_result) {
   $created_date = time();
+  $first_instered_id = '';
   global $user;
   $user_id = $user->uid;
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
@@ -445,12 +446,17 @@ function change_feeds_import_insert_data_in_custom_billing_table($billing_data_r
             'created_date' => $created_date,
           ))
           ->execute();
+      
+      if(empty($first_instered_id)){
+        $first_instered_id = $stage_billing_data;
+      }
+      
     }
     catch (Exception $ex) {
       
     }
   }
-  return "1";
+  return $first_instered_id;
 }
 
 function change_feeds_import_create_van_cld_report($data, &$context) {
