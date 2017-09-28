@@ -727,8 +727,6 @@ function dispatch_planning_form_save_validate($form, &$form_state) {
   }
 
   $bill_sequence_array = array();
-  //dpm($params,'param');
-  //dpm("if(($no_area || $no_sequence || $area_hook_group_name || count($area_hook_group_name) > 1) && !$skip_sequencing && $origin_lat && $origin_long && $enable_routing){");
   if(($no_area || $no_sequence || $area_hook_group_name || count($area_hook_group_name) > 1) && !$skip_sequencing && $origin_lat && $origin_long && $enable_routing){
         
     $params['vehicles'][] = array('vehicle_id' => 'origin', 'start_address' => array('location_id' => 'origin', 'lon' => (double)$origin_long, 'lat' => (double)$origin_lat), 'return_to_depot' => true);
@@ -753,7 +751,6 @@ function dispatch_planning_form_save_validate($form, &$form_state) {
                   $i ++;
                 }
               }
-              dpm($bill_sequence_array,'api');
               break;
             }
           }
@@ -771,7 +768,6 @@ function dispatch_planning_form_save_validate($form, &$form_state) {
   }
   
   $form_state['dispatch_planning']['manual_drs_sequence'] = $manual_drs_sequence;
-  //form_set_error('trip_execution_date', 'Trip api');
   ##############################################################################
 }
 
