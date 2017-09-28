@@ -675,7 +675,7 @@ function send_email_productivity_emailer($todays_date_date, $distributor_name, $
     return  $picking_godown_wise_html . "<br>" . $picking_supervisor_wise_html;
   }
   else {
-    drupal_mail('email_status', 'productivity_status', $mail_to, LANGUAGE_NONE, $params, $from);
+    //drupal_mail('email_status', 'productivity_status', $mail_to, LANGUAGE_NONE, $params, $from);
   }
 }
 
