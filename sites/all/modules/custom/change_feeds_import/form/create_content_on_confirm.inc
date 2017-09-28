@@ -450,7 +450,7 @@ function change_feeds_import_insert_data_in_custom_billing_table($billing_data_r
       
     }
   }
-  return true;
+  return "1";
 }
 
 function change_feeds_import_create_van_cld_report($data, &$context) {
