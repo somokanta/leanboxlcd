@@ -167,6 +167,7 @@ function dispatch_planning_cron_callback() {
       }
     }
   }
+  return true;
 }
 
 /**
