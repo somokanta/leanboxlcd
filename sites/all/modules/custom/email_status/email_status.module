@@ -271,8 +271,11 @@ function send_email_channel_emailer($distributor_name, $distributor_id = 60) {
   $todays_date_date_timestamp = strtotime(date($todays_date_date));
   $current_day = date("d", $todays_date_date_timestamp);
   $yesterday = strtotime('-1 day', strtotime($todays_date_date));
+  $yesterday_date = date('d-M-Y',strtotime("-1 days"));
   $day_before_yesterday = strtotime('-2 day', strtotime($todays_date_date));
+  $day_before_yesterday_date = date('d-M-Y',strtotime("-2 days"));
   $twoday_before_yesterday = strtotime('-3 day', strtotime($todays_date_date));
+  $twoday_before_yesterday_date = date('d-M-Y',strtotime("-3 days"));
   
   if ($current_day == 22) {
     $this_month = date("m", $todays_date_date_timestamp);
@@ -288,7 +291,7 @@ function send_email_channel_emailer($distributor_name, $distributor_id = 60) {
     $this_date = strtotime(date("Y-$this_month-21"));
   }
   
-  $twoday_before_yesterday_html = "<h3>Two Days Before Yesterday</h3>";
+  $twoday_before_yesterday_html = "<h3>Billing Date : " . $twoday_before_yesterday_date ." (Two Days Before Yesterday)</h3>";
   $twoday_before_yesterday_data = get_twoday_before_yesterday_data_channel($twoday_before_yesterday, $twoday_before_yesterday, $distributor_id);
   if ($twoday_before_yesterday_data == "No Result Found") {
     $header = get_header_of_chhanel();
@@ -299,7 +302,7 @@ function send_email_channel_emailer($distributor_name, $distributor_id = 60) {
     $twoday_before_yesterday_html .= $twoday_before_yesterday_data;
   }
   
-  $day_before_yesterday_html = "<h3>Day Before Yesterday</h3>";
+  $day_before_yesterday_html = "<h3>Billing Date : " . $day_before_yesterday_date ." (One Day Before Yesterday)</h3>";
   $day_before_yesterday_data = get_day_before_yesterday_data_channel($day_before_yesterday, $day_before_yesterday, $distributor_id);
   if ($day_before_yesterday_data == "No Result Found") {
     $header = get_header_of_chhanel();
@@ -310,7 +313,7 @@ function send_email_channel_emailer($distributor_name, $distributor_id = 60) {
     $day_before_yesterday_html .= $day_before_yesterday_data;
   }
 
-  $yesterday_html = "<h3>Yesterday</h3>";
+  $yesterday_html = "<h3>Billing Date : " . $yesterday_date ." (Yesterday)</h3>";
   $yesterday_data = get_yesterday_data_channel($yesterday, $yesterday, $distributor_id);
   if ($yesterday_data == "No Result Found") {
     $header = get_header_of_chhanel();
@@ -321,7 +324,7 @@ function send_email_channel_emailer($distributor_name, $distributor_id = 60) {
     $yesterday_html .= $yesterday_data;
   }
 
-  $mtd_html = "<h3>MTD</h3>";
+  $mtd_html = "<h3>MTD Wise</h3>";
   $mtd_data .= get_mtd_data_channel($this_date, $yesterday, $distributor_id);
   if ($mtd_data == "No Result Found") {
     $header = get_header_of_chhanel();
@@ -354,8 +357,11 @@ function send_email_pl_group_emailer($distributor_name, $distributor_id = 60) {
   $todays_date_date_timestamp = strtotime(date($todays_date_date));
   $current_day = date("d", $todays_date_date_timestamp);
   $yesterday = strtotime('-1 day', strtotime($todays_date_date));
+  $yesterday_date = date('d-M-Y',strtotime("-1 days"));
   $day_before_yesterday = strtotime('-2 day', strtotime($todays_date_date));
+  $day_before_yesterday_date = date('d-M-Y',strtotime("-2 days"));
   $twoday_before_yesterday = strtotime('-3 day', strtotime($todays_date_date));
+  $twoday_before_yesterday_date = date('d-M-Y',strtotime("-3 days"));
   
   if ($current_day == 22) {
     $this_month = date("m", $todays_date_date_timestamp);
@@ -371,7 +377,7 @@ function send_email_pl_group_emailer($distributor_name, $distributor_id = 60) {
     $this_date = strtotime(date("Y-$this_month-21"));
   }
   
-  $twoday_before_yesterday_html = "<h3>Two Days Before Yesterday</h3>";
+  $twoday_before_yesterday_html = "<h3>Billing Date : " . $twoday_before_yesterday_date ." (Two Days Before Yesterday)</h3>";
   $twoday_before_yesterday_data = get_twoday_before_yesterday_data_pl_groupwise($twoday_before_yesterday, $twoday_before_yesterday, $distributor_id);
   if ($twoday_before_yesterday_data == "No Result Found") {
     $header = get_header_of_pl_group();
@@ -382,7 +388,7 @@ function send_email_pl_group_emailer($distributor_name, $distributor_id = 60) {
     $twoday_before_yesterday_html .= $twoday_before_yesterday_data;
   }
   
-  $day_before_yesterday_html = "<h3>Day Before Yesterday</h3>";
+  $day_before_yesterday_html = "<h3>Billing Date : " . $day_before_yesterday_date ." (One Day Before Yesterday)</h3>";
   $day_before_yesterday_data = get_day_before_yesterday_data_pl_groupwise($day_before_yesterday, $day_before_yesterday, $distributor_id);
   if ($day_before_yesterday_data == "No Result Found") {
     $header = get_header_of_pl_group();
@@ -393,7 +399,7 @@ function send_email_pl_group_emailer($distributor_name, $distributor_id = 60) {
     $day_before_yesterday_html .= $day_before_yesterday_data;
   }
   
-  $yesterday_html = "<h3>Yesterday</h3>";
+  $yesterday_html = "<h3>Billing Date : " . $yesterday_date ." (Yesterday)</h3>";
   $yesterday_data = get_yesterday_data_pl_groupwise($yesterday, $yesterday, $distributor_id);
   if ($yesterday_data == "No Result Found") {
     $header = get_header_of_pl_group();
@@ -404,7 +410,7 @@ function send_email_pl_group_emailer($distributor_name, $distributor_id = 60) {
     $yesterday_html .= $yesterday_data;
   }
 
-  $mtd_html = "<h3>MTD</h3>";
+  $mtd_html = "<h3>MTD Wise</h3>";
   $mtd_data .= get_mtd_data_pl_groupwise($this_date, $yesterday, $distributor_id);
   if ($mtd_data == "No Result Found") {
     $header = get_header_of_pl_group();
