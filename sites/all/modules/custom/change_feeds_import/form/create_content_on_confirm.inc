@@ -11,11 +11,11 @@ function change_feeds_import_create_confirm_content($id) {
   /*$query = db_select('custom_billing_data', 'cb');
   $query->addExpression('MAX(id)', 'max');
   $query->condition('distributor_id', $distributor_id);
-  $max_billing_id = $query->execute()->fetchField();
+  $max_billing_id_new = $query->execute()->fetchField();
   */
   
-  $max_billing_id = db_query("select id from custom_billing_data where distributor_id = $distributor_id order by id desc limit 1")->fetchField();
-  $max_billing_id = $max_billing_id ? $max_billing_id : 0;
+  $max_billing_id_new = db_query("select id from custom_billing_data where distributor_id = $distributor_id order by id desc limit 1")->fetchField();
+  $max_billing_id_new = $max_billing_id_new ? $max_billing_id_new : 0;
   
   $csv_file = $distributor_id . "_error.csv";
   // select data from stage table
@@ -118,13 +118,13 @@ function change_feeds_import_create_confirm_content($id) {
     $mail_query = db_select('custom_billing_data', 'cb');
     $mail_query->addExpression('count(id)', 'max');
     $mail_query->condition('distributor_id', $distributor_id);
-    $mail_query->condition('id', $max_billing_id,'>');
+    $mail_query->condition('id', $max_billing_id_new,'>');
     $mail_row_diff = $mail_query->execute()->fetchField();
     
     $mail_stage_row_count = count($billing_data_result);
     if ($mail_row_diff != $mail_stage_row_count) {
       $message = "Stgaing table row count: $mail_stage_row_count.";
-      $message .= "Prev max custome billing id: $max_billing_id.";
+      $message .= "Prev max custome billing id: $max_billing_id_new.";
       $message .= "After insert, count of inserted id: $mail_row_diff.";
       $message .= "error billing data table id: $id. Distributor ID: $distributor_id ";
       
@@ -140,13 +140,13 @@ function change_feeds_import_create_confirm_content($id) {
   $billing_data_result = NULL; // better memory optimisation (it contents large data)
   $operations = array();
   
-  $create_billing_data = change_feeds_import_create_billing_data($max_billing_id);
+  $create_billing_data = change_feeds_import_create_billing_data($max_billing_id_new);
   $create_billing_data_chunk = array_chunk($create_billing_data, 750);
   foreach ($create_billing_data_chunk as $data) {
     $operations[] = array('change_feeds_import_create_billing', array($data));
   }
 
-  $create_picking_data = change_feeds_import_create_picking_data($max_billing_id);
+  $create_picking_data = change_feeds_import_create_picking_data($max_billing_id_new);
   $create_picking_data_chunk = array_chunk($create_picking_data, 750);
   foreach ($create_picking_data_chunk as $data) {
     $operations[] = array('change_feeds_import_create_picking', array($data));
@@ -154,14 +154,14 @@ function change_feeds_import_create_confirm_content($id) {
   
   $roles = $user->roles;
    if (in_array("leanbox", $roles)) {
-      $create_pick_confirm_data = change_feeds_import_create_pick_confirm_data($max_billing_id);
+      $create_pick_confirm_data = change_feeds_import_create_pick_confirm_data($max_billing_id_new);
       $create_pick_confirm_data_chunk = array_chunk($create_pick_confirm_data, 750);
       foreach ($create_pick_confirm_data_chunk as $data) {
          $operations[] = array('change_feeds_import_create_pick_confirm', array($data));
       }
    }
 
-   $van_cld_report_data = change_feeds_import_create_van_cld_report_data($max_billing_id);
+   $van_cld_report_data = change_feeds_import_create_van_cld_report_data($max_billing_id_new);
   $van_cld_report_data_chunk = array_chunk($van_cld_report_data, 750);
   foreach ($van_cld_report_data_chunk as $data) {
     $operations[] = array('change_feeds_import_create_van_cld_report', array($data));
