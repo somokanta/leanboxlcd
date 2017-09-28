@@ -155,10 +155,14 @@ function dispatch_planning_cron_callback() {
       $response_data = drupal_http_request($order_api_url, $options);
 
       $response_data = $response_data->data;
+      if($response_data){
       $api_success = json_decode($response_data);
       $api_success = ($api_success->failCount == 0) ? 1 : 0;
       // create response log entry
       dispatch_planning_api_log_update($response_data, $sql_ins_id, $api_success);
+      }else{
+        dpm($response_data);
+      }
     }
   }
 }
