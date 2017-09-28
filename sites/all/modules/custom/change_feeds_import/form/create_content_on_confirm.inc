@@ -573,7 +573,7 @@ function change_feeds_import_create_pick_confirm($data, &$context) {
       if ($value->total_cld > 0) {
         $node_copy->field_pc_picking_type[$node->language][0]['value'] = 'Bulk';
         $node_copy->field_pc_pick_lines[$node->language][0]['value'] = $value->cld_lines;
-        $node_copy->field_pc_pick_clds[$node->language][0]['value'] = 0;
+        $node_copy->field_pc_pick_units[$node->language][0]['value'] = 0;
         node_save($node_copy);
       }
     }
