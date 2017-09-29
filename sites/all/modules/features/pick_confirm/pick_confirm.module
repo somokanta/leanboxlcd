@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the Pick Confirm feature.
+ */
+
+include_once 'pick_confirm.features.inc';
