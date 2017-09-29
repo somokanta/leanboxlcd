@@ -52,12 +52,14 @@ function fetch_combined_status() {
 
     $from = date('Y-m-d', strtotime('-7 days'));
     $to = date('Y-m-d');
+    $completed_to_date = date('Y-m-d', strtotime('-1 day'));
+    
     $db_and1 = db_and();
     $db_and1->where("(DATE_FORMAT(field_picking_loading_date_value, '%Y-%m-%d') >= :from AND DATE_FORMAT(field_picking_loading_date_value, '%Y-%m-%d') <= :to)", array(':from' => $from, ':to' => $to));
     $db_and1->condition('field_picking_status_value', '1');
 
     $db_and2 = db_and();
-    $db_and2->where("(DATE_FORMAT(field_picking_loading_date_value, '%Y-%m-%d') = :to)", array(':to' => $to));
+    $db_and2->where("(DATE_FORMAT(field_picking_loading_date_value, '%Y-%m-%d') = :to)", array(':to' => $completed_to_date));
     $db_and2->condition('field_picking_status_value', '2');
 
     $db_or = db_or();
