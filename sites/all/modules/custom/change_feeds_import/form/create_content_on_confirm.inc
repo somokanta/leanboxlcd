@@ -124,7 +124,7 @@ function change_feeds_import_create_confirm_content($id) {
     $mail_row_diff = $mail_query->execute()->fetchField();
     
     $mail_stage_row_count = count($billing_data_result);
-    //if ($mail_row_diff != $mail_stage_row_count) {
+    if ($mail_row_diff != $mail_stage_row_count) {
       $message = "Stgaing table row count: $mail_stage_row_count.";
       $message .= "Prev max custome billing id: $max_billing_id_new.";
       $message .= "After insert, count of inserted id: $mail_row_diff.";
@@ -144,7 +144,7 @@ function change_feeds_import_create_confirm_content($id) {
 
       drupal_set_message('Something Happen. Please Click On Confirm Again.', 'warning');
       drupal_goto("confirm/" . $id);
-    //}
+    }
   /**
    * Debugging END
    */    
