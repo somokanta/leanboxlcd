@@ -106,12 +106,14 @@ function change_feeds_import_create_confirm_content($id) {
     $party_packing_data_new[] = $val;
   }
   
+  $from_time = time();
   sleep(3); // this should halt for 3s. 
   $return_true = change_feeds_import_insert_data_in_custom_billing_table($billing_data_result);
   if($return_true){
     sleep(3); // this should halt for 3s. 
   }
-  
+  $to_time = time() + 60; // to be on safer side
+
   /**
    * Debugging
    */
@@ -122,7 +124,7 @@ function change_feeds_import_create_confirm_content($id) {
     $mail_row_diff = $mail_query->execute()->fetchField();
     
     $mail_stage_row_count = count($billing_data_result);
-    if ($mail_row_diff != $mail_stage_row_count) {
+    //if ($mail_row_diff != $mail_stage_row_count) {
       $message = "Stgaing table row count: $mail_stage_row_count.";
       $message .= "Prev max custome billing id: $max_billing_id_new.";
       $message .= "After insert, count of inserted id: $mail_row_diff.";
@@ -133,7 +135,16 @@ function change_feeds_import_create_confirm_content($id) {
       $mail_to = "abhishek.r@iksula.com";
       $from = "MIS.HELPDESK@leanbox.in";
       drupal_mail('adhoc_task', 'bill_date_missing', $mail_to, LANGUAGE_NONE, $params, $from);
-    }
+      
+        //for rollback
+      db_delete('custom_billing_data')
+        ->condition('distributor_id', $distributor_id, '=')
+        ->condition('created_date', array($from_time, $to_time), 'BETWEEN')
+        ->execute();
+
+      drupal_set_message('Something Happen. Please Click On Confirm Again.', 'warning');
+      drupal_goto("confirm/" . $id);
+    //}
   /**
    * Debugging END
    */    
