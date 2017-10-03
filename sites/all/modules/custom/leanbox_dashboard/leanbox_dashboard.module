@@ -134,6 +134,7 @@ function leanbox_dashboard_menu() {
     'file path' => drupal_get_path('module', 'leanbox_dashboard'),
     'file' => '/includes/leanbox_dashboard_chart.inc',
   );
+  
   $items['central-sales-delivery-table'] = array(
     'title' => 'Central sales Delivery Report',
     'access arguments' => array('Central sales delivery report'),
@@ -208,8 +209,11 @@ function party_packing_filter_callback() {
     case 'otif_trends' :
       $activity_type = 'otif_ajax';
       $output_data = leanbox_dashboard_otif_trends_chart_query_details($activity_type, $start_date, $end_date);
+      break;   
+   
+    case 'central_dispatch_daywise' :
+      $output_data = leanbox_dashboard_central_dispatch_daywise_details($start_date, $end_date);
       break;
-
     default:
       $output_data = leanbox_dashboard_chart_query_details($activity_type, $start_date, $end_date, $ajax_type);
   }
@@ -286,6 +290,10 @@ function leanbox_dashboard_block_info() {
   );
   $blocks['otif_trends'] = array(
     'info' => t('Otif Day Wise Trends'),
+    'cache' => DRUPAL_NO_CACHE,
+  );
+ $blocks['central_dispatch_daywise'] = array(
+    'info' => t('Central Dispatch Daywise'),
     'cache' => DRUPAL_NO_CACHE,
   );
   $blocks['bills_per_van_trends'] = array(
@@ -685,6 +693,27 @@ function leanbox_dashboard_block_view($delta = '') {
             drupal_get_path('module', 'leanbox_dashboard') . '/js/leanbox_dashboard_otif_trends_chart.js',
             array(
               'data' => array('leanbox_dashboard' => array('otif_trends' => $data,)),
+              'type' => 'setting'
+            ),
+          ),
+        ),
+      );
+      break;
+   
+    case 'central_dispatch_daywise':
+
+      $bill_date = date('d-m-Y');
+      $block['subject'] = "Central Dispatch Value Day Wise ($bill_date Dispatch)";
+      $data = leanbox_dashboard_central_dispatch_daywise_details();
+
+      $filter_form = drupal_render(drupal_get_form('leanbox_dashboard_central_dispatch_daywise_form'));
+      $block['content'] = array(
+        '#markup' => theme('leanbox_dashboard', array('data' => $filter_form)),
+        '#attached' => array(
+          'js' => array(
+            drupal_get_path('module', 'leanbox_dashboard') . '/js/leanbox_dashboard_central_dispatch_daywise_chart.js',
+            array(
+              'data' => array('leanbox_dashboard' => array('central_dispatch_daywise' => $data,)),
               'type' => 'setting'
             ),
           ),

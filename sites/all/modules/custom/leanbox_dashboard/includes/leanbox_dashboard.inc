@@ -506,6 +506,49 @@ function leanbox_dashboard_chart_filter_otif_trends_form($form, &$form_state) {
   return $form;
 }
 
+
+/**
+ * 
+ * @param array $form
+ * @param array $form_state
+ * @return array
+ */
+function leanbox_dashboard_central_dispatch_daywise_form($form, &$form_state) {
+  $form = array();
+
+  if (arg(1) == 'central_dispatch_daywise') {
+    $bill_date = date('Y-m-d');
+    $form['start_date'] = array(
+      '#type' => 'date_popup',
+      '#title' => t('Dispatch Date From'),
+      '#required' => TRUE,
+      '#date_format' => 'Y-m-d',
+      '#default_value' => $bill_date,
+    );
+    $form['end_date'] = array(
+      '#type' => 'date_popup',
+      '#title' => t('Dispatch Date To'),
+      '#required' => TRUE,
+      '#date_format' => 'Y-m-d',
+      '#default_value' => $bill_date,
+    );
+
+    $form['submit'] = array(
+      '#type' => 'submit',
+      '#value' => 'Submit',
+      '#prefix' => '<div id ="central-dispatch-daywise-submit">',
+      '#suffix' => '</div>',
+      '#attributes' => array('class' => array('central-dispatch-daywise-submit')),
+    );
+  }
+
+  $form['otif_trends'] = array(
+    '#markup' => '<a href = "/leanbox-chart-details/central_dispatch_daywise" target = "_blank"><div id="central_dispatch_daywise_div"></div></a>',
+  );
+
+  return $form;
+}
+
 /**
  * 
  * @param array $form
@@ -2266,6 +2309,102 @@ function leanbox_dashboard_otif_trends_chart_query_details($type, $start_date = 
   }
 
   return $output;
+}
+
+
+/**
+ * 
+ * @global type $user
+ * @param type $type
+ * @param type $start_date
+ * @param type $end_date
+ * @return type
+ */
+function leanbox_dashboard_central_dispatch_daywise_details($start_date = '', $end_date = '') {
+   if (!empty($start_date)) {
+      $start_date = $start_date;
+   }
+   else {
+      $start_date = date('Y-m-d');
+   }
+   if (!empty($end_date)) {
+      $end_date = $end_date;
+   }
+   else {
+      $end_date = date('Y-m-d');
+   }
+
+   // 
+   $header[] = 'RS Code';
+   $header[] = 'RS Name';
+
+   $query = db_select('node', 'n');
+   $query->join('field_data_field_dispatch_date', 'b', 'b.entity_id = n.nid');
+   $query->join('field_data_field_third_party_username', 'rs', 'rs.entity_id = n.uid');
+   $query->join('field_data_field_name', 'rn', 'rn.entity_id = n.uid');
+   $query->fields('rs', array('field_third_party_username_value'));
+   $query->fields('rn', array('field_name_value'));
+   $query->fields('n', array('uid'));
+   if (!empty($start_date) && !empty($end_date)) {
+      $query->condition('b.field_dispatch_date_value', array($start_date, $end_date), 'BETWEEN');
+   }
+   $query->condition('n.type', 'dispatch_data');
+   $rs_details = $query->distinct()->execute()->fetchAll(PDO::FETCH_ASSOC);
+
+
+   if (!empty($rs_details)) {
+      $query = db_select('node', 'n');
+      $query->join('field_data_field_dispatch_date', 'b', 'b.entity_id = n.nid');
+      $query->fields('b', array('field_dispatch_date_value'));
+      if (!empty($start_date) && !empty($end_date)) {
+         $query->condition('b.field_dispatch_date_value', array($start_date, $end_date), 'BETWEEN');
+      }
+      $query->groupBy('b.field_dispatch_date_value');
+      $query->condition('n.type', 'dispatch_data');
+      $res_days = $query->execute()->fetchAllKeyed(0, 0);
+
+      foreach ($res_days as $key => $val) {
+         // prepare header
+         $header[$key] = $key;
+      }
+
+
+      foreach ($rs_details as $key1 => $val1) {
+         $row = array();
+         $row[] = $val1['field_third_party_username_value'];
+         $row[] = $val1['field_name_value'];
+         foreach ($res as $key2 => $val2) {
+            $query = db_select('node', 'n');
+            $query->join('field_data_field_bill_count', 'v', 'v.entity_id = n.nid');
+            $query->join('field_data_field_dispatch_date', 'b', 'b.entity_id = n.nid');
+
+            if (!empty($key2) && !empty($key2)) {
+               $query->condition('b.field_dispatch_date_value', array($key2, $key2), 'BETWEEN');
+            }
+            $query->addExpression('SUM(v.field_bill_count_value)', 'bill_count_value');
+            $query->addExpression('COUNT(n.nid)', 'trip_count_daywise');
+
+            $query->condition('n.uid', $val1['uid']);
+            $query->condition('n.type', 'dispatch_data');
+            $res_data = $query->execute()->fetch(PDO::FETCH_ASSOC);
+            $data = $res_data['bill_count_value'] / $res_data['trip_count_daywise'];
+            $row[] = !empty($data) ? $data : 0;
+         }
+         $rows[] = $row;
+      }
+
+
+      $output = theme('table', array(
+        'header' => $header,
+        'rows' => $rows,
+        'attributes' => array('width' => '100%')
+      ));
+   }
+   else {
+      $output = 'No Data found';
+   }
+
+   return $output;
 }
 
 /**
