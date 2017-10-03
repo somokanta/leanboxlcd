@@ -11,6 +11,13 @@ function email_status_menu() {
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
+  
+  $items['email/ofd-report'] = array(
+    'title' => 'Send Email Of OFD Report',
+    'page callback' => 'send_email_ofd_report',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
 
   // setting form for Email sender and reciever 
   $items['admin/config/email-conf'] = array(
@@ -44,6 +51,39 @@ function email_status_email_form($form, $form_state) {
   );
 
   return system_settings_form($form);
+}
+
+/*
+ * Function to send auto mailer of OFD Report.
+ */
+function send_email_ofd_report() {
+  $distributor_id = 23466;
+  $distributor_name = change_feeds_import_get_distributor_name($distributor_id);
+   // Today's Date
+  $todays_date = date('d-M-Y');
+  
+  $view_name = "ofd_mailer";
+  $arg1 = date("mdY");
+  $view = views_get_view($view_name, '');
+  $view->set_arguments(array($arg1));
+  $rendered_html = $view->render();
+  
+  $ofd_html = "<h3>Dispatch Date : " . $todays_date ." (Today)</h3>";
+  $ofd_html .= $rendered_html;
+  
+  $view_name2 = "ofd_mailer2";
+  $view2 = views_get_view($view_name2, '');
+  $rendered_html2 = $view2->render();
+  
+  $ofd_html2 = "<h3>Pending Van Till : " . $todays_date ." (Today)</h3>";
+  $ofd_html2 .= $rendered_html2;
+  
+  $params['subject'] = "OFD - $distributor_name";
+  $params['body']  = $ofd_html. "<br>" .$ofd_html2;
+  $mail_to = variable_get('to_email');
+  $from = variable_get('from_email');
+  drupal_mail('email_status', 'ofd_report', $mail_to, LANGUAGE_NONE, $params, $from);
+  
 }
 
 function send_email_daily_data() {
@@ -1337,6 +1377,10 @@ function email_status_mail($key, &$message, $params) {
       $message['body'][] = $params['body'];
       break;
     case 'channel_status':
+      $message['subject'] = $params['subject'];
+      $message['body'][] = $params['body'];
+      break;
+    case 'ofd_report':
       $message['subject'] = $params['subject'];
       $message['body'][] = $params['body'];
       break;
