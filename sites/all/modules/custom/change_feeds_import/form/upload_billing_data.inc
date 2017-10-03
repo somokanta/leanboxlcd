@@ -476,8 +476,11 @@ function check_bill_number_exist() {
   global $user;
   $user_id = $user->uid;
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
+  $time = strtotime('-30 days');  // last 1 month
+  
   $query3 = db_select('custom_billing_data', 'cb');
   $query3->condition('cb.distributor_id', $distributor_id);
+  $query3->condition('cb.created_date', $time, '>');
   $query3->fields('cb', array('bill_number'))->distinct();
   $bill_result = $query3->execute()->fetchAllKeyed(0, 0);
   return $bill_result;
@@ -579,7 +582,7 @@ function get_csv_file_header() {
  */
 function get_node_titles($type) {
   
-  $time = strtotime('-7 days');  // last 7 day check
+  $time = strtotime('-30 days');  // last 1 month
   $type = array('sales_register_data');
   
   $query1 = db_select('node', 'n');
