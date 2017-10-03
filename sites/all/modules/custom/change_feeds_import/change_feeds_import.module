@@ -1,7 +1,7 @@
 <?php
 
 module_load_include('inc', 'change_feeds_import', 'form/upload_billing_data');
-
+define('Distributor_id',23466);
 /*
  *  hook_permission()
  */
@@ -2127,7 +2127,7 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
     'central_mobile_return_analysis', 'user_manual',  'hul_impact_delete', 'impact_delivery_cron_2', 
     'impact_delivery_cron_evening_2', 'impact_party_master', 'impact_party_master_morning',
     'hul_code_distributor_wise', 'van_stop_master_report', 'update_sales_register_party_code',
-    'central_outlet_master_report', 'central_party_pack_master_report','ofd_mailer');
+    'central_outlet_master_report', 'central_party_pack_master_report','ofd_mailer','ofd_mailer2');
 
    if (!in_array($view->name, $views_array)) {
     foreach ($query->table_queue as $key => $val) {
@@ -2144,15 +2144,15 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
   
   // Alter the distributor id of role leanbox in ofd_mailer view.
   $views_array = array('ofd_mailer','ofd_mailer2');
-  $dist_id = 23466;
+  //$dist_id = 23466;
   if (in_array($view->name, $views_array)) {
     foreach ($query->table_queue as $key => $val) {
       if (($val['table'] == 'node')) {
         if (empty($val['join'])) {
-          $query->add_where(0, $val['alias'] . '.uid', $dist_id, '=');
+          $query->add_where(0, $val['alias'] . '.uid', 'Distributor_id', '=');
         }
         else {
-          $query->table_queue[$key]['join']->extra[] = array('field' => 'uid', 'value' => $dist_id);
+          $query->table_queue[$key]['join']->extra[] = array('field' => 'uid', 'value' => 'Distributor_id');
         }
       }
     }
