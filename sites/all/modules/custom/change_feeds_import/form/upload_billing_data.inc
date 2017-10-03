@@ -478,7 +478,7 @@ function check_bill_number_exist() {
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
   $query3 = db_select('custom_billing_data', 'cb');
   $query3->condition('cb.distributor_id', $distributor_id);
-  $query3->fields('cb', array('bill_number'));
+  $query3->fields('cb', array('bill_number'))->distinct();
   $bill_result = $query3->execute()->fetchAllKeyed(0, 0);
   return $bill_result;
 }
@@ -578,6 +578,21 @@ function get_csv_file_header() {
  * @return type
  */
 function get_node_titles($type) {
+  
+  $time = strtotime('-7 days');  // last 7 day check
+  $type = array('sales_register_data');
+  
+  $query1 = db_select('node', 'n');
+  $query1->condition('n.type', $type, 'IN');
+  $query1->condition('n.created', $time, '>');
+  $query1->fields('n', array('type', 'title'));
+  $query1->addTag('node_uid');
+  $titles = $query1->execute()->fetchAll();
+  foreach ($titles as $k => $v) {
+    $result[$v->type][$v->title] = $v->title;
+  }
+  
+  $type = array('pricelist_group_master', 'product_division_master');
   $query1 = db_select('node', 'n');
   $query1->condition('n.type', $type, 'IN');
   $query1->fields('n', array('type', 'title'));
@@ -586,5 +601,7 @@ function get_node_titles($type) {
   foreach ($titles as $k => $v) {
     $result[$v->type][$v->title] = $v->title;
   }
+  
+
   return $result;
 }
