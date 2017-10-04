@@ -106,12 +106,14 @@ function change_feeds_import_create_confirm_content($id) {
     $party_packing_data_new[] = $val;
   }
   
+  $from_time = time();
   sleep(3); // this should halt for 3s. 
   $return_true = change_feeds_import_insert_data_in_custom_billing_table($billing_data_result);
   if($return_true){
     sleep(3); // this should halt for 3s. 
   }
-  
+  $to_time = time() + 60; // to be on safer side
+
   /**
    * Debugging
    */
@@ -133,6 +135,15 @@ function change_feeds_import_create_confirm_content($id) {
       $mail_to = "abhishek.r@iksula.com";
       $from = "MIS.HELPDESK@leanbox.in";
       drupal_mail('adhoc_task', 'bill_date_missing', $mail_to, LANGUAGE_NONE, $params, $from);
+      
+        //for rollback
+      db_delete('custom_billing_data')
+        ->condition('distributor_id', $distributor_id, '=')
+        ->condition('created_date', array($from_time, $to_time), 'BETWEEN')
+        ->execute();
+
+      drupal_set_message('Something Went Wrong. Please Click On Confirm Again.', 'warning');
+      drupal_goto("confirm/" . $id);
     }
   /**
    * Debugging END
@@ -338,20 +349,20 @@ function change_feeds_import_finished($success, $results, $operations) {
     drupal_set_message($message);
     
     if (!array_key_exists('billing', $results)) {
-      drupal_set_message('Billing Not Create. Please Contact HUL HELP DESK.', 'error');
+      drupal_set_message('Billing Not Create. Please Contact LeanBox HELP DESK.', 'error');
     }
     if (!array_key_exists('picking', $results)) {
-      drupal_set_message('Picking Not Create. Please Contact HUL HELP DESK.', 'error');
+      drupal_set_message('Picking Not Create. Please Contact LeanBox HELP DESK.', 'error');
     }
     if (!array_key_exists('van', $results)) {
-      drupal_set_message('Van Not Create. Please Contact HUL HELP DESK.', 'error');
+      drupal_set_message('Van Not Create. Please Contact LeanBox HELP DESK.', 'error');
     }
     if (!array_key_exists('party_packing', $results)) {
-      drupal_set_message('Party Packing Not Create. Please Contact HUL HELP DESK.', 'error');
+      drupal_set_message('Party Packing Not Create. Please Contact LeanBox HELP DESK.', 'error');
     }
   }
   else {
-    drupal_set_message('Error Occure while uploading billing data. Please Contact HUL HELP DESK', 'error');
+    drupal_set_message('Error Occure while uploading billing data. Please Contact LeanBox HELP DESK', 'error');
   }
 
   if (!$success || !array_key_exists('billing', $results) || !array_key_exists('picking', $results) || !array_key_exists('van', $results) || !array_key_exists('party_packing', $results)) {
