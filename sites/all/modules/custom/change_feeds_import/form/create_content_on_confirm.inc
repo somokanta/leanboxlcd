@@ -129,7 +129,7 @@ function change_feeds_import_create_confirm_content($id) {
     $message .= "Prev max custome billing id: $max_billing_id_new.";
     $message .= "After insert, count of inserted id: $mail_row_diff.";
     $message .= "error billing data table id: $id. Distributor ID: $distributor_id ";
-    $message .= "Actual First inserted id: $return_true ";
+    $message .= "Actual First inserted id: $return_true and insert time $from_time - $to_time .";
     $params['subject'] = "Batch Proccess Billing Upload count Mismatch";
     $params['body'] = $message;
     $mail_to = "abhishek.r@iksula.com";
