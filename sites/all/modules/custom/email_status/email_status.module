@@ -1,5 +1,7 @@
 <?php
 
+define('_DISTRIBUTOR_ID',23466);
+
 /**
  * Implments hook_menu
  *
@@ -8,6 +10,13 @@ function email_status_menu() {
   $items['email/daily-data'] = array(
     'title' => 'Send Email Of Daily Data',
     'page callback' => 'send_email_daily_data',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  
+  $items['email/ofd-report'] = array(
+    'title' => 'Send Email Of OFD Report',
+    'page callback' => 'send_email_ofd_report',
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
@@ -46,11 +55,44 @@ function email_status_email_form($form, $form_state) {
   return system_settings_form($form);
 }
 
+/*
+ * Function to send auto mailer of OFD Report.
+ */
+function send_email_ofd_report() {
+  $distributor_id = _DISTRIBUTOR_ID;
+  $distributor_name = change_feeds_import_get_distributor_name($distributor_id);
+   // Today's Date
+  $todays_date = date('d-M-Y');
+  
+  $view_name = "ofd_mailer";
+  $arg1 = date("mdY");
+  $view = views_get_view($view_name, '');
+  $view->set_arguments(array($arg1));
+  $rendered_html = $view->render();
+  
+  $ofd_html = "<h3>Dispatch Date : " . $todays_date ." (Today)</h3>";
+  $ofd_html .= $rendered_html;
+  
+  $view_name2 = "ofd_mailer2";
+  $view2 = views_get_view($view_name2, '');
+  $rendered_html2 = $view2->render();
+  
+  $ofd_html2 = "<h3>Pending Van Till : " . $todays_date ." (Today)</h3>";
+  $ofd_html2 .= $rendered_html2;
+  
+  $params['subject'] = "OFD - $distributor_name";
+  $params['body']  = $ofd_html. "<br>" .$ofd_html2;
+  $mail_to = variable_get('to_email');
+  $from = variable_get('from_email');
+  drupal_mail('email_status', 'ofd_report', $mail_to, LANGUAGE_NONE, $params, $from);
+  
+}
+
 function send_email_daily_data() {
   //global $user;
   //$user_id = $user->uid;
   //$distributor_id = change_feeds_import_get_distributor_id($user_id);
-  $distributor_id = 23466;
+  $distributor_id = _DISTRIBUTOR_ID;
   $distributor_name = change_feeds_import_get_distributor_name($distributor_id);
 
   $todays_date_date = date('Y-m-d 00:00:00');
@@ -324,7 +366,7 @@ function send_email_channel_emailer($distributor_name, $distributor_id = 60) {
     $yesterday_html .= $yesterday_data;
   }
 
-  $mtd_html = "<h3>MTD Wise</h3>";
+  $mtd_html = "<h3>MTD Wise: ". $yesterday_date ." (Yesterday)</h3>";
   $mtd_data .= get_mtd_data_channel($this_date, $yesterday, $distributor_id);
   if ($mtd_data == "No Result Found") {
     $header = get_header_of_chhanel();
@@ -334,9 +376,31 @@ function send_email_channel_emailer($distributor_name, $distributor_id = 60) {
   else {
     $mtd_html .= $mtd_data;
   }
+  
+  $mtd_one_day_before_html = "<h3>MTD Wise: ". $day_before_yesterday_date ." (One Day Before Yesterday)</h3>";
+  $mtd_one_day_before_data .= get_one_day_before_mtd_data_channel($this_date, $day_before_yesterday, $distributor_id);
+  if ($mtd_one_day_before_data == "No Result Found") {
+    $header = get_header_of_chhanel();
+    $mtd_one_day_before_rows[] = array("<td colspan='10' style='text-align: center;'> There is No Activity</td>");
+    $mtd_one_day_before_html .= theme('table', array('header' => $header, 'rows' => $mtd_one_day_before_rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
+  }
+  else {
+    $mtd_one_day_before_html .= $mtd_one_day_before_data;
+  }
+  
+  $mtd_two_day_before_html = "<h3>MTD Wise: ". $twoday_before_yesterday_date ." (Two Day Before Yesterday)</h3>";
+  $mtd_two_day_before_data .= get_two_day_before_mtd_data_channel($this_date, $twoday_before_yesterday, $distributor_id);
+  if ($mtd_two_day_before_data == "No Result Found") {
+    $header = get_header_of_chhanel();
+    $mtd_two_day_before_rows[] = array("<td colspan='10' style='text-align: center;'> There is No Activity</td>");
+    $mtd_two_day_before_html .= theme('table', array('header' => $header, 'rows' => $mtd_two_day_before_rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
+  }
+  else {
+    $mtd_two_day_before_html .= $mtd_two_day_before_data;
+  }
 
   $params['subject'] = "Channel Wise OTIF - $distributor_name";
-  $params['body'] = $yesterday_html . "<br>" . $day_before_yesterday_html . "<br>" . $twoday_before_yesterday_html . "<br>" . $mtd_html;
+  $params['body'] = $yesterday_html . "<br>" . $day_before_yesterday_html . "<br>" . $twoday_before_yesterday_html . "<br>" . $mtd_html . "<br>" . $mtd_one_day_before_html . "<br>" . $mtd_two_day_before_html;
   $mail_to = variable_get('to_email');
 //  $mail_to = "dhirendra.mishra@iksula.com";
 //  $mail_to = "abhishek.r@iksula.com";
@@ -410,7 +474,7 @@ function send_email_pl_group_emailer($distributor_name, $distributor_id = 60) {
     $yesterday_html .= $yesterday_data;
   }
 
-  $mtd_html = "<h3>MTD Wise</h3>";
+  $mtd_html = "<h3>MTD Wise: ". $yesterday_date ." (Yesterday)</h3>";
   $mtd_data .= get_mtd_data_pl_groupwise($this_date, $yesterday, $distributor_id);
   if ($mtd_data == "No Result Found") {
     $header = get_header_of_pl_group();
@@ -420,9 +484,31 @@ function send_email_pl_group_emailer($distributor_name, $distributor_id = 60) {
   else {
     $mtd_html .= $mtd_data;
   }
+  
+  $mtd_one_day_before_html = "<h3>MTD Wise: ". $day_before_yesterday_date ." (One Day Before Yesterday)</h3>";
+  $mtd_one_day_before_data .= get_one_day_before_mtd_data_pl_groupwise($this_date, $day_before_yesterday, $distributor_id);
+  if ($mtd_one_day_before_data == "No Result Found") {
+    $header = get_header_of_pl_group();
+    $mtd_one_day_before_rows[] = array("<td colspan='10' style='text-align: center;'> There is No Activity</td>");
+    $mtd_one_day_before_html .= theme('table', array('header' => $header, 'rows' => $mtd_one_day_before_rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
+  }
+  else {
+    $mtd_one_day_before_html .= $mtd_one_day_before_data;
+  }
+  
+  $mtd_two_day_before_html = "<h3>MTD Wise: ". $twoday_before_yesterday_date ." (Two Day Before Yesterday)</h3>";
+  $mtd_two_day_before_data .= get_two_day_before_mtd_data_pl_groupwise($this_date, $twoday_before_yesterday, $distributor_id);
+  if ($mtd_two_day_before_data == "No Result Found") {
+    $header = get_header_of_pl_group();
+    $mtd_two_day_before_rows[] = array("<td colspan='10' style='text-align: center;'> There is No Activity</td>");
+    $mtd_two_day_before_html .= theme('table', array('header' => $header, 'rows' => $mtd_two_day_before_rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
+  }
+  else {
+    $mtd_two_day_before_html .= $mtd_two_day_before_data;
+  }
 
   $params['subject'] = "PL Group Wise Bill Pendency-$distributor_name";
-  $params['body'] = $yesterday_html . "<br>" . $day_before_yesterday_html . "<br>" . $twoday_before_yesterday_html . "<br>" . $mtd_html;
+  $params['body'] = $yesterday_html . "<br>" . $day_before_yesterday_html . "<br>" . $twoday_before_yesterday_html . "<br>" . $mtd_html . "<br>" . $mtd_one_day_before_html . "<br>" . $mtd_two_day_before_html;
   $mail_to = variable_get('to_email');
 //  $mail_to = "dhirendra.mishra@iksula.com";
 //  $mail_to = "abhishek.r@iksula.com";
@@ -1074,6 +1160,14 @@ function get_mtd_data_channel($this_date, $yesterday, $distributor_id) {
   return get_common_data_for_chhanel_datewise($this_date, $yesterday, $distributor_id);
 }
 
+function get_one_day_before_mtd_data_channel($this_date, $day_before_yesterday, $distributor_id) {
+  return get_common_data_for_chhanel_datewise($this_date, $day_before_yesterday, $distributor_id);
+}
+
+function get_two_day_before_mtd_data_channel($this_date, $twoday_before_yesterday, $distributor_id) {
+  return get_common_data_for_chhanel_datewise($this_date, $twoday_before_yesterday, $distributor_id);
+}
+
 function get_twoday_before_yesterday_data_pl_groupwise($twoday_before_yesterday, $twoday_before_yesterday, $distributor_id) {
   return get_common_data_for_pl_group_datewise($twoday_before_yesterday, $twoday_before_yesterday, $distributor_id);
 }
@@ -1088,6 +1182,14 @@ function get_yesterday_data_pl_groupwise($yesterday, $yesterday, $distributor_id
 
 function get_mtd_data_pl_groupwise($this_date, $yesterday, $distributor_id) {
   return get_common_data_for_pl_group_datewise($this_date, $yesterday, $distributor_id);
+}
+
+function get_one_day_before_mtd_data_pl_groupwise($this_date, $day_before_yesterday, $distributor_id) {
+  return get_common_data_for_pl_group_datewise($this_date, $day_before_yesterday, $distributor_id);
+}
+
+function get_two_day_before_mtd_data_pl_groupwise($this_date, $twoday_before_yesterday, $distributor_id) {
+  return get_common_data_for_pl_group_datewise($this_date, $twoday_before_yesterday, $distributor_id);
 }
 
 function get_common_data_for_chhanel_datewise($start_date, $end_date, $distributor_id) {
@@ -1337,6 +1439,10 @@ function email_status_mail($key, &$message, $params) {
       $message['body'][] = $params['body'];
       break;
     case 'channel_status':
+      $message['subject'] = $params['subject'];
+      $message['body'][] = $params['body'];
+      break;
+    case 'ofd_report':
       $message['subject'] = $params['subject'];
       $message['body'][] = $params['body'];
       break;
