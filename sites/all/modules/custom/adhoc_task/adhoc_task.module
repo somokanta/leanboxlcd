@@ -340,8 +340,8 @@ function weekly_report_form_validate($form, &$form_state) {
   if ($num_days < 0) {
    form_set_error('form', 'Please select valid To and From date'); 
   }
-  if ($num_days > 10) {
-   form_set_error('form', 'Date range should not be greater than 10');  
+  if ($num_days > 31) {
+   form_set_error('form', 'Date range should not be greater than 31');  
   }
   drupal_goto('email/weekly-billing-report', array('query' => array('from_date' => $from_date, 'to_date' => $to_date)));
 }
@@ -427,8 +427,10 @@ function get_html_for_weekly_report($bill_flag, $flag_n_plus_two, $users, $times
   foreach ($users as $key => $val) {
     $uid = $val['uid'];
     $distributor_id = $val['field_distributor_value'];
-    $hul_username = $val['field_third_party_username_value'] . ' : ' . $val['field_name_value'];
-    $html .= get_weekly_report_data($timestamp, $distributor_id, $flag_n_plus_two, $hul_username, $bill_flag, $num_days);
+    $rs_code = $val['field_third_party_username_value'];
+    $rs_name = $val['field_name_value'];
+    //$hul_username = $val['field_third_party_username_value'] . ' : ' . $val['field_name_value'];
+    $html .= get_weekly_report_data($timestamp, $distributor_id, $flag_n_plus_two, $rs_code, $rs_name, $bill_flag, $num_days);
   }
   $html .= '</table>';
   return $html;
@@ -439,7 +441,8 @@ function get_html_for_weekly_report($bill_flag, $flag_n_plus_two, $users, $times
  */
 function get_weekly_data_header($timestamp,$num_days) {
   $html .= '<tr>';
-  $html .= '<th> Customer</th>';
+  $html .= '<th> RS Code</th>';
+  $html .= '<th> RS Name</th>';
   for ($i = 0; $i <= $num_days; $i++) {
     $html .= '<th>' . date('Y-m-d', $timestamp) . '</th>';
     $timestamp += 24 * 3600;
@@ -451,7 +454,7 @@ function get_weekly_data_header($timestamp,$num_days) {
 /**
  * Function to get weekly report data for today's date to 10 days before
  */
-function get_weekly_report_data($timestamp, $distributor_id, $flag_n_plus_two, $hul_username, $bill_flag, $num_days) {
+function get_weekly_report_data($timestamp, $distributor_id, $flag_n_plus_two, $rs_code, $rs_name, $bill_flag, $num_days) {
   $html .= '<tr>';
   for ($i = 0; $i <= $num_days; $i++) {
     $query = db_select('node', 'n');
@@ -469,14 +472,17 @@ function get_weekly_report_data($timestamp, $distributor_id, $flag_n_plus_two, $
     $query->addExpression('COUNT(sr.field_sr_bill_date_value)', 'count');
     $query->addExpression('SUM(bv.field_bill_value_value)', 'sum');
     $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
-    $result_arr[$hul_username][] = $res[0];
+    
+    $result_arr[$rs_code.'|'.$rs_name][] = $res[0];
     
     $timestamp += 24 * 3600;
         
   }
 
   foreach ($result_arr as $k => $val) {
-    $html .= '<td>' . $k . '</td>';
+    $ex = explode("|", $k);
+    $html .= '<td>' . $ex[0] . '</td>';
+    $html .= '<td>' . $ex[1] . '</td>';
     foreach ($val as $value) {
       if ($bill_flag == 'count_bill' || $bill_flag == 'count_bill_n+2') {
         $html .= '<td>' . $value['count'] . '</td>';

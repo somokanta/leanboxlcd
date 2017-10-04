@@ -125,94 +125,96 @@ function change_feeds_import_create_confirm_content($id) {
     
     $mail_stage_row_count = count($billing_data_result);
     if ($mail_row_diff != $mail_stage_row_count) {
-      $message = "Stgaing table row count: $mail_stage_row_count.";
-      $message .= "Prev max custome billing id: $max_billing_id_new.";
-      $message .= "After insert, count of inserted id: $mail_row_diff.";
-      $message .= "error billing data table id: $id. Distributor ID: $distributor_id ";
-      $message .= "Actual First inserted id: $return_true ";
-      $params['subject'] = "Batch Proccess Billing Upload count Mismatch";
-      $params['body'] = $message;
-      $mail_to = "abhishek.r@iksula.com";
-      $from = "MIS.HELPDESK@leanbox.in";
-      drupal_mail('adhoc_task', 'bill_date_missing', $mail_to, LANGUAGE_NONE, $params, $from);
-      
-        //for rollback
-      db_delete('custom_billing_data')
-        ->condition('distributor_id', $distributor_id, '=')
-        ->condition('created_date', array($from_time, $to_time), 'BETWEEN')
-        ->execute();
+    $message = "Stgaing table row count: $mail_stage_row_count.";
+    $message .= "Prev max custome billing id: $max_billing_id_new.";
+    $message .= "After insert, count of inserted id: $mail_row_diff.";
+    $message .= "error billing data table id: $id. Distributor ID: $distributor_id ";
+    $message .= "Actual First inserted id: $return_true and insert time $from_time - $to_time .";
+    $params['subject'] = "Batch Proccess Billing Upload count Mismatch";
+    $params['body'] = $message;
+    $mail_to = "abhishek.r@iksula.com";
+    $from = "MIS.HELPDESK@leanbox.in";
+    drupal_mail('adhoc_task', 'bill_date_missing', $mail_to, LANGUAGE_NONE, $params, $from);
 
-      drupal_set_message('Something Went Wrong. Please Click On Confirm Again.', 'warning');
-      drupal_goto("confirm/" . $id);
+    //for rollback
+    db_delete('custom_billing_data')
+      ->condition('distributor_id', $distributor_id, '=')
+      ->condition('created_date', array($from_time, $to_time), 'BETWEEN')
+      ->execute();
+
+    drupal_set_message('Something Went Wrong. Please Click On Confirm Again.', 'warning');
+    drupal_goto("confirm/" . $id);
+  }
+  else {
+    /**
+     * Debugging END
+     */
+    $billing_data_result = NULL; // better memory optimisation (it contents large data)
+    $operations = array();
+
+    $create_billing_data = change_feeds_import_create_billing_data($max_billing_id_new);
+    $create_billing_data_chunk = array_chunk($create_billing_data, 750);
+    foreach ($create_billing_data_chunk as $data) {
+      $operations[] = array('change_feeds_import_create_billing', array($data));
     }
-  /**
-   * Debugging END
-   */    
-  $billing_data_result = NULL; // better memory optimisation (it contents large data)
-  $operations = array();
-  
-  $create_billing_data = change_feeds_import_create_billing_data($max_billing_id_new);
-  $create_billing_data_chunk = array_chunk($create_billing_data, 750);
-  foreach ($create_billing_data_chunk as $data) {
-    $operations[] = array('change_feeds_import_create_billing', array($data));
-  }
 
-  $create_picking_data = change_feeds_import_create_picking_data($max_billing_id_new);
-  $create_picking_data_chunk = array_chunk($create_picking_data, 750);
-  foreach ($create_picking_data_chunk as $data) {
-    $operations[] = array('change_feeds_import_create_picking', array($data));
-  }
-  
-  $roles = $user->roles;
-   if (in_array("leanbox", $roles)) {
+    $create_picking_data = change_feeds_import_create_picking_data($max_billing_id_new);
+    $create_picking_data_chunk = array_chunk($create_picking_data, 750);
+    foreach ($create_picking_data_chunk as $data) {
+      $operations[] = array('change_feeds_import_create_picking', array($data));
+    }
+
+    $roles = $user->roles;
+    if (in_array("leanbox", $roles)) {
       $create_pick_confirm_data = change_feeds_import_create_pick_confirm_data($max_billing_id_new);
       $create_pick_confirm_data_chunk = array_chunk($create_pick_confirm_data, 750);
       foreach ($create_pick_confirm_data_chunk as $data) {
-         $operations[] = array('change_feeds_import_create_pick_confirm', array($data));
+        $operations[] = array('change_feeds_import_create_pick_confirm', array($data));
       }
-   }
+    }
 
-   $van_cld_report_data = change_feeds_import_create_van_cld_report_data($max_billing_id_new);
-  $van_cld_report_data_chunk = array_chunk($van_cld_report_data, 750);
-  foreach ($van_cld_report_data_chunk as $data) {
-    $operations[] = array('change_feeds_import_create_van_cld_report', array($data));
-  }
-  
-  $party_packing_data_new_chunk = array_chunk($party_packing_data_new, 750);
-  foreach ($party_packing_data_new_chunk as $data) {
-    $operations[] = array('change_feeds_import_create_party_packing', array($data));
-  }
- 
-  $batch = array(
-    'operations' => $operations,
-    'finished' => 'change_feeds_import_finished',
-    'title' => t('Creating Billing Data'),
-    'init_message' => t('Uploading...'),
-    'progress_message' => t('Processed @current out of @total.'),
-    'error_message' => t('Billing Data Batch has encountered an error.'),
-    'file' => drupal_get_path('module', 'change_feeds_import') . '/form/create_content_on_confirm.inc'
-  );
-  batch_set($batch);
+    $van_cld_report_data = change_feeds_import_create_van_cld_report_data($max_billing_id_new);
+    $van_cld_report_data_chunk = array_chunk($van_cld_report_data, 750);
+    foreach ($van_cld_report_data_chunk as $data) {
+      $operations[] = array('change_feeds_import_create_van_cld_report', array($data));
+    }
 
-  //delete data from stage_billing_data.
-  db_delete('stage_billing_data')
+    $party_packing_data_new_chunk = array_chunk($party_packing_data_new, 750);
+    foreach ($party_packing_data_new_chunk as $data) {
+      $operations[] = array('change_feeds_import_create_party_packing', array($data));
+    }
+
+    $batch = array(
+      'operations' => $operations,
+      'finished' => 'change_feeds_import_finished',
+      'title' => t('Creating Billing Data'),
+      'init_message' => t('Uploading...'),
+      'progress_message' => t('Processed @current out of @total.'),
+      'error_message' => t('Billing Data Batch has encountered an error.'),
+      'file' => drupal_get_path('module', 'change_feeds_import') . '/form/create_content_on_confirm.inc'
+    );
+    batch_set($batch);
+
+    //delete data from stage_billing_data.
+    db_delete('stage_billing_data')
       ->condition('error_id', $id, '=')
       ->execute();
 
-  require_once drupal_get_path('module', 'change_feeds_import') . '/form/validate_content.inc';
-  $status = "Completed";
-  // change status in error billing data
-  change_feeds_import_update_data_in_error_billing_table($status, $id);
+    require_once drupal_get_path('module', 'change_feeds_import') . '/form/validate_content.inc';
+    $status = "Completed";
+    // change status in error billing data
+    change_feeds_import_update_data_in_error_billing_table($status, $id);
 
-  $path = "public://billing_data/$csv_file";
-  if (file_exists($path)) {
-    drupal_unlink($path); //delete the generated error file
+    $path = "public://billing_data/$csv_file";
+    if (file_exists($path)) {
+      drupal_unlink($path); //delete the generated error file
+    }
+
+    //$batch =& batch_get();
+    //$batch['progressive'] = FALSE;
+    batch_process('/billing_data/import');
+    // background_batch_process_batch('/billing_data/import');
   }
-  
-  //$batch =& batch_get();
-  //$batch['progressive'] = FALSE;
-  batch_process('/billing_data/import');
-  // background_batch_process_batch('/billing_data/import');
 }
 
 function change_feeds_import_create_billing_data($max_billing_id) {

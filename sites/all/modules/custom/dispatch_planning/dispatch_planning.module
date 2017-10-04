@@ -727,7 +727,9 @@ function dispatch_planning_form_save_validate($form, &$form_state) {
     $node = node_load($conf_nid);
     $origin_lat = $node->field_distributor_latitude[LANGUAGE_NONE][0]['value'];
     $origin_long = $node->field_distributor_longitude[LANGUAGE_NONE][0]['value'];
-    $enable_routing = $node->field_enable_routing[LANGUAGE_NONE][0]['value'];
+    //$enable_routing = $node->field_enable_routing[LANGUAGE_NONE][0]['value'];
+    // Earlier it was on node field. now we are creating for centrally managed
+    $enable_routing = check_dynamic_routing_configuration($distributor_id);
   }
 
   $bill_sequence_array = array();
@@ -1929,4 +1931,18 @@ function ptl_configuration_data_insert($api_data) {
       }
     }
   }
+}
+
+/**
+ * 
+ * @param type $distributor_id
+ * @return type bool false when configuration is not set
+ */
+function check_dynamic_routing_configuration($distributor_id) {
+  $query = db_select('field_data_field_dynamic_routing_config', 'tp');
+  $query->fields('tp', array('entity_id'));
+  $query->condition('tp.field_dynamic_routing_config_value', 1);
+  $query->condition('tp.entity_id', $distributor_id);
+  $res = $query->execute()->fetchField();
+  return $res;
 }
