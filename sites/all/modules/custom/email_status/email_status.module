@@ -1,5 +1,5 @@
 <?php
-define('Distributor_id',23466);
+define('_DISTRIBUTOR_ID',23466);
 /**
  * Implments hook_menu
  *
@@ -57,7 +57,7 @@ function email_status_email_form($form, $form_state) {
  * Function to send auto mailer of OFD Report.
  */
 function send_email_ofd_report() {
-  $distributor_id = 'Distributor_id';
+  $distributor_id = _DISTRIBUTOR_ID;
   $distributor_name = change_feeds_import_get_distributor_name($distributor_id);
    // Today's Date
   $todays_date = date('d-M-Y');
@@ -90,7 +90,7 @@ function send_email_daily_data() {
   //global $user;
   //$user_id = $user->uid;
   //$distributor_id = change_feeds_import_get_distributor_id($user_id);
-  $distributor_id = 'Distributor_id';
+  $distributor_id = _DISTRIBUTOR_ID;
   $distributor_name = change_feeds_import_get_distributor_name($distributor_id);
 
   $todays_date_date = date('Y-m-d 00:00:00');

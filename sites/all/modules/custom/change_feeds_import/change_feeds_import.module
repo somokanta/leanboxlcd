@@ -1,7 +1,6 @@
 <?php
 
 module_load_include('inc', 'change_feeds_import', 'form/upload_billing_data');
-define('Distributor_id',23466);
 /*
  *  hook_permission()
  */
@@ -2149,10 +2148,10 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
     foreach ($query->table_queue as $key => $val) {
       if (($val['table'] == 'node')) {
         if (empty($val['join'])) {
-          $query->add_where(0, $val['alias'] . '.uid', 'Distributor_id', '=');
+          $query->add_where(0, $val['alias'] . '.uid', _DISTRIBUTOR_ID, '=');
         }
         else {
-          $query->table_queue[$key]['join']->extra[] = array('field' => 'uid', 'value' => 'Distributor_id');
+          $query->table_queue[$key]['join']->extra[] = array('field' => 'uid', 'value' => _DISTRIBUTOR_ID);
         }
       }
     }
