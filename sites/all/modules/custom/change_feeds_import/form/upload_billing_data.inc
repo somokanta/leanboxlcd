@@ -211,6 +211,7 @@ function change_feeds_import_batch_fix_process($max, $data, $distributor_id, $fi
     $context['results']['party_code_result'] = check_party_code_exist_or_not(); // check party code present or not.
     $context['results']['sku_code_result'] = check_sku7_code_exist_or_not(); // check sku7 code is present or not.
     $context['results']['bill_result'] = check_bill_number_exist(); // check bill number is not exist.
+    dpm('check bill no');
     $context['results']['master_result'] = get_node_titles(array('pricelist_group_master', 'product_division_master', 'sales_register_data'));
   }
 
