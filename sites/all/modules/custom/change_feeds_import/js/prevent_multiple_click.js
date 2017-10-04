@@ -1,12 +1,12 @@
 (function ($) {
     Drupal.behaviors.Reclicks = {
         attach: function (context, settings) {
-            jQuery(".multiple_click").click(function () {
-                cosole.log("called0");
+            jQuery(".multiple_click a").click(function () {
+                alert("called0");
                 jQuery(this).click(function (e) {
-                    cosole.log("called1");
+                    alert("called1");
                     e.preventDefault();
-                    cosole.log("called2");
+                    alert("called2");
                 });
                 return true;
             });
