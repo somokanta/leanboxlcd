@@ -74,7 +74,7 @@ function send_email_ofd_report() {
   
   $view_name2 = "ofd_mailer2";
   $view2 = views_get_view($view_name2, '');
-  $view->set_display('page');
+  $view2->set_display('page');
   $rendered_html2 = $view2->render();
   
   $ofd_html2 = "<h3>Pending Van Till : " . $todays_date ." (Today)</h3>";
