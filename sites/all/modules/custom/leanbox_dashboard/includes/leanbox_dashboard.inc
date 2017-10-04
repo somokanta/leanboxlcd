@@ -2359,7 +2359,7 @@ function leanbox_dashboard_central_dispatch_daywise_details($start_date = '', $e
 
       foreach ($res_days as $key => $val) {
         // add header
-        $header[$key] = $res_days;
+        $header[$key] = date('Y-m-d', strtotime($val));
       }
 
       foreach ($rs_details as $key1 => $val1) {
