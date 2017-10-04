@@ -2381,7 +2381,7 @@ function leanbox_dashboard_central_dispatch_daywise_details($start_date = '', $e
             $query->condition('n.type', 'dispatch_data');
             $res_data = $query->execute()->fetch(PDO::FETCH_ASSOC);
             $data = $res_data['bill_count_value'] / $res_data['trip_count_daywise'];
-            $row[] = !empty($data) ? $data : 0;
+            $row[] = !empty($data) ? round($data) : 0;
          }
          $rows[] = $row;
       }
