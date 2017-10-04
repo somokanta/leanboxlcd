@@ -486,7 +486,7 @@ function get_promised_delivery_date($date) {
   $query->condition('n.uid', $distributor_id);
   $query->condition('n.type', 'holiday_master');
   $query->leftjoin('field_data_field_holiday', 'hday', 'hday.entity_id = n.nid');
-  $query->addExpression("DATE_FORMAT(FROM_UNIXTIME(hday.field_holiday_value), '%Y-%m-%d')", 'hdate');
+  $query->addExpression("DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(hday.field_holiday_value),'+00:00','+05:30'), '%Y-%m-%d')", 'hdate');
   $holiday_result = $query->execute()->fetchCol();
 
   $billing_date_stamp = $date;
