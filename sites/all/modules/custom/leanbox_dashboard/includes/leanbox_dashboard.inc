@@ -2321,20 +2321,14 @@ function leanbox_dashboard_otif_trends_chart_query_details($type, $start_date = 
  * @return type
  */
 function leanbox_dashboard_central_dispatch_daywise_details($start_date = '', $end_date = '') {
-   if (!empty($start_date)) {
-      $start_date = $start_date;
-   }
-   else {
+   if (empty($start_date)) {
       $start_date = date('Y-m-d');
    }
-   if (!empty($end_date)) {
-      $end_date = $end_date;
-   }
-   else {
+   if (empty($end_date)) {
       $end_date = date('Y-m-d');
    }
 
-   // 
+   // prepare header
    $header[] = 'RS Code';
    $header[] = 'RS Name';
 
@@ -2364,22 +2358,21 @@ function leanbox_dashboard_central_dispatch_daywise_details($start_date = '', $e
       $res_days = $query->execute()->fetchAllKeyed(0, 0);
 
       foreach ($res_days as $key => $val) {
-         // prepare header
-         $header[$key] = $key;
+        // add header
+        $header[$key] = $res_days;
       }
-
 
       foreach ($rs_details as $key1 => $val1) {
          $row = array();
          $row[] = $val1['field_third_party_username_value'];
          $row[] = $val1['field_name_value'];
-         foreach ($res as $key2 => $val2) {
+         foreach ($res_days as $key2 => $val2) {
             $query = db_select('node', 'n');
             $query->join('field_data_field_bill_count', 'v', 'v.entity_id = n.nid');
             $query->join('field_data_field_dispatch_date', 'b', 'b.entity_id = n.nid');
 
-            if (!empty($key2) && !empty($key2)) {
-               $query->condition('b.field_dispatch_date_value', array($key2, $key2), 'BETWEEN');
+            if (!empty($key2)) {
+               $query->condition('b.field_dispatch_date_value', $key2, '=');
             }
             $query->addExpression('SUM(v.field_bill_count_value)', 'bill_count_value');
             $query->addExpression('COUNT(n.nid)', 'trip_count_daywise');
@@ -2392,7 +2385,6 @@ function leanbox_dashboard_central_dispatch_daywise_details($start_date = '', $e
          }
          $rows[] = $row;
       }
-
 
       $output = theme('table', array(
         'header' => $header,
