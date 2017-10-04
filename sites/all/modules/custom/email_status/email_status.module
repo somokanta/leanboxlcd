@@ -62,7 +62,7 @@ function send_email_ofd_report() {
    // Today's Date
   $todays_date = date('d-M-Y');
   
-  $view_name = "ofd_mailer";
+  $view_name = "ofd_mail_report";
   $arg1 = date("mdY");
   $view = views_get_view($view_name, '');
   $view->set_arguments(array($arg1));
@@ -71,7 +71,7 @@ function send_email_ofd_report() {
   $ofd_html = "<h3>Dispatch Date : " . $todays_date ." (Today)</h3>";
   $ofd_html .= $rendered_html;
   
-  $view_name2 = "ofd_mailer2";
+  $view_name2 = "ofd_mail2_report";
   $view2 = views_get_view($view_name2, '');
   $rendered_html2 = $view2->render();
   
