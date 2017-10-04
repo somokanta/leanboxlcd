@@ -19,10 +19,11 @@ function change_feeds_import_confirm_content($id) {
     $rows['Sum_of_TOTAL_SALES_QTY'] = $result['Sum_of_TOTAL_SALES_QTY'];
     $discard_link = l(t('Discard'), 'discard/' . $id);
   if ($status == "Confirm") {
+    drupal_add_js(drupal_get_path('module', 'change_feeds_import') . '/js/prevent_multiple_click.js', 'file');
     $error_link = "";
     $action_link = l(t('Confirm'), 'confirm/create_content/' . $id);
     $rows['error_file'] = $error_link;
-    $rows['action'] = $action_link.'/'.$discard_link;
+    $rows['action'] = "<div class='multiple_click'>".$action_link.'/'.$discard_link."</div>";
   }elseif($status == "Error"){
     drupal_set_message('Validate Functionality is removed temporarily. Please discard and upload full data!!.','error');
     $error_link = l(t('Error file'), $result['error_file']);
