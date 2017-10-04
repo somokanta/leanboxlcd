@@ -631,7 +631,11 @@ function dispatch_planning_form_save_validate($form, &$form_state) {
     $s++;
     
     if (!empty($val->lat) && !empty($val->lng)) {
-      $params['services'][] = array('id' => $val->nid, 'address' => array('location_id' => $val->nid, 'lon' => (double)$val->lng, 'lat' => (double)$val->lat));
+      //$params['services'][] = array('id' => $val->nid, 'address' => array('location_id' => $val->nid, 'lon' => (double)$val->lng, 'lat' => (double)$val->lat));
+      //NEW API ROUTIFIC
+      $Locations['visits'][$val->nid]['location']['name'] = $val->nid;
+      $Locations['visits'][$val->nid]['location']['lat'] = $val->lat;
+      $Locations['visits'][$val->nid]['location']['lng'] = $val->lng;
     }
 
     if (is_null($val->sequence)) {
@@ -664,14 +668,24 @@ function dispatch_planning_form_save_validate($form, &$form_state) {
     $node = node_load($conf_nid);
     $origin_lat = $node->field_distributor_latitude[LANGUAGE_NONE][0]['value'];
     $origin_long = $node->field_distributor_longitude[LANGUAGE_NONE][0]['value'];
-    $enable_routing = $node->field_enable_routing[LANGUAGE_NONE][0]['value'];
+    //$enable_routing = $node->field_enable_routing[LANGUAGE_NONE][0]['value'];
+    // Earlier it was on node field. now we are creating for centrally managed
+    $enable_routing = check_dynamic_routing_configuration($distributor_id);
   }
 
   $bill_sequence_array = array();
   if(($no_area || $no_sequence || $area_hook_group_name || count($area_hook_group_name) > 1) && !$skip_sequencing && $origin_lat && $origin_long && $enable_routing){
         
-    $params['vehicles'][] = array('vehicle_id' => 'origin', 'start_address' => array('location_id' => 'origin', 'lon' => (double)$origin_long, 'lat' => (double)$origin_lat), 'return_to_depot' => true);
-    $post_result = graphhopper_postvrp_api($params);
+    //$params['vehicles'][] = array('vehicle_id' => 'origin', 'start_address' => array('location_id' => 'origin', 'lon' => (double)$origin_long, 'lat' => (double)$origin_lat), 'return_to_depot' => true);
+    //NEW API ROUTIFIC
+    $Locations['fleet']['origin']['start_location'] = array(
+      "id" => 'origin',
+      "name" => 'origin',
+      "lat" => $origin_lat, //'19.1817531000', //
+      "lng" => $origin_long //'72.9972678000',// 
+    );
+
+    /*$post_result = graphhopper_postvrp_api($params);
     if ($post_result) {
       $job_id = $post_result->getJobId();
       if ($job_id) {
@@ -698,16 +712,42 @@ function dispatch_planning_form_save_validate($form, &$form_state) {
           sleep(0.5); // this should halt for 500 ms for every loop
         }
       }
+    }*/
+    //NEW API ROUTIFIC
+    $Locations['options']['shortest_distance'] = true;
+    //dpm($Locations);
+    $Locations_data = json_encode($Locations);
+    $authorization = 'bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1ODgzOWY4ZjYyZmQyMzkzMGE4NjQwYjEiLCJpYXQiOjE1MDQ2Nzg4NTl9.AzJLVp6HDk6lbXCWxI1T8Y7US6R0panNjkY5B-pkdqg';
+    $request_headers = array('Content-Type' => 'application/json', 'Authorization' => $authorization);
+    $roitufic_api_url = variable_get('api_routific_url', 'https://api.routific.com/v1/vrp');
+    $routific_options = array('headers' => $request_headers, 'method' => 'POST', 'data' => $Locations_data);
+
+    $response_data = drupal_http_request($roitufic_api_url, $routific_options);
+
+    $response_data = json_decode($response_data->data);
+
+    if ($response_data->num_unserved) {
+      dpm($response_data->unserved,'unserved');
     }
-    
+    if ($response_data->status === 'success') {
+      $response_array = $response_data->solution->origin;
+      $i = 1;
+      foreach ($response_array as $k => $v) {
+        if ($v->location_name !== 'origin') {
+          $bill_sequence_array[$i] = $v->location_name;
+          $i++;
+        }
+      }
+    }
+
     if (!empty($bill_sequence_array)) {
       $form_state['dispatch_planning']['bill_sequence_array'] = $bill_sequence_array;
     }
     else {
-      form_set_error('list_form_items', 'An error occured while generating sequence');
+     // form_set_error('list_form_items', 'An error occured while generating sequence');
+      form_set_error('list_form_items', 'API Error'.$response_data->error);
     }
   }
-  
   $form_state['dispatch_planning']['manual_drs_sequence'] = $manual_drs_sequence;
   ##############################################################################
 }
@@ -1412,4 +1452,18 @@ function dispatch_planning_form_views_exposed_form_alter(&$form, &$form_state) {
 
     $form['field_trip_id_reference_nid']['#access'] = FALSE;
   }
+}
+
+/**
+ * 
+ * @param type $distributor_id
+ * @return type bool false when configuration is not set
+ */
+function check_dynamic_routing_configuration($distributor_id) {
+  $query = db_select('field_data_field_dynamic_routing_config', 'tp');
+  $query->fields('tp', array('entity_id'));
+  $query->condition('tp.field_dynamic_routing_config_value', 1);
+  $query->condition('tp.entity_id', $distributor_id);
+  $res = $query->execute()->fetchField();
+  return $res;
 }
