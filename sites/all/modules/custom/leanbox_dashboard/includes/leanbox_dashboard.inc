@@ -2414,8 +2414,9 @@ function leanbox_dashboard_central_dispatch_daywise_details($start_date = '', $e
       $data = array();
       $data['start_date'] = $start_date;
       $data['end_date'] = $end_date;
-
-      $output .= l(t('XLS'), 'central_bills_per_van/export', array('query' => array($data)));
+      if (isset($_GET['start_date'])) {
+        $output .= l(t('XLS'), 'central_bills_per_van/export', array('query' => array($data)));
+      }
    }
    else {
       $output = 'No Data found';
