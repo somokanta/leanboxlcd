@@ -29,6 +29,12 @@ function leanbox_dashboard_menu() {
     'page callback' => 'leanbox_dashboard_sales_delivery_table_export',
     'access arguments' => array('Distributor Upload File'),
   );
+  $items['central_bills_per_van/export'] = array(
+    'title' => 'Export',
+    'description' => 'Export',
+    'page callback' => 'leanbox_dashboard_central_dispatch_table_export',
+    'access arguments' => array('Distributor Upload File'),
+  );
 
   $items['dashboard'] = array(
     'page callback' => 'leanbox_dashboard_listing_page',
@@ -2326,6 +2332,17 @@ function central_sales_delivery_report_form_submit($form, &$form_state) {
 function central_sales_delivery_table_export () {
   $file = "centralSalesDelivery.xls";
   $table = central_sales_delivery_table(TRUE);
+  header("Content-type: application/vnd.ms-excel");
+  header("Content-Disposition: attachment; filename=$file");
+  echo $table['output'];
+}
+
+/**
+ * menu callback function for central_dispatch_table_export
+ */
+function leanbox_dashboard_central_dispatch_table_export() {
+  $file = "SalesDelivery.xls";
+  $table = leanbox_dashboard_central_dispatch_daywise_details(TRUE);
   header("Content-type: application/vnd.ms-excel");
   header("Content-Disposition: attachment; filename=$file");
   echo $table['output'];
