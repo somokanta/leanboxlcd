@@ -2341,7 +2341,7 @@ function central_sales_delivery_table_export () {
  * menu callback function for central_dispatch_table_export
  */
 function leanbox_dashboard_central_dispatch_table_export() {
-  $file = "SalesDelivery.xls";
+  $file = "Billspervan.xls";
   $table = leanbox_dashboard_central_dispatch_daywise_details();
   header("Content-type: application/vnd.ms-excel");
   header("Content-Disposition: attachment; filename=$file");
