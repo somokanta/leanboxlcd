@@ -2332,7 +2332,6 @@ function leanbox_dashboard_central_dispatch_daywise_details($start_date = '', $e
    else {
       $start_date = date("Y-m-d");
    }
-
    // end date
    if (isset($_GET['end_date']) && empty($end_date)) {
       $end_date = $_GET['end_date'];
@@ -2343,17 +2342,6 @@ function leanbox_dashboard_central_dispatch_daywise_details($start_date = '', $e
    else {
       $end_date = date("Y-m-d");
    }
-
-   // end date
-  if (isset($_GET['end_date']) && !empty($_GET['end_date'])) {
-    $end_date = strtotime($_GET['end_date']) + 86399;
-  }
-  else if (isset($_GET['end_date']) && empty($_GET['end_date'])) {
-    $end_date = '';
-  }
-  else {
-    $end_date = strtotime(date('Y-m-d')) + 86399;
-  }
 
    // prepare header
    $header[] = 'RS Code';
@@ -2427,7 +2415,7 @@ function leanbox_dashboard_central_dispatch_daywise_details($start_date = '', $e
       $data['start_date'] = $start_date;
       $data['end_date'] = $end_date;
 
-      $output .= l(t('XLS'), 'sales-delivery-table/export', array('query' => array($data)));
+      $output .= l(t('XLS'), 'central_bills_per_van/export', array('query' => array($data)));
    }
    else {
       $output = 'No Data found';
