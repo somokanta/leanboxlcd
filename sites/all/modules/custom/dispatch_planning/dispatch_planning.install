@@ -449,3 +449,22 @@ function dispatch_planning_update_7107() {
   db_create_table('ptl_data_configuration', $schema['ptl_data_configuration']);
 }
 
+/**
+ * Adding new api_flag in table ptl_data_configuration using hook_update_N()
+ */
+function dispatch_planning_update_7108() {
+  $fields = array(
+    'api_flag' => array(
+      'description' => 'Request flag field',
+      'type' => 'int',
+      'length' => 1,
+      'not null' => TRUE,
+      'default' => 0,
+    ),
+  );
+  foreach ($fields as $key => $field) {
+    if (!db_field_exists('ptl_data_configuration', $key)) {
+      db_add_field('ptl_data_configuration', $key, $field);
+    }
+  }
+}
