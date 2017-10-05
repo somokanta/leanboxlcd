@@ -130,8 +130,49 @@ function dispatch_planning_permission() {
       'title' => t('dispatch planning api url'),
       'description' => t('dispatch planning api url'),
     ),
+    'services_access_ptl_api' => array(
+      'title' => t(''),
+      'description' => t('PTL Api Access')
+    )
   );
 }
+
+/**
+ * 
+ * @return array API for PTL data
+ */
+function dispatch_planning_services_resources() {
+  $ptl_resource = array(
+    '#api_version' => 3002,
+  );
+  $ptl_resource = array(
+    'ptl-api-data' => array(
+      'actions' => array(
+        'ptl-api-data-fetch' => array(
+          'help' => 'Get PTL Data',
+          'callback' => 'fetch_ptl_data',
+          'args' => array(
+            array(
+              'name' => 'api_time',
+              'type' => 'string',
+              'description' => 'Pass last fetch time',
+              'source' => array('data' => 'api_time'),
+              'optional' => FALSE,
+            ),
+          ),
+          'file' => array(
+            'type' => 'inc',
+            'module' => 'dispatch_planning',
+            'name' => 'ptl_dispatch_planning'
+          ),
+          'access arguments' => array('services_access_ptl_api'),
+        ),
+      ),
+    ),
+  );
+  return $ptl_resource;
+}
+
 /**
  * dispatch planning cron page callback function
  */
