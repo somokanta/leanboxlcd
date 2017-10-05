@@ -2321,26 +2321,45 @@ function leanbox_dashboard_otif_trends_chart_query_details($type, $start_date = 
  * @return type
  */
 function leanbox_dashboard_central_dispatch_daywise_details($start_date = '', $end_date = '') {
-   if (empty($start_date)) {
-      $start_date = date('Y-m-d');
+
+   // start date
+   if (isset($_GET['start_date']) && empty($start_date)) {
+      $start_date = $_GET['start_date'];
    }
-   if (empty($end_date)) {
-      $end_date = date('Y-m-d');
+   else if (!isset($_GET['start_date']) && !empty($start_date)) {
+      $start_date = $start_date;
+   }
+   else {
+      $start_date = date("Y-m-d");
+   }
+   // end date
+   if (isset($_GET['end_date']) && empty($end_date)) {
+      $end_date = $_GET['end_date'];
+   }
+   else if (!isset($_GET['end_date']) && !empty($end_date)) {
+      $end_date = $end_date;
+   }
+   else {
+      $end_date = date("Y-m-d");
    }
 
    // prepare header
    $header[] = 'RS Code';
    $header[] = 'RS Name';
 
+   $values = fetch_rs_field_data();
+   
    $query = db_select('node', 'n');
    $query->join('field_data_field_dispatch_date', 'b', 'b.entity_id = n.nid');
    $query->join('field_data_field_third_party_username', 'rs', 'rs.entity_id = n.uid');
    $query->join('field_data_field_name', 'rn', 'rn.entity_id = n.uid');
+   $query->join('field_data_field_distributor', 'ds', 'n.uid = ds.entity_id');
+   $query->condition('ds.field_distributor_value', $values, 'IN');
    $query->fields('rs', array('field_third_party_username_value'));
    $query->fields('rn', array('field_name_value'));
    $query->fields('n', array('uid'));
    if (!empty($start_date) && !empty($end_date)) {
-      $query->condition('b.field_dispatch_date_value', array($start_date, $end_date), 'BETWEEN');
+     $query->condition('b.field_dispatch_date_value', array($start_date, $end_date), 'BETWEEN');
    }
    $query->condition('n.type', 'dispatch_data');
    $rs_details = $query->distinct()->execute()->fetchAll(PDO::FETCH_ASSOC);
@@ -2391,6 +2410,12 @@ function leanbox_dashboard_central_dispatch_daywise_details($start_date = '', $e
         'rows' => $rows,
         'attributes' => array('width' => '100%')
       ));
+      
+      $data = array();
+      $data['start_date'] = $start_date;
+      $data['end_date'] = $end_date;
+
+      $output .= l(t('XLS'), 'central_bills_per_van/export', array('query' => array($data)));
    }
    else {
       $output = 'No Data found';
