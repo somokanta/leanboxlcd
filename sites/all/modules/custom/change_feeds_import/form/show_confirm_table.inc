@@ -7,7 +7,6 @@ function change_feeds_import_confirm_content($id) {
           ->condition('bd.id', $id, '=')
           ->fields('bd')
           ->execute()->fetchAssoc();
-
   $header = array('Upload Date& Time', 'File', 'Total Bill Uploaded', 'Total Lines Uploaded', 'Sum Of Total Sales Qty', 'Error File', 'Action');
 
   $status = $result['status'];
@@ -43,6 +42,7 @@ function change_feeds_import_confirm_content($id) {
   $build['pager_table'] = array(
     '#theme' => 'table',
     '#header' => $header,
+    '#prefix'=> "<div id = 'referesh_warning' style='display:none';><h2><p><font color='red'>Please Do Not Referesh The Page And Wait While We Process the Data. This Can Take A Few Minutes...</font></p></h2></div>",
     '#rows' => array($rows),
     '#empty' => t('There are no date formats found.'),
   );
