@@ -42,13 +42,13 @@ if (empty($rows) && empty($totals)) {
   </tbody>
   <tfoot>
     <?php foreach ($sub_totals as $type => $row): ?>
-      <tr class="view-subfooter-number">
-        <?php foreach ($row as $field => $content): ?>
-          <td class="view-subfooter views-field views-field-<?php print $fields[$field]; ?>  <?php print $options['info'][$field]['align'] ?>">
-            <?php print $content; ?>
+<!--  <tr class="view-subfooter-number">
+        <!--?php foreach ($row as $field => $content): ?>
+          <!--td class="view-subfooter views-field views-field-<!--?php print $fields[$field]; ?>  <!--?php print $options['info'][$field]['align'] ?>">
+            <!--?php print $content; ?>
           </td>
-        <?php endforeach; ?>
-      </tr>
+        <!--?php endforeach; ?>
+      </tr>-->
     <?php endforeach; ?>
     <?php foreach ($totals as $type => $row): ?>
       <tr class="view-footer-number">

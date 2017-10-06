@@ -11464,3 +11464,11 @@ header[id="page-header"] ul, header[id="page-header"] li {
 #views-exposed-form-central-bill-trip-page #edit-field-third-party-username-value-wrapper {
   width: 140px;
 }
+
+/*ofd mailer subfooter remove*/
+/* line 1548, ../sass/leanbox-global.scss */
+.view-id-ofd_mailer .view-subfooter-number, .view-id-ofd_mailer2 .view-subfooter-number {
+  display: none;
+}
+
+/*End ofd mailer subfooter remove*/
