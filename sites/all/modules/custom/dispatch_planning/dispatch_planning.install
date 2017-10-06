@@ -482,7 +482,13 @@ function dispatch_planning_update_7109() {
         'default' => '',
     ),
     'update_time' => array(
-      'description' => 'Request flag field',
+      'description' => 'Update Time',
+      'type' => 'int',
+      'not null' => TRUE,
+      'default' => 0,
+    ),
+     'fetch_time' => array(
+      'description' => 'Fetch Time',
       'type' => 'int',
       'not null' => TRUE,
       'default' => 0,

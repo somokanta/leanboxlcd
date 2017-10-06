@@ -983,6 +983,24 @@ function dispatch_planning_views_data() {
     ),
   );
   // sum_sales_qty
+  $data['ptl_data_configuration']['fetch_time'] = array(
+    'title' => t('Fetch Time'),
+    'help' => t('Fetch Time'),
+    'field' => array(
+      'handler' => 'views_handler_field_date',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort_date',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_date',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_filter_date',
+    ),
+  );
+  // sum_sales_qty
   $data['ptl_data_configuration']['update_time'] = array(
     'title' => t('Update Time'),
     'help' => t('Update Time'),
