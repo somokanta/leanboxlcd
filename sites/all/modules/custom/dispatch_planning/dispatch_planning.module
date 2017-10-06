@@ -167,6 +167,39 @@ function dispatch_planning_services_resources() {
           ),
           'access arguments' => array('services_access_ptl_api'),
         ),
+        'ptl-api-data-update' => array(
+          'help' => 'Get PTL Data',
+          'callback' => 'update_ptl_data',
+          'args' => array(
+            array(
+              'name' => 'rs_code',
+              'type' => 'string',
+              'description' => 'RS Code',
+              'source' => array('data' => 'rs_code'),
+              'optional' => FALSE,
+            ),
+            array(
+              'name' => 'trip_id',
+              'type' => 'string',
+              'description' => 'Trip ID',
+              'source' => array('data' => 'trip_id'),
+              'optional' => FALSE,
+            ),
+            array(
+              'name' => 'update_time',
+              'type' => 'string',
+              'description' => 'Pass update time',
+              'source' => array('data' => 'update_time'),
+              'optional' => FALSE,
+            ),
+          ),
+          'file' => array(
+            'type' => 'inc',
+            'module' => 'dispatch_planning',
+            'name' => 'ptl_dispatch_planning'
+          ),
+          'access arguments' => array('services_access_ptl_api'),
+        ),
       ),
     ),
   );
@@ -823,7 +856,7 @@ function dispatch_planning_form_save_validate($form, &$form_state) {
     $routific_options = array('headers' => $request_headers, 'method' => 'POST', 'data' => $Locations_data);
 
     $response_data = drupal_http_request($roitufic_api_url, $routific_options);
-    dpm($response_data , 'API Response');
+    dpm($response_data,'API RESPONSE');
     $response_data = json_decode($response_data->data);
 
     if ($response_data->num_unserved) {
@@ -1722,7 +1755,7 @@ function ptl_sales_reg_api_data($value, $node, $trip_execution_date, $hht_id, $c
   $api_data['referenceNo'] = $reference_no;
   $api_data['date'] = date('d-m-Y',$trip_execution_date);
   $api_data['city'] = 'ABC';
-  //$api_data['hub'] = $rs_code;
+  $api_data['rs_code'] = $rs_code;
   $api_data['hub'] = '100006'; // need to remove when moving to HUL
   $api_data['fieldExecutive'] = $rs_code . '_' . $hht_id;
   $api_data['fieldExecutiveName'] = $cashier;
@@ -1955,6 +1988,7 @@ function ptl_configuration_data_insert($api_data) {
         $query = db_insert('ptl_data_configuration');
         $fields = array(
           'ptl_job' => $api_data['jobData']['vehicle'] . '-' . $api_data['date'],
+          'rs_code' => $api_data['rs_code'],
           'trip_id' => $api_data['jobData']['runsheet_number'],
           'vehicle' => $api_data['jobData']['vehicle'],
           'bill_number' => $api_data['jobData']['bill_number'],

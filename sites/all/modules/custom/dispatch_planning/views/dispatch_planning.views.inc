@@ -748,6 +748,24 @@ function dispatch_planning_views_data() {
       'handler' => 'views_handler_argument_string',
     ),
   );
+  // 	rs_code
+  $data['ptl_data_configuration']['rs_code'] = array(
+    'title' => t('RS Code'),
+    'help' => t('RS Code'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
   // 	trip_id
   $data['ptl_data_configuration']['trip_id'] = array(
     'title' => t('trip_id'),
@@ -950,6 +968,60 @@ function dispatch_planning_views_data() {
   $data['ptl_data_configuration']['sum_sales_qty'] = array(
     'title' => t('sum_sales_qty'),
     'help' => t('sum_sales_qty'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+  // sum_sales_qty
+  $data['ptl_data_configuration']['fetch_time'] = array(
+    'title' => t('Fetch Time'),
+    'help' => t('Fetch Time'),
+    'field' => array(
+      'handler' => 'views_handler_field_date',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort_date',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_date',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_filter_date',
+    ),
+  );
+  // sum_sales_qty
+  $data['ptl_data_configuration']['update_time'] = array(
+    'title' => t('Update Time'),
+    'help' => t('Update Time'),
+    'field' => array(
+      'handler' => 'views_handler_field_date',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort_date',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_date',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_filter_date',
+    ),
+  );
+  // sum_sales_qty
+  $data['ptl_data_configuration']['api_flag'] = array(
+    'title' => t('API Flag'),
+    'help' => t('API Flag'),
     'field' => array(
       'handler' => 'views_handler_field',
       'click sortable' => TRUE,
