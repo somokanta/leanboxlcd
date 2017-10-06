@@ -153,6 +153,13 @@ function dispatch_planning_services_resources() {
           'callback' => 'fetch_ptl_data',
           'args' => array(
             array(
+              'name' => 'rs_code',
+              'type' => 'string',
+              'description' => 'RS Code',
+              'source' => array('data' => 'rs_code'),
+              'optional' => FALSE,
+            ),
+            array(
               'name' => 'api_time',
               'type' => 'string',
               'description' => 'Pass last fetch time',
