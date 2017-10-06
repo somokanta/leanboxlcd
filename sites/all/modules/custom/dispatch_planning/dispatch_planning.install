@@ -468,3 +468,29 @@ function dispatch_planning_update_7108() {
     }
   }
 }
+
+/**
+ * Adding new api_flag in table ptl_data_configuration using hook_update_N()
+ */
+function dispatch_planning_update_7109() {
+  $fields = array(
+    'rs_code' => array(
+        'description' => t('RS Code'),
+        'type' => 'varchar',
+        'length' => 25,
+        'not null' => TRUE,
+        'default' => '',
+    ),
+    'update_time' => array(
+      'description' => 'Request flag field',
+      'type' => 'int',
+      'not null' => TRUE,
+      'default' => 0,
+    ),
+  );
+  foreach ($fields as $key => $field) {
+    if (!db_field_exists('ptl_data_configuration', $key)) {
+      db_add_field('ptl_data_configuration', $key, $field);
+    }
+  }
+}
