@@ -427,7 +427,7 @@ function weekly_billing_report_callback() {
   }
   
   // Function to get user id of distributor
-  $values = fetch_rs_field_data();
+  //$values = fetch_rs_field_data();
   
   $rid = get_role_by_name('RS Operator');
   $query = db_select('users', 'u');
@@ -442,7 +442,7 @@ function weekly_billing_report_callback() {
   $query->condition('r.rid', $rid);
   $query->condition('u.uid', 1, '>');
   if (!empty($values)) {
-    $query->condition('u.uid', $values, 'IN');
+    $query->condition('d.field_distributor_value', $values, 'IN');
   }
   $query->orderBy('u.name');
   $users = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
@@ -506,7 +506,7 @@ function weekly_billing_report2_callback() {
   $query->condition('r.rid', $rid);
   $query->condition('u.uid', 1, '>');
   if (!empty($values)) {
-    $query->condition('u.uid', $values, 'IN');
+    $query->condition('d.field_distributor_value', $values, 'IN');
   }
   $query->orderBy('u.name');
   $users = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
