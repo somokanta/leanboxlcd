@@ -33,7 +33,7 @@ function adhoc_task_menu() {
   );
   
   $items['email/weekly-billing-report'] = array(
-    'title' => 'Weekly Billing report',
+    'title' => 'Day Wise Bill Count And Value',
     'page callback' => 'weekly_billing_report_callback',
     'access arguments' => array('weekly report permission'),
     'type' => MENU_NORMAL_ITEM,
@@ -425,7 +425,7 @@ function weekly_billing_report_callback() {
   if(arg(2) != 'export'){
     $html .= drupal_render(drupal_get_form('weekly_report_form'));
   }
-  $rid = get_role_by_name('RS Operator');
+  $rid = get_role_by_name('leanbox');
   $query = db_select('users', 'u');
   $query->fields('u', array('uid'));
   $query->innerJoin('users_roles', 'r', 'r.uid = u.uid');
