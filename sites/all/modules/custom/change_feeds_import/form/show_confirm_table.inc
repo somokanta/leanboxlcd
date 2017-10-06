@@ -42,7 +42,7 @@ function change_feeds_import_confirm_content($id) {
   $build['pager_table'] = array(
     '#theme' => 'table',
     '#header' => $header,
-    '#prefix'=> "<div id = 'referesh_warning' style='display:none';><h2><p><font color='red'>Please Do Not Referesh The Page And Wait While We Process the Data. This Can Take A Few Minutes...</font></p></h2></div>",
+    '#prefix'=> "<div id = 'referesh_warning' style='display:none';><h2><p><font color='red'>Please Do Not Refresh The Page And Wait While We Process the Data. This Can Take A Few Minutes...</font></p></h2></div>",
     '#rows' => array($rows),
     '#empty' => t('There are no date formats found.'),
   );
