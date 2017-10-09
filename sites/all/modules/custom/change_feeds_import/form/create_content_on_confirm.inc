@@ -106,13 +106,13 @@ function change_feeds_import_create_confirm_content($id) {
     $party_packing_data_new[] = $val;
   }
   
-  $from_time = time();
-  sleep(3); // this should halt for 3s. 
+  $from_time = time() - 60;
+  sleep(1); // this should halt for 1s. 
   $return_true = change_feeds_import_insert_data_in_custom_billing_table($billing_data_result);
   if($return_true){
-    sleep(3); // this should halt for 3s. 
+    sleep(1); // this should halt for 1s. 
   }
-  $to_time = time() + 60; // to be on safer side
+  $to_time = time(); 
 
   /**
    * Debugging
