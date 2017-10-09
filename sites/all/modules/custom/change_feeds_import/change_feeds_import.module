@@ -1841,8 +1841,8 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
     }
     // check the character limit of "Payment Term" field.
     $max_payment_term_character_limit = strlen($entity->field_payment_terms[LANGUAGE_NONE][0]['value']);
-    if($max_payment_term_character_limit != 2) {
-      drupal_set_message("The character limit of payment term of party code- .'$entity->title'. should be 2.", 'error');
+    if($max_payment_term_character_limit > 12) {
+      drupal_set_message("The character limit of payment term of party code- .'$entity->title'. should be less than or Equal to 12.", 'error');
       $entity->feeds_item->skip = TRUE;
     }
     // check the integer value of "Credit Days" field.
