@@ -1432,7 +1432,7 @@ function get_common_data_for_chhanel_datewise_otif($start_date, $end_date, $dist
     $output = "No Result Found";
   }
   if (!empty($res)) {
-    $header = get_header_of_chhanel(TRUE);
+    $header = get_header_of_chhanel_otif();
     $total_otif_n2_count_perc = round(($total_n2_counts / $total_bill_count) * 100);
     $total_otif_n2_value_perc = round(($total_n2_value / $total_bill_val) * 100);
     $total_otif_n3_count_perc = round(($total_n3_counts / $total_bill_count) * 100);
@@ -1564,8 +1564,8 @@ function get_header_of_pl_group() {
 function get_header_of_chhanel($otif = FALSE) {
   if($otif) {
     $header = array('Channel', 'Bill Count', 'Bill Value', 'Dispatch (N+2) Count ', 'Dispatch (N+2) Value',
-    'Dispatch (N+3) Count', 'Dispatch (N+3) Value', 'Dispatch (>N+3) Count', 'Dispatch (>N+3) Value', 'OTIF (N+2) Count%', 'OTIF (N+2) Value%',
-    'OTIF (N+3) Count%', 'OTIF (N+3) Value%', 'OTIF (>N+3) Count%', 'OTIF (>N+3) Value%',);
+    'Dispatch (N+3) Count', 'Dispatch (N+3) Value', 'Dispatch (>N+3) Count', 'Dispatch (>N+3) Value', 'Not Dispatched Count', 'Not Dispatched Value', 'OTIF (N+2) Count%', 'OTIF (N+2) Value%',
+    'OTIF (N+3) Count%', 'OTIF (N+3) Value%', 'OTIF (>N+3) Count%', 'OTIF (>N+3) Value%','Not Dispatched Count %', 'Not Dispatched Value %');
   }
   else {
    $header = array('Channel', 'Bill Count', 'Bill Value', 'Dispatch (N+2) Count ', 'Dispatch (N+2) Value',
@@ -1578,9 +1578,8 @@ function get_header_of_chhanel($otif = FALSE) {
 
 function get_header_of_chhanel_otif() {
     $header = array('Channel', 'Bill Count', 'Bill Value', 'Dispatch (N+2) Count ', 'Dispatch (N+2) Value',
-    'Dispatch (N+3) Count', 'Dispatch (N+3) Value', 'Dispatch (>N+3) Count', 'Dispatch (>N+3) Value', 'Not Dispatched Count', 'Not Dispatched Value', 'OTIF (N+2) Count%', 'OTIF (N+2) Value%',
-    'OTIF (N+3) Count%', 'OTIF (N+3) Value%', 'OTIF (>N+3) Count%', 'OTIF (>N+3) Value%','Not Dispatched Count %', 'Not Dispatched Value %');
-  
+    'Dispatch (N+3) Count', 'Dispatch (N+3) Value', 'Dispatch (>N+3) Count', 'Dispatch (>N+3) Value', 'OTIF (N+2) Count%', 'OTIF (N+2) Value%',
+    'OTIF (N+3) Count%', 'OTIF (N+3) Value%', 'OTIF (>N+3) Count%', 'OTIF (>N+3) Value%',);
   return $header;
 }
 
