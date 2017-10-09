@@ -1470,7 +1470,7 @@ function reverse_geocode_node_presave($node) {
           }
         }
         else {
-          if ($hul_status == 0) {
+          if ($node->field_hul_status['und'][0]['value'] == 0) {
             $node->field_hul_updated_lat['und'][0]['value'] = $node->field_hul_lat['und'][0]['value'];
             $node->field_hul_updated_long['und'][0]['value'] = $node->field_hul_long['und'][0]['value'];
           }
