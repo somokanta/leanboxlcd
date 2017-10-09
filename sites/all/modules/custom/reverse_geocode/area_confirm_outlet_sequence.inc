@@ -8,8 +8,9 @@ function area_confirm_outlet_sequence() {
   drupal_add_js("https://apis.mapmyindia.com/advancedmaps/v1/$license_key/map_load?v=0.1", 'external');
   drupal_add_js("https://maps.googleapis.com/maps/api/js?key=$google_key&libraries=places", 'external');
   drupal_add_js(drupal_get_path('module', 'reverse_geocode') . '/js/selectable-row.js', 'file');
-  drupal_add_js(drupal_get_path('module', 'reverse_geocode') . '/js/leaflet.smoothmarkerbouncing.js', 'file');
   drupal_add_js(drupal_get_path('module', 'reverse_geocode') . '/js/multi-map.js', 'file');
+  drupal_add_js(drupal_get_path('module', 'reverse_geocode') . '/js/leaflet.smoothmarkerbouncing.js', 'file');
+  
 
   $form = drupal_render(drupal_get_form('area_confirm_outlet_sequence_form'));
   $result['map-container'] = array(
