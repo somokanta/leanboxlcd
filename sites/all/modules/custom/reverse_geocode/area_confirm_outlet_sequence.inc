@@ -125,14 +125,10 @@ function area_confirm_outlet_sequence_form($form, &$form_state) {
         'method' => 'replace',
         'effect' => 'fade',
       ),
-      /* '#states' => array(
-        'visible' => array(
-        ':input[name^="list_form_items"]' => array('checked' => TRUE),
-        ),
-        ), */
+
       '#id' => 'area-hook-routific',
     );
-    $form['routesavvy_submit'] = array(
+/*    $form['routesavvy_submit'] = array(
       '#type' => 'submit',
       '#value' => t('RouteSavvy API'),
       '#submit' => array('area_confirm_outlet_sequence_api'),
@@ -142,14 +138,9 @@ function area_confirm_outlet_sequence_form($form, &$form_state) {
         'method' => 'replace',
         'effect' => 'fade',
       ),
-      /* '#states' => array(
-        'visible' => array(
-        ':input[name^="list_form_items"]' => array('checked' => TRUE),
-        ),
-        ), */
       '#id' => 'area-hook-routesavvy',
     );
-
+*/
     if ($form_state['reverse_geocode']['rows_save']) {
       $form['save_submit'] = array(
         '#type' => 'submit',
@@ -461,6 +452,7 @@ function area_confirm_outlet_sequence_api(&$form, &$form_state) {
     );
 
     $Locations['options']['shortest_distance'] = true;
+    $Locations['options']['polylines'] = true;
     $Locations_data = json_encode($Locations);
     $authorization = 'bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1ODgzOWY4ZjYyZmQyMzkzMGE4NjQwYjEiLCJpYXQiOjE1MDQ2Nzg4NTl9.AzJLVp6HDk6lbXCWxI1T8Y7US6R0panNjkY5B-pkdqg';
     $request_headers = array('Content-Type' => 'application/json', 'Authorization' => $authorization);
@@ -468,7 +460,6 @@ function area_confirm_outlet_sequence_api(&$form, &$form_state) {
     $routific_options = array('headers' => $request_headers, 'method' => 'POST', 'data' => $Locations_data);
 
     $response_data = drupal_http_request($roitufic_api_url, $routific_options);
-
     ################SHORT THE ARRAY in sequence################### 
 
     $response_data = json_decode($response_data->data);
