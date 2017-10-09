@@ -10,6 +10,7 @@ function area_confirm_outlet_sequence() {
   drupal_add_js(drupal_get_path('module', 'reverse_geocode') . '/js/selectable-row.js', 'file');
   drupal_add_js(drupal_get_path('module', 'reverse_geocode') . '/js/leaflet.smoothmarkerbouncing.js', 'file');
   drupal_add_js(drupal_get_path('module', 'reverse_geocode') . '/js/multi-map.js', 'file');
+  
 
   $form = drupal_render(drupal_get_form('area_confirm_outlet_sequence_form'));
   $result['map-container'] = array(
