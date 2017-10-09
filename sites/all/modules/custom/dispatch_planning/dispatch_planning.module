@@ -715,6 +715,7 @@ function dispatch_planning_form_save_validate($form, &$form_state) {
     }*/
     //NEW API ROUTIFIC
     $Locations['options']['shortest_distance'] = true;
+    $Locations['options']['polylines'] = true;
     //dpm($Locations);
     $Locations_data = json_encode($Locations);
     $authorization = 'bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1ODgzOWY4ZjYyZmQyMzkzMGE4NjQwYjEiLCJpYXQiOjE1MDQ2Nzg4NTl9.AzJLVp6HDk6lbXCWxI1T8Y7US6R0panNjkY5B-pkdqg';
@@ -723,7 +724,7 @@ function dispatch_planning_form_save_validate($form, &$form_state) {
     $routific_options = array('headers' => $request_headers, 'method' => 'POST', 'data' => $Locations_data);
 
     $response_data = drupal_http_request($roitufic_api_url, $routific_options);
-    dpm($response_data , 'API Response');
+    dpm($response_data,'API RESPONSE');
     $response_data = json_decode($response_data->data);
 
     if ($response_data->num_unserved) {
