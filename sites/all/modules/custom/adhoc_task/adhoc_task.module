@@ -37,23 +37,33 @@ function adhoc_task_menu() {
     'page callback' => 'weekly_billing_report_callback',
     'access arguments' => array('weekly report permission'),
     'type' => MENU_NORMAL_ITEM,
-    'access callback' => true,
   );
   
   $items['email/weekly-billing-report/report1'] = array(
-      'title' => 'Report1',
+      'title' => 'Day Wise Bill Count And Value',
       'description' => 'Report1 of the custom menu',
+      'page callback' => 'weekly_billing_report_callback',
+      'access arguments' => array('weekly report permission'),
       'type' => MENU_DEFAULT_LOCAL_TASK,
-      'weight' => 0
+      'weight' => 0,
   );
   
   $items['email/weekly-billing-report/report2'] = array(
-      'title' => 'Report2',
+      'title' => 'Day Wise Bill Count And Value(N+2)',
       'description' => 'Report2 of the custom menu',
       'page callback' => 'weekly_billing_report2_callback',
+      'access arguments' => array('weekly report permission'),
       'type' => MENU_LOCAL_TASK,
-      'access callback' => true,
-      'weight' => 1
+      'weight' => 1,
+  );
+  
+  $items['email/weekly-billing-report/report3'] = array(
+      'title' => 'Day Wise Bill Count And Value(N+3)',
+      'description' => 'Report3 of the custom menu',
+      'page callback' => 'weekly_billing_report3_callback',
+      'access arguments' => array('weekly report permission'),
+      'type' => MENU_LOCAL_TASK,
+      'weight' => 2,
   );
   
   $items['email/weekly-billing-report/export'] = array(
@@ -69,6 +79,14 @@ function adhoc_task_menu() {
     'page callback' => 'weekly_billing_report2_table_export',
     'access arguments' => array('Day Wise Bill Count And Value Download File'),
   );
+  
+  $items['email/weekly-billing-report/report3/export'] = array(
+    'title' => 'Weekly Billing Report3 Export',
+    'description' => 'Weekly Billing Report3 Export',
+    'page callback' => 'weekly_billing_report3_table_export',
+    'access arguments' => array('Day Wise Bill Count And Value Download File'),
+  );
+    
   return $items;
 }
 /**
@@ -79,6 +97,11 @@ function adhoc_task_permission() {
     'weekly report permission' => array(
       'title' => 'Weekly report permission',
       'description' => 'weekly report permission'
+    ),
+    
+    'Day Wise Bill Count And Value Download File' => array(
+      'title' => 'Day wise bill count and value download file permission',
+      'description' => 'Day wise bill count and value download file permission'
     ),
   );
 }
@@ -361,8 +384,11 @@ function weekly_report_form_submit($form, &$form_state) {
   if (($form_state['values']["op"] == "Save") && (empty(arg(2)))) {
     drupal_goto('email/weekly-billing-report', array('query' => array('from_date' => $from_date, 'to_date' => $to_date)));
   }
-  else {
+  else if (($form_state['values']["op"] == "Save") && (arg(2) == 'report2')){
     drupal_goto('email/weekly-billing-report/report2', array('query' => array('from_date' => $from_date, 'to_date' => $to_date)));
+  }
+  else {
+    drupal_goto('email/weekly-billing-report/report3', array('query' => array('from_date' => $from_date, 'to_date' => $to_date)));
   }
 }
 /**
@@ -379,16 +405,16 @@ function weekly_report_form_validate($form, &$form_state) {
   if ($num_days > 31) {
    form_set_error('form', 'Date range should not be greater than 31');  
   }
-  if(arg(2) == 'report2') {
-    drupal_goto('email/weekly-billing-report/report2', array('query' => array('from_date' => $from_date, 'to_date' => $to_date)));
-  }
-  else {
-    drupal_goto('email/weekly-billing-report', array('query' => array('from_date' => $from_date, 'to_date' => $to_date)));
-  }
+//  if(arg(2) == 'report2') {
+//    drupal_goto('email/weekly-billing-report/report2', array('query' => array('from_date' => $from_date, 'to_date' => $to_date)));
+//  }
+//  else {
+//    drupal_goto('email/weekly-billing-report', array('query' => array('from_date' => $from_date, 'to_date' => $to_date)));
+//  }
 }
 
 function weekly_billing_report_table_export() {
-  $file = "WeeklyBillingReport.xls";
+  $file = "DayWiseBillCountAndValue.xls";
   $table = weekly_billing_report_callback();
   header("Content-type: application/vnd.ms-excel");
   header("Content-Disposition: attachment; filename=$file");
@@ -396,7 +422,15 @@ function weekly_billing_report_table_export() {
 }
 
 function weekly_billing_report2_table_export() {
-  $file = "WeeklyBillingReport2.xls";
+  $file = "DayWiseBillCountAndValue2.xls";
+  $table = weekly_billing_report2_callback();
+  header("Content-type: application/vnd.ms-excel");
+  header("Content-Disposition: attachment; filename=$file");
+  echo $table;
+}
+
+function weekly_billing_report3_table_export() {
+  $file = "DayWiseBillCountAndValue3.xls";
   $table = weekly_billing_report2_callback();
   header("Content-type: application/vnd.ms-excel");
   header("Content-Disposition: attachment; filename=$file");
@@ -427,7 +461,7 @@ function weekly_billing_report_callback() {
   }
   
   // Function to get user id of distributor
-  //$values = fetch_rs_field_data();
+  $values = fetch_rs_field_data();
   
   $rid = get_role_by_name('RS Operator');
   $query = db_select('users', 'u');
@@ -449,10 +483,12 @@ function weekly_billing_report_callback() {
 
   $bill_flag = 'count_bill';
   $flag_n_plus_two = FALSE;
-  $html .= get_html_for_weekly_report($bill_flag, $flag_n_plus_two, $users, $timestamp, $num_days);
+  $flag_n_plus_three = FALSE;
+  $html .= get_html_for_weekly_report($bill_flag, $flag_n_plus_two, $flag_n_plus_three, $users, $timestamp, $num_days);
   $bill_flag = 'count_bill_value';
   $flag_n_plus_two = FALSE;
-  $html .= get_html_for_weekly_report($bill_flag, $flag_n_plus_two, $users, $timestamp , $num_days);
+  $flag_n_plus_three = FALSE;
+  $html .= get_html_for_weekly_report($bill_flag, $flag_n_plus_two, $flag_n_plus_three, $users, $timestamp , $num_days);
   
   // To create the download link
   $data = array();
@@ -460,7 +496,7 @@ function weekly_billing_report_callback() {
   $data['to_date'] = $to_date;
   $html .= l(t('XLS'), 'email/weekly-billing-report/export', array('query' => array($data)));
 
-  $params['subject'] = "Weekly Billing Report";
+  $params['subject'] = "Day Wise Bill Count And Value";
   $params['body'] = $html;
   $mail_to = "sandip.auti11@gmail.com";
   $from = "MIS.HELPDESK@leanbox.in";
@@ -513,10 +549,12 @@ function weekly_billing_report2_callback() {
 
   $bill_flag = 'count_bill_n+2';
   $flag_n_plus_two = TRUE;
-  $html .= get_html_for_weekly_report($bill_flag, $flag_n_plus_two, $users, $timestamp , $num_days);
+  $flag_n_plus_three = FALSE;
+  $html .= get_html_for_weekly_report($bill_flag, $flag_n_plus_two, $flag_n_plus_three, $users, $timestamp , $num_days);
   $bill_flag = 'count_value_n+2';
   $flag_n_plus_two = TRUE;
-  $html .= get_html_for_weekly_report($bill_flag, $flag_n_plus_two, $users, $timestamp , $num_days);
+  $flag_n_plus_three = FALSE;
+  $html .= get_html_for_weekly_report($bill_flag, $flag_n_plus_two, $flag_n_plus_three, $users, $timestamp , $num_days);
   
   // To create the download link
   $data = array();
@@ -524,7 +562,72 @@ function weekly_billing_report2_callback() {
   $data['to_date'] = $to_date;
   $html .= l(t('XLS'), 'email/weekly-billing-report/report2/export', array('query' => array($data)));
   
-  $params['subject'] = "Weekly Billing Report";
+  $params['subject'] = "Day Wise Bill Count And Value(N+2)";
+  $params['body'] = $html;
+  $mail_to = "sandip.auti11@gmail.com";
+  $from = "MIS.HELPDESK@leanbox.in";
+  //drupal_mail('adhoc_task', 'weekly_billing_report', $mail_to, LANGUAGE_NONE, $params, $from);
+  return $html;
+}
+
+/**
+ * Below code is for billing report3
+ * Page callback for weekly report tab3
+ */
+function weekly_billing_report3_callback() {
+   if (isset($_GET['from_date'])) {
+    $from_date = $_GET['from_date'];
+  }
+  if (isset($_GET['to_date'])) {
+    $to_date = $_GET['to_date'];
+  }
+  if(!$from_date && !$to_date){
+    return drupal_render(drupal_get_form('weekly_report_form'));
+  }
+  $datediff = strtotime($to_date) - strtotime($from_date);
+  $num_days = $datediff / (60 * 60 * 24);
+  $timestamp = strtotime($from_date);
+  if(arg(3) != 'export'){
+    $html .= drupal_render(drupal_get_form('weekly_report_form'));
+  }
+  
+  // Function to get user id of distributor
+  $values = fetch_rs_field_data();
+  
+  $rid = get_role_by_name('RS Operator');
+  $query = db_select('users', 'u');
+  $query->fields('u', array('uid'));
+  $query->innerJoin('users_roles', 'r', 'r.uid = u.uid');
+  $query->innerjoin('field_data_field_distributor', 'd', 'd.entity_id = u.uid');
+  $query->fields('d', array('field_distributor_value'));
+  $query->join('field_data_field_name', 'nm', 'nm.entity_id = u.uid');
+  $query->join('field_data_field_third_party_username', 'pu', 'pu.entity_id = u.uid');
+  $query->fields('nm', array('field_name_value'));
+  $query->fields('pu', array('field_third_party_username_value'));
+  $query->condition('r.rid', $rid);
+  $query->condition('u.uid', 1, '>');
+  if (!empty($values)) {
+    $query->condition('d.field_distributor_value', $values, 'IN');
+  }
+  $query->orderBy('u.name');
+  $users = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+
+  $bill_flag = 'count_bill_n+3';
+  $flag_n_plus_two = FALSE;
+  $flag_n_plus_three = TRUE;
+  $html .= get_html_for_weekly_report($bill_flag, $flag_n_plus_two, $flag_n_plus_three, $users, $timestamp , $num_days);
+  $bill_flag = 'count_value_n+3';
+  $flag_n_plus_two = FALSE;
+  $flag_n_plus_three = TRUE;
+  $html .= get_html_for_weekly_report($bill_flag, $flag_n_plus_two, $flag_n_plus_three, $users, $timestamp , $num_days);
+  
+  // To create the download link
+  $data = array();
+  $data['from_date'] = $from_date;
+  $data['to_date'] = $to_date;
+  $html .= l(t('XLS'), 'email/weekly-billing-report/report3/export', array('query' => array($data)));
+  
+  $params['subject'] = "Day Wise Bill Count And Value(N+3)";
   $params['body'] = $html;
   $mail_to = "sandip.auti11@gmail.com";
   $from = "MIS.HELPDESK@leanbox.in";
@@ -535,7 +638,7 @@ function weekly_billing_report2_callback() {
 /**
  * get html for weekly report
  */
-function get_html_for_weekly_report($bill_flag, $flag_n_plus_two, $users, $timestamp , $num_days) {
+function get_html_for_weekly_report($bill_flag, $flag_n_plus_two, $flag_n_plus_three, $users, $timestamp , $num_days) {
  if ($num_days < 0) {
    return; 
  }
@@ -544,16 +647,22 @@ function get_html_for_weekly_report($bill_flag, $flag_n_plus_two, $users, $times
  }
   $timestamp = $timestamp;
   if ($bill_flag == 'count_bill') {
-    $caption = 'No. of bills uploaded on TP';
+    $caption = 'Day Wise Bill Count';
   }
   else if ($bill_flag == 'count_bill_value') {
-    $caption = 'Value of bills uploaded on TP';
+    $caption = 'Day Wise Bill Value';
   }
   else if ($bill_flag == 'count_bill_n+2') {
-    $caption = 'No of bills dispatched on TP corresponding to the following bill date on N+2';
+    $caption = 'Day Wise Bill Count(N+2)';
+  }
+  else if ($bill_flag == 'count_value_n+2'){
+    $caption = 'Day Wise Bill Value(N+2)';
+  }
+  else if ($bill_flag == 'count_bill_n+3'){
+    $caption = 'Day Wise Bill Count(N+3)';
   }
   else {
-    $caption = 'Value of bills dispatched on TP corresponding to the following bill date on N+2';
+    $caption = 'Day Wise Bill Value(N+3)';
   }
   $html .= '<caption><h2> ' . $caption . '</h2></caption>';
   $header = get_weekly_data_header($timestamp, $num_days);
@@ -563,7 +672,7 @@ function get_html_for_weekly_report($bill_flag, $flag_n_plus_two, $users, $times
     $rs_code = $val['field_third_party_username_value'];
     $rs_name = $val['field_name_value'];
     //$hul_username = $val['field_third_party_username_value'] . ' : ' . $val['field_name_value'];
-    $rows[] = get_weekly_report_data($timestamp, $distributor_id, $flag_n_plus_two, $rs_code, $rs_name, $bill_flag, $num_days); 
+    $rows[] = get_weekly_report_data($timestamp, $distributor_id, $flag_n_plus_two, $flag_n_plus_three, $rs_code, $rs_name, $bill_flag, $num_days); 
   }
   $html .= theme('table', array('header' => $header, 'rows' => $rows, 'empty' => 'No Result Found', 'attributes' => array('width' => '100%')));
   
@@ -586,12 +695,12 @@ function get_weekly_data_header($timestamp,$num_days) {
 /**
  * Function to get weekly report data for today's date to 10 days before
  */
-function get_weekly_report_data($timestamp, $distributor_id, $flag_n_plus_two, $rs_code, $rs_name, $bill_flag, $num_days) {
+function get_weekly_report_data($timestamp, $distributor_id, $flag_n_plus_two, $flag_n_plus_three, $rs_code, $rs_name, $bill_flag, $num_days) {
   for ($i = 0; $i <= $num_days; $i++) {
     $query = db_select('node', 'n');
     $query->join('field_data_field_sr_bill_date', 'sr', 'sr.entity_id = n.nid');
     $query->join('field_data_field_bill_value', 'bv', 'bv.entity_id = n.nid');
-    if ($flag_n_plus_two) {
+    if ($flag_n_plus_two || $flag_n_plus_three) {
       $query->join('field_data_field_dispatch_n_value', 'di', 'di.entity_id = n.nid');
     }
     $query->condition('sr.field_sr_bill_date_value', $timestamp);
@@ -599,6 +708,9 @@ function get_weekly_report_data($timestamp, $distributor_id, $flag_n_plus_two, $
     $query->condition('n.type', 'sales_register_data');
     if ($flag_n_plus_two) {
       $query->condition('di.field_dispatch_n_value_value', 'N+2');
+    }
+    if ($flag_n_plus_three) {
+      $query->condition('di.field_dispatch_n_value_value', 'N+3');
     }
     $query->addExpression('COUNT(sr.field_sr_bill_date_value)', 'count');
     $query->addExpression('SUM(bv.field_bill_value_value)', 'sum');
@@ -613,7 +725,7 @@ function get_weekly_report_data($timestamp, $distributor_id, $flag_n_plus_two, $
   foreach ($result_arr as $k => $val) {  
     $row = explode("|", $k);
     foreach ($val as $value) {
-      if ($bill_flag == 'count_bill' || $bill_flag == 'count_bill_n+2') {
+      if ($bill_flag == 'count_bill' || $bill_flag == 'count_bill_n+2' || $bill_flag == 'count_bill_n+3') {
         $data = $value['count'];
       }
       else {
