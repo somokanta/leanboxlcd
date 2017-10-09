@@ -153,13 +153,13 @@ function change_feeds_import_create_confirm_content($id) {
     $operations = array();
 
     $create_billing_data = change_feeds_import_create_billing_data($max_billing_id_new);
-    $create_billing_data_chunk = array_chunk($create_billing_data, 750);
+    $create_billing_data_chunk = array_chunk($create_billing_data, 1000);
     foreach ($create_billing_data_chunk as $data) {
       $operations[] = array('change_feeds_import_create_billing', array($data));
     }
 
     $create_picking_data = change_feeds_import_create_picking_data($max_billing_id_new);
-    $create_picking_data_chunk = array_chunk($create_picking_data, 750);
+    $create_picking_data_chunk = array_chunk($create_picking_data, 1000);
     foreach ($create_picking_data_chunk as $data) {
       $operations[] = array('change_feeds_import_create_picking', array($data));
     }
@@ -167,19 +167,19 @@ function change_feeds_import_create_confirm_content($id) {
     $roles = $user->roles;
     if (in_array("leanbox", $roles)) {
       $create_pick_confirm_data = change_feeds_import_create_pick_confirm_data($max_billing_id_new);
-      $create_pick_confirm_data_chunk = array_chunk($create_pick_confirm_data, 750);
+      $create_pick_confirm_data_chunk = array_chunk($create_pick_confirm_data, 1000);
       foreach ($create_pick_confirm_data_chunk as $data) {
         $operations[] = array('change_feeds_import_create_pick_confirm', array($data));
       }
     }
 
     $van_cld_report_data = change_feeds_import_create_van_cld_report_data($max_billing_id_new);
-    $van_cld_report_data_chunk = array_chunk($van_cld_report_data, 750);
+    $van_cld_report_data_chunk = array_chunk($van_cld_report_data, 3000); // simple table insert
     foreach ($van_cld_report_data_chunk as $data) {
       $operations[] = array('change_feeds_import_create_van_cld_report', array($data));
     }
 
-    $party_packing_data_new_chunk = array_chunk($party_packing_data_new, 750);
+    $party_packing_data_new_chunk = array_chunk($party_packing_data_new, 1000);
     foreach ($party_packing_data_new_chunk as $data) {
       $operations[] = array('change_feeds_import_create_party_packing', array($data));
     }
