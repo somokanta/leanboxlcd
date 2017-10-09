@@ -90,7 +90,7 @@ function reverse_geocode_menu() {
   );
 
   $items['area-confirm-outlet-sequence'] = array(
-    'title' => 'Area Hook Group Confirmation Outlet Sequence',
+    'title' => 'Original Outlet Sequencing-API',
     'page callback' => 'area_confirm_outlet_sequence',
     'access arguments' => array('address confirmation'),
     'type' => MENU_CALLBACK,
