@@ -87,6 +87,20 @@ function adhoc_task_menu() {
     'access arguments' => array('Day Wise Bill Count And Value Download File'),
   );
     
+  $items['central-impact-return-analys'] = array(
+    'title' => 'Impact Return Analysis Count and Value (Central)',
+    'page callback' => 'central_impact_return_analysis',
+    'access arguments' => array('weekly report permission'),
+    'type' => MENU_NORMAL_ITEM,
+    'access callback' => true,
+  );
+  $items['central-impact-return-analys/export'] = array(
+    'title' => 'Impact Return Analysis Count and Value (Central) Export',
+    'description' => 'Impact Return Analysis Count and Value (Central) Export',
+    'page callback' => 'central_impact_return_analysis_export',
+    'access arguments' => array('Day Wise Bill Count And Value Download File'),
+  );
+  
   return $items;
 }
 /**
@@ -379,17 +393,22 @@ function weekly_report_form($form, &$form_state) {
  * submit handler for weekly_report_form 
  */
 function weekly_report_form_submit($form, &$form_state) {
+  dpm(arg(0),1);
+  dpm($form_state);
   $from_date = $form_state['values']['from_date'];
   $to_date = $form_state['values']['to_date'];
-  if (($form_state['values']["op"] == "Save") && (empty(arg(2)))) {
+  if (($form_state['values']["op"] == "Save") && (arg(1) == 'weekly-billing-report' && empty(arg(2)))) {
     drupal_goto('email/weekly-billing-report', array('query' => array('from_date' => $from_date, 'to_date' => $to_date)));
   }
   else if (($form_state['values']["op"] == "Save") && (arg(2) == 'report2')){
     drupal_goto('email/weekly-billing-report/report2', array('query' => array('from_date' => $from_date, 'to_date' => $to_date)));
   }
-  else {
+  else if (($form_state['values']["op"] == "Save") && (arg(2) == 'report3')){
     drupal_goto('email/weekly-billing-report/report3', array('query' => array('from_date' => $from_date, 'to_date' => $to_date)));
   }
+  else if(($form_state['values']["op"] == "Save") && (arg(0) == 'central-impact-return-analys')){
+    drupal_goto('central-impact-return-analys', array('query' => array('from_date' => $from_date, 'to_date' => $to_date)));
+  }  
 }
 /**
  * Form validate
@@ -741,4 +760,147 @@ function get_weekly_report_data($timestamp, $distributor_id, $flag_n_plus_two, $
   }
   
   return $row;
+}
+
+
+/**
+ * Impact Return Analysis Count and Value (Central)
+ */
+function central_impact_return_analysis() {
+  if (isset($_GET['from_date'])) {
+    $from_date = $_GET['from_date'];
+  }
+  if (isset($_GET['to_date'])) {
+    $to_date = $_GET['to_date'];
+  }
+  if (!$from_date && !$to_date) {
+    return drupal_render(drupal_get_form('weekly_report_form'));
+  }
+  $datediff = strtotime($to_date) - strtotime($from_date);
+  $num_days = $datediff / (60 * 60 * 24);
+  $timestamp = strtotime($from_date);
+
+  // Check the condition of filter doesn't print in xls.
+  if (arg(1) != 'export') {
+    $html .= drupal_render(drupal_get_form('weekly_report_form'));
+  }
+
+  // Function to get user id of distributor
+  $values = fetch_rs_field_data();
+
+  $rid = get_role_by_name('RS Operator');
+  $query = db_select('users', 'u');
+  $query->fields('u', array('uid'));
+  $query->innerJoin('users_roles', 'r', 'r.uid = u.uid');
+  $query->innerjoin('field_data_field_distributor', 'd', 'd.entity_id = u.uid');
+  $query->fields('d', array('field_distributor_value'));
+  $query->join('field_data_field_name', 'nm', 'nm.entity_id = u.uid');
+  $query->join('field_data_field_third_party_username', 'pu', 'pu.entity_id = u.uid');
+  $query->fields('nm', array('field_name_value'));
+  $query->fields('pu', array('field_third_party_username_value'));
+  $query->condition('r.rid', $rid);
+  $query->condition('u.uid', 1, '>');
+  if (!empty($values)) {
+    $query->condition('d.field_distributor_value', $values, 'IN');
+  }
+  $query->orderBy('u.name');
+  $users = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+
+  $bill_flag = 'count_bill';
+  $html .= get_html_for_impact_return_report($bill_flag, $users, $timestamp, $num_days);
+  $bill_flag = 'count_bill_value';
+  $html .= get_html_for_impact_return_report($bill_flag, $users, $timestamp, $num_days);
+
+  // To create the download link
+  $data = array();
+  $data['from_date'] = $from_date;
+  $data['to_date'] = $to_date;
+  $html .= l(t('XLS'), 'central-impact-return-analys/export', array('query' => array($data)));
+
+  $params['subject'] = "Weekly Billing Report";
+  $params['body'] = $html;
+  $mail_to = "abhishek.r@iksula.com";
+  $from = "MIS.HELPDESK@leanbox.in";
+  //drupal_mail('adhoc_task', 'weekly_billing_report', $mail_to, LANGUAGE_NONE, $params, $from);
+
+  return $html;
+}
+
+function get_html_for_impact_return_report($bill_flag, $users, $timestamp, $num_days) {
+  if ($num_days < 0) {
+    return;
+  }
+  if ($num_days > 31) {
+    return;
+  }
+  $timestamp = $timestamp;
+  if ($bill_flag == 'count_bill') {
+    $caption = 'No. of bills uploaded on TP';
+  }
+  else if ($bill_flag == 'count_bill_value') {
+    $caption = 'Value of bills uploaded on TP';
+  }
+
+  $html .= '<caption><h2> ' . $caption . '</h2></caption>';
+  $header = get_weekly_data_header($timestamp, $num_days);
+  foreach ($users as $key => $val) {
+    $uid = $val['uid'];
+    $distributor_id = $val['field_distributor_value'];
+    $rs_code = $val['field_third_party_username_value'];
+    $rs_name = $val['field_name_value'];
+    //$hul_username = $val['field_third_party_username_value'] . ' : ' . $val['field_name_value'];
+    $rows[] = get_impact_return_report_data($timestamp, $distributor_id, $rs_code, $rs_name, $bill_flag, $num_days);
+  }
+  $html .= theme('table', array('header' => $header, 'rows' => $rows, 'empty' => 'No Result Found', 'attributes' => array('width' => '100%')));
+
+  return $html;
+}
+
+/**
+ * Function to get weekly report data for today's date to 10 days before
+ */
+function get_impact_return_report_data($timestamp, $distributor_id, $rs_code, $rs_name, $bill_flag, $num_days) {
+  for ($i = 0; $i <= $num_days; $i++) {
+    $query = db_select('node', 'n');
+    $query->join('field_data_field_mobile_bill_value', 'bv', 'bv.entity_id = n.nid');
+    $query->join('field_data_field_mobile_bill_date', 'bd', 'bd.entity_id = n.nid');
+    $query->condition('bd.field_mobile_bill_date_value', $timestamp);
+    $query->condition('n.uid', $distributor_id);
+    $query->condition('n.type', 'impact_cron_mobile_data');
+    $query->addExpression('COUNT(n.title)', 'count');
+    $query->addExpression('SUM(bv.field_mobile_bill_value_value)', 'sum');
+    $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+
+    $result_arr[$rs_code . '|' . $rs_name][] = $res[0];
+
+    $timestamp += 24 * 3600;
+  }
+
+  foreach ($result_arr as $k => $val) {  
+    $row = explode("|", $k);
+    foreach ($val as $value) {
+      if ($bill_flag == 'count_bill') {
+        $data = $value['count'];
+      }
+      else {
+        if (!empty($value['sum'])) {
+          $data = $value['sum'];
+        }
+        else {
+          $data = 0;
+        }
+      }
+    $row[] .= $data;  
+    } 
+  }
+
+  return $row;
+}
+
+function central_impact_return_analysis_export() {
+  $file = "centralImpactReport.xls";
+  $table = central_impact_return_analysis();
+  header("Content-type: application/vnd.ms-excel");
+  header("Content-Disposition: attachment; filename=$file");
+  echo $table;
 }
