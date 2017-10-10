@@ -1545,8 +1545,14 @@ header[id="page-header"] {
 
 /*ofd mailer subfooter remove*/
 .view-id-ofd_mailer, .view-id-ofd_mailer2 {
-  .view-subfooter-number {
-    display: none;
+  table {
+    tbody {
+      tr {
+        td {
+          border: 1px solid #000 !important;
+        }
+      }
+    }
   }
 }
 
