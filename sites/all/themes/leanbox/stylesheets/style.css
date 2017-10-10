@@ -11466,9 +11466,9 @@ header[id="page-header"] ul, header[id="page-header"] li {
 }
 
 /*ofd mailer subfooter remove*/
-/* line 1548, ../sass/leanbox-global.scss */
-.view-id-ofd_mailer .view-subfooter-number, .view-id-ofd_mailer2 .view-subfooter-number {
-  display: none;
+/* line 1551, ../sass/leanbox-global.scss */
+.view-id-ofd_mailer table tbody tr td, .view-id-ofd_mailer2 table tbody tr td {
+  border: 1px solid #000 !important;
 }
 
 /*End ofd mailer subfooter remove*/
