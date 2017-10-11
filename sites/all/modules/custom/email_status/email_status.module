@@ -353,7 +353,7 @@ function send_email_channel_emailer($distributor_name, $distributor_id = 60) {
   $twoday_before_yesterday_html = "<h3>Billing Date : " . $twoday_before_yesterday_date ." (Two Days Before Yesterday)</h3>";
   $twoday_before_yesterday_data = get_twoday_before_yesterday_data_channel($twoday_before_yesterday, $twoday_before_yesterday, $distributor_id);
   if ($twoday_before_yesterday_data == "No Result Found") {
-    $header = get_header_of_chhanel();
+    $header = get_header_of_chhanel(TRUE);
     $twoday_before_yesterday_rows[] = array("<td colspan='10' style='text-align: center;'> There is No Activity</td>");
     $twoday_before_yesterday_html .= theme('table', array('header' => $header, 'rows' => $twoday_before_yesterday_rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
   }
@@ -364,7 +364,7 @@ function send_email_channel_emailer($distributor_name, $distributor_id = 60) {
   $day_before_yesterday_html = "<h3>Billing Date : " . $day_before_yesterday_date ." (One Day Before Yesterday)</h3>";
   $day_before_yesterday_data = get_day_before_yesterday_data_channel($day_before_yesterday, $day_before_yesterday, $distributor_id);
   if ($day_before_yesterday_data == "No Result Found") {
-    $header = get_header_of_chhanel();
+    $header = get_header_of_chhanel(TRUE);
     $day_before_yesterday_rows[] = array("<td colspan='10' style='text-align: center;'> There is No Activity</td>");
     $day_before_yesterday_html .= theme('table', array('header' => $header, 'rows' => $day_before_yesterday_rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
   }
@@ -375,7 +375,7 @@ function send_email_channel_emailer($distributor_name, $distributor_id = 60) {
   $yesterday_html = "<h3>Billing Date : " . $yesterday_date ." (Yesterday)</h3>";
   $yesterday_data = get_yesterday_data_channel($yesterday, $yesterday, $distributor_id);
   if ($yesterday_data == "No Result Found") {
-    $header = get_header_of_chhanel();
+    $header = get_header_of_chhanel(TRUE);
     $yesterday_rows[] = array("<td colspan='10' style='text-align: center;'> There is No Activity</td>");
     $yesterday_html .= theme('table', array('header' => $header, 'rows' => $yesterday_rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
   }
@@ -386,7 +386,7 @@ function send_email_channel_emailer($distributor_name, $distributor_id = 60) {
   $mtd_html = "<h3>MTD Wise: ". $yesterday_date ." (Yesterday)</h3>";
   $mtd_data .= get_mtd_data_channel($this_date, $yesterday, $distributor_id);
   if ($mtd_data == "No Result Found") {
-    $header = get_header_of_chhanel();
+    $header = get_header_of_chhanel(TRUE);
     $mtd_rows[] = array("<td colspan='10' style='text-align: center;'> There is No Activity</td>");
     $mtd_html .= theme('table', array('header' => $header, 'rows' => $mtd_rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
   }
@@ -397,7 +397,7 @@ function send_email_channel_emailer($distributor_name, $distributor_id = 60) {
   $mtd_one_day_before_html = "<h3>MTD Wise: ". $day_before_yesterday_date ." (One Day Before Yesterday)</h3>";
   $mtd_one_day_before_data .= get_one_day_before_mtd_data_channel($this_date, $day_before_yesterday, $distributor_id);
   if ($mtd_one_day_before_data == "No Result Found") {
-    $header = get_header_of_chhanel();
+    $header = get_header_of_chhanel(TRUE);
     $mtd_one_day_before_rows[] = array("<td colspan='10' style='text-align: center;'> There is No Activity</td>");
     $mtd_one_day_before_html .= theme('table', array('header' => $header, 'rows' => $mtd_one_day_before_rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
   }
@@ -408,7 +408,7 @@ function send_email_channel_emailer($distributor_name, $distributor_id = 60) {
   $mtd_two_day_before_html = "<h3>MTD Wise: ". $twoday_before_yesterday_date ." (Two Day Before Yesterday)</h3>";
   $mtd_two_day_before_data .= get_two_day_before_mtd_data_channel($this_date, $twoday_before_yesterday, $distributor_id);
   if ($mtd_two_day_before_data == "No Result Found") {
-    $header = get_header_of_chhanel();
+    $header = get_header_of_chhanel(TRUE);
     $mtd_two_day_before_rows[] = array("<td colspan='10' style='text-align: center;'> There is No Activity</td>");
     $mtd_two_day_before_html .= theme('table', array('header' => $header, 'rows' => $mtd_two_day_before_rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
   }
@@ -462,7 +462,7 @@ function send_email_cron_pl_emailer($distributor_name, $distributor_id = 60) {
   $twoday_before_yesterday_html = "<h3>Billing Date : " . $twoday_before_yesterday_date ." (Two Days Before Yesterday)</h3>";
   $twoday_before_yesterday_data = get_cron_common_data_for_pl_datewise($twoday_before_yesterday, $twoday_before_yesterday, $distributor_id);
   if ($twoday_before_yesterday_data == "No Result Found") {
-    $header = get_header_of_chhanel();
+    $header = get_header_of_chhanel(TRUE);
     $twoday_before_yesterday_rows[] = array("<td colspan='10' style='text-align: center;'> There is No Activity</td>");
     $twoday_before_yesterday_html .= theme('table', array('header' => $header, 'rows' => $twoday_before_yesterday_rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
   }
@@ -473,7 +473,7 @@ function send_email_cron_pl_emailer($distributor_name, $distributor_id = 60) {
   $day_before_yesterday_html = "<h3>Billing Date : " . $day_before_yesterday_date ." (One Day Before Yesterday)</h3>";
   $day_before_yesterday_data = get_cron_common_data_for_pl_datewise($day_before_yesterday, $day_before_yesterday, $distributor_id);
   if ($day_before_yesterday_data == "No Result Found") {
-    $header = get_header_of_chhanel();
+    $header = get_header_of_chhanel(TRUE);
     $day_before_yesterday_rows[] = array("<td colspan='10' style='text-align: center;'> There is No Activity</td>");
     $day_before_yesterday_html .= theme('table', array('header' => $header, 'rows' => $day_before_yesterday_rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
   }
@@ -484,7 +484,7 @@ function send_email_cron_pl_emailer($distributor_name, $distributor_id = 60) {
   $yesterday_html = "<h3>Billing Date : " . $yesterday_date ." (Yesterday)</h3>";
   $yesterday_data = get_cron_common_data_for_pl_datewise($yesterday, $yesterday, $distributor_id);
   if ($yesterday_data == "No Result Found") {
-    $header = get_header_of_chhanel();
+    $header = get_header_of_chhanel(TRUE);
     $yesterday_rows[] = array("<td colspan='10' style='text-align: center;'> There is No Activity</td>");
     $yesterday_html .= theme('table', array('header' => $header, 'rows' => $yesterday_rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
   }
@@ -495,7 +495,7 @@ function send_email_cron_pl_emailer($distributor_name, $distributor_id = 60) {
   $mtd_html = "<h3>MTD Wise: ". $yesterday_date ." (Yesterday)</h3>";
   $mtd_data .= get_cron_common_data_for_pl_datewise($this_date, $yesterday, $distributor_id);
   if ($mtd_data == "No Result Found") {
-    $header = get_header_of_chhanel();
+    $header = get_header_of_chhanel(TRUE);
     $mtd_rows[] = array("<td colspan='10' style='text-align: center;'> There is No Activity</td>");
     $mtd_html .= theme('table', array('header' => $header, 'rows' => $mtd_rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
   }
@@ -506,7 +506,7 @@ function send_email_cron_pl_emailer($distributor_name, $distributor_id = 60) {
   $mtd_one_day_before_html = "<h3>MTD Wise: ". $day_before_yesterday_date ." (One Day Before Yesterday)</h3>";
   $mtd_one_day_before_data .= get_cron_common_data_for_pl_datewise($this_date, $day_before_yesterday, $distributor_id);
   if ($mtd_one_day_before_data == "No Result Found") {
-    $header = get_header_of_chhanel();
+    $header = get_header_of_chhanel(TRUE);
     $mtd_one_day_before_rows[] = array("<td colspan='10' style='text-align: center;'> There is No Activity</td>");
     $mtd_one_day_before_html .= theme('table', array('header' => $header, 'rows' => $mtd_one_day_before_rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
   }
@@ -517,7 +517,7 @@ function send_email_cron_pl_emailer($distributor_name, $distributor_id = 60) {
   $mtd_two_day_before_html = "<h3>MTD Wise: ". $twoday_before_yesterday_date ." (Two Day Before Yesterday)</h3>";
   $mtd_two_day_before_data .= get_cron_common_data_for_pl_datewise($this_date, $twoday_before_yesterday, $distributor_id);
   if ($mtd_two_day_before_data == "No Result Found") {
-    $header = get_header_of_chhanel();
+    $header = get_header_of_chhanel(TRUE);
     $mtd_two_day_before_rows[] = array("<td colspan='10' style='text-align: center;'> There is No Activity</td>");
     $mtd_two_day_before_html .= theme('table', array('header' => $header, 'rows' => $mtd_two_day_before_rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
   }
@@ -1489,9 +1489,13 @@ function get_cron_common_data_for_pl_datewise($start_date, $end_date, $distribut
   $query->join('node', 'oun', 'pc.field_sales_party_code_value = oun.title');
   $query->condition('oun.type', 'outlet_master');
   $query->condition('oun.uid', $distributor_id, '=');
-  $query->join('field_data_field_channel', 'chan', 'chan.entity_id = oun.nid');
-  $query->groupBy('field_channel_value');
-  $query->orderBy('chan.field_channel_value', 'ASC');
+ // $query->join('field_data_field_channel', 'chan', 'chan.entity_id = oun.nid');
+ // $query->groupBy('field_channel_value');
+  $query->join('field_data_field_pl_group', 'plg', 'plg.entity_id = oun.nid');
+  $query->groupBy('field_pl_group_value');
+  //$query->orderBy('chan.field_channel_value', 'ASC');
+    $query->orderBy('plg.field_pl_group_value', 'ASC');
+
   $query->leftjoin('field_data_field_trip_id_reference', 'ti', 'ti.entity_id = n.nid');
   $query->leftjoin('node', 'disn', 'disn.nid = ti.field_trip_id_reference_nid');
   $query->leftjoin('field_data_field_dispatch_date', 'disp_date', 'disp_date.entity_id = disn.nid');
@@ -1515,13 +1519,15 @@ function get_cron_common_data_for_pl_datewise($start_date, $end_date, $distribut
   
   $query->fields('n', array('nid'));
   $query->fields('bd', array('field_sr_bill_date_value'));
-  $query->fields('chan', array('field_channel_value'));
+ // $query->fields('chan', array('field_channel_value'));
+  $query->fields('plg', array('field_pl_group_value'));
 
   $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
 
   if (!empty($res)) {
     foreach ($res as $k => $v) {
-      $channel = $v['field_channel_value'];
+      //$channel = $v['field_channel_value'];
+      $channel = $v['field_pl_group_value'];
       $bill_val = $v['bill_value'];
       $bill_val = round($bill_val);
 
