@@ -1200,8 +1200,6 @@ function create_party_packing_billing_form_submit($form, &$form_state) {
     $party_packing_data_new[] = $val;
   }
 
-dpm($party_packing_data_new);
-return "1";
   foreach ($party_packing_data_new as $key => $value) {
     $loading_date = date("Y-m-d", ($value['LOADING_DATE']));
     $node = new stdClass();
