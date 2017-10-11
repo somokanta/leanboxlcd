@@ -947,10 +947,10 @@ function create_billing_form($form, &$form_state) {
       $msg = "There is no data to delete";
     }
     else {
-      $msg = "NUmber of Record Going To Create = $billing_count";
+      $msg = "Number of Record Going To Create = $billing_count";
       $form['sales_submit'] = array(
         '#type' => 'submit',
-        '#value' => t('Create Sales'),
+        '#value' => t('Create Dispatch'),
         '#submit' => array('create_sales_billing_form_submit'),
       );
       $form['picking_submit'] = array(
