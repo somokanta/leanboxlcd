@@ -1849,7 +1849,7 @@ function get_header_of_pl_group() {
 
 function get_header_of_chhanel($otif = FALSE, $pl = FALSE) {
   if ($pl) {
-      $header = array('Channel', 'Bill Count', 'Bill Value', 'Dispatch (N+2) Count ', 'Dispatch (N+2) Value',
+      $header = array('PL GROUP', 'Bill Count', 'Bill Value', 'Dispatch (N+2) Count ', 'Dispatch (N+2) Value',
         'Dispatch (N+3) Count', 'Dispatch (N+3) Value', 'Dispatch (>N+3) Count', 'Dispatch (>N+3) Value', 'Not Dispatched Count', 'Not Dispatched Value', 'OTIF (N+2) Count%', 'OTIF (N+2) Value%',
         'OTIF (N+3) Count%', 'OTIF (N+3) Value%', 'OTIF (>N+3) Count%', 'OTIF (>N+3) Value%', 'Not Dispatched Count %', 'Not Dispatched Value %');
    }
