@@ -500,3 +500,7 @@ function dispatch_planning_update_7109() {
     }
   }
 }
+
+function dispatch_planning_update_7110() {
+  db_add_index('field_data_field_dispatch_n_value', 'field_dispatch_n_value_value', array('field_dispatch_n_value_value'));
+}
