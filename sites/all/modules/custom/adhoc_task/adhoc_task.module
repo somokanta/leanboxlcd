@@ -101,6 +101,15 @@ function adhoc_task_menu() {
     'access arguments' => array('Day Wise Bill Count And Value Download File'),
   );
   
+    // Manually Create Billing Data
+  $items['create-billing-data'] = array(
+    'title' => 'Create Billing Data',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('create_billing_form'),
+    'access arguments' => array('Create Billing Data'),
+    'type' => MENU_CALLBACK,
+  );
+  
   return $items;
 }
 /**
@@ -116,6 +125,11 @@ function adhoc_task_permission() {
     'Day Wise Bill Count And Value Download File' => array(
       'title' => 'Day wise bill count and value download file permission',
       'description' => 'Day wise bill count and value download file permission'
+    ),
+    
+    'Create Billing Data' => array(
+      'title' => t('Create Billing Data'),
+      'description' => t('Create Billing Data')
     ),
   );
 }
@@ -901,4 +915,358 @@ function central_impact_return_analysis_export() {
   header("Content-type: application/vnd.ms-excel");
   header("Content-Disposition: attachment; filename=$file");
   echo $table;
+}
+
+
+/**
+ * 
+ * @param type $form
+ * @param type $form_state
+ * @return array
+ */
+function create_billing_form($form, &$form_state) {
+
+  $form['#prefix'] = '<div id="itemlist-div">';
+  $form['#suffix'] = '</div>';
+
+  // selected date for deleting data of billing data by admin
+  $form['to_date'] = array(
+    '#type' => 'date_popup',
+    '#date_format' => 'd-m-Y h:i A',
+    '#required' => TRUE,
+  );
+
+  $form['check'] = array(
+    '#type' => 'submit',
+    '#value' => t('Check Records'),
+    '#ajax' => array(
+      'wrapper' => 'itemlist-div',
+      'callback' => 'create_ajax_form_submit',
+      'method' => 'replace',
+      'effect' => 'fade',
+    ),
+    '#submit' => array('create_check_records_submit'),
+  );
+//$form_state['values']['op'] == 'RouteSavvy API'
+  if (!empty($form_state['values']['billing_count'])) {
+    $billing_count = $form_state['values']['billing_count'];
+    if ($billing_count == "empty") {
+      $msg = "There is no data to delete";
+    }
+    else {
+      $msg = "NUmber of Record Going To Create = $billing_count";
+      $form['sales_submit'] = array(
+        '#type' => 'submit',
+        '#value' => t('Create Sales'),
+        '#submit' => array('create_sales_billing_form_submit'),
+      );
+      $form['picking_submit'] = array(
+        '#type' => 'submit',
+        '#value' => t('Create Picking'),
+        '#submit' => array('create_picking_billing_form_submit'),
+      );
+      $form['party_packing_submit'] = array(
+        '#type' => 'submit',
+        '#value' => t('Party Packing'),
+        '#submit' => array('create_party_packing_billing_form_submit'),
+      );
+    }
+
+    $form['data'] = array(
+      '#type' => 'markup',
+      '#markup' => $msg,
+    );
+  }
+
+
+
+  return $form;
+}
+
+function create_ajax_form_submit($form, &$form_state) {
+  return $form;
+}
+
+/**
+ * 
+ * @param type $form
+ * @param type $form_state
+ */
+function create_check_records_submit($form, &$form_state) {
+  $start_date = strtotime($form_state['values']['to_date']);
+  $end_date = $start_date + 60;
+
+  global $user;
+  $user_id = $user->uid;
+  $distributor_id = change_feeds_import_get_distributor_id($user_id);
+
+  $pass = "";
+  // get data from custom table for selected date and user (custom_billing_data).
+  $billing_data = get_custom_data($pass, $start_date, $end_date, $distributor_id);
+  if (!empty($billing_data)) {
+    $billing_count = count($billing_data);
+  }
+  else {
+    $billing_count = "empty";
+  }
+  $form_state['values']['billing_count'] = $billing_count;
+  $form_state['rebuild'] = TRUE;
+}
+
+/**
+ * 
+ * @param type $form
+ * @param type $form_state
+ */
+function create_picking_billing_form_submit($form, &$form_state) {
+
+  $start_date = strtotime($form_state['values']['to_date']);
+  $end_date = $start_date + 60;
+
+  global $user;
+  $user_id = $user->uid;
+  $distributor_id = change_feeds_import_get_distributor_id($user_id);
+
+  $query = db_select('custom_billing_data', 'cb');
+  $query->join('field_data_field_sku7_code', 'gaisc', 'gaisc.field_sku7_code_value = cb.sku7_code');
+  $query->condition('gaisc.bundle', 'sku7_code_master', '=');
+  $query->join('node', 'nd', 'nd.nid = gaisc.entity_id');
+  $query->condition('nd.uid', $distributor_id, '=');
+//    $query->join('field_data_field_godown_area_id', 'gai', 'gaisc.entity_id = gai.entity_id');
+//    $query->condition('gai.bundle', 'sku7_code_master', '=');
+//    $query->join('field_data_field_pack_size', 'fps', 'fps.entity_id = gaisc.entity_id');
+//    $query->condition('fps.bundle', 'sku7_code_master', '=');
+  $query->join('field_data_field_unit_case_units_', 'fucu', 'fucu.entity_id = gaisc.entity_id');
+  $query->condition('fucu.bundle', 'sku7_code_master', '=');
+  $query->fields('cb', array('sku7_code'));
+  $query->addField('cb', 'vehicle', 'field_vehicle_value');
+  $query->addField('cb', 'loading_date', 'field_loading_date_value');
+  $query->addField('cb', 'PRICELIST_GROUP', 'PRICELIST_GROUP');
+  //$query->fields('gai', array('field_godown_area_id_value'));
+  //$query->fields('fps', array('field_pack_size_value'));
+  $query->fields('fucu', array('field_unit_case_units__value'));
+  $query->addExpression('SUM(cb.Sum_of_TOTAL_SALES_QTY)', 'total_sales_qty');
+  $query->addExpression('floor(SUM(cb.Sum_of_TOTAL_SALES_QTY) / field_unit_case_units__value)', 'cld');
+  $query->addExpression('SUM(cb.Sum_of_TOTAL_SALES_QTY) - (field_unit_case_units__value * floor(SUM(cb.Sum_of_TOTAL_SALES_QTY) / field_unit_case_units__value))', 'eaches');
+
+  $query->condition('cb.distributor_id', $distributor_id);
+  //$query->condition('cb.id', $max_billing_id, '>');
+  $query->condition('cb.created_date', array($start_date, $end_date), 'BETWEEN');
+
+  $query->groupBy('field_vehicle_value,field_loading_date_value,sku7_code,PRICELIST_GROUP');
+  $subquery = db_select($query, 'middle');
+  $subquery->fields('middle');
+  //$subquery->addExpression('COUNT(cld)', 'cld_lines');
+  //$subquery->addExpression('COUNT(eaches)', 'eaches_lines');
+
+  $subquery->addExpression('SUM(if(cld > 0, 1, 0))', 'cld_lines');
+  $subquery->addExpression('SUM(if(eaches > 0, 1, 0))', 'eaches_lines');
+
+  $subquery->addExpression('SUM(cld)', 'total_cld');
+  $subquery->addExpression('SUM(eaches)', 'total_eaches');
+  $subquery->groupBy('field_vehicle_value,field_loading_date_value,PRICELIST_GROUP');
+  $data = $subquery->execute()->fetchAll();
+
+
+  foreach ($data as $key => $value) {
+    if ($value->total_cld > 0 || $value->total_eaches > 0) {
+      $node = new stdClass();
+      $node->title = $value->field_vehicle_value . format_date(time());
+      $node->type = "picking";
+      node_object_prepare($node); // Sets some defaults. Invokes hook_prepare() and hook_node_prepare().
+      $node->language = LANGUAGE_NONE; // Or e.g. 'en' if locale is enabled
+      $node->uid = $user->uid;
+      $node->status = 1; //(1 or 0): published or not
+      $node->comment = 1; // 0 = comments disabled, 1 = read only, 2 = read/write
+
+      $node->field_picking_van_id[$node->language][0]['value'] = $value->field_vehicle_value;
+      $node->field_picking_loading_date[$node->language][0]['value'] = date("Y-m-d H:i:s", $value->field_loading_date_value);
+      $node->field_picking_godown_area_id[$node->language][0]['value'] = $value->PRICELIST_GROUP;
+
+      $node->field_pick_units[$node->language][0]['value'] = $value->total_eaches;
+      $node->field_pick_clds[$node->language][0]['value'] = $value->total_cld;
+      $node->field_distributor_uid['und'][0]['value'] = $distributor_id;
+      $node_copy = clone $node;
+      $node_copy->is_new = true;
+      if ($value->total_eaches > 0) {
+        $node->field_picking_picking_type[$node->language][0]['value'] = 'Loose';
+        $node->field_pick_lines[$node->language][0]['value'] = $value->eaches_lines;
+        $node->field_pick_clds[$node->language][0]['value'] = 0;
+        node_save($node);
+      }
+      if ($value->total_cld > 0) {
+        $node_copy->field_picking_picking_type[$node->language][0]['value'] = 'Bulk';
+        $node_copy->field_pick_lines[$node->language][0]['value'] = $value->cld_lines;
+        $node_copy->field_pick_units[$node->language][0]['value'] = 0;
+        node_save($node_copy);
+      }
+    }
+  }
+  drupal_set_message('Picking Data Created Successfully');
+}
+
+function create_party_packing_billing_form_submit($form, &$form_state) {
+  module_load_include('inc', 'change_feeds_import', 'form/create_content_on_confirm');
+  $start_date = strtotime($form_state['values']['to_date']);
+  $end_date = $start_date + 60;
+
+  global $user;
+  $user_id = $user->uid;
+  $distributor_id = change_feeds_import_get_distributor_id($user_id);
+
+  $billing_data_result = db_select('custom_billing_data', 'cb')
+      ->condition('cb.distributor_id', $distributor_id, '=')
+      ->condition('cb.created_date', array($start_date, $end_date), 'BETWEEN')
+      ->fields('cb')
+      ->execute()->fetchAll(PDO::FETCH_ASSOC);
+
+  $party_packing_check = get_party_packing_from_party_code(NULL, $distributor_id);
+
+  foreach ($billing_data_result as $key => $value) {
+    $vehicle = $value['vehicle'];
+    $loading_date = $value['loading_date'];
+    $total_qty = $value['Sum_of_TOTAL_SALES_QTY'];
+    $sku = $value['sku7_code'];
+    $bill_number = $value['bill_number'];
+    $pricelist_group = $value['PRICELIST_GROUP'];
+    if (isset($res[$vehicle . "/" . $loading_date])) {
+      $total_sku = $res[$vehicle . "/" . $loading_date]['sku_count'] ++;
+
+      if ($pricelist_group == "PP") {
+        $group++;
+        if (($group / $res[$vehicle . "/" . $loading_date]['sku_count']) * 100 >= 90) {
+          $group_party_packing = 1;
+        }
+        else {
+          $group_party_packing = 0;
+        }
+      }
+      if (isset($party_packing_check[$value['party_code']]) ? $party_packing_check[$value['party_code']] : 0 == 1) {
+        $check++;
+        if (($check / $res[$vehicle . "/" . $loading_date]['sku_count']) * 100 >= 90) {
+          $party_packing = 1;
+        }
+        else {
+          $party_packing = 0;
+        }
+      }
+
+      $res[$vehicle . "/" . $loading_date]['total_count'] += $total_qty;
+      $unique_sku_string = $vehicle . "" . $loading_date . "" . $sku;
+      if (!in_array("$unique_sku_string", $temp_unique_sku_string)) {
+        $res[$vehicle . "/" . $loading_date]['unique_count'] ++;
+        $temp_unique_sku_string[] = $vehicle . "" . $loading_date . "" . $sku;
+      }
+    }
+    else {
+      $res[$vehicle . "/" . $loading_date] = array();
+      $res[$vehicle . "/" . $loading_date]['sku_count'] = 1;
+      $res[$vehicle . "/" . $loading_date]['total_count'] = $total_qty;
+      $temp_unique_sku_string[] = $vehicle . "" . $loading_date . "" . $sku;
+      $res[$vehicle . "/" . $loading_date]['unique_count'] = 1;
+      if (isset($party_packing_check[$value['party_code']]) ? $party_packing_check[$value['party_code']] : 0 == 1) {
+        $party_packing = 1;
+        $check = 1;
+      }
+      else {
+        $party_packing = 0;
+      }
+
+      if ($pricelist_group == "PP") {
+        $group = 1;
+        $group_party_packing = 1;
+      }
+      else {
+        $group_party_packing = 0;
+      }
+    }
+
+    $distint_sku_count = $res[$vehicle . "/" . $loading_date]['unique_count'];
+    $sku_count = $res[$vehicle . "/" . $loading_date]['sku_count'];
+    $total_qty_count = $res[$vehicle . "/" . $loading_date]['total_count'];
+
+    $created_date = date("Y-m-d h:i:s", $value['date']);
+    $party_packing_data[$vehicle . "/" . $loading_date]['VEHICLE'] = $vehicle;
+    $party_packing_data[$vehicle . "/" . $loading_date]['LOADING_DATE'] = $loading_date;
+    //$party_packing_data[$vehicle . "/" . $loading_date]['party_packing_date'] = $created_date;
+    $party_packing_data[$vehicle . "/" . $loading_date]['loading_sheet_line'] = $distint_sku_count;
+    $party_packing_data[$vehicle . "/" . $loading_date]['bill_lines'] = $sku_count;
+    $party_packing_data[$vehicle . "/" . $loading_date]['each_units'] = $total_qty_count;
+    $party_packing_data[$vehicle . "/" . $loading_date]['party_check'] = $party_packing;
+    $party_packing_data[$vehicle . "/" . $loading_date]['party_pack'] = $group_party_packing;
+  }
+
+  foreach ($party_packing_data as $key => $val) {
+    $party_packing_data_new[] = $val;
+  }
+
+dpm($party_packing_data_new);
+return "1";
+  foreach ($party_packing_data_new as $key => $value) {
+    $loading_date = date("Y-m-d", ($value['LOADING_DATE']));
+    $node = new stdClass();
+    $node->title = $value['VEHICLE'] . format_date(time());
+    $node->type = "party_packing";
+    node_object_prepare($node); // Sets some defaults. Invokes hook_prepare() and hook_node_prepare().
+    $node->language = LANGUAGE_NONE; // Or e.g. 'en' if locale is enabled
+    $node->uid = $user->uid;
+    $node->status = 1; //(1 or 0): published or not
+    $node->comment = 1; // 0 = comments disabled, 1 = read only, 2 = read/write
+    $node->field_party_packing_vehicle[$node->language][0]['value'] = $value['VEHICLE'];
+    $node->field_party_packing_loading_date[$node->language][0]['value'] = $loading_date;
+    //$node->field_party_packing_date[$node->language][0]['value'] = $value['party_packing_date'];
+    $node->field_loading_sheet_line[$node->language][0]['value'] = $value['loading_sheet_line'];
+    $node->field_bill_lines[$node->language][0]['value'] = $value['bill_lines'];
+    $node->field_each_units[$node->language][0]['value'] = $value['each_units'];
+    $node->field_distributor_uid['und'][0]['value'] = $distributor_id ? $distributor_id : 0;
+    $node->field_party_packing_check['und'][0]['value'] = $value['party_check'];
+    $node->field_party_packing_type['und'][0]['value'] = $value['party_pack'];
+    $node = node_submit($node); // Prepare node for saving
+    node_save($node);
+  }
+  drupal_set_message('Party Packing Data Created Successfully');
+}
+
+/**
+ * 
+ * User create sales data from billing upload
+ */
+function create_sales_billing_form_submit($form, &$form_state) {
+
+  $start_date = strtotime($form_state['values']['to_date']);
+  $end_date = $start_date + 60;
+
+  global $user;
+  $user_id = $user->uid;
+  $distributor_id = change_feeds_import_get_distributor_id($user_id);
+  
+  $query = db_select('custom_billing_data', 'cb');
+
+  $query->addField('cb', 'bill_number');
+  $query->addField('cb', 'vehicle', 'vehicle');
+  $query->addField('cb', 'loading_date', 'loading_date');
+  $query->addField('cb', 'bill_date', 'bill_date');
+  $query->addExpression('SUM(cb.Sum_of_NET_SALES_VALUE)', 'sum_net_sales_value');
+
+  $query->condition('cb.distributor_id', $distributor_id);
+  //$query->condition('cb.id', $max_billing_id, '>');
+  $query->condition('cb.created_date', array($start_date, $end_date), 'BETWEEN');
+
+  $query->groupBy('cb.bill_number');
+  $results = $query->execute()->fetchAll();
+  
+  foreach ($results as $key => $value) {
+    $nid = check_node_title_exists($value->bill_number, 'sales_register_data');
+    $node = node_load($nid);
+    if ($node) {
+      $node->field_billing_van[LANGUAGE_NONE][0]['value'] = $value->vehicle;
+      $node->field_billing_loading_date[LANGUAGE_NONE][0]['value'] = $value->loading_date;
+      $node->field_sr_bill_date[LANGUAGE_NONE][0]['value'] = $value->bill_date;
+      $node->field_bill_net_sales[LANGUAGE_NONE][0]['value'] = round($value->sum_net_sales_value, 2);
+      // sum of net sales value from custom_billing_data to sales register
+      node_save($node);
+    }
+  }
+  
+  drupal_set_message('Sales Register Data Created Successfully');
 }
