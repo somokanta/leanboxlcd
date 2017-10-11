@@ -840,10 +840,10 @@ function get_html_for_impact_return_report($bill_flag, $users, $timestamp, $num_
   }
   $timestamp = $timestamp;
   if ($bill_flag == 'count_bill') {
-    $caption = 'No. of bills uploaded on TP';
+    $caption = 'No. of bills Processed in Impact ';
   }
   else if ($bill_flag == 'count_bill_value') {
-    $caption = 'Value of bills uploaded on TP';
+    $caption = 'Value of bills Processed in Impact';
   }
 
   $html .= '<caption><h2> ' . $caption . '</h2></caption>';
