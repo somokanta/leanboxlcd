@@ -255,6 +255,7 @@ function change_feeds_import_create_van_cld_report_data($max_billing_id) {
   $query->addExpression('floor(SUM(Sum_of_TOTAL_SALES_QTY) / field_unit_case_units__value)', 'cld');
   $query->addExpression('SUM(cb.Sum_of_TOTAL_SALES_QTY) - (field_unit_case_units__value * floor(SUM(Sum_of_TOTAL_SALES_QTY) / field_unit_case_units__value))', 'eaches');
   $query->groupBy('vehicle,loading_date,sku7_code');
+  $query->havingCondition('cld', 0, '!=');
   $results = $query->execute()->fetchAll();
 
   return $results;
