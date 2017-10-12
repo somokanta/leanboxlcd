@@ -80,7 +80,7 @@ function send_email_ofd_report() {
   $total_bill_count = 0;
   $total_dispatch_bill_value = 0;
   $total_dispatch_loader_team_count = 0;
-  $counter = 0;
+  $counter = 1;
   $table_style =  'border: 1px solid #000;';
   $header = array('Sr. No.','Trip Creation Date', 'Trip Execution Date', 'Trip ID','HHT ID','Bill Count','Dispatch Bill Value', 'Dispatch Supervisor','Cashier Name','Vehicle No','Dispatch Loader Team Count','Dispatch Date','Dispatch Start Time','Sequence Method');
   foreach($data as $result) {
@@ -151,7 +151,7 @@ function send_email_ofd_report() {
   $rows = array();
   $total_bill_count = 0;
   $total_dispatch_bill_value = 0;
-  $counter = 0;
+  $counter = 1;
   $table_style =  'border: 1px solid #000;';
   $header = array('Sr. No.','Trip Creation Date', 'Trip Execution Date', 'Trip ID','HHT ID','Bill Count','Dispatch Bill Value', 'Dispatch Supervisor','Cashier Name','Vehicle No','Dispatch Loader Team Count','Dispatch Date','Dispatch Start Time','Sequence Method');
   foreach($data as $result) {
