@@ -14,7 +14,7 @@ function leanbox_dashboard_menu() {
   $items['sales-return-data'] = array(
     'title' => 'Sales Return Data',
     'page callback' => 'sales_return_data_callback',
-    'access callback' => TRUE,
+    'access arguments' => array('Distributor Upload File'),
     'type' => MENU_CALLBACK,
   );
   $items['sales-delivery-table'] = array(
