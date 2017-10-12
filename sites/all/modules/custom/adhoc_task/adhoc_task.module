@@ -787,7 +787,7 @@ function central_impact_return_analysis() {
 
   // Check the condition of filter doesn't print in xls.
   if (arg(1) != 'export') {
-    $html .= drupal_render(drupal_get_form('weekly_report_form'));
+    $form = drupal_render(drupal_get_form('weekly_report_form'));
   }
 
   // Function to get user id of distributor
@@ -820,16 +820,18 @@ function central_impact_return_analysis() {
   $data = array();
   $data['from_date'] = $from_date;
   $data['to_date'] = $to_date;
-  //$html .= l(t('XLS'), 'central-impact-return-analys/export', array('query' => array($data)));
-  cache_set('central-impact-export'.session_id(), $html, 'cache', time() + 60*10);
-  $html .= l(t('XLS'), 'central-impact-return-analys/export', array('query' => array('id'=>'central-impact-export')));
+  
+  //newly added, 2 lines
+  cache_set('central-impact-return-analys'.session_id(), $html, 'cache', time() + 60*10);
+  $html .= l(t('XLS'), 'central-impact-return-analys/export', array('query' => array($data))); 
+  
   $params['subject'] = "Weekly Billing Report";
   $params['body'] = $html;
   $mail_to = "abhishek.r@iksula.com";
   $from = "MIS.HELPDESK@leanbox.in";
   //drupal_mail('adhoc_task', 'weekly_billing_report', $mail_to, LANGUAGE_NONE, $params, $from);
 
-  return $html;
+  return $form.$html;
 }
 
 function get_html_for_impact_return_report($bill_flag, $users, $timestamp, $num_days) {
@@ -905,14 +907,17 @@ function get_impact_return_report_data($timestamp, $distributor_id, $rs_code, $r
 
 function central_impact_return_analysis_export() {
   $file = "centralImpactReport.xls";
-  //$table = central_impact_return_analysis();
-  $c = cache_get('central-impact-export'.session_id());
-  $table = $c->data;
+  $data = cache_get('central-impact-return-analys' . session_id());
+  if (empty($data)) {
+    $table = central_impact_return_analysis();
+  }
+  else {
+    $table = $data->data;
+  }
   header("Content-type: application/vnd.ms-excel");
   header("Content-Disposition: attachment; filename=$file");
   echo $table;
 }
-
 
 /**
  * 
