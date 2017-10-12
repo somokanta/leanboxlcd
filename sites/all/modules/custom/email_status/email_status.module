@@ -109,11 +109,14 @@ function send_email_ofd_report() {
   $row11['style'] = 'border: 1px solid #000;';
   $row12['data']  = $result->_field_data->nid->entity->field_dispatch_start_time->und[0]->value;
   $row12['style'] = 'border: 1px solid #000;';
-  if ($result->_field_data->nid->entity->field_sequence_method->und[0]->value == 1) { {
-  $seq_method = 'API';
+  if ($result->_field_data->nid->entity->field_sequence_method->und[0]->value == 1) { 
+    $seq_method = 'API';
   }
   elseif ($result->_field_data->nid->entity->field_sequence_method->und[0]->value == 0) {
-  $seq_method = 'MANUAL';
+    $seq_method = 'MANUAL';
+  }
+  else{
+    $seq_method = '';
   }
   $row13['data']  = $seq_method;
   $row13['style'] = 'border: 1px solid #000;';
@@ -168,10 +171,13 @@ function send_email_ofd_report() {
   $row12['data']  = $result->_field_data->nid->entity->field_dispatch_start_time->und[0]->value;
   $row12['style'] = 'border: 1px solid #000;';
   if ($result->_field_data->nid->entity->field_sequence_method->und[0]->value == 1) {
-  $seq_method = 'API';
+    $seq_method = 'API';
   }
   elseif ($result->_field_data->nid->entity->field_sequence_method->und[0]->value == 0){
-  $seq_method = 'MANUAL';
+    $seq_method = 'MANUAL';
+  }
+  else {
+    $seq_method = '';
   }
   $row13['data']  = $seq_method;
   $row13['style'] = 'border: 1px solid #000;';
