@@ -72,21 +72,127 @@ function send_email_ofd_report() {
   
   $view_name = "ofd_mailer";
   $arg1 = date("mdY");
-  $view = views_get_view($view_name, '');
-  $view->set_display('page');
-  $view->set_arguments(array($arg1));
-  $rendered_html = $view->render();
+  $results = views_get_view_result($view_name, 'page', $arg1);
+  $encoded_data = json_encode($results);
+  $data = json_decode($encoded_data);
+  
+  $rows = array();
+  $total_bill_count = 0;
+  $total_dispatch_bill_value = 0;
+  $total_dispatch_loader_team_count = 0;
+  $header = array('Trip Creation Date', 'Trip Execution Date', 'Trip ID','HHT ID','Bill Count','Dispatch Bill Value', 'Dispatch Supervisor','Cashier Name','Vehicle No','Dispatch Loader Team Count','Dispatch Date','Dispatch Start Time','Sequence Method');
+  foreach($data as $result) {
+  $trip_creation_date =  $result->_field_data->nid->entity->field_trip_creation_date->und[0]->value;
+  $row1['data'] = date('d-M-y',$trip_creation_date);
+  $row1['style'] = 'border: 1px solid #000;';
+  $trip_execution_date =  $result->_field_data->nid->entity->field_trip_executon_date->und[0]->value;
+  $row2['data']  = date('d-M-y',$trip_execution_date);
+  $row2['style'] = 'border: 1px solid #000;';
+  $row3['data']  = $result->_field_data->nid->entity->field_trip_id->und[0]->value;
+  $row3['style'] = 'border: 1px solid #000;';
+  $row4['data'] = $result->_field_data->nid->entity->field_hht_id->und[0]->nid;
+  $row4['style'] = 'border: 1px solid #000;';
+  $row5['data'] = $result->_field_data->nid->entity->field_bill_count->und[0]->value;
+  $row5['style'] = 'border: 1px solid #000;';
+  $row6['data']  = $result->_field_data->nid->entity->field_dispatch_bill_value->und[0]->value;
+  $row6['style'] = 'border: 1px solid #000;';
+  $row7['data'] = $result->_field_data->nid->entity->field_dispatch_supervisor->und[0]->value;
+  $row7['style'] = 'border: 1px solid #000;';
+  $row8['data'] = $result->_field_data->nid->entity->field_cashier_name->und[0]->value;
+  $row8['style'] = 'border: 1px solid #000;';
+  $row9['data'] = $result->_field_data->nid->entity->field_vehicle_no->und[0]->value;
+  $row9['style'] = 'border: 1px solid #000;';
+  $row10['data']  = $result->_field_data->nid->entity->field_dispatch_loader_team_count->und[0]->value;
+  $row10['style'] = 'border: 1px solid #000;';
+  $dispatch_date = strtotime($result->_field_data->nid->entity->field_dispatch_date->und[0]->value);
+  $row11['data'] =  date('d-M-y',$dispatch_date);
+  $row11['style'] = 'border: 1px solid #000;';
+  $row12['data']  = $result->_field_data->nid->entity->field_dispatch_start_time->und[0]->value;
+  $row12['style'] = 'border: 1px solid #000;';
+  if ($result->_field_data->nid->entity->field_sequence_method->und[0]->value == 1) { 
+    $seq_method = 'API';
+  }
+  elseif ($result->_field_data->nid->entity->field_sequence_method->und[0]->value == 0) {
+    $seq_method = 'MANUAL';
+  }
+  else{
+    $seq_method = '';
+  }
+  $row13['data']  = $seq_method;
+  $row13['style'] = 'border: 1px solid #000;';
+
+  $total_bill_count  += $row5['data'];
+  $total_dispatch_bill_value += $row6['data'];
+  $total_dispatch_loader_team_count += $row10['data'];
+      
+  $rows[]  = array($row1,$row2,$row3,$row4,$row5,$row6,$row7,$row8,$row9,$row10,$row11,$row12,$row13);
+
+  }
+  $rows[]  = array('SUM','','','',$total_bill_count,$total_dispatch_bill_value,'','','',$total_dispatch_loader_team_count,'','','');
+
   
   $ofd_html = "<h3>Dispatch Date : " . $todays_date ." (Today)</h3>";
-  $ofd_html .= $rendered_html;
+  $ofd_html .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
   
   $view_name2 = "ofd_mailer2";
-  $view2 = views_get_view($view_name2, '');
-  $view2->set_display('page');
-  $rendered_html2 = $view2->render();
+  $results = views_get_view_result($view_name2, 'page');
+  $encoded_data = json_encode($results);
+  $data = json_decode($encoded_data);
   
+  $rows = array();
+  $total_bill_count = 0;
+  $total_dispatch_bill_value = 0;
+  $header = array('Trip Creation Date', 'Trip Execution Date', 'Trip ID','HHT ID','Bill Count','Dispatch Bill Value', 'Dispatch Supervisor','Cashier Name','Vehicle No','Dispatch Loader Team Count','Dispatch Date','Dispatch Start Time','Sequence Method');
+  foreach($data as $result) {
+  $trip_creation_date =  $result->_field_data->nid->entity->field_trip_creation_date->und[0]->value;
+  $row1['data'] = date('d-M-y',$trip_creation_date);
+  $row1['style'] = 'border: 1px solid #000;';
+  $trip_execution_date =  $result->_field_data->nid->entity->field_trip_executon_date->und[0]->value;
+  $row2['data']  = date('d-M-y',$trip_execution_date);
+  $row2['style'] = 'border: 1px solid #000;';
+  $row3['data']  = $result->_field_data->nid->entity->field_trip_id->und[0]->value;
+  $row3['style'] = 'border: 1px solid #000;';
+  $row4['data'] = $result->_field_data->nid->entity->field_hht_id->und[0]->nid;
+  $row4['style'] = 'border: 1px solid #000;';
+  $row5['data'] = $result->_field_data->nid->entity->field_bill_count->und[0]->value;
+  $row5['style'] = 'border: 1px solid #000;';
+  $row6['data']  = $result->_field_data->nid->entity->field_dispatch_bill_value->und[0]->value;
+  $row6['style'] = 'border: 1px solid #000;';
+  $row7['data'] = $result->_field_data->nid->entity->field_dispatch_supervisor->und[0]->value;
+  $row7['style'] = 'border: 1px solid #000;';
+  $row8['data'] = $result->_field_data->nid->entity->field_cashier_name->und[0]->value;
+  $row8['style'] = 'border: 1px solid #000;';
+  $row9['data'] = $result->_field_data->nid->entity->field_vehicle_no->und[0]->value;
+  $row9['style'] = 'border: 1px solid #000;';
+  $row10['data']  = $result->_field_data->nid->entity->field_dispatch_loader_team_count->und[0]->value;
+  $row10['style'] = 'border: 1px solid #000;';
+  $row11['data'] = $result->_field_data->nid->entity->field_dispatch_date->und[0]->value;
+  $row11['style'] = 'border: 1px solid #000;';
+  $row12['data']  = $result->_field_data->nid->entity->field_dispatch_start_time->und[0]->value;
+  $row12['style'] = 'border: 1px solid #000;';
+  if ($result->_field_data->nid->entity->field_sequence_method->und[0]->value == 1) {
+    $seq_method = 'API';
+  }
+  elseif ($result->_field_data->nid->entity->field_sequence_method->und[0]->value == 0){
+    $seq_method = 'MANUAL';
+  }
+  else {
+    $seq_method = '';
+  }
+  $row13['data']  = $seq_method;
+  $row13['style'] = 'border: 1px solid #000;';
+
+  $total_bill_count  += $row5['data'];
+  $total_dispatch_bill_value += $row6['data'];
+
+  $rows[]  = array($row1,$row2,$row3,$row4,$row5,$row6,$row7,$row8,$row9,$row10,$row11,$row12,$row13);
+
+  }
+  $rows[]  = array('SUM','','','',$total_bill_count,$total_dispatch_bill_value,'','','','','','','');
+
+
   $ofd_html2 = "<h3>Pending Van Till : " . $todays_date ." (Today)</h3>";
-  $ofd_html2 .= $rendered_html2;
+  $ofd_html2 .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
   
   $params['subject'] = "OFD - $distributor_name";
   $params['body']  = $ofd_html. "<br>" .$ofd_html2;
