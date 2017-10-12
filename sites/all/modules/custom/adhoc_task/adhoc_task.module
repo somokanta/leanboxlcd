@@ -966,6 +966,11 @@ function create_billing_form($form, &$form_state) {
         '#value' => t('Create Picking'),
         '#submit' => array('create_picking_billing_form_submit'),
       );
+      $form['van_cld_submit'] = array(
+        '#type' => 'submit',
+        '#value' => t('VAN CLD'),
+        '#submit' => array('create_van_cld_billing_form_submit'),
+      );
       $form['party_packing_submit'] = array(
         '#type' => 'submit',
         '#value' => t('Party Packing'),
@@ -1268,4 +1273,60 @@ function create_sales_billing_form_submit($form, &$form_state) {
   }
   
   drupal_set_message('Sales Register Data Created Successfully');
+}
+
+
+
+function create_van_cld_billing_form_submit($form, &$form_state) {
+
+  $start_date = strtotime($form_state['values']['to_date']);
+  $end_date = $start_date + 60;
+
+  global $user;
+  $user_id = $user->uid;
+  $distributor_id = change_feeds_import_get_distributor_id($user_id);
+
+  $query = db_select('custom_billing_data', 'cb');
+  $query->join('field_data_field_sku7_code', 'gaisc', 'gaisc.field_sku7_code_value = cb.sku7_code');
+  $query->condition('gaisc.bundle', 'sku7_code_master', '=');
+  $query->join('node', 'nd', 'nd.nid = gaisc.entity_id');
+  $query->condition('nd.uid', $distributor_id, '=');
+  $query->join('field_data_field_unit_case_units_', 'fucu', 'fucu.entity_id = gaisc.entity_id');
+  $query->condition('fucu.bundle', 'sku7_code_master', '=');
+  $query->fields('cb', array('vehicle', 'loading_date', 'sku7_code', 'product_name', 'Sum_of_TOTAL_SALES_QTY', 'mrp', 'PRICELIST_GROUP'));
+  $query->fields('fucu', array('field_unit_case_units__value'));
+  $query->condition('cb.distributor_id', $distributor_id);
+  //$query->condition('cb.id', $max_billing_id, '>');
+  $query->condition('cb.created_date', array($start_date, $end_date), 'BETWEEN');
+  $query->addExpression('floor(SUM(Sum_of_TOTAL_SALES_QTY) / field_unit_case_units__value)', 'cld');
+  $query->addExpression('SUM(cb.Sum_of_TOTAL_SALES_QTY) - (field_unit_case_units__value * floor(SUM(Sum_of_TOTAL_SALES_QTY) / field_unit_case_units__value))', 'eaches');
+  $query->groupBy('vehicle,loading_date,sku7_code');
+  $results = $query->execute()->fetchAll();
+  
+  foreach ($results as $key => $value) {
+    $vehicle = $value->vehicle;
+    $loading_date = $value->loading_date;
+    $sku7_code = $value->sku7_code;
+    $product_name = $value->product_name;
+    $cld = $value->cld;
+    $mrp = $value->mrp;
+    $pricelist_group = $value->PRICELIST_GROUP;
+
+
+    if ($cld != 0) {
+      $stage_billing_data = db_insert('van_cld_data_table') // Table name no longer needs {}
+          ->fields(array(
+            'vehicle' => $vehicle,
+            'loading_date' => $loading_date,
+            'sku7_code' => $sku7_code,
+            'product_name' => $product_name,
+            'distributor_id' => $distributor_id,
+            'cld' => $cld,
+            'mrp' => $mrp,
+            'pricelist_group' => $pricelist_group,
+          ))
+          ->execute();
+    }
+  }
+  drupal_set_message('Van CLD Data Created Successfully');
 }
