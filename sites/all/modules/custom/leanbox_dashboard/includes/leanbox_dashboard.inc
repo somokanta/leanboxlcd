@@ -1337,11 +1337,11 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     if (!empty($start_date) && !empty($end_date)) {
          $query->condition('srb.field_sr_bill_date_value', array($start_date, $end_date), 'BETWEEN');
       }
-   // $query->join('custom_billing_data', 'bd', 'bd.bill_number = n.title');
+    // $query->join('custom_billing_data', 'bd', 'bd.bill_number = n.title');
     //$query->condition('bd.distributor_id', $distributor_id);
-//    if (!empty($start_date) && !empty($end_date)) {
-//      $query->condition('bd.bill_date', array($start_date, $end_date), 'BETWEEN');
-//    }
+   //    if (!empty($start_date) && !empty($end_date)) {
+   //      $query->condition('bd.bill_date', array($start_date, $end_date), 'BETWEEN');
+   //    }
    // $query->groupBy('bd.bill_number');
     $query->join('field_data_field_bill_value', 'b', 'b.entity_id = n.nid');
     $query->leftjoin('field_data_field_sales_return_amt', 'r', 'r.entity_id = n.nid');
@@ -1369,8 +1369,8 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     $query->addExpression('SUM(bd.Sum_of_NET_SALES_VALUE)', 'sum');
      $query->join('field_data_field_bill_net_sales', 'ns', 'ns.entity_id = n.nid');
      
-//$query->groupBy('bd.bill_number');
-//$query->addExpression('COUNT(bd.bill_number)', 'bill_number');
+  //$query->groupBy('bd.bill_number');
+  //$query->addExpression('COUNT(bd.bill_number)', 'bill_number');
     $res3 = $query->execute()->fetchField();
     $total_bill_value = round($res3);
  
@@ -1613,7 +1613,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
       $query->addfield('plg', 'field_pl_group_value', 'pl_group');
       //$query->addExpression('SUM(bl.Sum_of_NET_SALES_VALUE)', 'sales_value');
       $query->addField('ns', 'field_bill_net_sales_value', 'sales_value');
-      $query->addField('n', 'title', 'bill_no');
+      $query->addField('n', 'title', 'bill_number');
       $query->addField('sp', 'field_sales_party_code_value', 'party_code');
       $query->addField('srb', 'field_sr_bill_date_value', 'bill_date');
       $query->leftjoin('field_data_field_impact_delivery_date', 'idl', 'idl.entity_id =  n.nid');
