@@ -90,7 +90,12 @@ function send_email_ofd_report() {
   $row2['style'] = 'border: 1px solid #000;';
   $row3['data']  = $result->_field_data->nid->entity->field_trip_id->und[0]->value;
   $row3['style'] = 'border: 1px solid #000;';
-  $row4['data'] = $result->_field_data->nid->entity->field_hht_id->und[0]->nid;
+  $hht_id = $result->_field_data->nid->entity->field_hht_id->und[0]->nid;
+  $query = db_select('node', 'n');
+  $query->fields('n', array('title'));
+  $query->condition('n.nid', $hht_id,'=');
+  $result1 = $query->execute()->fetchfield();
+  $row4['data'] = $result1;
   $row4['style'] = 'border: 1px solid #000;';
   $row5['data'] = $result->_field_data->nid->entity->field_bill_count->und[0]->value;
   $row5['style'] = 'border: 1px solid #000;';
@@ -152,7 +157,12 @@ function send_email_ofd_report() {
   $row2['style'] = 'border: 1px solid #000;';
   $row3['data']  = $result->_field_data->nid->entity->field_trip_id->und[0]->value;
   $row3['style'] = 'border: 1px solid #000;';
-  $row4['data'] = $result->_field_data->nid->entity->field_hht_id->und[0]->nid;
+  $hht_id = $result->_field_data->nid->entity->field_hht_id->und[0]->nid;
+  $query = db_select('node', 'n');
+  $query->fields('n', array('title'));
+  $query->condition('n.nid', $hht_id,'=');
+  $result1 = $query->execute()->fetchfield();
+  $row4['data'] = $result1;
   $row4['style'] = 'border: 1px solid #000;';
   $row5['data'] = $result->_field_data->nid->entity->field_bill_count->und[0]->value;
   $row5['style'] = 'border: 1px solid #000;';
