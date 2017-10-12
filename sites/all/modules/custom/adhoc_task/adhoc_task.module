@@ -827,8 +827,9 @@ function central_impact_return_analysis() {
   $data = array();
   $data['from_date'] = $from_date;
   $data['to_date'] = $to_date;
-  $html .= l(t('XLS'), 'central-impact-return-analys/export', array('query' => array($data)));
-
+  //$html .= l(t('XLS'), 'central-impact-return-analys/export', array('query' => array($data)));
+  cache_set('central-impact-export'.session_id(), $html, 'cache', time() + 60*10);
+  $html .= l(t('XLS'), 'central-impact-return-analys/export', array('query' => array('id'=>'central-impact-export')));
   $params['subject'] = "Weekly Billing Report";
   $params['body'] = $html;
   $mail_to = "abhishek.r@iksula.com";
@@ -911,7 +912,9 @@ function get_impact_return_report_data($timestamp, $distributor_id, $rs_code, $r
 
 function central_impact_return_analysis_export() {
   $file = "centralImpactReport.xls";
-  $table = central_impact_return_analysis();
+  //$table = central_impact_return_analysis();
+  $c = cache_get('central-impact-export'.session_id());
+  $table = $c->data;
   header("Content-type: application/vnd.ms-excel");
   header("Content-Disposition: attachment; filename=$file");
   echo $table;
