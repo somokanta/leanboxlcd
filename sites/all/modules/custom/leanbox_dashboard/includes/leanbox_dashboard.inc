@@ -1613,7 +1613,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
       $query->addfield('plg', 'field_pl_group_value', 'pl_group');
       //$query->addExpression('SUM(bl.Sum_of_NET_SALES_VALUE)', 'sales_value');
       $query->addField('ns', 'field_bill_net_sales_value', 'sales_value');
-      $query->addField('n', 'title', 'bill_no');
+      $query->addField('n', 'title', 'bill_number');
       $query->addField('sp', 'field_sales_party_code_value', 'party_code');
       $query->addField('srb', 'field_sr_bill_date_value', 'bill_date');
       $query->leftjoin('field_data_field_impact_delivery_date', 'idl', 'idl.entity_id =  n.nid');
