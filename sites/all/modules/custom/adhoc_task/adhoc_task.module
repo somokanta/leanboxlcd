@@ -179,7 +179,6 @@ function update_sales_register_thankyou() {
 }
 
 function update_sales_register() {
-   drupal_set_message('innn');
   $batch = array(
     'title' => t('Update Sales Register Nodes'),
     'operations' => array(
