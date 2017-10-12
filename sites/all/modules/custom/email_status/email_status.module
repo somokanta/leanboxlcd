@@ -80,7 +80,8 @@ function send_email_ofd_report() {
   $total_bill_count = 0;
   $total_dispatch_bill_value = 0;
   $total_dispatch_loader_team_count = 0;
-  $header = array('Trip Creation Date', 'Trip Execution Date', 'Trip ID','HHT ID','Bill Count','Dispatch Bill Value', 'Dispatch Supervisor','Cashier Name','Vehicle No','Dispatch Loader Team Count','Dispatch Date','Dispatch Start Time','Sequence Method');
+  $counter = 0;
+  $header = array('Sr. No.','Trip Creation Date', 'Trip Execution Date', 'Trip ID','HHT ID','Bill Count','Dispatch Bill Value', 'Dispatch Supervisor','Cashier Name','Vehicle No','Dispatch Loader Team Count','Dispatch Date','Dispatch Start Time','Sequence Method');
   foreach($data as $result) {
   $trip_creation_date =  $result->_field_data->nid->entity->field_trip_creation_date->und[0]->value;
   $row1['data'] = date('d-M-y',$trip_creation_date);
@@ -94,8 +95,8 @@ function send_email_ofd_report() {
   $query = db_select('node', 'n');
   $query->fields('n', array('title'));
   $query->condition('n.nid', $hht_id,'=');
-  $result1 = $query->execute()->fetchfield();
-  $row4['data'] = $result1;
+  $hht_id_title = $query->execute()->fetchfield();
+  $row4['data'] = $hht_id_title;
   $row4['style'] = 'border: 1px solid #000;';
   $row5['data'] = $result->_field_data->nid->entity->field_bill_count->und[0]->value;
   $row5['style'] = 'border: 1px solid #000;';
@@ -129,11 +130,11 @@ function send_email_ofd_report() {
   $total_bill_count  += $row5['data'];
   $total_dispatch_bill_value += $row6['data'];
   $total_dispatch_loader_team_count += $row10['data'];
-      
-  $rows[]  = array($row1,$row2,$row3,$row4,$row5,$row6,$row7,$row8,$row9,$row10,$row11,$row12,$row13);
+  $counter++;
+  $rows[]  = array($counter,$row1,$row2,$row3,$row4,$row5,$row6,$row7,$row8,$row9,$row10,$row11,$row12,$row13);
 
   }
-  $rows[]  = array('SUM','','','',$total_bill_count,$total_dispatch_bill_value,'','','',$total_dispatch_loader_team_count,'','','');
+  $rows[]  = array('SUM','','','','',$total_bill_count,$total_dispatch_bill_value,'','','',$total_dispatch_loader_team_count,'','','');
 
   
   $ofd_html = "<h3>Dispatch Date : " . $todays_date ." (Today)</h3>";
@@ -147,7 +148,8 @@ function send_email_ofd_report() {
   $rows = array();
   $total_bill_count = 0;
   $total_dispatch_bill_value = 0;
-  $header = array('Trip Creation Date', 'Trip Execution Date', 'Trip ID','HHT ID','Bill Count','Dispatch Bill Value', 'Dispatch Supervisor','Cashier Name','Vehicle No','Dispatch Loader Team Count','Dispatch Date','Dispatch Start Time','Sequence Method');
+  $counter = 0;
+  $header = array('Sr. No.','Trip Creation Date', 'Trip Execution Date', 'Trip ID','HHT ID','Bill Count','Dispatch Bill Value', 'Dispatch Supervisor','Cashier Name','Vehicle No','Dispatch Loader Team Count','Dispatch Date','Dispatch Start Time','Sequence Method');
   foreach($data as $result) {
   $trip_creation_date =  $result->_field_data->nid->entity->field_trip_creation_date->und[0]->value;
   $row1['data'] = date('d-M-y',$trip_creation_date);
@@ -161,8 +163,8 @@ function send_email_ofd_report() {
   $query = db_select('node', 'n');
   $query->fields('n', array('title'));
   $query->condition('n.nid', $hht_id,'=');
-  $result1 = $query->execute()->fetchfield();
-  $row4['data'] = $result1;
+  $hht_id_title = $query->execute()->fetchfield();
+  $row4['data'] = $hht_id_title;
   $row4['style'] = 'border: 1px solid #000;';
   $row5['data'] = $result->_field_data->nid->entity->field_bill_count->und[0]->value;
   $row5['style'] = 'border: 1px solid #000;';
@@ -194,11 +196,11 @@ function send_email_ofd_report() {
 
   $total_bill_count  += $row5['data'];
   $total_dispatch_bill_value += $row6['data'];
-
-  $rows[]  = array($row1,$row2,$row3,$row4,$row5,$row6,$row7,$row8,$row9,$row10,$row11,$row12,$row13);
+  $counter++;
+  $rows[]  = array($counter,$row1,$row2,$row3,$row4,$row5,$row6,$row7,$row8,$row9,$row10,$row11,$row12,$row13);
 
   }
-  $rows[]  = array('SUM','','','',$total_bill_count,$total_dispatch_bill_value,'','','','','','','');
+  $rows[]  = array('SUM','','','','',$total_bill_count,$total_dispatch_bill_value,'','','','','','','');
 
 
   $ofd_html2 = "<h3>Pending Van Till : " . $todays_date ." (Today)</h3>";
