@@ -170,7 +170,8 @@ function leanbox_dashboard_area_hook_group_batch_fix_process($data, $distributor
 function leanbox_dashboard_area_hook_group_csv_finished($success, $results, $operations) {
   if ($success) {
     $fid = $results['fid'];
-    drupal_goto("area-hook-group-confirm/" . $fid);
+    //drupal_goto("area-hook-group-confirm/" . $fid);
+    $_GET['destination'] = "area-hook-group-confirm/" . $fid;
   }
   else {
     drupal_set_message('There is Error Occured in batch process');
@@ -330,7 +331,8 @@ function leanbox_dashboard_area_hook_group_finished($success, $results, $operati
     }
 
     drupal_set_message(t("$count node was updated"));
-    drupal_goto("area-hook-group/import");
+    //drupal_goto("area-hook-group/import");
+    $_GET['destination'] = "area-hook-group/import";
   }
   else {
     drupal_set_message('There is Error Occured in batch process');

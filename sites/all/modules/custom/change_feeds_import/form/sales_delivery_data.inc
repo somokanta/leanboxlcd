@@ -373,7 +373,8 @@ function change_feeds_import_sales_delivery_batch_fix_process1($data, $distribut
 function sales_delivery_data_csv_finished($success, $results, $operations) {
   if ($success) {
     $fid = $results['fid'];
-    drupal_goto("sales-delivery-data-confirm/" . $fid);
+    //drupal_goto("sales-delivery-data-confirm/" . $fid);
+    $_GET['destination'] = "sales-delivery-data-confirm/" . $fid;
   }
   else {
     drupal_set_message('There is Error Occured in batch process');
@@ -568,7 +569,8 @@ function change_feeds_import_sales_delivery_finished($success, $results, $operat
     }
 
     drupal_set_message(t("$count node was created"));
-    drupal_goto("sales-delivery-data/import");
+    //drupal_goto("sales-delivery-data/import");
+    $_GET['destination'] = "sales-delivery-data/import";
   }
   else {
     drupal_set_message('There is Error Occured in batch process');
