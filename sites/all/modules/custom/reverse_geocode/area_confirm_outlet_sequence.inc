@@ -575,6 +575,7 @@ function update_area_confirm_outlet_sequence_status($code, $sequence_no) {
   if ($nid) {
     $node = node_load($nid);
     $node->field_sequence['und'][0]['value'] = $sequence_no;
+    $node->field_revised_sequence['und'][0]['value'] = $sequence_no;
     node_save($node);
   }
 }
