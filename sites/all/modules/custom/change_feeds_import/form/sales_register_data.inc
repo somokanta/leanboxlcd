@@ -223,7 +223,8 @@ function change_feeds_import_sales_register_batch_fix_process($data, $distributo
 function sales_register_data_csv_finished($success, $results, $operations) {
   if ($success) {
     $fid = $results['fid'];
-    drupal_goto("sales-confirm/" . $fid);
+    //drupal_goto("sales-confirm/" . $fid);
+    $_GET['destination'] = "sales-confirm/" . $fid;
   }
   else {
     drupal_set_message('There is Error Occured in batch process');
@@ -434,7 +435,8 @@ function change_feeds_import_sales_reg_finished($success, $results, $operations)
     }
 
     drupal_set_message(t("$count node was created"));
-    drupal_goto("sales-register/import");
+    //drupal_goto("sales-register/import");
+    $_GET['destination'] = "sales-register/import";
   }
   else {
     drupal_set_message('There is Error Occured in batch process');
