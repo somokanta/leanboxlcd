@@ -873,6 +873,8 @@ function dispatch_planning_form_save_validate($form, &$form_state) {
     if ($response_data->status === 'success') {
       $response_array = $response_data->solution->origin;
       $i = 1;
+      $form_state['dispatch_planning']['total_travel_time'] = $response_data->total_travel_time;
+      $form_state['dispatch_planning']['total_distance'] = $response_data->total_distance;
       foreach ($response_array as $k => $v) {
         if ($v->location_name !== 'origin') {
           $bill_sequence_array[$i] = $v->location_name;
@@ -911,6 +913,9 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
 
   if (isset($form_state['dispatch_planning']['bill_sequence_array']) && !empty($form_state['dispatch_planning']['bill_sequence_array'])) {
     $bill_sequence = $form_state['dispatch_planning']['bill_sequence_array'];
+    $total_travel_time = $form_state['dispatch_planning']['total_travel_time'];
+    $total_distance = $form_state['dispatch_planning']['total_distance'];
+      
     $seq_flag = 1;
   }
 
@@ -959,6 +964,8 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
   
   if($seq_flag){
     $node->field_sequence_method[$node->language][0]['value'] = 1;
+    $node->field_total_travel_time[$node->language][0]['value'] = $total_travel_time;
+    $node->field_total_distance[$node->language][0]['value'] = $total_distance;
   }
   else{
     $node->field_sequence_method[$node->language][0]['value'] = 0;
