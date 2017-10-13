@@ -331,7 +331,7 @@ function leanbox_dashboard_area_hook_group_finished($success, $results, $operati
     }
 
     drupal_set_message(t("$count node was updated"));
-    drupal_goto("area-hook-group/import");
+    //drupal_goto("area-hook-group/import");
     $_GET['destination'] = "area-hook-group/import";
   }
   else {
