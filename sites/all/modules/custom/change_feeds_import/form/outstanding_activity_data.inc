@@ -170,7 +170,8 @@ function change_feeds_import_outstanding_activity_batch_fix_process($data, $dist
 function outstanding_activity_data_csv_finished($success, $results, $operations) {
   if ($success) {
     $fid = $results['fid'];
-    drupal_goto("outstanding-activity-confirm/" . $fid);
+    //drupal_goto("outstanding-activity-confirm/" . $fid);
+    $_GET['destination'] = "outstanding-activity-confirm/" . $fid;
   }
   else {
     drupal_set_message('There is Error Occured in batch process');
@@ -348,7 +349,8 @@ function change_feeds_import_outstanding_activity_finished($success, $results, $
     }
 
     drupal_set_message(t("$count node was created"));
-    drupal_goto("outstanding-activity/import");
+    //drupal_goto("outstanding-activity/import");
+    $_GET['destination'] = "outstanding-activity/import";
   }
   else {
     drupal_set_message('There is Error Occured in batch process');
