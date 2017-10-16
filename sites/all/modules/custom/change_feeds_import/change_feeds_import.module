@@ -2118,6 +2118,18 @@ function change_feeds_import_query_alter(QueryAlterableInterface $query) {
 }
 
 function change_feeds_import_views_query_alter(&$view, &$query) {
+   dpm($query, 'query');
+   if(isset($_GET['field_third_party_username_value'])) {
+       
+       foreach($query->where[1]['conditions'] as $key => $val) {
+          if ($val['field'] == 'users_node__field_data_field_third_party_username.field_third_party_username_value') {
+            //unset($query->where[1]['conditions'][$key]['operator']); 
+                $query->where[1]['conditions'][$key]['operator'] = 'IN';
+              
+          }
+       }
+   }
+     dpm($query, 'query1');
   // Do the actual join
   global $user;
   // Store distributor id in author in each node

@@ -1680,8 +1680,9 @@ function leanbox_dashboard_form_alter(&$form, &$form_state, $form_id) {
          }
          $form['field_third_party_username_value']['#type'] = 'select';
          $form['field_third_party_username_value']['#options'] = $res;
-         $form['field_third_party_username_value']['#multiple'] = FALSE;
-         $form['field_third_party_username_value']['#size'] = 0;
+         $form['field_third_party_username_value']['#multiple'] = TRUE;
+         $form['field_third_party_username_value']['#size'] = 30;
+          $form['field_third_party_username_value']['#attributes'] = array('style' => array('height:10em;width:10em'));
          $form['field_third_party_username_value']['#default_value'] = $rs_default_value;
       }
 
