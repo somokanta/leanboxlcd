@@ -82,7 +82,7 @@ function send_email_ofd_report() {
   $total_dispatch_loader_team_count = 0;
   $counter = 1;
   $table_style =  'border: 1px solid #000;';
-  $header = array('Sr. No.','Trip Creation Date', 'Trip Execution Date', 'Trip ID','HHT ID','Bill Count','Dispatch Bill Value', 'Dispatch Supervisor','Cashier Name','Vehicle No','Dispatch Loader Team Count','Dispatch Date','Dispatch Start Time','Sequence Method');
+  $header = array('Sr. No.','Trip Creation Date', 'Trip Execution Date', 'Trip ID','HHT ID','Bill Count','Dispatch Bill Value', 'Dispatch Supervisor','Cashier Name','Vehicle No','Dispatch Loader Team Count','Dispatch Date','Dispatch Start Time','Dispatch End Time','Sequence Method');
   foreach($data as $result) {
   $trip_creation_date =  $result->_field_data->nid->entity->field_trip_creation_date->und[0]->value;
   $row1['data'] = date('d-M-y',$trip_creation_date);
@@ -114,8 +114,10 @@ function send_email_ofd_report() {
   $dispatch_date = strtotime($result->_field_data->nid->entity->field_dispatch_date->und[0]->value);
   $row11['data'] =  date('d-M-y',$dispatch_date);
   $row11['style'] = $table_style;
-  $row12['data']  = $result->_field_data->nid->entity->field_dispatch_start_time->und[0]->value;
+  $row12['data']  = $result->_field_data->nid->entity->field_dispatch_pre_start_time->und[0]->value;
   $row12['style'] = $table_style;
+  $row13['data']  = $result->_field_data->nid->entity->field_dispatch_start_time->und[0]->value;
+  $row13['style'] = $table_style;
   if ($result->_field_data->nid->entity->field_sequence_method->und[0]->value == 1) { 
     $seq_method = 'API';
   }
@@ -125,8 +127,8 @@ function send_email_ofd_report() {
   else{
     $seq_method = '';
   }
-  $row13['data']  = $seq_method;
-  $row13['style'] = $table_style;
+  $row14['data']  = $seq_method;
+  $row14['style'] = $table_style;
 
   $total_bill_count  += $row5['data'];
   $total_dispatch_bill_value += $row6['data'];
@@ -134,10 +136,10 @@ function send_email_ofd_report() {
   $row0['data']  = $counter++;
   $row0['style'] = $table_style;
 
-  $rows[]  = array($row0,$row1,$row2,$row3,$row4,$row5,$row6,$row7,$row8,$row9,$row10,$row11,$row12,$row13);
+  $rows[]  = array($row0,$row1,$row2,$row3,$row4,$row5,$row6,$row7,$row8,$row9,$row10,$row11,$row12,$row13,$row13);
 
   }
-  $rows[]  = array('SUM','','','','',$total_bill_count,$total_dispatch_bill_value,'','','',$total_dispatch_loader_team_count,'','','');
+  $rows[]  = array('SUM','','','','',$total_bill_count,$total_dispatch_bill_value,'','','',$total_dispatch_loader_team_count,'','','','');
 
   
   $ofd_html = "<h3>Dispatch Date : " . $todays_date ." (Today)</h3>";
