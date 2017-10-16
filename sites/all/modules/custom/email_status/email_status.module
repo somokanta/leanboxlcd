@@ -136,7 +136,7 @@ function send_email_ofd_report() {
   $row0['data']  = $counter++;
   $row0['style'] = $table_style;
 
-  $rows[]  = array($row0,$row1,$row2,$row3,$row4,$row5,$row6,$row7,$row8,$row9,$row10,$row11,$row12,$row13,$row13);
+  $rows[]  = array($row0,$row1,$row2,$row3,$row4,$row5,$row6,$row7,$row8,$row9,$row10,$row11,$row12,$row13,$row14);
 
   }
   $rows[]  = array('SUM','','','','',$total_bill_count,$total_dispatch_bill_value,'','','',$total_dispatch_loader_team_count,'','','','');
