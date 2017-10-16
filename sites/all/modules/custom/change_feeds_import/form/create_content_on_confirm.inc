@@ -68,13 +68,13 @@ function change_feeds_import_create_confirm_content($id) {
     $operations = array();
 
     $create_billing_data = change_feeds_import_create_billing_data($max_billing_id_new);
-    $create_billing_data_chunk = array_chunk($create_billing_data, 500);
+    $create_billing_data_chunk = array_chunk($create_billing_data, 1200);
     foreach ($create_billing_data_chunk as $data) {
       $operations[] = array('change_feeds_import_create_billing', array($data));
     }
 
     $create_picking_data = change_feeds_import_create_picking_data($max_billing_id_new);
-    $create_picking_data_chunk = array_chunk($create_picking_data, 500);
+    $create_picking_data_chunk = array_chunk($create_picking_data, 1200);
     foreach ($create_picking_data_chunk as $data) {
       $operations[] = array('change_feeds_import_create_picking', array($data));
     }
@@ -82,14 +82,14 @@ function change_feeds_import_create_confirm_content($id) {
     $roles = $user->roles;
     if (in_array("leanbox", $roles)) {
       $create_pick_confirm_data = change_feeds_import_create_pick_confirm_data($max_billing_id_new);
-      $create_pick_confirm_data_chunk = array_chunk($create_pick_confirm_data, 500);
+      $create_pick_confirm_data_chunk = array_chunk($create_pick_confirm_data, 1200);
       foreach ($create_pick_confirm_data_chunk as $data) {
         $operations[] = array('change_feeds_import_create_pick_confirm', array($data));
       }
     }
 
     $van_cld_report_data = change_feeds_import_create_van_cld_report_data($max_billing_id_new);
-    $van_cld_report_data_chunk = array_chunk($van_cld_report_data, 500); // simple table insert
+    $van_cld_report_data_chunk = array_chunk($van_cld_report_data, 1200); // simple table insert
     foreach ($van_cld_report_data_chunk as $data) {
       $operations[] = array('change_feeds_import_create_van_cld_report', array($data));
     }
@@ -750,17 +750,35 @@ function change_feeds_import_create_billing($data, &$context) {
     $context['sandbox']['progress'] = 0;
   }
   $context['message'] = t('Now Creating Billing Data');
-  
-  foreach ($data as $key => &$value) {
-    $nid = check_node_title_exists($value->bill_number, 'sales_register_data');
-    $node = node_load($nid);
-    if ($node) {
-      $node->field_billing_van[LANGUAGE_NONE][0]['value'] = $value->vehicle;
-      $node->field_billing_loading_date[LANGUAGE_NONE][0]['value'] = $value->loading_date;
-      $node->field_sr_bill_date[LANGUAGE_NONE][0]['value'] = $value->bill_date;
-      $node->field_bill_net_sales[LANGUAGE_NONE][0]['value'] = round($value->sum_net_sales_value, 2);
-      // sum of net sales value from custom_billing_data to sales register
-      node_save($node);
+
+  foreach ($data as $key => $value) {
+    try {
+      $nid = check_node_title_exists($value->bill_number, 'sales_register_data');
+      $node = node_load($nid);
+      if ($node) {
+        $node->field_billing_van[LANGUAGE_NONE][0]['value'] = $value->vehicle;
+        $node->field_billing_loading_date[LANGUAGE_NONE][0]['value'] = $value->loading_date;
+        $node->field_sr_bill_date[LANGUAGE_NONE][0]['value'] = $value->bill_date;
+        $node->field_bill_net_sales[LANGUAGE_NONE][0]['value'] = round($value->sum_net_sales_value, 2);
+        // sum of net sales value from custom_billing_data to sales register
+        node_save($node);
+      }
+    }
+    catch (Exception $ex) {
+      //Write mail logic
+      global $user;
+      $user_id = $user->uid;
+      $distributor_id = change_feeds_import_get_distributor_id($user_id);
+      $batch = & batch_get();
+      $batch_id = $batch['id'];
+
+      $message = "For Distributor: $distributor_id and Batch Id $batch_id \n" .
+      $message .= t('An error MSG:  %error_msg with arguments: @arguments', array('%error_msg' => $e->getMessage(), '@arguments' => print_r($value, TRUE)));
+      $params['subject'] = "Billing Upload Error in Batch Proccess ";
+      $params['body'] = $message;
+      $mail_to = "abhishek.r@iksula.com";
+      $from = "MIS.HELPDESK@leanbox.in";
+      drupal_mail('adhoc_task', 'bill_date_missing', $mail_to, LANGUAGE_NONE, $params, $from);
     }
   }
   $context['results']['billing'] = 'Billing Created';
