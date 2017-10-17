@@ -1378,6 +1378,16 @@ function reverse_geocode_node_presave($node) {
    
   // store reference for party code from outlet master type if node created.
   if ($node->type == 'sales_register_data') {
+      if (empty($node->field_bill_net_sales['und'][0]['value'])) {
+         $distributor_id = $node->uid;
+         $bill_number = $node->title;
+         $query = db_select('custom_billing_data', 'cb');
+         $query->addExpression('SUM(cb.Sum_of_NET_SALES_VALUE)', 'sum_net_sales_value');
+         $query->condition('cb.distributor_id', $distributor_id);
+         $query->condition('cb.bill_number', $bill_number, '=');
+         $sum_net_sales_value = $query->execute()->fetchField();
+         $node->field_bill_net_sales['und'][0]['value'] = round($sum_net_sales_value, 2);
+      }
    
      if(!empty($node->field_sales_party_code['und'][0]['value']) && empty($node->field_party_code_reference['und'][0]['nid'])) {
         // write a logic here to fetch same distributors party code reference 
