@@ -1557,3 +1557,16 @@ header[id="page-header"] {
 }
 
 /*End ofd mailer subfooter remove*/
+/*central billing report*/
+.views-widget-filter-field_third_party_username_value {
+	width: 55% !important;
+	display: block !important;
+	label {
+		display: flex;
+		text-align: center;
+	}
+	select.class-rs-code {
+		height: 170px !important;
+	}
+}
+/*End central billing report*/
