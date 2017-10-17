@@ -1565,3 +1565,20 @@ header[id="page-header"] ul, header[id="page-header"] li {
 }
 
 /*End ofd mailer subfooter remove*/
+/*central billing report*/
+/* line 1561, ../sass/leanbox-global.scss */
+.views-widget-filter-field_third_party_username_value {
+  width: 55% !important;
+  display: block !important;
+}
+/* line 1564, ../sass/leanbox-global.scss */
+.views-widget-filter-field_third_party_username_value label {
+  display: flex;
+  text-align: center;
+}
+/* line 1568, ../sass/leanbox-global.scss */
+.views-widget-filter-field_third_party_username_value select.class-rs-code {
+  height: 170px !important;
+}
+
+/*End central billing report*/
