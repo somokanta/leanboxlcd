@@ -11,7 +11,6 @@
 
 			var area_definition = Drupal.settings.leanbox_dashboard.area_definition;
 			var bod_data = Drupal.settings.leanbox_dashboard.bod_data;
-                        console.log(bod_data);
 			google.charts.load("current", {packages: ['gauge', 'corechart', 'bar']});
 			google.charts.setOnLoadCallback(function () {
 				drawpartypackingChart(bod_data);
