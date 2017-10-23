@@ -278,6 +278,10 @@ function leanbox_dashboard_block_info() {
     'info' => t('Picking On Time Adherence'),
     'cache' => DRUPAL_NO_CACHE,
   );
+  $blocks['bod_data'] = array(
+    'info' => t('BOD Data'),
+    'cache' => DRUPAL_NO_CACHE,
+  );
   $blocks['unloading_ota'] = array(
     'info' => t('Unloading On Time Adherence'),
     'cache' => DRUPAL_NO_CACHE,
@@ -925,6 +929,41 @@ function leanbox_dashboard_block_view($delta = '') {
             drupal_get_path('module', 'leanbox_dashboard') . '/js/leanbox_dashboard_picking_ota.js',
             array(
               'data' => array('leanbox_dashboard' => array('picking_ota' => $data, 'area_definition' => $area_definition)),
+              'type' => 'setting'
+            ),
+          ),
+        ),
+      );
+      break;
+      
+    case 'bod_data':
+
+      if (arg(1) == 'bod_data') {
+        $area_definition = array(
+          'width' => 700,
+          'height' => 400,
+          'ch_left' => 80,
+          'ch_top' => 50,
+          'ch_width' => 500,
+          'ch_height' => 250,
+        );
+      }
+
+      $loading_date = date('d-m-Y');
+      $block['subject'] = "BOD ($loading_date Billing)";
+      $data = leanbox_dashboard_chart_query_details('bod_data');
+      $filter_form = drupal_render(drupal_get_form('leanbox_dashboard_chart_filter_bod_data_form'));
+      $block['content'] = array(
+        '#markup' => theme('leanbox_dashboard', array('data' => $filter_form)),
+        '#attached' => array(
+          'js' => array(
+            array(
+              'type' => 'external',
+              'data' => 'https://www.gstatic.com/charts/loader.js'
+            ),
+            drupal_get_path('module', 'leanbox_dashboard') . '/js/leanbox_dashboard_bod_data.js',
+            array(
+              'data' => array('leanbox_dashboard' => array('bod_data' => $data, 'area_definition' => $area_definition)),
               'type' => 'setting'
             ),
           ),
