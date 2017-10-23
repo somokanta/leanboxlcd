@@ -25,7 +25,7 @@
 					$.ajax({
 						type: "POST",
 						cache: false, //for Chrome and IE8
-						url: "/leanbox/chart-daterange-filter",
+						url: "/chart-daterange-filter",
 						data: {start_date: start_date, end_date: end_date, activity_type: 'bod_data'},
 						success: function (response) {
 
