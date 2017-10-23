@@ -2070,14 +2070,14 @@ function get_mtd_data_pending_bills_count_value_pl_groupwise($distributor_id = 6
         else {
           $query->addExpression('SUM(bv.field_bill_value_value)', 'bill_value_count');
         }
-        $query->fields('bd', array('field_sr_bill_date_value'));
-        $query->fields('plg', array('field_pl_group_value'));
+        //$query->fields('bd', array('field_sr_bill_date_value'));
+        //$query->fields('plg', array('field_pl_group_value'));
         // $query->fields('n', array('nid'));
-        $res = $query->execute()->fetchAssoc();
+        $bill_res = $query->execute()->fetchfield();
 
-        $bill_sum += $res['bill_value_count'];
-        if($res['bill_value_count']) {
-          $row[$value->field_pl_group_value][] = $res['bill_value_count']; 
+        $bill_sum += $bill_res;
+        if($bill_res) {
+          $row[$value->field_pl_group_value][] = $bill_res; 
         }
         else {
           $row[$value->field_pl_group_value][] = 0; 
