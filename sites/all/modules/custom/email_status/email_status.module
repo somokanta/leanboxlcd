@@ -738,7 +738,8 @@ function send_email_pl_group_emailer($distributor_name, $distributor_id = 60) {
   }
   
   $mtd_pending_bill_count_html = "<h3>MTD Pending Bills Count by Billing Date</h3>";
-  $mtd_pending_bill_count_data .= get_mtd_data_pending_bills_count_pl_groupwise($distributor_id);
+  $mtd_type = 'bill_count';
+  $mtd_pending_bill_count_data .= get_mtd_data_pending_bills_count_value_pl_groupwise($distributor_id, $mtd_type);
   if ($mtd_pending_bill_count_data == "No Result Found") {
     $header = array('PL Group', date('dS M', strtotime('-1 day')), date('dS M', strtotime('-2 days')), date('dS M', strtotime('-3 days')), date('dS M', strtotime('-4 days')), '>4 Days', 'Total Bills');
     $mtd_pending_bill_count_rows[] = array("<td colspan='10' style='text-align: center;'> There is No Activity</td>");
@@ -749,7 +750,8 @@ function send_email_pl_group_emailer($distributor_name, $distributor_id = 60) {
   }
   
   $mtd_pending_bill_value_html = "<h3>MTD Pending Bills Value by Billing Date</h3>";
-  $mtd_pending_bill_value_data .= get_mtd_data_pending_bills_value_pl_groupwise($distributor_id);
+  $mtd_type = 'bill_value';
+  $mtd_pending_bill_value_data .= get_mtd_data_pending_bills_count_value_pl_groupwise($distributor_id, $mtd_type);
   if ($mtd_pending_bill_value_data == "No Result Found") {
     $header = array('PL Group', date('dS M', strtotime('-1 day')), date('dS M', strtotime('-2 days')), date('dS M', strtotime('-3 days')), date('dS M', strtotime('-4 days')), '>4 Days', 'Total Bill Value');
     $mtd_pending_bill_value_rows[] = array("<td colspan='10' style='text-align: center;'> There is No Activity</td>");
@@ -2003,8 +2005,11 @@ function get_header_of_pl_group() {
   return $header;
 }
 
+/*
+ * Get MTD Pending Bills Count And Value by Billing Date
+ */
 
-function get_mtd_data_pending_bills_count_pl_groupwise($distributor_id = 60) {
+function get_mtd_data_pending_bills_count_value_pl_groupwise($distributor_id = 60, $mtd_type) {
   $query = db_select('node', 'n');
   $query->condition('n.type', 'outlet_master');
   $query->join('field_data_field_pl_group', 'pl', 'pl.entity_id = n.nid');
@@ -2049,26 +2054,30 @@ function get_mtd_data_pending_bills_count_pl_groupwise($distributor_id = 60) {
         $query->join('field_data_field_sr_bill_date', 'bd', 'bd.entity_id = n.nid');
         $query->condition('bd.field_sr_bill_date_value', array($start_date, $end_date), 'BETWEEN');
         $query->join('field_data_field_bill_value', 'bv', 'bv.entity_id = n.nid');
-        $query->join('field_data_field_sales_party_code', 'pc', 'pc.entity_id = n.nid');
-        $query->join('node', 'oun', 'pc.field_sales_party_code_value = oun.title');
-        $query->condition('oun.type', 'outlet_master');
-        $query->condition('oun.uid', $distributor_id, '=');
-        $query->join('field_data_field_pl_group', 'plg', 'plg.entity_id = oun.nid');
+        $query->join('field_data_field_party_code_reference', 'pc', 'pc.entity_id = n.nid');
+        //$query->join('node', 'oun', 'pc.field_sales_party_code_value = oun.title');
+        //$query->condition('oun.type', 'outlet_master');
+        //$query->condition('oun.uid', $distributor_id, '=');
+        $query->join('field_data_field_pl_group', 'plg', 'plg.entity_id = pc.field_party_code_reference_nid');
         $query->condition('plg.field_pl_group_value',$value->field_pl_group_value, '=');
         $query->groupBy('field_pl_group_value');
   //      $query->leftjoin('field_data_field_trip_id_reference', 'ti', 'ti.entity_id = n.nid');
   //      $query->leftjoin('node', 'disn', 'disn.nid = ti.field_trip_id_reference_nid');
   //      $query->leftjoin('field_data_field_dispatch_status', 'disp_st', 'disp_st.entity_id = disn.nid');
-        $query->addExpression('COUNT(n.title)', 'bill_count');
-       // $query->addExpression('SUM(bv.field_bill_value_value)', 'bill_value');
+        if($mtd_type == 'bill_count'){
+          $query->addExpression('COUNT(n.title)', 'bill_value_count');
+        }
+        else {
+          $query->addExpression('SUM(bv.field_bill_value_value)', 'bill_value_count');
+        }
         $query->fields('bd', array('field_sr_bill_date_value'));
         $query->fields('plg', array('field_pl_group_value'));
         // $query->fields('n', array('nid'));
         $res = $query->execute()->fetchAssoc();
 
-        $bill_sum += $res['bill_count'];
-        if($res['bill_count']) {
-          $row[$value->field_pl_group_value][] = $res['bill_count']; 
+        $bill_sum += $res['bill_value_count'];
+        if($res['bill_value_count']) {
+          $row[$value->field_pl_group_value][] = $res['bill_value_count']; 
         }
         else {
           $row[$value->field_pl_group_value][] = 0; 
@@ -2090,99 +2099,12 @@ function get_mtd_data_pending_bills_count_pl_groupwise($distributor_id = 60) {
     $output = "No Result Found"; 
   }
   
-  $header = array('PL Group', date('dS M', strtotime('-1 day')), date('dS M', strtotime('-2 days')), date('dS M', strtotime('-3 days')), date('dS M', strtotime('-4 days')), '>4 Days', 'Total Bills');
-  $output = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
-
-  return $output;
-}
-
-function get_mtd_data_pending_bills_value_pl_groupwise($distributor_id = 60) {
-  $query = db_select('node', 'n');
-  $query->condition('n.type', 'outlet_master');
-  $query->join('field_data_field_pl_group', 'pl', 'pl.entity_id = n.nid');
-  $query->condition('n.uid', $distributor_id, '='); 
-  $query->fields('pl', array('field_pl_group_value'));
-  $query->groupBy('field_pl_group_value');
-  $ress = $query->execute()->fetchAll();
-  
-  if (!empty($ress)) {
-    $row = array();
-    foreach($ress as $value) {
-      $row[$value->field_pl_group_value][] = $value->field_pl_group_value;
-      $bill_sum = 0;
-      for($i = 1; $i <= 5; $i++) {
-        switch ($i){ 
-          case '1':
-          $start_date = strtotime('-1 day', strtotime(date('Y-m-d')));
-          $end_date = strtotime('-1 day', strtotime(date('Y-m-d')));
-          break;
-          case '2':
-          $start_date = strtotime('-2 day', strtotime(date('Y-m-d')));
-          $end_date = strtotime('-2 day', strtotime(date('Y-m-d')));
-          break;
-          case '3':
-          $start_date = strtotime('-3 day', strtotime(date('Y-m-d')));
-          $end_date = strtotime('-3 day', strtotime(date('Y-m-d')));
-          break;
-          case '4':
-          $start_date = strtotime('-4 day', strtotime(date('Y-m-d')));
-          $end_date = strtotime('-4 day', strtotime(date('Y-m-d')));
-          break;
-          case '5':
-          $start_date = strtotime('-5 day', strtotime(date('Y-m-d')));
-          $end_date = strtotime('-30 day', $start_date);
-          break;
-        }
-
-        $query = db_select('node', 'n');
-        $query->condition('n.type', 'sales_register_data');
-        $query->condition('n.uid', $distributor_id, '=');
-        $query->join('field_data_field_billing_van', 'bva', 'bva.entity_id = n.nid');
-        $query->join('field_data_field_sr_bill_date', 'bd', 'bd.entity_id = n.nid');
-        $query->condition('bd.field_sr_bill_date_value', array($start_date, $end_date), 'BETWEEN');
-        $query->join('field_data_field_bill_value', 'bv', 'bv.entity_id = n.nid');
-        $query->join('field_data_field_sales_party_code', 'pc', 'pc.entity_id = n.nid');
-        $query->join('node', 'oun', 'pc.field_sales_party_code_value = oun.title');
-        $query->condition('oun.type', 'outlet_master');
-        $query->condition('oun.uid', $distributor_id, '=');
-        $query->join('field_data_field_pl_group', 'plg', 'plg.entity_id = oun.nid');
-        $query->condition('plg.field_pl_group_value',$value->field_pl_group_value, '=');
-        $query->groupBy('field_pl_group_value');
-  //      $query->leftjoin('field_data_field_trip_id_reference', 'ti', 'ti.entity_id = n.nid');
-  //      $query->leftjoin('node', 'disn', 'disn.nid = ti.field_trip_id_reference_nid');
-  //      $query->leftjoin('field_data_field_dispatch_status', 'disp_st', 'disp_st.entity_id = disn.nid');
-        //$query->addExpression('COUNT(n.title)', 'bill_count');
-        $query->addExpression('SUM(bv.field_bill_value_value)', 'bill_value');
-        $query->fields('bd', array('field_sr_bill_date_value'));
-        $query->fields('plg', array('field_pl_group_value'));
-        // $query->fields('n', array('nid'));
-        $res = $query->execute()->fetchAssoc();
-
-        $bill_sum += $res['bill_value'];
-        if($res['bill_value']) {
-          $row[$value->field_pl_group_value][] = $res['bill_value']; 
-        }
-        else {
-          $row[$value->field_pl_group_value][] = 0; 
-        }
-      }
-      $row[$value->field_pl_group_value][] = $bill_sum; 
-    }
-
-    $total = array();
-    $total['Total'][0] = 'Total';
-    for($k=1; $k<count($ress); $k++) {
-      foreach($ress as $value) {
-        $total['Total'][$k] += $row[$value->field_pl_group_value][$k];
-      }
-    }
-    $rows = array_merge($row,$total);
+  if($mtd_type == 'bill_count') {
+    $header = array('PL Group', date('dS M', strtotime('-1 day')), date('dS M', strtotime('-2 days')), date('dS M', strtotime('-3 days')), date('dS M', strtotime('-4 days')), '>4 Days', 'Total Bills');
   }
-  else {
-    $output = "No Result Found"; 
+  else{
+    $header = array('PL Group', date('dS M', strtotime('-1 day')), date('dS M', strtotime('-2 days')), date('dS M', strtotime('-3 days')), date('dS M', strtotime('-4 days')), '>4 Days', 'Total Bill Value');
   }
-  
-  $header = array('PL Group', date('dS M', strtotime('-1 day')), date('dS M', strtotime('-2 days')), date('dS M', strtotime('-3 days')), date('dS M', strtotime('-4 days')), '>4 Days', 'Total Bill Value');
   $output = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
 
   return $output;
