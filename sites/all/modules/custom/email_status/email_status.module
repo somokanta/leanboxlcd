@@ -430,7 +430,7 @@ function send_email_daily_data() {
   $from = variable_get('from_email');
   //$rr = drupal_mail('email_status', 'daily_data', $mail_to, LANGUAGE_NONE, $params, $from);
 
-  //send_email_productivity_emailer($todays_date_date, $distributor_name, $distributor_id);
+  send_email_productivity_emailer($todays_date_date, $distributor_name, $distributor_id);
   send_email_pl_group_emailer($distributor_name, $distributor_id);
   send_email_channel_emailer($distributor_name, $distributor_id);
 }
