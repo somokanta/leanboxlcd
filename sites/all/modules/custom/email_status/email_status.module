@@ -15,7 +15,7 @@ function email_status_menu() {
   );
   $items['daily-productivity-email'] = array(
     'title' => 'Send Email Of Daily Data',
-    'page callback' => 'send_email_daily_data',
+    'page callback' => 'send_productivity_mail_callback',
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
