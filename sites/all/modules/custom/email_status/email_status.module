@@ -2054,28 +2054,18 @@ function get_mtd_data_pending_bills_count_value_pl_groupwise($distributor_id = 6
         $query->condition('n.uid', $distributor_id, '=');
         $query->join('field_data_field_billing_van', 'bva', 'bva.entity_id = n.nid');
         $query->join('field_data_field_sr_bill_date', 'bd', 'bd.entity_id = n.nid');
-        $query->condition('bd.field_sr_bill_date_value', array($start_date, $end_date), 'BETWEEN');
+        $query->condition('bd.field_sr_bill_date_value', array($end_date,$start_date), 'BETWEEN');
         $query->join('field_data_field_bill_value', 'bv', 'bv.entity_id = n.nid');
         $query->join('field_data_field_party_code_reference', 'pc', 'pc.entity_id = n.nid');
-        //$query->join('node', 'oun', 'pc.field_sales_party_code_value = oun.title');
-        //$query->condition('oun.type', 'outlet_master');
-        //$query->condition('oun.uid', $distributor_id, '=');
         $query->join('field_data_field_pl_group', 'plg', 'plg.entity_id = pc.field_party_code_reference_nid');
         $query->condition('plg.field_pl_group_value',$value->field_pl_group_value, '=');
-        $query->groupBy('field_pl_group_value');
-  //      $query->leftjoin('field_data_field_trip_id_reference', 'ti', 'ti.entity_id = n.nid');
-  //      $query->leftjoin('node', 'disn', 'disn.nid = ti.field_trip_id_reference_nid');
-  //      $query->leftjoin('field_data_field_dispatch_status', 'disp_st', 'disp_st.entity_id = disn.nid');
         if($mtd_type == 'bill_count'){
           $query->addExpression('COUNT(n.title)', 'bill_value_count');
         }
         else {
           $query->addExpression('SUM(bv.field_bill_value_value)', 'bill_value_count');
         }
-        //$query->fields('bd', array('field_sr_bill_date_value'));
-        //$query->fields('plg', array('field_pl_group_value'));
-        // $query->fields('n', array('nid'));
-        $bill_res = $query->execute()->fetchfield();
+        $bill_res = $query->execute()->fetchField();
 
         $bill_sum += $bill_res;
         if($bill_res) {
