@@ -694,43 +694,44 @@ function send_email_pl_group_emailer($distributor_name, $distributor_id = 60) {
     $this_date = strtotime(date("Y-$this_month-21"));
   }
   
-  $twoday_before_yesterday_html = "<h3>Billing Date : " . $twoday_before_yesterday_date ." (Two Days Before Yesterday)</h3>";
-  $twoday_before_yesterday_data = get_twoday_before_yesterday_data_pl_groupwise($twoday_before_yesterday, $twoday_before_yesterday, $distributor_id);
-  if ($twoday_before_yesterday_data == "No Result Found") {
-    $header = get_header_of_pl_group();
-    $twoday_before_yesterday_rows[] = array("<td colspan='10' style='text-align: center;'> There is No Activity</td>");
-    $twoday_before_yesterday_html .= theme('table', array('header' => $header, 'rows' => $twoday_before_yesterday_rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
-  }
-  else {
-    $twoday_before_yesterday_html .= $twoday_before_yesterday_data;
-  }
-  
-  $day_before_yesterday_html = "<h3>Billing Date : " . $day_before_yesterday_date ." (One Day Before Yesterday)</h3>";
-  $day_before_yesterday_data = get_day_before_yesterday_data_pl_groupwise($day_before_yesterday, $day_before_yesterday, $distributor_id);
-  if ($day_before_yesterday_data == "No Result Found") {
-    $header = get_header_of_pl_group();
-    $day_before_yesterday_rows[] = array("<td colspan='10' style='text-align: center;'> There is No Activity</td>");
-    $day_before_yesterday_html .= theme('table', array('header' => $header, 'rows' => $day_before_yesterday_rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
-  }
-  else {
-    $day_before_yesterday_html .= $day_before_yesterday_data;
-  }
-  
-  $yesterday_html = "<h3>Billing Date : " . $yesterday_date ." (Yesterday)</h3>";
-  $yesterday_data = get_yesterday_data_pl_groupwise($yesterday, $yesterday, $distributor_id);
-  if ($yesterday_data == "No Result Found") {
-    $header = get_header_of_pl_group();
-    $yesterday_rows[] = array("<td colspan='10' style='text-align: center;'> There is No Activity</td>");
-    $yesterday_html .= theme('table', array('header' => $header, 'rows' => $yesterday_rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
-  }
-  else {
-    $yesterday_html .= $yesterday_data;
-  }
+//  $twoday_before_yesterday_html = "<h3>Billing Date : " . $twoday_before_yesterday_date ." (Two Days Before Yesterday)</h3>";
+//  $twoday_before_yesterday_data = get_twoday_before_yesterday_data_pl_groupwise($twoday_before_yesterday, $twoday_before_yesterday, $distributor_id);
+//  if ($twoday_before_yesterday_data == "No Result Found") {
+//    $header = get_header_of_pl_group();
+//    $twoday_before_yesterday_rows[] = array("<td colspan='10' style='text-align: center;'> There is No Activity</td>");
+//    $twoday_before_yesterday_html .= theme('table', array('header' => $header, 'rows' => $twoday_before_yesterday_rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
+//  }
+//  else {
+//    $twoday_before_yesterday_html .= $twoday_before_yesterday_data;
+//  }
+//  
+//  $day_before_yesterday_html = "<h3>Billing Date : " . $day_before_yesterday_date ." (One Day Before Yesterday)</h3>";
+//  $day_before_yesterday_data = get_day_before_yesterday_data_pl_groupwise($day_before_yesterday, $day_before_yesterday, $distributor_id);
+//  if ($day_before_yesterday_data == "No Result Found") {
+//    $header = get_header_of_pl_group();
+//    $day_before_yesterday_rows[] = array("<td colspan='10' style='text-align: center;'> There is No Activity</td>");
+//    $day_before_yesterday_html .= theme('table', array('header' => $header, 'rows' => $day_before_yesterday_rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
+//  }
+//  else {
+//    $day_before_yesterday_html .= $day_before_yesterday_data;
+//  }
+//  
+//  $yesterday_html = "<h3>Billing Date : " . $yesterday_date ." (Yesterday)</h3>";
+//  $yesterday_data = get_yesterday_data_pl_groupwise($yesterday, $yesterday, $distributor_id);
+//  if ($yesterday_data == "No Result Found") {
+//    $header = get_header_of_pl_group();
+//    $yesterday_rows[] = array("<td colspan='10' style='text-align: center;'> There is No Activity</td>");
+//    $yesterday_html .= theme('table', array('header' => $header, 'rows' => $yesterday_rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
+//  }
+//  else {
+//    $yesterday_html .= $yesterday_data;
+//  }
 
-  $mtd_html = "<h3>MTD Wise: ". $yesterday_date ." (Yesterday)</h3>";
+  $mtd_html = "<h3>MTD Pending Bills Summary</h3>";
   $mtd_data .= get_mtd_data_pl_groupwise($this_date, $yesterday, $distributor_id);
   if ($mtd_data == "No Result Found") {
-    $header = get_header_of_pl_group();
+    //$header = get_header_of_pl_group();
+    $header = array('PL Group', 'Bill Count', 'Bill Value','Dispatch Count', 'Dispatch Value','Pending Bill','Pending Bill Value');
     $mtd_rows[] = array("<td colspan='10' style='text-align: center;'> There is No Activity</td>");
     $mtd_html .= theme('table', array('header' => $header, 'rows' => $mtd_rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
   }
@@ -738,30 +739,55 @@ function send_email_pl_group_emailer($distributor_name, $distributor_id = 60) {
     $mtd_html .= $mtd_data;
   }
   
-  $mtd_one_day_before_html = "<h3>MTD Wise: ". $day_before_yesterday_date ." (One Day Before Yesterday)</h3>";
-  $mtd_one_day_before_data .= get_one_day_before_mtd_data_pl_groupwise($this_date, $day_before_yesterday, $distributor_id);
-  if ($mtd_one_day_before_data == "No Result Found") {
-    $header = get_header_of_pl_group();
-    $mtd_one_day_before_rows[] = array("<td colspan='10' style='text-align: center;'> There is No Activity</td>");
-    $mtd_one_day_before_html .= theme('table', array('header' => $header, 'rows' => $mtd_one_day_before_rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
+  $mtd_pending_bill_count_html = "<h3>MTD Pending Bills Count by Billing Date</h3>";
+  $mtd_type = 'bill_count';
+  $mtd_pending_bill_count_data .= get_mtd_data_pending_bills_count_value_pl_groupwise($distributor_id, $mtd_type);
+  if ($mtd_pending_bill_count_data == "No Result Found") {
+    $header = array('PL Group', date('dS M', strtotime('-1 day')), date('dS M', strtotime('-2 days')), date('dS M', strtotime('-3 days')), date('dS M', strtotime('-4 days')), '>4 Days', 'Total Bills');
+    $mtd_pending_bill_count_rows[] = array("<td colspan='10' style='text-align: center;'> There is No Activity</td>");
+    $mtd_pending_bill_count_html .= theme('table', array('header' => $header, 'rows' => $mtd_pending_bill_count_rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
   }
   else {
-    $mtd_one_day_before_html .= $mtd_one_day_before_data;
+    $mtd_pending_bill_count_html .= $mtd_pending_bill_count_data;
   }
   
-  $mtd_two_day_before_html = "<h3>MTD Wise: ". $twoday_before_yesterday_date ." (Two Day Before Yesterday)</h3>";
-  $mtd_two_day_before_data .= get_two_day_before_mtd_data_pl_groupwise($this_date, $twoday_before_yesterday, $distributor_id);
-  if ($mtd_two_day_before_data == "No Result Found") {
-    $header = get_header_of_pl_group();
-    $mtd_two_day_before_rows[] = array("<td colspan='10' style='text-align: center;'> There is No Activity</td>");
-    $mtd_two_day_before_html .= theme('table', array('header' => $header, 'rows' => $mtd_two_day_before_rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
+  $mtd_pending_bill_value_html = "<h3>MTD Pending Bills Value by Billing Date</h3>";
+  $mtd_type = 'bill_value';
+  $mtd_pending_bill_value_data .= get_mtd_data_pending_bills_count_value_pl_groupwise($distributor_id, $mtd_type);
+  if ($mtd_pending_bill_value_data == "No Result Found") {
+    $header = array('PL Group', date('dS M', strtotime('-1 day')), date('dS M', strtotime('-2 days')), date('dS M', strtotime('-3 days')), date('dS M', strtotime('-4 days')), '>4 Days', 'Total Bill Value');
+    $mtd_pending_bill_value_rows[] = array("<td colspan='10' style='text-align: center;'> There is No Activity</td>");
+    $mtd_pending_bill_value_html .= theme('table', array('header' => $header, 'rows' => $mtd_pending_bill_value_rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
   }
   else {
-    $mtd_two_day_before_html .= $mtd_two_day_before_data;
+    $mtd_pending_bill_value_html .= $mtd_pending_bill_value_data;
   }
+  
+//  $mtd_one_day_before_html = "<h3>MTD Wise: ". $day_before_yesterday_date ." (One Day Before Yesterday)</h3>";
+//  $mtd_one_day_before_data .= get_one_day_before_mtd_data_pl_groupwise($this_date, $day_before_yesterday, $distributor_id);
+//  if ($mtd_one_day_before_data == "No Result Found") {
+//    $header = get_header_of_pl_group();
+//    $mtd_one_day_before_rows[] = array("<td colspan='10' style='text-align: center;'> There is No Activity</td>");
+//    $mtd_one_day_before_html .= theme('table', array('header' => $header, 'rows' => $mtd_one_day_before_rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
+//  }
+//  else {
+//    $mtd_one_day_before_html .= $mtd_one_day_before_data;
+//  }
+//  
+//  $mtd_two_day_before_html = "<h3>MTD Wise: ". $twoday_before_yesterday_date ." (Two Day Before Yesterday)</h3>";
+//  $mtd_two_day_before_data .= get_two_day_before_mtd_data_pl_groupwise($this_date, $twoday_before_yesterday, $distributor_id);
+//  if ($mtd_two_day_before_data == "No Result Found") {
+//    $header = get_header_of_pl_group();
+//    $mtd_two_day_before_rows[] = array("<td colspan='10' style='text-align: center;'> There is No Activity</td>");
+//    $mtd_two_day_before_html .= theme('table', array('header' => $header, 'rows' => $mtd_two_day_before_rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
+//  }
+//  else {
+//    $mtd_two_day_before_html .= $mtd_two_day_before_data;
+//  }
 
   $params['subject'] = "PL Group Wise Bill Pendency-$distributor_name";
-  $params['body'] = $yesterday_html . "<br>" . $day_before_yesterday_html . "<br>" . $twoday_before_yesterday_html . "<br>" . $mtd_html . "<br>" . $mtd_one_day_before_html . "<br>" . $mtd_two_day_before_html;
+  //$params['body'] = $yesterday_html . "<br>" . $day_before_yesterday_html . "<br>" . $twoday_before_yesterday_html . "<br>" . $mtd_html . "<br>" . $mtd_one_day_before_html . "<br>" . $mtd_two_day_before_html;
+  $params['body'] = $mtd_html . "<br>" . $mtd_pending_bill_count_html . "<br>" . $mtd_pending_bill_value_html;
   $mail_to = variable_get('to_email');
 //  $mail_to = "dhirendra.mishra@iksula.com";
 //  $mail_to = "abhishek.r@iksula.com";
@@ -1425,29 +1451,29 @@ function get_two_day_before_mtd_data_channel($this_date, $twoday_before_yesterda
   return get_common_data_for_chhanel_datewise($this_date, $twoday_before_yesterday, $distributor_id);
 }
 
-function get_twoday_before_yesterday_data_pl_groupwise($twoday_before_yesterday, $twoday_before_yesterday, $distributor_id) {
-  return get_common_data_for_pl_group_datewise($twoday_before_yesterday, $twoday_before_yesterday, $distributor_id);
-}
-
-function get_day_before_yesterday_data_pl_groupwise($day_before_yesterday, $day_before_yesterday, $distributor_id) {
-  return get_common_data_for_pl_group_datewise($day_before_yesterday, $day_before_yesterday, $distributor_id);
-}
-
-function get_yesterday_data_pl_groupwise($yesterday, $yesterday, $distributor_id) {
-  return get_common_data_for_pl_group_datewise($yesterday, $yesterday, $distributor_id);
-}
+//function get_twoday_before_yesterday_data_pl_groupwise($twoday_before_yesterday, $twoday_before_yesterday, $distributor_id) {
+//  return get_common_data_for_pl_group_datewise($twoday_before_yesterday, $twoday_before_yesterday, $distributor_id);
+//}
+//
+//function get_day_before_yesterday_data_pl_groupwise($day_before_yesterday, $day_before_yesterday, $distributor_id) {
+//  return get_common_data_for_pl_group_datewise($day_before_yesterday, $day_before_yesterday, $distributor_id);
+//}
+//
+//function get_yesterday_data_pl_groupwise($yesterday, $yesterday, $distributor_id) {
+//  return get_common_data_for_pl_group_datewise($yesterday, $yesterday, $distributor_id);
+//}
 
 function get_mtd_data_pl_groupwise($this_date, $yesterday, $distributor_id) {
   return get_common_data_for_pl_group_datewise($this_date, $yesterday, $distributor_id);
 }
 
-function get_one_day_before_mtd_data_pl_groupwise($this_date, $day_before_yesterday, $distributor_id) {
-  return get_common_data_for_pl_group_datewise($this_date, $day_before_yesterday, $distributor_id);
-}
-
-function get_two_day_before_mtd_data_pl_groupwise($this_date, $twoday_before_yesterday, $distributor_id) {
-  return get_common_data_for_pl_group_datewise($this_date, $twoday_before_yesterday, $distributor_id);
-}
+//function get_one_day_before_mtd_data_pl_groupwise($this_date, $day_before_yesterday, $distributor_id) {
+//  return get_common_data_for_pl_group_datewise($this_date, $day_before_yesterday, $distributor_id);
+//}
+//
+//function get_two_day_before_mtd_data_pl_groupwise($this_date, $twoday_before_yesterday, $distributor_id) {
+//  return get_common_data_for_pl_group_datewise($this_date, $twoday_before_yesterday, $distributor_id);
+//}
 
 function get_common_data_for_chhanel_datewise($start_date, $end_date, $distributor_id) {
   $query = db_select('node', 'n');
@@ -1896,8 +1922,8 @@ function get_common_data_for_pl_group_datewise($start_date, $end_date, $distribu
   $query->leftjoin('field_data_field_dispatch_status', 'disp_st', 'disp_st.entity_id = disn.nid');
   $query->addExpression('COUNT(n.title)', 'bill_count');
   $query->addExpression('SUM(bv.field_bill_value_value)', 'bill_value');
-  $query->addExpression('COUNT(ti.field_trip_id_reference_nid)', 'trip_count');
-  $query->addExpression('SUM(if(ti.field_trip_id_reference_nid IS NOT NULL,field_bill_value_value, 0))', 'trip_sum');
+  //$query->addExpression('COUNT(ti.field_trip_id_reference_nid)', 'trip_count');
+  //$query->addExpression('SUM(if(ti.field_trip_id_reference_nid IS NOT NULL,field_bill_value_value, 0))', 'trip_sum');
   $query->addExpression('SUM(if(disp_st.field_dispatch_status_value=1, 1, 0))', 'trip_dispatch_sum');
   $query->addExpression('SUM(if(disp_st.field_dispatch_status_value=1, field_bill_value_value, 0))', 'trip_dispatch_value');
   $query->fields('bd', array('field_sr_bill_date_value'));
@@ -1909,31 +1935,37 @@ function get_common_data_for_pl_group_datewise($start_date, $end_date, $distribu
   if (!empty($res)) {
     foreach ($res as $k => $v) {
       $pl_group = $v['field_pl_group_value'];
-      $trip_created_count_percentage = round(($v['trip_count'] / $v['bill_count']) * 100);
-      $trip_created_value_percentage = round(($v['trip_sum'] / $v['bill_value']) * 100);
-      $dispatch_created_pe_count_rcentage = round(($v['trip_dispatch_sum'] / $v['bill_count']) * 100);
-      $dispatch_created_value_percentage = round(($v['trip_dispatch_value'] / $v['bill_value']) * 100);
+//      $trip_created_count_percentage = round(($v['trip_count'] / $v['bill_count']) * 100);
+//      $trip_created_value_percentage = round(($v['trip_sum'] / $v['bill_value']) * 100);
+//      $dispatch_created_pe_count_rcentage = round(($v['trip_dispatch_sum'] / $v['bill_count']) * 100);
+//      $dispatch_created_value_percentage = round(($v['trip_dispatch_value'] / $v['bill_value']) * 100);
       $bill_val = $v['bill_value'];
       $bill_val = round($bill_val);
+      $pending_bill = ($v['bill_count'] - $v['trip_dispatch_sum']);
+      $pending_bill_value = ($bill_val - $v['trip_dispatch_value']);
 
       $total_bill_count += $v['bill_count'];
       $total_bill_val += $bill_val;
-      $total_trip_count += $v['trip_count'];
-      $total_trip_sum += $v['trip_sum'];
+      //$total_trip_count += $v['trip_count'];
+      //$total_trip_sum += $v['trip_sum'];
       $total_trip_dispatch_sum += $v['trip_dispatch_sum'];
       $total_trip_dispatch_value += $v['trip_dispatch_value'];
+      $total_pending_bill_count += $pending_bill;
+      $total_pending_bill_value += $pending_bill_value;
 
       $rows[] = array($pl_group,
         $v['bill_count'],
         $bill_val,
-        $v['trip_count'],
-        $v['trip_sum'],
+        //$v['trip_count'],
+        //$v['trip_sum'],
         $v['trip_dispatch_sum'],
         $v['trip_dispatch_value'],
-        $trip_created_count_percentage . " %",
-        $trip_created_value_percentage . " %",
-        $dispatch_created_pe_count_rcentage . " %",
-        $dispatch_created_value_percentage . " %"
+        $pending_bill,
+        $pending_bill_value
+//        $trip_created_count_percentage . " %",
+//        $trip_created_value_percentage . " %",
+//        $dispatch_created_pe_count_rcentage . " %",
+//        $dispatch_created_value_percentage . " %"
       );
     }
   }
@@ -1941,24 +1973,26 @@ function get_common_data_for_pl_group_datewise($start_date, $end_date, $distribu
     $output = "No Result Found";
   }
   if (!empty($res)) {
-    $header = get_header_of_pl_group();
-    $total_trip_created_count_percentage = round(($total_trip_count / $total_bill_count) * 100);
-    $total_trip_created_value_percentage = round(($total_trip_sum / $total_bill_val) * 100);
-    $total_dispatch_created_pe_count_rcentage = round(($total_trip_dispatch_sum / $total_bill_count) * 100);
-    $total_dispatch_created_value_percentage = round(($total_trip_dispatch_value / $total_bill_val) * 100);
-
+    $header = array('PL Group', 'Bill Count', 'Bill Value','Dispatch Count', 'Dispatch Value','Pending Bill','Pending Bill Value');
+//    $total_trip_created_count_percentage = round(($total_trip_count / $total_bill_count) * 100);
+//    $total_trip_created_value_percentage = round(($total_trip_sum / $total_bill_val) * 100);
+//    $total_dispatch_created_pe_count_rcentage = round(($total_trip_dispatch_sum / $total_bill_count) * 100);
+//    $total_dispatch_created_value_percentage = round(($total_trip_dispatch_value / $total_bill_val) * 100);
 
     $rows[] = array("Total",
       $total_bill_count,
       $total_bill_val,
-      $total_trip_count,
-      $total_trip_sum,
+//    $total_trip_count,
+//    $total_trip_sum,
       $total_trip_dispatch_sum,
       $total_trip_dispatch_value,
-      $total_trip_created_count_percentage . " %",
-      $total_trip_created_value_percentage . " %",
-      $total_dispatch_created_pe_count_rcentage . " %",
-      $total_dispatch_created_value_percentage . " %"
+      $total_pending_bill_count,
+      $total_pending_bill_value
+//    $total_trip_created_count_percentage . " %",
+//    $total_trip_created_value_percentage . " %",
+//    $total_dispatch_created_pe_count_rcentage . " %",
+//    $total_dispatch_created_value_percentage . " %"
+      
     );
 
     $output = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
@@ -1971,6 +2005,101 @@ function get_header_of_pl_group() {
     'Dispatch Count', 'Dispatch Value', 'Trip Created Count % ', 'Trip Created Value%',
     'Dispatch Count%', 'Dispatch Value%');
   return $header;
+}
+
+/*
+ * Get MTD Pending Bills Count And Value by Billing Date
+ */
+
+function get_mtd_data_pending_bills_count_value_pl_groupwise($distributor_id = 60, $mtd_type) {
+  $query = db_select('node', 'n');
+  $query->condition('n.type', 'outlet_master');
+  $query->join('field_data_field_pl_group', 'pl', 'pl.entity_id = n.nid');
+  $query->condition('n.uid', $distributor_id, '='); 
+  $query->fields('pl', array('field_pl_group_value'));
+  $query->groupBy('field_pl_group_value');
+  $ress = $query->execute()->fetchAll();
+  
+  if (!empty($ress)) {
+    $row = array();
+    foreach($ress as $value) {
+      $row[$value->field_pl_group_value][] = $value->field_pl_group_value;
+      $bill_sum = 0;
+      for($i = 1; $i <= 5; $i++) {
+        switch ($i){ 
+          case '1':
+          $start_date = strtotime('-1 day', strtotime(date('Y-m-d')));
+          $end_date = strtotime('-1 day', strtotime(date('Y-m-d')));
+          break;
+          case '2':
+          $start_date = strtotime('-2 day', strtotime(date('Y-m-d')));
+          $end_date = strtotime('-2 day', strtotime(date('Y-m-d')));
+          break;
+          case '3':
+          $start_date = strtotime('-3 day', strtotime(date('Y-m-d')));
+          $end_date = strtotime('-3 day', strtotime(date('Y-m-d')));
+          break;
+          case '4':
+          $start_date = strtotime('-4 day', strtotime(date('Y-m-d')));
+          $end_date = strtotime('-4 day', strtotime(date('Y-m-d')));
+          break;
+          case '5':
+          $start_date = strtotime('-5 day', strtotime(date('Y-m-d')));
+          $end_date = strtotime('-30 day', $start_date);
+          break;
+        }
+
+        $query = db_select('node', 'n');
+        $query->condition('n.type', 'sales_register_data');
+        $query->condition('n.uid', $distributor_id, '=');
+        $query->join('field_data_field_billing_van', 'bva', 'bva.entity_id = n.nid');
+        $query->join('field_data_field_sr_bill_date', 'bd', 'bd.entity_id = n.nid');
+        $query->condition('bd.field_sr_bill_date_value', array($end_date,$start_date), 'BETWEEN');
+        $query->join('field_data_field_bill_value', 'bv', 'bv.entity_id = n.nid');
+        $query->join('field_data_field_party_code_reference', 'pc', 'pc.entity_id = n.nid');
+        $query->join('field_data_field_pl_group', 'plg', 'plg.entity_id = pc.field_party_code_reference_nid');
+        $query->condition('plg.field_pl_group_value',$value->field_pl_group_value, '=');
+        if($mtd_type == 'bill_count'){
+          $query->addExpression('COUNT(n.title)', 'bill_value_count');
+        }
+        else {
+          $query->addExpression('SUM(bv.field_bill_value_value)', 'bill_value_count');
+        }
+        $bill_res = $query->execute()->fetchField();
+
+        $bill_sum += $bill_res;
+        if($bill_res) {
+          $row[$value->field_pl_group_value][] = $bill_res; 
+        }
+        else {
+          $row[$value->field_pl_group_value][] = 0; 
+        }
+      }
+      $row[$value->field_pl_group_value][] = $bill_sum; 
+    }
+
+    $total = array();
+    $total['Total'][0] = 'Total';
+    for($k=1; $k<count($ress); $k++) {
+      foreach($ress as $value) {
+        $total['Total'][$k] += $row[$value->field_pl_group_value][$k];
+      }
+    }
+    $rows = array_merge($row,$total);
+  }
+  else {
+    $output = "No Result Found"; 
+  }
+  
+  if($mtd_type == 'bill_count') {
+    $header = array('PL Group', date('dS M', strtotime('-1 day')), date('dS M', strtotime('-2 days')), date('dS M', strtotime('-3 days')), date('dS M', strtotime('-4 days')), '>4 Days', 'Total Bills');
+  }
+  else{
+    $header = array('PL Group', date('dS M', strtotime('-1 day')), date('dS M', strtotime('-2 days')), date('dS M', strtotime('-3 days')), date('dS M', strtotime('-4 days')), '>4 Days', 'Total Bill Value');
+  }
+  $output = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
+
+  return $output;
 }
 
 function get_header_of_chhanel($otif = FALSE, $pl = FALSE) {
