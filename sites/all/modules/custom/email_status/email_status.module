@@ -13,6 +13,12 @@ function email_status_menu() {
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
+  $items['daily-productivity-email'] = array(
+    'title' => 'Send Email Of Daily Data',
+    'page callback' => 'send_email_daily_data',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
   $items['email/daily-data-pl'] = array(
     'title' => 'Send Email Of Daily Data',
     'page callback' => 'send_email_daily_cron_pl_data',
@@ -430,11 +436,20 @@ function send_email_daily_data() {
   $from = variable_get('from_email');
   //$rr = drupal_mail('email_status', 'daily_data', $mail_to, LANGUAGE_NONE, $params, $from);
 
-  send_email_productivity_emailer($todays_date_date, $distributor_name, $distributor_id);
   send_email_pl_group_emailer($distributor_name, $distributor_id);
   send_email_channel_emailer($distributor_name, $distributor_id);
 }
 
+/**
+ * Menu callback for daily-productivity-email
+ */
+function send_productivity_mail_callback() {
+   $distributor_id = _DISTRIBUTOR_ID;
+   $distributor_name = change_feeds_import_get_distributor_name($distributor_id);
+
+   $todays_date_date = date('Y-m-d 00:00:00');
+   send_email_productivity_emailer($todays_date_date, $distributor_name, $distributor_id);
+}
 
 function send_email_daily_cron_pl_data() {
   $distributor_id = _DISTRIBUTOR_ID;
