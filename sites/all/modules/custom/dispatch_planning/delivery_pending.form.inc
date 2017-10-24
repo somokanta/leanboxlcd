@@ -212,7 +212,7 @@ function delivery_pending_form_save_submit($form, &$form_state) {
     if ($node) {
       if ($value) {
         $node->field_delivery_pending[LANGUAGE_NONE][0]['value'] = 1;
-        //previous trip mentain
+        //Maintain previous trip
         unset($node->field_bill_sequence[LANGUAGE_NONE]);
         unset($node->field_drs_sequence[LANGUAGE_NONE]);
         $node->field_previous_trip[LANGUAGE_NONE][0]['value'] = $node->field_trip_id_reference[LANGUAGE_NONE][0]['nid'];
