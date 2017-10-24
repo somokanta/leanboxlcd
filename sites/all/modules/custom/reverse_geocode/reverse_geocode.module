@@ -1525,6 +1525,11 @@ function reverse_geocode_node_presave($node) {
          module_load_include('inc', 'change_feeds_import', 'form/sales_register_data');
          $pdd = get_promised_delivery_date($updated_bill_date);
          $node->field_promised_date[LANGUAGE_NONE][0]['value'] = $pdd;
+         //bod
+         $bod = get_bod_date($updated_bill_date);
+         $party_code_nid = $node->field_party_code_reference['und'][0]['nid'];
+         $node->field_bod_date[LANGUAGE_NONE][0]['value'] = $bod;
+         $node->field_bod_flag[LANGUAGE_NONE][0]['value'] = get_bod_flag($bod,$party_code_nid);
       }
       // code for updating dispatch N value on updating pdd
       $original_pdd = $node->original->field_promised_date[LANGUAGE_NONE][0]['value'];

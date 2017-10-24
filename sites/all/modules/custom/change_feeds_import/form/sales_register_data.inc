@@ -369,7 +369,21 @@ function change_feeds_import_create_sales_register_node($sales_data_result, $dis
           }
 
           $node->field_promised_date[LANGUAGE_NONE][0]['value'] = $pdd;
-
+//bod start
+          if (isset($context['results']['dates'][$val['bod_date']])) {
+            $bod = $context['results']['dates'][$val['bod_date']];
+            $bod_flag = $context['results']['dates'][$val['bod_flag']] ;
+          }
+          else {
+            $bod = get_bod_date($val['date']);
+            $context['results']['dates'][$val['bod_date']] = $bod;   
+            $outlet_nid = get_outlet_master_nid($val['distributor_id'],$val['party_code']);
+            $bod_flag = get_bod_flag($bod,$outlet_nid);            
+            $context['results']['dates'][$val['bod_flag']] = $bod_flag ;            
+          }          
+          $node->field_bod_date[LANGUAGE_NONE][0]['value'] = $bod;
+          $node->field_bod_flag[LANGUAGE_NONE][0]['value'] = $bod_flag;
+//bod end
           $node->field_bill_value[LANGUAGE_NONE][0]['value'] = $val['bill_value'];
           $node->field_sales_party_code[LANGUAGE_NONE][0]['value'] = $val['party_code'];
           $node->field_sales_updated_date[LANGUAGE_NONE][0]['value'] = time();
@@ -390,7 +404,22 @@ function change_feeds_import_create_sales_register_node($sales_data_result, $dis
           }
 
           $node->field_promised_date[LANGUAGE_NONE][0]['value'] = $pdd;
-          //}
+
+//bod start
+          if (isset($context['results']['dates'][$val['bod_date']])) {
+            $bod = $context['results']['dates'][$val['bod_date']];
+            $bod_flag = $context['results']['dates'][$val['bod_flag']] ;
+          }
+          else {
+            $bod = get_bod_date($val['date']);
+            $context['results']['dates'][$val['bod_date']] = $bod;   
+            $outlet_nid = get_outlet_master_nid($val['distributor_id'],$val['party_code']);
+            $bod_flag = get_bod_flag($bod,$outlet_nid);
+            $context['results']['dates'][$val['bod_flag']] = $bod_flag ;            
+          }          
+          $node->field_bod_date[LANGUAGE_NONE][0]['value'] = $bod;
+          $node->field_bod_flag[LANGUAGE_NONE][0]['value'] = $bod_flag;
+//bod end      
 
           $node->field_bill_value[LANGUAGE_NONE][0]['value'] = $val['bill_value'];
           $node->field_sales_party_code[LANGUAGE_NONE][0]['value'] = $val['party_code'];
@@ -495,4 +524,89 @@ function get_promised_delivery_date($date) {
   $pdd = holiday_get_working_day($billing_date_stamp, $pdd_value, $holiday_result, $weeklyoff);
   
   return strtotime($pdd);
+}
+
+
+function get_bod_date($date) {
+  global $user;
+  $user_id = $user->uid;
+  $distributor_id = change_feeds_import_get_distributor_id($user_id);
+  
+  $query = db_select('node', 'n');
+  $query->condition('n.uid', $distributor_id);
+  $query->condition('n.type', 'pdd_master');
+  $query->fields('n', array('nid'));
+  $pdd_value_result = $query->execute()->fetchField();
+  
+  $bod_data = node_load($pdd_value_result);
+  //$pdd_value = $bod_data->field_pdd[LANGUAGE_NONE][0]['value'];
+  $bod_value = 1; // one day hardcoded
+  $weekly = $bod_data->field_day[LANGUAGE_NONE];
+  foreach ($weekly as $key => $val) {
+    $weeklyoff[] = $val['value'];
+  }
+
+  $query = db_select('node', 'n');
+  $query->condition('n.uid', $distributor_id);
+  $query->condition('n.type', 'holiday_master');
+  $query->leftjoin('field_data_field_holiday', 'hday', 'hday.entity_id = n.nid');
+  $query->addExpression("DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(hday.field_holiday_value),'+00:00','+05:30'), '%Y-%m-%d')", 'hdate');
+  $holiday_result = $query->execute()->fetchCol();
+
+  $billing_date_stamp = $date;
+  $bod = holiday_get_working_day_for_bod($billing_date_stamp, $bod_value, $holiday_result, $weeklyoff);
+  
+  return strtotime($bod);
+}
+
+function holiday_get_working_day_for_bod($date_timestamp, $day, $holidays, $weeklyoff) {
+  $date = date('Y-m-d', $date_timestamp);
+
+  while ($day != 0) {
+    $date_timestamp = strtotime('-1 days', $date_timestamp);
+    $date = date('Y-m-d', $date_timestamp);
+    $day_name = date("l", $date_timestamp);
+    if (in_array($date, $holidays)) {
+      
+    }
+    elseif (in_array($day_name, $weeklyoff)) {
+      
+    }
+    else {
+      $day--;
+    }
+  }
+  return $date;
+}
+
+function get_outlet_master_nid($node_author,$party_code){  
+  $query = db_select('node', 'n');
+  $query->fields('n', array('nid'));
+  $query->condition('n.type', 'outlet_master');
+  $query->join('field_data_field_party_code', 'p', 'p.entity_id = n.nid');
+  $query->condition('field_party_code_value', $party_code);
+  $query->condition('n.uid', $node_author);
+  $outlet_nid = $query->execute()->fetchField();
+  return $outlet_nid; 
+}
+
+
+function get_bod_flag($bod_date, $outlet_nid) {
+  $srd_day = date('l', $bod_date);
+  $flag = 0;
+
+  $query = db_select('field_data_field_sales_day', 'sd');
+  $query->condition('sd.entity_id', $outlet_nid);
+  $query->fields('sd', array('field_sales_day_value'));
+  $outlet_sales_day = $query->execute()->fetchField();
+
+  $outlet_sales_day = strtolower($outlet_sales_day);
+  $srd_day = strtolower($srd_day);
+
+  if (!empty($srd_day) && !empty($outlet_sales_day)) {
+    if ($srd_day === $outlet_sales_day) {
+      $flag = 1;
+    }
+  }
+  return $flag;
 }
