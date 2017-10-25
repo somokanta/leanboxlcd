@@ -1082,8 +1082,8 @@ function send_party_packingand_picking_productivity_emailer() {
         . "<th>Party Packer name</th>"
         . "<th>Sum - Bill Line</th>"
         . "<th>Sum - Total Time</th>"
-        . "<th>Productivity</th>"
-        . "<th>Target</th>";
+        . "<th>Productivity</th>";
+      //  . "<th>Target</th>";
 
     foreach ($party_packing as $key => $value) {
      
@@ -1132,14 +1132,9 @@ function send_party_packingand_picking_productivity_emailer() {
               $party_pack_superwise_html .="<td style = 'border:1px solid #000;'>$percentage</td>";
             }
             else {
-              $party_pack_superwise_html .="<td style = 'border:1px solid #000;'>$percentage</td>";
+              $party_pack_superwise_html .="<td style = 'border:1px solid #000;'>$percentage</td></tr>";
             }
                
-            $label = $ke . ' ' . $k;
-            $label_key = strtolower($label);
-            $party_pack_superwise_html .="<td style = 'border:1px solid #000;'> $target_data[$label_key]</td></tr>";
-            
-            
             $total_timing += $time;
             $total_bill_lines += $bill_lines;
           }
@@ -1242,9 +1237,13 @@ function send_party_packingand_picking_productivity_emailer() {
             
             $transaction_date = $v['loading_date'];
             $picker_name = $v['picker_name'];
-            
-            $picking_godown_wise_html .="<td style = 'border:1px solid #000;'>$k</td>";
+            $picker_sup = $v['supervisor'];
+                       
             $picking_godown_wise_html .="<td style = 'border:1px solid #000;'>$transaction_date</td>";
+            $picking_godown_wise_html .="<td style = 'border:1px solid #000;'>$k</td>";
+            $picking_godown_wise_html .="<td style = 'border:1px solid #000;'>$picker_sup</td>";
+            $picking_godown_wise_html .="<td style = 'border:1px solid #000;'>$picker_name</td>";
+            $picking_godown_wise_html .="<td style = 'border:1px solid #000;'>$loding_lines</td>";
             $picking_godown_wise_html .="<td style = 'border:1px solid #000;'>$timing</td>";
             $picking_godown_wise_html .="<td style = 'border:1px solid #000;'>$percentage</td>";
             
