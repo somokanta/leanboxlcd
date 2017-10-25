@@ -2117,7 +2117,7 @@ function get_mtd_data_pending_bills_count_value_pl_groupwise($distributor_id = 6
     $row = array();
     foreach($ress as $value) {
       $row[$value->field_pl_group_value][] = $value->field_pl_group_value;
-      $bill_sum = 0;
+      $pending_bill_sum_value = 0;
       for($i = 1; $i <= 5; $i++) {
         switch ($i){ 
           case '1':
@@ -2152,23 +2152,29 @@ function get_mtd_data_pending_bills_count_value_pl_groupwise($distributor_id = 6
         $query->join('field_data_field_party_code_reference', 'pc', 'pc.entity_id = n.nid');
         $query->join('field_data_field_pl_group', 'plg', 'plg.entity_id = pc.field_party_code_reference_nid');
         $query->condition('plg.field_pl_group_value',$value->field_pl_group_value, '=');
+        $query->leftjoin('field_data_field_trip_id_reference', 'ti', 'ti.entity_id = n.nid');
+        $query->leftjoin('node', 'disn', 'disn.nid = ti.field_trip_id_reference_nid');
+        $query->leftjoin('field_data_field_dispatch_status', 'disp_st', 'disp_st.entity_id = disn.nid');
         if($mtd_type == 'bill_count'){
           $query->addExpression('COUNT(n.title)', 'bill_value_count');
+          $query->addExpression('SUM(if(disp_st.field_dispatch_status_value=1, 1, 0))', 'trip_dispatch_sum_value');
         }
         else {
           $query->addExpression('SUM(bv.field_bill_value_value)', 'bill_value_count');
+          $query->addExpression('SUM(if(disp_st.field_dispatch_status_value=1, field_bill_value_value, 0))', 'trip_dispatch_sum_value');
         }
-        $bill_res = $query->execute()->fetchField();
-
-        $bill_sum += $bill_res;
-        if($bill_res) {
-          $row[$value->field_pl_group_value][] = $bill_res; 
+        $bill_res = $query->execute()->fetchAssoc();
+        
+        $pending_bill = ($bill_res['bill_value_count'] - $bill_res['trip_dispatch_sum_value']);
+        $pending_bill_sum_value += $pending_bill;
+        if($bill_res['bill_value_count'] || $bill_res['trip_dispatch_sum_value']) {
+          $row[$value->field_pl_group_value][] = $pending_bill; 
         }
         else {
           $row[$value->field_pl_group_value][] = 0; 
         }
       }
-      $row[$value->field_pl_group_value][] = $bill_sum; 
+      $row[$value->field_pl_group_value][] = $pending_bill_sum_value; 
     }
 
     $total = array();
@@ -2185,10 +2191,10 @@ function get_mtd_data_pending_bills_count_value_pl_groupwise($distributor_id = 6
   }
   
   if($mtd_type == 'bill_count') {
-    $header = array('PL Group', date('dS M', strtotime('-1 day')), date('dS M', strtotime('-2 days')), date('dS M', strtotime('-3 days')), date('dS M', strtotime('-4 days')), '>4 Days', 'Total Bills');
+    $header = array('PL Group', date('dS M', strtotime('-1 day')), date('dS M', strtotime('-2 days')), date('dS M', strtotime('-3 days')), date('dS M', strtotime('-4 days')), '>4 Days', 'Total Pending Bills');
   }
   else{
-    $header = array('PL Group', date('dS M', strtotime('-1 day')), date('dS M', strtotime('-2 days')), date('dS M', strtotime('-3 days')), date('dS M', strtotime('-4 days')), '>4 Days', 'Total Bill Value');
+    $header = array('PL Group', date('dS M', strtotime('-1 day')), date('dS M', strtotime('-2 days')), date('dS M', strtotime('-3 days')), date('dS M', strtotime('-4 days')), '>4 Days', 'Total Pending Bill Value');
   }
   $output = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
 
