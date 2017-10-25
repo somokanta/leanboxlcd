@@ -13,6 +13,12 @@ function email_status_menu() {
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
+  $items['email-productivity-data'] = array(
+    'title' => 'Send Email Of Productivity Data',
+    'page callback' => 'send_party_packingand_picking_productivity_emailer',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
   $items['daily-productivity-email'] = array(
     'title' => 'Send Email Of Daily Data',
     'page callback' => 'send_productivity_mail_callback',
@@ -436,20 +442,11 @@ function send_email_daily_data() {
   $from = variable_get('from_email');
   //$rr = drupal_mail('email_status', 'daily_data', $mail_to, LANGUAGE_NONE, $params, $from);
 
+  //send_email_productivity_emailer($todays_date_date, $distributor_name, $distributor_id);
   send_email_pl_group_emailer($distributor_name, $distributor_id);
   send_email_channel_emailer($distributor_name, $distributor_id);
 }
 
-/**
- * Menu callback for daily-productivity-email
- */
-function send_productivity_mail_callback() {
-   $distributor_id = _DISTRIBUTOR_ID;
-   $distributor_name = change_feeds_import_get_distributor_name($distributor_id);
-
-   $todays_date_date = date('Y-m-d 00:00:00');
-   send_email_productivity_emailer($todays_date_date, $distributor_name, $distributor_id);
-}
 
 function send_email_daily_cron_pl_data() {
   $distributor_id = _DISTRIBUTOR_ID;
@@ -814,18 +811,15 @@ function send_email_pl_group_emailer($distributor_name, $distributor_id = 60) {
 
 function send_email_productivity_emailer($todays_date_date, $distributor_name, $end_date = FALSE, $chart = FALSE, $type = '', $distributor_id = 60) {
  $target_data = leanbox_dashboard_target_value_using_voc_name('productivity target');
- $end_date = strtotime('-15 day', date('Y-m-d'));
+
   if (( $chart == TRUE && $type == 'party_packing' ) || ( $chart == FALSE )) {
-    $party_packing = get_productivity_data_for_party_packing($end_date, $todays_date_date, $distributor_id);
+    $party_packing = get_productivity_data_for_party_packing($todays_date_date, $end_date, $distributor_id);
     $party_pack_superwise_html = "<h3>Party Packing Supervisorwise (status:Completed)</h3><table class = 'pp-superwise-table' border='1' cellpadding='5' cellspacing='0'  style='color:#000; font-size: 13px;font-family: arial'>"
-        . "<th>Transaction Date</th>"
-        . "<th>Party Packer Name</th>"
-        . "<th>Party Packing Supervisor</th>"
         . "<th>Party Packing Type</th>"
+        . "<th>Party Packing Supervisor</th>"
         . "<th>Sum - Bill Line</th>"
         . "<th>Sum - Total Time</th>"
         . "<th>Productivity</th>";
-       // . "<th>Target</th>";
 
     foreach ($party_packing as $key => $value) {
      
@@ -835,7 +829,8 @@ function send_email_productivity_emailer($todays_date_date, $distributor_name, $
         }if ($key == 0) {
           $first_row = "NON-PP";
         }
-        $party_packing_table_type = $first_row;
+        $party_pack_superwise_html .="<tr>
+    <td>$first_row</td>";
         $super_wise_counter = 0;
         foreach ($value as $k => $v) {
           if (is_array($v)) {
@@ -858,14 +853,9 @@ function send_email_productivity_emailer($todays_date_date, $distributor_name, $
             if (empty($bill_lines)) {
               $bill_lines = $val['supervisor_pp_bill_lines'];
             }
-            $transaction_date = $val['loading_date'];
-            $party_packer_name = $val['party_packer_name'];
             $percentage = ($bill_lines / $time);
             $percentage = number_format((float) $percentage, 2, '.', '');
-            $party_pack_superwise_html .="<td><table class = 'pp-tp'><td><tr>$transaction_date</tr></td></table></td>";
-            $party_pack_superwise_html .="<td><table class = 'pp-ttsp'><td><tr>$party_packer_name</tr></td></table></td>";
             $party_pack_superwise_html .="<td><table class = 'pp-sp'><td><tr>$super_visor</tr></td></table></td>";
-            $party_pack_superwise_html .= "<td><table class = 'pp-ff'><td><tr>$party_packing_table_type</tr></td></table></td>"; ;
             $party_pack_superwise_html .="<td><table class = 'pp-bill'><td><tr>$bill_lines</tr></td></table></td>";
             $party_pack_superwise_html .="<td><table class = 'pp-time'><td><tr>$time</tr></td></table></td>";
             if ($super_wise_counter == $superwise_count) {
@@ -877,7 +867,7 @@ function send_email_productivity_emailer($todays_date_date, $distributor_name, $
                
             $label = $ke . ' ' . $k;
             $label_key = strtolower($label);
-           // $party_pack_superwise_html .="<td><table class = 'pp-count'><td><tr> $target_data[$label_key]</tr></td></table></td><tr></tr><td></td>";
+            $picking_godown_wise_html .="<td><table class = 'pp-count'><td><tr> $target_data[$label_key]</tr></td></table></td><tr></tr><td></td>";
             
             
             $total_timing += $time;
@@ -888,13 +878,13 @@ function send_email_productivity_emailer($todays_date_date, $distributor_name, $
         $total_percentage = number_format((float) $total_percentage, 2, '.', '');
         $all_total_timing += $total_timing;
         $all_total_loding_lines += $total_bill_lines;
-//        $party_pack_superwise_html .="<tr>
-//<td>$first_row Result</td>
-//<td></td>
-//<td><table class = 'pp-total-bill'><td><tr>$total_bill_lines</tr></td></table></td>
-//<td><table class = 'pp-total-time'><td><tr>$total_timing</tr></td></table></td>
-//<td><table class = 'pp-total-percent'><td><tr>$total_percentage</tr></td></table></td>
-//</tr><td></td>";
+        $party_pack_superwise_html .="<tr>
+<td>$first_row Result</td>
+<td></td>
+<td><table class = 'pp-total-bill'><td><tr>$total_bill_lines</tr></td></table></td>
+<td><table class = 'pp-total-time'><td><tr>$total_timing</tr></td></table></td>
+<td><table class = 'pp-total-percent'><td><tr>$total_percentage</tr></td></table></td>
+</tr><td></td>";
         unset($total_timing);
         unset($total_bill_lines);
         unset($total_percentage);
@@ -904,7 +894,7 @@ function send_email_productivity_emailer($todays_date_date, $distributor_name, $
     $all_godown_total_perc = ($all_total_loding_lines / $all_total_timing);
     $all_godown_total_perc = number_format((float) $all_godown_total_perc, 2, '.', '');
     if (empty($all_total_loding_lines) && empty($all_total_timing)) {
-      $party_pack_superwise_html .= "<tr><td colspan='7' style='text-align: center;'> There is No Activity for today's Date</td></tr>";
+      $party_pack_superwise_html .= "<tr><td colspan='5' style='text-align: center;'> There is No Activity for today's Date</td></tr>";
     }
     $party_pack_superwise_html .= "</table>";
     $total_non_time = $party_packing['total']['non_time'];
@@ -928,7 +918,7 @@ function send_email_productivity_emailer($todays_date_date, $distributor_name, $
 
 
     if (empty($total_bills) && empty($total_time)) {
-      $party_pack_type_wsie_html .= "<tr><td colspan='8' style='text-align: center;'> There is No Activity for today's Date</td></tr></table>";
+      $party_pack_type_wsie_html .= "<tr><td colspan='5' style='text-align: center;'> There is No Activity for today's Date</td></tr></table>";
     }
     else {
       $non_pp_target = $target_data['NON-PP'];
@@ -943,17 +933,14 @@ function send_email_productivity_emailer($todays_date_date, $distributor_name, $
   
   if (( $chart == TRUE && $type == 'picking' ) || ( $chart == FALSE )) {
 
-    $picking = get_productivity_data_for_picking($end_date, $todays_date_date, $distributor_id);
+    $picking = get_productivity_data_for_picking($todays_date_date, $end_date, $distributor_id);
     $picking_supervisor_wise_html = "<h3>Pick Supervisorwise (status:Completed)</h3><table class = 'pp-superwise-table' border='1' cellpadding='5' cellspacing='0'  style='color:#000; font-size: 13px;font-family: arial'>"
-        . "<th>Transaction date</th>"
-        . "<th>Picker Name</th>"
         . "<th>Pick Supervisor</th>"
         . "<th>Godown Area Id</th>"
         . "<th>Picking Type</th>"
         . "<th>Sum - Loading Sheet Line</th>"
         . "<th>Sum - Time Duration</th>"
         . "<th>Productivity</th>";
-       // . "<th>Target</th>";
 
 
     $picking_godown_wise_html = "<h3>Pick Godownwise (status:Completed)</h3><table class = 'pp-typewise' border='1' cellpadding='5' cellspacing='0'  style='color:#000; font-size: 13px;font-family: arial'>"
@@ -961,8 +948,8 @@ function send_email_productivity_emailer($todays_date_date, $distributor_name, $
         . "<th>Picking Type</th>"
         . "<th>Sum - Loading Sheet Line</th>"
         . "<th>Sum - Time Duration</th>"
-        . "<th>Productivity</th>";
-       // . "<th>Target</th>";
+        . "<th>Productivity</th>"
+        . "<th>Target</th>";
     
      
     foreach ($picking as $key => $value) {
@@ -974,7 +961,6 @@ function send_email_productivity_emailer($todays_date_date, $distributor_name, $
           $godown_counter = 0;
           $godown_count = count($val);
           foreach ($val as $k => $v) {
-             
             $godown_counter++;
             $loding_lines = $v['loading_sheet_line'];
             $timing = $v['total_tme'];
@@ -1012,21 +998,14 @@ function send_email_productivity_emailer($todays_date_date, $distributor_name, $
         $superwiser_counter = 0;
         $superwiser_count = count($value);
         foreach ($value as $k => $val) {
-           
-          $transaction_date = $val['loading_date'];
-          $picker_name = $val['party_packer_name'];
-                     
           $superwiser_counter++;
           $loding_lines = $val['loading_sheet_line'];
           $timing = $val['total_tme'];
           $pick_godown = $val['godown'];
           $percentage = ($loding_lines / $timing);
           $percentage = number_format((float) $percentage, 2, '.', '');
-           
-          $picking_supervisor_wise_html .="<td><table class = 'pp-sp'><td><tr>$transaction_date</tr></td></table></td>";
-          $picking_supervisor_wise_html .="<td><table class = 'pp-sp'><td><tr>$picker_name</tr></td></table></td>";
-          $picking_supervisor_wise_html .="<td><table class = 'pp-bill'><td><tr>$k</tr></td></table></td>";
           $picking_supervisor_wise_html .="<td><table class = 'pp-sp'><td><tr>$pick_godown</tr></td></table></td>";
+          $picking_supervisor_wise_html .="<td><table class = 'pp-bill'><td><tr>$k</tr></td></table></td>";
           $picking_supervisor_wise_html .="<td><table class = 'pp-line'><td><tr>$loding_lines</tr></td></table></td>";
           $picking_supervisor_wise_html .="<td><table class = 'pp-time'><td><tr>$timing</tr></td></table></td>";
           if ($superwiser_count == $superwiser_counter) {
@@ -1035,10 +1014,6 @@ function send_email_productivity_emailer($todays_date_date, $distributor_name, $
           else {
             $picking_supervisor_wise_html .="<td><table class = 'pp-count'><td><tr>$percentage</tr></td></table></td><tr></tr><td></td>";
           }
-          // $label = $ke . ' ' . $k;
-           // $label_key = strtolower($label);
-           // $picking_supervisor_wise_html .="<td><table class = 'pp-count'><td><tr> $target_data[$label_key]</tr></td></table></td><tr></tr><td></td>";
-            
           $total_timing += $timing;
           $total_loding_lines += $loding_lines;
           $all_sup_total_timing += $timing;
@@ -1056,7 +1031,7 @@ function send_email_productivity_emailer($todays_date_date, $distributor_name, $
     $all_godown_total_perc = ($all_godown_total_loding_lines / $all_godown_total_timing);
     $all_godown_total_perc = number_format((float) $all_godown_total_perc, 2, '.', '');
     if (empty($all_godown_total_loding_lines) && empty($all_godown_total_timing)) {
-      $picking_supervisor_wise_html .= "<tr><td colspan='8' style='text-align: center;'> There is No Activity for today's Date</td></tr>";
+      $picking_supervisor_wise_html .= "<tr><td colspan='6' style='text-align: center;'> There is No Activity for today's Date</td></tr>";
     }
     $picking_supervisor_wise_html .= "</tr></table>";
     if (empty($all_godown_total_loding_lines) && empty($all_godown_total_timing)) {
@@ -1067,7 +1042,7 @@ function send_email_productivity_emailer($todays_date_date, $distributor_name, $
 
 
   $params['subject'] = "Productivity Progress Status-$distributor_name";
-  $params['body'] = $party_pack_superwise_html . "<br>" . $picking_supervisor_wise_html;
+  $params['body'] = $party_pack_type_wsie_html . "<br>" . $party_pack_superwise_html . "<br>" . $picking_godown_wise_html . "<br>" . $picking_supervisor_wise_html;
   $mail_to = variable_get('to_email');
   $from = variable_get('from_email');
 
@@ -1081,6 +1056,260 @@ function send_email_productivity_emailer($todays_date_date, $distributor_name, $
     drupal_mail('email_status', 'productivity_status', $mail_to, LANGUAGE_NONE, $params, $from);
   }
 }
+
+/**
+ *  Send Particular Email 
+ * @param type $todays_date_date
+ * @param type $distributor_name
+ * @param type $end_date
+ * @param type $chart
+ * @param type $type
+ * @param type $distributor_id
+ * @return type
+ */
+function send_party_packingand_picking_productivity_emailer() {
+  $distributor_id = _DISTRIBUTOR_ID;
+  $distributor_name = change_feeds_import_get_distributor_name($distributor_id);
+  $end_date = strtotime('-15 day', date('Y-m-d'));
+  $todays_date_date = date('Y-m-d 00:00:00');
+  $target_data = leanbox_dashboard_target_value_using_voc_name('productivity target');
+
+    $party_packing = get_productivity_data_for_party_packing($end_date, $todays_date_date, $distributor_id);
+    $party_pack_superwise_html = "<h3>Party Packing Supervisorwise (status:Completed)</h3><table class = 'pp-superwise-table' border='1' cellpadding='5' cellspacing='0'  style='color:#000; font-size: 13px;font-family: arial'>"
+        . "<th>Party Packing Type</th>"
+        . "<th>Party Packing Supervisor</th>"
+        . "<th>Sum - Bill Line</th>"
+        . "<th>Sum - Total Time</th>"
+        . "<th>Productivity</th>";
+
+    foreach ($party_packing as $key => $value) {
+     
+      if ($key !== "total") {
+        if ($key == 1) {
+          $first_row = "PP";
+        }if ($key == 0) {
+          $first_row = "NON-PP";
+        }
+        $party_pack_superwise_html .="<tr>
+    <td>$first_row</td>";
+        $super_wise_counter = 0;
+        foreach ($value as $k => $v) {
+          if (is_array($v)) {
+            $counts++;
+          }
+        }
+        $superwise_count = $counts;
+        foreach ($value as $k => $val) {
+          if (($k == "total_non_pp_bill_lines") || ($k == "total_non_pp_total_time" ) || ($k == "total_pp_bill_lines") || ($k == "total_pp_total_time" )) {
+            // do nothing
+          }
+          else {
+            $super_wise_counter ++;
+            $super_visor = $k;
+            $time = $val['supervisor_non_pp_time'];
+            if (empty($time)) {
+              $time = $val['supervisor_pp_time'];
+            }
+            $bill_lines = $val['supervisor_non_pp_bill_lines'];
+            if (empty($bill_lines)) {
+              $bill_lines = $val['supervisor_pp_bill_lines'];
+            }
+            $percentage = ($bill_lines / $time);
+            $percentage = number_format((float) $percentage, 2, '.', '');
+            $party_pack_superwise_html .="<td><table class = 'pp-sp'><td><tr>$super_visor</tr></td></table></td>";
+            $party_pack_superwise_html .="<td><table class = 'pp-bill'><td><tr>$bill_lines</tr></td></table></td>";
+            $party_pack_superwise_html .="<td><table class = 'pp-time'><td><tr>$time</tr></td></table></td>";
+            if ($super_wise_counter == $superwise_count) {
+              $party_pack_superwise_html .="<td><table class = 'pp-count'><td><tr>$percentage</tr></td></table></td>";
+            }
+            else {
+              $party_pack_superwise_html .="<td><table class = 'pp-count'><td><tr>$percentage</tr></td></table></td><tr></tr><td></td>";
+            }
+               
+            $label = $ke . ' ' . $k;
+            $label_key = strtolower($label);
+            $party_pack_superwise_html .="<td><table class = 'pp-count'><td><tr> $target_data[$label_key]</tr></td></table></td><tr></tr><td></td>";
+            
+            
+            $total_timing += $time;
+            $total_bill_lines += $bill_lines;
+          }
+        }
+        $total_percentage = ($total_bill_lines / $total_timing);
+        $total_percentage = number_format((float) $total_percentage, 2, '.', '');
+        $all_total_timing += $total_timing;
+        $all_total_loding_lines += $total_bill_lines;
+        $party_pack_superwise_html .="<tr>
+<td>$first_row Result</td>
+<td></td>
+<td><table class = 'pp-total-bill'><td><tr>$total_bill_lines</tr></td></table></td>
+<td><table class = 'pp-total-time'><td><tr>$total_timing</tr></td></table></td>
+<td><table class = 'pp-total-percent'><td><tr>$total_percentage</tr></td></table></td>
+</tr><td></td>";
+        unset($total_timing);
+        unset($total_bill_lines);
+        unset($total_percentage);
+        unset($counts);
+      }
+    }
+    $all_godown_total_perc = ($all_total_loding_lines / $all_total_timing);
+    $all_godown_total_perc = number_format((float) $all_godown_total_perc, 2, '.', '');
+    if (empty($all_total_loding_lines) && empty($all_total_timing)) {
+      $party_pack_superwise_html .= "<tr><td colspan='5' style='text-align: center;'> There is No Activity for today's Date</td></tr>";
+    }
+    $party_pack_superwise_html .= "</table>";
+//    $total_non_time = $party_packing['total']['non_time'];
+//    $total_non_bill = $party_packing['total']['non_pp_bill_lines'];
+//    $total_non_perc = ($total_non_bill / $total_non_time);
+//    $total_non_perc = number_format((float) $total_non_perc, 2, '.', '');
+//    $total_pp_time = $party_packing['total']['pp_time'];
+//    $total_pp_bill = $party_packing['total']['pp_bill_lines'];
+//    $total_pp_perc = ($total_pp_bill / $total_pp_time);
+//    $total_pp_perc = number_format((float) $total_pp_perc, 2, '.', '');
+//    $total_bills = ($total_non_bill + $total_pp_bill);
+//    $total_time = ($total_non_time + $total_pp_time);
+//    $total_perc = ($total_bills / $total_time);
+//    $total_perc = number_format((float) $total_perc, 2, '.', '');
+//    $party_pack_type_wsie_html = "<h3>Party Packing Typewise</h3><table class = 'pp-typewise' border='1' cellpadding='5' cellspacing='0'  style='color:#000;font-size: 13px; font-family: arial'>"
+//        . "<th>Party Packing Type</th>"
+//        . "<th>Sum - Bill Line</th>"
+//        . "<th>Sum - Total Time</th>"
+//        . "<th>Productivity</th>"
+//        . "<th>Target</th>";
+
+//
+//    if (empty($total_bills) && empty($total_time)) {
+//      $party_pack_type_wsie_html .= "<tr><td colspan='5' style='text-align: center;'> There is No Activity for today's Date</td></tr></table>";
+//    }
+//    else {
+//      $non_pp_target = $target_data['NON-PP'];
+//      $pp_target = $target_data['PP'];
+//
+//      $party_pack_type_wsie_html .= "<tr><td>Non-PP</td><td>$total_non_bill</td><td>$total_non_time</td><td>$total_non_perc</td><td>$non_pp_target</td></tr>"
+//          . "<tr><td>PP</td><td>$total_pp_bill</td><td>$total_pp_time</td><td>$total_pp_perc</td>"
+//          . "<td>$pp_target</td>"
+//          . "</tr></table>";
+//    }
+//  
+  
+   // Picking productivity
+    $picking = get_productivity_data_for_picking($end_date, $todays_date_date, $distributor_id);
+    $picking_supervisor_wise_html = "<h3>Pick Supervisorwise (status:Completed)</h3><table class = 'pp-superwise-table' border='1' cellpadding='5' cellspacing='0'  style='color:#000; font-size: 13px;font-family: arial'>"
+        . "<th>Pick Supervisor</th>"
+        . "<th>Godown Area Id</th>"
+        . "<th>Picking Type</th>"
+        . "<th>Sum - Loading Sheet Line</th>"
+        . "<th>Sum - Time Duration</th>"
+        . "<th>Productivity</th>";
+
+
+    $picking_godown_wise_html = "<h3>Pick Godownwise (status:Completed)</h3><table class = 'pp-typewise' border='1' cellpadding='5' cellspacing='0'  style='color:#000; font-size: 13px;font-family: arial'>"
+        . "<th>Godown Area Id</th>"
+        . "<th>Picking Type</th>"
+        . "<th>Sum - Loading Sheet Line</th>"
+        . "<th>Sum - Time Duration</th>"
+        . "<th>Productivity</th>"
+        . "<th>Target</th>";
+    
+     
+    foreach ($picking as $key => $value) {
+
+      if ($key == "godown") {
+        foreach ($value as $ke => $val) {
+          $picking_godown_wise_html .="<tr>
+    <td>$ke</td>";
+          $godown_counter = 0;
+          $godown_count = count($val);
+          foreach ($val as $k => $v) {
+            $godown_counter++;
+            $loding_lines = $v['loading_sheet_line'];
+            $timing = $v['total_tme'];
+            $percentage = ($loding_lines / $timing);
+            $percentage = number_format((float) $percentage, 2, '.', '');
+            $picking_godown_wise_html .="<td><table class = 'pp-sp'><td><tr>$k</tr></td></table></td>";
+            $picking_godown_wise_html .="<td><table class = 'pp-bill'><td><tr>$loding_lines</tr></td></table></td>";
+            $picking_godown_wise_html .="<td><table class = 'pp-time'><td><tr>$timing</tr></td></table></td>";
+            $picking_godown_wise_html .="<td><table class = 'pp-count'><td><tr>$percentage</tr></td></table></td>";
+            
+            $label = $ke . ' ' . $k;
+            $label_key = strtolower($label);
+             if ($godown_counter == $godown_count) {
+              $picking_godown_wise_html .="<td><table class = 'pp-target'><td><tr>$target_data[$label_key]</tr></td></table></td>";
+            }
+            else {
+              $picking_godown_wise_html .="<td><table class = 'pp-target'><td><tr>$target_data[$label_key]</tr></td></table></td><tr></tr><td></td>";
+            }
+            
+            $total_timing += $timing;
+            $total_loding_lines += $loding_lines;
+            $all_godown_total_timing += $timing;
+            $all_godown_total_loding_lines += $loding_lines;
+          }
+          $total_perc = ($total_loding_lines / $total_timing);
+          $total_perc = number_format((float) $total_perc, 2, '.', '');
+          unset($total_timing);
+          unset($total_loding_lines);
+          unset($total_percentage);
+        }
+      }
+      else {
+        $picking_supervisor_wise_html .="<tr>
+    <td>$key</td>";
+        $superwiser_counter = 0;
+        $superwiser_count = count($value);
+        foreach ($value as $k => $val) {
+          $superwiser_counter++;
+          $loding_lines = $val['loading_sheet_line'];
+          $timing = $val['total_tme'];
+          $pick_godown = $val['godown'];
+          $percentage = ($loding_lines / $timing);
+          $percentage = number_format((float) $percentage, 2, '.', '');
+          $picking_supervisor_wise_html .="<td><table class = 'pp-sp'><td><tr>$pick_godown</tr></td></table></td>";
+          $picking_supervisor_wise_html .="<td><table class = 'pp-bill'><td><tr>$k</tr></td></table></td>";
+          $picking_supervisor_wise_html .="<td><table class = 'pp-line'><td><tr>$loding_lines</tr></td></table></td>";
+          $picking_supervisor_wise_html .="<td><table class = 'pp-time'><td><tr>$timing</tr></td></table></td>";
+          if ($superwiser_count == $superwiser_counter) {
+            $picking_supervisor_wise_html .="<td><table class = 'pp-count'><td><tr>$percentage</tr></td></table></td>";
+          }
+          else {
+            $picking_supervisor_wise_html .="<td><table class = 'pp-count'><td><tr>$percentage</tr></td></table></td><tr></tr><td></td>";
+          }
+          $total_timing += $timing;
+          $total_loding_lines += $loding_lines;
+          $all_sup_total_timing += $timing;
+          $all_sup_total_loding_lines += $loding_lines;
+        }
+        $total_perc = ($total_loding_lines / $total_timing);
+        $total_perc = number_format((float) $total_perc, 2, '.', '');
+        unset($total_timing);
+        unset($total_loding_lines);
+        unset($total_percentage);
+      }
+    }
+    $all_sup_total_perc = ($all_sup_total_loding_lines / $all_sup_total_timing);
+    $all_sup_total_perc = number_format((float) $all_sup_total_perc, 2, '.', '');
+    $all_godown_total_perc = ($all_godown_total_loding_lines / $all_godown_total_timing);
+    $all_godown_total_perc = number_format((float) $all_godown_total_perc, 2, '.', '');
+    if (empty($all_godown_total_loding_lines) && empty($all_godown_total_timing)) {
+      $picking_supervisor_wise_html .= "<tr><td colspan='6' style='text-align: center;'> There is No Activity for today's Date</td></tr>";
+    }
+    $picking_supervisor_wise_html .= "</tr></table>";
+    if (empty($all_godown_total_loding_lines) && empty($all_godown_total_timing)) {
+      $picking_godown_wise_html .= "<tr><td colspan='6' style='text-align: center;'> There is No Activity for today's Date</td></tr>";
+    }
+    $picking_godown_wise_html .= "</tr></table>";
+  
+
+
+  $params['subject'] = "Productivity Progress Status-$distributor_name";
+  $params['body'] = $party_pack_type_wsie_html . "<br>" . $party_pack_superwise_html . "<br>" . $picking_godown_wise_html . "<br>" . $picking_supervisor_wise_html;
+  $mail_to = variable_get('to_email');
+  $from = variable_get('from_email');
+
+    drupal_mail('email_status', 'productivity_status', $mail_to, LANGUAGE_NONE, $params, $from);
+  
+}
+
 
 function get_todays_party_packing_created_data($loading_date, $distributor_id = 60) {
   $query = db_select('node', 'n');
@@ -1257,6 +1486,13 @@ function get_todays_unloading_created_data($loading_date, $distributor_id = 60) 
   return $egir;
 }
 
+/**
+ * 
+ * @param type $start_date
+ * @param type $end_date
+ * @param type $dis_id
+ * @return type
+ */
 function get_productivity_data_for_party_packing($start_date, $end_date = FALSE, $dis_id = 60) {
   if ($end_date == FALSE) {
     $end_date = date('Y-m-d'); // dnt change format as date are stored in same format in db
@@ -1372,6 +1608,13 @@ function get_productivity_data_for_party_packing($start_date, $end_date = FALSE,
   return $party_packing;
 }
 
+/**
+ * 
+ * @param type $start_date
+ * @param type $end_date
+ * @param type $dis_id
+ * @return type
+ */
 function get_productivity_data_for_picking($start_date, $end_date = FALSE, $dis_id = 60) {
   if ($end_date == FALSE) {
     $end_date = date('Y-m-d'); // dnt change format as date are stored in same format in db
