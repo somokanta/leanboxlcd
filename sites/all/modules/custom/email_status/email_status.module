@@ -694,6 +694,7 @@ function send_email_pl_group_emailer($distributor_name, $distributor_id = 60) {
   $day_before_yesterday_date = date('d-M-Y',strtotime("-2 days"));
   $twoday_before_yesterday = strtotime('-3 day', strtotime($todays_date_date));
   $twoday_before_yesterday_date = date('d-M-Y',strtotime("-3 days"));
+  $twelveday_before_today = strtotime('-12 day', strtotime(date('Y-m-d')));
   
   if ($current_day == 22) {
     $this_month = date("m", $todays_date_date_timestamp);
@@ -742,8 +743,8 @@ function send_email_pl_group_emailer($distributor_name, $distributor_id = 60) {
 //    $yesterday_html .= $yesterday_data;
 //  }
 
-  $mtd_html = "<h3>MTD Pending Bills Summary</h3>";
-  $mtd_data .= get_mtd_data_pl_groupwise($this_date, $yesterday, $distributor_id);
+  $mtd_html = "<h3>Last 10 Days Pending Bills Summary till yesterday (". $yesterday_date .")</h3>";
+  $mtd_data .= get_mtd_data_pl_groupwise($twelveday_before_today, $yesterday, $distributor_id);
   if ($mtd_data == "No Result Found") {
     //$header = get_header_of_pl_group();
     $header = array('PL Group', 'Bill Count', 'Bill Value','Dispatch Count', 'Dispatch Value','Pending Bill','Pending Bill Value');
@@ -754,7 +755,7 @@ function send_email_pl_group_emailer($distributor_name, $distributor_id = 60) {
     $mtd_html .= $mtd_data;
   }
   
-  $mtd_pending_bill_count_html = "<h3>MTD Pending Bills Count by Billing Date</h3>";
+  $mtd_pending_bill_count_html = "<h3>Last 10 Days Pending Bills Count by Billing Date</h3>";
   $mtd_type = 'bill_count';
   $mtd_pending_bill_count_data .= get_mtd_data_pending_bills_count_value_pl_groupwise($distributor_id, $mtd_type);
   if ($mtd_pending_bill_count_data == "No Result Found") {
@@ -766,7 +767,7 @@ function send_email_pl_group_emailer($distributor_name, $distributor_id = 60) {
     $mtd_pending_bill_count_html .= $mtd_pending_bill_count_data;
   }
   
-  $mtd_pending_bill_value_html = "<h3>MTD Pending Bills Value by Billing Date</h3>";
+  $mtd_pending_bill_value_html = "<h3>Last 10 Days Pending Bills Value by Billing Date</h3>";
   $mtd_type = 'bill_value';
   $mtd_pending_bill_value_data .= get_mtd_data_pending_bills_count_value_pl_groupwise($distributor_id, $mtd_type);
   if ($mtd_pending_bill_value_data == "No Result Found") {
@@ -2087,24 +2088,24 @@ function get_mtd_data_pending_bills_count_value_pl_groupwise($distributor_id = 6
       for($i = 1; $i <= 5; $i++) {
         switch ($i){ 
           case '1':
-          $start_date = strtotime('-1 day', strtotime(date('Y-m-d')));
+          $start_date = strtotime('-1 day', strtotime(date('Y-m-d')))+86399;
           $end_date = strtotime('-1 day', strtotime(date('Y-m-d')));
           break;
           case '2':
-          $start_date = strtotime('-2 day', strtotime(date('Y-m-d')));
+          $start_date = strtotime('-2 day', strtotime(date('Y-m-d')))+86399;
           $end_date = strtotime('-2 day', strtotime(date('Y-m-d')));
           break;
           case '3':
-          $start_date = strtotime('-3 day', strtotime(date('Y-m-d')));
+          $start_date = strtotime('-3 day', strtotime(date('Y-m-d')))+86399;
           $end_date = strtotime('-3 day', strtotime(date('Y-m-d')));
           break;
           case '4':
-          $start_date = strtotime('-4 day', strtotime(date('Y-m-d')));
+          $start_date = strtotime('-4 day', strtotime(date('Y-m-d')))+86399;
           $end_date = strtotime('-4 day', strtotime(date('Y-m-d')));
           break;
           case '5':
           $start_date = strtotime('-5 day', strtotime(date('Y-m-d')));
-          $end_date = strtotime('-30 day', $start_date);
+          $end_date = strtotime('-12 day', strtotime(date('Y-m-d')));
           break;
         }
 
