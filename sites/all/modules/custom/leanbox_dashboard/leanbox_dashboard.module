@@ -950,7 +950,7 @@ function leanbox_dashboard_block_view($delta = '') {
       }
 
       $loading_date = date('d-m-Y');
-      $block['subject'] = "BOD ($loading_date Billing)";
+      $block['subject'] = "BOD Criteria ($loading_date Billing)";
       $data = leanbox_dashboard_chart_query_details('bod_data');
       $filter_form = drupal_render(drupal_get_form('leanbox_dashboard_chart_filter_bod_data_form'));
       $block['content'] = array(
