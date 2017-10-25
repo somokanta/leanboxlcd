@@ -1125,7 +1125,7 @@ function send_party_packingand_picking_productivity_emailer() {
             $party_pack_superwise_html .="<td style = 'border:1px solid #000;'>$transaction_date</td>";
             $party_pack_superwise_html .="<td style = 'border:1px solid #000;'>$super_visor</td>";
             $party_pack_superwise_html .="<td style = 'border:1px solid #000;'>$party_packer_name</td>";
-            $party_pack_superwise_html .="<td style = 'border:1px solid #000;'><$bill_lines</td>";
+            $party_pack_superwise_html .="<td style = 'border:1px solid #000;'>$bill_lines</td>";
             $party_pack_superwise_html .="<td style = 'border:1px solid #000;'>$time</td>";
             if ($super_wise_counter == $superwise_count) {
               $party_pack_superwise_html .="<td style = 'border:1px solid #000;'>$percentage</td>";
@@ -1238,8 +1238,8 @@ function send_party_packingand_picking_productivity_emailer() {
             $percentage = ($loding_lines / $timing);
             $percentage = number_format((float) $percentage, 2, '.', '');
             
-            $transaction_date = $val['loading_date'];
-            $picker_name = $val['picker_name'];
+            $transaction_date = $v['loading_date'];
+            $picker_name = $v['picker_name'];
             
             $picking_godown_wise_html .="<td style = 'border:1px solid #000;>$k</td>";
             $picking_godown_wise_html .="<td style = 'border:1px solid #000;>$loding_lines</td>";
@@ -1685,7 +1685,7 @@ function get_productivity_data_for_picking($start_date, $end_date = FALSE, $dis_
         $picking['godown'][$godown][$type]['loading_sheet_line'] += $loading_line;
         $picking['godown'][$godown][$type]['total_tme'] += $total_time;
         $picking['godown'][$godown][$type]['loading_date'] = $value['field_picking_loading_date_value'];
-        $picking['godown'][$godown][$type]['picker'] = $value['field_picking_picker_name_value'];
+        $picking['godown'][$godown][$type]['picker_name'] = $value['field_picking_picker_name_value'];
         $picking['godown'][$godown][$type]['supervisor'] = $value['field_picking_pick_supervisor_value'];
         
       }
@@ -1693,7 +1693,7 @@ function get_productivity_data_for_picking($start_date, $end_date = FALSE, $dis_
         $picking['godown'][$godown][$type]['loading_sheet_line'] += $loading_line;
         $picking['godown'][$godown][$type]['total_tme'] += $total_time;
         $picking['godown'][$godown][$type]['loading_date'] = $value['field_picking_loading_date_value'];
-        $picking['godown'][$godown][$type]['picker'] = $value['field_picking_picker_name_value'];
+        $picking['godown'][$godown][$type]['picker_name'] = $value['field_picking_picker_name_value'];
         $picking['godown'][$godown][$type]['supervisor'] = $value['field_picking_pick_supervisor_value'];
       }
     }
@@ -1704,14 +1704,14 @@ function get_productivity_data_for_picking($start_date, $end_date = FALSE, $dis_
         $picking['godown'][$godown][$type]['loading_sheet_line'] = $loading_line;
         $picking['godown'][$godown][$type]['total_tme'] = $total_time;
         $picking['godown'][$godown][$type]['loading_date'] = $value['field_picking_loading_date_value'];
-        $picking['godown'][$godown][$type]['picker'] = $value['field_picking_picker_name_value'];
+        $picking['godown'][$godown][$type]['picker_name'] = $value['field_picking_picker_name_value'];
         $picking['godown'][$godown][$type]['supervisor'] = $value['field_picking_pick_supervisor_value'];
       }
       if ($type == "Bulk") {
         $picking['godown'][$godown][$type]['loading_sheet_line'] = $loading_line;
         $picking['godown'][$godown][$type]['total_tme'] = $total_time;
         $picking['godown'][$godown][$type]['loading_date'] = $value['field_picking_loading_date_value'];
-        $picking['godown'][$godown][$type]['picker'] = $value['field_picking_picker_name_value'];
+        $picking['godown'][$godown][$type]['picker_name'] = $value['field_picking_picker_name_value'];
         $picking['godown'][$godown][$type]['supervisor'] = $value['field_picking_pick_supervisor_value'];
       }
     }
