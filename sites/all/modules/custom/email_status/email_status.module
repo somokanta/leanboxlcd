@@ -679,6 +679,7 @@ function send_email_pl_group_emailer($distributor_name, $distributor_id = 60) {
   $day_before_yesterday_date = date('d-M-Y',strtotime("-2 days"));
   $twoday_before_yesterday = strtotime('-3 day', strtotime($todays_date_date));
   $twoday_before_yesterday_date = date('d-M-Y',strtotime("-3 days"));
+  $twelveday_before_today = strtotime('-12 day', strtotime(date('Y-m-d')));
   
   if ($current_day == 22) {
     $this_month = date("m", $todays_date_date_timestamp);
@@ -727,8 +728,8 @@ function send_email_pl_group_emailer($distributor_name, $distributor_id = 60) {
 //    $yesterday_html .= $yesterday_data;
 //  }
 
-  $mtd_html = "<h3>MTD Pending Bills Summary</h3>";
-  $mtd_data .= get_mtd_data_pl_groupwise($this_date, $yesterday, $distributor_id);
+  $mtd_html = "<h3>Last 10 Days Pending Bills Summary till yesterday (". $yesterday_date .")</h3>";
+  $mtd_data .= get_pending_bills_pl_group_datewise($twelveday_before_today, $yesterday, $distributor_id);
   if ($mtd_data == "No Result Found") {
     //$header = get_header_of_pl_group();
     $header = array('PL Group', 'Bill Count', 'Bill Value','Dispatch Count', 'Dispatch Value','Pending Bill','Pending Bill Value');
@@ -739,7 +740,7 @@ function send_email_pl_group_emailer($distributor_name, $distributor_id = 60) {
     $mtd_html .= $mtd_data;
   }
   
-  $mtd_pending_bill_count_html = "<h3>MTD Pending Bills Count by Billing Date</h3>";
+  $mtd_pending_bill_count_html = "<h3>Last 10 Days Pending Bills Count by Billing Date</h3>";
   $mtd_type = 'bill_count';
   $mtd_pending_bill_count_data .= get_mtd_data_pending_bills_count_value_pl_groupwise($distributor_id, $mtd_type);
   if ($mtd_pending_bill_count_data == "No Result Found") {
@@ -751,7 +752,7 @@ function send_email_pl_group_emailer($distributor_name, $distributor_id = 60) {
     $mtd_pending_bill_count_html .= $mtd_pending_bill_count_data;
   }
   
-  $mtd_pending_bill_value_html = "<h3>MTD Pending Bills Value by Billing Date</h3>";
+  $mtd_pending_bill_value_html = "<h3>Last 10 Days Pending Bills Value by Billing Date</h3>";
   $mtd_type = 'bill_value';
   $mtd_pending_bill_value_data .= get_mtd_data_pending_bills_count_value_pl_groupwise($distributor_id, $mtd_type);
   if ($mtd_pending_bill_value_data == "No Result Found") {
@@ -1922,6 +1923,105 @@ function get_common_data_for_pl_group_datewise($start_date, $end_date, $distribu
   $query->leftjoin('field_data_field_dispatch_status', 'disp_st', 'disp_st.entity_id = disn.nid');
   $query->addExpression('COUNT(n.title)', 'bill_count');
   $query->addExpression('SUM(bv.field_bill_value_value)', 'bill_value');
+  $query->addExpression('COUNT(ti.field_trip_id_reference_nid)', 'trip_count');
+  $query->addExpression('SUM(if(ti.field_trip_id_reference_nid IS NOT NULL,field_bill_value_value, 0))', 'trip_sum');
+  $query->addExpression('SUM(if(disp_st.field_dispatch_status_value=1, 1, 0))', 'trip_dispatch_sum');
+  $query->addExpression('SUM(if(disp_st.field_dispatch_status_value=1, field_bill_value_value, 0))', 'trip_dispatch_value');
+  $query->fields('bd', array('field_sr_bill_date_value'));
+  $query->fields('plg', array('field_pl_group_value'));
+  $query->fields('n', array('nid'));
+  $query->fields('disp_st', array('field_dispatch_status_value'));
+  $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+
+  if (!empty($res)) {
+    foreach ($res as $k => $v) {
+      $pl_group = $v['field_pl_group_value'];
+      $trip_created_count_percentage = round(($v['trip_count'] / $v['bill_count']) * 100);
+      $trip_created_value_percentage = round(($v['trip_sum'] / $v['bill_value']) * 100);
+      $dispatch_created_pe_count_rcentage = round(($v['trip_dispatch_sum'] / $v['bill_count']) * 100);
+      $dispatch_created_value_percentage = round(($v['trip_dispatch_value'] / $v['bill_value']) * 100);
+      $bill_val = $v['bill_value'];
+      $bill_val = round($bill_val);
+
+      $total_bill_count += $v['bill_count'];
+      $total_bill_val += $bill_val;
+      $total_trip_count += $v['trip_count'];
+      $total_trip_sum += $v['trip_sum'];
+      $total_trip_dispatch_sum += $v['trip_dispatch_sum'];
+      $total_trip_dispatch_value += $v['trip_dispatch_value'];
+   
+      $rows[] = array($pl_group,
+        $v['bill_count'],
+        $bill_val,
+        $v['trip_count'],
+        $v['trip_sum'],
+        $v['trip_dispatch_sum'],
+        $v['trip_dispatch_value'],
+        $trip_created_count_percentage . " %",
+        $trip_created_value_percentage . " %",
+        $dispatch_created_pe_count_rcentage . " %",
+        $dispatch_created_value_percentage . " %"
+      );
+    }
+  }
+  else {
+    $output = "No Result Found";
+  }
+  if (!empty($res)) {
+    $header = get_header_of_pl_group();
+    $total_trip_created_count_percentage = round(($total_trip_count / $total_bill_count) * 100);
+    $total_trip_created_value_percentage = round(($total_trip_sum / $total_bill_val) * 100);
+    $total_dispatch_created_pe_count_rcentage = round(($total_trip_dispatch_sum / $total_bill_count) * 100);
+    $total_dispatch_created_value_percentage = round(($total_trip_dispatch_value / $total_bill_val) * 100);
+
+    $rows[] = array("Total",
+      $total_bill_count,
+      $total_bill_val,
+      $total_trip_count,
+      $total_trip_sum,
+      $total_trip_dispatch_sum,
+      $total_trip_dispatch_value,
+      $total_trip_created_count_percentage . " %",
+      $total_trip_created_value_percentage . " %",
+      $total_dispatch_created_pe_count_rcentage . " %",
+      $total_dispatch_created_value_percentage . " %"
+      
+    );
+
+    $output = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
+  }
+  return $output;
+}
+
+function get_header_of_pl_group() {
+  $header = array('PL Group', 'Bill Count', 'Bill Value', 'Trip Created Count ', 'Trip Created Value',
+    'Dispatch Count', 'Dispatch Value', 'Trip Created Count % ', 'Trip Created Value%',
+    'Dispatch Count%', 'Dispatch Value%');
+  return $header;
+}
+
+/*
+ * Get Pending Bills Summary In Mail
+ */
+function get_pending_bills_pl_group_datewise($start_date, $end_date, $distributor_id = 60) {
+  $query = db_select('node', 'n');
+  $query->condition('n.type', 'sales_register_data');
+  $query->condition('n.uid', $distributor_id, '=');
+  $query->join('field_data_field_billing_van', 'bva', 'bva.entity_id = n.nid');
+  $query->join('field_data_field_sr_bill_date', 'bd', 'bd.entity_id = n.nid');
+  $query->condition('bd.field_sr_bill_date_value', array($start_date, $end_date), 'BETWEEN');
+  $query->join('field_data_field_bill_value', 'bv', 'bv.entity_id = n.nid');
+  $query->join('field_data_field_sales_party_code', 'pc', 'pc.entity_id = n.nid');
+  $query->join('node', 'oun', 'pc.field_sales_party_code_value = oun.title');
+  $query->condition('oun.type', 'outlet_master');
+  $query->condition('oun.uid', $distributor_id, '=');
+  $query->join('field_data_field_pl_group', 'plg', 'plg.entity_id = oun.nid');
+  $query->groupBy('field_pl_group_value');
+  $query->leftjoin('field_data_field_trip_id_reference', 'ti', 'ti.entity_id = n.nid');
+  $query->leftjoin('node', 'disn', 'disn.nid = ti.field_trip_id_reference_nid');
+  $query->leftjoin('field_data_field_dispatch_status', 'disp_st', 'disp_st.entity_id = disn.nid');
+  $query->addExpression('COUNT(n.title)', 'bill_count');
+  $query->addExpression('SUM(bv.field_bill_value_value)', 'bill_value');
   //$query->addExpression('COUNT(ti.field_trip_id_reference_nid)', 'trip_count');
   //$query->addExpression('SUM(if(ti.field_trip_id_reference_nid IS NOT NULL,field_bill_value_value, 0))', 'trip_sum');
   $query->addExpression('SUM(if(disp_st.field_dispatch_status_value=1, 1, 0))', 'trip_dispatch_sum');
@@ -2000,15 +2100,8 @@ function get_common_data_for_pl_group_datewise($start_date, $end_date, $distribu
   return $output;
 }
 
-function get_header_of_pl_group() {
-  $header = array('PL Group', 'Bill Count', 'Bill Value', 'Trip Created Count ', 'Trip Created Value',
-    'Dispatch Count', 'Dispatch Value', 'Trip Created Count % ', 'Trip Created Value%',
-    'Dispatch Count%', 'Dispatch Value%');
-  return $header;
-}
-
 /*
- * Get MTD Pending Bills Count And Value by Billing Date
+ * Get Pending Bills Count And Value by Billing Date
  */
 
 function get_mtd_data_pending_bills_count_value_pl_groupwise($distributor_id = 60, $mtd_type) {
@@ -2028,24 +2121,24 @@ function get_mtd_data_pending_bills_count_value_pl_groupwise($distributor_id = 6
       for($i = 1; $i <= 5; $i++) {
         switch ($i){ 
           case '1':
-          $start_date = strtotime('-1 day', strtotime(date('Y-m-d')));
+          $start_date = strtotime('-1 day', strtotime(date('Y-m-d')))+86399;
           $end_date = strtotime('-1 day', strtotime(date('Y-m-d')));
           break;
           case '2':
-          $start_date = strtotime('-2 day', strtotime(date('Y-m-d')));
+          $start_date = strtotime('-2 day', strtotime(date('Y-m-d')))+86399;
           $end_date = strtotime('-2 day', strtotime(date('Y-m-d')));
           break;
           case '3':
-          $start_date = strtotime('-3 day', strtotime(date('Y-m-d')));
+          $start_date = strtotime('-3 day', strtotime(date('Y-m-d')))+86399;
           $end_date = strtotime('-3 day', strtotime(date('Y-m-d')));
           break;
           case '4':
-          $start_date = strtotime('-4 day', strtotime(date('Y-m-d')));
+          $start_date = strtotime('-4 day', strtotime(date('Y-m-d')))+86399;
           $end_date = strtotime('-4 day', strtotime(date('Y-m-d')));
           break;
           case '5':
           $start_date = strtotime('-5 day', strtotime(date('Y-m-d')));
-          $end_date = strtotime('-30 day', $start_date);
+          $end_date = strtotime('-12 day', strtotime(date('Y-m-d')));
           break;
         }
 
