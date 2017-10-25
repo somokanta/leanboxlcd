@@ -85,10 +85,10 @@
 					vAxis: {
 						minValue: 0,
 						maxValue: 1,
-						title: 'Percentage'
+						title: '100% Bar Stack Graph'
 					},
 					hAxis: {
-						title: 'BOD'
+						title: 'Billing Vs Sales Day Compliance %'
 					},
 				};
 				var chart = new google.visualization.ColumnChart(document.getElementById("bod_data_div"));
