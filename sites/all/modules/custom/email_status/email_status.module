@@ -1093,8 +1093,7 @@ function send_party_packingand_picking_productivity_emailer() {
         }if ($key == 0) {
           $first_row = "NON-PP";
         }
-        $party_pack_superwise_html .="<tr>
-    <td style = 'border:1px solid #000;'>$first_row</td>";
+        
         $super_wise_counter = 0;
         foreach ($value as $k => $v) {
           if (is_array($v)) {
@@ -1107,6 +1106,8 @@ function send_party_packingand_picking_productivity_emailer() {
             // do nothing
           }
           else {
+            $party_pack_superwise_html .="<tr>
+    <td style = 'border:1px solid #000;'>$first_row</td>";
             $super_wise_counter ++;
             $super_visor = $k;
             $time = $val['supervisor_non_pp_time'];
@@ -1227,11 +1228,12 @@ function send_party_packingand_picking_productivity_emailer() {
 
       if ($key == "godown") {
         foreach ($value as $ke => $val) {
-          $picking_godown_wise_html .="<tr>
-    <td style = 'border:1px solid #000;>$ke</td>";
+    
           $godown_counter = 0;
           $godown_count = count($val);
           foreach ($val as $k => $v) {
+                   $picking_godown_wise_html .="<tr>
+    <td style = 'border:1px solid #000;'>$ke</td>";
             $godown_counter++;
             $loding_lines = $v['loading_sheet_line'];
             $timing = $v['total_tme'];
@@ -1241,18 +1243,18 @@ function send_party_packingand_picking_productivity_emailer() {
             $transaction_date = $v['loading_date'];
             $picker_name = $v['picker_name'];
             
-            $picking_godown_wise_html .="<td style = 'border:1px solid #000;>$k</td>";
-            $picking_godown_wise_html .="<td style = 'border:1px solid #000;>$loding_lines</td>";
-            $picking_godown_wise_html .="<td style = 'border:1px solid #000;>$timing</td>";
-            $picking_godown_wise_html .="<td style = 'border:1px solid #000;>$percentage</td>";
+            $picking_godown_wise_html .="<td style = 'border:1px solid #000;'>$k</td>";
+            $picking_godown_wise_html .="<td style = 'border:1px solid #000;'>$transaction_date</td>";
+            $picking_godown_wise_html .="<td style = 'border:1px solid #000;'>$timing</td>";
+            $picking_godown_wise_html .="<td style = 'border:1px solid #000;'>$percentage</td>";
             
             $label = $ke . ' ' . $k;
             $label_key = strtolower($label);
              if ($godown_counter == $godown_count) {
-              $picking_godown_wise_html .="<td style = 'border:1px solid #000;>$target_data[$label_key]</td>";
+              $picking_godown_wise_html .="<td style = 'border:1px solid #000;'>$target_data[$label_key]</td>";
             }
             else {
-              $picking_godown_wise_html .="<td style = 'border:1px solid #000;>$target_data[$label_key]</td></tr>";
+              $picking_godown_wise_html .="<td style = 'border:1px solid #000;'>$target_data[$label_key]</td></tr>";
             }
             
             $total_timing += $timing;
