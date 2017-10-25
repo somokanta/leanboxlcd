@@ -743,8 +743,8 @@ function send_email_pl_group_emailer($distributor_name, $distributor_id = 60) {
 //    $yesterday_html .= $yesterday_data;
 //  }
 
-  $mtd_html = "<h3>Last 10 Days Pending Bills Summary till today (". date('d-M-Y') .")</h3>";
-  $mtd_data .= get_mtd_data_pl_groupwise($twelveday_before_today, $todays_date_date_timestamp, $distributor_id);
+  $mtd_html = "<h3>Last 10 Days Pending Bills Summary till yesterday (". $yesterday_date .")</h3>";
+  $mtd_data .= get_mtd_data_pl_groupwise($twelveday_before_today, $yesterday, $distributor_id);
   if ($mtd_data == "No Result Found") {
     //$header = get_header_of_pl_group();
     $header = array('PL Group', 'Bill Count', 'Bill Value','Dispatch Count', 'Dispatch Value','Pending Bill','Pending Bill Value');
