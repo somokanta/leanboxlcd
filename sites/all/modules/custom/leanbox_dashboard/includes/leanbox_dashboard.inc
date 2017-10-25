@@ -420,6 +420,48 @@ function leanbox_dashboard_chart_filter_picking_ota_form($form, &$form_state) {
   return $form;
 }
 
+
+/**
+ * 
+ * @param array $form
+ * @param array $form_state
+ * @return array
+ */
+function leanbox_dashboard_chart_filter_bod_data_form($form, &$form_state) {
+  $form = array();
+  if (arg(1) == 'bod_data') {
+    $form['start_date'] = array(
+      '#type' => 'date_popup',
+      '#title' => t('Billing Date From'),
+      '#required' => TRUE,
+      '#date_format' => 'Y-m-d',
+      '#default_value' => date('Y-m-d'),
+    );
+    $form['end_date'] = array(
+      '#type' => 'date_popup',
+      '#title' => t('Billing Date To'),
+      '#required' => TRUE,
+      '#date_format' => 'Y-m-d',
+      '#default_value' => date('Y-m-d'),
+    );
+    $form['submit'] = array(
+      '#type' => 'submit',
+      '#value' => 'Submit',
+      '#prefix' => '<div id ="bod-data-submit">',
+      '#suffix' => '</div>',
+      '#attributes' => array('class' => array('bod-data-submit')),
+    );
+  }
+
+  $form['bod_data'] = array(
+    '#markup' => '<a href = "/leanbox-chart-details/bod_data" target = "_blank"><div id="bod_data_div"></div></a>',
+  );
+
+
+  return $form;
+}
+
+
 /**
  * 
  * @param array $form
@@ -1767,6 +1809,35 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
       $data[] = array('No Finish Time Found', 0, 0);
     }
     return $data;
+  }
+  else if ($activity_type == 'bod_data') {
+
+    $data[] = array('PriceList Group', 'Fail', 'Success');
+
+    $query = db_select('node', 'n');
+    $query->addTag('node_uid');
+    $query->condition('n.type', 'sales_register_data');
+    $query->join('field_data_field_sr_bill_date', 'sr', 'sr.entity_id = n.nid');
+    $query->leftjoin('field_data_field_bod_flag', 'bf', 'bf.entity_id = n.nid');
+    if (!empty($start_date) && !empty($end_date)) {
+      $query->condition('sr.field_sr_bill_date_value', array($start_date, $end_date), 'BETWEEN');
+    }
+    $query->addExpression('COUNT(n.nid)', 'total_cont');
+    $query->addExpression('SUM(IF(bf.field_bod_flag_value = 1, 1, 0))', 'success_count');
+    $res = $query->execute()->fetch(PDO::FETCH_ASSOC);
+    
+      if (!empty($res)) {
+         $total_cont = (int)$res['total_cont'];
+         $success_count = (int)$res['success_count'];
+
+         $fail_count = $total_cont - $success_count;
+         $data[] = array('result', $fail_count, $success_count);
+      }
+      else {
+         $data[] = array('No Finish Time Found', 0, 0);
+      }
+
+      return $data;
   }
   else if ($activity_type == 'picking_ota') {
     $query = db_select('node', 'n');
