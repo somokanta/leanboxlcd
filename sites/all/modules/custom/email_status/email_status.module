@@ -1930,7 +1930,7 @@ function get_common_data_for_pl_group_datewise($start_date, $end_date, $distribu
   $query->addExpression('SUM(if(ti.field_trip_id_reference_nid IS NOT NULL,field_bill_value_value, 0))', 'trip_sum');
   //$query->addExpression('SUM(if(disp_st.field_dispatch_status_value=1, 1, 0))', 'trip_dispatch_sum');
   //$query->addExpression('SUM(if(disp_st.field_dispatch_status_value=1, field_bill_value_value, 0))', 'trip_dispatch_value');
-  $query->addExpression('SUM(if(fd.field_dispatch_date_value IS NOT NULL, 1, 0))', 'trip_sum');
+  $query->addExpression('SUM(if(fd.field_dispatch_date_value IS NOT NULL, 1, 0))', 'trip_dispatch_sum');
   $query->addExpression('SUM(if(fd.field_dispatch_date_value IS NOT NULL, field_bill_value_value, 0))', 'trip_dispatch_value');
 
   $query->fields('bd', array('field_sr_bill_date_value'));
