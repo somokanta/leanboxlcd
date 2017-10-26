@@ -1115,7 +1115,7 @@ function send_party_packingand_picking_productivity_emailer() {
                }
                $percentage = ($bill_lines / $time);
                $percentage = number_format((float) $percentage, 2, '.', '');
-               $transaction_date = $val['loading_date'];
+               $transaction_date = date('Y-m-d', $val['loading_date']);
                $party_packer_name = $val['party_packer_name'];
 
                $party_pack_superwise_html .= "<td style = 'border:1px solid #000;'>$transaction_date</td>";
@@ -1270,9 +1270,9 @@ function send_party_packingand_picking_productivity_emailer() {
       $superwiser_count = count($value);
       foreach ($value as $k => $val) {
 
-         $transaction_date = $v['loading_date'];
-         $picker_name = $v['picker_name'];
-         $picker_sup = $v['supervisor'];
+         $transaction_date = date('Y-m-d', $value['loading_date']);
+         $picker_name = $value['picker_name'];
+         $picker_sup = $value['supervisor'];
          $superwiser_counter++;
          $loding_lines = $val['loading_sheet_line'];
          $timing = $val['total_tme'];
