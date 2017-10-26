@@ -227,7 +227,7 @@ function party_packing_filter_callback() {
 }
 
 /**
- * 
+ * Implements hook_block_info().
  */
 function leanbox_dashboard_block_info() {
   $blocks['party_packing'] = array(
@@ -948,10 +948,11 @@ function leanbox_dashboard_block_view($delta = '') {
           'ch_height' => 250,
         );
       }
-
-      $loading_date = date('d-m-Y');
-      $block['subject'] = "BOD Criteria ($loading_date Billing)";
-      $data = leanbox_dashboard_chart_query_details('bod_data');
+      
+      $loading_date_timestamp = strtotime(date('Y-m-d') . "- 1 days");
+      $loading_date = date('d-m-Y', $loading_date_timestamp);
+      $block['subject'] = "Billing Vs Sales Day Compliance % ($loading_date Billing)";
+      $data = leanbox_dashboard_chart_query_details('bod_data', $loading_date, $loading_date);
       $filter_form = drupal_render(drupal_get_form('leanbox_dashboard_chart_filter_bod_data_form'));
       $block['content'] = array(
         '#markup' => theme('leanbox_dashboard', array('data' => $filter_form)),

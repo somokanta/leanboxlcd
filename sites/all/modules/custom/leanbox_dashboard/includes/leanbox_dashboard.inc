@@ -429,20 +429,22 @@ function leanbox_dashboard_chart_filter_picking_ota_form($form, &$form_state) {
  */
 function leanbox_dashboard_chart_filter_bod_data_form($form, &$form_state) {
   $form = array();
-  if (arg(1) == 'bod_data') {
+  //if (arg(1) == 'bod_data') {
+  $billing_date = strtotime(date('Y-m-d') . "-1 days");
+  $bill_date = date('Y-m-d', $billing_date);
     $form['start_date'] = array(
       '#type' => 'date_popup',
       '#title' => t('Billing Date From'),
       '#required' => TRUE,
       '#date_format' => 'Y-m-d',
-      '#default_value' => date('Y-m-d'),
+      '#default_value' => $bill_date,
     );
     $form['end_date'] = array(
       '#type' => 'date_popup',
       '#title' => t('Billing Date To'),
       '#required' => TRUE,
       '#date_format' => 'Y-m-d',
-      '#default_value' => date('Y-m-d'),
+      '#default_value' => $bill_date,
     );
     $form['submit'] = array(
       '#type' => 'submit',
@@ -451,7 +453,7 @@ function leanbox_dashboard_chart_filter_bod_data_form($form, &$form_state) {
       '#suffix' => '</div>',
       '#attributes' => array('class' => array('bod-data-submit')),
     );
-  }
+  //}
 
   $form['bod_data'] = array(
     '#markup' => '<a href = "/leanbox-chart-details/bod_data" target = "_blank"><div id="bod_data_div"></div></a>',
