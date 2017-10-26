@@ -429,20 +429,22 @@ function leanbox_dashboard_chart_filter_picking_ota_form($form, &$form_state) {
  */
 function leanbox_dashboard_chart_filter_bod_data_form($form, &$form_state) {
   $form = array();
-  if (arg(1) == 'bod_data') {
+  //if (arg(1) == 'bod_data') {
+  $billing_date = strtotime(date('Y-m-d') . "-1 days");
+  $bill_date = date('Y-m-d', $billing_date);
     $form['start_date'] = array(
       '#type' => 'date_popup',
-      '#title' => t('Billing Date From'),
+      '#title' => t('Bill Date From'),
       '#required' => TRUE,
       '#date_format' => 'Y-m-d',
-      '#default_value' => date('Y-m-d'),
+      '#default_value' => $bill_date,
     );
     $form['end_date'] = array(
       '#type' => 'date_popup',
-      '#title' => t('Billing Date To'),
+      '#title' => t('Bill Date To'),
       '#required' => TRUE,
       '#date_format' => 'Y-m-d',
-      '#default_value' => date('Y-m-d'),
+      '#default_value' => $bill_date,
     );
     $form['submit'] = array(
       '#type' => 'submit',
@@ -451,7 +453,7 @@ function leanbox_dashboard_chart_filter_bod_data_form($form, &$form_state) {
       '#suffix' => '</div>',
       '#attributes' => array('class' => array('bod-data-submit')),
     );
-  }
+  //}
 
   $form['bod_data'] = array(
     '#markup' => '<a href = "/leanbox-chart-details/bod_data" target = "_blank"><div id="bod_data_div"></div></a>',
@@ -2184,8 +2186,10 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     $query->join('field_data_field_billing_van', 'bva', 'bva.entity_id = n.nid');
     $query->leftjoin('field_data_field_trip_id_reference', 't', 't.entity_id = n.nid');
     $query->leftjoin('node', 'disn', 'disn.nid = t.field_trip_id_reference_nid');
-    $query->leftjoin('field_data_field_dispatch_status', 'disp_st', 'disp_st.entity_id = disn.nid');
-    $query->addExpression('SUM(if(disp_st.field_dispatch_status_value=1, 1, 0))', 'trip_dispatch_sum');
+    // $query->leftjoin('field_data_field_dispatch_status', 'disp_st', 'disp_st.entity_id = disn.nid');
+    $query->leftjoin('field_data_field_dispatch_date', 'fd', 'fd.entity_id = disn.nid');
+    //$query->addExpression('SUM(if(disp_st.field_dispatch_status_value=1, 1, 0))', 'trip_dispatch_sum');
+    $query->addExpression('SUM(if(fd.field_dispatch_date_value IS NOT NULL, 1, 0))', 'trip_dispatch_sum');
     $query->condition('n.uid', $distributor_id);
     $query->condition('n.type', 'sales_register_data');
     $query->addExpression('COUNT(n.nid)', 'total_count');
