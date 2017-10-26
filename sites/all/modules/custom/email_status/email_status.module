@@ -444,7 +444,7 @@ function send_email_daily_data() {
 
   //send_email_productivity_emailer($todays_date_date, $distributor_name, $distributor_id);
   send_email_pl_group_emailer($distributor_name, $distributor_id);
-  send_email_channel_emailer($distributor_name, $distributor_id);
+  //send_email_channel_emailer($distributor_name, $distributor_id);
 }
 
 
