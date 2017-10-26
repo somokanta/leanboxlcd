@@ -1118,8 +1118,8 @@ function send_party_packingand_picking_productivity_emailer() {
                $party_packer_name = $val['party_packer_name'];
 
                $party_pack_superwise_html .= "<tr><td style = 'border:1px solid #000;'>$transaction_date</td>";
-               $party_pack_superwise_html .= "<td style = 'border:1px solid #000;'>$party_packer_name</td>";
                $party_pack_superwise_html .= "<td style = 'border:1px solid #000;'>$super_visor</td>";
+               $party_pack_superwise_html .= "<td style = 'border:1px solid #000;'>$party_packer_name</td>";
                $party_pack_superwise_html .= "<td style = 'border:1px solid #000;'>$first_row</td>";
                $party_pack_superwise_html .= "<td style = 'border:1px solid #000;'>$bill_lines</td>";
                $party_pack_superwise_html .= "<td style = 'border:1px solid #000;'>$time</td>";
@@ -1575,7 +1575,7 @@ function get_email_productivity_data_for_party_packing($start_date, $end_date = 
       $party_packing['total']['non_time'] = $non_time;
     }
 
-    $supervisor = $value['field_party_packing_supervisor_value'];
+    // $supervisor = $value['field_party_packing_supervisor_value'];
     $supervisor = $value['field_party_packer_name_value'];
 
     if (isset($res[$supervisor])) {
