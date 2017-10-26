@@ -1071,10 +1071,10 @@ function send_party_packingand_picking_productivity_emailer() {
 
    $party_packing = get_email_productivity_data_for_party_packing($end_date, $todays_date_date, $distributor_id);
    $party_pack_superwise_html = "<h3>Party Packing Supervisorwise (status:Completed)</h3><table class = 'pp-superwise-table' border='1' cellpadding='5' cellspacing='0'  style='color:#000; font-size: 13px;font-family: arial'>"
-       . "<th>Party Packing Type</th>"
        . "<th>Transaction date</th>"
-       . "<th>Party Packing Supervisor</th>"
        . "<th>Party Packer name</th>"
+       . "<th>Party Packing Supervisor</th>"
+       . "<th>Party Packing Type</th>"
        . "<th>Sum - Bill Line</th>"
        . "<th>Sum - Total Time</th>"
        . "<th>Productivity</th>";
@@ -1101,8 +1101,7 @@ function send_party_packingand_picking_productivity_emailer() {
                // do nothing
             }
             else {
-               $party_pack_superwise_html .= "<tr>
-    <td style = 'border:1px solid #000;'>$first_row</td>";
+            
                $super_wise_counter ++;
                $super_visor = $k;
                $time = $val['supervisor_non_pp_time'];
@@ -1118,9 +1117,10 @@ function send_party_packingand_picking_productivity_emailer() {
                $transaction_date = date('Y-m-d', $val['loading_date']);
                $party_packer_name = $val['party_packer_name'];
 
-               $party_pack_superwise_html .= "<td style = 'border:1px solid #000;'>$transaction_date</td>";
-               $party_pack_superwise_html .= "<td style = 'border:1px solid #000;'>$super_visor</td>";
+               $party_pack_superwise_html .= "<tr><td style = 'border:1px solid #000;'>$transaction_date</td>";
                $party_pack_superwise_html .= "<td style = 'border:1px solid #000;'>$party_packer_name</td>";
+               $party_pack_superwise_html .= "<td style = 'border:1px solid #000;'>$super_visor</td>";
+               $party_pack_superwise_html .= "<td style = 'border:1px solid #000;'>$first_row</td>";
                $party_pack_superwise_html .= "<td style = 'border:1px solid #000;'>$bill_lines</td>";
                $party_pack_superwise_html .= "<td style = 'border:1px solid #000;'>$time</td>";
                if ($super_wise_counter == $superwise_count) {
@@ -1661,7 +1661,7 @@ function get_email_productivity_data_for_picking($start_date, $end_date = FALSE,
   $query->join('field_data_field_picking_pick_supervisor', 'pps', 'pps.entity_id = n.nid');
   $query->leftjoin('field_data_field_picking_picker_name', 'pn', 'pn.entity_id = n.nid');
 
-  $query->fields('d', array('field_picking_loading_date_value'));
+  // $query->fields('d', array('field_picking_loading_date_value'));
   $query->fields('pn', array('field_picking_picker_name_value'));
 
   $query->fields('gai', array('field_picking_godown_area_id_value'));
@@ -1669,7 +1669,7 @@ function get_email_productivity_data_for_picking($start_date, $end_date = FALSE,
   $query->fields('lsl', array('field_pick_lines_value'));
   $query->fields('pst', array('field_picking_start_time_value'));
   $query->fields('pet', array('field_picking_end_time_value'));
-  $query->fields('n', array('nid'));
+  $query->fields('n', array('nid', 'changed'));
   $query->fields('ps', array('field_picking_status_value'));
   $query->fields('tc', array('field_picking_picking_team_count_value'));
   $query->fields('pps', array('field_picking_pick_supervisor_value'));
