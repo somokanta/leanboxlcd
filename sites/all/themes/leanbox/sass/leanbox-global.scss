@@ -921,7 +921,7 @@ form {
           margin: 8px 0 0 0;
       }
     }
-    #otif-submit, #delivery-submit, #mobile-return-submit, #mobile-full-return-submit, #adoption-graph-submit{
+    #otif-submit, #delivery-submit, #mobile-return-submit, #mobile-full-return-submit, #adoption-graph-submit, #bod-data-submit{
         width: 80px;
         display: inline-block;
         button {
@@ -931,7 +931,7 @@ form {
     }
     a {
       width: 100%;
-      #otif_div, #delivery_div, #mobile_return_div, #mobile_full_return_div, #adoption_graph_div {
+      #otif_div, #delivery_div, #mobile_return_div, #mobile_full_return_div, #adoption_graph_div, #bod_data_div {
           margin: 10px 0 0 0;
           text-align: center;
           display: inline-block;
