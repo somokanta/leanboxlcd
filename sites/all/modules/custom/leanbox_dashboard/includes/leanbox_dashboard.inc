@@ -2186,8 +2186,10 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     $query->join('field_data_field_billing_van', 'bva', 'bva.entity_id = n.nid');
     $query->leftjoin('field_data_field_trip_id_reference', 't', 't.entity_id = n.nid');
     $query->leftjoin('node', 'disn', 'disn.nid = t.field_trip_id_reference_nid');
-    $query->leftjoin('field_data_field_dispatch_status', 'disp_st', 'disp_st.entity_id = disn.nid');
-    $query->addExpression('SUM(if(disp_st.field_dispatch_status_value=1, 1, 0))', 'trip_dispatch_sum');
+    // $query->leftjoin('field_data_field_dispatch_status', 'disp_st', 'disp_st.entity_id = disn.nid');
+    $query->leftjoin('field_data_field_dispatch_date', 'fd', 'fd.entity_id = disn.nid');
+    //$query->addExpression('SUM(if(disp_st.field_dispatch_status_value=1, 1, 0))', 'trip_dispatch_sum');
+    $query->addExpression('SUM(if(fd.field_dispatch_date_value IS NOT NULL, 1, 0))', 'trip_dispatch_sum');
     $query->condition('n.uid', $distributor_id);
     $query->condition('n.type', 'sales_register_data');
     $query->addExpression('COUNT(n.nid)', 'total_count');
