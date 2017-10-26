@@ -1270,9 +1270,9 @@ function send_party_packingand_picking_productivity_emailer() {
       $superwiser_count = count($value);
       foreach ($value as $k => $val) {
 
-         $transaction_date = date('Y-m-d', $value['loading_date']);
-         $picker_name = $value['picker_name'];
-         $picker_sup = $value['supervisor'];
+         $transaction_date = date('Y-m-d', $val['loading_date']);
+         $picker_name = $val['picker_name'];
+         $picker_sup = $val['supervisor'];
          $superwiser_counter++;
          $loding_lines = $val['loading_sheet_line'];
          $timing = $val['total_tme'];
@@ -1752,7 +1752,7 @@ function get_email_productivity_data_for_picking($start_date, $end_date = FALSE,
       }
       $picking[$supervisor][$type]['picker_name'] = $value['field_picking_picker_name_value'];
       $picking[$supervisor][$type]['supervisor'] = $value['field_picking_pick_supervisor_value'];
-      $picking[$supervisor][$type]['loading_date'] = $value['field_picking_loading_date_value'];
+      $picking[$supervisor][$type]['loading_date'] = $value['changed'];
    }
    return $picking;
 }
