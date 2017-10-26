@@ -2342,17 +2342,21 @@ function get_pending_bills_pl_group_datewise($start_date, $end_date, $distributo
   $query->groupBy('field_pl_group_value');
   $query->leftjoin('field_data_field_trip_id_reference', 'ti', 'ti.entity_id = n.nid');
   $query->leftjoin('node', 'disn', 'disn.nid = ti.field_trip_id_reference_nid');
-  $query->leftjoin('field_data_field_dispatch_status', 'disp_st', 'disp_st.entity_id = disn.nid');
+  $query->leftjoin('field_data_field_dispatch_date', 'fd', 'fd.entity_id = disn.nid');
+  //$query->leftjoin('field_data_field_dispatch_status', 'disp_st', 'disp_st.entity_id = disn.nid');
   $query->addExpression('COUNT(n.title)', 'bill_count');
   $query->addExpression('SUM(bv.field_bill_value_value)', 'bill_value');
   //$query->addExpression('COUNT(ti.field_trip_id_reference_nid)', 'trip_count');
   //$query->addExpression('SUM(if(ti.field_trip_id_reference_nid IS NOT NULL,field_bill_value_value, 0))', 'trip_sum');
-  $query->addExpression('SUM(if(disp_st.field_dispatch_status_value=1, 1, 0))', 'trip_dispatch_sum');
-  $query->addExpression('SUM(if(disp_st.field_dispatch_status_value=1, field_bill_value_value, 0))', 'trip_dispatch_value');
+    
+  //$query->addExpression('SUM(if(disp_st.field_dispatch_status_value=1, 1, 0))', 'trip_dispatch_sum');
+  //$query->addExpression('SUM(if(disp_st.field_dispatch_status_value=1, field_bill_value_value, 0))', 'trip_dispatch_value');
+  $query->addExpression('SUM(if(fd.field_dispatch_date_value IS NOT NULL, 1, 0))', 'trip_dispatch_sum');
+  $query->addExpression('SUM(if(fd.field_dispatch_date_value IS NOT NULL, field_bill_value_value, 0))', 'trip_dispatch_value');
   $query->fields('bd', array('field_sr_bill_date_value'));
   $query->fields('plg', array('field_pl_group_value'));
   $query->fields('n', array('nid'));
-  $query->fields('disp_st', array('field_dispatch_status_value'));
+  //$query->fields('disp_st', array('field_dispatch_status_value'));
   $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
 
   if (!empty($res)) {
@@ -2477,14 +2481,17 @@ function get_mtd_data_pending_bills_count_value_pl_groupwise($distributor_id = 6
         $query->condition('plg.field_pl_group_value',$value->field_pl_group_value, '=');
         $query->leftjoin('field_data_field_trip_id_reference', 'ti', 'ti.entity_id = n.nid');
         $query->leftjoin('node', 'disn', 'disn.nid = ti.field_trip_id_reference_nid');
-        $query->leftjoin('field_data_field_dispatch_status', 'disp_st', 'disp_st.entity_id = disn.nid');
+        //$query->leftjoin('field_data_field_dispatch_status', 'disp_st', 'disp_st.entity_id = disn.nid');
+        $query->leftjoin('field_data_field_dispatch_date', 'fd', 'fd.entity_id = disn.nid');
         if($mtd_type == 'bill_count'){
           $query->addExpression('COUNT(n.title)', 'bill_value_count');
-          $query->addExpression('SUM(if(disp_st.field_dispatch_status_value=1, 1, 0))', 'trip_dispatch_sum_value');
+          //$query->addExpression('SUM(if(disp_st.field_dispatch_status_value=1, 1, 0))', 'trip_dispatch_sum_value');
+          $query->addExpression('SUM(if(fd.field_dispatch_date_value IS NOT NULL, 1, 0))', 'trip_dispatch_sum_value');
         }
         else {
           $query->addExpression('SUM(bv.field_bill_value_value)', 'bill_value_count');
-          $query->addExpression('SUM(if(disp_st.field_dispatch_status_value=1, field_bill_value_value, 0))', 'trip_dispatch_sum_value');
+          //$query->addExpression('SUM(if(disp_st.field_dispatch_status_value=1, field_bill_value_value, 0))', 'trip_dispatch_sum_value');
+          $query->addExpression('SUM(if(fd.field_dispatch_date_value IS NOT NULL, field_bill_value_value, 0))', 'trip_dispatch_sum_value');
         }
         $bill_res = $query->execute()->fetchAssoc();
         
