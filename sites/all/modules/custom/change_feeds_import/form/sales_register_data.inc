@@ -363,18 +363,18 @@ function change_feeds_import_create_sales_register_node($sales_data_result, $dis
           if (isset($context['results']['dates'][$val['date']])) {
             $pdd = $context['results']['dates'][$val['date']];
             //bod
-            $bod = $context['results']['dates'][$val['bod_date']];
-            $bod_flag = $context['results']['dates'][$val['bod_flag']] ;
+            $bod = $context['results']['dates']['bod_date'];
+            $bod_flag = $context['results']['dates']['bod_flag'] ;
           }
           else {
             $pdd = get_promised_delivery_date($val['date']);
             $context['results']['dates'][$val['date']] = $pdd;
             //bod
             $bod = get_bod_date($val['date']);
-            $context['results']['dates'][$val['bod_date']] = $bod;   
+            $context['results']['dates']['bod_date'] = $bod;   
             $outlet_nid = get_outlet_master_nid($val['distributor_id'],$val['party_code']);
             $bod_flag = get_bod_flag($bod,$outlet_nid);            
-            $context['results']['dates'][$val['bod_flag']] = $bod_flag ;
+            $context['results']['dates']['bod_flag'] = $bod_flag ;
           }
 
           $node->field_promised_date[LANGUAGE_NONE][0]['value'] = $pdd;
@@ -396,18 +396,18 @@ function change_feeds_import_create_sales_register_node($sales_data_result, $dis
           if (isset($context['results']['dates'][$val['date']])) {
             $pdd = $context['results']['dates'][$val['date']];
             //bod
-            $bod = $context['results']['dates'][$val['bod_date']];
-            $bod_flag = $context['results']['dates'][$val['bod_flag']] ;
+            $bod = $context['results']['dates']['bod_date'];
+            $bod_flag = $context['results']['dates']['bod_flag'] ;
           }
           else {
             $pdd = get_promised_delivery_date($val['date']);
             $context['results']['dates'][$val['date']] = $pdd;
             //bod
             $bod = get_bod_date($val['date']);
-            $context['results']['dates'][$val['bod_date']] = $bod;   
+            $context['results']['dates']['bod_date'] = $bod;   
             $outlet_nid = get_outlet_master_nid($val['distributor_id'],$val['party_code']);
             $bod_flag = get_bod_flag($bod,$outlet_nid);
-            $context['results']['dates'][$val['bod_flag']] = $bod_flag ;
+            $context['results']['dates']['bod_flag'] = $bod_flag ;
           }
 
           $node->field_promised_date[LANGUAGE_NONE][0]['value'] = $pdd;
