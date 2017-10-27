@@ -443,6 +443,7 @@ function area_confirm_outlet_sequence_api(&$form, &$form_state) {
       $Locations['visits'][$key + 1]['location']['name'] = $key . '#' . $val['title'];
       $Locations['visits'][$key + 1]['location']['lat'] = $val['field_hul_updated_lat_value'];
       $Locations['visits'][$key + 1]['location']['lng'] = $val['field_hul_updated_long_value'];
+      $Locations['visits'][$key + 1]['duration'] = 6;
     }
 
     $Locations['fleet']['hul_vehicle']['start_location'] = array(

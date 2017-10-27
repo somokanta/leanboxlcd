@@ -776,6 +776,7 @@ function dispatch_planning_form_save_validate($form, &$form_state) {
       $Locations['visits'][$val->nid]['location']['name'] = $val->nid;
       $Locations['visits'][$val->nid]['location']['lat'] = $val->lat;
       $Locations['visits'][$val->nid]['location']['lng'] = $val->lng;
+      $Locations['visits'][$val->nid]['duration'] = 6;
     }
 
     if (is_null($val->sequence)) {
@@ -873,7 +874,7 @@ function dispatch_planning_form_save_validate($form, &$form_state) {
     if ($response_data->status === 'success') {
       $response_array = $response_data->solution->origin;
       $i = 1;
-      $form_state['dispatch_planning']['total_travel_time'] = $response_data->total_travel_time;
+      $form_state['dispatch_planning']['total_travel_time'] = $response_data->total_working_time; //total_travel_time
       $form_state['dispatch_planning']['total_distance'] = $response_data->total_distance;
       foreach ($response_array as $k => $v) {
         if ($v->location_name !== 'origin') {
