@@ -826,7 +826,7 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
   
   if($seq_flag){
     $node->field_sequence_method[$node->language][0]['value'] = 1;
-    $node->field_total_travel_time[$node->language][0]['value'] = $total_travel_time;
+    $node->field_total_travel_time[$node->language][0]['value'] = round($total_travel_time/60 , 2);
     $node->field_total_distance[$node->language][0]['value'] = round($total_distance,4);
   }
   else{
