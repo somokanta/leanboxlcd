@@ -776,7 +776,7 @@ function dispatch_planning_form_save_validate($form, &$form_state) {
       $Locations['visits'][$val->nid]['location']['name'] = $val->nid;
       $Locations['visits'][$val->nid]['location']['lat'] = $val->lat;
       $Locations['visits'][$val->nid]['location']['lng'] = $val->lng;
-      $Locations['visits'][$val->nid]['duration'] = 6;
+      $Locations['visits'][$val->nid]['duration'] = 7; // 7 min stop on every outlet
     }
 
     if (is_null($val->sequence)) {
@@ -825,6 +825,7 @@ function dispatch_planning_form_save_validate($form, &$form_state) {
       "lat" => $origin_lat, //'19.1817531000', //
       "lng" => $origin_long //'72.9972678000',// 
     );
+    $Locations['fleet']['origin']['speed'] = 'slow'; // speed of the driver
 
     /*$post_result = graphhopper_postvrp_api($params);
     if ($post_result) {
