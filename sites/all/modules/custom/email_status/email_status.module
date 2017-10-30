@@ -1533,6 +1533,7 @@ function get_email_productivity_data_for_loading($start_date, $end_date = FALSE,
   $query->join('field_data_field_distributor', 'fd', 'fd.entity_id = n.uid');
   $query->condition('fd.entity_id', $dis_id, '=');
   $query->condition('n.changed', array($start_date, $end_date), 'BETWEEN');
+  $query->orderBy('n.changed','DESC');
   $query->join('field_data_field_vehicle_no', 'vno', 'vno.entity_id = n.nid');
   $query->join('field_data_field_dispatch_bill_value', 'dis', 'dis.entity_id = n.nid');
   $query->join('field_data_field_bill_count', 'bc', 'bc.entity_id = n.nid');
@@ -1612,6 +1613,7 @@ function get_email_productivity_data_for_loose_confirmation($start_date, $end_da
   $query->join('field_data_field_distributor', 'fd', 'fd.entity_id = n.uid');
   $query->condition('fd.entity_id', $dis_id, '=');
   $query->condition('n.changed', array($start_date, $end_date), 'BETWEEN');
+  $query->orderBy('n.changed','DESC');
   $query->join('field_data_field_pc_picking_type', 'pt', 'pt.entity_id = n.nid');
   $query->join('field_data_field_pc_pick_lines', 'lsl', 'lsl.entity_id = n.nid');
   $query->join('field_data_field_pc_start_time', 'pst', 'pst.entity_id = n.nid');
@@ -1736,7 +1738,7 @@ function get_email_productivity_data_for_party_packing($start_date, $end_date = 
   $query->leftjoin('field_data_field_party_packer_name', 'pn', 'pn.entity_id = n.nid');
 
   $query->condition('n.changed', array($start_date, $end_date), 'BETWEEN');
-
+  $query->orderBy('n.changed','DESC');
   $query->leftjoin('field_data_field_party_packing_type', 'ppt', 'ppt.entity_id = n.nid');
   $query->leftjoin('field_data_field_party_packing_supervisor', 'pps', 'pps.entity_id = n.nid');
   $query->fields('n', array('nid', 'changed'));
@@ -1850,7 +1852,7 @@ function get_email_productivity_data_for_picking($start_date, $end_date = FALSE,
   $query->join('field_data_field_picking_loading_date', 'd', 'd.entity_id = n.nid');
 
   $query->condition('n.changed', array($start_date, $end_date), 'BETWEEN');
-
+  $query->orderBy('n.changed','DESC');
   $query->join('field_data_field_picking_godown_area_id', 'gai', 'gai.entity_id = n.nid');
   $query->orderBy('gai.field_picking_godown_area_id_value', 'ASC');
   $query->join('field_data_field_picking_picking_type', 'pt', 'pt.entity_id = n.nid');
