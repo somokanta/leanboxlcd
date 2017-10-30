@@ -1070,15 +1070,15 @@ function send_party_packingand_picking_productivity_emailer() {
    $target_data = leanbox_dashboard_target_value_using_voc_name('productivity target');
 
    $party_packing = get_email_productivity_data_for_party_packing($end_date, $todays_date_date, $distributor_id);
-   $party_pack_superwise_html = "<h3>Party Packing Supervisorwise (status:Completed)</h3><table class = 'pp-superwise-table' border='1' cellpadding='5' cellspacing='0'  style='color:#000; font-size: 13px;font-family: arial'>"
+   $party_pack_superwise_html = "<h3>Party Packing Productivity</h3></br><h3>Party Packing (status:Completed)</h3><table class = 'pp-superwise-table' border='1' cellpadding='5' cellspacing='0'  style='color:#000; font-size: 13px;font-family: arial'>"
        . "<th>Transaction date</th>"
        . "<th>Party Packer name</th>"
        . "<th>Party Packing Supervisor</th>"
        . "<th>Party Packing Type</th>"
        . "<th>Sum - Bill Line</th>"
        . "<th>Sum - Total Time</th>"
-       . "<th>Productivity</th>";
-   //  . "<th>Target</th>";
+       . "<th>Productivity</th>"
+       . "<th>Target</th>";
 
    foreach ($party_packing as $key => $value) {
 
@@ -1127,8 +1127,10 @@ function send_party_packingand_picking_productivity_emailer() {
                   $party_pack_superwise_html .= "<td style = 'border:1px solid #000;'>$percentage</td>";
                }
                else {
-                  $party_pack_superwise_html .= "<td style = 'border:1px solid #000;'>$percentage</td></tr>";
+                  $party_pack_superwise_html .= "<td style = 'border:1px solid #000;'>$percentage</td>";
                }
+               
+               $party_pack_superwise_html .= "<td style = 'border:1px solid #000;'>$target_data[$first_row]</td></tr>";
 
                $total_timing += $time;
                $total_bill_lines += $bill_lines;
@@ -1191,7 +1193,7 @@ function send_party_packingand_picking_productivity_emailer() {
 //  
    // Picking productivity
    $picking = get_email_productivity_data_for_picking($end_date, $todays_date_date, $distributor_id);
-   $picking_supervisor_wise_html = "<h3>Pick Supervisorwise (status:Completed)</h3><table class = 'pp-superwise-table' border='1' cellpadding='5' cellspacing='0'  style='color:#000; font-size: 13px;font-family: arial'>"
+   $picking_supervisor_wise_html = "<h3>Picking Productivity</h3></br><h3>Picking (status:Completed)</h3><table class = 'pp-superwise-table' border='1' cellpadding='5' cellspacing='0'  style='color:#000; font-size: 13px;font-family: arial'>"
        . "<th>Transaction date</th>"
        . "<th>Picker Name</th>"
        . "<th>Picking Supervisor</th>"
@@ -1199,7 +1201,8 @@ function send_party_packingand_picking_productivity_emailer() {
        . "<th>Picking Type</th>"
        . "<th>Sum - Loading Sheet Line</th>"
        . "<th>Sum - Time Duration</th>"
-       . "<th>Productivity</th>";
+       . "<th>Productivity</th>"
+       . "<th>Target</th>";
 
 
 
@@ -1293,8 +1296,12 @@ function send_party_packingand_picking_productivity_emailer() {
             $picking_supervisor_wise_html .= "<td style = 'border:1px solid #000;'>$percentage</td>";
          }
          else {
-            $picking_supervisor_wise_html .= "<td style = 'border:1px solid #000;'>$percentage</td></tr>";
+            $picking_supervisor_wise_html .= "<td style = 'border:1px solid #000;'>$percentage</td>";
          }
+         $label = $pick_godown . ' ' . $k;
+         $label_key = strtolower($label);
+         $picking_supervisor_wise_html .= "<td style = 'border:1px solid #000;'>$target_data[$label_key]</td></tr>";
+         
          $total_timing += $timing;
          $total_loding_lines += $loding_lines;
          $all_sup_total_timing += $timing;
@@ -1321,9 +1328,16 @@ function send_party_packingand_picking_productivity_emailer() {
 //   $picking_godown_wise_html .= "</table>";
 
 
+   
+   //Loose Confirmation Productivity Mailer
+   $loose_confirmation_html = get_email_productivity_data_for_loose_confirmation($end_date, $todays_date_date, $distributor_id);
+   
+   //Loading Productivity Mailer
+   $loading_html = get_email_productivity_data_for_loading($end_date, $todays_date_date, $distributor_id);
+   
 
    $params['subject'] = "Productivity Progress Status-$distributor_name";
-   $params['body'] = $party_pack_superwise_html . "<br>" . $picking_supervisor_wise_html;
+   $params['body'] = $party_pack_superwise_html . "<br>" . $picking_supervisor_wise_html . "<br>" . $loose_confirmation_html  . "<br>" . $loading_html;
    $mail_to = variable_get('to_email');
    $from = variable_get('from_email');
 
@@ -1506,6 +1520,194 @@ function get_todays_unloading_created_data($loading_date, $distributor_id = 60) 
   return $egir;
 }
 
+/**
+ * Send Email For Loading Productivity
+ * @param type $start_date
+ * @param type $end_date
+ * @param type $dis_id
+ * @return type
+ */
+function get_email_productivity_data_for_loading($start_date, $end_date = FALSE, $dis_id = 60) {
+  $query = db_select('node', 'n');
+  $query->condition('n.type', 'dispatch_data');
+  $query->join('field_data_field_distributor', 'fd', 'fd.entity_id = n.uid');
+  $query->condition('fd.entity_id', $dis_id, '=');
+  $query->condition('n.changed', array($start_date, $end_date), 'BETWEEN');
+  $query->join('field_data_field_vehicle_no', 'vno', 'vno.entity_id = n.nid');
+  $query->join('field_data_field_dispatch_bill_value', 'dis', 'dis.entity_id = n.nid');
+  $query->join('field_data_field_bill_count', 'bc', 'bc.entity_id = n.nid');
+  $query->join('field_data_field_dispatch_pre_start_time', 'dst', 'dst.entity_id = n.nid');
+  $query->join('field_data_field_dispatch_start_time', 'det', 'det.entity_id = n.nid');
+  $query->join('field_data_field_dispatch_status', 'ds', 'ds.entity_id = n.nid');
+  $query->condition('ds.field_dispatch_status_value', 1, "=");
+  $query->join('field_data_field_dispatch_loader_team_count', 'tc', 'tc.entity_id = n.nid');
+  $query->leftjoin('field_data_field_dispatch_supervisor', 'pps', 'pps.entity_id = n.nid');
+  $query->fields('bc', array('field_bill_count_value'));
+  $query->fields('dis', array('field_dispatch_bill_value_value'));
+  $query->fields('vno', array('field_vehicle_no_value'));
+  $query->fields('dst', array('field_dispatch_pre_start_time_value'));
+  $query->fields('det', array('field_dispatch_start_time_value'));
+  $query->fields('n', array('nid','changed'));
+  $query->fields('ds', array('field_dispatch_status_value'));
+  $query->fields('tc', array('field_dispatch_loader_team_count_value'));
+  $query->fields('pps', array('field_dispatch_supervisor_value'));
+  $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+
+  $table_data = array();
+  foreach($res as $value) {
+    $date = date('Y-m-d',$value['changed']);
+    $supervisor = $value['field_dispatch_supervisor_value'];
+    $start_time = strtotime($value['field_dispatch_pre_start_time_value']);
+    $end_time = strtotime($value['field_dispatch_start_time_value']);
+    $time_diff = abs($end_time - $start_time) / 60;
+    $team_count = $value['field_dispatch_loader_team_count_value'];
+    $time_per_transaction = ($team_count * $time_diff);
+    $table_data[$date][$supervisor]['transaction_date'] = $date;
+    $table_data[$date][$supervisor]['supervisor_name'] = $supervisor;
+    $table_data[$date][$supervisor]['vehicle'][$value['field_vehicle_no_value']] = $value['field_vehicle_no_value'];
+    $table_data[$date][$supervisor]['dispatch_value'] += $value['field_dispatch_bill_value_value'];
+    $table_data[$date][$supervisor]['bill_count'] += $value['field_bill_count_value'];
+    $table_data[$date][$supervisor]['total_time'] += $time_per_transaction;
+  }
+
+  $loading_productivity_html = "<h3>Loading Productivity</h3></br><h3>Loading Status (status:Completed)</h3><table class = 'pp-superwise-table' border='1' cellpadding='5' cellspacing='0'  style='color:#000; font-size: 13px;font-family: arial'>"
+   . "<th>Transaction date</th>"
+   . "<th>Loading Supervisor</th>"
+   . "<th>Count of Vehicle Loaded</th>"
+   . "<th>Total Dispatch Value</th>"
+   . "<th>Total Bill Count</th>"
+   . "<th>Total Time Taken in Mins</th>"
+   . "<th>Productivity (Dispatch Value/Hr)</th>"
+   . "<th>Productivity (Dispatch Value/10Mins)</th>";
+
+  foreach($table_data as $trannsaction_date => $data){
+    foreach($data as $key => $value) {
+      $productivity_per_min = round(($value['dispatch_value'] / $value['total_time']) * 10, 2);
+      $productivity_per_hour = $productivity_per_min * 6;
+      $loading_productivity_html .= "<tr><td style = 'border:1px solid #000;'>".$value['transaction_date']."</td>";
+      $loading_productivity_html .= "<td style = 'border:1px solid #000;'>".$value['supervisor_name']."</td>";
+      $loading_productivity_html .= "<td style = 'border:1px solid #000;'>".count($value['vehicle'])."</td>";
+      $loading_productivity_html .= "<td style = 'border:1px solid #000;'>".$value['dispatch_value']."</td>";
+      $loading_productivity_html .= "<td style = 'border:1px solid #000;'>".$value['bill_count']."</td>";
+      $loading_productivity_html .= "<td style = 'border:1px solid #000;'>".$value['total_time']."</td>";
+      $loading_productivity_html .= "<td style = 'border:1px solid #000;'>".$productivity_per_hour."</td>";
+      $loading_productivity_html .= "<td style = 'border:1px solid #000;'>".$productivity_per_min."</td></tr>";
+    }
+  }
+  $loading_productivity_html .= "</table>";
+  return $loading_productivity_html;
+}
+
+
+/**
+ * Send Email For Loose Confirmation Productivity
+ * @param type $start_date
+ * @param type $end_date
+ * @param type $dis_id
+ * @return type
+ */
+function get_email_productivity_data_for_loose_confirmation($start_date, $end_date = FALSE, $dis_id = 60) {
+  $query = db_select('node', 'n');
+  $query->condition('n.type', 'pick_confirm');
+  $query->join('field_data_field_distributor', 'fd', 'fd.entity_id = n.uid');
+  $query->condition('fd.entity_id', $dis_id, '=');
+  $query->condition('n.changed', array($start_date, $end_date), 'BETWEEN');
+  $query->join('field_data_field_pc_picking_type', 'pt', 'pt.entity_id = n.nid');
+  $query->join('field_data_field_pc_pick_lines', 'lsl', 'lsl.entity_id = n.nid');
+  $query->join('field_data_field_pc_start_time', 'pst', 'pst.entity_id = n.nid');
+  $query->join('field_data_field_pc_end_time', 'pet', 'pet.entity_id = n.nid');
+  $query->join('field_data_field_pc_status', 'ps', 'ps.entity_id = n.nid');
+  $query->condition('ps.field_pc_status_value', 2, "=");
+  $query->join('field_data_field_pc_team_count', 'tc', 'tc.entity_id = n.nid');
+  $query->join('field_data_field_pc_pick_supervisor', 'pps', 'pps.entity_id = n.nid');
+  $query->leftjoin('field_data_field_pc_picker_name', 'pn', 'pn.entity_id = n.nid');
+
+  $query->fields('pn', array('field_pc_picker_name_value'));
+  $query->fields('pt', array('field_pc_picking_type_value'));
+  $query->fields('lsl', array('field_pc_pick_lines_value'));
+  $query->fields('pst', array('field_pc_start_time_value'));
+  $query->fields('pet', array('field_pc_end_time_value'));
+  $query->fields('n', array('nid', 'changed'));
+  $query->fields('ps', array('field_pc_status_value'));
+  $query->fields('tc', array('field_pc_team_count_value'));
+  $query->fields('pps', array('field_pc_pick_supervisor_value'));
+  $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+
+  $picking = array();
+  foreach ($res as $value) {
+    $start_time = strtotime($value['field_pc_start_time_value']);
+    $end_time = strtotime($value['field_pc_end_time_value']);
+    $time_diff = abs(($end_time - $start_time) / 3600);
+    $time_diff = number_format((float) $time_diff, 2, '.', '');
+    $loading_line = $value['field_pc_pick_lines_value'];
+    $team_count = $value['field_pc_team_count_value'];
+    $total_time = ($team_count * $time_diff);
+
+    $picker_name = $value['field_pc_picker_name_value'];
+    $type = $value['field_pc_picking_type_value'];
+    $transaction_date = date('Y-m-d',$value['changed']);
+
+    if (isset($res[$picker_name])) {
+      if ($type == "Loose") {
+        $picking[$transaction_date][$picker_name][$type]['loading_sheet_line'] += $loading_line;
+        $picking[$transaction_date][$picker_name][$type]['total_tme'] += $total_time;
+        $productivity_per = ($loading_line / $total_time);
+        $picking[$transaction_date][$picker_name][$type]['productivity']  = number_format((float) $productivity_per, 2, '.', '');
+      }
+      if ($type == "Bulk") {
+        $picking[$transaction_date][$picker_name][$type]['loading_sheet_line'] += $loading_line;
+        $picking[$transaction_date][$picker_name][$type]['total_tme'] += $total_time;
+        $productivity_per = ($loading_line / $total_time);
+        $picking[$transaction_date][$picker_name][$type]['productivity']  = number_format((float) $productivity_per, 2, '.', '');
+        
+      }
+    }
+    else {
+      $res[$picker_name] = array();
+      if ($type == "Loose") {
+        $picking[$transaction_date][$picker_name][$type]['loading_sheet_line'] = $loading_line;
+        $picking[$transaction_date][$picker_name][$type]['total_tme'] = $total_time;
+        $productivity_per = ($loading_line / $total_time);
+        $picking[$transaction_date][$picker_name][$type]['productivity']  = number_format((float) $productivity_per, 2, '.', '');
+      }
+      if ($type == "Bulk") {
+        $picking[$transaction_date][$picker_name][$type]['loading_sheet_line'] = $loading_line;
+        $picking[$transaction_date][$picker_name][$type]['total_tme'] = $total_time;
+        $productivity_per = ($loading_line / $total_time);
+        $picking[$transaction_date][$picker_name][$type]['productivity']  = number_format((float) $productivity_per, 2, '.', '');
+       }
+    }
+    $picking[$transaction_date][$picker_name][$type]['pc_picker_name'] = $picker_name;
+    $picking[$transaction_date][$picker_name][$type]['supervisor'] = $value['field_pc_pick_supervisor_value'];
+    $picking[$transaction_date][$picker_name][$type]['updated_date'] = date('Y-m-d',$value['changed']);
+    $picking[$transaction_date][$picker_name][$type]['picking_type'] = $type;
+  }
+
+  $loose_confirm_productivity_html = "<h3>Loose Confirmation Productivity</h3></br><h3>Loose Confirmation (status:Completed)</h3><table class = 'pp-superwise-table' border='1' cellpadding='5' cellspacing='0'  style='color:#000; font-size: 13px;font-family: arial'>"
+   . "<th>Transaction date</th>"
+   . "<th>Pick Confirm Name</th>"
+   . "<th>Pick Confirm Supervisor</th>"
+   . "<th>Picking Type</th>"
+   . "<th>Sum - Loading Sheet Line</th>"
+   . "<th>Sum - Time Duration</th>"
+   . "<th>Productivity</th>";
+
+  foreach($picking as $transaction_date => $data){
+    foreach($data as $key => $value) {
+      foreach($value as $k => $result) {
+        $loose_confirm_productivity_html .= "<tr><td style = 'border:1px solid #000;'>".$result['updated_date']."</td>";
+        $loose_confirm_productivity_html .= "<td style = 'border:1px solid #000;'>".$result['pc_picker_name']."</td>";
+        $loose_confirm_productivity_html .= "<td style = 'border:1px solid #000;'>".$result['supervisor']."</td>";
+        $loose_confirm_productivity_html .= "<td style = 'border:1px solid #000;'>".$result['picking_type']."</td>";
+        $loose_confirm_productivity_html .= "<td style = 'border:1px solid #000;'>".$result['loading_sheet_line']."</td>";
+        $loose_confirm_productivity_html .= "<td style = 'border:1px solid #000;'>".$result['total_tme']."</td>";
+        $loose_confirm_productivity_html .= "<td style = 'border:1px solid #000;'>".$result['productivity']."</td></tr>";
+      }
+    }
+  }
+  $loose_confirm_productivity_html .= "</table>";
+  return $loose_confirm_productivity_html;
+}
 
 /**
  * Send Email Productivity
