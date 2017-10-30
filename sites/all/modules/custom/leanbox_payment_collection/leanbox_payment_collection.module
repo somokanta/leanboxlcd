@@ -1,0 +1,75 @@
+<?php
+
+/**
+ * Files containing list of functions for payment collection
+ */
+
+
+/**
+ * Implements hook_menu
+ */
+function leanbox_payment_collection_menu() {
+   $items = array();
+
+   $items['upload-signed-bill/signed'] = array(
+     'title' => 'Declare Payment Collection',
+     'page callback' => 'drupal_get_form',
+     'page arguments' => array('upload_signed_bill_callback'),
+     'access arguments' => array('upload payment collection'),
+     'type' => MENU_CALLBACK,
+     'file' => 'form/leanbox_payment_collection.form.inc',
+   );
+   $items['upload-signed-bill/bounced'] = array(
+     'title' => 'Declare Payment Collection',
+     'page callback' => 'drupal_get_form',
+     'page arguments' => array('upload_signed_bill_callback'),
+     'access arguments' => array('upload payment collection'),
+     'type' => MENU_CALLBACK,
+     'file' => 'form/leanbox_payment_collection.form.inc',
+   );
+   $items['bill-no/list'] = array(
+     'title' => 'Get List of logged in distributor bills',
+     'page callback' => 'get_list_of_bill_no',
+     'access arguments' => array('upload payment collection'),
+     'type' => MENU_CALLBACK,
+   );
+
+   return $items;
+}
+
+/**
+ * Implement hook_permission()
+ *  Add custom permission for collection payment
+ */
+function leanbox_payment_collection_permission() {
+  return array(
+    'upload payment collection' => array(
+      'title' => t('upload payment collection'),
+      'description' => t('upload payment collection for bills')
+    )
+  );
+}
+
+/**
+ * Menu callback; Retrieve a JSON object containing autocomplete suggestions for existing bill no.
+ * @param type $string
+ */
+function get_list_of_bill_no($string = '') {
+   global $user;
+   $res = '';
+   // Store distributor id in author in each node
+   $dis_id = change_feeds_import_get_distributor_id($user->uid);
+   $length = strlen($string);
+   if ($length > 2) {
+      if (!empty($dis_id) && !empty($string)) {
+         $query = db_select('node', 'n');
+         $query->condition('n.type', 'sales_register_data');
+         $query->condition('n.uid', $dis_id);
+         $query->condition('n.title', db_like($string) . '%', 'LIKE');
+         $query->fields('n', array('nid','title'));
+         $query->range(0, 10);
+         $res = $query->execute()->fetchAllKeyed(0, 1);
+      }
+   }
+   drupal_json_output($res);
+}
