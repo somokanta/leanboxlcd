@@ -1329,7 +1329,7 @@ function get_email_productivity_data_for_loading($start_date, $end_date = FALSE,
 
   foreach($table_data as $trannsaction_date => $data){
     foreach($data as $key => $value) {
-      $productivity_per_min = round(($value['dispatch_value'] / $value['total_time']) * 10, 2);
+      $productivity_per_min = round(($value['dispatch_value'] / $value['total_time']) * 10);
       $productivity_per_hour = $productivity_per_min * 6;
       $loading_productivity_html .= "<tr><td style = 'border:1px solid #000;'>".$value['transaction_date']."</td>";
       $loading_productivity_html .= "<td style = 'border:1px solid #000;'>".$value['supervisor_name']."</td>";
@@ -1400,13 +1400,13 @@ function get_email_productivity_data_for_loose_confirmation($start_date, $end_da
         $picking[$transaction_date][$picker_name][$type]['loading_sheet_line'] += $loading_line;
         $picking[$transaction_date][$picker_name][$type]['total_tme'] += $total_time;
         $productivity_per = ($loading_line / $total_time);
-        $picking[$transaction_date][$picker_name][$type]['productivity']  = number_format((float) $productivity_per, 2, '.', '');
+        $picking[$transaction_date][$picker_name][$type]['productivity']  = round($productivity_per);
       }
       if ($type == "Bulk") {
         $picking[$transaction_date][$picker_name][$type]['loading_sheet_line'] += $loading_line;
         $picking[$transaction_date][$picker_name][$type]['total_tme'] += $total_time;
         $productivity_per = ($loading_line / $total_time);
-        $picking[$transaction_date][$picker_name][$type]['productivity']  = number_format((float) $productivity_per, 2, '.', '');
+        $picking[$transaction_date][$picker_name][$type]['productivity']  = round($productivity_per);
         
       }
     }
@@ -1416,13 +1416,13 @@ function get_email_productivity_data_for_loose_confirmation($start_date, $end_da
         $picking[$transaction_date][$picker_name][$type]['loading_sheet_line'] = $loading_line;
         $picking[$transaction_date][$picker_name][$type]['total_tme'] = $total_time;
         $productivity_per = ($loading_line / $total_time);
-        $picking[$transaction_date][$picker_name][$type]['productivity']  = number_format((float) $productivity_per, 2, '.', '');
+        $picking[$transaction_date][$picker_name][$type]['productivity']  = round($productivity_per);
       }
       if ($type == "Bulk") {
         $picking[$transaction_date][$picker_name][$type]['loading_sheet_line'] = $loading_line;
         $picking[$transaction_date][$picker_name][$type]['total_tme'] = $total_time;
         $productivity_per = ($loading_line / $total_time);
-        $picking[$transaction_date][$picker_name][$type]['productivity']  = number_format((float) $productivity_per, 2, '.', '');
+        $picking[$transaction_date][$picker_name][$type]['productivity']  = round($productivity_per);
        }
     }
     $picking[$transaction_date][$picker_name][$type]['pc_picker_name'] = $picker_name;
@@ -1513,14 +1513,14 @@ function get_email_productivity_data_for_party_packing($start_date, $end_date = 
         $party_packing[$transaction_date][$party_packer_n][$type]['pp_time'] += $total_time;
         $party_packing[$transaction_date][$party_packer_n][$type]['packer_type']  = 'PP';
         $productivity_per = ($bill_line / $total_time);
-        $party_packing[$transaction_date][$party_packer_n][$type]['productivity']  = number_format((float) $productivity_per, 2, '.', '');
+        $party_packing[$transaction_date][$party_packer_n][$type]['productivity']  = round($productivity_per);
       }
       if ($type == 0) { //type is NON-PP
         $party_packing[$transaction_date][$party_packer_n][$type]['pp_bill_lines'] += $bill_line;
         $party_packing[$transaction_date][$party_packer_n][$type]['pp_time'] += $total_time;
         $party_packing[$transaction_date][$party_packer_n][$type]['packer_type']  = 'NON-PP';
         $productivity_per = ($bill_line / $total_time);
-        $party_packing[$transaction_date][$party_packer_n][$type]['productivity']  = number_format((float) $productivity_per, 2, '.', '');
+        $party_packing[$transaction_date][$party_packer_n][$type]['productivity']  = round($productivity_per);
       }
     }
     else {
@@ -1530,14 +1530,14 @@ function get_email_productivity_data_for_party_packing($start_date, $end_date = 
         $party_packing[$transaction_date][$party_packer_n][$type]['pp_time'] = $total_time;
         $party_packing[$transaction_date][$party_packer_n][$type]['packer_type']  = 'PP';
         $productivity_per = ($bill_line / $total_time);
-        $party_packing[$transaction_date][$party_packer_n][$type]['productivity']  = number_format((float) $productivity_per, 2, '.', '');
+        $party_packing[$transaction_date][$party_packer_n][$type]['productivity']  = round($productivity_per);
       }
       if ($type == 0) { //type is NON-PP
         $party_packing[$transaction_date][$party_packer_n][$type]['pp_bill_lines'] = $bill_line;
         $party_packing[$transaction_date][$party_packer_n][$type]['pp_time'] = $total_time;
         $party_packing[$transaction_date][$party_packer_n][$type]['packer_type']  = 'NON-PP';
         $productivity_per = ($bill_line / $total_time);
-        $party_packing[$transaction_date][$party_packer_n][$type]['productivity']  = number_format((float) $productivity_per, 2, '.', '');
+        $party_packing[$transaction_date][$party_packer_n][$type]['productivity']  = round($productivity_per);
       }
     }
 
@@ -1634,7 +1634,7 @@ function get_email_productivity_data_for_picking($start_date, $end_date = FALSE,
             $picking[$transaction_date][$picker_n][$type]['picking_type'] = $type;
             $picking[$transaction_date][$picker_n][$type]['godown'] = $godown;
             $productivity_per = ($loading_line / $total_time);
-            $picking[$transaction_date][$picker_n][$type]['productivity']  = number_format((float) $productivity_per, 2, '.', '');
+            $picking[$transaction_date][$picker_n][$type]['productivity']  = round($productivity_per);
          }
          if ($type == "Bulk") {
             $picking[$transaction_date][$picker_n][$type]['loading_sheet_line'] += $loading_line;
@@ -1642,7 +1642,7 @@ function get_email_productivity_data_for_picking($start_date, $end_date = FALSE,
             $picking[$transaction_date][$picker_n][$type]['picking_type'] = $type;
             $picking[$transaction_date][$picker_n][$type]['godown'] = $godown;
             $productivity_per = ($loading_line / $total_time);
-            $picking[$transaction_date][$picker_n][$type]['productivity']  = number_format((float) $productivity_per, 2, '.', '');
+            $picking[$transaction_date][$picker_n][$type]['productivity']  = round($productivity_per);
          }
       }
       else {
@@ -1653,7 +1653,7 @@ function get_email_productivity_data_for_picking($start_date, $end_date = FALSE,
             $picking[$transaction_date][$picker_n][$type]['picking_type'] = $type;
             $picking[$transaction_date][$picker_n][$type]['godown'] = $godown;
             $productivity_per = ($loading_line / $total_time);
-            $picking[$transaction_date][$picker_n][$type]['productivity']  = number_format((float) $productivity_per, 2, '.', '');
+            $picking[$transaction_date][$picker_n][$type]['productivity']  = round($productivity_per);
          }
          if ($type == "Bulk") {
             $picking[$transaction_date][$picker_n][$type]['loading_sheet_line'] = $loading_line;
@@ -1661,7 +1661,7 @@ function get_email_productivity_data_for_picking($start_date, $end_date = FALSE,
             $picking[$transaction_date][$picker_n][$type]['picking_type'] = $type;
             $picking[$transaction_date][$picker_n][$type]['godown'] = $godown;
             $productivity_per = ($loading_line / $total_time);
-            $picking[$transaction_date][$picker_n][$type]['productivity']  = number_format((float) $productivity_per, 2, '.', '');
+            $picking[$transaction_date][$picker_n][$type]['productivity']  = round($productivity_per);
          }
       }
       $picking[$transaction_date][$picker_n][$type]['picker_name'] = $value['field_picking_picker_name_value'];
