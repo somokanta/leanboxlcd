@@ -41,7 +41,12 @@ function upload_signed_bill_callback($form, &$form_state) {
         '#hidden' => TRUE,
         '#value' => $arg1,
       );
+      $form['dis_id'] = array(
+        '#hidden' => TRUE,
+        '#value' => $dis_id,
+      );
       if ($arg1 === 'bounced') {
+         // if arg is bounced then we have to collect cheque no and cheque date
          $form['cheque_no'] = array(
            '#type' => 'textfield',
            '#title' => t('Cheque number'),
@@ -57,7 +62,7 @@ function upload_signed_bill_callback($form, &$form_state) {
 
       $selected_bill_no = $form_state['input']['bill_no'];
       if (!empty($selected_bill_no)) {
-         
+
          $bill_details_html = get_bill_details_using_bill_no_callback($selected_bill_no, $dis_id, $arg1);
          $form['bill_details_wrapper']['bill_details'] = array(
            '#type' => 'tableselect',
@@ -94,13 +99,17 @@ function upload_signed_bill_callback_validate($form, &$form_state) {
    $query->fields('br', array('entity_id'));
    $query->condition('br.field_sales_bill_no_ref_nid', $bill_no_nid);
    $payment_collection_nid = $query->execute()->fetchField();
-   if(!empty($payment_collection_nid) && $arg1 === 'signed') {
+   $from_state['values']['bounced_nid'] = $payment_collection_nid;
+   if (!empty($payment_collection_nid) && $arg1 === 'signed') {
       $node = node_load($payment_collection_nid);
       $node_flag = $node->field_flag['und'][0]['value'];
-      if($node_flag === 'signed') {
-         drupal_set_message(t('bill already have signed flag.'), 'error');
+      if ($node_flag === 'signed') {
+         form_set_error('bill_no', t('bill already have signed flag.'));
       }
-   } 
+   }
+   if (($form_state['clicked_button']['#value'] === 'Remove Flag') && empty($payment_collection_nid)) {
+      form_set_error('bill_no', t('No Bill Found in Collection.'));
+   }
 }
 
 /**
@@ -110,6 +119,39 @@ function upload_signed_bill_callback_validate($form, &$form_state) {
  */
 function upload_signed_bill_callback_submit($form, &$form_state) {
    // write node creation or update (in case of bounced) code here
+   $bill_no_nid = $form_state['values']['bill_no'];
+   $dis_id = $form_state['values']['dis_id'];
+   $arg1 = $form_state['values']['bill_flag'];
+   $bounced_nid = $from_state['values']['bounced_nid'];
+   if (!empty($bounced_nid) && $arg1 === 'bounced') {
+      // write a code to update here
+   }
+   else {
+
+      $node = new stdClass();
+
+      // vvviiiimmmpppp
+      $node->title = $bill_no; // fetch or pass bill no here
+
+
+      $node->type = "payment_collection";
+      node_object_prepare($node); // Sets some defaults. Invokes hook_prepare() and hook_node_prepare().
+      $node->language = LANGUAGE_NONE; // Or e.g. 'en' if locale is enabled
+      $node->uid = $dis_id;
+      $node->status = 1; //(1 or 0): published or not
+      $node->comment = 0; // 0 = comments disabled, 1 = read only, 2 = read/write
+      $node->field_declaration_date[LANGUAGE_NONE][0]['value'] = date('Y-m-d');
+      if($arg1 === 'bounced') {
+          $node->field_bill_count[$node->language][0]['value'] = $dispatch_bill_count;
+      $node->field_bill_count[$node->language][0]['value'] = $dispatch_bill_count;
+      }
+     
+      $node->field_bill_count[$node->language][0]['value'] = $dispatch_bill_count;
+      $node->field_bill_count[$node->language][0]['value'] = $dispatch_bill_count;
+      $node->field_bill_count[$node->language][0]['value'] = $dispatch_bill_count;
+      $node->field_bill_count[$node->language][0]['value'] = $dispatch_bill_count;
+      $node->field_sales_bill_no_ref[LANGUAGE_NONE][0]['nid'] = $bill_no_nid;
+   }
 }
 
 /**
@@ -122,10 +164,9 @@ function get_bill_details_using_bill_no($form, $form_state) {
 function get_bill_details_using_bill_no_callback($bill_no_nid, $dis_id, $arg1) {
    // first parameter passed is nid of sales register
    $html = array();
-   
+
    if (!empty($bill_no_nid) && !empty($dis_id)) {
       $query = db_select('node', 'n');
-      // $query->condition('n.type', 'sales_register_data');
       $query->addField('n', 'title', 'Bill no');
       $query->join('field_data_field_sr_bill_date', 'sr', 'sr.entity_id = n.nid');
       $query->addExpression("DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(sr.field_sr_bill_date_value),'+00:00','+05:30'), '%Y/%m/%d')", 'bill date');
@@ -140,10 +181,6 @@ function get_bill_details_using_bill_no_callback($bill_no_nid, $dis_id, $arg1) {
       $query->addField('sc', 'field_salesman_code_value', 'Salesman code');
       $query->join('field_data_field_bill_value', 'bv', 'bv.entity_id = n.nid');
       $query->addField('bv', 'field_bill_value_value', 'Bill value');
-
-//      if($arg1 === 'bounced') {
-//         
-//      }
       $query->condition('n.nid', $bill_no_nid);
       $query->condition('n.uid', $dis_id);
       $rows = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
@@ -156,13 +193,6 @@ function get_bill_details_using_bill_no_callback($bill_no_nid, $dis_id, $arg1) {
         'Salesman' => 'Salesman',
         'Salesmancode' => 'Salesman code',
         'Billvalue' => 'Bill value');
-//      $html = theme('table', array(
-//        'header' => $header,
-//        'rows' => $rows,
-//       // 'attributes' => array('width' => '100%')
-//       // '#empty' => t('No content available.'), 
-//      ));
-
 
       $html['header'] = $header;
       $html['rows'] = $rows;
@@ -182,10 +212,7 @@ function remove_signed_bounced_flag($form, &$form_state) {
    $query->fields('br', array('entity_id'));
    $query->condition('br.field_sales_bill_no_ref_nid', $bill_no_nid);
    $payment_collection_nid = $query->execute()->fetchField();
-   if (empty($payment_collection_nid)) {
-      drupal_set_message(t('No Bill Found in Collection'), 'error');
-   }
-   else {
+   if (!empty($payment_collection_nid)) {
       $node = node_load($payment_collection_nid);
       unset($node->field_flag['und']);
       drupal_set_message(t('Removed flag'));
