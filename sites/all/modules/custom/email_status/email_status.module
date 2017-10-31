@@ -1068,266 +1068,12 @@ function send_party_packingand_picking_productivity_emailer() {
    $end_date = strtotime('-15 day', date('Y-m-d'));
    $todays_date_date = strtotime(date('Y-m-d 00:00:00'));
    $target_data = leanbox_dashboard_target_value_using_voc_name('productivity target');
-
-   $party_packing = get_email_productivity_data_for_party_packing($end_date, $todays_date_date, $distributor_id);
-   $party_pack_superwise_html = "<h3>Party Packing Productivity</h3></br><h3>Party Packing (status:Completed)</h3><table class = 'pp-superwise-table' border='1' cellpadding='5' cellspacing='0'  style='color:#000; font-size: 13px;font-family: arial'>"
-       . "<th>Transaction date</th>"
-       . "<th>Party Packer name</th>"
-       . "<th>Party Packing Supervisor</th>"
-       . "<th>Party Packing Type</th>"
-       . "<th>Sum - Bill Line</th>"
-       . "<th>Sum - Total Time</th>"
-       . "<th>Productivity</th>"
-       . "<th>Target</th>";
-
-   foreach ($party_packing as $key => $value) {
-
-      if ($key !== "total") {
-         if ($key == 1) {
-            $first_row = "PP";
-         }if ($key == 0) {
-            $first_row = "NON-PP";
-         }
-
-         $super_wise_counter = 0;
-         foreach ($value as $k => $v) {
-            if (is_array($v)) {
-               $counts++;
-            }
-         }
-         $superwise_count = $counts;
-         foreach ($value as $k => $val) {
-            if (($k == "total_non_pp_bill_lines") || ($k == "total_non_pp_total_time" ) || ($k == "total_pp_bill_lines") || ($k == "total_pp_total_time" )) {
-               // do nothing
-            }
-            else {
-            
-               $super_wise_counter ++;
-               $super_visor = $k;
-               $time = $val['supervisor_non_pp_time'];
-               if (empty($time)) {
-                  $time = $val['supervisor_pp_time'];
-               }
-               $bill_lines = $val['supervisor_non_pp_bill_lines'];
-               if (empty($bill_lines)) {
-                  $bill_lines = $val['supervisor_pp_bill_lines'];
-               }
-               $percentage = ($bill_lines / $time);
-               $percentage = number_format((float) $percentage, 2, '.', '');
-               $transaction_date = date('Y-m-d', $val['loading_date']);
-               $party_packer_name = $val['party_packer_name'];
-
-               $party_pack_superwise_html .= "<tr><td style = 'border:1px solid #000;'>$transaction_date</td>";
-               $party_pack_superwise_html .= "<td style = 'border:1px solid #000;'>$super_visor</td>";
-               $party_pack_superwise_html .= "<td style = 'border:1px solid #000;'>$party_packer_name</td>";
-               $party_pack_superwise_html .= "<td style = 'border:1px solid #000;'>$first_row</td>";
-               $party_pack_superwise_html .= "<td style = 'border:1px solid #000;'>$bill_lines</td>";
-               $party_pack_superwise_html .= "<td style = 'border:1px solid #000;'>$time</td>";
-               if ($super_wise_counter == $superwise_count) {
-                  $party_pack_superwise_html .= "<td style = 'border:1px solid #000;'>$percentage</td>";
-               }
-               else {
-                  $party_pack_superwise_html .= "<td style = 'border:1px solid #000;'>$percentage</td>";
-               }
-               
-               $party_pack_superwise_html .= "<td style = 'border:1px solid #000;'>$target_data[$first_row]</td></tr>";
-
-               $total_timing += $time;
-               $total_bill_lines += $bill_lines;
-            }
-         }
-         $total_percentage = ($total_bill_lines / $total_timing);
-         $total_percentage = number_format((float) $total_percentage, 2, '.', '');
-         $all_total_timing += $total_timing;
-         $all_total_loding_lines += $total_bill_lines;
-//        $party_pack_superwise_html .="<tr>
-//<td>$first_row Result</td>
-//<td></td>
-//<td><table class = 'pp-total-bill'><td><tr>$total_bill_lines</tr></td></table></td>
-//<td><table class = 'pp-total-time'><td><tr>$total_timing</tr></td></table></td>
-//<td><table class = 'pp-total-percent'><td><tr>$total_percentage</tr></td></table></td>
-//</tr><td></td>";
-//        unset($total_timing);
-//        unset($total_bill_lines);
-//        unset($total_percentage);
-//        unset($counts);
-      }
-   }
-   $all_godown_total_perc = ($all_total_loding_lines / $all_total_timing);
-   $all_godown_total_perc = number_format((float) $all_godown_total_perc, 2, '.', '');
-   if (empty($all_total_loding_lines) && empty($all_total_timing)) {
-      $party_pack_superwise_html .= "<tr><td colspan='8' style='text-align: center;'> There is No Activity for today's Date</td></tr>";
-   }
-   $party_pack_superwise_html .= "</table>";
-//    $total_non_time = $party_packing['total']['non_time'];
-//    $total_non_bill = $party_packing['total']['non_pp_bill_lines'];
-//    $total_non_perc = ($total_non_bill / $total_non_time);
-//    $total_non_perc = number_format((float) $total_non_perc, 2, '.', '');
-//    $total_pp_time = $party_packing['total']['pp_time'];
-//    $total_pp_bill = $party_packing['total']['pp_bill_lines'];
-//    $total_pp_perc = ($total_pp_bill / $total_pp_time);
-//    $total_pp_perc = number_format((float) $total_pp_perc, 2, '.', '');
-//    $total_bills = ($total_non_bill + $total_pp_bill);
-//    $total_time = ($total_non_time + $total_pp_time);
-//    $total_perc = ($total_bills / $total_time);
-//    $total_perc = number_format((float) $total_perc, 2, '.', '');
-//    $party_pack_type_wsie_html = "<h3>Party Packing Typewise</h3><table class = 'pp-typewise' border='1' cellpadding='5' cellspacing='0'  style='color:#000;font-size: 13px; font-family: arial'>"
-//        . "<th>Party Packing Type</th>"
-//        . "<th>Sum - Bill Line</th>"
-//        . "<th>Sum - Total Time</th>"
-//        . "<th>Productivity</th>"
-//        . "<th>Target</th>";
-//
-//    if (empty($total_bills) && empty($total_time)) {
-//      $party_pack_type_wsie_html .= "<tr><td colspan='5' style='text-align: center;'> There is No Activity for today's Date</td></tr></table>";
-//    }
-//    else {
-//      $non_pp_target = $target_data['NON-PP'];
-//      $pp_target = $target_data['PP'];
-//
-//      $party_pack_type_wsie_html .= "<tr><td>Non-PP</td><td>$total_non_bill</td><td>$total_non_time</td><td>$total_non_perc</td><td>$non_pp_target</td></tr>"
-//          . "<tr><td>PP</td><td>$total_pp_bill</td><td>$total_pp_time</td><td>$total_pp_perc</td>"
-//          . "<td>$pp_target</td>"
-//          . "</tr></table>";
-//    }
-//  
+   
+   // Party Packing productivity
+   $party_packing_html = get_email_productivity_data_for_party_packing($end_date, $todays_date_date, $distributor_id);
+  
    // Picking productivity
-   $picking = get_email_productivity_data_for_picking($end_date, $todays_date_date, $distributor_id);
-   $picking_supervisor_wise_html = "<h3>Picking Productivity</h3></br><h3>Picking (status:Completed)</h3><table class = 'pp-superwise-table' border='1' cellpadding='5' cellspacing='0'  style='color:#000; font-size: 13px;font-family: arial'>"
-       . "<th>Transaction date</th>"
-       . "<th>Picker Name</th>"
-       . "<th>Picking Supervisor</th>"
-       . "<th>Godown Area Id</th>"
-       . "<th>Picking Type</th>"
-       . "<th>Sum - Loading Sheet Line</th>"
-       . "<th>Sum - Time Duration</th>"
-       . "<th>Productivity</th>"
-       . "<th>Target</th>";
-
-
-
-//    $picking_godown_wise_html = "<h3>Pick Godownwise (status:Completed)</h3><table class = 'pp-typewise' border='1' cellpadding='5' cellspacing='0'  style='color:#000; font-size: 13px;font-family: arial'>"
-//       . "<th>Transaction date</th>"
-//       . "<th>Picker Name</th>"
-//       . "<th>Picking Supervisor</th>"
-//       . "<th>Godown Area Id</th>"
-//       . "<th>Picking Type</th>"
-//       . "<th>Sum - Loading Sheet Line</th>"
-//       . "<th>Sum - Time Duration</th>"
-//       . "<th>Productivity</th>"
-//       . "<th>Target</th>";
-
-
-   foreach ($picking as $key => $value) {
-//
-//      if ($key == "godown") {
-//        foreach ($value as $ke => $val) {
-//    
-//          $godown_counter = 0;
-//          $godown_count = count($val);
-//          foreach ($val as $k => $v) {
-//                   $picking_godown_wise_html .="<tr>
-//    <td style = 'border:1px solid #000;'>$ke</td>";
-//            $godown_counter++;
-//            $loding_lines = $v['loading_sheet_line'];
-//            $timing = $v['total_tme'];
-//            $percentage = ($loding_lines / $timing);
-//            $percentage = number_format((float) $percentage, 2, '.', '');
-//            
-//            $transaction_date = $v['loading_date'];
-//            $picker_name = $v['picker_name'];
-//            $picker_sup = $v['supervisor'];
-//                       
-//            $picking_godown_wise_html .="<td style = 'border:1px solid #000;'>$transaction_date</td>";
-//            $picking_godown_wise_html .="<td style = 'border:1px solid #000;'>$k</td>";
-//            $picking_godown_wise_html .="<td style = 'border:1px solid #000;'>$picker_sup</td>";
-//            $picking_godown_wise_html .="<td style = 'border:1px solid #000;'>$picker_name</td>";
-//            $picking_godown_wise_html .="<td style = 'border:1px solid #000;'>$loding_lines</td>";
-//            $picking_godown_wise_html .="<td style = 'border:1px solid #000;'>$timing</td>";
-//            $picking_godown_wise_html .="<td style = 'border:1px solid #000;'>$percentage</td>";
-//            
-//            $label = $ke . ' ' . $k;
-//            $label_key = strtolower($label);
-//             if ($godown_counter == $godown_count) {
-//              $picking_godown_wise_html .="<td style = 'border:1px solid #000;'>$target_data[$label_key]</td>";
-//            }
-//            else {
-//              $picking_godown_wise_html .="<td style = 'border:1px solid #000;'>$target_data[$label_key]</td></tr>";
-//            }
-//            
-//            $total_timing += $timing;
-//            $total_loding_lines += $loding_lines;
-//            $all_godown_total_timing += $timing;
-//            $all_godown_total_loding_lines += $loding_lines;
-//          }
-//          $total_perc = ($total_loding_lines / $total_timing);
-//          $total_perc = number_format((float) $total_perc, 2, '.', '');
-//          unset($total_timing);
-//          unset($total_loding_lines);
-//          unset($total_percentage);
-//        }
-//      }
-      //else {
-
-      $superwiser_counter = 0;
-      $superwiser_count = count($value);
-      foreach ($value as $k => $val) {
-
-         $transaction_date = date('Y-m-d', $val['loading_date']);
-         $picker_name = $val['picker_name'];
-         $picker_sup = $val['supervisor'];
-         $superwiser_counter++;
-         $loding_lines = $val['loading_sheet_line'];
-         $timing = $val['total_tme'];
-         $pick_godown = $val['godown'];
-         $percentage = ($loding_lines / $timing);
-         $percentage = number_format((float) $percentage, 2, '.', '');
-
-         $picking_supervisor_wise_html .= "<tr><td style = 'border:1px solid #000;'>$transaction_date</td>";
-         $picking_supervisor_wise_html .= "<td style = 'border:1px solid #000;'>$picker_name</td>";
-         $picking_supervisor_wise_html .= "<td style = 'border:1px solid #000;'>$picker_sup</td>";
-
-         //$picking_supervisor_wise_html .="<td style = 'border:1px solid #000;'>$key</td>";
-         $picking_supervisor_wise_html .= "<td style = 'border:1px solid #000;'>$pick_godown</td>";
-         $picking_supervisor_wise_html .= "<td style = 'border:1px solid #000;'>$k</td>";
-         $picking_supervisor_wise_html .= "<td style = 'border:1px solid #000;'>$loding_lines</td>";
-         $picking_supervisor_wise_html .= "<td style = 'border:1px solid #000;'>$timing</td>";
-         if ($superwiser_count == $superwiser_counter) {
-            $picking_supervisor_wise_html .= "<td style = 'border:1px solid #000;'>$percentage</td>";
-         }
-         else {
-            $picking_supervisor_wise_html .= "<td style = 'border:1px solid #000;'>$percentage</td>";
-         }
-         $label = $pick_godown . ' ' . $k;
-         $label_key = strtolower($label);
-         $picking_supervisor_wise_html .= "<td style = 'border:1px solid #000;'>$target_data[$label_key]</td></tr>";
-         
-         $total_timing += $timing;
-         $total_loding_lines += $loding_lines;
-         $all_sup_total_timing += $timing;
-         $all_sup_total_loding_lines += $loding_lines;
-      }
-      $total_perc = ($total_loding_lines / $total_timing);
-      $total_perc = number_format((float) $total_perc, 2, '.', '');
-      unset($total_timing);
-      unset($total_loding_lines);
-      unset($total_percentage);
-      //}
-   }
-   $all_sup_total_perc = ($all_sup_total_loding_lines / $all_sup_total_timing);
-   $all_sup_total_perc = number_format((float) $all_sup_total_perc, 2, '.', '');
-   $all_godown_total_perc = ($all_godown_total_loding_lines / $all_godown_total_timing);
-   $all_godown_total_perc = number_format((float) $all_godown_total_perc, 2, '.', '');
-   if (empty($all_godown_total_loding_lines) && empty($all_godown_total_timing)) {
-     $picking_supervisor_wise_html .= "<tr><td colspan='8' style='text-align: center;'> There is No Activity for today's Date</td></tr>";
-   }
-   $picking_supervisor_wise_html .= "</table>";
-//   if (empty($all_godown_total_loding_lines) && empty($all_godown_total_timing)) {
-//      $picking_godown_wise_html .= "<tr><td colspan='9' style='text-align: center;'> There is No Activity for today's Date</td></tr>";
-//   }
-//   $picking_godown_wise_html .= "</table>";
-
-
+   $picking_html = get_email_productivity_data_for_picking($end_date, $todays_date_date, $distributor_id);
    
    //Loose Confirmation Productivity Mailer
    $loose_confirmation_html = get_email_productivity_data_for_loose_confirmation($end_date, $todays_date_date, $distributor_id);
@@ -1337,7 +1083,7 @@ function send_party_packingand_picking_productivity_emailer() {
    
 
    $params['subject'] = "Productivity Progress Status-$distributor_name";
-   $params['body'] = $party_pack_superwise_html . "<br>" . $picking_supervisor_wise_html . "<br>" . $loose_confirmation_html  . "<br>" . $loading_html;
+   $params['body'] = $party_packing_html . "<br>" . $picking_html . "<br>" . $loose_confirmation_html  . "<br>" . $loading_html;
    $mail_to = variable_get('to_email');
    $from = variable_get('from_email');
 
@@ -1572,7 +1318,7 @@ function get_email_productivity_data_for_loading($start_date, $end_date = FALSE,
   }
 
   $loading_productivity_html = "<h3>Loading Productivity</h3></br><h3>Loading Status (status:Completed)</h3><table class = 'pp-superwise-table' border='1' cellpadding='5' cellspacing='0'  style='color:#000; font-size: 13px;font-family: arial'>"
-   . "<th>Transaction date</th>"
+   . "<th>Transaction Date</th>"
    . "<th>Loading Supervisor</th>"
    . "<th>Count of Vehicle Loaded</th>"
    . "<th>Total Dispatch Value</th>"
@@ -1686,7 +1432,7 @@ function get_email_productivity_data_for_loose_confirmation($start_date, $end_da
   }
 
   $loose_confirm_productivity_html = "<h3>Loose Confirmation Productivity</h3></br><h3>Loose Confirmation (status:Completed)</h3><table class = 'pp-superwise-table' border='1' cellpadding='5' cellspacing='0'  style='color:#000; font-size: 13px;font-family: arial'>"
-   . "<th>Transaction date</th>"
+   . "<th>Transaction Date</th>"
    . "<th>Pick Confirm Name</th>"
    . "<th>Pick Confirm Supervisor</th>"
    . "<th>Picking Type</th>"
@@ -1719,11 +1465,6 @@ function get_email_productivity_data_for_loose_confirmation($start_date, $end_da
  * @return type
  */
 function get_email_productivity_data_for_party_packing($start_date, $end_date = FALSE, $dis_id = 60) {
-  if ($end_date == FALSE) {
-    $end_date = date('Y-m-d'); // dnt change format as date are stored in same format in db
-  }
-
-
   $query = db_select('node', 'n');
   $query->condition('n.type', 'party_packing');
   $query->join('field_data_field_distributor', 'fd', 'fd.entity_id = n.uid');
@@ -1742,7 +1483,6 @@ function get_email_productivity_data_for_party_packing($start_date, $end_date = 
   $query->leftjoin('field_data_field_party_packing_type', 'ppt', 'ppt.entity_id = n.nid');
   $query->leftjoin('field_data_field_party_packing_supervisor', 'pps', 'pps.entity_id = n.nid');
   $query->fields('n', array('nid', 'changed'));
-  $query->fields('d', array('field_party_packing_loading_date_value'));
   $query->fields('pn', array('field_party_packer_name_value'));
   $query->fields('bl', array('field_bill_lines_value'));
 
@@ -1750,89 +1490,90 @@ function get_email_productivity_data_for_party_packing($start_date, $end_date = 
   $query->fields('st', array('field_party_packing_start_time_value'));
   $query->fields('et', array('field_party_packing_end_time_value'));
   $query->fields('s', array('field__party_packingstatus_value'));
-  $query->fields('d', array('field_party_packing_loading_date_value'));
   $query->fields('ppt', array('field_party_packing_type_value'));
   $query->fields('pps', array('field_party_packing_supervisor_value'));
   $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
   
-  foreach ($res as $key => $value) {
-
+  $party_packing = array();
+  foreach ($res as $value) {
     $start_time = strtotime($value['field_party_packing_start_time_value']);
     $end_time = strtotime($value['field_party_packing_end_time_value']);
-    $time_diff = ($end_time - $start_time) / 3600;
+    $time_diff = abs($end_time - $start_time) / 3600;
     $time_diff = number_format((float) $time_diff, 2, '.', '');
     $type = $value['field_party_packing_type_value'];
     $bill_line = $value['field_bill_lines_value'];
     $team_count = $value['field_party_packer_team_count_value'];
     $total_time = ($team_count * $time_diff);
+    $transaction_date = date('Y-m-d',$value['changed']);
+    $party_packer_n = $value['field_party_packer_name_value'];
 
-    if ($type == 1) {  // type is PP
-      $pp_bill_lines += $bill_line;
-      $pp_time += $total_time;
-      $party_packing['total']['pp_bill_lines'] = $pp_bill_lines;
-      $party_packing['total']['pp_time'] = $pp_time;
-    }
-    if ($type == 0) { //type is NON-PP
-      $non_pp_bill_lines += $bill_line;
-      $non_time += $total_time;
-      $party_packing['total']['non_pp_bill_lines'] = $non_pp_bill_lines;
-      $party_packing['total']['non_time'] = $non_time;
-    }
-
-    // $supervisor = $value['field_party_packing_supervisor_value'];
-    $supervisor = $value['field_party_packer_name_value'];
-
-    if (isset($res[$supervisor])) {
-
+    if (isset($res[$party_packer_n])) {
       if ($type == 1) { // type is PP
-        $party_packing[$type][$supervisor]['supervisor_pp_bill_lines'] += $bill_line;
-        $party_packing[$type][$supervisor]['supervisor_pp_time'] += $total_time;
-        $party_packing[$type][$supervisor]['loading_date'] = $value['changed'];
-        $party_packing[$type][$supervisor]['party_packer_name'] = $value['field_party_packing_supervisor_value'];
-        $total_pp_bill_lines += $bill_line;
-        $total_pp_total_time += $total_time;
+        $party_packing[$transaction_date][$party_packer_n][$type]['pp_bill_lines'] += $bill_line;
+        $party_packing[$transaction_date][$party_packer_n][$type]['pp_time'] += $total_time;
+        $party_packing[$transaction_date][$party_packer_n][$type]['packer_type']  = 'PP';
+        $productivity_per = ($bill_line / $total_time);
+        $party_packing[$transaction_date][$party_packer_n][$type]['productivity']  = number_format((float) $productivity_per, 2, '.', '');
       }
       if ($type == 0) { //type is NON-PP
-        $party_packing[$type][$supervisor]['supervisor_non_pp_bill_lines'] += $bill_line;
-        $party_packing[$type][$supervisor]['supervisor_non_pp_time'] += $total_time;
-        $party_packing[$type][$supervisor]['loading_date'] = $value['changed'];
-        $party_packing[$type][$supervisor]['party_packer_name'] = $value['field_party_packing_supervisor_value'];
-
-        $total_non_pp_bill_lines += $bill_line;
-        $total_non_pp_total_time += $total_time;
+        $party_packing[$transaction_date][$party_packer_n][$type]['pp_bill_lines'] += $bill_line;
+        $party_packing[$transaction_date][$party_packer_n][$type]['pp_time'] += $total_time;
+        $party_packing[$transaction_date][$party_packer_n][$type]['packer_type']  = 'NON-PP';
+        $productivity_per = ($bill_line / $total_time);
+        $party_packing[$transaction_date][$party_packer_n][$type]['productivity']  = number_format((float) $productivity_per, 2, '.', '');
       }
     }
     else {
-      $res[$supervisor] = array();
+      $res[$party_packer_n] = array();
       if ($type == 1) { // type is PP
-        $party_packing[$type][$supervisor]['supervisor_pp_bill_lines'] = $bill_line;
-        $party_packing[$type][$supervisor]['supervisor_pp_time'] = $total_time;
-        $party_packing[$type][$supervisor]['loading_date'] = $value['changed'];
-        $party_packing[$type][$supervisor]['party_packer_name'] = $value['field_party_packing_supervisor_value'];
-        $total_pp_bill_lines += $bill_line;
-        $total_pp_total_time += $total_time;
+        $party_packing[$transaction_date][$party_packer_n][$type]['pp_bill_lines'] = $bill_line;
+        $party_packing[$transaction_date][$party_packer_n][$type]['pp_time'] = $total_time;
+        $party_packing[$transaction_date][$party_packer_n][$type]['packer_type']  = 'PP';
+        $productivity_per = ($bill_line / $total_time);
+        $party_packing[$transaction_date][$party_packer_n][$type]['productivity']  = number_format((float) $productivity_per, 2, '.', '');
       }
       if ($type == 0) { //type is NON-PP
-        $party_packing[$type][$supervisor]['supervisor_non_pp_bill_lines'] = $bill_line;
-        $party_packing[$type][$supervisor]['supervisor_non_pp_time'] = $total_time;
-        $party_packing[$type][$supervisor]['loading_date'] = $value['changed'];
-        $party_packing[$type][$supervisor]['party_packer_name'] = $value['field_party_packing_supervisor_value'];
-        $total_non_pp_bill_lines += $bill_line;
-        $total_non_pp_total_time += $total_time;
+        $party_packing[$transaction_date][$party_packer_n][$type]['pp_bill_lines'] = $bill_line;
+        $party_packing[$transaction_date][$party_packer_n][$type]['pp_time'] = $total_time;
+        $party_packing[$transaction_date][$party_packer_n][$type]['packer_type']  = 'NON-PP';
+        $productivity_per = ($bill_line / $total_time);
+        $party_packing[$transaction_date][$party_packer_n][$type]['productivity']  = number_format((float) $productivity_per, 2, '.', '');
       }
     }
 
-    if ($type == 1) {
-      $party_packing[$type]['total_pp_bill_lines'] = $total_pp_bill_lines;
-      $party_packing[$type]['total_pp_total_time'] = $total_pp_total_time;
-    }
-    if ($type == 0) {
-      $party_packing[$type]['total_non_pp_bill_lines'] = $total_non_pp_bill_lines;
-      $party_packing[$type]['total_non_pp_total_time'] = $total_non_pp_total_time;
-    }
+  $party_packing[$transaction_date][$party_packer_n][$type]['updated_date'] = $transaction_date;
+  $party_packing[$transaction_date][$party_packer_n][$type]['supervisor_name'] = $value['field_party_packing_supervisor_value'];
+  $party_packing[$transaction_date][$party_packer_n][$type]['party_packer_name'] = $party_packer_n;
   }
 
-  return $party_packing;
+  $target_data = leanbox_dashboard_target_value_using_voc_name('productivity target');
+  $party_pack_datewise_html = "<h3>Party Packing Productivity</h3></br><h3>Party Packing (status:Completed)</h3><table class = 'pp-superwise-table' border='1' cellpadding='5' cellspacing='0'  style='color:#000; font-size: 13px;font-family: arial'>"
+       . "<th>Transaction Date</th>"
+       . "<th>Party Packer name</th>"
+       . "<th>Party Packing Supervisor</th>"
+       . "<th>Party Packing Type</th>"
+       . "<th>Sum - Bill Line</th>"
+       . "<th>Sum - Total Time</th>"
+       . "<th>Productivity</th>"
+       . "<th>Target</th>";
+      
+
+  foreach($party_packing as $transaction_date => $data){
+    foreach($data as $key => $value) {
+      foreach($value as $k => $result) {
+        $party_pack_datewise_html .= "<tr><td style = 'border:1px solid #000;'>".$result['updated_date']."</td>";
+        $party_pack_datewise_html .= "<td style = 'border:1px solid #000;'>".$result['party_packer_name']."</td>";
+        $party_pack_datewise_html .= "<td style = 'border:1px solid #000;'>".$result['supervisor_name']."</td>";
+        $party_pack_datewise_html .= "<td style = 'border:1px solid #000;'>".$result['packer_type']."</td>";
+        $party_pack_datewise_html .= "<td style = 'border:1px solid #000;'>".$result['pp_bill_lines']."</td>";
+        $party_pack_datewise_html .= "<td style = 'border:1px solid #000;'>".$result['pp_time']."</td>";
+        $party_pack_datewise_html .= "<td style = 'border:1px solid #000;'>".$result['productivity']."</td>";
+        $party_pack_datewise_html .= "<td style = 'border:1px solid #000;'>".$target_data[$result['packer_type']]."</td></tr>";
+      }
+    }
+  }
+  $party_pack_datewise_html .= "</table>";
+  return $party_pack_datewise_html;
 }
 
 
@@ -1844,17 +1585,14 @@ function get_email_productivity_data_for_party_packing($start_date, $end_date = 
  * @return type
  */
 function get_email_productivity_data_for_picking($start_date, $end_date = FALSE, $dis_id = 60) {
-
+  
   $query = db_select('node', 'n');
   $query->condition('n.type', 'picking');
   $query->join('field_data_field_distributor', 'fd', 'fd.entity_id = n.uid');
   $query->condition('fd.entity_id', $dis_id, '=');
-  $query->join('field_data_field_picking_loading_date', 'd', 'd.entity_id = n.nid');
-
   $query->condition('n.changed', array($start_date, $end_date), 'BETWEEN');
   $query->orderBy('n.changed','DESC');
   $query->join('field_data_field_picking_godown_area_id', 'gai', 'gai.entity_id = n.nid');
-  $query->orderBy('gai.field_picking_godown_area_id_value', 'ASC');
   $query->join('field_data_field_picking_picking_type', 'pt', 'pt.entity_id = n.nid');
   $query->join('field_data_field_pick_lines', 'lsl', 'lsl.entity_id = n.nid');
   $query->join('field_data_field_picking_start_time', 'pst', 'pst.entity_id = n.nid');
@@ -1864,10 +1602,7 @@ function get_email_productivity_data_for_picking($start_date, $end_date = FALSE,
   $query->join('field_data_field_picking_picking_team_count', 'tc', 'tc.entity_id = n.nid');
   $query->join('field_data_field_picking_pick_supervisor', 'pps', 'pps.entity_id = n.nid');
   $query->leftjoin('field_data_field_picking_picker_name', 'pn', 'pn.entity_id = n.nid');
-
-  // $query->fields('d', array('field_picking_loading_date_value'));
   $query->fields('pn', array('field_picking_picker_name_value'));
-
   $query->fields('gai', array('field_picking_godown_area_id_value'));
   $query->fields('pt', array('field_picking_picking_type_value'));
   $query->fields('lsl', array('field_pick_lines_value'));
@@ -1879,8 +1614,7 @@ function get_email_productivity_data_for_picking($start_date, $end_date = FALSE,
   $query->fields('pps', array('field_picking_pick_supervisor_value'));
   $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
 
-  foreach ($res as $key => $value) {
-
+  foreach ($res as $value) {
     $start_time = strtotime($value['field_picking_start_time_value']);
     $end_time = strtotime($value['field_picking_end_time_value']);
     $time_diff = abs(($end_time - $start_time) / 3600);
@@ -1888,77 +1622,84 @@ function get_email_productivity_data_for_picking($start_date, $end_date = FALSE,
     $loading_line = $value['field_pick_lines_value'];
     $team_count = $value['field_picking_picking_team_count_value'];
     $total_time = ($team_count * $time_diff);
-    $supervisor = $value['field_picking_picker_name_value'];
+    $picker_n = $value['field_picking_picker_name_value'];
     $type = $value['field_picking_picking_type_value'];
     $godown = $value['field_picking_godown_area_id_value'];
-    
-//    if (isset($res[$godown])) {
-//      if ($type == "Loose") {
-//        $picking['godown'][$godown][$type]['loading_sheet_line'] += $loading_line;
-//        $picking['godown'][$godown][$type]['total_tme'] += $total_time;
-//        $picking['godown'][$godown][$type]['loading_date'] = $value['field_picking_loading_date_value'];
-//        $picking['godown'][$godown][$type]['picker_name'] = $value['field_picking_picker_name_value'];
-//        $picking['godown'][$godown][$type]['supervisor'] = $value['field_picking_pick_supervisor_value'];
-//        
-//      }
-//      if ($type == "Bulk") {
-//        $picking['godown'][$godown][$type]['loading_sheet_line'] += $loading_line;
-//        $picking['godown'][$godown][$type]['total_tme'] += $total_time;
-//        $picking['godown'][$godown][$type]['loading_date'] = $value['field_picking_loading_date_value'];
-//        $picking['godown'][$godown][$type]['picker_name'] = $value['field_picking_picker_name_value'];
-//        $picking['godown'][$godown][$type]['supervisor'] = $value['field_picking_pick_supervisor_value'];
-//      }
-//    }
-//    else {
-//      $res[$godown] = array();
-//      $picking_type = $value['field_picking_picking_type_value'];
-//      if ($type == "Loose") {
-//        $picking['godown'][$godown][$type]['loading_sheet_line'] = $loading_line;
-//        $picking['godown'][$godown][$type]['total_tme'] = $total_time;
-//        $picking['godown'][$godown][$type]['loading_date'] = $value['field_picking_loading_date_value'];
-//        $picking['godown'][$godown][$type]['picker_name'] = $value['field_picking_picker_name_value'];
-//        $picking['godown'][$godown][$type]['supervisor'] = $value['field_picking_pick_supervisor_value'];
-//      }
-//      if ($type == "Bulk") {
-//        $picking['godown'][$godown][$type]['loading_sheet_line'] = $loading_line;
-//        $picking['godown'][$godown][$type]['total_tme'] = $total_time;
-//        $picking['godown'][$godown][$type]['loading_date'] = $value['field_picking_loading_date_value'];
-//        $picking['godown'][$godown][$type]['picker_name'] = $value['field_picking_picker_name_value'];
-//        $picking['godown'][$godown][$type]['supervisor'] = $value['field_picking_pick_supervisor_value'];
-//      }
-//    }
+    $transaction_date = date('Y-m-d',$value['changed']);
 
-
-    if (isset($res[$supervisor])) {
+    if (isset($res[$picker_n])) {
          if ($type == "Loose") {
-            $picking[$supervisor][$type]['loading_sheet_line'] += $loading_line;
-            $picking[$supervisor][$type]['total_tme'] += $total_time;
-            $picking[$supervisor][$type]['godown'] = $godown;
+            $picking[$transaction_date][$picker_n][$type]['loading_sheet_line'] += $loading_line;
+            $picking[$transaction_date][$picker_n][$type]['total_time'] += $total_time;
+            $picking[$transaction_date][$picker_n][$type]['picking_type'] = $type;
+            $picking[$transaction_date][$picker_n][$type]['godown'] = $godown;
+            $productivity_per = ($loading_line / $total_time);
+            $picking[$transaction_date][$picker_n][$type]['productivity']  = number_format((float) $productivity_per, 2, '.', '');
          }
          if ($type == "Bulk") {
-            $picking[$supervisor][$type]['loading_sheet_line'] += $loading_line;
-            $picking[$supervisor][$type]['total_tme'] += $total_time;
-            $picking[$supervisor][$type]['godown'] = $godown;
+            $picking[$transaction_date][$picker_n][$type]['loading_sheet_line'] += $loading_line;
+            $picking[$transaction_date][$picker_n][$type]['total_time'] += $total_time;
+            $picking[$transaction_date][$picker_n][$type]['picking_type'] = $type;
+            $picking[$transaction_date][$picker_n][$type]['godown'] = $godown;
+            $productivity_per = ($loading_line / $total_time);
+            $picking[$transaction_date][$picker_n][$type]['productivity']  = number_format((float) $productivity_per, 2, '.', '');
          }
       }
       else {
-         $res[$supervisor] = array();
+         $res[$picker_n] = array();
          if ($type == "Loose") {
-            $picking[$supervisor][$type]['loading_sheet_line'] = $loading_line;
-            $picking[$supervisor][$type]['total_tme'] = $total_time;
-            $picking[$supervisor][$type]['godown'] = $godown;
+            $picking[$transaction_date][$picker_n][$type]['loading_sheet_line'] = $loading_line;
+            $picking[$transaction_date][$picker_n][$type]['total_time'] = $total_time;
+            $picking[$transaction_date][$picker_n][$type]['picking_type'] = $type;
+            $picking[$transaction_date][$picker_n][$type]['godown'] = $godown;
+            $productivity_per = ($loading_line / $total_time);
+            $picking[$transaction_date][$picker_n][$type]['productivity']  = number_format((float) $productivity_per, 2, '.', '');
          }
          if ($type == "Bulk") {
-            $picking[$supervisor][$type]['loading_sheet_line'] = $loading_line;
-            $picking[$supervisor][$type]['total_tme'] = $total_time;
-            $picking[$supervisor][$type]['godown'] = $godown;
+            $picking[$transaction_date][$picker_n][$type]['loading_sheet_line'] = $loading_line;
+            $picking[$transaction_date][$picker_n][$type]['total_time'] = $total_time;
+            $picking[$transaction_date][$picker_n][$type]['picking_type'] = $type;
+            $picking[$transaction_date][$picker_n][$type]['godown'] = $godown;
+            $productivity_per = ($loading_line / $total_time);
+            $picking[$transaction_date][$picker_n][$type]['productivity']  = number_format((float) $productivity_per, 2, '.', '');
          }
       }
-      $picking[$supervisor][$type]['picker_name'] = $value['field_picking_picker_name_value'];
-      $picking[$supervisor][$type]['supervisor'] = $value['field_picking_pick_supervisor_value'];
-      $picking[$supervisor][$type]['loading_date'] = $value['changed'];
+      $picking[$transaction_date][$picker_n][$type]['picker_name'] = $value['field_picking_picker_name_value'];
+      $picking[$transaction_date][$picker_n][$type]['supervisor_name'] = $value['field_picking_pick_supervisor_value'];
+      $picking[$transaction_date][$picker_n][$type]['updated_date'] = $transaction_date;
    }
-   return $picking;
+
+  $target_data = leanbox_dashboard_target_value_using_voc_name('productivity target');
+  $picking_datewise_html = "<h3>Picking Productivity</h3></br><h3>Picking (status:Completed)</h3><table class = 'pp-superwise-table' border='1' cellpadding='5' cellspacing='0'  style='color:#000; font-size: 13px;font-family: arial'>"
+       . "<th>Transaction Date</th>"
+       . "<th>Picker Name</th>"
+       . "<th>Picking Supervisor</th>"
+       . "<th>Godown Area Id</th>"
+       . "<th>Picking Type</th>"
+       . "<th>Sum - Loading Sheet Line</th>"
+       . "<th>Sum - Time Duration</th>"
+       . "<th>Productivity</th>"
+       . "<th>Target</th>";
+
+  foreach($picking as $transaction_date => $data){
+    foreach($data as $key => $value) {
+      foreach($value as $k => $result) {
+        $label = $result['godown'] . ' ' . $result['picking_type'];
+        $label_key = strtolower($label);
+        $picking_datewise_html .= "<tr><td style = 'border:1px solid #000;'>".$result['updated_date']."</td>";
+        $picking_datewise_html .= "<td style = 'border:1px solid #000;'>".$result['picker_name']."</td>";
+        $picking_datewise_html .= "<td style = 'border:1px solid #000;'>".$result['supervisor_name']."</td>";
+        $picking_datewise_html .= "<td style = 'border:1px solid #000;'>".$result['godown']."</td>";
+        $picking_datewise_html .= "<td style = 'border:1px solid #000;'>".$result['picking_type']."</td>";
+        $picking_datewise_html .= "<td style = 'border:1px solid #000;'>".$result['loading_sheet_line']."</td>";
+        $picking_datewise_html .= "<td style = 'border:1px solid #000;'>".$result['total_time']."</td>";
+        $picking_datewise_html .= "<td style = 'border:1px solid #000;'>".$result['productivity']."</td>";
+        $picking_datewise_html .= "<td style = 'border:1px solid #000;'>".$target_data[$label_key]."</td></tr>";
+      }
+    }
+  }
+  $picking_datewise_html .= "</table>";
+  return $picking_datewise_html;
 }
 
 
