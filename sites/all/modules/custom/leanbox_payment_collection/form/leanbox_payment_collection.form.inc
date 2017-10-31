@@ -13,78 +13,53 @@
 function upload_signed_bill_callback($form, &$form_state) {
    $form = array();
    global $user;
-   $arg1 = arg(1);
+   $arg1 = arg(1); // wheather signed or bounced flag based on URL
    // Store distributor id in author in each node
    $dis_id = change_feeds_import_get_distributor_id($user->uid);
    if (!empty($dis_id) && !empty($arg1)) {
       $form['#prefix'] = '<div id="itemlist-div">';
       $form['#suffix'] = '</div>';
-      // wheather signed or bounced flag based on URL
-//      $form['bill_flag'] = array(
-//        '#type' => 'value',
-//        '#value' => $arg1,
-//      );
+
+      // store logged in users distributor id
       $form['dis_id'] = array(
-       '#type' => 'value',
+        '#type' => 'value',
         '#value' => $dis_id,
       );
-      
-//if(isset($form_state['input']['bill_no'])) {
-//   
-//}
-      $form['bill_no'] = array(
-        '#type' => 'textfield',
-        '#maxlength' => 20,
-        '#size' => 10,
-        '#default_value' => '',
-         '#prefix' => '<div id="bill-no">',
+      $form['arg'] = array(
+        '#type' => 'value',
+        '#value' => $arg1,
+      );
+
+      $form['bill_no_wrapper'] = array(
+        '#prefix' => '<div id="bill-no">',
         '#suffix' => '</div>',
-        //'#required' => TRUE,
-        '#autocomplete_path' => 'bill-no/list',
-        '#title' => t('Enter Bill No'),
-          '#ajax' => array(
-             'wrapper' => 'bill-no',
-             'callback' => 'bill_no_remove_callback',
-             'method' => 'replace',
-             'effect' => 'fade',
-           ),
       );
       $form['bill_details_wrapper'] = array(
         '#prefix' => '<div id="bill-details">',
         '#suffix' => '</div>',
       );
 
-      $form['bill_details_wrapper']['add_bill'] = array(
+      $form['bill_no_wrapper']['bill_no'] = array(
+        '#type' => 'textfield',
+        '#maxlength' => 20,
+        '#size' => 10,
+        //'#required' => TRUE,
+        '#autocomplete_path' => 'bill-no/list',
+        '#title' => t('Enter Bill No'),
+      );
+      $form['bill_no_wrapper']['add_bill'] = array(
         '#type' => 'submit',
         '#value' => t('Add Bill'),
         '#ajax' => array(
           'callback' => 'get_bill_details_using_bill_no',
-          'wrapper' => 'bill-details',
+          'wrapper' => 'itemlist-div',
           'method' => 'replace',
           'effect' => 'fade',
         ),
         '#submit' => array('add_bill_in_screen_submit'),
       );
 
-      if ($arg1 === 'bounced') {
-         // if arg is bounced then we have to collect cheque no and cheque date
-         $form['cheque_no'] = array(
-           '#type' => 'textfield',
-           '#title' => t('Cheque number'),
-           '#size' => 20,
-           '#maxlength' => 15,
-         );
-         $form['cheque_date'] = array(
-           '#type' => 'date_popup',
-           '#default_value' => date('Y-m-d'),
-           '#title' => t('Cheque date'),
-         );
-      }
-
-
-
-      $selected_bill_no = $form_state['values']['bill_no'];
-      if (!empty($selected_bill_no) && !empty($form_state['bills']['header']) && !empty($form_state['bills']['rows'])) {
+      if (!empty($form_state['bills']['header']) && !empty($form_state['bills']['rows'])) {
 
          $form['bill_details_wrapper']['bill_details'] = array(
            '#type' => 'tableselect',
@@ -96,10 +71,10 @@ function upload_signed_bill_callback($form, &$form_state) {
          $form['bill_details_wrapper']['bill_remove'] = array(
            '#type' => 'submit',
            '#value' => t('Remove Flag'),
-           '#submit' => array('remove_signed_bounced_flag'),        
-           //'#limit_validation_errors' => array(array('bill_details')),
+           '#submit' => array('remove_signed_bounced_flag'),
+           '#limit_validation_errors' => array(array('bill_details')),
            '#ajax' => array(
-             'wrapper' => 'bill-details',
+             'wrapper' => 'itemlist-div',
              'callback' => 'bill_details_remove_callback',
              'method' => 'replace',
              'effect' => 'fade',
@@ -113,6 +88,9 @@ function upload_signed_bill_callback($form, &$form_state) {
       if (!isset($form_state['bills']['rows'])) {
          $form_state['bills']['rows'] = array();
       }
+      $form['cheque_no'] = array('#type' => 'value');
+      $form['cheque_date'] = array('#type' => 'value');
+      $form['cheque_amt'] = array('#type' => 'value');
    }
 
    return $form;
@@ -139,7 +117,11 @@ function upload_signed_bill_callback_validate($form, &$form_state) {
          $query->condition('n.uid', $dis_id);
          $payment_collection_nid = $query->execute()->fetchField();
 
-         $from_state['values']['bounced_nid'][] = $payment_collection_nid;
+         $res = leanbox_payment_collection_get_title_and_nid_combo($bill_no, $dis_id);
+
+         // below array will be used in _sumbit function while node creation 
+         // for reference of bill no from sales register
+         $form_state['values']['title_and_nid_combo'][$bill_no] = $res['sales_register_nid'];
 
          if (!empty($payment_collection_nid) && $arg1 === 'signed') {
             $node = node_load($payment_collection_nid);
@@ -158,10 +140,9 @@ function upload_signed_bill_callback_validate($form, &$form_state) {
  * @param type $form_state
  */
 function upload_signed_bill_callback_submit($form, &$form_state) {
-   // write node creation or update (in case of bounced) code here
+   // write node creation code here
    $dis_id = $form_state['values']['dis_id'];
    $arg1 = arg(1);
-
    foreach ($form_state['values']['bill_details'] as $bill_no => $val) {
       if (!empty($bill_no)) {
          $node = new stdClass();
@@ -174,13 +155,15 @@ function upload_signed_bill_callback_submit($form, &$form_state) {
          $node->comment = 0; // 0 = comments disabled, 1 = read only, 2 = read/write
          $node->field_declaration_date[LANGUAGE_NONE][0]['value'] = date('Y-m-d');
          if ($arg1 === 'bounced') {
-            $node->field_cheque_date[$node->language][0]['value'] = $dispatch_bill_count;
-            $node->field_cheque_number[$node->language][0]['value'] = $dispatch_bill_count;
-            $node->field_cheque_amt[$node->language][0]['value'] = $dispatch_bill_count;
+            $node->field_cheque_number[$node->language][0]['value'] = $form_state['values']['cheque_no'][$bill_no];
+            $node->field_cheque_date[$node->language][0]['value'] = $form_state['values']['cheque_date'][$bill_no];
+            $node->field_cheque_amt[$node->language][0]['value'] = $form_state['values']['cheque_amt'][$bill_no];
          }
          $node->field_flag[LANGUAGE_NONE][0]['value'] = $arg1;
-         $node->field_sales_bill_no_ref[LANGUAGE_NONE][0]['nid'] = $bill_no_nid;
+         $node->field_sales_bill_no_ref[LANGUAGE_NONE][0]['nid'] = $form_state['values']['title_and_nid_combo'][$bill_no];
+
          node_save($node);
+
          drupal_set_message(t('Collection content uploded sucessfully.'));
       }
    }
@@ -190,22 +173,23 @@ function upload_signed_bill_callback_submit($form, &$form_state) {
  * Menu callback for AJAX additions. Render bill details.
  */
 function get_bill_details_using_bill_no($form, &$form_state) {
-   return $form['bill_details_wrapper'];
+   return $form;
 }
 
 /**
  * Menu callback for AJAX additions. Render bill details.
  */
 function bill_details_remove_callback($form, &$form_state) {
-   return $form['bill_details_wrapper'];
+   return $form;
 }
 
 /**
  * Menu callback for AJAX additions. Render bill details.
  */
 function bill_no_remove_callback() {
-    return $form['bill_no'];
+   return $form;
 }
+
 /**
  * submit handler when ajax is triggered
  * @param type $form
@@ -213,22 +197,27 @@ function bill_no_remove_callback() {
  */
 function add_bill_in_screen_submit(&$form, &$form_state) {
    global $user;
-   $arg1 = arg(1);
+   $arg = explode("/", $form_state['complete form']['#action']);
+   foreach ($arg as $key => $val) {
+      if ($val === 'signed' || $val === 'bounced') {
+         $arg1 = $val;
+      }
+   }
    // Store distributor id in author in each node
    $dis_id = change_feeds_import_get_distributor_id($user->uid);
    $bill_number = $form_state['values']['bill_no'];
-
+   unset($form_state['input']['bill_no']);
    $bill_details_html = get_bill_details_using_bill_no_callback($bill_number, $dis_id, $arg1);
    $form_state['bills']['header'] = $bill_details_html['header'];
    $form_state['bills']['rows'] += $bill_details_html['rows'];
    $form_state['rebuild'] = TRUE;
 }
 
-function get_bill_details_using_bill_no_callback($bill_no_nid, $dis_id, $arg1) {
-   // first parameter passed is nid of sales register
-   $html = array();
-   if (!empty($bill_no_nid) && !empty($dis_id)) {
+function get_bill_details_using_bill_no_callback($bill_no, $dis_id, $arg1) {
+   $array = array();
+   if (!empty($bill_no) && !empty($dis_id)) {
       $query = db_select('node', 'n');
+      $query->condition('n.type', 'sales_register_data');
       $query->addField('n', 'title', 'title');
       $query->addField('n', 'title', 'Bill no');
       $query->join('field_data_field_sr_bill_date', 'sr', 'sr.entity_id = n.nid');
@@ -244,23 +233,61 @@ function get_bill_details_using_bill_no_callback($bill_no_nid, $dis_id, $arg1) {
       $query->addField('sc', 'field_salesman_code_value', 'Salesman code');
       $query->join('field_data_field_bill_value', 'bv', 'bv.entity_id = n.nid');
       $query->addField('bv', 'field_bill_value_value', 'Bill value');
-      $query->condition('n.nid', $bill_no_nid);
+      $query->condition('n.title', $bill_no);
       $query->condition('n.uid', $dis_id);
       $rows = $query->execute()->fetchAll(PDO::FETCH_GROUP | PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
-      $header = array(
-        'Billno' => 'Bill No',
-        'billdate' => 'Bill date',
-        'Partycode' => 'Party code',
-        'Beatname' => 'Beat name',
-        'Salesman' => 'Salesman',
-        'Salesmancode' => 'Salesman code',
-        'Billvalue' => 'Bill value');
 
-      $html['header'] = $header;
-      $html['rows'] = $rows;
+      if ($arg1 === 'bounced') {
+         $header = array(
+           'Billno' => 'Bill No',
+           'billdate' => 'Bill date',
+           'Partycode' => 'Party code',
+           'Beatname' => 'Beat name',
+           'Salesman' => 'Salesman',
+           'Salesmancode' => 'Salesman code',
+           'Billvalue' => 'Bill value',
+           'cheque_no' => 'Cheque no',
+           'cheque_date' => 'Cheque date',
+           'cheque_amt' => 'Cheque amount',);
+      }
+      else {
+         $header = array(
+           'Billno' => 'Bill No',
+           'billdate' => 'Bill date',
+           'Partycode' => 'Party code',
+           'Beatname' => 'Beat name',
+           'Salesman' => 'Salesman',
+           'Salesmancode' => 'Salesman code',
+           'Billvalue' => 'Bill value');
+      }
+
+      if ($arg1 === 'bounced') {
+         foreach ($rows as $key => $value) {
+            $rows[$key]['cheque_no']['data'] = array(
+              '#type' => 'textfield',
+              '#title' => t('Cheque no'),
+              '#title_display' => 'invisible',
+              '#name' => "cheque_no[$key]",
+            );
+            $rows[$key]['cheque_date']['data'] = array(
+              '#type' => 'textfield',
+              '#title' => t('Cheque date'),
+              '#title_display' => 'invisible',
+              '#name' => "cheque_date[$key]",
+                //'#default_value' => date('Y-m-d'),
+            );
+            $rows[$key]['cheque_amt']['data'] = array(
+              '#type' => 'textfield',
+              '#title' => t('Cheque amount'),
+              '#title_display' => 'invisible',
+              '#name' => "cheque_amt[$key]",
+            );
+         }
+      }
+      $array['header'] = $header;
+      $array['rows'] = $rows;
    }
-   //dpm($html, '$html');
-   return $html;
+   return $array;
 }
 
 /**
@@ -269,21 +296,10 @@ function get_bill_details_using_bill_no_callback($bill_no_nid, $dis_id, $arg1) {
  * @param type $form_state
  */
 function remove_signed_bounced_flag($form, &$form_state) {
-   dpm($form_state, '$form_state');
-
+   // removing if bill_details array values is not selected (means having zero value)
    $checked = array_filter($form_state['values']['bill_details']);
    if (!empty($checked)) {
       $form_state['bills']['rows'] = array_diff_key($form_state['bills']['rows'], array_flip($checked));
    }
-   drupal_get_messages();
    $form_state['rebuild'] = TRUE;
-//   $query = db_select('field_data_field_sales_bill_no_ref', 'br');
-//   $query->fields('br', array('entity_id'));
-//   $query->condition('br.field_sales_bill_no_ref_nid', $bill_no_nid);
-//   $payment_collection_nid = $query->execute()->fetchField();
-//   if (!empty($payment_collection_nid)) {
-//      $node = node_load($payment_collection_nid);
-//      unset($node->field_flag['und']);
-//      drupal_set_message(t('Removed flag'));
-//   }
 }
