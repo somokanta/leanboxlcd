@@ -129,7 +129,7 @@ function get_data_from_trip_id($trip_id) {
   $query1->join('field_data_field_cashier_name', 'cash', 'cash.entity_id = n.nid');
   $query1->leftjoin('field_data_field_sequence_method', 'sm', 'sm.entity_id = n.nid');
   $query1->leftjoin('field_data_field_total_distance', 'td', 'td.entity_id = n.nid');
-  $query1->leftjoin('field_data_field_total_travel_time', 'td', 'ttt.entity_id = n.nid');
+  $query1->leftjoin('field_data_field_total_travel_time', 'ttt', 'ttt.entity_id = n.nid');
   $query1->fields('sm', array('	field_sequence_method_value'));
   $query1->fields('td', array('field_total_distance_value'));
   $query1->fields('ttt', array('field_total_travel_time_value'));
