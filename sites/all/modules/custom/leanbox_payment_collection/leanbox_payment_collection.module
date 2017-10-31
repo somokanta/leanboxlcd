@@ -4,7 +4,6 @@
  * Files containing list of functions for payment collection
  */
 
-
 /**
  * Implements hook_menu
  */
@@ -42,12 +41,12 @@ function leanbox_payment_collection_menu() {
  *  Add custom permission for collection payment
  */
 function leanbox_payment_collection_permission() {
-  return array(
-    'upload payment collection' => array(
-      'title' => t('upload payment collection'),
-      'description' => t('upload payment collection for bills')
-    )
-  );
+   return array(
+     'upload payment collection' => array(
+       'title' => t('upload payment collection'),
+       'description' => t('upload payment collection for bills')
+     )
+   );
 }
 
 /**
@@ -66,7 +65,7 @@ function get_list_of_bill_no($string = '') {
          $query->condition('n.type', 'sales_register_data');
          $query->condition('n.uid', $dis_id);
          $query->condition('n.title', db_like($string) . '%', 'LIKE');
-         $query->fields('n', array('nid','title'));
+         $query->fields('n', array('nid', 'title'));
          $query->range(0, 10);
          $res = $query->execute()->fetchAllKeyed(0, 1);
       }
