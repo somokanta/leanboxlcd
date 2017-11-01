@@ -11,9 +11,16 @@
  * @return array
  */
 function upload_signed_bill_callback($form, &$form_state) {
+   //jquery_ui_add("ui.datepicker");
+   //drupal_add_js(drupal_get_path('module', 'leanbox_payment_collection') . "/js/datepicker.js");
+   //drupal_add_library('system', 'ui.datepicker');
    $form = array();
    global $user;
    $arg1 = arg(1); // wheather signed or bounced flag based on URL
+
+   $form['#attached']['library'][] = array('system', 'ui.datepicker');
+   $form['#attached']['js'][] = drupal_get_path('module', 'leanbox_payment_collection') . "/js/datepicker.js";
+
    // Store distributor id in author in each node
    $dis_id = change_feeds_import_get_distributor_id($user->uid);
    if (!empty($dis_id) && !empty($arg1)) {
@@ -34,19 +41,41 @@ function upload_signed_bill_callback($form, &$form_state) {
         '#prefix' => '<div id="bill-no">',
         '#suffix' => '</div>',
       );
+      $form['bill_no_wrapper1'] = array(
+        '#prefix' => '<div id="bill-no-wrapper">',
+        '#suffix' => '</div>',
+      );
       $form['bill_details_wrapper'] = array(
         '#prefix' => '<div id="bill-details">',
         '#suffix' => '</div>',
       );
+      if ($arg1 === 'signed') {
+         $form['bill_no_wrapper']['bill_no'] = array(
+           '#type' => 'textfield',
+           '#maxlength' => 20,
+           '#size' => 10,
+           //'#required' => TRUE,
+           '#autocomplete_path' => 'bill-no/list',
+           '#title' => t('Enter Bill No'),
+         );
+      }
+      else {
+         $form['bill_no_wrapper']['bill_no'] = array(
+           '#type' => 'textfield',
+           '#maxlength' => 20,
+           '#size' => 10,
+           //'#required' => TRUE,
+           '#autocomplete_path' => 'bill-no/list',
+           '#title' => t('Enter Bill No'),
+           '#ajax' => array(
+             'callback' => '_bounce_bill_no_ajax',
+             'wrapper' => 'itemlist-div',
+             'method' => 'replace',
+             'effect' => 'fade',
+           ),
+         );
+      }
 
-      $form['bill_no_wrapper']['bill_no'] = array(
-        '#type' => 'textfield',
-        '#maxlength' => 20,
-        '#size' => 10,
-        //'#required' => TRUE,
-        '#autocomplete_path' => 'bill-no/list',
-        '#title' => t('Enter Bill No'),
-      );
       $form['bill_no_wrapper']['add_bill'] = array(
         '#type' => 'submit',
         '#value' => t('Add Bill'),
@@ -58,6 +87,43 @@ function upload_signed_bill_callback($form, &$form_state) {
         ),
         '#submit' => array('add_bill_in_screen_submit'),
       );
+
+      if (!empty($form_state['input']['bill_no'])) {
+         // call function to get bill no already declared as bounced
+         $bill_no = $form_state['input']['bill_no'];
+         $res = leanbox_payment_collection_get_title_and_nid_combo($bill_no, $dis_id);
+         if (!empty($res['payment_collection_nid'])) {
+            $node = node_load($res['payment_collection_nid']);
+            $node_flag = $node->field_flag['und'][0]['value'];
+            if ($node_flag === 'bounced') {
+               drupal_set_message(t("Bill $bill_no already declared bounced."), 'warning');
+
+               $form['bill_no_wrapper']['add_bill'] = array(
+                 '#type' => 'submit',
+                 '#value' => t("Continue to add"),
+                 '#ajax' => array(
+                   'callback' => 'get_bill_details_using_bill_no',
+                   'wrapper' => 'itemlist-div',
+                   'method' => 'replace',
+                   'effect' => 'fade',
+                 ),
+                 '#submit' => array('add_bill_in_screen_submit'),
+               );
+               $form['bill_no_wrapper']['remove_bill'] = array(
+                 '#type' => 'submit',
+                 '#value' => t('Remove bill'),
+                 '#ajax' => array(
+                   'callback' => '_bounce_bill_no_ajax',
+                   'wrapper' => 'bill-no',
+                   'method' => 'replace',
+                   'effect' => 'fade',
+                 ),
+                 '#submit' => array('_remove_bounce_bill_no_ajax'),
+               );
+            }
+         }
+      }
+
 
       if (!empty($form_state['bills']['header']) && !empty($form_state['bills']['rows'])) {
 
@@ -109,22 +175,13 @@ function upload_signed_bill_callback_validate($form, &$form_state) {
    // then show error
    foreach ($form_state['values']['bill_details'] as $bill_no => $val) {
       if (!empty($bill_no)) {
-         $query = db_select('field_data_field_sales_bill_no_ref', 'br');
-         $query->join('node', 'n', 'n.nid = br.entity_id');
-         $query->condition('n.type', 'payment_collection');
-         $query->fields('br', array('entity_id'));
-         $query->condition('n.title', $bill_no);
-         $query->condition('n.uid', $dis_id);
-         $payment_collection_nid = $query->execute()->fetchField();
 
          $res = leanbox_payment_collection_get_title_and_nid_combo($bill_no, $dis_id);
-
          // below array will be used in _sumbit function while node creation 
          // for reference of bill no from sales register
          $form_state['values']['title_and_nid_combo'][$bill_no] = $res['sales_register_nid'];
-
-         if (!empty($payment_collection_nid) && $arg1 === 'signed') {
-            $node = node_load($payment_collection_nid);
+         if (!empty($res['payment_collection_nid']) && $arg1 === 'signed') {
+            $node = node_load($res['payment_collection_nid']);
             $node_flag = $node->field_flag['und'][0]['value'];
             if ($node_flag === 'signed') {
                form_set_error('form', t("Bill no $bill_no already have signed flag."));
@@ -186,8 +243,27 @@ function bill_details_remove_callback($form, &$form_state) {
 /**
  * Menu callback for AJAX additions. Render bill details.
  */
-function bill_no_remove_callback() {
+function bill_no_remove_callback($form, &$form_state) {
    return $form;
+}
+
+/**
+ * Menu callback for AJAX additions. Render bill details.
+ */
+function _bounce_bill_no_ajax($form, &$form_state) {
+   return $form;
+}
+
+/**
+ * 
+ * @param type $form
+ * @param array $form_state
+ */
+function _remove_bounce_bill_no_ajax(&$form, &$form_state) {
+   unset($form_state['input']['bill_no']);
+   unset($form['bill_no_wrapper']['add_bill']);
+   unset($form['bill_no_wrapper']['remove_bill']);
+   $form_state['rebuild'] = TRUE;
 }
 
 /**
@@ -268,19 +344,22 @@ function get_bill_details_using_bill_no_callback($bill_no, $dis_id, $arg1) {
               '#title' => t('Cheque no'),
               '#title_display' => 'invisible',
               '#name' => "cheque_no[$key]",
+              '#required' =>TRUE,
             );
             $rows[$key]['cheque_date']['data'] = array(
               '#type' => 'textfield',
               '#title' => t('Cheque date'),
               '#title_display' => 'invisible',
               '#name' => "cheque_date[$key]",
-                //'#default_value' => date('Y-m-d'),
+              '#attributes' => array('class' => array('cheque-date-field')),
+              '#required' =>TRUE,
             );
             $rows[$key]['cheque_amt']['data'] = array(
               '#type' => 'textfield',
               '#title' => t('Cheque amount'),
               '#title_display' => 'invisible',
               '#name' => "cheque_amt[$key]",
+              '#required' =>TRUE,
             );
          }
       }
