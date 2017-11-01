@@ -57,6 +57,94 @@ function leanbox_payment_collection_feature_field_default_field_instances() {
   // Exported field_instance: 'node-payment_collection-field_amt_difference'.
   $field_instances['node-payment_collection-field_amt_difference'] = array(
     'bundle' => 'payment_collection',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'number',
+        'settings' => array(
+          'decimal_separator' => '.',
+          'prefix_suffix' => TRUE,
+          'scale' => 2,
+          'thousand_separator' => '',
+        ),
+        'type' => 'number_decimal',
+        'weight' => 17,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_amt_difference',
+    'label' => 'Amt Difference',
+    'required' => 0,
+    'settings' => array(
+      'max' => '',
+      'min' => '',
+      'prefix' => '',
+      'suffix' => '',
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 0,
+      'module' => 'number',
+      'settings' => array(),
+      'type' => 'number',
+      'weight' => 48,
+    ),
+  );
+
+  // Exported field_instance: 'node-payment_collection-field_assigned_person'.
+  $field_instances['node-payment_collection-field_assigned_person'] = array(
+    'bundle' => 'payment_collection',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 16,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_assigned_person',
+    'label' => 'Assigned Person',
+    'required' => 0,
+    'settings' => array(
+      'text_processing' => 0,
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'text',
+      'settings' => array(
+        'maxlength_js' => 0,
+        'maxlength_js_label' => 'Content limited to @limit characters, remaining: <strong>@remaining</strong>',
+        'size' => 60,
+      ),
+      'type' => 'text_textfield',
+      'weight' => 47,
+    ),
+  );
+
+  // Exported field_instance: 'node-payment_collection-field_assignment_date'.
+  $field_instances['node-payment_collection-field_assignment_date'] = array(
+    'bundle' => 'payment_collection',
     'deleted' => 0,
     'description' => '',
     'display' => array(
@@ -72,7 +160,7 @@ function leanbox_payment_collection_feature_field_default_field_instances() {
           'show_remaining_days' => FALSE,
         ),
         'type' => 'date_default',
-        'weight' => 7,
+        'weight' => 15,
       ),
       'teaser' => array(
         'label' => 'above',
@@ -82,11 +170,11 @@ function leanbox_payment_collection_feature_field_default_field_instances() {
       ),
     ),
     'entity_type' => 'node',
-    'field_name' => 'field_amt_difference',
-    'label' => 'Amt Difference',
+    'field_name' => 'field_assignment_date',
+    'label' => 'Assignment date',
     'required' => 0,
     'settings' => array(
-      'default_value' => 'blank',
+      'default_value' => 'now',
       'default_value2' => 'same',
       'default_value_code' => '',
       'default_value_code2' => '',
@@ -106,7 +194,7 @@ function leanbox_payment_collection_feature_field_default_field_instances() {
         'year_range' => '-3:+3',
       ),
       'type' => 'date_popup',
-      'weight' => 38,
+      'weight' => 46,
     ),
   );
 
@@ -720,6 +808,8 @@ function leanbox_payment_collection_feature_field_default_field_instances() {
   // Translatables
   // Included for use with string extractors like potx.
   t('Amt Difference');
+  t('Assigned Person');
+  t('Assignment date');
   t('Body');
   t('Cheque Amt');
   t('Cheque Number');
