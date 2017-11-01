@@ -411,8 +411,33 @@ function change_feeds_import_menu() {
     'access arguments' => array('Distributor Upload File'),
     'file' => 'form/discard_content.inc',
   );
+  
+  // setting form for views name used in hook_views_query_alter
+  $items['admin/config/views-name-conf'] = array(
+    'title' => 'Setting Form For Storing Views Name',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('storing_views_name_form'),
+    'access callback' => 'check_if_fr_role_user_admin',
+  );
 
   return $items;
+}
+
+// setting form for storing views name used in hook_views_query_alter
+function storing_views_name_form($form, $form_state) {
+
+  // Views Name
+  $form['views_name'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Views Name'),
+    '#description' => t('Above views will be skipped from default logged in distributor condition written in hook_views_query_alter.'),
+    '#default_value' => variable_get('views_name', ''),
+    '#required' => TRUE,
+    '#size' => 60,
+    '#maxlength' => 2048,
+  );
+
+  return system_settings_form($form);
 }
 
 function update_billing_data_thankyou() {
@@ -2133,12 +2158,14 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
   // Store distributor id in author in each node
   $distributor_id = change_feeds_import_get_distributor_id($user->uid);
 
-  $views_array = array('central_bill_trip', 'channel_master_central_report' , 
-    'central_picking_report' ,  'central_party_pack_report',  'central_unloading_form', 
-    'central_mobile_return_analysis', 'user_manual',  'hul_impact_delete', 'impact_delivery_cron_2', 
-    'impact_delivery_cron_evening_2', 'impact_party_master', 'impact_party_master_morning',
-    'hul_code_distributor_wise', 'van_stop_master_report', 'update_sales_register_party_code',
-    'central_outlet_master_report', 'central_party_pack_master_report','ofd_mailer','ofd_mailer2');
+  $all_views_names = variable_get('views_name');
+  $views_array = explode(",",$all_views_names);
+//  $views_array = array('central_bill_trip', 'channel_master_central_report' , 
+//    'central_picking_report' ,  'central_party_pack_report',  'central_unloading_form', 
+//    'central_mobile_return_analysis', 'user_manual',  'hul_impact_delete', 'impact_delivery_cron_2', 
+//    'impact_delivery_cron_evening_2', 'impact_party_master', 'impact_party_master_morning',
+//    'hul_code_distributor_wise', 'van_stop_master_report', 'update_sales_register_party_code',
+//    'central_outlet_master_report', 'central_party_pack_master_report','ofd_mailer','ofd_mailer2');
 
    if (!in_array($view->name, $views_array)) {
     foreach ($query->table_queue as $key => $val) {
