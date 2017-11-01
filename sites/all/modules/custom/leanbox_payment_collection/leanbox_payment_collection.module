@@ -4,7 +4,6 @@
  * Files containing list of functions for payment collection
  */
 
-
 /**
  * Implements hook_menu
  */
@@ -42,12 +41,12 @@ function leanbox_payment_collection_menu() {
  *  Add custom permission for collection payment
  */
 function leanbox_payment_collection_permission() {
-  return array(
-    'upload payment collection' => array(
-      'title' => t('upload payment collection'),
-      'description' => t('upload payment collection for bills')
-    )
-  );
+   return array(
+     'upload payment collection' => array(
+       'title' => t('upload payment collection'),
+       'description' => t('upload payment collection for bills')
+     )
+   );
 }
 
 /**
@@ -66,10 +65,31 @@ function get_list_of_bill_no($string = '') {
          $query->condition('n.type', 'sales_register_data');
          $query->condition('n.uid', $dis_id);
          $query->condition('n.title', db_like($string) . '%', 'LIKE');
-         $query->fields('n', array('nid','title'));
+         $query->fields('n', array('title'));
          $query->range(0, 10);
-         $res = $query->execute()->fetchAllKeyed(0, 1);
+         $res = $query->execute()->fetchAllKeyed(0, 0);
       }
    }
    drupal_json_output($res);
+}
+
+/**
+ * 
+ * @param type $bill_no
+ * @param type $dis_id
+ * @return array
+ */
+function leanbox_payment_collection_get_title_and_nid_combo($bill_no, $dis_id) {
+   $res = array();
+   if (!empty($bill_no) && !empty($dis_id)) {
+      $query = db_select('node', 'n');
+      $query->leftjoin('field_data_field_sales_bill_no_ref', 'br', 'n.nid = br.entity_id');
+      $query->condition('n.type', 'sales_register_data');
+      $query->addField('br', 'entity_id', 'payment_collection_nid');
+      $query->addField('n', 'nid', 'sales_register_nid');
+      $query->condition('n.title', $bill_no);
+      $query->condition('n.uid', $dis_id);
+      $res = $query->execute()->fetch(PDO::FETCH_ASSOC);
+   }
+   return $res;
 }
