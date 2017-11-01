@@ -54,52 +54,6 @@ function leanbox_payment_collection_feature_field_default_field_instances() {
     ),
   );
 
-  // Exported field_instance: 'node-payment_collection-field_amt_difference'.
-  $field_instances['node-payment_collection-field_amt_difference'] = array(
-    'bundle' => 'payment_collection',
-    'default_value' => NULL,
-    'deleted' => 0,
-    'description' => '',
-    'display' => array(
-      'default' => array(
-        'label' => 'above',
-        'module' => 'number',
-        'settings' => array(
-          'decimal_separator' => '.',
-          'prefix_suffix' => TRUE,
-          'scale' => 2,
-          'thousand_separator' => '',
-        ),
-        'type' => 'number_decimal',
-        'weight' => 17,
-      ),
-      'teaser' => array(
-        'label' => 'above',
-        'settings' => array(),
-        'type' => 'hidden',
-        'weight' => 0,
-      ),
-    ),
-    'entity_type' => 'node',
-    'field_name' => 'field_amt_difference',
-    'label' => 'Amt Difference',
-    'required' => 0,
-    'settings' => array(
-      'max' => '',
-      'min' => '',
-      'prefix' => '',
-      'suffix' => '',
-      'user_register_form' => FALSE,
-    ),
-    'widget' => array(
-      'active' => 0,
-      'module' => 'number',
-      'settings' => array(),
-      'type' => 'number',
-      'weight' => 48,
-    ),
-  );
-
   // Exported field_instance: 'node-payment_collection-field_assigned_person'.
   $field_instances['node-payment_collection-field_assigned_person'] = array(
     'bundle' => 'payment_collection',
@@ -591,6 +545,53 @@ function leanbox_payment_collection_feature_field_default_field_instances() {
     ),
   );
 
+  // Exported field_instance:
+  // 'node-payment_collection-field_field_amnt_difference'.
+  $field_instances['node-payment_collection-field_field_amnt_difference'] = array(
+    'bundle' => 'payment_collection',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'number',
+        'settings' => array(
+          'decimal_separator' => '.',
+          'prefix_suffix' => TRUE,
+          'scale' => 2,
+          'thousand_separator' => '',
+        ),
+        'type' => 'number_decimal',
+        'weight' => 17,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_field_amnt_difference',
+    'label' => 'field_amnt_difference',
+    'required' => 0,
+    'settings' => array(
+      'max' => '',
+      'min' => '',
+      'prefix' => '',
+      'suffix' => '',
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 0,
+      'module' => 'number',
+      'settings' => array(),
+      'type' => 'number',
+      'weight' => 48,
+    ),
+  );
+
   // Exported field_instance: 'node-payment_collection-field_file'.
   $field_instances['node-payment_collection-field_file'] = array(
     'bundle' => 'payment_collection',
@@ -807,7 +808,6 @@ function leanbox_payment_collection_feature_field_default_field_instances() {
 
   // Translatables
   // Included for use with string extractors like potx.
-  t('Amt Difference');
   t('Assigned Person');
   t('Assignment date');
   t('Body');
@@ -823,6 +823,7 @@ function leanbox_payment_collection_feature_field_default_field_instances() {
   t('File upload date');
   t('Flag');
   t('Returned Bill Flag');
+  t('field_amnt_difference');
   t('sales bill no ref');
 
   return $field_instances;
