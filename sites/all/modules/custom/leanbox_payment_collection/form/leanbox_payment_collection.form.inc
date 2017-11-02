@@ -202,7 +202,6 @@ function upload_signed_bill_callback_validate($form, &$form_state) {
             if (!empty($val1['payment_collection_nid']) && $arg1 === 'signed') {
                $node = node_load($val1['payment_collection_nid']);
                $node_flag = $node->field_flag['und'][0]['value'];
-               dpm($node_flag, '$node_flag');
                if ($node_flag === 'signed') {
                   form_set_error('form', t("Bill no $bill_no already have signed flag."));
                }
