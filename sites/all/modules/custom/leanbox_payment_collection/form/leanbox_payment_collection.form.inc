@@ -102,7 +102,6 @@ function upload_signed_bill_callback($form, &$form_state) {
          // call function to get bill no already declared as bounced
 
          $res = leanbox_payment_collection_get_title_and_nid_combo($bill_no, $dis_id);
-         dpm($res);
          if (!empty($res)) {
             foreach ($res as $key1 => $val1) {
                $node = node_load($val1['payment_collection_nid']);

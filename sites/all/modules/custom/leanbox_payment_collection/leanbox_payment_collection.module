@@ -72,6 +72,7 @@ function get_list_of_bill_no($string = '') {
    if ($length > 2) {
       if (!empty($dis_id) && !empty($string)) {
          $query = db_select('node', 'n');
+         $query->join('field_data_field_trip_id_reference', 'tr', 'tr.entity_id = n.nid');
          $query->condition('n.type', 'sales_register_data');
          $query->condition('n.uid', $dis_id);
          $query->condition('n.title', db_like($string) . '%', 'LIKE');
