@@ -685,7 +685,7 @@ function dispatch_planning_form_save_validate($form, &$form_state) {
       "lat" => $origin_lat, //'19.1817531000', //
       "lng" => $origin_long //'72.9972678000',// 
     );
-    $Locations['fleet']['origin']['speed'] = 'slow'; // speed of the driver
+    $Locations['fleet']['origin']['speed'] = 'very slow'; // speed of the driver
 
     /*$post_result = graphhopper_postvrp_api($params);
     if ($post_result) {
