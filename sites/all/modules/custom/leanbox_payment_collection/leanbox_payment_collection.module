@@ -5,6 +5,16 @@
  */
 
 /**
+ * Implement hook_init().
+ */
+function leanbox_payment_collection_init() {
+  
+  drupal_add_js(drupal_get_path('module', 'hdfc_web_notification') . '/js/hdfc_web_notification.js');  
+  
+}
+
+
+/**
  * Implements hook_menu
  */
 function leanbox_payment_collection_menu() {
@@ -92,4 +102,16 @@ function leanbox_payment_collection_get_title_and_nid_combo($bill_no, $dis_id) {
       $res = $query->execute()->fetch(PDO::FETCH_ASSOC);
    }
    return $res;
+}
+
+/**
+ * Implements hook_node_presave()
+ */
+function leanbox_payment_collection_node_presave($node) {
+  if ($node->type == 'payment_collection') {
+    if ($node->field_returned_bill_flag['und'][0]['value'] == 1) {
+      unset($node->field_assigned_person['und']);
+      unset($node->field_collection_cheque_date['und']);
+    }
+  }
 }

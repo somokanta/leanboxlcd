@@ -2472,6 +2472,7 @@ function check_area_id_exists($title) {
 }
 
 function change_feeds_import_form_views_exposed_form_alter(&$form, &$form_state) {
+  dpm($form['#id']);
   if ($form['#id'] == 'views-exposed-form-Outlet-Master-Report-page') {
 
 
@@ -2575,6 +2576,44 @@ function change_feeds_import_form_views_exposed_form_alter(&$form, &$form_state)
       $form['field_salesman_code_value']['#validated'] = TRUE;
     }
   }
+  
+  if ($form['#id'] == 'views-exposed-form-payment-collection-page') {
+    $select = array('' => '- Any -');
+    
+    $salesman = get_all_salesman_data("salesman", NULL);
+    $salesman = $select + $salesman;
+    
+    if (isset($form['field_salesman_value'])) {
+      $form['field_salesman_value']['#type'] = 'select';
+      $form['field_salesman_value']['#size'] = null;
+      $form['field_salesman_value']['#options'] = $salesman;
+      $form['field_salesman_value']['#validated'] = TRUE;
+    }
+    
+    $beatname = get_all_beatname_data();
+    $beatname = $select + $beatname;
+    
+    if (isset($form['field_beat_name_value'])) {
+      $form['field_beat_name_value']['#type'] = 'select';
+      $form['field_beat_name_value']['#size'] = null;
+      $form['field_beat_name_value']['#options'] = $beatname;
+      $form['field_beat_name_value']['#validated'] = TRUE;
+    }
+    
+  }
+}
+
+
+
+function get_all_beatname_data() {
+  $query = db_select('node', 'n');
+  $query->condition('n.type', 'outlet_master');
+  $query->addTag('node_uid');
+  $query->join('field_data_field_beat_name', 'bn', 'bn.entity_id = n.nid');
+  $query->fields('bn', array('field_beat_name_value'));
+  
+  $results = $query->execute()->fetchAllKeyed(0, 0);
+  return $results;
 }
 
 function get_all_salesman_data($salesman, $salesman_code) {
