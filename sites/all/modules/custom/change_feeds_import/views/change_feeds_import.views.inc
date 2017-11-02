@@ -459,6 +459,23 @@ function change_feeds_import_views_data() {
     ),
   );
 
+  
+  $data['custom_billing_data']['created_date'] = array(
+    'title' => t('custom billing created_date'),
+    'help' => t('The record created_date.'),
+    'field' => array(
+      'handler' => 'views_handler_field_date',
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort_date',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_date',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_filter_date',
+    ),
+  );
 
   $data['custom_billing_data']['party_code'] = array(
     'title' => t('party_code'),
