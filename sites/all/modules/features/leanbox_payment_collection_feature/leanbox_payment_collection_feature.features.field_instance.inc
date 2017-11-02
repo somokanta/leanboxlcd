@@ -806,6 +806,50 @@ function leanbox_payment_collection_feature_field_default_field_instances() {
     ),
   );
 
+  // Exported field_instance:
+  // 'node-payment_collection-field_terminated_bill_flag'.
+  $field_instances['node-payment_collection-field_terminated_bill_flag'] = array(
+    'bundle' => 'payment_collection',
+    'default_value' => array(
+      0 => array(
+        'value' => 0,
+      ),
+    ),
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'list',
+        'settings' => array(),
+        'type' => 'list_default',
+        'weight' => 18,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_terminated_bill_flag',
+    'label' => 'terminated bill flag',
+    'required' => 0,
+    'settings' => array(
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'options',
+      'settings' => array(
+        'display_label' => 0,
+      ),
+      'type' => 'options_onoff',
+      'weight' => 49,
+    ),
+  );
+
   // Translatables
   // Included for use with string extractors like potx.
   t('Assigned Person');
@@ -825,6 +869,7 @@ function leanbox_payment_collection_feature_field_default_field_instances() {
   t('Returned Bill Flag');
   t('field_amnt_difference');
   t('sales bill no ref');
+  t('terminated bill flag');
 
   return $field_instances;
 }
