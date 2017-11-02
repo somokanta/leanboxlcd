@@ -2575,10 +2575,9 @@ function change_feeds_import_form_views_exposed_form_alter(&$form, &$form_state)
       $form['field_salesman_code_value']['#validated'] = TRUE;
     }
   }
-  
+
   if ($form['#id'] == 'views-exposed-form-payment-collection-page' || $form['#id'] == 'views-exposed-form-signed-bills-upload-page-2' || $form['#id'] == 'views-exposed-form-signed-bills-upload-page-3') {
     $select = array('' => '- Any -');
-    
     $salesman = get_all_salesman_data("salesman", NULL);
     $salesman = $select + $salesman;
     
@@ -2598,8 +2597,16 @@ function change_feeds_import_form_views_exposed_form_alter(&$form, &$form_state)
       $form['field_beat_name_value']['#options'] = $beatname;
       $form['field_beat_name_value']['#validated'] = TRUE;
     }
-    
   }
+
+  if ($form['#id'] == 'views-exposed-form-signed-bills-upload-page' || $form['#id'] == 'views-exposed-form-signed-bills-upload-page-1') {
+    $options = array('=' => '- Any -','empty' => 'No','not empty' => 'Yes');
+    $form['field_file_fid']['value']['#type'] = 'hidden';
+    if (isset($form['field_file_fid_op'])) {
+      $form['field_file_fid_op']['#options'] = $options;
+    }
+    
+  }  
 }
 
 

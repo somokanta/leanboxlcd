@@ -10,8 +10,9 @@ function modify_views_forms_form_alter(&$form, &$form_state, $form_id) {
   if (isset($form['#node']) && !isset($form['#node']->nid) && in_array($form['#node']->type, $node_type)) {
     $form['#validate'][] = 'node_title_validate';
   }
+
   if ($form_id == 'editableviews_entity_form_signed_bills_upload') {
-    if (arg(0) == 'signed-bills-assignment' || arg(0) == 'bounced-cheque-assignment') {
+    if ($form['#view_display_name'] == 'page_2' || $form['#view_display_name'] == 'page_3') {
       $select = array('' => '- Any -');
 
       $salesman = get_all_salesman_data("salesman", NULL);
