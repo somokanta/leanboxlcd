@@ -10,6 +10,22 @@ function modify_views_forms_form_alter(&$form, &$form_state, $form_id) {
   if (isset($form['#node']) && !isset($form['#node']->nid) && in_array($form['#node']->type, $node_type)) {
     $form['#validate'][] = 'node_title_validate';
   }
+  
+  if ($form_id == 'editableviews_entity_form_signed_bills_upload') {
+    $select = array('' => '- Any -');
+    
+    $salesman = get_all_salesman_data("salesman", NULL);
+    $salesman = $select + $salesman;
+    
+    foreach ($form['node'] as $key => $value) {
+      if($value['#bundle'] == 'payment_collection') {
+        $form['node'][$key]['field_assigned_person'][LANGUAGE_NONE][0]['value']['#type'] = 'select';
+        $form['node'][$key]['field_assigned_person'][LANGUAGE_NONE][0]['value']['#multiple'] = FALSE;
+        $form['node'][$key]['field_assigned_person'][LANGUAGE_NONE][0]['value']['#options'] = $salesman;
+        $form['node'][$key]['field_assigned_person'][LANGUAGE_NONE][0]['value']['#size'] = 1;
+      }
+    }
+  }
 
   if(($form_id == 'editableviews_entity_form_pick_confirm_report') || ($form_id == 'editableviews_entity_form_picking_report') || ($form_id == 'editableviews_entity_form_party_packing_report') || ($form_id == 'editableviews_entity_form_unloading_form') || ($form_id == 'editableviews_entity_form_dispatch_data_report')) {
     // fetching supervisior on the basis of logged in users distributor id
