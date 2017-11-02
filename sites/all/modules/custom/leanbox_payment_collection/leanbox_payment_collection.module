@@ -10,7 +10,7 @@
 function leanbox_payment_collection_menu() {
    $items = array();
 
-   $items['upload-signed-bill/signed'] = array(
+   $items['upload-collection-bill/signed'] = array(
      'title' => 'Declare Payment Collection',
      'page callback' => 'drupal_get_form',
      'page arguments' => array('upload_signed_bill_callback'),
@@ -18,7 +18,7 @@ function leanbox_payment_collection_menu() {
      'type' => MENU_CALLBACK,
      'file' => 'form/leanbox_payment_collection.form.inc',
    );
-   $items['upload-signed-bill/bounced'] = array(
+   $items['upload-collection-bill/bounced'] = array(
      'title' => 'Declare Payment Collection',
      'page callback' => 'drupal_get_form',
      'page arguments' => array('upload_signed_bill_callback'),

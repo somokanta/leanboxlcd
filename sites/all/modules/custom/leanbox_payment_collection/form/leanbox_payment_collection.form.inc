@@ -187,6 +187,15 @@ function upload_signed_bill_callback_validate($form, &$form_state) {
                form_set_error('form', t("Bill no $bill_no already have signed flag."));
             }
          }
+         if(empty($form_state['values']['cheque_no'][$bill_no])) {
+            form_set_error('form', t("Cheque no for bill $bill_no is required."));
+         }
+         if( empty($form_state['values']['cheque_date'][$bill_no])) {
+            form_set_error('form', t("Cheque date for bill $bill_no is required."));
+         }
+         if(empty($form_state['values']['cheque_amt'][$bill_no])) {
+            form_set_error('form', t("Cheque amount for bill $bill_no is required."));
+         }
       }
    }
 }
@@ -344,7 +353,7 @@ function get_bill_details_using_bill_no_callback($bill_no, $dis_id, $arg1) {
               '#title' => t('Cheque no'),
               '#title_display' => 'invisible',
               '#name' => "cheque_no[$key]",
-              '#required' =>TRUE,
+              '#required' => TRUE,
             );
             $rows[$key]['cheque_date']['data'] = array(
               '#type' => 'textfield',
@@ -352,14 +361,14 @@ function get_bill_details_using_bill_no_callback($bill_no, $dis_id, $arg1) {
               '#title_display' => 'invisible',
               '#name' => "cheque_date[$key]",
               '#attributes' => array('class' => array('cheque-date-field')),
-              '#required' =>TRUE,
+              '#required' => TRUE,
             );
             $rows[$key]['cheque_amt']['data'] = array(
               '#type' => 'textfield',
               '#title' => t('Cheque amount'),
               '#title_display' => 'invisible',
               '#name' => "cheque_amt[$key]",
-              '#required' =>TRUE,
+              '#required' => TRUE,
             );
          }
       }
