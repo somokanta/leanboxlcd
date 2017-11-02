@@ -255,8 +255,10 @@ function upload_signed_bill_callback_submit($form, &$form_state) {
       }
       foreach ($form_state['values']['title_and_collection_nid_combo'][$bill_no] as $key1 => $val1) {
          $payment_col_node = node_load($val1);
-         $payment_col_node->field_terminated_bill_flag[LANGUAGE_NONE][0]['value'] = 1;
-         node_save($payment_col_node);
+         if (!empty($payment_col_node)) {
+            $payment_col_node->field_terminated_bill_flag[LANGUAGE_NONE][0]['value'] = 1;
+            node_save($payment_col_node);
+         }
       }
    }
 }
