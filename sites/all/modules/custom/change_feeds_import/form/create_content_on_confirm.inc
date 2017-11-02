@@ -773,8 +773,8 @@ function change_feeds_import_create_billing($data, &$context) {
       $batch_id = $batch['id'];
 
       $message = "For Distributor: $distributor_id and Batch Id $batch_id \n" .
-      $message .= t('An error MSG:  %error_msg with arguments: @arguments', array('%error_msg' => $e->getMessage(), '@arguments' => print_r($value, TRUE)));
-      $params['subject'] = "Billing Upload Error in Batch Proccess ";
+      $message .= t('An error MSG:  %error_msg with arguments: @arguments', array('%error_msg' => $ex->getMessage(), '@arguments' => print_r($value, TRUE)));
+      $params['subject'] = "Billing Upload Error in Batch Proccess-sales-data ";
       $params['body'] = $message;
       $mail_to = "abhishek.r@iksula.com";
       $from = "MIS.HELPDESK@leanbox.in";
