@@ -10,9 +10,9 @@
 function collection_feature_field_default_field_instances() {
   $field_instances = array();
 
-  // Exported field_instance: 'node-collection-body'.
-  $field_instances['node-collection-body'] = array(
-    'bundle' => 'collection',
+  // Exported field_instance: 'node-collection_history-body'.
+  $field_instances['node-collection_history-body'] = array(
+    'bundle' => 'collection_history',
     'default_value' => NULL,
     'deleted' => 0,
     'description' => '',
@@ -54,9 +54,9 @@ function collection_feature_field_default_field_instances() {
     ),
   );
 
-  // Exported field_instance: 'node-collection-field_assigned_to'.
-  $field_instances['node-collection-field_assigned_to'] = array(
-    'bundle' => 'collection',
+  // Exported field_instance: 'node-collection_history-field_assigned_to'.
+  $field_instances['node-collection_history-field_assigned_to'] = array(
+    'bundle' => 'collection_history',
     'default_value' => NULL,
     'deleted' => 0,
     'description' => '',
@@ -94,9 +94,10 @@ function collection_feature_field_default_field_instances() {
     ),
   );
 
-  // Exported field_instance: 'node-collection-field_collection_cash_amt'.
-  $field_instances['node-collection-field_collection_cash_amt'] = array(
-    'bundle' => 'collection',
+  // Exported field_instance:
+  // 'node-collection_history-field_collection_cash_amt'.
+  $field_instances['node-collection_history-field_collection_cash_amt'] = array(
+    'bundle' => 'collection_history',
     'default_value' => NULL,
     'deleted' => 0,
     'description' => '',
@@ -140,9 +141,9 @@ function collection_feature_field_default_field_instances() {
     ),
   );
 
-  // Exported field_instance: 'node-collection-field_collection_ch_amt'.
-  $field_instances['node-collection-field_collection_ch_amt'] = array(
-    'bundle' => 'collection',
+  // Exported field_instance: 'node-collection_history-field_collection_ch_amt'.
+  $field_instances['node-collection_history-field_collection_ch_amt'] = array(
+    'bundle' => 'collection_history',
     'default_value' => NULL,
     'deleted' => 0,
     'description' => '',
@@ -186,9 +187,10 @@ function collection_feature_field_default_field_instances() {
     ),
   );
 
-  // Exported field_instance: 'node-collection-field_collection_ch_date'.
-  $field_instances['node-collection-field_collection_ch_date'] = array(
-    'bundle' => 'collection',
+  // Exported field_instance:
+  // 'node-collection_history-field_collection_ch_date'.
+  $field_instances['node-collection_history-field_collection_ch_date'] = array(
+    'bundle' => 'collection_history',
     'deleted' => 0,
     'description' => '',
     'display' => array(
@@ -242,9 +244,10 @@ function collection_feature_field_default_field_instances() {
     ),
   );
 
-  // Exported field_instance: 'node-collection-field_collection_cheque_no'.
-  $field_instances['node-collection-field_collection_cheque_no'] = array(
-    'bundle' => 'collection',
+  // Exported field_instance:
+  // 'node-collection_history-field_collection_cheque_no'.
+  $field_instances['node-collection_history-field_collection_cheque_no'] = array(
+    'bundle' => 'collection_history',
     'default_value' => NULL,
     'deleted' => 0,
     'description' => '',
@@ -282,9 +285,10 @@ function collection_feature_field_default_field_instances() {
     ),
   );
 
-  // Exported field_instance: 'node-collection-field_payment_collection_ref'.
-  $field_instances['node-collection-field_payment_collection_ref'] = array(
-    'bundle' => 'collection',
+  // Exported field_instance:
+  // 'node-collection_history-field_payment_collection_ref'.
+  $field_instances['node-collection_history-field_payment_collection_ref'] = array(
+    'bundle' => 'collection_history',
     'default_value' => NULL,
     'deleted' => 0,
     'description' => '',
