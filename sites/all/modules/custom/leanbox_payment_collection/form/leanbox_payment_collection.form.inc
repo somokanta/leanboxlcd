@@ -370,9 +370,10 @@ function get_bill_details_using_bill_no_callback($bill_no, $dis_id, $arg1) {
            'Salesman' => 'Salesman',
            'Salesmancode' => 'Salesman code',
            'Billvalue' => 'Bill value',
+           'cheque_amt' => 'Cheque amount',
            'cheque_no' => 'Cheque no',
            'cheque_date' => 'Cheque date',
-           'cheque_amt' => 'Cheque amount',);
+           );
       }
       else {
          $header = array(
