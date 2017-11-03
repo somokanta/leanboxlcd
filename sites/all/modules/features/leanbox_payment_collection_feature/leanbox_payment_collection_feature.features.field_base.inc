@@ -10,6 +10,35 @@
 function leanbox_payment_collection_feature_field_default_field_bases() {
   $field_bases = array();
 
+  // Exported field_base: 'field_amt_difference'.
+  $field_bases['field_amt_difference'] = array(
+    'active' => 1,
+    'cardinality' => 1,
+    'deleted' => 0,
+    'entity_types' => array(),
+    'field_name' => 'field_amt_difference',
+    'indexes' => array(),
+    'locked' => 0,
+    'module' => 'date',
+    'settings' => array(
+      'cache_count' => 4,
+      'cache_enabled' => 0,
+      'granularity' => array(
+        'day' => 'day',
+        'hour' => 0,
+        'minute' => 0,
+        'month' => 'month',
+        'second' => 0,
+        'year' => 'year',
+      ),
+      'timezone_db' => '',
+      'todate' => '',
+      'tz_handling' => 'none',
+    ),
+    'translatable' => 0,
+    'type' => 'datetime',
+  );
+
   // Exported field_base: 'field_assigned_person'.
   $field_bases['field_assigned_person'] = array(
     'active' => 1,
@@ -217,6 +246,31 @@ function leanbox_payment_collection_feature_field_default_field_bases() {
     'type' => 'text',
   );
 
+  // Exported field_base: 'field_collection_status'.
+  $field_bases['field_collection_status'] = array(
+    'active' => 1,
+    'cardinality' => 1,
+    'deleted' => 0,
+    'entity_types' => array(),
+    'field_name' => 'field_collection_status',
+    'indexes' => array(
+      'value' => array(
+        0 => 'value',
+      ),
+    ),
+    'locked' => 0,
+    'module' => 'list',
+    'settings' => array(
+      'allowed_values' => array(
+        2 => 'Fully Collected',
+        1 => 'Partially Collected',
+      ),
+      'allowed_values_function' => '',
+    ),
+    'translatable' => 0,
+    'type' => 'list_text',
+  );
+
   // Exported field_base: 'field_declaration_date'.
   $field_bases['field_declaration_date'] = array(
     'active' => 1,
@@ -333,13 +387,51 @@ function leanbox_payment_collection_feature_field_default_field_bases() {
     'module' => 'list',
     'settings' => array(
       'allowed_values' => array(
-        'signed' => 'signed',
-        'bounced' => 'bounced',
+        'signed' => 'Signed',
+        'bounced' => 'Bounced',
       ),
       'allowed_values_function' => '',
     ),
     'translatable' => 0,
     'type' => 'list_text',
+  );
+
+  // Exported field_base: 'field_previous_cash_amt'.
+  $field_bases['field_previous_cash_amt'] = array(
+    'active' => 1,
+    'cardinality' => 1,
+    'deleted' => 0,
+    'entity_types' => array(),
+    'field_name' => 'field_previous_cash_amt',
+    'indexes' => array(),
+    'locked' => 0,
+    'module' => 'number',
+    'settings' => array(
+      'decimal_separator' => '.',
+      'precision' => 10,
+      'scale' => 2,
+    ),
+    'translatable' => 0,
+    'type' => 'number_decimal',
+  );
+
+  // Exported field_base: 'field_previous_cheque_amt'.
+  $field_bases['field_previous_cheque_amt'] = array(
+    'active' => 1,
+    'cardinality' => 1,
+    'deleted' => 0,
+    'entity_types' => array(),
+    'field_name' => 'field_previous_cheque_amt',
+    'indexes' => array(),
+    'locked' => 0,
+    'module' => 'number',
+    'settings' => array(
+      'decimal_separator' => '.',
+      'precision' => 10,
+      'scale' => 2,
+    ),
+    'translatable' => 0,
+    'type' => 'number_decimal',
   );
 
   // Exported field_base: 'field_returned_bill_flag'.
@@ -358,8 +450,8 @@ function leanbox_payment_collection_feature_field_default_field_bases() {
     'module' => 'list',
     'settings' => array(
       'allowed_values' => array(
-        0 => 0,
-        1 => 1,
+        0 => '',
+        1 => '',
       ),
       'allowed_values_function' => '',
     ),

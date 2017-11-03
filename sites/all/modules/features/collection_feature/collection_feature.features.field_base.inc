@@ -141,7 +141,7 @@ function collection_feature_field_default_field_bases() {
         'billing_data' => 0,
         'ccfot' => 0,
         'channel_master' => 0,
-        'collection' => 0,
+        'collection_history' => 0,
         'day_van_pl_gp_area_hook_grouping' => 0,
         'dispatch_data' => 0,
         'egir' => 0,
