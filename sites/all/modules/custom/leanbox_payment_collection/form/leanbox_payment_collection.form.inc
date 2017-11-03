@@ -153,7 +153,7 @@ function upload_signed_bill_callback($form, &$form_state) {
 
          $form['bill_details_wrapper']['bill_remove'] = array(
            '#type' => 'submit',
-           '#value' => t('Remove Flag'),
+           '#value' => t('Remove Bill'),
            '#submit' => array('remove_signed_bounced_flag'),
            '#limit_validation_errors' => array(array('bill_details')),
            '#ajax' => array(
@@ -215,7 +215,7 @@ function upload_signed_bill_callback_validate($form, &$form_state) {
             if (empty($cheque_no)) {
                form_set_error('form', t("Cheque no for bill $bill_no is required."));
             }
-            else if(!preg_match('/^[a-zA-Z]+[a-zA-Z0-9._]+$/', $cheque_no)) {
+            else if(preg_match('/[^a-z_\-0-9]/i', $cheque_no)) {
                form_set_error('form', t("Cheque no for bill $bill_no should be alphanumeric."));
             }
             if (empty($cheque_date)) {
@@ -262,7 +262,7 @@ function upload_signed_bill_callback_submit($form, &$form_state) {
 
          node_save($node);
 
-         drupal_set_message(t('Collection content uploded sucessfully.'));
+         drupal_set_message(t('Signed Bill Declared Successfully.'));
       }
       foreach ($form_state['values']['title_and_collection_nid_combo'][$bill_no] as $key1 => $val1) {
          $payment_col_node = node_load($val1);
@@ -345,7 +345,7 @@ function get_bill_details_using_bill_no_callback($bill_no, $dis_id, $arg1) {
       $query->addField('n', 'title', 'title');
       $query->addField('n', 'title', 'Bill no');
       $query->join('field_data_field_sr_bill_date', 'sr', 'sr.entity_id = n.nid');
-      $query->addExpression("DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(sr.field_sr_bill_date_value),'+00:00','+05:30'), '%Y/%m/%d')", 'bill date');
+      $query->addExpression("DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(sr.field_sr_bill_date_value),'+00:00','+05:30'), '%d-%b-%Y')", 'bill date');
       $query->leftjoin('field_data_field_party_code_reference', 'pc', 'pc.entity_id = n.nid');
       $query->join('node', 'n1', 'n1.nid = field_party_code_reference_nid');
       $query->addField('n1', 'title', 'Party code');
@@ -370,9 +370,10 @@ function get_bill_details_using_bill_no_callback($bill_no, $dis_id, $arg1) {
            'Salesman' => 'Salesman',
            'Salesmancode' => 'Salesman code',
            'Billvalue' => 'Bill value',
+           'cheque_amt' => 'Cheque amount',
            'cheque_no' => 'Cheque no',
            'cheque_date' => 'Cheque date',
-           'cheque_amt' => 'Cheque amount',);
+           );
       }
       else {
          $header = array(
@@ -387,7 +388,14 @@ function get_bill_details_using_bill_no_callback($bill_no, $dis_id, $arg1) {
 
       if ($arg1 === 'bounced') {
          foreach ($rows as $key => $value) {
-            $rows[$key]['cheque_no']['data'] = array(
+            $rows[$key]['cheque_amt']['data'] = array(
+              '#type' => 'textfield',
+              '#title' => t('Cheque amount'),
+              '#title_display' => 'invisible',
+              '#name' => "cheque_amt[$key]",
+              '#required' => TRUE,
+            );
+           $rows[$key]['cheque_no']['data'] = array(
               '#type' => 'textfield',
               '#title' => t('Cheque no'),
               '#title_display' => 'invisible',
@@ -400,13 +408,6 @@ function get_bill_details_using_bill_no_callback($bill_no, $dis_id, $arg1) {
               '#title_display' => 'invisible',
               '#name' => "cheque_date[$key]",
               '#attributes' => array('class' => array('cheque-date-field')),
-              '#required' => TRUE,
-            );
-            $rows[$key]['cheque_amt']['data'] = array(
-              '#type' => 'textfield',
-              '#title' => t('Cheque amount'),
-              '#title_display' => 'invisible',
-              '#name' => "cheque_amt[$key]",
               '#required' => TRUE,
             );
          }

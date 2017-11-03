@@ -2580,14 +2580,18 @@ function change_feeds_import_form_views_exposed_form_alter(&$form, &$form_state)
     $select = array('' => '- Any -');
     $salesman = get_all_salesman_data("salesman", NULL);
     $salesman = $select + $salesman;
-    
     if (isset($form['field_assigned_person_value'])) {
       $form['field_assigned_person_value']['#type'] = 'select';
       $form['field_assigned_person_value']['#size'] = null;
       $form['field_assigned_person_value']['#options'] = $salesman;
       $form['field_assigned_person_value']['#validated'] = TRUE;
     }
-    
+    if (isset($form['field_salesman_value'])) {
+      $form['field_salesman_value']['#type'] = 'select';
+      $form['field_salesman_value']['#size'] = null;
+      $form['field_salesman_value']['#options'] = $salesman;
+      $form['field_salesman_value']['#validated'] = TRUE;
+    }    
     $beatname = get_all_beatname_data();
     $beatname = $select + $beatname;
     
@@ -2607,6 +2611,11 @@ function change_feeds_import_form_views_exposed_form_alter(&$form, &$form_state)
       $form['field_assignment_date_value']['min']['#title'] = 'Assignment Start Date';
       $form['field_assignment_date_value']['max']['#title'] = 'Assignment End Date';
     }
+    if($form['#id'] == 'views-exposed-form-signed-bills-upload-page-3'){
+      $form['field_cheque_date_value']['min']['#title'] = 'Cheque From Date';
+      $form['field_cheque_date_value']['max']['#title'] = 'Cheque To Date';
+    }
+    
   }
 
   if ($form['#id'] == 'views-exposed-form-signed-bills-upload-page' || $form['#id'] == 'views-exposed-form-signed-bills-upload-page-1') {
