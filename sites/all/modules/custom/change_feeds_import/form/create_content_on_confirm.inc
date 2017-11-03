@@ -741,14 +741,14 @@ function get_party_packing_from_party_code($party_code = NULL, $distributor_id) 
   if (!is_null($party_code)) {
     $query->condition('pc.field_party_code_value', $party_code, '=');
   }
-  /* $query->fields('pl', array('field_pl_group_value'));
-    $query->fields('ch', array('field_channel_value')); */ //for understanding
+
   $query->addExpression("case when pp.field_party_packing_value = 'YES' then 1 else 0 END", "field_party_packing_value");
   $query->fields('pc', array('field_party_code_value'));
   return $query->execute()->fetchAllKeyed(0, 1);
 }
 
 function change_feeds_import_create_billing($data, &$context) {
+  
   if (!isset($context['sandbox']['progress'])) {
     $context['sandbox']['progress'] = 0;
   }
