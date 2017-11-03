@@ -252,17 +252,19 @@ function upload_signed_bill_callback_submit($form, &$form_state) {
          $node->status = 1; //(1 or 0): published or not
          $node->comment = 0; // 0 = comments disabled, 1 = read only, 2 = read/write
          $node->field_declaration_date[LANGUAGE_NONE][0]['value'] = date('Y-m-d');
+         $bill_type = 'Signed';
          if ($arg1 === 'bounced') {
             $node->field_cheque_number[$node->language][0]['value'] = $form_state['values']['cheque_no'][$bill_no];
             $node->field_cheque_date[$node->language][0]['value'] = $form_state['values']['cheque_date'][$bill_no];
             $node->field_cheque_amt[$node->language][0]['value'] = $form_state['values']['cheque_amt'][$bill_no];
+            $bill_type = 'Bounced';
          }
          $node->field_flag[LANGUAGE_NONE][0]['value'] = $arg1;
          $node->field_sales_bill_no_ref[LANGUAGE_NONE][0]['nid'] = $form_state['values']['title_and_nid_combo'][$bill_no];
 
          node_save($node);
 
-         drupal_set_message(t('Signed Bill Declared Successfully.'));
+         drupal_set_message(t("$bill_type Bill Declared Successfully."));
       }
       foreach ($form_state['values']['title_and_collection_nid_combo'][$bill_no] as $key1 => $val1) {
          $payment_col_node = node_load($val1);
