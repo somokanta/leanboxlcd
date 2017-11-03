@@ -54,6 +54,56 @@ function leanbox_payment_collection_feature_field_default_field_instances() {
     ),
   );
 
+  // Exported field_instance: 'node-payment_collection-field_amt_difference'.
+  $field_instances['node-payment_collection-field_amt_difference'] = array(
+    'bundle' => 'payment_collection',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'number',
+        'settings' => array(
+          'decimal_separator' => '.',
+          'prefix_suffix' => TRUE,
+          'scale' => 2,
+          'thousand_separator' => '',
+        ),
+        'type' => 'number_decimal',
+        'weight' => 17,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_amt_difference',
+    'label' => 'Amt Difference',
+    'required' => 0,
+    'settings' => array(
+      'default_value' => 'now',
+      'default_value2' => 'same',
+      'default_value_code' => '',
+      'default_value_code2' => '',
+      'max' => '',
+      'min' => '',
+      'prefix' => '',
+      'suffix' => '',
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 0,
+      'module' => 'number',
+      'settings' => array(),
+      'type' => 'number',
+      'weight' => 48,
+    ),
+  );
+
   // Exported field_instance: 'node-payment_collection-field_assigned_person'.
   $field_instances['node-payment_collection-field_assigned_person'] = array(
     'bundle' => 'payment_collection',
@@ -436,7 +486,7 @@ function leanbox_payment_collection_feature_field_default_field_instances() {
         'increment' => 15,
         'input_format' => 'm/d/y',
         'input_format_custom' => '',
-        'label_position' => 'above',
+        'label_position' => 'none',
         'no_fieldset' => 0,
         'text_parts' => array(),
         'year_range' => '-3:+3',
@@ -486,6 +536,43 @@ function leanbox_payment_collection_feature_field_default_field_instances() {
       ),
       'type' => 'text_textfield',
       'weight' => 43,
+    ),
+  );
+
+  // Exported field_instance: 'node-payment_collection-field_collection_status'.
+  $field_instances['node-payment_collection-field_collection_status'] = array(
+    'bundle' => 'payment_collection',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'list',
+        'settings' => array(),
+        'type' => 'list_default',
+        'weight' => 21,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_collection_status',
+    'label' => 'Collection Status',
+    'required' => 0,
+    'settings' => array(
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'options',
+      'settings' => array(),
+      'type' => 'options_buttons',
+      'weight' => 52,
     ),
   );
 
@@ -727,6 +814,99 @@ function leanbox_payment_collection_feature_field_default_field_instances() {
     ),
   );
 
+  // Exported field_instance: 'node-payment_collection-field_previous_cash_amt'.
+  $field_instances['node-payment_collection-field_previous_cash_amt'] = array(
+    'bundle' => 'payment_collection',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'number',
+        'settings' => array(
+          'decimal_separator' => '.',
+          'prefix_suffix' => TRUE,
+          'scale' => 2,
+          'thousand_separator' => '',
+        ),
+        'type' => 'number_decimal',
+        'weight' => 19,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_previous_cash_amt',
+    'label' => 'Previous Cash Amt',
+    'required' => 0,
+    'settings' => array(
+      'max' => '',
+      'min' => '',
+      'prefix' => '',
+      'suffix' => '',
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 0,
+      'module' => 'number',
+      'settings' => array(),
+      'type' => 'number',
+      'weight' => 50,
+    ),
+  );
+
+  // Exported field_instance:
+  // 'node-payment_collection-field_previous_cheque_amt'.
+  $field_instances['node-payment_collection-field_previous_cheque_amt'] = array(
+    'bundle' => 'payment_collection',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'number',
+        'settings' => array(
+          'decimal_separator' => '.',
+          'prefix_suffix' => TRUE,
+          'scale' => 2,
+          'thousand_separator' => '',
+        ),
+        'type' => 'number_decimal',
+        'weight' => 20,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_previous_cheque_amt',
+    'label' => 'Previous Cheque Amt',
+    'required' => 0,
+    'settings' => array(
+      'max' => '',
+      'min' => '',
+      'prefix' => '',
+      'suffix' => '',
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 0,
+      'module' => 'number',
+      'settings' => array(),
+      'type' => 'number',
+      'weight' => 51,
+    ),
+  );
+
   // Exported field_instance:
   // 'node-payment_collection-field_returned_bill_flag'.
   $field_instances['node-payment_collection-field_returned_bill_flag'] = array(
@@ -852,6 +1032,7 @@ function leanbox_payment_collection_feature_field_default_field_instances() {
 
   // Translatables
   // Included for use with string extractors like potx.
+  t('Amt Difference');
   t('Assigned Person');
   t('Assignment date');
   t('Body');
@@ -862,10 +1043,13 @@ function leanbox_payment_collection_feature_field_default_field_instances() {
   t('Collection Cheque Amt');
   t('Collection Cheque Number');
   t('Collection Cheque date');
+  t('Collection Status');
   t('Declaration date');
   t('File');
   t('File upload date');
   t('Flag');
+  t('Previous Cash Amt');
+  t('Previous Cheque Amt');
   t('Returned Bill Flag');
   t('field_amnt_difference');
   t('sales bill no ref');
