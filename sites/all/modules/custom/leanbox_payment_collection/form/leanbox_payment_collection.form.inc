@@ -387,7 +387,14 @@ function get_bill_details_using_bill_no_callback($bill_no, $dis_id, $arg1) {
 
       if ($arg1 === 'bounced') {
          foreach ($rows as $key => $value) {
-            $rows[$key]['cheque_no']['data'] = array(
+            $rows[$key]['cheque_amt']['data'] = array(
+              '#type' => 'textfield',
+              '#title' => t('Cheque amount'),
+              '#title_display' => 'invisible',
+              '#name' => "cheque_amt[$key]",
+              '#required' => TRUE,
+            );
+           $rows[$key]['cheque_no']['data'] = array(
               '#type' => 'textfield',
               '#title' => t('Cheque no'),
               '#title_display' => 'invisible',
@@ -400,13 +407,6 @@ function get_bill_details_using_bill_no_callback($bill_no, $dis_id, $arg1) {
               '#title_display' => 'invisible',
               '#name' => "cheque_date[$key]",
               '#attributes' => array('class' => array('cheque-date-field')),
-              '#required' => TRUE,
-            );
-            $rows[$key]['cheque_amt']['data'] = array(
-              '#type' => 'textfield',
-              '#title' => t('Cheque amount'),
-              '#title_display' => 'invisible',
-              '#name' => "cheque_amt[$key]",
               '#required' => TRUE,
             );
          }
