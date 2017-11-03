@@ -749,7 +749,6 @@ function get_party_packing_from_party_code($party_code = NULL, $distributor_id) 
 }
 
 function change_feeds_import_create_billing($data, &$context) {
-
   if (!isset($context['sandbox']['progress'])) {
     $context['sandbox']['progress'] = 0;
   }
