@@ -13,7 +13,7 @@ function modify_views_forms_form_alter(&$form, &$form_state, $form_id) {
 
   if ($form_id == 'editableviews_entity_form_signed_bills_upload') {
     if ($form['#view_display_name'] == 'page_2' || $form['#view_display_name'] == 'page_3') {
-      $select = array('' => '- Any -');
+      $select = array('' => '- In Stock -');
 
       $salesman = get_all_salesman_data("salesman", NULL);
       $salesman = $select + $salesman;
