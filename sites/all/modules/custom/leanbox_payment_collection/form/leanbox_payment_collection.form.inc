@@ -153,7 +153,7 @@ function upload_signed_bill_callback($form, &$form_state) {
 
          $form['bill_details_wrapper']['bill_remove'] = array(
            '#type' => 'submit',
-           '#value' => t('Remove Flag'),
+           '#value' => t('Remove Bill'),
            '#submit' => array('remove_signed_bounced_flag'),
            '#limit_validation_errors' => array(array('bill_details')),
            '#ajax' => array(
@@ -262,7 +262,7 @@ function upload_signed_bill_callback_submit($form, &$form_state) {
 
          node_save($node);
 
-         drupal_set_message(t('Collection content uploded sucessfully.'));
+         drupal_set_message(t('Signed Bill Declared Successfully.'));
       }
       foreach ($form_state['values']['title_and_collection_nid_combo'][$bill_no] as $key1 => $val1) {
          $payment_col_node = node_load($val1);
