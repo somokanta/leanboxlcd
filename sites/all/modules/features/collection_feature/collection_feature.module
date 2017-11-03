@@ -1,5 +1,7 @@
 <?php
 /**
  * @file
- * Drupal needs this blank file.
+ * Code for the Collection Feature feature.
  */
+
+include_once 'collection_feature.features.inc';
