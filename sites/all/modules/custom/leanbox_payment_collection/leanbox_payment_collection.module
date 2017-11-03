@@ -155,7 +155,6 @@ function leanbox_payment_collection_node_presave($node) {
         unset($node->field_cash_amt['und']);
         unset($node->field_collection_cheque_amt['und']);
         
-        dpm($node->field_field_amnt_difference['und'][0]['value']);
         if($node->field_field_amnt_difference['und'][0]['value'] == 0) {
           $node->field_collection_status['und'][0]['value'] = 'fully_collected';
         }
