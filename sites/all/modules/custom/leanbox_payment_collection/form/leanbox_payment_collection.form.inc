@@ -207,14 +207,26 @@ function upload_signed_bill_callback_validate($form, &$form_state) {
                }
             }
          }
-         if (empty($form_state['values']['cheque_no'][$bill_no]) && ($arg1 === 'bounced')) {
-            form_set_error('form', t("Cheque no for bill $bill_no is required."));
-         }
-         if (empty($form_state['values']['cheque_date'][$bill_no]) && ($arg1 === 'bounced')) {
-            form_set_error('form', t("Cheque date for bill $bill_no is required."));
-         }
-         if (empty($form_state['values']['cheque_amt'][$bill_no]) && ($arg1 === 'bounced')) {
-            form_set_error('form', t("Cheque amount for bill $bill_no is required."));
+         if ($arg1 === 'bounced') {
+            $cheque_no = $form_state['values']['cheque_no'][$bill_no];
+            $cheque_date = $form_state['values']['cheque_date'][$bill_no];
+            $cheque_amt = $form_state['values']['cheque_amt'][$bill_no];
+            
+            if (empty($cheque_no)) {
+               form_set_error('form', t("Cheque no for bill $bill_no is required."));
+            }
+            else if(!preg_match('/^[a-zA-Z]+[a-zA-Z0-9._]+$/', $cheque_no)) {
+               form_set_error('form', t("Cheque no for bill $bill_no should be alphanumeric."));
+            }
+            if (empty($cheque_date)) {
+               form_set_error('form', t("Cheque date for bill $bill_no is required."));
+            }
+            else if(empty(strtotime($cheque_date))) {
+               form_set_error('form', t("Cheque date for bill $bill_no should be in correct format ."));
+            }
+            if (empty($cheque_amt) || !is_numeric($cheque_amt)) {
+               form_set_error('form', t("Cheque amount for bill $bill_no is required and should be numeric"));
+            }
          }
       }
    }
