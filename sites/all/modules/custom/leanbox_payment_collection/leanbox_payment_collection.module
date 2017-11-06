@@ -142,6 +142,8 @@ function leanbox_payment_collection_node_presave($node) {
       unset($node->field_assigned_person['und']);
       unset($node->field_assignment_date['und']);
       unset($node->field_collection_cheque_date['und']);
+      unset($node->field_cash_amt['und']);
+      unset($node->field_collection_cheque_amt['und']);
     }
      
     
