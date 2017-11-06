@@ -10,6 +10,10 @@ function modify_views_forms_form_alter(&$form, &$form_state, $form_id) {
   if (isset($form['#node']) && !isset($form['#node']->nid) && in_array($form['#node']->type, $node_type)) {
     $form['#validate'][] = 'node_title_validate';
   }
+  
+  if($form_id == 'editableviews_entity_form_payment_collection') {
+    $form['#validate'][] = 'payment_collection_validate';
+  }
 
   if ($form_id == 'editableviews_entity_form_signed_bills_upload') {
     if ($form['#view_display_name'] == 'page_2' || $form['#view_display_name'] == 'page_3') {
@@ -127,6 +131,26 @@ function modify_views_forms_form_alter(&$form, &$form_state, $form_id) {
 //      $form['node'][$key][$field_count][LANGUAGE_NONE][0]['value']['#multiple'] = FALSE;
 //      $form['node'][$key][$field_count][LANGUAGE_NONE][0]['value']['#options'] = $multi_count;
 //      $form['node'][$key][$field_count][LANGUAGE_NONE][0]['value']['#size'] = 1;
+    }
+  }
+}
+
+function payment_collection_validate($form, &$form_state) {
+  foreach($form_state['values']['node'] as $nid => $form_data){
+    $cash_amt = $form_data['field_cash_amt']['und'][0]['value'];
+    $cheque_amt = $form_data['field_collection_cheque_amt']['und'][0]['value'];
+    $cheque_no = $form_data['field_collection_cheque_number']['und'][0]['value'];
+    $cheque_date = $form_data['field_collection_cheque_date']['und'][0]['value'];
+    $return_flag = $form_data['field_returned_bill_flag']['und'][0]['value'];
+
+
+    if( !empty($cheque_amt) && (empty($cheque_date) || empty($cheque_no)) || !empty($cheque_date) && (empty($cheque_amt) || empty($cheque_no)) || !empty($cheque_no) && (empty($cheque_amt) || empty($cheque_date)) ) {
+      $title = db_query("select title from node where nid = '".$nid."'")->fetchField();
+      form_set_error('form', t('Please fill cheque number, cheque amount and cheque date for bill '.$title));
+    }
+    if(!empty($return_flag) && (!empty($cheque_amt) || !empty($cash_amt))) {
+       $title = db_query("select title from node where nid = '".$nid."'")->fetchField();
+      form_set_error('form', t("Return flag is marked for $title. Please remove cash and cheque amount."));
     }
   }
 }
