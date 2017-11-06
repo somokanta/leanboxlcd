@@ -124,7 +124,7 @@ function leanbox_payment_collection_node_presave($node) {
     if(empty($node->field_assigned_person['und'][0]['value'])){
       unset($node->field_assignment_date['und'][0]['value']);
     }
-    if ($node->field_returned_bill_flag['und'][0]['value'] == 1) {
+    if ($node->original->field_returned_bill_flag['und'][0]['value'] != 1 && $node->field_returned_bill_flag['und'][0]['value'] == 1) {
       // New node Create
       $assign_history = new StdClass();
       $assign_history->type = 'assignment_history';
