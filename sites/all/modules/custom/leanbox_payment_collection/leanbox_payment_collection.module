@@ -103,7 +103,7 @@ function leanbox_payment_collection_node_presave($node) {
     if ($node->original->field_file['und'][0]['fid'] != $node->field_file['und'][0]['fid']) {
       $node->field_file_upload_date['und'][0]['value'] = date('Y-m-d');
     }
-    if ($node->original->field_assigned_person['und'][0]['value'] != $node->field_assigned_person['und'][0]['value'] && $node->field_assigned_person['und'][0]['value'] == 1) {
+    if ($node->original->field_assigned_person['und'][0]['value'] != $node->field_assigned_person['und'][0]['value']) {
       $node->field_assignment_date['und'][0]['value'] = date('Y-m-d');
       $node->field_returned_bill_flag['und'][0]['value'] = 0;
     }
