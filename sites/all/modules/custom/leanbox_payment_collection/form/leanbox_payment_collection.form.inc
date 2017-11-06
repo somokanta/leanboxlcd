@@ -229,11 +229,9 @@ function upload_signed_bill_callback_validate($form, &$form_state) {
                form_set_error('form', t("Cheque amount for bill $bill_no is required and should be numeric"));
             }
          }
-         else if($arg1 === 'signed') {
-            dpm($form_state['values'], 'dd');
+         else if ($arg1 === 'signed') {
             $remaining_amt = $form_state['values']['remaining_amt'][$bill_no];
-            dpm($remaining_amt);
-              if (empty($remaining_amt) || !is_numeric($remaining_amt)) {
+            if (empty($remaining_amt) || !is_numeric($remaining_amt)) {
                form_set_error('form', t("To be collected amount for bill $bill_no is required and should be numeric"));
             }
          }
@@ -263,7 +261,7 @@ function upload_signed_bill_callback_submit($form, &$form_state) {
          $node->field_declaration_date[LANGUAGE_NONE][0]['value'] = date('Y-m-d');
          $bill_type = 'Signed';
          $node->field_remaining_amt_collection[LANGUAGE_NONE][0]['value'] = $form_state['values']['remaining_amt'][$bill_no];
-         
+
          if ($arg1 === 'bounced') {
             $node->field_cheque_number[LANGUAGE_NONE][0]['value'] = $form_state['values']['cheque_no'][$bill_no];
             $node->field_cheque_date[LANGUAGE_NONE][0]['value'] = $form_state['values']['cheque_date'][$bill_no];
