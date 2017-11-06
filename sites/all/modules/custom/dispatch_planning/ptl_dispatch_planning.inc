@@ -16,7 +16,7 @@ function fetch_ptl_data($rs_code , $api_time) {
   $query->fields('p', array('ptl_job', 'rs_code', 'trip_id', 'vehicle', 'bill_number', 'loading_date', 'sequence_no', 'basepack_code', 'sku_code', 'product_name', 'MRP', 'TUR', 'sum_sales_qty'));
   $query->condition('p.api_flag', '0', '=');
   $query->condition('p.rs_code', $rs_code, '=');
-  $query->condition('p.id', $max_ptl_data, '<');
+  $query->condition('p.id', $max_ptl_data, '<=');
 
   $result = $query->execute()->fetchAll();
   
@@ -28,7 +28,7 @@ function fetch_ptl_data($rs_code , $api_time) {
       ->fields(array(
         'fetch_time' => $api_time,
       ))
-      ->condition('id', $max_ptl_data, '<')
+      ->condition('id', $max_ptl_data, '<=')
       ->condition('api_flag', '0', '=')
       ->condition('rs_code', $rs_code, '=')
       ->execute();
