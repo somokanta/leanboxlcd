@@ -5,6 +5,17 @@
  */
 
 /**
+ * Implements hook_preprocess_page
+ * @param type $vars
+ */
+function leanbox_payment_collection_preprocess_page(&$vars) {
+  $arg0 = arg(0);
+  if ($arg0 == 'payment-collection') {
+    drupal_add_js(drupal_get_path('module', 'leanbox_payment_collection') . '/js/leanbox_payment_collection.js');
+  }
+}
+
+/**
  * Implements hook_menu
  */
 function leanbox_payment_collection_menu() {
