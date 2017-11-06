@@ -790,9 +790,14 @@ function change_feeds_import_schema() {
       ),
     ),
     'primary key' => array('id'),
-  );
+     'indexes' => array(
+       'i_bill_number' => array('bill_number'),
+       'i_created_date' => array('created_date'),
+       'i_distributor_id' => array('distributor_id'),
+     ),
+   );
 
-  return $schema;
+   return $schema;
 }
 
 /**
