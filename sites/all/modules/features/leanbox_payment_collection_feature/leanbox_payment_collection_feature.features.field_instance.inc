@@ -908,6 +908,53 @@ function leanbox_payment_collection_feature_field_default_field_instances() {
   );
 
   // Exported field_instance:
+  // 'node-payment_collection-field_remaining_amt_collection'.
+  $field_instances['node-payment_collection-field_remaining_amt_collection'] = array(
+    'bundle' => 'payment_collection',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'number',
+        'settings' => array(
+          'decimal_separator' => '.',
+          'prefix_suffix' => TRUE,
+          'scale' => 2,
+          'thousand_separator' => '',
+        ),
+        'type' => 'number_decimal',
+        'weight' => 22,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_remaining_amt_collection',
+    'label' => 'remaining amt collection',
+    'required' => 0,
+    'settings' => array(
+      'max' => '',
+      'min' => '',
+      'prefix' => '',
+      'suffix' => '',
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 0,
+      'module' => 'number',
+      'settings' => array(),
+      'type' => 'number',
+      'weight' => 53,
+    ),
+  );
+
+  // Exported field_instance:
   // 'node-payment_collection-field_returned_bill_flag'.
   $field_instances['node-payment_collection-field_returned_bill_flag'] = array(
     'bundle' => 'payment_collection',
@@ -1052,6 +1099,7 @@ function leanbox_payment_collection_feature_field_default_field_instances() {
   t('Previous Cheque Amt');
   t('Returned Bill Flag');
   t('field_amnt_difference');
+  t('remaining amt collection');
   t('sales bill no ref');
   t('terminated bill flag');
 
