@@ -11,7 +11,6 @@
         var bill_value = $('.bill_value-'+nid).text();     
 
         var prev_cash_amt = $('.prev_cash_amt-'+nid).text();
-        console.log(prev_cash_amt);
         if(prev_cash_amt == '') {
           prev_cash_amt = 0;
         }
