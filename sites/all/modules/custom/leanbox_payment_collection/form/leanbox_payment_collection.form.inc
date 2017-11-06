@@ -174,6 +174,7 @@ function upload_signed_bill_callback($form, &$form_state) {
       $form['cheque_no'] = array('#type' => 'value');
       $form['cheque_date'] = array('#type' => 'value');
       $form['cheque_amt'] = array('#type' => 'value');
+      $form['remaining_amt'] = array('#type' => 'value');
    }
 
    return $form;
@@ -211,21 +212,29 @@ function upload_signed_bill_callback_validate($form, &$form_state) {
             $cheque_no = $form_state['values']['cheque_no'][$bill_no];
             $cheque_date = $form_state['values']['cheque_date'][$bill_no];
             $cheque_amt = $form_state['values']['cheque_amt'][$bill_no];
-            
+
             if (empty($cheque_no)) {
                form_set_error('form', t("Cheque no for bill $bill_no is required."));
             }
-            else if(preg_match('/[^a-z_\-0-9]/i', $cheque_no)) {
+            else if (preg_match('/[^a-z_\-0-9]/i', $cheque_no)) {
                form_set_error('form', t("Cheque no for bill $bill_no should be alphanumeric."));
             }
             if (empty($cheque_date)) {
                form_set_error('form', t("Cheque date for bill $bill_no is required."));
             }
-            else if(empty(strtotime($cheque_date))) {
+            else if (empty(strtotime($cheque_date))) {
                form_set_error('form', t("Cheque date for bill $bill_no should be in correct format ."));
             }
             if (empty($cheque_amt) || !is_numeric($cheque_amt)) {
                form_set_error('form', t("Cheque amount for bill $bill_no is required and should be numeric"));
+            }
+         }
+         else if($arg1 === 'signed') {
+            dpm($form_state['values'], 'dd');
+            $remaining_amt = $form_state['values']['remaining_amt'][$bill_no];
+            dpm($remaining_amt);
+              if (empty($remaining_amt) || !is_numeric($remaining_amt)) {
+               form_set_error('form', t("To be collected amount for bill $bill_no is required and should be numeric"));
             }
          }
       }
@@ -253,10 +262,13 @@ function upload_signed_bill_callback_submit($form, &$form_state) {
          $node->comment = 0; // 0 = comments disabled, 1 = read only, 2 = read/write
          $node->field_declaration_date[LANGUAGE_NONE][0]['value'] = date('Y-m-d');
          $bill_type = 'Signed';
+         $node->field_remaining_amt_collection[LANGUAGE_NONE][0]['value'] = $form_state['values']['remaining_amt'][$bill_no];
+         
          if ($arg1 === 'bounced') {
-            $node->field_cheque_number[$node->language][0]['value'] = $form_state['values']['cheque_no'][$bill_no];
-            $node->field_cheque_date[$node->language][0]['value'] = $form_state['values']['cheque_date'][$bill_no];
-            $node->field_cheque_amt[$node->language][0]['value'] = $form_state['values']['cheque_amt'][$bill_no];
+            $node->field_cheque_number[LANGUAGE_NONE][0]['value'] = $form_state['values']['cheque_no'][$bill_no];
+            $node->field_cheque_date[LANGUAGE_NONE][0]['value'] = $form_state['values']['cheque_date'][$bill_no];
+            $node->field_cheque_amt[LANGUAGE_NONE][0]['value'] = $form_state['values']['cheque_amt'][$bill_no];
+            $node->field_remaining_amt_collection[LANGUAGE_NONE][0]['value'] = $form_state['values']['cheque_amt'][$bill_no]; // should be same as cheque amt
             $bill_type = 'Bounced';
          }
          $node->field_flag[LANGUAGE_NONE][0]['value'] = $arg1;
@@ -375,7 +387,7 @@ function get_bill_details_using_bill_no_callback($bill_no, $dis_id, $arg1) {
            'cheque_amt' => 'Cheque amount',
            'cheque_no' => 'Cheque no',
            'cheque_date' => 'Cheque date',
-           );
+         );
       }
       else {
          $header = array(
@@ -385,7 +397,8 @@ function get_bill_details_using_bill_no_callback($bill_no, $dis_id, $arg1) {
            'Beatname' => 'Beat name',
            'Salesman' => 'Salesman',
            'Salesmancode' => 'Salesman code',
-           'Billvalue' => 'Bill value');
+           'Billvalue' => 'Bill value',
+           'remaining_amt' => 'To Be Collected Value');
       }
 
       if ($arg1 === 'bounced') {
@@ -397,7 +410,7 @@ function get_bill_details_using_bill_no_callback($bill_no, $dis_id, $arg1) {
               '#name' => "cheque_amt[$key]",
               '#required' => TRUE,
             );
-           $rows[$key]['cheque_no']['data'] = array(
+            $rows[$key]['cheque_no']['data'] = array(
               '#type' => 'textfield',
               '#title' => t('Cheque no'),
               '#title_display' => 'invisible',
@@ -410,6 +423,17 @@ function get_bill_details_using_bill_no_callback($bill_no, $dis_id, $arg1) {
               '#title_display' => 'invisible',
               '#name' => "cheque_date[$key]",
               '#attributes' => array('class' => array('cheque-date-field')),
+              '#required' => TRUE,
+            );
+         }
+      }
+      if ($arg1 === 'signed') {
+         foreach ($rows as $key => $value) {
+            $rows[$key]['remaining_amt']['data'] = array(
+              '#type' => 'textfield',
+              '#title' => t('To Be Collected Value'),
+              '#title_display' => 'invisible',
+              '#name' => "remaining_amt[$key]",
               '#required' => TRUE,
             );
          }
