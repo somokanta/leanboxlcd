@@ -11,9 +11,7 @@
  * @return array
  */
 function upload_signed_bill_callback($form, &$form_state) {
-   //jquery_ui_add("ui.datepicker");
-   //drupal_add_js(drupal_get_path('module', 'leanbox_payment_collection') . "/js/datepicker.js");
-   //drupal_add_library('system', 'ui.datepicker');
+
    $form = array();
    global $user;
 
@@ -59,46 +57,50 @@ function upload_signed_bill_callback($form, &$form_state) {
         '#prefix' => '<div id="bill-details">',
         '#suffix' => '</div>',
       );
-      if ($arg1 === 'signed') {
-         $form['bill_no_wrapper']['bill_no'] = array(
-           '#type' => 'textfield',
-           '#maxlength' => 20,
-           '#size' => 10,
-           //'#required' => TRUE,
-           '#autocomplete_path' => 'bill-no/list',
-           '#title' => t('Enter Bill No'),
-         );
-      }
-      else {
-         $form['bill_no_wrapper']['bill_no'] = array(
-           '#type' => 'textfield',
-           '#maxlength' => 20,
-           '#size' => 10,
-           //'#required' => TRUE,
-           '#autocomplete_path' => 'bill-no/list',
-           '#title' => t('Enter Bill No'),
-           '#ajax' => array(
-             'callback' => '_bounce_bill_no_ajax',
-             'wrapper' => 'itemlist-div',
-             'method' => 'replace',
-             'effect' => 'fade',
-           ),
-         );
-      }
-
-      $form['bill_no_wrapper']['add_bill'] = array(
-        '#type' => 'submit',
-        '#value' => t('Add Bill'),
+//      if ($arg1 === 'signed') {
+//         $form['bill_no_wrapper']['bill_no'] = array(
+//           '#type' => 'textfield',
+//           '#maxlength' => 20,
+//           '#size' => 10,
+//           //'#required' => TRUE,
+//           '#autocomplete_path' => 'bill-no/list',
+//           '#title' => t('Enter Bill No'),
+//         );
+//      }
+      // else {
+      $form['bill_no_wrapper']['bill_no'] = array(
+        '#type' => 'textfield',
+        '#maxlength' => 20,
+        '#size' => 10,
+        //'#required' => TRUE,
+        '#autocomplete_path' => 'bill-no/list',
+        '#title' => t('Enter Bill No'),
         '#ajax' => array(
-          'callback' => 'get_bill_details_using_bill_no',
+          'callback' => '_bounce_bill_no_ajax',
           'wrapper' => 'itemlist-div',
           'method' => 'replace',
           'effect' => 'fade',
         ),
-        '#submit' => array('add_bill_in_screen_submit'),
       );
+      //   }
+       $form['bill_no_wrapper']['bill_html'] = array(
+           '#prefix' => '<div>',
+           '#suffix' =>  '</div>',
+         );
+
       $bill_no = $form_state['input']['bill_no'];
       if (!empty($bill_no) && ($form_state['values']['arg'] == 'bounced') && (!isset($form_state['values']['title_and_nid_combo'][$bill_no]))) {
+         $form['bill_no_wrapper']['add_bill'] = array(
+           '#type' => 'submit',
+           '#value' => t('Add Bill'),
+           '#ajax' => array(
+             'callback' => 'get_bill_details_using_bill_no',
+             'wrapper' => 'itemlist-div',
+             'method' => 'replace',
+             'effect' => 'fade',
+           ),
+           '#submit' => array('add_bill_in_screen_submit'),
+         );
          // call function to get bill no already declared as bounced
 
          $res = leanbox_payment_collection_get_title_and_nid_combo($bill_no, $dis_id);
@@ -140,10 +142,40 @@ function upload_signed_bill_callback($form, &$form_state) {
             //}
          }
       }
+      else if (!empty($bill_no) && ($form_state['values']['arg'] == 'signed') && (!isset($form_state['values']['title_and_nid_combo'][$bill_no]))) {
+         $form['bill_no_wrapper']['add_bill'] = array(
+           '#type' => 'submit',
+           '#value' => t('Add Bill'),
+           '#ajax' => array(
+             'callback' => 'get_bill_details_using_bill_no',
+             'wrapper' => 'itemlist-div',
+             'method' => 'replace',
+             'effect' => 'fade',
+           ),
+           '#submit' => array('add_bill_in_screen_submit'),
+         );
+         // check if bill already declared as signed
+         $res = leanbox_payment_collection_get_title_and_nid_combo($bill_no, $dis_id);
+         // below array will be used in _sumbit function while node creation 
+         // for reference of bill no from sales register
+         foreach ($res as $key1 => $val1) {
+            if (!empty($val1['payment_collection_nid'])) {
+               $node = node_load($val1['payment_collection_nid']);
+               $node_flag = $node->field_flag['und'][0]['value'];
+               if ($node_flag === 'signed') {
+                  drupal_set_message(t("Bill no $bill_no already have signed flag."), 'error');
+                  $form['bill_no_wrapper']['add_bill']['#access'] = FALSE;
+               }
+            }
+         }
+      }
 
 
       if (!empty($form_state['bills']['header']) && !empty($form_state['bills']['rows'])) {
-
+         $form['bill_no_wrapper']['bill_details_html'] = array(
+           '#prefix' => '<div>',
+           '#suffix' =>  '</div>',
+         );
          $form['bill_details_wrapper']['bill_details'] = array(
            '#type' => 'tableselect',
            '#header' => $form_state['bills']['header'],
