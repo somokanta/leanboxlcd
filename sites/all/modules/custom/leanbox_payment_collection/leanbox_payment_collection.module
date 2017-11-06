@@ -103,8 +103,9 @@ function leanbox_payment_collection_node_presave($node) {
     if ($node->original->field_file['und'][0]['fid'] != $node->field_file['und'][0]['fid']) {
       $node->field_file_upload_date['und'][0]['value'] = date('Y-m-d');
     }
-    if ($node->original->field_assigned_person['und'][0]['value'] != $node->field_assigned_person['und'][0]['value']) {
+    if ($node->original->field_assigned_person['und'][0]['value'] != $node->field_assigned_person['und'][0]['value'] && $node->field_assigned_person['und'][0]['value'] == 1) {
       $node->field_assignment_date['und'][0]['value'] = date('Y-m-d');
+      $node->field_returned_bill_flag['und'][0]['value'] = 0;
     }
     if(empty($node->field_file['und'][0]['fid'])){
       unset($node->field_file_upload_date['und'][0]['value']);
@@ -113,15 +114,29 @@ function leanbox_payment_collection_node_presave($node) {
       unset($node->field_assignment_date['und'][0]['value']);
     }
     if ($node->field_returned_bill_flag['und'][0]['value'] == 1) {
+      // New node Create
+      $assign_history = new StdClass();
+      $assign_history->type = 'assignment_history';
+      node_object_prepare($assign_history); // Sets some defaults. Invokes hook_prepare() and hook_node_prepare().
+      $assign_history->language = LANGUAGE_NONE; // Or e.g. 'en' if locale is enabled
+      $assign_history->uid = $node->uid;
+      $assign_history->status = 1; //(1 or 0): published or not
+      $assign_history->comment = 0; // 0 = comments disabled, 1 = read only, 2 = read/write
+      $assign_history->title = $node->title;
+      $assign_history->field_assign_person['und'][0]['value'] = $node->field_assigned_person['und'][0]['value'];
+      $assign_history->field_assign_date['und'][0]['value'] = $node->field_assignment_date['und'][0]['value'];
+      $assign_history->field_returned_date['und'][0]['value'] = date("Y-m-d");
+      $assign_history->field_payment_collection_nid[$node->language][0]['nid'] = $node->nid;        
+      node_save($assign_history);
       unset($node->field_assigned_person['und']);
       unset($node->field_assignment_date['und']);
       unset($node->field_collection_cheque_date['und']);
     }
-    
+     
     
     if(arg(0) == 'payment-collection') {   
     // Create Collection History
-      if(!empty($node->field_cash_amt['und'][0]['value']) || !empty($node->field_collection_cheque_amt['und'][0]['value'])) {
+      if((!empty($node->field_cash_amt['und'][0]['value']) || !empty($node->field_collection_cheque_amt['und'][0]['value'])) && $node->field_returned_bill_flag['und'][0]['value'] != 1) {
         $collection_his = new StdClass();
         $collection_his->type = 'collection_history';
         node_object_prepare($collection_his); // Sets some defaults. Invokes hook_prepare() and hook_node_prepare().
