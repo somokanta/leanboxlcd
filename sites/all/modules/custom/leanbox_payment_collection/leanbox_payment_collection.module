@@ -171,14 +171,10 @@ function leanbox_payment_collection_node_presave($node) {
         $node->field_previous_cheque_amt['und'][0]['value'] = $node->field_previous_cheque_amt['und'][0]['value'] + $node->field_collection_cheque_amt['und'][0]['value'];
         
         //Get the bill value
-        $query = db_select('field_data_field_bill_value', 'b');
-        $query->fields('b', array('field_bill_value_value'));    
-        $query->condition('b.bundle', 'sales_register_data');
-        $query->condition('b.entity_id', $node->field_sales_bill_no_ref[$node->language][0]['nid']);
-        $bill_value_result = $query->execute()->fetchField();
+        $bill_value = $node->field_remaining_amt_collection['und'][0]['value'];
         
         //Update the difference field in payment collection
-        $node->field_field_amnt_difference['und'][0]['value'] = $bill_value_result - ($node->field_previous_cash_amt['und'][0]['value'] + $node->field_previous_cheque_amt['und'][0]['value']);
+        $node->field_field_amnt_difference['und'][0]['value'] = $bill_value - ($node->field_previous_cash_amt['und'][0]['value'] + $node->field_previous_cheque_amt['und'][0]['value']);
         
         unset($node->field_cash_amt['und']);
         unset($node->field_collection_cheque_amt['und']);
