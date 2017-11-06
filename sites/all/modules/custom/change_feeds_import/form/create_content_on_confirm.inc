@@ -515,6 +515,7 @@ function change_feeds_import_create_party_packing($max_billing_id_new, &$context
   if (!isset($context['sandbox']['progress'])) {
     $context['sandbox']['progress'] = 0;
   }
+  $party_create_flag = 0;
   $context['message'] = t('Now Creating Party Packing Data');
   global $user;
   $user_id = $user->uid;
@@ -627,9 +628,12 @@ function change_feeds_import_create_party_packing($max_billing_id_new, &$context
     $node->field_party_packing_type['und'][0]['value'] = $value['party_pack'];
     $node = node_submit($node); // Prepare node for saving
     node_save($node);
+    $party_create_flag = 1;
   }
-
-  $context['results']['party_packing'] = 'Party Packing Created';
+  
+  if($party_create_flag == 1){
+    $context['results']['party_packing'] = 'Party Packing Created';
+  }
 }
 
 ############## IN PROGRESS FUNCTION ##################
@@ -737,15 +741,14 @@ function get_party_packing_from_party_code($party_code = NULL, $distributor_id) 
   if (!is_null($party_code)) {
     $query->condition('pc.field_party_code_value', $party_code, '=');
   }
-  /* $query->fields('pl', array('field_pl_group_value'));
-    $query->fields('ch', array('field_channel_value')); */ //for understanding
+
   $query->addExpression("case when pp.field_party_packing_value = 'YES' then 1 else 0 END", "field_party_packing_value");
   $query->fields('pc', array('field_party_code_value'));
   return $query->execute()->fetchAllKeyed(0, 1);
 }
 
 function change_feeds_import_create_billing($data, &$context) {
-
+  
   if (!isset($context['sandbox']['progress'])) {
     $context['sandbox']['progress'] = 0;
   }
@@ -773,8 +776,8 @@ function change_feeds_import_create_billing($data, &$context) {
       $batch_id = $batch['id'];
 
       $message = "For Distributor: $distributor_id and Batch Id $batch_id \n" .
-      $message .= t('An error MSG:  %error_msg with arguments: @arguments', array('%error_msg' => $e->getMessage(), '@arguments' => print_r($value, TRUE)));
-      $params['subject'] = "Billing Upload Error in Batch Proccess ";
+      $message .= t('An error MSG:  %error_msg with arguments: @arguments', array('%error_msg' => $ex->getMessage(), '@arguments' => print_r($value, TRUE)));
+      $params['subject'] = "Billing Upload Error in Batch Proccess-sales-data ";
       $params['body'] = $message;
       $mail_to = "abhishek.r@iksula.com";
       $from = "MIS.HELPDESK@leanbox.in";

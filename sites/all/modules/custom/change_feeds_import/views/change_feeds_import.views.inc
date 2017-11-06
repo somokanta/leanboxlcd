@@ -441,7 +441,19 @@ function change_feeds_import_views_data() {
     ),
   );
 
-
+//  $base_table = 'custom_billing_data';
+//  $data[$base_table]['created_date'] = array(
+//   'group' => t('Date'),
+//   'title' => t('Date (!base_table)', array('!base_table' => $base_table)),
+//   'help' => t('Filter any Views !base_table date field.', array('!base_table' => $base_table)),
+//   'filter' => array(
+//     'handler' => 'date_views_filter_handler',
+//     'empty field name' => t('Undated'),
+//     'is date' => TRUE,
+//   //'skip base' => $base_table,
+//   ),
+//  );
+ 
   $data['custom_billing_data']['loading_date'] = array(
     'title' => t('loading_date'),
     'help' => t('The record loading_date.'),
@@ -459,6 +471,39 @@ function change_feeds_import_views_data() {
     ),
   );
 
+  
+  $data['custom_billing_data']['created_date'] = array(
+    'title' => t('custom billing created_date'),
+    'help' => t('The record created_date.'),
+    'field' => array(
+      'handler' => 'views_handler_field_date',
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort_date',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_date',
+       'is date' => TRUE,
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_filter_date',
+    ),
+  );
+  
+  
+ $base_table = 'custom_billing_data';
+ $data[$base_table]['date_filter'] = array(
+   'group' => t('Date'),
+   'title' => t('Date (!base_table)', array('!base_table' => $base_table)),
+   'help' => t('Filter any Views !base_table date field.', array('!base_table' => $base_table)),
+   'filter' => array(
+     'handler' => 'date_views_filter_handler',
+     'empty field name' => t('Undated'),
+     'is date' => TRUE,
+   //'skip base' => $base_table,
+   ),
+ );
+ 
 
   $data['custom_billing_data']['party_code'] = array(
     'title' => t('party_code'),
