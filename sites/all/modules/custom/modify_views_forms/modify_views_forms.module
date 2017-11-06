@@ -150,7 +150,7 @@ function payment_collection_validate($form, &$form_state) {
     }
     if(!empty($return_flag) && (!empty($cheque_amt) || !empty($cash_amt))) {
        $title = db_query("select title from node where nid = '".$nid."'")->fetchField();
-      form_set_error('form', t("Return flag is marked for $title please remove cash and cheque amount"));
+      form_set_error('form', t("Return flag is marked for $title. Please remove cash and cheque amount."));
     }
   }
 }
