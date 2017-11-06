@@ -11,12 +11,12 @@
         var bill_value = $('.bill_value-'+nid).text();     
 
         var prev_cash_amt = $('.prev_cash_amt-'+nid).text();
-        if(prev_cash_amt == NaN) {
+        if(prev_cash_amt == '') {
           prev_cash_amt = 0;
         }
 
         var prev_chq_amt = $('.prev_ch_amt-'+nid).text();
-        if(prev_chq_amt == NaN) {
+        if(prev_chq_amt == '') {
           prev_chq_amt = 0;
         }
         
@@ -30,7 +30,9 @@
         }
 
         var total = parseInt(bill_value) - (parseInt(cash_amt) + parseInt(ch_amt) + parseInt(prev_cash_amt) + parseInt(prev_chq_amt));
-        
+        if(total == NaN) {
+          total = '';
+        }
         $('#edit-node-'+nid+'-field-field-amnt-difference-und-0-value').val(total);
       });
        
