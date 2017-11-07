@@ -381,18 +381,40 @@ function new_custom_menus_menu_default_menu_links() {
     'customized' => 1,
     'parent_identifier' => 'menu-new-custom-menus_productivity:dashboard/Productivity',
   );
-  // Exported menu link: menu-new-custom-menus_bounced-check-declaration:upload-collection-bill/bounced.
-  $menu_links['menu-new-custom-menus_bounced-check-declaration:upload-collection-bill/bounced'] = array(
+  // Exported menu link: menu-new-custom-menus_bounced-cheque-assignment:bounced-cheques-assignment.
+  $menu_links['menu-new-custom-menus_bounced-cheque-assignment:bounced-cheques-assignment'] = array(
     'menu_name' => 'menu-new-custom-menus',
-    'link_path' => 'upload-collection-bill/bounced',
-    'router_path' => 'upload-collection-bill/bounced',
-    'link_title' => 'Bounced Check declaration',
+    'link_path' => 'bounced-cheques-assignment',
+    'router_path' => 'bounced-cheques-assignment',
+    'link_title' => 'Bounced Cheque Assignment',
     'options' => array(
       'attributes' => array(
         'title' => '',
       ),
       'alter' => TRUE,
-      'identifier' => 'menu-new-custom-menus_bounced-check-declaration:upload-collection-bill/bounced',
+      'identifier' => 'menu-new-custom-menus_bounced-cheque-assignment:bounced-cheques-assignment',
+    ),
+    'module' => 'menu',
+    'hidden' => 0,
+    'external' => 0,
+    'has_children' => 0,
+    'expanded' => 0,
+    'weight' => 0,
+    'customized' => 1,
+    'parent_identifier' => 'menu-new-custom-menus_collection-input:<nolink>',
+  );
+  // Exported menu link: menu-new-custom-menus_bounced-cheque-declaration:upload-collection-bill/bounced.
+  $menu_links['menu-new-custom-menus_bounced-cheque-declaration:upload-collection-bill/bounced'] = array(
+    'menu_name' => 'menu-new-custom-menus',
+    'link_path' => 'upload-collection-bill/bounced',
+    'router_path' => 'upload-collection-bill/bounced',
+    'link_title' => 'Bounced Cheque declaration',
+    'options' => array(
+      'attributes' => array(
+        'title' => '',
+      ),
+      'alter' => TRUE,
+      'identifier' => 'menu-new-custom-menus_bounced-cheque-declaration:upload-collection-bill/bounced',
     ),
     'module' => 'menu',
     'hidden' => 0,
@@ -415,28 +437,6 @@ function new_custom_menus_menu_default_menu_links() {
       ),
       'alter' => TRUE,
       'identifier' => 'menu-new-custom-menus_bounced-cheque-upload:bounced-cheques-upload',
-    ),
-    'module' => 'menu',
-    'hidden' => 0,
-    'external' => 0,
-    'has_children' => 0,
-    'expanded' => 0,
-    'weight' => 0,
-    'customized' => 1,
-    'parent_identifier' => 'menu-new-custom-menus_collection-input:<nolink>',
-  );
-  // Exported menu link: menu-new-custom-menus_bounced-cheques-assignment:bounced-cheques-assignment.
-  $menu_links['menu-new-custom-menus_bounced-cheques-assignment:bounced-cheques-assignment'] = array(
-    'menu_name' => 'menu-new-custom-menus',
-    'link_path' => 'bounced-cheques-assignment',
-    'router_path' => 'bounced-cheques-assignment',
-    'link_title' => 'Bounced Cheques Assignment',
-    'options' => array(
-      'attributes' => array(
-        'title' => '',
-      ),
-      'alter' => TRUE,
-      'identifier' => 'menu-new-custom-menus_bounced-cheques-assignment:bounced-cheques-assignment',
     ),
     'module' => 'menu',
     'hidden' => 0,
@@ -3472,9 +3472,9 @@ function new_custom_menus_menu_default_menu_links() {
   t('Bills Per Van');
   t('Bills Per Van (Central)');
   t('Bills Per Van DayWise');
-  t('Bounced Check declaration');
+  t('Bounced Cheque Assignment');
   t('Bounced Cheque Upload');
-  t('Bounced Cheques Assignment');
+  t('Bounced Cheque declaration');
   t('Central delivery data');
   t('Central report Authorisation');
   t('Centrally Managed');
