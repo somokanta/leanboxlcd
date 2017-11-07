@@ -164,12 +164,13 @@ function leanbox_payment_collection_node_presave($node) {
         $collection_his->field_collection_cheque_amount[$node->language][0]['value'] = $node->field_collection_cheque_amt['und'][0]['value'];
         $collection_his->field_collection_cheque_num[$node->language][0]['value'] = $node->field_collection_cheque_number['und'][0]['value'];
         $collection_his->field_collection_chq_date[$node->language][0]['value'] = $node->field_collection_cheque_date['und'][0]['value'];
+        $collection_his->field_collection_history_date[$node->language][0]['value'] = date('Y-m-d');
         node_save($collection_his);
         
         //Save the previous cash and cheque amount in payment collection content type    
         $node->field_previous_cash_amt['und'][0]['value'] = $node->field_previous_cash_amt['und'][0]['value'] + $node->field_cash_amt['und'][0]['value'];
         $node->field_previous_cheque_amt['und'][0]['value'] = $node->field_previous_cheque_amt['und'][0]['value'] + $node->field_collection_cheque_amt['und'][0]['value'];
-        
+        $node->field_collection_date[$node->language][0]['value'] = date('Y-m-d');
         //Get the bill value
         $bill_value = $node->field_remaining_amt_collection['und'][0]['value'];
         
