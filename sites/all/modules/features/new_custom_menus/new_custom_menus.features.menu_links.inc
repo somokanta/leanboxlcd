@@ -29,6 +29,28 @@ function new_custom_menus_menu_default_menu_links() {
     'customized' => 0,
     'parent_identifier' => 'management_menus:admin/structure/menu',
   );
+  // Exported menu link: menu-new-custom-menus_-impact-return-analysis-count-and-value-central:central-impact-return-analys.
+  $menu_links['menu-new-custom-menus_-impact-return-analysis-count-and-value-central:central-impact-return-analys'] = array(
+    'menu_name' => 'menu-new-custom-menus',
+    'link_path' => 'central-impact-return-analys',
+    'router_path' => 'central-impact-return-analys',
+    'link_title' => ' Impact Return Analysis Count and Value (Central)',
+    'options' => array(
+      'attributes' => array(
+        'title' => '',
+      ),
+      'alter' => TRUE,
+      'identifier' => 'menu-new-custom-menus_-impact-return-analysis-count-and-value-central:central-impact-return-analys',
+    ),
+    'module' => 'menu',
+    'hidden' => 0,
+    'external' => 0,
+    'has_children' => 0,
+    'expanded' => 0,
+    'weight' => 0,
+    'customized' => 1,
+    'parent_identifier' => 'menu-new-custom-menus_output:<nolink>',
+  );
   // Exported menu link: menu-new-custom-menus_address-confirmation:address/confirm.
   $menu_links['menu-new-custom-menus_address-confirmation:address/confirm'] = array(
     'menu_name' => 'menu-new-custom-menus',
@@ -181,6 +203,29 @@ function new_custom_menus_menu_default_menu_links() {
     'expanded' => 0,
     'weight' => 0,
     'customized' => 1,
+    'parent_identifier' => 'menu-new-custom-menus_progress:dashboard/Progress',
+  );
+  // Exported menu link: menu-new-custom-menus_bill-vs-trip-central:central-billing-report.
+  $menu_links['menu-new-custom-menus_bill-vs-trip-central:central-billing-report'] = array(
+    'menu_name' => 'menu-new-custom-menus',
+    'link_path' => 'central-billing-report',
+    'router_path' => 'central-billing-report',
+    'link_title' => 'Bill Vs Trip (Central)',
+    'options' => array(
+      'attributes' => array(
+        'title' => '',
+      ),
+      'alter' => TRUE,
+      'identifier' => 'menu-new-custom-menus_bill-vs-trip-central:central-billing-report',
+    ),
+    'module' => 'menu',
+    'hidden' => 0,
+    'external' => 0,
+    'has_children' => 0,
+    'expanded' => 0,
+    'weight' => 0,
+    'customized' => 1,
+    'parent_identifier' => 'menu-new-custom-menus_output:<nolink>',
   );
   // Exported menu link: menu-new-custom-menus_bill-vs-trip-report:billing-report.
   $menu_links['menu-new-custom-menus_bill-vs-trip-report:billing-report'] = array(
@@ -246,6 +291,7 @@ function new_custom_menus_menu_default_menu_links() {
     'expanded' => 0,
     'weight' => 0,
     'customized' => 1,
+    'parent_identifier' => 'menu-new-custom-menus_productivity:dashboard/Productivity',
   );
   // Exported menu link: menu-new-custom-menus_bills-per-person:leanbox-chart-details/bills_per_person.
   $menu_links['menu-new-custom-menus_bills-per-person:leanbox-chart-details/bills_per_person'] = array(
@@ -267,6 +313,29 @@ function new_custom_menus_menu_default_menu_links() {
     'expanded' => 0,
     'weight' => 0,
     'customized' => 1,
+    'parent_identifier' => 'menu-new-custom-menus_productivity:dashboard/Productivity',
+  );
+  // Exported menu link: menu-new-custom-menus_bills-per-van-central:leanbox-chart-details/central_dispatch_daywise.
+  $menu_links['menu-new-custom-menus_bills-per-van-central:leanbox-chart-details/central_dispatch_daywise'] = array(
+    'menu_name' => 'menu-new-custom-menus',
+    'link_path' => 'leanbox-chart-details/central_dispatch_daywise',
+    'router_path' => 'leanbox-chart-details/%',
+    'link_title' => 'Bills Per Van (Central)',
+    'options' => array(
+      'attributes' => array(
+        'title' => '',
+      ),
+      'alter' => TRUE,
+      'identifier' => 'menu-new-custom-menus_bills-per-van-central:leanbox-chart-details/central_dispatch_daywise',
+    ),
+    'module' => 'menu',
+    'hidden' => 0,
+    'external' => 0,
+    'has_children' => 0,
+    'expanded' => 0,
+    'weight' => 0,
+    'customized' => 1,
+    'parent_identifier' => 'menu-new-custom-menus_output:<nolink>',
   );
   // Exported menu link: menu-new-custom-menus_bills-per-van-daywise:leanbox-chart-details/bills_per_van_trends.
   $menu_links['menu-new-custom-menus_bills-per-van-daywise:leanbox-chart-details/bills_per_van_trends'] = array(
@@ -288,6 +357,7 @@ function new_custom_menus_menu_default_menu_links() {
     'expanded' => 0,
     'weight' => 0,
     'customized' => 1,
+    'parent_identifier' => 'menu-new-custom-menus_productivity:dashboard/Productivity',
   );
   // Exported menu link: menu-new-custom-menus_bills-per-van:leanbox-chart-details/bills_per_van.
   $menu_links['menu-new-custom-menus_bills-per-van:leanbox-chart-details/bills_per_van'] = array(
@@ -309,6 +379,7 @@ function new_custom_menus_menu_default_menu_links() {
     'expanded' => 0,
     'weight' => 0,
     'customized' => 1,
+    'parent_identifier' => 'menu-new-custom-menus_productivity:dashboard/Productivity',
   );
   // Exported menu link: menu-new-custom-menus_bounced-check-declaration:upload-collection-bill/bounced.
   $menu_links['menu-new-custom-menus_bounced-check-declaration:upload-collection-bill/bounced'] = array(
@@ -375,6 +446,49 @@ function new_custom_menus_menu_default_menu_links() {
     'weight' => 0,
     'customized' => 1,
     'parent_identifier' => 'menu-new-custom-menus_input:<nolink>',
+  );
+  // Exported menu link: menu-new-custom-menus_central-delivery-data:central-sales-delivery-table.
+  $menu_links['menu-new-custom-menus_central-delivery-data:central-sales-delivery-table'] = array(
+    'menu_name' => 'menu-new-custom-menus',
+    'link_path' => 'central-sales-delivery-table',
+    'router_path' => 'central-sales-delivery-table',
+    'link_title' => 'Central delivery data',
+    'options' => array(
+      'attributes' => array(
+        'title' => '',
+      ),
+      'alter' => TRUE,
+      'identifier' => 'menu-new-custom-menus_central-delivery-data:central-sales-delivery-table',
+    ),
+    'module' => 'menu',
+    'hidden' => 0,
+    'external' => 0,
+    'has_children' => 0,
+    'expanded' => 0,
+    'weight' => 0,
+    'customized' => 1,
+    'parent_identifier' => 'menu-new-custom-menus_output:<nolink>',
+  );
+  // Exported menu link: menu-new-custom-menus_central-report-authorisation:central-rs-configuration.
+  $menu_links['menu-new-custom-menus_central-report-authorisation:central-rs-configuration'] = array(
+    'menu_name' => 'menu-new-custom-menus',
+    'link_path' => 'central-rs-configuration',
+    'router_path' => 'central-rs-configuration',
+    'link_title' => 'Central report Authorisation',
+    'options' => array(
+      'attributes' => array(
+        'title' => '',
+      ),
+      'alter' => TRUE,
+      'identifier' => 'menu-new-custom-menus_central-report-authorisation:central-rs-configuration',
+    ),
+    'module' => 'menu',
+    'hidden' => 0,
+    'external' => 0,
+    'has_children' => 0,
+    'expanded' => 0,
+    'weight' => 0,
+    'customized' => 1,
   );
   // Exported menu link: menu-new-custom-menus_centrally-managed:<nolink>.
   $menu_links['menu-new-custom-menus_centrally-managed:<nolink>'] = array(
@@ -528,6 +642,49 @@ function new_custom_menus_menu_default_menu_links() {
     'customized' => 1,
     'parent_identifier' => 'menu-new-custom-menus_routing:<nolink>',
   );
+  // Exported menu link: menu-new-custom-menus_day-wise-bill-count-and-value:email/weekly-billing-report.
+  $menu_links['menu-new-custom-menus_day-wise-bill-count-and-value:email/weekly-billing-report'] = array(
+    'menu_name' => 'menu-new-custom-menus',
+    'link_path' => 'email/weekly-billing-report',
+    'router_path' => 'email/weekly-billing-report',
+    'link_title' => 'Day Wise Bill Count And Value',
+    'options' => array(
+      'attributes' => array(
+        'title' => '',
+      ),
+      'alter' => TRUE,
+      'identifier' => 'menu-new-custom-menus_day-wise-bill-count-and-value:email/weekly-billing-report',
+    ),
+    'module' => 'menu',
+    'hidden' => 0,
+    'external' => 0,
+    'has_children' => 0,
+    'expanded' => 0,
+    'weight' => 0,
+    'customized' => 1,
+    'parent_identifier' => 'menu-new-custom-menus_general-report:<nolink>',
+  );
+  // Exported menu link: menu-new-custom-menus_delete-billing-data:delete-billing-data.
+  $menu_links['menu-new-custom-menus_delete-billing-data:delete-billing-data'] = array(
+    'menu_name' => 'menu-new-custom-menus',
+    'link_path' => 'delete-billing-data',
+    'router_path' => 'delete-billing-data',
+    'link_title' => 'Delete Billing Data',
+    'options' => array(
+      'attributes' => array(
+        'title' => '',
+      ),
+      'alter' => TRUE,
+      'identifier' => 'menu-new-custom-menus_delete-billing-data:delete-billing-data',
+    ),
+    'module' => 'menu',
+    'hidden' => 0,
+    'external' => 0,
+    'has_children' => 0,
+    'expanded' => 0,
+    'weight' => 0,
+    'customized' => 1,
+  );
   // Exported menu link: menu-new-custom-menus_delivery-data:<nolink>.
   $menu_links['menu-new-custom-menus_delivery-data:<nolink>'] = array(
     'menu_name' => 'menu-new-custom-menus',
@@ -570,6 +727,7 @@ function new_custom_menus_menu_default_menu_links() {
     'expanded' => 0,
     'weight' => 0,
     'customized' => 1,
+    'parent_identifier' => 'menu-new-custom-menus_on-time-adherence:dashboard/ota',
   );
   // Exported menu link: menu-new-custom-menus_dispatch-planning:admin/dispatch-planning.
   $menu_links['menu-new-custom-menus_dispatch-planning:admin/dispatch-planning'] = array(
@@ -613,6 +771,28 @@ function new_custom_menus_menu_default_menu_links() {
     'expanded' => 1,
     'weight' => -48,
     'customized' => 1,
+  );
+  // Exported menu link: menu-new-custom-menus_download-central:central-outlet-master-report/view.
+  $menu_links['menu-new-custom-menus_download-central:central-outlet-master-report/view'] = array(
+    'menu_name' => 'menu-new-custom-menus',
+    'link_path' => 'central-outlet-master-report/view',
+    'router_path' => 'central-outlet-master-report/view',
+    'link_title' => 'Download (Central)',
+    'options' => array(
+      'attributes' => array(
+        'title' => '',
+      ),
+      'alter' => TRUE,
+      'identifier' => 'menu-new-custom-menus_download-central:central-outlet-master-report/view',
+    ),
+    'module' => 'menu',
+    'hidden' => 0,
+    'external' => 0,
+    'has_children' => 0,
+    'expanded' => 0,
+    'weight' => 0,
+    'customized' => 1,
+    'parent_identifier' => 'menu-new-custom-menus_outlet-master:<nolink>',
   );
   // Exported menu link: menu-new-custom-menus_download:area-hook-group-master-report.
   $menu_links['menu-new-custom-menus_download:area-hook-group-master-report'] = array(
@@ -1032,6 +1212,28 @@ function new_custom_menus_menu_default_menu_links() {
     'customized' => 1,
     'parent_identifier' => 'menu-new-custom-menus_sales-register-data:<nolink>',
   );
+  // Exported menu link: menu-new-custom-menus_download:sku7-code-master-report.
+  $menu_links['menu-new-custom-menus_download:sku7-code-master-report'] = array(
+    'menu_name' => 'menu-new-custom-menus',
+    'link_path' => 'sku7-code-master-report',
+    'router_path' => 'sku7-code-master-report',
+    'link_title' => 'Download',
+    'options' => array(
+      'attributes' => array(
+        'title' => '',
+      ),
+      'alter' => TRUE,
+      'identifier' => 'menu-new-custom-menus_download:sku7-code-master-report',
+    ),
+    'module' => 'menu',
+    'hidden' => 0,
+    'external' => 0,
+    'has_children' => 0,
+    'expanded' => 0,
+    'weight' => -49,
+    'customized' => 1,
+    'parent_identifier' => 'menu-new-custom-menus_sku7code-master:<nolink>',
+  );
   // Exported menu link: menu-new-custom-menus_download:van-pl-group-master-report.
   $menu_links['menu-new-custom-menus_download:van-pl-group-master-report'] = array(
     'menu_name' => 'menu-new-custom-menus',
@@ -1098,6 +1300,28 @@ function new_custom_menus_menu_default_menu_links() {
     'customized' => 1,
     'parent_identifier' => 'menu-new-custom-menus_output:<nolink>',
   );
+  // Exported menu link: menu-new-custom-menus_drs-report:drs-report.
+  $menu_links['menu-new-custom-menus_drs-report:drs-report'] = array(
+    'menu_name' => 'menu-new-custom-menus',
+    'link_path' => 'drs-report',
+    'router_path' => 'drs-report',
+    'link_title' => 'DRS Report',
+    'options' => array(
+      'attributes' => array(
+        'title' => '',
+      ),
+      'alter' => TRUE,
+      'identifier' => 'menu-new-custom-menus_drs-report:drs-report',
+    ),
+    'module' => 'menu',
+    'hidden' => 0,
+    'external' => 0,
+    'has_children' => 0,
+    'expanded' => 0,
+    'weight' => 0,
+    'customized' => 1,
+    'parent_identifier' => 'menu-new-custom-menus_output:<nolink>',
+  );
   // Exported menu link: menu-new-custom-menus_egir-data:<nolink>.
   $menu_links['menu-new-custom-menus_egir-data:<nolink>'] = array(
     'menu_name' => 'menu-new-custom-menus',
@@ -1119,6 +1343,28 @@ function new_custom_menus_menu_default_menu_links() {
     'weight' => -4,
     'customized' => 1,
     'parent_identifier' => 'menu-new-custom-menus_input:<nolink>',
+  );
+  // Exported menu link: menu-new-custom-menus_general-report:<nolink>.
+  $menu_links['menu-new-custom-menus_general-report:<nolink>'] = array(
+    'menu_name' => 'menu-new-custom-menus',
+    'link_path' => '<nolink>',
+    'router_path' => '<nolink>',
+    'link_title' => 'General Report',
+    'options' => array(
+      'attributes' => array(
+        'title' => '',
+      ),
+      'alter' => TRUE,
+      'identifier' => 'menu-new-custom-menus_general-report:<nolink>',
+    ),
+    'module' => 'menu',
+    'hidden' => 0,
+    'external' => 0,
+    'has_children' => 1,
+    'expanded' => 0,
+    'weight' => 7,
+    'customized' => 1,
+    'parent_identifier' => 'menu-new-custom-menus_centrally-managed:<nolink>',
   );
   // Exported menu link: menu-new-custom-menus_general:<nolink>.
   $menu_links['menu-new-custom-menus_general:<nolink>'] = array(
@@ -1273,6 +1519,94 @@ function new_custom_menus_menu_default_menu_links() {
     'weight' => -50,
     'customized' => 1,
   );
+  // Exported menu link: menu-new-custom-menus_metrics:<nolink>.
+  $menu_links['menu-new-custom-menus_metrics:<nolink>'] = array(
+    'menu_name' => 'menu-new-custom-menus',
+    'link_path' => '<nolink>',
+    'router_path' => '<nolink>',
+    'link_title' => 'Metrics',
+    'options' => array(
+      'attributes' => array(
+        'title' => '',
+      ),
+      'alter' => TRUE,
+      'identifier' => 'menu-new-custom-menus_metrics:<nolink>',
+    ),
+    'module' => 'menu',
+    'hidden' => 0,
+    'external' => 0,
+    'has_children' => 0,
+    'expanded' => 1,
+    'weight' => 0,
+    'customized' => 1,
+    'parent_identifier' => 'menu-new-custom-menus_dashboard:<nolink>',
+  );
+  // Exported menu link: menu-new-custom-menus_metrics:dashboard/Metrics.
+  $menu_links['menu-new-custom-menus_metrics:dashboard/Metrics'] = array(
+    'menu_name' => 'menu-new-custom-menus',
+    'link_path' => 'dashboard/Metrics',
+    'router_path' => 'dashboard/Metrics',
+    'link_title' => 'Metrics',
+    'options' => array(
+      'attributes' => array(
+        'title' => '',
+      ),
+      'alter' => TRUE,
+      'identifier' => 'menu-new-custom-menus_metrics:dashboard/Metrics',
+    ),
+    'module' => 'menu',
+    'hidden' => 0,
+    'external' => 0,
+    'has_children' => 0,
+    'expanded' => 1,
+    'weight' => 0,
+    'customized' => 1,
+    'parent_identifier' => 'menu-new-custom-menus_dashboard:<nolink>',
+  );
+  // Exported menu link: menu-new-custom-menus_on-time-adherence:<nolink>.
+  $menu_links['menu-new-custom-menus_on-time-adherence:<nolink>'] = array(
+    'menu_name' => 'menu-new-custom-menus',
+    'link_path' => '<nolink>',
+    'router_path' => '<nolink>',
+    'link_title' => 'On-Time Adherence',
+    'options' => array(
+      'attributes' => array(
+        'title' => '',
+      ),
+      'alter' => TRUE,
+      'identifier' => 'menu-new-custom-menus_on-time-adherence:<nolink>',
+    ),
+    'module' => 'menu',
+    'hidden' => 0,
+    'external' => 0,
+    'has_children' => 0,
+    'expanded' => 1,
+    'weight' => 0,
+    'customized' => 1,
+    'parent_identifier' => 'menu-new-custom-menus_dashboard:<nolink>',
+  );
+  // Exported menu link: menu-new-custom-menus_on-time-adherence:dashboard/ota.
+  $menu_links['menu-new-custom-menus_on-time-adherence:dashboard/ota'] = array(
+    'menu_name' => 'menu-new-custom-menus',
+    'link_path' => 'dashboard/ota',
+    'router_path' => 'dashboard/ota',
+    'link_title' => 'On-Time Adherence',
+    'options' => array(
+      'attributes' => array(
+        'title' => '',
+      ),
+      'alter' => TRUE,
+      'identifier' => 'menu-new-custom-menus_on-time-adherence:dashboard/ota',
+    ),
+    'module' => 'menu',
+    'hidden' => 0,
+    'external' => 0,
+    'has_children' => 0,
+    'expanded' => 1,
+    'weight' => 0,
+    'customized' => 1,
+    'parent_identifier' => 'menu-new-custom-menus_dashboard:<nolink>',
+  );
   // Exported menu link: menu-new-custom-menus_original-outlet-sequence:<nolink>.
   $menu_links['menu-new-custom-menus_original-outlet-sequence:<nolink>'] = array(
     'menu_name' => 'menu-new-custom-menus',
@@ -1292,6 +1626,28 @@ function new_custom_menus_menu_default_menu_links() {
     'has_children' => 1,
     'expanded' => 0,
     'weight' => -5,
+    'customized' => 1,
+    'parent_identifier' => 'menu-new-custom-menus_routing:<nolink>',
+  );
+  // Exported menu link: menu-new-custom-menus_original-outlet-sequencing-api:area-confirm-outlet-sequence.
+  $menu_links['menu-new-custom-menus_original-outlet-sequencing-api:area-confirm-outlet-sequence'] = array(
+    'menu_name' => 'menu-new-custom-menus',
+    'link_path' => 'area-confirm-outlet-sequence',
+    'router_path' => 'area-confirm-outlet-sequence',
+    'link_title' => 'Original Outlet Sequencing-API',
+    'options' => array(
+      'attributes' => array(
+        'title' => '',
+      ),
+      'alter' => TRUE,
+      'identifier' => 'menu-new-custom-menus_original-outlet-sequencing-api:area-confirm-outlet-sequence',
+    ),
+    'module' => 'menu',
+    'hidden' => 0,
+    'external' => 0,
+    'has_children' => 0,
+    'expanded' => 0,
+    'weight' => 0,
     'customized' => 1,
     'parent_identifier' => 'menu-new-custom-menus_routing:<nolink>',
   );
@@ -1315,6 +1671,29 @@ function new_custom_menus_menu_default_menu_links() {
     'expanded' => 1,
     'weight' => 0,
     'customized' => 1,
+    'parent_identifier' => 'menu-new-custom-menus_metrics:dashboard/Metrics',
+  );
+  // Exported menu link: menu-new-custom-menus_otif-value:leanbox-chart-details/otif.
+  $menu_links['menu-new-custom-menus_otif-value:leanbox-chart-details/otif'] = array(
+    'menu_name' => 'menu-new-custom-menus',
+    'link_path' => 'leanbox-chart-details/otif',
+    'router_path' => 'leanbox-chart-details/%',
+    'link_title' => 'OTIF Value',
+    'options' => array(
+      'attributes' => array(
+        'title' => '',
+      ),
+      'alter' => TRUE,
+      'identifier' => 'menu-new-custom-menus_otif-value:leanbox-chart-details/otif',
+    ),
+    'module' => 'menu',
+    'hidden' => 1,
+    'external' => 0,
+    'has_children' => 0,
+    'expanded' => 1,
+    'weight' => 0,
+    'customized' => 1,
+    'parent_identifier' => 'menu-new-custom-menus_metrics:dashboard/Metrics',
   );
   // Exported menu link: menu-new-custom-menus_outlet-area-hook:<nolink>.
   $menu_links['menu-new-custom-menus_outlet-area-hook:<nolink>'] = array(
@@ -1382,6 +1761,28 @@ function new_custom_menus_menu_default_menu_links() {
     'customized' => 1,
     'parent_identifier' => 'menu-new-custom-menus_warehousing:<nolink>',
   );
+  // Exported menu link: menu-new-custom-menus_party-packing-central:central-party-packing-report/view.
+  $menu_links['menu-new-custom-menus_party-packing-central:central-party-packing-report/view'] = array(
+    'menu_name' => 'menu-new-custom-menus',
+    'link_path' => 'central-party-packing-report/view',
+    'router_path' => 'central-party-packing-report/view',
+    'link_title' => 'Party Packing (Central)',
+    'options' => array(
+      'attributes' => array(
+        'title' => 'central-party-packing-report/view',
+      ),
+      'alter' => TRUE,
+      'identifier' => 'menu-new-custom-menus_party-packing-central:central-party-packing-report/view',
+    ),
+    'module' => 'menu',
+    'hidden' => 0,
+    'external' => 0,
+    'has_children' => 0,
+    'expanded' => 0,
+    'weight' => 0,
+    'customized' => 1,
+    'parent_identifier' => 'menu-new-custom-menus_output:<nolink>',
+  );
   // Exported menu link: menu-new-custom-menus_party-packing-on-time-adherence:leanbox-chart-details/pp_ota.
   $menu_links['menu-new-custom-menus_party-packing-on-time-adherence:leanbox-chart-details/pp_ota'] = array(
     'menu_name' => 'menu-new-custom-menus',
@@ -1402,6 +1803,7 @@ function new_custom_menus_menu_default_menu_links() {
     'expanded' => 0,
     'weight' => 0,
     'customized' => 1,
+    'parent_identifier' => 'menu-new-custom-menus_on-time-adherence:dashboard/ota',
   );
   // Exported menu link: menu-new-custom-menus_party-packing-productivity:leanbox-chart-details/party_packing_productivity.
   $menu_links['menu-new-custom-menus_party-packing-productivity:leanbox-chart-details/party_packing_productivity'] = array(
@@ -1423,6 +1825,7 @@ function new_custom_menus_menu_default_menu_links() {
     'expanded' => 0,
     'weight' => 0,
     'customized' => 1,
+    'parent_identifier' => 'menu-new-custom-menus_productivity:dashboard/Productivity',
   );
   // Exported menu link: menu-new-custom-menus_party-packing-van-progress:leanbox-chart-details/party_packing.
   $menu_links['menu-new-custom-menus_party-packing-van-progress:leanbox-chart-details/party_packing'] = array(
@@ -1444,6 +1847,7 @@ function new_custom_menus_menu_default_menu_links() {
     'expanded' => 0,
     'weight' => 0,
     'customized' => 1,
+    'parent_identifier' => 'menu-new-custom-menus_progress:dashboard/Progress',
   );
   // Exported menu link: menu-new-custom-menus_party-packing:party-packing-report/view.
   $menu_links['menu-new-custom-menus_party-packing:party-packing-report/view'] = array(
@@ -1467,6 +1871,28 @@ function new_custom_menus_menu_default_menu_links() {
     'customized' => 1,
     'parent_identifier' => 'menu-new-custom-menus_output:<nolink>',
   );
+  // Exported menu link: menu-new-custom-menus_payment-terms:<nolink>.
+  $menu_links['menu-new-custom-menus_payment-terms:<nolink>'] = array(
+    'menu_name' => 'menu-new-custom-menus',
+    'link_path' => '<nolink>',
+    'router_path' => '<nolink>',
+    'link_title' => 'Payment Terms',
+    'options' => array(
+      'attributes' => array(
+        'title' => '',
+      ),
+      'alter' => TRUE,
+      'identifier' => 'menu-new-custom-menus_payment-terms:<nolink>',
+    ),
+    'module' => 'menu',
+    'hidden' => 0,
+    'external' => 0,
+    'has_children' => 1,
+    'expanded' => 1,
+    'weight' => 0,
+    'customized' => 1,
+    'parent_identifier' => 'menu-new-custom-menus_general:<nolink>',
+  );
   // Exported menu link: menu-new-custom-menus_pdd-master:<nolink>.
   $menu_links['menu-new-custom-menus_pdd-master:<nolink>'] = array(
     'menu_name' => 'menu-new-custom-menus',
@@ -1489,6 +1915,28 @@ function new_custom_menus_menu_default_menu_links() {
     'customized' => 1,
     'parent_identifier' => 'menu-new-custom-menus_general:<nolink>',
   );
+  // Exported menu link: menu-new-custom-menus_pick-confirm:pick-confirm-report/view.
+  $menu_links['menu-new-custom-menus_pick-confirm:pick-confirm-report/view'] = array(
+    'menu_name' => 'menu-new-custom-menus',
+    'link_path' => 'pick-confirm-report/view',
+    'router_path' => 'pick-confirm-report/view',
+    'link_title' => 'Pick Confirm',
+    'options' => array(
+      'attributes' => array(
+        'title' => '',
+      ),
+      'alter' => TRUE,
+      'identifier' => 'menu-new-custom-menus_pick-confirm:pick-confirm-report/view',
+    ),
+    'module' => 'menu',
+    'hidden' => 0,
+    'external' => 0,
+    'has_children' => 0,
+    'expanded' => 0,
+    'weight' => 0,
+    'customized' => 1,
+    'parent_identifier' => 'menu-new-custom-menus_output:<nolink>',
+  );
   // Exported menu link: menu-new-custom-menus_picking-on-time-adherence-van-loose-:leanbox-chart-details/picking_ota.
   $menu_links['menu-new-custom-menus_picking-on-time-adherence-van-loose-:leanbox-chart-details/picking_ota'] = array(
     'menu_name' => 'menu-new-custom-menus',
@@ -1509,6 +1957,7 @@ function new_custom_menus_menu_default_menu_links() {
     'expanded' => 0,
     'weight' => 0,
     'customized' => 1,
+    'parent_identifier' => 'menu-new-custom-menus_on-time-adherence:dashboard/ota',
   );
   // Exported menu link: menu-new-custom-menus_picking-productivity:leanbox-chart-details/picking_productivity.
   $menu_links['menu-new-custom-menus_picking-productivity:leanbox-chart-details/picking_productivity'] = array(
@@ -1530,6 +1979,7 @@ function new_custom_menus_menu_default_menu_links() {
     'expanded' => 0,
     'weight' => 0,
     'customized' => 1,
+    'parent_identifier' => 'menu-new-custom-menus_productivity:dashboard/Productivity',
   );
   // Exported menu link: menu-new-custom-menus_picking-progress-task-bulk:leanbox-chart-details/picking_bulk.
   $menu_links['menu-new-custom-menus_picking-progress-task-bulk:leanbox-chart-details/picking_bulk'] = array(
@@ -1551,6 +2001,7 @@ function new_custom_menus_menu_default_menu_links() {
     'expanded' => 0,
     'weight' => 0,
     'customized' => 1,
+    'parent_identifier' => 'menu-new-custom-menus_progress:dashboard/Progress',
   );
   // Exported menu link: menu-new-custom-menus_picking-progress-task-loose:leanbox-chart-details/picking.
   $menu_links['menu-new-custom-menus_picking-progress-task-loose:leanbox-chart-details/picking'] = array(
@@ -1572,6 +2023,7 @@ function new_custom_menus_menu_default_menu_links() {
     'expanded' => 0,
     'weight' => 0,
     'customized' => 1,
+    'parent_identifier' => 'menu-new-custom-menus_progress:dashboard/Progress',
   );
   // Exported menu link: menu-new-custom-menus_picking:picking-report/view.
   $menu_links['menu-new-custom-menus_picking:picking-report/view'] = array(
@@ -1661,6 +2113,94 @@ function new_custom_menus_menu_default_menu_links() {
     'customized' => 1,
     'parent_identifier' => 'menu-new-custom-menus_centrally-managed:<nolink>',
   );
+  // Exported menu link: menu-new-custom-menus_productivity:<nolink>.
+  $menu_links['menu-new-custom-menus_productivity:<nolink>'] = array(
+    'menu_name' => 'menu-new-custom-menus',
+    'link_path' => '<nolink>',
+    'router_path' => '<nolink>',
+    'link_title' => 'Productivity',
+    'options' => array(
+      'attributes' => array(
+        'title' => '',
+      ),
+      'alter' => TRUE,
+      'identifier' => 'menu-new-custom-menus_productivity:<nolink>',
+    ),
+    'module' => 'menu',
+    'hidden' => 0,
+    'external' => 0,
+    'has_children' => 0,
+    'expanded' => 1,
+    'weight' => 0,
+    'customized' => 1,
+    'parent_identifier' => 'menu-new-custom-menus_dashboard:<nolink>',
+  );
+  // Exported menu link: menu-new-custom-menus_productivity:dashboard/Productivity.
+  $menu_links['menu-new-custom-menus_productivity:dashboard/Productivity'] = array(
+    'menu_name' => 'menu-new-custom-menus',
+    'link_path' => 'dashboard/Productivity',
+    'router_path' => 'dashboard/Productivity',
+    'link_title' => 'Productivity',
+    'options' => array(
+      'attributes' => array(
+        'title' => '',
+      ),
+      'alter' => TRUE,
+      'identifier' => 'menu-new-custom-menus_productivity:dashboard/Productivity',
+    ),
+    'module' => 'menu',
+    'hidden' => 0,
+    'external' => 0,
+    'has_children' => 0,
+    'expanded' => 1,
+    'weight' => 0,
+    'customized' => 1,
+    'parent_identifier' => 'menu-new-custom-menus_dashboard:<nolink>',
+  );
+  // Exported menu link: menu-new-custom-menus_progress:<nolink>.
+  $menu_links['menu-new-custom-menus_progress:<nolink>'] = array(
+    'menu_name' => 'menu-new-custom-menus',
+    'link_path' => '<nolink>',
+    'router_path' => '<nolink>',
+    'link_title' => 'Progress',
+    'options' => array(
+      'attributes' => array(
+        'title' => '',
+      ),
+      'alter' => TRUE,
+      'identifier' => 'menu-new-custom-menus_progress:<nolink>',
+    ),
+    'module' => 'menu',
+    'hidden' => 0,
+    'external' => 0,
+    'has_children' => 0,
+    'expanded' => 1,
+    'weight' => 0,
+    'customized' => 1,
+    'parent_identifier' => 'menu-new-custom-menus_dashboard:<nolink>',
+  );
+  // Exported menu link: menu-new-custom-menus_progress:dashboard/Progress.
+  $menu_links['menu-new-custom-menus_progress:dashboard/Progress'] = array(
+    'menu_name' => 'menu-new-custom-menus',
+    'link_path' => 'dashboard/Progress',
+    'router_path' => 'dashboard/Progress',
+    'link_title' => 'Progress',
+    'options' => array(
+      'attributes' => array(
+        'title' => '',
+      ),
+      'alter' => TRUE,
+      'identifier' => 'menu-new-custom-menus_progress:dashboard/Progress',
+    ),
+    'module' => 'menu',
+    'hidden' => 0,
+    'external' => 0,
+    'has_children' => 0,
+    'expanded' => 1,
+    'weight' => 0,
+    'customized' => 1,
+    'parent_identifier' => 'menu-new-custom-menus_dashboard:<nolink>',
+  );
   // Exported menu link: menu-new-custom-menus_resource-type-master:<nolink>.
   $menu_links['menu-new-custom-menus_resource-type-master:<nolink>'] = array(
     'menu_name' => 'menu-new-custom-menus',
@@ -1703,6 +2243,7 @@ function new_custom_menus_menu_default_menu_links() {
     'expanded' => 1,
     'weight' => 0,
     'customized' => 1,
+    'parent_identifier' => 'menu-new-custom-menus_metrics:dashboard/Metrics',
   );
   // Exported menu link: menu-new-custom-menus_routing:<nolink>.
   $menu_links['menu-new-custom-menus_routing:<nolink>'] = array(
@@ -1836,6 +2377,28 @@ function new_custom_menus_menu_default_menu_links() {
     'customized' => 1,
     'parent_identifier' => 'menu-new-custom-menus_input:<nolink>',
   );
+  // Exported menu link: menu-new-custom-menus_sku7code-master:<nolink>.
+  $menu_links['menu-new-custom-menus_sku7code-master:<nolink>'] = array(
+    'menu_name' => 'menu-new-custom-menus',
+    'link_path' => '<nolink>',
+    'router_path' => '<nolink>',
+    'link_title' => 'SKU7_Code Master',
+    'options' => array(
+      'attributes' => array(
+        'title' => '',
+      ),
+      'alter' => TRUE,
+      'identifier' => 'menu-new-custom-menus_sku7code-master:<nolink>',
+    ),
+    'module' => 'menu',
+    'hidden' => 0,
+    'external' => 0,
+    'has_children' => 1,
+    'expanded' => 0,
+    'weight' => 0,
+    'customized' => 1,
+    'parent_identifier' => 'menu-new-custom-menus_general:<nolink>',
+  );
   // Exported menu link: menu-new-custom-menus_static-beat-creation:delivery-beat.
   $menu_links['menu-new-custom-menus_static-beat-creation:delivery-beat'] = array(
     'menu_name' => 'menu-new-custom-menus',
@@ -1924,6 +2487,28 @@ function new_custom_menus_menu_default_menu_links() {
     'customized' => 1,
     'parent_identifier' => 'menu-new-custom-menus_output:<nolink>',
   );
+  // Exported menu link: menu-new-custom-menus_unloading-central:central-unloading-form/view.
+  $menu_links['menu-new-custom-menus_unloading-central:central-unloading-form/view'] = array(
+    'menu_name' => 'menu-new-custom-menus',
+    'link_path' => 'central-unloading-form/view',
+    'router_path' => 'central-unloading-form/view',
+    'link_title' => 'Unloading (Central)',
+    'options' => array(
+      'attributes' => array(
+        'title' => 'central-unloading-form/view',
+      ),
+      'alter' => TRUE,
+      'identifier' => 'menu-new-custom-menus_unloading-central:central-unloading-form/view',
+    ),
+    'module' => 'menu',
+    'hidden' => 0,
+    'external' => 0,
+    'has_children' => 0,
+    'expanded' => 0,
+    'weight' => 0,
+    'customized' => 1,
+    'parent_identifier' => 'menu-new-custom-menus_output:<nolink>',
+  );
   // Exported menu link: menu-new-custom-menus_unloading-on-time-adherence:leanbox-chart-details/unloading_ota.
   $menu_links['menu-new-custom-menus_unloading-on-time-adherence:leanbox-chart-details/unloading_ota'] = array(
     'menu_name' => 'menu-new-custom-menus',
@@ -1944,6 +2529,7 @@ function new_custom_menus_menu_default_menu_links() {
     'expanded' => 0,
     'weight' => 0,
     'customized' => 1,
+    'parent_identifier' => 'menu-new-custom-menus_on-time-adherence:dashboard/ota',
   );
   // Exported menu link: menu-new-custom-menus_unloading-progress:leanbox-chart-details/unloading.
   $menu_links['menu-new-custom-menus_unloading-progress:leanbox-chart-details/unloading'] = array(
@@ -1965,6 +2551,7 @@ function new_custom_menus_menu_default_menu_links() {
     'expanded' => 0,
     'weight' => 0,
     'customized' => 1,
+    'parent_identifier' => 'menu-new-custom-menus_progress:dashboard/Progress',
   );
   // Exported menu link: menu-new-custom-menus_unloading:unloading-form/view.
   $menu_links['menu-new-custom-menus_unloading:unloading-form/view'] = array(
@@ -2296,6 +2883,28 @@ function new_custom_menus_menu_default_menu_links() {
     'customized' => 1,
     'parent_identifier' => 'menu-new-custom-menus_sales-delivery-day-master:<nolink>',
   );
+  // Exported menu link: menu-new-custom-menus_upload:import/sku7_code_master.
+  $menu_links['menu-new-custom-menus_upload:import/sku7_code_master'] = array(
+    'menu_name' => 'menu-new-custom-menus',
+    'link_path' => 'import/sku7_code_master',
+    'router_path' => 'import/%',
+    'link_title' => 'Upload',
+    'options' => array(
+      'attributes' => array(
+        'title' => '',
+      ),
+      'alter' => TRUE,
+      'identifier' => 'menu-new-custom-menus_upload:import/sku7_code_master',
+    ),
+    'module' => 'menu',
+    'hidden' => 0,
+    'external' => 0,
+    'has_children' => 0,
+    'expanded' => 0,
+    'weight' => -50,
+    'customized' => 1,
+    'parent_identifier' => 'menu-new-custom-menus_sku7code-master:<nolink>',
+  );
   // Exported menu link: menu-new-custom-menus_upload:import/user_defined_outlet_sequence.
   $menu_links['menu-new-custom-menus_upload:import/user_defined_outlet_sequence'] = array(
     'menu_name' => 'menu-new-custom-menus',
@@ -2582,6 +3191,27 @@ function new_custom_menus_menu_default_menu_links() {
     'customized' => 1,
     'parent_identifier' => 'menu-new-custom-menus_input:<nolink>',
   );
+  // Exported menu link: menu-new-custom-menus_user-manual:user-manual.
+  $menu_links['menu-new-custom-menus_user-manual:user-manual'] = array(
+    'menu_name' => 'menu-new-custom-menus',
+    'link_path' => 'user-manual',
+    'router_path' => 'user-manual',
+    'link_title' => 'User Manual',
+    'options' => array(
+      'attributes' => array(
+        'title' => '',
+      ),
+      'alter' => TRUE,
+      'identifier' => 'menu-new-custom-menus_user-manual:user-manual',
+    ),
+    'module' => 'menu',
+    'hidden' => 0,
+    'external' => 0,
+    'has_children' => 0,
+    'expanded' => 0,
+    'weight' => 0,
+    'customized' => 1,
+  );
   // Exported menu link: menu-new-custom-menus_van-cld-report:van-cld-report.
   $menu_links['menu-new-custom-menus_van-cld-report:van-cld-report'] = array(
     'menu_name' => 'menu-new-custom-menus',
@@ -2782,6 +3412,7 @@ function new_custom_menus_menu_default_menu_links() {
 
   // Translatables
   // Included for use with string extractors like potx.
+  t(' Impact Return Analysis Count and Value (Central)');
   t('Address Confirmation');
   t('Agent Master');
   t('Area Hook Group Confirmation');
@@ -2789,48 +3420,64 @@ function new_custom_menus_menu_default_menu_links() {
   t('Area Hook Master');
   t('Assignment History');
   t('Bill Pendency');
+  t('Bill Vs Trip (Central)');
   t('Bill Vs Trip Report');
   t('Billing Data');
   t('Bills Per Person');
   t('Bills Per Person DayWise');
   t('Bills Per Van');
+  t('Bills Per Van (Central)');
   t('Bills Per Van DayWise');
   t('Bounced Check declaration');
   t('Bounced Cheque Upload');
   t('Bounced Cheques Assignment');
+  t('Central delivery data');
+  t('Central report Authorisation');
   t('Centrally Managed');
   t('Channel Master');
   t('Collection');
   t('Collection History');
   t('Collection Update');
   t('DRS PrintOut - 2');
+  t('DRS Report');
   t('Dashboard');
+  t('Day Wise Bill Count And Value');
   t('Day-Van Pl Group Area Grouping');
+  t('Delete Billing Data');
   t('Delivery Data');
   t('Dispatch');
   t('Dispatch On Time Adherence');
   t('Dispatch Planning');
   t('Download');
+  t('Download (Central)');
   t('EGIR Data');
   t('GPS Master');
   t('General');
+  t('General Report');
   t('HHT Master');
   t('Impact Delivery Report 2');
   t('Incremental Outlet Addition');
   t('Input');
   t('Masters');
+  t('Metrics');
   t('New Custom Menus');
   t('OTIF Day Wise');
+  t('OTIF Value');
+  t('On-Time Adherence');
   t('Original Outlet Sequence');
+  t('Original Outlet Sequencing-API');
   t('Outlet Area Hook');
   t('Outlet Master');
   t('Output');
   t('PDD Master');
   t('PL_Group Master');
   t('Party Packing');
+  t('Party Packing (Central)');
   t('Party Packing On Time Adherence');
   t('Party Packing Productivity');
   t('Party Packing Van Progress');
+  t('Payment Terms');
+  t('Pick Confirm');
   t('Picking');
   t('Picking On Time Adherence VAN Loose ');
   t('Picking Productivity');
@@ -2838,9 +3485,12 @@ function new_custom_menus_menu_default_menu_links() {
   t('Picking Progress Task Loose');
   t('Pricelist Group Master');
   t('Product Division Master');
+  t('Productivity');
+  t('Progress');
   t('Resource Type Master');
   t('Return Value %');
   t('Routing');
+  t('SKU7_Code Master');
   t('Sales Delivery Day Master');
   t('Sales Register Data');
   t('Signed Bill Assignment');
@@ -2851,11 +3501,13 @@ function new_custom_menus_menu_default_menu_links() {
   t('Trip Status Report');
   t('Trip Vs Van');
   t('Unloading');
+  t('Unloading (Central)');
   t('Unloading On Time Adherence');
   t('Unloading Progress');
   t('Upload');
   t('User Defined Outlet Sequence');
   t('User Defined Sequence Confirmation');
+  t('User Manual');
   t('Van Cld Report');
   t('Van PLG master');
   t('Van Planning Report');
