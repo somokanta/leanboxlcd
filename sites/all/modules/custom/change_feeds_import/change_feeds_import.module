@@ -2576,7 +2576,7 @@ function change_feeds_import_form_views_exposed_form_alter(&$form, &$form_state)
     }
   }
 
-  if ($form['#id'] == 'views-exposed-form-payment-collection-page' || $form['#id'] == 'views-exposed-form-signed-bills-upload-page-2' || $form['#id'] == 'views-exposed-form-signed-bills-upload-page-3') {
+  if ($form['#id'] == 'views-exposed-form-payment-collection-page' || $form['#id'] == 'views-exposed-form-signed-bills-upload-page-2' || $form['#id'] == 'views-exposed-form-signed-bills-upload-page-3' || $form['#id'] == 'views-exposed-form-bills-collection-page' || $form['#id'] == 'views-exposed-form-day-wise-collection-page') {
     $select = array('' => '- Any -');
     $salesman = get_all_salesman_data("salesman", NULL);
     $salesman = $select + $salesman;
@@ -2611,6 +2611,27 @@ function change_feeds_import_form_views_exposed_form_alter(&$form, &$form_state)
       $form['field_assignment_date_value']['min']['#title'] = 'Assignment Start Date';
       $form['field_assignment_date_value']['max']['#title'] = 'Assignment End Date';
     }
+    
+    if (isset($form['field_declaration_date_value'])) {
+      $form['field_declaration_date_value']['min']['#title'] = 'Declaration Start Date';
+      $form['field_declaration_date_value']['max']['#title'] = 'Declaration End Date';
+    }
+       
+    if (isset($form['field_file_upload_date_value'])) {
+      $form['field_file_upload_date_value']['min']['#title'] = 'Upload Start Date';
+      $form['field_file_upload_date_value']['max']['#title'] = 'Upload End Date';
+    }
+    
+    if (isset($form['field_collection_date_value'])) {
+      $form['field_collection_date_value']['min']['#title'] = 'Collection Start Date';
+      $form['field_collection_date_value']['max']['#title'] = 'Collection End Date';
+    }
+    
+    if (isset($form['field_collection_history_date_value'])) {
+      $form['field_collection_history_date_value']['min']['#title'] = 'Collection Start Date';
+      $form['field_collection_history_date_value']['max']['#title'] = 'Collection End Date';
+    }
+    
     if($form['#id'] == 'views-exposed-form-signed-bills-upload-page-3'){
       $form['field_cheque_date_value']['min']['#title'] = 'Cheque From Date';
       $form['field_cheque_date_value']['max']['#title'] = 'Cheque To Date';
