@@ -181,7 +181,7 @@ function new_custom_menus_menu_default_menu_links() {
     'expanded' => 0,
     'weight' => 0,
     'customized' => 1,
-    'parent_identifier' => 'menu-new-custom-menus_output:<nolink>',
+    'parent_identifier' => 'menu-new-custom-menus_collection-output:<nolink>',
   );
   // Exported menu link: menu-new-custom-menus_bill-pendency:leanbox-chart-details/bill_pendency.
   $menu_links['menu-new-custom-menus_bill-pendency:leanbox-chart-details/bill_pendency'] = array(
@@ -401,7 +401,7 @@ function new_custom_menus_menu_default_menu_links() {
     'expanded' => 1,
     'weight' => 0,
     'customized' => 1,
-    'parent_identifier' => 'menu-new-custom-menus_input:<nolink>',
+    'parent_identifier' => 'menu-new-custom-menus_collection-input:<nolink>',
   );
   // Exported menu link: menu-new-custom-menus_bounced-cheque-upload:bounced-cheques-upload.
   $menu_links['menu-new-custom-menus_bounced-cheque-upload:bounced-cheques-upload'] = array(
@@ -423,7 +423,7 @@ function new_custom_menus_menu_default_menu_links() {
     'expanded' => 0,
     'weight' => 0,
     'customized' => 1,
-    'parent_identifier' => 'menu-new-custom-menus_input:<nolink>',
+    'parent_identifier' => 'menu-new-custom-menus_collection-input:<nolink>',
   );
   // Exported menu link: menu-new-custom-menus_bounced-cheques-assignment:bounced-cheques-assignment.
   $menu_links['menu-new-custom-menus_bounced-cheques-assignment:bounced-cheques-assignment'] = array(
@@ -445,7 +445,7 @@ function new_custom_menus_menu_default_menu_links() {
     'expanded' => 0,
     'weight' => 0,
     'customized' => 1,
-    'parent_identifier' => 'menu-new-custom-menus_input:<nolink>',
+    'parent_identifier' => 'menu-new-custom-menus_collection-input:<nolink>',
   );
   // Exported menu link: menu-new-custom-menus_central-delivery-data:central-sales-delivery-table.
   $menu_links['menu-new-custom-menus_central-delivery-data:central-sales-delivery-table'] = array(
@@ -554,7 +554,51 @@ function new_custom_menus_menu_default_menu_links() {
     'expanded' => 0,
     'weight' => 0,
     'customized' => 1,
-    'parent_identifier' => 'menu-new-custom-menus_output:<nolink>',
+    'parent_identifier' => 'menu-new-custom-menus_collection-output:<nolink>',
+  );
+  // Exported menu link: menu-new-custom-menus_collection-input:<nolink>.
+  $menu_links['menu-new-custom-menus_collection-input:<nolink>'] = array(
+    'menu_name' => 'menu-new-custom-menus',
+    'link_path' => '<nolink>',
+    'router_path' => '<nolink>',
+    'link_title' => 'Collection Input',
+    'options' => array(
+      'attributes' => array(
+        'title' => '',
+      ),
+      'alter' => TRUE,
+      'identifier' => 'menu-new-custom-menus_collection-input:<nolink>',
+    ),
+    'module' => 'menu',
+    'hidden' => 0,
+    'external' => 0,
+    'has_children' => 1,
+    'expanded' => 0,
+    'weight' => 0,
+    'customized' => 1,
+    'parent_identifier' => 'menu-new-custom-menus_collection:<nolink>',
+  );
+  // Exported menu link: menu-new-custom-menus_collection-output:<nolink>.
+  $menu_links['menu-new-custom-menus_collection-output:<nolink>'] = array(
+    'menu_name' => 'menu-new-custom-menus',
+    'link_path' => '<nolink>',
+    'router_path' => '<nolink>',
+    'link_title' => 'Collection Output',
+    'options' => array(
+      'attributes' => array(
+        'title' => '',
+      ),
+      'alter' => TRUE,
+      'identifier' => 'menu-new-custom-menus_collection-output:<nolink>',
+    ),
+    'module' => 'menu',
+    'hidden' => 0,
+    'external' => 0,
+    'has_children' => 1,
+    'expanded' => 1,
+    'weight' => 0,
+    'customized' => 1,
+    'parent_identifier' => 'menu-new-custom-menus_collection:<nolink>',
   );
   // Exported menu link: menu-new-custom-menus_collection-update:payment-collection.
   $menu_links['menu-new-custom-menus_collection-update:payment-collection'] = array(
@@ -576,7 +620,7 @@ function new_custom_menus_menu_default_menu_links() {
     'expanded' => 0,
     'weight' => 0,
     'customized' => 1,
-    'parent_identifier' => 'menu-new-custom-menus_input:<nolink>',
+    'parent_identifier' => 'menu-new-custom-menus_collection-input:<nolink>',
   );
   // Exported menu link: menu-new-custom-menus_collection:<nolink>.
   $menu_links['menu-new-custom-menus_collection:<nolink>'] = array(
@@ -2331,7 +2375,7 @@ function new_custom_menus_menu_default_menu_links() {
     'expanded' => 0,
     'weight' => 0,
     'customized' => 1,
-    'parent_identifier' => 'menu-new-custom-menus_input:<nolink>',
+    'parent_identifier' => 'menu-new-custom-menus_collection-input:<nolink>',
   );
   // Exported menu link: menu-new-custom-menus_signed-bill-declaration:upload-collection-bill/signed.
   $menu_links['menu-new-custom-menus_signed-bill-declaration:upload-collection-bill/signed'] = array(
@@ -2353,7 +2397,7 @@ function new_custom_menus_menu_default_menu_links() {
     'expanded' => 0,
     'weight' => 0,
     'customized' => 1,
-    'parent_identifier' => 'menu-new-custom-menus_input:<nolink>',
+    'parent_identifier' => 'menu-new-custom-menus_collection-input:<nolink>',
   );
   // Exported menu link: menu-new-custom-menus_signed-bill-upload-:signed-bills-upload.
   $menu_links['menu-new-custom-menus_signed-bill-upload-:signed-bills-upload'] = array(
@@ -2375,7 +2419,7 @@ function new_custom_menus_menu_default_menu_links() {
     'expanded' => 0,
     'weight' => 0,
     'customized' => 1,
-    'parent_identifier' => 'menu-new-custom-menus_input:<nolink>',
+    'parent_identifier' => 'menu-new-custom-menus_collection-input:<nolink>',
   );
   // Exported menu link: menu-new-custom-menus_sku7code-master:<nolink>.
   $menu_links['menu-new-custom-menus_sku7code-master:<nolink>'] = array(
@@ -3437,6 +3481,8 @@ function new_custom_menus_menu_default_menu_links() {
   t('Channel Master');
   t('Collection');
   t('Collection History');
+  t('Collection Input');
+  t('Collection Output');
   t('Collection Update');
   t('DRS PrintOut - 2');
   t('DRS Report');
