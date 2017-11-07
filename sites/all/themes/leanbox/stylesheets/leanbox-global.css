@@ -1582,3 +1582,21 @@ header[id="page-header"] ul, header[id="page-header"] li {
 }
 
 /*End central billing report*/
+/*payment collection table css*/
+/* line 1578, ../sass/leanbox-global.scss */
+.view-id-payment_collection .table-responsive tbody tr td {
+  min-width: 50px;
+  text-align: center;
+  max-width: 160px;
+  word-break: break-all;
+}
+/* line 1584, ../sass/leanbox-global.scss */
+.view-id-payment_collection .table-responsive tbody tr .views-field-field-collection-cheque-date-editable {
+  width: 160px;
+}
+/* line 1588, ../sass/leanbox-global.scss */
+.view-id-payment_collection .table-responsive tbody tr .views-field-field-collection-cheque-date-editable .container-inline-date .form-item input {
+  width: 98% !important;
+  font-size: 13px;
+  padding: 0 3px;
+}

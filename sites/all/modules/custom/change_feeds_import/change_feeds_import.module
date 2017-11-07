@@ -411,8 +411,33 @@ function change_feeds_import_menu() {
     'access arguments' => array('Distributor Upload File'),
     'file' => 'form/discard_content.inc',
   );
+  
+  // setting form for views name used in hook_views_query_alter
+  $items['admin/config/views-name-conf'] = array(
+    'title' => 'Setting Form For Storing Views Name',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('storing_views_name_form'),
+    'access callback' => 'check_if_fr_role_user_admin',
+  );
 
   return $items;
+}
+
+// setting form for storing views name used in hook_views_query_alter
+function storing_views_name_form($form, $form_state) {
+
+  // Views Name
+  $form['views_name'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Views Name'),
+    '#description' => t('Above views will be skipped from default logged in distributor condition written in hook_views_query_alter.'),
+    '#default_value' => variable_get('views_name', ''),
+    '#required' => TRUE,
+    '#size' => 60,
+    '#maxlength' => 2048,
+  );
+
+  return system_settings_form($form);
 }
 
 function update_billing_data_thankyou() {
@@ -2133,12 +2158,14 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
   // Store distributor id in author in each node
   $distributor_id = change_feeds_import_get_distributor_id($user->uid);
 
-  $views_array = array('central_bill_trip', 'channel_master_central_report' , 
-    'central_picking_report' ,  'central_party_pack_report',  'central_unloading_form', 
-    'central_mobile_return_analysis', 'user_manual',  'hul_impact_delete', 'impact_delivery_cron_2', 
-    'impact_delivery_cron_evening_2', 'impact_party_master', 'impact_party_master_morning',
-    'hul_code_distributor_wise', 'van_stop_master_report', 'update_sales_register_party_code',
-    'central_outlet_master_report', 'central_party_pack_master_report','ofd_mailer','ofd_mailer2');
+  $all_views_names = variable_get('views_name');
+  $views_array = explode(",",$all_views_names);
+//  $views_array = array('central_bill_trip', 'channel_master_central_report' , 
+//    'central_picking_report' ,  'central_party_pack_report',  'central_unloading_form', 
+//    'central_mobile_return_analysis', 'user_manual',  'hul_impact_delete', 'impact_delivery_cron_2', 
+//    'impact_delivery_cron_evening_2', 'impact_party_master', 'impact_party_master_morning',
+//    'hul_code_distributor_wise', 'van_stop_master_report', 'update_sales_register_party_code',
+//    'central_outlet_master_report', 'central_party_pack_master_report','ofd_mailer','ofd_mailer2');
 
    if (!in_array($view->name, $views_array)) {
     foreach ($query->table_queue as $key => $val) {
@@ -2548,6 +2575,79 @@ function change_feeds_import_form_views_exposed_form_alter(&$form, &$form_state)
       $form['field_salesman_code_value']['#validated'] = TRUE;
     }
   }
+
+  if ($form['#id'] == 'views-exposed-form-payment-collection-page' || $form['#id'] == 'views-exposed-form-signed-bills-upload-page-2' || $form['#id'] == 'views-exposed-form-signed-bills-upload-page-3') {
+    $select = array('' => '- Any -');
+    $salesman = get_all_salesman_data("salesman", NULL);
+    $salesman = $select + $salesman;
+    if (isset($form['field_assigned_person_value'])) {
+      $form['field_assigned_person_value']['#type'] = 'select';
+      $form['field_assigned_person_value']['#size'] = null;
+      $form['field_assigned_person_value']['#options'] = $salesman;
+      $form['field_assigned_person_value']['#validated'] = TRUE;
+    }
+    if (isset($form['field_salesman_value'])) {
+      $form['field_salesman_value']['#type'] = 'select';
+      $form['field_salesman_value']['#size'] = null;
+      $form['field_salesman_value']['#options'] = $salesman;
+      $form['field_salesman_value']['#validated'] = TRUE;
+    }    
+    $beatname = get_all_beatname_data();
+    $beatname = $select + $beatname;
+    
+    if (isset($form['field_beat_name_value'])) {
+      $form['field_beat_name_value']['#type'] = 'select';
+      $form['field_beat_name_value']['#size'] = null;
+      $form['field_beat_name_value']['#options'] = $beatname;
+      $form['field_beat_name_value']['#validated'] = TRUE;
+    }
+    
+    if (isset($form['field_sr_bill_date_value'])) {
+      $form['field_sr_bill_date_value']['min']['#title'] = 'Bill Start Date';
+      $form['field_sr_bill_date_value']['max']['#title'] = 'Bill End Date';
+    }
+    
+    if (isset($form['field_assignment_date_value'])) {
+      $form['field_assignment_date_value']['min']['#title'] = 'Assignment Start Date';
+      $form['field_assignment_date_value']['max']['#title'] = 'Assignment End Date';
+    }
+    if($form['#id'] == 'views-exposed-form-signed-bills-upload-page-3'){
+      $form['field_cheque_date_value']['min']['#title'] = 'Cheque From Date';
+      $form['field_cheque_date_value']['max']['#title'] = 'Cheque To Date';
+    }
+    
+  }
+
+  if ($form['#id'] == 'views-exposed-form-signed-bills-upload-page' || $form['#id'] == 'views-exposed-form-signed-bills-upload-page-1') {
+    $options = array('=' => '- Any -','empty' => 'No','not empty' => 'Yes');
+    $form['field_file_fid']['value']['#type'] = 'hidden';
+    if (isset($form['field_file_fid_op'])) {
+      $form['field_file_fid_op']['#options'] = $options;
+    }
+    
+    if (isset($form['field_sr_bill_date_value'])) {
+      $form['field_sr_bill_date_value']['min']['#title'] = 'Bill Start Date';
+      $form['field_sr_bill_date_value']['max']['#title'] = 'Bill End Date';
+    }
+    
+    if (isset($form['field_declaration_date_value'])) {
+      $form['field_declaration_date_value']['min']['#title'] = 'Declaration Start Date';
+      $form['field_declaration_date_value']['max']['#title'] = 'Declaration End Date';
+    }
+    
+  }  
+}
+
+
+function get_all_beatname_data() {
+  $query = db_select('node', 'n');
+  $query->condition('n.type', 'outlet_master');
+  $query->addTag('node_uid');
+  $query->join('field_data_field_beat_name', 'bn', 'bn.entity_id = n.nid');
+  $query->fields('bn', array('field_beat_name_value'));
+  
+  $results = $query->execute()->fetchAllKeyed(0, 0);
+  return $results;
 }
 
 function get_all_salesman_data($salesman, $salesman_code) {

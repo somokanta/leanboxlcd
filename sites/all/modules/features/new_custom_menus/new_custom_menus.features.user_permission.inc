@@ -20,6 +20,7 @@ function new_custom_menus_user_default_permissions() {
       'RS Operator' => 'RS Operator',
       'Uploader' => 'Uploader',
       'administrator' => 'administrator',
+      'hul_admin' => 'hul_admin',
     ),
     'module' => 'change_feeds_import',
   );
@@ -31,6 +32,7 @@ function new_custom_menus_user_default_permissions() {
       'DFE' => 'DFE',
       'Distributor' => 'Distributor',
       'RS Admin' => 'RS Admin',
+      'RS Operator' => 'RS Operator',
       'Uploader' => 'Uploader',
       'administrator' => 'administrator',
     ),
@@ -66,6 +68,7 @@ function new_custom_menus_user_default_permissions() {
       'DFE' => 'DFE',
       'Distributor' => 'Distributor',
       'RS Admin' => 'RS Admin',
+      'RS Operator' => 'RS Operator',
       'Uploader' => 'Uploader',
     ),
     'module' => 'feeds',
@@ -75,8 +78,10 @@ function new_custom_menus_user_default_permissions() {
   $permissions['import channel_master feeds'] = array(
     'name' => 'import channel_master feeds',
     'roles' => array(
+      'DFE' => 'DFE',
       'Distributor' => 'Distributor',
       'RS Admin' => 'RS Admin',
+      'RS Operator' => 'RS Operator',
       'Uploader' => 'Uploader',
     ),
     'module' => 'feeds',
@@ -164,8 +169,10 @@ function new_custom_menus_user_default_permissions() {
   $permissions['import pl_group_master feeds'] = array(
     'name' => 'import pl_group_master feeds',
     'roles' => array(
+      'DFE' => 'DFE',
       'Distributor' => 'Distributor',
       'RS Admin' => 'RS Admin',
+      'RS Operator' => 'RS Operator',
       'Uploader' => 'Uploader',
     ),
     'module' => 'feeds',
@@ -180,6 +187,7 @@ function new_custom_menus_user_default_permissions() {
       'RS Admin' => 'RS Admin',
       'RS Operator' => 'RS Operator',
       'Uploader' => 'Uploader',
+      'leanbox' => 'leanbox',
     ),
     'module' => 'feeds',
   );
@@ -188,8 +196,10 @@ function new_custom_menus_user_default_permissions() {
   $permissions['import sales_delivery_day_importer feeds'] = array(
     'name' => 'import sales_delivery_day_importer feeds',
     'roles' => array(
+      'DFE' => 'DFE',
       'Distributor' => 'Distributor',
       'RS Admin' => 'RS Admin',
+      'RS Operator' => 'RS Operator',
       'Uploader' => 'Uploader',
     ),
     'module' => 'feeds',
@@ -239,9 +249,8 @@ function new_custom_menus_user_default_permissions() {
   $permissions['only-rs-admin-with-distributor'] = array(
     'name' => 'only-rs-admin-with-distributor',
     'roles' => array(
-      'Distributor' => 'Distributor',
+      'DFE' => 'DFE',
       'RS Admin' => 'RS Admin',
-      'Uploader' => 'Uploader',
       'administrator' => 'administrator',
     ),
     'module' => 'dispatch_planning',
@@ -254,6 +263,7 @@ function new_custom_menus_user_default_permissions() {
       'DFE' => 'DFE',
       'Distributor' => 'Distributor',
       'RS Admin' => 'RS Admin',
+      'RS Operator' => 'RS Operator',
       'Uploader' => 'Uploader',
     ),
     'module' => 'feeds',
@@ -346,6 +356,7 @@ function new_custom_menus_user_default_permissions() {
       'RS Admin' => 'RS Admin',
       'RS Operator' => 'RS Operator',
       'Uploader' => 'Uploader',
+      'leanbox' => 'leanbox',
     ),
     'module' => 'feeds',
   );
@@ -356,6 +367,7 @@ function new_custom_menus_user_default_permissions() {
     'roles' => array(
       'Distributor' => 'Distributor',
       'RS Admin' => 'RS Admin',
+      'RS Operator' => 'RS Operator',
       'Uploader' => 'Uploader',
     ),
     'module' => 'feeds',

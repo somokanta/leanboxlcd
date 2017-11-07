@@ -1268,3 +1268,4 @@ function change_feeds_import_update_7113() {
 function change_feeds_import_update_7115() {
   db_add_index('custom_billing_data', 'i_distributor_id', array('distributor_id'));
 }
+

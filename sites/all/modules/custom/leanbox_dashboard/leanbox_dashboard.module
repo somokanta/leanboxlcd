@@ -1582,7 +1582,9 @@ function leanbox_dashboard_user_presave(&$edit, $account, $category) {
   if (!empty($roles[$dfe_role_id]) || !empty($roles[$rs_role_id])) {
     $dis_id = $account->field_distributor['und'][0]['value'];
     $user_details = leanbox_dashboard_get_username_and_rs_code($dis_id);
-    $edit['field_name']['und'][0]['value'] = $user_details['field_name_value'];
+    if (empty($edit['field_name']['und'][0]['value'])) {
+      $edit['field_name']['und'][0]['value'] = $user_details['field_name_value'];
+    }
     $rs_code_default = $edit['field_third_party_username']['und'][0]['value'];
     if (empty($rs_code_default)) {
       $edit['field_third_party_username']['und'][0]['value'] = $user_details['field_third_party_username_value'];
