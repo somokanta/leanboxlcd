@@ -128,6 +128,25 @@ function leanbox_payment_collection_feature_views_default_views() {
   /* Display: Page */
   $handler = $view->new_display('page', 'Page', 'page');
   $handler->display->display_options['path'] = 'assignment-history';
+
+  /* Display: Data export */
+  $handler = $view->new_display('views_data_export', 'Data export', 'views_data_export_1');
+  $handler->display->display_options['pager']['type'] = 'none';
+  $handler->display->display_options['pager']['options']['offset'] = '0';
+  $handler->display->display_options['style_plugin'] = 'views_data_export_csv';
+  $handler->display->display_options['style_options']['provide_file'] = 1;
+  $handler->display->display_options['style_options']['parent_sort'] = 0;
+  $handler->display->display_options['style_options']['quote'] = 1;
+  $handler->display->display_options['style_options']['trim'] = 0;
+  $handler->display->display_options['style_options']['replace_newlines'] = 0;
+  $handler->display->display_options['style_options']['newline_token'] = '1';
+  $handler->display->display_options['style_options']['header'] = 1;
+  $handler->display->display_options['style_options']['keep_html'] = 0;
+  $handler->display->display_options['path'] = 'assignment-history-export';
+  $handler->display->display_options['displays'] = array(
+    'default' => 'default',
+    'page' => 'page',
+  );
   $export['assignment_history'] = $view;
 
   $view = new view();
@@ -365,11 +384,18 @@ function leanbox_payment_collection_feature_views_default_views() {
   $handler->display->display_options['fields']['field_returned_bill_flag_1']['id'] = 'field_returned_bill_flag_1';
   $handler->display->display_options['fields']['field_returned_bill_flag_1']['table'] = 'field_data_field_returned_bill_flag';
   $handler->display->display_options['fields']['field_returned_bill_flag_1']['field'] = 'field_returned_bill_flag';
+  $handler->display->display_options['fields']['field_returned_bill_flag_1']['type'] = 'list_key';
   /* Field: Content: terminated bill flag */
   $handler->display->display_options['fields']['field_terminated_bill_flag']['id'] = 'field_terminated_bill_flag';
   $handler->display->display_options['fields']['field_terminated_bill_flag']['table'] = 'field_data_field_terminated_bill_flag';
   $handler->display->display_options['fields']['field_terminated_bill_flag']['field'] = 'field_terminated_bill_flag';
   $handler->display->display_options['fields']['field_terminated_bill_flag']['label'] = 'Terminated';
+  $handler->display->display_options['fields']['field_terminated_bill_flag']['type'] = 'list_key';
+  $handler->display->display_options['fields']['field_terminated_bill_flag']['settings'] = array(
+    'data_element_key' => '',
+    'skip_safe' => 1,
+    'skip_empty_values' => 1,
+  );
   /* Sort criterion: Content: Post date */
   $handler->display->display_options['sorts']['created']['id'] = 'created';
   $handler->display->display_options['sorts']['created']['table'] = 'node';
@@ -418,6 +444,20 @@ function leanbox_payment_collection_feature_views_default_views() {
   /* Display: Page */
   $handler = $view->new_display('page', 'Page', 'page');
   $handler->display->display_options['path'] = 'bills-collection';
+
+  /* Display: Data export */
+  $handler = $view->new_display('views_data_export', 'Data export', 'views_data_export_1');
+  $handler->display->display_options['pager']['type'] = 'some';
+  $handler->display->display_options['pager']['options']['items_per_page'] = '0';
+  $handler->display->display_options['pager']['options']['offset'] = '0';
+  $handler->display->display_options['style_plugin'] = 'views_data_export_xls';
+  $handler->display->display_options['style_options']['provide_file'] = 1;
+  $handler->display->display_options['style_options']['parent_sort'] = 0;
+  $handler->display->display_options['path'] = 'bills-collection-export';
+  $handler->display->display_options['displays'] = array(
+    'page' => 'page',
+    'default' => 0,
+  );
   $export['bills_collection'] = $view;
 
   $view = new view();
@@ -556,6 +596,25 @@ function leanbox_payment_collection_feature_views_default_views() {
   /* Display: Page */
   $handler = $view->new_display('page', 'Page', 'page');
   $handler->display->display_options['path'] = 'collection-history';
+
+  /* Display: Data export */
+  $handler = $view->new_display('views_data_export', 'Data export', 'views_data_export_1');
+  $handler->display->display_options['pager']['type'] = 'none';
+  $handler->display->display_options['pager']['options']['offset'] = '0';
+  $handler->display->display_options['style_plugin'] = 'views_data_export_csv';
+  $handler->display->display_options['style_options']['provide_file'] = 1;
+  $handler->display->display_options['style_options']['parent_sort'] = 0;
+  $handler->display->display_options['style_options']['quote'] = 1;
+  $handler->display->display_options['style_options']['trim'] = 0;
+  $handler->display->display_options['style_options']['replace_newlines'] = 0;
+  $handler->display->display_options['style_options']['newline_token'] = '1';
+  $handler->display->display_options['style_options']['header'] = 1;
+  $handler->display->display_options['style_options']['keep_html'] = 0;
+  $handler->display->display_options['path'] = 'collection-history-export';
+  $handler->display->display_options['displays'] = array(
+    'default' => 'default',
+    'page' => 'page',
+  );
   $export['collection_history'] = $view;
 
   $view = new view();
@@ -592,15 +651,23 @@ function leanbox_payment_collection_feature_views_default_views() {
       'empty_column' => 0,
     ),
   );
-  /* Relationship: Content: Payment Collection Reference (field_payment_collection_referen) - reverse */
-  $handler->display->display_options['relationships']['reverse_field_payment_collection_referen_node']['id'] = 'reverse_field_payment_collection_referen_node';
-  $handler->display->display_options['relationships']['reverse_field_payment_collection_referen_node']['table'] = 'node';
-  $handler->display->display_options['relationships']['reverse_field_payment_collection_referen_node']['field'] = 'reverse_field_payment_collection_referen_node';
-  /* Relationship: Content: sales bill no ref (field_sales_bill_no_ref) - reverse */
-  $handler->display->display_options['relationships']['reverse_field_sales_bill_no_ref_node']['id'] = 'reverse_field_sales_bill_no_ref_node';
-  $handler->display->display_options['relationships']['reverse_field_sales_bill_no_ref_node']['table'] = 'node';
-  $handler->display->display_options['relationships']['reverse_field_sales_bill_no_ref_node']['field'] = 'reverse_field_sales_bill_no_ref_node';
-  $handler->display->display_options['relationships']['reverse_field_sales_bill_no_ref_node']['relationship'] = 'reverse_field_payment_collection_referen_node';
+  /* Relationship: Content: Payment Collection Reference (field_payment_collection_referen) */
+  $handler->display->display_options['relationships']['field_payment_collection_referen_nid']['id'] = 'field_payment_collection_referen_nid';
+  $handler->display->display_options['relationships']['field_payment_collection_referen_nid']['table'] = 'field_data_field_payment_collection_referen';
+  $handler->display->display_options['relationships']['field_payment_collection_referen_nid']['field'] = 'field_payment_collection_referen_nid';
+  $handler->display->display_options['relationships']['field_payment_collection_referen_nid']['delta'] = '-1';
+  /* Relationship: Content: sales bill no ref (field_sales_bill_no_ref) */
+  $handler->display->display_options['relationships']['field_sales_bill_no_ref_nid']['id'] = 'field_sales_bill_no_ref_nid';
+  $handler->display->display_options['relationships']['field_sales_bill_no_ref_nid']['table'] = 'field_data_field_sales_bill_no_ref';
+  $handler->display->display_options['relationships']['field_sales_bill_no_ref_nid']['field'] = 'field_sales_bill_no_ref_nid';
+  $handler->display->display_options['relationships']['field_sales_bill_no_ref_nid']['relationship'] = 'field_payment_collection_referen_nid';
+  $handler->display->display_options['relationships']['field_sales_bill_no_ref_nid']['delta'] = '-1';
+  /* Relationship: Content: party_code_reference (field_party_code_reference) */
+  $handler->display->display_options['relationships']['field_party_code_reference_nid']['id'] = 'field_party_code_reference_nid';
+  $handler->display->display_options['relationships']['field_party_code_reference_nid']['table'] = 'field_data_field_party_code_reference';
+  $handler->display->display_options['relationships']['field_party_code_reference_nid']['field'] = 'field_party_code_reference_nid';
+  $handler->display->display_options['relationships']['field_party_code_reference_nid']['relationship'] = 'field_sales_bill_no_ref_nid';
+  $handler->display->display_options['relationships']['field_party_code_reference_nid']['delta'] = '-1';
   /* Field: Content: Title */
   $handler->display->display_options['fields']['title']['id'] = 'title';
   $handler->display->display_options['fields']['title']['table'] = 'node';
@@ -608,11 +675,12 @@ function leanbox_payment_collection_feature_views_default_views() {
   $handler->display->display_options['fields']['title']['label'] = 'Bill No.';
   $handler->display->display_options['fields']['title']['alter']['word_boundary'] = FALSE;
   $handler->display->display_options['fields']['title']['alter']['ellipsis'] = FALSE;
+  $handler->display->display_options['fields']['title']['link_to_node'] = FALSE;
   /* Field: Content: Bill Date */
   $handler->display->display_options['fields']['field_sr_bill_date']['id'] = 'field_sr_bill_date';
   $handler->display->display_options['fields']['field_sr_bill_date']['table'] = 'field_data_field_sr_bill_date';
   $handler->display->display_options['fields']['field_sr_bill_date']['field'] = 'field_sr_bill_date';
-  $handler->display->display_options['fields']['field_sr_bill_date']['relationship'] = 'reverse_field_sales_bill_no_ref_node';
+  $handler->display->display_options['fields']['field_sr_bill_date']['relationship'] = 'field_sales_bill_no_ref_nid';
   $handler->display->display_options['fields']['field_sr_bill_date']['settings'] = array(
     'format_type' => 'sales_day',
     'fromto' => 'both',
@@ -621,18 +689,107 @@ function leanbox_payment_collection_feature_views_default_views() {
     'multiple_to' => '',
     'show_remaining_days' => 0,
   );
-  /* Field: Content: Payment Collection Reference */
-  $handler->display->display_options['fields']['field_payment_collection_referen']['id'] = 'field_payment_collection_referen';
-  $handler->display->display_options['fields']['field_payment_collection_referen']['table'] = 'field_data_field_payment_collection_referen';
-  $handler->display->display_options['fields']['field_payment_collection_referen']['field'] = 'field_payment_collection_referen';
-  $handler->display->display_options['fields']['field_payment_collection_referen']['relationship'] = 'reverse_field_payment_collection_referen_node';
-  $handler->display->display_options['fields']['field_payment_collection_referen']['type'] = 'node_reference_nid';
-  /* Field: Content: sales bill no ref */
-  $handler->display->display_options['fields']['field_sales_bill_no_ref']['id'] = 'field_sales_bill_no_ref';
-  $handler->display->display_options['fields']['field_sales_bill_no_ref']['table'] = 'field_data_field_sales_bill_no_ref';
-  $handler->display->display_options['fields']['field_sales_bill_no_ref']['field'] = 'field_sales_bill_no_ref';
-  $handler->display->display_options['fields']['field_sales_bill_no_ref']['relationship'] = 'reverse_field_sales_bill_no_ref_node';
-  $handler->display->display_options['fields']['field_sales_bill_no_ref']['type'] = 'node_reference_nid';
+  /* Field: Content: Flag */
+  $handler->display->display_options['fields']['field_flag']['id'] = 'field_flag';
+  $handler->display->display_options['fields']['field_flag']['table'] = 'field_data_field_flag';
+  $handler->display->display_options['fields']['field_flag']['field'] = 'field_flag';
+  $handler->display->display_options['fields']['field_flag']['relationship'] = 'field_payment_collection_referen_nid';
+  /* Field: Content: party_code_reference */
+  $handler->display->display_options['fields']['field_party_code_reference']['id'] = 'field_party_code_reference';
+  $handler->display->display_options['fields']['field_party_code_reference']['table'] = 'field_data_field_party_code_reference';
+  $handler->display->display_options['fields']['field_party_code_reference']['field'] = 'field_party_code_reference';
+  $handler->display->display_options['fields']['field_party_code_reference']['relationship'] = 'field_sales_bill_no_ref_nid';
+  $handler->display->display_options['fields']['field_party_code_reference']['label'] = 'Party Code';
+  $handler->display->display_options['fields']['field_party_code_reference']['type'] = 'node_reference_plain';
+  /* Field: Content: Beat Name */
+  $handler->display->display_options['fields']['field_beat_name']['id'] = 'field_beat_name';
+  $handler->display->display_options['fields']['field_beat_name']['table'] = 'field_data_field_beat_name';
+  $handler->display->display_options['fields']['field_beat_name']['field'] = 'field_beat_name';
+  $handler->display->display_options['fields']['field_beat_name']['relationship'] = 'field_party_code_reference_nid';
+  /* Field: Content: Salesman */
+  $handler->display->display_options['fields']['field_salesman']['id'] = 'field_salesman';
+  $handler->display->display_options['fields']['field_salesman']['table'] = 'field_data_field_salesman';
+  $handler->display->display_options['fields']['field_salesman']['field'] = 'field_salesman';
+  $handler->display->display_options['fields']['field_salesman']['relationship'] = 'field_party_code_reference_nid';
+  /* Field: Content: Salesman Code */
+  $handler->display->display_options['fields']['field_salesman_code']['id'] = 'field_salesman_code';
+  $handler->display->display_options['fields']['field_salesman_code']['table'] = 'field_data_field_salesman_code';
+  $handler->display->display_options['fields']['field_salesman_code']['field'] = 'field_salesman_code';
+  $handler->display->display_options['fields']['field_salesman_code']['relationship'] = 'field_party_code_reference_nid';
+  /* Field: Content: Bill Value */
+  $handler->display->display_options['fields']['field_bill_value']['id'] = 'field_bill_value';
+  $handler->display->display_options['fields']['field_bill_value']['table'] = 'field_data_field_bill_value';
+  $handler->display->display_options['fields']['field_bill_value']['field'] = 'field_bill_value';
+  $handler->display->display_options['fields']['field_bill_value']['relationship'] = 'field_sales_bill_no_ref_nid';
+  /* Field: Content: remaining amt collection */
+  $handler->display->display_options['fields']['field_remaining_amt_collection']['id'] = 'field_remaining_amt_collection';
+  $handler->display->display_options['fields']['field_remaining_amt_collection']['table'] = 'field_data_field_remaining_amt_collection';
+  $handler->display->display_options['fields']['field_remaining_amt_collection']['field'] = 'field_remaining_amt_collection';
+  $handler->display->display_options['fields']['field_remaining_amt_collection']['relationship'] = 'field_payment_collection_referen_nid';
+  $handler->display->display_options['fields']['field_remaining_amt_collection']['label'] = 'To Be Collected';
+  $handler->display->display_options['fields']['field_remaining_amt_collection']['settings'] = array(
+    'thousand_separator' => '',
+    'decimal_separator' => '.',
+    'scale' => '2',
+    'prefix_suffix' => 1,
+  );
+  /* Field: Content: Collection Cash Amt */
+  $handler->display->display_options['fields']['field_collection_cash_amount']['id'] = 'field_collection_cash_amount';
+  $handler->display->display_options['fields']['field_collection_cash_amount']['table'] = 'field_data_field_collection_cash_amount';
+  $handler->display->display_options['fields']['field_collection_cash_amount']['field'] = 'field_collection_cash_amount';
+  $handler->display->display_options['fields']['field_collection_cash_amount']['label'] = 'Cash Collection Amt';
+  $handler->display->display_options['fields']['field_collection_cash_amount']['settings'] = array(
+    'thousand_separator' => '',
+    'decimal_separator' => '.',
+    'scale' => '2',
+    'prefix_suffix' => 1,
+  );
+  /* Field: Content: Collection Cheque Amt */
+  $handler->display->display_options['fields']['field_collection_cheque_amount']['id'] = 'field_collection_cheque_amount';
+  $handler->display->display_options['fields']['field_collection_cheque_amount']['table'] = 'field_data_field_collection_cheque_amount';
+  $handler->display->display_options['fields']['field_collection_cheque_amount']['field'] = 'field_collection_cheque_amount';
+  $handler->display->display_options['fields']['field_collection_cheque_amount']['label'] = 'Cheque Collection Amt';
+  $handler->display->display_options['fields']['field_collection_cheque_amount']['settings'] = array(
+    'thousand_separator' => '',
+    'decimal_separator' => '.',
+    'scale' => '2',
+    'prefix_suffix' => 1,
+  );
+  /* Field: Content: Collection Cheque no */
+  $handler->display->display_options['fields']['field_collection_cheque_num']['id'] = 'field_collection_cheque_num';
+  $handler->display->display_options['fields']['field_collection_cheque_num']['table'] = 'field_data_field_collection_cheque_num';
+  $handler->display->display_options['fields']['field_collection_cheque_num']['field'] = 'field_collection_cheque_num';
+  $handler->display->display_options['fields']['field_collection_cheque_num']['label'] = 'Cheque No.';
+  /* Field: Content: Collection Cheque Date */
+  $handler->display->display_options['fields']['field_collection_chq_date']['id'] = 'field_collection_chq_date';
+  $handler->display->display_options['fields']['field_collection_chq_date']['table'] = 'field_data_field_collection_chq_date';
+  $handler->display->display_options['fields']['field_collection_chq_date']['field'] = 'field_collection_chq_date';
+  $handler->display->display_options['fields']['field_collection_chq_date']['label'] = 'Cheque Date';
+  $handler->display->display_options['fields']['field_collection_chq_date']['settings'] = array(
+    'format_type' => 'sales_day',
+    'fromto' => 'both',
+    'multiple_number' => '',
+    'multiple_from' => '',
+    'multiple_to' => '',
+    'show_remaining_days' => 0,
+  );
+  /* Field: Content: Assigned To */
+  $handler->display->display_options['fields']['field_assign_to']['id'] = 'field_assign_to';
+  $handler->display->display_options['fields']['field_assign_to']['table'] = 'field_data_field_assign_to';
+  $handler->display->display_options['fields']['field_assign_to']['field'] = 'field_assign_to';
+  /* Field: Content: Collection history date */
+  $handler->display->display_options['fields']['field_collection_history_date']['id'] = 'field_collection_history_date';
+  $handler->display->display_options['fields']['field_collection_history_date']['table'] = 'field_data_field_collection_history_date';
+  $handler->display->display_options['fields']['field_collection_history_date']['field'] = 'field_collection_history_date';
+  $handler->display->display_options['fields']['field_collection_history_date']['label'] = 'Collection Date';
+  $handler->display->display_options['fields']['field_collection_history_date']['settings'] = array(
+    'format_type' => 'sales_day',
+    'fromto' => 'both',
+    'multiple_number' => '',
+    'multiple_from' => '',
+    'multiple_to' => '',
+    'show_remaining_days' => 0,
+  );
   /* Sort criterion: Content: Post date */
   $handler->display->display_options['sorts']['created']['id'] = 'created';
   $handler->display->display_options['sorts']['created']['table'] = 'node';
@@ -652,10 +809,81 @@ function leanbox_payment_collection_feature_views_default_views() {
   $handler->display->display_options['filters']['type']['value'] = array(
     'collection_history' => 'collection_history',
   );
+  $handler->display->display_options['filters']['type']['group'] = 1;
+  /* Filter criterion: Content: Title */
+  $handler->display->display_options['filters']['title']['id'] = 'title';
+  $handler->display->display_options['filters']['title']['table'] = 'node';
+  $handler->display->display_options['filters']['title']['field'] = 'title';
+  $handler->display->display_options['filters']['title']['group'] = 1;
+  $handler->display->display_options['filters']['title']['exposed'] = TRUE;
+  $handler->display->display_options['filters']['title']['expose']['operator_id'] = 'title_op';
+  $handler->display->display_options['filters']['title']['expose']['label'] = 'Bill No.';
+  $handler->display->display_options['filters']['title']['expose']['operator'] = 'title_op';
+  $handler->display->display_options['filters']['title']['expose']['identifier'] = 'title';
+  $handler->display->display_options['filters']['title']['expose']['remember_roles'] = array(
+    2 => '2',
+    1 => 0,
+    3 => 0,
+    4 => 0,
+    5 => 0,
+    6 => 0,
+    7 => 0,
+    8 => 0,
+    9 => 0,
+    10 => 0,
+    11 => 0,
+    12 => 0,
+    14 => 0,
+    13 => 0,
+  );
+  /* Filter criterion: Content: Collection history date (field_collection_history_date) */
+  $handler->display->display_options['filters']['field_collection_history_date_value']['id'] = 'field_collection_history_date_value';
+  $handler->display->display_options['filters']['field_collection_history_date_value']['table'] = 'field_data_field_collection_history_date';
+  $handler->display->display_options['filters']['field_collection_history_date_value']['field'] = 'field_collection_history_date_value';
+  $handler->display->display_options['filters']['field_collection_history_date_value']['operator'] = 'between';
+  $handler->display->display_options['filters']['field_collection_history_date_value']['group'] = 1;
+  $handler->display->display_options['filters']['field_collection_history_date_value']['exposed'] = TRUE;
+  $handler->display->display_options['filters']['field_collection_history_date_value']['expose']['operator_id'] = 'field_collection_history_date_value_op';
+  $handler->display->display_options['filters']['field_collection_history_date_value']['expose']['label'] = 'Collection Date';
+  $handler->display->display_options['filters']['field_collection_history_date_value']['expose']['operator'] = 'field_collection_history_date_value_op';
+  $handler->display->display_options['filters']['field_collection_history_date_value']['expose']['identifier'] = 'field_collection_history_date_value';
+  $handler->display->display_options['filters']['field_collection_history_date_value']['expose']['remember_roles'] = array(
+    2 => '2',
+    1 => 0,
+    3 => 0,
+    4 => 0,
+    5 => 0,
+    6 => 0,
+    7 => 0,
+    8 => 0,
+    9 => 0,
+    10 => 0,
+    11 => 0,
+    12 => 0,
+    14 => 0,
+    13 => 0,
+  );
+  $handler->display->display_options['filters']['field_collection_history_date_value']['form_type'] = 'date_popup';
+  $handler->display->display_options['filters']['field_collection_history_date_value']['default_date'] = 'now -1 day';
+  $handler->display->display_options['filters']['field_collection_history_date_value']['default_to_date'] = 'now';
 
   /* Display: Page */
   $handler = $view->new_display('page', 'Page', 'page');
   $handler->display->display_options['path'] = 'day-wise-collection';
+
+  /* Display: Data export */
+  $handler = $view->new_display('views_data_export', 'Data export', 'views_data_export_1');
+  $handler->display->display_options['pager']['type'] = 'some';
+  $handler->display->display_options['pager']['options']['items_per_page'] = '0';
+  $handler->display->display_options['pager']['options']['offset'] = '0';
+  $handler->display->display_options['style_plugin'] = 'views_data_export_xls';
+  $handler->display->display_options['style_options']['provide_file'] = 1;
+  $handler->display->display_options['style_options']['parent_sort'] = 0;
+  $handler->display->display_options['path'] = 'day-wise-collection-export';
+  $handler->display->display_options['displays'] = array(
+    'page' => 'page',
+    'default' => 0,
+  );
   $export['day_wise_collection'] = $view;
 
   $view = new view();

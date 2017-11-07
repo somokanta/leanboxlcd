@@ -578,6 +578,28 @@ function new_custom_menus_menu_default_menu_links() {
     'customized' => 1,
     'parent_identifier' => 'menu-new-custom-menus_collection:<nolink>',
   );
+  // Exported menu link: menu-new-custom-menus_collection-life-cycle:bills-collection.
+  $menu_links['menu-new-custom-menus_collection-life-cycle:bills-collection'] = array(
+    'menu_name' => 'menu-new-custom-menus',
+    'link_path' => 'bills-collection',
+    'router_path' => 'bills-collection',
+    'link_title' => 'Collection Life Cycle',
+    'options' => array(
+      'attributes' => array(
+        'title' => '',
+      ),
+      'alter' => TRUE,
+      'identifier' => 'menu-new-custom-menus_collection-life-cycle:bills-collection',
+    ),
+    'module' => 'menu',
+    'hidden' => 0,
+    'external' => 0,
+    'has_children' => 0,
+    'expanded' => 0,
+    'weight' => 1,
+    'customized' => 1,
+    'parent_identifier' => 'menu-new-custom-menus_collection-output:<nolink>',
+  );
   // Exported menu link: menu-new-custom-menus_collection-output:<nolink>.
   $menu_links['menu-new-custom-menus_collection-output:<nolink>'] = array(
     'menu_name' => 'menu-new-custom-menus',
@@ -642,6 +664,28 @@ function new_custom_menus_menu_default_menu_links() {
     'expanded' => 1,
     'weight' => 0,
     'customized' => 1,
+  );
+  // Exported menu link: menu-new-custom-menus_daily-collection:day-wise-collection.
+  $menu_links['menu-new-custom-menus_daily-collection:day-wise-collection'] = array(
+    'menu_name' => 'menu-new-custom-menus',
+    'link_path' => 'day-wise-collection',
+    'router_path' => 'day-wise-collection',
+    'link_title' => 'Daily-collection',
+    'options' => array(
+      'attributes' => array(
+        'title' => '',
+      ),
+      'alter' => TRUE,
+      'identifier' => 'menu-new-custom-menus_daily-collection:day-wise-collection',
+    ),
+    'module' => 'menu',
+    'hidden' => 0,
+    'external' => 0,
+    'has_children' => 0,
+    'expanded' => 0,
+    'weight' => 4,
+    'customized' => 1,
+    'parent_identifier' => 'menu-new-custom-menus_collection-output:<nolink>',
   );
   // Exported menu link: menu-new-custom-menus_dashboard:<nolink>.
   $menu_links['menu-new-custom-menus_dashboard:<nolink>'] = array(
@@ -3482,10 +3526,12 @@ function new_custom_menus_menu_default_menu_links() {
   t('Collection');
   t('Collection History');
   t('Collection Input');
+  t('Collection Life Cycle');
   t('Collection Output');
   t('Collection Update');
   t('DRS PrintOut - 2');
   t('DRS Report');
+  t('Daily-collection');
   t('Dashboard');
   t('Day Wise Bill Count And Value');
   t('Day-Van Pl Group Area Grouping');
