@@ -17,6 +17,14 @@ function leanbox_payment_collection_feature_node_info() {
       'title_label' => t('Bill No'),
       'help' => '',
     ),
+    'collection_history' => array(
+      'name' => t('Collection History'),
+      'base' => 'node_content',
+      'description' => '',
+      'has_title' => '1',
+      'title_label' => t('Bill No.'),
+      'help' => '',
+    ),
     'payment_collection' => array(
       'name' => t('Payment Collection'),
       'base' => 'node_content',
