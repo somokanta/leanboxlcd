@@ -1570,3 +1570,16 @@ header[id="page-header"] {
 	}
 }
 /*End central billing report*/
+/*payment collection table css*/
+.view-id-payment_collection {
+  .table-responsive {
+    tbody {
+      tr {
+        td {
+          min-width: 60px;
+          text-align: center;
+        }
+      }
+    }
+  }
+}
