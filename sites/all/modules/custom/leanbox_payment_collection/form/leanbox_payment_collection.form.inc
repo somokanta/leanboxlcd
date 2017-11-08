@@ -276,7 +276,6 @@ dpm($form_state,'validate');
             if (empty($declaration_remark) && $remaining_amt != $bill_value ) {
                form_set_error('form', t("Declaration Remark for bill $bill_no is required. bill value: $bill_value , $remaining_amt"));
             }
-            form_set_error('form', t("validation"));
          }
       }
    }
