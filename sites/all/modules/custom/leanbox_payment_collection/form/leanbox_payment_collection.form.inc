@@ -439,7 +439,7 @@ function get_bill_details_using_bill_no_callback($bill_no, $dis_id, $arg1) {
            'Billvalue' => 'Bill value',
            'remaining_amt' => 'To Be Collected Value',
            'declaration_remark'=>'Declaration Remark' ,
-           'declaration_bill_value' => 'declaration_bill_value'
+           'declaration_bill_value' => ''
            );
       }
 
@@ -488,7 +488,7 @@ function get_bill_details_using_bill_no_callback($bill_no, $dis_id, $arg1) {
               '#name' => "declaration_remark[$key]",
             );
             $rows[$key]['declaration_bill_value']['data'] = array(
-              '#type' => 'textfield',
+              '#type' => 'hidden',
               '#title' => t('Declaration bill value'),
               '#title_display' => 'invisible',
               '#name' => "declaration_bill_value[$key]",
