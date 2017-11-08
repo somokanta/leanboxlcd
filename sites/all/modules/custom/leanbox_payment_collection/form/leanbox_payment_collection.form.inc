@@ -424,7 +424,7 @@ function get_bill_details_using_bill_no_callback($bill_no, $dis_id, $arg1) {
            'Billvalue' => 'Bill value',
            'cheque_amt' => 'Cheque amount',
            'cheque_no' => 'Cheque no',
-           'cheque_date' => 'Cheque date',
+           'cheque_date' => 'Cheque date'
          );
       }
       else {
@@ -437,7 +437,7 @@ function get_bill_details_using_bill_no_callback($bill_no, $dis_id, $arg1) {
            'Salesmancode' => 'Salesman code',
            'Billvalue' => 'Bill value',
            'remaining_amt' => 'To Be Collected Value',
-           'declaration_remark'=>'Declaration Remark' ,
+           'declaration_remark'=>'Declaration Remark'
            );
       }
 
