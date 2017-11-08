@@ -231,6 +231,7 @@ function upload_signed_bill_callback_validate($form, &$form_state) {
          $res = leanbox_payment_collection_get_title_and_nid_combo($bill_no, $dis_id);
          // below array will be used in _sumbit function while node creation 
          // for reference of bill no from sales register
+         dpm($form_state,'validate');
          foreach ($res as $key1 => $val1) {
             $form_state['values']['title_and_nid_combo'][$bill_no] = $val1['sales_register_nid'];
             $form_state['values']['title_and_collection_nid_combo'][$bill_no][] = $val1['payment_collection_nid'];
