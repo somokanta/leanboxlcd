@@ -207,6 +207,8 @@ function upload_signed_bill_callback($form, &$form_state) {
       $form['cheque_date'] = array('#type' => 'value');
       $form['cheque_amt'] = array('#type' => 'value');
       $form['remaining_amt'] = array('#type' => 'value');
+      $form['declaration_remark'] = array('#type' => 'value');
+      $form['declaration_bill_value'] = array('#type' => 'value');
    }
 
    return $form;
@@ -263,8 +265,13 @@ function upload_signed_bill_callback_validate($form, &$form_state) {
          }
          else if ($arg1 === 'signed') {
             $remaining_amt = $form_state['values']['remaining_amt'][$bill_no];
+            $declaration_remark = $form_state['values']['declaration_remark'][$bill_no];
+            $bill_value = $form_state['bills']['rows'][$bill_no]['declaration_bill_value']['data']['#value'];
             if (empty($remaining_amt) || !is_numeric($remaining_amt)) {
                form_set_error('form', t("To be collected amount for bill $bill_no is required and should be numeric"));
+            }
+            if (empty($declaration_remark) && $remaining_amt != $bill_value ) {
+               form_set_error('form', t("Declaration Remark for bill $bill_no is required."));
             }
          }
       }
@@ -293,6 +300,7 @@ function upload_signed_bill_callback_submit($form, &$form_state) {
          $node->field_declaration_date[LANGUAGE_NONE][0]['value'] = date('Y-m-d');
          $bill_type = 'Signed';
          $node->field_remaining_amt_collection[LANGUAGE_NONE][0]['value'] = $form_state['values']['remaining_amt'][$bill_no];
+         $node->field_declaration_remarks[LANGUAGE_NONE][0]['value'] = $form_state['values']['declaration_remark'][$bill_no];
 
          if ($arg1 === 'bounced') {
             $node->field_cheque_number[LANGUAGE_NONE][0]['value'] = $form_state['values']['cheque_no'][$bill_no];
@@ -416,7 +424,7 @@ function get_bill_details_using_bill_no_callback($bill_no, $dis_id, $arg1) {
            'Billvalue' => 'Bill value',
            'cheque_amt' => 'Cheque amount',
            'cheque_no' => 'Cheque no',
-           'cheque_date' => 'Cheque date',
+           'cheque_date' => 'Cheque date'
          );
       }
       else {
@@ -428,7 +436,9 @@ function get_bill_details_using_bill_no_callback($bill_no, $dis_id, $arg1) {
            'Salesman' => 'Salesman',
            'Salesmancode' => 'Salesman code',
            'Billvalue' => 'Bill value',
-           'remaining_amt' => 'To Be Collected Value');
+           'remaining_amt' => 'To Be Collected Value',
+           'declaration_remark'=>'Declaration Remark'
+           );
       }
 
       if ($arg1 === 'bounced') {
@@ -466,6 +476,19 @@ function get_bill_details_using_bill_no_callback($bill_no, $dis_id, $arg1) {
               '#title_display' => 'invisible',
               '#name' => "remaining_amt[$key]",
               '#required' => TRUE,
+              //'#value' => $value['Billvalue'],
+            );
+            $rows[$key]['declaration_remark']['data'] = array(
+              '#type' => 'textfield',
+              '#title' => t('Declaration Remark'),
+              '#title_display' => 'invisible',
+              '#name' => "declaration_remark[$key]",
+            );
+            $rows[$key]['declaration_bill_value']['data'] = array(
+              '#type' => 'hidden',
+              '#title' => t('Declaration bill value'),
+              '#title_display' => 'invisible',
+              '#name' => "declaration_bill_value[$key]",
               '#value' => $value['Billvalue'],
             );
          }
