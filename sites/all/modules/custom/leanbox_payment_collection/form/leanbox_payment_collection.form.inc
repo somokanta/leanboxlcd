@@ -496,6 +496,7 @@ function get_bill_details_using_bill_no_callback($bill_no, $dis_id, $arg1) {
       $array['header'] = $header;
       $array['rows'] = $rows;
    }
+   dpm($array,'array');
    return $array;
 }
 
