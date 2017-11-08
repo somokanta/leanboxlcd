@@ -270,6 +270,7 @@ function upload_signed_bill_callback_validate($form, &$form_state) {
             if (empty($remaining_amt) || !is_numeric($remaining_amt)) {
                form_set_error('form', t("To be collected amount for bill $bill_no is required and should be numeric"));
             }
+            dpm("$bill_no , $bill_value , $remaining_amt");
             if (empty($declaration_remark) && $remaining_amt != $bill_value ) {
                form_set_error('form', t("Declaration Remark for bill $bill_no is required."));
             }
