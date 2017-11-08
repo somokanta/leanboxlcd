@@ -207,7 +207,8 @@ function upload_signed_bill_callback($form, &$form_state) {
       $form['cheque_date'] = array('#type' => 'value');
       $form['cheque_amt'] = array('#type' => 'value');
       $form['remaining_amt'] = array('#type' => 'value');
-      $form['declaration_remark'] = array('#type' => 'value');      
+      $form['declaration_remark'] = array('#type' => 'value');
+      $form['declaration_bill_value'] = array('#type' => 'value');
    }
 
    return $form;
@@ -467,6 +468,7 @@ function get_bill_details_using_bill_no_callback($bill_no, $dis_id, $arg1) {
          }
       }
       if ($arg1 === 'signed') {
+        dpm($rows);
          foreach ($rows as $key => $value) {
             $rows[$key]['remaining_amt']['data'] = array(
               '#type' => 'textfield',
@@ -484,7 +486,7 @@ function get_bill_details_using_bill_no_callback($bill_no, $dis_id, $arg1) {
             );
             $rows[$key]['declaration_bill_value']['data'] = array(
               '#type' => 'textfield',
-              '#title' => t('Declaration Remark'),
+              '#title' => t('Declaration bill value'),
               '#title_display' => 'invisible',
               '#name' => "declaration_bill_value[$key]",
               '#value' => $value['Billvalue'],
