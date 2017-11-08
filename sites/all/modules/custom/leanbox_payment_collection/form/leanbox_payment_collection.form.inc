@@ -483,7 +483,7 @@ function get_bill_details_using_bill_no_callback($bill_no, $dis_id, $arg1) {
               '#name' => "declaration_remark[$key]",
             );
             $rows[$key]['declaration_bill_value']['data'] = array(
-              '#type' => 'hidden',
+              '#type' => 'textfield',
               '#title' => t('Declaration Remark'),
               '#title_display' => 'invisible',
               '#name' => "declaration_bill_value[$key]",
