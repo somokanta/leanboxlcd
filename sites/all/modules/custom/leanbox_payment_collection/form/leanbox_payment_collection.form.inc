@@ -438,7 +438,9 @@ function get_bill_details_using_bill_no_callback($bill_no, $dis_id, $arg1) {
            'Salesmancode' => 'Salesman code',
            'Billvalue' => 'Bill value',
            'remaining_amt' => 'To Be Collected Value',
-           'declaration_remark'=>'Declaration Remark' );
+           'declaration_remark'=>'Declaration Remark' ,
+           'declaration_bill_value' => 'declaration_bill_value'
+           );
       }
 
       if ($arg1 === 'bounced') {
