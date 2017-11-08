@@ -272,7 +272,7 @@ function upload_signed_bill_callback_validate($form, &$form_state) {
             if (empty($declaration_remark) && $remaining_amt != $bill_value ) {
                form_set_error('form', t("To be collected amount for bill $bill_no is required and should be numeric"));
             }
-            orm_set_error('form', t("validation"));
+            form_set_error('form', t("validation"));
          }
       }
    }
