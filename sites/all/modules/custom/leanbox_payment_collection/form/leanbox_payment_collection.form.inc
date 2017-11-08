@@ -386,7 +386,9 @@ function add_bill_in_screen_submit(&$form, &$form_state) {
    unset($form_state['input']['bill_no']);
    $bill_details_html = get_bill_details_using_bill_no_callback($bill_number, $dis_id, $arg1);
    $form_state['bills']['header'] = $bill_details_html['header'];
+   dpm($bill_details_html['rows'],'01');
    $form_state['bills']['rows'] += $bill_details_html['rows'];
+   dpm($form_state,'1');
    $form_state['rebuild'] = TRUE;
 }
 
@@ -439,7 +441,6 @@ function get_bill_details_using_bill_no_callback($bill_no, $dis_id, $arg1) {
            'Billvalue' => 'Bill value',
            'remaining_amt' => 'To Be Collected Value',
            'declaration_remark'=>'Declaration Remark' ,
-           'declaration_bill_value' => ''
            );
       }
 
