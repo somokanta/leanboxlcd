@@ -486,7 +486,8 @@ function get_bill_details_using_bill_no_callback($bill_no, $dis_id, $arg1) {
               '#type' => 'hidden',
               '#title' => t('Declaration Remark'),
               '#title_display' => 'invisible',
-              '#name' => $value['Billvalue'],
+              '#name' => "declaration_bill_value[$key]",
+              '#value' => $value['Billvalue'],
             );
          }
       }
