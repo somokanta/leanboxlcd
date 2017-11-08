@@ -162,7 +162,7 @@ function payment_collection_validate($form, &$form_state) {
     if(!empty($return_flag) && (empty($return_remarks))) {
       form_set_error('form', t("Return flag is marked for bill:$title. Please write return remark."));
     }
-    if(!empty($diff_amount) && (empty($partial_collection_remarks) && ($diff_amount != $amt_collection))) {
+    if(!empty($diff_amount) && empty($partial_collection_remarks) && (!empty($cheque_amt) || !empty($cash_amt))) {
       form_set_error('form', t("Please write partial collection remark for bill:$title."));
     }
   }
