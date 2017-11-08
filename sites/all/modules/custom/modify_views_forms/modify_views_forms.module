@@ -149,7 +149,6 @@ function payment_collection_validate($form, &$form_state) {
     //remark functionality
     $return_remarks = $form_data['field_return_remarks']['und'][0]['value'];
     $diff_amount = $form_data['field_field_amnt_difference']['und'][0]['value'];
-    $amt_collection = $form_data['field_remaining_amt_collection']['und'][0]['value'];
     $partial_collection_remarks = $form_data['field_partial_collection_remarks']['und'][0]['value'];
 
 // || !empty($cheque_date) && (empty($cheque_amt) || empty($cheque_no)) || !empty($cheque_no) && (empty($cheque_amt) || empty($cheque_date))
