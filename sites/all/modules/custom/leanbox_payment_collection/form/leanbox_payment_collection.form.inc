@@ -225,13 +225,13 @@ function upload_signed_bill_callback_validate($form, &$form_state) {
    // run foreach loop for all bills shown in table select
    // to fetch if any of these bill already a signed bill 
    // then show error
+dpm($form_state,'validate');
    foreach ($form_state['values']['bill_details'] as $bill_no => $val) {
       if (!empty($bill_no)) {
 
          $res = leanbox_payment_collection_get_title_and_nid_combo($bill_no, $dis_id);
          // below array will be used in _sumbit function while node creation 
          // for reference of bill no from sales register
-         dpm($form_state,'validate');
          foreach ($res as $key1 => $val1) {
             $form_state['values']['title_and_nid_combo'][$bill_no] = $val1['sales_register_nid'];
             $form_state['values']['title_and_collection_nid_combo'][$bill_no][] = $val1['payment_collection_nid'];
@@ -265,12 +265,11 @@ function upload_signed_bill_callback_validate($form, &$form_state) {
             }
          }
          else if ($arg1 === 'signed') {
-           dpm($form_state);
             $remaining_amt = $form_state['values']['remaining_amt'][$bill_no];
             
-            
+
             $bill_value = $form_state['bills']['rows'][$bill_no]['declaration_bill_value']['data']['#value'];
-            
+            dpm("hello $remaining_amt , $bill_value , $bill_no");
             if (empty($remaining_amt) || !is_numeric($remaining_amt)) {
                form_set_error('form', t("To be collected amount for bill $bill_no is required and should be numeric"));
             }
@@ -389,9 +388,7 @@ function add_bill_in_screen_submit(&$form, &$form_state) {
    unset($form_state['input']['bill_no']);
    $bill_details_html = get_bill_details_using_bill_no_callback($bill_number, $dis_id, $arg1);
    $form_state['bills']['header'] = $bill_details_html['header'];
-   dpm($bill_details_html['rows'],'01');
    $form_state['bills']['rows'] += $bill_details_html['rows'];
-   dpm($form_state,'1');
    $form_state['rebuild'] = TRUE;
 }
 
@@ -475,7 +472,6 @@ function get_bill_details_using_bill_no_callback($bill_no, $dis_id, $arg1) {
          }
       }
       if ($arg1 === 'signed') {
-        dpm($rows);
          foreach ($rows as $key => $value) {
             $rows[$key]['remaining_amt']['data'] = array(
               '#type' => 'textfield',
@@ -503,7 +499,6 @@ function get_bill_details_using_bill_no_callback($bill_no, $dis_id, $arg1) {
       $array['header'] = $header;
       $array['rows'] = $rows;
    }
-   dpm($array,'array');
    return $array;
 }
 
