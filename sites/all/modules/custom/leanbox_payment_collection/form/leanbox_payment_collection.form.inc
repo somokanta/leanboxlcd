@@ -265,12 +265,12 @@ function upload_signed_bill_callback_validate($form, &$form_state) {
          else if ($arg1 === 'signed') {
            dpm($form_state);
             $remaining_amt = $form_state['values']['remaining_amt'][$bill_no];
-            $remaining_amt = $form_state['values']['Billvalue'][$bill_no];
+            $bill_value = $form_state['values']['declaration_bill_value'][$bill_no];
             if (empty($remaining_amt) || !is_numeric($remaining_amt)) {
                form_set_error('form', t("To be collected amount for bill $bill_no is required and should be numeric"));
             }
             if (empty($declaration_remark) && $remaining_amt != $bill_value ) {
-               form_set_error('form', t("To be collected amount for bill $bill_no is required and should be numeric"));
+               form_set_error('form', t("Declaration Remark for bill $bill_no is required."));
             }
             form_set_error('form', t("validation"));
          }
@@ -481,6 +481,12 @@ function get_bill_details_using_bill_no_callback($bill_no, $dis_id, $arg1) {
               '#title' => t('Declaration Remark'),
               '#title_display' => 'invisible',
               '#name' => "declaration_remark[$key]",
+            );
+            $rows[$key]['declaration_bill_value']['data'] = array(
+              '#type' => 'hidden',
+              '#title' => t('Declaration Remark'),
+              '#title_display' => 'invisible',
+              '#name' => $value['Billvalue'],
             );
          }
       }
