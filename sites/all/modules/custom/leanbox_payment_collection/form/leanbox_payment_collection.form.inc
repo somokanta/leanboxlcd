@@ -476,7 +476,7 @@ function get_bill_details_using_bill_no_callback($bill_no, $dis_id, $arg1) {
               '#title_display' => 'invisible',
               '#name' => "remaining_amt[$key]",
               '#required' => TRUE,
-              '#default_value' => $value['Billvalue'],
+              //'#value' => $value['Billvalue'],
             );
             $rows[$key]['declaration_remark']['data'] = array(
               '#type' => 'textfield',
