@@ -225,7 +225,6 @@ function upload_signed_bill_callback_validate($form, &$form_state) {
    // run foreach loop for all bills shown in table select
    // to fetch if any of these bill already a signed bill 
    // then show error
-dpm($form_state,'validate');
    foreach ($form_state['values']['bill_details'] as $bill_no => $val) {
       if (!empty($bill_no)) {
 
@@ -267,14 +266,12 @@ dpm($form_state,'validate');
          else if ($arg1 === 'signed') {
             $remaining_amt = $form_state['values']['remaining_amt'][$bill_no];
             
-
             $bill_value = $form_state['bills']['rows'][$bill_no]['declaration_bill_value']['data']['#value'];
-            dpm("hello $remaining_amt , $bill_value , $bill_no");
             if (empty($remaining_amt) || !is_numeric($remaining_amt)) {
                form_set_error('form', t("To be collected amount for bill $bill_no is required and should be numeric"));
             }
             if (empty($declaration_remark) && $remaining_amt != $bill_value ) {
-               form_set_error('form', t("Declaration Remark for bill $bill_no is required. bill value: $bill_value , $remaining_amt"));
+               form_set_error('form', t("Declaration Remark for bill $bill_no is required."));
             }
          }
       }
@@ -303,6 +300,7 @@ function upload_signed_bill_callback_submit($form, &$form_state) {
          $node->field_declaration_date[LANGUAGE_NONE][0]['value'] = date('Y-m-d');
          $bill_type = 'Signed';
          $node->field_remaining_amt_collection[LANGUAGE_NONE][0]['value'] = $form_state['values']['remaining_amt'][$bill_no];
+         $node->field_declaration_remarks[LANGUAGE_NONE][0]['value'] = $form_state['values']['declaration_remark'][$bill_no];
 
          if ($arg1 === 'bounced') {
             $node->field_cheque_number[LANGUAGE_NONE][0]['value'] = $form_state['values']['cheque_no'][$bill_no];
