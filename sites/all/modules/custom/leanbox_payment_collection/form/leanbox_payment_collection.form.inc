@@ -270,7 +270,7 @@ function upload_signed_bill_callback_validate($form, &$form_state) {
             $remaining_amt = $form_state['values']['remaining_amt'][$bill_no];
             $form_state['complete form']['bill_details_wrapper']['bill_details']['#options'][$bill_no]['remaining_amt']['data']['#value'] = $remaining_amt;
             $declaration_remark = $form_state['values']['declaration_remark'][$bill_no];
-            $form_state['complete form']['bill_details_wrapper']['bill_details']['#options'][$bill_no]['declaration_bill_value']['data']['#value'] = $declaration_remark;
+            $form_state['complete form']['bill_details_wrapper']['bill_details']['#options'][$bill_no]['declaration_remark']['data']['#value'] = $declaration_remark;
             $bill_value = $form_state['bills']['rows'][$bill_no]['declaration_bill_value']['data']['#value'];
             if (empty($remaining_amt) || !is_numeric($remaining_amt)) {
                form_set_error('form', t("To be collected amount for bill $bill_no is required and should be numeric"));
