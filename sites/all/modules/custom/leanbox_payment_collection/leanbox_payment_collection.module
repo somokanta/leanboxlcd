@@ -181,8 +181,12 @@ function leanbox_payment_collection_node_presave($node) {
         //Update the difference field in payment collection
         $node->field_field_amnt_difference['und'][0]['value'] = $bill_value - ($node->field_previous_cash_amt['und'][0]['value'] + $node->field_previous_cheque_amt['und'][0]['value']);
         
+        //Update the previous fine amount field
+        $node->field_previous_fine_amount['und'][0]['value'] = ($node->field_previous_fine_amount['und'][0]['value'] + $node->field_fine_amount['und'][0]['value']);
+        
         unset($node->field_cash_amt['und']);
         unset($node->field_collection_cheque_amt['und']);
+        unset($node->field_fine_amount['und']);
         
         if($node->field_field_amnt_difference['und'][0]['value'] == 0) {
           $node->field_collection_status['und'][0]['value'] = '2';
