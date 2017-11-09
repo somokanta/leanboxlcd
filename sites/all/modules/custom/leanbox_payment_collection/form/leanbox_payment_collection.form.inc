@@ -244,8 +244,11 @@ function upload_signed_bill_callback_validate($form, &$form_state) {
          }
          if ($arg1 === 'bounced') {
             $cheque_no = $form_state['values']['cheque_no'][$bill_no];
+            $form_state['complete form']['bill_details_wrapper']['bill_details']['#options'][$bill_no]['cheque_no']['data']['#value'] = $cheque_no;
             $cheque_date = $form_state['values']['cheque_date'][$bill_no];
+            $form_state['complete form']['bill_details_wrapper']['bill_details']['#options'][$bill_no]['cheque_date']['data']['#value'] = $cheque_date;
             $cheque_amt = $form_state['values']['cheque_amt'][$bill_no];
+            $form_state['complete form']['bill_details_wrapper']['bill_details']['#options'][$bill_no]['cheque_amt']['data']['#value'] = $cheque_amt;
 
             if (empty($cheque_no)) {
                form_set_error('form', t("Cheque no for bill $bill_no is required."));
@@ -265,7 +268,9 @@ function upload_signed_bill_callback_validate($form, &$form_state) {
          }
          else if ($arg1 === 'signed') {
             $remaining_amt = $form_state['values']['remaining_amt'][$bill_no];
+            $form_state['complete form']['bill_details_wrapper']['bill_details']['#options'][$bill_no]['remaining_amt']['data']['#value'] = $remaining_amt;
             $declaration_remark = $form_state['values']['declaration_remark'][$bill_no];
+            $form_state['complete form']['bill_details_wrapper']['bill_details']['#options'][$bill_no]['declaration_bill_value']['data']['#value'] = $declaration_remark;
             $bill_value = $form_state['bills']['rows'][$bill_no]['declaration_bill_value']['data']['#value'];
             if (empty($remaining_amt) || !is_numeric($remaining_amt)) {
                form_set_error('form', t("To be collected amount for bill $bill_no is required and should be numeric"));
@@ -449,7 +454,7 @@ function get_bill_details_using_bill_no_callback($bill_no, $dis_id, $arg1) {
               '#title_display' => 'invisible',
               '#name' => "cheque_amt[$key]",
               '#required' => TRUE,
-             // '#value' => $value['Billvalue'],
+              '#value' => $value['Billvalue'],
             );
             $rows[$key]['cheque_no']['data'] = array(
               '#type' => 'textfield',
@@ -476,7 +481,7 @@ function get_bill_details_using_bill_no_callback($bill_no, $dis_id, $arg1) {
               '#title_display' => 'invisible',
               '#name' => "remaining_amt[$key]",
               '#required' => TRUE,
-              //'#value' => $value['Billvalue'],
+              '#value' => $value['Billvalue'],
             );
             $rows[$key]['declaration_remark']['data'] = array(
               '#type' => 'textfield',
