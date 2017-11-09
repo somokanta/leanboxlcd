@@ -1,0 +1,5 @@
+name = leanbox petty cash
+description = list of functionalities for leanbox petty cash.shows petty cash statement
+package = Custom
+core = 7.x
+

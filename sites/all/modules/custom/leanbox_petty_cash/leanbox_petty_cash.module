@@ -1,0 +1,51 @@
+<?php
+
+/**
+ * Files containing list of functions for petty cash functionalities
+ */
+
+
+/**
+ * 
+ * Implements hook_feeds_presave($source, $entity, $item)
+ */
+function leanbox_petty_cash_feeds_presave($source, $entity, $item, $entity_id) {
+   foreach ($item as $key => $value) {
+      $item[$key] = mb_convert_encoding($value, 'UTF-8', 'UTF-8');
+   }
+   if ($entity->feeds_item->id == 'petty_cash_master') {
+      foreach ($item as $key => $val) {
+         if ($key === 'type') {
+            $field = field_info_field('field_petty_cash_type');
+            $allowed_values = list_allowed_values($field);
+            $val = strtolower($val);
+            if (!array_key_exists($val, $allowed_values)) {
+               drupal_set_message("Please enter correct value for $key ". implode($allowed_values, ','), 'error');
+               $entity->feeds_item->skip = TRUE;
+            }
+            else {
+               $entity->field_petty_cash_type['und'][0]['value'] = $val;
+            }
+         }
+      }
+   }
+}
+
+/**
+ * Implements hook_taxonomy_term_presave($term)
+ * @param type $term
+ */
+function leanbox_petty_cash_taxonomy_term_presave($term) {
+   if ($term->vocabulary_machine_name === 'petty_cash') {
+      if (!isset($term->original->name) || ($term->original->name != $term->name)) {
+         $user_id = $GLOBALS['user']->uid;
+         $distributor_id = change_feeds_import_get_distributor_id($user_id);
+
+         $term_type = $term->field_petty_cash_type['und'][0]['value'];
+         $term_head = $term->field_petty_cash_head['und'][0]['value'];
+         $term_subhead = $term->field_petty_cash_subhead['und'][0]['value'];
+         $term->name = $term_type . "-" . $term_head . "-" . $term_subhead;
+         $term->field_petty_cash_distributor['und'][0]['uid'] = $distributor_id;
+      }
+   }
+}
