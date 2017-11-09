@@ -507,5 +507,8 @@ function dispatch_planning_update_7110() {
   }
   if (!db_index_exists('field_data_field_sr_bill_date', 'field_sr_bill_date_value')) {
     db_add_index('field_data_field_sr_bill_date', 'field_sr_bill_date_value', array('field_sr_bill_date_value'));
+  }
+  if (!db_index_exists('ptl_data_configuration', 'rs_code')) {
+    db_add_index('ptl_data_configuration', 'rs_code', array('rs_code'));
   }  
 }
