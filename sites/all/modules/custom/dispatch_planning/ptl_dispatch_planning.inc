@@ -48,17 +48,28 @@ function fetch_ptl_data($rs_code , $api_time) {
  */
 
 function update_ptl_data($rs_code, $trip_id, $update_time) {
-  db_update('ptl_data_configuration') // Table name no longer needs {}
-    ->fields(array(
-      'update_time' => $update_time,
-      'api_flag' => 1,
-    ))
-    ->condition('rs_code', $rs_code, '=')
-    ->condition('trip_id', $trip_id, '=')
-    ->execute();
 
-  $results['flag'] = '1';
-  $results['result'] = 'Updated Successfully';
+  $query = db_select('ptl_data_configuration', 'cb');
+  $query->addExpression('MAX(id)', 'max');
+  $query->condition('trip_id', $trip_id, '=');
+  $query->condition('rs_code', $rs_code, '=');
+  $max_ptl_data = $query->execute()->fetchField();
 
+  $results['flag'] = '0';
+  $results['result'] = 'Data not found. Please check RS Code and Trip Id';
+
+  if ($max_ptl_data) {
+    db_update('ptl_data_configuration') // Table name no longer needs {}
+      ->fields(array(
+        'update_time' => $update_time,
+        'api_flag' => 1,
+      ))
+      ->condition('rs_code', $rs_code, '=')
+      ->condition('trip_id', $trip_id, '=')
+      ->execute();
+
+    $results['flag'] = '1';
+    $results['result'] = 'Updated Successfully';
+  }
   return $results;
 }

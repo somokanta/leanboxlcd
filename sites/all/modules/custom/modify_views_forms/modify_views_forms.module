@@ -14,7 +14,12 @@ function modify_views_forms_form_alter(&$form, &$form_state, $form_id) {
   if($form_id == 'editableviews_entity_form_payment_collection') {
     $form['#validate'][] = 'payment_collection_validate';
     foreach ($form['node'] as $key => $value) {
+      //Remove the wrapper from the collection date field
       $form['node'][$key]['field_collection_cheque_date'][LANGUAGE_NONE][0]['#theme_wrappers'] = array();
+      //Make the fine amount field disabled if type is signed
+      if($value['field_flag']['und']['#default_value'][0] == 'signed') {
+        $form['node'][$key]['field_fine_amount']['#disabled'] = TRUE;
+      }
     }
   }
 
@@ -150,6 +155,9 @@ function payment_collection_validate($form, &$form_state) {
     $return_remarks = $form_data['field_return_remarks']['und'][0]['value'];
     $diff_amount = $form_data['field_field_amnt_difference']['und'][0]['value'];
     $partial_collection_remarks = $form_data['field_partial_collection_remarks']['und'][0]['value'];
+    //Fine Amount
+    $flag_type = $form_data['field_flag']['und'][0]['value'];
+    $fine_amount = $form_data['field_fine_amount']['und'][0]['value'];
 
 // || !empty($cheque_date) && (empty($cheque_amt) || empty($cheque_no)) || !empty($cheque_no) && (empty($cheque_amt) || empty($cheque_date))
     if( !empty($cheque_amt) && (empty($cheque_date) || empty($cheque_no)) ) {
@@ -163,6 +171,9 @@ function payment_collection_validate($form, &$form_state) {
     }
     if(!empty($diff_amount) && empty($partial_collection_remarks) && (!empty($cheque_amt) || !empty($cash_amt))) {
       form_set_error('form', t("Please write partial collection remark for bill:$title."));
+    }
+    if($flag_type == 'bounced' && empty($fine_amount)) {
+      form_set_error('form', t("Please add fine amount for bounced bill:$title."));
     }
   }
 }

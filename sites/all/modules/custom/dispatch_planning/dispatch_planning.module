@@ -2004,7 +2004,7 @@ function ptl_configuration_data_insert($api_data) {
       foreach ($api_data['jobData']['item_details'] as $item_data) {
         $query = db_insert('ptl_data_configuration');
         $fields = array(
-          'ptl_job' => $api_data['jobData']['vehicle'] . '-' . $api_data['date'],
+          'ptl_job' => $api_data['jobData']['runsheet_number'],//$api_data['jobData']['vehicle'] . '-' . $api_data['date'],
           'rs_code' => $api_data['rs_code'],
           'trip_id' => $api_data['jobData']['runsheet_number'],
           'vehicle' => $api_data['jobData']['vehicle'],
