@@ -4,6 +4,42 @@
  * Files containing list of functions for petty cash functionalities
  */
 
+/**
+ * Implements hook_menu
+ */
+function leanbox_petty_cash_menu() {
+   $items = array();
+   $items['petty-cash/credit'] = array(
+     'title' => 'petty cash credit',
+     'page callback' => 'drupal_get_form',
+     'page arguments' => array('upload_petty_cash_callback'),
+     'access arguments' => array('upload petty cash'),
+     'type' => MENU_CALLBACK,
+     'file' => 'form/leanbox_petty_cash.form.inc',
+   );
+   $items['petty-cash/debit'] = array(
+     'title' => 'petty cash credit',
+     'page callback' => 'drupal_get_form',
+     'page arguments' => array('upload_petty_cash_callback'),
+     'access arguments' => array('upload petty cash'),
+     'type' => MENU_CALLBACK,
+     'file' => 'form/leanbox_petty_cash.form.inc',
+   );
+   return $items;
+}
+
+/**
+ * Implement hook_permission()
+ *  Add custom permission for petty cash
+ */
+function leanbox_petty_cash_permission() {
+   return array(
+     'upload petty cash' => array(
+       'title' => t('upload petty cash'),
+       'description' => t('upload petty cash for details')
+     )
+   );
+}
 
 /**
  * 
@@ -20,7 +56,7 @@ function leanbox_petty_cash_feeds_presave($source, $entity, $item, $entity_id) {
             $allowed_values = list_allowed_values($field);
             $val = strtolower($val);
             if (!array_key_exists($val, $allowed_values)) {
-               drupal_set_message("Please enter correct value for $key ". implode($allowed_values, ','), 'error');
+               drupal_set_message("Please enter correct value for $key " . implode($allowed_values, ','), 'error');
                $entity->feeds_item->skip = TRUE;
             }
             else {
@@ -48,4 +84,19 @@ function leanbox_petty_cash_taxonomy_term_presave($term) {
          $term->field_petty_cash_distributor['und'][0]['uid'] = $distributor_id;
       }
    }
+}
+
+/**
+ * 
+ * @param type $distributor_id
+ */
+function _get_latest_balance($distributor_id) {
+   $max_billing_id_new = 0;
+   if (!empty($distributor_id)) {
+      $query = db_select('petty_cash', 'cb');
+      $query->addExpression('MAX(id)', 'max');
+      $query->condition('distributor_id', $distributor_id);
+      $max_billing_id_new = $query->execute()->fetchField();
+   }
+   return $max_billing_id_new;
 }

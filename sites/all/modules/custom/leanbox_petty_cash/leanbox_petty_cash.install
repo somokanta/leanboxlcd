@@ -1,0 +1,157 @@
+<?php
+
+/*
+ * Implement hook_schema.
+ */
+
+function leanbox_petty_cash_schema() {
+   $schema = array();
+   $schema['petty_cash_sequence_table'] = array(
+     'description' => 'Sequence for Trip ID',
+     'fields' => array(
+       'id' => array(
+         'description' => 'The primary identifier for a data',
+         'type' => 'serial',
+         'not null' => TRUE,
+       ),
+       'next_id' => array(
+         'description' => 'next_id',
+         'type' => 'int',
+       ),
+       'distributor_id' => array(
+         'description' => 'distributor_id',
+         'type' => 'int',
+       ),
+     ),
+     'primary key' => array('id'),
+   );
+
+   $schema['petty_cash'] = array(
+     'description' => 'Sequence for Trip ID',
+     'fields' => array(
+       'id' => array(
+         'description' => 'The primary identifier for a data',
+         'type' => 'serial',
+         'not null' => TRUE,
+       ),
+       'type' => array(
+         'description' => 'type',
+         'type' => 'varchar',
+         'length' => 20,
+       ),
+       'head' => array(
+         'description' => 'head',
+         'type' => 'varchar',
+         'length' => 255,
+       ),
+       'subhead' => array(
+         'description' => 'subhead',
+         'type' => 'varchar',
+         'length' => 255,
+       ),
+       'description' => array(
+         'description' => 'next_id',
+         'type' => 'varchar',
+         'length' => 255,
+       ),
+       'bill_available' => array(
+         'description' => 'bill_available',
+         'type' => 'varchar',
+         'length' => 10,
+       ),
+       'bill_no' => array(
+         'description' => 'bill_no',
+         'type' => 'varchar',
+         'length' => 50,
+       ),
+       'amount' => array(
+         'description' => 'amount',
+         'type' => 'float',
+       ),
+       'person_name' => array(
+         'description' => 'person_name',
+         'type' => 'varchar',
+         'length' => 50,
+       ),
+       'deleted' => array(
+         'description' => 'next_id',
+         'type' => 'varchar',
+         'length' => 10,
+       ),
+       'voucher_reference_no' => array(
+         'description' => 'voucher_reference_no',
+         'type' => 'varchar',
+         'length' => 30,
+       ),
+       'voucher_no' => array(
+         'description' => 'voucher_no',
+         'type' => 'varchar',
+         'length' => 30,
+       ),
+       'balance' => array(
+         'description' => 'next_id',
+         'type' => 'float',
+         'length' => 10,
+       ),
+        'file' => array(
+         'description' => 'next_id',
+         'type' => 'int',
+         'length' => 10,
+       ),
+       'distributor_id' => array(
+         'description' => 'distributor_id',
+         'type' => 'int',
+       ),
+     ),
+     'primary key' => array('id'),
+   );
+
+   return $schema;
+}
+
+
+function leanbox_petty_cash_update_7101() {
+
+  $schema['van_cld_data'] = array(
+    'description' => 'Custom table which is used for van cld reports',
+    'fields' => array(
+      'id' => array(
+        'description' => t('Unique id'),
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'vehicle' => array(
+        'description' => t('VEHICLE'),
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+      'loading_date' => array(
+        'description' => t('LOADING DATE'),
+        'type' => 'int',
+        'length' => 32,
+      ),
+      'sku7_code' => array(
+        'description' => t('SKU& CODE'),
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+      'product_name' => array(
+        'description' => t('PRODUCT NAME'),
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+      'cld' => array(
+        'description' => t('CLD'),
+        'type' => 'int',
+        'length' => 32,
+      ),
+      'mrp' => array(
+        'description' => 'MRP',
+        'type' => 'float',
+      ),
+    ),
+    'primary key' => array('id'),
+  );
+
+  db_create_table('van_cld_data_table1', $schema['van_cld_data']);
+}

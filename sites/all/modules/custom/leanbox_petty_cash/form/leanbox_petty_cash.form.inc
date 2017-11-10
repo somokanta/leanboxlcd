@@ -1,0 +1,244 @@
+<?php
+
+/**
+ * Files containing form for petty cash
+ */
+
+/**
+ * 
+ * @param array $form
+ * @param type $form_state
+ * @return array
+ */
+function upload_petty_cash_callback($form, &$form_state) {
+   $form = array();
+   $form['#prefix'] = '<div id="petty-cash-div">';
+   $form['#suffix'] = '</div>';
+
+   // get logged in users distributor id
+   $user_id = $GLOBALS['user']->uid;
+   $distributor_id = change_feeds_import_get_distributor_id($user_id);
+
+   $arg1 = arg(1); // wheather credit or debit based on URL
+   // override arg1 variable
+   if (isset($form_state['values']['arg'])) {
+      $arg1 = $form_state['values']['arg'];
+   }
+
+   // store arg in form_state because arg1 gets change in ajax callback
+   $form['arg'] = array(
+     '#type' => 'value',
+     '#value' => $arg1,
+   );
+
+   $header_options = get_list_of_head_option($arg1, $distributor_id);
+   if (!empty($header_options)) {
+      $form['head'] = array(
+        '#title' => t('Head'),
+        '#type' => 'select',
+        '#size' => 1,
+        '#ajax' => array(
+          'callback' => '_petty_cash_subhead_ajax',
+          'wrapper' => 'petty-cash-div',
+          'method' => 'replace',
+          'effect' => 'fade',
+        ),
+        '#options' => $header_options,
+        '#default_value' => '',
+        '#required' => TRUE,
+      );
+
+      if (isset($form_state['values']['head']) && !empty($form_state['values']['head'])) {
+
+         $selected_header = $form_state['values']['head'];
+         $subhead_options = get_list_of_subhead_option_using_head($arg1, $distributor_id, $selected_header);
+
+         $form['subhead'] = array(
+           '#title' => t('Subhead'),
+           '#type' => 'select',
+           '#size' => 1,
+           '#ajax' => array(
+             'callback' => '_petty_cash_subhead_ajax',
+             'wrapper' => 'petty-cash-div',
+             'method' => 'replace',
+             'effect' => 'fade',
+           ),
+           '#options' => $subhead_options,
+           '#default_value' => '',
+           '#required' => TRUE,
+         );
+
+         if (isset($form_state['values']['subhead']) && !empty($form_state['values']['head']) && !empty($form_state['values']['subhead'])) {
+            $form['description'] = array(
+              '#title' => t('Description'),
+              '#type' => 'textfield',
+              '#size' => 60,
+              '#required' => TRUE,
+            );
+            $form['amount'] = array(
+              '#title' => t('Amount'),
+              '#type' => 'textfield',
+              '#size' => 15,
+              '#element_validate' => array('element_validate_integer_positive'),
+              '#required' => TRUE,
+            );
+            $form['person_name'] = array(
+              '#title' => t('Person name'),
+              '#type' => 'textfield',
+              '#size' => 20,
+              '#required' => TRUE,
+            );
+            if ($arg1 === 'debit') {
+               $form['bill_available'] = array(
+                 '#title' => t('Bill Available'),
+                 '#type' => 'radios',
+                 '#size' => 20,
+                 '#options' => array('yes' => 'Yes', 'no' => 'No'),
+                 '#required' => TRUE,
+               );
+               $form['bill_no'] = array(
+                 '#title' => t('Bill No'),
+                 '#type' => 'textfield',
+                 '#size' => 20,
+                 '#required' => TRUE,
+                 '#states' => array(
+                   // Hide the settings when the cancel notify checkbox is disabled.
+                   'visible' => array(
+                     ':input[name="bill_available"]' => array('value' => 'yes'),
+                   ),
+                 ),
+               );
+            }
+            $form['submit'] = array(
+              '#value' => 'submit',
+              '#type' => 'submit',
+              '#size' => 20,
+            );
+         }
+      }
+   }
+   else {
+      drupal_set_message(t('No header found.Kindly upload header first.'), 'error');
+   }
+
+
+   return $form;
+}
+
+/**
+ * Menu callback for AJAX additions. Render subhead details.
+ */
+function _petty_cash_subhead_ajax($form, &$form_state) {
+   return $form;
+}
+
+/**
+ * 
+ * @param type $arg1
+ * @param type $distributor_id
+ * @return array
+ */
+function get_list_of_head_option($arg1, $distributor_id) {
+   $header = array();
+   if (!empty($arg1)) {
+      if (empty($distributor_id)) {
+         $user_id = $GLOBALS['user']->uid;
+         $distributor_id = change_feeds_import_get_distributor_id($user_id);
+      }
+      $query = db_select('field_data_field_petty_cash_type', 'ct');
+      $query->condition('ct.field_petty_cash_type_value', $arg1);
+      $query->join('field_data_field_petty_cash_head', 'ch', 'ch.entity_id = ct.entity_id');
+      $query->join('field_data_field_petty_cash_distributor', 'cds', 'cds.entity_id = ct.entity_id');
+      $query->condition('cds.field_petty_cash_distributor_uid', $distributor_id);
+      $query->fields('ch', array('field_petty_cash_head_value'));
+      $header = $query->execute()->fetchAllKeyed(0, 0);
+      $header[''] = t('-Select-');
+   }
+   return $header;
+}
+
+/**
+ * 
+ * @param type $arg1
+ * @param type $distributor_id
+ * @param type $head
+ * @return array
+ */
+function get_list_of_subhead_option_using_head($arg1, $distributor_id, $head) {
+   $subheader = array();
+   if (!empty($arg1) && !empty($head)) {
+      if (empty($distributor_id)) {
+         $user_id = $GLOBALS['user']->uid;
+         $distributor_id = change_feeds_import_get_distributor_id($user_id);
+      }
+
+      $query = db_select('field_data_field_petty_cash_type', 'ct');
+      $query->condition('ct.field_petty_cash_type_value', $arg1);
+      $query->join('field_data_field_petty_cash_head', 'ch', 'ch.entity_id = ct.entity_id');
+      $query->join('field_data_field_petty_cash_subhead', 'csu', 'csu.entity_id = ct.entity_id');
+      $query->join('field_data_field_petty_cash_distributor', 'cds', 'cds.entity_id = ct.entity_id');
+      $query->condition('cds.field_petty_cash_distributor_uid', $distributor_id);
+      $query->condition('ch.field_petty_cash_head_value', $head);
+
+      $query->fields('csu', array('field_petty_cash_subhead_value'));
+      $subheader = $query->execute()->fetchAllKeyed(0, 0);
+      $subheader[''] = t('-Select-');
+   }
+   return $subheader;
+}
+
+function upload_petty_cash_callback_submit($form, &$form_state) {
+   dpm($form_state, 'state');
+   $user_id = $GLOBALS['user']->uid;
+   $distributor_id = change_feeds_import_get_distributor_id($user_id);
+   
+   $txn = db_transaction();
+   
+   $query = db_select('petty_cash_sequence_table', 'ts');
+   $query->forUpdate();
+   $query->addField('ts', 'next_id');
+   $query->condition('ts.distributor_id', $distributor_id);
+   $coupon_id = $query->execute()->fetchField();
+   dpm($coupon_id, '$coupon_id');
+
+   if ($coupon_id) {
+      // Increment the next_value.
+      db_update('petty_cash_sequence_table')
+          ->fields(array('next_id' => $coupon_id + 1))
+          ->condition('distributor_id', $distributor_id)
+          ->execute();
+   }
+   else {
+      $coupon_id = 1;
+      $insert = db_insert('petty_cash_sequence_table')
+          ->fields(array(
+        'distributor_id' => $distributor_id,
+        'next_id' => $coupon_id + 1
+      ));
+      $insert->execute();
+   }
+      dpm($coupon_id, '$coupon_id1');
+
+   $arg1 = $form_state['values']['arg'];
+   $complete_voucher_no = "$distributor_id-$arg1-$coupon_id";
+   dpm($complete_voucher_no, '$complete_voucher_no');
+   
+   $balance = _get_latest_balance($distributor_id);
+   dpm($balance, '$balance');
+/**
+   db_insert('petty_cash') // Table name no longer needs {}
+       ->fields(array(
+         'type' => $form_state['values']['type'],
+         'head' => $form_state['values']['head'],
+         'subhead' => $form_state['values']['subhead'],
+         'description' => $form_state['values']['description'],
+         'amount' => $form_state['values']['amount'],
+         'voucher_no' => $complete_voucher_no,
+         'balance' => $balance,         
+         'distributor_id' => $distributor_id,
+       ))
+       ->execute();
+ * */
+ 
+}
+
