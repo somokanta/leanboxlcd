@@ -19,7 +19,12 @@ function email_status_menu() {
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
-
+  $items['email/pending-ofd-salesbeatwise'] = array(
+    'title' => 'Send Email Of Pending OFD Sales Beat Wise',
+    'page callback' => 'send_email_pending_ofd_salesbeatwise_data',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
   $items['email/daily-data-pl'] = array(
     'title' => 'Send Email Of Daily Data',
     'page callback' => 'send_email_daily_cron_pl_data',
@@ -2767,6 +2772,71 @@ function get_header_of_chhanel_otif() {
   return $header;
 }
 
+/*
+ * Function to send auto mailer of Pending OFD Sales Beat Wise Report.
+ */
+function send_email_pending_ofd_salesbeatwise_data() {
+  $distributor_id = _DISTRIBUTOR_ID;
+  $distributor_name = change_feeds_import_get_distributor_name($distributor_id);
+  $start_date = strtotime('-7 day', strtotime(date('Y-m-d')));
+  $end_date = strtotime('-1 day', strtotime(date('Y-m-d')));
+  $query = db_select('node', 'n');
+  $query->condition('n.type', 'sales_register_data');
+  $query->condition('n.uid', $distributor_id, '=');
+  $query->join('field_data_field_sr_bill_date', 'bd', 'bd.entity_id = n.nid');
+  $query->groupBy('field_sr_bill_date_value');
+  $query->condition('bd.field_sr_bill_date_value', array($start_date, $end_date), 'BETWEEN');
+  $query->orderBy('field_sr_bill_date_value','DESC');
+  $query->join('field_data_field_bill_value', 'bv', 'bv.entity_id = n.nid');
+  $query->join('field_data_field_party_code_reference', 'pc', 'pc.entity_id = n.nid');
+  $query->join('field_data_field_beat_name', 'sb', 'sb.entity_id = pc.field_party_code_reference_nid');
+  $query->groupBy('field_beat_name_value');
+  $query->join('field_data_field_salesman', 'sm', 'sm.entity_id = pc.field_party_code_reference_nid');
+  $query->groupBy('field_salesman_value');
+  
+  $query->leftjoin('field_data_field_trip_id_reference', 'ti', 'ti.entity_id = n.nid');
+  $query->leftjoin('field_data_field_dispatch_date', 'disp_date', 'disp_date.entity_id = ti.field_trip_id_reference_nid');
+  
+  // bill counts
+  $query->addExpression('SUM(CASE WHEN (disp_date.field_dispatch_date_value IS NULL) THEN 1 ELSE 0 END)', 'bill_count');
+
+  // bill values
+  $query->addExpression('SUM(CASE WHEN (disp_date.field_dispatch_date_value IS NULL) THEN field_bill_value_value ELSE 0 END)', 'bill_value');
+  
+  $query->fields('bd', array('field_sr_bill_date_value'));
+  $query->fields('sb', array('field_beat_name_value'));
+  $query->fields('sm', array('field_salesman_value'));
+
+  $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+
+  $header = array('Sr. No.', 'Bill Date', 'Sales Beat', 'Salesman', 'Bill Count', 'Bill Value');
+  $row = array();
+  $counter = 1;
+  foreach($res as $key => $data){
+    if($data['bill_count'] != 0  && $data['bill_value'] != 0) {
+      $row['serial_no'] = $counter++;
+      $row['bill_date'] = date('d-m-Y',$data['field_sr_bill_date_value']);
+      $row['beat_name'] = check_plain($data['field_beat_name_value']);
+      $row['salesman'] = check_plain($data['field_salesman_value']);
+      $row['bill_count'] = $data['bill_count'];
+      $row['bill_value'] = $data['bill_value'];
+
+      $rows[] = $row;
+    }
+  }
+
+  $output = "<h3>Pending OFD Sales Beat Wise For Last 7 Days Till Yesterday</h3>";
+  $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
+
+
+  $params['subject'] = "Pending OFD Sales Beat Wise - ". $distributor_name;
+  $params['body'] = $output;
+  $mail_to = variable_get('to_email');
+  $from = variable_get('from_email');
+
+  drupal_mail('email_status', 'ofd_report_salesbeatwise', $mail_to, LANGUAGE_NONE, $params, $from);
+}
+
 function email_status_mail($key, &$message, $params) {
   switch ($key) {
     case 'daily_data':
@@ -2787,6 +2857,10 @@ function email_status_mail($key, &$message, $params) {
       $message['body'][] = $params['body'];
       break;
     case 'ofd_report':
+      $message['subject'] = $params['subject'];
+      $message['body'][] = $params['body'];
+      break;
+    case 'ofd_report_salesbeatwise':
       $message['subject'] = $params['subject'];
       $message['body'][] = $params['body'];
       break;
