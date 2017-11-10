@@ -1796,7 +1796,7 @@ function ptl_sales_reg_api_data($value, $node, $trip_execution_date, $hht_id, $c
   /**
    * Insert data into PTL configuration table
    */
-  ptl_configuration_data_insert($api_data);
+  ptl_configuration_data_insert($api_data , $node_uid);
   return $ptl_data;
 }
 
@@ -1998,10 +1998,24 @@ function dispatch_planning_get_rscode_using_uid($uid) {
 /**
  * function for  ptl_configuration_data_insert($api_data);
  */
-function ptl_configuration_data_insert($api_data) {
+function ptl_configuration_data_insert($api_data, $distributor_id) {
   if (!empty($api_data)) {
+    $exist_sku_unit = array(); // declare in start
     if (!empty($api_data['jobData']['item_details'])) {
       foreach ($api_data['jobData']['item_details'] as $item_data) {
+        //find sku unit. Don't call function again and again for same SKU
+        $sku7_code =  $item_data['sku_code'];
+        if (isset($exist_sku_unit[$sku7_code])) {
+          $sku_unit_case = $exist_sku_unit[$sku7_code];
+        }
+        else {
+          $sku_unit_case = get_sku_unit_case($sku7_code, $distributor_id);
+          $exist_sku_unit[$sku7_code] = $sku_unit_case;
+        }
+        // Conversion of cld and loose
+        $cld = (int)($item_data['sum_net_sales_quantity']/$sku_unit_case); //petty
+        $loose = (int)($item_data['sum_net_sales_quantity'] % $sku_unit_case); //loose
+        //Insert in ptl table
         $query = db_insert('ptl_data_configuration');
         $fields = array(
           'ptl_job' => $api_data['jobData']['runsheet_number'],//$api_data['jobData']['vehicle'] . '-' . $api_data['date'],
@@ -2016,7 +2030,10 @@ function ptl_configuration_data_insert($api_data) {
           'product_name' => $item_data['product_name'],
           'MRP' => $item_data['mrp'],
           'TUR' => $item_data['tur'],
-          'sum_sales_qty' => $item_data['sum_net_sales_quantity']
+          'sum_sales_qty' => $item_data['sum_net_sales_quantity'],
+          'created_time' => REQUEST_TIME,
+          'cld' => $cld,
+          'loose' => $loose,
         );
         $query->fields($fields);
         $result_id = $query->execute();
@@ -2035,6 +2052,24 @@ function check_dynamic_routing_configuration($distributor_id) {
   $query->fields('tp', array('entity_id'));
   $query->condition('tp.field_dynamic_routing_config_value', 1);
   $query->condition('tp.entity_id', $distributor_id);
+  $res = $query->execute()->fetchField();
+  return $res;
+}
+
+/**
+ * 
+ * @param type $sku7_code
+ * @param type $distributor_id
+ * @return type qty for sku in one unit case
+ */
+function get_sku_unit_case($sku7_code, $distributor_id) {
+  $query = db_select('field_data_field_unit_case_units_', 'fucu');
+  $query->fields('fucu', array('field_unit_case_units__value'));
+  $query->join('field_data_field_sku7_code', 'sc', 'sc.entity_id = fucu.entity_id');
+  $query->join('node', 'n', 'n.nid = fucu.entity_id');
+  $query->condition('n.type', 'sku7_code_master');
+  $query->condition('sc.field_sku7_code_value', $sku7_code, '=');
+  $query->condition('n.uid', $distributor_id, '=');
   $res = $query->execute()->fetchField();
   return $res;
 }
