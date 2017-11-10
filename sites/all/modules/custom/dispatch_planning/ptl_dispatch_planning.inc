@@ -6,17 +6,22 @@
  */
 
 function fetch_ptl_data($rs_code , $api_time) {
+  $time = time() - 60 * 5; // send data which is created 5min befor, to avoid data loose of trip
+  
   $query = db_select('ptl_data_configuration', 'cb');
   $query->addExpression('MAX(id)', 'max');
   $query->condition('api_flag', '0');
   $query->condition('rs_code', $rs_code, '=');
+  $query->condition('created_time', $time, '<');
   $max_ptl_data = $query->execute()->fetchField();
 
   $query = db_select('ptl_data_configuration', 'p');
-  $query->fields('p', array('ptl_job', 'rs_code', 'trip_id', 'vehicle', 'bill_number', 'loading_date', 'sequence_no', 'basepack_code', 'sku_code', 'product_name', 'MRP', 'TUR', 'sum_sales_qty'));
+  $query->fields('p', array('ptl_job', 'rs_code', 'trip_id', 'vehicle', 'bill_number', 'loading_date', 'sequence_no', 'basepack_code', 'sku_code', 'product_name', 'MRP', 'TUR'));
+  $query->addExpression('loose', 'sum_sales_qty'); // send loose value in sum_sales_qty
+  $query->condition('p.id', $max_ptl_data, '<=');
   $query->condition('p.api_flag', '0', '=');
   $query->condition('p.rs_code', $rs_code, '=');
-  $query->condition('p.id', $max_ptl_data, '<=');
+  $query->condition('p.loose', 1, '>=');
 
   $result = $query->execute()->fetchAll();
   
@@ -31,6 +36,7 @@ function fetch_ptl_data($rs_code , $api_time) {
       ->condition('id', $max_ptl_data, '<=')
       ->condition('api_flag', '0', '=')
       ->condition('rs_code', $rs_code, '=')
+      ->condition('loose', 1, '>=')
       ->execute();
   }
   else {
@@ -66,6 +72,7 @@ function update_ptl_data($rs_code, $trip_id, $update_time) {
       ))
       ->condition('rs_code', $rs_code, '=')
       ->condition('trip_id', $trip_id, '=')
+      ->condition('loose', 1, '>=')
       ->execute();
 
     $results['flag'] = '1';
