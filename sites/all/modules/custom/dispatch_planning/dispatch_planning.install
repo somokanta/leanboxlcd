@@ -488,11 +488,29 @@ function dispatch_planning_update_7109() {
       'default' => 0,
     ),
      'fetch_time' => array(
-      'description' => 'Fetch Time',
+      'description' => 'API Fetch Time',
       'type' => 'int',
       'not null' => TRUE,
       'default' => 0,
     ),
+     'created_time' => array(
+      'description' => 'DATA Created Time',
+      'type' => 'int',
+      'not null' => TRUE,
+      'default' => 0,
+    ),
+     'cld' => array(
+      'description' => 'CLD qty',
+      'type' => 'int',
+      'not null' => TRUE,
+      'default' => 0,
+    ), 
+     'loose' => array(
+      'description' => 'Loose qty',
+      'type' => 'int',
+      'not null' => TRUE,
+      'default' => 0,
+    ),     
   );
   foreach ($fields as $key => $field) {
     if (!db_field_exists('ptl_data_configuration', $key)) {
