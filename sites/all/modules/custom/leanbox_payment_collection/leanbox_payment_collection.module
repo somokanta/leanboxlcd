@@ -151,7 +151,7 @@ function leanbox_payment_collection_node_presave($node) {
     
     if(arg(0) == 'payment-collection') {   
     // Create Collection History
-      if((!empty($node->field_cash_amt['und'][0]['value']) || !empty($node->field_collection_cheque_amt['und'][0]['value'])) && $node->field_returned_bill_flag['und'][0]['value'] != 1) {
+      if((!empty($node->field_cash_amt['und'][0]['value']) || !empty($node->field_collection_cheque_amt['und'][0]['value']) || !empty($node->field_fine_amount['und'][0]['value'])) && $node->field_returned_bill_flag['und'][0]['value'] != 1) {
         $collection_his = new StdClass();
         $collection_his->type = 'collection_history';
         node_object_prepare($collection_his); // Sets some defaults. Invokes hook_prepare() and hook_node_prepare().
@@ -181,8 +181,12 @@ function leanbox_payment_collection_node_presave($node) {
         //Update the difference field in payment collection
         $node->field_field_amnt_difference['und'][0]['value'] = $bill_value - ($node->field_previous_cash_amt['und'][0]['value'] + $node->field_previous_cheque_amt['und'][0]['value']);
         
+        //Update the previous fine amount field
+        $node->field_previous_fine_amount['und'][0]['value'] = ($node->field_previous_fine_amount['und'][0]['value'] + $node->field_fine_amount['und'][0]['value']);
+        
         unset($node->field_cash_amt['und']);
         unset($node->field_collection_cheque_amt['und']);
+        unset($node->field_fine_amount['und']);
         
         if($node->field_field_amnt_difference['und'][0]['value'] == 0) {
           $node->field_collection_status['und'][0]['value'] = '2';
