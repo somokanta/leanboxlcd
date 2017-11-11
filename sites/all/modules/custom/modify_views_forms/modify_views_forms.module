@@ -163,8 +163,8 @@ function payment_collection_validate($form, &$form_state) {
     if( !empty($cheque_amt) && (empty($cheque_date) || empty($cheque_no)) ) {
       form_set_error('form', t('Please fill cheque number, cheque amount and cheque date for bill '.$title));
     }
-    if(!empty($return_flag) && (!empty($cheque_amt) || !empty($cash_amt))) {
-      form_set_error('form', t("Return flag is marked for $title. Please remove cash and cheque amount."));
+    if(!empty($return_flag) && (!empty($cheque_amt) || !empty($cash_amt) || !empty($fine_amount))) {
+      form_set_error('form', t("Return flag is marked for $title. Please remove cash, cheque and fine amount."));
     }
     if(!empty($return_flag) && (empty($return_remarks))) {
       form_set_error('form', t("Return flag is marked for bill:$title. Please write return remark."));
@@ -172,7 +172,7 @@ function payment_collection_validate($form, &$form_state) {
     if(!empty($diff_amount) && empty($partial_collection_remarks) && (!empty($cheque_amt) || !empty($cash_amt))) {
       form_set_error('form', t("Please write partial collection remark for bill:$title."));
     }
-    if($flag_type == 'bounced' && empty($fine_amount)) {
+    if($flag_type == 'bounced' && empty($fine_amount) && $fine_amount !=='0') {
       form_set_error('form', t("Please add fine amount for bounced bill:$title."));
     }
   }
