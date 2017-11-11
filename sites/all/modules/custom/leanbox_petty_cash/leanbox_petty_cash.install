@@ -6,7 +6,7 @@
 
 function leanbox_petty_cash_schema() {
    $schema = array();
-   $schema['petty_cash_sequence_table'] = array(
+   $schema['petty_cash_sequence_table1'] = array(
      'description' => 'Sequence for Trip ID',
      'fields' => array(
        'id' => array(
@@ -26,7 +26,7 @@ function leanbox_petty_cash_schema() {
      'primary key' => array('id'),
    );
 
-   $schema['petty_cash'] = array(
+   $schema['petty_cash1'] = array(
      'description' => 'Sequence for Trip ID',
      'fields' => array(
        'id' => array(
@@ -91,13 +91,14 @@ function leanbox_petty_cash_schema() {
        'voucher_date' => array(
          'description' => 'voucher_date',
          'type' => 'date',
+         'mysql_type' => 'date',
        ),
        'balance' => array(
          'description' => 'next_id',
          'type' => 'float',
          'length' => 10,
        ),
-        'file' => array(
+       'file' => array(
          'description' => 'next_id',
          'type' => 'int',
          'length' => 10,

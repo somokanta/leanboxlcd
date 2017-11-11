@@ -23,7 +23,7 @@ function revert_petty_cash_callback($form, &$form_state) {
      '#title' => t('Voucher No'),
      '#type' => 'textfield',
      '#size' => 20,
-     '#maxlength' => 20,
+     //'#maxlength' => 20,
      '#autocomplete_path' => 'voucher-no/list',
      '#ajax' => array(
        'callback' => '_petty_cash_revert_ajax',
@@ -39,10 +39,10 @@ function revert_petty_cash_callback($form, &$form_state) {
    if (isset($form_state['values']['voucher']) && !empty($form_state['values']['voucher'])) {
       $output = _get_voucher_details_distributor_wise($distributor_id, $form_state['values']['voucher']);
 
-      if (!empty($output)) {
+      if (!empty($output['rows'])) {
          $html = theme('table', array(
-           'header' => $header,
-           'rows' => $rows,
+           'header' => $output['header'],
+           'rows' => $output['rows'],
            'attributes' => array('width' => '100%')
          ));
          $form['voucher_details'] = array(

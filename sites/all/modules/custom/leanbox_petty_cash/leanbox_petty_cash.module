@@ -113,14 +113,23 @@ function leanbox_petty_cash_taxonomy_term_presave($term) {
  * @param type $distributor_id
  */
 function _get_latest_balance($distributor_id) {
-   $max_billing_id_new = 0;
+   $res = 0;
    if (!empty($distributor_id)) {
       $query = db_select('petty_cash', 'cb');
       $query->addExpression('MAX(id)', 'max');
       $query->condition('distributor_id', $distributor_id);
       $max_billing_id_new = $query->execute()->fetchField();
+      
+      if(!empty($max_billing_id_new)) {
+          $query = db_select('petty_cash', 'pc');
+         $query->condition('pc.distributor_id', $distributor_id);
+         $query->condition('pc.id', $max_billing_id_new);
+         $query->fields('pc', array('balance'));
+         $query->range(0, 10);
+         $res = $query->execute()->fetchField();
+      }
    }
-   return $max_billing_id_new;
+   return $res;
 }
 
 /**
@@ -128,12 +137,13 @@ function _get_latest_balance($distributor_id) {
  * @param type $string
  */
 function get_list_of_voucher_details($string = '') {
+   dpm($string, '$string');
    $res = array();
    $user_id = $GLOBALS['user']->uid;
    $distributor_id = change_feeds_import_get_distributor_id($user_id);
    $length = strlen($string);
    if ($length > 2) {
-      if (!empty($dis_id) && !empty($string)) {
+      if (!empty($distributor_id) && !empty($string)) {
          $query = db_select('petty_cash', 'pc');
          $query->isNull('pc.voucher_reference_no');
          $query->condition('pc.distributor_id', $distributor_id);
@@ -143,11 +153,12 @@ function get_list_of_voucher_details($string = '') {
          $res = $query->execute()->fetchAllKeyed(0, 0);
       }
    }
+   dpm($res, 'res');
    drupal_json_output($res);
 }
 
 function _update_unique_coupon($distributor_id) {
-   $coupon_id = 1;
+   $coupon_id = 0;
    if (!empty($distributor_id)) {
       $txn = db_transaction();
 
@@ -166,6 +177,7 @@ function _update_unique_coupon($distributor_id) {
              ->execute();
       }
       else {
+         $coupon_id = 1;
          $insert = db_insert('petty_cash_sequence_table')
              ->fields(array(
            'distributor_id' => $distributor_id,

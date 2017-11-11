@@ -212,19 +212,19 @@ function upload_petty_cash_callback_submit($form, &$form_state) {
       $balance = $balance - $form_state['values']['amount'];
    }
    dpm($balance, '$balance1');
-   /**
-     db_insert('petty_cash') // Table name no longer needs {}
-     ->fields(array(
-     'type' => $form_state['values']['type'],
-     'head' => $form_state['values']['head'],
-     'subhead' => $form_state['values']['subhead'],
-     'description' => $form_state['values']['description'],
-     'amount' => $form_state['values']['amount'],
-     'voucher_no' => $complete_voucher_no,
-     //'voucher_date' => date('Y-m-d'),
-     'balance' => $balance,
-     'distributor_id' => $distributor_id,
-     ))
-     ->execute();
-    * */
+
+   db_insert('petty_cash') // Table name no longer needs {}
+       ->fields(array(
+         'type' => $form_state['values']['type'],
+         'head' => $form_state['values']['head'],
+         'subhead' => $form_state['values']['subhead'],
+         'description' => $form_state['values']['description'],
+         'amount' => $form_state['values']['amount'],
+         'voucher_no' => $complete_voucher_no,
+         'person_name' => $form_state['values']['person_name'],
+         'voucher_date' => date('Y-m-d'),
+         'balance' => $balance,
+         'distributor_id' => $distributor_id,
+       ))
+       ->execute();
 }

@@ -41,10 +41,10 @@ function file_upload_petty_cash_callback($form, &$form_state) {
       $output = _get_voucher_details_distributor_wise($distributor_id, $form_state['values']['voucher']);
       $file_id = variable_get("$voucher_$distributor_id");
 
-      if (!empty($output)) {
+      if (!empty($output['rows'])) {
          $html = theme('table', array(
-           'header' => $header,
-           'rows' => $rows,
+           'header' => $output['header'],
+           'rows' => $output['rows'],
            'attributes' => array('width' => '100%')
          ));
          $form['voucher_details'] = array(
