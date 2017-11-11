@@ -30,6 +30,10 @@ function upload_petty_cash_callback($form, &$form_state) {
      '#type' => 'value',
      '#value' => $arg1,
    );
+   $form['distributor_id'] = array(
+     '#type' => 'value',
+     '#value' => $distributor_id,
+   );
 
    $header_options = get_list_of_head_option($arg1, $distributor_id);
    if (!empty($header_options)) {
@@ -76,7 +80,7 @@ function upload_petty_cash_callback($form, &$form_state) {
               '#required' => TRUE,
             );
             $form['amount'] = array(
-              '#title' => t('Amount'),
+              '#title' => t('Enter Amount'),
               '#type' => 'textfield',
               '#size' => 15,
               '#element_validate' => array('element_validate_integer_positive'),
@@ -189,35 +193,10 @@ function get_list_of_subhead_option_using_head($arg1, $distributor_id, $head) {
 
 function upload_petty_cash_callback_submit($form, &$form_state) {
    dpm($form_state, 'state');
-   $user_id = $GLOBALS['user']->uid;
-   $distributor_id = change_feeds_import_get_distributor_id($user_id);
+   $distributor_id = $form_state['values']['distributor_id'];
 
-   $txn = db_transaction();
-
-   $query = db_select('petty_cash_sequence_table', 'ts');
-   $query->forUpdate();
-   $query->addField('ts', 'next_id');
-   $query->condition('ts.distributor_id', $distributor_id);
-   $coupon_id = $query->execute()->fetchField();
-   dpm($coupon_id, '$coupon_id');
-
-   if ($coupon_id) {
-      // Increment the next_value.
-      db_update('petty_cash_sequence_table')
-          ->fields(array('next_id' => $coupon_id + 1))
-          ->condition('distributor_id', $distributor_id)
-          ->execute();
-   }
-   else {
-      $coupon_id = 1;
-      $insert = db_insert('petty_cash_sequence_table')
-          ->fields(array(
-        'distributor_id' => $distributor_id,
-        'next_id' => $coupon_id + 1
-      ));
-      $insert->execute();
-   }
-   dpm($coupon_id, '$coupon_id1');
+   // fetch latest coupon id and update for next id
+   $coupon_id = _update_unique_coupon($distributor_id);
 
    $arg1 = $form_state['values']['arg'];
    $complete_voucher_no = "$distributor_id-$arg1-$coupon_id";
@@ -242,6 +221,7 @@ function upload_petty_cash_callback_submit($form, &$form_state) {
      'description' => $form_state['values']['description'],
      'amount' => $form_state['values']['amount'],
      'voucher_no' => $complete_voucher_no,
+     //'voucher_date' => date('Y-m-d'),
      'balance' => $balance,
      'distributor_id' => $distributor_id,
      ))

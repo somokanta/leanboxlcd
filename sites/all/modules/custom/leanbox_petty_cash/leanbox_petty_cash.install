@@ -86,7 +86,11 @@ function leanbox_petty_cash_schema() {
        'voucher_no' => array(
          'description' => 'voucher_no',
          'type' => 'varchar',
-         'length' => 30,
+         'length' => 40,
+       ),
+       'voucher_date' => array(
+         'description' => 'voucher_date',
+         'type' => 'date',
        ),
        'balance' => array(
          'description' => 'next_id',
