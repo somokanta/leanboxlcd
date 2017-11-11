@@ -191,9 +191,9 @@ function upload_petty_cash_callback_submit($form, &$form_state) {
    dpm($form_state, 'state');
    $user_id = $GLOBALS['user']->uid;
    $distributor_id = change_feeds_import_get_distributor_id($user_id);
-   
+
    $txn = db_transaction();
-   
+
    $query = db_select('petty_cash_sequence_table', 'ts');
    $query->forUpdate();
    $query->addField('ts', 'next_id');
@@ -217,28 +217,34 @@ function upload_petty_cash_callback_submit($form, &$form_state) {
       ));
       $insert->execute();
    }
-      dpm($coupon_id, '$coupon_id1');
+   dpm($coupon_id, '$coupon_id1');
 
    $arg1 = $form_state['values']['arg'];
    $complete_voucher_no = "$distributor_id-$arg1-$coupon_id";
    dpm($complete_voucher_no, '$complete_voucher_no');
-   
+
    $balance = _get_latest_balance($distributor_id);
    dpm($balance, '$balance');
-/**
-   db_insert('petty_cash') // Table name no longer needs {}
-       ->fields(array(
-         'type' => $form_state['values']['type'],
-         'head' => $form_state['values']['head'],
-         'subhead' => $form_state['values']['subhead'],
-         'description' => $form_state['values']['description'],
-         'amount' => $form_state['values']['amount'],
-         'voucher_no' => $complete_voucher_no,
-         'balance' => $balance,         
-         'distributor_id' => $distributor_id,
-       ))
-       ->execute();
- * */
- 
-}
 
+   if ($arg1 === 'credit') {
+      $balance = $balance + $form_state['values']['amount'];
+   }
+   else {
+      $balance = $balance - $form_state['values']['amount'];
+   }
+   dpm($balance, '$balance1');
+   /**
+     db_insert('petty_cash') // Table name no longer needs {}
+     ->fields(array(
+     'type' => $form_state['values']['type'],
+     'head' => $form_state['values']['head'],
+     'subhead' => $form_state['values']['subhead'],
+     'description' => $form_state['values']['description'],
+     'amount' => $form_state['values']['amount'],
+     'voucher_no' => $complete_voucher_no,
+     'balance' => $balance,
+     'distributor_id' => $distributor_id,
+     ))
+     ->execute();
+    * */
+}

@@ -25,6 +25,14 @@ function leanbox_petty_cash_menu() {
      'type' => MENU_CALLBACK,
      'file' => 'form/leanbox_petty_cash.form.inc',
    );
+   $items['petty-cash-voucher/delete'] = array(
+     'title' => 'petty cash voucher',
+     'page callback' => 'drupal_get_form',
+     'page arguments' => array('revert_petty_cash_callback'),
+     'access arguments' => array('upload petty cash'),
+     'type' => MENU_CALLBACK,
+     'file' => 'form/leanbox_petty_cash.form.inc',
+   );
    return $items;
 }
 
