@@ -103,6 +103,37 @@ function dispatch_planning_menu() {
     'access callback' => TRUE,
     'type' => MENU_NORMAL_ITEM,
   );
+  $items['ptl-loose-sheet'] = array(
+    'title' => 'Loose PICKING SHEET',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('ptl_loose_sheet_form'),
+    'access arguments' => array('Distributor Upload File'),
+    'type' => MENU_CALLBACK,
+    'file' => 'ptl_dispatch_planning.inc',
+  );
+  $items['download-ptl-loose-sheet/%'] = array(
+    'title' => 'Download PTL Loose',
+    'page callback' => 'download_ptl_loose_sheet',
+    'page arguments' => array(1),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  $items['ptl-cld-sheet'] = array(
+    'title' => 'CLD PICKING SHEET',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('ptl_cld_sheet_form'),
+    'access arguments' => array('Distributor Upload File'),
+    'type' => MENU_CALLBACK,
+    'file' => 'ptl_dispatch_planning.inc',
+  );
+  $items['download-ptl-cld-sheet/%'] = array(
+    'title' => 'CLD PICKING SHEET',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('download_ptl_cld_sheet'),
+    'access arguments' => array('Distributor Upload File'),
+    'type' => MENU_CALLBACK,
+    'file' => 'ptl_dispatch_planning.inc',
+  );   
 
   return $items;
 }
