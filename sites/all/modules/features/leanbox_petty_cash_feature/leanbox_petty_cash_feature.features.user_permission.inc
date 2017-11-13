@@ -35,5 +35,17 @@ function leanbox_petty_cash_feature_user_default_permissions() {
     'module' => 'feeds',
   );
 
+  // Exported permission: 'upload petty cash'.
+  $permissions['upload petty cash'] = array(
+    'name' => 'upload petty cash',
+    'roles' => array(
+      'DFE' => 'DFE',
+      'RS Admin' => 'RS Admin',
+      'RS Operator' => 'RS Operator',
+      'administrator' => 'administrator',
+    ),
+    'module' => 'leanbox_petty_cash',
+  );
+
   return $permissions;
 }
