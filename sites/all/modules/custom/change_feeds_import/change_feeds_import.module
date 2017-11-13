@@ -2199,6 +2199,9 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
   if ($view->base_table == 'custom_billing_data' && ($view->name != 'impact_delivery_cron_2') && ($view->name != 'impact_delivery_cron_evening_2')) {
     $query->add_where(0, 'custom_billing_data.distributor_id', $distributor_id, '=');
   }
+  if (($view->base_table == 'petty_cash') && ($view->name == 'petty_cash_transaction')) {
+    $query->add_where(0, 'petty_cash.distributor_id', $distributor_id, '=');
+  }
   if ($view->base_table == 'van_cld_data_table') {
     $query->add_where(0, 'van_cld_data_table.distributor_id', $distributor_id, '=');
   }

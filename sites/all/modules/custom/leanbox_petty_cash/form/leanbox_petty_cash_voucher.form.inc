@@ -111,7 +111,7 @@ function revert_petty_cash_callback_submit($form, &$form_state) {
             'description' => $old_voucher_details[0]['description'],
             'amount' => $old_amount,
             'voucher_no' => $complete_voucher_no,
-            'voucher_date' => date('Y-m-d'),
+            'voucher_date' => time(),
             'voucher_reference_no' => $old_voucher,
             'balance' => $balance,
             'person_name' => $old_voucher_details[0]['person_name'],

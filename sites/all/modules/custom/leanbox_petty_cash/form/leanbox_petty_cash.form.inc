@@ -237,7 +237,7 @@ function upload_petty_cash_callback_submit($form, &$form_state) {
          'amount' => $amount,
          'voucher_no' => $complete_voucher_no,
          'person_name' => $form_state['values']['person_name'],
-         'voucher_date' => date('Y-m-d'),
+         'voucher_date' => time(),
          'balance' => $balance,
          'distributor_id' => $distributor_id,
          'bill_available' => $bill_available,

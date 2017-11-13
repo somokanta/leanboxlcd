@@ -61,7 +61,11 @@ function file_upload_petty_cash_callback($form, &$form_state) {
          $form['file'] = array(
            '#title' => t('Upload file'),
            '#type' => 'file',
-           //  '#required' => TRUE,
+           '#description' => t('Allowed extensions: pdf png jpg jpeg txt'),
+         );
+         $form['bill_file'] = array(
+           '#title' => t('Upload bill file'),
+           '#type' => 'file',
            '#description' => t('Allowed extensions: pdf png jpg jpeg txt'),
          );
          $form['submit'] = array(
@@ -96,6 +100,28 @@ function file_upload_petty_cash_callback_validate($form, &$form_state) {
    else {
       form_set_error('file', t('No file was uploaded.'));
    }
+
+   $file = file_save_upload('bill_file', array(
+     'file_validate_extensions' => array('pdf png jpg jpeg txt'), // Validate extensions.
+   ));
+   // If the file passed validation:
+   if ($file) {
+      // Change the status
+      $file->status = FILE_STATUS_PERMANENT;
+      // Update the file status into the database
+      file_save($file);
+      // Move the file, into the Drupal file system
+      if ($file = file_move($file, 'public://')) {
+         // Save the file for use in the submit handler.
+         $form_state['storage']['bill_file'] = $file;
+      }
+      else {
+         form_set_error('bill_file', t('Failed to write the uploaded bill file the site\'s file folder.'));
+      }
+   }
+   else {
+      form_set_error('bill_file', t('No Bill file was uploaded.'));
+   }
 }
 
 /**
@@ -118,14 +144,16 @@ function file_upload_petty_cash_callback_submit($form, &$form_state) {
 
       //adding file and updating fid in petty_cash
       $file = ($form_state['storage']['file']);
-      if (!empty($file->fid)) {
-         $file_id = $file->fid;
+      $bill_file = ($form_state['storage']['bill_file']);
+      $file_id = $file->fid;
+      $bill_file_id = $bill_file->fid;
+      if (!empty($file_id) && !empty($bill_file_id)) {
 
          $old_voucher_serial_id = $form_state['values']['old_voucher_table_id'];
          if (!empty($old_voucher_serial_id)) {
             //  update file id in petty cash table
             db_update('petty_cash')
-                ->fields(array('file' => $file_id, 'file_date' => date('Y-m-d')))
+                ->fields(array('file' => $file_id, 'bill_file' => $bill_file_id, 'file_date' => time()))
                 ->condition('id', $old_voucher_serial_id)
                 ->execute();
             drupal_set_message("Documents uploaded successfully.");

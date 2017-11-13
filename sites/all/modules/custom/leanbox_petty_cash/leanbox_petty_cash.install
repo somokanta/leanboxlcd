@@ -90,13 +90,11 @@ function leanbox_petty_cash_schema() {
        ),
        'voucher_date' => array(
          'description' => 'voucher_date',
-         'type' => 'date',
-         'mysql_type' => 'date',
+         'type' => 'int',
        ),
        'file_date' => array(
          'description' => 'file_date',
-         'type' => 'date',
-         'mysql_type' => 'date',
+         'type' => 'int',
        ),
        'balance' => array(
          'description' => 'next_id',
@@ -108,6 +106,11 @@ function leanbox_petty_cash_schema() {
          'type' => 'int',
          'length' => 20,
        ),
+       'bill_file' => array(
+         'description' => 'bill file id',
+         'type' => 'int',
+         'length' => 20,
+       ),
        'distributor_id' => array(
          'description' => 'distributor_id',
          'type' => 'int',
@@ -115,6 +118,9 @@ function leanbox_petty_cash_schema() {
        ),
      ),
      'primary key' => array('id'),
+     'indexes' => array(
+       'voucher_no' => array('voucher_no'),
+     ),
    );
 
    return $schema;

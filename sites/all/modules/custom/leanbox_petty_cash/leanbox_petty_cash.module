@@ -119,13 +119,12 @@ function _get_latest_balance($distributor_id) {
       $query->addExpression('MAX(id)', 'max');
       $query->condition('distributor_id', $distributor_id);
       $max_billing_id_new = $query->execute()->fetchField();
-      
-      if(!empty($max_billing_id_new)) {
-          $query = db_select('petty_cash', 'pc');
+
+      if (!empty($max_billing_id_new)) {
+         $query = db_select('petty_cash', 'pc');
          $query->condition('pc.distributor_id', $distributor_id);
          $query->condition('pc.id', $max_billing_id_new);
          $query->fields('pc', array('balance'));
-         $query->range(0, 10);
          $res = $query->execute()->fetchField();
       }
    }
@@ -186,7 +185,6 @@ function _update_unique_coupon($distributor_id) {
    return $coupon_id;
 }
 
-
 /**
  * 
  * @param type $distributor_id
@@ -213,11 +211,20 @@ function _get_voucher_details_distributor_wise($distributor_id, $voucher) {
         'Type',
         'Description',
       );
-
+      $rows[0]['voucher_date'] = date('Y-m-d', $rows[0]['voucher_date']);
       $output['header'] = $header;
       $output['rows'] = $rows;
-      
    }
 
    return $output;
+}
+
+/**
+ * Implements of hook_views_api().
+ */
+function leanbox_petty_cash_views_api() {
+   return array(
+     'api' => 3,
+     'path' => drupal_get_path('module', 'leanbox_petty_cash') . '/views'
+   );
 }
