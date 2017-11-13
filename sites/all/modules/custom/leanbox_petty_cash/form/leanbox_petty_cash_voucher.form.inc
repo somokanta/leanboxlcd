@@ -38,8 +38,13 @@ function revert_petty_cash_callback($form, &$form_state) {
    );
    if (isset($form_state['values']['voucher']) && !empty($form_state['values']['voucher'])) {
       $output = _get_voucher_details_distributor_wise($distributor_id, $form_state['values']['voucher']);
-
       if (!empty($output['rows'])) {
+         $form['old_voucher_table_id'] = array(
+           '#type' => 'value',
+           '#value' => $output['rows'][0]['id'],
+         );
+
+         unset($output['rows'][0]['id']);
          $html = theme('table', array(
            'header' => $output['header'],
            'rows' => $output['rows'],
@@ -51,13 +56,6 @@ function revert_petty_cash_callback($form, &$form_state) {
          $form['voucher_rows'] = array(
            '#type' => 'value',
            '#value' => $output['rows'],
-         );
-         $form['amount'] = array(
-           '#title' => t('Enter Amount'),
-           '#type' => 'textfield',
-           '#size' => 15,
-           '#element_validate' => array('element_validate_integer_positive'),
-           '#required' => TRUE,
          );
          $form['submit'] = array(
            '#value' => 'delete',
@@ -82,37 +80,53 @@ function _petty_cash_revert_ajax($form, &$form_state) {
  * @param type $form_state
  */
 function revert_petty_cash_callback_submit($form, &$form_state) {
-   dpm($form_state, 'state');
    if (!empty($form_state['values']['voucher']) && !empty($form_state['values']['distributor_id'])) {
       $old_voucher = $form_state['values']['voucher'];
       $distributor_id = $form_state['values']['distributor_id'];
       $balance = _get_latest_balance($distributor_id);
-      $balance = $balance + $form_state['values']['amount'];
-      dpm($balance, 'updated $balance');
       $coupon_id = _update_unique_coupon($distributor_id);
-      dpm($coupon_id, 'received $coupon_id');
       $arg1 = $form_state['values']['arg'];
-      $complete_voucher_no = "revert-$distributor_id-credit-$coupon_id";
-      dpm($complete_voucher_no, '$complete_voucher_no');
+      $user_details = leanbox_dashboard_get_username_and_rs_code($distributor_id);
+      $rs_code = $user_details['field_third_party_username_value'];
+      $complete_voucher_no = "revert-credit-$rs_code-$coupon_id";
 
       $old_voucher_details = $form_state['values']['voucher_rows'];
-      dpm($old_voucher_details, '$old_voucher_details');
-      
-        db_insert('petty_cash') // Table name no longer needs {}
-        ->fields(array(
-        'type' => 'credit',
-        'head' => $old_voucher_details[0]['head'],
-        'subhead' => $old_voucher_details[0]['subhead'],
-        'description' => $old_voucher_details[0]['description'],
-        'amount' => $form_state['values']['amount'],
-        'voucher_no' => $complete_voucher_no,
-        //'voucher_date' => date('Y-m-d'),
-        'deleted' => 'yes',
-        'voucher_reference_no' => $old_voucher,
-        'balance' => $balance,
-        'distributor_id' => $distributor_id,
-        ))
-        ->execute();
-       
+      $old_amount = $old_voucher_details[0]['amount'];
+      if ($old_voucher_details[0]['type'] === 'credit') {
+         $type = 'debit';
+
+         // credit voucher is deleted
+         $balance = $balance - $old_amount;
+      }
+      else {
+         $type = 'credit';
+         $balance = $balance + $old_amount;
+      }
+
+      db_insert('petty_cash') // Table name no longer needs {}
+          ->fields(array(
+            'type' => $type,
+            'head' => $old_voucher_details[0]['head'],
+            'subhead' => $old_voucher_details[0]['subhead'],
+            'description' => $old_voucher_details[0]['description'],
+            'amount' => $old_amount,
+            'voucher_no' => $complete_voucher_no,
+            'voucher_date' => date('Y-m-d'),
+            'voucher_reference_no' => $old_voucher,
+            'balance' => $balance,
+            'person_name' => $old_voucher_details[0]['person_name'],
+            'distributor_id' => $distributor_id,
+          ))
+          ->execute();
+      drupal_set_message(t("$old_amount Reverted sucessfully."));
+
+      //  update file id in petty cash table
+      $old_voucher_serial_id = $form_state['values']['old_voucher_table_id'];
+      if (!empty($old_voucher_serial_id)) {
+         db_update('petty_cash')
+             ->fields(array('deleted' => 'yes'))
+             ->condition('id', $old_voucher_serial_id)
+             ->execute();
+      }
    }
 }

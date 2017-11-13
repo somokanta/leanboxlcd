@@ -93,19 +93,25 @@ function leanbox_petty_cash_schema() {
          'type' => 'date',
          'mysql_type' => 'date',
        ),
+       'file_date' => array(
+         'description' => 'file_date',
+         'type' => 'date',
+         'mysql_type' => 'date',
+       ),
        'balance' => array(
          'description' => 'next_id',
          'type' => 'float',
          'length' => 10,
        ),
        'file' => array(
-         'description' => 'next_id',
+         'description' => 'file id',
          'type' => 'int',
-         'length' => 10,
+         'length' => 20,
        ),
        'distributor_id' => array(
          'description' => 'distributor_id',
          'type' => 'int',
+         'length' => 20,
        ),
      ),
      'primary key' => array('id'),

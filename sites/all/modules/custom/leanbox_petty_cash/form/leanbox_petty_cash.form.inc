@@ -104,13 +104,14 @@ function upload_petty_cash_callback($form, &$form_state) {
                  '#title' => t('Bill No'),
                  '#type' => 'textfield',
                  '#size' => 20,
-                 '#required' => TRUE,
+                 //'#required' => TRUE,
                  '#states' => array(
                    // Hide the settings when the cancel notify checkbox is disabled.
                    'visible' => array(
                      ':input[name="bill_available"]' => array('value' => 'yes'),
                    ),
                  ),
+                 '#element_validate' => array('element_validate_require_bill_no'),
                );
             }
             $form['submit'] = array(
@@ -127,6 +128,20 @@ function upload_petty_cash_callback($form, &$form_state) {
 
 
    return $form;
+}
+
+/**
+ * 
+ * @param type $element
+ * @param type $form_state
+ */
+function element_validate_require_bill_no($element, &$form_state) {
+   $value = $element['#value'];
+   if (empty($value) && ($form_state['values']['bill_available'] === 'yes')) {
+      form_error($element, t('%name is required.', array(
+        '%name' => $element['#title'],
+      )));
+   }
 }
 
 /**
@@ -192,18 +207,15 @@ function get_list_of_subhead_option_using_head($arg1, $distributor_id, $head) {
 }
 
 function upload_petty_cash_callback_submit($form, &$form_state) {
-   dpm($form_state, 'state');
    $distributor_id = $form_state['values']['distributor_id'];
 
    // fetch latest coupon id and update for next id
    $coupon_id = _update_unique_coupon($distributor_id);
-
+   $user_details = leanbox_dashboard_get_username_and_rs_code($distributor_id);
+   $rs_code = $user_details['field_third_party_username_value'];
    $arg1 = $form_state['values']['arg'];
-   $complete_voucher_no = "$distributor_id-$arg1-$coupon_id";
-   dpm($complete_voucher_no, '$complete_voucher_no');
-
+   $complete_voucher_no = "$arg1-$rs_code-$coupon_id";
    $balance = _get_latest_balance($distributor_id);
-   dpm($balance, '$balance');
 
    if ($arg1 === 'credit') {
       $balance = $balance + $form_state['values']['amount'];
@@ -211,20 +223,26 @@ function upload_petty_cash_callback_submit($form, &$form_state) {
    else {
       $balance = $balance - $form_state['values']['amount'];
    }
-   dpm($balance, '$balance1');
+   
+   $bill_available = !empty($form_state['values']['bill_available']) ? $form_state['values']['bill_available'] : NULL;
+   $bill_no = !empty($form_state['values']['bill_no']) ? $form_state['values']['bill_no'] : NULL;
 
+   $amount = $form_state['values']['amount'];
    db_insert('petty_cash') // Table name no longer needs {}
        ->fields(array(
-         'type' => $form_state['values']['type'],
+         'type' => $arg1,
          'head' => $form_state['values']['head'],
          'subhead' => $form_state['values']['subhead'],
          'description' => $form_state['values']['description'],
-         'amount' => $form_state['values']['amount'],
+         'amount' => $amount,
          'voucher_no' => $complete_voucher_no,
          'person_name' => $form_state['values']['person_name'],
          'voucher_date' => date('Y-m-d'),
          'balance' => $balance,
          'distributor_id' => $distributor_id,
+         'bill_available' => $bill_available,
+         'bill_no' => $bill_no,
        ))
        ->execute();
+   drupal_set_message(t("$amount $arg1 sucessfully"));
 }

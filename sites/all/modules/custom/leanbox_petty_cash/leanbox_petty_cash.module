@@ -10,7 +10,7 @@
 function leanbox_petty_cash_menu() {
    $items = array();
    $items['petty-cash/credit'] = array(
-     'title' => 'petty cash credit',
+     'title' => 'Petty Cash Credit',
      'page callback' => 'drupal_get_form',
      'page arguments' => array('upload_petty_cash_callback'),
      'access arguments' => array('upload petty cash'),
@@ -18,7 +18,7 @@ function leanbox_petty_cash_menu() {
      'file' => 'form/leanbox_petty_cash.form.inc',
    );
    $items['petty-cash/debit'] = array(
-     'title' => 'petty cash credit',
+     'title' => 'Petty Cash Credit',
      'page callback' => 'drupal_get_form',
      'page arguments' => array('upload_petty_cash_callback'),
      'access arguments' => array('upload petty cash'),
@@ -26,7 +26,7 @@ function leanbox_petty_cash_menu() {
      'file' => 'form/leanbox_petty_cash.form.inc',
    );
    $items['petty-cash-voucher/delete'] = array(
-     'title' => 'petty cash voucher',
+     'title' => 'Petty Cash Revert Voucher',
      'page callback' => 'drupal_get_form',
      'page arguments' => array('revert_petty_cash_callback'),
      'access arguments' => array('upload petty cash'),
@@ -34,7 +34,7 @@ function leanbox_petty_cash_menu() {
      'file' => 'form/leanbox_petty_cash_voucher.form.inc',
    );
    $items['petty-cash-voucher/file-upload'] = array(
-     'title' => 'petty cash voucher',
+     'title' => 'Petty Cash Bill Upload',
      'page callback' => 'drupal_get_form',
      'page arguments' => array('file_upload_petty_cash_callback'),
      'access arguments' => array('upload petty cash'),
@@ -78,7 +78,7 @@ function leanbox_petty_cash_feeds_presave($source, $entity, $item, $entity_id) {
             $allowed_values = list_allowed_values($field);
             $val = strtolower($val);
             if (!array_key_exists($val, $allowed_values)) {
-               drupal_set_message("Please enter correct value for $key " . implode($allowed_values, ','), 'error');
+               drupal_set_message("Please enter correct value for type. Values should be in " . implode($allowed_values, ','), 'error');
                $entity->feeds_item->skip = TRUE;
             }
             else {
@@ -100,8 +100,8 @@ function leanbox_petty_cash_taxonomy_term_presave($term) {
          $distributor_id = change_feeds_import_get_distributor_id($user_id);
 
          $term_type = $term->field_petty_cash_type['und'][0]['value'];
-         $term_head = $term->field_petty_cash_head['und'][0]['value'];
-         $term_subhead = $term->field_petty_cash_subhead['und'][0]['value'];
+         $term_head = substr($term->field_petty_cash_head['und'][0]['value'], 0, 50);
+         $term_subhead = substr($term->field_petty_cash_subhead['und'][0]['value'], 0, 50);
          $term->name = $term_type . "-" . $term_head . "-" . $term_subhead;
          $term->field_petty_cash_distributor['und'][0]['uid'] = $distributor_id;
       }
@@ -165,7 +165,6 @@ function _update_unique_coupon($distributor_id) {
       $query->addField('ts', 'next_id');
       $query->condition('ts.distributor_id', $distributor_id);
       $coupon_id = $query->execute()->fetchField();
-      dpm($coupon_id, '$coupon_id');
 
       if ($coupon_id) {
          // Increment the next_value.
@@ -183,7 +182,6 @@ function _update_unique_coupon($distributor_id) {
          ));
          $insert->execute();
       }
-      dpm($coupon_id, '$coupon_id1');
    }
    return $coupon_id;
 }
@@ -201,7 +199,7 @@ function _get_voucher_details_distributor_wise($distributor_id, $voucher) {
       $query->isNull('pc.voucher_reference_no');
       $query->condition('pc.distributor_id', $distributor_id);
       $query->condition('pc.voucher_no', $voucher);
-      $query->fields('pc', array('voucher_date', 'head', 'subhead', 'amount', 'person_name', 'bill_available', 'bill_no'));
+      $query->fields('pc', array('id', 'voucher_date', 'head', 'subhead', 'amount', 'person_name', 'bill_available', 'bill_no', 'type', 'description'));
       $rows = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
       // $rows[] = $res;
       $header = array(
@@ -212,10 +210,13 @@ function _get_voucher_details_distributor_wise($distributor_id, $voucher) {
         'Person name',
         'Bill available',
         'Bill no',
+        'Type',
+        'Description',
       );
 
       $output['header'] = $header;
       $output['rows'] = $rows;
+      
    }
 
    return $output;

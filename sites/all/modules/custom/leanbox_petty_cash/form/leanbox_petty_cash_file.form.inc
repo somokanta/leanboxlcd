@@ -42,6 +42,13 @@ function file_upload_petty_cash_callback($form, &$form_state) {
       $file_id = variable_get("$voucher_$distributor_id");
 
       if (!empty($output['rows'])) {
+
+         $form['old_voucher_table_id'] = array(
+           '#type' => 'value',
+           '#value' => $output['rows'][0]['id'],
+         );
+
+         unset($output['rows'][0]['id']);
          $html = theme('table', array(
            'header' => $output['header'],
            'rows' => $output['rows'],
@@ -50,10 +57,7 @@ function file_upload_petty_cash_callback($form, &$form_state) {
          $form['voucher_details'] = array(
            '#markup' => $html,
          );
-//         $form['voucher_rows'] = array(
-//           '#type' => 'value',
-//           '#value' => $rows,
-//         );
+
          $form['file'] = array(
            '#title' => t('Upload file'),
            '#type' => 'file',
@@ -90,7 +94,7 @@ function file_upload_petty_cash_callback_validate($form, &$form_state) {
       }
    }
    else {
-      form_set_error('file', t('No file was uploaded. kinldy rename it and upload again.'));
+      form_set_error('file', t('No file was uploaded.'));
    }
 }
 
@@ -117,14 +121,15 @@ function file_upload_petty_cash_callback_submit($form, &$form_state) {
       if (!empty($file->fid)) {
          $file_id = $file->fid;
 
-
-         //  update file id in petty cash table
-         db_update('petty_cash')
-             ->fields(array('distributor_id' => 60))
-             ->condition('distributor_id', $distributor_id)
-             ->condition('voucher', $old_voucher)
-             ->execute();
-         drupal_set_message("Documents uploaded successfully.");
+         $old_voucher_serial_id = $form_state['values']['old_voucher_table_id'];
+         if (!empty($old_voucher_serial_id)) {
+            //  update file id in petty cash table
+            db_update('petty_cash')
+                ->fields(array('file' => $file_id, 'file_date' => date('Y-m-d')))
+                ->condition('id', $old_voucher_serial_id)
+                ->execute();
+            drupal_set_message("Documents uploaded successfully.");
+         }
       }
    }
 }
