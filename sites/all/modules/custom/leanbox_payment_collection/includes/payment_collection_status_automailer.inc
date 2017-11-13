@@ -57,14 +57,14 @@ function get_email_pending_for_collection($distributor_id) {
   $decl_bounced_counter = 1;
   $rows = array();
   $row[] = array('Type', 'Count', 'Value', 'Count', 'Value');
-  $start_date = strtotime('-8 day', strtotime(date('Y-m-d')));
-  $end_date =  strtotime(date('Y-m-d'));
+  $decl_date = strtotime('-8 day', strtotime(date('Y-m-d')));
+
   foreach($res as $data) {
     if($data['field_flag_value']  == 'signed') {
       $row['signed']['type']  = 'Signed';
       $row['signed']['count']  = $signed_counter++;
       $row['signed']['value'] += $data['field_remaining_amt_collection_value'] - ($data['field_previous_cash_amt_value'] + $data['field_previous_cheque_amt_value']);
-      if(strtotime($data['field_declaration_date_value'])  >= $start_date  && strtotime($data['field_declaration_date_value'])  <= $end_date) {
+      if(strtotime($data['field_declaration_date_value']) <= $decl_date) {
         $row['signed']['decl_count'] = $decl_signed_counter++;
         $row['signed']['decl_value'] += $data['field_remaining_amt_collection_value'] - ($data['field_previous_cash_amt_value'] + $data['field_previous_cheque_amt_value']);
       }
@@ -77,7 +77,7 @@ function get_email_pending_for_collection($distributor_id) {
       $row['bounced']['type']  = 'Bounced';
       $row['bounced']['count']  = $bounced_counter++;
       $row['bounced']['value'] += $data['field_remaining_amt_collection_value'] - ($data['field_previous_cash_amt_value'] + $data['field_previous_cheque_amt_value']);
-      if(strtotime($data['field_declaration_date_value'])  >= $start_date  && strtotime($data['field_declaration_date_value'])  <= $end_date) {
+      if(strtotime($data['field_declaration_date_value']) <= $decl_date) {
         $row['bounced']['decl_count'] = $decl_bounced_counter++;
         $row['bounced']['decl_value'] += $data['field_remaining_amt_collection_value'] - ($data['field_previous_cash_amt_value'] + $data['field_previous_cheque_amt_value']);
       }
@@ -86,7 +86,13 @@ function get_email_pending_for_collection($distributor_id) {
         $row['bounced']['decl_value'] = 0;
       }
     }
-  } 
+  }
+  
+  $total_till_date_count = $row['signed']['count'] + $row['bounced']['count'];
+  $total_till_date_value = $row['signed']['value'] + $row['bounced']['value'];
+  $total_decl_date_count = $row['signed']['decl_count'] + $row['bounced']['decl_count'];
+  $total_decl_date_value = $row['signed']['decl_value'] + $row['bounced']['decl_value'];
+  $row[] = array('Total',$total_till_date_count,$total_till_date_value,$total_decl_date_count,$total_decl_date_value);
   
   $header = array('', array('data' => 'Till Date', 'colspan' => 2), array('data' => '>8Days from Declaration Date', 'colspan' => 2));
   $output = "<h3>Pending for Collection</h3>";
@@ -121,14 +127,14 @@ function get_email_pending_for_assignment($distributor_id) {
   $decl_bounced_counter = 1;
   $rows = array();
   $row[] = array('Type', 'Count', 'Value', 'Count', 'Value');
-  $start_date = strtotime('-7 day', strtotime(date('Y-m-d')));
-  $end_date =  strtotime(date('Y-m-d'));
+  $decl_date = strtotime('-7 day', strtotime(date('Y-m-d')));
+
   foreach($res as $data) {
     if($data['field_flag_value']  == 'signed') {
       $row['signed']['type']  = 'Signed';
       $row['signed']['count']  = $signed_counter++;
       $row['signed']['value'] += $data['field_remaining_amt_collection_value'];
-      if(strtotime($data['field_declaration_date_value'])  >= $start_date  && strtotime($data['field_declaration_date_value'])  <= $end_date) {
+      if(strtotime($data['field_declaration_date_value']) <= $decl_date) {
         $row['signed']['decl_count'] = $decl_signed_counter++;
         $row['signed']['decl_value'] += $data['field_remaining_amt_collection_value'];
       }
@@ -141,7 +147,7 @@ function get_email_pending_for_assignment($distributor_id) {
       $row['bounced']['type']  = 'Bounced';
       $row['bounced']['count']  = $bounced_counter++;
       $row['bounced']['value'] += $data['field_remaining_amt_collection_value'];
-      if(strtotime($data['field_declaration_date_value'])  >= $start_date  && strtotime($data['field_declaration_date_value'])  <= $end_date) {
+      if(strtotime($data['field_declaration_date_value']) <= $decl_date) {
         $row['bounced']['decl_count'] = $decl_bounced_counter++;
         $row['bounced']['decl_value'] += $data['field_remaining_amt_collection_value'];
       }
@@ -151,7 +157,13 @@ function get_email_pending_for_assignment($distributor_id) {
       }
     }
   }
-
+  
+  $total_till_date_count = $row['signed']['count'] + $row['bounced']['count'];
+  $total_till_date_value = $row['signed']['value'] + $row['bounced']['value'];
+  $total_decl_date_count = $row['signed']['decl_count'] + $row['bounced']['decl_count'];
+  $total_decl_date_value = $row['signed']['decl_value'] + $row['bounced']['decl_value'];
+  $row[] = array('Total',$total_till_date_count,$total_till_date_value,$total_decl_date_count,$total_decl_date_value);
+  
   $header = array('', array('data' => 'Till Date', 'colspan' => 2), array('data' => '>7Days from Declaration Date', 'colspan' => 2));
   $output = "<h3>Pending for Assignment</h3>";
   $output .= theme('table', array('header' => $header, 'rows' => $row, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
@@ -185,14 +197,14 @@ function get_email_pending_for_upload($distributor_id) {
   $decl_bounced_counter = 1;
   $rows = array();
   $row[] = array('Type', 'Count', 'Value', 'Count', 'Value');
-  $start_date = strtotime('-2 day', strtotime(date('Y-m-d')));
-  $end_date =  strtotime(date('Y-m-d'));
+  $decl_date = strtotime('-2 day', strtotime(date('Y-m-d')));
+
   foreach($res as $data) {
     if($data['field_flag_value']  == 'signed') {
       $row['signed']['type']  = 'Signed';
       $row['signed']['count']  = $signed_counter++;
       $row['signed']['value'] += $data['field_remaining_amt_collection_value'];
-      if(strtotime($data['field_declaration_date_value'])  >= $start_date  && strtotime($data['field_declaration_date_value'])  <= $end_date) {
+      if(strtotime($data['field_declaration_date_value']) <= $decl_date) {
         $row['signed']['decl_count']  = $decl_signed_counter++;
         $row['signed']['decl_value'] += $data['field_remaining_amt_collection_value'];
       }
@@ -205,7 +217,7 @@ function get_email_pending_for_upload($distributor_id) {
       $row['bounced']['type']  = 'Bounced';
       $row['bounced']['count']  = $bounced_counter++;
       $row['bounced']['value'] += $data['field_remaining_amt_collection_value'];
-      if(strtotime($data['field_declaration_date_value'])  >= $start_date  && strtotime($data['field_declaration_date_value'])  <= $end_date) {    
+      if(strtotime($data['field_declaration_date_value']) <= $decl_date) {    
         $row['bounced']['decl_count']  = $decl_bounced_counter++;
         $row['bounced']['decl_value'] += $data['field_remaining_amt_collection_value'];
       }
@@ -215,7 +227,13 @@ function get_email_pending_for_upload($distributor_id) {
       }
     }
   }
-
+  
+  $total_till_date_count = $row['signed']['count'] + $row['bounced']['count'];
+  $total_till_date_value = $row['signed']['value'] + $row['bounced']['value'];
+  $total_decl_date_count = $row['signed']['decl_count'] + $row['bounced']['decl_count'];
+  $total_decl_date_value = $row['signed']['decl_value'] + $row['bounced']['decl_value'];
+  $row[] = array('Total',$total_till_date_count,$total_till_date_value,$total_decl_date_count,$total_decl_date_value);
+  
   $header = array('', array('data' => 'Till Date', 'colspan' => 2), array('data' => '>2Days from Declaration Date', 'colspan' => 2));
   $output = "<h3>Pending for Upload</h3>";
   $output .= theme('table', array('header' => $header, 'rows' => $row, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
