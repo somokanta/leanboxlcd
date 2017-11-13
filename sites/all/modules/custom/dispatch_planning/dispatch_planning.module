@@ -103,7 +103,7 @@ function dispatch_planning_menu() {
     'access callback' => TRUE,
     'type' => MENU_NORMAL_ITEM,
   );
-  $items['ptl-loose-sheet'] = array(
+  $items['loose-picking-sheet'] = array(
     'title' => 'Loose PICKING SHEET',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('ptl_loose_sheet_form'),
@@ -111,7 +111,7 @@ function dispatch_planning_menu() {
     'type' => MENU_CALLBACK,
     'file' => 'ptl_dispatch_planning.inc',
   );
-  $items['download-ptl-loose-sheet/%'] = array(
+  $items['download-loose-picking/%'] = array(
     'title' => 'Download PTL Loose',
     'page callback' => 'download_ptl_loose_sheet',
     'page arguments' => array(1),
@@ -119,7 +119,7 @@ function dispatch_planning_menu() {
     'type' => MENU_CALLBACK,
     'file' => 'ptl_dispatch_planning.inc',
   );
-  $items['ptl-cld-sheet'] = array(
+  $items['cld-picking-sheet'] = array(
     'title' => 'CLD PICKING SHEET',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('ptl_cld_sheet_form'),
@@ -127,7 +127,7 @@ function dispatch_planning_menu() {
     'type' => MENU_CALLBACK,
     'file' => 'ptl_dispatch_planning.inc',
   );
-  $items['download-ptl-cld-sheet/%'] = array(
+  $items['download-cld-picking/%'] = array(
     'title' => 'CLD PICKING SHEET',
     'page callback' => 'download_ptl_cld_sheet',
     'page arguments' => array(1),
