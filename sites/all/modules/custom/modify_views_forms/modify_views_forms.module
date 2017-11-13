@@ -10,7 +10,44 @@ function modify_views_forms_form_alter(&$form, &$form_state, $form_id) {
   if (isset($form['#node']) && !isset($form['#node']->nid) && in_array($form['#node']->type, $node_type)) {
     $form['#validate'][] = 'node_title_validate';
   }
+  
+  if($form_id == 'editableviews_entity_form_payment_collection') {
+    $form['#validate'][] = 'payment_collection_validate';
+    foreach ($form['node'] as $key => $value) {
+      //Remove the wrapper from the collection date field
+      $form['node'][$key]['field_collection_cheque_date'][LANGUAGE_NONE][0]['#theme_wrappers'] = array();
+      //Make the fine amount field disabled if type is signed
+      if($value['field_flag']['und']['#default_value'][0] == 'signed') {
+        $form['node'][$key]['field_fine_amount']['#disabled'] = TRUE;
+      }
+    }
+  }
 
+  if ($form_id == 'editableviews_entity_form_signed_bills_upload') {
+    if ($form['#view_display_name'] == 'page_2' || $form['#view_display_name'] == 'page_3') {
+      $select = array('' => '- In Stock -');
+
+      $salesman = get_all_salesman_data("salesman", NULL);
+      $salesman = $select + $salesman;
+
+      foreach ($form['node'] as $key => $value) {
+        if ($value['#bundle'] == 'payment_collection') {
+          $form['node'][$key]['field_assigned_person'][LANGUAGE_NONE][0]['value']['#type'] = 'select';
+          $form['node'][$key]['field_assigned_person'][LANGUAGE_NONE][0]['value']['#multiple'] = FALSE;
+          $form['node'][$key]['field_assigned_person'][LANGUAGE_NONE][0]['value']['#options'] = $salesman;
+          $form['node'][$key]['field_assigned_person'][LANGUAGE_NONE][0]['value']['#size'] = 1;
+        }
+      }
+    }
+    if ($form['#view_display_name'] == 'page' || $form['#view_display_name'] == 'page_1') {
+      foreach ($form['node'] as $key => $value) {
+        if (!empty($form['node'][$key]['field_file']['und'][0]['#description'])) {
+          $form['node'][$key]['field_file']['und'][0]['#description'] = "";
+        }
+      }
+    }    
+  }
+  
   if(($form_id == 'editableviews_entity_form_pick_confirm_report') || ($form_id == 'editableviews_entity_form_picking_report') || ($form_id == 'editableviews_entity_form_party_packing_report') || ($form_id == 'editableviews_entity_form_unloading_form') || ($form_id == 'editableviews_entity_form_dispatch_data_report')) {
     // fetching supervisior on the basis of logged in users distributor id
     global $user;
@@ -102,6 +139,41 @@ function modify_views_forms_form_alter(&$form, &$form_state, $form_id) {
 //      $form['node'][$key][$field_count][LANGUAGE_NONE][0]['value']['#multiple'] = FALSE;
 //      $form['node'][$key][$field_count][LANGUAGE_NONE][0]['value']['#options'] = $multi_count;
 //      $form['node'][$key][$field_count][LANGUAGE_NONE][0]['value']['#size'] = 1;
+    }
+  }
+}
+
+function payment_collection_validate($form, &$form_state) {
+  foreach($form_state['values']['node'] as $nid => $form_data){
+    $title = $form_data['title'];
+    $cash_amt = $form_data['field_cash_amt']['und'][0]['value'];
+    $cheque_amt = $form_data['field_collection_cheque_amt']['und'][0]['value'];
+    $cheque_no = $form_data['field_collection_cheque_number']['und'][0]['value'];
+    $cheque_date = $form_data['field_collection_cheque_date']['und'][0]['value'];
+    $return_flag = $form_data['field_returned_bill_flag']['und'][0]['value'];
+    //remark functionality
+    $return_remarks = $form_data['field_return_remarks']['und'][0]['value'];
+    $diff_amount = $form_data['field_field_amnt_difference']['und'][0]['value'];
+    $partial_collection_remarks = $form_data['field_partial_collection_remarks']['und'][0]['value'];
+    //Fine Amount
+    $flag_type = $form_data['field_flag']['und'][0]['value'];
+    $fine_amount = $form_data['field_fine_amount']['und'][0]['value'];
+
+// || !empty($cheque_date) && (empty($cheque_amt) || empty($cheque_no)) || !empty($cheque_no) && (empty($cheque_amt) || empty($cheque_date))
+    if( !empty($cheque_amt) && (empty($cheque_date) || empty($cheque_no)) ) {
+      form_set_error('form', t('Please fill cheque number, cheque amount and cheque date for bill '.$title));
+    }
+    if(!empty($return_flag) && (!empty($cheque_amt) || !empty($cash_amt) || !empty($fine_amount))) {
+      form_set_error('form', t("Return flag is marked for $title. Please remove cash, cheque and fine amount."));
+    }
+    if(!empty($return_flag) && (empty($return_remarks))) {
+      form_set_error('form', t("Return flag is marked for bill:$title. Please write return remark."));
+    }
+    if(!empty($diff_amount) && empty($partial_collection_remarks) && (!empty($cheque_amt) || !empty($cash_amt))) {
+      form_set_error('form', t("Please write partial collection remark for bill:$title."));
+    }
+    if($flag_type == 'bounced' && empty($fine_amount) && $fine_amount !=='0') {
+      form_set_error('form', t("Please add fine amount for bounced bill:$title."));
     }
   }
 }

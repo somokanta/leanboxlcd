@@ -1,0 +1,202 @@
+<?php
+
+/**
+ * Files containing list of functions for payment collection
+ */
+
+/**
+ * Implements hook_preprocess_page
+ * @param type $vars
+ */
+function leanbox_payment_collection_preprocess_page(&$vars) {
+  $arg0 = arg(0);
+  if ($arg0 == 'payment-collection') {
+    drupal_add_js(drupal_get_path('module', 'leanbox_payment_collection') . '/js/leanbox_payment_collection.js');
+  }
+}
+
+/**
+ * Implements hook_menu
+ */
+function leanbox_payment_collection_menu() {
+   $items = array();
+
+   $items['upload-collection-bill/signed'] = array(
+     'title' => 'Declare Payment Collection',
+     'page callback' => 'drupal_get_form',
+     'page arguments' => array('upload_signed_bill_callback'),
+     'access arguments' => array('upload payment collection'),
+     'type' => MENU_CALLBACK,
+     'file' => 'form/leanbox_payment_collection.form.inc',
+   );
+   $items['upload-collection-bill/bounced'] = array(
+     'title' => 'Declare Payment Collection',
+     'page callback' => 'drupal_get_form',
+     'page arguments' => array('upload_signed_bill_callback'),
+     'access arguments' => array('upload payment collection'),
+     'type' => MENU_CALLBACK,
+     'file' => 'form/leanbox_payment_collection.form.inc',
+   );
+   $items['bill-no/list'] = array(
+     'title' => 'Get List of logged in distributor bills',
+     'page callback' => 'get_list_of_bill_no',
+     'access arguments' => array('upload payment collection'),
+     'type' => MENU_CALLBACK,
+   );
+
+   return $items;
+}
+
+/**
+ * Implement hook_permission()
+ *  Add custom permission for collection payment
+ */
+function leanbox_payment_collection_permission() {
+   return array(
+     'upload payment collection' => array(
+       'title' => t('upload payment collection'),
+       'description' => t('upload payment collection for bills')
+     )
+   );
+}
+
+/**
+ * Menu callback; Retrieve a JSON object containing autocomplete suggestions for existing bill no.
+ * @param type $string
+ */
+function get_list_of_bill_no($string = '') {
+   global $user;
+   $res = '';
+   // Store distributor id in author in each node
+   $dis_id = change_feeds_import_get_distributor_id($user->uid);
+   $length = strlen($string);
+   if ($length > 2) {
+      if (!empty($dis_id) && !empty($string)) {
+         $query = db_select('node', 'n');
+         $query->join('field_data_field_trip_id_reference', 'tr', 'tr.entity_id = n.nid');
+         $query->condition('n.type', 'sales_register_data');
+         $query->condition('n.uid', $dis_id);
+         $query->condition('n.title', db_like($string) . '%', 'LIKE');
+         $query->fields('n', array('title'));
+         $query->range(0, 10);
+         $res = $query->execute()->fetchAllKeyed(0, 0);
+      }
+   }
+   drupal_json_output($res);
+}
+
+/**
+ * 
+ * @param type $bill_no
+ * @param type $dis_id
+ * @return array
+ */
+function leanbox_payment_collection_get_title_and_nid_combo($bill_no, $dis_id) {
+   $res = array();
+   if (!empty($bill_no) && !empty($dis_id)) {
+      $query = db_select('node', 'n');
+      $query->leftjoin('field_data_field_sales_bill_no_ref', 'br', 'n.nid = br.field_sales_bill_no_ref_nid');
+      $query->condition('n.type', 'sales_register_data');
+      $query->addField('br', 'entity_id', 'payment_collection_nid');
+      $query->addField('n', 'nid', 'sales_register_nid');
+      $query->condition('n.title', $bill_no);
+      $query->condition('n.uid', $dis_id);
+      $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+   }
+   return $res;
+}
+
+/**
+ * Implements hook_node_presave()
+ */
+function leanbox_payment_collection_node_presave($node) {
+  if ($node->type == 'payment_collection') {
+    if ($node->original->field_file['und'][0]['fid'] != $node->field_file['und'][0]['fid']) {
+      $node->field_file_upload_date['und'][0]['value'] = date('Y-m-d');
+    }
+    if ($node->original->field_assigned_person['und'][0]['value'] != $node->field_assigned_person['und'][0]['value']) {
+      $node->field_assignment_date['und'][0]['value'] = date('Y-m-d');
+      $node->field_returned_bill_flag['und'][0]['value'] = 0;
+      unset($node->field_return_remarks['und']);
+    }
+    if(empty($node->field_file['und'][0]['fid'])){
+      unset($node->field_file_upload_date['und'][0]['value']);
+    }
+    if(empty($node->field_assigned_person['und'][0]['value'])){
+      unset($node->field_assignment_date['und'][0]['value']);
+    }
+    if ($node->original->field_returned_bill_flag['und'][0]['value'] != 1 && $node->field_returned_bill_flag['und'][0]['value'] == 1) {
+      // New node Create
+      $assign_history = new StdClass();
+      $assign_history->type = 'assignment_history';
+      node_object_prepare($assign_history); // Sets some defaults. Invokes hook_prepare() and hook_node_prepare().
+      $assign_history->language = LANGUAGE_NONE; // Or e.g. 'en' if locale is enabled
+      $assign_history->uid = $node->uid;
+      $assign_history->status = 1; //(1 or 0): published or not
+      $assign_history->comment = 0; // 0 = comments disabled, 1 = read only, 2 = read/write
+      $assign_history->title = $node->title;
+      $assign_history->field_assign_person['und'][0]['value'] = $node->field_assigned_person['und'][0]['value'];
+      $assign_history->field_assign_date['und'][0]['value'] = $node->field_assignment_date['und'][0]['value'];
+      $assign_history->field_returned_date['und'][0]['value'] = date("Y-m-d");
+      $assign_history->field_payment_collection_nid[$node->language][0]['nid'] = $node->nid;
+      $assign_history->field_history_return_remarks['und'][0]['value'] = $node->field_return_remarks['und'][0]['value']; // return remark
+      node_save($assign_history);
+      unset($node->field_assigned_person['und']);
+      unset($node->field_assignment_date['und']);
+      unset($node->field_collection_cheque_date['und']);
+      unset($node->field_cash_amt['und']);
+      unset($node->field_collection_cheque_amt['und']);
+    }
+     
+    
+    if(arg(0) == 'payment-collection') {   
+    // Create Collection History
+      if((!empty($node->field_cash_amt['und'][0]['value']) || !empty($node->field_collection_cheque_amt['und'][0]['value']) || !empty($node->field_fine_amount['und'][0]['value'])) && $node->field_returned_bill_flag['und'][0]['value'] != 1) {
+        $collection_his = new StdClass();
+        $collection_his->type = 'collection_history';
+        node_object_prepare($collection_his); // Sets some defaults. Invokes hook_prepare() and hook_node_prepare().
+        $collection_his->language = LANGUAGE_NONE; // Or e.g. 'en' if locale is enabled
+        $collection_his->uid = $node->uid;
+        $collection_his->status = 1; //(1 or 0): published or not
+        $collection_his->comment = 0; // 0 = comments disabled, 1 = read only, 2 = read/write
+        $collection_his->title = $node->title;
+        $collection_his->field_payment_collection_referen[$node->language][0]['nid'] = $node->nid;
+        $collection_his->field_assign_to[$node->language][0]['value'] = $node->field_assigned_person['und'][0]['value'];
+        $collection_his->field_collection_cash_amount[$node->language][0]['value'] = $node->field_cash_amt['und'][0]['value'];
+        $collection_his->field_collection_cheque_amount[$node->language][0]['value'] = $node->field_collection_cheque_amt['und'][0]['value'];
+        $collection_his->field_collection_cheque_num[$node->language][0]['value'] = $node->field_collection_cheque_number['und'][0]['value'];
+        $collection_his->field_collection_chq_date[$node->language][0]['value'] = $node->field_collection_cheque_date['und'][0]['value'];
+        $collection_his->field_collection_history_date[$node->language][0]['value'] = date('Y-m-d');
+        $collection_his->field_his_partial_coll_remarks[$node->language][0]['value'] = $node->field_partial_collection_remarks['und'][0]['value']; // partial remark
+        $collection_his->field_his_fine_amount[$node->language][0]['value'] = $node->field_fine_amount['und'][0]['value']; // Fine Amount
+        node_save($collection_his);
+        
+        //Save the previous cash and cheque amount in payment collection content type    
+        $node->field_previous_cash_amt['und'][0]['value'] = $node->field_previous_cash_amt['und'][0]['value'] + $node->field_cash_amt['und'][0]['value'];
+        $node->field_previous_cheque_amt['und'][0]['value'] = $node->field_previous_cheque_amt['und'][0]['value'] + $node->field_collection_cheque_amt['und'][0]['value'];
+        $node->field_collection_date[$node->language][0]['value'] = date('Y-m-d');
+        //Get the bill value
+        $bill_value = $node->field_remaining_amt_collection['und'][0]['value'];
+        
+        //Update the difference field in payment collection
+        $node->field_field_amnt_difference['und'][0]['value'] = $bill_value - ($node->field_previous_cash_amt['und'][0]['value'] + $node->field_previous_cheque_amt['und'][0]['value']);
+        
+        //Update the previous fine amount field
+        $node->field_previous_fine_amount['und'][0]['value'] = ($node->field_previous_fine_amount['und'][0]['value'] + $node->field_fine_amount['und'][0]['value']);
+        
+        unset($node->field_cash_amt['und']);
+        unset($node->field_collection_cheque_amt['und']);
+        unset($node->field_fine_amount['und']);
+        
+        if($node->field_field_amnt_difference['und'][0]['value'] == 0) {
+          $node->field_collection_status['und'][0]['value'] = '2';
+        }
+        else {
+          $node->field_collection_status['und'][0]['value'] = '1';
+        }
+      }
+    }
+  }
+}
+
+

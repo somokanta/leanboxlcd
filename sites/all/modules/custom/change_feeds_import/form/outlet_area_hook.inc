@@ -197,7 +197,8 @@ function change_feeds_import_outlet_area_hook_batch_fix_process($data, $distribu
 function outlet_area_hook_csv_finished($success, $results, $operations) {
   if ($success) {
     $fid = $results['fid'];
-    drupal_goto("outlet-area-hook-confirm/" . $fid);
+    //drupal_goto("outlet-area-hook-confirm/" . $fid);
+    $_GET['destination'] = "outlet-area-hook-confirm/" . $fid;
   }
   else {
     drupal_set_message('There is Error Occured in batch process');
@@ -367,7 +368,8 @@ function change_feeds_import_outlet_area_hook_finished($success, $results, $oper
     }
 
     drupal_set_message(t("$count node was updated"));
-    drupal_goto("outlet-area-hook/import");
+    //drupal_goto("outlet-area-hook/import");
+    $_GET['destination'] = "outlet-area-hook/import";
   }
   else {
     drupal_set_message('There is Error Occured in batch process');

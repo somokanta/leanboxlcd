@@ -902,7 +902,7 @@ form {
       }
     }
   }
-  #leanbox-dashboard-chart-filter-otif-form, #leanbox-dashboard-chart-filter-delivery-form, #leanbox-mobile-chart-filter-return-form, #leanbox-mobile-chart-filter-full-return-form, #leanbox-dashboard-chart-filter-adoption-form {
+  #leanbox-dashboard-chart-filter-otif-form, #leanbox-dashboard-chart-filter-delivery-form, #leanbox-mobile-chart-filter-return-form, #leanbox-mobile-chart-filter-full-return-form, #leanbox-dashboard-chart-filter-adoption-form, #leanbox-dashboard-chart-filter-bod-data-form {
     .container-inline-date{
       width: auto;
       display: inline-block;
@@ -921,7 +921,7 @@ form {
           margin: 8px 0 0 0;
       }
     }
-    #otif-submit, #delivery-submit, #mobile-return-submit, #mobile-full-return-submit, #adoption-graph-submit{
+    #otif-submit, #delivery-submit, #mobile-return-submit, #mobile-full-return-submit, #adoption-graph-submit, #bod-data-submit{
         width: 80px;
         display: inline-block;
         button {
@@ -931,7 +931,7 @@ form {
     }
     a {
       width: 100%;
-      #otif_div, #delivery_div, #mobile_return_div, #mobile_full_return_div, #adoption_graph_div {
+      #otif_div, #delivery_div, #mobile_return_div, #mobile_full_return_div, #adoption_graph_div, #bod_data_div {
           margin: 10px 0 0 0;
           text-align: center;
           display: inline-block;
@@ -1545,9 +1545,55 @@ header[id="page-header"] {
 
 /*ofd mailer subfooter remove*/
 .view-id-ofd_mailer, .view-id-ofd_mailer2 {
-  .view-subfooter-number {
-    display: none;
+  table {
+    tbody {
+      tr {
+        td {
+          border: 1px solid #000 !important;
+        }
+      }
+    }
   }
 }
 
 /*End ofd mailer subfooter remove*/
+/*central billing report*/
+.views-widget-filter-field_third_party_username_value {
+	width: 55% !important;
+	display: block !important;
+	label {
+		display: flex;
+		text-align: center;
+	}
+	select.class-rs-code {
+		height: 170px !important;
+	}
+}
+/*End central billing report*/
+/*payment collection table css*/
+.view-id-payment_collection {
+  .table-responsive {
+    tbody {
+      tr {
+        td {
+          min-width: 50px;
+          text-align: center;
+          max-width: 160px;
+          word-break: break-all;
+        }      
+        .views-field-field-collection-cheque-date-editable {
+          width: 160px;
+          .container-inline-date {
+            .form-item {
+              input {
+                width: 98% !important;
+                font-size: 13px;
+                padding: 0 3px;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

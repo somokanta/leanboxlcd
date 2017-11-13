@@ -420,6 +420,50 @@ function leanbox_dashboard_chart_filter_picking_ota_form($form, &$form_state) {
   return $form;
 }
 
+
+/**
+ * 
+ * @param array $form
+ * @param array $form_state
+ * @return array
+ */
+function leanbox_dashboard_chart_filter_bod_data_form($form, &$form_state) {
+  $form = array();
+  //if (arg(1) == 'bod_data') {
+  $billing_date = strtotime(date('Y-m-d') . "-1 days");
+  $bill_date = date('Y-m-d', $billing_date);
+    $form['start_date'] = array(
+      '#type' => 'date_popup',
+      '#title' => t('Bill Date From'),
+      '#required' => TRUE,
+      '#date_format' => 'Y-m-d',
+      '#default_value' => $bill_date,
+    );
+    $form['end_date'] = array(
+      '#type' => 'date_popup',
+      '#title' => t('Bill Date To'),
+      '#required' => TRUE,
+      '#date_format' => 'Y-m-d',
+      '#default_value' => $bill_date,
+    );
+    $form['submit'] = array(
+      '#type' => 'submit',
+      '#value' => 'Submit',
+      '#prefix' => '<div id ="bod-data-submit">',
+      '#suffix' => '</div>',
+      '#attributes' => array('class' => array('bod-data-submit')),
+    );
+  //}
+
+  $form['bod_data'] = array(
+    '#markup' => '<a href = "/leanbox-chart-details/bod_data" target = "_blank"><div id="bod_data_div"></div></a>',
+  );
+
+
+  return $form;
+}
+
+
 /**
  * 
  * @param array $form
@@ -1324,84 +1368,96 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
 
 
 // code for delivery
-  else if ($activity_type == 'delivery') {
+   else if ($activity_type == 'delivery') {
 
-    $query = db_select('node', 'n');
-    $query->condition('n.type', 'sales_register_data');
-    $query->condition('n.uid', $distributor_id);
-    $query->join('field_data_field_sr_bill_date', 'i', 'i.entity_id = n.nid');
+      $query = db_select('node', 'n');
+      $query->condition('n.type', 'sales_register_data');
+      $query->condition('n.uid', $distributor_id);
+      $query->join('field_data_field_sr_bill_date', 'srb', 'srb.entity_id = n.nid');
+      $query->join('field_data_field_bill_net_sales', 'ns', 'ns.entity_id = n.nid');
 
-    $query->join('custom_billing_data', 'bd', 'bd.bill_number = n.title');
-    $query->condition('bd.distributor_id', $distributor_id);
-    if (!empty($start_date) && !empty($end_date)) {
-      $query->condition('bd.bill_date', array($start_date, $end_date), 'BETWEEN');
-    }
-    $query->groupBy('bd.bill_number');
-    $query->join('field_data_field_bill_value', 'b', 'b.entity_id = n.nid');
-    $query->leftjoin('field_data_field_sales_return_amt', 'r', 'r.entity_id = n.nid');
-    $query->fields('b', array('field_bill_value_value'));
-    $query->fields('r', array('field_sales_return_amt_value'));
-    $query->addExpression('SUM(bd.Sum_of_NET_SALES_VALUE)', 'sales_value');
-    $res2 = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
-
-    $output[0] = array('Sales Delivery', 'Return %');
-    $total_bill_value = 0;
-
-    // Calculate sum of bill from custom billing data without tax
-    $query = db_select('custom_billing_data', 'bd');
-    $query->condition('bd.distributor_id', $distributor_id);
-    if (!empty($start_date) && !empty($end_date)) {
-      $query->condition('bd.bill_date', array($start_date, $end_date), 'BETWEEN');
-    }
-    $query->join('node', 'n', 'bd.bill_number = n.title');
-    $query->condition('n.type', 'sales_register_data');
-    $query->condition('n.uid', $distributor_id);
-    $query->leftjoin('field_data_field_sales_return_amt', 'r', 'r.entity_id = n.nid');
-
-    $query->addExpression('SUM(bd.Sum_of_NET_SALES_VALUE)', 'sum');
-//$query->groupBy('bd.bill_number');
-//$query->addExpression('COUNT(bd.bill_number)', 'bill_number');
-    $res3 = $query->execute()->fetchField();
-    $total_bill_value = round($res3);
- 
-    if (!empty($res2)) {
-      foreach ($res2 as $key2 => $val2) {
-        if ($val2['field_sales_return_amt_value'] == NULL) {
-          $data['Bills Not Uploaded']['data'] += $val2['sales_value'];
-        }
-        else {
-          $sales_ret = (( $val2['sales_value'] - $val2['field_sales_return_amt_value']) / $val2['sales_value']) * 100;
-          if ($sales_ret >= 99) {
-            $data['Full Return']['data'] += $val2['sales_value'] - $val2['field_sales_return_amt_value'];
-          }
-          else if ($sales_ret > 1 && $sales_ret < 99) {
-            $data['Partial Delivery']['data'] += $val2['sales_value'] - $val2['field_sales_return_amt_value'];
-          }
-          else {
-            continue;
-          }
-        }
+      if (!empty($start_date) && !empty($end_date)) {
+         $query->condition('srb.field_sr_bill_date_value', array($start_date, $end_date), 'BETWEEN');
       }
+      // $query->join('custom_billing_data', 'bd', 'bd.bill_number = n.title');
+      //$query->condition('bd.distributor_id', $distributor_id);
+      //    if (!empty($start_date) && !empty($end_date)) {
+      //      $query->condition('bd.bill_date', array($start_date, $end_date), 'BETWEEN');
+      //    }
+      // $query->groupBy('bd.bill_number');
+      $query->join('field_data_field_bill_value', 'b', 'b.entity_id = n.nid');
+      $query->leftjoin('field_data_field_sales_return_amt', 'r', 'r.entity_id = n.nid');
+      $query->fields('b', array('field_bill_value_value'));
+      $query->fields('r', array('field_sales_return_amt_value'));
+      // $query->addExpression('SUM(bd.Sum_of_NET_SALES_VALUE)', 'sales_value');
+      $query->addField('ns', 'field_bill_net_sales_value', 'sales_value');
 
-      if (!empty($total_bill_value) && !empty($data)) {
-        foreach ($data as $key => $val) {
-          foreach ($val as $key1 => $val1) {
-            $data1 = (($val1) / $total_bill_value) * 100;
-            $output[] = array($key, round($data1, 2));
-          }
-        }
+      $res2 = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+
+      $output[0] = array('Sales Delivery', 'Return %');
+      $total_bill_value = 0;
+
+      // Calculate sum of bill from custom billing data without tax
+//    $query = db_select('custom_billing_data', 'bd');
+//    $query->condition('bd.distributor_id', $distributor_id);
+      $query = db_select('node', 'n');
+      $query->condition('n.type', 'sales_register_data');
+      $query->condition('n.uid', $distributor_id);
+      $query->join('field_data_field_sr_bill_date', 'srb', 'srb.entity_id = n.nid');
+      $query->join('field_data_field_bill_net_sales', 'ns', 'ns.entity_id = n.nid');
+//    if (!empty($start_date) && !empty($end_date)) {
+//      $query->condition('bd.bill_date', array($start_date, $end_date), 'BETWEEN');
+//    }
+      if (!empty($start_date) && !empty($end_date)) {
+         $query->condition('srb.field_sr_bill_date_value', array($start_date, $end_date), 'BETWEEN');
+      }
+      $query->leftjoin('field_data_field_sales_return_amt', 'r', 'r.entity_id = n.nid');
+
+      // $query->addExpression('SUM(bd.Sum_of_NET_SALES_VALUE)', 'sum');
+      $query->addExpression('SUM(ns.field_bill_net_sales_value)', 'sales_value');
+      //$query->groupBy('bd.bill_number');
+      //$query->addExpression('COUNT(bd.bill_number)', 'bill_number');
+      $res3 = $query->execute()->fetchField();
+      $total_bill_value = round($res3);
+
+      if (!empty($res2)) {
+         foreach ($res2 as $key2 => $val2) {
+            if ($val2['field_sales_return_amt_value'] == NULL) {
+               $data['Bills Not Uploaded']['data'] += $val2['sales_value'];
+            }
+            else {
+               $sales_ret = (( $val2['sales_value'] - $val2['field_sales_return_amt_value']) / $val2['sales_value']) * 100;
+               if ($sales_ret >= 99) {
+                  $data['Full Return']['data'] += $val2['sales_value'] - $val2['field_sales_return_amt_value'];
+               }
+               else if ($sales_ret > 1 && $sales_ret < 99) {
+                  $data['Partial Delivery']['data'] += $val2['sales_value'] - $val2['field_sales_return_amt_value'];
+               }
+               else {
+                  continue;
+               }
+            }
+         }
+
+         if (!empty($total_bill_value) && !empty($data)) {
+            foreach ($data as $key => $val) {
+               foreach ($val as $key1 => $val1) {
+                  $data1 = (($val1) / $total_bill_value) * 100;
+                  $output[] = array($key, round($data1, 2));
+               }
+            }
+         }
+         else {
+            $output[] = array('No Result Found for Return', 0);
+         }
       }
       else {
-        $output[] = array('No Result Found for Return', 0);
+         $output[] = array('No Result Found for Return', 0);
       }
-    }
-    else {
-      $output[] = array('No Result Found for Return', 0);
-    }
 
-    return $output;
-  }
-  else if ($activity_type == 'bills_per_person') {
+      return $output;
+   }
+   else if ($activity_type == 'bills_per_person') {
     $query = db_select('node', 'n');
     $query->condition('n.type', 'dispatch_data');
     $query->addTag('node_uid');
@@ -1579,53 +1635,54 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     return $output;
   }
   else if ($activity_type == 'sales_delivery_table') {
-    $data = array();
+      $data = array();
 
-    $query = db_select('custom_billing_data', 'bl')->extend('pagerDefault')->limit(10);
-    $query->condition('bl.distributor_id', $distributor_id);
-    $query->fields('bl', array('bill_number', 'bill_date', 'party_code'));
-
-// sales register
-    $query->join('node', 'n', 'bl.bill_number = n.title');
-    $query->condition('n.type', 'sales_register_data');
-    $query->condition('n.uid', $distributor_id);
-    $query->join('field_data_field_sales_party_code', 'sp', 'sp.entity_id = n.nid');
-
-
-// outlet_master
-    $query->join('node', 'ot', 'ot.title = sp.field_sales_party_code_value');
-    $query->condition('ot.type', 'outlet_master');
-    $query->condition('ot.uid', $distributor_id);
-    $query->join('field_data_field_channel', 'chan', 'chan.entity_id = ot.nid');
-    $query->join('field_data_field_pl_group', 'plg', 'plg.entity_id = ot.nid');
-
-    $query->addfield('chan', 'field_channel_value', 'channel');
-    $query->addfield('plg', 'field_pl_group_value', 'pl_group');
-    $query->addExpression('SUM(bl.Sum_of_NET_SALES_VALUE)', 'sales_value');
-    $query->leftjoin('field_data_field_impact_delivery_date', 'idl', 'idl.entity_id =  n.nid');
-    $query->addfield('idl', 'field_impact_delivery_date_value', 'impact_date');
-
-    if (!empty($start_date) && !empty($end_date)) {
-      $query->condition('bl.bill_date', array($start_date, $end_date), 'BETWEEN');
-    }
-    $query->leftjoin('field_data_field_sales_return_amt', 'r', 'r.entity_id = n.nid');
-    $query->addfield('r', 'field_sales_return_amt_value', 'delivered_value');
-
-    $query->groupBy('bl.bill_number');
-
-    $query->join('field_data_field_bill_value', 'bv', 'bv.entity_id = n.nid');
-    $query->addfield('bv', 'field_bill_value_value', 'bill_value');
-    $query->leftjoin('field_data_field_deliver_reason', 'dr', 'dr.entity_id = n.nid');
-   // $query->addExpression('(bv.field_bill_value_value - r.field_sales_return_amt_value)', 'return_value');
-    $query->addfield('dr', 'field_deliver_reason_tid', 'deliver_reason');
-
-    $query->leftjoin('field_data_field_delivery_pending', 'dp', 'dp.entity_id =  n.nid');
-    $query->addfield('dp', 'field_delivery_pending_value', 'delivery_pending');
-    
-    $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+      // $query = db_select('custom_billing_data', 'bl')->extend('pagerDefault')->limit(10);
+      //$query->condition('bl.distributor_id', $distributor_id);
+      //$query->fields('bl', array('bill_number', 'bill_date', 'party_code'));
+      // sales register
+      $query = db_select('node', 'n')->extend('pagerDefault')->limit(10);
+      $query->condition('n.type', 'sales_register_data');
+      $query->condition('n.uid', $distributor_id);
+      $query->join('field_data_field_sales_party_code', 'sp', 'sp.entity_id = n.nid');
+      $query->join('field_data_field_bill_net_sales', 'ns', 'ns.entity_id = n.nid');
+      $query->join('field_data_field_sr_bill_date', 'srb', 'srb.entity_id = n.nid');
 
 
-    if (!empty($res)) {
+      // outlet_master
+      $query->join('node', 'ot', 'ot.title = sp.field_sales_party_code_value');
+      $query->condition('ot.type', 'outlet_master');
+      $query->condition('ot.uid', $distributor_id);
+      $query->join('field_data_field_channel', 'chan', 'chan.entity_id = ot.nid');
+      $query->join('field_data_field_pl_group', 'plg', 'plg.entity_id = ot.nid');
+      $query->addfield('chan', 'field_channel_value', 'channel');
+      $query->addfield('plg', 'field_pl_group_value', 'pl_group');
+      //$query->addExpression('SUM(bl.Sum_of_NET_SALES_VALUE)', 'sales_value');
+      $query->addField('ns', 'field_bill_net_sales_value', 'sales_value');
+      $query->addField('n', 'title', 'bill_number');
+      $query->addField('sp', 'field_sales_party_code_value', 'party_code');
+      $query->addField('srb', 'field_sr_bill_date_value', 'bill_date');
+      $query->leftjoin('field_data_field_impact_delivery_date', 'idl', 'idl.entity_id =  n.nid');
+      $query->addfield('idl', 'field_impact_delivery_date_value', 'impact_date');
+      if (!empty($start_date) && !empty($end_date)) {
+         $query->condition('srb.field_sr_bill_date_value', array($start_date, $end_date), 'BETWEEN');
+      }
+      $query->leftjoin('field_data_field_sales_return_amt', 'r', 'r.entity_id = n.nid');
+      $query->addfield('r', 'field_sales_return_amt_value', 'delivered_value');
+      //$query->groupBy('bl.bill_number');
+      $query->join('field_data_field_bill_value', 'bv', 'bv.entity_id = n.nid');
+      $query->addfield('bv', 'field_bill_value_value', 'bill_value');
+      $query->leftjoin('field_data_field_deliver_reason', 'dr', 'dr.entity_id = n.nid');
+      // $query->addExpression('(bv.field_bill_value_value - r.field_sales_return_amt_value)', 'return_value');
+      $query->addfield('dr', 'field_deliver_reason_tid', 'deliver_reason');
+
+      $query->leftjoin('field_data_field_delivery_pending', 'dp', 'dp.entity_id =  n.nid');
+      $query->addfield('dp', 'field_delivery_pending_value', 'delivery_pending');
+
+      $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+
+
+      if (!empty($res)) {
       $header = array(
         array('data' => 'BILL NUMBER',),
         array('data' => 'BILL DATE',),
@@ -1754,6 +1811,35 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
       $data[] = array('No Finish Time Found', 0, 0);
     }
     return $data;
+  }
+  else if ($activity_type == 'bod_data') {
+
+    $data[] = array('PriceList Group', 'Fail', 'Success');
+
+    $query = db_select('node', 'n');
+    $query->addTag('node_uid');
+    $query->condition('n.type', 'sales_register_data');
+    $query->join('field_data_field_sr_bill_date', 'sr', 'sr.entity_id = n.nid');
+    $query->leftjoin('field_data_field_bod_flag', 'bf', 'bf.entity_id = n.nid');
+    if (!empty($start_date) && !empty($end_date)) {
+      $query->condition('sr.field_sr_bill_date_value', array($start_date, $end_date), 'BETWEEN');
+    }
+    $query->addExpression('COUNT(n.nid)', 'total_cont');
+    $query->addExpression('SUM(IF(bf.field_bod_flag_value = 1, 1, 0))', 'success_count');
+    $res = $query->execute()->fetch(PDO::FETCH_ASSOC);
+    
+      if (!empty($res)) {
+         $total_cont = (int)$res['total_cont'];
+         $success_count = (int)$res['success_count'];
+
+         $fail_count = $total_cont - $success_count;
+         $data[] = array('result', $fail_count, $success_count);
+      }
+      else {
+         $data[] = array('No Finish Time Found', 0, 0);
+      }
+
+      return $data;
   }
   else if ($activity_type == 'picking_ota') {
     $query = db_select('node', 'n');
@@ -2100,8 +2186,10 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
     $query->join('field_data_field_billing_van', 'bva', 'bva.entity_id = n.nid');
     $query->leftjoin('field_data_field_trip_id_reference', 't', 't.entity_id = n.nid');
     $query->leftjoin('node', 'disn', 'disn.nid = t.field_trip_id_reference_nid');
-    $query->leftjoin('field_data_field_dispatch_status', 'disp_st', 'disp_st.entity_id = disn.nid');
-    $query->addExpression('SUM(if(disp_st.field_dispatch_status_value=1, 1, 0))', 'trip_dispatch_sum');
+    // $query->leftjoin('field_data_field_dispatch_status', 'disp_st', 'disp_st.entity_id = disn.nid');
+    $query->leftjoin('field_data_field_dispatch_date', 'fd', 'fd.entity_id = disn.nid');
+    //$query->addExpression('SUM(if(disp_st.field_dispatch_status_value=1, 1, 0))', 'trip_dispatch_sum');
+    $query->addExpression('SUM(if(fd.field_dispatch_date_value IS NOT NULL, 1, 0))', 'trip_dispatch_sum');
     $query->condition('n.uid', $distributor_id);
     $query->condition('n.type', 'sales_register_data');
     $query->addExpression('COUNT(n.nid)', 'total_count');
@@ -2194,9 +2282,9 @@ function leanbox_dashboard_gauge_chart_query_details($type, $start_date = '', $e
    if ($arg !== 'dashboard') {
 
     $mtd_html = "<h3>Channel Wise Otif</h3>";
-    $mtd_data .= get_mtd_data_channel($start_date, $end_date, $uid);
+    $mtd_data .= get_mtd_data_channel_otif($start_date, $end_date, $uid);
     if ($mtd_data == "No Result Found") {
-      $header = get_header_of_chhanel(TRUE);
+      $header = get_header_of_chhanel_otif();
       $mtd_rows[] = array("<td colspan='10' style='text-align: center;'> There is No Activity</td>");
       $mtd_html .= theme('table', array('header' => $header, 'rows' => $mtd_rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
     }

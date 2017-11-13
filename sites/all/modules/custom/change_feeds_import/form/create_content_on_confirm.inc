@@ -23,96 +23,10 @@ function change_feeds_import_create_confirm_content($id) {
           ->condition('sbd.error_id', $id, '=')
           ->fields('sbd')
           ->execute()->fetchAll(PDO::FETCH_ASSOC);
-
-
-
-  $party_packing_check = get_party_packing_from_party_code(NULL, $distributor_id);
-
-  foreach ($billing_data_result as $key => $value) {
-    $vehicle = $value['vehicle'];
-    $loading_date = strtotime($value['loading_date']);
-    $total_qty = $value['Sum_of_TOTAL_SALES_QTY'];
-    $sku = $value['sku7_code'];
-    $bill_number = $value['bill_number'];
-    $pricelist_group = $value['PRICELIST_GROUP'];
-    if (isset($res[$vehicle . "/" . $loading_date])) {
-      $total_sku = $res[$vehicle . "/" . $loading_date]['sku_count'] ++;
-
-      if ($pricelist_group == "PP") {
-        $group++;
-        if (($group / $res[$vehicle . "/" . $loading_date]['sku_count']) * 100 >= 90) {
-          $group_party_packing = 1;
-        }
-        else {
-          $group_party_packing = 0;
-        }
-      }
-      if (isset($party_packing_check[$value['party_code']]) ? $party_packing_check[$value['party_code']] : 0 == 1) {
-        $check++;
-        if (($check / $res[$vehicle . "/" . $loading_date]['sku_count']) * 100 >= 90) {
-          $party_packing = 1;
-        }
-        else {
-          $party_packing = 0;
-        }
-      }
-
-      $res[$vehicle . "/" . $loading_date]['total_count'] += $total_qty;
-      $unique_sku_string = $vehicle . "" . $loading_date . "" . $sku;
-      if (!in_array("$unique_sku_string", $temp_unique_sku_string)) {
-        $res[$vehicle . "/" . $loading_date]['unique_count'] ++;
-        $temp_unique_sku_string[] = $vehicle . "" . $loading_date . "" . $sku;
-      }
-    }
-    else {
-      $res[$vehicle . "/" . $loading_date] = array();
-      $res[$vehicle . "/" . $loading_date]['sku_count'] = 1;
-      $res[$vehicle . "/" . $loading_date]['total_count'] = $total_qty;
-      $temp_unique_sku_string[] = $vehicle . "" . $loading_date . "" . $sku;
-      $res[$vehicle . "/" . $loading_date]['unique_count'] = 1;
-      if (isset($party_packing_check[$value['party_code']]) ? $party_packing_check[$value['party_code']] : 0 == 1) {
-        $party_packing = 1;
-        $check = 1;
-      }
-      else {
-        $party_packing = 0;
-      }
-
-      if ($pricelist_group == "PP") {
-        $group = 1;
-        $group_party_packing = 1;
-      }
-      else {
-        $group_party_packing = 0;
-      }
-    }
-
-    $distint_sku_count = $res[$vehicle . "/" . $loading_date]['unique_count'];
-    $sku_count = $res[$vehicle . "/" . $loading_date]['sku_count'];
-    $total_qty_count = $res[$vehicle . "/" . $loading_date]['total_count'];
-
-    $created_date = date("Y-m-d h:i:s", $value['date']);
-    $party_packing_data[$vehicle . "/" . $loading_date]['VEHICLE'] = $vehicle;
-    $party_packing_data[$vehicle . "/" . $loading_date]['LOADING_DATE'] = $loading_date;
-    //$party_packing_data[$vehicle . "/" . $loading_date]['party_packing_date'] = $created_date;
-    $party_packing_data[$vehicle . "/" . $loading_date]['loading_sheet_line'] = $distint_sku_count;
-    $party_packing_data[$vehicle . "/" . $loading_date]['bill_lines'] = $sku_count;
-    $party_packing_data[$vehicle . "/" . $loading_date]['each_units'] = $total_qty_count;
-    $party_packing_data[$vehicle . "/" . $loading_date]['party_check'] = $party_packing;
-    $party_packing_data[$vehicle . "/" . $loading_date]['party_pack'] = $group_party_packing;
-  }
-
-  foreach ($party_packing_data as $key => $val) {
-    $party_packing_data_new[] = $val;
-  }
   
-  $from_time = time();
-  sleep(3); // this should halt for 3s. 
+  $from_time = time() - 60;
   $return_true = change_feeds_import_insert_data_in_custom_billing_table($billing_data_result);
-  if($return_true){
-    sleep(3); // this should halt for 3s. 
-  }
-  $to_time = time() + 60; // to be on safer side
+  $to_time = time(); 
 
   /**
    * Debugging
@@ -124,7 +38,8 @@ function change_feeds_import_create_confirm_content($id) {
     $mail_row_diff = $mail_query->execute()->fetchField();
     
     $mail_stage_row_count = count($billing_data_result);
-    if ($mail_row_diff != $mail_stage_row_count) {
+    
+  if ($mail_row_diff != $mail_stage_row_count) {
     $message = "Stgaing table row count: $mail_stage_row_count.";
     $message .= "Prev max custome billing id: $max_billing_id_new.";
     $message .= "After insert, count of inserted id: $mail_row_diff.";
@@ -153,13 +68,13 @@ function change_feeds_import_create_confirm_content($id) {
     $operations = array();
 
     $create_billing_data = change_feeds_import_create_billing_data($max_billing_id_new);
-    $create_billing_data_chunk = array_chunk($create_billing_data, 750);
+    $create_billing_data_chunk = array_chunk($create_billing_data, 1200);
     foreach ($create_billing_data_chunk as $data) {
       $operations[] = array('change_feeds_import_create_billing', array($data));
     }
 
     $create_picking_data = change_feeds_import_create_picking_data($max_billing_id_new);
-    $create_picking_data_chunk = array_chunk($create_picking_data, 750);
+    $create_picking_data_chunk = array_chunk($create_picking_data, 1200);
     foreach ($create_picking_data_chunk as $data) {
       $operations[] = array('change_feeds_import_create_picking', array($data));
     }
@@ -167,22 +82,20 @@ function change_feeds_import_create_confirm_content($id) {
     $roles = $user->roles;
     if (in_array("leanbox", $roles)) {
       $create_pick_confirm_data = change_feeds_import_create_pick_confirm_data($max_billing_id_new);
-      $create_pick_confirm_data_chunk = array_chunk($create_pick_confirm_data, 750);
+      $create_pick_confirm_data_chunk = array_chunk($create_pick_confirm_data, 1200);
       foreach ($create_pick_confirm_data_chunk as $data) {
         $operations[] = array('change_feeds_import_create_pick_confirm', array($data));
       }
     }
 
     $van_cld_report_data = change_feeds_import_create_van_cld_report_data($max_billing_id_new);
-    $van_cld_report_data_chunk = array_chunk($van_cld_report_data, 750);
+    $van_cld_report_data_chunk = array_chunk($van_cld_report_data, 1200); // simple table insert
     foreach ($van_cld_report_data_chunk as $data) {
       $operations[] = array('change_feeds_import_create_van_cld_report', array($data));
     }
 
-    $party_packing_data_new_chunk = array_chunk($party_packing_data_new, 750);
-    foreach ($party_packing_data_new_chunk as $data) {
-      $operations[] = array('change_feeds_import_create_party_packing', array($data));
-    }
+
+    $operations[] = array('change_feeds_import_create_party_packing', array($max_billing_id_new));
 
     $batch = array(
       'operations' => $operations,
@@ -338,6 +251,7 @@ function change_feeds_import_create_van_cld_report_data($max_billing_id) {
   $query->addExpression('floor(SUM(Sum_of_TOTAL_SALES_QTY) / field_unit_case_units__value)', 'cld');
   $query->addExpression('SUM(cb.Sum_of_TOTAL_SALES_QTY) - (field_unit_case_units__value * floor(SUM(Sum_of_TOTAL_SALES_QTY) / field_unit_case_units__value))', 'eaches');
   $query->groupBy('vehicle,loading_date,sku7_code');
+  $query->havingCondition('cld', 0, '!=');
   $results = $query->execute()->fetchAll();
 
   return $results;
@@ -477,7 +391,6 @@ function change_feeds_import_create_van_cld_report($data, &$context) {
     $context['sandbox']['progress'] = 0;
   } 
   $context['message'] = t('Now Creating Van Data');
-
   global $user;
   $user_id = $user->uid;
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
@@ -514,7 +427,6 @@ function change_feeds_import_create_picking($data, &$context) {
     $context['sandbox']['progress'] = 0;
   }
   $context['message'] = t('Now Creating Picking Data');
-  
   global $user;
   $user_id = $user->uid;
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
@@ -561,7 +473,6 @@ function change_feeds_import_create_pick_confirm($data, &$context) {
     $context['sandbox']['progress'] = 0;
   }
   $context['message'] = t('Now Creating Pick Confirm Data');
-  
   global $user;
   $user_id = $user->uid;
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
@@ -600,16 +511,102 @@ function change_feeds_import_create_pick_confirm($data, &$context) {
   $context['results']['pick_confirm'] = 'Pick Confirm Created';
 }
 
-function change_feeds_import_create_party_packing($data, &$context) {
+function change_feeds_import_create_party_packing($max_billing_id_new, &$context) {
   if (!isset($context['sandbox']['progress'])) {
     $context['sandbox']['progress'] = 0;
   }
+  $party_create_flag = 0;
   $context['message'] = t('Now Creating Party Packing Data');
-  
-    global $user;
-    $user_id = $user->uid;
-    $distributor_id = change_feeds_import_get_distributor_id($user_id);
-  
+  global $user;
+  $user_id = $user->uid;
+  $distributor_id = change_feeds_import_get_distributor_id($user_id);
+
+  $billing_data_result = db_select('custom_billing_data', 'cb')
+      ->condition('cb.distributor_id', $distributor_id, '=')
+      ->condition('cb.id', $max_billing_id_new, '>')
+      ->fields('cb')
+      ->execute()->fetchAll(PDO::FETCH_ASSOC);
+
+  $party_packing_check = get_party_packing_from_party_code(NULL, $distributor_id);
+
+  foreach ($billing_data_result as $key => $value) {
+    $vehicle = $value['vehicle'];
+    $loading_date = $value['loading_date'];
+    $total_qty = $value['Sum_of_TOTAL_SALES_QTY'];
+    $sku = $value['sku7_code'];
+    $bill_number = $value['bill_number'];
+    $pricelist_group = $value['PRICELIST_GROUP'];
+    if (isset($res[$vehicle . "/" . $loading_date])) {
+      $total_sku = $res[$vehicle . "/" . $loading_date]['sku_count'] ++;
+
+      if ($pricelist_group == "PP") {
+        $group++;
+        if (($group / $res[$vehicle . "/" . $loading_date]['sku_count']) * 100 >= 90) {
+          $group_party_packing = 1;
+        }
+        else {
+          $group_party_packing = 0;
+        }
+      }
+      if (isset($party_packing_check[$value['party_code']]) ? $party_packing_check[$value['party_code']] : 0 == 1) {
+        $check++;
+        if (($check / $res[$vehicle . "/" . $loading_date]['sku_count']) * 100 >= 90) {
+          $party_packing = 1;
+        }
+        else {
+          $party_packing = 0;
+        }
+      }
+
+      $res[$vehicle . "/" . $loading_date]['total_count'] += $total_qty;
+      $unique_sku_string = $vehicle . "" . $loading_date . "" . $sku;
+      if (!in_array("$unique_sku_string", $temp_unique_sku_string)) {
+        $res[$vehicle . "/" . $loading_date]['unique_count'] ++;
+        $temp_unique_sku_string[] = $vehicle . "" . $loading_date . "" . $sku;
+      }
+    }
+    else {
+      $res[$vehicle . "/" . $loading_date] = array();
+      $res[$vehicle . "/" . $loading_date]['sku_count'] = 1;
+      $res[$vehicle . "/" . $loading_date]['total_count'] = $total_qty;
+      $temp_unique_sku_string[] = $vehicle . "" . $loading_date . "" . $sku;
+      $res[$vehicle . "/" . $loading_date]['unique_count'] = 1;
+      if (isset($party_packing_check[$value['party_code']]) ? $party_packing_check[$value['party_code']] : 0 == 1) {
+        $party_packing = 1;
+        $check = 1;
+      }
+      else {
+        $party_packing = 0;
+      }
+
+      if ($pricelist_group == "PP") {
+        $group = 1;
+        $group_party_packing = 1;
+      }
+      else {
+        $group_party_packing = 0;
+      }
+    }
+
+    $distint_sku_count = $res[$vehicle . "/" . $loading_date]['unique_count'];
+    $sku_count = $res[$vehicle . "/" . $loading_date]['sku_count'];
+    $total_qty_count = $res[$vehicle . "/" . $loading_date]['total_count'];
+
+    $created_date = date("Y-m-d h:i:s", $value['date']);
+    $party_packing_data[$vehicle . "/" . $loading_date]['VEHICLE'] = $vehicle;
+    $party_packing_data[$vehicle . "/" . $loading_date]['LOADING_DATE'] = $loading_date;
+    //$party_packing_data[$vehicle . "/" . $loading_date]['party_packing_date'] = $created_date;
+    $party_packing_data[$vehicle . "/" . $loading_date]['loading_sheet_line'] = $distint_sku_count;
+    $party_packing_data[$vehicle . "/" . $loading_date]['bill_lines'] = $sku_count;
+    $party_packing_data[$vehicle . "/" . $loading_date]['each_units'] = $total_qty_count;
+    $party_packing_data[$vehicle . "/" . $loading_date]['party_check'] = $party_packing;
+    $party_packing_data[$vehicle . "/" . $loading_date]['party_pack'] = $group_party_packing;
+  }
+
+  foreach ($party_packing_data as $key => $val) {
+    $data[] = $val;
+  }
+
   foreach ($data as $key => &$value) {
     $loading_date = date("Y-m-d", ($value['LOADING_DATE']));
     $node = new stdClass();
@@ -631,9 +628,12 @@ function change_feeds_import_create_party_packing($data, &$context) {
     $node->field_party_packing_type['und'][0]['value'] = $value['party_pack'];
     $node = node_submit($node); // Prepare node for saving
     node_save($node);
+    $party_create_flag = 1;
   }
   
-  $context['results']['party_packing'] = 'Party Packing Created';
+  if($party_create_flag == 1){
+    $context['results']['party_packing'] = 'Party Packing Created';
+  }
 }
 
 ############## IN PROGRESS FUNCTION ##################
@@ -741,30 +741,47 @@ function get_party_packing_from_party_code($party_code = NULL, $distributor_id) 
   if (!is_null($party_code)) {
     $query->condition('pc.field_party_code_value', $party_code, '=');
   }
-  /* $query->fields('pl', array('field_pl_group_value'));
-    $query->fields('ch', array('field_channel_value')); */ //for understanding
+
   $query->addExpression("case when pp.field_party_packing_value = 'YES' then 1 else 0 END", "field_party_packing_value");
   $query->fields('pc', array('field_party_code_value'));
   return $query->execute()->fetchAllKeyed(0, 1);
 }
 
 function change_feeds_import_create_billing($data, &$context) {
-
+  
   if (!isset($context['sandbox']['progress'])) {
     $context['sandbox']['progress'] = 0;
   }
   $context['message'] = t('Now Creating Billing Data');
-  
-  foreach ($data as $key => &$value) {
-    $nid = check_node_title_exists($value->bill_number, 'sales_register_data');
-    $node = node_load($nid);
-    if ($node) {
-      $node->field_billing_van[LANGUAGE_NONE][0]['value'] = $value->vehicle;
-      $node->field_billing_loading_date[LANGUAGE_NONE][0]['value'] = $value->loading_date;
-      $node->field_sr_bill_date[LANGUAGE_NONE][0]['value'] = $value->bill_date;
-      $node->field_bill_net_sales[LANGUAGE_NONE][0]['value'] = round($value->sum_net_sales_value, 2);
-      // sum of net sales value from custom_billing_data to sales register
-      node_save($node);
+
+  foreach ($data as $key => $value) {
+    try {
+      $nid = check_node_title_exists($value->bill_number, 'sales_register_data');
+      $node = node_load($nid);
+      if ($node) {
+        $node->field_billing_van[LANGUAGE_NONE][0]['value'] = $value->vehicle;
+        $node->field_billing_loading_date[LANGUAGE_NONE][0]['value'] = $value->loading_date;
+        $node->field_sr_bill_date[LANGUAGE_NONE][0]['value'] = $value->bill_date;
+        $node->field_bill_net_sales[LANGUAGE_NONE][0]['value'] = round($value->sum_net_sales_value, 2);
+        // sum of net sales value from custom_billing_data to sales register
+        node_save($node);
+      }
+    }
+    catch (Exception $ex) {
+      //Write mail logic
+      global $user;
+      $user_id = $user->uid;
+      $distributor_id = change_feeds_import_get_distributor_id($user_id);
+      $batch = & batch_get();
+      $batch_id = $batch['id'];
+
+      $message = "For Distributor: $distributor_id and Batch Id $batch_id \n" .
+      $message .= t('An error MSG:  %error_msg with arguments: @arguments', array('%error_msg' => $ex->getMessage(), '@arguments' => print_r($value, TRUE)));
+      $params['subject'] = "Billing Upload Error in Batch Proccess-sales-data ";
+      $params['body'] = $message;
+      $mail_to = "abhishek.r@iksula.com";
+      $from = "MIS.HELPDESK@leanbox.in";
+      drupal_mail('adhoc_task', 'bill_date_missing', $mail_to, LANGUAGE_NONE, $params, $from);
     }
   }
   $context['results']['billing'] = 'Billing Created';

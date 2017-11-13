@@ -90,7 +90,7 @@ function reverse_geocode_menu() {
   );
 
   $items['area-confirm-outlet-sequence'] = array(
-    'title' => 'Area Hook Group Confirmation Outlet Sequence',
+    'title' => 'Original Outlet Sequencing-API',
     'page callback' => 'area_confirm_outlet_sequence',
     'access arguments' => array('address confirmation'),
     'type' => MENU_CALLBACK,
@@ -1378,6 +1378,16 @@ function reverse_geocode_node_presave($node) {
    
   // store reference for party code from outlet master type if node created.
   if ($node->type == 'sales_register_data') {
+      if (empty($node->field_bill_net_sales['und'][0]['value'])) {
+         $distributor_id = $node->uid;
+         $bill_number = $node->title;
+         $query = db_select('custom_billing_data', 'cb');
+         $query->addExpression('SUM(cb.Sum_of_NET_SALES_VALUE)', 'sum_net_sales_value');
+         $query->condition('cb.distributor_id', $distributor_id);
+         $query->condition('cb.bill_number', $bill_number, '=');
+         $sum_net_sales_value = $query->execute()->fetchField();
+         $node->field_bill_net_sales['und'][0]['value'] = round($sum_net_sales_value, 2);
+      }
    
      if(!empty($node->field_sales_party_code['und'][0]['value']) && empty($node->field_party_code_reference['und'][0]['nid'])) {
         // write a logic here to fetch same distributors party code reference 
@@ -1470,7 +1480,7 @@ function reverse_geocode_node_presave($node) {
           }
         }
         else {
-          if ($hul_status == 0) {
+          if ($node->field_hul_status['und'][0]['value'] == 0) {
             $node->field_hul_updated_lat['und'][0]['value'] = $node->field_hul_lat['und'][0]['value'];
             $node->field_hul_updated_long['und'][0]['value'] = $node->field_hul_long['und'][0]['value'];
           }
@@ -1515,6 +1525,11 @@ function reverse_geocode_node_presave($node) {
          module_load_include('inc', 'change_feeds_import', 'form/sales_register_data');
          $pdd = get_promised_delivery_date($updated_bill_date);
          $node->field_promised_date[LANGUAGE_NONE][0]['value'] = $pdd;
+         //bod
+         $bod = get_bod_date($updated_bill_date);
+         $party_code_nid = $node->field_party_code_reference['und'][0]['nid'];
+         $node->field_bod_date[LANGUAGE_NONE][0]['value'] = $bod;
+         $node->field_bod_flag[LANGUAGE_NONE][0]['value'] = get_bod_flag($bod,$party_code_nid);
       }
       // code for updating dispatch N value on updating pdd
       $original_pdd = $node->original->field_promised_date[LANGUAGE_NONE][0]['value'];

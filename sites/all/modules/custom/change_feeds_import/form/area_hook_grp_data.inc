@@ -165,7 +165,8 @@ function change_feeds_import_area_hook_grp_batch_fix_process($data, $distributor
 function area_hook_grp_data_csv_finished($success, $results, $operations) {
   if ($success) {
     $fid = $results['fid'];
-    drupal_goto("area-hook-grp-confirm/" . $fid);
+    //drupal_goto("area-hook-grp-confirm/" . $fid);
+    $_GET['destination'] = "area-hook-grp-confirm/" . $fid;
   }
   else {
     drupal_set_message('There is Error Occured in batch process');

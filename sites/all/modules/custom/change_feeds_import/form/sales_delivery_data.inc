@@ -106,16 +106,16 @@ function change_feeds_import_sales_delivery1_form_submit($form, &$form_state) {
 
    $operations = array();
    
-   $start_date = strtotime('1-09-2017');
-   $end_date = strtotime('21-09-2017');
+   //$start_date = strtotime('01-09-2017');
+   //$end_date = strtotime('23-09-2017');
 
    $query = db_select('node', 'n');
-   $query->condition('n.type', 'outlet_master');
-   $query->leftjoin('field_data_field_hul_code_reference', 'ti', 'ti.entity_id = n.nid');
-   $query->isNull('ti.field_hul_code_reference_nid');
+   $query->condition('n.type', 'sales_register_data');
+   $query->leftjoin('field_data_field_bill_net_sales', 'ti', 'ti.entity_id = n.nid');
+   $query->isNull('ti.field_bill_net_sales_value');
 
    $query->fields('n', array('nid'));
-   $query->range(0, 10000);
+ //  $query->range(0, 10000);
    $datas = $query->execute()->fetchAllKeyed(0, 0);
 
    $data_chunk = array_chunk($datas, 100);
@@ -373,7 +373,8 @@ function change_feeds_import_sales_delivery_batch_fix_process1($data, $distribut
 function sales_delivery_data_csv_finished($success, $results, $operations) {
   if ($success) {
     $fid = $results['fid'];
-    drupal_goto("sales-delivery-data-confirm/" . $fid);
+    //drupal_goto("sales-delivery-data-confirm/" . $fid);
+    $_GET['destination'] = "sales-delivery-data-confirm/" . $fid;
   }
   else {
     drupal_set_message('There is Error Occured in batch process');
@@ -568,7 +569,8 @@ function change_feeds_import_sales_delivery_finished($success, $results, $operat
     }
 
     drupal_set_message(t("$count node was created"));
-    drupal_goto("sales-delivery-data/import");
+    //drupal_goto("sales-delivery-data/import");
+    $_GET['destination'] = "sales-delivery-data/import";
   }
   else {
     drupal_set_message('There is Error Occured in batch process');

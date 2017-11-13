@@ -10,6 +10,7 @@ function area_confirm_outlet_sequence() {
   drupal_add_js(drupal_get_path('module', 'reverse_geocode') . '/js/selectable-row.js', 'file');
   drupal_add_js(drupal_get_path('module', 'reverse_geocode') . '/js/leaflet.smoothmarkerbouncing.js', 'file');
   drupal_add_js(drupal_get_path('module', 'reverse_geocode') . '/js/multi-map.js', 'file');
+  
 
   $form = drupal_render(drupal_get_form('area_confirm_outlet_sequence_form'));
   $result['map-container'] = array(
@@ -125,14 +126,10 @@ function area_confirm_outlet_sequence_form($form, &$form_state) {
         'method' => 'replace',
         'effect' => 'fade',
       ),
-      /* '#states' => array(
-        'visible' => array(
-        ':input[name^="list_form_items"]' => array('checked' => TRUE),
-        ),
-        ), */
+
       '#id' => 'area-hook-routific',
     );
-    $form['routesavvy_submit'] = array(
+/*    $form['routesavvy_submit'] = array(
       '#type' => 'submit',
       '#value' => t('RouteSavvy API'),
       '#submit' => array('area_confirm_outlet_sequence_api'),
@@ -142,14 +139,9 @@ function area_confirm_outlet_sequence_form($form, &$form_state) {
         'method' => 'replace',
         'effect' => 'fade',
       ),
-      /* '#states' => array(
-        'visible' => array(
-        ':input[name^="list_form_items"]' => array('checked' => TRUE),
-        ),
-        ), */
       '#id' => 'area-hook-routesavvy',
     );
-
+*/
     if ($form_state['reverse_geocode']['rows_save']) {
       $form['save_submit'] = array(
         '#type' => 'submit',
@@ -451,6 +443,7 @@ function area_confirm_outlet_sequence_api(&$form, &$form_state) {
       $Locations['visits'][$key + 1]['location']['name'] = $key . '#' . $val['title'];
       $Locations['visits'][$key + 1]['location']['lat'] = $val['field_hul_updated_lat_value'];
       $Locations['visits'][$key + 1]['location']['lng'] = $val['field_hul_updated_long_value'];
+      //$Locations['visits'][$key + 1]['duration'] = 6; // not required here. because of 300 outlet
     }
 
     $Locations['fleet']['hul_vehicle']['start_location'] = array(
@@ -461,6 +454,7 @@ function area_confirm_outlet_sequence_api(&$form, &$form_state) {
     );
 
     $Locations['options']['shortest_distance'] = true;
+    $Locations['options']['polylines'] = true;
     $Locations_data = json_encode($Locations);
     $authorization = 'bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1ODgzOWY4ZjYyZmQyMzkzMGE4NjQwYjEiLCJpYXQiOjE1MDQ2Nzg4NTl9.AzJLVp6HDk6lbXCWxI1T8Y7US6R0panNjkY5B-pkdqg';
     $request_headers = array('Content-Type' => 'application/json', 'Authorization' => $authorization);
@@ -468,7 +462,6 @@ function area_confirm_outlet_sequence_api(&$form, &$form_state) {
     $routific_options = array('headers' => $request_headers, 'method' => 'POST', 'data' => $Locations_data);
 
     $response_data = drupal_http_request($roitufic_api_url, $routific_options);
-
     ################SHORT THE ARRAY in sequence################### 
 
     $response_data = json_decode($response_data->data);
@@ -583,6 +576,7 @@ function update_area_confirm_outlet_sequence_status($code, $sequence_no) {
   if ($nid) {
     $node = node_load($nid);
     $node->field_sequence['und'][0]['value'] = $sequence_no;
+    $node->field_revised_sequence['und'][0]['value'] = $sequence_no;
     node_save($node);
   }
 }

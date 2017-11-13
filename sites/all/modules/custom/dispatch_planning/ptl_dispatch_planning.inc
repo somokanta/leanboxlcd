@@ -5,16 +5,23 @@
  * 
  */
 
-function fetch_ptl_data($api_time) {
+function fetch_ptl_data($rs_code , $api_time) {
+  $time = time() - 60 * 5; // send data which is created 5min befor, to avoid data loose of trip
+  
   $query = db_select('ptl_data_configuration', 'cb');
   $query->addExpression('MAX(id)', 'max');
   $query->condition('api_flag', '0');
+  $query->condition('rs_code', $rs_code, '=');
+  $query->condition('created_time', $time, '<');
   $max_ptl_data = $query->execute()->fetchField();
 
   $query = db_select('ptl_data_configuration', 'p');
-  $query->fields('p', array('ptl_job', 'rs_code', 'trip_id', 'vehicle', 'bill_number', 'loading_date', 'sequence_no', 'basepack_code', 'sku_code', 'product_name', 'MRP', 'TUR', 'sum_sales_qty'));
+  $query->fields('p', array('ptl_job', 'rs_code', 'trip_id', 'vehicle', 'bill_number', 'loading_date', 'sequence_no', 'basepack_code', 'sku_code', 'product_name', 'MRP', 'TUR'));
+  $query->addExpression('loose', 'sum_sales_qty'); // send loose value in sum_sales_qty
+  $query->condition('p.id', $max_ptl_data, '<=');
   $query->condition('p.api_flag', '0', '=');
-  $query->condition('p.id', $max_ptl_data, '<');
+  $query->condition('p.rs_code', $rs_code, '=');
+  $query->condition('p.loose', 1, '>=');
 
   $result = $query->execute()->fetchAll();
   
@@ -26,8 +33,10 @@ function fetch_ptl_data($api_time) {
       ->fields(array(
         'fetch_time' => $api_time,
       ))
+      ->condition('id', $max_ptl_data, '<=')
       ->condition('api_flag', '0', '=')
-      ->condition('id', $max_ptl_data, '<')
+      ->condition('rs_code', $rs_code, '=')
+      ->condition('loose', 1, '>=')
       ->execute();
   }
   else {
@@ -45,17 +54,29 @@ function fetch_ptl_data($api_time) {
  */
 
 function update_ptl_data($rs_code, $trip_id, $update_time) {
-  db_update('ptl_data_configuration') // Table name no longer needs {}
-    ->fields(array(
-      'update_time' => $update_time,
-      'api_flag' => 1,
-    ))
-    ->condition('rs_code', $rs_code, '=')
-    ->condition('trip_id', $trip_id, '=')
-    ->execute();
 
-  $results['flag'] = '1';
-  $results['result'] = 'Updated Successfully';
+  $query = db_select('ptl_data_configuration', 'cb');
+  $query->addExpression('MAX(id)', 'max');
+  $query->condition('trip_id', $trip_id, '=');
+  $query->condition('rs_code', $rs_code, '=');
+  $max_ptl_data = $query->execute()->fetchField();
 
+  $results['flag'] = '0';
+  $results['result'] = 'Data not found. Please check RS Code and Trip Id';
+
+  if ($max_ptl_data) {
+    db_update('ptl_data_configuration') // Table name no longer needs {}
+      ->fields(array(
+        'update_time' => $update_time,
+        'api_flag' => 1,
+      ))
+      ->condition('rs_code', $rs_code, '=')
+      ->condition('trip_id', $trip_id, '=')
+      ->condition('loose', 1, '>=')
+      ->execute();
+
+    $results['flag'] = '1';
+    $results['result'] = 'Updated Successfully';
+  }
   return $results;
 }
