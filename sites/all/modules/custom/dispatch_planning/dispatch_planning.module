@@ -103,6 +103,38 @@ function dispatch_planning_menu() {
     'access callback' => TRUE,
     'type' => MENU_NORMAL_ITEM,
   );
+  $items['loose-picking-sheet'] = array(
+    'title' => 'Loose PICKING SHEET',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('ptl_loose_sheet_form'),
+    'access arguments' => array('Distributor Upload File'),
+    'type' => MENU_CALLBACK,
+    'file' => 'ptl_dispatch_planning.inc',
+  );
+  $items['download-loose-picking/%'] = array(
+    'title' => 'Download PTL Loose',
+    'page callback' => 'download_ptl_loose_sheet',
+    'page arguments' => array(1),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'ptl_dispatch_planning.inc',
+  );
+  $items['cld-picking-sheet'] = array(
+    'title' => 'CLD PICKING SHEET',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('ptl_cld_sheet_form'),
+    'access arguments' => array('Distributor Upload File'),
+    'type' => MENU_CALLBACK,
+    'file' => 'ptl_dispatch_planning.inc',
+  );
+  $items['download-cld-picking/%'] = array(
+    'title' => 'CLD PICKING SHEET',
+    'page callback' => 'download_ptl_cld_sheet',
+    'page arguments' => array(1),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'ptl_dispatch_planning.inc',
+  );   
 
   return $items;
 }
@@ -825,7 +857,7 @@ function dispatch_planning_form_save_validate($form, &$form_state) {
       "lat" => $origin_lat, //'19.1817531000', //
       "lng" => $origin_long //'72.9972678000',// 
     );
-    $Locations['fleet']['origin']['speed'] = 'very slow'; // speed of the driver
+    $Locations['fleet']['origin']['speed'] = '0.1'; // speed of the driver
 
     /*$post_result = graphhopper_postvrp_api($params);
     if ($post_result) {
