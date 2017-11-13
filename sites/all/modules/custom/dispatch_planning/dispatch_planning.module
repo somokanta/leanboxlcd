@@ -825,7 +825,7 @@ function dispatch_planning_form_save_validate($form, &$form_state) {
       "lat" => $origin_lat, //'19.1817531000', //
       "lng" => $origin_long //'72.9972678000',// 
     );
-    $Locations['fleet']['origin']['speed'] = 'very slow'; // speed of the driver
+    $Locations['fleet']['origin']['speed'] = '0.1'; // speed of the driver
 
     /*$post_result = graphhopper_postvrp_api($params);
     if ($post_result) {
@@ -2034,6 +2034,7 @@ function ptl_configuration_data_insert($api_data, $distributor_id) {
           'created_time' => REQUEST_TIME,
           'cld' => $cld,
           'loose' => $loose,
+          'upc' => $sku_unit_case ? $sku_unit_case : 0
         );
         $query->fields($fields);
         $result_id = $query->execute();

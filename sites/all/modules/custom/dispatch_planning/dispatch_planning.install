@@ -499,6 +499,12 @@ function dispatch_planning_update_7109() {
       'not null' => TRUE,
       'default' => 0,
     ),
+    'upc' => array(
+      'description' => 'UPC qty',
+      'type' => 'int',
+      'not null' => TRUE,
+      'default' => 0,
+    ), 
      'cld' => array(
       'description' => 'CLD qty',
       'type' => 'int',
