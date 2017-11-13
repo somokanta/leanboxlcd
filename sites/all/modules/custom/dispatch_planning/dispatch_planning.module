@@ -117,6 +117,7 @@ function dispatch_planning_menu() {
     'page arguments' => array(1),
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
+    'file' => 'ptl_dispatch_planning.inc',
   );
   $items['ptl-cld-sheet'] = array(
     'title' => 'CLD PICKING SHEET',
@@ -128,9 +129,9 @@ function dispatch_planning_menu() {
   );
   $items['download-ptl-cld-sheet/%'] = array(
     'title' => 'CLD PICKING SHEET',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('download_ptl_cld_sheet'),
-    'access arguments' => array('Distributor Upload File'),
+    'page callback' => 'download_ptl_cld_sheet',
+    'page arguments' => array(1),
+    'access callback' => TRUE,
     'type' => MENU_CALLBACK,
     'file' => 'ptl_dispatch_planning.inc',
   );   
