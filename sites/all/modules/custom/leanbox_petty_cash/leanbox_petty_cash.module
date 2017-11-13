@@ -137,7 +137,6 @@ function _get_latest_balance($distributor_id) {
  * @param type $string
  */
 function get_list_of_voucher_details($string = '') {
-   dpm($string, '$string');
    $res = array();
    $user_id = $GLOBALS['user']->uid;
    $distributor_id = change_feeds_import_get_distributor_id($user_id);
@@ -153,7 +152,6 @@ function get_list_of_voucher_details($string = '') {
          $res = $query->execute()->fetchAllKeyed(0, 0);
       }
    }
-   dpm($res, 'res');
    drupal_json_output($res);
 }
 

@@ -50,31 +50,48 @@ function file_upload_petty_cash_callback($form, &$form_state) {
          $form['voucher_details'] = array(
            '#markup' => $html,
          );
-         $form['voucher_rows'] = array(
-           '#type' => 'value',
-           '#value' => $rows,
-         );
-         $form['file_detail'] = array(
+//         $form['voucher_rows'] = array(
+//           '#type' => 'value',
+//           '#value' => $rows,
+//         );
+         $form['file'] = array(
            '#title' => t('Upload file'),
-           '#type' => 'managed_file',
-           '#required' => TRUE,
-           '#default_value' => !empty($file_id) ? $file_id : NULL,
-           '#progress_indicator' => "bar",
-           '#upload_validators' => array(
-             'file_validate_extensions' => array('pdf png jpg jpeg'),
-             // Pass the maximum file size in bytes
-             'file_validate_size' => array(MAX_FILE_SIZE * 1024 * 1024),
-           ),
-           '#description' => t('Allowed extensions: pdf png jpg jpeg'),
+           '#type' => 'file',
+           //  '#required' => TRUE,
+           '#description' => t('Allowed extensions: pdf png jpg jpeg txt'),
          );
          $form['submit'] = array(
-           '#value' => 'delete',
+           '#value' => 'Upload',
            '#type' => 'submit',
            '#size' => 20,
          );
       }
    }
    return $form;
+}
+
+function file_upload_petty_cash_callback_validate($form, &$form_state) {
+   $file = file_save_upload('file', array(
+     'file_validate_extensions' => array('pdf png jpg jpeg txt'), // Validate extensions.
+   ));
+   // If the file passed validation:
+   if ($file) {
+      // Change the status
+      $file->status = FILE_STATUS_PERMANENT;
+      // Update the file status into the database
+      file_save($file);
+      // Move the file, into the Drupal file system
+      if ($file = file_move($file, 'public://')) {
+         // Save the file for use in the submit handler.
+         $form_state['storage']['file'] = $file;
+      }
+      else {
+         form_set_error('file', t('Failed to write the uploaded file the site\'s file folder.'));
+      }
+   }
+   else {
+      form_set_error('file', t('No file was uploaded. kinldy rename it and upload again.'));
+   }
 }
 
 /**
@@ -90,50 +107,24 @@ function _petty_cash_file_ajax($form, &$form_state) {
  * @param type $form_state
  */
 function file_upload_petty_cash_callback_submit($form, &$form_state) {
-   dpm($form_state, 'state');
    if (!empty($form_state['values']['voucher']) && !empty($form_state['values']['distributor_id'])) {
 
       $old_voucher = $form_state['values']['voucher'];
       $distributor_id = $form_state['values']['distributor_id'];
 
-      //remove existing file while clicking remove button
-      //it sets file element value to zero when clicked on remove button
-      if ($form_state['values']['file_details'] == 0) {
+      //adding file and updating fid in petty_cash
+      $file = ($form_state['storage']['file']);
+      if (!empty($file->fid)) {
+         $file_id = $file->fid;
 
-         $exist_file_id = variable_get("$old_voucher_$distributor_id");
-         //get existing file id to delete
-         $exist_file = file_load($exist_file_id);
-         if (!empty($exist_file)) {
-            //delete file usage
-            file_usage_delete($exist_file, 'leanbox_petty_cash', 'user', $distributor_id);
 
-            // delete file forcefully
-            file_delete($exist_file, TRUE);
-            drupal_set_message(t('File removed.'));
-         }
-      }
-      else {
-
-         //adding file and updating fid in petty_cash
-         $file = file_load($form_state['values']['file_details']);
-         if (!empty($file->fid)) {
-            //get currently uploaded file id
-            $file_id = $file->fid;
-            //setting file id to its variable
-            variable_set("$old_voucher_$distributor_id", $file_id);
-            file_usage_add($file, 'leanbox_petty_cash', 'user', $distributor_id);
-            //make file status as permanent
-            $file->status = FILE_STATUS_PERMANENT;
-            file_save($file);
-
-            //  update file id in petty cash table
-            db_update('petty_cash')
-                ->fields(array('distributor_id' => 60))
-                ->condition('distributor_id', $distributor_id)
-                ->condition('voucher', $old_voucher)
-                ->execute();
-            drupal_set_message("Documents uploaded successfully.");
-         }
+         //  update file id in petty cash table
+         db_update('petty_cash')
+             ->fields(array('distributor_id' => 60))
+             ->condition('distributor_id', $distributor_id)
+             ->condition('voucher', $old_voucher)
+             ->execute();
+         drupal_set_message("Documents uploaded successfully.");
       }
    }
 }

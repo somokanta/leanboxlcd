@@ -50,7 +50,7 @@ function revert_petty_cash_callback($form, &$form_state) {
          );
          $form['voucher_rows'] = array(
            '#type' => 'value',
-           '#value' => $rows,
+           '#value' => $output['rows'],
          );
          $form['amount'] = array(
            '#title' => t('Enter Amount'),
@@ -97,13 +97,13 @@ function revert_petty_cash_callback_submit($form, &$form_state) {
 
       $old_voucher_details = $form_state['values']['voucher_rows'];
       dpm($old_voucher_details, '$old_voucher_details');
-      /**
+      
         db_insert('petty_cash') // Table name no longer needs {}
         ->fields(array(
         'type' => 'credit',
-        'head' => $old_voucher_details['head'],
-        'subhead' => $old_voucher_details['subhead'],
-        'description' => $old_voucher_details['description'],
+        'head' => $old_voucher_details[0]['head'],
+        'subhead' => $old_voucher_details[0]['subhead'],
+        'description' => $old_voucher_details[0]['description'],
         'amount' => $form_state['values']['amount'],
         'voucher_no' => $complete_voucher_no,
         //'voucher_date' => date('Y-m-d'),
@@ -113,6 +113,6 @@ function revert_petty_cash_callback_submit($form, &$form_state) {
         'distributor_id' => $distributor_id,
         ))
         ->execute();
-       * */
+       
    }
 }
