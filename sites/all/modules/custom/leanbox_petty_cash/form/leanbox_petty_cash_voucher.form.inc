@@ -39,6 +39,10 @@ function revert_petty_cash_callback($form, &$form_state) {
    if (isset($form_state['values']['voucher']) && !empty($form_state['values']['voucher'])) {
       $output = _get_voucher_details_distributor_wise($distributor_id, $form_state['values']['voucher']);
       if (!empty($output['rows'])) {
+          $form['old_voucher_id'] = array(
+           '#type' => 'value',
+           '#value' => $form_state['values']['voucher'],
+         );
          $form['old_voucher_table_id'] = array(
            '#type' => 'value',
            '#value' => $output['rows'][0]['id'],
@@ -81,7 +85,7 @@ function _petty_cash_revert_ajax($form, &$form_state) {
  */
 function revert_petty_cash_callback_submit($form, &$form_state) {
    if (!empty($form_state['values']['voucher']) && !empty($form_state['values']['distributor_id'])) {
-      $old_voucher = $form_state['values']['voucher'];
+      $old_voucher = $form_state['values']['old_voucher_id'];
       $distributor_id = $form_state['values']['distributor_id'];
       $balance = _get_latest_balance($distributor_id);
       $coupon_id = _update_unique_coupon($distributor_id);
