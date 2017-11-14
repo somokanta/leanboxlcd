@@ -1092,8 +1092,8 @@ function send_email_productivity_emailer($todays_date_date, $distributor_name, $
 
   $params['subject'] = "Productivity Progress Status-$distributor_name";
   $params['body'] = $party_pack_type_wsie_html . "<br>" . $party_pack_superwise_html . "<br>" . $picking_godown_wise_html . "<br>" . $picking_supervisor_wise_html;
-  $mail_to = variable_get('to_email');
-  $from = variable_get('from_email');
+  //$mail_to = variable_get('to_email');
+  //$from = variable_get('from_email');
 
   if ($chart == TRUE && $type == 'party_packing') {
     return $party_pack_type_wsie_html . "<br>" . $party_pack_superwise_html;
@@ -1102,7 +1102,7 @@ function send_email_productivity_emailer($todays_date_date, $distributor_name, $
     return  $picking_godown_wise_html . "<br>" . $picking_supervisor_wise_html;
   }
   else {
-    drupal_mail('email_status', 'productivity_status', $mail_to, LANGUAGE_NONE, $params, $from);
+    //drupal_mail('email_status', 'productivity_status', $mail_to, LANGUAGE_NONE, $params, $from);
   }
 }
 
