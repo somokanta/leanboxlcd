@@ -63,7 +63,7 @@ function file_upload_petty_cash_callback($form, &$form_state) {
            '#description' => t('Allowed extensions: pdf png jpg jpeg txt'),
          );
          $form['bill_file'] = array(
-           '#title' => t('Bill Copy Upload'),
+           '#title' => t('Bills Copy Upload'),
            '#type' => 'file',
            '#description' => t('Allowed extensions: pdf png jpg jpeg txt'),
          );
