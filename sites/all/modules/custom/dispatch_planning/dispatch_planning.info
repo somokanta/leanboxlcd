@@ -1,3 +1,8 @@
 name = Dispatch planning
 description = Dispatch Planning UI
 core = 7.x
+
+files[] = views/handler/footer_ptl_cld_custom_field.inc
+files[] = views/handler/footer_ptl_loose_custom_field.inc
+files[] = views/handler/header_ptl_cld_custom_field.inc
+files[] = views/handler/header_ptl_loose_custom_field.inc
