@@ -100,5 +100,4 @@ class header_ptl_loose_custom_field extends views_handler_field {
       return "";
     }
   }
-
 }
