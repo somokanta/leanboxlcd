@@ -618,8 +618,8 @@ function send_email_channel_emailer($distributor_name, $distributor_id = 60) {
 //  $mail_to = "abhishek.r@iksula.com";
 //  $mail_to = "shruti.a@iksulaops.com";
   //$from = "MIS.HELPDESK@leanbox.in";
-  $from = variable_get('from_email');
-  drupal_mail('email_status', 'channel_status', $mail_to, LANGUAGE_NONE, $params, $from);
+  //$from = variable_get('from_email');
+  //drupal_mail('email_status', 'channel_status', $mail_to, LANGUAGE_NONE, $params, $from);
 }
 
 
@@ -1092,7 +1092,7 @@ function send_email_productivity_emailer($todays_date_date, $distributor_name, $
 
   $params['subject'] = "Productivity Progress Status-$distributor_name";
   $params['body'] = $party_pack_type_wsie_html . "<br>" . $party_pack_superwise_html . "<br>" . $picking_godown_wise_html . "<br>" . $picking_supervisor_wise_html;
-  //$mail_to = variable_get('to_email');
+  $mail_to = variable_get('to_email');
   $from = variable_get('from_email');
 
   if ($chart == TRUE && $type == 'party_packing') {
