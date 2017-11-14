@@ -17,13 +17,20 @@ function leanbox_petty_cash_feature_user_default_permissions() {
     'module' => 'feeds',
   );
 
+  // Exported permission: 'edit terms in petty_cash'.
+  $permissions['edit terms in petty_cash'] = array(
+    'name' => 'edit terms in petty_cash',
+    'roles' => array(
+      'leanbox_petty_cash' => 'leanbox_petty_cash',
+    ),
+    'module' => 'taxonomy',
+  );
+
   // Exported permission: 'import petty_cash_master feeds'.
   $permissions['import petty_cash_master feeds'] = array(
     'name' => 'import petty_cash_master feeds',
     'roles' => array(
-      'DFE' => 'DFE',
-      'RS Admin' => 'RS Admin',
-      'RS Operator' => 'RS Operator',
+      'leanbox_petty_cash' => 'leanbox_petty_cash',
     ),
     'module' => 'feeds',
   );
@@ -39,10 +46,8 @@ function leanbox_petty_cash_feature_user_default_permissions() {
   $permissions['upload petty cash'] = array(
     'name' => 'upload petty cash',
     'roles' => array(
-      'DFE' => 'DFE',
-      'RS Admin' => 'RS Admin',
-      'RS Operator' => 'RS Operator',
       'administrator' => 'administrator',
+      'leanbox_petty_cash' => 'leanbox_petty_cash',
     ),
     'module' => 'leanbox_petty_cash',
   );
