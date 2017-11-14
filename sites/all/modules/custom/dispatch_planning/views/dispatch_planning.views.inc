@@ -730,6 +730,24 @@ function dispatch_planning_views_data() {
     'help' => t("unique identifiers."),
     // 'weight' => -10,
   );
+  // serial No
+  $data['ptl_data_configuration']['id'] = array(
+    'title' => t('ID'),
+    'help' => t('ID'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
   // ptl_job
   $data['ptl_data_configuration']['ptl_job'] = array(
     'title' => t('ptl_job'),
@@ -1107,6 +1125,42 @@ function dispatch_planning_views_data() {
     'argument' => array(
       'handler' => 'views_handler_argument_string',
     ),
-  );  
+  );
+  // Put Qty
+  $data['ptl_data_configuration']['put_qty'] = array(
+    'title' => t('Put Qty'),
+    'help' => t('Put Qty'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+  // put_qty_time
+  $data['ptl_data_configuration']['put_qty_time'] = array(
+    'title' => t('Put Qty Time'),
+    'help' => t('Put Qty Time'),
+    'field' => array(
+      'handler' => 'views_handler_field_date',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort_date',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_date',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_filter_date',
+    ),
+  ); 
   return $data;
 }
