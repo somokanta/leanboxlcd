@@ -43,7 +43,13 @@ function leanbox_payment_collection_menu() {
      'access arguments' => array('upload payment collection'),
      'type' => MENU_CALLBACK,
    );
-
+   $items['email/payment-collection-status'] = array(
+    'title' => 'Send Email Of Signed and Bounced Chq Status',
+    'page callback' => 'send_email_payment_collection_status',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'includes/payment_collection_status_automailer.inc',
+   );
    return $items;
 }
 
@@ -198,5 +204,3 @@ function leanbox_payment_collection_node_presave($node) {
     }
   }
 }
-
-
