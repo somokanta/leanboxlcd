@@ -27,6 +27,7 @@ class header_ptl_cld_custom_field extends views_handler_field {
     global $user;
     $user_id = $user->uid;
     $total_result = $this->view->result;
+    $box = 0;
     //dpm($total_result);
     foreach ($total_result as $key => $value) {
       $trip_date = $value->ptl_data_configuration_created_time;
@@ -43,7 +44,7 @@ class header_ptl_cld_custom_field extends views_handler_field {
     $this->view->custom_footer = $box;
 
     $name_line_1 = 'LeanBox Logistics Solution Pvt Ltd';
-    $name_line_2 = 'Loose PICKING SHEET';
+    $name_line_2 = 'CLD PICKING SHEET';
 
     $trip_id = $this->view->args[0];
     $trip_date = date('d-M-y', $trip_date);
