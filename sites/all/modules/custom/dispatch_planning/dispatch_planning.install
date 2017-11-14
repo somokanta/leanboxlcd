@@ -516,7 +516,19 @@ function dispatch_planning_update_7109() {
       'type' => 'int',
       'not null' => TRUE,
       'default' => 0,
-    ),     
+    ),
+     'put_qty' => array(
+      'description' => 'Put qty',
+      'type' => 'int',
+      'not null' => TRUE,
+      'default' => 0,
+    ),
+     'put_qty_time' => array(
+      'description' => 'Put Qty Time',
+      'type' => 'int',
+      'not null' => TRUE,
+      'default' => 0,
+    ),
   );
   foreach ($fields as $key => $field) {
     if (!db_field_exists('ptl_data_configuration', $key)) {
