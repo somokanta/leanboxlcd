@@ -88,18 +88,18 @@ function revert_petty_cash_callback_submit($form, &$form_state) {
       $arg1 = $form_state['values']['arg'];
       $user_details = leanbox_dashboard_get_username_and_rs_code($distributor_id);
       $rs_code = $user_details['field_third_party_username_value'];
-      $complete_voucher_no = "revert-credit-$rs_code-$coupon_id";
+      $complete_voucher_no = "delete-$rs_code-$coupon_id";
 
       $old_voucher_details = $form_state['values']['voucher_rows'];
       $old_amount = $old_voucher_details[0]['amount'];
+      
       if ($old_voucher_details[0]['type'] === 'credit') {
-         $type = 'debit';
-
+         $type = 'delete';
          // credit voucher is deleted
          $balance = $balance - $old_amount;
       }
       else {
-         $type = 'credit';
+         $type = 'delete';
          $balance = $balance + $old_amount;
       }
 
@@ -119,7 +119,7 @@ function revert_petty_cash_callback_submit($form, &$form_state) {
           ))
           ->execute();
       drupal_set_message(t("$old_amount Reverted sucessfully."));
-
+      drupal_set_message(t("$complete_voucher_no generated sucessfully."));
       //  update file id in petty cash table
       $old_voucher_serial_id = $form_state['values']['old_voucher_table_id'];
       if (!empty($old_voucher_serial_id)) {

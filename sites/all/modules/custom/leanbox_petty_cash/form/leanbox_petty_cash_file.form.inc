@@ -39,7 +39,6 @@ function file_upload_petty_cash_callback($form, &$form_state) {
    if (isset($form_state['values']['voucher']) && !empty($form_state['values']['voucher'])) {
       $voucher = $form_state['values']['voucher'];
       $output = _get_voucher_details_distributor_wise($distributor_id, $form_state['values']['voucher']);
-      $file_id = variable_get("$voucher_$distributor_id");
 
       if (!empty($output['rows'])) {
 
@@ -59,12 +58,12 @@ function file_upload_petty_cash_callback($form, &$form_state) {
          );
 
          $form['file'] = array(
-           '#title' => t('Upload file'),
+           '#title' => t('Voucher Copy Upload'),
            '#type' => 'file',
            '#description' => t('Allowed extensions: pdf png jpg jpeg txt'),
          );
          $form['bill_file'] = array(
-           '#title' => t('Upload bill file'),
+           '#title' => t('Bill Copy Upload'),
            '#type' => 'file',
            '#description' => t('Allowed extensions: pdf png jpg jpeg txt'),
          );
