@@ -19,7 +19,7 @@ function send_email_payment_collection_status() {
   // Pending For Upload
   $pending_for_upload_html = get_email_pending_for_upload($distributor_id);
   
-  $params['subject'] = "<h3>SB And Bounce Chq Status</h3>";
+  $params['subject'] = "SB And Bounce Chq Status";
   $params['body'] = $pending_for_collection_html . "<br>" . $pending_for_assignment_html . "<br>" . $pending_for_upload_html;
   $mail_to = variable_get('to_email');
   $from = variable_get('from_email');

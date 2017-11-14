@@ -1,0 +1,233 @@
+<?php
+
+/**
+ * Files containing list of functions for petty cash functionalities
+ */
+
+/**
+ * Implements hook_menu
+ */
+function leanbox_petty_cash_menu() {
+   $items = array();
+   $items['petty-cash/credit'] = array(
+     'title' => 'Petty Cash Credit',
+     'page callback' => 'drupal_get_form',
+     'page arguments' => array('upload_petty_cash_callback'),
+     'access arguments' => array('upload petty cash'),
+     'type' => MENU_CALLBACK,
+     'file' => 'form/leanbox_petty_cash.form.inc',
+   );
+   $items['petty-cash/debit'] = array(
+     'title' => 'Petty Cash Credit',
+     'page callback' => 'drupal_get_form',
+     'page arguments' => array('upload_petty_cash_callback'),
+     'access arguments' => array('upload petty cash'),
+     'type' => MENU_CALLBACK,
+     'file' => 'form/leanbox_petty_cash.form.inc',
+   );
+   $items['petty-cash-voucher/delete'] = array(
+     'title' => 'Petty Cash Revert Voucher',
+     'page callback' => 'drupal_get_form',
+     'page arguments' => array('revert_petty_cash_callback'),
+     'access arguments' => array('upload petty cash'),
+     'type' => MENU_CALLBACK,
+     'file' => 'form/leanbox_petty_cash_voucher.form.inc',
+   );
+   $items['petty-cash-voucher/file-upload'] = array(
+     'title' => 'Petty Cash Bill Upload',
+     'page callback' => 'drupal_get_form',
+     'page arguments' => array('file_upload_petty_cash_callback'),
+     'access arguments' => array('upload petty cash'),
+     'type' => MENU_CALLBACK,
+     'file' => 'form/leanbox_petty_cash_file.form.inc',
+   );
+   $items['voucher-no/list'] = array(
+     'title' => 'Get List of logged in distributor voucher details',
+     'page callback' => 'get_list_of_voucher_details',
+     'access arguments' => array('upload petty cash'),
+     'type' => MENU_CALLBACK,
+   );
+   return $items;
+}
+
+/**
+ * Implement hook_permission()
+ *  Add custom permission for petty cash
+ */
+function leanbox_petty_cash_permission() {
+   return array(
+     'upload petty cash' => array(
+       'title' => t('upload petty cash'),
+       'description' => t('upload petty cash for details')
+     )
+   );
+}
+
+/**
+ * 
+ * Implements hook_feeds_presave($source, $entity, $item)
+ */
+function leanbox_petty_cash_feeds_presave($source, $entity, $item, $entity_id) {
+   foreach ($item as $key => $value) {
+      $item[$key] = mb_convert_encoding($value, 'UTF-8', 'UTF-8');
+   }
+   if ($entity->feeds_item->id == 'petty_cash_master') {
+      foreach ($item as $key => $val) {
+         if ($key === 'type') {
+            $field = field_info_field('field_petty_cash_type');
+            $allowed_values = list_allowed_values($field);
+            $val = strtolower($val);
+            if (!array_key_exists($val, $allowed_values)) {
+               drupal_set_message("Please enter correct value for type. Values should be in " . implode($allowed_values, ','), 'error');
+               $entity->feeds_item->skip = TRUE;
+            }
+            else {
+               $entity->field_petty_cash_type['und'][0]['value'] = $val;
+            }
+         }
+      }
+   }
+}
+
+/**
+ * Implements hook_taxonomy_term_presave($term)
+ * @param type $term
+ */
+function leanbox_petty_cash_taxonomy_term_presave($term) {
+   if ($term->vocabulary_machine_name === 'petty_cash') {
+      if (!isset($term->original->name) || ($term->original->name != $term->name)) {
+         $user_id = $GLOBALS['user']->uid;
+         $distributor_id = change_feeds_import_get_distributor_id($user_id);
+
+         $term_type = $term->field_petty_cash_type['und'][0]['value'];
+         $term_head = substr($term->field_petty_cash_head['und'][0]['value'], 0, 50);
+         $term_subhead = substr($term->field_petty_cash_subhead['und'][0]['value'], 0, 50);
+         $term->name = $term_type . "-" . $term_head . "-" . $term_subhead;
+         $term->field_petty_cash_distributor['und'][0]['uid'] = $distributor_id;
+      }
+   }
+}
+
+/**
+ * 
+ * @param type $distributor_id
+ */
+function _get_latest_balance($distributor_id) {
+   $res = 0;
+   if (!empty($distributor_id)) {
+      $query = db_select('petty_cash', 'cb');
+      $query->addExpression('MAX(id)', 'max');
+      $query->condition('distributor_id', $distributor_id);
+      $max_billing_id_new = $query->execute()->fetchField();
+
+      if (!empty($max_billing_id_new)) {
+         $query = db_select('petty_cash', 'pc');
+         $query->condition('pc.distributor_id', $distributor_id);
+         $query->condition('pc.id', $max_billing_id_new);
+         $query->fields('pc', array('balance'));
+         $res = $query->execute()->fetchField();
+      }
+   }
+   return $res;
+}
+
+/**
+ * Menu callback; Retrieve a JSON object containing autocomplete suggestions for existing voucher no.
+ * @param type $string
+ */
+function get_list_of_voucher_details($string = '') {
+   $res = array();
+   $user_id = $GLOBALS['user']->uid;
+   $distributor_id = change_feeds_import_get_distributor_id($user_id);
+   $length = strlen($string);
+   if ($length > 2) {
+      if (!empty($distributor_id) && !empty($string)) {
+         $query = db_select('petty_cash', 'pc');
+         $query->isNull('pc.voucher_reference_no');
+         $query->isNull('pc.deleted');
+         $query->condition('pc.distributor_id', $distributor_id);
+         $query->condition('pc.voucher_no', db_like($string) . '%', 'LIKE');
+         $query->fields('pc', array('voucher_no'));
+         $query->range(0, 10);
+         $res = $query->execute()->fetchAllKeyed(0, 0);
+      }
+   }
+   drupal_json_output($res);
+}
+
+function _update_unique_coupon($distributor_id) {
+   $coupon_id = 0;
+   if (!empty($distributor_id)) {
+      $txn = db_transaction();
+
+      $query = db_select('petty_cash_sequence_table', 'ts');
+      $query->forUpdate();
+      $query->addField('ts', 'next_id');
+      $query->condition('ts.distributor_id', $distributor_id);
+      $coupon_id = $query->execute()->fetchField();
+
+      if ($coupon_id) {
+         // Increment the next_value.
+         db_update('petty_cash_sequence_table')
+             ->fields(array('next_id' => $coupon_id + 1))
+             ->condition('distributor_id', $distributor_id)
+             ->execute();
+      }
+      else {
+         $coupon_id = 1;
+         $insert = db_insert('petty_cash_sequence_table')
+             ->fields(array(
+           'distributor_id' => $distributor_id,
+           'next_id' => $coupon_id + 1
+         ));
+         $insert->execute();
+      }
+   }
+   return $coupon_id;
+}
+
+/**
+ * 
+ * @param type $distributor_id
+ * @param type $voucher
+ */
+function _get_voucher_details_distributor_wise($distributor_id, $voucher) {
+   $output = array();
+   if (!empty($distributor_id) && !empty($voucher)) {
+      $query = db_select('petty_cash', 'pc');
+      $query->isNull('pc.voucher_reference_no');
+      $query->condition('pc.distributor_id', $distributor_id);
+      $query->condition('pc.voucher_no', $voucher);
+      $query->fields('pc', array('id', 'voucher_date', 'head', 'subhead', 'amount', 'person_name', 'bill_available', 'bill_no', 'type', 'description'));
+      $rows = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+      // $rows[] = $res;
+      $header = array(
+        'Voucher date',
+        'Head',
+        'Subhead',
+        'Amount',
+        'Person name',
+        'Bill available',
+        'Bill no',
+        'Type',
+        'Description',
+      );
+      if (isset($rows[0]['voucher_date'])) {
+         $rows[0]['voucher_date'] = date('d-M-y', $rows[0]['voucher_date']);
+      }
+      $output['header'] = $header;
+      $output['rows'] = $rows;
+   }
+
+   return $output;
+}
+
+/**
+ * Implements of hook_views_api().
+ */
+function leanbox_petty_cash_views_api() {
+   return array(
+     'api' => 3,
+     'path' => drupal_get_path('module', 'leanbox_petty_cash') . '/views'
+   );
+}
