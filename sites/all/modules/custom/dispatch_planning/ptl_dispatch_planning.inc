@@ -16,7 +16,7 @@ function fetch_ptl_data($rs_code, $api_time) {
   $max_ptl_data = $query->execute()->fetchField();
 
   $query = db_select('ptl_data_configuration', 'p');
-  $query->fields('p', array('id','ptl_job', 'rs_code', 'trip_id', 'vehicle', 'bill_number', 'loading_date', 'sequence_no', 'basepack_code', 'sku_code', 'product_name', 'MRP', 'TUR'));
+  $query->fields('p', array('id', 'ptl_job', 'rs_code', 'trip_id', 'vehicle', 'bill_number', 'loading_date', 'sequence_no', 'basepack_code', 'sku_code', 'product_name', 'MRP', 'TUR'));
   $query->addExpression('loose', 'sum_sales_qty'); // send loose value in sum_sales_qty
   $query->condition('p.id', $max_ptl_data, '<=');
   $query->condition('p.api_flag', '0', '=');
@@ -81,7 +81,44 @@ function update_ptl_data($rs_code, $trip_id, $update_time) {
   return $results;
 }
 
-// PTL Loose PDF REPORT
+/**
+ * 
+ * @param type $id
+ * @param type $put_qty
+ * @return string
+ * Put QTY will be updated in our system by API
+ * They will pass id and put_qty.
+ */
+function put_qty_ptl_data($id_qty) {
+
+  $update_time = REQUEST_TIME;
+
+  $results['flag'] = '0';
+  $total = 0;
+
+  foreach ($id_qty as $value) {
+    $count = db_update('ptl_data_configuration') // Table name no longer needs {}
+      ->fields(array(
+        'put_qty' => $value['qty'],
+        'put_qty_time' => $update_time,
+      ))
+      ->condition('id', $value['id'], '=')
+      ->execute();
+    $total += $count;
+  }
+  if($total){
+    $results['flag'] = '1';
+  }
+  $results['result'] = "$total Row Updated";
+  return $results;
+}
+
+/**
+ * PTL Loose PDF REPORT
+ * @param type $form
+ * @param type $form_state
+ * @return type
+ */
 function ptl_loose_sheet_form($form, &$form_state) {
   $form['#prefix'] = '<div id="itemlist-div">';
   $form['#suffix'] = '</div>';
@@ -140,7 +177,6 @@ function download_ptl_loose_sheet($args) {
   $rendered_html = $view->render();
   pdf_using_mpdf_api($rendered_html);
 }
-
 
 //*************PTL PDF CLD REPORT***************
 function ptl_cld_sheet_form($form, &$form_state) {
