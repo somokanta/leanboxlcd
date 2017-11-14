@@ -45,6 +45,16 @@ class footer_ptl_loose_custom_field extends views_handler_field {
       <td></td>
       <td></td>
       <td></td>
+      <td>Start Time:</td>
+      <td></td>
+      <td></td>
+      </tr>
+      <tr>
+      <td></td>
+      <td>End Time:</td>
+      <td></td>
+      <td></td>
+      <td></td>
       <td>End Time:</td>
       <td></td>
       <td></td>
