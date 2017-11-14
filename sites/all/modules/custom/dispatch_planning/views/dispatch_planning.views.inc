@@ -6,6 +6,41 @@
  */
 
 function dispatch_planning_views_data() {
+  
+  $data = array();
+  
+  $data['views']['header_ptl_loose_custom'] = array(
+    'title' => t('PTL Loose Header'),
+    'help' => t('Just a field created for PTL Loose Header.'),
+    'area' => array(
+      'handler' => 'header_ptl_loose_custom_field',
+    ),
+  );
+
+  $data['views']['footer_ptl_loose_custom'] = array(
+    'title' => t('PTL Loose Footer'),
+    'help' => t('Just a field created for PTL Loose Footer.'),
+    'area' => array(
+      'handler' => 'footer_ptl_loose_custom_field',
+    ),
+  );
+  $data['views']['header_ptl_cld_custom'] = array(
+    'title' => t('PTL CLD Header'),
+    'help' => t('Just a field created for PTL CLD Header.'),
+    'area' => array(
+      'handler' => 'header_ptl_cld_custom_field',
+    ),
+  );
+
+  $data['views']['footer_ptl_cld_custom'] = array(
+    'title' => t('PTL CLD Footer'),
+    'help' => t('Just a field created for PTL CLD Footer.'),
+    'area' => array(
+      'handler' => 'footer_ptl_cld_custom_field',
+    ),
+  );
+  
+  //Dispatch Panning API Log
   $data['dispatch_planning_api_log']['table'] = array(
     'group' => t('dispatch_planning Logs'),
     'title' => t('dispatch_planning Logs'),
