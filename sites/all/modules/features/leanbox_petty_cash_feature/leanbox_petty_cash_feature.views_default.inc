@@ -36,10 +36,6 @@ function leanbox_petty_cash_feature_views_default_views() {
   $handler->display->display_options['pager']['type'] = 'full';
   $handler->display->display_options['pager']['options']['items_per_page'] = '10';
   $handler->display->display_options['style_plugin'] = 'editableviews_table';
-  /* Field: Taxonomy term: Name */
-  $handler->display->display_options['fields']['name_1']['id'] = 'name_1';
-  $handler->display->display_options['fields']['name_1']['table'] = 'taxonomy_term_data';
-  $handler->display->display_options['fields']['name_1']['field'] = 'name';
   /* Field: Taxonomy term: Petty Cash Head (editable) */
   $handler->display->display_options['fields']['field_petty_cash_head_editable']['id'] = 'field_petty_cash_head_editable';
   $handler->display->display_options['fields']['field_petty_cash_head_editable']['table'] = 'field_data_field_petty_cash_head';
@@ -164,6 +160,40 @@ function leanbox_petty_cash_feature_views_default_views() {
   $handler->display->display_options['fields']['id']['id'] = 'id';
   $handler->display->display_options['fields']['id']['table'] = 'petty_cash';
   $handler->display->display_options['fields']['id']['field'] = 'id';
+  /* Field: petty cash: Voucher no */
+  $handler->display->display_options['fields']['voucher_no']['id'] = 'voucher_no';
+  $handler->display->display_options['fields']['voucher_no']['table'] = 'petty_cash';
+  $handler->display->display_options['fields']['voucher_no']['field'] = 'voucher_no';
+  /* Field: petty cash: Type */
+  $handler->display->display_options['fields']['type']['id'] = 'type';
+  $handler->display->display_options['fields']['type']['table'] = 'petty_cash';
+  $handler->display->display_options['fields']['type']['field'] = 'type';
+  /* Field: petty cash: Voucher date */
+  $handler->display->display_options['fields']['voucher_date']['id'] = 'voucher_date';
+  $handler->display->display_options['fields']['voucher_date']['table'] = 'petty_cash';
+  $handler->display->display_options['fields']['voucher_date']['field'] = 'voucher_date';
+  $handler->display->display_options['fields']['voucher_date']['date_format'] = 'short';
+  $handler->display->display_options['fields']['voucher_date']['second_date_format'] = 'long';
+  /* Field: petty cash: Head */
+  $handler->display->display_options['fields']['head']['id'] = 'head';
+  $handler->display->display_options['fields']['head']['table'] = 'petty_cash';
+  $handler->display->display_options['fields']['head']['field'] = 'head';
+  /* Field: petty cash: Subhead */
+  $handler->display->display_options['fields']['subhead']['id'] = 'subhead';
+  $handler->display->display_options['fields']['subhead']['table'] = 'petty_cash';
+  $handler->display->display_options['fields']['subhead']['field'] = 'subhead';
+  /* Field: petty cash: description */
+  $handler->display->display_options['fields']['description']['id'] = 'description';
+  $handler->display->display_options['fields']['description']['table'] = 'petty_cash';
+  $handler->display->display_options['fields']['description']['field'] = 'description';
+  /* Field: petty cash: Person name */
+  $handler->display->display_options['fields']['person_name']['id'] = 'person_name';
+  $handler->display->display_options['fields']['person_name']['table'] = 'petty_cash';
+  $handler->display->display_options['fields']['person_name']['field'] = 'person_name';
+  /* Field: petty cash: Distributor_id */
+  $handler->display->display_options['fields']['distributor_id']['id'] = 'distributor_id';
+  $handler->display->display_options['fields']['distributor_id']['table'] = 'petty_cash';
+  $handler->display->display_options['fields']['distributor_id']['field'] = 'distributor_id';
   /* Field: petty cash: Amount */
   $handler->display->display_options['fields']['amount']['id'] = 'amount';
   $handler->display->display_options['fields']['amount']['table'] = 'petty_cash';
@@ -184,63 +214,29 @@ function leanbox_petty_cash_feature_views_default_views() {
   $handler->display->display_options['fields']['deleted']['id'] = 'deleted';
   $handler->display->display_options['fields']['deleted']['table'] = 'petty_cash';
   $handler->display->display_options['fields']['deleted']['field'] = 'deleted';
-  /* Field: petty cash: description */
-  $handler->display->display_options['fields']['description']['id'] = 'description';
-  $handler->display->display_options['fields']['description']['table'] = 'petty_cash';
-  $handler->display->display_options['fields']['description']['field'] = 'description';
-  /* Field: petty cash: Distributor_id */
-  $handler->display->display_options['fields']['distributor_id']['id'] = 'distributor_id';
-  $handler->display->display_options['fields']['distributor_id']['table'] = 'petty_cash';
-  $handler->display->display_options['fields']['distributor_id']['field'] = 'distributor_id';
+  /* Field: petty cash: Voucher reference no */
+  $handler->display->display_options['fields']['voucher_reference_no']['id'] = 'voucher_reference_no';
+  $handler->display->display_options['fields']['voucher_reference_no']['table'] = 'petty_cash';
+  $handler->display->display_options['fields']['voucher_reference_no']['field'] = 'voucher_reference_no';
   /* Field: petty cash: File date */
   $handler->display->display_options['fields']['file_date']['id'] = 'file_date';
   $handler->display->display_options['fields']['file_date']['table'] = 'petty_cash';
   $handler->display->display_options['fields']['file_date']['field'] = 'file_date';
   $handler->display->display_options['fields']['file_date']['date_format'] = 'long';
   $handler->display->display_options['fields']['file_date']['second_date_format'] = 'long';
-  /* Field: petty cash: Head */
-  $handler->display->display_options['fields']['head']['id'] = 'head';
-  $handler->display->display_options['fields']['head']['table'] = 'petty_cash';
-  $handler->display->display_options['fields']['head']['field'] = 'head';
-  /* Field: petty cash: Person name */
-  $handler->display->display_options['fields']['person_name']['id'] = 'person_name';
-  $handler->display->display_options['fields']['person_name']['table'] = 'petty_cash';
-  $handler->display->display_options['fields']['person_name']['field'] = 'person_name';
-  /* Field: petty cash: Subhead */
-  $handler->display->display_options['fields']['subhead']['id'] = 'subhead';
-  $handler->display->display_options['fields']['subhead']['table'] = 'petty_cash';
-  $handler->display->display_options['fields']['subhead']['field'] = 'subhead';
-  /* Field: petty cash: Type */
-  $handler->display->display_options['fields']['type']['id'] = 'type';
-  $handler->display->display_options['fields']['type']['table'] = 'petty_cash';
-  $handler->display->display_options['fields']['type']['field'] = 'type';
-  /* Field: petty cash: Voucher no */
-  $handler->display->display_options['fields']['voucher_no']['id'] = 'voucher_no';
-  $handler->display->display_options['fields']['voucher_no']['table'] = 'petty_cash';
-  $handler->display->display_options['fields']['voucher_no']['field'] = 'voucher_no';
-  /* Field: petty cash: Voucher reference no */
-  $handler->display->display_options['fields']['voucher_reference_no']['id'] = 'voucher_reference_no';
-  $handler->display->display_options['fields']['voucher_reference_no']['table'] = 'petty_cash';
-  $handler->display->display_options['fields']['voucher_reference_no']['field'] = 'voucher_reference_no';
-  /* Field: petty cash: Voucher date */
-  $handler->display->display_options['fields']['voucher_date']['id'] = 'voucher_date';
-  $handler->display->display_options['fields']['voucher_date']['table'] = 'petty_cash';
-  $handler->display->display_options['fields']['voucher_date']['field'] = 'voucher_date';
-  $handler->display->display_options['fields']['voucher_date']['date_format'] = 'short';
-  $handler->display->display_options['fields']['voucher_date']['second_date_format'] = 'long';
   /* Field: File: Name */
   $handler->display->display_options['fields']['filename']['id'] = 'filename';
   $handler->display->display_options['fields']['filename']['table'] = 'file_managed';
   $handler->display->display_options['fields']['filename']['field'] = 'filename';
   $handler->display->display_options['fields']['filename']['relationship'] = 'file';
-  $handler->display->display_options['fields']['filename']['label'] = 'File';
+  $handler->display->display_options['fields']['filename']['label'] = 'Voucher Copy';
   $handler->display->display_options['fields']['filename']['link_to_file'] = TRUE;
   /* Field: File: Name */
   $handler->display->display_options['fields']['filename_1']['id'] = 'filename_1';
   $handler->display->display_options['fields']['filename_1']['table'] = 'file_managed';
   $handler->display->display_options['fields']['filename_1']['field'] = 'filename';
   $handler->display->display_options['fields']['filename_1']['relationship'] = 'bill_file';
-  $handler->display->display_options['fields']['filename_1']['label'] = 'Bill File';
+  $handler->display->display_options['fields']['filename_1']['label'] = 'Bill copy';
   $handler->display->display_options['fields']['filename_1']['link_to_file'] = TRUE;
   /* Filter criterion: Date: Date (petty_cash) */
   $handler->display->display_options['filters']['date_filter_1']['id'] = 'date_filter_1';
