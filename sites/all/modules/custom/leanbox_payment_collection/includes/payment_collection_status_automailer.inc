@@ -21,7 +21,7 @@ function send_email_payment_collection_status() {
   
   $params['subject'] = "SB And Bounce Chq Status";
   $params['body'] = $pending_for_collection_html . "<br>" . $pending_for_assignment_html . "<br>" . $pending_for_upload_html;
-  $mail_to = variable_get('to_email');
+  $mail_to = variable_get('collection_status_to_email');
   $from = variable_get('from_email');
 
   drupal_mail('email_status', 'collection_status', $mail_to, LANGUAGE_NONE, $params, $from);
