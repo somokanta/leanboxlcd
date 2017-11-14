@@ -158,7 +158,7 @@ function _petty_cash_subhead_ajax($form, &$form_state) {
  * @return array
  */
 function get_list_of_head_option($arg1, $distributor_id) {
-   $header = array();
+   $arr1 = array();
    if (!empty($arg1)) {
       if (empty($distributor_id)) {
          $user_id = $GLOBALS['user']->uid;
@@ -172,8 +172,15 @@ function get_list_of_head_option($arg1, $distributor_id) {
       $query->fields('ch', array('field_petty_cash_head_value'));
       $header = $query->execute()->fetchAllKeyed(0, 0);
       $header[''] = t('-Select-');
+
+      // code to move last element of array to top
+      $lastvalue = end($header);
+      $lastkey = key($header);
+      $arr1 = array($lastkey => $lastvalue);
+      array_pop($header);
+      $arr1 = array_merge($arr1, $header);
    }
-   return $header;
+   return $arr1;
 }
 
 /**
@@ -184,7 +191,7 @@ function get_list_of_head_option($arg1, $distributor_id) {
  * @return array
  */
 function get_list_of_subhead_option_using_head($arg1, $distributor_id, $head) {
-   $subheader = array();
+   $arr1 = array();
    if (!empty($arg1) && !empty($head)) {
       if (empty($distributor_id)) {
          $user_id = $GLOBALS['user']->uid;
@@ -202,8 +209,15 @@ function get_list_of_subhead_option_using_head($arg1, $distributor_id, $head) {
       $query->fields('csu', array('field_petty_cash_subhead_value'));
       $subheader = $query->execute()->fetchAllKeyed(0, 0);
       $subheader[''] = t('-Select-');
+      
+      // code to move last element of array to top
+      $lastvalue = end($subheader);
+      $lastkey = key($subheader);
+      $arr1 = array($lastkey => $lastvalue);
+      array_pop($subheader);
+      $arr1 = array_merge($arr1, $subheader);
    }
-   return $subheader;
+   return $arr1;
 }
 
 function upload_petty_cash_callback_submit($form, &$form_state) {
@@ -223,7 +237,7 @@ function upload_petty_cash_callback_submit($form, &$form_state) {
    else {
       $balance = $balance - $form_state['values']['amount'];
    }
-   
+
    $bill_available = !empty($form_state['values']['bill_available']) ? $form_state['values']['bill_available'] : NULL;
    $bill_no = !empty($form_state['values']['bill_no']) ? $form_state['values']['bill_no'] : NULL;
 
@@ -244,5 +258,6 @@ function upload_petty_cash_callback_submit($form, &$form_state) {
          'bill_no' => $bill_no,
        ))
        ->execute();
-   drupal_set_message(t("$amount $arg1 sucessfully"));
+   drupal_set_message(t("$amount $arg1 sucessfully."));
+   drupal_set_message(t("$complete_voucher_no generated sucessfully."));
 }

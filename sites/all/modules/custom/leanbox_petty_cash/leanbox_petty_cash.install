@@ -74,7 +74,7 @@ function leanbox_petty_cash_schema() {
          'length' => 50,
        ),
        'deleted' => array(
-         'description' => 'next_id',
+         'description' => 'deleted',
          'type' => 'varchar',
          'length' => 10,
        ),
