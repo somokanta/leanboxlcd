@@ -24,7 +24,6 @@ class footer_ptl_loose_custom_field extends views_handler_field {
   }
 
   function render($empty = FALSE) {
-    dpm($this->view);
     $units = $this->view->custom_footer;
     if (!empty($units)) {
       return '<table border="0" width="100%" cellpadding="6"><tr> <td style="font-weight:bold; text-align:right">Total</td><td style="font-weight:bold; text-align:left; width:140px" width="140"> '.$units.'</td></tr></table>
