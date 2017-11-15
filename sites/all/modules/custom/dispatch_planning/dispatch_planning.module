@@ -2125,3 +2125,35 @@ function get_sku_unit_case($sku7_code, $distributor_id) {
   $res = $query->execute()->fetchField();
   return $res;
 }
+
+
+function ptl_loading_sheet_by_trip_id($trip_id) {
+  $query = db_select('ptl_data_configuration', 'pd');
+  $query->addExpression("concat(vehicle ,' / ', loading_date)", 'vehicle_loading');
+  $query->condition('trip_id', $trip_id);
+  $query->groupBy('vehicle,loading_date');
+  $results = $query->execute()->fetchAll();
+
+  foreach ($results as $key => $value) {
+    $vehicle_loading = $vehicle_loading . ', ' . $value->vehicle_loading;
+  }
+
+  return ltrim($vehicle_loading, ',');
+}
+
+
+function ptl_no_of_bills_by_trip_id($trip_id) {
+  $query = db_select('ptl_data_configuration', 'pd');
+  $query->condition('trip_id', $trip_id);
+  $query->addExpression('count(DISTINCT(bill_number))','bill_number');
+  $results = $query->execute()->fetchField();
+  return $results;
+}
+
+function ptl_trip_date_by_trip_id($trip_id) {
+  $query = db_select('ptl_data_configuration', 'pd');
+  $query->condition('trip_id', $trip_id);
+  $query->fields('pd',array('created_time'));
+  $results = $query->range(0,1)->execute()->fetchField();
+  return $results;
+}

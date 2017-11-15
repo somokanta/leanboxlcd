@@ -28,16 +28,7 @@ class header_ptl_cld_custom_field extends views_handler_field {
     $user_id = $user->uid;
     $total_result = $this->view->result;
     $box = 0;
-    //dpm($total_result);
     foreach ($total_result as $key => $value) {
-      $trip_date = $value->ptl_data_configuration_created_time;
-
-      $vehicle = $value->ptl_data_configuration_vehicle;
-      $loading_date = $value->ptl_data_configuration_loading_date;
-      $loading_sheets[$vehicle . "/" . $loading_date] = $vehicle . ' / ' . date('d-M-y', $loading_date);
-
-      $bills[$value->ptl_data_configuration_sku_code] = 1; // need distinct sku count
-
       $box += $value->ptl_data_configuration_cld;
     }
 
@@ -47,9 +38,10 @@ class header_ptl_cld_custom_field extends views_handler_field {
     $name_line_2 = 'CLD PICKING SHEET';
 
     $trip_id = $this->view->args[0];
+    $trip_date = ptl_trip_date_by_trip_id($trip_id);
     $trip_date = date('d-M-y', $trip_date);
-    $loading_sheet = implode(', ', $loading_sheets);
-    $no_of_bills = count($bills);
+    $loading_sheet = ptl_loading_sheet_by_trip_id($trip_id);
+    $no_of_bills = ptl_no_of_bills_by_trip_id($trip_id);
 
 
     if (!empty($no_of_bills)) {
@@ -102,3 +94,5 @@ class header_ptl_cld_custom_field extends views_handler_field {
     }
   }
 }
+
+
