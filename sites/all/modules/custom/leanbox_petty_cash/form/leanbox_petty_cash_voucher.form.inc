@@ -65,8 +65,8 @@ function revert_petty_cash_callback($form, &$form_state) {
            '#title' => 'Reversal Reason',
            '#type' => 'select',
            '#options' => array(
-                          0 => t('Advance Voucher Reversal'),
-                          1 => t('Wrong Entry'),
+                          'advance_voucher_reversal' => t('Advance Voucher Reversal'),
+                          'wrong_entry' => t('Wrong Entry'),
                       ),
            '#required' => true,
          );  
