@@ -61,6 +61,15 @@ function revert_petty_cash_callback($form, &$form_state) {
            '#type' => 'value',
            '#value' => $output['rows'],
          );
+         $form['reversal_reason'] = array(
+           '#title' => 'Reversal Reason',
+           '#type' => 'select',
+           '#options' => array(
+                          '1' => t('Advance Voucher Reversal'),
+                          '2' => t('Wrong Entry'),
+                      ),
+           '#required' => true,
+         );  
          $form['submit'] = array(
            '#value' => 'delete',
            '#type' => 'submit',
@@ -106,7 +115,11 @@ function revert_petty_cash_callback_submit($form, &$form_state) {
          $type = 'delete';
          $balance = $balance + $old_amount;
       }
-
+      // Reversal Reason
+     $reversal_reason = $form_state['values']['reversal_reason'];
+     $actual_data = array('1' => t('Advance Voucher Reversal'),'2' => t('Wrong Entry'),);
+     $reversal_reason = $actual_data[$reversal_reason];
+      
       $old_voucher_serial_id = $form_state['values']['old_voucher_table_id'];
       if (!empty($old_voucher_serial_id)) {
          db_insert('petty_cash') // Table name no longer needs {}
@@ -114,7 +127,8 @@ function revert_petty_cash_callback_submit($form, &$form_state) {
                'type' => $type,
                'head' => $old_voucher_details[0]['head'],
                'subhead' => $old_voucher_details[0]['subhead'],
-               'description' => $old_voucher_details[0]['description'],
+               //'description' => $old_voucher_details[0]['description'],
+               'description' => $reversal_reason,
                'amount' => $old_amount,
                'voucher_no' => $complete_voucher_no,
                'voucher_date' => time(),
