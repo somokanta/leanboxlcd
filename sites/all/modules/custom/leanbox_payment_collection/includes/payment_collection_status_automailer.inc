@@ -19,8 +19,11 @@ function send_email_payment_collection_status() {
   // Pending For Upload
   $pending_for_upload_html = get_email_pending_for_upload($distributor_id);
   
+  // Yesterday Assignment and Today's Collection
+  $pending_for_yesterday_assignment_html = get_email_pending_for_yesterday_assignment($distributor_id);
+  
   $params['subject'] = "SB And Bounce Chq Status";
-  $params['body'] = $pending_for_collection_html . "<br>" . $pending_for_assignment_html . "<br>" . $pending_for_upload_html;
+  $params['body'] = $pending_for_collection_html . "<br>" . $pending_for_assignment_html . "<br>" . $pending_for_upload_html . "<br>" . $pending_for_yesterday_assignment_html;
   $mail_to = variable_get('collection_status_to_email');
   $from = variable_get('from_email');
 
@@ -238,5 +241,113 @@ function get_email_pending_for_upload($distributor_id) {
   $output = "<h3>Pending for Upload</h3>";
   $output .= theme('table', array('header' => $header, 'rows' => $row, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
 
+  return $output;
+}
+
+function get_email_pending_for_yesterday_assignment($distributor_id) {
+  // Query For Yesterday Assignment
+  $assignment_date = strtotime('-1 day', strtotime(date('Y-m-d')));
+  $date = date('Y-m-d H:i:s', $assignment_date);
+  
+  $query = db_select('node', 'n');
+  $query->condition('n.type', 'payment_collection');
+  $query->condition('n.uid', $distributor_id, '=');
+  $query->join('field_data_field_flag', 'ff', 'ff.entity_id = n.nid');
+  $query->join('field_data_field_remaining_amt_collection', 'ra', 'ra.entity_id = n.nid');
+  $query->leftjoin('field_data_field_assignment_date', 'ad', 'ad.entity_id = n.nid');
+  $query->condition('ad.field_assignment_date_value', $date, '=');
+  $query->leftjoin('field_data_field_assigned_person', 'ap', 'ap.entity_id = n.nid');
+  $query->groupBy('ap.field_assigned_person_value');
+  
+  $query->addExpression('COUNT(n.title)', 'bill_count');
+  $query->addExpression('SUM(ra.field_remaining_amt_collection_value)', 'bill_value');
+  $query->fields('n', array('nid'));
+  $query->fields('ff', array('field_flag_value'));
+  $query->fields('ra', array('field_remaining_amt_collection_value'));
+  $query->fields('ap', array('field_assigned_person_value'));
+  $query->fields('ad', array('field_assignment_date_value'));
+  $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+
+  $row = array();
+  $row[] = array('Type', 'Assigned To', 'Count', 'Value', 'Count', 'Value');
+  foreach($res as $data) {
+    $person_signed = $data['field_assigned_person_value'].'-'.'signed';
+    $person_bounced = $data['field_assigned_person_value'].'-'.'bounced';
+    if($data['field_flag_value']  == 'signed') {
+      $row[$person_signed]['type']  = 'Signed';
+      $row[$person_signed]['assigned_to']  = $data['field_assigned_person_value'];
+      $row[$person_signed]['bill_count']  = $data['bill_count'];
+      $row[$person_signed]['bill_value']  = $data['bill_value'];
+      $row[$person_signed]['bill_counts'] =  '';
+      $row[$person_signed]['bill_values'] =  '' ;
+    }
+    else {
+      $row[$person_bounced]['type']  = 'Bounced';
+      $row[$person_bounced]['assigned_to']  = $data['field_assigned_person_value'];
+      $row[$person_bounced]['bill_count']  = $data['bill_count'];
+      $row[$person_bounced]['bill_value']  = $data['bill_value'];
+      $row[$person_bounced]['bill_counts'] =  '';
+      $row[$person_bounced]['bill_values'] =  '' ;
+    }
+  }
+  
+  // Query For Today's Collection
+  $collection_date = strtotime(date('Y-m-d'));
+  $date = date('Y-m-d H:i:s', $collection_date);
+  
+  $query = db_select('node', 'n');
+  $query->condition('n.type', 'payment_collection');
+  $query->condition('n.uid', $distributor_id, '=');
+  $query->join('field_data_field_flag', 'ff', 'ff.entity_id = n.nid');
+  $query->join('field_data_field_remaining_amt_collection', 'ra', 'ra.entity_id = n.nid');
+  $query->leftjoin('field_data_field_collection_date', 'cd', 'cd.entity_id = n.nid');
+  $query->condition('cd.field_collection_date_value', $date, '=');
+  $query->leftjoin('field_data_field_assigned_person', 'ap', 'ap.entity_id = n.nid');
+  $query->groupBy('ap.field_assigned_person_value');
+  
+  $query->addExpression('COUNT(n.title)', 'bill_count');
+  $query->addExpression('SUM(ra.field_remaining_amt_collection_value)', 'bill_value');
+  $query->fields('n', array('nid'));
+  $query->fields('ff', array('field_flag_value'));
+  $query->fields('ra', array('field_remaining_amt_collection_value'));
+  $query->fields('ap', array('field_assigned_person_value'));
+  $query->fields('cd', array('field_collection_date_value'));
+  $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+
+  foreach($res as $data) {
+    $person_signed = $data['field_assigned_person_value'].'-'.'signed';
+    $person_bounced = $data['field_assigned_person_value'].'-'.'bounced';
+    if($data['field_flag_value']  == 'signed') {
+      $row[$person_signed]['type']  = 'Signed';
+      $row[$person_signed]['assigned_to']  = $data['field_assigned_person_value'];
+      $row[$person_signed]['bill_count'] = isset($row[$person_signed]['bill_count']) ? $row[$person_signed]['bill_count'] : '';
+      $row[$person_signed]['bill_value'] = isset($row[$person_signed]['bill_value']) ? $row[$person_signed]['bill_value'] : '';
+      $row[$person_signed]['bill_counts']  = $data['bill_count'];
+      $row[$person_signed]['bill_values']  = $data['bill_value'];
+    }
+    else {
+      $row[$person_bounced]['type']  = 'Bounced';
+      $row[$person_bounced]['assigned_to']  = $data['field_assigned_person_value'];
+      $row[$person_bounced]['bill_count'] = isset($row[$person_bounced]['bill_count']) ? $row[$person_bounced]['bill_count'] : '';
+      $row[$person_bounced]['bill_value'] = isset($row[$person_bounced]['bill_value']) ? $row[$person_bounced]['bill_value'] : '';
+      $row[$person_bounced]['bill_counts']  = $data['bill_count'];
+      $row[$person_bounced]['bill_values']  = $data['bill_value'];
+    }
+  }
+
+  $total = $row;
+  foreach($total as $v){
+    $row['total']['type']  = 'Total';
+    $row['total']['person']  = '';
+    $row['total']['bill_count']  += $v['bill_count'];
+    $row['total']['bill_value']  += $v['bill_value'];
+    $row['total']['bill_counts'] +=  $v['bill_counts'];
+    $row['total']['bill_values'] +=  $v['bill_values'];
+  }
+
+  $header = array('','', array('data' => 'Yesterday Assignment', 'colspan' => 2), array('data' => 'Today\'s Collection', 'colspan' => 2));
+  $output = "<h3>Yesterday Assignment Today's Collection</h3>";
+  $output .= theme('table', array('header' => $header, 'rows' => $row, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
+  
   return $output;
 }
