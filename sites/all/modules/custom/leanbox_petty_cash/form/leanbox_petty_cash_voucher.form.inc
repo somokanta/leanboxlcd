@@ -65,8 +65,8 @@ function revert_petty_cash_callback($form, &$form_state) {
            '#title' => 'Reversal Reason',
            '#type' => 'select',
            '#options' => array(
-                          'advance_voucher_reversal' => t('Advance Voucher Reversal'),
-                          'wrong_entry' => t('Wrong Entry'),
+                          '1' => t('Advance Voucher Reversal'),
+                          '2' => t('Wrong Entry'),
                       ),
            '#required' => true,
          );  
@@ -116,7 +116,9 @@ function revert_petty_cash_callback_submit($form, &$form_state) {
          $balance = $balance + $old_amount;
       }
       // Reversal Reason
-      $reversal_reason = $form_state['values']['reversal_reason'];
+     $reversal_reason = $form_state['values']['reversal_reason'];
+     $actual_data = array('1' => t('Advance Voucher Reversal'),'2' => t('Wrong Entry'),);
+     $reversal_reason = $actual_data[$reversal_reason];
       
       $old_voucher_serial_id = $form_state['values']['old_voucher_table_id'];
       if (!empty($old_voucher_serial_id)) {
