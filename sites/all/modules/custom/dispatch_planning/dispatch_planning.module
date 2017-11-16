@@ -1742,7 +1742,7 @@ function dispatch_planning_sales_reg_api($value, $node, $trip_execution_date, $h
   $party_code = $node->field_sales_party_code[LANGUAGE_NONE][0]['value'];
   $store_sequence = $node->field_drs_sequence[LANGUAGE_NONE][0]['value'];
 
-  $billing_data_details = dispatch_planning_get_billing_data($node_uid, $bill_number);
+  $billing_data_details = dispatch_planning_get_billing_data($node_uid, $bill_number,'dps');
   $outlet_data_details = dispatch_planning_get_outlet_data($node_uid, $party_code);
   
   if (empty($outlet_data_details['field_hul_updated_lat_value'])) {
@@ -1808,7 +1808,7 @@ function ptl_sales_reg_api_data($value, $node, $trip_execution_date, $hht_id, $c
   $store_sequence = $node->field_drs_sequence[LANGUAGE_NONE][0]['value'];
   $loading_data = $node->field_billing_loading_date[LANGUAGE_NONE][0]['value'];
 
-  $billing_data_details = dispatch_planning_get_billing_data($node_uid, $bill_number);
+  $billing_data_details = dispatch_planning_get_billing_data($node_uid, $bill_number,'ptl');
   $outlet_data_details = dispatch_planning_get_outlet_data($node_uid, $party_code);
   
   if (empty($outlet_data_details['field_hul_updated_lat_value'])) {
@@ -1917,7 +1917,7 @@ function dispatch_planning_item_details($billing_data_details, $id) {
  * @param type $bill_number
  * @return array
  */
-function dispatch_planning_get_billing_data($node_uid, $bill_number) {
+function dispatch_planning_get_billing_data($node_uid, $bill_number,$type) {
   $query = db_select('custom_billing_data', 'bd');
   $query->fields('bd', array('tur', 'mrp', 'product_name'));
   $query->addfield('bd', 'Sum_of_NET_SALES_CASES', 'sum_net_sales_cases');
@@ -1926,8 +1926,9 @@ function dispatch_planning_get_billing_data($node_uid, $bill_number) {
   $query->addfield('bd', 'Sum_of_NET_SALES_KGS', 'sum_net_sales_kgs');
   $query->addfield('bd', 'Sum_of_NET_SALES_VALUE', 'sum_net_sales_value');
   $query->addfield('bd', 'product_name', 'sku_description');
-  $query->addfield('bd', 'BASEPACK_CODE', 'basepack_code');
-
+  if($type == 'ptl'){
+    $query->addfield('bd', 'BASEPACK_CODE', 'basepack_code');
+  }//dps nothing extra field for dispatch planning
   $query->condition('bd.distributor_id', $node_uid);
   $query->condition('bd.bill_number', $bill_number);
   $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
