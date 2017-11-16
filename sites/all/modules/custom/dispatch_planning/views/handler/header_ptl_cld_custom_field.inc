@@ -35,7 +35,7 @@ class header_ptl_cld_custom_field extends views_handler_field {
     $this->view->custom_footer = $box;
 
     $name_line_1 = 'LeanBox Logistics Solution Pvt Ltd';
-    $name_line_2 = 'CLD PICKING SHEET';
+    $name_line_2 = 'Party Packing CLD Picking Sheet';
 
     $trip_id = $this->view->args[0];
     $trip_date = ptl_trip_date_by_trip_id($trip_id,$rs_code);
@@ -51,7 +51,7 @@ class header_ptl_cld_custom_field extends views_handler_field {
       <td style = "font-size: 24px; font-weight: bold; text-align: center">' . $name_line_1 . '</td>
       </tr>
       <tr>
-      <td style = "font-size: 24px; font-weight: bold; text-align: center">' . $name_line_2 . '</td>
+      <td style = "font-size: 18px; font-weight: bold; text-align: center">' . $name_line_2 . '</td>
       </tr>      
       </table><br>
       <table class = "preview_table" width = "100%" cellspacing = "0" style = "font-family:arial; font-size: 13px; color:#000;" cellpadding = "5" border = "0" align = "center">
