@@ -27,22 +27,21 @@ class header_ptl_loose_custom_field extends views_handler_field {
     global $user;
     $user_id = $user->uid;
     $total_result = $this->view->result;
-    //dpm($total_result);
     foreach ($total_result as $key => $value) {
       $units += $value->ptl_data_configuration_loose;
       $remaining_loose += (int)($value->ptl_data_configuration_loose%$value->ptl_data_configuration_upc);
     }
-
+    $rs_code = $total_result[0]->ptl_data_configuration_rs_code;
     $this->view->custom_footer = $remaining_loose;
 
     $name_line_1 = 'LeanBox Logistics Solution Pvt Ltd';
     $name_line_2 = 'Loose PICKING SHEET';
 
     $trip_id = $this->view->args[0];
-    $trip_date = ptl_trip_date_by_trip_id($trip_id);
+    $trip_date = ptl_trip_date_by_trip_id($trip_id,$rs_code);
     $trip_date = date('d-M-y', $trip_date);
-    $loading_sheet = ptl_loading_sheet_by_trip_id($trip_id);
-    $no_of_bills = ptl_no_of_bills_by_trip_id($trip_id);
+    $loading_sheet = ptl_loading_sheet_by_trip_id($trip_id,$rs_code);
+    $no_of_bills = ptl_no_of_bills_by_trip_id($trip_id,$rs_code);
 
 
     if (!empty($no_of_bills)) {

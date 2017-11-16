@@ -31,17 +31,17 @@ class header_ptl_cld_custom_field extends views_handler_field {
     foreach ($total_result as $key => $value) {
       $box += $value->ptl_data_configuration_cld;
     }
-
+    $rs_code = $total_result[0]->ptl_data_configuration_rs_code;
     $this->view->custom_footer = $box;
 
     $name_line_1 = 'LeanBox Logistics Solution Pvt Ltd';
     $name_line_2 = 'CLD PICKING SHEET';
 
     $trip_id = $this->view->args[0];
-    $trip_date = ptl_trip_date_by_trip_id($trip_id);
+    $trip_date = ptl_trip_date_by_trip_id($trip_id,$rs_code);
     $trip_date = date('d-M-y', $trip_date);
-    $loading_sheet = ptl_loading_sheet_by_trip_id($trip_id);
-    $no_of_bills = ptl_no_of_bills_by_trip_id($trip_id);
+    $loading_sheet = ptl_loading_sheet_by_trip_id($trip_id,$rs_code);
+    $no_of_bills = ptl_no_of_bills_by_trip_id($trip_id,$rs_code);
 
 
     if (!empty($no_of_bills)) {
