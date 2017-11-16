@@ -29,10 +29,10 @@ class header_ptl_loose_custom_field extends views_handler_field {
     $total_result = $this->view->result;
     foreach ($total_result as $key => $value) {
       $units += $value->ptl_data_configuration_loose;
-      $remaining_loose += (int)($value->ptl_data_configuration_loose%$value->ptl_data_configuration_upc);
+      $clds += (int)($value->ptl_data_configuration_loose/$value->ptl_data_configuration_upc);
     }
     $rs_code = $total_result[0]->ptl_data_configuration_rs_code;
-    $this->view->custom_footer = $remaining_loose;
+    $this->view->custom_footer = $clds;
 
     $name_line_1 = 'LeanBox Logistics Solution Pvt Ltd';
     $name_line_2 = 'Party Packing Loose Picking Sheet';

@@ -24,9 +24,9 @@ class footer_ptl_loose_custom_field extends views_handler_field {
   }
 
   function render($empty = FALSE) {
-    $units = $this->view->custom_footer;
-    if (!empty($units)) {
-      return '<table border="0" width="100%" cellpadding="6"><tr> <td style="font-weight:bold; text-align:right">Total Loose</td><td style="font-weight:bold; text-align:left; width:140px" width="140"> '.$units.'</td></tr></table>
+    $clds = $this->view->custom_footer;
+    if (!empty($clds)) {
+      return '<table border="0" width="100%" cellpadding="6"><tr> <td style="font-weight:bold; text-align:right">Total CLDs</td><td style="font-weight:bold; text-align:left; width:140px" width="140"> '.$clds.'</td></tr></table>
         <table class = "preview_table" width = "100%" cellspacing = "0" style = "font-family:arial; font-size: 13px; color:#000;" cellpadding = "5" border = "0" align = "center">
       <tbody>
       <tr>
