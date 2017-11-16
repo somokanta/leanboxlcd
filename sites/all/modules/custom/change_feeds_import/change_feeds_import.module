@@ -2202,6 +2202,10 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
   if (($view->base_table == 'petty_cash') && ($view->name == 'petty_cash_transaction')) {
     $query->add_where(0, 'petty_cash.distributor_id', $distributor_id, '=');
   }
+  if (($view->base_table == 'ptl_data_configuration') && ($view->name == 'ptl_loose_sheet')) {
+    $rs_code = dispatch_planning_get_rscode_using_uid($distributor_id);
+    $query->add_where(0, 'ptl_data_configuration.rs_code', $rs_code, '=');
+  }
   if ($view->base_table == 'van_cld_data_table') {
     $query->add_where(0, 'van_cld_data_table.distributor_id', $distributor_id, '=');
   }
