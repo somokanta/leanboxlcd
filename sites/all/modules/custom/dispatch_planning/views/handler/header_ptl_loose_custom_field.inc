@@ -27,12 +27,13 @@ class header_ptl_loose_custom_field extends views_handler_field {
     global $user;
     $user_id = $user->uid;
     $total_result = $this->view->result;
-    //dpm($total_result);
+    dpm($total_result);
     foreach ($total_result as $key => $value) {
       $units += $value->ptl_data_configuration_loose;
+      $remaining_loose += (int)($value->ptl_data_configuration_loose%$value->ptl_data_configuration_upc);
     }
 
-    $this->view->custom_footer = $units;
+    $this->view->custom_footer = $remaining_loose;
 
     $name_line_1 = 'LeanBox Logistics Solution Pvt Ltd';
     $name_line_2 = 'Loose PICKING SHEET';
@@ -72,8 +73,8 @@ class header_ptl_loose_custom_field extends views_handler_field {
       <td align = "left" style="color:#666">' . $loading_sheet . '</td>
       <td></td>
       <td></td>
-      <td></td>
-      <td></td>
+      <td>Total Loose Qty</td>
+      <td align = "left" style="color:#666">' . $units . '</td>
       <td></td>
       </tr>
       <tr>
