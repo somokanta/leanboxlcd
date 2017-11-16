@@ -24,15 +24,12 @@ class header_ptl_loose_custom_field extends views_handler_field {
   }
 
   function render($empty = FALSE) {
-    global $user;
-    $user_id = $user->uid;
     $total_result = $this->view->result;
-    foreach ($total_result as $key => $value) {
+    foreach ($total_result as $value) {
       $units += $value->ptl_data_configuration_loose;
       $clds += (int)($value->ptl_data_configuration_loose/$value->ptl_data_configuration_upc);
     }
     $rs_code = $total_result[0]->ptl_data_configuration_rs_code;
-    $this->view->custom_footer = $clds;
 
     $name_line_1 = 'LeanBox Logistics Solution Pvt Ltd';
     $name_line_2 = 'Party Packing Loose Picking Sheet';
@@ -43,9 +40,8 @@ class header_ptl_loose_custom_field extends views_handler_field {
     $loading_sheet = ptl_loading_sheet_by_trip_id($trip_id,$rs_code);
     $no_of_bills = ptl_no_of_bills_by_trip_id($trip_id,$rs_code);
 
-
     if (!empty($no_of_bills)) {
-
+      $this->view->custom_footer = $clds ? $clds : 0;
       return '<table width = "100%" cellspacing = "0" style = "font-size: 13px; color:#000; font-family:arial" cellpadding = "5" border = "0" align = "center" class = "preview_table">
       <tr>
       <td style = "font-size: 24px; font-weight: bold; text-align: center">' . $name_line_1 . '</td>
