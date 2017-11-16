@@ -2586,8 +2586,8 @@ function change_feeds_import_form_views_exposed_form_alter(&$form, &$form_state)
       $form['field_salesman_code_value']['#validated'] = TRUE;
     }
   }
-  
-  if ($form['#id'] == 'views-exposed-form-payment-collection-page' || $form['#id'] == 'views-exposed-form-signed-bills-upload-page-2' || $form['#id'] == 'views-exposed-form-signed-bills-upload-page-3' || $form['#id'] == 'views-exposed-form-bills-collection-page' || $form['#id'] == 'views-exposed-form-day-wise-collection-page' || $form['#id'] == 'views-exposed-form-collection-history-page' || $form['#id'] == 'views-exposed-form-assignment-history-page') {
+
+if ($form['#id'] == 'views-exposed-form-payment-collection-page' || $form['#id'] == 'views-exposed-form-signed-bills-upload-page-2' || $form['#id'] == 'views-exposed-form-signed-bills-upload-page-3' || $form['#id'] == 'views-exposed-form-bills-collection-page' || $form['#id'] == 'views-exposed-form-day-wise-collection-page' || $form['#id'] == 'views-exposed-form-collection-history-page' || $form['#id'] == 'views-exposed-form-assignment-history-page' || $form['#id'] == 'views-exposed-form-collection-closure-page') {
     $select = array('' => '- Any -');
     $salesman = get_all_salesman_data("salesman", NULL);
     $salesman = $select + $salesman;
