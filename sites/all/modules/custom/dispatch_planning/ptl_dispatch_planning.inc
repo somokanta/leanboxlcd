@@ -278,10 +278,3 @@ function delete_fetch_data_ptl_trip_form_submit($form, &$form_state) {
     drupal_set_message("Fetch data is not found for a trip $trip_id");
   }
 }
-
-
-
-
-
-
-
