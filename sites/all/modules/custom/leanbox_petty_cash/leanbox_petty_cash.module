@@ -3,7 +3,8 @@
 /**
  * Files containing list of functions for petty cash functionalities
  */
-define('_ADVANCE', 'amount transferred from cash');
+define('S_ADVANCE', 'salary advance');
+define('E_ADVANCE', 'expenses advance');
 
 /**
  * Implements hook_menu
@@ -286,21 +287,24 @@ function leanbox_petty_cash_preprocess_leanbox_petty_cash_pdf(&$variables) {
    $voucher = $variables['voucher'];
    $distributor_id = $variables['distributor_id'];
    $head = trim(strtolower($variables['head']));
-   
+
    $query = db_select('petty_cash', 'pc');
    $query->isNull('pc.voucher_reference_no');
    $query->condition('pc.distributor_id', $distributor_id);
    $query->condition('pc.voucher_no', $voucher);
-   if ($head == _ADVANCE) {
+   if ($head == S_ADVANCE || $head == E_ADVANCE) {
       $query->fields('pc', array('voucher_date', 'head', 'subhead', 'amount', 'person_name', 'type', 'description'));
    }
    else {
       $query->fields('pc', array('voucher_date', 'head', 'subhead', 'amount', 'person_name', 'bill_available', 'bill_no', 'type', 'description'));
    }
    $res = $query->execute()->fetch(PDO::FETCH_ASSOC);
-   
+
+   $amount = $res['amount'];
+   $person_name = $res['person_name'];
+
    if (!empty($res)) {
-      if ($head == _ADVANCE) {
+      if ($head == S_ADVANCE || $head == E_ADVANCE) {
          $header = array(
            'Voucher date',
            'Head',
@@ -340,14 +344,14 @@ function leanbox_petty_cash_preprocess_leanbox_petty_cash_pdf(&$variables) {
          }
          $rows[] = $row;
       }
-      
+
 
       $html = theme('table', array(
         'header' => array(),
         'rows' => $rows,
         'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0'),
       ));
-      if ($head == _ADVANCE) {
+      if ($head == S_ADVANCE || $head == E_ADVANCE) {
          $variables['header1'] = "IOU Voucher";
       }
       else {
@@ -359,17 +363,17 @@ function leanbox_petty_cash_preprocess_leanbox_petty_cash_pdf(&$variables) {
       $variables['header2'] = $user_details['field_name_value'];
 
 // footer 1
-      $variables['footer1'] = t('I have received the sum of "Debit Amount".');
+      $variables['footer1'] = t("I have received the sum of $amount");
 
 // footer 4 & 5
       $variables['footer4'] = t('Receiver Signature');
-      $variables['footer5'] = t('Person Name');
+      $variables['footer5'] = t("$person_name");
 
 // body
       $variables['body_data'] = $html;
 
 // footer 2 & 3 & body below 
-      if ($head == _ADVANCE) {
+      if ($head == S_ADVANCE || $head == E_ADVANCE) {
          $variables['footer2'] = t('I/We Declared that will refund this amount Or Handover Expense Voucher for same.');
          $variables['footer3'] = t('If the amount is not refunded , then same would be recovered from Salary  Payment.');
       }
