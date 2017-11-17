@@ -134,8 +134,15 @@ function dispatch_planning_menu() {
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
     'file' => 'ptl_dispatch_planning.inc',
-  );   
-
+  );
+  $items['delete-ptl-trip'] = array(
+    'title' => 'Resent Trip To PTL',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('delete_fetch_data_ptl_trip_form'),
+    'access arguments' => array('Delete Ptl trip data'),
+    'type' => MENU_CALLBACK,
+    'file' => 'ptl_dispatch_planning.inc',
+  );
   return $items;
 }
 
@@ -165,7 +172,11 @@ function dispatch_planning_permission() {
     'services_access_ptl_api' => array(
       'title' => t(''),
       'description' => t('PTL Api Access')
-    )
+    ),
+    'Delete Ptl trip data' => array(
+      'title' => t('Delete Ptl trip data'),
+      'description' => t('Delete Ptl trip data')
+    )    
   );
 }
 
