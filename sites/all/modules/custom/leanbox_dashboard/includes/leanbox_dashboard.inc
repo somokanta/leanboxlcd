@@ -18,14 +18,14 @@ function leanbox_dashboard_chart_filter_adoption_form($form, &$form_state) {
    $bill_date = date('Y-m-d');
    $form['start_date'] = array(
      '#type' => 'date_popup',
-     '#title' => t('Bill Date From'),
+     '#title' => t('Dispatch Date From'),
      '#required' => TRUE,
      '#date_format' => 'Y-m-d',
      '#default_value' => $bill_date,
    );
    $form['end_date'] = array(
      '#type' => 'date_popup',
-     '#title' => t('Bill Date To'),
+     '#title' => t('Dispatch Date To'),
      '#required' => TRUE,
      '#date_format' => 'Y-m-d',
      '#default_value' => $bill_date,
