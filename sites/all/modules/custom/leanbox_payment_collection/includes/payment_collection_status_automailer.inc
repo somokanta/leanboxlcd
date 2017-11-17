@@ -72,8 +72,8 @@ function get_email_pending_for_collection($distributor_id) {
         $row['signed']['decl_value'] += $data['field_remaining_amt_collection_value'] - ($data['field_previous_cash_amt_value'] + $data['field_previous_cheque_amt_value']);
       }
       else {
-        $row['signed']['decl_count'] = 0;
-        $row['signed']['decl_value'] = 0;
+        $row['signed']['decl_count'] += 0;
+        $row['signed']['decl_value'] += 0;
       }
     }
     else{
@@ -85,8 +85,8 @@ function get_email_pending_for_collection($distributor_id) {
         $row['bounced']['decl_value'] += $data['field_remaining_amt_collection_value'] - ($data['field_previous_cash_amt_value'] + $data['field_previous_cheque_amt_value']);
       }
       else {
-        $row['bounced']['decl_count'] = 0;
-        $row['bounced']['decl_value'] = 0;
+        $row['bounced']['decl_count'] += 0;
+        $row['bounced']['decl_value'] += 0;
       }
     }
   }
@@ -142,8 +142,8 @@ function get_email_pending_for_assignment($distributor_id) {
         $row['signed']['decl_value'] += $data['field_remaining_amt_collection_value'];
       }
       else {
-        $row['signed']['decl_count'] = 0;
-        $row['signed']['decl_value'] = 0;
+        $row['signed']['decl_count'] += 0;
+        $row['signed']['decl_value'] += 0;
       }
     }
     else{
@@ -155,8 +155,8 @@ function get_email_pending_for_assignment($distributor_id) {
         $row['bounced']['decl_value'] += $data['field_remaining_amt_collection_value'];
       }
       else {
-        $row['bounced']['decl_count'] = 0;
-        $row['bounced']['decl_value'] = 0;
+        $row['bounced']['decl_count'] += 0;
+        $row['bounced']['decl_value'] += 0;
       }
     }
   }
@@ -212,8 +212,8 @@ function get_email_pending_for_upload($distributor_id) {
         $row['signed']['decl_value'] += $data['field_remaining_amt_collection_value'];
       }
       else {
-        $row['signed']['decl_count']  = 0;
-        $row['signed']['decl_value']  = 0;
+        $row['signed']['decl_count']  += 0;
+        $row['signed']['decl_value']  += 0;
       }
     }
     else {
@@ -225,8 +225,8 @@ function get_email_pending_for_upload($distributor_id) {
         $row['bounced']['decl_value'] += $data['field_remaining_amt_collection_value'];
       }
       else {
-        $row['bounced']['decl_count']  = 0;
-        $row['bounced']['decl_value'] = 0;
+        $row['bounced']['decl_count'] += 0;
+        $row['bounced']['decl_value'] += 0;
       }
     }
   }
