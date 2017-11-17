@@ -233,3 +233,55 @@ function download_ptl_cld_sheet($args) {
   $rendered_html = $view->render();
   pdf_using_mpdf_api($rendered_html);
 }
+
+/**
+ * 
+ */
+function delete_fetch_data_ptl_trip_form($form, &$form_state){
+  $form['trip_id'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Trip Id'),
+    '#size' => 10,
+    '#required' => TRUE,
+  );
+
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Submit'),
+  );
+  return $form;
+}
+
+function delete_fetch_data_ptl_trip_form_submit($form, &$form_state) {
+  global $user;
+  
+  $trip_id = $form_state['values']['trip_id'];
+  $query = db_select('field_data_field_third_party_username', 'rs');
+  $query->condition('rs.entity_id', $user->uid);
+  $query->fields('rs', array('field_third_party_username_value'));
+  $rs_code = $query->execute()->fetchField();
+
+  $count = db_update('ptl_data_configuration') // Table name no longer needs {}
+  ->fields(array(
+    'api_flag' => 0,
+  ))
+  ->condition('trip_id', $trip_id, '=')
+  ->condition('api_flag', '1', '=')
+  ->condition('rs_code', $rs_code, '=')
+  ->condition('loose', 1, '>=')
+  ->execute();
+  
+  if ($count) {
+    drupal_set_message("Trip $trip_id Fetch data is deleted successfully!");
+  }
+  else {
+    drupal_set_message("Fetch data is not found for a trip $trip_id");
+  }
+}
+
+
+
+
+
+
+
