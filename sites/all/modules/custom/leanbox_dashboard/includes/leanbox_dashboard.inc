@@ -990,10 +990,8 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
       $query->join('field_data_field_trip_id_reference', 't', 't.entity_id = n.nid');
       $query->join('field_data_field_dispatch_date', 'd', 't.field_trip_id_reference_nid = d.entity_id');
 
-      if (!empty($start_date) && !empty($end_date)) {
-
-         $query->where("(DATE_FORMAT(d.field_dispatch_date_value, '%Y-%m-%d') >= :start)", array(':start' => $start_date));
-         $query->where("(DATE_FORMAT(d.field_dispatch_date_value, '%Y-%m-%d') <= :to)", array(':to' => $end_date));
+      if (!empty($start) && !empty($end)) {
+         $query->condition('d.field_dispatch_date_value', array($start, $end), 'BETWEEN');
       }
       $res = $query->execute()->fetch(PDO::FETCH_ASSOC);
 
@@ -1004,9 +1002,9 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
       $query->join('node', 'n1', 'n.title = n1.title AND n.uid = n1.uid');
       $query->join('field_data_field_trip_id_reference', 't', 't.entity_id = n1.nid');
       $query->join('field_data_field_dispatch_date', 'd', 't.field_trip_id_reference_nid = d.entity_id');
-      if (!empty($start_date) && !empty($end_date)) {
-         $query->where("(DATE_FORMAT(d.field_dispatch_date_value, '%Y-%m-%d') >= :start)", array(':start' => $start));
-         $query->where("(DATE_FORMAT(d.field_dispatch_date_value, '%Y-%m-%d') <= :to)", array(':to' => $end));
+      
+      if (!empty($start) && !empty($end)) {
+         $query->condition('d.field_dispatch_date_value', array($start, $end), 'BETWEEN');
       }
       $res1 = $query->execute()->fetch(PDO::FETCH_ASSOC);
 
@@ -1376,7 +1374,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
       $query->join('field_data_field_bill_net_sales', 'ns', 'ns.entity_id = n.nid');
 
       if (!empty($start_date) && !empty($end_date)) {
-         $query->condition('srb.field_sr_bill_date_value', array($start_date, $end_date), 'BETWEEN');
+         $query->condition('d.field_dispatch_date_value', array($start, $end), 'BETWEEN');
       }
       // $query->join('custom_billing_data', 'bd', 'bd.bill_number = n.title');
       //$query->condition('bd.distributor_id', $distributor_id);
