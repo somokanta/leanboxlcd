@@ -33,8 +33,8 @@ class header_ptl_cld_custom_field extends views_handler_field {
     }
     $rs_code = $total_result[0]->ptl_data_configuration_rs_code;
     $this->view->custom_footer = $box;
-
-    $name_line_1 = 'LeanBox Logistics Solution Pvt Ltd';
+    
+    $name_line_1 = get_rsname_using_rscode($rs_code);
     $name_line_2 = 'Party Packing CLD Picking Sheet';
 
     $trip_id = $this->view->args[0];

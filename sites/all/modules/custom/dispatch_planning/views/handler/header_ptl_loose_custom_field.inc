@@ -31,7 +31,7 @@ class header_ptl_loose_custom_field extends views_handler_field {
     }
     $rs_code = $total_result[0]->ptl_data_configuration_rs_code;
 
-    $name_line_1 = 'LeanBox Logistics Solution Pvt Ltd';
+    $name_line_1 = get_rsname_using_rscode($rs_code);
     $name_line_2 = 'Party Packing Loose Picking Sheet';
 
     $trip_id = $this->view->args[0];
@@ -39,6 +39,7 @@ class header_ptl_loose_custom_field extends views_handler_field {
     $trip_date = date('d-M-y', $trip_date);
     $loading_sheet = ptl_loading_sheet_by_trip_id($trip_id,$rs_code);
     $no_of_bills = ptl_no_of_bills_by_trip_id($trip_id,$rs_code);
+    $no_of_bill_lines = ptl_no_of_bill_lines_by_trip_id($trip_id,$rs_code);
 
     if (!empty($no_of_bills)) {
       $this->view->custom_footer = $clds ? $clds : 0;
@@ -78,8 +79,8 @@ class header_ptl_loose_custom_field extends views_handler_field {
       <td align = "left" style="color:#666">' . $no_of_bills . '</td>
       <td></td>
       <td></td>
-      <td></td>
-      <td></td>
+      <td>Bill Lines</td>
+      <td align = "left" style="color:#666">' . $no_of_bill_lines . '</td>
       <td></td>
       </tr>
       </tbody>
