@@ -399,7 +399,7 @@ function leanbox_mobile_save_return_data_from_cron($csv_uri) {
       $node->status = 1; //(1 or 0): published or not
       $node->comment = 0; // 0 = comments disabled, 1 = read only, 2 = read/write
 
-      $node->uid = ($rs_uid = leanbox_mobile_get_uid_using_rscode($record['RS Code'])) ? $rs_uid : 0;
+      $node->uid = ($rs_distributor = leanbox_mobile_get_distributor_using_rscode($record['RS Code'])) ? $rs_distributor : 0;
 
       $node->field_sum_of_net_sales_bill_wise[LANGUAGE_NONE][0]['value'] = $record['Sum of NET_SALES_VALUE'];
       $node->field_mobile_bill_value[LANGUAGE_NONE][0]['value'] = $record['Bill Value'];
@@ -408,6 +408,7 @@ function leanbox_mobile_save_return_data_from_cron($csv_uri) {
       $node->field_delivery_outcome[LANGUAGE_NONE][0]['value'] = $record['DELIVERY OUTCOME'];
       $node->field_reason_entry[LANGUAGE_NONE][0]['value'] = $record['REASON ENTRY'];
       $node->field_mobile_update_date[LANGUAGE_NONE][0]['value'] = strtotime($record['UPDATE DATE']);
+      $node->field_mobile_bill_date[LANGUAGE_NONE][0]['value'] = strtotime($record['BILL DATE']);
 
       $node = node_submit($node); // Prepare node for saving
       node_save($node);
@@ -420,10 +421,14 @@ function leanbox_mobile_save_return_data_from_cron($csv_uri) {
  * 
  * @param type $rs_code
  */
-function leanbox_mobile_get_uid_using_rscode($rs_code) {
+function leanbox_mobile_get_distributor_using_rscode($rs_code) {
   $query = db_select('field_data_field_third_party_username', 'tp');
   $query->condition('tp.field_third_party_username_value', $rs_code);
-  $query->fields('tp', array('entity_id'));
+  $query->join('field_data_field_distributor', 'd', 'd.entity_id = tp.entity_id');
+  //$query->join('users_roles', 'ur', 'ur.uid = tp.entity_id');
+  //$query->join('role', 'r', 'r.rid = ur.rid');
+  // $query->condition('r.name', 'RS Operator');
+  $query->fields('d', array('field_distributor_value'));
   $result = $query->execute()->fetchField();
   return $result;
 }

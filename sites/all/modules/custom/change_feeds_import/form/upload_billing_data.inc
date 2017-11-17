@@ -70,7 +70,7 @@ function change_feeds_import_billing_data_form_validate($form, &$form_state) {
           $sku = $value[7];
           $unique_comb = $bill_no . $sku;
           if (array_key_exists($unique_comb, $res['unique_combination'])) {
-          //  form_set_error('duplicate_data', t('Duplicate Data Found , Please Remove Duplicate Data and Upload Again.'));
+            form_set_error('duplicate_data', t('Duplicate Data Found , Please Remove Duplicate Data and Upload Again.'));
           }
           $res['unique_combination'][$unique_comb] = $unique_comb;
         }
@@ -170,7 +170,8 @@ function billing_data_csv_finished($success, $results, $operations) {
     // insert data in error billing data table 
     change_feeds_import_update_data_in_error_billing_table_after_confirm($last_id, $bill_uploaded, $total_lines, $sum_of_total_sales_qty, $error_link, $status);
 
-    drupal_goto("confirm/" . $last_id);
+    //drupal_goto("confirm/" . $last_id);
+    $_GET['destination'] = "confirm/" . $last_id;
   }
   else {
     drupal_set_message('There is Error Occured in batch process');
@@ -231,7 +232,7 @@ function change_feeds_import_batch_fix_process($max, $data, $distributor_id, $fi
     if (!isset($context['results']['unique_combination'])) {
       $context['results']['unique_combination'] = array();
     }
-/*
+
     foreach ($value as $k => $v) {
       $flag = 0;
       $error_text = '';
@@ -355,7 +356,7 @@ function change_feeds_import_batch_fix_process($max, $data, $distributor_id, $fi
         $error[$k] = $v;
       }
     }
-*/
+
     if ($error_bool) { // if error occured generate error file
       $context['results']['error'][] = $error;
     }
@@ -475,9 +476,12 @@ function check_bill_number_exist() {
   global $user;
   $user_id = $user->uid;
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
+  $time = strtotime('-30 days');  // last 1 month
+  
   $query3 = db_select('custom_billing_data', 'cb');
   $query3->condition('cb.distributor_id', $distributor_id);
-  $query3->fields('cb', array('bill_number'));
+  $query3->condition('cb.created_date', $time, '>');
+  $query3->fields('cb', array('bill_number'))->distinct();
   $bill_result = $query3->execute()->fetchAllKeyed(0, 0);
   return $bill_result;
 }
@@ -577,6 +581,21 @@ function get_csv_file_header() {
  * @return type
  */
 function get_node_titles($type) {
+  
+  $time = strtotime('-30 days');  // last 1 month
+  $type = array('sales_register_data');
+  
+  $query1 = db_select('node', 'n');
+  $query1->condition('n.type', $type, 'IN');
+  $query1->condition('n.created', $time, '>');
+  $query1->fields('n', array('type', 'title'));
+  $query1->addTag('node_uid');
+  $titles = $query1->execute()->fetchAll();
+  foreach ($titles as $k => $v) {
+    $result[$v->type][$v->title] = $v->title;
+  }
+  
+  $type = array('pricelist_group_master', 'product_division_master');
   $query1 = db_select('node', 'n');
   $query1->condition('n.type', $type, 'IN');
   $query1->fields('n', array('type', 'title'));
@@ -585,5 +604,7 @@ function get_node_titles($type) {
   foreach ($titles as $k => $v) {
     $result[$v->type][$v->title] = $v->title;
   }
+  
+
   return $result;
 }

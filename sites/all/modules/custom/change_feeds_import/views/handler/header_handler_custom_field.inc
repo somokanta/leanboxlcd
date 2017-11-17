@@ -45,6 +45,9 @@ class header_handler_custom_field extends views_handler_field {
       $cashier_name = $result['field_cashier_name_value'];
       $seq_method = $result['field_sequence_method_value'];
       
+      $total_distance = round($result['field_total_distance_value'],1);
+      $total_travel_time = round($result['field_total_travel_time_value'],1);
+      
       if($seq_method == "0" || empty($seq_method)){
         $sequence = "MANUAL";
       }else{
@@ -98,8 +101,8 @@ class header_handler_custom_field extends views_handler_field {
       <td align = "left" style="color:#666">'.$vehicle_no.'</td>
       <td></td>
       <td></td>
-      <td>Seq Method</td>
-      <td align = "left" style="color:#666">'.$sequence.'</td>
+      <td>Seq/Kms/Time(Hrs)</td>
+      <td align = "left" style="color:#666">'.$sequence.'/'. $total_distance.'/'.$total_travel_time.'</td>
       <td></td>
       </tr>
       </tbody>
@@ -125,7 +128,11 @@ function get_data_from_trip_id($trip_id) {
   $query1->join('field_data_field_bill_count', 'bill', 'bill.entity_id = n.nid');
   $query1->join('field_data_field_cashier_name', 'cash', 'cash.entity_id = n.nid');
   $query1->leftjoin('field_data_field_sequence_method', 'sm', 'sm.entity_id = n.nid');
+  $query1->leftjoin('field_data_field_total_distance', 'td', 'td.entity_id = n.nid');
+  $query1->leftjoin('field_data_field_total_travel_time', 'ttt', 'ttt.entity_id = n.nid');
   $query1->fields('sm', array('	field_sequence_method_value'));
+  $query1->fields('td', array('field_total_distance_value'));
+  $query1->fields('ttt', array('field_total_travel_time_value'));
   $query1->fields('trip_exe', array('	field_trip_executon_date_value'));
   $query1->fields('hht', array('field_hht_id_nid'));
   $query1->fields('dd', array('title'));

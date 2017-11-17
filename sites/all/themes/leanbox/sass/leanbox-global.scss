@@ -431,7 +431,20 @@ header {
     }
   }
 }
-
+    .tickets {
+      position: absolute;
+      right: 27px;
+      top: 40px;
+      padding: 7px 39px;
+      background-color: #1e419b;
+      color: #fff;
+      font-size: 14px;
+      font-weight: 500;
+      z-index: 9;
+      &:hover, &:focus {
+          color: #fff;
+      }
+    } 
 body {
   > .main-container {
     /* max-width: 1300px; */
@@ -889,7 +902,7 @@ form {
       }
     }
   }
-  #leanbox-dashboard-chart-filter-otif-form, #leanbox-dashboard-chart-filter-delivery-form, #leanbox-mobile-chart-filter-return-form, #leanbox-mobile-chart-filter-full-return-form {
+  #leanbox-dashboard-chart-filter-otif-form, #leanbox-dashboard-chart-filter-delivery-form, #leanbox-mobile-chart-filter-return-form, #leanbox-mobile-chart-filter-full-return-form, #leanbox-dashboard-chart-filter-adoption-form, #leanbox-dashboard-chart-filter-bod-data-form {
     .container-inline-date{
       width: auto;
       display: inline-block;
@@ -908,7 +921,7 @@ form {
           margin: 8px 0 0 0;
       }
     }
-    #otif-submit, #delivery-submit, #mobile-return-submit, #mobile-full-return-submit{
+    #otif-submit, #delivery-submit, #mobile-return-submit, #mobile-full-return-submit, #adoption-graph-submit, #bod-data-submit{
         width: 80px;
         display: inline-block;
         button {
@@ -918,7 +931,7 @@ form {
     }
     a {
       width: 100%;
-      #otif_div, #delivery_div, #mobile_return_div, #mobile_full_return_div {
+      #otif_div, #delivery_div, #mobile_return_div, #mobile_full_return_div, #adoption_graph_div, #bod_data_div {
           margin: 10px 0 0 0;
           text-align: center;
           display: inline-block;
@@ -1465,3 +1478,122 @@ header[id="page-header"] {
 }
 
 // End Dashboard pages
+// page central impact return analysis
+#edit-field-third-party-username-value-wrapper {
+    label {
+      padding-top: 25px;
+      padding-right: 10%;
+  }
+    .views-widget {
+      display: inline-block;
+      margin-top: 1%;
+      vertical-align: middle;
+      width: 50%;
+  }
+}
+//end page central impact return analysis
+
+#views-exposed-form-central-bill-trip-page  {
+  #edit-title-wrapper, #edit-title-1-wrapper, #edit-field-billing-van-value-wrapper, #edit-field-sales-party-code-value-wrapper {
+    width: 23%;
+    padding-bottom: 10px;
+  }
+  #edit-field-sr-bill-date-value-wrapper, #edit-field-billing-loading-date-value-wrapper, #edit-field-trip-executon-date-value-wrapper {
+    padding-bottom: 10px;
+    width: 30%;
+    #edit-field-sr-bill-date-value-min-wrapper, #edit-field-sr-bill-date-value-max-wrapper, #edit-field-billing-loading-date-value-min-wrapper, #edit-field-billing-loading-date-value-max-wrapper, #edit-field-trip-executon-date-value-min-wrapper, #edit-field-trip-executon-date-value-max-wrapper{
+      width: 100%;
+      padding: 0;
+    }
+      #edit-field-sr-bill-date-value-min, #edit-field-billing-loading-date-value-min, #edit-field-trip-executon-date-value-min, #edit-field-sr-bill-date-value-max, #edit-field-billing-loading-date-value-max, #edit-field-trip-executon-date-value-max {
+        width: 85px;
+        margin-left: 10px;
+    }
+  }
+  #edit-field-trip-id-reference-nid-wrapper {
+    clear: both;
+    label {
+      display: block;
+    }
+    .views-operator, .views-widget {
+      width: 48%;
+      display: inline-block;
+    }
+  }
+  #edit-field-delivery-pending-value-wrapper {
+    width: 140px;
+  }
+  #edit-field-channel-value-wrapper {
+    width: 120px;
+  }
+  #edit-field-billing-van-value-1-wrapper {
+    label {
+    width: 100%;
+  }
+    .views-operator,  .views-widget {
+      width: 44%;
+      display: inline-block;
+      vertical-align: top;
+      margin-right: 2px;
+    }
+  }
+#edit-field-third-party-username-value-wrapper {
+    width: 140px;
+  }
+
+}
+
+/*ofd mailer subfooter remove*/
+.view-id-ofd_mailer, .view-id-ofd_mailer2 {
+  table {
+    tbody {
+      tr {
+        td {
+          border: 1px solid #000 !important;
+        }
+      }
+    }
+  }
+}
+
+/*End ofd mailer subfooter remove*/
+/*central billing report*/
+.views-widget-filter-field_third_party_username_value {
+	width: 55% !important;
+	display: block !important;
+	label {
+		display: flex;
+		text-align: center;
+	}
+	select.class-rs-code {
+		height: 170px !important;
+	}
+}
+/*End central billing report*/
+/*payment collection table css*/
+.view-id-payment_collection {
+  .table-responsive {
+    tbody {
+      tr {
+        td {
+          min-width: 50px;
+          text-align: center;
+          max-width: 160px;
+          word-break: break-all;
+        }      
+        .views-field-field-collection-cheque-date-editable {
+          width: 160px;
+          .container-inline-date {
+            .form-item {
+              input {
+                width: 98% !important;
+                font-size: 13px;
+                padding: 0 3px;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

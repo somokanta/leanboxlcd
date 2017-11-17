@@ -172,7 +172,8 @@ function change_feeds_import_day_van_area_batch_fix_process($data, $distributor_
 function day_van_area_data_csv_finished($success, $results, $operations) {
   if ($success) {
     $fid = $results['fid'];
-    drupal_goto("day-van-area-confirm/" . $fid);
+    //drupal_goto("day-van-area-confirm/" . $fid);
+    $_GET['destination'] = "day-van-area-confirm/" . $fid;
   }
   else {
     drupal_set_message('There is Error Occured in batch process');

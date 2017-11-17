@@ -14,7 +14,7 @@ function leanbox_dashboard_menu() {
   $items['sales-return-data'] = array(
     'title' => 'Sales Return Data',
     'page callback' => 'sales_return_data_callback',
-    'access callback' => TRUE,
+    'access arguments' => array('Distributor Upload File'),
     'type' => MENU_CALLBACK,
   );
   $items['sales-delivery-table'] = array(
@@ -29,6 +29,12 @@ function leanbox_dashboard_menu() {
     'page callback' => 'leanbox_dashboard_sales_delivery_table_export',
     'access arguments' => array('Distributor Upload File'),
   );
+  $items['central_bills_per_van/export'] = array(
+    'title' => 'Export',
+    'description' => 'Export',
+    'page callback' => 'leanbox_dashboard_central_dispatch_table_export',
+    'access arguments' => array('Distributor Upload File'),
+  );
 
   $items['dashboard'] = array(
     'page callback' => 'leanbox_dashboard_listing_page',
@@ -41,7 +47,7 @@ function leanbox_dashboard_menu() {
     'Metrics' => 'Metrics',
     'Productivity' => 'Productivity',
     'ota' => 'Process-On-Time Adherence',
-    //'Dispatch' => 'Dispatch',
+    'adoption' => 'Adoption',
   );
 
   $items['dashboard/Progress'] = array(
@@ -134,10 +140,33 @@ function leanbox_dashboard_menu() {
     'file path' => drupal_get_path('module', 'leanbox_dashboard'),
     'file' => '/includes/leanbox_dashboard_chart.inc',
   );
-
+  
+  $items['central-sales-delivery-table'] = array(
+    'title' => 'Central sales Delivery Report',
+    'access arguments' => array('Central sales delivery report'),
+    'page callback' => 'central_sales_delivery_table_callback',
+  );
+  $items['central-sales-delivery-table/export'] = array(
+    'title' => 'Central Sales Delivery Report Export',
+    'description' => 'Central Sales Delivery Report Export',
+    'page callback' => 'central_sales_delivery_table_export',
+    'access arguments' => array('Central sales delivery report'),
+  );  
   return $items;
 }
 
+/**
+ * Implement hook_permission()
+ *  Add custom permission Central sales delivery report
+ */
+function leanbox_dashboard_permission() {
+  return array(
+    'Central sales delivery report' => array(
+      'title' => t('Central sales delivery report'),
+      'description' => t('Central sales delivery report')
+    )
+  );
+}
 /**
  * Callback function for dashboard page
  * @return string
@@ -186,8 +215,11 @@ function party_packing_filter_callback() {
     case 'otif_trends' :
       $activity_type = 'otif_ajax';
       $output_data = leanbox_dashboard_otif_trends_chart_query_details($activity_type, $start_date, $end_date);
+      break;   
+   
+    case 'central_dispatch_daywise' :
+      $output_data = leanbox_dashboard_central_dispatch_daywise_details($start_date, $end_date);
       break;
-
     default:
       $output_data = leanbox_dashboard_chart_query_details($activity_type, $start_date, $end_date, $ajax_type);
   }
@@ -195,7 +227,7 @@ function party_packing_filter_callback() {
 }
 
 /**
- * 
+ * Implements hook_block_info().
  */
 function leanbox_dashboard_block_info() {
   $blocks['party_packing'] = array(
@@ -246,6 +278,10 @@ function leanbox_dashboard_block_info() {
     'info' => t('Picking On Time Adherence'),
     'cache' => DRUPAL_NO_CACHE,
   );
+  $blocks['bod_data'] = array(
+    'info' => t('BOD Data'),
+    'cache' => DRUPAL_NO_CACHE,
+  );
   $blocks['unloading_ota'] = array(
     'info' => t('Unloading On Time Adherence'),
     'cache' => DRUPAL_NO_CACHE,
@@ -266,6 +302,10 @@ function leanbox_dashboard_block_info() {
     'info' => t('Otif Day Wise Trends'),
     'cache' => DRUPAL_NO_CACHE,
   );
+ $blocks['central_dispatch_daywise'] = array(
+    'info' => t('Central Dispatch Daywise'),
+    'cache' => DRUPAL_NO_CACHE,
+  );
   $blocks['bills_per_van_trends'] = array(
     'info' => t('Bills Per Van Day Wise Trends'),
     'cache' => DRUPAL_NO_CACHE,
@@ -280,6 +320,10 @@ function leanbox_dashboard_block_info() {
   );
   $blocks['sales_delivery_table'] = array(
     'info' => t('Sales Delivery Table'),
+    'cache' => DRUPAL_NO_CACHE,
+  );
+  $blocks['adoption_graph'] = array(
+    'info' => t('Adoption Graph'),
     'cache' => DRUPAL_NO_CACHE,
   );
   return $blocks;
@@ -301,6 +345,39 @@ function leanbox_dashboard_block_view($delta = '') {
     'ch_height' => 200,
   );
   switch ($delta) {
+  case 'adoption_graph':
+
+      if (arg(1) == 'adoption_graph') {
+        $area_definition = array(
+          'width' => 700,
+          'height' => 400,
+          'ch_left' => 80,
+          'ch_top' => 50,
+          'ch_width' => 500,
+          'ch_height' => 250,
+        );
+      }
+      $billing_date = strtotime(date('Y-m-d') . "- 1 days");
+      $billing_date = date('d-m-Y', $billing_date);
+      $block['subject'] = "TP Vs Impact Adoption ($billing_date Dispatch)";
+      $data = leanbox_dashboard_chart_query_details('adoption_graph', $billing_date, $billing_date);
+
+      $filter_form = drupal_render(drupal_get_form('leanbox_dashboard_chart_filter_adoption_form'));
+      $block['content'] = array(
+        '#markup' => theme('leanbox_dashboard', array('data' => $filter_form)),
+        '#attached' => array(
+          'js' => array(
+drupal_get_path('module', 'leanbox_dashboard') . '/js/google_chart.js',
+            drupal_get_path('module', 'leanbox_dashboard') . '/js/leanbox_dashboard_adoption.js',
+            array(
+              'data' => array('leanbox_dashboard' => array('adoption_graph' => $data, 'area_definition' => $area_definition)),
+              'type' => 'setting'
+            ),
+          ),
+        ),
+      );
+      break;
+      
     case 'party_packing':
 
       if (arg(1) == 'party_packing') {
@@ -322,10 +399,7 @@ function leanbox_dashboard_block_view($delta = '') {
         '#markup' => theme('leanbox_dashboard', array('data' => $filter_form)),
         '#attached' => array(
           'js' => array(
-            array(
-              'type' => 'external',
-              'data' => 'https://www.gstatic.com/charts/loader.js'
-            ),
+             drupal_get_path('module', 'leanbox_dashboard') . '/js/google_chart.js',
             drupal_get_path('module', 'leanbox_dashboard') . '/js/leanbox_dashboard_partypackingchart.js',
             array(
               'data' => array('leanbox_dashboard' => array('party_packing' => $data, 'area_definition' => $area_definition)),
@@ -357,10 +431,7 @@ function leanbox_dashboard_block_view($delta = '') {
         '#markup' => theme('leanbox_dashboard', array('data' => $filter_form)),
         '#attached' => array(
           'js' => array(
-            array(
-              'type' => 'external',
-              'data' => 'https://www.gstatic.com/charts/loader.js'
-            ),
+            drupal_get_path('module', 'leanbox_dashboard') . '/js/google_chart.js',
             drupal_get_path('module', 'leanbox_dashboard') . '/js/leanbox_dashboard_pickingchart.js',
             array(
               'data' => array('leanbox_dashboard' => array('picking' => $data, 'area_definition' => $area_definition)),
@@ -392,10 +463,7 @@ function leanbox_dashboard_block_view($delta = '') {
         '#markup' => theme('leanbox_dashboard', array('data' => $filter_form)),
         '#attached' => array(
           'js' => array(
-            array(
-              'type' => 'external',
-              'data' => 'https://www.gstatic.com/charts/loader.js'
-            ),
+           drupal_get_path('module', 'leanbox_dashboard') . '/js/google_chart.js',
             drupal_get_path('module', 'leanbox_dashboard') . '/js/leanbox_dashboard_pickingbulkchart.js',
             array(
               'data' => array('leanbox_dashboard' => array('picking_bulk' => $data, 'area_definition' => $area_definition)),
@@ -427,10 +495,7 @@ function leanbox_dashboard_block_view($delta = '') {
         '#markup' => theme('leanbox_dashboard', array('data' => $filter_form)),
         '#attached' => array(
           'js' => array(
-            array(
-              'type' => 'external',
-              'data' => 'https://www.gstatic.com/charts/loader.js'
-            ),
+           drupal_get_path('module', 'leanbox_dashboard') . '/js/google_chart.js',
             drupal_get_path('module', 'leanbox_dashboard') . '/js/leanbox_dashboard_unloading.js',
             array(
               'data' => array('leanbox_dashboard' => array('unloading' => $data, 'area_definition' => $area_definition)),
@@ -463,10 +528,7 @@ function leanbox_dashboard_block_view($delta = '') {
         '#markup' => theme('leanbox_dashboard', array('data' => $filter_form)),
         '#attached' => array(
           'js' => array(
-            array(
-              'type' => 'external',
-              'data' => 'https://www.gstatic.com/charts/loader.js'
-            ),
+           drupal_get_path('module', 'leanbox_dashboard') . '/js/google_chart.js',
             drupal_get_path('module', 'leanbox_dashboard') . '/js/leanbox_dashboard_delivery.js',
             array(
               'data' => array('leanbox_dashboard' => array('delivery' => $data, 'area_definition' => $area_definition)),
@@ -498,10 +560,7 @@ function leanbox_dashboard_block_view($delta = '') {
         '#markup' => theme('leanbox_dashboard', array('data' => $filter_form, 'otif_table' => $data['table'])),
         '#attached' => array(
           'js' => array(
-            array(
-              'type' => 'external',
-              'data' => 'https://www.gstatic.com/charts/loader.js'
-            ),
+           drupal_get_path('module', 'leanbox_dashboard') . '/js/google_chart.js',
             drupal_get_path('module', 'leanbox_dashboard') . '/js/leanbox_dashboard_partypackingproductivitychart.js',
             array(
               'data' => array('leanbox_dashboard' => array('party_packing_productivity' => $data['output'], 'area_definition' => $area_definition)),
@@ -533,10 +592,7 @@ function leanbox_dashboard_block_view($delta = '') {
         '#markup' => theme('leanbox_dashboard', array('data' => $filter_form, 'otif_table' => $data['table'])),
         '#attached' => array(
           'js' => array(
-            array(
-              'type' => 'external',
-              'data' => 'https://www.gstatic.com/charts/loader.js'
-            ),
+            drupal_get_path('module', 'leanbox_dashboard') . '/js/google_chart.js',
             drupal_get_path('module', 'leanbox_dashboard') . '/js/leanbox_dashboard_pickingproductivitychart.js',
             array(
               'data' => array('leanbox_dashboard' => array('picking_productivity' => $data['output'], 'area_definition' => $area_definition)),
@@ -568,10 +624,7 @@ function leanbox_dashboard_block_view($delta = '') {
         '#markup' => theme('leanbox_dashboard', array('data' => $filter_form, 'otif_table' => $data['table'])),
         '#attached' => array(
           'js' => array(
-            array(
-              'type' => 'external',
-              'data' => 'https://www.gstatic.com/charts/loader.js'
-            ),
+            drupal_get_path('module', 'leanbox_dashboard') . '/js/google_chart.js',
             drupal_get_path('module', 'leanbox_dashboard') . '/js/leanbox_dashboard_bill_pendencychart.js',
             array(
               'data' => array('leanbox_dashboard' => array('bill_pendency' => $data['output'], 'area_definition' => $area_definition)),
@@ -594,10 +647,7 @@ function leanbox_dashboard_block_view($delta = '') {
         '#markup' => theme('leanbox_dashboard', array('data' => $filter_form, 'otif_table' => $data['table'],)),
         '#attached' => array(
           'js' => array(
-            array(
-              'type' => 'external',
-              'data' => 'https://www.gstatic.com/charts/loader.js'
-            ),
+           drupal_get_path('module', 'leanbox_dashboard') . '/js/google_chart.js',
             drupal_get_path('module', 'leanbox_dashboard') . '/js/leanbox_dashboard_otifchart.js',
             array(
               'data' => array('leanbox_dashboard' => array('otif' => $data['output'],)),
@@ -623,6 +673,27 @@ function leanbox_dashboard_block_view($delta = '') {
             drupal_get_path('module', 'leanbox_dashboard') . '/js/leanbox_dashboard_otif_trends_chart.js',
             array(
               'data' => array('leanbox_dashboard' => array('otif_trends' => $data,)),
+              'type' => 'setting'
+            ),
+          ),
+        ),
+      );
+      break;
+   
+    case 'central_dispatch_daywise':
+
+      $bill_date = date('d-m-Y');
+      $block['subject'] = "Central Dispatch Value Day Wise ($bill_date Dispatch)";
+      $data = leanbox_dashboard_central_dispatch_daywise_details();
+
+      $filter_form = drupal_render(drupal_get_form('leanbox_dashboard_central_dispatch_daywise_form'));
+      $block['content'] = array(
+        '#markup' => theme('leanbox_dashboard', array('data' => $filter_form)),
+        '#attached' => array(
+          'js' => array(
+            drupal_get_path('module', 'leanbox_dashboard') . '/js/leanbox_dashboard_central_dispatch_daywise_chart.js',
+            array(
+              'data' => array('leanbox_dashboard' => array('central_dispatch_daywise' => $data,)),
               'type' => 'setting'
             ),
           ),
@@ -713,10 +784,7 @@ function leanbox_dashboard_block_view($delta = '') {
         '#markup' => theme('leanbox_dashboard', array('data' => $filter_form)),
         '#attached' => array(
           'js' => array(
-            array(
-              'type' => 'external',
-              'data' => 'https://www.gstatic.com/charts/loader.js'
-            ),
+           drupal_get_path('module', 'leanbox_dashboard') . '/js/google_chart.js',
             drupal_get_path('module', 'leanbox_dashboard') . '/js/leanbox_dashboard_billsperpersonchart.js',
             array(
               'data' => array('leanbox_dashboard' => array('bills_per_person' => $data, 'area_definition' => $area_definition)),
@@ -749,10 +817,7 @@ function leanbox_dashboard_block_view($delta = '') {
         '#markup' => theme('leanbox_dashboard', array('data' => $filter_form)),
         '#attached' => array(
           'js' => array(
-            array(
-              'type' => 'external',
-              'data' => 'https://www.gstatic.com/charts/loader.js'
-            ),
+           drupal_get_path('module', 'leanbox_dashboard') . '/js/google_chart.js',
             drupal_get_path('module', 'leanbox_dashboard') . '/js/leanbox_dashboard_billspervanchart.js',
             array(
               'data' => array('leanbox_dashboard' => array('bills_per_van' => $data, 'area_definition' => $area_definition)),
@@ -785,10 +850,7 @@ function leanbox_dashboard_block_view($delta = '') {
         '#markup' => theme('leanbox_dashboard', array('data' => $filter_form)),
         '#attached' => array(
           'js' => array(
-            array(
-              'type' => 'external',
-              'data' => 'https://www.gstatic.com/charts/loader.js'
-            ),
+            drupal_get_path('module', 'leanbox_dashboard') . '/js/google_chart.js',
             drupal_get_path('module', 'leanbox_dashboard') . '/js/leanbox_dashboard_pp_ota.js',
             array(
               'data' => array('leanbox_dashboard' => array('pp_ota' => $data, 'area_definition' => $area_definition)),
@@ -821,13 +883,43 @@ function leanbox_dashboard_block_view($delta = '') {
         '#markup' => theme('leanbox_dashboard', array('data' => $filter_form)),
         '#attached' => array(
           'js' => array(
-            array(
-              'type' => 'external',
-              'data' => 'https://www.gstatic.com/charts/loader.js'
-            ),
+           drupal_get_path('module', 'leanbox_dashboard') . '/js/google_chart.js',
             drupal_get_path('module', 'leanbox_dashboard') . '/js/leanbox_dashboard_picking_ota.js',
             array(
               'data' => array('leanbox_dashboard' => array('picking_ota' => $data, 'area_definition' => $area_definition)),
+              'type' => 'setting'
+            ),
+          ),
+        ),
+      );
+      break;
+      
+    case 'bod_data':
+
+      if (arg(1) == 'bod_data') {
+        $area_definition = array(
+          'width' => 700,
+          'height' => 400,
+          'ch_left' => 80,
+          'ch_top' => 50,
+          'ch_width' => 500,
+          'ch_height' => 250,
+        );
+      }
+      
+      $loading_date_timestamp = strtotime(date('Y-m-d') . "- 1 days");
+      $loading_date = date('d-m-Y', $loading_date_timestamp);
+      $block['subject'] = "Billing Vs Sales Day Compliance % ($loading_date Billing)";
+      $data = leanbox_dashboard_chart_query_details('bod_data', $loading_date, $loading_date);
+      $filter_form = drupal_render(drupal_get_form('leanbox_dashboard_chart_filter_bod_data_form'));
+      $block['content'] = array(
+        '#markup' => theme('leanbox_dashboard', array('data' => $filter_form)),
+        '#attached' => array(
+          'js' => array(
+           drupal_get_path('module', 'leanbox_dashboard') . '/js/google_chart.js',
+            drupal_get_path('module', 'leanbox_dashboard') . '/js/leanbox_dashboard_bod_data.js',
+            array(
+              'data' => array('leanbox_dashboard' => array('bod_data' => $data, 'area_definition' => $area_definition)),
               'type' => 'setting'
             ),
           ),
@@ -857,10 +949,7 @@ function leanbox_dashboard_block_view($delta = '') {
         '#markup' => theme('leanbox_dashboard', array('data' => $filter_form)),
         '#attached' => array(
           'js' => array(
-            array(
-              'type' => 'external',
-              'data' => 'https://www.gstatic.com/charts/loader.js'
-            ),
+           drupal_get_path('module', 'leanbox_dashboard') . '/js/google_chart.js',
             drupal_get_path('module', 'leanbox_dashboard') . '/js/leanbox_dashboard_unloading_ota.js',
             array(
               'data' => array('leanbox_dashboard' => array('unloading_ota' => $data, 'area_definition' => $area_definition)),
@@ -916,10 +1005,7 @@ function leanbox_dashboard_block_view($delta = '') {
         '#markup' => theme('leanbox_dashboard', array('data' => $filter_form)),
         '#attached' => array(
           'js' => array(
-            array(
-              'type' => 'external',
-              'data' => 'https://www.gstatic.com/charts/loader.js'
-            ),
+           drupal_get_path('module', 'leanbox_dashboard') . '/js/google_chart.js',
             drupal_get_path('module', 'leanbox_dashboard') . '/js/leanbox_dashboard_dispatch_ota.js',
             array(
               'data' => array('leanbox_dashboard' => array('dispatch_ota' => $data, 'area_definition' => $area_definition)),
@@ -962,13 +1048,15 @@ function leanbox_dashboard_theme() {
  */
 function leanbox_dashboard_preprocess_page(&$vars) {
   $arg = drupal_get_path_alias();
+  $arg0 = arg(0);
+  $arg1 = arg(1);
   global $user;
   $roles = $user->roles;
   
   if ($arg == 'dashboard') {
     drupal_add_js(drupal_get_path('module', 'leanbox_dashboard') . '/js/leanbox_dashboard.js');
   }
-  if (in_array("hul_admin", $roles)) {
+  if (in_array("hul_admin", $roles) && !($arg0 == 'email' && $arg1 == 'weekly-billing-report')) {
     unset($vars['tabs']);
   }
 }
@@ -1224,53 +1312,66 @@ function leanbox_dashboard_sales_delivery_table($export = FALSE) {
 
   $data = array();
   if ($export) {
-    $query = db_select('custom_billing_data', 'bl');
+    //$query = db_select('custom_billing_data', 'bl');
+    $query = db_select('node','n');
   }
   else {
-    $query = db_select('custom_billing_data', 'bl')->extend('pagerDefault')->limit(10);
+    //$query = db_select('custom_billing_data', 'bl')->extend('pagerDefault')->limit(10);
+    $query = db_select('node', 'n')->extend('pagerDefault')->limit(10);
   }
-  $query->condition('bl.distributor_id', $distributor_id);
-  $query->fields('bl', array('bill_number', 'bill_date', 'party_code'));
+  //$query->condition('bl.distributor_id', $distributor_id);
+  //$query->fields('bl', array('bill_number', 'bill_date', 'party_code'));
+  $query->join('field_data_field_bill_net_sales', 'ns', 'ns.entity_id = n.nid');
+  $query->join('field_data_field_sr_bill_date', 'srb', 'srb.entity_id = n.nid');
 
-// sales register
-  $query->join('node', 'n', 'bl.bill_number = n.title');
+  // sales register
+  //$query->join('node', 'n', 'bl.bill_number = n.title');
   $query->condition('n.type', 'sales_register_data');
   $query->condition('n.uid', $distributor_id);
   $query->join('field_data_field_sales_party_code', 'sp', 'sp.entity_id = n.nid');
 
 
-// outlet_master
+  // outlet_master
   $query->join('node', 'ot', 'ot.title = sp.field_sales_party_code_value');
   $query->condition('ot.type', 'outlet_master');
   $query->condition('ot.uid', $distributor_id);
   $query->join('field_data_field_channel', 'chan', 'chan.entity_id = ot.nid');
   $query->join('field_data_field_pl_group', 'plg', 'plg.entity_id = ot.nid');
 
+  //  if (!empty($bill_no)) {
+  //    $query->condition('bl.bill_number',$bill_no);
+  //  }
   if (!empty($bill_no)) {
-    $query->condition('bl.bill_number',$bill_no);
+    $query->condition('n.title',$bill_no);
   }
   
   $query->addfield('chan', 'field_channel_value', 'channel');
   $query->addfield('plg', 'field_pl_group_value', 'pl_group');
-  $query->addExpression('SUM(bl.Sum_of_NET_SALES_VALUE)', 'sales_value');
+  //$query->addExpression('SUM(bl.Sum_of_NET_SALES_VALUE)', 'sales_value');
   $query->leftjoin('field_data_field_impact_delivery_date', 'idl', 'idl.entity_id =  n.nid');
   $query->addfield('idl', 'field_impact_delivery_date_value', 'impact_date');
 
+  //  if (!empty($start_date) && !empty($end_date)) {
+  //    $query->condition('bl.bill_date', array($start_date, $end_date), 'BETWEEN');
+  //  }
   if (!empty($start_date) && !empty($end_date)) {
-    $query->condition('bl.bill_date', array($start_date, $end_date), 'BETWEEN');
+    $query->condition('srb.field_sr_bill_date_value', array($start_date, $end_date), 'BETWEEN');
   }
   $query->leftjoin('field_data_field_sales_return_amt', 'r', 'r.entity_id = n.nid');
   $query->addfield('r', 'field_sales_return_amt_value', 'delivered_value');
+  $query->addField('n', 'title', 'bill_number');
+  $query->addField('sp', 'field_sales_party_code_value', 'party_code');
+  $query->addField('srb', 'field_sr_bill_date_value', 'bill_date');
 
   if ($delivered_amt == 'na') {
     $query->isNull('r.field_sales_return_amt_value');
   }
-  $query->groupBy('bl.bill_number');
+  //$query->groupBy('bl.bill_number');
 
   $query->join('field_data_field_bill_value', 'bv', 'bv.entity_id = n.nid');
   $query->addfield('bv', 'field_bill_value_value', 'bill_value');
   $query->leftjoin('field_data_field_deliver_reason', 'dr', 'dr.entity_id = n.nid');
-  // $query->addExpression('(bv.field_bill_value_value - r.field_sales_return_amt_value)', 'return_value');
+  $query->addField('ns', 'field_bill_net_sales_value', 'sales_value');
   $query->addfield('dr', 'field_deliver_reason_tid', 'deliver_reason');
 
   $query->leftjoin('field_data_field_delivery_pending', 'dp', 'dp.entity_id =  n.nid');
@@ -1389,6 +1490,14 @@ function leanbox_dashboard_exposed_form_submit(&$form, &$form_state) {
 }
 
 /**
+ * 
+ */
+function get_role_by_name($name) {
+  $roles = user_roles();
+  return array_search($name, $roles);
+}
+
+/**
  * Implements hook_user_insert
  * @global type $user
  * @param type $edit
@@ -1397,8 +1506,8 @@ function leanbox_dashboard_exposed_form_submit(&$form, &$form_state) {
  */
 function leanbox_dashboard_user_insert(&$edit, $account, $category) {
   $roles = $account->roles;
-
-  if (in_array(6, $roles)) {
+  $role_id = get_role_by_name('RS Operator');
+  if (in_array($role_id, $roles)) {
     $uid = $account->uid;
     $account->field_distributor['und'][0]['value'] = $uid;
     field_attach_update('user', $account);
@@ -1416,12 +1525,20 @@ function leanbox_dashboard_user_insert(&$edit, $account, $category) {
  */
 function leanbox_dashboard_user_presave(&$edit, $account, $category) {
   $roles = $account->roles;
-  if (!empty($roles[7]) || !empty($roles[8])) {
+  $dfe_role_id = get_role_by_name('DFE');
+  $rs_role_id = get_role_by_name('RS Admin');
+
+  if (!empty($roles[$dfe_role_id]) || !empty($roles[$rs_role_id])) {
     $dis_id = $account->field_distributor['und'][0]['value'];
     $user_details = leanbox_dashboard_get_username_and_rs_code($dis_id);
-    $edit['field_name']['und'][0]['value'] = $user_details['field_name_value'];
-    $edit['field_third_party_username']['und'][0]['value'] = $user_details['field_third_party_username_value'];
-  }
+    if (empty($edit['field_name']['und'][0]['value'])) {
+      $edit['field_name']['und'][0]['value'] = $user_details['field_name_value'];
+    }
+    $rs_code_default = $edit['field_third_party_username']['und'][0]['value'];
+    if (empty($rs_code_default)) {
+      $edit['field_third_party_username']['und'][0]['value'] = $user_details['field_third_party_username_value'];
+      }
+   }
 }
 
 /**
@@ -1467,6 +1584,11 @@ function leanbox_dashboard_get_username_and_rs_code($dis_id) {
 function leanbox_dashboard_form_alter(&$form, &$form_state, $form_id) {
   global $user;
   $roles = $user->roles;
+  $rs_operator_role_id = get_role_by_name('RS Operator');
+  $dfe_role_id = get_role_by_name('DFE');
+  $rs_admin_role_id = get_role_by_name('RS Admin');
+
+
   if ($form_id == 'user_register_form' || $form_id == 'user_profile_form') {
 
     if (in_array("hul_admin", $roles)) {
@@ -1481,12 +1603,12 @@ function leanbox_dashboard_form_alter(&$form, &$form_state, $form_id) {
 
       $form['field_name']['#states'] = array(
         'visible' => array(
-          ':input[name="roles[6]"]' => array('checked' => TRUE),
+          ':input[name="roles['. $rs_operator_role_id . ']"]' => array('checked' => TRUE),
         ),
       );
       $form['field_third_party_username']['#states'] = array(
         'visible' => array(
-          ':input[name="roles[6]"]' => array('checked' => TRUE),
+          ':input[name="roles['. $rs_operator_role_id . ']"]' => array('checked' => TRUE),
         ),
       );
 
@@ -1503,10 +1625,10 @@ function leanbox_dashboard_form_alter(&$form, &$form_state, $form_id) {
         'visible' =>
         array(
           array(
-            ':input[name="roles[7]"]' => array('checked' => TRUE),
+            ':input[name="roles['. $dfe_role_id . ']"]' => array('checked' => TRUE),
           ),
           array(
-            ':input[name="roles[8]"]' => array('checked' => TRUE),
+            ':input[name="roles['. $rs_admin_role_id . ']"]' => array('checked' => TRUE),
           )
         )
       );
@@ -1527,8 +1649,35 @@ function leanbox_dashboard_form_alter(&$form, &$form_state, $form_id) {
   }
 
   if ($form_id = 'views_exposed_form') {
-    
-    // party packing
+     
+      // rs code filter
+      if (isset($form['field_third_party_username_value'])) {
+         $values = fetch_rs_field_data();
+         $query = db_select('field_data_field_third_party_username', 't');
+         $query->fields('t', array('field_third_party_username_value'));
+         $query->leftjoin('field_data_field_name', 'n', 'n.entity_id = t.entity_id');
+         $query->addExpression("concat(t.field_third_party_username_value ,' : ', n.field_name_value)", 'name');
+         if (!empty($values)) {
+           $query->condition('t.entity_id', $values, 'IN');
+         }
+         $res = $query->execute()->fetchAllKeyed(0, 1);
+         $res[''] = t('-Any-');
+      
+         if (isset($_GET['field_third_party_username_value'])) {
+            $rs_default_value = $_GET['field_third_party_username_value'];
+         }
+         else {
+            $rs_default_value = '';
+         }
+         $form['field_third_party_username_value']['#type'] = 'select';
+         $form['field_third_party_username_value']['#options'] = $res;
+         $form['field_third_party_username_value']['#multiple'] = TRUE;
+         $form['field_third_party_username_value']['#size'] = 30;
+         $form['field_third_party_username_value']['#attributes'] = array('style' => array('height:6em;'), 'class' => array('class-rs-code'));
+         $form['field_third_party_username_value']['#default_value'] = $rs_default_value;
+      }
+
+      // party packing
     if (isset($form['field__party_packingstatus_value'])) {
       $form['field__party_packingstatus_value']['#options']['empty'] = t('Empty');
     }
@@ -1585,7 +1734,9 @@ function leanbox_dashboard_form_alter(&$form, &$form_state, $form_id) {
  */
 function leanbox_dashboard_user_register_validate($form, &$form_state) {
   $roles = isset($form_state['values']['roles']) ? $form_state['values']['roles'] : '';
-  if (!empty($roles) && !empty($roles[6])) {
+  $role_id = get_role_by_name('RS Operator');
+
+  if (!empty($roles) && !empty($roles[$role_id])) {
     if (isset($form_state['values']['field_name']['und'][0]['value']) && empty($form_state['values']['field_name']['und'][0]['value'])) {
       form_set_error('field_name', t('kindly Enter RS Name'));
     }
@@ -1737,121 +1888,514 @@ function sales_return_data() {
 }
 
 function change_feeds_import_get_return_query($start_date, $end_date, $data) {
+   global $user;
+   // Store distributor id in author in each node
+   $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+
+   // Calculate sum of bill from custom billing data without tax
+   // $query = db_select('custom_billing_data', 'bd');
+   $query = db_select('node', 'n');
+   // $query->condition('bd.distributor_id', $distributor_id);
+   //  if (!empty($start_date) && !empty($end_date)) {
+   //    $query->condition('bd.bill_date', array($start_date, $end_date), 'BETWEEN');
+   //  }
+   //$query->join('node', 'n', 'bd.bill_number = n.title');
+   $query->condition('n.type', 'sales_register_data');
+   $query->condition('n.uid', $distributor_id);
+   $query->join('field_data_field_bill_net_sales', 'ns', 'ns.entity_id = n.nid');
+   $query->join('field_data_field_sr_bill_date', 'srb', 'srb.entity_id = n.nid');
+   if (!empty($start_date) && !empty($end_date)) {
+      $query->condition('srb.field_sr_bill_date_value', array($start_date, $end_date), 'BETWEEN');
+   }
+   //$query->leftjoin('field_data_field_sales_return_amt', 'r', 'r.entity_id = n.nid');
+   //
+//  if ($data == 'value') {
+//    $query->addExpression('SUM(bd.Sum_of_NET_SALES_VALUE)', 'sum');
+//  }
+//  else {
+//    $query->addExpression('COUNT(DISTINCT(bd.bill_number))', 'bill_number');
+//  }
+//  
+
+   if ($data == 'value') {
+      $query->addExpression('SUM(ns.field_bill_net_sales_value)', 'sum');
+   }
+   else {
+      $query->addExpression('COUNT(DISTINCT(n.title))', 'bill_number');
+   }
+
+
+   $res3 = $query->execute()->fetchField();
+   $total_bill_value = round($res3);
+
+//   $subquery = db_select('custom_billing_data', 'bd');
+//   $subquery->condition('bd.distributor_id', $distributor_id);
+//   if (!empty($start_date) && !empty($end_date)) {
+//      $subquery->condition('bd.bill_date', array($start_date, $end_date), 'BETWEEN');
+//   }
+//   $subquery->groupBy('bd.bill_number');
+//   $subquery->addfield('bd', 'bill_number', 'bill_number');
+//   $subquery->addfield('bd', 'distributor_id', 'distributor_id');
+//   $subquery->addExpression('SUM(bd.Sum_of_NET_SALES_VALUE)', 'sales_value');
+//   $subquery = db_select('node', 'n1');
+//   $subquery->condition('n1.uid', $distributor_id);
+//   $subquery->join('field_data_field_bill_net_sales', 'ns', 'ns.entity_id = n1.nid');
+//   $subquery->join('field_data_field_sr_bill_date', 'srb', 'srb.entity_id = n1.nid');
+//   if (!empty($start_date) && !empty($end_date)) {
+//      $subquery->condition('srb.field_sr_bill_date_value', array($start_date, $end_date), 'BETWEEN');
+//   }
+//   $subquery->addfield('n1', 'title', 'bill_number');
+//   $subquery->addfield('n1', 'uid', 'distributor_id');
+//   $subquery->addField('ns', 'field_bill_net_sales_value', 'sales_value');
+
+   $query = db_select('node', 'n');
+   $query->join('field_data_field_bill_net_sales', 'bd', 'bd.entity_id = n.nid');
+   $query->join('field_data_field_sr_bill_date', 'srb', 'srb.entity_id = n.nid');
+   //$query->addField('bd', 'field_bill_net_sales_value', 'sales_value');
+
+   if (!empty($start_date) && !empty($end_date)) {
+      $query->condition('srb.field_sr_bill_date_value', array($start_date, $end_date), 'BETWEEN');
+   }
+   $query->condition('n.type', 'sales_register_data');
+   $query->condition('n.uid', $distributor_id);
+   //$query->join($subquery, 'bd', 'n.title = n1.bill_number AND n.uid = n1.distributor_id');
+
+   $query->join('field_data_field_sr_bill_date', 'i', 'i.entity_id = n.nid');
+   $query->join('field_data_field_bill_value', 'b', 'b.entity_id = n.nid');
+   $query->leftjoin('field_data_field_sales_return_amt', 'r', 'r.entity_id = n.nid');
+
+   if ($data == 'value') {
+      $query->addExpression('SUM(CASE WHEN  ((((bd.field_bill_net_sales_value - r.field_sales_return_amt_value) / bd.field_bill_net_sales_value ) * 100) >= 99) THEN (bd.field_bill_net_sales_value - r.field_sales_return_amt_value) ELSE 0 END)', 'full_return');
+      $query->addExpression('SUM(CASE WHEN  (((((bd.field_bill_net_sales_value - r.field_sales_return_amt_value) / bd.field_bill_net_sales_value ) * 100) < 99)  AND  ((((bd.field_bill_net_sales_value - r.field_sales_return_amt_value) / bd.field_bill_net_sales_value ) * 100) > 1) ) THEN (bd.field_bill_net_sales_value - r.field_sales_return_amt_value) ELSE 0 END)', 'partial_return');
+      $query->addExpression('SUM(CASE WHEN  (r.field_sales_return_amt_value IS NULL) THEN bd.field_bill_net_sales_value ELSE 0 END)', 'null_value');
+
+      //$query->addExpression('SUM(CASE WHEN  (((b.field_bill_value_value -  r.field_sales_return_amt_value) / b.field_bill_value_value ) <= 1) THEN (b.field_bill_value_value -  r.field_sales_return_amt_value) ELSE 0 END)', 'full_delivery');
+   }
+   else {
+      $query->addExpression('SUM(CASE WHEN  ((((bd.field_bill_net_sales_value - r.field_sales_return_amt_value) / bd.field_bill_net_sales_value ) * 100) >= 99) THEN 1 ELSE 0 END)', 'full_return');
+      $query->addExpression('SUM(CASE WHEN  (((((bd.field_bill_net_sales_value - r.field_sales_return_amt_value) / bd.field_bill_net_sales_value ) * 100) < 99)  AND  ((((bd.field_bill_net_sales_value - r.field_sales_return_amt_value) / bd.field_bill_net_sales_value ) * 100) > 1) ) THEN 1 ELSE 0 END)', 'partial_return');
+      $query->addExpression('SUM(CASE WHEN  (r.field_sales_return_amt_value IS NULL) THEN 1 ELSE 0 END)', 'null_value');
+      //$query->addExpression('SUM(CASE WHEN  (((b.field_bill_value_value -  r.field_sales_return_amt_value) / b.field_bill_value_value ) <= 1) THEN 1 ELSE 0 END)', 'full_delivery');
+   }
+
+   $query->join('field_data_field_sales_party_code', 'pc', 'pc.entity_id = n.nid');
+   $query->join('node', 'oun', 'pc.field_sales_party_code_value = oun.title');
+   $query->condition('oun.type', 'outlet_master');
+   $query->condition('oun.uid', $distributor_id, '=');
+   $query->join('field_data_field_channel', 'chan', 'chan.entity_id = oun.nid');
+   $query->fields('chan', array('field_channel_value'));
+   $query->groupBy('field_channel_value');
+   //  $query->addField('bd', 'sales_value', 'sales_value');
+   //  $res2 = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+   $res2 = $query->execute()->fetchAll(PDO::FETCH_GROUP | PDO::FETCH_ASSOC);
+
+   if ($data == 'value') {
+      $header['value'] = 'VALUE WISE %';
+   }
+   else {
+      $header['value'] = 'COUNT WISE %';
+   }
+   $header['full_return'] = 'FULL %';
+   $header['partial_return'] = 'PARTIAL %';
+   $header['na'] = 'Bills Not Uploaded %';
+   $header['total'] = 'TOTAL (Full + Partial) %';
+
+
+   $total_vert = array();
+   foreach ($res2 as $channel => $info) {
+      $row = array();
+
+      $row[] = $channel;
+      foreach ($info as $key1 => $val1) {
+         $total_horz = 0;
+         foreach ($val1 as $key2 => $val2) {
+            // calculate total vertically
+            $total_vert[$key2] += $val2;
+            if (($key2 == 'full_return') || ($key2 == 'partial_return')) {
+               // calculate total => full + partial
+               $total_horz += $val2;
+            }
+            $row[] = round((($val2 / $total_bill_value) * 100), 2) . ' %';
+         }
+         $row[] = round((($total_horz / $total_bill_value) * 100), 2) . ' %';
+         $total_vert['total_horz'] += $total_horz;
+      }
+      $rows[] = $row;
+   }
+
+   $row1[] = 'TOTAL';
+   foreach ($total_vert as $total_val) {
+      $row1[] = round((($total_val / $total_bill_value) * 100), 2) . ' %';
+   }
+   $rows[] = $row1;
+
+   $output = theme('table', array(
+     'header' => $header,
+     'rows' => $rows,
+     'attributes' => array('width' => '100%')
+   ));
+   return $output;
+}
+
+/**
+ * menu callback function for central-sales-delivery-report
+ */
+function central_sales_delivery_table_callback() {
+  $output = central_sales_delivery_table();
+  $output1 = $output['output'];
+  $param = $_GET;
+  unset($param['q']);
+  if ($output['status']) {
+
+    $data = array();
+    if (isset($param['start_date'])) {
+      $data['start_date'] = $param['start_date'];
+    }
+
+    if (isset($param['end_date'])) {
+      $data['end_date'] = $param['end_date'];
+    }
+
+    if (isset($param['bill_no'])) {
+      $data['bill_no'] = $param['bill_no'];
+    }
+    if (isset($param['delivered_amt'])) {
+      $data['delivered_amt'] = $param['delivered_amt'];
+    }
+    $output1 .= l(t('XLS'), 'central-sales-delivery-table/export', array('query' => array($data)));
+  }
+  return $output1;
+}
+
+/**
+ * @global type $user
+ * @param type $export
+ * @return string
+ */
+function central_sales_delivery_table($export = FALSE) {
   global $user;
   // Store distributor id in author in each node
-  $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+  $distributor_ids  = fetch_rs_field_data();
+  //$distributor_id = change_feeds_import_get_distributor_id($user->uid);
 
-  // Calculate sum of bill from custom billing data without tax
-  $query = db_select('custom_billing_data', 'bd');
-  $query->condition('bd.distributor_id', $distributor_id);
-  if (!empty($start_date) && !empty($end_date)) {
-    $query->condition('bd.bill_date', array($start_date, $end_date), 'BETWEEN');
+  // start date
+  if (isset($_GET['start_date']) && !empty($_GET['start_date'])) {
+    $start_date = strtotime($_GET['start_date']);
   }
-  $query->join('node', 'n', 'bd.bill_number = n.title');
+  else if (isset($_GET['start_date']) && empty($_GET['start_date'])) {
+    $start_date = '';
+  }
+  else {
+     $start_date = strtotime(date("Y-m-d"));
+  }
+  
+  // end date
+  if (isset($_GET['end_date']) && !empty($_GET['end_date'])) {
+    $end_date = strtotime($_GET['end_date']) + 86399;
+  }
+  else if (isset($_GET['end_date']) && empty($_GET['end_date'])) {
+    $end_date = '';
+  }
+  else {
+    $end_date = strtotime(date('Y-m-d')) + 86399;
+  }
+  
+  
+  if (isset($_GET['delivered_amt'])) {
+    $delivered_amt = $_GET['delivered_amt'];
+  }
+
+  $bill_no = '';
+  if (isset($_GET['bill_no'])) {
+    $bill_no = $_GET['bill_no'];
+  }
+
+  $data = array();
+  if ($export) {
+    //$query = db_select('custom_billing_data', 'bl');
+      $query = db_select('node', 'n');
+  }
+  else {
+    //$query = db_select('custom_billing_data', 'bl')->extend('pagerDefault')->limit(10);
+     $query = db_select('node', 'n')->extend('pagerDefault')->limit(10);
+  }
+  $query->join('field_data_field_bill_net_sales', 'ns', 'ns.entity_id = n.nid');
+  $query->join('field_data_field_sr_bill_date', 'srb', 'srb.entity_id = n.nid');
+  //$query->condition('bl.distributor_id', $distributor_ids, 'IN');
+  //$query->fields('bl', array('bill_number', 'bill_date', 'party_code'));
+
+// sales register
+ // $query->join('node', 'n', 'bl.bill_number = n.title AND bl.distributor_id = n.uid');
   $query->condition('n.type', 'sales_register_data');
-  $query->condition('n.uid', $distributor_id);
-  $query->leftjoin('field_data_field_sales_return_amt', 'r', 'r.entity_id = n.nid');
+  //$query->condition('n.uid', $distributor_id);
+  $query->join('field_data_field_sales_party_code', 'sp', 'sp.entity_id = n.nid');  
 
-  if ($data == 'value') {
-    $query->addExpression('SUM(bd.Sum_of_NET_SALES_VALUE)', 'sum');
-  }
-  else {
-    $query->addExpression('COUNT(DISTINCT(bd.bill_number))', 'bill_number');
+// outlet_master
+  $query->join('node', 'ot', 'ot.title = sp.field_sales_party_code_value AND ot.uid = n.uid');
+  $query->condition('ot.type', 'outlet_master');
+  //$query->condition('ot.uid', $distributor_id);
+  $query->join('field_data_field_channel', 'chan', 'chan.entity_id = ot.nid');
+  $query->join('field_data_field_pl_group', 'plg', 'plg.entity_id = ot.nid');
+  
+  //join user table
+  $query->join('users', 'u', 'u.uid = n.uid');
+  $query->join('field_data_field_third_party_username', 'rs_code', 'rs_code.entity_id = u.uid');
+  $query->join('field_data_field_name', 'rs_name', 'rs_name.entity_id = u.uid');
+  $query->addfield('rs_code', 'field_third_party_username_value', 'rs code');
+  $query->addfield('rs_name', 'field_name_value', 'rs name');
+
+//  if (!empty($bill_no)) {
+//    $query->condition('bl.bill_number',$bill_no);
+//  }
+  if (!empty($bill_no)) {
+    $query->condition('n.title',$bill_no);
   }
   
-  $res3 = $query->execute()->fetchField();
-  $total_bill_value = round($res3);
+  $query->addfield('chan', 'field_channel_value', 'channel');
+   $query->addfield('plg', 'field_pl_group_value', 'pl_group');
+   // $query->addExpression('SUM(bl.Sum_of_NET_SALES_VALUE)', 'sales_value');
+   $query->addField('ns', 'field_bill_net_sales_value', 'sales_value');
+   $query->addField('n', 'title', 'bill_number');
+   $query->addField('sp', 'field_sales_party_code_value', 'party_code');
+   $query->addField('srb', 'field_sr_bill_date_value', 'bill_date');
+   $query->leftjoin('field_data_field_impact_delivery_date', 'idl', 'idl.entity_id =  n.nid');
+   $query->addfield('idl', 'field_impact_delivery_date_value', 'impact_date');
 
-
-  $subquery = db_select('custom_billing_data', 'bd');
-  $subquery->condition('bd.distributor_id', $distributor_id);
-  if (!empty($start_date) && !empty($end_date)) {
-    $subquery->condition('bd.bill_date', array($start_date, $end_date), 'BETWEEN');
-  }
-  $subquery->groupBy('bd.bill_number');
-  $subquery->addfield('bd', 'bill_number', 'bill_number');
-  $subquery->addfield('bd', 'distributor_id', 'distributor_id');
-  $subquery->addExpression('SUM(bd.Sum_of_NET_SALES_VALUE)', 'sales_value');
-
-  $query = db_select('node', 'n');
-  $query->condition('n.type', 'sales_register_data');
-  $query->condition('n.uid', $distributor_id);
-  $query->join($subquery, 'bd', 'n.title = bd.bill_number AND n.uid = bd.distributor_id');
-
-  $query->join('field_data_field_sr_bill_date', 'i', 'i.entity_id = n.nid');
-  $query->join('field_data_field_bill_value', 'b', 'b.entity_id = n.nid');
-  $query->leftjoin('field_data_field_sales_return_amt', 'r', 'r.entity_id = n.nid');
-
-  if ($data == 'value') {
-    $query->addExpression('SUM(CASE WHEN  ((((bd.sales_value - r.field_sales_return_amt_value) / bd.sales_value ) * 100) >= 99) THEN (bd.sales_value - r.field_sales_return_amt_value) ELSE 0 END)', 'full_return');
-    $query->addExpression('SUM(CASE WHEN  (((((bd.sales_value - r.field_sales_return_amt_value) / bd.sales_value ) * 100) < 99)  AND  ((((bd.sales_value - r.field_sales_return_amt_value) / bd.sales_value ) * 100) > 1) ) THEN (bd.sales_value - r.field_sales_return_amt_value) ELSE 0 END)', 'partial_return');
-    $query->addExpression('SUM(CASE WHEN  (r.field_sales_return_amt_value IS NULL) THEN bd.sales_value ELSE 0 END)', 'null_value');
-
-    //$query->addExpression('SUM(CASE WHEN  (((b.field_bill_value_value -  r.field_sales_return_amt_value) / b.field_bill_value_value ) <= 1) THEN (b.field_bill_value_value -  r.field_sales_return_amt_value) ELSE 0 END)', 'full_delivery');
-  }
-  else {
-    $query->addExpression('SUM(CASE WHEN  ((((bd.sales_value - r.field_sales_return_amt_value) / bd.sales_value ) * 100) >= 99) THEN 1 ELSE 0 END)', 'full_return');
-    $query->addExpression('SUM(CASE WHEN  (((((bd.sales_value - r.field_sales_return_amt_value) / bd.sales_value ) * 100) < 99)  AND  ((((bd.sales_value - r.field_sales_return_amt_value) / bd.sales_value ) * 100) > 1) ) THEN 1 ELSE 0 END)', 'partial_return');
-    $query->addExpression('SUM(CASE WHEN  (r.field_sales_return_amt_value IS NULL) THEN 1 ELSE 0 END)', 'null_value');
-
-    //$query->addExpression('SUM(CASE WHEN  (((b.field_bill_value_value -  r.field_sales_return_amt_value) / b.field_bill_value_value ) <= 1) THEN 1 ELSE 0 END)', 'full_delivery');
-  }
-
-  $query->join('field_data_field_sales_party_code', 'pc', 'pc.entity_id = n.nid');
-  $query->join('node', 'oun', 'pc.field_sales_party_code_value = oun.title');
-  $query->condition('oun.type', 'outlet_master');
-  $query->condition('oun.uid', $distributor_id, '=');
-  $query->join('field_data_field_channel', 'chan', 'chan.entity_id = oun.nid');
-  $query->fields('chan', array('field_channel_value'));
-  $query->groupBy('field_channel_value');
-  //  $query->addField('bd', 'sales_value', 'sales_value');
-  //  $res2 = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
-  $res2 = $query->execute()->fetchAll(PDO::FETCH_GROUP | PDO::FETCH_ASSOC);
-  
-  if($data == 'value') {
-    $header['value'] = 'VALUE WISE %';
-  }
-  else {
-     $header['value'] = 'COUNT WISE %';
-  }
-  $header['full_return'] = 'FULL %';
-  $header['partial_return'] = 'PARTIAL %';
-  $header['na'] = 'Bills Not Uploaded %';
-  $header['total'] = 'TOTAL (Full + Partial) %';
-  
-  
-  $total_vert = array();
-  foreach ($res2 as $channel => $info) {
-    $row = array();
-
-    $row[] = $channel;
-    foreach ($info as $key1 => $val1) {
-      $total_horz = 0;
-      foreach ($val1 as $key2 => $val2) {
-        // calculate total vertically
-        $total_vert[$key2] += $val2;
-        if (($key2 == 'full_return') || ($key2 == 'partial_return')) {
-          // calculate total => full + partial
-          $total_horz += $val2;
-        }
-        $row[] = round((($val2 / $total_bill_value) * 100), 2) . ' %';
+//   if (!empty($start_date) && !empty($end_date)) {
+//    $query->condition('bl.bill_date', array($start_date, $end_date), 'BETWEEN');
+//  }
+   if (!empty($start_date) && !empty($end_date)) {
+         $query->condition('srb.field_sr_bill_date_value', array($start_date, $end_date), 'BETWEEN');
       }
-      $row[] = round((($total_horz / $total_bill_value) * 100), 2) . ' %';
-      $total_vert['total_horz'] += $total_horz;
+  $query->leftjoin('field_data_field_sales_return_amt', 'r', 'r.entity_id = n.nid');
+  $query->addfield('r', 'field_sales_return_amt_value', 'delivered_value');
+
+  if ($delivered_amt == 'na') {
+    $query->isNull('r.field_sales_return_amt_value');
+  }
+  //$query->groupBy('bl.bill_number');
+
+  $query->join('field_data_field_bill_value', 'bv', 'bv.entity_id = n.nid');
+  $query->addfield('bv', 'field_bill_value_value', 'bill_value');
+  $query->leftjoin('field_data_field_deliver_reason', 'dr', 'dr.entity_id = n.nid');
+  // $query->addExpression('(bv.field_bill_value_value - r.field_sales_return_amt_value)', 'return_value');
+  $query->addfield('dr', 'field_deliver_reason_tid', 'deliver_reason');
+
+  $query->leftjoin('field_data_field_delivery_pending', 'dp', 'dp.entity_id =  n.nid');
+  $query->addfield('dp', 'field_delivery_pending_value', 'delivery_pending');
+  $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+
+  if (!empty($res)) {
+    $header = array(
+      array('data' => 'RS CODE',),
+      array('data' => 'RS NAME',),
+      array('data' => 'BILL NUMBER',),
+      array('data' => 'BILL DATE',),
+      array('data' => 'PARTY CODE',),
+      array('data' => 'CHANNEL',),
+      array('data' => 'PL GROUP',),
+      array('data' => 'Sum of NET_SALES_VALUE'),
+      array('data' => 'IMPACT DATE'),
+      array('data' => 'SALES DELIVERED AMT',),
+      array('data' => 'SALES RETURNED AMT',),
+      array('data' => 'STATUS',),
+      array('data' => 'REASON',),
+      array('data' => 'DELIVERY PENDING',),
+    );
+    foreach ($res as $key => $val) {
+      $data = array();
+      $data['rscode'] = $val['rscode'];
+      $data['rsname'] = $val['rsname'];
+      $data['bill_no'] = $val['bill_number'];
+      $data['bill_date'] = date('d-M-y', $val['bill_date']);
+      $data['party_code'] = $val['party_code'];
+      $data['channel'] = $val['channel'];
+      $data['pl_group'] = $val['pl_group'];
+      $data['sales_value'] = round($val['sales_value']);
+      $data['impact_date'] = date('d-M-y', ($val['impact_date']));
+      $data['delivered_value'] = is_null($val['delivered_value']) ? 'NA' : round($val['delivered_value']);
+
+      if ($data['delivered_value'] === 'NA') {
+        $data['return_value'] = 'NA';
+      }
+      else {
+        $data['return_value'] = $data['sales_value'] - $data['delivered_value'];
+      }
+
+
+      $sales_ret = (($data['return_value'] / $data['sales_value'] ) * 100);
+      $reason_tid = $val['deliver_reason'];
+      if (!empty($reason_tid)) {
+        $term = taxonomy_term_load($reason_tid);
+        $name = $term->name;
+      }
+      else {
+        $name = 'NA';
+      }
+
+      if (($sales_ret >= 99) && ($data['return_value'] !== 'NA')) {
+        $data['status'] = 'Full RETURN';
+      }
+      else if (($sales_ret > 1 && $sales_ret < 99) && ($data['return_value'] !== 'NA')) {
+        $data['status'] = 'PARTIAL RETURN';
+      }
+      else if (($sales_ret <= 1) && ($data['return_value'] !== 'NA')) {
+        $data['status'] = 'FULL DELIVERED';
+      }
+      else {
+        $data['status'] = 'Bill Not Uploaded';
+      }
+
+      // reason and delivery pending below
+      $data['reason'] = $name;
+      $data['delivery_pending'] = $val['delivery_pending'];
+      $rows[] = $data;
     }
-    $rows[] = $row;
+    if ($export) {
+      $output = theme('table', array(
+        'header' => $header,
+        'rows' => $rows,
+        'attributes' => array('width' => '100%')
+      ));
+    }
+    else {
+      // render form
+      $output = drupal_render(drupal_get_form('central_sales_delivery_report_form'));
+      $output .= theme('table', array(
+        'header' => $header,
+        'rows' => $rows,
+        'attributes' => array('width' => '100%')
+      ));
+      $output .= theme('pager');
+    }
+
+
+    $output1['status'] = TRUE;
+    $output1['output'] = $output;
+  }
+  else {
+    // render form
+    $output = drupal_render(drupal_get_form('central_sales_delivery_report_form'));
+    $output .= 'No Result Found ';
+    $output1['status'] = FALSE;
+    $output1['output'] = $output;
+  }
+  return $output1;
+}
+
+/**
+ * 
+ * @param array $form
+ * @param array $form_state
+ * @return array
+ */
+function central_sales_delivery_report_form($form, &$form_state) {
+
+  $bill_no = '';
+  if (isset($_GET['bill_no']) && !empty($_GET['bill_no'])) {
+    $bill_no = $_GET['bill_no'];
   }
   
-  $row1[] = 'TOTAL';
-  foreach ($total_vert as $total_val) {
-    $row1[] = round((($total_val / $total_bill_value) * 100), 2) . ' %';
+  if (isset($_GET['delivered_amt'])) {
+    $delivered_amt = $_GET['delivered_amt'];
   }
-  $rows[] = $row1;
+  else {
+    $delivered_amt = 'all';
+  }
 
-  $output = theme('table', array(
-    'header' => $header,
-    'rows' => $rows,
-    'attributes' => array('width' => '100%')
-  ));
-  return $output;
+  
+  if (isset($_GET['start_date'])) {
+    $start_date = $_GET['start_date'];
+  }
+  else {
+    $start_date = date('Y-m-d');
+  }
+
+  if (isset($_GET['start_date'])) {
+    $end_date = $_GET['start_date'];
+  } 
+  else {
+    $end_date = date('Y-m-d');
+  }
+  
+  $form['start_date'] = array(
+    '#type' => 'date_popup',
+    '#title' => t('Bill Date From'),
+    '#date_format' => 'Y-m-d',
+    '#default_value' => $start_date,
+  );
+  $form['end_date'] = array(
+    '#type' => 'date_popup',
+    '#title' => t('Bill Date To'),
+    '#date_format' => 'Y-m-d',
+    '#default_value' => $end_date,
+  );
+  $form['bill_no'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Bill Number'),
+    '#required' => FALSE,
+    '#default_value' => $bill_no,
+    '#size'=> 20,
+  );
+  $form['delivered_amt'] = array(
+    '#type' => 'radios',
+    '#title' => t('Delivered Amt'),
+    '#required' => FALSE,
+    '#options' => array('all' => 'All', 'na' => 'Bill Not Uploaded'),
+    '#default_value' => $delivered_amt,
+    '#size'=> 20,
+  );
+
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => 'Submit',
+   // '#prefix' => '<div id ="sales-delivery-table-submit">',
+   // '#suffix' => '</div>',
+   // '#attributes' => array('class' => array('sales-delivery-table-submit')),
+  );
+
+
+//  $form['sales_delivery_table'] = array(
+//    '#markup' => '<a href = "/leanbox-chart-details/sales_delivery_table" target = "_blank"><div id="sales_delivery_table_div"></div></a>',
+//  );
+
+  return $form;
+}
+
+/**
+ * submit handler
+ * @param array $form
+ * @param array $form_state
+ * @return array
+ */
+function central_sales_delivery_report_form_submit($form, &$form_state) {
+  $param['start_date'] = $form_state['values']['start_date'];
+  $param['end_date'] = $form_state['values']['end_date'];
+  $param['bill_no'] = $form_state['values']['bill_no'];
+  $param['delivered_amt'] = $form_state['values']['delivered_amt'];
+
+  drupal_goto('central-sales-delivery-table', array('query' => $param));
+}
+
+/**
+ *  menu callback function for central_sales_delivery_table_export
+ */
+function central_sales_delivery_table_export () {
+  $file = "centralSalesDelivery.xls";
+  $table = central_sales_delivery_table(TRUE);
+  header("Content-type: application/vnd.ms-excel");
+  header("Content-Disposition: attachment; filename=$file");
+  echo $table['output'];
+}
+
+/**
+ * menu callback function for central_dispatch_table_export
+ */
+function leanbox_dashboard_central_dispatch_table_export() {
+  $file = "Billspervan.xls";
+  module_load_include('inc', 'leanbox_dashboard', 'includes/leanbox_dashboard');
+  $table = leanbox_dashboard_central_dispatch_daywise_details();
+  header("Content-type: application/vnd.ms-excel");
+  header("Content-Disposition: attachment; filename=$file");
+  echo $table;
 }

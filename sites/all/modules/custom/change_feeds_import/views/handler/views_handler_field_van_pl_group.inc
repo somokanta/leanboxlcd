@@ -14,9 +14,10 @@ class views_handler_field_van_pl_group extends views_handler_field {
   function render($values) {
     $channel = $values->_field_data[$this->field_alias]['entity']->field_channel['und'][0]['value'];
     $pl_group = $values->_field_data[$this->field_alias]['entity']->field_pl_group['und'][0]['value'];
-
+    
+    $node_uid = $values->users_node_uid;
     $query = db_select('node', 'n');
-    $query->addTag('node_uid');
+    $query->condition('n.uid', $node_uid);
     $query->join('field_data_field_channel', 'ppmch', 'ppmch.entity_id = n.nid');
     $query->join('field_data_field_pl_group', 'ppmpl', 'ppmpl.entity_id = n.nid');
     $query->join('field_data_field_van_pl_group', 'ppplg', 'n.nid = ppplg.entity_id');

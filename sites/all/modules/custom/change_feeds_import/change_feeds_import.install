@@ -790,9 +790,14 @@ function change_feeds_import_schema() {
       ),
     ),
     'primary key' => array('id'),
-  );
+     'indexes' => array(
+       'i_bill_number' => array('bill_number'),
+       'i_created_date' => array('created_date'),
+       'i_distributor_id' => array('distributor_id'),
+     ),
+   );
 
-  return $schema;
+   return $schema;
 }
 
 /**
@@ -1173,6 +1178,7 @@ function change_feeds_import_update_7109() {
   db_create_table('day_van_area_data', $schema['day_van_area_data']);
 }
 
+
 /**
  *  Implements Hook_Update_7110
  */
@@ -1184,6 +1190,7 @@ function change_feeds_import_update_7110() {
     'default' => 0,
   ));
 }
+
 
 /**
  *  Implements Hook_Update_7111
@@ -1253,3 +1260,12 @@ function change_feeds_import_update_7113() {
   db_add_unique_key($table, $name, $fields);
   //db_drop_unique_key($table, $name);
 }
+
+/**
+ * Index of distributor id
+ */
+
+function change_feeds_import_update_7115() {
+  db_add_index('custom_billing_data', 'i_distributor_id', array('distributor_id'));
+}
+

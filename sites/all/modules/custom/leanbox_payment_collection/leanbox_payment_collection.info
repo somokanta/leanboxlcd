@@ -1,0 +1,4 @@
+name = leanbox payment collection
+description = containing list of functionalities for leanbox payment collection service.
+package = Custom
+core = 7.x
