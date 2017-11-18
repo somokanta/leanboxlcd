@@ -1374,7 +1374,7 @@ function leanbox_dashboard_chart_query_details($activity_type, $start = '', $end
       $query->join('field_data_field_bill_net_sales', 'ns', 'ns.entity_id = n.nid');
 
       if (!empty($start_date) && !empty($end_date)) {
-         $query->condition('d.field_dispatch_date_value', array($start, $end), 'BETWEEN');
+         $query->condition('srb.field_sr_bill_date_value', array($start_date, $end_date), 'BETWEEN');
       }
       // $query->join('custom_billing_data', 'bd', 'bd.bill_number = n.title');
       //$query->condition('bd.distributor_id', $distributor_id);
