@@ -2146,6 +2146,7 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
    if(isset($_GET['field_third_party_username_value'])) {
        
        foreach($query->where[1]['conditions'] as $key => $val) {
+          dpm($val['field'], 'val');
           if ($val['field'] == 'users_node__field_data_field_third_party_username.field_third_party_username_value') {
             //unset($query->where[1]['conditions'][$key]['operator']); 
                 $query->where[1]['conditions'][$key]['operator'] = 'IN';
@@ -2384,7 +2385,7 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
 //    $query->add_field('temp', 'van_pl_group');
   }
   // This code is only for hul_admin role 
-  if ($view->name == 'dispatch_planning_log' || $view->name == 'central_bill_trip' ||  $view->name == 'channel_master_central_report' || $view->name == 'central_picking_report' || $view->name == 'central_party_pack_report' || $view->name == 'central_unloading_form' || $view->name == 'central_mobile_return_analysis' || $view->name == 'van_stop_master_report') {
+  if ($view->name == 'central_bill_trip' ||  $view->name == 'channel_master_central_report' || $view->name == 'central_picking_report' || $view->name == 'central_party_pack_report' || $view->name == 'central_unloading_form' || $view->name == 'central_mobile_return_analysis' || $view->name == 'van_stop_master_report') {
     //unset($query->where[0]['conditions'][0]);
     $values = fetch_rs_field_data();
     if (!empty($values)) {
