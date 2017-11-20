@@ -2200,7 +2200,9 @@ function ptl_no_of_bill_lines_by_trip_id($trip_id,$rs_code){
 function dispatch_planning_node_update($node) {
    if ($node->type == 'dispatch_data') {
       $original_pre_start = $node->original->field_dispatch_pre_start_time[LANGUAGE_NONE][0]['value'];
+      dpm($original_pre_start, '$original_pre_start');
       $new_pre_start = $node->field_dispatch_pre_start_time[LANGUAGE_NONE][0]['value'];
+      dpm($new_pre_start, '$new_pre_start');
       if ($original_pre_start != $new_pre_start) {
           drupal_register_shutdown_function('_update_dispatch_planning_api', $node);
       }
