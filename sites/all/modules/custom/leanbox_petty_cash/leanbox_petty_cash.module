@@ -293,10 +293,10 @@ function leanbox_petty_cash_preprocess_leanbox_petty_cash_pdf(&$variables) {
    $query->condition('pc.distributor_id', $distributor_id);
    $query->condition('pc.voucher_no', $voucher);
    if ($head == S_ADVANCE || $head == E_ADVANCE) {
-      $query->fields('pc', array('voucher_date', 'head', 'subhead', 'amount', 'person_name', 'type', 'description'));
+      $query->fields('pc', array('voucher_no', 'voucher_date', 'head', 'subhead', 'amount', 'person_name', 'type', 'description'));
    }
    else {
-      $query->fields('pc', array('voucher_date', 'head', 'subhead', 'amount', 'person_name', 'bill_available', 'bill_no', 'type', 'description'));
+      $query->fields('pc', array('voucher_no', 'voucher_date', 'head', 'subhead', 'amount', 'person_name', 'bill_available', 'bill_no', 'type', 'description'));
    }
    $res = $query->execute()->fetch(PDO::FETCH_ASSOC);
 
@@ -306,6 +306,7 @@ function leanbox_petty_cash_preprocess_leanbox_petty_cash_pdf(&$variables) {
    if (!empty($res)) {
       if ($head == S_ADVANCE || $head == E_ADVANCE) {
          $header = array(
+           'Voucher no',
            'Voucher date',
            'Head',
            'Subhead',
@@ -317,6 +318,7 @@ function leanbox_petty_cash_preprocess_leanbox_petty_cash_pdf(&$variables) {
       }
       else {
          $header = array(
+           'Voucher no',
            'Voucher date',
            'Head',
            'Subhead',

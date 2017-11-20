@@ -136,7 +136,7 @@ function dispatch_planning_menu() {
     'file' => 'ptl_dispatch_planning.inc',
   );
   $items['delete-ptl-trip'] = array(
-    'title' => 'Delete PTL Trip Data',
+    'title' => 'Resent Trip To PTL',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('delete_fetch_data_ptl_trip_form'),
     'access arguments' => array('Delete Ptl trip data'),
