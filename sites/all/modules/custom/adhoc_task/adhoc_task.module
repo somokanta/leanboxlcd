@@ -1376,7 +1376,7 @@ function create_van_cld_billing_form_submit($form, &$form_state) {
 function send_email_to_fill_zoho() {
   $html = '<h3>Hi Team, This is scheduled reminder to fill your zoho timesheet.</h3> 
     
-            <h4>Please ignor if you have filled already.</h4>
+            <h4>Please ignore if you have filled already.</h4>
 
             *** This is an automatically generated email, please do not reply ***
           </br>';
