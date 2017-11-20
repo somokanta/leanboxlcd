@@ -2204,7 +2204,8 @@ function dispatch_planning_node_update($node) {
       $new_pre_start = $node->field_dispatch_pre_start_time[LANGUAGE_NONE][0]['value'];
       dpm($new_pre_start, '$new_pre_start');
       if ($original_pre_start != $new_pre_start) {
-          drupal_register_shutdown_function('_update_dispatch_planning_api', $node);
+          //drupal_register_shutdown_function('_update_dispatch_planning_api', $node);
+         _update_dispatch_planning_api($node);
       }
    }
 }
@@ -2236,6 +2237,7 @@ function _update_dispatch_planning_api($node) {
                $api_data[] = dispatch_planning_sales_reg_api($sales_node, $trip_dispatch_date, $hht_id, $cashier, $trip_id);
             }
          }
+         dpm($api_data, '$api_data');
          // call api here
          // Call Dispatch API Here
          if (!empty($api_data)) {
