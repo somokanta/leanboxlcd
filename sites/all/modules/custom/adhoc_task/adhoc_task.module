@@ -109,7 +109,12 @@ function adhoc_task_menu() {
     'access arguments' => array('Create Billing Data'),
     'type' => MENU_CALLBACK,
   );
-  
+  $items['email/zoho-fill'] = array(
+    'title' => 'Send Email To Fill ZOHO',
+    'page callback' => 'send_email_to_fill_zoho',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
   return $items;
 }
 /**
@@ -1363,4 +1368,21 @@ function create_van_cld_billing_form_submit($form, &$form_state) {
     }
   }
   drupal_set_message('Van CLD Data Created Successfully');
+}
+
+/**
+ * Fill zoho
+ */
+function send_email_to_fill_zoho() {
+  $html = '<h3>Hi Team, This is scheduled reminder to fill your zoho timesheet.</h3> 
+    
+            <h4>Please ignor if you have filled already.</h4>
+
+            *** This is an automatically generated email, please do not reply ***
+          </br>';
+  $params['subject'] = "Bhai Pls Zoho Bhar De!!";
+  $params['body'] = $html;
+  $mail_to = variable_get('zoho_fill', "abhishek.r@iksula.com");
+  $from = "zoho@salarydeduction.com";
+  drupal_mail('adhoc_task', 'duplicate_data', $mail_to, LANGUAGE_NONE, $params, $from);
 }
