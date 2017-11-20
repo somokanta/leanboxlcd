@@ -221,18 +221,18 @@ function dispatch_planning_services_resources() {
           'help' => 'Get PTL Data',
           'callback' => 'update_ptl_data',
           'args' => array(
+//            array(
+//              'name' => 'rs_code',
+//              'type' => 'string',
+//              'description' => 'RS Code',
+//              'source' => array('data' => 'rs_code'),
+//              'optional' => FALSE,
+//            ),
             array(
-              'name' => 'rs_code',
+              'name' => 'unique_id',
               'type' => 'string',
-              'description' => 'RS Code',
-              'source' => array('data' => 'rs_code'),
-              'optional' => FALSE,
-            ),
-            array(
-              'name' => 'trip_id',
-              'type' => 'string',
-              'description' => 'Trip ID',
-              'source' => array('data' => 'trip_id'),
+              'description' => 'Unique ID',
+              'source' => array('data' => 'unique_id'),
               'optional' => FALSE,
             ),
             array(
