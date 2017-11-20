@@ -14,7 +14,20 @@ function fetch_ptl_data($rs_code, $api_time) {
   $query->condition('rs_code', $rs_code, '=');
   $query->condition('created_time', $time, '<');
   $max_ptl_data = $query->execute()->fetchField();
-
+  
+  $query = db_select('ptl_data_configuration', 'p');
+  $query->fields('p', array('ptl_job', 'rs_code'));
+  $query->addExpression('COUNT(id)', 'bill_lines'); // send loose value in sum_sales_qty
+  $query->addExpression('SUM(loose)', 'total_qty');
+  $query->condition('p.id', $max_ptl_data, '<=');
+  $query->condition('p.api_flag', '0', '=');
+  $query->condition('p.rs_code', $rs_code, '=');
+  $query->condition('p.loose', 1, '>=');
+  $query->groupBy('rs_code,ptl_job');
+  $header_result = $query->execute()->fetchAll();
+  
+  $data['header'] =  $header_result;
+  
   $query = db_select('ptl_data_configuration', 'p');
   $query->fields('p', array('id', 'ptl_job', 'rs_code', 'trip_id', 'vehicle', 'bill_number', 'loading_date', 'sequence_no', 'basepack_code', 'sku_code', 'product_name', 'MRP', 'TUR'));
   $query->addExpression('loose', 'sum_sales_qty'); // send loose value in sum_sales_qty
@@ -22,11 +35,12 @@ function fetch_ptl_data($rs_code, $api_time) {
   $query->condition('p.api_flag', '0', '=');
   $query->condition('p.rs_code', $rs_code, '=');
   $query->condition('p.loose', 1, '>=');
-
   $result = $query->execute()->fetchAll();
 
+  $data['data'] =  $result;
+  
   if (!empty($result)) {
-    $results['result'] = json_encode($result);
+    $results['result'] = json_encode($data);
     $results['flag'] = '1';
 
     db_update('ptl_data_configuration') // Table name no longer needs {}
@@ -53,12 +67,11 @@ function fetch_ptl_data($rs_code, $api_time) {
  * 
  */
 
-function update_ptl_data($rs_code, $trip_id, $update_time) {
-
+function update_ptl_data($unique_id, $update_time) {
   $query = db_select('ptl_data_configuration', 'cb');
   $query->addExpression('MAX(id)', 'max');
-  $query->condition('trip_id', $trip_id, '=');
-  $query->condition('rs_code', $rs_code, '=');
+  $query->condition('id', $unique_id, 'IN');
+  $query->condition('loose', 1, '>=');
   $max_ptl_data = $query->execute()->fetchField();
 
   $results['flag'] = '0';
@@ -70,8 +83,7 @@ function update_ptl_data($rs_code, $trip_id, $update_time) {
         'update_time' => $update_time,
         'api_flag' => 1,
       ))
-      ->condition('rs_code', $rs_code, '=')
-      ->condition('trip_id', $trip_id, '=')
+      ->condition('id', $unique_id, 'IN')
       ->condition('loose', 1, '>=')
       ->execute();
 
