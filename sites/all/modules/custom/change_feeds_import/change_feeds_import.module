@@ -2144,10 +2144,9 @@ function change_feeds_import_query_alter(QueryAlterableInterface $query) {
 
 function change_feeds_import_views_query_alter(&$view, &$query) {
    if(isset($_GET['field_third_party_username_value'])) {
-       
        foreach($query->where[1]['conditions'] as $key => $val) {
-          dpm($val['field'], 'val');
-          if ($val['field'] == 'users_node__field_data_field_third_party_username.field_third_party_username_value') {
+          $val_array = explode('.', $val['field']);
+          if ($val_array[1] == 'field_third_party_username_value') {
             //unset($query->where[1]['conditions'][$key]['operator']); 
                 $query->where[1]['conditions'][$key]['operator'] = 'IN';
               
