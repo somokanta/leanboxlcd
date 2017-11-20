@@ -22,6 +22,11 @@ function modify_views_forms_form_alter(&$form, &$form_state, $form_id) {
       }
     }
   }
+  
+  if($form_id == 'editableviews_entity_form_collection_closure') {
+    // Validation for Collection Closore Table
+    $form['#validate'][] = 'collection_closure_validate';
+  }
 
   if ($form_id == 'editableviews_entity_form_signed_bills_upload') {
     if ($form['#view_display_name'] == 'page_2' || $form['#view_display_name'] == 'page_3') {
@@ -176,6 +181,19 @@ function payment_collection_validate($form, &$form_state) {
       form_set_error('form', t("Please add fine amount for bounced bill:$title."));
     }
   }
+}
+
+function collection_closure_validate($form, &$form_state) {
+  foreach($form_state['values']['node'] as $nid => $form_data){
+    $title = $form_data['title'];
+    $closure_flag = $form_data['field_terminated_bill_flag']['und'][0]['value'];
+    $collection_closure_remarks = $form_data['field_collection_closure_remarks']['und'][0]['value'];
+    
+    if(!empty($closure_flag) && empty($collection_closure_remarks)) {
+      form_set_error('form', t("Closure flag is marked for $title. Please fill collection closure remark."));
+    }
+  }
+  
 }
 
 function modify_views_forms_field_widget_form_alter(&$element, &$form_state, $context) {
