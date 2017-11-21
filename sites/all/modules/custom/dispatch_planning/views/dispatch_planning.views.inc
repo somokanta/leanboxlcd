@@ -152,6 +152,35 @@ function dispatch_planning_views_data() {
       'handler' => 'views_handler_argument_string',
     ),
   );
+  
+   $data['dispatch_planning_api_log']['distributor_id'] = array(
+     'title' => t('Distributor id in dispatch api'),
+     'help' => t('Distributor id in dispatch api'),
+     'field' => array(
+       'handler' => 'views_handler_field_numeric',
+       'click sortable' => TRUE,
+     ),
+     'sort' => array(
+       'handler' => 'views_handler_sort',
+     ),
+     'filter' => array(
+       'handler' => 'views_handler_filter_string',
+     ),
+     'argument' => array(
+       'handler' => 'views_handler_argument_numeric',
+     ),
+   );
+   $data['dispatch_planning_api_log']['distributor_id']['relationship'] = array(
+     'title' => t('Rs relation in dispatch api'),
+     'help' => t("Rs relation in dispatch api"),
+     'handler' => 'views_handler_relationship',
+     'base' => 'users',
+     //'entity type' => 'file',
+     'base field' => 'uid',
+     'label' => t('Rs relation !field_name', array('!field_name' => 'distributor_id')),
+   );
+   
+   
   //Response Data of API
   $data['dispatch_planning_api_log']['request_flag'] = array(
     'title' => t('Request Flag'),
