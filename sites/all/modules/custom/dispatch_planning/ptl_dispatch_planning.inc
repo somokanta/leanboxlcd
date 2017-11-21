@@ -290,3 +290,151 @@ function delete_fetch_data_ptl_trip_form_submit($form, &$form_state) {
     drupal_set_message("Fetch data is not found for a trip $trip_id");
   }
 }
+
+function create_fetch_data_ptl_trip_form($form, &$form_state){
+  $form['trip_id'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Trip Id'),
+    '#size' => 10,
+    '#required' => TRUE,
+  );
+
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Submit'),
+  );
+  return $form;
+}
+
+function create_fetch_data_ptl_trip_form_submit($form, &$form_state) {
+  global $user;
+  $count = 0;
+  $user_id = $user->uid;
+  $distributor_id = change_feeds_import_get_distributor_id($user_id);
+
+  $trip_id = $form_state['values']['trip_id'];
+
+  $query = db_select('node', 'n');
+  $query->addField('n', 'nid');
+  $query->condition('n.title', $trip_id);
+  $query->condition('n.uid', $distributor_id);
+  $query->condition('n.type', 'dispatch_data');
+  $trip_id_nid = $query->execute()->fetchField();
+
+  $ptl_authentication_flag = ptl_check_api_authentication($distributor_id);
+  
+  if (!empty($ptl_authentication_flag) && $trip_id_nid) {
+    $sales_register_nid = ptl_get_sales_register_nid_by_trip($trip_id_nid);
+    foreach ($sales_register_nid as $nid) {
+      $count = 1;
+      ptl_api_data_create($nid->entity_id, $trip_id);
+    }
+  }
+
+  if ($count) {
+    drupal_set_message("Trip $trip_id PTL data is created successfully!");
+  }
+  else {
+    drupal_set_message("PTL data is not created for a trip $trip_id");
+  }
+}
+
+/**
+ * 
+ * @param type $nid
+ * @param type $trip_id
+ */
+function ptl_api_data_create($nid, $trip_id) {
+  $api_data = array();
+
+  $node = node_load($nid);
+  $node_uid = $node->uid;
+  if (!empty($node)) {
+    $rs_code = dispatch_planning_get_rscode_using_uid($node_uid);
+    $vehicle = $node->field_billing_van[LANGUAGE_NONE][0]['value'];
+    $bill_number = $node->title;
+    $loading_data = $node->field_billing_loading_date[LANGUAGE_NONE][0]['value'];
+    $store_sequence = $node->field_drs_sequence[LANGUAGE_NONE][0]['value'];
+
+    $billing_data_details = ptl_get_billing_data($node_uid, $bill_number);
+
+    $api_data['jobData']['trip_id'] = $trip_id;
+    $api_data['rs_code'] = $rs_code;
+    $api_data['jobData']['vehicle'] = $vehicle;
+    $api_data['jobData']['bill_number'] = $bill_number;
+    $api_data['jobData']['loading_data'] = $loading_data;
+    $api_data['jobData']['store_sequence_no'] = $store_sequence;
+
+    $api_data['jobData']['item_details'] = $billing_data_details; // array
+
+    ptl_data_insert_into_table($api_data, $node_uid);
+  }
+}
+
+/**
+ * Function for  ptl_configuration_data_insert($api_data);
+ */
+function ptl_data_insert_into_table($api_data, $distributor_id) {
+  if (!empty($api_data)) {
+    $exist_sku_unit = array();
+    if (!empty($api_data['jobData']['item_details'])) {
+      foreach ($api_data['jobData']['item_details'] as $item_data) {
+        //find sku unit. Don't call function again and again for same SKU
+        $sku7_code = $item_data['sku_code'];
+        if (isset($exist_sku_unit[$sku7_code])) {
+          $sku_unit_case = $exist_sku_unit[$sku7_code];
+        }
+        else {
+          $sku_unit_case = get_sku_unit_case($sku7_code, $distributor_id);
+          $exist_sku_unit[$sku7_code] = $sku_unit_case;
+        }
+        // Conversion of cld and loose
+        $cld = (int) ($item_data['sum_net_sales_quantity'] / $sku_unit_case); //petty
+        $loose = (int) ($item_data['sum_net_sales_quantity'] % $sku_unit_case); //loose
+        $query = db_insert('ptl_data_configuration');
+        $fields = array(
+          'ptl_job' => $api_data['jobData']['trip_id'],
+          'rs_code' => $api_data['rs_code'],
+          'trip_id' => $api_data['jobData']['trip_id'],
+          'vehicle' => $api_data['jobData']['vehicle'],
+          'bill_number' => $api_data['jobData']['bill_number'],
+          'loading_date' => $api_data['jobData']['loading_data'],
+          'sequence_no' => $api_data['jobData']['store_sequence_no'],
+          'basepack_code' => $item_data['basepack_code'], 
+          'sku_code' => $item_data['sku_code'],
+          'product_name' => $item_data['product_name'],
+          'MRP' => $item_data['mrp'],
+          'TUR' => $item_data['tur'],
+          'sum_sales_qty' => $item_data['sum_net_sales_quantity'],
+          'created_time' => REQUEST_TIME,
+          'cld' => $cld,
+          'loose' => $loose,
+          'upc' => $sku_unit_case ? $sku_unit_case : 0
+        );
+        $query->fields($fields);
+        $result_id = $query->execute();
+      }
+    }
+  }
+}
+
+function ptl_get_billing_data($node_uid, $bill_number) {
+  $query = db_select('custom_billing_data', 'bd');
+  $query->fields('bd', array('tur', 'mrp', 'product_name'));
+  $query->addfield('bd', 'Sum_of_NET_SALES_QTY', 'sum_net_sales_quantity');
+  $query->addfield('bd', 'sku7_code', 'sku_code');
+  $query->addfield('bd', 'BASEPACK_CODE', 'basepack_code');
+  $query->condition('bd.distributor_id', $node_uid);
+  $query->condition('bd.bill_number', $bill_number);
+  $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+  return $res;
+}
+
+function ptl_get_sales_register_nid_by_trip($trip_id_nid) {
+    $query = db_select('field_data_field_trip_id_reference', 'tr');
+    $query->addField('tr', 'entity_id');
+    $query->condition('field_trip_id_reference_nid', "$trip_id_nid");
+    $query->condition('bundle', "sales_register_data");
+    $sales_register_nid = $query->execute()->fetchAll();
+  return $sales_register_nid;
+}
