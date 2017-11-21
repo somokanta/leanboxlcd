@@ -305,7 +305,7 @@ function create_fetch_data_ptl_trip_form_submit($form, &$form_state) {
   
   $trip_id = $form_state['values']['trip_id'];
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
-  $rs_code = ptl_get_rs_code_by_uid($user->uid);
+  $rs_code = ptl_get_rs_code_by_uid($user_id);
   
   $query = db_select('ptl_data_configuration', 'cb');
   $query->addExpression('MAX(id)', 'max');
@@ -313,7 +313,7 @@ function create_fetch_data_ptl_trip_form_submit($form, &$form_state) {
   $query->condition('rs_code', $rs_code, '=');
   $ptl_data_exist = $query->execute()->fetchField();
   
-  //if (!$ptl_data_exist) {
+  if (!$ptl_data_exist) {
     $query = db_select('node', 'n');
     $query->addField('n', 'nid');
     $query->condition('n.title', $trip_id);
@@ -337,10 +337,10 @@ function create_fetch_data_ptl_trip_form_submit($form, &$form_state) {
     else {
       drupal_set_message("PTL data is not created for a trip $trip_id",'warning');
     }
-//  }
-//  else {
-//    drupal_set_message("Trip $trip_id data is already created!", 'warning');
-//  }
+  }
+  else {
+    drupal_set_message("Trip $trip_id data is already created!", 'warning');
+  }
 }
 
 /**
@@ -415,9 +415,8 @@ function ptl_data_insert_into_table($api_data, $distributor_id) {
           'loose' => $loose,
           'upc' => $sku_unit_case ? $sku_unit_case : 0
         );
-        dpm($fields);
-        //$query->fields($fields);
-        //$result_id = $query->execute();
+        $query->fields($fields);
+        $result_id = $query->execute();
       }
     }
   }
