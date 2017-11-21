@@ -268,20 +268,12 @@ function delete_fetch_data_ptl_trip_form_submit($form, &$form_state) {
   global $user;
   
   $trip_id = $form_state['values']['trip_id'];
-  $query = db_select('field_data_field_third_party_username', 'rs');
-  $query->condition('rs.entity_id', $user->uid);
-  $query->fields('rs', array('field_third_party_username_value'));
-  $rs_code = $query->execute()->fetchField();
+  $rs_code = ptl_get_rs_code_by_uid($user->uid);
 
-  $count = db_update('ptl_data_configuration') // Table name no longer needs {}
-  ->fields(array(
-    'api_flag' => 0,
-  ))
-  ->condition('trip_id', $trip_id, '=')
-  ->condition('api_flag', '1', '=')
-  ->condition('rs_code', $rs_code, '=')
-  ->condition('loose', 1, '>=')
-  ->execute();
+  $count = db_delete('ptl_data_configuration')
+    ->condition('trip_id', $trip_id, '=')
+    ->condition('rs_code', $rs_code, '=')
+    ->execute();
   
   if ($count) {
     drupal_set_message("Trip $trip_id Fetch data is deleted successfully!");
@@ -310,32 +302,44 @@ function create_fetch_data_ptl_trip_form_submit($form, &$form_state) {
   global $user;
   $count = 0;
   $user_id = $user->uid;
-  $distributor_id = change_feeds_import_get_distributor_id($user_id);
-
-  $trip_id = $form_state['values']['trip_id'];
-
-  $query = db_select('node', 'n');
-  $query->addField('n', 'nid');
-  $query->condition('n.title', $trip_id);
-  $query->condition('n.uid', $distributor_id);
-  $query->condition('n.type', 'dispatch_data');
-  $trip_id_nid = $query->execute()->fetchField();
-
-  $ptl_authentication_flag = ptl_check_api_authentication($distributor_id);
   
-  if (!empty($ptl_authentication_flag) && $trip_id_nid) {
-    $sales_register_nid = ptl_get_sales_register_nid_by_trip($trip_id_nid);
-    foreach ($sales_register_nid as $nid) {
-      $count = 1;
-      ptl_api_data_create($nid->entity_id, $trip_id);
+  $trip_id = $form_state['values']['trip_id'];
+  $distributor_id = change_feeds_import_get_distributor_id($user_id);
+  $rs_code = ptl_get_rs_code_by_uid($user->uid);
+  
+  $query = db_select('ptl_data_configuration', 'cb');
+  $query->addExpression('MAX(id)', 'max');
+  $query->condition('trip_id', $trip_id, '=');
+  $query->condition('rs_code', $rs_code, '=');
+  $ptl_data_exist = $query->execute()->fetchField();
+  
+  if (!$ptl_data_exist) {
+    $query = db_select('node', 'n');
+    $query->addField('n', 'nid');
+    $query->condition('n.title', $trip_id);
+    $query->condition('n.uid', $distributor_id);
+    $query->condition('n.type', 'dispatch_data');
+    $trip_id_nid = $query->execute()->fetchField();
+
+    $ptl_authentication_flag = ptl_check_api_authentication($distributor_id);
+
+    if (!empty($ptl_authentication_flag) && $trip_id_nid) {
+      $sales_register_nid = ptl_get_sales_register_nid_by_trip($trip_id_nid);
+      foreach ($sales_register_nid as $nid) {
+        $count = 1;
+        ptl_api_data_create($nid->entity_id, $trip_id);
+      }
+    }
+
+    if ($count) {
+      drupal_set_message("Trip $trip_id PTL data is created successfully!");
+    }
+    else {
+      drupal_set_message("PTL data is not created for a trip $trip_id");
     }
   }
-
-  if ($count) {
-    drupal_set_message("Trip $trip_id PTL data is created successfully!");
-  }
   else {
-    drupal_set_message("PTL data is not created for a trip $trip_id");
+    drupal_set_message("Trip $trip_id data is already created!", 'warning');
   }
 }
 
@@ -412,8 +416,8 @@ function ptl_data_insert_into_table($api_data, $distributor_id) {
           'upc' => $sku_unit_case ? $sku_unit_case : 0
         );
         dpm($fields);
-//        $query->fields($fields);
-//        $result_id = $query->execute();
+        //$query->fields($fields);
+        //$result_id = $query->execute();
       }
     }
   }
@@ -438,4 +442,12 @@ function ptl_get_sales_register_nid_by_trip($trip_id_nid) {
     $query->condition('bundle', "sales_register_data");
     $sales_register_nid = $query->execute()->fetchAll();
   return $sales_register_nid;
+}
+
+function ptl_get_rs_code_by_uid($uid) {
+  $query = db_select('field_data_field_third_party_username', 'rs');
+  $query->condition('rs.entity_id', $uid);
+  $query->fields('rs', array('field_third_party_username_value'));
+  $rs_code = $query->execute()->fetchField();
+  return $rs_code;
 }
