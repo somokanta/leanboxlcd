@@ -334,9 +334,12 @@ function create_fetch_data_ptl_trip_form_submit($form, &$form_state) {
     if ($count) {
       drupal_set_message("Trip $trip_id PTL data is created successfully!");
     }
-    else {
-      drupal_set_message("PTL data is not created for a trip $trip_id",'warning');
+    else if(empty($trip_id_nid)){  
+      drupal_set_message("Trip $trip_id is not created!",'warning');
     }
+    else if(empty($ptl_authentication_flag)){  
+      drupal_set_message("PTL data is not created because flag is not enabled!",'warning');
+    }    
   }
   else {
     drupal_set_message("Trip $trip_id data is already created!", 'warning');
