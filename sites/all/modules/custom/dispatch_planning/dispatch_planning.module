@@ -1748,7 +1748,7 @@ function dispatch_planning_form_views_exposed_form_alter(&$form, &$form_state) {
  * @param type $trip_id
  * @return array
  */
-function dispatch_planning_sales_reg_api($node, $trip_execution_date, $hht_id, $cashier, $trip_id) {
+function dispatch_planning_sales_reg_api($node, $trip_execution_date, $vehicle_no, $cashier, $trip_id) {
 
   $api_data = array();
   // get billing data details
@@ -1778,10 +1778,10 @@ function dispatch_planning_sales_reg_api($node, $trip_execution_date, $hht_id, $
   $api_data['city'] = 'ABC';
   //$api_data['hub'] = $rs_code;
   $api_data['hub'] = '100006'; // need to remove when moving to HUL
-  $api_data['fieldExecutive'] = $rs_code . '_' . $hht_id;
+  $api_data['fieldExecutive'] = $rs_code . '_' . $cashier;
   $api_data['fieldExecutiveName'] = $cashier;
 
-  $api_data['jobData']['vehicle'] = $vehicle;
+  $api_data['jobData']['vehicle'] = $vehicle_no;
   $api_data['jobData']['party_hll_code'] = $outlet_data_details['field_hul_code_value']; // hul code in outlet
   //$api_data['jobData']['lat_long'] = $outlet_data_details['field_hul_updated_lat_value'] . ',' . $outlet_data_details['field_hul_updated_long_value'];
   $api_data['jobData']['lat_long']['lat_longLatitude'] = $outlet_data_details['field_hul_updated_lat_value'];
@@ -2208,9 +2208,7 @@ function ptl_no_of_bill_lines_by_trip_id($trip_id,$rs_code){
 function dispatch_planning_node_update($node) {
    if ($node->type == 'dispatch_data') {
       $original_pre_start = $node->original->field_dispatch_pre_start_time[LANGUAGE_NONE][0]['value'];
-      dpm($original_pre_start, '$original_pre_start');
       $new_pre_start = $node->field_dispatch_pre_start_time[LANGUAGE_NONE][0]['value'];
-      dpm($new_pre_start, '$new_pre_start');
       if ($original_pre_start != $new_pre_start) {
           drupal_register_shutdown_function('_update_dispatch_planning_api', $node);
       }
@@ -2231,8 +2229,8 @@ function _update_dispatch_planning_api($node) {
       if (!empty($api_authentication_flag)) {
          // $node passed is of type sales_regiser_data
          $trip_dispatch_date = strtotime($node->field_dispatch_date['und'][0]['value']);
-         $hht_nid = $node->field_hht_id['und'][0]['nid'];
-         $hht_id = get_hht_id_from_nid($hht_nid);
+         $vehicle_no = $node->field_vehicle_no['und'][0]['value'];
+        // $hht_id = get_hht_id_from_nid($hht_nid);
          $cashier = $node->field_cashier_name['und'][0]['value'];
          $trip_id = $node->title;
          $nid = $node->nid;
@@ -2241,7 +2239,7 @@ function _update_dispatch_planning_api($node) {
             foreach ($res as $key => $val) {
                $sales_nid = $val['nid'];
                $sales_node = node_load($sales_nid);
-               $api_data[] = dispatch_planning_sales_reg_api($sales_node, $trip_dispatch_date, $hht_id, $cashier, $trip_id);
+               $api_data[] = dispatch_planning_sales_reg_api($sales_node, $trip_dispatch_date, $vehicle_no, $cashier, $trip_id);
             }
          }
          // call api here
@@ -2273,16 +2271,16 @@ function _update_dispatch_planning_api($node) {
  * @param type $nid
  * @return type
  */
-function get_hht_id_from_nid($nid) {
-   $result = '';
-   if (!empty($nid)) {
-      $query = db_select('node', 'n');
-      $query->fields('n', array('title'));
-      $query->condition('n.nid', $nid);
-      $result = $query->execute()->fetchField();
-   }
-   return $result;
-}
+//function get_hht_id_from_nid($nid) {
+//   $result = '';
+//   if (!empty($nid)) {
+//      $query = db_select('node', 'n');
+//      $query->fields('n', array('title'));
+//      $query->condition('n.nid', $nid);
+//      $result = $query->execute()->fetchField();
+//   }
+//   return $result;
+//}
 
 /**
  * _dispatch_planning_get_all_sales_nid list using trip nid
