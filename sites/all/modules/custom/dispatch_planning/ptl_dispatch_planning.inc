@@ -313,7 +313,7 @@ function create_fetch_data_ptl_trip_form_submit($form, &$form_state) {
   $query->condition('rs_code', $rs_code, '=');
   $ptl_data_exist = $query->execute()->fetchField();
   
-  if (!$ptl_data_exist) {
+  //if (!$ptl_data_exist) {
     $query = db_select('node', 'n');
     $query->addField('n', 'nid');
     $query->condition('n.title', $trip_id);
@@ -335,12 +335,12 @@ function create_fetch_data_ptl_trip_form_submit($form, &$form_state) {
       drupal_set_message("Trip $trip_id PTL data is created successfully!");
     }
     else {
-      drupal_set_message("PTL data is not created for a trip $trip_id");
+      drupal_set_message("PTL data is not created for a trip $trip_id",'warning');
     }
-  }
-  else {
-    drupal_set_message("Trip $trip_id data is already created!", 'warning');
-  }
+//  }
+//  else {
+//    drupal_set_message("Trip $trip_id data is already created!", 'warning');
+//  }
 }
 
 /**
