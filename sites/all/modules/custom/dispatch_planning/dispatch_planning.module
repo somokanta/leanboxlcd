@@ -1074,11 +1074,11 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
 //        $api_data[] = dispatch_planning_sales_reg_api($value, $node, $trip_execution_date, $hht_id, $cashier, $trip_id);
 //      }
       //PTL Data
-      $ptl_authentication_flag = ptl_check_api_authentication($node->uid);      
-      if (!empty($ptl_authentication_flag)) {
-        $ptl_data[] = ptl_sales_reg_api_data($value, $node, $trip_execution_date, $hht_id, $cashier, $trip_id);
-
-      }
+//      $ptl_authentication_flag = ptl_check_api_authentication($node->uid);      
+//      if (!empty($ptl_authentication_flag)) {
+//        $ptl_data[] = ptl_sales_reg_api_data($value, $node, $trip_execution_date, $hht_id, $cashier, $trip_id);
+//
+//      }
     }
 
     $diff = array_diff($bill_nids, $bill_sequence);
@@ -1101,11 +1101,11 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
 //
 //        }
         //PTL Data
-        $ptl_authentication_flag = ptl_check_api_authentication($node->uid);      
-        if (!empty($ptl_authentication_flag)) {
-          $ptl_data[] = ptl_sales_reg_api_data($value, $node, $trip_execution_date, $hht_id, $cashier, $trip_id);
-
-        }        
+//        $ptl_authentication_flag = ptl_check_api_authentication($node->uid);      
+//        if (!empty($ptl_authentication_flag)) {
+//          $ptl_data[] = ptl_sales_reg_api_data($value, $node, $trip_execution_date, $hht_id, $cashier, $trip_id);
+//
+//        }        
       }
     }
   }
@@ -1132,11 +1132,11 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
 //
 //      }
       //PTL Data
-      $ptl_authentication_flag = ptl_check_api_authentication($node->uid);      
-      if (!empty($ptl_authentication_flag)) {
-        $ptl_data[] = ptl_sales_reg_api_data($value, $node, $trip_execution_date, $hht_id, $cashier, $trip_id);
-
-      }
+//      $ptl_authentication_flag = ptl_check_api_authentication($node->uid);      
+//      if (!empty($ptl_authentication_flag)) {
+//        $ptl_data[] = ptl_sales_reg_api_data($value, $node, $trip_execution_date, $hht_id, $cashier, $trip_id);
+//
+//      }
     }
   }
 
