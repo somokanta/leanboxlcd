@@ -361,7 +361,7 @@ function ptl_api_data_create($nid, $trip_id) {
     $vehicle = $node->field_billing_van[LANGUAGE_NONE][0]['value'];
     $bill_number = $node->title;
     $loading_data = $node->field_billing_loading_date[LANGUAGE_NONE][0]['value'];
-    $store_sequence = $node->field_drs_sequence[LANGUAGE_NONE][0]['value'];
+    $store_sequence = (int) $node->field_drs_sequence[LANGUAGE_NONE][0]['value'];
 
     $billing_data_details = ptl_get_billing_data($node_uid, $bill_number);
 
