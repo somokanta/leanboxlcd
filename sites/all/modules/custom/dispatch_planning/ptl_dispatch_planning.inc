@@ -411,8 +411,9 @@ function ptl_data_insert_into_table($api_data, $distributor_id) {
           'loose' => $loose,
           'upc' => $sku_unit_case ? $sku_unit_case : 0
         );
-        $query->fields($fields);
-        $result_id = $query->execute();
+        dpm($fields);
+//        $query->fields($fields);
+//        $result_id = $query->execute();
       }
     }
   }
