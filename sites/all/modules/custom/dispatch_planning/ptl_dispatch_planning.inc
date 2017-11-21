@@ -339,30 +339,36 @@ function create_fetch_data_ptl_trip_form_submit($form, &$form_state) {
   }
 }
 
+/**
+ * 
+ * @param type $nid
+ * @param type $trip_id
+ */
 function ptl_api_data_create($nid, $trip_id) {
   $api_data = array();
-  
+
   $node = node_load($nid);
-  $node_uid = $node->uid; 
-  
-  $rs_code = dispatch_planning_get_rscode_using_uid($node_uid);
-  $vehicle = $node->field_billing_van[LANGUAGE_NONE][0]['value'];
-  $bill_number = $node->title;
-  $loading_data = $node->field_billing_loading_date[LANGUAGE_NONE][0]['value'];
-  $store_sequence = $node->field_drs_sequence[LANGUAGE_NONE][0]['value'];
-  
-  $billing_data_details = ptl_get_billing_data($node_uid, $bill_number);
+  $node_uid = $node->uid;
+  if (!empty($node)) {
+    $rs_code = dispatch_planning_get_rscode_using_uid($node_uid);
+    $vehicle = $node->field_billing_van[LANGUAGE_NONE][0]['value'];
+    $bill_number = $node->title;
+    $loading_data = $node->field_billing_loading_date[LANGUAGE_NONE][0]['value'];
+    $store_sequence = $node->field_drs_sequence[LANGUAGE_NONE][0]['value'];
 
-  $api_data['jobData']['trip_id'] = $trip_id;
-  $api_data['rs_code'] = $rs_code;
-  $api_data['jobData']['vehicle'] = $vehicle;
-  $api_data['jobData']['bill_number'] = $bill_number;
-  $api_data['jobData']['loading_data'] = $loading_data; 
-  $api_data['jobData']['store_sequence_no'] = $store_sequence;
+    $billing_data_details = ptl_get_billing_data($node_uid, $bill_number);
 
-  $api_data['jobData']['item_details'] = $billing_data_details; // array
+    $api_data['jobData']['trip_id'] = $trip_id;
+    $api_data['rs_code'] = $rs_code;
+    $api_data['jobData']['vehicle'] = $vehicle;
+    $api_data['jobData']['bill_number'] = $bill_number;
+    $api_data['jobData']['loading_data'] = $loading_data;
+    $api_data['jobData']['store_sequence_no'] = $store_sequence;
 
-  ptl_data_insert_into_table($api_data, $node_uid);
+    $api_data['jobData']['item_details'] = $billing_data_details; // array
+
+    ptl_data_insert_into_table($api_data, $node_uid);
+  }
 }
 
 /**
