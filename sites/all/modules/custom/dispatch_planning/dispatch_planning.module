@@ -143,6 +143,14 @@ function dispatch_planning_menu() {
     'type' => MENU_CALLBACK,
     'file' => 'ptl_dispatch_planning.inc',
   );
+  $items['create-ptl-trip'] = array(
+    'title' => 'Create Trip To PTL',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('create_fetch_data_ptl_trip_form'),
+    'access arguments' => array('Delete Ptl trip data'),
+    'type' => MENU_CALLBACK,
+    'file' => 'ptl_dispatch_planning.inc',
+  );  
   return $items;
 }
 
