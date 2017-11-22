@@ -499,7 +499,7 @@ function get_data_of_drs_box_id_sheet_form_submit($form, &$form_state) {
 
 function drs_box_id_sheet_form_submit($form, &$form_state) {
   $trip_id = $form_state['values']['trip_id'];
-  $view_name = "ptl_loose_sheet";
+  $view_name = "drs_report2";
   $view = views_get_view($view_name, '');
   $view->set_display('page_1');
   $view->set_arguments(array($trip_id));
@@ -509,7 +509,7 @@ function drs_box_id_sheet_form_submit($form, &$form_state) {
 }
 
 function download_drs_box_id_sheet($args) {
-  $view_name = "ptl_loose_sheet";
+  $view_name = "drs_report2";
   $view = views_get_view($view_name, '');
   $view->set_display('page_1');
   $view->set_arguments(array($args));
