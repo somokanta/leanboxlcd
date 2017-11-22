@@ -139,7 +139,7 @@ function dispatch_planning_menu() {
     'title' => 'Resent Trip To PTL',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('delete_fetch_data_ptl_trip_form'),
-    'access arguments' => array('Delete Ptl trip data'),
+    'access arguments' => array('Ptl trip creation'),
     'type' => MENU_CALLBACK,
     'file' => 'ptl_dispatch_planning.inc',
   );
@@ -147,7 +147,7 @@ function dispatch_planning_menu() {
     'title' => 'Create Trip To PTL',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('create_fetch_data_ptl_trip_form'),
-    'access arguments' => array('Delete Ptl trip data'),
+    'access arguments' => array('Ptl trip creation'),
     'type' => MENU_CALLBACK,
     'file' => 'ptl_dispatch_planning.inc',
   );  
@@ -181,9 +181,9 @@ function dispatch_planning_permission() {
       'title' => t(''),
       'description' => t('PTL Api Access')
     ),
-    'Delete Ptl trip data' => array(
-      'title' => t('Delete Ptl trip data'),
-      'description' => t('Delete Ptl trip data')
+    'Ptl trip creation' => array(
+      'title' => t('Ptl trip creation'),
+      'description' => t('Ptl trip creation')
     )    
   );
 }
@@ -281,6 +281,17 @@ function dispatch_planning_services_resources() {
     ),
   );
   return $ptl_resource;
+}
+
+
+/**
+ * Implements of hook_views_api().
+ */
+function dispatch_planning_views_api() {
+  return array(
+    'api' => 3,
+    'path' => drupal_get_path('module', 'dispatch_planning') . '/views'
+  );
 }
 
 /**
@@ -1052,10 +1063,6 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
   
   $sequence_array = $form_state['dispatch_planning']['sequence_array'];
   $manual_drs_sequence = $form_state['dispatch_planning']['manual_drs_sequence'];
-
-  // Start Dispatch API here
-  $api_data = array();
-
   if ($seq_flag) {
     foreach ($bill_sequence as $key => $value) {
       $node = node_load($value);
@@ -1067,18 +1074,6 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
       }
       $node->field_trip_id_reference[LANGUAGE_NONE][0]['nid'] = $nid;
       node_save($node);
-
-      // get api data here
-//      $api_authentication_flag = dispatch_planning_check_api_authentication($node->uid);
-//      if (!empty($api_authentication_flag)) {
-//        $api_data[] = dispatch_planning_sales_reg_api($value, $node, $trip_execution_date, $hht_id, $cashier, $trip_id);
-//      }
-      //PTL Data
-//      $ptl_authentication_flag = ptl_check_api_authentication($node->uid);      
-//      if (!empty($ptl_authentication_flag)) {
-//        $ptl_data[] = ptl_sales_reg_api_data($value, $node, $trip_execution_date, $hht_id, $cashier, $trip_id);
-//
-//      }
     }
 
     $diff = array_diff($bill_nids, $bill_sequence);
@@ -1093,26 +1088,12 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
         }
         $node->field_trip_id_reference[LANGUAGE_NONE][0]['nid'] = $nid;
         node_save($node);
-
-        // get api data here
-//        $api_authentication_flag = dispatch_planning_check_api_authentication($node->uid);
-//        if (!empty($api_authentication_flag)) {
-//          $api_data[] = dispatch_planning_sales_reg_api($value, $node, $trip_execution_date, $hht_id, $cashier, $trip_id);
-//
-//        }
-        //PTL Data
-//        $ptl_authentication_flag = ptl_check_api_authentication($node->uid);      
-//        if (!empty($ptl_authentication_flag)) {
-//          $ptl_data[] = ptl_sales_reg_api_data($value, $node, $trip_execution_date, $hht_id, $cashier, $trip_id);
-//
-//        }        
       }
     }
   }
   else {
     foreach ($bill_nids as $value) {
       $node = node_load($value);
-
 
       if (isset($sequence_array[$value]) && !empty($sequence_array[$value])) {
         $node->field_bill_sequence[LANGUAGE_NONE][0]['value'] = $sequence_array[$value];
@@ -1124,42 +1105,8 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
       }
       $node->field_trip_id_reference[LANGUAGE_NONE][0]['nid'] = $nid;
       node_save($node);
-
-      // get api data here
-//      $api_authentication_flag = dispatch_planning_check_api_authentication($node->uid);
-//      if (!empty($api_authentication_flag)) {
-//        $api_data[] = dispatch_planning_sales_reg_api($value, $node, $trip_execution_date, $hht_id, $cashier, $trip_id);
-//
-//      }
-      //PTL Data
-//      $ptl_authentication_flag = ptl_check_api_authentication($node->uid);      
-//      if (!empty($ptl_authentication_flag)) {
-//        $ptl_data[] = ptl_sales_reg_api_data($value, $node, $trip_execution_date, $hht_id, $cashier, $trip_id);
-//
-//      }
     }
   }
-
-  // Call Dispatch API Here
-//  if (!empty($api_data)) {
-//    $json_api_data = json_encode($api_data);
-//    // request log
-//    $api_type = 'dispatch_planning';
-//    $sql_ins_id = dispatch_planning_api_log($json_api_data, $trip_id, $api_type);
-//
-////Commented code for cron tab
-//
-//    $request_headers = array('Content-Type' => 'application/json');
-//    $order_api_url = 'https://staging.fareye.co/api/v1/job?api_key=l1S6xa5mnxUXDuqv12q7lerLBL9l1ICq';
-//    $options = array('headers' => $request_headers, 'method' => 'POST', 'data' => $json_api_data);
-//    $response_data = drupal_http_request($order_api_url, $options);
-//    
-//    $response_data = $response_data->data;
-//    $api_success = json_decode($response_data);
-//    $api_success = ($api_success->failCount == 0) ? 1 : 0;
-//    // create response log entry
-//    dispatch_planning_api_log_update($response_data, $sql_ins_id , $api_success);
-//  }
 
   drupal_set_message('Successfully updated. Trip id ' . $trip_id);
 }
@@ -1806,69 +1753,6 @@ function dispatch_planning_sales_reg_api($node, $trip_execution_date, $vehicle_n
   dispatch_planning_item_details($billing_data_details, $id);
   return $api_data;
 }
-/**
- * @param type $value
- * @param type $node
- * @param type $trip_execution_date
- * @param type $hht_id
- * @param type $cashier
- * @param type $trip_id
- */
-function ptl_sales_reg_api_data($value, $node, $trip_execution_date, $hht_id, $cashier, $trip_id) {
-  $api_data = array();
-  // get billing data details
-  $node_uid = $node->uid;
-  $rs_code = dispatch_planning_get_rscode_using_uid($node_uid);
-  $bill_number = $node->title;
-  $vehicle = $node->field_billing_van[LANGUAGE_NONE][0]['value'];
-  $bill_date = date('Y-m-d', $node->field_sr_bill_date[LANGUAGE_NONE][0]['value']);
-  $bill_value = $node->field_bill_value[LANGUAGE_NONE][0]['value'];
-  $party_code = $node->field_sales_party_code[LANGUAGE_NONE][0]['value'];
-  $store_sequence = $node->field_drs_sequence[LANGUAGE_NONE][0]['value'];
-  $loading_data = $node->field_billing_loading_date[LANGUAGE_NONE][0]['value'];
-
-  $billing_data_details = dispatch_planning_get_billing_data($node_uid, $bill_number,'ptl');
-  $outlet_data_details = dispatch_planning_get_outlet_data($node_uid, $party_code);
-  
-  if (empty($outlet_data_details['field_hul_updated_lat_value'])) {
-    $outlet_data_details['field_hul_updated_lat_value'] = 0;
-  } 
-  if (empty($outlet_data_details['field_hul_updated_long_value'])) {
-    $outlet_data_details['field_hul_updated_long_value'] = 0;
-  }
-  
-  $api_data['jobType'] = 'delivery1';  // Hardcoded as suggested by gaurav
-  $reference_no = $rs_code . '_' . $bill_number;
-  $api_data['referenceNo'] = $reference_no;
-  $api_data['date'] = date('d-m-Y',$trip_execution_date);
-  $api_data['city'] = 'ABC';
-  $api_data['rs_code'] = $rs_code;
-  $api_data['hub'] = '100006'; // need to remove when moving to HUL
-  $api_data['fieldExecutive'] = $rs_code . '_' . $hht_id;
-  $api_data['fieldExecutiveName'] = $cashier;
-
-  $api_data['jobData']['vehicle'] = $vehicle;
-  $api_data['jobData']['party_hll_code'] = $outlet_data_details['field_hul_code_value']; // hul code in outlet
-  //$api_data['jobData']['lat_long'] = $outlet_data_details['field_hul_updated_lat_value'] . ',' . $outlet_data_details['field_hul_updated_long_value'];
-  $api_data['jobData']['lat_long']['lat_longLatitude'] = $outlet_data_details['field_hul_updated_lat_value'];
-  $api_data['jobData']['lat_long']['lat_longLongitude'] = $outlet_data_details['field_hul_updated_long_value'];
-  $api_data['jobData']['bill_value'] = $bill_value;
-  $api_data['jobData']['item_details'] = $billing_data_details; // array
-  $api_data['jobData']['bill_date'] = $bill_date;
-  $api_data['jobData']['locality'] = 'ABCD_locality';  // Hardcoded as suggested by gaurav  
-  $api_data['jobData']['store_sequence_no'] = $store_sequence;  // drs sequence
-  $api_data['jobData']['party_name'] = $outlet_data_details['field_party_name_value']; // party name in outlet
-  $api_data['jobData']['beat_name'] = $outlet_data_details['field_beat_name_value'];  // beat name in outlet
-  $api_data['jobData']['party_code'] = $party_code;
-  $api_data['jobData']['bill_number'] = $bill_number;
-  $api_data['jobData']['runsheet_number'] = $trip_id;
-  $api_data['jobData']['loading_data'] = $loading_data; // newly added
-  /**
-   * Insert data into PTL configuration table
-   */
-  ptl_configuration_data_insert($api_data , $node_uid);
-  return $ptl_data;
-}
 
 /*
  * Insert data into dispatch_planning_api_data table
@@ -1998,29 +1882,6 @@ function dispatch_planning_check_api_authentication($node_uid) {
   return $res;
 }
 
-/**
- * 
- * @param type $node_uid
- * @return string
- */
-function ptl_check_api_authentication($node_uid) {
-  $query = db_select('field_data_field_ptl_data_configuration', 'tp');
-  $query->fields('tp', array('entity_id'));
-  $query->condition('tp.field_ptl_data_configuration_value', 1);
-  $query->condition('tp.entity_id', $node_uid);
-  $res = $query->execute()->fetchField();
-  return $res;
-}
-
-/**
- * Implements of hook_views_api().
- */
-function dispatch_planning_views_api() {
-  return array(
-    'api' => 3,
-    'path' => drupal_get_path('module', 'dispatch_planning') . '/views'
-  );
-}
 
 /**
  * 
@@ -2054,66 +1915,6 @@ function dispatch_planning_api_log_update($response_data, $sql_ins_id, $api_succ
     ->execute();
 }
 
-/**
- * 
- * @param type $uid
- * @return string
- */
-function dispatch_planning_get_rscode_using_uid($uid) {
-  $query = db_select('field_data_field_third_party_username', 'rs');
-  $query->condition('rs.entity_id', $uid);
-  $query->fields('rs', array('field_third_party_username_value'));
-  $res = $query->execute()->fetchField();
-  return $res;
-}
-
-/**
- * function for  ptl_configuration_data_insert($api_data);
- */
-function ptl_configuration_data_insert($api_data, $distributor_id) {
-  if (!empty($api_data)) {
-    $exist_sku_unit = array(); // declare in start
-    if (!empty($api_data['jobData']['item_details'])) {
-      foreach ($api_data['jobData']['item_details'] as $item_data) {
-        //find sku unit. Don't call function again and again for same SKU
-        $sku7_code =  $item_data['sku_code'];
-        if (isset($exist_sku_unit[$sku7_code])) {
-          $sku_unit_case = $exist_sku_unit[$sku7_code];
-        }
-        else {
-          $sku_unit_case = get_sku_unit_case($sku7_code, $distributor_id);
-          $exist_sku_unit[$sku7_code] = $sku_unit_case;
-        }
-        // Conversion of cld and loose
-        $cld = (int)($item_data['sum_net_sales_quantity']/$sku_unit_case); //petty
-        $loose = (int)($item_data['sum_net_sales_quantity'] % $sku_unit_case); //loose
-        //Insert in ptl table
-        $query = db_insert('ptl_data_configuration');
-        $fields = array(
-          'ptl_job' => $api_data['jobData']['runsheet_number'],//$api_data['jobData']['vehicle'] . '-' . $api_data['date'],
-          'rs_code' => $api_data['rs_code'],
-          'trip_id' => $api_data['jobData']['runsheet_number'],
-          'vehicle' => $api_data['jobData']['vehicle'],
-          'bill_number' => $api_data['jobData']['bill_number'],
-          'loading_date' => $api_data['jobData']['loading_data'], // Confusion here about loading date
-          'sequence_no' => $api_data['jobData']['store_sequence_no'],
-          'basepack_code' => $item_data['basepack_code'], // Confusion about base pack code
-          'sku_code' => $item_data['sku_code'],
-          'product_name' => $item_data['product_name'],
-          'MRP' => $item_data['mrp'],
-          'TUR' => $item_data['tur'],
-          'sum_sales_qty' => $item_data['sum_net_sales_quantity'],
-          'created_time' => REQUEST_TIME,
-          'cld' => $cld,
-          'loose' => $loose,
-          'upc' => $sku_unit_case ? $sku_unit_case : 0
-        );
-        $query->fields($fields);
-        $result_id = $query->execute();
-      }
-    }
-  }
-}
 
 /**
  * 
@@ -2129,77 +1930,7 @@ function check_dynamic_routing_configuration($distributor_id) {
   return $res;
 }
 
-/**
- * 
- * @param type $sku7_code
- * @param type $distributor_id
- * @return type qty for sku in one unit case
- */
-function get_sku_unit_case($sku7_code, $distributor_id) {
-  $query = db_select('field_data_field_unit_case_units_', 'fucu');
-  $query->fields('fucu', array('field_unit_case_units__value'));
-  $query->join('field_data_field_sku7_code', 'sc', 'sc.entity_id = fucu.entity_id');
-  $query->join('node', 'n', 'n.nid = fucu.entity_id');
-  $query->condition('n.type', 'sku7_code_master');
-  $query->condition('sc.field_sku7_code_value', $sku7_code, '=');
-  $query->condition('n.uid', $distributor_id, '=');
-  $res = $query->execute()->fetchField();
-  return $res;
-}
 
-
-function ptl_loading_sheet_by_trip_id($trip_id,$rs_code) {
-  $query = db_select('ptl_data_configuration', 'pd');
-  $query->addExpression("concat(vehicle ,' / ', DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(loading_date),'+00:00','+05:30'), '%d-%b-%y'))", 'vehicle_loading');
-  $query->condition('trip_id', $trip_id);
-  $query->condition('rs_code', $rs_code);
-  $query->groupBy('vehicle,loading_date');
-  $results = $query->execute()->fetchAll();
-
-  foreach ($results as $key => $value) {
-    $vehicle_loading = $vehicle_loading . ', ' . $value->vehicle_loading;
-  }
-
-  return ltrim($vehicle_loading, ',');
-}
-
-
-function ptl_no_of_bills_by_trip_id($trip_id,$rs_code) {
-  $query = db_select('ptl_data_configuration', 'pd');
-  $query->condition('trip_id', $trip_id);
-  $query->condition('rs_code', $rs_code);
-  $query->addExpression('count(DISTINCT(bill_number))','bill_number');
-  $results = $query->execute()->fetchField();
-  return $results;
-}
-
-function ptl_trip_date_by_trip_id($trip_id,$rs_code) {
-  $query = db_select('ptl_data_configuration', 'pd');
-  $query->condition('trip_id', $trip_id);
-  $query->condition('rs_code', $rs_code);
-  $query->fields('pd',array('created_time'));
-  $results = $query->range(0,1)->execute()->fetchField();
-  return $results;
-}
-
-function get_rsname_using_rscode($rs_code) {
-  $query = db_select('field_data_field_name', 'fn');
-  $query->join('field_data_field_third_party_username', 'tpu', 'tpu.entity_id = fn.entity_id');
-  $query->condition('tpu.field_third_party_username_value', $rs_code);
-  $query->fields('fn', array('field_name_value',entity_id));
-  $res = $query->execute()->fetchField();  
-  return $res;
-}
-
-function ptl_no_of_bill_lines_by_trip_id($trip_id,$rs_code){
-  $query = db_select('ptl_data_configuration', 'pd');
-  $query->condition('trip_id', $trip_id);
-  $query->condition('rs_code', $rs_code);
-  $query->condition('loose', 1, '>=');
-  $query->addExpression('count(id)','no_of_id');
-  $results = $query->execute()->fetchField();
-  return $results;
-}
 
 /**
  * Implements hook_node_update
@@ -2300,4 +2031,103 @@ function _dispatch_planning_get_all_sales_nid($nid) {
       $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
    }
    return $res;
+}
+
+/**
+ * 
+ * @param type $node_uid
+ * @return string
+ */
+function ptl_check_api_authentication($node_uid) {
+  $query = db_select('field_data_field_ptl_data_configuration', 'tp');
+  $query->fields('tp', array('entity_id'));
+  $query->condition('tp.field_ptl_data_configuration_value', 1);
+  $query->condition('tp.entity_id', $node_uid);
+  $res = $query->execute()->fetchField();
+  return $res;
+}
+
+/**
+ * 
+ * @param type $uid
+ * @return string
+ */
+function dispatch_planning_get_rscode_using_uid($uid) {
+  $query = db_select('field_data_field_third_party_username', 'rs');
+  $query->condition('rs.entity_id', $uid);
+  $query->fields('rs', array('field_third_party_username_value'));
+  $res = $query->execute()->fetchField();
+  return $res;
+}
+
+/**
+ * 
+ * @param type $sku7_code
+ * @param type $distributor_id
+ * @return type qty for sku in one unit case
+ */
+function get_sku_unit_case($sku7_code, $distributor_id) {
+  $query = db_select('field_data_field_unit_case_units_', 'fucu');
+  $query->fields('fucu', array('field_unit_case_units__value'));
+  $query->join('field_data_field_sku7_code', 'sc', 'sc.entity_id = fucu.entity_id');
+  $query->join('node', 'n', 'n.nid = fucu.entity_id');
+  $query->condition('n.type', 'sku7_code_master');
+  $query->condition('sc.field_sku7_code_value', $sku7_code, '=');
+  $query->condition('n.uid', $distributor_id, '=');
+  $res = $query->execute()->fetchField();
+  return $res;
+}
+
+
+function ptl_loading_sheet_by_trip_id($trip_id,$rs_code) {
+  $query = db_select('ptl_data_configuration', 'pd');
+  $query->addExpression("concat(vehicle ,' / ', DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(loading_date),'+00:00','+05:30'), '%d-%b-%y'))", 'vehicle_loading');
+  $query->condition('trip_id', $trip_id);
+  $query->condition('rs_code', $rs_code);
+  $query->groupBy('vehicle,loading_date');
+  $results = $query->execute()->fetchAll();
+
+  foreach ($results as $key => $value) {
+    $vehicle_loading = $vehicle_loading . ', ' . $value->vehicle_loading;
+  }
+
+  return ltrim($vehicle_loading, ',');
+}
+
+
+function ptl_no_of_bills_by_trip_id($trip_id,$rs_code) {
+  $query = db_select('ptl_data_configuration', 'pd');
+  $query->condition('trip_id', $trip_id);
+  $query->condition('rs_code', $rs_code);
+  $query->addExpression('count(DISTINCT(bill_number))','bill_number');
+  $results = $query->execute()->fetchField();
+  return $results;
+}
+
+function ptl_trip_date_by_trip_id($trip_id,$rs_code) {
+  $query = db_select('ptl_data_configuration', 'pd');
+  $query->condition('trip_id', $trip_id);
+  $query->condition('rs_code', $rs_code);
+  $query->fields('pd',array('created_time'));
+  $results = $query->range(0,1)->execute()->fetchField();
+  return $results;
+}
+
+function get_rsname_using_rscode($rs_code) {
+  $query = db_select('field_data_field_name', 'fn');
+  $query->join('field_data_field_third_party_username', 'tpu', 'tpu.entity_id = fn.entity_id');
+  $query->condition('tpu.field_third_party_username_value', $rs_code);
+  $query->fields('fn', array('field_name_value',entity_id));
+  $res = $query->execute()->fetchField();  
+  return $res;
+}
+
+function ptl_no_of_bill_lines_by_trip_id($trip_id,$rs_code){
+  $query = db_select('ptl_data_configuration', 'pd');
+  $query->condition('trip_id', $trip_id);
+  $query->condition('rs_code', $rs_code);
+  $query->condition('loose', 1, '>=');
+  $query->addExpression('count(id)','no_of_id');
+  $results = $query->execute()->fetchField();
+  return $results;
 }

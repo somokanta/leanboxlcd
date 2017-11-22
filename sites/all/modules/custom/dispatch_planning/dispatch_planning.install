@@ -546,7 +546,23 @@ function dispatch_planning_update_7110() {
   }
   if (!db_index_exists('ptl_data_configuration', 'rs_code')) {
     db_add_index('ptl_data_configuration', 'rs_code', array('rs_code'));
-  }  
+  }
+  if (!db_index_exists('field_data_field_area_hook_group_hul', 'field_area_hook_group_hul_value')) {
+    db_add_index('field_data_field_area_hook_group_hul', 'field_area_hook_group_hul_value', array('field_area_hook_group_hul_value'));
+  }
+  if (!db_index_exists('field_data_field_dva_sales_day', 'field_dva_sales_day_value')) {
+    db_add_index('field_data_field_dva_sales_day', 'field_dva_sales_day_value', array('field_dva_sales_day_value'));
+  }
+  if (!db_index_exists('field_data_field_dva_van_pl_group', 'field_dva_van_pl_group_value')) {
+    db_add_index('field_data_field_dva_van_pl_group', 'field_dva_van_pl_group_value', array('field_dva_van_pl_group_value'));
+  }
+  if (!db_index_exists('field_data_field_dva_area_hook_group_name', 'field_dva_area_hook_group_name_value')) {
+    db_add_index('field_data_field_dva_area_hook_group_name', 'field_dva_area_hook_group_name_value', array('field_dva_area_hook_group_name_value'));
+  }
+
+  if (!db_index_exists('field_data_field_hul_code', 'field_hul_code_value')) {
+    db_add_index('field_data_field_hul_code', 'field_hul_code_value', array('field_hul_code_value'));
+  }
 }
 
 function dispatch_planning_update_7111() {

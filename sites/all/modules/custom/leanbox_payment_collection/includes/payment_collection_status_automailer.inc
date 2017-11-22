@@ -45,6 +45,12 @@ function get_email_pending_for_collection($distributor_id) {
   $query->leftjoin('field_data_field_previous_cash_amt', 'pc', 'pc.entity_id = n.nid');
   $query->leftjoin('field_data_field_previous_cheque_amt', 'pch', 'pch.entity_id = n.nid');
   
+  // Want record where bill date is 1st oct onward
+  $timestamp = strtotime(date('2017-10-01'))-1;
+  $query->join('field_data_field_sales_bill_no_ref', 'sbrf', 'sbrf.entity_id = n.nid');
+  $query->join('field_data_field_sr_bill_date', 'sr', 'sr.entity_id = sbrf.field_sales_bill_no_ref_nid');
+  $query->condition('sr.field_sr_bill_date_value', $timestamp,'>');
+
   $query->fields('n', array('nid'));
   $query->fields('dd', array('field_declaration_date_value'));
   $query->fields('ff', array('field_flag_value'));
@@ -116,12 +122,22 @@ function get_email_pending_for_assignment($distributor_id) {
   $query->join('field_data_field_remaining_amt_collection', 'ra', 'ra.entity_id = n.nid');
   $query->leftjoin('field_data_field_assignment_date', 'ad', 'ad.entity_id = n.nid');
   $query->isNull('ad.field_assignment_date_value');
+  $query->leftjoin('field_data_field_previous_cash_amt', 'pc', 'pc.entity_id = n.nid');
+  $query->leftjoin('field_data_field_previous_cheque_amt', 'pch', 'pch.entity_id = n.nid');
+
+  // Want record where bill date is 1st oct onward
+  $timestamp = strtotime(date('2017-10-01'))-1;
+  $query->join('field_data_field_sales_bill_no_ref', 'sbrf', 'sbrf.entity_id = n.nid');
+  $query->join('field_data_field_sr_bill_date', 'sr', 'sr.entity_id = sbrf.field_sales_bill_no_ref_nid');
+  $query->condition('sr.field_sr_bill_date_value', $timestamp,'>');
   
   $query->fields('n', array('nid'));
   $query->fields('dd', array('field_declaration_date_value'));
   $query->fields('ff', array('field_flag_value'));
   $query->fields('ra', array('field_remaining_amt_collection_value'));
   $query->fields('ad', array('field_assignment_date_value'));
+  $query->fields('pc', array('field_previous_cash_amt_value'));
+  $query->fields('pch', array('field_previous_cheque_amt_value'));
   $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
 
   $signed_counter  = 1;
@@ -136,10 +152,10 @@ function get_email_pending_for_assignment($distributor_id) {
     if($data['field_flag_value']  == 'signed') {
       $row['signed']['type']  = 'Signed';
       $row['signed']['count']  = $signed_counter++;
-      $row['signed']['value'] += $data['field_remaining_amt_collection_value'];
+      $row['signed']['value'] += $data['field_remaining_amt_collection_value'] - ($data['field_previous_cash_amt_value'] + $data['field_previous_cheque_amt_value']);
       if(strtotime($data['field_declaration_date_value']) <= $decl_date) {
         $row['signed']['decl_count'] = $decl_signed_counter++;
-        $row['signed']['decl_value'] += $data['field_remaining_amt_collection_value'];
+        $row['signed']['decl_value'] += $data['field_remaining_amt_collection_value'] - ($data['field_previous_cash_amt_value'] + $data['field_previous_cheque_amt_value']);
       }
       else {
         $row['signed']['decl_count'] += 0;
@@ -149,10 +165,10 @@ function get_email_pending_for_assignment($distributor_id) {
     else{
       $row['bounced']['type']  = 'Bounced';
       $row['bounced']['count']  = $bounced_counter++;
-      $row['bounced']['value'] += $data['field_remaining_amt_collection_value'];
+      $row['bounced']['value'] += $data['field_remaining_amt_collection_value'] - ($data['field_previous_cash_amt_value'] + $data['field_previous_cheque_amt_value']);
       if(strtotime($data['field_declaration_date_value']) <= $decl_date) {
         $row['bounced']['decl_count'] = $decl_bounced_counter++;
-        $row['bounced']['decl_value'] += $data['field_remaining_amt_collection_value'];
+        $row['bounced']['decl_value'] += $data['field_remaining_amt_collection_value'] - ($data['field_previous_cash_amt_value'] + $data['field_previous_cheque_amt_value']);
       }
       else {
         $row['bounced']['decl_count'] += 0;
@@ -186,12 +202,22 @@ function get_email_pending_for_upload($distributor_id) {
   $query->join('field_data_field_remaining_amt_collection', 'ra', 'ra.entity_id = n.nid');
   $query->leftjoin('field_data_field_file_upload_date', 'ud', 'ud.entity_id = n.nid');
   $query->isNull('ud.field_file_upload_date_value');
+  $query->leftjoin('field_data_field_previous_cash_amt', 'pc', 'pc.entity_id = n.nid');
+  $query->leftjoin('field_data_field_previous_cheque_amt', 'pch', 'pch.entity_id = n.nid');
+
+  // Want record where bill date is 1st oct onward
+  $timestamp = strtotime(date('2017-10-01'))-1;
+  $query->join('field_data_field_sales_bill_no_ref', 'sbrf', 'sbrf.entity_id = n.nid');
+  $query->join('field_data_field_sr_bill_date', 'sr', 'sr.entity_id = sbrf.field_sales_bill_no_ref_nid');
+  $query->condition('sr.field_sr_bill_date_value', $timestamp,'>');
   
   $query->fields('n', array('nid'));
   $query->fields('dd', array('field_declaration_date_value'));
   $query->fields('ff', array('field_flag_value'));
   $query->fields('ra', array('field_remaining_amt_collection_value'));
   $query->fields('ud', array('field_file_upload_date_value'));
+  $query->fields('pc', array('field_previous_cash_amt_value'));
+  $query->fields('pch', array('field_previous_cheque_amt_value'));
   $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
 
   $signed_counter  = 1;
@@ -206,10 +232,10 @@ function get_email_pending_for_upload($distributor_id) {
     if($data['field_flag_value']  == 'signed') {
       $row['signed']['type']  = 'Signed';
       $row['signed']['count']  = $signed_counter++;
-      $row['signed']['value'] += $data['field_remaining_amt_collection_value'];
+      $row['signed']['value'] += $data['field_remaining_amt_collection_value'] - ($data['field_previous_cash_amt_value'] + $data['field_previous_cheque_amt_value']);
       if(strtotime($data['field_declaration_date_value']) <= $decl_date) {
         $row['signed']['decl_count']  = $decl_signed_counter++;
-        $row['signed']['decl_value'] += $data['field_remaining_amt_collection_value'];
+        $row['signed']['decl_value'] += $data['field_remaining_amt_collection_value'] - ($data['field_previous_cash_amt_value'] + $data['field_previous_cheque_amt_value']);
       }
       else {
         $row['signed']['decl_count']  += 0;
@@ -219,10 +245,10 @@ function get_email_pending_for_upload($distributor_id) {
     else {
       $row['bounced']['type']  = 'Bounced';
       $row['bounced']['count']  = $bounced_counter++;
-      $row['bounced']['value'] += $data['field_remaining_amt_collection_value'];
+      $row['bounced']['value'] += $data['field_remaining_amt_collection_value'] - ($data['field_previous_cash_amt_value'] + $data['field_previous_cheque_amt_value']);
       if(strtotime($data['field_declaration_date_value']) <= $decl_date) {    
         $row['bounced']['decl_count']  = $decl_bounced_counter++;
-        $row['bounced']['decl_value'] += $data['field_remaining_amt_collection_value'];
+        $row['bounced']['decl_value'] += $data['field_remaining_amt_collection_value'] - ($data['field_previous_cash_amt_value'] + $data['field_previous_cheque_amt_value']);
       }
       else {
         $row['bounced']['decl_count'] += 0;
@@ -257,7 +283,11 @@ function get_email_pending_for_yesterday_assignment($distributor_id) {
   $query->leftjoin('field_data_field_assignment_date', 'ad', 'ad.entity_id = n.nid');
   $query->condition('ad.field_assignment_date_value', $date, '=');
   $query->leftjoin('field_data_field_assigned_person', 'ap', 'ap.entity_id = n.nid');
-  $query->groupBy('ap.field_assigned_person_value');
+
+  $query->leftjoin('field_data_field_previous_cash_amt', 'pc', 'pc.entity_id = n.nid');
+  $query->leftjoin('field_data_field_previous_cheque_amt', 'pch', 'pch.entity_id = n.nid');
+  
+  $query->groupBy('ap.field_assigned_person_value','ff.field_flag_value');
   
   $query->addExpression('COUNT(n.title)', 'bill_count');
   $query->addExpression('SUM(ra.field_remaining_amt_collection_value)', 'bill_value');
@@ -266,6 +296,8 @@ function get_email_pending_for_yesterday_assignment($distributor_id) {
   $query->fields('ra', array('field_remaining_amt_collection_value'));
   $query->fields('ap', array('field_assigned_person_value'));
   $query->fields('ad', array('field_assignment_date_value'));
+  $query->fields('pc', array('field_previous_cash_amt_value'));
+  $query->fields('pch', array('field_previous_cheque_amt_value'));
   $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
 
   $row = array();
@@ -277,7 +309,7 @@ function get_email_pending_for_yesterday_assignment($distributor_id) {
       $row[$person_signed]['type']  = 'Signed';
       $row[$person_signed]['assigned_to']  = $data['field_assigned_person_value'];
       $row[$person_signed]['bill_count']  = $data['bill_count'];
-      $row[$person_signed]['bill_value']  = $data['bill_value'];
+      $row[$person_signed]['bill_value']  = $data['bill_value'] - ($data['field_previous_cash_amt_value'] + $data['field_previous_cheque_amt_value']);
       $row[$person_signed]['bill_counts'] =  '';
       $row[$person_signed]['bill_values'] =  '' ;
     }
@@ -285,7 +317,7 @@ function get_email_pending_for_yesterday_assignment($distributor_id) {
       $row[$person_bounced]['type']  = 'Bounced';
       $row[$person_bounced]['assigned_to']  = $data['field_assigned_person_value'];
       $row[$person_bounced]['bill_count']  = $data['bill_count'];
-      $row[$person_bounced]['bill_value']  = $data['bill_value'];
+      $row[$person_bounced]['bill_value']  = $data['bill_value'] - ($data['field_previous_cash_amt_value'] + $data['field_previous_cheque_amt_value']);
       $row[$person_bounced]['bill_counts'] =  '';
       $row[$person_bounced]['bill_values'] =  '' ;
     }
@@ -303,7 +335,11 @@ function get_email_pending_for_yesterday_assignment($distributor_id) {
   $query->leftjoin('field_data_field_collection_date', 'cd', 'cd.entity_id = n.nid');
   $query->condition('cd.field_collection_date_value', $date, '=');
   $query->leftjoin('field_data_field_assigned_person', 'ap', 'ap.entity_id = n.nid');
-  $query->groupBy('ap.field_assigned_person_value');
+  
+  $query->leftjoin('field_data_field_previous_cash_amt', 'pc', 'pc.entity_id = n.nid');
+  $query->leftjoin('field_data_field_previous_cheque_amt', 'pch', 'pch.entity_id = n.nid');
+  
+  $query->groupBy('ap.field_assigned_person_value','ff.field_flag_value');
   
   $query->addExpression('COUNT(n.title)', 'bill_count');
   $query->addExpression('SUM(ra.field_remaining_amt_collection_value)', 'bill_value');
@@ -312,6 +348,8 @@ function get_email_pending_for_yesterday_assignment($distributor_id) {
   $query->fields('ra', array('field_remaining_amt_collection_value'));
   $query->fields('ap', array('field_assigned_person_value'));
   $query->fields('cd', array('field_collection_date_value'));
+  $query->fields('pc', array('field_previous_cash_amt_value'));
+  $query->fields('pch', array('field_previous_cheque_amt_value'));
   $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
 
   foreach($res as $data) {
@@ -323,7 +361,7 @@ function get_email_pending_for_yesterday_assignment($distributor_id) {
       $row[$person_signed]['bill_count'] = isset($row[$person_signed]['bill_count']) ? $row[$person_signed]['bill_count'] : '';
       $row[$person_signed]['bill_value'] = isset($row[$person_signed]['bill_value']) ? $row[$person_signed]['bill_value'] : '';
       $row[$person_signed]['bill_counts']  = $data['bill_count'];
-      $row[$person_signed]['bill_values']  = $data['bill_value'];
+      $row[$person_signed]['bill_values']  = $data['bill_value'] - ($data['field_previous_cash_amt_value'] + $data['field_previous_cheque_amt_value']);
     }
     else {
       $row[$person_bounced]['type']  = 'Bounced';
@@ -331,7 +369,7 @@ function get_email_pending_for_yesterday_assignment($distributor_id) {
       $row[$person_bounced]['bill_count'] = isset($row[$person_bounced]['bill_count']) ? $row[$person_bounced]['bill_count'] : '';
       $row[$person_bounced]['bill_value'] = isset($row[$person_bounced]['bill_value']) ? $row[$person_bounced]['bill_value'] : '';
       $row[$person_bounced]['bill_counts']  = $data['bill_count'];
-      $row[$person_bounced]['bill_values']  = $data['bill_value'];
+      $row[$person_bounced]['bill_values']  = $data['bill_value'] - ($data['field_previous_cash_amt_value'] + $data['field_previous_cheque_amt_value']);
     }
   }
 

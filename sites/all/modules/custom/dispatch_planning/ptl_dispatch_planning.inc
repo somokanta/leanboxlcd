@@ -334,9 +334,12 @@ function create_fetch_data_ptl_trip_form_submit($form, &$form_state) {
     if ($count) {
       drupal_set_message("Trip $trip_id PTL data is created successfully!");
     }
-    else {
-      drupal_set_message("PTL data is not created for a trip $trip_id",'warning');
+    else if(empty($trip_id_nid)){  
+      drupal_set_message("Trip $trip_id is not created!",'warning');
     }
+    else if(empty($ptl_authentication_flag)){  
+      drupal_set_message("PTL data is not created because flag is not enabled!",'warning');
+    }    
   }
   else {
     drupal_set_message("Trip $trip_id data is already created!", 'warning');
@@ -358,7 +361,7 @@ function ptl_api_data_create($nid, $trip_id) {
     $vehicle = $node->field_billing_van[LANGUAGE_NONE][0]['value'];
     $bill_number = $node->title;
     $loading_data = $node->field_billing_loading_date[LANGUAGE_NONE][0]['value'];
-    $store_sequence = $node->field_drs_sequence[LANGUAGE_NONE][0]['value'];
+    $store_sequence = (int) $node->field_drs_sequence[LANGUAGE_NONE][0]['value'];
 
     $billing_data_details = ptl_get_billing_data($node_uid, $bill_number);
 
