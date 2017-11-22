@@ -1,0 +1,6 @@
+<?php
+
+/* 
+ * This module is for preventing a multiple click on form submit
+ */
+
