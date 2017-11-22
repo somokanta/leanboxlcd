@@ -89,8 +89,60 @@ function dispatch_planning_menu() {
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
-
-
+// $items['dispatch-planning-cron'] = array(
+//    'title' => '',
+//    'page callback' => 'dispatch_planning_cron_callback',
+//    'access callback' => TRUE,
+//    'type' => MENU_NORMAL_ITEM,
+//  );
+  $items['loose-picking-sheet'] = array(
+    'title' => 'Loose PICKING SHEET',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('ptl_loose_sheet_form'),
+    'access arguments' => array('Distributor Upload File'),
+    'type' => MENU_CALLBACK,
+    'file' => 'ptl_dispatch_planning.inc',
+  );
+  $items['download-loose-picking/%'] = array(
+    'title' => 'Download PTL Loose',
+    'page callback' => 'download_ptl_loose_sheet',
+    'page arguments' => array(1),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'ptl_dispatch_planning.inc',
+  );
+  $items['cld-picking-sheet'] = array(
+    'title' => 'CLD PICKING SHEET',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('ptl_cld_sheet_form'),
+    'access arguments' => array('Distributor Upload File'),
+    'type' => MENU_CALLBACK,
+    'file' => 'ptl_dispatch_planning.inc',
+  );
+  $items['download-cld-picking/%'] = array(
+    'title' => 'CLD PICKING SHEET',
+    'page callback' => 'download_ptl_cld_sheet',
+    'page arguments' => array(1),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'ptl_dispatch_planning.inc',
+  );
+  $items['delete-ptl-trip'] = array(
+    'title' => 'Resent Trip To PTL',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('delete_fetch_data_ptl_trip_form'),
+    'access arguments' => array('Ptl trip creation'),
+    'type' => MENU_CALLBACK,
+    'file' => 'ptl_dispatch_planning.inc',
+  );
+  $items['create-ptl-trip'] = array(
+    'title' => 'Create Trip To PTL',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('create_fetch_data_ptl_trip_form'),
+    'access arguments' => array('Ptl trip creation'),
+    'type' => MENU_CALLBACK,
+    'file' => 'ptl_dispatch_planning.inc',
+  );  
   return $items;
 }
 
@@ -113,9 +165,170 @@ function dispatch_planning_permission() {
       'title' => t('only-rs-admin-with existing data'),
       'description' => t('only-rs-admin-with existing data')
     ),
+    'dispatch planning api url' => array(
+      'title' => t('dispatch planning api url'),
+      'description' => t('dispatch planning api url'),
+    ),
+    'services_access_ptl_api' => array(
+      'title' => t(''),
+      'description' => t('PTL Api Access')
+    ),
+    'Ptl trip creation' => array(
+      'title' => t('Ptl trip creation'),
+      'description' => t('Ptl trip creation')
+    )    
   );
 }
 
+/**
+ * 
+ * @return array API for PTL data
+ */
+function dispatch_planning_services_resources() {
+  $ptl_resource = array(
+    '#api_version' => 3002,
+  );
+  $ptl_resource = array(
+    'ptl-api-data' => array(
+      'actions' => array(
+        'ptl-api-data-fetch' => array(
+          'help' => 'Get PTL Data',
+          'callback' => 'fetch_ptl_data',
+          'args' => array(
+            array(
+              'name' => 'rs_code',
+              'type' => 'string',
+              'description' => 'RS Code',
+              'source' => array('data' => 'rs_code'),
+              'optional' => FALSE,
+            ),
+            array(
+              'name' => 'api_time',
+              'type' => 'string',
+              'description' => 'Pass last fetch time',
+              'source' => array('data' => 'api_time'),
+              'optional' => FALSE,
+            ),
+          ),
+          'file' => array(
+            'type' => 'inc',
+            'module' => 'dispatch_planning',
+            'name' => 'ptl_dispatch_planning'
+          ),
+          'access arguments' => array('services_access_ptl_api'),
+        ),
+        'ptl-api-data-update' => array(
+          'help' => 'Get PTL Data',
+          'callback' => 'update_ptl_data',
+          'args' => array(
+//            array(
+//              'name' => 'rs_code',
+//              'type' => 'string',
+//              'description' => 'RS Code',
+//              'source' => array('data' => 'rs_code'),
+//              'optional' => FALSE,
+//            ),
+            array(
+              'name' => 'unique_id',
+              'type' => 'string',
+              'description' => 'Unique ID',
+              'source' => array('data' => 'unique_id'),
+              'optional' => FALSE,
+            ),
+            array(
+              'name' => 'update_time',
+              'type' => 'string',
+              'description' => 'Pass update time',
+              'source' => array('data' => 'update_time'),
+              'optional' => FALSE,
+            ),
+          ),
+          'file' => array(
+            'type' => 'inc',
+            'module' => 'dispatch_planning',
+            'name' => 'ptl_dispatch_planning'
+          ),
+          'access arguments' => array('services_access_ptl_api'),
+        ),
+        'ptl-api-put-qty' => array(
+          'help' => 'Qty update PTL Data',
+          'callback' => 'put_qty_ptl_data',
+          'args' => array(
+            array(
+              'name' => 'id_qty',
+              'type' => 'string',
+              'description' => 'ID and Put QTY',
+              'source' => array('data' => 'id_qty'),
+              'optional' => FALSE,
+            ),
+          ),
+          'file' => array(
+            'type' => 'inc',
+            'module' => 'dispatch_planning',
+            'name' => 'ptl_dispatch_planning'
+          ),
+          'access arguments' => array('services_access_ptl_api'),
+        ),        
+      ),
+    ),
+  );
+  return $ptl_resource;
+}
+
+
+/**
+ * Implements of hook_views_api().
+ */
+function dispatch_planning_views_api() {
+  return array(
+    'api' => 3,
+    'path' => drupal_get_path('module', 'dispatch_planning') . '/views'
+  );
+}
+
+/**
+ * dispatch planning cron page callback function
+ */
+function dispatch_planning_cron_callback() {
+  $query = db_select('dispatch_planning_api_log', 'a');
+  $query->fields('a', array('request_data', 'id'));
+  $query->condition('a.request_flag', 0);
+  $query->condition('a.api_type', 'dispatch_planning');
+
+  $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+
+  if (!empty($res)) {
+    foreach ($res as $key => $val) {
+
+// Write logic to hit API Here
+      $json_api_data = $val['request_data'];
+      $sql_ins_id = $val['id'];
+
+      $request_headers = array('Content-Type' => 'application/json');
+      $order_api_url = variable_get('dispatch_uri_settings');
+      $options = array('headers' => $request_headers, 'method' => 'POST', 'data' => $json_api_data);
+      $response = drupal_http_request($order_api_url, $options);
+
+      $response_data = $response->data;
+      if ($response_data) {
+        $api_success = json_decode($response_data);
+        $api_success = (isset($api_success->failCount) && $api_success->failCount == 0) ? 1 : 0;
+        // create response log entry
+        dispatch_planning_api_log_update($response_data, $sql_ins_id, $api_success);
+      }
+      else {
+        //dpm($response);
+      }
+    }
+  }
+  return "1";
+}
+
+/**
+ * @param type $form
+ * @param type $form_state
+ * @return string
+ */
 function dispatch_planning_form($form, &$form_state) {
 
   $form['#prefix'] = '<div id="itemlist-div">';
@@ -685,7 +898,7 @@ function dispatch_planning_form_save_validate($form, &$form_state) {
       "lat" => $origin_lat, //'19.1817531000', //
       "lng" => $origin_long //'72.9972678000',// 
     );
-    $Locations['fleet']['origin']['speed'] = 'very slow'; // speed of the driver
+    $Locations['fleet']['origin']['speed'] = '0.1'; // speed of the driver
 
     /*$post_result = graphhopper_postvrp_api($params);
     if ($post_result) {
@@ -1476,4 +1689,103 @@ function check_dynamic_routing_configuration($distributor_id) {
   $query->condition('tp.entity_id', $distributor_id);
   $res = $query->execute()->fetchField();
   return $res;
+}
+
+/**
+ * 
+ * @param type $node_uid
+ * @return string
+ */
+function ptl_check_api_authentication($node_uid) {
+  $query = db_select('field_data_field_ptl_data_configuration', 'tp');
+  $query->fields('tp', array('entity_id'));
+  $query->condition('tp.field_ptl_data_configuration_value', 1);
+  $query->condition('tp.entity_id', $node_uid);
+  $res = $query->execute()->fetchField();
+  return $res;
+}
+
+/**
+ * 
+ * @param type $uid
+ * @return string
+ */
+function dispatch_planning_get_rscode_using_uid($uid) {
+  $query = db_select('field_data_field_third_party_username', 'rs');
+  $query->condition('rs.entity_id', $uid);
+  $query->fields('rs', array('field_third_party_username_value'));
+  $res = $query->execute()->fetchField();
+  return $res;
+}
+
+/**
+ * 
+ * @param type $sku7_code
+ * @param type $distributor_id
+ * @return type qty for sku in one unit case
+ */
+function get_sku_unit_case($sku7_code, $distributor_id) {
+  $query = db_select('field_data_field_unit_case_units_', 'fucu');
+  $query->fields('fucu', array('field_unit_case_units__value'));
+  $query->join('field_data_field_sku7_code', 'sc', 'sc.entity_id = fucu.entity_id');
+  $query->join('node', 'n', 'n.nid = fucu.entity_id');
+  $query->condition('n.type', 'sku7_code_master');
+  $query->condition('sc.field_sku7_code_value', $sku7_code, '=');
+  $query->condition('n.uid', $distributor_id, '=');
+  $res = $query->execute()->fetchField();
+  return $res;
+}
+
+
+function ptl_loading_sheet_by_trip_id($trip_id,$rs_code) {
+  $query = db_select('ptl_data_configuration', 'pd');
+  $query->addExpression("concat(vehicle ,' / ', DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(loading_date),'+00:00','+05:30'), '%d-%b-%y'))", 'vehicle_loading');
+  $query->condition('trip_id', $trip_id);
+  $query->condition('rs_code', $rs_code);
+  $query->groupBy('vehicle,loading_date');
+  $results = $query->execute()->fetchAll();
+
+  foreach ($results as $key => $value) {
+    $vehicle_loading = $vehicle_loading . ', ' . $value->vehicle_loading;
+  }
+
+  return ltrim($vehicle_loading, ',');
+}
+
+
+function ptl_no_of_bills_by_trip_id($trip_id,$rs_code) {
+  $query = db_select('ptl_data_configuration', 'pd');
+  $query->condition('trip_id', $trip_id);
+  $query->condition('rs_code', $rs_code);
+  $query->addExpression('count(DISTINCT(bill_number))','bill_number');
+  $results = $query->execute()->fetchField();
+  return $results;
+}
+
+function ptl_trip_date_by_trip_id($trip_id,$rs_code) {
+  $query = db_select('ptl_data_configuration', 'pd');
+  $query->condition('trip_id', $trip_id);
+  $query->condition('rs_code', $rs_code);
+  $query->fields('pd',array('created_time'));
+  $results = $query->range(0,1)->execute()->fetchField();
+  return $results;
+}
+
+function get_rsname_using_rscode($rs_code) {
+  $query = db_select('field_data_field_name', 'fn');
+  $query->join('field_data_field_third_party_username', 'tpu', 'tpu.entity_id = fn.entity_id');
+  $query->condition('tpu.field_third_party_username_value', $rs_code);
+  $query->fields('fn', array('field_name_value',entity_id));
+  $res = $query->execute()->fetchField();  
+  return $res;
+}
+
+function ptl_no_of_bill_lines_by_trip_id($trip_id,$rs_code){
+  $query = db_select('ptl_data_configuration', 'pd');
+  $query->condition('trip_id', $trip_id);
+  $query->condition('rs_code', $rs_code);
+  $query->condition('loose', 1, '>=');
+  $query->addExpression('count(id)','no_of_id');
+  $results = $query->execute()->fetchField();
+  return $results;
 }

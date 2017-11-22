@@ -11,6 +11,12 @@ function adhoc_task_menu() {
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
+  $items['email/bill_date_miss_in_sales_register'] = array(
+    'title' => 'Email For Billing Date missing in Sales register',
+    'page callback' => 'bill_date_missing_in_sales_register',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
 
   $items['update-sales-register'] = array(
     'title' => 'update-sales-register',

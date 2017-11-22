@@ -29,3 +29,554 @@ function dispatch_planning_schema() {
 
   return $schema;
 }
+
+/**
+ * Create new database table {dispatch_planning_api_log}.
+ */
+function dispatch_planning_update_7102() {
+  $schema['dispatch_planning_api_log'] = array(
+    'description' => 'describes Api log for Dispatch planning',
+    'fields' => array(
+      'id' => array(
+        'description' => t('Id Primary Key'),
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'request_data' => array(
+        'description' => t('API Details'),
+        'type' => 'text',
+      ),
+      'response_data' => array(
+        'description' => t('API Details'),
+        'type' => 'text',
+      ),
+      'request_time' => array(
+        'description' => t('API Request time'),
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'trip_id' => array(
+        'description' => t('Trip Id'),
+        'type' => 'varchar',
+        'length' => 25,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'api_type' => array(
+        'description' => t('API Type'),
+        'type' => 'varchar',
+        'length' => 25,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'api_success' => array(
+        'description' => t('API Success'),
+        'type' => 'int',
+        'length'=>1,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    ),
+    'indexes' => array(
+      'trip_id' => array('trip_id'),
+    ),
+    'primary key' => array('id'),
+  );
+
+  db_create_table('dispatch_planning_api_log', $schema['dispatch_planning_api_log']);
+}
+
+function dispatch_planning_update_7103() {
+  db_change_field('dispatch_planning_api_log', 'request_data', 'request_data', array('type' => 'text','size'=>'medium'));
+}
+
+/**
+ * Create new database table using hook_update_N()
+ */
+function dispatch_planning_update_7105() {
+  $schema['dispatch_planning_api_data'] = array(
+    'description' => 'describes Api log for Dispatch planning',
+    'fields' => array(
+      'id' => array(
+        'description' => t('Id Primary Key'),
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'jobType' => array(
+        'description' => t('Job type'),
+        'type' => 'varchar',
+        'length' => 50,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'referenceNo' => array(
+        'description' => t('RS Code_Bill Number'),
+        'type' => 'varchar',
+        'length' => 25,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'date' => array(
+        'description' => t('Trip exicution Date'),
+        'type' => 'varchar',
+        'length' => 25,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'city' => array(
+        'description' => t('city'),
+        'type' => 'varchar',
+        'length' => 25,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'hub' => array(
+        'description' => t('RS Code'),
+        'type' => 'varchar',
+        'length' => 25,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'fieldExecutive' => array(
+        'description' => t('RS Code_HHT ID'),
+        'type' => 'varchar',
+        'length' => 25,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'fieldExecutiveName' => array(
+        'description' => t('cashier name'),
+        'type' => 'varchar',
+        'length' => 50,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'vehicle' => array(
+        'description' => t('Vehicle Number'),
+        'type' => 'varchar',
+        'length' => 50,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'party_hll_code' => array(
+        'description' => t('HUL code'),
+        'type' => 'varchar',
+        'length' => 50,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'lat_longlatitude' => array(
+        'description' => t('Updated Lat,Long'),
+        'type' => 'varchar',
+        'length' => 50,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'lat_longlongitude' => array(
+        'description' => t('Updated Lat,Long'),
+        'type' => 'varchar',
+        'length' => 50,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'bill_value' => array(
+        'description' => t('To be Collected amount'),
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'bill_date' => array(
+        'description' => t('Bill date'),
+        'type' => 'varchar',
+        'length' => 25,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'locality' => array(
+        'description' => t('Locality'),
+        'type' => 'varchar',
+        'length' => 100,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'store_sequence_no' => array(
+        'description' => t('DRS NO'),
+        'type' => 'varchar',
+        'length' => 20,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'party_name' => array(
+        'description' => t('Party Name'),
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'beat_name' => array(
+        'description' => t('Beat Name '),
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'party_code' => array(
+        'description' => t('PARTY_Code'),
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'bill_number' => array(
+        'description' => t('Bill Number'),
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'runsheet_number' => array(
+        'description' => t('Trip ID Number'),
+        'type' => 'varchar',
+        'length' => 100,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+    ),
+    'primary key' => array('id'),
+    'indexes' => array(
+      'bill_number' => array('bill_number'),
+      'runsheet_number' => array('runsheet_number'),
+    ),
+  );
+
+  $schema['dispatch_planning_item_details'] = array(
+    'description' => 'describes Api log for Dispatch planning',
+    'fields' => array(
+      'id' => array(
+        'description' => t('Id Primary Key'),
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'tur' => array(
+        'description' => t('Tur'),
+        'type' => 'varchar',
+        'length' => 20,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'mrp' => array(
+        'description' => t('MRP'),
+        'type' => 'varchar',
+        'length' => 25,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'product_name' => array(
+        'description' => t('Product name'),
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'sum_net_sales_cases' => array(
+        'description' => t('Sum net sales cases'),
+        'type' => 'float',
+        'not null' => TRUE,
+      ),
+      'sum_net_sales_quantity' => array(
+        'description' => t('Sum net sales quantity'),
+        'type' => 'float',
+        'not null' => TRUE,
+      ),
+      'sku_code' => array(
+        'description' => t('SKU Code'),
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'sum_net_sales_kgs' => array(
+        'description' => t('Sum net sales in kgs'),
+        'type' => 'float',
+        'not null' => TRUE,
+      ),
+      'sum_net_sales_value' => array(
+        'description' => t('Sum net sales value'),
+        'type' => 'float',
+        'not null' => TRUE,
+      ),
+      'sku_description' => array(
+        'description' => t('SKU Description'),
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'trip_bill_reference' => array(
+        'description' => t('Trip bill reference number'),
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    ),
+    'primary key' => array('id'),
+    'indexes' => array(
+      'trip_bill_reference' => array('trip_bill_reference'),
+    ),
+  );
+  $fields = array(
+    'request_flag' => array(
+      'description' => 'Request flag field',
+      'type' => 'int',
+      'not null' => TRUE,
+      'default' => 0,
+    ),
+  );
+  foreach ($fields as $key => $field) {
+    if (!db_field_exists('dispatch_planning_api_log', $key)) {
+      db_add_field('dispatch_planning_api_log', $key, $field);
+    }
+  }
+  db_create_table('dispatch_planning_api_data', $schema['dispatch_planning_api_data']);
+  db_create_table('dispatch_planning_item_details', $schema['dispatch_planning_item_details']);
+}
+
+/**
+ * Create new database table using hook_update_N()
+ */
+function dispatch_planning_update_7107() {
+  $schema['ptl_data_configuration'] = array(
+    'description' => 'PTL Data configuration',
+    'fields' => array(
+      'id' => array(
+        'description' => t('Id Primary Key'),
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'ptl_job' => array(
+        'description' => t('PTL JOB'),
+        'type' => 'varchar',
+        'length' => 150,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'trip_id' => array(
+        'description' => t('Trip ID'),
+        'type' => 'varchar',
+        'length' => 25,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'vehicle' => array(
+        'description' => t('VEHICLE'),
+        'type' => 'varchar',
+        'length' => 50,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'bill_number' => array(
+        'description' => t('BILL_NUMBER'),
+        'type' => 'varchar',
+        'length' => 50,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'loading_date' => array(
+        'description' => t('LOADING_DATE'),
+        'type' => 'int',
+        'length' => 32,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'sequence_no' => array(
+        'description' => t('SEQUENCE No'),
+        'type' => 'varchar',
+        'length' => 25,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'basepack_code' => array(
+        'description' => t('BASEPACK_CODE'),
+        'type' => 'varchar',
+        'length' => 50,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'sku_code' => array(
+        'description' => t('SKU7_CODE'),
+        'type' => 'varchar',
+        'length' => 50,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'product_name' => array(
+        'description' => t('PRODUCT_NAME'),
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'MRP' => array(
+        'description' => t('MRP'),
+        'type' => 'varchar',
+        'length' => 50,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'TUR' => array(
+        'description' => t('TUR'),
+        'type' => 'varchar',
+        'length' => 50,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'sum_sales_qty' => array(
+        'description' => t('Sum of TOTAL_SALES_QTY'),
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+     ), 
+    'primary key' => array('id'),
+    'indexes' => array(
+      'sku_code' => array('sku_code'),
+      'trip_id' => array('trip_id'),
+    ),
+  );
+  db_create_table('ptl_data_configuration', $schema['ptl_data_configuration']);
+}
+
+/**
+ * Adding new api_flag in table ptl_data_configuration using hook_update_N()
+ */
+function dispatch_planning_update_7108() {
+  $fields = array(
+    'api_flag' => array(
+      'description' => 'Request flag field',
+      'type' => 'int',
+      'length' => 1,
+      'not null' => TRUE,
+      'default' => 0,
+    ),
+  );
+  foreach ($fields as $key => $field) {
+    if (!db_field_exists('ptl_data_configuration', $key)) {
+      db_add_field('ptl_data_configuration', $key, $field);
+    }
+  }
+}
+
+/**
+ * Adding new api_flag in table ptl_data_configuration using hook_update_N()
+ */
+function dispatch_planning_update_7109() {
+  $fields = array(
+    'rs_code' => array(
+        'description' => t('RS Code'),
+        'type' => 'varchar',
+        'length' => 25,
+        'not null' => TRUE,
+        'default' => '',
+    ),
+    'update_time' => array(
+      'description' => 'Update Time',
+      'type' => 'int',
+      'not null' => TRUE,
+      'default' => 0,
+    ),
+     'fetch_time' => array(
+      'description' => 'API Fetch Time',
+      'type' => 'int',
+      'not null' => TRUE,
+      'default' => 0,
+    ),
+     'created_time' => array(
+      'description' => 'DATA Created Time',
+      'type' => 'int',
+      'not null' => TRUE,
+      'default' => 0,
+    ),
+    'upc' => array(
+      'description' => 'UPC qty',
+      'type' => 'int',
+      'not null' => TRUE,
+      'default' => 0,
+    ), 
+     'cld' => array(
+      'description' => 'CLD qty',
+      'type' => 'int',
+      'not null' => TRUE,
+      'default' => 0,
+    ), 
+     'loose' => array(
+      'description' => 'Loose qty',
+      'type' => 'int',
+      'not null' => TRUE,
+      'default' => 0,
+    ),
+     'put_qty' => array(
+      'description' => 'Put qty',
+      'type' => 'int',
+      'not null' => TRUE,
+      'default' => 0,
+    ),
+     'put_qty_time' => array(
+      'description' => 'Put Qty Time',
+      'type' => 'int',
+      'not null' => TRUE,
+      'default' => 0,
+    ),
+  );
+  foreach ($fields as $key => $field) {
+    if (!db_field_exists('ptl_data_configuration', $key)) {
+      db_add_field('ptl_data_configuration', $key, $field);
+    }
+  }
+}
+
+function dispatch_planning_update_7110() {
+  if (!db_index_exists('field_data_field_dispatch_n_value', 'field_dispatch_n_value_value')) {
+    db_add_index('field_data_field_dispatch_n_value', 'field_dispatch_n_value_value', array('field_dispatch_n_value_value'));
+  }
+  if (!db_index_exists('field_data_field_sr_bill_date', 'field_sr_bill_date_value')) {
+    db_add_index('field_data_field_sr_bill_date', 'field_sr_bill_date_value', array('field_sr_bill_date_value'));
+  }
+  if (!db_index_exists('ptl_data_configuration', 'rs_code')) {
+    db_add_index('ptl_data_configuration', 'rs_code', array('rs_code'));
+  }
+  if (!db_index_exists('field_data_field_area_hook_group_hul', 'field_area_hook_group_hul_value')) {
+    db_add_index('field_data_field_area_hook_group_hul', 'field_area_hook_group_hul_value', array('field_area_hook_group_hul_value'));
+  }
+  if (!db_index_exists('field_data_field_dva_sales_day', 'field_dva_sales_day_value')) {
+    db_add_index('field_data_field_dva_sales_day', 'field_dva_sales_day_value', array('field_dva_sales_day_value'));
+  }
+  if (!db_index_exists('field_data_field_dva_van_pl_group', 'field_dva_van_pl_group_value')) {
+    db_add_index('field_data_field_dva_van_pl_group', 'field_dva_van_pl_group_value', array('field_dva_van_pl_group_value'));
+  }
+  if (!db_index_exists('field_data_field_dva_area_hook_group_name', 'field_dva_area_hook_group_name_value')) {
+    db_add_index('field_data_field_dva_area_hook_group_name', 'field_dva_area_hook_group_name_value', array('field_dva_area_hook_group_name_value'));
+  }
+
+  if (!db_index_exists('field_data_field_hul_code', 'field_hul_code_value')) {
+    db_add_index('field_data_field_hul_code', 'field_hul_code_value', array('field_hul_code_value'));
+  }
+}
+
+function dispatch_planning_update_7111() {
+   $fields = array(
+     'distributor_id' => array(
+       'description' => 'distributor_id',
+       'type' => 'int',
+       'not null' => TRUE,
+       'default' => 0,
+     ),
+   );
+   foreach ($fields as $key => $field) {
+      if (!db_field_exists('dispatch_planning_api_log', $key)) {
+         db_add_field('dispatch_planning_api_log', $key, $field);
+      }
+   }
+}
