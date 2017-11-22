@@ -287,7 +287,7 @@ function get_email_pending_for_yesterday_assignment($distributor_id) {
   $query->leftjoin('field_data_field_previous_cash_amt', 'pc', 'pc.entity_id = n.nid');
   $query->leftjoin('field_data_field_previous_cheque_amt', 'pch', 'pch.entity_id = n.nid');
   
-  $query->groupBy('ap.field_assigned_person_value');
+  $query->groupBy('ap.field_assigned_person_value','ff.field_flag_value');
   
   $query->addExpression('COUNT(n.title)', 'bill_count');
   $query->addExpression('SUM(ra.field_remaining_amt_collection_value)', 'bill_value');
@@ -339,7 +339,7 @@ function get_email_pending_for_yesterday_assignment($distributor_id) {
   $query->leftjoin('field_data_field_previous_cash_amt', 'pc', 'pc.entity_id = n.nid');
   $query->leftjoin('field_data_field_previous_cheque_amt', 'pch', 'pch.entity_id = n.nid');
   
-  $query->groupBy('ap.field_assigned_person_value');
+  $query->groupBy('ap.field_assigned_person_value','ff.field_flag_value');
   
   $query->addExpression('COUNT(n.title)', 'bill_count');
   $query->addExpression('SUM(ra.field_remaining_amt_collection_value)', 'bill_value');
