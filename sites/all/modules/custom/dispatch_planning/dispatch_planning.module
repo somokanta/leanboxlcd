@@ -1063,10 +1063,6 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
   
   $sequence_array = $form_state['dispatch_planning']['sequence_array'];
   $manual_drs_sequence = $form_state['dispatch_planning']['manual_drs_sequence'];
-
-  // Start Dispatch API here
-  $api_data = array();
-
   if ($seq_flag) {
     foreach ($bill_sequence as $key => $value) {
       $node = node_load($value);
@@ -1078,12 +1074,6 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
       }
       $node->field_trip_id_reference[LANGUAGE_NONE][0]['nid'] = $nid;
       node_save($node);
-
-      // get api data here
-//      $api_authentication_flag = dispatch_planning_check_api_authentication($node->uid);
-//      if (!empty($api_authentication_flag)) {
-//        $api_data[] = dispatch_planning_sales_reg_api($value, $node, $trip_execution_date, $hht_id, $cashier, $trip_id);
-//      }
     }
 
     $diff = array_diff($bill_nids, $bill_sequence);
@@ -1098,20 +1088,12 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
         }
         $node->field_trip_id_reference[LANGUAGE_NONE][0]['nid'] = $nid;
         node_save($node);
-
-        // get api data here
-//        $api_authentication_flag = dispatch_planning_check_api_authentication($node->uid);
-//        if (!empty($api_authentication_flag)) {
-//          $api_data[] = dispatch_planning_sales_reg_api($value, $node, $trip_execution_date, $hht_id, $cashier, $trip_id);
-//
-//        }        
       }
     }
   }
   else {
     foreach ($bill_nids as $value) {
       $node = node_load($value);
-
 
       if (isset($sequence_array[$value]) && !empty($sequence_array[$value])) {
         $node->field_bill_sequence[LANGUAGE_NONE][0]['value'] = $sequence_array[$value];
@@ -1123,14 +1105,6 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
       }
       $node->field_trip_id_reference[LANGUAGE_NONE][0]['nid'] = $nid;
       node_save($node);
-
-      // get api data here
-//      $api_authentication_flag = dispatch_planning_check_api_authentication($node->uid);
-//      if (!empty($api_authentication_flag)) {
-//        $api_data[] = dispatch_planning_sales_reg_api($value, $node, $trip_execution_date, $hht_id, $cashier, $trip_id);
-//
-//      }
-
     }
   }
 

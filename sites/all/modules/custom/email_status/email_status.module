@@ -14,7 +14,6 @@ function email_status_menu() {
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
-
   $items['email-productivity-data'] = array(
     'title' => 'Send Email Of Productivity Data',
     'page callback' => 'send_party_packingand_picking_productivity_emailer',
@@ -437,7 +436,7 @@ function send_email_daily_data() {
     $bulk_pending_percentage = round(($picking_bulk_pending / $picking_Bulk) * 100);
 
 
-    $picking_html .= "<tr>
+    $picking_html .="<tr>
 <td>$key</td>
 <td><table ><tr>Bulk</tr><td>Loose</td></table></td>
 <td><table><tr>$picking_Bulk</tr><td>$picking_loose</td></table></td>
@@ -872,7 +871,7 @@ function send_email_productivity_emailer($todays_date_date, $distributor_name, $
         }if ($key == 0) {
           $first_row = "NON-PP";
         }
-        $party_pack_superwise_html .= "<tr>
+        $party_pack_superwise_html .="<tr>
     <td>$first_row</td>";
         $super_wise_counter = 0;
         foreach ($value as $k => $v) {
@@ -898,19 +897,19 @@ function send_email_productivity_emailer($todays_date_date, $distributor_name, $
             }
             $percentage = ($bill_lines / $time);
             $percentage = number_format((float) $percentage, 2, '.', '');
-            $party_pack_superwise_html .= "<td><table class = 'pp-sp'><td><tr>$super_visor</tr></td></table></td>";
-            $party_pack_superwise_html .= "<td><table class = 'pp-bill'><td><tr>$bill_lines</tr></td></table></td>";
-            $party_pack_superwise_html .= "<td><table class = 'pp-time'><td><tr>$time</tr></td></table></td>";
+            $party_pack_superwise_html .="<td><table class = 'pp-sp'><td><tr>$super_visor</tr></td></table></td>";
+            $party_pack_superwise_html .="<td><table class = 'pp-bill'><td><tr>$bill_lines</tr></td></table></td>";
+            $party_pack_superwise_html .="<td><table class = 'pp-time'><td><tr>$time</tr></td></table></td>";
             if ($super_wise_counter == $superwise_count) {
-              $party_pack_superwise_html .= "<td><table class = 'pp-count'><td><tr>$percentage</tr></td></table></td>";
+              $party_pack_superwise_html .="<td><table class = 'pp-count'><td><tr>$percentage</tr></td></table></td>";
             }
             else {
-              $party_pack_superwise_html .= "<td><table class = 'pp-count'><td><tr>$percentage</tr></td></table></td><tr></tr><td></td>";
+              $party_pack_superwise_html .="<td><table class = 'pp-count'><td><tr>$percentage</tr></td></table></td><tr></tr><td></td>";
             }
 
             $label = $ke . ' ' . $k;
             $label_key = strtolower($label);
-            $picking_godown_wise_html .= "<td><table class = 'pp-count'><td><tr> $target_data[$label_key]</tr></td></table></td><tr></tr><td></td>";
+            $picking_godown_wise_html .="<td><table class = 'pp-count'><td><tr> $target_data[$label_key]</tr></td></table></td><tr></tr><td></td>";
 
 
             $total_timing += $time;
@@ -921,7 +920,7 @@ function send_email_productivity_emailer($todays_date_date, $distributor_name, $
         $total_percentage = number_format((float) $total_percentage, 2, '.', '');
         $all_total_timing += $total_timing;
         $all_total_loding_lines += $total_bill_lines;
-        $party_pack_superwise_html .= "<tr>
+        $party_pack_superwise_html .="<tr>
 <td>$first_row Result</td>
 <td></td>
 <td><table class = 'pp-total-bill'><td><tr>$total_bill_lines</tr></td></table></td>
@@ -999,7 +998,7 @@ function send_email_productivity_emailer($todays_date_date, $distributor_name, $
 
       if ($key == "godown") {
         foreach ($value as $ke => $val) {
-          $picking_godown_wise_html .= "<tr>
+          $picking_godown_wise_html .="<tr>
     <td>$ke</td>";
           $godown_counter = 0;
           $godown_count = count($val);
@@ -1009,18 +1008,18 @@ function send_email_productivity_emailer($todays_date_date, $distributor_name, $
             $timing = $v['total_tme'];
             $percentage = ($loding_lines / $timing);
             $percentage = number_format((float) $percentage, 2, '.', '');
-            $picking_godown_wise_html .= "<td><table class = 'pp-sp'><td><tr>$k</tr></td></table></td>";
-            $picking_godown_wise_html .= "<td><table class = 'pp-bill'><td><tr>$loding_lines</tr></td></table></td>";
-            $picking_godown_wise_html .= "<td><table class = 'pp-time'><td><tr>$timing</tr></td></table></td>";
-            $picking_godown_wise_html .= "<td><table class = 'pp-count'><td><tr>$percentage</tr></td></table></td>";
+            $picking_godown_wise_html .="<td><table class = 'pp-sp'><td><tr>$k</tr></td></table></td>";
+            $picking_godown_wise_html .="<td><table class = 'pp-bill'><td><tr>$loding_lines</tr></td></table></td>";
+            $picking_godown_wise_html .="<td><table class = 'pp-time'><td><tr>$timing</tr></td></table></td>";
+            $picking_godown_wise_html .="<td><table class = 'pp-count'><td><tr>$percentage</tr></td></table></td>";
 
             $label = $ke . ' ' . $k;
             $label_key = strtolower($label);
             if ($godown_counter == $godown_count) {
-              $picking_godown_wise_html .= "<td><table class = 'pp-target'><td><tr>$target_data[$label_key]</tr></td></table></td>";
+              $picking_godown_wise_html .="<td><table class = 'pp-target'><td><tr>$target_data[$label_key]</tr></td></table></td>";
             }
             else {
-              $picking_godown_wise_html .= "<td><table class = 'pp-target'><td><tr>$target_data[$label_key]</tr></td></table></td><tr></tr><td></td>";
+              $picking_godown_wise_html .="<td><table class = 'pp-target'><td><tr>$target_data[$label_key]</tr></td></table></td><tr></tr><td></td>";
             }
 
             $total_timing += $timing;
@@ -1036,7 +1035,7 @@ function send_email_productivity_emailer($todays_date_date, $distributor_name, $
         }
       }
       else {
-        $picking_supervisor_wise_html .= "<tr>
+        $picking_supervisor_wise_html .="<tr>
     <td>$key</td>";
         $superwiser_counter = 0;
         $superwiser_count = count($value);
@@ -1047,15 +1046,15 @@ function send_email_productivity_emailer($todays_date_date, $distributor_name, $
           $pick_godown = $val['godown'];
           $percentage = ($loding_lines / $timing);
           $percentage = number_format((float) $percentage, 2, '.', '');
-          $picking_supervisor_wise_html .= "<td><table class = 'pp-sp'><td><tr>$pick_godown</tr></td></table></td>";
-          $picking_supervisor_wise_html .= "<td><table class = 'pp-bill'><td><tr>$k</tr></td></table></td>";
-          $picking_supervisor_wise_html .= "<td><table class = 'pp-line'><td><tr>$loding_lines</tr></td></table></td>";
-          $picking_supervisor_wise_html .= "<td><table class = 'pp-time'><td><tr>$timing</tr></td></table></td>";
+          $picking_supervisor_wise_html .="<td><table class = 'pp-sp'><td><tr>$pick_godown</tr></td></table></td>";
+          $picking_supervisor_wise_html .="<td><table class = 'pp-bill'><td><tr>$k</tr></td></table></td>";
+          $picking_supervisor_wise_html .="<td><table class = 'pp-line'><td><tr>$loding_lines</tr></td></table></td>";
+          $picking_supervisor_wise_html .="<td><table class = 'pp-time'><td><tr>$timing</tr></td></table></td>";
           if ($superwiser_count == $superwiser_counter) {
-            $picking_supervisor_wise_html .= "<td><table class = 'pp-count'><td><tr>$percentage</tr></td></table></td>";
+            $picking_supervisor_wise_html .="<td><table class = 'pp-count'><td><tr>$percentage</tr></td></table></td>";
           }
           else {
-            $picking_supervisor_wise_html .= "<td><table class = 'pp-count'><td><tr>$percentage</tr></td></table></td><tr></tr><td></td>";
+            $picking_supervisor_wise_html .="<td><table class = 'pp-count'><td><tr>$percentage</tr></td></table></td><tr></tr><td></td>";
           }
           $total_timing += $timing;
           $total_loding_lines += $loding_lines;
