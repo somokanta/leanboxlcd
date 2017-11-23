@@ -1724,7 +1724,7 @@ function dispatch_planning_sales_reg_api($node, $trip_execution_date, $vehicle_n
   $party_code = $node->field_sales_party_code[LANGUAGE_NONE][0]['value'];
   $store_sequence = $node->field_drs_sequence[LANGUAGE_NONE][0]['value'];
 
-  $billing_data_details = dispatch_planning_get_billing_data($node_uid, $bill_number,'dps');
+  $billing_data_details = dispatch_planning_get_billing_data($node_uid, $bill_number);
   $outlet_data_details = dispatch_planning_get_outlet_data($node_uid, $party_code);
   
   if (empty($outlet_data_details['field_hul_updated_lat_value'])) {
@@ -1836,7 +1836,7 @@ function dispatch_planning_item_details($billing_data_details, $id) {
  * @param type $bill_number
  * @return array
  */
-function dispatch_planning_get_billing_data($node_uid, $bill_number,$type) {
+function dispatch_planning_get_billing_data($node_uid, $bill_number) {
   $query = db_select('custom_billing_data', 'bd');
   $query->fields('bd', array('tur', 'mrp', 'product_name'));
   $query->addfield('bd', 'Sum_of_NET_SALES_CASES', 'sum_net_sales_cases');
@@ -1845,9 +1845,7 @@ function dispatch_planning_get_billing_data($node_uid, $bill_number,$type) {
   $query->addfield('bd', 'Sum_of_NET_SALES_KGS', 'sum_net_sales_kgs');
   $query->addfield('bd', 'Sum_of_NET_SALES_VALUE', 'sum_net_sales_value');
   $query->addfield('bd', 'product_name', 'sku_description');
-  if($type == 'ptl'){
-    $query->addfield('bd', 'BASEPACK_CODE', 'basepack_code');
-  }//dps nothing extra field for dispatch planning
+  $query->orderBy('bd.product_name');
   $query->condition('bd.distributor_id', $node_uid);
   $query->condition('bd.bill_number', $bill_number);
   $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
@@ -1969,10 +1967,14 @@ function dispatch_planning_node_update($node) {
  * @param object $node
  */
 function _update_dispatch_planning_api($node) {
+            watchdog('abcd1', '<pre>' . print_r($node, TRUE) . '</pre>');
+
    if (!empty($node)) {
       $dis_id = $node->uid;
       // get api data here
       $api_authentication_flag = dispatch_planning_check_api_authentication($dis_id);
+                  watchdog('abcd2', '<pre>' . print_r($api_authentication_flag, TRUE) . '</pre>');
+
       if (!empty($api_authentication_flag)) {
          // $node passed is of type sales_regiser_data
          $trip_dispatch_date = strtotime($node->field_dispatch_date['und'][0]['value']);
@@ -1982,6 +1984,7 @@ function _update_dispatch_planning_api($node) {
          $trip_id = $node->title;
          $nid = $node->nid;
          $res = _dispatch_planning_get_all_sales_nid($nid);
+         watchdog('abcd3', '<pre>' . print_r($res, TRUE) . '</pre>');
          if (!empty($res)) {
             foreach ($res as $key => $val) {
                $sales_nid = $val['nid'];
@@ -2041,6 +2044,8 @@ function _dispatch_planning_get_all_sales_nid($nid) {
       $query->condition('n.type', 'sales_register_data');
       $query->join('field_data_field_promised_date', 'pro_date', 'pro_date.entity_id = n.nid');
       $query->join('field_data_field_trip_id_reference', 'ti', 'ti.entity_id = n.nid');
+      $query->join('field_data_field_drs_sequence', 'ds', 'ds.entity_id = n.nid');
+      $query->orderBy('ds.field_drs_sequence_value', 'ASC');
       $query->condition('ti.field_trip_id_reference_nid', $nid);
       $query->fields('n', array('nid'));
       $query->fields('pro_date', array('field_promised_date_value'));
