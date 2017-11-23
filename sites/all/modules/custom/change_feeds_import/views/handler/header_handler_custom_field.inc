@@ -25,7 +25,6 @@ class header_handler_custom_field extends views_handler_field {
 
   function render($empty = FALSE) {
 
-    
     global $user;
     $user_id = $user->uid;
     $total_result = $this->view->result;
@@ -54,13 +53,17 @@ class header_handler_custom_field extends views_handler_field {
         $sequence = "API";
       }
       $trip_execution_date = date('d/m/y', $trip_execution_date);
+      $sheet_name = 'Delivery Run Sheet';
+      if($this->view->current_display === 'page_1'){
+        $sheet_name = 'DRS Box ID Print Out';
+      }
 
       return '<table width = "100%" cellspacing = "0" style = "font-size: 13px; color:#000; font-family:arial" cellpadding = "5" border = "0" align = "center" class = "preview_table">
       <tr>
       <td style = "font-size: 24px; font-weight: bold; text-align: center">'.$name.'</td>
       </tr>
       <tr>
-      <td style = "text-align: center; font-size: 18px; font-weight: bold;">Delivery Run Sheet</td>
+      <td style = "text-align: center; font-size: 18px; font-weight: bold;">'.$sheet_name.'</td>
       </tr>
       </table><br>
       <table class = "preview_table" width = "100%" cellspacing = "0" style = "font-family:arial; font-size: 13px; color:#000;" cellpadding = "5" border = "0" align = "center">
