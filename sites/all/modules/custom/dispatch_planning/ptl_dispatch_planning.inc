@@ -428,7 +428,7 @@ function ptl_data_insert_into_table($api_data, $distributor_id) {
 function ptl_get_billing_data($node_uid, $bill_number) {
   $query = db_select('custom_billing_data', 'bd');
   $query->fields('bd', array('tur', 'mrp', 'product_name'));
-  $query->addfield('bd', 'Sum_of_NET_SALES_QTY', 'sum_net_sales_quantity');
+  $query->addfield('bd', 'Sum_of_TOTAL_SALES_QTY', 'sum_net_sales_quantity');
   $query->addfield('bd', 'sku7_code', 'sku_code');
   $query->addfield('bd', 'BASEPACK_CODE', 'basepack_code');
   $query->condition('bd.distributor_id', $node_uid);
