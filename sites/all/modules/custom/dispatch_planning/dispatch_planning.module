@@ -1840,7 +1840,7 @@ function dispatch_planning_get_billing_data($node_uid, $bill_number,$type) {
   $query = db_select('custom_billing_data', 'bd');
   $query->fields('bd', array('tur', 'mrp', 'product_name'));
   $query->addfield('bd', 'Sum_of_NET_SALES_CASES', 'sum_net_sales_cases');
-  $query->addfield('bd', 'Sum_of_NET_SALES_QTY', 'sum_net_sales_quantity');
+  $query->addfield('bd', 'Sum_of_TOTAL_SALES_QTY', 'sum_net_sales_quantity');
   $query->addfield('bd', 'sku7_code', 'sku_code');
   $query->addfield('bd', 'Sum_of_NET_SALES_KGS', 'sum_net_sales_kgs');
   $query->addfield('bd', 'Sum_of_NET_SALES_VALUE', 'sum_net_sales_value');
