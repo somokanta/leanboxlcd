@@ -18,10 +18,9 @@ function _set_pod_threshold_callback($form, &$form_state) {
    // get logged in users distributor id
    $user_id = $GLOBALS['user']->uid;
    $distributor_id = change_feeds_import_get_distributor_id($user_id);
-   dpm($distributor_id, '$distributor_id');
    // get default threshold callback here
    $default_pod_threshold = _get_pod_threshold_value($distributor_id);
-dpm($default_pod_threshold, '$default_pod_threshold');
+
    $form['distributor_id'] = array(
      '#type' => 'value',
      '#value' => $distributor_id,
@@ -50,7 +49,6 @@ function _set_pod_threshold_callback_submit($form, &$form_state) {
    $pod_threshold = $form_state['values']['pod_threshold'];
    
    if (!empty($distributor_id) && !empty($pod_threshold)) {
-      drupal_set_message('t');
       db_merge('pod_flat_table')
           ->key(array('distributor_id' => $distributor_id))
           ->fields(array(

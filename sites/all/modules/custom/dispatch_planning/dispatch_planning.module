@@ -1967,13 +1967,11 @@ function dispatch_planning_node_update($node) {
  * @param object $node
  */
 function _update_dispatch_planning_api($node) {
-            watchdog('abcd1', '<pre>' . print_r($node, TRUE) . '</pre>');
 
    if (!empty($node)) {
       $dis_id = $node->uid;
       // get api data here
       $api_authentication_flag = dispatch_planning_check_api_authentication($dis_id);
-                  watchdog('abcd2', '<pre>' . print_r($api_authentication_flag, TRUE) . '</pre>');
 
       if (!empty($api_authentication_flag)) {
          // $node passed is of type sales_regiser_data
@@ -1984,7 +1982,7 @@ function _update_dispatch_planning_api($node) {
          $trip_id = $node->title;
          $nid = $node->nid;
          $res = _dispatch_planning_get_all_sales_nid($nid);
-         watchdog('abcd3', '<pre>' . print_r($res, TRUE) . '</pre>');
+
          if (!empty($res)) {
             foreach ($res as $key => $val) {
                $sales_nid = $val['nid'];
