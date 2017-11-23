@@ -142,7 +142,23 @@ function dispatch_planning_menu() {
     'access arguments' => array('Ptl trip creation'),
     'type' => MENU_CALLBACK,
     'file' => 'ptl_dispatch_planning.inc',
-  );  
+  );
+    $items['drs-box-id-sheet'] = array(
+    'title' => 'DRS BOX ID',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('drs_box_id_sheet_form'),
+    'access arguments' => array('Distributor Upload File'),
+    'type' => MENU_CALLBACK,
+    'file' => 'ptl_dispatch_planning.inc',
+  );
+  $items['download-drs-box-id/%'] = array(
+    'title' => 'Download DRS BOX ID',
+    'page callback' => 'download_drs_box_id_sheet',
+    'page arguments' => array(1),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'ptl_dispatch_planning.inc',
+  );
   return $items;
 }
 
