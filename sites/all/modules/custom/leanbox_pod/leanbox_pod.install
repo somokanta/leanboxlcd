@@ -1,0 +1,30 @@
+<?php
+
+/*
+ * Implement hook_schema.
+ */
+
+function leanbox_pod_schema() {
+   $schema = array();
+   $schema['pod_flat_table'] = array(
+     'description' => 'Sequence for Trip ID',
+     'fields' => array(
+       'id' => array(
+         'description' => 'The primary identifier for a data',
+         'type' => 'serial',
+         'not null' => TRUE,
+       ),
+       'pod_threshold' => array(
+         'description' => 'pod_threshold',
+         'type' => 'int',
+       ),
+       'distributor_id' => array(
+         'description' => 'distributor_id',
+         'type' => 'int',
+       ),
+     ),
+     'primary key' => array('id'),
+   );
+
+   return $schema;
+}

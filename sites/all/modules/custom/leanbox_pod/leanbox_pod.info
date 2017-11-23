@@ -1,0 +1,6 @@
+name = leanbox pod
+description = list of functionalities for leanbox pod
+package = Custom
+core = 7.x
+
+
