@@ -41,6 +41,30 @@ function modify_views_forms_form_alter(&$form, &$form_state, $form_id) {
       }
    }
 
+   if ($form_id == 'views_exposed_form') {
+      $select = array('All' => '- SELECT -');
+      if (isset($form['field_sales_call_status_tid']['#options'])) {
+         $sales_status_option = _get_distributors_sales_status_option('field_call_status_user');
+         $sales_status_option = $select + $sales_status_option;
+         $form['field_sales_call_status_tid']['#options'] = $sales_status_option;
+      }
+      if (isset($form['field_sales_delivery_status_tid']['#options'])) {
+         $sales_status_option = _get_distributors_sales_status_option('field_delivery_status_user');
+         $sales_status_option = $select + $sales_status_option;
+         $form['field_sales_delivery_status_tid']['#options'] = $sales_status_option;
+      }
+      if (isset($form['field_pod_call_history_tid']['#options'])) {
+         $sales_status_option = _get_distributors_sales_status_option('field_call_status_user');
+         $sales_status_option = $select + $sales_status_option;
+         $form['field_pod_call_history_tid']['#options'] = $sales_status_option;
+      }
+      if (isset($form['field_pod_delivery_history_tid']['#options'])) {
+         $sales_status_option = _get_distributors_sales_status_option('field_delivery_status_user');
+         $sales_status_option = $select + $sales_status_option;
+         $form['field_pod_delivery_history_tid']['#options'] = $sales_status_option;
+      }
+   }
+   
    if ($form_id == 'editableviews_entity_form_signed_bills_upload') {
     if ($form['#view_display_name'] == 'page_2' || $form['#view_display_name'] == 'page_3') {
       $select = array('' => '- In Stock -');
