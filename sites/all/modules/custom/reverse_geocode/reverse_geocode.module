@@ -1880,5 +1880,3 @@ function reverse_geocode_get_data_trip_wise($trip_id) {
   $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
   return $res;
 }
-
-  

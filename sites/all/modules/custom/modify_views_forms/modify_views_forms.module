@@ -27,8 +27,21 @@ function modify_views_forms_form_alter(&$form, &$form_state, $form_id) {
     // Validation for Collection Closore Table
     $form['#validate'][] = 'collection_closure_validate';
   }
+        
+  foreach ($form['node'] as $key => $value) {
+      if ($form_id == 'editableviews_entity_form_crm_screen') {
+         $select = array('' => '- SELECT -');
+         $sales_status_option = _get_distributors_sales_status_option('field_call_status_user');
+         $sales_status_option = $select + $sales_status_option;
+         $form['node'][$key]['field_sales_call_status']['und']['#options'] = $sales_status_option;
 
-  if ($form_id == 'editableviews_entity_form_signed_bills_upload') {
+         $delivery_status_option = _get_distributors_sales_status_option('field_delivery_status_user');
+         $delivery_status_option = $select + $delivery_status_option;
+         $form['node'][$key]['field_sales_delivery_status']['und']['#options'] = $delivery_status_option;
+      }
+   }
+
+   if ($form_id == 'editableviews_entity_form_signed_bills_upload') {
     if ($form['#view_display_name'] == 'page_2' || $form['#view_display_name'] == 'page_3') {
       $select = array('' => '- In Stock -');
 
@@ -311,4 +324,23 @@ function modify_views_forms_field_attach_validate($entity_type, $entity, &$error
       }
     }
   }
+}
+
+/**
+ * 
+ * @param type $user_field
+ * @return type
+ */
+function _get_distributors_sales_status_option($user_field) {
+   $res = array();
+   $user_id = $GLOBALS['user']->uid;
+   $distributor_id = change_feeds_import_get_distributor_id($user_id);
+   if (!empty($distributor_id)) {
+      $query = db_select('taxonomy_term_data', 't');
+      $query->join("field_data_" .$user_field, 'uf', 'uf.entity_id = t.tid');
+      $query->condition("uf." .$user_field. "_uid", $distributor_id);
+      $query->fields('t', array('tid', 'name'));
+      $res = $query->execute()->fetchAllKeyed(0, 1);
+   }
+   return $res;
 }
