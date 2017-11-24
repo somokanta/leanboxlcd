@@ -65,7 +65,9 @@ function leanbox_pod_taxonomy_term_presave($term) {
  */
 function leanbox_pod_node_presave($node) {
   if ($node->type == 'sales_register_data') {
+    dpm($node,'testing');
     if ($node->original->field_sales_remarks['und'][0]['value'] != $node->field_sales_remarks['und'][0]['value'] || $node->original->field_sales_call_status['und'][0]['tid'] != $node->field_sales_call_status['und'][0]['tid'] || $node->original->field_sales_delivery_status['und'][0]['tid'] != $node->field_sales_delivery_status['und'][0]['tid']) {
+    dpm($node,'testing inside');
       // New node Create for pod_history
       $pod_history = new StdClass();
       $pod_history->type = 'pod_history';
