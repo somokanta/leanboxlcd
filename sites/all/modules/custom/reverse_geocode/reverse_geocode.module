@@ -1386,10 +1386,33 @@ function reverse_geocode_node_presave($node) {
          $query->condition('cb.distributor_id', $distributor_id);
          $query->condition('cb.bill_number', $bill_number, '=');
          $sum_net_sales_value = $query->execute()->fetchField();
-         $node->field_bill_net_sales['und'][0]['value'] = round($sum_net_sales_value, 2);
+         if (!empty($sum_net_sales_value)) {
+            $node->field_bill_net_sales['und'][0]['value'] = round($sum_net_sales_value, 2);
+         }
       }
-   
-     if(!empty($node->field_sales_party_code['und'][0]['value']) && empty($node->field_party_code_reference['und'][0]['nid'])) {
+
+      if (!empty($node->field_bill_net_sales['und'][0]['value'])) {
+         // code for updating Pdd value on updating bill Date
+         $original_bill_value = $node->original->field_bill_value[LANGUAGE_NONE][0]['value'];
+         $sales_bill_value = $node->field_bill_value[LANGUAGE_NONE][0]['value'];
+         if ($original_bill_value != $sales_bill_value) {
+            $sum_of_net_sales_value = $node->field_bill_net_sales['und'][0]['value'];
+            $pod_value = (($sum_of_net_sales_value - $sales_bill_value) / $sum_of_net_sales_value) * 100;
+            $node_uid = $node->uid;
+
+            // fetch pod threshold for distributor
+            $user_pod_value = _get_pod_threshold_value($node_uid);
+
+            // check if $pod_value is greater than or not $user_pod_value
+            if (!empty($user_pod_value)) {
+               if ($pod_value >= $user_pod_value) {
+                  $node->field_pod_flag[LANGUAGE_NONE][0]['value'] = 1;
+               }
+            }
+         }
+      }
+
+      if(!empty($node->field_sales_party_code['und'][0]['value']) && empty($node->field_party_code_reference['und'][0]['nid'])) {
         // write a logic here to fetch same distributors party code reference 
         // and store here in node
         
@@ -1628,11 +1651,22 @@ function reverse_geocode_node_presave($node) {
    else if ($node->type == 'dispatch_data') {
       
       if (empty($node->field_dispatch_pre_start_time[LANGUAGE_NONE][0]['value']) && !empty($node->field_dispatch_start_time[LANGUAGE_NONE][0]['value'])) {
-        $node->field_dispatch_pre_start_time[LANGUAGE_NONE][0]['value'] = $node->field_dispatch_start_time[LANGUAGE_NONE][0]['value'];
+         // this for non leanbox role user.
+         // they do not have in progress status.
+         // their tasks are directly completed 
+         $node->field_dispatch_pre_start_time[LANGUAGE_NONE][0]['value'] = $node->field_dispatch_start_time[LANGUAGE_NONE][0]['value'];
+      }
+      
+      if (!empty($node->field_dispatch_date[LANGUAGE_NONE][0]['value']) && !empty($node->field_dispatch_start_time[LANGUAGE_NONE][0]['value'])) {
+         $node->field_dispatch_status[LANGUAGE_NONE][0]['value'] = 1; // 1 is completed
+      }
+      // this for leanbox role user
+      if (!empty($node->field_dispatch_date[LANGUAGE_NONE][0]['value']) && !empty($node->field_dispatch_pre_start_time[LANGUAGE_NONE][0]['value']) && empty($node->field_dispatch_start_time[LANGUAGE_NONE][0]['value'])) {
+         $node->field_dispatch_status[LANGUAGE_NONE][0]['value'] = 2; // 2 is in process
       }
       $creation_date = $node->field_trip_creation_date[LANGUAGE_NONE][0]['value'];
       $execution_date = $node->field_trip_executon_date[LANGUAGE_NONE][0]['value'];
-      
+
       if (preg_match("/^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])$/", $creation_date)) {
          $node->field_trip_creation_date[LANGUAGE_NONE][0]['value'] = strtotime($creation_date);
       }
@@ -1640,7 +1674,7 @@ function reverse_geocode_node_presave($node) {
          $node->field_trip_executon_date[LANGUAGE_NONE][0]['value'] = strtotime($execution_date);
       }
 
-    if (!empty($node->field_dispatch_date[LANGUAGE_NONE][0]['value'])) {    
+      if (!empty($node->field_dispatch_date[LANGUAGE_NONE][0]['value'])) {    
       // commented below line because we have IN Process also in dispatch_data
       //$node->field_dispatch_status[LANGUAGE_NONE][0]['value'] = 1;
       $nid = $node->nid;

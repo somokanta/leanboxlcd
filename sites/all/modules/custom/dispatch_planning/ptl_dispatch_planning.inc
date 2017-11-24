@@ -428,7 +428,7 @@ function ptl_data_insert_into_table($api_data, $distributor_id) {
 function ptl_get_billing_data($node_uid, $bill_number) {
   $query = db_select('custom_billing_data', 'bd');
   $query->fields('bd', array('tur', 'mrp', 'product_name'));
-  $query->addfield('bd', 'Sum_of_NET_SALES_QTY', 'sum_net_sales_quantity');
+  $query->addfield('bd', 'Sum_of_TOTAL_SALES_QTY', 'sum_net_sales_quantity');
   $query->addfield('bd', 'sku7_code', 'sku_code');
   $query->addfield('bd', 'BASEPACK_CODE', 'basepack_code');
   $query->condition('bd.distributor_id', $node_uid);
@@ -452,4 +452,67 @@ function ptl_get_rs_code_by_uid($uid) {
   $query->fields('rs', array('field_third_party_username_value'));
   $rs_code = $query->execute()->fetchField();
   return $rs_code;
+}
+
+#################DRS BOX ID#####################################3
+
+function drs_box_id_sheet_form($form, &$form_state) {
+  $form['#prefix'] = '<div id="itemlist-div">';
+  $form['#suffix'] = '</div>';
+
+  $form['trip_id'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Trip Id'),
+    '#size' => 10,
+    '#required' => TRUE,
+  );
+
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('submit'),
+    '#ajax' => array(
+      'wrapper' => 'itemlist-div',
+      'callback' => 'get_data_of_drs_box_id_sheet_form_submit',
+      'method' => 'replace',
+      'effect' => 'fade',
+    ),
+    '#submit' => array('drs_box_id_sheet_form_submit'),
+  );
+  if (!empty($form_state['views_data'])) {
+    $form['hhh'] = array(
+      '#type' => 'markup',
+      '#markup' => $form_state['views_data'],
+    );
+    $trip_id = $form_state['values']['trip_id'];
+    $rr = l('Open PDF', "/download-drs-box-id/$trip_id");
+    $form['dowmload_mark'] = array(
+      '#type' => 'markup',
+      '#markup' => $rr,
+    );
+  }
+  return $form;
+}
+
+function get_data_of_drs_box_id_sheet_form_submit($form, &$form_state) {
+  return $form;
+}
+
+function drs_box_id_sheet_form_submit($form, &$form_state) {
+  $trip_id = $form_state['values']['trip_id'];
+  $view_name = "drs_report2";
+  $view = views_get_view($view_name, '');
+  $view->set_display('page_1');
+  $view->set_arguments(array($trip_id));
+  $rendered_html = $view->render();
+  $form_state['views_data'] = $rendered_html;
+  $form_state['rebuild'] = TRUE;
+}
+
+function download_drs_box_id_sheet($args) {
+  $view_name = "drs_report2";
+  $view = views_get_view($view_name, '');
+  $view->set_display('page_1');
+  $view->set_arguments(array($args));
+  $rendered_html = $view->render();
+  pdf_using_mpdf_api($rendered_html);
 }

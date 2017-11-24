@@ -759,14 +759,29 @@ function change_feeds_import_create_billing($data, &$context) {
       $nid = check_node_title_exists($value->bill_number, 'sales_register_data');
       $node = node_load($nid);
       if ($node) {
-        $node->field_billing_van[LANGUAGE_NONE][0]['value'] = $value->vehicle;
-        $node->field_billing_loading_date[LANGUAGE_NONE][0]['value'] = $value->loading_date;
-        $node->field_sr_bill_date[LANGUAGE_NONE][0]['value'] = $value->bill_date;
-        $node->field_bill_net_sales[LANGUAGE_NONE][0]['value'] = round($value->sum_net_sales_value, 2);
-        // sum of net sales value from custom_billing_data to sales register
-        node_save($node);
+            $node->field_billing_van[LANGUAGE_NONE][0]['value'] = $value->vehicle;
+            $node->field_billing_loading_date[LANGUAGE_NONE][0]['value'] = $value->loading_date;
+            $node->field_sr_bill_date[LANGUAGE_NONE][0]['value'] = $value->bill_date;
+            $sum_of_net_sales_value = round($value->sum_net_sales_value, 2);
+            $node->field_bill_net_sales[LANGUAGE_NONE][0]['value'] = $sum_of_net_sales_value;
+            // sum of net sales value from custom_billing_data to sales register
+            // logic for pod flag below
+            $sales_bill_value = $node->field_bill_value[LANGUAGE_NONE][0]['value'];
+            $pod_value = (($sum_of_net_sales_value - $sales_bill_value) / $sum_of_net_sales_value) * 100;
+            $node_uid = $node->uid;
+
+            // fetch pod threshold for distributor
+            $user_pod_value = _get_pod_threshold_value($node_uid);
+
+            // check if $pod_value is greater than or not $user_pod_value
+            if (!empty($user_pod_value)) {
+               if ($pod_value >= $user_pod_value) {
+                  $node->field_pod_flag[LANGUAGE_NONE][0]['value'] = 1;
+               }
+            }
+            node_save($node);
+         }
       }
-    }
     catch (Exception $ex) {
       //Write mail logic
       global $user;
