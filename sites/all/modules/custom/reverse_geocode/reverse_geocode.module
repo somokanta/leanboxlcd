@@ -1655,12 +1655,11 @@ function reverse_geocode_node_presave($node) {
          // they do not have in progress status.
          // their tasks are directly completed 
          $node->field_dispatch_pre_start_time[LANGUAGE_NONE][0]['value'] = $node->field_dispatch_start_time[LANGUAGE_NONE][0]['value'];
-
-         if (!empty($node->field_dispatch_date[LANGUAGE_NONE][0]['value'])) {
-            $node->field_dispatch_status[LANGUAGE_NONE][0]['value'] = 1; // 1 is completed
-         }
       }
       
+      if (!empty($node->field_dispatch_date[LANGUAGE_NONE][0]['value']) && !empty($node->field_dispatch_start_time[LANGUAGE_NONE][0]['value'])) {
+         $node->field_dispatch_status[LANGUAGE_NONE][0]['value'] = 1; // 1 is completed
+      }
       // this for leanbox role user
       if (!empty($node->field_dispatch_date[LANGUAGE_NONE][0]['value']) && !empty($node->field_dispatch_pre_start_time[LANGUAGE_NONE][0]['value']) && empty($node->field_dispatch_start_time[LANGUAGE_NONE][0]['value'])) {
          $node->field_dispatch_status[LANGUAGE_NONE][0]['value'] = 2; // 2 is in process
