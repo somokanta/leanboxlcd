@@ -58,3 +58,31 @@ function leanbox_pod_taxonomy_term_presave($term) {
       $term->field_delivery_status_user['und'][0]['uid'] = $distributor_id;
    }
 }
+
+/**
+ * Implements hook_node_presave()
+ */
+function leanbox_pod_node_presave($node) {
+  if ($node->type == 'sales_register_data') {
+    if ($node->original->field_sales_remarks['und'][0]['value'] != $node->field_sales_remarks['und'][0]['value'] || $node->original->field_sales_call_status['und'][0]['tid'] != $node->field_sales_call_status['und'][0]['tid'] || $node->original->field_sales_delivery_status['und'][0]['tid'] != $node->field_sales_delivery_status['und'][0]['tid']) {
+      // New node Create for pod_history
+      $pod_history = new StdClass();
+      $pod_history->type = 'pod_history';
+      node_object_prepare($pod_history); // Sets some defaults. Invokes hook_prepare() and hook_node_prepare().
+      $pod_history->language = LANGUAGE_NONE; // Or e.g. 'en' if locale is enabled
+      $pod_history->uid = $node->uid;
+      $pod_history->status = 1; //(1 or 0): published or not
+      $pod_history->comment = 0; // 0 = comments disabled, 1 = read only, 2 = read/write
+      $pod_history->title = $node->title;
+      $pod_history->field_remarks_history['und'][0]['value'] = $node->field_sales_remarks['und'][0]['value'];
+      if ($node->field_sales_call_status['und'][0]['tid']) {
+        $pod_history->field_pod_call_history['und'][0]['tid'] = $node->field_sales_call_status['und'][0]['tid'];
+      }
+      if ($node->field_sales_delivery_status['und'][0]['tid']) {
+        $pod_history->field_pod_delivery_history['und'][0]['tid'] = $node->field_sales_delivery_status['und'][0]['tid'];
+      }
+      $pod_history->field_pod_bill_reference['und'][0]['nid'] = $node->nid;
+      node_save($pod_history);
+    }
+  }
+}
