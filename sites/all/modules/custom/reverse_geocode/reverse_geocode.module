@@ -1651,11 +1651,23 @@ function reverse_geocode_node_presave($node) {
    else if ($node->type == 'dispatch_data') {
       
       if (empty($node->field_dispatch_pre_start_time[LANGUAGE_NONE][0]['value']) && !empty($node->field_dispatch_start_time[LANGUAGE_NONE][0]['value'])) {
-        $node->field_dispatch_pre_start_time[LANGUAGE_NONE][0]['value'] = $node->field_dispatch_start_time[LANGUAGE_NONE][0]['value'];
+         // this for non leanbox role user.
+         // they do not have in progress status.
+         // their tasks are directly completed 
+         $node->field_dispatch_pre_start_time[LANGUAGE_NONE][0]['value'] = $node->field_dispatch_start_time[LANGUAGE_NONE][0]['value'];
+
+         if (!empty($node->field_dispatch_date[LANGUAGE_NONE][0]['value'])) {
+            $node->field_dispatch_status[LANGUAGE_NONE][0]['value'] = 1; // 1 is completed
+         }
+      }
+      
+      // this for leanbox role user
+      if (!empty($node->field_dispatch_date[LANGUAGE_NONE][0]['value']) && !empty($node->field_dispatch_pre_start_time[LANGUAGE_NONE][0]['value']) && empty($node->field_dispatch_start_time[LANGUAGE_NONE][0]['value'])) {
+         $node->field_dispatch_status[LANGUAGE_NONE][0]['value'] = 2; // 2 is in process
       }
       $creation_date = $node->field_trip_creation_date[LANGUAGE_NONE][0]['value'];
       $execution_date = $node->field_trip_executon_date[LANGUAGE_NONE][0]['value'];
-      
+
       if (preg_match("/^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])$/", $creation_date)) {
          $node->field_trip_creation_date[LANGUAGE_NONE][0]['value'] = strtotime($creation_date);
       }
@@ -1663,7 +1675,7 @@ function reverse_geocode_node_presave($node) {
          $node->field_trip_executon_date[LANGUAGE_NONE][0]['value'] = strtotime($execution_date);
       }
 
-    if (!empty($node->field_dispatch_date[LANGUAGE_NONE][0]['value'])) {    
+      if (!empty($node->field_dispatch_date[LANGUAGE_NONE][0]['value'])) {    
       // commented below line because we have IN Process also in dispatch_data
       //$node->field_dispatch_status[LANGUAGE_NONE][0]['value'] = 1;
       $nid = $node->nid;
