@@ -10,9 +10,16 @@
 function leanbox_pod_features_user_default_permissions() {
   $permissions = array();
 
-  // Exported permission: 'clear pod feeds'.
-  $permissions['clear pod feeds'] = array(
-    'name' => 'clear pod feeds',
+  // Exported permission: 'clear pod_call_status feeds'.
+  $permissions['clear pod_call_status feeds'] = array(
+    'name' => 'clear pod_call_status feeds',
+    'roles' => array(),
+    'module' => 'feeds',
+  );
+
+  // Exported permission: 'clear pod_delivery_status feeds'.
+  $permissions['clear pod_delivery_status feeds'] = array(
+    'name' => 'clear pod_delivery_status feeds',
     'roles' => array(),
     'module' => 'feeds',
   );
@@ -58,9 +65,18 @@ function leanbox_pod_features_user_default_permissions() {
     'module' => 'node',
   );
 
-  // Exported permission: 'import pod feeds'.
-  $permissions['import pod feeds'] = array(
-    'name' => 'import pod feeds',
+  // Exported permission: 'import pod_call_status feeds'.
+  $permissions['import pod_call_status feeds'] = array(
+    'name' => 'import pod_call_status feeds',
+    'roles' => array(
+      'leanbox_pod' => 'leanbox_pod',
+    ),
+    'module' => 'feeds',
+  );
+
+  // Exported permission: 'import pod_delivery_status feeds'.
+  $permissions['import pod_delivery_status feeds'] = array(
+    'name' => 'import pod_delivery_status feeds',
     'roles' => array(
       'leanbox_pod' => 'leanbox_pod',
     ),
@@ -77,9 +93,16 @@ function leanbox_pod_features_user_default_permissions() {
     'module' => 'leanbox_pod',
   );
 
-  // Exported permission: 'unlock pod feeds'.
-  $permissions['unlock pod feeds'] = array(
-    'name' => 'unlock pod feeds',
+  // Exported permission: 'unlock pod_call_status feeds'.
+  $permissions['unlock pod_call_status feeds'] = array(
+    'name' => 'unlock pod_call_status feeds',
+    'roles' => array(),
+    'module' => 'feeds',
+  );
+
+  // Exported permission: 'unlock pod_delivery_status feeds'.
+  $permissions['unlock pod_delivery_status feeds'] = array(
+    'name' => 'unlock pod_delivery_status feeds',
     'roles' => array(),
     'module' => 'feeds',
   );

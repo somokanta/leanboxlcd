@@ -42,21 +42,19 @@ function _get_pod_threshold_value($dis_id) {
    return $user_pod_value;
 }
 
-
 /**
  * Implements hook_taxonomy_term_presave($term)
  * @param type $term
  */
 function leanbox_pod_taxonomy_term_presave($term) {
-   if ($term->vocabulary_machine_name === 'pod') {
-      if (!isset($term->original->name) || ($term->original->name != $term->name)) {
-         $user_id = $GLOBALS['user']->uid;
-         $distributor_id = change_feeds_import_get_distributor_id($user_id);
-
-         $call_status = substr($term->field_pod_call_status['und'][0]['value'], 0, 50);
-         $delivery_status = substr($term->field_pod_delivery_status['und'][0]['value'], 0, 50);
-         $term->name = $call_status . "-" . $delivery_status . "-" . $distributor_id;
-         $term->field_pod_dis_user['und'][0]['uid'] = $distributor_id;
-      }
+   if ($term->vocabulary_machine_name === 'pod_call_status') {
+      $user_id = $GLOBALS['user']->uid;
+      $distributor_id = change_feeds_import_get_distributor_id($user_id);
+      $term->field_call_status_user['und'][0]['uid'] = $distributor_id;
+   }
+   if ($term->vocabulary_machine_name === 'pod_delivery_status') {
+      $user_id = $GLOBALS['user']->uid;
+      $distributor_id = change_feeds_import_get_distributor_id($user_id);
+      $term->field_delivery_status_user['und'][0]['uid'] = $distributor_id;
    }
 }
