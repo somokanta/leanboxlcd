@@ -1674,7 +1674,7 @@ function reverse_geocode_node_presave($node) {
          $node->field_trip_executon_date[LANGUAGE_NONE][0]['value'] = strtotime($execution_date);
       }
 
-    if (!empty($node->field_dispatch_date[LANGUAGE_NONE][0]['value'])) {
+    if ($node->original->field_dispatch_date[LANGUAGE_NONE][0]['value'] != $node->field_dispatch_date[LANGUAGE_NONE][0]['value']) {
          // commented below line because we have IN Process also in dispatch_data
          //$node->field_dispatch_status[LANGUAGE_NONE][0]['value'] = 1;
          $nid = $node->nid;
