@@ -1951,7 +1951,7 @@ function check_dynamic_routing_configuration($distributor_id) {
  * @param type $node
  */
 function dispatch_planning_node_update($node) {
-   if ($node->type == 'dispatch_data') {
+   if ($node->type == 'dispatch_data' && $t === 'r') {
       $original_pre_start = $node->original->field_dispatch_pre_start_time[LANGUAGE_NONE][0]['value'];
       $new_pre_start = $node->field_dispatch_pre_start_time[LANGUAGE_NONE][0]['value'];
       if ($original_pre_start != $new_pre_start) {
