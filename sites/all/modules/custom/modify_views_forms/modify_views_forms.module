@@ -11,19 +11,21 @@ function modify_views_forms_form_alter(&$form, &$form_state, $form_id) {
     $form['#validate'][] = 'node_title_validate';
   }
   
-  if($form_id == 'editableviews_entity_form_payment_collection') {
-    $form['#validate'][] = 'payment_collection_validate';
-    foreach ($form['node'] as $key => $value) {
-      //Remove the wrapper from the collection date field
-      $form['node'][$key]['field_collection_cheque_date'][LANGUAGE_NONE][0]['#theme_wrappers'] = array();
-      //Make the fine amount field disabled if type is signed
-      if($value['field_flag']['und']['#default_value'][0] == 'signed') {
-        $form['node'][$key]['field_fine_amount']['#disabled'] = TRUE;
+  if ($form_id == 'editableviews_entity_form_payment_collection') {
+      $form['#validate'][] = 'payment_collection_validate';
+      if (isset($form['node'])) {
+         foreach ($form['node'] as $key => $value) {
+            //Remove the wrapper from the collection date field
+            $form['node'][$key]['field_collection_cheque_date'][LANGUAGE_NONE][0]['#theme_wrappers'] = array();
+            //Make the fine amount field disabled if type is signed
+            if ($value['field_flag']['und']['#default_value'][0] == 'signed') {
+               $form['node'][$key]['field_fine_amount']['#disabled'] = TRUE;
+            }
+         }
       }
-    }
-  }
-  
-  if($form_id == 'editableviews_entity_form_collection_closure') {
+   }
+
+   if($form_id == 'editableviews_entity_form_collection_closure') {
     // Validation for Collection Closore Table
     $form['#validate'][] = 'collection_closure_validate';
   }
