@@ -1391,7 +1391,7 @@ function reverse_geocode_node_presave($node) {
          }
       }
 
-      if (!empty($node->field_bill_net_sales['und'][0]['value']) && $x == 5) {
+      if (!empty($node->field_bill_net_sales['und'][0]['value'])) {
          // code for updating Pdd value on updating bill Date
          $original_bill_value = $node->original->field_bill_value[LANGUAGE_NONE][0]['value'];
          $sales_bill_value = $node->field_bill_value[LANGUAGE_NONE][0]['value'];
