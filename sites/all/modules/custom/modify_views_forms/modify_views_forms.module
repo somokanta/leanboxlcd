@@ -29,15 +29,17 @@ function modify_views_forms_form_alter(&$form, &$form_state, $form_id) {
   }
         
     if ($form_id == 'editableviews_entity_form_crm_screen') {
-      foreach ($form['node'] as $key => $value) {
-         $select = array('' => '- SELECT -');
-         $sales_status_option = _get_distributors_sales_status_option('field_call_status_user');
-         $sales_status_option = $select + $sales_status_option;
-         $form['node'][$key]['field_sales_call_status']['und']['#options'] = $sales_status_option;
+      if (isset($form['node'])) {
+         foreach ($form['node'] as $key => $value) {
+            $select = array('' => '- SELECT -');
+            $sales_status_option = _get_distributors_sales_status_option('field_call_status_user');
+            $sales_status_option = $select + $sales_status_option;
+            $form['node'][$key]['field_sales_call_status']['und']['#options'] = $sales_status_option;
 
-         $delivery_status_option = _get_distributors_sales_status_option('field_delivery_status_user');
-         $delivery_status_option = $select + $delivery_status_option;
-         $form['node'][$key]['field_sales_delivery_status']['und']['#options'] = $delivery_status_option;
+            $delivery_status_option = _get_distributors_sales_status_option('field_delivery_status_user');
+            $delivery_status_option = $select + $delivery_status_option;
+            $form['node'][$key]['field_sales_delivery_status']['und']['#options'] = $delivery_status_option;
+         }
       }
    }
 
