@@ -42,7 +42,15 @@ function dispatch_planning_menu() {
       // 'admin/config/system/foo', if not specified here to override.
       // Need to add access callback or access arguments.
   );
-
+  $items['admin/dispatch-planning/api-url'] = array(
+    'title' => 'API URL',
+    'type' => MENU_LOCAL_TASK,
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('api_dispatch_uri_setting_form'),
+    'access arguments' => array('dispatch planning api url'),
+    'file' => 'api_dispatch_uri_setting_form.inc',
+    'weight' => 3,
+  );
 
   $items['modified-van-autocomplete-callback/%'] = array(
     'title' => 'Get All Modified Van',
@@ -1695,6 +1703,235 @@ function dispatch_planning_form_views_exposed_form_alter(&$form, &$form_state) {
 
 /**
  * 
+ * @param type $value
+ * @param type $node
+ * @param type $trip_execution_date
+ * @param type $hht_id
+ * @param type $cashier
+ * @param type $trip_id
+ * @return array
+ */
+function dispatch_planning_sales_reg_api($node, $trip_execution_date, $vehicle_no, $cashier, $trip_id) {
+
+  $api_data = array();
+  // get billing data details
+  $node_uid = $node->uid;
+  $rs_code = dispatch_planning_get_rscode_using_uid($node_uid);
+  $bill_number = $node->title;
+  $vehicle = $node->field_billing_van[LANGUAGE_NONE][0]['value'];
+  $bill_date = date('Y-m-d', $node->field_sr_bill_date[LANGUAGE_NONE][0]['value']);
+  $bill_value = $node->field_bill_value[LANGUAGE_NONE][0]['value'];
+  $party_code = $node->field_sales_party_code[LANGUAGE_NONE][0]['value'];
+  $store_sequence = $node->field_drs_sequence[LANGUAGE_NONE][0]['value'];
+
+  $billing_data_details = dispatch_planning_get_billing_data($node_uid, $bill_number);
+  $outlet_data_details = dispatch_planning_get_outlet_data($node_uid, $party_code);
+  
+  if (empty($outlet_data_details['field_hul_updated_lat_value'])) {
+    $outlet_data_details['field_hul_updated_lat_value'] = 0;
+  } 
+  if (empty($outlet_data_details['field_hul_updated_long_value'])) {
+    $outlet_data_details['field_hul_updated_long_value'] = 0;
+  }
+  
+  $api_data['jobType'] = 'delivery1';  // Hardcoded as suggested by gaurav
+  $reference_no = $rs_code . '_' . $bill_number;
+  $api_data['referenceNo'] = $reference_no;
+  $api_data['date'] = date('Y-m-d',$trip_execution_date);
+  $api_data['city'] = 'ABC';
+  $api_data['hub'] = $rs_code;
+  //$api_data['hub'] = '100006'; // need to remove when moving to HUL
+  $api_data['fieldExecutive'] = $rs_code . '_' . $cashier;
+  $api_data['fieldExecutiveName'] = $cashier;
+
+  $api_data['jobData']['vehicle'] = $vehicle_no;
+  $api_data['jobData']['party_hll_code'] = $outlet_data_details['field_hul_code_value']; // hul code in outlet
+  //$api_data['jobData']['lat_long'] = $outlet_data_details['field_hul_updated_lat_value'] . ',' . $outlet_data_details['field_hul_updated_long_value'];
+  $api_data['jobData']['lat_long']['lat_longLatitude'] = $outlet_data_details['field_hul_updated_lat_value'];
+  $api_data['jobData']['lat_long']['lat_longLongitude'] = $outlet_data_details['field_hul_updated_long_value'];
+  $api_data['jobData']['bill_value'] = (int)$bill_value;
+  $api_data['jobData']['item_details'] = $billing_data_details; // array
+  $api_data['jobData']['bill_date'] = $bill_date;
+  $api_data['jobData']['locality'] = 'ABCD_locality';  // Hardcoded as suggested by gaurav  
+  $api_data['jobData']['store_sequence_no'] = $store_sequence;  // drs sequence
+  $api_data['jobData']['party_name'] = $outlet_data_details['field_party_name_value']; // party name in outlet
+  $api_data['jobData']['beat_name'] = $outlet_data_details['field_beat_name_value'];  // beat name in outlet
+  $api_data['jobData']['party_code'] = $party_code;
+  $api_data['jobData']['bill_number'] = $bill_number;
+  $api_data['jobData']['runsheet_number'] = $trip_id;
+  /**
+   * Insert data into dispatch_planning_api_data table
+   */
+  $id = dispatch_planning_api_data($api_data);
+  /**
+   * Insert data into dispatch_planning_item_details table
+   */
+  dispatch_planning_item_details($billing_data_details, $id);
+  return $api_data;
+}
+
+/*
+ * Insert data into dispatch_planning_api_data table
+ */
+
+function dispatch_planning_api_data($api_data) {
+  if (!empty($api_data)) {
+      $query = db_insert('dispatch_planning_api_data');
+      $fields = array(
+        'jobType' => $api_data['jobType'],
+        'referenceNo' => $api_data['referenceNo'],
+        'date' => $api_data['date'],
+        'city' => $api_data['city'],
+        'hub' => $api_data['hub'],
+        'fieldExecutive' => $api_data['fieldExecutive'],
+        'fieldExecutiveName' => $api_data['fieldExecutiveName'],
+        'vehicle' => $api_data['jobData']['vehicle'],
+        'party_hll_code' => $api_data['jobData']['party_hll_code'],
+        'lat_longlatitude' => $api_data['jobData']['lat_long']['lat_longLatitude'],
+        'lat_longlongitude' => $api_data['jobData']['lat_long']['lat_longLongitude'],
+        'bill_value' => $api_data['jobData']['bill_value'],
+        'bill_date' => $api_data['jobData']['bill_date'],
+        'locality' => $api_data['jobData']['locality'],
+        'store_sequence_no' =>$api_data['jobData']['store_sequence_no'],
+        'party_name' => $api_data['jobData']['party_name'],
+        'beat_name' => $api_data['jobData']['beat_name'],
+        'party_code' => $api_data['jobData']['party_code'],
+        'bill_number' => $api_data['jobData']['bill_number'],
+        'runsheet_number' => $api_data['jobData']['runsheet_number'],
+      );
+      $query->fields($fields);
+      $result_id = $query->execute();
+      return $result_id;
+  }
+}
+
+/**
+   * Insert data into dispatch_planning_item_details table
+*/
+function dispatch_planning_item_details($billing_data_details, $id) {
+  if (!empty($billing_data_details)) {
+    foreach ($billing_data_details as $data) {
+      $query = db_insert('dispatch_planning_item_details');
+      $fields = array(
+        'tur' => $data['tur'],
+        'mrp' => $data['mrp'],
+        'product_name' => $data['product_name'],
+        'sum_net_sales_cases' => $data['sum_net_sales_cases'],
+        'sum_net_sales_quantity' => $data['sum_net_sales_quantity'],
+        'sku_code' => $data['sku_code'],
+        'sum_net_sales_kgs' => $data['sum_net_sales_kgs'],
+        'sum_net_sales_value' => $data['sum_net_sales_value'],
+        'sku_description' => $data['sku_description'],
+        'trip_bill_reference' => $id,
+      );
+      $query->fields($fields);
+      $result_id = $query->execute();
+    }
+  }
+}
+
+/**
+ * 
+ * @param type $node_uid
+ * @param type $bill_number
+ * @return array
+ */
+function dispatch_planning_get_billing_data($node_uid, $bill_number) {
+  $query = db_select('custom_billing_data', 'bd');
+  $query->fields('bd', array('tur', 'mrp', 'product_name'));
+  $query->addfield('bd', 'Sum_of_NET_SALES_CASES', 'sum_net_sales_cases');
+  $query->addfield('bd', 'Sum_of_TOTAL_SALES_QTY', 'sum_net_sales_quantity');
+  $query->addfield('bd', 'sku7_code', 'sku_code');
+  $query->addfield('bd', 'Sum_of_NET_SALES_KGS', 'sum_net_sales_kgs');
+  $query->addfield('bd', 'Sum_of_NET_SALES_VALUE', 'sum_net_sales_value');
+  $query->addfield('bd', 'product_name', 'sku_description');
+  $query->orderBy('bd.product_name', 'DESC');
+  $query->condition('bd.distributor_id', $node_uid);
+  $query->condition('bd.bill_number', $bill_number);
+  $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+  return $res;
+}
+
+/**
+ * 
+ * @param type $node_uid
+ * @param type $party_code
+ * @return array
+ */
+function dispatch_planning_get_outlet_data($node_uid, $party_code) {
+  $query = db_select('node', 'n');
+  $query->condition('n.type', 'outlet_master');
+  $query->condition('n.uid', $node_uid);
+  //$query->join('field_data_field_sales_party_code', 'pc', 'pc.field_sales_party_code_value = n.title');
+  $query->leftjoin('field_data_field_hul_code', 'hc', 'hc.entity_id = n.nid');
+  $query->leftjoin('field_data_field_party_name', 'pn', 'pn.entity_id = n.nid');
+  $query->leftjoin('field_data_field_beat_name', 'bn', 'bn.entity_id = n.nid');
+  $query->leftjoin('field_data_field_hul_updated_lat', 'hl', 'hl.entity_id = n.nid');
+  $query->leftjoin('field_data_field_hul_updated_long', 'ul', 'ul.entity_id = n.nid');
+
+  $query->fields('bn', array('field_beat_name_value'));
+  $query->fields('pn', array('field_party_name_value'));
+  $query->fields('hc', array('field_hul_code_value'));
+  $query->fields('hl', array('field_hul_updated_lat_value'));
+  $query->fields('ul', array('field_hul_updated_long_value'));
+
+  $query->condition('n.type', 'outlet_master');
+  $query->condition('n.title', $party_code);
+
+  $res = $query->execute()->fetch(PDO::FETCH_ASSOC);
+  return $res;
+}
+
+/**
+ * 
+ * @param type $node_uid
+ * @return string
+ */
+function dispatch_planning_check_api_authentication($node_uid) {
+  $query = db_select('field_data_field_dispatch_planing_api', 'dp');
+  $query->fields('dp', array('entity_id'));
+  $query->condition('dp.field_dispatch_planing_api_value', 1);
+  $query->condition('dp.entity_id', $node_uid);
+  $res = $query->execute()->fetchField();
+  return $res;
+}
+
+
+/**
+ * 
+ * @param type $json_api_data
+ */
+function dispatch_planning_api_log($json_api_data, $trip_id, $api_type, $dis_id) {
+  $sql_ins_id = db_insert('dispatch_planning_api_log')
+    ->fields(array(
+      'trip_id' => $trip_id,
+      'distributor_id' => $dis_id,
+      'request_data' => $json_api_data,
+      'api_type' => $api_type, // pass vraiable defined in oxigen wallet configuratation form
+      'request_time' => time(),
+    ))
+    ->execute();
+  return $sql_ins_id;
+}
+
+/**
+ * 
+ * @param $response_data (json_decode), $sql_ins_id (serial id)
+ */
+function dispatch_planning_api_log_update($response_data, $sql_ins_id, $api_success) {
+  db_update('dispatch_planning_api_log')
+    ->fields(array(
+      'response_data' => $response_data,
+      'api_success' => $api_success,
+      'request_flag' => 1
+    ))
+    ->condition('id', $sql_ins_id, '=')
+    ->execute();
+}
+
+
+/**
+ * 
  * @param type $distributor_id
  * @return type bool false when configuration is not set
  */
@@ -1705,6 +1942,114 @@ function check_dynamic_routing_configuration($distributor_id) {
   $query->condition('tp.entity_id', $distributor_id);
   $res = $query->execute()->fetchField();
   return $res;
+}
+
+
+
+/**
+ * Implements hook_node_update
+ * @param type $node
+ */
+function dispatch_planning_node_update($node) {
+   if ($node->type == 'dispatch_data') {
+      $original_pre_start = $node->original->field_dispatch_pre_start_time[LANGUAGE_NONE][0]['value'];
+      $new_pre_start = $node->field_dispatch_pre_start_time[LANGUAGE_NONE][0]['value'];
+      if ($original_pre_start != $new_pre_start) {
+          drupal_register_shutdown_function('_update_dispatch_planning_api', $node);
+      }
+   }
+}
+
+/**
+ * function to update dispatch_planning_api table 
+ *   and call api using drupal_http_request
+ * $node type dispatch_data
+ * @param object $node
+ */
+function _update_dispatch_planning_api($node) {
+
+   if (!empty($node)) {
+      $dis_id = $node->uid;
+      // get api data here
+      $api_authentication_flag = dispatch_planning_check_api_authentication($dis_id);
+
+      if (!empty($api_authentication_flag)) {
+         // $node passed is of type sales_regiser_data
+         $trip_dispatch_date = strtotime($node->field_dispatch_date['und'][0]['value']);
+         $vehicle_no = $node->field_vehicle_no['und'][0]['value'];
+        // $hht_id = get_hht_id_from_nid($hht_nid);
+         $cashier = $node->field_cashier_name['und'][0]['value'];
+         $trip_id = $node->title;
+         $nid = $node->nid;
+         $res = _dispatch_planning_get_all_sales_nid($nid);
+
+         if (!empty($res)) {
+            foreach ($res as $key => $val) {
+               $sales_nid = $val['nid'];
+               $sales_node = node_load($sales_nid);
+               $api_data[] = dispatch_planning_sales_reg_api($sales_node, $trip_dispatch_date, $vehicle_no, $cashier, $trip_id);
+            }
+         }
+         // call api here
+         // Call Dispatch API Here
+         if (!empty($api_data)) {
+            $json_api_data = json_encode($api_data);
+            // request log
+            $api_type = 'dispatch_planning';
+            $sql_ins_id = dispatch_planning_api_log($json_api_data, $trip_id, $api_type, $dis_id);
+
+
+            $request_headers = array('Content-Type' => 'application/json');
+            $order_api_url = 'https://staging.fareye.co/api/v1/job?api_key=l1S6xa5mnxUXDuqv12q7lerLBL9l1ICq';
+            $options = array('headers' => $request_headers, 'method' => 'POST', 'data' => $json_api_data);
+            $response_data = drupal_http_request($order_api_url, $options);
+
+            $response_data = $response_data->data;
+            $api_success = json_decode($response_data);
+            $api_success = ($api_success->failCount == 0) ? 1 : 0;
+            // create response log entry
+            dispatch_planning_api_log_update($response_data, $sql_ins_id, $api_success);
+         }
+      }
+   }
+}
+
+/**
+ * 
+ * @param type $nid
+ * @return type
+ */
+//function get_hht_id_from_nid($nid) {
+//   $result = '';
+//   if (!empty($nid)) {
+//      $query = db_select('node', 'n');
+//      $query->fields('n', array('title'));
+//      $query->condition('n.nid', $nid);
+//      $result = $query->execute()->fetchField();
+//   }
+//   return $result;
+//}
+
+/**
+ * _dispatch_planning_get_all_sales_nid list using trip nid
+ * @param type $nid
+ * @return type
+ */
+function _dispatch_planning_get_all_sales_nid($nid) {
+   $res = array();
+   if (!empty($nid)) {
+      $query = db_select('node', 'n');
+      $query->condition('n.type', 'sales_register_data');
+      $query->join('field_data_field_promised_date', 'pro_date', 'pro_date.entity_id = n.nid');
+      $query->join('field_data_field_trip_id_reference', 'ti', 'ti.entity_id = n.nid');
+      $query->join('field_data_field_drs_sequence', 'ds', 'ds.entity_id = n.nid');
+      $query->orderBy('ds.field_drs_sequence_value', 'ASC');
+      $query->condition('ti.field_trip_id_reference_nid', $nid);
+      $query->fields('n', array('nid'));
+      $query->fields('pro_date', array('field_promised_date_value'));
+      $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+   }
+   return $res;
 }
 
 /**

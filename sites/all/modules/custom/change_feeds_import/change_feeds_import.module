@@ -528,6 +528,7 @@ function download_pdf($args) {
 function download_pdf2($args) {
   $view_name = "drs_report2";
   $view = views_get_view($view_name, '');
+  $view->set_display('drs_report2');
   $view->set_arguments(array($args));
   $rendered_html = $view->render();
   pdf_using_mpdf_api($rendered_html);
@@ -858,6 +859,7 @@ function trip_2_form_submit($form, &$form_state) {
   $trip_id = $form_state['values']['trip_id'];
   $view_name = "drs_report2";
   $view = views_get_view($view_name, '');
+  $view->set_display('drs_report2');
   $view->set_arguments(array($trip_id));
   $rendered_html = $view->render();
   $form_state['views_data'] = $rendered_html;
@@ -2144,9 +2146,9 @@ function change_feeds_import_query_alter(QueryAlterableInterface $query) {
 
 function change_feeds_import_views_query_alter(&$view, &$query) {
    if(isset($_GET['field_third_party_username_value'])) {
-       
        foreach($query->where[1]['conditions'] as $key => $val) {
-          if ($val['field'] == 'users_node__field_data_field_third_party_username.field_third_party_username_value') {
+          $val_array = explode('.', $val['field']);
+          if ($val_array[1] == 'field_third_party_username_value') {
             //unset($query->where[1]['conditions'][$key]['operator']); 
                 $query->where[1]['conditions'][$key]['operator'] = 'IN';
               
