@@ -1374,14 +1374,18 @@ function create_van_cld_billing_form_submit($form, &$form_state) {
  * Fill zoho
  */
 function send_email_to_fill_zoho() {
-  $html = '<h2>Hi Team,</h2>
+  if (date('N') < 6) {
+    $html = '<h2>Hi Team,</h2>
                  <h3>This is a scheduled reminder to fill your Zoho timesheet.</h3> 
                <h4>Please ignore if you have filled it already.</h4>
-               *** This is an automatically generated email, please do not reply ***
-          </br>';
-  $params['subject'] = "Bhai Pls Zoho Bhar De!!";
-  $params['body'] = $html;
-  $mail_to = variable_get('zoho_fill', "abhishek.r@iksula.com");
-  $from = "zoho@salarydeduction.com";
-  drupal_mail('adhoc_task', 'duplicate_data', $mail_to, LANGUAGE_NONE, $params, $from);
+               ZOHO URL: https://projects.zoho.com/portal/iksulapmt#allprojects
+               JIRA URL: https://blisstering.atlassian.net/plugins/servlet/ac/is.origo.jira.tempo-plugin/tempo-my-work
+               
+*** This is an automatically generated email, please do not reply ***';
+    $params['subject'] = "Bhai Pls Zoho Bhar De!!";
+    $params['body'] = $html;
+    $mail_to = variable_get('zoho_fill', "abhishek.r@iksula.com");
+    $from = "zoho@salarydeduction.com";
+    drupal_mail('adhoc_task', 'duplicate_data', $mail_to, LANGUAGE_NONE, $params, $from);
+  }
 }
