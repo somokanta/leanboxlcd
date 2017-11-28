@@ -114,7 +114,7 @@ function upload_signed_bill_callback($form, &$form_state) {
                $terminated_bill_flag = $node->field_terminated_bill_flag['und'][0]['value'];
                $collection_status = $node->field_collection_status['und'][0]['value'];
 
-               if (empty($terminated_bill_flag) || $collection_status != 2) {
+               if (empty($terminated_bill_flag) && $collection_status != 2) {
                   drupal_set_message(t("Previous bill for Bill no $bill_no does not have closure flag or status completed."), 'error');
                   $form['bill_no_wrapper']['add_bill']['#access'] = FALSE;
                   $warning_flag = 0;
@@ -177,7 +177,7 @@ function upload_signed_bill_callback($form, &$form_state) {
 
                $terminated_bill_flag = $node->field_terminated_bill_flag['und'][0]['value'];
                $collection_status = $node->field_collection_status['und'][0]['value'];
-               if (empty($terminated_bill_flag) || $collection_status != 2) {
+               if (empty($terminated_bill_flag) && $collection_status != 2) {
                   drupal_set_message(t("Previous bill for Bill no $bill_no does not have closure flag or status completed."), 'error');
                   $form['bill_no_wrapper']['add_bill']['#access'] = FALSE;
                   break;
