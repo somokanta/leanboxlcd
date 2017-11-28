@@ -70,7 +70,7 @@ function modify_views_forms_form_alter(&$form, &$form_state, $form_id) {
    }
 
    if ($form_id == 'editableviews_entity_form_dispatch_data_report') {
-      $select = array('' => '- In Stock -');
+      $select = array('' => '- Select -');
       $vehicle = get_all_vehicle_data();
       $vehicle = $select + $vehicle;
       foreach ($form['node'] as $key => $value) {
