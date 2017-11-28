@@ -68,7 +68,19 @@ function modify_views_forms_form_alter(&$form, &$form_state, $form_id) {
          $form['field_pod_delivery_history_tid']['#options'] = $sales_status_option;
       }
    }
-   
+
+   if ($form_id == 'editableviews_entity_form_dispatch_data_report') {
+      $select = array('' => '- In Stock -');
+      $vehicle = get_all_vehicle_data();
+      $vehicle = $select + $vehicle;
+      foreach ($form['node'] as $key => $value) {
+         $form['node'][$key]['field_vehicle_no'][LANGUAGE_NONE][0]['value']['#type'] = 'select';
+         $form['node'][$key]['field_vehicle_no'][LANGUAGE_NONE][0]['value']['#multiple'] = FALSE;
+         $form['node'][$key]['field_vehicle_no'][LANGUAGE_NONE][0]['value']['#options'] = $vehicle;
+         $form['node'][$key]['field_vehicle_no'][LANGUAGE_NONE][0]['value']['#size'] = 1;
+      }
+   }
+
    if ($form_id == 'editableviews_entity_form_signed_bills_upload') {
     if ($form['#view_display_name'] == 'page_2' || $form['#view_display_name'] == 'page_3') {
       $select = array('' => '- In Stock -');
@@ -369,6 +381,21 @@ function _get_distributors_sales_status_option($user_field) {
       $query->condition("uf." .$user_field. "_uid", $distributor_id);
       $query->fields('t', array('tid', 'name'));
       $res = $query->execute()->fetchAllKeyed(0, 1);
+   }
+   return $res;
+}
+
+
+function get_all_vehicle_data() {
+   $res = array();
+   $user_id = $GLOBALS['user']->uid;
+   $distributor_id = change_feeds_import_get_distributor_id($user_id);
+   if (!empty($distributor_id)) {
+      $query = db_select('node', 'n');
+      $query->fields('n', array('title'));
+      $query->condition('n.type', 'vehicle_master');
+      $query->condition('n.uid', $distributor_id);
+      $res = $query->execute()->fetchAllKeyed(0, 0);
    }
    return $res;
 }
