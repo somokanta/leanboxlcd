@@ -2145,6 +2145,17 @@ function change_feeds_import_query_alter(QueryAlterableInterface $query) {
 }
 
 function change_feeds_import_views_query_alter(&$view, &$query) {
+
+   // remove 19800 condition which is default added by view
+   if ($view->petty_cash == 'petty_cash') {
+      foreach ($query->where[1]['conditions'] as $key => $val) {
+         if ((strpos($val['field'], 'petty_cash.voucher_date') !== false) || (strpos($val['field'], 'petty_cash.file_date') !== false)) {
+            $data = str_replace('+ 19800', '', $val['field']);
+            $query->where[1]['conditions'][$key]['field'] = $data;
+         }
+      }
+   }
+
    if(isset($_GET['field_third_party_username_value'])) {
        foreach($query->where[1]['conditions'] as $key => $val) {
           $val_array = explode('.', $val['field']);
