@@ -1600,3 +1600,13 @@ header[id="page-header"] ul, header[id="page-header"] li {
   font-size: 13px;
   padding: 0 3px;
 }
+
+/* line 1603, ../sass/leanbox-global.scss */
+#edit-field-collection-status-value-wrapper .views-widget .form-item select {
+  height: auto;
+}
+
+/* line 1609, ../sass/leanbox-global.scss */
+.form-text {
+  width: auto;
+}
