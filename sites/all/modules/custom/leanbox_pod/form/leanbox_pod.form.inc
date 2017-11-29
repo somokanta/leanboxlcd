@@ -27,6 +27,8 @@ function _set_pod_threshold_callback($form, &$form_state) {
    );
    $form['pod_threshold'] = array(
      '#type' => 'textfield',
+     '#size' => 10,
+     '#maxlength' => 3,
      '#title' => t('Pod Threshold'),
      '#default_value' => $default_pod_threshold,
      '#element_validate' => array('element_validate_integer_positive'),
