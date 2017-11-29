@@ -2151,6 +2151,7 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
       foreach ($query->where[1]['conditions'] as $key => $val) {
          if ((strpos($val['field'], 'petty_cash.voucher_date') !== false) || (strpos($val['field'], 'petty_cash.file_date') !== false)) {
             $data = str_replace('+ 19800', '', $val['field']);
+            $data = str_replace('%Y-%m-%d\T%H:%i:%s', '%Y-%m-%d', $data);
             $query->where[1]['conditions'][$key]['field'] = $data;
          }
       }
