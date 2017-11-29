@@ -50,6 +50,13 @@ function leanbox_payment_collection_menu() {
     'type' => MENU_CALLBACK,
     'file' => 'includes/payment_collection_status_automailer.inc',
    );
+   $items['download-bills-acknowledgement/%/%'] = array(
+    'title' => 'Download Bills Assignment Acknowledgement',
+    'page callback' => 'download_bills_acknowledgement',
+    'page arguments' => array(1, 2),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
    return $items;
 }
 
@@ -203,4 +210,24 @@ function leanbox_payment_collection_node_presave($node) {
       }
     }
   }
+}
+
+/*
+ * Implements hook_views_api
+ */
+function leanbox_payment_collection_views_api() {
+  return array(
+    'api' => '3.0',
+    'path' => drupal_get_path('module', 'leanbox_payment_collection') . '/views',
+  );
+}
+
+function download_bills_acknowledgement($arg1, $arg2) {
+  $view_name = "bills_assignment_acknowledgement";
+  $view = views_get_view($view_name, TRUE);
+  $view->set_arguments(array($arg1, $arg2));
+  $view->set_display('bills_assign_acknowlege');
+  $rendered_html = $view->render();
+  //$rendered_html = views_embed_view('bills_assignment_acknowledgement','page_1', array$arg1, $arg2));
+  pdf_using_mpdf_api($rendered_html);
 }
