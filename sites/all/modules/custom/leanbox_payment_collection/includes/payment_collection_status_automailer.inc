@@ -22,8 +22,11 @@ function send_email_payment_collection_status() {
   // Yesterday Assignment and Today's Collection
   $pending_for_yesterday_assignment_html = get_email_pending_for_yesterday_assignment($distributor_id);
   
+  // Today's Petty Cash TRansaction And Closing Balance
+  $today_petty_cash_transaction_html = get_email_today_petty_cash_transaction($distributor_id);
+  
   $params['subject'] = "SB And Bounce Chq Status";
-  $params['body'] = $pending_for_collection_html . "<br>" . $pending_for_assignment_html . "<br>" . $pending_for_upload_html . "<br>" . $pending_for_yesterday_assignment_html;
+  $params['body'] = $pending_for_collection_html . "<br>" . $pending_for_assignment_html . "<br>" . $pending_for_upload_html . "<br>" . $pending_for_yesterday_assignment_html . "<br>" . $today_petty_cash_transaction_html;
   $mail_to = variable_get('collection_status_to_email');
   $from = variable_get('from_email');
 
@@ -64,16 +67,28 @@ function get_email_pending_for_collection($distributor_id) {
   $bounced_counter  = 1;
   $decl_signed_counter = 1;
   $decl_bounced_counter = 1;
+  $fivedays_decl_signed_counter = 1;
+  $fivedays_decl_bounced_counter = 1;
+  $twelvedays_decl_signed_counter = 1;
+  $twelvedays_decl_bounced_counter = 1;
+  $thirtyonedays_decl_signed_counter = 1;
+  $thirtyonedays_decl_bounced_counter = 1;
   $rows = array();
-  $row[] = array('Type', 'Count', 'Value', 'Count', 'Value');
-  $decl_date = strtotime('-8 day', strtotime(date('Y-m-d')));
+  $row[] = array('Type', 'Count', 'Value', 'Count', 'Value', 'Count', 'Value', 'Count', 'Value', 'Count', 'Value');
+  $decl_date = strtotime(date('Y-m-d'));
+  $ten_days_before = strtotime('-10 day', strtotime(date('Y-m-d')));
+  $fifteen_days_before = strtotime('-15 day', strtotime(date('Y-m-d')));
+  $thirty_days_before = strtotime('-30 day', strtotime(date('Y-m-d')));
+  
 
   foreach($res as $data) {
+    $declaration_date = strtotime($data['field_declaration_date_value']);
     if($data['field_flag_value']  == 'signed') {
       $row['signed']['type']  = 'Signed';
       $row['signed']['count']  = $signed_counter++;
       $row['signed']['value'] += $data['field_remaining_amt_collection_value'] - ($data['field_previous_cash_amt_value'] + $data['field_previous_cheque_amt_value']);
-      if(strtotime($data['field_declaration_date_value']) <= $decl_date) {
+      // Collection from 1-10 Days from Declaration Date
+      if($declaration_date <= $decl_date && $declaration_date >= $ten_days_before) {
         $row['signed']['decl_count'] = $decl_signed_counter++;
         $row['signed']['decl_value'] += $data['field_remaining_amt_collection_value'] - ($data['field_previous_cash_amt_value'] + $data['field_previous_cheque_amt_value']);
       }
@@ -81,18 +96,73 @@ function get_email_pending_for_collection($distributor_id) {
         $row['signed']['decl_count'] += 0;
         $row['signed']['decl_value'] += 0;
       }
+      // Collection from 11-15 Days from Declaration Date
+      if($declaration_date < $ten_days_before && $declaration_date >= $fifteen_days_before) {
+        $row['signed']['5days_decl_count'] = $fivedays_decl_signed_counter++;
+        $row['signed']['5days_decl_value'] += $data['field_remaining_amt_collection_value'] - ($data['field_previous_cash_amt_value'] + $data['field_previous_cheque_amt_value']);
+      }
+      else {
+        $row['signed']['5days_decl_count'] += 0;
+        $row['signed']['5days_decl_value'] += 0;
+      }
+      // Collection from 16-30 Days from Declaration Date
+      if($declaration_date < $fifteen_days_before && $declaration_date >= $thirty_days_before) {
+        $row['signed']['12days_decl_count'] = $twelvedays_decl_signed_counter++;
+        $row['signed']['12days_decl_value'] += $data['field_remaining_amt_collection_value'] - ($data['field_previous_cash_amt_value'] + $data['field_previous_cheque_amt_value']);
+      }
+      else {
+        $row['signed']['12days_decl_count'] += 0;
+        $row['signed']['12days_decl_value'] += 0;
+      }
+      // Collection from below 30 Days from Declaration Date
+      if($declaration_date < $thirty_days_before) {
+        $row['signed']['31days_decl_count'] = $thirtyonedays_decl_signed_counter++;
+        $row['signed']['31days_decl_value'] += $data['field_remaining_amt_collection_value'] - ($data['field_previous_cash_amt_value'] + $data['field_previous_cheque_amt_value']);
+      }
+      else {
+        $row['signed']['31days_decl_count'] += 0;
+        $row['signed']['31days_decl_value'] += 0;
+      }
     }
     else{
       $row['bounced']['type']  = 'Bounced';
       $row['bounced']['count']  = $bounced_counter++;
       $row['bounced']['value'] += $data['field_remaining_amt_collection_value'] - ($data['field_previous_cash_amt_value'] + $data['field_previous_cheque_amt_value']);
-      if(strtotime($data['field_declaration_date_value']) <= $decl_date) {
+      // Collection from 1-10 Days from Declaration Date
+      if($declaration_date <= $decl_date && $declaration_date >= $ten_days_before) {
         $row['bounced']['decl_count'] = $decl_bounced_counter++;
         $row['bounced']['decl_value'] += $data['field_remaining_amt_collection_value'] - ($data['field_previous_cash_amt_value'] + $data['field_previous_cheque_amt_value']);
       }
       else {
         $row['bounced']['decl_count'] += 0;
         $row['bounced']['decl_value'] += 0;
+      }
+      // Collection from 10-15 Days from Declaration Date
+      if($declaration_date < $ten_days_before && $declaration_date >= $fifteen_days_before) {
+        $row['bounced']['5days_decl_count'] = $fivedays_decl_bounced_counter++;
+        $row['bounced']['5days_decl_value'] += $data['field_remaining_amt_collection_value'] - ($data['field_previous_cash_amt_value'] + $data['field_previous_cheque_amt_value']);
+      }
+      else {
+        $row['bounced']['5days_decl_count'] += 0;
+        $row['bounced']['5days_decl_value'] += 0;
+      }
+      // Collection from 16-30 Days from Declaration Date
+      if($declaration_date < $fifteen_days_before && $declaration_date >= $thirty_days_before) {
+        $row['bounced']['12days_decl_count'] = $twelvedays_decl_bounced_counter++;
+        $row['bounced']['12days_decl_value'] += $data['field_remaining_amt_collection_value'] - ($data['field_previous_cash_amt_value'] + $data['field_previous_cheque_amt_value']);
+      }
+      else {
+        $row['bounced']['12days_decl_count'] += 0;
+        $row['bounced']['12days_decl_value'] += 0;
+      }
+      // Collection from below 30 Days from Declaration Date
+      if($declaration_date < $thirty_days_before) {
+        $row['bounced']['31days_decl_count'] = $thirtyonedays_decl_bounced_counter++;
+        $row['bounced']['31days_decl_value'] += $data['field_remaining_amt_collection_value'] - ($data['field_previous_cash_amt_value'] + $data['field_previous_cheque_amt_value']);
+      }
+      else {
+        $row['bounced']['31days_decl_count'] += 0;
+        $row['bounced']['31days_decl_value'] += 0;
       }
     }
   }
@@ -101,9 +171,15 @@ function get_email_pending_for_collection($distributor_id) {
   $total_till_date_value = $row['signed']['value'] + $row['bounced']['value'];
   $total_decl_date_count = $row['signed']['decl_count'] + $row['bounced']['decl_count'];
   $total_decl_date_value = $row['signed']['decl_value'] + $row['bounced']['decl_value'];
-  $row[] = array('Total',$total_till_date_count,$total_till_date_value,$total_decl_date_count,$total_decl_date_value);
+  $total_5days_decl_count = $row['signed']['5days_decl_count'] + $row['bounced']['5days_decl_count'];
+  $total_5days_decl_value = $row['signed']['5days_decl_value'] + $row['bounced']['5days_decl_value'];
+  $total_12days_decl_count = $row['signed']['12days_decl_count'] + $row['bounced']['12days_decl_count'];
+  $total_12days_decl_value = $row['signed']['12days_decl_value'] + $row['bounced']['12days_decl_value'];
+  $total_31days_decl_count = $row['signed']['31days_decl_count'] + $row['bounced']['31days_decl_count'];
+  $total_31days_decl_value = $row['signed']['31days_decl_value'] + $row['bounced']['31days_decl_value'];
+  $row[] = array('Total',$total_till_date_count,$total_till_date_value,$total_decl_date_count,$total_decl_date_value,$total_5days_decl_count,$total_5days_decl_value,$total_12days_decl_count,$total_12days_decl_value,$total_31days_decl_count,$total_31days_decl_value);
   
-  $header = array('', array('data' => 'Till Date', 'colspan' => 2), array('data' => '>8Days from Declaration Date', 'colspan' => 2));
+  $header = array('', array('data' => 'Till Date', 'colspan' => 2), array('data' => '1-10 Days from Declaration Date', 'colspan' => 2), array('data' => '11-15 Days from Declaration Date', 'colspan' => 2), array('data' => '16-30 Days from Declaration Date', 'colspan' => 2), array('data' => '>30 Days from Declaration Date', 'colspan' => 2));
   $output = "<h3>Pending for Collection</h3>";
   $output .= theme('table', array('header' => $header, 'rows' => $row, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
 
@@ -144,16 +220,27 @@ function get_email_pending_for_assignment($distributor_id) {
   $bounced_counter  = 1;
   $decl_signed_counter = 1;
   $decl_bounced_counter = 1;
+  $fivedays_decl_signed_counter = 1;
+  $fivedays_decl_bounced_counter = 1;
+  $twelvedays_decl_signed_counter = 1;
+  $twelvedays_decl_bounced_counter = 1;
+  $thirtyonedays_decl_signed_counter = 1;
+  $thirtyonedays_decl_bounced_counter = 1;
   $rows = array();
-  $row[] = array('Type', 'Count', 'Value', 'Count', 'Value');
-  $decl_date = strtotime('-7 day', strtotime(date('Y-m-d')));
-
+  $row[] = array('Type', 'Count', 'Value', 'Count', 'Value', 'Count', 'Value', 'Count', 'Value', 'Count', 'Value');
+  $decl_date = strtotime(date('Y-m-d'));
+  $ten_days_before = strtotime('-10 day', strtotime(date('Y-m-d')));
+  $fifteen_days_before = strtotime('-15 day', strtotime(date('Y-m-d')));
+  $thirty_days_before = strtotime('-30 day', strtotime(date('Y-m-d')));
+  
   foreach($res as $data) {
+    $declaration_date = strtotime($data['field_declaration_date_value']);
     if($data['field_flag_value']  == 'signed') {
       $row['signed']['type']  = 'Signed';
       $row['signed']['count']  = $signed_counter++;
       $row['signed']['value'] += $data['field_remaining_amt_collection_value'] - ($data['field_previous_cash_amt_value'] + $data['field_previous_cheque_amt_value']);
-      if(strtotime($data['field_declaration_date_value']) <= $decl_date) {
+      // Assignment from 1-10 Days from Declaration Date
+      if($declaration_date <= $decl_date && $declaration_date >= $ten_days_before) {
         $row['signed']['decl_count'] = $decl_signed_counter++;
         $row['signed']['decl_value'] += $data['field_remaining_amt_collection_value'] - ($data['field_previous_cash_amt_value'] + $data['field_previous_cheque_amt_value']);
       }
@@ -161,18 +248,73 @@ function get_email_pending_for_assignment($distributor_id) {
         $row['signed']['decl_count'] += 0;
         $row['signed']['decl_value'] += 0;
       }
+      // Assignment from 11-15 Days from Declaration Date
+      if($declaration_date < $ten_days_before && $declaration_date >= $fifteen_days_before) {
+        $row['signed']['5days_decl_count'] = $fivedays_decl_signed_counter++;
+        $row['signed']['5days_decl_value'] += $data['field_remaining_amt_collection_value'] - ($data['field_previous_cash_amt_value'] + $data['field_previous_cheque_amt_value']);
+      }
+      else {
+        $row['signed']['5days_decl_count'] += 0;
+        $row['signed']['5days_decl_value'] += 0;
+      }
+      // Assignment from 16-30 Days from Declaration Date
+      if($declaration_date < $fifteen_days_before && $declaration_date >= $thirty_days_before) {
+        $row['signed']['12days_decl_count'] = $twelvedays_decl_signed_counter++;
+        $row['signed']['12days_decl_value'] += $data['field_remaining_amt_collection_value'] - ($data['field_previous_cash_amt_value'] + $data['field_previous_cheque_amt_value']);
+      }
+      else {
+        $row['signed']['12days_decl_count'] += 0;
+        $row['signed']['12days_decl_value'] += 0;
+      }
+      // Assignment from below 30 Days from Declaration Date
+      if($declaration_date < $thirty_days_before) {
+        $row['signed']['31days_decl_count'] = $thirtyonedays_decl_signed_counter++;
+        $row['signed']['31days_decl_value'] += $data['field_remaining_amt_collection_value'] - ($data['field_previous_cash_amt_value'] + $data['field_previous_cheque_amt_value']);
+      }
+      else {
+        $row['signed']['31days_decl_count'] += 0;
+        $row['signed']['31days_decl_value'] += 0;
+      }
     }
     else{
       $row['bounced']['type']  = 'Bounced';
       $row['bounced']['count']  = $bounced_counter++;
       $row['bounced']['value'] += $data['field_remaining_amt_collection_value'] - ($data['field_previous_cash_amt_value'] + $data['field_previous_cheque_amt_value']);
-      if(strtotime($data['field_declaration_date_value']) <= $decl_date) {
+      // Assignment from 1-10 Days from Declaration Date
+      if($declaration_date <= $decl_date && $declaration_date >= $ten_days_before) {
         $row['bounced']['decl_count'] = $decl_bounced_counter++;
         $row['bounced']['decl_value'] += $data['field_remaining_amt_collection_value'] - ($data['field_previous_cash_amt_value'] + $data['field_previous_cheque_amt_value']);
       }
       else {
         $row['bounced']['decl_count'] += 0;
         $row['bounced']['decl_value'] += 0;
+      }
+      // Assignment from 10-15 Days from Declaration Date
+      if($declaration_date < $ten_days_before && $declaration_date >= $fifteen_days_before) {
+        $row['bounced']['5days_decl_count'] = $fivedays_decl_bounced_counter++;
+        $row['bounced']['5days_decl_value'] += $data['field_remaining_amt_collection_value'] - ($data['field_previous_cash_amt_value'] + $data['field_previous_cheque_amt_value']);
+      }
+      else {
+        $row['bounced']['5days_decl_count'] += 0;
+        $row['bounced']['5days_decl_value'] += 0;
+      }
+      // Assignment from 16-30 Days from Declaration Date
+      if($declaration_date < $fifteen_days_before && $declaration_date >= $thirty_days_before) {
+        $row['bounced']['12days_decl_count'] = $twelvedays_decl_bounced_counter++;
+        $row['bounced']['12days_decl_value'] += $data['field_remaining_amt_collection_value'] - ($data['field_previous_cash_amt_value'] + $data['field_previous_cheque_amt_value']);
+      }
+      else {
+        $row['bounced']['12days_decl_count'] += 0;
+        $row['bounced']['12days_decl_value'] += 0;
+      }
+      // Assignment from below 30 Days from Declaration Date
+      if($declaration_date < $thirty_days_before) {
+        $row['bounced']['31days_decl_count'] = $thirtyonedays_decl_bounced_counter++;
+        $row['bounced']['31days_decl_value'] += $data['field_remaining_amt_collection_value'] - ($data['field_previous_cash_amt_value'] + $data['field_previous_cheque_amt_value']);
+      }
+      else {
+        $row['bounced']['31days_decl_count'] += 0;
+        $row['bounced']['31days_decl_value'] += 0;
       }
     }
   }
@@ -181,9 +323,15 @@ function get_email_pending_for_assignment($distributor_id) {
   $total_till_date_value = $row['signed']['value'] + $row['bounced']['value'];
   $total_decl_date_count = $row['signed']['decl_count'] + $row['bounced']['decl_count'];
   $total_decl_date_value = $row['signed']['decl_value'] + $row['bounced']['decl_value'];
-  $row[] = array('Total',$total_till_date_count,$total_till_date_value,$total_decl_date_count,$total_decl_date_value);
+  $total_5days_decl_count = $row['signed']['5days_decl_count'] + $row['bounced']['5days_decl_count'];
+  $total_5days_decl_value = $row['signed']['5days_decl_value'] + $row['bounced']['5days_decl_value'];
+  $total_12days_decl_count = $row['signed']['12days_decl_count'] + $row['bounced']['12days_decl_count'];
+  $total_12days_decl_value = $row['signed']['12days_decl_value'] + $row['bounced']['12days_decl_value'];
+  $total_31days_decl_count = $row['signed']['31days_decl_count'] + $row['bounced']['31days_decl_count'];
+  $total_31days_decl_value = $row['signed']['31days_decl_value'] + $row['bounced']['31days_decl_value'];
+  $row[] = array('Total',$total_till_date_count,$total_till_date_value,$total_decl_date_count,$total_decl_date_value,$total_5days_decl_count,$total_5days_decl_value,$total_12days_decl_count,$total_12days_decl_value,$total_31days_decl_count,$total_31days_decl_value);
   
-  $header = array('', array('data' => 'Till Date', 'colspan' => 2), array('data' => '>7Days from Declaration Date', 'colspan' => 2));
+  $header = array('', array('data' => 'Till Date', 'colspan' => 2), array('data' => '1-10 Days from Declaration Date', 'colspan' => 2), array('data' => '11-15 Days from Declaration Date', 'colspan' => 2), array('data' => '16-30 Days from Declaration Date', 'colspan' => 2), array('data' => '>30 Days from Declaration Date', 'colspan' => 2));
   $output = "<h3>Pending for Assignment</h3>";
   $output .= theme('table', array('header' => $header, 'rows' => $row, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
 
@@ -387,5 +535,40 @@ function get_email_pending_for_yesterday_assignment($distributor_id) {
   $output = "<h3>Yesterday Assignment Today's Collection</h3>";
   $output .= theme('table', array('header' => $header, 'rows' => $row, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
   
+  return $output;
+}
+
+/*
+ * Returns table of Today's Petty Cash Transaction and Closing Balance
+ */
+function get_email_today_petty_cash_transaction($distributor_id) {
+  $start_date = strtotime(date('Y-m-d'));
+  
+  $query = db_select('petty_cash', 'pc');
+  $query->condition('pc.voucher_date', $start_date, '>');
+  $query->condition('pc.distributor_id', $distributor_id, '=');
+  $query->fields('pc');
+  $result = $query->execute()->fetchAll();
+
+  $header = array('Serial ID', 'Voucher no', 'Type', 'Voucher date', 'Head', 'Subhead', 'Description', 'Person name', 'Amount', 'Balance');
+  $row = array();
+  foreach($result as $data) {
+    $row['serial_no'] = $data->id;
+    $row['voucher_no'] = $data->voucher_no;
+    $row['type'] = $data->type;
+    $row['voucher_date'] = date('d-M-y',$data->voucher_date);
+    $row['head'] = $data->head;
+    $row['subhead'] = $data->subhead;
+    $row['description'] = $data->description;
+    $row['person_name'] = $data->person_name;
+    $row['amount'] = $data->amount;
+    $row['balance'] = $data->balance;
+
+    $rows[] = $row;
+  }
+
+  $output = "<h3>Today's Petty Cash Transaction and Closing Balance</h3>";
+  $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0'), 'empty' => t('No Records has been found')));
+
   return $output;
 }

@@ -104,15 +104,27 @@ function upload_signed_bill_callback($form, &$form_state) {
          // call function to get bill no already declared as bounced
 
          $res = leanbox_payment_collection_get_title_and_nid_combo($bill_no, $dis_id);
+         $warning_flag = 0;
+
          if (!empty($res)) {
             foreach ($res as $key1 => $val1) {
                $node = node_load($val1['payment_collection_nid']);
                $node_flag = $node->field_flag['und'][0]['value'];
+               
+               $terminated_bill_flag = $node->field_terminated_bill_flag['und'][0]['value'];
+               $collection_status = $node->field_collection_status['und'][0]['value'];
+
+               if (empty($terminated_bill_flag) && $collection_status != 2 && $collection_status != 1) {
+                  
+                  drupal_set_message(t('For Bill no ' . $bill_no .' , Either Closure is not Marked or Bill is in "Not Collected" Status.'), 'error');
+                  $form['bill_no_wrapper']['add_bill']['#access'] = FALSE;
+                  $warning_flag = 0;
+                  break;
+               }
+
                if ($node_flag === 'bounced') {
-                  drupal_set_message(t("Bill $bill_no already declared bounced."), 'warning');
 
-                  //
-
+                  $warning_flag = 1;
                   $form['bill_no_wrapper']['add_bill'] = array(
                     '#type' => 'submit',
                     '#value' => t("Continue to add"),
@@ -135,11 +147,11 @@ function upload_signed_bill_callback($form, &$form_state) {
                     ),
                     '#submit' => array('_remove_bounce_bill_no_ajax'),
                   );
-
-                  break;
                }
             }
-            //}
+            if ($warning_flag == 1) {
+               drupal_set_message(t("Bill $bill_no already declared bounced."), 'warning');
+            }
          }
       }
       else if (!empty($bill_no) && ($form_state['values']['arg'] == 'signed') && (!isset($form_state['values']['title_and_nid_combo'][$bill_no]))) {
@@ -159,9 +171,18 @@ function upload_signed_bill_callback($form, &$form_state) {
          // below array will be used in _sumbit function while node creation 
          // for reference of bill no from sales register
          foreach ($res as $key1 => $val1) {
+
             if (!empty($val1['payment_collection_nid'])) {
                $node = node_load($val1['payment_collection_nid']);
                $node_flag = $node->field_flag['und'][0]['value'];
+
+//               $terminated_bill_flag = $node->field_terminated_bill_flag['und'][0]['value'];
+//               $collection_status = $node->field_collection_status['und'][0]['value'];
+//               if (empty($terminated_bill_flag) && $collection_status != 2) {
+//                  drupal_set_message(t("Previous bill for Bill no $bill_no does not have closure flag or status completed."), 'error');
+//                  $form['bill_no_wrapper']['add_bill']['#access'] = FALSE;
+//                  break;
+//               }
                if ($node_flag === 'signed') {
                   drupal_set_message(t("Bill no $bill_no already have signed flag."), 'error');
                   $form['bill_no_wrapper']['add_bill']['#access'] = FALSE;
@@ -233,7 +254,7 @@ function upload_signed_bill_callback_validate($form, &$form_state) {
          // for reference of bill no from sales register
          foreach ($res as $key1 => $val1) {
             $form_state['values']['title_and_nid_combo'][$bill_no] = $val1['sales_register_nid'];
-            $form_state['values']['title_and_collection_nid_combo'][$bill_no][] = $val1['payment_collection_nid'];
+            //$form_state['values']['title_and_collection_nid_combo'][$bill_no][] = $val1['payment_collection_nid'];
             if (!empty($val1['payment_collection_nid']) && $arg1 === 'signed') {
                $node = node_load($val1['payment_collection_nid']);
                $node_flag = $node->field_flag['und'][0]['value'];
@@ -321,13 +342,15 @@ function upload_signed_bill_callback_submit($form, &$form_state) {
 
          drupal_set_message(t("$bill_type Bill Declared Successfully."));
       }
-      foreach ($form_state['values']['title_and_collection_nid_combo'][$bill_no] as $key1 => $val1) {
-         $payment_col_node = node_load($val1);
-         if (!empty($payment_col_node)) {
-            $payment_col_node->field_terminated_bill_flag[LANGUAGE_NONE][0]['value'] = 1;
-            node_save($payment_col_node);
-         }
-      }
+      
+      // to be commented below as bill be terminated using closure flag only
+//      foreach ($form_state['values']['title_and_collection_nid_combo'][$bill_no] as $key1 => $val1) {
+//         $payment_col_node = node_load($val1);
+//         if (!empty($payment_col_node)) {
+//            $payment_col_node->field_terminated_bill_flag[LANGUAGE_NONE][0]['value'] = 1;
+//            node_save($payment_col_node);
+//         }
+//      }
    }
 }
 
