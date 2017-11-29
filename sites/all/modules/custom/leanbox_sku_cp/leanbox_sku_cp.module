@@ -3,15 +3,21 @@
 /**
  * Implements hook_menu
  */
-function leanbox_pod_menu() {
+function leanbox_sku_cp_menu() {
    $items = array();
-   $items['pod-threshold'] = array(
-     'title' => 'Pod Threshold',
+   $items['sku-cp-assign'] = array(
+     'title' => 'SKU CP',
      'page callback' => 'drupal_get_form',
-     'page arguments' => array('_set_pod_threshold_callback'),
-     'access arguments' => array('pod threshold'),
+     'page arguments' => array('_assign_sku_cp_callback'),
+     'access arguments' => array('sku cp'),
      'type' => MENU_CALLBACK,
-     'file' => 'form/leanbox_pod.form.inc',
+     'file' => 'form/leanbox_sku_cp.form.inc',
+   );
+    $items['sku-list'] = array(
+     'title' => 'Get List of logged in distributor sku',
+     'page callback' => 'get_list_of_sku',
+     'access arguments' => array('sku cp'),
+     'type' => MENU_CALLBACK,
    );
    return $items;
 }
@@ -22,10 +28,35 @@ function leanbox_pod_menu() {
  */
 function leanbox_pod_permission() {
    return array(
-     'pod threshold' => array(
-       'title' => t('pod threshold'),
-       'description' => t('pod threshold')
+     'sku cp' => array(
+       'title' => t('sku cp'),
+       'description' => t('sku cp assignment')
      )
    );
 }
 
+
+/**
+ * Menu callback; Retrieve a JSON object containing autocomplete suggestions for existing bill no.
+ * @param type $string
+ */
+function get_list_of_sku($string = '') {
+   global $user;
+   $res = '';
+   // Store distributor id in author in each node
+   $dis_id = change_feeds_import_get_distributor_id($user->uid);
+   $length = strlen($string);
+   if ($length > 2) {
+      if (!empty($dis_id) && !empty($string)) {
+         $query = db_select('node', 'n');
+        // $query->join('field_data_field_trip_id_reference', 'tr', 'tr.entity_id = n.nid');
+         $query->condition('n.type', 'sku7_code_master');
+         $query->condition('n.uid', $dis_id);
+         $query->condition('n.title', db_like($string) . '%', 'LIKE');
+         $query->fields('n', array('title'));
+         $query->range(0, 10);
+         $res = $query->execute()->fetchAllKeyed(0, 0);
+      }
+   }
+   drupal_json_output($res);
+}
