@@ -67,8 +67,13 @@ function modify_views_forms_form_alter(&$form, &$form_state, $form_id) {
          $sales_status_option = $select + $sales_status_option;
          $form['field_pod_delivery_history_tid']['#options'] = $sales_status_option;
       }
+      
+      if (arg(0) == 'bills-assignment-acknowledgement') {   
+        $form['field_assigned_person_value']['#attributes'] = array('required' => TRUE);
+        $form['field_assignment_date_value']['value']['#attributes'] = array('required' => TRUE);
+      }
    }
-   
+
    if ($form_id == 'editableviews_entity_form_signed_bills_upload') {
     if ($form['#view_display_name'] == 'page_2' || $form['#view_display_name'] == 'page_3') {
       $select = array('' => '- In Stock -');
