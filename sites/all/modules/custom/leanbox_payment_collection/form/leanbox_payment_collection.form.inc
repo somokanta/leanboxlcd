@@ -114,8 +114,8 @@ function upload_signed_bill_callback($form, &$form_state) {
                $terminated_bill_flag = $node->field_terminated_bill_flag['und'][0]['value'];
                $collection_status = $node->field_collection_status['und'][0]['value'];
 
-               if (empty($terminated_bill_flag) && $collection_status != 2) {
-                  drupal_set_message(t("Previous bill for Bill no $bill_no does not have closure flag or status completed."), 'error');
+               if (empty($terminated_bill_flag) && $collection_status != 2 && $collection_status != 1) {
+                  drupal_set_message(t("Previous bill for Bill no $bill_no does not have closure flag or status not in completed or partial."), 'error');
                   $form['bill_no_wrapper']['add_bill']['#access'] = FALSE;
                   $warning_flag = 0;
                   break;
@@ -175,13 +175,13 @@ function upload_signed_bill_callback($form, &$form_state) {
                $node = node_load($val1['payment_collection_nid']);
                $node_flag = $node->field_flag['und'][0]['value'];
 
-               $terminated_bill_flag = $node->field_terminated_bill_flag['und'][0]['value'];
-               $collection_status = $node->field_collection_status['und'][0]['value'];
-               if (empty($terminated_bill_flag) && $collection_status != 2) {
-                  drupal_set_message(t("Previous bill for Bill no $bill_no does not have closure flag or status completed."), 'error');
-                  $form['bill_no_wrapper']['add_bill']['#access'] = FALSE;
-                  break;
-               }
+//               $terminated_bill_flag = $node->field_terminated_bill_flag['und'][0]['value'];
+//               $collection_status = $node->field_collection_status['und'][0]['value'];
+//               if (empty($terminated_bill_flag) && $collection_status != 2) {
+//                  drupal_set_message(t("Previous bill for Bill no $bill_no does not have closure flag or status completed."), 'error');
+//                  $form['bill_no_wrapper']['add_bill']['#access'] = FALSE;
+//                  break;
+//               }
                if ($node_flag === 'signed') {
                   drupal_set_message(t("Bill no $bill_no already have signed flag."), 'error');
                   $form['bill_no_wrapper']['add_bill']['#access'] = FALSE;
@@ -341,13 +341,15 @@ function upload_signed_bill_callback_submit($form, &$form_state) {
 
          drupal_set_message(t("$bill_type Bill Declared Successfully."));
       }
-      foreach ($form_state['values']['title_and_collection_nid_combo'][$bill_no] as $key1 => $val1) {
-         $payment_col_node = node_load($val1);
-         if (!empty($payment_col_node)) {
-            $payment_col_node->field_terminated_bill_flag[LANGUAGE_NONE][0]['value'] = 1;
-            node_save($payment_col_node);
-         }
-      }
+      
+      // to be commented below as bill be terminated using closure flag only
+//      foreach ($form_state['values']['title_and_collection_nid_combo'][$bill_no] as $key1 => $val1) {
+//         $payment_col_node = node_load($val1);
+//         if (!empty($payment_col_node)) {
+//            $payment_col_node->field_terminated_bill_flag[LANGUAGE_NONE][0]['value'] = 1;
+//            node_save($payment_col_node);
+//         }
+//      }
    }
 }
 
