@@ -1,0 +1,31 @@
+<?php
+
+/**
+ * Implements hook_menu
+ */
+function leanbox_pod_menu() {
+   $items = array();
+   $items['pod-threshold'] = array(
+     'title' => 'Pod Threshold',
+     'page callback' => 'drupal_get_form',
+     'page arguments' => array('_set_pod_threshold_callback'),
+     'access arguments' => array('pod threshold'),
+     'type' => MENU_CALLBACK,
+     'file' => 'form/leanbox_pod.form.inc',
+   );
+   return $items;
+}
+
+/**
+ * Implement hook_permission()
+ *  Add custom permission Central sales delivery report
+ */
+function leanbox_pod_permission() {
+   return array(
+     'pod threshold' => array(
+       'title' => t('pod threshold'),
+       'description' => t('pod threshold')
+     )
+   );
+}
+
