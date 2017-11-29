@@ -253,7 +253,7 @@ function upload_signed_bill_callback_validate($form, &$form_state) {
          // for reference of bill no from sales register
          foreach ($res as $key1 => $val1) {
             $form_state['values']['title_and_nid_combo'][$bill_no] = $val1['sales_register_nid'];
-            $form_state['values']['title_and_collection_nid_combo'][$bill_no][] = $val1['payment_collection_nid'];
+            //$form_state['values']['title_and_collection_nid_combo'][$bill_no][] = $val1['payment_collection_nid'];
             if (!empty($val1['payment_collection_nid']) && $arg1 === 'signed') {
                $node = node_load($val1['payment_collection_nid']);
                $node_flag = $node->field_flag['und'][0]['value'];
