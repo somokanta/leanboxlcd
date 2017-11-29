@@ -115,7 +115,8 @@ function upload_signed_bill_callback($form, &$form_state) {
                $collection_status = $node->field_collection_status['und'][0]['value'];
 
                if (empty($terminated_bill_flag) && $collection_status != 2 && $collection_status != 1) {
-                  drupal_set_message(t("Previous bill for Bill no $bill_no does not have closure flag or status not in completed or partial."), 'error');
+                  
+                  drupal_set_message(t('For Bill no ' . $bill_no .' , Either Closure is not Marked or Bill is in "Not Collected" Status.'), 'error');
                   $form['bill_no_wrapper']['add_bill']['#access'] = FALSE;
                   $warning_flag = 0;
                   break;
