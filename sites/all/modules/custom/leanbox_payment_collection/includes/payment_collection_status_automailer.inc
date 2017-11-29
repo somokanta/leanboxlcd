@@ -53,6 +53,10 @@ function get_email_pending_for_collection($distributor_id) {
   $query->join('field_data_field_sales_bill_no_ref', 'sbrf', 'sbrf.entity_id = n.nid');
   $query->join('field_data_field_sr_bill_date', 'sr', 'sr.entity_id = sbrf.field_sales_bill_no_ref_nid');
   $query->condition('sr.field_sr_bill_date_value', $timestamp,'>');
+  
+  // Remove records where Closure Flag = 1
+  $query->leftjoin('field_data_field_terminated_bill_flag', 'tf', 'tf.entity_id = n.nid');
+  $query->condition('tf.field_terminated_bill_flag_value', '1', '!=');
 
   $query->fields('n', array('nid'));
   $query->fields('dd', array('field_declaration_date_value'));
@@ -207,6 +211,10 @@ function get_email_pending_for_assignment($distributor_id) {
   $query->join('field_data_field_sr_bill_date', 'sr', 'sr.entity_id = sbrf.field_sales_bill_no_ref_nid');
   $query->condition('sr.field_sr_bill_date_value', $timestamp,'>');
   
+   // Remove records where Closure Flag = 1
+  $query->leftjoin('field_data_field_terminated_bill_flag', 'tf', 'tf.entity_id = n.nid');
+  $query->condition('tf.field_terminated_bill_flag_value', '1', '!=');
+  
   $query->fields('n', array('nid'));
   $query->fields('dd', array('field_declaration_date_value'));
   $query->fields('ff', array('field_flag_value'));
@@ -359,6 +367,10 @@ function get_email_pending_for_upload($distributor_id) {
   $query->join('field_data_field_sr_bill_date', 'sr', 'sr.entity_id = sbrf.field_sales_bill_no_ref_nid');
   $query->condition('sr.field_sr_bill_date_value', $timestamp,'>');
   
+   // Remove records where Closure Flag = 1
+  $query->leftjoin('field_data_field_terminated_bill_flag', 'tf', 'tf.entity_id = n.nid');
+  $query->condition('tf.field_terminated_bill_flag_value', '1', '!=');
+  
   $query->fields('n', array('nid'));
   $query->fields('dd', array('field_declaration_date_value'));
   $query->fields('ff', array('field_flag_value'));
@@ -435,6 +447,10 @@ function get_email_pending_for_yesterday_assignment($distributor_id) {
   $query->leftjoin('field_data_field_previous_cash_amt', 'pc', 'pc.entity_id = n.nid');
   $query->leftjoin('field_data_field_previous_cheque_amt', 'pch', 'pch.entity_id = n.nid');
   
+  // Remove records where Closure Flag = 1
+  $query->leftjoin('field_data_field_terminated_bill_flag', 'tf', 'tf.entity_id = n.nid');
+  $query->condition('tf.field_terminated_bill_flag_value', '1', '!=');
+  
   $query->groupBy('ap.field_assigned_person_value','ff.field_flag_value');
   
   $query->addExpression('COUNT(n.title)', 'bill_count');
@@ -486,6 +502,10 @@ function get_email_pending_for_yesterday_assignment($distributor_id) {
   
   $query->leftjoin('field_data_field_previous_cash_amt', 'pc', 'pc.entity_id = n.nid');
   $query->leftjoin('field_data_field_previous_cheque_amt', 'pch', 'pch.entity_id = n.nid');
+  
+   // Remove records where Closure Flag = 1
+  $query->leftjoin('field_data_field_terminated_bill_flag', 'tf', 'tf.entity_id = n.nid');
+  $query->condition('tf.field_terminated_bill_flag_value', '1', '!=');
   
   $query->groupBy('ap.field_assigned_person_value','ff.field_flag_value');
   
