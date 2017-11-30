@@ -26,7 +26,7 @@ function leanbox_sku_cp_menu() {
  * Implement hook_permission()
  *  Add custom permission Central sales delivery report
  */
-function leanbox_pod_permission() {
+function leanbox_sku_cp_permission() {
    return array(
      'sku cp' => array(
        'title' => t('sku cp'),
