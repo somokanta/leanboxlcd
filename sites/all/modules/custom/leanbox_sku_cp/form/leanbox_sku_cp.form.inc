@@ -42,7 +42,7 @@ function _assign_sku_cp_callback($form, &$form_state) {
       $sku = $form_state['values']['sku'];
       $sku_details = _get_sku_details_using_sku_id($sku, $distributor_id);
 
-      if (!empty($sku_details['rows'])) {
+      if (!empty($sku_details['rows'][0])) {
          $form['sku_nid'] = array(
            '#type' => 'value',
            '#value' => $sku_details['rows'][0]['nid'],
@@ -79,8 +79,10 @@ function _assign_sku_cp_callback($form, &$form_state) {
                $sku_cp = sku_cp_get_title_using_nid($default_sku_cp);
                $form['sku_cp']['#default_value'] = $sku_cp;
             }
+            
             $sku_cp_details = _get_sku_details_using_sku_id($sku_cp, $distributor_id, TRUE);
-            if (!empty($sku_cp_details['rows'])) {
+            
+            if (!empty($sku_cp_details['rows'][0])) {
 
                $form['sku_cp_nid'] = array(
                  '#type' => 'value',
