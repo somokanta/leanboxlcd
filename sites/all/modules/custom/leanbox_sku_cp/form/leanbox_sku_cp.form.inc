@@ -80,7 +80,6 @@ function _assign_sku_cp_callback($form, &$form_state) {
                $form['sku_cp']['#default_value'] = $sku_cp;
             }
             $sku_cp_details = _get_sku_details_using_sku_id($sku_cp, $distributor_id, TRUE);
-            //dpm($sku_cp_details, '$sku_cp_details');
             if (!empty($sku_cp_details['rows'])) {
 
                $form['sku_cp_nid'] = array(
@@ -98,13 +97,13 @@ function _assign_sku_cp_callback($form, &$form_state) {
 
                // fix drupal issue in ajax to show input value as default value
                unset($form_state['input']['sku_cp_qty']);
-               dpm($default_sku_cp_qty, '$default_sku_cp_qty');
                $form['sku_cp_qty'] = array(
                  '#type' => 'textfield',
                  '#size' => 10,
                  '#required' => TRUE,
                  '#default_value' => $default_sku_cp_qty,
                  '#maxlength' => 5,
+                 '#element_validate' => array('element_validate_integer_positive'),
                  '#title' => t('Enter Child SKU Quantity'),
                );
 
@@ -146,46 +145,4 @@ function _assign_sku_cp_callback_submit($form, &$form_state) {
  */
 function _sku_list_no_ajax($form, &$form_state) {
    return $form;
-}
-
-/**
- * 
- * @param type $sku
- */
-function _get_sku_details_using_sku_id($sku, $distributor_id, $child = FALSE) {
-   $array = array();
-   if (!empty($sku) && !empty($distributor_id)) {
-      $query = db_select('node', 'n');
-      $query->join('field_data_field_product_name', 'pn', 'pn.entity_id = n.nid');
-      $query->condition('n.type', 'sku7_code_master');
-      $query->condition('n.uid', $distributor_id);
-      $query->condition('n.title', $sku);
-      $query->fields('n', array('nid', 'title'));
-      $query->fields('pn', array('field_product_name_value'));
-      if (!$child) {
-         $query->leftjoin('field_data_field_child_sku', 'csk', 'csk.entity_id = n.nid');
-         $query->fields('csk', array('field_child_sku_nid'));
-         $query->leftjoin('field_data_field_child_sku_qty‎', 'cskq', 'cskq.entity_id = n.nid');
-         $query->fields('cskq', array('field_child_sku_qty_value'));
-      }
-      $query->range(0, 10);
-      $row = $query->execute()->fetch(PDO::FETCH_ASSOC);
-      $rows[] = $row;
-      if (!empty($rows)) {
-         $header = array(
-           'sku' => 'Sku',
-           'name' => 'Product Name',
-         );
-         if ($child) {
-            $header = array(
-              'sku' => 'Child Sku',
-              'name' => 'Child Product Name',
-            );
-         }
-         $array['header'] = $header;
-         $array['rows'] = $rows;
-      }
-   }
-
-   return $array;
 }
