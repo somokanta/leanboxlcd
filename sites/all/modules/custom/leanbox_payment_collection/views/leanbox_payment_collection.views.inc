@@ -22,6 +22,13 @@ function leanbox_payment_collection_views_data() {
       'handler' => 'footer_total_custom_field',
     ),
   );
+  $data['views']['hover_data_payment_collection'] = array(
+    'title' => t('Hover Data For Payment Collection'),
+    'help' => t('Hover Data For Payment Collection.'),
+    'field' => array(
+      'handler' => 'hover_data_payment_coll_custom_field',
+    ),
+  );
   
   return $data;
 }
