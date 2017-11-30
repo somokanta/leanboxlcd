@@ -76,7 +76,7 @@ function _assign_sku_cp_callback($form, &$form_state) {
 
             $sku_cp = $form_state['values']['sku_cp'];
             if (!empty($default_sku_cp)) {
-               $sku_cp = node_load($default_sku_cp)->title;
+               $sku_cp = sku_cp_get_title_using_nid($default_sku_cp);
                $form['sku_cp']['#default_value'] = $sku_cp;
             }
             $sku_cp_details = _get_sku_details_using_sku_id($sku_cp, $distributor_id, TRUE);
@@ -145,4 +145,13 @@ function _assign_sku_cp_callback_submit($form, &$form_state) {
  */
 function _sku_list_no_ajax($form, &$form_state) {
    return $form;
+}
+
+
+function sku_cp_get_title_using_nid($nid) {
+   $query = db_select('node', 'n');
+   $query->condition('n.nid', $nid);
+   $query->fields('n', array('title'));
+   $field = $query->execute()->fetchField();
+   return $field;
 }
