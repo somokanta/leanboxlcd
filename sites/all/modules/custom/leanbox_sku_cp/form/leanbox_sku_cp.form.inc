@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Files containing form for petty cash
+ * Files containing form for sku cp
  */
 
 /**

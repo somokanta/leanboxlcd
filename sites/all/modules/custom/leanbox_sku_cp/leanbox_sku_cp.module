@@ -1,6 +1,10 @@
 <?php
 
 /**
+ * Files containing functions for sku cp
+ */
+
+/**
  * Implements hook_menu
  */
 function leanbox_sku_cp_menu() {
