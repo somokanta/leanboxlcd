@@ -1313,5 +1313,23 @@ function dispatch_planning_views_data() {
       'handler' => 'views_handler_argument_string',
     ),
   );  
+  // loose
+  $data['ptl_data_configuration']['derived_free_qty'] = array(
+    'title' => t('Derived Free QTY'),
+    'help' => t('Derived Free QTY'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
   return $data;
 }
