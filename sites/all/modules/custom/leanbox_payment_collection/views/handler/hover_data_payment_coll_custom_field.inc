@@ -47,7 +47,7 @@ function get_collection_history_for_hover($bill_no) {
   $query->fields('cca', array('field_collection_cash_amount_value'));
   $query->fields('chea', array('field_collection_cheque_amount_value'));
   $query->fields('nv', array('field_collection_cheque_num_value'));
-  $query->fields('chqd', array('field_collection_chq_date_value'));
+  $query->addExpression("DATE_FORMAT(chqd.field_collection_chq_date_value, '%Y-%m-%d')", 'chq_date');
   $query->condition('n.title', $bill_no);
   $query->condition('n.uid', $distributor_id);
   $query->condition('n.type', 'collection_history');
