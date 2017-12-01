@@ -11,19 +11,82 @@ function modify_views_forms_form_alter(&$form, &$form_state, $form_id) {
     $form['#validate'][] = 'node_title_validate';
   }
   
-  if($form_id == 'editableviews_entity_form_payment_collection') {
-    $form['#validate'][] = 'payment_collection_validate';
-    foreach ($form['node'] as $key => $value) {
-      //Remove the wrapper from the collection date field
-      $form['node'][$key]['field_collection_cheque_date'][LANGUAGE_NONE][0]['#theme_wrappers'] = array();
-      //Make the fine amount field disabled if type is signed
-      if($value['field_flag']['und']['#default_value'][0] == 'signed') {
-        $form['node'][$key]['field_fine_amount']['#disabled'] = TRUE;
+  if ($form_id == 'editableviews_entity_form_payment_collection') {
+      $form['#validate'][] = 'payment_collection_validate';
+      if (isset($form['node'])) {
+         foreach ($form['node'] as $key => $value) {
+            //Remove the wrapper from the collection date field
+            $form['node'][$key]['field_collection_cheque_date'][LANGUAGE_NONE][0]['#theme_wrappers'] = array();
+            //Make the fine amount field disabled if type is signed
+            if ($value['field_flag']['und']['#default_value'][0] == 'signed') {
+               $form['node'][$key]['field_fine_amount']['#disabled'] = TRUE;
+            }
+         }
       }
-    }
-  }
+   }
 
-  if ($form_id == 'editableviews_entity_form_signed_bills_upload') {
+   if($form_id == 'editableviews_entity_form_collection_closure') {
+    // Validation for Collection Closore Table
+    $form['#validate'][] = 'collection_closure_validate';
+  }
+        
+    if ($form_id == 'editableviews_entity_form_crm_screen') {
+      if (isset($form['node'])) {
+         foreach ($form['node'] as $key => $value) {
+            $select = array('' => '- SELECT -');
+            $sales_status_option = _get_distributors_sales_status_option('field_call_status_user');
+            $sales_status_option = $select + $sales_status_option;
+            $form['node'][$key]['field_sales_call_status']['und']['#options'] = $sales_status_option;
+
+            $delivery_status_option = _get_distributors_sales_status_option('field_delivery_status_user');
+            $delivery_status_option = $select + $delivery_status_option;
+            $form['node'][$key]['field_sales_delivery_status']['und']['#options'] = $delivery_status_option;
+         }
+      }
+   }
+
+   if ($form_id == 'views_exposed_form') {
+      $select = array('All' => '- SELECT -');
+      if (isset($form['field_sales_call_status_tid']['#options'])) {
+         $sales_status_option = _get_distributors_sales_status_option('field_call_status_user');
+         $sales_status_option = $select + $sales_status_option;
+         $form['field_sales_call_status_tid']['#options'] = $sales_status_option;
+      }
+      if (isset($form['field_sales_delivery_status_tid']['#options'])) {
+         $sales_status_option = _get_distributors_sales_status_option('field_delivery_status_user');
+         $sales_status_option = $select + $sales_status_option;
+         $form['field_sales_delivery_status_tid']['#options'] = $sales_status_option;
+      }
+      if (isset($form['field_pod_call_history_tid']['#options'])) {
+         $sales_status_option = _get_distributors_sales_status_option('field_call_status_user');
+         $sales_status_option = $select + $sales_status_option;
+         $form['field_pod_call_history_tid']['#options'] = $sales_status_option;
+      }
+      if (isset($form['field_pod_delivery_history_tid']['#options'])) {
+         $sales_status_option = _get_distributors_sales_status_option('field_delivery_status_user');
+         $sales_status_option = $select + $sales_status_option;
+         $form['field_pod_delivery_history_tid']['#options'] = $sales_status_option;
+      }
+      
+      if (arg(0) == 'bills-assignment-acknowledgement') {   
+        $form['field_assigned_person_value']['#attributes'] = array('required' => TRUE);
+        $form['field_assignment_date_value']['value']['#attributes'] = array('required' => TRUE);
+      }
+   }
+
+   if ($form_id == 'editableviews_entity_form_dispatch_data_report') {
+      $select = array('' => '- Select -');
+      $vehicle = get_all_vehicle_data();
+      $vehicle = $select + $vehicle;
+      foreach ($form['node'] as $key => $value) {
+         $form['node'][$key]['field_vehicle_no'][LANGUAGE_NONE][0]['value']['#type'] = 'select';
+         $form['node'][$key]['field_vehicle_no'][LANGUAGE_NONE][0]['value']['#multiple'] = FALSE;
+         $form['node'][$key]['field_vehicle_no'][LANGUAGE_NONE][0]['value']['#options'] = $vehicle;
+         $form['node'][$key]['field_vehicle_no'][LANGUAGE_NONE][0]['value']['#size'] = 1;
+      }
+   }
+
+   if ($form_id == 'editableviews_entity_form_signed_bills_upload') {
     if ($form['#view_display_name'] == 'page_2' || $form['#view_display_name'] == 'page_3') {
       $select = array('' => '- In Stock -');
 
@@ -178,6 +241,19 @@ function payment_collection_validate($form, &$form_state) {
   }
 }
 
+function collection_closure_validate($form, &$form_state) {
+  foreach($form_state['values']['node'] as $nid => $form_data){
+    $title = $form_data['title'];
+    $closure_flag = $form_data['field_terminated_bill_flag']['und'][0]['value'];
+    $collection_closure_remarks = $form_data['field_collection_closure_remarks']['und'][0]['value'];
+    
+    if(!empty($closure_flag) && empty($collection_closure_remarks)) {
+      form_set_error('form', t("Closure flag is marked for $title. Please fill collection closure remark."));
+    }
+  }
+  
+}
+
 function modify_views_forms_field_widget_form_alter(&$element, &$form_state, $context) {
 //  if($element['#field_name'] == 'field_picking_start_time' || $element['#field_name'] == 'field_picking_end_time' || $element['#field_name'] == 'field_unloading_start_time' || $element['#field_name'] == 'field_unloading_end_time' || $element['#field_name'] == 'field_party_packing_start_time' || $element['#field_name'] == 'field_party_packing_end_time') {
 //    //$element['value']['#description'] = t('Enter Value in 24 Hr format (HH:MM)');
@@ -293,4 +369,38 @@ function modify_views_forms_field_attach_validate($entity_type, $entity, &$error
       }
     }
   }
+}
+
+/**
+ * 
+ * @param type $user_field
+ * @return type
+ */
+function _get_distributors_sales_status_option($user_field) {
+   $res = array();
+   $user_id = $GLOBALS['user']->uid;
+   $distributor_id = change_feeds_import_get_distributor_id($user_id);
+   if (!empty($distributor_id)) {
+      $query = db_select('taxonomy_term_data', 't');
+      $query->join("field_data_" .$user_field, 'uf', 'uf.entity_id = t.tid');
+      $query->condition("uf." .$user_field. "_uid", $distributor_id);
+      $query->fields('t', array('tid', 'name'));
+      $res = $query->execute()->fetchAllKeyed(0, 1);
+   }
+   return $res;
+}
+
+
+function get_all_vehicle_data() {
+   $res = array();
+   $user_id = $GLOBALS['user']->uid;
+   $distributor_id = change_feeds_import_get_distributor_id($user_id);
+   if (!empty($distributor_id)) {
+      $query = db_select('node', 'n');
+      $query->fields('n', array('title'));
+      $query->condition('n.type', 'vehicle_master');
+      $query->condition('n.uid', $distributor_id);
+      $res = $query->execute()->fetchAllKeyed(0, 0);
+   }
+   return $res;
 }

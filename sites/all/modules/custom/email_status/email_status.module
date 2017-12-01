@@ -1,6 +1,6 @@
 <?php
 
-define('_DISTRIBUTOR_ID',23466);
+define('_DISTRIBUTOR_ID', 23466);
 
 /**
  * Implments hook_menu
@@ -9,7 +9,8 @@ define('_DISTRIBUTOR_ID',23466);
 function email_status_menu() {
   $items['email/daily-data'] = array(
     'title' => 'Send Email Of Daily Data',
-    'page callback' => 'send_email_daily_data',
+    //'page callback' => 'send_email_daily_data',
+    'page callback' => 'send_email_pl_group_emailer',
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
@@ -31,7 +32,7 @@ function email_status_menu() {
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
-  
+
   $items['email/ofd-report'] = array(
     'title' => 'Send Email Of OFD Report',
     'page callback' => 'send_email_ofd_report',
@@ -52,11 +53,67 @@ function email_status_menu() {
 // setting form for email of daily status
 function email_status_email_form($form, $form_state) {
 
-  // PARTY PACKING PRODUCTIVITY LINES/Hr
-  $form['to_email'] = array(
-    '#type' => 'textfield',
+  // PL Group Wise Bill Pendency
+  $form['pl_grp_wise_to_email'] = array(
+    '#type' => 'textarea',
     '#title' => t('Receiver'),
-    '#default_value' => variable_get('to_email', ''),
+    '#description' => t('PL Group Wise Bill Pendency'),
+    '#default_value' => variable_get('pl_grp_wise_to_email', ''),
+    '#required' => TRUE,
+    '#size' => 60,
+    '#maxlength' => 2048,
+  );
+
+  // Productivity Progress Status
+  $form['productivity_status_to_email'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Receiver'),
+    '#description' => t('Productivity Progress Status'),
+    '#default_value' => variable_get('productivity_status_to_email', ''),
+    '#required' => TRUE,
+    '#size' => 60,
+    '#maxlength' => 2048,
+  );
+
+  // Pending OFD Sales Beat Wise
+  $form['ofd_salesbeatwise_to_email'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Receiver'),
+    '#description' => t('Pending OFD Sales Beat Wise'),
+    '#default_value' => variable_get('ofd_salesbeatwise_to_email', ''),
+    '#required' => TRUE,
+    '#size' => 60,
+    '#maxlength' => 2048,
+  );
+
+  // PL GROUP Wise OTIF
+  $form['pl_grp_otif_to_email'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Receiver'),
+    '#description' => t('PL GROUP Wise OTIF'),
+    '#default_value' => variable_get('pl_grp_otif_to_email', ''),
+    '#required' => TRUE,
+    '#size' => 60,
+    '#maxlength' => 2048,
+  );
+
+  // OFD Report
+  $form['ofd_to_email'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Receiver'),
+    '#description' => t('OFD Report'),
+    '#default_value' => variable_get('ofd_to_email', ''),
+    '#required' => TRUE,
+    '#size' => 60,
+    '#maxlength' => 2048,
+  );
+
+  // Payment Collection Status
+  $form['collection_status_to_email'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Receiver'),
+    '#description' => t('Payment Collection Status'),
+    '#default_value' => variable_get('collection_status_to_email', ''),
     '#required' => TRUE,
     '#size' => 60,
     '#maxlength' => 2048,
@@ -64,7 +121,7 @@ function email_status_email_form($form, $form_state) {
 
   // PARTY PACKING COMPLIANCE
   $form['from_email'] = array(
-    '#type' => 'textfield',
+    '#type' => 'textarea',
     '#title' => t('Sender'),
     '#default_value' => variable_get('from_email', ''),
     '#required' => TRUE,
@@ -76,162 +133,160 @@ function email_status_email_form($form, $form_state) {
 /*
  * Function to send auto mailer of OFD Report.
  */
+
 function send_email_ofd_report() {
   $distributor_id = _DISTRIBUTOR_ID;
   $distributor_name = change_feeds_import_get_distributor_name($distributor_id);
-   // Today's Date
+  // Today's Date
   $todays_date = date('d-M-Y');
-  
+
   $view_name = "ofd_mailer";
   $arg1 = date("mdY");
   $results = views_get_view_result($view_name, 'page', $arg1);
   $encoded_data = json_encode($results);
   $data = json_decode($encoded_data);
-  
+
   $rows = array();
   $total_bill_count = 0;
   $total_dispatch_bill_value = 0;
   $total_dispatch_loader_team_count = 0;
   $counter = 1;
-  $table_style =  'border: 1px solid #000;';
-  $header = array('Sr. No.','Trip Creation Date', 'Trip Execution Date', 'Trip ID','HHT ID','Bill Count','Dispatch Bill Value', 'Dispatch Supervisor','Cashier Name','Vehicle No','Dispatch Loader Team Count','Dispatch Date','Dispatch Start Time','Dispatch End Time','Sequence Method');
-  foreach($data as $result) {
-  $trip_creation_date =  $result->_field_data->nid->entity->field_trip_creation_date->und[0]->value;
-  $row1['data'] = date('d-M-y',$trip_creation_date);
-  $row1['style'] = $table_style;
-  $trip_execution_date =  $result->_field_data->nid->entity->field_trip_executon_date->und[0]->value;
-  $row2['data']  = date('d-M-y',$trip_execution_date);
-  $row2['style'] = $table_style;
-  $row3['data']  = $result->_field_data->nid->entity->field_trip_id->und[0]->value;
-  $row3['style'] = $table_style;
-  $hht_id = $result->_field_data->nid->entity->field_hht_id->und[0]->nid;
-  $query = db_select('node', 'n');
-  $query->fields('n', array('title'));
-  $query->condition('n.nid', $hht_id,'=');
-  $hht_id_title = $query->execute()->fetchfield();
-  $row4['data'] = $hht_id_title;
-  $row4['style'] = $table_style;
-  $row5['data'] = $result->_field_data->nid->entity->field_bill_count->und[0]->value;
-  $row5['style'] = $table_style;
-  $row6['data']  = $result->_field_data->nid->entity->field_dispatch_bill_value->und[0]->value;
-  $row6['style'] = $table_style;
-  $row7['data'] = $result->_field_data->nid->entity->field_dispatch_supervisor->und[0]->value;
-  $row7['style'] = $table_style;
-  $row8['data'] = $result->_field_data->nid->entity->field_cashier_name->und[0]->value;
-  $row8['style'] = $table_style;
-  $row9['data'] = $result->_field_data->nid->entity->field_vehicle_no->und[0]->value;
-  $row9['style'] = $table_style;
-  $row10['data']  = $result->_field_data->nid->entity->field_dispatch_loader_team_count->und[0]->value;
-  $row10['style'] = $table_style;
-  $dispatch_date = strtotime($result->_field_data->nid->entity->field_dispatch_date->und[0]->value);
-  $row11['data'] =  date('d-M-y',$dispatch_date);
-  $row11['style'] = $table_style;
-  $row12['data']  = $result->_field_data->nid->entity->field_dispatch_pre_start_time->und[0]->value;
-  $row12['style'] = $table_style;
-  $row13['data']  = $result->_field_data->nid->entity->field_dispatch_start_time->und[0]->value;
-  $row13['style'] = $table_style;
-  if ($result->_field_data->nid->entity->field_sequence_method->und[0]->value == 1) { 
-    $seq_method = 'API';
-  }
-  elseif ($result->_field_data->nid->entity->field_sequence_method->und[0]->value == 0) {
-    $seq_method = 'MANUAL';
-  }
-  else{
-    $seq_method = '';
-  }
-  $row14['data']  = $seq_method;
-  $row14['style'] = $table_style;
+  $table_style = 'border: 1px solid #000;';
+  $header = array('Sr. No.', 'Trip Creation Date', 'Trip Execution Date', 'Trip ID', 'HHT ID', 'Bill Count', 'Dispatch Bill Value', 'Dispatch Supervisor', 'Cashier Name', 'Vehicle No', 'Dispatch Loader Team Count', 'Dispatch Date', 'Dispatch Start Time', 'Dispatch End Time', 'Sequence Method');
+  foreach ($data as $result) {
+    $trip_creation_date = $result->_field_data->nid->entity->field_trip_creation_date->und[0]->value;
+    $row1['data'] = date('d-M-y', $trip_creation_date);
+    $row1['style'] = $table_style;
+    $trip_execution_date = $result->_field_data->nid->entity->field_trip_executon_date->und[0]->value;
+    $row2['data'] = date('d-M-y', $trip_execution_date);
+    $row2['style'] = $table_style;
+    $row3['data'] = $result->_field_data->nid->entity->field_trip_id->und[0]->value;
+    $row3['style'] = $table_style;
+    $hht_id = $result->_field_data->nid->entity->field_hht_id->und[0]->nid;
+    $query = db_select('node', 'n');
+    $query->fields('n', array('title'));
+    $query->condition('n.nid', $hht_id, '=');
+    $hht_id_title = $query->execute()->fetchfield();
+    $row4['data'] = $hht_id_title;
+    $row4['style'] = $table_style;
+    $row5['data'] = $result->_field_data->nid->entity->field_bill_count->und[0]->value;
+    $row5['style'] = $table_style;
+    $row6['data'] = $result->_field_data->nid->entity->field_dispatch_bill_value->und[0]->value;
+    $row6['style'] = $table_style;
+    $row7['data'] = $result->_field_data->nid->entity->field_dispatch_supervisor->und[0]->value;
+    $row7['style'] = $table_style;
+    $row8['data'] = $result->_field_data->nid->entity->field_cashier_name->und[0]->value;
+    $row8['style'] = $table_style;
+    $row9['data'] = $result->_field_data->nid->entity->field_vehicle_no->und[0]->value;
+    $row9['style'] = $table_style;
+    $row10['data'] = $result->_field_data->nid->entity->field_dispatch_loader_team_count->und[0]->value;
+    $row10['style'] = $table_style;
+    $dispatch_date = strtotime($result->_field_data->nid->entity->field_dispatch_date->und[0]->value);
+    $row11['data'] = date('d-M-y', $dispatch_date);
+    $row11['style'] = $table_style;
+    $row12['data'] = $result->_field_data->nid->entity->field_dispatch_pre_start_time->und[0]->value;
+    $row12['style'] = $table_style;
+    $row13['data'] = $result->_field_data->nid->entity->field_dispatch_start_time->und[0]->value;
+    $row13['style'] = $table_style;
+    if ($result->_field_data->nid->entity->field_sequence_method->und[0]->value == 1) {
+      $seq_method = 'API';
+    }
+    elseif ($result->_field_data->nid->entity->field_sequence_method->und[0]->value == 0) {
+      $seq_method = 'MANUAL';
+    }
+    else {
+      $seq_method = '';
+    }
+    $row14['data'] = $seq_method;
+    $row14['style'] = $table_style;
 
-  $total_bill_count  += $row5['data'];
-  $total_dispatch_bill_value += $row6['data'];
-  $total_dispatch_loader_team_count += $row10['data'];
-  $row0['data']  = $counter++;
-  $row0['style'] = $table_style;
+    $total_bill_count += $row5['data'];
+    $total_dispatch_bill_value += $row6['data'];
+    $total_dispatch_loader_team_count += $row10['data'];
+    $row0['data'] = $counter++;
+    $row0['style'] = $table_style;
 
-  $rows[]  = array($row0,$row1,$row2,$row3,$row4,$row5,$row6,$row7,$row8,$row9,$row10,$row11,$row12,$row13,$row14);
-
+    $rows[] = array($row0, $row1, $row2, $row3, $row4, $row5, $row6, $row7, $row8, $row9, $row10, $row11, $row12, $row13, $row14);
   }
-  $rows[]  = array('SUM','','','','',$total_bill_count,$total_dispatch_bill_value,'','','',$total_dispatch_loader_team_count,'','','','');
+  $rows[] = array('SUM', '', '', '', '', $total_bill_count, $total_dispatch_bill_value, '', '', '', $total_dispatch_loader_team_count, '', '', '', '');
 
-  
-  $ofd_html = "<h3>Dispatch Date : " . $todays_date ." (Today)</h3>";
+
+  $ofd_html = "<h3>Dispatch Date : " . $todays_date . " (Today)</h3>";
   $ofd_html .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
-  
+
   $view_name2 = "ofd_mailer2";
   $results = views_get_view_result($view_name2, 'page');
   $encoded_data = json_encode($results);
   $data = json_decode($encoded_data);
-  
+
   $rows = array();
   $total_bill_count = 0;
   $total_dispatch_bill_value = 0;
   $counter = 1;
-  $table_style =  'border: 1px solid #000;';
-  $header = array('Sr. No.','Trip Creation Date', 'Trip Execution Date', 'Trip ID','HHT ID','Bill Count','Dispatch Bill Value', 'Dispatch Supervisor','Cashier Name','Vehicle No','Dispatch Loader Team Count','Dispatch Date','Dispatch Start Time','Sequence Method');
-  foreach($data as $result) {
-  $trip_creation_date =  $result->_field_data->nid->entity->field_trip_creation_date->und[0]->value;
-  $row1['data'] = date('d-M-y',$trip_creation_date);
-  $row1['style'] = $table_style;
-  $trip_execution_date =  $result->_field_data->nid->entity->field_trip_executon_date->und[0]->value;
-  $row2['data']  = date('d-M-y',$trip_execution_date);
-  $row2['style'] = $table_style;
-  $row3['data']  = $result->_field_data->nid->entity->field_trip_id->und[0]->value;
-  $row3['style'] = $table_style;
-  $hht_id = $result->_field_data->nid->entity->field_hht_id->und[0]->nid;
-  $query = db_select('node', 'n');
-  $query->fields('n', array('title'));
-  $query->condition('n.nid', $hht_id,'=');
-  $hht_id_title = $query->execute()->fetchfield();
-  $row4['data'] = $hht_id_title;
-  $row4['style'] = $table_style;
-  $row5['data'] = $result->_field_data->nid->entity->field_bill_count->und[0]->value;
-  $row5['style'] = $table_style;
-  $row6['data']  = $result->_field_data->nid->entity->field_dispatch_bill_value->und[0]->value;
-  $row6['style'] = $table_style;
-  $row7['data'] = $result->_field_data->nid->entity->field_dispatch_supervisor->und[0]->value;
-  $row7['style'] = $table_style;
-  $row8['data'] = $result->_field_data->nid->entity->field_cashier_name->und[0]->value;
-  $row8['style'] = $table_style;
-  $row9['data'] = $result->_field_data->nid->entity->field_vehicle_no->und[0]->value;
-  $row9['style'] = $table_style;
-  $row10['data']  = $result->_field_data->nid->entity->field_dispatch_loader_team_count->und[0]->value;
-  $row10['style'] = $table_style;
-  $row11['data'] = $result->_field_data->nid->entity->field_dispatch_date->und[0]->value;
-  $row11['style'] = $table_style;
-  $row12['data']  = $result->_field_data->nid->entity->field_dispatch_start_time->und[0]->value;
-  $row12['style'] = $table_style;
-  if ($result->_field_data->nid->entity->field_sequence_method->und[0]->value == 1) {
-    $seq_method = 'API';
-  }
-  elseif ($result->_field_data->nid->entity->field_sequence_method->und[0]->value == 0){
-    $seq_method = 'MANUAL';
-  }
-  else {
-    $seq_method = '';
-  }
-  $row13['data']  = $seq_method;
-  $row13['style'] = $table_style;
+  $table_style = 'border: 1px solid #000;';
+  $header = array('Sr. No.', 'Trip Creation Date', 'Trip Execution Date', 'Trip ID', 'HHT ID', 'Bill Count', 'Dispatch Bill Value', 'Dispatch Supervisor', 'Cashier Name', 'Vehicle No', 'Dispatch Loader Team Count', 'Dispatch Date', 'Dispatch Start Time', 'Sequence Method');
+  foreach ($data as $result) {
+    $trip_creation_date = $result->_field_data->nid->entity->field_trip_creation_date->und[0]->value;
+    $row1['data'] = date('d-M-y', $trip_creation_date);
+    $row1['style'] = $table_style;
+    $trip_execution_date = $result->_field_data->nid->entity->field_trip_executon_date->und[0]->value;
+    $row2['data'] = date('d-M-y', $trip_execution_date);
+    $row2['style'] = $table_style;
+    $row3['data'] = $result->_field_data->nid->entity->field_trip_id->und[0]->value;
+    $row3['style'] = $table_style;
+    $hht_id = $result->_field_data->nid->entity->field_hht_id->und[0]->nid;
+    $query = db_select('node', 'n');
+    $query->fields('n', array('title'));
+    $query->condition('n.nid', $hht_id, '=');
+    $hht_id_title = $query->execute()->fetchfield();
+    $row4['data'] = $hht_id_title;
+    $row4['style'] = $table_style;
+    $row5['data'] = $result->_field_data->nid->entity->field_bill_count->und[0]->value;
+    $row5['style'] = $table_style;
+    $row6['data'] = $result->_field_data->nid->entity->field_dispatch_bill_value->und[0]->value;
+    $row6['style'] = $table_style;
+    $row7['data'] = $result->_field_data->nid->entity->field_dispatch_supervisor->und[0]->value;
+    $row7['style'] = $table_style;
+    $row8['data'] = $result->_field_data->nid->entity->field_cashier_name->und[0]->value;
+    $row8['style'] = $table_style;
+    $row9['data'] = $result->_field_data->nid->entity->field_vehicle_no->und[0]->value;
+    $row9['style'] = $table_style;
+    $row10['data'] = $result->_field_data->nid->entity->field_dispatch_loader_team_count->und[0]->value;
+    $row10['style'] = $table_style;
+    $row11['data'] = $result->_field_data->nid->entity->field_dispatch_date->und[0]->value;
+    $row11['style'] = $table_style;
+    $row12['data'] = $result->_field_data->nid->entity->field_dispatch_start_time->und[0]->value;
+    $row12['style'] = $table_style;
+    if ($result->_field_data->nid->entity->field_sequence_method->und[0]->value == 1) {
+      $seq_method = 'API';
+    }
+    elseif ($result->_field_data->nid->entity->field_sequence_method->und[0]->value == 0) {
+      $seq_method = 'MANUAL';
+    }
+    else {
+      $seq_method = '';
+    }
+    $row13['data'] = $seq_method;
+    $row13['style'] = $table_style;
 
-  $total_bill_count  += $row5['data'];
-  $total_dispatch_bill_value += $row6['data'];
-  $row0['data']  = $counter++;
-  $row0['style'] = $table_style;
-  
-  $rows[]  = array($row0,$row1,$row2,$row3,$row4,$row5,$row6,$row7,$row8,$row9,$row10,$row11,$row12,$row13);
+    $total_bill_count += $row5['data'];
+    $total_dispatch_bill_value += $row6['data'];
+    $row0['data'] = $counter++;
+    $row0['style'] = $table_style;
 
+    $rows[] = array($row0, $row1, $row2, $row3, $row4, $row5, $row6, $row7, $row8, $row9, $row10, $row11, $row12, $row13);
   }
-  $rows[]  = array('SUM','','','','',$total_bill_count,$total_dispatch_bill_value,'','','','','','','');
+  $rows[] = array('SUM', '', '', '', '', $total_bill_count, $total_dispatch_bill_value, '', '', '', '', '', '', '');
 
 
-  $ofd_html2 = "<h3>Pending Van Till : " . $todays_date ." (Today)</h3>";
+  $ofd_html2 = "<h3>Pending Van Till : " . $todays_date . " (Today)</h3>";
   $ofd_html2 .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
-  
+
   $params['subject'] = "OFD - $distributor_name";
-  $params['body']  = $ofd_html. "<br>" .$ofd_html2;
-  $mail_to = variable_get('to_email');
+  $params['body'] = $ofd_html . "<br>" . $ofd_html2;
+  $mail_to = variable_get('ofd_to_email');
   $from = variable_get('from_email');
   drupal_mail('email_status', 'ofd_report', $mail_to, LANGUAGE_NONE, $params, $from);
-  
 }
 
 function send_email_daily_data() {
@@ -437,16 +492,14 @@ function send_email_daily_data() {
 //  $mail_to = "dhirendra.mishra@iksula.com";
 //  $mail_to = "abhishek.r@iksula.com";
 //  $mail_to = "shruti.a@iksulaops.com";
-  $mail_to = variable_get('to_email');
+  //$mail_to = variable_get('to_email');
   //$from = "MIS.HELPDESK@leanbox.in";
-  $from = variable_get('from_email');
+  //$from = variable_get('from_email');
   //$rr = drupal_mail('email_status', 'daily_data', $mail_to, LANGUAGE_NONE, $params, $from);
-
   //send_email_productivity_emailer($todays_date_date, $distributor_name, $distributor_id);
-  send_email_pl_group_emailer($distributor_name, $distributor_id);
+  //send_email_pl_group_emailer($distributor_name, $distributor_id);
   //send_email_channel_emailer($distributor_name, $distributor_id);
 }
-
 
 function send_email_daily_cron_pl_data() {
   $distributor_id = _DISTRIBUTOR_ID;
@@ -454,7 +507,6 @@ function send_email_daily_cron_pl_data() {
 
   send_email_cron_pl_emailer($distributor_name, $distributor_id);
 }
-
 
 function send_email_channel_emailer($distributor_name, $distributor_id = 60) {
 //  global $user;
@@ -468,12 +520,12 @@ function send_email_channel_emailer($distributor_name, $distributor_id = 60) {
   $todays_date_date_timestamp = strtotime(date($todays_date_date));
   $current_day = date("d", $todays_date_date_timestamp);
   $yesterday = strtotime('-1 day', strtotime($todays_date_date));
-  $yesterday_date = date('d-M-Y',strtotime("-1 days"));
+  $yesterday_date = date('d-M-Y', strtotime("-1 days"));
   $day_before_yesterday = strtotime('-2 day', strtotime($todays_date_date));
-  $day_before_yesterday_date = date('d-M-Y',strtotime("-2 days"));
+  $day_before_yesterday_date = date('d-M-Y', strtotime("-2 days"));
   $twoday_before_yesterday = strtotime('-3 day', strtotime($todays_date_date));
-  $twoday_before_yesterday_date = date('d-M-Y',strtotime("-3 days"));
-  
+  $twoday_before_yesterday_date = date('d-M-Y', strtotime("-3 days"));
+
   if ($current_day == 22) {
     $this_month = date("m", $todays_date_date_timestamp);
     $this_date = $yesterday;
@@ -487,8 +539,8 @@ function send_email_channel_emailer($distributor_name, $distributor_id = 60) {
     $this_month = date("m", $todays_date_date_timestamp);
     $this_date = strtotime(date("Y-$this_month-21"));
   }
-  
-  $twoday_before_yesterday_html = "<h3>Billing Date : " . $twoday_before_yesterday_date ." (Two Days Before Yesterday)</h3>";
+
+  $twoday_before_yesterday_html = "<h3>Billing Date : " . $twoday_before_yesterday_date . " (Two Days Before Yesterday)</h3>";
   $twoday_before_yesterday_data = get_twoday_before_yesterday_data_channel($twoday_before_yesterday, $twoday_before_yesterday, $distributor_id);
   if ($twoday_before_yesterday_data == "No Result Found") {
     $header = get_header_of_chhanel(TRUE);
@@ -498,8 +550,8 @@ function send_email_channel_emailer($distributor_name, $distributor_id = 60) {
   else {
     $twoday_before_yesterday_html .= $twoday_before_yesterday_data;
   }
-  
-  $day_before_yesterday_html = "<h3>Billing Date : " . $day_before_yesterday_date ." (One Day Before Yesterday)</h3>";
+
+  $day_before_yesterday_html = "<h3>Billing Date : " . $day_before_yesterday_date . " (One Day Before Yesterday)</h3>";
   $day_before_yesterday_data = get_day_before_yesterday_data_channel($day_before_yesterday, $day_before_yesterday, $distributor_id);
   if ($day_before_yesterday_data == "No Result Found") {
     $header = get_header_of_chhanel(TRUE);
@@ -510,7 +562,7 @@ function send_email_channel_emailer($distributor_name, $distributor_id = 60) {
     $day_before_yesterday_html .= $day_before_yesterday_data;
   }
 
-  $yesterday_html = "<h3>Billing Date : " . $yesterday_date ." (Yesterday)</h3>";
+  $yesterday_html = "<h3>Billing Date : " . $yesterday_date . " (Yesterday)</h3>";
   $yesterday_data = get_yesterday_data_channel($yesterday, $yesterday, $distributor_id);
   if ($yesterday_data == "No Result Found") {
     $header = get_header_of_chhanel(TRUE);
@@ -521,7 +573,7 @@ function send_email_channel_emailer($distributor_name, $distributor_id = 60) {
     $yesterday_html .= $yesterday_data;
   }
 
-  $mtd_html = "<h3>MTD Wise: ". $yesterday_date ." (Yesterday)</h3>";
+  $mtd_html = "<h3>MTD Wise: " . $yesterday_date . " (Yesterday)</h3>";
   $mtd_data .= get_mtd_data_channel($this_date, $yesterday, $distributor_id);
   if ($mtd_data == "No Result Found") {
     $header = get_header_of_chhanel(TRUE);
@@ -531,8 +583,8 @@ function send_email_channel_emailer($distributor_name, $distributor_id = 60) {
   else {
     $mtd_html .= $mtd_data;
   }
-  
-  $mtd_one_day_before_html = "<h3>MTD Wise: ". $day_before_yesterday_date ." (One Day Before Yesterday)</h3>";
+
+  $mtd_one_day_before_html = "<h3>MTD Wise: " . $day_before_yesterday_date . " (One Day Before Yesterday)</h3>";
   $mtd_one_day_before_data .= get_one_day_before_mtd_data_channel($this_date, $day_before_yesterday, $distributor_id);
   if ($mtd_one_day_before_data == "No Result Found") {
     $header = get_header_of_chhanel(TRUE);
@@ -542,8 +594,8 @@ function send_email_channel_emailer($distributor_name, $distributor_id = 60) {
   else {
     $mtd_one_day_before_html .= $mtd_one_day_before_data;
   }
-  
-  $mtd_two_day_before_html = "<h3>MTD Wise: ". $twoday_before_yesterday_date ." (Two Day Before Yesterday)</h3>";
+
+  $mtd_two_day_before_html = "<h3>MTD Wise: " . $twoday_before_yesterday_date . " (Two Day Before Yesterday)</h3>";
   $mtd_two_day_before_data .= get_two_day_before_mtd_data_channel($this_date, $twoday_before_yesterday, $distributor_id);
   if ($mtd_two_day_before_data == "No Result Found") {
     $header = get_header_of_chhanel(TRUE);
@@ -556,15 +608,14 @@ function send_email_channel_emailer($distributor_name, $distributor_id = 60) {
 
   $params['subject'] = "Channel Wise OTIF - $distributor_name";
   $params['body'] = $yesterday_html . "<br>" . $day_before_yesterday_html . "<br>" . $twoday_before_yesterday_html . "<br>" . $mtd_html . "<br>" . $mtd_one_day_before_html . "<br>" . $mtd_two_day_before_html;
-  $mail_to = variable_get('to_email');
+  // $mail_to = variable_get('to_email');
 //  $mail_to = "dhirendra.mishra@iksula.com";
 //  $mail_to = "abhishek.r@iksula.com";
 //  $mail_to = "shruti.a@iksulaops.com";
   //$from = "MIS.HELPDESK@leanbox.in";
-  $from = variable_get('from_email');
-  drupal_mail('email_status', 'channel_status', $mail_to, LANGUAGE_NONE, $params, $from);
+  //$from = variable_get('from_email');
+  //drupal_mail('email_status', 'channel_status', $mail_to, LANGUAGE_NONE, $params, $from);
 }
-
 
 /**
  * 
@@ -577,12 +628,12 @@ function send_email_cron_pl_emailer($distributor_name, $distributor_id = 60) {
   $todays_date_date_timestamp = strtotime(date($todays_date_date));
   $current_day = date("d", $todays_date_date_timestamp);
   $yesterday = strtotime('-1 day', strtotime($todays_date_date));
-  $yesterday_date = date('d-M-Y',strtotime("-1 days"));
+  $yesterday_date = date('d-M-Y', strtotime("-1 days"));
   $day_before_yesterday = strtotime('-2 day', strtotime($todays_date_date));
-  $day_before_yesterday_date = date('d-M-Y',strtotime("-2 days"));
+  $day_before_yesterday_date = date('d-M-Y', strtotime("-2 days"));
   $twoday_before_yesterday = strtotime('-3 day', strtotime($todays_date_date));
-  $twoday_before_yesterday_date = date('d-M-Y',strtotime("-3 days"));
-  
+  $twoday_before_yesterday_date = date('d-M-Y', strtotime("-3 days"));
+
   if ($current_day == 22) {
     $this_month = date("m", $todays_date_date_timestamp);
     $this_date = $yesterday;
@@ -596,8 +647,8 @@ function send_email_cron_pl_emailer($distributor_name, $distributor_id = 60) {
     $this_month = date("m", $todays_date_date_timestamp);
     $this_date = strtotime(date("Y-$this_month-21"));
   }
-  
-  $twoday_before_yesterday_html = "<h3>Billing Date : " . $twoday_before_yesterday_date ." (Two Days Before Yesterday)</h3>";
+
+  $twoday_before_yesterday_html = "<h3>Billing Date : " . $twoday_before_yesterday_date . " (Two Days Before Yesterday)</h3>";
   $twoday_before_yesterday_data = get_cron_common_data_for_pl_datewise($twoday_before_yesterday, $twoday_before_yesterday, $distributor_id);
   if ($twoday_before_yesterday_data == "No Result Found") {
     $header = get_header_of_chhanel(TRUE, TRUE);
@@ -607,8 +658,8 @@ function send_email_cron_pl_emailer($distributor_name, $distributor_id = 60) {
   else {
     $twoday_before_yesterday_html .= $twoday_before_yesterday_data;
   }
-  
-  $day_before_yesterday_html = "<h3>Billing Date : " . $day_before_yesterday_date ." (One Day Before Yesterday)</h3>";
+
+  $day_before_yesterday_html = "<h3>Billing Date : " . $day_before_yesterday_date . " (One Day Before Yesterday)</h3>";
   $day_before_yesterday_data = get_cron_common_data_for_pl_datewise($day_before_yesterday, $day_before_yesterday, $distributor_id);
   if ($day_before_yesterday_data == "No Result Found") {
     $header = get_header_of_chhanel(TRUE, TRUE);
@@ -619,7 +670,7 @@ function send_email_cron_pl_emailer($distributor_name, $distributor_id = 60) {
     $day_before_yesterday_html .= $day_before_yesterday_data;
   }
 
-  $yesterday_html = "<h3>Billing Date : " . $yesterday_date ." (Yesterday)</h3>";
+  $yesterday_html = "<h3>Billing Date : " . $yesterday_date . " (Yesterday)</h3>";
   $yesterday_data = get_cron_common_data_for_pl_datewise($yesterday, $yesterday, $distributor_id);
   if ($yesterday_data == "No Result Found") {
     $header = get_header_of_chhanel(TRUE, TRUE);
@@ -630,7 +681,7 @@ function send_email_cron_pl_emailer($distributor_name, $distributor_id = 60) {
     $yesterday_html .= $yesterday_data;
   }
 
-  $mtd_html = "<h3>MTD Wise: ". $yesterday_date ." (Yesterday)</h3>";
+  $mtd_html = "<h3>MTD Wise: " . $yesterday_date . " (Yesterday)</h3>";
   $mtd_data .= get_cron_common_data_for_pl_datewise($this_date, $yesterday, $distributor_id);
   if ($mtd_data == "No Result Found") {
     $header = get_header_of_chhanel(TRUE, TRUE);
@@ -640,8 +691,8 @@ function send_email_cron_pl_emailer($distributor_name, $distributor_id = 60) {
   else {
     $mtd_html .= $mtd_data;
   }
-  
-  $mtd_one_day_before_html = "<h3>MTD Wise: ". $day_before_yesterday_date ." (One Day Before Yesterday)</h3>";
+
+  $mtd_one_day_before_html = "<h3>MTD Wise: " . $day_before_yesterday_date . " (One Day Before Yesterday)</h3>";
   $mtd_one_day_before_data .= get_cron_common_data_for_pl_datewise($this_date, $day_before_yesterday, $distributor_id);
   if ($mtd_one_day_before_data == "No Result Found") {
     $header = get_header_of_chhanel(TRUE, TRUE);
@@ -651,8 +702,8 @@ function send_email_cron_pl_emailer($distributor_name, $distributor_id = 60) {
   else {
     $mtd_one_day_before_html .= $mtd_one_day_before_data;
   }
-  
-  $mtd_two_day_before_html = "<h3>MTD Wise: ". $twoday_before_yesterday_date ." (Two Day Before Yesterday)</h3>";
+
+  $mtd_two_day_before_html = "<h3>MTD Wise: " . $twoday_before_yesterday_date . " (Two Day Before Yesterday)</h3>";
   $mtd_two_day_before_data .= get_cron_common_data_for_pl_datewise($this_date, $twoday_before_yesterday, $distributor_id);
   if ($mtd_two_day_before_data == "No Result Found") {
     $header = get_header_of_chhanel(TRUE, TRUE);
@@ -665,20 +716,14 @@ function send_email_cron_pl_emailer($distributor_name, $distributor_id = 60) {
 
   $params['subject'] = "PL GROUP Wise OTIF - $distributor_name";
   $params['body'] = $yesterday_html . "<br>" . $day_before_yesterday_html . "<br>" . $twoday_before_yesterday_html . "<br>" . $mtd_html . "<br>" . $mtd_one_day_before_html . "<br>" . $mtd_two_day_before_html;
-  $mail_to = variable_get('to_email');
-//  $mail_to = "dhirendra.mishra@iksula.com";
-//  $mail_to = "abhishek.r@iksula.com";
-//  $mail_to = "shruti.a@iksulaops.com";
-  //$from = "MIS.HELPDESK@leanbox.in";
+  $mail_to = variable_get('pl_grp_otif_to_email');
   $from = variable_get('from_email');
   drupal_mail('email_status', 'channel_status', $mail_to, LANGUAGE_NONE, $params, $from);
 }
 
-
-function send_email_pl_group_emailer($distributor_name, $distributor_id = 60) {
-  //global $user;
-  //$user_id = $user->uid;
-  //$distributor_id = change_feeds_import_get_distributor_id($user_id);
+function send_email_pl_group_emailer() {
+  $distributor_id = _DISTRIBUTOR_ID;
+  $distributor_name = change_feeds_import_get_distributor_name($distributor_id);
 
   $todays_date_date = date('Y-m-d');
   //$todays_date_date = "2017-03-20";
@@ -686,13 +731,13 @@ function send_email_pl_group_emailer($distributor_name, $distributor_id = 60) {
   $todays_date_date_timestamp = strtotime(date($todays_date_date));
   $current_day = date("d", $todays_date_date_timestamp);
   $yesterday = strtotime('-1 day', strtotime($todays_date_date));
-  $yesterday_date = date('d-M-Y',strtotime("-1 days"));
+  $yesterday_date = date('d-M-Y', strtotime("-1 days"));
   $day_before_yesterday = strtotime('-2 day', strtotime($todays_date_date));
-  $day_before_yesterday_date = date('d-M-Y',strtotime("-2 days"));
+  $day_before_yesterday_date = date('d-M-Y', strtotime("-2 days"));
   $twoday_before_yesterday = strtotime('-3 day', strtotime($todays_date_date));
-  $twoday_before_yesterday_date = date('d-M-Y',strtotime("-3 days"));
+  $twoday_before_yesterday_date = date('d-M-Y', strtotime("-3 days"));
   $twelveday_before_today = strtotime('-12 day', strtotime(date('Y-m-d')));
-  
+
   if ($current_day == 22) {
     $this_month = date("m", $todays_date_date_timestamp);
     $this_date = $yesterday;
@@ -706,7 +751,7 @@ function send_email_pl_group_emailer($distributor_name, $distributor_id = 60) {
     $this_month = date("m", $todays_date_date_timestamp);
     $this_date = strtotime(date("Y-$this_month-21"));
   }
-  
+
 //  $twoday_before_yesterday_html = "<h3>Billing Date : " . $twoday_before_yesterday_date ." (Two Days Before Yesterday)</h3>";
 //  $twoday_before_yesterday_data = get_twoday_before_yesterday_data_pl_groupwise($twoday_before_yesterday, $twoday_before_yesterday, $distributor_id);
 //  if ($twoday_before_yesterday_data == "No Result Found") {
@@ -740,18 +785,18 @@ function send_email_pl_group_emailer($distributor_name, $distributor_id = 60) {
 //    $yesterday_html .= $yesterday_data;
 //  }
 
-  $mtd_html = "<h3>Last 10 Days Pending Bills Summary till yesterday (". $yesterday_date .")</h3>";
+  $mtd_html = "<h3>Last 10 Days Pending Bills Summary till yesterday (" . $yesterday_date . ")</h3>";
   $mtd_data .= get_pending_bills_pl_group_datewise($twelveday_before_today, $yesterday, $distributor_id);
   if ($mtd_data == "No Result Found") {
     //$header = get_header_of_pl_group();
-    $header = array('PL Group', 'Bill Count', 'Bill Value','Dispatch Count', 'Dispatch Value','Pending Bill','Pending Bill Value');
+    $header = array('PL Group', 'Bill Count', 'Bill Value', 'Dispatch Count', 'Dispatch Value', 'Pending Bill', 'Pending Bill Value');
     $mtd_rows[] = array("<td colspan='10' style='text-align: center;'> There is No Activity</td>");
     $mtd_html .= theme('table', array('header' => $header, 'rows' => $mtd_rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
   }
   else {
     $mtd_html .= $mtd_data;
   }
-  
+
   $mtd_pending_bill_count_html = "<h3>Last 10 Days Pending Bills Count by Billing Date</h3>";
   $mtd_type = 'bill_count';
   $mtd_pending_bill_count_data .= get_mtd_data_pending_bills_count_value_pl_groupwise($distributor_id, $mtd_type);
@@ -763,7 +808,7 @@ function send_email_pl_group_emailer($distributor_name, $distributor_id = 60) {
   else {
     $mtd_pending_bill_count_html .= $mtd_pending_bill_count_data;
   }
-  
+
   $mtd_pending_bill_value_html = "<h3>Last 10 Days Pending Bills Value by Billing Date</h3>";
   $mtd_type = 'bill_value';
   $mtd_pending_bill_value_data .= get_mtd_data_pending_bills_count_value_pl_groupwise($distributor_id, $mtd_type);
@@ -775,7 +820,7 @@ function send_email_pl_group_emailer($distributor_name, $distributor_id = 60) {
   else {
     $mtd_pending_bill_value_html .= $mtd_pending_bill_value_data;
   }
-  
+
 //  $mtd_one_day_before_html = "<h3>MTD Wise: ". $day_before_yesterday_date ." (One Day Before Yesterday)</h3>";
 //  $mtd_one_day_before_data .= get_one_day_before_mtd_data_pl_groupwise($this_date, $day_before_yesterday, $distributor_id);
 //  if ($mtd_one_day_before_data == "No Result Found") {
@@ -801,28 +846,25 @@ function send_email_pl_group_emailer($distributor_name, $distributor_id = 60) {
   $params['subject'] = "PL Group Wise Bill Pendency-$distributor_name";
   //$params['body'] = $yesterday_html . "<br>" . $day_before_yesterday_html . "<br>" . $twoday_before_yesterday_html . "<br>" . $mtd_html . "<br>" . $mtd_one_day_before_html . "<br>" . $mtd_two_day_before_html;
   $params['body'] = $mtd_html . "<br>" . $mtd_pending_bill_count_html . "<br>" . $mtd_pending_bill_value_html;
-  $mail_to = variable_get('to_email');
-//  $mail_to = "dhirendra.mishra@iksula.com";
-//  $mail_to = "abhishek.r@iksula.com";
-//  $mail_to = "shruti.a@iksulaops.com";
+  $mail_to = variable_get('pl_grp_wise_to_email');
   $from = variable_get('from_email');
   drupal_mail('email_status', 'pl_group_status', $mail_to, LANGUAGE_NONE, $params, $from);
 }
 
 function send_email_productivity_emailer($todays_date_date, $distributor_name, $end_date = FALSE, $chart = FALSE, $type = '', $distributor_id = 60) {
- $target_data = leanbox_dashboard_target_value_using_voc_name('productivity target');
+  $target_data = leanbox_dashboard_target_value_using_voc_name('productivity target');
 
   if (( $chart == TRUE && $type == 'party_packing' ) || ( $chart == FALSE )) {
     $party_packing = get_productivity_data_for_party_packing($todays_date_date, $end_date, $distributor_id);
     $party_pack_superwise_html = "<h3>Party Packing Supervisorwise (status:Completed)</h3><table class = 'pp-superwise-table' border='1' cellpadding='5' cellspacing='0'  style='color:#000; font-size: 13px;font-family: arial'>"
-        . "<th>Party Packing Type</th>"
-        . "<th>Party Packing Supervisor</th>"
-        . "<th>Sum - Bill Line</th>"
-        . "<th>Sum - Total Time</th>"
-        . "<th>Productivity</th>";
+      . "<th>Party Packing Type</th>"
+      . "<th>Party Packing Supervisor</th>"
+      . "<th>Sum - Bill Line</th>"
+      . "<th>Sum - Total Time</th>"
+      . "<th>Productivity</th>";
 
     foreach ($party_packing as $key => $value) {
-     
+
       if ($key !== "total") {
         if ($key == 1) {
           $first_row = "PP";
@@ -864,12 +906,12 @@ function send_email_productivity_emailer($todays_date_date, $distributor_name, $
             else {
               $party_pack_superwise_html .="<td><table class = 'pp-count'><td><tr>$percentage</tr></td></table></td><tr></tr><td></td>";
             }
-               
+
             $label = $ke . ' ' . $k;
             $label_key = strtolower($label);
             $picking_godown_wise_html .="<td><table class = 'pp-count'><td><tr> $target_data[$label_key]</tr></td></table></td><tr></tr><td></td>";
-            
-            
+
+
             $total_timing += $time;
             $total_bill_lines += $bill_lines;
           }
@@ -910,11 +952,11 @@ function send_email_productivity_emailer($todays_date_date, $distributor_name, $
     $total_perc = ($total_bills / $total_time);
     $total_perc = number_format((float) $total_perc, 2, '.', '');
     $party_pack_type_wsie_html = "<h3>Party Packing Typewise</h3><table class = 'pp-typewise' border='1' cellpadding='5' cellspacing='0'  style='color:#000;font-size: 13px; font-family: arial'>"
-        . "<th>Party Packing Type</th>"
-        . "<th>Sum - Bill Line</th>"
-        . "<th>Sum - Total Time</th>"
-        . "<th>Productivity</th>"
-        . "<th>Target</th>";
+      . "<th>Party Packing Type</th>"
+      . "<th>Sum - Bill Line</th>"
+      . "<th>Sum - Total Time</th>"
+      . "<th>Productivity</th>"
+      . "<th>Target</th>";
 
 
     if (empty($total_bills) && empty($total_time)) {
@@ -925,33 +967,33 @@ function send_email_productivity_emailer($todays_date_date, $distributor_name, $
       $pp_target = $target_data['PP'];
 
       $party_pack_type_wsie_html .= "<tr><td>Non-PP</td><td>$total_non_bill</td><td>$total_non_time</td><td>$total_non_perc</td><td>$non_pp_target</td></tr>"
-          . "<tr><td>PP</td><td>$total_pp_bill</td><td>$total_pp_time</td><td>$total_pp_perc</td>"
-          . "<td>$pp_target</td>"
-          . "</tr></table>";
+        . "<tr><td>PP</td><td>$total_pp_bill</td><td>$total_pp_time</td><td>$total_pp_perc</td>"
+        . "<td>$pp_target</td>"
+        . "</tr></table>";
     }
   }
-  
+
   if (( $chart == TRUE && $type == 'picking' ) || ( $chart == FALSE )) {
 
     $picking = get_productivity_data_for_picking($todays_date_date, $end_date, $distributor_id);
     $picking_supervisor_wise_html = "<h3>Pick Supervisorwise (status:Completed)</h3><table class = 'pp-superwise-table' border='1' cellpadding='5' cellspacing='0'  style='color:#000; font-size: 13px;font-family: arial'>"
-        . "<th>Pick Supervisor</th>"
-        . "<th>Godown Area Id</th>"
-        . "<th>Picking Type</th>"
-        . "<th>Sum - Loading Sheet Line</th>"
-        . "<th>Sum - Time Duration</th>"
-        . "<th>Productivity</th>";
+      . "<th>Pick Supervisor</th>"
+      . "<th>Godown Area Id</th>"
+      . "<th>Picking Type</th>"
+      . "<th>Sum - Loading Sheet Line</th>"
+      . "<th>Sum - Time Duration</th>"
+      . "<th>Productivity</th>";
 
 
     $picking_godown_wise_html = "<h3>Pick Godownwise (status:Completed)</h3><table class = 'pp-typewise' border='1' cellpadding='5' cellspacing='0'  style='color:#000; font-size: 13px;font-family: arial'>"
-        . "<th>Godown Area Id</th>"
-        . "<th>Picking Type</th>"
-        . "<th>Sum - Loading Sheet Line</th>"
-        . "<th>Sum - Time Duration</th>"
-        . "<th>Productivity</th>"
-        . "<th>Target</th>";
-    
-     
+      . "<th>Godown Area Id</th>"
+      . "<th>Picking Type</th>"
+      . "<th>Sum - Loading Sheet Line</th>"
+      . "<th>Sum - Time Duration</th>"
+      . "<th>Productivity</th>"
+      . "<th>Target</th>";
+
+
     foreach ($picking as $key => $value) {
 
       if ($key == "godown") {
@@ -970,16 +1012,16 @@ function send_email_productivity_emailer($todays_date_date, $distributor_name, $
             $picking_godown_wise_html .="<td><table class = 'pp-bill'><td><tr>$loding_lines</tr></td></table></td>";
             $picking_godown_wise_html .="<td><table class = 'pp-time'><td><tr>$timing</tr></td></table></td>";
             $picking_godown_wise_html .="<td><table class = 'pp-count'><td><tr>$percentage</tr></td></table></td>";
-            
+
             $label = $ke . ' ' . $k;
             $label_key = strtolower($label);
-             if ($godown_counter == $godown_count) {
+            if ($godown_counter == $godown_count) {
               $picking_godown_wise_html .="<td><table class = 'pp-target'><td><tr>$target_data[$label_key]</tr></td></table></td>";
             }
             else {
               $picking_godown_wise_html .="<td><table class = 'pp-target'><td><tr>$target_data[$label_key]</tr></td></table></td><tr></tr><td></td>";
             }
-            
+
             $total_timing += $timing;
             $total_loding_lines += $loding_lines;
             $all_godown_total_timing += $timing;
@@ -1043,17 +1085,17 @@ function send_email_productivity_emailer($todays_date_date, $distributor_name, $
 
   $params['subject'] = "Productivity Progress Status-$distributor_name";
   $params['body'] = $party_pack_type_wsie_html . "<br>" . $party_pack_superwise_html . "<br>" . $picking_godown_wise_html . "<br>" . $picking_supervisor_wise_html;
-  $mail_to = variable_get('to_email');
-  $from = variable_get('from_email');
+  //$mail_to = variable_get('to_email');
+  //$from = variable_get('from_email');
 
   if ($chart == TRUE && $type == 'party_packing') {
     return $party_pack_type_wsie_html . "<br>" . $party_pack_superwise_html;
   }
   else if ($chart == TRUE && $type == 'picking') {
-    return  $picking_godown_wise_html . "<br>" . $picking_supervisor_wise_html;
+    return $picking_godown_wise_html . "<br>" . $picking_supervisor_wise_html;
   }
   else {
-    drupal_mail('email_status', 'productivity_status', $mail_to, LANGUAGE_NONE, $params, $from);
+    //drupal_mail('email_status', 'productivity_status', $mail_to, LANGUAGE_NONE, $params, $from);
   }
 }
 
@@ -1069,32 +1111,31 @@ function send_email_productivity_emailer($todays_date_date, $distributor_name, $
  */
 function send_party_packingand_picking_productivity_emailer() {
   $distributor_id = _DISTRIBUTOR_ID;
-   $distributor_name = change_feeds_import_get_distributor_name($distributor_id);
-   $end_date = strtotime('-15 day', date('Y-m-d'));
-   $todays_date_date = strtotime(date('Y-m-d 00:00:00'));
-   $target_data = leanbox_dashboard_target_value_using_voc_name('productivity target');
-   
-   // Party Packing productivity
-   $party_packing_html = get_email_productivity_data_for_party_packing($end_date, $todays_date_date, $distributor_id);
-  
-   // Picking productivity
-   $picking_html = get_email_productivity_data_for_picking($end_date, $todays_date_date, $distributor_id);
-   
-   //Loose Confirmation Productivity Mailer
-   $loose_confirmation_html = get_email_productivity_data_for_loose_confirmation($end_date, $todays_date_date, $distributor_id);
-   
-   //Loading Productivity Mailer
-   $loading_html = get_email_productivity_data_for_loading($end_date, $todays_date_date, $distributor_id);
-   
+  $distributor_name = change_feeds_import_get_distributor_name($distributor_id);
+  $end_date = strtotime('-15 day', date('Y-m-d'));
+  $todays_date_date = strtotime(date('Y-m-d 00:00:00'));
+  $target_data = leanbox_dashboard_target_value_using_voc_name('productivity target');
 
-   $params['subject'] = "Productivity Progress Status-$distributor_name";
-   $params['body'] = $party_packing_html . "<br>" . $picking_html . "<br>" . $loose_confirmation_html  . "<br>" . $loading_html;
-   $mail_to = variable_get('to_email');
-   $from = variable_get('from_email');
+  // Party Packing productivity
+  $party_packing_html = get_email_productivity_data_for_party_packing($end_date, $todays_date_date, $distributor_id);
 
-   drupal_mail('email_status', 'productivity_status', $mail_to, LANGUAGE_NONE, $params, $from);
+  // Picking productivity
+  $picking_html = get_email_productivity_data_for_picking($end_date, $todays_date_date, $distributor_id);
+
+  //Loose Confirmation Productivity Mailer
+  $loose_confirmation_html = get_email_productivity_data_for_loose_confirmation($end_date, $todays_date_date, $distributor_id);
+
+  //Loading Productivity Mailer
+  $loading_html = get_email_productivity_data_for_loading($end_date, $todays_date_date, $distributor_id);
+
+
+  $params['subject'] = "Productivity Progress Status-$distributor_name";
+  $params['body'] = $party_packing_html . "<br>" . $picking_html . "<br>" . $loose_confirmation_html . "<br>" . $loading_html;
+  $mail_to = variable_get('productivity_status_to_email');
+  $from = variable_get('from_email');
+
+  drupal_mail('email_status', 'productivity_status', $mail_to, LANGUAGE_NONE, $params, $from);
 }
-
 
 function get_todays_party_packing_created_data($loading_date, $distributor_id = 60) {
   $query = db_select('node', 'n');
@@ -1284,7 +1325,7 @@ function get_email_productivity_data_for_loading($start_date, $end_date = FALSE,
   $query->join('field_data_field_distributor', 'fd', 'fd.entity_id = n.uid');
   $query->condition('fd.entity_id', $dis_id, '=');
   $query->condition('n.changed', array($start_date, $end_date), 'BETWEEN');
-  $query->orderBy('n.changed','DESC');
+  $query->orderBy('n.changed', 'DESC');
   $query->join('field_data_field_vehicle_no', 'vno', 'vno.entity_id = n.nid');
   $query->join('field_data_field_dispatch_bill_value', 'dis', 'dis.entity_id = n.nid');
   $query->join('field_data_field_bill_count', 'bc', 'bc.entity_id = n.nid');
@@ -1299,15 +1340,15 @@ function get_email_productivity_data_for_loading($start_date, $end_date = FALSE,
   $query->fields('vno', array('field_vehicle_no_value'));
   $query->fields('dst', array('field_dispatch_pre_start_time_value'));
   $query->fields('det', array('field_dispatch_start_time_value'));
-  $query->fields('n', array('nid','changed'));
+  $query->fields('n', array('nid', 'changed'));
   $query->fields('ds', array('field_dispatch_status_value'));
   $query->fields('tc', array('field_dispatch_loader_team_count_value'));
   $query->fields('pps', array('field_dispatch_supervisor_value'));
   $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
 
   $table_data = array();
-  foreach($res as $value) {
-    $date = date('Y-m-d',$value['changed']);
+  foreach ($res as $value) {
+    $date = date('Y-m-d', $value['changed']);
     $supervisor = $value['field_dispatch_supervisor_value'];
     $start_time = strtotime($value['field_dispatch_pre_start_time_value']);
     $end_time = strtotime($value['field_dispatch_start_time_value']);
@@ -1323,33 +1364,32 @@ function get_email_productivity_data_for_loading($start_date, $end_date = FALSE,
   }
 
   $loading_productivity_html = "<h3>Loading Productivity</h3></br><h3>Loading Status (status:Completed)</h3><table class = 'pp-superwise-table' border='1' cellpadding='5' cellspacing='0'  style='color:#000; font-size: 13px;font-family: arial'>"
-   . "<th>Transaction Date</th>"
-   . "<th>Loading Supervisor</th>"
-   . "<th>Count of Vehicle Loaded</th>"
-   . "<th>Total Dispatch Value</th>"
-   . "<th>Total Bill Count</th>"
-   . "<th>Total Time Taken in Mins</th>"
-   . "<th>Productivity (Dispatch Value/Hr)</th>"
-   . "<th>Productivity (Dispatch Value/10Mins)</th>";
+    . "<th>Transaction Date</th>"
+    . "<th>Loading Supervisor</th>"
+    . "<th>Count of Vehicle Loaded</th>"
+    . "<th>Total Dispatch Value</th>"
+    . "<th>Total Bill Count</th>"
+    . "<th>Total Time Taken in Mins</th>"
+    . "<th>Productivity (Dispatch Value/Hr)</th>"
+    . "<th>Productivity (Dispatch Value/10Mins)</th>";
 
-  foreach($table_data as $trannsaction_date => $data){
-    foreach($data as $key => $value) {
+  foreach ($table_data as $trannsaction_date => $data) {
+    foreach ($data as $key => $value) {
       $productivity_per_min = round(($value['dispatch_value'] / $value['total_time']) * 10);
       $productivity_per_hour = $productivity_per_min * 6;
-      $loading_productivity_html .= "<tr><td style = 'border:1px solid #000;'>".$value['transaction_date']."</td>";
-      $loading_productivity_html .= "<td style = 'border:1px solid #000;'>".$value['supervisor_name']."</td>";
-      $loading_productivity_html .= "<td style = 'border:1px solid #000;'>".count($value['vehicle'])."</td>";
-      $loading_productivity_html .= "<td style = 'border:1px solid #000;'>".$value['dispatch_value']."</td>";
-      $loading_productivity_html .= "<td style = 'border:1px solid #000;'>".$value['bill_count']."</td>";
-      $loading_productivity_html .= "<td style = 'border:1px solid #000;'>".$value['total_time']."</td>";
-      $loading_productivity_html .= "<td style = 'border:1px solid #000;'>".$productivity_per_hour."</td>";
-      $loading_productivity_html .= "<td style = 'border:1px solid #000;'>".$productivity_per_min."</td></tr>";
+      $loading_productivity_html .= "<tr><td style = 'border:1px solid #000;'>" . $value['transaction_date'] . "</td>";
+      $loading_productivity_html .= "<td style = 'border:1px solid #000;'>" . $value['supervisor_name'] . "</td>";
+      $loading_productivity_html .= "<td style = 'border:1px solid #000;'>" . count($value['vehicle']) . "</td>";
+      $loading_productivity_html .= "<td style = 'border:1px solid #000;'>" . $value['dispatch_value'] . "</td>";
+      $loading_productivity_html .= "<td style = 'border:1px solid #000;'>" . $value['bill_count'] . "</td>";
+      $loading_productivity_html .= "<td style = 'border:1px solid #000;'>" . $value['total_time'] . "</td>";
+      $loading_productivity_html .= "<td style = 'border:1px solid #000;'>" . $productivity_per_hour . "</td>";
+      $loading_productivity_html .= "<td style = 'border:1px solid #000;'>" . $productivity_per_min . "</td></tr>";
     }
   }
   $loading_productivity_html .= "</table>";
   return $loading_productivity_html;
 }
-
 
 /**
  * Send Email For Loose Confirmation Productivity
@@ -1364,7 +1404,7 @@ function get_email_productivity_data_for_loose_confirmation($start_date, $end_da
   $query->join('field_data_field_distributor', 'fd', 'fd.entity_id = n.uid');
   $query->condition('fd.entity_id', $dis_id, '=');
   $query->condition('n.changed', array($start_date, $end_date), 'BETWEEN');
-  $query->orderBy('n.changed','DESC');
+  $query->orderBy('n.changed', 'DESC');
   $query->join('field_data_field_pc_picking_type', 'pt', 'pt.entity_id = n.nid');
   $query->join('field_data_field_pc_pick_lines', 'lsl', 'lsl.entity_id = n.nid');
   $query->join('field_data_field_pc_start_time', 'pst', 'pst.entity_id = n.nid');
@@ -1398,21 +1438,20 @@ function get_email_productivity_data_for_loose_confirmation($start_date, $end_da
 
     $picker_name = $value['field_pc_picker_name_value'];
     $type = $value['field_pc_picking_type_value'];
-    $transaction_date = date('Y-m-d',$value['changed']);
+    $transaction_date = date('Y-m-d', $value['changed']);
 
     if (isset($res[$picker_name])) {
       if ($type == "Loose") {
         $picking[$transaction_date][$picker_name][$type]['loading_sheet_line'] += $loading_line;
         $picking[$transaction_date][$picker_name][$type]['total_tme'] += $total_time;
         $productivity_per = ($loading_line / $total_time);
-        $picking[$transaction_date][$picker_name][$type]['productivity']  = round($productivity_per);
+        $picking[$transaction_date][$picker_name][$type]['productivity'] = round($productivity_per);
       }
       if ($type == "Bulk") {
         $picking[$transaction_date][$picker_name][$type]['loading_sheet_line'] += $loading_line;
         $picking[$transaction_date][$picker_name][$type]['total_tme'] += $total_time;
         $productivity_per = ($loading_line / $total_time);
-        $picking[$transaction_date][$picker_name][$type]['productivity']  = round($productivity_per);
-        
+        $picking[$transaction_date][$picker_name][$type]['productivity'] = round($productivity_per);
       }
     }
     else {
@@ -1421,40 +1460,40 @@ function get_email_productivity_data_for_loose_confirmation($start_date, $end_da
         $picking[$transaction_date][$picker_name][$type]['loading_sheet_line'] = $loading_line;
         $picking[$transaction_date][$picker_name][$type]['total_tme'] = $total_time;
         $productivity_per = ($loading_line / $total_time);
-        $picking[$transaction_date][$picker_name][$type]['productivity']  = round($productivity_per);
+        $picking[$transaction_date][$picker_name][$type]['productivity'] = round($productivity_per);
       }
       if ($type == "Bulk") {
         $picking[$transaction_date][$picker_name][$type]['loading_sheet_line'] = $loading_line;
         $picking[$transaction_date][$picker_name][$type]['total_tme'] = $total_time;
         $productivity_per = ($loading_line / $total_time);
-        $picking[$transaction_date][$picker_name][$type]['productivity']  = round($productivity_per);
-       }
+        $picking[$transaction_date][$picker_name][$type]['productivity'] = round($productivity_per);
+      }
     }
     $picking[$transaction_date][$picker_name][$type]['pc_picker_name'] = $picker_name;
     $picking[$transaction_date][$picker_name][$type]['supervisor'] = $value['field_pc_pick_supervisor_value'];
-    $picking[$transaction_date][$picker_name][$type]['updated_date'] = date('Y-m-d',$value['changed']);
+    $picking[$transaction_date][$picker_name][$type]['updated_date'] = date('Y-m-d', $value['changed']);
     $picking[$transaction_date][$picker_name][$type]['picking_type'] = $type;
   }
 
   $loose_confirm_productivity_html = "<h3>Loose Confirmation Productivity</h3></br><h3>Loose Confirmation (status:Completed)</h3><table class = 'pp-superwise-table' border='1' cellpadding='5' cellspacing='0'  style='color:#000; font-size: 13px;font-family: arial'>"
-   . "<th>Transaction Date</th>"
-   . "<th>Pick Confirm Name</th>"
-   . "<th>Pick Confirm Supervisor</th>"
-   . "<th>Picking Type</th>"
-   . "<th>Sum - Loading Sheet Line</th>"
-   . "<th>Sum - Time Duration</th>"
-   . "<th>Productivity</th>";
+    . "<th>Transaction Date</th>"
+    . "<th>Pick Confirm Name</th>"
+    . "<th>Pick Confirm Supervisor</th>"
+    . "<th>Picking Type</th>"
+    . "<th>Sum - Loading Sheet Line</th>"
+    . "<th>Sum - Time Duration</th>"
+    . "<th>Productivity</th>";
 
-  foreach($picking as $transaction_date => $data){
-    foreach($data as $key => $value) {
-      foreach($value as $k => $result) {
-        $loose_confirm_productivity_html .= "<tr><td style = 'border:1px solid #000;'>".$result['updated_date']."</td>";
-        $loose_confirm_productivity_html .= "<td style = 'border:1px solid #000;'>".$result['pc_picker_name']."</td>";
-        $loose_confirm_productivity_html .= "<td style = 'border:1px solid #000;'>".$result['supervisor']."</td>";
-        $loose_confirm_productivity_html .= "<td style = 'border:1px solid #000;'>".$result['picking_type']."</td>";
-        $loose_confirm_productivity_html .= "<td style = 'border:1px solid #000;'>".$result['loading_sheet_line']."</td>";
-        $loose_confirm_productivity_html .= "<td style = 'border:1px solid #000;'>".$result['total_tme']."</td>";
-        $loose_confirm_productivity_html .= "<td style = 'border:1px solid #000;'>".$result['productivity']."</td></tr>";
+  foreach ($picking as $transaction_date => $data) {
+    foreach ($data as $key => $value) {
+      foreach ($value as $k => $result) {
+        $loose_confirm_productivity_html .= "<tr><td style = 'border:1px solid #000;'>" . $result['updated_date'] . "</td>";
+        $loose_confirm_productivity_html .= "<td style = 'border:1px solid #000;'>" . $result['pc_picker_name'] . "</td>";
+        $loose_confirm_productivity_html .= "<td style = 'border:1px solid #000;'>" . $result['supervisor'] . "</td>";
+        $loose_confirm_productivity_html .= "<td style = 'border:1px solid #000;'>" . $result['picking_type'] . "</td>";
+        $loose_confirm_productivity_html .= "<td style = 'border:1px solid #000;'>" . $result['loading_sheet_line'] . "</td>";
+        $loose_confirm_productivity_html .= "<td style = 'border:1px solid #000;'>" . $result['total_tme'] . "</td>";
+        $loose_confirm_productivity_html .= "<td style = 'border:1px solid #000;'>" . $result['productivity'] . "</td></tr>";
       }
     }
   }
@@ -1484,7 +1523,7 @@ function get_email_productivity_data_for_party_packing($start_date, $end_date = 
   $query->leftjoin('field_data_field_party_packer_name', 'pn', 'pn.entity_id = n.nid');
 
   $query->condition('n.changed', array($start_date, $end_date), 'BETWEEN');
-  $query->orderBy('n.changed','DESC');
+  $query->orderBy('n.changed', 'DESC');
   $query->leftjoin('field_data_field_party_packing_type', 'ppt', 'ppt.entity_id = n.nid');
   $query->leftjoin('field_data_field_party_packing_supervisor', 'pps', 'pps.entity_id = n.nid');
   $query->fields('n', array('nid', 'changed'));
@@ -1498,7 +1537,7 @@ function get_email_productivity_data_for_party_packing($start_date, $end_date = 
   $query->fields('ppt', array('field_party_packing_type_value'));
   $query->fields('pps', array('field_party_packing_supervisor_value'));
   $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
-  
+
   $party_packing = array();
   foreach ($res as $value) {
     $start_time = strtotime($value['field_party_packing_start_time_value']);
@@ -1509,23 +1548,23 @@ function get_email_productivity_data_for_party_packing($start_date, $end_date = 
     $bill_line = $value['field_bill_lines_value'];
     $team_count = $value['field_party_packer_team_count_value'];
     $total_time = ($team_count * $time_diff);
-    $transaction_date = date('Y-m-d',$value['changed']);
+    $transaction_date = date('Y-m-d', $value['changed']);
     $party_packer_n = $value['field_party_packer_name_value'];
 
     if (isset($res[$party_packer_n])) {
       if ($type == 1) { // type is PP
         $party_packing[$transaction_date][$party_packer_n][$type]['pp_bill_lines'] += $bill_line;
         $party_packing[$transaction_date][$party_packer_n][$type]['pp_time'] += $total_time;
-        $party_packing[$transaction_date][$party_packer_n][$type]['packer_type']  = 'PP';
+        $party_packing[$transaction_date][$party_packer_n][$type]['packer_type'] = 'PP';
         $productivity_per = ($bill_line / $total_time);
-        $party_packing[$transaction_date][$party_packer_n][$type]['productivity']  = round($productivity_per);
+        $party_packing[$transaction_date][$party_packer_n][$type]['productivity'] = round($productivity_per);
       }
       if ($type == 0) { //type is NON-PP
         $party_packing[$transaction_date][$party_packer_n][$type]['pp_bill_lines'] += $bill_line;
         $party_packing[$transaction_date][$party_packer_n][$type]['pp_time'] += $total_time;
-        $party_packing[$transaction_date][$party_packer_n][$type]['packer_type']  = 'NON-PP';
+        $party_packing[$transaction_date][$party_packer_n][$type]['packer_type'] = 'NON-PP';
         $productivity_per = ($bill_line / $total_time);
-        $party_packing[$transaction_date][$party_packer_n][$type]['productivity']  = round($productivity_per);
+        $party_packing[$transaction_date][$party_packer_n][$type]['productivity'] = round($productivity_per);
       }
     }
     else {
@@ -1533,54 +1572,53 @@ function get_email_productivity_data_for_party_packing($start_date, $end_date = 
       if ($type == 1) { // type is PP
         $party_packing[$transaction_date][$party_packer_n][$type]['pp_bill_lines'] = $bill_line;
         $party_packing[$transaction_date][$party_packer_n][$type]['pp_time'] = $total_time;
-        $party_packing[$transaction_date][$party_packer_n][$type]['packer_type']  = 'PP';
+        $party_packing[$transaction_date][$party_packer_n][$type]['packer_type'] = 'PP';
         $productivity_per = ($bill_line / $total_time);
-        $party_packing[$transaction_date][$party_packer_n][$type]['productivity']  = round($productivity_per);
+        $party_packing[$transaction_date][$party_packer_n][$type]['productivity'] = round($productivity_per);
       }
       if ($type == 0) { //type is NON-PP
         $party_packing[$transaction_date][$party_packer_n][$type]['pp_bill_lines'] = $bill_line;
         $party_packing[$transaction_date][$party_packer_n][$type]['pp_time'] = $total_time;
-        $party_packing[$transaction_date][$party_packer_n][$type]['packer_type']  = 'NON-PP';
+        $party_packing[$transaction_date][$party_packer_n][$type]['packer_type'] = 'NON-PP';
         $productivity_per = ($bill_line / $total_time);
-        $party_packing[$transaction_date][$party_packer_n][$type]['productivity']  = round($productivity_per);
+        $party_packing[$transaction_date][$party_packer_n][$type]['productivity'] = round($productivity_per);
       }
     }
 
-  $party_packing[$transaction_date][$party_packer_n][$type]['updated_date'] = $transaction_date;
-  $party_packing[$transaction_date][$party_packer_n][$type]['supervisor_name'] = $value['field_party_packing_supervisor_value'];
-  $party_packing[$transaction_date][$party_packer_n][$type]['party_packer_name'] = $party_packer_n;
+    $party_packing[$transaction_date][$party_packer_n][$type]['updated_date'] = $transaction_date;
+    $party_packing[$transaction_date][$party_packer_n][$type]['supervisor_name'] = $value['field_party_packing_supervisor_value'];
+    $party_packing[$transaction_date][$party_packer_n][$type]['party_packer_name'] = $party_packer_n;
   }
 
   $target_data = leanbox_dashboard_target_value_using_voc_name('productivity target');
   $party_pack_datewise_html = "<h3>Party Packing Productivity</h3></br><h3>Party Packing (status:Completed)</h3><table class = 'pp-superwise-table' border='1' cellpadding='5' cellspacing='0'  style='color:#000; font-size: 13px;font-family: arial'>"
-       . "<th>Transaction Date</th>"
-       . "<th>Party Packer name</th>"
-       . "<th>Party Packing Supervisor</th>"
-       . "<th>Party Packing Type</th>"
-       . "<th>Sum - Bill Line</th>"
-       . "<th>Sum - Total Time</th>"
-       . "<th>Productivity</th>"
-       . "<th>Target</th>";
-      
+    . "<th>Transaction Date</th>"
+    . "<th>Party Packer name</th>"
+    . "<th>Party Packing Supervisor</th>"
+    . "<th>Party Packing Type</th>"
+    . "<th>Sum - Bill Line</th>"
+    . "<th>Sum - Total Time</th>"
+    . "<th>Productivity</th>"
+    . "<th>Target</th>";
 
-  foreach($party_packing as $transaction_date => $data){
-    foreach($data as $key => $value) {
-      foreach($value as $k => $result) {
-        $party_pack_datewise_html .= "<tr><td style = 'border:1px solid #000;'>".$result['updated_date']."</td>";
-        $party_pack_datewise_html .= "<td style = 'border:1px solid #000;'>".$result['party_packer_name']."</td>";
-        $party_pack_datewise_html .= "<td style = 'border:1px solid #000;'>".$result['supervisor_name']."</td>";
-        $party_pack_datewise_html .= "<td style = 'border:1px solid #000;'>".$result['packer_type']."</td>";
-        $party_pack_datewise_html .= "<td style = 'border:1px solid #000;'>".$result['pp_bill_lines']."</td>";
-        $party_pack_datewise_html .= "<td style = 'border:1px solid #000;'>".$result['pp_time']."</td>";
-        $party_pack_datewise_html .= "<td style = 'border:1px solid #000;'>".$result['productivity']."</td>";
-        $party_pack_datewise_html .= "<td style = 'border:1px solid #000;'>".$target_data[$result['packer_type']]."</td></tr>";
+
+  foreach ($party_packing as $transaction_date => $data) {
+    foreach ($data as $key => $value) {
+      foreach ($value as $k => $result) {
+        $party_pack_datewise_html .= "<tr><td style = 'border:1px solid #000;'>" . $result['updated_date'] . "</td>";
+        $party_pack_datewise_html .= "<td style = 'border:1px solid #000;'>" . $result['party_packer_name'] . "</td>";
+        $party_pack_datewise_html .= "<td style = 'border:1px solid #000;'>" . $result['supervisor_name'] . "</td>";
+        $party_pack_datewise_html .= "<td style = 'border:1px solid #000;'>" . $result['packer_type'] . "</td>";
+        $party_pack_datewise_html .= "<td style = 'border:1px solid #000;'>" . $result['pp_bill_lines'] . "</td>";
+        $party_pack_datewise_html .= "<td style = 'border:1px solid #000;'>" . $result['pp_time'] . "</td>";
+        $party_pack_datewise_html .= "<td style = 'border:1px solid #000;'>" . $result['productivity'] . "</td>";
+        $party_pack_datewise_html .= "<td style = 'border:1px solid #000;'>" . $target_data[$result['packer_type']] . "</td></tr>";
       }
     }
   }
   $party_pack_datewise_html .= "</table>";
   return $party_pack_datewise_html;
 }
-
 
 /**
  * email productivity for picking
@@ -1590,13 +1628,13 @@ function get_email_productivity_data_for_party_packing($start_date, $end_date = 
  * @return type
  */
 function get_email_productivity_data_for_picking($start_date, $end_date = FALSE, $dis_id = 60) {
-  
+
   $query = db_select('node', 'n');
   $query->condition('n.type', 'picking');
   $query->join('field_data_field_distributor', 'fd', 'fd.entity_id = n.uid');
   $query->condition('fd.entity_id', $dis_id, '=');
   $query->condition('n.changed', array($start_date, $end_date), 'BETWEEN');
-  $query->orderBy('n.changed','DESC');
+  $query->orderBy('n.changed', 'DESC');
   $query->join('field_data_field_picking_godown_area_id', 'gai', 'gai.entity_id = n.nid');
   $query->join('field_data_field_picking_picking_type', 'pt', 'pt.entity_id = n.nid');
   $query->join('field_data_field_pick_lines', 'lsl', 'lsl.entity_id = n.nid');
@@ -1630,83 +1668,82 @@ function get_email_productivity_data_for_picking($start_date, $end_date = FALSE,
     $picker_n = $value['field_picking_picker_name_value'];
     $type = $value['field_picking_picking_type_value'];
     $godown = $value['field_picking_godown_area_id_value'];
-    $transaction_date = date('Y-m-d',$value['changed']);
+    $transaction_date = date('Y-m-d', $value['changed']);
 
     if (isset($res[$picker_n])) {
-         if ($type == "Loose") {
-            $picking[$transaction_date][$picker_n][$type]['loading_sheet_line'] += $loading_line;
-            $picking[$transaction_date][$picker_n][$type]['total_time'] += $total_time;
-            $picking[$transaction_date][$picker_n][$type]['picking_type'] = $type;
-            $picking[$transaction_date][$picker_n][$type]['godown'] = $godown;
-            $productivity_per = ($loading_line / $total_time);
-            $picking[$transaction_date][$picker_n][$type]['productivity']  = round($productivity_per);
-         }
-         if ($type == "Bulk") {
-            $picking[$transaction_date][$picker_n][$type]['loading_sheet_line'] += $loading_line;
-            $picking[$transaction_date][$picker_n][$type]['total_time'] += $total_time;
-            $picking[$transaction_date][$picker_n][$type]['picking_type'] = $type;
-            $picking[$transaction_date][$picker_n][$type]['godown'] = $godown;
-            $productivity_per = ($loading_line / $total_time);
-            $picking[$transaction_date][$picker_n][$type]['productivity']  = round($productivity_per);
-         }
+      if ($type == "Loose") {
+        $picking[$transaction_date][$picker_n][$type]['loading_sheet_line'] += $loading_line;
+        $picking[$transaction_date][$picker_n][$type]['total_time'] += $total_time;
+        $picking[$transaction_date][$picker_n][$type]['picking_type'] = $type;
+        $picking[$transaction_date][$picker_n][$type]['godown'] = $godown;
+        $productivity_per = ($loading_line / $total_time);
+        $picking[$transaction_date][$picker_n][$type]['productivity'] = round($productivity_per);
       }
-      else {
-         $res[$picker_n] = array();
-         if ($type == "Loose") {
-            $picking[$transaction_date][$picker_n][$type]['loading_sheet_line'] = $loading_line;
-            $picking[$transaction_date][$picker_n][$type]['total_time'] = $total_time;
-            $picking[$transaction_date][$picker_n][$type]['picking_type'] = $type;
-            $picking[$transaction_date][$picker_n][$type]['godown'] = $godown;
-            $productivity_per = ($loading_line / $total_time);
-            $picking[$transaction_date][$picker_n][$type]['productivity']  = round($productivity_per);
-         }
-         if ($type == "Bulk") {
-            $picking[$transaction_date][$picker_n][$type]['loading_sheet_line'] = $loading_line;
-            $picking[$transaction_date][$picker_n][$type]['total_time'] = $total_time;
-            $picking[$transaction_date][$picker_n][$type]['picking_type'] = $type;
-            $picking[$transaction_date][$picker_n][$type]['godown'] = $godown;
-            $productivity_per = ($loading_line / $total_time);
-            $picking[$transaction_date][$picker_n][$type]['productivity']  = round($productivity_per);
-         }
+      if ($type == "Bulk") {
+        $picking[$transaction_date][$picker_n][$type]['loading_sheet_line'] += $loading_line;
+        $picking[$transaction_date][$picker_n][$type]['total_time'] += $total_time;
+        $picking[$transaction_date][$picker_n][$type]['picking_type'] = $type;
+        $picking[$transaction_date][$picker_n][$type]['godown'] = $godown;
+        $productivity_per = ($loading_line / $total_time);
+        $picking[$transaction_date][$picker_n][$type]['productivity'] = round($productivity_per);
       }
-      $picking[$transaction_date][$picker_n][$type]['picker_name'] = $value['field_picking_picker_name_value'];
-      $picking[$transaction_date][$picker_n][$type]['supervisor_name'] = $value['field_picking_pick_supervisor_value'];
-      $picking[$transaction_date][$picker_n][$type]['updated_date'] = $transaction_date;
-   }
+    }
+    else {
+      $res[$picker_n] = array();
+      if ($type == "Loose") {
+        $picking[$transaction_date][$picker_n][$type]['loading_sheet_line'] = $loading_line;
+        $picking[$transaction_date][$picker_n][$type]['total_time'] = $total_time;
+        $picking[$transaction_date][$picker_n][$type]['picking_type'] = $type;
+        $picking[$transaction_date][$picker_n][$type]['godown'] = $godown;
+        $productivity_per = ($loading_line / $total_time);
+        $picking[$transaction_date][$picker_n][$type]['productivity'] = round($productivity_per);
+      }
+      if ($type == "Bulk") {
+        $picking[$transaction_date][$picker_n][$type]['loading_sheet_line'] = $loading_line;
+        $picking[$transaction_date][$picker_n][$type]['total_time'] = $total_time;
+        $picking[$transaction_date][$picker_n][$type]['picking_type'] = $type;
+        $picking[$transaction_date][$picker_n][$type]['godown'] = $godown;
+        $productivity_per = ($loading_line / $total_time);
+        $picking[$transaction_date][$picker_n][$type]['productivity'] = round($productivity_per);
+      }
+    }
+    $picking[$transaction_date][$picker_n][$type]['picker_name'] = $value['field_picking_picker_name_value'];
+    $picking[$transaction_date][$picker_n][$type]['supervisor_name'] = $value['field_picking_pick_supervisor_value'];
+    $picking[$transaction_date][$picker_n][$type]['updated_date'] = $transaction_date;
+  }
 
   $target_data = leanbox_dashboard_target_value_using_voc_name('productivity target');
   $picking_datewise_html = "<h3>Picking Productivity</h3></br><h3>Picking (status:Completed)</h3><table class = 'pp-superwise-table' border='1' cellpadding='5' cellspacing='0'  style='color:#000; font-size: 13px;font-family: arial'>"
-       . "<th>Transaction Date</th>"
-       . "<th>Picker Name</th>"
-       . "<th>Picking Supervisor</th>"
-       . "<th>Godown Area Id</th>"
-       . "<th>Picking Type</th>"
-       . "<th>Sum - Loading Sheet Line</th>"
-       . "<th>Sum - Time Duration</th>"
-       . "<th>Productivity</th>"
-       . "<th>Target</th>";
+    . "<th>Transaction Date</th>"
+    . "<th>Picker Name</th>"
+    . "<th>Picking Supervisor</th>"
+    . "<th>Godown Area Id</th>"
+    . "<th>Picking Type</th>"
+    . "<th>Sum - Loading Sheet Line</th>"
+    . "<th>Sum - Time Duration</th>"
+    . "<th>Productivity</th>"
+    . "<th>Target</th>";
 
-  foreach($picking as $transaction_date => $data){
-    foreach($data as $key => $value) {
-      foreach($value as $k => $result) {
+  foreach ($picking as $transaction_date => $data) {
+    foreach ($data as $key => $value) {
+      foreach ($value as $k => $result) {
         $label = $result['godown'] . ' ' . $result['picking_type'];
         $label_key = strtolower($label);
-        $picking_datewise_html .= "<tr><td style = 'border:1px solid #000;'>".$result['updated_date']."</td>";
-        $picking_datewise_html .= "<td style = 'border:1px solid #000;'>".$result['picker_name']."</td>";
-        $picking_datewise_html .= "<td style = 'border:1px solid #000;'>".$result['supervisor_name']."</td>";
-        $picking_datewise_html .= "<td style = 'border:1px solid #000;'>".$result['godown']."</td>";
-        $picking_datewise_html .= "<td style = 'border:1px solid #000;'>".$result['picking_type']."</td>";
-        $picking_datewise_html .= "<td style = 'border:1px solid #000;'>".$result['loading_sheet_line']."</td>";
-        $picking_datewise_html .= "<td style = 'border:1px solid #000;'>".$result['total_time']."</td>";
-        $picking_datewise_html .= "<td style = 'border:1px solid #000;'>".$result['productivity']."</td>";
-        $picking_datewise_html .= "<td style = 'border:1px solid #000;'>".$target_data[$label_key]."</td></tr>";
+        $picking_datewise_html .= "<tr><td style = 'border:1px solid #000;'>" . $result['updated_date'] . "</td>";
+        $picking_datewise_html .= "<td style = 'border:1px solid #000;'>" . $result['picker_name'] . "</td>";
+        $picking_datewise_html .= "<td style = 'border:1px solid #000;'>" . $result['supervisor_name'] . "</td>";
+        $picking_datewise_html .= "<td style = 'border:1px solid #000;'>" . $result['godown'] . "</td>";
+        $picking_datewise_html .= "<td style = 'border:1px solid #000;'>" . $result['picking_type'] . "</td>";
+        $picking_datewise_html .= "<td style = 'border:1px solid #000;'>" . $result['loading_sheet_line'] . "</td>";
+        $picking_datewise_html .= "<td style = 'border:1px solid #000;'>" . $result['total_time'] . "</td>";
+        $picking_datewise_html .= "<td style = 'border:1px solid #000;'>" . $result['productivity'] . "</td>";
+        $picking_datewise_html .= "<td style = 'border:1px solid #000;'>" . $target_data[$label_key] . "</td></tr>";
       }
     }
   }
   $picking_datewise_html .= "</table>";
   return $picking_datewise_html;
 }
-
 
 /**
  * 
@@ -1751,7 +1788,7 @@ function get_productivity_data_for_party_packing($start_date, $end_date = FALSE,
   $query->fields('ppt', array('field_party_packing_type_value'));
   $query->fields('pps', array('field_party_packing_supervisor_value'));
   $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
-  
+
   foreach ($res as $key => $value) {
 
     $start_time = strtotime($value['field_party_packing_start_time_value']);
@@ -1894,7 +1931,6 @@ function get_productivity_data_for_picking($start_date, $end_date = FALSE, $dis_
         $picking['godown'][$godown][$type]['loading_date'] = $value['field_picking_loading_date_value'];
         $picking['godown'][$godown][$type]['picker_name'] = $value['field_picking_picker_name_value'];
         $picking['godown'][$godown][$type]['supervisor'] = $value['field_picking_pick_supervisor_value'];
-        
       }
       if ($type == "Bulk") {
         $picking['godown'][$godown][$type]['loading_sheet_line'] += $loading_line;
@@ -2026,7 +2062,7 @@ function get_common_data_for_chhanel_datewise($start_date, $end_date, $distribut
   $query->addExpression('COUNT(n.title)', 'bill_count');
   $query->addExpression('SUM(bv.field_bill_value_value)', 'bill_value');
   $query->leftjoin('field_data_field_dispatch_n_value', 'd1', 'd1.entity_id = n.nid');
-  
+
   // bill counts
   $query->addExpression('SUM(CASE WHEN (d1.field_dispatch_n_value_value = \'N+2\') THEN 1 ELSE 0 END)', 'n2_counts');
   $query->addExpression('SUM(CASE WHEN (d1.field_dispatch_n_value_value = \'N+3\') THEN 1 ELSE 0 END)', 'n3_counts');
@@ -2040,7 +2076,7 @@ function get_common_data_for_chhanel_datewise($start_date, $end_date, $distribut
   $query->addExpression('SUM(CASE WHEN (d1.field_dispatch_n_value_value = \'N+4\') THEN field_bill_value_value ELSE 0 END)', 'n4_value');
   $query->addExpression('SUM(CASE WHEN (disp_date.field_dispatch_date_value IS NULL) THEN field_bill_value_value ELSE 0 END)', 'null_value');
 
-  
+
   $query->fields('n', array('nid'));
   $query->fields('bd', array('field_sr_bill_date_value'));
   $query->fields('chan', array('field_channel_value'));
@@ -2057,10 +2093,10 @@ function get_common_data_for_chhanel_datewise($start_date, $end_date, $distribut
       $otif_n2_value_perc = round(($v['n2_value'] / $v['bill_value']) * 100);
       $otif_n3_count_perc = round(($v['n3_counts'] / $v['bill_count']) * 100);
       $otif_n3_value_perc = round(($v['n3_value'] / $v['bill_value']) * 100);
-      
+
       $otif_n4_count_perc = round(($v['n4_counts'] / $v['bill_count']) * 100);
       $otif_n4_value_perc = round(($v['n4_value'] / $v['bill_value']) * 100);
-      
+
       $otif_null_count_perc = round(($v['null_counts'] / $v['bill_count']) * 100);
       $otif_null_value_perc = round(($v['null_value'] / $v['bill_value']) * 100);
 
@@ -2070,10 +2106,10 @@ function get_common_data_for_chhanel_datewise($start_date, $end_date, $distribut
       $total_n2_value += $v['n2_value'];
       $total_n3_counts += $v['n3_counts'];
       $total_n3_value += $v['n3_value'];
-      
+
       $total_n4_counts += $v['n4_counts'];
       $total_n4_value += $v['n4_value'];
-      
+
       $total_null_counts += $v['null_counts'];
       $total_null_value += $v['null_value'];
 
@@ -2084,21 +2120,16 @@ function get_common_data_for_chhanel_datewise($start_date, $end_date, $distribut
         round($v['n2_value']),
         $v['n3_counts'],
         round($v['n3_value']),
-        
         $v['n4_counts'],
         round($v['n4_value']),
-        
         $v['null_counts'],
         round($v['null_value']),
-        
         $otif_n2_count_perc . " %",
         $otif_n2_value_perc . " %",
         $otif_n3_count_perc . " %",
         $otif_n3_value_perc . " %",
-        
         $otif_n4_count_perc . " %",
         $otif_n4_value_perc . " %",
-        
         $otif_null_count_perc . " %",
         $otif_null_value_perc . " %",
       );
@@ -2113,13 +2144,13 @@ function get_common_data_for_chhanel_datewise($start_date, $end_date, $distribut
     $total_otif_n2_value_perc = round(($total_n2_value / $total_bill_val) * 100);
     $total_otif_n3_count_perc = round(($total_n3_counts / $total_bill_count) * 100);
     $total_otif_n3_value_perc = round(($total_n3_value / $total_bill_val) * 100);
-    
+
     $total_otif_n4_count_perc = round(($total_n4_counts / $total_bill_count) * 100);
     $total_otif_n4_value_perc = round(($total_n4_value / $total_bill_val) * 100);
-    
+
     $total_otif_null_count_perc = round(($total_null_counts / $total_bill_count) * 100);
     $total_otif_null_value_perc = round(($total_null_value / $total_bill_val) * 100);
-    
+
     $rows[] = array("Total",
       $total_bill_count,
       $total_bill_val,
@@ -2127,21 +2158,16 @@ function get_common_data_for_chhanel_datewise($start_date, $end_date, $distribut
       $total_n2_value,
       $total_n3_counts,
       $total_n3_value,
-      
       $total_n4_counts,
       $total_n4_value,
-      
       $total_null_counts,
       $total_null_value,
-      
       $total_otif_n2_count_perc . " %",
       $total_otif_n2_value_perc . " %",
       $total_otif_n3_count_perc . " %",
       $total_otif_n3_value_perc . " %",
-      
       $total_otif_n4_count_perc . " %",
       $total_otif_n4_value_perc . " %",
-      
       $total_otif_null_count_perc . " %",
       $total_otif_null_value_perc . " %",
     );
@@ -2150,7 +2176,6 @@ function get_common_data_for_chhanel_datewise($start_date, $end_date, $distribut
   }
   return $output;
 }
-
 
 /**
  * 
@@ -2171,12 +2196,12 @@ function get_cron_common_data_for_pl_datewise($start_date, $end_date, $distribut
   $query->join('node', 'oun', 'pc.field_sales_party_code_value = oun.title');
   $query->condition('oun.type', 'outlet_master');
   $query->condition('oun.uid', $distributor_id, '=');
- // $query->join('field_data_field_channel', 'chan', 'chan.entity_id = oun.nid');
- // $query->groupBy('field_channel_value');
+  // $query->join('field_data_field_channel', 'chan', 'chan.entity_id = oun.nid');
+  // $query->groupBy('field_channel_value');
   $query->join('field_data_field_pl_group', 'plg', 'plg.entity_id = oun.nid');
   $query->groupBy('field_pl_group_value');
   //$query->orderBy('chan.field_channel_value', 'ASC');
-    $query->orderBy('plg.field_pl_group_value', 'ASC');
+  $query->orderBy('plg.field_pl_group_value', 'ASC');
 
   $query->leftjoin('field_data_field_trip_id_reference', 'ti', 'ti.entity_id = n.nid');
   $query->leftjoin('node', 'disn', 'disn.nid = ti.field_trip_id_reference_nid');
@@ -2184,7 +2209,7 @@ function get_cron_common_data_for_pl_datewise($start_date, $end_date, $distribut
   $query->addExpression('COUNT(n.title)', 'bill_count');
   $query->addExpression('SUM(bv.field_bill_value_value)', 'bill_value');
   $query->leftjoin('field_data_field_dispatch_n_value', 'd1', 'd1.entity_id = n.nid');
-  
+
   // bill counts
   $query->addExpression('SUM(CASE WHEN (d1.field_dispatch_n_value_value = \'N+2\') THEN 1 ELSE 0 END)', 'n2_counts');
   $query->addExpression('SUM(CASE WHEN (d1.field_dispatch_n_value_value = \'N+3\') THEN 1 ELSE 0 END)', 'n3_counts');
@@ -2198,10 +2223,10 @@ function get_cron_common_data_for_pl_datewise($start_date, $end_date, $distribut
   $query->addExpression('SUM(CASE WHEN (d1.field_dispatch_n_value_value = \'N+4\') THEN field_bill_value_value ELSE 0 END)', 'n4_value');
   $query->addExpression('SUM(CASE WHEN (disp_date.field_dispatch_date_value IS NULL) THEN field_bill_value_value ELSE 0 END)', 'null_value');
 
-  
+
   $query->fields('n', array('nid'));
   $query->fields('bd', array('field_sr_bill_date_value'));
- // $query->fields('chan', array('field_channel_value'));
+  // $query->fields('chan', array('field_channel_value'));
   $query->fields('plg', array('field_pl_group_value'));
 
   $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
@@ -2217,10 +2242,10 @@ function get_cron_common_data_for_pl_datewise($start_date, $end_date, $distribut
       $otif_n2_value_perc = round(($v['n2_value'] / $v['bill_value']) * 100);
       $otif_n3_count_perc = round(($v['n3_counts'] / $v['bill_count']) * 100);
       $otif_n3_value_perc = round(($v['n3_value'] / $v['bill_value']) * 100);
-      
+
       $otif_n4_count_perc = round(($v['n4_counts'] / $v['bill_count']) * 100);
       $otif_n4_value_perc = round(($v['n4_value'] / $v['bill_value']) * 100);
-      
+
       $otif_null_count_perc = round(($v['null_counts'] / $v['bill_count']) * 100);
       $otif_null_value_perc = round(($v['null_value'] / $v['bill_value']) * 100);
 
@@ -2230,10 +2255,10 @@ function get_cron_common_data_for_pl_datewise($start_date, $end_date, $distribut
       $total_n2_value += $v['n2_value'];
       $total_n3_counts += $v['n3_counts'];
       $total_n3_value += $v['n3_value'];
-      
+
       $total_n4_counts += $v['n4_counts'];
       $total_n4_value += $v['n4_value'];
-      
+
       $total_null_counts += $v['null_counts'];
       $total_null_value += $v['null_value'];
 
@@ -2244,21 +2269,16 @@ function get_cron_common_data_for_pl_datewise($start_date, $end_date, $distribut
         round($v['n2_value']),
         $v['n3_counts'],
         round($v['n3_value']),
-        
         $v['n4_counts'],
         round($v['n4_value']),
-        
         $v['null_counts'],
         round($v['null_value']),
-        
         $otif_n2_count_perc . " %",
         $otif_n2_value_perc . " %",
         $otif_n3_count_perc . " %",
         $otif_n3_value_perc . " %",
-        
         $otif_n4_count_perc . " %",
         $otif_n4_value_perc . " %",
-        
         $otif_null_count_perc . " %",
         $otif_null_value_perc . " %",
       );
@@ -2273,13 +2293,13 @@ function get_cron_common_data_for_pl_datewise($start_date, $end_date, $distribut
     $total_otif_n2_value_perc = round(($total_n2_value / $total_bill_val) * 100);
     $total_otif_n3_count_perc = round(($total_n3_counts / $total_bill_count) * 100);
     $total_otif_n3_value_perc = round(($total_n3_value / $total_bill_val) * 100);
-    
+
     $total_otif_n4_count_perc = round(($total_n4_counts / $total_bill_count) * 100);
     $total_otif_n4_value_perc = round(($total_n4_value / $total_bill_val) * 100);
-    
+
     $total_otif_null_count_perc = round(($total_null_counts / $total_bill_count) * 100);
     $total_otif_null_value_perc = round(($total_null_value / $total_bill_val) * 100);
-    
+
     $rows[] = array("Total",
       $total_bill_count,
       $total_bill_val,
@@ -2287,21 +2307,16 @@ function get_cron_common_data_for_pl_datewise($start_date, $end_date, $distribut
       $total_n2_value,
       $total_n3_counts,
       $total_n3_value,
-      
       $total_n4_counts,
       $total_n4_value,
-      
       $total_null_counts,
       $total_null_value,
-      
       $total_otif_n2_count_perc . " %",
       $total_otif_n2_value_perc . " %",
       $total_otif_n3_count_perc . " %",
       $total_otif_n3_value_perc . " %",
-      
       $total_otif_n4_count_perc . " %",
       $total_otif_n4_value_perc . " %",
-      
       $total_otif_null_count_perc . " %",
       $total_otif_null_value_perc . " %",
     );
@@ -2310,8 +2325,6 @@ function get_cron_common_data_for_pl_datewise($start_date, $end_date, $distribut
   }
   return $output;
 }
-
-
 
 function get_common_data_for_chhanel_datewise_otif($start_date, $end_date, $distributor_id) {
   $query = db_select('node', 'n');
@@ -2334,7 +2347,7 @@ function get_common_data_for_chhanel_datewise_otif($start_date, $end_date, $dist
   $query->addExpression('COUNT(n.title)', 'bill_count');
   $query->addExpression('SUM(bv.field_bill_value_value)', 'bill_value');
   $query->leftjoin('field_data_field_dispatch_n_value', 'd1', 'd1.entity_id = n.nid');
-  
+
   // bill counts
   $query->addExpression('SUM(CASE WHEN (d1.field_dispatch_n_value_value = \'N+2\') THEN 1 ELSE 0 END)', 'n2_counts');
   $query->addExpression('SUM(CASE WHEN (d1.field_dispatch_n_value_value = \'N+3\') THEN 1 ELSE 0 END)', 'n3_counts');
@@ -2344,7 +2357,7 @@ function get_common_data_for_chhanel_datewise_otif($start_date, $end_date, $dist
   $query->addExpression('SUM(CASE WHEN (d1.field_dispatch_n_value_value = \'N+2\') THEN field_bill_value_value ELSE 0 END)', 'n2_value');
   $query->addExpression('SUM(CASE WHEN (d1.field_dispatch_n_value_value = \'N+3\') THEN field_bill_value_value ELSE 0 END)', 'n3_value');
   $query->addExpression('SUM(CASE WHEN (disp_date.field_dispatch_date_value IS NULL) OR ((d1.field_dispatch_n_value_value = \'N+4\')) THEN field_bill_value_value ELSE 0 END)', 'n4_value');
-  
+
   $query->fields('n', array('nid'));
   $query->fields('bd', array('field_sr_bill_date_value'));
   $query->fields('chan', array('field_channel_value'));
@@ -2361,7 +2374,7 @@ function get_common_data_for_chhanel_datewise_otif($start_date, $end_date, $dist
       $otif_n2_value_perc = round(($v['n2_value'] / $v['bill_value']) * 100);
       $otif_n3_count_perc = round(($v['n3_counts'] / $v['bill_count']) * 100);
       $otif_n3_value_perc = round(($v['n3_value'] / $v['bill_value']) * 100);
-      
+
       $otif_n4_count_perc = round(($v['n4_counts'] / $v['bill_count']) * 100);
       $otif_n4_value_perc = round(($v['n4_value'] / $v['bill_value']) * 100);
 
@@ -2371,7 +2384,7 @@ function get_common_data_for_chhanel_datewise_otif($start_date, $end_date, $dist
       $total_n2_value += $v['n2_value'];
       $total_n3_counts += $v['n3_counts'];
       $total_n3_value += $v['n3_value'];
-      
+
       $total_n4_counts += $v['n4_counts'];
       $total_n4_value += $v['n4_value'];
 
@@ -2382,15 +2395,12 @@ function get_common_data_for_chhanel_datewise_otif($start_date, $end_date, $dist
         round($v['n2_value']),
         $v['n3_counts'],
         round($v['n3_value']),
-        
         $v['n4_counts'],
         round($v['n4_value']),
-        
         $otif_n2_count_perc . " %",
         $otif_n2_value_perc . " %",
         $otif_n3_count_perc . " %",
         $otif_n3_value_perc . " %",
-        
         $otif_n4_count_perc . " %",
         $otif_n4_value_perc . " %",
       );
@@ -2405,7 +2415,7 @@ function get_common_data_for_chhanel_datewise_otif($start_date, $end_date, $dist
     $total_otif_n2_value_perc = round(($total_n2_value / $total_bill_val) * 100);
     $total_otif_n3_count_perc = round(($total_n3_counts / $total_bill_count) * 100);
     $total_otif_n3_value_perc = round(($total_n3_value / $total_bill_val) * 100);
-    
+
     $total_otif_n4_count_perc = round(($total_n4_counts / $total_bill_count) * 100);
     $total_otif_n4_value_perc = round(($total_n4_value / $total_bill_val) * 100);
     $rows[] = array("Total",
@@ -2415,15 +2425,12 @@ function get_common_data_for_chhanel_datewise_otif($start_date, $end_date, $dist
       $total_n2_value,
       $total_n3_counts,
       $total_n3_value,
-      
       $total_n4_counts,
       $total_n4_value,
-      
       $total_otif_n2_count_perc . " %",
       $total_otif_n2_value_perc . " %",
       $total_otif_n3_count_perc . " %",
       $total_otif_n3_value_perc . " %",
-      
       $total_otif_n4_count_perc . " %",
       $total_otif_n4_value_perc . " %",
     );
@@ -2449,7 +2456,7 @@ function get_common_data_for_pl_group_datewise($start_date, $end_date, $distribu
   $query->groupBy('field_pl_group_value');
   $query->leftjoin('field_data_field_trip_id_reference', 'ti', 'ti.entity_id = n.nid');
   $query->leftjoin('node', 'disn', 'disn.nid = ti.field_trip_id_reference_nid');
-      
+
   $query->leftjoin('field_data_field_dispatch_date', 'fd', 'fd.entity_id = disn.nid');
 
   $query->leftjoin('field_data_field_dispatch_status', 'disp_st', 'disp_st.entity_id = disn.nid');
@@ -2484,7 +2491,7 @@ function get_common_data_for_pl_group_datewise($start_date, $end_date, $distribu
       $total_trip_sum += $v['trip_sum'];
       $total_trip_dispatch_sum += $v['trip_dispatch_sum'];
       $total_trip_dispatch_value += $v['trip_dispatch_value'];
-   
+
       $rows[] = array($pl_group,
         $v['bill_count'],
         $bill_val,
@@ -2520,7 +2527,6 @@ function get_common_data_for_pl_group_datewise($start_date, $end_date, $distribu
       $total_trip_created_value_percentage . " %",
       $total_dispatch_created_pe_count_rcentage . " %",
       $total_dispatch_created_value_percentage . " %"
-      
     );
 
     $output = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
@@ -2538,6 +2544,7 @@ function get_header_of_pl_group() {
 /*
  * Get Pending Bills Summary In Mail
  */
+
 function get_pending_bills_pl_group_datewise($start_date, $end_date, $distributor_id = 60) {
   $query = db_select('node', 'n');
   $query->condition('n.type', 'sales_register_data');
@@ -2560,7 +2567,6 @@ function get_pending_bills_pl_group_datewise($start_date, $end_date, $distributo
   $query->addExpression('SUM(bv.field_bill_value_value)', 'bill_value');
   //$query->addExpression('COUNT(ti.field_trip_id_reference_nid)', 'trip_count');
   //$query->addExpression('SUM(if(ti.field_trip_id_reference_nid IS NOT NULL,field_bill_value_value, 0))', 'trip_sum');
-    
   //$query->addExpression('SUM(if(disp_st.field_dispatch_status_value=1, 1, 0))', 'trip_dispatch_sum');
   //$query->addExpression('SUM(if(disp_st.field_dispatch_status_value=1, field_bill_value_value, 0))', 'trip_dispatch_value');
   $query->addExpression('SUM(if(fd.field_dispatch_date_value IS NOT NULL, 1, 0))', 'trip_dispatch_sum');
@@ -2612,7 +2618,7 @@ function get_pending_bills_pl_group_datewise($start_date, $end_date, $distributo
     $output = "No Result Found";
   }
   if (!empty($res)) {
-    $header = array('PL Group', 'Bill Count', 'Bill Value','Dispatch Count', 'Dispatch Value','Pending Bill','Pending Bill Value');
+    $header = array('PL Group', 'Bill Count', 'Bill Value', 'Dispatch Count', 'Dispatch Value', 'Pending Bill', 'Pending Bill Value');
 //    $total_trip_created_count_percentage = round(($total_trip_count / $total_bill_count) * 100);
 //    $total_trip_created_value_percentage = round(($total_trip_sum / $total_bill_val) * 100);
 //    $total_dispatch_created_pe_count_rcentage = round(($total_trip_dispatch_sum / $total_bill_count) * 100);
@@ -2631,7 +2637,6 @@ function get_pending_bills_pl_group_datewise($start_date, $end_date, $distributo
 //    $total_trip_created_value_percentage . " %",
 //    $total_dispatch_created_pe_count_rcentage . " %",
 //    $total_dispatch_created_value_percentage . " %"
-      
     );
 
     $output = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
@@ -2647,38 +2652,38 @@ function get_mtd_data_pending_bills_count_value_pl_groupwise($distributor_id = 6
   $query = db_select('node', 'n');
   $query->condition('n.type', 'outlet_master');
   $query->join('field_data_field_pl_group', 'pl', 'pl.entity_id = n.nid');
-  $query->condition('n.uid', $distributor_id, '='); 
+  $query->condition('n.uid', $distributor_id, '=');
   $query->fields('pl', array('field_pl_group_value'));
   $query->groupBy('field_pl_group_value');
   $ress = $query->execute()->fetchAll();
-  
+
   if (!empty($ress)) {
     $row = array();
-    foreach($ress as $value) {
+    foreach ($ress as $value) {
       $row[$value->field_pl_group_value][] = $value->field_pl_group_value;
       $pending_bill_sum_value = 0;
-      for($i = 1; $i <= 5; $i++) {
-        switch ($i){ 
+      for ($i = 1; $i <= 5; $i++) {
+        switch ($i) {
           case '1':
-          $start_date = strtotime('-1 day', strtotime(date('Y-m-d')))+86399;
-          $end_date = strtotime('-1 day', strtotime(date('Y-m-d')));
-          break;
+            $start_date = strtotime('-1 day', strtotime(date('Y-m-d'))) + 86399;
+            $end_date = strtotime('-1 day', strtotime(date('Y-m-d')));
+            break;
           case '2':
-          $start_date = strtotime('-2 day', strtotime(date('Y-m-d')))+86399;
-          $end_date = strtotime('-2 day', strtotime(date('Y-m-d')));
-          break;
+            $start_date = strtotime('-2 day', strtotime(date('Y-m-d'))) + 86399;
+            $end_date = strtotime('-2 day', strtotime(date('Y-m-d')));
+            break;
           case '3':
-          $start_date = strtotime('-3 day', strtotime(date('Y-m-d')))+86399;
-          $end_date = strtotime('-3 day', strtotime(date('Y-m-d')));
-          break;
+            $start_date = strtotime('-3 day', strtotime(date('Y-m-d'))) + 86399;
+            $end_date = strtotime('-3 day', strtotime(date('Y-m-d')));
+            break;
           case '4':
-          $start_date = strtotime('-4 day', strtotime(date('Y-m-d')))+86399;
-          $end_date = strtotime('-4 day', strtotime(date('Y-m-d')));
-          break;
+            $start_date = strtotime('-4 day', strtotime(date('Y-m-d'))) + 86399;
+            $end_date = strtotime('-4 day', strtotime(date('Y-m-d')));
+            break;
           case '5':
-          $start_date = strtotime('-5 day', strtotime(date('Y-m-d')));
-          $end_date = strtotime('-12 day', strtotime(date('Y-m-d')));
-          break;
+            $start_date = strtotime('-5 day', strtotime(date('Y-m-d')));
+            $end_date = strtotime('-12 day', strtotime(date('Y-m-d')));
+            break;
         }
 
         $query = db_select('node', 'n');
@@ -2686,16 +2691,16 @@ function get_mtd_data_pending_bills_count_value_pl_groupwise($distributor_id = 6
         $query->condition('n.uid', $distributor_id, '=');
         $query->join('field_data_field_billing_van', 'bva', 'bva.entity_id = n.nid');
         $query->join('field_data_field_sr_bill_date', 'bd', 'bd.entity_id = n.nid');
-        $query->condition('bd.field_sr_bill_date_value', array($end_date,$start_date), 'BETWEEN');
+        $query->condition('bd.field_sr_bill_date_value', array($end_date, $start_date), 'BETWEEN');
         $query->join('field_data_field_bill_value', 'bv', 'bv.entity_id = n.nid');
         $query->join('field_data_field_party_code_reference', 'pc', 'pc.entity_id = n.nid');
         $query->join('field_data_field_pl_group', 'plg', 'plg.entity_id = pc.field_party_code_reference_nid');
-        $query->condition('plg.field_pl_group_value',$value->field_pl_group_value, '=');
+        $query->condition('plg.field_pl_group_value', $value->field_pl_group_value, '=');
         $query->leftjoin('field_data_field_trip_id_reference', 'ti', 'ti.entity_id = n.nid');
         $query->leftjoin('node', 'disn', 'disn.nid = ti.field_trip_id_reference_nid');
         //$query->leftjoin('field_data_field_dispatch_status', 'disp_st', 'disp_st.entity_id = disn.nid');
         $query->leftjoin('field_data_field_dispatch_date', 'fd', 'fd.entity_id = disn.nid');
-        if($mtd_type == 'bill_count'){
+        if ($mtd_type == 'bill_count') {
           $query->addExpression('COUNT(n.title)', 'bill_value_count');
           //$query->addExpression('SUM(if(disp_st.field_dispatch_status_value=1, 1, 0))', 'trip_dispatch_sum_value');
           $query->addExpression('SUM(if(fd.field_dispatch_date_value IS NOT NULL, 1, 0))', 'trip_dispatch_sum_value');
@@ -2706,36 +2711,36 @@ function get_mtd_data_pending_bills_count_value_pl_groupwise($distributor_id = 6
           $query->addExpression('SUM(if(fd.field_dispatch_date_value IS NOT NULL, field_bill_value_value, 0))', 'trip_dispatch_sum_value');
         }
         $bill_res = $query->execute()->fetchAssoc();
-        
+
         $pending_bill = ($bill_res['bill_value_count'] - $bill_res['trip_dispatch_sum_value']);
         $pending_bill_sum_value += $pending_bill;
-        if($bill_res['bill_value_count'] || $bill_res['trip_dispatch_sum_value']) {
-          $row[$value->field_pl_group_value][] = $pending_bill; 
+        if ($bill_res['bill_value_count'] || $bill_res['trip_dispatch_sum_value']) {
+          $row[$value->field_pl_group_value][] = $pending_bill;
         }
         else {
-          $row[$value->field_pl_group_value][] = 0; 
+          $row[$value->field_pl_group_value][] = 0;
         }
       }
-      $row[$value->field_pl_group_value][] = $pending_bill_sum_value; 
+      $row[$value->field_pl_group_value][] = $pending_bill_sum_value;
     }
 
     $total = array();
     $total['Total'][0] = 'Total';
-    for($k=1; $k<count($ress); $k++) {
-      foreach($ress as $value) {
+    for ($k = 1; $k < count($ress); $k++) {
+      foreach ($ress as $value) {
         $total['Total'][$k] += $row[$value->field_pl_group_value][$k];
       }
     }
-    $rows = array_merge($row,$total);
+    $rows = array_merge($row, $total);
   }
   else {
-    $output = "No Result Found"; 
+    $output = "No Result Found";
   }
-  
-  if($mtd_type == 'bill_count') {
+
+  if ($mtd_type == 'bill_count') {
     $header = array('PL Group', date('dS M', strtotime('-1 day')), date('dS M', strtotime('-2 days')), date('dS M', strtotime('-3 days')), date('dS M', strtotime('-4 days')), '>4 Days', 'Total Pending Bills');
   }
-  else{
+  else {
     $header = array('PL Group', date('dS M', strtotime('-1 day')), date('dS M', strtotime('-2 days')), date('dS M', strtotime('-3 days')), date('dS M', strtotime('-4 days')), '>4 Days', 'Total Pending Bill Value');
   }
   $output = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
@@ -2745,28 +2750,28 @@ function get_mtd_data_pending_bills_count_value_pl_groupwise($distributor_id = 6
 
 function get_header_of_chhanel($otif = FALSE, $pl = FALSE) {
   if ($pl) {
-      $header = array('PL GROUP', 'Bill Count', 'Bill Value', 'Dispatch (N+2) Count ', 'Dispatch (N+2) Value',
+    $header = array('PL GROUP', 'Bill Count', 'Bill Value', 'Dispatch (N+2) Count ', 'Dispatch (N+2) Value',
+      'Dispatch (N+3) Count', 'Dispatch (N+3) Value', 'Dispatch (>N+3) Count', 'Dispatch (>N+3) Value', 'Not Dispatched Count', 'Not Dispatched Value', 'OTIF (N+2) Count%', 'OTIF (N+2) Value%',
+      'OTIF (N+3) Count%', 'OTIF (N+3) Value%', 'OTIF (>N+3) Count%', 'OTIF (>N+3) Value%', 'Not Dispatched Count %', 'Not Dispatched Value %');
+  }
+  else {
+    if ($otif) {
+      $header = array('Channel', 'Bill Count', 'Bill Value', 'Dispatch (N+2) Count ', 'Dispatch (N+2) Value',
         'Dispatch (N+3) Count', 'Dispatch (N+3) Value', 'Dispatch (>N+3) Count', 'Dispatch (>N+3) Value', 'Not Dispatched Count', 'Not Dispatched Value', 'OTIF (N+2) Count%', 'OTIF (N+2) Value%',
         'OTIF (N+3) Count%', 'OTIF (N+3) Value%', 'OTIF (>N+3) Count%', 'OTIF (>N+3) Value%', 'Not Dispatched Count %', 'Not Dispatched Value %');
-   }
-   else {
-      if ($otif) {
-         $header = array('Channel', 'Bill Count', 'Bill Value', 'Dispatch (N+2) Count ', 'Dispatch (N+2) Value',
-           'Dispatch (N+3) Count', 'Dispatch (N+3) Value', 'Dispatch (>N+3) Count', 'Dispatch (>N+3) Value', 'Not Dispatched Count', 'Not Dispatched Value', 'OTIF (N+2) Count%', 'OTIF (N+2) Value%',
-           'OTIF (N+3) Count%', 'OTIF (N+3) Value%', 'OTIF (>N+3) Count%', 'OTIF (>N+3) Value%', 'Not Dispatched Count %', 'Not Dispatched Value %');
-      }
-      else {
-         $header = array('Channel', 'Bill Count', 'Bill Value', 'Dispatch (N+2) Count ', 'Dispatch (N+2) Value',
-           'Dispatch (N+3) Count', 'Dispatch (N+3) Value', 'OTIF (N+2) Count%', 'OTIF (N+2) Value%',
-           'OTIF (N+3) Count%', 'OTIF (N+3) Value%');
-      }
-   }
+    }
+    else {
+      $header = array('Channel', 'Bill Count', 'Bill Value', 'Dispatch (N+2) Count ', 'Dispatch (N+2) Value',
+        'Dispatch (N+3) Count', 'Dispatch (N+3) Value', 'OTIF (N+2) Count%', 'OTIF (N+2) Value%',
+        'OTIF (N+3) Count%', 'OTIF (N+3) Value%');
+    }
+  }
 
-   return $header;
+  return $header;
 }
 
 function get_header_of_chhanel_otif() {
-    $header = array('Channel', 'Bill Count', 'Bill Value', 'Dispatch (N+2) Count ', 'Dispatch (N+2) Value',
+  $header = array('Channel', 'Bill Count', 'Bill Value', 'Dispatch (N+2) Count ', 'Dispatch (N+2) Value',
     'Dispatch (N+3) Count', 'Dispatch (N+3) Value', 'Dispatch (>N+3) Count', 'Dispatch (>N+3) Value', 'OTIF (N+2) Count%', 'OTIF (N+2) Value%',
     'OTIF (N+3) Count%', 'OTIF (N+3) Value%', 'OTIF (>N+3) Count%', 'OTIF (>N+3) Value%',);
   return $header;
@@ -2775,6 +2780,7 @@ function get_header_of_chhanel_otif() {
 /*
  * Function to send auto mailer of Pending OFD Sales Beat Wise Report.
  */
+
 function send_email_pending_ofd_salesbeatwise_data() {
   $distributor_id = _DISTRIBUTOR_ID;
   $distributor_name = change_feeds_import_get_distributor_name($distributor_id);
@@ -2786,23 +2792,23 @@ function send_email_pending_ofd_salesbeatwise_data() {
   $query->join('field_data_field_sr_bill_date', 'bd', 'bd.entity_id = n.nid');
   $query->groupBy('field_sr_bill_date_value');
   $query->condition('bd.field_sr_bill_date_value', array($start_date, $end_date), 'BETWEEN');
-  $query->orderBy('field_sr_bill_date_value','DESC');
+  $query->orderBy('field_sr_bill_date_value', 'DESC');
   $query->join('field_data_field_bill_value', 'bv', 'bv.entity_id = n.nid');
   $query->join('field_data_field_party_code_reference', 'pc', 'pc.entity_id = n.nid');
   $query->join('field_data_field_beat_name', 'sb', 'sb.entity_id = pc.field_party_code_reference_nid');
   $query->groupBy('field_beat_name_value');
   $query->join('field_data_field_salesman', 'sm', 'sm.entity_id = pc.field_party_code_reference_nid');
   $query->groupBy('field_salesman_value');
-  
+
   $query->leftjoin('field_data_field_trip_id_reference', 'ti', 'ti.entity_id = n.nid');
   $query->leftjoin('field_data_field_dispatch_date', 'disp_date', 'disp_date.entity_id = ti.field_trip_id_reference_nid');
-  
+
   // bill counts
   $query->addExpression('SUM(CASE WHEN (disp_date.field_dispatch_date_value IS NULL) THEN 1 ELSE 0 END)', 'bill_count');
 
   // bill values
   $query->addExpression('SUM(CASE WHEN (disp_date.field_dispatch_date_value IS NULL) THEN field_bill_value_value ELSE 0 END)', 'bill_value');
-  
+
   $query->fields('bd', array('field_sr_bill_date_value'));
   $query->fields('sb', array('field_beat_name_value'));
   $query->fields('sm', array('field_salesman_value'));
@@ -2812,10 +2818,10 @@ function send_email_pending_ofd_salesbeatwise_data() {
   $header = array('Sr. No.', 'Bill Date', 'Sales Beat', 'Salesman', 'Bill Count', 'Bill Value');
   $row = array();
   $counter = 1;
-  foreach($res as $key => $data){
-    if($data['bill_count'] != 0  && $data['bill_value'] != 0) {
+  foreach ($res as $key => $data) {
+    if ($data['bill_count'] != 0 && $data['bill_value'] != 0) {
       $row['serial_no'] = $counter++;
-      $row['bill_date'] = date('d-m-Y',$data['field_sr_bill_date_value']);
+      $row['bill_date'] = date('d-m-Y', $data['field_sr_bill_date_value']);
       $row['beat_name'] = check_plain($data['field_beat_name_value']);
       $row['salesman'] = check_plain($data['field_salesman_value']);
       $row['bill_count'] = $data['bill_count'];
@@ -2829,9 +2835,9 @@ function send_email_pending_ofd_salesbeatwise_data() {
   $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
 
 
-  $params['subject'] = "Pending OFD Sales Beat Wise - ". $distributor_name;
+  $params['subject'] = "Pending OFD Sales Beat Wise - " . $distributor_name;
   $params['body'] = $output;
-  $mail_to = variable_get('to_email');
+  $mail_to = variable_get('ofd_salesbeatwise_to_email');
   $from = variable_get('from_email');
 
   drupal_mail('email_status', 'ofd_report_salesbeatwise', $mail_to, LANGUAGE_NONE, $params, $from);
@@ -2861,6 +2867,10 @@ function email_status_mail($key, &$message, $params) {
       $message['body'][] = $params['body'];
       break;
     case 'ofd_report_salesbeatwise':
+      $message['subject'] = $params['subject'];
+      $message['body'][] = $params['body'];
+      break;
+    case 'collection_status':
       $message['subject'] = $params['subject'];
       $message['body'][] = $params['body'];
       break;

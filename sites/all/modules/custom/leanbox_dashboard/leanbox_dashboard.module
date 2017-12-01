@@ -359,7 +359,7 @@ function leanbox_dashboard_block_view($delta = '') {
       }
       $billing_date = strtotime(date('Y-m-d') . "- 1 days");
       $billing_date = date('d-m-Y', $billing_date);
-      $block['subject'] = "TP Vs Impact Adoption ($billing_date Billing)";
+      $block['subject'] = "TP Vs Impact Adoption ($billing_date Dispatch)";
       $data = leanbox_dashboard_chart_query_details('adoption_graph', $billing_date, $billing_date);
 
       $filter_form = drupal_render(drupal_get_form('leanbox_dashboard_chart_filter_adoption_form'));

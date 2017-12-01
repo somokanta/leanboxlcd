@@ -6,6 +6,41 @@
  */
 
 function dispatch_planning_views_data() {
+  
+  $data = array();
+  
+  $data['views']['header_ptl_loose_custom'] = array(
+    'title' => t('PTL Loose Header'),
+    'help' => t('Just a field created for PTL Loose Header.'),
+    'area' => array(
+      'handler' => 'header_ptl_loose_custom_field',
+    ),
+  );
+
+  $data['views']['footer_ptl_loose_custom'] = array(
+    'title' => t('PTL Loose Footer'),
+    'help' => t('Just a field created for PTL Loose Footer.'),
+    'area' => array(
+      'handler' => 'footer_ptl_loose_custom_field',
+    ),
+  );
+  $data['views']['header_ptl_cld_custom'] = array(
+    'title' => t('PTL CLD Header'),
+    'help' => t('Just a field created for PTL CLD Header.'),
+    'area' => array(
+      'handler' => 'header_ptl_cld_custom_field',
+    ),
+  );
+
+  $data['views']['footer_ptl_cld_custom'] = array(
+    'title' => t('PTL CLD Footer'),
+    'help' => t('Just a field created for PTL CLD Footer.'),
+    'area' => array(
+      'handler' => 'footer_ptl_cld_custom_field',
+    ),
+  );
+  
+  //Dispatch Panning API Log
   $data['dispatch_planning_api_log']['table'] = array(
     'group' => t('dispatch_planning Logs'),
     'title' => t('dispatch_planning Logs'),
@@ -117,6 +152,35 @@ function dispatch_planning_views_data() {
       'handler' => 'views_handler_argument_string',
     ),
   );
+  
+   $data['dispatch_planning_api_log']['distributor_id'] = array(
+     'title' => t('Distributor id in dispatch api'),
+     'help' => t('Distributor id in dispatch api'),
+     'field' => array(
+       'handler' => 'views_handler_field_numeric',
+       'click sortable' => TRUE,
+     ),
+     'sort' => array(
+       'handler' => 'views_handler_sort',
+     ),
+     'filter' => array(
+       'handler' => 'views_handler_filter_string',
+     ),
+     'argument' => array(
+       'handler' => 'views_handler_argument_numeric',
+     ),
+   );
+   $data['dispatch_planning_api_log']['distributor_id']['relationship'] = array(
+     'title' => t('Rs relation in dispatch api'),
+     'help' => t("Rs relation in dispatch api"),
+     'handler' => 'views_handler_relationship',
+     'base' => 'users',
+     //'entity type' => 'file',
+     'base field' => 'uid',
+     'label' => t('Rs relation !field_name', array('!field_name' => 'distributor_id')),
+   );
+   
+   
   //Response Data of API
   $data['dispatch_planning_api_log']['request_flag'] = array(
     'title' => t('Request Flag'),
@@ -730,6 +794,24 @@ function dispatch_planning_views_data() {
     'help' => t("unique identifiers."),
     // 'weight' => -10,
   );
+  // serial No
+  $data['ptl_data_configuration']['id'] = array(
+    'title' => t('ID'),
+    'help' => t('ID'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
   // ptl_job
   $data['ptl_data_configuration']['ptl_job'] = array(
     'title' => t('ptl_job'),
@@ -1090,5 +1172,59 @@ function dispatch_planning_views_data() {
       'handler' => 'views_handler_argument_string',
     ),
   );
+  // UPC
+  $data['ptl_data_configuration']['upc'] = array(
+    'title' => t('UPC'),
+    'help' => t('UPC'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+  // Put Qty
+  $data['ptl_data_configuration']['put_qty'] = array(
+    'title' => t('Put Qty'),
+    'help' => t('Put Qty'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+  // put_qty_time
+  $data['ptl_data_configuration']['put_qty_time'] = array(
+    'title' => t('Put Qty Time'),
+    'help' => t('Put Qty Time'),
+    'field' => array(
+      'handler' => 'views_handler_field_date',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort_date',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_date',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_filter_date',
+    ),
+  ); 
   return $data;
 }

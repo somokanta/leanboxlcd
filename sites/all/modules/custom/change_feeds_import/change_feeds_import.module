@@ -528,6 +528,7 @@ function download_pdf($args) {
 function download_pdf2($args) {
   $view_name = "drs_report2";
   $view = views_get_view($view_name, '');
+  $view->set_display('drs_report2');
   $view->set_arguments(array($args));
   $rendered_html = $view->render();
   pdf_using_mpdf_api($rendered_html);
@@ -858,6 +859,7 @@ function trip_2_form_submit($form, &$form_state) {
   $trip_id = $form_state['values']['trip_id'];
   $view_name = "drs_report2";
   $view = views_get_view($view_name, '');
+  $view->set_display('drs_report2');
   $view->set_arguments(array($trip_id));
   $rendered_html = $view->render();
   $form_state['views_data'] = $rendered_html;
@@ -2143,10 +2145,22 @@ function change_feeds_import_query_alter(QueryAlterableInterface $query) {
 }
 
 function change_feeds_import_views_query_alter(&$view, &$query) {
+
+   // remove 19800 condition which is default added by view
+   if ($view->base_table == 'petty_cash') {
+      foreach ($query->where[1]['conditions'] as $key => $val) {
+         if ((strpos($val['field'], 'petty_cash.voucher_date') !== false) || (strpos($val['field'], 'petty_cash.file_date') !== false)) {
+            $data = str_replace('+ 19800', '', $val['field']);
+            $data = str_replace('%Y-%m-%d\T%H:%i:%s', '%Y-%m-%d', $data);
+            $query->where[1]['conditions'][$key]['field'] = $data;
+         }
+      }
+   }
+
    if(isset($_GET['field_third_party_username_value'])) {
-       
        foreach($query->where[1]['conditions'] as $key => $val) {
-          if ($val['field'] == 'users_node__field_data_field_third_party_username.field_third_party_username_value') {
+          $val_array = explode('.', $val['field']);
+          if ($val_array[1] == 'field_third_party_username_value') {
             //unset($query->where[1]['conditions'][$key]['operator']); 
                 $query->where[1]['conditions'][$key]['operator'] = 'IN';
               
@@ -2198,6 +2212,13 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
   
   if ($view->base_table == 'custom_billing_data' && ($view->name != 'impact_delivery_cron_2') && ($view->name != 'impact_delivery_cron_evening_2')) {
     $query->add_where(0, 'custom_billing_data.distributor_id', $distributor_id, '=');
+  }
+  if (($view->base_table == 'petty_cash') && ($view->name == 'petty_cash_transaction')) {
+    $query->add_where(0, 'petty_cash.distributor_id', $distributor_id, '=');
+  }
+  if (($view->base_table == 'ptl_data_configuration') && ($view->name == 'ptl_loose_sheet' || $view->name == 'short_put_report' || $view->name == 'ptl_cld_sheet')) {
+    $rs_code = dispatch_planning_get_rscode_using_uid($distributor_id);
+    $query->add_where(0, 'ptl_data_configuration.rs_code', $rs_code, '=');
   }
   if ($view->base_table == 'van_cld_data_table') {
     $query->add_where(0, 'van_cld_data_table.distributor_id', $distributor_id, '=');
@@ -2575,8 +2596,8 @@ function change_feeds_import_form_views_exposed_form_alter(&$form, &$form_state)
       $form['field_salesman_code_value']['#validated'] = TRUE;
     }
   }
-  
-  if ($form['#id'] == 'views-exposed-form-payment-collection-page' || $form['#id'] == 'views-exposed-form-signed-bills-upload-page-2' || $form['#id'] == 'views-exposed-form-signed-bills-upload-page-3' || $form['#id'] == 'views-exposed-form-bills-collection-page' || $form['#id'] == 'views-exposed-form-day-wise-collection-page' || $form['#id'] == 'views-exposed-form-collection-history-page' || $form['#id'] == 'views-exposed-form-assignment-history-page') {
+
+if ($form['#id'] == 'views-exposed-form-payment-collection-page' || $form['#id'] == 'views-exposed-form-signed-bills-upload-page-2' || $form['#id'] == 'views-exposed-form-signed-bills-upload-page-3' || $form['#id'] == 'views-exposed-form-bills-collection-page' || $form['#id'] == 'views-exposed-form-day-wise-collection-page' || $form['#id'] == 'views-exposed-form-collection-history-page' || $form['#id'] == 'views-exposed-form-assignment-history-page' || $form['#id'] == 'views-exposed-form-collection-closure-page' || $form['#id'] == 'views-exposed-form-bills-assignment-acknowledgement-page') {
     $select = array('' => '- Any -');
     $salesman = get_all_salesman_data("salesman", NULL);
     $salesman = $select + $salesman;

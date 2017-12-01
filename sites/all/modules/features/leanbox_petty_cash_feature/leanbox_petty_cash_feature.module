@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the leanbox petty cash feature feature.
+ */
+
+include_once 'leanbox_petty_cash_feature.features.inc';

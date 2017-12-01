@@ -2,3 +2,7 @@ name = leanbox payment collection
 description = containing list of functionalities for leanbox payment collection service.
 package = Custom
 core = 7.x
+
+files[] = views/handler/footer_link_custom_field.inc
+files[] = views/handler/footer_total_custom_field.inc
+files[] = views/handler/hover_data_payment_coll_custom_field.inc

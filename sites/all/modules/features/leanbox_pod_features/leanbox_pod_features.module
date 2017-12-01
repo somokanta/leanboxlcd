@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the leanbox pod feature feature.
+ */
+
+include_once 'leanbox_pod_features.features.inc';
