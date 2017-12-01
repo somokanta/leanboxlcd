@@ -553,7 +553,7 @@ function get_child_desc_and_qty_by_parent_sku($sku7_code, $distributor_id) {
   $query = db_select('node', 'n');
   $query->condition('n.type', 'sku7_code_master');
   $query->condition('n.uid', $distributor_id);
-  $query->condition('n.title', $sku_title);
+  $query->condition('n.title', $sku7_code);
   $query->leftjoin('field_data_field_child_sku', 'csk', 'csk.entity_id = n.nid');
   $query->leftjoin('node', 'n1', 'n1.nid = csk.field_child_sku_nid');
   $query->join('field_data_field_product_name', 'pn', 'pn.entity_id = n1.nid');
