@@ -38,7 +38,7 @@ class hover_data_payment_coll_custom_field extends views_handler_field {
 function get_collection_history_for_hover($bill_no) {
   global $user;
   $distributor_id = change_feeds_import_get_distributor_id($user->uid);
-
+  $html = '';
   $query = db_select('node', 'n');
   $query->leftjoin('field_data_field_collection_cash_amount', 'cca', 'cca.entity_id = n.nid');
   $query->leftjoin('field_data_field_collection_cheque_num', 'nv', 'nv.entity_id = n.nid');
@@ -52,8 +52,9 @@ function get_collection_history_for_hover($bill_no) {
   $query->condition('n.uid', $distributor_id);
   $query->condition('n.type', 'collection_history');
   $result = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
-  
-  $header = array('Cash Amt', 'Cheque Amt', 'Cheque No', 'Cheque Date');
-  $html .= theme('table', array('header' => $header, 'rows' => $result, 'attributes' => array('width' => '50%')));
+  if(!empty($result)){
+    $header = array('Cash Amt', 'Cheque Amt', 'Cheque No', 'Cheque Date');
+    $html .= theme('table', array('header' => $header, 'rows' => $result, 'attributes' => array('width' => '50%')));
+  }
   return $html;
 }
