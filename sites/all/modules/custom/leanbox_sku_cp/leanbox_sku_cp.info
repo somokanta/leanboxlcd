@@ -1,0 +1,4 @@
+name = leanbox sku cp
+description = list of functionalities for leanbox sku cp
+package = Custom
+core = 7.x

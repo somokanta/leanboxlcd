@@ -29,7 +29,7 @@ function fetch_ptl_data($rs_code, $api_time) {
   $data['header'] =  $header_result;
   
   $query = db_select('ptl_data_configuration', 'p');
-  $query->fields('p', array('id', 'ptl_job', 'rs_code', 'trip_id', 'vehicle', 'bill_number', 'loading_date', 'sequence_no', 'basepack_code', 'sku_code', 'product_name', 'MRP', 'TUR'));
+  $query->fields('p', array('id', 'ptl_job', 'rs_code', 'trip_id', 'vehicle', 'bill_number', 'loading_date', 'sequence_no', 'basepack_code', 'sku_code', 'product_name', 'MRP', 'TUR','free_sku_description','cp'));
   $query->addExpression('loose', 'sum_sales_qty'); // send loose value in sum_sales_qty
   $query->condition('p.id', $max_ptl_data, '<=');
   $query->condition('p.api_flag', '0', '=');
@@ -384,6 +384,7 @@ function ptl_api_data_create($nid, $trip_id) {
 function ptl_data_insert_into_table($api_data, $distributor_id) {
   if (!empty($api_data)) {
     $exist_sku_unit = array();
+    $exist_child_arr = array();
     if (!empty($api_data['jobData']['item_details'])) {
       foreach ($api_data['jobData']['item_details'] as $item_data) {
         //find sku unit. Don't call function again and again for same SKU
@@ -398,6 +399,25 @@ function ptl_data_insert_into_table($api_data, $distributor_id) {
         // Conversion of cld and loose
         $cld = (int) ($item_data['sum_net_sales_quantity'] / $sku_unit_case); //petty
         $loose = (int) ($item_data['sum_net_sales_quantity'] % $sku_unit_case); //loose
+        //New Logic for PTL
+        $free_cld = (int) ($item_data['sum_of_sales_free_qty'] / $sku_unit_case); //petty
+        $free_loose = (int) ($item_data['sum_of_sales_free_qty'] % $sku_unit_case); //loose
+        $cp = '';
+        $sum_of_sales_free_qty = '';
+        $free_sku_description = '';
+        if ($item_data['sum_net_sales_quantity']) {
+          $child_detail = get_child_desc_and_qty_by_parent_sku($sku7_code, $distributor_id);    
+          $sum_of_sales_free_qty = $child_detail['child_qty'] * $item_data['sum_net_sales_quantity'];
+          $free_sku_description = $child_detail['child_desc'];
+          if(!empty($sum_of_sales_free_qty) && !empty($free_sku_description)){
+            $cp = 'CP';
+          }
+        }
+        else {
+          $sum_of_sales_free_qty = $item_data['sum_of_sales_free_qty'];
+          //$free_sku_description =  $item_data['product_name']; // for now
+        }
+        // New logic end
         $query = db_insert('ptl_data_configuration');
         $fields = array(
           'ptl_job' => $api_data['jobData']['trip_id'],
@@ -416,7 +436,12 @@ function ptl_data_insert_into_table($api_data, $distributor_id) {
           'created_time' => REQUEST_TIME,
           'cld' => $cld,
           'loose' => $loose,
-          'upc' => $sku_unit_case ? $sku_unit_case : 0
+          'upc' => $sku_unit_case ? $sku_unit_case : 0,
+          'sum_of_sales_free_qty' => $sum_of_sales_free_qty, //below are newly added
+          'free_sku_description' => $free_sku_description,
+          'cp' => $cp ? $cp : '',
+          'free_cld' => $free_cld,
+          'free_loose' => $free_loose,
         );
         $query->fields($fields);
         $result_id = $query->execute();
@@ -428,7 +453,8 @@ function ptl_data_insert_into_table($api_data, $distributor_id) {
 function ptl_get_billing_data($node_uid, $bill_number) {
   $query = db_select('custom_billing_data', 'bd');
   $query->fields('bd', array('tur', 'mrp', 'product_name'));
-  $query->addfield('bd', 'Sum_of_TOTAL_SALES_QTY', 'sum_net_sales_quantity');
+  $query->addfield('bd', 'Sum_of_NET_SALES_QTY', 'sum_net_sales_quantity');
+  $query->addfield('bd', 'Sum_of_SALES_FREE_QTY', 'sum_of_sales_free_qty');
   $query->addfield('bd', 'sku7_code', 'sku_code');
   $query->addfield('bd', 'BASEPACK_CODE', 'basepack_code');
   $query->condition('bd.distributor_id', $node_uid);
@@ -515,4 +541,28 @@ function download_drs_box_id_sheet($args) {
   $view->set_arguments(array($args));
   $rendered_html = $view->render();
   pdf_using_mpdf_api($rendered_html);
+}
+
+/**
+ * 
+ * @param type $sku7_code
+ * @param type $distributor_id
+ */
+function get_child_desc_and_qty_by_parent_sku($sku7_code, $distributor_id) {
+  $result = array();
+  $query = db_select('node', 'n');
+  $query->condition('n.type', 'sku7_code_master');
+  $query->condition('n.uid', $distributor_id);
+  $query->condition('n.title', $sku7_code);
+  $query->leftjoin('field_data_field_child_sku', 'csk', 'csk.entity_id = n.nid');
+  $query->leftjoin('node', 'n1', 'n1.nid = csk.field_child_sku_nid');
+  $query->join('field_data_field_product_name', 'pn', 'pn.entity_id = n1.nid');
+  $query->fields('pn', array('field_product_name_value'));
+  $query->leftjoin('field_data_field_child_sku_qty‎', 'cskq', 'cskq.entity_id = n.nid');
+  $query->fields('cskq', array('field_child_sku_qty_value'));
+  $row = $query->execute()->fetch(PDO::FETCH_ASSOC);
+
+  $result['child_qty'] = ($row['field_child_sku_qty_value']) ? $row['field_child_sku_qty_value'] : 0;
+  $result['child_desc'] = ($row['field_product_name_value']) ? $row['field_product_name_value'] : '';
+  return $result;
 }

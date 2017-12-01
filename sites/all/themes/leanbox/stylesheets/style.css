@@ -11517,3 +11517,43 @@ header[id="page-header"] ul, header[id="page-header"] li {
 .form-text {
   width: auto;
 }
+
+/* line 1613, ../sass/leanbox-global.scss */
+.show_hover_payment {
+  color: #1e419b;
+  text-decoration: none;
+  outline: 0;
+  transition: all 0.5s linear 0s;
+  -moz-transition: all 0.5s linear 0s;
+  -webkit-transition: all 0.5s linear 0s;
+  -o-transition: all 0.5s linear 0s;
+  -ms-transition: all 0.5s linear 0s;
+  cursor: pointer;
+}
+
+/* line 1620, ../sass/leanbox-global.scss */
+.show_hover_payment_data {
+  padding: 5px 0 0 0;
+}
+/* line 1623, ../sass/leanbox-global.scss */
+.show_hover_payment_data .table-responsive .table {
+  border: 1px solid #ccc;
+}
+/* line 1627, ../sass/leanbox-global.scss */
+.show_hover_payment_data .table-responsive .table thead tr th {
+  padding: 0 5px;
+  font-size: 12px;
+}
+/* line 1635, ../sass/leanbox-global.scss */
+.show_hover_payment_data .table-responsive .table tbody tr td {
+  max-width: 260px;
+  min-width: 100px;
+  width: 280px;
+  border: 1px solid #ccc;
+  font-size: 12px;
+  padding: 1px 0 !IMPORTANT;
+}
+/* line 1642, ../sass/leanbox-global.scss */
+.show_hover_payment_data .table-responsive .table tbody tr td:nth-child(1) {
+  min-width: 90px;
+}
