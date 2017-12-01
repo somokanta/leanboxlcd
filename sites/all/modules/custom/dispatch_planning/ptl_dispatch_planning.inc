@@ -400,6 +400,8 @@ function ptl_data_insert_into_table($api_data, $distributor_id) {
         $cld = (int) ($item_data['sum_net_sales_quantity'] / $sku_unit_case); //petty
         $loose = (int) ($item_data['sum_net_sales_quantity'] % $sku_unit_case); //loose
         //New Logic for PTL
+        $free_cld = (int) ($item_data['sum_of_sales_free_qty'] / $sku_unit_case); //petty
+        $free_loose = (int) ($item_data['sum_of_sales_free_qty'] % $sku_unit_case); //loose
         $cp = '';
         $sum_of_sales_free_qty = '';
         $free_sku_description = '';
@@ -438,6 +440,8 @@ function ptl_data_insert_into_table($api_data, $distributor_id) {
           'sum_of_sales_free_qty' => $sum_of_sales_free_qty, //below are newly added
           'free_sku_description' => $free_sku_description,
           'cp' => $cp ? $cp : '',
+          'free_cld' => $free_cld,
+          'free_loose' => $free_loose,
         );
         $query->fields($fields);
         $result_id = $query->execute();
