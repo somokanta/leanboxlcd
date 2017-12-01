@@ -39,6 +39,14 @@ function email_status_menu() {
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
+  
+   $items['email/monthly-trip-summary'] = array(
+    'title' => 'Send Email Of Monthly Trip Summary',
+    'page callback' => 'send_email_monthly_trip_summary',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'includes/email_status_automailer.inc',
+  );
 
   // setting form for Email sender and reciever 
   $items['admin/config/email-conf'] = array(
@@ -118,8 +126,19 @@ function email_status_email_form($form, $form_state) {
     '#size' => 60,
     '#maxlength' => 2048,
   );
+  
+  // Monthly Trip Summary
+  $form['monthly_trip_summary_to_email'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Receiver'),
+    '#description' => t('Monthly Trip Summary'),
+    '#default_value' => variable_get('monthly_trip_summary_to_email', ''),
+    '#required' => TRUE,
+    '#size' => 60,
+    '#maxlength' => 2048,
+  );
 
-  // PARTY PACKING COMPLIANCE
+  // From Email
   $form['from_email'] = array(
     '#type' => 'textarea',
     '#title' => t('Sender'),
