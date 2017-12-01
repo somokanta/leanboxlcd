@@ -1610,26 +1610,34 @@ header[id="page-header"] {
     width: auto;
 }
 
-.view-id-payment_collection {
-  .show_hover_payment_data {
-    .table-responsive {
-      .table {
-        border: 1px solid #ccc;
-        thead {
-          tr {
-            th {
-              padding: 10px 10px;
-              font-size: 14px;
-            }
+.show_hover_payment {
+  text-decoration: underline;
+  color: #1277f9;
+  cursor: pointer;
+}
+.show_hover_payment_data {
+  .table-responsive {
+    .table {
+      border: 1px solid #ccc;
+      thead {
+        tr {
+          th {
+            padding: 0 5px;
+            font-size: 12px;
           }
         }
-        tbody {
-          tr {
-            td {
-              max-width: 260px;
-              min-width: 106px;
-              width: 280px;
-              border: 1px solid #ccc;
+      }
+      tbody {
+        tr {
+          td {
+            max-width: 260px;
+            min-width: 100px;
+            width: 280px;
+            border: 1px solid #ccc;
+            font-size: 12px;
+            padding: 1px 0 !IMPORTANT;
+            &:nth-child(1) {
+              min-width: 90px;
             }
           }
         }
