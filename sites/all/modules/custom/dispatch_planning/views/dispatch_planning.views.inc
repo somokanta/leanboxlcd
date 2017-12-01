@@ -1226,5 +1226,56 @@ function dispatch_planning_views_data() {
       'handler' => 'views_handler_filter_date',
     ),
   ); 
+  $data['ptl_data_configuration']['sum_of_sales_free_qty'] = array(
+    'title' => t('Sum of Sales Free QTY'),
+    'help' => t('Sum of Sales Free QTY'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+  $data['ptl_data_configuration']['free_sku_description'] = array(
+    'title' => t('FREE SKU DESCRIPTION'),
+    'help' => t('FREE SKU DESCRIPTION'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+  $data['ptl_data_configuration']['cp'] = array(
+    'title' => t('CP'),
+    'help' => t('CP'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
   return $data;
 }
