@@ -1610,3 +1610,20 @@ header[id="page-header"] ul, header[id="page-header"] li {
 .form-text {
   width: auto;
 }
+
+/* line 1616, ../sass/leanbox-global.scss */
+.view-id-payment_collection .show_hover_payment_data .table-responsive .table {
+  border: 1px solid #ccc;
+}
+/* line 1620, ../sass/leanbox-global.scss */
+.view-id-payment_collection .show_hover_payment_data .table-responsive .table thead tr th {
+  padding: 10px 10px;
+  font-size: 14px;
+}
+/* line 1628, ../sass/leanbox-global.scss */
+.view-id-payment_collection .show_hover_payment_data .table-responsive .table tbody tr td {
+  max-width: 260px;
+  min-width: 106px;
+  width: 280px;
+  border: 1px solid #ccc;
+}
