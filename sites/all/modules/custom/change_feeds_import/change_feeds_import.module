@@ -547,7 +547,7 @@ function download_pdf2($args) {
             pdf_using_mpdf_api($rendered_html);
          }
          else {
-            drupal_set_message(t('Mismatch between sum of sales value and dispatch value'), 'error');
+            drupal_set_message(t('Mismatch between: Original Trip Bill Count and Present Trip Bill Count'), 'error');
          }
       }
    }
