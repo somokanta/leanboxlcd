@@ -401,14 +401,10 @@ function ptl_data_insert_into_table($api_data, $distributor_id) {
         $loose = (int) ($item_data['sum_net_sales_quantity'] % $sku_unit_case); //loose
         //New Logic for PTL
         $cp = '';
+        $sum_of_sales_free_qty = '';
+        $free_sku_description = '';
         if ($item_data['sum_net_sales_quantity']) {
-          if (isset($exist_child_arr[$sku7_code])) {
-            $child_detail = $exist_child_arr[$sku7_code];
-          }
-          else {
-            $child_detail = get_child_desc_and_qty_by_parent_sku($sku7_code, $distributor_id);
-            $exist_child_arr[$sku7_code] = $child_detail;
-          }        
+          $child_detail = get_child_desc_and_qty_by_parent_sku($sku7_code, $distributor_id);    
           $sum_of_sales_free_qty = $child_detail['child_qty'] * $item_data['sum_net_sales_quantity'];
           $free_sku_description = $child_detail['child_desc'];
           if(!empty($sum_of_sales_free_qty) && !empty($free_sku_description)){
@@ -417,7 +413,7 @@ function ptl_data_insert_into_table($api_data, $distributor_id) {
         }
         else {
           $sum_of_sales_free_qty = $item_data['sum_of_sales_free_qty'];
-          $free_sku_description =  $item_data['product_name'];
+          //$free_sku_description =  $item_data['product_name']; // for now
         }
         // New logic end
         $query = db_insert('ptl_data_configuration');
