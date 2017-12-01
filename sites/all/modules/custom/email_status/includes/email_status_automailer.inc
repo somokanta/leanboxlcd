@@ -107,13 +107,15 @@ function send_email_monthly_trip_summary() {
    //$total_avg_bills_per_trip = (int) ($total_bill_count / $total_trip_count);
    //$total_avg_bills_value = (int) ($total_bill_value / $total_trip_count);
   }
-
-  $full_table[]  = array('Total', '', '', $total_trip_count, $total_bill_count, $total_bill_value, $total_team_count, '', '');
+  
+  if(!empty($full_table)){
+    $full_table[]  = array('Total', '', '', $total_trip_count, $total_bill_count, $total_bill_value, $total_team_count, '', '');
+  }
 
   $header = array('Cashier Name', 'Vehicle No', 'Party Packing', 'Trip Count', 'Bill Count', 'Dispatch Bill Value', 'Dispatch Loader Team Count','Average Bill Count/Trip','Average Bill Value/Trip');
   
   $output = "<h3>Monthly Trip Summary</h3>";
-  $output .= theme('table', array('header' => $header, 'rows' => $full_table, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
+  $output .= theme('table', array('header' => $header, 'rows' => $full_table, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0'), 'empty' => t('No Records has been found')));
   
   $params['subject'] = "Monthly Trip Summary";
   $params['body'] = $output;
