@@ -387,15 +387,10 @@ function ptl_data_insert_into_table($api_data, $distributor_id) {
     $exist_child_arr = array();
     if (!empty($api_data['jobData']['item_details'])) {
       foreach ($api_data['jobData']['item_details'] as $item_data) {
-        //find sku unit. Don't call function again and again for same SKU
-        $sku7_code = $item_data['sku_code'];
-        if (isset($exist_sku_unit[$sku7_code])) {
-          $sku_unit_case = $exist_sku_unit[$sku7_code];
-        }
-        else {
-          $sku_unit_case = get_sku_unit_case($sku7_code, $distributor_id);
-          $exist_sku_unit[$sku7_code] = $sku_unit_case;
-        }
+
+        $sku7_code = $item_data['sku_code'];     
+        $sku_unit_case = get_sku_unit_case($sku7_code, $distributor_id);
+        
         // Conversion of cld and loose
         $cld = (int) ($item_data['sum_net_sales_quantity'] / $sku_unit_case); //petty
         $loose = (int) ($item_data['sum_net_sales_quantity'] % $sku_unit_case); //loose
@@ -403,13 +398,14 @@ function ptl_data_insert_into_table($api_data, $distributor_id) {
         $free_cld = (int) ($item_data['sum_of_sales_free_qty'] / $sku_unit_case); //petty
         $free_loose = (int) ($item_data['sum_of_sales_free_qty'] % $sku_unit_case); //loose
         $cp = '';
-        $sum_of_sales_free_qty = '';
+        $sum_of_sales_free_qty = 0;
+        $derived_free_qty = 0;
         $free_sku_description = '';
-        if ($item_data['sum_net_sales_quantity']) {
+        if (!empty($item_data['sum_net_sales_quantity'])) {
           $child_detail = get_child_desc_and_qty_by_parent_sku($sku7_code, $distributor_id);    
-          $sum_of_sales_free_qty = $child_detail['child_qty'] * $item_data['sum_net_sales_quantity'];
+          $derived_free_qty = $child_detail['child_qty'] * $item_data['sum_net_sales_quantity'];
           $free_sku_description = $child_detail['child_desc'];
-          if(!empty($sum_of_sales_free_qty) && !empty($free_sku_description)){
+          if(!empty($derived_free_qty) && !empty($free_sku_description)){
             $cp = 'CP';
           }
         }
@@ -442,6 +438,7 @@ function ptl_data_insert_into_table($api_data, $distributor_id) {
           'cp' => $cp ? $cp : '',
           'free_cld' => $free_cld,
           'free_loose' => $free_loose,
+          'derived_free_qty'=>$derived_free_qty
         );
         $query->fields($fields);
         $result_id = $query->execute();
