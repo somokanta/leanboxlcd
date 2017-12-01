@@ -29,7 +29,7 @@ function fetch_ptl_data($rs_code, $api_time) {
   $data['header'] =  $header_result;
   
   $query = db_select('ptl_data_configuration', 'p');
-  $query->fields('p', array('id', 'ptl_job', 'rs_code', 'trip_id', 'vehicle', 'bill_number', 'loading_date', 'sequence_no', 'basepack_code', 'sku_code', 'product_name', 'MRP', 'TUR'));
+  $query->fields('p', array('id', 'ptl_job', 'rs_code', 'trip_id', 'vehicle', 'bill_number', 'loading_date', 'sequence_no', 'basepack_code', 'sku_code', 'product_name', 'MRP', 'TUR','sum_of_sales_free_qty','free_sku_description','cp'));
   $query->addExpression('loose', 'sum_sales_qty'); // send loose value in sum_sales_qty
   $query->condition('p.id', $max_ptl_data, '<=');
   $query->condition('p.api_flag', '0', '=');
