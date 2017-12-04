@@ -1,0 +1,111 @@
+<?php
+
+/**
+ * Files containing functions for sku cp
+ */
+
+/**
+ * Implements hook_menu
+ */
+function leanbox_sku_cp_menu() {
+   $items = array();
+   $items['sku-cp-assign'] = array(
+     'title' => 'SKU CP',
+     'page callback' => 'drupal_get_form',
+     'page arguments' => array('_assign_sku_cp_callback'),
+     'access arguments' => array('sku cp'),
+     'type' => MENU_CALLBACK,
+     'file' => 'form/leanbox_sku_cp.form.inc',
+   );
+    $items['sku-list'] = array(
+     'title' => 'Get List of logged in distributor sku',
+     'page callback' => 'get_list_of_sku',
+     'access arguments' => array('sku cp'),
+     'type' => MENU_CALLBACK,
+   );
+   return $items;
+}
+
+/**
+ * Implement hook_permission()
+ *  Add custom permission Central sales delivery report
+ */
+function leanbox_sku_cp_permission() {
+   return array(
+     'sku cp' => array(
+       'title' => t('sku cp'),
+       'description' => t('sku cp assignment')
+     )
+   );
+}
+
+
+/**
+ * Menu callback; Retrieve a JSON object containing autocomplete suggestions for existing bill no.
+ * @param type $string
+ */
+function get_list_of_sku($string = '') {
+   global $user;
+   $res = '';
+   // Store distributor id in author in each node
+   $dis_id = change_feeds_import_get_distributor_id($user->uid);
+   $length = strlen($string);
+   if ($length > 2) {
+      if (!empty($dis_id) && !empty($string)) {
+         $query = db_select('node', 'n');
+        // $query->join('field_data_field_trip_id_reference', 'tr', 'tr.entity_id = n.nid');
+         $query->condition('n.type', 'sku7_code_master');
+         $query->condition('n.uid', $dis_id);
+         $query->condition('n.title', db_like($string) . '%', 'LIKE');
+         $query->fields('n', array('title'));
+         $query->range(0, 10);
+         $res = $query->execute()->fetchAllKeyed(0, 0);
+      }
+   }
+   drupal_json_output($res);
+}
+
+
+/**
+ * 
+ * @param type $sku
+ * @param type $distributor_id
+ * @param type $child
+ * @return array
+ */
+function _get_sku_details_using_sku_id($sku, $distributor_id, $child = FALSE) {
+   $array = array();
+   if (!empty($sku) && !empty($distributor_id)) {
+      $query = db_select('node', 'n');
+      $query->join('field_data_field_product_name', 'pn', 'pn.entity_id = n.nid');
+      $query->condition('n.type', 'sku7_code_master');
+      $query->condition('n.uid', $distributor_id);
+      $query->condition('n.title', $sku);
+      $query->fields('n', array('nid', 'title'));
+      $query->fields('pn', array('field_product_name_value'));
+      if (!$child) {
+         $query->leftjoin('field_data_field_child_sku', 'csk', 'csk.entity_id = n.nid');
+         $query->fields('csk', array('field_child_sku_nid'));
+         $query->leftjoin('field_data_field_child_sku_qty‎', 'cskq', 'cskq.entity_id = n.nid');
+         $query->fields('cskq', array('field_child_sku_qty_value'));
+      }
+      $row = $query->execute()->fetch(PDO::FETCH_ASSOC);
+      $rows[] = $row;
+      if (!empty($rows)) {
+         $header = array(
+           'sku' => 'Sku',
+           'name' => 'Product Name',
+         );
+         if ($child) {
+            $header = array(
+              'sku' => 'Child Sku',
+              'name' => 'Child Product Name',
+            );
+         }
+         $array['header'] = $header;
+         $array['rows'] = $rows;
+      }
+   }
+
+   return $array;
+}
