@@ -124,3 +124,100 @@ function send_email_monthly_trip_summary() {
 
   drupal_mail('email_status', 'daily_data', $mail_to, LANGUAGE_NONE, $params, $from);
 }
+
+/*
+ * Function to send auto mailer of exception mis.
+ */
+function send_email_exception_mis() {
+  $distributor_id = _DISTRIBUTOR_ID;
+  $distributor_name = change_feeds_import_get_distributor_name($distributor_id);
+  
+  // PT-CT Not Maintained
+  $pt_ct_not_maintained_html = get_email_pt_ct_not_maintained($distributor_id);
+  
+  // Child Not Maintained
+  $child_not_maintained_html = get_email_child_not_maintained($distributor_id);
+  
+  $params['subject'] = "Exception MIS";
+  $params['body'] = $pt_ct_not_maintained_html . "<br>" . $child_not_maintained_html;
+  $mail_to = variable_get('exception_mis_to_email');
+  $from = variable_get('from_email');
+
+  drupal_mail('email_status', 'daily_data', $mail_to, LANGUAGE_NONE, $params, $from);
+}
+
+/*
+ * Returns table for PT-CT Not Maintained
+ */
+function get_email_pt_ct_not_maintained($distributor_id) {
+  $query = db_select('node', 'n');
+  $query->condition('n.type', 'outlet_master');
+  $query->condition('n.uid', $distributor_id, '=');
+  $query->join('field_data_field_party_code', 'pc', 'pc.entity_id = n.nid');
+  $query->join('field_data_field_hul_code', 'hc', 'hc.entity_id = n.nid');
+  $query->leftjoin('field_data_field_party_name', 'pn', 'pn.entity_id = n.nid');
+  $query->leftjoin('field_data_field_payment_terms', 'pt', 'pt.entity_id = n.nid');
+  $query->leftjoin('field_data_field_credit_days', 'cd', 'cd.entity_id = n.nid');
+  $db_or = db_or();
+  $db_or->isNull('pt.field_payment_terms_value');
+  $db_or->isNull('cd.field_credit_days_value');
+  $query->condition($db_or);
+
+  $query->fields('pc', array('field_party_code_value'));
+  $query->fields('hc', array('field_hul_code_value'));
+  $query->fields('pn', array('field_party_name_value'));
+  $query->fields('pt', array('field_payment_terms_value'));
+  $query->fields('cd', array('field_credit_days_value'));
+  $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+ 
+  $row = array();
+  foreach($res as $data) {
+    $row['party_code']  = $data['field_party_code_value'];
+    $row['party_name']  = $data['field_party_name_value'];
+    $row['hul_code']  = $data['field_hul_code_value'];
+    $row['payment_terms']  = $data['field_payment_terms_value'];
+    $row['credit_days'] =  $data['field_credit_days_value'];
+
+    $rows[] = $row;
+  }
+
+  $header = array('Party Name', 'Party Name', 'Hul Code', 'Payment Terms', 'Credit Days');
+  
+  $output = "<h3>PT-CT Not Maintained</h3>";
+  $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0'), 'empty' => t('No Records has been found')));
+  return $output;
+}
+
+/*
+ * Returns table for SKU7 Child Not Maintained
+ */
+function get_email_child_not_maintained($distributor_id) {
+  $query = db_select('node', 'n');
+  $query->condition('n.type', 'sku7_code_master');
+  $query->condition('n.uid', $distributor_id, '=');
+  $query->join('field_data_field_sku7_code', 'sc', 'sc.entity_id = n.nid');
+  $query->join('field_data_field_product_name', 'pn', 'pn.entity_id = n.nid');
+  $query->condition('field_product_name_value', db_like('X') . '%', 'LIKE');
+  $query->leftjoin('field_data_field_child_sku', 'cs', 'cs.entity_id = n.nid');
+  $query->leftjoin('node', 'n1', 'n1.nid = cs.field_child_sku_nid');
+  $query->isNULL('field_child_sku_nid'); 
+
+  $query->fields('n', array('nid'));
+  $query->fields('sc', array('field_sku7_code_value'));
+  $query->fields('pn', array('field_product_name_value'));
+  $query->fields('cs', array('field_child_sku_nid'));
+  $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+
+  foreach($res as $data) {
+    $row['sku7_code']  = $data['field_sku7_code_value'];
+    $row['sku7_des']  = $data['field_product_name_value'];
+   
+    $rows[] = $row;
+  }
+
+  $header = array('SKU7 Code', 'SKU7 Description');
+  
+  $output = "<h3>Child Not Maintained</h3>";
+  $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0'), 'empty' => t('No Records has been found')));
+  return $output;
+}
