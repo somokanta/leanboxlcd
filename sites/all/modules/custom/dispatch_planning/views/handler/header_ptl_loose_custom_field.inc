@@ -25,10 +25,10 @@ class header_ptl_loose_custom_field extends views_handler_field {
 
   function render($empty = FALSE) {
     $total_result = $this->view->result;
-    dpm($total_result);
     foreach ($total_result as $value) {
       $units += $value->ptl_data_configuration_loose;
       $clds += (int)($value->ptl_data_configuration_loose/$value->ptl_data_configuration_upc);
+      $derived_units += $value->ptl_data_configuration_derived_loose; 
     }
     $rs_code = $total_result[0]->ptl_data_configuration_rs_code;
 
@@ -80,8 +80,18 @@ class header_ptl_loose_custom_field extends views_handler_field {
       <td align = "left" style="color:#666">' . $no_of_bills . '</td>
       <td></td>
       <td></td>
+      <td>Total Free Qty</td>
+      <td align = "left" style="color:#666">' . $derived_units . '</td>
+      <td></td>
+      </tr>
+      <tr>
+      <td></td>
       <td>Bill Lines</td>
       <td align = "left" style="color:#666">' . $no_of_bill_lines . '</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
       <td></td>
       </tr>
       </tbody>

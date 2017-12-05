@@ -28,9 +28,9 @@ class header_ptl_cld_custom_field extends views_handler_field {
     $user_id = $user->uid;
     $total_result = $this->view->result;
     $box = 0;
-    dpm($total_result);
     foreach ($total_result as $key => $value) {
       $box += $value->ptl_data_configuration_cld;
+      $derived_box += $value->ptl_data_configuration_derived_cld;
     }
     $rs_code = $total_result[0]->ptl_data_configuration_rs_code;
     $this->view->custom_footer = $box;
@@ -73,8 +73,8 @@ class header_ptl_cld_custom_field extends views_handler_field {
       <td align = "left" style="color:#666">' . $loading_sheet . '</td>
       <td></td>
       <td></td>
-      <td></td>
-      <td></td>
+      <td>Total Free CLDs</td>
+      <td align = "left" style="color:#666">' . $derived_box . '</td>
       <td></td>
       </tr>
       <tr>
