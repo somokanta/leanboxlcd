@@ -21,7 +21,7 @@ function leanbox_sku_cp_menu() {
      'title' => 'SKU Product Name',
      'page callback' => 'drupal_get_form',
      'page arguments' => array('_add_sku_product_validation_word_callback'),
-     'access callback' => 'check_if_fr_role_user_admin',
+     'access callback' => 'leanbox_user_has_role',
      'type' => MENU_CALLBACK,
      'file' => 'form/leanbox_sku_cp.form.inc',
    );
@@ -146,4 +146,13 @@ function _get_feeds_url_for_sku_callabck($callback_arg1, $arg2) {
    }
    module_load_include('inc', 'feeds', 'feeds.pages.inc');
    return drupal_get_form($callback_arg1, $arg2);
+}
+
+function leanbox_user_has_role() {
+   GLOBAL $user;
+   $roles = $user->roles;
+   if (in_array('leanbox', $roles)) {
+      return TRUE;
+   }
+   return FALSE;
 }
