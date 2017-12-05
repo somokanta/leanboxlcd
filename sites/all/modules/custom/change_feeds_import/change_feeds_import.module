@@ -1509,6 +1509,27 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
   global $user;
   // Store distributor id in author in each node
   $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+  
+  if ($entity->feeds_item->id == 'sku7_code_master_leanbox') {
+      $product_list = variable_get('sku_product_list', '');
+      if (!empty($product_list)) {
+         $product_list = explode(",", $product_list);
+         foreach ($product_list as $key => $val) {
+            $product_list_array[] = strtolower(trim($val));
+         }
+         $sku = $entity->field_sku7_code['und'][0]['value'];
+         $product_name = $entity->field_product_name['und'][0]['value'];
+         $product_name = explode(" ", $product_name);
+
+         $product_name_first_word = strtolower(trim($product_name[0]));
+
+         if (!in_array($product_name_first_word, $product_list_array)) {
+            drupal_set_message("Please enter correct product name for sku $sku", 'error');
+            $entity->feeds_item->skip = TRUE;
+         }
+      }
+   }
+
 // Add presave/alter code for van stop master uploader
   if ($entity->feeds_item->id == 'target_master_import') {
     $dis_id = leanbox_mobile_get_distributor_using_rscode($entity->title);
@@ -2108,7 +2129,7 @@ function registration_validate($form, &$form_state) {
 }
 
 function change_feeds_import_feeds_after_import(FeedsSource $source) {
-  if ($source->id == 'sku7_code_master' || $source->id == 'outlet_master') { // if importing through sku7_code_master OR outlet_master.  
+  if ($source->id == 'sku7_code_master' || $source->id == 'outlet_master' || $source->id == 'sku7_code_master_leanbox') { // if importing through sku7_code_master OR outlet_master.  
     change_feeds_import_change_status_of_error_billing_table();
   }
 }
