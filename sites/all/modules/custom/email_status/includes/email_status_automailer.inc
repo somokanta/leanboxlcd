@@ -104,12 +104,12 @@ function send_email_monthly_trip_summary() {
     $total_bill_count += $bill_count;
     $total_bill_value += $bill_value;
     $total_team_count += $loader_team_count;
-   //$total_avg_bills_per_trip = (int) ($total_bill_count / $total_trip_count);
-   //$total_avg_bills_value = (int) ($total_bill_value / $total_trip_count);
+    $total_avg_bills_per_trip = (int) ($total_bill_count / $total_trip_count);
+    $total_avg_bills_value = (int) ($total_bill_value / $total_trip_count);
   }
   
   if(!empty($full_table)){
-    $full_table[]  = array('Total', '', '', $total_trip_count, $total_bill_count, $total_bill_value, $total_team_count, '', '');
+    $full_table[]  = array('Total', '', '', $total_trip_count, $total_bill_count, $total_bill_value, $total_team_count, $total_avg_bills_per_trip, $total_avg_bills_value);
   }
 
   $header = array('Cashier Name', 'Vehicle No', 'Party Packing', 'Trip Count', 'Bill Count', 'Dispatch Bill Value', 'Dispatch Loader Team Count','Average Bill Count/Trip','Average Bill Value/Trip');
