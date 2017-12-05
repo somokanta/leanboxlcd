@@ -17,8 +17,10 @@ function send_email_monthly_trip_summary() {
   $query->condition('n.type', 'dispatch_data');
   $query->join('field_data_field_cashier_name', 'cn', 'cn.entity_id = n.nid');
   $query->condition('cn.field_cashier_name_value', '', '!=');
+  $query->orderBy('field_cashier_name_value');
   $query->condition('n.uid', $distributor_id, '=');
   $query->join('field_data_field_vehicle_no', 'vn', 'vn.entity_id = n.nid');
+  $query->orderBy('field_vehicle_no_value');
   $query->join('field_data_field_trip_id', 'td', 'td.entity_id = n.nid');
   $query->join('field_data_field_bill_count', 'bc', 'bc.entity_id = n.nid');
   $query->join('field_data_field_dispatch_bill_value', 'dbv', 'dbv.entity_id = n.nid');
@@ -104,12 +106,12 @@ function send_email_monthly_trip_summary() {
     $total_bill_count += $bill_count;
     $total_bill_value += $bill_value;
     $total_team_count += $loader_team_count;
-   //$total_avg_bills_per_trip = (int) ($total_bill_count / $total_trip_count);
-   //$total_avg_bills_value = (int) ($total_bill_value / $total_trip_count);
+    $total_avg_bills_per_trip = (int) ($total_bill_count / $total_trip_count);
+    $total_avg_bills_value = (int) ($total_bill_value / $total_trip_count);
   }
   
   if(!empty($full_table)){
-    $full_table[]  = array('Total', '', '', $total_trip_count, $total_bill_count, $total_bill_value, $total_team_count, '', '');
+    $full_table[]  = array('Total', '', '', $total_trip_count, $total_bill_count, $total_bill_value, $total_team_count, $total_avg_bills_per_trip, $total_avg_bills_value);
   }
 
   $header = array('Cashier Name', 'Vehicle No', 'Party Packing', 'Trip Count', 'Bill Count', 'Dispatch Bill Value', 'Dispatch Loader Team Count','Average Bill Count/Trip','Average Bill Value/Trip');
