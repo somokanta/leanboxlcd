@@ -382,69 +382,77 @@ function ptl_api_data_create($nid, $trip_id) {
  * Function for  ptl_configuration_data_insert($api_data);
  */
 function ptl_data_insert_into_table($api_data, $distributor_id) {
-  if (!empty($api_data)) {
-    $exist_sku_unit = array();
-    $exist_child_arr = array();
-    if (!empty($api_data['jobData']['item_details'])) {
-      foreach ($api_data['jobData']['item_details'] as $item_data) {
+    if (!empty($api_data)) {
+        $exist_sku_unit = array();
+        $exist_child_arr = array();
+        if (!empty($api_data['jobData']['item_details'])) {
+            foreach ($api_data['jobData']['item_details'] as $item_data) {
 
-        $sku7_code = $item_data['sku_code'];     
-        $sku_unit_case = get_sku_unit_case($sku7_code, $distributor_id);
-        
-        // Conversion of cld and loose
-        $cld = (int) ($item_data['sum_net_sales_quantity'] / $sku_unit_case); //petty
-        $loose = (int) ($item_data['sum_net_sales_quantity'] % $sku_unit_case); //loose
-        //New Logic for PTL
-        $free_cld = (int) ($item_data['sum_of_sales_free_qty'] / $sku_unit_case); //petty
-        $free_loose = (int) ($item_data['sum_of_sales_free_qty'] % $sku_unit_case); //loose
-        $cp = '';
-        $sum_of_sales_free_qty = 0;
-        $derived_free_qty = 0;
-        $free_sku_description = '';
-        if (!empty($item_data['sum_net_sales_quantity'])) {
-          $child_detail = get_child_desc_and_qty_by_parent_sku($sku7_code, $distributor_id);    
-          $derived_free_qty = $child_detail['child_qty'] * $item_data['sum_net_sales_quantity'];
-          $free_sku_description = $child_detail['child_desc'];
-          if(!empty($derived_free_qty) && !empty($free_sku_description)){
-            $cp = 'CP';
-          }
+                $sku7_code = $item_data['sku_code'];
+                $sku_unit_case = get_sku_unit_case($sku7_code, $distributor_id);
+
+                // Conversion of cld and loose
+                $cld = (int) ($item_data['sum_net_sales_quantity'] / $sku_unit_case); //petty
+                $loose = (int) ($item_data['sum_net_sales_quantity'] % $sku_unit_case); //loose
+                //New Logic for PTL
+                $free_cld = (int) ($item_data['sum_of_sales_free_qty'] / $sku_unit_case); //petty
+                $free_loose = (int) ($item_data['sum_of_sales_free_qty'] % $sku_unit_case); //loose
+                $cp = '';
+                $sum_of_sales_free_qty = 0;
+                $derived_free_qty = 0;
+                $free_sku_description = '';
+                $derived_unit_case = 0;
+                $derived_cld = 0;
+                $derived_loose = 0;
+                if (!empty($item_data['sum_net_sales_quantity'])) {
+                    $child_detail = get_child_desc_and_qty_by_parent_sku($sku7_code, $distributor_id);
+                    $derived_free_qty = $child_detail['child_qty'] * $item_data['sum_net_sales_quantity'];
+                    $free_sku_description = $child_detail['child_desc'];
+                    if (!empty($derived_free_qty) && !empty($free_sku_description)) {
+                        $cp = 'CP';
+                        $derived_unit_case = get_sku_unit_case($child_detail['child_sku'], $distributor_id);
+                        $derived_cld = (int) ($derived_free_qty / $derived_unit_case); //petty
+                        $derived_loose = (int) ($derived_free_qty % $derived_unit_case); //loose
+                    }
+                } else {
+                    $sum_of_sales_free_qty = $item_data['sum_of_sales_free_qty'];
+                    //$free_sku_description =  $item_data['product_name']; // for now
+                }
+                // New logic end
+                $query = db_insert('ptl_data_configuration');
+                $fields = array(
+                    'ptl_job' => $api_data['jobData']['trip_id'],
+                    'rs_code' => $api_data['rs_code'],
+                    'trip_id' => $api_data['jobData']['trip_id'],
+                    'vehicle' => $api_data['jobData']['vehicle'],
+                    'bill_number' => $api_data['jobData']['bill_number'],
+                    'loading_date' => $api_data['jobData']['loading_data'],
+                    'sequence_no' => $api_data['jobData']['store_sequence_no'],
+                    'basepack_code' => $item_data['basepack_code'],
+                    'sku_code' => $item_data['sku_code'],
+                    'product_name' => $item_data['product_name'],
+                    'MRP' => $item_data['mrp'],
+                    'TUR' => $item_data['tur'],
+                    'sum_sales_qty' => $item_data['sum_net_sales_quantity'],
+                    'created_time' => REQUEST_TIME,
+                    'cld' => $cld,
+                    'loose' => $loose,
+                    'upc' => $sku_unit_case ? $sku_unit_case : 0,
+                    'sum_of_sales_free_qty' => $sum_of_sales_free_qty, //below are newly added
+                    'free_sku_description' => $free_sku_description,
+                    'cp' => $cp ? $cp : '',
+                    'free_cld' => $free_cld,
+                    'free_loose' => $free_loose,
+                    'derived_free_qty' => $derived_free_qty,
+                    'derived_cld' => $derived_cld,
+                    'derived_loose' => $derived_loose,
+                    'derived_upc' => $derived_unit_case
+                );
+                $query->fields($fields);
+                $result_id = $query->execute();
+            }
         }
-        else {
-          $sum_of_sales_free_qty = $item_data['sum_of_sales_free_qty'];
-          //$free_sku_description =  $item_data['product_name']; // for now
-        }
-        // New logic end
-        $query = db_insert('ptl_data_configuration');
-        $fields = array(
-          'ptl_job' => $api_data['jobData']['trip_id'],
-          'rs_code' => $api_data['rs_code'],
-          'trip_id' => $api_data['jobData']['trip_id'],
-          'vehicle' => $api_data['jobData']['vehicle'],
-          'bill_number' => $api_data['jobData']['bill_number'],
-          'loading_date' => $api_data['jobData']['loading_data'],
-          'sequence_no' => $api_data['jobData']['store_sequence_no'],
-          'basepack_code' => $item_data['basepack_code'], 
-          'sku_code' => $item_data['sku_code'],
-          'product_name' => $item_data['product_name'],
-          'MRP' => $item_data['mrp'],
-          'TUR' => $item_data['tur'],
-          'sum_sales_qty' => $item_data['sum_net_sales_quantity'],
-          'created_time' => REQUEST_TIME,
-          'cld' => $cld,
-          'loose' => $loose,
-          'upc' => $sku_unit_case ? $sku_unit_case : 0,
-          'sum_of_sales_free_qty' => $sum_of_sales_free_qty, //below are newly added
-          'free_sku_description' => $free_sku_description,
-          'cp' => $cp ? $cp : '',
-          'free_cld' => $free_cld,
-          'free_loose' => $free_loose,
-          'derived_free_qty'=>$derived_free_qty
-        );
-        $query->fields($fields);
-        $result_id = $query->execute();
-      }
     }
-  }
 }
 
 function ptl_get_billing_data($node_uid, $bill_number) {
@@ -553,12 +561,17 @@ function get_child_desc_and_qty_by_parent_sku($sku7_code, $distributor_id) {
   $query->condition('n.title', $sku7_code);
   $query->leftjoin('field_data_field_child_sku', 'csk', 'csk.entity_id = n.nid');
   $query->leftjoin('node', 'n1', 'n1.nid = csk.field_child_sku_nid');
+
+  $query->join('field_data_field_sku7_code', 'sc', 'sc.entity_id = n1.nid');
+  $query->fields('sc', array('field_sku7_code_value'));
+
   $query->join('field_data_field_product_name', 'pn', 'pn.entity_id = n1.nid');
   $query->fields('pn', array('field_product_name_value'));
   $query->leftjoin('field_data_field_child_sku_qty‎', 'cskq', 'cskq.entity_id = n.nid');
   $query->fields('cskq', array('field_child_sku_qty_value'));
   $row = $query->execute()->fetch(PDO::FETCH_ASSOC);
-
+  
+  $result['child_sku'] = ($row['field_sku7_code_value']) ? $row['field_sku7_code_value'] : '';
   $result['child_qty'] = ($row['field_child_sku_qty_value']) ? $row['field_child_sku_qty_value'] : 0;
   $result['child_desc'] = ($row['field_product_name_value']) ? $row['field_product_name_value'] : '';
   return $result;

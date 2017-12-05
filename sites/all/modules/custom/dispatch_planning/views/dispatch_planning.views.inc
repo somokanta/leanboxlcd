@@ -1313,10 +1313,64 @@ function dispatch_planning_views_data() {
       'handler' => 'views_handler_argument_string',
     ),
   );  
-  // loose
+  // drived free qty
   $data['ptl_data_configuration']['derived_free_qty'] = array(
     'title' => t('Derived Free QTY'),
     'help' => t('Derived Free QTY'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+  // drived loose
+  $data['ptl_data_configuration']['derived_loose'] = array(
+    'title' => t('Derived Loose'),
+    'help' => t('Derived Loose'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+  // drived CLD
+  $data['ptl_data_configuration']['derived_cld'] = array(
+    'title' => t('Derived CLD'),
+    'help' => t('Derived CLD'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+  // drived UPC
+  $data['ptl_data_configuration']['derived_upc'] = array(
+    'title' => t('Derived UPC'),
+    'help' => t('Derived UPC'),
     'field' => array(
       'handler' => 'views_handler_field',
       'click sortable' => TRUE,
