@@ -25,6 +25,7 @@ class header_ptl_loose_custom_field extends views_handler_field {
 
   function render($empty = FALSE) {
     $total_result = $this->view->result;
+    dpm($total_result);
     foreach ($total_result as $value) {
       $units += $value->ptl_data_configuration_loose;
       $clds += (int)($value->ptl_data_configuration_loose/$value->ptl_data_configuration_upc);

@@ -28,6 +28,7 @@ class header_ptl_cld_custom_field extends views_handler_field {
     $user_id = $user->uid;
     $total_result = $this->view->result;
     $box = 0;
+    dpm($total_result);
     foreach ($total_result as $key => $value) {
       $box += $value->ptl_data_configuration_cld;
     }
