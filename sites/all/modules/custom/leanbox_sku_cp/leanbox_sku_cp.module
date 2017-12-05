@@ -17,11 +17,11 @@ function leanbox_sku_cp_menu() {
      'type' => MENU_CALLBACK,
      'file' => 'form/leanbox_sku_cp.form.inc',
    );
-    $items['admin/config/sku-product-listing'] = array(
+    $items['sku-product-listing'] = array(
      'title' => 'SKU Product Name',
      'page callback' => 'drupal_get_form',
      'page arguments' => array('_add_sku_product_validation_word_callback'),
-     'access callback' => 'check_if_fr_role_user_admin',
+     'access callback' => 'leanbox_user_has_role',
      'type' => MENU_CALLBACK,
      'file' => 'form/leanbox_sku_cp.form.inc',
    );
@@ -118,18 +118,41 @@ function _get_sku_details_using_sku_id($sku, $distributor_id, $child = FALSE) {
    return $array;
 }
 
+
 /**
- * Implements hook_init
- * @param type $menu
+ * Implements hook_menu_alter
+ * @param array $items
  */
-//function leanbox_sku_cp_init() {
-//   GLOBAL $user;
-//   $roles = $user->roles;
-//   $arg0 = arg(0);
-//   $arg1 = arg(1);
-//   if (in_array('leanbox', $roles)) {
-//      if ($arg0 == 'import' && $arg1 == 'sku7_code_master') {
-//        // drupal_goto('import/sku7_code_master');
-//      }
-//   }
-//}
+function leanbox_sku_cp_menu_alter(&$items) {
+    $items['import/%feeds_importer']['page callback'] = '_get_feeds_url_for_sku_callabck';
+}
+
+/**
+ * 
+ * @global type $user
+ * @param type $callback_arg1
+ * @param type $arg2
+ * @return type
+ */
+function _get_feeds_url_for_sku_callabck($callback_arg1, $arg2) {
+   GLOBAL $user;
+   $roles = $user->roles;
+   $url_arg0 = arg(0);
+   $url_arg = arg(1);
+   if (in_array('leanbox', $roles)) {
+      if ($url_arg0 == 'import' && $url_arg == 'sku7_code_master') {
+         drupal_goto('import/sku7_code_master_leanbox');
+      }
+   }
+   module_load_include('inc', 'feeds', 'feeds.pages.inc');
+   return drupal_get_form($callback_arg1, $arg2);
+}
+
+function leanbox_user_has_role() {
+   GLOBAL $user;
+   $roles = $user->roles;
+   if (in_array('leanbox', $roles)) {
+      return TRUE;
+   }
+   return FALSE;
+}
