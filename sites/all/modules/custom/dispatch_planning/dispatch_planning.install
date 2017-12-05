@@ -624,6 +624,24 @@ function dispatch_planning_update_7112() {
       'not null' => TRUE,
       'default' => 0,
     ),
+     'derived_cld' => array(
+      'description' => 'Drived CLD qty',
+      'type' => 'int',
+      'not null' => TRUE,
+      'default' => 0,
+    ), 
+     'derived_loose' => array(
+      'description' => 'Drived Loose qty',
+      'type' => 'int',
+      'not null' => TRUE,
+      'default' => 0,
+    ),
+     'derived_upc' => array(
+      'description' => 'Drived UPC',
+      'type' => 'int',
+      'not null' => TRUE,
+      'default' => 0,
+    ),
     
   );
   foreach ($fields as $key => $field) {
