@@ -157,3 +157,21 @@ function sku_cp_get_title_using_nid($nid) {
    $field = $query->execute()->fetchField();
    return $field;
 }
+
+
+
+/**
+ * 
+ * @param array $form
+ * @param type $form_state
+ * @return array
+ */
+function _add_sku_product_validation_word_callback($form, &$form_state) {
+   $form = array();
+   $form['sku_product_list'] = array(
+     '#type' => 'textarea',
+     '#title' => t('List'),
+     '#default_value' => variable_get('sku_product_list', ''),
+   );
+   return system_settings_form($form);
+}
