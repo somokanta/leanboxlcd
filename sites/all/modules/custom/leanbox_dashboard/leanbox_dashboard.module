@@ -1050,6 +1050,7 @@ function leanbox_dashboard_preprocess_page(&$vars) {
   $arg = drupal_get_path_alias();
   $arg0 = arg(0);
   $arg1 = arg(1);
+  $arg2 = arg(2);
   global $user;
   $roles = $user->roles;
   
@@ -1058,6 +1059,22 @@ function leanbox_dashboard_preprocess_page(&$vars) {
   }
   if (in_array("hul_admin", $roles) && !($arg0 == 'email' && $arg1 == 'weekly-billing-report')) {
     unset($vars['tabs']);
+  }
+  if ($arg0 == 'user' && $arg2 == 'edit' && !(in_array("administrator", $roles))) {
+    leanbox_dashboard_removetab('Edit', $vars);
+  }
+}
+
+// Remove undesired local task tabs.
+// Related to yourthemename_removetab() in yourthemename_preprocess_page().
+function leanbox_dashboard_removetab($label, &$vars) {
+  $tabs = explode("\n", $vars['tabs']);
+  $vars['tabs'] = '';
+
+  foreach ($tabs as $tab) {
+    if (strpos($tab, '>' . $label . '<') === FALSE) {
+      $vars['tabs'] .= $tab . "\n";
+    }
   }
 }
 
