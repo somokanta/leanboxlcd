@@ -118,18 +118,32 @@ function _get_sku_details_using_sku_id($sku, $distributor_id, $child = FALSE) {
    return $array;
 }
 
+
 /**
- * Implements hook_init
- * @param type $menu
+ * Implements hook_menu_alter
+ * @param array $items
  */
-//function leanbox_sku_cp_init() {
-//   GLOBAL $user;
-//   $roles = $user->roles;
-//   $arg0 = arg(0);
-//   $arg1 = arg(1);
-//   if (in_array('leanbox', $roles)) {
-//      if ($arg0 == 'import' && $arg1 == 'sku7_code_master') {
-//        // drupal_goto('import/sku7_code_master');
-//      }
-//   }
-//}
+function leanbox_sku_cp_menu_alter(&$items) {
+    $items['import/%feeds_importer']['page callback'] = '_get_feeds_url_for_sku_callabck';
+}
+
+/**
+ * 
+ * @global type $user
+ * @param type $callback_arg1
+ * @param type $arg2
+ * @return type
+ */
+function _get_feeds_url_for_sku_callabck($callback_arg1, $arg2) {
+   GLOBAL $user;
+   $roles = $user->roles;
+   $url_arg0 = arg(0);
+   $url_arg = arg(1);
+   if (in_array('leanbox', $roles)) {
+      if ($url_arg0 == 'import' && $url_arg == 'sku7_code_master') {
+         drupal_goto('import/sku7_code_master_leanbox');
+      }
+   }
+   module_load_include('inc', 'feeds', 'feeds.pages.inc');
+   return drupal_get_form($callback_arg1, $arg2);
+}
