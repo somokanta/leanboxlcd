@@ -75,11 +75,14 @@ function _assign_sku_cp_callback($form, &$form_state) {
          if ((isset($form_state['values']['sku_cp']) && !empty($form_state['values']['sku_cp'])) || !empty($default_sku_cp)) {
 
             $sku_cp = $form_state['values']['sku_cp'];
-            if (!empty($default_sku_cp)) {
+            if (!empty($default_sku_cp) && empty($form_state['values']['sku_cp'])) {
                $sku_cp = sku_cp_get_title_using_nid($default_sku_cp);
                $form['sku_cp']['#default_value'] = $sku_cp;
             }
-            
+            if (!empty($form_state['values']['sku_cp'])) {
+               $default_sku_cp_qty = '';
+            }
+
             $sku_cp_details = _get_sku_details_using_sku_id($sku_cp, $distributor_id, TRUE);
             
             if (!empty($sku_cp_details['rows'][0])) {
