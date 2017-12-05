@@ -175,7 +175,7 @@ function get_email_pt_ct_not_maintained($distributor_id) {
   $header = array('Party Code', 'Party Name', 'Hul Code', 'Payment Terms', 'Credit Days');
   
   $output = "<h3>PT-CT Not Maintained</h3>";
-  $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0'), 'empty' => t('No Records has been found')));
+  $output .= theme('table', array('header' => $header, 'rows' => $res, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0'), 'empty' => t('No Records has been found')));
   return $output;
 }
 
