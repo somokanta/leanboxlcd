@@ -17,15 +17,15 @@ function leanbox_sku_cp_menu() {
      'type' => MENU_CALLBACK,
      'file' => 'form/leanbox_sku_cp.form.inc',
    );
-    $items['sku-product-listing'] = array(
+   $items['sku-product-listing'] = array(
      'title' => 'SKU Product Name',
      'page callback' => 'drupal_get_form',
      'page arguments' => array('_add_sku_product_validation_word_callback'),
-     'access callback' => 'leanbox_user_has_role',
+     'access arguments' => array('sku upload validation'),
      'type' => MENU_CALLBACK,
      'file' => 'form/leanbox_sku_cp.form.inc',
    );
-    $items['sku-list'] = array(
+   $items['sku-list'] = array(
      'title' => 'Get List of logged in distributor sku',
      'page callback' => 'get_list_of_sku',
      'access arguments' => array('sku cp'),
@@ -43,10 +43,13 @@ function leanbox_sku_cp_permission() {
      'sku cp' => array(
        'title' => t('sku cp'),
        'description' => t('sku cp assignment')
+     ),
+     'sku upload validation' => array(
+       'title' => t('sku upload validation'),
+       'description' => t('sku upload validation')
      )
    );
 }
-
 
 /**
  * Menu callback; Retrieve a JSON object containing autocomplete suggestions for existing bill no.
@@ -61,7 +64,7 @@ function get_list_of_sku($string = '') {
    if ($length > 2) {
       if (!empty($dis_id) && !empty($string)) {
          $query = db_select('node', 'n');
-        // $query->join('field_data_field_trip_id_reference', 'tr', 'tr.entity_id = n.nid');
+         // $query->join('field_data_field_trip_id_reference', 'tr', 'tr.entity_id = n.nid');
          $query->condition('n.type', 'sku7_code_master');
          $query->condition('n.uid', $dis_id);
          $query->condition('n.title', db_like($string) . '%', 'LIKE');
@@ -72,7 +75,6 @@ function get_list_of_sku($string = '') {
    }
    drupal_json_output($res);
 }
-
 
 /**
  * 
@@ -118,13 +120,12 @@ function _get_sku_details_using_sku_id($sku, $distributor_id, $child = FALSE) {
    return $array;
 }
 
-
 /**
  * Implements hook_menu_alter
  * @param array $items
  */
 function leanbox_sku_cp_menu_alter(&$items) {
-    $items['import/%feeds_importer']['page callback'] = '_get_feeds_url_for_sku_callabck';
+   $items['import/%feeds_importer']['page callback'] = '_get_feeds_url_for_sku_callabck';
 }
 
 /**
@@ -146,13 +147,4 @@ function _get_feeds_url_for_sku_callabck($callback_arg1, $arg2) {
    }
    module_load_include('inc', 'feeds', 'feeds.pages.inc');
    return drupal_get_form($callback_arg1, $arg2);
-}
-
-function leanbox_user_has_role() {
-   GLOBAL $user;
-   $roles = $user->roles;
-   if (in_array('leanbox', $roles)) {
-      return TRUE;
-   }
-   return FALSE;
 }
