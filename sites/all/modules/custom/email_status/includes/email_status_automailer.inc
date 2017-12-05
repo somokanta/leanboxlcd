@@ -17,8 +17,10 @@ function send_email_monthly_trip_summary() {
   $query->condition('n.type', 'dispatch_data');
   $query->join('field_data_field_cashier_name', 'cn', 'cn.entity_id = n.nid');
   $query->condition('cn.field_cashier_name_value', '', '!=');
+  $query->orderBy('field_cashier_name_value');
   $query->condition('n.uid', $distributor_id, '=');
   $query->join('field_data_field_vehicle_no', 'vn', 'vn.entity_id = n.nid');
+  $query->orderBy('field_vehicle_no_value');
   $query->join('field_data_field_trip_id', 'td', 'td.entity_id = n.nid');
   $query->join('field_data_field_bill_count', 'bc', 'bc.entity_id = n.nid');
   $query->join('field_data_field_dispatch_bill_value', 'dbv', 'dbv.entity_id = n.nid');
@@ -164,24 +166,13 @@ function get_email_pt_ct_not_maintained($distributor_id) {
   $query->condition($db_or);
 
   $query->fields('pc', array('field_party_code_value'));
-  $query->fields('hc', array('field_hul_code_value'));
   $query->fields('pn', array('field_party_name_value'));
+  $query->fields('hc', array('field_hul_code_value')); 
   $query->fields('pt', array('field_payment_terms_value'));
   $query->fields('cd', array('field_credit_days_value'));
   $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
  
-  $row = array();
-  foreach($res as $data) {
-    $row['party_code']  = $data['field_party_code_value'];
-    $row['party_name']  = $data['field_party_name_value'];
-    $row['hul_code']  = $data['field_hul_code_value'];
-    $row['payment_terms']  = $data['field_payment_terms_value'];
-    $row['credit_days'] =  $data['field_credit_days_value'];
-
-    $rows[] = $row;
-  }
-
-  $header = array('Party Name', 'Party Name', 'Hul Code', 'Payment Terms', 'Credit Days');
+  $header = array('Party Code', 'Party Name', 'Hul Code', 'Payment Terms', 'Credit Days');
   
   $output = "<h3>PT-CT Not Maintained</h3>";
   $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0'), 'empty' => t('No Records has been found')));
@@ -199,25 +190,15 @@ function get_email_child_not_maintained($distributor_id) {
   $query->join('field_data_field_product_name', 'pn', 'pn.entity_id = n.nid');
   $query->condition('field_product_name_value', db_like('X') . '%', 'LIKE');
   $query->leftjoin('field_data_field_child_sku', 'cs', 'cs.entity_id = n.nid');
-  $query->leftjoin('node', 'n1', 'n1.nid = cs.field_child_sku_nid');
   $query->isNULL('field_child_sku_nid'); 
 
-  $query->fields('n', array('nid'));
   $query->fields('sc', array('field_sku7_code_value'));
   $query->fields('pn', array('field_product_name_value'));
-  $query->fields('cs', array('field_child_sku_nid'));
   $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
-
-  foreach($res as $data) {
-    $row['sku7_code']  = $data['field_sku7_code_value'];
-    $row['sku7_des']  = $data['field_product_name_value'];
-   
-    $rows[] = $row;
-  }
 
   $header = array('SKU7 Code', 'SKU7 Description');
   
   $output = "<h3>Child Not Maintained</h3>";
-  $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0'), 'empty' => t('No Records has been found')));
+  $output .= theme('table', array('header' => $header, 'rows' => $res, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0'), 'empty' => t('No Records has been found')));
   return $output;
 }
