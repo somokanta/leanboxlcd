@@ -140,8 +140,11 @@ function send_email_exception_mis() {
   // Child Not Maintained
   $child_not_maintained_html = get_email_child_not_maintained($distributor_id);
   
+  // CRM Status of High Discounted Bills
+  $crm_status_high_discounted_bills_html = get_email_crm_status_high_discounted_bills($distributor_id);
+  
   $params['subject'] = "Exception MIS";
-  $params['body'] = $pt_ct_not_maintained_html . "<br>" . $child_not_maintained_html;
+  $params['body'] = $pt_ct_not_maintained_html . "<br>" . $child_not_maintained_html . "<br>" . $crm_status_high_discounted_bills_html;
   $mail_to = variable_get('exception_mis_to_email');
   $from = variable_get('from_email');
 
@@ -200,5 +203,64 @@ function get_email_child_not_maintained($distributor_id) {
   
   $output = "<h3>Child Not Maintained</h3>";
   $output .= theme('table', array('header' => $header, 'rows' => $res, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0'), 'empty' => t('No Records has been found')));
+  return $output;
+}
+
+/*
+ * Returns table for CRM Status of High Discounted Bills
+ */
+function get_email_crm_status_high_discounted_bills($distributor_id) {
+  $start_date = strtotime('-7 day', strtotime(date('Y-m-d')));
+  $end_date = strtotime(date('Y-m-d'));
+
+  $query = db_select('node', 'n');
+  $query->condition('n.type', 'sales_register_data');
+  $query->condition('n.uid', $distributor_id, '=');
+  $query->join('field_data_field_sr_bill_date', 'bd', 'bd.entity_id = n.nid');
+  $query->condition('bd.field_sr_bill_date_value', array($start_date, $end_date), 'BETWEEN');
+  $query->orderBy('bd.field_sr_bill_date_value', 'DESC');
+  $query->leftjoin('field_data_field_sales_delivery_status', 'ds', 'ds.entity_id = n.nid');
+  $query->join('field_data_field_trip_id_reference', 'ti', 'ti.entity_id = n.nid');
+  $query->join('field_data_field_dispatch_date', 'dd', 'dd.entity_id = ti.field_trip_id_reference_nid'); 
+  $query->isNotNull('dd.field_dispatch_date_value');
+  $query->join('field_data_field_pod_flag', 'pf', 'pf.entity_id = n.nid');
+  $query->condition('pf.field_pod_flag_value', 1, '=');
+
+  $query->fields('bd', array('field_sr_bill_date_value'));
+  $query->fields('ds', array('field_sales_delivery_status_tid'));
+  $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+
+  foreach ($res as $data) {
+    $bill_date = date('d-m-Y',$data['field_sr_bill_date_value']);
+      
+    if (!isset($row[$bill_date])) {
+      $row[$bill_date]['bill_date'] = $bill_date;
+      $row[$bill_date]['delivered_status'] = 0;
+      $row[$bill_date]['undelivered_status'] = 0;
+      $row[$bill_date]['notdispatched_status'] = 0;
+      $row[$bill_date]['blank_status'] = 0;
+    }
+
+    if ($data['field_sales_delivery_status_tid'] == '59') {
+      $row[$bill_date]['delivered_status'] += 1;
+    }
+    else if ($data['field_sales_delivery_status_tid'] == '60') {
+      $row[$bill_date]['undelivered_status'] += 1;
+    }
+    else if ($data['field_sales_delivery_status_tid'] == '66') {
+      $row[$bill_date]['notdispatched_status'] += 1;
+    }
+    else {
+      $row[$bill_date]['blank_status'] += 1;
+    }
+  
+    $row[$bill_date]['total'] +=1; 
+  }
+
+  $header = array('Bill Date', 'Delivered', 'Undelivered', 'Not Dispatched', 'Blank', 'Total');
+  
+  $output = "<h3>CRM Status of High Discounted Bills</h3>";
+  $output .= theme('table', array('header' => $header, 'rows' => $row, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0'), 'empty' => t('No Records has been found')));
+  
   return $output;
 }
