@@ -24,9 +24,13 @@ class basepack_sku7_code_custom_field extends views_handler_field {
    }
 
    function render($data) {
+      $billing_date_from = strtotime(date('Y-m-d') . "-10 days");
+      $billing_date_to = strtotime(date('Y-m-d'));
+
       $sku_code = $data->node_title;
       $node_uid = $data->node_uid;
       $query = db_select('custom_billing_data', 'b');
+      $query->condition('b.bill_date', array($billing_date_from, $billing_date_to), 'BETWEEN');
       $query->fields('b', array('BASEPACK_CODE'));
       $query->condition('b.distributor_id', $node_uid);
       $query->condition('b.sku7_code', $sku_code);
