@@ -126,3 +126,141 @@ function send_email_monthly_trip_summary() {
 
   drupal_mail('email_status', 'daily_data', $mail_to, LANGUAGE_NONE, $params, $from);
 }
+
+/*
+ * Function to send auto mailer of exception mis.
+ */
+function send_email_exception_mis() {
+  $distributor_id = _DISTRIBUTOR_ID;
+  $distributor_name = change_feeds_import_get_distributor_name($distributor_id);
+  
+  // PT-CT Not Maintained
+  $pt_ct_not_maintained_html = get_email_pt_ct_not_maintained($distributor_id);
+  
+  // Child Not Maintained
+  $child_not_maintained_html = get_email_child_not_maintained($distributor_id);
+  
+  // CRM Status of High Discounted Bills
+  $crm_status_high_discounted_bills_html = get_email_crm_status_high_discounted_bills($distributor_id);
+  
+  $params['subject'] = "Exception MIS";
+  $params['body'] = $pt_ct_not_maintained_html . "<br>" . $child_not_maintained_html . "<br>" . $crm_status_high_discounted_bills_html;
+  $mail_to = variable_get('exception_mis_to_email');
+  $from = variable_get('from_email');
+
+  drupal_mail('email_status', 'daily_data', $mail_to, LANGUAGE_NONE, $params, $from);
+}
+
+/*
+ * Returns table for PT-CT Not Maintained
+ */
+function get_email_pt_ct_not_maintained($distributor_id) {
+  $query = db_select('node', 'n');
+  $query->condition('n.type', 'outlet_master');
+  $query->condition('n.uid', $distributor_id, '=');
+  $query->join('field_data_field_party_code', 'pc', 'pc.entity_id = n.nid');
+  $query->join('field_data_field_hul_code', 'hc', 'hc.entity_id = n.nid');
+  $query->leftjoin('field_data_field_party_name', 'pn', 'pn.entity_id = n.nid');
+  $query->leftjoin('field_data_field_payment_terms', 'pt', 'pt.entity_id = n.nid');
+  $query->leftjoin('field_data_field_credit_days', 'cd', 'cd.entity_id = n.nid');
+  $db_or = db_or();
+  $db_or->isNull('pt.field_payment_terms_value');
+  $db_or->isNull('cd.field_credit_days_value');
+  $query->condition($db_or);
+
+  $query->fields('pc', array('field_party_code_value'));
+  $query->fields('pn', array('field_party_name_value'));
+  $query->fields('hc', array('field_hul_code_value')); 
+  $query->fields('pt', array('field_payment_terms_value'));
+  $query->fields('cd', array('field_credit_days_value'));
+  $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+ 
+  $header = array('Party Code', 'Party Name', 'Hul Code', 'Payment Terms', 'Credit Days');
+  
+  $output = "<h3>PT-CT Not Maintained</h3>";
+  $output .= theme('table', array('header' => $header, 'rows' => $res, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0'), 'empty' => t('No Records has been found')));
+  return $output;
+}
+
+/*
+ * Returns table for SKU7 Child Not Maintained
+ */
+function get_email_child_not_maintained($distributor_id) {
+  $query = db_select('node', 'n');
+  $query->condition('n.type', 'sku7_code_master');
+  $query->condition('n.uid', $distributor_id, '=');
+  $query->join('field_data_field_sku7_code', 'sc', 'sc.entity_id = n.nid');
+  $query->join('field_data_field_product_name', 'pn', 'pn.entity_id = n.nid');
+  $query->condition('field_product_name_value', db_like('X') . '%', 'LIKE');
+  $query->leftjoin('field_data_field_child_sku', 'cs', 'cs.entity_id = n.nid');
+  $query->isNULL('field_child_sku_nid'); 
+
+  $query->fields('sc', array('field_sku7_code_value'));
+  $query->fields('pn', array('field_product_name_value'));
+  $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+
+  $header = array('SKU7 Code', 'SKU7 Description');
+  
+  $output = "<h3>Child Not Maintained</h3>";
+  $output .= theme('table', array('header' => $header, 'rows' => $res, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0'), 'empty' => t('No Records has been found')));
+  return $output;
+}
+
+/*
+ * Returns table for CRM Status of High Discounted Bills
+ */
+function get_email_crm_status_high_discounted_bills($distributor_id) {
+  $start_date = strtotime('-7 day', strtotime(date('Y-m-d')));
+  $end_date = strtotime(date('Y-m-d'));
+
+  $query = db_select('node', 'n');
+  $query->condition('n.type', 'sales_register_data');
+  $query->condition('n.uid', $distributor_id, '=');
+  $query->join('field_data_field_sr_bill_date', 'bd', 'bd.entity_id = n.nid');
+  $query->condition('bd.field_sr_bill_date_value', array($start_date, $end_date), 'BETWEEN');
+  $query->orderBy('bd.field_sr_bill_date_value', 'DESC');
+  $query->leftjoin('field_data_field_sales_delivery_status', 'ds', 'ds.entity_id = n.nid');
+  $query->join('field_data_field_trip_id_reference', 'ti', 'ti.entity_id = n.nid');
+  $query->join('field_data_field_dispatch_date', 'dd', 'dd.entity_id = ti.field_trip_id_reference_nid'); 
+  $query->isNotNull('dd.field_dispatch_date_value');
+  $query->join('field_data_field_pod_flag', 'pf', 'pf.entity_id = n.nid');
+  $query->condition('pf.field_pod_flag_value', 1, '=');
+
+  $query->fields('bd', array('field_sr_bill_date_value'));
+  $query->fields('ds', array('field_sales_delivery_status_tid'));
+  $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+
+  foreach ($res as $data) {
+    $bill_date = date('d-m-Y',$data['field_sr_bill_date_value']);
+      
+    if (!isset($row[$bill_date])) {
+      $row[$bill_date]['bill_date'] = $bill_date;
+      $row[$bill_date]['delivered_status'] = 0;
+      $row[$bill_date]['undelivered_status'] = 0;
+      $row[$bill_date]['notdispatched_status'] = 0;
+      $row[$bill_date]['blank_status'] = 0;
+    }
+
+    if ($data['field_sales_delivery_status_tid'] == '59') {
+      $row[$bill_date]['delivered_status'] += 1;
+    }
+    else if ($data['field_sales_delivery_status_tid'] == '60') {
+      $row[$bill_date]['undelivered_status'] += 1;
+    }
+    else if ($data['field_sales_delivery_status_tid'] == '66') {
+      $row[$bill_date]['notdispatched_status'] += 1;
+    }
+    else {
+      $row[$bill_date]['blank_status'] += 1;
+    }
+  
+    $row[$bill_date]['total'] +=1; 
+  }
+
+  $header = array('Bill Date', 'Delivered', 'Undelivered', 'Not Dispatched', 'Blank', 'Total');
+  
+  $output = "<h3>CRM Status of High Discounted Bills</h3>";
+  $output .= theme('table', array('header' => $header, 'rows' => $row, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0'), 'empty' => t('No Records has been found')));
+  
+  return $output;
+}
