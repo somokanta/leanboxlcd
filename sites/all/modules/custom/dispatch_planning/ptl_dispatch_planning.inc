@@ -325,9 +325,13 @@ function create_fetch_data_ptl_trip_form_submit($form, &$form_state) {
 
     if (!empty($ptl_authentication_flag) && $trip_id_nid) {
       $sales_register_nid = ptl_get_sales_register_nid_by_trip($trip_id_nid);
-      foreach ($sales_register_nid as $nid) {
-        $count = 1;
-        ptl_api_data_create($nid->entity_id, $trip_id);
+      if (count($sales_register_nid) < 69) {
+        foreach ($sales_register_nid as $nid) {
+          $count = 1;
+          ptl_api_data_create($nid->entity_id, $trip_id);
+        }
+      }else{
+        drupal_set_message("Trip contains more than 68 Bills!",'warning');
       }
     }
 
