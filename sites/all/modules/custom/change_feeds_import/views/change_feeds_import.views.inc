@@ -307,6 +307,15 @@ class change_feeds_import_handler_val_pan_group extends views_handler_field {
 function change_feeds_import_views_data() {
 
   $data = array();
+  
+  // basepack code handler in sku7_code_master report
+  $data['views']['basepack_sku7_code_custom'] = array(
+    'title' => t('Basepack Code'),
+    'help' => t('Basepack to sku7 code master.'),
+    'field' => array(
+      'handler' => 'basepack_sku7_code_custom_field',
+    ),
+  );
 
   $data['views']['header_area_text_custom'] = array(
     'title' => t('Header field'),
