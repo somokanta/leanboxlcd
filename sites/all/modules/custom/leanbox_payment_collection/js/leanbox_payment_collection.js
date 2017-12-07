@@ -36,13 +36,13 @@
                 $('#edit-node-' + nid + '-field-field-amnt-difference-und-0-value').val(total);
             });
             //Payment Collection screen Hover data show logic
-            $('.show_hover_payment_data').hide();
-            $('.show_hover_payment').click(function () {
-                var show_id = $(this).attr('id');
-                var res = show_id.split('-');
-                var nid = res[1];
-                $('#show_hover_payment_data' + nid).toggle();
-            });
+            //$('.show_hover_payment_data').hide();
+//            $('.show_hover_payment').click(function () {
+//                var show_id = $(this).attr('id');
+//                var res = show_id.split('-');
+//                var nid = res[1];
+//                $('#show_hover_payment_data' + nid).toggle();
+//            });
         }
     };
 })(jQuery);
