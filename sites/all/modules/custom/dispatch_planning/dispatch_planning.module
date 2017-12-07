@@ -1845,7 +1845,7 @@ function dispatch_planning_get_billing_data($node_uid, $bill_number) {
   $query->addfield('bd', 'Sum_of_NET_SALES_KGS', 'sum_net_sales_kgs');
   //$query->addfield('bd', 'Sum_of_NET_SALES_VALUE', 'sum_net_sales_value');
   // send per unit value
-  $query->addExpression('ROUND((bd.Sum_of_NET_SALES_VALUE/bd.Sum_of_TOTAL_SALES_QTY), 2)', 'sum_net_sales_value');
+  $query->addExpression('ROUND(((Sum_of_NET_SALES_VALUE - ((Sum_of_OTHER_DISCOUNT + Sum_of_SCHEME_DISCOUNT)*(1 + (Sum_of_TAX_PERCENTAGE/100))))/Sum_of_TOTAL_SALES_QTY), 2)', 'sum_net_sales_value');
   $query->addfield('bd', 'product_name', 'sku_description');
   $query->orderBy('bd.product_name', 'DESC');
   $query->condition('bd.distributor_id', $node_uid);
