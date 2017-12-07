@@ -60,7 +60,7 @@ function get_collection_history_for_hover($bill_no) {
 
   if(!empty($result)){
     $result['Total'] = array('Total', $total_cash_amt, $total_chq_amt, '');
-    $header = array('Cash Amt', 'Cheque Amt', 'Cheque No', 'Cheque Date');
+    $header = array('Cheque Date', 'Cash Amt', 'Cheque Amt', 'Cheque No');
     $html .= theme('table', array('header' => $header, 'rows' => $result, 'attributes' => array('width' => '50%')));
   }
   return $html;
