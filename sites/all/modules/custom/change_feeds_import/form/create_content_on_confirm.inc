@@ -212,12 +212,12 @@ function change_feeds_import_get_sku7_data($max_billing_id, $distributor_id) {
       $query = db_select('custom_billing_data', 'cb');
       $query->join('node', 'nd', 'nd.title = cb.sku7_code');
       $query->condition('nd.uid', $distributor_id, '=');
-      $query->fields('n', array('nid'));
+      $query->fields('nd', array('nid'));
       $query->fields('cb', array('BASEPACK_CODE'));
       $query->condition('nd.type', 'sku7_code_master', '=');
       $query->condition('cb.distributor_id', $distributor_id);
       $query->condition('cb.id', $max_billing_id, '>');
-      $results = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+      $results = $query->distinct()->execute()->fetchAll(PDO::FETCH_ASSOC);
    }
    return $results;
 }
