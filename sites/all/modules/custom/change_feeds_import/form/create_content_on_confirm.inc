@@ -87,8 +87,19 @@ function change_feeds_import_create_confirm_content($id) {
         $operations[] = array('change_feeds_import_create_pick_confirm', array($data));
       }
     }
+    
+    // update sku7_code master for basepack
+     if (in_array("leanbox_sku_cp", $roles)) {
+         $create_sku7_data = change_feeds_import_get_sku7_data($max_billing_id_new, $distributor_id);
+         if (!empty($create_sku7_data)) {
+            $create_sku7_data_chunk = array_chunk($create_sku7_data, 1200);
+            foreach ($create_sku7_data_chunk as $data) {
+               $operations[] = array('change_feeds_import_update_sku7_code', array($data));
+            }
+         }
+      }
 
-    $van_cld_report_data = change_feeds_import_create_van_cld_report_data($max_billing_id_new);
+      $van_cld_report_data = change_feeds_import_create_van_cld_report_data($max_billing_id_new);
     $van_cld_report_data_chunk = array_chunk($van_cld_report_data, 1200); // simple table insert
     foreach ($van_cld_report_data_chunk as $data) {
       $operations[] = array('change_feeds_import_create_van_cld_report', array($data));
@@ -194,6 +205,41 @@ function change_feeds_import_create_picking_data($max_billing_id) {
   $results = $subquery->execute()->fetchAll();
   return $results;
 }
+
+function change_feeds_import_get_sku7_data($max_billing_id, $distributor_id) {
+   $results = array();
+   if (!empty($max_billing_id) && !empty($distributor_id)) {
+      $query = db_select('custom_billing_data', 'cb');
+      $query->join('node', 'nd', 'nd.title = cb.sku7_code');
+      $query->condition('nd.uid', $distributor_id, '=');
+      $query->fields('n', array('nid'));
+      $query->fields('cb', array('BASEPACK_CODE'));
+      $query->condition('nd.type', 'sku7_code_master', '=');
+      $query->condition('cb.distributor_id', $distributor_id);
+      $query->condition('cb.id', $max_billing_id, '>');
+      $results = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+   }
+   return $results;
+}
+
+   
+function change_feeds_import_update_sku7_code($data, &$context) {
+   if (!isset($context['sandbox']['progress'])) {
+      $context['sandbox']['progress'] = 0;
+   }
+   $context['message'] = t('Now Updating Basepack Data');
+   global $user;
+   $user_id = $user->uid;
+   $distributor_id = change_feeds_import_get_distributor_id($user_id);
+   foreach ($data as $key => $value) {
+      $base_pack_code = $value['BASEPACK_CODE'];
+      $node = node_load($value['nid']);
+      $node->field_billing_basepack_data['und'][0]['value'] = $base_pack_code;
+      node_save($node);
+   }
+   $context['results']['basepack_code'] = 'BASE Pack Updated';
+}
+
 
 function change_feeds_import_create_pick_confirm_data($max_billing_id) {
   global $user;
