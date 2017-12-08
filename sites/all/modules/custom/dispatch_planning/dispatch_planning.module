@@ -1,5 +1,12 @@
 <?php
 
+/**
+ *  Generate basics authentication for header 
+ *  $header = "Authorization: Basic " . base64_encode($username . ':' . $password);
+ *  $header = "Authorization: Basic " . base64_encode('farey_user' . ':' . 'farey_user');
+ *  Authorization: Basic ZmFyZXlfdXNlcjpmYXJleV91c2Vy
+ */
+
 require_once DRUPAL_ROOT .  '/sites/all/modules/custom/reverse_geocode/directions-api-clients-route-optimization-master/php/SwaggerClient-php/autoload.php';
 
 function dispatch_planning_menu() {
@@ -197,6 +204,10 @@ function dispatch_planning_permission() {
       'title' => t(''),
       'description' => t('PTL Api Access')
     ),
+     'services_access_farey_api' => array(
+      'title' => t('Farey Api Access'),
+      'description' => t('Farey Api Access')
+    ),
     'Ptl trip creation' => array(
       'title' => t('Ptl trip creation'),
       'description' => t('Ptl trip creation')
@@ -215,6 +226,25 @@ function dispatch_planning_services_resources() {
   $ptl_resource = array(
     'ptl-api-data' => array(
       'actions' => array(
+         'dispatch-planning-api-data-fetch' => array(
+          'help' => 'Get Farey Data',
+          'callback' => 'fetch_dispatch_planning_api_data',
+          'args' => array(
+            array(
+              'data' => 'data',
+              'type' => 'array',
+              'description' => 'Post data',
+              'source' => array('data' => 'data'),
+              'optional' => TRUE,
+            ),
+          ),
+          'file' => array(
+            'type' => 'inc',
+            'module' => 'dispatch_planning',
+            'name' => 'dispatch_planning_farey_api'
+          ),
+           'access arguments' => array('services_access_farey_api'),
+        ),
         'ptl-api-data-fetch' => array(
           'help' => 'Get PTL Data',
           'callback' => 'fetch_ptl_data',
