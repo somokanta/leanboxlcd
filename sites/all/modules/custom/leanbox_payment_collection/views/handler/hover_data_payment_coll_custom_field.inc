@@ -28,10 +28,10 @@ class hover_data_payment_coll_custom_field extends views_handler_field {
 
   function render($values) {
     //dpm($values, 11);
-    if (!empty($values->field_field_previous_cash_amt[0]['raw']['value']) || !empty($values->field_field_previous_cheque_amt[0]['raw']['value'])) {
-      return get_collection_history_for_hover($values->node_title);
-    }
-    return '';
+    //if (!empty($values->field_field_previous_cash_amt[0]['raw']['value']) || !empty($values->field_field_previous_cheque_amt[0]['raw']['value'])) {
+    return get_collection_history_for_hover($values->node_title);
+    //}
+    //return '';
   }
 }
 
