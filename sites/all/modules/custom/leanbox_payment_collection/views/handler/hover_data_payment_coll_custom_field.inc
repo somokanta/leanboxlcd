@@ -60,10 +60,10 @@ function get_collection_history_for_hover($bill_no) {
     $total_chq_amt += $data['field_collection_cheque_amount_value'];   
   }
 
-  if(!empty($result)){
+  //if(!empty($result)){
     $result['Total'] = array('Total', $total_cash_amt, $total_chq_amt, '', '');
     $header = array('Collection Date', 'Cash Amt', 'Cheque Amt', 'Cheque No', 'Cheque Date');
-    $html .= theme('table', array('header' => $header, 'rows' => $result, 'attributes' => array('width' => '50%')));
-  }
+    $html .= theme('table', array('header' => $header, 'rows' => $result, 'attributes' => array('width' => '50%'), 'empty' => t('No Records has been found')));
+  //}
   return $html;
 }
