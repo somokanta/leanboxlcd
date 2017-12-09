@@ -205,7 +205,7 @@ function delivery_beat_get_results($sales_day, $van_pl_group = NULL, $area_hook_
   $query->join('field_data_field_area_hook_group_hul', 'faconf', 'faconf.entity_id = n.nid');
 
   $query->condition('faconf.field_area_hook_group_hul_value', 1);
-  $query->condition('n.created', $start_date, '>');
+ // $query->condition('n.created', $start_date, '>');
 
   //$query->condition('fsd.field_sales_day_value', $sales_day);
   $query->condition('n.type', 'outlet_master');
@@ -298,7 +298,7 @@ function delivery_beat_get_results($sales_day, $van_pl_group = NULL, $area_hook_
   $subquery = db_select('node', 'n');
   $subquery->addTag('node_uid');
   $subquery->condition('n.type', 'outlet_master');
-  $subquery->condition('n.created', $start_date, '>');
+ // $subquery->condition('n.created', $start_date, '>');
 
   //Outlet Master
   $subquery->join('field_data_field_revised_sequence', 'fs', 'fs.entity_id = n.nid');
