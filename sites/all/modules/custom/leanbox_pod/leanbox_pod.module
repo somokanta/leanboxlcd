@@ -13,6 +13,14 @@ function leanbox_pod_menu() {
      'type' => MENU_CALLBACK,
      'file' => 'form/leanbox_pod.form.inc',
    );
+   $items['declare-fr-flag'] = array(
+     'title' => 'Declare full return',
+     'page callback' => 'drupal_get_form',
+     'page arguments' => array('_declare_fr_flag_callback'),
+     'access arguments' => array('pod threshold'),
+     'type' => MENU_CALLBACK,
+     'file' => 'form/full_return.form.inc',
+   );
    return $items;
 }
 
