@@ -335,7 +335,21 @@ function upload_signed_bill_callback_submit($form, &$form_state) {
          }
          $node->field_flag[LANGUAGE_NONE][0]['value'] = $arg1;
          $node->field_sales_bill_no_ref[LANGUAGE_NONE][0]['nid'] = $form_state['values']['title_and_nid_combo'][$bill_no];
+         
+         if ($arg1 === 'signed') {
+            // get nid from bill_no
+            $nid = check_node_title_exists($bill_no, 'sales_register_data');
+            $nodedata = node_load($nid);
+            $bill_value = $nodedata->field_bill_value[LANGUAGE_NONE][0]['value'];
+            $to_be_collected_value = $form_state['values']['remaining_amt'][$bill_no];
 
+            // update the call type in sales register data
+            if ($bill_value != $to_be_collected_value) {
+               $nodedata->field_call_type[LANGUAGE_NONE][0]['value'] = 'sd';
+               node_save($nodedata);
+            }
+         }
+         
          node_save($node);
 
          drupal_set_message(t("$bill_type Bill Declared Successfully."));
