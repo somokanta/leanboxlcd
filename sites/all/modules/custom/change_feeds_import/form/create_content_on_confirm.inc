@@ -823,6 +823,8 @@ function change_feeds_import_create_billing($data, &$context) {
             if (!empty($user_pod_value)) {
                if ($pod_value >= $user_pod_value) {
                   $node->field_pod_flag[LANGUAGE_NONE][0]['value'] = 1;
+                  // make the call type 'highly discounted'
+                  $node->field_call_type['und'][0]['value'] = 'hd';
                }
             }
             node_save($node);
