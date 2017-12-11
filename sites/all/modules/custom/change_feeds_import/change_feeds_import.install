@@ -1275,9 +1275,7 @@ function change_feeds_import_update_7115() {
 
 function change_feeds_import_update_7116() {
   db_add_index('node', 'n_title', array('title'));
-  db_add_index('field_data_field_dva_sales_day', 'n_field_dva_sales_day_value', array('field_dva_sales_day_value'));
-  db_add_index('field_data_field_dva_van_pl_group', 'n_field_dva_van_pl_group_value', array('field_dva_van_pl_group_value'));
-  db_add_index('field_data_field_dva_area_hook_group_name', 'n_field_dva_area_hook_group_name_value', array('field_dva_area_hook_group_name_value'));
+  db_add_index('field_data_field_revised_sequence', 'n_field_revised_sequence_value', array('field_revised_sequence_value'));
+  db_add_index('field_data_field_deliveries_per_stop', 'n_field_deliveries_per_stop_value', array('field_deliveries_per_stop_value'));
 
 }
-
