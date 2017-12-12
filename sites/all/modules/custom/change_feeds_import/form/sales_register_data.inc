@@ -412,10 +412,7 @@ function change_feeds_import_create_sales_register_node($sales_data_result, $dis
           $new_bill_value = $val['bill_value'];
           $existing_bill_value = $node->field_bill_value[LANGUAGE_NONE][0]['value'];
           if(!empty($trip_id) && ($existing_bill_value != $new_bill_value)) {
-            $query = db_select('field_data_field_dispatch_date', 'dd');
-            $query->condition('dd.entity_id',$trip_id , '=');
-            $query->fields('dd', array('field_dispatch_date_value'));
-            $dispatch_date = $query->execute()->fetchField();
+            $dispatch_date = check_dispatch_date($trip_id);
             if(!empty($dispatch_date)) {
               $node->field_call_type[LANGUAGE_NONE][0]['value'] = 'sd';
             }

@@ -2983,3 +2983,14 @@ function _check_dispatch_value_and_bill_value_mismatch($trip_id) {
    $res = $query->execute()->fetch(PDO::FETCH_ASSOC);
    return $res;
 }
+
+/*
+ * function to check the dispatch date of each trip
+ */
+function check_dispatch_date($trip_id) {
+  $query = db_select('field_data_field_dispatch_date', 'dd');
+  $query->condition('dd.entity_id',$trip_id , '=');
+  $query->fields('dd', array('field_dispatch_date_value'));
+  $dispatch_date = $query->execute()->fetchField();
+  return $dispatch_date;
+}
