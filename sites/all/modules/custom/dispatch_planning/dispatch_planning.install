@@ -650,3 +650,226 @@ function dispatch_planning_update_7112() {
     }
   }
 }
+
+
+/**
+ * Create new database table using hook_update_N()
+ */
+function dispatch_planning_update_7113() {
+  $schema['master_ptl_data'] = array(
+    'description' => 'PTL Data configuration',
+    'fields' => array(
+      'id' => array(
+        'description' => t('Id Primary Key'),
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'ptl_job' => array(
+        'description' => t('PTL JOB'),
+        'type' => 'varchar',
+        'length' => 25,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'trip_id' => array(
+        'description' => t('Trip ID'),
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'vehicle' => array(
+        'description' => t('VEHICLE'),
+        'type' => 'varchar',
+        'length' => 50,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'bill_number' => array(
+        'description' => t('BILL_NUMBER'),
+        'type' => 'varchar',
+        'length' => 50,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'loading_date' => array(
+        'description' => t('LOADING_DATE'),
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'sequence_no' => array(
+        'description' => t('SEQUENCE No'),
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'basepack_code' => array(
+        'description' => t('BASEPACK_CODE'),
+        'type' => 'varchar',
+        'length' => 50,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'sku_code' => array(
+        'description' => t('SKU7_CODE'),
+        'type' => 'varchar',
+        'length' => 50,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'product_name' => array(
+        'description' => t('PRODUCT_NAME'),
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'MRP' => array(
+        'description' => t('MRP'),
+        'type' => 'varchar',
+        'length' => 25,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'TUR' => array(
+        'description' => t('TUR'),
+        'type' => 'varchar',
+        'length' => 25,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'sum_sales_qty' => array(
+        'description' => t('Sum_of_NET_SALES_QTY'),
+        'type' => 'varchar',
+        'length' => 25,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'api_flag' => array(
+      'description' => 'Request flag field',
+      'type' => 'int',
+      'length' => 1,
+      'not null' => TRUE,
+      'default' => 0,
+    ),
+      'rs_code' => array(
+        'description' => t('RS Code'),
+        'type' => 'varchar',
+        'length' => 25,
+        'not null' => TRUE,
+        'default' => '',
+    ),
+    'update_time' => array(
+      'description' => 'Update Time',
+      'type' => 'int',
+      'not null' => TRUE,
+      'default' => 0,
+    ),
+     'fetch_time' => array(
+      'description' => 'API Fetch Time',
+      'type' => 'int',
+      'not null' => TRUE,
+      'default' => 0,
+    ),
+     'created_time' => array(
+      'description' => 'DATA Created Time',
+      'type' => 'int',
+      'not null' => TRUE,
+      'default' => 0,
+    ),
+    'upc' => array(
+      'description' => 'UPC qty',
+      'type' => 'int',
+      'not null' => TRUE,
+      'default' => 0,
+    ), 
+     'cld' => array(
+      'description' => 'CLD qty',
+      'type' => 'int',
+      'not null' => TRUE,
+      'default' => 0,
+    ), 
+     'loose' => array(
+      'description' => 'Loose qty',
+      'type' => 'int',
+      'not null' => TRUE,
+      'default' => 0,
+    ),
+     'put_qty' => array(
+      'description' => 'Put qty',
+      'type' => 'int',
+      'not null' => TRUE,
+      'default' => 0,
+    ),
+     'put_qty_time' => array(
+      'description' => 'Put Qty Time',
+      'type' => 'int',
+      'not null' => TRUE,
+      'default' => 0,
+    ),
+    'sum_of_sales_free_qty' => array(
+      'description' => t('Sum_of_SALES_FREE_QTY'),
+      'type' => 'int',
+      'not null' => TRUE,
+      'default' => 0,
+    ),
+    'free_sku_description' => array(
+      'description' => t('FREE SKU DESCRIPTION'),
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+    ),
+     'cp' => array(
+      'description' => 'CP',
+        'type' => 'varchar',
+        'length' => 10,
+        'not null' => TRUE,
+        'default' => '',
+    ),
+     'free_cld' => array(
+      'description' => 'Free CLD qty',
+      'type' => 'int',
+      'not null' => TRUE,
+      'default' => 0,
+    ), 
+     'free_loose' => array(
+      'description' => 'Free Loose qty',
+      'type' => 'int',
+      'not null' => TRUE,
+      'default' => 0,
+    ),
+     'derived_free_qty' => array(
+      'description' => 'Derived free qty',
+      'type' => 'int',
+      'not null' => TRUE,
+      'default' => 0,
+    ),
+     'derived_cld' => array(
+      'description' => 'Drived CLD qty',
+      'type' => 'int',
+      'not null' => TRUE,
+      'default' => 0,
+    ), 
+     'derived_loose' => array(
+      'description' => 'Drived Loose qty',
+      'type' => 'int',
+      'not null' => TRUE,
+      'default' => 0,
+    ),
+     'derived_upc' => array(
+      'description' => 'Drived UPC',
+      'type' => 'int',
+      'not null' => TRUE,
+      'default' => 0,
+    ),      
+     ), 
+    'primary key' => array('id'),
+    'indexes' => array(
+      'sku_code' => array('sku_code'),
+      'trip_id' => array('trip_id'),
+      'rs_code' => array('rs_code'),
+    ),
+  );
+  db_create_table('master_ptl_data', $schema['master_ptl_data']);
+}

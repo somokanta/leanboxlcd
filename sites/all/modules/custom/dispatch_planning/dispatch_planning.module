@@ -174,6 +174,55 @@ function dispatch_planning_menu() {
     'type' => MENU_CALLBACK,
     'file' => 'ptl_dispatch_planning.inc',
   );
+// Master PTL
+  $items['master-loose-picking-sheet'] = array(
+    'title' => 'Master Loose PICKING SHEET',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('master_ptl_loose_sheet_form'),
+    'access arguments' => array('Distributor Upload File'),
+    'type' => MENU_CALLBACK,
+    'file' => 'master_ptl_dispatch_planning.inc',
+  );
+  $items['download-master-loose-picking/%'] = array(
+    'title' => 'Download Master PTL Loose',
+    'page callback' => 'download_master_ptl_loose_sheet',
+    'page arguments' => array(1),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'master_ptl_dispatch_planning.inc',
+  );
+  $items['master-cld-picking-sheet'] = array(
+    'title' => 'Master CLD PICKING SHEET',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('master_ptl_cld_sheet_form'),
+    'access arguments' => array('Distributor Upload File'),
+    'type' => MENU_CALLBACK,
+    'file' => 'master_ptl_dispatch_planning.inc',
+  );
+  $items['download-master-cld-picking/%'] = array(
+    'title' => 'CLD PICKING SHEET',
+    'page callback' => 'download_master_ptl_cld_sheet',
+    'page arguments' => array(1),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'master_ptl_dispatch_planning.inc',
+  );
+  $items['delete-master-ptl-trip'] = array(
+    'title' => 'Resent Master Trip To PTL',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('delete_fetch_data_master_ptl_trip_form'),
+    'access arguments' => array('Master Ptl trip creation'),
+    'type' => MENU_CALLBACK,
+    'file' => 'master_ptl_dispatch_planning.inc',
+  );
+  $items['create-master-ptl-trip'] = array(
+    'title' => 'Create Master Trip To PTL',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('create_fetch_data_master_ptl_trip_form'),
+    'access arguments' => array('Master Ptl trip creation'),
+    'type' => MENU_CALLBACK,
+    'file' => 'master_ptl_dispatch_planning.inc',
+  );
   return $items;
 }
 
