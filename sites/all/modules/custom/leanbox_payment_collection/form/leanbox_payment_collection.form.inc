@@ -335,6 +335,7 @@ function upload_signed_bill_callback_submit($form, &$form_state) {
          }
          $node->field_flag[LANGUAGE_NONE][0]['value'] = $arg1;
          $node->field_sales_bill_no_ref[LANGUAGE_NONE][0]['nid'] = $form_state['values']['title_and_nid_combo'][$bill_no];
+         node_save($node);
          
          if ($arg1 === 'signed') {
             // get nid from bill_no
@@ -349,9 +350,7 @@ function upload_signed_bill_callback_submit($form, &$form_state) {
                node_save($nodedata);
             }
          }
-         
-         node_save($node);
-
+        
          drupal_set_message(t("$bill_type Bill Declared Successfully."));
       }
 
