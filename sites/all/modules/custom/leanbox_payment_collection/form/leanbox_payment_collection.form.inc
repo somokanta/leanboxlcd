@@ -311,6 +311,7 @@ function upload_signed_bill_callback_submit($form, &$form_state) {
    // write node creation code here
    $dis_id = $form_state['values']['dis_id'];
    $arg1 = arg(1);
+   require_once drupal_get_path('module', 'change_feeds_import') . '/form/upload_billing_data.inc';
    foreach ($form_state['values']['bill_details'] as $bill_no => $val) {
       if (!empty($bill_no)) {
          $node = new stdClass();
@@ -335,9 +336,22 @@ function upload_signed_bill_callback_submit($form, &$form_state) {
          }
          $node->field_flag[LANGUAGE_NONE][0]['value'] = $arg1;
          $node->field_sales_bill_no_ref[LANGUAGE_NONE][0]['nid'] = $form_state['values']['title_and_nid_combo'][$bill_no];
-         
          node_save($node);
+         
+         if ($arg1 === 'signed') {
+            // get nid from bill_no
+            $nid = check_node_title_exists($bill_no, 'sales_register_data');
+            $nodedata = node_load($nid);
+            $bill_value = $nodedata->field_bill_value[LANGUAGE_NONE][0]['value'];
+            $to_be_collected_value = $form_state['values']['remaining_amt'][$bill_no];
 
+            // update the call type in sales register data
+            if ($bill_value != $to_be_collected_value) {
+               $nodedata->field_call_type[LANGUAGE_NONE][0]['value'] = 'sd';
+               node_save($nodedata);
+            }
+         }
+        
          drupal_set_message(t("$bill_type Bill Declared Successfully."));
       }
 
