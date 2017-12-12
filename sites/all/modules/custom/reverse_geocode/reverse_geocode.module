@@ -1404,7 +1404,9 @@ function reverse_geocode_node_presave($node) {
             $user_pod_value = _get_pod_threshold_value($node_uid);
 
             // check if $pod_value is greater than or not $user_pod_value
-            if (!empty($user_pod_value)) {
+            $trip_id = $node->field_trip_id_reference[LANGUAGE_NONE][0]['nid'];
+            $dispatch_date = check_dispatch_date($trip_id);
+            if (!empty($user_pod_value) && empty($dispatch_date)) {
                if ($pod_value >= $user_pod_value) {
                   $node->field_pod_flag[LANGUAGE_NONE][0]['value'] = 1;
                   // make the call type 'highly discounted'
