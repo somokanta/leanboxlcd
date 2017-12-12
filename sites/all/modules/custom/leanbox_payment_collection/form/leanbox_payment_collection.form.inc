@@ -311,6 +311,7 @@ function upload_signed_bill_callback_submit($form, &$form_state) {
    // write node creation code here
    $dis_id = $form_state['values']['dis_id'];
    $arg1 = arg(1);
+   require_once drupal_get_path('module', 'change_feeds_import') . '/form/upload_billing_data.inc';
    foreach ($form_state['values']['bill_details'] as $bill_no => $val) {
       if (!empty($bill_no)) {
          $node = new stdClass();

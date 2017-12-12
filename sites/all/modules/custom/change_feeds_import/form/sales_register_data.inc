@@ -436,17 +436,6 @@ function change_feeds_import_create_sales_register_node($sales_data_result, $dis
   $context['results']['count'] = $count;
 }
 
-/*
- * function to check the dispatch date of each trip
- */
-function check_dispatch_date($trip_id) {
-  $query = db_select('field_data_field_dispatch_date', 'dd');
-  $query->condition('dd.entity_id',$trip_id , '=');
-  $query->fields('dd', array('field_dispatch_date_value'));
-  $dispatch_date = $query->execute()->fetchField();
-  return $dispatch_date;
-}
-
 /**
  * finish function for batch process
  * 
