@@ -83,10 +83,10 @@ function upload_signed_bill_callback($form, &$form_state) {
         ),
       );
       //   }
-       $form['bill_no_wrapper']['bill_html'] = array(
-           '#prefix' => '<div>',
-           '#suffix' =>  '</div>',
-         );
+      $form['bill_no_wrapper']['bill_html'] = array(
+        '#prefix' => '<div>',
+        '#suffix' => '</div>',
+      );
 
       $bill_no = $form_state['input']['bill_no'];
       if (!empty($bill_no) && ($form_state['values']['arg'] == 'bounced') && (!isset($form_state['values']['title_and_nid_combo'][$bill_no]))) {
@@ -108,49 +108,47 @@ function upload_signed_bill_callback($form, &$form_state) {
 
          if (!empty($res)) {
             foreach ($res as $key1 => $val1) {
-               $node = node_load($val1['payment_collection_nid']);
-               $node_flag = $node->field_flag['und'][0]['value'];
-               
-               $terminated_bill_flag = $node->field_terminated_bill_flag['und'][0]['value'];
-               $collection_status = $node->field_collection_status['und'][0]['value'];
+               if (!empty($val1['payment_collection_nid'])) {
+                  $node = node_load($val1['payment_collection_nid']);
+                  $node_flag = $node->field_flag['und'][0]['value'];
 
-               if (empty($terminated_bill_flag) && $collection_status != 2 && $collection_status != 1) {
-                  
-                  drupal_set_message(t('For Bill no ' . $bill_no .' , Either Closure is not Marked or Bill is in "Not Collected" Status.'), 'error');
-                  $form['bill_no_wrapper']['add_bill']['#access'] = FALSE;
-                  $warning_flag = 0;
-                  break;
+                  $terminated_bill_flag = $node->field_terminated_bill_flag['und'][0]['value'];
+                  $collection_status = $node->field_collection_status['und'][0]['value'];
+
+                  if (empty($terminated_bill_flag) && $collection_status != 2 && $collection_status != 1) {
+
+                     drupal_set_message(t('For Bill no ' . $bill_no . ' , Either Closure is not Marked or Bill is in "Not Collected" Status.'), 'error');
+                     $form['bill_no_wrapper']['add_bill']['#access'] = FALSE;
+                     $warning_flag = 0;
+                     break;
+                  }
                }
 
                if ($node_flag === 'bounced') {
-
-                  $warning_flag = 1;
-                  $form['bill_no_wrapper']['add_bill'] = array(
-                    '#type' => 'submit',
-                    '#value' => t("Continue to add"),
-                    '#ajax' => array(
-                      'callback' => 'get_bill_details_using_bill_no',
-                      'wrapper' => 'itemlist-div',
-                      'method' => 'replace',
-                      'effect' => 'fade',
-                    ),
-                    '#submit' => array('add_bill_in_screen_submit'),
-                  );
-                  $form['bill_no_wrapper']['remove_bill'] = array(
-                    '#type' => 'submit',
-                    '#value' => t('Remove bill'),
-                    '#ajax' => array(
-                      'callback' => '_bounce_bill_no_ajax',
-                      'wrapper' => 'bill-no',
-                      'method' => 'replace',
-                      'effect' => 'fade',
-                    ),
-                    '#submit' => array('_remove_bounce_bill_no_ajax'),
-                  );
+                  drupal_set_message(t("Bill $bill_no already declared bounced."), 'warning');
                }
-            }
-            if ($warning_flag == 1) {
-               drupal_set_message(t("Bill $bill_no already declared bounced."), 'warning');
+               $form['bill_no_wrapper']['add_bill'] = array(
+                 '#type' => 'submit',
+                 '#value' => t("Continue to add"),
+                 '#ajax' => array(
+                   'callback' => 'get_bill_details_using_bill_no',
+                   'wrapper' => 'itemlist-div',
+                   'method' => 'replace',
+                   'effect' => 'fade',
+                 ),
+                 '#submit' => array('add_bill_in_screen_submit'),
+               );
+               $form['bill_no_wrapper']['remove_bill'] = array(
+                 '#type' => 'submit',
+                 '#value' => t('Remove bill'),
+                 '#ajax' => array(
+                   'callback' => '_bounce_bill_no_ajax',
+                   'wrapper' => 'bill-no',
+                   'method' => 'replace',
+                   'effect' => 'fade',
+                 ),
+                 '#submit' => array('_remove_bounce_bill_no_ajax'),
+               );
             }
          }
       }
@@ -195,7 +193,7 @@ function upload_signed_bill_callback($form, &$form_state) {
       if (!empty($form_state['bills']['header']) && !empty($form_state['bills']['rows'])) {
          $form['bill_no_wrapper']['bill_details_html'] = array(
            '#prefix' => '<div>',
-           '#suffix' =>  '</div>',
+           '#suffix' => '</div>',
          );
          $form['bill_details_wrapper']['bill_details'] = array(
            '#type' => 'tableselect',
@@ -296,7 +294,7 @@ function upload_signed_bill_callback_validate($form, &$form_state) {
             if (empty($remaining_amt) || !is_numeric($remaining_amt)) {
                form_set_error('form', t("To be collected amount for bill $bill_no is required and should be numeric"));
             }
-            if (empty($declaration_remark) && $remaining_amt != $bill_value ) {
+            if (empty($declaration_remark) && $remaining_amt != $bill_value) {
                form_set_error('form', t("Declaration Remark for bill $bill_no is required."));
             }
          }
@@ -313,6 +311,7 @@ function upload_signed_bill_callback_submit($form, &$form_state) {
    // write node creation code here
    $dis_id = $form_state['values']['dis_id'];
    $arg1 = arg(1);
+   require_once drupal_get_path('module', 'change_feeds_import') . '/form/upload_billing_data.inc';
    foreach ($form_state['values']['bill_details'] as $bill_no => $val) {
       if (!empty($bill_no)) {
          $node = new stdClass();
@@ -337,12 +336,25 @@ function upload_signed_bill_callback_submit($form, &$form_state) {
          }
          $node->field_flag[LANGUAGE_NONE][0]['value'] = $arg1;
          $node->field_sales_bill_no_ref[LANGUAGE_NONE][0]['nid'] = $form_state['values']['title_and_nid_combo'][$bill_no];
-
          node_save($node);
+         
+         if ($arg1 === 'signed') {
+            // get nid from bill_no
+            $nid = check_node_title_exists($bill_no, 'sales_register_data');
+            $nodedata = node_load($nid);
+            $bill_value = $nodedata->field_bill_value[LANGUAGE_NONE][0]['value'];
+            $to_be_collected_value = $form_state['values']['remaining_amt'][$bill_no];
 
+            // update the call type in sales register data
+            if ($bill_value != $to_be_collected_value) {
+               $nodedata->field_call_type[LANGUAGE_NONE][0]['value'] = 'sd';
+               node_save($nodedata);
+            }
+         }
+        
          drupal_set_message(t("$bill_type Bill Declared Successfully."));
       }
-      
+
       // to be commented below as bill be terminated using closure flag only
 //      foreach ($form_state['values']['title_and_collection_nid_combo'][$bill_no] as $key1 => $val1) {
 //         $payment_col_node = node_load($val1);
@@ -465,8 +477,8 @@ function get_bill_details_using_bill_no_callback($bill_no, $dis_id, $arg1) {
            'Salesmancode' => 'Salesman code',
            'Billvalue' => 'Bill value',
            'remaining_amt' => 'To Be Collected Value',
-           'declaration_remark'=>'Declaration Remark'
-           );
+           'declaration_remark' => 'Declaration Remark'
+         );
       }
 
       if ($arg1 === 'bounced') {

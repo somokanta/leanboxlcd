@@ -1275,5 +1275,7 @@ function change_feeds_import_update_7115() {
 
 function change_feeds_import_update_7116() {
   db_add_index('node', 'n_title', array('title'));
-}
+  db_add_index('field_data_field_revised_sequence', 'n_field_revised_sequence_value', array('field_revised_sequence_value'));
+  db_add_index('field_data_field_deliveries_per_stop', 'n_field_deliveries_per_stop_value', array('field_deliveries_per_stop_value'));
 
+}

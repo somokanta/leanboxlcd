@@ -184,6 +184,7 @@ function delivery_beat_get_results($sales_day, $van_pl_group = NULL, $area_hook_
   global $user;
   $user_id = $user->uid;
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
+  $start_date = strtotime('2017-09-01');
   
   $query = db_select('node', 'n');
 
@@ -204,6 +205,8 @@ function delivery_beat_get_results($sales_day, $van_pl_group = NULL, $area_hook_
   $query->join('field_data_field_area_hook_group_hul', 'faconf', 'faconf.entity_id = n.nid');
 
   $query->condition('faconf.field_area_hook_group_hul_value', 1);
+ // $query->condition('n.created', $start_date, '>');
+
   //$query->condition('fsd.field_sales_day_value', $sales_day);
   $query->condition('n.type', 'outlet_master');
   $query->fields('n', array('nid', 'title'));
@@ -279,9 +282,7 @@ function delivery_beat_get_results($sales_day, $van_pl_group = NULL, $area_hook_
       . "LPAD(fdn.field_day_number_value, 2, '0'), "
       . "LPAD(ppplg.field_dva_van_pl_group_value, 2, '0'),"
       . "fagi.field_area_hook_group_id_value,"
-      . "LPAD(CEIL(fs.field_revised_sequence_value/fsv.field_deliveries_per_stop_value), 3, '0'),"
-      . "sub.area"
-      . ")";
+      . "LPAD(CEIL(fs.field_revised_sequence_value/fsv.field_deliveries_per_stop_value), 3, '0'))";
   
   //$expression = "SUBSTRING($expression,1,30)";
   
@@ -290,11 +291,13 @@ function delivery_beat_get_results($sales_day, $van_pl_group = NULL, $area_hook_
   $query->orderBy('ppplg.field_dva_van_pl_group_value');
   $query->orderBy('agr.field_dva_area_hook_group_name_value');
   $query->orderBy('fs.field_revised_sequence_value');
-  
+  $query->addExpression("(FLOOR((fs.field_revised_sequence_value - 1)/fsv.field_deliveries_per_stop_value)*fsv.field_deliveries_per_stop_value + 1)", 'sub_exp');
+
   
   $subquery = db_select('node', 'n');
   $subquery->addTag('node_uid');
   $subquery->condition('n.type', 'outlet_master');
+ // $subquery->condition('n.created', $start_date, '>');
 
   //Outlet Master
   $subquery->join('field_data_field_revised_sequence', 'fs', 'fs.entity_id = n.nid');
@@ -340,12 +343,25 @@ function delivery_beat_get_results($sales_day, $van_pl_group = NULL, $area_hook_
   
   ############ CHANGE 10 to DYNAMIC####################
   $subquery->where("((fs.field_revised_sequence_value - 1)%(fsv.field_deliveries_per_stop_value) = 0)");
-  
-  $query->join($subquery, 'sub', "sub.field_revised_sequence_value = (FLOOR((fs.field_revised_sequence_value - 1)/fsv.field_deliveries_per_stop_value)*fsv.field_deliveries_per_stop_value + 1) AND sub.field_dva_van_pl_group_value = ppplg.field_dva_van_pl_group_value AND sub.field_dva_area_hook_group_name_value = agr.field_dva_area_hook_group_name_value");
+    $sub_res = $subquery->execute()->fetchAll(PDO::FETCH_ASSOC);
 
-  $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+ // $query->join($subquery, 'sub', "sub.field_revised_sequence_value = (FLOOR((fs.field_revised_sequence_value - 1)/fsv.field_deliveries_per_stop_value)*fsv.field_deliveries_per_stop_value + 1) AND sub.field_dva_van_pl_group_value = ppplg.field_dva_van_pl_group_value AND sub.field_dva_area_hook_group_name_value = agr.field_dva_area_hook_group_name_value");
 
-  return $res;
+ $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+ $res1 = array();
+   $i = 0;
+   foreach ($res as $k => $val) {
+      foreach ($sub_res as $sub_val) {
+         if ($val['sub_exp'] == (int) ($sub_val['field_revised_sequence_value']) && $sub_val['field_dva_van_pl_group_value'] == $val['field_dva_van_pl_group_value'] && $sub_val['field_dva_area_hook_group_name_value'] == $val['field_dva_area_hook_group_name_value']) {
+            $res1[$i] = $res[$k];
+            $res1[$i]['exp'] = $val['exp'] . '-' . $sub_val['area'];
+            unset($res1[$i]['sub_exp']);
+            $i++;
+         }
+      }
+   }
+
+   return $res1;
 }
 
 function delivery_beat_batch_process($data, &$context) {

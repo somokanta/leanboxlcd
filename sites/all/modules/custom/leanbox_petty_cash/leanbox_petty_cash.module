@@ -214,6 +214,7 @@ function _get_voucher_details_distributor_wise($distributor_id, $voucher) {
    if (!empty($distributor_id) && !empty($voucher)) {
       $query = db_select('petty_cash', 'pc');
       $query->isNull('pc.voucher_reference_no');
+      $query->isNull('pc.deleted');
       $query->condition('pc.distributor_id', $distributor_id);
       $query->condition('pc.voucher_no', $voucher);
       $query->fields('pc', array('id', 'voucher_date', 'head', 'subhead', 'amount', 'person_name', 'bill_available', 'bill_no', 'type', 'description'));

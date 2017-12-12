@@ -25,9 +25,14 @@ function modify_views_forms_form_alter(&$form, &$form_state, $form_id) {
       }
    }
 
-   if($form_id == 'editableviews_entity_form_collection_closure') {
+  if($form_id == 'editableviews_entity_form_collection_closure') {
     // Validation for Collection Closore Table
     $form['#validate'][] = 'collection_closure_validate';
+  }
+
+  if($form_id == 'editableviews_entity_form_change_to_be_collected_amount') {
+    // Validation for Change To Be Collected Amount Table
+    $form['#validate'][] = 'change_to_be_collected_amt_validate';
   }
         
     if ($form_id == 'editableviews_entity_form_crm_screen') {
@@ -252,6 +257,29 @@ function collection_closure_validate($form, &$form_state) {
     }
   }
   
+}
+
+function change_to_be_collected_amt_validate($form, &$form_state) {
+  foreach($form_state['values']['node'] as $nid => $form_data){
+    $to_be_collected_amt = $form_data['field_remaining_amt_collection']['und'][0]['value'];
+    $declaration_rem = $form_data['field_declaration_remarks']['und'][0]['value'];
+    $sales_reg_nid = $form_data['field_sales_bill_no_ref']['und'][0]['nid'];
+    
+    $query = db_select('node', 'n');
+    $query->join('field_data_field_bill_value', 'bv', 'bv.entity_id = n.nid');
+    $query->condition('n.type', 'sales_register_data');
+    $query->condition('n.nid', $sales_reg_nid, '=');
+    $query->fields('bv', array('field_bill_value_value'));
+    $bill_value = $query->execute()->fetch();
+    
+    if(empty($to_be_collected_amt) || !is_numeric($to_be_collected_amt)) {
+      form_set_error('form', t("To be collected amount is required and should be numeric."));
+    }
+    
+    if (empty($declaration_rem) && ($to_be_collected_amt != $bill_value->field_bill_value_value)) {
+      form_set_error('form', t("Declaration Remark is required due to change in collected amount."));
+    }
+  }
 }
 
 function modify_views_forms_field_widget_form_alter(&$element, &$form_state, $context) {
