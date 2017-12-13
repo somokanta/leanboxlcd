@@ -475,7 +475,7 @@ function master_ptl_get_billing_data($node_uid, $bill_numbers) {
   $query->condition('bd.distributor_id', $node_uid);
   //$query->condition('bd.bill_number', $bill_number);
   $query->condition('bd.bill_number', $bill_numbers, 'IN'); //for master trip
-  $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+  $res = $query->groupBy('sku7_code','tur', 'mrp')->execute()->fetchAll(PDO::FETCH_ASSOC);
   return $res;
 }
 
