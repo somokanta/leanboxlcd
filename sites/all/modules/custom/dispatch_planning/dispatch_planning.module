@@ -19,6 +19,15 @@ function dispatch_planning_menu() {
     'type' => MENU_NORMAL_ITEM,
       // Page callback, etc. need to be added here.
   );
+  $items['admin/master-dispatch-planning'] = array(
+    'title' => 'Master Trip Creation',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('master_dispatch_planning_form'),
+    'access arguments' => array('dispatch planning screen'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'master_dispatch_planning_form.inc',
+      // Page callback, etc. need to be added here.
+  );
   $items['admin/dispatch-planning/form'] = array(
     'title' => 'Dispatch Planning',
     'type' => MENU_DEFAULT_LOCAL_TASK,
@@ -71,7 +80,12 @@ function dispatch_planning_menu() {
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
-  
+  $items['trip/autocomplete'] = array(
+    'title' => 'trip_autocomplete',
+    'page callback' => 'trip_autocomplete',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
   $items['bill/pending/autocomplete'] = array(
     'title' => 'bill_autocomplete',
     'page callback' => 'bill_autocomplete',
