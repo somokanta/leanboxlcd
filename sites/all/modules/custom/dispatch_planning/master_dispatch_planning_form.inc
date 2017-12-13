@@ -169,7 +169,12 @@ function master_trip_dispatch_date_ajax_submit(&$form, &$form_state) {
    $dis_id = change_feeds_import_get_distributor_id($user->uid);
    if (!empty($trip_date) && !empty($dis_id)) {
       $trips = get_trip_info($trip_date, $dis_id);
-      $form_state['dispatch_planning']['trips'] += $trips;
+      if (!empty($trips)) {
+         $form_state['dispatch_planning']['trips'] += $trips;
+      }
+      else {
+         drupal_set_message(t('No result Found.'));
+      }
    }
    $form_state['rebuild'] = TRUE;
 }
@@ -274,7 +279,7 @@ function dispatch_planning_master_form_save_submit($form, &$form_state) {
 
       node_save($node);
       $master_trip_nid = $node->nid;
-      
+
       foreach ($form_state['values']['list_form_items'] as $nid => $value) {
          $trip_node = node_load($nid);
          if (!empty($trip_node)) {
@@ -287,6 +292,7 @@ function dispatch_planning_master_form_save_submit($form, &$form_state) {
       $node->field_master_bill_count['und'][0]['value'] = $total_bill_count;
       $node->field_master_bill_value['und'][0]['value'] = $total_bill_value;
       node_save($node); // save node of master_dispatch_data type
+      drupal_set_message(t("Master Trip $serial_id Created Sucessfully"));
    }
 }
 
