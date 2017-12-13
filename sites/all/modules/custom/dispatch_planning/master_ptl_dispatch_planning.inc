@@ -353,15 +353,12 @@ function create_fetch_data_master_ptl_trip_form_submit($form, &$form_state) {
  */
 function master_ptl_api_data_create($dispatch_data_nid, $master_trip_id, $sequence, $distributor_id) {
   $api_data = array();
-
   $query = db_select('node', 'n');
   $query->condition('n.nid', $dispatch_data_nid);
   $query->fields('n', array('title'));
   $trip_id = $query->execute()->fetchField();
-
   // find first sales ragister nid from trip
   $bill_numbers = get_all_bills_of_trip_id($dispatch_data_nid);
-
   if (!empty($bill_numbers)) {
     $rs_code = dispatch_planning_get_rscode_using_uid($distributor_id);
 
@@ -369,7 +366,6 @@ function master_ptl_api_data_create($dispatch_data_nid, $master_trip_id, $sequen
     $store_sequence = $sequence; // for master trip asc of trip id
 
     $billing_data_details = master_ptl_get_billing_data($distributor_id, $bill_numbers);
-
     $api_data['ptl_job'] = $master_trip_id; //newly added for master trip
     $api_data['trip_id'] = $trip_id;
     $api_data['rs_code'] = $rs_code;
@@ -474,7 +470,7 @@ function master_ptl_get_billing_data($node_uid, $bill_numbers) {
   $query->condition('bd.distributor_id', $node_uid);
   //$query->condition('bd.bill_number', $bill_number);
   $query->condition('bd.bill_number', $bill_numbers, 'IN'); //for master trip
-  $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+  $res = $query->groupBy('sku7_code','tur', 'mrp')->execute()->fetchAll(PDO::FETCH_ASSOC);
   return $res;
 }
 
@@ -537,4 +533,5 @@ function get_all_bills_of_trip_id($dispatch_data_nid) {
   $query->condition('bundle', "sales_register_data");
   $sales_register_titles = $query->execute()->fetchField();
   $bills = explode(',', $sales_register_titles);
+  return $bills;
 }
