@@ -325,6 +325,7 @@ function create_fetch_data_master_ptl_trip_form_submit($form, &$form_state) {
 
     if (!empty($ptl_authentication_flag) && $master_trip_id_nid) {
       $dispatch_data_nid = master_ptl_get_all_trip_by_master_trip($master_trip_id_nid);
+      dpm($dispatch_data_nid,'$dispatch_data_nid');
       foreach ($dispatch_data_nid as $nid) {
         $count++;
         master_ptl_api_data_create($nid->entity_id, $master_trip_id, $count, $distributor_id);
@@ -353,15 +354,15 @@ function create_fetch_data_master_ptl_trip_form_submit($form, &$form_state) {
  */
 function master_ptl_api_data_create($dispatch_data_nid, $master_trip_id, $sequence, $distributor_id) {
   $api_data = array();
-
+dpm("$dispatch_data_nid, $master_trip_id, $sequence, $distributor_id");
   $query = db_select('node', 'n');
   $query->condition('n.nid', $dispatch_data_nid);
   $query->fields('n', array('title'));
   $trip_id = $query->execute()->fetchField();
-
+dpm($trip_id,'$trip_id');
   // find first sales ragister nid from trip
   $bill_numbers = get_all_bills_of_trip_id($dispatch_data_nid);
-
+dpm($bill_numbers,'$bill_numbers');
   if (!empty($bill_numbers)) {
     $rs_code = dispatch_planning_get_rscode_using_uid($distributor_id);
 
@@ -369,7 +370,7 @@ function master_ptl_api_data_create($dispatch_data_nid, $master_trip_id, $sequen
     $store_sequence = $sequence; // for master trip asc of trip id
 
     $billing_data_details = master_ptl_get_billing_data($distributor_id, $bill_numbers);
-
+dpm($billing_data_details,'$billing_data_details');
     $api_data['ptl_job'] = $master_trip_id; //newly added for master trip
     $api_data['trip_id'] = $trip_id;
     $api_data['rs_code'] = $rs_code;
