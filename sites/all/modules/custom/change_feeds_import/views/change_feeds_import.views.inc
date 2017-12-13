@@ -140,6 +140,15 @@ function change_feeds_import_views_data_alter(&$data) {
     ),
   );
   
+   $data['node']['custom_master_trip_reference'] = array(
+    'title' => t('Custom master trip reference'),
+    'help' => t('concatenated trip id'),
+   // 'real field' => 'nid',
+    'field' => array(
+      'handler' => 'views_handler_field_master_trip',
+    ),
+  );
+  
    $data['custom_billing']['table']['group'] = t('Custom');
    $data['custom_billing']['table']['join'] = array(
      // #global is a special flag which let's a table appear all the time.
