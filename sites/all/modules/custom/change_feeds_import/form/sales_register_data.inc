@@ -406,10 +406,21 @@ function change_feeds_import_create_sales_register_node($sales_data_result, $dis
           $node->field_bod_date[LANGUAGE_NONE][0]['value'] = $bod;
           $node->field_bod_flag[LANGUAGE_NONE][0]['value'] = $bod_flag;
 //bod end      
-
+          
+          // Updating the call type if dispatch date exists and bill value not equal to existing bill value.
+//          $trip_id = $node->field_trip_id_reference['und'][0]['nid'];
+//          $new_bill_value = $val['bill_value'];
+//          $existing_bill_value = $node->field_bill_value[LANGUAGE_NONE][0]['value'];
+//          if(!empty($trip_id) && ($existing_bill_value != $new_bill_value)) {
+//            $dispatch_date = check_dispatch_date($trip_id);
+//            if(!empty($dispatch_date)) {
+//              $node->field_call_type[LANGUAGE_NONE][0]['value'] = 'sd';
+//            }
+//          }
+          
           $node->field_bill_value[LANGUAGE_NONE][0]['value'] = $val['bill_value'];
           $node->field_sales_party_code[LANGUAGE_NONE][0]['value'] = $val['party_code'];
-          $node->field_sales_updated_date[LANGUAGE_NONE][0]['value'] = time();
+          $node->field_sales_updated_date[LANGUAGE_NONE][0]['value'] = time();                   
           node_save($node);
         }
         $count++;
