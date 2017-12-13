@@ -538,4 +538,5 @@ function get_all_bills_of_trip_id($dispatch_data_nid) {
   $query->condition('bundle', "sales_register_data");
   $sales_register_titles = $query->execute()->fetchField();
   $bills = explode(',', $sales_register_titles);
+  return $bills;
 }
