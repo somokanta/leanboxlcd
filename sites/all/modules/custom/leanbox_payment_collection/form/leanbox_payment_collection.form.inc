@@ -343,12 +343,21 @@ function upload_signed_bill_callback_submit($form, &$form_state) {
             $nid = check_node_title_exists($bill_no, 'sales_register_data');
             $nodedata = node_load($nid);
             $bill_value = $nodedata->field_bill_value[LANGUAGE_NONE][0]['value'];
+            $original_bill_value = $nodedata->field_original_bill_value[LANGUAGE_NONE][0]['value'];
             $to_be_collected_value = $form_state['values']['remaining_amt'][$bill_no];
-
-            // update the call type in sales register data
-            if ($bill_value != $to_be_collected_value) {
-               $nodedata->field_call_type[LANGUAGE_NONE][0]['value'] = 'sd';
-               node_save($nodedata);
+            
+            if(empty($original_bill_value)) {
+              // update the call type in sales register data
+              if ($bill_value != $to_be_collected_value) {
+                 $nodedata->field_call_type[LANGUAGE_NONE][0]['value'] = 'sd';
+                 node_save($nodedata);
+              }
+            }
+            else {
+              if ($original_bill_value != $to_be_collected_value) {
+                 $nodedata->field_call_type[LANGUAGE_NONE][0]['value'] = 'sd';
+                 node_save($nodedata);
+              }
             }
          }
         
