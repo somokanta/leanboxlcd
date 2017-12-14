@@ -313,3 +313,60 @@ function _get_highest_title_master_trip_distributor_wise($dis_id) {
    }
    return $field;
 }
+
+/**
+ * 
+ * @param type $form
+ * @param type $form_state
+ * @return string
+ */
+function delete_master_dispatch_planning_form($form, &$form_state) {
+  $form['maste_trip_id'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Master Trip Id'),
+    '#size' => 10,
+    '#required' => TRUE,
+  );
+
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Submit'),
+  );
+  return $form;
+}
+
+function delete_master_dispatch_planning_form_submit($form, &$form_state) {
+  global $user;
+  $dis_id = change_feeds_import_get_distributor_id($user->uid);
+
+  $master_trip_id = $form_state['values']['master_trip_id'];
+
+  $query = db_select('node', 'n');
+  $query->condition('n.type', 'master_dispatch_data');
+  $query->fields('n', array('nid'));
+  $query->condition('n.title', $master_trip_id);
+  $query->condition('n.uid', $dis_id);
+  $master_trip_nid = $query->execute()->fetchField();
+  
+  if ($master_trip_nid) {
+    $master_node = node_load($master_trip_nid);
+    $master_node->status = 0;
+    node_save($master_node);
+
+    $query = db_select('field_data_field_master_trip_id_reference', 'tr');
+    $query->condition('field_master_trip_id_reference_nid', $master_trip_nid);
+    $query->fields('tr', array('entity_id'));
+    $query->condition('tr.bundle', "dispatch_data");
+    $trip_nids = $query->execute()->fetchAll();
+
+    foreach ($trip_nids as $dis_nid) {
+      $dis_node = node_load($dis_nid->entity_id);
+      unset($dis_node->field_master_trip_id_reference['und']);
+      node_save($dis_node);
+    }
+    drupal_set_message("Master Trip $master_trip_id is deleted successfully!");
+  }
+  else {
+    drupal_set_message("Master Trip $master_trip_id is not found!!");
+  }
+}

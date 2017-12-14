@@ -23,7 +23,16 @@ function dispatch_planning_menu() {
     'title' => 'Master Trip Creation',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('master_dispatch_planning_form'),
-    'access arguments' => array('dispatch planning screen'),
+    'access arguments' => array('Master Ptl trip creation'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'master_dispatch_planning_form.inc',
+      // Page callback, etc. need to be added here.
+  );
+  $items['admin/delete-master-dispatch-planning'] = array(
+    'title' => 'Delete Master Trip Creation',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('delete_master_dispatch_planning_form'),
+    'access arguments' => array('Master Ptl trip creation'),
     'type' => MENU_NORMAL_ITEM,
     'file' => 'master_dispatch_planning_form.inc',
       // Page callback, etc. need to be added here.
