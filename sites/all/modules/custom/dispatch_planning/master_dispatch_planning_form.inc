@@ -321,7 +321,7 @@ function _get_highest_title_master_trip_distributor_wise($dis_id) {
  * @return string
  */
 function delete_master_dispatch_planning_form($form, &$form_state) {
-  $form['maste_trip_id'] = array(
+  $form['master_trip_id'] = array(
     '#type' => 'textfield',
     '#title' => t('Master Trip Id'),
     '#size' => 10,
