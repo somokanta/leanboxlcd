@@ -23,7 +23,7 @@ function dispatch_planning_menu() {
     'title' => 'Master Trip Creation',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('master_dispatch_planning_form'),
-    'access arguments' => array('Master Ptl trip creation'),
+    'access arguments' => array('Ptl trip creation'),
     'type' => MENU_NORMAL_ITEM,
     'file' => 'master_dispatch_planning_form.inc',
       // Page callback, etc. need to be added here.
@@ -32,7 +32,7 @@ function dispatch_planning_menu() {
     'title' => 'Delete Master Trip Creation',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('delete_master_dispatch_planning_form'),
-    'access arguments' => array('Master Ptl trip creation'),
+    'access arguments' => array('Ptl trip creation'),
     'type' => MENU_NORMAL_ITEM,
     'file' => 'master_dispatch_planning_form.inc',
       // Page callback, etc. need to be added here.
@@ -234,7 +234,7 @@ function dispatch_planning_menu() {
     'title' => 'Resent Master Trip To PTL',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('delete_fetch_data_master_ptl_trip_form'),
-    'access arguments' => array('Master Ptl trip creation'),
+    'access arguments' => array('Ptl trip creation'),
     'type' => MENU_CALLBACK,
     'file' => 'master_ptl_dispatch_planning.inc',
   );
@@ -242,7 +242,7 @@ function dispatch_planning_menu() {
     'title' => 'Create Master Trip To PTL',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('create_fetch_data_master_ptl_trip_form'),
-    'access arguments' => array('Master Ptl trip creation'),
+    'access arguments' => array('Ptl trip creation'),
     'type' => MENU_CALLBACK,
     'file' => 'master_ptl_dispatch_planning.inc',
   );
@@ -283,7 +283,7 @@ function dispatch_planning_permission() {
     'Ptl trip creation' => array(
       'title' => t('Ptl trip creation'),
       'description' => t('Ptl trip creation')
-    )    
+    ) 
   );
 }
 
