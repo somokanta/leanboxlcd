@@ -88,6 +88,18 @@ function leanbox_misc_menu() {
   return $items;
 }
 
+/**
+ * Implement hook_permission
+ */
+function leanbox_misc_permission() {
+  return array(
+    'pendency report permission' => array(
+      'title' => 'Pendency Report permission',
+      'description' => 'pendency report permission'
+    ),
+  );
+}
+
 function leanbox_misc_block_info() {
   $blocks['distributor_name'] = array(
     'info' => t('Distributor Name'),
