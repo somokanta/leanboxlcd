@@ -2005,7 +2005,7 @@ function dispatch_planning_check_api_authentication($node_uid) {
  * 
  * @param type $json_api_data
  */
-function dispatch_planning_api_log($json_api_data, $trip_id, $api_type, $dis_id) {
+function dispatch_planning_api_log($json_api_data, $trip_id, $api_type, $dis_id, $api_flag = 0) {
   $sql_ins_id = db_insert('dispatch_planning_api_log')
     ->fields(array(
       'trip_id' => $trip_id,
@@ -2013,6 +2013,7 @@ function dispatch_planning_api_log($json_api_data, $trip_id, $api_type, $dis_id)
       'request_data' => $json_api_data,
       'api_type' => $api_type, // pass vraiable defined in oxigen wallet configuratation form
       'request_time' => time(),
+      'api_success' => $api_flag,
     ))
     ->execute();
   return $sql_ins_id;
