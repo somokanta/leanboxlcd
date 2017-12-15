@@ -52,7 +52,7 @@ function fetch_dispatch_planning_api_data($json_data) {
             'res_money_collect2' => $data['fieldData']['money_collect2'],
             'res_signed_bill_delivery' => $data['fieldData']['signed_bill_delivery'],
           ))
-          ->condition('referenceNo', "365254_GST13826", '=')
+          ->condition('referenceNo', $data['referenceNumber'], '=')
           ->execute();
 
       // add trip id condition also in db_update
@@ -75,7 +75,7 @@ function fetch_dispatch_planning_api_data($json_data) {
    }
    else {
       // make log entry here
-      dispatch_planning_api_log($json_data, '', 'farey_sales_deliver', 0, 0);
+      //dispatch_planning_api_log($json_data, '', 'farey_sales_deliver', 0, 0);
       $results['flag'] = '0';
       $results['result'] = 'No data was updated.';
    }

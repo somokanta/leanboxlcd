@@ -1102,41 +1102,12 @@ function dispatch_planning_update_7114() {
      ),
    );
    $fields2 = array(
-//     'res_sum_net_sales_quantity1' => array(
-//       'description' => t('Response sum_net_sales_quantity1'),
-//       'type' => 'varchar',
-//       'length' => 30,
-//     ),
-//     'res_sum_net_sales_cases1' => array(
-//       'description' => t('Response sum_net_sales_cases1'),
-//       'type' => 'varchar',
-//       'length' => 30,
-//     ),
+
      'res_sku_actual_quantity1' => array(
        'description' => t('Response sku_actual_quantity1'),
        'type' => 'varchar',
        'length' => 30,
      ),
-//     'res_mrp1' => array(
-//       'description' => t('Response mrp1'),
-//       'type' => 'varchar',
-//       'length' => 30,
-//     ),
-//     'res_sum_net_sales_kgs1' => array(
-//       'description' => t('Response sum_net_sales_kgs1'),
-//       'type' => 'varchar',
-//       'length' => 30,
-//     ),
-//     'res_sum_net_sales_value1' => array(
-//       'description' => t('Response sum_net_sales_value1'),
-//       'type' => 'varchar',
-//       'length' => 30,
-//     ),
-//     'res_tur1' => array(
-//       'description' => t('Response tur1'),
-//       'type' => 'varchar',
-//       'length' => 30,
-//     ),
    );
 
    foreach ($fields1 as $key => $field) {
