@@ -46,6 +46,44 @@ function leanbox_misc_menu() {
     'access arguments' => array('dispatch planning screen'),
     'type' => MENU_NORMAL_ITEM,
   );
+  
+  $items['pendency/reports'] = array(
+    'title' => 'Pendency Reports',
+    'page callback' => 'pendency_report_callback',
+    'access arguments' => array('pendency report permission'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'includes/pendency_reports.inc',
+  );
+  
+  $items['pendency/reports/van-wise'] = array(
+      'title' => 'Van Wise',
+      'description' => 'Pendency Report Van Wise',
+      'page callback' => 'pendency_report_callback',
+      'access arguments' => array('pendency report permission'),
+      'type' => MENU_DEFAULT_LOCAL_TASK,
+      'weight' => 0,
+      'file' => 'includes/pendency_reports.inc',
+  );
+  
+  $items['pendency/reports/sales-beat-wise'] = array(
+      'title' => 'Sales Beat Wise',
+      'description' => 'Pendency Report Sales beat Wise',
+      'page callback' => 'pendency_report_sales_beat_wise_callback',
+      'access arguments' => array('pendency report permission'),
+      'type' => MENU_LOCAL_TASK,
+      'weight' => 1,
+      'file' => 'includes/pendency_reports.inc',
+  );
+  
+  $items['pendency/reports/pl-group-wise'] = array(
+      'title' => 'PL Group Wise',
+      'description' => 'Pendency Report Pl Group Wise',
+      'page callback' => 'pendency_report_pl_group_wise_callback',
+      'access arguments' => array('pendency report permission'),
+      'type' => MENU_LOCAL_TASK,
+      'weight' => 2,
+      'file' => 'includes/pendency_reports.inc',
+  );
 
   return $items;
 }
