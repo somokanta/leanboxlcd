@@ -19,6 +19,24 @@ function dispatch_planning_menu() {
     'type' => MENU_NORMAL_ITEM,
       // Page callback, etc. need to be added here.
   );
+  $items['admin/master-dispatch-planning'] = array(
+    'title' => 'Master Trip Creation',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('master_dispatch_planning_form'),
+    'access arguments' => array('Ptl trip creation'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'master_dispatch_planning_form.inc',
+      // Page callback, etc. need to be added here.
+  );
+  $items['admin/delete-master-dispatch-planning'] = array(
+    'title' => 'Delete Master Trip Creation',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('delete_master_dispatch_planning_form'),
+    'access arguments' => array('Ptl trip creation'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'master_dispatch_planning_form.inc',
+      // Page callback, etc. need to be added here.
+  );
   $items['admin/dispatch-planning/form'] = array(
     'title' => 'Dispatch Planning',
     'type' => MENU_DEFAULT_LOCAL_TASK,
@@ -71,7 +89,12 @@ function dispatch_planning_menu() {
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
-  
+  $items['trip/autocomplete'] = array(
+    'title' => 'trip_autocomplete',
+    'page callback' => 'trip_autocomplete',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
   $items['bill/pending/autocomplete'] = array(
     'title' => 'bill_autocomplete',
     'page callback' => 'bill_autocomplete',
@@ -174,6 +197,55 @@ function dispatch_planning_menu() {
     'type' => MENU_CALLBACK,
     'file' => 'ptl_dispatch_planning.inc',
   );
+// Master PTL
+  $items['master-loose-picking-sheet'] = array(
+    'title' => 'Master Loose PICKING SHEET',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('master_ptl_loose_sheet_form'),
+    'access arguments' => array('Distributor Upload File'),
+    'type' => MENU_CALLBACK,
+    'file' => 'master_ptl_dispatch_planning.inc',
+  );
+  $items['download-master-loose-picking/%'] = array(
+    'title' => 'Download Master PTL Loose',
+    'page callback' => 'download_master_ptl_loose_sheet',
+    'page arguments' => array(1),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'master_ptl_dispatch_planning.inc',
+  );
+  $items['master-cld-picking-sheet'] = array(
+    'title' => 'Master CLD PICKING SHEET',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('master_ptl_cld_sheet_form'),
+    'access arguments' => array('Distributor Upload File'),
+    'type' => MENU_CALLBACK,
+    'file' => 'master_ptl_dispatch_planning.inc',
+  );
+  $items['download-master-cld-picking/%'] = array(
+    'title' => 'CLD PICKING SHEET',
+    'page callback' => 'download_master_ptl_cld_sheet',
+    'page arguments' => array(1),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'master_ptl_dispatch_planning.inc',
+  );
+  $items['delete-master-ptl-trip'] = array(
+    'title' => 'Resent Master Trip To PTL',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('delete_fetch_data_master_ptl_trip_form'),
+    'access arguments' => array('Ptl trip creation'),
+    'type' => MENU_CALLBACK,
+    'file' => 'master_ptl_dispatch_planning.inc',
+  );
+  $items['create-master-ptl-trip'] = array(
+    'title' => 'Create Master Trip To PTL',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('create_fetch_data_master_ptl_trip_form'),
+    'access arguments' => array('Ptl trip creation'),
+    'type' => MENU_CALLBACK,
+    'file' => 'master_ptl_dispatch_planning.inc',
+  );
   return $items;
 }
 
@@ -211,7 +283,7 @@ function dispatch_planning_permission() {
     'Ptl trip creation' => array(
       'title' => t('Ptl trip creation'),
       'description' => t('Ptl trip creation')
-    )    
+    ) 
   );
 }
 
@@ -1933,7 +2005,7 @@ function dispatch_planning_check_api_authentication($node_uid) {
  * 
  * @param type $json_api_data
  */
-function dispatch_planning_api_log($json_api_data, $trip_id, $api_type, $dis_id) {
+function dispatch_planning_api_log($json_api_data, $trip_id, $api_type, $dis_id, $api_flag = 0) {
   $sql_ins_id = db_insert('dispatch_planning_api_log')
     ->fields(array(
       'trip_id' => $trip_id,
@@ -1941,6 +2013,7 @@ function dispatch_planning_api_log($json_api_data, $trip_id, $api_type, $dis_id)
       'request_data' => $json_api_data,
       'api_type' => $api_type, // pass vraiable defined in oxigen wallet configuratation form
       'request_time' => time(),
+      'api_success' => $api_flag,
     ))
     ->execute();
   return $sql_ins_id;
