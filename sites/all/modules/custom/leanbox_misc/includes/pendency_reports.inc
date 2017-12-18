@@ -4,97 +4,35 @@
  *  Filter form for pendency report
  */
 function pendency_report_filter_form($form, &$form_state) {
-  if(empty(arg(2))) {
-    if (isset($_GET['start_date']) || isset($_GET['end_date'])) {
-      $start_date = $_GET['start_date'];
-      $end_date = $_GET['end_date'];
-
-      $form['start_date'] = array(
-        '#type' => 'date_popup',
-        '#title' => 'Loading From date',
-        '#description' => 'Select from date to generate report',
-        '#require' => TRUE,
-        '#date_label_position' => 'within',
-        '#date_format' => 'Y-m-d',
-        '#default_value' => $start_date,
-      );
-      $form['end_date'] = array(
-        '#type' => 'date_popup',
-        '#title' => 'Loading To date',
-        '#description' => 'Select to date to generate report',
-        '#require' => TRUE,
-        '#date_label_position' => 'within',
-        '#date_format' => 'Y-m-d',
-        '#default_value' => $end_date,
-      );
-    }
-    else {
-      $form['start_date'] = array(
-        '#type' => 'date_popup',
-        '#title' => 'Loading From date',
-        '#description' => 'Select from date to generate report',
-        '#require' => TRUE,
-        '#date_label_position' => 'within',
-        '#date_format' => 'Y-m-d',
-        '#default_value' => date('Y-m-d', strtotime("-1 days")),
-      );
-      $form['end_date'] = array(
-        '#type' => 'date_popup',
-        '#title' => 'Loading To date',
-        '#description' => 'Select to date to generate report',
-        '#require' => TRUE,
-        '#date_label_position' => 'within',
-        '#date_format' => 'Y-m-d',
-        '#default_value' => date('Y-m-d', strtotime("-1 days")),
-      );
-    }
+  if (empty(arg(2))) {
+    $title = 'Loading';
   }
   else {
-     if (isset($_GET['start_date']) || isset($_GET['end_date'])) {
-      $start_date = $_GET['start_date'];
-      $end_date = $_GET['end_date'];
-
-      $form['start_date'] = array(
-        '#type' => 'date_popup',
-        '#title' => 'Billing From date',
-        '#description' => 'Select from date to generate report',
-        '#require' => TRUE,
-        '#date_label_position' => 'within',
-        '#date_format' => 'Y-m-d',
-        '#default_value' => $start_date,
-      );
-      $form['end_date'] = array(
-        '#type' => 'date_popup',
-        '#title' => 'Billing To date',
-        '#description' => 'Select to date to generate report',
-        '#require' => TRUE,
-        '#date_label_position' => 'within',
-        '#date_format' => 'Y-m-d',
-        '#default_value' => $end_date,
-      );
-    }
-    else {
-      $form['start_date'] = array(
-        '#type' => 'date_popup',
-        '#title' => 'Billing From date',
-        '#description' => 'Select from date to generate report',
-        '#require' => TRUE,
-        '#date_label_position' => 'within',
-        '#date_format' => 'Y-m-d',
-        '#default_value' => date('Y-m-d', strtotime("-1 days")),
-      );
-      $form['end_date'] = array(
-        '#type' => 'date_popup',
-        '#title' => 'Billing To date',
-        '#description' => 'Select to date to generate report',
-        '#require' => TRUE,
-        '#date_label_position' => 'within',
-        '#date_format' => 'Y-m-d',
-        '#default_value' => date('Y-m-d', strtotime("-1 days")),
-      );
-    }
+    $title = 'Billing';
   }
-  
+
+  $start_date = isset($_GET['start_date']) ? $_GET['start_date'] : date('Y-m-d', strtotime("-1 days"));
+  $end_date = isset($_GET['end_date']) ? $_GET['end_date'] : date('Y-m-d', strtotime("-1 days"));
+
+  $form['start_date'] = array(
+    '#type' => 'date_popup',
+    '#title' => "$title From date",
+    '#description' => 'Select from date to generate report',
+    '#require' => TRUE,
+    '#date_label_position' => 'within',
+    '#date_format' => 'Y-m-d',
+    '#default_value' => $start_date,
+  );
+  $form['end_date'] = array(
+    '#type' => 'date_popup',
+    '#title' => "$title To date",
+    '#description' => 'Select to date to generate report',
+    '#require' => TRUE,
+    '#date_label_position' => 'within',
+    '#date_format' => 'Y-m-d',
+    '#default_value' => $end_date,
+  );
+
   $form['save'] = array(
     '#type' => 'submit',
     '#value' => 'Save'
