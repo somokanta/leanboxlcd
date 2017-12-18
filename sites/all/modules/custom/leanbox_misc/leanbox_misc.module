@@ -84,7 +84,29 @@ function leanbox_misc_menu() {
       'weight' => 2,
       'file' => 'includes/pendency_reports.inc',
   );
-
+  $items['pendency/reports/export'] = array(
+    'title' => 'Pendency Report Export',
+    'description' => 'Pendency Report Export',
+    'page callback' => 'pendency_report_export',
+    'access arguments' => array('pendency report permission'),
+    'file' => 'includes/pendency_reports.inc',
+  );
+  
+  $items['pendency/reports/sales-beat-wise/export'] = array(
+    'title' => 'Pendency Report Sales Beat Wise Export',
+    'description' => 'Pendency Report Sales Beat Wise Export',
+    'page callback' => 'pendency_report_sales_beat_wise_export',
+    'access arguments' => array('pendency report permission'),
+    'file' => 'includes/pendency_reports.inc',
+  );
+  
+  $items['pendency/reports/pl-group-wise/export'] = array(
+    'title' => 'Pendency Report Pl Group Wise Export',
+    'description' => 'Pendency Report Pl Group Wise Export',
+    'page callback' => 'pendency_report_pl_group_wise_export',
+    'access arguments' => array('pendency report permission'),
+    'file' => 'includes/pendency_reports.inc',
+  );
   return $items;
 }
 
