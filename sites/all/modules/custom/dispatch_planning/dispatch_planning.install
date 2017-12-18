@@ -1154,7 +1154,7 @@ function dispatch_planning_update_7115() {
       'trip_id' => array(
         'description' => t('Trip ID'),
         'type' => 'varchar',
-        'length' => 50,
+        'length' => 250,
         'not null' => TRUE,
         'default' => '',
       ),
@@ -1168,7 +1168,7 @@ function dispatch_planning_update_7115() {
       'vehicle' => array(
         'description' => t('Vehicle No'),
         'type' => 'varchar',
-        'length' => 50,
+        'length' => 250,
         'not null' => TRUE,
         'default' => '',
       ),
