@@ -448,14 +448,14 @@ function dispatch_planning_services_resources() {
               'source' => array('data' => 'operator_id'),
               'optional' => FALSE,
             ),
-                        array(
+            array(
               'name' => 'start_time',
               'type' => 'string',
               'description' => 'Start Date/Time',
               'source' => array('data' => 'start_time'),
               'optional' => FALSE,
             ),
-                        array(
+            array(
               'name' => 'end_time',
               'type' => 'string',
               'description' => 'End Date Time',
