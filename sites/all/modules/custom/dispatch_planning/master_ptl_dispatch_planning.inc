@@ -543,8 +543,8 @@ function get_all_bills_of_trip_id($dispatch_data_nid) {
  */
 function insert_master_ptl_header_data($header_result) {
   foreach ($header_result as $value) {
-    $result = db_insert('ptl_header_data')
-      ->key(array('ptl_job' => $value->ptl_job, 'rs_code' => $value->rs_code))
+    $result = db_merge('ptl_header_data')
+      ->key(array('ptl_job' => $value->ptl_job, 'rs_code' => $value->rs_code, 'type' => 'MASTER_TRIP'))
       ->fields(array(
         'ptl_job' => $value->ptl_job,
         'bill_lines' => $value->bill_lines,

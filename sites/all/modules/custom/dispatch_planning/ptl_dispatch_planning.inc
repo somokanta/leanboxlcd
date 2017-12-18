@@ -589,8 +589,8 @@ function get_child_desc_and_qty_by_parent_sku($sku7_code, $distributor_id) {
  */
 function insert_ptl_header_data($header_result) {
   foreach ($header_result as $value) {
-    $result = db_insert('ptl_header_data')
-      ->key(array('ptl_job' => $value->ptl_job, 'rs_code' => $value->rs_code))
+    $result = db_merge('ptl_header_data')
+      ->key(array('ptl_job' => $value->ptl_job, 'rs_code' => $value->rs_code, 'type' => 'TRIP'))
       ->fields(array(
         'ptl_job' => $value->ptl_job,
         'bill_lines' => $value->bill_lines,
