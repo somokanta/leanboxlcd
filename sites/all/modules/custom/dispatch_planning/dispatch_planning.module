@@ -493,7 +493,7 @@ function dispatch_planning_services_resources() {
           'file' => array(
             'type' => 'inc',
             'module' => 'dispatch_planning',
-            'name' => 'ptl_dispatch_planning'
+            'name' => 'master_ptl_dispatch_planning'
           ),
           'access arguments' => array('services_access_ptl_api'),
         ),
@@ -519,7 +519,7 @@ function dispatch_planning_services_resources() {
           'file' => array(
             'type' => 'inc',
             'module' => 'dispatch_planning',
-            'name' => 'ptl_dispatch_planning'
+            'name' => 'master_ptl_dispatch_planning'
           ),
           'access arguments' => array('services_access_ptl_api'),
         ),
@@ -538,7 +538,7 @@ function dispatch_planning_services_resources() {
           'file' => array(
             'type' => 'inc',
             'module' => 'dispatch_planning',
-            'name' => 'ptl_dispatch_planning'
+            'name' => 'master_ptl_dispatch_planning'
           ),
           'access arguments' => array('services_access_ptl_api'),
         ),
@@ -613,7 +613,7 @@ function dispatch_planning_services_resources() {
           'file' => array(
             'type' => 'inc',
             'module' => 'dispatch_planning',
-            'name' => 'ptl_dispatch_planning'
+            'name' => 'master_ptl_dispatch_planning'
           ),
           'access arguments' => array('services_access_ptl_api'),
         ),        

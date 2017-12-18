@@ -566,7 +566,7 @@ function update_master_ptl_header_data($ptl_job ,$trip_id, $rs_code, $vehicle,$b
   $results['flag'] = '0';
   $results['result'] = 'Data not found. Please check RS Code and PTL Job';
 
-   $result =  db_update('ptl_data_configuration') // Table name no longer needs {}
+   $result =  db_update('ptl_header_data') // Table name no longer needs {}
       ->fields(array(
         'trip_id' => $trip_id,
         'vehicle' => $vehicle,
