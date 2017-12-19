@@ -499,6 +499,9 @@ function sales_beat_wise_ofd_callback() {
   }
 
   if (isset($_GET['start_date']) && isset($_GET['end_date'])) {
+    $start_date = $_GET['start_date'];
+    $end_date = $_GET['end_date'];
+    
     $query = db_select('node', 'n');
     $query->condition('n.type', 'dispatch_data');
     $query->condition('n.uid', $distributor_id, '=');
@@ -550,7 +553,6 @@ function sales_beat_wise_ofd_callback() {
     $query->fields('sb', array('field_beat_name_value'));
     $query->fields('sm', array('field_salesman_value'));
     $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
-    dpm($res);
 
     $row = array();
     $counter = 1;
