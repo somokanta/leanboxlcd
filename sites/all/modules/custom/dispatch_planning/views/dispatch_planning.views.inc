@@ -3162,9 +3162,291 @@ function dispatch_planning_views_data() {
      ),
    );
 
+   
+   // Adding custom handler for PTL Header Report
+   $data['ptl_header_data']['table'] = array(
+     'group' => t('PTL Header data'),
+     'title' => t('PTL Header data'),
+     'help' => t('PTL Header data'),
+   );
 
-
-
-
+   // Define this as a base table.
+   $data['ptl_header_data']['table']['base'] = array(
+     'field' => 'id',
+     'title' => t('PTL Header data'),
+     'help' => t("unique identifiers."),
+       // 'weight' => -10,
+   );
+   // serial No
+   $data['ptl_header_data']['id'] = array(
+     'title' => t('ID'),
+     'help' => t('ID'),
+     'field' => array(
+       'handler' => 'views_handler_field',
+       'click sortable' => TRUE,
+     ),
+     'sort' => array(
+       'handler' => 'views_handler_sort',
+     ),
+     'filter' => array(
+       'handler' => 'views_handler_filter_string',
+     ),
+     'argument' => array(
+       'handler' => 'views_handler_argument_string',
+     ),
+   );
+   // ptl_job
+   $data['ptl_header_data']['ptl_job'] = array(
+     'title' => t('ptl_job'),
+     'help' => t('Ptl Job'),
+     'field' => array(
+       'handler' => 'views_handler_field',
+       'click sortable' => TRUE,
+     ),
+     'sort' => array(
+       'handler' => 'views_handler_sort',
+     ),
+     'filter' => array(
+       'handler' => 'views_handler_filter_string',
+     ),
+     'argument' => array(
+       'handler' => 'views_handler_argument_string',
+     ),
+   );
+   // 	rs_code
+   $data['ptl_header_data']['rs_code'] = array(
+     'title' => t('RS Code'),
+     'help' => t('RS Code'),
+     'field' => array(
+       'handler' => 'views_handler_field',
+       'click sortable' => TRUE,
+     ),
+     'sort' => array(
+       'handler' => 'views_handler_sort',
+     ),
+     'filter' => array(
+       'handler' => 'views_handler_filter_string',
+     ),
+     'argument' => array(
+       'handler' => 'views_handler_argument_string',
+     ),
+   );
+   // 	trip_id
+   $data['ptl_header_data']['trip_id'] = array(
+     'title' => t('trip_id'),
+     'help' => t('Trip ID'),
+     'field' => array(
+       'handler' => 'views_handler_field',
+       'click sortable' => TRUE,
+     ),
+     'sort' => array(
+       'handler' => 'views_handler_sort',
+     ),
+     'filter' => array(
+       'handler' => 'views_handler_filter_string',
+     ),
+     'argument' => array(
+       'handler' => 'views_handler_argument_string',
+     ),
+   );
+   // type
+   $data['ptl_header_data']['type'] = array(
+     'title' => t('Type'),
+     'help' => t('Type'),
+     'field' => array(
+       'handler' => 'views_handler_field',
+       'click sortable' => TRUE,
+     ),
+     'sort' => array(
+       'handler' => 'views_handler_sort',
+     ),
+     'filter' => array(
+       'handler' => 'views_handler_filter_string',
+     ),
+     'argument' => array(
+       'handler' => 'views_handler_argument_string',
+     ),
+   );   
+   // vehicle
+   $data['ptl_header_data']['vehicle'] = array(
+     'title' => t('vehicle'),
+     'help' => t('vehicle'),
+     'field' => array(
+       'handler' => 'views_handler_field',
+       'click sortable' => TRUE,
+     ),
+     'sort' => array(
+       'handler' => 'views_handler_sort',
+     ),
+     'filter' => array(
+       'handler' => 'views_handler_filter_string',
+     ),
+     'argument' => array(
+       'handler' => 'views_handler_argument_string',
+     ),
+   );
+   // bill_lines
+   $data['ptl_header_data']['bill_lines'] = array(
+     'title' => t('Bill Lines'),
+     'help' => t('Bill Lines'),
+     'field' => array(
+       'handler' => 'views_handler_field',
+       'click sortable' => TRUE,
+     ),
+     'sort' => array(
+       'handler' => 'views_handler_sort',
+     ),
+     'filter' => array(
+       'handler' => 'views_handler_filter_string',
+     ),
+     'argument' => array(
+       'handler' => 'views_handler_argument_string',
+     ),
+   );
+   // res_bill_lines
+   $data['ptl_header_data']['res_bill_lines'] = array(
+     'title' => t('RES Bill Lines'),
+     'help' => t('RES Bill Lines'),
+     'field' => array(
+       'handler' => 'views_handler_field',
+       'click sortable' => TRUE,
+     ),
+     'sort' => array(
+       'handler' => 'views_handler_sort',
+     ),
+     'filter' => array(
+       'handler' => 'views_handler_filter_string',
+     ),
+     'argument' => array(
+       'handler' => 'views_handler_argument_string',
+     ),
+   );   
+   // total_qty
+   $data['ptl_header_data']['total_qty'] = array(
+     'title' => t('Total QTY'),
+     'help' => t('Total QTY'),
+     'field' => array(
+       'handler' => 'views_handler_field',
+       'click sortable' => TRUE,
+     ),
+     'sort' => array(
+       'handler' => 'views_handler_sort',
+     ),
+     'filter' => array(
+       'handler' => 'views_handler_filter_string',
+     ),
+     'argument' => array(
+       'handler' => 'views_handler_argument_string',
+     ),
+   );
+   // res_total_qty
+   $data['ptl_header_data']['res_total_qty'] = array(
+     'title' => t('RES Total QTY'),
+     'help' => t('RES Total QTY'),
+     'field' => array(
+       'handler' => 'views_handler_field',
+       'click sortable' => TRUE,
+     ),
+     'sort' => array(
+       'handler' => 'views_handler_sort',
+     ),
+     'filter' => array(
+       'handler' => 'views_handler_filter_string',
+     ),
+     'argument' => array(
+       'handler' => 'views_handler_argument_string',
+     ),
+   );   
+   // operator_id
+   $data['ptl_header_data']['operator_id'] = array(
+     'title' => t('Operator Id'),
+     'help' => t('Operator Id'),
+     'field' => array(
+       'handler' => 'views_handler_field',
+       'click sortable' => TRUE,
+     ),
+     'sort' => array(
+       'handler' => 'views_handler_sort',
+     ),
+     'filter' => array(
+       'handler' => 'views_handler_filter_string',
+     ),
+     'argument' => array(
+       'handler' => 'views_handler_argument_string',
+     ),
+   );
+   // start_time
+   $data['ptl_header_data']['start_time'] = array(
+     'title' => t('Start Time'),
+     'help' => t('Start Time'),
+     'field' => array(
+       'handler' => 'views_handler_field_date',
+       'click sortable' => TRUE,
+     ),
+     'sort' => array(
+       'handler' => 'views_handler_sort_date',
+     ),
+     'filter' => array(
+       'handler' => 'views_handler_filter_date',
+     ),
+     'argument' => array(
+       'handler' => 'views_handler_filter_date',
+     ),
+   );
+   // end_time
+   $data['ptl_header_data']['end_time'] = array(
+     'title' => t('End Time'),
+     'help' => t('End Time'),
+     'field' => array(
+       'handler' => 'views_handler_field_date',
+       'click sortable' => TRUE,
+     ),
+     'sort' => array(
+       'handler' => 'views_handler_sort_date',
+     ),
+     'filter' => array(
+       'handler' => 'views_handler_filter_date',
+     ),
+     'argument' => array(
+       'handler' => 'views_handler_filter_date',
+     ),
+   );   
+   // created_time
+   $data['ptl_header_data']['created_time'] = array(
+     'title' => t('Created Time'),
+     'help' => t('Created Time'),
+     'field' => array(
+       'handler' => 'views_handler_field_date',
+       'click sortable' => TRUE,
+     ),
+     'sort' => array(
+       'handler' => 'views_handler_sort_date',
+     ),
+     'filter' => array(
+       'handler' => 'views_handler_filter_date',
+     ),
+     'argument' => array(
+       'handler' => 'views_handler_filter_date',
+     ),
+   ); 
+   // updated_time
+   $data['ptl_header_data']['updated_time'] = array(
+     'title' => t('Updated Time'),
+     'help' => t('Updated Time'),
+     'field' => array(
+       'handler' => 'views_handler_field_date',
+       'click sortable' => TRUE,
+     ),
+     'sort' => array(
+       'handler' => 'views_handler_sort_date',
+     ),
+     'filter' => array(
+       'handler' => 'views_handler_filter_date',
+     ),
+     'argument' => array(
+       'handler' => 'views_handler_filter_date',
+     ),
+   );
+   
    return $data;
 }
