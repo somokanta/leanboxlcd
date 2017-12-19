@@ -107,6 +107,22 @@ function leanbox_misc_menu() {
     'access arguments' => array('pendency report permission'),
     'file' => 'includes/pendency_reports.inc',
   );
+  
+  $items['ofd/sales-beat-wise'] = array(
+    'title' => 'Sales Beat Wise OFD',
+    'page callback' => 'sales_beat_wise_ofd_callback',
+    'access arguments' => array('sales beat wise ofd permission'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'includes/pendency_reports.inc',
+  );
+  
+  $items['ofd/sales-beat-wise/export'] = array(
+    'title' => 'OFD Sales Beat Wise Export',
+    'description' => 'OFD Sales Beat Wise Export',
+    'page callback' => 'sales_beat_wise_ofd_export',
+    'access arguments' => array('sales beat wise ofd permission'),
+    'file' => 'includes/pendency_reports.inc',
+  );
   return $items;
 }
 
