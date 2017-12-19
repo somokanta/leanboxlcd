@@ -2270,6 +2270,10 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
     $rs_code = dispatch_planning_get_rscode_using_uid($distributor_id);
     $query->add_where(0, 'ptl_data_configuration.rs_code', $rs_code, '=');
   }
+  if (($view->base_table == 'master_ptl_data') && ($view->name == 'master_ptl_loose_sheet' || $view->name == 'master_short_put_report' || $view->name == 'master_ptl_cld_sheet')) {
+    $rs_code = dispatch_planning_get_rscode_using_uid($distributor_id);
+    $query->add_where(0, 'ptl_data_configuration.rs_code', $rs_code, '=');
+  }
   if ($view->base_table == 'van_cld_data_table') {
     $query->add_where(0, 'van_cld_data_table.distributor_id', $distributor_id, '=');
   }
