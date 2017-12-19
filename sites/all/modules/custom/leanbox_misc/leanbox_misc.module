@@ -46,8 +46,100 @@ function leanbox_misc_menu() {
     'access arguments' => array('dispatch planning screen'),
     'type' => MENU_NORMAL_ITEM,
   );
-
+  
+  $items['pendency/reports'] = array(
+    'title' => 'Pendency Reports',
+    'page callback' => 'pendency_report_callback',
+    'access arguments' => array('pendency report permission'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'includes/pendency_reports.inc',
+  );
+  
+  $items['pendency/reports/van-wise'] = array(
+      'title' => 'Van Wise',
+      'description' => 'Pendency Report Van Wise',
+      'page callback' => 'pendency_report_callback',
+      'access arguments' => array('pendency report permission'),
+      'type' => MENU_DEFAULT_LOCAL_TASK,
+      'weight' => 0,
+      'file' => 'includes/pendency_reports.inc',
+  );
+  
+  $items['pendency/reports/sales-beat-wise'] = array(
+      'title' => 'Sales Beat Wise',
+      'description' => 'Pendency Report Sales beat Wise',
+      'page callback' => 'pendency_report_sales_beat_wise_callback',
+      'access arguments' => array('pendency report permission'),
+      'type' => MENU_LOCAL_TASK,
+      'weight' => 1,
+      'file' => 'includes/pendency_reports.inc',
+  );
+  
+  $items['pendency/reports/pl-group-wise'] = array(
+      'title' => 'PL Group Wise',
+      'description' => 'Pendency Report Pl Group Wise',
+      'page callback' => 'pendency_report_pl_group_wise_callback',
+      'access arguments' => array('pendency report permission'),
+      'type' => MENU_LOCAL_TASK,
+      'weight' => 2,
+      'file' => 'includes/pendency_reports.inc',
+  );
+  $items['pendency/reports/export'] = array(
+    'title' => 'Pendency Report Export',
+    'description' => 'Pendency Report Export',
+    'page callback' => 'pendency_report_export',
+    'access arguments' => array('pendency report permission'),
+    'file' => 'includes/pendency_reports.inc',
+  );
+  
+  $items['pendency/reports/sales-beat-wise/export'] = array(
+    'title' => 'Pendency Report Sales Beat Wise Export',
+    'description' => 'Pendency Report Sales Beat Wise Export',
+    'page callback' => 'pendency_report_sales_beat_wise_export',
+    'access arguments' => array('pendency report permission'),
+    'file' => 'includes/pendency_reports.inc',
+  );
+  
+  $items['pendency/reports/pl-group-wise/export'] = array(
+    'title' => 'Pendency Report Pl Group Wise Export',
+    'description' => 'Pendency Report Pl Group Wise Export',
+    'page callback' => 'pendency_report_pl_group_wise_export',
+    'access arguments' => array('pendency report permission'),
+    'file' => 'includes/pendency_reports.inc',
+  );
+  
+  $items['ofd/sales-beat-wise'] = array(
+    'title' => 'Sales Beat Wise OFD',
+    'page callback' => 'sales_beat_wise_ofd_callback',
+    'access arguments' => array('sales beat wise ofd permission'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'includes/pendency_reports.inc',
+  );
+  
+  $items['ofd/sales-beat-wise/export'] = array(
+    'title' => 'OFD Sales Beat Wise Export',
+    'description' => 'OFD Sales Beat Wise Export',
+    'page callback' => 'sales_beat_wise_ofd_export',
+    'access arguments' => array('sales beat wise ofd permission'),
+    'file' => 'includes/pendency_reports.inc',
+  );
   return $items;
+}
+
+/**
+ * Implement hook_permission
+ */
+function leanbox_misc_permission() {
+  return array(
+    'pendency report permission' => array(
+      'title' => 'Pendency Report permission',
+      'description' => 'pendency report permission'
+    ),
+    'sales beat wise ofd permission' => array(
+      'title' => 'sales beat wise ofd permission',
+      'description' => 'sales beat wise ofd permission'
+    ),   
+  );
 }
 
 function leanbox_misc_block_info() {
