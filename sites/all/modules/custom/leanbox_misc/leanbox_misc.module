@@ -135,6 +135,10 @@ function leanbox_misc_permission() {
       'title' => 'Pendency Report permission',
       'description' => 'pendency report permission'
     ),
+    'sales beat wise ofd permission' => array(
+      'title' => 'sales beat wise ofd permission',
+      'description' => 'sales beat wise ofd permission'
+    ),   
   );
 }
 
