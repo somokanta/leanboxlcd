@@ -521,7 +521,8 @@ function sales_beat_wise_ofd_callback() {
     $query->leftjoin('field_data_field_hht_id', 'h', 'h.entity_id = n.nid');
     $query->leftjoin('node', 'hht', 'h.field_hht_id_nid = hht.nid');
     $query->condition('hht.type', 'hht_master');
-
+    $query->orderBy('hht.title');
+    
     $query->join('field_data_field_trip_id_reference', 'tr', 'tr.field_trip_id_reference_nid = n.nid');
     $query->join('field_data_field_sr_bill_date', 'bd', 'bd.entity_id = tr.entity_id');
     $query->groupBy('field_sr_bill_date_value');
