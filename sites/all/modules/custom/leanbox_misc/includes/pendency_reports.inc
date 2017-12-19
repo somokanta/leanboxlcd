@@ -49,10 +49,10 @@ function pendency_report_filter_form_submit($form, &$form_state) {
   if (($form_state['values']["op"] == "Save") && (arg(1) == 'reports' && empty(arg(2)))) {
     drupal_goto('pendency/reports', array('query' => array('start_date' => $start_date, 'end_date' => $end_date)));
   }
-  else if (($form_state['values']["op"] == "Save") && (arg(2) == 'sales-beat-wise')){
+  else if (($form_state['values']["op"] == "Save") && (arg(2) == 'sales-beat-wise')) {
     drupal_goto('pendency/reports/sales-beat-wise', array('query' => array('start_date' => $start_date, 'end_date' => $end_date)));
   }
-  else if (($form_state['values']["op"] == "Save") && (arg(2) == 'pl-group-wise')){
+  else if (($form_state['values']["op"] == "Save") && (arg(2) == 'pl-group-wise')) {
     drupal_goto('pendency/reports/pl-group-wise', array('query' => array('start_date' => $start_date, 'end_date' => $end_date)));
   }
 }
@@ -62,19 +62,19 @@ function pendency_report_filter_form_submit($form, &$form_state) {
  */
 function pendency_report_filter_form_validate($form, &$form_state) {
   $start_date = $form_state['values']['start_date'];
-  $end_date = $form_state['values']['end_date']; 
-  
+  $end_date = $form_state['values']['end_date'];
+
   if (empty($start_date) || empty($end_date)) {
-    form_set_error('form', 'Please select From and To dates both.'); 
+    form_set_error('form', 'Please select From and To dates both.');
   }
-  if (strtotime($start_date) > strtotime($end_date)){
+  if (strtotime($start_date) > strtotime($end_date)) {
     form_set_error('form', 'From Date should be less than To Date.');
   }
 }
 
 function pendency_report_export() {
   $file = "PendencyReportVanWise.xls";
-  $data = cache_get('pendency/reports'.session_id());
+  $data = cache_get('pendency/reports' . session_id());
   if (empty($data)) {
     $table = pendency_report_callback();
   }
@@ -88,7 +88,7 @@ function pendency_report_export() {
 
 function pendency_report_sales_beat_wise_export() {
   $file = "PendencyReportSalesBeatWise.xls";
-  $data = cache_get('pendency/reports/sales-beat-wise'.session_id());
+  $data = cache_get('pendency/reports/sales-beat-wise' . session_id());
   if (empty($data)) {
     $table = pendency_report_sales_beat_wise_callback();
   }
@@ -102,7 +102,7 @@ function pendency_report_sales_beat_wise_export() {
 
 function pendency_report_pl_group_wise_export() {
   $file = "PendencyReportPlGroupWise.xls";
-  $data = cache_get('pendency/reports/pl-group-wise'.session_id());
+  $data = cache_get('pendency/reports/pl-group-wise' . session_id());
   if (empty($data)) {
     $table = pendency_report_pl_group_wise_callback();
   }
@@ -114,23 +114,23 @@ function pendency_report_pl_group_wise_export() {
   echo $table;
 }
 
-
 /*
  * Page Callback for Pendency Report Van Wise
  */
+
 function pendency_report_callback() {
   global $user;
   $user_id = $user->uid;
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
-  
-  if(arg(2) != 'export'){
+
+  if (arg(2) != 'export') {
     $form = drupal_render(drupal_get_form('pendency_report_filter_form'));
   }
-  
+
   if (isset($_GET['start_date']) && isset($_GET['end_date'])) {
     $start_date = strtotime($_GET['start_date']);
     $end_date = strtotime($_GET['end_date']);
-  
+
     $query = db_select('node', 'n');
     $query->condition('n.type', 'sales_register_data');
     $query->condition('n.uid', $distributor_id, '=');
@@ -162,11 +162,11 @@ function pendency_report_callback() {
       $count = 1;
       foreach ($res as $k => $v) {
         $serial_no = $count;
-        $loading_date = date('d-m-Y',$v['field_billing_loading_date_value']);
+        $loading_date = date('d-m-Y', $v['field_billing_loading_date_value']);
         $van = $v['field_billing_van_value'];
         $bill_count = $v['bill_count'];
         $bill_val = $v['bill_value'];
-        $bill_val = round($bill_val); 
+        $bill_val = round($bill_val);
         $dispatch_bill_count = $v['trip_dispatch_sum'];
         $dispatch_bill_value = $v['trip_dispatch_value'];
         $pending_bill = ($bill_count - $dispatch_bill_count);
@@ -189,7 +189,7 @@ function pendency_report_callback() {
           $pending_bill,
           $pending_bill_value
         );
-      $count ++;
+        $count ++;
       }
     }
     else {
@@ -209,37 +209,37 @@ function pendency_report_callback() {
       );
 
       $output = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
-  
-    // To create the download link
-    $data = array();
-    $data['start_date'] = $_GET['start_date'];
-    $data['end_date'] = $_GET['end_date'];
 
-    //newly added, 2 lines
-    cache_set('pendency/reports'.session_id(), $output, 'cache', time() + 60*10);
-    $output .= l(t('XLS'), 'pendency/reports/export', array('query' => array($data)));
-    
+      // To create the download link
+      $data = array();
+      $data['start_date'] = $_GET['start_date'];
+      $data['end_date'] = $_GET['end_date'];
+
+      //newly added, 2 lines
+      cache_set('pendency/reports' . session_id(), $output, 'cache', time() + 60 * 10);
+      $output .= l(t('XLS'), 'pendency/reports/export', array('query' => array($data)));
     }
   }
-  return $form.$output;
+  return $form . $output;
 }
 
 /*
  * Page Callback for Pendency Report Sales Beat Wise
  */
+
 function pendency_report_sales_beat_wise_callback() {
   global $user;
   $user_id = $user->uid;
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
-  
-  if(arg(3) != 'export'){
+
+  if (arg(3) != 'export') {
     $form = drupal_render(drupal_get_form('pendency_report_filter_form'));
   }
-    
+
   if (isset($_GET['start_date']) && isset($_GET['end_date'])) {
     $start_date = strtotime($_GET['start_date']);
     $end_date = strtotime($_GET['end_date']);
-  
+
     $query = db_select('node', 'n');
     $query->condition('n.type', 'sales_register_data');
     $query->condition('n.uid', $distributor_id, '=');
@@ -257,11 +257,8 @@ function pendency_report_sales_beat_wise_callback() {
     $query->leftjoin('field_data_field_trip_id_reference', 'ti', 'ti.entity_id = n.nid');
     $query->leftjoin('field_data_field_dispatch_date', 'disp_date', 'disp_date.entity_id = ti.field_trip_id_reference_nid');
 
-    // bill counts
-    $query->addExpression('SUM(CASE WHEN (disp_date.field_dispatch_date_value IS NULL) THEN 1 ELSE 0 END)', 'bill_count');
-
-    // bill values
-    $query->addExpression('SUM(CASE WHEN (disp_date.field_dispatch_date_value IS NULL) THEN field_bill_value_value ELSE 0 END)', 'bill_value');
+    $query->addExpression('COUNT(n.title)', 'bill_count');
+    $query->addExpression('SUM(bv.field_bill_value_value)', 'bill_value');
 
     $query->addExpression('SUM(if(disp_date.field_dispatch_date_value IS NOT NULL, 1, 0))', 'trip_dispatch_sum');
     $query->addExpression('SUM(if(disp_date.field_dispatch_date_value IS NOT NULL, field_bill_value_value, 0))', 'trip_dispatch_value');
@@ -287,43 +284,53 @@ function pendency_report_sales_beat_wise_callback() {
         $row['pending_bill'] = ($data['bill_count'] - $data['trip_dispatch_sum']);
         $row['pending_bill_value'] = ($data['bill_value'] - $data['trip_dispatch_value']);
 
+        $total_bill_count += $data['bill_count'];
+        $total_bill_value += $data['bill_value'];
+        $total_dispatch_bill_count += $data['trip_dispatch_sum'];
+        $total_dispatch_bill_value += $data['trip_dispatch_value'];
+        $total_pending_bill += ($data['bill_count'] - $data['trip_dispatch_sum']);
+        $total_pending_bill_value += ($data['bill_value'] - $data['trip_dispatch_value']);
+
         $rows[] = $row;
       }
     }
 
     $header = array('Sr. No.', 'Bill Date', 'Sales Beat', 'Salesman', 'Bill Count', 'Bill Value', 'Dispatch Count', 'Dispatch Value', 'Pending Bill', 'Pending Bill Value');
-      
+    if (!empty($res)) {
+      $rows[] = array('Total', '', '', '', $total_bill_count, $total_bill_value, $total_dispatch_bill_count, $total_dispatch_bill_value, $total_pending_bill, $total_pending_bill_value);
+    }
+
     $output = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0'), 'empty' => t('No Records has been found')));
-  
+
     // To create the download link
     $data = array();
     $data['start_date'] = $_GET['start_date'];
     $data['end_date'] = $_GET['end_date'];
 
     //newly added, 2 lines
-    cache_set('pendency/reports/sales-beat-wise'.session_id(), $output, 'cache', time() + 60*10);
-    $output .= l(t('XLS'), 'pendency/reports/sales-beat-wise/export', array('query' => array($data)));
-    
+    cache_set('pendency/reports/sales-beat-wise' . session_id(), $output, 'cache', time() + 60 * 10);
+    $output .= l(t('XLS'), 'pendency/reports/sales-beat-wise/export', array('query' => array($data)));    
   }
-  return $form.$output;
+  return $form . $output;
 }
 
 /*
  * Page Callback for Pendency Report Pl Group Wise
  */
+
 function pendency_report_pl_group_wise_callback() {
   global $user;
   $user_id = $user->uid;
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
-  
-  if(arg(3) != 'export'){
+
+  if (arg(3) != 'export') {
     $form = drupal_render(drupal_get_form('pendency_report_filter_form'));
   }
-    
+
   if (isset($_GET['start_date']) && isset($_GET['end_date'])) {
     $start_date = strtotime($_GET['start_date']);
     $end_date = strtotime($_GET['end_date']);
-    
+
     $query = db_select('node', 'n');
     $query->condition('n.type', 'sales_register_data');
     $query->condition('n.uid', $distributor_id, '=');
@@ -340,16 +347,16 @@ function pendency_report_pl_group_wise_callback() {
     $query->leftjoin('field_data_field_trip_id_reference', 'ti', 'ti.entity_id = n.nid');
     $query->leftjoin('node', 'disn', 'disn.nid = ti.field_trip_id_reference_nid');
     $query->leftjoin('field_data_field_dispatch_date', 'fd', 'fd.entity_id = disn.nid');
- 
+
     $query->addExpression('COUNT(n.title)', 'bill_count');
     $query->addExpression('SUM(bv.field_bill_value_value)', 'bill_value');
-  
+
     $query->addExpression('SUM(if(fd.field_dispatch_date_value IS NOT NULL, 1, 0))', 'trip_dispatch_sum');
     $query->addExpression('SUM(if(fd.field_dispatch_date_value IS NOT NULL, field_bill_value_value, 0))', 'trip_dispatch_value');
     $query->fields('bd', array('field_sr_bill_date_value'));
     $query->fields('plg', array('field_pl_group_value'));
     //$query->fields('n', array('nid'));
- 
+
     $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
 
     if (!empty($res)) {
@@ -390,21 +397,20 @@ function pendency_report_pl_group_wise_callback() {
         $total_trip_dispatch_value,
         $total_pending_bill_count,
         $total_pending_bill_value
-    );
+      );
 
       $output = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
-    
-      
+
+
       // To create the download link
       $data = array();
       $data['start_date'] = $_GET['start_date'];
       $data['end_date'] = $_GET['end_date'];
 
       //newly added, 2 lines
-      cache_set('pendency/reports/pl-group-wise'.session_id(), $output, 'cache', time() + 60*10);
+      cache_set('pendency/reports/pl-group-wise' . session_id(), $output, 'cache', time() + 60 * 10);
       $output .= l(t('XLS'), 'pendency/reports/pl-group-wise/export', array('query' => array($data)));
-      
     }
   }
-  return $form.$output;
+  return $form . $output;
 }
