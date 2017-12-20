@@ -90,7 +90,7 @@ function fetch_sku_ean_mrp_data($rs_code, $api_time) {
         'flag' => 1
       ))
       ->condition('created_time', $time, '<')
-      ->condition('api_flag', '0', '=')
+      ->condition('flag', '0', '=')
       ->condition('rs_code', $rs_code, '=')
       ->execute();
   }
