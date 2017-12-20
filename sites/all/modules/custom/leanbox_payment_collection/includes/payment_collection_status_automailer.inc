@@ -214,7 +214,7 @@ function get_email_pending_for_collection($distributor_id, $download = FALSE) {
   $output .= theme('table', array('header' => $header, 'rows' => $row, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
   
   if ($download) {
-    $output1['header'] = $header;
+    $output1['header'] = array('', 'Till Date', 'Till Date', '1-10 Days from Declaration Date', '1-10 Days from Declaration Date', '11-15 Days from Declaration Date', '11-15 Days from Declaration Date', '16-30 Days from Declaration Date', '16-30 Days from Declaration Date', '>30 Days from Declaration Date', '>30 Days from Declaration Date');
     $output1['rows'] = $row;
 
     return $output1;
