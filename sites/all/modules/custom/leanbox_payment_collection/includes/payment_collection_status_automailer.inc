@@ -30,6 +30,13 @@ function send_email_payment_collection_status() {
   $mail_to = variable_get('collection_status_to_email');
   $from = variable_get('from_email');
   $filepath = DRUPAL_ROOT.'/sb_and_bounce_chq_status.xls';
+  $params['headers'] = array(
+                    'MIME-Version' => '1.0',
+                    'Content-Type' => 'text/html; charset=UTF-8;',
+                    'Content-Transfer-Encoding' => '8Bit',
+                    'X-Mailer' => 'Drupal'
+                );
+                drupal_set_message($filepath);
   $params['attachment'] = array(
       'filecontent' => file_get_contents($filepath),
       'filename' => 'sb_and_bounce_chq_status.xls',
@@ -54,11 +61,13 @@ function get_email_pending_for_collection($distributor_id) {
   $query->leftjoin('field_data_field_previous_cash_amt', 'pc', 'pc.entity_id = n.nid');
   $query->leftjoin('field_data_field_previous_cheque_amt', 'pch', 'pch.entity_id = n.nid');
   
-  // Want record where bill date is 1st oct onward
-  $timestamp = strtotime(date('2017-10-01'))-1;
+  // Want record of last 60 days based on billing date
+  $start_date = strtotime('-60 day', strtotime(date('Y-m-d')));
+  $end_date = strtotime(date('Y-m-d'));
+  //$timestamp = strtotime(date('2017-10-01'))-1;
   $query->join('field_data_field_sales_bill_no_ref', 'sbrf', 'sbrf.entity_id = n.nid');
   $query->join('field_data_field_sr_bill_date', 'sr', 'sr.entity_id = sbrf.field_sales_bill_no_ref_nid');
-  $query->condition('sr.field_sr_bill_date_value', $timestamp,'>');
+  $query->condition('sr.field_sr_bill_date_value', array($start_date, $end_date), 'BETWEEN');
   
   // Remove records where Closure Flag = 1
   $query->leftjoin('field_data_field_terminated_bill_flag', 'tf', 'tf.entity_id = n.nid');
@@ -211,15 +220,21 @@ function get_email_pending_for_assignment($distributor_id) {
   $query->leftjoin('field_data_field_previous_cash_amt', 'pc', 'pc.entity_id = n.nid');
   $query->leftjoin('field_data_field_previous_cheque_amt', 'pch', 'pch.entity_id = n.nid');
 
-  // Want record where bill date is 1st oct onward
-  $timestamp = strtotime(date('2017-10-01'))-1;
+  //$timestamp = strtotime(date('2017-10-01'))-1;
+  // Want record of last 45 days based on billing date
+  $start_date = strtotime('-45 day', strtotime(date('Y-m-d')));
+  $end_date = strtotime(date('Y-m-d'));
   $query->join('field_data_field_sales_bill_no_ref', 'sbrf', 'sbrf.entity_id = n.nid');
   $query->join('field_data_field_sr_bill_date', 'sr', 'sr.entity_id = sbrf.field_sales_bill_no_ref_nid');
-  $query->condition('sr.field_sr_bill_date_value', $timestamp,'>');
+  $query->condition('sr.field_sr_bill_date_value', array($start_date, $end_date), 'BETWEEN');
   
    // Remove records where Closure Flag = 1
   $query->leftjoin('field_data_field_terminated_bill_flag', 'tf', 'tf.entity_id = n.nid');
   $query->condition('tf.field_terminated_bill_flag_value', '1', '!=');
+  
+  // Remove records where status status if Fully Collected
+  $query->leftjoin('field_data_field_collection_status', 'cs', 'cs.entity_id = n.nid');
+  $query->condition('cs.field_collection_status_value', '2', '!=');
   
   $query->fields('n', array('nid'));
   $query->fields('dd', array('field_declaration_date_value'));
@@ -367,15 +382,21 @@ function get_email_pending_for_upload($distributor_id) {
   $query->leftjoin('field_data_field_previous_cash_amt', 'pc', 'pc.entity_id = n.nid');
   $query->leftjoin('field_data_field_previous_cheque_amt', 'pch', 'pch.entity_id = n.nid');
 
-  // Want record where bill date is 1st oct onward
-  $timestamp = strtotime(date('2017-10-01'))-1;
+ //$timestamp = strtotime(date('2017-10-01'))-1;
+  // Want record of last 45 days based on billing date
+  $start_date = strtotime('-45 day', strtotime(date('Y-m-d')));
+  $end_date = strtotime(date('Y-m-d'));
   $query->join('field_data_field_sales_bill_no_ref', 'sbrf', 'sbrf.entity_id = n.nid');
   $query->join('field_data_field_sr_bill_date', 'sr', 'sr.entity_id = sbrf.field_sales_bill_no_ref_nid');
-  $query->condition('sr.field_sr_bill_date_value', $timestamp,'>');
+  $query->condition('sr.field_sr_bill_date_value', array($start_date, $end_date), 'BETWEEN');
   
    // Remove records where Closure Flag = 1
   $query->leftjoin('field_data_field_terminated_bill_flag', 'tf', 'tf.entity_id = n.nid');
   $query->condition('tf.field_terminated_bill_flag_value', '1', '!=');
+  
+  // Remove records where status status if Fully Collected
+  $query->leftjoin('field_data_field_collection_status', 'cs', 'cs.entity_id = n.nid');
+  $query->condition('cs.field_collection_status_value', '2', '!=');
   
   $query->fields('n', array('nid'));
   $query->fields('dd', array('field_declaration_date_value'));
