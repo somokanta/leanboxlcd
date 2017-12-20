@@ -161,7 +161,7 @@ function insert_data_in_sku_ean_mrp_table($data, $rs_code) {
         'sku' => $sku7_code,
         'ean' => $ean,
         'mrp' => $mrp,
-        'rs_code' => rs_code,
+        'rs_code' => $rs_code,
         'flag' => 0, // enable for api
         'created_time' => REQUEST_TIME
       ))
