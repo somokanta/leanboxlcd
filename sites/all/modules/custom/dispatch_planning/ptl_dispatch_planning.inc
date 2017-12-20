@@ -86,7 +86,7 @@ function fetch_sku_ean_mrp_data($rs_code, $api_time) {
 
     db_update('sku_ean_mrp') // Table name no longer needs {}
       ->fields(array(
-        'fetch_time' => $api_time,
+        'api_fetch_time' => $api_time,
         'flag' => 1
       ))
       ->condition('created_time', $time, '<')
