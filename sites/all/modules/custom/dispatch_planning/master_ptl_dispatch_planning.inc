@@ -52,6 +52,8 @@ function fetch_master_ptl_data($rs_code, $api_time) {
       ->condition('rs_code', $rs_code, '=')
       ->condition('loose', 1, '>=')
       ->execute();
+    
+    insert_master_ptl_header_data($header_result);
   }
   else {
     $results['flag'] = '0';
@@ -534,4 +536,55 @@ function get_all_bills_of_trip_id($dispatch_data_nid) {
   $sales_register_titles = $query->execute()->fetchField();
   $bills = explode(',', $sales_register_titles);
   return $bills;
+}
+
+/**
+ * it will call to insert the header data in header table
+ */
+function insert_master_ptl_header_data($header_result) {
+  foreach ($header_result as $value) {
+    $result = db_merge('ptl_header_data')
+      ->key(array('ptl_job' => $value->ptl_job, 'rs_code' => $value->rs_code, 'type' => 'MASTER_TRIP'))
+      ->fields(array(
+        'ptl_job' => $value->ptl_job,
+        'bill_lines' => $value->bill_lines,
+        'total_qty' => $value->total_qty,
+        'rs_code' => $value->rs_code,
+        'type' => 'MASTER_TRIP', // same table, diff is trip and master trip
+        'created_time' => REQUEST_TIME
+      ))
+      ->execute();
+  }
+}
+/**
+ * it will call for update the header data
+ * $ptl_job ,$trip_id, $rs_code, $vehicle,$bill_lines,$total_qty,$operator_id,$start_time,$end_time
+ */
+
+function update_master_ptl_header_data($ptl_job ,$trip_id, $rs_code, $vehicle,$bill_lines,$total_qty,$operator_id,$start_time,$end_time) {
+
+  $results['flag'] = '0';
+  $results['result'] = 'Data not found. Please check RS Code and PTL Job';
+
+   $result =  db_update('ptl_header_data') // Table name no longer needs {}
+      ->fields(array(
+        'trip_id' => $trip_id,
+        'vehicle' => $vehicle,
+        'res_bill_lines' => $bill_lines,
+        'res_total_qty' => $total_qty,
+        'operator_id' => $operator_id,
+        'start_time' => $start_time,
+        'end_time' => $end_time,
+        'updated_time' => time(),
+      ))
+      ->condition('ptl_job', $ptl_job, '=')
+      ->condition('type', 'MASTER_TRIP', '=')
+      ->condition('rs_code', $rs_code, '=')
+      ->execute();
+   
+  if($result){
+    $results['flag'] = '1';
+    $results['result'] = 'Updated Successfully';
+  }
+  return $results;
 }

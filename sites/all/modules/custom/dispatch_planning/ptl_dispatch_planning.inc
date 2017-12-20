@@ -52,6 +52,8 @@ function fetch_ptl_data($rs_code, $api_time) {
       ->condition('rs_code', $rs_code, '=')
       ->condition('loose', 1, '>=')
       ->execute();
+    
+    insert_ptl_header_data($header_result);
   }
   else {
     $results['flag'] = '0';
@@ -580,3 +582,57 @@ function get_child_desc_and_qty_by_parent_sku($sku7_code, $distributor_id) {
   $result['child_desc'] = ($row['field_product_name_value']) ? $row['field_product_name_value'] : '';
   return $result;
 }
+
+
+/**
+ * it will call to insert the header data in header table
+ */
+function insert_ptl_header_data($header_result) {
+  foreach ($header_result as $value) {
+    $result = db_merge('ptl_header_data')
+      ->key(array('ptl_job' => $value->ptl_job, 'rs_code' => $value->rs_code, 'type' => 'TRIP'))
+      ->fields(array(
+        'ptl_job' => $value->ptl_job,
+        'bill_lines' => $value->bill_lines,
+        'total_qty' => $value->total_qty,
+        'rs_code' => $value->rs_code,
+        'type' => 'TRIP', // same table diff is trip and master trip
+        'created_time' => REQUEST_TIME
+      ))
+      ->execute();
+  }
+}
+
+/**
+ * it will call for update the header data
+ * $ptl_job ,$trip_id, $rs_code, $vehicle,$bill_lines,$total_qty,$operator_id,$start_time,$end_time
+ */
+
+function update_ptl_header_data($ptl_job ,$trip_id, $rs_code, $vehicle,$bill_lines,$total_qty,$operator_id,$start_time,$end_time) {
+
+  $results['flag'] = '0';
+  $results['result'] = 'Data not found. Please check RS Code and PTL Job';
+
+   $result =  db_update('ptl_header_data') // Table name no longer needs {}
+      ->fields(array(
+        'trip_id' => $trip_id,
+        'vehicle' => $vehicle,
+        'res_bill_lines' => $bill_lines,
+        'res_total_qty' => $total_qty,
+        'operator_id' => $operator_id,
+        'start_time' => $start_time,
+        'end_time' => $end_time,
+        'updated_time' => time(),
+      ))
+      ->condition('ptl_job', $ptl_job, '=')
+      ->condition('type', 'TRIP', '=')
+      ->condition('rs_code', $rs_code, '=')
+      ->execute();
+   
+  if($result){
+    $results['flag'] = '1';
+    $results['result'] = 'Updated Successfully';
+  }
+  return $results;
+}
+

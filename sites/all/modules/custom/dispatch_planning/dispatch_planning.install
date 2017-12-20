@@ -1124,3 +1124,117 @@ function dispatch_planning_update_7114() {
    db_add_index('dispatch_planning_item_details', 'dp_sku_code', array('sku_code'));
 
 }
+
+/**
+ * Create new ptl_header_data table using hook_update_N()
+ */
+
+function dispatch_planning_update_7115() {
+  $schema['ptl_header_data'] = array(
+    'description' => 'PTL Header Level Data',
+    'fields' => array(
+      'id' => array(
+        'description' => t('Id Primary Key'),
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'ptl_job' => array(
+        'description' => t('PTL JOB'),
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'type' => array(
+        'description' => t('Type'),
+        'type' => 'varchar',
+        'length' => 15,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'trip_id' => array(
+        'description' => t('Trip ID'),
+        'type' => 'varchar',
+        'length' => 250,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'rs_code' => array(
+        'description' => t('RS Code'),
+        'type' => 'varchar',
+        'length' => 15,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'vehicle' => array(
+        'description' => t('Vehicle No'),
+        'type' => 'varchar',
+        'length' => 250,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'bill_lines' => array(
+        'description' => t('Bill Lines'),
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'res_bill_lines' => array(
+        'description' => t('Response Bill Lines'),
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'total_qty' => array(
+        'description' => t('Totla QTY'),
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'res_total_qty' => array(
+        'description' => t('Response Totla QTY'),
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+
+      'operator_id' => array(
+        'description' => t('Operator ID'),
+        'type' => 'varchar',
+        'length' => 50,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      //Start Date/Time,End Date Time    
+      'start_time' => array(
+        'description' => t('Start Date/Time'),
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'end_time' => array(
+        'description' => t('End Date Time'),
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'created_time' => array(
+        'description' => t('Created Time'),
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'updated_time' => array(
+        'description' => t('Updated Time'),
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    ),
+    'primary key' => array('id'),
+    'indexes' => array(
+      'ptl_job' => array('ptl_job'),
+      'rs_code' => array('rs_code'),
+    ),
+  );
+  db_create_table('ptl_header_data', $schema['ptl_header_data']);
+}

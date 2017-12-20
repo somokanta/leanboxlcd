@@ -394,6 +394,228 @@ function dispatch_planning_services_resources() {
             'name' => 'ptl_dispatch_planning'
           ),
           'access arguments' => array('services_access_ptl_api'),
+        ),
+        'ptl-header-data-update' => array(
+          'help' => 'Update PTL Header Data',
+          'callback' => 'update_ptl_header_data',
+          'args' => array(
+            array(
+              'name' => 'ptl_job',
+              'type' => 'string',
+              'description' => 'PTL JOB',
+              'source' => array('data' => 'ptl_job'),
+              'optional' => FALSE,
+            ),
+            array(
+              'name' => 'trip_id',
+              'type' => 'string',
+              'description' => 'Trip ID',
+              'source' => array('data' => 'trip_id'),
+              'optional' => FALSE,
+            ),
+            array(
+              'name' => 'rs_code',
+              'type' => 'string',
+              'description' => 'Rs Code',
+              'source' => array('data' => 'rs_code'),
+              'optional' => FALSE,
+            ),
+            array(
+              'name' => 'vehicle',
+              'type' => 'string',
+              'description' => 'Vehicle',
+              'source' => array('data' => 'vehicle'),
+              'optional' => FALSE,
+            ),
+            array(
+              'name' => 'bill_lines',
+              'type' => 'string',
+              'description' => 'Bill Lines',
+              'source' => array('data' => 'bill_lines'),
+              'optional' => FALSE,
+            ),
+            array(
+              'name' => 'total_qty',
+              'type' => 'string',
+              'description' => 'Totla QTY',
+              'source' => array('data' => 'total_qty'),
+              'optional' => FALSE,
+            ),
+            array(
+              'name' => 'operator_id',
+              'type' => 'string',
+              'description' => 'Operator ID',
+              'source' => array('data' => 'operator_id'),
+              'optional' => FALSE,
+            ),
+            array(
+              'name' => 'start_time',
+              'type' => 'string',
+              'description' => 'Start Date/Time',
+              'source' => array('data' => 'start_time'),
+              'optional' => FALSE,
+            ),
+            array(
+              'name' => 'end_time',
+              'type' => 'string',
+              'description' => 'End Date Time',
+              'source' => array('data' => 'end_time'),
+              'optional' => FALSE,
+            ),
+          ),
+          'file' => array(
+            'type' => 'inc',
+            'module' => 'dispatch_planning',
+            'name' => 'ptl_dispatch_planning'
+          ),
+          'access arguments' => array('services_access_ptl_api'),
+        ),
+//MASTER PTL
+        'master-ptl-api-data-fetch' => array(
+          'help' => 'Get Master PTL Data',
+          'callback' => 'fetch_master_ptl_data',
+          'args' => array(
+            array(
+              'name' => 'rs_code',
+              'type' => 'string',
+              'description' => 'RS Code',
+              'source' => array('data' => 'rs_code'),
+              'optional' => FALSE,
+            ),
+            array(
+              'name' => 'api_time',
+              'type' => 'string',
+              'description' => 'Pass last fetch time',
+              'source' => array('data' => 'api_time'),
+              'optional' => FALSE,
+            ),
+          ),
+          'file' => array(
+            'type' => 'inc',
+            'module' => 'dispatch_planning',
+            'name' => 'master_ptl_dispatch_planning'
+          ),
+          'access arguments' => array('services_access_ptl_api'),
+        ),
+        'master-ptl-api-data-update' => array(
+          'help' => 'Update Master PTL Data',
+          'callback' => 'update_master_ptl_data',
+          'args' => array(
+            array(
+              'name' => 'unique_id',
+              'type' => 'string',
+              'description' => 'Unique ID',
+              'source' => array('data' => 'unique_id'),
+              'optional' => FALSE,
+            ),
+            array(
+              'name' => 'update_time',
+              'type' => 'string',
+              'description' => 'Pass update time',
+              'source' => array('data' => 'update_time'),
+              'optional' => FALSE,
+            ),
+          ),
+          'file' => array(
+            'type' => 'inc',
+            'module' => 'dispatch_planning',
+            'name' => 'master_ptl_dispatch_planning'
+          ),
+          'access arguments' => array('services_access_ptl_api'),
+        ),
+        'master-ptl-api-put-qty' => array(
+          'help' => 'Qty update Master PTL Data',
+          'callback' => 'put_qty_master_ptl_data',
+          'args' => array(
+            array(
+              'name' => 'id_qty',
+              'type' => 'string',
+              'description' => 'ID and Put QTY',
+              'source' => array('data' => 'id_qty'),
+              'optional' => FALSE,
+            ),
+          ),
+          'file' => array(
+            'type' => 'inc',
+            'module' => 'dispatch_planning',
+            'name' => 'master_ptl_dispatch_planning'
+          ),
+          'access arguments' => array('services_access_ptl_api'),
+        ),
+        'master-ptl-header-data-update' => array(
+          'help' => 'Update PTL Header Data',
+          'callback' => 'update_master_ptl_header_data',
+          'args' => array(
+            array(
+              'name' => 'ptl_job',
+              'type' => 'string',
+              'description' => 'PTL JOB',
+              'source' => array('data' => 'ptl_job'),
+              'optional' => FALSE,
+            ),
+            array(
+              'name' => 'trip_id',
+              'type' => 'string',
+              'description' => 'Trip ID',
+              'source' => array('data' => 'trip_id'),
+              'optional' => FALSE,
+            ),
+            array(
+              'name' => 'rs_code',
+              'type' => 'string',
+              'description' => 'Rs Code',
+              'source' => array('data' => 'rs_code'),
+              'optional' => FALSE,
+            ),
+            array(
+              'name' => 'vehicle',
+              'type' => 'string',
+              'description' => 'Vehicle',
+              'source' => array('data' => 'vehicle'),
+              'optional' => FALSE,
+            ),
+            array(
+              'name' => 'bill_lines',
+              'type' => 'string',
+              'description' => 'Bill Lines',
+              'source' => array('data' => 'bill_lines'),
+              'optional' => FALSE,
+            ),
+            array(
+              'name' => 'total_qty',
+              'type' => 'string',
+              'description' => 'Totla QTY',
+              'source' => array('data' => 'total_qty'),
+              'optional' => FALSE,
+            ),
+            array(
+              'name' => 'operator_id',
+              'type' => 'string',
+              'description' => 'Operator ID',
+              'source' => array('data' => 'operator_id'),
+              'optional' => FALSE,
+            ),
+                        array(
+              'name' => 'start_time',
+              'type' => 'string',
+              'description' => 'Start Date/Time',
+              'source' => array('data' => 'start_time'),
+              'optional' => FALSE,
+            ),
+                        array(
+              'name' => 'end_time',
+              'type' => 'string',
+              'description' => 'End Date Time',
+              'source' => array('data' => 'end_time'),
+              'optional' => FALSE,
+            ),
+          ),
+          'file' => array(
+            'type' => 'inc',
+            'module' => 'dispatch_planning',
+            'name' => 'master_ptl_dispatch_planning'
+          ),
+          'access arguments' => array('services_access_ptl_api'),
         ),        
       ),
     ),
