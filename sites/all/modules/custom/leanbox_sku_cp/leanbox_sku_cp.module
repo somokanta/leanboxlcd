@@ -31,6 +31,15 @@ function leanbox_sku_cp_menu() {
      'access arguments' => array('sku cp'),
      'type' => MENU_CALLBACK,
    );
+  // Upload form for sales register data
+  $items['sku-ean-mrp/import'] = array(
+    'title' => 'Import SKU7 EAN and MRP',
+    'description' => 'Import SKU7 EAN and MRP',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('sku_ean_mrp_feeds_import_form'),
+    'access arguments' => array('Distributor Upload File'),
+    'file' => 'form/sku_ean_mrp.inc',
+  );   
    return $items;
 }
 
@@ -49,6 +58,16 @@ function leanbox_sku_cp_permission() {
        'description' => t('sku upload validation')
      )
    );
+}
+
+/**
+ * Implements of hook_views_api().
+ */
+function leanbox_sku_cp_views_api() {
+  return array(
+    'api' => 3,
+    'path' => drupal_get_path('module', 'leanbox_sku_cp') . '/views'
+  );
 }
 
 /**

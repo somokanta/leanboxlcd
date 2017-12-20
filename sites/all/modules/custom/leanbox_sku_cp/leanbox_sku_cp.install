@@ -1,0 +1,71 @@
+<?php
+
+/*
+ * Implement hook_schema.
+ */
+
+function leanbox_sku_cp_schema() {
+  $schema['sku_ean_mrp'] = array(
+    'description' => 'Sequence for EAN ID',
+    'fields' => array(
+      'id' => array(
+        'description' => 'The primary identifier for a data',
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'sku' => array(
+        'description' => 'Sku',
+        'type' => 'varchar',
+        'length' => 25,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'ean' => array(
+        'description' => 'EAN',
+        'type' => 'varchar',
+        'length' => 25,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'mrp' => array(
+        'description' => 'MRP',
+        'type' => 'float',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'flag' => array(
+        'description' => 'Flag',
+        'type' => 'int',
+        'length' => 1,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'distributor_id' => array(
+        'description' => 'distributor_id',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'created_time' => array(
+        'description' => 'Created Time',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'api_fetch_time' => array(
+        'description' => 'API Fetch Time',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    ),
+    'indexes' => array(
+      'sku' => array('sku'),
+    ),
+    'primary key' => array('id'),
+  );
+
+//Run on live. because module is already created  
+//db_create_table('sku_ean_mrp', $schema['sku_ean_mrp']); 
+  return $schema;
+}
