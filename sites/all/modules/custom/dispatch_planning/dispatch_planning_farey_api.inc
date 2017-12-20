@@ -15,8 +15,8 @@ function fetch_dispatch_planning_api_data($json_data) {
       
       // first entry in log table
       // get dis id using rs code
-      $dis_id = leanbox_mobile_get_distributor_using_rscode($data['hubCode']);
-      dispatch_planning_api_log($json_data, $data['LB_RunsheetNo'], 'farey_sales_deliver', $dis_id, 1);
+      $dis_id = leanbox_mobile_get_distributor_using_rscode($data['jobData']['hub']);
+      dispatch_planning_api_log($json_data, $data['jobData']['runsheet_number'], 'farey_sales_deliver', $dis_id, 1);
       
       $updated_bill_row_id = db_update('dispatch_planning_api_data') // Table name no longer needs {}
           ->fields(array(

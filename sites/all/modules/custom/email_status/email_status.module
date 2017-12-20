@@ -2911,6 +2911,8 @@ function email_status_mail($key, &$message, $params) {
     case 'collection_status':
       $message['subject'] = $params['subject'];
       $message['body'][] = $params['body'];
+      $message['headers'] += $params['headers'];
+      $message['params']['attachments'][] = $params['attachment'];
       break;
   }
 }
