@@ -38,7 +38,7 @@ function send_email_payment_collection_status() {
   $dir = 'public://COLLECTION_STATUS';
   file_prepare_directory($dir, FILE_CREATE_DIRECTORY);
   
-  $file = fopen('public://COLLECTION_STATUS', 'w');
+  $file = fopen($file_uri, 'w');
   
   $table = get_email_pending_for_collection($distributor_id, TRUE);
   fputcsv($file, $table['header']);
