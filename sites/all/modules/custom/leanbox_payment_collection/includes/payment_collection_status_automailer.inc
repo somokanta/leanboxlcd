@@ -29,6 +29,12 @@ function send_email_payment_collection_status() {
   $params['body'] = $pending_for_collection_html . "<br>" . $pending_for_assignment_html . "<br>" . $pending_for_upload_html . "<br>" . $pending_for_yesterday_assignment_html . "<br>" . $today_petty_cash_transaction_html;
   $mail_to = variable_get('collection_status_to_email');
   $from = variable_get('from_email');
+  $filepath = DRUPAL_ROOT.'/sb_and_bounce_chq_status.xls';
+  $params['attachment'] = array(
+      'filecontent' => file_get_contents($filepath),
+      'filename' => 'sb_and_bounce_chq_status.xls',
+      'filemime' => 'text/xls',
+    );
 
   drupal_mail('email_status', 'collection_status', $mail_to, LANGUAGE_NONE, $params, $from);
 }
