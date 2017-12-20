@@ -167,3 +167,22 @@ function _get_feeds_url_for_sku_callabck($callback_arg1, $arg2) {
    module_load_include('inc', 'feeds', 'feeds.pages.inc');
    return drupal_get_form($callback_arg1, $arg2);
 }
+
+
+/**
+ * Implements hook_entity_info().
+ */
+function leanbox_sku_cp_entity_info() {
+
+  $info = array();
+
+  $info['sku_ean_mrp'] = array(
+    'label' => t('SKU EAN MAP Entity'),
+    'base table' => 'sku_ean_mrp',
+    'entity keys' => array(
+      'id' => 'id',
+    ),
+  );
+
+  return $info;
+}
