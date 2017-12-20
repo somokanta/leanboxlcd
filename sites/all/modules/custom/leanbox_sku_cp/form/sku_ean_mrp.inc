@@ -55,7 +55,7 @@ function sku_ean_mrp_feeds_import_form_submit($form, &$form_state) {
   global $user;
   $user_id = $user->uid;
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
-
+  $rs_code = dispatch_planning_get_rscode_using_uid($distributor_id);
   $file = $form_state['values']['file'];
   $filepath = $file->uri;
 
@@ -78,7 +78,7 @@ function sku_ean_mrp_feeds_import_form_submit($form, &$form_state) {
   $operations = array();
   $data_chunk = array_chunk($datas, 1);
   foreach ($data_chunk as $data) {
-    $operations[] = array('sku_ean_mrp_upload_batch_process', array($data, $distributor_id));
+    $operations[] = array('sku_ean_mrp_upload_batch_process', array($data, $rs_code));
   }
   $batch = array(
     'title' => t('Reading SKU7 EAN and MRP Csv'),
@@ -92,7 +92,7 @@ function sku_ean_mrp_feeds_import_form_submit($form, &$form_state) {
   batch_set($batch);
 }
 
-function sku_ean_mrp_upload_batch_process($data, $distributor_id, &$context) {
+function sku_ean_mrp_upload_batch_process($data, $rs_code, &$context) {
   if (!isset($context['results']['sku_code_result'])) {
     // check sku7 code is present or not.
     $context['results']['sku_code_result'] = check_sku7_code_exist_or_not();
@@ -108,7 +108,7 @@ function sku_ean_mrp_upload_batch_process($data, $distributor_id, &$context) {
       $error_text = "\n" . $sku7_code . " SKU7_CODE is not present in SKU7_CODE Master.";
       drupal_set_message($error_text, 'error');
     }
-    $exist_sku_of_ean = check_ean_combination_with_other_sku($ean, $sku7_code, $distributor_id);
+    $exist_sku_of_ean = check_ean_combination_with_other_sku($ean, $sku7_code, $rs_code);
     if ($exist_sku_of_ean) {
       $context['results']['error_flag'] = 1;
       $error_text = "\n" . $ean . "is already present with SKU7_CODE " . $exist_sku_of_ean . " and you are uploading with SKU7_CODE $sku7_code";
@@ -118,7 +118,7 @@ function sku_ean_mrp_upload_batch_process($data, $distributor_id, &$context) {
 
   if ($context['results']['error_flag'] == 0) {
     // insert into custom sales table
-    insert_data_in_sku_ean_mrp_table($data, $distributor_id);
+    insert_data_in_sku_ean_mrp_table($data, $rs_code);
   }
 }
 
@@ -139,29 +139,29 @@ function sku_ean_mrp_csv_finished($success, $results, $operations) {
 }
 
 //check ean combination with sku except passed sku
-function check_ean_combination_with_other_sku($ean, $sku7_code, $distributor_id) {
+function check_ean_combination_with_other_sku($ean, $sku7_code, $rs_code) {
   $query = db_select('sku_ean_mrp', 'sem');
   $query->condition('sem.sku', $sku7_code, '!=');
   $query->condition('sem.ean', $ean, '=');
-  $query->condition('sem.distributor_id', $distributor_id, '=');
+  $query->condition('sem.rs_code', $rs_code, '=');
   $query->fields('sem', array('sku'));
   $exist_sku_of_ean = $query->execute()->fetchField();
   return $exist_sku_of_ean;
 }
 
-function insert_data_in_sku_ean_mrp_table($data, $distributor_id) {
+function insert_data_in_sku_ean_mrp_table($data, $rs_code) {
   foreach ($data as $value) {
     $sku7_code = $value['SKU7_Code'];
     $ean = $value['EAN'];
     $mrp = $value['MRP'];
 
     db_merge('sku_ean_mrp')
-      ->key(array('sku' => $sku7_code, 'ean' => $ean, 'distributor_id' => $distributor_id))
+      ->key(array('sku' => $sku7_code, 'ean' => $ean, 'rs_code' => $rs_code))
       ->fields(array(
         'sku' => $sku7_code,
         'ean' => $ean,
         'mrp' => $mrp,
-        'distributor_id' => $distributor_id,
+        'rs_code' => rs_code,
         'flag' => 0, // enable for api
         'created_time' => REQUEST_TIME
       ))

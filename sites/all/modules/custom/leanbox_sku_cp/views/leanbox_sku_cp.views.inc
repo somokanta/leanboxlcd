@@ -114,9 +114,9 @@ function leanbox_sku_cp_views_data() {
      ),
    );   
    // vehicle
-   $data['sku_ean_mrp']['distributor_id'] = array(
-     'title' => t('Distributor Id'),
-     'help' => t('Distributor Id'),
+   $data['sku_ean_mrp']['rs_code'] = array(
+     'title' => t('RS Code'),
+     'help' => t('RS Code'),
      'field' => array(
        'handler' => 'views_handler_field',
        'click sortable' => TRUE,
