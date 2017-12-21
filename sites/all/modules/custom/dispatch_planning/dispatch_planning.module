@@ -306,7 +306,7 @@ function dispatch_planning_services_resources() {
               'name' => 'data',
               'type' => 'array',
               'description' => 'Post data',
-              'source' => array('data'),
+              'source' => 'data',
               'optional' => TRUE,
             ),
           ),
