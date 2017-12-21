@@ -11,7 +11,7 @@ function send_email_payment_collection_status() {
   $distributor_name = change_feeds_import_get_distributor_name($distributor_id);
   
   // Pending For Collection
-  $pending_for_collection_html = get_email_pending_for_collection($distributor_id);
+  $pending_for_collection_html = get_email_pending_for_collection($distributor_id, FALSE);
   
   // Pending For Assignment
   $pending_for_assignment_html = get_email_pending_for_assignment($distributor_id);
@@ -29,18 +29,29 @@ function send_email_payment_collection_status() {
   $params['body'] = $pending_for_collection_html . "<br>" . $pending_for_assignment_html . "<br>" . $pending_for_upload_html . "<br>" . $pending_for_yesterday_assignment_html . "<br>" . $today_petty_cash_transaction_html;
   $mail_to = variable_get('collection_status_to_email');
   $from = variable_get('from_email');
-  $filepath = DRUPAL_ROOT.'/sb_and_bounce_chq_status.xls';
-  $params['headers'] = array(
-                    'MIME-Version' => '1.0',
-                    'Content-Type' => 'text/html; charset=UTF-8;',
-                    'Content-Transfer-Encoding' => '8Bit',
-                    'X-Mailer' => 'Drupal'
-                );
-                drupal_set_message($filepath);
+  
+  $file_name = 'Pending_Collection.csv';
+
+  $file_uri = 'public://COLLECTION_STATUS/' . $file_name;
+  
+  // create directory if not exist
+  $dir = 'public://COLLECTION_STATUS';
+  file_prepare_directory($dir, FILE_CREATE_DIRECTORY);
+  
+  $file = fopen($file_uri, 'w');
+  
+  $table = get_email_pending_for_collection($distributor_id, TRUE);
+  fputcsv($file, $table['header']);
+  foreach ($table['rows'] as $line) {
+    fputcsv($file, $line);
+  }
+
+  fclose($file);
+ 
   $params['attachment'] = array(
-      'filecontent' => file_get_contents($filepath),
-      'filename' => 'sb_and_bounce_chq_status.xls',
-      'filemime' => 'text/xls',
+      'filecontent' => file_get_contents($file_uri),
+      'filename' => $file_name,
+      'filemime' => 'text/csv',
     );
 
   drupal_mail('email_status', 'collection_status', $mail_to, LANGUAGE_NONE, $params, $from);
@@ -49,7 +60,7 @@ function send_email_payment_collection_status() {
 /*
  * Returns table of Pending for Collection
  */
-function get_email_pending_for_collection($distributor_id) {
+function get_email_pending_for_collection($distributor_id, $download = FALSE) {
   $query = db_select('node', 'n');
   $query->condition('n.type', 'payment_collection');
   $query->condition('n.uid', $distributor_id, '=');
@@ -201,7 +212,13 @@ function get_email_pending_for_collection($distributor_id) {
   $header = array('', array('data' => 'Till Date', 'colspan' => 2), array('data' => '1-10 Days from Declaration Date', 'colspan' => 2), array('data' => '11-15 Days from Declaration Date', 'colspan' => 2), array('data' => '16-30 Days from Declaration Date', 'colspan' => 2), array('data' => '>30 Days from Declaration Date', 'colspan' => 2));
   $output = "<h3>Pending for Collection</h3>";
   $output .= theme('table', array('header' => $header, 'rows' => $row, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
+  
+  if ($download) {
+    $output1['header'] = array('', 'Till Date', 'Till Date', '1-10 Days from Declaration Date', '1-10 Days from Declaration Date', '11-15 Days from Declaration Date', '11-15 Days from Declaration Date', '16-30 Days from Declaration Date', '16-30 Days from Declaration Date', '>30 Days from Declaration Date', '>30 Days from Declaration Date');
+    $output1['rows'] = $row;
 
+    return $output1;
+  }
   return $output;
 }
 
