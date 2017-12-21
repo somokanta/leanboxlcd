@@ -6,12 +6,13 @@
  */
 
 function fetch_dispatch_planning_api_data($json_data) {
+   
    watchdog('$json_data', '<pre>' . print_r($json_data, TRUE) . '</pre>');
 
    if (!empty($json_data)) {
 
       // data is in json format always so decode it
-      $data = json_decode($json_data, true);
+      $data = ($json_data);
          watchdog('$json_data$data', '<pre>' . print_r($data, TRUE) . '</pre>');
 
       // first entry in log table
