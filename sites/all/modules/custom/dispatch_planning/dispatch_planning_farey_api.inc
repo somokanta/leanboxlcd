@@ -61,6 +61,11 @@ function fetch_dispatch_planning_api_data($json_data) {
 
       if (!empty($updated_bill_row_id)) {
          foreach ($data['fieldData']['item_details1'] as $key => $value) {
+
+            // ignore if value is not in form of array
+            if (!is_array($value)) {
+              continue;
+            }
             db_update('dispatch_planning_item_details') // Table name no longer needs {}
                 ->fields(array(
                   'res_sku_actual_quantity1' => $value['sku_actual_quantity1'],
