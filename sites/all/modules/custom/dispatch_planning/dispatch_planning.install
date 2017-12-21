@@ -113,7 +113,7 @@ function dispatch_planning_update_7105() {
       'referenceNo' => array(
         'description' => t('RS Code_Bill Number'),
         'type' => 'varchar',
-        'length' => 25,
+        'length' => 80,
         'not null' => TRUE,
         'default' => '',
       ),

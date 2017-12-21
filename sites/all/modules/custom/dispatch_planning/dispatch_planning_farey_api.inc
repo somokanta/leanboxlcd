@@ -5,19 +5,14 @@
  * 
  */
 
-function fetch_dispatch_planning_api_data($json_data) {
+function fetch_dispatch_planning_api_data($data) {
    
-   watchdog('$json_data', '<pre>' . print_r($json_data, TRUE) . '</pre>');
-
-   if (!empty($json_data)) {
-
-      // data is in json format always so decode it
-      $data = ($json_data);
-         watchdog('$json_data$data', '<pre>' . print_r($data, TRUE) . '</pre>');
+   if (!empty($data)) {
 
       // first entry in log table
       // get dis id using rs code
       $dis_id = leanbox_mobile_get_distributor_using_rscode($data['hubCode']);
+      $json_data = json_encode($json_data);
       dispatch_planning_api_log($json_data, $data['jobData']['runsheet_number'], 'farey_sales_deliver', $dis_id, 1);
       
       $updated_bill_row_id = db_update('dispatch_planning_api_data') // Table name no longer needs {}
