@@ -6,7 +6,7 @@
  */
 
 function fetch_dispatch_planning_api_data($data) {
-   
+   watchdog('request data', '<pre>' . print_r($data,TRUE). '</pre>');
    if (!empty($data)) {
 
       // first entry in log table
