@@ -74,7 +74,7 @@ function fetch_sku_ean_mrp_data($rs_code, $api_time) {
 
   $query = db_select('sku_ean_mrp', 'p');
   $query->addField('p', 'sku', 'sku_code');
-  $query->fields('p', array('ean', 'mrp','rs_code'));
+  $query->fields('p', array('ean', 'mrp','rs_code','deleted'));
   $query->condition('created_time', $time, '<');
   $query->condition('p.flag', '0', '=');
   $query->condition('p.rs_code', $rs_code, '=');

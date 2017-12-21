@@ -41,7 +41,7 @@ function leanbox_sku_cp_views_data() {
        'handler' => 'views_handler_argument_string',
      ),
    );
-   // ptl_job
+   // sku
    $data['sku_ean_mrp']['sku'] = array(
      'title' => t('SKU7_Code'),
      'help' => t('SKU7_Code'),
@@ -59,7 +59,7 @@ function leanbox_sku_cp_views_data() {
        'handler' => 'views_handler_argument_string',
      ),
    );
-   // 	rs_code
+   // 	ean
    $data['sku_ean_mrp']['ean'] = array(
      'title' => t('EAN'),
      'help' => t('EAN'),
@@ -77,7 +77,7 @@ function leanbox_sku_cp_views_data() {
        'handler' => 'views_handler_argument_string',
      ),
    );
-   // 	trip_id
+   // 	mrp
    $data['sku_ean_mrp']['mrp'] = array(
      'title' => t('MRP'),
      'help' => t('MRP'),
@@ -95,7 +95,7 @@ function leanbox_sku_cp_views_data() {
        'handler' => 'views_handler_argument_string',
      ),
    );
-   // type
+   // flag
    $data['sku_ean_mrp']['flag'] = array(
      'title' => t('Flag'),
      'help' => t('Flag'),
@@ -112,8 +112,26 @@ function leanbox_sku_cp_views_data() {
      'argument' => array(
        'handler' => 'views_handler_argument_string',
      ),
-   );   
-   // vehicle
+   );
+   // deleted
+   $data['sku_ean_mrp']['deleted'] = array(
+     'title' => t('Deleted'),
+     'help' => t('Deleted'),
+     'field' => array(
+       'handler' => 'views_handler_field',
+       'click sortable' => TRUE,
+     ),
+     'sort' => array(
+       'handler' => 'views_handler_sort',
+     ),
+     'filter' => array(
+       'handler' => 'views_handler_filter_string',
+     ),
+     'argument' => array(
+       'handler' => 'views_handler_argument_string',
+     ),
+   );    
+   // rs_code
    $data['sku_ean_mrp']['rs_code'] = array(
      'title' => t('RS Code'),
      'help' => t('RS Code'),
@@ -151,7 +169,7 @@ function leanbox_sku_cp_views_data() {
        'handler' => 'views_handler_filter_date',
      ),
    ); 
-   // updated_time
+   // api_fetch_time
    $data['sku_ean_mrp']['api_fetch_time'] = array(
      'title' => t('API Fetch Time'),
      'help' => t('API Fetch Time'),
