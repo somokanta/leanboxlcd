@@ -303,10 +303,10 @@ function dispatch_planning_services_resources() {
           'callback' => 'fetch_dispatch_planning_api_data',
           'args' => array(
             array(
-              'data' => 'data',
+              'name' => 'data',
               'type' => 'array',
               'description' => 'Post data',
-              'source' => array(),
+              'source' => array('data'),
               'optional' => TRUE,
             ),
           ),
