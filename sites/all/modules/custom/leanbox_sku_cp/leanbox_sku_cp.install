@@ -40,6 +40,13 @@ function leanbox_sku_cp_schema() {
         'not null' => TRUE,
         'default' => 0,
       ),
+      'deleted' => array(
+        'description' => 'Deleted',
+        'type' => 'int',
+        'length' => 1,
+        'not null' => TRUE,
+        'default' => 0,
+      ),      
       'rs_code' => array(
         'description' => t('RS Code'),
         'type' => 'varchar',
