@@ -258,7 +258,6 @@ function get_attachment_pending_for_collection($distributor_id) {
   $query->leftjoin('field_data_field_assigned_person', 'ap', 'ap.entity_id = n.nid');
   $query->leftjoin('field_data_field_assignment_date', 'ad', 'ad.entity_id = n.nid');
   $query->leftjoin('field_data_field_collection_date', 'lcd', 'lcd.entity_id = n.nid');
-  $query->leftjoin('field_data_field_collection_date', 'lcd', 'lcd.entity_id = n.nid');
   $query->leftjoin('field_data_field_returned_bill_flag', 'rbf', 'rbf.entity_id = n.nid');
   $query->leftjoin('field_data_field_declaration_remarks', 'dr', 'dr.entity_id = n.nid');
   $query->leftjoin('field_data_field_return_remarks', 'rr', 'rr.entity_id = n.nid');
