@@ -1710,7 +1710,7 @@ function get_email_productivity_data_for_party_packing($start_date, $end_date = 
     }
   }
   else {
-    $party_pack_datewise_html .= "<tr><td style = 'border:1px solid #000;'>" . $target_data[$result['packer_type']] . "</td></tr>";
+    $party_pack_datewise_html .= "<tr><td style = 'border:1px solid #000;'>No Result Found</td></tr>";
   }
   $party_pack_datewise_html .= "</table>";
   return $party_pack_datewise_html;
@@ -1845,7 +1845,7 @@ function get_email_productivity_data_for_picking($start_date, $end_date = FALSE,
     }
   }
   else {
-    $picking_datewise_html .= "<tr><td style = 'border:1px solid #000;'>" . $target_data[$label_key] . "</td></tr>";
+    $picking_datewise_html .= "<tr><td style = 'border:1px solid #000;'>No Result Found</td></tr>";
   }
   $picking_datewise_html .= "</table>";
   return $picking_datewise_html;
