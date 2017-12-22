@@ -556,7 +556,7 @@ function get_email_pending_for_assignment($distributor_id) {
   $row[] = array('Total', $total_till_date_count, $total_till_date_value, $total_decl_date_count, $total_decl_date_value, $total_5days_decl_count, $total_5days_decl_value, $total_12days_decl_count, $total_12days_decl_value, $total_31days_decl_count, $total_31days_decl_value);
 
   $header = array('', array('data' => 'Till Date', 'colspan' => 2), array('data' => '1-10 Days from Declaration Date', 'colspan' => 2), array('data' => '11-15 Days from Declaration Date', 'colspan' => 2), array('data' => '16-30 Days from Declaration Date', 'colspan' => 2), array('data' => '>30 Days from Declaration Date', 'colspan' => 2));
-  $output = "<h3>Pending for Assignment</h3>";
+  $output = "<h3>Pending for Assignment(For Last 45 days from Declaration Date)Excluding Fully Collected or Forced Closed Cases</h3>";
   $output .= theme('table', array('header' => $header, 'rows' => $row, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
 
   return $output;
@@ -649,7 +649,7 @@ function get_email_pending_for_upload($distributor_id) {
   $row[] = array('Total', $total_till_date_count, $total_till_date_value, $total_decl_date_count, $total_decl_date_value);
 
   $header = array('', array('data' => 'Till Date', 'colspan' => 2), array('data' => '>2Days from Declaration Date', 'colspan' => 2));
-  $output = "<h3>Pending for Upload</h3>";
+  $output = "<h3>Pending for Upload(For Last 45 days from Declaration Date)Excluding Fully Collected or Forced Closed Cases</h3>";
   $output .= theme('table', array('header' => $header, 'rows' => $row, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
 
   return $output;
