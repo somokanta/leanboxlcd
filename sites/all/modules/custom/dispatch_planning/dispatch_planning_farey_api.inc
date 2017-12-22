@@ -5,18 +5,15 @@
  * 
  */
 
-function fetch_dispatch_planning_api_data($json_data) {
+function fetch_dispatch_planning_api_data($data) {
+   watchdog('request data', '<pre>' . print_r($data,TRUE). '</pre>');
+   if (!empty($data)) {
 
-
-   if (!empty($json_data)) {
-
-      // data is in json format always so decode it
-      $data = json_decode($json_data, true);
-      
       // first entry in log table
       // get dis id using rs code
       $dis_id = leanbox_mobile_get_distributor_using_rscode($data['hubCode']);
-      dispatch_planning_api_log($json_data, $data['LB_RunsheetNo'], 'farey_sales_deliver', $dis_id, 1);
+      $json_data = json_encode($json_data);
+      dispatch_planning_api_log($json_data, $data['jobData']['runsheet_number'], 'farey_sales_deliver', $dis_id, 1);
       
       $updated_bill_row_id = db_update('dispatch_planning_api_data') // Table name no longer needs {}
           ->fields(array(
@@ -61,6 +58,11 @@ function fetch_dispatch_planning_api_data($json_data) {
 
       if (!empty($updated_bill_row_id)) {
          foreach ($data['fieldData']['item_details1'] as $key => $value) {
+
+            // ignore if value is not in form of array
+            if (!is_array($value)) {
+              continue;
+            }
             db_update('dispatch_planning_item_details') // Table name no longer needs {}
                 ->fields(array(
                   'res_sku_actual_quantity1' => $value['sku_actual_quantity1'],

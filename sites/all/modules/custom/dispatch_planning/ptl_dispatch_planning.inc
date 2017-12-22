@@ -63,6 +63,45 @@ function fetch_ptl_data($rs_code, $api_time) {
 
   return $results;
 }
+/**
+ * 
+ * @param type $rs_code
+ * @param type $api_time
+ * @return string
+ */
+function fetch_sku_ean_mrp_data($rs_code, $api_time) {
+  $time = time() - 60 * 2; // send data which is created 5min befor, to avoid data loose of trip
+
+  $query = db_select('sku_ean_mrp', 'p');
+  $query->addField('p', 'sku', 'sku_code');
+  $query->fields('p', array('ean', 'mrp','rs_code','deleted'));
+  $query->condition('created_time', $time, '<');
+  $query->condition('p.flag', '0', '=');
+  $query->condition('p.rs_code', $rs_code, '=');
+  $result = $query->execute()->fetchAll();
+  
+  if (!empty($result)) {
+    $results['result'] = json_encode($result);
+    $results['flag'] = '1';
+
+    db_update('sku_ean_mrp') // Table name no longer needs {}
+      ->fields(array(
+        'api_fetch_time' => $api_time,
+        'flag' => 1
+      ))
+      ->condition('created_time', $time, '<')
+      ->condition('flag', '0', '=')
+      ->condition('rs_code', $rs_code, '=')
+      ->execute();
+  }
+  else {
+    $results['flag'] = '0';
+    $results['result'] = 'No Result';
+  }
+  // log entry and is remaining
+
+  return $results;
+}
 
 /*
  * it will call from, "ptl-api-data" services to update the time
