@@ -1167,8 +1167,10 @@ function send_email_productivity_emailer($todays_date_date, $distributor_name, $
 function send_party_packingand_picking_productivity_emailer() {
   $distributor_id = _DISTRIBUTOR_ID;
   $distributor_name = change_feeds_import_get_distributor_name($distributor_id);
-  $end_date = strtotime('-7 day', date('Y-m-d'));
-  $todays_date_date = strtotime(date('Y-m-d 00:00:00'));
+  //$end_date = strtotime('-7 day', date('Y-m-d'));
+  //$todays_date_date = strtotime(date('Y-m-d 00:00:00'));
+  $end_date = date('Y-m-d', strtotime('-7 day', strtotime(date('Y-m-d'))));
+  $todays_date_date = date('Y-m-d');
   $target_data = leanbox_dashboard_target_value_using_voc_name('productivity target');
 
   // Party Packing productivity
