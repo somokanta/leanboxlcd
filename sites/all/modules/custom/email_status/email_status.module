@@ -1186,7 +1186,7 @@ function send_party_packingand_picking_productivity_emailer() {
   //$loading_html = get_email_productivity_data_for_loading($end_date, $todays_date_date, $distributor_id);
 
 
-  $params['subject'] = "Productivity Progress Status-$distributor_name";
+  $params['subject'] = "Pick/Party Packing/LC Productivity Status-$distributor_name";
   $params['body'] = $party_packing_html . "<br>" . $picking_html . "<br>" . $loose_confirmation_html;
   $mail_to = variable_get('productivity_status_to_email');
   $from = variable_get('from_email');
@@ -1710,7 +1710,7 @@ function get_email_productivity_data_for_loading($start_date, $end_date = FALSE,
     $table_data[$date][$supervisor]['total_time'] += $time_per_transaction;
   }
 
-  $loading_productivity_html = "<h3>Loading Productivity</h3></br><h3>Loading Status (status:Completed)</h3><table class = 'pp-superwise-table' border='1' cellpadding='5' cellspacing='0'  style='color:#000; font-size: 13px;font-family: arial'>"
+  $loading_productivity_html = "<h3>Loading Productivity For Last 7 Days</h3></br><h3>Loading Status (status:Completed)</h3><table class = 'pp-superwise-table' border='1' cellpadding='5' cellspacing='0'  style='color:#000; font-size: 13px;font-family: arial'>"
     . "<th>Transaction Date</th>"
     . "<th>Loading Supervisor</th>"
     . "<th>Count of Vehicle Loaded</th>"
@@ -1829,7 +1829,7 @@ function get_email_productivity_data_for_loose_confirmation($start_date, $end_da
     $picking[$transaction_date][$picker_name][$type]['picking_type'] = $type;
   }
 
-  $loose_confirm_productivity_html = "<h3>Loose Confirmation Productivity</h3></br><h3>Loose Confirmation (status:Completed)</h3><table class = 'pp-superwise-table' border='1' cellpadding='5' cellspacing='0'  style='color:#000; font-size: 13px;font-family: arial'>"
+  $loose_confirm_productivity_html = "<h3>Loose Confirmation Productivity For Last 7 Days</h3></br><h3>Loose Confirmation (status:Completed)</h3><table class = 'pp-superwise-table' border='1' cellpadding='5' cellspacing='0'  style='color:#000; font-size: 13px;font-family: arial'>"
     . "<th>Transaction Date</th>"
     . "<th>Pick Confirm Name</th>"
     . "<th>Pick Confirm Supervisor</th>"
@@ -1958,7 +1958,7 @@ function get_email_productivity_data_for_party_packing($start_date, $end_date = 
   }
 
   $target_data = leanbox_dashboard_target_value_using_voc_name('productivity target');
-  $party_pack_datewise_html = "<h3>Party Packing Productivity</h3></br><h3>Party Packing (status:Completed)</h3><table class = 'pp-superwise-table' border='1' cellpadding='5' cellspacing='0'  style='color:#000; font-size: 13px;font-family: arial'>"
+  $party_pack_datewise_html = "<h3>Party Packing Productivity For Last 7 Days</h3></br><h3>Party Packing (status:Completed)</h3><table class = 'pp-superwise-table' border='1' cellpadding='5' cellspacing='0'  style='color:#000; font-size: 13px;font-family: arial'>"
     . "<th>Transaction Date</th>"
     . "<th>Party Packer name</th>"
     . "<th>Party Packing Supervisor</th>"
@@ -2090,7 +2090,7 @@ function get_email_productivity_data_for_picking($start_date, $end_date = FALSE,
   }
 
   $target_data = leanbox_dashboard_target_value_using_voc_name('productivity target');
-  $picking_datewise_html = "<h3>Picking Productivity</h3></br><h3>Picking (status:Completed)</h3><table class = 'pp-superwise-table' border='1' cellpadding='5' cellspacing='0'  style='color:#000; font-size: 13px;font-family: arial'>"
+  $picking_datewise_html = "<h3>Picking Productivity For Last 7 Days</h3></br><h3>Picking (status:Completed)</h3><table class = 'pp-superwise-table' border='1' cellpadding='5' cellspacing='0'  style='color:#000; font-size: 13px;font-family: arial'>"
     . "<th>Transaction Date</th>"
     . "<th>Picker Name</th>"
     . "<th>Picking Supervisor</th>"

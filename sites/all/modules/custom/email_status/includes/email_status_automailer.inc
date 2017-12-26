@@ -262,7 +262,7 @@ function get_email_crm_status_high_discounted_bills($distributor_id) {
     }
   
     $row[$dispatch_date]['total'] +=1;
-    $row[$dispatch_date]['per_delivered'] = round(($row[$dispatch_date]['delivered_status'] / $row[$dispatch_date]['total']) * 100);
+    $row[$dispatch_date]['per_delivered'] = round(($row[$dispatch_date]['delivered_status'] / $row[$dispatch_date]['total']) * 100).'%';
   }
 
   $header = array('Dispatch Date', 'Delivered', 'Undelivered', 'Not Dispatched', 'Blank', 'Total', '% Delivered');
@@ -274,7 +274,7 @@ function get_email_crm_status_high_discounted_bills($distributor_id) {
       $total_not_delivered += $value['notdispatched_status'];
       $total_blank += $value['blank_status'];
       $total += $value['total'];
-      $per_delivered += $value['per_delivered'];
+      $per_delivered = round(($total_delivered / $total) * 100).'%';
     }
     $row[] = array('Total', $total_delivered, $total_undelivered, $total_not_delivered, $total_blank, $total, $per_delivered);
   }
@@ -335,7 +335,7 @@ function get_email_crm_status_signed_bills($distributor_id) {
     }
   
     $row[$dispatch_date]['total'] +=1;
-    $row[$dispatch_date]['per_delivered'] = round(($row[$dispatch_date]['delivered_status'] / $row[$dispatch_date]['total']) * 100);
+    $row[$dispatch_date]['per_delivered'] = round(($row[$dispatch_date]['delivered_status'] / $row[$dispatch_date]['total']) * 100).'%';
   }
 
   $header = array('Dispatch Date', 'Delivered', 'Undelivered', 'Not Dispatched', 'Blank', 'Total', '% Delivered');
@@ -347,7 +347,7 @@ function get_email_crm_status_signed_bills($distributor_id) {
       $total_not_delivered += $value['notdispatched_status'];
       $total_blank += $value['blank_status'];
       $total += $value['total'];
-      $per_delivered += $value['per_delivered'];
+      $per_delivered = round(($total_delivered / $total) * 100).'%';
     }
     $row[] = array('Total', $total_delivered, $total_undelivered, $total_not_delivered, $total_blank, $total, $per_delivered);
   }
@@ -408,7 +408,7 @@ function get_email_crm_status_full_returned_bills($distributor_id) {
     }
   
     $row[$dispatch_date]['total'] +=1;
-    $row[$dispatch_date]['per_delivered'] = round(($row[$dispatch_date]['delivered_status'] / $row[$dispatch_date]['total']) * 100);
+    $row[$dispatch_date]['per_delivered'] = round(($row[$dispatch_date]['delivered_status'] / $row[$dispatch_date]['total']) * 100).'%';
   }
 
   $header = array('Dispatch Date', 'Delivered', 'Undelivered', 'Not Dispatched', 'Blank', 'Total', '% Delivered');
@@ -420,7 +420,7 @@ function get_email_crm_status_full_returned_bills($distributor_id) {
       $total_not_delivered += $value['notdispatched_status'];
       $total_blank += $value['blank_status'];
       $total += $value['total'];
-      $per_delivered += $value['per_delivered'];
+      $per_delivered = round(($total_delivered / $total) * 100).'%';
     }
     $row[] = array('Total', $total_delivered, $total_undelivered, $total_not_delivered, $total_blank, $total, $per_delivered);
   }
