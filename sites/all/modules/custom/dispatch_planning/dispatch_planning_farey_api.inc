@@ -6,7 +6,7 @@
  */
 
 function fetch_dispatch_planning_api_data($data) {
-   watchdog('request data', '<pre>' . print_r($data,TRUE). '</pre>');
+   watchdog('farey data', '<pre>' . print_r($data,TRUE). '</pre>');
    if (!empty($data)) {
 
       // first entry in log table
@@ -17,37 +17,37 @@ function fetch_dispatch_planning_api_data($data) {
       
       $updated_bill_row_id = db_update('dispatch_planning_api_data') // Table name no longer needs {}
           ->fields(array(
-            'res_runsheetNo' => $data['runsheetNo'],
-            'res_actualAmount' => $data['actualAmount'],
-            'res_originalAmount' => $data['originalAmount'],
-            'res_moneyTransactionType' => $data['moneyTransactionType'],
-            'res_latitude' => $data['latitude'],
-            'res_longitude' => $data['longitude'],
-            'res_attemptCount' => $data['attemptCount'],
-            'res_jobMasterId' => $data['jobMasterId'],
-            'res_companyId' => $data['companyId'],
-            'res_jobType' => $data['delivery1'],
-            'res_jobId' => $data['jobId'],
-            'res_employeeCode' => $data['employeeCode'],
-            'res_status' => $data['status'],
-            'res_trackHalt' => $data['trackHalt'],
-            'res_trackKm' => $data['trackKm'],
-            'res_trackTransactionTimeSpent' => $data['trackTransactionTimeSpent'],
-            'res_merchantCode' => $data['merchantCode'],
-            'res_transactionDate' => strtotime($data['transactionDate']),
-            'res_erpPushTime' => $data['erpPushTime'],
-            'res_lastTransactionTime' => $data['lastTransactionTime'],
-            'res_battery' => $data['battery'],
-            'res_confirm_signed_bill_amount' => $data['fieldData']['confirm_signed_bill_amount'],
-            'res_bank_name' => $data['fieldData']['bank_name'],
-            'res_photo_of_signed_bill_delivery' => $data['fieldData']['photo_of_signed_bill_delivery'],
-            'res_total_amount' => $data['fieldData']['total_amount'],
-            'res_remarks' => $data['fieldData']['remarks'],
-            'res_cheque_date' => strtotime($data['fieldData']['cheque_date']),
-            'res_photo_of_cheque' => $data['fieldData']['photo_of_cheque'],
-            'res_cheque_amount' => $data['fieldData']['cheque_amount'],
-            'res_money_collect2' => $data['fieldData']['money_collect2'],
-            'res_signed_bill_delivery' => $data['fieldData']['signed_bill_delivery'],
+            'res_runsheetNo' => isset($data['runsheetNo']) ? $data['runsheetNo'] : '' ,
+            'res_actualAmount' => isset($data['actualAmount']) ? $data['actualAmount'] : '',
+            'res_originalAmount' => isset($data['originalAmount']) ? $data['originalAmount'] : '',
+            'res_moneyTransactionType' => isset($data['moneyTransactionType']) ? $data['moneyTransactionType'] : '',
+            'res_latitude' => isset($data['latitude']) ? $data['latitude'] : '',
+            'res_longitude' => isset($data['longitude']) ? $data['longitude'] : '',
+            'res_attemptCount' => isset($data['attemptCount']) ? $data['attemptCount'] : '',
+            'res_jobMasterId' => isset($data['jobMasterId']) ? $data['jobMasterId'] : '',
+            'res_companyId' => isset($data['companyId']) ? $data['companyId'] : '',
+            'res_jobType' => isset($data['delivery1']) ? $data['delivery1'] : '',
+            'res_jobId' => isset($data['jobId']) ? $data['jobId'] : '',
+            'res_employeeCode' => isset($data['employeeCode']) ? $data['employeeCode'] : '',
+            'res_status' => isset($data['status']) ? $data['status'] : '',
+            'res_trackHalt' => isset($data['trackHalt']) ? $data['trackHalt'] : '',
+            'res_trackKm' => isset($data['trackKm']) ? $data['trackKm'] : '',
+            'res_trackTransactionTimeSpent' => isset($data['trackTransactionTimeSpent']) ? $data['trackTransactionTimeSpent'] : '',
+            'res_merchantCode' => isset($data['merchantCode']) ? $data['merchantCode'] : '',
+            'res_transactionDate' => isset($data['transactionDate']) ? strtotime($data['transactionDate']) : '',
+            'res_erpPushTime' => isset($data['erpPushTime']) ? $data['erpPushTime'] : '',
+            'res_lastTransactionTime' => isset($data['lastTransactionTime']) ? $data['lastTransactionTime'] : '',
+            'res_battery' => isset($data['battery']) ? $data['battery'] : '',
+            'res_confirm_signed_bill_amount' => isset($data['fieldData']['confirm_signed_bill_amount']) ? $data['fieldData']['confirm_signed_bill_amount'] : '',
+            'res_bank_name' => isset($data['fieldData']['bank_name']) ? $data['fieldData']['bank_name'] : '',
+            'res_photo_of_signed_bill_delivery' => isset($data['fieldData']['photo_of_signed_bill_delivery']) ? $data['fieldData']['photo_of_signed_bill_delivery'] : '',
+            'res_total_amount' => isset($data['fieldData']['total_amount']) ? $data['fieldData']['total_amount'] : '',
+            'res_remarks' => isset($data['fieldData']['remarks']) ? $data['fieldData']['remarks'] : '',
+            'res_cheque_date' => isset($data['fieldData']['cheque_date']) ? strtotime($data['fieldData']['cheque_date']) : '',
+            'res_photo_of_cheque' => isset($data['fieldData']['photo_of_cheque']) ? $data['fieldData']['photo_of_cheque'] : '',
+            'res_cheque_amount' => isset($data['fieldData']['cheque_amount']) ? $data['fieldData']['cheque_amount'] : '',
+            'res_money_collect2' => isset($data['fieldData']['money_collect2']) ? $data['fieldData']['money_collect2'] : '',
+            'res_signed_bill_delivery' => isset($data['fieldData']['signed_bill_delivery']) ? $data['fieldData']['signed_bill_delivery'] : '',
           ))
           ->condition('referenceNo', $data['referenceNumber'], '=')
           ->execute();
@@ -56,7 +56,7 @@ function fetch_dispatch_planning_api_data($data) {
       //       ->condition('referenceNo', $data[''referenceNumber], '=')
 
 
-      if (!empty($updated_bill_row_id)) {
+      if (!empty($updated_bill_row_id) && isset($data['fieldData']['item_details1']) && !empty($data['fieldData']['item_details1'])) {
          foreach ($data['fieldData']['item_details1'] as $key => $value) {
 
             // ignore if value is not in form of array
