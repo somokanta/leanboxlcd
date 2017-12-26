@@ -1190,8 +1190,280 @@ function send_party_packingand_picking_productivity_emailer() {
   $params['body'] = $party_packing_html . "<br>" . $picking_html . "<br>" . $loose_confirmation_html;
   $mail_to = variable_get('productivity_status_to_email');
   $from = variable_get('from_email');
+  
+  // Attach File For Party Packing
+  $file1_name = 'Productivity_Data_Party_Packing.csv';
+  $file1_uri = 'public://PRODUCTIVITY_DATA/' . $file1_name;
 
+  // create directory if not exist
+  $dir = 'public://PRODUCTIVITY_DATA';
+  file_prepare_directory($dir, FILE_CREATE_DIRECTORY);
+
+  $file1 = fopen($file1_uri, 'w');
+
+  $table1 = get_attachment_productivity_data_for_party_packing($end_date, $todays_date_date, $distributor_id);
+  fputcsv($file1, $table1['header']);
+  foreach ($table1['rows'] as $line) {
+    fputcsv($file1, $line);
+  }
+
+  fclose($file1);
+
+  $params['attachment'] = array(
+    'filecontent' => file_get_contents($file1_uri),
+    'filename' => $file1_name,
+    'filemime' => 'text/csv',
+  );
+  
+  // Attach File For Picking
+  $file2_name = 'Productivity_Data_Picking.csv';
+  $file2_uri = 'public://PRODUCTIVITY_DATA/' . $file2_name;
+
+  // create directory if not exist
+  $dir = 'public://PRODUCTIVITY_DATA';
+  file_prepare_directory($dir, FILE_CREATE_DIRECTORY);
+
+  $file2 = fopen($file2_uri, 'w');
+
+  $table2 = get_attachment_productivity_data_for_picking($end_date, $todays_date_date, $distributor_id);
+  fputcsv($file2, $table2['header']);
+  foreach ($table2['rows'] as $line) {
+    fputcsv($file2, $line);
+  }
+
+  fclose($file2);
+
+  $params['attachment2'] = array(
+    'filecontent' => file_get_contents($file2_uri),
+    'filename' => $file2_name,
+    'filemime' => 'text/csv',
+  );
+  
+  // Attach File For Loose Confirmation
+  $file3_name = 'Productivity_Data_Loose_confirmation.csv';
+  $file3_uri = 'public://PRODUCTIVITY_DATA/' . $file3_name;
+
+  // create directory if not exist
+  $dir = 'public://PRODUCTIVITY_DATA';
+  file_prepare_directory($dir, FILE_CREATE_DIRECTORY);
+
+  $file3 = fopen($file3_uri, 'w');
+
+  $table3 = get_attachment_productivity_data_for_loose_confirmation($end_date, $todays_date_date, $distributor_id);
+  fputcsv($file3, $table3['header']);
+  foreach ($table3['rows'] as $line) {
+    fputcsv($file3, $line);
+  }
+
+  fclose($file3);
+
+  $params['attachment3'] = array(
+    'filecontent' => file_get_contents($file3_uri),
+    'filename' => $file3_name,
+    'filemime' => 'text/csv',
+  );
+  
   drupal_mail('email_status', 'productivity_status', $mail_to, LANGUAGE_NONE, $params, $from);
+}
+
+/*
+ * Function to attach with automailer for party packing
+ */
+function get_attachment_productivity_data_for_party_packing($start_date, $end_date = FALSE, $dis_id = 60) {
+  $query = db_select('node', 'n');
+  $query->condition('n.type', 'party_packing');
+  $query->join('field_data_field_distributor', 'fd', 'fd.entity_id = n.uid');
+  $query->condition('fd.entity_id', $dis_id, '=');
+  $query->leftjoin('field_data_field_bill_lines', 'bl', 'bl.entity_id = n.nid');
+  $query->leftjoin('field_data_field_party_packer_team_count', 'tc', 'tc.entity_id = n.nid');
+  $query->leftjoin('field_data_field_party_packing_start_time', 'st', 'st.entity_id = n.nid');
+  $query->leftjoin('field_data_field_party_packing_end_time', 'et', 'et.entity_id = n.nid');
+  $query->leftjoin('field_data_field__party_packingstatus', 's', 's.entity_id = n.nid');
+  $query->condition('s.field__party_packingstatus_value', 2, "=");
+  $query->leftjoin('field_data_field_party_packing_loading_date', 'd', 'd.entity_id = n.nid');
+  $query->leftjoin('field_data_field_party_packer_name', 'pn', 'pn.entity_id = n.nid');
+
+  $query->join('field_data_field_party_packing_date', 'ppd', 'ppd.entity_id = n.nid');
+  $query->condition('ppd.field_party_packing_date_value', array($start_date, $end_date), 'BETWEEN');
+  $query->orderBy('ppd.field_party_packing_date_value', 'DESC');
+  $query->leftjoin('field_data_field_party_packing_type', 'ppt', 'ppt.entity_id = n.nid');
+  $query->leftjoin('field_data_field_party_packing_supervisor', 'pps', 'pps.entity_id = n.nid');
+
+  $query->fields('ppd', array('field_party_packing_date_value'));
+  $query->fields('pn', array('field_party_packer_name_value'));
+  $query->fields('bl', array('field_bill_lines_value'));
+  $query->fields('tc', array('field_party_packer_team_count_value'));
+  $query->fields('st', array('field_party_packing_start_time_value'));
+  $query->fields('et', array('field_party_packing_end_time_value'));
+  $query->fields('s', array('field__party_packingstatus_value'));
+  $query->fields('ppt', array('field_party_packing_type_value'));
+  $query->fields('pps', array('field_party_packing_supervisor_value'));
+  $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+  
+  $target_data = leanbox_dashboard_target_value_using_voc_name('productivity target');
+  foreach ($res as $data) {
+    $start_time = strtotime($data['field_party_packing_start_time_value']);
+    $end_time = strtotime($data['field_party_packing_end_time_value']);
+    $time_diff = abs($end_time - $start_time) / 3600;
+    $time_diff = number_format((float) $time_diff, 2, '.', '');
+    $team_count = $data['field_party_packer_team_count_value'];
+    $total_time = ($team_count * $time_diff);
+    $bill_line = $data['field_bill_lines_value'];
+    $transaction_date = strtotime($data['field_party_packing_date_value']);
+    
+    $row['transaction_date'] = date('d-m-Y',$transaction_date);
+    $row['party_packer_name'] = $data['field_party_packer_name_value'];
+    $row['party_packing_sup'] = $data['field_party_packing_supervisor_value'];
+    if($data['field_party_packing_type_value'] == 1) {
+      $row['party_packing_type'] = 'PP';
+      $row['target'] = $target_data['PP'];
+    }
+    if($data['field_party_packing_type_value'] == 0){
+      $row['party_packing_type'] = 'NON-PP';
+      $row['target'] = $target_data['NON-PP'];
+    }
+    $row['bill_lines'] = $bill_line;
+    $row['party_packing_start_time'] = $data['field_party_packing_start_time_value'];
+    $row['party_packing_end_time'] = $data['field_party_packing_end_time_value'];
+    $row['party_packing_team_count'] = $data['field_party_packer_team_count_value'];
+
+     $rows[] = $row;
+  }
+  $header = array('Transaction Date', 'Party Packer name', 'Party Packing Supervisor', 'Party Packing Type','Target', 'Sum - Bill Line', 'Start Time', 'End Time', 'Team Count');
+  
+  $output1['header'] = $header;
+  $output1['rows'] = $rows;
+
+  return $output1;
+}
+
+/*
+ * Function to attach with automailer for picking
+ */
+function get_attachment_productivity_data_for_picking($start_date, $end_date = FALSE, $dis_id = 60) {
+  $query = db_select('node', 'n');
+  $query->condition('n.type', 'picking');
+  $query->join('field_data_field_distributor', 'fd', 'fd.entity_id = n.uid');
+  $query->condition('fd.entity_id', $dis_id, '=');
+  $query->join('field_data_field_picking_picking_date', 'ppd', 'ppd.entity_id = n.nid');
+  $query->condition('ppd.field_picking_picking_date_value', array($start_date, $end_date), 'BETWEEN');
+  $query->orderBy('ppd.field_picking_picking_date_value', 'DESC');
+  $query->join('field_data_field_picking_godown_area_id', 'gai', 'gai.entity_id = n.nid');
+  $query->join('field_data_field_picking_picking_type', 'pt', 'pt.entity_id = n.nid');
+  $query->join('field_data_field_pick_lines', 'lsl', 'lsl.entity_id = n.nid');
+  $query->join('field_data_field_picking_start_time', 'pst', 'pst.entity_id = n.nid');
+  $query->join('field_data_field_picking_end_time', 'pet', 'pet.entity_id = n.nid');
+  $query->join('field_data_field_picking_status', 'ps', 'ps.entity_id = n.nid');
+  $query->condition('ps.field_picking_status_value', 2, "=");
+  $query->join('field_data_field_picking_picking_team_count', 'tc', 'tc.entity_id = n.nid');
+  $query->join('field_data_field_picking_pick_supervisor', 'pps', 'pps.entity_id = n.nid');
+  $query->leftjoin('field_data_field_picking_picker_name', 'pn', 'pn.entity_id = n.nid');
+  $query->fields('pn', array('field_picking_picker_name_value'));
+  $query->fields('gai', array('field_picking_godown_area_id_value'));
+  $query->fields('pt', array('field_picking_picking_type_value'));
+  $query->fields('lsl', array('field_pick_lines_value'));
+  $query->fields('pst', array('field_picking_start_time_value'));
+  $query->fields('pet', array('field_picking_end_time_value'));
+
+  $query->fields('ppd', array('field_picking_picking_date_value'));
+  $query->fields('ps', array('field_picking_status_value'));
+  $query->fields('tc', array('field_picking_picking_team_count_value'));
+  $query->fields('pps', array('field_picking_pick_supervisor_value'));
+  $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+  
+  $target_data = leanbox_dashboard_target_value_using_voc_name('productivity target');
+  foreach ($res as $data) {
+    $start_time = strtotime($data['field_picking_start_time_value']);
+    $end_time = strtotime($data['field_picking_end_time_value']);
+    $time_diff = abs(($end_time - $start_time) / 3600);
+    $time_diff = number_format((float) $time_diff, 2, '.', '');
+    $team_count = $data['field_picking_picking_team_count_value'];
+    $total_time = ($team_count * $time_diff);
+    $loading_line = $data['field_pick_lines_value'];
+    $transaction_date = strtotime($data['field_picking_picking_date_value']);
+    
+    $row['transaction_date'] = date('d-m-Y',$transaction_date);
+    $row['picker_name'] = $data['field_picking_picker_name_value'];
+    $row['picker_sup'] = $data['field_picking_pick_supervisor_value'];
+    $row['godwon_area_id'] = $data['field_picking_godown_area_id_value'];
+    $row['picking_type'] = $data['field_picking_picking_type_value'];
+    $row['loading_lines'] = $loading_line;
+    $row['picking_start_time'] = $data['field_picking_start_time_value'];
+    $row['picking_end_time'] = $data['field_picking_end_time_value'];
+    $row['picking_team_count'] = $data['field_picking_picking_team_count_value'];
+    $target = strtolower($data['field_picking_godown_area_id_value'].' '.$data['field_picking_picking_type_value']);
+    $row['target'] = $target_data[$target];
+    
+    $rows[] = $row;
+  }
+  $header = array('Transaction Date', 'Picker Name', 'Picking Supervisor', 'Godown Area Id', 'Picking Type', 'Sum - Loading Sheet Line', 'Start Time', 'End Time', 'Team Count', 'Target');
+  
+  $output1['header'] = $header;
+  $output1['rows'] = $rows;
+
+  return $output1;
+}
+
+/*
+ * Function to attach with automailer for loose confirmation
+ */
+function get_attachment_productivity_data_for_loose_confirmation($start_date, $end_date = FALSE, $dis_id = 60) {
+  $query = db_select('node', 'n');
+  $query->condition('n.type', 'pick_confirm');
+  $query->join('field_data_field_distributor', 'fd', 'fd.entity_id = n.uid');
+  $query->condition('fd.entity_id', $dis_id, '=');
+  $query->join('field_data_field_pc_picking_date', 'ppd', 'ppd.entity_id = n.nid');
+  $query->condition('ppd.field_pc_picking_date_value', array($start_date, $end_date), 'BETWEEN');
+  $query->orderBy('ppd.field_pc_picking_date_value', 'DESC');
+  $query->join('field_data_field_pc_picking_type', 'pt', 'pt.entity_id = n.nid');
+  $query->join('field_data_field_pc_pick_lines', 'lsl', 'lsl.entity_id = n.nid');
+  $query->join('field_data_field_pc_start_time', 'pst', 'pst.entity_id = n.nid');
+  $query->join('field_data_field_pc_end_time', 'pet', 'pet.entity_id = n.nid');
+  $query->join('field_data_field_pc_status', 'ps', 'ps.entity_id = n.nid');
+  $query->condition('ps.field_pc_status_value', 2, "=");
+  $query->join('field_data_field_pc_team_count', 'tc', 'tc.entity_id = n.nid');
+  $query->join('field_data_field_pc_pick_supervisor', 'pps', 'pps.entity_id = n.nid');
+  $query->leftjoin('field_data_field_pc_picker_name', 'pn', 'pn.entity_id = n.nid');
+
+  $query->fields('pn', array('field_pc_picker_name_value'));
+  $query->fields('pt', array('field_pc_picking_type_value'));
+  $query->fields('lsl', array('field_pc_pick_lines_value'));
+  $query->fields('pst', array('field_pc_start_time_value'));
+  $query->fields('pet', array('field_pc_end_time_value'));
+  $query->fields('ppd', array('field_pc_picking_date_value'));
+  $query->fields('ps', array('field_pc_status_value'));
+  $query->fields('tc', array('field_pc_team_count_value'));
+  $query->fields('pps', array('field_pc_pick_supervisor_value'));
+  $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+
+  foreach ($res as $data) {
+    $start_time = strtotime($data['field_pc_start_time_value']);
+    $end_time = strtotime($data['field_pc_end_time_value']);
+    $time_diff = abs(($end_time - $start_time) / 3600);
+    $time_diff = number_format((float) $time_diff, 2, '.', '');
+    $team_count = $data['field_pc_team_count_value'];
+    $total_time = ($team_count * $time_diff);
+    $loading_line = $data['field_pc_pick_lines_value'];
+    $transaction_date = strtotime($data['field_pc_picking_date_value']);
+    
+    $row['transaction_date'] = date('d-m-Y',$transaction_date);
+    $row['pick_confirm_name'] = $data['field_pc_picker_name_value'];
+    $row['pick_confirm_sup'] = $data['field_pc_pick_supervisor_value'];
+    $row['picking_type'] = $data['field_pc_picking_type_value'];
+    $row['loading_lines'] = $loading_line;
+    $row['picking_start_time'] = $data['field_pc_start_time_value'];
+    $row['picking_end_time'] = $data['field_pc_end_time_value'];
+    $row['picking_team_count'] = $data['field_pc_team_count_value'];
+    
+    $rows[] = $row;
+  }
+  
+  $header = array('Transaction Date', 'Pick Confirm Name', 'Pick Confirm Supervisor', 'Picking Type', 'Sum - Loading Sheet Line', 'Start Time', 'End Time', 'Team Count');
+   
+  $output1['header'] = $header;
+  $output1['rows'] = $rows;
+
+  return $output1;
 }
 
 function send_loading_productivity_emailer() {
@@ -1209,7 +1481,7 @@ function send_loading_productivity_emailer() {
   $mail_to = variable_get('loading_productivity_status_to_email');
   $from = variable_get('from_email');
 
-  drupal_mail('email_status', 'productivity_status', $mail_to, LANGUAGE_NONE, $params, $from);
+  drupal_mail('email_status', 'daily_data', $mail_to, LANGUAGE_NONE, $params, $from);
 }
 
 function get_todays_party_packing_created_data($loading_date, $distributor_id = 60) {
@@ -1524,14 +1796,14 @@ function get_email_productivity_data_for_loose_confirmation($start_date, $end_da
       if ($type == "Loose") {
         $picking[$transaction_date][$picker_name][$type]['loading_sheet_line'] += $loading_line;
         $picking[$transaction_date][$picker_name][$type]['total_tme'] += $total_time;
-        $productivity_per = ($loading_line / $total_time);
-        $picking[$transaction_date][$picker_name][$type]['productivity'] = round($productivity_per);
+        //$productivity_per = ($loading_line / $total_time);
+        //$picking[$transaction_date][$picker_name][$type]['productivity'] = round($productivity_per);
       }
       if ($type == "Bulk") {
         $picking[$transaction_date][$picker_name][$type]['loading_sheet_line'] += $loading_line;
         $picking[$transaction_date][$picker_name][$type]['total_tme'] += $total_time;
-        $productivity_per = ($loading_line / $total_time);
-        $picking[$transaction_date][$picker_name][$type]['productivity'] = round($productivity_per);
+        //$productivity_per = ($loading_line / $total_time);
+        //$picking[$transaction_date][$picker_name][$type]['productivity'] = round($productivity_per);
       }
     }
     else {
@@ -1539,14 +1811,14 @@ function get_email_productivity_data_for_loose_confirmation($start_date, $end_da
       if ($type == "Loose") {
         $picking[$transaction_date][$picker_name][$type]['loading_sheet_line'] = $loading_line;
         $picking[$transaction_date][$picker_name][$type]['total_tme'] = $total_time;
-        $productivity_per = ($loading_line / $total_time);
-        $picking[$transaction_date][$picker_name][$type]['productivity'] = round($productivity_per);
+        //$productivity_per = ($loading_line / $total_time);
+        //$picking[$transaction_date][$picker_name][$type]['productivity'] = round($productivity_per);
       }
       if ($type == "Bulk") {
         $picking[$transaction_date][$picker_name][$type]['loading_sheet_line'] = $loading_line;
         $picking[$transaction_date][$picker_name][$type]['total_tme'] = $total_time;
-        $productivity_per = ($loading_line / $total_time);
-        $picking[$transaction_date][$picker_name][$type]['productivity'] = round($productivity_per);
+        //$productivity_per = ($loading_line / $total_time);
+       //$picking[$transaction_date][$picker_name][$type]['productivity'] = round($productivity_per);
       }
     }
     $picking[$transaction_date][$picker_name][$type]['pc_picker_name'] = $picker_name;
@@ -1570,13 +1842,14 @@ function get_email_productivity_data_for_loose_confirmation($start_date, $end_da
     foreach ($picking as $transaction_date => $data) {
       foreach ($data as $key => $value) {
         foreach ($value as $k => $result) {
+          $productivity = round($result['loading_sheet_line'] / $result['total_tme']);
           $loose_confirm_productivity_html .= "<tr><td style = 'border:1px solid #000;'>" . $result['pick_confirm_date'] . "</td>";
           $loose_confirm_productivity_html .= "<td style = 'border:1px solid #000;'>" . $result['pc_picker_name'] . "</td>";
           $loose_confirm_productivity_html .= "<td style = 'border:1px solid #000;'>" . $result['supervisor'] . "</td>";
           $loose_confirm_productivity_html .= "<td style = 'border:1px solid #000;'>" . $result['picking_type'] . "</td>";
           $loose_confirm_productivity_html .= "<td style = 'border:1px solid #000;'>" . $result['loading_sheet_line'] . "</td>";
           $loose_confirm_productivity_html .= "<td style = 'border:1px solid #000;'>" . $result['total_tme'] . "</td>";
-          $loose_confirm_productivity_html .= "<td style = 'border:1px solid #000;'>" . $result['productivity'] . "</td></tr>";
+          $loose_confirm_productivity_html .= "<td style = 'border:1px solid #000;'>" . $productivity . "</td></tr>";
         }
       }
     }
@@ -1648,15 +1921,15 @@ function get_email_productivity_data_for_party_packing($start_date, $end_date = 
         $party_packing[$transaction_date][$party_packer_n][$type]['pp_bill_lines'] += $bill_line;
         $party_packing[$transaction_date][$party_packer_n][$type]['pp_time'] += $total_time;
         $party_packing[$transaction_date][$party_packer_n][$type]['packer_type'] = 'PP';
-        $productivity_per = ($bill_line / $total_time);
-        $party_packing[$transaction_date][$party_packer_n][$type]['productivity'] = round($productivity_per);
+        //$productivity_per = ($bill_line / $total_time);
+        //$party_packing[$transaction_date][$party_packer_n][$type]['productivity'] = round($productivity_per);
       }
       if ($type == 0) { //type is NON-PP
         $party_packing[$transaction_date][$party_packer_n][$type]['pp_bill_lines'] += $bill_line;
         $party_packing[$transaction_date][$party_packer_n][$type]['pp_time'] += $total_time;
         $party_packing[$transaction_date][$party_packer_n][$type]['packer_type'] = 'NON-PP';
-        $productivity_per = ($bill_line / $total_time);
-        $party_packing[$transaction_date][$party_packer_n][$type]['productivity'] = round($productivity_per);
+        //$productivity_per = ($bill_line / $total_time);
+        //$party_packing[$transaction_date][$party_packer_n][$type]['productivity'] = round($productivity_per);
       }
     }
     else {
@@ -1665,15 +1938,15 @@ function get_email_productivity_data_for_party_packing($start_date, $end_date = 
         $party_packing[$transaction_date][$party_packer_n][$type]['pp_bill_lines'] = $bill_line;
         $party_packing[$transaction_date][$party_packer_n][$type]['pp_time'] = $total_time;
         $party_packing[$transaction_date][$party_packer_n][$type]['packer_type'] = 'PP';
-        $productivity_per = ($bill_line / $total_time);
-        $party_packing[$transaction_date][$party_packer_n][$type]['productivity'] = round($productivity_per);
+        //$productivity_per = ($bill_line / $total_time);
+        //$party_packing[$transaction_date][$party_packer_n][$type]['productivity'] = round($productivity_per);
       }
       if ($type == 0) { //type is NON-PP
         $party_packing[$transaction_date][$party_packer_n][$type]['pp_bill_lines'] = $bill_line;
         $party_packing[$transaction_date][$party_packer_n][$type]['pp_time'] = $total_time;
         $party_packing[$transaction_date][$party_packer_n][$type]['packer_type'] = 'NON-PP';
-        $productivity_per = ($bill_line / $total_time);
-        $party_packing[$transaction_date][$party_packer_n][$type]['productivity'] = round($productivity_per);
+        //$productivity_per = ($bill_line / $total_time);
+        //$party_packing[$transaction_date][$party_packer_n][$type]['productivity'] = round($productivity_per);
       }
     }
 
@@ -1699,13 +1972,14 @@ function get_email_productivity_data_for_party_packing($start_date, $end_date = 
     foreach ($party_packing as $transaction_date => $data) {
       foreach ($data as $key => $value) {
         foreach ($value as $k => $result) {
+          $productivity = round($result['pp_bill_lines'] / $result['pp_time']);
           $party_pack_datewise_html .= "<tr><td style = 'border:1px solid #000;'>" . $result['party_packing_date'] . "</td>";
           $party_pack_datewise_html .= "<td style = 'border:1px solid #000;'>" . $result['party_packer_name'] . "</td>";
           $party_pack_datewise_html .= "<td style = 'border:1px solid #000;'>" . $result['supervisor_name'] . "</td>";
           $party_pack_datewise_html .= "<td style = 'border:1px solid #000;'>" . $result['packer_type'] . "</td>";
           $party_pack_datewise_html .= "<td style = 'border:1px solid #000;'>" . $result['pp_bill_lines'] . "</td>";
           $party_pack_datewise_html .= "<td style = 'border:1px solid #000;'>" . $result['pp_time'] . "</td>";
-          $party_pack_datewise_html .= "<td style = 'border:1px solid #000;'>" . $result['productivity'] . "</td>";
+          $party_pack_datewise_html .= "<td style = 'border:1px solid #000;'>" . $productivity . "</td>";
           $party_pack_datewise_html .= "<td style = 'border:1px solid #000;'>" . $target_data[$result['packer_type']] . "</td></tr>";
         }
       }
@@ -1726,7 +2000,6 @@ function get_email_productivity_data_for_party_packing($start_date, $end_date = 
  * @return type
  */
 function get_email_productivity_data_for_picking($start_date, $end_date = FALSE, $dis_id = 60) {
-
   $query = db_select('node', 'n');
   $query->condition('n.type', 'picking');
   $query->join('field_data_field_distributor', 'fd', 'fd.entity_id = n.uid');
@@ -1775,45 +2048,45 @@ function get_email_productivity_data_for_picking($start_date, $end_date = FALSE,
 
     if (isset($res[$picker_n])) {
       if ($type == "Loose") {
-        $picking[$transaction_date][$picker_n][$type]['loading_sheet_line'] += $loading_line;
-        $picking[$transaction_date][$picker_n][$type]['total_time'] += $total_time;
-        $picking[$transaction_date][$picker_n][$type]['picking_type'] = $type;
-        $picking[$transaction_date][$picker_n][$type]['godown'] = $godown;
-        $productivity_per = ($loading_line / $total_time);
-        $picking[$transaction_date][$picker_n][$type]['productivity'] = round($productivity_per);
+        $picking[$transaction_date][$picker_n][$type][$godown]['loading_sheet_line'] += $loading_line;
+        $picking[$transaction_date][$picker_n][$type][$godown]['total_time'] += $total_time;
+        $picking[$transaction_date][$picker_n][$type][$godown]['picking_type'] = $type;
+        $picking[$transaction_date][$picker_n][$type][$godown]['godown'] = $godown;
+        //$productivity_per = ($loading_line / $total_time);
+        //$picking[$transaction_date][$picker_n][$type]['productivity'] = round($productivity_per);
       }
       if ($type == "Bulk") {
-        $picking[$transaction_date][$picker_n][$type]['loading_sheet_line'] += $loading_line;
-        $picking[$transaction_date][$picker_n][$type]['total_time'] += $total_time;
-        $picking[$transaction_date][$picker_n][$type]['picking_type'] = $type;
-        $picking[$transaction_date][$picker_n][$type]['godown'] = $godown;
-        $productivity_per = ($loading_line / $total_time);
-        $picking[$transaction_date][$picker_n][$type]['productivity'] = round($productivity_per);
+        $picking[$transaction_date][$picker_n][$type][$godown]['loading_sheet_line'] += $loading_line;
+        $picking[$transaction_date][$picker_n][$type][$godown]['total_time'] += $total_time;
+        $picking[$transaction_date][$picker_n][$type][$godown]['picking_type'] = $type;
+        $picking[$transaction_date][$picker_n][$type][$godown]['godown'] = $godown;
+        //$productivity_per = ($loading_line / $total_time);
+        //$picking[$transaction_date][$picker_n][$type]['productivity'] = round($productivity_per);
       }
     }
     else {
       $res[$picker_n] = array();
       if ($type == "Loose") {
-        $picking[$transaction_date][$picker_n][$type]['loading_sheet_line'] = $loading_line;
-        $picking[$transaction_date][$picker_n][$type]['total_time'] = $total_time;
-        $picking[$transaction_date][$picker_n][$type]['picking_type'] = $type;
-        $picking[$transaction_date][$picker_n][$type]['godown'] = $godown;
-        $productivity_per = ($loading_line / $total_time);
-        $picking[$transaction_date][$picker_n][$type]['productivity'] = round($productivity_per);
+        $picking[$transaction_date][$picker_n][$type][$godown]['loading_sheet_line'] = $loading_line;
+        $picking[$transaction_date][$picker_n][$type][$godown]['total_time'] = $total_time;
+        $picking[$transaction_date][$picker_n][$type][$godown]['picking_type'] = $type;
+        $picking[$transaction_date][$picker_n][$type][$godown]['godown'] = $godown;
+        //$productivity_per = ($loading_line / $total_time);
+        //$picking[$transaction_date][$picker_n][$type]['productivity'] = round($productivity_per);
       }
       if ($type == "Bulk") {
-        $picking[$transaction_date][$picker_n][$type]['loading_sheet_line'] = $loading_line;
-        $picking[$transaction_date][$picker_n][$type]['total_time'] = $total_time;
-        $picking[$transaction_date][$picker_n][$type]['picking_type'] = $type;
-        $picking[$transaction_date][$picker_n][$type]['godown'] = $godown;
-        $productivity_per = ($loading_line / $total_time);
-        $picking[$transaction_date][$picker_n][$type]['productivity'] = round($productivity_per);
+        $picking[$transaction_date][$picker_n][$type][$godown]['loading_sheet_line'] = $loading_line;
+        $picking[$transaction_date][$picker_n][$type][$godown]['total_time'] = $total_time;
+        $picking[$transaction_date][$picker_n][$type][$godown]['picking_type'] = $type;
+        $picking[$transaction_date][$picker_n][$type][$godown]['godown'] = $godown;
+        //$productivity_per = ($loading_line / $total_time);
+        //$picking[$transaction_date][$picker_n][$type]['productivity'] = round($productivity_per);
       }
     }
-    $picking[$transaction_date][$picker_n][$type]['picker_name'] = $value['field_picking_picker_name_value'];
-    $picking[$transaction_date][$picker_n][$type]['supervisor_name'] = $value['field_picking_pick_supervisor_value'];
+    $picking[$transaction_date][$picker_n][$type][$godown]['picker_name'] = $value['field_picking_picker_name_value'];
+    $picking[$transaction_date][$picker_n][$type][$godown]['supervisor_name'] = $value['field_picking_pick_supervisor_value'];
     $picking_date = strtotime($transaction_date);
-    $picking[$transaction_date][$picker_n][$type]['picking_date'] = date('d-m-Y',$picking_date);
+    $picking[$transaction_date][$picker_n][$type][$godown]['picking_date'] = date('d-m-Y',$picking_date);
   }
 
   $target_data = leanbox_dashboard_target_value_using_voc_name('productivity target');
@@ -1831,17 +2104,20 @@ function get_email_productivity_data_for_picking($start_date, $end_date = FALSE,
     foreach ($picking as $transaction_date => $data) {
       foreach ($data as $key => $value) {
         foreach ($value as $k => $result) {
-          $label = $result['godown'] . ' ' . $result['picking_type'];
+          foreach($result as $kk => $results) {
+          $productivity = round($results['loading_sheet_line'] / $results['total_time']);
+          $label = $results['godown'] . ' ' . $results['picking_type'];
           $label_key = strtolower($label);
-          $picking_datewise_html .= "<tr><td style = 'border:1px solid #000;'>" . $result['picking_date'] . "</td>";
-          $picking_datewise_html .= "<td style = 'border:1px solid #000;'>" . $result['picker_name'] . "</td>";
-          $picking_datewise_html .= "<td style = 'border:1px solid #000;'>" . $result['supervisor_name'] . "</td>";
-          $picking_datewise_html .= "<td style = 'border:1px solid #000;'>" . $result['godown'] . "</td>";
-          $picking_datewise_html .= "<td style = 'border:1px solid #000;'>" . $result['picking_type'] . "</td>";
-          $picking_datewise_html .= "<td style = 'border:1px solid #000;'>" . $result['loading_sheet_line'] . "</td>";
-          $picking_datewise_html .= "<td style = 'border:1px solid #000;'>" . $result['total_time'] . "</td>";
-          $picking_datewise_html .= "<td style = 'border:1px solid #000;'>" . $result['productivity'] . "</td>";
+          $picking_datewise_html .= "<tr><td style = 'border:1px solid #000;'>" . $results['picking_date'] . "</td>";
+          $picking_datewise_html .= "<td style = 'border:1px solid #000;'>" . $results['picker_name'] . "</td>";
+          $picking_datewise_html .= "<td style = 'border:1px solid #000;'>" . $results['supervisor_name'] . "</td>";
+          $picking_datewise_html .= "<td style = 'border:1px solid #000;'>" . $results['godown'] . "</td>";
+          $picking_datewise_html .= "<td style = 'border:1px solid #000;'>" . $results['picking_type'] . "</td>";
+          $picking_datewise_html .= "<td style = 'border:1px solid #000;'>" . $results['loading_sheet_line'] . "</td>";
+          $picking_datewise_html .= "<td style = 'border:1px solid #000;'>" . $results['total_time'] . "</td>";
+          $picking_datewise_html .= "<td style = 'border:1px solid #000;'>" . $productivity . "</td>";
           $picking_datewise_html .= "<td style = 'border:1px solid #000;'>" . $target_data[$label_key] . "</td></tr>";
+          }
         }
       }
     }
@@ -2961,6 +3237,9 @@ function email_status_mail($key, &$message, $params) {
     case 'productivity_status':
       $message['subject'] = $params['subject'];
       $message['body'][] = $params['body'];
+      $message['params']['attachments'][] = $params['attachment'];
+      $message['params']['attachments'][] = $params['attachment2'];
+      $message['params']['attachments'][] = $params['attachment3'];
       break;
     case 'pl_group_status':
       $message['subject'] = $params['subject'];
