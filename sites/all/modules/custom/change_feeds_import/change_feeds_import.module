@@ -1529,6 +1529,32 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
          }
       }
    }
+   
+   if ($entity->feeds_item->id == 'update_hul_updated_address') {
+      $title = $entity->title;
+      $existing_uid = check_hul_code_exist($title);
+      if (!empty($existing_uid) && ($existing_uid != $distributor_id)) {
+         drupal_set_message("You can not update hul_code_master because same title is already uploaded by another distributor", 'error', FALSE);
+         $entity->feeds_item->skip = TRUE;
+      }
+
+      $hul_add_status = $entity->field_hul_status['und'][0]['value'];
+      if ($hul_add_status != 1) {
+         drupal_set_message("You can not update hul_code_master because Address is not Confirmed", 'error', FALSE);
+         $entity->feeds_item->skip = TRUE;
+      }
+      $node = node_load($entity->nid, NULL, TRUE);
+      //$entity->field_updated_address['und'][0]['country'] = $node->field_updated_address['und'][0]['country'];
+      $entity->field_updated_address['und'][0]['administrative_area'] = $node->field_updated_address['und'][0]['administrative_area'];
+      $entity->field_updated_address['und'][0]['sub_administrative_area'] = $node->field_updated_address['und'][0]['sub_administrative_area'];
+      $entity->field_updated_address['und'][0]['postal_code'] = $node->field_updated_address['und'][0]['postal_code'];
+      $entity->field_updated_address['und'][0]['thoroughfare'] = $node->field_updated_address['und'][0]['thoroughfare'];
+      $entity->field_updated_address['und'][0]['premise'] = $node->field_updated_address['und'][0]['premise'];
+      $entity->field_updated_address['und'][0]['organisation_name'] = $node->field_updated_address['und'][0]['organisation_name'];
+      $entity->field_updated_address['und'][0]['name_line'] = $node->field_updated_address['und'][0]['name_line'];
+      $entity->field_updated_address['und'][0]['first_name'] = $node->field_updated_address['und'][0]['first_name'];
+      $entity->field_updated_address['und'][0]['last_name'] = $node->field_updated_address['und'][0]['last_name'];
+   }
 
 // Add presave/alter code for van stop master uploader
   if ($entity->feeds_item->id == 'target_master_import') {
