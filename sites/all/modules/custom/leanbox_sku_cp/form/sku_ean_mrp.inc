@@ -108,12 +108,12 @@ function sku_ean_mrp_upload_batch_process($data, $rs_code, &$context) {
       $error_text = "\n" . $sku7_code . " SKU7_CODE is not present in SKU7_CODE Master.";
       drupal_set_message($error_text, 'error');
     }
-    $exist_sku_of_ean = check_ean_combination_with_other_sku($ean, $sku7_code, $rs_code);
+    /*$exist_sku_of_ean = check_ean_combination_with_other_sku($ean, $sku7_code, $rs_code);
     if ($exist_sku_of_ean) {
       $context['results']['error_flag'] = 1;
       $error_text = "\n" . $ean . "is already present with SKU7_CODE " . $exist_sku_of_ean . " and you are uploading with SKU7_CODE $sku7_code";
       drupal_set_message($error_text, 'error');
-    }
+    }*/
   }
 
   if ($context['results']['error_flag'] == 0) {
@@ -156,7 +156,7 @@ function insert_data_in_sku_ean_mrp_table($data, $rs_code) {
     $mrp = $value['MRP'];
 
     db_merge('sku_ean_mrp')
-      ->key(array('sku' => $sku7_code, 'ean' => $ean, 'rs_code' => $rs_code))
+      ->key(array('sku' => $sku7_code,'rs_code' => $rs_code))
       ->fields(array(
         'sku' => $sku7_code,
         'ean' => $ean,
