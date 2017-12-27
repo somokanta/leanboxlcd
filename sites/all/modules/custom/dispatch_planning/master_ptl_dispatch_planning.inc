@@ -29,8 +29,10 @@ function fetch_master_ptl_data($rs_code, $api_time) {
   $data['header'] = $header_result;
 
   $query = db_select('master_ptl_data', 'p');
+  $query->leftJoin('sku_ean_mrp', 's', "s.sku = p.sku_code AND s.rs_code = $rs_code");//new change for ean
   $query->fields('p', array('id', 'ptl_job', 'rs_code', 'trip_id', 'vehicle', 'bill_number', 'loading_date', 'sequence_no', 'basepack_code', 'sku_code', 'product_name', 'MRP', 'TUR', 'free_sku_description', 'cp'));
   $query->addExpression('loose', 'sum_sales_qty'); // send loose value in sum_sales_qty
+  $query->addField('s', 'ean', 'ean');//new change for ean
   $query->condition('p.id', $max_ptl_data, '<=');
   $query->condition('p.api_flag', '0', '=');
   $query->condition('p.rs_code', $rs_code, '=');

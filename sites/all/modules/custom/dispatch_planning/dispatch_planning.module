@@ -303,10 +303,10 @@ function dispatch_planning_services_resources() {
           'callback' => 'fetch_dispatch_planning_api_data',
           'args' => array(
             array(
-              'data' => 'data',
+              'name' => 'data',
               'type' => 'array',
               'description' => 'Post data',
-              'source' => array('data' => 'data'),
+              'source' => 'data',
               'optional' => TRUE,
             ),
           ),
@@ -2306,9 +2306,13 @@ function check_dynamic_routing_configuration($distributor_id) {
 function dispatch_planning_node_update($node) {
    if ($node->type == 'dispatch_data') {
       $original_pre_start = $node->original->field_dispatch_pre_start_time[LANGUAGE_NONE][0]['value'];
+      dpm($original_pre_start, '$original_pre_start');
       $new_pre_start = $node->field_dispatch_pre_start_time[LANGUAGE_NONE][0]['value'];
+      dpm($new_pre_start, '$new_pre_start');
+      dpm($node, 'node');
       if ($original_pre_start != $new_pre_start) {
-          drupal_register_shutdown_function('_update_dispatch_planning_api', $node);
+        drupal_set_message(t('data is changed'));
+        drupal_register_shutdown_function('_update_dispatch_planning_api', $node);
       }
    }
 }
