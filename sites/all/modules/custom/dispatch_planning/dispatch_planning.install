@@ -606,6 +606,13 @@ function dispatch_planning_update_7112() {
         'not null' => TRUE,
         'default' => '',
     ),
+     'ean' => array(
+    'description' => 'EAN',
+    'type' => 'varchar',
+    'length' => 25,
+    'not null' => TRUE,
+    'default' => '',
+    ),
      'free_cld' => array(
       'description' => 'Free CLD qty',
       'type' => 'int',
@@ -826,6 +833,13 @@ function dispatch_planning_update_7113() {
         'length' => 10,
         'not null' => TRUE,
         'default' => '',
+    ),
+     'ean' => array(
+    'description' => 'EAN',
+    'type' => 'varchar',
+    'length' => 25,
+    'not null' => TRUE,
+    'default' => '',
     ),
      'free_cld' => array(
       'description' => 'Free CLD qty',
