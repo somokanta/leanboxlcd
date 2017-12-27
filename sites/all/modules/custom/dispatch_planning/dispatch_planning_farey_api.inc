@@ -65,7 +65,7 @@ function fetch_dispatch_planning_api_data($data) {
             }
             db_update('dispatch_planning_item_details') // Table name no longer needs {}
                 ->fields(array(
-                  'res_sku_actual_quantity1' => $value['sku_actual_quantity1'],
+                  'res_sku_actual_quantity1' => isset($value['sku_actual_quantity1']) ? $value['sku_actual_quantity1'] : 0,
                 ))
                 ->condition('trip_bill_reference', $updated_bill_row_id, '=')
                 ->condition('sku_code', $value['sku_code1'], '=')
