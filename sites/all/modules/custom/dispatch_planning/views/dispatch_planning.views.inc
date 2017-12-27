@@ -802,6 +802,24 @@ function dispatch_planning_views_data() {
        'handler' => 'views_handler_argument_string',
      ),
    );
+   // drived EAN
+   $data['ptl_data_configuration']['ean'] = array(
+     'title' => t('EAN'),
+     'help' => t('EAN'),
+     'field' => array(
+       'handler' => 'views_handler_field',
+       'click sortable' => TRUE,
+     ),
+     'sort' => array(
+       'handler' => 'views_handler_sort',
+     ),
+     'filter' => array(
+       'handler' => 'views_handler_filter_string',
+     ),
+     'argument' => array(
+       'handler' => 'views_handler_argument_string',
+     ),
+   );   
 
 
    // Adding custom handler for Master PTL Report data
@@ -1395,6 +1413,24 @@ function dispatch_planning_views_data() {
    $data['master_ptl_data']['derived_upc'] = array(
      'title' => t('Derived UPC'),
      'help' => t('Derived UPC'),
+     'field' => array(
+       'handler' => 'views_handler_field',
+       'click sortable' => TRUE,
+     ),
+     'sort' => array(
+       'handler' => 'views_handler_sort',
+     ),
+     'filter' => array(
+       'handler' => 'views_handler_filter_string',
+     ),
+     'argument' => array(
+       'handler' => 'views_handler_argument_string',
+     ),
+   );
+   // drived EAN
+   $data['master_ptl_data']['ean'] = array(
+     'title' => t('EAN'),
+     'help' => t('EAN'),
      'field' => array(
        'handler' => 'views_handler_field',
        'click sortable' => TRUE,
