@@ -29,10 +29,10 @@ function fetch_ptl_data($rs_code, $api_time) {
   $data['header'] =  $header_result;
   
   $query = db_select('ptl_data_configuration', 'p');
-  $query->leftJoin('sku_ean_mrp', 's', "s.sku = p.sku_code AND s.rs_code = $rs_code");//new change for ean
-  $query->fields('p', array('id', 'ptl_job', 'rs_code', 'trip_id', 'vehicle', 'bill_number', 'loading_date', 'sequence_no', 'basepack_code', 'sku_code', 'product_name', 'MRP', 'TUR','free_sku_description','cp'));
+  //$query->leftJoin('sku_ean_mrp', 's', "s.sku = p.sku_code AND s.rs_code = $rs_code");//new change for ean
+  $query->fields('p', array('id', 'ptl_job', 'rs_code', 'trip_id', 'vehicle', 'bill_number', 'loading_date', 'sequence_no', 'basepack_code', 'sku_code', 'product_name', 'MRP', 'TUR','free_sku_description','cp','ean'));
   $query->addExpression('loose', 'sum_sales_qty'); // send loose value in sum_sales_qty
-  $query->addField('s', 'ean', 'ean');//new change for ean
+  //$query->addField('s', 'ean', 'ean');//new change for ean
   $query->condition('p.id', $max_ptl_data, '<=');
   $query->condition('p.api_flag', '0', '=');
   $query->condition('p.rs_code', $rs_code, '=');
@@ -437,7 +437,7 @@ function ptl_data_insert_into_table($api_data, $distributor_id) {
 
                 $sku7_code = $item_data['sku_code'];
                 $sku_unit_case = get_sku_unit_case($sku7_code, $distributor_id);
-
+                $ean = get_sku_ean($sku7_code, $api_data['rs_code']);
                 // Conversion of cld and loose
                 $cld = (int) ($item_data['sum_net_sales_quantity'] / $sku_unit_case); //petty
                 $loose = (int) ($item_data['sum_net_sales_quantity'] % $sku_unit_case); //loose
@@ -493,7 +493,8 @@ function ptl_data_insert_into_table($api_data, $distributor_id) {
                     'derived_free_qty' => $derived_free_qty,
                     'derived_cld' => $derived_cld,
                     'derived_loose' => $derived_loose,
-                    'derived_upc' => $derived_unit_case
+                    'derived_upc' => $derived_unit_case,
+                    'ean' => $ean ? $ean : '',
                 );
                 $query->fields($fields);
                 $result_id = $query->execute();
