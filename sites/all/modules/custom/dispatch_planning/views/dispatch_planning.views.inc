@@ -1427,7 +1427,7 @@ function dispatch_planning_views_data() {
        'handler' => 'views_handler_argument_string',
      ),
    );
-   // drived UPC
+   // drived EAN
    $data['master_ptl_data']['ean'] = array(
      'title' => t('EAN'),
      'help' => t('EAN'),

@@ -1,12 +1,5 @@
 <?php
 
-/**
- *  Generate basics authentication for header 
- *  $header = "Authorization: Basic " . base64_encode($username . ':' . $password);
- *  $header = "Authorization: Basic " . base64_encode('farey_user' . ':' . 'farey_user');
- *  Authorization: Basic ZmFyZXlfdXNlcjpmYXJleV91c2Vy
- */
-
 require_once DRUPAL_ROOT .  '/sites/all/modules/custom/reverse_geocode/directions-api-clients-route-optimization-master/php/SwaggerClient-php/autoload.php';
 
 function dispatch_planning_menu() {
@@ -2306,13 +2299,9 @@ function check_dynamic_routing_configuration($distributor_id) {
 function dispatch_planning_node_update($node) {
    if ($node->type == 'dispatch_data') {
       $original_pre_start = $node->original->field_dispatch_pre_start_time[LANGUAGE_NONE][0]['value'];
-      dpm($original_pre_start, '$original_pre_start');
       $new_pre_start = $node->field_dispatch_pre_start_time[LANGUAGE_NONE][0]['value'];
-      dpm($new_pre_start, '$new_pre_start');
-      dpm($node, 'node');
       if ($original_pre_start != $new_pre_start) {
-        drupal_set_message(t('data is changed'));
-        drupal_register_shutdown_function('_update_dispatch_planning_api', $node);
+          drupal_register_shutdown_function('_update_dispatch_planning_api', $node);
       }
    }
 }
@@ -2458,7 +2447,7 @@ function get_sku_unit_case($sku7_code, $distributor_id) {
  * 
  * @param type $sku7_code
  * @param type $rs_code
- * @return type qty for sku in one unit case
+ * @return ean
  */
 function get_sku_ean($sku7_code, $rs_code) {
   $query = db_select('sku_ean_mrp', 'p');
