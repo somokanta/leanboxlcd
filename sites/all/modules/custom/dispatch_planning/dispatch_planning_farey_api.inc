@@ -55,6 +55,7 @@ function fetch_dispatch_planning_api_data($data) {
       // add trip id condition also in db_update
       //       ->condition('referenceNo', $data[''referenceNumber], '=')
 
+   watchdog('farey data1', '<pre>' . print_r($updated_bill_row_id,TRUE). '</pre>');
 
       if (!empty($updated_bill_row_id) && isset($data['fieldData']['item_details1']) && !empty($data['fieldData']['item_details1'])) {
          foreach ($data['fieldData']['item_details1'] as $key => $value) {
@@ -73,7 +74,8 @@ function fetch_dispatch_planning_api_data($data) {
          }
       }
       if (!empty($updated_bill_row_id) && isset($data['fieldData']['item_details']) && !empty($data['fieldData']['item_details'])) {
-         foreach ($data['fieldData']['item_details'] as $key => $value) {
+         watchdog('farey data2', '<pre>' . print_r($data['fieldData']['item_details'],TRUE). '</pre>');
+        foreach ($data['fieldData']['item_details'] as $key => $value) {
 
             // ignore if value is not in form of array
             if (!is_array($value)) {
