@@ -15,6 +15,8 @@ function fetch_dispatch_planning_api_data($data) {
       $json_data = json_encode($json_data);
       dispatch_planning_api_log($json_data, $data['jobData']['runsheet_number'], 'farey_sales_deliver', $dis_id, 1);
       
+      $bill_row_id = _get_bill_row_id_using_reference_no($data['referenceNumber']);
+      
       $updated_bill_row_id = db_update('dispatch_planning_api_data') // Table name no longer needs {}
           ->fields(array(
             'res_runsheetNo' => isset($data['runsheetNo']) ? $data['runsheetNo'] : '' ,
@@ -57,7 +59,7 @@ function fetch_dispatch_planning_api_data($data) {
 
    watchdog('farey data1', '<pre>' . print_r($updated_bill_row_id,TRUE). '</pre>');
 
-      if (!empty($updated_bill_row_id) && isset($data['fieldData']['item_details1']) && !empty($data['fieldData']['item_details1'])) {
+      if (!empty($bill_row_id) && isset($data['fieldData']['item_details1']) && !empty($data['fieldData']['item_details1'])) {
          foreach ($data['fieldData']['item_details1'] as $key => $value) {
 
             // ignore if value is not in form of array
@@ -68,12 +70,12 @@ function fetch_dispatch_planning_api_data($data) {
                 ->fields(array(
                   'res_sku_actual_quantity1' => isset($value['sku_actual_quantity1']) ? $value['sku_actual_quantity1'] : 0,
                 ))
-                ->condition('trip_bill_reference', $updated_bill_row_id, '=')
+                ->condition('trip_bill_reference', $bill_row_id, '=')
                 ->condition('sku_code', $value['sku_code1'], '=')
                 ->execute();
          }
       }
-      if (!empty($updated_bill_row_id) && isset($data['fieldData']['item_details']) && !empty($data['fieldData']['item_details'])) {
+      if (!empty($bill_row_id) && isset($data['fieldData']['item_details']) && !empty($data['fieldData']['item_details'])) {
          watchdog('farey data2', '<pre>' . print_r($data['fieldData']['item_details'],TRUE). '</pre>');
         foreach ($data['fieldData']['item_details'] as $key => $value) {
 
@@ -85,7 +87,7 @@ function fetch_dispatch_planning_api_data($data) {
                 ->fields(array(
                   'res_sku_actual_quantity1' => isset($value['sku_actual_quantity']) ? $value['sku_actual_quantity'] : 0,
                 ))
-                ->condition('trip_bill_reference', $updated_bill_row_id, '=')
+                ->condition('trip_bill_reference', $bill_row_id, '=')
                 ->condition('sku_code', $value['sku_code'], '=')
                 ->execute();
          }
@@ -101,4 +103,17 @@ function fetch_dispatch_planning_api_data($data) {
    }
    // log entry and is remaining
    return $results;
+}
+
+/**
+ * 
+ * @param type $ref_no
+ * @return type
+ */
+function _get_bill_row_id_using_reference_no($ref_no) {
+   $query = db_select('dispatch_planning_api_data', 'dp');
+   $query->fields('dp', array('id'));
+   $query->condition('dp.referenceNo', $ref_no);
+   $res = $query->execute()->fetchField();
+   return $res;
 }
