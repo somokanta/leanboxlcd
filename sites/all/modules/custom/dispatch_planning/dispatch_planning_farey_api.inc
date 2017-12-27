@@ -72,6 +72,22 @@ function fetch_dispatch_planning_api_data($data) {
                 ->execute();
          }
       }
+      if (!empty($updated_bill_row_id) && isset($data['fieldData']['item_details']) && !empty($data['fieldData']['item_details'])) {
+         foreach ($data['fieldData']['item_details'] as $key => $value) {
+
+            // ignore if value is not in form of array
+            if (!is_array($value)) {
+              continue;
+            }
+            db_update('dispatch_planning_item_details') // Table name no longer needs {}
+                ->fields(array(
+                  'res_sku_actual_quantity1' => isset($value['sku_actual_quantity']) ? $value['sku_actual_quantity'] : 0,
+                ))
+                ->condition('trip_bill_reference', $updated_bill_row_id, '=')
+                ->condition('sku_code', $value['sku_code'], '=')
+                ->execute();
+         }
+      }
       $results['flag'] = '1';
       $results['result'] = 'Data updated Sucessfully.';
    }
