@@ -92,6 +92,28 @@ function _sku_ean_list_no_ajax($form, &$form_state) {
  * @param type $form
  * @param type $form_state
  */
+function sku_ean_add_edit_validate($form, &$form_state) {
+  $distributor_id = $form_state['values']['distributor_id'];
+  $sku = $form_state['values']['sku'];
+
+  $query = db_select('node', 'n');
+  $query->condition('n.type', 'sku7_code_master');
+  $query->condition('n.uid', $distributor_id);
+  $query->condition('n.title', $sku);
+  $query->fields('n', array('title'));
+  
+  $res = $query->execute()->fetchField();
+
+  if (empty($res)) {
+    form_set_error('sku', "SKU: $sku is not found in SKU7 Master");
+  }
+}
+
+/**
+ * 
+ * @param type $form
+ * @param type $form_state
+ */
 function sku_ean_add_edit_submit($form, &$form_state) {
   $distributor_id = $form_state['values']['distributor_id'];
   $rs_code = $form_state['values']['rs_code'];
