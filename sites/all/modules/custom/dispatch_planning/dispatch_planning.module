@@ -3,6 +3,16 @@
 require_once DRUPAL_ROOT .  '/sites/all/modules/custom/reverse_geocode/directions-api-clients-route-optimization-master/php/SwaggerClient-php/autoload.php';
 
 function dispatch_planning_menu() {
+   
+  $items['delivered-trip-data'] = array(
+    'title' => 'Farey Delivered Trip',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('_delivered_trip_data_callback'),
+    'access arguments' => array('Ptl trip creation'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'dispatch_planning_farey.form.inc',
+      // Page callback, etc. need to be added here.
+  );
 
   $items['admin/dispatch-planning'] = array(
     'title' => 'Dispatch Planning',
@@ -2067,16 +2077,18 @@ function dispatch_planning_sales_reg_api($node, $trip_execution_date, $vehicle_n
   $party_code = $node->field_sales_party_code[LANGUAGE_NONE][0]['value'];
   $store_sequence = $node->field_drs_sequence[LANGUAGE_NONE][0]['value'];
 
-  $billing_data_details = dispatch_planning_get_billing_data($node_uid, $bill_number);
+  $billing_data_details = $billing_data_details_insert = dispatch_planning_get_billing_data($node_uid, $bill_number);
   $outlet_data_details = dispatch_planning_get_outlet_data($node_uid, $party_code);
   
-  if (empty($outlet_data_details['field_hul_updated_lat_value'])) {
+  foreach ($billing_data_details as $key => $val) {
+      unset($billing_data_details[$key]['og_Sum_of_NET_SALES_QTY']);
+   }
+   if (empty($outlet_data_details['field_hul_updated_lat_value'])) {
     $outlet_data_details['field_hul_updated_lat_value'] = 0;
   } 
   if (empty($outlet_data_details['field_hul_updated_long_value'])) {
     $outlet_data_details['field_hul_updated_long_value'] = 0;
   }
-  
   $api_data['jobType'] = 'delivery1';  // Hardcoded as suggested by gaurav
   $reference_no = $rs_code . '_' . $bill_number;
   $api_data['referenceNo'] = $reference_no;
@@ -2109,7 +2121,7 @@ function dispatch_planning_sales_reg_api($node, $trip_execution_date, $vehicle_n
   /**
    * Insert data into dispatch_planning_item_details table
    */
-  dispatch_planning_item_details($billing_data_details, $id);
+  dispatch_planning_item_details($billing_data_details_insert, $id);
   return $api_data;
 }
 
@@ -2161,6 +2173,7 @@ function dispatch_planning_item_details($billing_data_details, $id) {
         'product_name' => $data['product_name'],
         'sum_net_sales_cases' => $data['sum_net_sales_cases'],
         'sum_net_sales_quantity' => $data['sum_net_sales_quantity'],
+        'og_sum_net_sales_quantity' => $data['og_Sum_of_NET_SALES_QTY'],
         'sku_code' => $data['sku_code'],
         'sum_net_sales_kgs' => $data['sum_net_sales_kgs'],
         'sum_net_sales_value' => $data['sum_net_sales_value'],
@@ -2186,7 +2199,7 @@ function dispatch_planning_get_billing_data($node_uid, $bill_number) {
   $query->addfield('bd', 'Sum_of_TOTAL_SALES_QTY', 'sum_net_sales_quantity');
   $query->addfield('bd', 'sku7_code', 'sku_code');
   $query->addfield('bd', 'Sum_of_NET_SALES_KGS', 'sum_net_sales_kgs');
-  //$query->addfield('bd', 'Sum_of_NET_SALES_VALUE', 'sum_net_sales_value');
+  $query->addfield('bd', 'Sum_of_NET_SALES_QTY', 'og_Sum_of_NET_SALES_QTY');
   // send per unit value
   $query->addExpression('ROUND(((Sum_of_NET_SALES_VALUE - ((Sum_of_OTHER_DISCOUNT + Sum_of_SCHEME_DISCOUNT)*(1 + (Sum_of_TAX_PERCENTAGE/100))))/Sum_of_TOTAL_SALES_QTY), 2)', 'sum_net_sales_value');
   $query->addfield('bd', 'product_name', 'sku_description');
