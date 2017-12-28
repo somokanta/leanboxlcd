@@ -2314,7 +2314,6 @@ function dispatch_planning_node_update($node) {
       $original_pre_start = $node->original->field_dispatch_pre_start_time[LANGUAGE_NONE][0]['value'];
       $new_pre_start = $node->field_dispatch_pre_start_time[LANGUAGE_NONE][0]['value'];
       if ($original_pre_start != $new_pre_start) {
-         drupal_set_message('t');
           drupal_register_shutdown_function('_update_dispatch_planning_api', $node);
       }
    }
