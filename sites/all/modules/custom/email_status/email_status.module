@@ -1685,16 +1685,17 @@ function get_email_productivity_data_for_loading($start_date, $end_date = FALSE,
   $query->leftjoin('field_data_field_dispatch_start_time', 'det', 'det.entity_id = n.nid');
   $query->leftjoin('field_data_field_dispatch_status', 'ds', 'ds.entity_id = n.nid');
   $query->condition('ds.field_dispatch_status_value', 1, "=");
-  $query->leftjoin('field_data_field_dispatch_loader_team_count', 'tc', 'tc.entity_id = n.nid');
+  //$query->leftjoin('field_data_field_dispatch_loader_team_count', 'tc', 'tc.entity_id = n.nid');
   $query->leftjoin('field_data_field_dispatch_supervisor', 'pps', 'pps.entity_id = n.nid');
   $query->fields('bc', array('field_bill_count_value'));
   $query->fields('dis', array('field_dispatch_bill_value_value'));
   $query->fields('vno', array('field_vehicle_no_value'));
   $query->fields('dst', array('field_dispatch_pre_start_time_value'));
   $query->fields('det', array('field_dispatch_start_time_value'));
-  $query->fields('n', array('nid', 'changed'));
+  //$query->fields('n', array('nid', 'changed'));
+  $query->fields('dd', array('field_dispatch_date_value'));
   $query->fields('ds', array('field_dispatch_status_value'));
-  $query->fields('tc', array('field_dispatch_loader_team_count_value'));
+  //$query->fields('tc', array('field_dispatch_loader_team_count_value'));
   $query->fields('pps', array('field_dispatch_supervisor_value'));
   $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
 
@@ -1705,9 +1706,9 @@ function get_email_productivity_data_for_loading($start_date, $end_date = FALSE,
     $supervisor = $value['field_dispatch_supervisor_value'];
     $start_time = strtotime($value['field_dispatch_pre_start_time_value']);
     $end_time = strtotime($value['field_dispatch_start_time_value']);
-    $time_diff = abs($end_time - $start_time) / 60;
-    $team_count = $value['field_dispatch_loader_team_count_value'];
-    $time_per_transaction = ($team_count * $time_diff);
+    $time_per_transaction = abs($end_time - $start_time) / 60;
+    //$team_count = $value['field_dispatch_loader_team_count_value'];
+    //$time_per_transaction = ($team_count * $time_diff);
     $table_data[$date][$supervisor]['transaction_date'] = $date;
     $table_data[$date][$supervisor]['supervisor_name'] = $supervisor;
     $table_data[$date][$supervisor]['vehicle'][$value['field_vehicle_no_value']] = $value['field_vehicle_no_value'];
