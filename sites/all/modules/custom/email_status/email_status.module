@@ -1469,8 +1469,10 @@ function get_attachment_productivity_data_for_loose_confirmation($start_date, $e
 function send_loading_productivity_emailer() {
   $distributor_id = _DISTRIBUTOR_ID;
   $distributor_name = change_feeds_import_get_distributor_name($distributor_id);
-  $end_date = strtotime('-7 day', date('Y-m-d'));
-  $todays_date_date = strtotime(date('Y-m-d 00:00:00'));
+  //$end_date = strtotime('-7 day', date('Y-m-d'));
+  //$todays_date_date = strtotime(date('Y-m-d 00:00:00'));
+  $end_date = date('Y-m-d', strtotime('-7 day', strtotime(date('Y-m-d'))));
+  $todays_date_date = date('Y-m-d');
   $target_data = leanbox_dashboard_target_value_using_voc_name('productivity target');
   
   //Loading Productivity Mailer
@@ -1671,16 +1673,19 @@ function get_email_productivity_data_for_loading($start_date, $end_date = FALSE,
   $query->condition('n.type', 'dispatch_data');
   $query->join('field_data_field_distributor', 'fd', 'fd.entity_id = n.uid');
   $query->condition('fd.entity_id', $dis_id, '=');
-  $query->condition('n.changed', array($start_date, $end_date), 'BETWEEN');
-  $query->orderBy('n.changed', 'DESC');
-  $query->join('field_data_field_vehicle_no', 'vno', 'vno.entity_id = n.nid');
-  $query->join('field_data_field_dispatch_bill_value', 'dis', 'dis.entity_id = n.nid');
-  $query->join('field_data_field_bill_count', 'bc', 'bc.entity_id = n.nid');
-  $query->join('field_data_field_dispatch_pre_start_time', 'dst', 'dst.entity_id = n.nid');
-  $query->join('field_data_field_dispatch_start_time', 'det', 'det.entity_id = n.nid');
-  $query->join('field_data_field_dispatch_status', 'ds', 'ds.entity_id = n.nid');
+  //$query->condition('n.changed', array($start_date, $end_date), 'BETWEEN');
+  //$query->orderBy('n.changed', 'DESC');
+  $query->join('field_data_field_dispatch_date', 'dd', 'dd.entity_id = n.nid');
+  $query->condition('dd.field_dispatch_date_value', array($start_date, $end_date), 'BETWEEN');
+  $query->orderBy('dd.field_dispatch_date_value', 'DESC');
+  $query->leftjoin('field_data_field_vehicle_no', 'vno', 'vno.entity_id = n.nid');
+  $query->leftjoin('field_data_field_dispatch_bill_value', 'dis', 'dis.entity_id = n.nid');
+  $query->leftjoin('field_data_field_bill_count', 'bc', 'bc.entity_id = n.nid');
+  $query->leftjoin('field_data_field_dispatch_pre_start_time', 'dst', 'dst.entity_id = n.nid');
+  $query->leftjoin('field_data_field_dispatch_start_time', 'det', 'det.entity_id = n.nid');
+  $query->leftjoin('field_data_field_dispatch_status', 'ds', 'ds.entity_id = n.nid');
   $query->condition('ds.field_dispatch_status_value', 1, "=");
-  $query->join('field_data_field_dispatch_loader_team_count', 'tc', 'tc.entity_id = n.nid');
+  $query->leftjoin('field_data_field_dispatch_loader_team_count', 'tc', 'tc.entity_id = n.nid');
   $query->leftjoin('field_data_field_dispatch_supervisor', 'pps', 'pps.entity_id = n.nid');
   $query->fields('bc', array('field_bill_count_value'));
   $query->fields('dis', array('field_dispatch_bill_value_value'));
@@ -1695,7 +1700,8 @@ function get_email_productivity_data_for_loading($start_date, $end_date = FALSE,
 
   $table_data = array();
   foreach ($res as $value) {
-    $date = date('Y-m-d', $value['changed']);
+    $dispatch_date = strtotime($value['field_dispatch_date_value']);
+    $date = date('d-m-Y', $dispatch_date);
     $supervisor = $value['field_dispatch_supervisor_value'];
     $start_time = strtotime($value['field_dispatch_pre_start_time_value']);
     $end_time = strtotime($value['field_dispatch_start_time_value']);
