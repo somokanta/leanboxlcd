@@ -341,6 +341,60 @@ function create_fetch_data_ptl_trip_form($form, &$form_state){
   return $form;
 }
 
+function create_fetch_data_ptl_trip_form_validate($form, &$form_state) {
+  global $user;
+  $user_id = $user->uid;
+
+  $trip_id = $form_state['values']['trip_id'];
+  
+  $distributor_id = change_feeds_import_get_distributor_id($user_id);
+  $rs_code = dispatch_planning_get_rscode_using_uid($distributor_id);
+
+  $query = db_select('node', 'n');
+  $query->addField('n', 'nid');
+  $query->condition('n.title', $trip_id);
+  $query->condition('n.uid', $distributor_id);
+  $query->condition('n.type', 'dispatch_data');
+  $trip_id_nid = $query->execute()->fetchField();
+
+  $query = db_select('node', 'n');
+  $query->condition('n.type', "sales_register_data");
+  $query->addField('n', 'title');
+  $query->join('field_data_field_trip_id_reference', 'tir', 'tir.entity_id = n.nid');
+  $query->condition('field_trip_id_reference_nid', "$trip_id_nid");
+  $bill_numbers = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+
+  $query = db_select('custom_billing_data', 'bd');
+  $query->addField('bd', 'sku7_code');
+  $query->condition('bd.distributor_id', $distributor_id);
+  $query->condition('bd.Sum_of_NET_SALES_QTY', 1, '>=');
+  $query->condition('bd.bill_number', $bill_numbers, 'IN');
+  $query->groupBy('sku7_code');
+  $sku7_codes = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+
+  $sku_codes = array();
+  foreach ($sku7_codes as $sku) {
+    $sku_codes[] = $sku['sku7_code'];
+  }
+
+  $query = db_select('sku_ean_mrp', 'p');
+  $query->addField('p', 'sku');
+  $query->condition('p.rs_code', $rs_code, '=');
+  $query->condition('p.sku', $sku_codes, 'IN');
+  $exist_sku7s = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+
+  $exist_skus = array();
+  foreach ($exist_sku7s as $sku) {
+    $exist_skus[] = $sku['sku'];
+  }
+
+  $not_ean_sku = array_diff($sku_codes, $exist_skus);
+
+  if (!empty($not_ean_sku)) {
+    form_set_error('trip_id', 'EAN is not maintained for SKUs: ' . implode(' , ', $not_ean_sku));
+  }
+}
+
 function create_fetch_data_ptl_trip_form_submit($form, &$form_state) {
   global $user;
   $count = 0;
