@@ -7,7 +7,7 @@
  * @return int
  * To insert/update and delete ean and mrp on sku
  */
-function sku_ean_add_edit_delete($form, &$form_state) {
+function sku_ean_add_edit($form, &$form_state) {
   $form = array();
   $form['#prefix'] = '<div id="itemlist-div">';
   $form['#suffix'] = '</div>';
@@ -92,7 +92,7 @@ function _sku_ean_list_no_ajax($form, &$form_state) {
  * @param type $form
  * @param type $form_state
  */
-function sku_ean_add_edit_delete_submit($form, &$form_state) {
+function sku_ean_add_edit_submit($form, &$form_state) {
   $distributor_id = $form_state['values']['distributor_id'];
   $rs_code = $form_state['values']['rs_code'];
   $sku = $form_state['values']['sku'];

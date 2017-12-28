@@ -40,10 +40,10 @@ function leanbox_sku_cp_menu() {
     'access arguments' => array('Distributor Upload File'),
     'file' => 'form/sku_ean_mrp.inc',
   );
-   $items['sku-ean-edit-delete'] = array(
-     'title' => 'Add Edit or Delete SKU-EAN',
+   $items['sku-ean-add-edit'] = array(
+     'title' => 'Add Edit SKU EAN',
      'page callback' => 'drupal_get_form',
-     'page arguments' => array('sku_ean_add_edit_delete'),
+     'page arguments' => array('sku_ean_add_edit'),
      'access arguments' => array('sku cp'),
      'type' => MENU_CALLBACK,
      'file' => 'form/sku_ean_mrp_edit_delete.form.inc',
