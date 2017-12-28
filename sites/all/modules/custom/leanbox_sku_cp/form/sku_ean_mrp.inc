@@ -67,7 +67,7 @@ function sku_ean_mrp_feeds_import_form_submit($form, &$form_state) {
     while (($row = fgetcsv($handle) ) !== FALSE) {
 
       foreach ($row as $key => &$value) {
-        $value = mb_convert_encoding($value, 'UTF-8', 'UTF-8');
+        $value = mb_convert_encoding(trim($value), 'UTF-8', 'UTF-8');
       }
 
       $datas[] = array_combine($header, $row);
