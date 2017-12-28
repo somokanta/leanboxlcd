@@ -68,13 +68,13 @@ function sku_ean_add_edit_delete($form, &$form_state) {
       '#size' => 20,
     );
     // Show delete button if data already present
-    if (!empty($sku_details[0]->ean)) {
-      $form['delete'] = array(
-        '#value' => 'Delete',
-        '#type' => 'submit',
-        '#size' => 20,
-      );
-    }
+//    if (!empty($sku_details[0]->ean)) {
+//      $form['delete'] = array(
+//        '#value' => 'Delete',
+//        '#type' => 'submit',
+//        '#size' => 20,
+//      );
+//    }
   }
 
   return $form;
