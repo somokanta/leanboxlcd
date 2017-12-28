@@ -29,10 +29,8 @@ function fetch_ptl_data($rs_code, $api_time) {
   $data['header'] =  $header_result;
   
   $query = db_select('ptl_data_configuration', 'p');
-  //$query->leftJoin('sku_ean_mrp', 's', "s.sku = p.sku_code AND s.rs_code = $rs_code");//new change for ean
   $query->fields('p', array('id', 'ptl_job', 'rs_code', 'trip_id', 'vehicle', 'bill_number', 'loading_date', 'sequence_no', 'basepack_code', 'sku_code', 'product_name', 'MRP', 'TUR','free_sku_description','cp','ean'));
   $query->addExpression('loose', 'sum_sales_qty'); // send loose value in sum_sales_qty
-  //$query->addField('s', 'ean', 'ean');//new change for ean
   $query->condition('p.id', $max_ptl_data, '<=');
   $query->condition('p.api_flag', '0', '=');
   $query->condition('p.rs_code', $rs_code, '=');
@@ -72,11 +70,11 @@ function fetch_ptl_data($rs_code, $api_time) {
  * @return string
  */
 function fetch_sku_ean_mrp_data($rs_code, $api_time) {
-  $time = time() - 60 * 2; // send data which is created 5min befor, to avoid data loose of trip
+  $time = time() - 60 * 1; // send data which is created 5min befor, to avoid data loose of trip
 
   $query = db_select('sku_ean_mrp', 'p');
   $query->addField('p', 'sku', 'sku_code');
-  $query->fields('p', array('ean', 'mrp','rs_code','deleted'));
+  $query->fields('p', array('ean', 'mrp','rs_code'));
   $query->condition('created_time', $time, '<');
   $query->condition('p.flag', '0', '=');
   $query->condition('p.rs_code', $rs_code, '=');
@@ -344,7 +342,7 @@ function create_fetch_data_ptl_trip_form($form, &$form_state){
 function create_fetch_data_ptl_trip_form_validate($form, &$form_state) {
   global $user;
   $user_id = $user->uid;
-
+/*
   $trip_id = $form_state['values']['trip_id'];
   
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
@@ -393,6 +391,8 @@ function create_fetch_data_ptl_trip_form_validate($form, &$form_state) {
   if (!empty($not_ean_sku)) {
     form_set_error('trip_id', 'EAN is not maintained for SKUs: ' . implode(' , ', $not_ean_sku));
   }
+ * 
+ */
 }
 
 function create_fetch_data_ptl_trip_form_submit($form, &$form_state) {
