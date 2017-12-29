@@ -3240,7 +3240,6 @@ function email_status_mail($key, &$message, $params) {
       $message['subject'] = $params['subject'];
       $message['body'][] = $params['body'];
       break;
-
     case 'productivity_status':
       $message['subject'] = $params['subject'];
       $message['body'][] = $params['body'];
@@ -3268,6 +3267,13 @@ function email_status_mail($key, &$message, $params) {
       $message['subject'] = $params['subject'];
       $message['body'][] = $params['body'];
       $message['params']['attachments'][] = $params['attachment'];
+      break;
+    case 'exception_mis':
+      $message['subject'] = $params['subject'];
+      $message['body'][] = $params['body'];
+      $message['params']['attachments'][] = $params['attachment'];
+      $message['params']['attachments'][] = $params['attachment2'];
+      $message['params']['attachments'][] = $params['attachment3'];
       break;
   }
 }
