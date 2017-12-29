@@ -2090,7 +2090,7 @@ function dispatch_planning_sales_reg_api($node, $trip_execution_date, $vehicle_n
     $outlet_data_details['field_hul_updated_long_value'] = 0;
   }
   $api_data['jobType'] = 'delivery1';  // Hardcoded as suggested by gaurav
-  $reference_no = $rs_code . '_' . $bill_number;
+  $reference_no = $trip_id . '_'. $rs_code . '_' . $bill_number;
   $api_data['referenceNo'] = $reference_no;
   $api_data['date'] = date('Y-m-d',$trip_execution_date);
   $api_data['city'] = 'ABC';
