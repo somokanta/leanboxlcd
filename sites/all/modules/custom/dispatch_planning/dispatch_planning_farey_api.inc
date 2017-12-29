@@ -80,9 +80,6 @@ watchdog('farey data1', '<pre>' . print_r($updated_bill_row_id,TRUE). '</pre>');
          }
       }
 
-      if (!empty($bill_row_id) && isset($data['fieldData']['item_details']) && !empty($data['fieldData']['item_details'])) {
-         watchdog('farey data2', '<pre>' . print_r($data['fieldData']['item_details'],TRUE). '</pre>');
-
       if (!empty($updated_bill_row_id) && isset($data['fieldData']['item_details']) && !empty($data['fieldData']['item_details'])) {
         watchdog('farey data1', '<pre>' . print_r($data['fieldData']['item_details'],TRUE). '</pre>');
  
