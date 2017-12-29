@@ -153,8 +153,81 @@ function send_email_exception_mis() {
   $params['body'] = $pt_ct_not_maintained_html . "<br>" . $child_not_maintained_html . "<br>" . $crm_status_high_discounted_bills_html . "<br>" . $crm_status_signed_bill_html . "<br>" . $crm_status_full_returned_html;
   $mail_to = variable_get('exception_mis_to_email');
   $from = variable_get('from_email');
+  
+  // Attachment for Highly Discounted Bills
+  $file_name = 'Highly_Discounted_Bills.csv';
+  $file_uri = 'public://CRM_STATUS/' . $file_name;
 
-  drupal_mail('email_status', 'daily_data', $mail_to, LANGUAGE_NONE, $params, $from);
+  // create directory if not exist
+  $dir = 'public://CRM_STATUS';
+  file_prepare_directory($dir, FILE_CREATE_DIRECTORY);
+
+  $file = fopen($file_uri, 'w');
+
+  $table = get_attachment_high_discounted_bills($distributor_id);
+  fputcsv($file, $table['header']);
+  foreach ($table['rows'] as $line) {
+    fputcsv($file, $line);
+  }
+
+  fclose($file);
+
+  $params['attachment'] = array(
+    'filecontent' => file_get_contents($file_uri),
+    'filename' => $file_name,
+    'filemime' => 'text/csv',
+  );
+  
+  // Attachment for Signed Bills
+  $file2_name = 'Signed_Bills.csv';
+  $file2_uri = 'public://CRM_STATUS/' . $file2_name;
+
+  // create directory if not exist
+  $dir = 'public://CRM_STATUS';
+  file_prepare_directory($dir, FILE_CREATE_DIRECTORY);
+
+  $file2 = fopen($file2_uri, 'w');
+
+  $table2 = get_attachment_signed_bills($distributor_id);
+  fputcsv($file2, $table2['header']);
+  foreach ($table2['rows'] as $line) {
+    fputcsv($file2, $line);
+  }
+
+  fclose($file2);
+
+  $params['attachment2'] = array(
+    'filecontent' => file_get_contents($file2_uri),
+    'filename' => $file2_name,
+    'filemime' => 'text/csv',
+  );
+  
+  
+  // Attachment for Full Returned Bills
+  $file3_name = 'Full_Returned_Bills.csv';
+  $file3_uri = 'public://CRM_STATUS/' . $file3_name;
+
+  // create directory if not exist
+  $dir = 'public://CRM_STATUS';
+  file_prepare_directory($dir, FILE_CREATE_DIRECTORY);
+
+  $file3 = fopen($file3_uri, 'w');
+
+  $table3 = get_attachment_full_returned_bills($distributor_id);
+  fputcsv($file3, $table3['header']);
+  foreach ($table3['rows'] as $line) {
+    fputcsv($file3, $line);
+  }
+
+  fclose($file3);
+
+  $params['attachment3'] = array(
+    'filecontent' => file_get_contents($file3_uri),
+    'filename' => $file3_name,
+    'filemime' => 'text/csv',
+  );
+
+  drupal_mail('email_status', 'exception_mis', $mail_to, LANGUAGE_NONE, $params, $from);
 }
 
 /*
@@ -429,4 +502,155 @@ function get_email_crm_status_full_returned_bills($distributor_id) {
   $output .= theme('table', array('header' => $header, 'rows' => $row, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0'), 'empty' => t('No Records has been found')));
   
   return $output;
+}
+
+function get_attachment_high_discounted_bills($distributor_id) {
+  $start_date = strtotime('-7 day', strtotime(date('Y-m-d')));
+  $start = date('Y-m-d', $start_date);
+  $end = date('Y-m-d');
+
+  $query = db_select('node', 'n');
+  $query->condition('n.type', 'sales_register_data');
+  $query->condition('n.uid', $distributor_id, '=');
+  $query->leftjoin('field_data_field_sales_delivery_status', 'ds', 'ds.entity_id = n.nid');
+  $query->join('field_data_field_trip_id_reference', 'ti', 'ti.entity_id = n.nid');
+  $query->join('field_data_field_dispatch_date', 'dd', 'dd.entity_id = ti.field_trip_id_reference_nid');
+  $query->join('node', 'nw', 'nw.nid = ti.field_trip_id_reference_nid');
+  $query->isNotNull('dd.field_dispatch_date_value');
+  $query->condition('dd.field_dispatch_date_value', array($start, $end), 'BETWEEN');
+  $query->orderBy('dd.field_dispatch_date_value', 'DESC');
+  $query->join('field_data_field_call_type', 'ct', 'ct.entity_id = n.nid');
+  $query->condition('ct.field_call_type_value', 'hd', '=');
+
+  $query->fields('n', array('title'));
+  $query->fields('nw', array('title'));
+  $query->fields('dd', array('field_dispatch_date_value'));
+  $query->fields('ds', array('field_sales_delivery_status_tid'));
+  $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+
+  foreach ($res as $data) {
+    $row['bill_no'] = $data['title'];
+    $row['trip_id'] = $data['nw_title'];
+    $row['dispatch_data'] = date('d-m-Y', strtotime($data['field_dispatch_date_value']));
+    if ($data['field_sales_delivery_status_tid'] == '59') {
+      $row['status'] = 'Delivered';
+    }
+    else if ($data['field_sales_delivery_status_tid'] == '60') {
+      $row['status'] = 'Undelivered';
+    }
+    else if ($data['field_sales_delivery_status_tid'] == '66') {
+      $row['status'] = 'Not Dispatched';
+    }
+    else {
+      $row['status'] = 'Blank';
+    }
+    $rows[] = $row;
+  }
+  $header = array('Bill No.', 'Trip ID', 'Dispatch date', 'Status');
+
+  $output1['header'] = $header;
+  $output1['rows'] = $rows;
+
+  return $output1;
+}
+
+
+function get_attachment_signed_bills($distributor_id) {
+  $start_date = strtotime('-7 day', strtotime(date('Y-m-d')));
+  $start = date('Y-m-d', $start_date);
+  $end = date('Y-m-d');
+  
+  $query = db_select('node', 'n');
+  $query->condition('n.type', 'sales_register_data');
+  $query->condition('n.uid', $distributor_id, '=');
+  $query->leftjoin('field_data_field_sales_delivery_status', 'ds', 'ds.entity_id = n.nid');
+  $query->join('field_data_field_trip_id_reference', 'ti', 'ti.entity_id = n.nid');
+  $query->join('field_data_field_dispatch_date', 'dd', 'dd.entity_id = ti.field_trip_id_reference_nid');
+  $query->join('node', 'nw', 'nw.nid = ti.field_trip_id_reference_nid');
+  $query->isNotNull('dd.field_dispatch_date_value');
+  $query->condition('dd.field_dispatch_date_value', array($start, $end), 'BETWEEN');
+  $query->orderBy('dd.field_dispatch_date_value', 'DESC');
+  $query->join('field_data_field_call_type', 'ct', 'ct.entity_id = n.nid');
+  $query->condition('ct.field_call_type_value', 'sd', '=');
+  
+  $query->fields('n', array('title'));
+  $query->fields('nw', array('title'));
+  $query->fields('dd', array('field_dispatch_date_value'));
+  $query->fields('ds', array('field_sales_delivery_status_tid'));
+  $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+  
+  foreach ($res as $data) {
+    $row['bill_no'] = $data['title'];
+    $row['trip_id'] = $data['nw_title'];
+    $row['dispatch_data'] = date('d-m-Y', strtotime($data['field_dispatch_date_value']));
+    if ($data['field_sales_delivery_status_tid'] == '59') {
+      $row['status'] = 'Delivered';
+    }
+    else if ($data['field_sales_delivery_status_tid'] == '60') {
+      $row['status'] = 'Undelivered';
+    }
+    else if ($data['field_sales_delivery_status_tid'] == '66') {
+      $row['status'] = 'Not Dispatched';
+    }
+    else {
+      $row['status'] = 'Blank';
+    }
+    $rows[] = $row;
+  }
+  $header = array('Bill No.', 'Trip ID', 'Dispatch date', 'Status');
+
+  $output1['header'] = $header;
+  $output1['rows'] = $rows;
+
+  return $output1;
+}
+ 
+function get_attachment_full_returned_bills($distributor_id) {
+  $start_date = strtotime('-7 day', strtotime(date('Y-m-d')));
+  $start = date('Y-m-d', $start_date);
+  $end = date('Y-m-d');
+  
+  $query = db_select('node', 'n');
+  $query->condition('n.type', 'sales_register_data');
+  $query->condition('n.uid', $distributor_id, '=');
+  $query->leftjoin('field_data_field_sales_delivery_status', 'ds', 'ds.entity_id = n.nid');
+  $query->join('field_data_field_trip_id_reference', 'ti', 'ti.entity_id = n.nid');
+  $query->join('field_data_field_dispatch_date', 'dd', 'dd.entity_id = ti.field_trip_id_reference_nid');
+  $query->join('node', 'nw', 'nw.nid = ti.field_trip_id_reference_nid');
+  $query->isNotNull('dd.field_dispatch_date_value');
+  $query->condition('dd.field_dispatch_date_value', array($start, $end), 'BETWEEN');
+  $query->orderBy('dd.field_dispatch_date_value', 'DESC');
+  $query->join('field_data_field_call_type', 'ct', 'ct.entity_id = n.nid');
+  $query->condition('ct.field_call_type_value', 'fr', '=');
+  
+  $query->fields('n', array('title'));
+  $query->fields('nw', array('title'));
+  $query->fields('dd', array('field_dispatch_date_value'));
+  $query->fields('ds', array('field_sales_delivery_status_tid'));
+  $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+  
+  foreach ($res as $data) {
+    $row['bill_no'] = $data['title'];
+    $row['trip_id'] = $data['nw_title'];
+    $row['dispatch_data'] = date('d-m-Y', strtotime($data['field_dispatch_date_value']));
+    if ($data['field_sales_delivery_status_tid'] == '59') {
+      $row['status'] = 'Delivered';
+    }
+    else if ($data['field_sales_delivery_status_tid'] == '60') {
+      $row['status'] = 'Undelivered';
+    }
+    else if ($data['field_sales_delivery_status_tid'] == '66') {
+      $row['status'] = 'Not Dispatched';
+    }
+    else {
+      $row['status'] = 'Blank';
+    }
+    $rows[] = $row;
+  }
+  $header = array('Bill No.', 'Trip ID', 'Dispatch date', 'Status');
+
+  $output1['header'] = $header;
+  $output1['rows'] = $rows;
+
+  return $output1;
 }
