@@ -155,12 +155,12 @@ function send_email_exception_mis() {
   $from = variable_get('from_email');
   
   // Attachment for Highly Discounted Bills
-  $file_name = 'Highly_Discounted_Bills.csv';
-  $file_uri = 'public://CRM_STATUS/' . $file_name;
-
   // create directory if not exist
   $dir = 'public://CRM_STATUS';
   file_prepare_directory($dir, FILE_CREATE_DIRECTORY);
+  
+  $file_name = 'Highly_Discounted_Bills.csv';
+  $file_uri = 'public://CRM_STATUS/' . $file_name;
 
   $file = fopen($file_uri, 'w');
 
@@ -182,9 +182,6 @@ function send_email_exception_mis() {
   $file2_name = 'Signed_Bills.csv';
   $file2_uri = 'public://CRM_STATUS/' . $file2_name;
 
-  // create directory if not exist
-  $dir = 'public://CRM_STATUS';
-  file_prepare_directory($dir, FILE_CREATE_DIRECTORY);
 
   $file2 = fopen($file2_uri, 'w');
 
@@ -206,10 +203,6 @@ function send_email_exception_mis() {
   // Attachment for Full Returned Bills
   $file3_name = 'Full_Returned_Bills.csv';
   $file3_uri = 'public://CRM_STATUS/' . $file3_name;
-
-  // create directory if not exist
-  $dir = 'public://CRM_STATUS';
-  file_prepare_directory($dir, FILE_CREATE_DIRECTORY);
 
   $file3 = fopen($file3_uri, 'w');
 
