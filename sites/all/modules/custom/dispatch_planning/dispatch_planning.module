@@ -2359,7 +2359,8 @@ function _update_dispatch_planning_api($node) {
 
 
             $request_headers = array('Content-Type' => 'application/json');
-            $order_api_url = 'https://staging.fareye.co/api/v1/job?api_key=l1S6xa5mnxUXDuqv12q7lerLBL9l1ICq';
+            //$order_api_url = 'https://staging.fareye.co/api/v1/job?api_key=l1S6xa5mnxUXDuqv12q7lerLBL9l1ICq';
+            $order_api_url = variable_get('dispatch_uri_settings', 'https://staging.fareye.co/api/v1/job?api_key=l1S6xa5mnxUXDuqv12q7lerLBL9l1ICq');
             $options = array('headers' => $request_headers, 'method' => 'POST', 'data' => $json_api_data);
             $response_data = drupal_http_request($order_api_url, $options);
 
