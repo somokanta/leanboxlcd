@@ -711,7 +711,7 @@ function dispatch_planning_form($form, &$form_state) {
     '#title' => t('Loading date'),
     '#date_label_position' => '',
     //'#default_value' => empty($variables['from_date']) ? NULL : format_date($variables['from_date'], $type = 'custom', $format = 'Y-m-d H:i:s'),
-    '#date_year_range' => '-200:+0',
+    '#date_year_range' => '-20:+1',
     '#size' => 30,
     '#ajax' => array(
       'event' => 'change',
@@ -951,7 +951,7 @@ function dispatch_planning_form($form, &$form_state) {
       '#date_format' => 'm/d/y',
       '#title' => t('Trip Execution Date'),
       '#date_label_position' => '',
-      '#date_year_range' => '-200:+0',
+      '#date_year_range' => '-20:+1',
       '#size' => 30,
       '#required' => TRUE,
       '#ajax' => array(
