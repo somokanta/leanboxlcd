@@ -821,6 +821,18 @@ function dispatch_planning_views_data() {
      ),
    );   
 
+ $base_table = 'ptl_data_configuration';
+ $data[$base_table]['date_filter'] = array(
+   'group' => t('Date'),
+   'title' => t('Date (!base_table)', array('!base_table' => $base_table)),
+   'help' => t('Filter any Views !base_table date field.', array('!base_table' => $base_table)),
+   'filter' => array(
+     'handler' => 'date_views_filter_handler',
+     'empty field name' => t('Undated'),
+     'is date' => TRUE,
+   //'skip base' => $base_table,
+   ),
+ );
 
    // Adding custom handler for Master PTL Report data
    $data['master_ptl_data']['table'] = array(
