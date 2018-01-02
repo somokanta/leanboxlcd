@@ -332,6 +332,7 @@ function dispatch_planning_views_data() {
      ),
      'filter' => array(
        'handler' => 'views_handler_filter_date',
+       'is date' => TRUE,
      ),
      'argument' => array(
        'handler' => 'views_handler_filter_date',
