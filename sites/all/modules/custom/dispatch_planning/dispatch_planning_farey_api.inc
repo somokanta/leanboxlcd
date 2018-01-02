@@ -50,6 +50,9 @@ function fetch_dispatch_planning_api_data($data) {
             'res_cheque_amount' => isset($data['fieldData']['cheque_amount']) ? $data['fieldData']['cheque_amount'] : '',
             'res_money_collect2' => isset($data['fieldData']['money_collect2']) ? $data['fieldData']['money_collect2'] : '',
             'res_signed_bill_delivery' => isset($data['fieldData']['signed_bill_delivery']) ? $data['fieldData']['signed_bill_delivery'] : '',
+            'res_cash_amount' => isset($data['fieldData']['cash_amount']) ? $data['fieldData']['cash_amount'] : '',
+            'res_to_be_collection' => isset($data['fieldData']['to_be_collection']) ? $data['fieldData']['to_be_collection'] : '',
+            'res_signed_bill_partial' => isset($data['fieldData']['signed_bill_partial']) ? $data['fieldData']['signed_bill_partial'] : '',
           ))
           ->condition('referenceNo', $data['referenceNumber'], '=')
           ->execute();

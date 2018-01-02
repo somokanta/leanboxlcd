@@ -1641,6 +1641,58 @@ function dispatch_planning_views_data() {
        'handler' => 'views_handler_argument_string',
      ),
    );
+   
+    $data['dispatch_planning_api_data']['res_cash_amount'] = array(
+     'title' => t('DP res_cash_amount'),
+     'help' => t('Dispatch Planning res_cash_amount'),
+     'field' => array(
+       'handler' => 'views_handler_field',
+       'click sortable' => TRUE,
+     ),
+     'sort' => array(
+       'handler' => 'views_handler_sort',
+     ),
+     'filter' => array(
+       'handler' => 'views_handler_filter_string',
+     ),
+     'argument' => array(
+       'handler' => 'views_handler_argument_string',
+     ),
+   );
+     $data['dispatch_planning_api_data']['res_to_be_collection'] = array(
+     'title' => t('DP res_to_be_collection'),
+     'help' => t('Dispatch Planning res_to_be_collection'),
+     'field' => array(
+       'handler' => 'views_handler_field',
+       'click sortable' => TRUE,
+     ),
+     'sort' => array(
+       'handler' => 'views_handler_sort',
+     ),
+     'filter' => array(
+       'handler' => 'views_handler_filter_string',
+     ),
+     'argument' => array(
+       'handler' => 'views_handler_argument_string',
+     ),
+   );
+      $data['dispatch_planning_api_data']['res_signed_bill_partial'] = array(
+     'title' => t('DP res_signed_bill_partial'),
+     'help' => t('Dispatch Planning res_signed_bill_partial'),
+     'field' => array(
+       'handler' => 'views_handler_field',
+       'click sortable' => TRUE,
+     ),
+     'sort' => array(
+       'handler' => 'views_handler_sort',
+     ),
+     'filter' => array(
+       'handler' => 'views_handler_filter_string',
+     ),
+     'argument' => array(
+       'handler' => 'views_handler_argument_string',
+     ),
+   );
 
    $data['dispatch_planning_api_data']['party_hll_code'] = array(
      'title' => t('DP party_hll_code'),
