@@ -1747,8 +1747,8 @@ function dispatch_planning_views_data() {
      ),
    );
    $data['dispatch_planning_api_data']['bill_value'] = array(
-     'title' => t('DP lat_longlongitude'),
-     'help' => t('Dispatch Planning lat_longlongitude'),
+     'title' => t('DP bill_value'),
+     'help' => t('Dispatch Planning bill_value'),
      'field' => array(
        'handler' => 'views_handler_field',
        'click sortable' => TRUE,
