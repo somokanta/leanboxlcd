@@ -1096,6 +1096,10 @@ function leanbox_dashboard_get_areahookgroup_entity($title, $day_tid) {
 function leanbox_dashboard_target_value_using_voc_name($vname) {
   $uid = $GLOBALS['user']->uid;
   $distributor_id = change_feeds_import_get_distributor_id($uid);
+  $arg0 = arg(0);
+  if(empty($uid) && $arg0 == 'email-productivity-data') {
+    $distributor_id = _DISTRIBUTOR_ID;
+  }
   $query1 = db_select('node', 'n');
   $query1->leftjoin('field_data_field_dets_bulk', 'v', 'v.entity_id = n.nid');
   $query1->leftjoin('field_data_field_dets_loose', 'l', 'v.entity_id = n.nid');
