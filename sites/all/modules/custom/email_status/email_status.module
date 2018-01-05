@@ -696,7 +696,13 @@ function send_email_cron_pl_emailer($distributor_name, $distributor_id = 60) {
   elseif ($current_day <= 21) {
     $old_date = strtotime('-1 month', strtotime($todays_date_date));
     $last_month = date("m", $old_date);
-    $this_date = strtotime(date("Y-$last_month-21"));
+    if($last_month == '12') {
+      $last_year = date("Y",strtotime("-1 year"));
+      $this_date = strtotime(date("$last_year-$last_month-21"));
+    }
+    else {
+      $this_date = strtotime(date("Y-$last_month-21"));
+    } 
   }
   else {
     $this_month = date("m", $todays_date_date_timestamp);
