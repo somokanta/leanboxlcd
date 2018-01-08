@@ -6,3 +6,7 @@ files[] = views/handler/footer_ptl_cld_custom_field.inc
 files[] = views/handler/footer_ptl_loose_custom_field.inc
 files[] = views/handler/header_ptl_cld_custom_field.inc
 files[] = views/handler/header_ptl_loose_custom_field.inc
+files[] = views/handler/footer_master_ptl_cld_custom_field.inc
+files[] = views/handler/footer_master_ptl_loose_custom_field.inc
+files[] = views/handler/header_master_ptl_cld_custom_field.inc
+files[] = views/handler/header_master_ptl_loose_custom_field.inc
