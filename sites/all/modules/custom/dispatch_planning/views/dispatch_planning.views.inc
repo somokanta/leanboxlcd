@@ -821,6 +821,18 @@ function dispatch_planning_views_data() {
      ),
    );   
 
+ $base_table = 'ptl_data_configuration';
+ $data[$base_table]['date_filter'] = array(
+   'group' => t('Date'),
+   'title' => t('Date (!base_table)', array('!base_table' => $base_table)),
+   'help' => t('Filter any Views !base_table date field.', array('!base_table' => $base_table)),
+   'filter' => array(
+     'handler' => 'date_views_filter_handler',
+     'empty field name' => t('Undated'),
+     'is date' => TRUE,
+   //'skip base' => $base_table,
+   ),
+ );
 
    // Adding custom handler for Master PTL Report data
    $data['master_ptl_data']['table'] = array(
@@ -1629,6 +1641,58 @@ function dispatch_planning_views_data() {
        'handler' => 'views_handler_argument_string',
      ),
    );
+   
+    $data['dispatch_planning_api_data']['res_cash_amount'] = array(
+     'title' => t('DP res_cash_amount'),
+     'help' => t('Dispatch Planning res_cash_amount'),
+     'field' => array(
+       'handler' => 'views_handler_field',
+       'click sortable' => TRUE,
+     ),
+     'sort' => array(
+       'handler' => 'views_handler_sort',
+     ),
+     'filter' => array(
+       'handler' => 'views_handler_filter_string',
+     ),
+     'argument' => array(
+       'handler' => 'views_handler_argument_string',
+     ),
+   );
+     $data['dispatch_planning_api_data']['res_to_be_collection'] = array(
+     'title' => t('DP res_to_be_collection'),
+     'help' => t('Dispatch Planning res_to_be_collection'),
+     'field' => array(
+       'handler' => 'views_handler_field',
+       'click sortable' => TRUE,
+     ),
+     'sort' => array(
+       'handler' => 'views_handler_sort',
+     ),
+     'filter' => array(
+       'handler' => 'views_handler_filter_string',
+     ),
+     'argument' => array(
+       'handler' => 'views_handler_argument_string',
+     ),
+   );
+      $data['dispatch_planning_api_data']['res_signed_bill_partial'] = array(
+     'title' => t('DP res_signed_bill_partial'),
+     'help' => t('Dispatch Planning res_signed_bill_partial'),
+     'field' => array(
+       'handler' => 'views_handler_field',
+       'click sortable' => TRUE,
+     ),
+     'sort' => array(
+       'handler' => 'views_handler_sort',
+     ),
+     'filter' => array(
+       'handler' => 'views_handler_filter_string',
+     ),
+     'argument' => array(
+       'handler' => 'views_handler_argument_string',
+     ),
+   );
 
    $data['dispatch_planning_api_data']['party_hll_code'] = array(
      'title' => t('DP party_hll_code'),
@@ -1683,8 +1747,8 @@ function dispatch_planning_views_data() {
      ),
    );
    $data['dispatch_planning_api_data']['bill_value'] = array(
-     'title' => t('DP lat_longlongitude'),
-     'help' => t('Dispatch Planning lat_longlongitude'),
+     'title' => t('DP bill_value'),
+     'help' => t('Dispatch Planning bill_value'),
      'field' => array(
        'handler' => 'views_handler_field',
        'click sortable' => TRUE,

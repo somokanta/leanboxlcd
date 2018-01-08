@@ -6,7 +6,7 @@
  */
 
 function fetch_dispatch_planning_api_data($data) {
-   watchdog('farey data', '<pre>' . print_r($data,TRUE). '</pre>');
+   watchdog('farey data', '<pre>' . print_r($data, TRUE) . '</pre>');
    if (!empty($data)) {
 
       // first entry in log table
@@ -14,12 +14,12 @@ function fetch_dispatch_planning_api_data($data) {
       $dis_id = leanbox_mobile_get_distributor_using_rscode($data['hubCode']);
       $json_data = json_encode($data);
       dispatch_planning_api_log($json_data, $data['jobData']['runsheet_number'], 'farey_sales_deliver', $dis_id, 1);
-      
+
       $bill_row_id = _get_bill_row_id_using_reference_no($data['referenceNumber']);
-      
+
       $updated_bill_row_id = db_update('dispatch_planning_api_data') // Table name no longer needs {}
           ->fields(array(
-            'res_runsheetNo' => isset($data['runsheetNo']) ? $data['runsheetNo'] : '' ,
+            'res_runsheetNo' => isset($data['runsheetNo']) ? $data['runsheetNo'] : '',
             'res_actualAmount' => isset($data['actualAmount']) ? $data['actualAmount'] : '',
             'res_originalAmount' => isset($data['originalAmount']) ? $data['originalAmount'] : '',
             'res_moneyTransactionType' => isset($data['moneyTransactionType']) ? $data['moneyTransactionType'] : '',
@@ -50,6 +50,9 @@ function fetch_dispatch_planning_api_data($data) {
             'res_cheque_amount' => isset($data['fieldData']['cheque_amount']) ? $data['fieldData']['cheque_amount'] : '',
             'res_money_collect2' => isset($data['fieldData']['money_collect2']) ? $data['fieldData']['money_collect2'] : '',
             'res_signed_bill_delivery' => isset($data['fieldData']['signed_bill_delivery']) ? $data['fieldData']['signed_bill_delivery'] : '',
+            'res_cash_amount' => isset($data['fieldData']['cash_amount']) ? $data['fieldData']['cash_amount'] : '',
+            'res_to_be_collection' => isset($data['fieldData']['to_be_collection']) ? $data['fieldData']['to_be_collection'] : '',
+            'res_signed_bill_partial' => isset($data['fieldData']['signed_bill_partial']) ? $data['fieldData']['signed_bill_partial'] : '',
           ))
           ->condition('referenceNo', $data['referenceNumber'], '=')
           ->execute();
@@ -58,17 +61,16 @@ function fetch_dispatch_planning_api_data($data) {
       //       ->condition('referenceNo', $data[''referenceNumber], '=')
 
 
-   watchdog('farey data1', '<pre>' . print_r($updated_bill_row_id,TRUE). '</pre>');
-
-watchdog('farey data1', '<pre>' . print_r($updated_bill_row_id,TRUE). '</pre>');
-
+      watchdog('updated row id', '<pre>' . print_r($updated_bill_row_id, TRUE) . '</pre>');
 
       if (!empty($bill_row_id) && isset($data['fieldData']['item_details1']) && !empty($data['fieldData']['item_details1'])) {
+         watchdog('farey data full', '<pre>' . print_r($data['fieldData']['item_details'], TRUE) . '</pre>');
+
          foreach ($data['fieldData']['item_details1'] as $key => $value) {
 
             // ignore if value is not in form of array
             if (!is_array($value)) {
-              continue;
+               continue;
             }
             db_update('dispatch_planning_item_details') // Table name no longer needs {}
                 ->fields(array(
@@ -81,14 +83,14 @@ watchdog('farey data1', '<pre>' . print_r($updated_bill_row_id,TRUE). '</pre>');
       }
 
       if (!empty($updated_bill_row_id) && isset($data['fieldData']['item_details']) && !empty($data['fieldData']['item_details'])) {
-        watchdog('farey data1', '<pre>' . print_r($data['fieldData']['item_details'],TRUE). '</pre>');
- 
+         watchdog('farey data partial', '<pre>' . print_r($data['fieldData']['item_details'], TRUE) . '</pre>');
 
-        foreach ($data['fieldData']['item_details'] as $key => $value) {
+
+         foreach ($data['fieldData']['item_details'] as $key => $value) {
 
             // ignore if value is not in form of array
             if (!is_array($value)) {
-              continue;
+               continue;
             }
             db_update('dispatch_planning_item_details') // Table name no longer needs {}
                 ->fields(array(
@@ -98,6 +100,15 @@ watchdog('farey data1', '<pre>' . print_r($updated_bill_row_id,TRUE). '</pre>');
                 ->condition('sku_code', $value['sku_code'], '=')
                 ->execute();
          }
+      }
+      if ($data['status'] == 'undeliver' && !empty($updated_bill_row_id)) {
+         watchdog('farey data undeliver', '<pre>' . print_r($data['fieldData']['item_details'], TRUE) . '</pre>');
+         db_update('dispatch_planning_item_details') // Table name no longer needs {}
+             ->fields(array(
+               'res_sku_actual_quantity1' => 0,
+             ))
+             ->condition('trip_bill_reference', $bill_row_id, '=')
+             ->execute();
       }
       $results['flag'] = '1';
       $results['result'] = 'Data updated Sucessfully.';

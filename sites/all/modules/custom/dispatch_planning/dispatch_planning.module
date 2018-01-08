@@ -721,7 +721,7 @@ function dispatch_planning_form($form, &$form_state) {
     '#title' => t('Loading date'),
     '#date_label_position' => '',
     //'#default_value' => empty($variables['from_date']) ? NULL : format_date($variables['from_date'], $type = 'custom', $format = 'Y-m-d H:i:s'),
-    '#date_year_range' => '-200:+0',
+    '#date_year_range' => '-20:+1',
     '#size' => 30,
     '#ajax' => array(
       'event' => 'change',
@@ -961,7 +961,7 @@ function dispatch_planning_form($form, &$form_state) {
       '#date_format' => 'm/d/y',
       '#title' => t('Trip Execution Date'),
       '#date_label_position' => '',
-      '#date_year_range' => '-200:+0',
+      '#date_year_range' => '-20:+1',
       '#size' => 30,
       '#required' => TRUE,
       '#ajax' => array(
@@ -2090,7 +2090,7 @@ function dispatch_planning_sales_reg_api($node, $trip_execution_date, $vehicle_n
     $outlet_data_details['field_hul_updated_long_value'] = 0;
   }
   $api_data['jobType'] = 'delivery1';  // Hardcoded as suggested by gaurav
-  $reference_no = $rs_code . '_' . $bill_number;
+  $reference_no = $trip_id . '_'. $rs_code . '_' . $bill_number;
   $api_data['referenceNo'] = $reference_no;
   $api_data['date'] = date('Y-m-d',$trip_execution_date);
   $api_data['city'] = 'ABC';
@@ -2359,7 +2359,8 @@ function _update_dispatch_planning_api($node) {
 
 
             $request_headers = array('Content-Type' => 'application/json');
-            $order_api_url = 'https://staging.fareye.co/api/v1/job?api_key=l1S6xa5mnxUXDuqv12q7lerLBL9l1ICq';
+            //$order_api_url = 'https://staging.fareye.co/api/v1/job?api_key=l1S6xa5mnxUXDuqv12q7lerLBL9l1ICq';
+            $order_api_url = variable_get('dispatch_uri_settings', 'https://staging.fareye.co/api/v1/job?api_key=l1S6xa5mnxUXDuqv12q7lerLBL9l1ICq');
             $options = array('headers' => $request_headers, 'method' => 'POST', 'data' => $json_api_data);
             $response_data = drupal_http_request($order_api_url, $options);
 
