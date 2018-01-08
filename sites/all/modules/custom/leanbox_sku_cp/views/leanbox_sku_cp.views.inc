@@ -113,6 +113,24 @@ function leanbox_sku_cp_views_data() {
        'handler' => 'views_handler_argument_string',
      ),
    );
+   // master_flag
+   $data['sku_ean_mrp']['master_flag'] = array(
+     'title' => t('Master Flag'),
+     'help' => t('Master Flag'),
+     'field' => array(
+       'handler' => 'views_handler_field',
+       'click sortable' => TRUE,
+     ),
+     'sort' => array(
+       'handler' => 'views_handler_sort',
+     ),
+     'filter' => array(
+       'handler' => 'views_handler_filter_string',
+     ),
+     'argument' => array(
+       'handler' => 'views_handler_argument_string',
+     ),
+   );
    // deleted
    $data['sku_ean_mrp']['deleted'] = array(
      'title' => t('Deleted'),
@@ -173,6 +191,24 @@ function leanbox_sku_cp_views_data() {
    $data['sku_ean_mrp']['api_fetch_time'] = array(
      'title' => t('API Fetch Time'),
      'help' => t('API Fetch Time'),
+     'field' => array(
+       'handler' => 'views_handler_field_date',
+       'click sortable' => TRUE,
+     ),
+     'sort' => array(
+       'handler' => 'views_handler_sort_date',
+     ),
+     'filter' => array(
+       'handler' => 'views_handler_filter_date',
+     ),
+     'argument' => array(
+       'handler' => 'views_handler_filter_date',
+     ),
+   );
+   // api_fetch_time
+   $data['sku_ean_mrp']['master_api_fetch_time'] = array(
+     'title' => t('Master API Fetch Time'),
+     'help' => t('Master API Fetch Time'),
      'field' => array(
        'handler' => 'views_handler_field_date',
        'click sortable' => TRUE,

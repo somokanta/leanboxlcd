@@ -552,6 +552,32 @@ function dispatch_planning_services_resources() {
           ),
           'access arguments' => array('services_access_ptl_api'),
         ),
+        'master-ptl-sku-ean-api' => array(
+          'help' => 'Get SKU EAn and MRP Data',
+          'callback' => 'fetch_master_ptl_sku_ean_mrp_data',
+          'args' => array(
+            array(
+              'name' => 'rs_code',
+              'type' => 'string',
+              'description' => 'RS Code',
+              'source' => array('data' => 'rs_code'),
+              'optional' => FALSE,
+            ),
+            array(
+              'name' => 'api_time',
+              'type' => 'string',
+              'description' => 'Pass last fetch time',
+              'source' => array('data' => 'api_time'),
+              'optional' => FALSE,
+            ),
+          ),
+          'file' => array(
+            'type' => 'inc',
+            'module' => 'dispatch_planning',
+            'name' => 'master_ptl_dispatch_planning'
+          ),
+          'access arguments' => array('services_access_ptl_api'),
+        ),
         'master-ptl-api-put-qty' => array(
           'help' => 'Qty update Master PTL Data',
           'callback' => 'put_qty_master_ptl_data',

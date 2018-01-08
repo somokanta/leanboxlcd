@@ -40,6 +40,38 @@ function dispatch_planning_views_data() {
      ),
    );
 
+   //Master PTL
+      $data['views']['header_master_ptl_loose_custom'] = array(
+     'title' => t('Master PTL Loose Header'),
+     'help' => t('Just a field created for Master PTL Loose Header.'),
+     'area' => array(
+       'handler' => 'header_master_ptl_loose_custom_field',
+     ),
+   );
+
+   $data['views']['footer_master_ptl_loose_custom'] = array(
+     'title' => t('Master PTL Loose Footer'),
+     'help' => t('Just a field created for Master PTL Loose Footer.'),
+     'area' => array(
+       'handler' => 'footer_master_ptl_loose_custom_field',
+     ),
+   );
+   $data['views']['header_master_ptl_cld_custom'] = array(
+     'title' => t('Master PTL CLD Header'),
+     'help' => t('Just a field created for Master PTL CLD Header.'),
+     'area' => array(
+       'handler' => 'header_master_ptl_cld_custom_field',
+     ),
+   );
+
+   $data['views']['footer_master_ptl_cld_custom'] = array(
+     'title' => t('Master PTL CLD Footer'),
+     'help' => t('Just a field created for Master PTL CLD Footer.'),
+     'area' => array(
+       'handler' => 'footer_master_ptl_cld_custom_field',
+     ),
+   );
+   
    //Dispatch Panning API Log
    $data['dispatch_planning_api_log']['table'] = array(
      'group' => t('dispatch_planning Logs'),
