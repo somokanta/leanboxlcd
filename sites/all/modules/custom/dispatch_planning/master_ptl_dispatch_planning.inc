@@ -589,3 +589,43 @@ function update_master_ptl_header_data($ptl_job ,$trip_id, $rs_code, $vehicle,$b
   }
   return $results;
 }
+
+/**
+ * 
+ * @param type $rs_code
+ * @param type $api_time
+ * @return string
+ */
+function fetch_master_ptl_sku_ean_mrp_data($rs_code, $api_time) {
+  $time = time() - 60 * 1; // send data which is created 1min befor, to avoid data loose of trip
+
+  $query = db_select('sku_ean_mrp', 'p');
+  $query->addField('p', 'sku', 'sku_code');
+  $query->fields('p', array('ean', 'mrp','rs_code'));
+  $query->condition('created_time', $time, '<');
+  $query->condition('p.master_flag', '0', '=');
+  $query->condition('p.rs_code', $rs_code, '=');
+  $result = $query->execute()->fetchAll();
+  
+  if (!empty($result)) {
+    $results['result'] = json_encode($result);
+    $results['flag'] = '1';
+
+    db_update('sku_ean_mrp') // Table name no longer needs {}
+      ->fields(array(
+        'master_api_fetch_time' => $api_time,
+        'master_flag' => 1
+      ))
+      ->condition('created_time', $time, '<')
+      ->condition('master_flag', '0', '=')
+      ->condition('rs_code', $rs_code, '=')
+      ->execute();
+  }
+  else {
+    $results['flag'] = '0';
+    $results['result'] = 'No Result';
+  }
+  // log entry and is remaining
+
+  return $results;
+}

@@ -66,6 +66,19 @@ function leanbox_sku_cp_schema() {
         'not null' => TRUE,
         'default' => 0,
       ),
+     'master_flag' => array(
+       'description' => 'Master Flag',
+       'type' => 'int',
+       'length' => 1,
+       'not null' => TRUE,
+       'default' => 0,
+     ),
+      'master_api_fetch_time' => array(
+        'description' => 'Master API Fetch Time',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
     ),
     'indexes' => array(
       'sku' => array('sku'),
