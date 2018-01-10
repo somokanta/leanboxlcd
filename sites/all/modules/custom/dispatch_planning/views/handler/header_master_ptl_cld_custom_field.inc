@@ -29,14 +29,14 @@ class header_master_ptl_cld_custom_field extends views_handler_field {
     $total_result = $this->view->result;
     $box = 0;
     foreach ($total_result as $key => $value) {
-      $box += $value->ptl_data_configuration_cld;
-      $derived_box += $value->ptl_data_configuration_derived_cld;
+      $box += $value->master_ptl_data_cld;
+      $derived_box += $value->master_ptl_data_derived_cld;
     }
-    $rs_code = $total_result[0]->ptl_data_configuration_rs_code;
+    $rs_code = $total_result[0]->master_ptl_data_rs_code;
     $this->view->custom_footer = $box;
     
     $name_line_1 = get_rsname_using_rscode($rs_code);
-    $name_line_2 = 'Party Packing CLD Picking Sheet';
+    $name_line_2 = 'Master sParty Packing CLD Picking Sheet';
 
     $trip_id = $this->view->args[0];
     $trip_date = ptl_trip_date_by_trip_id($trip_id,$rs_code);
@@ -59,11 +59,11 @@ class header_master_ptl_cld_custom_field extends views_handler_field {
       <tbody>
       <tr>
       <td></td>
-      <td>Trip Id:</td>
+      <td>Master Trip Id:</td>
       <td align = "left" style="color:#666">' . $trip_id . '</td>
       <td></td>
       <td></td>
-      <td>Trip Date</td>
+      <td>Master Trip Date</td>
       <td align = "left" style="color:#666">' . $trip_date . '</td>
       <td></td>
       </tr>
