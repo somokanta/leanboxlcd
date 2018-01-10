@@ -1324,3 +1324,183 @@ function dispatch_planning_update_7117() {
       }
    }
 }
+
+/**
+ * Create new dispatch_delivered_vrs_details table using hook_update_N()
+ */
+
+function dispatch_planning_update_7118() {
+  $schema['dispatch_delivered_vrs_details'] = array(
+    'description' => 'dispatch_delivered_vrs_details Data',
+    'fields' => array(
+      'id' => array(
+        'description' => t('Id Primary Key'),
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'trip_id' => array(
+        'description' => t('Trip Id'),
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'sb_bill_count' => array(
+        'description' => t('sb_bill_count'),
+        'type' => 'varchar',
+        'length' => 15,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'sb_bill_value' => array(
+        'description' => t('sb_bill_value'),
+        'type' => 'varchar',
+        'length' => 250,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'sb_app_value' => array(
+        'description' => t('sb_app_value'),
+        'type' => 'varchar',
+        'length' => 15,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'sb_actual_collected' => array(
+        'description' => t('sb_actual_collected'),
+        'type' => 'varchar',
+        'length' => 250,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'sb_difference' => array(
+        'description' => t('sb_difference'),
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'ch_bill_count' => array(
+        'description' => t('ch_bill_count'),
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'ch_bill_value' => array(
+        'description' => t('ch_bill_value'),
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'ch_app_value' => array(
+        'description' => t('ch_app_value'),
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+
+      'ch_actual_collected' => array(
+        'description' => t('ch_actual_collected'),
+        'type' => 'varchar',
+        'length' => 50,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      //Start Date/Time,End Date Time    
+      'ch_difference' => array(
+        'description' => t('ch_difference'),
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'cash_bill_count' => array(
+        'description' => t('cash_bill_count'),
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'cash_bill_value' => array(
+        'description' => t('cash_bill_value'),
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'cash_app_value' => array(
+        'description' => t('cash_app_value'),
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+       'cash_actual_collected' => array(
+        'description' => t('cash_actual_collected'),
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+       'cash_difference' => array(
+        'description' => t('cash_difference'),
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      
+       'tbr_bill_count' => array(
+        'description' => t('tbr_bill_count'),
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'tbr_bill_value' => array(
+        'description' => t('tbr_bill_value'),
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'tbr_app_value' => array(
+        'description' => t('tbr_app_value'),
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+       'tbr_actual_collected' => array(
+        'description' => t('tbr_actual_collected'),
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+       'tbr_difference' => array(
+        'description' => t('tbr_difference'),
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'van_bill_value' => array(
+        'description' => t('van_bill_value'),
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'cash_debit' => array(
+        'description' => t('cash_debit'),
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'inventory_debit' => array(
+        'description' => t('inventory_debit'),
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'total_debit' => array(
+        'description' => t('total_debit'),
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    ),
+    'primary key' => array('id'),
+    'indexes' => array(
+      'trip_id' => array('trip_id'),
+    ),
+  );
+  db_create_table('dispatch_delivered_vrs_details', $schema['dispatch_delivered_vrs_details']);
+}

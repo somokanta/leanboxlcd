@@ -13,6 +13,15 @@ function dispatch_planning_menu() {
     'file' => 'dispatch_planning_farey.form.inc',
       // Page callback, etc. need to be added here.
   );
+  $items['delivered-tripwise-vrs-data'] = array(
+    'title' => 'Farey VRS data',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('_delivered_tripwise_vrs_data_callback'),
+    'access arguments' => array('Ptl trip creation'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'dispatch_planning_farey_vrs.form.inc',
+      // Page callback, etc. need to be added here.
+  );
 
   $items['admin/dispatch-planning'] = array(
     'title' => 'Dispatch Planning',
