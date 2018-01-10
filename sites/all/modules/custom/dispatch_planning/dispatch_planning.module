@@ -2587,7 +2587,7 @@ function ptl_no_of_bill_lines_by_trip_id($trip_id,$rs_code){
 
 function master_ptl_no_of_bill_lines_by_trip_id($trip_id,$rs_code){
   $query = db_select('master_ptl_data', 'pd');
-  $query->condition('pl_job', $trip_id);
+  $query->condition('ptl_job', $trip_id);
   $query->condition('rs_code', $rs_code);
   $query->condition('loose', 1, '>=');
   $query->addExpression('count(id)','no_of_id');
