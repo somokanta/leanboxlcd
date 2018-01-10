@@ -26,11 +26,11 @@ class header_master_ptl_loose_custom_field extends views_handler_field {
   function render($empty = FALSE) {
     $total_result = $this->view->result;
     foreach ($total_result as $value) {
-      $units += $value->ptl_data_configuration_loose;
-      $clds += (int)($value->ptl_data_configuration_loose/$value->ptl_data_configuration_upc);
-      $derived_units += $value->ptl_data_configuration_derived_loose; 
+      $units += $value->mater_ptl_data_loose;
+      $clds += (int)($value->master_ptl_data_loose/$value->ptl_data_configuration_upc);
+      $derived_units += $value->master_ptl_data_derived_loose; 
     }
-    $rs_code = $total_result[0]->ptl_data_configuration_rs_code;
+    $rs_code = $total_result[0]->master_ptl_data_rs_code;
 
     $name_line_1 = get_rsname_using_rscode($rs_code);
     $name_line_2 = 'Master Party Packing Loose Picking Sheet';
