@@ -39,10 +39,10 @@ class header_master_ptl_cld_custom_field extends views_handler_field {
     $name_line_2 = 'Master sParty Packing CLD Picking Sheet';
 
     $trip_id = $this->view->args[0];
-    $trip_date = ptl_trip_date_by_trip_id($trip_id,$rs_code);
+    $trip_date = master_ptl_trip_date_by_trip_id($trip_id,$rs_code);
     $trip_date = date('d-M-y', $trip_date);
-    $loading_sheet = ptl_loading_sheet_by_trip_id($trip_id,$rs_code);
-    $no_of_bills = ptl_no_of_bills_by_trip_id($trip_id,$rs_code);
+    $loading_sheet = master_ptl_loading_sheet_by_trip_id($trip_id,$rs_code);
+    $no_of_bills = master_ptl_no_of_bills_by_trip_id($trip_id,$rs_code);
 
 
     if (!empty($no_of_bills)) {
