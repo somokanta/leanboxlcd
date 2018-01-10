@@ -196,8 +196,8 @@ function delivery_beat_get_results($sales_day, $van_pl_group = NULL, $area_hook_
   $query->join('field_data_field_channel', 'fc1', 'fc1.entity_id = n.nid');
   $query->join('field_data_field_pl_group', 'fp1', 'fp1.entity_id = n.nid');
   $query->join('field_data_field_area_hook', 'fa', 'fa.entity_id = n.nid');
-  //$query->join('field_data_field_hul_code', 'fh', 'fh.entity_id = n.nid');
-   $query->join('field_data_field_hul_code_reference', 'fh', 'fh.entity_id = n.nid');
+  $query->join('field_data_field_hul_code', 'fh', 'fh.entity_id = n.nid');
+  // $query->join('field_data_field_hul_code_reference', 'fh', 'fh.entity_id = n.nid');
 
   $query->join('field_data_field_party_name', 'fp', 'fp.entity_id = n.nid');
   $query->join('field_data_field_beat_name', 'fb', 'fb.entity_id = n.nid');
@@ -252,10 +252,10 @@ function delivery_beat_get_results($sales_day, $van_pl_group = NULL, $area_hook_
   $query->condition('nsd.uid', $distributor_id, '=');
 
 //HUL code Master
- // $query->join('node', 'nh', 'nh.title = fh.field_hul_code_value');
-  $query->join('node', 'nh', 'nh.nid = fh.field_hul_code_reference_nid');
+ $query->join('node', 'nh', 'nh.title = fh.field_hul_code_value');
   $query->join('field_data_field_hul_status', 'fhs', 'fhs.entity_id = nh.nid');
- // $query->condition('nh.uid', $distributor_id, '=');
+  $query->condition('nh.uid', $distributor_id, '=');
+  $query->condition('nh.type', 'hul_code_master');
   
   //VAN PL Group Stop Master
   $query->join('node', 'nv', 'nv.title = ppplg.field_dva_van_pl_group_value');
