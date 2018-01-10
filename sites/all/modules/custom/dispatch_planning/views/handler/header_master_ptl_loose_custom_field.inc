@@ -37,11 +37,11 @@ class header_master_ptl_loose_custom_field extends views_handler_field {
 
     $trip_id = $this->view->args[0];
     $trip_date = master_ptl_trip_date_by_trip_id($trip_id,$rs_code);
-    $trip_date = date('d-M-y', $trip_date);
-    $loading_sheet = master_ptl_loading_sheet_by_trip_id($trip_id,$rs_code);
+    $trip_dates = date('d-M-y', $trip_date);
+    $trip_ids = master_ptl_trip_ids_by_trip_id($trip_id,$rs_code);
     $no_of_bill_lines = master_ptl_no_of_bill_lines_by_trip_id($trip_id,$rs_code);
 
-    if (!empty($no_of_bills)) {
+    if (!empty($no_of_bill_lines)) {
       $this->view->custom_footer = $clds ? $clds : 0;
       return '<table width = "100%" cellspacing = "0" style = "font-size: 13px; color:#000; font-family:arial" cellpadding = "5" border = "0" align = "center" class = "preview_table">
       <tr>
@@ -60,13 +60,13 @@ class header_master_ptl_loose_custom_field extends views_handler_field {
       <td></td>
       <td></td>
       <td>Master Trip Date</td>
-      <td align = "left" style="color:#666">' . $trip_date . '</td>
+      <td align = "left" style="color:#666">' . $trip_dates . '</td>
       <td></td>
       </tr>
       <tr>
       <td></td>
-      <td>Loading Sheet</td>
-      <td align = "left" style="color:#666">' . $loading_sheet . '</td>
+      <td>Trip IDs</td>
+      <td align = "left" style="color:#666">' . $trip_ids . '</td>
       <td></td>
       <td></td>
       <td>Total Loose Qty</td>

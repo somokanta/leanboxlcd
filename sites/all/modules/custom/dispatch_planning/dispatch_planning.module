@@ -2514,19 +2514,14 @@ function ptl_loading_sheet_by_trip_id($trip_id,$rs_code) {
   return ltrim($vehicle_loading, ',');
 }
 
-function master_ptl_loading_sheet_by_trip_id($trip_id,$rs_code) {
+function master_ptl_trip_ids_by_trip_id($trip_id,$rs_code) {
   $query = db_select('master_ptl_data', 'pd');
-  $query->addExpression("concat(vehicle ,' / ', DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(loading_date),'+00:00','+05:30'), '%d-%b-%y'))", 'vehicle_loading');
+  $query->addExpression("GROUP_CONCAT(DISTINCT(trip_id))", 'trip_ids');
   $query->condition('ptl_job', $trip_id);
   $query->condition('rs_code', $rs_code);
-  $query->groupBy('vehicle,loading_date');
   $results = $query->execute()->fetchAll();
 
-  foreach ($results as $key => $value) {
-    $vehicle_loading = $vehicle_loading . ', ' . $value->vehicle_loading;
-  }
-
-  return ltrim($vehicle_loading, ',');
+  return $results;
 }
 
 
