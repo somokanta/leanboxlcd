@@ -292,7 +292,6 @@ function delivery_beat_get_results($sales_day, $van_pl_group = NULL, $area_hook_
   $query->orderBy('agr.field_dva_area_hook_group_name_value');
   $query->orderBy('fs.field_revised_sequence_value');
   $query->addExpression("(FLOOR((fs.field_revised_sequence_value - 1)/fsv.field_deliveries_per_stop_value)*fsv.field_deliveries_per_stop_value + 1)", 'sub_exp');
-
   
   $subquery = db_select('node', 'n');
   $subquery->addTag('node_uid');
@@ -311,16 +310,15 @@ function delivery_beat_get_results($sales_day, $van_pl_group = NULL, $area_hook_
   
   
   //HUL Code Master
-//  $subquery->join('field_data_field_hul_code', 'hc', 'hc.entity_id = n.nid');
-//  $subquery->join('node', 'hul', 'hc.field_hul_code_value = hul.title');
-//  $subquery->condition('hul.type', 'hul_code_master');
-//  $subquery->condition('hul.uid', $distributor_id, '=');
-//  $subquery->join('field_data_field_updated_address', 'addr', 'addr.entity_id = hul.nid');
-//  $subquery->condition('hul.type', 'outlet_master');
-  
-  $subquery->join('field_data_field_hul_code_reference', 'hc', 'hc.entity_id = n.nid');
-  $subquery->join('node', 'hul', 'hc.field_hul_code_reference_nid = hul.nid');
+  $subquery->join('field_data_field_hul_code', 'hc', 'hc.entity_id = n.nid');
+  $subquery->join('node', 'hul', 'hc.field_hul_code_value = hul.title');
+  $subquery->condition('hul.type', 'hul_code_master');
+  $subquery->condition('hul.uid', $distributor_id, '=');
   $subquery->join('field_data_field_updated_address', 'addr', 'addr.entity_id = hul.nid');
+  
+//  $subquery->join('field_data_field_hul_code_reference', 'hc', 'hc.entity_id = n.nid');
+//  $subquery->join('node', 'hul', 'hc.field_hul_code_reference_nid = hul.nid');
+//  $subquery->join('field_data_field_updated_address', 'addr', 'addr.entity_id = hul.nid');
 
 
   //VAN PL Group Stop Master
