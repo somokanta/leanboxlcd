@@ -36,16 +36,15 @@ class header_master_ptl_cld_custom_field extends views_handler_field {
     $this->view->custom_footer = $box;
     
     $name_line_1 = get_rsname_using_rscode($rs_code);
-    $name_line_2 = 'Master sParty Packing CLD Picking Sheet';
+    $name_line_2 = 'Master Party Packing CLD Picking Sheet';
 
     $trip_id = $this->view->args[0];
     $trip_date = master_ptl_trip_date_by_trip_id($trip_id,$rs_code);
-    $trip_date = date('d-M-y', $trip_date);
+    $trip_dates = date('d-M-y', $trip_date);
     $loading_sheet = master_ptl_loading_sheet_by_trip_id($trip_id,$rs_code);
-    $no_of_bills = master_ptl_no_of_bills_by_trip_id($trip_id,$rs_code);
 
 
-    if (!empty($no_of_bills)) {
+    if (!empty($trip_date)) {
 
       return '<table width = "100%" cellspacing = "0" style = "font-size: 13px; color:#000; font-family:arial" cellpadding = "5" border = "0" align = "center" class = "preview_table">
       <tr>
@@ -64,7 +63,7 @@ class header_master_ptl_cld_custom_field extends views_handler_field {
       <td></td>
       <td></td>
       <td>Master Trip Date</td>
-      <td align = "left" style="color:#666">' . $trip_date . '</td>
+      <td align = "left" style="color:#666">' . $trip_dates . '</td>
       <td></td>
       </tr>
       <tr>
@@ -75,16 +74,6 @@ class header_master_ptl_cld_custom_field extends views_handler_field {
       <td></td>
       <td>Total Free CLDs</td>
       <td align = "left" style="color:#666">' . $derived_box . '</td>
-      <td></td>
-      </tr>
-      <tr>
-      <td></td>
-      <td>No. of Bills</td>
-      <td align = "left" style="color:#666">' . $no_of_bills . '</td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
       <td></td>
       </tr>
       </tbody>

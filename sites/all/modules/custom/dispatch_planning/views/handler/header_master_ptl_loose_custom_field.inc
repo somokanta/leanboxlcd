@@ -39,7 +39,6 @@ class header_master_ptl_loose_custom_field extends views_handler_field {
     $trip_date = master_ptl_trip_date_by_trip_id($trip_id,$rs_code);
     $trip_date = date('d-M-y', $trip_date);
     $loading_sheet = master_ptl_loading_sheet_by_trip_id($trip_id,$rs_code);
-    $no_of_bills = master_ptl_no_of_bills_by_trip_id($trip_id,$rs_code);
     $no_of_bill_lines = master_ptl_no_of_bill_lines_by_trip_id($trip_id,$rs_code);
 
     if (!empty($no_of_bills)) {
@@ -76,22 +75,12 @@ class header_master_ptl_loose_custom_field extends views_handler_field {
       </tr>
       <tr>
       <td></td>
-      <td>No. of Bills</td>
-      <td align = "left" style="color:#666">' . $no_of_bills . '</td>
-      <td></td>
-      <td></td>
-      <td>Total Free Qty</td>
-      <td align = "left" style="color:#666">' . $derived_units . '</td>
-      <td></td>
-      </tr>
-      <tr>
-      <td></td>
       <td>Bill Lines</td>
       <td align = "left" style="color:#666">' . $no_of_bill_lines . '</td>
       <td></td>
       <td></td>
-      <td></td>
-      <td></td>
+      <td>Total Free Qty</td>
+      <td align = "left" style="color:#666">' . $derived_units . '</td>
       <td></td>
       </tr>
       </tbody>
