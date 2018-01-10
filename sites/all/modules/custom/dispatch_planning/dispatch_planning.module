@@ -2514,6 +2514,16 @@ function ptl_loading_sheet_by_trip_id($trip_id,$rs_code) {
   return ltrim($vehicle_loading, ',');
 }
 
+function master_ptl_trip_ids_by_trip_id($trip_id,$rs_code) {
+  $query = db_select('master_ptl_data', 'pd');
+  $query->addExpression("GROUP_CONCAT(DISTINCT(trip_id))", 'trip_ids');
+  $query->condition('ptl_job', $trip_id);
+  $query->condition('rs_code', $rs_code);
+  $results = $query->execute()->fetchField();
+
+  return $results;
+}
+
 
 function ptl_no_of_bills_by_trip_id($trip_id,$rs_code) {
   $query = db_select('ptl_data_configuration', 'pd');
@@ -2533,6 +2543,15 @@ function ptl_trip_date_by_trip_id($trip_id,$rs_code) {
   return $results;
 }
 
+function master_ptl_trip_date_by_trip_id($trip_id,$rs_code) {
+  $query = db_select('master_ptl_data', 'pd');
+  $query->condition('ptl_job', $trip_id);
+  $query->condition('rs_code', $rs_code);
+  $query->fields('pd',array('created_time'));
+  $results = $query->range(0,1)->execute()->fetchField();
+  return $results;
+}
+
 function get_rsname_using_rscode($rs_code) {
   $query = db_select('field_data_field_name', 'fn');
   $query->join('field_data_field_third_party_username', 'tpu', 'tpu.entity_id = fn.entity_id');
@@ -2545,6 +2564,16 @@ function get_rsname_using_rscode($rs_code) {
 function ptl_no_of_bill_lines_by_trip_id($trip_id,$rs_code){
   $query = db_select('ptl_data_configuration', 'pd');
   $query->condition('trip_id', $trip_id);
+  $query->condition('rs_code', $rs_code);
+  $query->condition('loose', 1, '>=');
+  $query->addExpression('count(id)','no_of_id');
+  $results = $query->execute()->fetchField();
+  return $results;
+}
+
+function master_ptl_no_of_bill_lines_by_trip_id($trip_id,$rs_code){
+  $query = db_select('master_ptl_data', 'pd');
+  $query->condition('ptl_job', $trip_id);
   $query->condition('rs_code', $rs_code);
   $query->condition('loose', 1, '>=');
   $query->addExpression('count(id)','no_of_id');
