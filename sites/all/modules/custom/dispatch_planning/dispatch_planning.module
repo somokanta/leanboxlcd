@@ -2519,7 +2519,7 @@ function master_ptl_trip_ids_by_trip_id($trip_id,$rs_code) {
   $query->addExpression("GROUP_CONCAT(DISTINCT(trip_id))", 'trip_ids');
   $query->condition('ptl_job', $trip_id);
   $query->condition('rs_code', $rs_code);
-  $results = $query->execute()->fetchAll();
+  $results = $query->execute()->fetchField();
 
   return $results;
 }
