@@ -2540,7 +2540,7 @@ function ptl_no_of_bills_by_trip_id($trip_id,$rs_code) {
 }
 
 function master_ptl_no_of_bills_by_trip_id($trip_id,$rs_code) {
-  $query = db_select('ptl_data_configuration', 'pd');
+  $query = db_select('master_ptl_data', 'pd');
   $query->condition('ptl_job', $trip_id);
   $query->condition('rs_code', $rs_code);
   $query->addExpression('count(DISTINCT(bill_number))','bill_number');
