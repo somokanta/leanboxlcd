@@ -275,7 +275,8 @@ function get_attachment_pending_for_collection($distributor_id) {
 
   $query->leftjoin('field_data_field_party_code_reference', 'pcr', 'pcr.entity_id = sbrf.field_sales_bill_no_ref_nid');
   $query->join('node', 'pp', 'pp.nid = pcr.field_party_code_reference_nid');
-
+  
+  $query->leftjoin('field_data_field_party_name', 'opn', 'opn.entity_id = pcr.field_party_code_reference_nid');
   $query->leftjoin('field_data_field_payment_terms', 'pt', 'pt.entity_id = pcr.field_party_code_reference_nid');
   $query->leftjoin('field_data_field_credit_days', 'ct', 'ct.entity_id = pcr.field_party_code_reference_nid');
   $query->leftjoin('field_data_field_beat_name', 'bn', 'bn.entity_id = pcr.field_party_code_reference_nid');
@@ -302,6 +303,7 @@ function get_attachment_pending_for_collection($distributor_id) {
   $query->fields('sr', array('field_sr_bill_date_value'));
   $query->fields('ff', array('field_flag_value'));
   $query->fields('pp', array('title'));
+  $query->fields('opn', array('field_party_name_value'));
   $query->fields('pt', array('field_payment_terms_value'));
   $query->fields('ct', array('field_credit_days_value'));
   $query->fields('bn', array('field_beat_name_value'));
@@ -351,6 +353,7 @@ function get_attachment_pending_for_collection($distributor_id) {
     $row['bill_date'] = date('d-M-Y', $data['field_sr_bill_date_value']);
     $row['type'] = $data['field_flag_value'];
     $row['party_code'] = $data['pp_title'];
+    $row['party_name'] = $data['field_party_name_value'];
     $row['payment_terms'] = $data['field_payment_terms_value'];
     $row['credit_days'] = $data['field_credit_days_value'];
     $row['beat_name'] = $data['field_beat_name_value'];
@@ -433,7 +436,7 @@ function get_attachment_pending_for_collection($distributor_id) {
     $rows[] = $row;
   }
 
-  $header = array('Nid', 'Bill No.', 'Bill Date', 'Type', 'Party Code', 'PT', 'CT', 'Beat Name', 'Salesman', 'Salesman Code', 'Bill Value', 'To Be Collected', 'Declaration Date', 'Old Cheque No.', 'Old Cheque Date', 'File Upload Date', 'Assigned To', 'Assignment Date', 'Collection Status', 'Cash Collected Amt', 'Cheque Collected Amt', 'Total Amt Collected', 'Difference Amt', 'Latest Collection Date', 'Returned Bill Flag', 'Declaration Remarks', 'Return Remarks', 'Partial Collection Remarks', 'Fine Amt', 'Final Closure', 'Final Closure Remarks', 'Ageing');
+  $header = array('Nid', 'Bill No.', 'Bill Date', 'Type', 'Party Code', 'Party Name', 'PT', 'CT', 'Beat Name', 'Salesman', 'Salesman Code', 'Bill Value', 'To Be Collected', 'Declaration Date', 'Old Cheque No.', 'Old Cheque Date', 'File Upload Date', 'Assigned To', 'Assignment Date', 'Collection Status', 'Cash Collected Amt', 'Cheque Collected Amt', 'Total Amt Collected', 'Difference Amt', 'Latest Collection Date', 'Returned Bill Flag', 'Declaration Remarks', 'Return Remarks', 'Partial Collection Remarks', 'Fine Amt', 'Final Closure', 'Final Closure Remarks', 'Ageing');
 
   $output1['header'] = $header;
   $output1['rows'] = $rows;
@@ -731,10 +734,25 @@ function get_email_pending_for_upload($distributor_id) {
   return $output;
 }
 
-function get_email_pending_for_yesterday_assignment($distributor_id) {
+function pending_for_yesterday_assignment($distributor_id) {
+  // for MTD LOGIC
+  $todays_date = date('Y-m-d');
+  $todays_date_timestamp = strtotime($todays_date);
+  $current_day = date("d", $todays_date_timestamp);
+  if ($current_day <= '21') {
+    $old_date = strtotime('-1 month', strtotime($todays_date));
+    $last_month = date("m", $old_date);
+    $last_year = date("Y", $old_date);
+    $from_this_date = date("$last_year-$last_month-21");
+  }
+  else {
+    $this_month = date("m", $todays_date_timestamp);
+    $from_this_date = date("Y-$this_month-21");
+  }
+
   // Query For Yesterday Assignment
   $assignment_date = strtotime('-1 day', strtotime(date('Y-m-d')));
-  $date = date('Y-m-d H:i:s', $assignment_date);
+  $yesterday_date = date('Y-m-d', $assignment_date);
 
   $query = db_select('node', 'n');
   $query->condition('n.type', 'payment_collection');
@@ -742,7 +760,7 @@ function get_email_pending_for_yesterday_assignment($distributor_id) {
   $query->join('field_data_field_flag', 'ff', 'ff.entity_id = n.nid');
   $query->join('field_data_field_remaining_amt_collection', 'ra', 'ra.entity_id = n.nid');
   $query->leftjoin('field_data_field_assignment_date', 'ad', 'ad.entity_id = n.nid');
-  $query->condition('ad.field_assignment_date_value', $date, '=');
+  $query->condition('ad.field_assignment_date_value', $yesterday_date, '=');
   $query->leftjoin('field_data_field_assigned_person', 'ap', 'ap.entity_id = n.nid');
 
   $query->leftjoin('field_data_field_previous_cash_amt', 'pc', 'pc.entity_id = n.nid');
@@ -752,7 +770,8 @@ function get_email_pending_for_yesterday_assignment($distributor_id) {
   $query->leftjoin('field_data_field_terminated_bill_flag', 'tf', 'tf.entity_id = n.nid');
   $query->condition('tf.field_terminated_bill_flag_value', '1', '!=');
 
-  $query->groupBy('ap.field_assigned_person_value', 'ff.field_flag_value');
+  $query->groupBy('ap.field_assigned_person_value');
+  $query->groupBy('ff.field_flag_value');
 
   $query->addExpression('COUNT(n.title)', 'bill_count');
   $query->addExpression('SUM(ra.field_remaining_amt_collection_value)', 'bill_value');
@@ -766,7 +785,7 @@ function get_email_pending_for_yesterday_assignment($distributor_id) {
   $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
 
   $row = array();
-  $row[] = array('Type', 'Assigned To', 'Count', 'Value', 'Count', 'Value');
+  $row[] = array('Type', 'Assigned To', 'Count', 'Value', 'Count', 'Value', 'Count', 'Value', 'Count', 'Value');
   foreach ($res as $data) {
     $person_signed = $data['field_assigned_person_value'] . '-' . 'signed';
     $person_bounced = $data['field_assigned_person_value'] . '-' . 'bounced';
@@ -775,30 +794,22 @@ function get_email_pending_for_yesterday_assignment($distributor_id) {
       $row[$person_signed]['assigned_to'] = $data['field_assigned_person_value'];
       $row[$person_signed]['bill_count'] = $data['bill_count'];
       $row[$person_signed]['bill_value'] = $data['bill_value'] - ($data['field_previous_cash_amt_value'] + $data['field_previous_cheque_amt_value']);
-      $row[$person_signed]['bill_counts'] = '';
-      $row[$person_signed]['bill_values'] = '';
     }
     else {
       $row[$person_bounced]['type'] = 'Bounced';
       $row[$person_bounced]['assigned_to'] = $data['field_assigned_person_value'];
       $row[$person_bounced]['bill_count'] = $data['bill_count'];
       $row[$person_bounced]['bill_value'] = $data['bill_value'] - ($data['field_previous_cash_amt_value'] + $data['field_previous_cheque_amt_value']);
-      $row[$person_bounced]['bill_counts'] = '';
-      $row[$person_bounced]['bill_values'] = '';
     }
   }
-
-  // Query For Today's Collection
-  $collection_date = strtotime(date('Y-m-d'));
-  $date = date('Y-m-d H:i:s', $collection_date);
-
+  // MTD Query For Assignment
   $query = db_select('node', 'n');
   $query->condition('n.type', 'payment_collection');
   $query->condition('n.uid', $distributor_id, '=');
   $query->join('field_data_field_flag', 'ff', 'ff.entity_id = n.nid');
   $query->join('field_data_field_remaining_amt_collection', 'ra', 'ra.entity_id = n.nid');
-  $query->leftjoin('field_data_field_collection_date', 'cd', 'cd.entity_id = n.nid');
-  $query->condition('cd.field_collection_date_value', $date, '=');
+  $query->leftjoin('field_data_field_assignment_date', 'ad', 'ad.entity_id = n.nid');
+  $query->condition('ad.field_assignment_date_value', array($from_this_date, $yesterday_date), 'BETWEEN');
   $query->leftjoin('field_data_field_assigned_person', 'ap', 'ap.entity_id = n.nid');
 
   $query->leftjoin('field_data_field_previous_cash_amt', 'pc', 'pc.entity_id = n.nid');
@@ -808,7 +819,61 @@ function get_email_pending_for_yesterday_assignment($distributor_id) {
   $query->leftjoin('field_data_field_terminated_bill_flag', 'tf', 'tf.entity_id = n.nid');
   $query->condition('tf.field_terminated_bill_flag_value', '1', '!=');
 
-  $query->groupBy('ap.field_assigned_person_value', 'ff.field_flag_value');
+  $query->groupBy('ap.field_assigned_person_value');
+  $query->groupBy('ff.field_flag_value');
+
+  $query->addExpression('COUNT(n.title)', 'bill_count');
+  $query->addExpression('SUM(ra.field_remaining_amt_collection_value)', 'bill_value');
+  $query->fields('n', array('nid'));
+  $query->fields('ff', array('field_flag_value'));
+  $query->fields('ra', array('field_remaining_amt_collection_value'));
+  $query->fields('ap', array('field_assigned_person_value'));
+  $query->fields('ad', array('field_assignment_date_value'));
+  $query->fields('pc', array('field_previous_cash_amt_value'));
+  $query->fields('pch', array('field_previous_cheque_amt_value'));
+  $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+
+
+  foreach ($res as $data) {
+    $person_signed = $data['field_assigned_person_value'] . '-' . 'signed';
+    $person_bounced = $data['field_assigned_person_value'] . '-' . 'bounced';
+    if ($data['field_flag_value'] == 'signed') {
+      $row[$person_signed]['type'] = 'Signed';
+      $row[$person_signed]['assigned_to'] = $data['field_assigned_person_value'];
+      $row[$person_signed]['mtd_bill_count'] = $data['bill_count'];
+      $row[$person_signed]['mtd_bill_value'] = $data['bill_value'];
+    }
+    else {
+      $row[$person_bounced]['type'] = 'Bounced';
+      $row[$person_bounced]['assigned_to'] = $data['field_assigned_person_value'];
+      $row[$person_bounced]['mtd_bill_count'] = $data['bill_count'];
+      $row[$person_bounced]['mtd_bill_value'] = $data['bill_value'];
+    }
+  }
+
+
+  // Query For Today's Collection
+  $collection_date = strtotime(date('Y-m-d'));
+  $todaydate = date('Y-m-d', $collection_date);
+
+  $query = db_select('node', 'n');
+  $query->condition('n.type', 'payment_collection');
+  $query->condition('n.uid', $distributor_id, '=');
+  $query->join('field_data_field_flag', 'ff', 'ff.entity_id = n.nid');
+  $query->join('field_data_field_remaining_amt_collection', 'ra', 'ra.entity_id = n.nid');
+  $query->leftjoin('field_data_field_collection_date', 'cd', 'cd.entity_id = n.nid');
+  $query->condition('cd.field_collection_date_value', $todaydate, '=');
+  $query->leftjoin('field_data_field_assigned_person', 'ap', 'ap.entity_id = n.nid');
+
+  $query->leftjoin('field_data_field_previous_cash_amt', 'pc', 'pc.entity_id = n.nid');
+  $query->leftjoin('field_data_field_previous_cheque_amt', 'pch', 'pch.entity_id = n.nid');
+
+  // Remove records where Closure Flag = 1
+  $query->leftjoin('field_data_field_terminated_bill_flag', 'tf', 'tf.entity_id = n.nid');
+  $query->condition('tf.field_terminated_bill_flag_value', '1', '!=');
+
+  $query->groupBy('ap.field_assigned_person_value');
+  $query->groupBy('ff.field_flag_value');
 
   $query->addExpression('COUNT(n.title)', 'bill_count');
   $query->addExpression('SUM(ra.field_remaining_amt_collection_value)', 'bill_value');
@@ -827,34 +892,107 @@ function get_email_pending_for_yesterday_assignment($distributor_id) {
     if ($data['field_flag_value'] == 'signed') {
       $row[$person_signed]['type'] = 'Signed';
       $row[$person_signed]['assigned_to'] = $data['field_assigned_person_value'];
-      $row[$person_signed]['bill_count'] = isset($row[$person_signed]['bill_count']) ? $row[$person_signed]['bill_count'] : '';
-      $row[$person_signed]['bill_value'] = isset($row[$person_signed]['bill_value']) ? $row[$person_signed]['bill_value'] : '';
       $row[$person_signed]['bill_counts'] = $data['bill_count'];
       $row[$person_signed]['bill_values'] = $data['bill_value'] - ($data['field_previous_cash_amt_value'] + $data['field_previous_cheque_amt_value']);
     }
     else {
       $row[$person_bounced]['type'] = 'Bounced';
       $row[$person_bounced]['assigned_to'] = $data['field_assigned_person_value'];
-      $row[$person_bounced]['bill_count'] = isset($row[$person_bounced]['bill_count']) ? $row[$person_bounced]['bill_count'] : '';
-      $row[$person_bounced]['bill_value'] = isset($row[$person_bounced]['bill_value']) ? $row[$person_bounced]['bill_value'] : '';
       $row[$person_bounced]['bill_counts'] = $data['bill_count'];
       $row[$person_bounced]['bill_values'] = $data['bill_value'] - ($data['field_previous_cash_amt_value'] + $data['field_previous_cheque_amt_value']);
     }
   }
 
-  $total = $row;
-  foreach ($total as $v) {
-    $row['total']['type'] = 'Total';
-    $row['total']['person'] = '';
-    $row['total']['bill_count'] += $v['bill_count'];
-    $row['total']['bill_value'] += $v['bill_value'];
-    $row['total']['bill_counts'] += $v['bill_counts'];
-    $row['total']['bill_values'] += $v['bill_values'];
+  // MTD Query For Today's Collection
+
+  $query = db_select('node', 'n');
+  $query->condition('n.type', 'payment_collection');
+  $query->condition('n.uid', $distributor_id, '=');
+  $query->join('field_data_field_flag', 'ff', 'ff.entity_id = n.nid');
+  $query->join('field_data_field_remaining_amt_collection', 'ra', 'ra.entity_id = n.nid');
+  //$query->leftjoin('field_data_field_collection_date', 'cd', 'cd.entity_id = n.nid');
+  //$query->condition('cd.field_collection_date_value', array($from_this_date, $date), 'BETWEEN');
+  $query->leftjoin('field_data_field_assignment_date', 'ad', 'ad.entity_id = n.nid');
+  $query->condition('ad.field_assignment_date_value', array($from_this_date, $yesterday_date), 'BETWEEN');
+  $query->leftjoin('field_data_field_assigned_person', 'ap', 'ap.entity_id = n.nid');
+  $query->leftjoin('field_data_field_collection_status', 'cs', 'cs.entity_id = n.nid');
+  $query->condition('cs.field_collection_status_value', '0', '!=');
+
+  $query->leftjoin('field_data_field_previous_cash_amt', 'pc', 'pc.entity_id = n.nid');
+  $query->leftjoin('field_data_field_previous_cheque_amt', 'pch', 'pch.entity_id = n.nid');
+
+  // Remove records where Closure Flag = 1
+  $query->leftjoin('field_data_field_terminated_bill_flag', 'tf', 'tf.entity_id = n.nid');
+  $query->condition('tf.field_terminated_bill_flag_value', '1', '!=');
+
+  $query->groupBy('ap.field_assigned_person_value');
+  $query->groupBy('ff.field_flag_value');
+
+  $query->addExpression('COUNT(n.title)', 'bill_count');
+  $query->addExpression('SUM(pc.field_previous_cash_amt_value + pch.field_previous_cheque_amt_value)', 'bill_value');
+  $query->fields('n', array('nid'));
+  $query->fields('ff', array('field_flag_value'));
+  $query->fields('ra', array('field_remaining_amt_collection_value'));
+  $query->fields('ap', array('field_assigned_person_value'));
+  //$query->fields('cd', array('field_collection_date_value'));
+  $query->fields('ad', array('field_assignment_date_value'));
+  $query->fields('pc', array('field_previous_cash_amt_value'));
+  $query->fields('pch', array('field_previous_cheque_amt_value'));
+  $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+
+
+  foreach ($res as $data) {
+    $person_signed = $data['field_assigned_person_value'] . '-' . 'signed';
+    $person_bounced = $data['field_assigned_person_value'] . '-' . 'bounced';
+    if ($data['field_flag_value'] == 'signed') {
+      $row[$person_signed]['type'] = 'Signed';
+      $row[$person_signed]['assigned_to'] = $data['field_assigned_person_value'];
+      $row[$person_signed]['mtd_bill_counts'] = $data['bill_count'];
+      $row[$person_signed]['mtd_bill_values'] = $data['bill_value'];
+    }
+    else {
+      $row[$person_bounced]['type'] = 'Bounced';
+      $row[$person_bounced]['assigned_to'] = $data['field_assigned_person_value'];
+      $row[$person_bounced]['mtd_bill_counts'] = $data['bill_count'];
+      $row[$person_bounced]['mtd_bill_values'] = $data['bill_value'];
+    }
   }
 
-  $header = array('', '', array('data' => 'Yesterday Assignment', 'colspan' => 2), array('data' => 'Today\'s Collection', 'colspan' => 2));
-  $output = "<h3>Yesterday Assignment Today's Collection</h3>";
-  $output .= theme('table', array('header' => $header, 'rows' => $row, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
+  $final_row = array();
+  foreach ($row as $k => $value) {
+    if ($k !== 0) {
+      $final_row[$k]['type'] = $value['type'];
+      $final_row[$k]['assigned_to'] = $value['assigned_to'];
+      $final_row[$k]['bill_count'] = isset($value['bill_count']) ? $value['bill_count'] : '';
+      $final_row[$k]['bill_value'] = isset($value['bill_value']) ? $value['bill_value'] : '';
+      $final_row[$k]['bill_counts'] = isset($value['bill_counts']) ? $value['bill_counts'] : '';
+      $final_row[$k]['bill_values'] = isset($value['bill_values']) ? $value['bill_values'] : '';
+      $final_row[$k]['mtd_bill_count'] = isset($value['mtd_bill_count']) ? $value['mtd_bill_count'] : '';
+      $final_row[$k]['mtd_bill_value'] = isset($value['mtd_bill_value']) ? $value['mtd_bill_value'] : '';
+      $final_row[$k]['mtd_bill_counts'] = isset($value['mtd_bill_counts']) ? $value['mtd_bill_counts'] : '';
+      $final_row[$k]['mtd_bill_values'] = isset($value['mtd_bill_values']) ? $value['mtd_bill_values'] : '';
+    }
+    else {
+      $final_row[$k] = $value;
+    }
+  }
+
+  foreach ($row as $v) {
+    $final_row['total']['type'] = 'Total';
+    $final_row['total']['assigned_to'] = '';
+    $final_row['total']['bill_count'] += $v['bill_count'];
+    $final_row['total']['bill_value'] += $v['bill_value'];
+    $final_row['total']['bill_counts'] += $v['bill_counts'];
+    $final_row['total']['bill_values'] += $v['bill_values'];
+    $final_row['total']['mtd_bill_count'] += $v['mtd_bill_count'];
+    $final_row['total']['mtd_bill_value'] += $v['mtd_bill_value'];
+    $final_row['total']['mtd_bill_counts'] += $v['mtd_bill_counts'];
+    $final_row['total']['mtd_bill_values'] += $v['mtd_bill_values'];
+  }
+
+  $header = array('', '', array('data' => 'Yesterday Assignment', 'colspan' => 2), array('data' => 'Today\'s Collection', 'colspan' => 2), array('data' => 'MTD Assignment', 'colspan' => 2), array('data' => 'MTD Collection', 'colspan' => 2));
+  $output = "<h3>Yesterday Assignment Today's Collection and MTD Assignment MTD Collection</h3>";
+  $output .= theme('table', array('header' => $header, 'rows' => $final_row, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
 
   return $output;
 }
