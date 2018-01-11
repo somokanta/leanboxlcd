@@ -734,7 +734,7 @@ function get_email_pending_for_upload($distributor_id) {
   return $output;
 }
 
-function pending_for_yesterday_assignment($distributor_id) {
+function get_email_pending_for_yesterday_assignment($distributor_id) {
   // for MTD LOGIC
   $todays_date = date('Y-m-d');
   $todays_date_timestamp = strtotime($todays_date);
