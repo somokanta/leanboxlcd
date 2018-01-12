@@ -161,7 +161,7 @@ function master_dispatch_planning_form_validate($form, &$form_state) {
       $node = node_load($trip_node->field_master_trip_id_reference['und'][0]['nid']);
       $master_trip = $node->title;
       //dpm("Trip: $child_trip is already presend in master Trip:$master_trip ");
-      //form_set_error('form', "Trip: $child_trip is already presend in master Trip:$master_trip ");
+      form_set_error('list_form_items', "Trip: $child_trip is already presend in master Trip:$master_trip ");
       form_set_error('list_form_items', t('error'));
     }
   }
