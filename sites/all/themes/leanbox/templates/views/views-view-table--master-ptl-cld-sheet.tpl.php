@@ -19,7 +19,7 @@
  * @ingroup views_templates
  */
 ?>
-<table border="1" cellpadding="5" cellspacing="0" width="100%" <?php if ($classes) { print 'class="'. $classes . '" '; } ?><?php print $attributes; ?>>
+<table border="1" cellpadding="5" cellspacing="0" width="100%" style="color:#000; font-size: 13px; font-family: arial" <?php if ($classes) { print 'class="'. $classes . '" '; } ?><?php print $attributes; ?>>
    <?php if (!empty($title) || !empty($caption)) : ?>
      <caption><?php print $caption . $title; ?></caption>
   <?php endif; ?>
@@ -27,7 +27,7 @@
     <thead>
       <tr>
         <?php foreach ($header as $field => $label): ?>
-          <th style="background: #ccc; color: #000; border:1px solid #000; border-right:none;" <?php if ($header_classes[$field]) { print 'class="'. $header_classes[$field] . '" '; } ?>>
+          <th style="background: #ccc; color: #000;" <?php if ($header_classes[$field]) { print 'class="'. $header_classes[$field] . '" '; } ?> scope="col">
             <?php print $label; ?>
           </th>
         <?php endforeach; ?>
@@ -38,7 +38,7 @@
     <?php foreach ($rows as $row_count => $row): ?>
       <tr <?php if ($row_classes[$row_count]) { print 'class="' . implode(' ', $row_classes[$row_count]) .'"';  } ?>>
         <?php foreach ($row as $field => $content): ?>
-          <td style="color:#666; border:1px solid #000; border-top:none; border-right:none;" <?php if ($field_classes[$field][$row_count]) { print 'class="'. $field_classes[$field][$row_count] . '" '; } ?><?php print drupal_attributes($field_attributes[$field][$row_count]); ?>>
+          <td style="color:#666;" <?php if ($field_classes[$field][$row_count]) { print 'class="'. $field_classes[$field][$row_count] . '" '; } ?><?php print drupal_attributes($field_attributes[$field][$row_count]); ?>>
             <?php print $content; ?>
           </td>
         <?php endforeach; ?>
