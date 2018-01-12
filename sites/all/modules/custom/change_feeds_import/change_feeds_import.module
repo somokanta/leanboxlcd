@@ -2580,7 +2580,20 @@ function check_area_id_exists($title) {
 }
 
 function change_feeds_import_form_views_exposed_form_alter(&$form, &$form_state) {
-  if ($form['#id'] == 'views-exposed-form-Outlet-Master-Report-page') {
+   if (isset($form['field_petty_cash_type_value']['#options'])) {
+      $default = array('All' => '- Any -');
+      global $user;
+      // Store distributor id in author in each node
+      $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+
+      $query = db_select('field_data_field_petty_cash_type', 'pc');
+      $query->join('field_data_field_petty_cash_distributor', 'd', 'd.entity_id = pc.entity_id');
+      $query->fields('pc', array('field_petty_cash_type_value'));
+      $query->condition('d.field_petty_cash_distributor_uid', $distributor_id);
+      $options = $query->execute()->fetchAllKeyed(0,0);
+      $form['field_petty_cash_type_value']['#options'] = $default + $options;
+   }
+   if ($form['#id'] == 'views-exposed-form-Outlet-Master-Report-page') {
 
 
     $van_pl_options = get_van_pl('van', NULL, NULL);
