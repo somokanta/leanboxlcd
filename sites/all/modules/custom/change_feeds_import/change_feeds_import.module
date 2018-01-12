@@ -2285,11 +2285,18 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
       }
     }
   }
-  
   if ($view->base_table == 'custom_billing_data' && ($view->name != 'impact_delivery_cron_2') && ($view->name != 'impact_delivery_cron_evening_2')) {
     $query->add_where(0, 'custom_billing_data.distributor_id', $distributor_id, '=');
   }
-  if (($view->base_table == 'petty_cash') && ($view->name == 'petty_cash_transaction')) {
+  if (($view->base_table == 'taxonomy_term_data') && ($view->name == 'petty_cash_edit')) {
+      $query->where[0]['conditions'][] = array(
+        'field' => 'field_data_field_petty_cash_distributor.field_petty_cash_distributor_uid',
+        'value' => $distributor_id,
+        'operator' => '=',
+      );
+  }
+
+  if ($view->base_table == 'petty_cash') {
     $query->add_where(0, 'petty_cash.distributor_id', $distributor_id, '=');
   }
   if (($view->base_table == 'ptl_data_configuration') && ($view->name == 'ptl_loose_sheet' || $view->name == 'short_put_report' || $view->name == 'ptl_cld_sheet')) {
