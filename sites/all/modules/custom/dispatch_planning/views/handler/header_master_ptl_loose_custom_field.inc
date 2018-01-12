@@ -33,7 +33,7 @@ class header_master_ptl_loose_custom_field extends views_handler_field {
     $rs_code = $total_result[0]->master_ptl_data_rs_code;
 
     $name_line_1 = get_rsname_using_rscode($rs_code);
-    $name_line_2 = 'Party Packing Loose Picking Sheet';
+    $name_line_2 = 'Master Trip Party Packing Loose Picking Sheet';
 
     $trip_id = $this->view->args[0];
     $trip_date = master_ptl_trip_date_by_trip_id($trip_id,$rs_code);
