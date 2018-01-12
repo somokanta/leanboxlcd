@@ -155,6 +155,7 @@ function master_dispatch_planning_form_validate($form, &$form_state) {
   dpm($form_state);
   foreach ($form_state['values']['list_form_items'] as $nid => $value) {
     $trip_node = node_load($nid);
+    dpm($trip_node);
     if (!empty($trip_node->field_master_trip_id_reference['und'][0]['nid'])) {
       $child_trip = $trip_node->title;
       $node = node_load($trip_node->field_master_trip_id_reference['und'][0]['nid']);
