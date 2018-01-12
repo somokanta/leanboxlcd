@@ -319,7 +319,7 @@ function _get_highest_title_master_trip_distributor_wise($dis_id) {
    $query = db_select('node', 'n');
    $query->condition('n.type', 'master_dispatch_data');
    $query->fields('n', array('title'));
-   $query->orderBy('n.title', 'DESC');
+   $query->orderBy('n.nid', 'DESC');
    $query->condition('n.uid', $dis_id);
    $field = $query->execute()->fetchField();
    if (empty($field)) {
