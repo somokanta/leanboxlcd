@@ -165,6 +165,7 @@ function master_dispatch_planning_form_validate($form, &$form_state) {
       form_set_error('list_form_items', t('error'));
     }
   }
+  form_set_error('list_form_items', t('error 2'));
 }
 
 
