@@ -84,6 +84,7 @@ function _delivered_trip_data_download_callback() {
         'rows' => $rows,
         'attributes' => array('width' => '100%')
       ));
+      $file = "fareydeliveredtrip.xls";
       header("Content-type: application/vnd.ms-excel");
       header("Content-Disposition: attachment; filename=$file");
       echo $table['output'];
