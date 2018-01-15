@@ -1496,6 +1496,12 @@ function dispatch_planning_update_7118() {
         'not null' => TRUE,
         'default' => 0,
       ),
+      'dis_id' => array(
+        'description' => t('dis_id'),
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
     ),
     'primary key' => array('id'),
     'indexes' => array(
