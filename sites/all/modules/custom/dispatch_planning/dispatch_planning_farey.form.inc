@@ -49,9 +49,9 @@ function _delivered_trip_data_callback($form, &$form_state) {
 
          
     $data = array();
-    if (isset($param['start_date'])) {
+
       $data['trip_number'] = $trip_number;
-    }
+    
 
 
          $output = l(t('XLS'), 'delivered-trip-data/export', array('query' => array($data)));
