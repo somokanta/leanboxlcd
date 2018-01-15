@@ -88,6 +88,7 @@ function _delivered_trip_data_download_callback() {
       header("Content-type: application/vnd.ms-excel");
       header("Content-Disposition: attachment; filename=$file");
       echo $output;
+      exit;
    }
 }
 
