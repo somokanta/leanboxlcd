@@ -155,17 +155,19 @@ function _get_farey_delivered_tripwise_vrs_amt_details($trip_number, $rs_code) {
    $query->condition('ad.runsheet_number', $trip_number, '=');
    $query->condition('ad.hub', $rs_code, '=');
 
-   $query->addExpression('SUM(CASE WHEN (res_confirm_signed_bill_amount IS NOT NULL) THEN 1 ELSE 0 END)', 'Count_signed_bills');
-   $query->addExpression('SUM(CASE WHEN (res_confirm_signed_bill_amount IS NOT NULL) THEN bill_value ELSE 0 END)', 'Sum_signed_bills');
-   $query->addExpression('SUM(CASE WHEN (res_confirm_signed_bill_amount IS NOT NULL) THEN res_to_be_collection ELSE 0 END)', 'app_signed_bills');
+ 
+   
+  $query->addExpression('SUM(CASE WHEN (res_confirm_signed_bill_amount IS NOT NULL AND res_confirm_signed_bill_amount != \'NA\') THEN 1 ELSE 0 END)', 'Count_signed_bills');
+   $query->addExpression('SUM(CASE WHEN (res_confirm_signed_bill_amount IS NOT NULL AND res_confirm_signed_bill_amount != \'NA\') THEN bill_value ELSE 0 END)', 'Sum_signed_bills');
+   $query->addExpression('SUM(CASE WHEN (res_confirm_signed_bill_amount IS NOT NULL AND res_confirm_signed_bill_amount != \'NA\') THEN res_to_be_collection ELSE 0 END)', 'app_signed_bills');
 
-   $query->addExpression('SUM(CASE WHEN (res_cheque_amount IS NOT NULL) THEN 1 ELSE 0 END)', 'Count_cheque_bills');
-   $query->addExpression('SUM(CASE WHEN (res_cheque_amount IS NOT NULL) THEN bill_value ELSE 0 END)', 'Sum_cheque_bills');
-   $query->addExpression('SUM(CASE WHEN (res_cheque_amount IS NOT NULL) THEN res_to_be_collection ELSE 0 END)', 'app_cheque_bills');
+   $query->addExpression('SUM(CASE WHEN (res_cheque_amount IS NOT NULL AND res_cheque_amount != \'NA\') THEN 1 ELSE 0 END)', 'Count_cheque_bills');
+   $query->addExpression('SUM(CASE WHEN (res_cheque_amount IS NOT NULL AND res_cheque_amount != \'NA\') THEN bill_value ELSE 0 END)', 'Sum_cheque_bills');
+   $query->addExpression('SUM(CASE WHEN (res_cheque_amount IS NOT NULL AND res_cheque_amount != \'NA\') THEN res_to_be_collection ELSE 0 END)', 'app_cheque_bills');
 
-   $query->addExpression('SUM(CASE WHEN (res_cash_amount IS NOT NULL) THEN 1 ELSE 0 END)', 'Count_cash_bills');
-   $query->addExpression('SUM(CASE WHEN (res_cash_amount IS NOT NULL) THEN bill_value ELSE 0 END)', 'Sum_cash_bills');
-   $query->addExpression('SUM(CASE WHEN (res_cash_amount IS NOT NULL) THEN res_to_be_collection ELSE 0 END)', 'app_cash_bills');
+   $query->addExpression('SUM(CASE WHEN (res_cash_amount IS NOT NULL AND res_cash_amount != \'NA\') THEN 1 ELSE 0 END)', 'Count_cash_bills');
+   $query->addExpression('SUM(CASE WHEN (res_cash_amount IS NOT NULL AND res_cash_amount != \'NA\') THEN bill_value ELSE 0 END)', 'Sum_cash_bills');
+   $query->addExpression('SUM(CASE WHEN (res_cash_amount IS NOT NULL AND res_cash_amount != \'NA\') THEN res_to_be_collection ELSE 0 END)', 'app_cash_bills');
    $rows = $query->execute()->fetch(PDO::FETCH_ASSOC);
 
 
