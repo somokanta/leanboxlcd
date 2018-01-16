@@ -29,7 +29,7 @@ function fetch_ptl_data($rs_code, $api_time) {
   $data['header'] =  $header_result;
   
   $query = db_select('ptl_data_configuration', 'p');
-  $query->fields('p', array('id', 'ptl_job', 'rs_code', 'trip_id', 'vehicle', 'bill_number', 'loading_date', 'sequence_no', 'basepack_code', 'sku_code', 'product_name', 'MRP', 'TUR','free_sku_description','cp','ean'));
+  $query->fields('p', array('id', 'ptl_job', 'rs_code', 'trip_id', 'vehicle', 'bill_number', 'loading_date', 'sequence_no', 'basepack_code', 'sku_code', 'product_name', 'MRP', 'TUR','free_sku_description','cp','ean','ean1','ean2','ean3'));
   $query->addExpression('loose', 'sum_sales_qty'); // send loose value in sum_sales_qty
   $query->condition('p.id', $max_ptl_data, '<=');
   $query->condition('p.api_flag', '0', '=');
@@ -74,7 +74,7 @@ function fetch_sku_ean_mrp_data($rs_code, $api_time) {
 
   $query = db_select('sku_ean_mrp', 'p');
   $query->addField('p', 'sku', 'sku_code');
-  $query->fields('p', array('ean', 'mrp','rs_code'));
+  $query->fields('p', array('ean', 'mrp','ean1', 'mrp1','ean2', 'mrp2','ean3', 'mrp3','rs_code'));
   $query->condition('created_time', $time, '<');
   $query->condition('p.flag', '0', '=');
   $query->condition('p.rs_code', $rs_code, '=');

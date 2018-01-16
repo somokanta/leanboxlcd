@@ -54,36 +54,19 @@ function sku_ean_add_edit($form, &$form_state) {
       '#maxlength' => 20,
       '#title' => t('Enter EAN'),
     );
-    $form['ean1'] = array(
-      '#type' => 'textfield',
-      '#size' => 20,
-      '#required' => TRUE,
-      '#default_value' => $sku_details[0]->ean1 ? $sku_details[0]->ean1 : '',
-      '#maxlength' => 20,
-      '#title' => t('Enter EAN1'),
-    );
-    $form['ean2'] = array(
-      '#type' => 'textfield',
-      '#size' => 20,
-      '#required' => TRUE,
-      '#default_value' => $sku_details[0]->ean2 ? $sku_details[0]->ean2 : '',
-      '#maxlength' => 20,
-      '#title' => t('Enter EAN2'),
-    );
-    $form['ean3'] = array(
-      '#type' => 'textfield',
-      '#size' => 20,
-      '#required' => TRUE,
-      '#default_value' => $sku_details[0]->ean3 ? $sku_details[0]->ean3 : '',
-      '#maxlength' => 20,
-      '#title' => t('Enter EAN3'),
-    );    
     $form['mrp'] = array(
       '#type' => 'textfield',
       '#size' => 20,
       '#default_value' => $sku_details[0]->mrp ? $sku_details[0]->mrp : '',
       '#maxlength' => 20,
       '#title' => t('Enter MRP'),
+    );
+    $form['ean1'] = array(
+      '#type' => 'textfield',
+      '#size' => 20,
+      '#default_value' => $sku_details[0]->ean1 ? $sku_details[0]->ean1 : '',
+      '#maxlength' => 20,
+      '#title' => t('Enter EAN1'),
     );
     $form['mrp1'] = array(
       '#type' => 'textfield',
@@ -92,12 +75,27 @@ function sku_ean_add_edit($form, &$form_state) {
       '#maxlength' => 20,
       '#title' => t('Enter MRP1'),
     );
+    $form['ean2'] = array(
+      '#type' => 'textfield',
+      '#size' => 20,
+      '#default_value' => $sku_details[0]->ean2 ? $sku_details[0]->ean2 : '',
+      '#maxlength' => 20,
+      '#title' => t('Enter EAN2'),
+    );
     $form['mrp2'] = array(
       '#type' => 'textfield',
       '#size' => 20,
       '#default_value' => $sku_details[0]->mrp2 ? $sku_details[0]->mrp2 : '',
       '#maxlength' => 20,
       '#title' => t('Enter MRP2'),
+    );
+    
+    $form['ean3'] = array(
+      '#type' => 'textfield',
+      '#size' => 20,
+      '#default_value' => $sku_details[0]->ean3 ? $sku_details[0]->ean3 : '',
+      '#maxlength' => 20,
+      '#title' => t('Enter EAN3'),
     );
     $form['mrp3'] = array(
       '#type' => 'textfield',
