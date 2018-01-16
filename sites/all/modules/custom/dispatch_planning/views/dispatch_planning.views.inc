@@ -851,7 +851,61 @@ function dispatch_planning_views_data() {
      'argument' => array(
        'handler' => 'views_handler_argument_string',
      ),
-   );   
+   );
+   // drived EAN
+   $data['ptl_data_configuration']['ean1'] = array(
+     'title' => t('EAN1'),
+     'help' => t('EAN1'),
+     'field' => array(
+       'handler' => 'views_handler_field',
+       'click sortable' => TRUE,
+     ),
+     'sort' => array(
+       'handler' => 'views_handler_sort',
+     ),
+     'filter' => array(
+       'handler' => 'views_handler_filter_string',
+     ),
+     'argument' => array(
+       'handler' => 'views_handler_argument_string',
+     ),
+   ); 
+   // drived EAN
+   $data['ptl_data_configuration']['ean2'] = array(
+     'title' => t('EAN2'),
+     'help' => t('EAN2'),
+     'field' => array(
+       'handler' => 'views_handler_field',
+       'click sortable' => TRUE,
+     ),
+     'sort' => array(
+       'handler' => 'views_handler_sort',
+     ),
+     'filter' => array(
+       'handler' => 'views_handler_filter_string',
+     ),
+     'argument' => array(
+       'handler' => 'views_handler_argument_string',
+     ),
+   ); 
+   // drived EAN
+   $data['ptl_data_configuration']['ean3'] = array(
+     'title' => t('EAN3'),
+     'help' => t('EAN3'),
+     'field' => array(
+       'handler' => 'views_handler_field',
+       'click sortable' => TRUE,
+     ),
+     'sort' => array(
+       'handler' => 'views_handler_sort',
+     ),
+     'filter' => array(
+       'handler' => 'views_handler_filter_string',
+     ),
+     'argument' => array(
+       'handler' => 'views_handler_argument_string',
+     ),
+   ); 
 
  $base_table = 'ptl_data_configuration';
  $data[$base_table]['date_filter'] = array(
@@ -1475,6 +1529,57 @@ function dispatch_planning_views_data() {
    $data['master_ptl_data']['ean'] = array(
      'title' => t('EAN'),
      'help' => t('EAN'),
+     'field' => array(
+       'handler' => 'views_handler_field',
+       'click sortable' => TRUE,
+     ),
+     'sort' => array(
+       'handler' => 'views_handler_sort',
+     ),
+     'filter' => array(
+       'handler' => 'views_handler_filter_string',
+     ),
+     'argument' => array(
+       'handler' => 'views_handler_argument_string',
+     ),
+   );
+   $data['master_ptl_data']['ean1'] = array(
+     'title' => t('EAN1'),
+     'help' => t('EAN1'),
+     'field' => array(
+       'handler' => 'views_handler_field',
+       'click sortable' => TRUE,
+     ),
+     'sort' => array(
+       'handler' => 'views_handler_sort',
+     ),
+     'filter' => array(
+       'handler' => 'views_handler_filter_string',
+     ),
+     'argument' => array(
+       'handler' => 'views_handler_argument_string',
+     ),
+   );
+   $data['master_ptl_data']['ean2'] = array(
+     'title' => t('EAN2'),
+     'help' => t('EAN2'),
+     'field' => array(
+       'handler' => 'views_handler_field',
+       'click sortable' => TRUE,
+     ),
+     'sort' => array(
+       'handler' => 'views_handler_sort',
+     ),
+     'filter' => array(
+       'handler' => 'views_handler_filter_string',
+     ),
+     'argument' => array(
+       'handler' => 'views_handler_argument_string',
+     ),
+   );
+   $data['master_ptl_data']['ean3'] = array(
+     'title' => t('EAN3'),
+     'help' => t('EAN3'),
      'field' => array(
        'handler' => 'views_handler_field',
        'click sortable' => TRUE,

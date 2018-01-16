@@ -1510,3 +1510,41 @@ function dispatch_planning_update_7118() {
   );
   db_create_table('dispatch_delivered_vrs_details', $schema['dispatch_delivered_vrs_details']);
 }
+
+
+/**
+ * Adding new fields in PTL table using hook_update_N()
+ */
+function dispatch_planning_update_7119() {
+  $fields = array(
+    'ean1' => array(
+      'description' => 'EAN1',
+      'type' => 'varchar',
+      'length' => 25,
+      'not null' => TRUE,
+      'default' => '',
+    ),
+    'ean2' => array(
+      'description' => 'EAN2',
+      'type' => 'varchar',
+      'length' => 25,
+      'not null' => TRUE,
+      'default' => '',
+    ),
+    'ean3' => array(
+      'description' => 'EAN3',
+      'type' => 'varchar',
+      'length' => 25,
+      'not null' => TRUE,
+      'default' => '',
+    ),
+  );
+  foreach ($fields as $key => $field) {
+    if (!db_field_exists('ptl_data_configuration', $key)) {
+      db_add_field('ptl_data_configuration', $key, $field);
+    }
+    if (!db_field_exists('master_ptl_data', $key)) {
+      db_add_field('master_ptl_data', $key, $field);
+    }    
+  }
+}
