@@ -50,24 +50,22 @@ function _delivered_tripwise_vrs_data_callback($form, &$form_state) {
            '#header' => $trip_details_header,
            '#rows' => $trip_details,
          );
-         dpm($trip_amt_details, '$trip_amt_details');
 
          $form['trip_amt_details'] = array(
            '#theme' => 'table',
            '#header' => $trip_details_amt_header,
            '#rows' => $trip_amt_details,
          );
-         dpm($ret_trip_amt_details, '$trip_amt_details');
 
          $form['ret_trip_details'] = array(
            '#theme' => 'table',
            '#header' => $returned_details_amt_header,
            '#rows' => $ret_trip_amt_details,
          );
-
          $form['van_bill_value'] = array(
            '#type' => 'textfield',
            '#title' => t('van bill value'),
+           '#default_value' => $trip_details['Total Bills'][2],
          );
          $form['cash_debit'] = array(
            '#type' => 'textfield',
@@ -136,7 +134,6 @@ function _get_farey_delivered_tripwise_vrs_details($trip_number, $rs_code) {
          $rows1 = array_shift($rows);
       }
    }
-
    return $data;
 }
 
@@ -264,7 +261,6 @@ function _get_farey_returned_delivered_trip_details($trip_number, $rs_code) {
 }
 
 function _delivered_tripwise_vrs_data_callback_submit($form, &$form_state) {
-   dpm($form_state, '$form_state');
    $trip_id = $form_state['values']['trip_number'];
    if (!empty($trip_id)) {
       db_merge('dispatch_delivered_vrs_details')
