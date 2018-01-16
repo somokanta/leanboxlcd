@@ -14,6 +14,8 @@ function _delivered_tripwise_vrs_data_callback($form, &$form_state) {
    $form = array();
    $form['#prefix'] = '<div id="itemlist-div">';
    $form['#suffix'] = '</div>';
+   $form['#attached']['js'][] = drupal_get_path('module', 'dispatch_planning') . '/js/dispatch_planning_vrs.js';
+
 
    // get logged in users rs id
    $user_id = $GLOBALS['user']->uid;
@@ -146,7 +148,7 @@ function _get_farey_delivered_tripwise_vrs_amt_details($trip_number, $rs_code) {
    global $user;
    $data = array();
 
-   $trip_number = 1111;
+   //$trip_number = 1111;
    $rs_code = 100006;
 
    $query = db_select('dispatch_planning_api_data', 'ad');
