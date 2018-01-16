@@ -146,7 +146,7 @@ function _get_farey_delivered_tripwise_vrs_amt_details($trip_number, $rs_code) {
    global $user;
    $data = array();
 
-   $trip_number = 1111;
+   //$trip_number = 1111;
    $rs_code = 100006;
 
    $query = db_select('dispatch_planning_api_data', 'ad');
