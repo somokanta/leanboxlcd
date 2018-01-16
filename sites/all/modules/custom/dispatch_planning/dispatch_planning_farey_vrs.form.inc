@@ -232,7 +232,7 @@ function _get_farey_returned_delivered_trip_details($trip_number, $rs_code) {
    // $query->groupBy('id.sku_code');
    // $query->addExpression('SUM(og_sum_net_sales_quantity)', 'Sum_of_net_sales_qty');
    //$query->addExpression('SUM(res_sku_actual_quantity1)', 'Actual_qty_delivered');
-   $query->addExpression('(og_sum_net_sales_quantity - res_sku_actual_quantity1)', 'Returned_qty');
+   $query->addExpression('(SUM(og_sum_net_sales_quantity) - SUM(res_sku_actual_quantity1))', 'Returned_qty');
    //$query->addExpression('SUM(og_sum_net_sales_quantity*sum_net_sales_value)', 'Returned_val');
    $query->addExpression('SUM((og_sum_net_sales_quantity - res_sku_actual_quantity1)*sum_net_sales_value)', 'Returned_val');
 
