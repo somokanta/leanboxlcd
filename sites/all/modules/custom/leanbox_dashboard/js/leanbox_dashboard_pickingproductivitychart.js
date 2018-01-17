@@ -10,7 +10,7 @@
 		attach: function (context, settings) {
 			var area_definition = Drupal.settings.leanbox_dashboard.area_definition;
 			var picking_productivity_data = Drupal.settings.leanbox_dashboard.picking_productivity;
-			google.charts.load("current", {packages: ['gauge','corechart', 'bar']});
+			//google.charts.load("current", {packages: ['gauge','corechart', 'bar']});
 			google.charts.setOnLoadCallback(function () {
 				drawpickingproductivityChart(picking_productivity_data);
 			});

@@ -10,7 +10,7 @@
 		attach: function (context, settings) {
 			
 			var otif = Drupal.settings.leanbox_dashboard.otif;
-      google.charts.load('current', {'packages':['gauge','corechart', 'bar']});
+      //google.charts.load('current', {'packages':['gauge','corechart', 'bar']});
 			google.charts.setOnLoadCallback(function () {
 				drawotifChart(otif);
 			});

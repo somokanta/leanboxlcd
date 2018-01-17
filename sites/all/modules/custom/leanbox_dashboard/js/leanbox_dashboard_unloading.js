@@ -11,7 +11,7 @@
 
 			var area_definition = Drupal.settings.leanbox_dashboard.area_definition;
 			var unloading_data = Drupal.settings.leanbox_dashboard.unloading;
-			google.charts.load("current", {packages: ['gauge', 'corechart', 'bar']});
+			//google.charts.load("current", {packages: ['gauge', 'corechart', 'bar']});
 			google.charts.setOnLoadCallback(function () {
 				drawunloadingChart(unloading_data);
 			});

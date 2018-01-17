@@ -12,7 +12,7 @@
 			var party_pack_data = Drupal.settings.leanbox_mobile.fullreturnchart;
 			var area_definition = Drupal.settings.leanbox_mobile.area_definition;
 
-			google.charts.load("current", {packages: ['gauge', 'corechart', 'bar']});
+			//google.charts.load("current", {packages: ['gauge', 'corechart', 'bar']});
 			google.charts.setOnLoadCallback(function () {
 				drawpartypackingChart(party_pack_data);
 			});
