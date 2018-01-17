@@ -5,9 +5,8 @@
  * having graph data integrated using google chart
  */
 function leanbox_dashboard_init() {
-  if (arg(0) != 'admin') {
+    drupal_add_js(drupal_get_path('module', 'leanbox_dashboard') . '/js/google_chart.js');
     drupal_add_js(drupal_get_path('module', 'leanbox_dashboard') . '/js/all_chart_load.js');
-  }
 }
 /**
  * Implements hook_menu
@@ -375,7 +374,7 @@ function leanbox_dashboard_block_view($delta = '') {
         '#markup' => theme('leanbox_dashboard', array('data' => $filter_form)),
         '#attached' => array(
           'js' => array(
-drupal_get_path('module', 'leanbox_dashboard') . '/js/google_chart.js',
+//drupal_get_path('module', 'leanbox_dashboard') . '/js/google_chart.js',
             drupal_get_path('module', 'leanbox_dashboard') . '/js/leanbox_dashboard_adoption.js',
             array(
               'data' => array('leanbox_dashboard' => array('adoption_graph' => $data, 'area_definition' => $area_definition)),
@@ -407,7 +406,7 @@ drupal_get_path('module', 'leanbox_dashboard') . '/js/google_chart.js',
         '#markup' => theme('leanbox_dashboard', array('data' => $filter_form)),
         '#attached' => array(
           'js' => array(
-             drupal_get_path('module', 'leanbox_dashboard') . '/js/google_chart.js',
+             //drupal_get_path('module', 'leanbox_dashboard') . '/js/google_chart.js',
             drupal_get_path('module', 'leanbox_dashboard') . '/js/leanbox_dashboard_partypackingchart.js',
             array(
               'data' => array('leanbox_dashboard' => array('party_packing' => $data, 'area_definition' => $area_definition)),
@@ -439,7 +438,7 @@ drupal_get_path('module', 'leanbox_dashboard') . '/js/google_chart.js',
         '#markup' => theme('leanbox_dashboard', array('data' => $filter_form)),
         '#attached' => array(
           'js' => array(
-            drupal_get_path('module', 'leanbox_dashboard') . '/js/google_chart.js',
+            //drupal_get_path('module', 'leanbox_dashboard') . '/js/google_chart.js',
             drupal_get_path('module', 'leanbox_dashboard') . '/js/leanbox_dashboard_pickingchart.js',
             array(
               'data' => array('leanbox_dashboard' => array('picking' => $data, 'area_definition' => $area_definition)),
@@ -471,7 +470,7 @@ drupal_get_path('module', 'leanbox_dashboard') . '/js/google_chart.js',
         '#markup' => theme('leanbox_dashboard', array('data' => $filter_form)),
         '#attached' => array(
           'js' => array(
-           drupal_get_path('module', 'leanbox_dashboard') . '/js/google_chart.js',
+           //drupal_get_path('module', 'leanbox_dashboard') . '/js/google_chart.js',
             drupal_get_path('module', 'leanbox_dashboard') . '/js/leanbox_dashboard_pickingbulkchart.js',
             array(
               'data' => array('leanbox_dashboard' => array('picking_bulk' => $data, 'area_definition' => $area_definition)),
@@ -503,7 +502,7 @@ drupal_get_path('module', 'leanbox_dashboard') . '/js/google_chart.js',
         '#markup' => theme('leanbox_dashboard', array('data' => $filter_form)),
         '#attached' => array(
           'js' => array(
-           drupal_get_path('module', 'leanbox_dashboard') . '/js/google_chart.js',
+           //drupal_get_path('module', 'leanbox_dashboard') . '/js/google_chart.js',
             drupal_get_path('module', 'leanbox_dashboard') . '/js/leanbox_dashboard_unloading.js',
             array(
               'data' => array('leanbox_dashboard' => array('unloading' => $data, 'area_definition' => $area_definition)),
@@ -536,7 +535,7 @@ drupal_get_path('module', 'leanbox_dashboard') . '/js/google_chart.js',
         '#markup' => theme('leanbox_dashboard', array('data' => $filter_form)),
         '#attached' => array(
           'js' => array(
-           drupal_get_path('module', 'leanbox_dashboard') . '/js/google_chart.js',
+           //drupal_get_path('module', 'leanbox_dashboard') . '/js/google_chart.js',
             drupal_get_path('module', 'leanbox_dashboard') . '/js/leanbox_dashboard_delivery.js',
             array(
               'data' => array('leanbox_dashboard' => array('delivery' => $data, 'area_definition' => $area_definition)),
@@ -568,7 +567,7 @@ drupal_get_path('module', 'leanbox_dashboard') . '/js/google_chart.js',
         '#markup' => theme('leanbox_dashboard', array('data' => $filter_form, 'otif_table' => $data['table'])),
         '#attached' => array(
           'js' => array(
-           drupal_get_path('module', 'leanbox_dashboard') . '/js/google_chart.js',
+           //drupal_get_path('module', 'leanbox_dashboard') . '/js/google_chart.js',
             drupal_get_path('module', 'leanbox_dashboard') . '/js/leanbox_dashboard_partypackingproductivitychart.js',
             array(
               'data' => array('leanbox_dashboard' => array('party_packing_productivity' => $data['output'], 'area_definition' => $area_definition)),
@@ -600,7 +599,7 @@ drupal_get_path('module', 'leanbox_dashboard') . '/js/google_chart.js',
         '#markup' => theme('leanbox_dashboard', array('data' => $filter_form, 'otif_table' => $data['table'])),
         '#attached' => array(
           'js' => array(
-            drupal_get_path('module', 'leanbox_dashboard') . '/js/google_chart.js',
+            //drupal_get_path('module', 'leanbox_dashboard') . '/js/google_chart.js',
             drupal_get_path('module', 'leanbox_dashboard') . '/js/leanbox_dashboard_pickingproductivitychart.js',
             array(
               'data' => array('leanbox_dashboard' => array('picking_productivity' => $data['output'], 'area_definition' => $area_definition)),
@@ -632,7 +631,7 @@ drupal_get_path('module', 'leanbox_dashboard') . '/js/google_chart.js',
         '#markup' => theme('leanbox_dashboard', array('data' => $filter_form, 'otif_table' => $data['table'])),
         '#attached' => array(
           'js' => array(
-            drupal_get_path('module', 'leanbox_dashboard') . '/js/google_chart.js',
+            //drupal_get_path('module', 'leanbox_dashboard') . '/js/google_chart.js',
             drupal_get_path('module', 'leanbox_dashboard') . '/js/leanbox_dashboard_bill_pendencychart.js',
             array(
               'data' => array('leanbox_dashboard' => array('bill_pendency' => $data['output'], 'area_definition' => $area_definition)),
@@ -655,7 +654,7 @@ drupal_get_path('module', 'leanbox_dashboard') . '/js/google_chart.js',
         '#markup' => theme('leanbox_dashboard', array('data' => $filter_form, 'otif_table' => $data['table'],)),
         '#attached' => array(
           'js' => array(
-           drupal_get_path('module', 'leanbox_dashboard') . '/js/google_chart.js',
+           //drupal_get_path('module', 'leanbox_dashboard') . '/js/google_chart.js',
             drupal_get_path('module', 'leanbox_dashboard') . '/js/leanbox_dashboard_otifchart.js',
             array(
               'data' => array('leanbox_dashboard' => array('otif' => $data['output'],)),
@@ -678,7 +677,7 @@ drupal_get_path('module', 'leanbox_dashboard') . '/js/google_chart.js',
         '#markup' => theme('leanbox_dashboard', array('data' => $filter_form, 'otif_table' => $data['table'],)),
         '#attached' => array(
           'js' => array(
-           drupal_get_path('module', 'leanbox_dashboard') . '/js/google_chart.js',
+           //drupal_get_path('module', 'leanbox_dashboard') . '/js/google_chart.js',
             drupal_get_path('module', 'leanbox_dashboard') . '/js/leanbox_dashboard_otifchart.js',
             array(
               'data' => array('leanbox_dashboard' => array('otif' => $data['output'],)),
@@ -815,7 +814,7 @@ drupal_get_path('module', 'leanbox_dashboard') . '/js/google_chart.js',
         '#markup' => theme('leanbox_dashboard', array('data' => $filter_form)),
         '#attached' => array(
           'js' => array(
-           drupal_get_path('module', 'leanbox_dashboard') . '/js/google_chart.js',
+           //drupal_get_path('module', 'leanbox_dashboard') . '/js/google_chart.js',
             drupal_get_path('module', 'leanbox_dashboard') . '/js/leanbox_dashboard_billsperpersonchart.js',
             array(
               'data' => array('leanbox_dashboard' => array('bills_per_person' => $data, 'area_definition' => $area_definition)),
@@ -848,7 +847,7 @@ drupal_get_path('module', 'leanbox_dashboard') . '/js/google_chart.js',
         '#markup' => theme('leanbox_dashboard', array('data' => $filter_form)),
         '#attached' => array(
           'js' => array(
-           drupal_get_path('module', 'leanbox_dashboard') . '/js/google_chart.js',
+           //drupal_get_path('module', 'leanbox_dashboard') . '/js/google_chart.js',
             drupal_get_path('module', 'leanbox_dashboard') . '/js/leanbox_dashboard_billspervanchart.js',
             array(
               'data' => array('leanbox_dashboard' => array('bills_per_van' => $data, 'area_definition' => $area_definition)),
@@ -881,7 +880,7 @@ drupal_get_path('module', 'leanbox_dashboard') . '/js/google_chart.js',
         '#markup' => theme('leanbox_dashboard', array('data' => $filter_form)),
         '#attached' => array(
           'js' => array(
-            drupal_get_path('module', 'leanbox_dashboard') . '/js/google_chart.js',
+            //drupal_get_path('module', 'leanbox_dashboard') . '/js/google_chart.js',
             drupal_get_path('module', 'leanbox_dashboard') . '/js/leanbox_dashboard_pp_ota.js',
             array(
               'data' => array('leanbox_dashboard' => array('pp_ota' => $data, 'area_definition' => $area_definition)),
@@ -914,7 +913,7 @@ drupal_get_path('module', 'leanbox_dashboard') . '/js/google_chart.js',
         '#markup' => theme('leanbox_dashboard', array('data' => $filter_form)),
         '#attached' => array(
           'js' => array(
-           drupal_get_path('module', 'leanbox_dashboard') . '/js/google_chart.js',
+           //drupal_get_path('module', 'leanbox_dashboard') . '/js/google_chart.js',
             drupal_get_path('module', 'leanbox_dashboard') . '/js/leanbox_dashboard_picking_ota.js',
             array(
               'data' => array('leanbox_dashboard' => array('picking_ota' => $data, 'area_definition' => $area_definition)),
@@ -947,7 +946,7 @@ drupal_get_path('module', 'leanbox_dashboard') . '/js/google_chart.js',
         '#markup' => theme('leanbox_dashboard', array('data' => $filter_form)),
         '#attached' => array(
           'js' => array(
-           drupal_get_path('module', 'leanbox_dashboard') . '/js/google_chart.js',
+           //drupal_get_path('module', 'leanbox_dashboard') . '/js/google_chart.js',
             drupal_get_path('module', 'leanbox_dashboard') . '/js/leanbox_dashboard_bod_data.js',
             array(
               'data' => array('leanbox_dashboard' => array('bod_data' => $data, 'area_definition' => $area_definition)),
@@ -980,7 +979,7 @@ drupal_get_path('module', 'leanbox_dashboard') . '/js/google_chart.js',
         '#markup' => theme('leanbox_dashboard', array('data' => $filter_form)),
         '#attached' => array(
           'js' => array(
-           drupal_get_path('module', 'leanbox_dashboard') . '/js/google_chart.js',
+           //drupal_get_path('module', 'leanbox_dashboard') . '/js/google_chart.js',
             drupal_get_path('module', 'leanbox_dashboard') . '/js/leanbox_dashboard_unloading_ota.js',
             array(
               'data' => array('leanbox_dashboard' => array('unloading_ota' => $data, 'area_definition' => $area_definition)),
@@ -1036,7 +1035,7 @@ drupal_get_path('module', 'leanbox_dashboard') . '/js/google_chart.js',
         '#markup' => theme('leanbox_dashboard', array('data' => $filter_form)),
         '#attached' => array(
           'js' => array(
-           drupal_get_path('module', 'leanbox_dashboard') . '/js/google_chart.js',
+           //drupal_get_path('module', 'leanbox_dashboard') . '/js/google_chart.js',
             drupal_get_path('module', 'leanbox_dashboard') . '/js/leanbox_dashboard_dispatch_ota.js',
             array(
               'data' => array('leanbox_dashboard' => array('dispatch_ota' => $data, 'area_definition' => $area_definition)),
