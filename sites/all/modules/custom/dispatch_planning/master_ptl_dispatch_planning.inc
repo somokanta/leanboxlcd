@@ -604,7 +604,7 @@ function fetch_master_ptl_sku_ean_mrp_data($rs_code, $api_time) {
 
   $query = db_select('sku_ean_mrp', 'p');
   $query->addField('p', 'sku', 'sku_code');
-  $query->fields('p', array('ean', 'mrp','rs_code'));
+  $query->fields('p', array('ean', 'mrp','ean1', 'mrp1','ean2', 'mrp2','ean3', 'mrp3','rs_code'));
   $query->condition('created_time', $time, '<');
   $query->condition('p.master_flag', '0', '=');
   $query->condition('p.rs_code', $rs_code, '=');
