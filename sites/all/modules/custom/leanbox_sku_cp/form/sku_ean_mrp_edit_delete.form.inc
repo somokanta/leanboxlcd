@@ -251,6 +251,7 @@ function sku_ean_add_edit_submit($form, &$form_state) {
         'mrp3' => !empty($mrp3) ? $mrp3 : 0,
         'rs_code' => $rs_code,
         'flag' => 0, // enable for api
+        'master_flag' => 0,
         'created_time' => REQUEST_TIME
       ))
       ->execute();
