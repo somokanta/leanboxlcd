@@ -1619,6 +1619,24 @@ function dispatch_planning_views_data() {
        'handler' => 'views_handler_argument_string',
      ),
    );
+   
+    $data['dispatch_planning_api_data']['res_reason_for_failure'] = array(
+     'title' => t('DP res_reason_for_failure'),
+     'help' => t('Dispatch Planning res_reason_for_failure'),
+     'field' => array(
+       'handler' => 'views_handler_field',
+       'click sortable' => TRUE,
+     ),
+     'sort' => array(
+       'handler' => 'views_handler_sort',
+     ),
+     'filter' => array(
+       'handler' => 'views_handler_filter_string',
+     ),
+     'argument' => array(
+       'handler' => 'views_handler_argument_string',
+     ),
+   );
 
    $data['dispatch_planning_api_data']['fieldExecutive'] = array(
      'title' => t('DP fieldExecutive'),
@@ -2561,6 +2579,25 @@ function dispatch_planning_views_data() {
        'handler' => 'views_handler_argument_string',
      ),
    );
+   
+   $data['dispatch_planning_item_details']['res_sku_reason'] = array(
+     'title' => t('DP lines res_sku_reason'),
+     'help' => t('Dispatch Planning lines res_sku_reason'),
+     'field' => array(
+       'handler' => 'views_handler_field',
+       'click sortable' => TRUE,
+     ),
+     'sort' => array(
+       'handler' => 'views_handler_sort',
+     ),
+     'filter' => array(
+       'handler' => 'views_handler_filter_string',
+     ),
+     'argument' => array(
+       'handler' => 'views_handler_argument_string',
+     ),
+   );
+     
    $data['dispatch_planning_item_details']['sum_net_sales_cases'] = array(
      'title' => t('DP lines sum_net_sales_cases'),
      'help' => t('Dispatch Planning lines sum_net_sales_cases'),

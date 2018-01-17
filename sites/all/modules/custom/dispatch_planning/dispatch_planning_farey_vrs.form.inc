@@ -66,18 +66,22 @@ function _delivered_tripwise_vrs_data_callback($form, &$form_state) {
            '#type' => 'textfield',
            '#title' => t('van bill value'),
            '#default_value' => $trip_details['Total Bills'][2],
+           '#disabled' => TRUE,
          );
          $form['cash_debit'] = array(
            '#type' => 'textfield',
            '#title' => t('Cash debit'),
+           '#disabled' => TRUE,
          );
          $form['inventory_detail'] = array(
            '#type' => 'textfield',
            '#title' => t('Inventory debit'),
+           '#disabled' => TRUE,
          );
          $form['total_debit'] = array(
            '#type' => 'textfield',
            '#title' => t('Total debit'),
+           '#disabled' => TRUE,
          );
          $form['submit'] = array(
            '#type' => 'submit',
@@ -252,6 +256,7 @@ function _get_farey_returned_delivered_trip_details($trip_number, $rs_code) {
      '#title' => t('Difference'),
      '#title_display' => 'invisible',
      '#name' => "ret_difference",
+     '#disabled' => TRUE,
      '#attributes' => array('class' => array('cheque-date-field')),
      '#required' => TRUE,
    );
