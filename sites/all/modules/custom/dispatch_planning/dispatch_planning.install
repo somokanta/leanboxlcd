@@ -1548,3 +1548,39 @@ function dispatch_planning_update_7119() {
     }    
   }
 }
+
+
+/**
+ * Adding new fields in PTL table using hook_update_N()
+ */
+function dispatch_planning_update_7120() {
+   $fields1 = array(
+     'res_reason_for_failure' => array(
+       'description' => 'res_reason_for_failure',
+       'type' => 'varchar',
+       'length' => 255,
+       'default' => '',
+     ),
+   );
+
+   $fields2 = array(
+     'res_sku_reason' => array(
+       'description' => 'res_sku_reason',
+       'type' => 'varchar',
+       'length' => 255,
+       'default' => '',
+     ),
+   );
+
+   foreach ($fields1 as $key => $field) {
+      if (!db_field_exists('dispatch_planning_api_data', $key)) {
+         db_add_field('dispatch_planning_api_data', $key, $field);
+      }
+   }
+   foreach ($fields2 as $key => $field) {
+
+      if (!db_field_exists('dispatch_planning_item_details', $key)) {
+         db_add_field('dispatch_planning_item_details', $key, $field);
+      }
+   }
+}
