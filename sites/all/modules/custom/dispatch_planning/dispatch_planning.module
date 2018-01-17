@@ -2510,10 +2510,10 @@ function get_sku_unit_case($sku7_code, $distributor_id) {
  */
 function get_sku_ean($sku7_code, $rs_code) {
   $query = db_select('sku_ean_mrp', 'p');
-  $query->fields('p', array('ean'));
+  $query->fields('p', array('ean','ean1','ean2','ean3'));
   $query->condition('p.rs_code', $rs_code, '=');
   $query->condition('p.sku', $sku7_code, '=');
-  $result = $query->execute()->fetchField();
+  $result = $query->execute()->fetchAll();
   return $result;
 }
 

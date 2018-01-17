@@ -389,7 +389,7 @@ function master_ptl_data_insert_into_table($api_data, $distributor_id) {
 
         $sku7_code = $item_data['sku_code'];
         $sku_unit_case = get_sku_unit_case($sku7_code, $distributor_id);
-        $ean = get_sku_ean($sku7_code, $api_data['rs_code']);
+        $eans = get_sku_ean($sku7_code, $api_data['rs_code']);
         // Conversion of cld and loose
         $cld = (int) ($item_data['sum_net_sales_quantity'] / $sku_unit_case); //petty
         $loose = (int) ($item_data['sum_net_sales_quantity'] % $sku_unit_case); //loose
@@ -447,7 +447,10 @@ function master_ptl_data_insert_into_table($api_data, $distributor_id) {
           'derived_cld' => $derived_cld,
           'derived_loose' => $derived_loose,
           'derived_upc' => $derived_unit_case,
-          'ean' => $ean ? $ean : '',
+          'ean' => $eans[0]->ean ? $eans[0]->ean : '',
+          'ean1' => $eans[0]->ean1 ? $eans[0]->ean1 : '',
+          'ean2' => $eans[0]->ean2 ? $eans[0]->ean2 : '',
+          'ean3' => $eans[0]->ean3 ? $eans[0]->ean3 : '',
         );
         $query->fields($fields);
         $result_id = $query->execute();
