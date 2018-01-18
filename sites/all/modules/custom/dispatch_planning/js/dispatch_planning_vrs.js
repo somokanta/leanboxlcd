@@ -71,7 +71,9 @@
                 ret_difference = ret_app - ret_collected;
                 $('.ret_difference').val(ret_difference);
                 $('.inventory_detail').val(ret_difference);
-
+                
+                //
+                _calculate_total_debit();
             });
 
 
