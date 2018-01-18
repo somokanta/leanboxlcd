@@ -390,29 +390,31 @@ function leanbox_mobile_save_return_data_from_cron($csv_uri) {
       foreach ($row as $i => $field) {
         $record[$columns[$i]] = $field;
       }
+         $rs_distributor = leanbox_mobile_get_distributor_using_rscode($record['RS Code']);
+         if (!empty($rs_distributor)) {
+            $node = new stdClass();
+            $node->title = $record['BILL_NUMBER'];
+            $node->type = "impact_cron_mobile_data";
+            node_object_prepare($node); // Sets some defaults. Invokes hook_prepare() and hook_node_prepare().
+            $node->language = LANGUAGE_NONE; // Or e.g. 'en' if locale is enabled
+            $node->status = 1; //(1 or 0): published or not
+            $node->comment = 0; // 0 = comments disabled, 1 = read only, 2 = read/write
 
-      $node = new stdClass();
-      $node->title = $record['BILL_NUMBER'];
-      $node->type = "impact_cron_mobile_data";
-      node_object_prepare($node); // Sets some defaults. Invokes hook_prepare() and hook_node_prepare().
-      $node->language = LANGUAGE_NONE; // Or e.g. 'en' if locale is enabled
-      $node->status = 1; //(1 or 0): published or not
-      $node->comment = 0; // 0 = comments disabled, 1 = read only, 2 = read/write
+            $node->uid = $rs_distributor;
 
-      $node->uid = ($rs_distributor = leanbox_mobile_get_distributor_using_rscode($record['RS Code'])) ? $rs_distributor : 0;
+            $node->field_sum_of_net_sales_bill_wise[LANGUAGE_NONE][0]['value'] = $record['Sum of NET_SALES_VALUE'];
+            $node->field_mobile_bill_value[LANGUAGE_NONE][0]['value'] = $record['Bill Value'];
+            $node->field_mobile_return_value[LANGUAGE_NONE][0]['value'] = $record['RETURN VALUE'];
+            $node->field_payment_type[LANGUAGE_NONE][0]['value'] = $record['PAYMENT TYPE'];
+            $node->field_delivery_outcome[LANGUAGE_NONE][0]['value'] = $record['DELIVERY OUTCOME'];
+            $node->field_reason_entry[LANGUAGE_NONE][0]['value'] = $record['REASON ENTRY'];
+            $node->field_mobile_update_date[LANGUAGE_NONE][0]['value'] = strtotime($record['UPDATE DATE']);
+            $node->field_mobile_bill_date[LANGUAGE_NONE][0]['value'] = strtotime($record['BILL DATE']);
 
-      $node->field_sum_of_net_sales_bill_wise[LANGUAGE_NONE][0]['value'] = $record['Sum of NET_SALES_VALUE'];
-      $node->field_mobile_bill_value[LANGUAGE_NONE][0]['value'] = $record['Bill Value'];
-      $node->field_mobile_return_value[LANGUAGE_NONE][0]['value'] = $record['RETURN VALUE'];
-      $node->field_payment_type[LANGUAGE_NONE][0]['value'] = $record['PAYMENT TYPE'];
-      $node->field_delivery_outcome[LANGUAGE_NONE][0]['value'] = $record['DELIVERY OUTCOME'];
-      $node->field_reason_entry[LANGUAGE_NONE][0]['value'] = $record['REASON ENTRY'];
-      $node->field_mobile_update_date[LANGUAGE_NONE][0]['value'] = strtotime($record['UPDATE DATE']);
-      $node->field_mobile_bill_date[LANGUAGE_NONE][0]['value'] = strtotime($record['BILL DATE']);
-
-      $node = node_submit($node); // Prepare node for saving
-      node_save($node);
-    }
+            $node = node_submit($node); // Prepare node for saving
+            node_save($node);
+         }
+      }
     fclose($handle);
   }
 }
