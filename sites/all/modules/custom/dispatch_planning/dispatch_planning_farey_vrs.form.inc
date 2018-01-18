@@ -69,21 +69,25 @@ function _delivered_tripwise_vrs_data_callback($form, &$form_state) {
            '#title' => t('van bill value'),
            '#default_value' => $trip_details['Total Bills'][2],
            '#disabled' => TRUE,
+           '#attributes' => array('class' => array("van_bill_value")),
          );
          $form['cash_debit'] = array(
            '#type' => 'textfield',
            '#title' => t('Cash debit'),
            '#disabled' => TRUE,
+           '#attributes' => array('class' => array("cash_debit")),
          );
          $form['inventory_detail'] = array(
            '#type' => 'textfield',
            '#title' => t('Inventory debit'),
            '#disabled' => TRUE,
+           '#attributes' => array('class' => array("inventory_detail")),
          );
          $form['total_debit'] = array(
            '#type' => 'textfield',
            '#title' => t('Total debit'),
            '#disabled' => TRUE,
+           '#attributes' => array('class' => array("total_debit")),
          );
          $form['submit'] = array(
            '#type' => 'submit',
@@ -172,7 +176,7 @@ function _get_farey_delivered_tripwise_vrs_amt_details($trip_number, $rs_code) {
    $query->addExpression('SUM(CASE WHEN (res_cash_amount IS NOT NULL AND res_cash_amount != \'NA\'  AND res_cash_amount != \'\') THEN res_to_be_collection ELSE 0 END)', 'app_cash_bills');
    $rows = $query->execute()->fetch(PDO::FETCH_ASSOC);
 
-   $first_row = array('Signed Bills', 'Cheque Bills', 'Cash Bills');
+   $first_row = array('Signed_Bills', 'Cheque_Bills', 'Cash_Bills');
    foreach ($first_row as $val) {
       $k = 0;
       $data[$val][] = $val;
@@ -180,7 +184,8 @@ function _get_farey_delivered_tripwise_vrs_amt_details($trip_number, $rs_code) {
          if ($k == 3) {
             continue;
          }
-         $data[$val][] = $val1;
+         //$data[$val][] = array('data' => $val1, 'class' => array("$val-$key1-val"));
+            $data[$val][] = array('data' => 100,  'data-value' => 100, 'class' => array("$val-$key1-val"));
          $k = $k + 1;
          $rows1 = array_shift($rows);
       }
@@ -193,6 +198,7 @@ function _get_farey_delivered_tripwise_vrs_amt_details($trip_number, $rs_code) {
         '#title' => t('Actual Collected'),
         '#title_display' => 'invisible',
         '#name' => "actual_collected[$key]",
+        '#attributes' => array('class' => array("$key-collected")),
         '#required' => TRUE,
       );
       $data[$key]['difference']['data'] = array(
@@ -201,7 +207,7 @@ function _get_farey_delivered_tripwise_vrs_amt_details($trip_number, $rs_code) {
         '#title_display' => 'invisible',
         '#name' => "difference[$key]",
         '#disabled' => TRUE,
-        '#attributes' => array('class' => array('cheque-date-field')),
+        '#attributes' => array('class' => array("$key-difference")),
         '#required' => TRUE,
       );
    }
@@ -245,13 +251,14 @@ function _get_farey_returned_delivered_trip_details($trip_number, $rs_code) {
    $data[0]['to_be_ret'] = '';
    $data[0]['Returned_qty'] = $rows['Returned_qty'];
    $data[0]['del_val'] = '';
-   $data[0]['Returned_val'] = $rows['Returned_val'];
-
+   //$data[0]['Returned_val'] = array('data' => $rows['Returned_val'], 'class' => array("ret_val"));
+ $data[0]['Returned_val'] = array('data' => 100,  'data-value' => 100, 'class' => array("ret_val"));
    $data[0]['ret_actual_collected']['data'] = array(
      '#type' => 'textfield',
      '#title' => t('Actual Collected'),
      '#title_display' => 'invisible',
      '#name' => "ret_actual_collected",
+     '#attributes' => array('class' => array("ret_collected")),
      '#required' => TRUE,
    );
    $data[0]['ret_difference']['data'] = array(
@@ -260,7 +267,7 @@ function _get_farey_returned_delivered_trip_details($trip_number, $rs_code) {
      '#title_display' => 'invisible',
      '#name' => "ret_difference",
      '#disabled' => TRUE,
-     '#attributes' => array('class' => array('cheque-date-field')),
+     '#attributes' => array('class' => array("ret_difference")),
      '#required' => TRUE,
    );
 
