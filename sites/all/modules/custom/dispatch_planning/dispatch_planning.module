@@ -2147,8 +2147,10 @@ function dispatch_planning_sales_reg_api($node, $trip_execution_date, $vehicle_n
   $api_data['jobData']['vehicle'] = $vehicle_no;
   $api_data['jobData']['party_hll_code'] = $outlet_data_details['field_hul_code_value']; // hul code in outlet
   //$api_data['jobData']['lat_long'] = $outlet_data_details['field_hul_updated_lat_value'] . ',' . $outlet_data_details['field_hul_updated_long_value'];
-  $api_data['jobData']['lat_long']['lat_longLatitude'] = $outlet_data_details['field_hul_updated_lat_value'];
-  $api_data['jobData']['lat_long']['lat_longLongitude'] = $outlet_data_details['field_hul_updated_long_value'];
+//  $api_data['jobData']['lat_long']['lat_longLatitude'] = $outlet_data_details['field_hul_updated_lat_value'];
+//  $api_data['jobData']['lat_long']['lat_longLongitude'] = $outlet_data_details['field_hul_updated_long_value'];
+  $api_data['jobData']['latitude'] = $outlet_data_details['field_hul_updated_lat_value'];
+  $api_data['jobData']['longitude'] = $outlet_data_details['field_hul_updated_long_value'];
   $api_data['jobData']['bill_value'] = (int)$bill_value;
   $api_data['jobData']['item_details'] = $billing_data_details; // array
   $api_data['jobData']['bill_date'] = $bill_date;
