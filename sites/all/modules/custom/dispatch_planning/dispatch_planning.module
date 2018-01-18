@@ -2151,7 +2151,7 @@ function dispatch_planning_sales_reg_api($node, $trip_execution_date, $vehicle_n
  // $api_data['jobData']['lat_long']['lat_longLongitude'] = $outlet_data_details['field_hul_updated_long_value'];
   $api_data['latitude'] = $outlet_data_details['field_hul_updated_lat_value'];
   $api_data['longitude'] = $outlet_data_details['field_hul_updated_long_value'];
-  $api_data['jobData']['slot'] = 3;
+  //$api_data['jobData']['slot'] = 3;
   $api_data['jobData']['bill_value'] = (int)$bill_value;
   $api_data['jobData']['item_details'] = $billing_data_details; // array
   $api_data['jobData']['bill_date'] = $bill_date;
