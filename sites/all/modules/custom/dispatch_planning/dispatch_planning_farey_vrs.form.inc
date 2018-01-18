@@ -156,9 +156,6 @@ function _get_farey_delivered_tripwise_vrs_amt_details($trip_number, $rs_code) {
    global $user;
    $data = array();
 
-   //$trip_number = 1111;
-   // $rs_code = 100006;
-
    $query = db_select('dispatch_planning_api_data', 'ad');
    $query->condition('ad.runsheet_number', $trip_number, '=');
    $query->condition('ad.hub', $rs_code, '=');
@@ -185,7 +182,7 @@ function _get_farey_delivered_tripwise_vrs_amt_details($trip_number, $rs_code) {
             continue;
          }
          $data[$val][] = array('data' => $val1, 'data-value' => $val1, 'class' => array("$val-$key1-val"));
-          //  $data[$val][] = array('data' => 100,  'data-value' => 100, 'class' => array("$val-$key1-val"));
+         //  $data[$val][] = array('data' => 100,  'data-value' => 100, 'class' => array("$val-$key1-val"));
          $k = $k + 1;
          $rows1 = array_shift($rows);
       }
@@ -207,7 +204,7 @@ function _get_farey_delivered_tripwise_vrs_amt_details($trip_number, $rs_code) {
         '#title_display' => 'invisible',
         '#name' => "difference[$key]",
         '#disabled' => TRUE,
-        '#attributes' => array('class' => array("$key-difference")),
+        '#attributes' => array('class' => array("$key-difference"), 'readonly' => 'readonly'),
         '#required' => TRUE,
       );
    }
@@ -262,7 +259,7 @@ function _get_farey_returned_delivered_trip_details($trip_number, $rs_code) {
      '#title_display' => 'invisible',
      '#name' => "ret_difference",
      '#disabled' => TRUE,
-     '#attributes' => array('class' => array("ret_difference")),
+     '#attributes' => array('class' => array("ret_difference"), 'readonly' => 'readonly'),
      '#required' => TRUE,
    );
 
@@ -270,7 +267,6 @@ function _get_farey_returned_delivered_trip_details($trip_number, $rs_code) {
 }
 
 function _delivered_tripwise_vrs_data_callback_submit($form, &$form_state) {
-   dpm($form_state, '$form_state');
    //$trip_id = $form_state['values']['trip_number'];
    if (!empty($trip_id)) {
       db_merge('dispatch_delivered_vrs_details')
