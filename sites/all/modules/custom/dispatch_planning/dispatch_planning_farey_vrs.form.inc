@@ -182,7 +182,7 @@ function _get_farey_delivered_tripwise_vrs_amt_details($trip_number, $rs_code) {
             continue;
          }
          $data[$val][] = array('data' => $val1, 'data-value' => $val1, 'class' => array("$val-$key1-val"));
-         //  $data[$val][] = array('data' => 100,  'data-value' => 100, 'class' => array("$val-$key1-val"));
+         //$data[$val][] = array('data' => 100,  'data-value' => 100, 'class' => array("$val-$key1-val"));
          $k = $k + 1;
          $rows1 = array_shift($rows);
       }
