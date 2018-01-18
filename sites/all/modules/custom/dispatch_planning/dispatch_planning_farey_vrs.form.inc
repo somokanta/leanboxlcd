@@ -14,6 +14,8 @@ function _delivered_tripwise_vrs_data_callback($form, &$form_state) {
    $form = array();
    $form['#prefix'] = '<div id="itemlist-div">';
    $form['#suffix'] = '</div>';
+   $form['#attached']['js'][] = drupal_get_path('module', 'dispatch_planning') . '/js/dispatch_planning_vrs.js';
+
 
    // get logged in users rs id
    $user_id = $GLOBALS['user']->uid;
@@ -67,21 +69,25 @@ function _delivered_tripwise_vrs_data_callback($form, &$form_state) {
            '#title' => t('van bill value'),
            '#default_value' => $trip_details['Total Bills'][2],
            '#disabled' => TRUE,
+           '#attributes' => array('class' => array("van_bill_value")),
          );
          $form['cash_debit'] = array(
            '#type' => 'textfield',
            '#title' => t('Cash debit'),
            '#disabled' => TRUE,
+           '#attributes' => array('class' => array("cash_debit")),
          );
          $form['inventory_detail'] = array(
            '#type' => 'textfield',
            '#title' => t('Inventory debit'),
            '#disabled' => TRUE,
+           '#attributes' => array('class' => array("inventory_detail")),
          );
          $form['total_debit'] = array(
            '#type' => 'textfield',
            '#title' => t('Total debit'),
            '#disabled' => TRUE,
+           '#attributes' => array('class' => array("total_debit")),
          );
          $form['submit'] = array(
            '#type' => 'submit',
@@ -170,7 +176,7 @@ function _get_farey_delivered_tripwise_vrs_amt_details($trip_number, $rs_code) {
    $query->addExpression('SUM(CASE WHEN (res_cash_amount IS NOT NULL AND res_cash_amount != \'NA\'  AND res_cash_amount != \'\') THEN res_to_be_collection ELSE 0 END)', 'app_cash_bills');
    $rows = $query->execute()->fetch(PDO::FETCH_ASSOC);
 
-   $first_row = array('Signed Bills', 'Cheque Bills', 'Cash Bills');
+   $first_row = array('Signed_Bills', 'Cheque_Bills', 'Cash_Bills');
    foreach ($first_row as $val) {
       $k = 0;
       $data[$val][] = $val;
@@ -178,7 +184,8 @@ function _get_farey_delivered_tripwise_vrs_amt_details($trip_number, $rs_code) {
          if ($k == 3) {
             continue;
          }
-         $data[$val][] = $val1;
+         $data[$val][] = array('data' => $val1, 'data-value' => $val1, 'class' => array("$val-$key1-val"));
+          //  $data[$val][] = array('data' => 100,  'data-value' => 100, 'class' => array("$val-$key1-val"));
          $k = $k + 1;
          $rows1 = array_shift($rows);
       }
@@ -191,6 +198,7 @@ function _get_farey_delivered_tripwise_vrs_amt_details($trip_number, $rs_code) {
         '#title' => t('Actual Collected'),
         '#title_display' => 'invisible',
         '#name' => "actual_collected[$key]",
+        '#attributes' => array('class' => array("$key-collected")),
         '#required' => TRUE,
       );
       $data[$key]['difference']['data'] = array(
@@ -198,7 +206,8 @@ function _get_farey_delivered_tripwise_vrs_amt_details($trip_number, $rs_code) {
         '#title' => t('Difference'),
         '#title_display' => 'invisible',
         '#name' => "difference[$key]",
-        '#attributes' => array('class' => array('cheque-date-field')),
+        '#disabled' => TRUE,
+        '#attributes' => array('class' => array("$key-difference")),
         '#required' => TRUE,
       );
    }
@@ -226,14 +235,8 @@ function _get_farey_returned_delivered_trip_details($trip_number, $rs_code) {
    $query->condition('id.og_sum_net_sales_quantity', 0, '!=');
    $query->condition('id.res_sku_actual_quantity1', '', '!=');
    $query->condition('id.res_sku_actual_quantity1', 'NULL', '!=');
-   // $query->fields('id', array('sku_code', 'sku_description'));
-   // $query->addField('n1', 'title', 'Child squ');
-   // $query->addField('id', 'sum_net_sales_value', 'value per unit');
-   // $query->groupBy('id.sku_code');
-   // $query->addExpression('SUM(og_sum_net_sales_quantity)', 'Sum_of_net_sales_qty');
-   //$query->addExpression('SUM(res_sku_actual_quantity1)', 'Actual_qty_delivered');
+
    $query->addExpression('(SUM(og_sum_net_sales_quantity) - SUM(res_sku_actual_quantity1))', 'Returned_qty');
-   //$query->addExpression('SUM(og_sum_net_sales_quantity*sum_net_sales_value)', 'Returned_val');
    $query->addExpression('SUM((og_sum_net_sales_quantity - res_sku_actual_quantity1)*sum_net_sales_value)', 'Returned_val');
 
    $query->havingCondition('Returned_qty', 0, '>');
@@ -242,13 +245,15 @@ function _get_farey_returned_delivered_trip_details($trip_number, $rs_code) {
    $data[0]['to_be_ret'] = '';
    $data[0]['Returned_qty'] = $rows['Returned_qty'];
    $data[0]['del_val'] = '';
-   $data[0]['Returned_val'] = $rows['Returned_val'];
-
+   $data[0]['Returned_val'] = array('data' => $rows['Returned_val'],'data-value' => $rows['Returned_val'],  'class' => array("ret_val"));
+   //$data[0]['Returned_val'] = array('data' => 100,  'data-value' => 100, 'class' => array("ret_val"));
+   
    $data[0]['ret_actual_collected']['data'] = array(
      '#type' => 'textfield',
      '#title' => t('Actual Collected'),
      '#title_display' => 'invisible',
      '#name' => "ret_actual_collected",
+     '#attributes' => array('class' => array("ret_collected")),
      '#required' => TRUE,
    );
    $data[0]['ret_difference']['data'] = array(
@@ -257,7 +262,7 @@ function _get_farey_returned_delivered_trip_details($trip_number, $rs_code) {
      '#title_display' => 'invisible',
      '#name' => "ret_difference",
      '#disabled' => TRUE,
-     '#attributes' => array('class' => array('cheque-date-field')),
+     '#attributes' => array('class' => array("ret_difference")),
      '#required' => TRUE,
    );
 
@@ -265,7 +270,8 @@ function _get_farey_returned_delivered_trip_details($trip_number, $rs_code) {
 }
 
 function _delivered_tripwise_vrs_data_callback_submit($form, &$form_state) {
-   $trip_id = $form_state['values']['trip_number'];
+   dpm($form_state, '$form_state');
+   //$trip_id = $form_state['values']['trip_number'];
    if (!empty($trip_id)) {
       db_merge('dispatch_delivered_vrs_details')
           ->key(array('dis_id' => $distributor_id, 'trip_id' => $trip_id))
@@ -274,16 +280,16 @@ function _delivered_tripwise_vrs_data_callback_submit($form, &$form_state) {
             'trip_id' => $trip_id,
             'sb_actual_collected' => $form_state['values']['actual_collected']['Signed Bills'],
             'sb_difference' => $form_state['values']['difference']['Signed Bills'],
-            'ch_actual_collected' =>  $form_state['values']['actual_collected']['Cheque Bills'],
-            'ch_difference' =>  $form_state['values']['difference']['Cheque Bills'],
-            'cash_actual_collected' =>  $form_state['values']['actual_collected']['Cash Bills'],
+            'ch_actual_collected' => $form_state['values']['actual_collected']['Cheque Bills'],
+            'ch_difference' => $form_state['values']['difference']['Cheque Bills'],
+            'cash_actual_collected' => $form_state['values']['actual_collected']['Cash Bills'],
             'cash_difference' => $form_state['values']['difference']['Cash Bills'],
-            'tbr_actual_collected' =>  $form_state['values']['ret_actual_collected'],
-            'tbr_difference' =>  $form_state['values']['ret_difference'],
-            'van_bill_value' =>  $form_state['values']['van_bill_value'],
-            'cash_debit' =>  $form_state['values']['cash_debit'],
-            'inventory_debit' =>  $form_state['values']['inventory_detail'],
-            'total_debit' =>  $form_state['values']['total_debit'],
+            'tbr_actual_collected' => $form_state['values']['ret_actual_collected'],
+            'tbr_difference' => $form_state['values']['ret_difference'],
+            'van_bill_value' => $form_state['values']['van_bill_value'],
+            'cash_debit' => $form_state['values']['cash_debit'],
+            'inventory_debit' => $form_state['values']['inventory_detail'],
+            'total_debit' => $form_state['values']['total_debit'],
           ))
           ->execute();
    }
