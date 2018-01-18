@@ -184,8 +184,8 @@ function _get_farey_delivered_tripwise_vrs_amt_details($trip_number, $rs_code) {
          if ($k == 3) {
             continue;
          }
-         //$data[$val][] = array('data' => $val1, 'class' => array("$val-$key1-val"));
-            $data[$val][] = array('data' => 100,  'data-value' => 100, 'class' => array("$val-$key1-val"));
+         $data[$val][] = array('data' => $val1, 'data-value' => $val1, 'class' => array("$val-$key1-val"));
+          //  $data[$val][] = array('data' => 100,  'data-value' => 100, 'class' => array("$val-$key1-val"));
          $k = $k + 1;
          $rows1 = array_shift($rows);
       }
@@ -235,14 +235,8 @@ function _get_farey_returned_delivered_trip_details($trip_number, $rs_code) {
    $query->condition('id.og_sum_net_sales_quantity', 0, '!=');
    $query->condition('id.res_sku_actual_quantity1', '', '!=');
    $query->condition('id.res_sku_actual_quantity1', 'NULL', '!=');
-   // $query->fields('id', array('sku_code', 'sku_description'));
-   // $query->addField('n1', 'title', 'Child squ');
-   // $query->addField('id', 'sum_net_sales_value', 'value per unit');
-   // $query->groupBy('id.sku_code');
-   // $query->addExpression('SUM(og_sum_net_sales_quantity)', 'Sum_of_net_sales_qty');
-   //$query->addExpression('SUM(res_sku_actual_quantity1)', 'Actual_qty_delivered');
+
    $query->addExpression('(SUM(og_sum_net_sales_quantity) - SUM(res_sku_actual_quantity1))', 'Returned_qty');
-   //$query->addExpression('SUM(og_sum_net_sales_quantity*sum_net_sales_value)', 'Returned_val');
    $query->addExpression('SUM((og_sum_net_sales_quantity - res_sku_actual_quantity1)*sum_net_sales_value)', 'Returned_val');
 
    $query->havingCondition('Returned_qty', 0, '>');
@@ -251,8 +245,9 @@ function _get_farey_returned_delivered_trip_details($trip_number, $rs_code) {
    $data[0]['to_be_ret'] = '';
    $data[0]['Returned_qty'] = $rows['Returned_qty'];
    $data[0]['del_val'] = '';
-   //$data[0]['Returned_val'] = array('data' => $rows['Returned_val'], 'class' => array("ret_val"));
- $data[0]['Returned_val'] = array('data' => 100,  'data-value' => 100, 'class' => array("ret_val"));
+   $data[0]['Returned_val'] = array('data' => $rows['Returned_val'],'data-value' => $rows['Returned_val'],  'class' => array("ret_val"));
+   //$data[0]['Returned_val'] = array('data' => 100,  'data-value' => 100, 'class' => array("ret_val"));
+   
    $data[0]['ret_actual_collected']['data'] = array(
      '#type' => 'textfield',
      '#title' => t('Actual Collected'),
