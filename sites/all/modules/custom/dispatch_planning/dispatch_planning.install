@@ -1455,13 +1455,13 @@ function dispatch_planning_update_7118() {
         'default' => 0,
       ),
       'tbr_app_value' => array(
-        'description' => t('tbr_app_value'),
+        'description' => t('App ret inventory value'),
         'type' => 'int',
         'not null' => TRUE,
         'default' => 0,
       ),
        'tbr_actual_collected' => array(
-        'description' => t('tbr_actual_collected'),
+        'description' => t('Actual ret inventory value'),
         'type' => 'int',
         'not null' => TRUE,
         'default' => 0,
@@ -1479,19 +1479,19 @@ function dispatch_planning_update_7118() {
         'default' => 0,
       ),
       'cash_debit' => array(
-        'description' => t('cash_debit'),
+        'description' => t('Total Collection'),
         'type' => 'int',
         'not null' => TRUE,
         'default' => 0,
       ),
       'inventory_debit' => array(
-        'description' => t('inventory_debit'),
+        'description' => t('Actual ret inventory Value'),
         'type' => 'int',
         'not null' => TRUE,
         'default' => 0,
       ),
       'total_debit' => array(
-        'description' => t('total_debit'),
+        'description' => t('total_van_debit'),
         'type' => 'int',
         'not null' => TRUE,
         'default' => 0,
