@@ -4,10 +4,7 @@
  * Files containing list of custom blocks
  * having graph data integrated using google chart
  */
-function leanbox_dashboard_init() {
-   // drupal_add_js(drupal_get_path('module', 'leanbox_dashboard') . '/js/google_chart.js');
-    //drupal_add_js(drupal_get_path('module', 'leanbox_dashboard') . '/js/all_chart_load.js');
-}
+
 /**
  * Implements hook_menu
  */
