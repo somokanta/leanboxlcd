@@ -45,7 +45,7 @@ function _delivered_tripwise_vrs_data_callback($form, &$form_state) {
       if (!empty($trip_details)) {
          $trip_details_header = array('', 'Bill count', 'Bill value');
          $trip_details_amt_header = array('', 'Bill count', 'Bill value', 'App value', 'Actual collected', 'Difference');
-         $returned_details_amt_header = array('To be returned Inventory', 'Sku count', 'Bill value', 'App value', 'Actual collected', 'Difference');
+         $returned_details_amt_header = array('To be returned Inventory', 'Sku count', 'Bill value', 'App Ret Inventory Value', 'Actual Ret Inventory Value', 'Difference');
 
          $form['trip_details'] = array(
            '#theme' => 'table',
@@ -73,19 +73,19 @@ function _delivered_tripwise_vrs_data_callback($form, &$form_state) {
          );
          $form['cash_debit'] = array(
            '#type' => 'textfield',
-           '#title' => t('Cash debit'),
+           '#title' => t('Total collection'),
            '#disabled' => TRUE,
            '#attributes' => array('class' => array("cash_debit")),
          );
          $form['inventory_detail'] = array(
            '#type' => 'textfield',
-           '#title' => t('Inventory debit'),
+           '#title' => t('Actual ret inventory value'),
            '#disabled' => TRUE,
            '#attributes' => array('class' => array("inventory_detail")),
          );
          $form['total_debit'] = array(
            '#type' => 'textfield',
-           '#title' => t('Total debit'),
+           '#title' => t('Total van debit'),
            '#disabled' => TRUE,
            '#attributes' => array('class' => array("total_debit")),
          );
