@@ -11,7 +11,7 @@
 
 			var picking_data = Drupal.settings.leanbox_dashboard.picking_bulk;
 			var area_definition = Drupal.settings.leanbox_dashboard.area_definition;
-			//google.charts.load("current", {packages: ['gauge', 'corechart', 'bar']});
+			google.charts.load("current", {packages: ['gauge', 'corechart', 'bar']});
 			google.charts.setOnLoadCallback(function () {
 				drawpickingChart(picking_data, area_definition);
 			});

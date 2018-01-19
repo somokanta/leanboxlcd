@@ -10,7 +10,7 @@
 		attach: function (context, settings) {
 			var area_definition = Drupal.settings.leanbox_dashboard.area_definition;
 			var party_pack_productivity_data = Drupal.settings.leanbox_dashboard.party_packing_productivity;
-			//google.charts.load("current", {packages: ['gauge','corechart', 'bar']});
+			google.charts.load("current", {packages: ['gauge','corechart', 'bar']});
 			google.charts.setOnLoadCallback(function () {
 				drawpartypackingproductivityChart(party_pack_productivity_data);
 			});

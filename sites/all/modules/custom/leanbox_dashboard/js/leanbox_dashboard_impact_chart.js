@@ -10,7 +10,7 @@
         attach: function (context, settings) {
 
             var impact = Drupal.settings.leanbox_dashboard.impact;
-            //google.charts.load('current', {'packages':['gauge','corechart', 'bar']});
+            google.charts.load('current', {'packages':['gauge','corechart', 'bar']});
             google.charts.setOnLoadCallback(function () {
                 drawimpactChart(impact);
             });
