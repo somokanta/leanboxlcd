@@ -20,6 +20,7 @@ function _delivered_tripwise_vrs_data_callback($form, &$form_state) {
    // get logged in users rs id
    $user_id = $GLOBALS['user']->uid;
    $rs_code = dispatch_planning_get_rscode_using_uid($user_id);
+   $dis_id = change_feeds_import_get_distributor_id($user_id);
 
    $form['trip_number'] = array(
      '#prefix' => '<div class="textfield-wrapper">',
@@ -34,6 +35,16 @@ function _delivered_tripwise_vrs_data_callback($form, &$form_state) {
        'effect' => 'fade',
      ),
    );
+
+   $form['rs_code'] = array(
+     '#type' => 'value',
+     '#value' => $rs_code,
+   );
+   $form['dis_id'] = array(
+     '#type' => 'value',
+     '#value' => $dis_id,
+   );
+
 
    $trip_number = $form_state['input']['trip_number'];
 
@@ -74,20 +85,17 @@ function _delivered_tripwise_vrs_data_callback($form, &$form_state) {
          $form['cash_debit'] = array(
            '#type' => 'textfield',
            '#title' => t('Total collection'),
-           '#disabled' => TRUE,
-           '#attributes' => array('class' => array("cash_debit")),
+           '#attributes' => array('class' => array("cash_debit"), 'readonly' => 'readonly'),
          );
          $form['inventory_detail'] = array(
            '#type' => 'textfield',
            '#title' => t('Actual ret inventory value'),
-           '#disabled' => TRUE,
-           '#attributes' => array('class' => array("inventory_detail")),
+           '#attributes' => array('class' => array("inventory_detail"), 'readonly' => 'readonly'),
          );
          $form['total_debit'] = array(
            '#type' => 'textfield',
            '#title' => t('Total van debit'),
-           '#disabled' => TRUE,
-           '#attributes' => array('class' => array("total_debit")),
+           '#attributes' => array('class' => array("total_debit"), 'readonly' => 'readonly'),
          );
          $form['submit'] = array(
            '#type' => 'submit',
@@ -182,7 +190,7 @@ function _get_farey_delivered_tripwise_vrs_amt_details($trip_number, $rs_code) {
             continue;
          }
          $data[$val][] = array('data' => $val1, 'data-value' => $val1, 'class' => array("$val-$key1-val"));
-         //$data[$val][] = array('data' => 100,  'data-value' => 100, 'class' => array("$val-$key1-val"));
+         //$data[$val][] = array('data' => 100, 'data-value' => 100, 'class' => array("$val-$key1-val"));
          $k = $k + 1;
          $rows1 = array_shift($rows);
       }
@@ -243,8 +251,8 @@ function _get_farey_returned_delivered_trip_details($trip_number, $rs_code) {
    $data[0]['Returned_qty'] = $rows['Returned_qty'];
    $data[0]['del_val'] = '';
    $data[0]['Returned_val'] = array('data' => $rows['Returned_val'],'data-value' => $rows['Returned_val'],  'class' => array("ret_val"));
-   //$data[0]['Returned_val'] = array('data' => 100,  'data-value' => 100, 'class' => array("ret_val"));
-   
+   //$data[0]['Returned_val'] = array('data' => 100, 'data-value' => 100, 'class' => array("ret_val"));
+
    $data[0]['ret_actual_collected']['data'] = array(
      '#type' => 'textfield',
      '#title' => t('Actual Collected'),
@@ -267,25 +275,52 @@ function _get_farey_returned_delivered_trip_details($trip_number, $rs_code) {
 }
 
 function _delivered_tripwise_vrs_data_callback_submit($form, &$form_state) {
-   //$trip_id = $form_state['values']['trip_number'];
-   if (!empty($trip_id)) {
+   $trip_id = $form_state['values']['trip_number'];
+
+   $dis_id = $form_state['values']['dis_id'];
+   $rs_code = $form_state['values']['rs_code'];
+
+   if (!empty($trip_id) && !empty($rs_code)) {
+
+      $trip_details = _get_farey_delivered_tripwise_vrs_details($trip_id, $rs_code);
+      $trip_amt_details = _get_farey_delivered_tripwise_vrs_amt_details($trip_id, $rs_code);
+      $ret_trip_amt_details = _get_farey_returned_delivered_trip_details($trip_id, $rs_code);
+      
+      // insert new or update if already created
       db_merge('dispatch_delivered_vrs_details')
-          ->key(array('dis_id' => $distributor_id, 'trip_id' => $trip_id))
+          ->key(array('dis_id' => $dis_id, 'trip_id' => $trip_id))
           ->fields(array(
-            'dis_id' => $distributor_id,
+            'dis_id' => $dis_id,
             'trip_id' => $trip_id,
-            'sb_actual_collected' => $form_state['values']['actual_collected']['Signed Bills'],
-            'sb_difference' => $form_state['values']['difference']['Signed Bills'],
-            'ch_actual_collected' => $form_state['values']['actual_collected']['Cheque Bills'],
-            'ch_difference' => $form_state['values']['difference']['Cheque Bills'],
-            'cash_actual_collected' => $form_state['values']['actual_collected']['Cash Bills'],
-            'cash_difference' => $form_state['values']['difference']['Cash Bills'],
+            'total_bill_count' => $trip_details['Total Bills'][1],
+            'total_bill_value' => $trip_details['Total Bills'][2],
+            'fr_bill_count' => $trip_details['Full Returned Bills'][1],
+            'fr_bill_value' => $trip_details['Full Returned Bills'][2],
+            'ws_bill_count' => $trip_details['Without Status Bills'][1],
+            'ws_bill_value' => $trip_details['Without Status Bills'][2],
+            'sb_actual_collected' => $form_state['values']['actual_collected']['Signed_Bills'],
+            'sb_difference' => $form_state['values']['difference']['Signed_Bills'],
+            'sb_bill_count' => $trip_amt_details['Signed_Bills'][1]['data'],
+            'sb_bill_value' => $trip_amt_details['Signed_Bills'][2]['data'],
+            'sb_app_value' => $trip_amt_details['Signed_Bills'][3]['data'],
+            'ch_actual_collected' => $form_state['values']['actual_collected']['Cheque_Bills'],
+            'ch_difference' => $form_state['values']['difference']['Cheque_Bills'],
+            'ch_bill_count' => $trip_amt_details['Cheque_Bills'][1]['data'],
+            'ch_bill_value' => $trip_amt_details['Cheque_Bills'][2]['data'],
+            'ch_app_value' => $trip_amt_details['Cheque_Bills'][3]['data'],
+            'cash_actual_collected' => $form_state['values']['actual_collected']['Cash_Bills'],
+            'cash_difference' => $form_state['values']['difference']['Cash_Bills'],
+            'cash_bill_count' => $trip_amt_details['Cash_Bills'][1]['data'],
+            'cash_bill_value' => $trip_amt_details['Cash_Bills'][2]['data'],
+            'cash_app_value' => $trip_amt_details['Cash_Bills'][3]['data'],
+            'tbr_bill_count' => $ret_trip_amt_details[0]['Returned_qty'],
             'tbr_actual_collected' => $form_state['values']['ret_actual_collected'],
             'tbr_difference' => $form_state['values']['ret_difference'],
-            'van_bill_value' => $form_state['values']['van_bill_value'],
-            'cash_debit' => $form_state['values']['cash_debit'],
-            'inventory_debit' => $form_state['values']['inventory_detail'],
-            'total_debit' => $form_state['values']['total_debit'],
+            'tbr_app_value' => $ret_trip_amt_details[0]['Returned_val']['data'],
+            'van_bill_value' => (float) $form_state['values']['van_bill_value'],
+            'cash_debit' => (float) $form_state['values']['cash_debit'],
+            'inventory_debit' => (float) $form_state['values']['inventory_detail'],
+            'total_debit' => (float) $form_state['values']['total_debit'],
           ))
           ->execute();
    }
