@@ -151,6 +151,20 @@ function master_dispatch_planning_form($form, &$form_state) {
    return $form;
 }
 
+function master_dispatch_planning_form_validate($form, &$form_state) {
+  if ($form_state['clicked_button']['#value'] === 'Save') {
+    foreach ($form_state['values']['list_form_items'] as $nid => $value) {
+      $trip_node = node_load($nid);
+      if (!empty($trip_node->field_master_trip_id_reference['und'][0]['nid'])) {
+        $child_trip = $trip_node->title;
+        $node = node_load($trip_node->field_master_trip_id_reference['und'][0]['nid']);
+        $master_trip = $node->title;
+        form_set_error('list_form_items', "Trip: $child_trip is already presend in master Trip:$master_trip ");
+      }
+    }
+  }
+}
+
 /**
  * 
  * @param type $form
@@ -305,7 +319,7 @@ function _get_highest_title_master_trip_distributor_wise($dis_id) {
    $query = db_select('node', 'n');
    $query->condition('n.type', 'master_dispatch_data');
    $query->fields('n', array('title'));
-   $query->orderBy('n.title', 'DESC');
+   $query->orderBy('n.nid', 'DESC');
    $query->condition('n.uid', $dis_id);
    $field = $query->execute()->fetchField();
    if (empty($field)) {
@@ -347,24 +361,40 @@ function delete_master_dispatch_planning_form_submit($form, &$form_state) {
   $query->condition('n.title', $master_trip_id);
   $query->condition('n.uid', $dis_id);
   $master_trip_nid = $query->execute()->fetchField();
-  
+
   if ($master_trip_nid) {
-    $master_node = node_load($master_trip_nid);
-    $master_node->status = 0;
-    node_save($master_node);
+    $query = db_select('field_data_field_third_party_username', 'rs');
+    $query->condition('rs.entity_id', $user->uid);
+    $query->fields('rs', array('field_third_party_username_value'));
+    $rs_code = $query->execute()->fetchField();
 
-    $query = db_select('field_data_field_master_trip_id_reference', 'tr');
-    $query->condition('field_master_trip_id_reference_nid', $master_trip_nid);
-    $query->fields('tr', array('entity_id'));
-    $query->condition('tr.bundle', "dispatch_data");
-    $trip_nids = $query->execute()->fetchAll();
+    $query = db_select('master_ptl_data', 'cb');
+    $query->addExpression('MAX(id)', 'max');
+    $query->condition('rs_code', $rs_code, '=');
+    $query->condition('ptl_job', $master_trip_id, '=');
+    $trip_data_exist = $query->execute()->fetchField();
 
-    foreach ($trip_nids as $dis_nid) {
-      $dis_node = node_load($dis_nid->entity_id);
-      unset($dis_node->field_master_trip_id_reference['und']);
-      node_save($dis_node);
+    if (!$trip_data_exist) {
+      $master_node = node_load($master_trip_nid);
+      $master_node->status = 0;
+      node_save($master_node);
+
+      $query = db_select('field_data_field_master_trip_id_reference', 'tr');
+      $query->condition('field_master_trip_id_reference_nid', $master_trip_nid);
+      $query->fields('tr', array('entity_id'));
+      $query->condition('tr.bundle', "dispatch_data");
+      $trip_nids = $query->execute()->fetchAll();
+
+      foreach ($trip_nids as $dis_nid) {
+        $dis_node = node_load($dis_nid->entity_id);
+        unset($dis_node->field_master_trip_id_reference['und']);
+        node_save($dis_node);
+      }
+      drupal_set_message("Master Trip $master_trip_id is deleted successfully!");
     }
-    drupal_set_message("Master Trip $master_trip_id is deleted successfully!");
+    else {
+      drupal_set_message("Trip data is already created for Master Trip $master_trip_id. You can't delete the Master Trip!", 'warning');
+    }
   }
   else {
     drupal_set_message("Master Trip $master_trip_id is not found!!");

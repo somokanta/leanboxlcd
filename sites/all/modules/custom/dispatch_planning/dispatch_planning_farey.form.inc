@@ -46,13 +46,50 @@ function _delivered_trip_data_callback($form, &$form_state) {
            '#header' => $trip_details['header'],
            '#rows' => $trip_details['rows'],
          );
+
+         
+    $data = array();
+
+      $data['trip_number'] = $trip_number;
+    
+
+
+         $output = l(t('XLS'), 'delivered-trip-data/export', array('query' => array($data)));
+         $form['trip_details_download'] = array(
+           '#markup' => $output,
+         );
       }
       else {
          drupal_set_message(t('No result Found'), 'error');
       }
    }
+   
 
    return $form;
+}
+
+function _delivered_trip_data_download_callback() {
+
+   if (isset($_GET['trip_number']) && !empty($_GET['trip_number'])) {
+      $trip_number = $_GET['trip_number'];
+      // get logged in users rs id
+      $user_id = $GLOBALS['user']->uid;
+      $rs_code = dispatch_planning_get_rscode_using_uid($user_id);
+      $trip_details = _get_farey_delivered_trip_details($trip_number, $rs_code);
+      
+      $header = array('SKU7Code', 'Description', 'Free Product', 'Value/Unit', 'Sum of Net Sales Qty', 'Actual Qty', 'Returned Qty');
+      $rows = $trip_details['rows'];
+      $output = theme('table', array(
+        'header' => $header,
+        'rows' => $rows,
+        'attributes' => array('width' => '100%')
+      ));
+      $file = "fareydeliveredtrip.xls";
+      header("Content-type: application/vnd.ms-excel");
+      header("Content-Disposition: attachment; filename=$file");
+      echo $output;
+      exit;
+   }
 }
 
 /**
@@ -82,7 +119,7 @@ function _get_farey_delivered_trip_details($trip_number, $rs_code) {
    $query->groupBy('id.sku_code');
    $query->addExpression('SUM(og_sum_net_sales_quantity)', 'Sum_of_net_sales_qty');
    $query->addExpression('SUM(res_sku_actual_quantity1)', 'Actual_qty_delivered');
-   $query->addExpression('(og_sum_net_sales_quantity - res_sku_actual_quantity1)', 'Returned_qty');
+   $query->addExpression('(SUM(og_sum_net_sales_quantity) - SUM(res_sku_actual_quantity1))', 'Returned_qty');
    $query->havingCondition('Returned_qty', 0, '>');
    $rows['rows'] = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
    return $rows;

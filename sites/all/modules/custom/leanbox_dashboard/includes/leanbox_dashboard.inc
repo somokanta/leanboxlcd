@@ -504,6 +504,42 @@ function leanbox_dashboard_chart_filter_otif_form($form, &$form_state) {
    return $form;
 }
 
+function leanbox_dashboard_chart_filter_impact_form($form, &$form_state) {
+   $form = array();
+
+   // if (arg(1) == 'otif') {
+   $bill_date = leanbox_dashboard_get_default_pdd_date_for_chart();
+   $bill_date = date('Y-m-d', $bill_date);
+   $form['start_date'] = array(
+     '#type' => 'date_popup',
+     '#title' => t('From'),
+     '#required' => TRUE,
+     '#date_format' => 'Y-m-d',
+     '#default_value' => $bill_date,
+   );
+   $form['end_date'] = array(
+     '#type' => 'date_popup',
+     '#title' => t('To'),
+     '#required' => TRUE,
+     '#date_format' => 'Y-m-d',
+     '#default_value' => $bill_date,
+   );
+
+   $form['submit'] = array(
+     '#type' => 'submit',
+     '#value' => 'Submit',
+     '#prefix' => '<div id ="impact-submit">',
+     '#suffix' => '</div>',
+     '#attributes' => array('class' => array('impact-submit')),
+   );
+   // }
+
+   $form['otif'] = array(
+     '#markup' => '<a href = "/leanbox-chart-details/impact" target = "_blank"><div id="impact_div"></div></a>',
+   );
+
+   return $form;
+}
 /**
  * 
  * @param array $form
@@ -2294,7 +2330,75 @@ function leanbox_dashboard_gauge_chart_query_details($type, $start_date = '', $e
 
    return $output1;
 }
+function leanbox_dashboard_impact_chart_query_details($type, $start_date = '', $end_date = '', $data = TRUE) {
 
+   $output1 = array();
+   $output = 0;
+   $table = '';
+
+   global $user;
+   // Store distributor id in author in each node
+   $uid = change_feeds_import_get_distributor_id($user->uid);
+   if (!empty($start_date)) {
+      $start_date = strtotime($start_date);
+   }
+   else {
+      $start_date = leanbox_dashboard_get_default_pdd_date_for_chart();
+   }
+   if (!empty($end_date)) {
+      $end_date = strtotime($end_date) + 86399;
+   }
+   else {
+      $end_date = leanbox_dashboard_get_default_pdd_date_for_chart();
+   }
+
+   $query = db_select('node', 'n');
+   $query->join('field_data_field_bill_value', 'v', 'v.entity_id = n.nid');
+   $query->join('field_data_field_sr_bill_date', 'b', 'b.entity_id = n.nid');
+   //$query->join('field_data_field_promised_date', 'pro_date', 'pro_date.entity_id = n.nid');
+   $query->join('field_data_field_billing_van', 'bva', 'bva.entity_id = n.nid');
+
+   $query->addExpression('SUM(v.field_bill_value_value)', 'bill_value');
+   $query->leftjoin('field_data_field_dispatch_n_value', 'd1', 'd1.entity_id = n.nid');
+   $query->addExpression('SUM(CASE WHEN (d1.field_dispatch_n_value_value = \'N+2\') THEN field_bill_value_value ELSE 0 END)', 'bill_value1');
+
+   $query->condition('n.type', 'sales_register_data');
+   if (!empty($start_date) && !empty($end_date)) {
+      $query->condition('b.field_sr_bill_date_value', array($start_date, $end_date), 'BETWEEN');
+   }
+   $query->condition('n.uid', $uid);
+   $total = $query->execute()->fetch(PDO::FETCH_ASSOC);
+
+   $output = round(($total['bill_value1'] / $total['bill_value'] ) * 100);
+   $output1['output'] = $output;
+
+   if ($data) {
+      $arg = arg(0);
+   }
+   else {
+      $arg_array['r'] = $type;
+      $arg_array = explode('/', $type);
+      $arg = $arg_array[3];
+   }
+
+//   if ($arg !== 'dashboard') {
+//
+//      $mtd_html = "<h3>Channel Wise Otif</h3>";
+//      $mtd_data .= get_mtd_data_channel_otif($start_date, $end_date, $uid);
+//      if ($mtd_data == "No Result Found") {
+//         $header = get_header_of_chhanel_otif();
+//         $mtd_rows[] = array("<td colspan='10' style='text-align: center;'> There is No Activity</td>");
+//         $mtd_html .= theme('table', array('header' => $header, 'rows' => $mtd_rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
+//      }
+//      else {
+//         $mtd_html .= $mtd_data;
+//      }
+//      $table = $mtd_html;
+//   }
+//   $output1['table'] = $table;
+
+   return $output1;
+}
 /**
  * 
  * @global type $user

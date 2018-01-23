@@ -53,6 +53,7 @@ function fetch_dispatch_planning_api_data($data) {
             'res_cash_amount' => isset($data['fieldData']['cash_amount']) ? $data['fieldData']['cash_amount'] : '',
             'res_to_be_collection' => isset($data['fieldData']['to_be_collection']) ? $data['fieldData']['to_be_collection'] : '',
             'res_signed_bill_partial' => isset($data['fieldData']['signed_bill_partial']) ? $data['fieldData']['signed_bill_partial'] : '',
+            'res_reason_for_failure' => isset($data['fieldData']['reason_for_failure']) ? $data['fieldData']['reason_for_failure'] : '',
           ))
           ->condition('referenceNo', $data['referenceNumber'], '=')
           ->execute();
@@ -75,6 +76,7 @@ function fetch_dispatch_planning_api_data($data) {
             db_update('dispatch_planning_item_details') // Table name no longer needs {}
                 ->fields(array(
                   'res_sku_actual_quantity1' => isset($value['sku_actual_quantity1']) ? $value['sku_actual_quantity1'] : 0,
+                  'res_sku_reason' => isset($value['sku_reason']) ? $value['sku_reason'] : '',
                 ))
                 ->condition('trip_bill_reference', $bill_row_id, '=')
                 ->condition('sku_code', $value['sku_code1'], '=')
@@ -95,6 +97,7 @@ function fetch_dispatch_planning_api_data($data) {
             db_update('dispatch_planning_item_details') // Table name no longer needs {}
                 ->fields(array(
                   'res_sku_actual_quantity1' => isset($value['sku_actual_quantity']) ? $value['sku_actual_quantity'] : 0,
+                  'res_sku_reason' => isset($value['sku_reason']) ? $value['sku_reason'] : '',
                 ))
                 ->condition('trip_bill_reference', $bill_row_id, '=')
                 ->condition('sku_code', $value['sku_code'], '=')

@@ -90,3 +90,55 @@ function leanbox_sku_cp_schema() {
 //db_create_table('sku_ean_mrp', $schema['sku_ean_mrp']); 
   return $schema;
 }
+
+/**
+ * Adding new field in table using hook_update_N()
+ */
+function leanbox_sku_cp_update_7102() {
+  $fields = array(
+      'ean1' => array(
+        'description' => 'EAN',
+        'type' => 'varchar',
+        'length' => 25,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'mrp1' => array(
+        'description' => 'MRP',
+        'type' => 'float',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'ean2' => array(
+        'description' => 'EAN',
+        'type' => 'varchar',
+        'length' => 25,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'mrp2' => array(
+        'description' => 'MRP',
+        'type' => 'float',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'ean3' => array(
+        'description' => 'EAN',
+        'type' => 'varchar',
+        'length' => 25,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'mrp3' => array(
+        'description' => 'MRP',
+        'type' => 'float',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+  );
+  foreach ($fields as $key => $field) {
+    if (!db_field_exists('sku_ean_mrp', $key)) {
+      db_add_field('sku_ean_mrp', $key, $field);
+    }
+  }
+}
