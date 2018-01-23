@@ -681,7 +681,7 @@ function master_trip_box_id_form($form, &$form_state) {
       '#markup' => $form_state['views_data'],
     );
     $master_trip_id = $form_state['values']['master_trip_id'];
-    $rr = l('Open PDF', "/download-master-trip-box_id/$master_trip_id");
+    $rr = l('Open PDF', "/download-master-trip-box-id/$master_trip_id");
     $form['dowmload_mark'] = array(
       '#type' => 'markup',
       '#markup' => $rr,
