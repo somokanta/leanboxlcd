@@ -651,3 +651,67 @@ function fetch_master_ptl_sku_ean_mrp_data($rs_code, $api_time) {
 
   return $results;
 }
+
+//Master trip Box -ID
+function master_trip_box_id_form($form, &$form_state) {
+  $form['#prefix'] = '<div id="itemlist-div">';
+  $form['#suffix'] = '</div>';
+
+  $form['master_trip_id'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Master Trip Id'),
+    '#size' => 10,
+    '#required' => TRUE,
+  ); 
+
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('submit'),
+    '#ajax' => array(
+      'wrapper' => 'itemlist-div',
+      'callback' => 'get_data_of_master_ptl_sheet_form_submit',
+      'method' => 'replace',
+      'effect' => 'fade',
+    ),
+    '#submit' => array('master_trip_box_id_form_submit'),
+  );
+  if (!empty($form_state['views_data'])) {
+    $form['hhh'] = array(
+      '#type' => 'markup',
+      '#markup' => $form_state['views_data'],
+    );
+    $master_trip_id = $form_state['values']['master_trip_id'];
+    $rr = l('Open PDF', "/download-master-trip-box_id/$master_trip_id");
+    $form['dowmload_mark'] = array(
+      '#type' => 'markup',
+      '#markup' => $rr,
+    );
+  }
+  return $form;
+}
+
+function master_trip_box_id_form_validate($form, &$form_state) {
+  $master_trip_id = $form_state['values']['master_trip_id'];
+  if(empty($master_trip_id)){
+    form_set_error('master_ptl_id', 'Please enter Master PTL ID');
+  }
+}
+
+function master_trip_box_id_form_submit($form, &$form_state) {
+  $master_trip_id = $form_state['values']['master_trip_id'];
+  $view_name = "master_trip_box_id_report";
+  $view = views_get_view($view_name, '');
+  $view->set_arguments(array($master_trip_id));
+  $rendered_html = $view->render();
+  $form_state['views_data'] = $rendered_html;
+  $form_state['rebuild'] = TRUE;
+}
+
+
+function download_master_trip_box_id($args) {
+  $view_name = "master_trip_box_id_report";
+  $view = views_get_view($view_name, '');
+  $view->set_arguments(array($args));
+  $rendered_html = $view->render();
+  pdf_using_mpdf_api($rendered_html);
+}
