@@ -2604,3 +2604,29 @@ function master_ptl_no_of_bill_lines_by_trip_id($trip_id,$rs_code){
   $results = $query->execute()->fetchField();
   return $results;
 }
+/**
+ * 
+ * @param type $dispatch_data_nid
+ * @return type
+ */
+function _get_van_loading_combination_by_trip($dispatch_data_nid) {
+  $query = db_select('field_data_field_trip_id_reference', 'tr');
+  $query->condition('tr.field_trip_id_reference_nid', "$dispatch_data_nid");
+
+  $query->join('field_data_field_billing_loading_date', 'ld', 'ld.entity_id = tr.entity_id');
+  $query->join('field_data_field_billing_van', 'bv', 'bv.entity_id = tr.entity_id');
+
+  $query->addExpression("concat(bv.field_billing_van_value ,' / ', DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(ld.field_billing_loading_date_value),'+00:00','+05:30'), '%d-%b-%y'))", 'vehicle_loading');
+
+  $query->groupBy('bv.field_billing_van_value,ld.field_billing_loading_date_value');
+
+  $query->condition('tr.bundle', "sales_register_data");
+
+  $results = $query->execute()->fetchAll();
+
+  foreach ($results as $key => $value) {
+    $vehicle_loading = $vehicle_loading . ', ' . $value->vehicle_loading;
+  }
+
+  return ltrim($vehicle_loading, ',');
+}
