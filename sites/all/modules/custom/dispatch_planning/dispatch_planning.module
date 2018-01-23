@@ -277,7 +277,7 @@ function dispatch_planning_menu() {
     'type' => MENU_CALLBACK,
     'file' => 'master_ptl_dispatch_planning.inc',
   );
-  $items['download-master-trip-box_id/%'] = array(
+  $items['download-master-trip-box-id/%'] = array(
     'title' => 'Master Trip – Box IDs Report',
     'page callback' => 'download_master_trip_box_id',
     'page arguments' => array(1),
