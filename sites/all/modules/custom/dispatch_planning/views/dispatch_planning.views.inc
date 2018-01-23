@@ -8,6 +8,15 @@
 function dispatch_planning_views_data() {
 
    $data = array();
+   
+    // Add custom field
+  $data['views']['field_van_loading_date'] = array(
+    'title' => t('van_loading_date'),
+    'help' => t('Provides a custom van_loading_date field.'),
+    'field' => array(
+      'handler' => 'field_van_loading_date',
+    ),
+  );
 
    $data['views']['header_ptl_loose_custom'] = array(
      'title' => t('PTL Loose Header'),
