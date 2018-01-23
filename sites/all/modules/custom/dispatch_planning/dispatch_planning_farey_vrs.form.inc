@@ -10,6 +10,63 @@
  * @param type $form_state
  * @return array
  */
+function _delivered_tripwise_vrs_delete_data_callback($form, &$form_state) {
+   $form = array();
+   $form['#prefix'] = '<div id="itemlist-div">';
+   $form['#suffix'] = '</div>';
+   $user_id = $GLOBALS['user']->uid;
+   $rs_code = dispatch_planning_get_rscode_using_uid($user_id);
+   $dis_id = change_feeds_import_get_distributor_id($user_id);
+   $form['dis_id'] = array(
+     '#type' => 'value',
+     '#value' => $dis_id,
+   );
+   $form['trip_number'] = array(
+     '#prefix' => '<div class="textfield-wrapper">',
+     '#type' => 'textfield',
+     '#title' => t('Trip'),
+     '#required' => TRUE,
+//     '#autocomplete_path' => 'vrswise-trip/autocomplete',
+//     '#ajax' => array(
+//       'wrapper' => 'itemlist-div',
+//       'callback' => 'tripwise_vrs_details_remove_callback',
+//       'method' => 'replace',
+//       'effect' => 'fade',
+//     ),
+   );
+
+   $form['submit'] = array(
+     '#type' => 'submit',
+     '#value' => 'delete',
+   );
+}
+
+/**
+ * 
+ * @param array $form
+ * @param type $form_state
+ * @return array
+ */
+function _delivered_tripwise_vrs_delete_data_callback_submit($form, &$form_state) {
+
+   $trip_id = $form_state['values']['trip_number'];
+   $dis_id = $form_state['values']['dis_id'];
+
+   if (!empty($trip_id) && !empty($dis_id)) {
+        db_delete('dispatch_delivered_vrs_details')
+          ->condition('trip_id', $trip_id, '=')
+          ->condition('dis_id', $dis_id, '=')
+          ->execute();
+      drupal_set_message(t('Successfully Deleted'));
+   }
+}
+
+/**
+ * 
+ * @param array $form
+ * @param type $form_state
+ * @return array
+ */
 function _delivered_tripwise_vrs_data_callback($form, &$form_state) {
    $form = array();
    $form['#prefix'] = '<div id="itemlist-div">';
@@ -27,7 +84,7 @@ function _delivered_tripwise_vrs_data_callback($form, &$form_state) {
      '#type' => 'textfield',
      '#title' => t('Trip'),
      '#required' => TRUE,
-     '#autocomplete_path' => 'trip/autocomplete',
+     '#autocomplete_path' => 'vrswise-trip/autocomplete',
      '#ajax' => array(
        'wrapper' => 'itemlist-div',
        'callback' => 'tripwise_vrs_details_remove_callback',
@@ -250,7 +307,7 @@ function _get_farey_returned_delivered_trip_details($trip_number, $rs_code) {
    $data[0]['to_be_ret'] = '';
    $data[0]['Returned_qty'] = $rows['Returned_qty'];
    $data[0]['del_val'] = '';
-   $data[0]['Returned_val'] = array('data' => $rows['Returned_val'],'data-value' => $rows['Returned_val'],  'class' => array("ret_val"));
+   $data[0]['Returned_val'] = array('data' => $rows['Returned_val'], 'data-value' => $rows['Returned_val'], 'class' => array("ret_val"));
    //$data[0]['Returned_val'] = array('data' => 100, 'data-value' => 100, 'class' => array("ret_val"));
 
    $data[0]['ret_actual_collected']['data'] = array(
@@ -285,7 +342,7 @@ function _delivered_tripwise_vrs_data_callback_submit($form, &$form_state) {
       $trip_details = _get_farey_delivered_tripwise_vrs_details($trip_id, $rs_code);
       $trip_amt_details = _get_farey_delivered_tripwise_vrs_amt_details($trip_id, $rs_code);
       $ret_trip_amt_details = _get_farey_returned_delivered_trip_details($trip_id, $rs_code);
-      
+
       // insert new or update if already created
       db_merge('dispatch_delivered_vrs_details')
           ->key(array('dis_id' => $dis_id, 'trip_id' => $trip_id))

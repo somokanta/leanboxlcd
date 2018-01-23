@@ -5,7 +5,7 @@ require_once DRUPAL_ROOT .  '/sites/all/modules/custom/reverse_geocode/direction
 function dispatch_planning_menu() {
    
   $items['delivered-trip-data'] = array(
-    'title' => 'Farey Delivered Trip',
+    'title' => 'Delivered Trip',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('_delivered_trip_data_callback'),
     'access arguments' => array('Ptl trip creation'),
@@ -14,7 +14,7 @@ function dispatch_planning_menu() {
       // Page callback, etc. need to be added here.
   );
   $items['delivered-trip-data/export'] = array(
-    'title' => 'Farey Delivered Trip',
+    'title' => 'Delivered Trip',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('_delivered_trip_data_download_callback'),
     'access arguments' => array('Ptl trip creation'),
@@ -24,9 +24,19 @@ function dispatch_planning_menu() {
   );
   
   $items['delivered-tripwise-vrs-data'] = array(
-    'title' => 'Farey VRS data',
+    'title' => 'VRS data',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('_delivered_tripwise_vrs_data_callback'),
+    'access arguments' => array('Ptl trip creation'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'dispatch_planning_farey_vrs.form.inc',
+      // Page callback, etc. need to be added here.
+  );
+  
+   $items['delivered-tripwise-vrs-delete-data'] = array(
+    'title' => 'VRS delete data',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('_delivered_tripwise_vrs_delete_data_callback'),
     'access arguments' => array('Ptl trip creation'),
     'type' => MENU_NORMAL_ITEM,
     'file' => 'dispatch_planning_farey_vrs.form.inc',
@@ -111,9 +121,9 @@ function dispatch_planning_menu() {
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
-  $items['trip/autocomplete'] = array(
+  $items['vrswise-trip/autocomplete'] = array(
     'title' => 'trip_autocomplete',
-    'page callback' => 'trip_autocomplete',
+    'page callback' => 'vrswise_trip_id_autocomplete',
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
@@ -1728,6 +1738,25 @@ function trip_id_autocomplete($string = '') {
     $query->condition('n.type', 'dispatch_data');
     $query->fields('n', array('title'));
     $query->range(0, 15);
+    $query->addTag('node_distributor_access');
+    $result = $query->execute()->fetchAllKeyed(0, 0);
+  }
+
+  drupal_json_output($result);
+}
+
+
+function vrswise_trip_id_autocomplete($string = '') {
+  $result = array();
+
+  if ($string) {
+    $query = db_select('node', 'n');
+    $query->condition('n.title', db_like($string) . '%', 'LIKE');
+    $query->condition('n.type', 'dispatch_data');
+    $query->fields('n', array('title'));
+    $query->range(0, 15);
+    $query->leftjoin('dispatch_delivered_vrs_details', 'vd', 'vd.trip_id =n.title AND n.uid = dis_id');
+    $query->isNull('vd.trip_id');
     $query->addTag('node_distributor_access');
     $result = $query->execute()->fetchAllKeyed(0, 0);
   }
