@@ -2285,11 +2285,18 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
       }
     }
   }
-  
   if ($view->base_table == 'custom_billing_data' && ($view->name != 'impact_delivery_cron_2') && ($view->name != 'impact_delivery_cron_evening_2')) {
     $query->add_where(0, 'custom_billing_data.distributor_id', $distributor_id, '=');
   }
-  if (($view->base_table == 'petty_cash') && ($view->name == 'petty_cash_transaction')) {
+  if (($view->base_table == 'taxonomy_term_data') && ($view->name == 'petty_cash_edit')) {
+      $query->where[0]['conditions'][] = array(
+        'field' => 'field_data_field_petty_cash_distributor.field_petty_cash_distributor_uid',
+        'value' => $distributor_id,
+        'operator' => '=',
+      );
+  }
+
+  if ($view->base_table == 'petty_cash') {
     $query->add_where(0, 'petty_cash.distributor_id', $distributor_id, '=');
   }
   if (($view->base_table == 'ptl_data_configuration') && ($view->name == 'ptl_loose_sheet' || $view->name == 'short_put_report' || $view->name == 'ptl_cld_sheet')) {
@@ -2573,7 +2580,20 @@ function check_area_id_exists($title) {
 }
 
 function change_feeds_import_form_views_exposed_form_alter(&$form, &$form_state) {
-  if ($form['#id'] == 'views-exposed-form-Outlet-Master-Report-page') {
+   if (isset($form['field_petty_cash_type_value']['#options'])) {
+      $default = array('All' => '- Any -');
+      global $user;
+      // Store distributor id in author in each node
+      $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+
+      $query = db_select('field_data_field_petty_cash_type', 'pc');
+      $query->join('field_data_field_petty_cash_distributor', 'd', 'd.entity_id = pc.entity_id');
+      $query->fields('pc', array('field_petty_cash_type_value'));
+      $query->condition('d.field_petty_cash_distributor_uid', $distributor_id);
+      $options = $query->execute()->fetchAllKeyed(0,0);
+      $form['field_petty_cash_type_value']['#options'] = $default + $options;
+   }
+   if ($form['#id'] == 'views-exposed-form-Outlet-Master-Report-page') {
 
 
     $van_pl_options = get_van_pl('van', NULL, NULL);

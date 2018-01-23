@@ -29,7 +29,7 @@ function fetch_master_ptl_data($rs_code, $api_time) {
   $data['header'] = $header_result;
 
   $query = db_select('master_ptl_data', 'p');
-  $query->fields('p', array('id', 'ptl_job', 'rs_code', 'trip_id', 'vehicle', 'loading_date', 'sequence_no', 'basepack_code', 'sku_code', 'product_name', 'MRP', 'TUR', 'free_sku_description', 'cp','ean'));
+  $query->fields('p', array('id', 'ptl_job', 'rs_code', 'trip_id', 'vehicle', 'loading_date', 'sequence_no', 'basepack_code', 'sku_code', 'product_name', 'MRP', 'TUR', 'free_sku_description', 'cp','ean','ean1','ean2','ean3'));
   $query->addExpression('loose', 'sum_sales_qty'); // send loose value in sum_sales_qty
   $query->condition('p.id', $max_ptl_data, '<=');
   $query->condition('p.api_flag', '0', '=');
@@ -203,6 +203,12 @@ function master_ptl_cld_sheet_form($form, &$form_state) {
     '#size' => 10,
     '#required' => TRUE,
   );
+  $form['trip_id'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Trip Id'),
+    '#size' => 10,
+    '#required' => TRUE,
+  );  
 
   $form['submit'] = array(
     '#type' => 'submit',
@@ -221,7 +227,8 @@ function master_ptl_cld_sheet_form($form, &$form_state) {
       '#markup' => $form_state['views_data'],
     );
     $master_trip_id = $form_state['values']['master_trip_id'];
-    $rr = l('Open PDF', "/download-master-cld-picking/$master_trip_id");
+    $trip_id = $form_state['values']['trip_id'];
+    $rr = l('Open PDF', "/download-master-cld-picking/$master_trip_id/$trip_id");
     $form['dowmload_mark'] = array(
       '#type' => 'markup',
       '#markup' => $rr,
@@ -230,20 +237,32 @@ function master_ptl_cld_sheet_form($form, &$form_state) {
   return $form;
 }
 
+function master_ptl_cld_sheet_form_validate($form, &$form_state) {
+  $master_trip_id = $form_state['values']['master_trip_id'];
+  $trip_id = $form_state['values']['trip_id'];
+  if(empty($master_trip_id)){
+    form_set_error('master_ptl_id', 'Please enter Master PTL ID');
+  }
+  if(empty($trip_id)){
+    form_set_error('trip_id', 'Please enter trip ID');
+  }
+}
+
 function master_ptl_cld_sheet_form_submit($form, &$form_state) {
   $master_trip_id = $form_state['values']['master_trip_id'];
+  $trip_id = $form_state['values']['trip_id'];
   $view_name = "master_ptl_cld_sheet";
   $view = views_get_view($view_name, '');
-  $view->set_arguments(array($master_trip_id));
+  $view->set_arguments(array($master_trip_id,$trip_id));
   $rendered_html = $view->render();
   $form_state['views_data'] = $rendered_html;
   $form_state['rebuild'] = TRUE;
 }
 
-function download_master_ptl_cld_sheet($args) {
+function download_master_ptl_cld_sheet($args,$args2) {
   $view_name = "master_ptl_cld_sheet";
   $view = views_get_view($view_name, '');
-  $view->set_arguments(array($args));
+  $view->set_arguments(array($args,$args2));
   $rendered_html = $view->render();
   pdf_using_mpdf_api($rendered_html);
 }
@@ -389,7 +408,7 @@ function master_ptl_data_insert_into_table($api_data, $distributor_id) {
 
         $sku7_code = $item_data['sku_code'];
         $sku_unit_case = get_sku_unit_case($sku7_code, $distributor_id);
-        $ean = get_sku_ean($sku7_code, $api_data['rs_code']);
+        $eans = get_sku_ean($sku7_code, $api_data['rs_code']);
         // Conversion of cld and loose
         $cld = (int) ($item_data['sum_net_sales_quantity'] / $sku_unit_case); //petty
         $loose = (int) ($item_data['sum_net_sales_quantity'] % $sku_unit_case); //loose
@@ -447,7 +466,10 @@ function master_ptl_data_insert_into_table($api_data, $distributor_id) {
           'derived_cld' => $derived_cld,
           'derived_loose' => $derived_loose,
           'derived_upc' => $derived_unit_case,
-          'ean' => $ean ? $ean : '',
+          'ean' => $eans[0]->ean ? $eans[0]->ean : '',
+          'ean1' => $eans[0]->ean1 ? $eans[0]->ean1 : '',
+          'ean2' => $eans[0]->ean2 ? $eans[0]->ean2 : '',
+          'ean3' => $eans[0]->ean3 ? $eans[0]->ean3 : '',
         );
         $query->fields($fields);
         $result_id = $query->execute();
@@ -601,7 +623,7 @@ function fetch_master_ptl_sku_ean_mrp_data($rs_code, $api_time) {
 
   $query = db_select('sku_ean_mrp', 'p');
   $query->addField('p', 'sku', 'sku_code');
-  $query->fields('p', array('ean', 'mrp','rs_code'));
+  $query->fields('p', array('ean', 'mrp','ean1', 'mrp1','ean2', 'mrp2','ean3', 'mrp3','rs_code'));
   $query->condition('created_time', $time, '<');
   $query->condition('p.master_flag', '0', '=');
   $query->condition('p.rs_code', $rs_code, '=');

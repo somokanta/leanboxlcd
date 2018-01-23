@@ -13,6 +13,25 @@ function dispatch_planning_menu() {
     'file' => 'dispatch_planning_farey.form.inc',
       // Page callback, etc. need to be added here.
   );
+  $items['delivered-trip-data/export'] = array(
+    'title' => 'Farey Delivered Trip',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('_delivered_trip_data_download_callback'),
+    'access arguments' => array('Ptl trip creation'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'dispatch_planning_farey.form.inc',
+      // Page callback, etc. need to be added here.
+  );
+  
+  $items['delivered-tripwise-vrs-data'] = array(
+    'title' => 'Farey VRS data',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('_delivered_tripwise_vrs_data_callback'),
+    'access arguments' => array('Ptl trip creation'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'dispatch_planning_farey_vrs.form.inc',
+      // Page callback, etc. need to be added here.
+  );
 
   $items['admin/dispatch-planning'] = array(
     'title' => 'Dispatch Planning',
@@ -225,10 +244,10 @@ function dispatch_planning_menu() {
     'type' => MENU_CALLBACK,
     'file' => 'master_ptl_dispatch_planning.inc',
   );
-  $items['download-master-cld-picking/%'] = array(
+  $items['download-master-cld-picking/%/%'] = array(
     'title' => 'CLD PICKING SHEET',
     'page callback' => 'download_master_ptl_cld_sheet',
-    'page arguments' => array(1),
+    'page arguments' => array(1,2),
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
     'file' => 'master_ptl_dispatch_planning.inc',
@@ -2119,17 +2138,20 @@ function dispatch_planning_sales_reg_api($node, $trip_execution_date, $vehicle_n
   $reference_no = $trip_id . '_'. $rs_code . '_' . $bill_number;
   $api_data['referenceNo'] = $reference_no;
   $api_data['date'] = date('Y-m-d',$trip_execution_date);
-  $api_data['city'] = 'ABC';
-  $api_data['hub'] = $rs_code;
-  //$api_data['hub'] = '100006'; // need to remove when moving to HUL
-  $api_data['fieldExecutive'] = $rs_code . '_' . $cashier;
+  $api_data['city'] = 'Mumbai';
+ // $api_data['hub'] = $rs_code;
+  $api_data['hub'] = '100006'; // need to remove when moving to HUL
+  $api_data['fieldExecutive'] = 100006 . '_' . $cashier;
   $api_data['fieldExecutiveName'] = $cashier;
 
   $api_data['jobData']['vehicle'] = $vehicle_no;
   $api_data['jobData']['party_hll_code'] = $outlet_data_details['field_hul_code_value']; // hul code in outlet
-  //$api_data['jobData']['lat_long'] = $outlet_data_details['field_hul_updated_lat_value'] . ',' . $outlet_data_details['field_hul_updated_long_value'];
-  $api_data['jobData']['lat_long']['lat_longLatitude'] = $outlet_data_details['field_hul_updated_lat_value'];
-  $api_data['jobData']['lat_long']['lat_longLongitude'] = $outlet_data_details['field_hul_updated_long_value'];
+ // $api_data['jobData']['lat_long'] = $outlet_data_details['field_hul_updated_lat_value'] . ',' . $outlet_data_details['field_hul_updated_long_value'];
+  //$api_data['jobData']['lat_long']['lat_longLatitude'] = $outlet_data_details['field_hul_updated_lat_value'];
+ // $api_data['jobData']['lat_long']['lat_longLongitude'] = $outlet_data_details['field_hul_updated_long_value'];
+  $api_data['latitude'] = $outlet_data_details['field_hul_updated_lat_value'];
+  $api_data['longitude'] = $outlet_data_details['field_hul_updated_long_value'];
+  //$api_data['jobData']['slot'] = 3;
   $api_data['jobData']['bill_value'] = (int)$bill_value;
   $api_data['jobData']['item_details'] = $billing_data_details; // array
   $api_data['jobData']['bill_date'] = $bill_date;
@@ -2168,8 +2190,8 @@ function dispatch_planning_api_data($api_data) {
         'fieldExecutiveName' => $api_data['fieldExecutiveName'],
         'vehicle' => $api_data['jobData']['vehicle'],
         'party_hll_code' => $api_data['jobData']['party_hll_code'],
-        'lat_longlatitude' => $api_data['jobData']['lat_long']['lat_longLatitude'],
-        'lat_longlongitude' => $api_data['jobData']['lat_long']['lat_longLongitude'],
+        'lat_longlatitude' => $api_data['latitude'],
+        'lat_longlongitude' => $api_data['longitude'],
         'bill_value' => $api_data['jobData']['bill_value'],
         'bill_date' => $api_data['jobData']['bill_date'],
         'locality' => $api_data['jobData']['locality'],
@@ -2248,10 +2270,12 @@ function dispatch_planning_get_outlet_data($node_uid, $party_code) {
   $query->condition('n.uid', $node_uid);
   //$query->join('field_data_field_sales_party_code', 'pc', 'pc.field_sales_party_code_value = n.title');
   $query->leftjoin('field_data_field_hul_code', 'hc', 'hc.entity_id = n.nid');
+  $query->join('node', 'n1', 'n1.title = field_hul_code_value AND n.uid = n1.uid');
+
   $query->leftjoin('field_data_field_party_name', 'pn', 'pn.entity_id = n.nid');
   $query->leftjoin('field_data_field_beat_name', 'bn', 'bn.entity_id = n.nid');
-  $query->leftjoin('field_data_field_hul_updated_lat', 'hl', 'hl.entity_id = n.nid');
-  $query->leftjoin('field_data_field_hul_updated_long', 'ul', 'ul.entity_id = n.nid');
+  $query->leftjoin('field_data_field_hul_updated_lat', 'hl', 'hl.entity_id = n1.nid');
+  $query->leftjoin('field_data_field_hul_updated_long', 'ul', 'ul.entity_id = n1.nid');
 
   $query->fields('bn', array('field_beat_name_value'));
   $query->fields('pn', array('field_party_name_value'));
@@ -2491,10 +2515,10 @@ function get_sku_unit_case($sku7_code, $distributor_id) {
  */
 function get_sku_ean($sku7_code, $rs_code) {
   $query = db_select('sku_ean_mrp', 'p');
-  $query->fields('p', array('ean'));
+  $query->fields('p', array('ean','ean1','ean2','ean3'));
   $query->condition('p.rs_code', $rs_code, '=');
   $query->condition('p.sku', $sku7_code, '=');
-  $result = $query->execute()->fetchField();
+  $result = $query->execute()->fetchAll();
   return $result;
 }
 
@@ -2514,6 +2538,16 @@ function ptl_loading_sheet_by_trip_id($trip_id,$rs_code) {
   return ltrim($vehicle_loading, ',');
 }
 
+function master_ptl_trip_ids_by_trip_id($trip_id,$rs_code) {
+  $query = db_select('master_ptl_data', 'pd');
+  $query->addExpression("GROUP_CONCAT(DISTINCT(trip_id))", 'trip_ids');
+  $query->condition('ptl_job', $trip_id);
+  $query->condition('rs_code', $rs_code);
+  $results = $query->execute()->fetchField();
+
+  return $results;
+}
+
 
 function ptl_no_of_bills_by_trip_id($trip_id,$rs_code) {
   $query = db_select('ptl_data_configuration', 'pd');
@@ -2527,6 +2561,15 @@ function ptl_no_of_bills_by_trip_id($trip_id,$rs_code) {
 function ptl_trip_date_by_trip_id($trip_id,$rs_code) {
   $query = db_select('ptl_data_configuration', 'pd');
   $query->condition('trip_id', $trip_id);
+  $query->condition('rs_code', $rs_code);
+  $query->fields('pd',array('created_time'));
+  $results = $query->range(0,1)->execute()->fetchField();
+  return $results;
+}
+
+function master_ptl_trip_date_by_trip_id($trip_id,$rs_code) {
+  $query = db_select('master_ptl_data', 'pd');
+  $query->condition('ptl_job', $trip_id);
   $query->condition('rs_code', $rs_code);
   $query->fields('pd',array('created_time'));
   $results = $query->range(0,1)->execute()->fetchField();
@@ -2550,4 +2593,40 @@ function ptl_no_of_bill_lines_by_trip_id($trip_id,$rs_code){
   $query->addExpression('count(id)','no_of_id');
   $results = $query->execute()->fetchField();
   return $results;
+}
+
+function master_ptl_no_of_bill_lines_by_trip_id($trip_id,$rs_code){
+  $query = db_select('master_ptl_data', 'pd');
+  $query->condition('ptl_job', $trip_id);
+  $query->condition('rs_code', $rs_code);
+  $query->condition('loose', 1, '>=');
+  $query->addExpression('count(id)','no_of_id');
+  $results = $query->execute()->fetchField();
+  return $results;
+}
+/**
+ * 
+ * @param type $dispatch_data_nid
+ * @return type
+ */
+function _get_van_loading_combination_by_trip($dispatch_data_nid) {
+  $query = db_select('field_data_field_trip_id_reference', 'tr');
+  $query->condition('tr.field_trip_id_reference_nid', "$dispatch_data_nid");
+
+  $query->join('field_data_field_billing_loading_date', 'ld', 'ld.entity_id = tr.entity_id');
+  $query->join('field_data_field_billing_van', 'bv', 'bv.entity_id = tr.entity_id');
+
+  $query->addExpression("concat(bv.field_billing_van_value ,' / ', DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(ld.field_billing_loading_date_value),'+00:00','+05:30'), '%d-%b-%y'))", 'vehicle_loading');
+
+  $query->groupBy('bv.field_billing_van_value,ld.field_billing_loading_date_value');
+
+  $query->condition('tr.bundle', "sales_register_data");
+
+  $results = $query->execute()->fetchAll();
+
+  foreach ($results as $key => $value) {
+    $vehicle_loading = $vehicle_loading . ', ' . $value->vehicle_loading;
+  }
+
+  return ltrim($vehicle_loading, ',');
 }
