@@ -203,6 +203,12 @@ function master_ptl_cld_sheet_form($form, &$form_state) {
     '#size' => 10,
     '#required' => TRUE,
   );
+  $form['trip_id'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Trip Id'),
+    '#size' => 10,
+    '#required' => TRUE,
+  );  
 
   $form['submit'] = array(
     '#type' => 'submit',
@@ -221,7 +227,8 @@ function master_ptl_cld_sheet_form($form, &$form_state) {
       '#markup' => $form_state['views_data'],
     );
     $master_trip_id = $form_state['values']['master_trip_id'];
-    $rr = l('Open PDF', "/download-master-cld-picking/$master_trip_id");
+    $trip_id = $form_state['values']['trip_id'];
+    $rr = l('Open PDF', "/download-master-cld-picking/$master_trip_id/$trip_id");
     $form['dowmload_mark'] = array(
       '#type' => 'markup',
       '#markup' => $rr,
@@ -230,20 +237,32 @@ function master_ptl_cld_sheet_form($form, &$form_state) {
   return $form;
 }
 
+function master_ptl_cld_sheet_form_validate($form, &$form_state) {
+  $master_trip_id = $form_state['values']['master_trip_id'];
+  $trip_id = $form_state['values']['trip_id'];
+  if(empty($master_trip_id)){
+    form_set_error('master_ptl_id', 'Please enter Master PTL ID');
+  }
+  if(empty($trip_id)){
+    form_set_error('trip_id', 'Please enter trip ID');
+  }
+}
+
 function master_ptl_cld_sheet_form_submit($form, &$form_state) {
   $master_trip_id = $form_state['values']['master_trip_id'];
+  $trip_id = $form_state['values']['trip_id'];
   $view_name = "master_ptl_cld_sheet";
   $view = views_get_view($view_name, '');
-  $view->set_arguments(array($master_trip_id));
+  $view->set_arguments(array($master_trip_id,$trip_id));
   $rendered_html = $view->render();
   $form_state['views_data'] = $rendered_html;
   $form_state['rebuild'] = TRUE;
 }
 
-function download_master_ptl_cld_sheet($args) {
+function download_master_ptl_cld_sheet($args,$args2) {
   $view_name = "master_ptl_cld_sheet";
   $view = views_get_view($view_name, '');
-  $view->set_arguments(array($args));
+  $view->set_arguments(array($args,$args2));
   $rendered_html = $view->render();
   pdf_using_mpdf_api($rendered_html);
 }
