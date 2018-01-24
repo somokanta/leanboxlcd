@@ -131,7 +131,9 @@ function add_sales_bill_in_screen_submit(&$form, &$form_state) {
    unset($form_state['input']['bill_no']);
    $bill_details_html = get_sales_bill_details_using_bill_no_callback($bill_number, $dis_id);
    $form_state['bills']['header'] = $bill_details_html['header'];
-   $form_state['bills']['rows'] += $bill_details_html['rows'];
+   if(!empty($bill_details_html['rows'])) {
+     $form_state['bills']['rows'] += $bill_details_html['rows'];
+   }
    $form_state['rebuild'] = TRUE;
 }
 
