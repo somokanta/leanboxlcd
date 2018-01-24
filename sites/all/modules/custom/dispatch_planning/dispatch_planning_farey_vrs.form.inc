@@ -10,6 +10,64 @@
  * @param type $form_state
  * @return array
  */
+function _delivered_tripwise_vrs_delete_data_callback($form, &$form_state) {
+   $form = array();
+   $form['#prefix'] = '<div id="itemlist-div">';
+   $form['#suffix'] = '</div>';
+   $user_id = $GLOBALS['user']->uid;
+   $rs_code = dispatch_planning_get_rscode_using_uid($user_id);
+   $dis_id = change_feeds_import_get_distributor_id($user_id);
+   $form['dis_id'] = array(
+     '#type' => 'value',
+     '#value' => $dis_id,
+   );
+   $form['trip_number'] = array(
+     '#prefix' => '<div class="textfield-wrapper">',
+     '#type' => 'textfield',
+     '#title' => t('Trip'),
+     '#required' => TRUE,
+//     '#autocomplete_path' => 'vrswise-trip/autocomplete',
+//     '#ajax' => array(
+//       'wrapper' => 'itemlist-div',
+//       'callback' => 'tripwise_vrs_details_remove_callback',
+//       'method' => 'replace',
+//       'effect' => 'fade',
+//     ),
+   );
+
+   $form['submit'] = array(
+     '#type' => 'submit',
+     '#value' => 'delete',
+   );
+   return $form;
+}
+
+/**
+ * 
+ * @param array $form
+ * @param type $form_state
+ * @return array
+ */
+function _delivered_tripwise_vrs_delete_data_callback_submit($form, &$form_state) {
+
+   $trip_id = $form_state['values']['trip_number'];
+   $dis_id = $form_state['values']['dis_id'];
+
+   if (!empty($trip_id) && !empty($dis_id)) {
+      db_delete('dispatch_delivered_vrs_details')
+          ->condition('trip_id', $trip_id, '=')
+          ->condition('dis_id', $dis_id, '=')
+          ->execute();
+      drupal_set_message(t('Successfully Deleted'));
+   }
+}
+
+/**
+ * 
+ * @param array $form
+ * @param type $form_state
+ * @return array
+ */
 function _delivered_tripwise_vrs_data_callback($form, &$form_state) {
    $form = array();
    $form['#prefix'] = '<div id="itemlist-div">';
@@ -27,7 +85,7 @@ function _delivered_tripwise_vrs_data_callback($form, &$form_state) {
      '#type' => 'textfield',
      '#title' => t('Trip'),
      '#required' => TRUE,
-     '#autocomplete_path' => 'trip/autocomplete',
+     '#autocomplete_path' => 'vrswise-trip/autocomplete',
      '#ajax' => array(
        'wrapper' => 'itemlist-div',
        'callback' => 'tripwise_vrs_details_remove_callback',
@@ -53,7 +111,7 @@ function _delivered_tripwise_vrs_data_callback($form, &$form_state) {
       $trip_amt_details = _get_farey_delivered_tripwise_vrs_amt_details($trip_number, $rs_code);
       $ret_trip_amt_details = _get_farey_returned_delivered_trip_details($trip_number, $rs_code);
 
-      if (!empty($trip_details)) {
+      if (!empty($trip_details['Total Bills'][1])) {
          $trip_details_header = array('', 'Bill count', 'Bill value');
          $trip_details_amt_header = array('', 'Bill count', 'Bill value', 'App value', 'Actual collected', 'Difference');
          $returned_details_amt_header = array('To be returned Inventory', 'Sku count', 'Bill value', 'App Ret Inventory Value', 'Actual Ret Inventory Value', 'Difference');
@@ -128,6 +186,8 @@ function _get_farey_delivered_tripwise_vrs_details($trip_number, $rs_code) {
    $data = array();
    $query = db_select('dispatch_planning_api_data', 'ad');
    $query->condition('ad.runsheet_number', $trip_number, '=');
+   $query->leftjoin('dispatch_delivered_vrs_details', 'vd', 'vd.trip_id = ad.runsheet_number');
+   $query->isNull('vd.trip_id');
    $query->condition('ad.hub', $rs_code, '=');
    $query->addExpression('Count(ad.id)', 'Count_of_bills');
    $query->addExpression('SUM(ad.bill_value)', 'Sum_of_bills');
@@ -167,7 +227,8 @@ function _get_farey_delivered_tripwise_vrs_amt_details($trip_number, $rs_code) {
    $query = db_select('dispatch_planning_api_data', 'ad');
    $query->condition('ad.runsheet_number', $trip_number, '=');
    $query->condition('ad.hub', $rs_code, '=');
-
+   $query->leftjoin('dispatch_delivered_vrs_details', 'vd', 'vd.trip_id = ad.runsheet_number');
+   $query->isNull('vd.trip_id');
    $query->addExpression('SUM(CASE WHEN (res_confirm_signed_bill_amount IS NOT NULL AND res_confirm_signed_bill_amount != \'NA\' AND res_confirm_signed_bill_amount != \'\') THEN 1 ELSE 0 END)', 'Count_signed_bills');
    $query->addExpression('SUM(CASE WHEN (res_confirm_signed_bill_amount IS NOT NULL AND res_confirm_signed_bill_amount != \'NA\'  AND res_confirm_signed_bill_amount != \'\') THEN bill_value ELSE 0 END)', 'Sum_signed_bills');
    $query->addExpression('SUM(CASE WHEN (res_confirm_signed_bill_amount IS NOT NULL AND res_confirm_signed_bill_amount != \'NA\'  AND res_confirm_signed_bill_amount != \'\') THEN res_confirm_signed_bill_amount ELSE 0 END)', 'app_signed_bills');
@@ -190,7 +251,7 @@ function _get_farey_delivered_tripwise_vrs_amt_details($trip_number, $rs_code) {
             continue;
          }
          $data[$val][] = array('data' => $val1, 'data-value' => $val1, 'class' => array("$val-$key1-val"));
-         //$data[$val][] = array('data' => 100, 'data-value' => 100, 'class' => array("$val-$key1-val"));
+         // $data[$val][] = array('data' => 100, 'data-value' => 100, 'class' => array("$val-$key1-val"));
          $k = $k + 1;
          $rows1 = array_shift($rows);
       }
@@ -250,8 +311,8 @@ function _get_farey_returned_delivered_trip_details($trip_number, $rs_code) {
    $data[0]['to_be_ret'] = '';
    $data[0]['Returned_qty'] = $rows['Returned_qty'];
    $data[0]['del_val'] = '';
-   $data[0]['Returned_val'] = array('data' => $rows['Returned_val'],'data-value' => $rows['Returned_val'],  'class' => array("ret_val"));
-   //$data[0]['Returned_val'] = array('data' => 100, 'data-value' => 100, 'class' => array("ret_val"));
+   $data[0]['Returned_val'] = array('data' => $rows['Returned_val'], 'data-value' => $rows['Returned_val'], 'class' => array("ret_val"));
+   // $data[0]['Returned_val'] = array('data' => 100, 'data-value' => 100, 'class' => array("ret_val"));
 
    $data[0]['ret_actual_collected']['data'] = array(
      '#type' => 'textfield',
@@ -285,7 +346,7 @@ function _delivered_tripwise_vrs_data_callback_submit($form, &$form_state) {
       $trip_details = _get_farey_delivered_tripwise_vrs_details($trip_id, $rs_code);
       $trip_amt_details = _get_farey_delivered_tripwise_vrs_amt_details($trip_id, $rs_code);
       $ret_trip_amt_details = _get_farey_returned_delivered_trip_details($trip_id, $rs_code);
-      
+
       // insert new or update if already created
       db_merge('dispatch_delivered_vrs_details')
           ->key(array('dis_id' => $dis_id, 'trip_id' => $trip_id))
@@ -323,5 +384,6 @@ function _delivered_tripwise_vrs_data_callback_submit($form, &$form_state) {
             'total_debit' => (float) $form_state['values']['total_debit'],
           ))
           ->execute();
+      drupal_set_message(t('Data inserted successfully'));
    }
 }

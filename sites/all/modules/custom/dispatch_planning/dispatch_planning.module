@@ -5,7 +5,7 @@ require_once DRUPAL_ROOT .  '/sites/all/modules/custom/reverse_geocode/direction
 function dispatch_planning_menu() {
    
   $items['delivered-trip-data'] = array(
-    'title' => 'Farey Delivered Trip',
+    'title' => 'Delivered Trip',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('_delivered_trip_data_callback'),
     'access arguments' => array('Ptl trip creation'),
@@ -14,7 +14,7 @@ function dispatch_planning_menu() {
       // Page callback, etc. need to be added here.
   );
   $items['delivered-trip-data/export'] = array(
-    'title' => 'Farey Delivered Trip',
+    'title' => 'Delivered Trip',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('_delivered_trip_data_download_callback'),
     'access arguments' => array('Ptl trip creation'),
@@ -24,9 +24,19 @@ function dispatch_planning_menu() {
   );
   
   $items['delivered-tripwise-vrs-data'] = array(
-    'title' => 'Farey VRS data',
+    'title' => 'VRS data',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('_delivered_tripwise_vrs_data_callback'),
+    'access arguments' => array('Ptl trip creation'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'dispatch_planning_farey_vrs.form.inc',
+      // Page callback, etc. need to be added here.
+  );
+  
+   $items['delivered-tripwise-vrs-delete-data'] = array(
+    'title' => 'VRS delete data',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('_delivered_tripwise_vrs_delete_data_callback'),
     'access arguments' => array('Ptl trip creation'),
     'type' => MENU_NORMAL_ITEM,
     'file' => 'dispatch_planning_farey_vrs.form.inc',
@@ -111,9 +121,9 @@ function dispatch_planning_menu() {
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
-  $items['trip/autocomplete'] = array(
+  $items['vrswise-trip/autocomplete'] = array(
     'title' => 'trip_autocomplete',
-    'page callback' => 'trip_autocomplete',
+    'page callback' => 'vrswise_trip_id_autocomplete',
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
@@ -244,10 +254,10 @@ function dispatch_planning_menu() {
     'type' => MENU_CALLBACK,
     'file' => 'master_ptl_dispatch_planning.inc',
   );
-  $items['download-master-cld-picking/%'] = array(
+  $items['download-master-cld-picking/%/%'] = array(
     'title' => 'CLD PICKING SHEET',
     'page callback' => 'download_master_ptl_cld_sheet',
-    'page arguments' => array(1),
+    'page arguments' => array(1,2),
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
     'file' => 'master_ptl_dispatch_planning.inc',
@@ -265,6 +275,23 @@ function dispatch_planning_menu() {
     'page callback' => 'drupal_get_form',
     'page arguments' => array('create_fetch_data_master_ptl_trip_form'),
     'access arguments' => array('Ptl trip creation'),
+    'type' => MENU_CALLBACK,
+    'file' => 'master_ptl_dispatch_planning.inc',
+  );
+//Master trip box id report
+    $items['master-trip-box-id'] = array(
+    'title' => 'Master Trip – Box IDs Report',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('master_trip_box_id_form'),
+    'access arguments' => array('Distributor Upload File'),
+    'type' => MENU_CALLBACK,
+    'file' => 'master_ptl_dispatch_planning.inc',
+  );
+  $items['download-master-trip-box-id/%'] = array(
+    'title' => 'Master Trip – Box IDs Report',
+    'page callback' => 'download_master_trip_box_id',
+    'page arguments' => array(1),
+    'access callback' => TRUE,
     'type' => MENU_CALLBACK,
     'file' => 'master_ptl_dispatch_planning.inc',
   );
@@ -1735,6 +1762,25 @@ function trip_id_autocomplete($string = '') {
   drupal_json_output($result);
 }
 
+
+function vrswise_trip_id_autocomplete($string = '') {
+  $result = array();
+
+  if ($string) {
+    $query = db_select('node', 'n');
+    $query->condition('n.title', db_like($string) . '%', 'LIKE');
+    $query->condition('n.type', 'dispatch_data');
+    $query->fields('n', array('title'));
+    $query->range(0, 15);
+    $query->leftjoin('dispatch_delivered_vrs_details', 'vd', 'vd.trip_id =n.title AND n.uid = vd.dis_id');
+    $query->isNull('vd.trip_id');
+    $query->addTag('node_distributor_access');
+    $result = $query->execute()->fetchAllKeyed(0, 0);
+  }
+
+  drupal_json_output($result);
+}
+
 function _get_header_sort($array, $field_name, $order) {
   if ($order == 'asc') {
     uasort($array, function ($a, $b) use ($field_name) {
@@ -2603,4 +2649,30 @@ function master_ptl_no_of_bill_lines_by_trip_id($trip_id,$rs_code){
   $query->addExpression('count(id)','no_of_id');
   $results = $query->execute()->fetchField();
   return $results;
+}
+/**
+ * 
+ * @param type $dispatch_data_nid
+ * @return type
+ */
+function _get_van_loading_combination_by_trip($dispatch_data_nid) {
+  $query = db_select('field_data_field_trip_id_reference', 'tr');
+  $query->condition('tr.field_trip_id_reference_nid', "$dispatch_data_nid");
+
+  $query->join('field_data_field_billing_loading_date', 'ld', 'ld.entity_id = tr.entity_id');
+  $query->join('field_data_field_billing_van', 'bv', 'bv.entity_id = tr.entity_id');
+
+  $query->addExpression("concat(bv.field_billing_van_value ,' / ', DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(ld.field_billing_loading_date_value),'+00:00','+05:30'), '%d-%b-%y'))", 'vehicle_loading');
+
+  $query->groupBy('bv.field_billing_van_value,ld.field_billing_loading_date_value');
+
+  $query->condition('tr.bundle', "sales_register_data");
+
+  $results = $query->execute()->fetchAll();
+
+  foreach ($results as $key => $value) {
+    $vehicle_loading = $vehicle_loading . ', ' . $value->vehicle_loading;
+  }
+
+  return ltrim($vehicle_loading, ',');
 }

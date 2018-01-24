@@ -41,8 +41,18 @@ class header_master_ptl_cld_custom_field extends views_handler_field {
     $trip_id = $this->view->args[0];
     $trip_date = master_ptl_trip_date_by_trip_id($trip_id,$rs_code);
     $trip_dates = date('d-M-y', $trip_date);
-    $trip_ids = master_ptl_trip_ids_by_trip_id($trip_id,$rs_code);
-
+    
+    //$trip_ids = master_ptl_trip_ids_by_trip_id($trip_id,$rs_code);
+    $actual_trip_id = $this->view->args[1];
+    $distributor_id = change_feeds_import_get_distributor_id($user_id);
+    
+    $query = db_select('node', 'n');
+    $query->addField('n', 'nid');
+    $query->condition('n.title', $actual_trip_id);
+    $query->condition('n.uid', $distributor_id);
+    $query->condition('n.type', 'dispatch_data');
+    $trip_id_nid = $query->execute()->fetchField();
+    $van_date = _get_van_loading_combination_by_trip($trip_id_nid);
 
     if (!empty($trip_date)) {
 
@@ -68,8 +78,8 @@ class header_master_ptl_cld_custom_field extends views_handler_field {
       </tr>
       <tr>
       <td></td>
-      <td>Trip IDs</td>
-      <td align = "left" style="color:#666">' . $trip_ids . '</td>
+      <td>Van-Date</td>
+      <td align = "left" style="color:#666">' . $van_date . '</td>
       <td></td>
       <td></td>
       <td>Total Free CLDs</td>

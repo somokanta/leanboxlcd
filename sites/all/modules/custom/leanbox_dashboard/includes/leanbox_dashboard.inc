@@ -2359,8 +2359,8 @@ function leanbox_dashboard_impact_chart_query_details($type, $start_date = '', $
    $query->join('field_data_field_billing_van', 'bva', 'bva.entity_id = n.nid');
 
    $query->addExpression('SUM(v.field_bill_value_value)', 'bill_value');
-   $query->leftjoin('field_data_field_dispatch_n_value', 'd1', 'd1.entity_id = n.nid');
-   $query->addExpression('SUM(CASE WHEN (d1.field_dispatch_n_value_value = \'N+2\') THEN field_bill_value_value ELSE 0 END)', 'bill_value1');
+   $query->leftjoin('field_data_field_impact_ontime_criteria', 'd1', 'd1.entity_id = n.nid');
+   $query->addExpression('SUM(CASE WHEN (d1.field_impact_ontime_criteria_value = \'N+2\') THEN field_bill_value_value ELSE 0 END)', 'bill_value1');
 
    $query->condition('n.type', 'sales_register_data');
    if (!empty($start_date) && !empty($end_date)) {

@@ -902,7 +902,7 @@ form {
       }
     }
   }
-  #leanbox-dashboard-chart-filter-otif-form, #leanbox-dashboard-chart-filter-delivery-form, #leanbox-mobile-chart-filter-return-form, #leanbox-mobile-chart-filter-full-return-form, #leanbox-dashboard-chart-filter-adoption-form, #leanbox-dashboard-chart-filter-bod-data-form {
+  #leanbox-dashboard-chart-filter-otif-form, #leanbox-dashboard-chart-filter-delivery-form, #leanbox-dashboard-chart-filter-impact-form, #leanbox-mobile-chart-filter-return-form, #leanbox-mobile-chart-filter-full-return-form, #leanbox-dashboard-chart-filter-adoption-form, #leanbox-dashboard-chart-filter-bod-data-form {
     .container-inline-date{
       width: auto;
       display: inline-block;
@@ -921,7 +921,7 @@ form {
           margin: 8px 0 0 0;
       }
     }
-    #otif-submit, #delivery-submit, #mobile-return-submit, #mobile-full-return-submit, #adoption-graph-submit, #bod-data-submit{
+    #otif-submit, #impact-submit, #delivery-submit, #mobile-return-submit, #mobile-full-return-submit, #adoption-graph-submit, #bod-data-submit{
         width: 80px;
         display: inline-block;
         button {
@@ -931,7 +931,7 @@ form {
     }
     a {
       width: 100%;
-      #otif_div, #delivery_div, #mobile_return_div, #mobile_full_return_div, #adoption_graph_div, #bod_data_div {
+      #otif_div, #impact_div, #delivery_div, #mobile_return_div, #mobile_full_return_div, #adoption_graph_div, #bod_data_div {
           margin: 10px 0 0 0;
           text-align: center;
           display: inline-block;
