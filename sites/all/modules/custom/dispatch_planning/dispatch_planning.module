@@ -1772,7 +1772,7 @@ function vrswise_trip_id_autocomplete($string = '') {
     $query->condition('n.type', 'dispatch_data');
     $query->fields('n', array('title'));
     $query->range(0, 15);
-    $query->leftjoin('dispatch_delivered_vrs_details', 'vd', 'vd.trip_id =n.title AND n.uid = dis_id');
+    $query->leftjoin('dispatch_delivered_vrs_details', 'vd', 'vd.trip_id =n.title AND n.uid = vd.dis_id');
     $query->isNull('vd.trip_id');
     $query->addTag('node_distributor_access');
     $result = $query->execute()->fetchAllKeyed(0, 0);
