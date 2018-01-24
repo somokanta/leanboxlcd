@@ -17,7 +17,7 @@ function leanbox_mobile_schema() {
       'bill_num' => array(
         'description' => 'Bill no.',
         'type' => 'varchar',
-        'length' => 255
+        'length' => 50
       ),
       'distributor_id' => array(
         'description' => 'distributor_id',
@@ -25,8 +25,7 @@ function leanbox_mobile_schema() {
       ),
       'impact_date' => array(
         'description' => 'impact_date',
-        'type' => 'varchar',
-        'length' => 25
+        'type' => 'int'
       ),
       'flag' => array(
         'description' => 'flag',
