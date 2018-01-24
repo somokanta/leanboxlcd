@@ -462,7 +462,7 @@ function leanbox_mobile_get_impact_date() {
   $query = db_select('impact_data', 'imp')
       ->fields('imp')
       ->condition('imp.flag', 0)
-      ->range(0, 500);
+      ->range(0, 5000);
   $result = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
 
   foreach ($result as $key => $value) {
