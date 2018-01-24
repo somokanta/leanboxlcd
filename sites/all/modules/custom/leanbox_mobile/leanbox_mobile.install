@@ -1,0 +1,43 @@
+<?php
+
+/*
+ * Implement hook_schema.
+ */
+
+function leanbox_mobile_schema() {
+
+  $schema['impact_data'] = array(
+    'description' => 'Sequence for Trip ID',
+    'fields' => array(
+      'no' => array(
+        'description' => 'The primary identifier for a data',
+        'type' => 'serial',
+        'not null' => TRUE
+      ),
+      'bill_num' => array(
+        'description' => 'Bill no.',
+        'type' => 'varchar',
+        'length' => 255
+      ),
+      'distributor_id' => array(
+        'description' => 'distributor_id',
+        'type' => 'int'
+      ),
+      'impact_date' => array(
+        'description' => 'impact_date',
+        'type' => 'varchar',
+        'length' => 25
+      ),
+      'flag' => array(
+        'description' => 'flag',
+        'type' => 'int',
+        'length' => 1
+      ),
+    ),
+    'primary key' => array('no'),
+  );
+
+  return $schema;
+}
+
+?>
