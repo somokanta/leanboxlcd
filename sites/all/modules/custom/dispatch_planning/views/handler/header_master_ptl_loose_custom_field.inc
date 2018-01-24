@@ -27,7 +27,7 @@ class header_master_ptl_loose_custom_field extends views_handler_field {
     $total_result = $this->view->result;
     foreach ($total_result as $value) {
       $units += $value->master_ptl_data_loose;
-      $clds += (int)($value->master_ptl_data_loose/$value->ptl_data_configuration_upc);
+      $clds += (int)($value->master_ptl_data_loose/$value->master_ptl_data_configuration_upc);
       $derived_units += $value->master_ptl_data_derived_loose; 
     }
     $rs_code = $total_result[0]->master_ptl_data_rs_code;
