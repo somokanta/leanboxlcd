@@ -2925,7 +2925,7 @@ function get_common_data_for_chhanel_datewise_impact($start_date, $end_date, $di
     $output = "No Result Found";
   }
   if (!empty($res)) {
-    $header = get_header_of_chhanel_otif();
+    $header = get_header_of_chhanel_impact();
     $total_otif_n2_count_perc = round(($total_n2_counts / $total_bill_count) * 100);
     $total_otif_n2_value_perc = round(($total_n2_value / $total_bill_val) * 100);
     $total_otif_n3_count_perc = round(($total_n3_counts / $total_bill_count) * 100);
@@ -2952,6 +2952,7 @@ function get_common_data_for_chhanel_datewise_impact($start_date, $end_date, $di
 
     $output = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
   }
+  dpm($output,'2');
   return $output;
 }
 
