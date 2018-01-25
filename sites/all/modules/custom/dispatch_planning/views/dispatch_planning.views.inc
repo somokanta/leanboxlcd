@@ -8,15 +8,15 @@
 function dispatch_planning_views_data() {
 
    $data = array();
-   
-    // Add custom field
-  $data['views']['field_van_loading_date'] = array(
-    'title' => t('van_loading_date'),
-    'help' => t('Provides a custom van_loading_date field.'),
-    'field' => array(
-      'handler' => 'field_van_loading_date',
-    ),
-  );
+
+   // Add custom field
+   $data['views']['field_van_loading_date'] = array(
+     'title' => t('van_loading_date'),
+     'help' => t('Provides a custom van_loading_date field.'),
+     'field' => array(
+       'handler' => 'field_van_loading_date',
+     ),
+   );
 
    $data['views']['header_ptl_loose_custom'] = array(
      'title' => t('PTL Loose Header'),
@@ -50,7 +50,7 @@ function dispatch_planning_views_data() {
    );
 
    //Master PTL
-      $data['views']['header_master_ptl_loose_custom'] = array(
+   $data['views']['header_master_ptl_loose_custom'] = array(
      'title' => t('Master PTL Loose Header'),
      'help' => t('Just a field created for Master PTL Loose Header.'),
      'area' => array(
@@ -80,7 +80,7 @@ function dispatch_planning_views_data() {
        'handler' => 'footer_master_ptl_cld_custom_field',
      ),
    );
-   
+
    //Dispatch Panning API Log
    $data['dispatch_planning_api_log']['table'] = array(
      'group' => t('dispatch_planning Logs'),
@@ -878,7 +878,7 @@ function dispatch_planning_views_data() {
      'argument' => array(
        'handler' => 'views_handler_argument_string',
      ),
-   ); 
+   );
    // drived EAN
    $data['ptl_data_configuration']['ean2'] = array(
      'title' => t('EAN2'),
@@ -896,7 +896,7 @@ function dispatch_planning_views_data() {
      'argument' => array(
        'handler' => 'views_handler_argument_string',
      ),
-   ); 
+   );
    // drived EAN
    $data['ptl_data_configuration']['ean3'] = array(
      'title' => t('EAN3'),
@@ -914,20 +914,20 @@ function dispatch_planning_views_data() {
      'argument' => array(
        'handler' => 'views_handler_argument_string',
      ),
-   ); 
+   );
 
- $base_table = 'ptl_data_configuration';
- $data[$base_table]['date_filter'] = array(
-   'group' => t('Date'),
-   'title' => t('Date (!base_table)', array('!base_table' => $base_table)),
-   'help' => t('Filter any Views !base_table date field.', array('!base_table' => $base_table)),
-   'filter' => array(
-     'handler' => 'date_views_filter_handler',
-     'empty field name' => t('Undated'),
-     'is date' => TRUE,
-   //'skip base' => $base_table,
-   ),
- );
+   $base_table = 'ptl_data_configuration';
+   $data[$base_table]['date_filter'] = array(
+     'group' => t('Date'),
+     'title' => t('Date (!base_table)', array('!base_table' => $base_table)),
+     'help' => t('Filter any Views !base_table date field.', array('!base_table' => $base_table)),
+     'filter' => array(
+       'handler' => 'date_views_filter_handler',
+       'empty field name' => t('Undated'),
+       'is date' => TRUE,
+     //'skip base' => $base_table,
+     ),
+   );
 
    // Adding custom handler for Master PTL Report data
    $data['master_ptl_data']['table'] = array(
@@ -1733,8 +1733,8 @@ function dispatch_planning_views_data() {
        'handler' => 'views_handler_argument_string',
      ),
    );
-   
-    $data['dispatch_planning_api_data']['res_reason_for_failure'] = array(
+
+   $data['dispatch_planning_api_data']['res_reason_for_failure'] = array(
      'title' => t('DP res_reason_for_failure'),
      'help' => t('Dispatch Planning res_reason_for_failure'),
      'field' => array(
@@ -1805,8 +1805,8 @@ function dispatch_planning_views_data() {
        'handler' => 'views_handler_argument_string',
      ),
    );
-   
-    $data['dispatch_planning_api_data']['res_cash_amount'] = array(
+
+   $data['dispatch_planning_api_data']['res_cash_amount'] = array(
      'title' => t('DP res_cash_amount'),
      'help' => t('Dispatch Planning res_cash_amount'),
      'field' => array(
@@ -1823,7 +1823,7 @@ function dispatch_planning_views_data() {
        'handler' => 'views_handler_argument_string',
      ),
    );
-     $data['dispatch_planning_api_data']['res_to_be_collection'] = array(
+   $data['dispatch_planning_api_data']['res_to_be_collection'] = array(
      'title' => t('DP res_to_be_collection'),
      'help' => t('Dispatch Planning res_to_be_collection'),
      'field' => array(
@@ -1840,7 +1840,7 @@ function dispatch_planning_views_data() {
        'handler' => 'views_handler_argument_string',
      ),
    );
-      $data['dispatch_planning_api_data']['res_signed_bill_partial'] = array(
+   $data['dispatch_planning_api_data']['res_signed_bill_partial'] = array(
      'title' => t('DP res_signed_bill_partial'),
      'help' => t('Dispatch Planning res_signed_bill_partial'),
      'field' => array(
@@ -2693,7 +2693,7 @@ function dispatch_planning_views_data() {
        'handler' => 'views_handler_argument_string',
      ),
    );
-   
+
    $data['dispatch_planning_item_details']['res_sku_reason'] = array(
      'title' => t('DP lines res_sku_reason'),
      'help' => t('Dispatch Planning lines res_sku_reason'),
@@ -2711,7 +2711,7 @@ function dispatch_planning_views_data() {
        'handler' => 'views_handler_argument_string',
      ),
    );
-     
+
    $data['dispatch_planning_item_details']['sum_net_sales_cases'] = array(
      'title' => t('DP lines sum_net_sales_cases'),
      'help' => t('Dispatch Planning lines sum_net_sales_cases'),
@@ -2862,7 +2862,7 @@ function dispatch_planning_views_data() {
      ),
    );
 
-   
+
    // Adding custom handler for PTL Header Report
    $data['ptl_header_data']['table'] = array(
      'group' => t('PTL Header data'),
@@ -2966,7 +2966,7 @@ function dispatch_planning_views_data() {
      'argument' => array(
        'handler' => 'views_handler_argument_string',
      ),
-   );   
+   );
    // vehicle
    $data['ptl_header_data']['vehicle'] = array(
      'title' => t('vehicle'),
@@ -3020,7 +3020,7 @@ function dispatch_planning_views_data() {
      'argument' => array(
        'handler' => 'views_handler_argument_string',
      ),
-   );   
+   );
    // total_qty
    $data['ptl_header_data']['total_qty'] = array(
      'title' => t('Total QTY'),
@@ -3056,7 +3056,7 @@ function dispatch_planning_views_data() {
      'argument' => array(
        'handler' => 'views_handler_argument_string',
      ),
-   );   
+   );
    // operator_id
    $data['ptl_header_data']['operator_id'] = array(
      'title' => t('Operator Id'),
@@ -3110,7 +3110,7 @@ function dispatch_planning_views_data() {
      'argument' => array(
        'handler' => 'views_handler_filter_date',
      ),
-   );   
+   );
    // created_time
    $data['ptl_header_data']['created_time'] = array(
      'title' => t('Created Time'),
@@ -3128,7 +3128,7 @@ function dispatch_planning_views_data() {
      'argument' => array(
        'handler' => 'views_handler_filter_date',
      ),
-   ); 
+   );
    // updated_time
    $data['ptl_header_data']['updated_time'] = array(
      'title' => t('Updated Time'),
@@ -3147,6 +3147,596 @@ function dispatch_planning_views_data() {
        'handler' => 'views_handler_filter_date',
      ),
    );
-   
+
+
+
+   // VRS TABLE
+   //Dispatch Panning API Log
+   $data['dispatch_delivered_vrs_details']['table'] = array(
+     'group' => t('dispatch_delivered_vrs_details'),
+     'title' => t('dispatch_delivered_vrs_details'),
+     'help' => t('dispatch_delivered_vrs_details.'),
+   );
+
+   // Define this as a base table.
+   $data['dispatch_delivered_vrs_details']['table']['base'] = array(
+     'field' => 'id',
+     'title' => t('dispatch_delivered_vrs_details'),
+     'help' => t("unique identifiers."),
+       // 'weight' => -10,
+   );
+
+   // Trip ID
+   $data['dispatch_delivered_vrs_details']['trip_id'] = array(
+     'title' => t('Trip ID'),
+     'help' => t('Trip ID'),
+     'field' => array(
+       'handler' => 'views_handler_field',
+       'click sortable' => TRUE,
+     ),
+     'sort' => array(
+       'handler' => 'views_handler_sort',
+     ),
+     'filter' => array(
+       'handler' => 'views_handler_filter_string',
+     ),
+     'argument' => array(
+       'handler' => 'views_handler_argument_string',
+     ),
+   );
+
+   // ID
+   $data['dispatch_delivered_vrs_details']['id'] = array(
+     'title' => t('vrs ID'),
+     'help' => t('vrs ID'),
+     'field' => array(
+       'handler' => 'views_handler_field',
+       'click sortable' => TRUE,
+     ),
+     'sort' => array(
+       'handler' => 'views_handler_sort',
+     ),
+     'filter' => array(
+       'handler' => 'views_handler_filter_string',
+     ),
+     'argument' => array(
+       'handler' => 'views_handler_argument_string',
+     ),
+   );
+
+   $data['dispatch_delivered_vrs_details']['sb_bill_count'] = array(
+     'title' => t('sb_bill_count'),
+     'help' => t('sb_bill_count'),
+     'field' => array(
+       'handler' => 'views_handler_field',
+       'click sortable' => TRUE,
+     ),
+     'sort' => array(
+       'handler' => 'views_handler_sort',
+     ),
+     'filter' => array(
+       'handler' => 'views_handler_filter_string',
+     ),
+     'argument' => array(
+       'handler' => 'views_handler_argument_string',
+     ),
+   );
+
+   $data['dispatch_delivered_vrs_details']['sb_bill_value'] = array(
+     'title' => t('sb_bill_value'),
+     'help' => t('sb_bill_value'),
+     'field' => array(
+       'handler' => 'views_handler_field',
+       'click sortable' => TRUE,
+     ),
+     'sort' => array(
+       'handler' => 'views_handler_sort',
+     ),
+     'filter' => array(
+       'handler' => 'views_handler_filter_string',
+     ),
+     'argument' => array(
+       'handler' => 'views_handler_argument_string',
+     ),
+   );
+
+   $data['dispatch_delivered_vrs_details']['sb_app_value'] = array(
+     'title' => t('sb_app_value'),
+     'help' => t('sb_app_value'),
+     'field' => array(
+       'handler' => 'views_handler_field',
+       'click sortable' => TRUE,
+     ),
+     'sort' => array(
+       'handler' => 'views_handler_sort',
+     ),
+     'filter' => array(
+       'handler' => 'views_handler_filter_string',
+     ),
+     'argument' => array(
+       'handler' => 'views_handler_argument_string',
+     ),
+   );
+
+   $data['dispatch_delivered_vrs_details']['sb_actual_collected'] = array(
+     'title' => t('sb_actual_collected'),
+     'help' => t('sb_actual_collected'),
+     'field' => array(
+       'handler' => 'views_handler_field',
+       'click sortable' => TRUE,
+     ),
+     'sort' => array(
+       'handler' => 'views_handler_sort',
+     ),
+     'filter' => array(
+       'handler' => 'views_handler_filter_string',
+     ),
+     'argument' => array(
+       'handler' => 'views_handler_argument_string',
+     ),
+   );
+
+   $data['dispatch_delivered_vrs_details']['sb_difference'] = array(
+     'title' => t('sb_difference'),
+     'help' => t('sb_difference'),
+     'field' => array(
+       'handler' => 'views_handler_field',
+       'click sortable' => TRUE,
+     ),
+     'sort' => array(
+       'handler' => 'views_handler_sort',
+     ),
+     'filter' => array(
+       'handler' => 'views_handler_filter_string',
+     ),
+     'argument' => array(
+       'handler' => 'views_handler_argument_string',
+     ),
+   );
+
+   $data['dispatch_delivered_vrs_details']['ch_bill_count'] = array(
+     'title' => t('ch_bill_count'),
+     'help' => t('ch_bill_count'),
+     'field' => array(
+       'handler' => 'views_handler_field',
+       'click sortable' => TRUE,
+     ),
+     'sort' => array(
+       'handler' => 'views_handler_sort',
+     ),
+     'filter' => array(
+       'handler' => 'views_handler_filter_string',
+     ),
+     'argument' => array(
+       'handler' => 'views_handler_argument_string',
+     ),
+   );
+   $data['dispatch_delivered_vrs_details']['ch_bill_value'] = array(
+     'title' => t('ch_bill_value'),
+     'help' => t('ch_bill_value'),
+     'field' => array(
+       'handler' => 'views_handler_field',
+       'click sortable' => TRUE,
+     ),
+     'sort' => array(
+       'handler' => 'views_handler_sort',
+     ),
+     'filter' => array(
+       'handler' => 'views_handler_filter_string',
+     ),
+     'argument' => array(
+       'handler' => 'views_handler_argument_string',
+     ),
+   );
+   $data['dispatch_delivered_vrs_details']['ch_app_value'] = array(
+     'title' => t('ch_app_value'),
+     'help' => t('ch_app_value'),
+     'field' => array(
+       'handler' => 'views_handler_field',
+       'click sortable' => TRUE,
+     ),
+     'sort' => array(
+       'handler' => 'views_handler_sort',
+     ),
+     'filter' => array(
+       'handler' => 'views_handler_filter_string',
+     ),
+     'argument' => array(
+       'handler' => 'views_handler_argument_string',
+     ),
+   );
+   $data['dispatch_delivered_vrs_details']['ch_actual_collected'] = array(
+     'title' => t('ch_actual_collected'),
+     'help' => t('ch_actual_collected'),
+     'field' => array(
+       'handler' => 'views_handler_field',
+       'click sortable' => TRUE,
+     ),
+     'sort' => array(
+       'handler' => 'views_handler_sort',
+     ),
+     'filter' => array(
+       'handler' => 'views_handler_filter_string',
+     ),
+     'argument' => array(
+       'handler' => 'views_handler_argument_string',
+     ),
+   );
+   $data['dispatch_delivered_vrs_details']['ch_difference'] = array(
+     'title' => t('ch_difference'),
+     'help' => t('ch_difference'),
+     'field' => array(
+       'handler' => 'views_handler_field',
+       'click sortable' => TRUE,
+     ),
+     'sort' => array(
+       'handler' => 'views_handler_sort',
+     ),
+     'filter' => array(
+       'handler' => 'views_handler_filter_string',
+     ),
+     'argument' => array(
+       'handler' => 'views_handler_argument_string',
+     ),
+   );
+   $data['dispatch_delivered_vrs_details']['cash_bill_count'] = array(
+     'title' => t('cash_bill_count'),
+     'help' => t('cash_bill_count'),
+     'field' => array(
+       'handler' => 'views_handler_field',
+       'click sortable' => TRUE,
+     ),
+     'sort' => array(
+       'handler' => 'views_handler_sort',
+     ),
+     'filter' => array(
+       'handler' => 'views_handler_filter_string',
+     ),
+     'argument' => array(
+       'handler' => 'views_handler_argument_string',
+     ),
+   );
+   $data['dispatch_delivered_vrs_details']['cash_bill_value'] = array(
+     'title' => t('cash_bill_value'),
+     'help' => t('cash_bill_value'),
+     'field' => array(
+       'handler' => 'views_handler_field',
+       'click sortable' => TRUE,
+     ),
+     'sort' => array(
+       'handler' => 'views_handler_sort',
+     ),
+     'filter' => array(
+       'handler' => 'views_handler_filter_string',
+     ),
+     'argument' => array(
+       'handler' => 'views_handler_argument_string',
+     ),
+   );
+   $data['dispatch_delivered_vrs_details']['cash_app_value'] = array(
+     'title' => t('cash_app_value'),
+     'help' => t('cash_app_value'),
+     'field' => array(
+       'handler' => 'views_handler_field',
+       'click sortable' => TRUE,
+     ),
+     'sort' => array(
+       'handler' => 'views_handler_sort',
+     ),
+     'filter' => array(
+       'handler' => 'views_handler_filter_string',
+     ),
+     'argument' => array(
+       'handler' => 'views_handler_argument_string',
+     ),
+   );
+   $data['dispatch_delivered_vrs_details']['cash_actual_collected'] = array(
+     'title' => t('cash_actual_collected'),
+     'help' => t('cash_actual_collected'),
+     'field' => array(
+       'handler' => 'views_handler_field',
+       'click sortable' => TRUE,
+     ),
+     'sort' => array(
+       'handler' => 'views_handler_sort',
+     ),
+     'filter' => array(
+       'handler' => 'views_handler_filter_string',
+     ),
+     'argument' => array(
+       'handler' => 'views_handler_argument_string',
+     ),
+   );
+   $data['dispatch_delivered_vrs_details']['cash_difference'] = array(
+     'title' => t('cash_difference'),
+     'help' => t('cash_difference'),
+     'field' => array(
+       'handler' => 'views_handler_field',
+       'click sortable' => TRUE,
+     ),
+     'sort' => array(
+       'handler' => 'views_handler_sort',
+     ),
+     'filter' => array(
+       'handler' => 'views_handler_filter_string',
+     ),
+     'argument' => array(
+       'handler' => 'views_handler_argument_string',
+     ),
+   );
+   $data['dispatch_delivered_vrs_details']['tbr_bill_count'] = array(
+     'title' => t('tbr_bill_count'),
+     'help' => t('tbr_bill_count'),
+     'field' => array(
+       'handler' => 'views_handler_field',
+       'click sortable' => TRUE,
+     ),
+     'sort' => array(
+       'handler' => 'views_handler_sort',
+     ),
+     'filter' => array(
+       'handler' => 'views_handler_filter_string',
+     ),
+     'argument' => array(
+       'handler' => 'views_handler_argument_string',
+     ),
+   );
+   $data['dispatch_delivered_vrs_details']['tbr_bill_value'] = array(
+     'title' => t('tbr_bill_value'),
+     'help' => t('tbr_bill_value'),
+     'field' => array(
+       'handler' => 'views_handler_field',
+       'click sortable' => TRUE,
+     ),
+     'sort' => array(
+       'handler' => 'views_handler_sort',
+     ),
+     'filter' => array(
+       'handler' => 'views_handler_filter_string',
+     ),
+     'argument' => array(
+       'handler' => 'views_handler_argument_string',
+     ),
+   );
+   $data['dispatch_delivered_vrs_details']['tbr_app_value'] = array(
+     'title' => t('tbr_app_value'),
+     'help' => t('tbr_app_value'),
+     'field' => array(
+       'handler' => 'views_handler_field',
+       'click sortable' => TRUE,
+     ),
+     'sort' => array(
+       'handler' => 'views_handler_sort',
+     ),
+     'filter' => array(
+       'handler' => 'views_handler_filter_string',
+     ),
+     'argument' => array(
+       'handler' => 'views_handler_argument_string',
+     ),
+   );
+   $data['dispatch_delivered_vrs_details']['tbr_actual_collected'] = array(
+     'title' => t('tbr_actual_collected'),
+     'help' => t('tbr_actual_collected'),
+     'field' => array(
+       'handler' => 'views_handler_field',
+       'click sortable' => TRUE,
+     ),
+     'sort' => array(
+       'handler' => 'views_handler_sort',
+     ),
+     'filter' => array(
+       'handler' => 'views_handler_filter_string',
+     ),
+     'argument' => array(
+       'handler' => 'views_handler_argument_string',
+     ),
+   );
+   $data['dispatch_delivered_vrs_details']['tbr_difference'] = array(
+     'title' => t('tbr_difference'),
+     'help' => t('tbr_difference'),
+     'field' => array(
+       'handler' => 'views_handler_field',
+       'click sortable' => TRUE,
+     ),
+     'sort' => array(
+       'handler' => 'views_handler_sort',
+     ),
+     'filter' => array(
+       'handler' => 'views_handler_filter_string',
+     ),
+     'argument' => array(
+       'handler' => 'views_handler_argument_string',
+     ),
+   );
+   $data['dispatch_delivered_vrs_details']['van_bill_value'] = array(
+     'title' => t('van_bill_value'),
+     'help' => t('van_bill_value'),
+     'field' => array(
+       'handler' => 'views_handler_field',
+       'click sortable' => TRUE,
+     ),
+     'sort' => array(
+       'handler' => 'views_handler_sort',
+     ),
+     'filter' => array(
+       'handler' => 'views_handler_filter_string',
+     ),
+     'argument' => array(
+       'handler' => 'views_handler_argument_string',
+     ),
+   );
+   $data['dispatch_delivered_vrs_details']['cash_debit'] = array(
+     'title' => t('cash_debit'),
+     'help' => t('cash_debit'),
+     'field' => array(
+       'handler' => 'views_handler_field',
+       'click sortable' => TRUE,
+     ),
+     'sort' => array(
+       'handler' => 'views_handler_sort',
+     ),
+     'filter' => array(
+       'handler' => 'views_handler_filter_string',
+     ),
+     'argument' => array(
+       'handler' => 'views_handler_argument_string',
+     ),
+   );
+   $data['dispatch_delivered_vrs_details']['inventory_debit'] = array(
+     'title' => t('inventory_debit'),
+     'help' => t('inventory_debit'),
+     'field' => array(
+       'handler' => 'views_handler_field',
+       'click sortable' => TRUE,
+     ),
+     'sort' => array(
+       'handler' => 'views_handler_sort',
+     ),
+     'filter' => array(
+       'handler' => 'views_handler_filter_string',
+     ),
+     'argument' => array(
+       'handler' => 'views_handler_argument_string',
+     ),
+   );
+   $data['dispatch_delivered_vrs_details']['total_debit'] = array(
+     'title' => t('total_debit'),
+     'help' => t('total_debit'),
+     'field' => array(
+       'handler' => 'views_handler_field',
+       'click sortable' => TRUE,
+     ),
+     'sort' => array(
+       'handler' => 'views_handler_sort',
+     ),
+     'filter' => array(
+       'handler' => 'views_handler_filter_string',
+     ),
+     'argument' => array(
+       'handler' => 'views_handler_argument_string',
+     ),
+   );
+   $data['dispatch_delivered_vrs_details']['total_bill_count'] = array(
+     'title' => t('total_bill_count'),
+     'help' => t('total_bill_count'),
+     'field' => array(
+       'handler' => 'views_handler_field',
+       'click sortable' => TRUE,
+     ),
+     'sort' => array(
+       'handler' => 'views_handler_sort',
+     ),
+     'filter' => array(
+       'handler' => 'views_handler_filter_string',
+     ),
+     'argument' => array(
+       'handler' => 'views_handler_argument_string',
+     ),
+   );
+   $data['dispatch_delivered_vrs_details']['total_bill_value'] = array(
+     'title' => t('total_bill_value'),
+     'help' => t('total_bill_value'),
+     'field' => array(
+       'handler' => 'views_handler_field',
+       'click sortable' => TRUE,
+     ),
+     'sort' => array(
+       'handler' => 'views_handler_sort',
+     ),
+     'filter' => array(
+       'handler' => 'views_handler_filter_string',
+     ),
+     'argument' => array(
+       'handler' => 'views_handler_argument_string',
+     ),
+   );
+   $data['dispatch_delivered_vrs_details']['fr_bill_count'] = array(
+     'title' => t('fr_bill_count'),
+     'help' => t('fr_bill_count'),
+     'field' => array(
+       'handler' => 'views_handler_field',
+       'click sortable' => TRUE,
+     ),
+     'sort' => array(
+       'handler' => 'views_handler_sort',
+     ),
+     'filter' => array(
+       'handler' => 'views_handler_filter_string',
+     ),
+     'argument' => array(
+       'handler' => 'views_handler_argument_string',
+     ),
+   );
+   $data['dispatch_delivered_vrs_details']['fr_bill_value'] = array(
+     'title' => t('fr_bill_value'),
+     'help' => t('fr_bill_value'),
+     'field' => array(
+       'handler' => 'views_handler_field',
+       'click sortable' => TRUE,
+     ),
+     'sort' => array(
+       'handler' => 'views_handler_sort',
+     ),
+     'filter' => array(
+       'handler' => 'views_handler_filter_string',
+     ),
+     'argument' => array(
+       'handler' => 'views_handler_argument_string',
+     ),
+   );
+   $data['dispatch_delivered_vrs_details']['ws_bill_count'] = array(
+     'title' => t('ws_bill_count'),
+     'help' => t('ws_bill_count'),
+     'field' => array(
+       'handler' => 'views_handler_field',
+       'click sortable' => TRUE,
+     ),
+     'sort' => array(
+       'handler' => 'views_handler_sort',
+     ),
+     'filter' => array(
+       'handler' => 'views_handler_filter_string',
+     ),
+     'argument' => array(
+       'handler' => 'views_handler_argument_string',
+     ),
+   );
+   $data['dispatch_delivered_vrs_details']['ws_bill_value'] = array(
+     'title' => t('ws_bill_value'),
+     'help' => t('ws_bill_value'),
+     'field' => array(
+       'handler' => 'views_handler_field',
+       'click sortable' => TRUE,
+     ),
+     'sort' => array(
+       'handler' => 'views_handler_sort',
+     ),
+     'filter' => array(
+       'handler' => 'views_handler_filter_string',
+     ),
+     'argument' => array(
+       'handler' => 'views_handler_argument_string',
+     ),
+   );
+   $data['dispatch_delivered_vrs_details']['dis_id'] = array(
+     'title' => t('vrs dis_id'),
+     'help' => t('vrs dis_id'),
+     'field' => array(
+       'handler' => 'views_handler_field',
+       'click sortable' => TRUE,
+     ),
+     'sort' => array(
+       'handler' => 'views_handler_sort',
+     ),
+     'filter' => array(
+       'handler' => 'views_handler_filter_string',
+     ),
+     'argument' => array(
+       'handler' => 'views_handler_argument_string',
+     ),
+   );
+
+
    return $data;
 }
