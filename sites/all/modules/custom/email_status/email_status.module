@@ -2856,9 +2856,9 @@ function get_common_data_for_chhanel_datewise_impact($start_date, $end_date, $di
   $query->join('field_data_field_channel', 'chan', 'chan.entity_id = oun.nid');
   $query->groupBy('field_channel_value');
   $query->orderBy('chan.field_channel_value', 'ASC');
-  $query->leftjoin('field_data_field_trip_id_reference', 'ti', 'ti.entity_id = n.nid');
-  $query->leftjoin('node', 'disn', 'disn.nid = ti.field_trip_id_reference_nid');
-  $query->leftjoin('field_data_field_impact_updated_date', 'im_date', 'im_date.entity_id = disn.nid');
+  //$query->leftjoin('field_data_field_trip_id_reference', 'ti', 'ti.entity_id = n.nid');
+  //$query->leftjoin('node', 'disn', 'disn.nid = ti.field_trip_id_reference_nid');
+  $query->leftjoin('field_data_field_impact_updated_date', 'im_date', 'im_date.entity_id = n.nid');
   $query->addExpression('COUNT(n.title)', 'bill_count');
   $query->addExpression('SUM(bv.field_bill_value_value)', 'bill_value');
   $query->leftjoin('field_data_field_impact_ontime_criteria', 'd1', 'd1.entity_id = n.nid');
@@ -2952,7 +2952,6 @@ function get_common_data_for_chhanel_datewise_impact($start_date, $end_date, $di
 
     $output = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
   }
-  dpm($output,'2');
   return $output;
 }
 

@@ -2395,7 +2395,6 @@ function leanbox_dashboard_impact_chart_query_details($type, $start_date = '', $
       $table = $mtd_html;
    }
    $output1['table'] = $table;
-dpm($output1,'$output1');
    return $output1;
 }
 /**
