@@ -676,7 +676,7 @@ drupal_get_path('module', 'leanbox_dashboard') . '/js/google_chart.js',
 
       $filter_form = drupal_render(drupal_get_form('leanbox_dashboard_chart_filter_impact_form'));
       $block['content'] = array(
-        '#markup' => theme('leanbox_dashboard', array('data' => $filter_form, 'impact_table' => $data['table'],)),
+        '#markup' => theme('leanbox_dashboard', array('data' => $filter_form, 'otif_table' => $data['table'],)),
         '#attached' => array(
           'js' => array(
            drupal_get_path('module', 'leanbox_dashboard') . '/js/google_chart.js',
