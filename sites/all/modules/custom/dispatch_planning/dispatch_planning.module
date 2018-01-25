@@ -299,7 +299,7 @@ function dispatch_planning_menu() {
 
   $items['vrs-popup-details/%ctools_js/%/%'] = array(
     'page callback' => 'vrs_popup_details_callback',
-    'page arguments' => array(1, 2),
+    'page arguments' => array(1, 2, 3),
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
@@ -354,21 +354,26 @@ function vrs_popup_details_form($form, $form_state) {
    $query = db_select('dispatch_planning_api_data', 'ad');
    $query->condition('ad.runsheet_number', $trip_number, '=');
 
+  
    if ($type == 'Signed_Bills') {
       $header = array('beat_name', 'party_code', 'party_name', 'bill_number', 'bill_date', 'bill_value', 'res_confirm_signed_bill_amount');
+      $query->condition('ad.res_confirm_signed_bill_amount', 'NA', '!=');
+      $query->isNotNull('ad.res_confirm_signed_bill_amount');
    }
    else if ($type == 'Cheque_Bills') {
       $header = array('beat_name', 'party_code', 'party_name', 'bill_number', 'bill_date', 'bill_value', 'res_cheque_amount');
+      $query->condition('ad.res_cheque_amount', 'NA', '!=');
+      $query->isNotNull('ad.res_cheque_amount');
    }
    else {
       $header = array('beat_name', 'party_code', 'party_name', 'bill_number', 'bill_date', 'bill_value', 'res_cash_amount');
+      $query->condition('ad.res_cash_amount', 'NA', '!=');
+      $query->isNotNull('ad.res_cash_amount');
    }
    // $query->condition('ad.hub', $rs_code, '=');
    $query->fields('ad', $header);
-   $query->condition('ad.res_cheque_amount', 'NA', '!=');
-   $query->isNotNull('ad.res_cheque_amount');
-   $rows[] = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
-   
+   $rows = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+
    $form['ret_trip_details'] = array(
      '#theme' => 'table',
      '#header' => $header,
