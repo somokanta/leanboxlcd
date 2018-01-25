@@ -296,11 +296,6 @@ function dispatch_planning_menu() {
     'file' => 'master_ptl_dispatch_planning.inc',
   );
   
-//  $items['mymodule/page'] = array(
-//    'page callback' => 'mymodule_page',
-//    'access callback' => TRUE,
-//    'type' => MENU_CALLBACK,
-//  );
 
   $items['vrs-popup-details/%ctools_js/%/%'] = array(
     'page callback' => 'vrs_popup_details_callback',
@@ -312,13 +307,6 @@ function dispatch_planning_menu() {
   return $items;
 }
 
-//
-//function mymodule_page() {
-//   // Load the modal library and add the modal javascript.
-//   ctools_include('modal');
-//   ctools_modal_add_js();
-//   return '<div id="magical-modal-link">' . l(t('hello'), 'mymodule/nojs', array('attributes' => array('class' => 'ctools-use-modal'))) . '</div>';
-//}
 
 /**
  * Ajax menu callback.
@@ -379,7 +367,7 @@ function vrs_popup_details_form($form, $form_state) {
    $query->fields('ad', $header);
    $query->condition('ad.res_cheque_amount', 'NA', '!=');
    $query->isNotNull('ad.res_cheque_amount');
-   $rows = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+   $rows[] = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
    
    $form['ret_trip_details'] = array(
      '#theme' => 'table',
