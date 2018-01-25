@@ -2372,15 +2372,15 @@ function leanbox_dashboard_impact_chart_query_details($type, $start_date = '', $
    $output = round(($total['bill_value1'] / $total['bill_value'] ) * 100);
    $output1['output'] = $output;
 
-   if ($data) {
+//   if ($data) {
       $arg = arg(0);
-   }
-   else {
-      $arg_array['r'] = $type;
-      $arg_array = explode('/', $type);
-      $arg = $arg_array[3];
-   }
-
+//   }
+//   else {
+//      $arg_array['r'] = $type;
+//      $arg_array = explode('/', $type);
+//      $arg = $arg_array[3];
+//   }
+dpm($arg,'testing');
    if ($arg !== 'dashboard') {
 
       $mtd_html = "<h3>Channel Wise Impact</h3>";
