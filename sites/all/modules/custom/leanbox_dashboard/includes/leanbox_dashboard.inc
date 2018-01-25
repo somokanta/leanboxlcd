@@ -2380,7 +2380,6 @@ function leanbox_dashboard_impact_chart_query_details($type, $start_date = '', $
 //      $arg_array = explode('/', $type);
 //      $arg = $arg_array[3];
 //   }
-dpm($arg,'testing');
    if ($arg !== 'dashboard') {
 
       $mtd_html = "<h3>Channel Wise Impact</h3>";
@@ -2396,7 +2395,7 @@ dpm($arg,'testing');
       $table = $mtd_html;
    }
    $output1['table'] = $table;
-
+dpm($output1,'$output1');
    return $output1;
 }
 /**
