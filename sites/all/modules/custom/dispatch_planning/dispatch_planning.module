@@ -367,7 +367,7 @@ function vrs_popup_details_form($form, $form_state) {
    $query->fields('ad', $header);
    $query->condition('ad.res_cheque_amount', 'NA', '!=');
    $query->isNotNull('ad.res_cheque_amount');
-   $rows = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+   $rows[] = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
    
    $form['ret_trip_details'] = array(
      '#theme' => 'table',
