@@ -295,7 +295,86 @@ function dispatch_planning_menu() {
     'type' => MENU_CALLBACK,
     'file' => 'master_ptl_dispatch_planning.inc',
   );
+  
+
+  $items['vrs-popup-details/%ctools_js/%/%'] = array(
+    'page callback' => 'vrs_popup_details_callback',
+    'page arguments' => array(1, 2),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+
   return $items;
+}
+
+
+/**
+ * Ajax menu callback.
+ */
+function vrs_popup_details_callback($ajax, $type, $trip_number) {
+  if ($ajax) {
+    ctools_include('ajax');
+    ctools_include('modal');
+
+    $form_state = array(
+      'ajax' => TRUE,
+      'title' => t("$type Bill Details"),
+      'type' => $type,
+      'trip_number' => $trip_number,
+    );
+
+    // Use ctools to generate ajax instructions for the browser to create
+    // a form in a modal popup.
+    $output = ctools_modal_form_wrapper('vrs_popup_details_form', $form_state);
+
+    // If the form has been submitted, there may be additional instructions
+    // such as dismissing the modal popup.
+    if (!empty($form_state['ajax_commands'])) {
+      $output = $form_state['ajax_commands'];
+    }
+
+    // Return the ajax instructions to the browser via ajax_render().
+    print ajax_render($output);
+    drupal_exit();
+  }
+  else {
+    return drupal_get_form('vrs_popup_details_form');
+  }
+}
+
+
+/**
+ * Drupal form to be put in a modal.
+ */
+function vrs_popup_details_form($form, $form_state) {
+   $form = array();
+   $trip_number = $form_state['trip_number'];
+   $type = $form_state['type'];
+   
+   $query = db_select('dispatch_planning_api_data', 'ad');
+   $query->condition('ad.runsheet_number', $trip_number, '=');
+
+   if ($type == 'Signed_Bills') {
+      $header = array('beat_name', 'party_code', 'party_name', 'bill_number', 'bill_date', 'bill_value', 'res_confirm_signed_bill_amount');
+   }
+   else if ($type == 'Cheque_Bills') {
+      $header = array('beat_name', 'party_code', 'party_name', 'bill_number', 'bill_date', 'bill_value', 'res_cheque_amount');
+   }
+   else {
+      $header = array('beat_name', 'party_code', 'party_name', 'bill_number', 'bill_date', 'bill_value', 'res_cash_amount');
+   }
+   // $query->condition('ad.hub', $rs_code, '=');
+   $query->fields('ad', $header);
+   $query->condition('ad.res_cheque_amount', 'NA', '!=');
+   $query->isNotNull('ad.res_cheque_amount');
+   $rows = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+   
+   $form['ret_trip_details'] = array(
+     '#theme' => 'table',
+     '#header' => $header,
+     '#rows' => $rows,
+   );
+   return $form;
 }
 
 function dispatch_planning_permission() {
