@@ -2405,6 +2405,9 @@ function get_mtd_data_channel($this_date, $yesterday, $distributor_id) {
 function get_mtd_data_channel_otif($this_date, $yesterday, $distributor_id) {
   return get_common_data_for_chhanel_datewise_otif($this_date, $yesterday, $distributor_id);
 }
+function get_mtd_data_channel_impact($this_date, $yesterday, $distributor_id) {
+  return get_common_data_for_chhanel_datewise_impact($this_date, $yesterday, $distributor_id);
+}
 
 function get_one_day_before_mtd_data_channel($this_date, $day_before_yesterday, $distributor_id) {
   return get_common_data_for_chhanel_datewise($this_date, $day_before_yesterday, $distributor_id);
@@ -2837,6 +2840,122 @@ function get_common_data_for_chhanel_datewise_otif($start_date, $end_date, $dist
   return $output;
 }
 
+//Impact
+function get_common_data_for_chhanel_datewise_impact($start_date, $end_date, $distributor_id) {
+  $query = db_select('node', 'n');
+  $query->condition('n.type', 'sales_register_data');
+  $query->condition('n.uid', $distributor_id, '=');
+  $query->join('field_data_field_billing_van', 'bva', 'bva.entity_id = n.nid');
+  $query->join('field_data_field_sr_bill_date', 'bd', 'bd.entity_id = n.nid');
+  $query->condition('bd.field_sr_bill_date_value', array($start_date, $end_date), 'BETWEEN');
+  $query->join('field_data_field_bill_value', 'bv', 'bv.entity_id = n.nid');
+  $query->join('field_data_field_sales_party_code', 'pc', 'pc.entity_id = n.nid');
+  $query->join('node', 'oun', 'pc.field_sales_party_code_value = oun.title');
+  $query->condition('oun.type', 'outlet_master');
+  $query->condition('oun.uid', $distributor_id, '=');
+  $query->join('field_data_field_channel', 'chan', 'chan.entity_id = oun.nid');
+  $query->groupBy('field_channel_value');
+  $query->orderBy('chan.field_channel_value', 'ASC');
+  $query->leftjoin('field_data_field_trip_id_reference', 'ti', 'ti.entity_id = n.nid');
+  $query->leftjoin('node', 'disn', 'disn.nid = ti.field_trip_id_reference_nid');
+  $query->leftjoin('field_data_field_impact_updated_date', 'im_date', 'im_date.entity_id = disn.nid');
+  $query->addExpression('COUNT(n.title)', 'bill_count');
+  $query->addExpression('SUM(bv.field_bill_value_value)', 'bill_value');
+  $query->leftjoin('field_data_field_impact_ontime_criteria', 'd1', 'd1.entity_id = n.nid');
+
+  // bill counts
+  $query->addExpression('SUM(CASE WHEN (d1.field_impact_ontime_criteria_value = \'N+2\') THEN 1 ELSE 0 END)', 'n2_counts');
+  $query->addExpression('SUM(CASE WHEN (d1.field_impact_ontime_criteria_value = \'N+3\') THEN 1 ELSE 0 END)', 'n3_counts');
+  $query->addExpression('SUM(CASE WHEN (im_date.field_impact_updated_date_value IS NULL) OR ((d1.field_impact_ontime_criteria_value = \'N+4\')) THEN 1 ELSE 0 END)', 'n4_counts');
+
+  // bill values
+  $query->addExpression('SUM(CASE WHEN (d1.field_impact_ontime_criteria_value = \'N+2\') THEN field_bill_value_value ELSE 0 END)', 'n2_value');
+  $query->addExpression('SUM(CASE WHEN (d1.field_impact_ontime_criteria_value = \'N+3\') THEN field_bill_value_value ELSE 0 END)', 'n3_value');
+  $query->addExpression('SUM(CASE WHEN (im_date.field_impact_updated_date_value IS NULL) OR ((d1.field_impact_ontime_criteria_value = \'N+4\')) THEN field_bill_value_value ELSE 0 END)', 'n4_value');
+
+  $query->fields('n', array('nid'));
+  $query->fields('bd', array('field_sr_bill_date_value'));
+  $query->fields('chan', array('field_channel_value'));
+
+  $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+
+  if (!empty($res)) {
+    foreach ($res as $k => $v) {
+      $channel = $v['field_channel_value'];
+      $bill_val = $v['bill_value'];
+      $bill_val = round($bill_val);
+
+      $otif_n2_count_perc = round(($v['n2_counts'] / $v['bill_count']) * 100);
+      $otif_n2_value_perc = round(($v['n2_value'] / $v['bill_value']) * 100);
+      $otif_n3_count_perc = round(($v['n3_counts'] / $v['bill_count']) * 100);
+      $otif_n3_value_perc = round(($v['n3_value'] / $v['bill_value']) * 100);
+
+      $otif_n4_count_perc = round(($v['n4_counts'] / $v['bill_count']) * 100);
+      $otif_n4_value_perc = round(($v['n4_value'] / $v['bill_value']) * 100);
+
+      $total_bill_count += $v['bill_count'];
+      $total_bill_val += $bill_val;
+      $total_n2_counts += $v['n2_counts'];
+      $total_n2_value += $v['n2_value'];
+      $total_n3_counts += $v['n3_counts'];
+      $total_n3_value += $v['n3_value'];
+
+      $total_n4_counts += $v['n4_counts'];
+      $total_n4_value += $v['n4_value'];
+
+      $rows[] = array($channel,
+        $v['bill_count'],
+        $bill_val,
+        $v['n2_counts'],
+        round($v['n2_value']),
+        $v['n3_counts'],
+        round($v['n3_value']),
+        $v['n4_counts'],
+        round($v['n4_value']),
+        $otif_n2_count_perc . " %",
+        $otif_n2_value_perc . " %",
+        $otif_n3_count_perc . " %",
+        $otif_n3_value_perc . " %",
+        $otif_n4_count_perc . " %",
+        $otif_n4_value_perc . " %",
+      );
+    }
+  }
+  else {
+    $output = "No Result Found";
+  }
+  if (!empty($res)) {
+    $header = get_header_of_chhanel_otif();
+    $total_otif_n2_count_perc = round(($total_n2_counts / $total_bill_count) * 100);
+    $total_otif_n2_value_perc = round(($total_n2_value / $total_bill_val) * 100);
+    $total_otif_n3_count_perc = round(($total_n3_counts / $total_bill_count) * 100);
+    $total_otif_n3_value_perc = round(($total_n3_value / $total_bill_val) * 100);
+
+    $total_otif_n4_count_perc = round(($total_n4_counts / $total_bill_count) * 100);
+    $total_otif_n4_value_perc = round(($total_n4_value / $total_bill_val) * 100);
+    $rows[] = array("Total",
+      $total_bill_count,
+      $total_bill_val,
+      $total_n2_counts,
+      $total_n2_value,
+      $total_n3_counts,
+      $total_n3_value,
+      $total_n4_counts,
+      $total_n4_value,
+      $total_otif_n2_count_perc . " %",
+      $total_otif_n2_value_perc . " %",
+      $total_otif_n3_count_perc . " %",
+      $total_otif_n3_value_perc . " %",
+      $total_otif_n4_count_perc . " %",
+      $total_otif_n4_value_perc . " %",
+    );
+
+    $output = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
+  }
+  return $output;
+}
+
+
 function get_common_data_for_pl_group_datewise($start_date, $end_date, $distributor_id = 60) {
   $query = db_select('node', 'n');
   $query->condition('n.type', 'sales_register_data');
@@ -3171,6 +3290,13 @@ function get_header_of_chhanel_otif() {
   $header = array('Channel', 'Bill Count', 'Bill Value', 'Dispatch (N+2) Count ', 'Dispatch (N+2) Value',
     'Dispatch (N+3) Count', 'Dispatch (N+3) Value', 'Dispatch (>N+3) Count', 'Dispatch (>N+3) Value', 'OTIF (N+2) Count%', 'OTIF (N+2) Value%',
     'OTIF (N+3) Count%', 'OTIF (N+3) Value%', 'OTIF (>N+3) Count%', 'OTIF (>N+3) Value%',);
+  return $header;
+}
+
+function get_header_of_chhanel_impact() {
+  $header = array('Channel', 'Bill Count', 'Bill Value', 'Impact (N+2) Count ', 'Impact (N+2) Value',
+    'Impact (N+3) Count', 'Impact (N+3) Value', 'Impact (>N+3) Count', 'Impact (>N+3) Value', 'Impact (N+2) Count%', 'Impact (N+2) Value%',
+    'Impact (N+3) Count%', 'Impact (N+3) Value%', 'Impact (>N+3) Count%', 'Impact (>N+3) Value%',);
   return $header;
 }
 

@@ -2381,21 +2381,21 @@ function leanbox_dashboard_impact_chart_query_details($type, $start_date = '', $
       $arg = $arg_array[3];
    }
 
-//   if ($arg !== 'dashboard') {
-//
-//      $mtd_html = "<h3>Channel Wise Otif</h3>";
-//      $mtd_data .= get_mtd_data_channel_otif($start_date, $end_date, $uid);
-//      if ($mtd_data == "No Result Found") {
-//         $header = get_header_of_chhanel_otif();
-//         $mtd_rows[] = array("<td colspan='10' style='text-align: center;'> There is No Activity</td>");
-//         $mtd_html .= theme('table', array('header' => $header, 'rows' => $mtd_rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
-//      }
-//      else {
-//         $mtd_html .= $mtd_data;
-//      }
-//      $table = $mtd_html;
-//   }
-//   $output1['table'] = $table;
+   if ($arg !== 'dashboard') {
+
+      $mtd_html = "<h3>Channel Wise Impact</h3>";
+      $mtd_data .= get_mtd_data_channel_impact($start_date, $end_date, $uid);
+      if ($mtd_data == "No Result Found") {
+         $header = get_header_of_chhanel_impact();
+         $mtd_rows[] = array("<td colspan='10' style='text-align: center;'> There is No Activity</td>");
+         $mtd_html .= theme('table', array('header' => $header, 'rows' => $mtd_rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
+      }
+      else {
+         $mtd_html .= $mtd_data;
+      }
+      $table = $mtd_html;
+   }
+   $output1['table'] = $table;
 
    return $output1;
 }
