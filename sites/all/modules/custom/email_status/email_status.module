@@ -2952,6 +2952,7 @@ function get_common_data_for_chhanel_datewise_impact($start_date, $end_date, $di
 
     $output = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
   }
+  dpm($output,'2');
   return $output;
 }
 
