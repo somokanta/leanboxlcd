@@ -243,9 +243,23 @@ function _get_farey_delivered_tripwise_vrs_amt_details($trip_number, $rs_code) {
    $rows = $query->execute()->fetch(PDO::FETCH_ASSOC);
 
    $first_row = array('Signed_Bills', 'Cheque_Bills', 'Cash_Bills');
+
+   foreach ($first_row as $header) {
+      $header_array[] = array(
+        'data' => array(
+          '#type' => 'link',
+          '#title' => $header,
+          '#href' => "mymodule/nojs/$header",
+          '#options' => array(
+            'html' => true,
+          )
+        ),
+      );
+   }
    foreach ($first_row as $val) {
       $k = 0;
-      $data[$val][] = $val;
+     // $data[$val][] = $val;
+      $data[$val][] = array('data' => l(t("$val"), "vrs-popup-details/nojs/$val/$trip_number",  array('attributes' => array('class' => 'ctools-use-modal'))));
       foreach ($rows as $key1 => $val1) {
          if ($k == 3) {
             continue;
