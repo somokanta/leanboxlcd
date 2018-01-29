@@ -6,6 +6,12 @@
  * and open the template in the editor.
  */
 
+function leanbox_mobile_views_api() {
+  return array(
+    'api' => '3.0',
+    'path' => drupal_get_path('module', 'leanbox_mobile') . '/views',
+  );
+}
 /**
  * Implements hook_menu
  */
@@ -25,6 +31,12 @@ function leanbox_mobile_menu() {
   $items['leanbox-dispatch-return-data'] = array(
     'title' => 'Fetch Return Data By Cron',
     'page callback' => 'leanbox_mobile_dispatch_return_data_by_cron',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  $items['leanbox-impact-data'] = array(
+    'title' => 'Get data',
+    'page callback' => 'leanbox_mobile_get_impact_date',
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
@@ -413,6 +425,15 @@ function leanbox_mobile_save_return_data_from_cron($csv_uri) {
 
             $node = node_submit($node); // Prepare node for saving
             node_save($node);
+            
+            $query = db_insert('impact_data') // Table name no longer needs {}
+                    ->fields(array(
+                      'bill_num' => $record['BILL_NUMBER'],
+                      'distributor_id' => $rs_distributor,
+                      'impact_date' => strtotime($record['UPDATE DATE']), 
+                      'flag' => 0,  
+                    ))
+                    ->execute();
          }
       }
     fclose($handle);
@@ -433,4 +454,47 @@ function leanbox_mobile_get_distributor_using_rscode($rs_code) {
   $query->fields('d', array('field_distributor_value'));
   $result = $query->execute()->fetchField();
   return $result;
+}
+
+function leanbox_mobile_get_impact_date() {
+
+  $query = db_select('impact_data', 'imp')
+      ->fields('imp')
+      ->condition('imp.flag', 0)
+      ->range(0, 5000);
+  $result = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+
+  foreach ($result as $key => $value) {
+    $title = $value['bill_num'];
+    $impact_date = $value['impact_date'];
+    $distributor_id = $value['distributor_id'];
+    $nid = check_node_title_exists_sales_register_data($title, $distributor_id);
+    if ($nid) {
+      $node = node_load($nid);
+      $node->field_impact_updated_date['und'][0]['value'] = $impact_date;
+      $updated_pdd = $node->field_promised_date[LANGUAGE_NONE][0]['value'];
+
+      if (!empty($impact_date)) {
+        //$imp_date = strtotime($impact_date);
+        if ($impact_date <= $updated_pdd) {
+          $n_value = "N+2";
+        }
+        elseif (($impact_date > $updated_pdd) && ( ($impact_date - $updated_pdd) <= 86400)) {
+          $n_value = "N+3";
+        }
+        elseif (($impact_date > $updated_pdd) && ( ($impact_date - $updated_pdd) > 86400)) {
+          $n_value = "N+4";
+        }
+        $node->field_impact_ontime_criteria[LANGUAGE_NONE][0]['value'] = $n_value;
+      }
+      node_save($node);
+    }
+
+    db_update('impact_data')
+        ->fields(array(
+          'flag' => 1,
+        ))
+        ->condition('no', $value['no'], '=')
+        ->execute();
+  }
 }

@@ -196,7 +196,12 @@ function party_packing_filter_callback() {
       $activity_type = $_POST['url'];
       $output_data = leanbox_dashboard_gauge_chart_query_details($activity_type, $start_date, $end_date, FALSE);
       break;
-
+    
+    case 'impact' :
+      //$activity_type = $_POST['url'];
+      $output_data = leanbox_dashboard_impact_chart_query_details($activity_type, $start_date, $end_date, FALSE);
+      break;
+    
     case 'party_packing_productivity' :
       $ajax_type = 'party_packing_ajax';
       $output_data = leanbox_dashboard_chart_query_details($activity_type, $start_date, $end_date, $ajax_type);
@@ -252,6 +257,10 @@ function leanbox_dashboard_block_info() {
   );
   $blocks['otif'] = array(
     'info' => t('Otif'),
+    'cache' => DRUPAL_NO_CACHE,
+  );
+  $blocks['impact'] = array(
+    'info' => t('Impact Ontime Criteria'),
     'cache' => DRUPAL_NO_CACHE,
   );
   $blocks['party_packing_productivity'] = array(
@@ -651,6 +660,29 @@ drupal_get_path('module', 'leanbox_dashboard') . '/js/google_chart.js',
             drupal_get_path('module', 'leanbox_dashboard') . '/js/leanbox_dashboard_otifchart.js',
             array(
               'data' => array('leanbox_dashboard' => array('otif' => $data['output'],)),
+              'type' => 'setting'
+            ),
+          ),
+        ),
+      );
+      break;
+    
+    case 'impact':
+
+      $bill_date = leanbox_dashboard_get_default_pdd_date_for_chart();
+      $bill_date = date('d-m-Y', $bill_date);
+      $block['subject'] = "Impact OTIF ($bill_date Billing)";
+      $data = leanbox_dashboard_impact_chart_query_details('impact');
+
+      $filter_form = drupal_render(drupal_get_form('leanbox_dashboard_chart_filter_impact_form'));
+      $block['content'] = array(
+        '#markup' => theme('leanbox_dashboard', array('data' => $filter_form, 'otif_table' => $data['table'],)),
+        '#attached' => array(
+          'js' => array(
+           drupal_get_path('module', 'leanbox_dashboard') . '/js/google_chart.js',
+            drupal_get_path('module', 'leanbox_dashboard') . '/js/leanbox_dashboard_impact_chart.js',
+            array(
+              'data' => array('leanbox_dashboard' => array('impact' => $data['output'],)),
               'type' => 'setting'
             ),
           ),
