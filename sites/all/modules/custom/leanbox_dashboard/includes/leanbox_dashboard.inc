@@ -2380,7 +2380,7 @@ function leanbox_dashboard_impact_chart_query_details($type, $start_date = '', $
 //      $arg_array = explode('/', $type);
 //      $arg = $arg_array[3];
 //   }
-   if ($arg !== 'dashboard') {
+   if ($arg === 'leanbox-chart-details') {
 
       $mtd_html = "<h3>Channel Wise Impact</h3>";
       $mtd_data .= get_mtd_data_channel_impact($start_date, $end_date, $uid);
