@@ -922,7 +922,7 @@ function reverse_geocode_get_data_hul_code_wise($sales_day, $pl_group, $sales_pe
     //Show results having lat/lng
     $query->isNotNull('hul_lat.field_hul_lat_value');
     $query->isNotNull('hul_long.field_hul_long_value');
-    $query->condition('hul_st.field_hul_status_value', 0, '=');
+    //$query->condition('hul_st.field_hul_status_value', 0, '=');
 
     //Order results on basis of Lat/lng
     $query->orderBy('hul_lat.field_hul_lat_value', 'asc');
