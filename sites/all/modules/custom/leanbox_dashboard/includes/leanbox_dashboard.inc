@@ -2375,6 +2375,7 @@ function leanbox_dashboard_impact_chart_query_details($type, $start_date = '', $
 //   if ($data) {
       $arg = arg(0);
       $arg = arg(1);
+      dpm($arg);
 //   }
 //   else {
 //      $arg_array['r'] = $type;
