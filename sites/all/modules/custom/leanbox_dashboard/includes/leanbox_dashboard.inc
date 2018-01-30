@@ -2380,6 +2380,11 @@ function leanbox_dashboard_impact_chart_query_details($type, $start_date = '', $
       $arg_array = explode('/', $type);
       $arg = $arg_array[3];
    }
+dpm($type,'$type');
+dpm($data,'$data');
+dpm($arg,'$arg');
+
+
 
    if ($arg !== 'dashboard') {
 
