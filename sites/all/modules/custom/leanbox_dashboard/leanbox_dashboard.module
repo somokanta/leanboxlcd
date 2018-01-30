@@ -198,7 +198,7 @@ function party_packing_filter_callback() {
       break;
     
     case 'impact' :
-      //$activity_type = $_POST['url'];
+      $activity_type = $_POST['url'];
       $output_data = leanbox_dashboard_impact_chart_query_details($activity_type, $start_date, $end_date, FALSE);
       break;
     
