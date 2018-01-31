@@ -38,7 +38,7 @@
     <?php foreach ($rows as $row_count => $row): ?>
       <tr <?php if ($row_classes[$row_count]) { print 'class="' . implode(' ', $row_classes[$row_count]) .'"';  } ?>>
         <?php foreach ($row as $field => $content): ?>
-          <td style=<?php if (empty($content)) { print '"color:#666; height: 250px; width:150px;"'; } else { print '"color:#666; height: 100px; width:100px;"'; }?> <?php if ($field_classes[$field][$row_count]) { print 'class="'. $field_classes[$field][$row_count] . '" '; } ?><?php print drupal_attributes($field_attributes[$field][$row_count]); ?>>
+          <td style=<?php if (empty($content)) { print '"color:#666; height: 150px; width:500px;"'; } else { print '"color:#666; height: 150px; width:100px;"'; }?> <?php if ($field_classes[$field][$row_count]) { print 'class="'. $field_classes[$field][$row_count] . '" '; } ?><?php print drupal_attributes($field_attributes[$field][$row_count]); ?>>
             <?php print $content; ?>
           </td>
         <?php endforeach; ?>
