@@ -68,7 +68,7 @@ function change_feeds_import_create_confirm_content($id) {
     $operations = array();
 
     $create_billing_data = change_feeds_import_create_billing_data($max_billing_id_new);
-    $create_billing_data_chunk = array_chunk($create_billing_data, 600);
+    $create_billing_data_chunk = array_chunk($create_billing_data, 400);
     foreach ($create_billing_data_chunk as $data) {
       $operations[] = array('change_feeds_import_create_billing', array($data));
     }
