@@ -581,7 +581,7 @@ function get_email_pending_for_assignment($distributor_id) {
         $row['bounced']['no_due_value'] += 0;
       }
       // Collection date is between last 1-10 Days
-      if ($declaration_date < $decl_date && $declaration_date >= $ten_days_before) {
+      if ($collection_date < $decl_date && $collection_date >= $ten_days_before) {
         $row['bounced']['decl_count'] = $decl_bounced_counter++;
         $row['bounced']['decl_value'] += $data['field_remaining_amt_collection_value'] - ($data['field_previous_cash_amt_value'] + $data['field_previous_cheque_amt_value']);
       }
@@ -590,7 +590,7 @@ function get_email_pending_for_assignment($distributor_id) {
         $row['bounced']['decl_value'] += 0;
       }
       // Collection date is between last 11-15 Days
-      if ($declaration_date < $ten_days_before && $declaration_date >= $fifteen_days_before) {
+      if ($collection_date < $ten_days_before && $collection_date >= $fifteen_days_before) {
         $row['bounced']['5days_decl_count'] = $fivedays_decl_bounced_counter++;
         $row['bounced']['5days_decl_value'] += $data['field_remaining_amt_collection_value'] - ($data['field_previous_cash_amt_value'] + $data['field_previous_cheque_amt_value']);
       }
@@ -599,7 +599,7 @@ function get_email_pending_for_assignment($distributor_id) {
         $row['bounced']['5days_decl_value'] += 0;
       }
       // Collection date is between last 16-30 Days
-      if ($declaration_date < $fifteen_days_before && $declaration_date >= $thirty_days_before) {
+      if ($collection_date < $fifteen_days_before && $collection_date >= $thirty_days_before) {
         $row['bounced']['12days_decl_count'] = $twelvedays_decl_bounced_counter++;
         $row['bounced']['12days_decl_value'] += $data['field_remaining_amt_collection_value'] - ($data['field_previous_cash_amt_value'] + $data['field_previous_cheque_amt_value']);
       }
@@ -608,7 +608,7 @@ function get_email_pending_for_assignment($distributor_id) {
         $row['bounced']['12days_decl_value'] += 0;
       }
       // Collection date is below last 30 Days
-      if ($declaration_date < $thirty_days_before) {
+      if ($collection_date < $thirty_days_before) {
         $row['bounced']['31days_decl_count'] = $thirtyonedays_decl_bounced_counter++;
         $row['bounced']['31days_decl_value'] += $data['field_remaining_amt_collection_value'] - ($data['field_previous_cash_amt_value'] + $data['field_previous_cheque_amt_value']);
       }
