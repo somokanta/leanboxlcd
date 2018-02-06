@@ -270,9 +270,9 @@ function change_feeds_import_finished($success, $results, $operations) {
     if (!array_key_exists('picking', $results)) {
       drupal_set_message('Picking Not Create. Please Contact LeanBox HELP DESK.', 'error');
     }
-    if (!array_key_exists('van', $results)) {
-      drupal_set_message('Van Not Create. Please Contact LeanBox HELP DESK.', 'error');
-    }
+//    if (!array_key_exists('van', $results)) {
+//      drupal_set_message('Van Not Create. Please Contact LeanBox HELP DESK.', 'error');
+//    }
     if (!array_key_exists('party_packing', $results)) {
       drupal_set_message('Party Packing Not Create. Please Contact LeanBox HELP DESK.', 'error');
     }
@@ -281,7 +281,7 @@ function change_feeds_import_finished($success, $results, $operations) {
     drupal_set_message('Error Occure while uploading billing data. Please Contact LeanBox HELP DESK', 'error');
   }
 
-  if (!$success || !array_key_exists('billing', $results) || !array_key_exists('picking', $results) || !array_key_exists('van', $results) || !array_key_exists('party_packing', $results)) {
+  if (!$success || !array_key_exists('billing', $results) || !array_key_exists('picking', $results) || !array_key_exists('party_packing', $results)) {
     // An error occurred.
     // $operations contains the operations that remained unprocessed.
     global $user;
