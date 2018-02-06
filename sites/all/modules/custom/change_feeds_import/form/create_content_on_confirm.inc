@@ -99,7 +99,7 @@ function change_feeds_import_create_confirm_content($id) {
          }
       }
 
-      $van_cld_report_data = change_feeds_import_create_van_cld_report_data($max_billing_id_new);
+    $van_cld_report_data = change_feeds_import_create_van_cld_report_data($max_billing_id_new);
     $van_cld_report_data_chunk = array_chunk($van_cld_report_data, 1200); // simple table insert
     foreach ($van_cld_report_data_chunk as $data) {
       $operations[] = array('change_feeds_import_create_van_cld_report', array($data));
