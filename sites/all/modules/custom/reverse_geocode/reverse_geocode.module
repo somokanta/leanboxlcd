@@ -206,10 +206,9 @@ function reverse_geocode_form_submit($form, &$form_state) {
     $lat = $location[1];
     $lng = $location[2];
 
-    $license_key = 'z94i9hvuqcsz7amywt76aknw8dx9o15z';
+    $license_key = variable_get('mapmyindia_rest_key', 'z94i9hvuqcsz7amywt76aknw8dx9o15z');
 
-
-    $url = "http://apis.mapmyindia.com/advancedmaps/v1/$license_key/rev_geocode" . "?lng=$lng&lat=$lat";
+    $url = "https://apis.mapmyindia.com/advancedmaps/v1/$license_key/rev_geocode" . "?lng=$lng&lat=$lat";
     $curl = curl_init();
     curl_setopt($curl, CURLOPT_URL, $url);
     curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
@@ -1212,7 +1211,7 @@ function lat_lng_results($area_hook, $sales_day, $van_pl_group) {
 function reverse_geocode_results($lat, $lng) {
   $license_key = variable_get('mapmyindia_rest_key', 'z94i9hvuqcsz7amywt76aknw8dx9o15z');
 
-  $url = "http://apis.mapmyindia.com/advancedmaps/v1/$license_key/rev_geocode" . "?lng=$lng&lat=$lat";
+  $url = "https://apis.mapmyindia.com/advancedmaps/v1/$license_key/rev_geocode" . "?lng=$lng&lat=$lat";
   $curl = curl_init();
   curl_setopt($curl, CURLOPT_URL, $url);
   curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
