@@ -1500,36 +1500,45 @@ function change_feeds_import_node_delete($node) {
  * Implements hook_feeds_presave($source, $entity, $item)
  */
 function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) {
-  require_once drupal_get_path('module', 'change_feeds_import') . '/form/upload_billing_data.inc';
-  if (!empty($item)) {
-    foreach ($item as $key => $value) {
-      $item[$key] = mb_convert_encoding($value, 'UTF-8', 'UTF-8');
-    }
-  }
-  global $user;
-  // Store distributor id in author in each node
-  $distributor_id = change_feeds_import_get_distributor_id($user->uid);
-  
-  if ($entity->feeds_item->id == 'sku7_code_master_leanbox') {
-      $product_list = variable_get('sku_product_list', '');
-      if (!empty($product_list)) {
-         $product_list = explode(",", $product_list);
-         foreach ($product_list as $key => $val) {
-            $product_list_array[] = strtolower(trim($val));
-         }
+   require_once drupal_get_path('module', 'change_feeds_import') . '/form/upload_billing_data.inc';
+   if (!empty($item)) {
+      foreach ($item as $key => $value) {
+         $item[$key] = mb_convert_encoding($value, 'UTF-8', 'UTF-8');
+      }
+   }
+   global $user;
+   // Store distributor id in author in each node
+   $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+
+   if ($entity->feeds_item->id == 'sku7_code_master_leanbox') {
+      $query = db_select('node', 'n');
+      $query->condition('n.type', 'product_validation_master');
+      $query->condition('n.uid', $distributor_id);
+      $query->fields('n', array('title'));
+      $product_list_array = $query->execute()->fetchAllKeyed(0, 0);
+
+      if (!empty($product_list_array)) {
+
+         // commenting old code
+//      $product_list = variable_get('sku_product_list', '');
+//         $product_list = explode(",", $product_list);
+//         foreach ($product_list as $key => $val) {
+//            $product_list_array[] = strtolower(trim($val));
+//         }
          $sku = $entity->field_sku7_code['und'][0]['value'];
          $product_name = $entity->field_product_name['und'][0]['value'];
          $product_name = explode(" ", $product_name);
-
-         $product_name_first_word = strtolower(trim($product_name[0]));
-
-         if (!in_array($product_name_first_word, $product_list_array)) {
-            drupal_set_message("Please enter correct product name for sku $sku", 'error');
+         $product_name_first_word = trim($product_name[0]);
+         if (isset($item['sub division'])) {
+            $sub_division = $item['sub division'];
+         }
+         if (($sub_division != $product_name_first_word ) || (!in_array($product_name_first_word, $product_list_array))) {
+            drupal_set_message("Please enter correct name and sub division for sku $sku", 'error');
             $entity->feeds_item->skip = TRUE;
          }
       }
    }
-   
+
    if ($entity->feeds_item->id == 'update_hul_updated_address') {
       $title = $entity->title;
       $existing_uid = check_hul_code_exist($title);
