@@ -1133,6 +1133,17 @@ function dispatch_planning_views_data() {
     'argument' => array(
       'handler' => 'views_handler_argument_string',
     ),
+    'relationship' => array(
+      'title' => t('PTL Sku reference.'),
+      'help' => t("PTL Sku reference."),
+      'handler' => 'views_handler_relationship',
+      'base' => 'node',
+      'base field' => 'title',
+        'extra' => array(
+        array('field' => 'type', 'value' => 'sku7_code_master'),
+        array('field' => 'uid', 'value' => _DISTRIBUTOR_ID),
+      ),
+    ),
   );
   // fieldExecutive
   $data['master_ptl_data']['fieldExecutive'] = array(
