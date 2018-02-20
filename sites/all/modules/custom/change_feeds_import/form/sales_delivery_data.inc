@@ -119,6 +119,8 @@ function change_feeds_import_sales_delivery1_form_submit1() {
    $datas = $query->execute()->fetchAllKeyed(0, 0);
 
    $data_chunk = array_chunk($datas, 100);
+   $file_name = 2131;
+   $fid = 5;
    foreach ($data_chunk as $data) {
     $operations[] = array('change_feeds_import_sales_delivery_batch_fix_process1', array($data, $distributor_id, $file_name, $fid));
   }
