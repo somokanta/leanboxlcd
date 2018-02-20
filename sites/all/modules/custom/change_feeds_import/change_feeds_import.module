@@ -164,9 +164,9 @@ function change_feeds_import_menu() {
    $items['sales-delivery-data1/import'] = array(
      'title' => 'Sales Delivery Data',
      'description' => 'Import Sales Delivery Data',
-     'page callback' => 'drupal_get_form',
-     'page arguments' => array('change_feeds_import_sales_delivery1_form_submit1'),
-     'access arguments' => array('Distributor Upload File'),
+     'page callback' => 'change_feeds_import_sales_delivery1_form_submit1',
+     //'page arguments' => array('change_feeds_import_sales_delivery1_form_submit1'),
+     'access callback' => TRUE,
      'file' => 'form/sales_delivery_data.inc',
    );
 
