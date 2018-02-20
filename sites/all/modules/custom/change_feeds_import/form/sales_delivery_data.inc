@@ -79,30 +79,30 @@ function change_feeds_import_sales_delivery1_form_validate($form, &$form_state) 
   }
 }
 
-function change_feeds_import_sales_delivery1_form_submit($form, &$form_state) {
+function change_feeds_import_sales_delivery1_form_submit1($form, &$form_state) {
   global $user;
   $user_id = $user->uid;
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
-  $file = $form_state['values']['file'];
-  $file_name = $file->filename;
-  $fid = $file->fid;
-  $filepath = $file->uri;
-
-  $datas = array();
-  // Making data as associative array with header.
-  if (($handle = fopen($filepath, "r")) !== FALSE) {
-    $header = fgetcsv($handle, 0, ',', '"');
-
-    while (($row = fgetcsv($handle) ) !== FALSE) {
-
-      foreach ($row as $key => &$value) {
-        $value = mb_convert_encoding($value, 'UTF-8', 'UTF-8');
-      }
-
-      $datas[] = array_combine($header, $row);
-    }
-    fclose($handle);
-  }
+//  $file = $form_state['values']['file'];
+//  $file_name = $file->filename;
+//  $fid = $file->fid;
+//  $filepath = $file->uri;
+//
+//  $datas = array();
+//  // Making data as associative array with header.
+//  if (($handle = fopen($filepath, "r")) !== FALSE) {
+//    $header = fgetcsv($handle, 0, ',', '"');
+//
+//    while (($row = fgetcsv($handle) ) !== FALSE) {
+//
+//      foreach ($row as $key => &$value) {
+//        $value = mb_convert_encoding($value, 'UTF-8', 'UTF-8');
+//      }
+//
+//      $datas[] = array_combine($header, $row);
+//    }
+//    fclose($handle);
+//  }
 
    $operations = array();
    
