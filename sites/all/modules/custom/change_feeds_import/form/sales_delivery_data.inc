@@ -112,10 +112,10 @@ function change_feeds_import_sales_delivery1_form_submit($form, &$form_state) {
    $query = db_select('node', 'n');
    $query->condition('n.type', 'sales_register_data');
    $query->leftjoin('field_data_field_bill_net_sales', 'ti', 'ti.entity_id = n.nid');
-   $query->isNull('ti.field_bill_net_sales_value');
+   //$query->isNull('ti.field_bill_net_sales_value');
 
    $query->fields('n', array('nid'));
- //  $query->range(0, 10000);
+   $query->range(0, 20000);
    $datas = $query->execute()->fetchAllKeyed(0, 0);
 
    $data_chunk = array_chunk($datas, 100);
@@ -364,6 +364,7 @@ function change_feeds_import_sales_delivery_batch_fix_process1($data, $distribut
   }
       foreach ($data as $key => $value) {
       $node = node_load($value);
+      $node->field_used_data['und'][0]['value'] = 1;
       node_save($node);
       }
 
