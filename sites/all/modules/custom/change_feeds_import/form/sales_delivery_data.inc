@@ -79,7 +79,7 @@ function change_feeds_import_sales_delivery1_form_validate($form, &$form_state) 
   }
 }
 
-function change_feeds_import_sales_delivery1_form_submit1($form, &$form_state) {
+function change_feeds_import_sales_delivery1_form_submit1() {
   global $user;
   $user_id = $user->uid;
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
