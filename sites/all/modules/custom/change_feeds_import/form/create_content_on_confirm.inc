@@ -336,14 +336,14 @@ function change_feeds_import_finished($success, $results, $operations) {
     $batch = & batch_get();
     $batch_id = $batch['id'];
 
-    $message = "For Distributor: $distributor_id and Batch Id $batch_id \n" .
-      $message .= theme('item_list', array('items' => $results));
-
+    $msg = "For Distributor: $distributor_id and Batch Id $batch_id \n" .
     $error_operation = reset($operations);
-    $message .= t('An error occurred while processing %error_operation with arguments: @arguments', array('%error_operation' => $error_operation[0], '@arguments' => print_r($error_operation[1], TRUE)));
+    $msg .= t('Success: @succ_1 . Result: @result_2 .', array('@succ_1' => print_r($success, TRUE), '@result_2' => print_r($results, TRUE)));
+    $msg .= "\n";
+    $msg .= t('Error: @err . Operations: @oper .', array('@err' => print_r($error_operation, TRUE), '@oper' => print_r($operations, TRUE)));
 
     $params['subject'] = "Batch Proccess Billing Upload Error";
-    $params['body'] = $message;
+    $params['body'] = $msg;
     $mail_to = "abhishek.r@iksula.com";
     $from = "MIS.HELPDESK@leanbox.in";
     drupal_mail('adhoc_task', 'bill_date_missing', $mail_to, LANGUAGE_NONE, $params, $from);
