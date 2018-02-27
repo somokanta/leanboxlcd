@@ -198,7 +198,7 @@ function party_packing_filter_callback() {
       break;
     
     case 'impact' :
-      //$activity_type = $_POST['url'];
+      $activity_type = $_POST['url'];
       $output_data = leanbox_dashboard_impact_chart_query_details($activity_type, $start_date, $end_date, FALSE);
       break;
     
@@ -671,12 +671,12 @@ drupal_get_path('module', 'leanbox_dashboard') . '/js/google_chart.js',
 
       $bill_date = leanbox_dashboard_get_default_pdd_date_for_chart();
       $bill_date = date('d-m-Y', $bill_date);
-      $block['subject'] = "Impact Ontime Criteria ($bill_date Billing)";
+      $block['subject'] = "Impact OTIF ($bill_date Billing)";
       $data = leanbox_dashboard_impact_chart_query_details('impact');
 
       $filter_form = drupal_render(drupal_get_form('leanbox_dashboard_chart_filter_impact_form'));
       $block['content'] = array(
-        '#markup' => theme('leanbox_dashboard', array('data' => $filter_form, 'impact_table' => $data['table'],)),
+        '#markup' => theme('leanbox_dashboard', array('data' => $filter_form, 'otif_table' => $data['table'],)),
         '#attached' => array(
           'js' => array(
            drupal_get_path('module', 'leanbox_dashboard') . '/js/google_chart.js',

@@ -68,7 +68,7 @@ function change_feeds_import_create_confirm_content($id) {
     $operations = array();
 
     $create_billing_data = change_feeds_import_create_billing_data($max_billing_id_new);
-    $create_billing_data_chunk = array_chunk($create_billing_data, 1200);
+    $create_billing_data_chunk = array_chunk($create_billing_data, 400);
     foreach ($create_billing_data_chunk as $data) {
       $operations[] = array('change_feeds_import_create_billing', array($data));
     }
@@ -99,7 +99,7 @@ function change_feeds_import_create_confirm_content($id) {
          }
       }
 
-      $van_cld_report_data = change_feeds_import_create_van_cld_report_data($max_billing_id_new);
+    $van_cld_report_data = change_feeds_import_create_van_cld_report_data($max_billing_id_new);
     $van_cld_report_data_chunk = array_chunk($van_cld_report_data, 1200); // simple table insert
     foreach ($van_cld_report_data_chunk as $data) {
       $operations[] = array('change_feeds_import_create_van_cld_report', array($data));
@@ -316,9 +316,9 @@ function change_feeds_import_finished($success, $results, $operations) {
     if (!array_key_exists('picking', $results)) {
       drupal_set_message('Picking Not Create. Please Contact LeanBox HELP DESK.', 'error');
     }
-    if (!array_key_exists('van', $results)) {
-      drupal_set_message('Van Not Create. Please Contact LeanBox HELP DESK.', 'error');
-    }
+//    if (!array_key_exists('van', $results)) {
+//      drupal_set_message('Van Not Create. Please Contact LeanBox HELP DESK.', 'error');
+//    }
     if (!array_key_exists('party_packing', $results)) {
       drupal_set_message('Party Packing Not Create. Please Contact LeanBox HELP DESK.', 'error');
     }
@@ -327,7 +327,7 @@ function change_feeds_import_finished($success, $results, $operations) {
     drupal_set_message('Error Occure while uploading billing data. Please Contact LeanBox HELP DESK', 'error');
   }
 
-  if (!$success || !array_key_exists('billing', $results) || !array_key_exists('picking', $results) || !array_key_exists('van', $results) || !array_key_exists('party_packing', $results)) {
+  if (!$success || !array_key_exists('billing', $results) || !array_key_exists('picking', $results) || !array_key_exists('party_packing', $results)) {
     // An error occurred.
     // $operations contains the operations that remained unprocessed.
     global $user;
@@ -336,14 +336,14 @@ function change_feeds_import_finished($success, $results, $operations) {
     $batch = & batch_get();
     $batch_id = $batch['id'];
 
-    $message = "For Distributor: $distributor_id and Batch Id $batch_id \n" .
-      $message .= theme('item_list', array('items' => $results));
-
+    $msg = "For Distributor: $distributor_id and Batch Id $batch_id \n" .
     $error_operation = reset($operations);
-    $message .= t('An error occurred while processing %error_operation with arguments: @arguments', array('%error_operation' => $error_operation[0], '@arguments' => print_r($error_operation[1], TRUE)));
+    $msg .= t('Success: @succ_1 . Result: @result_2 .', array('@succ_1' => print_r($success, TRUE), '@result_2' => print_r($results, TRUE)));
+    $msg .= "\n";
+    $msg .= t('Error: @err . Operations: @oper .', array('@err' => print_r($error_operation, TRUE), '@oper' => print_r($operations, TRUE)));
 
     $params['subject'] = "Batch Proccess Billing Upload Error";
-    $params['body'] = $message;
+    $params['body'] = $msg;
     $mail_to = "abhishek.r@iksula.com";
     $from = "MIS.HELPDESK@leanbox.in";
     drupal_mail('adhoc_task', 'bill_date_missing', $mail_to, LANGUAGE_NONE, $params, $from);

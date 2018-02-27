@@ -79,30 +79,30 @@ function change_feeds_import_sales_delivery1_form_validate($form, &$form_state) 
   }
 }
 
-function change_feeds_import_sales_delivery1_form_submit($form, &$form_state) {
+function change_feeds_import_sales_delivery1_form_submit1() {
   global $user;
   $user_id = $user->uid;
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
-  $file = $form_state['values']['file'];
-  $file_name = $file->filename;
-  $fid = $file->fid;
-  $filepath = $file->uri;
-
-  $datas = array();
-  // Making data as associative array with header.
-  if (($handle = fopen($filepath, "r")) !== FALSE) {
-    $header = fgetcsv($handle, 0, ',', '"');
-
-    while (($row = fgetcsv($handle) ) !== FALSE) {
-
-      foreach ($row as $key => &$value) {
-        $value = mb_convert_encoding($value, 'UTF-8', 'UTF-8');
-      }
-
-      $datas[] = array_combine($header, $row);
-    }
-    fclose($handle);
-  }
+//  $file = $form_state['values']['file'];
+//  $file_name = $file->filename;
+//  $fid = $file->fid;
+//  $filepath = $file->uri;
+//
+//  $datas = array();
+//  // Making data as associative array with header.
+//  if (($handle = fopen($filepath, "r")) !== FALSE) {
+//    $header = fgetcsv($handle, 0, ',', '"');
+//
+//    while (($row = fgetcsv($handle) ) !== FALSE) {
+//
+//      foreach ($row as $key => &$value) {
+//        $value = mb_convert_encoding($value, 'UTF-8', 'UTF-8');
+//      }
+//
+//      $datas[] = array_combine($header, $row);
+//    }
+//    fclose($handle);
+//  }
 
    $operations = array();
    
@@ -112,13 +112,15 @@ function change_feeds_import_sales_delivery1_form_submit($form, &$form_state) {
    $query = db_select('node', 'n');
    $query->condition('n.type', 'sales_register_data');
    $query->leftjoin('field_data_field_bill_net_sales', 'ti', 'ti.entity_id = n.nid');
-   $query->isNull('ti.field_bill_net_sales_value');
+   //$query->isNull('ti.field_bill_net_sales_value');
 
    $query->fields('n', array('nid'));
- //  $query->range(0, 10000);
+   $query->range(0, 20000);
    $datas = $query->execute()->fetchAllKeyed(0, 0);
 
    $data_chunk = array_chunk($datas, 100);
+   $file_name = 2131;
+   $fid = 5;
    foreach ($data_chunk as $data) {
     $operations[] = array('change_feeds_import_sales_delivery_batch_fix_process1', array($data, $distributor_id, $file_name, $fid));
   }
@@ -364,6 +366,7 @@ function change_feeds_import_sales_delivery_batch_fix_process1($data, $distribut
   }
       foreach ($data as $key => $value) {
       $node = node_load($value);
+      $node->field_used_data['und'][0]['value'] = 1;
       node_save($node);
       }
 

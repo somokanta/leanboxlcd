@@ -76,19 +76,19 @@ function leanbox_mobile_views_data() {
    $data['impact_data']['impact_date'] = array(
     'title' => t('Impact Date'),
     'help' => t("Impact Date"),
-    'field' => array(
-      'handler' => 'views_handler_field',
-      'click sortable' => TRUE,
-    ),
-    'sort' => array(
-      'handler' => 'views_handler_sort',
-    ),
-    'filter' => array(
-      'handler' => 'views_handler_filter_string',
-    ),
-    'argument' => array(
-      'handler' => 'views_handler_argument_string',
-    ),
+     'field' => array(
+       'handler' => 'views_handler_field_date',
+       'click sortable' => TRUE,
+     ),
+     'sort' => array(
+       'handler' => 'views_handler_sort_date',
+     ),
+     'filter' => array(
+       'handler' => 'views_handler_filter_date',
+     ),
+     'argument' => array(
+       'handler' => 'views_handler_filter_date',
+     ),
   );  
   $data['impact_data']['flag'] = array(
     'title' => t('Flag'),

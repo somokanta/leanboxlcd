@@ -377,7 +377,6 @@ function leanbox_mobile_chart_query_details($start = '', $end = '', $field_condi
  */
 function leanbox_mobile_dispatch_return_data_by_cron() {
   $import_file = 'IMPACT2TP_' . date("dmY") . '.csv';
-  $import_file = 'IMPACT2TP_23012018.csv'; // please remove on live
   $file_path_url = getcwd();
   $command = 'sshpass -p "Techub123#" scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -r sftpuser03@103.233.76.251:/impact2tp/' . $import_file . ' ' . $file_path_url . '/sites/default/files/TP2IMPACT_RETURN/';
   $return = shell_exec($command);
@@ -462,7 +461,7 @@ function leanbox_mobile_get_impact_date() {
   $query = db_select('impact_data', 'imp')
       ->fields('imp')
       ->condition('imp.flag', 0)
-      ->range(0, 5000);
+      ->range(0, 500);
   $result = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
 
   foreach ($result as $key => $value) {
