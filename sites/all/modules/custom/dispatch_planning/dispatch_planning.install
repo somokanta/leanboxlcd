@@ -1551,3 +1551,52 @@ function dispatch_planning_update_7120() {
       }
    }
 }
+
+/**
+ * Adding new fields in PTL table using hook_update_N()
+ */
+function dispatch_planning_update_7121() {
+  $fields = array(
+    'put_operator_id' => array(
+      'description' => 'Put Operator ID',
+      'type' => 'varchar',
+      'length' => 50,
+      'not null' => TRUE,
+      'default' => '',
+    ),
+     'put_time' => array(
+      'description' => 'Put Time',
+      'type' => 'int',
+      'not null' => TRUE,
+      'default' => 0,
+    ),
+    'close_operator_id' => array(
+      'description' => 'Close Operator ID',
+      'type' => 'varchar',
+      'length' => 50,
+      'not null' => TRUE,
+      'default' => '',
+    ),
+     'close_time' => array(
+      'description' => 'Close Time',
+      'type' => 'int',
+      'not null' => TRUE,
+      'default' => 0,
+    ),
+    'box_id' => array(
+      'description' => 'Box ID',
+      'type' => 'varchar',
+      'length' => 25,
+      'not null' => TRUE,
+      'default' => '',
+    ),
+  );
+  foreach ($fields as $key => $field) {
+    if (!db_field_exists('ptl_data_configuration', $key)) {
+      db_add_field('ptl_data_configuration', $key, $field);
+    }
+    if (!db_field_exists('master_ptl_data', $key)) {
+      db_add_field('master_ptl_data', $key, $field);
+    }    
+  }
+}
