@@ -115,6 +115,11 @@ function put_qty_master_ptl_data($id_qty) {
       ->fields(array(
         'put_qty' => $value['qty'],
         'put_qty_time' => $update_time,
+        'put_operator_id' => $value['put_operator_id'],
+        'put_time'=>$value['put_time'],
+        'close_operator_id'=>$value['close_operator_id'],
+        'close_time'=>$value['close_time'],
+        'box_id'=>$value['box_id'],
       ))
       ->condition('id', $value['id'], '=')
       ->execute();
