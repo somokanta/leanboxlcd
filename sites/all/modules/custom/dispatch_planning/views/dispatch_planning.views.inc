@@ -926,7 +926,95 @@ function dispatch_planning_views_data() {
       'handler' => 'views_handler_argument_string',
     ),
   );
-
+  $data['ptl_data_configuration']['put_operator_id'] = array(
+    'title' => t('Put Operator ID'),
+    'help' => t('Put Operator ID'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+  // put_qty_time
+  $data['ptl_data_configuration']['put_time'] = array(
+    'title' => t('Put Time'),
+    'help' => t('Put Time'),
+    'field' => array(
+      'handler' => 'views_handler_field_date',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort_date',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_date',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_filter_date',
+    ),
+  );
+  // Put Qty
+  $data['ptl_data_configuration']['close_operator_id'] = array(
+    'title' => t('Close Operator ID'),
+    'help' => t('Close Operator ID'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+  // put_qty_time
+  $data['ptl_data_configuration']['close_time'] = array(
+    'title' => t('Close Time'),
+    'help' => t('Close Time'),
+    'field' => array(
+      'handler' => 'views_handler_field_date',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort_date',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_date',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_filter_date',
+    ),
+  );
+  $data['ptl_data_configuration']['box_id'] = array(
+    'title' => t('Box ID'),
+    'help' => t('Box ID'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+  
   $base_table = 'ptl_data_configuration';
   $data[$base_table]['date_filter'] = array(
     'group' => t('Date'),
@@ -1625,8 +1713,95 @@ function dispatch_planning_views_data() {
       'handler' => 'views_handler_argument_string',
     ),
   );
-
-
+  // Put Qty
+  $data['master_ptl_data']['put_operator_id'] = array(
+    'title' => t('Put Operator ID'),
+    'help' => t('Put Operator ID'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+  // put_qty_time
+  $data['master_ptl_data']['put_time'] = array(
+    'title' => t('Put Time'),
+    'help' => t('Put Time'),
+    'field' => array(
+      'handler' => 'views_handler_field_date',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort_date',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_date',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_filter_date',
+    ),
+  );
+  // Put Qty
+  $data['master_ptl_data']['close_operator_id'] = array(
+    'title' => t('Close Operator ID'),
+    'help' => t('Close Operator ID'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+  // put_qty_time
+  $data['master_ptl_data']['close_time'] = array(
+    'title' => t('Close Time'),
+    'help' => t('Close Time'),
+    'field' => array(
+      'handler' => 'views_handler_field_date',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort_date',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_date',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_filter_date',
+    ),
+  );
+  $data['master_ptl_data']['box_id'] = array(
+    'title' => t('Box ID'),
+    'help' => t('Box ID'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
   // Table for farey exposed api
   $data['dispatch_planning_api_data']['table'] = array(
     'group' => t('dispatch_planning data'),
