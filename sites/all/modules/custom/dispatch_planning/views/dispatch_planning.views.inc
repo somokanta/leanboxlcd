@@ -8,6 +8,146 @@
 function dispatch_planning_views_data() {
 
   $data = array();
+  
+   // Start of MASTER-PTL_PUT_QTY
+  $data['ptl_put_qty']['table'] = array(
+    'group' => t('ptl_put_qty data'),
+    'title' => t('ptl_put_qty data'),
+    'help' => t('ptl_put_qty data.'),
+  );
+
+  // Define this as a base table.
+  $data['ptl_put_qty']['table']['base'] = array(
+    'field' => 'id',
+    'title' => t('ptl_put_qty'),
+    'help' => t("unique identifiers."),
+    // 'weight' => -10,
+  );
+
+
+  // ptl_job ID
+  $data['ptl_put_qty']['ptl_job'] = array(
+    'title' => t('ptl_job'),
+    'help' => t('ptl_job'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+  $base_table = 'ptl_put_qty';
+  $data[$base_table]['date_filter'] = array(
+    'group' => t('Date'),
+    'title' => t('Date (!base_table)', array('!base_table' => $base_table)),
+    'help' => t('Filter any Views !base_table date field.', array('!base_table' => $base_table)),
+    'filter' => array(
+      'handler' => 'date_views_filter_handler',
+      'empty field name' => t('Undated'),
+      'is date' => TRUE,
+    //'skip base' => $base_table,
+    ),
+  );
+  
+  $data['ptl_put_qty']['line_count'] = array(
+    'title' => t('line_count'),
+    'help' => t('line_count'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+  
+  $data['ptl_put_qty']['put_qty_sum'] = array(
+    'title' => t('put_qty_sum'),
+    'help' => t('put_qty_sum'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+  
+  $data['ptl_put_qty']['rs_code'] = array(
+    'title' => t('rs_code'),
+    'help' => t('rs_code'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+  
+  $data['ptl_put_qty']['created'] = array(
+    'title' => t('created'),
+    'help' => t('created'),
+    'field' => array(
+      'handler' => 'views_handler_field_date',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort_date',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_date',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_filter_date',
+    ),
+  );
+  
+  
+  $data['ptl_put_qty']['type'] = array(
+    'title' => t('type'),
+    'help' => t('type'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+  // end of MASTER-PTL_PUT_QTY
+  
 
   // Add custom field
   $data['views']['field_van_loading_date'] = array(

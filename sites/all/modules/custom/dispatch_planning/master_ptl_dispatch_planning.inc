@@ -720,3 +720,27 @@ function download_master_trip_box_id($args) {
   $rendered_html = $view->render();
   pdf_using_mpdf_api($rendered_html);
 }
+
+/**
+ * 
+ * @param type $ptl_job
+ * @param type $rs_code
+ * @param type $line_count
+ * @param type $put_qty_sum
+ */
+function update_master_ptl_put_qty_sum_data($ptl_job, $rs_code, $line_count, $put_qty_sum) {
+   $result = db_merge('ptl_put_qty')
+       ->key(array('ptl_job' => $ptl_job, 'rs_code' => $rs_code, 'type' => 'MASTER_TRIP'))
+       ->fields(array(
+         'ptl_job' => $ptl_job,
+         'line_count' => $line_count,
+         'put_qty_sum' => $put_qty_sum,
+         'rs_code' => $rs_code,
+         'type' => 'MASTER_TRIP', // same table diff is trip and master trip
+         'created' => REQUEST_TIME
+       ))
+       ->execute();
+   $results['flag'] = '1';
+   $results['result'] = 'Updated Successfully';
+   return $results;
+}

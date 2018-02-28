@@ -740,3 +740,26 @@ function update_ptl_header_data($ptl_job ,$trip_id, $rs_code, $vehicle,$bill_lin
   return $results;
 }
 
+/**
+ * 
+ * @param type $ptl_job
+ * @param type $rs_code
+ * @param type $line_count
+ * @param type $put_qty_sum
+ */
+function update_ptl_put_qty_sum_data($ptl_job, $rs_code, $line_count, $put_qty_sum) {
+   $result = db_merge('ptl_put_qty')
+       ->key(array('ptl_job' => $ptl_job, 'rs_code' => $rs_code, 'type' => 'TRIP'))
+       ->fields(array(
+         'ptl_job' => $ptl_job,
+         'line_count' => $line_count,
+         'put_qty_sum' => $put_qty_sum,
+         'rs_code' => $rs_code,
+         'type' => 'TRIP', // same table diff is trip and master trip
+         'created' => REQUEST_TIME
+       ))
+       ->execute();
+   $results['flag'] = '1';
+   $results['result'] = 'Updated Successfully';
+   return $results;
+}

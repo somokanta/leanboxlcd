@@ -450,6 +450,88 @@ function dispatch_planning_services_resources() {
           ),
            'access arguments' => array('services_access_farey_api'),
         ),
+        'ptl-api-put-qty-sum' => array(
+          'help' => 'Update PTL Put Qty Sum Table Data',
+          'callback' => 'update_ptl_put_qty_sum_data',
+          'args' => array(
+            array(
+              'name' => 'ptl_job',
+              'type' => 'string',
+              'description' => 'PTL JOB',
+              'source' => array('data' => 'ptl_job'),
+              'optional' => FALSE,
+            ),
+            array(
+              'name' => 'rs_code',
+              'type' => 'string',
+              'description' => 'Rs Code',
+              'source' => array('data' => 'rs_code'),
+              'optional' => FALSE,
+            ),
+            array(
+              'name' => 'line_count',
+              'type' => 'string',
+              'description' => 'line_count',
+              'source' => array('data' => 'line_count'),
+              'optional' => FALSE,
+            ),
+            array(
+              'name' => 'put_qty_sum',
+              'type' => 'string',
+              'description' => 'Put qty sum',
+              'source' => array('data' => 'put_qty_sum'),
+              'optional' => FALSE,
+            ),
+           
+          ),
+          'file' => array(
+            'type' => 'inc',
+            'module' => 'dispatch_planning',
+            'name' => 'ptl_dispatch_planning'
+          ),
+          'access arguments' => array('services_access_ptl_api'),
+        ),
+        'master-ptl-api-put-qty-sum' => array(
+          'help' => 'Update PTL Put Qty Sum Table Data',
+          'callback' => 'update_master_ptl_put_qty_sum_data',
+          'args' => array(
+            array(
+              'name' => 'ptl_job',
+              'type' => 'string',
+              'description' => 'PTL JOB',
+              'source' => array('data' => 'ptl_job'),
+              'optional' => FALSE,
+            ),
+            array(
+              'name' => 'rs_code',
+              'type' => 'string',
+              'description' => 'Rs Code',
+              'source' => array('data' => 'rs_code'),
+              'optional' => FALSE,
+            ),
+            array(
+              'name' => 'line_count',
+              'type' => 'string',
+              'description' => 'line_count',
+              'source' => array('data' => 'line_count'),
+              'optional' => FALSE,
+            ),
+            array(
+              'name' => 'put_qty_sum',
+              'type' => 'string',
+              'description' => 'Put qty sum',
+              'source' => array('data' => 'put_qty_sum'),
+              'optional' => FALSE,
+            ),
+           
+          ),
+          'file' => array(
+            'type' => 'inc',
+            'module' => 'dispatch_planning',
+            'name' => 'master_ptl_dispatch_planning'
+          ),
+          'access arguments' => array('services_access_ptl_api'),
+        ),
         'ptl-api-data-fetch' => array(
           'help' => 'Get PTL Data',
           'callback' => 'fetch_ptl_data',

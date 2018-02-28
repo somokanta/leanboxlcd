@@ -26,8 +26,53 @@ function dispatch_planning_schema() {
     ),
     'primary key' => array('id'),
   );
+$schema['ptl_put_qty'] = array(
+    'description' => 'ptl_put_qty sum',
+    'fields' => array(
+      'id' => array(
+        'description' => 'The primary identifier for a data',
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'ptl_job' => array(
+        'description' => 'ptl_job',
+        'type' => 'int',
+         'not null' => TRUE,
+         'default' => 0,
+      ),
+      'line_count' => array(
+        'description' => 'line_count',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'put_qty_sum' => array(
+        'description' => 'put_qty_sum',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'rs_code' => array(
+        'description' => 'rs_code',
+        'type' => 'varchar',
+        'length' => 20,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'created' => array(
+        'description' => 'created',
+        'type' => 'int',
+      ),
+      'type' => array(
+        'description' => 'type',
+        'type' => 'varchar',
+        'length' => 20,
+      ),
+    ),
+    'primary key' => array('id'),
+  );
 
-  return $schema;
+return $schema;
 }
 
 /**
@@ -1599,4 +1644,56 @@ function dispatch_planning_update_7121() {
       db_add_field('master_ptl_data', $key, $field);
     }    
   }
+}
+
+/**
+ *  
+ */
+function dispatch_planning_update_7122() {
+  $schema['ptl_put_qty'] = array(
+    'description' => 'ptl_put_qty sum',
+    'fields' => array(
+      'id' => array(
+        'description' => 'The primary identifier for a data',
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'ptl_job' => array(
+        'description' => 'ptl_job',
+        'type' => 'int',
+         'not null' => TRUE,
+         'default' => 0,
+      ),
+      'line_count' => array(
+        'description' => 'line_count',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'put_qty_sum' => array(
+        'description' => 'put_qty_sum',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'rs_code' => array(
+        'description' => 'rs_code',
+        'type' => 'varchar',
+        'length' => 20,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'created' => array(
+        'description' => 'created',
+        'type' => 'int',
+      ),
+      'type' => array(
+        'description' => 'type',
+        'type' => 'varchar',
+        'length' => 20,
+      ),
+    ),
+    'primary key' => array('id'),
+  );
+  db_create_table('ptl_put_qty', $schema['ptl_put_qty']);
 }
