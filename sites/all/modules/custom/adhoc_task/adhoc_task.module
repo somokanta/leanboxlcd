@@ -100,7 +100,12 @@ function adhoc_task_menu() {
     'page callback' => 'central_impact_return_analysis_export',
     'access arguments' => array('Day Wise Bill Count And Value Download File'),
   );
-  
+  $items['email/impact_unprocessed'] = array(
+    'title' => 'Send Email For Impact Unprocessed File',
+    'page callback' => 'send_email_for_impact_unprocessed',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
     // Manually Create Billing Data
   $items['create-billing-data'] = array(
     'title' => 'Create Billing Data',
@@ -1308,7 +1313,29 @@ function create_sales_billing_form_submit($form, &$form_state) {
   drupal_set_message('Sales Register Data Created Successfully');
 }
 
+function send_email_for_impact_unprocessed() {
+    $html = '<h2>Hi,</h2>
+                 <h3>Below are the files which are present in Unprocess Directory.</h3>';
+    
+    $result = "";
+    exec("sshpass -p 'Techub123#'  ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no  sftpuser03@103.233.76.251 ls -l /unprocessed", $response);
+    foreach ($response as $val) {
 
+      if (strpos($val, 'TP2IMPACT_PARTYMASTER') !== false) {
+        $result .= substr($val, - 67) . "\n";
+      }
+      else {
+        $result .= substr($val, - 64) . "\n";
+      }
+    }
+    
+    $html .= "\n".$result;
+    $params['subject'] = "IMPACT unprocessed File Details";
+    $params['body'] = $html;
+    $mail_to = variable_get('impact_unprocessed_to_email', 'abhishek.r@iksula.com');
+    $from = variable_get('from_email', '');
+    drupal_mail('adhoc_task', 'duplicate_data', $mail_to, LANGUAGE_NONE, $params, $from);
+}
 
 function create_van_cld_billing_form_submit($form, &$form_state) {
 
