@@ -1154,6 +1154,23 @@ function dispatch_planning_views_data() {
       'handler' => 'views_handler_argument_string',
     ),
   );
+  $data['ptl_data_configuration']['zone'] = array(
+    'title' => t('Zone'),
+    'help' => t('Zone'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
   
   $base_table = 'ptl_data_configuration';
   $data[$base_table]['date_filter'] = array(
@@ -1928,6 +1945,23 @@ function dispatch_planning_views_data() {
   $data['master_ptl_data']['box_id'] = array(
     'title' => t('Box ID'),
     'help' => t('Box ID'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+    $data['master_ptl_data']['zone'] = array(
+    'title' => t('Zone'),
+    'help' => t('Zone'),
     'field' => array(
       'handler' => 'views_handler_field',
       'click sortable' => TRUE,

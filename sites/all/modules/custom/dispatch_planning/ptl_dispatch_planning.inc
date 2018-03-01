@@ -157,6 +157,7 @@ function put_qty_ptl_data($id_qty) {
         'put_operator_id' => $value['put_operator_id'],
         'put_time'=>$value['put_time'],
         'close_operator_id'=>$value['close_operator_id'],
+        'zone'=>$value['zone'],
         'close_time'=>$value['close_time'],
         'box_id'=>$value['box_id'],
       ))
