@@ -1995,6 +1995,20 @@ function dispatch_planning_views_data() {
       'handler' => 'views_handler_argument_string',
     ),
   );
+
+  $base_table = 'master_ptl_data';
+  $data[$base_table]['date_filter'] = array(
+    'group' => t('Date'),
+    'title' => t('Date (!base_table)', array('!base_table' => $base_table)),
+    'help' => t('Filter any Views !base_table date field.', array('!base_table' => $base_table)),
+    'filter' => array(
+      'handler' => 'date_views_filter_handler',
+      'empty field name' => t('Undated'),
+      'is date' => TRUE,
+    //'skip base' => $base_table,
+    ),
+  );
+    
   // Table for farey exposed api
   $data['dispatch_planning_api_data']['table'] = array(
     'group' => t('dispatch_planning data'),
