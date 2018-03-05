@@ -146,6 +146,25 @@ function dispatch_planning_views_data() {
       'handler' => 'views_handler_argument_string',
     ),
   );
+
+  
+  $data['ptl_put_qty']['unique_id'] = array(
+    'title' => t('Unique ID'),
+    'help' => t('Unique ID'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
   // end of MASTER-PTL_PUT_QTY
   
 

@@ -1699,6 +1699,12 @@ function dispatch_planning_update_7122() {
         'type' => 'varchar',
         'length' => 20,
       ),
+      'unique_id' => array(
+        'description' => 'Unique ID',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
     ),
     'primary key' => array('id'),
   );
