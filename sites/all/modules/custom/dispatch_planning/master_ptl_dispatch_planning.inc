@@ -729,7 +729,7 @@ function download_master_trip_box_id($args) {
  * @param type $line_count
  * @param type $put_qty_sum
  */
-function update_master_ptl_put_qty_sum_data($id, $ptl_job, $rs_code, $line_count, $put_qty_sum) {
+function update_master_ptl_put_qty_sum_data($ptl_job, $id, $rs_code, $api_time, $line_count, $put_qty_sum) {
    $result = db_merge('ptl_put_qty')
        ->key(array('unique_id' => $id, 'rs_code' => $rs_code, 'type' => 'MASTER_TRIP'))
        ->fields(array(
@@ -739,7 +739,7 @@ function update_master_ptl_put_qty_sum_data($id, $ptl_job, $rs_code, $line_count
          'put_qty_sum' => $put_qty_sum,
          'rs_code' => $rs_code,
          'type' => 'MASTER_TRIP', // same table diff is trip and master trip
-         'created' => REQUEST_TIME
+         'created' => $api_time
        ))
        ->execute();
    $results['flag'] = '1';

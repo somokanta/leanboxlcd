@@ -455,13 +455,6 @@ function dispatch_planning_services_resources() {
           'callback' => 'update_ptl_put_qty_sum_data',
           'args' => array(
             array(
-              'name' => 'id',
-              'type' => 'string',
-              'description' => 'ID',
-              'source' => array('data' => 'ptl_job'),
-              'optional' => FALSE,
-            ),
-            array(
               'name' => 'ptl_job',
               'type' => 'string',
               'description' => 'PTL JOB',
@@ -469,10 +462,24 @@ function dispatch_planning_services_resources() {
               'optional' => FALSE,
             ),
             array(
+              'name' => 'id',
+              'type' => 'string',
+              'description' => 'ID',
+              'source' => array('data' => 'id'),
+              'optional' => FALSE,
+            ),
+            array(
               'name' => 'rs_code',
               'type' => 'string',
               'description' => 'Rs Code',
               'source' => array('data' => 'rs_code'),
+              'optional' => FALSE,
+            ),
+            array(
+              'name' => 'api_time',
+              'type' => 'string',
+              'description' => 'line_count',
+              'source' => array('data' => 'api_time'),
               'optional' => FALSE,
             ),
             array(
@@ -503,13 +510,6 @@ function dispatch_planning_services_resources() {
           'callback' => 'update_master_ptl_put_qty_sum_data',
           'args' => array(
             array(
-              'name' => 'id',
-              'type' => 'string',
-              'description' => 'ID',
-              'source' => array('data' => 'ptl_job'),
-              'optional' => FALSE,
-            ),
-            array(
               'name' => 'ptl_job',
               'type' => 'string',
               'description' => 'PTL JOB',
@@ -517,10 +517,24 @@ function dispatch_planning_services_resources() {
               'optional' => FALSE,
             ),
             array(
+              'name' => 'id',
+              'type' => 'string',
+              'description' => 'ID',
+              'source' => array('data' => 'id'),
+              'optional' => FALSE,
+            ),
+            array(
               'name' => 'rs_code',
               'type' => 'string',
               'description' => 'Rs Code',
               'source' => array('data' => 'rs_code'),
+              'optional' => FALSE,
+            ),
+            array(
+              'name' => 'api_time',
+              'type' => 'string',
+              'description' => 'line_count',
+              'source' => array('data' => 'api_time'),
               'optional' => FALSE,
             ),
             array(

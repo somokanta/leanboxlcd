@@ -748,7 +748,7 @@ function update_ptl_header_data($ptl_job ,$trip_id, $rs_code, $vehicle,$bill_lin
  * @param type $line_count
  * @param type $put_qty_sum
  */
-function update_ptl_put_qty_sum_data($id, $ptl_job, $rs_code, $line_count, $put_qty_sum) {
+function update_ptl_put_qty_sum_data($ptl_job, $id, $rs_code, $api_time, $line_count, $put_qty_sum) {
    $result = db_merge('ptl_put_qty')
        ->key(array('unique_id' => $id, 'rs_code' => $rs_code, 'type' => 'TRIP'))
        ->fields(array(
@@ -758,7 +758,7 @@ function update_ptl_put_qty_sum_data($id, $ptl_job, $rs_code, $line_count, $put_
          'put_qty_sum' => $put_qty_sum,
          'rs_code' => $rs_code,
          'type' => 'TRIP', // same table diff is trip and master trip
-         'created' => REQUEST_TIME
+         'created' => $api_time
        ))
        ->execute();
    $results['flag'] = '1';
