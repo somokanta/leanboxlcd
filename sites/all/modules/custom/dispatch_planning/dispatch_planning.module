@@ -455,6 +455,13 @@ function dispatch_planning_services_resources() {
           'callback' => 'update_ptl_put_qty_sum_data',
           'args' => array(
             array(
+              'name' => 'id',
+              'type' => 'string',
+              'description' => 'ID',
+              'source' => array('data' => 'ptl_job'),
+              'optional' => FALSE,
+            ),
+            array(
               'name' => 'ptl_job',
               'type' => 'string',
               'description' => 'PTL JOB',
@@ -495,6 +502,13 @@ function dispatch_planning_services_resources() {
           'help' => 'Update PTL Put Qty Sum Table Data',
           'callback' => 'update_master_ptl_put_qty_sum_data',
           'args' => array(
+            array(
+              'name' => 'id',
+              'type' => 'string',
+              'description' => 'ID',
+              'source' => array('data' => 'ptl_job'),
+              'optional' => FALSE,
+            ),
             array(
               'name' => 'ptl_job',
               'type' => 'string',
