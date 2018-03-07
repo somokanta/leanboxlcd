@@ -29,7 +29,7 @@ class field_box_id_master_ptl extends views_handler_field {
     $query1 = db_select('master_ptl_data', 'mptl');
     $query1->condition('mptl.ptl_job', $ptl_job, "=");
     $query1->condition('mptl.trip_id', $trip_id, "=");
-    $query1->addExpression('GROUP_CONCAT(DISTINCT mptl.box_id)', 'box_id');
+    $query1->addExpression("GROUP_CONCAT(DISTINCT mptl.box_id separator ', ')", 'box_id');
     $query1->condition('mptl.box_id', '', "!=");
     $box_id = $query1->execute()->fetchField();
     return $box_id;
