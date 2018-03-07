@@ -29,7 +29,7 @@ class field_box_id_ptl extends views_handler_field {
     $query1 = db_select('ptl_data_configuration', 'ptl');
     $query1->condition('ptl.trip_id', $trip_id, "=");
     $query1->condition('ptl.bill_number', $bill_number, "=");
-    $query1->addExpression('GROUP_CONCAT(DISTINCT ptl.box_id)', 'box_id');
+    $query1->addExpression("GROUP_CONCAT(DISTINCT ptl.box_id separator ', ')", 'box_id');
     $query1->condition('ptl.box_id', '', "!=");
     $box_id = $query1->execute()->fetchField();
     return $box_id;
