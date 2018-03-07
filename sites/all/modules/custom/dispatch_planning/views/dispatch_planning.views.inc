@@ -193,6 +193,24 @@ function dispatch_planning_views_data() {
       'handler' => 'field_van_loading_date',
     ),
   );
+  
+   // Add custom field for box id in master ptl
+  $data['views']['field_box_id_master_ptl'] = array(
+    'title' => t('box_id_master_ptl'),
+    'help' => t('Provides a custom box id field for master ptl.'),
+    'field' => array(
+      'handler' => 'field_box_id_master_ptl',
+    ),
+  );
+  
+   // Add custom field for box id in ptl for drs
+  $data['views']['field_box_id_ptl'] = array(
+    'title' => t('box_id_ptl'),
+    'help' => t('Provides a custom box id field for ptl.'),
+    'field' => array(
+      'handler' => 'field_box_id_ptl',
+    ),
+  );
 
   $data['views']['header_ptl_loose_custom'] = array(
     'title' => t('PTL Loose Header'),

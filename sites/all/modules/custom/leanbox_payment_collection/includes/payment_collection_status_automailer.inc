@@ -345,7 +345,9 @@ function get_attachment_pending_for_collection($distributor_id) {
     $query->join('field_data_field_credit_days', 'ct', 'ct.entity_id = pc.field_party_code_reference_nid');
     $query->fields('ct', array('field_credit_days_value'));
     $credit_days = $query->execute()->fetchField();
-    
+    if(empty($credit_days)) {
+      $credit_days = 0;
+    }
     $collection_date = strtotime("+$credit_days day", strtotime($data['field_declaration_date_value']));
     $declaration_date = strtotime($data['field_declaration_date_value']);
     $row['nid'] = $data['nid'];

@@ -697,9 +697,43 @@ function master_trip_box_id_form($form, &$form_state) {
 }
 
 function master_trip_box_id_form_validate($form, &$form_state) {
+  global $user;
+  $rs_code = master_ptl_get_rs_code_by_uid($user->uid);
   $master_trip_id = $form_state['values']['master_trip_id'];
   if(empty($master_trip_id)){
+    unset($form_state['complete form']['hhh']);
+    unset($form_state['complete form']['dowmload_mark']);
     form_set_error('master_ptl_id', 'Please enter Master PTL ID');
+  }
+  $query1 = db_select('master_ptl_data', 'mptl');
+  $query1->condition('mptl.ptl_job', $master_trip_id, "=");
+  $query1->condition('mptl.rs_code', $rs_code, "=");
+  $query1->addExpression('SUM(mptl.put_qty)', 'put_qty');
+  $put_qty = $query1->execute()->fetchField();
+
+  $query = db_select('ptl_put_qty', 'put');
+  $query->condition('put.type', 'MASTER_TRIP', "=");
+  $query->condition('put.rs_code', $rs_code, "=");
+  $query->condition('put.ptl_job', $master_trip_id, "=");
+  $query->addExpression('SUM(put.put_qty_sum)', 'put_qty_sum');
+  $put_qty_sum = $query->execute()->fetchField();
+  
+  $error_msg = '';
+
+  if (empty($put_qty)) {
+    $error_msg = "Put Quantity is empty";
+  }
+  if (empty($put_qty_sum)) {
+    $error_msg = "Put Incremental Quantity is empty";
+  }
+  if ($put_qty != $put_qty_sum) {
+    $error_msg = "Put Quantity($put_qty) and Put Incremental Quantity($put_qty_sum) does not match";
+  }
+  
+  if (!empty($error_msg)) {
+    unset($form_state['complete form']['hhh']);
+    unset($form_state['complete form']['dowmload_mark']);
+    form_set_error('master_trip_id', $error_msg);
   }
 }
 

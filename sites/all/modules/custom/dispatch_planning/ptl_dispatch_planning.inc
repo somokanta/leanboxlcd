@@ -619,6 +619,7 @@ function drs_box_id_sheet_form($form, &$form_state) {
       'effect' => 'fade',
     ),
     '#submit' => array('drs_box_id_sheet_form_submit'),
+    '#validate' => array('drs_box_id_sheet_form_validate'),
   );
   if (!empty($form_state['views_data'])) {
     $form['hhh'] = array(
@@ -637,6 +638,45 @@ function drs_box_id_sheet_form($form, &$form_state) {
 
 function get_data_of_drs_box_id_sheet_form_submit($form, &$form_state) {
   return $form;
+}
+
+function drs_box_id_sheet_form_validate($form, &$form_state) {
+  global $user;
+  $rs_code = ptl_get_rs_code_by_uid($user->uid);
+  $trip_id = $form_state['values']['trip_id'];
+  if (!is_numeric($trip_id)) {
+    unset($form_state['complete form']['hhh']);
+    unset($form_state['complete form']['dowmload_mark']);
+    form_set_error('trip_id', "Enter Correct  Integer Value");
+  }
+  $query1 = db_select('ptl_data_configuration', 'ptl');
+  $query1->condition('ptl.trip_id', $trip_id, "=");
+  $query1->condition('ptl.rs_code', $rs_code, "=");
+  $query1->addExpression('SUM(ptl.put_qty)', 'put_qty');
+  $put_qty = $query1->execute()->fetchField();
+
+  $query = db_select('ptl_put_qty', 'put');
+  $query->condition('put.type', 'TRIP', "=");
+  $query->condition('put.rs_code', $rs_code, "=");
+  $query->condition('put.ptl_job', $trip_id, "=");
+  $query->addExpression('SUM(put.put_qty_sum)', 'put_qty_sum');
+  $put_qty_sum = $query->execute()->fetchField();
+
+  $error_msg = '';
+  if (empty($put_qty)) {
+    $error_msg = "Put Quantity is empty";
+  }
+  if (empty($put_qty_sum)) {
+    $error_msg = "Put Incremental Quantity is empty";
+  }
+  if ($put_qty != $put_qty_sum) {
+    $error_msg = "Put Quantity($put_qty) and Put Incremental Quantity($put_qty_sum) does not match";
+  }
+  if (!empty($error_msg)) {
+    unset($form_state['complete form']['hhh']);
+    unset($form_state['complete form']['dowmload_mark']);
+    form_set_error('master_trip_id', $error_msg);
+  }
 }
 
 function drs_box_id_sheet_form_submit($form, &$form_state) {
