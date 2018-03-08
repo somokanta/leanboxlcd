@@ -220,6 +220,33 @@ function dispatch_planning_views_data() {
       'handler' => 'field_box_id_ptl_count',
     ),
   );
+  
+  // Add custom field for count of box id in master ptl
+  $data['views']['field_box_id_master_ptl_count'] = array(
+    'title' => t('box_id_master_ptl_count'),
+    'help' => t('Provides count for custom box id field for master ptl.'),
+    'field' => array(
+      'handler' => 'field_box_id_master_ptl_count',
+    ),
+  );
+  
+  // Add footer for count of box id in master ptl
+  $data['views']['footer_master_ptl_custom_box_count'] = array(
+    'title' => t('Master PTL Custom Footer for Box Count'),
+    'help' => t('Just a field created for  Master PTL Custom Footer for Box Count.'),
+    'area' => array(
+      'handler' => 'footer_master_ptl_custom_box_count',
+    ),
+  );
+  
+  // Add footer for count of box id in ptl
+  $data['views']['footer_ptl_custom_box_count'] = array(
+    'title' => t('PTL Custom Footer for Box Count'),
+    'help' => t('Just a field created for PTL Custom Footer for Box Count.'),
+    'area' => array(
+      'handler' => 'footer_ptl_custom_box_count',
+    ),
+  );
 
   $data['views']['header_ptl_loose_custom'] = array(
     'title' => t('PTL Loose Header'),

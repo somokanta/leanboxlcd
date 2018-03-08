@@ -14,4 +14,7 @@ files[] = views/handler/field_van_loading_date.inc
 files[] = views/handler/field_box_id_master_ptl.inc
 files[] = views/handler/field_box_id_ptl.inc
 files[] = views/handler/field_box_id_ptl_count.inc
+files[] = views/handler/field_box_id_master_ptl_count.inc
+files[] = views/handler/footer_master_ptl_custom_box_count.inc
+files[] = views/handler/footer_ptl_custom_box_count.inc
 
