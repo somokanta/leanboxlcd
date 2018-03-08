@@ -211,6 +211,15 @@ function dispatch_planning_views_data() {
       'handler' => 'field_box_id_ptl',
     ),
   );
+  
+  // Add custom field for count of box id in ptl for drs
+  $data['views']['field_box_id_ptl_count'] = array(
+    'title' => t('box_id_ptl_count'),
+    'help' => t('Provides count for custom box id field for ptl.'),
+    'field' => array(
+      'handler' => 'field_box_id_ptl_count',
+    ),
+  );
 
   $data['views']['header_ptl_loose_custom'] = array(
     'title' => t('PTL Loose Header'),

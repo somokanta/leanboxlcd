@@ -730,7 +730,15 @@ function master_trip_box_id_form_validate($form, &$form_state) {
     $error_msg = "Put Quantity($put_qty) and Put Incremental Quantity($put_qty_sum) does not match";
   }
   
-  if (!empty($error_msg)) {
+  $query1 = db_select('master_ptl_data', 'mptl');
+  $query1->condition('mptl.ptl_job', $master_trip_id, "=");
+  $query1->condition('mptl.rs_code', $rs_code, "=");
+  $query1->condition('mptl.box_id', '', "!=");
+  $query1->fields('mptl',array('box_id'));
+  $query1->range(0, 1);
+  $res = $query1->execute()->fetchField();
+ 
+  if (!empty($error_msg) && !empty($res)) {
     unset($form_state['complete form']['hhh']);
     unset($form_state['complete form']['dowmload_mark']);
     form_set_error('master_trip_id', $error_msg);
