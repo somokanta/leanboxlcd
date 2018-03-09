@@ -1753,19 +1753,26 @@ function get_bill_info($bill_number, $van = NULL, $loading_date = NULL, $beat_na
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
   $query = db_select('node', 'n');
   $query->leftJoin('field_data_field_bill_value', 'bv', 'n.nid = bv.entity_id');
-  $query->leftJoin('field_data_field_sales_party_code', 'spc', 'n.nid = spc.entity_id');
+  
+  // commented on 9 march
+  //$query->leftJoin('field_data_field_sales_party_code', 'spc', 'n.nid = spc.entity_id');
   $query->leftJoin('field_data_field_billing_loading_date', 'ld', 'n.nid = ld.entity_id');
   $query->leftJoin('field_data_field_billing_van', 'v', 'n.nid = v.entity_id');
   $query->leftJoin('field_data_field_delivery_pending', 'dp', 'n.nid = dp.entity_id');
   $query->leftJoin('field_data_field_trip_id_reference', 't', 'n.nid = t.entity_id');
   $query->leftJoin('node', 'nt', 'nt.nid = t.field_trip_id_reference_nid');
 
-  $query->leftJoin('field_data_field_party_code', 'pc', 'pc.field_party_code_value = spc.field_sales_party_code_value');
- // $query->leftJoin('field_data_field_party_code', 'ppc', 'pc.field_party_code_value = ppc.field_party_code_value');
-  $query->condition('pc.bundle', 'outlet_master');
-  $query->join('node', 'oun', 'oun.nid = pc.entity_id');
-  $query->condition('oun.uid', $distributor_id, '=');
-
+  // commented on 9 march
+ // $query->leftJoin('field_data_field_party_code', 'pc', 'pc.field_party_code_value = spc.field_sales_party_code_value');
+//  $query->condition('pc.bundle', 'outlet_master');
+//  $query->join('node', 'oun', 'oun.nid = pc.entity_id');
+//  $query->condition('oun.uid', $distributor_id, '=');
+  
+  // added on 9 march
+  $query->leftJoin('field_data_field_party_code_reference', 'pc', 'pc.entity_id = n.nid'); 
+  $query->leftjoin('node', 'oun', 'oun.nid = pc.field_party_code_reference_nid');
+ 
+  
   $query->leftJoin('field_data_field_party_name', 'pn', 'pn.entity_id = oun.nid');
   $query->leftJoin('field_data_field_beat_name', 'bn', 'bn.entity_id = oun.nid');
 
@@ -1784,11 +1791,12 @@ function get_bill_info($bill_number, $van = NULL, $loading_date = NULL, $beat_na
 
   $query->addField('bn', 'field_beat_name_value', 'sales_beat');
 
-  $db_or = db_or();
-  $db_or->condition('pc.bundle', 'outlet_master');
-  $db_or->isNull('pc.bundle');
-
-  $query->condition($db_or);
+  // commented on 9 march
+//  $db_or = db_or();
+//  $db_or->condition('pc.bundle', 'outlet_master');
+//  $db_or->isNull('pc.bundle');
+//
+//  $query->condition($db_or);
 
   if (!is_null($bill_number)) {
     $query->condition('n.title', $bill_number);
