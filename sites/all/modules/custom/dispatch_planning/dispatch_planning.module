@@ -4,11 +4,21 @@ require_once DRUPAL_ROOT .  '/sites/all/modules/custom/reverse_geocode/direction
 
 function dispatch_planning_menu() {
    
+   $items['edit-trip-delivered'] = array(
+    'title' => 'Edit Delivered Trip -details',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('_edit_trip_delivered_callback_form'),
+    'access arguments' => array('dispatch planning screen'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'dispatch_planning_farey.form.inc',
+      // Page callback, etc. need to be added here.
+  );
+     
   $items['delivered-trip-data'] = array(
     'title' => 'Delivered Trip',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('_delivered_trip_data_callback'),
-    'access arguments' => array('Ptl trip creation'),
+    'access arguments' => array('dispatch planning screen'),
     'type' => MENU_NORMAL_ITEM,
     'file' => 'dispatch_planning_farey.form.inc',
       // Page callback, etc. need to be added here.
@@ -17,7 +27,7 @@ function dispatch_planning_menu() {
     'title' => 'Delivered Trip',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('_delivered_trip_data_download_callback'),
-    'access arguments' => array('Ptl trip creation'),
+    'access arguments' => array('dispatch planning screen'),
     'type' => MENU_NORMAL_ITEM,
     'file' => 'dispatch_planning_farey.form.inc',
       // Page callback, etc. need to be added here.
@@ -2877,4 +2887,17 @@ function _get_van_loading_combination_by_trip($dispatch_data_nid) {
   }
 
   return ltrim($vehicle_loading, ',');
+}
+
+/**
+ * 
+ * @param type $ref_no
+ * @return type
+ */
+function _get_bill_row_id_using_reference_no($ref_no) {
+   $query = db_select('dispatch_planning_api_data', 'dp');
+   $query->fields('dp', array('id'));
+   $query->condition('dp.referenceNo', $ref_no);
+   $res = $query->execute()->fetchField();
+   return $res;
 }

@@ -54,6 +54,9 @@ function fetch_dispatch_planning_api_data($data) {
             'res_to_be_collection' => isset($data['fieldData']['to_be_collection']) ? $data['fieldData']['to_be_collection'] : '',
             'res_signed_bill_partial' => isset($data['fieldData']['signed_bill_partial']) ? $data['fieldData']['signed_bill_partial'] : '',
             'res_reason_for_failure' => isset($data['fieldData']['reason_for_failure']) ? $data['fieldData']['reason_for_failure'] : '',
+            'photo_of_signed_bill_partial' => isset($data['fieldData']['photo_of_signed_bill_partial']) ? $data['fieldData']['photo_of_signed_bill_partial'] : '',
+            'updated_flag' => 'api',
+
           ))
           ->condition('referenceNo', $data['referenceNumber'], '=')
           ->execute();
@@ -126,15 +129,3 @@ function fetch_dispatch_planning_api_data($data) {
    return $results;
 }
 
-/**
- * 
- * @param type $ref_no
- * @return type
- */
-function _get_bill_row_id_using_reference_no($ref_no) {
-   $query = db_select('dispatch_planning_api_data', 'dp');
-   $query->fields('dp', array('id'));
-   $query->condition('dp.referenceNo', $ref_no);
-   $res = $query->execute()->fetchField();
-   return $res;
-}
