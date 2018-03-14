@@ -344,7 +344,7 @@ function _edit_trip_delivered_callback_form($form, &$form_state) {
                  '#title_display' => 'invisible',
                  '#name' => "sku_reason[$key]",
                  '#required' => TRUE,
-                 '#value' => $key['Sku_reason'],
+                 '#value' => !empty($key['Sku_reason']) ? $key['Sku_reason'] : '',
                );
             }
             $form['trip_details'] = array(
