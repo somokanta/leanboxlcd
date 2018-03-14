@@ -1171,7 +1171,7 @@ function dispatch_planning_update_7114() {
        'length' => 255,
      ),
      'updated_flag' => array(
-       'description' => t('0 => no changes, manual => manual entry, api => api response'),
+       'description' => t('0 => no changes, 1 => manual entry, 2 => api response'),
        'type' => 'int',
        'default' => 0,
        'length' => 3,

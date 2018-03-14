@@ -529,7 +529,7 @@ function _edit_trip_delivered_callback_form_submit($form, &$form_state) {
             'res_photo_of_signed_bill_delivery' => ($collc_mode == 'signed') ? $sb_file_uri : '',
             'res_signed_bill_delivery' => ($collc_mode == 'signed' && $order_status == 'deliver') ? 1 : '',
             'res_signed_bill_partial' => ($collc_mode == 'signed' && $order_status == 'partial_deliver') ? 1 : '',
-            'updated_flag' => 'manual',
+            'updated_flag' => 1,
           ))
           ->condition('runsheet_number', $trip_number, '=')
           ->condition('bill_number', $bill_number, '=')

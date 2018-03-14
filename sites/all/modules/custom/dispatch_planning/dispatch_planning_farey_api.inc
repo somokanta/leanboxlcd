@@ -55,7 +55,7 @@ function fetch_dispatch_planning_api_data($data) {
             'res_signed_bill_partial' => isset($data['fieldData']['signed_bill_partial']) ? $data['fieldData']['signed_bill_partial'] : '',
             'res_reason_for_failure' => isset($data['fieldData']['reason_for_failure']) ? $data['fieldData']['reason_for_failure'] : '',
             'photo_of_signed_bill_partial' => isset($data['fieldData']['photo_of_signed_bill_partial']) ? $data['fieldData']['photo_of_signed_bill_partial'] : '',
-            'updated_flag' => 'api',
+            'updated_flag' => 2,
 
           ))
           ->condition('referenceNo', $data['referenceNumber'], '=')
