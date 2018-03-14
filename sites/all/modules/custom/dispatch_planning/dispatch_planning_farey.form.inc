@@ -328,7 +328,7 @@ function _edit_trip_delivered_callback_form($form, &$form_state) {
                  '#title_display' => 'invisible',
                  '#name' => "actual_qty[$key]",
                  '#required' => TRUE,
-                 '#value' => $key['Actual_qty'],
+                 '#value' => !empty($key['Actual_qty']) ? $key['Actual_qty'] : '',
                );
                if (!empty($order_status) && $order_status == 'deliver') {
                   $item_details[$key]['actual_qty']['data']['#value'] = $item_details[$key]['og_sum_net_sales_quantity'];
