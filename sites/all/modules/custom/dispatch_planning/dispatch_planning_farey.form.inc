@@ -441,7 +441,7 @@ function _get_all_tripsbill($trip_id) {
     $query->condition('n.type', 'sales_register_data');
     $query->condition('n1.title', $trip_id);
     $query->fields('n', array('title'));
-    $query->range(0, 15);
+    // $query->range(0, 15);
     $query->addTag('node_distributor_access');
     $result = $query->execute()->fetchAllKeyed(0, 0);
   }
@@ -613,7 +613,8 @@ function _edit_trip_delivered_callback_form_submit($form, &$form_state) {
       $sb_file = ($form_state['storage']['sb_file']);
       $cheque_file_uri = $cheque_file->uri;
       $sb_file_uri = $sb_file->uri;
-
+      $reason_for_failure = isset($form_state['values']['undeliver_reason']) ? $form_state['values']['undeliver_reason'] : '';
+      
       $updated_bill_rows = db_update('dispatch_planning_api_data') // Table name no longer needs {}
           ->fields(array(
             'res_status' => $order_status,
@@ -626,6 +627,7 @@ function _edit_trip_delivered_callback_form_submit($form, &$form_state) {
             'res_photo_of_signed_bill_delivery' => ($collc_mode == 'signed') ? $sb_file_uri : '',
             'res_signed_bill_delivery' => ($collc_mode == 'signed' && $order_status == 'deliver') ? 'yes' : '',
             'res_signed_bill_partial' => ($collc_mode == 'signed' && $order_status == 'partial_deliver') ? 'yes' : '',
+            'res_reason_for_failure' => $reason_for_failure,
             'updated_flag' => 1,
           ))
           ->condition('runsheet_number', $trip_number, '=')
