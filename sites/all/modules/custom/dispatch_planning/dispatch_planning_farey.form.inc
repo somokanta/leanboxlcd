@@ -598,13 +598,13 @@ function _edit_trip_delivered_callback_form_validate($form, &$form_state) {
 function _edit_trip_delivered_callback_form_submit($form, &$form_state) {
   // dpm($form_state, '$form_state');
    $trip_number = $form_state['values']['trip_number'];
-   dpm($trip_number, '$trip_number');
+  // dpm($trip_number, '$trip_number');
    $bill_number = $form_state['values']['bill_number'];
-   dpm($bill_number, '$bill_number');
+  // dpm($bill_number, '$bill_number');
    // get logged in users rs id
    $user_id = $GLOBALS['user']->uid;
    $rs_code = dispatch_planning_get_rscode_using_uid($user_id);
-   dpm($rs_code, '$rs_code');
+  // dpm($rs_code, '$rs_code');
    if (!empty($trip_number) && !empty($bill_number) && !empty($rs_code)) {
       $order_status = $form_state['values']['order_status'];
       $collc_mode = $form_state['values']['collection_mode'];
@@ -634,11 +634,11 @@ function _edit_trip_delivered_callback_form_submit($form, &$form_state) {
           ->condition('bill_number', $bill_number, '=')
           ->condition('hub', $rs_code, '=')
           ->execute();
-      dpm($updated_bill_rows, '$updated_bill_rows');
-      if (!empty($updated_bill_rows)) {
+     // dpm($updated_bill_rows, '$updated_bill_rows');
+     // if (!empty($updated_bill_rows)) {
          $reference_no = $trip_number . '_' . $rs_code . '_' . $bill_number;
          $bill_row_id = _get_bill_row_id_using_reference_no($reference_no);
-         dpm($bill_row_id, '$bill_row_id');
+        //  dpm($bill_row_id, '$bill_row_id');
 
 
          foreach ($form_state['values']['actual_qty'] as $key => $value) {
@@ -654,7 +654,7 @@ function _edit_trip_delivered_callback_form_submit($form, &$form_state) {
          }
          
          drupal_set_message(t('Data submitted successfully'));
-      }
+     // }
    }
 }
 
