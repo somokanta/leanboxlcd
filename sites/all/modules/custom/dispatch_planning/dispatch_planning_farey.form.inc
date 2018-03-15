@@ -235,95 +235,103 @@ function _edit_trip_delivered_callback_form($form, &$form_state) {
             );
             // collection mode
             $lists = array('' => '-select-', 'signed' => 'Signed', 'cheque' => 'Cheque', 'cash' => 'Cash');
-            $form['collection_mode'] = array(
-              '#type' => 'select',
-              '#options' => $lists,
-              '#title' => t('Collection Mode'),
-              '#required' => TRUE,
-            );
-
-
-            $form['bank_name'] = array(
-              '#type' => 'textfield',
-              //'#options' => $lists,
-              '#title' => t('Bank Name'),
-              '#states' => array(
-                'visible' => array(
-                  ':input[name="collection_mode"]' => array('value' => 'cheque'),
-                ),
-              ),
-             // '#required' => TRUE,
-            );
-            $form['cheque_amt'] = array(
-              '#type' => 'textfield',
-              //'#options' => $lists,
-              '#title' => t('Cheque Amt'),
-              '#states' => array(
-               'visible' => array(
-                  ':input[name="collection_mode"]' => array('value' => 'cheque'),
-                ),
-              ),
-             // '#required' => TRUE,
-            );
-            $form['cheque_date'] = array(
-              '#type' => 'date_popup',
-              // '#options' => $lists,
-              '#title' => t('Cheque Date'),
-              '#states' => array(
-                'visible' => array(
-                  ':input[name="collection_mode"]' => array('value' => 'cheque'),
-                ),
-              ),
-              '#date_format' => 'Y-m-d',
-             // '#required' => TRUE,
-            );
-            $form['cheque_file'] = array(
-              '#title' => t('Photo of Cheque Copy'),
-              '#type' => 'file',
-              '#description' => t('Allowed extensions: pdf png jpg jpeg txt'),
-              '#states' => array(
-                 'visible' => array(
-                  ':input[name="collection_mode"]' => array('value' => 'cheque'),
-                ),
-              ),
-             // '#required' => TRUE,
-            );
-
             
-            $form['sb_amt'] = array(
-              '#type' => 'textfield',
-              '#title' => t('Signed bill Amt'),
-              '#states' => array(
-                'visible' => array(
-                  ':input[name="collection_mode"]' => array('value' => 'signed'),
-                ),
-              ),
-             // '#required' => TRUE,
-            );
+            if (!empty($order_status) && $order_status == 'undeliver') {
+                $form['collection_mode'] = array(
+                 '#type' => 'value',
+                 '#value' => '',
+               );
+            }
+            else {
+               $form['collection_mode'] = array(
+                 '#type' => 'select',
+                 '#options' => $lists,
+                 '#title' => t('Collection Mode'),
+                 '#required' => TRUE,
+               );
 
-            $form['sb_file'] = array(
-              '#title' => t('Photo of Signed bill Copy'),
-              '#type' => 'file',
-              '#description' => t('Allowed extensions: pdf png jpg jpeg txt'),
-              '#states' => array(
-                'visible' => array(
-                  ':input[name="collection_mode"]' => array('value' => 'signed'),
-                ),
-              ),
-              // '#required' => TRUE,
-            );
-            
-            $form['cash_amt'] = array(
-              '#type' => 'textfield',
-              '#title' => t('Cash Amt'),
-              '#states' => array(
-              'visible' => array(
-                  ':input[name="collection_mode"]' => array('value' => 'cash'),
-                ),
-              ),
-              // '#required' => TRUE,
-            );
-            
+
+               $form['bank_name'] = array(
+                 '#type' => 'textfield',
+                 //'#options' => $lists,
+                 '#title' => t('Bank Name'),
+                 '#states' => array(
+                   'visible' => array(
+                     ':input[name="collection_mode"]' => array('value' => 'cheque'),
+                   ),
+                 ),
+                   // '#required' => TRUE,
+               );
+               $form['cheque_amt'] = array(
+                 '#type' => 'textfield',
+                 //'#options' => $lists,
+                 '#title' => t('Cheque Amt'),
+                 '#states' => array(
+                   'visible' => array(
+                     ':input[name="collection_mode"]' => array('value' => 'cheque'),
+                   ),
+                 ),
+                   // '#required' => TRUE,
+               );
+               $form['cheque_date'] = array(
+                 '#type' => 'date_popup',
+                 // '#options' => $lists,
+                 '#title' => t('Cheque Date'),
+                 '#states' => array(
+                   'visible' => array(
+                     ':input[name="collection_mode"]' => array('value' => 'cheque'),
+                   ),
+                 ),
+                 '#date_format' => 'Y-m-d',
+                   // '#required' => TRUE,
+               );
+               $form['cheque_file'] = array(
+                 '#title' => t('Photo of Cheque Copy'),
+                 '#type' => 'file',
+                 '#description' => t('Allowed extensions: pdf png jpg jpeg txt'),
+                 '#states' => array(
+                   'visible' => array(
+                     ':input[name="collection_mode"]' => array('value' => 'cheque'),
+                   ),
+                 ),
+                   // '#required' => TRUE,
+               );
+
+
+               $form['sb_amt'] = array(
+                 '#type' => 'textfield',
+                 '#title' => t('Signed bill Amt'),
+                 '#states' => array(
+                   'visible' => array(
+                     ':input[name="collection_mode"]' => array('value' => 'signed'),
+                   ),
+                 ),
+                   // '#required' => TRUE,
+               );
+
+               $form['sb_file'] = array(
+                 '#title' => t('Photo of Signed bill Copy'),
+                 '#type' => 'file',
+                 '#description' => t('Allowed extensions: pdf png jpg jpeg txt'),
+                 '#states' => array(
+                   'visible' => array(
+                     ':input[name="collection_mode"]' => array('value' => 'signed'),
+                   ),
+                 ),
+                   // '#required' => TRUE,
+               );
+
+               $form['cash_amt'] = array(
+                 '#type' => 'textfield',
+                 '#title' => t('Cash Amt'),
+                 '#states' => array(
+                   'visible' => array(
+                     ':input[name="collection_mode"]' => array('value' => 'cash'),
+                   ),
+                 ),
+                   // '#required' => TRUE,
+               );
+            }
             $form['error_message'] = array(
                 '#prefix' => '<div class ="error-msg">',
                 '#markup' => t('Actual Qty should not be greater than Net Qty.'),
@@ -382,8 +390,8 @@ function _edit_trip_delivered_callback_form($form, &$form_state) {
                  // $item_details[$key]['sku_reason']['data']['#disabled'] = TRUE;
                //}
             }
+            $og_total = 0;
             foreach ($item_details as $key => $val) {
-               $og_total = 0;
                foreach ($val as $key1 => $val1) {
                   if($key1 == 'og_sum_net_sales_quantity') {
                      $og_total =  $og_total + $val1;                  
@@ -483,7 +491,6 @@ function _get_editable_delivered_trip_details($trip_number, $rs_code, $bill_no) 
    $query->condition('ad.bill_number', $bill_no);
    $query->fields('id', array('sku_code', 'sku_code', 'sku_description', 'og_sum_net_sales_quantity'));
    $rows = $query->execute()->fetchAll(PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
-    
    return $rows;
 }
 
@@ -500,7 +507,6 @@ function _edit_trip_delivered_callback_form_validate($form, &$form_state) {
    foreach ($actual_qty_array as $key => $value) {
       $actual_qty = $actual_qty + $value;
    }
-
    if ($actual_qty > $og_total) {
       form_set_error('actual_qty', t('Sum of actual quantity can not be greater than sum of net sales quantity.'));
    }
