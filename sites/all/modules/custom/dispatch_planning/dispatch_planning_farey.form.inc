@@ -39,8 +39,9 @@ function _delivered_trip_data_callback($form, &$form_state) {
       $trip_details = _get_farey_delivered_trip_details($trip_number, $rs_code);
 
       if (!empty($trip_details['rows'])) {
+        
          $trip_details['header'] = array('SKU7Code', 'Description', 'Free Product', 'Value/Unit', 'Sum of Net Sales Qty', 'Actual Qty', 'Returned Qty');
-
+ //$data[$val][] = array('data' => $val1, 'data-value' => $val1, 'class' => array("$val-$key1-val"));
          $form['trip_details'] = array(
            '#theme' => 'table',
            '#header' => $trip_details['header'],
@@ -147,6 +148,7 @@ function _edit_trip_delivered_callback_form($form, &$form_state) {
    $form = array();
    $form['#prefix'] = '<div id="itemlist-div">';
    $form['#suffix'] = '</div>';
+   $form['#attached']['js'][] = drupal_get_path('module', 'dispatch_planning') . '/js/dispatch_planning_farey.js';
 
    // get logged in users rs id
    $user_id = $GLOBALS['user']->uid;
@@ -214,10 +216,23 @@ function _edit_trip_delivered_callback_form($form, &$form_state) {
                 'method' => 'replace',
                 'effect' => 'fade',
               ),
+              '#attributes' => array('class' => array('order_status_list')),
             );
             
             $order_status = $form_state['input']['order_status'];
-
+            
+            $undeliver_reason_list = _get_dispatch_planning_reason_master_list('undeliver');
+            $form['undeliver_reason'] = array(
+              '#type' => 'select',
+              '#options' => $undeliver_reason_list,
+              '#title' => t('Undeliver reason'),
+              '#states' => array(
+                'visible' => array(
+                  ':input[name="order_status"]' => array('value' => 'undeliver'),
+                ),
+              ),
+             // '#required' => TRUE,
+            );
             // collection mode
             $lists = array('' => '-select-', 'signed' => 'Signed', 'cheque' => 'Cheque', 'cash' => 'Cash');
             $form['collection_mode'] = array(
@@ -308,11 +323,18 @@ function _edit_trip_delivered_callback_form($form, &$form_state) {
               ),
               // '#required' => TRUE,
             );
+            
+            $form['error_message'] = array(
+                '#prefix' => '<div class ="error-msg">',
+                '#markup' => t('Actual Qty should not be greater than Net Qty.'),
+                '#suffix' => '</div>',    
+              );
 
             $item_details = _get_editable_delivered_trip_details($trip_number, $rs_code, $bill_number);
-            $item_details_header = array('SKU7Code' => 'SKU7Code', 
+            $item_details_header = array(
+              'SKU7Code' => 'SKU7Code', 
               'Description' => 'Description',
-               'Sum_of_Net_Sales_Qty' => 'Sum of Net Sales Qty', 
+              'Sum_of_Net_Sales_Qty' => 'Sum of Net Sales Qty', 
               'Actual_qty' => 'Actual qty', 
               'Sku_reason' => 'Sku reason');
 
@@ -320,6 +342,7 @@ function _edit_trip_delivered_callback_form($form, &$form_state) {
             $form['actual_qty'] = array('#type' => 'value');
             $form['sku_reason'] = array('#type' => 'value');
 
+            $partial_reason_list = _get_dispatch_planning_reason_master_list('partial_deliver');
             // editable elemenst
             foreach ($item_details as $key => $value) {
                $item_details[$key]['actual_qty']['data'] = array(
@@ -327,6 +350,7 @@ function _edit_trip_delivered_callback_form($form, &$form_state) {
                  '#title' => t('Actual qty'),
                  '#title_display' => 'invisible',
                  '#name' => "actual_qty[$key]",
+                 '#attributes' => array('class' => array('actual_qty_value')),
                  '#required' => TRUE,
                  '#value' => !empty($key['Actual_qty']) ? $key['Actual_qty'] : '',
                );
@@ -334,23 +358,50 @@ function _edit_trip_delivered_callback_form($form, &$form_state) {
                   $item_details[$key]['actual_qty']['data']['#value'] = $item_details[$key]['og_sum_net_sales_quantity'];
                   $item_details[$key]['actual_qty']['data']['#attributes'] = array('readonly' => 'readonly');
                }
+               if (!empty($order_status) && $order_status == 'partial_deliver') {
+                  $item_details[$key]['actual_qty']['data']['#value'] = $item_details[$key]['og_sum_net_sales_quantity'];
+                 // $item_details[$key]['actual_qty']['data']['#attributes'] = array('readonly' => 'readonly');
+               }
+              
                if (!empty($order_status) && $order_status == 'undeliver') {
                   $item_details[$key]['actual_qty']['data']['#value'] = 0;
                   $item_details[$key]['actual_qty']['data']['#attributes'] = array('readonly' => 'readonly');
                }
                $item_details[$key]['sku_reason']['data'] = array(
-                 '#type' => 'textfield',
+                 '#type' => 'select',
                  '#title' => t('Sku reason'),
                  '#title_display' => 'invisible',
                  '#name' => "sku_reason[$key]",
+                 '#attributes' => array('class' => array('sku_reason_list')),
+                 '#options' => $partial_reason_list,
                  '#required' => TRUE,
                  '#value' => !empty($key['Sku_reason']) ? $key['Sku_reason'] : '',
                );
+               //if ((!empty($order_status) && $order_status == 'deliver') || (!empty($order_status) && $order_status == 'undeliver')) {
+                 // $item_details[$key]['actual_qty']['data']['#value'] = $item_details[$key]['og_sum_net_sales_quantity'];
+                 // $item_details[$key]['sku_reason']['data']['#disabled'] = TRUE;
+               //}
             }
+            foreach ($item_details as $key => $val) {
+               $og_total = 0;
+               foreach ($val as $key1 => $val1) {
+                  if($key1 == 'og_sum_net_sales_quantity') {
+                     $og_total =  $og_total + $val1;                  
+                  }
+                   $form['og_total'] = array(
+                    '#type' => 'value',
+                    '#value' => $og_total,
+                  );
+                  $item_details_new[$key][$key1] = array('data' => $val1, 'data-value' => $val1, 'class' => array("$key1-val"));
+               }
+            }
+            //dpm($item_details, '$trip_details');
+                      //    dpm($item_details_new, '$trip_details');
+
             $form['trip_details'] = array(
               '#theme' => 'table',
               '#header' => $item_details_header,
-              '#rows' => $item_details,
+              '#rows' => $item_details_new,
             );
             $form['submit'] = array(
               '#type' => 'submit',
@@ -443,12 +494,58 @@ function _get_editable_delivered_trip_details($trip_number, $rs_code, $bill_no) 
  * @param type $form_state
  */
 function _edit_trip_delivered_callback_form_validate($form, &$form_state) {
-  // dpm($form_state, '$form_state');
+   $og_total = $form_state['values']['og_total'];
+   $actual_qty = 0;
+   $actual_qty_array = $form_state['values']['actual_qty'];
+   foreach ($actual_qty_array as $key => $value) {
+      $actual_qty = $actual_qty + $value;
+   }
+
+   if ($actual_qty > $og_total) {
+      form_set_error('actual_qty', t('Sum of actual quantity can not be greater than sum of net sales quantity.'));
+   }
+   $order_status = $form_state['values']['order_status'];
+   if ($order_status == 'undeliver') {
+      $undeliver_reason = $form_state['values']['undeliver_reason'];
+      if (empty($undeliver_reason)) {
+         form_set_error('undeliver_reason', t('Undeliover reason can not be empty'));
+      }
+   }
+
    $collc_mode = $form_state['values']['collection_mode'];
+ 
+   if ($collc_mode == 'cash') {
+      $cash_amt = $form_state['values']['cash_amt'];
+      if (empty($cash_amt)) {
+         form_set_error('cash_amt', t('Cash amt can not be empty'));
+      }
+   }
+   if ($collc_mode == 'signed') {
+      $sb_amt = $form_state['values']['sb_amt'];
+      if (empty($sb_amt)) {
+         form_set_error('sb_amt', t('Signed bill amt can not be empty'));
+      }
+   }
+
    if ($collc_mode == 'cheque') {
+      $cheque_date = $form_state['values']['cheque_date'];
+      if (empty($cheque_date)) {
+         form_set_error('cheque_date', t('Cheque date can not be empty'));
+      }
+      $cheque_amt = $form_state['values']['cheque_amt'];
+      if (empty($cheque_amt)) {
+         form_set_error('cheque_amt', t('Cheque amt can not be empty'));
+      }
+      $bank_name = $form_state['values']['bank_name'];
+      if (empty($bank_name)) {
+         form_set_error('bank_name', t('Bank name can not be empty'));
+      }
+
+      
       $file = file_save_upload('cheque_file', array(
         'file_validate_extensions' => array('pdf png jpg jpeg txt'), // Validate extensions.
       ));
+      
       // If the file passed validation:
       if ($file) {
          // Change the status
@@ -463,9 +560,6 @@ function _edit_trip_delivered_callback_form_validate($form, &$form_state) {
          else {
             form_set_error('cheque_file', t('Failed to write the uploaded bill file the site\'s file folder.'));
          }
-      }
-      else {
-         form_set_error('cheque_file', t('No Cheque file was uploaded.'));
       }
    }
    if ($collc_mode == 'signed') {
@@ -486,9 +580,6 @@ function _edit_trip_delivered_callback_form_validate($form, &$form_state) {
          else {
             form_set_error('sb_file', t('Failed to write the uploaded bill file the site\'s file folder.'));
          }
-      }
-      else {
-         form_set_error('sb_file', t('No Signed file was uploaded.'));
       }
    }
 }
@@ -527,8 +618,8 @@ function _edit_trip_delivered_callback_form_submit($form, &$form_state) {
             'res_photo_of_cheque' => ($collc_mode == 'cheque') ? $cheque_file_uri : '',
             'res_confirm_signed_bill_amount' => ($collc_mode == 'signed') ? $form_state['values']['sb_amt'] : '',
             'res_photo_of_signed_bill_delivery' => ($collc_mode == 'signed') ? $sb_file_uri : '',
-            'res_signed_bill_delivery' => ($collc_mode == 'signed' && $order_status == 'deliver') ? 1 : '',
-            'res_signed_bill_partial' => ($collc_mode == 'signed' && $order_status == 'partial_deliver') ? 1 : '',
+            'res_signed_bill_delivery' => ($collc_mode == 'signed' && $order_status == 'deliver') ? 'yes' : '',
+            'res_signed_bill_partial' => ($collc_mode == 'signed' && $order_status == 'partial_deliver') ? 'yes' : '',
             'updated_flag' => 1,
           ))
           ->condition('runsheet_number', $trip_number, '=')
@@ -557,4 +648,19 @@ function _edit_trip_delivered_callback_form_submit($form, &$form_state) {
          drupal_set_message(t('Data submitted successfully'));
       }
    }
+}
+
+
+function _get_dispatch_planning_reason_master_list($reason_type) {
+   $query = db_select('node', 'n');
+   $query->join('field_data_field_reason_type', 'rt', 'rt.entity_id = n.nid');
+   $query->join('field_data_field_dp_reason', 'dr', 'dr.entity_id = n.nid');
+   $query->condition('rt.field_reason_type_value', $reason_type);
+   $query->fields('dr', array('field_dp_reason_value'));
+   $query->addTag('node_distributor_access');
+   $res = $query->execute()->fetchAllKeyed(0,0);
+   $res1 = array('' => '- select -');
+   $response = $res1 + $res;
+   return $response;
+
 }
