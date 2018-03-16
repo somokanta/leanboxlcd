@@ -558,6 +558,7 @@ function ptl_data_insert_into_table($api_data, $distributor_id) {
                     'ean1' => $eans[0]->ean1 ? $eans[0]->ean1 : '',
                     'ean2' => $eans[0]->ean2 ? $eans[0]->ean2 : '',
                     'ean3' => $eans[0]->ean3 ? $eans[0]->ean3 : '',
+                    'distributor_id' => $distributor_id ? $distributor_id : 0,
                 );
                 $query->fields($fields);
                 $result_id = $query->execute();
@@ -742,6 +743,7 @@ function get_child_desc_and_qty_by_parent_sku($sku7_code, $distributor_id) {
  * it will call to insert the header data in header table
  */
 function insert_ptl_header_data($header_result) {
+  $distributor_id = get_distributor_id_using_rscode($header_result[0]->rs_code);
   foreach ($header_result as $value) {
     $result = db_merge('ptl_header_data')
       ->key(array('ptl_job' => $value->ptl_job, 'rs_code' => $value->rs_code, 'type' => 'TRIP'))
@@ -751,7 +753,8 @@ function insert_ptl_header_data($header_result) {
         'total_qty' => $value->total_qty,
         'rs_code' => $value->rs_code,
         'type' => 'TRIP', // same table diff is trip and master trip
-        'created_time' => REQUEST_TIME
+        'created_time' => REQUEST_TIME,
+        'distributor_id' => $distributor_id ? $distributor_id : 0
       ))
       ->execute();
   }
@@ -798,6 +801,7 @@ function update_ptl_header_data($ptl_job ,$trip_id, $rs_code, $vehicle,$bill_lin
  * @param type $put_qty_sum
  */
 function update_ptl_put_qty_sum_data($ptl_job, $id, $rs_code, $api_time, $line_count, $put_qty_sum) {
+   $distributor_id = get_distributor_id_using_rscode($rs_code);
    $result = db_merge('ptl_put_qty')
        ->key(array('unique_id' => $id, 'rs_code' => $rs_code, 'type' => 'TRIP'))
        ->fields(array(
@@ -807,7 +811,8 @@ function update_ptl_put_qty_sum_data($ptl_job, $id, $rs_code, $api_time, $line_c
          'put_qty_sum' => $put_qty_sum,
          'rs_code' => $rs_code,
          'type' => 'TRIP', // same table diff is trip and master trip
-         'created' => $api_time
+         'created' => $api_time,
+         'distributor_id' => $distributor_id ? $distributor_id : 0
        ))
        ->execute();
    $results['flag'] = '1';

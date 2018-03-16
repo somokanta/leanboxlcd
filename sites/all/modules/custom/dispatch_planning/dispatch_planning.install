@@ -1722,3 +1722,28 @@ function dispatch_planning_update_7122() {
   );
   db_create_table('ptl_put_qty', $schema['ptl_put_qty']);
 }
+
+function dispatch_planning_update_7123() {
+  $fields = array(
+    'distributor_id' => array(
+      'description' => 'Distributor ID',
+      'type' => 'int',
+      'not null' => TRUE,
+      'default' => 23466,
+    ),
+  ); 
+  foreach ($fields as $key => $field) {
+    if (!db_field_exists('ptl_data_configuration', $key)) {
+      db_add_field('ptl_data_configuration', $key, $field);
+    }
+    if (!db_field_exists('master_ptl_data', $key)) {
+      db_add_field('master_ptl_data', $key, $field);
+    }
+    if (!db_field_exists('ptl_header_data', $key)) {
+      db_add_field('ptl_header_data', $key, $field);
+    } 
+    if (!db_field_exists('ptl_put_qty', $key)) {
+      db_add_field('ptl_put_qty', $key, $field);
+    } 
+  }  
+}

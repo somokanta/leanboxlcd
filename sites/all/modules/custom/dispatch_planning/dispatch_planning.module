@@ -2834,6 +2834,15 @@ function master_ptl_trip_date_by_trip_id($trip_id,$rs_code) {
   return $results;
 }
 
+function get_distributor_id_using_rscode($rs_code) {
+  $query = db_select('field_data_field_distributor', 'fd');
+  $query->join('field_data_field_third_party_username', 'tpu', 'tpu.entity_id = fd.entity_id');
+  $query->condition('tpu.field_third_party_username_value', $rs_code);
+  $query->fields('fd', array('field_distributor_value',entity_id));
+  $res = $query->execute()->fetchField();  
+  return $res;
+}
+
 function get_rsname_using_rscode($rs_code) {
   $query = db_select('field_data_field_name', 'fn');
   $query->join('field_data_field_third_party_username', 'tpu', 'tpu.entity_id = fn.entity_id');
