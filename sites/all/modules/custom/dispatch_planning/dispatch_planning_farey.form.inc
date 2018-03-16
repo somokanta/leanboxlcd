@@ -505,6 +505,7 @@ function _edit_trip_delivered_callback_form_validate($form, &$form_state) {
   // dpm($form_state, '$form_state');
    $og_total = $form_state['values']['og_total'];
    $og_array = $form_state['values']['og_array'];
+   $sku_reason = $form_state['values']['sku_reason'];
    $actual_qty_array = $form_state['values']['actual_qty'];
 
    $actual_qty = 0;
@@ -525,7 +526,9 @@ function _edit_trip_delivered_callback_form_validate($form, &$form_state) {
       if ($actual_qty == $og_total) {
          form_set_error('actual_qty', t('Sum of actual quantity can not be equal to sum of net sales quantity.'));
       }
-      
+     // dpm($og_array, '$og_array');
+     // dpm($actual_qty_array, '$actual_qty_array');
+     // dpm($sku_reason, '$sku_reason');
       foreach ($og_array as $key => $val) {
          if (($actual_qty_array[$key] != $val) && (empty($sku_reason[$key]))) {
             form_set_error('actual_qty', t('Kindly select the reason for partial delivery.'));
