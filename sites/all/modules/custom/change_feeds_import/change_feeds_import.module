@@ -2121,9 +2121,26 @@ function change_feeds_import_prevent_import_validate($form, $form_state) {
 }
 
 function change_feeds_import_form_alter(&$form, &$form_state, $form_id) {
+  
   if ($form_id == 'feeds_import_form') {
     unset($form['feeds']["FeedsFileFetcher"]['upload']['#file_info']);
     $form['#validate'][] = 'change_feeds_import_prevent_import_validate';
+
+    if ($form['#importer_id'] == 'dispatch_planning_reason_master') {
+      $text = "<br>Please enter the below values in resource type field:";
+      $field = field_info_field('field_reason_type');
+      $allowed_values = list_allowed_values($field);
+      foreach ($allowed_values as $key => $value) {
+        $allowed[] = $value;
+      }
+      $form['feeds']['FeedsCSVParser']['help']['title'] = array(
+        '#markup' => $text,
+      );
+      $form['feeds']['FeedsCSVParser']['help']['final_text'] = array(
+        '#theme' => 'item_list',
+        '#items' => $allowed,
+      );
+    }
   }
   if ($form_id == 'user_register_form' || $form_id == 'user_profile_form') {
     $form['#validate'][] = 'registration_validate';

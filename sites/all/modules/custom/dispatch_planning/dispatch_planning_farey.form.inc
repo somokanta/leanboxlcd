@@ -231,7 +231,6 @@ function _edit_trip_delivered_callback_form($form, &$form_state) {
                   ':input[name="order_status"]' => array('value' => 'undeliver'),
                 ),
               ),
-             // '#required' => TRUE,
             );
             // collection mode
             $lists = array('' => '-select-', 'signed' => 'Signed', 'cheque' => 'Cheque', 'cash' => 'Cash');
@@ -253,29 +252,24 @@ function _edit_trip_delivered_callback_form($form, &$form_state) {
 
                $form['bank_name'] = array(
                  '#type' => 'textfield',
-                 //'#options' => $lists,
                  '#title' => t('Bank Name'),
                  '#states' => array(
                    'visible' => array(
                      ':input[name="collection_mode"]' => array('value' => 'cheque'),
                    ),
                  ),
-                   // '#required' => TRUE,
                );
                $form['cheque_amt'] = array(
                  '#type' => 'textfield',
-                 //'#options' => $lists,
                  '#title' => t('Cheque Amt'),
                  '#states' => array(
                    'visible' => array(
                      ':input[name="collection_mode"]' => array('value' => 'cheque'),
                    ),
                  ),
-                   // '#required' => TRUE,
                );
                $form['cheque_date'] = array(
                  '#type' => 'date_popup',
-                 // '#options' => $lists,
                  '#title' => t('Cheque Date'),
                  '#states' => array(
                    'visible' => array(
@@ -283,7 +277,6 @@ function _edit_trip_delivered_callback_form($form, &$form_state) {
                    ),
                  ),
                  '#date_format' => 'Y-m-d',
-                   // '#required' => TRUE,
                );
                $form['cheque_file'] = array(
                  '#title' => t('Photo of Cheque Copy'),
@@ -294,7 +287,6 @@ function _edit_trip_delivered_callback_form($form, &$form_state) {
                      ':input[name="collection_mode"]' => array('value' => 'cheque'),
                    ),
                  ),
-                   // '#required' => TRUE,
                );
 
 
@@ -306,7 +298,6 @@ function _edit_trip_delivered_callback_form($form, &$form_state) {
                      ':input[name="collection_mode"]' => array('value' => 'signed'),
                    ),
                  ),
-                   // '#required' => TRUE,
                );
 
                $form['sb_file'] = array(
@@ -318,7 +309,6 @@ function _edit_trip_delivered_callback_form($form, &$form_state) {
                      ':input[name="collection_mode"]' => array('value' => 'signed'),
                    ),
                  ),
-                   // '#required' => TRUE,
                );
 
                $form['cash_amt'] = array(
@@ -329,7 +319,6 @@ function _edit_trip_delivered_callback_form($form, &$form_state) {
                      ':input[name="collection_mode"]' => array('value' => 'cash'),
                    ),
                  ),
-                   // '#required' => TRUE,
                );
             }
             $form['error_message'] = array(
@@ -360,7 +349,7 @@ function _edit_trip_delivered_callback_form($form, &$form_state) {
                  '#name' => "actual_qty[$key]",
                  '#attributes' => array('class' => array('actual_qty_value')),
                  '#required' => TRUE,
-                 '#value' => !empty($key['Actual_qty']) ? $key['Actual_qty'] : '',
+               //  '#value' => !empty($key['Actual_qty']) ? $key['Actual_qty'] : '',
                );
                if (!empty($order_status) && $order_status == 'deliver') {
                   $item_details[$key]['actual_qty']['data']['#value'] = $item_details[$key]['og_sum_net_sales_quantity'];
@@ -383,28 +372,33 @@ function _edit_trip_delivered_callback_form($form, &$form_state) {
                  '#attributes' => array('class' => array('sku_reason_list')),
                  '#options' => $partial_reason_list,
                  '#required' => TRUE,
-                 '#value' => !empty($key['Sku_reason']) ? $key['Sku_reason'] : '',
+               //  '#value' => !empty($key['Sku_reason']) ? $key['Sku_reason'] : '',
                );
-               //if ((!empty($order_status) && $order_status == 'deliver') || (!empty($order_status) && $order_status == 'undeliver')) {
-                 // $item_details[$key]['actual_qty']['data']['#value'] = $item_details[$key]['og_sum_net_sales_quantity'];
-                 // $item_details[$key]['sku_reason']['data']['#disabled'] = TRUE;
-               //}
+               
             }
             $og_total = 0;
             foreach ($item_details as $key => $val) {
                foreach ($val as $key1 => $val1) {
-                  if($key1 == 'og_sum_net_sales_quantity') {
-                     $og_total =  $og_total + $val1;                  
+                  if ($key1 == 'og_sum_net_sales_quantity') {
+                     $og_total = $og_total + $val1;
+                     $og_array[$key] = $val1;
                   }
-                   $form['og_total'] = array(
+                  $form['og_array'] = array(
+                    '#type' => 'value',
+                    '#value' => $og_array,
+                  );
+                  $form['og_total'] = array(
                     '#type' => 'value',
                     '#value' => $og_total,
                   );
-                  $item_details_new[$key][$key1] = array('data' => $val1, 'data-value' => $val1, 'class' => array("$key1-val"));
+                  if ($key1 == 'actual_qty' || $key1 == 'sku_reason') {
+                     $item_details_new[$key][$key1] = array('data' => $val1['data'], 'data-value' => $val1, 'class' => array("$key1-val"));
+                  }
+                  else {
+                     $item_details_new[$key][$key1] = array('data' => $val1, 'data-value' => $val1, 'class' => array("$key1-val"));
+                  }
                }
             }
-            //dpm($item_details, '$trip_details');
-                      //    dpm($item_details_new, '$trip_details');
 
             $form['trip_details'] = array(
               '#theme' => 'table',
@@ -421,6 +415,7 @@ function _edit_trip_delivered_callback_form($form, &$form_state) {
          }
       }
    }
+   //dpm($form, 'form');
 
    return $form;
 }
@@ -501,9 +496,18 @@ function _get_editable_delivered_trip_details($trip_number, $rs_code, $bill_no) 
  * @param type $form_state
  */
 function _edit_trip_delivered_callback_form_validate($form, &$form_state) {
+    foreach ($form_state['values']['actual_qty'] as $sku_no => $val) {
+      $form_state['complete form']['trip_details']['#rows'][$sku_no]['actual_qty']['data']['#value'] = $val;
+   }
+   foreach ($form_state['values']['sku_reason'] as $sku_no => $val) {
+      $form_state['complete form']['trip_details']['#rows'][$sku_no]['sku_reason']['data']['#value'] = $val;
+   }
+  // dpm($form_state, '$form_state');
    $og_total = $form_state['values']['og_total'];
-   $actual_qty = 0;
+   $og_array = $form_state['values']['og_array'];
    $actual_qty_array = $form_state['values']['actual_qty'];
+
+   $actual_qty = 0;
    foreach ($actual_qty_array as $key => $value) {
       $actual_qty = $actual_qty + $value;
    }
@@ -515,6 +519,17 @@ function _edit_trip_delivered_callback_form_validate($form, &$form_state) {
       $undeliver_reason = $form_state['values']['undeliver_reason'];
       if (empty($undeliver_reason)) {
          form_set_error('undeliver_reason', t('Undeliover reason can not be empty'));
+      }
+   }
+   if ($order_status == 'partial_deliver') {
+      if ($actual_qty == $og_total) {
+         form_set_error('actual_qty', t('Sum of actual quantity can not be equal to sum of net sales quantity.'));
+      }
+      
+      foreach ($og_array as $key => $val) {
+         if (($actual_qty_array[$key] != $val) && (empty($sku_reason[$key]))) {
+            form_set_error('actual_qty', t('Kindly select the reason for partial delivery.'));
+         }
       }
    }
 
