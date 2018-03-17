@@ -2460,17 +2460,17 @@ function dispatch_planning_views_data() {
     'title' => t('DP bill_date'),
     'help' => t('Dispatch Planning bill_date'),
     'field' => array(
-      'handler' => 'views_handler_field_date',
+      'handler' => 'views_handler_field',
       'click sortable' => TRUE,
     ),
     'sort' => array(
-      'handler' => 'views_handler_sort_date',
+      'handler' => 'views_handler_sort',
     ),
     'filter' => array(
-      'handler' => 'views_handler_filter_date',
+      'handler' => 'views_handler_filter_string',
     ),
     'argument' => array(
-      'handler' => 'views_handler_filter_date',
+      'handler' => 'views_handler_argument_string',
     ),
   );
 
