@@ -382,6 +382,7 @@ function _edit_trip_delivered_callback_form($form, &$form_state) {
                  '#type' => 'textfield',
                  '#title' => t('Godown Short'),
                  '#title_display' => 'invisible',
+                 '#size'=> 50,
                  '#name' => "godown_short[$key]",
                  '#attributes' => array('class' => array('godown_short_list')),
                );               
