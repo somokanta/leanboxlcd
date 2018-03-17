@@ -333,11 +333,14 @@ function _edit_trip_delivered_callback_form($form, &$form_state) {
               'Description' => 'Description',
               'Sum_of_Net_Sales_Qty' => 'Sum of Net Sales Qty', 
               'Actual_qty' => 'Actual qty', 
-              'Sku_reason' => 'Sku reason');
+              'Sku_reason' => 'Sku reason',
+              'godown_short' => 'Godown Short'
+              );
 
             // initialize editable elements here
             $form['actual_qty'] = array('#type' => 'value');
             $form['sku_reason'] = array('#type' => 'value');
+            $form['godown_short'] = array('#type' => 'value');
 
             $partial_reason_list = _get_dispatch_planning_reason_master_list('partial_deliver');
             // editable elemenst
@@ -365,7 +368,7 @@ function _edit_trip_delivered_callback_form($form, &$form_state) {
                   $item_details[$key]['actual_qty']['data']['#attributes'] = array('readonly' => 'readonly');
                }
                $item_details[$key]['sku_reason']['data'] = array(
-                 '#type' => 'select',
+                 '#type' => 'textfield',
                  '#title' => t('Sku reason'),
                  '#title_display' => 'invisible',
                  '#name' => "sku_reason[$key]",
@@ -374,6 +377,13 @@ function _edit_trip_delivered_callback_form($form, &$form_state) {
                  '#required' => TRUE,
                //  '#value' => !empty($key['Sku_reason']) ? $key['Sku_reason'] : '',
                );
+               $item_details[$key]['godown_short']['data'] = array(
+                 '#type' => 'select',
+                 '#title' => t('Godown Short'),
+                 '#title_display' => 'invisible',
+                 '#name' => "godown_short[$key]",
+                 '#attributes' => array('class' => array('godown_short_list')),
+               );               
                
             }
             $og_total = 0;
@@ -391,7 +401,7 @@ function _edit_trip_delivered_callback_form($form, &$form_state) {
                     '#type' => 'value',
                     '#value' => $og_total,
                   );
-                  if ($key1 == 'actual_qty' || $key1 == 'sku_reason') {
+                  if ($key1 == 'actual_qty' || $key1 == 'sku_reason' || $key1 == 'godown_short') {
                      $item_details_new[$key][$key1] = array('data' => $val1['data'], 'data-value' => $val1, 'class' => array("$key1-val"));
                   }
                   else {
@@ -502,10 +512,14 @@ function _edit_trip_delivered_callback_form_validate($form, &$form_state) {
    foreach ($form_state['values']['sku_reason'] as $sku_no => $val) {
       $form_state['complete form']['trip_details']['#rows'][$sku_no]['sku_reason']['data']['#value'] = $val;
    }
+   foreach ($form_state['values']['godown_short'] as $sku_no => $val) {
+      $form_state['complete form']['trip_details']['#rows'][$sku_no]['godown_short']['data']['#value'] = $val;
+   }   
   // dpm($form_state, '$form_state');
    $og_total = $form_state['values']['og_total'];
    $og_array = $form_state['values']['og_array'];
    $sku_reason = $form_state['values']['sku_reason'];
+   $godown_short = $form_state['values']['godown_short'];
    $actual_qty_array = $form_state['values']['actual_qty'];
 
    $actual_qty = 0;
@@ -665,6 +679,7 @@ function _edit_trip_delivered_callback_form_submit($form, &$form_state) {
                 ->fields(array(
                   'res_sku_actual_quantity1' => $value,
                   'res_sku_reason' => $form_state['values']['sku_reason'][$key],
+                  'res_godown_short' => $form_state['values']['godown_short'][$key],
                 ))
                 ->condition('trip_bill_reference', $bill_row_id, '=')
                 ->condition('sku_code', $key, '=')

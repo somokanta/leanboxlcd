@@ -1594,6 +1594,12 @@ function dispatch_planning_update_7120() {
        'length' => 255,
        'default' => '',
      ),
+     'res_godown_short' => array(
+       'description' => 'res_godown_short',
+       'type' => 'varchar',
+       'length' => 255,
+       'default' => '',
+     ),
    );
 
    foreach ($fields1 as $key => $field) {
