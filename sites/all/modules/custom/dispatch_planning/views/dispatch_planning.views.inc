@@ -3257,9 +3257,9 @@ function dispatch_planning_views_data() {
       'handler' => 'views_handler_argument_string',
     ),
   );
-  $data['dispatch_planning_item_details']['res_godown_short'] = array(
-    'title' => t('DP lines res_godres_godown_shortown_short'),
-    'help' => t('Dispatch Planning lines res_godown_short'),
+  $data['dispatch_planning_item_details']['res_cashier_short'] = array(
+    'title' => t('DP lines res_godres_res_cashier_short'),
+    'help' => t('Dispatch Planning lines res_cashier_short'),
     'field' => array(
       'handler' => 'views_handler_field',
       'click sortable' => TRUE,
