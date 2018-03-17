@@ -17,4 +17,5 @@ files[] = views/handler/field_box_id_ptl_count.inc
 files[] = views/handler/field_box_id_master_ptl_count.inc
 files[] = views/handler/footer_master_ptl_custom_box_count.inc
 files[] = views/handler/footer_ptl_custom_box_count.inc
+files[] = views/handler/dispatch_planning_inventory_return_qty.inc
 

@@ -248,6 +248,15 @@ function dispatch_planning_views_data() {
     ),
   );
   
+    // Add custom field for count of box id in master ptl
+  $data['views']['dispatch_planning_inventory_return_qty'] = array(
+    'title' => t('dispatch_planning_inventory_return_qty'),
+    'help' => t('Provides return count for dispatch_planning_inventory_return_qty.'),
+    'field' => array(
+      'handler' => 'dispatch_planning_inventory_return_qty',
+    ),
+  );
+  
   // Add footer for count of box id in master ptl
   $data['views']['footer_master_ptl_custom_box_count'] = array(
     'title' => t('Master PTL Custom Footer for Box Count'),
