@@ -384,7 +384,7 @@ function _edit_trip_delivered_callback_form($form, &$form_state) {
                  '#type' => 'textfield',
                  '#title' => t('Cashier Short'),
                  '#title_display' => 'invisible',
-                 '#size'=> 25,
+                 '#size'=> 20,
                  '#name' => "cashier_short[$key]",
                  '#attributes' => array('class' => array('cashier_short_list')),
                );                
@@ -392,7 +392,7 @@ function _edit_trip_delivered_callback_form($form, &$form_state) {
                  '#type' => 'textfield',
                  '#title' => t('Godown Short'),
                  '#title_display' => 'invisible',
-                 '#size'=> 25,
+                 '#size'=> 20,
                  '#name' => "godown_short[$key]",
                  '#attributes' => array('class' => array('godown_short_list')),
                );               
