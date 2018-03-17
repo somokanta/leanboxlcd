@@ -351,6 +351,7 @@ function _edit_trip_delivered_callback_form($form, &$form_state) {
                  '#title_display' => 'invisible',
                  '#name' => "actual_qty[$key]",
                  '#attributes' => array('class' => array('actual_qty_value')),
+                 '#size'=> 30,
                  '#required' => TRUE,
                //  '#value' => !empty($key['Actual_qty']) ? $key['Actual_qty'] : '',
                );
