@@ -368,7 +368,7 @@ function _edit_trip_delivered_callback_form($form, &$form_state) {
                   $item_details[$key]['actual_qty']['data']['#attributes'] = array('readonly' => 'readonly');
                }
                $item_details[$key]['sku_reason']['data'] = array(
-                 '#type' => 'textfield',
+                 '#type' => 'select',
                  '#title' => t('Sku reason'),
                  '#title_display' => 'invisible',
                  '#name' => "sku_reason[$key]",
@@ -378,7 +378,7 @@ function _edit_trip_delivered_callback_form($form, &$form_state) {
                //  '#value' => !empty($key['Sku_reason']) ? $key['Sku_reason'] : '',
                );
                $item_details[$key]['godown_short']['data'] = array(
-                 '#type' => 'select',
+                 '#type' => 'textfield',
                  '#title' => t('Godown Short'),
                  '#title_display' => 'invisible',
                  '#name' => "godown_short[$key]",
