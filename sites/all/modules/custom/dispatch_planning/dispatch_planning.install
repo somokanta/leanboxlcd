@@ -1600,6 +1600,12 @@ function dispatch_planning_update_7120() {
        'length' => 255,
        'default' => '',
      ),
+     'res_cashier_short' => array(
+       'description' => 'res_cashier_short',
+       'type' => 'int',
+       'not null' => TRUE,
+       'default' => 0,
+     ),     
    );
 
    foreach ($fields1 as $key => $field) {
