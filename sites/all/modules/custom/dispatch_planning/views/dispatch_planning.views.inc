@@ -3258,7 +3258,7 @@ function dispatch_planning_views_data() {
     ),
   );
   $data['dispatch_planning_item_details']['res_cashier_short'] = array(
-    'title' => t('DP lines res_godres_res_cashier_short'),
+    'title' => t('DP lines res_cashier_short'),
     'help' => t('Dispatch Planning lines res_cashier_short'),
     'field' => array(
       'handler' => 'views_handler_field',
