@@ -148,7 +148,12 @@ function dispatch_planning_update_7105() {
         'type' => 'serial',
         'not null' => TRUE,
       ),
-      'jobType' => array(
+      'distributor_id' => array(
+         'description' => t('distributor_id'),
+         'type' => 'int',
+         'default' => 0,
+       ),
+       'jobType' => array(
         'description' => t('Job type'),
         'type' => 'varchar',
         'length' => 50,

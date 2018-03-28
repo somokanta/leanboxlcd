@@ -2425,7 +2425,7 @@ function dispatch_planning_sales_reg_api($node, $trip_execution_date, $vehicle_n
   /**
    * Insert data into dispatch_planning_api_data table
    */
-  $id = dispatch_planning_api_data($api_data);
+  $id = dispatch_planning_api_data($api_data, $node_uid);
   /**
    * Insert data into dispatch_planning_item_details table
    */
@@ -2437,10 +2437,11 @@ function dispatch_planning_sales_reg_api($node, $trip_execution_date, $vehicle_n
  * Insert data into dispatch_planning_api_data table
  */
 
-function dispatch_planning_api_data($api_data) {
+function dispatch_planning_api_data($api_data, $node_uid = 0) {
   if (!empty($api_data)) {
       $query = db_insert('dispatch_planning_api_data');
       $fields = array(
+        'distributor_id' => $node_uid,
         'jobType' => $api_data['jobType'],
         'referenceNo' => $api_data['referenceNo'],
         'date' => $api_data['date'],
