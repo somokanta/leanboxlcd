@@ -1551,7 +1551,7 @@ function dispatch_planning_form_save_validate($form, &$form_state) {
       "lat" => $origin_lat, //'19.1817531000', //
       "lng" => $origin_long //'72.9972678000',// 
     );
-    $speed = '0.1';
+    $speed = '0.2';
     $speed_in_double = (double) $speed;
     $Locations['fleet']['origin']['speed'] = $speed_in_double; // speed of the driver
 
