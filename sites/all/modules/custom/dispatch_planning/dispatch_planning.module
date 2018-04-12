@@ -1605,7 +1605,20 @@ function dispatch_planning_form_save_validate($form, &$form_state) {
       $form_state['dispatch_planning']['total_distance'] = $response_data->total_distance;
       foreach ($response_array as $k => $v) {
         if ($v->location_name !== 'origin') {
-          $bill_sequence_array[$i] = $v->location_name;
+          $bill_sequence_array[$i]['nid'] = $v->location_name;
+          
+          if ($k == 0) {
+            $travel_time = 0;
+          }
+          else if ($k == 1) {
+            $travel_time = strtotime($response_array[$k]->arrival_time) - strtotime($response_array[$k - 1]->arrival_time);
+          }
+          else {
+            $travel_time = strtotime($response_array[$k]->arrival_time) - strtotime($response_array[$k - 1]->finish_time);
+          }
+          $travel_time = $travel_time / 60; // min
+          $bill_sequence_array[$i]['prev_travel_time'] = $travel_time;
+          $bill_sequence_array[$i]['prev_distance'] = round(($v->distance) / 1000, 2);
           $i++;
         }
       }
@@ -1703,14 +1716,15 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
   node_save($node);
 
   $nid = $node->nid;
-
-  $bill_nids = array_keys($rows);
   
   $sequence_array = $form_state['dispatch_planning']['sequence_array'];
   $manual_drs_sequence = $form_state['dispatch_planning']['manual_drs_sequence'];
   if ($seq_flag) {
+    
+    $bill_sequence_new = array();    
     foreach ($bill_sequence as $key => $value) {
-      $node = node_load($value);
+      $bill_sequence_new[$key] = $value['nid'];
+      $node = node_load($value['nid']);
 
       $node->field_bill_sequence[LANGUAGE_NONE][0]['value'] = $key;
       $node->field_drs_sequence[LANGUAGE_NONE][0]['value'] = $key;
@@ -1718,10 +1732,14 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
         $node->field_delivery_pending = array();
       }
       $node->field_trip_id_reference[LANGUAGE_NONE][0]['nid'] = $nid;
+      // calculate time and distance
+      
+      $node->field_prev_arrival_time[LANGUAGE_NONE][0]['value'] = $value['prev_travel_time'];
+      $node->field_prev_distance[LANGUAGE_NONE][0]['value'] = $value['prev_distance'];
       node_save($node);
     }
 
-    $diff = array_diff($bill_nids, $bill_sequence);
+    $diff = array_diff($bill_nids, $bill_sequence_new);
     if (!empty($diff)) {
       foreach ($diff as $value) {
         $node = node_load($value);
