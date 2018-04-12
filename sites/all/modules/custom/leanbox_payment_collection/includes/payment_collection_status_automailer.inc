@@ -24,9 +24,12 @@ function send_email_payment_collection_status() {
 
   // Today's Petty Cash TRansaction And Closing Balance
   $today_petty_cash_transaction_html = get_email_today_petty_cash_transaction($distributor_id);
+  
+  // PT Non Compliance
+  $pt_non_compliance_html = get_email_pt_non_compliance($distributor_id);
 
   $params['subject'] = "SB And Bounce Chq Status";
-  $params['body'] = $pending_for_collection_html . "<br>" . $pending_for_assignment_html . "<br>" . $pending_for_upload_html . "<br>" . $pending_for_yesterday_assignment_html . "<br>" . $today_petty_cash_transaction_html;
+  $params['body'] = $pending_for_collection_html . "<br>" . $pending_for_assignment_html . "<br>" . $pending_for_upload_html . "<br>" . $pending_for_yesterday_assignment_html . "<br>" . $today_petty_cash_transaction_html . "<br>". $pt_non_compliance_html;
   $mail_to = variable_get('collection_status_to_email');
   $from = variable_get('from_email');
 
@@ -345,7 +348,9 @@ function get_attachment_pending_for_collection($distributor_id) {
     $query->join('field_data_field_credit_days', 'ct', 'ct.entity_id = pc.field_party_code_reference_nid');
     $query->fields('ct', array('field_credit_days_value'));
     $credit_days = $query->execute()->fetchField();
-    
+    if(empty($credit_days)) {
+      $credit_days = 0;
+    }
     $collection_date = strtotime("+$credit_days day", strtotime($data['field_declaration_date_value']));
     $declaration_date = strtotime($data['field_declaration_date_value']);
     $row['nid'] = $data['nid'];
@@ -1029,6 +1034,65 @@ function get_email_today_petty_cash_transaction($distributor_id) {
 
   $output = "<h3>Today's Petty Cash Transaction and Closing Balance</h3>";
   $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0'), 'empty' => t('No Records has been found')));
+
+  return $output;
+}
+
+function get_email_pt_non_compliance($distributor_id) {
+
+  $query = db_select('node', 'n');
+  $query->condition('n.type', 'payment_collection');
+  $query->condition('n.uid', $distributor_id, '=');
+  $query->join('field_data_field_flag', 'ff', 'ff.entity_id = n.nid');
+  $query->condition('ff.field_flag_value', 'signed', '=');
+  $query->join('field_data_field_collection_status', 'cs', 'cs.entity_id = n.nid');
+  $query->condition('cs.field_collection_status_value', '2', '!=');
+  $query->join('field_data_field_remaining_amt_collection', 'ra', 'ra.entity_id = n.nid');
+  $query->leftjoin('field_data_field_previous_cash_amt', 'pc', 'pc.entity_id = n.nid');
+  $query->leftjoin('field_data_field_previous_cheque_amt', 'pch', 'pch.entity_id = n.nid');
+
+  // Want record from 1st oct onwards
+  $timestamp = strtotime(date('2017-10-01')) - 1;
+  $query->join('field_data_field_sales_bill_no_ref', 'sbrf', 'sbrf.entity_id = n.nid');
+  $query->join('field_data_field_sr_bill_date', 'sr', 'sr.entity_id = sbrf.field_sales_bill_no_ref_nid');
+  $query->condition('sr.field_sr_bill_date_value', $timestamp, '>');
+
+  // Remove records where Closure Flag = 1
+  $query->leftjoin('field_data_field_terminated_bill_flag', 'tf', 'tf.entity_id = n.nid');
+  $query->condition('tf.field_terminated_bill_flag_value', '1', '!=');
+
+  $query->leftjoin('field_data_field_party_code_reference', 'pcr', 'pcr.entity_id = sbrf.field_sales_bill_no_ref_nid');
+  $query->join('node', 'pp', 'pp.nid = pcr.field_party_code_reference_nid');
+
+  $query->leftjoin('field_data_field_payment_terms', 'pt', 'pt.entity_id = pcr.field_party_code_reference_nid');
+
+  $query->groupBy('pt.field_payment_terms_value');
+
+  $query->addExpression('COUNT(n.title)', 'bill_count');
+  $query->addExpression('SUM(ra.field_remaining_amt_collection_value)', 'to_be_collected_amt');
+  $query->addExpression('SUM(pc.field_previous_cash_amt_value)', 'prev_cash_amt');
+  $query->addExpression('SUM(pch.field_previous_cheque_amt_value)', 'prev_chq_amt');
+  $query->fields('pt', array('field_payment_terms_value'));
+
+  $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+
+
+  foreach ($res as $data) {
+    $row['pt'] = $data['field_payment_terms_value'];
+    $row['bill_count'] = $data['bill_count'];
+    $row['bill_value'] = $data['to_be_collected_amt'] - ($data['prev_cash_amt'] + $data['prev_chq_amt']);
+
+    $total_bill_count += $row['bill_count'];
+    $total_bill_value += $row['bill_value'];
+    
+    $rows[] = $row;
+  }
+
+  $header = array('PT', 'Count of Bills', 'Value of Bills');
+  $rows[] = array('Total', $total_bill_count, $total_bill_value);
+
+  $output = "<h3>PT Non Compliance</h3>";
+  $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
 
   return $output;
 }

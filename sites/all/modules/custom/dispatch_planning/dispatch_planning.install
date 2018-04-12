@@ -26,8 +26,53 @@ function dispatch_planning_schema() {
     ),
     'primary key' => array('id'),
   );
+$schema['ptl_put_qty'] = array(
+    'description' => 'ptl_put_qty sum',
+    'fields' => array(
+      'id' => array(
+        'description' => 'The primary identifier for a data',
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'ptl_job' => array(
+        'description' => 'ptl_job',
+        'type' => 'int',
+         'not null' => TRUE,
+         'default' => 0,
+      ),
+      'line_count' => array(
+        'description' => 'line_count',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'put_qty_sum' => array(
+        'description' => 'put_qty_sum',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'rs_code' => array(
+        'description' => 'rs_code',
+        'type' => 'varchar',
+        'length' => 20,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'created' => array(
+        'description' => 'created',
+        'type' => 'int',
+      ),
+      'type' => array(
+        'description' => 'type',
+        'type' => 'varchar',
+        'length' => 20,
+      ),
+    ),
+    'primary key' => array('id'),
+  );
 
-  return $schema;
+return $schema;
 }
 
 /**
@@ -103,7 +148,12 @@ function dispatch_planning_update_7105() {
         'type' => 'serial',
         'not null' => TRUE,
       ),
-      'jobType' => array(
+      'distributor_id' => array(
+         'description' => t('distributor_id'),
+         'type' => 'int',
+         'default' => 0,
+       ),
+       'jobType' => array(
         'description' => t('Job type'),
         'type' => 'varchar',
         'length' => 50,
@@ -1119,6 +1169,18 @@ function dispatch_planning_update_7114() {
       'default' => NULL,
 
      ),
+     'photo_of_signed_bill_partial' => array(
+       'description' => t('Response photo_of_signed_bill_partial'),
+       'type' => 'varchar',
+       'default' => NULL,
+       'length' => 255,
+     ),
+     'updated_flag' => array(
+       'description' => t('0 => no changes, 1 => manual entry, 2 => api response'),
+       'type' => 'int',
+       'default' => 0,
+       'length' => 3,
+     ),
    );
    $fields2 = array(
 
@@ -1537,6 +1599,18 @@ function dispatch_planning_update_7120() {
        'length' => 255,
        'default' => '',
      ),
+     'res_godown_short' => array(
+       'description' => 'res_godown_short',
+       'type' => 'varchar',
+       'length' => 255,
+       'default' => '',
+     ),
+     'res_cashier_short' => array(
+       'description' => 'res_cashier_short',
+       'type' => 'int',
+       'not null' => TRUE,
+       'default' => 0,
+     ),     
    );
 
    foreach ($fields1 as $key => $field) {
@@ -1590,6 +1664,13 @@ function dispatch_planning_update_7121() {
       'not null' => TRUE,
       'default' => '',
     ),
+    'zone' => array(
+      'description' => 'Zone',
+      'type' => 'varchar',
+      'length' => 25,
+      'not null' => TRUE,
+      'default' => '',
+    ),
   );
   foreach ($fields as $key => $field) {
     if (!db_field_exists('ptl_data_configuration', $key)) {
@@ -1599,4 +1680,87 @@ function dispatch_planning_update_7121() {
       db_add_field('master_ptl_data', $key, $field);
     }    
   }
+}
+
+/**
+ *  
+ */
+function dispatch_planning_update_7122() {
+  $schema['ptl_put_qty'] = array(
+    'description' => 'ptl_put_qty sum',
+    'fields' => array(
+      'id' => array(
+        'description' => 'The primary identifier for a data',
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'ptl_job' => array(
+        'description' => 'ptl_job',
+        'type' => 'int',
+         'not null' => TRUE,
+         'default' => 0,
+      ),
+      'line_count' => array(
+        'description' => 'line_count',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'put_qty_sum' => array(
+        'description' => 'put_qty_sum',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'rs_code' => array(
+        'description' => 'rs_code',
+        'type' => 'varchar',
+        'length' => 20,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'created' => array(
+        'description' => 'created',
+        'type' => 'int',
+      ),
+      'type' => array(
+        'description' => 'type',
+        'type' => 'varchar',
+        'length' => 20,
+      ),
+      'unique_id' => array(
+        'description' => 'Unique ID',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    ),
+    'primary key' => array('id'),
+  );
+  db_create_table('ptl_put_qty', $schema['ptl_put_qty']);
+}
+
+function dispatch_planning_update_7123() {
+  $fields = array(
+    'distributor_id' => array(
+      'description' => 'Distributor ID',
+      'type' => 'int',
+      'not null' => TRUE,
+      'default' => 23466,
+    ),
+  ); 
+  foreach ($fields as $key => $field) {
+    if (!db_field_exists('ptl_data_configuration', $key)) {
+      db_add_field('ptl_data_configuration', $key, $field);
+    }
+    if (!db_field_exists('master_ptl_data', $key)) {
+      db_add_field('master_ptl_data', $key, $field);
+    }
+    if (!db_field_exists('ptl_header_data', $key)) {
+      db_add_field('ptl_header_data', $key, $field);
+    } 
+    if (!db_field_exists('ptl_put_qty', $key)) {
+      db_add_field('ptl_put_qty', $key, $field);
+    } 
+  }  
 }

@@ -50,7 +50,7 @@
             tableRow.find('a.cell-details').click(function() {
                 var sr = $(this).closest('tr').attr('data-sr');
                 marker[sr].mk.openPopup();
-                marker[sr].mk.bounce(3);
+                //marker[sr].mk.bounce(3);
             })
             
 //            selectableRow.find('a.cell-details').hover(function() {

@@ -244,18 +244,18 @@ function _get_farey_delivered_tripwise_vrs_amt_details($trip_number, $rs_code) {
 
    $first_row = array('Signed_Bills', 'Cheque_Bills', 'Cash_Bills');
 
-//   foreach ($first_row as $header) {
-//      $header_array[] = array(
-//        'data' => array(
-//          '#type' => 'link',
-//          '#title' => $header,
-//          '#href' => "mymodule/nojs/$header",
-//          '#options' => array(
-//            'html' => true,
-//          )
-//        ),
-//      );
-//   }
+   foreach ($first_row as $header) {
+      $header_array[] = array(
+        'data' => array(
+          '#type' => 'link',
+          '#title' => $header,
+          '#href' => "mymodule/nojs/$header",
+          '#options' => array(
+            'html' => true,
+          )
+        ),
+      );
+   }
    foreach ($first_row as $val) {
       $k = 0;
      // $data[$val][] = $val;

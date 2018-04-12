@@ -4,11 +4,21 @@ require_once DRUPAL_ROOT .  '/sites/all/modules/custom/reverse_geocode/direction
 
 function dispatch_planning_menu() {
    
+   $items['edit-trip-delivered'] = array(
+    'title' => 'Edit Delivered Trip -details',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('_edit_trip_delivered_callback_form'),
+    'access arguments' => array('dispatch planning screen'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'dispatch_planning_farey.form.inc',
+      // Page callback, etc. need to be added here.
+  );
+     
   $items['delivered-trip-data'] = array(
     'title' => 'Delivered Trip',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('_delivered_trip_data_callback'),
-    'access arguments' => array('Ptl trip creation'),
+    'access arguments' => array('dispatch planning screen'),
     'type' => MENU_NORMAL_ITEM,
     'file' => 'dispatch_planning_farey.form.inc',
       // Page callback, etc. need to be added here.
@@ -17,7 +27,7 @@ function dispatch_planning_menu() {
     'title' => 'Delivered Trip',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('_delivered_trip_data_download_callback'),
-    'access arguments' => array('Ptl trip creation'),
+    'access arguments' => array('dispatch planning screen'),
     'type' => MENU_NORMAL_ITEM,
     'file' => 'dispatch_planning_farey.form.inc',
       // Page callback, etc. need to be added here.
@@ -449,6 +459,116 @@ function dispatch_planning_services_resources() {
             'name' => 'dispatch_planning_farey_api'
           ),
            'access arguments' => array('services_access_farey_api'),
+        ),
+        'ptl-api-put-qty-sum' => array(
+          'help' => 'Update PTL Put Qty Sum Table Data',
+          'callback' => 'update_ptl_put_qty_sum_data',
+          'args' => array(
+            array(
+              'name' => 'ptl_job',
+              'type' => 'string',
+              'description' => 'PTL JOB',
+              'source' => array('data' => 'ptl_job'),
+              'optional' => FALSE,
+            ),
+            array(
+              'name' => 'id',
+              'type' => 'string',
+              'description' => 'ID',
+              'source' => array('data' => 'id'),
+              'optional' => FALSE,
+            ),
+            array(
+              'name' => 'rs_code',
+              'type' => 'string',
+              'description' => 'Rs Code',
+              'source' => array('data' => 'rs_code'),
+              'optional' => FALSE,
+            ),
+            array(
+              'name' => 'api_time',
+              'type' => 'string',
+              'description' => 'line_count',
+              'source' => array('data' => 'api_time'),
+              'optional' => FALSE,
+            ),
+            array(
+              'name' => 'line_count',
+              'type' => 'string',
+              'description' => 'line_count',
+              'source' => array('data' => 'line_count'),
+              'optional' => FALSE,
+            ),
+            array(
+              'name' => 'put_qty_sum',
+              'type' => 'string',
+              'description' => 'Put qty sum',
+              'source' => array('data' => 'put_qty_sum'),
+              'optional' => FALSE,
+            ),
+           
+          ),
+          'file' => array(
+            'type' => 'inc',
+            'module' => 'dispatch_planning',
+            'name' => 'ptl_dispatch_planning'
+          ),
+          'access arguments' => array('services_access_ptl_api'),
+        ),
+        'master-ptl-api-put-qty-sum' => array(
+          'help' => 'Update PTL Put Qty Sum Table Data',
+          'callback' => 'update_master_ptl_put_qty_sum_data',
+          'args' => array(
+            array(
+              'name' => 'ptl_job',
+              'type' => 'string',
+              'description' => 'PTL JOB',
+              'source' => array('data' => 'ptl_job'),
+              'optional' => FALSE,
+            ),
+            array(
+              'name' => 'id',
+              'type' => 'string',
+              'description' => 'ID',
+              'source' => array('data' => 'id'),
+              'optional' => FALSE,
+            ),
+            array(
+              'name' => 'rs_code',
+              'type' => 'string',
+              'description' => 'Rs Code',
+              'source' => array('data' => 'rs_code'),
+              'optional' => FALSE,
+            ),
+            array(
+              'name' => 'api_time',
+              'type' => 'string',
+              'description' => 'line_count',
+              'source' => array('data' => 'api_time'),
+              'optional' => FALSE,
+            ),
+            array(
+              'name' => 'line_count',
+              'type' => 'string',
+              'description' => 'line_count',
+              'source' => array('data' => 'line_count'),
+              'optional' => FALSE,
+            ),
+            array(
+              'name' => 'put_qty_sum',
+              'type' => 'string',
+              'description' => 'Put qty sum',
+              'source' => array('data' => 'put_qty_sum'),
+              'optional' => FALSE,
+            ),
+           
+          ),
+          'file' => array(
+            'type' => 'inc',
+            'module' => 'dispatch_planning',
+            'name' => 'master_ptl_dispatch_planning'
+          ),
+          'access arguments' => array('services_access_ptl_api'),
         ),
         'ptl-api-data-fetch' => array(
           'help' => 'Get PTL Data',
@@ -1485,7 +1605,20 @@ function dispatch_planning_form_save_validate($form, &$form_state) {
       $form_state['dispatch_planning']['total_distance'] = $response_data->total_distance;
       foreach ($response_array as $k => $v) {
         if ($v->location_name !== 'origin') {
-          $bill_sequence_array[$i] = $v->location_name;
+          $bill_sequence_array[$i]['nid'] = $v->location_name;
+          
+          if ($k == 0) {
+            $travel_time = 0;
+          }
+          else if ($k == 1) {
+            $travel_time = strtotime($response_array[$k]->arrival_time) - strtotime($response_array[$k - 1]->arrival_time);
+          }
+          else {
+            $travel_time = strtotime($response_array[$k]->arrival_time) - strtotime($response_array[$k - 1]->finish_time);
+          }
+          $travel_time = $travel_time / 60; // min
+          $bill_sequence_array[$i]['prev_travel_time'] = $travel_time;
+          $bill_sequence_array[$i]['prev_distance'] = round(($v->distance) / 1000, 2);
           $i++;
         }
       }
@@ -1583,14 +1716,15 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
   node_save($node);
 
   $nid = $node->nid;
-
-  $bill_nids = array_keys($rows);
   
   $sequence_array = $form_state['dispatch_planning']['sequence_array'];
   $manual_drs_sequence = $form_state['dispatch_planning']['manual_drs_sequence'];
   if ($seq_flag) {
+    
+    $bill_sequence_new = array();    
     foreach ($bill_sequence as $key => $value) {
-      $node = node_load($value);
+      $bill_sequence_new[$key] = $value['nid'];
+      $node = node_load($value['nid']);
 
       $node->field_bill_sequence[LANGUAGE_NONE][0]['value'] = $key;
       $node->field_drs_sequence[LANGUAGE_NONE][0]['value'] = $key;
@@ -1598,10 +1732,14 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
         $node->field_delivery_pending = array();
       }
       $node->field_trip_id_reference[LANGUAGE_NONE][0]['nid'] = $nid;
+      // calculate time and distance
+      
+      $node->field_prev_arrival_time[LANGUAGE_NONE][0]['value'] = $value['prev_travel_time'];
+      $node->field_prev_distance[LANGUAGE_NONE][0]['value'] = $value['prev_distance'];
       node_save($node);
     }
 
-    $diff = array_diff($bill_nids, $bill_sequence);
+    $diff = array_diff($bill_nids, $bill_sequence_new);
     if (!empty($diff)) {
       foreach ($diff as $value) {
         $node = node_load($value);
@@ -1643,19 +1781,26 @@ function get_bill_info($bill_number, $van = NULL, $loading_date = NULL, $beat_na
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
   $query = db_select('node', 'n');
   $query->leftJoin('field_data_field_bill_value', 'bv', 'n.nid = bv.entity_id');
-  $query->leftJoin('field_data_field_sales_party_code', 'spc', 'n.nid = spc.entity_id');
+  
+  // commented on 9 march
+  //$query->leftJoin('field_data_field_sales_party_code', 'spc', 'n.nid = spc.entity_id');
   $query->leftJoin('field_data_field_billing_loading_date', 'ld', 'n.nid = ld.entity_id');
   $query->leftJoin('field_data_field_billing_van', 'v', 'n.nid = v.entity_id');
   $query->leftJoin('field_data_field_delivery_pending', 'dp', 'n.nid = dp.entity_id');
   $query->leftJoin('field_data_field_trip_id_reference', 't', 'n.nid = t.entity_id');
   $query->leftJoin('node', 'nt', 'nt.nid = t.field_trip_id_reference_nid');
 
-  $query->leftJoin('field_data_field_party_code', 'pc', 'pc.field_party_code_value = spc.field_sales_party_code_value');
- // $query->leftJoin('field_data_field_party_code', 'ppc', 'pc.field_party_code_value = ppc.field_party_code_value');
-  $query->condition('pc.bundle', 'outlet_master');
-  $query->join('node', 'oun', 'oun.nid = pc.entity_id');
-  $query->condition('oun.uid', $distributor_id, '=');
-
+  // commented on 9 march
+ // $query->leftJoin('field_data_field_party_code', 'pc', 'pc.field_party_code_value = spc.field_sales_party_code_value');
+//  $query->condition('pc.bundle', 'outlet_master');
+//  $query->join('node', 'oun', 'oun.nid = pc.entity_id');
+//  $query->condition('oun.uid', $distributor_id, '=');
+  
+  // added on 9 march
+  $query->leftJoin('field_data_field_party_code_reference', 'pc', 'pc.entity_id = n.nid'); 
+  $query->leftjoin('node', 'oun', 'oun.nid = pc.field_party_code_reference_nid');
+ 
+  
   $query->leftJoin('field_data_field_party_name', 'pn', 'pn.entity_id = oun.nid');
   $query->leftJoin('field_data_field_beat_name', 'bn', 'bn.entity_id = oun.nid');
 
@@ -1674,11 +1819,12 @@ function get_bill_info($bill_number, $van = NULL, $loading_date = NULL, $beat_na
 
   $query->addField('bn', 'field_beat_name_value', 'sales_beat');
 
-  $db_or = db_or();
-  $db_or->condition('pc.bundle', 'outlet_master');
-  $db_or->isNull('pc.bundle');
-
-  $query->condition($db_or);
+  // commented on 9 march
+//  $db_or = db_or();
+//  $db_or->condition('pc.bundle', 'outlet_master');
+//  $db_or->isNull('pc.bundle');
+//
+//  $query->condition($db_or);
 
   if (!is_null($bill_number)) {
     $query->condition('n.title', $bill_number);
@@ -2264,7 +2410,9 @@ function dispatch_planning_sales_reg_api($node, $trip_execution_date, $vehicle_n
   if (empty($outlet_data_details['field_hul_updated_long_value'])) {
     $outlet_data_details['field_hul_updated_long_value'] = 0;
   }
-  $api_data['jobType'] = 'delivery1';  // Hardcoded as suggested by gaurav
+  $api_data['jobType'] = 'delivery1';  // delivery1 for hul
+  $api_data['merchantCode'] = 'hul';  // hul for Merchant code
+  
   $reference_no = $trip_id . '_'. $rs_code . '_' . $bill_number;
   $api_data['referenceNo'] = $reference_no;
   $api_data['date'] = date('Y-m-d',$trip_execution_date);
@@ -2295,7 +2443,7 @@ function dispatch_planning_sales_reg_api($node, $trip_execution_date, $vehicle_n
   /**
    * Insert data into dispatch_planning_api_data table
    */
-  $id = dispatch_planning_api_data($api_data);
+  $id = dispatch_planning_api_data($api_data, $node_uid);
   /**
    * Insert data into dispatch_planning_item_details table
    */
@@ -2307,10 +2455,11 @@ function dispatch_planning_sales_reg_api($node, $trip_execution_date, $vehicle_n
  * Insert data into dispatch_planning_api_data table
  */
 
-function dispatch_planning_api_data($api_data) {
+function dispatch_planning_api_data($api_data, $node_uid = 0) {
   if (!empty($api_data)) {
       $query = db_insert('dispatch_planning_api_data');
       $fields = array(
+        'distributor_id' => $node_uid,
         'jobType' => $api_data['jobType'],
         'referenceNo' => $api_data['referenceNo'],
         'date' => $api_data['date'],
@@ -2706,6 +2855,15 @@ function master_ptl_trip_date_by_trip_id($trip_id,$rs_code) {
   return $results;
 }
 
+function get_distributor_id_using_rscode($rs_code) {
+  $query = db_select('field_data_field_distributor', 'fd');
+  $query->join('field_data_field_third_party_username', 'tpu', 'tpu.entity_id = fd.entity_id');
+  $query->condition('tpu.field_third_party_username_value', $rs_code);
+  $query->fields('fd', array('field_distributor_value',entity_id));
+  $res = $query->execute()->fetchField();  
+  return $res;
+}
+
 function get_rsname_using_rscode($rs_code) {
   $query = db_select('field_data_field_name', 'fn');
   $query->join('field_data_field_third_party_username', 'tpu', 'tpu.entity_id = fn.entity_id');
@@ -2759,4 +2917,17 @@ function _get_van_loading_combination_by_trip($dispatch_data_nid) {
   }
 
   return ltrim($vehicle_loading, ',');
+}
+
+/**
+ * 
+ * @param type $ref_no
+ * @return type
+ */
+function _get_bill_row_id_using_reference_no($ref_no) {
+   $query = db_select('dispatch_planning_api_data', 'dp');
+   $query->fields('dp', array('id'));
+   $query->condition('dp.referenceNo', $ref_no);
+   $res = $query->execute()->fetchField();
+   return $res;
 }

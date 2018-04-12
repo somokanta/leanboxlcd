@@ -118,6 +118,7 @@ function put_qty_master_ptl_data($id_qty) {
         'put_operator_id' => $value['put_operator_id'],
         'put_time'=>$value['put_time'],
         'close_operator_id'=>$value['close_operator_id'],
+        'zone'=>$value['zone'],
         'close_time'=>$value['close_time'],
         'box_id'=>$value['box_id'],
       ))
@@ -475,6 +476,7 @@ function master_ptl_data_insert_into_table($api_data, $distributor_id) {
           'ean1' => $eans[0]->ean1 ? $eans[0]->ean1 : '',
           'ean2' => $eans[0]->ean2 ? $eans[0]->ean2 : '',
           'ean3' => $eans[0]->ean3 ? $eans[0]->ean3 : '',
+          'distributor_id' => $distributor_id ? $distributor_id : 0,
         );
         $query->fields($fields);
         $result_id = $query->execute();
@@ -570,6 +572,7 @@ function get_all_bills_of_trip_id($dispatch_data_nid) {
  * it will call to insert the header data in header table
  */
 function insert_master_ptl_header_data($header_result) {
+  $distributor_id = get_distributor_id_using_rscode($header_result[0]->rs_code);
   foreach ($header_result as $value) {
     $result = db_merge('ptl_header_data')
       ->key(array('ptl_job' => $value->ptl_job, 'rs_code' => $value->rs_code, 'type' => 'MASTER_TRIP'))
@@ -579,7 +582,8 @@ function insert_master_ptl_header_data($header_result) {
         'total_qty' => $value->total_qty,
         'rs_code' => $value->rs_code,
         'type' => 'MASTER_TRIP', // same table, diff is trip and master trip
-        'created_time' => REQUEST_TIME
+        'created_time' => REQUEST_TIME,
+        'distributor_id' => $distributor_id ? $distributor_id : 0
       ))
       ->execute();
   }
@@ -686,7 +690,7 @@ function master_trip_box_id_form($form, &$form_state) {
       '#markup' => $form_state['views_data'],
     );
     $master_trip_id = $form_state['values']['master_trip_id'];
-    $rr = l('Open PDF', "/download-master-trip-box-id/$master_trip_id");
+    $rr = l('Open PDF', "/download-master-trip-box-id/$master_trip_id",array('attributes'=>array("target" => "_blank")));
     $form['dowmload_mark'] = array(
       '#type' => 'markup',
       '#markup' => $rr,
@@ -696,9 +700,51 @@ function master_trip_box_id_form($form, &$form_state) {
 }
 
 function master_trip_box_id_form_validate($form, &$form_state) {
+  global $user;
+  $rs_code = master_ptl_get_rs_code_by_uid($user->uid);
   $master_trip_id = $form_state['values']['master_trip_id'];
   if(empty($master_trip_id)){
+    unset($form_state['complete form']['hhh']);
+    unset($form_state['complete form']['dowmload_mark']);
     form_set_error('master_ptl_id', 'Please enter Master PTL ID');
+  }
+  $query1 = db_select('master_ptl_data', 'mptl');
+  $query1->condition('mptl.ptl_job', $master_trip_id, "=");
+  $query1->condition('mptl.rs_code', $rs_code, "=");
+  $query1->addExpression('SUM(mptl.put_qty)', 'put_qty');
+  $put_qty = $query1->execute()->fetchField();
+
+  $query = db_select('ptl_put_qty', 'put');
+  $query->condition('put.type', 'MASTER_TRIP', "=");
+  $query->condition('put.rs_code', $rs_code, "=");
+  $query->condition('put.ptl_job', $master_trip_id, "=");
+  $query->addExpression('SUM(put.put_qty_sum)', 'put_qty_sum');
+  $put_qty_sum = $query->execute()->fetchField();
+  
+  $error_msg = '';
+
+  if (empty($put_qty)) {
+    $error_msg = "Put Quantity is empty";
+  }
+  if (empty($put_qty_sum)) {
+    $error_msg = "Put Incremental Quantity is empty";
+  }
+  if ($put_qty != $put_qty_sum) {
+    $error_msg = "Put Quantity($put_qty) and Put Incremental Quantity($put_qty_sum) does not match";
+  }
+  
+  $query1 = db_select('master_ptl_data', 'mptl');
+  $query1->condition('mptl.ptl_job', $master_trip_id, "=");
+  $query1->condition('mptl.rs_code', $rs_code, "=");
+  $query1->condition('mptl.box_id', '', "!=");
+  $query1->fields('mptl',array('box_id'));
+  $query1->range(0, 1);
+  $res = $query1->execute()->fetchField();
+ 
+  if (!empty($error_msg) && !empty($res)) {
+    unset($form_state['complete form']['hhh']);
+    unset($form_state['complete form']['dowmload_mark']);
+    form_set_error('master_trip_id', $error_msg);
   }
 }
 
@@ -719,4 +765,31 @@ function download_master_trip_box_id($args) {
   $view->set_arguments(array($args));
   $rendered_html = $view->render();
   pdf_using_mpdf_api($rendered_html);
+}
+
+/**
+ * 
+ * @param type $ptl_job
+ * @param type $rs_code
+ * @param type $line_count
+ * @param type $put_qty_sum
+ */
+function update_master_ptl_put_qty_sum_data($ptl_job, $id, $rs_code, $api_time, $line_count, $put_qty_sum) {
+   $distributor_id = get_distributor_id_using_rscode($rs_code);
+   $result = db_merge('ptl_put_qty')
+       ->key(array('unique_id' => $id, 'rs_code' => $rs_code, 'type' => 'MASTER_TRIP'))
+       ->fields(array(
+         'unique_id' => $id,
+         'ptl_job' => $ptl_job,
+         'line_count' => $line_count,
+         'put_qty_sum' => $put_qty_sum,
+         'rs_code' => $rs_code,
+         'type' => 'MASTER_TRIP', // same table diff is trip and master trip
+         'created' => $api_time,
+         'distributor_id' => $distributor_id ? $distributor_id : 0
+       ))
+       ->execute();
+   $results['flag'] = '1';
+   $results['result'] = 'Updated Successfully';
+   return $results;
 }

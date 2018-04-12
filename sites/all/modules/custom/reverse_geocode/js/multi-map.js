@@ -14,12 +14,12 @@ var marker = {};
         map = new MapmyIndia.Map('map-container', {center: centre, zoomControl: true, hybrid: true, search: true});
         map.setView([default_lat, default_lng], 5);
         
-        L.Marker.setBouncingOptions({
+      /*  L.Marker.setBouncingOptions({
             bounceHeight: 40, // height of the bouncing
             bounceSpeed: 50, // bouncing speed coefficient
             contractHeight : 1,
         });
-
+*/
         function addMarker(position, icon, text) {
             if (icon == '') {
                 var mk = new L.Marker(position, {draggable: false});/*marker with a default icon and optional param draggable, title */
