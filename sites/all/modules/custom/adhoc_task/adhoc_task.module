@@ -1407,8 +1407,7 @@ function send_email_to_fill_zoho() {
                <h4>Please ignore if you have filled it already.</h4>
                ZOHO URL: https://projects.zoho.com/portal/iksulapmt#allprojects
                JIRA URL: https://blisstering.atlassian.net/plugins/servlet/ac/is.origo.jira.tempo-plugin/tempo-my-work
-               
-*** This is an automatically generated email, please do not reply ***';
+               <br>*** This is an automatically generated email, please do not reply ***';
     $params['subject'] = "Bhai Pls Zoho Bhar De!!";
     $params['body'] = $html;
     $mail_to = variable_get('zoho_fill', "abhishek.r@iksula.com");
