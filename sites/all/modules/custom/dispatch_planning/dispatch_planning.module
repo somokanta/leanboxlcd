@@ -183,9 +183,25 @@ function dispatch_planning_menu() {
     'type' => MENU_CALLBACK,
     'file' => 'ptl_dispatch_planning.inc',
   );
+   $items['billwise-picking-sheet'] = array(
+    'title' => 'Bill-wise Loose Picking Sheet',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('ptl_billwise_sheet_form'),
+    'access arguments' => array('Distributor Upload File'),
+    'type' => MENU_CALLBACK,
+    'file' => 'ptl_dispatch_planning.inc',
+  );
   $items['download-loose-picking/%'] = array(
     'title' => 'Download PTL Loose',
     'page callback' => 'download_ptl_loose_sheet',
+    'page arguments' => array(1),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'ptl_dispatch_planning.inc',
+  );
+   $items['download-billwise-picking/%'] = array(
+    'title' => 'Download PTL Billwise',
+    'page callback' => 'download_ptl_billwise',
     'page arguments' => array(1),
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,

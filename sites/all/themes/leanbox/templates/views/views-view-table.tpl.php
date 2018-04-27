@@ -19,7 +19,7 @@
  * @ingroup views_templates
  */
 ?>
-<table border="1" cellpadding="1" cellspacing="0" width="100%" style="color:#000; font-size: 11px; font-family: arial" <?php if ($classes) { print 'class="'. $classes . '" '; } ?><?php print $attributes; ?>>
+<table border="1" cellpadding="5" cellspacing="0" width="100%" style="color:#000; font-size: 13px;" <?php if ($classes) { print 'class="'. $classes . '" '; } ?><?php print $attributes; ?>>
    <?php if (!empty($title) || !empty($caption)) : ?>
      <caption><?php print $caption . $title; ?></caption>
   <?php endif; ?>
