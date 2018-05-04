@@ -1494,6 +1494,26 @@ function change_feeds_import_node_delete($node) {
       ->execute();
   }
 }
+// Required hul code & distributor id only to check hul address verified or not
+function check_hul_code_exists($hul_code)
+{
+  global $user; 
+  $hu_code = '';
+  $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+  if (!empty($hul_code)) {
+        $query = db_select('node', 'hul');
+        $query->condition('hul.type', 'hul_code_master');
+        $query->condition('hul.uid', $distributor_id, '=');
+       //Hul code  $hul_code,
+        $query->fields('hul', array('title'));
+        $query->condition('hul.title', $hul_code, '=');
+      // Hul Status Not confirmed   $hul_status!  =1
+        $query->leftJoin('field_data_field_hul_status', 'hul_st', 'hul_st.entity_id = hul.nid');
+        $query->condition('hul_st.field_hul_status_value', 1, '!=');
+        $hu_code = $query->execute()->fetchField();
+  }
+        return $hu_code;
+}
 
 /**
  * 
@@ -1926,6 +1946,7 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
       drupal_set_message("$pl_group does not exist in PL Group Master", 'error');
       $entity->feeds_item->skip = TRUE;
     }
+    
   }
   if ($entity->feeds_item->id == 'sales_delivery_day_importer') {
     $sales_day = strtolower($entity->title);
@@ -3036,6 +3057,52 @@ function change_feeds_import_form_feeds_import_form_alter(&$form, $form_state, $
       '#href' => 'central-van-stop-master-report-download',
       '#weight' => -10,
     );
+  }
+  // This for validate HUL_Address Confirmation
+  if ($form['#importer_id'] == 'outlet_master' ) {
+       if (user_access('hul_address_confirm_upload')) {
+            $form['#submit'][] = 'hul_code_address_confirmation';
+       }
+  }
+  
+    
+}
+/*
+ * // This for validate HUL_Address Confirmation
+ */
+function hul_code_address_confirmation($form, &$form_state) {
+ // it for address confirmation checking user has permission to confirm address after outlet upload & sales register upload   
+ if (user_access('hul_address_confirm_upload')) {
+     global $base_url;
+     $page_url = $base_url.'/address/confirm';
+    if($form['#importer_id'] == 'outlet_master') {
+      $filepath = $form_state['values']['feeds']['FeedsFileFetcher']['file']->uri;
+      $datas = array();
+      if (($handle = fopen($filepath, "r")) !== FALSE) {
+        $header = fgetcsv($handle, 0, ',', '"');
+        while (($row = fgetcsv($handle) ) !== FALSE) {
+        foreach ($row as $key => &$value) {
+            $value = mb_convert_encoding(trim($value), 'UTF-8', 'UTF-8');
+          }
+          $datas[] = array_combine($header, $row);
+        }
+        fclose($handle);
+      }
+      foreach ($datas as $item) {
+        $party_code = $item['Party Code'];
+        $pl_group = $item['PL_GROUP'];
+        $sales_day = $item['Sales Day'];
+        $beat_name = $item['Beat Name'];
+        $hu_code = $item['HUL_Code'];
+        // returns hul code
+        $hul_code_exist = check_hul_code_exists($hu_code); //returns hul_code, 
+        if (!empty($hul_code_exist)) {
+           $arugments = '?pl_group=' . urlencode($pl_group) . '&sales_day=' . urlencode($sales_day) . '&beat_name=' . urlencode($beat_name) . '&hul_status=' . urlencode(0);
+          $url = $page_url . $arugments;
+          drupal_set_message('Please confirm the address for Party Code:  ' . l($party_code . '- (HUL Code:' . $hu_code . ')', $url, array('attributes' => array('target' => '_blank'))), 'error');
+        }
+      }
+    }
   }
 }
 

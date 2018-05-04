@@ -1,7 +1,7 @@
 <?php
 
 // upload form for billing data
-
+module_load_include('inc', 'leanbox_address_confirm', 'includes/address_confirm');
 function change_feeds_import_sales_register_form($form, $form_state) {
   global $user;
   $user_id = $user->uid;
@@ -132,8 +132,7 @@ function change_feeds_import_sales_register_batch_fix_process($data, $distributo
   if (!isset($context['results']['unique_combination'])) {
     $context['results']['unique_combination'] = array();
   }
-
-  foreach ($data as $key => $value) {
+   foreach ($data as $key => $value) {
 
     foreach ($value as $k => $v) {
       $error_text = '';
@@ -206,14 +205,31 @@ function change_feeds_import_sales_register_batch_fix_process($data, $distributo
       // Check if PARTY_CODE doesnt exist in outlet master
       $party_code = check_node_title_exists($value['PARTY_CODE'], 'outlet_master');
       if (empty($party_code)) {
-        $value['error_message'] .= " Party code " . $value['PARTY_CODE'] . ' does not exist in our system.';
+          $value['error_message'] .= " Party code " . $value['PARTY_CODE'] . ' does not exist in our system.';
+      }
+       // checking hul_address confirmed for that outlet
+      if (user_access('hul_address_confirm_upload') && !empty($value['PARTY_CODE'])) {
+        global $base_url;
+        $page_url = $base_url . '/address/confirm';
+        $hul_details = check_hul_address_confirmed_or_not($value['PARTY_CODE']); //returns hul_code, 
+        if (!empty($hul_details)) {
+          foreach ($hul_details as $key => $details) {
+            if (!in_array($details['party_code'], $party_codes)) {
+              $party_codes[] = $details['party_code'];
+
+              $arugments = '?pl_group=' . urlencode($details['pl_group']) . '&sales_day=' . urlencode($details['sales_day']) . '&beat_name=' . urlencode($details['beat_name']) . '&hul_status=' . urlencode(0);
+              $url = $page_url . $arugments;
+              $value['error_message'] = t('Address not confirmed for Party Code: ' . l($details['party_code'] . '- (HUL Code:' . $details['hul_code'] . ')', $url, array('attributes' => array('target' => '_blank'))));
+            }
+          }
+        }
       }
     }
-    if (empty($distributor_id)) {
-      $value['error_message'] .= " Please check your Distributor code";
-    }
+        if (empty($distributor_id)) {
+            $value['error_message'] .= " Please check your Distributor code";
+        }
 
-    // insert into custom sales table
+        // insert into custom sales table
     change_feeds_import_insert_data_in_custom_sales_table($value, $fid, $distributor_id);
 
     $context['results']['fid'] = $fid;
@@ -426,6 +442,7 @@ function change_feeds_import_create_sales_register_node($sales_data_result, $dis
         $count++;
       }
       $fid = $val['fid'];
+     
     }
     if ($billing_error_validate) {
       // Update the status of error billing table to validate
@@ -434,6 +451,8 @@ function change_feeds_import_create_sales_register_node($sales_data_result, $dis
   }
   $context['results']['fid'] = $fid;
   $context['results']['count'] = $count;
+  
+  
 }
 
 /**
@@ -448,11 +467,9 @@ function change_feeds_import_sales_reg_finished($success, $results, $operations)
     global $user;
     $user_id = $user->uid;
     $distributor_id = change_feeds_import_get_distributor_id($user_id);
-
-    // delete data from stage_billing_data.
+   // delete data from stage_billing_data.
     $fid = $results['fid'];
     $count = $results['count'];
-
     if (!empty($fid)) {
       db_delete('custom_sales_data')
           ->condition('fid', $fid, '=')
