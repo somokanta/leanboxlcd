@@ -1409,10 +1409,15 @@ function send_email_to_fill_zoho() {
                JIRA URL: https://blisstering.atlassian.net/plugins/servlet/ac/is.origo.jira.tempo-plugin/tempo-my-work
                
 *** This is an automatically generated email, please do not reply ***';
-    $params['subject'] = "Bhai Pls Zoho Bhar De!!";
-    $params['body'] = $html;
+
+    $params = array(
+      'context' => array(
+        'subject' => "Bhai Pls Zoho Bhar De!!",
+        'body' => $html,
+      ),);
+
     $mail_to = variable_get('zoho_fill', "abhishek.r@iksula.com");
     $from = "zoho@salarydeduction.com";
-    drupal_mail('adhoc_task', 'duplicate_data', $mail_to, LANGUAGE_NONE, $params, $from);
+    drupal_mail('mimemail', 'duplicate_data', $mail_to, LANGUAGE_NONE, $params, $from);
   }
 }

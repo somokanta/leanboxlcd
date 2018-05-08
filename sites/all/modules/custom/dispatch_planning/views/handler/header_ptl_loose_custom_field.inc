@@ -34,6 +34,9 @@ class header_ptl_loose_custom_field extends views_handler_field {
 
     $name_line_1 = get_rsname_using_rscode($rs_code);
     $name_line_2 = 'Party Packing Loose Picking Sheet';
+    if ($this->view->name === 'ptl_loose_sheet' && $this->view->current_display === 'page_1') {
+        $name_line_2 = "Bill-wise Loose Picking Sheet";
+    }
 
     $trip_id = $this->view->args[0];
     $trip_date = ptl_trip_date_by_trip_id($trip_id,$rs_code);

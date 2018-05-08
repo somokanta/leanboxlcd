@@ -1,0 +1,14 @@
+<?php
+/**
+ * Implement hook_permission()
+ *  Add custom permission Central sales delivery report
+ */
+function leanbox_address_confirm_permission() {
+   return array(
+     'hul_address_confirm_upload' => array(
+       'title' => t('HUL Code Address Confirm.Outlet upload & Sales Register Upload'),
+       'description' => t('HUL Code Address Confirm.Outlet upload & Sales Register Upload')
+     )
+   );
+}
+

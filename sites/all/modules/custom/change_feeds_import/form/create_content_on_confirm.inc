@@ -267,15 +267,15 @@ function change_feeds_import_finished($success, $results, $operations) {
     if (!array_key_exists('billing', $results)) {
       drupal_set_message('Billing Not Create. Please Contact LeanBox HELP DESK.', 'error');
     }
-    if (!array_key_exists('picking', $results)) {
-      drupal_set_message('Picking Not Create. Please Contact LeanBox HELP DESK.', 'error');
-    }
+//    if (!array_key_exists('picking', $results)) {
+//      drupal_set_message('Picking Not Create. Please Contact LeanBox HELP DESK.', 'error');
+//    }
 //    if (!array_key_exists('van', $results)) {
 //      drupal_set_message('Van Not Create. Please Contact LeanBox HELP DESK.', 'error');
 //    }
-    if (!array_key_exists('party_packing', $results)) {
-      drupal_set_message('Party Packing Not Create. Please Contact LeanBox HELP DESK.', 'error');
-    }
+//    if (!array_key_exists('party_packing', $results)) {
+//      drupal_set_message('Party Packing Not Create. Please Contact LeanBox HELP DESK.', 'error');
+//    }
   }
   else {
     drupal_set_message('Error Occure while uploading billing data. Please Contact LeanBox HELP DESK', 'error');

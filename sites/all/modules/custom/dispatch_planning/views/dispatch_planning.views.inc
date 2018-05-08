@@ -616,6 +616,17 @@ function dispatch_planning_views_data() {
     'argument' => array(
       'handler' => 'views_handler_argument_string',
     ),
+    'relationship' => array(
+      'title' => t('PTL Bill reference.'),
+      'help' => t("PTL Bill reference."),
+      'handler' => 'views_handler_relationship',
+      'base' => 'node',
+      'base field' => 'title',
+        'extra' => array(
+        array('field' => 'type', 'value' => 'sales_register_data'),
+        array('field' => 'uid', 'left_field' => 'distributor_id'),
+      ),
+    ),
   );
   // loading_date
   $data['ptl_data_configuration']['loading_date'] = array(

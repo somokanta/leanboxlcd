@@ -1,0 +1,6 @@
+name = leanbox Address Confirm
+description = HUL Code Address Confirmation. Sales Register Upload & Outlet Upload
+package = Custom
+core = 7.x
+
+

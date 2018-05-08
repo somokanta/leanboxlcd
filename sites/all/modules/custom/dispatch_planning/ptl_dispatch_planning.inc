@@ -821,3 +821,65 @@ function update_ptl_put_qty_sum_data($ptl_job, $id, $rs_code, $api_time, $line_c
    $results['result'] = 'Updated Successfully';
    return $results;
 }
+
+// PTL BILLWISE PRINTOUT
+function ptl_billwise_sheet_form($form, &$form_state) {
+  $form['#prefix'] = '<div id="itemlist-div">';
+  $form['#suffix'] = '</div>';
+
+  $form['trip_id'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Trip Id'),
+    '#size' => 10,
+    '#required' => TRUE,
+  );
+
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('submit'),
+    '#ajax' => array(
+      'wrapper' => 'itemlist-div',
+      'callback' => 'get_data_of_ptl_sheet_billwise_form_submit',
+      'method' => 'replace',
+      'effect' => 'fade',
+    ),
+    '#submit' => array('ptl_billwise_sheet_form_submit'),
+  );
+  if (!empty($form_state['views_data'])) {
+    $form['hhh'] = array(
+      '#type' => 'markup',
+      '#markup' => $form_state['views_data'],
+    );
+    $trip_id = $form_state['values']['trip_id'];
+    $rr = l('Open PDF', "/download-billwise-picking/$trip_id");
+    $form['dowmload_mark'] = array(
+      '#type' => 'markup',
+      '#markup' => $rr,
+    );
+  }
+  return $form;
+}
+
+function get_data_of_ptl_sheet_billwise_form_submit($form, &$form_state) {
+  return $form;
+}
+
+function ptl_billwise_sheet_form_submit($form, &$form_state) {
+  $trip_id = $form_state['values']['trip_id'];
+  $view_name = "ptl_loose_sheet";
+  $view = views_get_view($view_name, '');
+  $view->set_display('page_1');
+  $view->set_arguments(array($trip_id));
+  $rendered_html = $view->render();
+  $form_state['views_data'] = $rendered_html;
+  $form_state['rebuild'] = TRUE;
+}
+
+function download_ptl_billwise($args) {
+  $view_name = "ptl_loose_sheet";
+  $view = views_get_view($view_name, '');
+  $view->set_display('page_1');
+  $view->set_arguments(array($args));
+  $rendered_html = $view->render();
+  pdf_using_mpdf_api($rendered_html);
+}

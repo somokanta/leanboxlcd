@@ -435,8 +435,10 @@ function master_ptl_data_insert_into_table($api_data, $distributor_id) {
           if (!empty($derived_free_qty) && !empty($free_sku_description)) {
             $cp = 'CP';
             $derived_unit_case = get_sku_unit_case($child_detail['child_sku'], $distributor_id);
-            $derived_cld = (int) ($derived_free_qty / $derived_unit_case); //petty
-            $derived_loose = (int) ($derived_free_qty % $derived_unit_case); //loose
+//            $derived_cld = (int) ($derived_free_qty / $derived_unit_case); //petty
+//            $derived_loose = (int) ($derived_free_qty % $derived_unit_case); //loose
+            $derived_cld = number_format((($cld * $sku_unit_case * $child_detail['child_qty']) / $derived_unit_case), 2, '.', ''); //petty
+            $derived_loose = $loose * $child_detail['child_qty']; //loose            
           }
         }
         else {

@@ -688,9 +688,11 @@ function dispatch_planning_update_7112() {
     ),
      'derived_cld' => array(
       'description' => 'Drived CLD qty',
-      'type' => 'int',
+      'type' => 'numeric',
+      'precision'=>10,
+      'scale'=>2,
       'not null' => TRUE,
-      'default' => 0,
+      'default' => 0
     ), 
      'derived_loose' => array(
       'description' => 'Drived Loose qty',
@@ -916,9 +918,11 @@ function dispatch_planning_update_7113() {
     ),
      'derived_cld' => array(
       'description' => 'Drived CLD qty',
-      'type' => 'int',
+      'type' => 'numeric',
+      'precision'=>10,
+      'scale'=>2,
       'not null' => TRUE,
-      'default' => 0,
+      'default' => 0
     ), 
      'derived_loose' => array(
       'description' => 'Drived Loose qty',
