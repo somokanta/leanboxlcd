@@ -1401,8 +1401,24 @@ function create_van_cld_billing_form_submit($form, &$form_state) {
  * Fill zoho
  */
 function send_email_to_fill_zoho() {
+  // Send mail only for monday to friday
   if (date('N') < 6) {
-    $html = '<h2>Hi Team,</h2>
+    // holiday list: key->month and value->days
+    $holiday_list[1] = array(1, 26);
+    $holiday_list[3] = array(2, 30);
+    $holiday_list[5] = array(1);
+    $holiday_list[6] = array(15);
+    $holiday_list[8] = array(15);
+    $holiday_list[9] = array(3);
+    $holiday_list[10] = array(2);
+    $holiday_list[11] = array(7);
+    $holiday_list[12] = array(25);
+
+
+      if (isset($holiday_list[date('n')]) && in_array(date('j'), $holiday_list[date('n')])) {
+      // do nothing because today is holiday
+      }else{// send mail.
+        $html = '<h2>Hi Team,</h2>
                  <h3>This is a scheduled reminder to fill your Zoho timesheet.</h3> 
                <h4>Please ignore if you have filled it already.</h4>
                ZOHO URL: https://projects.zoho.com/portal/iksulapmt#allprojects
@@ -1410,14 +1426,15 @@ function send_email_to_fill_zoho() {
                
 *** This is an automatically generated email, please do not reply ***';
 
-    $params = array(
-      'context' => array(
-        'subject' => "Bhai Pls Zoho Bhar De!!",
-        'body' => $html,
-      ),);
+        $params = array(
+          'context' => array(
+            'subject' => "Bhai Pls Zoho Bhar De!!",
+            'body' => $html,
+          ),);
 
-    $mail_to = variable_get('zoho_fill', "abhishek.r@iksula.com");
-    $from = "zoho@salarydeduction.com";
-    drupal_mail('mimemail', 'duplicate_data', $mail_to, LANGUAGE_NONE, $params, $from);
+        $mail_to = variable_get('zoho_fill', "abhishek.r@iksula.com");
+        $from = "zoho@salarydeduction.com";
+        drupal_mail('mimemail', 'duplicate_data', $mail_to, LANGUAGE_NONE, $params, $from);
+      }
   }
 }
