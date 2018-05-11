@@ -75,7 +75,7 @@ function delivery_details_form_validate($form, &$form_state) {
       $error_flag = 0;
       foreach ($datas as $key => $val) {
         $bill_no = $val['Bill No.'];
-        $status = $val['Status'];
+        $status = ucwords(strtolower($val['Status']));
         $dispatch_date = $val['Dispatch Date'];
         $delivery_date = $val['Delivery Date (dd-mmm-yyyy)'];
         if (empty($status)) {
@@ -221,7 +221,7 @@ function insert_data_in_delivery_details_table($data) {
     $trip_id = $value['Trip ID'];
     $cashier_name = $value['Cashier Name'];
     $del_boy_name = $value['Delivery Boy Name'];
-    $status = $value['Status'];
+    $status = ucwords(strtolower($value['Status']));
     $del_date = strtotime($value['Delivery Date (dd-mmm-yyyy)']);
     $comments = $value['Comments'];
 
