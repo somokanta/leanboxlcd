@@ -1,0 +1,4 @@
+name = Delivery details tracking
+description = Delivery details tracking.
+package = Custom
+core = 7.x

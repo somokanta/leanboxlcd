@@ -1,0 +1,87 @@
+<?php
+
+/**
+ * Implements hook_menu
+ */
+function delivery_details_tracking_menu() {
+  $items = array();
+
+  $items['delivery-details/import'] = array(
+    'title' => 'Delivery details Upload',
+    'description' => 'Delivery details Upload',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('delivery_details_form'),
+    'access arguments' => array('Delivery details Upload'),
+    'file' => 'delivery_details_upload.inc',
+  );
+  $items['cashier-deliver/autocomplete'] = array(
+    'title' => 'cashier_names_deliver_autocomplete',
+    'page callback' => 'cashier_names_deliver_autocomplete',
+    'access arguments' => array('Delivery details Upload'),
+    'type' => MENU_CALLBACK,
+  );
+  return $items;
+}
+
+/**
+ * Implements hook_permission
+ * @return array
+ */
+function delivery_details_tracking_permission() {
+  return array(
+    'Delivery details Upload' => array(
+      'title' => t('Delivery details Upload'),
+      'description' => t('Run Delivery details Upload')
+    ),
+  );
+}
+
+/**
+ * Implements hook_views_api
+ * @return array
+ */
+function delivery_details_tracking_views_api() {
+  return array(
+    'api' => 3,
+    'path' => drupal_get_path('module', 'delivery_details_tracking') . '/views'
+  );
+}
+
+/**
+ * Implements hook_views_exposed_form_alter
+ * @return array
+ */
+function delivery_details_tracking_form_views_exposed_form_alter(&$form, &$form_state) {
+  if ($form['#id'] == 'views-exposed-form-delivery-details-page') {
+    $select = array('' => '- Any -');
+    $status = array('Delivered' => 'Delivered', 'Full Return' => 'Full Return', 'Pending' => 'Pending');
+    $status = $select + $status;
+    if (isset($form['status'])) {
+      $form['status']['#type'] = 'select';
+      $form['status']['#size'] = null;
+      $form['status']['#options'] = $status;
+    }
+    $form['cashier_name']['#autocomplete_path'] = 'cashier-deliver/autocomplete';
+  }
+}
+
+/**
+ * Implements hook_view_cashier_names_exposed_filter_autocomplete
+ * @return array
+ */
+function cashier_names_deliver_autocomplete($string = '') {
+  global $user;
+  $dis_id = change_feeds_import_get_distributor_id($user->uid);
+  $result = array();
+
+  if ($string) {
+    $query = db_select('delivery_details', 'dt');
+    $query->condition('dt.cashier_name', db_like($string) . '%', 'LIKE');
+    $query->condition('dt.distributor_id', $dis_id, "=");
+    $query->range(0, 15);
+    $query->fields('dt', array('cashier_name'));
+    $result = $query->execute()->fetchAllKeyed(0, 0);
+  }
+
+  drupal_json_output($result);
+}
