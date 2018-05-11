@@ -122,12 +122,13 @@ function get_data_from_trip_id($trip_id) {
 
   $query1 = db_select('node', 'n');
   $query1->condition('n.title', $trip_id, "=");
+  $query1->condition('n.type', 'dispatch_data');
   $query1->condition('n.status', 1);
   $query1->addTag('node_distributor_access');
   $query1->join('field_data_field_trip_executon_date', 'trip_exe', 'trip_exe.entity_id = n.nid');
   $query1->join('field_data_field_hht_id', 'hht', 'hht.entity_id = n.nid');
   $query1->join('node', 'dd', 'dd.nid = hht.field_hht_id_nid');
-  $query1->join('field_data_field_vehicle_no', 've', 've.entity_id = n.nid');
+  $query1->leftjoin('field_data_field_vehicle_no', 've', 've.entity_id = n.nid');
   $query1->join('field_data_field_bill_count', 'bill', 'bill.entity_id = n.nid');
   $query1->join('field_data_field_cashier_name', 'cash', 'cash.entity_id = n.nid');
   $query1->leftjoin('field_data_field_sequence_method', 'sm', 'sm.entity_id = n.nid');
