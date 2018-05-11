@@ -1995,7 +1995,6 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
     }
   }
 }
-
 /**
  * 
  * @param type $title
@@ -2536,6 +2535,9 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
       $query->add_where(0, 'node.uid', $values, 'IN');
     }
   }
+    if ($view->base_table == 'delivery_details') {
+      $query->add_where(0, 'delivery_details.distributor_id', $distributor_id, '=');
+    }
 }
 
 /**

@@ -1,0 +1,74 @@
+<?php
+
+/*
+ * Implement hook_schema.
+ */
+function delivery_details_tracking_schema() {
+
+  $schema['delivery_details'] = array(
+    'description' => 'Delivery Details Tracking',
+    'fields' => array(
+      'id' => array(
+        'description' => 'The primary identifier for a data',
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'dispatch_date' => array(
+        'description' => 'Dispatch Date',
+        'type' => 'int',
+      ),
+      'bill_number' => array(
+        'description' => 'Bill No.',
+        'type' => 'varchar',
+        'length' => 25,
+      ),
+      'van_number' => array(
+        'description' => 'Van No.',
+        'type' => 'varchar',
+        'length' => 25,
+      ),
+      'trip_id' => array(
+        'description' => 'Trip Id',
+        'type' => 'int',
+      ),
+      'cashier_name' => array(
+        'description' => 'Cashier Name',
+        'type' => 'varchar',
+        'length' => 50,
+      ),
+      'delivery_boy_name' => array(
+        'description' => 'Delivery Boy Name',
+        'type' => 'varchar',
+        'length' => 25,
+      ),
+      'status' => array(
+        'description' => 'Status',
+        'type' => 'varchar',
+        'length' => 25,
+      ),
+      'delivery_date' => array(
+        'description' => 'Delivery Date',
+        'type' => 'int',
+      ),
+      'comments' => array(
+        'description' => 'Comments',
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+      'distributor_id' => array(
+        'description' => 'Distributor id',
+        'type' => 'int',
+      ),
+         'created_time' => array(
+        'description' => 'Data created Time',
+        'type' => 'int',
+      ),
+     ),
+    'indexes' => array(
+      'bill_number' => array('bill_number'),
+      'dispatch_date' => array('dispatch_date'),
+    ),
+    'primary key' => array('id'),
+  );
+ return $schema; 
+}
