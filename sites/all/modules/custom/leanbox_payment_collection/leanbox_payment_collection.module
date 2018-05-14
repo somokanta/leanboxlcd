@@ -37,6 +37,14 @@ function leanbox_payment_collection_menu() {
      'type' => MENU_CALLBACK,
      'file' => 'form/leanbox_payment_collection.form.inc',
    );
+   $items['upload-collection-bill/missing'] = array(
+     'title' => 'Declare Payment Collection',
+     'page callback' => 'drupal_get_form',
+     'page arguments' => array('upload_missing_bill_callback'),
+     'access arguments' => array('upload payment collection'),
+     'type' => MENU_CALLBACK,
+     'file' => 'form/leanbox_payment_collection_missing.form.inc',
+   );
    $items['bill-no/list'] = array(
      'title' => 'Get List of logged in distributor bills',
      'page callback' => 'get_list_of_bill_no',
