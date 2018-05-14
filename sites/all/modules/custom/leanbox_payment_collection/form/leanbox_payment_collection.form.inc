@@ -19,6 +19,7 @@ function upload_signed_bill_callback($form, &$form_state) {
 
    $form['#attached']['library'][] = array('system', 'ui.datepicker');
    $form['#attached']['js'][] = drupal_get_path('module', 'leanbox_payment_collection') . "/js/datepicker.js";
+   $form['#attached']['js'][] = drupal_get_path('module', 'leanbox_payment_collection') . "/js/leanbox_payment_collection.js";
 
    // Store distributor id in author in each node
    $dis_id = change_feeds_import_get_distributor_id($user->uid);
@@ -195,6 +196,9 @@ function upload_signed_bill_callback($form, &$form_state) {
            '#prefix' => '<div>',
            '#suffix' => '</div>',
          );
+         $form['bill_details_wrapper']['bill_error'] = array(
+           '#markup' => '<div class = "error-class error"></div>',
+         );
          $form['bill_details_wrapper']['bill_details'] = array(
            '#type' => 'tableselect',
            '#header' => $form_state['bills']['header'],
@@ -225,6 +229,8 @@ function upload_signed_bill_callback($form, &$form_state) {
       $form['cheque_no'] = array('#type' => 'value');
       $form['cheque_date'] = array('#type' => 'value');
       $form['cheque_amt'] = array('#type' => 'value');
+      $form['credit_note_value'] = array('#type' => 'value');
+      $form['unaccounted_value'] = array('#type' => 'value');
       $form['remaining_amt'] = array('#type' => 'value');
       $form['declaration_remark'] = array('#type' => 'value');
       $form['declaration_bill_value'] = array('#type' => 'value');
@@ -286,11 +292,35 @@ function upload_signed_bill_callback_validate($form, &$form_state) {
             }
          }
          else if ($arg1 === 'signed') {
+            $credit_note_value = $form_state['values']['credit_note_value'][$bill_no];
+            $form_state['complete form']['bill_details_wrapper']['bill_details']['#options'][$bill_no]['credit_note_value']['data']['#value'] = $credit_note_value;
+            if ($credit_note_value < 0) {
+               form_set_error('form', t("Credit Note Value can not be Negative for bill $bill_no"));
+            }
+
+            $unaccounted_value = $form_state['values']['unaccounted_value'][$bill_no];
+            $form_state['complete form']['bill_details_wrapper']['bill_details']['#options'][$bill_no]['unaccounted_value']['data']['#value'] = $unaccounted_value;
+            if ($unaccounted_value < 0) {
+               form_set_error('form', t("Unaccounted Value can not be Negative for bill $bill_no"));
+            }
+
             $remaining_amt = $form_state['values']['remaining_amt'][$bill_no];
             $form_state['complete form']['bill_details_wrapper']['bill_details']['#options'][$bill_no]['remaining_amt']['data']['#value'] = $remaining_amt;
+            if ($remaining_amt < 0) {
+               form_set_error('form', t("To be collected Value can not be Negative for bill $bill_no"));
+            }
+            
             $declaration_remark = $form_state['values']['declaration_remark'][$bill_no];
             $form_state['complete form']['bill_details_wrapper']['bill_details']['#options'][$bill_no]['declaration_remark']['data']['#value'] = $declaration_remark;
             $bill_value = $form_state['bills']['rows'][$bill_no]['declaration_bill_value']['data']['#value'];
+
+            if ($remaining_amt > $bill_value) {
+               form_set_error('form', t("To be collected amount for bill $bill_no can not be greater than Bill value"));
+            }
+            $sum_of_note_and_account = $credit_note_value + $unaccounted_value;
+            if ($sum_of_note_and_account >= $bill_value) {
+               form_set_error('form', t("Sum of Credit Note Value and Unaccounted Value cannot be greater than or equal to Bill Value for bill $bill_no"));
+            }
             if (empty($remaining_amt) || !is_numeric($remaining_amt)) {
                form_set_error('form', t("To be collected amount for bill $bill_no is required and should be numeric"));
             }
@@ -324,6 +354,7 @@ function upload_signed_bill_callback_submit($form, &$form_state) {
          $node->comment = 0; // 0 = comments disabled, 1 = read only, 2 = read/write
          $node->field_declaration_date[LANGUAGE_NONE][0]['value'] = date('Y-m-d');
          $bill_type = 'Signed';
+
          $node->field_remaining_amt_collection[LANGUAGE_NONE][0]['value'] = $form_state['values']['remaining_amt'][$bill_no];
          $node->field_declaration_remarks[LANGUAGE_NONE][0]['value'] = $form_state['values']['declaration_remark'][$bill_no];
 
@@ -334,10 +365,14 @@ function upload_signed_bill_callback_submit($form, &$form_state) {
             $node->field_remaining_amt_collection[LANGUAGE_NONE][0]['value'] = $form_state['values']['cheque_amt'][$bill_no]; // should be same as cheque amt
             $bill_type = 'Bounced';
          }
+         else {
+            $node->field_credit_note_value[LANGUAGE_NONE][0]['value'] = $form_state['values']['credit_note_value'][$bill_no];
+            $node->field_unaccounted_value[LANGUAGE_NONE][0]['value'] = $form_state['values']['unaccounted_value'][$bill_no];
+         }
          $node->field_flag[LANGUAGE_NONE][0]['value'] = $arg1;
          $node->field_sales_bill_no_ref[LANGUAGE_NONE][0]['nid'] = $form_state['values']['title_and_nid_combo'][$bill_no];
          node_save($node);
-         
+
          if ($arg1 === 'signed') {
             // get nid from bill_no
             $nid = check_node_title_exists($bill_no, 'sales_register_data');
@@ -345,22 +380,22 @@ function upload_signed_bill_callback_submit($form, &$form_state) {
             $bill_value = $nodedata->field_bill_value[LANGUAGE_NONE][0]['value'];
             $original_bill_value = $nodedata->field_original_bill_value[LANGUAGE_NONE][0]['value'];
             $to_be_collected_value = $form_state['values']['remaining_amt'][$bill_no];
-            
-            if(empty($original_bill_value)) {
-              // update the call type in sales register data
-              if ($bill_value != $to_be_collected_value) {
-                 $nodedata->field_call_type[LANGUAGE_NONE][0]['value'] = 'sd';
-                 node_save($nodedata);
-              }
+
+            if (empty($original_bill_value)) {
+               // update the call type in sales register data
+               if ($bill_value != $to_be_collected_value) {
+                  $nodedata->field_call_type[LANGUAGE_NONE][0]['value'] = 'sd';
+                  node_save($nodedata);
+               }
             }
             else {
-              if ($original_bill_value != $to_be_collected_value) {
-                 $nodedata->field_call_type[LANGUAGE_NONE][0]['value'] = 'sd';
-                 node_save($nodedata);
-              }
+               if ($original_bill_value != $to_be_collected_value) {
+                  $nodedata->field_call_type[LANGUAGE_NONE][0]['value'] = 'sd';
+                  node_save($nodedata);
+               }
             }
          }
-        
+
          drupal_set_message(t("$bill_type Bill Declared Successfully."));
       }
 
@@ -485,6 +520,8 @@ function get_bill_details_using_bill_no_callback($bill_no, $dis_id, $arg1) {
            'Salesman' => 'Salesman',
            'Salesmancode' => 'Salesman code',
            'Billvalue' => 'Bill value',
+           'credit_note_value' => 'Credit Note value',
+           'unaccounted_value' => 'Unaccounted Value',
            'remaining_amt' => 'To Be Collected Value',
            'declaration_remark' => 'Declaration Remark'
          );
@@ -519,13 +556,35 @@ function get_bill_details_using_bill_no_callback($bill_no, $dis_id, $arg1) {
       }
       if ($arg1 === 'signed') {
          foreach ($rows as $key => $value) {
+            foreach ($value as $key1 => $val1) {
+               $rows[$key][$key1] = array('data' => $val1, 'data-value' => $val1, 'class' => array("$key1-val"));
+            }
+            $rows[$key]['credit_note_value']['data'] = array(
+              '#type' => 'textfield',
+              '#title' => t('Credit Note value'),
+              '#title_display' => 'invisible',
+              '#name' => "credit_note_value[$key]",
+              '#attributes' => array('class' => array('credit_note_value')),
+              '#required' => TRUE,
+              '#value' => 0,
+            );
+            $rows[$key]['unaccounted_value']['data'] = array(
+              '#type' => 'textfield',
+              '#title' => t('Unaccounted Value'),
+              '#title_display' => 'invisible',
+              '#name' => "unaccounted_value[$key]",
+              '#attributes' => array('class' => array('unaccounted_value')),
+              '#value' => 0,
+            );
             $rows[$key]['remaining_amt']['data'] = array(
               '#type' => 'textfield',
               '#title' => t('To Be Collected Value'),
               '#title_display' => 'invisible',
               '#name' => "remaining_amt[$key]",
+              '#attributes' => array('class' => array('remaining_amt'), 'readonly' => 'readonly'),
               '#required' => TRUE,
               '#value' => $value['Billvalue'],
+                //'#attributes'=> array('readonly' => 'readonly'),
             );
             $rows[$key]['declaration_remark']['data'] = array(
               '#type' => 'textfield',
