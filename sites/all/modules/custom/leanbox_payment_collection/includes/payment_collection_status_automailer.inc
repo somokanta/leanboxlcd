@@ -98,16 +98,22 @@ function get_email_pending_for_collection($distributor_id) {
 
   $signed_counter = 1;
   $bounced_counter = 1;
+  $missing_counter = 1;
   $no_due_signed_counter = 1;
   $no_due_bounced_counter = 1;
+  $no_due_missing_counter = 1;
   $decl_signed_counter = 1;
   $decl_bounced_counter = 1;
+  $decl_missing_counter = 1;
   $fivedays_decl_signed_counter = 1;
   $fivedays_decl_bounced_counter = 1;
+  $fivedays_decl_missing_counter = 1;
   $twelvedays_decl_signed_counter = 1;
   $twelvedays_decl_bounced_counter = 1;
+  $twelvedays_decl_missing_counter = 1;
   $thirtyonedays_decl_signed_counter = 1;
   $thirtyonedays_decl_bounced_counter = 1;
+  $thirtyonedays_decl_missing_counter = 1;
   $rows = array();
   $row[] = array('Type', 'Count', 'Value', 'Count', 'Value', 'Count', 'Value', 'Count', 'Value', 'Count', 'Value', 'Count', 'Value');
   $decl_date = strtotime(date('Y-m-d'));
@@ -176,7 +182,7 @@ function get_email_pending_for_collection($distributor_id) {
         $row['signed']['31days_decl_value'] += 0;
       }
     }
-    else {
+    elseif ($data['field_flag_value'] == 'bounced') {
       $row['bounced']['type'] = 'Bounced';
       $row['bounced']['count'] = $bounced_counter++;
       $row['bounced']['value'] += $data['field_remaining_amt_collection_value'] - ($data['field_previous_cash_amt_value'] + $data['field_previous_cheque_amt_value']);
@@ -226,20 +232,71 @@ function get_email_pending_for_collection($distributor_id) {
         $row['bounced']['31days_decl_value'] += 0;
       }
     }
+    
+    elseif ($data['field_flag_value'] == 'missing') {
+      $row['missing']['type'] = 'Missing';
+      $row['missing']['count'] = $missing_counter++;
+      $row['missing']['value'] += $data['field_remaining_amt_collection_value'] - ($data['field_previous_cash_amt_value'] + $data['field_previous_cheque_amt_value']);
+      // Collection date is greater than today's date will be no-due 
+      if ($collection_date >= $decl_date) {
+        $row['missing']['no_due_count'] = $no_due_missing_counter++;
+        $row['missing']['no_due_value'] += $data['field_remaining_amt_collection_value'] - ($data['field_previous_cash_amt_value'] + $data['field_previous_cheque_amt_value']);
+      }
+      else {
+        $row['missing']['no_due_count'] += 0;
+        $row['missing']['no_due_value'] += 0;
+      }
+      // Collection date is between last 1-10 Days
+      if ($collection_date < $decl_date && $collection_date >= $ten_days_before) {
+        $row['missing']['decl_count'] = $decl_missing_counter++;
+        $row['missing']['decl_value'] += $data['field_remaining_amt_collection_value'] - ($data['field_previous_cash_amt_value'] + $data['field_previous_cheque_amt_value']);
+      }
+      else {
+        $row['missing']['decl_count'] += 0;
+        $row['missing']['decl_value'] += 0;
+      }
+      // Collection date is between last 11-15 Days
+      if ($collection_date < $ten_days_before && $collection_date >= $fifteen_days_before) {
+        $row['missing']['5days_decl_count'] = $fivedays_decl_missing_counter++;
+        $row['missing']['5days_decl_value'] += $data['field_remaining_amt_collection_value'] - ($data['field_previous_cash_amt_value'] + $data['field_previous_cheque_amt_value']);
+      }
+      else {
+        $row['missing']['5days_decl_count'] += 0;
+        $row['missing']['5days_decl_value'] += 0;
+      }
+      // Collection date is between last 16-30 Days
+      if ($collection_date < $fifteen_days_before && $collection_date >= $thirty_days_before) {
+        $row['missing']['12days_decl_count'] = $twelvedays_decl_missing_counter++;
+        $row['missing']['12days_decl_value'] += $data['field_remaining_amt_collection_value'] - ($data['field_previous_cash_amt_value'] + $data['field_previous_cheque_amt_value']);
+      }
+      else {
+        $row['missing']['12days_decl_count'] += 0;
+        $row['missing']['12days_decl_value'] += 0;
+      }
+      // Collection date is below last 30 Days
+      if ($collection_date < $thirty_days_before) {
+        $row['missing']['31days_decl_count'] = $thirtyonedays_decl_missing_counter++;
+        $row['missing']['31days_decl_value'] += $data['field_remaining_amt_collection_value'] - ($data['field_previous_cash_amt_value'] + $data['field_previous_cheque_amt_value']);
+      }
+      else {
+        $row['missing']['31days_decl_count'] += 0;
+        $row['missing']['31days_decl_value'] += 0;
+      }
+    }
   }
 
-  $total_till_date_count = $row['signed']['count'] + $row['bounced']['count'];
-  $total_till_date_value = $row['signed']['value'] + $row['bounced']['value'];
-  $total_no_due_count = $row['signed']['no_due_count'] + $row['bounced']['no_due_count'];
-  $total_no_due_value = $row['signed']['no_due_value'] + $row['bounced']['no_due_value'];
-  $total_decl_date_count = $row['signed']['decl_count'] + $row['bounced']['decl_count'];
-  $total_decl_date_value = $row['signed']['decl_value'] + $row['bounced']['decl_value'];
-  $total_5days_decl_count = $row['signed']['5days_decl_count'] + $row['bounced']['5days_decl_count'];
-  $total_5days_decl_value = $row['signed']['5days_decl_value'] + $row['bounced']['5days_decl_value'];
-  $total_12days_decl_count = $row['signed']['12days_decl_count'] + $row['bounced']['12days_decl_count'];
-  $total_12days_decl_value = $row['signed']['12days_decl_value'] + $row['bounced']['12days_decl_value'];
-  $total_31days_decl_count = $row['signed']['31days_decl_count'] + $row['bounced']['31days_decl_count'];
-  $total_31days_decl_value = $row['signed']['31days_decl_value'] + $row['bounced']['31days_decl_value'];
+  $total_till_date_count = $row['signed']['count'] + $row['bounced']['count'] + $row['missing']['count'];
+  $total_till_date_value = $row['signed']['value'] + $row['bounced']['value'] + $row['missing']['value'];
+  $total_no_due_count = $row['signed']['no_due_count'] + $row['bounced']['no_due_count'] + $row['missing']['no_due_count'];
+  $total_no_due_value = $row['signed']['no_due_value'] + $row['bounced']['no_due_value'] + $row['missing']['no_due_value'];
+  $total_decl_date_count = $row['signed']['decl_count'] + $row['bounced']['decl_count'] + $row['missing']['decl_count'];
+  $total_decl_date_value = $row['signed']['decl_value'] + $row['bounced']['decl_value'] + $row['missing']['decl_value'];
+  $total_5days_decl_count = $row['signed']['5days_decl_count'] + $row['bounced']['5days_decl_count'] + $row['missing']['5days_decl_count'];
+  $total_5days_decl_value = $row['signed']['5days_decl_value'] + $row['bounced']['5days_decl_value'] + $row['missing']['5days_decl_value'];
+  $total_12days_decl_count = $row['signed']['12days_decl_count'] + $row['bounced']['12days_decl_count'] + $row['missing']['12days_decl_count'];
+  $total_12days_decl_value = $row['signed']['12days_decl_value'] + $row['bounced']['12days_decl_value'] + $row['missing']['12days_decl_value'];
+  $total_31days_decl_count = $row['signed']['31days_decl_count'] + $row['bounced']['31days_decl_count'] + $row['missing']['31days_decl_count'];
+  $total_31days_decl_value = $row['signed']['31days_decl_value'] + $row['bounced']['31days_decl_value'] + $row['missing']['31days_decl_value'];
   $row[] = array('Total', $total_till_date_count, $total_till_date_value, $total_no_due_count, $total_no_due_value, $total_decl_date_count, $total_decl_date_value, $total_5days_decl_count, $total_5days_decl_value, $total_12days_decl_count, $total_12days_decl_value, $total_31days_decl_count, $total_31days_decl_value);
 
   $header = array('', array('data' => 'Till Date', 'colspan' => 2), array('data' => 'No Due', 'colspan' => 2), array('data' => 'Due 1-10 Days from Credit Days', 'colspan' => 2), array('data' => 'Due 11-15 Days from Credit Days', 'colspan' => 2), array('data' => 'Due 16-30 Days from Credit Days', 'colspan' => 2), array('data' => 'Due >30 Days from Credit Days', 'colspan' => 2));
@@ -495,16 +552,22 @@ function get_email_pending_for_assignment($distributor_id) {
 
   $signed_counter = 1;
   $bounced_counter = 1;
+  $missing_counter = 1;
   $no_due_signed_counter = 1;
   $no_due_bounced_counter = 1;
+  $no_due_missing_counter = 1;
   $decl_signed_counter = 1;
   $decl_bounced_counter = 1;
+  $decl_missing_counter = 1;
   $fivedays_decl_signed_counter = 1;
   $fivedays_decl_bounced_counter = 1;
+  $fivedays_decl_missing_counter = 1;
   $twelvedays_decl_signed_counter = 1;
   $twelvedays_decl_bounced_counter = 1;
+  $twelvedays_decl_missing_counter = 1;
   $thirtyonedays_decl_signed_counter = 1;
   $thirtyonedays_decl_bounced_counter = 1;
+  $thirtyonedays_decl_missing_counter = 1;
   $rows = array();
   $row[] = array('Type', 'Count', 'Value', 'Count', 'Value', 'Count', 'Value', 'Count', 'Value', 'Count', 'Value', 'Count', 'Value');
   $decl_date = strtotime(date('Y-m-d'));
@@ -572,7 +635,7 @@ function get_email_pending_for_assignment($distributor_id) {
         $row['signed']['31days_decl_value'] += 0;
       }
     }
-    else {
+    elseif ($data['field_flag_value'] == 'bounced') {
       $row['bounced']['type'] = 'Bounced';
       $row['bounced']['count'] = $bounced_counter++;
       $row['bounced']['value'] += $data['field_remaining_amt_collection_value'] - ($data['field_previous_cash_amt_value'] + $data['field_previous_cheque_amt_value']);
@@ -622,20 +685,71 @@ function get_email_pending_for_assignment($distributor_id) {
         $row['bounced']['31days_decl_value'] += 0;
       }
     }
+    
+    elseif ($data['field_flag_value'] == 'missing') {
+      $row['missing']['type'] = 'Missing';
+      $row['missing']['count'] = $missing_counter++;
+      $row['missing']['value'] += $data['field_remaining_amt_collection_value'] - ($data['field_previous_cash_amt_value'] + $data['field_previous_cheque_amt_value']);
+      // Collection date is greater than today's date will be no-due 
+      if ($collection_date >= $decl_date) {
+        $row['missing']['no_due_count'] = $no_due_missing_counter++;
+        $row['missing']['no_due_value'] += $data['field_remaining_amt_collection_value'] - ($data['field_previous_cash_amt_value'] + $data['field_previous_cheque_amt_value']);
+      }
+      else {
+        $row['missing']['no_due_count'] += 0;
+        $row['missing']['no_due_value'] += 0;
+      }
+      // Collection date is between last 1-10 Days
+      if ($collection_date < $decl_date && $collection_date >= $ten_days_before) {
+        $row['missing']['decl_count'] = $decl_missing_counter++;
+        $row['missing']['decl_value'] += $data['field_remaining_amt_collection_value'] - ($data['field_previous_cash_amt_value'] + $data['field_previous_cheque_amt_value']);
+      }
+      else {
+        $row['missing']['decl_count'] += 0;
+        $row['missing']['decl_value'] += 0;
+      }
+      // Collection date is between last 11-15 Days
+      if ($collection_date < $ten_days_before && $collection_date >= $fifteen_days_before) {
+        $row['missing']['5days_decl_count'] = $fivedays_decl_missing_counter++;
+        $row['missing']['5days_decl_value'] += $data['field_remaining_amt_collection_value'] - ($data['field_previous_cash_amt_value'] + $data['field_previous_cheque_amt_value']);
+      }
+      else {
+        $row['missing']['5days_decl_count'] += 0;
+        $row['missing']['5days_decl_value'] += 0;
+      }
+      // Collection date is between last 16-30 Days
+      if ($collection_date < $fifteen_days_before && $collection_date >= $thirty_days_before) {
+        $row['missing']['12days_decl_count'] = $twelvedays_decl_missing_counter++;
+        $row['missing']['12days_decl_value'] += $data['field_remaining_amt_collection_value'] - ($data['field_previous_cash_amt_value'] + $data['field_previous_cheque_amt_value']);
+      }
+      else {
+        $row['missing']['12days_decl_count'] += 0;
+        $row['missing']['12days_decl_value'] += 0;
+      }
+      // Collection date is below last 30 Days
+      if ($collection_date < $thirty_days_before) {
+        $row['missing']['31days_decl_count'] = $thirtyonedays_decl_missing_counter++;
+        $row['missing']['31days_decl_value'] += $data['field_remaining_amt_collection_value'] - ($data['field_previous_cash_amt_value'] + $data['field_previous_cheque_amt_value']);
+      }
+      else {
+        $row['missing']['31days_decl_count'] += 0;
+        $row['missing']['31days_decl_value'] += 0;
+      }
+    }
   }
 
-  $total_till_date_count = $row['signed']['count'] + $row['bounced']['count'];
-  $total_till_date_value = $row['signed']['value'] + $row['bounced']['value'];
-  $total_no_due_count = $row['signed']['no_due_count'] + $row['bounced']['no_due_count'];
-  $total_no_due_value = $row['signed']['no_due_value'] + $row['bounced']['no_due_value'];
-  $total_decl_date_count = $row['signed']['decl_count'] + $row['bounced']['decl_count'];
-  $total_decl_date_value = $row['signed']['decl_value'] + $row['bounced']['decl_value'];
-  $total_5days_decl_count = $row['signed']['5days_decl_count'] + $row['bounced']['5days_decl_count'];
-  $total_5days_decl_value = $row['signed']['5days_decl_value'] + $row['bounced']['5days_decl_value'];
-  $total_12days_decl_count = $row['signed']['12days_decl_count'] + $row['bounced']['12days_decl_count'];
-  $total_12days_decl_value = $row['signed']['12days_decl_value'] + $row['bounced']['12days_decl_value'];
-  $total_31days_decl_count = $row['signed']['31days_decl_count'] + $row['bounced']['31days_decl_count'];
-  $total_31days_decl_value = $row['signed']['31days_decl_value'] + $row['bounced']['31days_decl_value'];
+  $total_till_date_count = $row['signed']['count'] + $row['bounced']['count'] + $row['missing']['count'];
+  $total_till_date_value = $row['signed']['value'] + $row['bounced']['value'] + $row['missing']['value'];
+  $total_no_due_count = $row['signed']['no_due_count'] + $row['bounced']['no_due_count'] + $row['missing']['no_due_count'];
+  $total_no_due_value = $row['signed']['no_due_value'] + $row['bounced']['no_due_value'] + $row['missing']['no_due_value'];
+  $total_decl_date_count = $row['signed']['decl_count'] + $row['bounced']['decl_count'] + $row['missing']['decl_count'];
+  $total_decl_date_value = $row['signed']['decl_value'] + $row['bounced']['decl_value'] + $row['missing']['decl_value'];
+  $total_5days_decl_count = $row['signed']['5days_decl_count'] + $row['bounced']['5days_decl_count'] + $row['missing']['5days_decl_count'];
+  $total_5days_decl_value = $row['signed']['5days_decl_value'] + $row['bounced']['5days_decl_value'] + $row['missing']['5days_decl_value'];
+  $total_12days_decl_count = $row['signed']['12days_decl_count'] + $row['bounced']['12days_decl_count'] + $row['missing']['12days_decl_count'];
+  $total_12days_decl_value = $row['signed']['12days_decl_value'] + $row['bounced']['12days_decl_value'] + $row['missing']['12days_decl_value'];
+  $total_31days_decl_count = $row['signed']['31days_decl_count'] + $row['bounced']['31days_decl_count'] + $row['missing']['31days_decl_count'];
+  $total_31days_decl_value = $row['signed']['31days_decl_value'] + $row['bounced']['31days_decl_value'] + $row['missing']['31days_decl_value'];
   $row[] = array('Total', $total_till_date_count, $total_till_date_value, $total_no_due_count, $total_no_due_value, $total_decl_date_count, $total_decl_date_value, $total_5days_decl_count, $total_5days_decl_value, $total_12days_decl_count, $total_12days_decl_value, $total_31days_decl_count, $total_31days_decl_value);
 
   $header = array('', array('data' => 'Till Date', 'colspan' => 2), array('data' => 'No Due', 'colspan' => 2), array('data' => 'Due 1-10 Days from Credit Days', 'colspan' => 2), array('data' => 'Due 11-15 Days from Credit Days', 'colspan' => 2), array('data' => 'Due 16-30 Days from Credit Days', 'colspan' => 2), array('data' => 'Due >30 Days from Credit Days', 'colspan' => 2));
@@ -691,8 +805,10 @@ function get_email_pending_for_upload($distributor_id) {
 
   $signed_counter = 1;
   $bounced_counter = 1;
+  $missing_counter = 1;
   $decl_signed_counter = 1;
   $decl_bounced_counter = 1;
+  $decl_missing_counter = 1;
   $rows = array();
   $row[] = array('Type', 'Count', 'Value', 'Count', 'Value');
   $decl_date = strtotime('-2 day', strtotime(date('Y-m-d')));
@@ -711,7 +827,7 @@ function get_email_pending_for_upload($distributor_id) {
         $row['signed']['decl_value'] += 0;
       }
     }
-    else {
+    elseif ($data['field_flag_value'] == 'bounced') {
       $row['bounced']['type'] = 'Bounced';
       $row['bounced']['count'] = $bounced_counter++;
       $row['bounced']['value'] += $data['field_remaining_amt_collection_value'] - ($data['field_previous_cash_amt_value'] + $data['field_previous_cheque_amt_value']);
@@ -724,12 +840,25 @@ function get_email_pending_for_upload($distributor_id) {
         $row['bounced']['decl_value'] += 0;
       }
     }
+    elseif ($data['field_flag_value'] == 'missing') {
+      $row['missing']['type'] = 'Missing';
+      $row['missing']['count'] = $missing_counter++;
+      $row['missing']['value'] += $data['field_remaining_amt_collection_value'] - ($data['field_previous_cash_amt_value'] + $data['field_previous_cheque_amt_value']);
+      if (strtotime($data['field_declaration_date_value']) <= $decl_date) {
+        $row['missing']['decl_count'] = $decl_missing_counter++;
+        $row['missing']['decl_value'] += $data['field_remaining_amt_collection_value'] - ($data['field_previous_cash_amt_value'] + $data['field_previous_cheque_amt_value']);
+      }
+      else {
+        $row['missing']['decl_count'] += 0;
+        $row['missing']['decl_value'] += 0;
+      }
+    }
   }
 
-  $total_till_date_count = $row['signed']['count'] + $row['bounced']['count'];
-  $total_till_date_value = $row['signed']['value'] + $row['bounced']['value'];
-  $total_decl_date_count = $row['signed']['decl_count'] + $row['bounced']['decl_count'];
-  $total_decl_date_value = $row['signed']['decl_value'] + $row['bounced']['decl_value'];
+  $total_till_date_count = $row['signed']['count'] + $row['bounced']['count'] + $row['missing']['count'];
+  $total_till_date_value = $row['signed']['value'] + $row['bounced']['value'] + $row['missing']['value'];
+  $total_decl_date_count = $row['signed']['decl_count'] + $row['bounced']['decl_count'] + $row['missing']['decl_count'];
+  $total_decl_date_value = $row['signed']['decl_value'] + $row['bounced']['decl_value'] + $row['missing']['decl_value'];
   $row[] = array('Total', $total_till_date_count, $total_till_date_value, $total_decl_date_count, $total_decl_date_value);
 
   $header = array('', array('data' => 'Till Date', 'colspan' => 2), array('data' => '>2Days from Declaration Date', 'colspan' => 2));
@@ -794,17 +923,24 @@ function get_email_pending_for_yesterday_assignment($distributor_id) {
   foreach ($res as $data) {
     $person_signed = $data['field_assigned_person_value'] . '-' . 'signed';
     $person_bounced = $data['field_assigned_person_value'] . '-' . 'bounced';
+    $person_missing = $data['field_assigned_person_value'] . '-' . 'missing';
     if ($data['field_flag_value'] == 'signed') {
       $row[$person_signed]['type'] = 'Signed';
       $row[$person_signed]['assigned_to'] = $data['field_assigned_person_value'];
       $row[$person_signed]['bill_count'] = $data['bill_count'];
       $row[$person_signed]['bill_value'] = $data['bill_value'] - ($data['field_previous_cash_amt_value'] + $data['field_previous_cheque_amt_value']);
     }
-    else {
+    elseif ($data['field_flag_value'] == 'bounced') {
       $row[$person_bounced]['type'] = 'Bounced';
       $row[$person_bounced]['assigned_to'] = $data['field_assigned_person_value'];
       $row[$person_bounced]['bill_count'] = $data['bill_count'];
       $row[$person_bounced]['bill_value'] = $data['bill_value'] - ($data['field_previous_cash_amt_value'] + $data['field_previous_cheque_amt_value']);
+    }
+    elseif ($data['field_flag_value'] == 'missing') {
+      $row[$person_missing]['type'] = 'missing';
+      $row[$person_missing]['assigned_to'] = $data['field_assigned_person_value'];
+      $row[$person_missing]['bill_count'] = $data['bill_count'];
+      $row[$person_missing]['bill_value'] = $data['bill_value'] - ($data['field_previous_cash_amt_value'] + $data['field_previous_cheque_amt_value']);
     }
   }
   // MTD Query For Assignment
@@ -842,17 +978,24 @@ function get_email_pending_for_yesterday_assignment($distributor_id) {
   foreach ($res as $data) {
     $person_signed = $data['field_assigned_person_value'] . '-' . 'signed';
     $person_bounced = $data['field_assigned_person_value'] . '-' . 'bounced';
+    $person_missing = $data['field_assigned_person_value'] . '-' . 'missing';
     if ($data['field_flag_value'] == 'signed') {
       $row[$person_signed]['type'] = 'Signed';
       $row[$person_signed]['assigned_to'] = $data['field_assigned_person_value'];
       $row[$person_signed]['mtd_bill_count'] = $data['bill_count'];
       $row[$person_signed]['mtd_bill_value'] = $data['bill_value'];
     }
-    else {
+    elseif ($data['field_flag_value'] == 'bounced') {
       $row[$person_bounced]['type'] = 'Bounced';
       $row[$person_bounced]['assigned_to'] = $data['field_assigned_person_value'];
       $row[$person_bounced]['mtd_bill_count'] = $data['bill_count'];
       $row[$person_bounced]['mtd_bill_value'] = $data['bill_value'];
+    }
+    elseif ($data['field_flag_value'] == 'missing') {
+      $row[$person_missing]['type'] = 'missing';
+      $row[$person_missing]['assigned_to'] = $data['field_assigned_person_value'];
+      $row[$person_missing]['mtd_bill_count'] = $data['bill_count'];
+      $row[$person_missing]['mtd_bill_value'] = $data['bill_value'];
     }
   }
 
@@ -894,17 +1037,24 @@ function get_email_pending_for_yesterday_assignment($distributor_id) {
   foreach ($res as $data) {
     $person_signed = $data['field_assigned_person_value'] . '-' . 'signed';
     $person_bounced = $data['field_assigned_person_value'] . '-' . 'bounced';
+    $person_missing = $data['field_assigned_person_value'] . '-' . 'missing';
     if ($data['field_flag_value'] == 'signed') {
       $row[$person_signed]['type'] = 'Signed';
       $row[$person_signed]['assigned_to'] = $data['field_assigned_person_value'];
       $row[$person_signed]['bill_counts'] = $data['bill_count'];
       $row[$person_signed]['bill_values'] = $data['bill_value'] - ($data['field_previous_cash_amt_value'] + $data['field_previous_cheque_amt_value']);
     }
-    else {
+    elseif ($data['field_flag_value'] == 'bounced') {
       $row[$person_bounced]['type'] = 'Bounced';
       $row[$person_bounced]['assigned_to'] = $data['field_assigned_person_value'];
       $row[$person_bounced]['bill_counts'] = $data['bill_count'];
       $row[$person_bounced]['bill_values'] = $data['bill_value'] - ($data['field_previous_cash_amt_value'] + $data['field_previous_cheque_amt_value']);
+    }
+    elseif ($data['field_flag_value'] == 'missing') {
+      $row[$person_missing]['type'] = 'Missing';
+      $row[$person_missing]['assigned_to'] = $data['field_assigned_person_value'];
+      $row[$person_missing]['bill_counts'] = $data['bill_count'];
+      $row[$person_missing]['bill_values'] = $data['bill_value'] - ($data['field_previous_cash_amt_value'] + $data['field_previous_cheque_amt_value']);
     }
   }
 
@@ -949,17 +1099,24 @@ function get_email_pending_for_yesterday_assignment($distributor_id) {
   foreach ($res as $data) {
     $person_signed = $data['field_assigned_person_value'] . '-' . 'signed';
     $person_bounced = $data['field_assigned_person_value'] . '-' . 'bounced';
+    $person_missing = $data['field_assigned_person_value'] . '-' . 'missing';
     if ($data['field_flag_value'] == 'signed') {
       $row[$person_signed]['type'] = 'Signed';
       $row[$person_signed]['assigned_to'] = $data['field_assigned_person_value'];
       $row[$person_signed]['mtd_bill_counts'] = $data['bill_count'];
       $row[$person_signed]['mtd_bill_values'] = $data['bill_value'];
     }
-    else {
+    elseif ($data['field_flag_value'] == 'bounced') {
       $row[$person_bounced]['type'] = 'Bounced';
       $row[$person_bounced]['assigned_to'] = $data['field_assigned_person_value'];
       $row[$person_bounced]['mtd_bill_counts'] = $data['bill_count'];
       $row[$person_bounced]['mtd_bill_values'] = $data['bill_value'];
+    }
+    elseif ($data['field_flag_value'] == 'missing') {
+      $row[$person_missing]['type'] = 'Missing';
+      $row[$person_missing]['assigned_to'] = $data['field_assigned_person_value'];
+      $row[$person_missing]['mtd_bill_counts'] = $data['bill_count'];
+      $row[$person_missing]['mtd_bill_values'] = $data['bill_value'];
     }
   }
 
