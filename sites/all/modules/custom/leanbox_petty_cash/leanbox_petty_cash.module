@@ -218,7 +218,17 @@ function _get_voucher_details_distributor_wise($distributor_id, $voucher) {
       $query->condition('pc.distributor_id', $distributor_id);
       $query->condition('pc.voucher_no', $voucher);
       $query->fields('pc', array('id', 'voucher_date', 'head', 'subhead', 'amount', 'person_name', 'bill_available', 'bill_no', 'type', 'description'));
+      $query->leftjoin('file_managed', 'fm', 'fm.fid = pc.file');
+      $query->leftjoin('file_managed', 'fm1', 'fm1.fid = pc.bill_file');
+      $query->fields('fm', array('filename'));
+      $query->fields('fm1', array('filename'));
       $rows = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+      if (isset($rows[0]['filename'])) {
+         $rows[0]['filename'] = l($rows[0]['filename'],'sites/default/files/'.$rows[0]['filename'], array('attributes' => array('target' => '_blank')));
+      }
+      if (isset($rows[0]['fm1_filename'])) {
+         $rows[0]['fm1_filename'] = l($rows[0]['fm1_filename'],'sites/default/files/'.$rows[0]['fm1_filename'], array('attributes' => array('target' => '_blank')));
+      }
 // $rows[] = $res;
       $header = array(
         'Voucher date',
@@ -230,6 +240,8 @@ function _get_voucher_details_distributor_wise($distributor_id, $voucher) {
         'Bill no',
         'Type',
         'Description',
+        'Voucher Copy',
+        'Bill Copy',
       );
       if (isset($rows[0]['voucher_date'])) {
          $rows[0]['voucher_date'] = date('d-M-y', $rows[0]['voucher_date']);
@@ -385,4 +397,80 @@ function leanbox_petty_cash_preprocess_leanbox_petty_cash_pdf(&$variables) {
          $variables['footer3'] = t('');
       }
    }
+}
+
+function leanbox_petty_cash_form_views_exposed_form_alter(&$form, &$form_state) {
+  // unset all fields except empty and not empty for voucher copy
+  if ($form['#id'] == 'views-exposed-form-petty-cash-transaction-page') {
+    if (isset($form['filename_op'])) {
+      $select = array('' => '- Any -');
+      unset($form['filename_op']['#options']);
+      $form['filename_op']['#options'] = $select;
+      $form['filename_op']['#default_value'] = '';
+      $form['filename_op']['#options']['empty'] = 'Empty';
+      $form['filename_op']['#options']['not empty'] = 'Not Empty';
+    }
+    // unset all fields except empty and not empty for bill copy
+    if (isset($form['filename_1_op'])) {
+      unset($form['filename_1_op']['#options']);
+      $form['filename_1_op']['#options'] = $select;
+      $form['filename_1_op']['#default_value'] = '';
+      $form['filename_1_op']['#options']['empty'] = 'Empty';
+      $form['filename_1_op']['#options']['not empty'] = 'Not Empty';
+    }
+    //dropdowns
+    $type = get_pettycash_type();
+    $type = $select + $type;
+    if (isset($form['type'])) {
+      $form['type']['#type'] = 'select';
+      $form['type']['#size'] = null;
+      $form['type']['#options'] = $type;
+    } 
+    $head = get_pettycash_head();
+    $head = $select + $head;
+    if (isset($form['head'])) {
+      $form['head']['#type'] = 'select';
+      $form['head']['#size'] = null;
+      $form['head']['#options'] = $head;
+    }
+    $subhead = get_pettycash_subhead();
+    $subhead = $select + $subhead;
+    if (isset($form['subhead'])) {
+      $form['subhead']['#type'] = 'select';
+      $form['subhead']['#size'] = null;
+      $form['subhead']['#options'] = $subhead;
+    }
+  }
+}
+
+function get_pettycash_type() {
+  $user_id = $GLOBALS['user']->uid;
+  $distributor_id = change_feeds_import_get_distributor_id($user_id);
+  $query = db_select('field_data_field_petty_cash_type', 'ct');
+  $query->join('field_data_field_petty_cash_distributor', 'd', 'd.entity_id = ct.entity_id');
+  $query->condition('d.field_petty_cash_distributor_uid', $distributor_id);
+  $query->fields('ct', array('field_petty_cash_type_value'));
+  $res = $query->execute()->fetchAllKeyed(0,0);
+  return $res;
+}
+
+function get_pettycash_head() {
+  $user_id = $GLOBALS['user']->uid;
+  $distributor_id = change_feeds_import_get_distributor_id($user_id);
+  $query = db_select('field_data_field_petty_cash_head', 'ch');
+  $query->join('field_data_field_petty_cash_distributor', 'd', 'd.entity_id = ch.entity_id');
+  $query->condition('d.field_petty_cash_distributor_uid', $distributor_id);
+  $query->fields('ch', array('field_petty_cash_head_value'));
+  $res = $query->execute()->fetchAllKeyed(0,0);
+  return $res;
+}
+function get_pettycash_subhead() {
+  $user_id = $GLOBALS['user']->uid;
+  $distributor_id = change_feeds_import_get_distributor_id($user_id);
+  $query = db_select('field_data_field_petty_cash_subhead', 'cs');
+  $query->join('field_data_field_petty_cash_distributor', 'd', 'd.entity_id = cs.entity_id');
+  $query->condition('d.field_petty_cash_distributor_uid', $distributor_id);
+  $query->fields('cs', array('field_petty_cash_subhead_value'));
+  $res = $query->execute()->fetchAllKeyed(0,0);
+  return $res;
 }
