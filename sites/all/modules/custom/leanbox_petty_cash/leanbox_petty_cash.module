@@ -402,21 +402,22 @@ function leanbox_petty_cash_preprocess_leanbox_petty_cash_pdf(&$variables) {
 function leanbox_petty_cash_form_views_exposed_form_alter(&$form, &$form_state) {
   // unset all fields except empty and not empty for voucher copy
   if ($form['#id'] == 'views-exposed-form-petty-cash-transaction-page') {
+    $select = array('' => '- Any -');
+    $select1 = array('=' => '- Any -');
     if (isset($form['filename_op'])) {
-      $select = array('' => '- Any -');
       unset($form['filename_op']['#options']);
-      $form['filename_op']['#options'] = $select;
-      $form['filename_op']['#default_value'] = '';
+      $form['filename_op']['#options'] = $select1; 
       $form['filename_op']['#options']['empty'] = 'Empty';
       $form['filename_op']['#options']['not empty'] = 'Not Empty';
+      $form['filename']['#type'] = 'hidden';
     }
     // unset all fields except empty and not empty for bill copy
     if (isset($form['filename_1_op'])) {
       unset($form['filename_1_op']['#options']);
-      $form['filename_1_op']['#options'] = $select;
-      $form['filename_1_op']['#default_value'] = '';
+      $form['filename_1_op']['#options'] = $select1;
       $form['filename_1_op']['#options']['empty'] = 'Empty';
       $form['filename_1_op']['#options']['not empty'] = 'Not Empty';
+      $form['filename_1']['#type'] = 'hidden';
     }
     //dropdowns
     $type = get_pettycash_type();
