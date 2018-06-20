@@ -18,4 +18,9 @@ files[] = views/handler/field_box_id_master_ptl_count.inc
 files[] = views/handler/footer_master_ptl_custom_box_count.inc
 files[] = views/handler/footer_ptl_custom_box_count.inc
 files[] = views/handler/dispatch_planning_inventory_return_qty.inc
+files[] = views/handler/dispatch_planning_updated_flag.inc
+files[] = views/handler/dispatch_planning_bill_status.inc
+files[] = views/handler/header_handler_full_printout.inc
+files[] = views/handler/header_handler_partial_printout.inc
+files[] =  views/handler/bill_returns_report.inc
 

@@ -14,5 +14,11 @@ function api_dispatch_uri_setting_form($form, &$form_state) {
     '#default_value' => variable_get('dispatch_uri_settings'),
     //'#size' => 10,
   );
+  $form['dispatch_job_type'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Dispatch planning Job Type settings'),
+    '#default_value' => variable_get('dispatch_job_type'),
+    //'#size' => 10,
+  );
   return system_settings_form($form);
 }
