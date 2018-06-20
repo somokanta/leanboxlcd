@@ -2089,6 +2089,15 @@ function change_feeds_import_node_presave($node) {
   if (!empty($node->field_unloading_start_time['und']) && empty($node->field_unloading_end_time['und'])) {
     $node->field_unloading_status[LANGUAGE_NONE][0]['value'] = 1;
   }
+  
+  // Validate Dispatch Planning Reason Master Importer
+  if ($node->type == 'dispatch_planning_reason_master') {
+    $reason_type = $node->field_reason_type[LANGUAGE_NONE][0]['value'];
+    $dp_reason = $node->field_dp_reason[LANGUAGE_NONE][0]['value'];
+    if(!empty($reason_type) && !empty($dp_reason)) {
+      $node->title = $reason_type.'_'.$dp_reason;
+    }
+  }
 }
 
 function holiday_get_working_day($date_timestamp, $day, $holidays, $weeklyoff) {
