@@ -100,7 +100,7 @@ function sku_wise_returns_form($form, &$form_state) {
 
       if (!empty($mrp)) {
         $get_to_be_returned_qty = get_to_be_returned_qty($trip_number, $sku_name, $mrp);
-        
+
         if (isset($form_state['input']['to_be_returned_qty'])) {
           unset($form_state['input']['to_be_returned_qty']);
         }
@@ -335,33 +335,56 @@ function sku_wise_return_confirm_submit($form, &$form_state) {
   if ($to_be_returned_qty == $actual_returned_qty) {
     foreach ($trip_ref_ids_arr as $id) {
       db_update('dispatch_planning_api_data') // Table name no longer needs {}
-          ->fields(array(
-            'updated_flag' => 1,
-            'updated_time' => REQUEST_TIME,
-          ))
-          ->condition('runsheet_number', $trip_number, '=')
-          ->condition('id', $id, '=')
-          ->execute();
+        ->fields(array(
+          'updated_flag' => 1,
+          'updated_time' => REQUEST_TIME,
+        ))
+        ->condition('runsheet_number', $trip_number, '=')
+        ->condition('id', $id, '=')
+        ->execute();
     }
   }
   else {
     $bill_details = $form_state['values']['bill_details'];
     foreach ($bill_details as $id => $value) {
 
-      //adding new
-     $query = db_select('dispatch_planning_item_details', 'dpi');
-    $query->join('dispatch_planning_api_data', 'ad', 'dpi.trip_bill_reference = ad.id');
-    $query->addfield('ad', 'res_status','res_status');
-    $query->fields('dpi', array('res_godown_short', 'dispatch_qty', 'trip_bill_reference'));
-    $query->condition('dpi.id', $id, '=');
+      $query = db_select('dispatch_planning_item_details', 'dpi');
+      $query->join('dispatch_planning_api_data', 'ad', 'dpi.trip_bill_reference = ad.id');
+      $query->addfield('ad', 'res_status', 'res_status');
+      $query->fields('dpi', array('res_godown_short', 'dispatch_qty', 'trip_bill_reference'));
+      $query->condition('dpi.id', $id, '=');
       $itdatas = $query->execute()->fetchAll();
       $itdata = $itdatas[0];
-      //dpm($itdata, '$itdata');
- 
 
       if ($itdata->res_status == 'undeliver') {
-        //dpm("undile");
-        db_update('dispatch_planning_api_data') // Table name no longer needs {}
+        $ret_cash = $value['actual_returned_qty'] + $value['cashier_short']; //Return Qty + Cashier Short  
+        $ret_cash_godown = $ret_cash + $itdata->res_godown_short; //Return Qty + Cashier Short + Godown Short
+        $line_status = '';
+        if ($ret_cash == $itdata->dispatch_qty) {
+          $line_status = 'line_undeliver';
+        }
+        else if ($ret_cash_godown > 0) {
+          $line_status = 'line_partial_deliver';
+        }
+        else if ($ret_cash_godown == 0) {
+          $line_status = 'line_deliver';
+        }
+
+        db_update('dispatch_planning_item_details') // Table name no longer needs {}
+          ->fields(array(
+            'res_sku_actual_quantity1' => $itdata->dispatch_qty - $value['actual_returned_qty'] - $value['cashier_short'],
+            'return_qty' => $value['actual_returned_qty'],
+            'res_sku_reason' => $value['reason_code'],
+            'res_cashier_short' => $value['cashier_short'],
+            'line_level_status' => $line_status, // line level status
+          ))
+          ->condition('product_name', $product_name, '=')
+          ->condition('mrp', $mrp, '=')
+          ->condition('id', $id, '=')
+          ->execute();
+
+        if ($line_status == 'line_undeliver') {
+          db_update('dispatch_planning_api_data') // Table name no longer needs {}
             ->fields(array(
               'res_reason_for_failure' => $value['reason_code'] ? $value['reason_code'] : '',
               'updated_flag' => 1,
@@ -370,20 +393,21 @@ function sku_wise_return_confirm_submit($form, &$form_state) {
             ->condition('runsheet_number', $trip_number, '=')
             ->condition('id', $itdata->trip_bill_reference, '=')
             ->execute();
-
-        db_update('dispatch_planning_item_details') // Table name no longer needs {}
+        }
+        else {
+          db_update('dispatch_planning_api_data') // Table name no longer needs {}
             ->fields(array(
-              'res_sku_actual_quantity1' => 0,
-              'return_qty' => $value['actual_returned_qty'],
-              'res_sku_reason' => $value['reason_code'],
-              'res_cashier_short' => $value['cashier_short'],
-              'line_level_status' => 'line_undeliver', // line level status
+              'res_status' => 'partial_deliver',
+              'res_reason_for_failure'=>'',
+              'updated_flag' => 1,
+              'updated_time' => REQUEST_TIME,
             ))
-            ->condition('product_name', $product_name, '=')
-            ->condition('mrp', $mrp, '=')
-            ->condition('id', $id, '=')
+            ->condition('runsheet_number', $trip_number, '=')
+            ->condition('id', $itdata->trip_bill_reference, '=')
             ->execute();
-      } else if ($itdata->res_status == 'partial_deliver') {
+        }
+      }
+      else if ($itdata->res_status == 'partial_deliver') {
 
         $ret_cash = $value['actual_returned_qty'] + $value['cashier_short']; //Return Qty + Cashier Short  
         $ret_cash_godown = $ret_cash + $itdata->res_godown_short; //Return Qty + Cashier Short + Godown Short
@@ -398,36 +422,26 @@ function sku_wise_return_confirm_submit($form, &$form_state) {
           $line_status = 'line_deliver';
         }
         db_update('dispatch_planning_api_data') // Table name no longer needs {}
-            ->fields(array(
-              'updated_flag' => 1,
-              'updated_time' => REQUEST_TIME,
-            ))
-            ->condition('runsheet_number', $trip_number, '=')
-            ->condition('id', $itdata->trip_bill_reference, '=')
-            ->execute();
-
-
-        //old below
-//        dpm($itdata->dispatch_qty);
-//        dpm($value['actual_returned_qty']);
-//        dpm($value['cashier_short']);
-//        dpm($line_status);
-//        dpm($id);
-//        dpm($product_name);
-//        dpm($mrp);
+          ->fields(array(
+            'updated_flag' => 1,
+            'updated_time' => REQUEST_TIME,
+          ))
+          ->condition('runsheet_number', $trip_number, '=')
+          ->condition('id', $itdata->trip_bill_reference, '=')
+          ->execute();
 
         db_update('dispatch_planning_item_details') // Table name no longer needs {}
-            ->fields(array(
-              'res_sku_actual_quantity1' => $itdata->dispatch_qty - $value['actual_returned_qty'] - $value['cashier_short'],
-              'return_qty' => $value['actual_returned_qty'],
-              'res_sku_reason' => $value['reason_code'],
-              'res_cashier_short' => $value['cashier_short'],
-              'line_level_status' => $line_status, // line level status
-            ))
-            ->condition('product_name', $product_name, '=')
-            ->condition('mrp', $mrp, '=')
-            ->condition('id', $id, '=')
-            ->execute();
+          ->fields(array(
+            'res_sku_actual_quantity1' => $itdata->dispatch_qty - $value['actual_returned_qty'] - $value['cashier_short'],
+            'return_qty' => $value['actual_returned_qty'],
+            'res_sku_reason' => $value['reason_code'],
+            'res_cashier_short' => $value['cashier_short'],
+            'line_level_status' => $line_status, // line level status
+          ))
+          ->condition('product_name', $product_name, '=')
+          ->condition('mrp', $mrp, '=')
+          ->condition('id', $id, '=')
+          ->execute();
       }
     }
   }
