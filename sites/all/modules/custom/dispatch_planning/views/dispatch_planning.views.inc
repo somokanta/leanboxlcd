@@ -221,6 +221,15 @@ function dispatch_planning_views_data() {
     ),
   );
   
+   // Add custom field for box id in master ptl
+  $data['views']['field_res_status'] = array(
+    'title' => t('field_res_status'),
+    'help' => t('Provides a custom res status for billvs trip.'),
+    'field' => array(
+      'handler' => 'field_res_status',
+    ),
+  );
+  
    // Add custom field for box id in ptl for drs
   $data['views']['field_box_id_ptl'] = array(
     'title' => t('box_id_ptl'),
@@ -2406,7 +2415,43 @@ function dispatch_planning_views_data() {
       'handler' => 'views_handler_argument_string',
     ),
   );
-
+  
+  $data['dispatch_planning_api_data']['res_signed_bill_partial_edit'] = array(
+    'title' => t('DP res_signed_bill_partial_edit'),
+    'help' => t('Dispatch Planning res_signed_bill_partial'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+    
+  $data['dispatch_planning_api_data']['res_signed_bill_delivery_edit'] = array(
+    'title' => t('DP res_signed_bill_delivery_edit'),
+    'help' => t('Dispatch Planning res_signed_bill_delivery'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+  
   $data['dispatch_planning_api_data']['party_hll_code'] = array(
     'title' => t('DP party_hll_code'),
     'help' => t('Dispatch Planning party_hll_code'),
@@ -2480,23 +2525,23 @@ function dispatch_planning_views_data() {
     'title' => t('DP bill_date'),
     'help' => t('Dispatch Planning bill_date'),
     'field' => array(
-      'handler' => 'views_handler_field',
+      'handler' => 'views_handler_field_date',
       'click sortable' => TRUE,
     ),
     'sort' => array(
-      'handler' => 'views_handler_sort',
+      'handler' => 'views_handler_sort_date',
     ),
     'filter' => array(
-      'handler' => 'views_handler_filter_string',
+      'handler' => 'views_handler_filter_date',
     ),
     'argument' => array(
-      'handler' => 'views_handler_argument_string',
+      'handler' => 'views_handler_filter_date',
     ),
   );
 
   $data['dispatch_planning_api_data']['locality'] = array(
-    'title' => t('DP bill_date'),
-    'help' => t('Dispatch Planning bill_date'),
+    'title' => t('DP locality'),
+    'help' => t('Dispatch Planning locality'),
     'field' => array(
       'handler' => 'views_handler_field',
       'click sortable' => TRUE,
@@ -2846,12 +2891,77 @@ function dispatch_planning_views_data() {
       'handler' => 'views_handler_sort',
     ),
     'filter' => array(
-      'handler' => 'views_handler_filter_string',
+      'handler' => 'dispatch_planning_bill_status',
     ),
     'argument' => array(
       'handler' => 'views_handler_argument_string',
     ),
   );
+  
+  $data['views']['total_sales_quantity'] = array(
+        'title' => t('Total Sales Quantity'),
+        'help' => t('Total Sales Quantity.'),
+        'real field' => 'id',
+        'field' => array(
+            'handler' => 'bill_returns_report',
+        ),
+    );
+  
+  //Godown short res_godown_short in item level
+    $data['views']['res_godown_short'] = array(
+        'title' => t('Godown Short'),
+        'help' => t('Godown Short'),
+        'real field' => 'id',
+        'field' => array(
+            'handler' => 'bill_returns_report',
+        ),
+    );
+    //res_cashier_short in item level
+    $data['views']['cashier_short'] = array(
+        'title' => t('Cashier Short'),
+        'help' => t('Cashier Short'),
+        'real field' => 'id',
+        'field' => array(
+            'handler' => 'bill_returns_report',
+        ),
+    );
+    //Dispatched Quantity dispatch_qty in item level
+    $data['views']['dispatched_qty'] = array(
+        'title' => t('Dispatched Quantity'),
+        'help' => t('Dispatched Quantity'),
+        'real field' => 'id',
+        'field' => array(
+            'handler' => 'bill_returns_report',
+        ),
+    );
+    //Returned Qty return_qty in item level
+    $data['views']['return_qty'] = array(
+        'title' => t('Returned Quantity'),
+        'help' => t('Returned Quantity'),
+        'real field' => 'id',
+        'field' => array(
+            'handler' => 'bill_returns_report',
+        ),
+    );
+    //Actual Deliverd Qty .res_sku_actual_quantity1
+    $data['views']['actual_delivered_qty'] = array(
+        'title' => t('Actual Delivered Quantity'),
+        'help' => t('Actual Delivered Quantity'),
+        'real field' => 'id',
+        'field' => array(
+            'handler' => 'bill_returns_report',
+        ),
+    );
+    // Delivery app delivered quantity  
+    $data['views']['delivery_app_delivered_qty'] = array(
+        'title' => t('Delivery App Delivered Quantity'),
+        'help' => t('Delivery App Delivered Quantity'),
+        'real field' => 'id',
+        'field' => array(
+            'handler' => 'bill_returns_report',
+        ),
+    );
+    
   $data['dispatch_planning_api_data']['res_trackHalt'] = array(
     'title' => t('DP res_trackHalt'),
     'help' => t('Dispatch Planning res_trackHalt'),
@@ -3022,6 +3132,25 @@ function dispatch_planning_views_data() {
       'handler' => 'views_handler_argument_string',
     ),
   );
+  
+  $data['dispatch_planning_api_data']['updated_flag'] = array(
+    'title' => t('DP updated_flag'),
+    'help' => t('Dispatch Planning updated_flag'),
+    'field' => array(
+      'handler' => 'dispatch_planning_updated_flag_data',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'dispatch_planning_updated_flag',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+  
   $data['dispatch_planning_api_data']['res_photo_of_signed_bill_delivery'] = array(
     'title' => t('DP res_photo_of_signed_bill_delivery'),
     'help' => t('Dispatch Planning res_photo_of_signed_bill_delivery'),
@@ -3158,8 +3287,251 @@ function dispatch_planning_views_data() {
       'handler' => 'views_handler_argument_string',
     ),
   );
-
-
+  
+  $data['dispatch_planning_api_data']['salesman'] = array(
+    'title' => t('DP salesman'),
+    'help' => t('Dispatch Planning salesman'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+  
+  $data['dispatch_planning_api_data']['created_time'] = array(
+    'title' => t('DP Created Time'),
+    'help' => t('DP Created Time'),
+    'field' => array(
+      'handler' => 'views_handler_field_date',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort_date',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_date',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_filter_date',
+    ),
+  );
+   
+  $data['dispatch_planning_api_data']['updated_time'] = array(
+    'title' => t('DP Updated Time'),
+    'help' => t('DP Updated Time'),
+    'field' => array(
+      'handler' => 'views_handler_field_date',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort_date',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_date',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_filter_date',
+    ),
+  ); 
+  
+     
+  $data['dispatch_planning_api_data']['res_updated_time'] = array(
+    'title' => t('DP FAREY Updated Time'),
+    'help' => t('DP FAREY Updated Time'),
+    'field' => array(
+      'handler' => 'views_handler_field_date',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort_date',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_date',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_filter_date',
+    ),
+  ); 
+   $data['dispatch_planning_api_data']['res_cheque_date_edit'] = array(
+    'title' => t('DP res_cheque_date_edit'),
+    'help' => t('Dispatch Planning res_cheque_date'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+  $data['dispatch_planning_api_data']['res_photo_of_cheque_edit'] = array(
+    'title' => t('DP res_photo_of_cheque_edit'),
+    'help' => t('Dispatch Planning res_photo_of_cheque'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+  $data['dispatch_planning_api_data']['res_cheque_amount_edit'] = array(
+    'title' => t('DP res_cheque_amount_edit'),
+    'help' => t('Dispatch Planning res_cheque_amount'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+  $data['dispatch_planning_api_data']['res_money_collect2_edit'] = array(
+    'title' => t('DP res_money_collect2_edit'),
+    'help' => t('Dispatch Planning res_money_collect2'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+   $data['dispatch_planning_api_data']['res_confirm_signed_bill_amount_edit'] = array(
+    'title' => t('DP res_confirm_signed_bill_amount_edit'),
+    'help' => t('Dispatch Planning res_confirm_signed_bill_amount'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+  $data['dispatch_planning_api_data']['res_bank_name_edit'] = array(
+    'title' => t('DP res_bank_name_edit'),
+    'help' => t('Dispatch Planning res_bank_name'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+  $data['dispatch_planning_api_data']['res_photo_of_signed_bill_delivery_edit'] = array(
+    'title' => t('DP res_photo_of_signed_bill_delivery_edit'),
+    'help' => t('Dispatch Planning res_photo_of_signed_bill_delivery'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+    $data['dispatch_planning_api_data']['res_cash_amount_edit'] = array(
+    'title' => t('DP res_cash_amount_edit'),
+    'help' => t('Dispatch Planning res_cash_amount'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+  
+  $data['dispatch_planning_api_data']['res_cheque_no'] = array(
+    'title' => t('DP res_cheque_no'),
+    'help' => t('Dispatch Planning res_cheque_no'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+   $data['dispatch_planning_api_data']['res_cheque_no_edit'] = array(
+    'title' => t('DP res_cheque_no_edit'),
+    'help' => t('Dispatch Planning res_cheque_no'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+    
   //Dispatch Panning API Log
   $data['dispatch_planning_item_details']['table'] = array(
     'group' => t('dispatch_planning_item_details lines'),
@@ -3417,6 +3789,77 @@ function dispatch_planning_views_data() {
   $data['dispatch_planning_item_details']['res_sku_actual_quantity1'] = array(
     'title' => t('DP lines res_sku_actual_quantity1'),
     'help' => t('Dispatch Planning lines res_sku_actual_quantity1'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+  
+  $data['dispatch_planning_item_details']['farey_delivered_qty'] = array(
+    'title' => t('DP lines farey_delivered_qty'),
+    'help' => t('Dispatch Planning lines farey_delivered_qty'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+    
+  $data['dispatch_planning_item_details']['dispatch_qty'] = array(
+    'title' => t('DP dispatch_qty'),
+    'help' => t('Dispatch Planning lines dispatch_qty'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+   $data['dispatch_planning_item_details']['return_qty'] = array(
+    'title' => t('DP return_qty'),
+    'help' => t('Dispatch Planning lines return_qty'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+   
+   $data['dispatch_planning_item_details']['line_level_status'] = array(
+    'title' => t('DP Line level status'),
+    'help' => t('Dispatch Planning lines level status'),
     'field' => array(
       'handler' => 'views_handler_field',
       'click sortable' => TRUE,
@@ -4336,6 +4779,211 @@ function dispatch_planning_views_data() {
     ),
   );
 
+  // Adding custom handler for Godown Data
+  $data['godown_data']['table'] = array(
+    'group' => t('Godown data'),
+    'title' => t('Godown data'),
+    'help' => t('Godown data'),
+  );
 
+  // Define this as a base table.
+  $data['godown_data']['table']['base'] = array(
+    'field' => 'id',
+    'title' => t('Godown data'),
+    'help' => t("unique identifiers."),
+  );
+
+  // serial No
+  $data['godown_data']['id'] = array(
+    'title' => t('ID'),
+    'help' => t('ID'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+  $data['godown_data']['trip_id'] = array(
+    'title' => t('Trip Id'),
+    'help' => t('Trip Id'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+  $data['godown_data']['bill_number'] = array(
+    'title' => t('Bill Number'),
+    'help' => t('Bill Number'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+  $data['godown_data']['sku_code'] = array(
+    'title' => t('SKU Code'),
+    'help' => t('SKU Code'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+  $data['godown_data']['batch_code'] = array(
+    'title' => t('Batch Code'),
+    'help' => t('Batch Code'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+  $data['godown_data']['mrp'] = array(
+    'title' => t('MRP'),
+    'help' => t('MRP'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+  $data['godown_data']['sku_desc'] = array(
+    'title' => t('SKU Description'),
+    'help' => t('SKU Description'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+  $data['godown_data']['sum_sales_qty'] = array(
+    'title' => t('Sum of Net Sales Quantity'),
+    'help' => t('Sum of Net Sales Quantity'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+  $data['godown_data']['godown_short'] = array(
+    'title' => t('Godown Short'),
+    'help' => t('Godown Short'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+  
+  $data['views']['header_area_full_printout'] = array(
+    'title' => t('Header field'),
+    'help' => t('Just a field created for header purposes for full printout.'),
+    'area' => array(
+      'handler' => 'header_handler_full_printout',
+    ),
+  );
+  
+  $data['views']['header_area_partial_printout'] = array(
+    'title' => t('Header field'),
+    'help' => t('Just a field created for header purposes for partial printout.'),
+    'area' => array(
+      'handler' => 'header_handler_partial_printout',
+    ),
+  );
+  
   return $data;
+}
+
+/**
+ * Field handler to translate a Status into its readable form.
+ */
+class dispatch_planning_updated_flag_data extends views_handler_field {
+
+  function render($values) {
+    //dpm($values);
+    $updated_flag = $values->dispatch_planning_api_data_updated_flag;
+      $res = '';
+
+      if ($updated_flag == 1) {
+         $res = 'Manual';
+      }
+      if ($updated_flag == 2) {
+         $res = 'Api';
+      }
+    return $res;
+  }
+
 }

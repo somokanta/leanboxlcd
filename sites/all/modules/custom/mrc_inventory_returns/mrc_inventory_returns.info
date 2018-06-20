@@ -1,0 +1,7 @@
+name = Mrc Inventory Returns
+description = Inventory Management
+core = 7.x
+
+stylesheets[all][] = css/vrs_confirmation.css
+files[] = views/handler/footer_inventory_returns_bills_summary.inc
+

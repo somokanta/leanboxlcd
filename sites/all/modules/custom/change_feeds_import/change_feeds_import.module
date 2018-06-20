@@ -2748,7 +2748,7 @@ function change_feeds_import_form_views_exposed_form_alter(&$form, &$form_state)
     }
   }
 
-  if ($form['#id'] == 'views-exposed-form-payment-collection-page' || $form['#id'] == 'views-exposed-form-signed-bills-upload-page-2' || $form['#id'] == 'views-exposed-form-signed-bills-upload-page-3' || $form['#id'] == 'views-exposed-form-bills-collection-page' || $form['#id'] == 'views-exposed-form-day-wise-collection-page' || $form['#id'] == 'views-exposed-form-collection-history-page' || $form['#id'] == 'views-exposed-form-assignment-history-page' || $form['#id'] == 'views-exposed-form-collection-closure-page' || $form['#id'] == 'views-exposed-form-bills-assignment-acknowledgement-page') {
+  if ($form['#id'] == 'views-exposed-form-payment-collection-page' || $form['#id'] == 'views-exposed-form-signed-bills-upload-page-2' || $form['#id'] == 'views-exposed-form-signed-bills-upload-page-3' || $form['#id'] == 'views-exposed-form-bills-collection-page' || $form['#id'] == 'views-exposed-form-day-wise-collection-page' || $form['#id'] == 'views-exposed-form-collection-history-page' || $form['#id'] == 'views-exposed-form-assignment-history-page' || $form['#id'] == 'views-exposed-form-collection-closure-page' || $form['#id'] == 'views-exposed-form-bills-assignment-acknowledgement-page' || $form['#id'] == 'views-exposed-form-dispatch-planning-inventory-return-sheet-page' || $form['#id'] == 'views-exposed-form-trip-asset-report-detailed-page' || $form['#id'] == 'views-exposed-form-trip-asset-report-detailed-page-1' || $form['#id'] == 'views-exposed-form-bill-return-report-page') {
     $select = array('' => '- Any -');
     $salesman = get_all_salesman_data("salesman", NULL);
     $salesman = $select + $salesman;
@@ -2770,6 +2770,13 @@ function change_feeds_import_form_views_exposed_form_alter(&$form, &$form_state)
       $form['field_assign_to_value']['#options'] = $salesman;
       $form['field_assign_to_value']['#validated'] = TRUE;
     }
+    // Salesman field in Farey API Data in inventory return sheet view
+    if (isset($form['salesman'])) {
+      $form['salesman']['#type'] = 'select';
+      $form['salesman']['#size'] = null;
+      $form['salesman']['#options'] = $salesman;
+      $form['salesman']['#validated'] = TRUE;
+    }
     $beatname = get_all_beatname_data();
     $beatname = $select + $beatname;
 
@@ -2778,6 +2785,17 @@ function change_feeds_import_form_views_exposed_form_alter(&$form, &$form_state)
       $form['field_beat_name_value']['#size'] = null;
       $form['field_beat_name_value']['#options'] = $beatname;
       $form['field_beat_name_value']['#validated'] = TRUE;
+    }
+    
+    $cashiername = get_all_cashier_data();
+    $cashiername = $select + $cashiername;
+
+    if (isset($form['field_cashier_name_value'])) {
+      $form['field_cashier_name_value']['#type'] = 'select';
+      $form['field_cashier_name_value']['#size'] = null;
+      $form['field_cashier_name_value']['#options'] = $cashiername;
+      $form['field_cashier_name_value']['#validated'] = TRUE;
+      //$form['field_cashier_name_value']['#multiple'] = TRUE;
     }
 
     if (isset($form['field_sr_bill_date_value'])) {
@@ -2846,6 +2864,17 @@ function get_all_beatname_data() {
   $query->addTag('node_uid');
   $query->join('field_data_field_beat_name', 'bn', 'bn.entity_id = n.nid');
   $query->fields('bn', array('field_beat_name_value'));
+
+  $results = $query->execute()->fetchAllKeyed(0, 0);
+  return $results;
+}
+
+function get_all_cashier_data() {
+  $query = db_select('node', 'n');
+  $query->condition('n.type', 'dispatch_data');
+  $query->addTag('node_uid');
+  $query->join('field_data_field_cashier_name', 'cn', 'cn.entity_id = n.nid');
+  $query->fields('cn', array('field_cashier_name_value'));
 
   $results = $query->execute()->fetchAllKeyed(0, 0);
   return $results;

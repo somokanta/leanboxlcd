@@ -16,7 +16,17 @@ function fetch_dispatch_planning_api_data($data) {
       dispatch_planning_api_log($json_data, $data['jobData']['runsheet_number'], 'farey_sales_deliver', $dis_id, 1);
 
       $bill_row_id = _get_bill_row_id_using_reference_no($data['referenceNumber']);
-
+      
+      if (isset($data['fieldData']['money_collect2'])) {
+         if (is_array($data['fieldData']['money_collect2'])) {
+            $money_collect = implode(",", $data['fieldData']['money_collect2']);
+         }
+      }
+       if (isset($data['fieldData']['money_collect3'])) {
+         if (is_array($data['fieldData']['money_collect3'])) {
+            $money_collect = implode(",", $data['fieldData']['money_collect3']);
+         }
+      }
       $updated_bill_row_id = db_update('dispatch_planning_api_data') // Table name no longer needs {}
           ->fields(array(
             'res_runsheetNo' => isset($data['runsheetNo']) ? $data['runsheetNo'] : '',
@@ -48,14 +58,17 @@ function fetch_dispatch_planning_api_data($data) {
             'res_cheque_date' => isset($data['fieldData']['cheque_date']) ? strtotime($data['fieldData']['cheque_date']) : '',
             'res_photo_of_cheque' => isset($data['fieldData']['photo_of_cheque']) ? $data['fieldData']['photo_of_cheque'] : '',
             'res_cheque_amount' => isset($data['fieldData']['cheque_amount']) ? $data['fieldData']['cheque_amount'] : '',
-            'res_money_collect2' => isset($data['fieldData']['money_collect2']) ? $data['fieldData']['money_collect2'] : '',
+            'res_money_collect2' => !empty($money_collect) ? $money_collect : '',
             'res_signed_bill_delivery' => isset($data['fieldData']['signed_bill_delivery']) ? $data['fieldData']['signed_bill_delivery'] : '',
             'res_cash_amount' => isset($data['fieldData']['cash_amount']) ? $data['fieldData']['cash_amount'] : '',
             'res_to_be_collection' => isset($data['fieldData']['to_be_collection']) ? $data['fieldData']['to_be_collection'] : '',
             'res_signed_bill_partial' => isset($data['fieldData']['signed_bill_partial']) ? $data['fieldData']['signed_bill_partial'] : '',
             'res_reason_for_failure' => isset($data['fieldData']['reason_for_failure']) ? $data['fieldData']['reason_for_failure'] : '',
             'photo_of_signed_bill_partial' => isset($data['fieldData']['photo_of_signed_bill_partial']) ? $data['fieldData']['photo_of_signed_bill_partial'] : '',
+            'res_cheque_no' => isset($data['fieldData']['cheque_no']) ? $data['fieldData']['cheque_no'] : 'NA',
             'updated_flag' => 2,
+            'updated_time' => REQUEST_TIME,  
+            'res_updated_time' => REQUEST_TIME,
 
           ))
           ->condition('referenceNo', $data['referenceNumber'], '=')
@@ -71,15 +84,22 @@ function fetch_dispatch_planning_api_data($data) {
          watchdog('farey data full', '<pre>' . print_r($data['fieldData']['item_details'], TRUE) . '</pre>');
 
          foreach ($data['fieldData']['item_details1'] as $key => $value) {
-
+            
+            // fetch dispatch_qty here
             // ignore if value is not in form of array
             if (!is_array($value)) {
                continue;
             }
+            $data = _get_dispatch_qty_item_details($bill_row_id, $value['sku_code1']);
+            $return_qty = $data['dispatch_qty'] - $value['sku_actual_quantity1'] - $data['res_cashier_short'];
+            
             db_update('dispatch_planning_item_details') // Table name no longer needs {}
                 ->fields(array(
                   'res_sku_actual_quantity1' => isset($value['sku_actual_quantity1']) ? $value['sku_actual_quantity1'] : 0,
+                  'farey_delivered_qty' => isset($value['sku_actual_quantity1']) ? $value['sku_actual_quantity1'] : 0,
                   'res_sku_reason' => isset($value['sku_reason']) ? $value['sku_reason'] : '',
+                  'return_qty' => $return_qty,
+                  'line_level_status'=> 'line_deliver', // line level status
                 ))
                 ->condition('trip_bill_reference', $bill_row_id, '=')
                 ->condition('sku_code', $value['sku_code1'], '=')
@@ -97,10 +117,27 @@ function fetch_dispatch_planning_api_data($data) {
             if (!is_array($value)) {
                continue;
             }
+            
+            $data = _get_dispatch_qty_item_details($bill_row_id, $value['sku_code']);
+            $return_qty = $data['dispatch_qty'] - $value['sku_actual_quantity'] - $data['res_cashier_short'];
+            $line_status = '';
+            $ret_cash = $return_qty + $data['res_cashier_short']; //Return Qty + Cashier Short  
+            $ret_cash_godown = $ret_cash + $data['res_godown_short']; //Return Qty + Cashier Short + Godown Short
+            if ($ret_cash == $data['dispatch_qty'] ) {
+             $line_status = 'line_undeliver';
+            }else if ($ret_cash_godown > 0) {
+              $line_status = 'line_partial_deliver';
+            }else if ($ret_cash_godown == 0) {
+              $line_status = 'line_deliver';
+            }
+            
             db_update('dispatch_planning_item_details') // Table name no longer needs {}
                 ->fields(array(
                   'res_sku_actual_quantity1' => isset($value['sku_actual_quantity']) ? $value['sku_actual_quantity'] : 0,
+                  'farey_delivered_qty' => isset($value['sku_actual_quantity']) ? $value['sku_actual_quantity'] : 0,
                   'res_sku_reason' => isset($value['sku_reason']) ? $value['sku_reason'] : '',
+                  'return_qty' => $return_qty,
+                  'line_level_status' => $line_status, // line level status
                 ))
                 ->condition('trip_bill_reference', $bill_row_id, '=')
                 ->condition('sku_code', $value['sku_code'], '=')
@@ -109,12 +146,22 @@ function fetch_dispatch_planning_api_data($data) {
       }
       if ($data['status'] == 'undeliver' && !empty($updated_bill_row_id)) {
          watchdog('farey data undeliver', '<pre>' . print_r($data['fieldData']['item_details'], TRUE) . '</pre>');
-         db_update('dispatch_planning_item_details') // Table name no longer needs {}
-             ->fields(array(
-               'res_sku_actual_quantity1' => 0,
-             ))
-             ->condition('trip_bill_reference', $bill_row_id, '=')
-             ->execute();
+         $sku_list = _get_dispatch_qty_undeliver($bill_row_id);
+         foreach ($sku_list as $key => $val) {
+            $sku_code = $val['sku_code'];
+            $dispatch_qty = $val['dispatch_qty'];
+         
+          db_update('dispatch_planning_item_details') // Table name no longer needs {}
+              ->fields(array(
+                'res_sku_actual_quantity1' => 0,
+                'return_qty' => $dispatch_qty,
+                'farey_delivered_qty' => 0,
+                'line_level_status'=> 'line_undeliver', // line level status
+              ))
+              ->condition('trip_bill_reference', $bill_row_id, '=')
+              ->condition('sku_code', $sku_code, '=')
+              ->execute();
+         }
       }
       $results['flag'] = '1';
       $results['result'] = 'Data updated Sucessfully.';
@@ -129,3 +176,30 @@ function fetch_dispatch_planning_api_data($data) {
    return $results;
 }
 
+/**
+ * 
+ * @param type $bill_row_id
+ * @param type $sku
+ * @return type
+ */
+function _get_dispatch_qty_item_details($bill_row_id, $sku) {
+   $query1 = db_select('dispatch_planning_item_details', 'it');
+   $query1->fields('it', array('dispatch_qty', 'res_cashier_short','res_godown_short'));
+   $query1->condition('it.trip_bill_reference', $bill_row_id);
+   $query1->condition('it.sku_code', $sku);
+   $res1 = $query1->execute()->fetch(PDO::FETCH_ASSOC);
+   return $res1;
+}
+
+/**
+ * 
+ * @param type $bill_row_id
+ * @return type
+ */
+function _get_dispatch_qty_undeliver($bill_row_id) {
+   $query = db_select('dispatch_planning_item_details', 'ad');
+   $query->fields('ad', array('sku_code', 'dispatch_qty', 'res_cashier_short'));
+   $query->condition('ad.trip_bill_reference', $bill_row_id);
+   $sku_list = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+   return $sku_list;
+}
