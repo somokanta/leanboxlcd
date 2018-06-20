@@ -333,20 +333,15 @@ function vrs_confirmation_form($form, &$form_state) {
         $total_cheque_collected_value = 0;
         $total_signed_bill_value = 0;
         $short_total = 0;
-        $short_reasons = get_short_reasons();
-        $non_bankable_reasons = get_non_bankable_reasons();
         $non_bankable_reason_options = array();
         $short_reason_options = array();
+        $short_reasons = get_short_reasons();
+        $non_bankable_reasons = get_non_bankable_reasons();
         if (!empty($short_reasons)) {
-            foreach ($short_reasons as $code => $short_value) {
-                $short_reason_options[$short_value['field_short_reason_code_value']] = $short_value['title'];
-            }
+            $short_reason_options = $short_reasons;
         }
-        
-         if (!empty($non_bankable_reasons)) {
-            foreach ($non_bankable_reasons as $code => $reason_value) {
-                $non_bankable_reason_options[$reason_value['field_reason_code_value']] = $reason_value['title'];
-            }
+        if (!empty($non_bankable_reasons)) {
+            $non_bankable_reason_options = $non_bankable_reasons;
         }
         // Bill level table details
 
@@ -511,11 +506,7 @@ function vrs_confirmation_form($form, &$form_state) {
             );
             // Fetch Reason from Short Reason Master
             //if ($short_display > 0) {
-            if (!empty($short_reason_options)) {
-                $short_reason_options = $short_reason_options;
-            } else {
-                $short_reason_options = array();
-            }
+            
             //}
             $short_reason_code = array(
               //  '#id' => 'bill_details-' . $key . '-short_reason_code',

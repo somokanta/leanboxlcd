@@ -553,10 +553,8 @@ function get_short_reasons() {
     $query = db_select('node', 'n');
     $query->condition('n.type', 'short_reason_master');
     $query->condition('n.status', 1);
-    $query->join('field_data_field_short_reason_code', 'r', 'r.entity_id = n.nid');
-    $query->fields('n', array('title'));
-    $query->fields('r', array('field_short_reason_code_value'));
-    $result = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+    $query->fields('n', array('nid','title'));
+    $result = $query->execute()->fetchAllKeyed(0,1);
     return $result;
 }
 
@@ -565,10 +563,8 @@ function get_non_bankable_reasons() {
     $query = db_select('node', 'n');
     $query->condition('n.type', 'non_bankable_reason_master');
     $query->condition('n.status', 1);
-    $query->join('field_data_field_reason_code', 'r', 'r.entity_id = n.nid');
-    $query->fields('n', array('title'));
-    $query->fields('r', array('field_reason_code_value'));
-    $result = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+    $query->fields('n', array('nid','title'));
+    $result = $query->execute()->fetchAllKeyed(0,1);
     return $result;
 }
 
@@ -587,37 +583,6 @@ function _get_bank_names($trip_id, $string) {
 }
 
 function mrc_inventory_returns_feeds_presave($source, $entity, $item, $entity_id) {
-    if ($entity->feeds_item->id == 'non_bankable_reason_master') {
-      $reason_code = $item['reason code']; 
-      if (empty($reason_code)) {
-           drupal_set_message("Reson Code can't be empty.", 'error');
-           $entity->feeds_item->skip = TRUE;
-      }
-      else  {
-        $check_reason_code_exist = check_non_bank_reason_code_exist($reason_code);
-        if ($check_reason_code_exist  == 1) {
-            drupal_set_message("Reson Code: $reason_code  already exists.", 'error');
-            $entity->feeds_item->skip = TRUE;
-        }
-      }
-      
-  }
-  if ($entity->feeds_item->id == 'short_reason_master') { 
-      $reason_code = $item['reason code']; 
-      if (empty($reason_code)) {
-           drupal_set_message("Reson Code can't be empty.", 'error');
-           $entity->feeds_item->skip = TRUE;
-      }
-      else  {
-        $check_reason_code_exist = check_short_reason_code_exist($reason_code);
-          if ($check_reason_code_exist  == 1) {
-            drupal_set_message("Reson Code: $reason_code  already exists.", 'error');
-            $entity->feeds_item->skip = TRUE;
-        }
-      }
-      
-  }
-  
   if ($entity->feeds_item->id == 'asset_type_master') {
     $asset_type_tid = $entity->field_asset_types['und'][0]['tid'];
     if (empty($asset_type_tid)) {
@@ -633,28 +598,4 @@ function mrc_inventory_returns_feeds_presave($source, $entity, $item, $entity_id
       $entity->feeds_item->skip = TRUE;
     }
   }
-}
- 
-  function check_non_bank_reason_code_exist($reason_code) {
-    if (!empty($reason_code)) {
-        $query = db_select('field_data_field_reason_code', 'r');
-        $query->condition('r.field_reason_code_value',$reason_code);
-        $query->fields('r', array('field_reason_code_value'));
-        $result = $query->execute()->fetchField();
-        if(!empty($result))
-            return 1;
-    }
-    return 0;
-}
-
-function check_short_reason_code_exist($reason_code) {
-    if (!empty($reason_code)) {
-        $query = db_select('field_data_field_short_reason_code', 'r');
-        $query->condition('r.field_short_reason_code_value',$reason_code);
-        $query->fields('r', array('field_short_reason_code_value'));
-        $result = $query->execute()->fetchField();
-        if(!empty($result))
-            return 1;
-    }
-    return 0;
 }
