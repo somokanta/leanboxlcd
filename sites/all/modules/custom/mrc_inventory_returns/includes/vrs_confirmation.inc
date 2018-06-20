@@ -1576,28 +1576,20 @@ function validate_bank_names($bank_name,$trip_id) {
        $query->condition('n.status', 1);
        $query->fields('n', array('title'));
        $result = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
-      
        // Checking it in trip level
        if(empty($result)) {
             $query = db_select('dispatch_planning_api_data', 'ad');
             $query->condition('ad.distributor_id', $dis_id, '=');
-            $query->condition('ad.runsheet_number', $trip_id, '=');
-            $query->leftJoin('vrs_trip_items', 'vt', 'vt.trip_id = ad.runsheet_number');
+            $query->condition('ad.runsheet_number',$trip_id);
             $db_or = db_or();
-            $db_or->condition('ad.res_bank_name_edit',$bank_name);
             $db_or->condition('ad.res_bank_name',$bank_name);
-            $db_or->condition('vt.bank_name',$bank_name);
+            $db_or->condition('ad.res_bank_name_edit',$bank_name);
             $query->condition($db_or);
             $query->fields('ad', array('res_bank_name_edit','res_bank_name'));
-            $query->fields('vt', array('bank_name'));
-            $query->groupBy('vt.bank_name');
-            $query->groupBy('ad.res_bank_name_edit');
-            $query->groupBy('ad.res_bank_name');
             $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
             if(empty($res)) {
                  return 1; 
            }
-        
     }
      
 }
