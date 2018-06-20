@@ -1,0 +1,2426 @@
+<?php
+
+/*
+ * Implement hook_schema.
+ */
+
+function mrc_inventory_returns_schema() {
+  $schema['inventory_versioning_api_data'] = array(
+      'description' => 'Saves versioning history of api data',
+      'fields' => array(
+      'id' => array(
+      'description' => t('Id Primary Key'),
+      'type' => 'serial',
+      'not null' => TRUE,
+    ),
+      'jobType' => array(
+      'description' => t('Job type'),
+      'type' => 'varchar',
+      'length' => 50,
+      'not null' => TRUE,
+      'default' => '',
+    ),
+      'referenceNo' => array(
+      'description' => t('RS Code_Bill Number'),
+      'type' => 'varchar',
+      'length' => 80,
+      'not null' => TRUE,
+      'default' => '',
+    ),
+      'date' => array(
+      'description' => t('Trip exicution Date'),
+      'type' => 'varchar',
+      'length' => 25,
+      'not null' => TRUE,
+      'default' => '',
+    ),
+      'city' => array(
+      'description' => t('city'),
+      'type' => 'varchar',
+      'length' => 25,
+      'not null' => TRUE,
+      'default' => '',
+    ),
+      'hub' => array(
+      'description' => t('RS Code'),
+      'type' => 'varchar',
+      'length' => 25,
+      'not null' => TRUE,
+      'default' => '',
+    ),
+      'fieldExecutive' => array(
+      'description' => t('RS Code_cashier'),
+      'type' => 'varchar',
+      'length' => 50,
+      'not null' => TRUE,
+      'default' => '',
+    ),
+      'fieldExecutiveName' => array(
+      'description' => t('cashier name'),
+      'type' => 'varchar',
+      'length' => 50,
+      'not null' => TRUE,
+      'default' => '',
+    ),
+      'vehicle' => array(
+      'description' => t('Vehicle Number'),
+      'type' => 'varchar',
+      'length' => 50,
+      'not null' => TRUE,
+      'default' => '',
+    ),
+      'party_hll_code' => array(
+      'description' => t('HUL code'),
+      'type' => 'varchar',
+      'length' => 50,
+      'not null' => TRUE,
+      'default' => '',
+    ),
+      'lat_longlatitude' => array(
+      'description' => t('Updated Lat,Long'),
+      'type' => 'varchar',
+      'length' => 50,
+      'not null' => TRUE,
+      'default' => '',
+    ),
+      'lat_longlongitude' => array(
+      'description' => t('Updated Lat,Long'),
+      'type' => 'varchar',
+      'length' => 50,
+      'not null' => TRUE,
+      'default' => '',
+    ),
+      'bill_value' => array(
+      'description' => t('To be Collected amount'),
+      'type' => 'varchar',
+      'length' => 255,
+      'not null' => TRUE,
+      'default' => '',
+    ),
+      'bill_date' => array(
+      'description' => t('Bill date'),
+      'type' => 'varchar',
+      'length' => 25,
+      'not null' => TRUE,
+      'default' => '',
+    ),
+      'locality' => array(
+      'description' => t('Locality'),
+      'type' => 'varchar',
+      'length' => 100,
+      'not null' => TRUE,
+      'default' => '',
+    ),
+      'store_sequence_no' => array(
+      'description' => t('DRS NO'),
+      'type' => 'varchar',
+      'length' => 20,
+      'not null' => TRUE,
+      'default' => '',
+    ),
+      'party_name' => array(
+      'description' => t('Party Name'),
+      'type' => 'varchar',
+      'length' => 255,
+      'not null' => TRUE,
+      'default' => '',
+    ),
+      'beat_name' => array(
+      'description' => t('Beat Name '),
+      'type' => 'varchar',
+      'length' => 255,
+      'not null' => TRUE,
+      'default' => '',
+    ),
+      'party_code' => array(
+      'description' => t('PARTY_Code'),
+      'type' => 'varchar',
+      'length' => 255,
+      'not null' => TRUE,
+      'default' => '',
+    ),
+      'bill_number' => array(
+      'description' => t('Bill Number'),
+      'type' => 'varchar',
+      'length' => 255,
+      'not null' => TRUE,
+      'default' => '',
+    ),
+      'runsheet_number' => array(
+      'description' => t('Trip ID Number'),
+      'type' => 'varchar',
+      'length' => 100,
+      'not null' => TRUE,
+      'default' => '',
+    ),
+      'res_runsheetNo' => array(
+      'description' => t('response id'),
+      'type' => 'varchar',
+      'default' => NULL,
+      'length' => 50,
+    ),
+      'res_actualAmount' => array(
+      'description' => t('Response Actual Amount'),
+      'type' => 'varchar',
+      'length' => 50,
+      'default' => NULL,
+    ),
+      'res_originalAmount' => array(
+      'description' => t('Response Original Amount Code_Bill Number'),
+      'type' => 'varchar',
+      'length' => 50,
+      'default' => NULL,
+    ),
+      'res_moneyTransactionType' => array(
+      'description' => t('Response moneyTransactionType'),
+      'type' => 'varchar',
+      'length' => 50,
+      'default' => NULL,
+    ),
+      'res_latitude' => array(
+      'description' => t('Response Lattitude'),
+      'type' => 'varchar',
+      'length' => 50,
+      'default' => NULL,
+    ),
+      'res_longitude' => array(
+      'description' => t('Response Longitude'),
+      'type' => 'varchar',
+      'length' => 50,
+      'default' => NULL,
+    ),
+      'res_attemptCount' => array(
+      'description' => t('Response attemptCount'),
+      'type' => 'varchar',
+      'length' => 5,
+      'default' => NULL,
+    ),
+      'res_jobMasterId' => array(
+      'description' => t('Response jobMasterId'),
+      'type' => 'varchar',
+      'length' => 50,
+      'default' => NULL,
+    ),
+      'res_companyId' => array(
+      'description' => t('Response companyId'),
+      'type' => 'varchar',
+      'length' => 50,
+      'default' => NULL,
+    ),
+      'res_jobType' => array(
+      'description' => t('Response Job Type'),
+      'type' => 'varchar',
+      'length' => 50,
+      'default' => NULL,
+    ),
+      'res_jobId' => array(
+      'description' => t('Response Job id'),
+      'type' => 'varchar',
+      'length' => 50,
+      'default' => NULL,
+    ),
+      'res_employeeCode' => array(
+      'description' => t('Response employeeCode'),
+      'type' => 'varchar',
+      'length' => 50,
+      'default' => NULL,
+    ),
+      'res_status' => array(
+      'description' => t('Response status'),
+      'type' => 'varchar',
+      'length' => 25,
+      'default' => NULL,
+    ),
+      'res_trackHalt' => array(
+      'description' => t('Response trackHalt'),
+      'type' => 'varchar',
+      'length' => 20,
+      'default' => NULL,
+    ),
+      'res_trackKm' => array(
+      'description' => t('Response trackKm'),
+      'type' => 'varchar',
+      'length' => 50,
+      'default' => NULL,
+    ),
+      'res_trackTransactionTimeSpent' => array(
+      'description' => t('Response trackTransactionTimeSpent'),
+      'type' => 'varchar',
+      'length' => 50,
+      'default' => NULL,
+    ),
+      'res_merchantCode' => array(
+      'description' => t('Response merchantCode'),
+      'type' => 'varchar',
+      'length' => 50,
+      'default' => NULL,
+    ),
+      'res_transactionDate' => array(
+      'description' => t('Response transactionDate'),
+      'type' => 'varchar',
+      'length' => 50,
+      'default' => NULL,
+    ),
+      'res_erpPushTime' => array(
+      'description' => t('Response erpPushTime'),
+      'type' => 'varchar',
+      'length' => 50,
+      'default' => NULL,
+    ),
+      'res_lastTransactionTime' => array(
+      'description' => t('Response lastTransactionTime'),
+      'type' => 'varchar',
+      'length' => 50,
+      'default' => NULL,
+    ),
+      'res_battery' => array(
+      'description' => t('Response battery'),
+      'type' => 'varchar',
+      'length' => 50,
+      'default' => NULL,
+    ),
+      'res_confirm_signed_bill_amount' => array(
+      'description' => t('Response confirm_signed_bill_amount'),
+      'type' => 'varchar',
+      'length' => 50,
+      'default' => NULL,
+    ),
+      'res_bank_name' => array(
+      'description' => t('Response Bank Name'),
+      'type' => 'varchar',
+      'length' => 50,
+      'default' => NULL,
+    ),
+      'res_photo_of_signed_bill_delivery' => array(
+      'description' => t('Response photo_of_signed_bill_delivery'),
+      'type' => 'varchar',
+      'default' => NULL,
+      'length' => 255,
+    ),
+      'res_total_amount' => array(
+      'description' => t('Response total_amount'),
+      'type' => 'varchar',
+      'length' => 50,
+      'default' => NULL,
+    ),
+      'res_remarks' => array(
+      'description' => t('Response remarks'),
+      'type' => 'varchar',
+      'length' => 50,
+      'default' => NULL,
+    ),
+      'res_cheque_date' => array(
+      'description' => t('Response cheque_date'),
+      'type' => 'varchar',
+      'length' => 50,
+      'default' => NULL,
+    ),
+      'res_photo_of_cheque' => array(
+      'description' => t('Response photo_of_cheque'),
+      'type' => 'varchar',
+      'default' => NULL,
+      'length' => 255,
+    ),
+      'res_cheque_amount' => array(
+      'description' => t('Response cheque_amount'),
+      'type' => 'varchar',
+      'length' => 50,
+      'default' => NULL,
+    ),
+      'res_money_collect2' => array(
+      'description' => t('Response money_collect2'),
+      'type' => 'varchar',
+      'length' => 50,
+      'default' => NULL,
+    ),
+      'res_signed_bill_delivery' => array(
+      'description' => t('Response signed_bill_delivery'),
+      'type' => 'varchar',
+      'length' => 50,
+      'default' => NULL,
+    ),
+      'res_cash_amount' => array(
+      'description' => 'res_cash_amount',
+      'type' => 'varchar',
+      'length' => 50,
+      'not null' => TRUE,
+      'default' => '',
+    ),
+      'res_to_be_collection' => array(
+      'description' => 'res_to_be_collection',
+      'type' => 'varchar',
+      'length' => 50,
+      'not null' => TRUE,
+      'default' => '',
+    ),
+      'res_signed_bill_partial' => array(
+      'description' => 'res_signed_bill_partial',
+      'type' => 'varchar',
+      'length' => 50,
+      'not null' => TRUE,
+      'default' => '',
+    ),
+      'res_reason_for_failure' => array(
+      'description' => 'res_reason_for_failure',
+      'type' => 'varchar',
+      'length' => 255,
+      'default' => '',
+    ),
+      'photo_of_signed_bill_partial' => array(
+      'description' => t('Response photo_of_signed_bill_partial'),
+      'type' => 'varchar',
+      'default' => NULL,
+      'length' => 255,
+    ),
+      'updated_flag' => array(
+      'description' => t('0 => no changes, 1 => manual entry, 2 => api response'),
+      'type' => 'int',
+      'default' => 0,
+      'length' => 3,
+    ),
+      'distributor_id' => array(
+      'description' => t('distributor_id'),
+      'type' => 'int',
+      'default' => 0,
+    ),
+      'created_time' => array(
+      'description' => 'DATA Created Time',
+      'type' => 'int',
+      'not null' => TRUE,
+      'default' => 0,
+    ),
+      'updated_time' => array(
+      'description' => 'DATA Updated Time',
+      'type' => 'int',
+      'not null' => TRUE,
+      'default' => 0,
+    ),
+      'salesman' => array(
+      'description' => 'Outlet Salesman',
+      'type' => 'varchar',
+      'length' => 255,
+      'not null' => TRUE,
+      'default' => '',
+    ),
+      'res_updated_time' => array(
+      'description' => t('FAREY Updated Time'),
+      'type' => 'int',
+      'not null' => TRUE,
+      'default' => 0,
+    ),
+    'version_created_time' => array(
+      'description' => 'Version Created Time',
+      'type' => 'int',
+      'not null' => TRUE,
+      'default' => 0,
+    ),
+    'version_no' => array(
+      'description' => 'Version No',
+      'type' => 'varchar',
+      'length' => 25,
+      'not null' => TRUE,
+      'default' => '',
+    ),
+    'res_cheque_date_edit' => array(
+      'description' => t('Response cheque_date_edit'),
+      'type' => 'varchar',
+      'length' => 50,
+      'default' => NULL,
+    ),
+    'res_photo_of_cheque_edit' => array(
+      'description' => t('Response photo_of_cheque_edit'),
+      'type' => 'varchar',
+      'default' => NULL,
+      'length' => 255,
+    ),
+    'res_cheque_amount_edit' => array(
+      'description' => t('Response cheque_amount_edit'),
+      'type' => 'varchar',
+      'length' => 50,
+      'default' => NULL,
+    ),
+    'res_money_collect2_edit' => array(
+      'description' => t('Response money_collect2_edit'),
+      'type' => 'varchar',
+      'length' => 50,
+      'default' => NULL,
+    ),
+    'photo_of_signed_bill_partial_edit' => array(
+      'description' => t('Response photo_of_signed_bill_partial_edit'),
+      'type' => 'varchar',
+      'default' => NULL,
+      'length' => 255,
+    ),
+    'res_confirm_signed_bill_amount_edit' => array(
+      'description' => t('Response confirm_signed_bill_amount_edit'),
+      'type' => 'varchar',
+      'length' => 50,
+      'default' => NULL,
+    ),
+    'res_bank_name_edit' => array(
+      'description' => t('Response Bank Name_edit'),
+      'type' => 'varchar',
+      'length' => 50,
+      'default' => NULL,
+    ),
+    'res_photo_of_signed_bill_delivery_edit' => array(
+      'description' => t('Response photo_of_signed_bill_delivery_edit'),
+      'type' => 'varchar',
+      'default' => NULL,
+      'length' => 255,
+    ),
+    'res_cash_amount_edit' => array(
+       'description' => 'res_cash_amount_edit',
+       'type' => 'varchar',
+       'length' => 50,
+       'not null' => TRUE,
+       'default' => '',
+    ),
+    'res_signed_bill_delivery_edit' => array(
+       'description' => t('Response signed_bill_delivery_edit'),
+       'type' => 'varchar',
+       'length' => 50,
+      'default' => NULL,
+    ),
+    'res_signed_bill_partial_edit' => array(
+       'description' => t('Response signed_bill_delivery_edit'),
+       'type' => 'varchar',
+       'length' => 50,
+      'default' => NULL,
+    ),
+    'res_cheque_no' => array(
+       'description' => t('Response cheque_no'),
+       'type' => 'varchar',
+       'length' => 50,
+       'default' => NULL,
+     ),
+    'res_cheque_no_edit' => array(
+       'description' => t('Response cheque_no'),
+       'type' => 'varchar',
+       'length' => 50,
+       'default' => NULL,
+     ),     
+  ),
+  'primary key' => array('id'),
+  'indexes' => array(
+    'bill_number' => array('bill_number'),
+    'runsheet_number' => array('runsheet_number'),
+    ),
+  );
+    
+  $schema['inventory_versioning_item_details'] = array(
+    'description' => 'inventory versioning history of item details',
+    'fields' => array(
+      'id' => array(
+        'description' => t('Id Primary Key'),
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),   
+      'tur' => array(
+        'description' => t('Tur'),
+        'type' => 'varchar',
+        'length' => 20,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'mrp' => array(
+        'description' => t('MRP'),
+        'type' => 'varchar',
+        'length' => 25,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'product_name' => array(
+        'description' => t('Product name'),
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'sum_net_sales_cases' => array(
+        'description' => t('Sum net sales cases'),
+        'type' => 'float',
+        'not null' => TRUE,
+      ),
+      'sum_net_sales_quantity' => array(
+        'description' => t('Sum net sales quantity'),
+        'type' => 'float',
+        'not null' => TRUE,
+      ),
+      'sku_code' => array(
+        'description' => t('SKU Code'),
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'sum_net_sales_kgs' => array(
+        'description' => t('Sum net sales in kgs'),
+        'type' => 'float',
+        'not null' => TRUE,
+      ),
+      'sum_net_sales_value' => array(
+        'description' => t('Sum net sales value'),
+        'type' => 'float',
+        'not null' => TRUE,
+      ),
+      'sku_description' => array(
+        'description' => t('SKU Description'),
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'trip_bill_reference' => array(
+        'description' => t('Trip bill reference number'),
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'res_sku_actual_quantity1' => array(
+        'description' => t('Response sku_actual_quantity1'),
+        'type' => 'varchar',
+        'length' => 30,
+     ),
+      'og_sum_net_sales_quantity' => array(
+        'description' => 'og_sum_net_sales_quantity',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+     ),
+      'res_sku_reason' => array(
+        'description' => 'res_sku_reason',
+        'type' => 'varchar',
+        'length' => 255,
+        'default' => '',
+     ),
+      'photo_of_signed_bill_partial' => array(
+       'description' => t('Response photo_of_signed_bill_partial'),
+       'type' => 'varchar',
+       'default' => NULL,
+       'length' => 255,
+     ),
+     'updated_flag' => array(
+       'description' => t('0 => no changes, 1 => manual entry, 2 => api response'),
+       'type' => 'int',
+       'default' => 0,
+       'length' => 3,
+     ),
+       'res_godown_short' => array(
+        'description' => 'res_godown_short',
+        'type' => 'varchar',
+        'length' => 10,
+        'default' => '',
+     ),
+      'res_cashier_short' => array(
+        'description' => 'res_cashier_short',
+        'type' => 'varchar',
+        'length' => 10,
+        'default' => '',
+     ),
+      'dispatch_qty' => array(
+        'description' => t('Dispatch Quantity'),
+        'type' => 'int',
+        'default' => 0,
+     ),
+      'return_qty' => array(
+        'description' => t('Return Quantity'),
+        'type' => 'int',
+        'default' => 0,
+     ),
+      'farey_delivered_qty' => array(
+       'description' => 'farey_delivered_qty',
+       'type' => 'int',
+       'default' => 0,
+     ), 
+      'money_collect_type' => array(
+       'description' => 'money_collect_type',
+       'type' => 'varchar',
+       'length' => 20,
+       'default' => '',
+     ),
+      'line_level_status' => array(
+        'description' => 'Line Level Status',
+        'type' => 'varchar',
+        'length' => 50,
+        'default' => '',
+     ),    
+  ),
+  'primary key' => array('id'),
+  'indexes' => array(
+    'trip_bill_reference' => array('trip_bill_reference'),
+    'sku_code' => array('sku_code'),
+    ),
+ );
+  
+  $schema['vrs_trip_items_history'] = array(
+    'description' => 'describes vrs trip items',
+    'fields' => array(
+      'id' => array(
+        'description' => t('Id Primary Key'),
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'trip_id' => array(
+        'description' => t('Trip ID'),
+        'type' => 'varchar',
+        'length' => 100,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'vrs_id' => array(
+        'description' => t('VRS ID'),
+        'type' => 'varchar',
+        'length' => 100,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'bill_number' => array(
+        'description' => t('Bill Number'),
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'bill_status' => array(
+        'description' => t('Bill status'),
+        'type' => 'varchar',
+        'length' => 25,
+        'default' => NULL,
+      ),
+      'to_be_collected_amt_sales_register' => array(
+        'description' => 'Bill Value From Sales Register',
+        'type' => 'varchar',
+        'length' => 15,
+      ),
+      'to_be_collected_amt' => array(
+        'description' => 'bill_value',
+       'type' => 'varchar',
+       'length' => 15,
+       ),
+      'actual_cash_amount' => array(
+        'description' => 'Actual Cash Amount Collected',
+        'type' => 'varchar',
+        'length' => 15,
+      ),
+      'actual_cheque_amount' => array(
+        'description' => 'Actual Cheque Amount Collected',
+        'type' => 'varchar',
+        'length' => 15,
+      ),
+      'actual_signed_bill_amount' => array(
+        'description' => 'Actual Signed Bill Amount Collected',
+       'type' => 'varchar',
+        'length' => 15,
+      ),
+      'cheque_number' => array(
+        'description' => 'Cheque Number',
+        'type' => 'varchar',
+        'length' => 50,
+      ),
+      'cheque_date' => array(
+        'description' => t('Cheque Date'),
+        'type' => 'int',
+      ),
+      'bank_name' => array(
+        'description' => t('Bank Name'),
+        'type' => 'varchar',
+        'length' => 50,
+      ),
+      'short_amt' => array(
+        'description' => t('Short Amount'),
+        'type' => 'varchar',
+        'length' => 15,
+      ),
+      'reason_code' => array(
+        'description' => t('Reason Code'),
+        'type' => 'varchar',
+        'length' => 50,
+       ),
+      'vrs_version_no' => array(
+        'description' => 'VRS Version No',
+        'type' => 'varchar',
+        'length' => 25,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'vrs_created_date' => array(
+        'description' => 'VRS Created Date',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'vrs_confirm_date' => array(
+        'description' => 'VRS Confirm Date',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'distributor_id' => array(
+        'description' => t('distributor_id'),
+        'type' => 'int',
+         'not null' => TRUE,  
+        'default' => 0,
+      ),
+        'remarks' => array(
+        'description' => 'Bill level remarks',
+        'type' => 'varchar',
+        'length' => 100,
+      ),
+     'non_billable' => array(
+        'description' => 'non_billable',
+        'type' => 'int',
+        'length' => 1,
+      ),
+     'photo_cheque' => array(
+        'description' => 'photo_cheque',
+        'type' => 'varchar',
+        'length' => 200,
+      ),
+     'photo_signed_bill' => array(
+        'description' => 'photo_signed_bill',
+        'type' => 'varchar',
+        'length' => 200,
+      ), 
+       'non_bank_reason_code' => array(
+        'description' => 'non_bank_reason_code',
+        'type' => 'varchar',
+        'length' => 25,   
+      ), 
+    ),
+    'indexes' => array(
+      'trip_id' => array('trip_id'),
+    ),
+    'primary key' => array('id'),
+  );
+  
+  $schema['vrs_trip_items'] = array(
+    'description' => 'describes vrs trip items',
+    'fields' => array(
+      'id' => array(
+        'description' => t('Id Primary Key'),
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'trip_id' => array(
+        'description' => t('Trip ID'),
+        'type' => 'varchar',
+        'length' => 100,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'vrs_id' => array(
+        'description' => t('VRS ID'),
+        'type' => 'varchar',
+        'length' => 100,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'bill_number' => array(
+        'description' => t('Bill Number'),
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'bill_status' => array(
+        'description' => t('Bill status'),
+        'type' => 'varchar',
+        'length' => 25,
+        'default' => NULL,
+      ),
+      'to_be_collected_amt_sales_register' => array(
+        'description' => 'Bill Value From Sales Register',
+        'type' => 'varchar',
+        'length' => 15,
+      ),
+      'to_be_collected_amt' => array(
+        'description' => 'bill_value',
+       'type' => 'varchar',
+       'length' => 15,
+       ),
+      'actual_cash_amount' => array(
+        'description' => 'Actual Cash Amount Collected',
+        'type' => 'varchar',
+        'length' => 15,
+      ),
+      'actual_cheque_amount' => array(
+        'description' => 'Actual Cheque Amount Collected',
+        'type' => 'varchar',
+        'length' => 15,
+      ),
+      'actual_signed_bill_amount' => array(
+        'description' => 'Actual Signed Bill Amount Collected',
+       'type' => 'varchar',
+        'length' => 15,
+      ),
+      'cheque_number' => array(
+        'description' => 'Cheque Number',
+        'type' => 'varchar',
+        'length' => 50,
+      ),
+      'cheque_date' => array(
+        'description' => t('Cheque Date'),
+        'type' => 'int',
+      ),
+      'bank_name' => array(
+        'description' => t('Bank Name'),
+        'type' => 'varchar',
+        'length' => 50,
+      ),
+      'short_amt' => array(
+        'description' => t('Short Amount'),
+        'type' => 'varchar',
+        'length' => 15,
+      ),
+      'reason_code' => array(
+        'description' => t('Reason Code'),
+        'type' => 'varchar',
+        'length' => 50,
+       ),
+      'vrs_version_no' => array(
+        'description' => 'VRS Version No',
+        'type' => 'varchar',
+        'length' => 25,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'vrs_created_date' => array(
+        'description' => 'VRS Created Date',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'vrs_confirm_date' => array(
+        'description' => 'VRS Confirm Date',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'distributor_id' => array(
+        'description' => t('distributor_id'),
+        'type' => 'int',
+         'not null' => TRUE,  
+        'default' => 0,
+      ),
+      'remarks' => array(
+        'description' => 'Bill level remarks',
+        'type' => 'varchar',
+        'length' => 100,
+      ),
+     'non_billable' => array(
+        'description' => 'non_billable',
+        'type' => 'int',
+        'length' => 1,
+      ),
+     'photo_cheque' => array(
+        'description' => 'photo_cheque',
+        'type' => 'varchar',
+        'length' => 200,
+      ),
+     'photo_signed_bill' => array(
+        'description' => 'photo_signed_bill',
+        'type' => 'varchar',
+        'length' => 200,
+      ),  
+      'non_bank_reason_code' => array(
+        'description' => 'non_bank_reason_code',
+        'type' => 'varchar',
+        'length' => 25,   
+      ),     
+    ),
+    'indexes' => array(
+      'trip_id' => array('trip_id'),
+    ),
+    'primary key' => array('id'),
+  );
+ 
+  $schema['vrs_trip_total'] = array(
+    'description' => 'describes vrs trip total',
+    'fields' => array(
+      'id' => array(
+        'description' => t('Id Primary Key'),
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'trip_id' => array(
+        'description' => t('Trip ID'),
+        'type' => 'varchar',
+        'length' => 100,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'vrs_id' => array(
+        'description' => t('VRS ID'),
+        'type' => 'varchar',
+        'length' => 100,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'vrs_version_no' => array(
+        'description' => 'VRS Version No',
+        'type' => 'varchar',
+        'length' => 25,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'bill_count' => array(
+        'description' => 'Bill count',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'total_to_be_collected_sales_register' => array(
+        'description' => 'Total Amount Collected From Sales Register',
+        'type' => 'varchar',
+        'length' => 15,
+        'not null' => TRUE,
+      ),
+      'total_to_be_collected_amt' => array(
+        'description' => 'Total bill_value',
+       'type' => 'varchar',
+        'length' => 15,
+      ),
+      'total_actual_cash_amount' => array(
+        'description' => 'Total Cash Amount Collected',
+        'type' => 'varchar',
+        'length' => 15,
+      ),
+      'total_actual_cheque_amount' => array(
+        'description' => 'Total Cheque Amount Collected',
+        'type' => 'varchar',
+        'length' => 15,
+      ),
+      'total_actual_signed_bill_amount' => array(
+        'description' => 'Total Signed Bill Amount Collected',
+        'type' => 'varchar',
+        'length' => 15,
+      ),
+      'total_short_amt' => array(
+        'description' => t('Total Short Amount'),
+       'type' => 'varchar',
+        'length' => 15,
+      ),
+      'total_cashier_debit_value' => array(
+        'description' => t('Total Cashier Debit Value'),
+        'type' => 'varchar',
+        'length' => 15,
+      ),
+      'cheque_count' => array(
+        'description' => 'Total Cheques Count ',
+        'type' => 'int',
+      ),
+      'sb_count' => array(
+        'description' => 'Total SB Count',
+        'type' => 'int',
+       ),
+      'vrs_created_date' => array(
+        'description' => 'VRS Created Date',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'vrs_confirm_date' => array(
+        'description' => 'VRS Confirm Date',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'distributor_id' => array(
+        'description' => t('distributor_id'),
+        'type' => 'int',
+         'not null' => TRUE,  
+        'default' => 0,
+      ),
+      'total_cashier_cash_short' => array(
+        'description' => t('Total Cashier Cash Shhort'),
+        'type' => 'varchar',
+        'length' => 15,
+      ),  
+     ),
+      'indexes' => array(
+      'trip_id' => array('trip_id'),
+    ),
+    'primary key' => array('id'),
+  );
+  
+  $schema['vrs_trip_total_history'] = array(
+    'description' => 'describes vrs trip total',
+    'fields' => array(
+      'id' => array(
+        'description' => t('Id Primary Key'),
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'trip_id' => array(
+        'description' => t('Trip ID'),
+        'type' => 'varchar',
+        'length' => 100,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'vrs_id' => array(
+        'description' => t('VRS ID'),
+        'type' => 'varchar',
+        'length' => 100,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'vrs_version_no' => array(
+        'description' => 'VRS Version No',
+        'type' => 'varchar',
+        'length' => 25,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'bill_count' => array(
+        'description' => 'Bill count',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'total_to_be_collected_sales_register' => array(
+        'description' => 'Total Amount Collected From Sales Register',
+        'type' => 'varchar',
+        'length' => 15,
+        'not null' => TRUE,
+      ),
+      'total_to_be_collected_amt' => array(
+        'description' => 'Total bill_value',
+       'type' => 'varchar',
+        'length' => 15,
+      ),
+      'total_actual_cash_amount' => array(
+        'description' => 'Total Cash Amount Collected',
+        'type' => 'varchar',
+        'length' => 15,
+      ),
+      'total_actual_cheque_amount' => array(
+        'description' => 'Total Cheque Amount Collected',
+        'type' => 'varchar',
+        'length' => 15,
+      ),
+      'total_actual_signed_bill_amount' => array(
+        'description' => 'Total Signed Bill Amount Collected',
+        'type' => 'varchar',
+        'length' => 15,
+      ),
+      'total_short_amt' => array(
+        'description' => t('Total Short Amount'),
+       'type' => 'varchar',
+        'length' => 15,
+      ),
+      'total_cashier_debit_value' => array(
+        'description' => t('Total Cashier Debit Value'),
+        'type' => 'varchar',
+        'length' => 15,
+      ),
+      'cheque_count' => array(
+        'description' => 'Total Cheques Count ',
+        'type' => 'int',
+      ),
+      'sb_count' => array(
+        'description' => 'Total SB Count',
+        'type' => 'int',
+       ),
+      'vrs_created_date' => array(
+        'description' => 'VRS Created Date',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'vrs_confirm_date' => array(
+        'description' => 'VRS Confirm Date',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'distributor_id' => array(
+        'description' => t('distributor_id'),
+        'type' => 'int',
+         'not null' => TRUE,  
+        'default' => 0,
+      ),
+      'total_cashier_cash_short' => array(
+        'description' => t('Total Cashier Cash Shhort'),
+        'type' => 'varchar',
+        'length' => 15,
+      ),    
+        
+     ),
+      'indexes' => array(
+      'trip_id' => array('trip_id'),
+    ),
+    'primary key' => array('id'),
+  );
+  
+  $schema['vrs_handover'] = array(
+    'description' => 'describes vrs handover',
+    'fields' => array(
+      'id' => array(
+        'description' => t('Id Primary Key'),
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'trip_id' => array(
+        'description' => t('Trip ID'),
+        'type' => 'varchar',
+        'length' => 100,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'vrs_id' => array(
+        'description' => t('VRS ID'),
+        'type' => 'varchar',
+        'length' => 100,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'collection_type' => array(
+        'description' => t('Collection Type'),
+        'type' => 'varchar',
+        'length' => 50,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'total_cash_amt' => array(
+        'description' => t('Total Cash Amount'),
+        'type' => 'float',
+        'not null' => TRUE,
+      ),
+      'handover_to' => array(
+        'description' => t('Handover To'),
+        'type' => 'varchar',
+        'length' => 50,
+      ),
+      'handover_date' => array(
+        'description' => 'Handover Date',
+        'type' => 'int',
+      ),
+      'handover_amt' => array(
+        'description' => t('Handover Amt'),
+        'type' => 'float',
+      ),
+      'petty_cash_amt' => array(
+        'description' => t('Petty Cash Amt'),
+        'type' => 'float',
+      ),
+      'total_cheque_count' => array(
+        'description' => 'Total cheque count',
+        'type' => 'int',
+      ),
+      'cheque_amt' => array(
+        'description' => t('Cheque Amt'),
+        'type' => 'float',
+      ),
+      'signed_bills_count' => array(
+        'description' => 'Signed Bills count',
+        'type' => 'int',
+      ),
+      'signed_bills_amt' => array(
+        'description' => t('Signed Bills Amt'),
+        'type' => 'float',
+      ),
+      'remarks' => array(
+        'description' => t('Remarks'),
+        'type' => 'varchar',
+        'length' => 225,
+      ),
+      'handover_id' => array(
+        'description' => t('Handover ID'),
+        'type' => 'varchar',
+        'length' => 50,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'handover_cheque_id' => array(
+        'description' => t('Handover cheque ID'),
+        'type' => 'varchar',
+        'length' => 50,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'handover_signedbill_id' => array(
+        'description' => t('Handover SignedBill ID'),
+        'type' => 'varchar',
+        'length' => 50,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'file' => array(
+         'description' => 'file id',
+         'type' => 'int',
+         'length' => 20,
+       ),
+      'file_date' => array(
+         'description' => 'file_date',
+         'type' => 'int',
+       ),
+      'distributor_id' => array(
+        'description' => t('distributor_id'),
+        'type' => 'int',
+        'default' => 0,
+      ),
+      'created_date' => array(
+        'description' => 'Created Date',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    ),
+      'indexes' => array(
+      'trip_id' => array('trip_id'),
+    ),
+    'primary key' => array('id'),
+  );
+  $schema['vrs_trip_denominations'] = array(
+    'description' => 'describes vrs trip denominations',
+    'fields' => array(
+      'id' => array(
+        'description' => t('Id Primary Key'),
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'trip_id' => array(
+        'description' => t('Trip ID'),
+        'type' => 'varchar',
+        'length' => 100,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'vrs_total_id' => array(
+        'description' => t('VRs Trip Total Ref ID'),
+        'type' => 'int',
+        'not null' => TRUE,
+      ),
+      'denominations_nid' => array(
+        'description' => t('Denominations Ref NID'),
+        'type' => 'int',
+        'not null' => TRUE,
+      ),
+      'no_of_notes' => array(
+        'description' => 'No Of Notes',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'created_date' => array(
+        'description' => 'Created Date',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'distributor_id' => array(
+        'description' => t('distributor_id'),
+        'type' => 'int',
+        'default' => 0,
+      ),
+      'coins' => array(
+        'description' => 'No Of Coins Value',
+        'type' => 'varchar',
+        'length' => 10,
+      ),  
+     ),
+      'indexes' => array(
+      'trip_id' => array('trip_id'),
+    ),
+    'primary key' => array('id'),
+  );
+  
+  $schema['vrs_handover_history'] = array(
+    'description' => 'VRS handover history',
+    'fields' => array(
+      'id' => array(
+        'description' => t('Id Primary Key'),
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'trip_id' => array(
+        'description' => t('Trip ID'),
+        'type' => 'varchar',
+        'length' => 100,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'vrs_id' => array(
+        'description' => t('VRS ID'),
+        'type' => 'varchar',
+        'length' => 100,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'collection_type' => array(
+        'description' => t('Collection Type'),
+        'type' => 'varchar',
+        'length' => 50,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'total_cash_amt' => array(
+        'description' => t('Total Cash Amount'),
+        'type' => 'float',
+        'not null' => TRUE,
+      ),
+      'handover_to' => array(
+        'description' => t('Handover To'),
+        'type' => 'varchar',
+        'length' => 50,
+      ),
+      'handover_date' => array(
+        'description' => 'Handover Date',
+        'type' => 'int',
+      ),
+      'handover_amt' => array(
+        'description' => t('Handover Amt'),
+        'type' => 'float',
+      ),
+      'petty_cash_amt' => array(
+        'description' => t('Petty Cash Amt'),
+        'type' => 'float',
+      ),
+      'total_cheque_count' => array(
+        'description' => 'Total cheque count',
+        'type' => 'int',
+      ),
+      'cheque_amt' => array(
+        'description' => t('Cheque Amt'),
+        'type' => 'float',
+      ),
+      'signed_bills_count' => array(
+        'description' => 'Signed Bills count',
+        'type' => 'int',
+      ),
+      'signed_bills_amt' => array(
+        'description' => t('Signed Bills Amt'),
+        'type' => 'float',
+      ),
+      'remarks' => array(
+        'description' => t('Remarks'),
+        'type' => 'varchar',
+        'length' => 225,
+      ),
+      'handover_id' => array(
+        'description' => t('Handover ID'),
+        'type' => 'varchar',
+        'length' => 50,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'handover_cheque_id' => array(
+        'description' => t('Handover cheque ID'),
+        'type' => 'varchar',
+        'length' => 50,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'handover_signedbill_id' => array(
+        'description' => t('Handover SignedBill ID'),
+        'type' => 'varchar',
+        'length' => 50,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'file' => array(
+         'description' => 'file id',
+         'type' => 'int',
+         'length' => 20,
+       ),
+      'file_date' => array(
+         'description' => 'file_date',
+         'type' => 'int',
+       ),
+      'distributor_id' => array(
+        'description' => t('distributor_id'),
+        'type' => 'int',
+        'default' => 0,
+      ),
+      'created_date' => array(
+        'description' => 'Created Date',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'cash_version_no' => array(
+        'description' => 'Cash Version No',
+        'type' => 'varchar',
+        'length' => 25,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'cheque_version_no' => array(
+        'description' => 'Cheque Version No',
+        'type' => 'varchar',
+        'length' => 25,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'signed_version_no' => array(
+        'description' => 'Signed Version No',
+        'type' => 'varchar',
+        'length' => 25,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+    ),
+      'indexes' => array(
+      'trip_id' => array('trip_id'),
+    ),
+    'primary key' => array('id'),
+  );
+  return $schema;
+}
+ 
+/*function mrc_inventory_returns_update_7103() {
+  $schema['vrs_trip_items_history'] = array(
+    'description' => 'describes vrs trip items',
+    'fields' => array(
+      'id' => array(
+        'description' => t('Id Primary Key'),
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'trip_id' => array(
+        'description' => t('Trip ID'),
+        'type' => 'varchar',
+        'length' => 100,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'vrs_id' => array(
+        'description' => t('VRS ID'),
+        'type' => 'varchar',
+        'length' => 100,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'bill_number' => array(
+        'description' => t('Bill Number'),
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'bill_status' => array(
+        'description' => t('Bill status'),
+        'type' => 'varchar',
+        'length' => 25,
+        'default' => NULL,
+      ),
+      'to_be_collected_amt_sales_register' => array(
+        'description' => 'Bill Value From Sales Register',
+        'type' => 'varchar',
+        'length' => 15,
+      ),
+      'to_be_collected_amt' => array(
+        'description' => 'bill_value',
+       'type' => 'varchar',
+       'length' => 15,
+       ),
+      'actual_cash_amount' => array(
+        'description' => 'Actual Cash Amount Collected',
+        'type' => 'varchar',
+        'length' => 15,
+      ),
+      'actual_cheque_amount' => array(
+        'description' => 'Actual Cheque Amount Collected',
+        'type' => 'varchar',
+        'length' => 15,
+      ),
+      'actual_signed_bill_amount' => array(
+        'description' => 'Actual Signed Bill Amount Collected',
+       'type' => 'varchar',
+        'length' => 15,
+      ),
+      'cheque_number' => array(
+        'description' => 'Cheque Number',
+        'type' => 'varchar',
+        'length' => 50,
+      ),
+      'cheque_date' => array(
+        'description' => t('Cheque Date'),
+        'type' => 'int',
+      ),
+      'bank_name' => array(
+        'description' => t('Bank Name'),
+        'type' => 'varchar',
+        'length' => 50,
+      ),
+      'short_amt' => array(
+        'description' => t('Short Amount'),
+        'type' => 'varchar',
+        'length' => 15,
+      ),
+      'reason_code' => array(
+        'description' => t('Reason Code'),
+        'type' => 'varchar',
+        'length' => 50,
+       ),
+      'vrs_version_no' => array(
+        'description' => 'VRS Version No',
+        'type' => 'varchar',
+        'length' => 25,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'vrs_created_date' => array(
+        'description' => 'VRS Created Date',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'vrs_confirm_date' => array(
+        'description' => 'VRS Confirm Date',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'distributor_id' => array(
+        'description' => t('distributor_id'),
+        'type' => 'int',
+         'not null' => TRUE,  
+        'default' => 0,
+      ),
+    ),
+    'indexes' => array(
+      'trip_id' => array('trip_id'),
+    ),
+    'primary key' => array('id'),
+  );
+  
+  $schema['vrs_trip_items'] = array(
+    'description' => 'describes vrs trip items',
+    'fields' => array(
+      'id' => array(
+        'description' => t('Id Primary Key'),
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'trip_id' => array(
+        'description' => t('Trip ID'),
+        'type' => 'varchar',
+        'length' => 100,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'vrs_id' => array(
+        'description' => t('VRS ID'),
+        'type' => 'varchar',
+        'length' => 100,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'bill_number' => array(
+        'description' => t('Bill Number'),
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'bill_status' => array(
+        'description' => t('Bill status'),
+        'type' => 'varchar',
+        'length' => 25,
+        'default' => NULL,
+      ),
+      'to_be_collected_amt_sales_register' => array(
+        'description' => 'Bill Value From Sales Register',
+        'type' => 'varchar',
+        'length' => 15,
+      ),
+      'to_be_collected_amt' => array(
+        'description' => 'bill_value',
+       'type' => 'varchar',
+       'length' => 15,
+       ),
+      'actual_cash_amount' => array(
+        'description' => 'Actual Cash Amount Collected',
+        'type' => 'varchar',
+        'length' => 15,
+      ),
+      'actual_cheque_amount' => array(
+        'description' => 'Actual Cheque Amount Collected',
+        'type' => 'varchar',
+        'length' => 15,
+      ),
+      'actual_signed_bill_amount' => array(
+        'description' => 'Actual Signed Bill Amount Collected',
+       'type' => 'varchar',
+        'length' => 15,
+      ),
+      'cheque_number' => array(
+        'description' => 'Cheque Number',
+        'type' => 'varchar',
+        'length' => 50,
+      ),
+      'cheque_date' => array(
+        'description' => t('Cheque Date'),
+        'type' => 'int',
+      ),
+      'bank_name' => array(
+        'description' => t('Bank Name'),
+        'type' => 'varchar',
+        'length' => 50,
+      ),
+      'short_amt' => array(
+        'description' => t('Short Amount'),
+        'type' => 'varchar',
+        'length' => 15,
+      ),
+      'reason_code' => array(
+        'description' => t('Reason Code'),
+        'type' => 'varchar',
+        'length' => 50,
+       ),
+      'vrs_version_no' => array(
+        'description' => 'VRS Version No',
+        'type' => 'varchar',
+        'length' => 25,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'vrs_created_date' => array(
+        'description' => 'VRS Created Date',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'vrs_confirm_date' => array(
+        'description' => 'VRS Confirm Date',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'distributor_id' => array(
+        'description' => t('distributor_id'),
+        'type' => 'int',
+         'not null' => TRUE,  
+        'default' => 0,
+      ),
+    ),
+    'indexes' => array(
+      'trip_id' => array('trip_id'),
+    ),
+    'primary key' => array('id'),
+  );
+ 
+  $schema['vrs_trip_total'] = array(
+    'description' => 'describes vrs trip total',
+    'fields' => array(
+      'id' => array(
+        'description' => t('Id Primary Key'),
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'trip_id' => array(
+        'description' => t('Trip ID'),
+        'type' => 'varchar',
+        'length' => 100,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'vrs_id' => array(
+        'description' => t('VRS ID'),
+        'type' => 'varchar',
+        'length' => 100,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'vrs_version_no' => array(
+        'description' => 'VRS Version No',
+        'type' => 'varchar',
+        'length' => 25,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'bill_count' => array(
+        'description' => 'Bill count',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'total_to_be_collected_sales_register' => array(
+        'description' => 'Total Amount Collected From Sales Register',
+        'type' => 'varchar',
+        'length' => 15,
+        'not null' => TRUE,
+      ),
+      'total_to_be_collected_amt' => array(
+        'description' => 'Total bill_value',
+       'type' => 'varchar',
+        'length' => 15,
+      ),
+      'total_actual_cash_amount' => array(
+        'description' => 'Total Cash Amount Collected',
+        'type' => 'varchar',
+        'length' => 15,
+      ),
+      'total_actual_cheque_amount' => array(
+        'description' => 'Total Cheque Amount Collected',
+        'type' => 'varchar',
+        'length' => 15,
+      ),
+      'total_actual_signed_bill_amount' => array(
+        'description' => 'Total Signed Bill Amount Collected',
+        'type' => 'varchar',
+        'length' => 15,
+      ),
+      'total_short_amt' => array(
+        'description' => t('Total Short Amount'),
+       'type' => 'varchar',
+        'length' => 15,
+      ),
+      'total_cashier_debit_value' => array(
+        'description' => t('Total Cashier Debit Value'),
+        'type' => 'varchar',
+        'length' => 15,
+      ),
+      'cheque_count' => array(
+        'description' => 'Total Cheques Count ',
+        'type' => 'int',
+      ),
+      'sb_count' => array(
+        'description' => 'Total SB Count',
+        'type' => 'int',
+       ),
+      'vrs_created_date' => array(
+        'description' => 'VRS Created Date',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'vrs_confirm_date' => array(
+        'description' => 'VRS Confirm Date',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'distributor_id' => array(
+        'description' => t('distributor_id'),
+        'type' => 'int',
+         'not null' => TRUE,  
+        'default' => 0,
+      ),
+     ),
+      'indexes' => array(
+      'trip_id' => array('trip_id'),
+    ),
+    'primary key' => array('id'),
+  );
+  
+  $schema['vrs_trip_total_history'] = array(
+    'description' => 'describes vrs trip total',
+    'fields' => array(
+      'id' => array(
+        'description' => t('Id Primary Key'),
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'trip_id' => array(
+        'description' => t('Trip ID'),
+        'type' => 'varchar',
+        'length' => 100,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'vrs_id' => array(
+        'description' => t('VRS ID'),
+        'type' => 'varchar',
+        'length' => 100,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'vrs_version_no' => array(
+        'description' => 'VRS Version No',
+        'type' => 'varchar',
+        'length' => 25,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'bill_count' => array(
+        'description' => 'Bill count',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'total_to_be_collected_sales_register' => array(
+        'description' => 'Total Amount Collected From Sales Register',
+        'type' => 'varchar',
+        'length' => 15,
+        'not null' => TRUE,
+      ),
+      'total_to_be_collected_amt' => array(
+        'description' => 'Total bill_value',
+       'type' => 'varchar',
+        'length' => 15,
+      ),
+      'total_actual_cash_amount' => array(
+        'description' => 'Total Cash Amount Collected',
+        'type' => 'varchar',
+        'length' => 15,
+      ),
+      'total_actual_cheque_amount' => array(
+        'description' => 'Total Cheque Amount Collected',
+        'type' => 'varchar',
+        'length' => 15,
+      ),
+      'total_actual_signed_bill_amount' => array(
+        'description' => 'Total Signed Bill Amount Collected',
+        'type' => 'varchar',
+        'length' => 15,
+      ),
+      'total_short_amt' => array(
+        'description' => t('Total Short Amount'),
+       'type' => 'varchar',
+        'length' => 15,
+      ),
+      'total_cashier_debit_value' => array(
+        'description' => t('Total Cashier Debit Value'),
+        'type' => 'varchar',
+        'length' => 15,
+      ),
+      'cheque_count' => array(
+        'description' => 'Total Cheques Count ',
+        'type' => 'int',
+      ),
+      'sb_count' => array(
+        'description' => 'Total SB Count',
+        'type' => 'int',
+       ),
+      'vrs_created_date' => array(
+        'description' => 'VRS Created Date',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'vrs_confirm_date' => array(
+        'description' => 'VRS Confirm Date',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'distributor_id' => array(
+        'description' => t('distributor_id'),
+        'type' => 'int',
+         'not null' => TRUE,  
+        'default' => 0,
+      ),
+     ),
+      'indexes' => array(
+      'trip_id' => array('trip_id'),
+    ),
+    'primary key' => array('id'),
+  );
+  
+  $schema['vrs_handover'] = array(
+    'description' => 'describes vrs handover',
+    'fields' => array(
+      'id' => array(
+        'description' => t('Id Primary Key'),
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'trip_id' => array(
+        'description' => t('Trip ID'),
+        'type' => 'varchar',
+        'length' => 100,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'vrs_id' => array(
+        'description' => t('VRS ID'),
+        'type' => 'varchar',
+        'length' => 100,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'collection_type' => array(
+        'description' => t('Collection Type'),
+        'type' => 'varchar',
+        'length' => 50,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'total_cash_amt' => array(
+        'description' => t('Total Cash Amount'),
+        'type' => 'float',
+        'not null' => TRUE,
+      ),
+      'handover_to' => array(
+        'description' => t('Handover To'),
+        'type' => 'varchar',
+        'length' => 50,
+      ),
+      'handover_date' => array(
+        'description' => 'Handover Date',
+        'type' => 'int',
+      ),
+      'handover_amt' => array(
+        'description' => t('Handover Amt'),
+        'type' => 'float',
+      ),
+      'petty_cash_amt' => array(
+        'description' => t('Petty Cash Amt'),
+        'type' => 'float',
+      ),
+      'total_cheque_count' => array(
+        'description' => 'Total cheque count',
+        'type' => 'int',
+      ),
+      'cheque_amt' => array(
+        'description' => t('Cheque Amt'),
+        'type' => 'float',
+      ),
+      'signed_bills_count' => array(
+        'description' => 'Signed Bills count',
+        'type' => 'int',
+      ),
+      'signed_bills_amt' => array(
+        'description' => t('Signed Bills Amt'),
+        'type' => 'float',
+      ),
+      'remarks' => array(
+        'description' => t('Remarks'),
+        'type' => 'varchar',
+        'length' => 225,
+      ),
+      'handover_id' => array(
+        'description' => t('Handover ID'),
+        'type' => 'varchar',
+        'length' => 50,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'handover_cheque_id' => array(
+        'description' => t('Handover cheque ID'),
+        'type' => 'varchar',
+        'length' => 50,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'handover_signedbill_id' => array(
+        'description' => t('Handover SignedBill ID'),
+        'type' => 'varchar',
+        'length' => 50,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'file' => array(
+         'description' => 'file id',
+         'type' => 'int',
+         'length' => 20,
+       ),
+      'file_date' => array(
+         'description' => 'file_date',
+         'type' => 'int',
+       ),
+      'distributor_id' => array(
+        'description' => t('distributor_id'),
+        'type' => 'int',
+        'default' => 0,
+      ),
+      'created_date' => array(
+        'description' => 'Created Date',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    ),
+      'indexes' => array(
+      'trip_id' => array('trip_id'),
+    ),
+    'primary key' => array('id'),
+  );
+  $schema['vrs_trip_denominations'] = array(
+    'description' => 'describes vrs trip denominations',
+    'fields' => array(
+      'id' => array(
+        'description' => t('Id Primary Key'),
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'trip_id' => array(
+        'description' => t('Trip ID'),
+        'type' => 'varchar',
+        'length' => 100,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'vrs_total_id' => array(
+        'description' => t('VRs Trip Total Ref ID'),
+        'type' => 'int',
+        'not null' => TRUE,
+      ),
+      'denominations_nid' => array(
+        'description' => t('Denominations Ref NID'),
+        'type' => 'int',
+        'not null' => TRUE,
+      ),
+      'no_of_notes' => array(
+        'description' => 'No Of Notes',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'created_date' => array(
+        'description' => 'Created Date',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'distributor_id' => array(
+        'description' => t('distributor_id'),
+        'type' => 'int',
+        'default' => 0,
+      ),
+     ),
+      'indexes' => array(
+      'trip_id' => array('trip_id'),
+    ),
+    'primary key' => array('id'),
+  );
+   
+  db_create_table('vrs_trip_items', $schema['vrs_trip_items']);
+  db_create_table('vrs_trip_total', $schema['vrs_trip_total']);
+  db_create_table('vrs_trip_denominations', $schema['vrs_trip_denominations']);
+  db_create_table('vrs_handover', $schema['vrs_handover']);
+  db_create_table('vrs_trip_items_history', $schema['vrs_trip_items_history']);
+  db_create_table('vrs_trip_total_history', $schema['vrs_trip_total_history']);
+ 
+}*/
+
+/*function mrc_inventory_returns_update_7104() {
+  $field =  array(
+        'description' => t('Total Cashier Cash Shhort'),
+        'type' => 'varchar',
+        'length' => 15,
+      );
+  db_add_field('vrs_trip_total', 'total_cashier_cash_short', $field);
+  db_add_field('vrs_trip_total_history', 'total_cashier_cash_short', $field);
+}*/
+
+/*function mrc_inventory_returns_update_7106() {
+  $field =  array(
+        'description' => 'No Of Coins Value',
+        'type' => 'varchar',
+        'length' => 10,
+      );
+  db_add_field('vrs_trip_denominations', 'coins', $field);
+
+}*/
+
+/*function mrc_inventory_returns_update_7107() {
+  $field1 =  array(
+        'description' => 'Bill level remarks',
+        'type' => 'varchar',
+        'length' => 100,
+      );
+    $field2 =  array(
+        'description' => 'non_billable',
+        'type' => 'int',
+        'length' => 1,
+      );
+    
+    $field3 =  array(
+        'description' => 'photo_cheque',
+        'type' => 'varchar',
+        'length' => 200,
+      );
+    
+    $field4 =  array(
+        'description' => 'photo_signed_bill',
+        'type' => 'varchar',
+        'length' => 200,
+      );
+  
+  db_add_field('vrs_trip_items', 'remarks', $field1);
+  db_add_field('vrs_trip_items_history', 'remarks', $field1);
+  
+  
+  db_add_field('vrs_trip_items', 'non_billable', $field2);
+  db_add_field('vrs_trip_items_history', 'non_billable', $field2);
+  
+  db_add_field('vrs_trip_items', 'photo_cheque', $field3);
+  db_add_field('vrs_trip_items_history', 'photo_cheque', $field3);
+  
+  db_add_field('vrs_trip_items', 'photo_signed_bill', $field4);
+  db_add_field('vrs_trip_items_history', 'photo_signed_bill', $field4);
+
+}
+
+function mrc_inventory_returns_update_7108() {
+  $field1 =  array(
+        'description' => 'Non Bankable Reason Code',
+        'type' => 'int',
+        'length' => 1,
+      );
+  db_add_field('vrs_trip_items', 'non_bank_reason_code', $field1);
+  db_add_field('vrs_trip_items_history', 'non_bank_reason_code', $field1);
+}
+
+function mrc_inventory_returns_update_7109() {
+  db_change_field('vrs_trip_items', 'non_bank_reason_code', 'non_bank_reason_code', array('type' => 'varchar','length'=>5));
+  db_change_field('vrs_trip_items_history', 'non_bank_reason_code', 'non_bank_reason_code', array('type' => 'varchar','length'=>5));
+}
+
+
+/*function mrc_inventory_returns_update_7110() {
+   $fields = array(
+    'res_cheque_date_edit' => array(
+      'description' => t('Response cheque_date_edit'),
+      'type' => 'varchar',
+      'length' => 50,
+      'default' => NULL,
+    ),
+    'res_photo_of_cheque_edit' => array(
+      'description' => t('Response photo_of_cheque_edit'),
+      'type' => 'varchar',
+      'default' => NULL,
+      'length' => 255,
+    ),
+    'res_cheque_amount_edit' => array(
+      'description' => t('Response cheque_amount_edit'),
+      'type' => 'varchar',
+      'length' => 50,
+      'default' => NULL,
+    ),
+    'res_money_collect2_edit' => array(
+      'description' => t('Response money_collect2_edit'),
+      'type' => 'varchar',
+      'length' => 50,
+      'default' => NULL,
+    ),
+    'photo_of_signed_bill_partial_edit' => array(
+      'description' => t('Response photo_of_signed_bill_partial_edit'),
+      'type' => 'varchar',
+      'default' => NULL,
+      'length' => 255,
+    ),
+    'res_confirm_signed_bill_amount_edit' => array(
+      'description' => t('Response confirm_signed_bill_amount_edit'),
+      'type' => 'varchar',
+      'length' => 50,
+      'default' => NULL,
+    ),
+    'res_bank_name_edit' => array(
+      'description' => t('Response Bank Name_edit'),
+      'type' => 'varchar',
+      'length' => 50,
+      'default' => NULL,
+    ),
+    'res_photo_of_signed_bill_delivery_edit' => array(
+      'description' => t('Response photo_of_signed_bill_delivery_edit'),
+      'type' => 'varchar',
+      'default' => NULL,
+      'length' => 255,
+    ),
+    'res_cash_amount_edit' => array(
+       'description' => 'res_cash_amount_edit',
+       'type' => 'varchar',
+       'length' => 50,
+       'not null' => TRUE,
+       'default' => '',
+    ),
+    'res_signed_bill_delivery_edit' => array(
+       'description' => t('Response signed_bill_delivery_edit'),
+       'type' => 'varchar',
+       'length' => 50,
+      'default' => NULL,
+    ),
+    'res_signed_bill_partial_edit' => array(
+       'description' => t('Response signed_bill_delivery_edit'),
+       'type' => 'varchar',
+       'length' => 50,
+      'default' => NULL,
+    ),
+    'res_cheque_no' => array(
+       'description' => t('Response cheque_no'),
+       'type' => 'varchar',
+       'length' => 50,
+       'default' => NULL,
+     ),
+    'res_cheque_no_edit' => array(
+       'description' => t('Response cheque_no'),
+       'type' => 'varchar',
+       'length' => 50,
+       'default' => NULL,
+     ),
+  );
+  foreach ($fields as $key => $field) {
+    if (!db_field_exists('inventory_versioning_api_data', $key)) {
+      db_add_field('inventory_versioning_api_data', $key, $field);
+    }
+  }
+}
+ * 
+ */
+
+/*function mrc_inventory_returns_update_7111() {
+  $schema['vrs_handover_history'] = array(
+    'description' => 'VRS handover history',
+    'fields' => array(
+      'id' => array(
+        'description' => t('Id Primary Key'),
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'trip_id' => array(
+        'description' => t('Trip ID'),
+        'type' => 'varchar',
+        'length' => 100,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'vrs_id' => array(
+        'description' => t('VRS ID'),
+        'type' => 'varchar',
+        'length' => 100,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'collection_type' => array(
+        'description' => t('Collection Type'),
+        'type' => 'varchar',
+        'length' => 50,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'total_cash_amt' => array(
+        'description' => t('Total Cash Amount'),
+        'type' => 'float',
+        'not null' => TRUE,
+      ),
+      'handover_to' => array(
+        'description' => t('Handover To'),
+        'type' => 'varchar',
+        'length' => 50,
+      ),
+      'handover_date' => array(
+        'description' => 'Handover Date',
+        'type' => 'int',
+      ),
+      'handover_amt' => array(
+        'description' => t('Handover Amt'),
+        'type' => 'float',
+      ),
+      'petty_cash_amt' => array(
+        'description' => t('Petty Cash Amt'),
+        'type' => 'float',
+      ),
+      'total_cheque_count' => array(
+        'description' => 'Total cheque count',
+        'type' => 'int',
+      ),
+      'cheque_amt' => array(
+        'description' => t('Cheque Amt'),
+        'type' => 'float',
+      ),
+      'signed_bills_count' => array(
+        'description' => 'Signed Bills count',
+        'type' => 'int',
+      ),
+      'signed_bills_amt' => array(
+        'description' => t('Signed Bills Amt'),
+        'type' => 'float',
+      ),
+      'remarks' => array(
+        'description' => t('Remarks'),
+        'type' => 'varchar',
+        'length' => 225,
+      ),
+      'handover_id' => array(
+        'description' => t('Handover ID'),
+        'type' => 'varchar',
+        'length' => 50,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'handover_cheque_id' => array(
+        'description' => t('Handover cheque ID'),
+        'type' => 'varchar',
+        'length' => 50,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'handover_signedbill_id' => array(
+        'description' => t('Handover SignedBill ID'),
+        'type' => 'varchar',
+        'length' => 50,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'file' => array(
+         'description' => 'file id',
+         'type' => 'int',
+         'length' => 20,
+       ),
+      'file_date' => array(
+         'description' => 'file_date',
+         'type' => 'int',
+       ),
+      'distributor_id' => array(
+        'description' => t('distributor_id'),
+        'type' => 'int',
+        'default' => 0,
+      ),
+      'created_date' => array(
+        'description' => 'Created Date',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'cash_version_no' => array(
+        'description' => 'Cash Version No',
+        'type' => 'varchar',
+        'length' => 25,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'cheque_version_no' => array(
+        'description' => 'Cheque Version No',
+        'type' => 'varchar',
+        'length' => 25,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'signed_version_no' => array(
+        'description' => 'Signed Version No',
+        'type' => 'varchar',
+        'length' => 25,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+    ),
+      'indexes' => array(
+      'trip_id' => array('trip_id'),
+    ),
+    'primary key' => array('id'),
+  );
+  if (!db_table_exists('vrs_handover_history')) {
+    db_create_table('vrs_handover_history', $schema['vrs_handover_history']);
+  }
+}
+*/
+/*function mrc_inventory_returns_update_7112() {
+   $fields = array(
+    'line_confirmation_date' => array(
+      'description' => 'Line Confirmation Date',
+      'type' => 'int',
+    ),
+    'return_qty_edit' => array(
+        'description' => t('Return Quantity Edit'),
+        'type' => 'int',
+        'default' => 0,
+    ),
+    'res_sku_reason_edit' => array(
+       'description' => 'Sku Reason Edit',
+       'type' => 'varchar',
+       'length' => 255,
+       'default' => '',
+    ),
+  );
+  foreach ($fields as $key => $field) {
+    if (!db_field_exists('inventory_versioning_item_details', $key)) {
+      db_add_field('inventory_versioning_item_details', $key, $field);
+    }
+  }
+}*/

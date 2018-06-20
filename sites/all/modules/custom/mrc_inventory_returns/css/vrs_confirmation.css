@@ -1,0 +1,332 @@
+/*
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+*/
+/* 
+    Created on : 21 May, 2018, 1:03:51 PM
+    Author     : user
+*/
+
+/*#bill_details thead, tbody { display: block; }
+
+#bill_details tbody {
+    height: 100px;       
+    overflow-y: auto;    
+    overflow-x: auto;  
+}
+*/
+/* line 1966, ../sass/leanbox-global.scss */
+/* line 1949, ../sass/leanbox-global.scss */
+.note_denomination_popup {
+  position: fixed;
+  width: 540px;
+  height: 325px;
+  margin: auto;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  z-index: 9999;
+  background: #eee;
+  padding: 20px;
+  border: 1px solid #ddd;
+  display: none;
+  font-size: 13px;
+  overflow-x: scroll;
+}
+.note_denomination_popup .control-label {
+  float: left;
+  display: block;
+  clear:both;
+}
+/* line 1973, ../sass/leanbox-global.scss */
+.note_denomination_popup .form-control {
+  /*width: 55%;
+  display: inline-block;
+  float: left;*/
+}
+/* line 1979, ../sass/leanbox-global.scss */
+.note_denomination_popup #close_button {
+  text-align: center;
+  
+}
+/* line 1982, ../sass/leanbox-global.scss */
+.note_denomination_popup .form-group {
+  /*display: inline-block;
+  width: 50%;
+  float: left;
+  margin-top:10px;*/
+}
+
+
+/* line 1903, ../sass/leanbox-global.scss */
+.page-vrs-confirmation .note_denomination_popup .form-group {
+  /*display: inline-block;
+  width: 140px;
+  float: none;
+  vertical-align: top;
+  margin-left: 20px;*/
+}
+/* line 1909, ../sass/leanbox-global.scss */
+.page-vrs-confirmation .note_denomination_popup .form-group .control-label {
+  /*width: 100%;
+  line-height: 29px;
+  display: inline-block;
+  margin-right: 10px;
+  clear: both;
+  float: left;*/
+}
+/* line 1917, ../sass/leanbox-global.scss */
+.page-vrs-confirmation .note_denomination_popup .form-group .form-control {
+  /*width: 66%;*/
+}
+
+/* line 1924, ../sass/leanbox-global.scss */
+.page-vrs-confirmation .note_denomination_popup {
+  width: 450px;
+}
+/* line 1927, ../sass/leanbox-global.scss */
+.page-vrs-confirmation .note_denomination_popup .form-group .control-label {
+  width: auto;
+  margin-right: 10px;
+}
+/* line 1931, ../sass/leanbox-global.scss */
+.page-vrs-confirmation .note_denomination_popup .form-group input {
+  /*width: 170px;*/
+}
+/* line 1937, ../sass/leanbox-global.scss */
+.page-vrs-confirmation #trip-details .font-weight-bold.col-lg-6 {
+  padding-bottom: 15px;
+}
+/* line 1942, ../sass/leanbox-global.scss */
+.page-vrs-confirmation #trip-details table th:first-child, .page-crate-handover #trip-details table td:first-child {
+  display: none;
+}
+.vrs_version {
+    text-align: center;
+    font-weight: bold;
+}
+.custom_form_wrapper{
+  font-size: 14px;
+  line-height: 16px;
+}
+.custom_form_wrapper .form-item input, .custom_form_wrapper .form-item select {
+  width: 100%;
+}
+.custom_form_wrapper .form-item input[type="text"], 
+.custom_form_wrapper .form-item input[type="password"], 
+.custom_form_wrapper .form-item input[type="email"], 
+.custom_form_wrapper .form-item select, 
+.custom_form_wrapper .form-item select.form-select{
+  padding: 0 12px;
+  height: 25px;
+  line-height: 25px;
+}
+.custom_form_wrapper .container-inline-date .form-item {
+  width: 100%;
+}
+.custom_form_wrapper .container-inline-date .form-item .date-padding {
+  width: 100%;
+}
+.custom_form_wrapper .form_row {
+  margin: 0 -15px 8px -15px;
+}
+.custom_form_wrapper .form_row.form_row2{
+  margin: 0 -25px 8px -25px;
+}
+.custom_form_wrapper .form_row label{
+  margin-bottom: 3px;
+}
+.custom_form_wrapper .form_row:before, .custom_form_wrapper .form_row:after {
+  content: '';
+  display: table;
+}
+.custom_form_wrapper .form_row:after {
+  clear: both;
+}
+.custom_form_wrapper .form_row .col_2 {
+  width: 12%;
+  float: left;
+  padding: 0 15px;
+}
+.custom_form_wrapper .form_row2 .col_2 {
+  width: 12%;
+  float: left;
+  padding: 0 25px;
+}
+.custom_form_wrapper .form_row2 .col_2.col_2_1{
+  width: 13%;
+}
+.custom_form_wrapper .form_row2 .col_2.col_2_2{
+  width: 20%;
+}
+.custom_form_wrapper .form_row2 .col_3 {
+  width: 12%;
+  float: left;
+  padding:0 25px; 
+  position: relative;
+}
+.custom_form_wrapper .common_btn .btn.btn-default{
+  margin-top: 0;
+}
+.custom_form_wrapper .form_row .form-group{
+  margin: 0;
+}
+.custom_form_wrapper .custom_middle_table .table-responsive {
+  overflow: auto;
+  max-height: 300px;
+}
+.custom_form_wrapper .custom_middle_table .form-type-file {
+  width: 115px;
+}
+.custom_form_wrapper .custom_header_table input,
+.custom_form_wrapper .custom_header_table select,
+.custom_form_wrapper .custom_middle_table input, 
+.custom_form_wrapper .custom_middle_table select,
+.custom_form_wrapper .footer_table input,
+.custom_form_wrapper .footer_table select{
+  max-width: 110px;
+}
+.custom_form_wrapper .vrs_version {
+  color: #278a27;
+  background: #dcf1dc;
+  padding: 6px;
+}
+.custom_form_wrapper .vrs_version h2 {
+  margin: 0;
+  font-size: 14px;
+  line-height: 16px;
+}
+.custom_form_wrapper .or_txt {
+  margin-bottom: 5px;
+}
+.custom_form_wrapper .or_txt1{
+  position: absolute;
+  right: -9px;
+  top: 50%;
+}
+.custom_form_wrapper .form-item select[multiple] {
+  height: auto;
+  float: none;
+}
+.custom_form_wrapper .note_denomination_popup {
+  text-align: center;
+}
+.custom_form_wrapper .note_2col {
+  width: 33.33%;
+  float: left;
+  padding: 0 10px;
+  margin-bottom: 12px;
+  text-align: left;
+}
+.custom_form_wrapper .note_2col .form-group.form-item label {
+  margin-bottom: 2px;
+}
+.custom_form_wrapper .note_btn_wrap {
+  text-align: center;
+}
+.custom_form_wrapper .note_btn_wrap .btn {
+  display: inline-block;
+}
+.custom_form_wrapper .note_txt {
+  font-size: 14px;
+}
+.clear {
+  clear: both;
+}
+.custom_header_table table > thead > tr > th, 
+.custom_header_table table > tbody > tr > td,
+.custom_middle_table table > thead > tr > th, 
+.custom_middle_table table > tbody > tr > td,
+.footer_table table > thead > tr > th,
+.footer_table table > tbody > tr > td{
+  padding: 4px !important;
+  font-size: 12px;
+} 
+.custom_form_wrapper .table{
+  margin-bottom: 10px;
+}
+.custom_form_wrapper .bill_status{
+  margin-top: 5px;
+}
+.custom_form_wrapper .bill_status label{
+  padding: 0;
+}
+.custom_form_wrapper .bill_status input[type="checkbox"]{
+  width: auto;
+  margin:0 5px 0 0; 
+  position: relative;
+  display: inline-block;
+  vertical-align: middle;
+}
+.custom_form_wrapper .vrs_signed_bill_image{
+  float: left;
+  margin-right: 2px;
+  line-height: 22px;
+}
+.custom_form_wrapper .custom_middle_table .form-type-file{
+  float: left;
+  width: auto;
+}
+.custom_form_wrapper .custom_middle_table .form-type-file .form-file{
+  max-width: 91px;
+  padding: 0;
+  border: 0;
+}
+.custom_form_wrapper .custom_middle_table.vrs_middle_table table > thead > tr > th,
+.custom_form_wrapper .custom_middle_table.vrs_middle_table table > tbody > tr > td{
+  padding: 2px !important;
+}
+
+@media (max-width: 1300px) {
+  .custom_form_wrapper .form_row2 .col_3{
+    width: 13%;
+  }
+}
+@media (max-width: 1250px) {
+  .custom_form_wrapper .form_row2 .col_2.col_2_2{
+    width: 25%;
+  }
+  .custom_form_wrapper .form_row2 .col_3{
+    width: 15%;
+  }
+}
+
+.img_close_btn {
+    float:right;
+    width:100;
+    cursor:pointer;
+    margin-botton:10px;
+}
+.img_close {
+  width:20px;  
+  height:20px;
+  cursor:pointer;
+  float:right;
+  
+}
+
+#bill_details tr td:last-child {
+    background: #ff0000;
+    display:none;
+}
+#footer_details tr :nth-child(2) {
+    background: #ff0000;
+    display:none;
+}
+
+#bill_details tr :nth-child(5) {
+    background: #ff0000;
+    display:none;
+}
+
+#bill_details tr :nth-child(6) {
+    background: #ff0000;
+    display:none;
+}
+
+
+
+
+

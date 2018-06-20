@@ -1,0 +1,115 @@
+<?php
+
+/* 
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+
+/**
+ * Implements hook_menu
+ * @return string
+ */
+function leanbox_sku_wise_return_menu() {
+  $items = array();
+  
+  $items['sku-wise-return'] = array(
+     'title' => 'SKU-wise Returns',
+     'page callback' => 'drupal_get_form',
+     'page arguments' => array('sku_wise_returns_form'),
+     'access arguments' => array('returns confirmation'),
+     'type' => MENU_NORMAL_ITEM,
+     'file' => 'includes/sku_wise_returns.inc',
+   );
+  
+  $items['sku-wise-trip/autocomplete'] = array(
+    'title' => 'trip_autocomplete',
+    'page callback' => 'sku_wise_trip_id_autocomplete',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  
+  $items['sku/autocomplete/%'] = array(
+    'title' => 'sku autocomplete',
+    'page callback' => '_get_all_tripsku',
+    'page arguments' => array(2),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  
+  return $items;
+}
+
+function sku_wise_trip_id_autocomplete($string = '') {
+  global $user;
+  $dis_id = change_feeds_import_get_distributor_id($user->uid);
+  $result = array();
+
+  if ($string) {
+    $query = db_select('node', 'n');
+    $query->condition('n.title', db_like($string) . '%', 'LIKE');
+    $query->condition('n.type', 'dispatch_data');
+    $query->join('dispatch_planning_api_data', 'ad', 'ad.runsheet_number = n.title');
+    $query->fields('n', array('title'));
+    $query->condition('n.uid', $dis_id);
+    $query->condition('ad.distributor_id', $dis_id);
+    $result = $query->execute()->fetchAllKeyed(0, 0);
+  }
+
+  drupal_json_output($result);
+}
+
+function _get_all_tripsku($trip_id, $string = '') {
+  global $user;
+  $dis_id = change_feeds_import_get_distributor_id($user->uid);
+  
+  if (!empty($trip_id) && !empty($string)) {
+    $query = db_select('dispatch_planning_item_details', 'dpi');
+    $query->join('dispatch_planning_api_data', 'ad', 'dpi.trip_bill_reference = ad.id');
+    $query->condition('ad.runsheet_number', $trip_id);
+    $query->condition('ad.distributor_id', $dis_id);
+    $query->condition('dpi.product_name' , '%'.db_like($string) . '%', 'LIKE');
+    $query->condition('dpi.line_level_status', 'line_deliver', '!=');
+    $query->fields('dpi', array('product_name'));
+    $result = $query->execute()->fetchAllKeyed(0, 0);
+  }
+  drupal_json_output($result);
+}
+
+function get_mrp_from_sku($trip_number, $sku_name) {
+  global $user;
+  $dis_id = change_feeds_import_get_distributor_id($user->uid);
+  
+  $result = array();
+  if (!empty($sku_name)) {
+    $query = db_select('dispatch_planning_item_details', 'dpi');
+    $query->join('dispatch_planning_api_data', 'ad', 'dpi.trip_bill_reference = ad.id');
+    $query->condition('ad.runsheet_number', $trip_number, '=');
+    $query->condition('ad.distributor_id', $dis_id);
+    $query->condition('dpi.line_level_status', 'line_deliver', '!=');
+    $query->condition('dpi.product_name', $sku_name, '=');
+    $query->fields('dpi', array('mrp'));
+    $result = $query->execute()->fetchAllKeyed(0, 0);  
+  }
+  return $result;
+}
+
+function get_to_be_returned_qty($trip_number, $sku_name, $mrp) {
+  global $user;
+  $dis_id = change_feeds_import_get_distributor_id($user->uid);
+  
+  $result = array();
+  if(!empty($trip_number) && !empty($sku_name) && !empty($mrp)) {
+    $query = db_select('dispatch_planning_item_details', 'dpi');
+    $query->join('dispatch_planning_api_data', 'ad', 'dpi.trip_bill_reference = ad.id');
+    $query->condition('ad.runsheet_number', $trip_number, '=');
+    $query->condition('ad.distributor_id', $dis_id);
+    $query->condition('dpi.product_name', $sku_name, '=');
+    $query->condition('dpi.mrp', $mrp, '=');
+    $query->condition('dpi.line_level_status', 'line_deliver', '!=');
+    $query->addExpression('SUM(dpi.return_qty)', 'return_qty');
+    $query->addExpression('GROUP_CONCAT(dpi.trip_bill_reference)', 'ids');
+    $result = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+  }
+  return $result;
+}

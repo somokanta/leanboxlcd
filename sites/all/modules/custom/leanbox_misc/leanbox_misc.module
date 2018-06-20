@@ -440,3 +440,15 @@ function van_stop_master_form_submit($form, &$form_state) {
     node_save($node);
   }
 }
+
+function get_trip_exec_date_from_trip_id($trip_id) {
+  $query = db_select('node', 'n');
+  $query->condition('n.title', $trip_id, "=");
+  $query->condition('n.status', 1);
+  $query->addTag('node_distributor_access');
+  $query->join('field_data_field_trip_executon_date', 'trip_exe', 'trip_exe.entity_id = n.nid');
+  $query->fields('trip_exe', array('field_trip_executon_date_value'));
+  $trip_id_result = $query->execute()->fetchAssoc();
+  
+  return $trip_id_result;
+}

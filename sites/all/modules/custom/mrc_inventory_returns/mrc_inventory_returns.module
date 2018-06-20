@@ -1,0 +1,660 @@
+<?php
+
+/* 
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+
+/**
+ * Implements hook_menu
+ * @return string
+ */
+function mrc_inventory_returns_menu() {
+  $items = array();
+  
+  $items['returns-confirmation'] = array(
+     'title' => 'Returns Confirmation',
+     'page callback' => 'drupal_get_form',
+     'page arguments' => array('returns_confirmation_form'),
+     'access arguments' => array('returns confirmation'),
+     'type' => MENU_NORMAL_ITEM,
+     'file' => 'includes/returns_confirmation.inc',
+   );
+  
+  $items['overall-summary-popup/%ctools_js/%'] = array(
+    'page callback' => 'overall_summary_popup_callback',
+    'page arguments' => array(1, 2),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  
+  /*$items['full-returns-popup/%ctools_js/%'] = array(
+    'page callback' => 'full_returns_popup_callback',
+    'page arguments' => array(1, 2),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  
+  $items['partial-deliver-popup/%ctools_js/%'] = array(
+    'page callback' => 'partial_deliver_popup_callback',
+    'page arguments' => array(1, 2),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  
+  $items['asset-summary-popup/%ctools_js/%'] = array(
+    'page callback' => 'asset_summary_popup_callback',
+    'page arguments' => array(1, 2),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  
+  $items['bills-summary-popup/%ctools_js/%'] = array(
+    'page callback' => 'bills_summary_popup_callback',
+    'page arguments' => array(1, 2),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  */
+  $items['returns-confirmation/edit'] = array(
+     'title' => 'Returns Confirmation Edit',
+     'page callback' => 'drupal_get_form',
+     'page arguments' => array('returns_confirmation_edit_form'),
+     'access arguments' => array('returns confirmation'),
+     'type' => MENU_NORMAL_ITEM,
+     'file' => 'includes/returns_confirmation_edit.inc',
+   );
+   
+  $items['vrs-confirmation'] = array(
+     'title' => 'VRS Confirmation',
+     'page callback' => 'drupal_get_form',
+     'page arguments' => array('vrs_confirmation_form'),
+     'access arguments' => array('returns confirmation'),
+     'type' => MENU_NORMAL_ITEM,
+     'file' => 'includes/vrs_confirmation.inc',
+   );
+  
+  $items['vrs-confirmation/delete'] = array(
+     'title' => 'Delete Current VRS Version',
+     'page callback' => 'drupal_get_form',
+     'page arguments' => array('vrs_confirmation_delete_form'),
+     'access arguments' => array('returns confirmation'),
+     'type' => MENU_NORMAL_ITEM,
+     'file' => 'includes/vrs_confirmation_delete.inc',
+   );
+
+  $items['handover-confirmation'] = array(
+     'title' => 'Handover Confirmation',
+     'page callback' => 'drupal_get_form',
+     'page arguments' => array('handover_confirmation_form'),
+     'access arguments' => array('returns confirmation'),
+     'type' => MENU_NORMAL_ITEM,
+     'file' => 'includes/handover_confirmation.inc',
+   );
+  
+  $items['handover-acknowledgement-upload'] = array(
+     'title' => 'Handover Acknowledgement Upload',
+     'page callback' => 'drupal_get_form',
+     'page arguments' => array('handover_acknowledgement_form'),
+     'access arguments' => array('returns confirmation'),
+     'type' => MENU_NORMAL_ITEM,
+     'file' => 'includes/handover_acknowledgement_upload.inc',
+   );
+  
+  $items['handover-id/list'] = array(
+     'title' => 'Get List of handover id',
+     'page callback' => 'get_list_of_handover_ids',
+     'access arguments' => array('returns confirmation'),
+     'type' => MENU_CALLBACK,
+   );
+  
+  $items['vrs-printout'] = array(
+    'title' => 'VRS Printout',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('get_data_of_vrs_form'),
+    'access arguments' => array('returns confirmation'),
+    'file' => 'includes/vrs_printout.inc',
+  );
+  
+  $items['download-vrs-report/%'] = array(
+    'title' => 'Download VRS Report',
+    'page callback' => 'download_vrs_report',
+    'page arguments' => array(1),
+    'access callback' => TRUE,
+    'access arguments' => array('returns confirmation'),  
+    'type' => MENU_CALLBACK,
+    'file' => 'includes/vrs_printout.inc',
+  );
+  
+  $items['download-bills-summary/%'] = array(
+    'title' => 'Download Bills Summary',
+    'page callback' => 'download_bills_summary',
+    'page arguments' => array(1),
+    'access arguments' => array('returns confirmation'),  
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  
+  $items['get_all_vrs_versions/%'] = array(
+    'title' => 'All Versions',
+    'page callback' => 'get_vrs_versions',
+    'page arguments' => array(1),
+    'access arguments' => array('returns confirmation'),  
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'includes/vrs_printout.inc',
+  );
+  
+
+  $items['bank_names/autocomplete/%'] = array(
+      'title' => 'Autocomplete for Bank Name',
+      'page callback' => '_banks_autocomplete',
+      'page arguments' => array(2),
+      'access arguments' => array('returns confirmation'),  //or whatever permission makes sense
+      'type' => MENU_CALLBACK,
+      'file' => 'includes/vrs_confirmation.inc',
+    );
+ 
+  $items['get_bank_names/autocomplete/%'] = array(
+      'title' => 'Autocomplete for Bank Names',
+      'page callback' => '_get_bank_names',
+      'page arguments' => array(2),
+      'access arguments' => array('returns confirmation'),  //or whatever permission makes sense
+      'type' => MENU_CALLBACK,
+    );
+  
+
+  $items['handover-confirmation/delete'] = array(
+    'title' => 'Handover Confirmation Delete',
+     'page callback' => 'drupal_get_form',
+     'page arguments' => array('handover_confirmation_delete_form'),
+     'access arguments' => array('returns confirmation'),
+     'type' => MENU_NORMAL_ITEM,
+     'file' => 'includes/handover_confirmation_delete.inc',
+  );
+  
+  $items['confirm_trips/autocomplete'] = array(
+    'title' => 'confirm_trips/autocomplete',
+    'page callback' => 'confirm_trips_autocomplete',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+    
+  return $items;
+
+}
+
+function confirm_trips_autocomplete($string = '') {
+  $result = array();
+
+  if ($string) {
+    global $user;
+    $dis_id = change_feeds_import_get_distributor_id($user->uid);
+    $query = db_select('vrs_handover', 'vh');
+    $query->condition('vh.distributor_id', $dis_id, '=');
+    $query->condition('vh.trip_id', '%'. db_like($string) . '%', 'LIKE');
+    $query->fields('vh', array('trip_id'));
+    $result = $query->execute()->fetchAllKeyed(0, 0);
+  }
+
+  drupal_json_output($result);
+}
+
+/**
+ * Implements hook_permission
+ * @return array
+ */
+function mrc_inventory_returns_permission() {
+   return array(
+     'returns confirmation' => array(
+       'title' => t('Returns Confirmation'),
+       'description' => t('Returns Confirmation')
+     ),
+   );
+}
+
+/*
+ * Function to get all cashier names for select list
+ */
+function get_all_cashier_names() {
+  $query = db_select('node', 'n');
+  $query->condition('n.type', 'dispatch_data');
+  $query->addTag('node_uid');
+  $query->join('field_data_field_cashier_name', 'cn', 'cn.entity_id = n.nid');
+  $query->fields('cn', array('field_cashier_name_value'));
+
+  $results = $query->execute()->fetchAllKeyed(0, 0);
+  return $results;
+}
+
+/*
+ * Get all data of Trip from Dispatch Data Table.
+ */
+function check_trip_id_exists_or_not($dis_id, $trip_id) {
+  $query = db_select('node', 'n');
+  $query->condition('n.type', 'dispatch_data');
+  $query->condition('n.uid', $dis_id);
+  $query->condition('n.title', $trip_id);
+  $query->leftjoin('field_data_field_vrs_status', 'vs', 'vs.entity_id = n.nid');
+  $query->fields('vs', array('field_vrs_status_value'));
+
+  $query->fields('n', array('nid'));
+  $results = $query->execute()->fetchAll();
+
+  return $results[0];
+}
+
+/**
+ * Ajax menu callback.
+ * Overall Summary Prinout Popup
+ */
+function overall_summary_popup_callback($ajax, $trip_number) {
+  if ($ajax) {
+    ctools_include('ajax');
+    ctools_include('modal');
+    
+    $view_name = "asset_summary";
+    $view = views_get_view($view_name, '');
+    $view->set_arguments(array($trip_number));
+    $view->use_ajax = TRUE;
+    $output[] = ctools_modal_command_display(t('Summary Printout'), $view->render());
+
+    print ajax_render($output);
+    drupal_exit();
+  }
+}
+
+
+/**
+ * Ajax menu callback.
+ * Full Returned Prinout Popup
+ */
+/*function full_returns_popup_callback($ajax, $trip_number) {
+  if ($ajax) {
+    ctools_include('ajax');
+    ctools_include('modal');
+    
+    $view_name = "full_return_printout_popup";
+    $view = views_get_view($view_name, '');
+    $view->set_arguments(array($trip_number));
+    $view->use_ajax = TRUE;
+    $output[] = ctools_modal_command_display(t('Full Returned Prinout'), $view->render());
+
+    print ajax_render($output);
+    drupal_exit();
+  }
+}
+
+
+function partial_deliver_popup_callback($ajax, $trip_number) {
+  if ($ajax) {
+    ctools_include('ajax');
+    ctools_include('modal');
+    
+    $view_name = "partial_return_printout_popup";
+    $view = views_get_view($view_name, '');
+    $view->set_arguments(array($trip_number));
+    $view->use_ajax = TRUE;
+    $output[] = ctools_modal_command_display(t('Partial Delivered Prinout'), $view->render());
+
+    print ajax_render($output);
+    drupal_exit();
+  }
+}
+
+function asset_summary_popup_callback($ajax, $trip_number) {
+  if ($ajax) {
+    ctools_include('ajax');
+    ctools_include('modal');
+    
+    $view_name = "asset_summary";
+    $view = views_get_view($view_name, '');
+    $view->set_arguments(array($trip_number));
+    $view->use_ajax = TRUE;
+    $output[] = ctools_modal_command_display(t('Asset Summary'), $view->render());
+
+    print ajax_render($output);
+    drupal_exit();
+  }
+}
+
+function bills_summary_popup_callback($ajax, $trip_number) {
+  if ($ajax) {
+    ctools_include('ajax');
+    ctools_include('modal');
+    
+    $get_bills_summary = get_bills_summary($trip_number);
+    $view->use_ajax = TRUE;
+    $output[] = ctools_modal_command_display(t('Bills Summary'), $get_bills_summary);
+
+    print ajax_render($output);
+    drupal_exit();
+  }
+}*/
+
+// get notes denominations
+function get_notes_denominations() {
+    /*$query = db_select('node', 'n');
+    $query->condition('n.type', 'notes_denominations');
+    $query->condition('n.status',1);
+    $query->fields('n', array('nid'));
+    $query->addExpression("CAST(n.title AS UNSIGNED)", 'title');
+    $query->orderBy('n.title','ASC');
+    //$query->fields('n', array('nid', 'title'));
+    $result = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+    return $result;*/
+    
+    $query =  db_query("SELECT distinct CAST(title AS UNSIGNED) AS title,nid  FROM {node}"
+           . " WHERE type = 'notes_denominations'  and status =1 order by title desc");
+    $result = $query->fetchAll(PDO::FETCH_ASSOC);
+    return $result;
+}
+
+function _get_trip_ids_using_dispatch_date($dispatch_date) {
+    $res = array();
+   if (!empty($dispatch_date)) {
+      global $user;
+      $dis_id = change_feeds_import_get_distributor_id($user->uid);
+      $query = db_select('node', 'n');
+      $query->condition('n.type', 'dispatch_data');
+      $query->condition('n.uid', $dis_id);
+      $query->join('field_data_field_dispatch_date', 't', 't.entity_id = n.nid');
+      $query->condition('t.field_dispatch_date_value', $dispatch_date);
+      $query->fields('n', array('title'));
+      $res = $query->execute()->fetchAllKeyed(0, 0);
+   }
+   return $res;
+}
+
+
+
+// Get all vrs ids
+function get_all_vrs_ids() {
+  global $user;
+  $dis_id = change_feeds_import_get_distributor_id($user->uid);
+  // Status will be VRS Confirmed, VRS Pending,  Handover InProgress
+  $status = array(2,3,4);
+  
+  $query = db_select('node', 'n');
+  $query->condition('n.type', 'dispatch_data');
+  $query->condition('n.uid', $dis_id);
+  $query->join('field_data_field_vrs_status', 'vs', 'vs.entity_id = n.nid');
+  $query->condition('vs.field_vrs_status_value', $status, 'IN');
+  $query->join('field_data_field_vrs_closure_id', 'vid', 'vid.entity_id = n.nid');  
+  $query->fields('vid', array('field_vrs_closure_id_value'));
+  
+  $results = $query->execute()->fetchAllKeyed(0, 0);
+  return $results;
+}
+
+// Get all trip ids
+function get_all_trip_ids() {
+  global $user;
+  $dis_id = change_feeds_import_get_distributor_id($user->uid);
+  // Status will be VRS Confirmed, VRS Pending,  Handover InProgress
+  $status = array(2,3,4);
+  
+  $query = db_select('node', 'n');
+  $query->condition('n.type', 'dispatch_data');
+  $query->condition('n.uid', $dis_id);
+  $query->join('field_data_field_vrs_status', 'vs', 'vs.entity_id = n.nid');
+  $query->condition('vs.field_vrs_status_value', $status, 'IN');
+  $query->join('field_data_field_vrs_closure_id', 'vid', 'vid.entity_id = n.nid');
+  $query->fields('n', array('title'));
+  $results = $query->execute()->fetchAllKeyed(0, 0);
+  
+  return $results;
+}
+
+function get_all_handover_names() {
+  global $user;
+  $dis_id = change_feeds_import_get_distributor_id($user->uid);
+  
+  $query = db_select('node', 'n');
+  $query->condition('n.type', 'handover_master');
+  $query->condition('n.uid', $dis_id);
+  $query->fields('n', array('title'));
+  $res = $query->execute()->fetchAllKeyed(0, 0);
+  
+  return $res;
+}
+
+/**
+ * 
+ * @return type
+ * View API
+ */
+function mrc_inventory_returns_views_api() {
+  return array(
+    'api' => '3.0',
+    'path' => drupal_get_path('module', 'mrc_inventory_returns') . '/views',
+  );
+}
+
+/**
+ * Menu callback; Retrieve a JSON object containing autocomplete suggestions for existing handover id.
+ * @param type $string
+ */
+function get_list_of_handover_ids($string = '') {
+   $res = '';
+   $user_id = $GLOBALS['user']->uid;
+   $distributor_id = change_feeds_import_get_distributor_id($user_id);
+
+   $length = strlen($string);
+   if ($length >= 2) {
+    if (!empty($distributor_id) && !empty($string)) {
+      $substring = strtolower(substr($string,0,2));
+       
+      $query = db_select('vrs_handover', 'vh');
+      $query->condition('vh.distributor_id', $distributor_id);
+      if($substring == 'cs') {
+          $query->condition('vh.handover_id', db_like($string) . '%', 'LIKE');
+          $query->fields('vh', array('handover_id'));
+      }
+      
+      elseif($substring == 'cq') {
+          $query->condition('vh.handover_cheque_id', db_like($string) . '%', 'LIKE');
+          $query->fields('vh', array('handover_cheque_id'));
+      }
+      
+      else {
+          $query->condition('vh.handover_signedbill_id', db_like($string) . '%', 'LIKE');
+          $query->fields('vh', array('handover_signedbill_id'));
+      }
+     
+      $query->range(0, 10);
+      $res = $query->execute()->fetchAllKeyed(0, 0);
+    }
+
+   
+   drupal_json_output($res);
+}
+}
+
+function get_bills_summary($trip_number) {
+  $user_id = $GLOBALS['user']->uid;
+  $distributor_id = change_feeds_import_get_distributor_id($user_id);
+
+  $query = db_select('dispatch_planning_api_data', 'ad');
+  $query->condition('ad.distributor_id', $distributor_id, '=');
+  $query->condition('ad.runsheet_number', $trip_number, '=');
+  $query->join('dispatch_planning_item_details', 'dpi', 'dpi.trip_bill_reference = ad.id');
+  $query->addExpression('COUNT(DISTINCT(CASE WHEN (ad.res_status = \'partial_deliver\') THEN ad.bill_number END))', 'bill_count_partial_deliver');
+  $query->addExpression('COUNT(CASE WHEN (ad.res_status = \'partial_deliver\' AND (dpi.line_level_status = \'line_partial_deliver\'  or dpi.line_level_status = \'line_undeliver\')) THEN dpi.sku_code END)', 'bill_lines_count_partial_deliver');
+  $query->addExpression('COUNT(DISTINCT(CASE WHEN (ad.res_status = \'partial_deliver\' AND (dpi.line_level_status = \'line_partial_deliver\'  or dpi.line_level_status = \'line_undeliver\')) THEN dpi.sku_code END))', 'bill_lines_count_unique_partial_deliver');
+  $query->addExpression('SUM(CASE WHEN (ad.res_status = \'partial_deliver\' AND (dpi.line_level_status = \'line_partial_deliver\'  or dpi.line_level_status = \'line_undeliver\')) THEN dpi.return_qty END)', 'return_qty_partial_deliver');
+  $results = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+
+  $query = db_select('dispatch_planning_api_data', 'ad');
+  $query->condition('ad.distributor_id', $distributor_id, '=');
+  $query->condition('ad.runsheet_number', $trip_number, '=');
+  $query->join('dispatch_planning_item_details', 'dpi', 'dpi.trip_bill_reference = ad.id');
+  $query->addExpression('COUNT(DISTINCT(CASE WHEN (ad.res_status = \'undeliver\') THEN ad.bill_number END))', 'bill_count_undeliver');
+  $query->addExpression('COUNT(CASE WHEN (ad.res_status = \'undeliver\' AND (dpi.line_level_status = \'line_partial_deliver\'  or dpi.line_level_status = \'line_undeliver\')) THEN dpi.sku_code END)', 'bill_lines_count_undeliver');
+  $query->addExpression('COUNT(DISTINCT(CASE WHEN (ad.res_status = \'undeliver\' AND (dpi.line_level_status = \'line_partial_deliver\'  or dpi.line_level_status = \'line_undeliver\')) THEN dpi.sku_code END))', 'bill_lines_count_unique_undeliver');
+  $query->addExpression('SUM(CASE WHEN (ad.res_status = \'undeliver\' AND (dpi.line_level_status = \'line_partial_deliver\'  or dpi.line_level_status = \'line_undeliver\')) THEN dpi.return_qty END)', 'return_qty_undeliver');
+  $results1 = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+
+  $query = db_select('dispatch_planning_api_data', 'ad');
+  $query->condition('ad.distributor_id', $distributor_id, '=');
+  $query->condition('ad.runsheet_number', $trip_number, '=');
+  $query->join('dispatch_planning_item_details', 'dpi', 'dpi.trip_bill_reference = ad.id');
+  $query->addExpression('COUNT(DISTINCT(CASE WHEN (dpi.res_cashier_short >= 1) THEN ad.bill_number END))', 'bill_count_cashier_short');
+  $query->addExpression('COUNT(CASE WHEN (dpi.res_cashier_short >= 1) THEN dpi.sku_code END)', 'bill_lines_count_cashier_short');
+  $query->addExpression('COUNT(DISTINCT(CASE WHEN (dpi.res_cashier_short >= 1) THEN dpi.sku_code END))', 'bill_lines_count_unique_cashier_short');
+  $query->addExpression('SUM(CASE WHEN (dpi.res_cashier_short >= 1) THEN dpi.res_cashier_short END)', 'return_qty_cashier_short');
+  $results2 = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+
+  $query = db_select('dispatch_planning_api_data', 'ad');
+  $query->condition('ad.distributor_id', $distributor_id, '=');
+  $query->condition('ad.runsheet_number', $trip_number, '=');
+  $query->join('dispatch_planning_item_details', 'dpi', 'dpi.trip_bill_reference = ad.id');
+  $query->addExpression('COUNT(DISTINCT(CASE WHEN (dpi.res_godown_short >= 1) THEN ad.bill_number END))', 'bill_count_godown_short');
+  $query->addExpression('COUNT(CASE WHEN (dpi.res_godown_short >= 1) THEN dpi.sku_code END)', 'bill_lines_count_godown_short');
+  $query->addExpression('COUNT(DISTINCT(CASE WHEN (dpi.res_godown_short >= 1) THEN dpi.sku_code END))', 'bill_lines_count_unique_godown_short');
+  $query->addExpression('SUM(CASE WHEN (dpi.res_godown_short >= 1) THEN dpi.res_godown_short END)', 'return_qty_godown_short');
+  $results3 = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+
+  $rows[] = array("Partial Delivered") + $results[0];
+  $rows[] = array('Full Returned') + $results1[0];
+  $rows[] = array('Cashier Short') + $results2[0];
+  $rows[] = array('Godown Short') + $results3[0];
+
+  $header = array('Status','Bill Count', 'Bill Lines Count', 'Product Count', 'Returned Product Qty');
+  $output = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
+
+  return $output;
+}
+
+
+function download_bills_summary($args) {
+  $view_name = "asset_summary";
+  $view = views_get_view($view_name, '');
+  $view->set_arguments(array($args));
+  $rendered_html = $view->render();
+  pdf_using_mpdf_api($rendered_html);
+}
+
+function ajax_redirect($path) {
+    if (!empty($path)) {
+            ctools_include('ajax');
+            ctools_add_js('ajax-responder');
+            $commands[] = ctools_ajax_command_redirect($path);
+            print ajax_render($commands);
+            exit;
+    }
+  drupal_json_output($res);
+}
+
+
+// get notes denominations
+function get_short_reasons() {
+    $query = db_select('node', 'n');
+    $query->condition('n.type', 'short_reason_master');
+    $query->condition('n.status', 1);
+    $query->join('field_data_field_short_reason_code', 'r', 'r.entity_id = n.nid');
+    $query->fields('n', array('title'));
+    $query->fields('r', array('field_short_reason_code_value'));
+    $result = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+    return $result;
+}
+
+// get notes denominations
+function get_non_bankable_reasons() {
+    $query = db_select('node', 'n');
+    $query->condition('n.type', 'non_bankable_reason_master');
+    $query->condition('n.status', 1);
+    $query->join('field_data_field_reason_code', 'r', 'r.entity_id = n.nid');
+    $query->fields('n', array('title'));
+    $query->fields('r', array('field_reason_code_value'));
+    $result = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+    return $result;
+}
+
+function _get_bank_names($trip_id, $string) {
+    $bank_names = array();
+    if (!empty($trip_id)) {
+       $query = db_select('node', 'n');
+       $query->condition('n.type', 'bank_master');
+       $query->condition('n.title', '%'.db_like($string) . '%', 'LIKE');
+       $query->condition('n.status', 1); // publish
+       $query->fields('n', array('title'));
+       $result = $query->execute()->fetchAllKeyed(0,0);
+    }
+    print json_encode($result);
+    exit();
+}
+
+function mrc_inventory_returns_feeds_presave($source, $entity, $item, $entity_id) {
+    if ($entity->feeds_item->id == 'non_bankable_reason_master') {
+      $reason_code = $item['reason code']; 
+      if (empty($reason_code)) {
+           drupal_set_message("Reson Code can't be empty.", 'error');
+           $entity->feeds_item->skip = TRUE;
+      }
+      else  {
+        $check_reason_code_exist = check_non_bank_reason_code_exist($reason_code);
+        if ($check_reason_code_exist  == 1) {
+            drupal_set_message("Reson Code: $reason_code  already exists.", 'error');
+            $entity->feeds_item->skip = TRUE;
+        }
+      }
+      
+  }
+  if ($entity->feeds_item->id == 'short_reason_master') { 
+      $reason_code = $item['reason code']; 
+      if (empty($reason_code)) {
+           drupal_set_message("Reson Code can't be empty.", 'error');
+           $entity->feeds_item->skip = TRUE;
+      }
+      else  {
+        $check_reason_code_exist = check_short_reason_code_exist($reason_code);
+          if ($check_reason_code_exist  == 1) {
+            drupal_set_message("Reson Code: $reason_code  already exists.", 'error');
+            $entity->feeds_item->skip = TRUE;
+        }
+      }
+      
+  }
+  
+  if ($entity->feeds_item->id == 'asset_type_master') {
+    $asset_type_tid = $entity->field_asset_types['und'][0]['tid'];
+    if (empty($asset_type_tid)) {
+      drupal_set_message("Asset Type does not exist for Asset Name: $entity->title", 'error');
+      $entity->feeds_item->skip = TRUE;
+    }
+  }
+  
+  if ($entity->feeds_item->id == 'handover_master') {
+    $handover_entity_type_tid = $entity->field_handover_entity_type['und'][0]['tid'];
+    if (empty($handover_entity_type_tid)) {
+      drupal_set_message("Handover Entity Type does not exist for Handover Person: $entity->title", 'error');
+      $entity->feeds_item->skip = TRUE;
+    }
+  }
+}
+ 
+  function check_non_bank_reason_code_exist($reason_code) {
+    if (!empty($reason_code)) {
+        $query = db_select('field_data_field_reason_code', 'r');
+        $query->condition('r.field_reason_code_value',$reason_code);
+        $query->fields('r', array('field_reason_code_value'));
+        $result = $query->execute()->fetchField();
+        if(!empty($result))
+            return 1;
+    }
+    return 0;
+}
+
+function check_short_reason_code_exist($reason_code) {
+    if (!empty($reason_code)) {
+        $query = db_select('field_data_field_short_reason_code', 'r');
+        $query->condition('r.field_short_reason_code_value',$reason_code);
+        $query->fields('r', array('field_short_reason_code_value'));
+        $result = $query->execute()->fetchField();
+        if(!empty($result))
+            return 1;
+    }
+    return 0;
+}
