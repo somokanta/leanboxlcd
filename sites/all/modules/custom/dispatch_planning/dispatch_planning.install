@@ -1768,3 +1768,216 @@ function dispatch_planning_update_7123() {
     } 
   }  
 }
+
+function dispatch_planning_update_7124() {
+  $fields = array(
+    'created_time' => array(
+      'description' => 'DATA Created Time',
+      'type' => 'int',
+      'not null' => TRUE,
+      'default' => 0,
+    ),
+    'updated_time' => array(
+      'description' => 'DATA Updated Time',
+      'type' => 'int',
+      'not null' => TRUE,
+      'default' => 0,
+    ),
+    'salesman' => array(
+      'description' => 'Outlet Salesman',
+      'type' => 'varchar',
+      'length' => 255,
+      'not null' => TRUE,
+      'default' => '',
+    ),
+    'res_updated_time' => array(
+        'description' => t('FAREY Updated Time'),
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+    ),
+    'res_cheque_date_edit' => array(
+      'description' => t('Response cheque_date_edit'),
+      'type' => 'varchar',
+      'length' => 50,
+      'default' => NULL,
+    ),
+    'res_photo_of_cheque_edit' => array(
+      'description' => t('Response photo_of_cheque_edit'),
+      'type' => 'varchar',
+      'default' => NULL,
+      'length' => 255,
+    ),
+    'res_cheque_amount_edit' => array(
+      'description' => t('Response cheque_amount_edit'),
+      'type' => 'varchar',
+      'length' => 50,
+      'default' => NULL,
+    ),
+    'res_money_collect2_edit' => array(
+      'description' => t('Response money_collect2_edit'),
+      'type' => 'varchar',
+      'length' => 50,
+      'default' => NULL,
+    ),
+    'photo_of_signed_bill_partial_edit' => array(
+      'description' => t('Response photo_of_signed_bill_partial_edit'),
+      'type' => 'varchar',
+      'default' => NULL,
+      'length' => 255,
+    ),
+    'res_confirm_signed_bill_amount_edit' => array(
+      'description' => t('Response confirm_signed_bill_amount_edit'),
+      'type' => 'varchar',
+      'length' => 50,
+      'default' => NULL,
+    ),
+    'res_bank_name_edit' => array(
+      'description' => t('Response Bank Name_edit'),
+      'type' => 'varchar',
+      'length' => 50,
+      'default' => NULL,
+    ),
+    'res_photo_of_signed_bill_delivery_edit' => array(
+      'description' => t('Response photo_of_signed_bill_delivery_edit'),
+      'type' => 'varchar',
+      'default' => NULL,
+      'length' => 255,
+    ),
+    'res_cash_amount_edit' => array(
+       'description' => 'res_cash_amount_edit',
+       'type' => 'varchar',
+       'length' => 50,
+       'not null' => TRUE,
+       'default' => '',
+    ),
+    'res_signed_bill_delivery_edit' => array(
+       'description' => t('Response signed_bill_delivery_edit'),
+       'type' => 'varchar',
+       'length' => 50,
+      'default' => NULL,
+    ),
+    'res_signed_bill_partial_edit' => array(
+       'description' => t('Response signed_bill_delivery_edit'),
+       'type' => 'varchar',
+       'length' => 50,
+      'default' => NULL,
+    ), 
+    'res_cheque_no' => array(
+       'description' => t('Response cheque_no'),
+       'type' => 'varchar',
+       'length' => 50,
+       'default' => NULL,
+     ),
+    'res_cheque_no_edit' => array(
+       'description' => t('Response cheque_no'),
+       'type' => 'varchar',
+       'length' => 50,
+       'default' => NULL,
+     ),
+  );
+  foreach ($fields as $key => $field) {
+    if (!db_field_exists('dispatch_planning_api_data', $key)) {
+      db_add_field('dispatch_planning_api_data', $key, $field);
+    }
+  }
+}
+
+function dispatch_planning_update_7125() {
+  $fields = array(
+    'dispatch_qty' => array(
+      'description' => t('Dispatch Quantity'),
+      'type' => 'int',
+      'default' => 0,
+     ),
+     'return_qty' => array(
+      'description' => t('Return Quantity'),
+      'type' => 'int',
+      'default' => 0,
+    ),
+    'farey_delivered_qty' => array(
+       'description' => 'farey_delivered_qty',
+       'type' => 'int',
+       'default' => 0,
+    ),
+    'money_collect_type' => array(
+       'description' => 'money_collect_type',
+       'type' => 'varchar',
+       'length' => 20,
+       'default' => '',
+    ),
+    'line_level_status' => array(
+      'description' => 'Line Level Status',
+      'type' => 'varchar',
+      'length' => 50,
+      'default' => '',
+    ),
+  );
+  foreach ($fields as $key => $field) {
+    if (!db_field_exists('dispatch_planning_item_details', $key)) {
+      db_add_field('dispatch_planning_item_details', $key, $field);
+    }
+  }
+}
+
+function dispatch_planning_update_7126() {
+  $schema['godown_data'] = array(
+    'description' => 'Godown Data',
+    'fields' => array(
+      'id' => array(
+        'description' => t('Id Primary Key'),
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'trip_id' => array(
+        'description' => t('Trip ID'),
+        'type' => 'int',
+      ),
+      'bill_number' => array(
+        'description' => t('BILL_NUMBER'),
+        'type' => 'varchar',
+        'length' => 50,
+      ),
+      'sku_code' => array(
+        'description' => t('SKU_CODE'),
+        'type' => 'varchar',
+        'length' => 50,
+      ),
+//      'batch_code' => array(
+//         'description' => 'Basepack code',
+//         'type' => 'varchar',
+//         'length' => 255,
+//      ),
+      'mrp' => array(
+        'description' => 'MRP',
+        'type' => 'float',
+      ),
+      'sku_desc' => array(
+        'description' => t('SKU DESCRIPTION'),
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+      'sum_sales_qty' => array(
+        'description' => t('Sum_of_NET_SALES_QTY'),
+        'type' => 'int',
+      ),
+      'godown_short' => array(
+        'description' => t('Godown Short Qty'),
+        'type' => 'varchar',
+        'length' => 25,
+      ),
+      'distributor_id' => array(
+        'description' => t('Distributor ID'),
+        'type' => 'int',
+      ),
+      'created_date' => array(
+      'description' => 'Created Date',
+      'type' => 'int',
+    ),
+     ), 
+    'primary key' => array('id'),
+  );
+  if (!db_table_exists('godown_data')) {
+    db_create_table('godown_data', $schema['godown_data']);
+  }
+}
