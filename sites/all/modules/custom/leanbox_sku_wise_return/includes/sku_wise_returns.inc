@@ -129,7 +129,7 @@ function sku_wise_returns_form($form, &$form_state) {
         );
 
         if (!empty($form_state['input']['actual_returned_qty']) || $form_state['input']['actual_returned_qty'] === "0") {
-          $to_be_returned_qty = $form_state['input']['to_be_returned_qty'];
+          $to_be_returned_qty = $form_state['values']['to_be_returned_qty'];
           $actual_returned_qty = $form_state['input']['actual_returned_qty'];
 
           if ($to_be_returned_qty != $actual_returned_qty) {
