@@ -26,16 +26,7 @@ function vrs_confirmation_form($form, &$form_state) {
     $sum_s_register_bill_value = 0;
     global $user;
     $dis_id = change_feeds_import_get_distributor_id($user->uid);
-    //$form['#attached']['css'][] = drupal_get_path('module', 'mrc_inventory_returns') . '/css/vrs_confirmation.css';
-    //$form['#attached']['css'] = array('http://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css' => array('type' => 'external'),);
-    //$form['#attached']['js'] = array('https://code.jquery.com/ui/1.12.1/jquery-ui.js' => array('type' => 'external'),);
     $form['#attached']['js'][] = drupal_get_path('module', 'mrc_inventory_returns') . '/js/vrs_confirmation.js';
-    /* $form['#attached']['css'][] = array(
-      'data' => drupal_get_path('module', 'mrc_inventory_returns') . '/css/vrs_confirmation.css',
-      'type' => 'file',
-      'weight' => 3000,
-      );
-     */
     $form['#attributes'] = array('enctype' => 'multipart/form-data');
     $form['#prefix'] = '<div id="itemlist-div" class="custom_form_wrapper">';
     $form['#suffix'] = '</div>';
@@ -115,8 +106,8 @@ function vrs_confirmation_form($form, &$form_state) {
         '#prefix' => '',
         '#suffix' => '</div>'
     );
-    
-    
+
+
     $bill_status_options = array('deliver' => 'Delivered'
         , 'partial_deliver' => 'Partial Delivered'
        // , 'delivery_pending' => 'Delivery Pending'
@@ -497,12 +488,17 @@ function vrs_confirmation_form($form, &$form_state) {
             $short =  $val['sales_register_to_be_collected_amt'] -  $val['res_cash_amount'] -  $val['res_cheque_amount'] -  $val['res_confirm_signed_bill_amount'];
             $short_display = $short;
             $short_total += $short;
+            $vrs_short = round($val['sales_register_to_be_collected_amt']) - round($bills[$key]['actual_cash_amount']) - round($bills[$key]['actual_signed_bill_amount']) - round($bills[$key]['actual_cheque_amount']) ;
+            if ($vrs_short <=1 && $vrs_short>=0) {
+                $vrs_short = 0;
+            }
+            
             $short_collected = array(
                // '#id' => 'bill_details-' . $key . '-short_collected',
                 '#type' => 'textfield',
                 '#attributes' => array('class' => array('short'), 'data' => $val['sales_register_to_be_collected_amt'],'title'=>t('Short Amount')),
                 '#size' => $text_box_size,
-                '#default_value' => $vrs_total_id ? $bills[$key]['short_amt'] : $short_display,
+                '#default_value' => $vrs_total_id ? $vrs_short : $short_display,
             );
             // Fetch Reason from Short Reason Master
             //if ($short_display > 0) {
@@ -822,15 +818,23 @@ function vrs_confirmation_form($form, &$form_state) {
             '#attributes' => array('id' => 'total_short'),
             '#value' => $short_display,
         );
+        if (empty($vrs_version)) {
+            $version_number = 'V1.0';
+        }
+        else {
+            $version_number = $vrs_version;
+        }
         $form['confirm_vrs'] = array(
             '#type' => 'submit',
             '#value' => 'Confirm VRS',
             '#pefix' => '<div class ="confirm_vrs">',
             '#suffix' => '</div">',
             '#name' => 'confirm_vrs',
-            '#attributes' => array('class' => array('vrs-trip-submit')),
-            '#submit' => array('vrs_confirmation_form_submit'),
-            '#validate' => array('vrs_confirmation_validate'),
+            '#attributes' => array('class' => array('vrs-trip-submit'),
+            'onclick' => 'if(!confirm("Do you want to Confirm VRS version :'.$version_number.' of Trip ID: ' . $trip_id . '?")){return false;}',
+            'style' => array('float: left;')),
+                '#submit' => array('vrs_confirmation_form_submit'),
+                '#validate' => array('vrs_confirmation_validate'),
         );
         $note_denominations = get_notes_denominations();
         if (!empty($note_denominations)) {
@@ -1098,7 +1102,11 @@ function vrs_confirmation_validate($form, &$form_state) {
         foreach ($form_state['values']['bill_details'] as $key => $value) {
             $bill_level_to_be_collected = (float) $value['sales_register_tobe_collected'];
             $bill_level_actual_cash = (float) $value['actual_cash_collected'] + (float) $value['actual_cheque_collected'] + (float) $value['signed_bill_collected'] + (float) $value['short_collected'];
-            if ($bill_level_to_be_collected !== $bill_level_actual_cash) {
+            // Difference in RS 1  Short amt will be greater than RS 1
+            $diff_amt = $bill_level_to_be_collected - $bill_level_actual_cash;
+            if ($diff_amt<=1 && $diff_amt>=0) {
+            }
+            else {
                 $messages[] = t('Error:Bill Number:' . $key . '-To be collected amount should be equal to (Actual Cash Collected + Actual Cheque Amount + Actual Signed Bill + Short).');
             }
             $short_collected = (float) $value['short_collected'];
@@ -1369,10 +1377,13 @@ function vrs_confirmation_form_submit($form, &$form_state) {
                 if (!empty($no_notes) && is_numeric($no_notes)) {
                     $denominations[$value['nid']] = array('trip_id' => $trip_id, 'vrs_total_id' => $vrs_total_id,
                         'denominations_nid' => $value['nid'], 'no_of_notes' => $no_notes
-                        , 'distributor_id' => $dis_id, 'coins' => $coins);
+                        , 'distributor_id' => $dis_id);
                 }
             }
             if (!empty($denominations)) {
+                reset($denominations);
+                $first_key = key($denominations);
+                $denominations[$first_key]['coins'] = $coins;
                 insert_denominations($denominations, $trip_id, $vrs_total_id);
             }
         }

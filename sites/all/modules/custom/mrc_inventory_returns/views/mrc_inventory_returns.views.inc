@@ -382,6 +382,24 @@ function mrc_inventory_returns_views_data() {
     ),
   );
   
+    // Add custom field for footer_inventory_returns_collection_summary
+  $data['views']['footer_collection_summary'] = array(
+    'title' => t('mrc_inventory_returns_collection_summary'),
+    'help' => t('Provides count for mrc_inventory_returns_collection_summary.'),
+    'area' => array(
+      'handler' => 'footer_inventory_returns_collection_summary',
+    ),
+  );
+  
+  // Add custom field for footer_inventory_returns_collection_mode_discrepancy
+  $data['views']['footer_collection_mode_discrepancy'] = array(
+    'title' => t('mrc_inventory_returns_collection_mode_discrepancy'),
+    'help' => t('Provides count for mrc_inventory_returns_collection_mode_discrepancy.'),
+    'area' => array(
+      'handler' => 'footer_inventory_returns_collection_mode_discrepancy',
+    ),
+  );
+  
   // Adding custom handler for VRS Trip Total Report
   $data['vrs_trip_total']['table'] = array(
     'group' => t('VRS Trip Total'),
@@ -1904,6 +1922,557 @@ function mrc_inventory_returns_views_data() {
   $data['inventory_versioning_api_data']['version_no'] = array(
     'title' => t('IV Version No'),
     'help' => t('Inventory Versioning version_no'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+  
+  $data['inventory_versioning_api_data']['res_cheque_date_edit'] = array(
+    'title' => t('IV res_cheque_date_edit'),
+    'help' => t('Inventory Versioning res_cheque_date'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+  $data['inventory_versioning_api_data']['res_photo_of_cheque_edit'] = array(
+    'title' => t('IV res_photo_of_cheque_edit'),
+    'help' => t('Inventory Versioning res_photo_of_cheque'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+  $data['inventory_versioning_api_data']['res_cheque_amount_edit'] = array(
+    'title' => t('IV res_cheque_amount_edit'),
+    'help' => t('Inventory Versioning res_cheque_amount'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+  $data['inventory_versioning_api_data']['res_money_collect2_edit'] = array(
+    'title' => t('IV res_money_collect2_edit'),
+    'help' => t('Inventory Versioning res_money_collect2'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+   $data['inventory_versioning_api_data']['res_confirm_signed_bill_amount_edit'] = array(
+    'title' => t('IV res_confirm_signed_bill_amount_edit'),
+    'help' => t('Inventory Versioning res_confirm_signed_bill_amount'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+  $data['inventory_versioning_api_data']['res_bank_name_edit'] = array(
+    'title' => t('IV res_bank_name_edit'),
+    'help' => t('Inventory Versioning res_bank_name'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+  $data['inventory_versioning_api_data']['res_photo_of_signed_bill_delivery_edit'] = array(
+    'title' => t('IV res_photo_of_signed_bill_delivery_edit'),
+    'help' => t('Inventory Versioning res_photo_of_signed_bill_delivery'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+    $data['inventory_versioning_api_data']['res_cash_amount_edit'] = array(
+    'title' => t('IV res_cash_amount_edit'),
+    'help' => t('Inventory Versioning res_cash_amount'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+  
+  $data['inventory_versioning_api_data']['res_cheque_no'] = array(
+    'title' => t('IV res_cheque_no'),
+    'help' => t('Inventory Versioning res_cheque_no'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+   $data['inventory_versioning_api_data']['res_cheque_no_edit'] = array(
+    'title' => t('IV res_cheque_no_edit'),
+    'help' => t('Inventory Versioning res_cheque_no'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+  
+   $data['inventory_versioning_api_data']['res_signed_bill_delivery_edit'] = array(
+    'title' => t('IV res_signed_bill_delivery_edit'),
+    'help' => t('Inventory Versioning res_signed_bill_delivery'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+ 
+  $data['inventory_versioning_api_data']['res_signed_bill_partial_edit'] = array(
+    'title' => t('IV res_signed_bill_partial_edit'),
+    'help' => t('Inventory Versioning res_signed_bill_partial'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  ); 
+ 
+    //inventory_versioning_item_details Item Details
+  $data['inventory_versioning_item_details']['table'] = array(
+    'group' => t('inventory_versioning_item_details lines'),
+    'title' => t('inventory_versioning_item_details '),
+    'help' => t('inventory_versioning_item_details .'),
+  );
+
+  // Define this as a base table.
+  $data['inventory_versioning_item_details']['table']['base'] = array(
+    'field' => 'id',
+    'title' => t('inventory_versioning_item_details lines'),
+    'help' => t("unique identifiers."),
+    // 'weight' => -10,
+  );
+  $data['inventory_versioning_item_details']['id'] = array(
+    'title' => t('IV lines id'),
+    'help' => t('Inventory Versioning lines id'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+  $data['inventory_versioning_item_details']['tur'] = array(
+    'title' => t('IV lines tur'),
+    'help' => t('Inventory Versioning lines tur'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+  $data['inventory_versioning_item_details']['mrp'] = array(
+    'title' => t('IV lines mrp'),
+    'help' => t('Inventory Versioning lines mrp'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+  $data['inventory_versioning_item_details']['product_name'] = array(
+    'title' => t('IV lines product_name'),
+    'help' => t('Inventory Versioning lines product_name'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+
+  $data['inventory_versioning_item_details']['res_sku_reason'] = array(
+    'title' => t('IV lines res_sku_reason'),
+    'help' => t('Inventory Versioning lines res_sku_reason'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+  $data['inventory_versioning_item_details']['res_godown_short'] = array(
+    'title' => t('IV lines res_godown_short'),
+    'help' => t('Inventory Versioning lines res_godown_short'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+  $data['inventory_versioning_item_details']['res_cashier_short'] = array(
+    'title' => t('IV lines res_cashier_short'),
+    'help' => t('Inventory Versioning lines res_cashier_short'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+  $data['inventory_versioning_item_details']['sum_net_sales_cases'] = array(
+    'title' => t('IV lines sum_net_sales_cases'),
+    'help' => t('Inventory Versioning lines sum_net_sales_cases'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+  $data['inventory_versioning_item_details']['sum_net_sales_quantity'] = array(
+    'title' => t('IV lines sum_net_sales_quantity'),
+    'help' => t('Inventory Versioning lines sum_net_sales_quantity'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+  $data['inventory_versioning_item_details']['sku_code'] = array(
+    'title' => t('IV lines sku_code'),
+    'help' => t('Inventory Versioning lines sku_code'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+  $data['inventory_versioning_item_details']['sum_net_sales_kgs'] = array(
+    'title' => t('IV lines sum_net_sales_kgs'),
+    'help' => t('Inventory Versioning lines sum_net_sales_kgs'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+  $data['inventory_versioning_item_details']['sum_net_sales_value'] = array(
+    'title' => t('IV lines sum_net_sales_value'),
+    'help' => t('Inventory Versioning lines sum_net_sales_value'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+  $data['inventory_versioning_item_details']['sku_description'] = array(
+    'title' => t('IV lines sku_description'),
+    'help' => t('Inventory Versioning lines sku_description'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+  $data['inventory_versioning_item_details']['trip_bill_reference'] = array(
+    'title' => t('IV lines trip_bill_reference'),
+    'help' => t('Inventory Versioning lines trip_bill_reference'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+
+  $data['inventory_versioning_item_details']['res_sku_actual_quantity1'] = array(
+    'title' => t('IV lines res_sku_actual_quantity1'),
+    'help' => t('Inventory Versioning lines res_sku_actual_quantity1'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+  
+  $data['inventory_versioning_item_details']['farey_delivered_qty'] = array(
+    'title' => t('IV lines farey_delivered_qty'),
+    'help' => t('Inventory Versioning lines farey_delivered_qty'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+    
+  $data['inventory_versioning_item_details']['dispatch_qty'] = array(
+    'title' => t('IV dispatch_qty'),
+    'help' => t('Inventory Versioning lines dispatch_qty'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+   $data['inventory_versioning_item_details']['return_qty'] = array(
+    'title' => t('IV return_qty'),
+    'help' => t('Inventory Versioning lines return_qty'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+   
+   $data['inventory_versioning_item_details']['line_level_status'] = array(
+    'title' => t('IV Line level status'),
+    'help' => t('Inventory Versioning lines level status'),
     'field' => array(
       'handler' => 'views_handler_field',
       'click sortable' => TRUE,

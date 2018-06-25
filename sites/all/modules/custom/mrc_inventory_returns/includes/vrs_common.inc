@@ -74,7 +74,69 @@ function get_vrs_total_denominations($trip_id, $vrs_total_id, $distributor_id) {
     return $res;
 }
 
+// function to fetch all trips denomination
+function get_vrs_trips_denominations($trip_ids, $dis_id) {
+    if (!empty($trip_ids) && !empty($dis_id)) {
+        $query = db_select('node', 'n');
+        $query->condition('n.type', 'notes_denominations');
+        $query->condition('n.uid', $dis_id);
+        $query->join('vrs_trip_denominations', 'deno', 'deno.denominations_nid = n.nid');
+        $query->condition('deno.trip_id', $trip_ids, 'IN');
+        $query->condition('deno.distributor_id', $dis_id);
+        $query->addExpression('Sum(deno.no_of_notes)', 'no_notes');
+        $query->addExpression('Sum(deno.coins)', 'sum_coins');
+        $query->addExpression('convert(n.title,unsigned)', 'note_value');
+        // $query->groupBy('deno.trip_id,deno.denominations_nid');
+        $query->groupBy('deno.denominations_nid');
+        $query->fields('n', array('title', 'nid'));
+        $query->fields('deno', array('denominations_nid', 'trip_id', 'vrs_total_id', 'coins'));
+        $res = $query->execute()->fetchAll(PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
+        if (!empty($res)) {
+            krsort($res);
+        }
+    }
+    return $res;
+}
 
+function  get_vrs_coins_value($trip_ids,$dis_id){
+    $res = 0;
+   if (!empty($trip_ids) && !empty($dis_id)) { 
+        $query = db_select('node', 'n');
+        $query->condition('n.type', 'notes_denominations');
+        $query->condition('n.uid', $dis_id);
+        $query->join('vrs_trip_denominations', 'deno', 'deno.denominations_nid = n.nid');
+        $query->condition('deno.trip_id', $trip_ids,'IN');
+        $query->condition('deno.distributor_id', $dis_id);
+        $query->addExpression('Sum( distinct deno.coins)', 'sum_coins');
+        $query->groupBy('deno.distributor_id');
+        $res = $query->execute()->fetchField();
+    }
+   return $res;
+}
+
+function get_vrs_trips_deno_details($trip_ids, $dis_id) {
+    if (!empty($trip_ids) && !empty($dis_id)) {
+        $query = db_select('node', 'n');
+        $query->condition('n.type', 'notes_denominations');
+        $query->condition('n.uid', $dis_id);
+        $query->join('vrs_trip_denominations', 'deno', 'deno.denominations_nid = n.nid');
+        $query->condition('deno.trip_id', $trip_ids, 'IN');
+        $query->condition('deno.distributor_id', $dis_id);
+        $query->addExpression('convert(n.title,unsigned)', 'note_value');
+        $query->fields('n', array('title', 'nid'));
+        $query->fields('deno', array('denominations_nid', 'trip_id', 'no_of_notes', 'coins'));
+        $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+        $trip_deno = array();
+        if(!empty($res)) {
+                foreach($res as $key=>$value) {
+                   $trip_deno[$value['trip_id']][$value['note_value']] = $value['no_of_notes'];
+                   if(!empty($value['coins']))
+                   $trip_deno[$value['trip_id']]['coins'] = $value['coins'];
+            }
+        }
+      }
+    return $trip_deno;
+}
 
 // function to fetch received assets count
 

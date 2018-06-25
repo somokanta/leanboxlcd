@@ -180,6 +180,21 @@ function mrc_inventory_returns_menu() {
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
+  
+  $items['cash-denomination-report'] = array(
+    'title' => 'Trip Cash Denomination Report',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('trips_denominations_form'),
+    'access arguments' => array('returns confirmation'),
+    'file' => 'includes/trips_cash_denomination_report.inc',
+  );
+  $items['cash-denomination-report/export'] = array(
+     'title' => 'cash-denomination-report Download',
+     'description' => 'cash-denomination-report Download',
+     'page callback' => 'cash_denomination_report_export',
+     'access arguments' => array('returns confirmation'),
+     'file' => 'includes/trips_cash_denomination_report.inc',
+  );
     
   return $items;
 

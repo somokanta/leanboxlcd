@@ -84,7 +84,7 @@ function returns_confirmation_form($form, &$form_state) {
     '#submit' => array('returns_confirmation_form_submit'),
   );
 
-  $header = array('Trip ID', 'Dispatch Date', 'Cashier Name', 'Bill Count', 'Full Delivered Bill Count', 'Full Returned Bill Count', 'Partial Delivered Bill Count', 'Summary Printout', 'Action');
+  $header = array('Trip ID', 'Dispatch Date', 'Cashier Name', 'Bill Count', 'Full Delivered Bill Count', 'Full Returned Bill Count', 'Partial Delivered Bill Count', 'Pending Bill Count', 'Summary Printout', 'Action');
 
   if (!isset($form_state['returns_confirmation']['bills'])) {
     $form_state['returns_confirmation']['bills'] = array();
@@ -105,32 +105,21 @@ function returns_confirmation_form($form, &$form_state) {
 
   $form['bill_details']['#rows'] = $options;
   foreach ($options as $key => $val) {
+    $bill_count = $val['bill_count'];
+    $full_delivered_bill_count = $val['full_delivered_bill_count'];
+    $full_returned_bill_count = $val['full_returned_bill_count'];
+    $partial_delivered_bill_count = $val['partial_delivered_bill_count'];
+    
+    $pending_bill_count = array(
+      '#markup' => $bill_count - ($full_delivered_bill_count + $full_returned_bill_count + $partial_delivered_bill_count),
+      '#name' => "pending_bill_count_$key"
+    );
+     
     $overall_summary_printout = array(
       '#markup' => l(t('Summary Printout'), "overall-summary-popup/nojs/$key", array('attributes' => array('class' => 'ctools-use-modal'))),
       '#name' => "overall_summary_$key",
         //'#attributes' => array('class' => array('full-return')),
     );
-
-//    $full_return_printout = array(
-//      '#markup' => l(t('Full Returned Prinout'), "full-returns-popup/nojs/$key", array('attributes' => array('class' => 'ctools-use-modal'))),
-//      '#name' => "full_return_$key",
-//        //'#attributes' => array('class' => array('full-return')),
-//    );
-//    $partial_deliver_printout = array(
-//      '#markup' => l(t('Partial Delivered Prinout'), "partial-deliver-popup/nojs/$key", array('attributes' => array('class' => 'ctools-use-modal'))),
-//      '#name' => "partial_deliver_$key",
-//        //'#attributes' => array('class' => array('partial-deliver')),
-//    );
-//    $asset_summary = array(
-//      '#markup' => l(t('Asset Summary'), "asset-summary-popup/nojs/$key", array('attributes' => array('class' => 'ctools-use-modal'))),
-//      '#name' => "asset_summary_$key",
-//        //'#attributes' => array('class' => array('partial-deliver')),
-//    );
-//    $bills_summary = array(
-//      '#markup' => l(t('Bills Summary'), "bills-summary-popup/nojs/$key", array('attributes' => array('class' => 'ctools-use-modal'))),
-//      '#name' => "bills_summary_$key",
-//        //'#attributes' => array('class' => array('partial-deliver')),
-//    );
 
     $confirm_btn = array(
       '#type' => 'submit',
@@ -145,26 +134,17 @@ function returns_confirmation_form($form, &$form_state) {
       '#submit' => array('return_confirm_submit'),
       '#attributes' => array('class' => array('confirm-remove')),
     );
-
+    
+    $form['bill_details'][$key]["pending_bill_count_{$key}"] = &$pending_bill_count;
     $form['bill_details'][$key]["overall_summary_{$key}"] = &$overall_summary_printout;
-    //$form['bill_details'][$key]["full_return_{$key}"] = &$full_return_printout;
-    //$form['bill_details'][$key]["partial_deliver_{$key}"] = &$partial_deliver_printout;
-    //$form['bill_details'][$key]["asset_summary_{$key}"] = &$asset_summary;
-    //$form['bill_details'][$key]["bills_summary_{$key}"] = &$bills_summary;
     $form['bill_details'][$key]["confirm_submit_{$key}"] = &$confirm_btn;
 
+    $form['bill_details']['#rows'][$key][]['data']["pending_bill_count_{$key}"] = &$pending_bill_count;
     $form['bill_details']['#rows'][$key][]['data']["overall_summary_{$key}"] = &$overall_summary_printout;
-    //$form['bill_details']['#rows'][$key][]['data']["full_return_{$key}"] = &$full_return_printout;
-    //$form['bill_details']['#rows'][$key][]['data']["partial_deliver_{$key}"] = &$partial_deliver_printout;
-    //$form['bill_details']['#rows'][$key][]['data']["asset_summary_{$key}"] = &$asset_summary;
-    //$form['bill_details']['#rows'][$key][]['data']["bills_summary_{$key}"] = &$bills_summary;
     $form['bill_details']['#rows'][$key][]['data']["confirm_submit_{$key}"] = &$confirm_btn;
-
+    
+    unset($pending_bill_count);
     unset($overall_summary_printout);
-    //unset($full_return_printout);
-    //unset($partial_deliver_printout);
-    //unset($asset_summary);
-    //unset($bills_summary);
     unset($confirm_btn);
   }
   return $form;

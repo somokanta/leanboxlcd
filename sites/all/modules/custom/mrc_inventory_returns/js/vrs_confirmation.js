@@ -128,6 +128,11 @@
                     
                         var row_total = to_be_colelcted - sum;
                         row_total = row_total.toFixed(2);
+                        // Difference in RS 1  Short amt will be greater than RS 1
+                       if(row_total<=1 && row_total>=0) {
+                            row_total =  0;
+                        }
+                        
                         $(this).find('.short').val(row_total);
                     
                 });
@@ -389,6 +394,7 @@
    
             
         }
+        
         
         
         
