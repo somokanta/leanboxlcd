@@ -23,4 +23,5 @@ files[] = views/handler/dispatch_planning_bill_status.inc
 files[] = views/handler/header_handler_full_printout.inc
 files[] = views/handler/header_handler_partial_printout.inc
 files[] =  views/handler/bill_returns_report.inc
-
+files[] = views/handler/header_handler_partial_printout_popup.inc
+files[] = views/handler/header_handler_full_printout_popup.inc

@@ -8,7 +8,7 @@
 /**
  * Provides a custom views field.
  */
-class header_handler_partial_printout extends views_handler_field {
+class header_handler_partial_printout_popup extends views_handler_field {
 
   function option_definition() {
     $options = parent::option_definition();
@@ -37,14 +37,9 @@ class header_handler_partial_printout extends views_handler_field {
       $bill_number = $result['bill_number_2'];
       $cashier_name = $result['fieldExecutiveName'];
       $trip_execution_date = $result1['field_trip_executon_date_value'];
-      $name= get_distrubutor_name_partial_from_user_id($user_id);
+      //$name= get_distrubutor_name_partial_from_user_id($user_id);
 
-      return '<table width = "100%" cellspacing = "0" style = "font-size: 13px; color:#000; font-family:arial" cellpadding = "5" border = "0" align = "center" class = "preview_table">
-      <tr>
-      <td style = "font-size: 24px; font-weight: bold; text-align: center">'.$name.'</td>
-      </tr>
-      </table><br>
-      <table class = "preview_table" width = "100%" cellspacing = "0" style = "font-family:arial; font-size: 13px; color:#000;" cellpadding = "5" border = "0" align = "center">
+      return '<table class = "preview_table" width = "100%" cellspacing = "0" style = "font-family:arial; font-size: 13px; color:#000;" cellpadding = "5" border = "0" align = "center">
       <tbody>
       <tr>
       <td></td>
@@ -74,16 +69,4 @@ class header_handler_partial_printout extends views_handler_field {
     }
   }
 
-}
-
-function get_distrubutor_name_partial_from_user_id($user_id) {
-  $query = db_select('users', 'u');
-  $query->innerjoin('field_data_field_distributor', 'd', 'd.entity_id = u.uid');
-  $query->condition('d.entity_id', $user_id, '=');
-  $query->fields('d', array('field_distributor_value'));
-  $query->innerjoin('field_data_field_name', 'n', 'n.entity_id = d.field_distributor_value');
-  $query->fields('n', array('field_name_value'));
-  $result = $query->execute()->fetchAssoc();
-  $name = $result['field_name_value'];
-  return $name;
 }

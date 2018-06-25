@@ -4956,11 +4956,27 @@ function dispatch_planning_views_data() {
     ),
   );
   
+  $data['views']['header_area_full_printout_popup'] = array(
+    'title' => t('Header field'),
+    'help' => t('Just a field created for header purposes for full printout popup.'),
+    'area' => array(
+      'handler' => 'header_handler_full_printout_popup',
+    ),
+  );
+  
   $data['views']['header_area_partial_printout'] = array(
     'title' => t('Header field'),
     'help' => t('Just a field created for header purposes for partial printout.'),
     'area' => array(
       'handler' => 'header_handler_partial_printout',
+    ),
+  );
+  
+  $data['views']['header_area_partial_printout_popup'] = array(
+    'title' => t('Header field'),
+    'help' => t('Just a field created for header purposes for partial printout popup.'),
+    'area' => array(
+      'handler' => 'header_handler_partial_printout_popup',
     ),
   );
   

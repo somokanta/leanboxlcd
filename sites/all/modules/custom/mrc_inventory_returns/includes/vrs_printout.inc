@@ -458,7 +458,9 @@ function get_vrs_items($trip_id) {
         $query->leftjoin('field_data_field_vrs_status', 'vs', 'vs.entity_id = disp_data.nid');
         // VRS Screen and VRS status = 1, 3 Means VRS pending
         
-        $query->join('field_data_field_trip_executon_date', 'exe_date', 'exe_date.entity_id = disp_data.nid');
+        //$query->join('field_data_field_trip_executon_date', 'exe_date', 'exe_date.entity_id = disp_data.nid');
+        $query->join('field_data_field_dispatch_date', 'dispatch_date', 'dispatch_date.entity_id = disp_data.nid');
+        
         $query->join('field_data_field_cashier_name', 'fld_cashier', 'fld_cashier.entity_id = disp_data.nid');
         $vrs_status = array('2','3','4','5');
         $query->condition('vs.field_vrs_status_value', $vrs_status,'IN');
@@ -488,8 +490,7 @@ function get_vrs_items($trip_id) {
         $query->addExpression('ad.photo_of_signed_bill_partial', 'photo_of_signed_bill_partial');
         $query->addExpression('ad.res_confirm_signed_bill_amount', 'res_confirm_signed_bill_amount');
         $query->addExpression('bv.field_bill_value_value', 'field_bill_value_value');
-        $query->addExpression("DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(exe_date.field_trip_executon_date_value),'+00:00','+05:30'), '%d-%b-%Y')", 'trip_execution_date');
-        
+        //$query->addExpression("DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(exe_date.field_trip_executon_date_value),'+00:00','+05:30'), '%d-%b-%Y')", 'trip_execution_date');
         $query->addExpression('ad.res_cheque_date_edit', 'res_cheque_date_edit');
         $query->addExpression('ad.res_photo_of_cheque_edit', 'res_photo_of_cheque_edit');
         $query->addExpression('ad.res_cheque_amount_edit', 'res_cheque_amount_edit');
@@ -506,15 +507,11 @@ function get_vrs_items($trip_id) {
         $query->addExpression('item_details.return_qty', 'return_qty');
         $query->addExpression('item_details.sum_net_sales_value', 'sum_net_sales_value');
         $query->addExpression('(SUM(item_details.total_delivered_value))', 'total_delivered_value');
-  
-       
-         //$query->addExpression('ad.res_cheque_amount', 'res_cheque_amount');
-        //$query->addExpression("SUM(bv.field_bill_value_value)", 'total_bill_value');
-        //$query->groupBy('bv.entity_id');
-        //$query->range(0, 5);
+        $query->addExpression("DATE_FORMAT(ad.date,'%d-%b-%Y')", 'dispatch_date');
         $res = $query->execute()->fetchAll(PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
 }
                         return $res;
+                        
 }
 
 function get_vrs_print($trip_id) {
@@ -530,7 +527,7 @@ function get_vrs_print($trip_id) {
             $signed_bill_details = array();
             foreach ($options as $key => $val) {
                 $sum_s_register_bill_value += round($val['field_bill_value_value']);
-                $trip_execution_date = $val['trip_execution_date'];
+                $dispatch_date = $val['dispatch_date'];
                 $field_cashier_name = $val['field_cashier_name_value'];
             }
             $vrs_version = get_current_vrs_version($trip_id, $dis_id);
@@ -550,7 +547,7 @@ function get_vrs_print($trip_id) {
                 'Bank Name',
             );
             $footer_header = array('Count of Bills','Total to be collected(Sales Register)','Total Cash Collected', 'Total Signed Bill Collected','Total Cheque Collected',  'Cashier Cash Short', 'Total Short', 'Total Cashier Debit Value');
-            $trip_header_values[] = array($trip_id,$field_cashier_name,$sum_s_register_bill_value,$trip_execution_date);
+            $trip_header_values[] = array($trip_id,$field_cashier_name,$sum_s_register_bill_value,$dispatch_date);
             $get_shorts = get_return_short($trip_id, $dis_id);
             $asset = received_assets_count($trip_id, $dis_id);
             $assets_details = received_assets_count_details($trip_id, $dis_id);
@@ -664,7 +661,7 @@ function get_vrs_print($trip_id) {
             $table1.='<tr><td colspan="2">'.t('Billing Date').'</td>';
             $table1.='<td>'.'</td>';
             $table1.='<td colspan="2">'.t('Dispatch Date').'</td>';
-            $table1.='<td>'.$trip_execution_date.'</td></tr>';
+            $table1.='<td>'.$dispatch_date.'</td></tr>';
             $table1.='<tr><td>'.t('Start Time').'</td>';
             $table1.='<td colspan="2">'.'</td>';
             $table1.='<td>'.t('End Time').'</td>';
