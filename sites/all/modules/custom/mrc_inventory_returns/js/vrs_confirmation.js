@@ -1,6 +1,9 @@
 (function($) {
     Drupal.behaviors.vrs_confirmation = {
         attach: function(context, settings) {
+            calculateRowSum();//Calculate short again
+            cal_short_total();//Calculate short again
+            calc_footer_total();//Calculate short again
             $(".total_actual_cash_collected").click(function() {
                 $('#note_denomination_popup').show();
 
