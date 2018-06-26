@@ -1,0 +1,9 @@
+<?php
+
+function phpexcel_install() {
+  drupal_set_message(t("In order to use PHPExcel, you must first download the entire library (1.7) at !link and put it under sites/all/libraries/PHPExcel/ (so you should have sites/all/libraries/PHPExcel/PHPExcel.php)", array('!link' => '<a href="http://www.phpexcel.net">phpexcel.net</a>')), 'warning');
+}
+
+function phpexcel_update_7201() {
+  drupal_set_message(t("All modules including the phpexcel/phpexcel.api.inc should be updated to include the new phpexcel/phpexcel.inc file instead. The modules will still work, but the file will be removed in the future."), 'warning');
+}
