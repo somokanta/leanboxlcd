@@ -4980,6 +4980,22 @@ function dispatch_planning_views_data() {
     ),
   );
   
+  $data['views']['field_collection_value'] = array(
+    'title' => t('Collection value handler'),
+    'help' => t('Collection value handler.'),
+    'field' => array(
+      'handler' => 'field_collection_value',
+    ),
+  );
+  
+  $data['views']['field_collection_mode'] = array(
+    'title' => t('Collection mode handler'),
+    'help' => t('Collection mode handler.'),
+    'field' => array(
+      'handler' => 'field_collection_mode',
+    ),
+  );
+  
   return $data;
 }
 
