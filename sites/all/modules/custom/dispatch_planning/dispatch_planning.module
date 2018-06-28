@@ -453,6 +453,14 @@ function dispatch_planning_menu() {
     'file' => 'delete_fareye_dp_id_form.inc',
   );
   
+  $items['asset-summary-printout'] = array(
+    'title' => 'Returns Summary Printout',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('get_data_of_asset_summary_return_form'),
+    'access arguments' => array('Distributor Upload File'),
+    'file' => 'asset_summary_return_printout.inc',
+  );
+  
   return $items;
 }
 
@@ -3302,6 +3310,35 @@ function get_partial_return_data_from_trip_id($trip_id) {
   $query1->condition('idt.res_sku_reason','', "!=");
   $query1->condition('ad.runsheet_number', $trip_id, "=");
   $query1->condition('ad.res_status','partial_deliver', "=");
+  $query1->condition('ad.hub',$rs_code, "=");
+  $query1->addExpression("COUNT(DISTINCT ad.bill_number)", 'bill_number');
+  $query1->addExpression("GROUP_CONCAT(DISTINCT ad.bill_number ORDER BY ad.bill_number separator ', ' )", 'bill_number');
+  $query1->fields('ad', array('fieldExecutiveName'));
+  $trip_id_result = $query1->execute()->fetchAssoc();
+  return $trip_id_result;
+}
+
+function get_partial_popup_return_data_from_trip_id($trip_id) {
+  $user_id = $GLOBALS['user']->uid;
+  $rs_code = dispatch_planning_get_rscode_using_uid($user_id);
+  $query1 = db_select('dispatch_planning_api_data', 'ad');
+  $query1->join('dispatch_planning_item_details', 'idt', 'ad.id =idt.trip_bill_reference');
+  $query1->condition('ad.runsheet_number', $trip_id, "=");
+  
+  // check if status is partial then sku reason cannot be empty or the status is undeliver
+    $db_and1 = db_and();
+    $db_and1->condition('idt.res_sku_reason','', "!=");
+    $db_and1->condition('ad.res_status','partial_deliver', "=");
+
+    $db_and2 = db_and();
+    $db_and2->condition('ad.res_status','undeliver', "=");
+
+    $db_or = db_or();
+    $db_or->condition($db_and1);
+    $db_or->condition($db_and2);
+
+    $query1->condition($db_or); 
+    
   $query1->condition('ad.hub',$rs_code, "=");
   $query1->addExpression("COUNT(DISTINCT ad.bill_number)", 'bill_number');
   $query1->addExpression("GROUP_CONCAT(DISTINCT ad.bill_number ORDER BY ad.bill_number separator ', ' )", 'bill_number');
