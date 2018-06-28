@@ -390,9 +390,6 @@ function vrs_confirmation_form($form, &$form_state) {
                     $bill_status = t('NA');
             }
             // Payment Outcome string
-            $bills[$key]['actual_signed_bill_amount'] = round($bills[$key]['actual_signed_bill_amount']);
-            $bills[$key]['actual_cash_amount'] = round($bills[$key]['actual_cash_amount']);
-            $bills[$key]['actual_cheque_amount'] = round($bills[$key]['actual_cheque_amount']);
             if (($bills[$key]['actual_signed_bill_amount']>0) || ($val['res_confirm_signed_bill_amount']>0)) {
                 $payment_term[] = t('Signed Bill');
             }
@@ -432,11 +429,13 @@ function vrs_confirmation_form($form, &$form_state) {
                 '#size' => $text_box_size,
                 '#default_value' => $vrs_total_id ? $bills[$key]['cheque_number'] : $val['res_cheque_no']
             );
-             if (!empty($bills[$key]['cheque_date'])) {
+            if (!empty($bills[$key]['cheque_date'])) {
                 $bills[$key]['cheque_date'] =  date('Y-m-d', $bills[$key]['cheque_date']); 
             }
             else if (!empty($val['res_cheque_date'])) {
-               $val['res_cheque_date'] =  date('Y-m-d', $val['res_cheque_date']);
+                if (is_numeric($val['res_cheque_date'])) {
+                    $val['res_cheque_date'] = date('Y-m-d', $val['res_cheque_date']);
+                }
             }
             $cheque_date = array(
                 //'#id' => 'bill_details-' . $key . '-cheque_date',
@@ -553,6 +552,10 @@ function vrs_confirmation_form($form, &$form_state) {
                 $na_position =  strpos($url,'/NA');
                 $path = $url;
                 if (empty($na_position)) {
+                    $wrapper = file_stream_wrapper_get_instance_by_uri($url) ;
+                    if (!empty($wrapper)) {
+                        $path = $wrapper->getExternalUrl();
+                    }
                     $ph_cheque .= '<a target="_blank" href="' . $path . '">';
                     $ph_cheque .= t('File');
                     $ph_cheque .= '</a>';
@@ -584,6 +587,7 @@ function vrs_confirmation_form($form, &$form_state) {
             );
             unset($path);
             unset($url);
+            unset($wrapper);
             $ph_sign_flag = 0;
             $ph_signed_bill= '<div class ="vrs_signed_bill_image">';
             if (!empty($bills[$key]['photo_signed_bill'])) {
@@ -603,6 +607,10 @@ function vrs_confirmation_form($form, &$form_state) {
                 $na_position =  strpos($url,'/NA');
                 $path = $url;
                 if (empty($na_position)) {
+                    $wrapper = file_stream_wrapper_get_instance_by_uri($url) ;
+                    if (!empty($wrapper)) {
+                        $path = $wrapper->getExternalUrl();
+                    }
                     $ph_signed_bill.= '<a target="_blank" href="'.$path.'">';
                     $ph_signed_bill.= t('File');
                     $ph_signed_bill.= '</a>';
