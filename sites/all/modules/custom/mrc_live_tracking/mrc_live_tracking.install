@@ -1,0 +1,95 @@
+<?php
+
+/*
+ * Implement hook_schema.
+ */
+
+function mrc_live_tracking_schema() {
+
+  $schema['van_live_tracking'] = array(
+    'description' => 'Sequence for van tracking table',
+    'fields' => array(
+      'id' => array(
+        'description' => 'The primary identifier for a data',
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'employeecode' => array(
+        'description' => 'employeeCode',
+        'type' => 'varchar',
+        'length' => 50,
+      ),
+      'tracktime' => array(
+        'description' => 'trackTime',
+        'type' => 'int',
+      ),
+      'latitude' => array(
+        'description' => 'latitude',
+        'type' => 'varchar',
+        'length' => 25,
+      ),
+      'longitude' => array(
+        'description' => 'longitude',
+        'type' => 'varchar',
+        'length' => 25,
+      ),
+      'gpssignal' => array(
+        'description' => 'gpsSignal',
+        'type' => 'varchar',
+        'length' => 25,
+      ),
+      'speed' => array(
+        'description' => 'speed',
+        'type' => 'varchar',
+        'length' => 25,
+      ),
+      'battery' => array(
+        'description' => 'battery',
+        'type' => 'varchar',
+        'length' => 25,
+      ),
+      'signalaccuracy' => array(
+        'description' => 'signalAccuracy',
+        'type' => 'varchar',
+        'length' => 25,
+      ),
+      'altitude' => array(
+        'description' => 'altitude',
+        'type' => 'varchar',
+        'length' => 25,
+      ),
+      'bearing' => array(
+        'description' => 'bearing',
+        'type' => 'varchar',
+        'length' => 25,
+      ),
+      'extra1' => array(
+        'description' => 'extra1',
+        'type' => 'varchar',
+        'length' => 50,
+      ),
+      'extra2' => array(
+        'description' => 'extra2',
+        'type' => 'varchar',
+        'length' => 50,
+      ),
+      'extra3' => array(
+        'description' => 'extra3',
+        'type' => 'varchar',
+        'length' => 50,
+      ),
+      'distributor_id' => array(
+        'description' => t('distributor_id'),
+        'type' => 'int',
+        'default' => 0,
+      ),
+      'created_time' => array(
+        'description' => 'DATA Created Time',
+        'type' => 'int',
+        'default' => 0,
+      ),
+    ),
+    'primary key' => array('id'),
+  );
+  return $schema;
+}
