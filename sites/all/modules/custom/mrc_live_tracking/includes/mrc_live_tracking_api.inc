@@ -15,26 +15,28 @@ function get_live_tracking_van_api_data($data) {
       $distributor_id = get_distributor_id_using_rscode($rs_code);
       //db_insert('van_live_tracking')//ForGraph
         //->key(array('employeecode' => $value['employeeCode']))//ForGraph
-      db_merge('van_live_tracking')
-        ->key(array('employeecode' => $value['employeeCode']))
-        ->fields(array(
-          'employeecode' => $value['employeeCode'],
-          'tracktime' => strtotime($value['trackTime']),
-          'latitude' => $value['latitude'],
-          'longitude' => $value['longitude'],
-          'gpssignal' => $value['gpsSignal'],
-          'speed' => $value['speed'],
-          'battery' => $value['battery'],
-          'signalaccuracy' => $value['signalAccuracy'],
-          'altitude' => $value['altitude'],
-          'bearing' => $value['bearing'],
-          'extra1' => $value['extra1'],
-          'extra2' => $value['extra2'],
-          'extra3' => $value['extra3'],
-          'distributor_id' => $distributor_id ? $distributor_id : 0, // hardcoded value because no parameter in api
-          'created_time' => REQUEST_TIME,
-        ))
-        ->execute();
+      if (!empty($distributor_id)) {
+        db_merge('van_live_tracking')
+          ->key(array('employeecode' => $value['employeeCode']))
+          ->fields(array(
+            'employeecode' => $value['employeeCode'],
+            'tracktime' => strtotime($value['trackTime']),
+            'latitude' => $value['latitude'],
+            'longitude' => $value['longitude'],
+            'gpssignal' => $value['gpsSignal'],
+            'speed' => $value['speed'],
+            'battery' => $value['battery'],
+            'signalaccuracy' => $value['signalAccuracy'],
+            'altitude' => $value['altitude'],
+            'bearing' => $value['bearing'],
+            'extra1' => $value['extra1'],
+            'extra2' => $value['extra2'],
+            'extra3' => $value['extra3'],
+            'distributor_id' => $distributor_id ? $distributor_id : 0, // hardcoded value because no parameter in api
+            'created_time' => REQUEST_TIME,
+          ))
+          ->execute();
+      }
     }
 
     $results['flag'] = '1';
