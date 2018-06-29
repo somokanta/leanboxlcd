@@ -442,6 +442,8 @@ function get_vrs_items($trip_id) {
         $query->condition('ad.res_status', $default_bill_status, 'IN');
         $query->join('node', 'n', 'n.title = ad.bill_number AND n.uid = ad.distributor_id');
         $query->condition('n.type', 'sales_register_data', '=');
+        $query->leftjoin('field_data_field_sr_bill_date', 'sr_bill_date', 'sr_bill_date.entity_id = n.nid');
+
        // Join with outlet master to fetch payment type
         $query->join('field_data_field_party_code_reference', 'pc', 'pc.entity_id = n.nid');
         $query->join('node', 'oun', 'oun.nid = pc.field_party_code_reference_nid');
@@ -508,10 +510,29 @@ function get_vrs_items($trip_id) {
         $query->addExpression('item_details.sum_net_sales_value', 'sum_net_sales_value');
         $query->addExpression('(SUM(item_details.total_delivered_value))', 'total_delivered_value');
         $query->addExpression("DATE_FORMAT(ad.date,'%d-%b-%Y')", 'dispatch_date');
+        $query->addExpression("DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(sr_bill_date.field_sr_bill_date_value),'+00:00','+05:30'), '%d-%b-%Y')", 'billing_date');
         $res = $query->execute()->fetchAll(PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
 }
                         return $res;
                         
+}
+
+function get_van_no($trip_id,$distributor_id) {
+    $res = NULL;
+   if (!empty($trip_id) && !empty($distributor_id)) {                    
+        $result = array();
+        $query = db_select('node', 'n');
+        $query->condition('n.type', 'hht_master');
+        $query->condition('n.uid', $distributor_id, '=');
+        $query->fields('n', array('title'));
+        $query->leftJoin('field_data_field_hht_id', 'fh', 'fh.field_hht_id_nid = n.nid');
+        $query->leftJoin('node', 'nt', 'nt.nid = fh.entity_id');
+        $query->condition('nt.type', 'dispatch_data');
+        $query->condition('nt.uid', $distributor_id, '=');
+        $query->condition('nt.title', $trip_id, '=');
+        $res = $query->execute()->fetchField();
+   }
+   return $res;
 }
 
 function get_vrs_print($trip_id) {
@@ -529,8 +550,16 @@ function get_vrs_print($trip_id) {
                 $sum_s_register_bill_value += round($val['field_bill_value_value']);
                 $dispatch_date = $val['dispatch_date'];
                 $field_cashier_name = $val['field_cashier_name_value'];
+                $billing_date[$val['billing_date']] = $val['billing_date'];
+            }
+            if (count($billing_date)>1) {
+               $billing_dates = implode(',',$billing_date); 
+            }
+            else {
+                $billing_dates = reset($billing_date);
             }
             $vrs_version = get_current_vrs_version($trip_id, $dis_id);
+            $van_no = get_van_no($trip_id,$dis_id);
             $short_header = array('Short Name', 'Quantity', 'Value');
             $trip_header = array('Trip ID','Cashier Name', 'Total Bill Value(Sales Register)', 'Trip Execution Date');
             $bill_header = array(
@@ -650,16 +679,16 @@ function get_vrs_print($trip_id) {
             $table1= '<table border="1" cellpadding="5" cellspacing="0" width="100%" style="color:#000; font-size: 13px;" class="views-table cols-13 table table-hover table-striped">';
             $table1.='<tr><td>'.'<b>'.t('Trip ID').'</b>'.'</td>';
             $table1.='<td>'.$trip_id.'</td>';
-            $table1.='<td>'.'<h3>'.t('Van Reconciliation Sheet(VRS)').'</h3>'.'</td>';
+            $table1.='<td>'.'<h4>'.t('Van Reconciliation Sheet(VRS)').'Version:'.$vrs_version.'</h4>'.'</td>';
             $table1.='<td colspan="2">'.'<b>'.t('Done By').'</b>'.'</td>';
             $table1.='</tr>';
             $table1.='<tr><td colspan="2">'.t('VAN No').'</td>';
-            $table1.='<td>'.'</td>';
+            $table1.='<td>'.$van_no.'</td>';
             $table1.='<td colspan="2">'.t('Cashier Name').'</td>';
             $table1.='<td>'.$field_cashier_name.'</td></tr>';
             
             $table1.='<tr><td colspan="2">'.t('Billing Date').'</td>';
-            $table1.='<td>'.'</td>';
+            $table1.='<td>'.$billing_dates.'</td>';
             $table1.='<td colspan="2">'.t('Dispatch Date').'</td>';
             $table1.='<td>'.$dispatch_date.'</td></tr>';
             $table1.='<tr><td>'.t('Start Time').'</td>';
