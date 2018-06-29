@@ -38,6 +38,7 @@ function sku_wise_returns_form($form, &$form_state) {
       '#title' => t('Product Name'),
       '#required' => TRUE,
       '#autocomplete_path' => "sku/autocomplete/$trip_number",
+      '#value' => '',
       '#ajax' => array(
         'wrapper' => 'itemlist-div',
         'callback' => 'trip_details_return_callback',
