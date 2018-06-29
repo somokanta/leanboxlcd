@@ -1,0 +1,73 @@
+<?php
+
+/**
+ * This module is to show the live van tracking from FarEye
+ */
+
+/**
+ * Implements hook_menu
+ */
+
+function mrc_live_tracking_menu() {
+  $items['van-live-track'] = array(
+    'title' => 'Real-time Van Tracking',
+    'page callback' => 'van_live_tracking',
+    'access arguments' => array('live van tracking'),
+    'type' => MENU_CALLBACK,
+    'file' => 'includes/mrc_live_tracking.inc'    
+  );
+  return $items;
+}
+/**
+ * 
+ * @return type
+ */
+function mrc_live_tracking_permission() {
+  return array(
+    'live van tracking' => array(
+      'title' => t('live van tracking'),
+      'description' => t('live van tracking')
+    ),
+  );
+}
+/**
+ * Implements of hook_views_api().
+ */
+function mrc_live_tracking_views_api() {
+  return array(
+    'api' => 3,
+    'path' => drupal_get_path('module', 'mrc_live_tracking') . '/views'
+  );
+}
+
+function mrc_live_tracking_services_resources() {
+  $resource = array(
+    '#api_version' => 3002
+  );
+  $resource = array(
+    'live-tracking' => array(
+      'actions' => array(
+        'van-api-data' => array(
+          'help' => 'Get live tracking Data',
+          'callback' => 'get_live_tracking_van_api_data',
+          'args' => array(
+            array(
+              'name' => 'data',
+              'type' => 'array',
+              'description' => 'Post data',
+              'source' => 'data',
+              'optional' => TRUE,
+            ),
+          ),
+          'file' => array(
+            'type' => 'inc',
+            'module' => 'mrc_live_tracking',
+            'name' => 'includes/mrc_live_tracking_api'
+          ),
+          'access arguments' => array('services_access_farey_api'),
+        ),
+      ),
+    ),
+  );
+  return $resource;
+}
