@@ -96,12 +96,12 @@ function get_data_of_vrs_form_validate($form, &$form_state){
         } 
         else if ($check_returns_flag->field_vrs_status_value == 1) {
             unset($form_state['views_data']['bills']);
-            form_set_error('trip_id', "Trip ID :$trip_id – Please confirm Return Inventory first.");
+            form_set_error('trip_id', "Trip ID :$trip_id – VRS Confirmation Pending.");
             ajax_redirect('/vrs-printout');
         }
        else if (empty($check_returns_flag->field_vrs_status_value)) {
             unset($form_state['views_data']['bills']);
-            form_set_error('trip_id', "Trip ID:$trip_id-Please confirm Return Inventory first.");
+            form_set_error('trip_id', "Trip ID:$trip_id- Please confirm Return Inventory first.");
             ajax_redirect('vrs-printout');
         } 
        
@@ -596,7 +596,7 @@ function get_vrs_print($trip_id) {
                 $total_key = key($vrs_total);
                 $vrs_total_id = $vrs_total[$total_key]['id'];
                 $vrs_created_date = $vrs_total[$total_key]['vrs_created_date'];
-                $denominations = get_vrs_total_denominations($trip_id, $vrs_total_id, $dis_id);
+                $denominations = get_vrs_total_denominations($trip_id,$dis_id);
             }
             foreach ($options as $key => $val) {
                switch ($val['res_status']) {

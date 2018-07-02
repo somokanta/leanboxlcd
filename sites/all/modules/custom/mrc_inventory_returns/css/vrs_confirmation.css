@@ -326,7 +326,11 @@ and open the template in the editor.
     display:none;
 }
 
-
+#deno_total {
+    font-weight: bold;
+    padding-bottom :10px;
+    padding-top :10px;
+}
 
 
 

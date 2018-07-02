@@ -2424,3 +2424,73 @@ function mrc_inventory_returns_update_7109() {
     }
   }
 }*/
+
+function mrc_inventory_returns_update_7115() {
+ $schema['vrs_trip_denominations_history'] = array(
+    'description' => 'describes vrs trip denominations',
+    'fields' => array(
+      'id' => array(
+        'description' => t('Id Primary Key'),
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'trip_id' => array(
+        'description' => t('Trip ID'),
+        'type' => 'varchar',
+        'length' => 100,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'vrs_total_id' => array(
+        'description' => t('VRs Trip Total Ref ID'),
+        'type' => 'int',
+        'not null' => TRUE,
+      ),
+      'denominations_nid' => array(
+        'description' => t('Denominations Ref NID'),
+        'type' => 'int',
+        'not null' => TRUE,
+      ),
+      'no_of_notes' => array(
+        'description' => 'No Of Notes',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'created_date' => array(
+        'description' => 'Created Date',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'distributor_id' => array(
+        'description' => t('distributor_id'),
+        'type' => 'int',
+        'default' => 0,
+      ),
+      'coins' => array(
+        'description' => 'No Of Coins Value',
+        'type' => 'varchar',
+        'length' => 10,
+      ),  
+     ),
+      'indexes' => array(
+      'trip_id' => array('trip_id'),
+    ),
+    'primary key' => array('id'),
+  );
+
+  db_create_table('vrs_trip_denominations_history', $schema['vrs_trip_denominations_history']);
+  db_add_index('vrs_trip_items', 'vrs_trip_items_bill_number', array('bill_number'));
+  db_add_index('vrs_trip_items_history', 'vrs_trip_history_bill_number', array('bill_number'));
+}
+
+function mrc_inventory_returns_update_7116() {
+  $field =  array(
+        'description' => t('Version No in denomination table'),
+        'type' => 'varchar',
+        'length' => 25,
+      );
+  db_add_field('vrs_trip_denominations', 'vrs_version_no', $field);
+  db_add_field('vrs_trip_denominations_history', 'vrs_version_no', $field);
+}

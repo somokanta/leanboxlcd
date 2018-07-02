@@ -54,19 +54,18 @@ function get_bill_details($bill_numbers, $trip_id) {
         $query = db_select('dispatch_planning_api_data', 'ad');
         $query->condition('ad.runsheet_number', $trip_id, '=');
         $query->condition('ad.distributor_id', $dis_id, '=');
-        $query->condition('ad.bill_number', $bill_numbers, 'IN');
+        $query->condition('ad.bill_number',$bill_numbers,'IN');
         $query->fields('ad', array('bill_number', 'res_status'));
         $res = $query->execute()->fetchAll(PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
-        return $res;
     }
+          return $res;
 }
 // function to fetch vrs bill items vrs_trip_denominations
-function get_vrs_total_denominations($trip_id, $vrs_total_id, $distributor_id) {
+function get_vrs_total_denominations($trip_id,$distributor_id) {
     $res = array();
     if (!empty($trip_id) && !empty($distributor_id)) {
         $query = db_select('vrs_trip_denominations', 'deno');
         $query->condition('deno.trip_id', $trip_id);
-        $query->condition('deno.vrs_total_id', $vrs_total_id);
         $query->condition('deno.distributor_id', $distributor_id);
         $query->fields('deno', array('denominations_nid', 'no_of_notes', 'trip_id', 'vrs_total_id', 'coins'));
         $res = $query->execute()->fetchAll(PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
