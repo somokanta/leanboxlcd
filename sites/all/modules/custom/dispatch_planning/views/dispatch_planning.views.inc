@@ -2898,6 +2898,24 @@ function dispatch_planning_views_data() {
     ),
   );
   
+   $data['dispatch_planning_api_data']['res_delivery_boy'] = array(
+    'title' => t('DP res_delivery_boy'),
+    'help' => t('Dispatch Planning res_delivery_boy'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+  
   $data['views']['total_sales_quantity'] = array(
         'title' => t('Total Sales Quantity'),
         'help' => t('Total Sales Quantity.'),
