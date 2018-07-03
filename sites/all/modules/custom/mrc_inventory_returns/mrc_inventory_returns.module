@@ -195,6 +195,21 @@ function mrc_inventory_returns_menu() {
      'access arguments' => array('returns confirmation'),
      'file' => 'includes/trips_cash_denomination_report.inc',
   );
+  $items['return-vrs-time-report'] = array(
+    'title' => 'Returns & VRS Productivity',
+    'page callback' => array('return_vrs_callback'),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'includes/retun_vrs_report.inc',
+  );
+  
+  $items['return-vrs-time-report/export'] = array(
+    'title' => 'Returns & VRS Productivity Export',
+    'description' => 'Returns & VRS Productivity Export',
+    'page callback' => array('return_vrs_export'),
+    'file' => 'includes/retun_vrs_report.inc',
+    'access callback' => TRUE,
+  );
     
   return $items;
 

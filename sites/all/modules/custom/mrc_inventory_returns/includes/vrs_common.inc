@@ -23,7 +23,7 @@ function get_vrs_total_items($trip_id, $distributor_id, $vrs_version) {
         $query->fields('total', array('trip_id', 'bill_count', 'total_to_be_collected_sales_register', 'total_to_be_collected_amt'
             , 'total_actual_cash_amount', 'total_actual_cheque_amount', 'total_actual_signed_bill_amount',
             'total_short_amt', 'total_cashier_debit_value', 'cheque_count', 'sb_count'
-            , 'vrs_version_no', 'id', 'trip_id', 'total_cashier_cash_short', 'vrs_created_date'));
+            , 'vrs_version_no', 'id', 'trip_id', 'total_cashier_cash_short', 'vrs_created_date','rto_charges'));
         $res = $query->execute()->fetchAll(PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
     }
     return $res;
