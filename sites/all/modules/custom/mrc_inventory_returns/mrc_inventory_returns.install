@@ -2494,3 +2494,31 @@ function mrc_inventory_returns_update_7116() {
   db_add_field('vrs_trip_denominations', 'vrs_version_no', $field);
   db_add_field('vrs_trip_denominations_history', 'vrs_version_no', $field);
 }
+
+function mrc_inventory_returns_update_7120() {
+  $fields = array(
+    'rto_charges' => array(
+      'description' => 'RTO Charges',
+      'type' => 'varchar',
+      'length' => 11,
+    ),
+    'vrs_start_time' => array(
+        'description' => t('VRS Start Time'),
+        'type' => 'int',
+        'default' => 0,
+    ),
+    'vrs_end_time' => array(
+        'description' => t('VRS end Time'),
+        'type' => 'int',
+        'default' => 0,
+    ),
+  );
+  foreach ($fields as $key => $field) {
+    if (!db_field_exists('vrs_trip_total', $key)) {
+      db_add_field('vrs_trip_total', $key, $field);
+    }
+    if (!db_field_exists('vrs_trip_total_history', $key)) {
+      db_add_field('vrs_trip_total_history', $key, $field);
+    }
+  }
+}
