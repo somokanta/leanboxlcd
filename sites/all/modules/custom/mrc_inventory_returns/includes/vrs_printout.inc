@@ -879,7 +879,7 @@ function get_vrs_print($trip_id) {
                 
                 $table6.='<tr>';
                 $table6.= '<td><b>'.t('I) R.T.O').'</b></td>';
-                $table6.= '<td>'.t(' ').'</td>';
+                $table6.= '<td>'.$vrs_total[$total_key]['rto_charges'].'</td>';
                 $table6.= '<td><b>'.t('Cashier Signature').'</b></td>';
                 $table6.= '<td><b>'.t('').'</b></td>';
                 $table6.= '</tr>';

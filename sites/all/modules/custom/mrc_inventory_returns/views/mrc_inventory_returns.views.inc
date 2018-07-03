@@ -511,6 +511,17 @@ function mrc_inventory_returns_views_data() {
       'handler' => 'views_handler_argument_numeric',
     ),
   );
+  
+   //Custom field handler for Crate Count for Order Summary
+  $data['views']['total_bill_value'] = array(
+    'title' => t('Sales Register Total Bill Value'),
+    'help' => t('Just a field created for display sales register bill value.'),
+    'real field' => 'id',
+    'field' => array(
+      'handler' => 'vrs_printout_total_bill_value',
+    ),
+  );
+  
   $data['vrs_trip_total']['total_to_be_collected_sales_register'] = array(
     'title' => t('Total To Be Collected Sales Register'),
     'help' => t('Total To Be Collected Sales Register'),
@@ -528,6 +539,24 @@ function mrc_inventory_returns_views_data() {
       'handler' => 'views_handler_argument_string',
     ),
   );
+  $data['vrs_trip_total']['rto_charges'] = array(
+    'title' => t('RTO Charges'),
+    'help' => t('RTO Charges'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+  
   $data['vrs_trip_total']['total_to_be_collected_amt'] = array(
     'title' => t('Total To Be Collected'),
     'help' => t('Total To Be Collected'),

@@ -239,7 +239,7 @@ function vrs_confirmation_form($form, &$form_state) {
     $trip_header_values[] = array($trip_id, $field_cashier_name, $sum_s_register_bill_value, round($sum_return_value), $cash_count, $cheque_count, $signed_bill_count, $trip_execution_date);
     $short_header = array('Short Name', 'Quantity', 'Value');
     $trip_header = array('Trip ID', 'Cashier Name', 'Total Bill Value', 'Returned Value', 'Cash Count', 'Cheque Count', 'Signed Bill Count', 'Trip Execution Date');
-    $footer_header = array('Count of Bills', 'Total Delivery App (To be collected)', 'Total To be collected', 'Total Cash Collected', 'Total Signed Bill Collected', 'Total Cheque Collected', 'Cashier Cash Short', 'Total Short', 'Total Cashier Debit Value');
+    $footer_header = array('Count of Bills', 'Total Delivery App (To be collected)', 'Total To be collected', 'Total Cash Collected', 'Total Signed Bill Collected', 'Total Cheque Collected','RTO Charges', 'Cashier Cash Short', 'Total Short', 'Total Cashier Debit Value');
     if (!empty($vrs_version)) {
       if (!empty($bills)) {
         $form['version_details'] = array(
@@ -779,6 +779,15 @@ function vrs_confirmation_form($form, &$form_state) {
       '#size' => $text_box_size,
       '#default_value' => !empty($vrs_total[$total_key]) ? round($vrs_total[$total_key]['total_actual_cheque_amount']) : $total_cheque_collected_value_display,
     );
+    
+    $rto_charges = array(
+      '#id' => 'footer_details-' . $key . '-rto_charges',
+      '#type' => 'textfield',
+      '#attributes' => array('class' => array('rto_charges', 'cashier_total', 'allownumericwithoutdecimal'),),
+      '#size' => $text_box_size,
+      '#default_value' => !empty($vrs_total[$total_key]) ? round($vrs_total[$total_key]['rto_charges']) : '',
+    );
+    
     $total_signed_bill_collected = array(
       '#id' => 'footer_details-' . $key . '-total_signed_bill_collected',
       '#type' => 'textfield',
@@ -831,6 +840,7 @@ function vrs_confirmation_form($form, &$form_state) {
 
     $form['footer_details'][$key]["total_actual_cash_collected"] = &$total_actual_cash_collected;
     $form['footer_details'][$key]["total_cheque_collected"] = &$total_cheque_collected;
+    $form['footer_details'][$key]["rto_charges"] = &$rto_charges;
     $form['footer_details'][$key]["total_signed_bill_collected"] = &$total_signed_bill_collected;
     $form['footer_details'][$key]["total_cashier_cash_short"] = &$total_cashier_cash_short;
     $form['footer_details'][$key]["short_collected"] = &$short_collected;
@@ -844,6 +854,7 @@ function vrs_confirmation_form($form, &$form_state) {
     $form['footer_details']['#rows'][$key][]['data']["total_actual_cash_collected"] = &$total_actual_cash_collected;
     $form['footer_details']['#rows'][$key][]['data']["total_signed_bill_collected"] = &$total_signed_bill_collected;
     $form['footer_details']['#rows'][$key][]['data']["total_cheque_collected"] = &$total_cheque_collected;
+    $form['footer_details']['#rows'][$key][]['data']["rto_charges"] = &$rto_charges;
     $form['footer_details']['#rows'][$key][]['data']["total_cashier_cash_short"] = &$total_cashier_cash_short;
     $form['footer_details']['#rows'][$key][]['data']["short_collected"] = &$short_collected;
     $form['footer_details']['#rows'][$key][]['data']["total_cashier_debit_value"] = &$total_cashier_debit_value_field;
@@ -1006,6 +1017,7 @@ function validate_vrs_trip_details($form, &$form_state) {
 
 function display_vrs_trip_details($form, &$form_state) {
   global $user;
+  $res = array();
   $dis_id = change_feeds_import_get_distributor_id($user->uid);
   $trip_id = $form_state['values']['trip_id'];
   $dispatch_date = $form_state['values']['dispatch_date'];
@@ -1031,86 +1043,77 @@ function display_vrs_trip_details($form, &$form_state) {
       $query->condition('ad.date', $dispatch_date, '=');
     }
     if (!empty($cashier_name)) {
-      $query->condition('ad.fieldExecutiveName', $cashier_name);
-    }
-    $query->condition('ad.res_status', $default_bill_status, 'IN');
-    if (!empty($bill_number)) {
-      //$query->condition('ad.bill_number', $bill_number, '=');
-    }
-    $query->join('node', 'n', 'n.title = ad.bill_number AND n.uid = ad.distributor_id');
-    $query->condition('n.type', 'sales_register_data', '=');
-    // Join with outlet master to fetch payment type
-    $query->join('field_data_field_party_code_reference', 'pc', 'pc.entity_id = n.nid');
-    $query->join('node', 'oun', 'oun.nid = pc.field_party_code_reference_nid');
-    $query->leftJoin('field_data_field_payment_terms', 'pt', 'pt.entity_id = oun.nid');
-    $query->condition('oun.uid', $dis_id);
-    //---------------------------
-    $query->condition('n.uid', $dis_id);
-    $query->join('field_data_field_bill_value', 'bv', 'bv.entity_id = n.nid');
-    $query->join($sub_query1, 'item_details', 'item_details.trip_bill_reference = ad.id');
-    // Join with dispatch_data to check vrs status and return flage 
-    $query->join('node', 'disp_data', 'disp_data.title = ad.runsheet_number');
-    $query->condition('disp_data.type', 'dispatch_data');
-    $query->condition('disp_data .uid', $dis_id);
-    $query->leftjoin('field_data_field_vrs_status', 'vs', 'vs.entity_id = disp_data.nid');
-    // VRS Screen Return flag = 1 and VRS status = 1, 3 Means VRS pending
-
-    $query->join('field_data_field_trip_executon_date', 'exe_date', 'exe_date.entity_id = disp_data.nid');
-    $query->leftjoin('field_data_field_cashier_name', 'fld_cashier', 'fld_cashier.entity_id = disp_data.nid');
-    $vrs_status = array('1', '3');
-    $query->condition('vs.field_vrs_status_value', $vrs_status, 'IN');
-
-    $query->groupBy('ad.bill_number');
-
-    $query->fields('ad', array('bill_number', 'res_bank_name', 'res_status', 'res_cheque_date', 'res_bank_name', 'res_photo_of_cheque', 'res_photo_of_signed_bill_delivery', 'photo_of_signed_bill_partial', 'res_moneyTransactionType'));
-    $query->fields('item_details', array('trip_bill_reference'));
-    $query->fields('bv', array('field_bill_value_value'));
-    $query->fields('fld_cashier', array('field_cashier_name_value'));
-
-    // payment type
-    $query->fields('pt', array('field_payment_terms_value'));
-    // sales register to be collected amt
-    $query->addExpression("SUM(bv.field_bill_value_value - item_details.return_value - item_details.cashier_short_value - item_details.godown_short_value)", 'sales_register_to_be_collected_amt');
-    // Farery to be collected amt
-    $query->addExpression("SUM(ad.bill_value - item_details.return_value - item_details.cashier_short_value - item_details.godown_short_value)", 'to_be_collected_amt');
-    $query->addExpression('ad.res_cash_amount', 'res_cash_amount');
-    $query->addExpression('ad.res_cheque_amount', 'res_cheque_amount');
-    $query->addExpression('ad.bill_value', 'bill_value');
-    $query->addExpression('ad.bill_number', 'bill_number');
-    $query->addExpression('ad.res_bank_name', 'res_bank_name');
-    $query->addExpression('ad.res_status', 'res_status');
-    $query->addExpression('ad.res_cheque_date', 'res_cheque_date');
-    $query->addExpression('ad.res_photo_of_cheque', 'res_photo_of_cheque');
-    $query->addExpression('ad.res_photo_of_signed_bill_delivery', 'res_photo_of_signed_bill_delivery');
-    $query->addExpression('ad.photo_of_signed_bill_partial', 'photo_of_signed_bill_partial');
-    $query->addExpression('ad.res_confirm_signed_bill_amount', 'res_confirm_signed_bill_amount');
-    $query->addExpression('bv.field_bill_value_value', 'field_bill_value_value');
-    $query->addExpression("DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(exe_date.field_trip_executon_date_value),'+00:00','+05:30'), '%d-%b-%Y')", 'trip_execution_date');
-
-    $query->addExpression('ad.res_cheque_date_edit', 'res_cheque_date_edit');
-    $query->addExpression('ad.res_photo_of_cheque_edit', 'res_photo_of_cheque_edit');
-    $query->addExpression('ad.res_cheque_amount_edit', 'res_cheque_amount_edit');
-    $query->addExpression('ad.res_money_collect2_edit', 'res_money_collect2_edit');
-    $query->addExpression('ad.photo_of_signed_bill_partial_edit', 'photo_of_signed_bill_partial_edit');
-    $query->addExpression('ad.res_confirm_signed_bill_amount_edit', 'res_confirm_signed_bill_amount_edit');
-    $query->addExpression('ad.res_bank_name_edit', 'res_bank_name_edit');
-    $query->addExpression('ad.res_photo_of_signed_bill_delivery_edit', 'res_photo_of_signed_bill_delivery_edit');
-    $query->addExpression('ad.res_cash_amount_edit', 'res_cash_amount_edit');
-    $query->addExpression('ad.res_signed_bill_delivery_edit', 'res_signed_bill_delivery_edit');
-    $query->addExpression('ad.res_signed_bill_partial_edit', 'res_signed_bill_partial_edit');
-    $query->addExpression('ad.res_cheque_no', 'res_cheque_no');
-    $query->addExpression('ad.res_cheque_no_edit', 'res_cheque_no_edit');
-    $query->addExpression('item_details.return_value', 'total_return_value');
-    $query->orderBy('ad.res_status', 'asc');
-
-    //$query->addExpression('ad.res_cheque_amount', 'res_cheque_amount');
-    //$query->addExpression("SUM(bv.field_bill_value_value)", 'total_bill_value');
-    //$query->groupBy('bv.entity_id');
-    //$query->range(0, 25);
-    $res = $query->execute()->fetchAll(PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
-    $form_state['vrs_confirmation']['bills'] = $res;
-    $form_state['rebuild'] = TRUE;
+            $query->condition('ad.fieldExecutiveName', $cashier_name);
+   }
+        $query->condition('ad.res_status', $default_bill_status, 'IN');
+        if (!empty($bill_number)) {
+            //$query->condition('ad.bill_number', $bill_number, '=');
+        }
+        $query->join('node', 'n', 'n.title = ad.bill_number AND n.uid = ad.distributor_id');
+        $query->condition('n.type', 'sales_register_data', '=');
+        // Join with outlet master to fetch payment type
+        $query->join('field_data_field_party_code_reference', 'pc', 'pc.entity_id = n.nid');
+        $query->join('node', 'oun', 'oun.nid = pc.field_party_code_reference_nid');
+        $query->leftJoin('field_data_field_payment_terms', 'pt', 'pt.entity_id = oun.nid');
+        $query->condition('oun.uid', $dis_id);
+        //---------------------------
+        $query->condition('n.uid', $dis_id);
+        $query->join('field_data_field_bill_value', 'bv', 'bv.entity_id = n.nid');
+        $query->join($sub_query1, 'item_details', 'item_details.trip_bill_reference = ad.id');
+        // Join with dispatch_data to check vrs status and return flage 
+        $query->join('node', 'disp_data', 'disp_data.title = ad.runsheet_number');
+        $query->condition('disp_data.type', 'dispatch_data');
+        $query->condition('disp_data .uid', $dis_id);
+        $query->leftjoin('field_data_field_vrs_status', 'vs', 'vs.entity_id = disp_data.nid');
+        // VRS Screen Return flag = 1 and VRS status = 1, 3 Means VRS pending
+        $query->join('field_data_field_trip_executon_date', 'exe_date', 'exe_date.entity_id = disp_data.nid');
+        $query->leftjoin('field_data_field_cashier_name', 'fld_cashier', 'fld_cashier.entity_id = disp_data.nid');
+        $vrs_status = array('1', '3');
+        $query->condition('vs.field_vrs_status_value', $vrs_status, 'IN');
+        $query->groupBy('ad.bill_number');
+        $query->fields('ad', array('bill_number', 'res_bank_name', 'res_status', 'res_cheque_date', 'res_bank_name', 'res_photo_of_cheque', 'res_photo_of_signed_bill_delivery', 'photo_of_signed_bill_partial', 'res_moneyTransactionType'));
+        $query->fields('item_details', array('trip_bill_reference'));
+        $query->fields('bv', array('field_bill_value_value'));
+        $query->fields('fld_cashier', array('field_cashier_name_value'));
+        // payment type
+        $query->fields('pt', array('field_payment_terms_value'));
+        // sales register to be collected amt
+        $query->addExpression("SUM(bv.field_bill_value_value - item_details.return_value - item_details.cashier_short_value - item_details.godown_short_value)", 'sales_register_to_be_collected_amt');
+        // Farery to be collected amt
+        $query->addExpression("SUM(ad.bill_value - item_details.return_value - item_details.cashier_short_value - item_details.godown_short_value)", 'to_be_collected_amt');
+        $query->addExpression('ad.res_cash_amount', 'res_cash_amount');
+        $query->addExpression('ad.res_cheque_amount', 'res_cheque_amount');
+        $query->addExpression('ad.bill_value', 'bill_value');
+        $query->addExpression('ad.bill_number', 'bill_number');
+        $query->addExpression('ad.res_bank_name', 'res_bank_name');
+        $query->addExpression('ad.res_status', 'res_status');
+        $query->addExpression('ad.res_cheque_date', 'res_cheque_date');
+        $query->addExpression('ad.res_photo_of_cheque', 'res_photo_of_cheque');
+        $query->addExpression('ad.res_photo_of_signed_bill_delivery', 'res_photo_of_signed_bill_delivery');
+        $query->addExpression('ad.photo_of_signed_bill_partial', 'photo_of_signed_bill_partial');
+        $query->addExpression('ad.res_confirm_signed_bill_amount', 'res_confirm_signed_bill_amount');
+        $query->addExpression('bv.field_bill_value_value', 'field_bill_value_value');
+        $query->addExpression("DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(exe_date.field_trip_executon_date_value),'+00:00','+05:30'), '%d-%b-%Y')", 'trip_execution_date');
+        $query->addExpression('ad.res_cheque_date_edit', 'res_cheque_date_edit');
+        $query->addExpression('ad.res_photo_of_cheque_edit', 'res_photo_of_cheque_edit');
+        $query->addExpression('ad.res_cheque_amount_edit', 'res_cheque_amount_edit');
+        $query->addExpression('ad.res_money_collect2_edit', 'res_money_collect2_edit');
+        $query->addExpression('ad.photo_of_signed_bill_partial_edit', 'photo_of_signed_bill_partial_edit');
+        $query->addExpression('ad.res_confirm_signed_bill_amount_edit', 'res_confirm_signed_bill_amount_edit');
+        $query->addExpression('ad.res_bank_name_edit', 'res_bank_name_edit');
+        $query->addExpression('ad.res_photo_of_signed_bill_delivery_edit', 'res_photo_of_signed_bill_delivery_edit');
+        $query->addExpression('ad.res_cash_amount_edit', 'res_cash_amount_edit');
+        $query->addExpression('ad.res_signed_bill_delivery_edit', 'res_signed_bill_delivery_edit');
+        $query->addExpression('ad.res_signed_bill_partial_edit', 'res_signed_bill_partial_edit');
+        $query->addExpression('ad.res_cheque_no', 'res_cheque_no');
+        $query->addExpression('ad.res_cheque_no_edit', 'res_cheque_no_edit');
+        $query->addExpression('item_details.return_value', 'total_return_value');
+        $query->orderBy('ad.res_status', 'asc');
+        $res = $query->execute()->fetchAll(PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
   }
+        $form_state['vrs_confirmation']['bills'] = $res;
+        $form_state['start_time'] = REQUEST_TIME;
+        $form_state['rebuild'] = TRUE;
 }
 
 function vrs_confirmation_validate($form, &$form_state) {
@@ -1128,7 +1131,8 @@ function vrs_confirmation_validate($form, &$form_state) {
   $total_cheque_collected = (float) $form_state['values']['footer_details'][$key_footer]['total_cheque_collected'];
   $total_signed_bill_collected = (float) $form_state['values']['footer_details'][$key_footer]['total_signed_bill_collected'];
   $total_cashier_cash_short = (float) $form_state['values']['footer_details'][$key_footer]['total_cashier_cash_short'];
-  $total_cash = $total_actual_cash + $total_cheque_collected + $total_signed_bill_collected + $total_cashier_cash_short + $total_short;
+  $rto_charges = (float) $form_state['values']['footer_details'][$key_footer]['rto_charges'];
+  $total_cash = $total_actual_cash + $total_cheque_collected + $total_signed_bill_collected + $total_cashier_cash_short + $total_short + $rto_charges;
   if (!empty($form_state['values']['bill_details'])) {
 
     //2. At Table Level, for each bill to be collected should be = cash amount + cheque + signed bill + short
@@ -1221,7 +1225,7 @@ function vrs_confirmation_validate($form, &$form_state) {
 
   //1. At Footer Level, Total To be collected should be = Footer level total cash + total cheque + total signed bill + cashier short + short
   if ($total_cash !== $to_be_collected) {
-    $messages[] = t('Error:To be collected amount should be equal to total cash + total cheque + total signed bill + cashier short + short.');
+    $messages[] = t('Error:To be collected amount should be equal to total cash + total cheque + total signed bill + cashier short + short + RTO Charges.');
   }
   $bill_numbers = array_keys($form_state['values']['bill_details']);
   $bill_status = get_bill_details($bill_numbers, $trip_id);
@@ -1263,7 +1267,7 @@ function check_vrs_trip_exist($trip_id, $dis_id) {
 }
 
 function vrs_confirmation_form_submit($form, &$form_state) {
-  //print_r($_POST);
+  $vrs_start_time = $form_state['start_time'];
   global $user;
   $dis_id = change_feeds_import_get_distributor_id($user->uid);
   $trip_id = $form_state['values']['trip_id'];
@@ -1284,6 +1288,7 @@ function vrs_confirmation_form_submit($form, &$form_state) {
   $total_short = (float) $form_state['values']['footer_details'][$key_footer]['short_collected'];
   $total_actual_cash = $form_state['values']['footer_details'][$key_footer]['total_actual_cash_collected'];
   $total_cheque_collected = $form_state['values']['footer_details'][$key_footer]['total_cheque_collected'];
+  $rto_charges = $form_state['values']['footer_details'][$key_footer]['rto_charges'];
   $total_signed_bill_collected = (float) $form_state['values']['footer_details'][$key_footer]['total_signed_bill_collected'];
   $total_cashier_cash_short = (float) $form_state['values']['footer_details'][$key_footer]['total_cashier_cash_short'];
   $total_cash = $total_actual_cash + $total_cheque_collected + $total_signed_bill_collected + $total_cashier_cash_short + $total_short;
@@ -1311,7 +1316,6 @@ function vrs_confirmation_form_submit($form, &$form_state) {
       }
     }
   }
-
   $trip_items = array();
   $dir = 'public://bills';
   file_prepare_directory($dir, FILE_CREATE_DIRECTORY);
@@ -1327,7 +1331,6 @@ function vrs_confirmation_form_submit($form, &$form_state) {
   if (!empty($form_state['values']['bill_details'])) {
     $vrs_id = "VRS$trip_id";
     foreach ($form_state['values']['bill_details'] as $key => $value) {
-
       $photo_cheque = "cheque_$key";
       $photo_signed_bill = "signedbill_$key";
       if (isset($_FILES['files']['name'][$photo_cheque])) {
@@ -1449,6 +1452,9 @@ function vrs_confirmation_form_submit($form, &$form_state) {
     $trip_items_total['total_cashier_debit_value'] = $footer_level_cashier_debit_value;
     $trip_items_total['cheque_count'] = $check_count;
     $trip_items_total['sb_count'] = $sb_count;
+    $trip_items_total['rto_charges'] = $rto_charges;
+    $trip_items_total['vrs_start_time'] = $vrs_start_time;
+    $trip_items_total['vrs_end_time'] = time();
     if (!empty($vrs_total_id) && !empty($vrs_created_date)) {
       $trip_items[$key]['vrs_created_date'] = $vrs_created_date;
     }
@@ -1464,7 +1470,6 @@ function vrs_confirmation_form_submit($form, &$form_state) {
       $vrs_total_id = $vrs_total_id;
     else
       $vrs_total_id = $vrs_total_id_insert;
-
     // Saving Note denominations
     $note_denominations = get_notes_denominations();
     $denominations = array();
@@ -1496,8 +1501,6 @@ function vrs_confirmation_form_submit($form, &$form_state) {
       }
     }
   }
-
-
   if ($node) {
     //$message = t('VRS has been successfully confirmed for Trip ID:'. $trip_id);
     $message = t('Successfully created VRS-Version:' . $version_number . ' for Trip ID:' . $trip_id);
@@ -1527,6 +1530,9 @@ function insert_vrs_trip_total($values, $trip_id) {
     'vrs_created_date',
     'vrs_confirm_date',
     'distributor_id',
+    'rto_charges',
+    'vrs_start_time',
+    'vrs_end_time'  
   );
   $res = db_merge('vrs_trip_total') // Table name no longer needs {}
     ->fields($values)
