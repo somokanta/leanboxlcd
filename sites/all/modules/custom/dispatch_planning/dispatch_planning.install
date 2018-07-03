@@ -1875,6 +1875,12 @@ function dispatch_planning_update_7124() {
        'length' => 50,
        'default' => NULL,
      ),
+    'res_delivery_boy' => array(
+       'description' => t('Response delivery_boy'),
+       'type' => 'varchar',
+       'length' => 50,
+       'default' => NULL,
+     ),
   );
   foreach ($fields as $key => $field) {
     if (!db_field_exists('dispatch_planning_api_data', $key)) {
