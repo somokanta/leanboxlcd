@@ -120,7 +120,7 @@ function van_live_tracking_form($form, &$form_state) {
   $query = db_select('dispatch_planning_api_data', 'ad');
   $query->condition('ad.distributor_id', $distributor_id, '=');
   $query->condition('ad.fieldExecutiveName', $drivername_arr, 'IN');
-  $query->fields('ad', array('fieldExecutiveName'));
+  $query->fields('ad', array('fieldExecutiveName','runsheet_number'));
   $query->groupBy('ad.fieldExecutiveName');
   
   if (!empty($dispatch_from_date) && !empty($dispatch_to_date)) {
@@ -133,7 +133,7 @@ function van_live_tracking_form($form, &$form_state) {
   foreach($total_res as &$val){
     $val['pendency'] = round(($val['pending_bill_count']/$val['bill_count'])*100);
   }
-  $header = array('Cashier Name', 'Bill Count','Pending Bill Count','Pendency %');
+  $header = array('Cashier Name', 'Trip No','Bill Count','Pending Bill Count','Pendency %');
 
   $html = theme('table', array('header' => $header, 'rows' => $total_res, 'attributes' => array('width' => '100%'), 'empty' => t('No Records has been found')));
   $form['bill_pending_details'] = array(
