@@ -41,6 +41,9 @@ class bill_returns_report extends views_handler_field {
             $query->addExpression('(SUM(ad.dispatch_qty))', 'dispatch_qty');
             $query->addExpression('(SUM(ad.res_godown_short))', 'godown_short');
             $query->addExpression('(SUM(ad.return_qty))', 'return_qty');
+            $query->addExpression('(SUM(ad.sum_net_sales_value * ad.res_sku_actual_quantity1))', 'delivered_value');
+            $query->addExpression('(SUM(ad.return_qty * ad.sum_net_sales_value))', 'returned_value');
+            $query->addExpression('(CASE WHEN (dpi.res_status = \'undeliver\') THEN dpi.res_reason_for_failure END)', 'reason_for_failure');
             $bill_return_report =$query->execute()->fetch(PDO::FETCH_ASSOC);
             if (!empty($views_current_field)) {
                 switch ($views_current_field) {
@@ -64,7 +67,16 @@ class bill_returns_report extends views_handler_field {
                         break;
                     case 'delivery_app_delivered_qty';
                         return $bill_return_report['farey_delivered_qty'];
-                        break;     
+                        break;
+                    case 'delivered_value';
+                        return round($bill_return_report['delivered_value'],2);
+                        break;
+                    case 'returned_value';
+                        return round($bill_return_report['returned_value'],2);
+                        break;
+                    case 'reason_for_failure';
+                        return $bill_return_report['reason_for_failure'];
+                        break;
                     default:
                         return '';
                 }

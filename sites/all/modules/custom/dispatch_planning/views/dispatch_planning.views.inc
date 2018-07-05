@@ -2980,6 +2980,36 @@ function dispatch_planning_views_data() {
         ),
     );
     
+    // Delivery value
+    $data['views']['delivered_value'] = array(
+        'title' => t('Delivered Value'),
+        'help' => t('Delivered Value'),
+        'real field' => 'id',
+        'field' => array(
+            'handler' => 'bill_returns_report',
+        ),
+    );
+    
+    // Returned value
+    $data['views']['returned_value'] = array(
+        'title' => t('Returned Value'),
+        'help' => t('Returned Value'),
+        'real field' => 'id',
+        'field' => array(
+            'handler' => 'bill_returns_report',
+        ),
+    );
+    
+    // Reason For Failure
+    $data['views']['reason_for_failure'] = array(
+        'title' => t('Reason For Failure'),
+        'help' => t('Reason For Failure'),
+        'real field' => 'id',
+        'field' => array(
+            'handler' => 'bill_returns_report',
+        ),
+    );
+    
   $data['dispatch_planning_api_data']['res_trackHalt'] = array(
     'title' => t('DP res_trackHalt'),
     'help' => t('Dispatch Planning res_trackHalt'),
