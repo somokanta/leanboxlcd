@@ -120,7 +120,8 @@ function van_live_tracking_form($form, &$form_state) {
   $query = db_select('dispatch_planning_api_data', 'ad');
   $query->condition('ad.distributor_id', $distributor_id, '=');
   $query->condition('ad.fieldExecutiveName', $drivername_arr, 'IN');
-  $query->fields('ad', array('fieldExecutiveName','runsheet_number'));
+  $query->fields('ad', array('fieldExecutiveName'));
+  $query->addExpression('GROUP_CONCAT(DISTINCT ad.runsheet_number)', 'runsheet_number');
   $query->groupBy('ad.fieldExecutiveName');
   
   if (!empty($dispatch_from_date) && !empty($dispatch_to_date)) {
