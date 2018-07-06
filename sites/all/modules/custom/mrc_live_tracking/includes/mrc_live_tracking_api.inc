@@ -7,17 +7,15 @@
  */
 
 function get_live_tracking_van_api_data($data) {
-  watchdog('tracking data', '<pre>' . print_r($data, TRUE) . '</pre>');
   if (!empty($data)) {
     foreach ($data as $value) {
       $rs_code_string = explode("_", $value['employeeCode']);
       $rs_code = $rs_code_string[0];
       $distributor_id = get_distributor_id_using_rscode($rs_code);
-      //db_insert('van_live_tracking')//ForGraph
-        //->key(array('employeecode' => $value['employeeCode']))//ForGraph
       if (!empty($distributor_id)) {
-        db_merge('van_live_tracking')
-          ->key(array('employeecode' => $value['employeeCode']))
+//        db_merge('van_live_tracking')
+//          ->key(array('employeecode' => $value['employeeCode']))
+          db_insert('van_live_tracking')//ForGraph
           ->fields(array(
             'employeecode' => $value['employeeCode'],
             'tracktime' => strtotime($value['trackTime']),
