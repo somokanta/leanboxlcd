@@ -56,7 +56,7 @@ function van_live_tracking_form($form, &$form_state) {
   $query->condition('vlt.employeecode', db_like($rs_code) . '%', 'LIKE');  
   $query->fields('vlt', array('employeecode', 'tracktime','battery','speed','latitude', 'longitude'));
   $query->orderBy('vlt.employeecode', 'asc');
-  //$query->orderBy('vlt.id', 'asc'); //ForGraph
+  $query->orderBy('vlt.id', 'asc');
   $result = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
 
   $options = array();
@@ -65,7 +65,8 @@ function van_live_tracking_form($form, &$form_state) {
   foreach ($result as $k => $val) {
     $employeecode = $val['employeecode'];
     $driver = explode("_", $employeecode);
-    $drivername_arr[] = ucfirst($driver[1]);
+    $driver_name = ucfirst($driver[1]);
+    $drivername_arr[$driver_name] = $driver_name;
     $tracktime = date('d-M-Y H:i',$val['tracktime']);
     $battery = round($val['battery']);
     $speed = round($val['speed']);
