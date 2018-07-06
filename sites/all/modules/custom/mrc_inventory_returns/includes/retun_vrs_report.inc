@@ -81,22 +81,27 @@ function return_vrs_callback() {
 
   $query = db_select('dispatch_planning_api_data', 'ad');
   $query->condition('ad.distributor_id', $distributor_id, '=');
-  $query->condition('ad.updated_flag', 1, '=');
+  //$query->condition('ad.updated_flag', 1, '=');
   if (!empty($dispatch_date)) {
     $query->condition('ad.date', $dispatch_date, '=');
   }
   if (!empty($trip_id)) {
     $query->condition('ad.runsheet_number', $trip_id, '=');
   }
-
+  
   $query->fields('ad', array('runsheet_number'));
-  $query->addExpression('MIN(updated_time)', 'min_updated_time');
-  $query->addExpression('MAX(updated_time)', 'max_updated_time');
-  $query->addexpression("MAX(updated_time) - MIN(updated_time)", 'total_return_time');
+  $query->join('node', 'disp_data', 'disp_data.title = ad.runsheet_number');
+  $query->condition('disp_data.type', 'dispatch_data');
+  $query->condition('disp_data .uid', $distributor_id);
+  $query->join('field_data_field_vrs_status', 'vs', 'vs.entity_id = disp_data.nid');
+  $query->fields('vs', array('field_vrs_status_value'));
+  $query->addExpression('MIN(CASE WHEN (ad.updated_flag = 1) THEN ad.updated_time END)', 'min_updated_time');
+  $query->addExpression('MAX(CASE WHEN (ad.updated_flag = 1) THEN ad.updated_time END)', 'max_updated_time');
+  $query->addExpression('(MAX(CASE WHEN (ad.updated_flag = 1) THEN ad.updated_time END) - MIN(CASE WHEN (ad.updated_flag = 1) THEN ad.updated_time END))', 'total_return_time');
   $query->groupBy('ad.runsheet_number');
   $query->join('dispatch_planning_item_details', 'idt', 'ad.id = idt.trip_bill_reference');
   $query->addexpression("SUM(idt.return_qty * idt.sum_net_sales_value)", 'return_value');
-  $query->addexpression("((SUM(idt.return_qty * idt.sum_net_sales_value) * 10) / ((MAX(updated_time) - MIN(updated_time))/60))", 'return_prod');
+  $query->addexpression("(SUM(CASE WHEN (ad.updated_flag = 1) THEN (idt.return_qty * idt.sum_net_sales_value * 10) END)) / ((MAX(CASE WHEN (ad.updated_flag = 1) THEN ad.updated_time END) - MIN(CASE WHEN (ad.updated_flag = 1) THEN ad.updated_time END)) / 60)", 'return_prod');
   $query->join('vrs_trip_total_history', 'vtth', 'ad.runsheet_number = vtth.trip_id AND ad.distributor_id = vtth.distributor_id');
   $query->condition('vtth.vrs_version_no', 'V1.0', '=');
   $query->fields('vtth', array('vrs_start_time'));
@@ -108,21 +113,52 @@ function return_vrs_callback() {
   $row = array();
   foreach ($result as $val) {
     $row['trip_id'] = $val['runsheet_number'];
-    $row['min_updated_time'] = date('d-M-y H:i:s', $val['min_updated_time']);
+    $field = field_info_field('field_vrs_status');
+     $allowed_values = list_allowed_values($field);
+     foreach ($allowed_values as $key => $value) {
+       if ($key == $val['field_vrs_status_value']) {
+         $row['field_vrs_status_value'] = $value;
+       }
+     }
+    if(isset($val['min_updated_time'])){
+      $row['min_updated_time'] = date('d-M-y H:i:s', $val['min_updated_time']);
+    }else{
+      $row['min_updated_time'] = '';
+    }
+    if(isset($val['max_updated_time'])){
     $row['max_updated_time'] = date('d-M-y H:i:s', $val['max_updated_time']);
+    }else{
+      $row['max_updated_time'] = '';
+    }
+    if(isset($val['total_return_time'])){
     $row['total_return_time'] = gmdate('H:i:s', $val['total_return_time']);
+    }else{
+      $row['total_return_time'] = '';
+    }
     $row['return_value'] = round($val['return_value']);
     $row['return_prod'] = round($val['return_prod']);
+    if(!empty($val['vrs_start_time'])){
     $row['vrs_start_time'] = date('d-M-y H:i:s', $val['vrs_start_time']);
+    }else{
+      $row['vrs_start_time'] = '';
+    }
+    if(!empty($val['vrs_end_time'])){
     $row['vrs_end_time'] = date('d-M-y H:i:s', $val['vrs_end_time']);
+    }else{
+      $row['vrs_end_time'] = '';
+    }  
+    if(!empty($val['vrs_time'])){
     $row['vrs_time'] = gmdate('H:i:s', $val['vrs_time']);
+    }else{
+      $row['vrs_time'] = '';
+    }
     $row['total_actual_cash_amount'] = $val['total_actual_cash_amount'];
     $row['total_actual_cheque_amount'] = $val['total_actual_cheque_amount'];
     $row['total_actual_signed_bill_amount'] = $val['total_actual_signed_bill_amount'];
     $rows[] = $row;
   }
 
-  $header = array('Trip ID', 'Returns Start Time', 'Returns End Time', 'Total Returns Time taken', 'Total Returned Value', 'Returns Productivity (Value/10 min)', 'VRS Start Time', 'VRS End Time', 'Total VRS Time taken', 'Cash Value', 'Cheque Value', 'Signed Bill Value');
+  $header = array('Trip ID', 'Status', 'Returns Start Time', 'Returns End Time', 'Total Returns Time taken', 'Total Returned Value', 'Returns Productivity (Value/10 min)', 'VRS Start Time', 'VRS End Time', 'Total VRS Time taken', 'Cash Value', 'Cheque Value', 'Signed Bill Value');
   $per_page = 10;
   // Initialize the pager
   $current_page = pager_default_initialize(count($rows), $per_page);
