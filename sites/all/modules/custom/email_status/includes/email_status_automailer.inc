@@ -647,3 +647,100 @@ function get_attachment_full_returned_bills($distributor_id) {
 
   return $output1;
 }
+
+function send_email_return_vrs_prod() {
+  $distributor_id = _DISTRIBUTOR_ID;
+
+  $yesterday_date = date('Y-m-d', strtotime("-1 days"));
+  $query = db_select('dispatch_planning_api_data', 'ad');
+  $query->condition('ad.distributor_id', $distributor_id, '=');
+  $query->fields('ad', array('date'));
+  $query->condition('ad.date', $yesterday_date, '=');
+  $query->fields('ad', array('runsheet_number'));
+  $query->join('node', 'n', 'n.title = ad.runsheet_number');
+  $query->join('field_data_field_vrs_status', 'vs', 'vs.entity_id = n.nid');
+  $query->fields('vs', array('field_vrs_status_value'));
+  $query->leftjoin('field_data_field_returned_version', 'rv', 'rv.entity_id = n.nid');
+  $query->fields('rv', array('field_returned_version_value'));
+  $query->leftjoin('field_data_field_vrs_version', 'vv', 'vv.entity_id = n.nid');
+  $query->fields('vv', array('field_vrs_version_value'));
+  $query->fields('ad', array('fieldExecutiveName'));
+  $query->addExpression('((MAX(CASE WHEN (ad.updated_flag = 1) THEN ad.updated_time END) - MIN(CASE WHEN (ad.updated_flag = 1) THEN ad.updated_time END)) / 60)', 'total_return_time');
+  $query->groupBy('ad.runsheet_number');
+  $query->join('dispatch_planning_item_details', 'dpi', 'ad.id = dpi.trip_bill_reference');
+  $query->addexpression("(SUM(CASE WHEN (ad.updated_flag = 1) THEN (dpi.return_qty * dpi.sum_net_sales_value * 10) END)) / ((MAX(CASE WHEN (ad.updated_flag = 1) THEN ad.updated_time END) - MIN(CASE WHEN (ad.updated_flag = 1) THEN ad.updated_time END)) / 60)", 'return_prod');
+
+  $query->addExpression('(COUNT(DISTINCT(CASE WHEN (dpi.line_level_status = \'line_partial_deliver\'  or dpi.line_level_status = \'line_undeliver\') THEN dpi.sku_code END)) * 10) /  ((MAX(CASE WHEN (ad.updated_flag = 1) THEN ad.updated_time END) - MIN(CASE WHEN (ad.updated_flag = 1) THEN ad.updated_time END)) / 60)', 'product_lines');
+
+  $query->join('vrs_trip_total_history', 'vtth', 'ad.runsheet_number = vtth.trip_id AND ad.distributor_id = vtth.distributor_id');
+  $query->condition('vtth.vrs_version_no', 'V1.0', '=');
+  $query->addexpression('((vtth.vrs_start_time) - MAX(CASE WHEN (ad.updated_flag = 1) THEN ad.updated_time END))', 'vrs_start_return_end');
+  $query->join('vrs_trip_total', 'vtt', 'ad.runsheet_number = vtt.trip_id AND ad.distributor_id = vtt.distributor_id');
+  $query->addexpression("((vtt.vrs_end_time - vtth.vrs_start_time) / 60)", 'vrs_time_difference');
+  $query->addexpression("((vtt.total_to_be_collected_amt * 10) / ((vtt.vrs_end_time - vtth.vrs_start_time) / 60))", 'vrs_value');
+  $query->addexpression("(vtt.total_actual_cash_amount * 100) / (vtt.total_actual_cash_amount + vtth.total_actual_cheque_amount + vtt.total_actual_signed_bill_amount)", 'cash_percentage');
+  $query->addexpression("(vtt.total_actual_cheque_amount * 100) / (vtt.total_actual_cash_amount + vtth.total_actual_cheque_amount + vtt.total_actual_signed_bill_amount)", 'cheque_percentage');
+  $query->addexpression("(vtt.total_actual_signed_bill_amount * 100) / (vtt.total_actual_cash_amount + vtth.total_actual_cheque_amount + vtt.total_actual_signed_bill_amount)", 'signed_percentage');
+
+  $result = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+  $rows = array();
+  foreach ($result as $val) {
+    $row['dispatch_date'] = $val['date'];
+    $row['trip_id'] = $val['runsheet_number'];
+
+    $field = field_info_field('field_vrs_status');
+    $allowed_values = list_allowed_values($field);
+    foreach ($allowed_values as $key => $value) {
+      if ($key == $val['field_vrs_status_value']) {
+        $row['status'] = $value;
+      }
+    }
+    $row['cashier_name'] = $val['fieldExecutiveName'];
+    $row['arrival_to_asset_returns'] = '';
+    $row['arrival_to_returns_start'] = '';
+
+    $return_version_value = $val['field_returned_version_value'];
+    if (empty($return_version_value) || ($val['field_vrs_status_value'] < 1 && !empty($return_version_value))) {
+      $row['returns_time_difference'] = '';
+      $row['return_prod'] = '';
+      $row['product_lines'] = '';
+    }
+    else {
+      $row['returns_time_difference'] = round($val['total_return_time']);
+      $row['return_prod'] = round($val['return_prod']);
+      $row['product_lines'] = round($val['product_lines']);
+    }
+
+
+    $vrs_version_value = $val['field_vrs_version_value'];
+    if (empty($return_version_value) || ($val['field_vrs_status_value'] < 2 && !empty($vrs_version_value))) {
+      $row['returns_end_to_vrs_start'] = '';
+      $row['vrs_time_difference'] = '';
+      $row['vrs_value'] = '';
+      $row['cash_percentage'] = '';
+      $row['cheque_percentage'] = '';
+      $row['signed_percentage'] = '';
+    }
+    else {
+
+      $row['returns_end_to_vrs_start'] = gmdate('i', $val['vrs_start_return_end']);
+      $row['vrs_time_difference'] = round($val['vrs_time_difference']);
+      $row['vrs_value'] = round($val['vrs_value']);
+      $row['cash_percentage'] = round($val['cash_percentage']);
+      $row['cheque_percentage'] = round($val['cheque_percentage']);
+      $row['signed_percentage'] = round($val['signed_percentage']);
+    }
+
+    $rows[] = $row;
+  }
+  $header = array('Dispatch Date', 'Trip ID', 'Status', 'Cashier', 'Arrival to Asset Returns (min)', 'Arrival to Returns Start (min)', 'Returns Start to Returns End (min)', 'Returns Value(Rs.)/10 Min', 'Product Lines/10 Min', 'Returns End to VRS Start (Min)', 'VRS Start to VRS End (Min)', 'VRS Value(Rs.)/10 Min', 'Cash %', 'Cheque %', 'Signed Bill %');
+
+  $html = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
+
+  $params['subject'] = "Returns & VRS Productivity";
+  $params['body'] = $html;
+  $mail_to = variable_get('return_vrs_to_email');
+  $from = variable_get('from_email');
+
+  drupal_mail('email_status', 'daily_data', $mail_to, LANGUAGE_NONE, $params, $from);
+}
