@@ -102,12 +102,11 @@ function return_vrs_callback() {
   $query->join('dispatch_planning_item_details', 'idt', 'ad.id = idt.trip_bill_reference');
   $query->addexpression("SUM(idt.return_qty * idt.sum_net_sales_value)", 'return_value');
   $query->addexpression("(SUM(CASE WHEN (ad.updated_flag = 1) THEN (idt.return_qty * idt.sum_net_sales_value * 10) END)) / ((MAX(CASE WHEN (ad.updated_flag = 1) THEN ad.updated_time END) - MIN(CASE WHEN (ad.updated_flag = 1) THEN ad.updated_time END)) / 60)", 'return_prod');
-  $query->join('vrs_trip_total_history', 'vtth', 'ad.runsheet_number = vtth.trip_id AND ad.distributor_id = vtth.distributor_id');
-  $query->condition('vtth.vrs_version_no', 'V1.0', '=');
-  $query->fields('vtth', array('vrs_start_time'));
-  $query->join('vrs_trip_total', 'vtt', 'ad.runsheet_number = vtt.trip_id AND ad.distributor_id = vtt.distributor_id');
+  $query->leftjoin('vrs_trip_total_history', 'vtth', 'ad.runsheet_number = vtth.trip_id AND ad.distributor_id = vtth.distributor_id');
+  $query->addExpression("CASE WHEN vtth.vrs_version_no = 'V1.0' THEN vtth.vrs_start_time END", 'vrs_start_time');
+  $query->leftjoin('vrs_trip_total', 'vtt', 'ad.runsheet_number = vtt.trip_id AND ad.distributor_id = vtt.distributor_id');
   $query->fields('vtt', array('vrs_end_time'));
-  $query->addexpression("vtt.vrs_end_time - vtth.vrs_start_time", 'vrs_time');
+  $query->addexpression("vtt.vrs_end_time - (CASE WHEN vtth.vrs_version_no = 'V1.0' THEN vtth.vrs_start_time END)", 'vrs_time');
   $query->fields('vtt', array('total_actual_cash_amount', 'total_actual_cheque_amount', 'total_actual_signed_bill_amount'));
   $result = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
   $row = array();

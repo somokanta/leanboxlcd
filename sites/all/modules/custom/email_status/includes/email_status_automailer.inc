@@ -672,16 +672,17 @@ function send_email_return_vrs_prod() {
 
   $query->addExpression('(COUNT(DISTINCT(CASE WHEN (dpi.line_level_status = \'line_partial_deliver\'  or dpi.line_level_status = \'line_undeliver\') THEN dpi.sku_code END)) * 10) /  ((MAX(CASE WHEN (ad.updated_flag = 1) THEN ad.updated_time END) - MIN(CASE WHEN (ad.updated_flag = 1) THEN ad.updated_time END)) / 60)', 'product_lines');
 
-  $query->join('vrs_trip_total_history', 'vtth', 'ad.runsheet_number = vtth.trip_id AND ad.distributor_id = vtth.distributor_id');
-  $query->condition('vtth.vrs_version_no', 'V1.0', '=');
-  $query->addexpression('((vtth.vrs_start_time) - MAX(CASE WHEN (ad.updated_flag = 1) THEN ad.updated_time END))', 'vrs_start_return_end');
-  $query->join('vrs_trip_total', 'vtt', 'ad.runsheet_number = vtt.trip_id AND ad.distributor_id = vtt.distributor_id');
-  $query->addexpression("((vtt.vrs_end_time - vtth.vrs_start_time) / 60)", 'vrs_time_difference');
-  $query->addexpression("((vtt.total_to_be_collected_amt * 10) / ((vtt.vrs_end_time - vtth.vrs_start_time) / 60))", 'vrs_value');
+  $query->leftjoin('vrs_trip_total_history', 'vtth', 'ad.runsheet_number = vtth.trip_id AND ad.distributor_id = vtth.distributor_id');
+  //$query->condition('vtth.vrs_version_no', 'V1.0', '=');
+  $query->addexpression("(CASE WHEN vtth.vrs_version_no = 'V1.0' THEN vtth.vrs_start_time END) - MAX(CASE WHEN (ad.updated_flag = 1) THEN ad.updated_time END)", 'vrs_start_return_end');
+  $query->leftjoin('vrs_trip_total', 'vtt', 'ad.runsheet_number = vtt.trip_id AND ad.distributor_id = vtt.distributor_id');
+  $query->addexpression("((vtt.vrs_end_time - (CASE WHEN vtth.vrs_version_no = 'V1.0' THEN vtth.vrs_start_time END)) / 60)", 'vrs_time_difference');
+  $query->addexpression("((vtt.total_to_be_collected_amt * 10) / ((vtt.vrs_end_time - (CASE WHEN vtth.vrs_version_no = 'V1.0' THEN vtth.vrs_start_time END)) / 60))", 'vrs_value');
   $query->addexpression("(vtt.total_actual_cash_amount * 100) / (vtt.total_actual_cash_amount + vtth.total_actual_cheque_amount + vtt.total_actual_signed_bill_amount)", 'cash_percentage');
   $query->addexpression("(vtt.total_actual_cheque_amount * 100) / (vtt.total_actual_cash_amount + vtth.total_actual_cheque_amount + vtt.total_actual_signed_bill_amount)", 'cheque_percentage');
   $query->addexpression("(vtt.total_actual_signed_bill_amount * 100) / (vtt.total_actual_cash_amount + vtth.total_actual_cheque_amount + vtt.total_actual_signed_bill_amount)", 'signed_percentage');
-
+  $query->orderBy('vs.field_vrs_status_value', 'DESC');
+  
   $result = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
   $rows = array();
   foreach ($result as $val) {
