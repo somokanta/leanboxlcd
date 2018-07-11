@@ -187,6 +187,7 @@ function get_vrs_versions($trip_id){
             'vrs_created_date',
             'vrs_confirm_date',
             'distributor_id',
+            'rto_charges'            
     );
         $dis_id = change_feeds_import_get_distributor_id($user->uid);
         $query = db_select('vrs_trip_items_history', 'vr_items');
@@ -276,12 +277,13 @@ function get_vrs_versions($trip_id){
                     $total_cheque = $value['total_actual_cheque_amount'];
                     $total_signed_bill = $value['total_actual_signed_bill_amount'];
                     $total_short = $value['total_short_amt'];
+                    $rto_charges = $value['rto_charges'];
                     $total_cashier_short = $value['total_cashier_cash_short'];
                     $total_cashier_debit_value = $value['total_cashier_debit_value'];
                     
                 }
-                $vrs_data[] = array('Bill count','Total to be collected','Total Actual Cash','Total Cheque Amt','Total Signed Bill','Total Short','Total Cashier Short','Total Cashier Debit Value');
-                $vrs_data[] = array($bill_count,$total_tobe_collected,$total_cash,$total_cheque,$total_signed_bill,$total_short,$total_cashier_short,$total_cashier_debit_value);
+                $vrs_data[] = array('Bill count','Total to be collected','Total Actual Cash','Total Cheque Amt','Total Signed Bill','RTO Charges','Total Short','Total Cashier Short','Total Cashier Debit Value');
+                $vrs_data[] = array($bill_count,$total_tobe_collected,$total_cash,$total_cheque,$total_signed_bill,$rto_charges,$total_short,$total_cashier_short,$total_cashier_debit_value);
                 unset($bill_count);
                 unset($total_tobe_collected);
                 unset($total_cash);
@@ -364,7 +366,7 @@ function vrs_export($vrs_data,$trip_id) {
         'Non Bankable Reason'
     );
 
-    $vrs_total_header = array('Count of Bills','Total Delivery App (To be collected)', 'Total to be collected(Sales Register)','Total Cash Collected', 'Total Cheque Collected', 'Total Signed Bill Collected', 'Cashier Cash Short', 'Total Short', 'Total Cashier Debit Value');
+    $vrs_total_header = array('Count of Bills','Total Delivery App (To be collected)', 'Total to be collected(Sales Register)','Total Cash Collected', 'Total Cheque Collected', 'Total Signed Bill Collected','RTO Charges', 'Cashier Cash Short', 'Total Short', 'Total Cashier Debit Value');
     $result = phpexcel_export(
             array('vrs_bill' => $vrs_bill_items_header,
                   ),

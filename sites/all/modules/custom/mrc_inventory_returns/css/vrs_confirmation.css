@@ -331,6 +331,9 @@ and open the template in the editor.
     padding-bottom :10px;
     padding-top :10px;
 }
+.bill_changes {
+    color:#ff0000;
+}
 
 
 

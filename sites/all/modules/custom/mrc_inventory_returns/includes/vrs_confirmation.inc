@@ -150,7 +150,20 @@ function vrs_confirmation_form($form, &$form_state) {
   if (!empty($options)) {
     // VRS edit screen load existing data
     $vrs_version = get_current_vrs_version($trip_id, $dis_id);
+    $get_shorts = get_return_short($trip_id, $dis_id);
+    $asset = received_assets_count($trip_id, $dis_id);
+    $sum_godown_short_qty = $get_shorts['sum_godown_short_qty'] ? $get_shorts['sum_godown_short_qty'] : 0;
+    $sum_cashier_short_qty = $get_shorts['sum_cashier_short_qty'] ? $get_shorts['sum_cashier_short_qty'] : 0;
+    $sum_godown_short_value = $get_shorts['sum_godown_short_value'] ? number_format((float) $get_shorts['sum_godown_short_value'], 2, '.', '') : 0;
+    $sum_cashier_short_value = $get_shorts['sum_cashier_short_value'] ? number_format((float) $get_shorts['sum_cashier_short_value'], 2, '.', '') : 0;
+    $asset_short_qty = $asset['received_qty'] ? $asset['received_qty'] : 0;
+    $asset_short_value = $asset['value'] ? $asset['value'] : 0;
+    $short_values[] = array('Godown Short', $sum_godown_short_qty, $sum_godown_short_value);
+    $short_values[] = array('Cashier Short', $sum_cashier_short_qty, $sum_cashier_short_value);
+    $short_values[] = array('Assets Short', $asset_short_qty, $asset_short_value);
+    $asset_total = 0;
     $bills = array();
+    // If VRS alraedy created fetch VRS value, footer value, Denominations value
     if (!empty($vrs_version)) {
       $bills = get_vrs_bill_items($trip_id, $dis_id, $vrs_version);
       $vrs_total = get_vrs_total_items($trip_id, $dis_id, $vrs_version);
@@ -160,45 +173,212 @@ function vrs_confirmation_form($form, &$form_state) {
       $denominations = get_vrs_total_denominations($trip_id, $dis_id);
     }
     $signed_bill_count = $cash_count = $cheque_count = 0;
-    foreach ($options as $key => $val) {
+    $bills_cheque_amt = 0;
+    $bills_signed_amt = 0;
+    $bills_short_amt = 0;
+    $bills_cash_amt = 0;
+    $return_edit = 0;
+    $bills_total_cashier_cash_short_value = 0;
+    $return_changes = array();
+    foreach ($options as $key => &$val) {
       $sum_s_register_bill_value += (float) $val['field_bill_value_value'];
       $trip_execution_date = $val['trip_execution_date'];
       $field_cashier_name = $val['field_cashier_name_value'];
       $sum_return_value += $val['total_return_value'];
-      // Payment Outcome string
-      if ($val['res_status'] !== 'undeliver') {
-        if (($bills[$key]['actual_signed_bill_amount'] > 0) || ($val['res_confirm_signed_bill_amount'] > 0 || ($val['res_confirm_signed_bill_amount_edit']) > 0)) {
-          $signed_bill_count++;
-        }
-        if (($bills[$key]['actual_cheque_amount'] > 0) || ($val['res_cheque_amount'] > 0) || ($val['res_cheque_amount_edit'] > 0)) {
-          $cheque_count++;
-        }
-        if (($bills[$key]['actual_cash_amount'] > 0) || ($val['res_cash_amount'] > 0) || ($val['res_cash_amount_edit'] > 0)) {
-          $cash_count++;
-        }
-        //Checking difference in To be collected amt
-        if (!empty($bills)) {
-          if (round($val['sales_register_to_be_collected_amt']) !== $bills[$key]['to_be_collected_amt_sales_register']) {
-            $return_edit = 1;
-          }
-          /* $val['res_cheque_date'] = !empty($val['res_cheque_date_edit']) ? $val['res_cheque_date_edit'] : $val['res_cheque_date'];
-            $val['res_cash_amount'] = !empty($val['res_cash_amount_edit']) ? round($val['res_cash_amount_edit']) : round($val['res_cash_amount']);
-            $val['res_photo_of_cheque'] = !empty($val['res_photo_of_cheque_edit']) ? $val['res_photo_of_cheque_edit'] : $val['res_photo_of_cheque'];
-            $val['res_cheque_amount'] = !empty($val['res_cheque_amount_edit']) ? round($val['res_cheque_amount_edit']) : round($val['res_cheque_amount']);
-            $val['res_money_collect2'] = !empty($val['res_money_collect2_edit']) ? $val['res_money_collect2_edit'] : $val['res_money_collect2'];
-            $val['photo_of_signed_bill_partial'] = !empty($val['photo_of_signed_bill_partial_edit']) ? $val['photo_of_signed_bill_partial_edit'] : $val['photo_of_signed_bill_partial'];
-            $val['res_confirm_signed_bill_amount'] = !empty($val['res_confirm_signed_bill_amount_edit']) ? $val['res_confirm_signed_bill_amount_edit'] : $val['res_confirm_signed_bill_amount'];
-            $val['res_bank_name'] = !empty($val['res_bank_name_edit']) ? $val['res_bank_name_edit'] : $val['res_bank_name'];
-            $val['res_photo_of_signed_bill_delivery'] = !empty($val['res_photo_of_signed_bill_delivery_edit']) ? $val['res_photo_of_signed_bill_delivery_edit'] : $val['res_photo_of_signed_bill_delivery'];
-            // Yes or No column
-            $val['res_signed_bill_delivery'] = !empty($val['res_signed_bill_delivery_edit']) ? $val['res_signed_bill_delivery_edit'] : $val['res_signed_bill_delivery'];
-            $val['res_signed_bill_partial'] = !empty($val['res_signed_bill_partial_edit']) ? $val['res_signed_bill_partial_edit'] : $val['res_signed_bill_partial'];
-            $val['res_cheque_no'] = !empty($val['res_cheque_no_edit']) ? $val['res_cheque_no_edit'] : $val['res_cheque_no'];
-            $val['res_confirm_signed_bill_amount'] = round($val['res_confirm_signed_bill_amount']); */
-          //if($bills[$key]['actual_signed_bill_amount']!==)
-        }
+      $key = str_replace(' ', '', $key);
+      // Checking Farery values present in  edit field also 
+      $val['res_cheque_date'] = !empty($val['res_cheque_date_edit']) ? $val['res_cheque_date_edit'] : $val['res_cheque_date'];
+      $val['res_cash_amount'] = !empty($val['res_cash_amount_edit']) ? round($val['res_cash_amount_edit']) : round($val['res_cash_amount']);
+      $val['res_photo_of_cheque'] = !empty($val['res_photo_of_cheque_edit']) ? $val['res_photo_of_cheque_edit'] : $val['res_photo_of_cheque'];
+      $val['res_cheque_amount'] = !empty($val['res_cheque_amount_edit']) ? round($val['res_cheque_amount_edit']) : round($val['res_cheque_amount']);
+      $val['res_money_collect2'] = !empty($val['res_money_collect2_edit']) ? $val['res_money_collect2_edit'] : $val['res_money_collect2'];
+      $val['photo_of_signed_bill_partial'] = !empty($val['photo_of_signed_bill_partial_edit']) ? $val['photo_of_signed_bill_partial_edit'] : $val['photo_of_signed_bill_partial'];
+      $val['res_confirm_signed_bill_amount'] = !empty($val['res_confirm_signed_bill_amount_edit']) ? $val['res_confirm_signed_bill_amount_edit'] : $val['res_confirm_signed_bill_amount'];
+      $val['res_bank_name'] = !empty($val['res_bank_name_edit']) ? $val['res_bank_name_edit'] : $val['res_bank_name'];
+      $val['res_photo_of_signed_bill_delivery'] = !empty($val['res_photo_of_signed_bill_delivery_edit']) ? $val['res_photo_of_signed_bill_delivery_edit'] : $val['res_photo_of_signed_bill_delivery'];
+      // Yes or No column
+      $val['res_signed_bill_delivery'] = !empty($val['res_signed_bill_delivery_edit']) ? $val['res_signed_bill_delivery_edit'] : $val['res_signed_bill_delivery'];
+      $val['res_signed_bill_partial'] = !empty($val['res_signed_bill_partial_edit']) ? $val['res_signed_bill_partial_edit'] : $val['res_signed_bill_partial'];
+      $val['res_cheque_no'] = !empty($val['res_cheque_no_edit']) ? $val['res_cheque_no_edit'] : $val['res_cheque_no'];
+      $val['res_confirm_signed_bill_amount'] = round($val['res_confirm_signed_bill_amount']);
+      // to be collected,total cash, signed bill all  should be zero in the case of undeliver
+      // Payment outcome is undeliver then cash collected = zero,cheque collected =zero signed bill = Zero
+      if ($val['res_status'] == 'undeliver') {
+                                        unset($val['res_cheque_date']);
+                                        unset($val['res_cheque_amount']);
+                                        unset($val['res_cheque_no']);
+                                        unset($val['res_bank_name']);
+                                        unset($val['res_photo_of_cheque']);
+                                        unset($val['photo_of_signed_bill_partial']);
+                                        unset($val['res_photo_of_signed_bill_delivery']);
+                                        unset($val['res_confirm_signed_bill_amount']);
+		                        unset($val['res_cash_amount']);	
+                                        // vrs confirmed and manual edit screen changed bill status to undeliver
+                                        if(!empty($bills)) {
+                                            unset($bills[$key]['actual_cash_amount']);
+                                            unset($bills[$key]['actual_cheque_amount']);
+                                            unset($bills[$key]['cheque_date']);
+                                            unset($bills[$key]['actual_signed_bill_amount']);
+                                            unset($bills[$key]['photo_cheque']);
+                                            unset($bills[$key]['photo_signed_bill']);
+                                            unset($bills[$key]['bank_name']);
+                                            unset($bills[$key]['cheque_number']);
+                                        }
       }
-    }
+      // Checking Manual Edit screen latest Payment Mode. Before VRS Confirmation
+      /*
+       *  Before VRS Confirmaiton,
+       *  Fetch Values from Return manual Edit screen, If the collection mode changed that means return version created.
+          $val['res_money_collect2_edit'] is empty fetch values from farey cash,cheque,signed bill  fields 
+       *  AFter VRS Confirmation, If return changes, then fetch values from manual edit screen based on collection mode.   
+       *        */
+      switch ($val['res_money_collect2_edit']) {
+                                    case 'cash':
+                                        unset($val['res_cheque_date']);
+                                        unset($val['res_cheque_amount']);
+                                        unset($val['res_cheque_no']);
+                                        unset($val['res_bank_name']);
+                                        unset($val['res_photo_of_cheque']);
+                                        unset($val['photo_of_signed_bill_partial']);
+                                        unset($val['res_photo_of_signed_bill_delivery']);
+                                        unset($val['res_confirm_signed_bill_amount']);
+                                        break;
+                                    case 'cheque':
+                                        unset($val['photo_of_signed_bill_partial']);
+                                        unset($val['res_photo_of_signed_bill_delivery']);
+                                        unset($val['res_confirm_signed_bill_amount']);
+                                        unset($val['res_cash_amount']);
+                                        break;
+                                    case 'signed':
+                                        unset($val['res_cheque_date']);
+                                        unset($val['res_cheque_amount']);
+                                        unset($val['res_cheque_no']);
+                                        unset($val['res_bank_name']);
+                                        unset($val['res_photo_of_cheque']);
+                                        unset($val['res_cash_amount']);
+                                        break;
+                                    default:
+                                }
+
+        // Payment Outcome string, VRS present or Farey value
+      if ($val['res_status'] !== 'undeliver') {
+           
+                       
+            // Farey Edit Time(Manual Edit Screen time) is greater than Vrs Confirmed Date.
+            // Which means Manual edit was latest, then fetch farey manual edit values Unset VRS values
+            if (!empty($bills) && !empty($vrs_version)) {
+                    if ($val['farey_updated_time'] > $bills[$key]['vrs_confirm_date']) {
+                            $return_edit = 1;
+                            $return_changes[$key] = $key;
+                            if (!empty($val['res_money_collect2_edit'])) {
+                                switch ($val['res_money_collect2_edit']) {
+                                    case 'cash':
+                                        $bills[$key]['actual_cash_amount'] = $val['res_cash_amount'];
+                                        unset($bills[$key]['actual_cheque_amount']);
+                                        unset($bills[$key]['cheque_date']);
+                                        unset($bills[$key]['actual_signed_bill_amount']);
+                                        unset($bills[$key]['photo_cheque']);
+                                        unset($bills[$key]['photo_signed_bill']);
+                                        unset($bills[$key]['bank_name']);
+                                        unset($bills[$key]['cheque_number']);
+                                        break;
+                                    case 'cheque':
+                                        $bills[$key]['cheque_date'] = $val['res_cheque_date'];
+                                        $bills[$key]['actual_cheque_amount'] = $val['res_cheque_amount'];
+                                        $bills[$key]['cheque_number'] = $val['res_cheque_no'];
+                                        $bills[$key]['bank_name'] = $val['res_bank_name'];
+                                        $bills[$key]['photo_cheque'] = $val['res_photo_of_cheque'];
+                                        unset($bills[$key]['actual_signed_bill_amount']);
+                                        unset($bills[$key]['photo_signed_bill']);
+                                        unset($bills[$key]['actual_cash_amount']);
+                                        break;
+                                    case 'signed':
+                                        $bills[$key]['photo_signed_bill'] = $val['photo_of_signed_bill_partial'];
+                                        if (empty($bills[$key]['photo_signed_bill'])) {
+                                            $bills[$key]['photo_signed_bill'] = $val['res_photo_of_signed_bill_delivery'];
+                                        }
+                                        $bills[$key]['actual_signed_bill_amount'] = $val['res_confirm_signed_bill_amount'];
+                                        unset($bills[$key]['actual_cheque_amount']);
+                                        unset($bills[$key]['cheque_date']);
+                                        unset($bills[$key]['photo_cheque']);
+                                        unset($bills[$key]['actual_cash_amount']);
+                                        unset($bills[$key]['bank_name']);
+                                        unset($bills[$key]['cheque_number']);
+                                        break;
+                                    default:
+                                }
+                             }
+                             // ON the Manual Edit Screen Changed Bill status only and empty any cash mode then fetch farey default values
+                            $bills[$key]['actual_cash_amount'] = $val['res_cash_amount'];
+                            $bills[$key]['cheque_date'] = $val['res_cheque_date'];
+                            $bills[$key]['actual_cheque_amount'] = $val['res_cheque_amount'];
+                            $bills[$key]['cheque_number'] = $val['res_cheque_no'];
+                            $bills[$key]['bank_name'] = $val['res_bank_name'];
+                            $bills[$key]['photo_cheque'] = $val['res_photo_of_cheque'];
+                            $bills[$key]['photo_signed_bill'] = $val['photo_of_signed_bill_partial'];
+                            if (empty($bills[$key]['photo_signed_bill'])) {
+                                $bills[$key]['photo_signed_bill'] = $val['res_photo_of_signed_bill_delivery'];
+                            }
+                            $bills[$key]['actual_signed_bill_amount'] = $val['res_confirm_signed_bill_amount'];
+                    } // Changes in To be collected amount then fetch farey values Godown short,cashier short added after vrs-confimation then fetch default values from farey table
+                    elseif(round($val['sales_register_to_be_collected_amt']) != round($bills[$key]['to_be_collected_amt_sales_register'])) {
+                        $bills[$key]['actual_cash_amount'] = $val['res_cash_amount'];
+                        $bills[$key]['cheque_date'] = $val['res_cheque_date'];
+                        $bills[$key]['actual_cheque_amount'] = $val['res_cheque_amount'];
+                        $bills[$key]['cheque_number'] = $val['res_cheque_no'];
+                        $bills[$key]['bank_name'] = $val['res_bank_name'];
+                        $bills[$key]['photo_cheque'] = $val['res_photo_of_cheque'];
+                        $bills[$key]['photo_signed_bill'] = $val['photo_of_signed_bill_partial'];
+                        if (empty($bills[$key]['photo_signed_bill'])) {
+                            $bills[$key]['photo_signed_bill'] = $val['res_photo_of_signed_bill_delivery'];
+                        }
+                        $bills[$key]['actual_signed_bill_amount'] = $val['res_confirm_signed_bill_amount'];
+                        
+                    }
+                            if ($bills[$key]['actual_signed_bill_amount'] > 0) {
+                                $bills[$key]['payment_term'][] = t('Signed Bill');
+                            }
+                            if ($bills[$key]['actual_cheque_amount'] > 0) {
+                                $bills[$key]['payment_term'][] = t('Cheque');
+                            }
+                            if ($bills[$key]['actual_cash_amount'] > 0) {
+                                $bills[$key]['payment_term'][] = t('Cash');
+                            }
+                            $bills_cheque_amt += $bills[$key]['actual_cheque_amount'];
+                            $bills_signed_amt += $bills[$key]['actual_signed_bill_amount'];
+                            $bills_cash_amt += $bills[$key]['actual_cash_amount'];
+                            $vrs_short = round($val['sales_register_to_be_collected_amt']) - round($bills[$key]['actual_cash_amount']) - round($bills[$key]['actual_signed_bill_amount']) - round($bills[$key]['actual_cheque_amount']);
+                            if ($vrs_short <= 1 && $vrs_short >= 0) {
+                                $vrs_short = 0;
+                            }
+                            $bills_short_amt += $vrs_short;
+                }
+            }
+            if (($bills[$key]['actual_signed_bill_amount'] > 0) || ($val['res_confirm_signed_bill_amount'] > 0)) {
+              $signed_bill_count++;
+            }
+            if (($bills[$key]['actual_cheque_amount'] > 0) || ($val['res_cheque_amount'] > 0)) {
+              $cheque_count++;
+            }
+            if (($bills[$key]['actual_cash_amount'] > 0) || ($val['res_cash_amount'] > 0)) {
+              $cash_count++;
+            }
+        }
+        if ($return_edit == 1 && !empty($vrs_version)) {
+        $bills_total_cashier_cash_short_value = round($val['sales_register_to_be_collected_amt']) - $bills_cash_amt - $bills_cheque_amt - $bills_signed_amt - $vrs_total[$total_key]['rto_charges'] - $bills_short_amt   ;
+        $bills_total_cashier_cash_short_debit_value  = $bills_total_cashier_cash_short_value + $sum_cashier_short_value + $asset_short_value;
+        $vrs_total[$total_key]['total_cashier_cash_short'] =  $bills_total_cashier_cash_short_value ;
+        $vrs_total[$total_key]['total_cashier_debit_value'] =  $bills_total_cashier_cash_short_debit_value ;
+        $vrs_total[$total_key]['total_actual_cheque_amount'] =  $bills_cheque_amt ;
+        $vrs_total[$total_key]['total_actual_signed_bill_amount'] =  $bills_signed_amt ;
+        // This will fetch from denominations sum
+        if (!empty($bills_cash_amt)) {
+            $vrs_total[$total_key]['total_actual_cash_amount'] =  $bills_cash_amt ;
+        }
+                
+      }
+    
+
   }
   $form['bank_name'] = array(
     '#type' => 'textfield',
@@ -247,20 +427,10 @@ function vrs_confirmation_form($form, &$form_state) {
           '#prefix' => '<div class="vrs_version" align="center"><h2>' . t('You are editing  VRS Version:' . $vrs_version),
           '#suffix' => '</h2></div></br>',
         );
+           
       }
     }
-    $get_shorts = get_return_short($trip_id, $dis_id);
-    $asset = received_assets_count($trip_id, $dis_id);
-    $sum_godown_short_qty = $get_shorts['sum_godown_short_qty'] ? $get_shorts['sum_godown_short_qty'] : 0;
-    $sum_cashier_short_qty = $get_shorts['sum_cashier_short_qty'] ? $get_shorts['sum_cashier_short_qty'] : 0;
-    $sum_godown_short_value = $get_shorts['sum_godown_short_value'] ? number_format((float) $get_shorts['sum_godown_short_value'], 2, '.', '') : 0;
-    $sum_cashier_short_value = $get_shorts['sum_cashier_short_value'] ? number_format((float) $get_shorts['sum_cashier_short_value'], 2, '.', '') : 0;
-    $asset_short_qty = $asset['received_qty'] ? $asset['received_qty'] : 0;
-    $asset_short_value = $asset['value'] ? $asset['value'] : 0;
-    $short_values[] = array('Godown Short', $sum_godown_short_qty, $sum_godown_short_value);
-    $short_values[] = array('Cashier Short', $sum_cashier_short_qty, $sum_cashier_short_value);
-    $short_values[] = array('Assets Short', $asset_short_qty, $asset_short_value);
-    $asset_total = 0;
+    
     if (!empty($asset_short_value)) {
       $asset_total = $asset_short_value;
 
@@ -365,25 +535,7 @@ function vrs_confirmation_form($form, &$form_state) {
 
     foreach ($options as $key => &$val) {
       $key = str_replace(' ', '', $key);
-      // Checking Farery values present in  edit field also 
-
-      $val['res_cheque_date'] = !empty($val['res_cheque_date_edit']) ? $val['res_cheque_date_edit'] : $val['res_cheque_date'];
-      $val['res_cash_amount'] = !empty($val['res_cash_amount_edit']) ? round($val['res_cash_amount_edit']) : round($val['res_cash_amount']);
-      $val['res_photo_of_cheque'] = !empty($val['res_photo_of_cheque_edit']) ? $val['res_photo_of_cheque_edit'] : $val['res_photo_of_cheque'];
-      $val['res_cheque_amount'] = !empty($val['res_cheque_amount_edit']) ? round($val['res_cheque_amount_edit']) : round($val['res_cheque_amount']);
-      $val['res_money_collect2'] = !empty($val['res_money_collect2_edit']) ? $val['res_money_collect2_edit'] : $val['res_money_collect2'];
-      $val['photo_of_signed_bill_partial'] = !empty($val['photo_of_signed_bill_partial_edit']) ? $val['photo_of_signed_bill_partial_edit'] : $val['photo_of_signed_bill_partial'];
-      $val['res_confirm_signed_bill_amount'] = !empty($val['res_confirm_signed_bill_amount_edit']) ? $val['res_confirm_signed_bill_amount_edit'] : $val['res_confirm_signed_bill_amount'];
-      $val['res_bank_name'] = !empty($val['res_bank_name_edit']) ? $val['res_bank_name_edit'] : $val['res_bank_name'];
-      $val['res_photo_of_signed_bill_delivery'] = !empty($val['res_photo_of_signed_bill_delivery_edit']) ? $val['res_photo_of_signed_bill_delivery_edit'] : $val['res_photo_of_signed_bill_delivery'];
-      // Yes or No column
-      $val['res_signed_bill_delivery'] = !empty($val['res_signed_bill_delivery_edit']) ? $val['res_signed_bill_delivery_edit'] : $val['res_signed_bill_delivery'];
-      $val['res_signed_bill_partial'] = !empty($val['res_signed_bill_partial_edit']) ? $val['res_signed_bill_partial_edit'] : $val['res_signed_bill_partial'];
-      $val['res_cheque_no'] = !empty($val['res_cheque_no_edit']) ? $val['res_cheque_no_edit'] : $val['res_cheque_no'];
-      $val['res_confirm_signed_bill_amount'] = round($val['res_confirm_signed_bill_amount']);
-
       //$val['sales_register_to_be_collected_amt'] = number_format((float) $val['sales_register_to_be_collected_amt'], 2, '.', '');
-      // to be collected,total cash, signed bill all  should be zero in the case of undeliver
       if ($val['res_status'] == 'undeliver') {
         $val['sales_register_to_be_collected_amt'] = 0;
       }
@@ -415,17 +567,23 @@ function vrs_confirmation_form($form, &$form_state) {
           defualt:
           $bill_status = t('NA');
       }
-      if (($bills[$key]['actual_signed_bill_amount'] > 0) || ($val['res_confirm_signed_bill_amount'] > 0)) {
-        $payment_term[] = t('Signed Bill');
+      if (empty($bills[$key]['payment_term'])) {
+        if (($bills[$key]['actual_signed_bill_amount'] > 0) || ($val['res_confirm_signed_bill_amount'] > 0)) {
+          $payment_term[] = t('Signed Bill');
+        }
+        if (($bills[$key]['actual_cheque_amount'] > 0) || ($val['res_cheque_amount'] > 0)) {
+          $payment_term[] = t('Cheque');
+        }
+        if (($bills[$key]['actual_cash_amount'] > 0) || ($val['res_cash_amount'] > 0)) {
+          $payment_term[] = t('Cash');
+        }
+        if (!empty($payment_term)) {
+          $payments_terms = implode(',', $payment_term);
+        }
       }
-      if (($bills[$key]['actual_cheque_amount'] > 0) || ($val['res_cheque_amount'] > 0)) {
-        $payment_term[] = t('Cheque');
-      }
-      if (($bills[$key]['actual_cash_amount'] > 0) || ($val['res_cash_amount'] > 0)) {
-        $payment_term[] = t('Cash');
-      }
-      if (!empty($payment_term)) {
-        $payments_terms = implode(',', $payment_term);
+      else {
+          $payment_term = $bills[$key]['payment_term'];
+          $payments_terms = implode(',', $payment_term);
       }
       // payment terms will be zero in the case of undeliver
       if ($undeliver == 1) {
@@ -438,10 +596,10 @@ function vrs_confirmation_form($form, &$form_state) {
       $form['bill_details']['#rows'][$key][] = $val['to_be_collected_amt'];
       $total_sales_register += $val['sales_register_to_be_collected_amt'];
       // Farery bill value
-      $total_to_be_collected += $val['to_be_collected_amt'];
-      $total_signed_bill_value += $val['res_confirm_signed_bill_amount'];
-      $total_actual_cash_collected_value += $val['res_cash_amount'];
-      $total_cheque_collected_value += $val['res_cheque_amount'];
+      $total_to_be_collected += round($val['to_be_collected_amt']);
+      $total_signed_bill_value += round($val['res_confirm_signed_bill_amount']);
+      $total_actual_cash_collected_value += round($val['res_cash_amount']);
+      $total_cheque_collected_value += round($val['res_cheque_amount']);
 
       $bank_name = array(
         //'#id' => 'bill_details-' . $key . '-bank_name',
@@ -459,14 +617,16 @@ function vrs_confirmation_form($form, &$form_state) {
         '#default_value' => $vrs_total_id ? $bills[$key]['cheque_number'] : $val['res_cheque_no']
       );
       if (!empty($bills[$key]['cheque_date'])) {
-        $bills[$key]['cheque_date'] = date('Y-m-d', $bills[$key]['cheque_date']);
-      }
-      else if (!empty($val['res_cheque_date'])) {
-        if (is_numeric($val['res_cheque_date'])) {
-          $val['res_cheque_date'] = date('Y-m-d', $val['res_cheque_date']);
+                if (is_numeric($bills[$key]['cheque_date'])) {
+                    $bills[$key]['cheque_date'] = date('Y-m-d', $bills[$key]['cheque_date']);
+                }
+        } 
+        else if (!empty($val['res_cheque_date'])) {
+                if (is_numeric($val['res_cheque_date'])) {
+                    $val['res_cheque_date'] = date('Y-m-d', $val['res_cheque_date']);
+                }
         }
-      }
-      $cheque_date = array(
+        $cheque_date = array(
         //'#id' => 'bill_details-' . $key . '-cheque_date',
         '#attributes' => array('class' => array('cheque_date'), 'title' => t('Cheque Date')),
         '#type' => 'date_popup',
@@ -569,14 +729,20 @@ function vrs_confirmation_form($form, &$form_state) {
       if (!empty($bills[$key]['photo_cheque'])) {
         $url = $bills[$key]['photo_cheque'];
         $path = $url;
-        $wrapper = file_stream_wrapper_get_instance_by_uri($url);
-        if (!empty($wrapper)) {
-          $path = $wrapper->getExternalUrl();
+        $na_position = strpos($url, '/NA');
+        if (empty($na_position)) {
+            $wrapper = file_stream_wrapper_get_instance_by_uri($url);
+            if (!empty($wrapper)) {
+              $path = $wrapper->getExternalUrl();
+            }
+            $ph_cheque .= '<a target="_blank" href="' . $path . '">';
+            $ph_cheque .= t('File');
+            $ph_cheque .= '</a>';
+            $ph_flag = 1;
         }
-        $ph_cheque .= '<a target="_blank" href="' . $path . '">';
-        $ph_cheque .= t('File');
-        $ph_cheque .= '</a>';
-        $ph_flag = 1;
+        else {
+          $ph_flag = 0;
+        }
       }
       else if (!empty($val['res_photo_of_cheque'])) {
         $url = $val['res_photo_of_cheque'];
@@ -624,14 +790,20 @@ function vrs_confirmation_form($form, &$form_state) {
       if (!empty($bills[$key]['photo_signed_bill'])) {
         $url = $bills[$key]['photo_signed_bill'];
         $path = $url;
+        $na_position = strpos($url, '/NA');
         $wrapper = file_stream_wrapper_get_instance_by_uri($url);
-        if (!empty($wrapper)) {
-          $path = $wrapper->getExternalUrl();
+        if (empty($na_position)) {
+            if (!empty($wrapper)) {
+              $path = $wrapper->getExternalUrl();
+            }
+            $ph_signed_bill .= '<a target="_blank" href="' . $path . '">';
+            $ph_signed_bill .= t('File');
+            $ph_signed_bill .= '</a>';
+            $ph_sign_flag = 1;
         }
-        $ph_signed_bill .= '<a target="_blank" href="' . $path . '">';
-        $ph_signed_bill .= t('File');
-        $ph_signed_bill .= '</a>';
-        $ph_sign_flag = 1;
+        else {
+             $ph_sign_flag = 0;
+        }
       }
       elseif (!empty($val['res_photo_of_signed_bill_delivery']) || !empty($val['photo_of_signed_bill_partial'])) {
         $url = $val['photo_of_signed_bill_partial'];
@@ -763,7 +935,7 @@ function vrs_confirmation_form($form, &$form_state) {
 
     //$total_cheque_collected_value_display = number_format($total_cheque_collected_value, 2, '.', '');
     $total_cheque_collected_value_display = round($total_cheque_collected_value);
-    $total_signed_bill_value_display = number_format($total_signed_bill_value, 2, '.', '');
+    $total_signed_bill_value_display = $total_signed_bill_value;
     $total_actual_cash_collected = array(
       '#id' => 'footer_details-' . $key . '-total_actual_cash_collected',
       '#attributes' => array('class' => array('total_actual_cash_collected', 'cashier_total', 'allownumericwithoutdecimal'), 'readonly' => 'readonly'),
@@ -930,7 +1102,7 @@ function vrs_confirmation_form($form, &$form_state) {
         '#type' => 'markup',
         '#value' => 'Close',
         '#suffix' => ' <div class="clear">
-                    <div id="deno_total">' . $total_deno . '</div></div><div class="note_btn_wrap"><input id="close_button" class ="btn" type ="button" value ="Calculate">
+                    <div id="deno_total">' . $total_deno . '</div></div><div class="note_btn_wrap">
                                <input id="close_popup_btn" class ="btn" type ="button" value ="Close"></div>
                               </div>',
         '#name' => 'close_btn',
@@ -1097,7 +1269,6 @@ function display_vrs_trip_details($form, &$form_state) {
         $query->addExpression('ad.res_cheque_date_edit', 'res_cheque_date_edit');
         $query->addExpression('ad.res_photo_of_cheque_edit', 'res_photo_of_cheque_edit');
         $query->addExpression('ad.res_cheque_amount_edit', 'res_cheque_amount_edit');
-        $query->addExpression('ad.res_money_collect2_edit', 'res_money_collect2_edit');
         $query->addExpression('ad.photo_of_signed_bill_partial_edit', 'photo_of_signed_bill_partial_edit');
         $query->addExpression('ad.res_confirm_signed_bill_amount_edit', 'res_confirm_signed_bill_amount_edit');
         $query->addExpression('ad.res_bank_name_edit', 'res_bank_name_edit');
@@ -1105,9 +1276,14 @@ function display_vrs_trip_details($form, &$form_state) {
         $query->addExpression('ad.res_cash_amount_edit', 'res_cash_amount_edit');
         $query->addExpression('ad.res_signed_bill_delivery_edit', 'res_signed_bill_delivery_edit');
         $query->addExpression('ad.res_signed_bill_partial_edit', 'res_signed_bill_partial_edit');
+        $query->addExpression('ad.res_signed_bill_delivery', 'res_signed_bill_delivery');
+        $query->addExpression('ad.res_signed_bill_partial', 'res_signed_bill_partial');
+        $query->addExpression('ad.res_money_collect2_edit', 'res_money_collect2_edit');
+        $query->addExpression('ad.res_money_collect2', 'res_money_collect2');
         $query->addExpression('ad.res_cheque_no', 'res_cheque_no');
         $query->addExpression('ad.res_cheque_no_edit', 'res_cheque_no_edit');
         $query->addExpression('item_details.return_value', 'total_return_value');
+        $query->addExpression('ad.updated_time', 'farey_updated_time');
         $query->orderBy('ad.res_status', 'asc');
         $res = $query->execute()->fetchAll(PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
   }
@@ -1201,16 +1377,20 @@ function vrs_confirmation_validate($form, &$form_state) {
   }
   // Note denomination validation
   $note_denominations = get_notes_denominations();
+  $coins = (float) $form_state['values']['coins'];
   $denominations = array();
+  $sum_denominations = 0;
+  $sum_denominations = $sum_denominations + $coins;
   if (!empty($note_denominations)) {
     foreach ($note_denominations as $key => $value) {
       $no_notes = $form_state['values']['note_denominations_' . $value['nid']];
-      $coins = (float) $form_state['values']['coins'];
+     
       if (!empty($no_notes) && is_numeric($no_notes)) {
         $denominations[$value['nid']] = array('trip_id' => $trip_id, 'vrs_total_id' => $vrs_total_id,
           'denominations_nid' => $value['nid'], 'no_of_notes' => $no_notes
           , 'distributor_id' => $dis_id, 'coins' => $coins);
       }
+      $sum_denominations += (int)$value['title'] * $no_notes;
     }
     if (empty($denominations) && !empty($sum_actual_cash) && empty($coins)) {
       $messages[] = t('Error:Please enter the cash denomination');
@@ -1220,6 +1400,9 @@ function vrs_confirmation_validate($form, &$form_state) {
     }
     if (empty($sum_actual_cash) && !empty($coins)) {
       $messages[] = t('Error:Total Cash Collected is zero,please remove denominations entry.');
+    }
+    if ($sum_actual_cash!==$sum_denominations) {
+        $messages[] = t("Error:Sum of Bill's To Be collected amount should be equal to Sum of denominations.");
     }
   }
 
@@ -1278,7 +1461,7 @@ function vrs_confirmation_form_submit($form, &$form_state) {
   $vrs_total_data = get_vrs_total_id($trip_id, $dis_id);
   if (!empty($vrs_total_data)) {
     $vrs_total_id = key($vrs_total_data);
-    $vrs_created_date = $vrs_total_data[$vrs_total_id];
+    $vrs_created_date = $vrs_total_data[$vrs_total_id]['vrs_created_date'];
   }
   // Checking VRS Bill items exists or NOt
   $vrs_bill_trip_exist = check_vrs_trip_exist($trip_id, $dis_id);
@@ -1387,9 +1570,9 @@ function vrs_confirmation_form_submit($form, &$form_state) {
         $trip_items[$key]['vrs_created_date'] = $vrs_created_date;
       }
       else {
-        $trip_items[$key]['vrs_created_date'] = strtotime(date('Y-m-d H:i:s'));
+        $trip_items[$key]['vrs_created_date'] = time();
       }
-      $trip_items[$key]['vrs_confirm_date'] = strtotime(date('Y-m-d H:i:s'));
+      $trip_items[$key]['vrs_confirm_date'] = time();
 
       $trip_items[$key]['distributor_id'] = $dis_id;
       $trip_items[$key]['remarks'] = $value['remarks'];
@@ -1421,6 +1604,17 @@ function vrs_confirmation_form_submit($form, &$form_state) {
         $trip_items[$key]['actual_signed_bill_amount'] = 0;
         $trip_items[$key]['cheque_number'] = '';
       }
+      // if empty actual cheque amt collected , and signed bill then empty existing photo values
+      if (empty($trip_items[$key]['actual_cheque_amount'])) {
+          $trip_items[$key]['photo_cheque'] = '';
+          $trip_items[$key]['cheque_date'] = 0;
+          $trip_items[$key]['bank_name'] = '';
+          $trip_items[$key]['cheque_number'] =  '';
+
+      }
+      if (empty($trip_items[$key]['actual_signed_bill_amount'])) {
+          $trip_items[$key]['photo_signed_bill'] = '';
+      }
     }
     if ($no_billable == 1) {
       $vrs_status = 3; // vrs pending
@@ -1428,6 +1622,7 @@ function vrs_confirmation_form_submit($form, &$form_state) {
     else {
       $vrs_status = 2; // vrs confirmed
     }
+
     // Update vrs version in trip level
     $node = update_vrs_version($trip_id, $version_number, $dis_id, $vrs_status);
     if (!empty($node))
@@ -1455,13 +1650,13 @@ function vrs_confirmation_form_submit($form, &$form_state) {
     $trip_items_total['rto_charges'] = $rto_charges;
     $trip_items_total['vrs_start_time'] = $vrs_start_time;
     $trip_items_total['vrs_end_time'] = time();
-    if (!empty($vrs_total_id) && !empty($vrs_created_date)) {
-      $trip_items[$key]['vrs_created_date'] = $vrs_created_date;
+    if (!empty($vrs_created_date)) {
+      $trip_items_total['vrs_created_date'] = $vrs_created_date;
     }
     else {
-      $trip_items[$key]['vrs_created_date'] = strtotime(date('Y-m-d H:i:s'));
+      $trip_items_total['vrs_created_date'] = time();
     }
-    $trip_items_total['vrs_confirm_date'] = strtotime(date('Y-m-d H:i:s'));
+    $trip_items_total['vrs_confirm_date'] = time();
     $trip_items_total['distributor_id'] = $dis_id;
     $vrs_total_id_insert = insert_vrs_trip_total($trip_items_total, $trip_id);
     // Delete existing denominations  before insert new denominations
@@ -1479,7 +1674,7 @@ function vrs_confirmation_form_submit($form, &$form_state) {
         $coins = (float) $form_state['values']['coins'];
         if (!empty($no_notes) && is_numeric($no_notes)) {
           $denominations[$value['nid']] = array('trip_id' => $trip_id, 'vrs_total_id' => $vrs_total_id,
-            'denominations_nid' => $value['nid'], 'no_of_notes' => $no_notes, 'created_date' => strtotime(date('Y-m-d H:i:s'))
+            'denominations_nid' => $value['nid'], 'no_of_notes' => $no_notes, 'created_date' => time()
             , 'distributor_id' => $dis_id, 'vrs_version_no' => $version_number);
         }
       }
@@ -1493,7 +1688,7 @@ function vrs_confirmation_form_submit($form, &$form_state) {
         foreach ($note_denominations as $key => $value) {
           $no_notes = $form_state['values']['note_denominations_' . $value['nid']];
           $denominations[$value['nid']] = array('trip_id' => $trip_id, 'vrs_total_id' => $vrs_total_id,
-            'denominations_nid' => $value['nid'], 'no_of_notes' => 0, 'created_date' => strtotime(date('Y-m-d H:i:s'))
+            'denominations_nid' => $value['nid'], 'no_of_notes' => 0, 'created_date' => time()
             , 'distributor_id' => $dis_id, 'vrs_version_no' => $version_number, 'coins' => $coins);
           insert_denominations($denominations, $trip_id, $vrs_total_id);
           break;

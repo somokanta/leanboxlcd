@@ -40,7 +40,7 @@ function get_vrs_bill_items($trip_id, $distributor_id, $vrs_version) {
         $query->fields('bills', array('bill_number', 'bill_status', 'to_be_collected_amt_sales_register'
             , 'to_be_collected_amt', 'actual_cash_amount', 'actual_cheque_amount',
             'actual_signed_bill_amount', 'cheque_number', 'cheque_date', 'bank_name'
-            , 'short_amt', 'reason_code', 'vrs_version_no', 'trip_id', 'remarks', 'non_billable', 'photo_cheque', 'photo_signed_bill','non_bank_reason_code'));
+            , 'short_amt', 'reason_code', 'vrs_version_no', 'trip_id', 'remarks', 'non_billable', 'photo_cheque', 'photo_signed_bill','non_bank_reason_code','vrs_confirm_date'));
         $res = $query->execute()->fetchAll(PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
     }
     return $res;
