@@ -1402,7 +1402,8 @@ function vrs_confirmation_validate($form, &$form_state) {
       $messages[] = t('Error:Total Cash Collected is zero,please remove denominations entry.');
     }
     if ($sum_actual_cash!==$sum_denominations) {
-        $messages[] = t("Error:Sum of Bill's To Be collected amount should be equal to Sum of denominations.");
+      //HOT FIX
+        //$messages[] = t("Error:Sum of Bill's To Be collected amount should be equal to Sum of denominations.");
     }
   }
 
