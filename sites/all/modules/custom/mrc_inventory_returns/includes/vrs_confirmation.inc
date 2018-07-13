@@ -1375,7 +1375,7 @@ function vrs_confirmation_validate($form, &$form_state) {
       $sum_actual_cash += (float) $value['actual_cash_collected'];
     }
   }
-  // Note denomination validation
+   // Note denomination validation
   $note_denominations = get_notes_denominations();
   $coins = (float) $form_state['values']['coins'];
   $denominations = array();
@@ -1392,6 +1392,9 @@ function vrs_confirmation_validate($form, &$form_state) {
       }
       $sum_denominations += (int)$value['title'] * $no_notes;
     }
+    if (!empty($sum_denominations)) {
+        $sum_denominations = $sum_denominations + $rto_charges;
+    }
     if (empty($denominations) && !empty($sum_actual_cash) && empty($coins)) {
       $messages[] = t('Error:Please enter the cash denomination');
     }
@@ -1401,10 +1404,10 @@ function vrs_confirmation_validate($form, &$form_state) {
     if (empty($sum_actual_cash) && !empty($coins)) {
       $messages[] = t('Error:Total Cash Collected is zero,please remove denominations entry.');
     }
-    if ($sum_actual_cash!==$sum_denominations) {
-      //HOT FIX
-        //$messages[] = t("Error:Sum of Bill's To Be collected amount should be equal to Sum of denominations.");
-    }
+    // Not required this Change on 12-7-2017 
+    /*if ($sum_actual_cash!==$sum_denominations) {
+        $messages[] = t("Error:Sum of Bill's Actual Cash Collected should be equal to Sum of denominations + RTO charges.");
+    }*/
   }
 
   //1. At Footer Level, Total To be collected should be = Footer level total cash + total cheque + total signed bill + cashier short + short
@@ -1479,7 +1482,8 @@ function vrs_confirmation_form_submit($form, &$form_state) {
   $asset_short_total = (float) $form_state['values']['asset_total_value'];
   //header level hidden field value         
   $cashier_short_value = $form_state['values']['cashier_short_value'];
-  $footer_level_cashier_debit_value = ($to_be_collected - ($total_short + $total_actual_cash + $total_cheque_collected + $total_signed_bill_collected)) + $cashier_short_value + $asset_short_total;
+  //$footer_level_cashier_debit_value = ($to_be_collected - ($rto_charges + $total_short + $total_actual_cash + $total_cheque_collected + $total_signed_bill_collected)) + $cashier_short_value + $asset_short_total;
+  $footer_level_cashier_debit_value = $form_state['values']['footer_details'][$key_footer]['total_cashier_debit_value'];
   $to_be_collected_farey = (float) $form_state['values']['footer_details'][$key_footer]['total_farey'];
   $check_count = 0;
   $sb_count = 0;
@@ -1660,7 +1664,7 @@ function vrs_confirmation_form_submit($form, &$form_state) {
     $trip_items_total['vrs_confirm_date'] = time();
     $trip_items_total['distributor_id'] = $dis_id;
     $vrs_total_id_insert = insert_vrs_trip_total($trip_items_total, $trip_id);
-    // Delete existing denominations  before insert new denominations
+     // Delete existing denominations  before insert new denominations
     delete_existing_denominations($trip_id);
     if (!empty($vrs_total_id))
       $vrs_total_id = $vrs_total_id;
