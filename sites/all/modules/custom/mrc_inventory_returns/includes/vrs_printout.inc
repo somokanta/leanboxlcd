@@ -170,7 +170,9 @@ function get_vrs_versions($trip_id){
             'photo_signed_bill',
             'non_bank_reason_code'
         );
-      $vrs_total = array('trip_id',
+      $vrs_total = array(
+            'vrs_version_no',
+            'trip_id',
             'vrs_id',
             'bill_count',
             'total_to_be_collected_sales_register',
@@ -183,7 +185,6 @@ function get_vrs_versions($trip_id){
             'total_cashier_cash_short',
             'cheque_count',
             'sb_count',
-            'vrs_version_no',
             'vrs_created_date',
             'vrs_confirm_date',
             'distributor_id',
@@ -193,20 +194,29 @@ function get_vrs_versions($trip_id){
         $query = db_select('vrs_trip_items_history', 'vr_items');
         $query->condition('vr_items.distributor_id', $dis_id, '=');
         $query->condition('vr_items.trip_id', $trip_id, '=');
-        $query->join('vrs_trip_total_history', 'vr_total', 'vr_total.vrs_version_no = vr_items.vrs_version_no');
+        //$query->join('vrs_trip_total_history', 'vr_total', 'vr_total.vrs_version_no = vr_items.vrs_version_no');
         $query->orderBy('vr_items.id','desc');
-        $query->groupBy('vr_items.vrs_version_no,vr_items.bill_number');
+        //$query->groupBy('vr_items.vrs_version_no,vr_items.bill_number,vr_total.vrs_version_no');
         $query->fields('vr_items',$bill_items);
-        $query->fields('vr_total',$vrs_total);
+        //$query->fields('vr_total',$vrs_total);
         $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+        
+        $query1 = db_select('vrs_trip_total_history', 'vr_total');
+        $query1->condition('vr_total.distributor_id', $dis_id, '=');
+        $query1->condition('vr_total.trip_id', $trip_id, '=');
+        $query1->orderBy('vr_total.id','desc');
+        $query1->fields('vr_total',$vrs_total);
+        $res1 = $query1->execute()->fetchAll(PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
         $vrs= array();
         $vrs_data = array();
         $short_reasons = get_short_reasons();
         $non_bankable_reasons = get_non_bankable_reasons();
         if (!empty($res)){
+            if (!empty($res)){
             foreach($res as $key=>$value){ 
-                $vrs[$value['vrs_version_no']][]= $value;
+                $vrs[$value['vrs_version_no']][]=  $value + $res1[$value['vrs_version_no']];
             }
+        }
             $asset  = received_assets_count($trip_id, $dis_id) ;
             foreach ($vrs as $key => &$val) {
                 foreach ($val as $key1 => &$value) {
@@ -239,17 +249,20 @@ function get_vrs_versions($trip_id){
                     }
                     if (!empty($value['short_amt'])) {
                         foreach ($short_reasons as $code => $short_value) {
-                            if ($value['reason_code'] == $short_value['field_short_reason_code_value']) {
-                                $value['reason_code'] = $short_value['title'];
+                            if ($value['reason_code'] == $code) {
+                                $value['reason_code'] = $short_value;
                             }
                         }
                     }
                     if (!empty($value['non_bank_reason_code'])) {
                         foreach ($non_bankable_reasons as $code => $reason_value) {
-                            if ($value['non_bank_reason_code'] == $reason_value['field_reason_code_value']) {
-                                $value['non_bank_reason_code'] = $reason_value['title'];
+                            if ($value['non_bank_reason_code'] == $code) {
+                                $value['non_bank_reason_code'] = $reason_value;
                             }
                         }
+                    }
+                    else {
+                        $value['non_bank_reason_code'] = t('');
                     }
                     $vrs_data[] = array(
                         $value['trip_id'],
@@ -360,7 +373,7 @@ function vrs_export($vrs_data,$trip_id) {
         'Cheque Image',
         'Bank Name',
         'Short',
-        'Short Reason Code',
+        'Short Reason',
         'Remarks',
         'Is Non Bankable',
         'Non Bankable Reason'

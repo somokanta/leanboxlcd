@@ -74,7 +74,7 @@
                         calculated_total_sum += parseFloat(get_textbox_value);
                     }
                 });
-                $(".total_actual_cash_collected").val(calculated_total_sum);
+                //$(".total_actual_cash_collected").val(calculated_total_sum);
                 // Actual Cheque collected
                 calculated_total_sum = 0;
                 $("#bill_details .actual_cheque_amt_collected").each(function () {
