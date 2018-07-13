@@ -2098,6 +2098,13 @@ function change_feeds_import_node_presave($node) {
       $node->title = $reason_type.'_'.$dp_reason;
     }
   }
+  
+  // Saving the date time stamp in received assets screen
+  if ($node->type == 'assets_count') {
+    if(arg(0) == 'received-assets-screen') {
+      $node->field_received_asset_time[LANGUAGE_NONE][0]['value'] = REQUEST_TIME;
+    }
+  }
 }
 
 function holiday_get_working_day($date_timestamp, $day, $holidays, $weeklyoff) {

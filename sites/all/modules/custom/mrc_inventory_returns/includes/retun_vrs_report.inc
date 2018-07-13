@@ -90,6 +90,11 @@ function return_vrs_callback() {
   }
   
   $query->fields('ad', array('runsheet_number'));
+  $query->fields('ad', array('date'));
+  $query->fields('ad', array('fieldExecutiveName'));
+  $query->leftjoin('node', 'n1', "n1.title = ad.runsheet_number and n1.type ='assets_count' and n1.uid = $distributor_id");
+  $query->leftjoin('field_data_field_received_asset_time', 'at', 'at.entity_id = n1.nid');
+  $query->fields('at', array('field_received_asset_time_value'));
   $query->join('node', 'disp_data', 'disp_data.title = ad.runsheet_number');
   $query->condition('disp_data.type', 'dispatch_data');
   $query->condition('disp_data .uid', $distributor_id);
@@ -112,6 +117,18 @@ function return_vrs_callback() {
   $row = array();
   foreach ($result as $val) {
     $row['trip_id'] = $val['runsheet_number'];
+    $dispatch_date = strtotime($val['date']); 
+    if(isset($dispatch_date)){
+      $row['dispatch_date'] = date('d-M-y', $dispatch_date);
+    }else{
+      $row['dispatch_date'] = '';
+    }
+    $row['fieldExecutiveName'] = $val['fieldExecutiveName'];
+    if(isset($val['field_received_asset_time_value'])){
+      $row['field_received_asset_time_value'] = date('d-M-y H:i:s', $val['field_received_asset_time_value']);
+    }else{
+      $row['field_received_asset_time_value'] = '';
+    }
     $field = field_info_field('field_vrs_status');
      $allowed_values = list_allowed_values($field);
      foreach ($allowed_values as $key => $value) {
@@ -157,7 +174,7 @@ function return_vrs_callback() {
     $rows[] = $row;
   }
 
-  $header = array('Trip ID', 'Status', 'Returns Start Time', 'Returns End Time', 'Total Returns Time taken', 'Total Returned Value', 'Returns Productivity (Value/10 min)', 'VRS Start Time', 'VRS End Time', 'Total VRS Time taken', 'Cash Value', 'Cheque Value', 'Signed Bill Value');
+  $header = array('Trip ID', 'Dispatch Date', 'Cashier Name', 'Received Assets Time', 'Status', 'Returns Start Time', 'Returns End Time', 'Total Returns Time taken', 'Total Returned Value', 'Returns Productivity (Value/10 min)', 'VRS Start Time', 'VRS End Time', 'Total VRS Time taken', 'Cash Value', 'Cheque Value', 'Signed Bill Value');
   $per_page = 10;
   // Initialize the pager
   $current_page = pager_default_initialize(count($rows), $per_page);
