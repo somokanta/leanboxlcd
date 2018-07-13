@@ -348,10 +348,25 @@ function create_fetch_data_ptl_trip_form($form, &$form_state){
 function create_fetch_data_ptl_trip_form_validate($form, &$form_state) {
   global $user;
   $user_id = $user->uid;
-/*
   $trip_id = $form_state['values']['trip_id'];
-  
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
+  
+    $query = db_select('node', 'n');
+    $query->condition('n.title', $trip_id);
+    $query->condition('n.uid', $distributor_id);
+    $query->condition('n.type', 'dispatch_data');
+    $query->join('field_data_field_master_trip_id_reference', 'mt', 'mt.entity_id = n.nid');
+    $query->join('node', 'n1', 'mt.field_master_trip_id_reference_nid = n1.nid');
+    $query->condition('n1.uid', $distributor_id);
+    $query->condition('n1.type', 'master_dispatch_data');
+    $query->addField('n1', 'title');
+    $master_trip_id = $query->execute()->fetchField();
+
+  if(!empty($master_trip_id)){
+    form_set_error('trip_id', "Trip ID $trip_id has already been attached to a Master Trip ID $master_trip_id");
+  }
+  
+/*
   $rs_code = dispatch_planning_get_rscode_using_uid($distributor_id);
 
   $query = db_select('node', 'n');
