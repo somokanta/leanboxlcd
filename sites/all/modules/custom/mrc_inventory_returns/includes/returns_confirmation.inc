@@ -131,6 +131,7 @@ function returns_confirmation_form($form, &$form_state) {
         'effect' => 'fade',
       ),
       '#name' => "confirm_submit_$key",
+      '#validate' => array('return_confirm_validate'),
       '#submit' => array('return_confirm_submit'),
       '#attributes' => array('class' => array('confirm-remove')),
     );
@@ -205,7 +206,6 @@ function returns_confirmation_form_validate($form, &$form_state) {
       $error_flag = 1;
     }
   }
-
   $form_state['error_flag'] = $error_flag;
 }
 
@@ -282,6 +282,42 @@ function returns_confirmation_form_submit($form, &$form_state) {
   $form_state['rebuild'] = TRUE;
 }
 
+function return_confirm_validate($form, $form_state) {
+  global $user;
+  $dis_id = change_feeds_import_get_distributor_id($user->uid);
+  
+  $get_trip_id = $form_state['triggering_element']['#name'];
+  $exploded_name = explode('_', $get_trip_id);
+  $trip_id = $exploded_name[2];
+  
+  // Validation of Total bill count should be equal to sum of Full delivered bill count + full returned bill count + partial delivered bill count
+  $validation_on_bill_count = get_bill_count_validation($trip_id, $dis_id);
+
+  $total_bill_count = $validation_on_bill_count['bill_count'];
+  $sum_of_delivered_bills_count = ($validation_on_bill_count['full_delivered_bill_count'] + $validation_on_bill_count['full_returned_bill_count'] + $validation_on_bill_count['partial_delivered_bill_count']);
+
+  if ($total_bill_count != $sum_of_delivered_bills_count) {
+    form_set_error('form', "Please declare status for all bills in this Trip id:$trip_id.");
+  }
+  
+  
+  $query = db_select('dispatch_planning_api_data', 'ad');
+  $query->join('dispatch_planning_item_details', 'dpi', 'ad.id = dpi.trip_bill_reference');
+  $query->condition('ad.runsheet_number', $trip_id, '=');
+  $query->condition('ad.distributor_id', $dis_id);
+  $query->condition('ad.updated_flag', 2); //api
+
+  $db_or = db_or();
+  $db_or->condition('dpi.line_level_status', 'line_undeliver');
+  $db_or->condition('dpi.line_level_status', 'line_partial_deliver');
+  $query->condition($db_or);
+
+  $query->addExpression("GROUP_CONCAT(DISTINCT dpi.product_name separator '<br>')", 'product_name');
+  $res = $query->execute()->fetchField();
+  if (!empty($res)) {
+    form_set_error('form', "Please confirm SKU-wise Returns for Trip ID $trip_id and products<br>". $res);
+  }
+}
 /**
  * Submit function of modal pop up
  */
@@ -295,13 +331,6 @@ function return_confirm_submit($form, $form_state) {
 
   $trip_nid = check_trip_id_exists_or_not($dis_id, $trip_id);
   if (!empty($trip_nid->nid)) {
-    // Validation of Total bill count should be equal to sum of Full delivered bill count + full returned bill count + partial delivered bill count
-    $validation_on_bill_count = get_bill_count_validation($trip_id, $dis_id);
-
-    $total_bill_count = $validation_on_bill_count['bill_count'];
-    $sum_of_delivered_bills_count = ($validation_on_bill_count['full_delivered_bill_count'] + $validation_on_bill_count['full_returned_bill_count'] + $validation_on_bill_count['partial_delivered_bill_count']);
-
-    if ($total_bill_count == $sum_of_delivered_bills_count) {
       $node = node_load($trip_nid->nid);
       // Status updated to 'Returned Confirm'
       $node->field_vrs_status['und'][0]['value'] = 1;
@@ -387,10 +416,6 @@ function return_confirm_submit($form, $form_state) {
       }
 
       drupal_set_message("Returns confirmation of trip id:$trip_id is done successfully.");
-    }
-    else {
-      drupal_set_message("Please declare status for all bills in this Trip id:$trip_id.", 'error');
-    }
   }
   else {
     drupal_set_message('Trip id nid not found.');

@@ -2416,16 +2416,16 @@ function get_productivity_data_for_picking($start_date, $end_date = FALSE, $dis_
   return $picking;
 }
 
-function get_twoday_before_yesterday_data_channel($twoday_before_yesterday, $twoday_before_yesterday, $distributor_id) {
-  return get_common_data_for_chhanel_datewise($twoday_before_yesterday, $twoday_before_yesterday, $distributor_id);
+function get_twoday_before_yesterday_data_channel($twoday_before_yesterday, $twoday_before_yesterdays, $distributor_id) {
+  return get_common_data_for_chhanel_datewise($twoday_before_yesterday, $twoday_before_yesterdays, $distributor_id);
 }
 
-function get_day_before_yesterday_data_channel($day_before_yesterday, $day_before_yesterday, $distributor_id) {
-  return get_common_data_for_chhanel_datewise($day_before_yesterday, $day_before_yesterday, $distributor_id);
+function get_day_before_yesterday_data_channel($day_before_yesterday, $day_before_yesterdays, $distributor_id) {
+  return get_common_data_for_chhanel_datewise($day_before_yesterday, $day_before_yesterdays, $distributor_id);
 }
 
-function get_yesterday_data_channel($yesterday, $yesterday, $distributor_id) {
-  return get_common_data_for_chhanel_datewise($yesterday, $yesterday, $distributor_id);
+function get_yesterday_data_channel($yesterday, $yesterdays, $distributor_id) {
+  return get_common_data_for_chhanel_datewise($yesterday, $yesterdays, $distributor_id);
 }
 
 function get_mtd_data_channel($this_date, $yesterday, $distributor_id) {
