@@ -153,6 +153,10 @@ function master_dispatch_planning_form($form, &$form_state) {
 
 function master_dispatch_planning_form_validate($form, &$form_state) {
   if ($form_state['clicked_button']['#value'] === 'Save') {
+      global $user;
+      $user_id = $user->uid;
+      $distributor_id = change_feeds_import_get_distributor_id($user_id);
+  
     foreach ($form_state['values']['list_form_items'] as $nid => $value) {
       $trip_node = node_load($nid);
       if (!empty($trip_node->field_master_trip_id_reference['und'][0]['nid'])) {
@@ -160,6 +164,17 @@ function master_dispatch_planning_form_validate($form, &$form_state) {
         $node = node_load($trip_node->field_master_trip_id_reference['und'][0]['nid']);
         $master_trip = $node->title;
         form_set_error('list_form_items', "Trip: $child_trip is already presend in master Trip:$master_trip ");
+      }
+      
+      $trip_id = $trip_node->title;
+      $query = db_select('ptl_data_configuration', 'cb');
+      $query->addExpression('MAX(id)', 'max');
+      $query->condition('trip_id', $trip_id, '=');
+      $query->condition('distributor_id', $distributor_id, '=');
+      $ptl_data_exist = $query->execute()->fetchField();
+      
+      if(!empty($ptl_data_exist)){
+         form_set_error('list_form_items',"Trip ID $trip_id has already been sent to PTL");
       }
     }
   }
