@@ -84,10 +84,12 @@ function email_status_menu() {
 function email_status_email_form($form, $form_state) {
 
   // PL Group Wise Bill Pendency
+  $click_here = t('Click here to send email :');
+  $target =  array('attributes' => array('target' => '_blank'));
   $form['pl_grp_wise_to_email'] = array(
     '#type' => 'textarea',
     '#title' => t('Receiver'),
-    '#description' => t('PL Group Wise Bill Pendency'),
+    '#description' => l($click_here.t('PL Group Wise Bill Pendency'), 'email/daily-data',$target),
     '#default_value' => variable_get('pl_grp_wise_to_email', ''),
     '#required' => TRUE,
     '#size' => 60,
@@ -98,7 +100,7 @@ function email_status_email_form($form, $form_state) {
   $form['productivity_status_to_email'] = array(
     '#type' => 'textarea',
     '#title' => t('Receiver'),
-    '#description' => t('Productivity Progress Status'),
+    '#description' => l($click_here.t('Productivity Progress Status'), 'email-productivity-data',$target),
     '#default_value' => variable_get('productivity_status_to_email', ''),
     '#required' => TRUE,
     '#size' => 60,
@@ -109,7 +111,7 @@ function email_status_email_form($form, $form_state) {
   $form['loading_productivity_status_to_email'] = array(
     '#type' => 'textarea',
     '#title' => t('Receiver'),
-    '#description' => t('Loading Productivity Progress Status'),
+    '#description' => l($click_here.t('Loading Productivity Progress Status'), 'email-loading-productivity',$target),
     '#default_value' => variable_get('loading_productivity_status_to_email', ''),
     '#required' => TRUE,
     '#size' => 60,
@@ -120,7 +122,7 @@ function email_status_email_form($form, $form_state) {
   $form['ofd_salesbeatwise_to_email'] = array(
     '#type' => 'textarea',
     '#title' => t('Receiver'),
-    '#description' => t('Pending OFD Sales Beat Wise'),
+    '#description' => l($click_here.t('Pending OFD Sales Beat Wise'), 'email/pending-ofd-salesbeatwise',$target),
     '#default_value' => variable_get('ofd_salesbeatwise_to_email', ''),
     '#required' => TRUE,
     '#size' => 60,
@@ -131,7 +133,7 @@ function email_status_email_form($form, $form_state) {
   $form['pl_grp_otif_to_email'] = array(
     '#type' => 'textarea',
     '#title' => t('Receiver'),
-    '#description' => t('PL GROUP Wise OTIF'),
+    '#description' => l($click_here.t('PL GROUP Wise OTIF'), 'email/daily-data-pl',$target),
     '#default_value' => variable_get('pl_grp_otif_to_email', ''),
     '#required' => TRUE,
     '#size' => 60,
@@ -142,7 +144,7 @@ function email_status_email_form($form, $form_state) {
   $form['ofd_to_email'] = array(
     '#type' => 'textarea',
     '#title' => t('Receiver'),
-    '#description' => t('OFD Report'),
+    '#description' => l($click_here.t('OFD Report'), 'email/ofd-report',$target),
     '#default_value' => variable_get('ofd_to_email', ''),
     '#required' => TRUE,
     '#size' => 60,
@@ -153,7 +155,7 @@ function email_status_email_form($form, $form_state) {
   $form['collection_status_to_email'] = array(
     '#type' => 'textarea',
     '#title' => t('Receiver'),
-    '#description' => t('Payment Collection Status'),
+    '#description' =>  l($click_here.t('Payment Collection Status'), 'email/payment-collection-status',$target),
     '#default_value' => variable_get('collection_status_to_email', ''),
     '#required' => TRUE,
     '#size' => 60,
@@ -164,7 +166,7 @@ function email_status_email_form($form, $form_state) {
   $form['monthly_trip_summary_to_email'] = array(
     '#type' => 'textarea',
     '#title' => t('Receiver'),
-    '#description' => t('Monthly Trip Summary'),
+    '#description' =>  l($click_here.t('Monthly Trip Summary'), 'email/monthly-trip-summary',$target),
     '#default_value' => variable_get('monthly_trip_summary_to_email', ''),
     '#required' => TRUE,
     '#size' => 60,
@@ -175,7 +177,7 @@ function email_status_email_form($form, $form_state) {
   $form['exception_mis_to_email'] = array(
     '#type' => 'textarea',
     '#title' => t('Receiver'),
-    '#description' => t('Exception MIS'),
+    '#description' =>  l($click_here.t('Exception MIS'), 'email/exception-mis',$target),
     '#default_value' => variable_get('exception_mis_to_email', ''),
     '#required' => TRUE,
     '#size' => 60,
@@ -186,7 +188,7 @@ function email_status_email_form($form, $form_state) {
   $form['impact_unprocessed_to_email'] = array(
     '#type' => 'textarea',
     '#title' => t('Receiver'),
-    '#description' => t('Impact Unprocessed'),
+    '#description' => l($click_here.t('Impact Unprocessed'), 'email/impact_unprocessed',$target),
     '#default_value' => variable_get('impact_unprocessed_to_email', ''),
     '#required' => TRUE,
     '#size' => 60,
@@ -197,7 +199,7 @@ function email_status_email_form($form, $form_state) {
   $form['return_vrs_to_email'] = array(
     '#type' => 'textarea',
     '#title' => t('Receiver'),
-    '#description' => t('Returns & VRS Productivity'),
+    '#description' => l($click_here.t('Returns & VRS Productivity'), 'email/return-vrs-prod',$target),
     '#default_value' => variable_get('return_vrs_to_email', ''),
     '#required' => TRUE,
     '#size' => 60,
