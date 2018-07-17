@@ -315,7 +315,8 @@ function return_confirm_validate($form, $form_state) {
   $query->addExpression("GROUP_CONCAT(DISTINCT dpi.product_name separator '<br>')", 'product_name');
   $res = $query->execute()->fetchField();
   if (!empty($res)) {
-    form_set_error('form', "Please confirm SKU-wise Returns for Trip ID $trip_id and products<br>". $res);
+    //Temporary commented
+    //form_set_error('form', "Please confirm SKU-wise Returns for Trip ID $trip_id and products<br>". $res); 
   }
 }
 /**
