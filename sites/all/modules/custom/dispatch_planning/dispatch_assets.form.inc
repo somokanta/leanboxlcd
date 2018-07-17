@@ -10,12 +10,16 @@ function _dispatch_assets_form($form, &$form_state) {
   $form = array();
   $form['#prefix'] = '<div id="itemlist-div">';
   $form['#suffix'] = '</div>';
-
+  $trip_id = arg(1);
+  if (!empty($trip_id)) {
+      $default_trip_id = $trip_id;
+  }
   $form['trip_number'] = array(
     '#prefix' => '<div class="textfield-wrapper">',
     '#type' => 'textfield',
     '#title' => t('Trip ID'),
     '#required' => TRUE,
+    '#default_value'=>$default_trip_id,  
     '#autocomplete_path' => 'trip/autocomplete',
     '#ajax' => array(
       'wrapper' => 'itemlist-div',
@@ -28,6 +32,9 @@ function _dispatch_assets_form($form, &$form_state) {
   $form['dispatch_count'] = array('#type' => 'value');
 
   $trip_number = $form_state['input']['trip_number'];
+  if (empty($trip_number) && !empty($default_trip_id)) {
+    $trip_number =   $default_trip_id;
+  }
 
   if (!empty($trip_number)) {
     $user_id = $GLOBALS['user']->uid;
