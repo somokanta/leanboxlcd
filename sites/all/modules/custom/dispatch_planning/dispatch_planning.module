@@ -2573,28 +2573,48 @@ function received_assets_validation_callback($form, &$form_state) {
   $trip_id = $form_state['values']['title'];
 
   if(!empty($trip_id)) {
-    global $user;
-    $dis_id = change_feeds_import_get_distributor_id($user->uid);
-  
-    $trip_detail = check_trip_id_exists_or_not($dis_id, $trip_id);
-    $vrs_status = $trip_detail->field_vrs_status_value;
+        global $user;
+        $dis_id = change_feeds_import_get_distributor_id($user->uid);
+        // Checking Trip ID exist in the system
+        $trip_node_obj = node_load_multiple(NULL, array('title' => $trip_id, 'type' => 'dispatch_data', 'uid' => $dis_id));
+        $trip_node_key = key($trip_node_key);
+        $trip_node = $trip_node_obj[$trip_node_key];
+        if (empty($trip_node_obj)) {
+            form_set_error('form', t("Trip ID:$trip_id does not exists."));
+        }
+        $node_obj = node_load_multiple(NULL, array('title' => $trip_id, 'type' => 'assets_count', 'uid' => $dis_id));
+        $key = key($node_obj);
+        $node = $node_obj[$key];
+        $target =  array('attributes' => array('target' => '_blank'));
+        /* User should enter dispatch count before entering received assest. Dispatched assets
+           screen creates assets count of node. 
+        */ 
+        if (!empty($node)) {
 
-    if($vrs_status == 1) {
-      form_set_error('form', t("You cannot edit because this trip:$trip_id is returns confirmed."));
+        $trip_detail = check_trip_id_exists_or_not($dis_id, $trip_id);
+        $vrs_status = $trip_detail->field_vrs_status_value;
+
+        if($vrs_status == 1) {
+          form_set_error('form', t("You cannot edit because this trip:$trip_id is returns confirmed."));
+        }
+        else if($vrs_status == 2) {
+          form_set_error('form', t("You cannot edit because this trip:$trip_id is VRS confirmed."));
+        }
+        else if($vrs_status == 3) {
+          form_set_error('form', t("You cannot edit because this trip:$trip_id is VRS pending."));
+        }
+        else if($vrs_status == 4) {
+          form_set_error('form', t("You cannot edit because this trip:$trip_id is Handover pending."));
+        }
+        else if($vrs_status == 5) {
+          form_set_error('form', t("You cannot edit because this trip:$trip_id is Handover confirmed."));
+        }
+    } 
+    else {
+         $dispatch_link = l(t(' Click here to enter Dispatch count'),'dispatch-assets-screen/'.$trip_id,$target);
+         form_set_error('form', t("Please enter Dispatch Count for Trip ID:$trip_id first.").$dispatch_link);
     }
-    else if($vrs_status == 2) {
-      form_set_error('form', t("You cannot edit because this trip:$trip_id is VRS confirmed."));
-    }
-    else if($vrs_status == 3) {
-      form_set_error('form', t("You cannot edit because this trip:$trip_id is VRS pending."));
-    }
-    else if($vrs_status == 4) {
-      form_set_error('form', t("You cannot edit because this trip:$trip_id is Handover pending."));
-    }
-    else if($vrs_status == 5) {
-      form_set_error('form', t("You cannot edit because this trip:$trip_id is Handover confirmed."));
-    }
-  } 
+  }
 }
 
 /**
