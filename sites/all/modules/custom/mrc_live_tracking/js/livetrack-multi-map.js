@@ -134,7 +134,7 @@ var marker = {};
                 /*parameters of polyline*/
                 var poly1param = {
                     color: randomColor,
-                    weight: 4,
+                    weight: 1,
                     opacity: 0.5
                 };
                 var poly1 = new L.Polyline(pts1, poly1param);/*polyline with given points and default color is created*/
