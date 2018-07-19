@@ -260,7 +260,7 @@ function van_live_tracking_history_vanwise_form_submit($form, &$form_state) {
       'sr_no' => array('data' => $key + 1, 'class' => 'sr-cell'),
       'party_code' => array('data' => $party_code, 'class' => 'party-code-cell'),
       'party_name' => array('data' => '<div class="party-name-data">' . $party_name . '</div>', 'class' => 'party-name-cell'),
-      '#attributes' => array('data-lat' => $res_latitude, 'data-lng' => $res_longitude, 'data-sr' => $key + 1),
+      '#attributes' => array('data-lat' => $res_latitude, 'data-lng' => $res_longitude, 'data-sr' => 'FarEye-'.$party_code),
       'details' => array('data' => array('#markup' => '<a class="cell-details" style="display:none;">On Map</a>' . $marker_tooltip1)),
     );
     $form_state['vanwise_tracking_farey']['rows'] = $farey_data;
