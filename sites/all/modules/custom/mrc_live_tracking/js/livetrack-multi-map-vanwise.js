@@ -158,7 +158,7 @@ var marker = {};
                     /*parameters of polyline*/
                     var poly2param = {
                         color: '#0085FF',
-                        weight: 4,
+                        weight: 1,
                         opacity: 0.5
                     };
                     var poly2 = new L.Polyline(pts2, poly2param);/*polyline with given points and default color is created*/
