@@ -113,7 +113,7 @@ function van_live_tracking_history_vanwise_form($form, &$form_state) {
     $form_state['vanwise_tracking']['rows'] = array();
   }
   $driver_data = $form_state['vanwise_tracking']['rows'];
-
+  $class = array('selectable-row', 'table-checkbox');
   if ($driver_data) {
     $form['head'] = array(
       '#markup' => '<div style="background-color:#cccccc;margin-bottom: 2px;width: 35%;padding: 5px;">' . t('History Driver Wise') . '</div>',
@@ -126,7 +126,6 @@ function van_live_tracking_history_vanwise_form($form, &$form_state) {
       'details' => array('data' => '', 'class' => 'details-cell'),
     );
 
-    $class = array('selectable-row', 'table-checkbox');
     $form['list_form_items'] = array(
       '#type' => 'tableselect',
       '#header' => $header_array,
