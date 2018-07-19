@@ -15,6 +15,8 @@ function van_live_tracking_history_vanwise() {
   drupal_add_js(drupal_get_path('module', 'mrc_live_tracking') . '/js/selectable-row.js', 'file');
   drupal_add_js(drupal_get_path('module', 'mrc_live_tracking') . '/js/leaflet.smoothmarkerbouncing.js', 'file');
   drupal_add_js(drupal_get_path('module', 'mrc_live_tracking') . '/js/livetrack-multi-map-vanwise.js', 'file'); //ForGraph
+  drupal_add_js(drupal_get_path('module', 'mrc_live_tracking') . '/js/tooltip/jquery.tinytooltip.js', 'file');
+  drupal_add_css(drupal_get_path('module', 'mrc_live_tracking') . '/js/tooltip/jquery.tinytooltip.css', 'file');
   //drupal_add_js(drupal_get_path('module', 'mrc_live_tracking') . '/js/multi-map.js', 'file');
   $output = '';
   $form = drupal_get_form('van_live_tracking_history_vanwise_form');
@@ -155,6 +157,8 @@ function van_live_tracking_history_vanwise_form($form, &$form_state) {
       '#type' => 'tableselect',
       '#header' => $header_array1,
       '#options' => $trip_data,
+      '#prefix' => '<div id="table-div" style="min-height: auto;max-height: 350px;overflow-y: auto;">',
+      '#suffix' => '</div>',
       '#empty' => t(''),
       '#attributes' => array('class' => $class),
       '#multiple' => TRUE,
@@ -181,6 +185,8 @@ function van_live_tracking_history_vanwise_form($form, &$form_state) {
       '#type' => 'tableselect',
       '#header' => $header_array2,
       '#options' => $farey_data,
+      '#prefix' => '<div id="table-div" style="min-height: auto;max-height: 350px;overflow-y: auto;">',
+      '#suffix' => '</div>',
       '#empty' => t(''),
       '#attributes' => array('class' => $class),
       '#multiple' => TRUE,
@@ -259,7 +265,7 @@ function van_live_tracking_history_vanwise_form_submit($form, &$form_state) {
     $farey_data[$party_code] = array(
       'sr_no' => array('data' => $key + 1, 'class' => 'sr-cell'),
       'party_code' => array('data' => $party_code, 'class' => 'party-code-cell'),
-      'party_name' => array('data' => '<div class="party-name-data">' . $party_name . '</div>', 'class' => 'party-name-cell'),
+      'party_name' => array('data' => '<div class="party-name-data">' . substr($party_name,0,10) . '</div>', 'class' => 'party-name-cell-'.$key, 'data-store' => $party_name,'data-trans' => $key),
       '#attributes' => array('data-lat' => $res_latitude, 'data-lng' => $res_longitude, 'data-sr' => 'Del-'.$party_code),
       'details' => array('data' => array('#markup' => '<a class="cell-details" style="display:none;">On Map</a>' . $marker_tooltip1)),
     );
@@ -360,7 +366,7 @@ function van_live_tracking_history_vanwise_form_submit($form, &$form_state) {
     $trip_data[$key] = array(
       'sr_no' => array('data' => $sr_no, 'class' => 'sr-cell'),
       'party_code' => array('data' => $party_code1, 'class' => 'party-code-cell'),
-      'party_name' => array('data' => '<div class="party-name-data">' . $party_name1 . '</div>', 'class' => 'party-name-cell'),
+      'party_name' => array('data' => '<div class="party-name-data">' . substr($party_name1,0,10) . '</div>', 'class' => 'party-name-cell-'.$sr_no,'data-store' => $party_name1,'data-trans' => $sr_no),
       'seq' => array('data' => $seq, 'class' => 'seq-cell'),
       '#attributes' => array('class' => 'party-tracking', 'data-lat' => $lat, 'data-lng' => $long, 'data-sr' => $party_code1),
       'details' => array('data' => array('#markup' => '<a class="cell-details" style="display:none;">On Map</a>' . $marker_tooltip2)),
