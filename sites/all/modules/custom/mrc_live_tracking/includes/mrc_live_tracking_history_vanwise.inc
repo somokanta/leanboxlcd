@@ -345,7 +345,7 @@ function van_live_tracking_history_vanwise_form_submit($form, &$form_state) {
     $old_sublocality = $val['field_original_address_dependent_locality'];
     $old_poi = $val['field_original_address_data'];
 
-    $old_lat_long = !empty($old_lat) ? $old_lat . ',' . $old_long : '';
+    $old_lat_long = !empty($lat) ? $lat . ',' . $long : '';
     $lat_long_arr[] = $old_lat_long;
     $marker_tooltip2 = '<div class="cell-address cell-hide"><table>'
       . '<tr><td style="white-space:nowrap;color:#222">Party code</td><td>' . $party_code1 . '</td></tr>'
