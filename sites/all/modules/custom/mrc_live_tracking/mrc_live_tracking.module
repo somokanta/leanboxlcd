@@ -20,9 +20,23 @@ function mrc_live_tracking_menu() {
     'title' => 'Real-time Van Tracking History',
     'page callback' => 'van_live_tracking_history',
     'access arguments' => array('live van tracking'),
-    'type' => MENU_CALLBACK,
+    'type' => MENU_NORMAL_ITEM,
     'file' => 'includes/mrc_live_tracking_history.inc'    
   );
+   $items['van-live-track-history/allvan'] = array(
+    'title' => 'All Vans',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => 0,
+  );
+  $items['van-live-track-history/vanwise'] = array(
+    'title' => 'Van Wise',
+    'page callback' => 'van_live_tracking_history_vanwise',
+    'access arguments' => array('live van tracking'),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 1,
+    'file' => 'includes/mrc_live_tracking_history_vanwise.inc'    
+  );
+
   return $items;
 }
 /**
