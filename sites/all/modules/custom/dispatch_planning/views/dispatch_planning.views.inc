@@ -3216,6 +3216,25 @@ function dispatch_planning_views_data() {
       'handler' => 'views_handler_argument_string',
     ),
   );
+  
+   $data['dispatch_planning_api_data']['photo_of_signed_bill_partial'] = array(
+    'title' => t('DP photo_of_signed_bill_partial'),
+    'help' => t('Dispatch Planning photo_of_signed_bill_partial'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+  
   $data['dispatch_planning_api_data']['res_total_amount'] = array(
     'title' => t('DP res_total_amount'),
     'help' => t('Dispatch Planning res_total_amount'),
@@ -3527,6 +3546,25 @@ function dispatch_planning_views_data() {
       'handler' => 'views_handler_argument_string',
     ),
   );
+  
+  $data['dispatch_planning_api_data']['photo_of_signed_bill_partial_edit'] = array(
+    'title' => t('DP photo_of_signed_bill_partial_edit'),
+    'help' => t('Dispatch Planning photo_of_signed_bill_partial_edit'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+  
     $data['dispatch_planning_api_data']['res_cash_amount_edit'] = array(
     'title' => t('DP res_cash_amount_edit'),
     'help' => t('Dispatch Planning res_cash_amount'),
@@ -5041,6 +5079,14 @@ function dispatch_planning_views_data() {
     'help' => t('Collection mode handler.'),
     'field' => array(
       'handler' => 'field_collection_mode',
+    ),
+  );
+  
+  $data['views']['photo_url_handler'] = array(
+    'title' => t('Photo of Cheque/Signed Bills'),
+    'help' => t('Photo of Cheque/Signed Bills handler.'),
+    'field' => array(
+      'handler' => 'photo_url_handler',
     ),
   );
   
