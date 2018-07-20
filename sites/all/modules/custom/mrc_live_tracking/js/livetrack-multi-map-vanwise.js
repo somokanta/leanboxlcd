@@ -174,25 +174,6 @@ var marker = {};
         };
                 /*function to remove  markers from map*/
         function remove_poliline_van_tracking($rr) {
-/*            var tr = $rr.closest('tr');
-            var latlong = tr.attr('latlong');
-            var latlongnew = tr.attr('latlongnew');
-            console.log("remove"+latlong);
-            if (marker[latlong] !== undefined) {
-                var result = latlong.split(" ");
-                for (var i = result.length -1; i >= 0; i--) {
-                    console.log('inside'+i);
-                    map.removeLayer(marker[latlong].i);
-                }
-                delete marker[latlong];
-            }
-            if (marker[latlongnew] !== undefined) {
-                var result1 = latlongnew.split(" ");
-                for (var k = result1.length -1; k >= 0; k--) {
-                    console.log('inside'+k);
-                    map.removeLayer(marker[latlongnew].k);
-                }
-            }*/
             var $van_track = $rr.closest('tr');
             var latlongnew = $van_track.attr("latlong");
             var polylength = 0;
@@ -213,9 +194,7 @@ var marker = {};
                         }
                     }
                 }
-            }
-
-            
+            }            
         }
     })
 }(jQuery));
