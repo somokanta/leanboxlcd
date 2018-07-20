@@ -10,7 +10,8 @@ var marker = {};
         var min_lat;
         var min_lng;
         var centre = new L.LatLng(default_lat, default_lng);
-        var poly = [];
+        var poly_ob1 = [];
+        var poly_ob2 = [];
 
         map = new MapmyIndia.Map('map-container', {center: centre, zoomControl: true, hybrid: true, search: true});
         map.setView([default_lat, default_lng], 5);
@@ -143,7 +144,7 @@ var marker = {};
                     var poly1 = new L.Polyline(pts1, poly1param);/*polyline with given points and default color is created*/
                     map.addLayer(poly1);
                     marker[latlong] = {i: poly1};
-                    poly.push(poly1);
+                    poly_ob1.push(poly1);
 
                 };
             }
@@ -167,7 +168,7 @@ var marker = {};
 
                     map.addLayer(poly2);
                     marker[latlongnew] = {k: poly2};
-                    poly.push(poly2);
+                    poly_ob2.push(poly2);
                 };
             }            
         };
@@ -192,14 +193,29 @@ var marker = {};
                     map.removeLayer(marker[latlongnew].k);
                 }
             }*/
-
-
-            var polylength = poly.length;
-            if (polylength > 0) {
-                for (var i = 0; i < polylength; i++) {
-                    map.removeLayer(poly[i]);
+            var $van_track = $rr.closest('tr');
+            var latlongnew = $van_track.attr("latlong");
+            var polylength = 0;
+            if (latlongnew !== undefined) {
+                polylength = poly_ob1.length;
+                if (polylength > 0) {
+                    for (var i = 0; i < polylength; i++) {
+                        map.removeLayer(poly_ob1[i]);
+                    }
+                }
+            } else {
+                latlongnew = $van_track.attr("latlongnew");
+                if (latlongnew !== undefined) {
+                    polylength = poly_ob2.length;
+                    if (polylength > 0) {
+                        for (var i = 0; i < polylength; i++) {
+                            map.removeLayer(poly_ob2[i]);
+                        }
+                    }
                 }
             }
+
+            
         }
     })
 }(jQuery));
