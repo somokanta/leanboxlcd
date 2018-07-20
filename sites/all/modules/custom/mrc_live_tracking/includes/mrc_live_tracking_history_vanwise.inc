@@ -326,7 +326,11 @@ function van_live_tracking_history_vanwise_form_submit($form, &$form_state) {
     $data = reverse_geocode_get_data_trip_wise($trip_id);
   }
   
-
+  $conf_nid = check_node_title_exists($distributor_id, 'van_stop_master');
+  $conf_node = node_load($conf_nid);
+  $origin_lat = $conf_node->field_distributor_latitude[LANGUAGE_NONE][0]['value'];
+  $origin_long = $conf_node->field_distributor_longitude[LANGUAGE_NONE][0]['value'];
+  $lat_long_arr[] = $origin_lat . ',' . $origin_long;
   foreach ($data as $key => $val) {
     $party_code1 = $val['field_party_code_value'];
     $lat = $val['field_hul_updated_lat_value'];
@@ -374,6 +378,14 @@ function van_live_tracking_history_vanwise_form_submit($form, &$form_state) {
       $trip_data[$key]['#attributes'] = array('class' => 'party-tracking', 'latlongnew' => $lat_long_arr, 'data-lat' => $lat, 'data-lng' => $long, 'data-sr' => $party_code1);
     }
   }
+//  //Add first element for warehouse
+  $first_trip_element = array('sr_no' => array('data' => 0, 'class' => 'sr-cell'),
+    'party_code' => array('data' => 'Warehouse', 'class' => 'party-code-cell'),
+    'party_name' =>array('data' => '<div class="party-name-data">' . substr('Warehouse',0,10) . '</div>', 'class' => 'party-name-cell-'.'0','data-store' => 'Warehouse','data-trans' => 0),
+    'seq' => array('data' => '', 'class' => 'seq-cell'),
+    '#attributes' => array('class' => 'party-tracking', 'data-lat' => $origin_lat, 'data-lng' => $origin_long, 'data-sr' => 'Warehouse'),
+     'details' => array('data' => array('#markup' => '<a class="cell-details" style="display:none;">On Map</a>')),); 
+  array_unshift($trip_data, $first_trip_element);
   $form_state['vanwise_tracking_trip']['rows'] = $trip_data;
   $form_state['rebuild'] = TRUE;
 }
