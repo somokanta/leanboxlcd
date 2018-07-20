@@ -10,6 +10,7 @@ var marker = {};
         var min_lat;
         var min_lng;
         var centre = new L.LatLng(default_lat, default_lng);
+        var poly = [];
 
         map = new MapmyIndia.Map('map-container', {center: centre, zoomControl: true, hybrid: true, search: true});
         map.setView([default_lat, default_lng], 5);
@@ -142,6 +143,7 @@ var marker = {};
                     var poly1 = new L.Polyline(pts1, poly1param);/*polyline with given points and default color is created*/
                     map.addLayer(poly1);
                     marker[latlong] = {i: poly1};
+                    poly.push(poly1);
 
                 };
             }
@@ -165,12 +167,13 @@ var marker = {};
 
                     map.addLayer(poly2);
                     marker[latlongnew] = {k: poly2};
+                    poly.push(poly2);
                 };
             }            
         };
                 /*function to remove  markers from map*/
         function remove_poliline_van_tracking($rr) {
-            var tr = $rr.closest('tr');
+/*            var tr = $rr.closest('tr');
             var latlong = tr.attr('latlong');
             var latlongnew = tr.attr('latlongnew');
             console.log("remove"+latlong);
@@ -187,6 +190,14 @@ var marker = {};
                 for (var k = result1.length -1; k >= 0; k--) {
                     console.log('inside'+k);
                     map.removeLayer(marker[latlongnew].k);
+                }
+            }*/
+
+
+            var polylength = poly.length;
+            if (polylength > 0) {
+                for (var i = 0; i < polylength; i++) {
+                    map.removeLayer(poly[i]);
                 }
             }
         }
