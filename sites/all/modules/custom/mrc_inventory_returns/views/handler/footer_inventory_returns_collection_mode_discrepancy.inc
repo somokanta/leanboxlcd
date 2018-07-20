@@ -39,31 +39,50 @@ class footer_inventory_returns_collection_mode_discrepancy extends views_handler
     $query->addExpression("case when pt.field_payment_terms_value !=  '' then LOWER(pt.field_payment_terms_value) else 'NA' END", "field_payment_terms_value");
     $query->havingCondition('field_payment_terms_value', 'sign bill', '!=');
 
-    $query->addExpression('CONVERT(ad.res_confirm_signed_bill_amount, SIGNED)', 'res_confirm_signed_bill_amount');
-    $query->havingCondition('res_confirm_signed_bill_amount', 0, '>');
+    //$query->addExpression('CONVERT(ad.res_confirm_signed_bill_amount, SIGNED)', 'res_confirm_signed_bill_amount');
+    //$query->havingCondition('res_confirm_signed_bill_amount', 0, '>');
     $query->fields('ad', array('bill_number'));
     $query->fields('ad', array('party_code'));
     $query->fields('ad', array('party_name'));
     $query->fields('pt', array('field_payment_terms_value'));
     $query->fields('ad', array('res_confirm_signed_bill_amount'));
+    $query->fields('ad', array('res_confirm_signed_bill_amount_edit'));
+    $query->fields('ad', array('res_money_collect2_edit'));
+    $query->fields('ad', array('res_signed_bill_delivery'));
+    $query->fields('ad', array('res_signed_bill_partial'));
     $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
 
     $count = 1;
+    $rows = array();
     foreach ($res as $val) {
-      $row['counter'] = $count++;
-      $row['bill_number'] = $val['bill_number'];
-      $row['party_code'] = $val['party_code'];
-      $row['party_name'] = $val['party_name'];
-      $row['payment_term'] = $val['field_payment_terms_value'];
-      $row['collection_mode'] = 'Signed Bill';
-      $row['collected_value'] = $val['res_confirm_signed_bill_amount'];
+      if (empty($val['res_money_collect2_edit']) && ($val['res_signed_bill_delivery'] == 'Yes' || $val['res_signed_bill_partial'] == 'Yes')) {
+        $row['counter'] = $count++;
+        $row['bill_number'] = $val['bill_number'];
+        $row['party_code'] = $val['party_code'];
+        $row['party_name'] = $val['party_name'];
+        $row['payment_term'] = $val['field_payment_terms_value'];
+        $row['collection_mode'] = 'Signed Bill';
+        $row['collected_value'] = $val['res_confirm_signed_bill_amount'];
 
-      $total_collected_value += $val['res_confirm_signed_bill_amount'];
-      $rows[] = $row;
+        $total_collected_value += $val['res_confirm_signed_bill_amount'];
+        $rows[] = $row;
+      }
+      else if ($val['res_money_collect2_edit'] == 'signed') {
+        $row['counter'] = $count++;
+        $row['bill_number'] = $val['bill_number'];
+        $row['party_code'] = $val['party_code'];
+        $row['party_name'] = $val['party_name'];
+        $row['payment_term'] = $val['field_payment_terms_value'];
+        $row['collection_mode'] = 'Signed Bill';
+        $row['collected_value'] = (!empty($val['res_confirm_signed_bill_amount_edit'])) ? $val['res_confirm_signed_bill_amount_edit'] : $val['res_confirm_signed_bill_amount'];
+
+        $total_collected_value += (!empty($val['res_confirm_signed_bill_amount_edit'])) ? $val['res_confirm_signed_bill_amount_edit'] : $val['res_confirm_signed_bill_amount'];
+        $rows[] = $row;
+      }
     }
-    $rows['total'] = array('Total', '', '', '', '', '', $total_collected_value);
 
-    if (!empty($res)) {
+    if (!empty($rows)) {
+      $rows['total'] = array('Total', '', '', '', '', '', $total_collected_value);
       $header = array('Sr No.', 'Bill Number', 'Party Code', 'Party Name', 'Payment Terms', 'Collection Mode', 'Collected Value');
       $output = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
     }
