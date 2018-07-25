@@ -672,6 +672,7 @@ function send_email_return_vrs_prod() {
   $query->addExpression('((MAX(CASE WHEN (ad.updated_flag = 1) THEN ad.updated_time END) - MIN(CASE WHEN (ad.updated_flag = 1) THEN ad.updated_time END)) / 60)', 'total_return_time');
   $query->groupBy('ad.runsheet_number');
   $query->join('dispatch_planning_item_details', 'dpi', 'ad.id = dpi.trip_bill_reference');
+  $query->addexpression("SUM(dpi.return_qty * dpi.sum_net_sales_value)", 'return_value');
   $query->addexpression("(SUM(CASE WHEN (ad.updated_flag = 1) THEN (dpi.return_qty * dpi.sum_net_sales_value * 10) END)) / ((MAX(CASE WHEN (ad.updated_flag = 1) THEN ad.updated_time END) - MIN(CASE WHEN (ad.updated_flag = 1) THEN ad.updated_time END)) / 60)", 'return_prod');
 
   $query->addExpression('(COUNT(DISTINCT(CASE WHEN (dpi.line_level_status = \'line_partial_deliver\'  or dpi.line_level_status = \'line_undeliver\') THEN dpi.sku_code END)) * 10) /  ((MAX(CASE WHEN (ad.updated_flag = 1) THEN ad.updated_time END) - MIN(CASE WHEN (ad.updated_flag = 1) THEN ad.updated_time END)) / 60)', 'product_lines');
