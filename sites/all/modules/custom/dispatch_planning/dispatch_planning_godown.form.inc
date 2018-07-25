@@ -25,7 +25,7 @@ function _godown_callback_form($form, &$form_state) {
     '#autocomplete_path' => 'trip/autocomplete',
     '#ajax' => array(
       'wrapper' => 'itemlist-div',
-      'callback' => 'trip_details_remove_godown_callback',
+      'callback' => 'trip_details_remove_godown_callback_trip',
       'method' => 'replace',
       'effect' => 'fade',
     ),
@@ -40,6 +40,7 @@ function _godown_callback_form($form, &$form_state) {
     $trip_no = $form_state['storage']['trip_id'];
     //$options = _get_all_tripsbill_godown($trip_number);
     //if (!empty($options)) {
+    unset($form_state['input']['bill_number']);
     $form['bill_number'] = array(
       '#prefix' => '<div class="textfield-wrapper">',
       '#type' => 'textfield',
@@ -81,6 +82,11 @@ function _godown_callback_form($form, &$form_state) {
       drupal_set_message(t('You cannot edit because this trip is Handover confirmed.'), 'error');
     }
     else {
+
+      if (isset($form_state['triggering_element']['#title']) && ($form_state['triggering_element']['#title'] == 'Trip') && !empty($form_state['input']['trip_number'])) {
+        unset($form_state['input']['bill_number']);
+        unset($form_state['trip_change']);
+      }
       $form['bill_number'] = array(
         '#prefix' => '<div class="textfield-wrapper">',
         '#type' => 'textfield',
@@ -106,7 +112,8 @@ function _godown_callback_form($form, &$form_state) {
 //              '#header' => $bill_details_header,
 //              '#rows' => $bill_details,
 //            );
-
+        $exit = check_bill_and_trip_combination($trip_number, $bill_number);
+        if(!empty($exit)){
         $item_details = _get_editable_godown_delivered_item_details($trip_number, $bill_number);
         $item_details_header = array(
           'SKU7_Code' => 'SKU7 Code',
@@ -161,10 +168,10 @@ function _godown_callback_form($form, &$form_state) {
           '#type' => 'submit',
           '#value' => 'submit',
         );
-        //}
-//         else {
-//            drupal_set_message(t('No result Found'), 'error');
-//         }
+        }
+         else {
+            drupal_set_message(t("Bill Number: $bill_number not found in the Trip: $trip_number"), 'error');
+         }
         }
       }
     }
@@ -293,6 +300,10 @@ function _get_noneditable_godown_delivered_bill_details($trip_number, $rs_code, 
 function trip_details_remove_godown_callback($form, &$form_state) {
   return $form;
 }
+function trip_details_remove_godown_callback_trip($form, &$form_state) {
+  $form_state['trip_change'] = 1;
+  return $form;
+}
 
 /**
  * 
@@ -360,4 +371,16 @@ function _get_editable_godown_delivered_item_details($trip_id, $bill_no) {
     }
   }
   return $rows;
+}
+function check_bill_and_trip_combination($trip_id, $bill_no) {
+    $query = db_select('node', 'n');
+    $query->Join('field_data_field_trip_id_reference', 'ft', 'ft.entity_id = n.nid');
+    $query->Join('node', 'n1', 'n1.nid = ft.field_trip_id_reference_nid');
+    $query->condition('n.type', 'sales_register_data');
+    $query->condition('n.title', $bill_no);
+    $query->condition('n1.title', $trip_id);
+    $query->fields('n', array('title'));
+    $query->addTag('node_distributor_access');
+    $bill_no = $query->execute()->fetchField();
+    return $bill_no;
 }
