@@ -78,6 +78,8 @@ function return_vrs_callback() {
   if (arg(1) != 'export') {
     $form = drupal_render(drupal_get_form('retun_vrs_form'));
   }
+  
+  $get_subdivision_nids = check_product_validation($distributor_id);
 
   $query = db_select('dispatch_planning_api_data', 'ad');
   $query->condition('ad.distributor_id', $distributor_id, '=');
@@ -113,6 +115,14 @@ function return_vrs_callback() {
   $query->fields('vtt', array('vrs_end_time'));
   $query->addexpression("vtt.vrs_end_time - (CASE WHEN vtth.vrs_version_no = 'V1.0' THEN vtth.vrs_start_time END)", 'vrs_time');
   $query->fields('vtt', array('total_actual_cash_amount', 'total_actual_cheque_amount', 'total_actual_signed_bill_amount'));
+  
+  $query->join('node', 'n2', "n2.title = idt.sku_code");
+  $query->condition('n2.type', 'sku7_code_master', '=');
+  $query->condition('n2.uid',$distributor_id);
+  $query->leftjoin('field_data_field_product_devision_reference', 'pdr', 'pdr.entity_id = n2.nid');
+  $query->addexpression("SUM(CASE WHEN pdr.field_product_devision_reference_nid IN ($get_subdivision_nids) THEN idt.return_qty END)", 'return_sku_qty_sachets');
+  $query->addexpression("SUM(CASE WHEN pdr.field_product_devision_reference_nid NOT IN ($get_subdivision_nids) THEN idt.return_qty END)", 'return_sku_qty_wo_sachets');
+  
   $result = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
   $row = array();
   foreach ($result as $val) {
@@ -152,6 +162,8 @@ function return_vrs_callback() {
       $row['total_return_time'] = '';
     }
     $row['return_value'] = round($val['return_value']);
+    $row['return_qty_wo_sachets'] = $val['return_sku_qty_wo_sachets'];
+    $row['return_qty_sachets'] = $val['return_sku_qty_sachets'];
     $row['return_prod'] = round($val['return_prod']);
     if(!empty($val['vrs_start_time'])){
     $row['vrs_start_time'] = date('d-M-y H:i:s', $val['vrs_start_time']);
@@ -174,7 +186,7 @@ function return_vrs_callback() {
     $rows[] = $row;
   }
 
-  $header = array('Trip ID', 'Dispatch Date', 'Cashier Name', 'Received Assets Time', 'Status', 'Returns Start Time', 'Returns End Time', 'Total Returns Time taken', 'Total Returned Value', 'Returns Productivity (Value/10 min)', 'VRS Start Time', 'VRS End Time', 'Total VRS Time taken', 'Cash Value', 'Cheque Value', 'Signed Bill Value');
+  $header = array('Trip ID', 'Dispatch Date', 'Cashier Name', 'Received Assets Time', 'Status', 'Returns Start Time', 'Returns End Time', 'Total Returns Time taken', 'Total Returned Value','Returned SKU Quantity(w/o Sachets)','Returned Quantity of Sachets','Returns Productivity (Value/10 min)', 'VRS Start Time', 'VRS End Time', 'Total VRS Time taken', 'Cash Value', 'Cheque Value', 'Signed Bill Value');
   $per_page = 10;
   // Initialize the pager
   $current_page = pager_default_initialize(count($rows), $per_page);
