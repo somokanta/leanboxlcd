@@ -650,7 +650,9 @@ function get_attachment_full_returned_bills($distributor_id) {
 
 function send_email_return_vrs_prod() {
   $distributor_id = _DISTRIBUTOR_ID;
-
+  
+  $get_subdivision_nids = check_product_validation($distributor_id);
+ 
   $yesterday_date = date('Y-m-d', strtotime("-1 days"));
   $query = db_select('dispatch_planning_api_data', 'ad');
   $query->condition('ad.distributor_id', $distributor_id, '=');
@@ -658,6 +660,8 @@ function send_email_return_vrs_prod() {
   $query->condition('ad.date', $yesterday_date, '=');
   $query->fields('ad', array('runsheet_number'));
   $query->join('node', 'n', 'n.title = ad.runsheet_number');
+  $query->condition('n.type', 'dispatch_data', '=');
+  $query->condition('n.uid',$distributor_id);
   $query->join('field_data_field_vrs_status', 'vs', 'vs.entity_id = n.nid');
   $query->fields('vs', array('field_vrs_status_value'));
   $query->leftjoin('field_data_field_returned_version', 'rv', 'rv.entity_id = n.nid');
@@ -682,6 +686,13 @@ function send_email_return_vrs_prod() {
   $query->addexpression("(vtt.total_actual_cheque_amount * 100) / (vtt.total_actual_cash_amount + vtth.total_actual_cheque_amount + vtt.total_actual_signed_bill_amount)", 'cheque_percentage');
   $query->addexpression("(vtt.total_actual_signed_bill_amount * 100) / (vtt.total_actual_cash_amount + vtth.total_actual_cheque_amount + vtt.total_actual_signed_bill_amount)", 'signed_percentage');
   $query->orderBy('vs.field_vrs_status_value', 'DESC');
+  
+  $query->join('node', 'n1', "n1.title = dpi.sku_code");
+  $query->condition('n1.type', 'sku7_code_master', '=');
+  $query->condition('n1.uid',$distributor_id);
+  $query->leftjoin('field_data_field_product_devision_reference', 'pdr', 'pdr.entity_id = n1.nid');
+  $query->addexpression("SUM(CASE WHEN pdr.field_product_devision_reference_nid IN ($get_subdivision_nids) THEN dpi.return_qty END)", 'return_sku_qty_sachets');
+  $query->addexpression("SUM(CASE WHEN pdr.field_product_devision_reference_nid NOT IN ($get_subdivision_nids) THEN dpi.return_qty END)", 'return_sku_qty_wo_sachets');
   
   $result = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
   $rows = array();
@@ -711,7 +722,10 @@ function send_email_return_vrs_prod() {
       $row['return_prod'] = round($val['return_prod']);
       $row['product_lines'] = round($val['product_lines']);
     }
-
+    
+    $row['return_value'] = round($val['return_value']);
+    $row['return_qty_wo_sachets'] = $val['return_sku_qty_wo_sachets'];
+    $row['return_qty_sachets'] = $val['return_sku_qty_sachets'];
 
     $vrs_version_value = $val['field_vrs_version_value'];
     if (empty($return_version_value) || ($val['field_vrs_status_value'] < 2 && !empty($vrs_version_value))) {
@@ -734,7 +748,7 @@ function send_email_return_vrs_prod() {
 
     $rows[] = $row;
   }
-  $header = array('Dispatch Date', 'Trip ID', 'Status', 'Cashier', 'Arrival to Asset Returns (min)', 'Arrival to Returns Start (min)', 'Returns Start to Returns End (min)', 'Returns Value(Rs.)/10 Min', 'Product Lines/10 Min', 'Returns End to VRS Start (Min)', 'VRS Start to VRS End (Min)', 'VRS Value(Rs.)/10 Min', 'Cash %', 'Cheque %', 'Signed Bill %');
+  $header = array('Dispatch Date', 'Trip ID', 'Status', 'Cashier', 'Arrival to Asset Returns (min)', 'Arrival to Returns Start (min)', 'Returns Start to Returns End (min)', 'Returns Value(Rs.)/10 Min', 'Product Lines/10 Min','Total Returned Value(Rs.)','Returned SKU Quantity(w/o Sachets)','Returned Quantity of Sachets','Returns End to VRS Start (Min)', 'VRS Start to VRS End (Min)', 'VRS Value(Rs.)/10 Min', 'Cash %', 'Cheque %', 'Signed Bill %');
 
   $html = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
 

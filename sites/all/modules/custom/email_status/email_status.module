@@ -3441,3 +3441,17 @@ function email_status_mail($key, &$message, $params) {
       break;
   }
 }
+
+
+function check_product_validation($distributor_id) {
+  $subdivisions = variable_get('sku_subdivisions', array('PHsc', 'ZPHsc', 'PSsc', 'ZPSsc', 'DPsc', 'FBsc', 'POsc', 'FJMsc', 'FKPsc'));
+  
+  $query1 = db_select('node', 'n');
+  $query1->condition('n.type', 'product_validation_master', '=');
+  $query1->condition('n.uid', $distributor_id, '=');
+  $query1->condition('n.title', $subdivisions, 'IN');
+  $query1->fields('n', array('nid'));
+  $all_nids = $query1->execute()->fetchCol();
+  $all_nids = implode(",", $all_nids);
+  return $all_nids; 
+}
