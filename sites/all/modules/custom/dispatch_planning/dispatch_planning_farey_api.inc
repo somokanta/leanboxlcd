@@ -15,8 +15,9 @@ function fetch_dispatch_planning_api_data($data) {
       $json_data = json_encode($data);
       dispatch_planning_api_log($json_data, $data['jobData']['runsheet_number'], 'farey_sales_deliver', $dis_id, 1);
 
-      $bill_row_id = _get_bill_row_id_using_reference_no($data['referenceNumber']);
-      
+      $bill_row_id = _get_bill_row_id_manual_using_reference_no($data['referenceNumber']);
+      if (!empty($bill_row_id)) {
+              
       if (isset($data['fieldData']['money_collect2'])) {
          if (is_array($data['fieldData']['money_collect2'])) {
             $money_collect = implode(",", $data['fieldData']['money_collect2']);
@@ -166,6 +167,10 @@ function fetch_dispatch_planning_api_data($data) {
       }
       $results['flag'] = '1';
       $results['result'] = 'Data updated Sucessfully.';
+      }else{
+           $results['flag'] = '0';
+          $results['result'] = 'No data was updated.';
+      }
    }
    else {
       // make log entry here
