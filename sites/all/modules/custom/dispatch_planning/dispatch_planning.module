@@ -2723,6 +2723,7 @@ function dispatch_planning_api_data($api_data, $node_uid = 0) {
         'jobType' => $api_data['jobType'],
         'referenceNo' => $api_data['referenceNo'],
         'date' => $api_data['date'],
+        'dispatch_date' => strtotime($api_data['date']),
         'city' => $api_data['city'],
         'hub' => $api_data['hub'],
         'fieldExecutive' => $api_data['fieldExecutive'],
