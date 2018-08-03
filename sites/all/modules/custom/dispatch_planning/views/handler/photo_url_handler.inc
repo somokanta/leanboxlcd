@@ -26,7 +26,7 @@ class photo_url_handler extends views_handler_field {
    function render($data) {
     $money_collect_edit = $data->dispatch_planning_api_data_res_money_collect2_edit;
 
-    if ($money_collect_edit == 'cheque' || $money_collect_edit == 'signed') {
+    if (!empty($money_collect_edit)) {
       $res_photo_of_cheque = $data->dispatch_planning_api_data_res_photo_of_cheque_edit;
       $photo_of_signed_bill_partial = $data->dispatch_planning_api_data_photo_of_signed_bill_partial_edit;
       $res_photo_of_signed_bill_delivery = $data->dispatch_planning_api_data_res_photo_of_signed_bill_delivery_1;
