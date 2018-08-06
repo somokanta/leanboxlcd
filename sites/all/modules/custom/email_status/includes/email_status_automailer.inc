@@ -760,3 +760,64 @@ function send_email_return_vrs_prod() {
 
   drupal_mail('email_status', 'daily_data', $mail_to, LANGUAGE_NONE, $params, $from);
 }
+
+function send_email_del_app_adoption() {
+  $distributor_id = _DISTRIBUTOR_ID;
+  $todays_date = date('Y-m-d');
+  $todays_date_timestamp = strtotime($todays_date);
+  $current_day = date("d", $todays_date_timestamp);
+  if ($current_day <= '21') {
+    $old_date = strtotime('-1 month', strtotime($todays_date));
+    $last_month = date("m", $old_date);
+    $last_year = date("Y", $old_date);
+    $from_this_date = strtotime(date("$last_year-$last_month-21"));
+  }
+  else {
+    $this_month = date("m", $todays_date_timestamp);
+    $from_this_date = strtotime(date("Y-$this_month-21"));
+  }
+  $yesterday_date = strtotime(date('Y-m-d', strtotime("-1 days"))) ;
+  $query = db_select('dispatch_planning_api_data', 'ad');
+  $query->condition('ad.distributor_id', $distributor_id, '=');
+  $query->condition('ad.dispatch_date', array($from_this_date, $yesterday_date), 'BETWEEN');
+  $query->fields('ad', array('fieldExecutiveName'));
+  $query->addexpression("ROUND(COUNT(CASE WHEN ad.dispatch_date =  $yesterday_date AND  ad.res_updated_time != 0 THEN ad.bill_number END) / COUNT(CASE WHEN ad.dispatch_date =  $yesterday_date THEN ad.bill_number END) *100)", 'app_adoption');
+
+  $query->addexpression("ROUND(COUNT(CASE WHEN ad.dispatch_date = $yesterday_date AND ad.res_updated_time !=0 AND ad.res_updated_time < (UNIX_TIMESTAMP(from_unixtime(ad.res_updated_time, '%Y-%m-%d'))+60*60*18-19800) THEN ad.bill_number END) / COUNT(CASE WHEN  ad.dispatch_date = $yesterday_date AND ad.res_updated_time != 0 THEN ad.bill_number END)*100)", 'entrybefsix');
+
+  $query->addexpression("ROUND(COUNT(CASE WHEN ad.dispatch_date = $yesterday_date AND ad.res_updated_time !=0 AND ad.res_updated_time >= (UNIX_TIMESTAMP(from_unixtime(ad.res_updated_time, '%Y-%m-%d'))+60*60*18-19800) THEN ad.bill_number END) / COUNT(CASE WHEN ad.dispatch_date = $yesterday_date AND ad.res_updated_time != 0 THEN ad.bill_number END)*100)", 'entryaftsix');
+
+  $query->addexpression("ROUND(COUNT(CASE WHEN ad.res_updated_time != 0 THEN ad.bill_number END) / COUNT(ad.bill_number) *100)", 'mtd_app_adoption');
+  $query->addexpression("ROUND(COUNT(CASE WHEN ad.res_updated_time !=0 AND ad.res_updated_time < (UNIX_TIMESTAMP(from_unixtime(ad.res_updated_time, '%Y-%m-%d'))+60*60*18-19800) THEN ad.bill_number END) / COUNT(CASE WHEN ad.res_updated_time != 0 THEN ad.bill_number END)*100)", 'mtd_entrybefsix');
+  $query->addexpression("ROUND(COUNT(CASE WHEN ad.res_updated_time !=0 AND ad.res_updated_time >= (UNIX_TIMESTAMP(from_unixtime(ad.res_updated_time, '%Y-%m-%d'))+60*60*18-19800) THEN ad.bill_number END) / COUNT(CASE WHEN ad.res_updated_time != 0 THEN ad.bill_number END)*100)", 'mtd_entryaftsix');
+  $query->groupBy('ad.fieldExecutiveName');
+  $result = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+  $rows[] = array('Cashier', 'Delivery App Adoption(%)', '% Entries before 6:00 PM', '% Entries after 6:00 PM', 'Delivery App Adoption(%)', '% Entries before 6:00 PM', '% Entries after 6:00 PM');
+  foreach ($result as $value) {
+    $row['fieldExecutiveName'] = $value['fieldExecutiveName'];
+    $total['fieldExecutiveName'] = 'Total';
+    $row['app_adoption'] = $value['app_adoption'];
+    $total['app_adoption'] += $value['app_adoption'];
+    $row['entrybefsix'] = $value['entrybefsix'];
+    $total['entrybefsix'] += $value['entrybefsix'];
+    $row['entryaftsix'] = $value['entryaftsix'];
+    $total['entryaftsix'] += $value['entryaftsix'];
+    $row['mtd_app_adoption'] = $value['mtd_app_adoption'];
+    $total['mtd_app_adoption'] += $value['mtd_app_adoption'];
+    $row['mtd_entrybefsix'] = $value['mtd_entrybefsix'];
+    $total['mtd_entrybefsix'] += $value['mtd_entrybefsix'];
+    $row['mtd_entryaftsix'] = $value['mtd_entryaftsix'];
+    $total['mtd_entryaftsix'] += $value['mtd_entryaftsix'];
+    $rows[] = $row;
+  }
+  $rows[] = $total;
+  $header = array(array('data' => 'Dispatch Date:' . date('d-M-y', strtotime("-1 days")), 'colspan' => 4), array('data' => 'MTD', 'colspan' => 3));
+  $output = "<h3>Delivery App Adoption - RS Jogs</h3>";
+  $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0'), 'empty' => t('No Records has been found')));
+  $params['subject'] = "Delivery App Adoption - RS Jogs";
+  $params['body'] = $output;
+  $mail_to = variable_get('return_del_app_adoption');
+  $from = variable_get('from_email');
+
+  drupal_mail('email_status', 'daily_data', $mail_to, LANGUAGE_NONE, $params, $from);
+}
