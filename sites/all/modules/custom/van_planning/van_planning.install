@@ -1,0 +1,41 @@
+<?php
+
+function van_planning_schema() {
+
+  $schema['prevan_sequence'] = array(
+    'description' => 'Sequence for PreVan ID',
+    'fields' => array(
+      'id' => array(
+        'description' => 'The primary identifier for a data',
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'next_id' => array(
+        'description' => 'next_id',
+        'type' => 'int',
+      ),
+      'distributor_id' => array(
+        'description' => 'distributor_id',
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+    ),
+    'primary key' => array('id'),
+  );
+  return $schema;
+}
+
+function van_planning_schema_update_7101() {
+   $fields = array(
+    'sequencing_date' => array(
+       'description' => t('Sequencing Date'),
+        'type' => 'int',
+        'default' => 0,
+     ),
+  );
+  foreach ($fields as $key => $field) {
+    if (!db_field_exists('prevan_sequence', $key)) {
+      db_add_field('prevan_sequence', $key, $field);
+    }
+  }
+}

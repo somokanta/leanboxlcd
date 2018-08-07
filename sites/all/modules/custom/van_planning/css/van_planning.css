@@ -1,0 +1,21 @@
+#van-planning-group table .radio input[type="radio"] {
+    display: none;
+}
+
+#van-planning-group .table thead tr td:first-child,
+#van-planning-group .table thead tr th:first-child, 
+#van-planning-group .table tbody tr td:first-child,
+#van-planning-group .table tbody tr th:first-child{
+    max-width: 10px;
+}
+.hide_prev_checkbox td:first-child label{
+    display: none;
+}
+.pb_reset_div {
+  margin-top: 23px;
+  display: inline-block;
+  float: left;
+}
+.van-planning-popup-screen .pb_reset_div {
+  float: none;
+}

@@ -311,30 +311,30 @@ function change_feeds_import_insert_data_in_custom_billing_table($billing_data_r
   $user_id = $user->uid;
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
 
-  /* $query = db_select('node', 'n');
-    $query->condition('n.uid', $distributor_id);
-    $query->condition('n.type', 'pdd_master');
-    $query->fields('n', array('nid'));
-    $pdd_value_result = $query->execute()->fetchCol();
-    $pdd_data = node_load($pdd_value_result[0]);
-    $pdd_value = $pdd_data->field_pdd[LANGUAGE_NONE][0]['value'];
-    $weekly = $pdd_data->field_day[LANGUAGE_NONE];
-    foreach ($weekly as $key => $val) {
-    $weeklyoff[] = $val['value'];
-    }
-
-    $query = db_select('node', 'n');
-    $query->condition('n.uid', $distributor_id);
-    $query->condition('n.type', 'holiday_master');
-    $query->leftjoin('field_data_field_holiday', 'hday', 'hday.entity_id = n.nid');
-    $query->addExpression("DATE_FORMAT(FROM_UNIXTIME(hday.field_holiday_value), '%Y-%m-%d')", 'hdate');
-    $holiday_result = $query->execute()->fetchCol();
-   */
-
+  // For weight and volume calculation
+  $unique_skus = array_unique(array_map(function($elem){return $elem['sku7_code'];}, $billing_data_result));
+  $sku_wt_vl = get_weight_volume_by_skus($unique_skus,$distributor_id);
+  
   foreach ($billing_data_result as $key => $data) {
-//    $billing_date_stamp = $data['bill_date'];
-//    $pdd = holiday_get_working_day($billing_date_stamp, $pdd_value, $holiday_result, $weeklyoff);
-// 
+    // For weight and volume calculation
+    $sku_wt = $data['Sum_of_NET_SALES_KGS'];
+    if(empty($sku_wt)){
+      $sku_wt = $sku_wt_vl[$data['sku7_code']]['weight'] ?
+                ($sku_wt_vl[$data['sku7_code']]['weight'] * $data['Sum_of_TOTAL_SALES_QTY']) :
+                (
+                  ($data['Sum_of_TOTAL_SALES_QTY'] *($data['tur'] ? $data['tur'] : $data['mrp'] * .9)) /
+                   $sku_wt_vl[$data['sku7_code']]['rs_per_kg']
+                );
+    }
+    
+    $sku_vl = $sku_wt_vl[$data['sku7_code']]['volume'] ?
+              ($sku_wt_vl[$data['sku7_code']]['volume'] * $data['Sum_of_TOTAL_SALES_QTY']) :
+              (
+                ($data['Sum_of_TOTAL_SALES_QTY'] *($data['tur'] ? $data['tur'] : $data['mrp'] * .9)) /
+                 $sku_wt_vl[$data['sku7_code']]['rs_per_cft']
+              );
+    //END
+    
     $loading_date = strtotime($data['loading_date']);
     $billing_date = strtotime($data['bill_date']);
     try {
@@ -369,6 +369,8 @@ function change_feeds_import_insert_data_in_custom_billing_table($billing_data_r
             'Sum_of_OTHER_DISCOUNT' => $data['Sum_of_OTHER_DISCOUNT'],
             'Sum_of_TAX_PERCENTAGE' => $data['Sum_of_TAX_PERCENTAGE'],
             //'promise_date'=> $pdd,
+            'Derived_NET_SALES_KGS' => $sku_wt ? round($sku_wt,2) : 0,
+            'Derived_NET_SALES_VOLUME' => $sku_vl ? round($sku_vl,2) : 0,
             'distributor_id' => $distributor_id,
             'created_date' => $created_date,
           ))
