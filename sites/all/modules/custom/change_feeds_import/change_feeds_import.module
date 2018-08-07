@@ -1545,7 +1545,8 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
 //         foreach ($product_list as $key => $val) {
 //            $product_list_array[] = strtolower(trim($val));
 //         }
-      $sku = $entity->field_sku7_code['und'][0]['value'];
+      //$sku = $entity->field_sku7_code['und'][0]['value'];
+      $sku = $entity->title;
       $product_name = $entity->field_product_name['und'][0]['value'];
       $product_name = explode(" ", $product_name);
       $product_name_first_word = trim($product_name[0]);
@@ -1557,6 +1558,161 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
         $entity->feeds_item->skip = TRUE;
       }
     }
+    
+    //columns validation
+
+    $col_sku_wt = $item['sku weight'];
+    if(!empty($col_sku_wt)) {
+      if(!is_numeric($col_sku_wt)) {
+        drupal_set_message("Please enter correct sku weight for sku $sku", 'error');
+        $entity->feeds_item->skip = TRUE;
+      }
+    }
+    
+    $col_carton_len = $item['carton length (ft)'];
+    if(!empty($col_carton_len)) {
+      if(!is_numeric($col_carton_len)) {
+        drupal_set_message("Please enter correct carton length for sku $sku", 'error');
+        $entity->feeds_item->skip = TRUE;
+      }
+    }
+    
+    $col_carton_bh = $item['carton breadth (ft)'];
+    if(!empty($col_carton_bh)) {
+      if(!is_numeric($col_carton_bh)) {
+        drupal_set_message("Please enter correct carton breadth for sku $sku", 'error');
+        $entity->feeds_item->skip = TRUE;
+      }
+    }
+    
+    $col_carton_ht = $item['carton height (ft)'];
+    if(!empty($col_carton_ht)) {
+      if(!is_numeric($col_carton_ht)) {
+        drupal_set_message("Please enter correct carton height for sku $sku", 'error');
+        $entity->feeds_item->skip = TRUE;
+      }
+    }
+    
+    $col_carton_vol = $item['carton volume (cft)'];
+    if(!empty($col_carton_vol)) {
+      if(!is_numeric($col_carton_vol)) {
+        drupal_set_message("Please enter correct carton volume for sku $sku", 'error');
+        $entity->feeds_item->skip = TRUE;
+      }
+    }
+    
+    $col_carton_wt = $item['carton weight (kgs)'];
+    if(!empty($col_carton_wt)) {
+      if(!is_numeric($col_carton_wt)) {
+        drupal_set_message("Please enter correct carton weight for sku $sku", 'error');
+        $entity->feeds_item->skip = TRUE;
+      }
+    }
+    
+    // If empty anyone column and other are not in length, breadth and height
+    if(empty($col_carton_len) && (!empty($col_carton_bh) || !empty($col_carton_ht))) {
+      drupal_set_message("Please enter carton length for sku $sku", 'error');
+      $entity->feeds_item->skip = TRUE;
+    }
+    else if(empty($col_carton_bh) && (!empty($col_carton_len) || !empty($col_carton_ht))) {
+      drupal_set_message("Please enter carton breadth for sku $sku", 'error');
+      $entity->feeds_item->skip = TRUE;
+    }
+    else if(empty($col_carton_ht) && (!empty($col_carton_len) || !empty($col_carton_bh))) {
+      drupal_set_message("Please enter carton height for sku $sku", 'error');
+      $entity->feeds_item->skip = TRUE;
+    }
+    
+    // sub category validation
+    $sub_category = $item['sub category'];
+    $check_sub_category_nid = check_product_sub_category_exist($sub_category, $distributor_id);
+    if(!empty($sub_category)) {
+      if(empty($check_sub_category_nid)) {
+        drupal_set_message("Please enter correct sub category for sku $sku", 'error');
+        $entity->feeds_item->skip = TRUE;
+      }
+      else {
+        $entity->field_sub_category['und'][0]['nid'] = $check_sub_category_nid;
+      }
+    }
+    
+    
+    // Update the sku7 code in SKU7_CODE field
+    $entity->field_sku7_code['und'][0]['value'] = $sku;
+    
+    // code for volume calculation
+    //$sku_vol = $entity->field_sku_volume['und'][0]['value'];
+    $carton_vol = $entity->field_carton_volume['und'][0]['value'];
+    $upc = $entity->field_unit_case_units_['und'][0]['value'];
+    
+    $carton_length = $entity->field_carton_length['und'][0]['value'];
+    $carton_breadth = $entity->field_carton_breadth['und'][0]['value'];
+    $carton_height = $entity->field_carton_height['und'][0]['value'];
+    
+    //if(empty($sku_vol)) {
+    if(!empty($carton_vol)) {
+      $entity->field_sku_volume['und'][0]['value'] = round(($carton_vol / $upc),2);
+    }
+    else {
+      $carton_volume = $carton_length * $carton_breadth * $carton_height;
+      $entity->field_sku_volume['und'][0]['value'] = round(($carton_volume / $upc),2);
+      $entity->field_carton_volume['und'][0]['value'] = $carton_volume;
+    }
+//    }
+//    else {
+//      if(empty($carton_vol)) {
+//        $entity->field_carton_volume['und'][0]['value'] = $sku_vol * $upc;
+//      }
+//    }
+    
+    // code for weight calculation
+    $sku_wt = $entity->field_sku_weight['und'][0]['value'];
+    $carton_wt = $entity->field_carton_weight['und'][0]['value'];
+    
+    if(empty($sku_wt)) {
+      $entity->field_sku_weight['und'][0]['value'] = round(($carton_wt / $upc),2);
+    }
+    else {
+      if(empty($carton_wt)) {
+        $entity->field_carton_weight['und'][0]['value'] = $sku_wt * $upc;
+      }
+    }
+  }
+  
+  if ($entity->feeds_item->id == 'product_sub_category_master') {
+    
+    // columns validation
+    $sub_category = $item['sub category'];
+    $rs_per_kg = $item['rs/kg'];
+    $rs_per_cft = $item['rs/cft'];
+    
+    
+    if(!empty($rs_per_kg)) {
+      if(!is_numeric($rs_per_kg)) {
+        drupal_set_message("Please enter correct rs per kg for sub category $sub_category.", 'error');
+        $entity->feeds_item->skip = TRUE;
+      }
+    }
+    
+    if(!empty($rs_per_cft)) {
+      if(!is_numeric($rs_per_cft)) {
+        drupal_set_message("Please enter correct rs per cft for sub category $sub_category.", 'error');
+        $entity->feeds_item->skip = TRUE;
+      }
+    }
+        // category validation
+    $category = $item['category'];
+    $check_category_nid = check_product_category_exist($category, $distributor_id);
+    if(!empty($category)) {
+      if(empty($check_category_nid)) {
+        drupal_set_message("Please enter correct category for sub category $sub_category", 'error');
+        $entity->feeds_item->skip = TRUE;
+      }
+      else {
+        $entity->field_product_category['und'][0]['nid'] = $check_category_nid;
+      }
+    }
+
   }
 
   if ($entity->feeds_item->id == 'update_hul_updated_address') {
@@ -2005,6 +2161,30 @@ function check_hul_code_exist($title) {
   $query->condition('n.type', 'hul_code_master');
   $query->fields('n', array('uid'));
   $query->condition('n.title', $title);
+  $results = $query->execute()->fetchField();
+  return $results;
+}
+
+/**
+ * 
+ * @param type $title
+ * @return string
+ */
+function check_product_sub_category_exist($title, $distributor_id) {
+  $query = db_select('node', 'n');
+  $query->condition('n.type', 'product_sub_category_master');
+  $query->fields('n', array('nid'));
+  $query->condition('n.title', $title);
+  $query->condition('n.uid', $distributor_id);
+  $results = $query->execute()->fetchField();
+  return $results;
+}
+function check_product_category_exist($title, $distributor_id) {
+  $query = db_select('node', 'n');
+  $query->condition('n.type', 'product_category_master');
+  $query->fields('n', array('nid'));
+  $query->condition('n.title', $title);
+  $query->condition('n.uid', $distributor_id);
   $results = $query->execute()->fetchField();
   return $results;
 }
@@ -3139,6 +3319,7 @@ function hul_code_address_confirmation($form, &$form_state) {
         }
         fclose($handle);
       }
+      $area_code_warning = array();
       foreach ($datas as $item) {
         $party_code = $item['Party Code'];
         $pl_group = $item['PL_GROUP'];
@@ -3151,6 +3332,16 @@ function hul_code_address_confirmation($form, &$form_state) {
            $arugments = '?pl_group=' . urlencode($pl_group) . '&sales_day=' . urlencode($sales_day) . '&beat_name=' . urlencode($beat_name) . '&hul_status=' . urlencode(0);
           $url = $page_url . $arugments;
           drupal_set_message('Please confirm the address for Party Code:  ' . l($party_code . '- (HUL Code:' . $hu_code . ')', $url, array('attributes' => array('target' => '_blank'))), 'error');
+        }
+        if ($hu_code) {
+          if (!in_array($hu_code, $area_code_warning)) {
+            $area_code_warning[] = $hu_code;
+            $area_code_exist = check_area_code_exist_in_hul_code($hu_code);
+            if (empty($area_code_exist)) {
+              $url = 'import/hul_code_area_code_mapping';
+              drupal_set_message("Please link Area Code in Hul Code:".l($hu_code, $url, array('attributes' => array('target' => '_blank'))), 'warning');
+            }
+          }
         }
       }
     }
@@ -3189,4 +3380,47 @@ function check_dispatch_date($trip_id) {
   $query->fields('dd', array('field_dispatch_date_value'));
   $dispatch_date = $query->execute()->fetchField();
   return $dispatch_date;
+}
+
+
+function check_area_code_exist_in_hul_code($hul_code){
+  global $user;
+  $hu_code = '';
+  $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+  if (!empty($hul_code)) {
+        $query = db_select('node', 'hul');
+        $query->condition('hul.type', 'hul_code_master');
+        $query->condition('hul.uid', $distributor_id, '=');
+        $query->fields('ac', array('field_area_code_nid'));
+        $query->condition('hul.title', $hul_code, '=');
+        $query->Join('field_data_field_area_code', 'ac', 'ac.entity_id = hul.nid');
+        $area_code = $query->execute()->fetchField();
+  }
+        return $area_code;
+}
+/**
+ * 
+ * @param type $unique_skus
+ * return skuwise weight volume rs_per_kg and rs_per_cft
+ */
+function get_weight_volume_by_skus($unique_skus, $distributor_id) {
+  $query = db_select('node', 'n');
+  $query->condition('n.type', 'sku7_code_master');
+  $query->condition('n.title', $unique_skus, 'IN');
+  $query->condition('n.uid', $distributor_id);
+  $query->leftjoin('field_data_field_sku_weight', 'fsw', 'fsw.entity_id = n.nid'); //MRC_WEIGHT
+  $query->leftjoin('field_data_field_sku_volume', 'fsv', 'fsv.entity_id = n.nid');
+  $query->leftjoin('field_data_field_sub_category', 'fc', 'fc.entity_id = n.nid');
+  $query->leftjoin('node', 'n1', "n1.nid = fc.field_sub_category_nid and n1.type = 'product_sub_category_master' ");
+
+  $query->leftjoin('field_data_field_rs_kg', 'frk', 'frk.entity_id = n1.nid');
+  $query->leftjoin('field_data_field_rs_cft', 'frc', 'frc.entity_id = n1.nid');
+
+  $query->addField('n', 'title', 'sku7_code');
+  $query->addField('fsw', 'field_sku_weight_value', 'weight');
+  $query->addField('fsv', 'field_sku_volume_value', 'volume');
+  $query->addField('frk', 'field_rs_kg_value', 'rs_per_kg');
+  $query->addField('frc', 'field_rs_cft_value', 'rs_per_cft');
+  $res = $query->execute()->fetchAll(PDO::FETCH_GROUP | PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
+  return $res;
 }

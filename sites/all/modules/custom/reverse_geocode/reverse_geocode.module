@@ -1687,6 +1687,30 @@ function reverse_geocode_node_presave($node) {
 
       } 
     }
+    // Van Planning related Change. Store party pack master Nid
+    if (empty($node->field_pp_master_reference[LANGUAGE_NONE][0]['nid'])) {
+      global $user;
+      if (in_array('leanbox', $user->roles)) {
+        $channel = $node->field_channel['und'][0]['value'];
+        $pl_group = $node->field_pl_group['und'][0]['value'];
+
+        $query = db_select('node', 'n');
+        $query->addTag('node_uid');
+        $query->join('field_data_field_channel', 'ppmch', 'ppmch.entity_id = n.nid');
+        $query->join('field_data_field_pl_group', 'ppmpl', 'ppmpl.entity_id = n.nid');
+        $query->condition('n.type', 'party_pack_master');
+        $query->condition('ppmch.field_channel_value', $channel);
+        $query->condition('ppmpl.field_pl_group_value', $pl_group);
+        //$query->join('field_data_field_pp_sales_day', 'psd', 'psd.entity_id = n.nid');
+        //$query->condition('psd.field_pp_sales_day_value', $updated_day);
+        $query->fields('n', array('nid'));
+        $party_pack_master_nid = $query->execute()->fetchField();
+
+        if (!empty($party_pack_master_nid)) {
+          $node->field_pp_master_reference[LANGUAGE_NONE][0]['nid'] = $party_pack_master_nid;
+        }
+      }
+    }
     
     // code for Updating hul_code_reference field in outlet master type
       $hul_code_data = $node->field_hul_code[LANGUAGE_NONE][0]['value'];

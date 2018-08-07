@@ -1,0 +1,169 @@
+<?php
+
+/**
+ * @file provides the van planning module
+ */
+
+/**
+ * 
+ */
+function van_planning_menu() {
+   $items = array();
+   $items['van-map-planning/%'] = array(
+     'title' => 'Van Map Planning',
+     'page callback' => '_get_van_map_callback',
+     'page arguments' => array(1),
+     'access arguments' => array('dispatch planning screen'),
+     'type' => MENU_NORMAL_ITEM,
+     'file' => 'form/van_map_planning.form.inc',
+   );
+   $items['van-planning'] = array(
+     'title' => 'Van Planning',
+     'page callback' => 'drupal_get_form',
+     'page arguments' => array('_van_planning_callback_form'),
+     'access arguments' => array('dispatch planning screen'),
+     'type' => MENU_NORMAL_ITEM,
+     'file' => 'form/van_planning.form.inc',
+   );
+   $items['outlet-areahookgrp-master/autocomplete'] = array(
+     'title' => '',
+     'page callback' => '_get_outlet_areahookgrp_master_autocomplete',
+     'access callback' => TRUE,
+     'type' => MENU_CALLBACK,
+   );
+   $items['areacode-master/autocomplete'] = array(
+     'title' => '',
+     'page callback' => '_get_areacode_master_autocomplete',
+     'access callback' => TRUE,
+     'type' => MENU_CALLBACK,
+   );
+   $items['plgroup-master/autocomplete'] = array(
+     'title' => '',
+     'page callback' => '_get_plgroup_master_autocomplete',
+     'access callback' => TRUE,
+     'type' => MENU_CALLBACK,
+   );
+   $items['vanplgroup-master/autocomplete'] = array(
+     'title' => '',
+     'page callback' => '_get_vanplgroup_master_autocomplete',
+     'access callback' => TRUE,
+     'type' => MENU_CALLBACK,
+   );
+   $items['hht-id-master/autocomplete'] = array(
+    'title' => 'hht_id_master_autocomplete',
+    'page callback' => 'hht_id_master_autocomplete',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+   $items['pending-summary'] = array(
+    'title' => 'Pending Summary',
+    'page callback' => array('pending_summary_callback'),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'form/pending_summary.inc',
+  );
+   return $items;
+}
+
+/**
+ * 
+ * @param type $string
+ */
+function _get_areacode_master_autocomplete($string = '') {
+   $result = array();
+
+   if ($string) {
+      $query = db_select('node', 'n');
+      $query->condition('n.type', 'area_code_master');
+      $query->addField('n', 'title', 'area_code');
+      $query->condition('n.title', db_like($string) . '%', 'LIKE');
+      $query->fields('n', array('title'));
+      $query->range(0, 15);
+      $query->addTag('node_distributor_access');
+      $result = $query->execute()->fetchAllKeyed(0, 0);
+   }
+
+   drupal_json_output($result);
+}
+
+/**
+ * 
+ * @param type $string
+ */
+function _get_plgroup_master_autocomplete($string = '') {
+   $result = array();
+
+   if ($string) {
+      $query = db_select('node', 'n');
+      $query->condition('n.type', 'party_pack_master');
+      $query->join('field_data_field_pl_group', 'vpg', 'vpg.entity_id = n.nid');
+      $query->groupBy('vpg.field_pl_group_value'); // group by Pl Group
+      $query->condition('vpg.field_pl_group_value', db_like($string) . '%', 'LIKE');
+      $query->fields('vpg', array('field_pl_group_value'));
+      $query->range(0, 15);
+      $query->addTag('node_distributor_access');
+      $result = $query->execute()->fetchAllKeyed(0, 0);
+   }
+   drupal_json_output($result);
+}
+
+/**
+ * 
+ * @param type $string
+ */
+function _get_vanplgroup_master_autocomplete($string = '') {
+   $result = array();
+
+   if ($string) {
+      $query = db_select('node', 'n');
+      $query->condition('n.type', 'party_pack_master');
+      $query->join('field_data_field_van_pl_group', 'vpg', 'vpg.entity_id = n.nid');
+      $query->groupBy('vpg.field_van_pl_group_value'); // group by van Pl Group
+      $query->condition('vpg.field_van_pl_group_value', db_like($string) . '%', 'LIKE');
+      $query->fields('vpg', array('field_van_pl_group_value'));
+      $query->range(0, 15);
+      $query->addTag('node_distributor_access');
+      $result = $query->execute()->fetchAllKeyed(0, 0);
+   }
+   drupal_json_output($result);
+}
+
+/**
+ * 
+ * @param type $string
+ */
+function _get_outlet_areahookgrp_master_autocomplete($string = '') {
+   $result = array();
+
+   if ($string) {
+      $query = db_select('node', 'n');
+      $query->condition('n.type', 'day_van_pl_gp_area_hook_grouping'); //field_dva_area_hook_group_name
+      //new
+      $query->join('field_data_field_dva_area_hook_group_name', 'ah', 'ah.entity_id = n.nid');// Wrong join pcr.entity_id
+      $query->condition('ah.field_dva_area_hook_group_name_value', db_like($string) . '%', 'LIKE');
+      $query->fields('ah', array('field_dva_area_hook_group_name_value'));
+      $query->range(0, 15);
+      $query->addTag('node_distributor_access');
+      $result = $query->execute()->fetchAllKeyed(0, 0);
+   }
+   drupal_json_output($result);
+}
+
+
+/**
+ * 
+ * @param type $string
+ */
+function hht_id_master_autocomplete($string = '') {
+   $result = array();
+
+   if ($string) {
+      $query = db_select('node', 'n');
+      $query->condition('n.type', 'hht_master');
+      $query->fields('n', array('title'));
+      $query->condition('n.title', db_like($string) . '%', 'LIKE');
+      $query->addTag('node_distributor_access');
+      $result = $query->execute()->fetchAllKeyed(0, 0);
+   }
+   drupal_json_output($result);
+}

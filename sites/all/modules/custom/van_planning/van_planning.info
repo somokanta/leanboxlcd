@@ -1,0 +1,4 @@
+name = Van Planning
+description = Van planning module.
+package = Custom
+core = 7.x

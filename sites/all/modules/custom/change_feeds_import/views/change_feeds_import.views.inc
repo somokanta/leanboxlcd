@@ -860,6 +860,34 @@ function change_feeds_import_views_data() {
       'handler' => 'views_handler_filter_numeric',
     ),
   );
+  
+  $data['custom_billing_data']['Derived_NET_SALES_KGS'] = array(
+    'title' => t('Derived_NET_SALES_KGS'),
+    'help' => t('The record Derived_NET_SALES_KGS.'),
+    'field' => array(
+      'handler' => 'views_handler_field_numeric',
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_numeric',
+    ),
+  );
+  
+  $data['custom_billing_data']['Derived_NET_SALES_VOLUME'] = array(
+    'title' => t('Derived_NET_SALES_VOLUME'),
+    'help' => t('The record Derived_NET_SALES_VOLUME.'),
+    'field' => array(
+      'handler' => 'views_handler_field_numeric',
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_numeric',
+    ),
+  );
 
   $data['custom_billing_data']['Sum_of_SCHEME_DISCOUNT'] = array(
     'title' => t('Sum_of_SCHEME_DISCOUNT'),
