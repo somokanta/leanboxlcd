@@ -1284,3 +1284,22 @@ function change_feeds_import_update_7116() {
     db_add_index('field_data_field_deliveries_per_stop', 'n_field_deliveries_per_stop_value', array('field_deliveries_per_stop_value'));
   }
 }
+// Two new field of derived weight and volume
+function change_feeds_import_update_7117() {
+  $fields = array(
+      'Derived_NET_SALES_KGS' => array(
+        'description' => 'Derived NET_SALES_KGS',
+        'type' => 'float',
+      ),
+      'Derived_NET_SALES_VOLUME' => array(
+        'description' => 'Derived NET_SALES_VOLUME',
+        'type' => 'float',
+      ),
+
+  );
+  foreach ($fields as $key => $field) {
+    if (!db_field_exists('custom_billing_data', $key)) {
+      db_add_field('custom_billing_data', $key, $field);
+    }
+  }
+}
