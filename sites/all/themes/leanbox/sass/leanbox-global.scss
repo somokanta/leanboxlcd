@@ -1648,3 +1648,274 @@ header[id="page-header"] {
     }
   }
 }
+.common_form_wrap{
+  .bill_table{
+    input[type="text"], 
+    input[type="password"], 
+    input[type="email"], select, 
+    select.form-select,
+    .form-text{
+      max-width: 110px;
+    }
+    .select-all{
+      min-width: 10px;
+    }
+    tbody{
+      td{
+        &:first-child{
+          min-width:10px;
+        }
+      }
+    }
+  }
+}
+#van-itemlist-div{
+  #van-planning-screen{
+    border: 1px solid #ccc;
+    margin-bottom: 20px;
+    padding:10px;
+
+    .form-item-bill-date {
+      .date-padding{
+        label{
+          display: none;
+        }
+      }
+    }
+  }
+  #van-planning-group{
+    border: 1px solid #ccc;
+    padding:10px;
+
+    .vehicle-data{
+      margin: 20px 0 0 0;
+    }
+  }
+  .form_row{
+    margin: 0 -10px 15px -10px;
+
+    @media (max-width: 1160px) {
+      margin: 0 -8px 15px -8px;
+    }
+    @media (max-width: 1130px) {
+      margin: 0 -5px 15px -5px;
+    }
+
+    &:before, &:after{
+      content:'';
+      display: table;
+    }
+    &:after{
+      clear: both;
+    }
+  }
+  .form-item{
+    width: 12.5%;
+    float: left;
+    padding: 0 10px;
+    margin: 0;
+    position: relative;
+
+    @media (max-width: 1160px) {
+      padding: 0 8px;
+    }
+    @media (max-width: 1130px) {
+      padding: 0 5px;
+    }
+    label{
+      @media (max-width: 1320px) {
+        font-size: 12px;
+      }
+      @media (max-width: 1085px) {
+        font-size:11px;
+      }
+    }
+    &.form-type-radio, &.form-type-checkbox{
+      width: auto;
+    }
+  }
+  .form-autocomplete_fields{
+    .form-item{
+      width: auto;  
+      padding: 0;   
+      
+      input{
+        width: 120px;
+      }
+    }
+  }
+  .vp_final_editable_element{
+    .form-item{
+      width: auto;
+      max-width: 120px;
+      padding: 0;
+    }
+  }
+  .container-inline-date{
+    width: 12.5%;
+    float: left;
+    clear: none;
+    padding: 0 10px;
+
+    .form-item{
+      width: 100%;
+      padding: 0;
+      border: 0;
+
+      input{
+        width: 100%;
+      }
+    }
+  }
+  .btn{
+    margin-top: 0;
+  }
+  .table{
+    .bill_no_val, .bill_group_data{
+      display: none;
+    }
+    thead, tbody{
+      tr{
+        td, th{
+          &:first-child{
+            min-width:10px;
+          }
+        }
+      }
+    }
+  }
+  input[type="text"], 
+  input[type="password"], 
+  input[type="email"], 
+  select, 
+  select.form-select{
+    border: 1px solid #999;
+  }
+  #show_in_popup{
+    .form-item{
+      width: 100%;
+      padding: 0;
+      margin-bottom: 10px;
+    }
+    .pop_content{
+      width: 35%;
+
+      .btn{
+        margin-bottom: 0;
+      }
+    }
+  }
+  .van-planning-popup-screen{
+    .form_row{
+      margin-bottom: 0;
+    }
+    .form-item{
+      width: 12.4%;
+      float: none;
+      display: inline-block;
+      vertical-align: bottom;
+      margin-bottom: 15px;
+
+      label{
+        font-size: 11px;
+      }
+    }
+    .container-inline-date{
+    	width: 12.4%;
+	    float: none;
+	    display: inline-block;
+	    vertical-align: bottom;
+	    margin-bottom: 15px;
+
+    	.form-item{
+    		width: 100%;
+    		padding: 0;
+    		border: 0;
+    		margin: 0;
+    	}
+    }
+    .bill-edit{
+      margin-bottom: 15px;
+
+      .form-item{
+        margin: 0;
+      }
+      .table{
+        margin-bottom: 10px;
+        > thead, > tbody{
+          > tr{
+            > th, > td{
+              min-width: 40px;
+              padding: 4px;
+              font-size: 11px;
+            }
+          }
+        }
+      }
+    }
+  }
+  #van-table-div, .van-edit{
+    margin-bottom: 15px;
+  }
+  .trip-date-details{
+    padding: 20px 0;
+    clear: both;
+    width: 100%;
+    display: block;
+
+    &:before, &:after{
+      content:'';
+      display: table;
+    }
+    &:after{
+      clear: both;
+    }
+  }
+}
+.popup_border{
+  border: 1px solid #ccc;
+  padding:10px;
+}
+.popup_overlay{
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  background: #000000;
+  opacity: .6;
+  filter: alpha(opacity=6);
+  -moz-opacity: .6;
+  z-index: 101;
+}
+.popup_wrap{
+  width: 100%;
+  height: 100%;
+  position: fixed;
+  top:20%;
+  z-index: 102;
+  text-align: center;
+  left: 0;
+}
+.pop_content{
+  padding:20px;
+  position: relative;
+  text-align: left;
+  background:#fff;
+  width:80%;
+  max-height: 400px;
+  margin: 0 auto;
+  overflow: auto;
+
+  &:before, &:after{
+    content:'';
+    display: table;
+  }
+  &:after{
+    clear: both;
+  }
+}
