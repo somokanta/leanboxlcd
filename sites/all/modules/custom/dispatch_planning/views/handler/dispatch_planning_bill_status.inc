@@ -12,6 +12,7 @@ class dispatch_planning_bill_status extends views_handler_filter_in_operator {
     //$field = field_info_field($this->definition['field_name']);
     $field = field_info_field('field_reason_type');
     $allowed_values = list_allowed_values($field);
+    unset($allowed_values['delivery_pending']);// This status is not present in farEye
 //    $this->value_options = array(
 //          // Put the list of your states/province/departments or whatever here.
 //          // These are just examples

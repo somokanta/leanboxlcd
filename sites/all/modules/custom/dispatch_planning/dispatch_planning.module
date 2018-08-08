@@ -84,6 +84,23 @@ function dispatch_planning_menu() {
     'file' => 'partial_return_printout.inc',
   );
   
+  $items['delivery-pending-printout'] = array(
+    'title' => 'Delivery Pending Printout',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('get_data_of_delivery_pending_form'),
+    'access arguments' => array('Distributor Upload File'),
+    'file' => 'delivery_pending_printout.inc',
+  );
+  $items['download-delivery-pending/%/%'] = array(
+    'title' => 'Download Delivery Pending',
+    'page callback' => 'download_delivery_pending',
+    'page arguments' => array(1,2),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'delivery_pending_printout.inc',
+  );
+  
+  
   $items['download-partial-return/%'] = array(
     'title' => 'Download Partial Return',
     'page callback' => 'download_partial_return',
@@ -188,6 +205,16 @@ function dispatch_planning_menu() {
       // 'admin/config/system/foo', if not specified here to override.
       // Need to add access callback or access arguments.
   );
+  // Need separate menu without tab.
+  $items['admin/dispatch_planning/delivery_pending'] = array(
+    'title' => 'Delivery Pending',
+    'type' => MENU_NORMAL_ITEM,
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('delivery_pending_form'),
+    'access arguments' => array('dispatch planning screen'),
+    'file' => 'delivery_pending.form.inc',
+  );
+  
   $items['admin/dispatch-planning/api-url'] = array(
     'title' => 'API URL',
     'type' => MENU_LOCAL_TASK,
@@ -216,10 +243,17 @@ function dispatch_planning_menu() {
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
-  $items['bill/pending/autocomplete'] = array(
-    'title' => 'bill_autocomplete',
-    'page callback' => 'bill_autocomplete',
-    'page arguments' => array(4, 3),
+  
+  $items['dp_trip/autocomplete'] = array(
+    'title' => 'trip_autocomplete',
+    'page callback' => 'dp_trip_id_autocomplete',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  $items['bill/pending/autocomplete/%'] = array(
+    'title' => 'bill_pending_autocomplete',
+    'page callback' => 'bill_pending_autocomplete',
+    'page arguments' => array(3),
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
@@ -459,6 +493,21 @@ function dispatch_planning_menu() {
     'page arguments' => array('get_data_of_asset_summary_return_form'),
     'access arguments' => array('Distributor Upload File'),
     'file' => 'asset_summary_return_printout.inc',
+  );
+ 
+  $items['delivery-summary-printout'] = array(
+    'title' => 'Delivery Summary Printout',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('get_data_of_delivery_summary_return_form'),
+    'access arguments' => array('Distributor Upload File'),
+    'file' => 'delivery_summary_return_printout.inc',
+  );
+  
+  $items['get_bank_names/autocomplete'] = array(
+      'title' => 'Autocomplete for Bank Names',
+      'page callback' => '_get_bank_names',
+      'access arguments' => array('returns confirmation'),  //or whatever permission makes sense
+      'type' => MENU_CALLBACK,
   );
   
   return $items;
@@ -1548,13 +1597,39 @@ function bill_number_ajax_submit($form, &$form_state) {
 //}
 
 function remove_selected_ajax_submit($form, &$form_state) {
-
+  $rows = $form_state['input']['list_form_items'];
   $checked = array_filter($form_state['values']['list_form_items']);
-
+  if (!empty($rows)) {
+    foreach ($rows as $key => $value) {
+      foreach ($form_state['dispatch_planning']['bills'][$key]['delivery_pending']['data'][$key] as $k => &$v) {
+                       if ($v['#name'] == "delivery_pending[$key]") {
+                        $v['#value'] = $form_state['input']['delivery_pending'][$key];
+                    
+           }
+       } 
+    }
+  }
   if (!empty($checked)) {
     $form_state['dispatch_planning']['bills'] = array_diff_key($form_state['dispatch_planning']['bills'], array_flip($checked));
   }
   $form_state['rebuild'] = TRUE;
+}
+
+// function get cashier name of trips
+function get_trip_cashiers($trip_ids,$bills_numbers) {
+    $res = array();
+   if (!empty($trip_ids) && !empty($bills_numbers)) {
+        global $user;
+        $user_id = $user->uid;
+        $distributor_id = change_feeds_import_get_distributor_id($user_id);
+        $query = db_select('dispatch_planning_api_data', 'ad');
+        $query->fields('ad', array('runsheet_number','bill_number','fieldExecutiveName'));
+        $query->condition('ad.runsheet_number', $trip_ids,'IN');
+        $query->condition('ad.bill_number', $bills_numbers,'IN');
+        $query->condition('ad.distributor_id', $distributor_id);
+        $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+   }
+    return $res;
 }
 
 function dispatch_planning_form_save_validate($form, &$form_state) {
@@ -1569,11 +1644,47 @@ function dispatch_planning_form_save_validate($form, &$form_state) {
   $vehicle_number = trim($form_state['values']['vehicle_number']);
   $trip_execution_date = strtotime($form_state['values']['trip_execution_date']);
   $hht_id = trim($form_state['values']['hht_id']);
-  
+  $mess = '';
+  $cashier_lower = strtolower($cashier);
+  $vehicle_number_lower = strtolower($vehicle_number);
+  if($vehicle_number_lower == 'handover' && $cashier_lower != 'handover') {
+       $mess .= t('Please select cashier name as Handover.' ).'<br>';
+  }
+  elseif($vehicle_number_lower != 'handover' && $cashier_lower == 'handover') {
+       $mess .= t(' Please select Vehicle Number as Handover.' ).'<br>';
+  }
+  // handover validation
+  elseif($vehicle_number_lower == 'handover' && $cashier_lower == 'handover') {
+      // handover trip validation. handover trip bill number should be belongs to  same cashier
+      $bills_nids = array_keys($rows);
+      $sales_register_nodes = node_load_multiple($bills_nids);
+      $hand_over_bills = array();
+      $bills_previous_trips = array();
+      foreach($rows as $key=>$val) {
+          if (!empty($sales_register_nodes[$key]->field_previous_trip[LANGUAGE_NONE][0]['value'])) {
+                $bills_previous_trips[] = $sales_register_nodes[$key]->field_previous_trip[LANGUAGE_NONE][0]['value'];
+                $hand_over_bills[$sales_register_nodes[$key]->title] = $sales_register_nodes[$key]->title;
+          }
+          else {
+              $mess .= t('Bill number: '. $sales_register_nodes[$key]->title.' does not belong to any Cashier.You can not add it to a Handover Trip.').'<br>';
+          }
+      }
+      $handover_bills_details = get_trip_cashiers($bills_previous_trips,$hand_over_bills);
+      $previous_trip_cashier = array();
+      if (!empty($handover_bills_details)) { 
+          foreach($handover_bills_details as $hand_value) {
+                 $previous_trip_cashier[strtolower($hand_value['fieldExecutiveName'])] = strtolower($hand_value['fieldExecutiveName']);
+                 if (count($previous_trip_cashier)>1){
+                     $mess .= t('Bill number: '. $hand_value['bill_number'].' belong to  cashier:'.$hand_value['fieldExecutiveName']).'<br>';
+                 }
+          }
+      }
+  }
+  if (!empty($mess)) {
+          form_set_error('list_form_items', $mess);
+  }
   $skip_sequencing = $form_state['values']['skip_sequencing'];
-  
   $bill_nids = array_keys($rows);
-
   $today = strtotime(date('Y-m-d 00:00:00'));
 
   if ($trip_execution_date < $today) {
@@ -1744,11 +1855,11 @@ function dispatch_planning_form_save_validate($form, &$form_state) {
     $routific_options = array('headers' => $request_headers, 'method' => 'POST', 'data' => $Locations_data);
 
     $response_data = drupal_http_request($roitufic_api_url, $routific_options);
-    dpm($response_data,'API RESPONSE');
+    //dpm($response_data,'API RESPONSE');
     $response_data = json_decode($response_data->data);
 
     if ($response_data->num_unserved) {
-      dpm($response_data->unserved,'unserved');
+      //dpm($response_data->unserved,'unserved');
     }
     if ($response_data->status === 'success') {
       $response_array = $response_data->solution->origin;
@@ -1926,7 +2037,7 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
   drupal_set_message('Successfully updated. Trip id ' . $trip_id);
 }
 
-function get_bill_info($bill_number, $van = NULL, $loading_date = NULL, $beat_name = NULL, $trip_id = NULL, $delivery_pending = NULL) {
+function get_bill_info($bill_number, $van = NULL, $loading_date = NULL, $beat_name = NULL, $trip_id = NULL, $delivery_pending = NULL,$res_status = NULL) {
 
   global $user;
   $user_id = $user->uid;
@@ -1987,6 +2098,20 @@ function get_bill_info($bill_number, $van = NULL, $loading_date = NULL, $beat_na
   if (!is_null($loading_date)) {
     $query->condition('field_billing_loading_date_value', $loading_date);
   }
+  // This is for delivery pending screen, fetch bills status full return and blank
+  if (!empty($res_status)) {
+       $query->join('dispatch_planning_api_data', 'ad', 'n.title = ad.bill_number AND n.uid = ad.distributor_id');
+       $query->condition('ad.delivery_pending_flag',1, '!=');
+       // This will enable later on after delivery confirmation flag -1. delivery confirmation
+       $query->leftjoin('field_data_field_vrs_status', 'vs', 'vs.entity_id = nt.nid');
+       $query->condition('vs.field_vrs_status_value', '-1', '=');
+       $db_or = db_or();
+       $db_or->condition('ad.res_status', NULL);
+       $db_or->condition('ad.res_status', '');
+       $db_or->condition('ad.res_status', 'undeliver');
+       $query->condition($db_or);
+  }
+  
 
   if (!is_null($trip_id)) {
     $query->condition('nt.title', $trip_id);
@@ -2128,9 +2253,44 @@ function bill_autocomplete($string = '', $delivery_pending = NULL) {
   drupal_json_output($result);
 }
 
+function bill_pending_autocomplete($trip_id,$string = '') {
+  $result = array();
+  global $user;
+  $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+  $res_status = array('undeliver','');
+  if (!empty($trip_id)) {
+    $node_obj = node_load_multiple(NULL, array('title' =>$trip_id, 'type' => 'dispatch_data','uid' => $distributor_id));
+    $trip_nid = key($node_obj);
+  }
+  if (!empty($string) && !empty($trip_nid)) {
+    $query = db_select('node', 'n');
+    $query->join('field_data_field_billing_loading_date', 'ld', 'n.nid = ld.entity_id');
+    $query->join('field_data_field_trip_id_reference', 'ft', 'ft.entity_id = n.nid');
+    $query->join('dispatch_planning_api_data', 'ad', 'ad.bill_number = n.title');
+    $query->condition('n.title', db_like($string) . '%', 'LIKE');
+    $query->condition('n.type', 'sales_register_data');
+    $query->condition('ad.distributor_id', $distributor_id);
+    $query->condition('ad.delivery_pending_flag', 1,'!=');
+    // This is for delivery pending screen, fetch bills status full return and blank
+    $db_or = db_or();
+    $db_or->condition('ad.res_status', NULL);
+    $db_or->condition('ad.res_status', '');
+    $db_or->condition('ad.res_status', 'undeliver');
+    $query->condition($db_or);
+    if (!empty($trip_nid)) {
+        $query->condition('ft.field_trip_id_reference_nid',$trip_nid);
+        $query->leftjoin('field_data_field_vrs_status', 'vs', 'vs.entity_id = ft.field_trip_id_reference_nid');
+        $query->condition('vs.field_vrs_status_value', '-1', '=');
+    }
+    $query->fields('n', array('title'));
+    $query->addTag('node_distributor_access');
+    $result = $query->execute()->fetchAllKeyed(0, 0);
+  }
+  drupal_json_output($result);
+}
+
 function trip_id_autocomplete($string = '') {
   $result = array();
-
   if ($string) {
     $query = db_select('node', 'n');
     $query->condition('n.title', db_like($string) . '%', 'LIKE');
@@ -2139,8 +2299,8 @@ function trip_id_autocomplete($string = '') {
     $query->range(0, 15);
     $query->addTag('node_distributor_access');
     $result = $query->execute()->fetchAllKeyed(0, 0);
+    
   }
-
   drupal_json_output($result);
 }
 
@@ -2162,6 +2322,26 @@ function vrswise_trip_id_autocomplete($string = '') {
 
   drupal_json_output($result);
 }
+
+function dp_trip_id_autocomplete($string = '') {
+  $result = array();
+  global $user;
+  $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+  if (!empty($string) ){
+    $query = db_select('node', 'n');
+    $query->condition('n.title', db_like($string) . '%', 'LIKE');
+    $query->condition('n.type', 'dispatch_data');
+    $query->join('dispatch_planning_api_data', 'ad', 'ad.runsheet_number = n.title');
+    $query->leftjoin('field_data_field_vrs_status', 'vs', 'vs.entity_id = n.nid');
+    $query->condition('vs.field_vrs_status_value', -1);
+    $query->fields('n', array('title'));
+    $query->condition('ad.distributor_id', $distributor_id);
+    $query->condition('n.uid', $distributor_id);
+    $result = $query->execute()->fetchAllKeyed(0, 0);
+  }
+  drupal_json_output($result);
+}
+
 
 function _get_header_sort($array, $field_name, $order) {
   if ($order == 'asc') {
@@ -2594,20 +2774,23 @@ function received_assets_validation_callback($form, &$form_state) {
         $trip_detail = check_trip_id_exists_or_not($dis_id, $trip_id);
         $vrs_status = $trip_detail->field_vrs_status_value;
 
-        if($vrs_status == 1) {
-          form_set_error('form', t("You cannot edit because this trip:$trip_id is returns confirmed."));
+        if ($vrs_status == 0) {
+          drupal_set_message(t('Trip is already in returns confirmation pending status.'), 'error');
         }
-        else if($vrs_status == 2) {
-          form_set_error('form', t("You cannot edit because this trip:$trip_id is VRS confirmed."));
+        if ($vrs_status == 1) {
+          drupal_set_message(t('Trip is already in returns confirmed status.'), 'error');
         }
-        else if($vrs_status == 3) {
-          form_set_error('form', t("You cannot edit because this trip:$trip_id is VRS pending."));
+        else if ($vrs_status == 2) {
+          drupal_set_message(t('Trip is already in VRS confirmed status.'), 'error');
         }
-        else if($vrs_status == 4) {
-          form_set_error('form', t("You cannot edit because this trip:$trip_id is Handover pending."));
+        else if ($vrs_status == 3) {
+          drupal_set_message(t('Trip is already in VRS pending status.'), 'error');
         }
-        else if($vrs_status == 5) {
-          form_set_error('form', t("You cannot edit because this trip:$trip_id is Handover confirmed."));
+        else if ($vrs_status == 4) {
+          drupal_set_message(t('Trip is already in Handover pending status.'), 'error');
+        }
+        else if ($vrs_status == 5) {
+          drupal_set_message(t('Trip is already in Handover confirmed status.'), 'error');
         }
     } 
     else {
@@ -3247,7 +3430,9 @@ function _get_all_tripsbill($trip_id, $string = '') {
   if (!empty($trip_id) && !empty($string)) {
     $query = db_select('dispatch_planning_api_data', 'ad');
     $query->condition('ad.runsheet_number' , $trip_id);
-    $query->condition('ad.bill_number' ,  '%' . db_like($string) . '%', 'LIKE');
+     $query->condition('ad.bill_number' ,  '%' . db_like($string) . '%', 'LIKE');
+    //not required delivery pending bills of that trip
+    $query->condition('ad.delivery_pending_flag' ,1,'!=');
     $query->condition('ad.hub' , $rs_code);
     $query->fields('ad', array('bill_number'));
     $query->range(0, 15);
@@ -3320,6 +3505,7 @@ function get_full_return_data_from_trip_id($trip_id) {
   $rs_code = dispatch_planning_get_rscode_using_uid($user_id);
   $query1 = db_select('dispatch_planning_api_data', 'ad');
   $query1->condition('ad.runsheet_number', $trip_id, "=");
+  $query1->condition('ad.delivery_pending_flag', 1, "!=");
   $query1->condition('ad.res_status','undeliver', "=");
   $query1->condition('ad.hub',$rs_code, "=");
   $query1->addExpression("COUNT(DISTINCT ad.bill_number)", 'bill_number');
@@ -3349,6 +3535,7 @@ function get_partial_popup_return_data_from_trip_id($trip_id) {
   $user_id = $GLOBALS['user']->uid;
   $rs_code = dispatch_planning_get_rscode_using_uid($user_id);
   $query1 = db_select('dispatch_planning_api_data', 'ad');
+  $query1->condition('ad.delivery_pending_flag', 1, "!=");
   $query1->join('dispatch_planning_item_details', 'idt', 'ad.id =idt.trip_bill_reference');
   $query1->condition('ad.runsheet_number', $trip_id, "=");
   
@@ -3369,7 +3556,121 @@ function get_partial_popup_return_data_from_trip_id($trip_id) {
   $query1->condition('ad.hub',$rs_code, "=");
   $query1->addExpression("COUNT(DISTINCT ad.bill_number)", 'bill_number');
   $query1->addExpression("GROUP_CONCAT(DISTINCT ad.bill_number ORDER BY ad.bill_number separator ', ' )", 'bill_number');
-  $query1->fields('ad', array('fieldExecutiveName'));
+  //$query1->fields('ad', array('fieldExecutiveName'));
   $trip_id_result = $query1->execute()->fetchAssoc();
   return $trip_id_result;
+}
+function get_delivery_summary_full_return_reason_header($trip_id) {
+  global $user;
+    $trip_id_result = array();
+    $user_id = $user->uid;
+    $distributor_id = change_feeds_import_get_distributor_id($user_id);
+    if (!empty($trip_id)) {
+        $rs_code = dispatch_planning_get_rscode_using_uid($user_id);
+        $query = db_select('dispatch_planning_api_data', 'ad');
+        $query->condition('ad.delivery_pending_flag', 1, "!=");
+        $query->condition('ad.runsheet_number', $trip_id, "=");
+        $query->condition('ad.res_status','undeliver', "=");
+        $query->isNotNull('ad.res_reason_for_failure');
+        $query->condition('ad.hub',$rs_code, "=");
+        $query->condition('ad.distributor_id',$distributor_id, "=");
+        $query->addExpression("COUNT(DISTINCT ad.bill_number)", 'bill_number');
+        $query->addExpression("GROUP_CONCAT(DISTINCT ad.bill_number ORDER BY ad.bill_number separator ', ' )", 'bill_number');
+        $trip_id_result = $query->execute()->fetchAssoc();
+  }
+  return $trip_id_result;
+}
+
+
+
+
+// Function to return VAN type of a trip
+function get_van_type($trip_id) {
+  if (!empty($trip_id))   {
+      global $user;
+      $user_id = $user->uid;
+      $distributor_id = change_feeds_import_get_distributor_id($user_id);
+      $node_obj = node_load_multiple(NULL, array('title' =>$trip_id, 'type' => 'dispatch_data','uid' => $distributor_id));
+      $trip_nid = key($node_obj);
+      $node = $node_obj[$trip_nid];
+      $selected_option = $node->field_is_party_pack[LANGUAGE_NONE][0]['value'];
+      $field = field_info_field('field_is_party_pack');
+      $allowed_values = list_allowed_values($field);
+  }
+  return $allowed_values[$selected_option];
+}
+
+function get_delivery_pending_data($trip_id) {
+    $trip_id_result = array();
+  if (!empty($trip_id)) {
+    global $user;
+    $user_id = $user->uid;
+    $distributor_id = change_feeds_import_get_distributor_id($user_id);
+    $query = db_select('dispatch_planning_api_data', 'ad');
+    //$query->join('dispatch_planning_item_details', 'idt', 'ad.id =idt.trip_bill_reference');
+    //$query->condition('idt.res_sku_reason','', "!=");
+    $query->condition('ad.runsheet_number', $trip_id, "=");
+    $query->condition('ad.delivery_pending_flag',1);
+    $query->condition('ad.distributor_id',$distributor_id, "=");
+    $query->addExpression("COUNT(DISTINCT ad.bill_number)", 'bill_count');
+    //$bill_count = $query->execute()->fetchField();
+    $query->addExpression("GROUP_CONCAT(DISTINCT ad.bill_number ORDER BY ad.bill_number separator ', ' )", 'bill_number');
+    $query->fields('ad', array('fieldExecutiveName'));
+    $trip_id_result = $query->execute()->fetchAssoc();
+  }
+  return $trip_id_result;
+}
+// get delivery_pending data dispatch date and cashier name
+function get_delivery_pending_header_data($trip_id) {
+    $result = array();
+  if (!empty($trip_id)) {
+    global $user;
+    $user_id = $user->uid;
+    $distributor_id = change_feeds_import_get_distributor_id($user_id);
+    $query = db_select('dispatch_planning_api_data', 'ad');
+    $query->condition('ad.runsheet_number', $trip_id, "=");
+    $query->condition('ad.delivery_pending_flag',1);
+    $query->condition('ad.distributor_id',$distributor_id, "=");
+    $query->fields('ad', array('fieldExecutiveName','date'));
+    $result = $query->execute()->fetchAssoc();
+  }
+  return $result;
+}
+
+function get_distrubutor_name_full_from_user_id($user_id) {
+  $query = db_select('users', 'u');
+  $query->innerjoin('field_data_field_distributor', 'd', 'd.entity_id = u.uid');
+  $query->condition('d.entity_id', $user_id, '=');
+  $query->fields('d', array('field_distributor_value'));
+  $query->innerjoin('field_data_field_name', 'n', 'n.entity_id = d.field_distributor_value');
+  $query->fields('n', array('field_name_value'));
+  $result = $query->execute()->fetchAssoc();
+  $name = $result['field_name_value'];
+  return $name;
+}
+
+function _get_bank_names($string) {
+    $bank_names = array();
+    if (!empty($string)) {
+       $query = db_select('node', 'n');
+       $query->condition('n.type', 'bank_master');
+       $query->condition('n.title', '%'.db_like($string) . '%', 'LIKE');
+       $query->condition('n.status', 1); // publish
+       $query->fields('n', array('title'));
+       $bank_names = $query->execute()->fetchAllKeyed(0,0);
+    }
+    print json_encode($bank_names);
+    exit();
+}
+
+function get_cashier_name($trip_id) {
+  global $user;
+  $user_id = $user->uid;
+  $distributor_id = change_feeds_import_get_distributor_id($user_id);
+  $query1 = db_select('dispatch_planning_api_data', 'ad');
+  $query1->condition('ad.runsheet_number', $trip_id, "=");
+  $query1->condition('ad.distributor_id',$distributor_id, "=");
+  $query1->fields('ad', array('fieldExecutiveName'));
+  $cashier_name = $query1->execute()->fetchField();
+  return $cashier_name;
 }

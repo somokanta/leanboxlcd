@@ -38,20 +38,23 @@ function _planned_assets_form($form, &$form_state) {
     $trip_detail = check_trip_id_exists_or_not($distributor_id, $trip_number);
     $vrs_status = $trip_detail->field_vrs_status_value;
 
+    if ($vrs_status == 0) {
+      drupal_set_message(t('Trip is already in returns confirmation pending status.'), 'error');
+    }
     if ($vrs_status == 1) {
-      drupal_set_message(t('You cannot edit because this trip is returns confirmed.'), 'error');
+      drupal_set_message(t('Trip is already in returns confirmed status.'), 'error');
     }
     else if ($vrs_status == 2) {
-      drupal_set_message(t('You cannot edit because this trip is VRS confirmed.'), 'error');
+      drupal_set_message(t('Trip is already in VRS confirmed status.'), 'error');
     }
     else if ($vrs_status == 3) {
-      drupal_set_message(t('You cannot edit because this trip is VRS pending.'), 'error');
+      drupal_set_message(t('Trip is already in VRS pending status.'), 'error');
     }
     else if ($vrs_status == 4) {
-      drupal_set_message(t('You cannot edit because this trip is Handover pending.'), 'error');
+      drupal_set_message(t('Trip is already in Handover pending status.'), 'error');
     }
     else if ($vrs_status == 5) {
-      drupal_set_message(t('You cannot edit because this trip is Handover confirmed.'), 'error');
+      drupal_set_message(t('Trip is already in Handover confirmed status.'), 'error');
     }
     else {
       $item_details = _get_all_assets_type($trip_number);

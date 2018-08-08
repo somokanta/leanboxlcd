@@ -2150,7 +2150,52 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
       }
     }
   }
+  //dispatch planning reason master
+  if ($entity->feeds_item->id == 'dispatch_planning_reason_master') {
+       $reason_type = $entity->field_reason_type[LANGUAGE_NONE][0]['value'];
+       $dp_reason = $entity->field_dp_reason[LANGUAGE_NONE][0]['value'];
+       $reason_type_exist = check_dp_reason_type_exist($reason_type);
+       if ($reason_type_exist == 1 && !empty($reason_type)) {
+           drupal_set_message("Reason Type : $reason_type does not exists.Allowed values are deliver,undeliver,partial_deliver,delivery_pending", 'error');
+           $entity->feeds_item->skip = TRUE;
+       }
+       $reason_exist = check_dispatch_planning_reason_exist($reason_type,$dp_reason); 
+       if (!empty($reason_exist) && !empty($dp_reason)) {
+           drupal_set_message("Reason Type-Reason: $reason_type-$dp_reason already exists.", 'error');
+           $entity->feeds_item->skip = TRUE;
+       }
+  }
 }
+
+// function check reason type exist in system
+   function check_dp_reason_type_exist($reason_type) {
+       $field_reason_type = field_info_field('field_reason_type');
+       $field_reason_type= list_allowed_values($field_reason_type);
+       if(!isset($field_reason_type[$reason_type])) {
+           return 1;
+       }
+       return 0;
+   }
+   
+// Check reason type and dp reason exist in dispatch planning reason master
+ function check_dispatch_planning_reason_exist($reason_type,$dp_reason) {
+     $results = 0;
+     global $user;
+     $user_id = $user->uid;
+     $distributor_id = change_feeds_import_get_distributor_id($user_id);
+    if (!empty($reason_type) && !empty($dp_reason)) {
+        $query = db_select('node', 'n');
+        $query->condition('n.type', 'dispatch_planning_reason_master');
+        $query->leftjoin('field_data_field_reason_type', 'r_type', 'r_type.entity_id = n.nid');
+        $query->leftjoin('field_data_field_dp_reason', 'dp_reason', 'dp_reason.entity_id = n.nid');
+        $query->condition('n.uid',$distributor_id);
+        $query->fields('n', array('nid'));
+        $query->condition('r_type.field_reason_type_value', $reason_type);
+        $query->condition('dp_reason.field_dp_reason_value', $dp_reason);
+        $results = $query->execute()->fetchField();
+    }
+    return $results;
+ }
 /**
  * 
  * @param type $title

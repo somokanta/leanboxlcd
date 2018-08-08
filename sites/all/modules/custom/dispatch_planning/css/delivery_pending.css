@@ -1,0 +1,48 @@
+/*
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+*/
+/* 
+    Created on : 17 Jul, 2018, 7:36:28 PM
+    Author     : user
+*/
+.dp_filter {
+    width:100%;
+}
+.dp_trip_id {
+    width:12%;
+    float:left;
+    padding-right:10px;
+}
+.dp_bill_number {
+    width: 150px;
+    float:left;
+}
+.add_bills_btn {
+    clear:both;
+    float:left;
+    width:100%;
+}
+.textfield-wrapper input {
+   width: 200px;
+}
+.dp_list_table {
+    float:left;
+    width:100%;
+    margin-top:20px;
+}
+.remove_checked_items_outer {
+    float:left;
+    width:100%;
+}
+.add_bill {
+    float:left;
+    margin-left:20px;
+    margin-top:12px;
+}
+.delivery_pending_all {
+    width:200px;
+    float:right;
+}
+

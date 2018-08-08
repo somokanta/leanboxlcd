@@ -28,3 +28,6 @@ files[] = views/handler/header_handler_full_printout_popup.inc
 files[] = views/handler/field_collection_value.inc
 files[] = views/handler/field_collection_mode.inc
 files[] = views/handler/photo_url_handler.inc
+files[] = views/handler/header_handler_delivery_pending_printout.inc
+files[] = views/handler/dispatch_planning_delivery_pending_flag.inc
+files[] = views/handler/header_handler_delivery_summary_full_returned_reasons.inc

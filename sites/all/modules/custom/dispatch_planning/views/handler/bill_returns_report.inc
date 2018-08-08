@@ -24,11 +24,12 @@ class bill_returns_report extends views_handler_field {
     // do nothing -- to override the parent query.
   }
 
-  function render($data) {
+  function render(&$data) {
         $distributor_id = $data->dispatch_planning_api_data_distributor_id;
         $dispatch_planning_id = $data->id;
         // Get views current field value
         $views_current_field = $this->field;
+        $sales_bill_value = $data->_field_data['node_dispatch_planning_api_data_1_nid']['entity']->field_bill_value[LANGUAGE_NONE][0]['value'];
         if (!empty($dispatch_planning_id) && !empty($distributor_id)) {
             $query = db_select('dispatch_planning_api_data', 'dpi');
             $query->condition('dpi.distributor_id', $distributor_id, '=');
@@ -43,8 +44,22 @@ class bill_returns_report extends views_handler_field {
             $query->addExpression('(SUM(ad.return_qty))', 'return_qty');
             $query->addExpression('(SUM(ad.sum_net_sales_value * ad.res_sku_actual_quantity1))', 'delivered_value');
             $query->addExpression('(SUM(ad.return_qty * ad.sum_net_sales_value))', 'returned_value');
+            $query->addExpression("SUM(ad.res_cashier_short * ad.sum_net_sales_value)", 'cashier_short_value');
+            $query->addExpression("SUM(ad.res_godown_short * ad.sum_net_sales_value)", 'godown_short_value');
             $query->addExpression('(CASE WHEN (dpi.res_status = \'undeliver\') THEN dpi.res_reason_for_failure END)', 'reason_for_failure');
             $bill_return_report =$query->execute()->fetch(PDO::FETCH_ASSOC);
+            if (!empty($sales_bill_value)) {
+                $to_be_collected = round($sales_bill_value - $bill_return_report['returned_value'] - $bill_return_report['cashier_short_value']- $bill_return_report['godown_short_value']);
+                if ($data->dispatch_planning_api_data_res_status !== 'undeliver') {
+                    $data->sales_to_be_collected = $to_be_collected;
+                }
+                else {
+                    $data->sales_to_be_collected = 0;
+                }
+                 
+                
+            }
+            //print_r($to_be_collected);die;
             if (!empty($views_current_field)) {
                 switch ($views_current_field) {
                     case 'total_sales_quantity' :
@@ -76,6 +91,9 @@ class bill_returns_report extends views_handler_field {
                         break;
                     case 'reason_for_failure';
                         return $bill_return_report['reason_for_failure'];
+                        break;
+                    case 'to_be_collected_amount';
+                        return $data->sales_to_be_collected;
                         break;
                     default:
                         return '';

@@ -36,6 +36,7 @@ class field_collection_value extends views_handler_field {
     $cash_amt = $data->dispatch_planning_api_data_res_cash_amount;
     $chq_amt = $data->dispatch_planning_api_data_res_cheque_amount;
     $sign_amt = $data->dispatch_planning_api_data_res_confirm_signed_bill_amount;
+    $money_collect2_edit = $data->dispatch_planning_api_data_res_money_collect2_edit;
 
     $query1 = db_select('vrs_trip_items', 'vti');
     $query1->condition('vti.trip_id', $trip_id, "=");
@@ -46,16 +47,13 @@ class field_collection_value extends views_handler_field {
     if ($res != 0) {
       return $res;
     }
-    else {
-      $total_edit = $cash_edit + $chq_edit + $sign_edit;
-      if ($total_edit != 0) {
-        return $total_edit;
+    else if ($money_collect2_edit) {
+        $total_edit = $cash_edit + $chq_edit + $sign_edit;
+      }else{
+        $total_edit = $cash_amt + $chq_amt + $sign_amt;
       }
-      else {
-        $total = $cash_amt + $chq_amt + $sign_amt;
-        return $total;
+      if ($total_edit != 0) {
+        return round($total_edit);
       }
     }
   }
-
-}

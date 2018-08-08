@@ -134,7 +134,17 @@ function _get_farey_delivered_trip_details($trip_number, $rs_code) {
  * @return array
  */
 function trip_details_remove_callback($form, &$form_state) {
-   return $form;
+  //return $form;
+// Used for removing drupal set message on submit.
+  $commands[] = ajax_command_replace('#itemlist-div', render($form));
+  $commands[] = array
+    (
+    'command' => 'filter_clicked',
+  );
+  $commands[] = ajax_command_replace('.alert-danger', '');
+  $commands[] = ajax_command_replace('.alert-success', '');
+  $commands[] = ajax_command_prepend('#itemlist-div', theme('status_messages'));
+  return array('#type' => 'ajax', '#commands' => $commands);
 }
 
 
@@ -219,8 +229,11 @@ function _edit_trip_delivered_callback_form($form, &$form_state) {
         // check trip if it is VRS Confirmed
         $trip_detail = check_trip_id_exists_or_not($distributor_id, $trip_number);
         $vrs_status = $trip_detail->field_vrs_status_value;
-  
-        if($vrs_status == 1) {
+        
+        if($vrs_status == 0) {
+           drupal_set_message(t('You cannot edit because this trip is Delivery confirmation done.'), 'error');
+        }
+        else if($vrs_status == 1) {
            drupal_set_message(t('You cannot edit because this trip is returns confirmed.'), 'error');
         }
         else if($vrs_status == 2) {
@@ -306,6 +319,10 @@ function _edit_trip_delivered_callback_form($form, &$form_state) {
                $res_signed_bill_partial_edit = $bill_details[0]['res_signed_bill_partial_edit'];
                $res_cheque_no = $bill_details[0]['res_cheque_no'];
                $res_cheque_no_edit = $bill_details[0]['res_cheque_no_edit'];
+               $photo_of_signed_bill_partial = $bill_details[0]['photo_of_signed_bill_partial'];
+               $photo_of_signed_bill_partial_edit = $bill_details[0]['photo_of_signed_bill_partial_edit'];
+               $res_delivery_boy = $bill_details[0]['res_delivery_boy'];
+               $res_delivery_boy_edit = $bill_details[0]['res_delivery_boy_edit'];
 
                // unset all keys 
                unset($bill_details[0]['res_reason_for_failure']);
@@ -331,6 +348,10 @@ function _edit_trip_delivered_callback_form($form, &$form_state) {
                unset($bill_details[0]['res_signed_bill_partial_edit']);
                unset($bill_details[0]['res_cheque_no']);
                unset($bill_details[0]['res_cheque_no_edit']);
+               unset($bill_details[0]['photo_of_signed_bill_partial']);
+               unset($bill_details[0]['photo_of_signed_bill_partial_edit']);
+               unset($bill_details[0]['res_delivery_boy']);
+               unset($bill_details[0]['res_delivery_boy_edit']);
                
                //unset form input for signed,cheque and cash amounts
                unset($form_state['input']['collection_mode']);
@@ -342,6 +363,7 @@ function _edit_trip_delivered_callback_form($form, &$form_state) {
                unset($form_state['input']['sb_amt']);
                unset($form_state['input']['sb_file']);
                unset($form_state['input']['cheque_no']);
+               unset($form_state['input']['delivery_boy']);
 
                $bill_details_header = array('Bill value', 'Party name');
 
@@ -406,8 +428,14 @@ function _edit_trip_delivered_callback_form($form, &$form_state) {
                 }else{
                   $col_mode = '';
                 }
+                
+                $form['delivery_boy'] = array(
+                    '#type' => 'textfield',
+                    '#title' => t('Delivery Boy'),
+                    '#default_value' => !empty($res_delivery_boy_edit) ? $res_delivery_boy_edit : $res_delivery_boy,
+                  );
 
-            $form['collection_mode'] = array(
+                $form['collection_mode'] = array(
                     '#type' => 'select',
                     '#options' => $lists,
                     '#title' => t('Collection Mode'),
@@ -420,6 +448,7 @@ function _edit_trip_delivered_callback_form($form, &$form_state) {
                   $form['bank_name'] = array(
                     '#type' => 'textfield',
                     '#title' => t('Bank Name'),
+                    '#autocomplete_path' => 'get_bank_names/autocomplete',
                     '#states' => array(
                       'visible' => array(
                         ':input[name="collection_mode"]' => array('value' => 'cheque'),
@@ -456,6 +485,7 @@ function _edit_trip_delivered_callback_form($form, &$form_state) {
                   $form['cheque_date'] = array(
                     '#type' => 'date_popup',
                     '#title' => t('Cheque Date'),
+                    '#date_label_position' => 'none',
                     '#states' => array(
                       'visible' => array(
                         ':input[name="collection_mode"]' => array('value' => 'cheque'),
@@ -474,25 +504,43 @@ function _edit_trip_delivered_callback_form($form, &$form_state) {
                       ),
                     ),
                   );
+                  $na_position = strpos($res_photo_of_cheque, '/NA');
+                  if (!empty($na_position)) {
+                    unset($res_photo_of_cheque);
+                  }
+                  $na_position = strpos($res_photo_of_cheque_edit, '/NA');
+                  if (!empty($na_position)) {
+                    unset($res_photo_of_cheque_edit);
+                  }
+                  
                   if (!empty($res_photo_of_cheque_edit)) {
                     $url = file_create_url($res_photo_of_cheque_edit);
-                  }else{
+                  }else if(!empty($res_photo_of_cheque)){
                     $url = file_create_url($res_photo_of_cheque);
                   }
-                  if (!empty($res_photo_of_cheque) || !empty($res_photo_of_cheque_edit)) {
+
+               if (!empty($url)) {
+                    $path = $url;
+                    $na_position = strpos($url, '/NA');
+                    $wrapper = file_stream_wrapper_get_instance_by_uri($url);
+                    if (empty($na_position)) {
+                      if (!empty($wrapper)) {
+                        $path = $wrapper->getExternalUrl();
+                      }
+                   
                      $file = 'Open File';
                      $form['res_photo_of_cheque'] = array(
                        '#type' => 'item',
-                       '#markup' => l("$file", $url,  array('attributes' => array('target'=> '_blank'))) . '<div></div></br>',
+                       '#markup' => l("$file", $path,  array('attributes' => array('target'=> '_blank'))) . '<div></div></br>',
                        '#states' => array(
                          'visible' => array(
                            ':input[name="collection_mode"]' => array('value' => 'cheque'),
                          ),
                        ),
                      );
-                  }
-
-                  $form['sb_amt'] = array(
+               }
+              }
+              $form['sb_amt'] = array(
                     '#type' => 'textfield',
                     '#title' => t('Signed bill Amt'),
                     '#states' => array(
@@ -514,23 +562,56 @@ function _edit_trip_delivered_callback_form($form, &$form_state) {
                       ),
                     ),
                   );
-                  if (!empty($res_photo_of_signed_bill_delivery_edit)) {
-                    $url = file_create_url($res_photo_of_signed_bill_delivery_edit);
-                  }else{
-                  $url = file_create_url($res_photo_of_signed_bill_delivery);
-                  }
-                  if (!empty($res_photo_of_signed_bill_delivery) || !empty($res_photo_of_signed_bill_delivery_edit)) {
+
+
+              $na_position = strpos($res_photo_of_signed_bill_delivery_edit, '/NA');
+              if (!empty($na_position)) {
+                unset($res_photo_of_signed_bill_delivery_edit);
+              }
+
+              $na_position = strpos($res_photo_of_signed_bill_delivery, '/NA');
+              if (!empty($na_position)) {
+                unset($res_photo_of_signed_bill_delivery);
+              }
+
+              $na_position = strpos($photo_of_signed_bill_partial_edit, '/NA');
+              if (!empty($na_position)) {
+                unset($photo_of_signed_bill_partial_edit);
+              }
+              $na_position = strpos($photo_of_signed_bill_partial, '/NA');
+              if (!empty($na_position)) {
+                unset($photo_of_signed_bill_partial);
+              }
+              
+              if (!empty($res_photo_of_signed_bill_delivery_edit)) {
+                $url = file_create_url($res_photo_of_signed_bill_delivery_edit);
+              }else if(!empty($res_photo_of_signed_bill_delivery)){
+              $url = file_create_url($res_photo_of_signed_bill_delivery);
+              }else if (!empty($photo_of_signed_bill_partial_edit)) {
+               $url = file_create_url($photo_of_signed_bill_partial_edit);
+              }else if(!empty($photo_of_signed_bill_partial)){
+               $url = file_create_url($photo_of_signed_bill_partial);
+              }
+                 if (!empty($url)) {
+                    $path = $url;
+                    $na_position = strpos($url, '/NA');
+                    $wrapper = file_stream_wrapper_get_instance_by_uri($url);
+                 if (empty($na_position)) {
+                   if (!empty($wrapper)) {
+                        $path = $wrapper->getExternalUrl();
+                      }
                      $file = 'Open File';
                      $form['res_photo_of_signed_bill_delivery'] = array(
                        '#type' => 'item',
-                       '#markup' => l("$file", $url, array('attributes' => array('target'=> '_blank'))) . '<div></div></br>',
+                       '#markup' => l("$file", $path, array('attributes' => array('target'=> '_blank'))) . '<div></div></br>',
                        '#states' => array(
                          'visible' => array(
                            ':input[name="collection_mode"]' => array('value' => 'signed'),
                          ),
                        ),
                      );
-                  }
+                }
+               }
 
                   $form['cash_amt'] = array(
                     '#type' => 'textfield',
@@ -540,7 +621,7 @@ function _edit_trip_delivered_callback_form($form, &$form_state) {
                         ':input[name="collection_mode"]' => array('value' => 'cash'),
                       ),
                     ),
-                    '#default_value' => isset($res_cash_amount_edit) ? $res_cash_amount_edit : $res_cash_amount,
+                    '#default_value' => !empty($res_cash_amount_edit) ? $res_cash_amount_edit : $res_cash_amount,
                   );
                }
                $form['error_message'] = array(
@@ -711,6 +792,8 @@ function _get_noneditable_delivered_trip_details($trip_number, $rs_code, $bill_n
    $query = db_select('dispatch_planning_api_data', 'ad');
    $query->condition('ad.runsheet_number', $trip_number);
    $query->condition('ad.hub', $rs_code);
+   //not required delivery pending bills of that trip
+   $query->condition('ad.delivery_pending_flag' ,1,'!=');
    $query->condition('ad.bill_number', $bill_no);
    $query->fields('ad', array('bill_value', 'party_name', 
      'res_reason_for_failure', 'res_confirm_signed_bill_amount', 
@@ -718,7 +801,7 @@ function _get_noneditable_delivered_trip_details($trip_number, $rs_code, $bill_n
      'res_cheque_date', 'res_photo_of_cheque', 'res_cash_amount', 'res_money_collect2',
      'res_money_collect2_edit','res_confirm_signed_bill_amount_edit','res_photo_of_signed_bill_delivery_edit',
      'res_bank_name_edit','res_cheque_amount_edit','res_cheque_date_edit','res_photo_of_cheque_edit','res_cash_amount_edit',
-     'res_signed_bill_delivery','res_signed_bill_partial','res_signed_bill_delivery_edit','res_signed_bill_partial_edit','res_cheque_no','res_cheque_no_edit'));
+     'res_signed_bill_delivery','res_signed_bill_partial','res_signed_bill_delivery_edit','res_signed_bill_partial_edit','res_cheque_no','res_cheque_no_edit','photo_of_signed_bill_partial','photo_of_signed_bill_partial_edit','res_delivery_boy','res_delivery_boy_edit'));
    $rows = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
    return $rows;
 }
@@ -755,6 +838,19 @@ function _get_editable_delivered_trip_details($trip_number, $rs_code, $bill_no) 
  * @param type $form_state
  */
 function _edit_trip_delivered_callback_form_validate($form, &$form_state) {
+  $user_id = $GLOBALS['user']->uid;
+  $rs_code = dispatch_planning_get_rscode_using_uid($user_id);
+  $trip_number = $form_state['values']['trip_number'];
+  $bill_number = $form_state['values']['bill_number'];
+  $bill_details = _get_noneditable_delivered_trip_details($trip_number, $rs_code, $bill_number);
+  
+  $res_photo_of_cheque_edit = strpos($bill_details[0]['res_photo_of_cheque_edit'], '/NA') ? '' : $bill_details[0]['res_photo_of_cheque_edit'];
+  $res_photo_of_cheque = strpos($bill_details[0]['res_photo_of_cheque'], '/NA') ? '' : $bill_details[0]['res_photo_of_cheque'];
+  $res_photo_of_signed_bill_delivery = strpos($bill_details[0]['res_photo_of_signed_bill_delivery'], '/NA') ? '' : $bill_details[0]['res_photo_of_signed_bill_delivery'];
+  $res_photo_of_signed_bill_delivery_edit = strpos($bill_details[0]['res_photo_of_signed_bill_delivery_edit'], '/NA') ? '' : $bill_details[0]['res_photo_of_signed_bill_delivery_edit'];
+  $photo_of_signed_bill_partial = strpos($bill_details[0]['photo_of_signed_bill_partial'], '/NA') ? '' : $bill_details[0]['photo_of_signed_bill_partial'];
+  $photo_of_signed_bill_partial_edit = strpos($bill_details[0]['photo_of_signed_bill_partial_edit'], '/NA') ? '' : $bill_details[0]['photo_of_signed_bill_partial_edit'];
+ 
     foreach ($form_state['values']['actual_qty'] as $sku_no => $val) {
       $form_state['complete form']['trip_details']['#rows'][$sku_no]['actual_qty']['data']['#value'] = $val;
    }
@@ -771,27 +867,15 @@ function _edit_trip_delivered_callback_form_validate($form, &$form_state) {
    $cash_short = $form_state['values']['cashier_short'];
    $actual_qty_array = $form_state['values']['actual_qty'];
 
-//   $actual_qty = 0;
-//   foreach ($actual_qty_array as $key => $value) {
-//      $actual_qty = $actual_qty + $value;
-//   }
-//   if ($actual_qty > $og_total) {
-//      form_set_error('actual_qty', t('Sum of actual quantity can not be greater than sum of Total Sales Quantityy.'));
-//   }
+
    $order_status = $form_state['values']['order_status'];
    if ($order_status == 'undeliver') {
       $undeliver_reason = $form_state['values']['undeliver_reason'];
       if (empty($undeliver_reason)) {
-         form_set_error('undeliver_reason', t('Undeliover reason can not be empty'));
+         form_set_error('undeliver_reason', t('Undeliver reason can not be empty'));
       }
    }
-   //  if ($order_status == 'partial_deliver') {
-//      if ($actual_qty == $og_total) {
-//         form_set_error('actual_qty', t('Sum of actual quantity can not be equal to sum of Total Sales Quantity.'));
-//      }
-   // dpm($og_array, '$og_array');
-   // dpm($actual_qty_array, '$actual_qty_array');
-   // dpm($sku_reason, '$sku_reason');
+
    foreach ($og_array as $key => $val) {
       $dispatch_qty = $og_array[$key];
       $user_input_qty = $actual_qty_array[$key] + $cash_short[$key];
@@ -802,40 +886,60 @@ function _edit_trip_delivered_callback_form_validate($form, &$form_state) {
          if (($actual_qty_array[$key] != 0) && (empty($sku_reason[$key]))) {
             form_set_error('actual_qty', t('Kindly select the reason for partial delivery.'));
          }
-//         if (array_sum($actual_qty_array) == 0) {
-//            form_set_error('actual_qty', t('Sum of return qty cannot be zero'));
-//         }
       }
    }
-   // }
+   
+   if ($order_status == 'partial_deliver') {
+      if ((array_sum($actual_qty_array) + array_sum($cash_short)) < 1) {
+         form_set_error('actual_qty', t('Sum of return qty and cashier short cannot be zero for status partial delivered.'));
+      }
+   }
 
-   $collc_mode = $form_state['values']['collection_mode'];
+
+   if ($order_status != 'undeliver') {
+      $delivery_boy = $form_state['values']['delivery_boy'];
+        if(empty($delivery_boy)) {
+          form_set_error('delivery_boy', t('Delivery boy field can not be empty.'));
+    }
+
+      $collc_mode = $form_state['values']['collection_mode'];
+      if(empty($collc_mode)) {
+        form_set_error('collection_mode', t('Collection mode can not be empty.'));
+      }
+   }
 
    if ($collc_mode == 'cash') {
       $cash_amt = $form_state['values']['cash_amt'];
-      if (empty($cash_amt)) {
-         // form_set_error('cash_amt', t('Cash amt can not be empty'));
+      if (empty($cash_amt) || !is_numeric($cash_amt)) {
+          form_set_error('cash_amt', t('Cash amount can not be empty and should be greater than zero'));
       }
    }
    if ($collc_mode == 'signed') {
       $sb_amt = $form_state['values']['sb_amt'];
-      if (empty($sb_amt)) {
-         // form_set_error('sb_amt', t('Signed bill amt can not be empty'));
+      if (empty($sb_amt) || !is_numeric($sb_amt)) {
+          form_set_error('sb_amt', t('Signed bill amount can not be empty'));
       }
    }
 
    if ($collc_mode == 'cheque') {
       $cheque_date = $form_state['values']['cheque_date'];
       if (empty($cheque_date)) {
-         // form_set_error('cheque_date', t('Cheque date can not be empty'));
+          form_set_error('cheque_date', t('Cheque date can not be empty'));
       }
       $cheque_amt = $form_state['values']['cheque_amt'];
-      if (empty($cheque_amt)) {
-         // form_set_error('cheque_amt', t('Cheque amt can not be empty'));
+      if (empty($cheque_amt) || !is_numeric($cheque_amt)) {
+          form_set_error('cheque_amt', t('Cheque amount can not be empty'));
       }
       $bank_name = $form_state['values']['bank_name'];
-      if (empty($bank_name)) {
-         // form_set_error('bank_name', t('Bank name can not be empty'));
+      if (empty($bank_name) || $bank_name == 'NA') {
+          form_set_error('bank_name', t('Bank name can not be empty'));
+      }
+      if(empty(check_bank_name_exist($bank_name))){
+        form_set_error('bank_name', t('Please select correct bank name'));
+      }
+      $cheque_no = $form_state['values']['cheque_no'];
+      if (empty($cheque_no) || !is_numeric($cheque_no)) {
+          form_set_error('cheque_no', t('Cheque number can not be empty'));
       }
 
 
@@ -857,6 +961,8 @@ function _edit_trip_delivered_callback_form_validate($form, &$form_state) {
          else {
             form_set_error('cheque_file', t('Failed to write the uploaded bill file the site\'s file folder.'));
          }
+      }else if (empty($res_photo_of_cheque) && empty($res_photo_of_cheque_edit)) {
+         form_set_error('cheque_file', t('Photo of Cheque cannot be empty'));
       }
    }
    if ($collc_mode == 'signed') {
@@ -877,8 +983,10 @@ function _edit_trip_delivered_callback_form_validate($form, &$form_state) {
          else {
             form_set_error('sb_file', t('Failed to write the uploaded bill file the site\'s file folder.'));
          }
-      }
-   }
+      }else if (empty($res_photo_of_signed_bill_delivery) && empty($res_photo_of_signed_bill_delivery_edit) && empty($photo_of_signed_bill_partial_edit) && empty($photo_of_signed_bill_partial)) {
+      form_set_error('sb_file', t('Photo of Signed Bill cannot be empty'));
+    }
+  }
 }
 
 /**
@@ -906,6 +1014,34 @@ function _edit_trip_delivered_callback_form_submit($form, &$form_state) {
       $sb_file_uri = $sb_file->uri;
       $reason_for_failure = isset($form_state['values']['undeliver_reason']) ? $form_state['values']['undeliver_reason'] : '';
       $og_array = $form_state['values']['og_array']; // dispatch_qty 
+      
+      if($collc_mode == 'signed' && empty($sb_file_uri)) {
+        $query = db_select('dispatch_planning_api_data', 'dpi');
+        $query->condition('dpi.hub', $rs_code, '=');
+        $query->condition('dpi.runsheet_number', $trip_number, '=');
+        $query->condition('dpi.bill_number', $bill_number, '=');
+        $query->fields('dpi', array('res_photo_of_signed_bill_delivery'));
+        $query->fields('dpi', array('photo_of_signed_bill_partial'));
+        $res = $query->execute()->fetch(PDO::FETCH_ASSOC);
+        if(!empty($res['res_photo_of_signed_bill_delivery'])) {
+          $signed_bill_deliver_url = $res['res_photo_of_signed_bill_delivery'];
+        }
+        else if(!empty($res['photo_of_signed_bill_partial'])){
+          $signed_bill_partial_url = $res['photo_of_signed_bill_partial'];
+        }
+      }
+      
+      if($collc_mode == 'cheque' && empty($cheque_file_uri)) {
+        $query = db_select('dispatch_planning_api_data', 'dpi');
+        $query->condition('dpi.hub', $rs_code, '=');
+        $query->condition('dpi.runsheet_number', $trip_number, '=');
+        $query->condition('dpi.bill_number', $bill_number, '=');
+        $query->fields('dpi', array('res_photo_of_cheque'));
+        $cheque_bill_url = $query->execute()->fetchField();
+        if(!empty($cheque_bill_url)) {
+          $cheque_bill_file_url = $cheque_bill_url;
+        }
+      }
 
       $updated_bill_rows = db_update('dispatch_planning_api_data') // Table name no longer needs {}
           ->fields(array(
@@ -915,15 +1051,17 @@ function _edit_trip_delivered_callback_form_submit($form, &$form_state) {
             'res_cheque_no_edit' => ($collc_mode == 'cheque') ? $form_state['values']['cheque_no'] : '',
             'res_bank_name_edit' => ($collc_mode == 'cheque') ? $form_state['values']['bank_name'] : '',
             'res_cheque_date_edit' => ($collc_mode == 'cheque') ? $form_state['values']['cheque_date'] : '',
-            'res_photo_of_cheque_edit' => ($collc_mode == 'cheque') ? $cheque_file_uri : '',
+            'res_photo_of_cheque_edit' => ($collc_mode == 'cheque' && !empty($cheque_file_uri)) ? $cheque_file_uri : $cheque_bill_file_url,
             'res_confirm_signed_bill_amount_edit' => ($collc_mode == 'signed') ? $form_state['values']['sb_amt'] : '',
-            'res_photo_of_signed_bill_delivery_edit' => ($collc_mode == 'signed') ? $sb_file_uri : '',
+            'res_photo_of_signed_bill_delivery_edit' => ($collc_mode == 'signed' && $order_status == 'deliver' && !empty($sb_file_uri)) ? $sb_file_uri : $signed_bill_deliver_url,
+            'photo_of_signed_bill_partial_edit' => ($collc_mode == 'signed'&& $order_status == 'partial_deliver' && !empty($sb_file_uri)) ? $sb_file_uri : $signed_bill_partial_url,
             'res_signed_bill_delivery_edit' => ($collc_mode == 'signed' && $order_status == 'deliver') ? 'Yes' : '',
             'res_signed_bill_partial_edit' => ($collc_mode == 'signed' && $order_status == 'partial_deliver') ? 'Yes' : '',
             'res_reason_for_failure' => ($order_status == 'undeliver') ? $reason_for_failure : '',
             'updated_flag' => 1,
             'updated_time' => REQUEST_TIME,  
             'res_money_collect2_edit' =>  isset($form_state['values']['collection_mode']) ? $form_state['values']['collection_mode'] : '',
+            'res_delivery_boy_edit' => !empty($form_state['values']['delivery_boy']) ? $form_state['values']['delivery_boy'] : '',
             
           ))
           ->condition('runsheet_number', $trip_number, '=')
@@ -990,7 +1128,7 @@ function _edit_trip_delivered_callback_form_submit($form, &$form_state) {
             db_update('dispatch_planning_item_details') // Table name no longer needs {}
                 ->fields(array(
                   'res_sku_actual_quantity1' => $og_array[$key] - $value - $form_state['values']['cashier_short'][$key],
-                  'return_qty' => $value,
+                  'return_qty' => $value ? $value : 0,
                   'res_sku_reason' => $form_state['values']['sku_reason'][$key],
                   'res_cashier_short' => $form_state['values']['cashier_short'][$key],
                   'line_level_status' => $line_status, // line level status
@@ -1021,4 +1159,17 @@ function _get_dispatch_planning_reason_master_list($reason_type) {
    $response = $res1 + $res;
    return $response;
 
+}
+
+function check_bank_name_exist($bank_name) {
+  global $user;
+  $dis_id = change_feeds_import_get_distributor_id($user->uid);
+  $query = db_select('node', 'n');
+  $query->condition('n.type', 'bank_master');
+  $query->condition('n.title', $bank_name);
+  $query->condition('n.uid', $dis_id, '=');
+  $query->condition('n.status', 1); // publish
+  $query->fields('n', array('title'));
+  $bank_names = $query->execute()->fetchField();
+  return $bank_names;
 }

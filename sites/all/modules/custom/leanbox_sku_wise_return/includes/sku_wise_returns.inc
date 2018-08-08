@@ -275,6 +275,8 @@ function sku_wise_return_table($trip_number, $sku_name, $mrp, $selected_bill_sta
 
   $query = db_select('dispatch_planning_item_details', 'dpi');
   $query->join('dispatch_planning_api_data', 'ad', 'dpi.trip_bill_reference = ad.id');
+      //not required delivery pending bills of that trip
+  $query->condition('ad.delivery_pending_flag' ,1,'!=');
   $query->condition('ad.runsheet_number', $trip_number, '=');
   $query->condition('ad.distributor_id', $dis_id);
   $query->condition('dpi.product_name', $sku_name, '=');

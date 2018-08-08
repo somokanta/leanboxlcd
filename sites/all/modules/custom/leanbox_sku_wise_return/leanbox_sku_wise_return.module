@@ -50,6 +50,8 @@ function sku_wise_trip_id_autocomplete($string = '') {
     $query->condition('n.title', db_like($string) . '%', 'LIKE');
     $query->condition('n.type', 'dispatch_data');
     $query->join('dispatch_planning_api_data', 'ad', 'ad.runsheet_number = n.title');
+    //not required delivery pending bills of that trip
+    $query->condition('ad.delivery_pending_flag' ,1,'!=');
     $query->fields('n', array('title'));
     $query->condition('n.uid', $dis_id);
     $query->condition('ad.distributor_id', $dis_id);
@@ -66,6 +68,8 @@ function _get_all_tripsku($trip_id, $string = '') {
   if (!empty($trip_id) && !empty($string)) {
     $query = db_select('dispatch_planning_item_details', 'dpi');
     $query->join('dispatch_planning_api_data', 'ad', 'dpi.trip_bill_reference = ad.id');
+    //not required delivery pending bills of that trip
+    $query->condition('ad.delivery_pending_flag' ,1,'!=');
     $query->condition('ad.runsheet_number', $trip_id);
     $query->condition('ad.distributor_id', $dis_id);
     $query->condition('dpi.product_name' , '%'.db_like($string) . '%', 'LIKE');
@@ -84,6 +88,8 @@ function get_mrp_from_sku($trip_number, $sku_name) {
   if (!empty($sku_name)) {
     $query = db_select('dispatch_planning_item_details', 'dpi');
     $query->join('dispatch_planning_api_data', 'ad', 'dpi.trip_bill_reference = ad.id');
+    //not required delivery pending bills of that trip
+    $query->condition('ad.delivery_pending_flag' ,1,'!=');
     $query->condition('ad.runsheet_number', $trip_number, '=');
     $query->condition('ad.distributor_id', $dis_id);
     $query->condition('dpi.line_level_status', 'line_deliver', '!=');
@@ -102,6 +108,8 @@ function get_to_be_returned_qty($trip_number, $sku_name, $mrp) {
   if(!empty($trip_number) && !empty($sku_name) && !empty($mrp)) {
     $query = db_select('dispatch_planning_item_details', 'dpi');
     $query->join('dispatch_planning_api_data', 'ad', 'dpi.trip_bill_reference = ad.id');
+    //not required delivery pending bills of that trip
+    $query->condition('ad.delivery_pending_flag' ,1,'!=');
     $query->condition('ad.runsheet_number', $trip_number, '=');
     $query->condition('ad.distributor_id', $dis_id);
     $query->condition('dpi.product_name', $sku_name, '=');

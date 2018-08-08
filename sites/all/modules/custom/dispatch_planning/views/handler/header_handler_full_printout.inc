@@ -72,14 +72,3 @@ class header_handler_full_printout extends views_handler_field {
 
 }
 
-function get_distrubutor_name_full_from_user_id($user_id) {
-  $query = db_select('users', 'u');
-  $query->innerjoin('field_data_field_distributor', 'd', 'd.entity_id = u.uid');
-  $query->condition('d.entity_id', $user_id, '=');
-  $query->fields('d', array('field_distributor_value'));
-  $query->innerjoin('field_data_field_name', 'n', 'n.entity_id = d.field_distributor_value');
-  $query->fields('n', array('field_name_value'));
-  $result = $query->execute()->fetchAssoc();
-  $name = $result['field_name_value'];
-  return $name;
-}
