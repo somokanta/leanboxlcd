@@ -30,6 +30,8 @@ class footer_inventory_returns_bills_summary extends views_handler_field {
     $distributor_id = change_feeds_import_get_distributor_id($user_id);
 
     $query = db_select('dispatch_planning_api_data', 'ad');
+    //not required delivery pending bills of that trip
+    $query->condition('ad.delivery_pending_flag' ,1,'!=');
     $query->condition('ad.distributor_id', $distributor_id, '=');
     $query->condition('ad.runsheet_number', $trip_number, '=');
     $query->join('dispatch_planning_item_details', 'dpi', 'dpi.trip_bill_reference = ad.id');
@@ -40,6 +42,8 @@ class footer_inventory_returns_bills_summary extends views_handler_field {
     $results = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
 
     $query = db_select('dispatch_planning_api_data', 'ad');
+    //not required delivery pending bills of that trip
+    $query->condition('ad.delivery_pending_flag' ,1,'!=');
     $query->condition('ad.distributor_id', $distributor_id, '=');
     $query->condition('ad.runsheet_number', $trip_number, '=');
     $query->join('dispatch_planning_item_details', 'dpi', 'dpi.trip_bill_reference = ad.id');
@@ -50,6 +54,8 @@ class footer_inventory_returns_bills_summary extends views_handler_field {
     $results1 = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
 
     $query = db_select('dispatch_planning_api_data', 'ad');
+    //not required delivery pending bills of that trip
+    $query->condition('ad.delivery_pending_flag' ,1,'!=');
     $query->condition('ad.distributor_id', $distributor_id, '=');
     $query->condition('ad.runsheet_number', $trip_number, '=');
     $query->join('dispatch_planning_item_details', 'dpi', 'dpi.trip_bill_reference = ad.id');
@@ -60,6 +66,8 @@ class footer_inventory_returns_bills_summary extends views_handler_field {
     $results2 = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
 
     $query = db_select('dispatch_planning_api_data', 'ad');
+    //not required delivery pending bills of that trip
+    $query->condition('ad.delivery_pending_flag' ,1,'!=');
     $query->condition('ad.distributor_id', $distributor_id, '=');
     $query->condition('ad.runsheet_number', $trip_number, '=');
     $query->join('dispatch_planning_item_details', 'dpi', 'dpi.trip_bill_reference = ad.id');

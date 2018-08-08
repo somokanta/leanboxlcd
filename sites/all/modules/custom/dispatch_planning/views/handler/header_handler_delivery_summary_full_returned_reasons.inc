@@ -8,7 +8,7 @@
 /**
  * Provides a custom views field.
  */
-class header_handler_partial_printout_popup extends views_handler_field {
+class header_handler_delivery_summary_full_returned_reasons extends views_handler_field {
 
   function option_definition() {
     $options = parent::option_definition();
@@ -29,7 +29,7 @@ class header_handler_partial_printout_popup extends views_handler_field {
     $user_id = $user->uid;
     $total_result = $this->view->result;
     $trip_id = $this->view->args[0];
-    $result = get_partial_popup_return_data_from_trip_id($trip_id);
+    $result = get_delivery_summary_full_return_reason_header($trip_id);
     $result1 = get_trip_exec_date_from_trip_id($trip_id);
 
     if (!empty($result)) { 

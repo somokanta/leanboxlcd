@@ -13,6 +13,15 @@
 function mrc_inventory_returns_menu() {
   $items = array();
   
+  $items['delivery-confirmation'] = array(
+     'title' => 'Delivery Confirmation',
+     'page callback' => 'drupal_get_form',
+     'page arguments' => array('delivery_confirmation_form'),
+     'access arguments' => array('returns confirmation'),
+     'type' => MENU_NORMAL_ITEM,
+     'file' => 'includes/delivery_confirmation.inc',
+   );
+  
   $items['returns-confirmation'] = array(
      'title' => 'Returns Confirmation',
      'page callback' => 'drupal_get_form',
@@ -29,34 +38,13 @@ function mrc_inventory_returns_menu() {
     'type' => MENU_CALLBACK,
   );
   
-  /*$items['full-returns-popup/%ctools_js/%'] = array(
-    'page callback' => 'full_returns_popup_callback',
+  $items['delivery-summary-popup/%ctools_js/%'] = array(
+    'page callback' => 'delivery_summary_popup_callback',
     'page arguments' => array(1, 2),
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
   
-  $items['partial-deliver-popup/%ctools_js/%'] = array(
-    'page callback' => 'partial_deliver_popup_callback',
-    'page arguments' => array(1, 2),
-    'access callback' => TRUE,
-    'type' => MENU_CALLBACK,
-  );
-  
-  $items['asset-summary-popup/%ctools_js/%'] = array(
-    'page callback' => 'asset_summary_popup_callback',
-    'page arguments' => array(1, 2),
-    'access callback' => TRUE,
-    'type' => MENU_CALLBACK,
-  );
-  
-  $items['bills-summary-popup/%ctools_js/%'] = array(
-    'page callback' => 'bills_summary_popup_callback',
-    'page arguments' => array(1, 2),
-    'access callback' => TRUE,
-    'type' => MENU_CALLBACK,
-  );
-  */
   $items['returns-confirmation/edit'] = array(
      'title' => 'Returns Confirmation Edit',
      'page callback' => 'drupal_get_form',
@@ -64,6 +52,15 @@ function mrc_inventory_returns_menu() {
      'access arguments' => array('returns confirmation'),
      'type' => MENU_NORMAL_ITEM,
      'file' => 'includes/returns_confirmation_edit.inc',
+   );
+  
+  $items['delivery-confirmation/edit'] = array(
+     'title' => 'Delivery Confirmation Edit',
+     'page callback' => 'drupal_get_form',
+     'page arguments' => array('delivery_confirmation_edit_form'),
+     'access arguments' => array('returns confirmation'),
+     'type' => MENU_NORMAL_ITEM,
+     'file' => 'includes/delivery_confirmation_edit.inc',
    );
    
   $items['vrs-confirmation'] = array(
@@ -136,6 +133,15 @@ function mrc_inventory_returns_menu() {
     'type' => MENU_CALLBACK,
   );
   
+  $items['download-bills-delivery-summary/%'] = array(
+    'title' => 'Download Bills Delivery Summary',
+    'page callback' => 'download_bills_delivery_summary',
+    'page arguments' => array(1),
+    'access arguments' => array('returns confirmation'),  
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  
   $items['get_all_vrs_versions/%'] = array(
     'title' => 'All Versions',
     'page callback' => 'get_vrs_versions',
@@ -155,15 +161,6 @@ function mrc_inventory_returns_menu() {
       'type' => MENU_CALLBACK,
       'file' => 'includes/vrs_confirmation.inc',
     );
- 
-  $items['get_bank_names/autocomplete/%'] = array(
-      'title' => 'Autocomplete for Bank Names',
-      'page callback' => '_get_bank_names',
-      'page arguments' => array(2),
-      'access arguments' => array('returns confirmation'),  //or whatever permission makes sense
-      'type' => MENU_CALLBACK,
-    );
-  
 
   $items['handover-confirmation/delete'] = array(
     'title' => 'Handover Confirmation Delete',
@@ -295,6 +292,25 @@ function overall_summary_popup_callback($ajax, $trip_number) {
   }
 }
 
+/**
+ * Ajax menu callback.
+ * Overall Delivery Summary Prinout Popup
+ */
+function delivery_summary_popup_callback($ajax, $trip_number) {
+  if ($ajax) {
+    ctools_include('ajax');
+    ctools_include('modal');
+    
+    $view_name = "delivery_summary";
+    $view = views_get_view($view_name, '');
+    $view->set_arguments(array($trip_number));
+    $view->use_ajax = TRUE;
+    $output[] = ctools_modal_command_display(t('Delivery Summary'), $view->render());
+
+    print ajax_render($output);
+    drupal_exit();
+  }
+}
 
 /**
  * Ajax menu callback.
@@ -566,6 +582,14 @@ function download_bills_summary($args) {
   pdf_using_mpdf_api($rendered_html);
 }
 
+function download_bills_delivery_summary($args) {
+  $view_name = "delivery_summary";
+  $view = views_get_view($view_name, '');
+  $view->set_arguments(array($args));
+  $rendered_html = $view->render();
+  pdf_using_mpdf_api($rendered_html);
+}
+
 function ajax_redirect($path) {
     if (!empty($path)) {
             ctools_include('ajax');
@@ -598,20 +622,6 @@ function get_non_bankable_reasons() {
     return $result;
 }
 
-function _get_bank_names($trip_id, $string) {
-    $bank_names = array();
-    if (!empty($trip_id)) {
-       $query = db_select('node', 'n');
-       $query->condition('n.type', 'bank_master');
-       $query->condition('n.title', '%'.db_like($string) . '%', 'LIKE');
-       $query->condition('n.status', 1); // publish
-       $query->fields('n', array('title'));
-       $result = $query->execute()->fetchAllKeyed(0,0);
-    }
-    print json_encode($result);
-    exit();
-}
-
 function mrc_inventory_returns_feeds_presave($source, $entity, $item, $entity_id) {
   if ($entity->feeds_item->id == 'asset_type_master') {
     $asset_type_tid = $entity->field_asset_types['und'][0]['tid'];
@@ -628,4 +638,33 @@ function mrc_inventory_returns_feeds_presave($source, $entity, $item, $entity_id
       $entity->feeds_item->skip = TRUE;
     }
   }
+}
+
+// Function to check the status of all bills of a trip is declared or not.
+function get_bill_count_validation($trip_id, $dis_id) {
+  $query = db_select('dispatch_planning_api_data', 'ad');
+  $query->condition('ad.distributor_id', $dis_id);
+  $query->condition('ad.runsheet_number', $trip_id, '=');
+  $query->addExpression('COUNT(ad.id)', 'bill_count');
+  $query->addExpression("SUM(CASE WHEN (ad.res_status = 'deliver') THEN 1 ELSE 0 END)", 'full_delivered_bill_count');
+  $query->addExpression("SUM(CASE WHEN (ad.res_status = 'undeliver' and ad.delivery_pending_flag != 1) THEN 1 ELSE 0 END)", 'full_returned_bill_count');
+  $query->addExpression("SUM(CASE WHEN (ad.res_status = 'partial_deliver') THEN 1 ELSE 0 END)", 'partial_delivered_bill_count');
+  $query->addExpression("SUM(CASE WHEN (ad.delivery_pending_flag = 1) THEN 1 ELSE 0 END)", 'delivery_pending_bill_count');
+  $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+
+  return $res[0];
+}
+
+function get_bill_items_details($trip_id, $dis_id) {
+  $query = db_select('dispatch_planning_api_data', 'ad');
+  $query->condition('ad.runsheet_number', $trip_id);
+  $query->condition('ad.distributor_id', $dis_id);
+  $query->join('dispatch_planning_item_details', 'dpi', 'dpi.trip_bill_reference = ad.id');
+  $query->fields('dpi');
+  $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+  $bills_item = array();
+  foreach ($res as $val) {
+    $bills_item[$val['trip_bill_reference']][] = $val;
+  }
+  return $bills_item;
 }

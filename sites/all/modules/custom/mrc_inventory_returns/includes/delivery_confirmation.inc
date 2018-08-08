@@ -12,7 +12,7 @@
  * @param type $form_state
  * @return array
  */
-function returns_confirmation_form($form, &$form_state) {
+function delivery_confirmation_form($form, &$form_state) {
   $form = array();
 
   $arr['ajaxConfirm']['confirm-remove'] = array('title' => 'Confirmation Dialog', 'text' => 'Are you sure you want to confirm this Trip ID?', 'buttons' => array('button_confirm' => array('text' => 'Yes'), 'button_reject' => array('text' => 'No')));
@@ -75,21 +75,21 @@ function returns_confirmation_form($form, &$form_state) {
     '#value' => 'Show',
     '#name' => 'show',
     '#ajax' => array(
-      'callback' => 'returns_confirmation_callback',
+      'callback' => 'delivery_confirmation_callback',
       'wrapper' => 'itemlist-div',
       'method' => 'replace',
       'effect' => 'fade',
     ),
     '#attributes' => array('class' => array('trip-submit')),
-    '#submit' => array('returns_confirmation_form_submit'),
+    '#submit' => array('delivery_confirmation_form_submit'),
   );
 
-  $header = array('Trip ID','Dispatch Date','Cashier Name','Bill Count','Full Delivered Bill Count', 'Full Returned Bill Count', 'Partial Delivered Bill Count','Reattempt Bill Count','Pending Bill Count','Returns Incharge Name','Summary Printout','Action');
+  $header = array('Trip ID', 'Dispatch Date', 'Cashier Name', 'Bill Count', 'Full Delivered Bill Count', 'Full Returned Bill Count', 'Partial Delivered Bill Count','Reattempt Bill Count','Pending Bill Count','Delivery Incharge Name','Asset Summary','Delivery Summary','Action');
 
-  if (!isset($form_state['returns_confirmation']['bills'])) {
-    $form_state['returns_confirmation']['bills'] = array();
+  if (!isset($form_state['delivery_confirmation']['bills'])) {
+    $form_state['delivery_confirmation']['bills'] = array();
   }
-  $options = $form_state['returns_confirmation']['bills'];
+  $options = $form_state['delivery_confirmation']['bills'];
 
 
   if (!empty($options)) {
@@ -110,59 +110,71 @@ function returns_confirmation_form($form, &$form_state) {
     $full_returned_bill_count = $val['full_returned_bill_count'];
     $partial_delivered_bill_count = $val['partial_delivered_bill_count'];
     $delivery_pending_bill_count = $val['delivery_pending_bill_count'];
+
+//    $pending_bill_count = array(
+//      '#markup' => $bill_count - ($full_delivered_bill_count + $full_returned_bill_count + $partial_delivered_bill_count + $delivery_pending_bill_count),
+//      '#name' => "pending_bill_count_$key"
+//    );
+    $pending_bill_count = $bill_count - ($full_delivered_bill_count + $full_returned_bill_count + $partial_delivered_bill_count + $delivery_pending_bill_count);
     
-    $pending_bill_count = array(
-      '#markup' => $bill_count - ($full_delivered_bill_count + $full_returned_bill_count + $partial_delivered_bill_count + $delivery_pending_bill_count),
-      '#name' => "pending_bill_count_$key"
-    );
     
-    $returns_incharge_name = array(
+    $delivery_incharge_name = array(
       '#type' => 'textfield',
-      '#size' => 10,
-      '#name' => "returns_incharge_name_$key",
-      '#attributes' => array('class' => array('returns-incharge-name')),
+       '#size' => 10,
+      '#attributes' => array('class' => array('delivery-incharge-name')),
     );
-     
-    $overall_summary_printout = array(
-      '#markup' => l(t('Summary Printout'), "overall-summary-popup/nojs/$key", array('attributes' => array('class' => 'ctools-use-modal'))),
-      '#name' => "overall_summary_$key",
-        //'#attributes' => array('class' => array('full-return')),
-    );
+    
+    $link = l('Received Assets', "received-assets-screen?title=$key", array('html' => TRUE, 'attributes' => array('target' => '_blank')));
+//    $asset_summary = array(
+//      '#markup' => rawurldecode($link),
+//      '#name' => "asset_summary_$key",
+//    );
+    $asset_summary = rawurldecode($link);
+    
+//    $delivery_summary_printout = array(
+//      '#markup' => l(t('Delivery Summary'), "delivery-summary-popup/nojs/$key", array('attributes' => array('class' => 'ctools-use-modal'))),
+//      '#name' => "delivery_summary_$key",
+//        //'#attributes' => array('class' => array('full-return')),
+//    );
+    $delivery_summary_printout = l(t('Delivery Summary'), "delivery-summary-popup/nojs/$key", array('attributes' => array('class' => 'ctools-use-modal')));
 
     $confirm_btn = array(
       '#type' => 'submit',
       '#value' => t('Confirm'),
       '#ajax' => array(
-        'callback' => 'returns_confirmation_callback',
+        'callback' => 'delivery_confirmation_callback',
         'wrapper' => 'itemlist-div',
         'method' => 'replace',
         'effect' => 'fade',
       ),
       '#name' => "confirm_submit_$key",
-      '#validate' => array('return_confirm_validate'),
-      '#submit' => array('return_confirm_submit'),
+      '#validate' => array('delivery_confirm_validate'),
+      '#submit' => array('delivery_confirm_submit'),
       '#attributes' => array('class' => array('confirm-remove')),
     );
-    
-    $form['bill_details'][$key]["pending_bill_count_{$key}"] = &$pending_bill_count;
-    $form['bill_details'][$key]["returns_incharge_name_{$key}"] = &$returns_incharge_name;
-    $form['bill_details'][$key]["overall_summary_{$key}"] = &$overall_summary_printout;
-    $form['bill_details'][$key]["confirm_submit_{$key}"] = &$confirm_btn;
 
-    $form['bill_details']['#rows'][$key][]['data']["pending_bill_count_{$key}"] = &$pending_bill_count;
-    $form['bill_details']['#rows'][$key][]['data']["returns_incharge_name_{$key}"] = &$returns_incharge_name;
-    $form['bill_details']['#rows'][$key][]['data']["overall_summary_{$key}"] = &$overall_summary_printout;
-    $form['bill_details']['#rows'][$key][]['data']["confirm_submit_{$key}"] = &$confirm_btn;
+    //$form['bill_details'][$key]["pending_bill_count_{$key}"] = &$pending_bill_count;
+    $form['bill_details'][$key]["delivery_incharge_name"] = &$delivery_incharge_name;
+    //$form['bill_details'][$key]["asset_summary_{$key}"] = &$asset_summary;
+    //$form['bill_details'][$key]["delivery_summary_{$key}"] = &$delivery_summary_printout;
+    $form['bill_details'][$key]["confirm_submit"] = &$confirm_btn;
     
-    unset($pending_bill_count);
-    unset($returns_incharge_name);
-    unset($overall_summary_printout);
+    $form['bill_details']['#rows'][$key][] = $pending_bill_count;
+    $form['bill_details']['#rows'][$key][]['data']["delivery_incharge_name"] = &$delivery_incharge_name;
+    $form['bill_details']['#rows'][$key][] = $asset_summary;
+    $form['bill_details']['#rows'][$key][] = $delivery_summary_printout;
+    $form['bill_details']['#rows'][$key][]['data']["confirm_btn"] = &$confirm_btn;
+
+    //unset($pending_bill_count);
+    unset($delivery_incharge_name);
+    //unset($asset_summary);
+    //unset($delivery_summary_printout);
     unset($confirm_btn);
   }
   return $form;
 }
 
-function returns_confirmation_callback($form, &$form_state) {
+function delivery_confirmation_callback($form, &$form_state) {
   return $form;
 }
 
@@ -172,7 +184,7 @@ function returns_confirmation_callback($form, &$form_state) {
  * @param array $form_state
  * @return array
  */
-function returns_confirmation_form_validate($form, &$form_state) {
+function delivery_confirmation_form_validate($form, &$form_state) {
   global $user;
   $dis_id = change_feeds_import_get_distributor_id($user->uid);
 
@@ -194,14 +206,9 @@ function returns_confirmation_form_validate($form, &$form_state) {
     }
     // check for returned confirmed or not
     $check_returns_flag = check_trip_id_exists_or_not($dis_id, $form_state['values']['trip_id']);
-    if ($check_returns_flag->field_vrs_status_value >= 1) {
-      unset($form_state['returns_confirmation']['bills']);
-      drupal_set_message(t("This Trip status is already returns confirmed."), 'error');
-      $error_flag = 1;
-    }
-    if ($check_returns_flag->field_vrs_status_value == -1) {
-      unset($form_state['returns_confirmation']['bills']);
-      drupal_set_message(t("This Trip is in delivery confirmation pending status."), 'error');
+    if ($check_returns_flag->field_vrs_status_value >= 0) {
+      unset($form_state['delivery_confirmation']['bills']);
+      drupal_set_message(t("This Trip status is already delivery confirmed."), 'error');
       $error_flag = 1;
     }
   }
@@ -231,7 +238,7 @@ function returns_confirmation_form_validate($form, &$form_state) {
  * @param array $form_state
  * @return array
  */
-function returns_confirmation_form_submit($form, &$form_state) {
+function delivery_confirmation_form_submit($form, &$form_state) {
   if ($form_state['error_flag'] != 1) {
     global $user;
     $dis_id = change_feeds_import_get_distributor_id($user->uid);
@@ -247,19 +254,8 @@ function returns_confirmation_form_submit($form, &$form_state) {
     $query->condition('n.type', 'dispatch_data', '=');
     $query->condition('n.uid', $dis_id, '=');
     $query->leftjoin('field_data_field_vrs_status', 'vs', 'vs.entity_id = n.nid');
-
-    $db_and1 = db_and();
-    $db_and1->isNULL('vs.field_vrs_status_value');
-
-    $db_and2 = db_and();
-    $db_and2->condition('vs.field_vrs_status_value', '0');
+    $query->condition('vs.field_vrs_status_value', '-1', '=');
     
-    $db_or = db_or();
-    $db_or->condition($db_and1);
-    $db_or->condition($db_and2);
-
-    $query->condition($db_or);
-
     if (!empty($trip_id)) {
       $query->condition('n.title', $trip_id, '=');
     }
@@ -286,17 +282,18 @@ function returns_confirmation_form_submit($form, &$form_state) {
     $query->addExpression("SUM(CASE WHEN (dpi.res_status = 'partial_deliver') THEN 1 ELSE 0 END)", 'partial_delivered_bill_count');
     $query->addExpression("SUM(CASE WHEN (dpi.delivery_pending_flag = 1) THEN 1 ELSE 0 END)", 'delivery_pending_bill_count');
     $res = $query->execute()->fetchAll(PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
-
-    $form_state['returns_confirmation']['bills'] = $res;
+    
+    $form_state['delivery_confirmation']['bills'] = $res;
   }
   else {
-    unset($form_state['returns_confirmation']['bills']);
+    unset($form_state['delivery_confirmation']['bills']);
   }
 
   $form_state['rebuild'] = TRUE;
 }
 
-function return_confirm_validate($form, $form_state) {
+
+function delivery_confirm_validate(&$form, &$form_state) {
   global $user;
   $dis_id = change_feeds_import_get_distributor_id($user->uid);
   
@@ -304,42 +301,40 @@ function return_confirm_validate($form, $form_state) {
   $exploded_name = explode('_', $get_trip_id);
   $trip_id = $exploded_name[2];
   
-  // Validation of Total bill count should be equal to sum of Full delivered bill count + full returned bill count + partial delivered bill count
+  // Validation of Total bill count should be equal to sum of Full delivered bill count + full returned bill count + partial delivered bill count + delivery pending bill count
   $validation_on_bill_count = get_bill_count_validation($trip_id, $dis_id);
 
   $total_bill_count = $validation_on_bill_count['bill_count'];
   $sum_of_delivered_bills_count = ($validation_on_bill_count['full_delivered_bill_count'] + $validation_on_bill_count['full_returned_bill_count'] + $validation_on_bill_count['partial_delivered_bill_count'] + $validation_on_bill_count['delivery_pending_bill_count']);
 
   if ($total_bill_count != $sum_of_delivered_bills_count) {
+    $form_state['rebuild']  = TRUE;
     form_set_error('form', "Please declare status for all bills in this Trip id:$trip_id.");
   }
   
-  if(empty($form_state['input']["returns_incharge_name_$trip_id"])) {
-    form_set_error('form', "Please enter returns incharge name for Trip id:$trip_id.");
+  if(empty($form_state['input']['bill_details'][$trip_id]['delivery_incharge_name'])) {
+    $form_state['rebuild']  = TRUE;
+    form_set_error('form', "Please enter delivery incharge name for Trip id:$trip_id.");
   }
   
-  $query = db_select('dispatch_planning_api_data', 'ad');
-  $query->join('dispatch_planning_item_details', 'dpi', 'ad.id = dpi.trip_bill_reference');
-  $query->condition('ad.runsheet_number', $trip_id, '=');
-  $query->condition('ad.distributor_id', $dis_id);
-  $query->condition('ad.updated_flag', 2); //api
-
-  $db_or = db_or();
-  $db_or->condition('dpi.line_level_status', 'line_undeliver');
-  $db_or->condition('dpi.line_level_status', 'line_partial_deliver');
-  $query->condition($db_or);
-
-  $query->addExpression("GROUP_CONCAT(DISTINCT dpi.product_name separator '<br>')", 'product_name');
+  $query = db_select('node', 'n');
+  $query->condition('n.type', 'assets_count');
+  $query->condition('n.uid', $dis_id);
+  $query->leftjoin('field_data_field_received_asset_time', 'at', 'at.entity_id = n.nid');
+  $query->condition('n.title', $trip_id);
+  $query->fields('at', array('field_received_asset_time_value'));
   $res = $query->execute()->fetchField();
-  if (!empty($res)) {
-    //Temporary commented
-    //form_set_error('form', "Please confirm SKU-wise Returns for Trip ID $trip_id and products<br>". $res); 
+  if(empty($res)) {
+    $form_state['rebuild']  = TRUE;
+    form_set_error('form', "Please confirm Received Assets first for Trip ID: $trip_id");
   }
+  
 }
+
 /**
  * Submit function of modal pop up
  */
-function return_confirm_submit($form, $form_state) {
+function delivery_confirm_submit($form, $form_state) {
   global $user;
   $dis_id = change_feeds_import_get_distributor_id($user->uid);
 
@@ -347,35 +342,34 @@ function return_confirm_submit($form, $form_state) {
   $exploded_name = explode('_', $get_trip_id);
   $trip_id = $exploded_name[2];
   
-  $returns_incharge_name = $form_state['input']["returns_incharge_name_$trip_id"];
+  $delivery_incharge_name = $form_state['values']['bill_details'][$trip_id]['delivery_incharge_name'];
 
   $trip_nid = check_trip_id_exists_or_not($dis_id, $trip_id);
   if (!empty($trip_nid->nid)) {
       $node = node_load($trip_nid->nid);
-      // Status updated to 'Returned Confirm'
-      $node->field_vrs_status['und'][0]['value'] = 1;
+      // Status updated to 'Returns Confirmation Pending'
+      $node->field_vrs_status['und'][0]['value'] = '0';
 
-      $returns_version = $node->field_returned_version['und'][0]['value'];
-      if (empty($returns_version)) {
+      $delivery_version = $node->field_delivery_version['und'][0]['value'];
+      if (empty($delivery_version)) {
         $version_no = 'V_1.0';
-        $node->field_returned_version['und'][0]['value'] = $version_no;
+        $node->field_delivery_version['und'][0]['value'] = $version_no;
       }
       // version increment
       else {
-        $exploded_val = explode('_', $returns_version);
+        $exploded_val = explode('_', $delivery_version);
         $updated_version = $exploded_val[1] + 0.1;
         $version_no = "V_$updated_version";
-        $node->field_returned_version['und'][0]['value'] = $version_no;
+        $node->field_delivery_version['und'][0]['value'] = $version_no;
       }
 
-      $node->field_returns_closure_id['und'][0]['value'] = "RC$trip_id";
-      $node->field_returns_incharge_name['und'][0]['value'] = $returns_incharge_name;
+      $node->field_delivery_incharge_name['und'][0]['value'] = $delivery_incharge_name;
       node_save($node);
       
-      // Insert the Returns Incharge Name in Fareye Table
+      // Insert the Delivery Incharge Name in Fareye Table
       db_update('dispatch_planning_api_data') // Table name no longer needs {}
           ->fields(array(
-            'returns_incharge_name' => $returns_incharge_name,
+            'delivery_incharge_name' => $delivery_incharge_name,
           ))
           ->condition('runsheet_number', $trip_id, '=')
           ->condition('distributor_id', $dis_id, '=')
@@ -388,7 +382,8 @@ function return_confirm_submit($form, $form_state) {
       }
       //Remove row after confirmation
       unset($form_state['complete form']['bill_details']['#rows'][$trip_id]);
-
+      unset($form_state['complete form']['bill_details'][$trip_id]);
+      
       $form_state['rebuild'] = TRUE;
 
       $query = db_select('dispatch_planning_api_data', 'ad');
@@ -406,7 +401,7 @@ function return_confirm_submit($form, $form_state) {
         unset($val['id']);
         $val['version_created_time'] = REQUEST_TIME;
         $val['version_no'] = $version_no;
-        $val['version_flag'] = 2;
+        $val['version_flag'] = 1;
         $query->fields($val);
         $result_id = $query->execute();
 
@@ -446,7 +441,7 @@ function return_confirm_submit($form, $form_state) {
         }
       }
 
-      drupal_set_message("Returns confirmation of trip id:$trip_id is done successfully.");
+      drupal_set_message("Delivery confirmation of trip id:$trip_id is done successfully.");
   }
   else {
     drupal_set_message('Trip id nid not found.');

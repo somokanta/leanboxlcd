@@ -361,7 +361,7 @@
                 table = document.getElementById("bill_details");
                 tr = table.getElementsByTagName("tr");
                 for (i = 0; i < tr.length; i++) {
-                    td = tr[i].getElementsByTagName("td")[21];
+                    td = tr[i].getElementsByTagName("td")[22];
                     if (td) {
                         //document.getElementById("tabela").rows[n].cells[n].getElementsByTagName('input')[0].value;
                         //var bank_input =td.getElementsByTagName('input')[0];

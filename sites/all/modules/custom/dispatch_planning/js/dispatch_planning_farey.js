@@ -20,7 +20,7 @@
                     $(".form-submit").hide();
                     $(this).parent().parent().next().find('select').prop('disabled', 'disabled');
                 } else */
-                if (parseInt(actual_qty) == 0) {
+                if (parseInt(actual_qty) == 0 || isNaN(parseInt(actual_qty))) {
                     // alert('hi1');
                     $(this).parent().parent().next().find('select').prop('disabled', 'disabled');
                     //$(".form-submit").show();
@@ -44,7 +44,7 @@
                         //$("div.error-msg").css({'color': 'red', 'font-size': '100%'});
                        // $(".form-submit").hide();
                         $(this).parent().parent().next().find('select').prop('disabled', 'disabled');
-                    } else if (parseInt(actual_qty) == 0) {
+                    } else if (parseInt(actual_qty) == 0 || isNaN(parseInt(actual_qty))) {
                         $(this).parent().parent().next().find('select').prop('disabled', 'disabled');
                         //$(".form-submit").show();
                     } else {

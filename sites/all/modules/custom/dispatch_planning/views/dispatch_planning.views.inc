@@ -2657,6 +2657,18 @@ function dispatch_planning_views_data() {
     'argument' => array(
       'handler' => 'views_handler_argument_string',
     ),
+    'relationship' => array(
+      'title' => t('Sales Register Bill Number to get bill value'),
+      'help' => t("Sales Register Bill Number to get bill valu"),
+      'handler' => 'views_handler_relationship',
+      'base' => 'node',
+      'base field' => 'title',
+        'extra' => array(
+        array('field' => 'type', 'value' => 'sales_register_data'),
+        array('field' => 'uid', 'left_field' => 'distributor_id'),
+      ),
+    ),   
+      
   );
   $data['dispatch_planning_api_data']['runsheet_number'] = array(
     'title' => t('DP runsheet_number'),
@@ -2913,11 +2925,92 @@ function dispatch_planning_views_data() {
     'argument' => array(
       'handler' => 'views_handler_argument_string',
     ),
+  ); 
+  // it is for delivery pending report.
+  $data['dispatch_planning_api_data']['delivery_pending_flag'] = array(
+    'title' => t('Delivery Pending Flag'),
+    'help' => t('Used to identify delivery pending bills. 1= delivery pending'),
+    'field' => array(
+      'handler' => 'dispatch_planning_delivery_pending_flag_data',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'dispatch_planning_delivery_pending_flag',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+  
+  // it is for delivery pending report.
+  $data['dispatch_planning_api_data']['delivery_pending_reason'] = array(
+    'title' => t('Delivery Pending Reason'),
+    'help' => t('Delivery Pending Reason'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+    'relationship' => array(
+      'title' => t('Dispatch_planning reason'),
+      'help' => t("Dispatch_planning reason."),
+      'handler' => 'views_handler_relationship',
+      'base' => 'node',
+      'base field' => 'nid',
+        'extra' => array(
+        array('field' => 'type', 'value' => 'dispatch_planning_reason_master'),
+        array('field' => 'uid', 'left_field' => 'distributor_id'),
+      )),  
   );
   
    $data['dispatch_planning_api_data']['res_delivery_boy'] = array(
     'title' => t('DP res_delivery_boy'),
     'help' => t('Dispatch Planning res_delivery_boy'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+     $data['dispatch_planning_api_data']['res_delivery_boy_edit'] = array(
+    'title' => t('DP res_delivery_boy_edit'),
+    'help' => t('Dispatch Planning res_delivery_boy_edit'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+   $data['dispatch_planning_api_data']['returns_incharge_name'] = array(
+    'title' => t('DP returns_incharge_name'),
+    'help' => t('Dispatch Planning returns_incharge_name'),
     'field' => array(
       'handler' => 'views_handler_field',
       'click sortable' => TRUE,
@@ -3021,6 +3114,16 @@ function dispatch_planning_views_data() {
     $data['views']['reason_for_failure'] = array(
         'title' => t('Reason For Failure'),
         'help' => t('Reason For Failure'),
+        'real field' => 'id',
+        'field' => array(
+            'handler' => 'bill_returns_report',
+        ),
+    );
+    
+     //res_cashier_short in item level
+    $data['views']['to_be_collected_amount'] = array(
+        'title' => t('To Be Collected Amount'),
+        'help' => t('To Be Collected Amount'),
         'real field' => 'id',
         'field' => array(
             'handler' => 'bill_returns_report',
@@ -3411,6 +3514,24 @@ function dispatch_planning_views_data() {
   $data['dispatch_planning_api_data']['updated_time'] = array(
     'title' => t('DP Updated Time'),
     'help' => t('DP Updated Time'),
+    'field' => array(
+      'handler' => 'views_handler_field_date',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort_date',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_date',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_filter_date',
+    ),
+  ); 
+  
+  $data['dispatch_planning_api_data']['dp_declaration_time'] = array(
+    'title' => t('Delivery Pending Time'),
+    'help' => t('Delivery Pending Time'),
     'field' => array(
       'handler' => 'views_handler_field_date',
       'click sortable' => TRUE,
@@ -5083,6 +5204,14 @@ function dispatch_planning_views_data() {
     ),
   );
   
+  $data['views']['header_area_delivery_summary_full_returned_reasons'] = array(
+    'title' => t('Delivery Summary Full return Reason'),
+    'help' => t('Just a field created for header purposes for Delivery Summary Full return Reason.'),
+    'area' => array(
+      'handler' => 'header_handler_delivery_summary_full_returned_reasons',
+    ),
+  );
+  
   $data['views']['field_collection_value'] = array(
     'title' => t('Collection value handler'),
     'help' => t('Collection value handler.'),
@@ -5107,6 +5236,16 @@ function dispatch_planning_views_data() {
     ),
   );
   
+  // Delivery pending printout handler
+  $data['views']['header_area_delivery_pending_printout'] = array(
+    'title' => t('Header field'),
+    'help' => t('Just a field created for header purposes for delivery pending printout.'),
+    'area' => array(
+      'handler' => 'header_handler_delivery_pending_printout',
+    ),
+  );
+  
+  
   return $data;
 }
 
@@ -5127,6 +5266,22 @@ class dispatch_planning_updated_flag_data extends views_handler_field {
          $res = 'Api';
       }
     return $res;
+  }
+
+}
+
+/**
+ * Field handler to translate a Status into its readable form.
+ */
+class dispatch_planning_delivery_pending_flag_data extends views_handler_field {
+
+  function render($values) {
+   $res = 'No';
+    $dp_flag = $values->dispatch_planning_api_data_delivery_pending_flag;
+      if ($dp_flag == 1) {
+         $res = 'Yes';
+      }
+     return $res;
   }
 
 }

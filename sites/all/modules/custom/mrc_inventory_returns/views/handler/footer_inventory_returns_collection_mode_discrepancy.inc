@@ -29,6 +29,7 @@ class footer_inventory_returns_collection_mode_discrepancy extends views_handler
     $user_id = $GLOBALS['user']->uid;
     $distributor_id = change_feeds_import_get_distributor_id($user_id);
     $query = db_select('dispatch_planning_api_data', 'ad');
+    $query->condition('ad.delivery_pending_flag', 1, '!=');
     $query->condition('ad.distributor_id', $distributor_id, '=');
     $query->condition('ad.runsheet_number', $trip_number, '=');
     $query->leftjoin('node', 'n', 'ad.party_code = n.title');

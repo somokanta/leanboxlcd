@@ -180,27 +180,58 @@ function vrs_confirmation_form($form, &$form_state) {
     $return_edit = 0;
     $bills_total_cashier_cash_short_value = 0;
     $return_changes = array();
+    $field_cashier_name_set = 0;
     foreach ($options as $key => &$val) {
       $sum_s_register_bill_value += (float) $val['field_bill_value_value'];
       $trip_execution_date = $val['trip_execution_date'];
       $field_cashier_name = $val['field_cashier_name_value'];
       $sum_return_value += $val['total_return_value'];
       $key = str_replace(' ', '', $key);
+      //cashier name = handover that means handover trip, fetch existing bills cashier name
+      if ($field_cashier_name == 'handover' && $field_cashier_name_set!==1) {
+           $sales_node_obj = node_load_multiple(NULL, array('title' => $key, 'type' => 'sales_register_data', 'uid' => $dis_id));
+           if (!empty($sales_node_obj)) {
+               $key_sales = key($sales_node_obj);
+               $previous_trip_id = $sales_node_obj[$key_sales]->field_previous_trip[LANGUAGE_NONE][0]['value'];
+               if (!empty($previous_trip_id)) {
+                   $trip_node_obj = node_load_multiple(NULL, array('title' => $previous_trip_id, 'type' => 'dispatch_data', 'uid' => $dis_id));
+                   $trip_node_key = key($trip_node_obj);
+                   $field_cashier_name = $trip_node_obj[$trip_node_key]->field_cashier_name[LANGUAGE_NONE][0]['value'];
+                   $field_cashier_name_set = 1;
+               }
+           }
+           
+      }
       // Checking Farery values present in  edit field also 
-      $val['res_cheque_date'] = !empty($val['res_cheque_date_edit']) ? $val['res_cheque_date_edit'] : $val['res_cheque_date'];
-      $val['res_cash_amount'] = !empty($val['res_cash_amount_edit']) ? round($val['res_cash_amount_edit']) : round($val['res_cash_amount']);
-      $val['res_photo_of_cheque'] = !empty($val['res_photo_of_cheque_edit']) ? $val['res_photo_of_cheque_edit'] : $val['res_photo_of_cheque'];
-      $val['res_cheque_amount'] = !empty($val['res_cheque_amount_edit']) ? round($val['res_cheque_amount_edit']) : round($val['res_cheque_amount']);
-      $val['res_money_collect2'] = !empty($val['res_money_collect2_edit']) ? $val['res_money_collect2_edit'] : $val['res_money_collect2'];
-      $val['photo_of_signed_bill_partial'] = !empty($val['photo_of_signed_bill_partial_edit']) ? $val['photo_of_signed_bill_partial_edit'] : $val['photo_of_signed_bill_partial'];
-      $val['res_confirm_signed_bill_amount'] = !empty($val['res_confirm_signed_bill_amount_edit']) ? $val['res_confirm_signed_bill_amount_edit'] : $val['res_confirm_signed_bill_amount'];
-      $val['res_bank_name'] = !empty($val['res_bank_name_edit']) ? $val['res_bank_name_edit'] : $val['res_bank_name'];
-      $val['res_photo_of_signed_bill_delivery'] = !empty($val['res_photo_of_signed_bill_delivery_edit']) ? $val['res_photo_of_signed_bill_delivery_edit'] : $val['res_photo_of_signed_bill_delivery'];
-      // Yes or No column
-      $val['res_signed_bill_delivery'] = !empty($val['res_signed_bill_delivery_edit']) ? $val['res_signed_bill_delivery_edit'] : $val['res_signed_bill_delivery'];
-      $val['res_signed_bill_partial'] = !empty($val['res_signed_bill_partial_edit']) ? $val['res_signed_bill_partial_edit'] : $val['res_signed_bill_partial'];
-      $val['res_cheque_no'] = !empty($val['res_cheque_no_edit']) ? $val['res_cheque_no_edit'] : $val['res_cheque_no'];
-      $val['res_confirm_signed_bill_amount'] = round($val['res_confirm_signed_bill_amount']);
+      // Checking there is collection mode change in manual edit screen
+      // Checking Manual Edit screen latest Payment Mode. Before VRS Confirmation
+      /*
+       *  Before VRS Confirmaiton,
+       *  Fetch Values from Return manual Edit screen, If the collection mode changed that means return version created.
+          $val['res_money_collect2_edit'] is empty fetch values from farey cash,cheque,signed bill  fields 
+       *  AFter VRS Confirmation, If return changes, then fetch values from manual edit screen based on collection mode.   
+       *  This will handle double mode.
+       *        */
+      if (!empty($val['res_money_collect2_edit'])) {
+            $val['res_cheque_date'] = $val['res_cheque_date_edit'];
+            $val['res_cash_amount'] = round($val['res_cash_amount_edit']); 
+            $val['res_photo_of_cheque'] = $val['res_photo_of_cheque_edit'];
+            $val['res_cheque_amount'] =  round($val['res_cheque_amount_edit']);
+            $val['photo_of_signed_bill_partial'] = $val['photo_of_signed_bill_partial_edit'];
+            $val['res_confirm_signed_bill_amount'] = round($val['res_confirm_signed_bill_amount_edit']);
+            $val['res_bank_name'] = $val['res_bank_name_edit'];
+            $val['res_photo_of_signed_bill_delivery'] = $val['res_photo_of_signed_bill_delivery_edit'];
+            // Yes or No column
+            $val['res_signed_bill_delivery'] = $val['res_signed_bill_delivery_edit'];
+            $val['res_signed_bill_partial'] = $val['res_signed_bill_partial_edit'];
+            $val['res_cheque_no'] =  $val['res_cheque_no_edit'] ;
+      }
+      // Fetch from farey fields not from edit. Only to round off values
+      else {
+            $val['res_cash_amount'] =  round($val['res_cash_amount']);
+            $val['res_cheque_amount'] =  round($val['res_cheque_amount']);
+            $val['res_confirm_signed_bill_amount'] = round($val['res_confirm_signed_bill_amount']);
+      }
       // to be collected,total cash, signed bill all  should be zero in the case of undeliver
       // Payment outcome is undeliver then cash collected = zero,cheque collected =zero signed bill = Zero
       if ($val['res_status'] == 'undeliver') {
@@ -232,7 +263,7 @@ function vrs_confirmation_form($form, &$form_state) {
           $val['res_money_collect2_edit'] is empty fetch values from farey cash,cheque,signed bill  fields 
        *  AFter VRS Confirmation, If return changes, then fetch values from manual edit screen based on collection mode.   
        *        */
-      switch ($val['res_money_collect2_edit']) {
+      /*switch ($val['res_money_collect2_edit']) {
                                     case 'cash':
                                         unset($val['res_cheque_date']);
                                         unset($val['res_cheque_amount']);
@@ -258,7 +289,7 @@ function vrs_confirmation_form($form, &$form_state) {
                                         unset($val['res_cash_amount']);
                                         break;
                                     default:
-                                }
+                                }*/
 
         // Payment Outcome string, VRS present or Farey value
       if ($val['res_status'] !== 'undeliver') {
@@ -309,6 +340,7 @@ function vrs_confirmation_form($form, &$form_state) {
                                 }
                              }
                              // ON the Manual Edit Screen Changed Bill status only and empty any cash mode then fetch farey default values
+                             // There is no value in money_collect2_edit  and dp declared after vrs confirmation,that case we have to assign values
                             $bills[$key]['actual_cash_amount'] = $val['res_cash_amount'];
                             $bills[$key]['cheque_date'] = $val['res_cheque_date'];
                             $bills[$key]['actual_cheque_amount'] = $val['res_cheque_amount'];
@@ -412,7 +444,8 @@ function vrs_confirmation_form($form, &$form_state) {
     'Short Reason Code',
     'Remarks',
     'Pending',
-    'Pending Reason'
+    'Pending Reason',
+    'Delivery Pending'  
   );
 
   if (!empty($options)) {
@@ -548,7 +581,13 @@ function vrs_confirmation_form($form, &$form_state) {
         
       }
 
-
+      if($val['delivery_pending_flag'] == 1){
+          $delivery_pending = t('Yes');
+      }
+      else
+      {
+          $delivery_pending = t('No');
+      }
       $form['bill_details']['#rows'][$key][] = $val['bill_number'];
       $undeliver = 0;
       switch ($val['res_status']) {
@@ -605,7 +644,7 @@ function vrs_confirmation_form($form, &$form_state) {
         //'#id' => 'bill_details-' . $key . '-bank_name',
         '#attributes' => array('class' => array('bank_name'), 'title' => t('Bank Name')),
         '#type' => 'textfield',
-        '#autocomplete_path' => 'get_bank_names/autocomplete/' . $trip_id,
+        '#autocomplete_path' => 'get_bank_names/autocomplete',
         '#size' => $text_box_size,
         '#default_value' => $vrs_total_id ? $bills[$key]['bank_name'] : $val['res_bank_name']
       );
@@ -877,6 +916,8 @@ function vrs_confirmation_form($form, &$form_state) {
         $form['bill_details']['#rows'][$key][] = $na;
         $form['bill_details']['#rows'][$key][] = $na;
         $form['bill_details']['#rows'][$key][] = $na;
+         $form['bill_details']['#rows'][$key][] = $na;
+        $form['bill_details']['#rows'][$key][] = $delivery_pending;
       }
       else {
         $form['bill_details']['#rows'][$key][]['data']["s_register_bill_value"] = &$s_register_bill_value;
@@ -895,8 +936,11 @@ function vrs_confirmation_form($form, &$form_state) {
         $form['bill_details']['#rows'][$key][]['data']["remarks"] = &$remarks;
         $form['bill_details']['#rows'][$key][]['data']["non_billable"] = &$non_billable;
         $form['bill_details']['#rows'][$key][]['data']["non_bankable_reason_code"] = &$non_bankable_reason_code;
+        $form['bill_details']['#rows'][$key][] = $delivery_pending;
       }
+      
       $form['bill_details']['#rows'][$key][] = $vrs_total_id ? $bills[$key]['bank_name'] : $val['res_bank_name'];
+      
       unset($actual_cash_collected);
       unset($actual_cheque_collected);
       unset($signed_bill_collected);
@@ -1159,7 +1203,23 @@ function validate_vrs_trip_details($form, &$form_state) {
       form_set_error('trip_id', "Trip ID :$trip_id does not exists.");
       ajax_redirect('vrs-confirmation');
     }
-    else if ($check_returns_flag->field_vrs_status_value == 2) {
+    $current_vrs_status = $check_returns_flag->field_vrs_status_value;
+    $field_vrs_status = field_info_field('field_vrs_status');
+    $vrs_status = list_allowed_values($field_vrs_status);
+    unset($vrs_status[3]); // vrs confirmation pending
+    unset($vrs_status[1]); // return confirmed
+    //Vrs screen entry return conrimed and vrs confirmation pending
+    if (isset($vrs_status[$current_vrs_status])) {
+        form_set_error('trip_id', "Trip ID :$trip_id is in $vrs_status[$current_vrs_status] state.");
+        ajax_redirect('vrs-confirmation');
+    }
+    else if (empty($check_returns_flag->field_vrs_status_value)) {
+      unset($form_state['vrs_confirmation']['bills']);
+      form_set_error('trip_id', "Trip ID:$trip_id-Please confirm Delivery Confirmation.");
+      ajax_redirect('vrs-confirmation');
+    }
+    
+    /*else if ($check_returns_flag->field_vrs_status_value == 2) {
       unset($form_state['vrs_confirmation']['bills']);
       form_set_error('trip_id', "Trip ID :$trip_id – VRS Status already Confirmed.");
       ajax_redirect('vrs-confirmation');
@@ -1178,7 +1238,9 @@ function validate_vrs_trip_details($form, &$form_state) {
       unset($form_state['vrs_confirmation']['bills']);
       form_set_error('trip_id', "Trip ID:$trip_id-Please confirm Return Inventory first.");
       ajax_redirect('vrs-confirmation');
-    }
+    }*/
+     
+    
   }
   else {
     form_set_error('trip_id', '');
@@ -1206,6 +1268,8 @@ function display_vrs_trip_details($form, &$form_state) {
     $sub_query1->addExpression("SUM(dpi.return_qty * dpi.sum_net_sales_value)", 'return_value');
     $sub_query1->addExpression("SUM(dpi.res_cashier_short * dpi.sum_net_sales_value)", 'cashier_short_value');
     $sub_query1->addExpression("SUM(dpi.res_godown_short * dpi.sum_net_sales_value)", 'godown_short_value');
+    $sub_query1->join('dispatch_planning_api_data', 'dp_header', 'dpi.trip_bill_reference = dp_header.id AND dp_header.distributor_id ='.$dis_id);    
+    $sub_query1->condition('dp_header.runsheet_number', $trip_id, '=');
     $sub_query1->groupBy('dpi.trip_bill_reference');
     $query = db_select('dispatch_planning_api_data', 'ad');
     $query->condition('ad.distributor_id', $dis_id, '=');
@@ -1284,6 +1348,7 @@ function display_vrs_trip_details($form, &$form_state) {
         $query->addExpression('ad.res_cheque_no_edit', 'res_cheque_no_edit');
         $query->addExpression('item_details.return_value', 'total_return_value');
         $query->addExpression('ad.updated_time', 'farey_updated_time');
+        $query->addExpression('ad.delivery_pending_flag', 'delivery_pending_flag');
         $query->orderBy('ad.res_status', 'asc');
         $res = $query->execute()->fetchAll(PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
   }
@@ -1927,3 +1992,4 @@ function _get_cashier_name_using_trip_id($trip_id) {
   }
   return $res;
 }
+

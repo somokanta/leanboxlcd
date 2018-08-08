@@ -1987,3 +1987,66 @@ function dispatch_planning_update_7126() {
     db_create_table('godown_data', $schema['godown_data']);
   }
 }
+
+function dispatch_planning_update_7128() {
+   $fields = array(
+    'delivery_pending_reason' => array(
+       'description' => 'delivery_pending_reason.not send it to farey api',
+       'type' => 'int',
+    ),
+  );
+  foreach ($fields as $key => $field) {
+    if (!db_field_exists('dispatch_planning_api_data', $key)) {
+      db_add_field('dispatch_planning_api_data', $key, $field);
+    }
+  }
+}
+
+function dispatch_planning_update_7133() {
+   $fields = array(
+    'delivery_pending_flag' => array(
+       'description' => 'delivery_pending_flag if flag =1 it is in delivery pending mode.',
+       'type' => 'int',
+       'size'=>'tiny',
+       'not null' => TRUE,
+       'default'=>0, 
+    ),
+    'delivery_pending_reason' => array(
+        'description' => 'delivery_pending_reason.not send it to farey api',
+        'type' => 'int',
+    ),   
+    'returns_incharge_name' => array(
+       'description' => t('Returns Incharge Name'),
+       'type' => 'varchar',
+       'length' => 50,
+       'default' => NULL,
+     ),
+    'res_delivery_boy_edit' => array(
+       'description' => t('Response delivery_boy Edit'),
+       'type' => 'varchar',
+       'length' => 50,
+       'default' => NULL,
+     ),
+    'dp_declaration_time' => array(
+       'description' => t('Delivery Pending Declaration time.'),
+       'type' => 'int',
+       'not null' => TRUE,
+       'default' => 0,
+     ),   
+     'delivery_incharge_name' => array(
+       'description' => t('Delivery Incharge Name'),
+       'type' => 'varchar',
+       'length' => 50,
+       'default' => NULL,
+     ),
+      'dispatch_date' => array(
+        'description' => t('Dispatch date'),
+        'type' => 'int',
+      ),
+  );
+  foreach ($fields as $key => $field) {
+    if (!db_field_exists('dispatch_planning_api_data', $key)) {
+      db_add_field('dispatch_planning_api_data', $key, $field);
+    }
+  }
+}
