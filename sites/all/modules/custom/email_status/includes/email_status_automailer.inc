@@ -782,7 +782,7 @@ function send_email_del_app_adoption() {
   $query->condition('ad.dispatch_date', array($from_this_date, $yesterday_date), 'BETWEEN');
   $query->fields('ad', array('fieldExecutiveName'));
   $query->addexpression("ROUND(COUNT(CASE WHEN ad.dispatch_date =  $yesterday_date AND  ad.res_updated_time != 0 THEN ad.bill_number END) / COUNT(CASE WHEN ad.dispatch_date =  $yesterday_date THEN ad.bill_number END) *100)", 'app_adoption');
-
+  $query->orderBy('app_adoption','DESC');
   $query->addexpression("ROUND(COUNT(CASE WHEN ad.dispatch_date = $yesterday_date AND ad.res_updated_time !=0 AND ad.res_updated_time < (UNIX_TIMESTAMP(from_unixtime(ad.res_updated_time, '%Y-%m-%d'))+60*60*18-19800) THEN ad.bill_number END) / COUNT(CASE WHEN  ad.dispatch_date = $yesterday_date AND ad.res_updated_time != 0 THEN ad.bill_number END)*100)", 'entrybefsix');
 
   $query->addexpression("ROUND(COUNT(CASE WHEN ad.dispatch_date = $yesterday_date AND ad.res_updated_time !=0 AND ad.res_updated_time >= (UNIX_TIMESTAMP(from_unixtime(ad.res_updated_time, '%Y-%m-%d'))+60*60*18-19800) THEN ad.bill_number END) / COUNT(CASE WHEN ad.dispatch_date = $yesterday_date AND ad.res_updated_time != 0 THEN ad.bill_number END)*100)", 'entryaftsix');
