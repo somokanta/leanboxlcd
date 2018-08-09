@@ -1,0 +1,7 @@
+name = Party Packing PTL
+description = Party Packing for PTL
+package = Custom
+core = 7.x
+
+files[] = views/handler/views_handler_field_sequence.inc
+files[] = views/handler/views_handler_field_total_quantity.inc
