@@ -1,0 +1,183 @@
+<?php
+
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+
+function party_packing_ptl_views_api() {
+  return array(
+    'api' => '3.0',
+    'path' => drupal_get_path('module', 'party_packing_ptl') . '/views',
+  );
+}
+
+function party_packing_ptl_menu() {
+  $items = array();
+
+  $items['trip-wise-report'] = array(
+    'title' => 'Party packing trip wise report',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('get_data_trip_id_form'),
+    'access arguments' => array('Distributor Upload File'),
+    'type' => MENU_CALLBACK,
+  );
+  
+  $items['party-pack-ptl'] = array(
+    'title' => 'Party packing PTL report',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('party_pack_ptl_trip_id_form'),
+    'access arguments' => array('Distributor Upload File'),
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['download-pdf/%'] = array(
+    'title' => 'Download PDF',
+    'page callback' => 'download_pdf3',
+    'page arguments' => array(1),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  
+  $items['download-pdf-ptl/%'] = array(
+    'title' => 'Download PDF',
+    'page callback' => 'download_pdf4',
+    'page arguments' => array(1),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  return $items;
+}
+
+function get_data_trip_id_form($form, &$form_state) {
+  $form['#prefix'] = '<div id="itemlist-div">';
+  $form['#suffix'] = '</div>';
+
+  $form['trip_id'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Trip Id'),
+    '#required' => TRUE,
+  );
+
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('submit'),
+    '#ajax' => array(
+      'wrapper' => 'itemlist-div',
+      'callback' => 'get_data_trip_id_form_submit',
+      'method' => 'replace',
+      'effect' => 'fade',
+    ),
+    '#submit' => array('trip_id_form_submit'),
+    '#validate' => array('trip_id_form_validate'),
+  );
+  if (!empty($form_state['views_data'])) {
+    $form['markup'] = array(
+      '#type' => 'markup',
+      '#markup' => $form_state['views_data'],
+    );
+    $trip_id = $form_state['values']['trip_id'];
+    $pdf_link = l('Open PDF', "/download-pdf/$trip_id");
+    $form['download_mark'] = array(
+      '#type' => 'markup',
+      '#markup' => $pdf_link,
+    );
+  }
+  return $form;
+}
+
+function get_data_trip_id_form_submit($form, &$form_state) {
+  return $form;
+}
+
+function trip_id_form_validate($form, &$form_state) {
+  $trip_id = $form_state['values']['trip_id'];
+  if (!is_numeric($trip_id)) {
+    form_set_error('trip_id', "Enter Correct  Integer Value");
+  }
+}
+
+function trip_id_form_submit($form, &$form_state) {
+  $trip_id = $form_state['values']['trip_id'];
+  $view_name = "trip_wise_report";
+  $view = views_get_view($view_name, '');
+  $view->set_arguments(array($trip_id));
+  $rendered_html = $view->preview();
+  $form_state['views_data'] = $rendered_html;
+  $form_state['rebuild'] = TRUE;
+}
+
+function download_pdf3($args) {
+  $view_name = "trip_wise_report";
+  $view = views_get_view($view_name, '');
+  $view->set_arguments(array($args));
+  $rendered_html = $view->preview();
+  pdf_using_mpdf_api($rendered_html);
+}
+
+function party_pack_ptl_trip_id_form($form, &$form_state) {
+  $form['#prefix'] = '<div id="itemlist-div">';
+  $form['#suffix'] = '</div>';
+
+  $form['trip_id'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Trip Id'),
+    '#required' => TRUE,
+  );
+
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('submit'),
+    '#ajax' => array(
+      'wrapper' => 'itemlist-div',
+      'callback' => 'party_pack_ptl_trip_id_form_submit',
+      'method' => 'replace',
+      'effect' => 'fade',
+    ),
+    '#submit' => array('ptl_trip_id_form_submit'),
+    '#validate' => array('ptl_trip_id_form_validate'),
+  );
+  if (!empty($form_state['views_data'])) {
+    $form['markup'] = array(
+      '#type' => 'markup',
+      '#markup' => $form_state['views_data'],
+    );
+    $trip_id = $form_state['values']['trip_id'];
+    $pdf_link = l('Open PDF', "/download-pdf-ptl/$trip_id");
+    $form['download_mark'] = array(
+      '#type' => 'markup',
+      '#markup' => $pdf_link,
+    );
+  }
+  return $form;
+}
+
+function party_pack_ptl_trip_id_form_submit($form, &$form_state) {
+  return $form;
+}
+
+function ptl_trip_id_form_validate($form, &$form_state) {
+  $trip_id = $form_state['values']['trip_id'];
+  if (!is_numeric($trip_id)) {
+    form_set_error('trip_id', "Enter Correct  Integer Value");
+  }
+}
+
+function ptl_trip_id_form_submit($form, &$form_state) {
+  $trip_id = $form_state['values']['trip_id'];
+  $view_name = "party_pack_ptl";
+  $view = views_get_view($view_name, '');
+  $view->set_arguments(array($trip_id));
+  $rendered_html = $view->preview();
+  $form_state['views_data'] = $rendered_html;
+  $form_state['rebuild'] = TRUE;
+}
+
+function download_pdf4($args) {
+  $view_name = "party_pack_ptl";
+  $view = views_get_view($view_name, '');
+  $view->set_arguments(array($args));
+  $rendered_html = $view->preview();
+  pdf_using_mpdf_api($rendered_html);
+}
