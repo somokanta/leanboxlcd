@@ -44,6 +44,7 @@ class header_ptl_loose_custom_field extends views_handler_field {
     $loading_sheet = ptl_loading_sheet_by_trip_id($trip_id,$rs_code);
     $no_of_bills = ptl_no_of_bills_by_trip_id($trip_id,$rs_code);
     $no_of_bill_lines = ptl_no_of_bill_lines_by_trip_id($trip_id,$rs_code);
+    $tp_van = get_tp_van_by_trip_id($trip_id);
 
     if (!empty($no_of_bills)) {
       $this->view->custom_footer = $clds ? $clds : 0;
@@ -93,8 +94,8 @@ class header_ptl_loose_custom_field extends views_handler_field {
       <td align = "left" style="color:#666">' . $no_of_bill_lines . '</td>
       <td></td>
       <td></td>
-      <td></td>
-      <td></td>
+      <td>TP Van</td>
+      <td align = "left" style="color:#666">' . $tp_van . '</td>
       <td></td>
       </tr>
       </tbody>

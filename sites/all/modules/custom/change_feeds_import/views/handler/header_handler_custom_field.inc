@@ -35,6 +35,7 @@ class header_handler_custom_field extends views_handler_field {
     $name = get_distrubutor_name_from_user_id($user_id);
     $trip_id = $this->view->args[0];
     $result = get_data_from_trip_id($trip_id);
+    $tp_van = get_tp_van_by_trip_id($trip_id);
 
     if (!empty($result)) {
       $trip_execution_date = $result['field_trip_executon_date_value'];
@@ -106,6 +107,16 @@ class header_handler_custom_field extends views_handler_field {
       <td></td>
       <td>Seq/Kms/Time(Hrs)</td>
       <td align = "left" style="color:#666">'.$sequence.'/'. $total_distance.'/'.$total_travel_time.'</td>
+      <td></td>
+      </tr>
+      <tr>
+      <td></td>
+      <td>TP Van</td>
+      <td align = "left" style="color:#666">'.$tp_van.'</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
       <td></td>
       </tr>
       </tbody>
