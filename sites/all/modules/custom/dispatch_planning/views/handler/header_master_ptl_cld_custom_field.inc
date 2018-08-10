@@ -53,7 +53,7 @@ class header_master_ptl_cld_custom_field extends views_handler_field {
     $query->condition('n.type', 'dispatch_data');
     $trip_id_nid = $query->execute()->fetchField();
     $van_date = _get_van_loading_combination_by_trip($trip_id_nid);
-    $tp_van = get_tp_van_by_trip_id($trip_id);
+    $tp_van = get_tp_van_by_trip_id($actual_trip_id);
     if (!empty($trip_date)) {
 
       return '<table width = "100%" cellspacing = "0" style = "font-size: 13px; color:#000; font-family:arial" cellpadding = "5" border = "0" align = "center" class = "preview_table">
