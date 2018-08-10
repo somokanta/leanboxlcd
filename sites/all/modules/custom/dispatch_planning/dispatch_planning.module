@@ -3674,3 +3674,18 @@ function get_cashier_name($trip_id) {
   $cashier_name = $query1->execute()->fetchField();
   return $cashier_name;
 }
+/**
+ * 
+ * @param type $trip_id
+ * @return type
+ */
+function get_tp_van_by_trip_id($trip_id) {
+  $query = db_select('node', 'n');
+  $query->condition('n.type', 'dispatch_data');
+  $query->addTag('node_uid');
+  $query->condition('n.title', $trip_id);
+  $query->join('field_data_field_entered_prevan', 'ep', 'ep.entity_id = n.nid');
+  $query->fields('ep', array('field_entered_prevan_value'));
+  $results = $query->execute()->fetchField();
+  return $results;
+}

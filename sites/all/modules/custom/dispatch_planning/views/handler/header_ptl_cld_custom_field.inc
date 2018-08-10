@@ -43,6 +43,7 @@ class header_ptl_cld_custom_field extends views_handler_field {
     $trip_date = date('d-M-y', $trip_date);
     $loading_sheet = ptl_loading_sheet_by_trip_id($trip_id,$rs_code);
     $no_of_bills = ptl_no_of_bills_by_trip_id($trip_id,$rs_code);
+    $tp_van = get_tp_van_by_trip_id($trip_id);
 
 
     if (!empty($no_of_bills)) {
@@ -83,8 +84,8 @@ class header_ptl_cld_custom_field extends views_handler_field {
       <td align = "left" style="color:#666">' . $no_of_bills . '</td>
       <td></td>
       <td></td>
-      <td></td>
-      <td></td>
+      <td>TP Van</td>
+      <td align = "left" style="color:#666">' . $tp_van . '</td>
       <td></td>
       </tr>
       </tbody>
