@@ -153,17 +153,24 @@ function change_feeds_import_sales_register_batch_fix_process($data, $distributo
      // $value['BILL_DATE'] = str_replace('/', '-', $value['BILL_DATE']);
      // $date_arr = explode('-', $value['BILL_DATE']);
      // $converted_date = $date_arr[2] . '-' . $date_arr[1] . '-' . $date_arr[0];
-      $value['BILL_DATE'] = strtotime($value['BILL_DATE']);
-      if (empty($value['BILL_DATE'])) {
-        $value['error_message'] .= " Enter correct Bill Date for Bill No " . $value['BILL_NUMBER'] . ".";
+      $is_not_valid_date = validate_input_date(trim($value['BILL_DATE']));
+      if ($is_not_valid_date === 1) {
+                $value['error_message'] .= " Please Enter  Bill Date for Bill No:" . $value['BILL_NUMBER'] . " in corect format. 
+                                             Acceptable formats are e.g. 2-4-18 or 2/4/18 or 2-Apr-18 or 2/Apr/18 or 2-4-2018 or 2/4/2018 .";
+      } else {
+                $value['BILL_DATE'] = date('d-m-Y',strtotime($is_not_valid_date));
       }
-      else {
-
+      $value['BILL_DATE'] = strtotime($value['BILL_DATE']);
+      if (!empty($value['BILL_DATE'])) {
         $check_date = $value['BILL_DATE'];
         $from = strtotime(date('Y-m-d', strtotime("-$no_of_days days")));
         $to = strtotime(date('Y-m-d'));
         if (($check_date >= $from) && ($check_date <= $to)) {
-          // do nothing
+          //Check sales register is already updated then validate with field_sr_bill_date
+          $sr_bill_date = get_sales_register_sr_bill_date($value['BILL_NUMBER'], $distributor_id);
+          if(!empty($sr_bill_date) && $sr_bill_date != $value['BILL_DATE']){
+            $value['error_message'] .= "Bill Date should be equal to previously uploaded bill date for Bill No " . $value['BILL_NUMBER'] . ".";
+          }
         }
         else {
           $value['error_message'] .= "Enter correct Bill Date for Bill No " . $value['BILL_NUMBER'] . ".";
@@ -623,4 +630,22 @@ function get_bod_flag($bod_date, $outlet_nid) {
     }
   }
   return $flag;
+}
+
+/**
+ * 
+ * @param type $bill_number
+ * @param type $distributor_id
+ * @return type
+ */
+function get_sales_register_sr_bill_date($bill_number, $distributor_id) {
+  $query = db_select('node', 'n');
+  $query->condition('n.uid', $distributor_id);
+  $query->condition('n.type', 'sales_register_data');
+  $query->condition('n.title', $bill_number, '=');
+  $query->join('field_data_field_sr_bill_date', 'sr_bill', 'sr_bill.entity_id = n.nid');
+  $query->fields('sr_bill', array('field_sr_bill_date_value'));
+  
+  $sr_bill_dates = $query->execute()->fetchField();
+  return $sr_bill_dates;
 }

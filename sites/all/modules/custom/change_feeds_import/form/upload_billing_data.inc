@@ -190,6 +190,22 @@ function change_feeds_import_update_data_in_error_billing_table_after_confirm($l
       ->condition('id', $last_id, '=')
       ->execute();
 }
+// fetch sales register bill date
+function get_sales_register_bill_date($distributor_id) {
+    $sr_bill_dates = array();
+    $time = strtotime('-30 days');  // last 1 month
+    if (!empty($distributor_id)) {
+        $query = db_select('node', 'n');
+        $query->leftjoin('field_data_field_sr_new_bill_date', 'sr_bill', 'sr_bill.entity_id = n.nid');
+        $query->condition('n.uid', $distributor_id);
+        $query->condition('n.type', 'sales_register_data');
+        $query->fields('n',array('title'));
+        $query->fields('sr_bill', array('field_sr_new_bill_date_value'));
+        $query->condition('n.created', $time, '>');
+        $sr_bill_dates = $query->execute()->fetchAllKeyed(0,1);
+    }
+    return $sr_bill_dates;
+}
 
 function change_feeds_import_batch_fix_process($max, $data, $distributor_id, $file_name, $party_code_result, $sku_code_result, $bill_result, $master_result, &$context) {
   if (!isset($context['results']['last_id'])) {
@@ -212,6 +228,7 @@ function change_feeds_import_batch_fix_process($max, $data, $distributor_id, $fi
     $context['results']['sku_code_result'] = check_sku7_code_exist_or_not(); // check sku7 code is present or not.
     $context['results']['bill_result'] = check_bill_number_exist(); // check bill number is not exist.
     $context['results']['master_result'] = get_node_titles(array('pricelist_group_master', 'product_division_master', 'sales_register_data'));
+    $context['results']['sr_bill_dates'] = get_sales_register_bill_date($distributor_id);
   }
 
   $last_id = $context['results']['last_id'];
@@ -316,10 +333,28 @@ function change_feeds_import_batch_fix_process($max, $data, $distributor_id, $fi
 
           case 'BILL_DATE':
           case 'LOADING_DATE':
-            if (empty(strtotime($v))) {
+            /*if (empty(strtotime($v))) {
               $flag = 1;
               $error_text = "$v Not a valid date";
-            }
+            }*/
+            $is_not_valid_date = validate_input_date(trim($v));
+                        if ($is_not_valid_date === 1) {
+                            $flag = 1;
+                            $error_text =  "$v Not a valid date format.Acceptable formats are e.g. 2-4-18 or 2/4/18 or 2-Apr-18 or 2/Apr/18 or 2-4-2018 or 2/4/2018 .";
+                        } else {
+                            $sr_new_bill_date =  strtotime($is_not_valid_date);
+                        }
+                        if (!empty($sr_new_bill_date)) {
+                                     //$context['results']['sr_bill_dates'][$bill_number]);one month bill _number dates
+                            if ($sr_new_bill_date != $context['results']['sr_bill_dates'][$bill_number]) {
+                                $flag = 1;
+                                $error_text =  "Loading/Billing Date - $v : Does not match with Sales register Billing Date.";
+                            }
+                            else {
+                                    // strtotitme value
+                                    $value[$k] = date('d-m-Y', $sr_new_bill_date);
+                            }
+                        }
 
             break;
 

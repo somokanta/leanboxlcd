@@ -400,6 +400,15 @@ function mrc_inventory_returns_views_data() {
     ),
   );
   
+  // Add custom field for collection terms _discrepancy
+  $data['views']['footer_collection_terms_discrepancy'] = array(
+    'title' => t('collection terms discrepancy'),
+    'help' => t('collection terms discrepancy.'),
+    'area' => array(
+      'handler' => 'credit_terms_discrepancy',
+    ),
+  );
+  
   // Adding custom handler for VRS Trip Total Report
   $data['vrs_trip_total']['table'] = array(
     'group' => t('VRS Trip Total'),
