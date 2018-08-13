@@ -2267,7 +2267,7 @@ function bill_pending_autocomplete($trip_id,$string = '') {
     $query->join('field_data_field_billing_loading_date', 'ld', 'n.nid = ld.entity_id');
     $query->join('field_data_field_trip_id_reference', 'ft', 'ft.entity_id = n.nid');
     $query->join('dispatch_planning_api_data', 'ad', 'ad.bill_number = n.title');
-    $query->condition('n.title', db_like($string) . '%', 'LIKE');
+    $query->condition('n.title', '%'.db_like($string) . '%', 'LIKE');
     $query->condition('n.type', 'sales_register_data');
     $query->condition('ad.distributor_id', $distributor_id);
     $query->condition('ad.delivery_pending_flag', 1,'!=');
