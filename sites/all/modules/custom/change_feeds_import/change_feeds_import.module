@@ -2046,6 +2046,8 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
     }
     $ph_no = $entity->field_hul_phone_no[LANGUAGE_NONE][0]['value'];
     $hul_address = $entity->field_hul_address[LANGUAGE_NONE][0]['value'];
+    $hul_lat = $entity->field_hul_lat[LANGUAGE_NONE][0]['value'];
+    $hul_long = $entity->field_hul_long[LANGUAGE_NONE][0]['value'];
 
     if (empty($ph_no)) {
       drupal_set_message("Hul Phone No Can Not Be Null", 'error', FALSE);
@@ -2053,6 +2055,18 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
     }
     if (empty($hul_address)) {
       drupal_set_message("Hul Address Can Not Be Null", 'error', FALSE);
+      $entity->feeds_item->skip = TRUE;
+    }
+    if (!isset($hul_lat) || !isset($hul_long)) {
+      drupal_set_message("Lat Long cannot be blank for HUL Code $title", 'error', FALSE);
+      $entity->feeds_item->skip = TRUE;
+    }
+    if (floatval($hul_lat) == 0 || floatval($hul_long) == 0) {
+      drupal_set_message("Lat Long cannot be zero for HUL Code $title", 'error', FALSE);
+      $entity->feeds_item->skip = TRUE;
+    }
+     if (($hul_lat< 0) || ($hul_long< 0)) {
+      drupal_set_message("Lat Long cannot be negative for HUL Code $title", 'error', FALSE);
       $entity->feeds_item->skip = TRUE;
     }
   }
