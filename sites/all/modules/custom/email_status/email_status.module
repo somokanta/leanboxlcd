@@ -3472,5 +3472,8 @@ function check_product_validation($distributor_id) {
   $query1->fields('n', array('nid'));
   $all_nids = $query1->execute()->fetchCol();
   $all_nids = implode(",", $all_nids);
+  if(empty($all_nids)){
+    $all_nids = 0;
+  }
   return $all_nids; 
 }
