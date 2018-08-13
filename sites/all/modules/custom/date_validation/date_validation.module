@@ -1,0 +1,58 @@
+<?php
+
+// Fuction to validate & return date, return if it is valid 12-02-2015
+function validate_input_date($input_date) {
+ $formated_date = '';
+   $error = 1;
+   $current_year = date('Y');
+   $year_first_two_digit = substr($current_year, 0, 2);
+   // Explode with / or -
+   $input_date_array = explode('-', $input_date);
+   if (count($input_date_array) != 3) {
+            $input_date_array = explode('/', $input_date);
+            if (count($input_date_array) != 3) {
+                return $error;
+            }
+        }
+// Year validation
+        if(!is_numeric($input_date_array[2]))
+              return $error;  
+        if (strlen($input_date_array[2]) == 4 || strlen($input_date_array[2]) == 2) {
+            // correct year validation. Do nothing
+        }
+        else {
+            return $error;
+        }
+       if (strlen($input_date_array[2]) == 2)
+        $year = $year_first_two_digit . $input_date_array[2];
+       else
+        $year = $input_date_array[2];
+
+    $day = $input_date_array[0];
+// validate day
+        if(empty($input_date_array[0]))
+            return $error;  
+        if ($input_date_array[0] > 31 || !is_numeric($input_date_array[0]))
+            return $error;
+        if (strlen($input_date_array[0])>2)
+            return $error;
+// validate month
+        if(empty($input_date_array[1]))
+            return $error; 
+        if (is_numeric($input_date_array[1])) {
+            if ($input_date_array[1] > 12)
+                return $error;
+            else
+                $month = $input_date_array[1];
+        }
+        elseif (is_string($input_date_array[1])) {
+            $monthobject = date_create_from_format("j-M-Y", "15-$input_date_array[1]-2013");
+            $month = date_format($monthobject, "m");
+            if ($month > 0 && $month <= 12)
+                $month = $month;
+            else
+                return $error;
+        }
+        $formated_date = $day . '-' . $month . '-' . $year;
+      return $formated_date;
+}

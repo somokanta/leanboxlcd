@@ -1,0 +1,4 @@
+name = Date Validation
+description = CSV Date Validation Module
+package = Custom
+core = 7.x
