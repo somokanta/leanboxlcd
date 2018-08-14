@@ -565,6 +565,8 @@ function _van_planning_callback_form($form, &$form_state) {
       'sum_cft' => array('data' => t('Volume')),
       'rs_per_sum_kg' => array('data' => t('Rs/Kg')),
       'rs_per_sum_cft' => array('data' => t('Rs/Cft')),
+      'party_code_val'=>array('data'=>t('Party Code')),//NEWFIELD
+      'party_name_val'=>array('data'=>t('Party Name'))
     );
 
     // find selected van no in popup
@@ -915,6 +917,7 @@ function _van_planning_callback_form($form, &$form_state) {
           $bill_wise_volume = $form_state['input']['child_bill_wise_volume'];
           $bill_wise_rs_kg = $form_state['input']['child_bill_wise_rs_kg'];
           $bill_wise_rs_cft = $form_state['input']['child_bill_wise_rs_cft'];
+          $bill_wise_input_data = FALSE;
           if (!empty($bill_area_code) ||
             !empty($bill_pl_group) ||
             !empty($child_bill_wise_date) ||
@@ -926,13 +929,12 @@ function _van_planning_callback_form($form, &$form_state) {
             !empty($bill_wise_rs_cft)) {
             $bill_wise_input_data = TRUE;
           }
-
-          $constant_bill_array1 = _get_van_planning_bill_wise_data1($bill_area_code, $bill_pl_group, $bill_wise_range_op, $bill_wise_value, $bill_wise_weight, $bill_wise_volume, $bill_wise_rs_kg, $bill_wise_rs_cft, $bill_wise_array);
-
+          
+          // Without filter don't show the value. Show commented below codes
+          //$constant_bill_array1 = _get_van_planning_bill_wise_data1($bill_area_code, $bill_pl_group, $bill_wise_range_op, $bill_wise_value, $bill_wise_weight, $bill_wise_volume, $bill_wise_rs_kg, $bill_wise_rs_cft, $bill_wise_array);
           if ($bill_wise_input_data) {
             $constant_bill_array1 = _get_van_planning_bill_wise_data1($bill_area_code, $bill_pl_group, $bill_wise_range_op, $bill_wise_value, $bill_wise_weight, $bill_wise_volume, $bill_wise_rs_kg, $bill_wise_rs_cft, $bill_wise_array, $child_bill_wise_date);
           }
-
           // New group created element 
           $child_bill_header_array = array(
             'area_code' => array('data' => t('Area Code')),
@@ -943,6 +945,8 @@ function _van_planning_callback_form($form, &$form_state) {
             'sum_cft' => array('data' => t('Volume')),
             'rs_per_sum_kg' => array('data' => t('Rs/Kg')),
             'rs_per_sum_cft' => array('data' => t('Rs/Cft')),
+            'party_code_val'=>array('data'=>t('Party Code')),//NEWFIELD
+            'party_name_val'=>array('data'=>t('Party Name')),
             'bill_group' => array('data' => t('bill_group'), 'class' => array('bill_no_val')),
           );
           // show result in pop up's pop up form
@@ -1295,6 +1299,8 @@ function van_planning_remove_bill_ajax_submit($form, &$form_state) {
         'sum_cft' => round($val['sum_cft']),
         'rs_per_sum_kg' => round($val['bill_value'] / $val['sum_kg'], 2),
         'rs_per_sum_cft' => round($val['bill_value'] / $val['sum_cft'], 2),
+        'party_code_val'=>$val['party_code_val'],//NEWFIELD
+        'party_name_val'=>$val['party_name_val']
       );
     }
 
@@ -1521,7 +1527,10 @@ function van_planning_ajax_submit($area_codes, $van_pl_group, $pl_group, $bill_d
   if (!empty($pl_group)) {
     $query->condition('fpg.field_pl_group_value', $pl_group); // condition for Pl Group
   }
-
+  // Party code and party Name NEWFIELD
+  $query->join('field_data_field_party_code', 'fpc', 'fpc.entity_id = n2.nid');
+  $query->join('field_data_field_party_name', 'fpn', 'fpn.entity_id = n2.nid');
+  
   // join sales register data
   $query->join('field_data_field_party_code_reference', 'pcr', 'pcr.field_party_code_reference_nid = n2.nid');
   if (!empty($outlet_area_hook_grp)) {
@@ -1577,6 +1586,9 @@ function van_planning_ajax_submit($area_codes, $van_pl_group, $pl_group, $bill_d
     $query->condition('n5.uid', $dis_id);
     $query->condition('vpg.field_van_pl_group_value', $van_pl_group);
   }
+  // Party code and party Name NEWFIELD
+  $query->addExpression('fpc.field_party_code_value', 'party_code_val');
+  $query->addExpression('fpn.field_party_name_value', 'party_name_val');
 
   // condition according to operator selected
   if (!empty($bill_range_op)) {
@@ -1621,7 +1633,9 @@ function van_planning_ajax_submit($area_codes, $van_pl_group, $pl_group, $bill_d
       'sum_kg' => round($val['sum_kg']),
       'sum_cft' => round($val['sum_cft']),
       'rs_per_sum_kg' => round($val['bill_value'] / $val['sum_kg'], 2),
-      'rs_per_sum_cft' => round($val['bill_value'] / $val['sum_cft'], 2)
+      'rs_per_sum_cft' => round($val['bill_value'] / $val['sum_cft'], 2),
+      'party_code_val'=>$val['party_code_val'],//NEWFIELD
+      'party_name_val'=>$val['party_name_val']
     );
 
     $res1[$val['area_code'] . '#' . $val['pl_group']]['bill_no'] = array('data' => '', 'class' => array('bill_no_val'), 'data-value' => json_encode($res_1[$val['area_code'] . '#' . $val['pl_group']]));
@@ -1702,7 +1716,10 @@ function _get_van_planning_bill_wise_data($bill_area_code, $bill_pl_group, $bill
   if (!empty($bill_pl_group)) {
     $query->condition('fpg.field_pl_group_value', $bill_pl_group); // condition for Pl Group
   }
-
+  // Party code and party Name NEWFIELD
+  $query->join('field_data_field_party_code', 'fpc', 'fpc.entity_id = n2.nid');
+  $query->join('field_data_field_party_name', 'fpn', 'fpn.entity_id = n2.nid');
+  
   // join sales register data
   $query->join('field_data_field_party_code_reference', 'pcr', 'pcr.field_party_code_reference_nid = n2.nid');
   $query->join('node', 'n3', 'n3.nid = pcr.entity_id');
@@ -1739,6 +1756,10 @@ function _get_van_planning_bill_wise_data($bill_area_code, $bill_pl_group, $bill
   $query->addExpression('ROUND(ROUND(bv.field_bill_net_sales_value) / ROUND(SUM(cb.Derived_NET_SALES_KGS)),2)', 'rs_per_sum_kg');
   $query->addExpression('ROUND(ROUND(bv.field_bill_net_sales_value) / ROUND(SUM(cb.Derived_NET_SALES_VOLUME)),2)', 'rs_per_sum_cft');
   // condition according to operator selected
+
+  // Party code and party Name NEWFIELD
+  $query->addExpression('fpc.field_party_code_value', 'party_code_val');
+  $query->addExpression('fpn.field_party_name_value', 'party_name_val');
 
   if (!empty($bill_wise_range_op)) {
     if (!empty($bill_wise_value)) {
@@ -1824,6 +1845,9 @@ function _get_van_planning_bill_wise_data1($bill_area_code, $bill_pl_group, $bil
   if (!empty($bill_pl_group)) {
     $query->condition('fpg.field_pl_group_value', $bill_pl_group); // condition for Pl Group
   }
+  // Party code and party Name NEWFIELD
+  $query->join('field_data_field_party_code', 'fpc', 'fpc.entity_id = n2.nid');
+  $query->join('field_data_field_party_name', 'fpn', 'fpn.entity_id = n2.nid');
 
   // join sales register data
   $query->join('field_data_field_party_code_reference', 'pcr', 'pcr.field_party_code_reference_nid = n2.nid');
@@ -1872,6 +1896,10 @@ function _get_van_planning_bill_wise_data1($bill_area_code, $bill_pl_group, $bil
   $query->addExpression('ROUND(ROUND(bv.field_bill_net_sales_value) / ROUND(SUM(cb.Derived_NET_SALES_VOLUME)),2)', 'rs_per_sum_cft');
   // condition according to operator selected
 
+  // Party code and party Name NEWFIELD
+  $query->addExpression('fpc.field_party_code_value', 'party_code_val');
+  $query->addExpression('fpn.field_party_name_value', 'party_name_val');
+
   if (!empty($bill_wise_range_op)) {
     if (!empty($bill_wise_value)) {
       $query->addExpression('ROUND(CONVERT(field_bill_net_sales_value, SIGNED))', 'bill_value1');
@@ -1913,7 +1941,10 @@ function _get_van_planning_bill_wise_data1($bill_area_code, $bill_pl_group, $bil
       'sum_kg' => round($val['sum_kg']),
       'sum_cft' => round($val['sum_cft']),
       'rs_per_sum_kg' => round($val['bill_value'] / $val['sum_kg'], 2),
-      'rs_per_sum_cft' => round($val['bill_value'] / $val['sum_cft'], 2));
+      'rs_per_sum_cft' => round($val['bill_value'] / $val['sum_cft'], 2),
+      'party_code_val'=>$val['party_code_val'],//NEWFIELD
+      'party_name_val'=>$val['party_name_val']
+      );
 
     $res[$key]['bill_group'] = array('data' => '',
       'class' => array('bill_no_val'),
