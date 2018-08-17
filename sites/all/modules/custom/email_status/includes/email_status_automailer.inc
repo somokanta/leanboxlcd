@@ -821,3 +821,111 @@ function send_email_del_app_adoption() {
 
   drupal_mail('email_status', 'daily_data', $mail_to, LANGUAGE_NONE, $params, $from);
 }
+
+function send_email_del_pending() {
+  $distributor_id = _DISTRIBUTOR_ID;
+  $start_date = strtotime(date('Y-m-d', strtotime("-7 days")));
+  $todays_date = strtotime(date('Y-m-d'));
+
+//Find all bills which are DP
+  $query = db_select('dispatch_planning_api_data', 'ad');
+  $query->condition('ad.distributor_id', $distributor_id, '=');
+  $query->condition('ad.dispatch_date', array($start_date, $todays_date), 'BETWEEN');
+  $query->condition('ad.delivery_pending_flag', 1, '=');
+  $query->fields('ad', array('bill_number'));
+  $query->groupBy('ad.bill_number');
+  $bills = $query->execute()->fetchCol();
+
+  $query = db_select('dispatch_planning_api_data', 'ad');
+  $query->condition('ad.distributor_id', $distributor_id, '=');
+  $query->condition('ad.dispatch_date', array($start_date, $todays_date), 'BETWEEN');
+  if (!empty($bills)) {
+      $query->condition('ad.bill_number', $bills, 'IN');
+  }
+  $query->fields('ad', array('bill_number'));
+  $query->fields('ad', array('bill_date'));
+  $query->addexpression("CASE WHEN (ad.delivery_pending_flag = 0 and (ad.res_status IS NOT NULL or ad.res_status !='')) THEN 'Completed' ELSE 'Pending' END", 'attempted_status');
+  $query->addexpression("CASE WHEN ad.delivery_pending_flag = 0 THEN ad.res_status END", 'current_bill_status');
+  $query->addexpression("CASE WHEN ad.delivery_pending_flag = 0 AND res_status ='undeliver'  THEN ad.res_reason_for_failure END", 'reason_for_failure');
+  $query->addexpression("ad.runsheet_number", 'trip_number');
+  $query->addexpression("ad.dispatch_date", 'dispatch_date');
+  $query->leftjoin('field_data_field_dp_reason', 'dpr', 'dpr.entity_id = ad.delivery_pending_reason');
+  $query->fields('dpr', array('field_dp_reason_value'));
+  $query->addexpression("ad.fieldExecutiveName", 'fieldExecutiveName');
+  $query->join('node', 'n', 'n.title = ad.runsheet_number');
+  $query->condition('n.type', 'dispatch_data', '=');
+  $query->condition('n.uid', $distributor_id);
+  $query->join('field_data_field_vrs_status', 'vs', 'vs.entity_id = n.nid');
+  $query->fields('vs', array('field_vrs_status_value'));
+  $query->groupBy('ad.bill_number,ad.runsheet_number');
+  $query->orderBy('ad.id');
+  $result = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+  $arr = array();
+  $header_new = array();
+
+  foreach ($result as $val) {
+    $arr[$val['bill_number']]['bill_number'] = $val['bill_number'];
+    $arr[$val['bill_number']]['bill_date'] = date('d-M-y', $val['bill_date']);
+    $arr[$val['bill_number']]['attempted_status'] = $val['attempted_status'];
+    $arr[$val['bill_number']]['current_bill_status'] = $val['current_bill_status'];
+    $arr[$val['bill_number']]['reason_for_failure'] = $val['reason_for_failure'];
+    $arr[$val['bill_number']]['trip_count'] += 1;
+    $counter = $arr[$val['bill_number']]['trip_count'];
+    $arr[$val['bill_number']]['trip_number' . $counter] = $val['trip_number'];
+    $arr[$val['bill_number']]['dispatch_date' . $counter] = date('d-M-y', $val['dispatch_date']);
+    $arr[$val['bill_number']]['delivery_pending_reason' . $counter] = $val['field_dp_reason_value'];
+    $arr[$val['bill_number']]['fieldExecutiveName' . $counter] = $val['fieldExecutiveName'];
+    $field = field_info_field('field_vrs_status');
+    $allowed_values = list_allowed_values($field);
+    foreach ($allowed_values as $key => $value) {
+      if ($key == $val['field_vrs_status_value']) {
+        $arr[$val['bill_number']]['vrs_status' . $counter] = $value;
+      }
+    }
+    $header_new['trip_id' . $counter] = 'Trip ' . $counter;
+    $header_new['dispatch_date' . $counter] = 'Trip ' . $counter . ' Dispatch Date';
+    $header_new['dp_reason' . $counter] = 'Trip ' . $counter . ' DP Reason';
+    $header_new['cashier' . $counter] = 'Trip ' . $counter . ' Cashier';
+    $header_new['status' . $counter] = 'Trip ' . $counter . ' Status';
+  }
+  $header = array('Bill Number', 'Bill Date', 'DP Attempted Status', 'Current Bill Status', 'Reason if full returned', 'Count of Trips');
+  foreach ($header_new as $val) {
+    $header[] = $val;
+  }
+
+  foreach ($result as $val) {
+    for ($i = 1; $i <= getMax($arr); $i++) {
+      if (!isset($arr[$val['bill_number']]['trip_number' . $i])) {
+        $arr[$val['bill_number']]['trip_number' . $i] = '';
+      }
+      if (!isset($arr[$val['bill_number']]['dispatch_date' . $i])) {
+        $arr[$val['bill_number']]['dispatch_date' . $i] = '';
+      }
+      if (!isset($arr[$val['bill_number']]['delivery_pending_reason' . $i])) {
+        $arr[$val['bill_number']]['delivery_pending_reason' . $i] = '';
+      }
+      if (!isset($arr[$val['bill_number']]['fieldExecutiveName' . $i])) {
+        $arr[$val['bill_number']]['fieldExecutiveName' . $i] = '';
+      }
+      if (!isset($arr[$val['bill_number']]['vrs_status' . $i])) {
+        $arr[$val['bill_number']]['vrs_status' . $i] = '';
+      }
+    }
+  }
+
+  $output = "<h3>Delivery Pending Report</h3>";
+  $output .= theme('table', array('header' => $header, 'rows' => $arr, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0'), 'empty' => t('No Records has been found')));
+  $params['subject'] = "Delivery Pending Report";
+  $params['body'] = $output;
+  $mail_to = variable_get('return_del_pending');
+  $from = variable_get('from_email');
+  drupal_mail('email_status', 'daily_data', $mail_to, LANGUAGE_NONE, $params, $from);
+}
+
+function getMax($arr) {
+  $max = 0;
+  foreach ($arr as $k => $v) {
+    $max = max(array($max, $v['trip_count']));
+  }
+  return $max;
+}
