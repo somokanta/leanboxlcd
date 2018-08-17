@@ -824,7 +824,7 @@ function send_email_del_app_adoption() {
 
 function send_email_del_pending() {
   $distributor_id = _DISTRIBUTOR_ID;
-  $start_date = strtotime(date('Y-m-d', strtotime("-7 days")));
+  $start_date = strtotime(date('Y-m-d', strtotime("-15 days")));
   $todays_date = strtotime(date('Y-m-d'));
 
 //Find all bills which are DP
@@ -912,9 +912,19 @@ function send_email_del_pending() {
       }
     }
   }
+  $res_set1 = $res_set2 = array();
+  foreach($arr as $key => $val){
+    if($val['attempted_status'] == 'Pending'){
+      $res_set1[$key] = $val; 
+    }else{
+      $res_set2[$key] = $val;
+    }
+  }
+  
+  $final_arr = $res_set1 + $res_set2;
 
   $output = "<h3>Delivery Pending Report</h3>";
-  $output .= theme('table', array('header' => $header, 'rows' => $arr, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0'), 'empty' => t('No Records has been found')));
+  $output .= theme('table', array('header' => $header, 'rows' => $final_arr, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0'), 'empty' => t('No Records has been found')));
   $params['subject'] = "Delivery Pending Report";
   $params['body'] = $output;
   $mail_to = variable_get('return_del_pending');
