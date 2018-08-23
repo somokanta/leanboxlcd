@@ -2043,6 +2043,14 @@ function dispatch_planning_update_7133() {
         'description' => t('Dispatch date'),
         'type' => 'int',
       ),
+
+
+      'delivered_date' => array(
+      'description' => t('Delivered date'),
+      'type' => 'int',
+      'default' => 0
+      ),
+
   );
   foreach ($fields as $key => $field) {
     if (!db_field_exists('dispatch_planning_api_data', $key)) {

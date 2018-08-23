@@ -140,7 +140,13 @@ function reverse_geocode_menu() {
     'access arguments' => array('only-rs-admin-with existing data'),
     'file' => 'delivery_beat_form.inc'
   );
-
+  //Deliver N Value -  CRON
+  $items['cal-delivery-n-val'] = array(
+    'title' => 'Update Delivery N Value By Cron',
+    'page callback' => 'cal_delivery_n_val_by_cron',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
   return $items;
 }
 
@@ -1425,6 +1431,9 @@ function reverse_geocode_update_hul_lat_lng($hul_code, $lat, $lng) {
  * Implements hook_node_presave()
  */
 function reverse_geocode_node_presave($node) {
+  global $user;
+  $user_id = $user->uid;
+  $distributor_id = change_feeds_import_get_distributor_id($user_id);
    
   // store reference for party code from outlet master type if node created.
   if ($node->type == 'sales_register_data') {
@@ -1570,18 +1579,27 @@ function reverse_geocode_node_presave($node) {
   }
    else if (($node->type == 'sales_register_data') && !($node->is_new)) {
       // code for One Time Updating Dispatch N Value
+      $distributor_id = $node->uid;
       $dispatch_value = $node->field_dispatch_n_value[LANGUAGE_NONE][0]['value'];
-      
-      if (empty($dispatch_value)) {
+      $delivered_value = $node->field_deliver_n_value[LANGUAGE_NONE][0]['value'];
+      $bill_number = $node->title;
       $updated_pdd = $node->field_promised_date[LANGUAGE_NONE][0]['value'];
       $trip_nid = $node->field_trip_id_reference[LANGUAGE_NONE][0]['nid'];
-  
+     
          $query = db_select('node', 'n');
          $query->condition('n.type', 'dispatch_data');
          $query->join('field_data_field_dispatch_date', 'disp_date', 'disp_date.entity_id = n.nid');
          $query->condition('n.nid', $trip_nid);
+         $query->fields('n', array('title'));
          $query->fields('disp_date', array('field_dispatch_date_value'));
-         $disp_date = $query->execute()->fetchField();
+         $disp_date_res = $query->execute()->fetchAllKeyed(0, 1);
+         if (!empty($disp_date_res)) {
+           $trip_number = key($disp_date_res);
+           $disp_date = $disp_date_res[$trip_number];
+         }
+      
+      if (empty($dispatch_value)) {
+       
          if (!empty($disp_date)) {
             $dispatch_date = strtotime($disp_date);
             if ($dispatch_date <= $updated_pdd) {
@@ -1597,6 +1615,28 @@ function reverse_geocode_node_presave($node) {
          }
       } 
       
+      if (empty($delivered_value)) {
+        //Code for updating deliver N value       
+         $query = db_select('dispatch_planning_api_data', 'ad');
+         $query->condition('ad.bill_number', $bill_number);
+         $query->condition('ad.runsheet_number', $trip_number);
+         $query->condition('ad.distributor_id', $distributor_id);
+         $query->fields('ad', array('delivered_date'));
+         $del_date = $query->execute()->fetchField();
+         $del_date = strtotime(date('Y-m-d',$del_date));
+         if (!empty($del_date)) {
+            if ($del_date <= $updated_pdd) {
+               $n_value = "N+2";
+            }
+            elseif (($del_date > $updated_pdd) && ( ($del_date - $updated_pdd) <= 86400)) {
+               $n_value = "N+3";
+            }
+            elseif (($del_date > $updated_pdd) && ( ($del_date - $updated_pdd) > 86400)) {
+               $n_value = "N+4";
+            }
+            $node->field_deliver_n_value[LANGUAGE_NONE][0]['value'] = $n_value;
+         }
+      }
       
       // code for updating Pdd value on updating bill Date
       $original_bill_date = $node->original->field_sr_bill_date[LANGUAGE_NONE][0]['value'];
@@ -1634,6 +1674,26 @@ function reverse_geocode_node_presave($node) {
                $n_value = "N+4";
             }
             $node->field_dispatch_n_value[LANGUAGE_NONE][0]['value'] = $n_value;
+         }
+         //Code for updating deliver N value       
+         $query = db_select('dispatch_planning_api_data', 'ad');
+         $query->condition('ad.bill_number', $bill_number);
+         $query->condition('ad.runsheet_number', $trip_number);
+         $query->condition('ad.distributor_id', $distributor_id);
+         $query->fields('ad', array('delivered_date'));
+         $del_date = $query->execute()->fetchField();
+         $del_date = strtotime(date('Y-m-d',$del_date));
+         if (!empty($del_date)) {
+            if ($del_date <= $updated_pdd) {
+               $n_value = "N+2";
+            }
+            elseif (($del_date > $updated_pdd) && ( ($del_date - $updated_pdd) <= 86400)) {
+               $n_value = "N+3";
+            }
+            elseif (($del_date > $updated_pdd) && ( ($del_date - $updated_pdd) > 86400)) {
+               $n_value = "N+4";
+            }
+            $node->field_deliver_n_value[LANGUAGE_NONE][0]['value'] = $n_value;
          }
       }
    }
@@ -1960,4 +2020,40 @@ function reverse_geocode_get_data_trip_wise($trip_id) {
   return $res;
 }
 
-  
+/**
+ * Calculate delivery n val: URL Hit by cron
+ */
+function cal_delivery_n_val_by_cron() {
+  $distributor_id = _DISTRIBUTOR_ID;
+  $status = array('deliver', 'partial_deliver');
+
+  $query = db_select('dispatch_planning_api_data', 'ad')
+    ->fields('ad', array('bill_number'))
+    ->condition('ad.distributor_id', $distributor_id)
+    ->condition('ad.delivered_date', '0')
+    ->condition('ad.res_status', $status, 'IN')
+    ->condition(db_or()
+    ->condition('updated_time', '0', '!=')
+    ->condition('res_updated_time', '0', '!=')
+  );
+  $res = $query->execute()->fetchAllKeyed(0, 0);
+  watchdog('cal_delivery_n_val_by_cron', '<pre>' . print_r($res, TRUE) . '</pre>');
+  if (!empty($res)) {
+    db_update('dispatch_planning_api_data')
+      ->expression('delivered_date', "CASE WHEN res_updated_time!=0 THEN res_updated_time  ELSE updated_time END")
+      ->condition('distributor_id', $distributor_id)
+      ->condition('delivered_date', '0')
+      ->condition('res_status', $status, 'IN')
+      ->condition(db_or()
+        ->condition('updated_time', '0', '!=')
+        ->condition('res_updated_time', '0', '!=')
+      )
+      ->execute();
+
+    foreach ($res as $bill_number) {
+      $nid = check_node_title_exists_for_update($bill_number, $distributor_id);
+      $node = node_load($nid);
+      node_save($node);
+    }
+  }
+}
