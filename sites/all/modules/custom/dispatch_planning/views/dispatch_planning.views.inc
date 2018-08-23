@@ -2273,6 +2273,23 @@ function dispatch_planning_views_data() {
       'handler' => 'views_handler_filter_date',
     ),
   );
+  $data['dispatch_planning_api_data']['delivered_date'] = array(
+    'title' => t('Delivered Date'),
+    'help' => t('Delivered Date'),
+    'field' => array(
+      'handler' => 'views_handler_field_date',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort_date',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_date',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_filter_date',
+    ),
+  );
   $data['dispatch_planning_api_data']['city'] = array(
     'title' => t('DP city'),
     'help' => t('Dispatch Planning date'),
