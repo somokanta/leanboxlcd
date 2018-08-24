@@ -892,7 +892,56 @@ function send_email_del_pending() {
   foreach ($header_new as $val) {
     $header[] = $val;
   }
+  
+  //Summary Table
+  $header_summ = array('DP Attempted Status', 'Total Count of Trips', 'Bill Count','Remarks');
+  foreach ($arr as $val) {
+    $row[$val['attempted_status']][$val['trip_count']] += 1;
+  }
 
+  $p = $row['Pending'];
+  $c = $row['Completed'];
+  ksort($p);
+  ksort($c);
+
+   $i = 0;
+  foreach ($p as $key => $val) {  
+   $final_summ[$i][] = 'Pending';
+    $final_summ[$i][] = $key;
+    $final_summ[$i][] = $val;
+    if ($key == 1) {
+      $final_summ[$i][] = 'These are the count of DP Bills which have yet not been dispatched'; // change the message
+    }
+    elseif ($key == 2) {
+      $final_summ[$i][] = 'These are the count of DP Bills which have been dispatched but delivery outcome has not been updated in TP'; // change the message
+    }
+    else if ($key == 3){
+      $final_summ[$i][] = '- These are the count of DP Bills which have been dispatched but delivery outcome has not been updated in TP. <br> -These DP Bills were dispatched twice i.e. they were declared Delivery Pending twice'; // change the message
+    }
+    else{
+      $final_summ[$i][] = ''; // change the message
+    }
+    $i++;
+  }
+
+  foreach ($c as $key => $val) {
+    $final_summ[$i][] = 'Completed';
+    $final_summ[$i][] = $key;
+    $final_summ[$i][] = $val;
+    if ($key == 2) {
+      $final_summ[$i][] = 'These are the count of DP bills which have been dispatched and their delivery outcome has also been updated in TP'; // change the message
+    }
+    else {
+      $final_summ[$i][] = ''; // change the message
+    }
+    $i++;
+  }
+  
+  $output = "<h3>Delivery Pending Report</h3>";
+  $output .= theme('table', array('header' => $header_summ, 'rows' => $final_summ, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0'), 'empty' => t('No Records has been found')));
+  $output .= '<br><br>';
+  //Summary Table
+  
   foreach ($result as $val) {
     for ($i = 1; $i <= getMax($arr); $i++) {
       if (!isset($arr[$val['bill_number']]['trip_number' . $i])) {
@@ -923,7 +972,7 @@ function send_email_del_pending() {
   
   $final_arr = $res_set1 + $res_set2;
 
-  $output = "<h3>Delivery Pending Report</h3>";
+  //$output = "<h3>Delivery Pending Report</h3>";
   $output .= theme('table', array('header' => $header, 'rows' => $final_arr, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0'), 'empty' => t('No Records has been found')));
   $params['subject'] = "Delivery Pending Report";
   $params['body'] = $output;
