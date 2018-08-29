@@ -937,7 +937,7 @@ function send_email_del_pending() {
     $i++;
   }
   
-  $output = "<h3>Delivery Pending Report</h3>";
+  $output = "<h3>DP Bills Status Report</h3>";
   $output .= theme('table', array('header' => $header_summ, 'rows' => $final_summ, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0'), 'empty' => t('No Records has been found')));
   $output .= '<br><br>';
   //Summary Table
@@ -974,7 +974,7 @@ function send_email_del_pending() {
 
   //$output = "<h3>Delivery Pending Report</h3>";
   $output .= theme('table', array('header' => $header, 'rows' => $final_arr, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0'), 'empty' => t('No Records has been found')));
-  $params['subject'] = "Delivery Pending Report";
+  $params['subject'] = "DP Bills Status Report";
   $params['body'] = $output;
   $mail_to = variable_get('return_del_pending');
   $from = variable_get('from_email');
