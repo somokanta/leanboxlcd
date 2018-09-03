@@ -669,7 +669,9 @@ function send_email_return_vrs_prod() {
   $query->leftjoin('field_data_field_vrs_version', 'vv', 'vv.entity_id = n.nid');
   $query->fields('vv', array('field_vrs_version_value'));
   $query->fields('ad', array('fieldExecutiveName'));
+  $query->fields('ad', array('vehicle'));
   $query->addExpression('((MAX(CASE WHEN (ad.updated_flag = 1) THEN ad.updated_time END) - MIN(CASE WHEN (ad.updated_flag = 1) THEN ad.updated_time END)) / 60)', 'total_return_time');
+  $query->addExpression('MIN(CASE WHEN (ad.updated_flag = 1) THEN ad.updated_time END)', 'return_start_time');
   $query->groupBy('ad.runsheet_number');
   $query->join('dispatch_planning_item_details', 'dpi', 'ad.id = dpi.trip_bill_reference');
   $query->addexpression("SUM(dpi.return_qty * dpi.sum_net_sales_value)", 'return_value');
@@ -697,7 +699,9 @@ function send_email_return_vrs_prod() {
   
   $result = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
   $rows = array();
+  $counter = 1;
   foreach ($result as $val) {
+    $row['sr_no']= $counter++;// newly added
     $row['dispatch_date'] = $val['date'];
     $row['trip_id'] = $val['runsheet_number'];
 
@@ -709,9 +713,31 @@ function send_email_return_vrs_prod() {
       }
     }
     $row['cashier_name'] = $val['fieldExecutiveName'];
+    $row['vehicle'] = $val['vehicle'];
     $row['arrival_to_asset_returns'] = '';
-    $row['arrival_to_returns_start'] = '';
+    
+    //Delivery Confirmation time
+    $query = db_select('inventory_versioning_api_data', 'iad');
+    $query->condition('iad.distributor_id', $distributor_id, '=');
+    $query->condition('iad.version_flag', 1, '=');
+    $query->condition('iad.runsheet_number', $val['runsheet_number'], '=');
+    $query->fields('iad', array('version_created_time'));
+    $query->orderBy('iad.id','DESC');
+    $query->range(0, 1);
+    $version_created_time = $query->execute()->fetchField();
 
+    if (!empty($version_created_time)) {
+      $row['version_created_time'] = date('d-M-y H:i:s', $version_created_time);
+    }
+    else {
+      $row['version_created_time'] = '';
+    }
+    if (!empty($val['return_start_time']) && ($val['return_start_time'] - $version_created_time)> 0) {
+      $row['arrival_to_returns_start'] = gmdate('i', ($val['return_start_time'] - $version_created_time));
+    }else {
+      $row['arrival_to_returns_start'] = '';
+    }
+    
     $return_version_value = $val['field_returned_version_value'];
     if (empty($return_version_value) || ($val['field_vrs_status_value'] < 1 && !empty($return_version_value))) {
       $row['returns_time_difference'] = '';
@@ -729,6 +755,8 @@ function send_email_return_vrs_prod() {
     $row['return_qty_sachets'] = $val['return_sku_qty_sachets'];
 
     $vrs_version_value = $val['field_vrs_version_value'];
+
+ 
     if (empty($return_version_value) || ($val['field_vrs_status_value'] < 2 && !empty($vrs_version_value))) {
       $row['returns_end_to_vrs_start'] = '';
       $row['vrs_time_difference'] = '';
@@ -749,7 +777,7 @@ function send_email_return_vrs_prod() {
 
     $rows[] = $row;
   }
-  $header = array('Dispatch Date', 'Trip ID', 'Status', 'Cashier', 'Arrival to Asset Returns (min)', 'Arrival to Returns Start (min)', 'Returns Start to Returns End (min)', 'Returns Value(Rs.)/10 Min', 'Product Lines/10 Min','Total Returned Value(Rs.)','Returned SKU Quantity(w/o Sachets)','Returned Quantity of Sachets','Returns End to VRS Start (Min)', 'VRS Start to VRS End (Min)', 'VRS Value(Rs.)/10 Min', 'Cash %', 'Cheque %', 'Signed Bill %');
+  $header = array('S.No.','Dispatch Date', 'Trip ID', 'Status', 'Cashier', 'Vehicle', 'Arrival to Delivery Confirmation (min)', 'Delivery Confirmation Time', 'Delivery Confirmation to Returns Start (min)', 'Returns Start to Returns End (min)', 'Returns Value(Rs.)/10 Min', 'Product Lines/10 Min','Total Returned Value(Rs.)','Returned SKU Quantity(w/o Sachets)','Returned Quantity of Sachets','Returns End to VRS Start (Min)', 'VRS Start to VRS End (Min)', 'VRS Value(Rs.)/10 Min', 'Cash %', 'Cheque %', 'Signed Bill %');
 
   $html = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
 

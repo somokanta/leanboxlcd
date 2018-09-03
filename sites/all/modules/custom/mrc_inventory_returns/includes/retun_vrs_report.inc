@@ -11,7 +11,8 @@ function retun_vrs_form($form, &$form_state) {
   if (isset($_GET['trip_id'])) {
     $trip_id = $_GET['trip_id'];
   }
-
+  
+  $dispatch_date = date('Y-m-d');
   if (isset($_GET['dispatch_date'])) {
     $dispatch_date = $_GET['dispatch_date'];
   }
@@ -66,6 +67,7 @@ function return_vrs_callback() {
 
   global $user;
   $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+  $dispatch_date = date('Y-m-d');
 
   if (isset($_GET['trip_id'])) {
     $trip_id = $_GET['trip_id'];
@@ -134,11 +136,6 @@ function return_vrs_callback() {
       $row['dispatch_date'] = '';
     }
     $row['fieldExecutiveName'] = $val['fieldExecutiveName'];
-    if(isset($val['field_received_asset_time_value'])){
-      $row['field_received_asset_time_value'] = date('d-M-y H:i:s', $val['field_received_asset_time_value']);
-    }else{
-      $row['field_received_asset_time_value'] = '';
-    }
     $field = field_info_field('field_vrs_status');
      $allowed_values = list_allowed_values($field);
      foreach ($allowed_values as $key => $value) {
@@ -146,6 +143,31 @@ function return_vrs_callback() {
          $row['field_vrs_status_value'] = $value;
        }
      }
+     
+    if(isset($val['field_received_asset_time_value'])){
+      $row['field_received_asset_time_value'] = date('d-M-y H:i:s', $val['field_received_asset_time_value']);
+    }else{
+      $row['field_received_asset_time_value'] = '';
+    }
+    
+    //Delivery Confirmation time
+    $query = db_select('inventory_versioning_api_data', 'iad');
+    $query->condition('iad.distributor_id', $distributor_id, '=');
+    $query->condition('iad.version_flag', 1, '=');
+    $query->condition('iad.runsheet_number', $val['runsheet_number'], '=');
+    $query->fields('iad', array('version_created_time'));
+    $query->orderBy('iad.id','DESC');
+    $query->range(0, 1);
+    $version_created_time = $query->execute()->fetchField();
+
+    if (!empty($version_created_time)) {
+      $row['version_created_time'] = date('d-M-y H:i:s', $version_created_time);
+    }
+    else {
+      $row['version_created_time'] = '';
+    }
+    //Delivery Confirmation time
+    
     if(isset($val['min_updated_time'])){
       $row['min_updated_time'] = date('d-M-y H:i:s', $val['min_updated_time']);
     }else{
@@ -186,7 +208,7 @@ function return_vrs_callback() {
     $rows[] = $row;
   }
 
-  $header = array('Trip ID', 'Dispatch Date', 'Cashier Name', 'Received Assets Time', 'Status', 'Returns Start Time', 'Returns End Time', 'Total Returns Time taken', 'Total Returned Value','Returned SKU Quantity(w/o Sachets)','Returned Quantity of Sachets','Returns Productivity (Value/10 min)', 'VRS Start Time', 'VRS End Time', 'Total VRS Time taken', 'Cash Value', 'Cheque Value', 'Signed Bill Value');
+  $header = array('Trip ID', 'Dispatch Date', 'Cashier Name', 'Status', 'Received Assets Time', 'Delivery Confirmation Time' , 'Returns Start Time', 'Returns End Time', 'Total Returns Time taken', 'Total Returned Value','Returned SKU Quantity(w/o Sachets)','Returned Quantity of Sachets','Returns Productivity (Value/10 min)', 'VRS Start Time', 'VRS End Time', 'Total VRS Time taken', 'Cash Value', 'Cheque Value', 'Signed Bill Value');
   $per_page = 10;
   // Initialize the pager
   $current_page = pager_default_initialize(count($rows), $per_page);
