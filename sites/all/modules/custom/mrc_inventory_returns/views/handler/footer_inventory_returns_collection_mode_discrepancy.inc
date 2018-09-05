@@ -28,6 +28,7 @@ class footer_inventory_returns_collection_mode_discrepancy extends views_handler
 
     $user_id = $GLOBALS['user']->uid;
     $distributor_id = change_feeds_import_get_distributor_id($user_id);
+    $payment_terms_not_allowed = array('sign bill','cash/chq/sb');
     $query = db_select('dispatch_planning_api_data', 'ad');
     $query->condition('ad.delivery_pending_flag', 1, '!=');
     $query->condition('ad.distributor_id', $distributor_id, '=');
@@ -38,8 +39,9 @@ class footer_inventory_returns_collection_mode_discrepancy extends views_handler
     $query->leftjoin('field_data_field_payment_terms', 'pt', 'pt.entity_id = n.nid ');
 
     $query->addExpression("case when pt.field_payment_terms_value !=  '' then LOWER(pt.field_payment_terms_value) else 'NA' END", "field_payment_terms_value");
-    $query->havingCondition('field_payment_terms_value', 'sign bill', '!=');
-
+    //$query->havingCondition('field_payment_terms_value', 'sign bill', '!=');
+    $query->havingCondition('field_payment_terms_value', $payment_terms_not_allowed, 'NOT IN');
+    
     //$query->addExpression('CONVERT(ad.res_confirm_signed_bill_amount, SIGNED)', 'res_confirm_signed_bill_amount');
     //$query->havingCondition('res_confirm_signed_bill_amount', 0, '>');
     $query->fields('ad', array('bill_number'));
