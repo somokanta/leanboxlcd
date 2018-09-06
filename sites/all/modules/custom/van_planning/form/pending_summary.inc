@@ -109,6 +109,7 @@ function pending_summary_callback() {
 
   $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
  
+  $total = array();
   foreach ($res as $key => $val) {
     foreach ($val as $key1 => $val1) {
       if ($key1 == 'bill_no') {
@@ -116,18 +117,29 @@ function pending_summary_callback() {
           $res1[$val['pl_group']]['bill_count'] = 0;
         }
         $res1[$val['pl_group']]['bill_count'] += 1;
+        $total['bill_count'] += 1;
       }
-      else if (($key1 == 'bill_value') || ($key1 == 'sum_kg')) {
+      else if ($key1 == 'bill_value') {
         $res1[$val['pl_group']][$key1] += $val1;
+        $total['bill_value'] += $val1;
+      }
+      else if ($key1 == 'sum_kg') {
+        $res1[$val['pl_group']][$key1] += $val1;
+        $total['sum_kg'] += $val1;
       }
       else {
         $res1[$val['pl_group']][$key1] = $val1;
+        $total['others'] = 'Total';
       }
     }
+  }
+  foreach($total as $key => $val){
+      $res1['Total'][$key] = $val;
   }
 
   $header = array('PL Group','Bill Count','Weight (KGs)','Total Value');
 
+  /*
   $per_page = 10;
   // Initialize the pager
   $current_page = pager_default_initialize(count($res1), $per_page);
@@ -137,7 +149,7 @@ function pending_summary_callback() {
   $output = theme('table', array('header' => $header, 'rows' => $chunks[$current_page]));
   // Show the pager
   $output .= theme('pager', array('quantity', count($res1)));
-
+*/
   $output = theme('table', array('header' => $header, 'rows' => $res1, 'attributes' => array('width' => '100%')));
 
   return $form.$output;
