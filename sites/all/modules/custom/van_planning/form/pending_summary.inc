@@ -129,7 +129,7 @@ function pending_summary_callback() {
       }
       else {
         $res1[$val['pl_group']][$key1] = $val1;
-        $total['others'] = 'Total';
+        $total['others'] = '<b>Total</b>';
       }
     }
   }
