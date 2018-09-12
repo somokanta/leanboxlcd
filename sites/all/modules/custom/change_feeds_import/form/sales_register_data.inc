@@ -133,7 +133,7 @@ function change_feeds_import_sales_register_batch_fix_process($data, $distributo
     $context['results']['unique_combination'] = array();
   }
    foreach ($data as $key => $value) {
-
+     
     foreach ($value as $k => $v) {
       $error_text = '';
       $v = trim($v);
@@ -207,7 +207,7 @@ function change_feeds_import_sales_register_batch_fix_process($data, $distributo
         $value['error_message'] .= " Bill no " . $value['BILL_NUMBER'] . ' should have numeric bill value.';
       }
     }
-    if (isset($value['PARTY_CODE'])) {
+    if (isset($value['PARTY_CODE'])) {      
       $value['PARTY_CODE'] = trim($value['PARTY_CODE']);
       // Check if PARTY_CODE doesnt exist in outlet master
       $party_code = check_node_title_exists($value['PARTY_CODE'], 'outlet_master');
@@ -235,8 +235,31 @@ function change_feeds_import_sales_register_batch_fix_process($data, $distributo
         if (empty($distributor_id)) {
             $value['error_message'] .= " Please check your Distributor code";
         }
-
-        // insert into custom sales table
+    
+    if (isset($value['PARTY_CODE']) && isset($value['BILL_NUMBER']) && isset($value['BILL_DATE'])) {
+      $unique_comb = $value['PARTY_CODE']. $value['BILL_DATE'];
+      $context['results']['unique_party_billdate'][$unique_comb][$value['BILL_NUMBER']] = $value['BILL_NUMBER'];
+      if (count($context['results']['unique_party_billdate'][$unique_comb]) > 1) {
+        $value['error_message'] .= "Duplicate Bills are found for party code " . $value['PARTY_CODE'];
+      }else{   
+        $query = db_select('node', 'n');
+        $query->condition('n.type', 'sales_register_data');
+        $query->condition('n.uid', $distributor_id, '=');
+        $query->condition('n.title', $value['BILL_NUMBER'], '!=');
+        $query->join('field_data_field_sr_new_bill_date', 'bd', 'n.nid = bd.entity_id');
+        $query->condition('bd.field_sr_new_bill_date_value',$value['BILL_DATE'], '=');
+        $query->join('field_data_field_party_code_reference', 'pc', 'pc.entity_id = n.nid');
+        $query->join('node', 'n1', 'n1.nid = pc.field_party_code_reference_nid');
+        $query->condition('n1.title', $value['PARTY_CODE'], '=');
+        $query->fields('n1', array('title'));
+        $result = $query->execute()->fetchField();
+        if (!empty($result)) {
+          $value['error_message'] .= "Duplicate Bills are found for party code " . $result;
+        }
+      }
+    }
+    
+    // insert into custom sales table
     change_feeds_import_insert_data_in_custom_sales_table($value, $fid, $distributor_id);
 
     $context['results']['fid'] = $fid;
