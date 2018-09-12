@@ -2657,6 +2657,17 @@ function dispatch_planning_views_data() {
     'argument' => array(
       'handler' => 'views_handler_argument_string',
     ),
+    'relationship' => array(
+      'title' => t('PT Party code reference'),
+      'help' => t("PT Party code reference"),
+      'handler' => 'views_handler_relationship',
+      'base' => 'node',
+      'base field' => 'title',
+      'extra' => array(
+        array('field' => 'type', 'value' => 'outlet_master'),
+        array('field' => 'uid', 'left_field' => 'distributor_id'),
+      ),
+    ),
   );
   $data['dispatch_planning_api_data']['bill_number'] = array(
     'title' => t('DP bill_number'),
@@ -5250,6 +5261,14 @@ function dispatch_planning_views_data() {
     'help' => t('Photo of Cheque/Signed Bills handler.'),
     'field' => array(
       'handler' => 'photo_url_handler',
+    ),
+  );
+  
+   $data['views']['cheque_date_handler'] = array(
+    'title' => t('Cheque Date'),
+    'help' => t('Cheque Date.'),
+    'field' => array(
+      'handler' => 'field_cheque_date_handler',
     ),
   );
   
