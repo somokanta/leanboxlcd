@@ -1016,3 +1016,151 @@ function getMax($arr) {
   }
   return $max;
 }
+
+
+function send_email_pt_compliance() {
+
+  $distributor_id = _DISTRIBUTOR_ID;
+  $header[] = array('data' => 'Dispatch Date');
+  for ($i = 1; $i <= 7; $i++) {
+    $header[] = array('data' => date('d-M-y', strtotime("-$i days")), 'colspan' => 3);
+    $yesterday_date = strtotime(date('Y-m-d', strtotime("-$i days")));
+    $cash_chq_arr = array('Cash', 'Cheque', 'Cash,Cheque', 'Cheque,Cash', 'Cash,Cash', 'Cheque,Cheque');
+    $cash_chq = implode("','", $cash_chq_arr);
+    $cash_chq = "'" . $cash_chq . "'";
+    $cash_chq_lower = array_map("strtolower", $cash_chq_arr);
+    $cash_chq_lower = implode("','", $cash_chq_lower);
+    $cash_chq_lower = "'" . $cash_chq_lower . "'";
+    $cash_chq_sb_arr = array('Cash', 'Cheque', 'Cash,Cheque', 'Cheque,Cash', 'Cash,Cash', 'Cheque,Cheque', 'Signed');
+    $cash_chq_sb = implode("','", $cash_chq_sb_arr);
+    $cash_chq_sb = "'" . $cash_chq_sb . "'";
+    $cash_chq_sb_lower = array_map("strtolower", $cash_chq_sb_arr);
+    $cash_chq_sb_lower = implode("','", $cash_chq_sb_lower);
+    $cash_chq_sb_lower = "'" . $cash_chq_sb_lower . "'";
+
+    $query = db_select('dispatch_planning_api_data', 'ad');
+    $query->condition('ad.distributor_id', $distributor_id, '=');
+    $query->condition('ad.delivery_pending_flag', 0, '=');
+    $query->condition('ad.dispatch_date', $yesterday_date, '=');
+
+    $db_or = db_or();
+    $db_or->condition('ad.res_status', NULL);
+    $db_or->condition('ad.res_status', '');
+    $db_or->condition('ad.res_status', 'undeliver', '!=');
+    $query->condition($db_or);
+
+    $query->join('node', 'n', 'ad.party_code = n.title');
+    $query->condition('n.type', 'outlet_master');
+    $query->condition('n.uid', $distributor_id, '=');
+    $query->join('field_data_field_payment_terms', 'pt', 'pt.entity_id = n.nid ');
+
+//Cash/Chq
+    $query->addexpression("COUNT(CASE WHEN  pt.field_payment_terms_value = 'Cash/Chq' AND (CASE WHEN ad.res_money_collect2_edit IN ($cash_chq_lower) THEN 1 ELSE  ad.res_money_collect2 IN ($cash_chq) END) THEN ad.bill_number END)", 'count_cash_chq');
+    $query->addexpression("count(CASE WHEN  pt.field_payment_terms_value = 'Cash/Chq' AND (CASE WHEN ad.res_money_collect2_edit NOT IN ($cash_chq_lower) THEN 1 ELSE ((ad.res_money_collect2 NOT IN ($cash_chq) and ad.res_money_collect2 !='') or (ad.res_money_collect2 ='' and ad.res_signed_bill_delivery = 'Yes' or ad.res_signed_bill_partial = 'Yes')) END) THEN ad.bill_number END)", 'not_count_cash_chq');
+  //$query->addexpression("COUNT(CASE WHEN  pt.field_payment_terms_value = 'Cash/Chq' AND (CASE WHEN ad.res_money_collect2_edit NOT IN ($cash_chq_lower) THEN 1 ELSE  ad.res_money_collect2  NOT IN ($cash_chq) and  (ad.res_money_collect2 =''  and ad.res_signed_bill_delivery <> 'No'   and ad.res_signed_bill_partial <> 'No') END) THEN ad.bill_number END)", 'not_count_cash_chq');
+    $query->addexpression("COUNT(CASE WHEN  pt.field_payment_terms_value = 'Cash/Chq' AND ((ad.res_money_collect2 is null  and ad.res_money_collect2_edit is null) or (ad.res_money_collect2 is null  and ad.res_money_collect2_edit ='') or (ad.res_money_collect2 =''  and ad.res_signed_bill_delivery <> 'Yes' and ad.res_signed_bill_partial <> 'Yes') )  THEN ad.bill_number END)", 'count_cash_blank');
+
+//Cash/Chq/SB
+    $query->addexpression("COUNT(CASE WHEN  pt.field_payment_terms_value = 'Cash/Chq/SB'  AND (CASE WHEN ad.res_money_collect2_edit IN ($cash_chq_sb_lower) THEN 1 ELSE  (ad.res_money_collect2 IN ($cash_chq_sb) OR ad.res_signed_bill_delivery ='Yes' OR ad.res_signed_bill_partial = 'Yes' OR ad.res_signed_bill_delivery_edit ='Yes' OR ad.res_signed_bill_partial_edit ='Yes'  ) END) THEN ad.bill_number END)", 'count_cash_chq_sb');
+    $query->addexpression("COUNT(CASE WHEN  pt.field_payment_terms_value = 'Cash/Chq/SB' AND (CASE WHEN ad.res_money_collect2_edit NOT IN ($cash_chq_sb_lower) THEN 1 ELSE  (ad.res_money_collect2  NOT IN ($cash_chq_sb) AND ad.res_signed_bill_delivery !='Yes' AND ad.res_signed_bill_partial != 'Yes' AND ad.res_signed_bill_delivery_edit !='Yes' AND ad.res_signed_bill_partial_edit !='Yes' ) END) THEN ad.bill_number END)", 'not_count_cash_chq_sb');
+    $query->addexpression("COUNT(CASE WHEN  pt.field_payment_terms_value = 'Cash/Chq/SB' AND ((ad.res_money_collect2 is null  and ad.res_money_collect2_edit is null) or (ad.res_money_collect2 is null  and ad.res_money_collect2_edit ='') or (ad.res_money_collect2 =''  and ad.res_signed_bill_delivery <> 'Yes' and ad.res_signed_bill_partial <> 'Yes') ) THEN ad.bill_number END)", 'count_cash_sb_blank');
+
+//Only Cash
+    $query->addexpression("COUNT(CASE WHEN  pt.field_payment_terms_value = 'Only Cash' AND (CASE WHEN ad.res_money_collect2_edit IN ('cash') THEN 1 ELSE  ad.res_money_collect2 IN ('Cash','Cash,Cash')  END) THEN ad.bill_number END)", 'count_only_cash');
+    $query->addexpression("COUNT(CASE WHEN  pt.field_payment_terms_value = 'Only Cash'  AND (CASE WHEN ad.res_money_collect2_edit NOT IN ('cash') THEN 1 ELSE  ((ad.res_money_collect2  NOT IN ('Cash','Cash,Cash') and  ad.res_money_collect2 !='' ) or (ad.res_money_collect2 =''  and ad.res_signed_bill_delivery = 'Yes' or ad.res_signed_bill_partial = 'Yes')) END) THEN ad.bill_number END)", 'not_count_only_cash');
+    $query->addexpression("COUNT(CASE WHEN  pt.field_payment_terms_value = 'Only Cash'  AND ((ad.res_money_collect2 is null  and ad.res_money_collect2_edit is null) or (ad.res_money_collect2 is null  and ad.res_money_collect2_edit ='') or (ad.res_money_collect2 =''  and ad.res_signed_bill_delivery <> 'Yes' and ad.res_signed_bill_partial <> 'Yes') ) THEN ad.bill_number END)", 'count_only_cash_blank');
+
+//Cash PF
+    $query->addexpression("COUNT(CASE WHEN  pt.field_payment_terms_value = 'Cash-PF' AND (CASE WHEN ad.res_money_collect2_edit IN ('cash') THEN 1 ELSE  ad.res_money_collect2 IN ('Cash','Cash,Cash')  END) THEN ad.bill_number END)", 'count_only_cash_pf');
+    $query->addexpression("COUNT(CASE WHEN  pt.field_payment_terms_value = 'Cash-PF' AND (CASE WHEN ad.res_money_collect2_edit NOT IN ('cash') THEN 1 ELSE  ((ad.res_money_collect2  NOT IN ('Cash','Cash,Cash') and  ad.res_money_collect2 !='' ) or (ad.res_money_collect2 =''  and ad.res_signed_bill_delivery = 'Yes' or ad.res_signed_bill_partial = 'Yes')) END) THEN ad.bill_number END)",  'not_count_only_cash_pf');
+    $query->addexpression("COUNT(CASE WHEN  pt.field_payment_terms_value = 'Cash-PF'  AND ((ad.res_money_collect2 is null  and ad.res_money_collect2_edit is null) or (ad.res_money_collect2 is null  and ad.res_money_collect2_edit ='') or (ad.res_money_collect2 =''  and ad.res_signed_bill_delivery <> 'Yes' and ad.res_signed_bill_partial <> 'Yes') ) THEN ad.bill_number END)", 'count_only_cash_blank_pf');
+
+    $result = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+
+    foreach ($result as $val) {
+      //PT header
+      $payment['pt']['name'] = 'PT';
+      $payment['pt']['count_cash_chq' . $i] = 'Compliant';
+      $payment['pt']['not_count_cash_chq' . $i] = 'Not Compliant';
+      $payment['pt']['count_cash_blank' . $i] = 'Not Entered';
+
+      //Cash/Chq
+      $payment['cash_chq']['payment_terms_chq'] = 'Cash/Chq';
+      $payment['cash_chq']['count_cash_chq' . $i] = $val['count_cash_chq'];
+      $payment['cash_chq']['not_count_cash_chq' . $i] = $val['not_count_cash_chq'];
+      $payment['cash_chq']['count_cash_blank' . $i] = $val['count_cash_blank'];
+
+      //Cash/Chq/Sb
+      $payment['cash_chq_sb']['payment_terms_cash_chq_sb'] = 'Cash/Chq/SB';
+      $payment['cash_chq_sb']['count_cash_chq_sb' . $i] = $val['count_cash_chq_sb'];
+      $payment['cash_chq_sb']['not_count_cash_chq_sb' . $i] = $val['not_count_cash_chq_sb'];
+      $payment['cash_chq_sb']['count_cash_sb_blank' . $i] = $val['count_cash_sb_blank'];
+
+      //Only Cash
+      $payment['only_cash']['payment_terms_cash'] = 'Only Cash';
+      $payment['only_cash']['count_only_cash' . $i] = $val['count_only_cash'];
+      $payment['only_cash']['not_count_only_cash' . $i] = $val['not_count_only_cash'];
+      $payment['only_cash']['count_only_cash_blank' . $i] = $val['count_only_cash_blank'];
+
+      //Cash-PF
+      $payment['cash_pf']['payment_terms_cash_pf'] = 'Cash-PF';
+      $payment['cash_pf']['count_only_cash_pf' . $i] = $val['count_only_cash_pf'];
+      $payment['cash_pf']['not_count_only_cash_pf' . $i] = $val['not_count_only_cash_pf'];
+      $payment['cash_pf']['count_only_cash_blank_pf' . $i] = $val['count_only_cash_blank_pf'];
+    }
+  }
+
+
+  foreach ($payment as $key1 => $val1) {
+    $final_result[$key1] = $val1;
+    $j = 0;
+    foreach ($val1 as $k => $v) {
+      $r[$j++] += $v;
+    }
+  }
+  $r[0] = 'Grand Total';
+  $final_result['total'] = $r;
+
+  $output = "<h3>PT Compliance Report</h3>";
+  $output .= theme('table', array('header' => $header, 'rows' => $final_result, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0'), 'empty' => t('No Records has been found')));
+  $params['subject'] = "PT Compliance Report";
+  $params['body'] = $output;
+  $mail_to = variable_get('pt_compliance');
+  $from = variable_get('from_email');
+
+  $file_name = 'PT_Compliance.csv';
+  $file_uri = 'public://PT_COMPLIANCE/' . $file_name;
+
+  // create directory if not exist
+  $dir = 'public://PT_COMPLIANCE';
+  file_prepare_directory($dir, FILE_CREATE_DIRECTORY);
+
+  $file = fopen($file_uri, 'w');
+
+  $table['header'] = $header;
+  $table['rows'] = $final_result;
+
+  foreach ($table['header'] as $line1) {
+    $all_header[] = $line1['data'];
+    if (!empty($line1['colspan'])) {
+      for ($x = 1; $x < $line1['colspan']; $x++) {
+        $all_header[] = $line1['data'];
+      }
+    }
+  }
+  fputcsv($file, $all_header);
+
+  foreach ($table['rows'] as $line) {
+    fputcsv($file, $line);
+  }
+
+  fclose($file);
+
+  $params['attachment'] = array(
+    'filecontent' => file_get_contents($file_uri),
+    'filename' => $file_name,
+    'filemime' => 'text/csv',
+  );
+
+  drupal_mail('email_status', 'collection_status', $mail_to, LANGUAGE_NONE, $params, $from);
+}
