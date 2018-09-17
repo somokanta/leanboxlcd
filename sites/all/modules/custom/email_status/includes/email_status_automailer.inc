@@ -1161,6 +1161,19 @@ function send_email_pt_compliance() {
     'filename' => $file_name,
     'filemime' => 'text/csv',
   );
+  
+  //2nd
+  $file1_name = 'PT_Compliance_Full_Report.csv';
+  $file1_uri = 'public://PT_COMPLIANCE/' . $file1_name;
 
-  drupal_mail('email_status', 'collection_status', $mail_to, LANGUAGE_NONE, $params, $from);
+  $view_output = views_embed_view('bill_return_report', 'views_data_export_2', '');
+  $return = file_unmanaged_save_data($view_output, "$file1_uri", FILE_EXISTS_REPLACE);
+
+  $params['attachment2'] = array(
+    'filecontent' => file_get_contents($file1_uri),
+    'filename' => $file1_name,
+    'filemime' => 'text/csv',
+  );
+//2nd end
+  drupal_mail('email_status', 'productivity_status', $mail_to, LANGUAGE_NONE, $params, $from);
 }
