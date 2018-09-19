@@ -240,7 +240,7 @@ function delivery_details_tracking_views_data() {
   $delivery_details = 'delivery_details';
   $data[$delivery_details]['date_filter'] = array(
     'group' => t('Date'),
-    'title' => t('Date (!base_table)', array('!base_table' => delivery_details)),
+    'title' => t('Date (!base_table)', array('!base_table' => $delivery_details)),
     'help' => t('Filter any Views !base_table date field.', array('!base_table' => $delivery_details)),
     'filter' => array(
       'handler' => 'date_views_filter_handler',

@@ -176,6 +176,21 @@ function master_dispatch_planning_form_validate($form, &$form_state) {
       if(!empty($ptl_data_exist)){
          form_set_error('list_form_items',"Trip ID $trip_id has already been sent to PTL");
       }
+      
+        // Master trip DP validation validation
+        $query = db_select('field_data_field_trip_id_reference', 'tr');
+        $query->join('node', 'n', 'n.nid = tr.entity_id');
+        $query->addExpression('GROUP_CONCAT(n.title)', 'titles');
+        $query->condition('tr.field_trip_id_reference_nid', "$nid");
+        $query->condition('tr.bundle', "sales_register_data");
+        $query->leftJoin('field_data_field_previous_trip', 'dp', 'tr.entity_id = dp.entity_id');
+        $query->isNotNull('dp.field_previous_trip_value');
+        $pending_bills = $query->execute()->fetchField();
+
+        if(!empty($pending_bills)){
+           form_set_error('list_form_items',"Trip ID $trip_id has DP Bills: $pending_bills");
+        }
+      //end
     }
   }
 }

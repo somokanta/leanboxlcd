@@ -360,6 +360,11 @@ function create_fetch_data_master_ptl_trip_form_submit($form, &$form_state) {
 
     if ($count) {
       drupal_set_message("Master Trip $master_trip_id PTL data is created successfully!");
+      
+      $pending_bills = master_ptl_get_pending_bill_title_by_master_trip($master_trip_id_nid);
+      if($pending_bills){
+        drupal_set_message("Did not send DP Bill Numbers: $pending_bills",'warning');
+      }
     }
     else if (empty($master_trip_id_nid)) {
       drupal_set_message("Master Trip $master_trip_id is not created!", 'warning');
@@ -560,13 +565,16 @@ function get_child_desc_and_qty_by_parent_sku($sku7_code, $distributor_id) {
  * @param type $dispatch_data_nid
  */
 function get_all_bills_of_trip_id($dispatch_data_nid) {
-  $query = db_select('field_data_field_trip_id_reference', 'tr');
-  $query->condition('field_trip_id_reference_nid', "$dispatch_data_nid");
-  $query->join('node', 'n', 'n.nid = tr.entity_id');
-  $query->addExpression('GROUP_CONCAT(n.title)', 'titles');
-  $query->condition('bundle', "sales_register_data");
-  $sales_register_titles = $query->execute()->fetchField();
-  $bills = explode(',', $sales_register_titles);
+    $query = db_select('field_data_field_trip_id_reference', 'tr');
+    $query->condition('tr.field_trip_id_reference_nid', "$dispatch_data_nid");
+    $query->join('node', 'n', 'n.nid = tr.entity_id');
+    $query->addExpression('GROUP_CONCAT(n.title)', 'titles');
+    $query->condition('tr.bundle', "sales_register_data");
+    //don't send pending bills. means which picking is done against previous trip attached
+    $query->leftJoin('field_data_field_previous_trip', 'dp', 'tr.entity_id = dp.entity_id');
+    $query->isNull('dp.field_previous_trip_value');
+    $sales_register_titles = $query->execute()->fetchField();
+    $bills = explode(',', $sales_register_titles);
   return $bills;
 }
 
@@ -794,4 +802,18 @@ function update_master_ptl_put_qty_sum_data($ptl_job, $id, $rs_code, $api_time, 
    $results['flag'] = '1';
    $results['result'] = 'Updated Successfully';
    return $results;
+}
+
+function master_ptl_get_pending_bill_title_by_master_trip($master_trip_id_nid) {
+    $query = db_select('field_data_field_master_trip_id_reference', 'tm');
+    $query->condition('tm.field_master_trip_id_reference_nid', "$master_trip_id_nid");
+    $query->condition('tm.bundle', "dispatch_data");
+    $query->leftJoin('field_data_field_trip_id_reference', 'td', 'td.field_trip_id_reference_nid = tm.entity_id');
+    $query->condition('td.bundle', "sales_register_data");
+    $query->join('node', 'n', 'n.nid = td.entity_id');
+    $query->addExpression('GROUP_CONCAT(n.title)', 'titles');
+    $query->leftJoin('field_data_field_previous_trip', 'dp', 'td.entity_id = dp.entity_id');
+    $query->isNotNull('dp.field_previous_trip_value');
+    $sales_register_title = $query->execute()->fetchField();
+  return $sales_register_title;
 }
