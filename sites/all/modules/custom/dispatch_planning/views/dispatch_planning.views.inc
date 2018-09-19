@@ -5271,6 +5271,14 @@ function dispatch_planning_views_data() {
       'handler' => 'field_cheque_date_handler',
     ),
   );
+   
+   $data['views']['bill_date_handler'] = array(
+    'title' => t('Bill Date'),
+    'help' => t('Bill Date.'),
+    'field' => array(
+      'handler' => 'field_bill_date_handler',
+    ),
+  );
   
   // Delivery pending printout handler
   $data['views']['header_area_delivery_pending_printout'] = array(
