@@ -510,6 +510,22 @@ function dispatch_planning_menu() {
       'type' => MENU_CALLBACK,
   );
   
+  $items['delivery-pending-report'] = array(
+    'title' => 'Delivery Pending Report',
+    'page callback' => array('delivery_pending_report_callback'),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'delivery_pending_report.inc',
+  );
+  
+  $items['delivery-pending-report/export'] = array(
+    'title' => 'Delivery Pending Report Export',
+    'description' => 'Delivery Pending Report Export',
+    'page callback' => array('delivery_pending_export'),
+    'file' => 'delivery_pending_report.inc',
+    'access callback' => TRUE,
+  );
+  
   return $items;
 }
 
@@ -1707,6 +1723,18 @@ function dispatch_planning_form_save_validate($form, &$form_state) {
     form_set_error('vehicle_number', 'Please enter a valid vehicle number');
   }
   
+  $query = db_select('node', 'n');
+  $query->condition('n.uid', $distributor_id);
+  $query->condition('n.type', 'sales_register_data');
+  $query->condition('n.nid', $bill_nids, 'IN');
+  $query->leftJoin('field_data_field_delivery_pending', 'dp', 'n.nid = dp.entity_id');
+  $query->condition('dp.field_delivery_pending_value', 1, '=');
+  $query->fields('n', array('title'));
+  $res = $query->execute()->fetchCol();
+  if (count($res) != count($bill_nids) && count($res) != 0) {
+      $dp_bills = implode(',', $res);
+    form_set_error('list_form_items', 'DP Bills and Non-DP bills cannot be combined together in a Trip. DP Bills are ' . $dp_bills);
+  }
   ##############################################################################
   $query = db_select('node', 'n');
   $query->leftJoin('field_data_field_sales_party_code', 'spc', 'n.nid = spc.entity_id');
@@ -2683,6 +2711,11 @@ function trip_delete_form_submit($form, &$form_state) {
       $node->field_bill_sequence = array();
       $node->field_drs_sequence = array();
       $node->field_dispatch_n_value = array();
+      
+      $previously_dp = check_previous_dp_status($node->field_previous_trip['und'][0]['value'],$node->title,$distributor_id);
+      if(!empty($previously_dp)){
+        $node->field_delivery_pending['und'][0]['value'] = 1;
+      }
       node_save($node);
     }
   }
@@ -2696,6 +2729,19 @@ function trip_delete_form_submit($form, &$form_state) {
   // Delete Farey table data dispatch_planning_api_data, dispatch_planning_item_details
   delete_data_from_farey_table($trip_id,$distributor_id);
   drupal_set_message('Successfully deleted');
+}
+
+/**
+ *  Return 1 in case of DP
+ */
+function check_previous_dp_status($trip_id,$bill_number,$dis_id){
+    $query = db_select('dispatch_planning_api_data', 'ad');
+    $query->condition('ad.distributor_id', $dis_id, '=');
+    $query->condition('ad.runsheet_number', $trip_id, '=');
+    $query->condition('ad.bill_number', $bill_number, '=');
+    $query->fields('ad', array('delivery_pending_flag'));
+    $res = $query->execute()->fetchField();
+    return $res;
 }
 
 // delete data from farey table when delete a trip
