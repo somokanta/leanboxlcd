@@ -1682,8 +1682,8 @@ function reverse_geocode_node_presave($node) {
          $query->condition('ad.distributor_id', $distributor_id);
          $query->fields('ad', array('delivered_date'));
          $del_date = $query->execute()->fetchField();
-         $del_date = strtotime(date('Y-m-d',$del_date));
          if (!empty($del_date)) {
+           $del_date = strtotime(date('Y-m-d',$del_date));
             if ($del_date <= $updated_pdd) {
                $n_value = "N+2";
             }
