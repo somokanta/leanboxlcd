@@ -1614,7 +1614,7 @@ function reverse_geocode_node_presave($node) {
             $node->field_dispatch_n_value[LANGUAGE_NONE][0]['value'] = $n_value;
          }
       } 
-      
+      $delivered_value = ''; // For updating. remove once done. URGENT
       if (empty($delivered_value)) {
         //Code for updating deliver N value       
          $query = db_select('dispatch_planning_api_data', 'ad');
@@ -1635,6 +1635,8 @@ function reverse_geocode_node_presave($node) {
                $n_value = "N+4";
             }
             $node->field_deliver_n_value[LANGUAGE_NONE][0]['value'] = $n_value;
+         }else{
+             unset($node->field_deliver_n_value[LANGUAGE_NONE]); // For updating. remove once done. URGENT
          }
       }
       
