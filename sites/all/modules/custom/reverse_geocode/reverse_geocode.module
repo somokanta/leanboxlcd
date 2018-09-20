@@ -2026,28 +2026,24 @@ function reverse_geocode_get_data_trip_wise($trip_id) {
 function cal_delivery_n_val_by_cron() {
   $distributor_id = _DISTRIBUTOR_ID;
   //$status = array('deliver', 'partial_deliver');
-
   $query = db_select('dispatch_planning_api_data', 'ad')
     ->fields('ad', array('bill_number'))
     ->condition('ad.distributor_id', $distributor_id)
     ->condition('ad.delivered_date', '0')
-    //->condition('ad.res_status', $status, 'IN')
-    ->condition(db_or()
-    ->condition('updated_time', '0', '!=')
-    ->condition('res_updated_time', '0', '!=')
-  );
+    ->isNotNull('ad.res_status')
+    ->condition('ad.res_status', '', '!=')
+    ->condition('updated_time', '0', '!=');
   $res = $query->execute()->fetchAllKeyed(0, 0);
   watchdog('cal_delivery_n_val_by_cron', '<pre>' . print_r($res, TRUE) . '</pre>');
+  
   if (!empty($res)) {
     db_update('dispatch_planning_api_data')
-      ->expression('delivered_date', "CASE WHEN res_updated_time!=0 THEN res_updated_time  ELSE updated_time END")
+      ->expression('delivered_date', "CASE WHEN res_updated_time !=0 THEN res_updated_time  ELSE updated_time END")
       ->condition('distributor_id', $distributor_id)
       ->condition('delivered_date', '0')
-      //->condition('res_status', $status, 'IN')
-      ->condition(db_or()
+       ->isNotNull('ad.res_status')
+       ->condition('ad.res_status', '', '!=')
         ->condition('updated_time', '0', '!=')
-        ->condition('res_updated_time', '0', '!=')
-      )
       ->execute();
 
     foreach ($res as $bill_number) {

@@ -240,6 +240,8 @@ function change_feeds_import_batch_fix_process($max, $data, $distributor_id, $fi
 
     $error_bool = 0;
     $total_qty = $value['Sum of TOTAL_SALES_QTY'];
+    $net_sales_qty = $value['Sum of NET_SALES_QTY'];
+    $sales_free_qty = $value['Sum of SALES_FREE_QTY'];
 
     $party_code = $value['PARTY_CODE'];
     $bill_number = $value['BILL_NUMBER'];
@@ -377,7 +379,28 @@ function change_feeds_import_batch_fix_process($max, $data, $distributor_id, $fi
           }
           else {
             if ($k == 'Sum of TOTAL_SALES_QTY') {
+              
+              if ($total_qty != $net_sales_qty + $sales_free_qty) {
+                $flag = 1;
+                $error_text = "$total_qty in $k should be Sum of NET_SALES_QTY + Sum of SALES_FREE_QTY";
+              }
+              if($total_qty < 0){
+                $flag = 1;
+                $error_text = "$total_qty in $k cannot be negative";
+              }
+              if (floatval($total_qty) == 0) {
+                $flag = 1;
+                $error_text = "$total_qty in $k cannot be zero";
+              }
               $context['results']['sum_of_total_sales_qty'] += $total_qty;
+            }
+            if ($k == 'Sum of NET_SALES_QTY' && $net_sales_qty < 0) {
+              $flag = 1;
+              $error_text = "$net_sales_qty in $k cannot be negative";
+            }
+            if ($k == 'Sum of SALES_FREE_QTY' && $sales_free_qty < 0) {
+              $flag = 1;
+              $error_text = "$sales_free_qty in $k cannot be negative";
             }
           }
         }
