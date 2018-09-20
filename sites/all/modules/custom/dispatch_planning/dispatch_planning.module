@@ -2971,8 +2971,8 @@ function dispatch_planning_api_data($api_data, $node_uid = 0) {
         'bill_number' => $api_data['jobData']['bill_number'],
         'runsheet_number' => $api_data['jobData']['runsheet_number'],
         'salesman' => $api_data['jobData']['salesman'],
-        'created_time' => REQUEST_TIME,
-        'updated_time' => REQUEST_TIME
+        'created_time' => REQUEST_TIME
+        //'updated_time' => REQUEST_TIME //updated time should enter from response and manual edit.
       );
       $query->fields($fields);
       $result_id = $query->execute();
