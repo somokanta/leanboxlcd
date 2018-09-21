@@ -240,7 +240,7 @@ function change_feeds_import_sales_register_batch_fix_process($data, $distributo
       $unique_comb = $value['PARTY_CODE']. $value['BILL_DATE'];
       $context['results']['unique_party_billdate'][$unique_comb][$value['BILL_NUMBER']] = $value['BILL_NUMBER'];
       if (count($context['results']['unique_party_billdate'][$unique_comb]) > 1) {
-        $value['error_message'] .= "Duplicate Bills are found for party code " . $value['PARTY_CODE'];
+        //$value['error_message'] .= "Duplicate Bills are found for party code " . $value['PARTY_CODE'];
       }else{   
         $query = db_select('node', 'n');
         $query->condition('n.type', 'sales_register_data');
@@ -254,7 +254,7 @@ function change_feeds_import_sales_register_batch_fix_process($data, $distributo
         $query->fields('n1', array('title'));
         $result = $query->execute()->fetchField();
         if (!empty($result)) {
-          $value['error_message'] .= "Duplicate Bills are found for party code " . $result;
+          //$value['error_message'] .= "Duplicate Bills are found for party code " . $result;
         }
       }
     }
