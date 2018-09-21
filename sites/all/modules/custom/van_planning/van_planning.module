@@ -62,9 +62,36 @@ function van_planning_menu() {
     'type' => MENU_CALLBACK,
     'file' => 'form/pending_summary.inc',
   );
+   
+  // setting form for Dispatch Planning
+  $items['admin/config/dispatch-related-conf'] = array(
+    'title' => 'Setting Form For Dispatch Related',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('dispatch_related_config_form'),
+    'access callback' => 'check_if_fr_role_user_admin',
+  );
    return $items;
 }
 
+// setting form for storing views name used in hook_views_query_alter
+function dispatch_related_config_form($form, $form_state) {
+  // Views Name
+  $form['van_planning_dates'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Van Planning Dates'),
+    '#description' => t('No of dates which bill will be visible'),
+    '#default_value' => variable_get('van_planning_dates', 15),
+    '#required' => TRUE,
+  );
+  $form['party_bill_check'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Party Code and Bill Check'),
+    '#description' => t('1 Will run duplicate validation and 0 will bypass'),
+    '#default_value' => variable_get('party_bill_check', ''),
+    '#required' => TRUE,
+  );
+  return system_settings_form($form);
+}
 /**
  * 
  * @param type $string
