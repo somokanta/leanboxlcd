@@ -19,15 +19,19 @@ function fetch_dispatch_planning_api_data($data) {
       if (!empty($bill_row_id)) {
               
       if (isset($data['fieldData']['money_collect2'])) {
-         if (is_array($data['fieldData']['money_collect2'])) {
-            $money_collect = implode(",", $data['fieldData']['money_collect2']);
-         }
-      }
+          if (is_array($data['fieldData']['money_collect2'])) {
+                $money_collect = implode(",", $data['fieldData']['money_collect2']);
+          } else {
+                $money_collect = str_replace("&", ",", $data['fieldData']['money_collect2']);
+          }
+        }
        if (isset($data['fieldData']['money_collect3'])) {
-         if (is_array($data['fieldData']['money_collect3'])) {
-            $money_collect = implode(",", $data['fieldData']['money_collect3']);
-         }
-      }
+            if (is_array($data['fieldData']['money_collect3'])) {
+                $money_collect = implode(",", $data['fieldData']['money_collect3']);
+            } else {
+                $money_collect = str_replace("&", ",", $data['fieldData']['money_collect3']);
+            }
+        }
       $updated_bill_row_id = db_update('dispatch_planning_api_data') // Table name no longer needs {}
           ->fields(array(
             'res_runsheetNo' => isset($data['runsheetNo']) ? $data['runsheetNo'] : '',
