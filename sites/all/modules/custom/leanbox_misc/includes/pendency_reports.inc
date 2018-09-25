@@ -141,12 +141,15 @@ function pendency_report_callback() {
     $query->join('field_data_field_bill_value', 'bv', 'bv.entity_id = n.nid');
     $query->join('field_data_field_billing_van', 'v', 'v.entity_id = n.nid');
     $query->groupBy('field_billing_van_value');
+    $query->groupBy('disn.title');
 
     $query->leftjoin('field_data_field_trip_id_reference', 'ti', 'ti.entity_id = n.nid');
     $query->leftjoin('node', 'disn', 'disn.nid = ti.field_trip_id_reference_nid');
     $query->leftjoin('field_data_field_dispatch_date', 'fd', 'fd.entity_id = disn.nid');
-
-
+    $query->leftjoin('field_data_field_entered_prevan', 'pvan', 'pvan.entity_id = disn.nid');
+    $query->fields('disn', array('title'));
+    $query->fields('pvan', array('field_entered_prevan_value'));
+    
     $query->addExpression('COUNT(n.title)', 'bill_count');
     $query->addExpression('SUM(bv.field_bill_value_value)', 'bill_value');
 
@@ -163,6 +166,8 @@ function pendency_report_callback() {
       foreach ($res as $k => $v) {
         $serial_no = $count;
         $loading_date = date('d-m-Y', $v['field_billing_loading_date_value']);
+        $trip_id = $v['title'];
+        $tp_van = $v['field_entered_prevan_value'];
         $van = $v['field_billing_van_value'];
         $bill_count = $v['bill_count'];
         $bill_val = $v['bill_value'];
@@ -181,6 +186,8 @@ function pendency_report_callback() {
 
         $rows[] = array($serial_no,
           $loading_date,
+          $trip_id,
+          $tp_van,
           $van,
           $bill_count,
           $bill_val,
@@ -196,8 +203,10 @@ function pendency_report_callback() {
       $output = "No Result Found";
     }
     if (!empty($res)) {
-      $header = array('Serial No', 'Loading Date', 'Van', 'Bill Count', 'Bill Value', 'Dispatch Count', 'Dispatch Value', 'Pending Bill', 'Pending Bill Value');
+      $header = array('Serial No', 'Loading Date', 'Trip ID', 'TP Van', 'Van', 'Bill Count', 'Bill Value', 'Dispatch Count', 'Dispatch Value', 'Pending Bill', 'Pending Bill Value');
       $rows[] = array('Total',
+        '',
+        '',
         '',
         '',
         $total_bill_count,
