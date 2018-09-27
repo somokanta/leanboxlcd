@@ -1825,7 +1825,7 @@ function _get_van_planning_bill_wise_data1($bill_area_code, $bill_pl_group, $bil
   $child_bill_wise_date = strtotime($child_bill_wise_date);
 
   if (empty($child_bill_wise_date)) {
-    $no_of_days = variable_get('van-planning_dates', 15);
+    $no_of_days = variable_get('van_planning_dates', 15);
     $billing_start_date = strtotime(date('Y-m-d') . "- $no_of_days days"); // @todo replace 15 this line
     $billing_end_date = strtotime(date("Y-m-d"));
   }
