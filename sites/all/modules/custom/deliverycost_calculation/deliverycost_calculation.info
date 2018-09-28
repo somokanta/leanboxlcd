@@ -1,0 +1,6 @@
+name = Delivery Cost Calculation 
+description = Delivery Cost Module
+package = Custom
+core = 7.x
+
+files[] = views/handler/handler_deliverycost_calculation.inc
