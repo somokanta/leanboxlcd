@@ -1,0 +1,6 @@
+name = Delivery Cost Calculation
+description = Delivery Cost Module
+package = Custom
+core = 7.x
+
+files[] = views/handler/render_field_vehicle_maintenance_form.inc

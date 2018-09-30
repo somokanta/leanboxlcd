@@ -78,24 +78,71 @@ function modify_views_forms_form_alter(&$form, &$form_state, $form_id) {
         $form['field_assignment_date_value']['value']['#attributes'] = array('required' => TRUE);
       }
    }
-
+   if ($form_id == 'editableviews_entity_form_vehicle_master') {
+       $form['#validate'][] = 'validate_vehilce_master_edit'; 
+       $form['#attached']['js'][] = drupal_get_path('module', 'deliverycost_calculation') . '/js/delivery_cost_edit.js';
+       foreach ($form['node'] as $key => $value) {
+           $form['node'][$key]['field_mode_of_contract'][LANGUAGE_NONE]['#attributes'] = array('class'=>array('mode_of_contract','mode_of_contract_'.$key),'vehicle_id'=>$key);
+           $form['node'][$key]['field_cost_per_day'][LANGUAGE_NONE][0]['value']['#attributes'] = array('class'=>array('allownumericwithoutdecimal','cost_per_day_all','cost_per_day_'.$key),'vehicle_id'=>$key);
+           $form['node'][$key]['field_cost_per_month'][LANGUAGE_NONE][0]['value']['#attributes'] = array('class'=>array('allownumericwithoutdecimal', 'cost_per_month_all','cost_per_month_'.$key),'vehicle_id'=>$key);
+           $form['node'][$key]['field_driver_phone_no'][LANGUAGE_NONE][0]['value']['#attributes'] = array('class'=>array('allownumericwithoutdecimal'),'maxlength'=>10);
+       }
+   }
+   
+   if ($form_id == 'editableviews_entity_form_Resource_Master_Report') {
+       $form['#attached']['js'][] = drupal_get_path('module', 'deliverycost_calculation') . '/js/delivery_cost_edit.js';
+       foreach ($form['node'] as $key => $value) {
+           $form['node'][$key]['field_cost_per_day'][LANGUAGE_NONE][0]['value']['#attributes'] = array('class'=>array('allownumericwithoutdecimal','resource_cost_per_day_all','resource_cost_per_day_'.$key),'resource_id'=>$key,'readonly'=>'readonly');
+           $form['node'][$key]['field_cost_per_month'][LANGUAGE_NONE][0]['value']['#attributes'] = array('class'=>array('allownumericwithoutdecimal','resource_cost_per_month_all','resource_cost_per_month_'.$key),'resource_id'=>$key);
+       }
+   }
    if ($form_id == 'editableviews_entity_form_dispatch_data_report') {
+      $form['#attached']['js'][] = drupal_get_path('module', 'mrc_inventory_returns') . '/js/fSelect.js';
+      $form['#attached']['css'][] = drupal_get_path('module', 'mrc_inventory_returns') . '/css/fSelect.css';  
+      $form['#attached']['js'][] = drupal_get_path('module', 'deliverycost_calculation') . '/js/trip_dispatch_delivery_boy.js';
+      $form['#attached']['css'][] = drupal_get_path('module', 'deliverycost_calculation') . '/css/delivery_cost.css';  
       $form['#validate'][] = 'validate_trip_status'; 
+      $form['#validate'][] = 'validate_dispatch_time'; 
+      $form['#validate'][] = 'validate_working_day'; 
+      // Validate trip status report dispatch start time and end time
+      
       $select = array('' => '- Select -');
       $vehicle = get_all_vehicle_data();
       $vehicle = $select + $vehicle;
-      foreach ($form['node'] as $key => $value) {
-         $form['node'][$key]['field_vehicle_no'][LANGUAGE_NONE][0]['value']['#type'] = 'select';
-         $form['node'][$key]['field_vehicle_no'][LANGUAGE_NONE][0]['value']['#multiple'] = FALSE;
-         $form['node'][$key]['field_vehicle_no'][LANGUAGE_NONE][0]['value']['#options'] = $vehicle;
-         $form['node'][$key]['field_vehicle_no'][LANGUAGE_NONE][0]['value']['#size'] = 1;
+      $delivery_boys = get_all_resources_by_type('Delivery Boy');
+      $delivery_boys = $select + $delivery_boys;
+      //field-dispatch-status
+      foreach ($form['node'] as $key => $value) { 
+          
+         $trip_status = $value['#entity']->field_dispatch_status[LANGUAGE_NONE][0]['value'];
+         $form['node'][$key]['field_vehicle_no'][LANGUAGE_NONE][0]['value']['#type'] = 'textfield';
+         //$form['node'][$key]['field_vehicle_no'][LANGUAGE_NONE][0]['value']['#multiple'] = FALSE;
+         //$form['node'][$key]['field_vehicle_no'][LANGUAGE_NONE][0]['value']['#options'] = $vehicle;
+         $form['node'][$key]['field_vehicle_no'][LANGUAGE_NONE][0]['value']['#size'] = 35;
+         $form['node'][$key]['field_vehicle_no'][LANGUAGE_NONE][0]['value']['#prefix'] = '<div class="trip_staus_vehicle">';
+         $form['node'][$key]['field_vehicle_no'][LANGUAGE_NONE][0]['value']['#required']    =  true;
+         $form['node'][$key]['field_vehicle_no'][LANGUAGE_NONE][0]['value']['#suffix'] = '</div>';
+         $form['node'][$key]['field_vehicle_no'][LANGUAGE_NONE][0]['value']['#autocomplete_path'] = 'vehicle_maintenance/autocomplete';
          // Not editable when dispatch start time alreay entered.
          $dispatch_pre_start_time = trim($value['#entity']->field_dispatch_pre_start_time[LANGUAGE_NONE][0]['value']);
          if (!empty($dispatch_pre_start_time)) {
                $form['node'][$key]['field_cashier_name']['#access'] = FALSE;
                $form['node'][$key]['field_dispatch_date']['#access'] = FALSE;
          }
+  
+         $form['node'][$key]['field_delivery_boy'][LANGUAGE_NONE]['#options'] = $delivery_boys;
+         $form['node'][$key]['field_delivery_boy'][LANGUAGE_NONE]['#multiple']    =  true;
+         $form['node'][$key]['field_delivery_boy'][LANGUAGE_NONE]['#required']    =  true;
+         $form['node'][$key]['field_delivery_boy'][LANGUAGE_NONE]['#attributes'] = array('class'=>array('delivery_boy'));
+         // if trip status is completed then delivery boy can't be editable
+         if ($trip_status == 1) {
+              $form['node'][$key]['field_delivery_boy']['#access'] = FALSE;
+         }
+         
+             // Not editable when dispatch start time alreay entered.
       }
+      // Delivery boy team create a delivery boy field in trip dispatch 
+      
    }
 
    if ($form_id == 'editableviews_entity_form_signed_bills_upload' || $form_id == 'editableviews_entity_form_missing_bills_assignment') {
@@ -265,6 +312,86 @@ function collection_closure_validate($form, &$form_state) {
   }
   
 }
+// validate dispatch pre start time and start time
+function validate_dispatch_time($form, &$form_state) {
+    $mess = '';
+    foreach ($form['node'] as $key => $value) { // It is for fetching existing node values
+            $node_status[$key]['trip_id'] = $value['#entity']->title;
+    }
+    foreach($form_state['values']['node'] as $nid => $form_data){
+      $dispatch_pre_start_time =  trim($form_data['field_dispatch_pre_start_time'][LANGUAGE_NONE][0]['value']);
+      $dispatch_start_time = trim($form_data['field_dispatch_start_time'][LANGUAGE_NONE][0]['value']);
+      $trip_id = $node_status[$nid]['trip_id'];
+      $start_time_flag =  $end_time_flag = 0;
+      
+      if (!empty($dispatch_pre_start_time)) {
+          $pre_start_time = explode(':',$dispatch_pre_start_time);
+          if (count($pre_start_time) != 2) {
+               $start_time_flag = 1;
+          }
+          if (!empty($pre_start_time)) {
+              $hour = (int)$pre_start_time[0];
+              $minutes_array = explode(' ',$pre_start_time[1]);
+              $minutes = (int)$minutes_array[0];
+              $am_pm =  strtolower(trim($minutes_array[1]));
+          }
+          if ($hour>12 || !is_numeric($hour) || $hour<=0 ) {
+              $start_time_flag = 1;
+          }
+          if ($minutes>60 && is_numeric($minutes) ) {
+                  $start_time_flag = 1;
+          }
+          if ($minutes< 0 && !is_numeric($minutes)) {
+                  $start_time_flag = 1;
+          }
+          if ($minutes< 0) {
+                  $start_time_flag = 1;
+          }
+          if($am_pm!='am' && $am_pm!='pm') {
+                  $start_time_flag = 1;
+          }
+     }
+     // dispatch end time validation
+     if (!empty($dispatch_start_time)) {
+          $pre_start_time = explode(':',$dispatch_start_time);
+          if (count($pre_start_time) != 2) {
+               $end_time_flag = 1;
+          }
+          if (!empty($pre_start_time)) {
+              $hour = (int)$pre_start_time[0];
+              $minutes_array = explode(' ',$pre_start_time[1]);
+              $minutes = (int)$minutes_array[0];
+              $am_pm =  strtolower(trim($minutes_array[1]));
+          }
+          if ($hour>12 || !is_numeric($hour) || $hour<=0 ) {
+              $end_time_flag = 1;
+          }
+          if ($minutes>60 && is_numeric($minutes) ) {
+                  $end_time_flag = 1;
+          }
+          if ($minutes< 0 && !is_numeric($minutes)) {
+                  $end_time_flag = 1;
+          }
+          if ($minutes< 0) {
+                  $end_time_flag = 1;
+          }
+          if($am_pm!='am' && $am_pm!='pm') {
+                  $end_time_flag = 1;
+          }
+          
+     }
+    if ($start_time_flag == 1) {
+        $mess.= t('Please enter valid dispatch start time for Trip ID:'.$trip_id.'.Allowed format is hh:mm AM/PM').'<br>'; 
+    }
+    if ($end_time_flag == 1) {
+       $mess.= t('Please enter valid dispatch end time for Trip ID:'.$trip_id.'.Allowed format is hh:mm AM/PM').'<br>'; 
+    }
+  }
+  //print_r($mess);die;
+  if (!empty($mess)) {
+      form_set_error('form',$mess);
+  }
+}
 
 // This function is used to validate trip status
 function validate_trip_status($form, &$form_state) {
@@ -286,6 +413,63 @@ function validate_trip_status($form, &$form_state) {
               form_set_error('form', t("Please enter the Dispatch date for Trip ID: ".$node_status[$nid]['trip_id']));
             }
       }
+  }
+}
+
+// function checks non working days ofresource and vehicle
+function validate_working_day($form, &$form_state) {
+     // This is user input values.  Edit screen, that if Pre-start or Start time is being entered/already entered for a Trip ID, then entering Cashier name is mandatory.
+    $public_holidays = get_public_holiday();
+    $weekoff = strtolower(get_resource_weekly_off_day());
+    foreach($form_state['values']['node'] as $nid => $form_data){
+      $vehicle_number =  trim($form_data['field_vehicle_no'][LANGUAGE_NONE][0]['value']);
+      $dispatch_date = trim($form_data['field_dispatch_date'][LANGUAGE_NONE][0]['value']);
+      $working_day = strtolower(date('l',strtotime($dispatch_date))); 
+      $field_delivery_boys = $form_data['field_delivery_boy'][LANGUAGE_NONE];
+      if (!empty($dispatch_date)) {
+            if (!empty($field_delivery_boys)) {
+                foreach($field_delivery_boys as $res_key=>$resource) {
+                    $resource_nids[$resource['nid']] = $resource['nid'];
+                    $resource_selected_weekly_off = get_resource_weeklyoff_selected(array($resource['nid']));
+                    
+                    $master_nid = $resource['nid'];
+                    $type = 'resource_extra_working';
+                    $start_period = strtotime($dispatch_date);
+                    // checking already added this date in extra working
+                    $is_exist = check_extra_working_exists($master_nid,$start_period,$type);
+                    $resource_selected_weekly_off[$resource['nid']]['weekly_off_selected'];
+                    if (empty($is_exist)) {
+                        if (!empty($resource_selected_weekly_off[$resource['nid']]['weekly_off_selected']) && strtolower($resource_selected_weekly_off[$resource['nid']]['weekly_off_selected']) == $working_day) {
+                            if(!empty($resource_selected_weekly_off[$resource['nid']]['resource_name'])) {
+                             $mess.= t('You are selecting non working day(Dispacth Date:'.date('d-M-Y',strtotime($dispatch_date)).') for Resource:'.$resource_selected_weekly_off[$resource['nid']]['resource_name'].' Please add extra working day.').l(t('Add Extra Working'), '/resource-master-report/edit/', array('query' => array('field_resource_name_value'=>$resource_selected_weekly_off[$resource['nid']]['resource_name']),'attributes' => array('target' => '_blank'))).'<br>'; 
+                            }
+                        }
+                        else if(empty($resource_selected_weekly_off[$resource['nid']]['weekly_off_selected']) && $weekoff == $working_day || in_array($dis_date,$public_holidays)) {
+                           if(!empty($resource_selected_weekly_off[$resource['nid']]['resource_name'])) {
+                               $mess.= t('You are selecting non working day(Dispacth Date:'.date('d-M-Y',strtotime($dispatch_date)).') for Resource:'.$resource_selected_weekly_off[$resource['nid']]['resource_name'].' Please add extra working day.').l(t('Add Extra Working'), '/resource-master-report/edit/', array('query' => array('field_resource_name_value'=>$resource_selected_weekly_off[$resource['nid']]['resource_name']),'attributes' => array('target' => '_blank'))).'<br>';
+                            } 
+                        }
+                
+                        
+                    }
+                }
+            }
+            $type = 'vehicle_master';
+            $master_nid = get_nid_from_title($vehicle_number,$type);
+            $type = 'vehicle_extra_working';
+            $start_period = strtotime($dispatch_date);
+            // checking already added this date in extra working
+            $is_exist = check_extra_working_exists($master_nid,$start_period,$type);
+            $dis_date = date('Y-m-d',strtotime($dispatch_date));
+            if (!empty($dispatch_date) && !empty($vehicle_number) && empty($is_exist)) {
+                 if ($weekoff == $working_day || in_array($dis_date,$public_holidays)) {
+                     $mess.= t('You are selecting non working day(Dispacth Date:'.date('d-M-Y',strtotime($dispatch_date)).') for vehicle:'.$vehicle_number.' Please add extra working day.').l(t('Add Extra Working'), 'vehicle-master/edit/', array('query' => array('title'=>$vehicle_number),'attributes' => array('target' => '_blank'))).'<br>';
+                 }
+            }
+        }
+    }
+  if (!empty($mess)) {
+      form_set_error('form',$mess);
   }
 }
 
@@ -459,7 +643,49 @@ function get_all_vehicle_data() {
       $query->fields('n', array('title'));
       $query->condition('n.type', 'vehicle_master');
       $query->condition('n.uid', $distributor_id);
+      // New condition for fetching active vehicles only
+      $query->leftjoin('field_data_field_is_active', 'is_active', 'is_active.entity_id = n.nid');
+    //$query->join('field_data_field_mode_of_contract', 'mode_contract', 'mode_contract.entity_id = n.nid');
+      $query->condition('n.type', 'vehicle_master');
+      $query->condition('is_active.field_is_active_value', '1');
       $res = $query->execute()->fetchAllKeyed(0, 0);
    }
    return $res;
+}
+function validate_vehilce_master_edit(&$form, &$form_state) {
+    //print_r($form_state['values']['node']);die;
+    $mess = '';
+    foreach ($form_state['values']['node'] as $nid => $form_data) {
+        $vehicle_number = $form_data['title'];
+        $mobile_number = trim($form_data['field_driver_phone_no'][LANGUAGE_NONE][0]['value']);
+        $valid_mobile = validate_mobile($mobile_number);
+        $field_is_active = trim($form_data['field_is_active'][LANGUAGE_NONE][0]['value']);
+        if (empty($valid_mobile) && !empty($mobile_number)) {
+            $mess .= t("Please enter valid driver mobile number for Vehilce Number:$vehicle_number") . '<br>';
+        }
+    }
+    if (!empty($mess)) {
+        form_set_error('form', $mess);
+    }
+}
+
+function check_vehicle_contract_end_period($vehicle_nid) {
+    if (!empty($vehicle_nid) && !empty($end_period)) {
+        $query = db_select('node', 'n');
+        $query->join('field_data_field_vehicle_number_ref', 'vehicle_ref', 'vehicle_ref.entity_id = n.nid');
+        $query->join('field_data_field_end_period', 'end_period', 'end_period.entity_id = n.nid');
+        $query->condition('vehicle_ref.field_vehicle_number_ref_nid', $vehicle_nid);
+        $query->condition('end_period.field_end_period_value', $end_period, '>=');
+        $query->condition('n.type', 'vehicle_contract');
+        $query->condition('n.uid', $distributor_id);
+        $query->fields('n', array('nid'));
+        $result = $query->execute()->fetchAllKeyed(0, 0);
+        if (!empty($result)) {
+            $node = node_load($vehicle_nid);
+            if (!empty($node)) {
+                $node->field_is_active[LANGUAGE_NONE][0]['value'] = 1;
+                node_save($node);
+            }
+        }
+    }
 }

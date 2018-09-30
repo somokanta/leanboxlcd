@@ -1,0 +1,43 @@
+<?php
+
+function delivery_cost_views_data() {
+  $data = array();
+  $data['views']['vehicle_contract_entry'] = array(
+    'title' => t('Vehicle Contract Entry '),
+    'help' => t('Vehicle Contract Entry.'),
+    'field' => array(
+      'handler' => 'render_field_vehicle_maintenance_form',
+    ),
+  );
+ $data['views']['vehicle_maintenace_entry'] = array(
+    'title' => t('Vehicle maintenace'),
+    'help' => t('Vehicle maintenace'),
+    'field' => array(
+      'handler' => 'render_field_vehicle_maintenance_form',
+    ),
+  );
+ $data['views']['resource_contract_entry'] = array(
+    'title' => t('Resource contract'),
+    'help' => t('Resource contract'),
+    'field' => array(
+      'handler' => 'render_field_vehicle_maintenance_form',
+    ),
+  );
+ $data['views']['resource_leave_entry'] = array(
+    'title' => t('Resource Leave Entry'),
+    'help' => t('Resource Leave Entry.'),
+    'field' => array(
+      'handler' => 'render_field_vehicle_maintenance_form',
+    ),
+  );
+ $data['views']['resource_weekoff_entry'] = array(
+    'title' => t('Resource weekoff Entry'),
+    'help' => t('Resource weekoff Entry.'),
+    'field' => array(
+      'handler' => 'render_field_vehicle_maintenance_form',
+    ),
+  );
+  
+  
+  return $data;
+}
