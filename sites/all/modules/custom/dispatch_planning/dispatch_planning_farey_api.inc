@@ -71,7 +71,7 @@ function fetch_dispatch_planning_api_data($data) {
             'res_reason_for_failure' => isset($data['fieldData']['reason_for_failure']) ? $data['fieldData']['reason_for_failure'] : '',
             'photo_of_signed_bill_partial' => isset($data['fieldData']['photo_of_signed_bill_partial']) ? $data['fieldData']['photo_of_signed_bill_partial'] : '',
             'res_cheque_no' => isset($data['fieldData']['cheque_no']) ? $data['fieldData']['cheque_no'] : 'NA',
-            'res_delivery_boy' => isset($data['fieldData']['delivery_boy']) ? $data['fieldData']['delivery_boy'] : '',
+            'res_delivery_boy' => isset($data['fieldData']['delivery_b']['delivery_boy_value']) ? $data['fieldData']['delivery_b']['delivery_boy_value'] : '',
             'updated_flag' => 2,
             'updated_time' => REQUEST_TIME,  
             'res_updated_time' => REQUEST_TIME,
