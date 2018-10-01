@@ -122,6 +122,7 @@ function adhoc_task_menu() {
   );
   return $items;
 }
+
 /**
  * Implement hook_permission
  */
