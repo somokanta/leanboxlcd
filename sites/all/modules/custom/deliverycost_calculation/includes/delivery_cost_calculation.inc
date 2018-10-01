@@ -919,10 +919,10 @@ function get_delivery_cost_details($form, &$form_state) {
                 $counter++;
             }
                 if (strtolower(date('l', $dis_date)) != strtolower($weekoff)) {
-                    $vehilce_monthly_cost = 0;
-                    $vehicle_per_day_cost = 0;
-                    if (!empty($vehicles_not_attempted_trips) && $dipacth_date_filter == 1) {
+                   if (!empty($vehicles_not_attempted_trips) && $dipacth_date_filter == 1) {
                         foreach ($vehicles_not_attempted_trips as $key => $value) {
+                           $vehilce_monthly_cost = 0;
+                           $vehicle_per_day_cost = 0;
                             $vehicle_cost = get_vehilce_per_day_cost($value);
                             if (!empty($vehicle_cost[$value]['cost_per_month'])) {
                                 $vehilce_monthly_cost = $vehicle_cost[$value]['cost_per_month'];
@@ -935,10 +935,7 @@ function get_delivery_cost_details($form, &$form_state) {
                             $rows[] = array($counter, $value, 'Trip Not Created', $get_active_vehicles_on_dispatch_date[$value]['field_vehicle_type_value'], $get_active_vehicles_on_dispatch_date[$value]['field_vehicle_owner_value'], '', '', '', '', '', '', '', '', $vehicle_per_day_cost);
                             $counter++;
                         }
-                        $total_trip_delivery_cost += $vehicle_per_day_cost;
-                        $total_cost_for_theday += $vehicle_per_day_cost;
-                        $rows[] = array($counter, $value, '', $get_active_vehicles_on_dispatch_date[$value]['field_vehicle_type_value'], $get_active_vehicles_on_dispatch_date[$value]['field_vehicle_owner_value'], '', '', '', '', '', '', '', '', $vehicle_per_day_cost);
-                        $counter++;
+                       
                     }
                 }
             
