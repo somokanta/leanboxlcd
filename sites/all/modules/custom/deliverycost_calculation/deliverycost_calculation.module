@@ -230,6 +230,7 @@ function deactivate_resource_vehicle() {
     $query->join('field_data_field_vehicle_number_ref', 'vehicle_ref', 'vehicle_ref.entity_id = n.nid');
     $query->fields('vehicle_ref', array('field_vehicle_number_ref_nid'));
     $query->join('field_data_field_is_active', 'is_active', 'is_active.entity_id = vehicle_ref.field_vehicle_number_ref_nid');
+    $query->condition('is_active.field_is_active_value', 1);
     $query->condition('n.type', $type);
     //$query->condition('n.uid', $distributor_id);
     $result = $query->execute()->fetchAll(PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
@@ -250,7 +251,8 @@ function deactivate_resource_vehicle() {
     $query->join('field_data_field_resource', 'resource_ref', 'resource_ref.entity_id = n.nid');
     $query->join('field_data_field_is_active', 'is_active', 'is_active.entity_id = resource_ref.field_resource_nid');
     $query->join('field_data_field_resource_type', 'resource_type', 'resource_type.entity_id = resource_ref.field_resource_nid');
-    $query->condition('resource_type.field_resource_type_value', 'Delivery boy');
+    $query->condition('resource_type.field_resource_type_value', array('Delivery boy','Cashier'),'IN');
+    $query->condition('is_active.field_is_active_value', 1);
     $query->fields('resource_ref', array('field_resource_nid'));
     $query->condition('n.type', $type);
     //$query->condition('n.uid', $distributor_id);
@@ -1800,7 +1802,7 @@ function get_all_running_vehicles() {
     return $res;
 }
 
-function get_all_resources_by_type($resource_type = null) {
+function get_all_resources_by_type($resource_type = null,$cashier_flag=0) {
     global $user;
     $dis_id = change_feeds_import_get_distributor_id($user->uid);
     $query = db_select('node', 'n');
@@ -1813,9 +1815,17 @@ function get_all_resources_by_type($resource_type = null) {
     $query->join('field_data_field_resource_name', 'rn', 'rn.entity_id = n.nid');
     $query->leftjoin('field_data_field_is_active', 'is_active', 'is_active.entity_id = n.nid');
     $query->condition('is_active.field_is_active_value', 1);
-    $query->fields('n', array('nid', 'title'));
+    if ($cashier_flag == 1 ) {
+     //$query->fields('n', array('title'));
+     $query->fields('rn', array('field_resource_name_value'));
+     $result = $query->execute()->fetchAllKeyed(0, 0);
+    }
+    else {
+        $query->fields('n', array('nid', 'title'));
+        $result = $query->execute()->fetchAllKeyed(0, 1);
+    }
     //$query->fields('rn', array('field_resource_name_value'));
-    $result = $query->execute()->fetchAllKeyed(0, 1);
+    
     return $result;
 }
 

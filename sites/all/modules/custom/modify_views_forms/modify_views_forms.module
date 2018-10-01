@@ -263,6 +263,21 @@ function modify_views_forms_form_alter(&$form, &$form_state, $form_id) {
 //      $form['node'][$key][$field_count][LANGUAGE_NONE][0]['value']['#size'] = 1;
     }
   }
+  // cashier name values only active cashier values
+  if ($form_id == 'editableviews_entity_form_dispatch_data_report') {
+       $select = array('' => '- Select -');
+       $cashier_flag=1;
+       $cashiers = get_all_resources_by_type('Cashier',$cashier_flag);
+       $cashiers_boys = $select + $cashiers;
+       $field_cashier = 'field_cashier_name';
+       foreach ($form['node'] as $key => $value) { 
+           $form['node'][$key][$field_cashier][LANGUAGE_NONE][0]['value']['#type'] = 'select';
+           $form['node'][$key][$field_cashier][LANGUAGE_NONE][0]['value']['#multiple'] = FALSE;
+           $form['node'][$key][$field_cashier][LANGUAGE_NONE][0]['value']['#options'] = $cashiers_boys;
+           $form['node'][$key][$field_cashier][LANGUAGE_NONE][0]['value']['#size'] = 1;
+       }
+      
+  }
 }
 
 function payment_collection_validate($form, &$form_state) {
@@ -657,6 +672,8 @@ function validate_vehilce_master_edit(&$form, &$form_state) {
     $mess = '';
     foreach ($form_state['values']['node'] as $nid => $form_data) {
         $vehicle_number = $form_data['title'];
+        //$data = check_vehicle_contract_end_period($nid);
+        
         $mobile_number = trim($form_data['field_driver_phone_no'][LANGUAGE_NONE][0]['value']);
         $valid_mobile = validate_mobile($mobile_number);
         $field_is_active = trim($form_data['field_is_active'][LANGUAGE_NONE][0]['value']);
@@ -670,8 +687,12 @@ function validate_vehilce_master_edit(&$form, &$form_state) {
 }
 
 function check_vehicle_contract_end_period($vehicle_nid) {
-    if (!empty($vehicle_nid) && !empty($end_period)) {
+   global $user;
+   $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+   if (!empty($vehicle_nid)) {
         $query = db_select('node', 'n');
+        $end_period = strtotime(date('Y-m-d'));
+        $end_period_change =  strtotime('-1 day', $end_period);
         $query->join('field_data_field_vehicle_number_ref', 'vehicle_ref', 'vehicle_ref.entity_id = n.nid');
         $query->join('field_data_field_end_period', 'end_period', 'end_period.entity_id = n.nid');
         $query->condition('vehicle_ref.field_vehicle_number_ref_nid', $vehicle_nid);
@@ -679,11 +700,13 @@ function check_vehicle_contract_end_period($vehicle_nid) {
         $query->condition('n.type', 'vehicle_contract');
         $query->condition('n.uid', $distributor_id);
         $query->fields('n', array('nid'));
+        $query->orderBy('n.nid', array('desc'));
+        $query->range(0, 1);
         $result = $query->execute()->fetchAllKeyed(0, 0);
         if (!empty($result)) {
             $node = node_load($vehicle_nid);
             if (!empty($node)) {
-                $node->field_is_active[LANGUAGE_NONE][0]['value'] = 1;
+                $node->field_end_period_value[LANGUAGE_NONE][0]['value'] = $end_period_change;
                 node_save($node);
             }
         }
