@@ -805,9 +805,11 @@ function get_delivery_cost_details($form, &$form_state) {
             $public_holidays = get_public_holiday($month, $year);
             $total_dispatched_value = 0;
             $total_return_value = 0;
+            $total_return_value = 0;
             $total_dp_value = 0;
             $total_return_percent = 0;
             $total_dp_percent = 0;
+            $total_delivered_value = 0;
             $trip_titles = array_keys($res);
             $no_of_working_days = calculateWorkingDaysInMonth($year, $month, $weekoff);
             // Not considering weekly off only calendar days for resources
@@ -827,6 +829,8 @@ function get_delivery_cost_details($form, &$form_state) {
                 $vh_not_utilized_non_working_days = array();
                 if (!empty($vehicles_not_utilized_on_working_days)) {
                     foreach ($vehicles_not_utilized_on_working_days as $vehicleno => $value) {
+                        $vehicle_per_day_cost = 0;
+                        $vehilce_monthly_cost = 0;
                         $vehicle_cost = get_vehilce_per_day_cost($value);
                         if (!empty($vehicle_cost[$value]['cost_per_month'])) {
                             $vehilce_monthly_cost = $vehicle_cost[$value]['cost_per_month'];
@@ -845,7 +849,9 @@ function get_delivery_cost_details($form, &$form_state) {
                 $total_trip_delivery_cost = 0;
                 $dispatched_value_in_lak = round($value['dispatched_value'] / $lak, $round_off_no_digits);
                 $return_value_in_lak = round($value['return_value'] / $lak, $round_off_no_digits);
-                ;
+                $vehicle_per_day_cost = 0;
+                $vehilce_monthly_cost = 0;
+                $cashier_cost = 0;                ;
                 $delivered_value_in_lak = round($value['delivered_value'] / $lak, $round_off_no_digits);
                 $return_percent = ($dispatched_value_in_lak / $return_value_in_lak) * 100;
                 $return_vs_delivered_percent = ($return_value_in_lak / $delivered_value_in_lak) * 100;
@@ -912,16 +918,22 @@ function get_delivery_cost_details($form, &$form_state) {
                 $rows[] = array($counter, $value['vehicle_number'], $key, $value['field_vehicle_type_value'], $value['field_vehicle_owner_value'], $value['field_cashier_name_value'], $dispatched_value_in_lak, $delivered_value_in_lak, $return_value_in_lak, $return_vs_delivered_percent, $return_vs_dispatched_percent, $dp_value_in_lak, $dp_percent, $total_trip_delivery_cost);
                 $counter++;
             }
-            if (strtolower(date('l', strtotime($value['dispacth_date']))) != strtolower($weekoff)) {
-
-                if (!empty($vehicles_not_attempted_trips) && $dipacth_date_filter == 1) {
-                    foreach ($vehicles_not_attempted_trips as $key => $value) {
-                        $vehicle_cost = get_vehilce_per_day_cost($value);
-                        if (!empty($vehicle_cost[$value]['cost_per_month'])) {
-                            $vehilce_monthly_cost = $vehicle_cost[$value]['cost_per_month'];
-                            $vehicle_per_day_cost = $vehilce_monthly_cost / $no_of_working_days;
-                        } else if (!empty($vehicle_cost[$value]['cost_per_day'])) {
-                            $vehicle_per_day_cost = $vehicle_cost[$value]['cost_per_day'];
+                if (strtolower(date('l', $dis_date)) != strtolower($weekoff)) {
+                    $vehilce_monthly_cost = 0;
+                    $vehicle_per_day_cost = 0;
+                    if (!empty($vehicles_not_attempted_trips) && $dipacth_date_filter == 1) {
+                        foreach ($vehicles_not_attempted_trips as $key => $value) {
+                            $vehicle_cost = get_vehilce_per_day_cost($value);
+                            if (!empty($vehicle_cost[$value]['cost_per_month'])) {
+                                $vehilce_monthly_cost = $vehicle_cost[$value]['cost_per_month'];
+                                $vehicle_per_day_cost = $vehilce_monthly_cost / $no_of_working_days;
+                            } else if (!empty($vehicle_cost[$value]['cost_per_day'])) {
+                                $vehicle_per_day_cost = $vehicle_cost[$value]['cost_per_day'];
+                            }
+                            $total_trip_delivery_cost += $vehicle_per_day_cost;
+                            $total_cost_for_theday += $vehicle_per_day_cost;
+                            $rows[] = array($counter, $value, 'Trip Not Created', $get_active_vehicles_on_dispatch_date[$value]['field_vehicle_type_value'], $get_active_vehicles_on_dispatch_date[$value]['field_vehicle_owner_value'], '', '', '', '', '', '', '', '', $vehicle_per_day_cost);
+                            $counter++;
                         }
                         $total_trip_delivery_cost += $vehicle_per_day_cost;
                         $total_cost_for_theday += $vehicle_per_day_cost;
@@ -929,7 +941,7 @@ function get_delivery_cost_details($form, &$form_state) {
                         $counter++;
                     }
                 }
-            }
+            
             if ($dipacth_date_filter == 1 && !empty($vh_not_utilized_non_working_days)) {
 
                 foreach ($vh_not_utilized_non_working_days as $key => $value) {
