@@ -431,7 +431,8 @@ function get_delivery_cost_details_mtd($form, &$form_state) {
     $dis_id = change_feeds_import_get_distributor_id($user->uid);
     $dispatch_from_date = $form_state['values']['dispatch_from_date'];
     $dispatch_to_date = $form_state['values']['dispatch_to_date'];
-    $round_off_no_digits = 4;
+    $round_off_no_digits = 3;
+    $round_off_no_digits_2 = 2;
     if (!empty($dispatch_from_date) && !empty($dispatch_to_date)) {
         $all_vehicles = get_all_active_vehicles_on_date_range(strtotime($dispatch_from_date), strtotime($dispatch_to_date));
         $absent_vehilce_details = get_maintenance_dates_of_vehicle(strtotime($dispatch_from_date), strtotime($dispatch_to_date));
@@ -625,10 +626,10 @@ function get_delivery_cost_details_mtd($form, &$form_state) {
                             $return_value_sum = round($return_value_sum, $round_off_no_digits);
                             $average_delivered_value_per_trip = round($average_delivered_value_per_trip, $round_off_no_digits);
                             $average_cost_per_trip = round($average_cost_per_trip, $round_off_no_digits);
-                            $return_percent_sale_vs_delivered = round($return_percent_sale_vs_delivered, $round_off_no_digits);
-                            $return_percent_sale_vs_dispatched = round($return_percent_sale_vs_dispatched, $round_off_no_digits);
+                            $return_percent_sale_vs_delivered = round($return_percent_sale_vs_delivered, $round_off_no_digits)*100;
+                            $return_percent_sale_vs_dispatched = round($return_percent_sale_vs_dispatched, $round_off_no_digits)*100;
                             $dp_value_sum = round($dp_value_sum, $round_off_no_digits);
-                            $cost_per_sale = round($cost_per_sale);
+                            $cost_per_sale = round($cost_per_sale,$round_off_no_digits_2);
                             $rows[] = array($vehicle_number_value, $vehicle_values['field_vehicle_owner_value'], $cashier, $trip_count, $dispatched_value_sum, $delivered_value_sum, $return_value_sum, $average_delivered_value_per_trip, $average_cost_per_trip, $return_percent_sale_vs_delivered, $return_percent_sale_vs_dispatched, $dp_value_sum, $dp_value_percent, $cost_per_sale);
                             $sl_index = $sl_index + 1;
                         }
@@ -701,10 +702,10 @@ function get_delivery_cost_details_mtd($form, &$form_state) {
             //print_r($not_attempted_count);die;
 
             $not_attempted_cost = $not_attempted_cost / $lak;
-            $rows[] = array($vehicle_number_value, $vehicle_values['field_vehicle_owner_value'], 'Trip Not Created', $not_attempted_count, '', '', '', '', '', '', '', '', '', round($not_attempted_cost, $round_off_no_digits));
+            $rows[] = array($vehicle_number_value, $vehicle_values['field_vehicle_owner_value'], 'Trip Not Created', $not_attempted_count, '', '', '', '', '', '', '', '', '', round($not_attempted_cost,$round_off_no_digits_2));
             $cost_per_sale = (($vehicle_total_cost + $not_attempted_cost) / $vehicle_total_delivered_value) * 100;
             $cost_per_sale = round($cost_per_sale);
-            $rows[] = array($vehicle_number_value, '', 'Total', '', '', '', '', '', '', '', '', '', '', $cost_per_sale);
+            $rows[] = array($vehicle_number_value, '', 'Total', '', '', '', '', '', '', '', '', '', '', round($cost_per_sale,$round_off_no_digits_2));
         }
     }
 
