@@ -449,6 +449,7 @@ function get_delivery_cost_details_mtd($form, &$form_state) {
     $trip_created_days = array();
     if (!empty($all_vehicles)) {
         foreach ($all_vehicles as $vehicle_number_value => $vehicle_values) {
+            $vehicle_total_delivered_value = 0;
             $mtd_result = array();
             $vehicle_cost_calc = get_vehilce_per_day_cost($vehicle_number_value);
             $query = db_select('dispatch_planning_api_data', 'ad');
@@ -638,6 +639,9 @@ function get_delivery_cost_details_mtd($form, &$form_state) {
             }
             $not_attempted_cost = 0;
             $not_attempted_count = 0;
+            $vehilce_monthly_cost = 0;
+            $vehicle_per_day_cost = 0;
+            $vehilce_monthly_cost = 0;
             if (!empty($all_extra_working[$vehicle_number_value])) {
                 $trip_not_created_on_non_working_days = array_diff($all_extra_working[$vehicle_number_value], $trip_created_days[$vehicle_number_value]);
                 foreach ($trip_not_created_on_non_working_days as $value) {
