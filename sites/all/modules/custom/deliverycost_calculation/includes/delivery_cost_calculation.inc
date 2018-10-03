@@ -708,7 +708,6 @@ function get_delivery_cost_details_mtd($form, &$form_state) {
             $not_attempted_cost = $not_attempted_cost / $lak;
             $rows[] = array($vehicle_number_value, $vehicle_values['field_vehicle_owner_value'], 'Trip Not Created', $not_attempted_count, '', '', '', '', '', '', '', '', '', round($not_attempted_cost,$round_off_no_digits_2));
             $cost_per_sale = (($vehicle_total_cost + $not_attempted_cost) / $vehicle_total_delivered_value) * 100;
-            $cost_per_sale = round($cost_per_sale);
             $rows[] = array($vehicle_number_value, '', 'Total', '', '', '', '', '', '', '', '', '', '', round($cost_per_sale,$round_off_no_digits_2));
         }
     }
