@@ -626,7 +626,7 @@ function get_delivery_cost_details_mtd($form, &$form_state) {
                             $delivered_value_sum = round($delivered_value_sum, $round_off_no_digits);
                             $return_value_sum = round($return_value_sum, $round_off_no_digits);
                             $average_delivered_value_per_trip = round($average_delivered_value_per_trip, $round_off_no_digits);
-                            $average_cost_per_trip = round($average_cost_per_trip, $round_off_no_digits);
+                            //$average_cost_per_trip = round($average_cost_per_trip, $round_off_no_digits);
                             $return_percent_sale_vs_delivered = round($return_percent_sale_vs_delivered, $round_off_no_digits)*100;
                             $return_percent_sale_vs_dispatched = round($return_percent_sale_vs_dispatched, $round_off_no_digits)*100;
                             $dp_value_sum = round($dp_value_sum, $round_off_no_digits);
