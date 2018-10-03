@@ -613,7 +613,7 @@ function get_delivery_cost_details_mtd($form, &$form_state) {
                                 $vehicle_total_delivered_value += $trip_value['delivered_value'];
                             }
                             $average_delivered_value_per_trip = $delivered_value_sum / $trip_count;
-                            $average_cost_per_trip = $total_cost / $trip_count;
+                            $average_cost_per_trip = $total_cost ;
                             $return_percent_sale_vs_delivered = $return_value_sum / $delivered_value_sum;
                             $return_percent_sale_vs_dispatched = $return_value_sum / $dispatched_value_sum;
                             $average_cost_per_day = $total_cost / $trip_count;
