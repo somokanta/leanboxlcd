@@ -1170,7 +1170,7 @@ function create_move_to_van_submit($form, &$form_state) {
 
   if (!empty($group_name)) {
     foreach ($form_state['values']['list_form_items'] as $key => $value) {
-      if ($key != "main_table_total") { // Don't allow total row
+      if ($key != "main_table_total"  && $key != 'main_table_subtotal') { // Don't allow total row and subtotal row also
         if (!empty($value)) {
           if (!isset($form_state['van_wise_bills'][$group_name])) {
             $form_state['van_wise_bills'][$group_name] = array();
@@ -1644,6 +1644,7 @@ function van_planning_ajax_submit($area_codes, $van_pl_group, $pl_group, $bill_d
 
     $res1[$val['area_code'] . '#' . $val['pl_group']]['bill_no'] = array('data' => '', 'class' => array('bill_no_val'), 'data-value' => json_encode($res_1[$val['area_code'] . '#' . $val['pl_group']]));
   }
+  $subtotal = array();
   $total = array();
   foreach ($res1 as $array_key => $array_value) {
     $res2 = array();
@@ -1651,6 +1652,12 @@ function van_planning_ajax_submit($area_codes, $van_pl_group, $pl_group, $bill_d
     $res1[$array_key]['rs_per_sum_kg'] = round($array_value['bill_value'] / $array_value['sum_kg'], 2);
     $res1[$array_key]['rs_per_sum_cft'] = round($array_value['bill_value'] / $array_value['sum_cft'], 2);
     $res1[$array_key]['#attributes'] = array('class' => array("$array_key"));
+        
+    // Adding class for bill count, bill value, weight and volume 
+    $res1[$array_key]['bill_count'] = array('data' => $array_value['bill_count'],'class' => array("van_bill_count"));
+    $res1[$array_key]['bill_value'] = array('data' => $array_value['bill_value'],'class' => array("van_bill_value"));
+    $res1[$array_key]['sum_kg'] = array('data' => $array_value['sum_kg'],'class' => array("van_bill_sumkg"));
+    $res1[$array_key]['sum_cft'] = array('data' => $array_value['sum_cft'],'class' => array("van_bill_sumcft"));
 
     // bill_no , bill_value, area_code, pl_grp, weight, volume
     $res2[$array_key] = array(
@@ -1666,6 +1673,16 @@ function van_planning_ajax_submit($area_codes, $van_pl_group, $pl_group, $bill_d
 
     $res1[$array_key]['bill_group'] = array('data' => '', 'class' => array('bill_group_data'), 'data-value' => json_encode($res2));
 
+    //Subtotal
+    $subtotal['area_code'] = '<b>Sub Total</b>';
+    $subtotal['bill_count'] = array('data' => '', 'class' => array('subtotal_bill_count'));
+    $subtotal['bill_value'] = array('data' => '', 'class' => array('subtotal_bill_value'));
+    $subtotal['sum_kg'] = array('data' => '', 'class' => array('subtotal_bill_sumkg'));
+    $subtotal['sum_cft'] = array('data' => '', 'class' => array('subtotal_bill_sumcft'));
+    $subtotal['bill_no'] = array('data' => '', 'class' => array('bill_no_val'), 'data-value' => '');
+    $subtotal['#attributes'] = array('class' => array("hide_prev_checkbox"));
+    $subtotal['bill_group'] = array('data' => '', 'class' => array('bill_group_data'), 'data-value' => '');
+    
     $total['area_code'] = '<b>Total</b>';
     $total['bill_count'] += $array_value['bill_count'];
     $total['bill_value'] += $array_value['bill_value'];
@@ -1677,6 +1694,7 @@ function van_planning_ajax_submit($area_codes, $van_pl_group, $pl_group, $bill_d
   }
   if (!empty($res)) {
     $total['bill_value'] = number_format($total['bill_value']);
+    $res1['main_table_subtotal'] = $subtotal; //subtotal
     $res1['main_table_total'] = $total;
   }
   return $res1;
