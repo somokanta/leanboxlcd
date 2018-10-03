@@ -575,7 +575,7 @@ function get_delivery_cost_details_mtd($form, &$form_state) {
                     }
 
                     //echo $vehicle_per_day_cost;die;
-                    $total_trip_delivery_cost = ($delivery_boy_cost + $cashier_cost + $vehicle_per_day_cost) / $lak;
+                    $total_trip_delivery_cost = round(($delivery_boy_cost + $cashier_cost + $vehicle_per_day_cost) / $lak,$round_off_no_digits);
                     $mtd_result[$value['vehicle_number']]['vehicle_type'] = $value['field_vehicle_type_value'];
                     $mtd_result[$value['vehicle_number']]['vehicle_owner'] = $value['field_vehicle_owner_value'];
                     $mtd_result[$value['vehicle_number']]['cashiers'][$value['field_cashier_name_value']][$key] = array('dispatched_value' => $dispatched_value_in_lak, 'delivered_value' => $delivered_value_in_lak, 'return_value' => $return_value_in_lak, 'dp_value' => $dp_value_in_lak, 'dp_percent' => $dp_value_percent, 'total_cost' => $total_trip_delivery_cost);
@@ -597,6 +597,7 @@ function get_delivery_cost_details_mtd($form, &$form_state) {
                             $return_percent_sale_vs_dispatched = 0;
                             $dp_value_percent = 0;
                             $trip_count = 0;
+                            $total_cost = 0;
                             $average_cost_per_day = 0;
                             $total_not_attempted_cost = 0;
                             $not_attempted_vehicle_per_day_cost = 0;
@@ -613,7 +614,7 @@ function get_delivery_cost_details_mtd($form, &$form_state) {
                                 $vehicle_total_delivered_value += $trip_value['delivered_value'];
                             }
                             $average_delivered_value_per_trip = $delivered_value_sum / $trip_count;
-                            $average_cost_per_trip = $total_cost ;
+                            $average_cost_per_trip = $total_cost / $trip_count;
                             $return_percent_sale_vs_delivered = $return_value_sum / $delivered_value_sum;
                             $return_percent_sale_vs_dispatched = $return_value_sum / $dispatched_value_sum;
                             $average_cost_per_day = $total_cost / $trip_count;
@@ -626,7 +627,7 @@ function get_delivery_cost_details_mtd($form, &$form_state) {
                             $delivered_value_sum = round($delivered_value_sum, $round_off_no_digits);
                             $return_value_sum = round($return_value_sum, $round_off_no_digits);
                             $average_delivered_value_per_trip = round($average_delivered_value_per_trip, $round_off_no_digits);
-                            //$average_cost_per_trip = round($average_cost_per_trip, $round_off_no_digits);
+                            $average_cost_per_trip = round($average_cost_per_trip, $round_off_no_digits);
                             $return_percent_sale_vs_delivered = round($return_percent_sale_vs_delivered, $round_off_no_digits)*100;
                             $return_percent_sale_vs_dispatched = round($return_percent_sale_vs_dispatched, $round_off_no_digits)*100;
                             $dp_value_sum = round($dp_value_sum, $round_off_no_digits);
