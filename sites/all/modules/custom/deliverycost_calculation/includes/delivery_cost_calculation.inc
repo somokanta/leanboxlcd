@@ -622,6 +622,8 @@ function get_delivery_cost_details_mtd($form, &$form_state) {
                             $return_percent_sale_vs_delivered = $return_value_sum / $delivered_value_sum;
                             $return_percent_sale_vs_dispatched = $return_value_sum / $dispatched_value_sum;
                             $average_cost_per_day = $total_cost / $trip_count;
+                            $dispatched_value_sum = round($dispatched_value_sum, $round_off_no_digits);
+                            $delivered_value_sum = round($delivered_value_sum, $round_off_no_digits);
                             $cost_per_sale = ($total_cost / $delivered_value_sum) * 100;
                             $cost_per_sale_dispatched = ($total_cost / $dispatched_value_sum) * 100;
                             $cost_per_sale_delivered = ($total_cost / $delivered_value_sum) * 100;
@@ -629,8 +631,7 @@ function get_delivery_cost_details_mtd($form, &$form_state) {
                             $dp_value_percent = ($dp_value_sum / $dispatched_value_sum) * 100;
                             $dp_value_percent = round($dp_value_percent);
 
-                            $dispatched_value_sum = round($dispatched_value_sum, $round_off_no_digits);
-                            $delivered_value_sum = round($delivered_value_sum, $round_off_no_digits);
+         
                             $return_value_sum = round($return_value_sum, $round_off_no_digits);
                             $average_delivered_value_per_trip = round($average_delivered_value_per_trip, $round_off_no_digits);
                             $average_cost_per_trip = round($average_cost_per_trip, $round_off_no_digits);
@@ -958,7 +959,7 @@ function get_delivery_cost_details($form, &$form_state) {
                 $dp_percent = round($dp_percent, $round_off_no_digits);
                 $total_trip_delivered_cost_in_lak = $total_trip_delivery_cost/$lak;
                 $cost_vs_delivered_cost = ($total_trip_delivered_cost_in_lak)/$delivered_value_in_lak *100; 
-                $cost_vs_dispatched = ($total_trip_delivery_cost/$lak)/$dispatched_value_in_lak *100;
+                $cost_vs_dispatched = ($total_trip_delivered_cost_in_lak)/$dispatched_value_in_lak *100;
                 $total_trip_delivery_cost = round($total_trip_delivery_cost, $round_off_no_digits_2);
                 $dispatched_value_in_lak = round($dispatched_value_in_lak, $round_off_no_digits);
                 $delivered_value_in_lak = round($delivered_value_in_lak, $round_off_no_digits);
