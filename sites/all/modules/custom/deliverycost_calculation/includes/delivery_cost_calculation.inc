@@ -368,8 +368,8 @@ function delivery_cost_calculation_form($form, &$form_state) {
           '#sticky' => FALSE,
         );
         cache_set('delivery_cost_download' . session_id(), $form['delivery_cost_table'], 'cache', time() + 60 * 10);
-        $output .= l(t('XLS'), 'return-vrs-time-report/export', array('query' => array($data)));
-        $rr = l('Download', "delivery_cost/export", array('attributes' => array("target" => "_blank")));
+        $output .= l(t('XLS'), 'return-vrs-time-report/export', array('query' => array('dispatch_date'=>$form_state['values']['dispatch_date'])));
+        $rr = l('Download', "delivery_cost/export", array('attributes' => array("target" => "_blank"),'query' => array('dispatch_date'=>$form_state['values']['dispatch_date'],'trip_id'=>$form_state['values']['trip_id'])));
         $form['download_mark'] = array(
           '#type' => 'markup',
           '#markup' => $rr,
@@ -958,10 +958,10 @@ function get_delivery_cost_details($form, &$form_state) {
                 $total_dp_percent += $dp_percent;
                 $total_cost_for_theday += $total_trip_delivery_cost/$lak;
                 $return_value_in_lak = round($return_value_in_lak, $round_off_no_digits);
-                $return_vs_delivered_percent = round($return_vs_delivered_percent, $round_off_no_digits);
-                $return_vs_dispatched_percent = round($return_vs_dispatched_percent, $round_off_no_digits);
+                $return_vs_delivered_percent = round($return_vs_delivered_percent);
+                $return_vs_dispatched_percent = round($return_vs_dispatched_percent);
                 $dp_value_in_lak = round($dp_value_in_lak, $round_off_no_digits);
-                $dp_percent = round($dp_percent, $round_off_no_digits);
+                $dp_percent = round($dp_percent);
                 $dispatched_value_in_lak = round($dispatched_value_in_lak, $round_off_no_digits);
                 $delivered_value_in_lak = round($delivered_value_in_lak, $round_off_no_digits);
                 $total_trip_delivered_cost_in_lak = round($total_trip_delivery_cost/$lak,$round_off_no_digits);
@@ -1003,7 +1003,7 @@ function get_delivery_cost_details($form, &$form_state) {
                     $counter++;
                 }
             }
-            if (!empty($rows)) {
+            if (!empty($rows)) { 
                 $total_dispatched_value = round($total_dispatched_value, $round_off_no_digits);
                 $total_return_value = round($total_return_value, $round_off_no_digits);
                 $total_return_vs_delivered_percent = round($total_return_vs_delivered_percent, $round_off_no_digits);
@@ -1012,8 +1012,11 @@ function get_delivery_cost_details($form, &$form_state) {
                 $total_dp_percent = round($total_dp_percent, $round_off_no_digits);
                 $total_delivered_value = round($total_delivered_value, $round_off_no_digits);
                 $total_cost_for_theday = round($total_cost_for_theday, $round_off_no_digits_2);
-                $total_cost_vs_delivered = round($total_cost_vs_delivered, $round_off_no_digits_2);
-                $total_cost_vs_dispatched = round($total_cost_vs_dispatched, $round_off_no_digits_2);
+                $total_cost_vs_delivered = round(($total_cost_for_theday/$total_delivered_value)*100, $round_off_no_digits_2);
+                $total_cost_vs_dispatched = round(($total_cost_for_theday/$total_dispatched_value)*100, $round_off_no_digits_2);
+                $total_return_vs_delivered_percent = round(($total_return_value/$total_delivered_value)*100);
+                $total_return_vs_dispatched_percent = round(($total_return_value/$total_dispatched_value)*100);
+                $total_dp_percent = round(($total_dp_value/$total_dispatched_value)*100);
                 $rows[] = array('', t('Total'), '', '', '', '', $total_dispatched_value, $total_delivered_value, $total_return_value, $total_return_vs_delivered_percent, $total_return_vs_dispatched_percent, $total_dp_value, $total_dp_percent, $total_cost_for_theday,$total_cost_vs_dispatched,$total_cost_vs_delivered);
             }
         }
