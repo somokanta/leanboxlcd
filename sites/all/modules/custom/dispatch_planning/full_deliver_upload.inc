@@ -171,11 +171,13 @@ function update_data_in_dispatch_data_table($data) {
     $bill_number = $v['Bill Number'];
     $trip_id = $v['Trip Id'];
     $status = $v['Status'];
+    $reason = $v['Reason']; //newly added. previously missed
     $status_updated = db_update('dispatch_planning_api_data') // Table name no longer needs {}
         ->fields(array(
           'res_status' => $status,
           'updated_flag' => 1, //manual
-          'updated_time' => REQUEST_TIME,  
+          'updated_time' => REQUEST_TIME,
+          'res_reason_for_failure' => ($status == 'undeliver') ? $reason : '',
         ))
         ->condition('bill_number', $bill_number, '=')
         ->condition('runsheet_number', $trip_id, '=')
