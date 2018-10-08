@@ -51,3 +51,9 @@ and open the template in the editor.
 {
     width:175px;
 }
+.custom_form_wrapper .form_row2 .col_3 {
+  width: 17%;
+  float: left;
+  padding:0 25px; 
+  position: relative;
+}
