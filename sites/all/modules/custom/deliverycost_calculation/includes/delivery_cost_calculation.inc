@@ -1732,8 +1732,9 @@ function _get_previous_trip_id($dispatch_date,$vehicle_number) {
       $query->condition('t.field_dispatch_date_value', $dispatch_date);
       $query->fields('n', array('title'));
       $res = $query->execute()->fetchAll(PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
-      if (strtolower(date('l', $dispatch_date)) == strtolower($weekoff) && empty($res)) {
-          $previous_date = strtotime('-1 day', $dispatch_date);
+      $dispatch_date_in_strtotime =  strtotime($dispatch_date);
+      if (strtolower(date('l', $dispatch_date_in_strtotime)) == strtolower($weekoff) && empty($res)) {
+          $previous_date = strtotime('-1 day', $dispatch_date_in_strtotime);
           $res = _get_previous_trip_id($previous_date,$vehicle_number);
       }
    }
