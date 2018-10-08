@@ -213,6 +213,22 @@ function deliverycost_calculation_menu() {
       'access callback' => TRUE,
       'type' => MENU_NORMAL_ITEM,
     );
+    $items['vehicle-day-wise-performance'] = array(
+      'title' => 'Vehicle Day-wise Performance',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('vehicle_day_wise_performance_form'),
+      'access arguments' => array('delivery cost'),
+      'type' => MENU_NORMAL_ITEM,
+      'file' => 'includes/delivery_cost_calculation.inc',
+    );
+    
+    $items['vehicle_daily_wise_report/export'] = array(
+      'title' => 'Vehicle Dailywise Report Export',
+      'description' => 'Vehicle Dailywise Report Export',
+      'page callback' => array('vehicle_daily_wise_report_export'),
+      'file' => 'includes/delivery_cost_calculation.inc',
+      'access callback' => TRUE,
+    );
 
     return $items;
 }
@@ -1552,7 +1568,7 @@ function get_extra_working_days($startdate, $enddate) {
     return $extra_working;
 }
 
-function get_maintenance_dates_of_vehicle($start_period, $end_period) {
+function get_maintenance_dates_of_vehicle($start_period, $end_period,$performance=0) {
     $result = array();
     global $user;
     $distributor_id = change_feeds_import_get_distributor_id($user->uid);
@@ -1585,12 +1601,14 @@ function get_maintenance_dates_of_vehicle($start_period, $end_period) {
             $query->join('field_data_field_start_period', 'start_period', 'start_period.entity_id = n.nid');
             $query->condition('end_period.field_end_period_value', $end_period, '<=');
             $query->condition('start_period.field_start_period_value', $start_period, '>=');
+            $query->leftjoin('field_data_field_remarks', 'remarks', 'remarks.entity_id = n.nid');
             $query->condition('n.type', 'vehicle_maintenance');
             $query->condition('n.uid', $distributor_id);
             $query->join('node', 'vehicle_master', 'vehicle_master.nid = vehicle_ref.field_vehicle_number_ref_nid');
             $query->condition('vehicle_master.title', $vehicle_numbrs, 'IN');
             $query->fields('vehicle_master', array('title'));
             $query->fields('n', array('nid', 'title'));
+            $query->fields('remarks', array('field_remarks_value'));
             $query->addExpression("DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(start_period.field_start_period_value),'+00:00','+05:30'), '%Y-%m-%d')", 'start_period');
             $query->addExpression("DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(end_period.field_end_period_value),'+00:00','+05:30'), '%Y-%m-%d')", 'end_period');
             $absent_details = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
@@ -1599,7 +1617,13 @@ function get_maintenance_dates_of_vehicle($start_period, $end_period) {
                     $absent_days = get_days_between_ranges($value['start_period'], $value['end_period']);
                     if (!empty($absent_days)) {
                         foreach ($absent_days as $ab_day) {
-                            $absent_days_list[$value['title']][$ab_day] = $ab_day;
+                            if ($performance== 1) {
+                                $absent_days_list[$value['title']][$ab_day] = $value['field_remarks_value'];
+                            }
+                            else {
+                                $absent_days_list[$value['title']][$ab_day] = $ab_day;
+                            }
+                            
                         }
                     }
                 }
