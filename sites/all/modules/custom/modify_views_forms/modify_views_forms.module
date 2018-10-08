@@ -90,6 +90,16 @@ function modify_views_forms_form_alter(&$form, &$form_state, $form_id) {
    }
    
    if ($form_id == 'editableviews_entity_form_Resource_Master_Report') {
+       $form['#attached']['css'][] = drupal_get_path('module', 'deliverycost_calculation') . '/css/delivery_cost.css';
+       // This hidden field is to add calendar in resource master report.
+       $form['calender_hide'] = array(
+          '#type' => 'date_popup',
+          '#date_year_range' => '-20:+2',
+         '#prefix'=>'<div style="display:none;">',
+          '#suffix'=>'</div>',
+         '#attributes'=>array('style'=>'display:none;','readonly')
+          
+        );
        $form['#attached']['js'][] = drupal_get_path('module', 'deliverycost_calculation') . '/js/delivery_cost_edit.js';
        foreach ($form['node'] as $key => $value) {
            $form['node'][$key]['field_cost_per_day'][LANGUAGE_NONE][0]['value']['#attributes'] = array('class'=>array('allownumericwithoutdecimal','resource_cost_per_day_all','resource_cost_per_day_'.$key),'resource_id'=>$key,'readonly'=>'readonly');
