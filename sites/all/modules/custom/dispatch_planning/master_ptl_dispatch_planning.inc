@@ -122,6 +122,7 @@ function put_qty_master_ptl_data($id_qty) {
         'close_time'=>$value['close_time'],
         'box_id'=>$value['box_id'],
       ))
+      ->expression('short_put_qty', "loose - ".$value['qty'])
       ->condition('id', $value['id'], '=')
       ->execute();
     $total += $count;
