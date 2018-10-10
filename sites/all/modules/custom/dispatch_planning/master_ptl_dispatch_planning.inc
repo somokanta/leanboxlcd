@@ -470,6 +470,7 @@ function master_ptl_data_insert_into_table($api_data, $distributor_id) {
           'created_time' => REQUEST_TIME,
           'cld' => $cld,
           'loose' => $loose,
+          'short_put_qty'=>$loose,
           'upc' => $sku_unit_case ? $sku_unit_case : 0,
           'sum_of_sales_free_qty' => $sum_of_sales_free_qty, //below are newly added
           'free_sku_description' => $free_sku_description,
