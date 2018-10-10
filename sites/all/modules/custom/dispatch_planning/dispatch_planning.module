@@ -526,6 +526,22 @@ function dispatch_planning_menu() {
     'access callback' => TRUE,
   );
   
+  $items['delivery-confirmation-status-report'] = array(
+    'title' => 'Delivery Confirmation Status Report',
+    'page callback' => 'delivery_confirmation_status_callback',
+    'access arguments' => array('Distributor Upload File'),
+    'type' => MENU_CALLBACK,
+    'file' => 'delivery_confirmation_status_report.inc',
+  );
+  
+  $items['delivery-confirmation-status-report/export'] = array(
+    'title' => 'Delivery Confirmation Status Report Export',
+    'description' => 'Delivery Confirmation Status Report Export',
+    'page callback' => array('delivery_confirmation_status_export'),
+    'file' => 'delivery_confirmation_status_report.inc',
+    'access callback' => TRUE,
+  );
+
   return $items;
 }
 
