@@ -957,17 +957,17 @@ function dispatch_planning_views_data() {
         'title' => t('Short Put Qty'),
         'help' => t('Short Put Qty'),
         'field' => array(
-            'handler' => 'views_handler_field',
+            'handler' => 'views_handler_field_numeric',
             'click sortable' => TRUE,
         ),
         'sort' => array(
             'handler' => 'views_handler_sort',
         ),
         'filter' => array(
-            'handler' => 'views_handler_filter_string',
+            'handler' => 'views_handler_filter_numeric',
         ),
         'argument' => array(
-            'handler' => 'views_handler_argument_string',
+            'handler' => 'views_handler_argument_numeric',
         ),
     );
     // put_qty_time
@@ -1800,17 +1800,17 @@ function dispatch_planning_views_data() {
         'title' => t('Short Put Qty'),
         'help' => t('Short Put Qty'),
         'field' => array(
-            'handler' => 'views_handler_field',
+            'handler' => 'views_handler_field_numeric',
             'click sortable' => TRUE,
         ),
         'sort' => array(
             'handler' => 'views_handler_sort',
         ),
         'filter' => array(
-            'handler' => 'views_handler_filter_string',
+            'handler' => 'views_handler_filter_numeric',
         ),
         'argument' => array(
-            'handler' => 'views_handler_argument_string',
+            'handler' => 'views_handler_argument_numeric',
         ),
     );
     // put_qty_time
