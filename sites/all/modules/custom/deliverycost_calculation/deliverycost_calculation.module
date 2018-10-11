@@ -229,7 +229,22 @@ function deliverycost_calculation_menu() {
       'file' => 'includes/delivery_cost_calculation.inc',
       'access callback' => TRUE,
     );
-
+      $items['resource-day-wise-performance'] = array(
+      'title' => 'Resource Day-wise Performance',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('resource_day_wise_performance_form'),
+      'access arguments' => array('delivery cost'),
+      'type' => MENU_NORMAL_ITEM,
+      'file' => 'includes/delivery_cost_calculation.inc',
+    );
+    
+    $items['resource_daily_wise_report/export'] = array(
+      'title' => 'Resource Dailywise Report Export',
+      'description' => 'Resource Dailywise Report Export',
+      'page callback' => array('resource_daily_wise_report_export'),
+      'file' => 'includes/delivery_cost_calculation.inc',
+      'access callback' => TRUE,
+);
     return $items;
 }
 
@@ -1964,4 +1979,100 @@ function deliverycost_calculation_form_resource_leaves_node_form_alter(&$form, $
     $form['title']['#required'] = FALSE;
     $form['#validate'][] = 'validate_resource_details';
     $form['field_resource'][LANGUAGE_NONE][0]['nid']['#autocomplete_path'] = 'get_active_resource/autocomplete';
+}
+function get_all_active_resources_on_date_range($dispatch_from_date, $dispatch_to_date) {
+    $resource_types = array('Delivery Boy','Cashier');
+    $result = array();
+    if (!empty($dispatch_from_date) && !empty($dispatch_to_date)) {
+        global $user;
+        $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+        $query = db_select('node', 'n');
+        $query->join('field_data_field_resource', 'resource_ref', 'resource_ref.entity_id = n.nid');
+        $query->join('field_data_field_end_period', 'end_period', 'end_period.entity_id = n.nid');
+        $query->join('field_data_field_start_period', 'start_period', 'start_period.entity_id = n.nid');
+        $query->condition('end_period.field_end_period_value', $dispatch_from_date, '>=');
+        $query->condition('start_period.field_start_period_value', $dispatch_to_date, '<=');
+        $query->condition('n.type', 'resources_contract');
+        $query->condition('n.uid', $distributor_id);
+        $query->join('node', 'resource_master', 'resource_master.nid = resource_ref.field_resource_nid');
+        $query->condition('resource_master.type', 'resource_master');
+        $query->condition('resource_master.uid', $distributor_id);
+        $query->leftjoin('field_data_field_is_active', 'is_active', 'is_active.entity_id = resource_master.nid');
+        $query->addExpression("DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(end_period.field_end_period_value),'+00:00','+05:30'), '%Y-%m-%d')", 'end_period');
+        $query->addExpression("rt.field_resource_type_value", 'resource_type');
+        $query->join('field_data_field_resource_type', 'rt', 'rt.entity_id = resource_master.nid');
+        $query->condition('rt.field_resource_type_value', $resource_types,'IN');
+        $query->leftjoin('field_data_field_resource_name', 'resource', 'resource.entity_id = resource_master.nid');
+        $query->fields('resource', array('field_resource_name_value'));
+        $result = $query->execute()->fetchAll(PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
+    }
+    return $result;
+}
+function get_leave_dates_of_resources($start_period, $end_period) {
+    $result = array();
+    global $user;
+    $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+    $absent_days_list = array();
+    $resource_types = array('Delivery Boy','Cashier');
+    $absent_days_list = array();
+    if (!empty($start_period) && !empty($end_period)) {
+        $result =   get_all_active_resources_on_date_range($start_period, $end_period);
+        if (!empty($result)) {
+            $resource_names = array_keys($result);
+            $query = db_select('node', 'n');
+            $query->join('field_data_field_resource', 'resource_ref', 'resource_ref.entity_id = n.nid');
+            $query->join('field_data_field_end_period', 'end_period', 'end_period.entity_id = n.nid');
+            $query->join('field_data_field_start_period', 'start_period', 'start_period.entity_id = n.nid');
+            $query->condition('end_period.field_end_period_value', $end_period, '<=');
+            $query->condition('start_period.field_start_period_value', $start_period, '>=');
+            $query->leftjoin('field_data_field_remarks', 'remarks', 'remarks.entity_id = n.nid');
+            $query->condition('n.type', 'resource_leaves');
+            $query->condition('n.uid', $distributor_id);
+            $query->join('node', 'resource_master', 'resource_master.nid = resource_ref.field_resource_nid');
+            $query->join('field_data_field_resource_name', 'resource', 'resource.entity_id = resource_master.nid');
+            $query->fields('resource', array('field_resource_name_value'));
+            $query->condition('resource.field_resource_name_value', $resource_names, 'IN');
+            $query->fields('remarks', array('field_remarks_value'));
+            $query->addExpression("DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(start_period.field_start_period_value),'+00:00','+05:30'), '%Y-%m-%d')", 'start_period');
+            $query->addExpression("DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(end_period.field_end_period_value),'+00:00','+05:30'), '%Y-%m-%d')", 'end_period');
+            $absent_details = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+            if (!empty($absent_details)) {
+                foreach ($absent_details as $key => $value) {
+                    $absent_days = get_days_between_ranges($value['start_period'], $value['end_period']);
+                    if (!empty($absent_days)) {
+                        foreach ($absent_days as $ab_day) {
+                          $absent_days_list[$value['field_resource_name_value']][$ab_day] = $value['field_remarks_value'];
+                         }
+                    }
+                }
+            }
+        }
+    }
+    return $absent_days_list;
+}
+function get_resource_extra_working_days($startdate, $enddate) {
+    $extra_working = array();
+    if (!empty($startdate) && !empty($enddate)) {
+        global $user;
+        $type = 'resource_extra_working';
+        $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+        $query = db_select('node', 'n');
+        $query->condition('n.type', $type);
+        $query->condition('n.uid', $distributor_id);
+        $query->join('field_data_field_resource', 'resource_ref', 'resource_ref.entity_id = n.nid');
+        $query->join('field_data_field_start_period', 'start_period', 'start_period.entity_id = n.nid');
+        $query->condition('start_period.field_start_period_value', array($startdate, $enddate), 'BETWEEN');
+        $query->join('node', 'resource_master', 'resource_master.nid = resource_ref.field_resource_nid');
+        $query->addExpression("DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(start_period.field_start_period_value),'+00:00','+05:30'), '%Y-%m-%d')", 'start_period');
+        $query->condition('resource_master.type', 'resource_master');
+        $query->leftjoin('field_data_field_resource_name', 'resource', 'resource.entity_id = resource_master.nid');
+        $query->fields('resource', array('field_resource_name_value'));
+        $result = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+        if (!empty($result)) {
+            foreach ($result as $key => $value) {
+                $extra_working[$value['field_resource_name_value']][$value['start_period']] = $value['start_period'];
+            }
+        }
+    }
+    return $extra_working;
 }
