@@ -1741,3 +1741,373 @@ function _get_previous_trip_id($dispatch_date,$vehicle_number) {
    return $res;
 }
 
+function resource_day_wise_performance_form($form, &$form_state) {
+    $form['#attached']['css'][] = drupal_get_path('module', 'deliverycost_calculation') . '/css/delivery_cost.css';
+    $form['#attached']['js'][] = drupal_get_path('module', 'deliverycost_calculation') . '/js/delivery_cost.js';
+    if (!isset($form_state['delivery_cost_details'])) {
+        $form_state['delivery_cost_details'] = array();
+    }
+    $options = $form_state['delivery_cost_details'];
+    $date = date('Y-m-d');
+    $end_date = $date;
+    $start_date = date('Y-m-d', strtotime($date . ' - 1 month'));
+    $form['#prefix'] = '<div id="itemlist-div" class="custom_form_wrapper">';
+    $form['#suffix'] = '</div>';
+    $form['dispatch_from_date'] = array(
+        '#type' => 'date_popup',
+        '#title' => t('Dispatch From Date*'),
+        '#date_format' => 'Y-m-d',
+        '#attributes' => array('class' => array('dispatch_date')),
+        '#date_label_position' => '',
+        '#date_year_range' => '-20:+2',
+        '#size' => 30,
+        '#default_value' => $start_date,
+        '#prefix' => '<div class="form_row form_row2"><div class="col_3 vehicle_performance">',
+        '#suffix' => '</div>'
+    );
+    $form['dispatch_to_date'] = array(
+        '#type' => 'date_popup',
+        '#title' => t('Dispatch To Date*'),
+        '#date_format' => 'Y-m-d',
+        '#attributes' => array('class' => array('dispatch_date')),
+        '#date_label_position' => '',
+        '#date_year_range' => '-20:+2',
+        '#default_value' => $end_date,
+        '#size' => 30,
+        '#prefix' => '<div class="form_row form_row2"><div class="col_3 vehicle_performance">',
+        '#suffix' => '</div>'
+    );
+    //$options = array(''=>t('-Select-'),'Cashier'=>'Cashier','Delivery Boy'=>'Delivery Boy');
+    /* $form['resource_type'] = array(
+      '#type' => 'select',
+      '#title' => t('Resource Type'),
+      '#options' => $options,
+      '#size' => 20,
+      '#maxlength' => 50,
+      //'#attributes' => array('class' => array('trip-id'), 'id' => 'trip-id'),
+      '#prefix' => '<div class="form_row form_row2"><div class="col_3 vehicle_performance">',
+      '#suffix' => '</div></div></div>'
+      ); */
+
+    $form['resource_name'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Resource Name'),
+        '#autocomplete_path' => 'get_active_resource/autocomplete',
+        '#size' => 20,
+        '#maxlength' => 50,
+        //'#attributes' => array('class' => array('trip-id'), 'id' => 'trip-id'),
+        '#prefix' => '<div class="form_row form_row2"><div class="col_3 vehicle_performance">',
+        '#suffix' => '</div></div></div>'
+    );
+    $form['submit'] = array(
+        '#type' => 'submit',
+        '#value' => 'Show',
+        '#name' => 'show',
+        '#attributes' => array('class' => array('vrs-trip-submit')),
+        '#submit' => array('resource_day_wise_performance_form_submit'),
+        //'#validate' => array('validate_delivery_cost_details_mtd'),
+        '#prefix' => '<div class="col_3">',
+        '#suffix' => '</div></div>'
+    );
+    if (!empty($options)) {
+        $header = array(
+            'Resource Name',
+            'Resource Type',
+            'Dispatch Date',
+            'Active/On Leave',
+            'Trip ID',
+            'Previous Trip Status',
+            'Cost',
+            'Vehicle Number',
+            'Reason if on Leave/Maintenance',
+        );
+        $form['delivery_cost_table'] = array(
+            '#theme' => 'table',
+            '#prefix' => '<div class="delivery_cost_table custom_middle_table">',
+            '#tree' => TRUE,
+            '#header' => $header,
+            '#rows' => $options,
+            '#attributes' => array(
+                'class' => array('delivery_cost'),
+                'id' => 'delivery_cost'
+            ),
+            '#suffix' => '</div>',
+            '#sticky' => FALSE,
+        );
+        cache_set('delivery_cost_download' . session_id(), $form['delivery_cost_table'], 'cache', time() + 60 * 10);
+        $rr = l('Download', "resource_daily_wise_report/export", array('attributes' => array("target" => "_blank"), 'query' => array('dispatch_from_date' => $form_state['values']['dispatch_from_date'], 'dispatch_to_date' => $form_state['values']['dispatch_to_date'], 'resource_name' => $form_state['values']['resource_name'])));
+        $form['download_mark'] = array(
+            '#type' => 'markup',
+            '#markup' => $rr,
+        );
+    }
+    return $form;
+}
+
+function resource_day_wise_performance_form_submit($form, &$form_state) {
+    global $user;
+    $rows = array();
+    $trip_ids = array();
+    $dis_id = change_feeds_import_get_distributor_id($user->uid);
+    $dispatch_from_date = $form_state['values']['dispatch_from_date'];
+    $dispatch_to_date = $form_state['values']['dispatch_to_date'];
+    $resource_name = $form_state['values']['resource_name'];
+    $round_off_no_digits = 3;
+    $round_off_no_digits_2 = 2;
+    $lak = 100000;
+    if (!empty($dispatch_from_date) && !empty($dispatch_to_date)) {
+        $all_resources = get_all_active_resources_on_date_range(strtotime($dispatch_from_date), strtotime($dispatch_to_date));
+        $absent_resource_details = get_leave_dates_of_resources(strtotime($dispatch_from_date), strtotime($dispatch_to_date));
+        $resource_all_extra_working = get_resource_extra_working_days(strtotime($dispatch_from_date), strtotime($dispatch_to_date));
+        $weekoff = get_resource_weekly_off_day();
+        $dis_date = strtotime($dispatch_from_date);
+        $year = date('Y', $dis_date);
+        $month = date('m', $dis_date);
+        $no_of_working_days = calculateWorkingDaysInMonth($year, $month, $weekoff);
+        if (!empty($all_resources[$resource_name])) {
+            $resource_list[$resource_name] = $all_resources[$resource_name];
+        } else {
+            $resource_list = $all_resources;
+        }
+        $resource_list = $resource_list;
+    }
+    $rows = array();
+    $trip_created_days = array();
+    if (!empty($resource_list)) {
+        foreach ($resource_list as $resource_name => $resource_values) {
+            $res_type = Ucfirst(strtolower($resource_values['resource_type']));
+            $query = db_select('dispatch_planning_api_data', 'ad');
+            $query->condition('ad.distributor_id', $dis_id, '=');
+            if (strtolower($resource_values['resource_type']) == 'cashier') {
+                $query->condition('fld_cashier.field_cashier_name_value', $resource_name);
+                $query->groupBy('fld_cashier.field_cashier_name_value,ad.date');
+            }
+            if (strtolower($resource_values['resource_type']) == 'delivery boy') {
+                // Fetch delivery boy nid for join with dispatch data
+                $delivery_boy_nid = check_resource_exist($resource_values['resource_type'], $resource_name);
+                if (!empty($delivery_boy_nid)) {
+                    $query->condition('delivery_boy.field_delivery_boy_nid', $delivery_boy_nid); //
+                    $query->groupBy('delivery_boy.field_delivery_boy_nid,ad.date');
+                }
+            }
+            // $query->condition('ad.delivery_pending_flag', 1, '!=');
+            $query->condition('ad.date', array($dispatch_from_date, $dispatch_to_date), 'BETWEEN');
+            $query->join('node', 'n', 'n.title = ad.bill_number AND n.uid = ad.distributor_id');
+            $query->condition('n.type', 'sales_register_data', '=');
+            $query->condition('n.uid', $dis_id);
+            $query->join('dispatch_planning_item_details', 'item', 'item.trip_bill_reference = ad.id');
+            // Join with dispatch_data to check vrs status and return flage 
+            $query->join('node', 'disp_data', 'disp_data.title = ad.runsheet_number');
+            $query->condition('disp_data.type', 'dispatch_data');
+            $query->condition('disp_data .uid', $dis_id);
+            //$query->leftjoin('field_data_field_vrs_status', 'vs', 'vs.entity_id = disp_data.nid');
+            $query->leftjoin('field_data_field_vehicle_no', 'vehicle_no', 'vehicle_no.entity_id = disp_data.nid');
+            // VRS Screen Return flag = 1 and VRS status = 1, 3 Means VRS pending
+            $query->leftjoin('field_data_field_cashier_name', 'fld_cashier', 'fld_cashier.entity_id = disp_data.nid');
+            $query->leftjoin('field_data_field_delivery_boy', 'delivery_boy', 'delivery_boy.entity_id = disp_data.nid');
+            $query->leftJoin('node', 'vehicle', 'vehicle.title = ad.vehicle');
+            $query->condition('vehicle.type', 'vehicle_master');
+            $query->condition('vehicle.uid', $dis_id);
+            $query->addExpression("GROUP_CONCAT(DISTINCT ad.runsheet_number  separator ', ' )", 'trip_ids');
+            $query->addExpression('ad.date', 'dispacth_date');
+            $query->fields('ad', array('runsheet_number'));
+            $query->fields('fld_cashier', array('field_cashier_name_value'));
+            $query->addExpression('vehicle_no.field_vehicle_no_value', 'vehicle_number');
+            $res = $query->execute()->fetchAll(PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
+            $vehicle_name_printed = 0;
+            $input_resource_type = $resource_values['resource_type'];
+            $resource_data = get_resource_cost_per_day($resource_name, $input_resource_type);
+            if (!empty($res)) {
+                foreach ($res as $key => $value) {
+                    $resource_cost = 0;
+                    if (!empty($value['dispacth_date'])) {
+                        $dis_date = strtotime($value['dispacth_date']);
+                        $year = date('Y', $dis_date);
+                        $month = date('m', $dis_date);
+
+                        /* if (!empty($resource_data[$resource_name]['weeklyoff'])) {
+                          $weekoff =  $resource_data[$resource_name]['weeklyoff'];
+                          }
+                          else {
+                          $weekoff = get_resource_weekly_off_day() ;
+                          } */
+                        $resource_no_of_working_days = calculateWorkingDaysInMonth($year, $month);
+                        $public_holidays = get_public_holiday($month, $year);
+                        $trip_created_days[$resource_name][$value['dispacth_date']] = $value['dispacth_date'];
+                    }
+                    if (!empty($resource_data[$resource_name]['cost_per_month'])) {
+                        $resource_cost = $resource_data[$resource_name]['cost_per_month'] / $resource_no_of_working_days;
+                    }
+                    //$previous_trip_status  = get_previous_trip_status($dis_date,$vehicle_number_value);
+                    $previous_trip_status  = get_resource_previous_trip_status($dis_date, $resource_name, $resource_values['resource_type']);
+                    $resource_cost = round($resource_cost);
+                    $rows[$resource_name][$value['dispacth_date']] = array('resource_name' => '', 'resource_type' => '', 'date' => date('d-M-Y', $dis_date), 'active' => 'Active', 'trip_ids' => $value['trip_ids'], $previous_trip_status, 'cost' => $resource_cost, 'vehicle_number' => $value['vehicle_number'], 'leave_reason' => '');
+                }
+            }
+            if (!empty($resource_all_extra_working[$resource_name])) {
+                $trip_not_created_on_non_working_days = array_diff($resource_all_extra_working[$resource_name], $trip_created_days[$resource_name]);
+                foreach ($trip_not_created_on_non_working_days as $value) {
+                    if (!empty($value)) {
+                        $date_array = explode('-', $value);
+                        $year = $date_array[0];
+                        $month = $date_array[1];
+                        $resource_cost = 0;
+                        $resource_no_of_working_days = calculateWorkingDaysInMonth($year, $month);
+                        if (!empty($resource_data[$resource_name]['cost_per_month'])) {
+                         $resource_cost = $resource_data[$resource_name]['cost_per_month'] / $resource_no_of_working_days;
+                        }
+                        $resource_cost = round($resource_cost);
+                        $previous_trip_status  =  get_resource_previous_trip_status(strtotime($value), $resource_name, $resource_values['resource_type']);
+                        //$rows[$vehicle_number_value][$value] =  array('vehicle_no'=>'','date'=>$value,'active'=>'Active','trip_ids'=>'Trip Not Created',$previous_trip_status,'cashier_names'=>'','dispatched_value'=>'','delivered_value'=>'','cost'=>round($vehicle_per_day_cost/$lak,$round_off_no_digits_2),'cost_vs_dispatched'=>'','cost_vs_delivered'=>'','leave_reason'=>'');
+                        $rows[$resource_name][$value] = array('resource_name' => '', 'resource_type' => '', 'date' => $value, 'active' => 'Active', 'trip_ids' => 'Trip Not Created', $previous_trip_status, 'cost' => $resource_cost, 'vehicle_number' => '', 'leave_reason' => '');
+                    }
+                }
+            }
+            //Checking working days trip not created
+            $ts1 = strtotime($dispatch_from_date);
+            $ts2 = strtotime($dispatch_to_date);
+            $contract_end_period = strtotime($resource_values['end_period']);
+            $currentdate = $ts1;
+            $year1 = date('Y', $ts1);
+            $year2 = date('Y', $ts2);
+            $month1 = date('m', $ts1);
+            $month2 = date('m', $ts2);
+            $diff = (($year2 - $year1) * 12) + ($month2 - $month1);
+            if ($diff > 0) {
+                
+            }
+            while ($currentdate <= $ts2 && $currentdate <= $contract_end_period) {
+                $day_of_month = date('Y-m-d', $currentdate);
+                if (strtolower(date('l', $currentdate)) != strtolower($weekoff)) {
+                    if (empty($absent_resource_details[$resource_name][$day_of_month]) && empty($trip_created_days[$resource_name][$day_of_month])) {
+                        $days[$resource_name][$day_of_month] = $day_of_month;
+                    }
+                }
+                $currentdate = strtotime('+1 day', $currentdate);
+            }
+
+
+            foreach ($days[$resource_name] as $datekey => $date_value) {
+                if (!empty($date_value)) {
+                    $date_array = explode('-', $date_value);
+                    $year = $date_array[0];
+                    $month = $date_array[1];
+                    $resource_no_of_working_days = calculateWorkingDaysInMonth($year, $month);
+                    $resource_cost = 0;
+                    //$previous_trip_status  = get_previous_trip_status(strtotime($date_value),$vehicle_number_value);
+                    
+                    //print_r(get_resource_previous_trip_status($strtotime($date_value),$resource_name,$resource_values['resource_type']));
+                    $previous_trip_status  = get_resource_previous_trip_status(strtotime($date_value),$resource_name,$resource_values['resource_type']);
+                    //$rows[$vehicle_number_value][$date_value] =  array('vehicle_no'=>'','date'=>$date_value,'active'=>'Active','trip_ids'=>'Trip Not Created',$previous_trip_status,'cashier_names'=>'','dispatched_value'=>'','delivered_value'=>'','cost'=>round($vehicle_per_day_cost/$lak,$round_off_no_digits_2),'cost_vs_dispatched'=>'','cost_vs_delivered'=>'','leave_reason'=>'');
+                    if (!empty($resource_data[$resource_name]['cost_per_month'])) {
+                        $resource_cost = $resource_data[$resource_name]['cost_per_month'] / $resource_no_of_working_days;
+                    }
+                    $resource_cost = round($resource_cost);
+                    $rows[$resource_name][$date_value] = array('resource_name' => '', 'resource_type' => '', 'date' => $date_value, 'active' => 'Active', 'trip_ids' => 'Trip Not Created', $previous_trip_status, 'cost' => $resource_cost, 'vehicle_number' => '', 'leave_reason' => '');
+                }
+            }
+
+
+            if (!empty($absent_resource_details[$resource_name])) {
+                foreach ($absent_resource_details[$resource_name] as $date_key => $date_value) {
+                    //$rows[$resource_name][$date_key] =  array('vehicle_no'=>'','date'=>$date_key,'active'=>'On Leave','trip_ids'=>'','cashier_names'=>'','dispatched_value'=>'','delivered_value'=>'','cost'=>'','cost_vs_dispatched'=>'','cost_vs_delivered'=>'','leave_reason'=>$date_value);
+                    $rows[$resource_name][$date_key] = array('resource_name' => '', 'resource_type' => $resource_values['resource_type'], 'date' => $date_key, 'active' => 'On Leave', 'trip_ids' => 'Trip Not Created', $previous_trip_status, 'cost' => 0, 'vehicle_number' => '', 'leave_reason' => $date_value);
+                }
+            }
+            usort($rows[$resource_name], "sortFunction");
+            $rows[$resource_name][0]['resource_name'] = $resource_name;
+            $rows[$resource_name][0]['resource_type'] = $res_type;
+            $datas[$resource_name] = $rows[$resource_name];
+        }
+
+        if (!empty($datas)) {
+            $rows = array();
+            foreach ($datas as $key => $value) {
+                foreach ($value as &$val) {
+                    $val['date'] = date('d-M-Y', strtotime($val['date']));
+                    $rows[] = $val;
+                }
+            }
+            $rows[] = array();
+        }
+
+        // print_r($rows);die;
+    }
+
+    $form_state['delivery_cost_details'] = $rows;
+    $form_state['rebuild'] = TRUE;
+}
+
+function resource_daily_wise_report_export() {
+    $query_parameters = drupal_get_query_parameters();
+    if (!empty($query_parameters['dispatch_from_date']) && !empty($query_parameters['dispatch_to_date'])) {
+        $vehicle_number = $query_parameters['vehicle_number'];
+        $from_date = $query_parameters['dispatch_from_date'];
+        $to_date = $query_parameters['dispatch_to_date'];
+    }
+    $file = "hul_daily_wise_resource_report_" . date('d-M-Y') . ".xls";
+    $data = cache_get('delivery_cost_download' . session_id());
+    $table = drupal_render($data->data);
+    header("Content-type: application/vnd.ms-excel");
+    header("Content-Disposition: attachment; filename=$file");
+    echo $table;
+}
+
+function get_resource_previous_trip_status($dispatch_date, $resource_name, $resource_type) {
+    $vrs_status = '';
+
+    if (!empty($dispatch_date) && !empty($resource_name) && !empty($resource_type)) {
+        global $user;
+        $dis_id = change_feeds_import_get_distributor_id($user->uid);
+        $previous_date = strtotime('-1 day', $dispatch_date);
+        $previous_trip_ids = _get_resource_previous_trip_id($previous_date, $resource_name, $resource_type);
+        if (!empty($previous_trip_ids)) {
+            foreach ($previous_trip_ids as $previous_trip_id => $value) {
+                $trip_detail = check_trip_id_exists_or_not($dis_id, $previous_trip_id);
+                $status = $trip_detail->field_vrs_status_value;
+                $field = field_info_field('field_vrs_status');
+                $allowed_values = list_allowed_values($field);
+                if (isset($allowed_values[$status])) {
+                    $vrs_status .= $previous_trip_id . '-' . $allowed_values[$status] . '<br>';
+                }
+            }
+        }
+    }
+    return $vrs_status;
+}
+
+function _get_resource_previous_trip_id($dispatch_date, $resource_name, $resource_type) {
+    $res = '';
+   if (!empty($dispatch_date) && !empty($resource_name) && !empty($resource_type)) {
+        global $user;
+        $dispatch_date = date('Y-m-d', $dispatch_date);
+        $weekoff = get_resource_weekly_off_day();
+        $dis_id = change_feeds_import_get_distributor_id($user->uid);
+        $query = db_select('node', 'n');
+        $query->condition('n.type', 'dispatch_data');
+        $query->condition('n.uid', $dis_id);
+        $query->join('field_data_field_dispatch_date', 't', 't.entity_id = n.nid');
+        $query->leftjoin('field_data_field_cashier_name', 'fld_cashier', 'fld_cashier.entity_id = n.nid');
+        $query->leftjoin('field_data_field_delivery_boy', 'delivery_boy', 'delivery_boy.entity_id = n.nid');
+        $query->condition('t.field_dispatch_date_value', $dispatch_date);
+        if (strtolower($resource_type) == 'cashier') {
+            $query->condition('fld_cashier.field_cashier_name_value', $resource_name);
+        }
+        if (strtolower($resource_type) == 'delivery boy') {
+            // Fetch delivery boy nid for join with dispatch data
+            $delivery_boy_nid = check_resource_exist($resource_type, $resource_name);
+            if (!empty($delivery_boy_nid)) {
+                $query->condition('delivery_boy.field_delivery_boy_nid', $delivery_boy_nid); //
+            }
+        }
+
+        $query->fields('n', array('title'));
+        $res = $query->execute()->fetchAll(PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
+        $dispatch_date_in_strtotime = strtotime($dispatch_date);
+        if (strtolower(date('l', $dispatch_date_in_strtotime)) == strtolower($weekoff) && empty($res)) {
+            $previous_date = strtotime('-1 day', $dispatch_date_in_strtotime);
+            $res = _get_previous_trip_id($previous_date,  $resource_name, $resource_type);
+        }
+    }
+    return $res;
+}
