@@ -116,7 +116,7 @@ function get_next_day_load_count($i) {
   $query->join('field_data_field_dispatch_date', 'fdfdd', 'fdfdd.entity_id = n.nid');
   $query->join('field_data_field_cashier_name', 'fcn', 'fcn.entity_id = n.nid');
   $query->condition('fdfdd.field_dispatch_date_value', $yesterday_date, '=');
-  $query->addExpression("COUNT(distinct  CASE WHEN fdfvs.field_vrs_status_value = -1 AND $cashier_names_count !=0 AND  fdfdd.field_dispatch_date_value >  $yesterday_date THEN field_cashier_name_value END)", 'next_load');
+  $query->addExpression("COUNT(CASE WHEN fdfvs.field_vrs_status_value = -1 AND $cashier_names_count !=0 AND  fdfdd.field_dispatch_date_value >  $yesterday_date THEN field_cashier_name_value END)", 'next_load');
   $query->groupBY('fdfdd.field_dispatch_date_value');
   $result = $query->execute()->fetchField();
   return $result;
