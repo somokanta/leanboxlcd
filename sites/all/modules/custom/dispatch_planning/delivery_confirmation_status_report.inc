@@ -96,7 +96,6 @@ function get_next_day_load_count($i) {
   $query->join('field_data_field_dispatch_date', 'fdfdd', 'fdfdd.entity_id = n.nid');
   $query->join('field_data_field_cashier_name', 'fcn', 'fcn.entity_id = n.nid');
   $query->condition('fdfdd.field_dispatch_date_value', $yesterday_date, '=');
-  $query->condition('fdfvs.field_vrs_status_value', '-1', '=');
   $query->fields('fcn', array(' field_cashier_name_value'));
   $cashier_names = $query->execute()->fetchAll(PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
   if (!empty($cashier_names)) {
@@ -131,7 +130,6 @@ function get_next_day_cashier_names($next_day) {
     $query->join('field_data_field_dispatch_date', 'fdfdd', 'fdfdd.entity_id = n.nid');
     $query->join('field_data_field_cashier_name', 'fcn', 'fcn.entity_id = n.nid');
     $query->condition('fdfdd.field_dispatch_date_value', $next_day, '=');
-    $query->condition('fdfvs.field_vrs_status_value', '-1', '=');
     $query->fields('fcn', array(' field_cashier_name_value'));
     $cashier_names = $query->execute()->fetchAll(PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
 
