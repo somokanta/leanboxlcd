@@ -70,6 +70,14 @@ function van_planning_menu() {
     'page arguments' => array('dispatch_related_config_form'),
     'access callback' => 'check_if_fr_role_user_admin',
   );
+  
+   $items['pending-summary/export'] = array(
+    'title' => 'Pending Summary Export',
+    'description' => 'Pending Summary Export',
+    'page callback' => array('pending_summary_export'),
+    'file' => 'form/pending_summary.inc',
+    'access callback' => TRUE,
+  );
    return $items;
 }
 
