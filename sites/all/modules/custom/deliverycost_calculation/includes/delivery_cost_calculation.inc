@@ -2106,7 +2106,37 @@ function _get_resource_previous_trip_id($dispatch_date, $resource_name, $resourc
         $dispatch_date_in_strtotime = strtotime($dispatch_date);
         if (strtolower(date('l', $dispatch_date_in_strtotime)) == strtolower($weekoff) && empty($res)) {
             $previous_date = strtotime('-1 day', $dispatch_date_in_strtotime);
-            $res = _get_previous_trip_id($previous_date,  $resource_name, $resource_type);
+            $res = _get_resource_previous_trip_id($previous_date, $resource_name, $resource_type);
+        }
+    }
+    return $res;
+}
+
+function get_trip_not_created_reason($declration_date, $vehicle_number = null, $resource_name = null, $resource_nid = null,$resource_type=null) {
+    global $user;
+    $dis_id = change_feeds_import_get_distributor_id($user->uid);
+    $res = '';
+    if (!empty($declration_date)) {
+        $declaration_date = strtotime($declration_date);
+        $dis_id = change_feeds_import_get_distributor_id($user->uid);
+        $query = db_select('vehicle_resource_daily_status', 'vrs');
+        $query->condition('vrs.distributor_id', $dis_id);
+        $query->condition('vrs.declaration_date', $declaration_date);
+        if (!empty($vehicle_number)) {
+            $query->condition('vrs.vehicle_number', $vehicle_number);
+        }
+        if (!empty($resource_type)) {
+            $query->condition('vrs.resource_type', $resource_type);
+        }
+        if (!empty($resource_name)) {
+            $query->condition('vrs.resource_name', $resource_name);
+        }
+        $query->fields('vrs', array('reason'));
+        $res = $query->execute()->fetchField();
+        if (!empty($res)) {
+           $term_obj=  taxonomy_term_load($res);
+           if (!empty($term_obj))
+           return $term_obj->name;
         }
     }
     return $res;
