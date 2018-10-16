@@ -1878,11 +1878,11 @@ function resource_day_wise_performance_form_submit($form, &$form_state) {
             $res_type = Ucfirst(strtolower($resource_values['resource_type']));
             $query = db_select('dispatch_planning_api_data', 'ad');
             $query->condition('ad.distributor_id', $dis_id, '=');
-            if (strtolower($resource_values['resource_type']) == 'cashier') {
+            if (strtolower(trim($resource_values['resource_type'])) == 'cashier') {
                 $query->condition('fld_cashier.field_cashier_name_value', $resource_name);
                 $query->groupBy('fld_cashier.field_cashier_name_value,ad.date');
             }
-            if (strtolower($resource_values['resource_type']) == 'delivery boy') {
+            if (strtolower(trim($resource_values['resource_type'])) == 'delivery boy') {
                 // Fetch delivery boy nid for join with dispatch data
                 $delivery_boy_nid = check_resource_exist($resource_values['resource_type'], $resource_name);
                 if (!empty($delivery_boy_nid)) {
@@ -2078,7 +2078,7 @@ function get_resource_previous_trip_status($dispatch_date, $resource_name, $reso
 
 function _get_resource_previous_trip_id($dispatch_date, $resource_name, $resource_type) {
     $res = '';
-   if (!empty($dispatch_date) && !empty($resource_name) && !empty($resource_type)) {
+    if (!empty($dispatch_date) && !empty($resource_name) && !empty($resource_type)) {
         global $user;
         $dispatch_date = date('Y-m-d', $dispatch_date);
         $weekoff = get_resource_weekly_off_day();
@@ -2090,10 +2090,10 @@ function _get_resource_previous_trip_id($dispatch_date, $resource_name, $resourc
         $query->leftjoin('field_data_field_cashier_name', 'fld_cashier', 'fld_cashier.entity_id = n.nid');
         $query->leftjoin('field_data_field_delivery_boy', 'delivery_boy', 'delivery_boy.entity_id = n.nid');
         $query->condition('t.field_dispatch_date_value', $dispatch_date);
-        if (strtolower($resource_type) == 'cashier') {
+        if (strtolower(trim($resource_type)) == 'cashier') {
             $query->condition('fld_cashier.field_cashier_name_value', $resource_name);
         }
-        if (strtolower($resource_type) == 'delivery boy') {
+        if (strtolower(trim($resource_type)) == 'delivery boy') {
             // Fetch delivery boy nid for join with dispatch data
             $delivery_boy_nid = check_resource_exist($resource_type, $resource_name);
             if (!empty($delivery_boy_nid)) {
@@ -2106,7 +2106,37 @@ function _get_resource_previous_trip_id($dispatch_date, $resource_name, $resourc
         $dispatch_date_in_strtotime = strtotime($dispatch_date);
         if (strtolower(date('l', $dispatch_date_in_strtotime)) == strtolower($weekoff) && empty($res)) {
             $previous_date = strtotime('-1 day', $dispatch_date_in_strtotime);
-            $res = _get_previous_trip_id($previous_date,  $resource_name, $resource_type);
+            $res = _get_resource_previous_trip_id($previous_date, $resource_name, $resource_type);
+        }
+    }
+    return $res;
+}
+
+function get_trip_not_created_reason($declration_date, $vehicle_number = null, $resource_name = null, $resource_nid = null,$resource_type=null) {
+    global $user;
+    $dis_id = change_feeds_import_get_distributor_id($user->uid);
+    $res = '';
+    if (!empty($declration_date)) {
+        $declaration_date = strtotime($declration_date);
+        $dis_id = change_feeds_import_get_distributor_id($user->uid);
+        $query = db_select('vehicle_resource_daily_status', 'vrs');
+        $query->condition('vrs.distributor_id', $dis_id);
+        $query->condition('vrs.declaration_date', $declaration_date);
+        if (!empty($vehicle_number)) {
+            $query->condition('vrs.vehicle_number', $vehicle_number);
+        }
+        if (!empty($resource_type)) {
+            $query->condition('vrs.resource_type', $resource_type);
+        }
+        if (!empty($resource_name)) {
+            $query->condition('vrs.resource_name', $resource_name);
+        }
+        $query->fields('vrs', array('reason'));
+        $res = $query->execute()->fetchField();
+        if (!empty($res)) {
+           $term_obj=  taxonomy_term_load($res);
+           if (!empty($term_obj))
+           return $term_obj->name;
         }
     }
     return $res;
