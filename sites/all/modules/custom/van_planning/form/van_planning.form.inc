@@ -384,6 +384,7 @@ function _van_planning_callback_form($form, &$form_state) {
       // all latitude and longitude van wise
       $vanwise_all_latlong_array = $cld_loose_array['lat_long'];
       $total_dist = $total_time = '';
+      $bill_sequencing_array = array();// intialize because one van value can't go in another van
 
       if ($form_state['clicked_button']['#name'] == 'check_seq') {
         // call lat long sequencing api here
@@ -471,8 +472,8 @@ function _van_planning_callback_form($form, &$form_state) {
             $total_bill_array[$bill]['prev_distance'] = $bill_sequencing_array[$bill]['prev_distance'];
           }
           else {
-            $vanwise_all_latlong_array[$bill]['sequence'] = $count++;
-            $total_bill_array[$bill]['sequence'] = $count++;
+            $vanwise_all_latlong_array[$bill]['sequence'] = ++$count;
+            $total_bill_array[$bill]['sequence'] = $count;
           }
         }
       }
@@ -2442,17 +2443,24 @@ function _create_van_submit($form, &$form_state) {
         $count = 1;
         foreach ($disp_planning[$van]['bill_array'] as $nid => $value2) {
           $node = node_load($nid);
-
-          $node->field_bill_sequence[LANGUAGE_NONE][0]['value'] = $value2['sequence'] ? $value2['sequence'] : $count;
-          $node->field_drs_sequence[LANGUAGE_NONE][0]['value'] = $value2['sequence'] ? $value2['sequence'] : $count++; //Increament the counter once
+          if (!empty($form_state['time_dist'][$van]['dist']) && !empty($form_state['time_dist'][$van]['time'])) {
+            $node->field_bill_sequence[LANGUAGE_NONE][0]['value'] = $value2['sequence'] ? $value2['sequence'] : $count; // $count has no use. kept for safety
+            $node->field_drs_sequence[LANGUAGE_NONE][0]['value'] = $value2['sequence'] ? $value2['sequence'] : $count++; //Increament the counter once
+            // calculate time and distance
+            $node->field_prev_arrival_time[LANGUAGE_NONE][0]['value'] = $value2['prev_travel_time'];
+            $node->field_prev_distance[LANGUAGE_NONE][0]['value'] = $value2['prev_distance'];
+          }else{
+            $node->field_bill_sequence[LANGUAGE_NONE][0]['value'] = $count;
+            $node->field_drs_sequence[LANGUAGE_NONE][0]['value'] = $count++; //Increament the counter once
+            // calculate time and distance
+            $node->field_prev_arrival_time[LANGUAGE_NONE][0]['value'] = '';
+            $node->field_prev_distance[LANGUAGE_NONE][0]['value'] = '';
+          }
           if (isset($node->field_delivery_pending[LANGUAGE_NONE])) {
             $node->field_delivery_pending = array();
           }
           //$node->field_prevan_reference[LANGUAGE_NONE][0]['nid'] = $prevan_nid;
           $node->field_trip_id_reference[LANGUAGE_NONE][0]['nid'] = $trip_nid;
-          // calculate time and distance
-          $node->field_prev_arrival_time[LANGUAGE_NONE][0]['value'] = $value2['prev_travel_time'];
-          $node->field_prev_distance[LANGUAGE_NONE][0]['value'] = $value2['prev_distance'];
           node_save($node);
         }
         $all_area_codes = $disp_planning[$van]['area_codes'];
