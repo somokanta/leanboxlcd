@@ -1878,11 +1878,11 @@ function resource_day_wise_performance_form_submit($form, &$form_state) {
             $res_type = Ucfirst(strtolower($resource_values['resource_type']));
             $query = db_select('dispatch_planning_api_data', 'ad');
             $query->condition('ad.distributor_id', $dis_id, '=');
-            if (strtolower($resource_values['resource_type']) == 'cashier') {
+            if (strtolower(trim($resource_values['resource_type'])) == 'cashier') {
                 $query->condition('fld_cashier.field_cashier_name_value', $resource_name);
                 $query->groupBy('fld_cashier.field_cashier_name_value,ad.date');
             }
-            if (strtolower($resource_values['resource_type']) == 'delivery boy') {
+            if (strtolower(trim($resource_values['resource_type'])) == 'delivery boy') {
                 // Fetch delivery boy nid for join with dispatch data
                 $delivery_boy_nid = check_resource_exist($resource_values['resource_type'], $resource_name);
                 if (!empty($delivery_boy_nid)) {
