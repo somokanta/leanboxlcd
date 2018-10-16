@@ -2078,7 +2078,7 @@ function get_resource_previous_trip_status($dispatch_date, $resource_name, $reso
 
 function _get_resource_previous_trip_id($dispatch_date, $resource_name, $resource_type) {
     $res = '';
-   if (!empty($dispatch_date) && !empty($resource_name) && !empty($resource_type)) {
+    if (!empty($dispatch_date) && !empty($resource_name) && !empty($resource_type)) {
         global $user;
         $dispatch_date = date('Y-m-d', $dispatch_date);
         $weekoff = get_resource_weekly_off_day();
@@ -2090,10 +2090,10 @@ function _get_resource_previous_trip_id($dispatch_date, $resource_name, $resourc
         $query->leftjoin('field_data_field_cashier_name', 'fld_cashier', 'fld_cashier.entity_id = n.nid');
         $query->leftjoin('field_data_field_delivery_boy', 'delivery_boy', 'delivery_boy.entity_id = n.nid');
         $query->condition('t.field_dispatch_date_value', $dispatch_date);
-        if (strtolower($resource_type) == 'cashier') {
+        if (strtolower(trim($resource_type)) == 'cashier') {
             $query->condition('fld_cashier.field_cashier_name_value', $resource_name);
         }
-        if (strtolower($resource_type) == 'delivery boy') {
+        if (strtolower(trim($resource_type)) == 'delivery boy') {
             // Fetch delivery boy nid for join with dispatch data
             $delivery_boy_nid = check_resource_exist($resource_type, $resource_name);
             if (!empty($delivery_boy_nid)) {
