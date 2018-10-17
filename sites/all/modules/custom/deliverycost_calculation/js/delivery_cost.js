@@ -1,8 +1,23 @@
 (function ($) {
     Drupal.behaviors.deliverycost_calculation = {
         attach: function (context, settings) {
-            $(".cost_per_day").prop('readonly', true);
-            $(".cost_per_month").prop('readonly', true);
+           $('.mode_of_contract').each(function () {
+                mode_of_contract = $(this).val();
+                if (mode_of_contract == 'Contracted') {
+                    $(".cost_per_day").prop('readonly', true);
+                    $(".cost_per_month").prop('readonly', false);
+                 } else if (mode_of_contract == 'Market') {
+                    $(".cost_per_month").prop('readonly', true);
+                    $(".cost_per_day").prop('readonly', false);
+                   
+                }
+                else {
+                     $(".cost_per_month").prop('readonly', true);
+                     $(".cost_per_day").prop('readonly', true);
+                }
+
+            });
+           
             $("#trip-id").change(function () {
                 $(".dispatch_date").val('');
                 $(".trip-dropdown").val('');
@@ -17,6 +32,8 @@
                 cost_per_month = $(this).val();
                 if (cost_per_month)
                     cost_per_day = parseFloat(cost_per_month / 30).toFixed(2);
+                else
+                    cost_per_day = '';
                 $(".cost_per_day").val(cost_per_day);
 
             });

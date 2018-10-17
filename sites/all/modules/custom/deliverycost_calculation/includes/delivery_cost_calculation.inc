@@ -198,7 +198,7 @@ function get_weekly_off_day($resource_nid) {
 }
 
 function delivery_cost_calculation_mtd_form($form, &$form_state) {
-     $form['#attached']['css'][] = drupal_get_path('module', 'deliverycost_calculation') . '/css/delivery_cost.css';
+    $form['#attached']['css'][] = drupal_get_path('module', 'deliverycost_calculation') . '/css/delivery_cost.css';
     $form['#attached']['js'][] = drupal_get_path('module', 'deliverycost_calculation') . '/js/delivery_cost.js';
     if (!isset($form_state['delivery_cost_details'])) {
         $form_state['delivery_cost_details'] = array();
@@ -262,7 +262,6 @@ function delivery_cost_calculation_mtd_form($form, &$form_state) {
           //'Cost % Sale',
           'Cost % Sale vs Dispatched',
           'Cost % Sale vs Delivered',
-      
         );
         $form['delivery_cost_table'] = array(
           '#theme' => 'table',
@@ -370,8 +369,8 @@ function delivery_cost_calculation_form($form, &$form_state) {
           '#sticky' => FALSE,
         );
         cache_set('delivery_cost_download' . session_id(), $form['delivery_cost_table'], 'cache', time() + 60 * 10);
-        $output .= l(t('XLS'), 'return-vrs-time-report/export', array('query' => array('dispatch_date'=>$form_state['values']['dispatch_date'])));
-        $rr = l('Download', "delivery_cost/export", array('attributes' => array("target" => "_blank"),'query' => array('dispatch_date'=>$form_state['values']['dispatch_date'],'trip_id'=>$form_state['values']['trip_id'])));
+        $output .= l(t('XLS'), 'return-vrs-time-report/export', array('query' => array('dispatch_date' => $form_state['values']['dispatch_date'])));
+        $rr = l('Download', "delivery_cost/export", array('attributes' => array("target" => "_blank"), 'query' => array('dispatch_date' => $form_state['values']['dispatch_date'], 'trip_id' => $form_state['values']['trip_id'])));
         $form['download_mark'] = array(
           '#type' => 'markup',
           '#markup' => $rr,
@@ -413,7 +412,8 @@ function get_dp_value($trip_id) {
     }
     return $dp_value;
 }
-function get_dp_value_vehicle_number($trip_id,$vehicle_number) {
+
+function get_dp_value_vehicle_number($trip_id, $vehicle_number) {
     global $user;
     $dis_id = change_feeds_import_get_distributor_id($user->uid);
     $dp_value = 0;
@@ -492,7 +492,8 @@ function get_delivery_cost_details_mtd($form, &$form_state) {
             $query->leftjoin('field_data_field_vehicle_type', 'vehicle_type', 'vehicle_type.entity_id = vehicle.nid');
             $query->leftjoin('field_data_field_net_sales_bill_value', 'dispatched_value', 'dispatched_value.entity_id = disp_data.nid');
             $query->condition('vehicle.uid', $dis_id);
-            $query->groupBy('ad.runsheet_number');
+            // $query->groupBy('ad.runsheet_number');
+            $query->groupBy('vehicle_no.field_vehicle_no_value,fld_cashier.field_cashier_name_value,ad.date');
             $query->addExpression('ad.date', 'dispacth_date');
             $query->fields('ad', array('runsheet_number'));
             $query->fields('fld_cashier', array('field_cashier_name_value'));
@@ -501,6 +502,7 @@ function get_delivery_cost_details_mtd($form, &$form_state) {
             $query->fields('dispatched_value', array('field_net_sales_bill_value_value'));
             $query->addExpression('vehicle_no.field_vehicle_no_value', 'vehicle_number');
             $query->condition('vehicle_no.field_vehicle_no_value', $vehicle_number_value);
+            $query->addExpression("GROUP_CONCAT(DISTINCT ad.runsheet_number  separator ',' )", 'trip_ids');
             //$query->condition('vehicle_no.field_vehicle_no_value', 'testvehicle123');
             $res = $query->execute()->fetchAll(PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
             //echo $vehiclenumber;
@@ -519,6 +521,7 @@ function get_delivery_cost_details_mtd($form, &$form_state) {
                 $vh_not_ampted = array();
                 $sl_index = 1;
                 foreach ($res as $key => $value) { //print_r($value);
+                    $total_trips = explode(',', $value['trip_ids']);
                     if (!empty($value['dispacth_date'])) {
                         $dis_date = strtotime($value['dispacth_date']);
                         $year = date('Y', $dis_date);
@@ -541,7 +544,7 @@ function get_delivery_cost_details_mtd($form, &$form_state) {
                     ;
                     $delivered_value_in_lak = round($value['delivered_value'] / $lak, $round_off_no_digits);
                     $return_percent = ($dispatched_value_in_lak / $return_value_in_lak) * 100;
-                    $dp_value = get_dp_value(array($key));
+                    $dp_value = get_dp_value($total_trips);
                     $dp_value_in_lak = 0;
                     $dp_percent = 0;
                     if (!empty($dp_value)) {
@@ -586,7 +589,7 @@ function get_delivery_cost_details_mtd($form, &$form_state) {
                     $total_trip_delivery_cost = ($delivery_boy_cost + $cashier_cost + $vehicle_per_day_cost) / $lak;
                     $mtd_result[$value['vehicle_number']]['vehicle_type'] = $value['field_vehicle_type_value'];
                     $mtd_result[$value['vehicle_number']]['vehicle_owner'] = $value['field_vehicle_owner_value'];
-                    $mtd_result[$value['vehicle_number']]['cashiers'][$value['field_cashier_name_value']][$key] = array('dispatched_value' => $dispatched_value_in_lak, 'delivered_value' => $delivered_value_in_lak, 'return_value' => $return_value_in_lak, 'dp_value' => $dp_value_in_lak, 'dp_percent' => $dp_value_percent, 'total_cost' => $total_trip_delivery_cost);
+                    $mtd_result[$value['vehicle_number']]['cashiers'][$value['field_cashier_name_value']][$key] = array('dispatched_value' => $dispatched_value_in_lak, 'delivered_value' => $delivered_value_in_lak, 'return_value' => $return_value_in_lak, 'dp_value' => $dp_value_in_lak, 'dp_percent' => $dp_value_percent, 'total_cost' => $total_trip_delivery_cost, 'total_trip_created' => $total_trips);
                 }
                 //print_r($mtd_result);die;
                 //Cashier specific data  
@@ -600,25 +603,26 @@ function get_delivery_cost_details_mtd($form, &$form_state) {
                         $vehicle_total_dispatched_value = 0;
                         foreach ($vehicle['cashiers'] as $cashier => $trips) {
                             // cashier specific trips details
+                            //total_trip_created
                             $sl_index = $sl_index + 1;
                             $dispatched_value_sum = $delivered_value = $return_value_sum = $dp_value_sum = $total_cost = $delivered_value_sum = 0;
                             $return_percent_sale_vs_delivered = 0;
                             $return_percent_sale_vs_dispatched = 0;
                             $dp_value_percent = 0;
-                            $trip_count = 0;
                             $total_cost = 0;
                             $average_cost_per_day = 0;
                             $total_not_attempted_cost = 0;
                             $not_attempted_vehicle_per_day_cost = 0;
                             $not_attempted_count = 0;
                             $cost_per_sale = 0;
+                            $trip_count = 0;
                             foreach ($trips as $trip_key => $trip_value) {
                                 $dispatched_value_sum += $trip_value['dispatched_value'];
                                 $delivered_value_sum += $trip_value['delivered_value'];
                                 $return_value_sum += $trip_value['return_value'];
                                 $dp_value_sum += $trip_value['dp_value'];
                                 $total_cost += $trip_value['total_cost'];
-                                $trip_count++;
+                                $trip_count = count($trip_value['total_trip_created']);
                                 $vehicle_total_cost += $trip_value['total_cost'];
                                 $vehicle_total_delivered_value += $trip_value['delivered_value'];
                                 $vehicle_total_dispatched_value += $trip_value['dispatched_value'];
@@ -637,17 +641,17 @@ function get_delivery_cost_details_mtd($form, &$form_state) {
                             $dp_value_percent = ($dp_value_sum / $dispatched_value_sum) * 100;
                             $dp_value_percent = round($dp_value_percent);
 
-         
+
                             $return_value_sum = round($return_value_sum, $round_off_no_digits);
                             $average_delivered_value_per_trip = round($average_delivered_value_per_trip, $round_off_no_digits);
                             $average_cost_per_trip = round($average_cost_per_trip, $round_off_no_digits);
-                            $return_percent_sale_vs_delivered = round($return_percent_sale_vs_delivered, $round_off_no_digits)*100;
-                            $return_percent_sale_vs_dispatched = round($return_percent_sale_vs_dispatched, $round_off_no_digits)*100;
+                            $return_percent_sale_vs_delivered = round($return_percent_sale_vs_delivered, $round_off_no_digits) * 100;
+                            $return_percent_sale_vs_dispatched = round($return_percent_sale_vs_dispatched, $round_off_no_digits) * 100;
                             $dp_value_sum = round($dp_value_sum, $round_off_no_digits);
-                            $cost_per_sale = round($cost_per_sale,$round_off_no_digits_2);
-                            $cost_per_sale_delivered = round($cost_per_sale_delivered,$round_off_no_digits_2);
-                            $cost_per_sale_dispatched = round($cost_per_sale_dispatched,$round_off_no_digits_2);
-                            $rows[] = array($vehicle_number_value, $vehicle_values['field_vehicle_owner_value'], $cashier, $trip_count, $dispatched_value_sum, $delivered_value_sum, $return_value_sum, $average_delivered_value_per_trip, $average_cost_per_trip, $return_percent_sale_vs_delivered, $return_percent_sale_vs_dispatched, $dp_value_sum, $dp_value_percent,$cost_per_sale_dispatched,$cost_per_sale);
+                            $cost_per_sale = round($cost_per_sale, $round_off_no_digits_2);
+                            $cost_per_sale_delivered = round($cost_per_sale_delivered, $round_off_no_digits_2);
+                            $cost_per_sale_dispatched = round($cost_per_sale_dispatched, $round_off_no_digits_2);
+                            $rows[] = array($vehicle_number_value, $vehicle_values['field_vehicle_owner_value'], $cashier, $trip_count, $dispatched_value_sum, $delivered_value_sum, $return_value_sum, $average_delivered_value_per_trip, $average_cost_per_trip, $return_percent_sale_vs_delivered, $return_percent_sale_vs_dispatched, $dp_value_sum, $dp_value_percent, $cost_per_sale_dispatched, $cost_per_sale);
                             $sl_index = $sl_index + 1;
                         }
                     }
@@ -719,13 +723,13 @@ function get_delivery_cost_details_mtd($form, &$form_state) {
                     $not_attempted_cost += $vehicle_per_day_cost;
                 }
             }
-             $not_attempted_cost = $not_attempted_cost / $lak; 
-             $average_not_attempted = $not_attempted_cost/$not_attempted_count;
-            
-            $rows[] = array($vehicle_number_value, $vehicle_values['field_vehicle_owner_value'], 'Trip Not Created', $not_attempted_count, '', '', '','', round($average_not_attempted,$round_off_no_digits), '', '', '', '', '',round($not_attempted_cost,$round_off_no_digits_2));
+            $not_attempted_cost = $not_attempted_cost / $lak;
+            $average_not_attempted = $not_attempted_cost / $not_attempted_count;
+
+            $rows[] = array($vehicle_number_value, $vehicle_values['field_vehicle_owner_value'], 'Trip Not Created', $not_attempted_count, '', '', '', '', round($average_not_attempted, $round_off_no_digits), '', '', '', '', '', round($not_attempted_cost, $round_off_no_digits_2));
             $cost_per_sale = (($vehicle_total_cost + $not_attempted_cost) / $vehicle_total_delivered_value) * 100;
             $cost_per_sale_dispatched = (($vehicle_total_cost + $not_attempted_cost) / $vehicle_total_dispatched_value) * 100;
-            $rows[] = array($vehicle_number_value, '', 'Total', '', '', '', '', '', '', '', '', '', '', round($cost_per_sale_dispatched,$round_off_no_digits_2),round($cost_per_sale,$round_off_no_digits_2));
+            $rows[] = array($vehicle_number_value, '', 'Total', '', '', '', '', '', '', '', '', '', '', round($cost_per_sale_dispatched, $round_off_no_digits_2), round($cost_per_sale, $round_off_no_digits_2));
         }
     }
 
@@ -790,10 +794,14 @@ function get_delivery_cost_details($form, &$form_state) {
         $trip_ids[$trip_id] = $trip_id;
         $dis_date = _get_dispatch_date_using_trip_id($trip_id);
     }
-
     $dis_date = strtotime($dis_date);
+    $all_vehicles = get_all_active_vehicles_on_date_range($dis_date, $dis_date);
+    $absent_vehilce_details = get_maintenance_dates_of_vehicle($dis_date, $dis_date);
+    $all_extra_working = get_extra_working_days($dis_date, $dis_date);
     $get_active_vehicles_on_dispatch_date = get_all_active_vehicles($dis_date);
     $weekoff = get_resource_weekly_off_day();
+    $lak = 100000;
+    $active_vehicle_numbers = array_keys($all_vehicles);
     if (!empty($trip_ids)) {
         $query = db_select('dispatch_planning_api_data', 'ad');
         $query->condition('ad.distributor_id', $dis_id, '=');
@@ -801,6 +809,9 @@ function get_delivery_cost_details($form, &$form_state) {
         $query->join('node', 'n', 'n.title = ad.bill_number AND n.uid = ad.distributor_id');
         $query->condition('n.type', 'sales_register_data', '=');
         $query->condition('n.uid', $dis_id);
+        if (!empty($active_vehicle_numbers)) {
+            $query->condition('vehicle_no.field_vehicle_no_value', $active_vehicle_numbers, 'IN');
+        }
         $query->join('dispatch_planning_item_details', 'item', 'item.trip_bill_reference = ad.id');
         $query->addExpression("SUM(item.return_qty * item.sum_net_sales_value)", 'return_value');
         $query->addExpression("SUM((item.sum_net_sales_quantity-item.res_sku_actual_quantity1)* item.sum_net_sales_value)", 'return_value');
@@ -827,15 +838,15 @@ function get_delivery_cost_details($form, &$form_state) {
         $query->condition('vehicle.uid', $dis_id);
         //$query->groupBy('ad.runsheet_number');
         if ($dipacth_date_filter == 1) {
-           $query->groupBy('vehicle_no.field_vehicle_no_value');
-        }
-        else {
+            $query->groupBy('vehicle_no.field_vehicle_no_value');
+        } else {
             $query->groupBy('ad.runsheet_number');
         }
-        $query->addExpression('GROUP_CONCAT(DISTINCT ad.runsheet_number)', 'trip_ids');
+        $query->addExpression("GROUP_CONCAT(DISTINCT ad.runsheet_number  separator ', ' )", 'trip_ids');
+        $query->addExpression("GROUP_CONCAT(DISTINCT ad.runsheet_number)", 'tripids_cal');
+        $query->addExpression("GROUP_CONCAT(DISTINCT fld_cashier.field_cashier_name_value  separator ', ' )", 'cashiernames');
         $query->fields('ad', array('runsheet_number'));
         $query->fields('fld_cashier', array('field_cashier_name_value'));
-        //$query->fields('ad', array('res_delivery_boy','res_delivery_boy_edit'));
         $query->fields('vehicle_owner', array('field_vehicle_owner_value'));
         $query->fields('vehicle_type', array('field_vehicle_type_value'));
         $query->addExpression('vehicle_no.field_vehicle_no_value', 'vehicle_number');
@@ -843,31 +854,29 @@ function get_delivery_cost_details($form, &$form_state) {
         $res = $query->execute()->fetchAll(PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
         $counter = 1;
         $active_vehicles = array_keys($get_active_vehicles_on_dispatch_date);
-        
+        $year = date('Y', $dis_date);
+        $month = date('m', $dis_date);
+        $trip_ids = array_keys($res);
+        $public_holidays = get_public_holiday($month, $year);
+        $total_dispatched_value = 0;
+        $total_return_value = 0;
+        $total_return_value = 0;
+        $total_dp_value = 0;
+        $total_return_percent = 0;
+        $total_dp_percent = 0;
+        $total_delivered_value = 0;
+        $trip_titles = array_keys($res);
+        $no_of_working_days = calculateWorkingDaysInMonth($year, $month, $weekoff);
+        // Not considering weekly off only calendar days for resources
+        $resource_no_of_working_days = calculateWorkingDaysInMonth($year, $month);
+        $total_cost_for_theday = 0;
+        foreach ($res as $key => $value) {
+            //$all_vehicles
+            $trip_attempted_vehicles[$value['vehicle_number']] = $value['vehicle_number'];
+        }
+
+        $vehicles_not_attempted_trips = array_diff($active_vehicles, $trip_attempted_vehicles);
         if (!empty($res)) {
-            $year = date('Y', $dis_date);
-            $lak = 100000;
-            $month = date('m', $dis_date);
-            $trip_ids = array_keys($res);
-            $public_holidays = get_public_holiday($month, $year);
-            $total_dispatched_value = 0;
-            $total_return_value = 0;
-            $total_return_value = 0;
-            $total_dp_value = 0;
-            $total_return_percent = 0;
-            $total_dp_percent = 0;
-            $total_delivered_value = 0;
-            $trip_titles = array_keys($res);
-            $no_of_working_days = calculateWorkingDaysInMonth($year, $month, $weekoff);
-            // Not considering weekly off only calendar days for resources
-            $resource_no_of_working_days = calculateWorkingDaysInMonth($year, $month);
-            $total_cost_for_theday = 0;
-            foreach ($res as $key => $value) {
-                $trip_attempted_vehicles[$value['vehicle_number']] = $value['vehicle_number'];
-            }
-            
-            $vehicles_not_attempted_trips = array_diff($active_vehicles, $trip_attempted_vehicles);
-           
             // Fetch extra working day vehicles get vehicle not utilized. excluding weekly off day
             if (strtolower(date('l', $dis_date)) == strtolower($weekoff) || in_array($value['dispacth_date'], $public_holidays)) {
                 $extra_working_vehicles = get_extra_working_vehicles($dis_date);
@@ -897,16 +906,16 @@ function get_delivery_cost_details($form, &$form_state) {
                 $return_value_in_lak = round($value['return_value'] / $lak, $round_off_no_digits);
                 $vehicle_per_day_cost = 0;
                 $vehilce_monthly_cost = 0;
-                $cashier_cost = 0;                ;
+                $cashier_cost = 0;
+                ;
                 $delivered_value_in_lak = round($value['delivered_value'] / $lak, $round_off_no_digits);
                 $return_percent = ($dispatched_value_in_lak / $return_value_in_lak) * 100;
                 $return_vs_delivered_percent = ($return_value_in_lak / $delivered_value_in_lak) * 100;
                 $return_vs_dispatched_percent = ($return_value_in_lak / $dispatched_value_in_lak) * 100;
-                $dp_trip_ids = explode(',',$value['trip_ids']);
+                $dp_trip_ids = explode(',', $value['tripids_cal']);
                 if ($dipacth_date_filter == 1) {
-                  $dp_value = get_dp_value_vehicle_number($dp_trip_ids,$value['vehicle_number']);
-                }
-                else {
+                    $dp_value = get_dp_value_vehicle_number($dp_trip_ids, $value['vehicle_number']);
+                } else {
                     $dp_value = get_dp_value($dp_trip_ids);
                 }
                 $dp_value_in_lak = 0;
@@ -958,7 +967,7 @@ function get_delivery_cost_details($form, &$form_state) {
                 $total_return_vs_delivered_percent += $return_vs_delivered_percent;
                 $total_return_vs_dispatched_percent += $return_vs_dispatched_percent;
                 $total_dp_percent += $dp_percent;
-                $total_cost_for_theday += $total_trip_delivery_cost/$lak;
+                $total_cost_for_theday += $total_trip_delivery_cost / $lak;
                 $return_value_in_lak = round($return_value_in_lak, $round_off_no_digits);
                 $return_vs_delivered_percent = round($return_vs_delivered_percent);
                 $return_vs_dispatched_percent = round($return_vs_dispatched_percent);
@@ -966,46 +975,62 @@ function get_delivery_cost_details($form, &$form_state) {
                 $dp_percent = round($dp_percent);
                 $dispatched_value_in_lak = round($dispatched_value_in_lak, $round_off_no_digits);
                 $delivered_value_in_lak = round($delivered_value_in_lak, $round_off_no_digits);
-                $total_trip_delivered_cost_in_lak = round($total_trip_delivery_cost/$lak,$round_off_no_digits);
-                $cost_vs_delivered_cost = ($total_trip_delivered_cost_in_lak)/$delivered_value_in_lak *100; 
-                $cost_vs_dispatched = ($total_trip_delivered_cost_in_lak)/$dispatched_value_in_lak *100;
-                $total_cost_vs_delivered += $cost_vs_delivered_cost ;
-                $total_cost_vs_dispatched += $cost_vs_dispatched ;
+                $total_trip_delivered_cost_in_lak = round($total_trip_delivery_cost / $lak, $round_off_no_digits);
+                $cost_vs_delivered_cost = ($total_trip_delivered_cost_in_lak) / $delivered_value_in_lak * 100;
+                $cost_vs_dispatched = ($total_trip_delivered_cost_in_lak) / $dispatched_value_in_lak * 100;
+                $total_cost_vs_delivered += $cost_vs_delivered_cost;
+                $total_cost_vs_dispatched += $cost_vs_dispatched;
                 $total_trip_delivery_cost = round($total_trip_delivered_cost_in_lak, $round_off_no_digits);
-                $rows[] = array($counter, $value['vehicle_number'], $value['trip_ids'], $value['field_vehicle_type_value'], $value['field_vehicle_owner_value'], $value['field_cashier_name_value'], $dispatched_value_in_lak, $delivered_value_in_lak, $return_value_in_lak, $return_vs_delivered_percent, $return_vs_dispatched_percent, $dp_value_in_lak, $dp_percent, $total_trip_delivery_cost,round($cost_vs_dispatched,$round_off_no_digits_2),round($cost_vs_delivered_cost,$round_off_no_digits_2));
+                $rows[] = array($counter, $value['vehicle_number'], $value['trip_ids'], $value['field_vehicle_type_value'], $value['field_vehicle_owner_value'], $value['cashiernames'], $dispatched_value_in_lak, $delivered_value_in_lak, $return_value_in_lak, $return_vs_delivered_percent, $return_vs_dispatched_percent, $dp_value_in_lak, $dp_percent, $total_trip_delivery_cost, round($cost_vs_dispatched, $round_off_no_digits_2), round($cost_vs_delivered_cost, $round_off_no_digits_2));
                 $counter++;
             }
-                if (strtolower(date('l', $dis_date)) != strtolower($weekoff)) {
-                   if (!empty($vehicles_not_attempted_trips) && $dipacth_date_filter == 1) {
-                        foreach ($vehicles_not_attempted_trips as $key => $value) {
-                           $vehilce_monthly_cost = 0;
-                           $vehicle_per_day_cost = 0;
-                            $vehicle_cost = get_vehilce_per_day_cost($value);
-                            if (!empty($vehicle_cost[$value]['cost_per_month'])) {
-                                $vehilce_monthly_cost = $vehicle_cost[$value]['cost_per_month'];
-                                $vehicle_per_day_cost = $vehilce_monthly_cost / $no_of_working_days;
-                            } else if (!empty($vehicle_cost[$value]['cost_per_day'])) {
-                                $vehicle_per_day_cost = $vehicle_cost[$value]['cost_per_day'];
-                            }
-                            $total_trip_delivery_cost += $vehicle_per_day_cost;
-                            $total_cost_for_theday += $vehicle_per_day_cost/$lak;
-                            $rows[] = array($counter, $value, 'Trip Not Created', $get_active_vehicles_on_dispatch_date[$value]['field_vehicle_type_value'], $get_active_vehicles_on_dispatch_date[$value]['field_vehicle_owner_value'], '', '', '', '', '', '', '', '', round($vehicle_per_day_cost/$lak,$round_off_no_digits_2),'','');
-                            $counter++;
+            if (strtolower(date('l', $dis_date)) != strtolower($weekoff)) {
+                if (!empty($vehicles_not_attempted_trips) && $dipacth_date_filter == 1) {
+                    foreach ($vehicles_not_attempted_trips as $key => $value) {
+                        $vehilce_monthly_cost = 0;
+                        $vehicle_per_day_cost = 0;
+                        $vehicle_cost = get_vehilce_per_day_cost($value);
+                        if (!empty($vehicle_cost[$value]['cost_per_month'])) {
+                            $vehilce_monthly_cost = $vehicle_cost[$value]['cost_per_month'];
+                            $vehicle_per_day_cost = $vehilce_monthly_cost / $no_of_working_days;
+                        } else if (!empty($vehicle_cost[$value]['cost_per_day'])) {
+                            $vehicle_per_day_cost = $vehicle_cost[$value]['cost_per_day'];
                         }
-                       
+                        $total_trip_delivery_cost += $vehicle_per_day_cost;
+                        $total_cost_for_theday += $vehicle_per_day_cost / $lak;
+                        $trip_not_created_reason = get_trip_not_created_reason(date('Y-m-d',$dis_date), $vehicle_number = $value, $resource_name = null, $resource_nid = null);
+                        if (empty($trip_not_created_reason)) {
+                         $trip_not_created_reason = t('Trip Not Created');
+                        }
+                        $rows[] = array($counter, $value,$trip_not_created_reason , $get_active_vehicles_on_dispatch_date[$value]['field_vehicle_type_value'], $get_active_vehicles_on_dispatch_date[$value]['field_vehicle_owner_value'], '', '', '', '', '', '', '', '', round($vehicle_per_day_cost / $lak, $round_off_no_digits_2), '', '');
+                        $counter++;
                     }
                 }
-            
+            }
+
             if ($dipacth_date_filter == 1 && !empty($vh_not_utilized_non_working_days)) {
 
                 foreach ($vh_not_utilized_non_working_days as $key => $value) {
+                   $trip_not_created_reason = get_trip_not_created_reason(date('Y-m-d', $dis_date), $vehicle_number = $key, $resource_name = null, $resource_nid = null);
+                    if (empty($trip_not_created_reason)) {
+                        $trip_not_created_reason = t('Trip Not Created');
+                    }
                     $total_trip_delivery_cost += (float) $value;
-                    $total_cost_for_theday += (float) $value/$lak;
-                    $rows[] = array($counter, $key, 'Trip Not Created', $get_active_vehicles_on_dispatch_date[$key]['field_vehicle_type_value'], $get_active_vehicles_on_dispatch_date[$key]['field_vehicle_owner_value'], '', '', '', '', '', '', '', '', round($value/$lak, $round_off_no_digits_2),'','');
+                    $total_cost_for_theday += (float) $value / $lak;
+                    $rows[] = array($counter, $key, $trip_not_created_reason, $get_active_vehicles_on_dispatch_date[$key]['field_vehicle_type_value'], $get_active_vehicles_on_dispatch_date[$key]['field_vehicle_owner_value'], '', '', '', '', '', '', '', '', round($value / $lak, $round_off_no_digits_2), '', '');
                     $counter++;
                 }
             }
-            if (!empty($rows)) { 
+            // For absent vehicles
+            if ($dipacth_date_filter == 1) {
+                $absent_vehilce_details = get_maintenance_dates_of_vehicle($dis_date, $dis_date);
+                foreach ($absent_vehilce_details as $ab_vehicle_number => $ab_vehiclevalue) {
+                    $rows[] = array($counter, $ab_vehicle_number, 'On Leave', $get_active_vehicles_on_dispatch_date[$ab_vehicle_number]['field_vehicle_type_value'], $get_active_vehicles_on_dispatch_date[$ab_vehicle_number]['field_vehicle_owner_value'], '', '', '', '', '', '', '', '', 0, '', '');
+                    $counter++;
+                }
+            }
+
+            if (!empty($rows)) {
                 $total_dispatched_value = round($total_dispatched_value, $round_off_no_digits);
                 $total_return_value = round($total_return_value, $round_off_no_digits);
                 $total_return_vs_delivered_percent = round($total_return_vs_delivered_percent, $round_off_no_digits);
@@ -1014,20 +1039,17 @@ function get_delivery_cost_details($form, &$form_state) {
                 $total_dp_percent = round($total_dp_percent, $round_off_no_digits);
                 $total_delivered_value = round($total_delivered_value, $round_off_no_digits);
                 $total_cost_for_theday = round($total_cost_for_theday, $round_off_no_digits_2);
-                $total_cost_vs_delivered = round(($total_cost_for_theday/$total_delivered_value)*100, $round_off_no_digits_2);
-                $total_cost_vs_dispatched = round(($total_cost_for_theday/$total_dispatched_value)*100, $round_off_no_digits_2);
-                $total_return_vs_delivered_percent = round(($total_return_value/$total_delivered_value)*100);
-                $total_return_vs_dispatched_percent = round(($total_return_value/$total_dispatched_value)*100);
-                $total_dp_percent = round(($total_dp_value/$total_dispatched_value)*100);
-                $rows[] = array('', t('Total'), '', '', '', '', $total_dispatched_value, $total_delivered_value, $total_return_value, $total_return_vs_delivered_percent, $total_return_vs_dispatched_percent, $total_dp_value, $total_dp_percent, $total_cost_for_theday,$total_cost_vs_dispatched,$total_cost_vs_delivered);
+                $total_cost_vs_delivered = round(($total_cost_for_theday / $total_delivered_value) * 100, $round_off_no_digits_2);
+                $total_cost_vs_dispatched = round(($total_cost_for_theday / $total_dispatched_value) * 100, $round_off_no_digits_2);
+                $total_return_vs_delivered_percent = round(($total_return_value / $total_delivered_value) * 100);
+                $total_return_vs_dispatched_percent = round(($total_return_value / $total_dispatched_value) * 100);
+                $total_dp_percent = round(($total_dp_value / $total_dispatched_value) * 100);
+                $rows[] = array('', t('Total'), '', '', '', '', $total_dispatched_value, $total_delivered_value, $total_return_value, $total_return_vs_delivered_percent, $total_return_vs_dispatched_percent, $total_dp_value, $total_dp_percent, $total_cost_for_theday, $total_cost_vs_dispatched, $total_cost_vs_delivered);
             }
         }
     }
-    else if ($dipacth_date_filter == 1) {
+    if ($dipacth_date_filter == 1 && empty($res)) {
         $not_attempted_cost = 0;
-        $all_vehicles = get_all_active_vehicles_on_date_range($dis_date, $dis_date);
-        $absent_vehilce_details = get_maintenance_dates_of_vehicle($dis_date, $dis_date);
-        $all_extra_working = get_extra_working_days($dis_date, $dis_date);
         if (!empty($all_vehicles)) {
             foreach ($all_vehicles as $vehicle_number_value => $vehicle_values) {
                 $index++;
@@ -1047,17 +1069,18 @@ function get_delivery_cost_details($form, &$form_state) {
                     $not_attempted_count++;
                     $not_attempted_cost += $vehicle_per_day_cost;
                 }
-               
+
                 if (strtolower(date('l', $currentdate)) != strtolower($weekoff)) {
                     if (empty($absent_vehilce_details[$vehicle_number_value][$dispatch_date])) {
                         $not_attempted_cost += $vehicle_per_day_cost;
-                        $rows[] = array($index, $vehicle_number_value, 'Trip Not Created', $vehicle_values['field_vehicle_type_value'], $vehicle_values['field_vehicle_owner_value'], '', '', '', '', '', '', '', '', round($vehicle_per_day_cost),'','');
-                        $rows[] = array('', t('Total'), '', '', '', '', '', '', '', '', '', '', '', round($not_attempted_cost));
+                        $rows[] = array($index, $vehicle_number_value, 'Trip Not Created', $vehicle_values['field_vehicle_type_value'], $vehicle_values['field_vehicle_owner_value'], '', '', '', '', '', '', '', '', round($vehicle_per_day_cost / $lak, $round_off_no_digits_2), '', '');
+                    } else {
+                        $rows[] = array($index, $vehicle_number_value, 'On Leave', $vehicle_values['field_vehicle_type_value'], $vehicle_values['field_vehicle_owner_value'], '', '', '', '', '', '', '', '', 0, '', '');
                     }
                 }
-                 
             }
-                 
+            $not_attempted_cost = round($not_attempted_cost / $lak, $round_off_no_digits_2);
+            $rows[] = array('', t('Total'), '', '', '', '', '', '', '', '', '', '', '', $not_attempted_cost);
         }
     }
     $form_state['delivery_cost_details'] = $rows;
@@ -1306,7 +1329,7 @@ function vehicle_day_wise_performance_form($form, &$form_state) {
     $options = $form_state['delivery_cost_details'];
     $date = date('Y-m-d');
     $end_date = $date;
-    $start_date = date('Y-m-d',strtotime($date . ' - 1 month'));
+    $start_date = date('Y-m-d', strtotime($date . ' - 1 month'));
     $form['#prefix'] = '<div id="itemlist-div" class="custom_form_wrapper">';
     $form['#suffix'] = '</div>';
     $form['dispatch_from_date'] = array(
@@ -1317,7 +1340,7 @@ function vehicle_day_wise_performance_form($form, &$form_state) {
       '#date_label_position' => '',
       '#date_year_range' => '-20:+2',
       '#size' => 30,
-      '#default_value'=>$start_date,
+      '#default_value' => $start_date,
       '#prefix' => '<div class="form_row form_row2"><div class="col_3 vehicle_performance">',
       '#suffix' => '</div>'
     );
@@ -1328,7 +1351,7 @@ function vehicle_day_wise_performance_form($form, &$form_state) {
       '#attributes' => array('class' => array('dispatch_date')),
       '#date_label_position' => '',
       '#date_year_range' => '-20:+2',
-      '#default_value'=>$end_date,
+      '#default_value' => $end_date,
       '#size' => 30,
       '#prefix' => '<div class="form_row form_row2"><div class="col_3 vehicle_performance">',
       '#suffix' => '</div>'
@@ -1341,7 +1364,7 @@ function vehicle_day_wise_performance_form($form, &$form_state) {
       '#maxlength' => 50,
       //'#attributes' => array('class' => array('trip-id'), 'id' => 'trip-id'),
       '#prefix' => '<div class="form_row form_row2"><div class="col_3 vehicle_performance">',
-       '#suffix' => '</div></div></div>'
+      '#suffix' => '</div></div></div>'
     );
     $form['submit'] = array(
       '#type' => 'submit',
@@ -1349,7 +1372,7 @@ function vehicle_day_wise_performance_form($form, &$form_state) {
       '#name' => 'show',
       '#attributes' => array('class' => array('vrs-trip-submit')),
       '#submit' => array('vehicle_day_wise_performance_form_submit'),
-      '#validate' => array('validate_delivery_cost_details_mtd'),
+      // '#validate' => array('validate_delivery_cost_details_mtd'),
       '#prefix' => '<div class="col_3">',
       '#suffix' => '</div></div>'
     );
@@ -1367,7 +1390,6 @@ function vehicle_day_wise_performance_form($form, &$form_state) {
           'Cost % of Dispatched Value',
           'Cost % of Delivered Value',
           'Reason if on Leave/Maintenance',
-      
         );
         $form['delivery_cost_table'] = array(
           '#theme' => 'table',
@@ -1383,7 +1405,7 @@ function vehicle_day_wise_performance_form($form, &$form_state) {
           '#sticky' => FALSE,
         );
         cache_set('delivery_cost_download' . session_id(), $form['delivery_cost_table'], 'cache', time() + 60 * 10);
-        $rr = l('Download', "vehicle_daily_wise_report/export", array('attributes' => array("target" => "_blank"),'query' => array('dispatch_from_date'=>$form_state['values']['dispatch_from_date'],'dispatch_to_date'=>$form_state['values']['dispatch_to_date'],'vehicle_number'=>$form_state['values']['vehicle_number'])));
+        $rr = l('Download', "vehicle_daily_wise_report/export", array('attributes' => array("target" => "_blank"), 'query' => array('dispatch_from_date' => $form_state['values']['dispatch_from_date'], 'dispatch_to_date' => $form_state['values']['dispatch_to_date'], 'vehicle_number' => $form_state['values']['vehicle_number'])));
         $form['download_mark'] = array(
           '#type' => 'markup',
           '#markup' => $rr,
@@ -1405,7 +1427,7 @@ function vehicle_day_wise_performance_form_submit($form, &$form_state) {
     $lak = 100000;
     if (!empty($dispatch_from_date) && !empty($dispatch_to_date)) {
         $all_vehicles = get_all_active_vehicles_on_date_range(strtotime($dispatch_from_date), strtotime($dispatch_to_date));
-        $absent_vehilce_details = get_maintenance_dates_of_vehicle(strtotime($dispatch_from_date), strtotime($dispatch_to_date),1);
+        $absent_vehilce_details = get_maintenance_dates_of_vehicle(strtotime($dispatch_from_date), strtotime($dispatch_to_date), 1);
         $all_extra_working = get_extra_working_days(strtotime($dispatch_from_date), strtotime($dispatch_to_date));
         $weekoff = get_resource_weekly_off_day();
         $dis_date = strtotime($dispatch_from_date);
@@ -1414,12 +1436,10 @@ function vehicle_day_wise_performance_form_submit($form, &$form_state) {
         $no_of_working_days = calculateWorkingDaysInMonth($year, $month, $weekoff);
         if (!empty($all_vehicles[$vehicle_number])) {
             $vehicle_list[$vehicle_number] = $all_vehicles[$vehicle_number];
-            
-        }
-        else {
+        } else {
             $vehicle_list = $all_vehicles;
         }
-      $all_vehicles = $vehicle_list;
+        $all_vehicles = $vehicle_list;
     }
     $mtd_data = array();
     $rows = array();
@@ -1457,19 +1477,13 @@ function vehicle_day_wise_performance_form_submit($form, &$form_state) {
             // Join with vehicle master
             $query->leftJoin('node', 'vehicle', 'vehicle.title = ad.vehicle');
             $query->condition('vehicle.type', 'vehicle_master');
-            $query->leftjoin('field_data_field_vehicle_owner', 'vehicle_owner', 'vehicle_owner.entity_id = vehicle.nid');
-            $query->leftjoin('field_data_field_vehicle_type', 'vehicle_type', 'vehicle_type.entity_id = vehicle.nid');
-            $query->leftjoin('field_data_field_net_sales_bill_value', 'dispatched_value', 'dispatched_value.entity_id = disp_data.nid');
             $query->condition('vehicle.uid', $dis_id);
             $query->groupBy('vehicle_no.field_vehicle_no_value,ad.date');
-            $query->addExpression('GROUP_CONCAT(DISTINCT ad.runsheet_number)', 'trip_ids');
-            $query->addExpression('GROUP_CONCAT(DISTINCT fld_cashier.field_cashier_name_value)', 'cashier_names');
+            $query->addExpression("GROUP_CONCAT(DISTINCT ad.runsheet_number  separator ', ' )", 'trip_ids');
+            $query->addExpression("GROUP_CONCAT(DISTINCT fld_cashier.field_cashier_name_value  separator ', ' )", 'cashier_names');
             $query->addExpression('ad.date', 'dispacth_date');
             $query->fields('ad', array('runsheet_number'));
             $query->fields('fld_cashier', array('field_cashier_name_value'));
-            $query->fields('vehicle_owner', array('field_vehicle_owner_value'));
-            $query->fields('vehicle_type', array('field_vehicle_type_value'));
-            $query->fields('dispatched_value', array('field_net_sales_bill_value_value'));
             $query->addExpression('vehicle_no.field_vehicle_no_value', 'vehicle_number');
             $query->condition('vehicle_no.field_vehicle_no_value', $vehicle_number_value);
             //$query->condition('vehicle_no.field_vehicle_no_value', 'testvehicle123');
@@ -1489,7 +1503,7 @@ function vehicle_day_wise_performance_form_submit($form, &$form_state) {
                 $total_dp_percent = 0;
                 $vh_not_utilized_non_working_days = array();
                 $vh_not_ampted = array();
-                  
+
                 foreach ($res as $key => $value) { //print_r($value);
                     if (!empty($value['dispacth_date'])) {
                         $dis_date = strtotime($value['dispacth_date']);
@@ -1556,15 +1570,15 @@ function vehicle_day_wise_performance_form_submit($form, &$form_state) {
 
                     //echo $vehicle_per_day_cost;die;
                     $total_trip_delivery_cost = ($delivery_boy_cost + $cashier_cost + $vehicle_per_day_cost) / $lak;
-                    $total_trip_delivery_cost  = round($total_trip_delivery_cost,$round_off_no_digits_2);
+                    $total_trip_delivery_cost = round($total_trip_delivery_cost, $round_off_no_digits_2);
                     $mtd_result[$value['vehicle_number']]['cashiers'][$value['field_cashier_name_value']][$key] = array('dispatched_value' => $dispatched_value_in_lak, 'delivered_value' => $delivered_value_in_lak, 'return_value' => $return_value_in_lak, 'dp_value' => $dp_value_in_lak, 'dp_percent' => $dp_value_percent, 'total_cost' => $total_trip_delivery_cost);
-                    $cost_percent_dispatched = round($total_trip_delivery_cost/$dispatched_value_in_lak*100);
-                    $cost_percent_delivered = round($total_trip_delivery_cost/$delivered_value_in_lak*100);
-                    $previous_trip_status  = get_previous_trip_status($dis_date,$vehicle_number_value);
-                    $rows[$vehicle_number_value][$value['dispacth_date']] =  array('vehicle_no'=>'','date'=>date('d-M-Y',$dis_date),'active'=>'Active','trip_ids'=>$value['trip_ids'],$previous_trip_status,'cashier'=>$value['cashier_names'],'dispatched_value'=>$dispatched_value_in_lak,'delivered_value'=>$delivered_value_in_lak,'cost'=>$total_trip_delivery_cost,'cost_vs_dispatched'=>$cost_percent_dispatched,'cost_vs_delivered'=>$cost_percent_delivered,'leave_reason'=>'');
-                    }
+                    $cost_percent_dispatched = round($total_trip_delivery_cost / $dispatched_value_in_lak * 100);
+                    $cost_percent_delivered = round($total_trip_delivery_cost / $delivered_value_in_lak * 100);
+                    $previous_trip_status = get_previous_trip_status($dis_date, $vehicle_number_value);
+                    $rows[$vehicle_number_value][$value['dispacth_date']] = array('vehicle_no' => '', 'date' => date('d-M-Y', $dis_date), 'active' => 'Active', 'trip_ids' => $value['trip_ids'], $previous_trip_status, 'cashier' => $value['cashier_names'], 'dispatched_value' => $dispatched_value_in_lak, 'delivered_value' => $delivered_value_in_lak, 'cost' => $total_trip_delivery_cost, 'cost_vs_dispatched' => $cost_percent_dispatched, 'cost_vs_delivered' => $cost_percent_delivered, 'leave_reason' => '');
+                }
             }
-         
+
             $not_attempted_cost = 0;
             $not_attempted_count = 0;
             $vehilce_monthly_cost = 0;
@@ -1586,8 +1600,8 @@ function vehicle_day_wise_performance_form_submit($form, &$form_state) {
                         }
                         $not_attempted_count++;
                         $not_attempted_cost += $not_attempted_cost;
-                        $previous_trip_status  = get_previous_trip_status(strtotime($value),$vehicle_number_value);
-                        $rows[$vehicle_number_value][$value] =  array('vehicle_no'=>'','date'=>$value,'active'=>'Active','trip_ids'=>'Trip Not Created',$previous_trip_status,'cashier_names'=>'','dispatched_value'=>'','delivered_value'=>'','cost'=>'','cost_vs_dispatched'=>'','cost_vs_delivered'=>'','leave_reason'=>'');
+                        $previous_trip_status = get_previous_trip_status(strtotime($value), $vehicle_number_value);
+                        $rows[$vehicle_number_value][$value] = array('vehicle_no' => '', 'date' => $value, 'active' => 'Active', 'trip_ids' => 'Trip Not Created', $previous_trip_status, 'cashier_names' => '', 'dispatched_value' => '', 'delivered_value' => '', 'cost' => round($vehicle_per_day_cost / $lak, $round_off_no_digits_2), 'cost_vs_dispatched' => '', 'cost_vs_delivered' => '', 'leave_reason' => '');
                     }
                 }
             }
@@ -1631,58 +1645,62 @@ function vehicle_day_wise_performance_form_submit($form, &$form_state) {
                     $not_attempted_count = $not_attempted_count + 1;
                     //}
                     $not_attempted_cost += $vehicle_per_day_cost;
-                    $previous_trip_status  = get_previous_trip_status(strtotime($date_value),$vehicle_number_value);
-                    $rows[$vehicle_number_value][$date_value] =  array('vehicle_no'=>'','date'=>$date_value,'active'=>'Active','trip_ids'=>'Trip Not Created',$previous_trip_status,'cashier_names'=>'','dispatched_value'=>'','delivered_value'=>'','cost'=>'','cost_vs_dispatched'=>'','cost_vs_delivered'=>'','leave_reason'=>'');
-                    
+                    $previous_trip_status = get_previous_trip_status(strtotime($date_value), $vehicle_number_value);
+                    $trip_not_created_reason = get_trip_not_created_reason($date_value, $vehicle_number = $vehicle_number_value, $resource_name = null, $resource_nid = null);
+                    if (empty($trip_not_created_reason)) {
+                        $trip_not_created_reason= t('Trip Not Created');
+                    }
+                    $rows[$vehicle_number_value][$date_value] = array('vehicle_no' => '', 'date' => $date_value, 'active' => 'Active', 'trip_ids' => $trip_not_created_reason, $previous_trip_status, 'cashier_names' => '', 'dispatched_value' => '', 'delivered_value' => '', 'cost' => round($vehicle_per_day_cost / $lak, $round_off_no_digits_2), 'cost_vs_dispatched' => '', 'cost_vs_delivered' => '', 'leave_reason' => '');
                 }
             }
-             $not_attempted_cost = $not_attempted_cost / $lak; 
-             $average_not_attempted = $not_attempted_cost/$not_attempted_count;
-            
-            
+            $not_attempted_cost = $not_attempted_cost / $lak;
+            $average_not_attempted = $not_attempted_cost / $not_attempted_count;
+
+
             $cost_per_sale = (($vehicle_total_cost + $not_attempted_cost) / $vehicle_total_delivered_value) * 100;
             $cost_per_sale_dispatched = (($vehicle_total_cost + $not_attempted_cost) / $vehicle_total_dispatched_value) * 100;
             //$rows[] = array($vehicle_number_value, '', 'Total', '', '', '', '', '', '', '', '', '', '', round($cost_per_sale_dispatched,$round_off_no_digits_2),round($cost_per_sale,$round_off_no_digits_2));
-            
-            
+
+
             if (!empty($absent_vehilce_details[$vehicle_number_value])) {
-                foreach($absent_vehilce_details[$vehicle_number_value] as $date_key=>$date_value) {
-                    $rows[$vehicle_number_value][$date_key] =  array('vehicle_no'=>'','date'=>$date_key,'active'=>'On Leave','trip_ids'=>'','cashier_names'=>'','dispatched_value'=>'','delivered_value'=>'','cost'=>'','cost_vs_dispatched'=>'','cost_vs_delivered'=>'','leave_reason'=>$date_value);
+                foreach ($absent_vehilce_details[$vehicle_number_value] as $date_key => $date_value) {
+                    $rows[$vehicle_number_value][$date_key] = array('vehicle_no' => '', 'date' => $date_key, 'active' => 'On Leave', 'trip_ids' => '', 'cashier_names' => '', 'dispatched_value' => '', 'delivered_value' => '', 'cost' => '', 'cost_vs_dispatched' => '', 'cost_vs_delivered' => '', 'leave_reason' => $date_value);
                 }
             }
             //print_r($absent_vehilce_details);die;
             usort($rows[$vehicle_number_value], "sortFunction");
-            
+
             $rows[$vehicle_number_value][0]['vehicle_no'] = $vehicle_number_value;
             $datas[$vehicle_number_value] = $rows[$vehicle_number_value];
-            
-                    }
-                    if(!empty($datas)) {
-                        $rows = array();
-                        foreach($datas as $key=>$value) {
-                            foreach($value as &$val) {
-                                $val['date'] = date('d-M-Y', strtotime($val['date']));
-                              $rows[] = $val;
-                            }
-                        }
-                        $rows[] = array();
-                    }
-        
-       // print_r($rows);die;
+        }
+        if (!empty($datas)) {
+            $rows = array();
+            foreach ($datas as $key => $value) {
+                foreach ($value as &$val) {
+                    $val['date'] = date('d-M-Y', strtotime($val['date']));
+                    $rows[] = $val;
+                }
+            }
+            $rows[] = array();
+        }
+
+        // print_r($rows);die;
     }
 
     $form_state['delivery_cost_details'] = $rows;
     $form_state['rebuild'] = TRUE;
 }
-function sortFunction($a, $b ) {
+
+function sortFunction($a, $b) {
     return strtotime($a["date"]) - strtotime($b["date"]);
 }
+
 function vehicle_daily_wise_report_export() {
     $query_parameters = drupal_get_query_parameters();
     if (!empty($query_parameters['dispatch_from_date']) && !empty($query_parameters['dispatch_to_date'])) {
-       $vehicle_number = $query_parameters['vehicle_number'];
-       $from_date = $query_parameters['dispatch_from_date'];
-       $to_date = $query_parameters['dispatch_to_date'];
+        $vehicle_number = $query_parameters['vehicle_number'];
+        $from_date = $query_parameters['dispatch_from_date'];
+        $to_date = $query_parameters['dispatch_to_date'];
     }
     $file = "hul_daily_wise_report_" . date('d-M-Y') . ".xls";
     $data = cache_get('delivery_cost_download' . session_id());
@@ -1691,56 +1709,57 @@ function vehicle_daily_wise_report_export() {
     header("Content-Disposition: attachment; filename=$file");
     echo $table;
 }
-function get_previous_trip_status($dispatch_date,$vehicle_number) {
+
+function get_previous_trip_status($dispatch_date, $vehicle_number) {
     $vrs_status = '';
     if (!empty($dispatch_date) && !empty($vehicle_number)) {
         global $user;
         $dis_id = change_feeds_import_get_distributor_id($user->uid);
         $previous_date = strtotime('-1 day', $dispatch_date);
         //echo date('Y-m-d',$previous_date);
-        
-        $previous_trip_ids = _get_previous_trip_id($previous_date,$vehicle_number);
+
+        $previous_trip_ids = _get_previous_trip_id($previous_date, $vehicle_number);
         if (!empty($previous_trip_ids)) {
-            foreach($previous_trip_ids as $previous_trip_id=>$value) {
+            foreach ($previous_trip_ids as $previous_trip_id => $value) {
                 $trip_detail = check_trip_id_exists_or_not($dis_id, $previous_trip_id);
                 $status = $trip_detail->field_vrs_status_value;
                 $field = field_info_field('field_vrs_status');
                 $allowed_values = list_allowed_values($field);
-                if(isset($allowed_values[$status])) {
-                   $vrs_status .= $previous_trip_id.'-'.$allowed_values[$status].'<br>';
+                if (isset($allowed_values[$status])) {
+                    $vrs_status .= $previous_trip_id . '-' . $allowed_values[$status] . '<br>';
                 }
             }
         }
     }
     return $vrs_status;
-
 }
 
-function _get_previous_trip_id($dispatch_date,$vehicle_number) {
+function _get_previous_trip_id($dispatch_date, $vehicle_number) {
     $res = '';
-   if (!empty($dispatch_date) && !empty($vehicle_number)) {
-      global $user;
-      $dispatch_date = date('Y-m-d',$dispatch_date);
-      $weekoff = get_resource_weekly_off_day();
-      $dis_id = change_feeds_import_get_distributor_id($user->uid);
-      $query = db_select('node', 'n');
-      $query->condition('n.type', 'dispatch_data');
-      $query->condition('n.uid', $dis_id);
-      $query->join('field_data_field_dispatch_date', 't', 't.entity_id = n.nid');
-      $query->join('field_data_field_vehicle_no', 'vehicle', 'vehicle.entity_id = n.nid');
-      $query->condition('vehicle.field_vehicle_no_value', $vehicle_number);
-      $query->condition('t.field_dispatch_date_value', $dispatch_date);
-      $query->fields('n', array('title'));
-      $res = $query->execute()->fetchAll(PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
-      $dispatch_date_in_strtotime =  strtotime($dispatch_date);
-      if (strtolower(date('l', $dispatch_date_in_strtotime)) == strtolower($weekoff) && empty($res)) {
-          $previous_date = strtotime('-1 day', $dispatch_date_in_strtotime);
-          $res = _get_previous_trip_id($previous_date,$vehicle_number);
-      }
-   }
-   return $res;
+    if (!empty($dispatch_date) && !empty($vehicle_number)) {
+        global $user;
+        $dispatch_date = date('Y-m-d', $dispatch_date);
+        $weekoff = get_resource_weekly_off_day();
+        $dis_id = change_feeds_import_get_distributor_id($user->uid);
+        $query = db_select('node', 'n');
+        $query->condition('n.type', 'dispatch_data');
+        $query->condition('n.uid', $dis_id);
+        $query->join('field_data_field_dispatch_date', 't', 't.entity_id = n.nid');
+        $query->join('field_data_field_vehicle_no', 'vehicle', 'vehicle.entity_id = n.nid');
+        $query->condition('vehicle.field_vehicle_no_value', $vehicle_number);
+        $query->condition('t.field_dispatch_date_value', $dispatch_date);
+        $query->fields('n', array('title'));
+        $res = $query->execute()->fetchAll(PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
+        $dispatch_date_in_strtotime = strtotime($dispatch_date);
+        if (strtolower(date('l', $dispatch_date_in_strtotime)) == strtolower($weekoff) && empty($res)) {
+            $previous_date = strtotime('-1 day', $dispatch_date_in_strtotime);
+            $res = _get_previous_trip_id($previous_date, $vehicle_number);
+        }
+    }
+    return $res;
 }
 
+// resource daily wise performance report
 function resource_day_wise_performance_form($form, &$form_state) {
     $form['#attached']['css'][] = drupal_get_path('module', 'deliverycost_calculation') . '/css/delivery_cost.css';
     $form['#attached']['js'][] = drupal_get_path('module', 'deliverycost_calculation') . '/js/delivery_cost.js';
@@ -1754,28 +1773,28 @@ function resource_day_wise_performance_form($form, &$form_state) {
     $form['#prefix'] = '<div id="itemlist-div" class="custom_form_wrapper">';
     $form['#suffix'] = '</div>';
     $form['dispatch_from_date'] = array(
-        '#type' => 'date_popup',
-        '#title' => t('Dispatch From Date*'),
-        '#date_format' => 'Y-m-d',
-        '#attributes' => array('class' => array('dispatch_date')),
-        '#date_label_position' => '',
-        '#date_year_range' => '-20:+2',
-        '#size' => 30,
-        '#default_value' => $start_date,
-        '#prefix' => '<div class="form_row form_row2"><div class="col_3 vehicle_performance">',
-        '#suffix' => '</div>'
+      '#type' => 'date_popup',
+      '#title' => t('Dispatch From Date*'),
+      '#date_format' => 'Y-m-d',
+      '#attributes' => array('class' => array('dispatch_date')),
+      '#date_label_position' => '',
+      '#date_year_range' => '-20:+2',
+      '#size' => 30,
+      '#default_value' => $start_date,
+      '#prefix' => '<div class="form_row form_row2"><div class="col_3 vehicle_performance">',
+      '#suffix' => '</div>'
     );
     $form['dispatch_to_date'] = array(
-        '#type' => 'date_popup',
-        '#title' => t('Dispatch To Date*'),
-        '#date_format' => 'Y-m-d',
-        '#attributes' => array('class' => array('dispatch_date')),
-        '#date_label_position' => '',
-        '#date_year_range' => '-20:+2',
-        '#default_value' => $end_date,
-        '#size' => 30,
-        '#prefix' => '<div class="form_row form_row2"><div class="col_3 vehicle_performance">',
-        '#suffix' => '</div>'
+      '#type' => 'date_popup',
+      '#title' => t('Dispatch To Date*'),
+      '#date_format' => 'Y-m-d',
+      '#attributes' => array('class' => array('dispatch_date')),
+      '#date_label_position' => '',
+      '#date_year_range' => '-20:+2',
+      '#default_value' => $end_date,
+      '#size' => 30,
+      '#prefix' => '<div class="form_row form_row2"><div class="col_3 vehicle_performance">',
+      '#suffix' => '</div>'
     );
     //$options = array(''=>t('-Select-'),'Cashier'=>'Cashier','Delivery Boy'=>'Delivery Boy');
     /* $form['resource_type'] = array(
@@ -1790,55 +1809,55 @@ function resource_day_wise_performance_form($form, &$form_state) {
       ); */
 
     $form['resource_name'] = array(
-        '#type' => 'textfield',
-        '#title' => t('Resource Name'),
-        '#autocomplete_path' => 'get_active_resource/autocomplete',
-        '#size' => 20,
-        '#maxlength' => 50,
-        //'#attributes' => array('class' => array('trip-id'), 'id' => 'trip-id'),
-        '#prefix' => '<div class="form_row form_row2"><div class="col_3 vehicle_performance">',
-        '#suffix' => '</div></div></div>'
+      '#type' => 'textfield',
+      '#title' => t('Resource Name'),
+      '#autocomplete_path' => 'get_active_resource/autocomplete',
+      '#size' => 20,
+      '#maxlength' => 50,
+      //'#attributes' => array('class' => array('trip-id'), 'id' => 'trip-id'),
+      '#prefix' => '<div class="form_row form_row2"><div class="col_3 vehicle_performance">',
+      '#suffix' => '</div></div></div>'
     );
     $form['submit'] = array(
-        '#type' => 'submit',
-        '#value' => 'Show',
-        '#name' => 'show',
-        '#attributes' => array('class' => array('vrs-trip-submit')),
-        '#submit' => array('resource_day_wise_performance_form_submit'),
-        //'#validate' => array('validate_delivery_cost_details_mtd'),
-        '#prefix' => '<div class="col_3">',
-        '#suffix' => '</div></div>'
+      '#type' => 'submit',
+      '#value' => 'Show',
+      '#name' => 'show',
+      '#attributes' => array('class' => array('vrs-trip-submit')),
+      '#submit' => array('resource_day_wise_performance_form_submit'),
+      //'#validate' => array('validate_delivery_cost_details_mtd'),
+      '#prefix' => '<div class="col_3">',
+      '#suffix' => '</div></div>'
     );
     if (!empty($options)) {
         $header = array(
-            'Resource Name',
-            'Resource Type',
-            'Dispatch Date',
-            'Active/On Leave',
-            'Trip ID',
-            'Previous Trip Status',
-            'Cost',
-            'Vehicle Number',
-            'Reason if on Leave/Maintenance',
+          'Resource Name',
+          'Resource Type',
+          'Dispatch Date',
+          'Active/On Leave',
+          'Trip ID',
+          'Previous Trip Status',
+          'Cost',
+          'Vehicle Number',
+          'Reason if on Leave/Maintenance',
         );
         $form['delivery_cost_table'] = array(
-            '#theme' => 'table',
-            '#prefix' => '<div class="delivery_cost_table custom_middle_table">',
-            '#tree' => TRUE,
-            '#header' => $header,
-            '#rows' => $options,
-            '#attributes' => array(
-                'class' => array('delivery_cost'),
-                'id' => 'delivery_cost'
-            ),
-            '#suffix' => '</div>',
-            '#sticky' => FALSE,
+          '#theme' => 'table',
+          '#prefix' => '<div class="delivery_cost_table custom_middle_table">',
+          '#tree' => TRUE,
+          '#header' => $header,
+          '#rows' => $options,
+          '#attributes' => array(
+            'class' => array('delivery_cost'),
+            'id' => 'delivery_cost'
+          ),
+          '#suffix' => '</div>',
+          '#sticky' => FALSE,
         );
         cache_set('delivery_cost_download' . session_id(), $form['delivery_cost_table'], 'cache', time() + 60 * 10);
         $rr = l('Download', "resource_daily_wise_report/export", array('attributes' => array("target" => "_blank"), 'query' => array('dispatch_from_date' => $form_state['values']['dispatch_from_date'], 'dispatch_to_date' => $form_state['values']['dispatch_to_date'], 'resource_name' => $form_state['values']['resource_name'])));
         $form['download_mark'] = array(
-            '#type' => 'markup',
-            '#markup' => $rr,
+          '#type' => 'markup',
+          '#markup' => $rr,
         );
     }
     return $form;
@@ -1939,7 +1958,7 @@ function resource_day_wise_performance_form_submit($form, &$form_state) {
                         $resource_cost = $resource_data[$resource_name]['cost_per_month'] / $resource_no_of_working_days;
                     }
                     //$previous_trip_status  = get_previous_trip_status($dis_date,$vehicle_number_value);
-                    $previous_trip_status  = get_resource_previous_trip_status($dis_date, $resource_name, $resource_values['resource_type']);
+                    $previous_trip_status = get_resource_previous_trip_status($dis_date, $resource_name, $resource_values['resource_type']);
                     $resource_cost = round($resource_cost);
                     $rows[$resource_name][$value['dispacth_date']] = array('resource_name' => '', 'resource_type' => '', 'date' => date('d-M-Y', $dis_date), 'active' => 'Active', 'trip_ids' => $value['trip_ids'], $previous_trip_status, 'cost' => $resource_cost, 'vehicle_number' => $value['vehicle_number'], 'leave_reason' => '');
                 }
@@ -1954,12 +1973,16 @@ function resource_day_wise_performance_form_submit($form, &$form_state) {
                         $resource_cost = 0;
                         $resource_no_of_working_days = calculateWorkingDaysInMonth($year, $month);
                         if (!empty($resource_data[$resource_name]['cost_per_month'])) {
-                         $resource_cost = $resource_data[$resource_name]['cost_per_month'] / $resource_no_of_working_days;
+                            $resource_cost = $resource_data[$resource_name]['cost_per_month'] / $resource_no_of_working_days;
                         }
                         $resource_cost = round($resource_cost);
-                        $previous_trip_status  =  get_resource_previous_trip_status(strtotime($value), $resource_name, $resource_values['resource_type']);
+                        $previous_trip_status = get_resource_previous_trip_status(strtotime($value), $resource_name, $resource_values['resource_type']);
                         //$rows[$vehicle_number_value][$value] =  array('vehicle_no'=>'','date'=>$value,'active'=>'Active','trip_ids'=>'Trip Not Created',$previous_trip_status,'cashier_names'=>'','dispatched_value'=>'','delivered_value'=>'','cost'=>round($vehicle_per_day_cost/$lak,$round_off_no_digits_2),'cost_vs_dispatched'=>'','cost_vs_delivered'=>'','leave_reason'=>'');
-                        $rows[$resource_name][$value] = array('resource_name' => '', 'resource_type' => '', 'date' => $value, 'active' => 'Active', 'trip_ids' => 'Trip Not Created', $previous_trip_status, 'cost' => $resource_cost, 'vehicle_number' => '', 'leave_reason' => '');
+                        $trip_not_created_reason = get_trip_not_created_reason($value, $vehicle_number = null, $resource_name = $resource_name, $resource_nid = null,$resource_type=$resource_values['field_resource_type_value']);
+                        if (empty($trip_not_created_reason)) {
+                            $trip_not_created_reason =  t('Trip Not Created');
+                        }
+                        $rows[$resource_name][$value] = array('resource_name' => '', 'resource_type' => '', 'date' => $value, 'active' => 'Active', 'trip_ids' => $trip_not_created_reason, $previous_trip_status, 'cost' => $resource_cost, 'vehicle_number' => '', 'leave_reason' => '');
                     }
                 }
             }
@@ -1995,15 +2018,18 @@ function resource_day_wise_performance_form_submit($form, &$form_state) {
                     $resource_no_of_working_days = calculateWorkingDaysInMonth($year, $month);
                     $resource_cost = 0;
                     //$previous_trip_status  = get_previous_trip_status(strtotime($date_value),$vehicle_number_value);
-                    
                     //print_r(get_resource_previous_trip_status($strtotime($date_value),$resource_name,$resource_values['resource_type']));
-                    $previous_trip_status  = get_resource_previous_trip_status(strtotime($date_value),$resource_name,$resource_values['resource_type']);
+                    $previous_trip_status = get_resource_previous_trip_status(strtotime($date_value), $resource_name, $resource_values['resource_type']);
                     //$rows[$vehicle_number_value][$date_value] =  array('vehicle_no'=>'','date'=>$date_value,'active'=>'Active','trip_ids'=>'Trip Not Created',$previous_trip_status,'cashier_names'=>'','dispatched_value'=>'','delivered_value'=>'','cost'=>round($vehicle_per_day_cost/$lak,$round_off_no_digits_2),'cost_vs_dispatched'=>'','cost_vs_delivered'=>'','leave_reason'=>'');
                     if (!empty($resource_data[$resource_name]['cost_per_month'])) {
                         $resource_cost = $resource_data[$resource_name]['cost_per_month'] / $resource_no_of_working_days;
                     }
                     $resource_cost = round($resource_cost);
-                    $rows[$resource_name][$date_value] = array('resource_name' => '', 'resource_type' => '', 'date' => $date_value, 'active' => 'Active', 'trip_ids' => 'Trip Not Created', $previous_trip_status, 'cost' => $resource_cost, 'vehicle_number' => '', 'leave_reason' => '');
+                    $trip_not_created_reason = get_trip_not_created_reason($date_value, $vehicle_number = null, $resource_name = $resource_name, $resource_nid = null, $resource_type = $resource_values['field_resource_type_value']);
+                    if (empty($trip_not_created_reason)) {
+                        $trip_not_created_reason = t('Trip Not Created');
+                    }
+                    $rows[$resource_name][$date_value] = array('resource_name' => '', 'resource_type' => '', 'date' => $date_value, 'active' => 'Active', 'trip_ids' => $trip_not_created_reason, $previous_trip_status, 'cost' => $resource_cost, 'vehicle_number' => '', 'leave_reason' => '');
                 }
             }
 

@@ -1,14 +1,27 @@
 (function ($) {
     Drupal.behaviors.deliverycost_calculation = {
         attach: function (context, settings) {
-            $(".cost_per_day_all").prop('readonly', true);
-            $(".cost_per_month_all").prop('readonly', true);
+            $('.mode_of_contract').each(function () {
+                vehicle_id =  $(this).attr('vehicle_id');
+                mode_of_contract = $('.mode_of_contract_'+vehicle_id).val();
+                if (mode_of_contract == 'Contracted') {
+                    $(".cost_per_day_"+vehicle_id).prop('readonly', true);
+                    $(".cost_per_month_"+vehicle_id).prop('readonly', false);
+                 } else if (mode_of_contract == 'Market') {
+                    $(".cost_per_month_"+vehicle_id).prop('readonly', true);
+                    $(".cost_per_day_"+vehicle_id).prop('readonly', false);
+                   
+                }
+
+            });
             
             $(".cost_per_month_all").blur(function () { 
                 vehicle_id =  $(this).attr('vehicle_id');
                 cost_per_month =  $(".cost_per_month_"+vehicle_id).val();
                 if (cost_per_month)
                     cost_per_day = parseFloat(cost_per_month/30).toFixed(2);
+                else
+                    cost_per_day = '';
                 $(".cost_per_day_"+vehicle_id).val(cost_per_day);
                
             });
@@ -18,6 +31,8 @@
                 cost_per_month =  $(".resource_cost_per_month_"+resource_id).val();
                 if (cost_per_month)
                     cost_per_day = parseFloat(cost_per_month/30).toFixed(2);
+                else 
+                    cost_per_day = '';
                 $(".resource_cost_per_day_"+resource_id).val(cost_per_day);
                
             });

@@ -1,0 +1,119 @@
+<?php
+
+/*
+ * Implement hook_schema.
+ */
+function deliverycost_calculation_schema() {
+
+  $schema['vehicle_resource_daily_status'] = array(
+    'description' => 'vehicle_resource_daily_status',
+    'fields' => array(
+      'id' => array(
+        'description' => 'The primary identifier for a data',
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'trip_id' => array(
+        'description' => 'Trip ID',
+         'type' => 'varchar',
+         'length' => 25,  
+      ),
+      'vehicle_number' => array(
+        'description' => 'vehicle_number',
+        'type' => 'varchar',
+        'length' => 30,
+      ),
+      'resource_type' => array(
+        'description' => 'Resource Type',
+        'type' => 'varchar',
+        'length' => 25,
+      ),
+     'resource_name' => array(
+        'description' => 'Resource Name',
+        'type' => 'varchar',
+        'length' => 50,
+      ),
+      'declaration_date' => array(
+        'description' => 'Declaration Date',
+        'type' => 'int',
+      ),
+      'reason' => array(
+        'description' => 'reason taxonomy vehicle_resource_daily_status',
+        'type' => 'int',
+      ),
+      'created_date' => array(
+        'description' => 'Created Date',
+        'type' => 'int',
+      ),
+    
+      'distributor_id' => array(
+        'description' => 'Distributor id',
+        'type' => 'int',
+      ),
+        
+     ),
+    'primary key' => array('id'),
+  );
+ return $schema; 
+}
+
+
+function deliverycost_calculation_update_7102() {
+  $schema['vehicle_resource_daily_status'] = array(
+    'description' => 'vehicle_resource_daily_status',
+    'fields' => array(
+      'id' => array(
+        'description' => 'The primary identifier for a data',
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'trip_id' => array(
+        'description' => 'Trip ID',
+         'type' => 'varchar',
+         'length' => 25,  
+      ),
+      'vehicle_number' => array(
+        'description' => 'vehicle_number',
+        'type' => 'varchar',
+        'length' => 30,
+      ),
+      'resource_type' => array(
+        'description' => 'Resource Type',
+        'type' => 'varchar',
+        'length' => 25,
+      ),
+     'resource_name' => array(
+        'description' => 'Resource Name',
+        'type' => 'varchar',
+        'length' => 50,
+      ),
+       'resource_nid' => array(
+        'description' => 'Resource Nid',
+        'type' => 'int',
+        'default'=>0   
+      ),
+      'declaration_date' => array(
+        'description' => 'Declaration Date',
+        'type' => 'int',
+      ),
+      'reason' => array(
+        'description' => 'reason taxonomy vehicle_resource_daily_status',
+        'type' => 'int',
+      ),
+      'created_date' => array(
+        'description' => 'Created Date',
+        'type' => 'int',
+      ),
+    
+      'distributor_id' => array(
+        'description' => 'Distributor id',
+        'type' => 'int',
+      ),
+        
+     ),
+    'primary key' => array('id'),
+  );
+  if(!db_table_exists('vehicle_resource_daily_status'))
+   db_create_table('vehicle_resource_daily_status', $schema['vehicle_resource_daily_status']);
+}
+}
