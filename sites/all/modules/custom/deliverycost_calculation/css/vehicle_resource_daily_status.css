@@ -1,0 +1,36 @@
+/*
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+*/
+/* 
+    Created on : 12 Oct, 2018, 12:50:17 PM
+    Author     : user
+*/
+.res_status_width {
+    width:150px;
+    float:left;
+    margin-left:10px;
+}
+.col_2_2 {
+    width:100px;
+}
+.declaration_date{
+    margin-top:10px;
+    margin-bottom:10px;
+    width:130px;
+}
+.button_class {
+    clear:both;float:left;align:center;margin-left:23px;
+}
+.width_daily_status_update {
+    width:700px;
+}
+.reason_height {
+    height:128px;
+}
+.custom_form_wrapper .form-item select, .custom_form_wrapper .form-item select.form-select {
+    padding: 0 12px;
+     height: 35px; 
+
+}
