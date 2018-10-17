@@ -962,7 +962,7 @@ function _edit_trip_delivered_callback_form_validate($form, &$form_state) {
             form_set_error('cheque_file', t('Failed to write the uploaded bill file the site\'s file folder.'));
          }
       }else if (empty($res_photo_of_cheque) && empty($res_photo_of_cheque_edit)) {
-         form_set_error('cheque_file', t('Photo of Cheque cannot be empty'));
+         //form_set_error('cheque_file', t('Photo of Cheque cannot be empty'));
       }
    }
    if ($collc_mode == 'signed') {
@@ -984,7 +984,7 @@ function _edit_trip_delivered_callback_form_validate($form, &$form_state) {
             form_set_error('sb_file', t('Failed to write the uploaded bill file the site\'s file folder.'));
          }
       }else if (empty($res_photo_of_signed_bill_delivery) && empty($res_photo_of_signed_bill_delivery_edit) && empty($photo_of_signed_bill_partial_edit) && empty($photo_of_signed_bill_partial)) {
-      form_set_error('sb_file', t('Photo of Signed Bill cannot be empty'));
+      //form_set_error('sb_file', t('Photo of Signed Bill cannot be empty'));
     }
   }
 }

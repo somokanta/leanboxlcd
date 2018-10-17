@@ -5341,6 +5341,15 @@ function dispatch_planning_views_data() {
             'handler' => 'header_handler_delivery_pending_printout',
         ),
     );
+    
+    // Custom view field for Fresh/DP Van.
+    $data['views']['fresh_dp_van_handler'] = array(
+        'title' => t('Fresh/DP Van'),
+        'help' => t('Fresh/DP Van.'),
+        'field' => array(
+            'handler' => 'field_fresh_dp_van_handler',
+        ),
+    );
 
 
     return $data;
