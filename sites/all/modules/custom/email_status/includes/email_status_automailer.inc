@@ -1040,9 +1040,10 @@ function send_email_pt_compliance() {
     $cash_chq_sb_lower = "'" . $cash_chq_sb_lower . "'";
 
     $query = db_select('dispatch_planning_api_data', 'ad');
+    $query->join('inventory_versioning_api_data', 'iad', 'iad.referenceNo = ad.referenceNo');
     $query->condition('ad.distributor_id', $distributor_id, '=');
     $query->condition('ad.delivery_pending_flag', 0, '=');
-    $query->condition('ad.delivered_date', array($yesterday_date, $yesterday_date_tillnight), 'BETWEEN');
+    $query->condition('iad.version_created_time', array($yesterday_date, $yesterday_date_tillnight), 'BETWEEN');
 
     $db_or = db_or();
     $db_or->condition('ad.res_status', NULL);
