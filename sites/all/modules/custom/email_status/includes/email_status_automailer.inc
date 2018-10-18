@@ -1021,10 +1021,11 @@ function getMax($arr) {
 function send_email_pt_compliance() {
 
   $distributor_id = _DISTRIBUTOR_ID;
-  $header[] = array('data' => 'Dispatch Date');
+  $header[] = array('data' => 'Delivery Date');
   for ($i = 1; $i <= 7; $i++) {
     $header[] = array('data' => date('d-M-y', strtotime("-$i days")), 'colspan' => 3);
     $yesterday_date = strtotime(date('Y-m-d', strtotime("-$i days")));
+    $yesterday_date_tillnight = $yesterday_date + 86399; // till 11:59:59
     $cash_chq_arr = array('Cash', 'Cheque', 'Cash,Cheque', 'Cheque,Cash', 'Cash,Cash', 'Cheque,Cheque');
     $cash_chq = implode("','", $cash_chq_arr);
     $cash_chq = "'" . $cash_chq . "'";
@@ -1041,7 +1042,7 @@ function send_email_pt_compliance() {
     $query = db_select('dispatch_planning_api_data', 'ad');
     $query->condition('ad.distributor_id', $distributor_id, '=');
     $query->condition('ad.delivery_pending_flag', 0, '=');
-    $query->condition('ad.dispatch_date', $yesterday_date, '=');
+    $query->condition('ad.delivered_date', array($yesterday_date, $yesterday_date_tillnight), 'BETWEEN');
 
     $db_or = db_or();
     $db_or->condition('ad.res_status', NULL);
