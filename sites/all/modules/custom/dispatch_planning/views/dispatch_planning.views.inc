@@ -2271,7 +2271,16 @@ function dispatch_planning_views_data() {
         'argument' => array(
             'handler' => 'views_handler_argument_string',
         ),
-    );
+      // Relationship with referenceNo of table inventory_versioning_api_data for Version Created Time.
+      'relationship' => array(
+      'title' => t('Reference No'),
+      'help' => t("Reference No"),
+      'handler' => 'views_handler_relationship',
+      'base' => 'inventory_versioning_api_data',
+      'base field' => 'referenceNo',
+      'label' => t('Id to !field_name', array('!field_name' => 'referenceNo')),
+    ),
+  );
 
     $data['dispatch_planning_api_data']['date'] = array(
         'title' => t('DP date'),
