@@ -3772,3 +3772,22 @@ function get_tp_van_by_trip_id($trip_id) {
   $results = $query->execute()->fetchField();
   return $results;
 }
+
+/**
+ * Implementation of hook_views_query_alter
+ * @param type $view
+ * @param type $query
+ */
+function dispatch_planning_views_query_alter(&$view, &$query) {
+
+  // remove 19800 condition which is default added by view
+  if ($view->base_table == 'dispatch_planning_api_data') {
+    foreach ($query->where[1]['conditions'] as $key => $val) {
+      if ((strpos($val['field'], 'dispatch_planning_api_data.version_created_time') !== false)) {
+        $data = str_replace('+ 19800', '', $val['field']);
+        $data = str_replace('%Y-%m-%d\T%H:%i:%s', '%Y-%m-%d', $data);
+        $query->where[1]['conditions'][$key]['field'] = $data;
+      }
+    }
+  }
+}
