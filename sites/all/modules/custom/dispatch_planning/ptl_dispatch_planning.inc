@@ -160,6 +160,7 @@ function put_qty_ptl_data($id_qty) {
         'zone'=>$value['zone'],
         'close_time'=>$value['close_time'],
         'box_id'=>$value['box_id'],
+        'reason_code'=>$value['reason_code'] ? $value['reason_code'] : "",
       ))
       ->expression('short_put_qty', "loose - ".$value['qty'])
       ->condition('id', $value['id'], '=')

@@ -1324,7 +1324,23 @@ function dispatch_planning_views_data() {
             'handler' => 'views_handler_argument_string',
         ),
     );
-
+    $data['ptl_data_configuration']['reason_code'] = array(
+        'title' => t('Reason Code'),
+        'help' => t('Reason Code'),
+        'field' => array(
+            'handler' => 'views_handler_field',
+            'click sortable' => TRUE,
+        ),
+        'sort' => array(
+            'handler' => 'views_handler_sort',
+        ),
+        'filter' => array(
+            'handler' => 'views_handler_filter_string',
+        ),
+        'argument' => array(
+            'handler' => 'views_handler_argument_string',
+        ),
+    );
     $data['ptl_data_configuration']['distributor_id'] = array(
         'title' => t('Distributor Id'),
         'help' => t('Distributor Id'),
