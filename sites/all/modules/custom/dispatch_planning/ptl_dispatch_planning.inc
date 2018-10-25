@@ -832,8 +832,22 @@ function update_ptl_header_data($ptl_job ,$trip_id, $rs_code, $vehicle,$bill_lin
  */
 function update_ptl_put_qty_sum_data($ptl_job, $id, $rs_code, $api_time, $line_count, $put_qty_sum) {
    $distributor_id = get_distributor_id_using_rscode($rs_code);
-   $result = db_merge('ptl_put_qty')
+/*   $result = db_merge('ptl_put_qty')
        ->key(array('unique_id' => $id, 'rs_code' => $rs_code, 'type' => 'TRIP'))
+       ->expression('put_qty_sum', 'put_qty_sum + :qty', array(':qty' => $put_qty_sum))
+       ->fields(array(
+         'unique_id' => $id,
+         'ptl_job' => $ptl_job,
+         'line_count' => $line_count,
+         'put_qty_sum' => $put_qty_sum,
+         'rs_code' => $rs_code,
+         'type' => 'TRIP', // same table diff is trip and master trip
+         'created' => $api_time,
+         'distributor_id' => $distributor_id ? $distributor_id : 0
+       ))
+       ->execute();*/
+   // This code is for some testing. So uncommented actual code which is above this line
+    $result = db_insert('ptl_put_qty')
        ->fields(array(
          'unique_id' => $id,
          'ptl_job' => $ptl_job,
@@ -845,6 +859,7 @@ function update_ptl_put_qty_sum_data($ptl_job, $id, $rs_code, $api_time, $line_c
          'distributor_id' => $distributor_id ? $distributor_id : 0
        ))
        ->execute();
+
    $results['flag'] = '1';
    $results['result'] = 'Updated Successfully';
    return $results;
