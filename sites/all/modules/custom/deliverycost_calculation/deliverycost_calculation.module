@@ -1,2188 +1,2215 @@
 <?php
 
 function deliverycost_calculation_views_api() {
-    return array(
-      'api' => '3.0',
-      'path' => drupal_get_path('module', 'deliverycost_calculation') . '/views',
-    );
+  return array(
+    'api' => '3.0',
+    'path' => drupal_get_path('module', 'deliverycost_calculation') . '/views',
+  );
 }
 
 function check_active_vehicle_ref(&$form, &$form_state) {
-    ;
-    $vehicle_number = $form_state['values']['field_vehicle_number_ref'][LANGUAGE_NONE][0]['nid'];
-    $leave_start_date = $form_state['values']['field_start_period'][LANGUAGE_NONE][0]['value'];
-    $leave_end_date = $form_state['values']['field_end_period'][LANGUAGE_NONE][0]['value'];
-    // vehicle maintenance nid
-    $vehicle_maintenance_nid = $form_state['values']['nid'];
-    if (!empty($vehicle_number)) {
-        $vehicle_object = node_load($vehicle_number);
-        $form_state['values']['title'] = 'vehicle_' . $vehicle_object->title;
-        if ($vehicle_object->field_is_active[LANGUAGE_NONE][0]['value'] != 1) {
-            form_set_error('form', t("Vehicle No:$vehicle_object->title is not active.Please select active vehicle only. "));
-        }
-        if ($leave_end_date < $leave_start_date) {
-            form_set_error('field_end_period', t("Maintenance End Period period should be higher than Maintenance Start period."));
-        }
-        $maintenance_exist = check_vehicle_maintenance_already_exist($vehicle_number, $leave_start_date, $leave_end_date);
-        if (!empty($maintenance_exist) && $vehicle_maintenance_nid != $maintenance_exist) {
-            form_set_error('field_end_period', t("Maintenance already exist for this Period."));
-        }
+  $vehicle_number = $form_state['values']['field_vehicle_number_ref'][LANGUAGE_NONE][0]['nid'];
+  $leave_start_date = $form_state['values']['field_start_period'][LANGUAGE_NONE][0]['value'];
+  $leave_end_date = $form_state['values']['field_end_period'][LANGUAGE_NONE][0]['value'];
+  // vehicle maintenance nid
+  $vehicle_maintenance_nid = $form_state['values']['nid'];
+  if (!empty($vehicle_number)) {
+    $vehicle_object = node_load($vehicle_number);
+    $form_state['values']['title'] = 'vehicle_' . $vehicle_object->title;
+    if ($vehicle_object->field_is_active[LANGUAGE_NONE][0]['value'] != 1) {
+      form_set_error('form', t("Vehicle No:$vehicle_object->title is not active.Please select active vehicle only. "));
     }
+    if ($leave_end_date < $leave_start_date) {
+      form_set_error('field_end_period', t("Maintenance End Period period should be higher than Maintenance Start period."));
+    }
+    $maintenance_exist = check_vehicle_maintenance_already_exist($vehicle_number, $leave_start_date, $leave_end_date);
+    if (!empty($maintenance_exist) && $vehicle_maintenance_nid != $maintenance_exist) {
+      form_set_error('field_end_period', t("Maintenance already exist for this Period."));
+    }
+  }
 }
 
 function get_public_holiday($month = null, $year = null) {
-    global $user;
-    $distributor_id = change_feeds_import_get_distributor_id($user->uid);
-    if (empty($month) && empty($year)) {
-        $year = date('Y');
-        $month = date('m');
-    }
-    $startdate = strtotime($year . '-' . $month . '-01');
-    $enddate = strtotime('+' . (date('t', $startdate) - 1) . ' days', $startdate);
-    $query = db_select('node', 'n');
-    $query->condition('n.uid', $distributor_id);
-    $query->condition('n.type', 'holiday_master');
-    $query->leftjoin('field_data_field_holiday', 'hday', 'hday.entity_id = n.nid');
-    $query->condition('hday.field_holiday_value', $startdate, '>=');
-    $query->condition('hday.field_holiday_value', $enddate, '<=');
-    $query->addExpression("DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(hday.field_holiday_value),'+00:00','+05:30'), '%Y-%m-%d')", 'hdate');
-    $holiday_result = $query->execute()->fetchCol();
-    return $holiday_result;
+  global $user;
+  $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+  if (empty($month) && empty($year)) {
+    $year = date('Y');
+    $month = date('m');
+  }
+  $startdate = strtotime($year . '-' . $month . '-01');
+  $enddate = strtotime('+' . (date('t', $startdate) - 1) . ' days', $startdate);
+  $query = db_select('node', 'n');
+  $query->condition('n.uid', $distributor_id);
+  $query->condition('n.type', 'holiday_master');
+  $query->leftjoin('field_data_field_holiday', 'hday', 'hday.entity_id = n.nid');
+  $query->condition('hday.field_holiday_value', $startdate, '>=');
+  $query->condition('hday.field_holiday_value', $enddate, '<=');
+  $query->addExpression("DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(hday.field_holiday_value),'+00:00','+05:30'), '%Y-%m-%d')", 'hdate');
+  $holiday_result = $query->execute()->fetchCol();
+  return $holiday_result;
 }
 
 function get_resource_weekly_off_day() {
-    global $user;
-    $distributor_id = change_feeds_import_get_distributor_id($user->uid);
-    //fist check on resource weekly off content type
-    $query = db_select('node', 'n');
-    $query->condition('n.uid', $distributor_id);
-    $query->condition('n.type', 'pdd_master');
-    $query->fields('n', array('nid'));
-    $pdd_value_result = $query->execute()->fetchField();
-    $pdd_data = node_load($pdd_value_result);
-    $weekly = $pdd_data->field_day[LANGUAGE_NONE];
-    foreach ($weekly as $key => $val) {
-        $weeklyoff = $val['value'];
-    }
-    return $weeklyoff;
+  global $user;
+  $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+  //fist check on resource weekly off content type
+  $query = db_select('node', 'n');
+  $query->condition('n.uid', $distributor_id);
+  $query->condition('n.type', 'pdd_master');
+  $query->fields('n', array('nid'));
+  $pdd_value_result = $query->execute()->fetchField();
+  $pdd_data = node_load($pdd_value_result);
+  $weekly = $pdd_data->field_day[LANGUAGE_NONE];
+  foreach ($weekly as $key => $val) {
+    $weeklyoff = $val['value'];
+  }
+  return $weeklyoff;
 }
 
 function check_active_vehicle(&$form, &$form_state) {
-    ;
-    if (!empty($form_state['values']['node'])) {
-        foreach ($form_state['values']['node'] as $nid => $form_data) {
-            $leave_start_date = $form_data['field_start_period'][LANGUAGE_NONE][0]['value'];
-            $leave_end_date = $form_data['field_end_period'][LANGUAGE_NONE][0]['value'];
-            $vehicle_number = $form_data['field_vehicle_number_ref'][LANGUAGE_NONE][0]['nid'];
-            if (!empty($vehicle_number) && is_numeric($vehicle_number)) {
-                $vehicle_object = node_load($vehicle_number);
-                if ($vehicle_object->field_is_active[LANGUAGE_NONE][0]['value'] != 1) {
-                    form_set_error('form', t("Vehicle No:$vehicle_object->title is not active.Please select active vehicle only. "));
-                }
-            }
-        }
-    }
-    $vehicle_number = $form_state['values']['field_vehicle_number_ref'][LANGUAGE_NONE][0]['nid'];
-    $leave_start_date = $form_state['values']['field_start_period'][LANGUAGE_NONE][0]['value'];
-    $leave_end_date = $form_state['values']['field_end_period'][LANGUAGE_NONE][0]['value'];
-    if (!empty($vehicle_number)) {
+  ;
+  if (!empty($form_state['values']['node'])) {
+    foreach ($form_state['values']['node'] as $nid => $form_data) {
+      $leave_start_date = $form_data['field_start_period'][LANGUAGE_NONE][0]['value'];
+      $leave_end_date = $form_data['field_end_period'][LANGUAGE_NONE][0]['value'];
+      $vehicle_number = $form_data['field_vehicle_number_ref'][LANGUAGE_NONE][0]['nid'];
+      if (!empty($vehicle_number) && is_numeric($vehicle_number)) {
         $vehicle_object = node_load($vehicle_number);
         if ($vehicle_object->field_is_active[LANGUAGE_NONE][0]['value'] != 1) {
-            form_set_error('form', t("Vehicle No:$vehicle_object->title is not active.Please select active vehicle only. "));
+          form_set_error('form', t("Vehicle No:$vehicle_object->title is not active.Please select active vehicle only. "));
         }
-        if ($leave_end_date < $leave_start_date) {
-            form_set_error('field_end_period', t("Maintenance End Period period should be higher than Maintenance Start period."));
-        }
-        $maintenance_exist = check_vehicle_maintenance_already_exist($vehicle_number, $leave_start_date, $leave_end_date);
-        if (!empty($maintenance_exist)) {
-            form_set_error('field_end_period', t("Maintenance already exist for this Period."));
-        }
+      }
     }
+  }
+  $vehicle_number = $form_state['values']['field_vehicle_number_ref'][LANGUAGE_NONE][0]['nid'];
+  $leave_start_date = $form_state['values']['field_start_period'][LANGUAGE_NONE][0]['value'];
+  $leave_end_date = $form_state['values']['field_end_period'][LANGUAGE_NONE][0]['value'];
+  if (!empty($vehicle_number)) {
+    $vehicle_object = node_load($vehicle_number);
+    if ($vehicle_object->field_is_active[LANGUAGE_NONE][0]['value'] != 1) {
+      form_set_error('form', t("Vehicle No:$vehicle_object->title is not active.Please select active vehicle only. "));
+    }
+    if ($leave_end_date < $leave_start_date) {
+      form_set_error('field_end_period', t("Maintenance End Period period should be higher than Maintenance Start period."));
+    }
+    $maintenance_exist = check_vehicle_maintenance_already_exist($vehicle_number, $leave_start_date, $leave_end_date);
+    if (!empty($maintenance_exist)) {
+      form_set_error('field_end_period', t("Maintenance already exist for this Period."));
+    }
+  }
 }
 
 function deliverycost_calculation_menu() {
-    $items['vehicle_maintenance/autocomplete'] = array(
-      'title' => 'vehicle_maintenance autocomplete',
-      'page callback' => '_get_active_vehicles',
-      'access callback' => TRUE,
-      'type' => MENU_CALLBACK,
-    );
-    $items['get_active_resource/autocomplete'] = array(
-      'title' => 'get_active_resources autocomplete',
-      'page callback' => '_get_active_resources',
-      'access callback' => TRUE,
-      'type' => MENU_CALLBACK,
-    );
-    $items['vehicle_contract_entry/%ctools_js/add/%'] = array(
-      'page callback' => 'contract_entry_callback',
-      'page arguments' => array(1),
-      'access arguments' => array('delivery cost'),
-    );
-    $items['resources_contract_entry/%ctools_js/add/%'] = array(
-      'page callback' => 'contract_entry_callback',
-      'page arguments' => array(1),
-      'access arguments' => array('delivery cost'),
-    );
-    $items['view_contract_entry/%ctools_js/%/%'] = array(
-      'page callback' => 'view_contract_entry_callback',
-      'page arguments' => array(1),
-      'access arguments' => array('delivery cost'),
-    );
+  $items['vehicle_maintenance/autocomplete'] = array(
+    'title' => 'vehicle_maintenance autocomplete',
+    'page callback' => '_get_active_vehicles',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  $items['get_active_resource/autocomplete'] = array(
+    'title' => 'get_active_resources autocomplete',
+    'page callback' => '_get_active_resources',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  $items['vehicle_contract_entry/%ctools_js/add/%'] = array(
+    'page callback' => 'contract_entry_callback',
+    'page arguments' => array(1),
+    'access arguments' => array('delivery cost'),
+  );
+  $items['resources_contract_entry/%ctools_js/add/%'] = array(
+    'page callback' => 'contract_entry_callback',
+    'page arguments' => array(1),
+    'access arguments' => array('delivery cost'),
+  );
+  $items['view_contract_entry/%ctools_js/%/%'] = array(
+    'page callback' => 'view_contract_entry_callback',
+    'page arguments' => array(1),
+    'access arguments' => array('delivery cost'),
+  );
 
-    $items['view_weekly_off_entry/%ctools_js/%/%'] = array(
-      'page callback' => 'view_weekly_off_entry_callback',
-      'page arguments' => array(1),
-      'access arguments' => array('delivery cost'),
-    );
+  $items['view_weekly_off_entry/%ctools_js/%/%'] = array(
+    'page callback' => 'view_weekly_off_entry_callback',
+    'page arguments' => array(1),
+    'access arguments' => array('delivery cost'),
+  );
 
 
-    $items['delivery-cost'] = array(
-      'title' => 'Delivery Cost',
-      'page callback' => 'drupal_get_form',
-      'page arguments' => array('delivery_cost_calculation_form'),
-      'access arguments' => array('delivery cost'),
-      'type' => MENU_NORMAL_ITEM,
-      'file' => 'includes/delivery_cost_calculation.inc',
-    );
-    $items['delivery-cost/mtd'] = array(
-      'title' => 'Delivery Cost MTD',
-      'page callback' => 'drupal_get_form',
-      'page arguments' => array('delivery_cost_calculation_mtd_form'),
-      'access arguments' => array('delivery cost'),
-      'type' => MENU_NORMAL_ITEM,
-      'file' => 'includes/delivery_cost_calculation.inc',
-    );
+  $items['delivery-cost'] = array(
+    'title' => 'Delivery Cost',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('delivery_cost_calculation_form'),
+    'access arguments' => array('delivery cost'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'includes/delivery_cost_calculation.inc',
+  );
+  $items['delivery-cost/mtd'] = array(
+    'title' => 'Delivery Cost MTD',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('delivery_cost_calculation_mtd_form'),
+    'access arguments' => array('delivery cost'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'includes/delivery_cost_calculation.inc',
+  );
 
-    $items['vehicle/extra-working-day'] = array(
-      'title' => 'Extra Working Days',
-      'page callback' => 'drupal_get_form',
-      'page arguments' => array('resource_extra_working_form'),
-      'access arguments' => array('delivery cost'),
-      'type' => MENU_NORMAL_ITEM,
-      'file' => 'includes/delivery_cost_calculation.inc',
-    );
-    $items['resource/extra-working-day'] = array(
-      'title' => 'Extra Working Days',
-      'page callback' => 'drupal_get_form',
-      'page arguments' => array('resource_extra_working_form'),
-      'access arguments' => array('delivery cost'),
-      'type' => MENU_NORMAL_ITEM,
-      'file' => 'includes/delivery_cost_calculation.inc',
-    );
+  $items['vehicle/extra-working-day'] = array(
+    'title' => 'Extra Working Days',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('resource_extra_working_form'),
+    'access arguments' => array('delivery cost'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'includes/delivery_cost_calculation.inc',
+  );
+  $items['resource/extra-working-day'] = array(
+    'title' => 'Extra Working Days',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('resource_extra_working_form'),
+    'access arguments' => array('delivery cost'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'includes/delivery_cost_calculation.inc',
+  );
 
-    $items['delivery_cost/export'] = array(
-      'title' => 'Delivery Cost Export',
-      'description' => 'delivery cost export',
-      'page callback' => array('delivery_cost_export'),
-      'file' => 'includes/delivery_cost_calculation.inc',
-      'access callback' => TRUE,
-    );
+  $items['delivery_cost/export'] = array(
+    'title' => 'Delivery Cost Export',
+    'description' => 'delivery cost export',
+    'page callback' => array('delivery_cost_export'),
+    'file' => 'includes/delivery_cost_calculation.inc',
+    'access callback' => TRUE,
+  );
 
-    $items['resources_weekoff_entry/%ctools_js/add/%'] = array(
-      'page callback' => 'resources_weekoff_entry_callback',
-      'page arguments' => array(1),
-      'access arguments' => array('delivery cost'),
-    );
+  $items['resources_weekoff_entry/%ctools_js/add/%'] = array(
+    'page callback' => 'resources_weekoff_entry_callback',
+    'page arguments' => array(1),
+    'access arguments' => array('delivery cost'),
+  );
 
-    $items['vehicle/contract/%'] = array(
-      'title' => 'Vehicle Contract',
-      'page callback' => 'drupal_get_form',
-      'page arguments' => array('contract_details_form'),
-      'access arguments' => array('delivery cost'),
-      'type' => MENU_NORMAL_ITEM,
-    );
+  $items['vehicle/contract/%'] = array(
+    'title' => 'Vehicle Contract',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('contract_details_form'),
+    'access arguments' => array('delivery cost'),
+    'type' => MENU_NORMAL_ITEM,
+  );
 
-    $items['contract_entry/%ctools_js/add/%/%'] = array(
-      'page callback' => 'contract_entry_callback',
-      'page arguments' => array(3, 4),
-      'access arguments' => array('delivery cost'),
-    );
-    $items['leave_entry/%ctools_js/add/%/%'] = array(
-      'page callback' => 'contract_entry_callback',
-      'page arguments' => array(3, 4),
-      'access arguments' => array('delivery cost'),
-    );
-    $items['extra_working/%ctools_js/add/%/%'] = array(
-      'page callback' => 'contract_entry_callback',
-      'page arguments' => array(3, 4),
-      'access arguments' => array('delivery cost'),
-    );
-    $items['deactivate_resource'] = array(
-      'page callback' => 'deactivate_resource_vehicle',
-      'title' => 'Deactivate Vehicle and resource',
-      'access callback' => TRUE,
-      'type' => MENU_NORMAL_ITEM,
-    );
-    $items['vehicle-day-wise-performance'] = array(
-      'title' => 'Vehicle Day-wise Performance',
-      'page callback' => 'drupal_get_form',
-      'page arguments' => array('vehicle_day_wise_performance_form'),
-      'access arguments' => array('delivery cost'),
-      'type' => MENU_NORMAL_ITEM,
-      'file' => 'includes/delivery_cost_calculation.inc',
-    );
-    
-    $items['vehicle_daily_wise_report/export'] = array(
-      'title' => 'Vehicle Dailywise Report Export',
-      'description' => 'Vehicle Dailywise Report Export',
-      'page callback' => array('vehicle_daily_wise_report_export'),
-      'file' => 'includes/delivery_cost_calculation.inc',
-      'access callback' => TRUE,
-    );
-     $items['resource-day-wise-performance'] = array(
-      'title' => 'Resource Day-wise Performance',
-      'page callback' => 'drupal_get_form',
-      'page arguments' => array('resource_day_wise_performance_form'),
-      'access arguments' => array('delivery cost'),
-      'type' => MENU_NORMAL_ITEM,
-      'file' => 'includes/delivery_cost_calculation.inc',
-    );
-    
-    $items['resource_daily_wise_report/export'] = array(
-      'title' => 'Resource Dailywise Report Export',
-      'description' => 'Resource Dailywise Report Export',
-      'page callback' => array('resource_daily_wise_report_export'),
-      'file' => 'includes/delivery_cost_calculation.inc',
-      'access callback' => TRUE,
-    );
-    $items['vehicle-resource-daily-status-update'] = array(
-      'title' => 'Declare Vehicle Resource Daily Status',
-      'page callback' => 'drupal_get_form',
-      'page arguments' => array('vehicle_resource_daily_status_form'),
-      'access arguments' => array('delivery cost'),
-      'type' => MENU_NORMAL_ITEM,
-      'file' => 'includes/vehicle_resource_daily_status.inc',
-    );
-      $items['get_active_resource_type/autocomplete'] = array(
-      'title' => 'get_active_resources autocomplete',
-      'page callback' => '_get_active_resources_type',
-      'page arguments' => array(2),    
-      'access callback' => TRUE,
-      'type' => MENU_CALLBACK,
-    );
+  $items['contract_entry/%ctools_js/add/%/%'] = array(
+    'page callback' => 'contract_entry_callback',
+    'page arguments' => array(3, 4),
+    'access arguments' => array('delivery cost'),
+  );
+  $items['leave_entry/%ctools_js/add/%/%'] = array(
+    'page callback' => 'contract_entry_callback',
+    'page arguments' => array(3, 4),
+    'access arguments' => array('delivery cost'),
+  );
+  $items['extra_working/%ctools_js/add/%/%'] = array(
+    'page callback' => 'contract_entry_callback',
+    'page arguments' => array(3, 4),
+    'access arguments' => array('delivery cost'),
+  );
+  $items['deactivate_resource'] = array(
+    'page callback' => 'deactivate_resource_vehicle',
+    'title' => 'Deactivate Vehicle and resource',
+    'access callback' => TRUE,
+    'type' => MENU_NORMAL_ITEM,
+  );
+  $items['vehicle-day-wise-performance'] = array(
+    'title' => 'Vehicle Day-wise Performance',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('vehicle_day_wise_performance_form'),
+    'access arguments' => array('delivery cost'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'includes/delivery_cost_calculation.inc',
+  );
 
-    return $items;
+  $items['vehicle_daily_wise_report/export'] = array(
+    'title' => 'Vehicle Dailywise Report Export',
+    'description' => 'Vehicle Dailywise Report Export',
+    'page callback' => array('vehicle_daily_wise_report_export'),
+    'file' => 'includes/delivery_cost_calculation.inc',
+    'access callback' => TRUE,
+  );
+  $items['resource-day-wise-performance'] = array(
+    'title' => 'Resource Day-wise Performance',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('resource_day_wise_performance_form'),
+    'access arguments' => array('delivery cost'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'includes/delivery_cost_calculation.inc',
+  );
+
+  $items['resource_daily_wise_report/export'] = array(
+    'title' => 'Resource Dailywise Report Export',
+    'description' => 'Resource Dailywise Report Export',
+    'page callback' => array('resource_daily_wise_report_export'),
+    'file' => 'includes/delivery_cost_calculation.inc',
+    'access callback' => TRUE,
+  );
+  $items['vehicle-resource-daily-status-update'] = array(
+    'title' => 'Declare Vehicle Resource Daily Status',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('vehicle_resource_daily_status_form'),
+    'access arguments' => array('delivery cost'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'includes/vehicle_resource_daily_status.inc',
+  );
+  $items['get_active_resource_type/autocomplete'] = array(
+    'title' => 'get_active_resources autocomplete',
+    'page callback' => '_get_active_resources_type',
+    'page arguments' => array(2),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+
+  return $items;
 }
 
 // set active flag = 0 in vehicle and resource master
 function deactivate_resource_vehicle() {
-    global $user;
-    $distributor_id = change_feeds_import_get_distributor_id($user->uid);
-    // deactivate vehicle
-    $type = 'vehicle_contract';
-    $start_period = strtotime(date('Y-m-d'));
-    $query = db_select('node', 'n');
-    $query->join('field_data_field_end_period', 'end_period', 'end_period.entity_id = n.nid');
-    $query->condition('end_period.field_end_period_value', $start_period, '<');
-    $query->join('field_data_field_vehicle_number_ref', 'vehicle_ref', 'vehicle_ref.entity_id = n.nid');
-    $query->fields('vehicle_ref', array('field_vehicle_number_ref_nid'));
-    $query->join('field_data_field_is_active', 'is_active', 'is_active.entity_id = vehicle_ref.field_vehicle_number_ref_nid');
-    $query->condition('is_active.field_is_active_value', 1);
-    $query->condition('n.type', $type);
-    //$query->condition('n.uid', $distributor_id);
-    $result = $query->execute()->fetchAll(PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
-    if (!empty($result)) {
-        foreach ($result as $key => $value) {
-            $node = node_load($key);
-            if ($node) {
-                $node->field_is_active[LANGUAGE_NONE][0]['value'] = 0;
-                node_save($node);
-            }
-        }
+  global $user;
+  $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+  // deactivate vehicle
+  $type = 'vehicle_contract';
+  $start_period = strtotime(date('Y-m-d'));
+  $query = db_select('node', 'n');
+  $query->join('field_data_field_end_period', 'end_period', 'end_period.entity_id = n.nid');
+  $query->condition('end_period.field_end_period_value', $start_period, '<');
+  $query->join('field_data_field_vehicle_number_ref', 'vehicle_ref', 'vehicle_ref.entity_id = n.nid');
+  $query->fields('vehicle_ref', array('field_vehicle_number_ref_nid'));
+  $query->join('field_data_field_is_active', 'is_active', 'is_active.entity_id = vehicle_ref.field_vehicle_number_ref_nid');
+  $query->condition('is_active.field_is_active_value', 1);
+  $query->condition('n.type', $type);
+  //$query->condition('n.uid', $distributor_id);
+  $result = $query->execute()->fetchAll(PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
+  if (!empty($result)) {
+    foreach ($result as $key => $value) {
+      $node = node_load($key);
+      if ($node) {
+        $node->field_is_active[LANGUAGE_NONE][0]['value'] = 0;
+        node_save($node);
+      }
     }
-    // Deactivate resource
-    $type = 'resources_contract';
-    $query = db_select('node', 'n');
-    $query->join('field_data_field_end_period', 'end_period', 'end_period.entity_id = n.nid');
-    $query->condition('end_period.field_end_period_value', $start_period, '<');
-    $query->join('field_data_field_resource', 'resource_ref', 'resource_ref.entity_id = n.nid');
-    $query->join('field_data_field_is_active', 'is_active', 'is_active.entity_id = resource_ref.field_resource_nid');
-    $query->join('field_data_field_resource_type', 'resource_type', 'resource_type.entity_id = resource_ref.field_resource_nid');
-    $query->condition('resource_type.field_resource_type_value', array('Delivery boy','Cashier'),'IN');
-    $query->condition('is_active.field_is_active_value', 1);
-    $query->fields('resource_ref', array('field_resource_nid'));
-    $query->condition('n.type', $type);
-    //$query->condition('n.uid', $distributor_id);
-    $result = $query->execute()->fetchAll(PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
-    if (!empty($result)) {
-        foreach ($result as $key => $value) {
-            $node = node_load($key);
-            if (!empty($node)) {
-                $node->field_is_active[LANGUAGE_NONE][0]['value'] = 0;
-                node_save($node);
-            }
-        }
+  }
+  // Deactivate resource
+  $type = 'resources_contract';
+  $query = db_select('node', 'n');
+  $query->join('field_data_field_end_period', 'end_period', 'end_period.entity_id = n.nid');
+  $query->condition('end_period.field_end_period_value', $start_period, '<');
+  $query->join('field_data_field_resource', 'resource_ref', 'resource_ref.entity_id = n.nid');
+  $query->join('field_data_field_is_active', 'is_active', 'is_active.entity_id = resource_ref.field_resource_nid');
+  $query->join('field_data_field_resource_type', 'resource_type', 'resource_type.entity_id = resource_ref.field_resource_nid');
+  $query->condition('resource_type.field_resource_type_value', array('Delivery boy', 'Cashier'), 'IN');
+  $query->condition('is_active.field_is_active_value', 1);
+  $query->fields('resource_ref', array('field_resource_nid'));
+  $query->condition('n.type', $type);
+  //$query->condition('n.uid', $distributor_id);
+  $result = $query->execute()->fetchAll(PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
+  if (!empty($result)) {
+    foreach ($result as $key => $value) {
+      $node = node_load($key);
+      if (!empty($node)) {
+        $node->field_is_active[LANGUAGE_NONE][0]['value'] = 0;
+        node_save($node);
+      }
     }
+  }
 }
 
 function view_weekly_off_entry_callback($js = FALSE) {
-    global $user;
-    $page = arg(2);
-    $nid = arg(3);
-    $resource_name = arg(4);
-    // If people aren't using javascript, then I just boot em. sorry. its 2011.
-    if (!$js)
-        return "Javascript required";
-    // Include your ctools crap here
-    ctools_include('modal');
-    ctools_include('ajax');
+  global $user;
+  $page = arg(2);
+  $nid = arg(3);
+  $resource_name = arg(4);
+  // If people aren't using javascript, then I just boot em. sorry. its 2011.
+  if (!$js)
+    return "Javascript required";
+  // Include your ctools crap here
+  ctools_include('modal');
+  ctools_include('ajax');
+  $output = array();
+  if ($page == 'resource') {
+    $view = views_embed_view('resources_weekly_off', 'page', array($nid));
+    $output[] = ctools_modal_command_display(t('Resource Weekly Off-' . $resource_name), $view);
+  }
+  if (!empty($form_state['executed'])) {
     $output = array();
-    if ($page == 'resource') {
-        $view = views_embed_view('resources_weekly_off', 'page', array($nid));
-        $output[] = ctools_modal_command_display(t('Resource Weekly Off-' . $resource_name), $view);
-    }
-    if (!empty($form_state['executed'])) {
-        $output = array();
-        // Close the modal
-        $output[] = ctools_modal_command_dismiss();
-        $output[] = ctools_ajax_command_reload();
-    }
-
-
     // Close the modal
-    //$output[] = ctools_modal_command_dismiss();
-    // I use this method a lot on pages that have views, so what I do is get the latest view content
-    // with the latest node and replace the current view. magic!
-    /*
-      $html = views_embed_view('my_view', 'my_display';
-      $output[] = ajax_command_html('.view-display-id-page', $html);
-     */
+    $output[] = ctools_modal_command_dismiss();
+    $output[] = ctools_ajax_command_reload();
+  }
 
-    print ajax_render($output);
-    drupal_exit();
+
+  // Close the modal
+  //$output[] = ctools_modal_command_dismiss();
+  // I use this method a lot on pages that have views, so what I do is get the latest view content
+  // with the latest node and replace the current view. magic!
+  /*
+    $html = views_embed_view('my_view', 'my_display';
+    $output[] = ajax_command_html('.view-display-id-page', $html);
+   */
+
+  print ajax_render($output);
+  drupal_exit();
 }
 
 function resources_weekoff_entry_callback($js = FALSE) {
-    global $user;
-    $page = arg(3);
-    $nid = arg(4);
-    if ($page == 'resource') {
-        $type = 'resource_weekly_off';
-        $title = t('Resource Weekly Off Entry');
-        $form_id = 'resource_weekly_off_node_form';
-    }
-    $form_state = array(
-      'title' => $title,
-      'ajax' => TRUE,
-    );
-    unset($form_state['field_resource']);
-    // If people aren't using javascript, then I just boot em. sorry. its 2011.
-    if (!$js)
-        return "Javascript required";
+  global $user;
+  $page = arg(3);
+  $nid = arg(4);
+  if ($page == 'resource') {
+    $type = 'resource_weekly_off';
+    $title = t('Resource Weekly Off Entry');
+    $form_id = 'resource_weekly_off_node_form';
+  }
+  $form_state = array(
+    'title' => $title,
+    'ajax' => TRUE,
+  );
+  unset($form_state['field_resource']);
+  // If people aren't using javascript, then I just boot em. sorry. its 2011.
+  if (!$js)
+    return "Javascript required";
 
-    // Include your ctools crap here
-    ctools_include('node.pages', 'node', '');
-    ctools_include('modal');
-    ctools_include('ajax');
-    // Create a blank node object here. You can also set values for your custom fields here as well.
-    $node = (object) array(
-          'uid' => $user->uid,
-          'name' => (isset($user->name) ? $user->name : ''),
-          'type' => $type,
-          'language' => LANGUAGE_NONE,
-    );
-    $node->field_resource[LANGUAGE_NONE][0]['nid'] = $nid;
-    $form_state['build_info']['args'] = array($node);
-    // change this to your type node form
-    $output = ctools_modal_form_wrapper($form_id, $form_state);
-    // This means the form has been exectued
-    if (!empty($form_state['executed'])) {
-        $output = array();
-        // Close the modal
-        $output[] = ctools_modal_command_dismiss();
-        $output[] = ctools_ajax_command_reload();
-    }
+  // Include your ctools crap here
+  ctools_include('node.pages', 'node', '');
+  ctools_include('modal');
+  ctools_include('ajax');
+  // Create a blank node object here. You can also set values for your custom fields here as well.
+  $node = (object) array(
+      'uid' => $user->uid,
+      'name' => (isset($user->name) ? $user->name : ''),
+      'type' => $type,
+      'language' => LANGUAGE_NONE,
+  );
+  $node->field_resource[LANGUAGE_NONE][0]['nid'] = $nid;
+  $form_state['build_info']['args'] = array($node);
+  // change this to your type node form
+  $output = ctools_modal_form_wrapper($form_id, $form_state);
+  // This means the form has been exectued
+  if (!empty($form_state['executed'])) {
+    $output = array();
+    // Close the modal
+    $output[] = ctools_modal_command_dismiss();
+    $output[] = ctools_ajax_command_reload();
+  }
 
-    print ajax_render($output);
-    exit;
+  print ajax_render($output);
+  exit;
 }
 
 function contract_entry_callback($js = FALSE) {
-    global $user;
-    $user_action = arg(0); // contract_entry,leave
-    $page = arg(3); // vehicle ,resource
-    $nid = arg(4);
-    $page_view = arg(5);
+  global $user;
+  $user_action = arg(0); // contract_entry,leave
+  $page = arg(3); // vehicle ,resource
+  $nid = arg(4);
+  $page_view = arg(5);
 
-    //print_r($page);print_r($user_action);die;
-    if ($page == 'vehicle' && $user_action == 'contract_entry') {
-        $type = 'vehicle_contract';
-        $title = t('Vehicle Contract Entry');
-        $form_id = 'contract_details_form';
-        $redirect = 'vehicle-master/edit';
-    } elseif ($page == 'resource' && $user_action == 'contract_entry') {
-        $title = t('Resource Contract Entry');
-        $form_id = 'contract_details_form';
-        $redirect = 'resource-master-report/view';
-    }
-    if ($page == 'resource' && $user_action == 'leave_entry') {
-        $title = t('Resource Leave Entry');
-        $form_id = 'contract_details_form';
-    } else if ($page == 'vehicle' && $user_action == 'leave_entry') {
-        $title = t('Vehicle Maintenance Entry');
-        $form_id = 'contract_details_form';
-    }
-    if ($page == 'resource' && $user_action == 'extra_working') {
-        $title = t('Resource Extra Working');
-        $form_id = 'contract_details_form';
-    } else if ($page == 'vehicle' && $user_action == 'extra_working') {
-        $title = t('Vehicle Extra Working');
-        $form_id = 'contract_details_form';
-    }
-    $form_state = array(
-      'title' => $title,
-      'ajax' => TRUE,
-    );
+  //print_r($page);print_r($user_action);die;
+  if ($page == 'vehicle' && $user_action == 'contract_entry') {
+    $type = 'vehicle_contract';
+    $title = t('Vehicle Contract Entry');
+    $form_id = 'contract_details_form';
+    $redirect = 'vehicle-master/edit';
+  }
+  elseif ($page == 'resource' && $user_action == 'contract_entry') {
+    $title = t('Resource Contract Entry');
+    $form_id = 'contract_details_form';
+    $redirect = 'resource-master-report/view';
+  }
+  if ($page == 'resource' && $user_action == 'leave_entry') {
+    $title = t('Resource Leave Entry');
+    $form_id = 'contract_details_form';
+  }
+  else if ($page == 'vehicle' && $user_action == 'leave_entry') {
+    $title = t('Vehicle Maintenance Entry');
+    $form_id = 'contract_details_form';
+  }
+  if ($page == 'resource' && $user_action == 'extra_working') {
+    $title = t('Resource Extra Working');
+    $form_id = 'contract_details_form';
+  }
+  else if ($page == 'vehicle' && $user_action == 'extra_working') {
+    $title = t('Vehicle Extra Working');
+    $form_id = 'contract_details_form';
+  }
+  $form_state = array(
+    'title' => $title,
+    'ajax' => TRUE,
+  );
 
-    unset($form_state['field_resource']);
-    // If people aren't using javascript, then I just boot em. sorry. its 2011.
-    if (!$js)
-        return "Javascript required";
+  unset($form_state['field_resource']);
+  // If people aren't using javascript, then I just boot em. sorry. its 2011.
+  if (!$js)
+    return "Javascript required";
 
-    // Include your ctools crap here
-    ctools_include('node.pages', 'node', '');
-    ctools_include('modal');
-    ctools_include('ajax');
-    // Create a blank node object here. You can also set values for your custom fields here as well.
-    $form_state['resource_vehicle'] = $page;
-    $form_state['user_selected'] = $user_action;
-    $form_state['master_nid'] = $nid;
-    $form_state['page_view'] = $page_view;
-    //$form_state['build_info']['args'] = array($node);
-    // change this to your type node form
-    $output = ctools_modal_form_wrapper($form_id, $form_state);
+  // Include your ctools crap here
+  ctools_include('node.pages', 'node', '');
+  ctools_include('modal');
+  ctools_include('ajax');
+  // Create a blank node object here. You can also set values for your custom fields here as well.
+  $form_state['resource_vehicle'] = $page;
+  $form_state['user_selected'] = $user_action;
+  $form_state['master_nid'] = $nid;
+  $form_state['page_view'] = $page_view;
+  //$form_state['build_info']['args'] = array($node);
+  // change this to your type node form
+  $output = ctools_modal_form_wrapper($form_id, $form_state);
 
-    // This means the form has been exectued
-    if (!empty($form_state['executed'])) {
-        //$output = array();
-        // Close the modal
-        $output[] = ctools_modal_command_dismiss();
-        $output[] = ctools_ajax_command_reload();
-    }
+  // This means the form has been exectued
+  if (!empty($form_state['executed'])) {
+    //$output = array();
+    // Close the modal
+    $output[] = ctools_modal_command_dismiss();
+    $output[] = ctools_ajax_command_reload();
+  }
 
-    print ajax_render($output);
-    exit;
+  print ajax_render($output);
+  exit;
 }
 
 function contract_callback($form, &$form_state) {
-    $commands[] = ajax_command_replace('#itemlist-div', render($form));
-    $commands[] = ajax_command_replace('.alert-danger', '');
-    $commands[] = ajax_command_replace('.alert-success', '');
-    $commands[] = ajax_command_prepend('#itemlist-div', theme('status_messages'));
+  $commands[] = ajax_command_replace('#itemlist-div', render($form));
+  $commands[] = ajax_command_replace('.alert-danger', '');
+  $commands[] = ajax_command_replace('.alert-success', '');
+  $commands[] = ajax_command_prepend('#itemlist-div', theme('status_messages'));
 
-    return array('#type' => 'ajax', '#commands' => $commands);
+  return array('#type' => 'ajax', '#commands' => $commands);
 }
 
 function get_contract_leave_details($resource_nid, $node_type, $type, $extra_working = 0) {
-    global $user;
-    $distributor_id = change_feeds_import_get_distributor_id($user->uid);
-    $query = db_select('node', 'n');
-    $query->fields('n', array('nid', 'title'));
-    if ($type == 'resource') {
-        $query->join('field_data_field_resource', 'resource_ref', 'resource_ref.entity_id = n.nid');
-        $query->condition('resource_ref.field_resource_nid', $resource_nid);
-        $query->leftjoin('field_data_field_remarks', 'remarks', 'remarks.entity_id = n.nid');
-        $query->fields('remarks', array('field_remarks_value'));
-    }
-    if ($type == 'vehicle') {
-        $query->join('field_data_field_vehicle_number_ref', 'vehicle_ref', 'vehicle_ref.entity_id = n.nid');
-        $query->condition('vehicle_ref.field_vehicle_number_ref_nid', $resource_nid);
-        $query->leftjoin('field_data_field_remarks', 'remarks', 'remarks.entity_id = n.nid');
-        $query->fields('remarks', array('field_remarks_value'));
-    }
-    if ($extra_working == 0) {
-        $query->join('field_data_field_end_period', 'end_period', 'end_period.entity_id = n.nid');
-        $query->addExpression("DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(end_period.field_end_period_value),'+00:00','+05:30'), '%Y-%m-%d')", 'end_period');
-    }
-    $query->join('field_data_field_start_period', 'start_period', 'start_period.entity_id = n.nid');
-    $query->condition('n.type', $node_type);
-    $query->condition('n.uid', $distributor_id);
-    $query->addExpression("DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(start_period.field_start_period_value),'+00:00','+05:30'), '%Y-%m-%d')", 'start_period');
-    //$query->fields('start_period', array('field_start_period_value'));
-    $result = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
-    return $result;
+  global $user;
+  $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+  $query = db_select('node', 'n');
+  $query->fields('n', array('nid', 'title'));
+  if ($type == 'resource') {
+    $query->join('field_data_field_resource', 'resource_ref', 'resource_ref.entity_id = n.nid');
+    $query->condition('resource_ref.field_resource_nid', $resource_nid);
+    $query->leftjoin('field_data_field_remarks', 'remarks', 'remarks.entity_id = n.nid');
+    $query->fields('remarks', array('field_remarks_value'));
+  }
+  if ($type == 'vehicle') {
+    $query->join('field_data_field_vehicle_number_ref', 'vehicle_ref', 'vehicle_ref.entity_id = n.nid');
+    $query->condition('vehicle_ref.field_vehicle_number_ref_nid', $resource_nid);
+    $query->leftjoin('field_data_field_remarks', 'remarks', 'remarks.entity_id = n.nid');
+    $query->fields('remarks', array('field_remarks_value'));
+  }
+  if ($extra_working == 0) {
+    $query->join('field_data_field_end_period', 'end_period', 'end_period.entity_id = n.nid');
+    $query->addExpression("DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(end_period.field_end_period_value),'+00:00','+05:30'), '%Y-%m-%d')", 'end_period');
+  }
+  $query->join('field_data_field_start_period', 'start_period', 'start_period.entity_id = n.nid');
+  $query->condition('n.type', $node_type);
+  $query->condition('n.uid', $distributor_id);
+  $query->addExpression("DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(start_period.field_start_period_value),'+00:00','+05:30'), '%Y-%m-%d')", 'start_period');
+  //$query->fields('start_period', array('field_start_period_value'));
+  $result = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+  return $result;
 }
 
 function contract_details_form($form, &$form_state) {
-    $form['#tree'] = TRUE;
-    $form['#attached']['js'][] = drupal_get_path('module', 'deliverycost_calculation') . '/js/delivery_cost.js';
-    $form['#attached']['css'][] = drupal_get_path('module', 'deliverycost_calculation') . '/css/delivery_cost.css';
-    $form['#prefix'] = '<div id="itemlist-div" class="custom_form_wrapper">';
-    $form['#suffix'] = '</div>';
-    $form['resource_vehicle'] = array('#type' => 'hidden', '#value' => $form_state['resource_vehicle']);
-    $form['user_selected'] = array('#type' => 'hidden', '#value' => $form_state['user_selected']);
-    $form['master_nid'] = array('#type' => 'hidden', '#value' => $form_state['master_nid']);
-    $page_view = $form_state['page_view'];
-    $readonly = '';
-    if ($page_view == 'view') {
-        $readonly = 'readonly';
-    }
-    $user_selected = $form_state['user_selected'];
-    $user_page = $form_state['resource_vehicle'];
-    $nid = $form_state['master_nid'];
-    $extra_working = 0;
-    //$contract_leaves_details = get_contract_leave_details($resource_nid,$node_type,$type,$extra_working=0)
+  $form['#tree'] = TRUE;
+  $form['#attached']['js'][] = drupal_get_path('module', 'deliverycost_calculation') . '/js/delivery_cost.js';
+  $form['#attached']['css'][] = drupal_get_path('module', 'deliverycost_calculation') . '/css/delivery_cost.css';
+  $form['#prefix'] = '<div id="itemlist-div" class="custom_form_wrapper">';
+  $form['#suffix'] = '</div>';
+  $form['resource_vehicle'] = array('#type' => 'hidden', '#value' => $form_state['resource_vehicle']);
+  $form['user_selected'] = array('#type' => 'hidden', '#value' => $form_state['user_selected']);
+  $form['master_nid'] = array('#type' => 'hidden', '#value' => $form_state['master_nid']);
+  $page_view = $form_state['page_view'];
+  $readonly = '';
+  if ($page_view == 'view') {
+    $readonly = 'readonly';
+  }
+  $user_selected = $form_state['user_selected'];
+  $user_page = $form_state['resource_vehicle'];
+  $nid = $form_state['master_nid'];
+  $extra_working = 0;
+  //$contract_leaves_details = get_contract_leave_details($resource_nid,$node_type,$type,$extra_working=0)
 
-    if ($user_page == 'resource') {
-        if ($user_selected == 'contract_entry') {
-            $node_type = 'resources_contract';
-        } elseif ($user_selected == 'leave_entry') {
-            $node_type = 'resource_leaves';
-        } elseif ($user_selected == 'extra_working') {
-            $node_type = 'resource_extra_working';
-            $extra_working = 1;
-        }
-    } elseif ($user_page == 'vehicle') {
-        if ($user_selected == 'contract_entry') {
-            $node_type = 'vehicle_contract';
-        } elseif ($user_selected == 'leave_entry') {
-            $node_type = 'vehicle_maintenance';
-        } elseif ($user_selected == 'extra_working') {
-            $node_type = 'vehicle_extra_working';
-            $extra_working = 1;
-        }
+  if ($user_page == 'resource') {
+    if ($user_selected == 'contract_entry') {
+      $node_type = 'resources_contract';
     }
-    $type = $user_page;
-    $resource_nid = $nid;
-    $current_node = node_load($resource_nid);
-    if (!empty($current_node)) {
-        $resource_title = $current_node->title;
+    elseif ($user_selected == 'leave_entry') {
+      $node_type = 'resource_leaves';
     }
-    $contract_leaves_details = get_contract_leave_details($resource_nid, $node_type, $type, $extra_working);
-    if (!isset($form_state['total_items'])) {
-        if (!empty($contract_leaves_details))
-            $total_items = count($contract_leaves_details);
-        else
-            $total_items = 1;
-        $form_state['total_items'] = $total_items;
+    elseif ($user_selected == 'extra_working') {
+      $node_type = 'resource_extra_working';
+      $extra_working = 1;
     }
-    $resource_title = Ucfirst($user_page) . ': ' . $resource_title;
-    $form['delivery_cost'] = array(
-      '#type' => 'fieldset',
-      '#title' => t($resource_title),
-      '#prefix' => '<div id="fieldset-wrapper">',
-      '#suffix' => '</div>',
+  }
+  elseif ($user_page == 'vehicle') {
+    if ($user_selected == 'contract_entry') {
+      $node_type = 'vehicle_contract';
+    }
+    elseif ($user_selected == 'leave_entry') {
+      $node_type = 'vehicle_maintenance';
+    }
+    elseif ($user_selected == 'extra_working') {
+      $node_type = 'vehicle_extra_working';
+      $extra_working = 1;
+    }
+  }
+  $type = $user_page;
+  $resource_nid = $nid;
+  $current_node = node_load($resource_nid);
+  if (!empty($current_node)) {
+    $resource_title = $current_node->title;
+  }
+  $contract_leaves_details = get_contract_leave_details($resource_nid, $node_type, $type, $extra_working);
+  if (!isset($form_state['total_items'])) {
+    if (!empty($contract_leaves_details))
+      $total_items = count($contract_leaves_details);
+    else
+      $total_items = 1;
+    $form_state['total_items'] = $total_items;
+  }
+  $resource_title = Ucfirst($user_page) . ': ' . $resource_title;
+  $form['delivery_cost'] = array(
+    '#type' => 'fieldset',
+    '#title' => t($resource_title),
+    '#prefix' => '<div id="fieldset-wrapper">',
+    '#suffix' => '</div>',
+  );
+  if (empty($form_state['num_items'])) {
+    if (!empty($contract_leaves_details)) {
+      $form_state['num_items'] = count($contract_leaves_details);
+    }
+    else {
+      $form_state['num_items'] = 1;
+    }
+  }
+  for ($i = 0; $i < $form_state['num_items']; $i++) {
+    if (!empty($contract_leaves_details[$i]['nid'])) {
+      $index = $contract_leaves_details[$i]['nid'];
+    }
+    else {
+      $index = 'key_index' . $i;
+    }
+    $form['delivery_cost'][$index]['field_start_period'] = array(
+      '#type' => 'date_popup',
+      '#required' => TRUE,
+      '#date_format' => 'Y-m-d',
+      '#default_value' => $contract_leaves_details[$i]['start_period'],
+      '#date_label_position' => '',
+      '#date_year_range' => '-20:+2',
+      '#attributes' => $readonly ? array('readonly' => $readonly) : '',
+      '#title' => t('Start Period'),
+      '#prefix' => '<div class="one_row"><div class="one_row_left">',
     );
-    if (empty($form_state['num_items'])) {
-        if (!empty($contract_leaves_details)) {
-            $form_state['num_items'] = count($contract_leaves_details);
-        } else {
-            $form_state['num_items'] = 1;
-        }
+    if ($user_selected != 'extra_working') {
+      $form['delivery_cost'][$index]['field_end_period'] = array(
+        '#type' => 'date_popup',
+        '#title' => t('End Period'),
+        '#required' => TRUE,
+        '#date_format' => 'Y-m-d',
+        '#default_value' => $contract_leaves_details[$i]['end_period'],
+        '#attributes' => $readonly ? array('readonly' => $readonly) : '',
+        '#date_label_position' => '',
+        '#date_year_range' => '-20:+2',
+        '#prefix' => '</div><div class="one_row_left">',
+        '#suffix' => '</div>',
+      );
     }
-    for ($i = 0; $i < $form_state['num_items']; $i++) {
-        if (!empty($contract_leaves_details[$i]['nid'])) {
-            $index = $contract_leaves_details[$i]['nid'];
-        } else {
-            $index = 'key_index' . $i;
-        }
-        $form['delivery_cost'][$index]['field_start_period'] = array(
-          '#type' => 'date_popup',
-          '#required' => TRUE,
-          '#date_format' => 'Y-m-d',
-          '#default_value' => $contract_leaves_details[$i]['start_period'],
-          '#date_label_position' => '',
-          '#date_year_range' => '-20:+2',
-          '#attributes' => $readonly ? array('readonly' => $readonly) : '',
-          '#title' => t('Start Period'),
-          '#prefix' => '<div class="one_row"><div class="one_row_left">',
-        );
-        if ($user_selected != 'extra_working') {
-            $form['delivery_cost'][$index]['field_end_period'] = array(
-              '#type' => 'date_popup',
-              '#title' => t('End Period'),
-              '#required' => TRUE,
-              '#date_format' => 'Y-m-d',
-              '#default_value' => $contract_leaves_details[$i]['end_period'],
-              '#attributes' => $readonly ? array('readonly' => $readonly) : '',
-              '#date_label_position' => '',
-              '#date_year_range' => '-20:+2',
-              '#prefix' => '</div><div class="one_row_left">',
-              '#suffix' => '</div>',
-            );
-        } else {
-            $form['delivery_cost'][$index]['field_start_period']['#suffix'] = '</div></div>';
-        }
-        if ($user_selected != 'extra_working' && $user_selected != 'contract_entry') {
-            $form['delivery_cost'][$index]['remarks'] = array(
-              '#type' => 'textfield',
-              '#title' => t('Remarks'),
-              '#attributes' => $readonly ? array('readonly' => $readonly) : '',
-              '#date_format' => 'Y-m-d',
-              '#default_value' => $contract_leaves_details[$i]['field_remarks_value'],
-              '#prefix' => '<div class="one_row_left_remarks">',
-              '#suffix' => '</div></div>',
-            );
-        }
+    else {
+      $form['delivery_cost'][$index]['field_start_period']['#suffix'] = '</div></div>';
     }
-    if (empty($readonly)) {
-        $form['delivery_cost']['add_name'] = array(
-          '#type' => 'submit',
-          '#value' => t('Add one more'),
-          '#submit' => array('add_field_add_more_add_one'),
-          '#prefix' => '<div class="addmore">',
-          '#suffix' => '</div>',
-          '#ajax' => array(
-            'callback' => 'add_field_add_more_callback',
-            'wrapper' => 'fieldset-wrapper',
-          ),
-        );
+    if ($user_selected != 'extra_working' && $user_selected != 'contract_entry') {
+      $form['delivery_cost'][$index]['remarks'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Remarks'),
+        '#attributes' => $readonly ? array('readonly' => $readonly) : '',
+        '#date_format' => 'Y-m-d',
+        '#default_value' => $contract_leaves_details[$i]['field_remarks_value'],
+        '#prefix' => '<div class="one_row_left_remarks">',
+        '#suffix' => '</div></div>',
+      );
+    }
+  }
+  if (empty($readonly)) {
+    $form['delivery_cost']['add_name'] = array(
+      '#type' => 'submit',
+      '#value' => t('Add one more'),
+      '#submit' => array('add_field_add_more_add_one'),
+      '#prefix' => '<div class="addmore">',
+      '#suffix' => '</div>',
+      '#ajax' => array(
+        'callback' => 'add_field_add_more_callback',
+        'wrapper' => 'fieldset-wrapper',
+      ),
+    );
 
-        if ($form_state['num_items'] > 1) {
-            $form['delivery_cost']['remove_name'] = array(
-              '#type' => 'submit',
-              '#value' => t('Remove one'),
-              '#submit' => array('add_field_add_more_remove_one'),
-              '#limit_validation_errors' => array(),
-              '#prefix' => '<div class="addmore">',
-              '#suffix' => '</div>',
-              '#ajax' => array(
-                'callback' => 'add_field_add_more_callback',
-                'wrapper' => 'fieldset-wrapper',
-              ),
-            );
-        }
-        $form['submit'] = array(
-          '#type' => 'submit',
-          '#value' => 'Save',
-          '#name' => 'Save',
-          '#attributes' => array('class' => array('vrs-trip-submit')),
-          '#ajax' => array(
-            'callback' => 'contract_callback',
-            'wrapper' => 'itemlist-div',
-            'method' => 'replace',
-            'effect' => 'fade',
-          ),
-          '#submit' => array('save_contract_details'),
-          '#validate' => array('validate_vehicle_details'),
-          '#prefix' => '<div class="addmore">',
-          '#suffix' => '</div>'
-        );
+    if ($form_state['num_items'] > 1) {
+      $form['delivery_cost']['remove_name'] = array(
+        '#type' => 'submit',
+        '#value' => t('Remove one'),
+        '#submit' => array('add_field_add_more_remove_one'),
+        '#limit_validation_errors' => array(),
+        '#prefix' => '<div class="addmore">',
+        '#suffix' => '</div>',
+        '#ajax' => array(
+          'callback' => 'add_field_add_more_callback',
+          'wrapper' => 'fieldset-wrapper',
+        ),
+      );
     }
+    $form['submit'] = array(
+      '#type' => 'submit',
+      '#value' => 'Save',
+      '#name' => 'Save',
+      '#attributes' => array('class' => array('vrs-trip-submit')),
+      '#ajax' => array(
+        'callback' => 'contract_callback',
+        'wrapper' => 'itemlist-div',
+        'method' => 'replace',
+        'effect' => 'fade',
+      ),
+      '#submit' => array('save_contract_details'),
+      '#validate' => array('validate_vehicle_details'),
+      '#prefix' => '<div class="addmore">',
+      '#suffix' => '</div>'
+    );
+  }
 
-    if ($no_js_use) {
-        // Remove the #ajax from the above, so ajax.js won't be loaded.
-        if (!empty($form['delivery_cost']['remove_name']['#ajax'])) {
-            unset($form['delivery_cost']['remove_name']['#ajax']);
-        }
-        unset($form['delivery_cost']['add_name']['#ajax']);
+  if ($no_js_use) {
+    // Remove the #ajax from the above, so ajax.js won't be loaded.
+    if (!empty($form['delivery_cost']['remove_name']['#ajax'])) {
+      unset($form['delivery_cost']['remove_name']['#ajax']);
     }
+    unset($form['delivery_cost']['add_name']['#ajax']);
+  }
 
 
-    return $form;
+  return $form;
 }
 
 function add_field_add_more_callback($form, $form_state) {
-    return $form['delivery_cost'];
+  return $form['delivery_cost'];
 }
 
 function add_field_add_more_add_one($form, &$form_state) {
-    $form_state['num_items'] ++;
-    $form_state['rebuild'] = TRUE;
+  $form_state['num_items'] ++;
+  $form_state['rebuild'] = TRUE;
 }
 
 function add_field_add_more_remove_one($form, &$form_state) {
-    if ($form_state['num_items'] > 1) {
-        $form_state['num_items'] --;
-    }
-    $form_state['rebuild'] = TRUE;
+  if ($form_state['num_items'] > 1) {
+    $form_state['num_items'] --;
+  }
+  $form_state['rebuild'] = TRUE;
 }
 
 function addmore_items_callback($form, &$form_state) {
-    $commands[] = ajax_command_replace('#itemlist-div', render($form));
-    $commands[] = ajax_command_replace('.alert-danger', '');
-    $commands[] = ajax_command_replace('.alert-success', '');
-    $commands[] = ajax_command_prepend('#itemlist-div', theme('status_messages'));
+  $commands[] = ajax_command_replace('#itemlist-div', render($form));
+  $commands[] = ajax_command_replace('.alert-danger', '');
+  $commands[] = ajax_command_replace('.alert-success', '');
+  $commands[] = ajax_command_prepend('#itemlist-div', theme('status_messages'));
 
-    return array('#type' => 'ajax', '#commands' => $commands);
+  return array('#type' => 'ajax', '#commands' => $commands);
 }
 
 function add_more_submit($form, &$form_state) {
-    $form_state['total_items'] ++;
-    $form_state['rebuild'] = TRUE;
+  $form_state['total_items'] ++;
+  $form_state['rebuild'] = TRUE;
 }
 
 function save_contract_details($form, &$form_state) {
-    $resource_vehicle = $form_state['values']['resource_vehicle']; // vehicle, resource
-    $user_selected = $form_state['values']['user_selected']; //contract_entry
-    $master_nid = $form_state['values']['master_nid']; // verhicle or resource nid
-    $remarks = $form_state['values']['remarks'];
-    $nodeobject = node_load($master_nid);
-    if ($nodeobject) {
-        global $user;
-        $distributor_id = change_feeds_import_get_distributor_id($user->uid);
-        switch ($user_selected) {
-            case 'contract_entry':
-                if ($resource_vehicle == 'vehicle') {
-                    $node_type = 'vehicle_contract';
-                } elseif ($resource_vehicle == 'resource') {
-                    $node_type = 'resources_contract';
-                }
-                break;
-            case 'leave_entry':
-                if ($resource_vehicle == 'vehicle') {
-                    $node_type = 'vehicle_maintenance';
-                } elseif ($resource_vehicle == 'resource') {
-                    $node_type = 'resource_leaves';
-                }
-                break;
-            case 'extra_working':
-                if ($resource_vehicle == 'vehicle') {
-                    $node_type = 'vehicle_extra_working';
-                } elseif ($resource_vehicle == 'resource') {
-                    $node_type = 'resource_extra_working';
-                }
-                break;
+  $resource_vehicle = $form_state['values']['resource_vehicle']; // vehicle, resource
+  $user_selected = $form_state['values']['user_selected']; //contract_entry
+  $master_nid = $form_state['values']['master_nid']; // verhicle or resource nid
+  $remarks = $form_state['values']['remarks'];
+  $nodeobject = node_load($master_nid);
+  if ($nodeobject) {
+    global $user;
+    $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+    switch ($user_selected) {
+      case 'contract_entry':
+        if ($resource_vehicle == 'vehicle') {
+          $node_type = 'vehicle_contract';
         }
-        //print_r($form_state['values']['delivery_cost']);die;
-        $title = $node_type . '_' . $nodeobject->title;
-
-        // fetching existing nids, if user wants to delte unwanted
-        $existing_nids = get_resource_nids($nodeobject->nid, $node_type);
-        if (!empty($form_state['values']['delivery_cost'])) {
-            foreach ($form_state['values']['delivery_cost'] as $key => $value) {
-                if ($key !== 'add_name' && $key !== 'remove_name') {
-                    if (!empty($value['field_start_period'])) {
-                        $node_insert = node_load($key);
-                        if (empty($node_insert)) {
-                            $node_insert = new stdClass();
-                            $node_insert->type = $node_type;
-                            node_object_prepare($node_insert);
-                            $node_insert->status = 1;
-                            $node_insert->is_new = TRUE;
-                            $node_insert->field_resource[LANGUAGE_NONE][0]['nid'] = $nodeobject->nid;
-                            $node_insert->field_vehicle_number_ref[LANGUAGE_NONE][0]['nid'] = $nodeobject->nid;
-                            $node_insert->uid = $node->uid;
-                            $node_insert->language = LANGUAGE_NONE;
-                            $node_insert->title = $title;
-                            $node_insert->name = (isset($user->name) ? $user->name : '');
-                        }
-
-
-
-                        $node_insert->field_start_period[LANGUAGE_NONE][0]['value'] = strtotime($value['field_start_period']);
-                        $node_insert->field_end_period[LANGUAGE_NONE][0]['value'] = strtotime($value['field_end_period']);
-                        $node_insert->field_remarks[LANGUAGE_NONE][0]['value'] = $value['remarks'];
-
-                        //node_submit($node_insert); 
-                        node_save($node_insert);
-                    }
-                }
-                unset($existing_nids[$node_insert->nid]);
-            }
-            // deleteremoved nodes
-            if (!empty($existing_nids)) {
-                //print_r($existing_nids);die;
-                node_delete_multiple($existing_nids);
-            }
+        elseif ($resource_vehicle == 'resource') {
+          $node_type = 'resources_contract';
         }
-        drupal_set_message('successfully saved');
+        break;
+      case 'leave_entry':
+        if ($resource_vehicle == 'vehicle') {
+          $node_type = 'vehicle_maintenance';
+        }
+        elseif ($resource_vehicle == 'resource') {
+          $node_type = 'resource_leaves';
+        }
+        break;
+      case 'extra_working':
+        if ($resource_vehicle == 'vehicle') {
+          $node_type = 'vehicle_extra_working';
+        }
+        elseif ($resource_vehicle == 'resource') {
+          $node_type = 'resource_extra_working';
+        }
+        break;
     }
+    //print_r($form_state['values']['delivery_cost']);die;
+    $title = $node_type . '_' . $nodeobject->title;
+
+    // fetching existing nids, if user wants to delte unwanted
+    $existing_nids = get_resource_nids($nodeobject->nid, $node_type);
+    if (!empty($form_state['values']['delivery_cost'])) {
+      foreach ($form_state['values']['delivery_cost'] as $key => $value) {
+        if ($key !== 'add_name' && $key !== 'remove_name') {
+          if (!empty($value['field_start_period'])) {
+            $node_insert = node_load($key);
+            if (empty($node_insert)) {
+              $node_insert = new stdClass();
+              $node_insert->type = $node_type;
+              node_object_prepare($node_insert);
+              $node_insert->status = 1;
+              $node_insert->is_new = TRUE;
+              $node_insert->field_resource[LANGUAGE_NONE][0]['nid'] = $nodeobject->nid;
+              $node_insert->field_vehicle_number_ref[LANGUAGE_NONE][0]['nid'] = $nodeobject->nid;
+              $node_insert->uid = $node->uid;
+              $node_insert->language = LANGUAGE_NONE;
+              $node_insert->title = $title;
+              $node_insert->name = (isset($user->name) ? $user->name : '');
+            }
+
+
+
+            $node_insert->field_start_period[LANGUAGE_NONE][0]['value'] = strtotime($value['field_start_period']);
+            $node_insert->field_end_period[LANGUAGE_NONE][0]['value'] = strtotime($value['field_end_period']);
+            $node_insert->field_remarks[LANGUAGE_NONE][0]['value'] = $value['remarks'];
+
+            //node_submit($node_insert); 
+            node_save($node_insert);
+          }
+        }
+        unset($existing_nids[$node_insert->nid]);
+      }
+      // deleteremoved nodes
+      if (!empty($existing_nids)) {
+        //print_r($existing_nids);die;
+        node_delete_multiple($existing_nids);
+      }
+    }
+    drupal_set_message('successfully saved');
+  }
 }
 
 function view_contract_entry_callback($js = FALSE) {
-    global $user;
-    $page = arg(2);
-    $nid = arg(3);
-    $resource_name = arg(4);
-    // If people aren't using javascript, then I just boot em. sorry. its 2011.
-    if (!$js)
-        return "Javascript required";
-    // Include your ctools crap here
-    ctools_include('modal');
-    ctools_include('ajax');
-    $output = array();
-    if ($page == 'resource') {
-        $view = views_embed_view('resources_contract', 'page', array($nid));
+  global $user;
+  $page = arg(2);
+  $nid = arg(3);
+  $resource_name = arg(4);
+  // If people aren't using javascript, then I just boot em. sorry. its 2011.
+  if (!$js)
+    return "Javascript required";
+  // Include your ctools crap here
+  ctools_include('modal');
+  ctools_include('ajax');
+  $output = array();
+  if ($page == 'resource') {
+    $view = views_embed_view('resources_contract', 'page', array($nid));
 
-        $output[] = ctools_modal_command_display(t('Resource Contract-' . $resource_name), $view);
-    } else if ($page == 'vehicle') {
-        $view = views_embed_view('vehicle_contract', 'page', array($nid));
-        $output[] = ctools_modal_command_display(t('Vehicle Contract-' . $resource_name), $view);
-    }
-    // Close the modal
-    //$output[] = ctools_modal_command_dismiss();
-    // I use this method a lot on pages that have views, so what I do is get the latest view content
-    // with the latest node and replace the current view. magic!
-    /*
-      $html = views_embed_view('my_view', 'my_display';
-      $output[] = ajax_command_html('.view-display-id-page', $html);
-     */
+    $output[] = ctools_modal_command_display(t('Resource Contract-' . $resource_name), $view);
+  }
+  else if ($page == 'vehicle') {
+    $view = views_embed_view('vehicle_contract', 'page', array($nid));
+    $output[] = ctools_modal_command_display(t('Vehicle Contract-' . $resource_name), $view);
+  }
+  // Close the modal
+  //$output[] = ctools_modal_command_dismiss();
+  // I use this method a lot on pages that have views, so what I do is get the latest view content
+  // with the latest node and replace the current view. magic!
+  /*
+    $html = views_embed_view('my_view', 'my_display';
+    $output[] = ajax_command_html('.view-display-id-page', $html);
+   */
 
-    print ajax_render($output);
-    drupal_exit();
+  print ajax_render($output);
+  drupal_exit();
 }
 
 function view_leave_entry_callback($js = FALSE) {
-    global $user;
-    $page = arg(2);
-    $nid = arg(3);
-    $resource_name = arg(4);
-    // If people aren't using javascript, then I just boot em. sorry. its 2011.
-    if (!$js)
-        return "Javascript required";
-    // Include your ctools crap here
-    ctools_include('modal');
-    ctools_include('ajax');
-    $output = array();
-    if ($page == 'resource') {
-        $view = views_embed_view('resource_leaves', 'page', array($nid));
+  global $user;
+  $page = arg(2);
+  $nid = arg(3);
+  $resource_name = arg(4);
+  // If people aren't using javascript, then I just boot em. sorry. its 2011.
+  if (!$js)
+    return "Javascript required";
+  // Include your ctools crap here
+  ctools_include('modal');
+  ctools_include('ajax');
+  $output = array();
+  if ($page == 'resource') {
+    $view = views_embed_view('resource_leaves', 'page', array($nid));
 
-        $output[] = ctools_modal_command_display(t('Leave-' . $resource_name), $view);
-    } else if ($page == 'vehicle') {
-        $view = views_embed_view('vehicle_maintenance', 'page', array($nid));
-        $output[] = ctools_modal_command_display(t('Maintenance-' . $resource_name), $view);
-    }
+    $output[] = ctools_modal_command_display(t('Leave-' . $resource_name), $view);
+  }
+  else if ($page == 'vehicle') {
+    $view = views_embed_view('vehicle_maintenance', 'page', array($nid));
+    $output[] = ctools_modal_command_display(t('Maintenance-' . $resource_name), $view);
+  }
+  // Close the modal
+  //$output[] = ctools_modal_command_dismiss();
+  // I use this method a lot on pages that have views, so what I do is get the latest view content
+  // with the latest node and replace the current view. magic!
+  /*
+    $html = views_embed_view('my_view', 'my_display';
+    $output[] = ajax_command_html('.view-display-id-page', $html);
+   */
+
+  print ajax_render($output);
+  drupal_exit();
+}
+
+function leave_entry_callback($js = FALSE) {
+  global $user;
+  $page = arg(3);
+  $nid = arg(4);
+  if ($page == 'vehicle') {
+
+    $type = 'vehicle_maintenance';
+    $title = t('Vehicle Maintenance Entry');
+    $form_id = 'vehicle_maintenance_node_form';
+  }
+  else if ($page == 'resource') {
+    $type = 'resource_leaves';
+    $title = t('Resource Leave Entry');
+    $form_id = 'resource_leaves_node_form';
+  }
+  // If people aren't using javascript, then I just boot em. sorry. its 2011.
+  if (!$js)
+    return "Javascript required";
+
+  // Include your ctools crap here
+  ctools_include('node.pages', 'node', '');
+  ctools_include('modal');
+  ctools_include('ajax');
+  // Create a blank node object here. You can also set values for your custom fields here as well.
+  $node = (object) array(
+      'uid' => $user->uid,
+      'name' => (isset($user->name) ? $user->name : ''),
+      'type' => $type,
+      'language' => LANGUAGE_NONE,
+  );
+  $node->field_resource[LANGUAGE_NONE][0]['nid'] = $nid;
+  $node->field_vehicle_number_ref[LANGUAGE_NONE][0]['nid'] = $nid;
+  $form_state = array(
+    'title' => $title,
+    'ajax' => TRUE,
+  );
+  $form_state['build_info']['args'] = array($node);
+  // change this to your type node form
+  $output = ctools_modal_form_wrapper($form_id, $form_state);
+  // This means the form has been exectued
+  if (!empty($form_state['executed'])) {
+    $output = array();
     // Close the modal
-    //$output[] = ctools_modal_command_dismiss();
+    $output[] = ctools_modal_command_dismiss();
+    $output[] = ctools_ajax_command_reload();
     // I use this method a lot on pages that have views, so what I do is get the latest view content
     // with the latest node and replace the current view. magic!
     /*
       $html = views_embed_view('my_view', 'my_display';
-      $output[] = ajax_command_html('.view-display-id-page', $html);
+      $output[] = ajax_command_html('.view-display-id-my_display', $html);
      */
+  }
 
-    print ajax_render($output);
-    drupal_exit();
-}
-
-function leave_entry_callback($js = FALSE) {
-    global $user;
-    $page = arg(3);
-    $nid = arg(4);
-    if ($page == 'vehicle') {
-
-        $type = 'vehicle_maintenance';
-        $title = t('Vehicle Maintenance Entry');
-        $form_id = 'vehicle_maintenance_node_form';
-    } else if ($page == 'resource') {
-        $type = 'resource_leaves';
-        $title = t('Resource Leave Entry');
-        $form_id = 'resource_leaves_node_form';
-    }
-    // If people aren't using javascript, then I just boot em. sorry. its 2011.
-    if (!$js)
-        return "Javascript required";
-
-    // Include your ctools crap here
-    ctools_include('node.pages', 'node', '');
-    ctools_include('modal');
-    ctools_include('ajax');
-    // Create a blank node object here. You can also set values for your custom fields here as well.
-    $node = (object) array(
-          'uid' => $user->uid,
-          'name' => (isset($user->name) ? $user->name : ''),
-          'type' => $type,
-          'language' => LANGUAGE_NONE,
-    );
-    $node->field_resource[LANGUAGE_NONE][0]['nid'] = $nid;
-    $node->field_vehicle_number_ref[LANGUAGE_NONE][0]['nid'] = $nid;
-    $form_state = array(
-      'title' => $title,
-      'ajax' => TRUE,
-    );
-    $form_state['build_info']['args'] = array($node);
-    // change this to your type node form
-    $output = ctools_modal_form_wrapper($form_id, $form_state);
-    // This means the form has been exectued
-    if (!empty($form_state['executed'])) {
-        $output = array();
-        // Close the modal
-        $output[] = ctools_modal_command_dismiss();
-        $output[] = ctools_ajax_command_reload();
-        // I use this method a lot on pages that have views, so what I do is get the latest view content
-        // with the latest node and replace the current view. magic!
-        /*
-          $html = views_embed_view('my_view', 'my_display';
-          $output[] = ajax_command_html('.view-display-id-my_display', $html);
-         */
-    }
-
-    print ajax_render($output);
-    exit;
+  print ajax_render($output);
+  exit;
 }
 
 function deliverycost_calculation_permission() {
-    return array(
-      'delivery cost' => array(
-        'title' => t('delivery cost'),
-        'description' => t('delivery cost')
-      ),
-    );
+  return array(
+    'delivery cost' => array(
+      'title' => t('delivery cost'),
+      'description' => t('delivery cost')
+    ),
+  );
 }
 
 function validate_vehicle_details(&$form, &$form_state) {
-    global $user;
-    $distributor_id = change_feeds_import_get_distributor_id($user->uid);
-    $resource_vehicle = $form_state['values']['resource_vehicle']; // vehicle, resource
-    $user_selected = $form_state['values']['user_selected']; //contract_entry
-    $master_nid = $form_state['values']['master_nid']; // verhicle or resource nid
-    $remarks = $form_state['values']['remarks'];
-    $nodeobject = node_load($master_nid);
-    $user_page = $form_state['resource_vehicle'];
-    $current_date = strtotime(date('Y-m-d'));
-    if ($user_page == 'resource') {
-        if ($user_selected == 'contract_entry') {
-            $node_type = 'resources_contract';
-        } elseif ($user_selected == 'leave_entry') {
-            $node_type = 'resource_leaves';
-        } elseif ($user_selected == 'extra_working') {
-            $node_type = 'resource_extra_working';
-            $extra_working = 1;
-        }
-    } elseif ($user_page == 'vehicle') {
-        if ($user_selected == 'contract_entry') {
-            $node_type = 'vehicle_contract';
-        } elseif ($user_selected == 'leave_entry') {
-            $node_type = 'vehicle_maintenance';
-        } elseif ($user_selected == 'extra_working') {
-            $node_type = 'vehicle_extra_working';
-            $extra_working = 1;
-        }
+  global $user;
+  $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+  $resource_vehicle = $form_state['values']['resource_vehicle']; // vehicle, resource
+  $user_selected = $form_state['values']['user_selected']; //contract_entry
+  $master_nid = $form_state['values']['master_nid']; // verhicle or resource nid
+  $remarks = $form_state['values']['remarks'];
+  $nodeobject = node_load($master_nid);
+  $user_page = $form_state['resource_vehicle'];
+  $current_date = strtotime(date('Y-m-d'));
+  if ($user_page == 'resource') {
+    if ($user_selected == 'contract_entry') {
+      $node_type = 'resources_contract';
+    }
+    elseif ($user_selected == 'leave_entry') {
+      $node_type = 'resource_leaves';
+    }
+    elseif ($user_selected == 'extra_working') {
+      $node_type = 'resource_extra_working';
+      $extra_working = 1;
+    }
+  }
+  elseif ($user_page == 'vehicle') {
+    if ($user_selected == 'contract_entry') {
+      $node_type = 'vehicle_contract';
+    }
+    elseif ($user_selected == 'leave_entry') {
+      $node_type = 'vehicle_maintenance';
+    }
+    elseif ($user_selected == 'extra_working') {
+      $node_type = 'vehicle_extra_working';
+      $extra_working = 1;
+    }
+  }
+
+  if (!empty($form_state['values']['delivery_cost'])) {
+
+    $node_existing_object = node_load($master_nid);
+    if (!empty($node_existing_object) && $node_type == 'resource_extra_working') {
+      $resource_weekly_off = strtolower($node_existing_object->field_weekly_off[LANGUAGE_NONE][0]['value']);
+    }
+    if (empty($resource_weekly_off)) {
+      $resource_weekly_off = strtolower(get_resource_weekly_off_day());
     }
 
-    if (!empty($form_state['values']['delivery_cost'])) {
 
-        $node_existing_object = node_load($master_nid);
-        if (!empty($node_existing_object) && $node_type == 'resource_extra_working') {
-            $resource_weekly_off = strtolower($node_existing_object->field_weekly_off[LANGUAGE_NONE][0]['value']);
+    foreach ($form_state['values']['delivery_cost'] as $key => $value) {
+      $extra_working_flag = 0;
+      if ($key !== 'add_name' && $key !== 'remove_name') {
+        if (!empty($value['field_start_period'])) {
+          $start_period = strtotime($value['field_start_period']);
+          $month = date('m', $start_period);
+          $year = date('Y', $start_period);
+          $public_holidays = get_public_holiday($month, $year);
         }
-        if (empty($resource_weekly_off)) {
-            $resource_weekly_off = strtolower(get_resource_weekly_off_day());
+        if (!empty($value['field_end_period'])) {
+          $end_period = strtotime($value['field_end_period']);
+        }
+        if (!empty($start_period) && !empty($end_period)) {
+          if ($end_period < $start_period) {
+            form_set_error('field_end_period', t("End period should be higher than Start period."));
+          }
+          //
+        }
+        if (($node_type == 'vehicle_contract' || $node_type == 'resources_contract') && !empty($start_period)) {
+          $is_contract_alredy_exist = check_maintenace_end_period($master_nid, $start_period, $node_type);
         }
 
-
-        foreach ($form_state['values']['delivery_cost'] as $key => $value) {
-            $extra_working_flag = 0;
-            if ($key !== 'add_name' && $key !== 'remove_name') {
-                if (!empty($value['field_start_period'])) {
-                    $start_period = strtotime($value['field_start_period']);
-                    $month = date('m', $start_period);
-                    $year = date('Y', $start_period);
-                    $public_holidays = get_public_holiday($month, $year);
-                }
-                if (!empty($value['field_end_period'])) {
-                    $end_period = strtotime($value['field_end_period']);
-                }
-                if (!empty($start_period) && !empty($end_period)) {
-                    if ($end_period < $start_period) {
-                        form_set_error('field_end_period', t("End period should be higher than Start period."));
-                    }
-                    //
-                }
-                if (($node_type == 'vehicle_contract' || $node_type == 'resources_contract') && !empty($start_period)) {
-                    $is_contract_alredy_exist = check_maintenace_end_period($master_nid, $start_period, $node_type);
-                }
-
-                if (($node_type == 'vehicle_contract' || $node_type == 'resources_contract') && !empty($start_period)) {
-                    /*if ($start_period < $current_date && empty($is_contract_alredy_exist)) {
-                        form_set_error('field_start_period', t("Please enter future date for contract periods."));
-                    }*/
-                }
-                //echo $value['field_start_period'];
-
-                if (!empty($is_contract_alredy_exist) && $key != $is_contract_alredy_exist) {
-                    form_set_error('field_start_period', t("Contract already exists."));
-                }
-
-                if (($node_type == 'resource_leaves' || $node_type == 'vehicle_maintenance') && !empty($start_period)) {
-                    $is_leave_alredy_exist = check_resource_leave_already_exist($master_nid, $start_period, $end_period, $node_type);
-                    ;
-                }
-                if (!empty($is_leave_alredy_exist) && $key != $is_leave_alredy_exist && !empty($start_period)) {
-                    form_set_error('field_start_period', t("Duplicate data."));
-                }
-                if (($node_type == 'vehicle_extra_working' || $node_type == 'resource_extra_working') && !empty($start_period)) {
-                    $is_extraworking_exist = check_extra_working_exists($master_nid, $start_period, $node_type);
-                    $extra_working_date = strtotime($value['field_start_period']);
-                    $day_name = strtolower(date('l', $extra_working_date));
-                    //echo date('Y-m-d',strtotime($value['field_start_period']));
-                    //print_r($public_holidays);
-                    if (($resource_weekly_off == $day_name)) {
-                        $extra_working_flag = 1;
-                        //form_set_error('field_start_period',t('Please select either public holiday or weekly off '));
-                    } elseif (in_array($value['field_start_period'], $public_holidays)) {
-                        $extra_working_flag = 1;
-                        //form_set_error('field_start_period',t('Please select either public holiday or weekly off '));
-                    }
-                    if ($extra_working_flag == 0)
-                        form_set_error('field_start_period', t('Please select either public holiday or weekly off '));
-                }
-                if (!empty($is_extraworking_exist) && $key != $is_extraworking_exist) {
-                    form_set_error('field_start_period', t("Duplicate data."));
-                }
-            }
+        if (($node_type == 'vehicle_contract' || $node_type == 'resources_contract') && !empty($start_period)) {
+          /* if ($start_period < $current_date && empty($is_contract_alredy_exist)) {
+            form_set_error('field_start_period', t("Please enter future date for contract periods."));
+            } */
         }
+        //echo $value['field_start_period'];
+
+        if (!empty($is_contract_alredy_exist) && $key != $is_contract_alredy_exist) {
+          form_set_error('field_start_period', t("Contract already exists."));
+        }
+
+        if (($node_type == 'resource_leaves' || $node_type == 'vehicle_maintenance') && !empty($start_period)) {
+          $is_leave_alredy_exist = check_resource_leave_already_exist($master_nid, $start_period, $end_period, $node_type);
+          ;
+        }
+        if (!empty($is_leave_alredy_exist) && $key != $is_leave_alredy_exist && !empty($start_period)) {
+          form_set_error('field_start_period', t("Duplicate data."));
+        }
+        if (($node_type == 'vehicle_extra_working' || $node_type == 'resource_extra_working') && !empty($start_period)) {
+          $is_extraworking_exist = check_extra_working_exists($master_nid, $start_period, $node_type);
+          $extra_working_date = strtotime($value['field_start_period']);
+          $day_name = strtolower(date('l', $extra_working_date));
+          //echo date('Y-m-d',strtotime($value['field_start_period']));
+          //print_r($public_holidays);
+          if (($resource_weekly_off == $day_name)) {
+            $extra_working_flag = 1;
+            //form_set_error('field_start_period',t('Please select either public holiday or weekly off '));
+          }
+          elseif (in_array($value['field_start_period'], $public_holidays)) {
+            $extra_working_flag = 1;
+            //form_set_error('field_start_period',t('Please select either public holiday or weekly off '));
+          }
+          if ($extra_working_flag == 0)
+            form_set_error('field_start_period', t('Please select either public holiday or weekly off '));
+        }
+        if (!empty($is_extraworking_exist) && $key != $is_extraworking_exist) {
+          form_set_error('field_start_period', t("Duplicate data."));
+        }
+      }
     }
+  }
 }
 
 function get_all_days() {
-    $timestamp = strtotime('next Sunday');
-    $days = array();
-    for ($i = 0; $i < 7; $i++) {
-        $days[] = strtolower(strftime('%A', $timestamp));
-        $timestamp = strtotime('+1 day', $timestamp);
-    }
-    return $days;
+  $timestamp = strtotime('next Sunday');
+  $days = array();
+  for ($i = 0; $i < 7; $i++) {
+    $days[] = strtolower(strftime('%A', $timestamp));
+    $timestamp = strtotime('+1 day', $timestamp);
+  }
+  return $days;
 }
 
 function validate_resource_weekoff($form, &$form_state) {
-    //print_r($form_state['values']['node']);die;
-    $distributor_id = change_feeds_import_get_distributor_id($user->uid);
-    $resource_nid = $form_state['values']['field_resource'][LANGUAGE_NONE][0]['nid'];
-    $weekly_off = $form_state['values']['field_day'][LANGUAGE_NONE];
-    if (empty($resource_nid)) {
-        $weekly_nid = key($form_state['values']['node']);
-        $weekly_off = $form_state['values']['node'][$resource_nid]['field_day'][LANGUAGE_NONE];
-        $resource_nid = $form_state['build_info'][args][0]['node'][$weekly_nid]->field_resource[LANGUAGE_NONE][0]['nid'];
-        $weekly_off = $form_state['build_info'][args][0]['node'][$weekly_nid]->field_day[LANGUAGE_NONE];
-    }
+  //print_r($form_state['values']['node']);die;
+  $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+  $resource_nid = $form_state['values']['field_resource'][LANGUAGE_NONE][0]['nid'];
+  $weekly_off = $form_state['values']['field_day'][LANGUAGE_NONE];
+  if (empty($resource_nid)) {
+    $weekly_nid = key($form_state['values']['node']);
+    $weekly_off = $form_state['values']['node'][$resource_nid]['field_day'][LANGUAGE_NONE];
+    $resource_nid = $form_state['build_info'][args][0]['node'][$weekly_nid]->field_resource[LANGUAGE_NONE][0]['nid'];
+    $weekly_off = $form_state['build_info'][args][0]['node'][$weekly_nid]->field_day[LANGUAGE_NONE];
+  }
 
-    $all_days = get_all_days();
-    if (!empty($resource_nid) && is_numeric($resource_nid)) {
-        $resource_object = node_load($resource_nid);
-        if (!empty($resource_object)) {
-            $form_state['values']['title'] = 'resource_weekly_off' . $resource_object->title;
-            if ($resource_object->field_is_active[LANGUAGE_NONE][0]['value'] != 1) {
-                form_set_error('form', t("Resource:$resource_object->title is not active.Please select active resource only. "));
-            }
-            foreach ($weekly_off as $key => $value) {
-                if (!empty($value['value'])) {
-                    $week_selected = strtolower($value['value']);
-                }
-            }
-            if (empty($week_selected)) {
-                form_set_error('field_day', t("Please enter weekly off day for Resource:$resource_object->title"));
-            }
-
-            if (!in_array($week_selected, $all_days)) {
-                form_set_error('field_day', t("Please enter a valid weekly off day for Resource:$resource_object->title"));
-            }
-            //$is_contract_exist =  check_resource_contract_period($resource_nid,$end_period);
-            //if (!empty($is_contract_exist)) {
-            //      form_set_error('field_start_period', t("Contract already exists for same period."));
-            //}
+  $all_days = get_all_days();
+  if (!empty($resource_nid) && is_numeric($resource_nid)) {
+    $resource_object = node_load($resource_nid);
+    if (!empty($resource_object)) {
+      $form_state['values']['title'] = 'resource_weekly_off' . $resource_object->title;
+      if ($resource_object->field_is_active[LANGUAGE_NONE][0]['value'] != 1) {
+        form_set_error('form', t("Resource:$resource_object->title is not active.Please select active resource only. "));
+      }
+      foreach ($weekly_off as $key => $value) {
+        if (!empty($value['value'])) {
+          $week_selected = strtolower($value['value']);
         }
+      }
+      if (empty($week_selected)) {
+        form_set_error('field_day', t("Please enter weekly off day for Resource:$resource_object->title"));
+      }
+
+      if (!in_array($week_selected, $all_days)) {
+        form_set_error('field_day', t("Please enter a valid weekly off day for Resource:$resource_object->title"));
+      }
+      //$is_contract_exist =  check_resource_contract_period($resource_nid,$end_period);
+      //if (!empty($is_contract_exist)) {
+      //      form_set_error('field_start_period', t("Contract already exists for same period."));
+      //}
     }
+  }
 }
 
 function validate_resource_contract($form, &$form_state) {
-    global $user;
-    $distributor_id = change_feeds_import_get_distributor_id($user->uid);
-    $start_period = $form_state['values']['field_start_period'][LANGUAGE_NONE][0]['value'];
-    $end_period = $form_state['values']['field_end_period'][LANGUAGE_NONE][0]['value'];
-    $resource_nid = $form_state['values']['field_resource'][LANGUAGE_NONE][0]['nid'];
-    if (!empty($resource_nid) && is_numeric($resource_nid)) {
-        $resource_object = node_load($resource_nid);
-        if (!empty($resource_object)) {
-            $form_state['values']['title'] = 'resource_' . $resource_object->title;
-            if ($resource_object->field_is_active[LANGUAGE_NONE][0]['value'] != 1) {
-                //form_set_error('form', t("Resource:$resource_object->title is not active.Please select active resource only. "));
-            }
-            if ($end_period < $start_period) {
-                form_set_error('field_end_period', t("Contract End Period should be higher than Contract Start Period."));
-            }
-            // returns resource leaves nid
-            $is_contract_exist = check_resource_contract_period($resource_nid, $end_period);
-            if (!empty($is_contract_exist)) {
-                form_set_error('field_start_period', t("Contract already exists for same period."));
-            }
-        }
+  global $user;
+  $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+  $start_period = $form_state['values']['field_start_period'][LANGUAGE_NONE][0]['value'];
+  $end_period = $form_state['values']['field_end_period'][LANGUAGE_NONE][0]['value'];
+  $resource_nid = $form_state['values']['field_resource'][LANGUAGE_NONE][0]['nid'];
+  if (!empty($resource_nid) && is_numeric($resource_nid)) {
+    $resource_object = node_load($resource_nid);
+    if (!empty($resource_object)) {
+      $form_state['values']['title'] = 'resource_' . $resource_object->title;
+      if ($resource_object->field_is_active[LANGUAGE_NONE][0]['value'] != 1) {
+        //form_set_error('form', t("Resource:$resource_object->title is not active.Please select active resource only. "));
+      }
+      if ($end_period < $start_period) {
+        form_set_error('field_end_period', t("Contract End Period should be higher than Contract Start Period."));
+      }
+      // returns resource leaves nid
+      $is_contract_exist = check_resource_contract_period($resource_nid, $end_period);
+      if (!empty($is_contract_exist)) {
+        form_set_error('field_start_period', t("Contract already exists for same period."));
+      }
     }
+  }
 }
 
 function validate_resource_details(&$form, &$form_state) {
-    global $user;
-    $distributor_id = change_feeds_import_get_distributor_id($user->uid);
-    $start_period = $form_state['values']['field_start_period'][LANGUAGE_NONE][0]['value'];
-    $end_period = $form_state['values']['field_end_period'][LANGUAGE_NONE][0]['value'];
-    $resource_nid = $form_state['values']['field_resource'][LANGUAGE_NONE][0]['nid'];
-    if (!empty($resource_nid) && is_numeric($resource_nid)) {
-        $resource_object = node_load($resource_nid);
-        if (!empty($resource_object)) {
-            $form_state['values']['title'] = 'resource_' . $resource_object->title;
-            if ($resource_object->field_is_active[LANGUAGE_NONE][0]['value'] != 1) {
-                //form_set_error('form', t("Resource:$resource_object->title is not active.Please select active resource only. "));
-            }
-            if ($end_period < $start_period) {
-                form_set_error('field_end_period', t("Leave end date should be higher than leave start date."));
-            }
-            // returns resource leaves nid
-            $is_leave_already_exist = check_resource_leave_already_exist($resource_nid, $start_period, $end_period);
-            if (!empty($is_leave_already_exist) && $form_state['values']['nid'] != $is_leave_already_exist) {
-                form_set_error('field_start_period', t("Leave already exists for same period."));
-            }
-        }
+  global $user;
+  $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+  $start_period = $form_state['values']['field_start_period'][LANGUAGE_NONE][0]['value'];
+  $end_period = $form_state['values']['field_end_period'][LANGUAGE_NONE][0]['value'];
+  $resource_nid = $form_state['values']['field_resource'][LANGUAGE_NONE][0]['nid'];
+  if (!empty($resource_nid) && is_numeric($resource_nid)) {
+    $resource_object = node_load($resource_nid);
+    if (!empty($resource_object)) {
+      $form_state['values']['title'] = 'resource_' . $resource_object->title;
+      if ($resource_object->field_is_active[LANGUAGE_NONE][0]['value'] != 1) {
+        //form_set_error('form', t("Resource:$resource_object->title is not active.Please select active resource only. "));
+      }
+      if ($end_period < $start_period) {
+        form_set_error('field_end_period', t("Leave end date should be higher than leave start date."));
+      }
+      // returns resource leaves nid
+      $is_leave_already_exist = check_resource_leave_already_exist($resource_nid, $start_period, $end_period);
+      if (!empty($is_leave_already_exist) && $form_state['values']['nid'] != $is_leave_already_exist) {
+        form_set_error('field_start_period', t("Leave already exists for same period."));
+      }
     }
+  }
 }
 
 function get_all_resource_types() {
-    global $user;
-    $distributor_id = change_feeds_import_get_distributor_id($user->uid);
-    $query = db_select('node', 'n');
-    $query->condition('n.type', 'resource_type');
-    $query->condition('n.uid', $distributor_id);
-    $query->fields('n', array('title'));
-    $result = $query->execute()->fetchAllKeyed(0, 0);
-    return $result;
+  global $user;
+  $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+  $query = db_select('node', 'n');
+  $query->condition('n.type', 'resource_type');
+  $query->condition('n.uid', $distributor_id);
+  $query->fields('n', array('title'));
+  $result = $query->execute()->fetchAllKeyed(0, 0);
+  return $result;
 }
 
 function check_resource_exist($resource_type, $resource_name) {
-    global $user;
-    $dis_id = change_feeds_import_get_distributor_id($user->uid);
-    if (!empty($resource_type) && !empty($resource_name)) {
-        $query = db_select('node', 'n');
-        $query->condition('n.type', 'resource_master');
-        $query->condition('n.uid', $dis_id);
-        $query->join('field_data_field_resource_type', 'rt', 'rt.entity_id = n.nid');
-        $query->join('field_data_field_resource_name', 'rn', 'rn.entity_id = n.nid');
-        $query->condition('rt.field_resource_type_value', $resource_type);
-        $query->condition('rn.field_resource_name_value', $resource_name);
-        $query->fields('n', array('nid'));
-        $result = $query->execute()->fetchField();
-    }
-    return $result;
+  global $user;
+  $dis_id = change_feeds_import_get_distributor_id($user->uid);
+  if (!empty($resource_type) && !empty($resource_name)) {
+    $query = db_select('node', 'n');
+    $query->condition('n.type', 'resource_master');
+    $query->condition('n.uid', $dis_id);
+    $query->join('field_data_field_resource_type', 'rt', 'rt.entity_id = n.nid');
+    $query->join('field_data_field_resource_name', 'rn', 'rn.entity_id = n.nid');
+    $query->condition('rt.field_resource_type_value', $resource_type);
+    $query->condition('rn.field_resource_name_value', $resource_name);
+    $query->fields('n', array('nid'));
+    $result = $query->execute()->fetchField();
+  }
+  return $result;
 }
 
 function check_vehicle_exist($vehicle_number) {
-    global $user;
-    $result = 0;
-    $dis_id = change_feeds_import_get_distributor_id($user->uid);
-    if (!empty($vehicle_number)) {
-        $query = db_select('node', 'n');
-        $query->condition('n.type', 'vehicle_master');
-        $query->condition('n.uid', $dis_id);
-        $query->condition('n.title', $vehicle_number);
-        $query->fields('n', array('nid'));
-        $result = $query->execute()->fetchField();
-    }
-    return $result;
+  global $user;
+  $result = 0;
+  $dis_id = change_feeds_import_get_distributor_id($user->uid);
+  if (!empty($vehicle_number)) {
+    $query = db_select('node', 'n');
+    $query->condition('n.type', 'vehicle_master');
+    $query->condition('n.uid', $dis_id);
+    $query->condition('n.title', $vehicle_number);
+    $query->fields('n', array('nid'));
+    $result = $query->execute()->fetchField();
+  }
+  return $result;
 }
 
 function validate_resource_master(&$form, &$form_state) {
-    $form_state['values']['field_resource_type'][LANGUAGE_NONE][0]['value'] = $form_state['values']['resource_type'];
-    $form_state['values']['title'] = $form_state['values']['field_resource_name'][LANGUAGE_NONE][0]['value'];
-    $resource_name = $form_state['values']['field_resource_name'][LANGUAGE_NONE][0]['value'];
-    $containsLetter = preg_match('/[a-zA-Z]/', $resource_name);
-    if (empty($containsLetter)) {
-        form_set_error('field_resource_name', t("Resource Name should have atleast one letter."));
-    }
-    $resource_existing_nid = $form_state['values']['nid'];
-    $start_period = $form_state['values']['field_start_period'];
-    $end_period = $form_state['values']['field_end_period'];
-    $current_date = date('Y-m-d');
-    if ($start_period < $current_date) {
-        //form_set_error('field_start_period', t("Please enter future date for contract periods."));
-    }
-    if ($end_period < $start_period) {
-        form_set_error('field_end_period', t("Contract end period should be higher than contract start period."));
-    }
-    $resource_type = $form_state['values']['resource_type'];
-    $resource_name = $form_state['values']['field_resource_name'][LANGUAGE_NONE][0]['value'];
-    $resource_nid = check_resource_exist($resource_type, $resource_name);
-    if (!empty($resource_nid) && $resource_existing_nid != $resource_nid) {
-        form_set_error('field_resource_name', t("Resource already exists."));
-    }
+  $form_state['values']['field_resource_type'][LANGUAGE_NONE][0]['value'] = $form_state['values']['resource_type'];
+  $form_state['values']['title'] = $form_state['values']['field_resource_name'][LANGUAGE_NONE][0]['value'];
+  $resource_name = $form_state['values']['field_resource_name'][LANGUAGE_NONE][0]['value'];
+  $containsLetter = preg_match('/[a-zA-Z]/', $resource_name);
+  if (empty($containsLetter)) {
+    form_set_error('field_resource_name', t("Resource Name should have atleast one letter."));
+  }
+  $resource_existing_nid = $form_state['values']['nid'];
+  $start_period = $form_state['values']['field_start_period'];
+  $end_period = $form_state['values']['field_end_period'];
+  $current_date = date('Y-m-d');
+  if ($start_period < $current_date) {
+    //form_set_error('field_start_period', t("Please enter future date for contract periods."));
+  }
+  if ($end_period < $start_period) {
+    form_set_error('field_end_period', t("Contract end period should be higher than contract start period."));
+  }
+  $resource_type = $form_state['values']['resource_type'];
+  $resource_name = $form_state['values']['field_resource_name'][LANGUAGE_NONE][0]['value'];
+  $resource_nid = check_resource_exist($resource_type, $resource_name);
+  if (!empty($resource_nid) && $resource_existing_nid != $resource_nid) {
+    form_set_error('field_resource_name', t("Resource already exists."));
+  }
 }
 
 function validate_vehicle_master(&$form, &$form_state) {
-    $vehicle_number = $form_state['values']['title'];
-    $containsLetter = preg_match('/[a-zA-Z]/', $vehicle_number);
-    $containsDigit = preg_match('/\d/', $vehicle_number);
-    $vehicle_nid = $form_state['values']['nid'];
-    $start_period = $form_state['values']['field_start_period'];
-    $current_date = date('Y-m-d');
-    $end_period = $form_state['values']['field_end_period'];
-    $mobile_number = $form_state['values']['field_driver_phone_no'][LANGUAGE_NONE][0]['value'];
-    $mode_of_contract = $form_state['values']['field_mode_of_contract'][LANGUAGE_NONE][0]['value'];
-    if ($mode_of_contract == 'Contracted') {
-       if (empty($form_state['values']['field_cost_per_month'][LANGUAGE_NONE][0][value])) {
-           form_set_error('field_cost_per_month', t("Please enter Cost per Month."));
-       } 
+  $vehicle_number = $form_state['values']['title'];
+  $containsLetter = preg_match('/[a-zA-Z]/', $vehicle_number);
+  $containsDigit = preg_match('/\d/', $vehicle_number);
+  $vehicle_nid = $form_state['values']['nid'];
+  $start_period = $form_state['values']['field_start_period'];
+  $current_date = date('Y-m-d');
+  $end_period = $form_state['values']['field_end_period'];
+  $mobile_number = $form_state['values']['field_driver_phone_no'][LANGUAGE_NONE][0]['value'];
+  $mode_of_contract = $form_state['values']['field_mode_of_contract'][LANGUAGE_NONE][0]['value'];
+  if ($mode_of_contract == 'Contracted') {
+    if (empty($form_state['values']['field_cost_per_month'][LANGUAGE_NONE][0][value])) {
+      form_set_error('field_cost_per_month', t("Please enter Cost per Month."));
     }
-    elseif ($mode_of_contract == 'Market') {
-        if (empty($form_state['values']['field_cost_per_day'][LANGUAGE_NONE][0][value])) {
-           form_set_error('field_cost_per_day', t("Please enter Cost per Day."));
-       } 
+  }
+  elseif ($mode_of_contract == 'Market') {
+    if (empty($form_state['values']['field_cost_per_day'][LANGUAGE_NONE][0][value])) {
+      form_set_error('field_cost_per_day', t("Please enter Cost per Day."));
     }
-    
-    
-    $is_valid_vehicle = validate_vehicle_number_digits($vehicle_number);
-    $valid_mobile = validate_mobile($mobile_number);
-    if (empty($containsLetter) || empty($containsDigit)) {
-        //form_set_error('title', t("Vehicle Number should have atleast one letter and one number."));
-    }
-    if (empty($is_valid_vehicle)) {
-        //form_set_error('title', t("Please enter valid vehicle number."));
-    }
-    if (empty($valid_mobile) && !empty($mobile_number)) {
-        form_set_error('field_driver_phone_no', t("Please enter valid mobile number."));
-    }
-    if ($start_period < $current_date) {
-        //form_set_error('field_start_period', t("Please enter future date for contract periods."));
-    }
-    if ($end_period < $start_period) {
-        form_set_error('field_end_period', t("Contract end period should be higher than contract start period."));
-    }
-    $resource_nid = check_vehicle_exist($vehicle_number);
-    if ($resource_nid && $vehicle_nid !== $resource_nid) {
-        form_set_error('title', t("vehicle already exists."));
-    }
+  }
+
+
+  $is_valid_vehicle = validate_vehicle_number_digits($vehicle_number);
+  $valid_mobile = validate_mobile($mobile_number);
+  if (empty($containsLetter) || empty($containsDigit)) {
+    //form_set_error('title', t("Vehicle Number should have atleast one letter and one number."));
+  }
+  if (empty($is_valid_vehicle)) {
+    //form_set_error('title', t("Please enter valid vehicle number."));
+  }
+  if (empty($valid_mobile) && !empty($mobile_number)) {
+    form_set_error('field_driver_phone_no', t("Please enter valid mobile number."));
+  }
+  if ($start_period < $current_date) {
+    //form_set_error('field_start_period', t("Please enter future date for contract periods."));
+  }
+  if ($end_period < $start_period) {
+    form_set_error('field_end_period', t("Contract end period should be higher than contract start period."));
+  }
+  $resource_nid = check_vehicle_exist($vehicle_number);
+  if ($resource_nid && $vehicle_nid !== $resource_nid) {
+    form_set_error('title', t("vehicle already exists."));
+  }
 }
 
 function validate_mobile($mobile) {
-    return preg_match('/^[0-9]{10}+$/', $mobile);
+  return preg_match('/^[0-9]{10}+$/', $mobile);
 }
 
 function validate_vehicle_number_digits($vehicle_number) {
-    return preg_match('/^[a-zA-Z\d]+$/', $vehicle_number);
+  return preg_match('/^[a-zA-Z\d]+$/', $vehicle_number);
 }
 
 function deliverycost_calculation_form_vehicle_master_node_form_alter(&$form, &$form_state) {
-    $resource_type = $form_state['node']->field_resource_type[LANGUAGE_NONE][0]['value'];
-    $form['#attached']['css'][] = drupal_get_path('module', 'deliverycost_calculation') . '/css/delivery_cost.css';
-    $form['#attached']['js'][] = drupal_get_path('module', 'deliverycost_calculation') . '/js/delivery_cost.js';
-    $form['#validate'][] = 'validate_vehicle_master';
+  $resource_type = $form_state['node']->field_resource_type[LANGUAGE_NONE][0]['value'];
+  $form['#attached']['css'][] = drupal_get_path('module', 'deliverycost_calculation') . '/css/delivery_cost.css';
+  $form['#attached']['js'][] = drupal_get_path('module', 'deliverycost_calculation') . '/js/delivery_cost.js';
+  $form['#validate'][] = 'validate_vehicle_master';
 
-    $form['field_cost_per_month'][LANGUAGE_NONE][0]['value']['#attributes']['class'] = array('cost_per_month', 'allownumericwithoutdecimal');
-    $form['field_driver_phone_no'][LANGUAGE_NONE][0]['value']['#attributes']['class'] = array('allownumericwithoutdecimal');
-    $form['field_driver_phone_no'][LANGUAGE_NONE][0]['value']['#attributes']['maxlength'] = 10;
-    //$form['field_cost_per_day'][LANGUAGE_NONE][0]['value']['#attributes']['readonly'] = TRUE;
-    $form['field_cost_per_day'][LANGUAGE_NONE][0]['value']['#attributes']['class'] = array('cost_per_day', 'allownumericwithoutdecimal');
-    $form['field_mode_of_contract'][LANGUAGE_NONE]['#attributes']['class'] = array('mode_of_contract');
-    $form['vehicle_contract']['field_start_period'] = array(
-      '#type' => 'date_popup',
-      '#title' => t('Contract Start Period'),
-      '#required' => TRUE,
-      '#date_format' => 'Y-m-d',
-      '#date_label_position' => '',
-      '#date_year_range' => '-20:+2',
-      '#size' => 30,
-      //'#weight' => 17,
-      '#prefix' => '<div class="col_33">',
-    );
-    $form['vehicle_contract']['field_end_period'] = array(
-      '#type' => 'date_popup',
-      '#title' => t('Contract End Period'),
-      '#required' => TRUE,
-      '#date_format' => 'Y-m-d',
-      '#date_label_position' => '',
-      '#date_year_range' => '-20:+2',
-      '#size' => 30,
-      //'#weight' => 18,
-      '#suffix' => '</div>'
-    );
-    $form['actions']['submit']['#submit'][] = 'redirect_vehicle_edit';
+  $form['field_cost_per_month'][LANGUAGE_NONE][0]['value']['#attributes']['class'] = array('cost_per_month', 'allownumericwithoutdecimal');
+  $form['field_driver_phone_no'][LANGUAGE_NONE][0]['value']['#attributes']['class'] = array('allownumericwithoutdecimal');
+  $form['field_driver_phone_no'][LANGUAGE_NONE][0]['value']['#attributes']['maxlength'] = 10;
+  //$form['field_cost_per_day'][LANGUAGE_NONE][0]['value']['#attributes']['readonly'] = TRUE;
+  $form['field_cost_per_day'][LANGUAGE_NONE][0]['value']['#attributes']['class'] = array('cost_per_day', 'allownumericwithoutdecimal');
+  $form['field_mode_of_contract'][LANGUAGE_NONE]['#attributes']['class'] = array('mode_of_contract');
+  $form['vehicle_contract']['field_start_period'] = array(
+    '#type' => 'date_popup',
+    '#title' => t('Contract Start Period'),
+    '#required' => TRUE,
+    '#date_format' => 'Y-m-d',
+    '#date_label_position' => '',
+    '#date_year_range' => '-20:+2',
+    '#size' => 30,
+    //'#weight' => 17,
+    '#prefix' => '<div class="col_33">',
+  );
+  $form['vehicle_contract']['field_end_period'] = array(
+    '#type' => 'date_popup',
+    '#title' => t('Contract End Period'),
+    '#required' => TRUE,
+    '#date_format' => 'Y-m-d',
+    '#date_label_position' => '',
+    '#date_year_range' => '-20:+2',
+    '#size' => 30,
+    //'#weight' => 18,
+    '#suffix' => '</div>'
+  );
+  $form['actions']['submit']['#submit'][] = 'redirect_vehicle_edit';
 }
 
 function redirect_vehicle_edit($form, &$form_state) {
-    $vehicle_number = $form_state['values']['title'];
-    $form_state['redirect'] = array('vehicle-master/edit', array('query' => array('title' => $vehicle_number,)));
+  $vehicle_number = $form_state['values']['title'];
+  $form_state['redirect'] = array('vehicle-master/edit', array('query' => array('title' => $vehicle_number,)));
 }
 
 function redirect_resource_edit($form, &$form_state) {
-    $resource_name = $form_state['values']['field_resource_name'][LANGUAGE_NONE][0]['value'];
-    $form_state['redirect'] = array('resource-master-report/edit', array('query' => array('field_resource_name_value' => $resource_name,)));
+  $resource_name = $form_state['values']['field_resource_name'][LANGUAGE_NONE][0]['value'];
+  $form_state['redirect'] = array('resource-master-report/edit', array('query' => array('field_resource_name_value' => $resource_name,)));
 }
 
 function deliverycost_calculation_form_resource_master_node_form_alter(&$form, &$form_state) {
-    $resource_type = $form_state['node']->field_resource_type[LANGUAGE_NONE][0]['value'];
-    $form['#attached']['css'][] = drupal_get_path('module', 'deliverycost_calculation') . '/css/delivery_cost.css';
-    $form['#attached']['js'][] = drupal_get_path('module', 'deliverycost_calculation') . '/js/delivery_cost.js';
-    $form['#validate'][] = 'validate_resource_master';
-    $options = get_all_resource_types();
-    $form['title']['#access'] = FALSE;
-    $form['title']['#required'] = FALSE;
-    $form['field_resource_type']['#access'] = FALSE;
-    $form['field_resource_type']['#required'] = FALSE;
-    $form['field_cost_per_month'][LANGUAGE_NONE][0]['value']['#attributes']['class'] = array('resource_cost_per_month', 'allownumericwithoutdecimal');
-    $form['field_cost_per_day'][LANGUAGE_NONE][0]['value']['#attributes']['readonly'] = TRUE;
-    $form['field_cost_per_day'][LANGUAGE_NONE][0]['value']['#attributes']['class'] = array('resource_cost_per_day', 'allownumericwithoutdecimal');
-    $form['resource_type'] = array(
-      '#type' => 'select',
-      '#title' => t('Resource Type'),
-      '#required' => TRUE,
-      '#weight' => 2,
-      '#options' => $options,
-      '#default_value' => $resource_type
-    );
-    $form['resource_contract']['field_start_period'] = array(
-      '#type' => 'date_popup',
-      '#title' => t('Contract Start Period'),
-      '#required' => TRUE,
-      '#date_format' => 'Y-m-d',
-      '#date_label_position' => '',
-      '#date_year_range' => '-20:+2',
-      '#size' => 30,
-      '#weight' => 7,
-      '#prefix' => '<div class="col_33">',
-    );
+  $resource_type = $form_state['node']->field_resource_type[LANGUAGE_NONE][0]['value'];
+  $form['#attached']['css'][] = drupal_get_path('module', 'deliverycost_calculation') . '/css/delivery_cost.css';
+  $form['#attached']['js'][] = drupal_get_path('module', 'deliverycost_calculation') . '/js/delivery_cost.js';
+  $form['#validate'][] = 'validate_resource_master';
+  $options = get_all_resource_types();
+  $form['title']['#access'] = FALSE;
+  $form['title']['#required'] = FALSE;
+  $form['field_resource_type']['#access'] = FALSE;
+  $form['field_resource_type']['#required'] = FALSE;
+  $form['field_cost_per_month'][LANGUAGE_NONE][0]['value']['#attributes']['class'] = array('resource_cost_per_month', 'allownumericwithoutdecimal');
+  $form['field_cost_per_day'][LANGUAGE_NONE][0]['value']['#attributes']['readonly'] = TRUE;
+  $form['field_cost_per_day'][LANGUAGE_NONE][0]['value']['#attributes']['class'] = array('resource_cost_per_day', 'allownumericwithoutdecimal');
+  $form['resource_type'] = array(
+    '#type' => 'select',
+    '#title' => t('Resource Type'),
+    '#required' => TRUE,
+    '#weight' => 2,
+    '#options' => $options,
+    '#default_value' => $resource_type
+  );
+  $form['resource_contract']['field_start_period'] = array(
+    '#type' => 'date_popup',
+    '#title' => t('Contract Start Period'),
+    '#required' => TRUE,
+    '#date_format' => 'Y-m-d',
+    '#date_label_position' => '',
+    '#date_year_range' => '-20:+2',
+    '#size' => 30,
+    '#weight' => 7,
+    '#prefix' => '<div class="col_33">',
+  );
 
-    $form['resource_contract']['field_end_period'] = array(
-      '#type' => 'date_popup',
-      '#title' => t('Contract End Period'),
-      '#required' => TRUE,
-      '#date_format' => 'Y-m-d',
-      '#date_label_position' => '',
-      '#date_year_range' => '-20:+2',
-      '#size' => 30,
-      '#weight' => 8,
-      '#suffix' => '</div>'
-    );
-    $form['actions']['submit']['#submit'][] = 'redirect_resource_edit';
+  $form['resource_contract']['field_end_period'] = array(
+    '#type' => 'date_popup',
+    '#title' => t('Contract End Period'),
+    '#required' => TRUE,
+    '#date_format' => 'Y-m-d',
+    '#date_label_position' => '',
+    '#date_year_range' => '-20:+2',
+    '#size' => 30,
+    '#weight' => 8,
+    '#suffix' => '</div>'
+  );
+  $form['actions']['submit']['#submit'][] = 'redirect_resource_edit';
 }
 
 function _get_active_vehicles($string = '') {
-    $result = array();
-    global $user;
-    $distributor_id = change_feeds_import_get_distributor_id($user->uid);
-    if (!empty($string)) {
-        $query = db_select('node', 'n');
-        $query->leftjoin('field_data_field_is_active', 'is_active', 'is_active.entity_id = n.nid');
-        //$query->join('field_data_field_mode_of_contract', 'mode_contract', 'mode_contract.entity_id = n.nid');
-        $query->condition('n.type', 'vehicle_master');
-        $query->condition('is_active.field_is_active_value', 1);
-        //$query->condition('mode_contract.field_mode_of_contract_value', 'Contracted');
-        $query->condition('n.uid', $distributor_id);
-        $query->condition('n.title', '%' . db_like($string) . '%', 'LIKE');
-        $query->fields('n', array('title', 'nid'));
-        $result = $query->execute()->fetchAllKeyed(0, 0);
-    }
-    drupal_json_output($result);
+  $result = array();
+  global $user;
+  $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+  if (!empty($string)) {
+    $query = db_select('node', 'n');
+    $query->leftjoin('field_data_field_is_active', 'is_active', 'is_active.entity_id = n.nid');
+    //$query->join('field_data_field_mode_of_contract', 'mode_contract', 'mode_contract.entity_id = n.nid');
+    $query->condition('n.type', 'vehicle_master');
+    $query->condition('is_active.field_is_active_value', 1);
+    //$query->condition('mode_contract.field_mode_of_contract_value', 'Contracted');
+    $query->condition('n.uid', $distributor_id);
+    $query->condition('n.title', '%' . db_like($string) . '%', 'LIKE');
+    $query->fields('n', array('title', 'nid'));
+    $result = $query->execute()->fetchAllKeyed(0, 0);
+  }
+  drupal_json_output($result);
 }
 
-
-
 function deliverycost_calculation_node_update($node) {
-    $master_nid = $node->nid;
-    if ($node->type == 'vehicle_contract') {
-        //activate_vehicles($node);
+  $master_nid = $node->nid;
+  if ($node->type == 'vehicle_contract') {
+    //activate_vehicles($node);
+  }
+  if ($node->type == 'resources_contract') {
+    //activate_ressource($node);
+  }
+  if ($node->type == 'vehicle_master') {
+    $type = 'vehicle_contract';
+    if ($node->field_is_active[LANGUAGE_NONE][0]['value'] == 0) {
+      update_contract_dates($type, $master_nid);
     }
-    if ($node->type == 'resources_contract') {
-        //activate_ressource($node);
+  }
+  if ($node->type == 'resource_master') {
+    $type = 'resources_contract';
+    if ($node->field_is_active[LANGUAGE_NONE][0]['value'] == 0) {
+      update_contract_dates($type, $master_nid);
     }
-    if ($node->type == 'vehicle_master') {
-        $type = 'vehicle_contract';
-        if ($node->field_is_active[LANGUAGE_NONE][0]['value'] == 0) {
-           update_contract_dates($type,$master_nid);
-        }
-    }
-    if ($node->type == 'resource_master') {
-        $type = 'resources_contract';
-        if ($node->field_is_active[LANGUAGE_NONE][0]['value'] == 0) {
-           update_contract_dates($type,$master_nid);
-        }
-    }
-    
+  }
 }
 
 function save_contract_entry($type, $node) {
-    global $user;
-    $distributor_id = change_feeds_import_get_distributor_id($user->uid);
-    $node_contract = (object) array(
-          'uid' => $distributor_id,
-          'name' => (isset($user->name) ? $user->name : ''),
-          'type' => $type,
-          'language' => LANGUAGE_NONE,
-    );
-    $node_contract->field_start_period[LANGUAGE_NONE][0]['value'] = strtotime($node->field_start_period);
-    $node_contract->field_end_period[LANGUAGE_NONE][0]['value'] = strtotime($node->field_end_period);
-    $node_contract->field_vehicle_number_ref[LANGUAGE_NONE][0]['nid'] = $node->nid;
-    $node_contract->field_resource[LANGUAGE_NONE][0]['nid'] = $node->nid;
-    $node_contract->title = $type . '_' . $node->title;
-    node_save($node_contract);
+  global $user;
+  $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+  $node_contract = (object) array(
+      'uid' => $distributor_id,
+      'name' => (isset($user->name) ? $user->name : ''),
+      'type' => $type,
+      'language' => LANGUAGE_NONE,
+  );
+  $node_contract->field_start_period[LANGUAGE_NONE][0]['value'] = strtotime($node->field_start_period);
+  $node_contract->field_end_period[LANGUAGE_NONE][0]['value'] = strtotime($node->field_end_period);
+  $node_contract->field_vehicle_number_ref[LANGUAGE_NONE][0]['nid'] = $node->nid;
+  $node_contract->field_resource[LANGUAGE_NONE][0]['nid'] = $node->nid;
+  $node_contract->title = $type . '_' . $node->title;
+  node_save($node_contract);
 }
 
 function deliverycost_calculation_node_insert($node) {
-    if ($node->type == 'vehicle_contract') {
-        //activate_vehicles($node);
-    }
-    if ($node->type == 'resources_contract') {
-        //activate_ressource($node);
-    }
-    if ($node->type == 'resource_master') {
-        //activate_ressource($node);
-        $type = 'resources_contract';
-        save_contract_entry($type, $node);
-    }
-    if ($node->type == 'vehicle_master') {
-        //activate_ressource($node);
-        $type = 'vehicle_contract';
-        save_contract_entry($type, $node);
-    }
+  if ($node->type == 'vehicle_contract') {
+    //activate_vehicles($node);
+  }
+  if ($node->type == 'resources_contract') {
+    //activate_ressource($node);
+  }
+  if ($node->type == 'resource_master') {
+    //activate_ressource($node);
+    $type = 'resources_contract';
+    save_contract_entry($type, $node);
+  }
+  if ($node->type == 'vehicle_master') {
+    //activate_ressource($node);
+    $type = 'vehicle_contract';
+    save_contract_entry($type, $node);
+  }
 }
 
 function deliverycost_calculation_node_presave($node) {
-    if ($node->type == 'resource_master') {
-        //activate_ressource($node);
-    }
+  if ($node->type == 'resource_master') {
+    //activate_ressource($node);
+  }
 }
 
 // . Check resource weekly off already exist
 function check_resource_weekly_off_exist($resource_nid) {
-    $result = '';
-    global $user;
-    $distributor_id = change_feeds_import_get_distributor_id($user->uid);
-    if (!empty($resource_nid)) {
-        $query = db_select('node', 'n');
-        $query->join('field_data_field_resource', 'res_ref', 'res_ref.entity_id = n.nid');
-        $query->condition('res_ref.field_resource_nid', $resource_nid);
-        $query->condition('n.type', 'resource_weekly_off');
-        $query->condition('n.uid', $distributor_id);
-        $query->fields('n', array('nid'));
-        $result = $query->execute()->fetchField();
-    }
-    return $result;
+  $result = '';
+  global $user;
+  $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+  if (!empty($resource_nid)) {
+    $query = db_select('node', 'n');
+    $query->join('field_data_field_resource', 'res_ref', 'res_ref.entity_id = n.nid');
+    $query->condition('res_ref.field_resource_nid', $resource_nid);
+    $query->condition('n.type', 'resource_weekly_off');
+    $query->condition('n.uid', $distributor_id);
+    $query->fields('n', array('nid'));
+    $result = $query->execute()->fetchField();
+  }
+  return $result;
 }
 
 // Activate resource when contract exist
 
 function activate_ressource($node) {
-    $result = '';
-    global $user;
-    $distributor_id = change_feeds_import_get_distributor_id($user->uid);
-    $resource_nid = $node->field_resource[LANGUAGE_NONE][0]['nid'];
-    $end_period = $node->field_end_period[LANGUAGE_NONE][0]['value'];
-    $today = strtotime(date('Y-m-d'));
-    if (!empty($resource_nid) && !empty($end_period)) {
-        $query = db_select('node', 'n');
-        $query->join('field_data_field_resource', 'res_ref', 'res_ref.entity_id = n.nid');
-        $query->join('field_data_field_end_period', 'end_period', 'end_period.entity_id = n.nid');
-        $query->condition('res_ref.field_resource_nid', $resource_nid);
-        $query->condition('end_period.field_end_period_value', $end_period, '>=');
-        $query->condition('n.type', 'resources_contract');
-        $query->condition('n.uid', $distributor_id);
-        $query->fields('n', array('nid'));
-        $result = $query->execute()->fetchAllKeyed(0, 0);
-        if (!empty($result)) {
-            $node = node_load($resource_nid);
-            if (!empty($node)) {
-                $node->field_is_active[LANGUAGE_NONE][0]['value'] = 1;
-                node_save($node);
-            }
-        }
+  $result = '';
+  global $user;
+  $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+  $resource_nid = $node->field_resource[LANGUAGE_NONE][0]['nid'];
+  $end_period = $node->field_end_period[LANGUAGE_NONE][0]['value'];
+  $today = strtotime(date('Y-m-d'));
+  if (!empty($resource_nid) && !empty($end_period)) {
+    $query = db_select('node', 'n');
+    $query->join('field_data_field_resource', 'res_ref', 'res_ref.entity_id = n.nid');
+    $query->join('field_data_field_end_period', 'end_period', 'end_period.entity_id = n.nid');
+    $query->condition('res_ref.field_resource_nid', $resource_nid);
+    $query->condition('end_period.field_end_period_value', $end_period, '>=');
+    $query->condition('n.type', 'resources_contract');
+    $query->condition('n.uid', $distributor_id);
+    $query->fields('n', array('nid'));
+    $result = $query->execute()->fetchAllKeyed(0, 0);
+    if (!empty($result)) {
+      $node = node_load($resource_nid);
+      if (!empty($node)) {
+        $node->field_is_active[LANGUAGE_NONE][0]['value'] = 1;
+        node_save($node);
+      }
     }
-    return $result;
+  }
+  return $result;
 }
 
 function activate_vehicles($node) {
-    $result = '';
-    global $user;
-    $distributor_id = change_feeds_import_get_distributor_id($user->uid);
-    $vehicle_nid = $node->field_vehicle_number_ref[LANGUAGE_NONE][0]['nid'];
-    $end_period = $node->field_end_period[LANGUAGE_NONE][0]['value'];
-    $today = strtotime(date('Y-m-d'));
-    if (!empty($vehicle_nid) && !empty($end_period)) {
-        $query = db_select('node', 'n');
-        $query->join('field_data_field_vehicle_number_ref', 'vehicle_ref', 'vehicle_ref.entity_id = n.nid');
-        $query->join('field_data_field_end_period', 'end_period', 'end_period.entity_id = n.nid');
-        $query->condition('vehicle_ref.field_vehicle_number_ref_nid', $vehicle_nid);
-        $query->condition('end_period.field_end_period_value', $end_period, '>=');
-        $query->condition('n.type', 'vehicle_contract');
-        $query->condition('n.uid', $distributor_id);
-        $query->fields('n', array('nid'));
-        $result = $query->execute()->fetchAllKeyed(0, 0);
-        if (!empty($result)) {
-            $node = node_load($vehicle_nid);
-            if (!empty($node)) {
-                $node->field_is_active[LANGUAGE_NONE][0]['value'] = 1;
-                node_save($node);
-            }
-        }
+  $result = '';
+  global $user;
+  $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+  $vehicle_nid = $node->field_vehicle_number_ref[LANGUAGE_NONE][0]['nid'];
+  $end_period = $node->field_end_period[LANGUAGE_NONE][0]['value'];
+  $today = strtotime(date('Y-m-d'));
+  if (!empty($vehicle_nid) && !empty($end_period)) {
+    $query = db_select('node', 'n');
+    $query->join('field_data_field_vehicle_number_ref', 'vehicle_ref', 'vehicle_ref.entity_id = n.nid');
+    $query->join('field_data_field_end_period', 'end_period', 'end_period.entity_id = n.nid');
+    $query->condition('vehicle_ref.field_vehicle_number_ref_nid', $vehicle_nid);
+    $query->condition('end_period.field_end_period_value', $end_period, '>=');
+    $query->condition('n.type', 'vehicle_contract');
+    $query->condition('n.uid', $distributor_id);
+    $query->fields('n', array('nid'));
+    $result = $query->execute()->fetchAllKeyed(0, 0);
+    if (!empty($result)) {
+      $node = node_load($vehicle_nid);
+      if (!empty($node)) {
+        $node->field_is_active[LANGUAGE_NONE][0]['value'] = 1;
+        node_save($node);
+      }
     }
-    return $result;
+  }
+  return $result;
 }
 
 function check_resource_contract_period($resource_nid, $start_period) {
-    $result = '';
-    global $user;
-    $distributor_id = change_feeds_import_get_distributor_id($user->uid);
-    if (!empty($resource_nid) && !empty($start_period)) {
-        $query = db_select('node', 'n');
-        $query->join('field_data_field_resource', 'res_ref', 'res_ref.entity_id = n.nid');
-        $query->join('field_data_field_end_period', 'end_period', 'end_period.entity_id = n.nid');
-        $query->condition('res_ref.field_resource_nid', $resource_nid);
-        $query->condition('end_period.field_end_period_value', $start_period, '>=');
-        $query->condition('n.type', 'resources_contract');
-        $query->condition('n.uid', $distributor_id);
-        $query->fields('n', array('nid'));
-        $result = $query->execute()->fetchField();
-    }
-    return $result;
+  $result = '';
+  global $user;
+  $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+  if (!empty($resource_nid) && !empty($start_period)) {
+    $query = db_select('node', 'n');
+    $query->join('field_data_field_resource', 'res_ref', 'res_ref.entity_id = n.nid');
+    $query->join('field_data_field_end_period', 'end_period', 'end_period.entity_id = n.nid');
+    $query->condition('res_ref.field_resource_nid', $resource_nid);
+    $query->condition('end_period.field_end_period_value', $start_period, '>=');
+    $query->condition('n.type', 'resources_contract');
+    $query->condition('n.uid', $distributor_id);
+    $query->fields('n', array('nid'));
+    $result = $query->execute()->fetchField();
+  }
+  return $result;
 }
 
 function check_maintenace_end_period($master_nid, $start_period, $type) {
-    $result = '';
-    global $user;
-    $distributor_id = change_feeds_import_get_distributor_id($user->uid);
-    if (!empty($master_nid) && !empty($start_period) && !empty($type)) {
-        $query = db_select('node', 'n');
-        $query->join('field_data_field_end_period', 'end_period', 'end_period.entity_id = n.nid');
-        $query->condition('end_period.field_end_period_value', $start_period, '>=');
-        if ($type == 'vehicle_contract') {
-            $query->join('field_data_field_vehicle_number_ref', 'vehicle_ref', 'vehicle_ref.entity_id = n.nid');
-            $query->condition('vehicle_ref.field_vehicle_number_ref_nid', $master_nid);
-        }
-        if ($type == 'resources_contract') {
-            $query->join('field_data_field_resource', 'resource_ref', 'resource_ref.entity_id = n.nid');
-            $query->condition('resource_ref.field_resource_nid', $master_nid);
-        }
-        $query->condition('n.type', $type);
-        $query->condition('n.uid', $distributor_id);
-        $query->fields('n', array('nid'));
-        $result = $query->execute()->fetchField();
+  $result = '';
+  global $user;
+  $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+  if (!empty($master_nid) && !empty($start_period) && !empty($type)) {
+    $query = db_select('node', 'n');
+    $query->join('field_data_field_end_period', 'end_period', 'end_period.entity_id = n.nid');
+    $query->condition('end_period.field_end_period_value', $start_period, '>=');
+    if ($type == 'vehicle_contract') {
+      $query->join('field_data_field_vehicle_number_ref', 'vehicle_ref', 'vehicle_ref.entity_id = n.nid');
+      $query->condition('vehicle_ref.field_vehicle_number_ref_nid', $master_nid);
     }
-    return $result;
+    if ($type == 'resources_contract') {
+      $query->join('field_data_field_resource', 'resource_ref', 'resource_ref.entity_id = n.nid');
+      $query->condition('resource_ref.field_resource_nid', $master_nid);
+    }
+    $query->condition('n.type', $type);
+    $query->condition('n.uid', $distributor_id);
+    $query->fields('n', array('nid'));
+    $result = $query->execute()->fetchField();
+  }
+  return $result;
 }
 
 function get_resource_nids($master_nid, $type) {
-    $result = '';
+  $result = '';
+  global $user;
+  $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+  if (!empty($master_nid) && !empty($type)) {
+    $query = db_select('node', 'n');
+    if ($type == 'vehicle_contract' || $type == 'vehicle_maintenance' || $type == 'vehicle_extra_working') {
+      $query->join('field_data_field_vehicle_number_ref', 'vehicle_ref', 'vehicle_ref.entity_id = n.nid');
+      $query->condition('vehicle_ref.field_vehicle_number_ref_nid', $master_nid);
+    }
+    if ($type == 'resources_contract' || $type == 'resource_leaves' || $type == 'resource_extra_working') {
+      $query->join('field_data_field_resource', 'resource_ref', 'resource_ref.entity_id = n.nid');
+      $query->condition('resource_ref.field_resource_nid', $master_nid);
+    }
+    $query->condition('n.type', $type);
+    $query->condition('n.uid', $distributor_id);
+    $query->fields('n', array('nid'));
+    $result = $query->execute()->fetchAllkeyed(0, 0);
+  }
+  return $result;
+}
+
+function get_all_active_vehicles_on_date_range($dispatch_from_date, $dispatch_to_date,$vehicle_number=null) {
+  $result = array();
+  if (!empty($dispatch_from_date) && !empty($dispatch_to_date)) {
     global $user;
     $distributor_id = change_feeds_import_get_distributor_id($user->uid);
-    if (!empty($master_nid) && !empty($type)) {
-        $query = db_select('node', 'n');
-        if ($type == 'vehicle_contract' || $type == 'vehicle_maintenance' || $type == 'vehicle_extra_working') {
-            $query->join('field_data_field_vehicle_number_ref', 'vehicle_ref', 'vehicle_ref.entity_id = n.nid');
-            $query->condition('vehicle_ref.field_vehicle_number_ref_nid', $master_nid);
-        }
-        if ($type == 'resources_contract' || $type == 'resource_leaves' || $type == 'resource_extra_working') {
-            $query->join('field_data_field_resource', 'resource_ref', 'resource_ref.entity_id = n.nid');
-            $query->condition('resource_ref.field_resource_nid', $master_nid);
-        }
-        $query->condition('n.type', $type);
-        $query->condition('n.uid', $distributor_id);
-        $query->fields('n', array('nid'));
-        $result = $query->execute()->fetchAllkeyed(0, 0);
+    $query = db_select('node', 'n');
+    $query->join('field_data_field_vehicle_number_ref', 'vehicle_ref', 'vehicle_ref.entity_id = n.nid');
+    $query->join('field_data_field_end_period', 'end_period', 'end_period.entity_id = n.nid');
+    $query->join('field_data_field_start_period', 'start_period', 'start_period.entity_id = n.nid');
+    $query->condition('end_period.field_end_period_value', $dispatch_from_date, '>=');
+    $query->condition('start_period.field_start_period_value', $dispatch_to_date, '<=');
+    $query->condition('n.type', 'vehicle_contract');
+    $query->condition('n.uid', $distributor_id);
+    $query->fields('vehicle_master', array('title'));
+    $query->join('node', 'vehicle_master', 'vehicle_master.nid = vehicle_ref.field_vehicle_number_ref_nid');
+    $query->condition('vehicle_master.type', 'vehicle_master');
+    $query->condition('vehicle_master.uid', $distributor_id);
+    if (!empty($vehicle_number)) {
+       $query->condition('vehicle_master.title', $vehicle_number);
     }
-    return $result;
+    $query->leftjoin('field_data_field_is_active', 'is_active', 'is_active.entity_id = vehicle_master.nid');
+    $query->leftjoin('field_data_field_vehicle_type', 'vehicle_type', 'vehicle_type.entity_id = vehicle_master.nid');
+    $query->leftjoin('field_data_field_vehicle_owner', 'vehicle_owner', 'vehicle_owner.entity_id = vehicle_master.nid');
+    $query->addExpression("DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(end_period.field_end_period_value),'+00:00','+05:30'), '%Y-%m-%d')", 'end_period');
+    $query->fields('vehicle_owner', array('field_vehicle_owner_value'));
+    $query->fields('vehicle_type', array('field_vehicle_type_value'));
+    $result = $query->execute()->fetchAll(PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
+  }
+  return $result;
 }
 
-function get_all_active_vehicles_on_date_range($dispatch_from_date, $dispatch_to_date) {
-    $result = array();
-    if (!empty($dispatch_from_date) && !empty($dispatch_to_date)) {
-        global $user;
-        $distributor_id = change_feeds_import_get_distributor_id($user->uid);
-        $query = db_select('node', 'n');
-        $query->join('field_data_field_vehicle_number_ref', 'vehicle_ref', 'vehicle_ref.entity_id = n.nid');
-        $query->join('field_data_field_end_period', 'end_period', 'end_period.entity_id = n.nid');
-        $query->join('field_data_field_start_period', 'start_period', 'start_period.entity_id = n.nid');
-        $query->condition('end_period.field_end_period_value', $dispatch_from_date, '>=');
-        $query->condition('start_period.field_start_period_value', $dispatch_to_date, '<=');
-        $query->condition('n.type', 'vehicle_contract');
-        $query->condition('n.uid', $distributor_id);
-        $query->fields('vehicle_master', array('title'));
-        $query->join('node', 'vehicle_master', 'vehicle_master.nid = vehicle_ref.field_vehicle_number_ref_nid');
-        $query->condition('vehicle_master.type', 'vehicle_master');
-        $query->condition('vehicle_master.uid', $distributor_id);
-        $query->leftjoin('field_data_field_is_active', 'is_active', 'is_active.entity_id = vehicle_master.nid');
-        $query->leftjoin('field_data_field_vehicle_type', 'vehicle_type', 'vehicle_type.entity_id = vehicle_master.nid');
-        $query->leftjoin('field_data_field_vehicle_owner', 'vehicle_owner', 'vehicle_owner.entity_id = vehicle_master.nid');
-        $query->addExpression("DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(end_period.field_end_period_value),'+00:00','+05:30'), '%Y-%m-%d')", 'end_period');
-        $query->fields('vehicle_owner', array('field_vehicle_owner_value'));
-        $query->fields('vehicle_type', array('field_vehicle_type_value'));
-        $result = $query->execute()->fetchAll(PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
+function get_all_active_resources_on_date_range($dispatch_from_date, $dispatch_to_date,$resource_name=null,$resource_types= array()) {
+  if (empty($resource_types)) {
+   $resource_types = array('Delivery Boy', 'Cashier');
+  }
+  
+  $result = array();
+  if (!empty($dispatch_from_date) && !empty($dispatch_to_date)) {
+    global $user;
+    $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+    $query = db_select('node', 'n');
+    $query->join('field_data_field_resource', 'resource_ref', 'resource_ref.entity_id = n.nid');
+    $query->join('field_data_field_end_period', 'end_period', 'end_period.entity_id = n.nid');
+    $query->join('field_data_field_start_period', 'start_period', 'start_period.entity_id = n.nid');
+    $query->condition('end_period.field_end_period_value', $dispatch_from_date, '>=');
+    $query->condition('start_period.field_start_period_value', $dispatch_to_date, '<=');
+    $query->condition('n.type', 'resources_contract');
+    $query->condition('n.uid', $distributor_id);
+    $query->join('node', 'resource_master', 'resource_master.nid = resource_ref.field_resource_nid');
+    $query->condition('resource_master.type', 'resource_master');
+    $query->condition('resource_master.uid', $distributor_id);
+    $query->leftjoin('field_data_field_is_active', 'is_active', 'is_active.entity_id = resource_master.nid');
+    $query->addExpression("DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(end_period.field_end_period_value),'+00:00','+05:30'), '%Y-%m-%d')", 'end_period');
+    $query->addExpression("rt.field_resource_type_value", 'resource_type');
+    $query->join('field_data_field_resource_type', 'rt', 'rt.entity_id = resource_master.nid');
+    $query->condition('rt.field_resource_type_value', $resource_types, 'IN');
+    $query->leftjoin('field_data_field_resource_name', 'resource', 'resource.entity_id = resource_master.nid');
+    $query->fields('resource', array('field_resource_name_value'));
+    $query->fields('rt', array('field_resource_type_value'));
+    if (!empty($resource_name)) {
+      $query->condition('resource.field_resource_name_value', $resource_name);
     }
-    return $result;
-}
-
-function get_all_active_resources_on_date_range($dispatch_from_date, $dispatch_to_date) {
-    $resource_types = array('Delivery Boy','Cashier');
-    $result = array();
-    if (!empty($dispatch_from_date) && !empty($dispatch_to_date)) {
-        global $user;
-        $distributor_id = change_feeds_import_get_distributor_id($user->uid);
-        $query = db_select('node', 'n');
-        $query->join('field_data_field_resource', 'resource_ref', 'resource_ref.entity_id = n.nid');
-        $query->join('field_data_field_end_period', 'end_period', 'end_period.entity_id = n.nid');
-        $query->join('field_data_field_start_period', 'start_period', 'start_period.entity_id = n.nid');
-        $query->condition('end_period.field_end_period_value', $dispatch_from_date, '>=');
-        $query->condition('start_period.field_start_period_value', $dispatch_to_date, '<=');
-        $query->condition('n.type', 'resources_contract');
-        $query->condition('n.uid', $distributor_id);
-        $query->join('node', 'resource_master', 'resource_master.nid = resource_ref.field_resource_nid');
-        $query->condition('resource_master.type', 'resource_master');
-        $query->condition('resource_master.uid', $distributor_id);
-        $query->leftjoin('field_data_field_is_active', 'is_active', 'is_active.entity_id = resource_master.nid');
-        $query->addExpression("DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(end_period.field_end_period_value),'+00:00','+05:30'), '%Y-%m-%d')", 'end_period');
-        $query->addExpression("rt.field_resource_type_value", 'resource_type');
-        $query->join('field_data_field_resource_type', 'rt', 'rt.entity_id = resource_master.nid');
-        $query->condition('rt.field_resource_type_value', $resource_types,'IN');
-        $query->leftjoin('field_data_field_resource_name', 'resource', 'resource.entity_id = resource_master.nid');
-        $query->fields('resource', array('field_resource_name_value'));
-        $query->fields('rt', array('field_resource_type_value'));
-        $result = $query->execute()->fetchAll(PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
-    }
-    return $result;
+    $result = $query->execute()->fetchAll(PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
+  }
+  return $result;
 }
 
 function get_days_between_ranges($startdate, $enddate) {
-    $days = array();
-    if (!empty($startdate) && !empty($enddate)) {
-        $startdate = strtotime($startdate);
-        $enddate = strtotime($enddate);
-        $currentdate = $startdate;
-        //loop through the dates, from the start date to the end date
-        while ($currentdate <= $enddate) {
-            $days[] = date('Y-m-d', $currentdate);
-            $currentdate = strtotime('+1 day', $currentdate);
-        }
+  $days = array();
+  if (!empty($startdate) && !empty($enddate)) {
+    $startdate = strtotime($startdate);
+    $enddate = strtotime($enddate);
+    $currentdate = $startdate;
+    //loop through the dates, from the start date to the end date
+    while ($currentdate <= $enddate) {
+      $days[] = date('Y-m-d', $currentdate);
+      $currentdate = strtotime('+1 day', $currentdate);
     }
-    return $days;
+  }
+  return $days;
 }
 
 function get_extra_working_days($startdate, $enddate) {
-    $extra_working = array();
-    if (!empty($startdate) && !empty($enddate)) {
-        global $user;
-        $type = 'vehicle_extra_working';
-        $distributor_id = change_feeds_import_get_distributor_id($user->uid);
-        $query = db_select('node', 'n');
-        $query->condition('n.type', $type);
-        $query->condition('n.uid', $distributor_id);
-        $query->join('field_data_field_vehicle_number_ref', 'vehicle_ref', 'vehicle_ref.entity_id = n.nid');
-        $query->join('field_data_field_start_period', 'start_period', 'start_period.entity_id = n.nid');
-        $query->condition('start_period.field_start_period_value', array($startdate, $enddate), 'BETWEEN');
-        $query->join('node', 'vehicle_master', 'vehicle_master.nid = vehicle_ref.field_vehicle_number_ref_nid');
-        $query->addExpression("DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(start_period.field_start_period_value),'+00:00','+05:30'), '%Y-%m-%d')", 'start_period');
-        $query->condition('vehicle_master.type', 'vehicle_master');
-        $query->fields('vehicle_master', array('title'));
-        $result = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
-        if (!empty($result)) {
-            foreach ($result as $key => $value) {
-                $extra_working[$value['title']][$value['start_period']] = $value['start_period'];
-            }
-        }
+  $extra_working = array();
+  if (!empty($startdate) && !empty($enddate)) {
+    global $user;
+    $type = 'vehicle_extra_working';
+    $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+    $query = db_select('node', 'n');
+    $query->condition('n.type', $type);
+    $query->condition('n.uid', $distributor_id);
+    $query->join('field_data_field_vehicle_number_ref', 'vehicle_ref', 'vehicle_ref.entity_id = n.nid');
+    $query->join('field_data_field_start_period', 'start_period', 'start_period.entity_id = n.nid');
+    $query->condition('start_period.field_start_period_value', array($startdate, $enddate), 'BETWEEN');
+    $query->join('node', 'vehicle_master', 'vehicle_master.nid = vehicle_ref.field_vehicle_number_ref_nid');
+    $query->addExpression("DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(start_period.field_start_period_value),'+00:00','+05:30'), '%Y-%m-%d')", 'start_period');
+    $query->condition('vehicle_master.type', 'vehicle_master');
+    $query->fields('vehicle_master', array('title'));
+    $result = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+    if (!empty($result)) {
+      foreach ($result as $key => $value) {
+        $extra_working[$value['title']][$value['start_period']] = $value['start_period'];
+      }
     }
-    return $extra_working;
+  }
+  return $extra_working;
 }
 
 function get_resource_extra_working_days($startdate, $enddate) {
-    $extra_working = array();
-    if (!empty($startdate) && !empty($enddate)) {
-        global $user;
-        $type = 'resource_extra_working';
-        $distributor_id = change_feeds_import_get_distributor_id($user->uid);
-        $query = db_select('node', 'n');
-        $query->condition('n.type', $type);
-        $query->condition('n.uid', $distributor_id);
-        $query->join('field_data_field_resource', 'resource_ref', 'resource_ref.entity_id = n.nid');
-        $query->join('field_data_field_start_period', 'start_period', 'start_period.entity_id = n.nid');
-        $query->condition('start_period.field_start_period_value', array($startdate, $enddate), 'BETWEEN');
-        $query->join('node', 'resource_master', 'resource_master.nid = resource_ref.field_resource_nid');
-        $query->addExpression("DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(start_period.field_start_period_value),'+00:00','+05:30'), '%Y-%m-%d')", 'start_period');
-        $query->condition('resource_master.type', 'resource_master');
-        $query->leftjoin('field_data_field_resource_name', 'resource', 'resource.entity_id = resource_master.nid');
-        $query->fields('resource', array('field_resource_name_value'));
-        $result = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
-        if (!empty($result)) {
-            foreach ($result as $key => $value) {
-                $extra_working[$value['field_resource_name_value']][$value['start_period']] = $value['start_period'];
-            }
-        }
-    }
-    return $extra_working;
-}
-
-function get_maintenance_dates_of_vehicle($start_period, $end_period,$performance=0) {
-    $result = array();
+  $extra_working = array();
+  if (!empty($startdate) && !empty($enddate)) {
     global $user;
+    $type = 'resource_extra_working';
     $distributor_id = change_feeds_import_get_distributor_id($user->uid);
-    $absent_days_list = array();
-    if (!empty($start_period) && !empty($end_period)) {
-        $query = db_select('node', 'n');
-        $query->join('field_data_field_vehicle_number_ref', 'vehicle_ref', 'vehicle_ref.entity_id = n.nid');
-        $query->join('field_data_field_end_period', 'end_period', 'end_period.entity_id = n.nid');
-        $query->join('field_data_field_start_period', 'start_period', 'start_period.entity_id = n.nid');
-        $query->condition('end_period.field_end_period_value', $start_period, '>=');
-        $query->condition('start_period.field_start_period_value', $end_period, '<=');
-        $query->condition('n.type', 'vehicle_contract');
-        $query->condition('n.uid', $distributor_id);
-        $query->fields('vehicle_master', array('title'));
-        $query->join('node', 'vehicle_master', 'vehicle_master.nid = vehicle_ref.field_vehicle_number_ref_nid');
-        $query->condition('vehicle_master.type', 'vehicle_master');
-        $query->condition('vehicle_master.uid', $distributor_id);
-        $query->leftjoin('field_data_field_is_active', 'is_active', 'is_active.entity_id = vehicle_master.nid');
-        $query->leftjoin('field_data_field_vehicle_type', 'vehicle_type', 'vehicle_type.entity_id = vehicle_master.nid');
-        $query->leftjoin('field_data_field_vehicle_owner', 'vehicle_owner', 'vehicle_owner.entity_id = vehicle_master.nid');
-        $query->fields('vehicle_owner', array('field_vehicle_owner_value'));
-        $query->fields('vehicle_type', array('field_vehicle_type_value'));
-        $result = $query->execute()->fetchAll(PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
-        if (!empty($result)) {
-            // Exculding maintenance vehicles on dispatch date
-            $vehicle_numbrs = array_keys($result);
-            $query = db_select('node', 'n');
-            $query->join('field_data_field_vehicle_number_ref', 'vehicle_ref', 'vehicle_ref.entity_id = n.nid');
-            $query->join('field_data_field_end_period', 'end_period', 'end_period.entity_id = n.nid');
-            $query->join('field_data_field_start_period', 'start_period', 'start_period.entity_id = n.nid');
-            $query->condition('end_period.field_end_period_value', $end_period, '<=');
-            $query->condition('start_period.field_start_period_value', $start_period, '>=');
-            $query->leftjoin('field_data_field_remarks', 'remarks', 'remarks.entity_id = n.nid');
-            $query->condition('n.type', 'vehicle_maintenance');
-            $query->condition('n.uid', $distributor_id);
-            $query->join('node', 'vehicle_master', 'vehicle_master.nid = vehicle_ref.field_vehicle_number_ref_nid');
-            $query->condition('vehicle_master.title', $vehicle_numbrs, 'IN');
-            $query->fields('vehicle_master', array('title'));
-            $query->fields('n', array('nid', 'title'));
-            $query->fields('remarks', array('field_remarks_value'));
-            $query->addExpression("DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(start_period.field_start_period_value),'+00:00','+05:30'), '%Y-%m-%d')", 'start_period');
-            $query->addExpression("DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(end_period.field_end_period_value),'+00:00','+05:30'), '%Y-%m-%d')", 'end_period');
-            $absent_details = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
-            if (!empty($absent_details)) {
-                foreach ($absent_details as $key => $value) {
-                    $absent_days = get_days_between_ranges($value['start_period'], $value['end_period']);
-                    if (!empty($absent_days)) {
-                        foreach ($absent_days as $ab_day) {
-                            if ($performance== 1) {
-                                $absent_days_list[$value['title']][$ab_day] = $value['field_remarks_value'];
-                            }
-                            else {
-                                $absent_days_list[$value['title']][$ab_day] = $ab_day;
-                            }
-                            
-                        }
-                    }
-                }
-            }
-        }
+    $query = db_select('node', 'n');
+    $query->condition('n.type', $type);
+    $query->condition('n.uid', $distributor_id);
+    $query->join('field_data_field_resource', 'resource_ref', 'resource_ref.entity_id = n.nid');
+    $query->join('field_data_field_start_period', 'start_period', 'start_period.entity_id = n.nid');
+    $query->condition('start_period.field_start_period_value', array($startdate, $enddate), 'BETWEEN');
+    $query->join('node', 'resource_master', 'resource_master.nid = resource_ref.field_resource_nid');
+    $query->addExpression("DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(start_period.field_start_period_value),'+00:00','+05:30'), '%Y-%m-%d')", 'start_period');
+    $query->condition('resource_master.type', 'resource_master');
+    $query->leftjoin('field_data_field_resource_name', 'resource', 'resource.entity_id = resource_master.nid');
+    $query->fields('resource', array('field_resource_name_value'));
+    $result = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+    if (!empty($result)) {
+      foreach ($result as $key => $value) {
+        $extra_working[$value['field_resource_name_value']][$value['start_period']] = $value['start_period'];
+      }
     }
-    return $absent_days_list;
+  }
+  return $extra_working;
 }
 
-function get_leave_dates_of_resources($start_period, $end_period) {
-    $result = array();
-    global $user;
-    $distributor_id = change_feeds_import_get_distributor_id($user->uid);
-    $absent_days_list = array();
-    $resource_types = array('Delivery Boy','Cashier');
-    $absent_days_list = array();
-    if (!empty($start_period) && !empty($end_period)) {
-        $result =   get_all_active_resources_on_date_range($start_period, $end_period);
-        if (!empty($result)) {
-            $resource_names = array_keys($result);
-            $query = db_select('node', 'n');
-            $query->join('field_data_field_resource', 'resource_ref', 'resource_ref.entity_id = n.nid');
-            $query->join('field_data_field_end_period', 'end_period', 'end_period.entity_id = n.nid');
-            $query->join('field_data_field_start_period', 'start_period', 'start_period.entity_id = n.nid');
-            $query->condition('end_period.field_end_period_value', $end_period, '<=');
-            $query->condition('start_period.field_start_period_value', $start_period, '>=');
-            $query->leftjoin('field_data_field_remarks', 'remarks', 'remarks.entity_id = n.nid');
-            $query->condition('n.type', 'resource_leaves');
-            $query->condition('n.uid', $distributor_id);
-            $query->join('node', 'resource_master', 'resource_master.nid = resource_ref.field_resource_nid');
-            $query->join('field_data_field_resource_name', 'resource', 'resource.entity_id = resource_master.nid');
-            $query->fields('resource', array('field_resource_name_value'));
-            $query->condition('resource.field_resource_name_value', $resource_names, 'IN');
-            $query->fields('remarks', array('field_remarks_value'));
-            $query->addExpression("DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(start_period.field_start_period_value),'+00:00','+05:30'), '%Y-%m-%d')", 'start_period');
-            $query->addExpression("DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(end_period.field_end_period_value),'+00:00','+05:30'), '%Y-%m-%d')", 'end_period');
-            $absent_details = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
-            if (!empty($absent_details)) {
-                foreach ($absent_details as $key => $value) {
-                    $absent_days = get_days_between_ranges($value['start_period'], $value['end_period']);
-                    if (!empty($absent_days)) {
-                        foreach ($absent_days as $ab_day) {
-                          $absent_days_list[$value['field_resource_name_value']][$ab_day] = $value['field_remarks_value'];
-                         }
-                    }
-                }
-            }
-        }
-    }
-    return $absent_days_list;
-}
-
-
-function get_all_active_vehicles($dispatch_date) {
-    $result = array();
-    global $user;
-    $distributor_id = change_feeds_import_get_distributor_id($user->uid);
-    if (!empty($dispatch_date)) {
-        $query = db_select('node', 'n');
-        $query->join('field_data_field_vehicle_number_ref', 'vehicle_ref', 'vehicle_ref.entity_id = n.nid');
-        $query->join('field_data_field_end_period', 'end_period', 'end_period.entity_id = n.nid');
-        $query->join('field_data_field_start_period', 'start_period', 'start_period.entity_id = n.nid');
-        $query->condition('end_period.field_end_period_value', $dispatch_date, '>=');
-        $query->condition('start_period.field_start_period_value', $dispatch_date, '<=');
-        $query->condition('n.type', 'vehicle_contract');
-        $query->condition('n.uid', $distributor_id);
-        $query->fields('vehicle_master', array('title'));
-        $query->join('node', 'vehicle_master', 'vehicle_master.nid = vehicle_ref.field_vehicle_number_ref_nid');
-        $query->condition('vehicle_master.type', 'vehicle_master');
-        $query->condition('vehicle_master.uid', $distributor_id);
-        $query->leftjoin('field_data_field_is_active', 'is_active', 'is_active.entity_id = vehicle_master.nid');
-        $query->leftjoin('field_data_field_vehicle_type', 'vehicle_type', 'vehicle_type.entity_id = vehicle_master.nid');
-        $query->leftjoin('field_data_field_vehicle_owner', 'vehicle_owner', 'vehicle_owner.entity_id = vehicle_master.nid');
-        $query->fields('vehicle_owner', array('field_vehicle_owner_value'));
-        $query->fields('vehicle_type', array('field_vehicle_type_value'));
-        $result = $query->execute()->fetchAll(PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
-        if (!empty($result)) {
-            // Exculding maintenance vehicles on dispatch date
-            $vehicle_numbrs = array_keys($result);
-            $query = db_select('node', 'n');
-            $query->join('field_data_field_vehicle_number_ref', 'vehicle_ref', 'vehicle_ref.entity_id = n.nid');
-            $query->join('field_data_field_end_period', 'end_period', 'end_period.entity_id = n.nid');
-            $query->join('field_data_field_start_period', 'start_period', 'start_period.entity_id = n.nid');
-            //$query->condition('vehicle_ref.field_vehicle_number_ref_nid', $vehicle_nid);
-            //$query->condition('end_period.field_end_period_value',$end_period, '=');
-            //$query->condition('start_period.field_start_period_value',$start_period, '=');
-            $db_or = db_or();
-            $db_or->condition('start_period.field_start_period_value', $dispatch_date);
-            $db_or->condition('end_period.field_end_period_value', $dispatch_date);
-            $query->condition($db_or);
-            $query->condition('n.type', 'vehicle_maintenance');
-            $query->condition('n.uid', $distributor_id);
-            $query->join('node', 'vehicle_master', 'vehicle_master.nid = vehicle_ref.field_vehicle_number_ref_nid');
-            $query->condition('vehicle_master.title', $vehicle_numbrs, 'IN');
-            $query->fields('vehicle_master', array('title'));
-            $absent_vehicles = $query->execute()->fetchAllKeyed(0, 0);
-            if (!empty($absent_vehicles)) {
-                foreach ($absent_vehicles as $key => $value) {
-                    unset($result[$key]); // removing absent vehicles
-                }
-            }
-        }
-    }
-    return $result;
-}
-
-function _get_dispatch_date_using_trip_id($trip_id) {
-    $res = 0;
-    if (!empty($trip_id)) {
-        global $user;
-        $dis_id = change_feeds_import_get_distributor_id($user->uid);
-        $query = db_select('node', 'n');
-        $query->condition('n.type', 'dispatch_data');
-        $query->condition('n.uid', $dis_id);
-        $query->join('field_data_field_dispatch_date', 'dt', 'dt.entity_id = n.nid');
-        $query->condition('n.title', $trip_id);
-        $query->fields('dt', array('field_dispatch_date_value'));
-        $res = $query->execute()->fetchField();
-    }
-    return $res;
-}
-
-function check_vehicle_maintenance_already_exist($vehicle_nid, $start_period, $end_period) {
-    $result = '';
-    global $user;
-    $distributor_id = change_feeds_import_get_distributor_id($user->uid);
-    if (!empty($vehicle_nid) && !empty($start_period) && !empty($end_period)) {
-        $query = db_select('node', 'n');
-        $query->join('field_data_field_vehicle_number_ref', 'vehicle_ref', 'vehicle_ref.entity_id = n.nid');
-        $query->join('field_data_field_end_period', 'end_period', 'end_period.entity_id = n.nid');
-        $query->join('field_data_field_start_period', 'start_period', 'start_period.entity_id = n.nid');
-        $query->condition('vehicle_ref.field_vehicle_number_ref_nid', $vehicle_nid);
-        $query->condition('end_period.field_end_period_value', $end_period, '=');
-        $query->condition('start_period.field_start_period_value', $start_period, '=');
-        $query->condition('n.type', 'vehicle_maintenance');
-        $query->condition('n.uid', $distributor_id);
-        $query->fields('n', array('nid'));
-        $result = $query->execute()->fetchField();
-    }
-    return $result;
-}
-
-function check_resource_leave_already_exist($master_nid, $start_period, $end_period, $type) {
-    $result = '';
-    global $user;
-    $distributor_id = change_feeds_import_get_distributor_id($user->uid);
-    if (!empty($master_nid) && !empty($start_period) && !empty($end_period) && !empty($type)) {
-        $query = db_select('node', 'n');
-        if ($type == 'vehicle_maintenance') {
-            $query->join('field_data_field_vehicle_number_ref', 'vehicle_ref', 'vehicle_ref.entity_id = n.nid');
-            $query->condition('vehicle_ref.field_vehicle_number_ref_nid', $master_nid);
-        }
-        if ($type == 'resource_leaves') {
-            $query->join('field_data_field_resource', 'resource_ref', 'resource_ref.entity_id = n.nid');
-            $query->condition('resource_ref.field_resource_nid', $master_nid);
-        }
-        $query->join('field_data_field_end_period', 'end_period', 'end_period.entity_id = n.nid');
-        $query->join('field_data_field_start_period', 'start_period', 'start_period.entity_id = n.nid');
-        $query->condition('start_period.field_start_period_value', $start_period, '=');
-        $query->condition('end_period.field_end_period_value', $end_period, '=');
-        $query->condition('n.type', $type);
-        $query->condition('n.uid', $distributor_id);
-        $query->fields('n', array('nid'));
-        $result = $query->execute()->fetchField();
-    }
-    return $result;
-}
-
-function get_nid_from_title($title, $type) {
-    global $user;
-    $distributor_id = change_feeds_import_get_distributor_id($user->uid);
-    if (!empty($title)) {
-        $query = db_select('node', 'n');
-        $query->condition('n.title', $title);
-        if (!empty($type)) {
-            $query->condition('n.type', $type);
-        }
-        $query->condition('n.uid', $distributor_id);
-        $query->fields('n', array('nid'));
-        $result = $query->execute()->fetchField();
-    }
-    return $result;
-}
-
-function check_extra_working_exists($master_nid, $start_period, $type) {
-    $result = '';
-    global $user;
-    $distributor_id = change_feeds_import_get_distributor_id($user->uid);
-    if (!empty($master_nid) && !empty($start_period) && !empty($type)) {
-        $query = db_select('node', 'n');
-        if ($type == 'vehicle_extra_working') {
-            $query->join('field_data_field_vehicle_number_ref', 'vehicle_ref', 'vehicle_ref.entity_id = n.nid');
-            $query->condition('vehicle_ref.field_vehicle_number_ref_nid', $master_nid);
-        }
-        if ($type == 'resource_extra_working') {
-            $query->join('field_data_field_resource', 'resource_ref', 'resource_ref.entity_id = n.nid');
-            $query->condition('resource_ref.field_resource_nid', $master_nid);
-        }
-        $query->join('field_data_field_start_period', 'start_period', 'start_period.entity_id = n.nid');
-        $query->condition('start_period.field_start_period_value', $start_period, '=');
-        $query->condition('n.type', $type);
-        $query->condition('n.uid', $distributor_id);
-        $query->fields('n', array('nid'));
-        $result = $query->execute()->fetchField();
-    }
-    return $result;
-}
-
-function _get_active_resources($string = '') {
-    $result = array();
-    global $user;
-    $distributor_id = change_feeds_import_get_distributor_id($user->uid);
-    if (!empty($string)) {
-        $query = db_select('node', 'n');
-        $query->leftjoin('field_data_field_is_active', 'is_active', 'is_active.entity_id = n.nid');
-        $query->leftjoin('field_data_field_resource_name', 'resource', 'resource.entity_id = n.nid');
-        $query->condition('n.type', 'resource_master');
-        $query->condition('is_active.field_is_active_value', 1);
-        $query->condition('n.uid', $distributor_id);
-        $query->condition('resource.field_resource_name_value', '%' . db_like($string) . '%', 'LIKE');
-        $query->fields('resource', array('field_resource_name_value'));
-        $result = $query->execute()->fetchAllKeyed(0, 0);
-    }
-    drupal_json_output($result);
-}
-
-function _get_active_resources_type($resource_type, $resource_type,$string = '') {
-    watchdog('$resource_type', $resource_type);
-     watchdog('string', $string);
-    $result = array();
-    global $user;
-    $distributor_id = change_feeds_import_get_distributor_id($user->uid);
-    if (!empty($string)) {
-        $query = db_select('node', 'n');
-        $query->leftjoin('field_data_field_is_active', 'is_active', 'is_active.entity_id = n.nid');
-        $query->leftjoin('field_data_field_resource_name', 'resource', 'resource.entity_id = n.nid');
-        $query->condition('n.type', 'resource_master');
-        $query->join('field_data_field_resource_type', 'rt', 'rt.entity_id = n.nid');
-        if (!empty($resource_type)) {
-            $query->condition('rt.field_resource_type_value', $resource_type);
-        }
-        $query->condition('is_active.field_is_active_value', 1);
-        $query->condition('n.uid', $distributor_id);
-        $query->condition('resource.field_resource_name_value', '%' . db_like($string) . '%', 'LIKE');
-        $query->fields('resource', array('field_resource_name_value'));
-        $result = $query->execute()->fetchAllKeyed(0, 0);
-    }
-    drupal_json_output($result);
-}
-
-function get_all_running_vehicles() {
-    $result = '';
-    global $user;
-    $distributor_id = change_feeds_import_get_distributor_id($user->uid);
-    $query = db_select('node', 'vehicle_master');
-    $query->condition('vehicle_master.uid', $distributor_id);
-    $query->fields('vehicle_master', array('nid', 'title'));
+function get_maintenance_dates_of_vehicle($start_period, $end_period, $performance = 0) {
+  $result = array();
+  global $user;
+  $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+  $absent_days_list = array();
+  if (!empty($start_period) && !empty($end_period)) {
+    $query = db_select('node', 'n');
+    $query->join('field_data_field_vehicle_number_ref', 'vehicle_ref', 'vehicle_ref.entity_id = n.nid');
+    $query->join('field_data_field_end_period', 'end_period', 'end_period.entity_id = n.nid');
+    $query->join('field_data_field_start_period', 'start_period', 'start_period.entity_id = n.nid');
+    $query->condition('end_period.field_end_period_value', $start_period, '>=');
+    $query->condition('start_period.field_start_period_value', $end_period, '<=');
+    $query->condition('n.type', 'vehicle_contract');
+    $query->condition('n.uid', $distributor_id);
+    $query->fields('vehicle_master', array('title'));
+    $query->join('node', 'vehicle_master', 'vehicle_master.nid = vehicle_ref.field_vehicle_number_ref_nid');
     $query->condition('vehicle_master.type', 'vehicle_master');
     $query->condition('vehicle_master.uid', $distributor_id);
     $query->leftjoin('field_data_field_is_active', 'is_active', 'is_active.entity_id = vehicle_master.nid');
-    $query->condition('is_active.field_is_active_value', 1);
+    $query->leftjoin('field_data_field_vehicle_type', 'vehicle_type', 'vehicle_type.entity_id = vehicle_master.nid');
+    $query->leftjoin('field_data_field_vehicle_owner', 'vehicle_owner', 'vehicle_owner.entity_id = vehicle_master.nid');
+    $query->fields('vehicle_owner', array('field_vehicle_owner_value'));
+    $query->fields('vehicle_type', array('field_vehicle_type_value'));
     $result = $query->execute()->fetchAll(PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
-    $res = array();
     if (!empty($result)) {
-        foreach ($result as $key => $value) {
-            $res[$key] = array($value['title']);
+      // Exculding maintenance vehicles on dispatch date
+      $vehicle_numbrs = array_keys($result);
+      $query = db_select('node', 'n');
+      $query->join('field_data_field_vehicle_number_ref', 'vehicle_ref', 'vehicle_ref.entity_id = n.nid');
+      $query->join('field_data_field_end_period', 'end_period', 'end_period.entity_id = n.nid');
+      $query->join('field_data_field_start_period', 'start_period', 'start_period.entity_id = n.nid');
+      $query->condition('end_period.field_end_period_value', $end_period, '<=');
+      $query->condition('start_period.field_start_period_value', $start_period, '>=');
+      $query->leftjoin('field_data_field_remarks', 'remarks', 'remarks.entity_id = n.nid');
+      $query->condition('n.type', 'vehicle_maintenance');
+      $query->condition('n.uid', $distributor_id);
+      $query->join('node', 'vehicle_master', 'vehicle_master.nid = vehicle_ref.field_vehicle_number_ref_nid');
+      $query->condition('vehicle_master.title', $vehicle_numbrs, 'IN');
+      $query->fields('vehicle_master', array('title'));
+      $query->fields('n', array('nid', 'title'));
+      $query->fields('remarks', array('field_remarks_value'));
+      $query->addExpression("DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(start_period.field_start_period_value),'+00:00','+05:30'), '%Y-%m-%d')", 'start_period');
+      $query->addExpression("DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(end_period.field_end_period_value),'+00:00','+05:30'), '%Y-%m-%d')", 'end_period');
+      $absent_details = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+      if (!empty($absent_details)) {
+        foreach ($absent_details as $key => $value) {
+          $absent_days = get_days_between_ranges($value['start_period'], $value['end_period']);
+          if (!empty($absent_days)) {
+            foreach ($absent_days as $ab_day) {
+              if ($performance == 1) {
+                $absent_days_list[$value['title']][$ab_day] = $value['field_remarks_value'];
+              }
+              else {
+                $absent_days_list[$value['title']][$ab_day] = $ab_day;
+              }
+            }
+          }
         }
+      }
     }
-    return $res;
+  }
+  return $absent_days_list;
 }
 
-function get_all_resources_by_type($resource_type = null,$cashier_flag=0) {
+function get_leave_dates_of_resources($start_period, $end_period) {
+  $result = array();
+  global $user;
+  $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+  $absent_days_list = array();
+  $resource_types = array('Delivery Boy', 'Cashier');
+  $absent_days_list = array();
+  if (!empty($start_period) && !empty($end_period)) {
+    $result = get_all_active_resources_on_date_range($start_period, $end_period);
+    if (!empty($result)) {
+      $resource_names = array_keys($result);
+      $query = db_select('node', 'n');
+      $query->join('field_data_field_resource', 'resource_ref', 'resource_ref.entity_id = n.nid');
+      $query->join('field_data_field_end_period', 'end_period', 'end_period.entity_id = n.nid');
+      $query->join('field_data_field_start_period', 'start_period', 'start_period.entity_id = n.nid');
+      $query->condition('end_period.field_end_period_value', $end_period, '<=');
+      $query->condition('start_period.field_start_period_value', $start_period, '>=');
+      $query->leftjoin('field_data_field_remarks', 'remarks', 'remarks.entity_id = n.nid');
+      $query->condition('n.type', 'resource_leaves');
+      $query->condition('n.uid', $distributor_id);
+      $query->join('node', 'resource_master', 'resource_master.nid = resource_ref.field_resource_nid');
+      $query->join('field_data_field_resource_name', 'resource', 'resource.entity_id = resource_master.nid');
+      $query->fields('resource', array('field_resource_name_value'));
+      $query->condition('resource.field_resource_name_value', $resource_names, 'IN');
+      $query->fields('remarks', array('field_remarks_value'));
+      $query->addExpression("DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(start_period.field_start_period_value),'+00:00','+05:30'), '%Y-%m-%d')", 'start_period');
+      $query->addExpression("DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(end_period.field_end_period_value),'+00:00','+05:30'), '%Y-%m-%d')", 'end_period');
+      $absent_details = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+      if (!empty($absent_details)) {
+        foreach ($absent_details as $key => $value) {
+          $absent_days = get_days_between_ranges($value['start_period'], $value['end_period']);
+          if (!empty($absent_days)) {
+            foreach ($absent_days as $ab_day) {
+              $absent_days_list[$value['field_resource_name_value']][$ab_day] = $value['field_remarks_value'];
+            }
+          }
+        }
+      }
+    }
+  }
+  return $absent_days_list;
+}
+
+function get_all_active_vehicles($dispatch_date) {
+  $result = array();
+  global $user;
+  $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+  if (!empty($dispatch_date)) {
+    $query = db_select('node', 'n');
+    $query->join('field_data_field_vehicle_number_ref', 'vehicle_ref', 'vehicle_ref.entity_id = n.nid');
+    $query->join('field_data_field_end_period', 'end_period', 'end_period.entity_id = n.nid');
+    $query->join('field_data_field_start_period', 'start_period', 'start_period.entity_id = n.nid');
+    $query->condition('end_period.field_end_period_value', $dispatch_date, '>=');
+    $query->condition('start_period.field_start_period_value', $dispatch_date, '<=');
+    $query->condition('n.type', 'vehicle_contract');
+    $query->condition('n.uid', $distributor_id);
+    $query->fields('vehicle_master', array('title'));
+    $query->join('node', 'vehicle_master', 'vehicle_master.nid = vehicle_ref.field_vehicle_number_ref_nid');
+    $query->condition('vehicle_master.type', 'vehicle_master');
+    $query->condition('vehicle_master.uid', $distributor_id);
+    $query->leftjoin('field_data_field_is_active', 'is_active', 'is_active.entity_id = vehicle_master.nid');
+    $query->leftjoin('field_data_field_vehicle_type', 'vehicle_type', 'vehicle_type.entity_id = vehicle_master.nid');
+    $query->leftjoin('field_data_field_vehicle_owner', 'vehicle_owner', 'vehicle_owner.entity_id = vehicle_master.nid');
+    $query->fields('vehicle_owner', array('field_vehicle_owner_value'));
+    $query->fields('vehicle_type', array('field_vehicle_type_value'));
+    $result = $query->execute()->fetchAll(PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
+    if (!empty($result)) {
+      // Exculding maintenance vehicles on dispatch date
+      $vehicle_numbrs = array_keys($result);
+      $query = db_select('node', 'n');
+      $query->join('field_data_field_vehicle_number_ref', 'vehicle_ref', 'vehicle_ref.entity_id = n.nid');
+      $query->join('field_data_field_end_period', 'end_period', 'end_period.entity_id = n.nid');
+      $query->join('field_data_field_start_period', 'start_period', 'start_period.entity_id = n.nid');
+      //$query->condition('vehicle_ref.field_vehicle_number_ref_nid', $vehicle_nid);
+      //$query->condition('end_period.field_end_period_value',$end_period, '=');
+      //$query->condition('start_period.field_start_period_value',$start_period, '=');
+      $db_or = db_or();
+      $db_or->condition('start_period.field_start_period_value', $dispatch_date);
+      $db_or->condition('end_period.field_end_period_value', $dispatch_date);
+      $query->condition($db_or);
+      $query->condition('n.type', 'vehicle_maintenance');
+      $query->condition('n.uid', $distributor_id);
+      $query->join('node', 'vehicle_master', 'vehicle_master.nid = vehicle_ref.field_vehicle_number_ref_nid');
+      $query->condition('vehicle_master.title', $vehicle_numbrs, 'IN');
+      $query->fields('vehicle_master', array('title'));
+      $absent_vehicles = $query->execute()->fetchAllKeyed(0, 0);
+      if (!empty($absent_vehicles)) {
+        foreach ($absent_vehicles as $key => $value) {
+          unset($result[$key]); // removing absent vehicles
+        }
+      }
+    }
+  }
+  return $result;
+}
+
+function _get_dispatch_date_using_trip_id($trip_id) {
+  $res = 0;
+  if (!empty($trip_id)) {
     global $user;
     $dis_id = change_feeds_import_get_distributor_id($user->uid);
     $query = db_select('node', 'n');
-    $query->condition('n.type', 'resource_master');
+    $query->condition('n.type', 'dispatch_data');
     $query->condition('n.uid', $dis_id);
+    $query->join('field_data_field_dispatch_date', 'dt', 'dt.entity_id = n.nid');
+    $query->condition('n.title', $trip_id);
+    $query->fields('dt', array('field_dispatch_date_value'));
+    $res = $query->execute()->fetchField();
+  }
+  return $res;
+}
+
+function check_vehicle_maintenance_already_exist($vehicle_nid, $start_period, $end_period) {
+  $result = '';
+  global $user;
+  $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+  if (!empty($vehicle_nid) && !empty($start_period) && !empty($end_period)) {
+    $query = db_select('node', 'n');
+    $query->join('field_data_field_vehicle_number_ref', 'vehicle_ref', 'vehicle_ref.entity_id = n.nid');
+    $query->join('field_data_field_end_period', 'end_period', 'end_period.entity_id = n.nid');
+    $query->join('field_data_field_start_period', 'start_period', 'start_period.entity_id = n.nid');
+    $query->condition('vehicle_ref.field_vehicle_number_ref_nid', $vehicle_nid);
+    $query->condition('end_period.field_end_period_value', $end_period, '=');
+    $query->condition('start_period.field_start_period_value', $start_period, '=');
+    $query->condition('n.type', 'vehicle_maintenance');
+    $query->condition('n.uid', $distributor_id);
+    $query->fields('n', array('nid'));
+    $result = $query->execute()->fetchField();
+  }
+  return $result;
+}
+
+function check_resource_leave_already_exist($master_nid, $start_period, $end_period, $type) {
+  $result = '';
+  global $user;
+  $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+  if (!empty($master_nid) && !empty($start_period) && !empty($end_period) && !empty($type)) {
+    $query = db_select('node', 'n');
+    if ($type == 'vehicle_maintenance') {
+      $query->join('field_data_field_vehicle_number_ref', 'vehicle_ref', 'vehicle_ref.entity_id = n.nid');
+      $query->condition('vehicle_ref.field_vehicle_number_ref_nid', $master_nid);
+    }
+    if ($type == 'resource_leaves') {
+      $query->join('field_data_field_resource', 'resource_ref', 'resource_ref.entity_id = n.nid');
+      $query->condition('resource_ref.field_resource_nid', $master_nid);
+    }
+    $query->join('field_data_field_end_period', 'end_period', 'end_period.entity_id = n.nid');
+    $query->join('field_data_field_start_period', 'start_period', 'start_period.entity_id = n.nid');
+    $query->condition('start_period.field_start_period_value', $start_period, '=');
+    $query->condition('end_period.field_end_period_value', $end_period, '=');
+    $query->condition('n.type', $type);
+    $query->condition('n.uid', $distributor_id);
+    $query->fields('n', array('nid'));
+    $result = $query->execute()->fetchField();
+  }
+  return $result;
+}
+
+function get_nid_from_title($title, $type) {
+  global $user;
+  $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+  if (!empty($title)) {
+    $query = db_select('node', 'n');
+    $query->condition('n.title', $title);
+    if (!empty($type)) {
+      $query->condition('n.type', $type);
+    }
+    $query->condition('n.uid', $distributor_id);
+    $query->fields('n', array('nid'));
+    $result = $query->execute()->fetchField();
+  }
+  return $result;
+}
+
+function check_extra_working_exists($master_nid, $start_period, $type) {
+  $result = '';
+  global $user;
+  $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+  if (!empty($master_nid) && !empty($start_period) && !empty($type)) {
+    $query = db_select('node', 'n');
+    if ($type == 'vehicle_extra_working') {
+      $query->join('field_data_field_vehicle_number_ref', 'vehicle_ref', 'vehicle_ref.entity_id = n.nid');
+      $query->condition('vehicle_ref.field_vehicle_number_ref_nid', $master_nid);
+    }
+    if ($type == 'resource_extra_working') {
+      $query->join('field_data_field_resource', 'resource_ref', 'resource_ref.entity_id = n.nid');
+      $query->condition('resource_ref.field_resource_nid', $master_nid);
+    }
+    $query->join('field_data_field_start_period', 'start_period', 'start_period.entity_id = n.nid');
+    $query->condition('start_period.field_start_period_value', $start_period, '=');
+    $query->condition('n.type', $type);
+    $query->condition('n.uid', $distributor_id);
+    $query->fields('n', array('nid'));
+    $result = $query->execute()->fetchField();
+  }
+  return $result;
+}
+
+function _get_active_resources($string = '') {
+  $result = array();
+  global $user;
+  $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+  if (!empty($string)) {
+    $query = db_select('node', 'n');
+    $query->leftjoin('field_data_field_is_active', 'is_active', 'is_active.entity_id = n.nid');
+    $query->leftjoin('field_data_field_resource_name', 'resource', 'resource.entity_id = n.nid');
+    $query->condition('n.type', 'resource_master');
+    $query->condition('is_active.field_is_active_value', 1);
+    $query->condition('n.uid', $distributor_id);
+    $query->condition('resource.field_resource_name_value', '%' . db_like($string) . '%', 'LIKE');
+    $query->fields('resource', array('field_resource_name_value'));
+    $result = $query->execute()->fetchAllKeyed(0, 0);
+  }
+  drupal_json_output($result);
+}
+
+function _get_active_resources_type($resource_type, $resource_type, $string = '') {
+  watchdog('$resource_type', $resource_type);
+  watchdog('string', $string);
+  $result = array();
+  global $user;
+  $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+  if (!empty($string)) {
+    $query = db_select('node', 'n');
+    $query->leftjoin('field_data_field_is_active', 'is_active', 'is_active.entity_id = n.nid');
+    $query->leftjoin('field_data_field_resource_name', 'resource', 'resource.entity_id = n.nid');
+    $query->condition('n.type', 'resource_master');
     $query->join('field_data_field_resource_type', 'rt', 'rt.entity_id = n.nid');
     if (!empty($resource_type)) {
-        $query->condition('rt.field_resource_type_value', $resource_type);
+      $query->condition('rt.field_resource_type_value', $resource_type);
     }
-    $query->join('field_data_field_resource_name', 'rn', 'rn.entity_id = n.nid');
-    $query->leftjoin('field_data_field_is_active', 'is_active', 'is_active.entity_id = n.nid');
     $query->condition('is_active.field_is_active_value', 1);
-    if ($cashier_flag == 1 ) {
-     //$query->fields('n', array('title'));
-     $query->fields('rn', array('field_resource_name_value'));
-     $result = $query->execute()->fetchAllKeyed(0, 0);
+    $query->condition('n.uid', $distributor_id);
+    $query->condition('resource.field_resource_name_value', '%' . db_like($string) . '%', 'LIKE');
+    $query->fields('resource', array('field_resource_name_value'));
+    $result = $query->execute()->fetchAllKeyed(0, 0);
+  }
+  drupal_json_output($result);
+}
+
+function get_all_running_vehicles() {
+  $result = '';
+  global $user;
+  $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+  $query = db_select('node', 'vehicle_master');
+  $query->condition('vehicle_master.uid', $distributor_id);
+  $query->fields('vehicle_master', array('nid', 'title'));
+  $query->condition('vehicle_master.type', 'vehicle_master');
+  $query->condition('vehicle_master.uid', $distributor_id);
+  $query->leftjoin('field_data_field_is_active', 'is_active', 'is_active.entity_id = vehicle_master.nid');
+  $query->condition('is_active.field_is_active_value', 1);
+  $result = $query->execute()->fetchAll(PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
+  $res = array();
+  if (!empty($result)) {
+    foreach ($result as $key => $value) {
+      $res[$key] = array($value['title']);
     }
-    else {
-        $query->fields('n', array('nid', 'title'));
-        $result = $query->execute()->fetchAllKeyed(0, 1);
-    }
-    //$query->fields('rn', array('field_resource_name_value'));
-    
-    return $result;
+  }
+  return $res;
+}
+
+function get_all_resources_by_type($resource_type = null, $cashier_flag = 0) {
+  global $user;
+  $dis_id = change_feeds_import_get_distributor_id($user->uid);
+  $query = db_select('node', 'n');
+  $query->condition('n.type', 'resource_master');
+  $query->condition('n.uid', $dis_id);
+  $query->join('field_data_field_resource_type', 'rt', 'rt.entity_id = n.nid');
+  if (!empty($resource_type)) {
+    $query->condition('rt.field_resource_type_value', $resource_type);
+  }
+  $query->join('field_data_field_resource_name', 'rn', 'rn.entity_id = n.nid');
+  $query->leftjoin('field_data_field_is_active', 'is_active', 'is_active.entity_id = n.nid');
+  $query->condition('is_active.field_is_active_value', 1);
+  if ($cashier_flag == 1) {
+    //$query->fields('n', array('title'));
+    $query->fields('rn', array('field_resource_name_value'));
+    $result = $query->execute()->fetchAllKeyed(0, 0);
+  }
+  else {
+    $query->fields('n', array('nid', 'title'));
+    $result = $query->execute()->fetchAllKeyed(0, 1);
+  }
+  //$query->fields('rn', array('field_resource_name_value'));
+
+  return $result;
 }
 
 function get_all_resources() {
-    global $user;
+  global $user;
+  $dis_id = change_feeds_import_get_distributor_id($user->uid);
+  $query = db_select('node', 'n');
+  $query->condition('n.type', 'resource_master');
+  $query->condition('n.uid', $dis_id);
+  $query->join('field_data_field_resource_type', 'rt', 'rt.entity_id = n.nid');
+  $query->join('field_data_field_resource_name', 'rn', 'rn.entity_id = n.nid');
+  $query->leftjoin('field_data_field_is_active', 'is_active', 'is_active.entity_id = n.nid');
+  $query->condition('is_active.field_is_active_value', 1);
+  $query->fields('n', array('nid'));
+  $query->fields('rn', array('field_resource_name_value'));
+  $query->fields('rt', array('field_resource_type_value'));
+  $result = $query->execute()->fetchAll(PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
+  $res = array();
+  if (!empty($result)) {
+    foreach ($result as $key => $value) {
+      $res[$key] = array($value['field_resource_type_value'], $value['field_resource_name_value']);
+    }
+  }
+  return $res;
+}
+
+function get_resource_weeklyoff_selected($resource_nids) {
+  global $user;
+  $result = '';
+  if (!empty($resource_nids)) {
     $dis_id = change_feeds_import_get_distributor_id($user->uid);
     $query = db_select('node', 'n');
     $query->condition('n.type', 'resource_master');
     $query->condition('n.uid', $dis_id);
-    $query->join('field_data_field_resource_type', 'rt', 'rt.entity_id = n.nid');
+    $query->leftjoin('field_data_field_weekly_off', 'weekly_off_selected', 'weekly_off_selected.entity_id = n.nid');
+    $query->condition('n.nid', $resource_nids, 'IN');
+    $query->fields('n', array('nid', 'title'));
+    $query->fields('weekly_off_selected', array('field_weekly_off_value'));
     $query->join('field_data_field_resource_name', 'rn', 'rn.entity_id = n.nid');
-    $query->leftjoin('field_data_field_is_active', 'is_active', 'is_active.entity_id = n.nid');
-    $query->condition('is_active.field_is_active_value', 1);
-    $query->fields('n', array('nid'));
     $query->fields('rn', array('field_resource_name_value'));
-    $query->fields('rt', array('field_resource_type_value'));
-    $result = $query->execute()->fetchAll(PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
-    $res = array();
-    if (!empty($result)) {
-        foreach ($result as $key => $value) {
-            $res[$key] = array($value['field_resource_type_value'], $value['field_resource_name_value']);
-        }
+    $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+    if (!empty($res)) {
+      foreach ($res as $key => $value) {
+        $result[$value['nid']] = array('resource_name' => $value['field_resource_name_value'], 'weekly_off_selected' => $value['field_weekly_off_value']);
+      }
     }
-    return $res;
-}
-
-function get_resource_weeklyoff_selected($resource_nids) {
-    global $user;
-    $result = '';
-    if (!empty($resource_nids)) {
-        $dis_id = change_feeds_import_get_distributor_id($user->uid);
-        $query = db_select('node', 'n');
-        $query->condition('n.type', 'resource_master');
-        $query->condition('n.uid', $dis_id);
-        $query->leftjoin('field_data_field_weekly_off', 'weekly_off_selected', 'weekly_off_selected.entity_id = n.nid');
-        $query->condition('n.nid', $resource_nids, 'IN');
-        $query->fields('n', array('nid', 'title'));
-        $query->fields('weekly_off_selected', array('field_weekly_off_value'));
-        $query->join('field_data_field_resource_name', 'rn', 'rn.entity_id = n.nid');
-        $query->fields('rn', array('field_resource_name_value'));
-        $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
-        if (!empty($res)) {
-            foreach ($res as $key => $value) {
-                $result[$value['nid']] = array('resource_name' => $value['field_resource_name_value'], 'weekly_off_selected' => $value['field_weekly_off_value']);
-            }
-        }
-    }
-    return $result;
+  }
+  return $result;
 }
 
 function deliverycost_calculation_form_alter(&$form, $form_state, $form_id) {
-    //dpm($form);
-    if ($form_id == 'editableviews_entity_form_vehicle_master') {
-        $form['node']['field_cost_per_month'][LANGUAGE_NONE][0]['value']['#attributes']['class'] = array('cost_per_month');
-        //$form['field_cost_per_day'][LANGUAGE_NONE][0]['value']['#attributes']['readonly'] = TRUE;
-        $form['node']['field_cost_per_day'][LANGUAGE_NONE][0]['value']['#attributes']['class'] = array('cost_per_day');
-    }
+  //dpm($form);
+  if ($form_id == 'editableviews_entity_form_vehicle_master') {
+    $form['node']['field_cost_per_month'][LANGUAGE_NONE][0]['value']['#attributes']['class'] = array('cost_per_month');
+    //$form['field_cost_per_day'][LANGUAGE_NONE][0]['value']['#attributes']['readonly'] = TRUE;
+    $form['node']['field_cost_per_day'][LANGUAGE_NONE][0]['value']['#attributes']['class'] = array('cost_per_day');
+  }
 }
 
 function deliverycost_calculation_form_resource_weekly_off_node_form_alter(&$form, $form_state) {
-    global $user;
-    if (!in_array('administrator', $user->roles)) {
-        $form['field_resource'][LANGUAGE_NONE][0]['nid']['#attributes']['readonly'] = TRUE;
-    }
-    $form['title']['#access'] = FALSE;
-    $form['title']['#required'] = FALSE;
-    $form['#validate'][] = 'validate_resource_weekoff';
-    $form['field_resource'][LANGUAGE_NONE][0]['nid']['#autocomplete_path'] = 'vehicle_maintenance/autocomplete';
+  global $user;
+  if (!in_array('administrator', $user->roles)) {
+    $form['field_resource'][LANGUAGE_NONE][0]['nid']['#attributes']['readonly'] = TRUE;
+  }
+  $form['title']['#access'] = FALSE;
+  $form['title']['#required'] = FALSE;
+  $form['#validate'][] = 'validate_resource_weekoff';
+  $form['field_resource'][LANGUAGE_NONE][0]['nid']['#autocomplete_path'] = 'vehicle_maintenance/autocomplete';
 }
 
 function deliverycost_calculation_form_vehicle_maintenance_node_form_alter(&$form, $form_state) {
-    global $user;
-    if (!in_array('administrator', $user->roles)) {
-        $form['field_vehicle_number_ref'][LANGUAGE_NONE][0]['nid']['#attributes']['readonly'] = TRUE;
-    }
-    $form['title']['#access'] = FALSE;
-    $form['title']['#required'] = FALSE;
-    $form['#validate'][] = 'check_active_vehicle_ref';
-    $form['field_vehicle_number_ref'][LANGUAGE_NONE][0]['nid']['#autocomplete_path'] = 'vehicle_maintenance/autocomplete';
+  global $user;
+  if (!in_array('administrator', $user->roles)) {
+    $form['field_vehicle_number_ref'][LANGUAGE_NONE][0]['nid']['#attributes']['readonly'] = TRUE;
+  }
+  $form['title']['#access'] = FALSE;
+  $form['title']['#required'] = FALSE;
+  $form['#validate'][] = 'check_active_vehicle_ref';
+  $form['field_vehicle_number_ref'][LANGUAGE_NONE][0]['nid']['#autocomplete_path'] = 'vehicle_maintenance/autocomplete';
 }
 
 function deliverycost_calculation_form_vehicle_contract_node_form_alter(&$form, $form_state) {
-    global $user;
-    if (!in_array('administrator', $user->roles)) {
-        $form['field_vehicle_number_ref'][LANGUAGE_NONE][0]['nid']['#attributes']['readonly'] = TRUE;
-    }
-    $form['title']['#access'] = FALSE;
-    $form['title']['#required'] = FALSE;
-    $form['#validate'][] = 'validate_vehicle_details';
-    $form['field_vehicle_number_ref'][LANGUAGE_NONE][0]['nid']['#autocomplete_path'] = 'vehicle_maintenance/autocomplete';
+  global $user;
+  if (!in_array('administrator', $user->roles)) {
+    $form['field_vehicle_number_ref'][LANGUAGE_NONE][0]['nid']['#attributes']['readonly'] = TRUE;
+  }
+  $form['title']['#access'] = FALSE;
+  $form['title']['#required'] = FALSE;
+  $form['#validate'][] = 'validate_vehicle_details';
+  $form['field_vehicle_number_ref'][LANGUAGE_NONE][0]['nid']['#autocomplete_path'] = 'vehicle_maintenance/autocomplete';
 }
 
 function deliverycost_calculation_form_resources_contract_node_form_alter(&$form, $form_state) {
-    global $user;
-    if (!in_array('administrator', $user->roles)) {
-        $form['field_resource'][LANGUAGE_NONE][0]['nid']['#attributes']['readonly'] = TRUE;
-    }
-    $form['title']['#access'] = FALSE;
-    $form['title']['#required'] = FALSE;
-    $form['field_resource'][LANGUAGE_NONE][0]['nid']['#autocomplete_path'] = 'get_active_resource/autocomplete';
-    $form['#validate'][] = 'validate_resource_contract';
+  global $user;
+  if (!in_array('administrator', $user->roles)) {
+    $form['field_resource'][LANGUAGE_NONE][0]['nid']['#attributes']['readonly'] = TRUE;
+  }
+  $form['title']['#access'] = FALSE;
+  $form['title']['#required'] = FALSE;
+  $form['field_resource'][LANGUAGE_NONE][0]['nid']['#autocomplete_path'] = 'get_active_resource/autocomplete';
+  $form['#validate'][] = 'validate_resource_contract';
 }
 
 function deliverycost_calculation_form_resource_leaves_node_form_alter(&$form, $form_state) {
-    global $user;
-    if (!in_array('administrator', $user->roles)) {
-        $form['field_resource'][LANGUAGE_NONE][0]['nid']['#attributes']['readonly'] = TRUE;
+  global $user;
+  if (!in_array('administrator', $user->roles)) {
+    $form['field_resource'][LANGUAGE_NONE][0]['nid']['#attributes']['readonly'] = TRUE;
+  }
+  $form['title']['#access'] = FALSE;
+  $form['title']['#required'] = FALSE;
+  $form['#validate'][] = 'validate_resource_details';
+  $form['field_resource'][LANGUAGE_NONE][0]['nid']['#autocomplete_path'] = 'get_active_resource/autocomplete';
+}
+
+function update_contract_dates($type, $master_nid) {
+  global $user;
+  if (!empty($type) && !empty($master_nid)) {
+    $current_date = date('Y-m-d');
+    $end_date = strtotime($current_date . ' -1 day');
+    $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+    $query = db_select('node', 'n');
+    $query->join('field_data_field_end_period', 'end_period', 'end_period.entity_id = n.nid');
+    $query->condition('end_period.field_end_period_value', $end_date, '>=');
+    $query->condition('n.type', $type);
+    $query->fields('n', array('nid', 'title'));
+    $query->condition('n.uid', $distributor_id);
+    $node_object = node_load($master_nid);
+    if (!empty($node_object)) {
+      $master_title = $node_object->title;
     }
-    $form['title']['#access'] = FALSE;
-    $form['title']['#required'] = FALSE;
-    $form['#validate'][] = 'validate_resource_details';
-    $form['field_resource'][LANGUAGE_NONE][0]['nid']['#autocomplete_path'] = 'get_active_resource/autocomplete';
-}
-function update_contract_dates($type,$master_nid) {
-    global $user;
-    if (!empty($type) && !empty($master_nid)) {
-        $current_date = date('Y-m-d');
-        $end_date =  strtotime($current_date . ' -1 day');
-        $distributor_id = change_feeds_import_get_distributor_id($user->uid);
-        $query = db_select('node', 'n');
-        $query->join('field_data_field_end_period', 'end_period', 'end_period.entity_id = n.nid');
-        $query->condition('end_period.field_end_period_value', $end_date, '>=');
-        $query->condition('n.type', $type);
-        $query->fields('n', array('nid','title'));
-        $query->condition('n.uid', $distributor_id);
-        $node_object = node_load($master_nid);
-        if (!empty($node_object)) {
-          $master_title = $node_object->title;
+    if ($type == 'vehicle_contract') {
+      $query->join('field_data_field_vehicle_number_ref', 'vehicle_ref', 'vehicle_ref.entity_id = n.nid');
+      $query->condition('vehicle_ref.field_vehicle_number_ref_nid', $master_nid);
+      $resource_value = 'Vehicle Number:';
+    }
+    if ($type == 'resources_contract') {
+      $query->join('field_data_field_resource', 'resource_ref', 'resource_ref.entity_id = n.nid');
+      $query->condition('resource_ref.field_resource_nid', $master_nid);
+      $resource_value = 'Resource:';
+    }
+    $result = $query->execute()->fetchAll(PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
+    if (!empty($result)) {
+      foreach ($result as $key => $value) {
+        $node = node_load($key);
+        if ($node) {
+          $node->field_end_period[LANGUAGE_NONE][0]['value'] = $end_date;
+          node_save($node);
+          drupal_set_message(t('Contract end period  of ' . $resource_value . $master_title . ' changed to ' . date('d-M-Y', $end_date)));
         }
-        if ($type == 'vehicle_contract') {
-                $query->join('field_data_field_vehicle_number_ref', 'vehicle_ref', 'vehicle_ref.entity_id = n.nid');
-                $query->condition('vehicle_ref.field_vehicle_number_ref_nid', $master_nid);
-                $resource_value = 'Vehicle Number:';
-        }
-        if ($type == 'resources_contract') {
-                $query->join('field_data_field_resource', 'resource_ref', 'resource_ref.entity_id = n.nid');
-                $query->condition('resource_ref.field_resource_nid', $master_nid);
-                $resource_value = 'Resource:';
-        }
-        $result = $query->execute()->fetchAll(PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
-        if (!empty($result)) {
-            foreach ($result as $key => $value) {
-                $node = node_load($key);
-                if ($node) { 
-                    $node->field_end_period[LANGUAGE_NONE][0]['value'] =  $end_date;
-                    node_save($node);
-                    drupal_set_message(t('Contract end period  of '.$resource_value. $master_title. ' changed to '.date('d-M-Y',$end_date)));
-                }
-            }
-        }
-}
+      }
+    }
+  }
 }
