@@ -1843,6 +1843,21 @@ function reverse_geocode_node_presave($node) {
             }
          }
       }
+      /*
+      //for testing
+      if (empty($node->field_net_sales_bill_value[LANGUAGE_NONE][0]['value'])){
+        $nid = $node->nid;
+        $res = _dispatch_planning_get_all_sales_nid($nid);
+        if (!empty($res)) {
+            foreach ($res as $key => $val) {
+               $nid = $val['nid'];
+               $sales_node = node_load($nid);
+               $net_sales_val += $sales_node->field_bill_net_sales[LANGUAGE_NONE][0]['value'];
+            }
+            $node->field_net_sales_bill_value[LANGUAGE_NONE][0]['value'] = $net_sales_val;
+         }
+      }//testing end
+      */
    }
 
 //  else if ($node->type == 'party_pack_master') {
