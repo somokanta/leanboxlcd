@@ -155,7 +155,6 @@ function vehicle_resource_daily_status_form($form, &$form_state) {
                     $form['daily_status_update']['trip_vehicle_reason'] = array(
                       '#type' => 'select',
                       '#title' => t('Reason'),
-                      '#size' => 30,
                       '#attributes' => array('class' => array('reason_height')),
                       '#default_value' => $trip_details['vehicle_number'],
                       '#options' => array('0' => t('Select')) + $vehicle_reason,
@@ -166,7 +165,6 @@ function vehicle_resource_daily_status_form($form, &$form_state) {
                     $form['daily_status_update']['trip_cashier'] = array(
                       '#type' => 'textfield',
                       '#title' => t('Cashier'),
-                      '#size' => 30,
                       '#prefix' => '<div class="form_row form_row2"><div class="col_3" style="width:200px">',
                       '#suffix' => '</div>',
                       '#attributes' => array('readonly' => 'readonly'),
@@ -178,7 +176,6 @@ function vehicle_resource_daily_status_form($form, &$form_state) {
                       '#title' => t('Reason'),
                       '#options' => array('0' => t('Select')) + $resource_reason,
                       '#default_value' => $trip_details[$field_cashier_name],
-                      '#size' => 30,
                       '#prefix' => '<div class="col_3" style="width:200px;">',
                       '#suffix' => '</div></div>'
                     );
@@ -190,7 +187,6 @@ function vehicle_resource_daily_status_form($form, &$form_state) {
                         $form['daily_status_update']['trip_delivery_boy_' . $resource_nid] = array(
                           '#type' => 'textfield',
                           '#title' => t('Delivery Boy'),
-                          '#size' => 30,
                           '#prefix' => '<div class="form_row form_row2"><div class="col_3" style="width:200px">',
                           '#suffix' => '</div>',
                           '#attributes' => array('readonly' => 'readonly'),
@@ -202,7 +198,6 @@ function vehicle_resource_daily_status_form($form, &$form_state) {
                           '#title' => t('Reason'),
                           '#options' => array('0' => t('Select')) + $resource_reason,
                           '#default_value' => $trip_details[$resource_nid],
-                          '#size' => 30,
                           '#prefix' => '<div class="col_3" style="width:200px;">',
                           '#suffix' => '</div></div>'
                         );
@@ -217,7 +212,6 @@ function vehicle_resource_daily_status_form($form, &$form_state) {
                     $form['daily_status_update']['trip_vehicle_number'] = array(
                       '#type' => 'textfield',
                       '#title' => t('Vehicle Number'),
-                      '#size' => 30,
                       '#prefix' => '<div class="form_row form_row2"><div class="col_3" style="width:200px">',
                       '#suffix' => '</div>',
                       '#attributes' => array('readonly' => 'readonly'),
@@ -229,7 +223,6 @@ function vehicle_resource_daily_status_form($form, &$form_state) {
                       '#title' => t('Reason'),
                       '#options' => array('0' => t('Select')) + $vehicle_reason,
                       '#default_value' => $trip_details['vehicle_number'],
-                      '#size' => 30,
                       '#prefix' => '<div class="col_3" style="width:200px;">',
                       '#suffix' => '</div></div>'
                     );
@@ -243,7 +236,6 @@ function vehicle_resource_daily_status_form($form, &$form_state) {
                     $form['daily_status_update']['trip_resource_name'] = array(
                       '#type' => 'textfield',
                       '#title' => t('Resource Name'),
-                      '#size' => 30,
                       '#prefix' => '<div class="form_row form_row2"><div class="col_3" style="width:200px">',
                       '#suffix' => '</div>',
                       '#attributes' => array('readonly' => 'readonly'),
@@ -254,7 +246,6 @@ function vehicle_resource_daily_status_form($form, &$form_state) {
                       '#type' => 'select',
                       '#title' => t('Reason'),
                       '#options' => array('0' => t('Select')) + $resource_reason,
-                      '#size' => 30,
                       '#default_value' => $default_value,
                       '#prefix' => '<div class="col_3" style="width:200px;">',
                       '#suffix' => '</div></div>'
@@ -285,18 +276,29 @@ function validate_resource_vehicle_daily_status($form, $form_state) {
     $resource_name = $form_state['values']['resource_name'];
     $resource_type = $form_state['values']['resource_type'];
     $declaration_date = $form_state['values']['declaration_date'];
-    
-    //check_dispatch_date_trip_number($declaration_date);
-    
-    
-    if (empty($form_state['values']['resource_type']) && !empty($form_state['values']['resource_name']) && empty($form_state['values']['resource_name'])) {
+    $declaration_date_in_strtotime = strtotime($declaration_date);
+    if (empty($form_state['values']['resource_type']) && !empty($form_state['values']['resource_name'])) {
         form_set_error('resource_type', t('Please select resource type.'));
+        $form_state['redirect'] = 'node';
     }
 
-    if (empty($form_state['values']['trip_id']) || strlen(form_state['values']['vehicle_number']) == 1 || empty(form_state['values']['resource_name'])) {
-        //form_set_error('trip_id', t('Please enter either Trip ID or Vehicle Number or Resource Name.'));
+    if (empty($form_state['values']['trip_id']) && empty($form_state['values']['vehicle_number']) && empty($form_state['values']['resource_name'])) {
+        form_set_error('trip_id', t('Please enter either Trip ID or Vehicle Number or Resource Name.'));
     }
-}
+    if (!empty($resource_name) && !empty($resource_type)) {
+      $check_active_resource = get_all_active_resources_on_date_range($declaration_date_in_strtotime, $declaration_date_in_strtotime,$resource_name,$resource_types= array($resource_type=>$resource_type));
+      if (empty($check_active_resource)) {
+        form_set_error('resource_name', t("Resource:$resource_name contract not valid on ". date('d-M-Y',$declaration_date_in_strtotime)));
+      }
+    }
+    if (!empty($vehicle_number)) {
+      $check_active_vehicle = get_all_active_vehicles_on_date_range($declaration_date_in_strtotime, $declaration_date_in_strtotime,$vehicle_number);
+      if (empty($check_active_vehicle)) {
+        form_set_error('vehicle_number', t("Vehicle Number:$vehicle_number contract not valid on ". date('d-M-Y',$declaration_date_in_strtotime)));
+      }
+    }
+   
+    }
 
 function resource_type_callback(&$form, &$form_state) {
     return $form;
@@ -382,11 +384,18 @@ function validate_input_vehicle_resource_daily_status($form,&$form_state) {
         if (!empty($trip_vehicle_number) && empty($trip_vehicle_reason)) {
             $mess.=t('Please select reason for Vehicle Number: '.$trip_vehicle_number).'<br>';
         }
-             
+        $existing_trip_title =   check_trip_id_already_exist_in_declaration_date($form_state['values']['declaration_date'],$trip_id,$vehicle_number=null,$resource_type=null,$resource_name=null,$delivery_boy_nid=null);
+        if (!empty($existing_trip_title)) {
+            $mess.=t("Trip has already been created for Trip ID  for date ".date('d-M-Y',$declaration_date));
+        }
     } 
     else if (!empty($trip_vehicle_number)) {
         if (!empty($trip_vehicle_number) && empty($trip_vehicle_reason)) {
             $mess.=t('Please select reason for Vehicle Number: '.$trip_vehicle_number).'<br>';
+        }
+        $existing_trip_title =   check_trip_id_already_exist_in_declaration_date($form_state['values']['declaration_date'],$trip_id=null,$vehicle_number = $vehicle_number ,$resource_type=null,$resource_name=null,$delivery_boy_nid=null);
+        if (!empty($existing_trip_title)) {
+            $mess.=t("Trip has already been created for Vehicle Number: $vehicle_number for date ".date('d-M-Y',$declaration_date));
         }
         
     } 
@@ -394,6 +403,19 @@ function validate_input_vehicle_resource_daily_status($form,&$form_state) {
      
         if (!empty($trip_resource_name) && empty($trip_reason)) {
             $mess.=t('Please select reason for Resource Name: '.$trip_resource_name).'<br>';
+        }
+        if ($resource_type == 'Cashier') {
+          $existing_trip_title =   check_trip_id_already_exist_in_declaration_date($form_state['values']['declaration_date'],$trip_id=null,$vehicle_number = null ,$resource_type='cashier',$resource_name=$trip_resource_name,$delivery_boy_nid=null);
+          if (!empty($existing_trip_title)) {
+              $mess.=t("Trip has already been created for Cashier: $trip_resource_name for date ".date('d-M-Y',$declaration_date));
+          }
+        }
+        elseif ($resource_type == 'Delivery Boy') {
+          $delivery_boy_nid = check_resource_exist($resource_type, $trip_resource_name);
+          $existing_trip_title =   check_trip_id_already_exist_in_declaration_date($form_state['values']['declaration_date'],$trip_id=null,$vehicle_number = null ,$resource_type='delivery boy',$resource_name=$trip_resource_name,$delivery_boy_nid);
+          if (!empty($existing_trip_title)) {
+              $mess.=t("Trip has already been created for Delivery Boy: $trip_resource_name for date ".date('d-M-Y',$declaration_date));
+          }
         }
     }
     if (!empty($mess)) {
@@ -601,3 +623,33 @@ function check_dispatch_date_trip_number($dispatch_date,$vehilce_number) {
     }
     return $res;
 }
+function check_trip_id_already_exist_in_declaration_date($declaration_date,$trip_id=null,$vehicle_number=null,$resource_type=null,$resource_name=null,$delivery_boy_nid=null){
+ if (!empty($declaration_date)) {
+    $trip_id_result = '';
+    $query = db_select('node', 'n');
+    if (!empty($trip_id)) {
+       $query->condition('n.title', $trip_id, "=");
+    }
+    $query->condition('n.type', 'dispatch_data');
+    $query->join('field_data_field_dispatch_date', 'dt', 'dt.entity_id = n.nid');
+    $query->condition('dt.field_dispatch_date_value',$declaration_date);
+    $query->addTag('node_distributor_access');
+    if (!empty($vehicle_number)) {
+      $query->join('field_data_field_vehicle_no', 've', 've.entity_id = n.nid');
+      $query->condition('ve.field_vehicle_no_value', $vehicle_number);
+    }
+    if(!empty($resource_name) && $resource_type == 'cashier') {
+      $query->join('field_data_field_cashier_name', 'cash', 'cash.entity_id = n.nid');
+      $query->condition('cash.field_cashier_name_value', $resource_name); 
+    }
+    if(!empty($resource_name) && $resource_type == 'delivery boy') {
+       $query->join('field_data_field_delivery_boy', 'delivery_boys', 'delivery_boys.entity_id = n.nid');
+       $query->condition('delivery_boys.field_delivery_boy_nid', $delivery_boy_nid); 
+    }
+    $query->fields('n', array('title'));
+    $trip_id_result = $query->execute()->fetchField();
+   }
+  return $trip_id_result;
+}
+
+

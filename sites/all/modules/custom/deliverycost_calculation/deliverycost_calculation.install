@@ -50,6 +50,7 @@ function deliverycost_calculation_schema() {
         'description' => 'Distributor id',
         'type' => 'int',
       ),
+      
         
      ),
     'primary key' => array('id'),
@@ -113,6 +114,7 @@ function deliverycost_calculation_update_7102() {
      ),
     'primary key' => array('id'),
   );
+
   if(!db_table_exists('vehicle_resource_daily_status')){
    db_create_table('vehicle_resource_daily_status', $schema['vehicle_resource_daily_status']);
   }
