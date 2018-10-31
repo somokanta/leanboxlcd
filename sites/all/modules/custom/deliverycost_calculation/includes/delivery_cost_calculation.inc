@@ -995,6 +995,7 @@ function get_delivery_cost_details($form, &$form_state) {
             }
             else {
               $flag = 0;
+              break;
             }
           }
           // flag to check vrs status  = delivery confirmation pending
