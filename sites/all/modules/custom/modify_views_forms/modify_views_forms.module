@@ -418,6 +418,26 @@ function validate_dispatch_time($form, &$form_state) {
   }
 }
 
+function check_active_vehicles($string) {
+  $result = array();
+  global $user;
+  $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+  if (!empty($string)) {
+    $query = db_select('node', 'n');
+    $query->leftjoin('field_data_field_is_active', 'is_active', 'is_active.entity_id = n.nid');
+    //$query->join('field_data_field_mode_of_contract', 'mode_contract', 'mode_contract.entity_id = n.nid');
+    $query->condition('n.type', 'vehicle_master');
+    $query->condition('is_active.field_is_active_value', 1);
+    //$query->condition('mode_contract.field_mode_of_contract_value', 'Contracted');
+    $query->condition('n.uid', $distributor_id);
+    $query->condition('n.title', $string);
+    $query->fields('n', array('title', 'nid'));
+    $result = $query->execute()->fetchAllKeyed(0, 0);
+  }
+  return $result;
+}
+
+
 // This function is used to validate trip status
 function validate_trip_status($form, &$form_state) {
     $node_status = array();
@@ -430,6 +450,15 @@ function validate_trip_status($form, &$form_state) {
       $dispatch_start_time = trim($form_data[field_dispatch_start_time][LANGUAGE_NONE][0]['value']);
       $cashier_name =  trim($form_data['field_cashier_name'][LANGUAGE_NONE][0]['value']);
       $dispatch_date = trim($form_data['field_dispatch_date'][LANGUAGE_NONE][0]['value']);
+      $vehicle_no = trim($form_data['field_vehicle_no'][LANGUAGE_NONE][0]['value']);
+      if (!empty($vehicle_no) && empty(validate_vehicle_number($vehicle_no))) {
+      form_set_error('form', t("Please enter valid Vehicle Number for Trip ID: " . $node_status[$nid]['trip_id']));
+     }
+      $active_vehicle = check_active_vehicles($vehicle_no);
+      if (empty($active_vehicle) && !empty($vehicle_no)) {
+          form_set_error('form', t("Please select active vehicle for Trip ID: ". $node_status[$nid]['trip_id'])); 
+      }
+     
       if (!empty($pre_start_time) || !empty($dispatch_start_time)) {
             if(empty($cashier_name)) {
                 form_set_error('form', t("Please enter the Cashier Name for Trip ID: ". $node_status[$nid]['trip_id'])); 
