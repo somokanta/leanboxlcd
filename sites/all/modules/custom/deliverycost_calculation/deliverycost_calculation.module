@@ -265,11 +265,24 @@ function deliverycost_calculation_menu() {
 
 // set active flag = 0 in vehicle and resource master
 function deactivate_resource_vehicle() {
-  /*global $user;
+  global $user;
   $distributor_id = change_feeds_import_get_distributor_id($user->uid);
   // deactivate vehicle
   $type = 'vehicle_contract';
   $start_period = strtotime(date('Y-m-d'));
+  
+  // This for handling end period condition
+  $query = db_select('node', 'n');
+  $query->join('field_data_field_end_period', 'end_period', 'end_period.entity_id = n.nid');
+  $query->condition('end_period.field_end_period_value', $start_period, '>=');
+  $query->join('field_data_field_vehicle_number_ref', 'vehicle_ref', 'vehicle_ref.entity_id = n.nid');
+  $query->fields('vehicle_ref', array('field_vehicle_number_ref_nid'));
+  $query->join('field_data_field_is_active', 'is_active', 'is_active.entity_id = vehicle_ref.field_vehicle_number_ref_nid');
+  $query->condition('is_active.field_is_active_value', 1);
+  $query->condition('n.type', $type);
+  $vehicle_nids = $query->execute()->fetchAllKeyed(0,0);
+  
+   
   $query = db_select('node', 'n');
   $query->join('field_data_field_end_period', 'end_period', 'end_period.entity_id = n.nid');
   $query->condition('end_period.field_end_period_value', $start_period, '<');
@@ -278,7 +291,10 @@ function deactivate_resource_vehicle() {
   $query->join('field_data_field_is_active', 'is_active', 'is_active.entity_id = vehicle_ref.field_vehicle_number_ref_nid');
   $query->condition('is_active.field_is_active_value', 1);
   $query->condition('n.type', $type);
-  //$query->condition('n.uid', $distributor_id);
+  if (!empty($vehicle_nids)) {
+    $query->condition('vehicle_ref.field_vehicle_number_ref_nid', $vehicle_nids,'NOT IN');
+  }
+  //$query->condition('n.uid', $distributor_id); // Vehicle master deactivate flag
   $result = $query->execute()->fetchAll(PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
   if (!empty($result)) {
     foreach ($result as $key => $value) {
@@ -289,8 +305,21 @@ function deactivate_resource_vehicle() {
       }
     }
   }
-  // Deactivate resource
+    
+  // // This for handling end period condition
   $type = 'resources_contract';
+  $query = db_select('node', 'n');
+  $query->join('field_data_field_end_period', 'end_period', 'end_period.entity_id = n.nid');
+  $query->condition('end_period.field_end_period_value', $start_period, '>=');
+  $query->join('field_data_field_resource', 'resource_ref', 'resource_ref.entity_id = n.nid');
+  $query->join('field_data_field_is_active', 'is_active', 'is_active.entity_id = resource_ref.field_resource_nid');
+  $query->join('field_data_field_resource_type', 'resource_type', 'resource_type.entity_id = resource_ref.field_resource_nid');
+  $query->condition('resource_type.field_resource_type_value', array('Delivery boy', 'Cashier'), 'IN');
+  $query->condition('is_active.field_is_active_value', 1);
+  $query->fields('resource_ref', array('field_resource_nid'));
+  $query->condition('n.type', $type);
+  $resource_nids = $query->execute()->fetchAllKeyed(0,0);
+  // deactivate resource
   $query = db_select('node', 'n');
   $query->join('field_data_field_end_period', 'end_period', 'end_period.entity_id = n.nid');
   $query->condition('end_period.field_end_period_value', $start_period, '<');
@@ -301,7 +330,10 @@ function deactivate_resource_vehicle() {
   $query->condition('is_active.field_is_active_value', 1);
   $query->fields('resource_ref', array('field_resource_nid'));
   $query->condition('n.type', $type);
-  //$query->condition('n.uid', $distributor_id);
+  if (!empty($resource_nids)) {
+    $query->condition('resource_ref.field_resource_nid', $resource_nids,'NOT IN');
+  }
+  //$query->condition('n.uid', $distributor_id); resource master deactivate flag
   $result = $query->execute()->fetchAll(PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
   if (!empty($result)) {
     foreach ($result as $key => $value) {
@@ -311,7 +343,7 @@ function deactivate_resource_vehicle() {
         node_save($node);
       }
     }
-  }*/
+  }
 }
 
 function view_weekly_off_entry_callback($js = FALSE) {
