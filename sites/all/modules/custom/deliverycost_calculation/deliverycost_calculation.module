@@ -265,7 +265,7 @@ function deliverycost_calculation_menu() {
 
 // set active flag = 0 in vehicle and resource master
 function deactivate_resource_vehicle() {
-  global $user;
+  /*global $user;
   $distributor_id = change_feeds_import_get_distributor_id($user->uid);
   // deactivate vehicle
   $type = 'vehicle_contract';
@@ -311,7 +311,7 @@ function deactivate_resource_vehicle() {
         node_save($node);
       }
     }
-  }
+  }*/
 }
 
 function view_weekly_off_entry_callback($js = FALSE) {
