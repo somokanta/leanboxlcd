@@ -1767,15 +1767,22 @@ function get_maintenance_dates_of_vehicle($start_period, $end_period, $performan
     $query->fields('vehicle_owner', array('field_vehicle_owner_value'));
     $query->fields('vehicle_type', array('field_vehicle_type_value'));
     $result = $query->execute()->fetchAll(PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
-    if (!empty($result)) {
+     if (!empty($result)) {
+      $db_or = db_or();
+      $db_or->condition('start_period.field_start_period_value', array($start_period,$end_period), 'BETWEEN');
+      $db_or->condition('end_period.field_end_period_value', array($start_period,$end_period), 'BETWEEN');
+      $db_or->condition('end_period.field_end_period_value', $end_period, '<=');
+      $db_or->condition('start_period.field_start_period_value', $start_period, '>=');
+      $db_or->condition('start_period.field_start_period_value', $start_period, '<=');
       // Exculding maintenance vehicles on dispatch date
       $vehicle_numbrs = array_keys($result);
       $query = db_select('node', 'n');
       $query->join('field_data_field_vehicle_number_ref', 'vehicle_ref', 'vehicle_ref.entity_id = n.nid');
       $query->join('field_data_field_end_period', 'end_period', 'end_period.entity_id = n.nid');
       $query->join('field_data_field_start_period', 'start_period', 'start_period.entity_id = n.nid');
-      $query->condition('end_period.field_end_period_value', $end_period, '<=');
-      $query->condition('start_period.field_start_period_value', $start_period, '>=');
+      //$query->condition('end_period.field_end_period_value', $end_period, '<=');
+      //$query->condition('start_period.field_start_period_value', $start_period, '>=');
+      $query->condition($db_or);
       $query->leftjoin('field_data_field_remarks', 'remarks', 'remarks.entity_id = n.nid');
       $query->condition('n.type', 'vehicle_maintenance');
       $query->condition('n.uid', $distributor_id);
@@ -1792,11 +1799,13 @@ function get_maintenance_dates_of_vehicle($start_period, $end_period, $performan
           $absent_days = get_days_between_ranges($value['start_period'], $value['end_period']);
           if (!empty($absent_days)) {
             foreach ($absent_days as $ab_day) {
-              if ($performance == 1) {
-                $absent_days_list[$value['title']][$ab_day] = $value['field_remarks_value'];
-              }
-              else {
-                $absent_days_list[$value['title']][$ab_day] = $ab_day;
+              if(strtotime($ab_day)<=$end_period && strtotime($ab_day)>=$start_period) {
+                if ($performance == 1) {
+                  $absent_days_list[$value['title']][$ab_day] = $value['field_remarks_value'];
+                }
+                else {
+                  $absent_days_list[$value['title']][$ab_day] = $ab_day;
+                }
               }
             }
           }
@@ -1818,12 +1827,20 @@ function get_leave_dates_of_resources($start_period, $end_period) {
     $result = get_all_active_resources_on_date_range($start_period, $end_period);
     if (!empty($result)) {
       $resource_names = array_keys($result);
+      $db_or = db_or();
+      $db_or->condition('start_period.field_start_period_value', array($start_period,$end_period), 'BETWEEN');
+      $db_or->condition('end_period.field_end_period_value', array($start_period,$end_period), 'BETWEEN');
+      $db_or->condition('end_period.field_end_period_value', $end_period, '<=');
+      $db_or->condition('start_period.field_start_period_value', $start_period, '>=');
+      $db_or->condition('start_period.field_start_period_value', $start_period, '<=');
+      
       $query = db_select('node', 'n');
       $query->join('field_data_field_resource', 'resource_ref', 'resource_ref.entity_id = n.nid');
       $query->join('field_data_field_end_period', 'end_period', 'end_period.entity_id = n.nid');
       $query->join('field_data_field_start_period', 'start_period', 'start_period.entity_id = n.nid');
-      $query->condition('end_period.field_end_period_value', $end_period, '<=');
-      $query->condition('start_period.field_start_period_value', $start_period, '>=');
+      //$query->condition('end_period.field_end_period_value', $end_period, '<=');
+      //$query->condition('start_period.field_start_period_value', $start_period, '>=');
+      $query->condition($db_or);
       $query->leftjoin('field_data_field_remarks', 'remarks', 'remarks.entity_id = n.nid');
       $query->condition('n.type', 'resource_leaves');
       $query->condition('n.uid', $distributor_id);
@@ -1840,7 +1857,9 @@ function get_leave_dates_of_resources($start_period, $end_period) {
           $absent_days = get_days_between_ranges($value['start_period'], $value['end_period']);
           if (!empty($absent_days)) {
             foreach ($absent_days as $ab_day) {
-              $absent_days_list[$value['field_resource_name_value']][$ab_day] = $value['field_remarks_value'];
+               if(strtotime($ab_day)<=$end_period && strtotime($ab_day)>=$start_period) {
+                $absent_days_list[$value['field_resource_name_value']][$ab_day] = $value['field_remarks_value'];
+              }
             }
           }
         }

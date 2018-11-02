@@ -810,6 +810,14 @@ function get_delivery_cost_details($form, &$form_state) {
   $month = date('m', $dis_date);
   $all_vehicles = get_all_active_vehicles_on_date_range($dis_date, $dis_date);
   $absent_vehilce_details = get_maintenance_dates_of_vehicle($dis_date, $dis_date);
+  $absent_resource_details = get_leave_dates_of_resources($dis_date, $dis_date);
+  // delete absent resources from that list
+  if (!empty($absent_resource_details)) {
+    foreach($absent_resource_details as $key=>$absent_resource_data) {
+      unset($all_resources[$key]);
+    }
+  }
+  
   $all_extra_working = get_extra_working_days($dis_date, $dis_date);
   $get_active_vehicles_on_dispatch_date = get_all_active_vehicles($dis_date);
   $weekoff = get_resource_weekly_off_day();
@@ -1170,7 +1178,7 @@ function get_delivery_cost_details($form, &$form_state) {
         }
         
       $not_attempted_cost = round($not_attempted_cost / $lak, $round_off_no_digits_2);
-      $rows[] = array($index, t('Resources not utilized'), '', '', '', '', '', '', '', '', '', '', '', $resource_not_utilized_cost_print, '', '');
+      $rows[] = array($index+1, t('Resources not utilized'), '', '', '', '', '', '', '', '', '', '', '', $resource_not_utilized_cost_print, '', '');
       $rows[] = array('', t('Total'), '', '', '', '', '', '', '', '', '', '', '', $not_attempted_cost);
     }
   }
@@ -1761,7 +1769,7 @@ function vehicle_day_wise_performance_form_submit($form, &$form_state) {
 
       if (!empty($absent_vehilce_details[$vehicle_number_value])) {
         foreach ($absent_vehilce_details[$vehicle_number_value] as $date_key => $date_value) {
-          $rows[$vehicle_number_value][$date_key] = array('vehicle_no' => '', 'date' => $date_key, 'active' => 'On Leave', 'trip_ids' => '', 'cashier_names' => '', 'dispatched_value' => '', 'delivered_value' => '', 'cost' => '', 'cost_vs_dispatched' => '', 'cost_vs_delivered' => '', 'leave_reason' => $date_value);
+          $rows[$vehicle_number_value][$date_key] = array('vehicle_no' => '', 'date' => $date_key, 'active' => 'On Leave', 'trip_ids' => '','previous_trip'=>'', 'cashier_names' => '', 'dispatched_value' => '', 'delivered_value' => '', 'cost' => '', 'cost_vs_dispatched' => '', 'cost_vs_delivered' => '', 'leave_reason' => $date_value);
         }
       }
       //print_r($absent_vehilce_details);die;
