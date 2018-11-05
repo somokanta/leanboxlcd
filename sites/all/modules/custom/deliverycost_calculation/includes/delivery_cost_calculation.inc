@@ -282,7 +282,7 @@ function delivery_cost_calculation_mtd_form($form, &$form_state) {
       '#sticky' => FALSE,
     );
     cache_set('delivery_cost_download' . session_id(), $form['delivery_cost_table'], 'cache', time() + 60 * 10);
-    $rr = l('Download', "delivery_cost/export", array('attributes' => array("target" => "_blank")));
+    $rr = l('Download', "delivery_cost/export/mtd", array('attributes' => array("target" => "_blank")));
     $form['download_mark'] = array(
       '#type' => 'markup',
       '#markup' => $rr,
@@ -375,7 +375,7 @@ function delivery_cost_calculation_form($form, &$form_state) {
     );
     cache_set('delivery_cost_download' . session_id(), $form['delivery_cost_table'], 'cache', time() + 60 * 10);
     $output .= l(t('XLS'), 'return-vrs-time-report/export', array('query' => array('dispatch_date' => $form_state['values']['dispatch_date'])));
-    $rr = l('Download', "delivery_cost/export", array('attributes' => array("target" => "_blank"), 'query' => array('dispatch_date' => $form_state['values']['dispatch_date'], 'trip_id' => $form_state['values']['trip_id'])));
+    $rr = l('Download', "delivery_cost/export/daywise", array('attributes' => array("target" => "_blank"), 'query' => array('dispatch_date' => $form_state['values']['dispatch_date'], 'trip_id' => $form_state['values']['trip_id'])));
     $form['download_mark'] = array(
       '#type' => 'markup',
       '#markup' => $rr,
@@ -1413,7 +1413,10 @@ function validate_delivery_cost_details(&$form, &$form_state) {
 }
 
 function delivery_cost_export() {
-  $file = "hul_delivery_cost_" . date('d-M-Y') . ".xls";
+  // arg3 is the file name
+  $arg3 = arg(2);
+  $label = $arg3;
+  $file = "hul_delivery_cost_$label" .'_' . date('d-M-Y') .'_'.time(). ".xls";
   $data = cache_get('delivery_cost_download' . session_id());
   $table = drupal_render($data->data);
   header("Content-type: application/vnd.ms-excel");
@@ -1807,7 +1810,7 @@ function vehicle_daily_wise_report_export() {
     $from_date = $query_parameters['dispatch_from_date'];
     $to_date = $query_parameters['dispatch_to_date'];
   }
-  $file = "hul_daily_wise_report_" . date('d-M-Y') . ".xls";
+  $file = "hul_vehicle_daily_wise_report_" . date('d-M-Y') . ".xls";
   $data = cache_get('delivery_cost_download' . session_id());
   $table = drupal_render($data->data);
   header("Content-type: application/vnd.ms-excel");
@@ -2177,7 +2180,7 @@ function resource_daily_wise_report_export() {
     $from_date = $query_parameters['dispatch_from_date'];
     $to_date = $query_parameters['dispatch_to_date'];
   }
-  $file = "hul_daily_wise_resource_report_" . date('d-M-Y') . ".xls";
+  $file = "hul_resource_daily_wise_report_" . date('d-M-Y') . ".xls";
   $data = cache_get('delivery_cost_download' . session_id());
   $table = drupal_render($data->data);
   header("Content-type: application/vnd.ms-excel");
