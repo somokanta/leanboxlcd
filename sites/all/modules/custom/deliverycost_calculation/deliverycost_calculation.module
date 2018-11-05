@@ -255,7 +255,7 @@ function deliverycost_calculation_menu() {
   $items['get_active_resource_type/autocomplete'] = array(
     'title' => 'get_active_resources autocomplete',
     'page callback' => '_get_active_resources_type',
-    'page arguments' => array(2),
+    'page arguments' => array(1),
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
@@ -2042,9 +2042,7 @@ function _get_active_resources($string = '') {
   drupal_json_output($result);
 }
 
-function _get_active_resources_type($resource_type, $resource_type, $string = '') {
-  watchdog('$resource_type', $resource_type);
-  watchdog('string', $string);
+function _get_active_resources_type($resource_type, $string = '') {
   $result = array();
   global $user;
   $distributor_id = change_feeds_import_get_distributor_id($user->uid);
