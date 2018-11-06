@@ -3790,4 +3790,28 @@ function dispatch_planning_views_query_alter(&$view, &$query) {
       }
     }
   }
+
+  if ($view->name == 'bill_return_report' && $view->name == 'views_data_export_2') {
+    global $user;
+    $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+    $query = db_select('dispatch_planning_api_data', 'ad');
+    $query->join('inventory_versioning_api_data', 'iad', 'iad.referenceNo = ad.referenceNo');
+    $query->condition('iad.distributor_id', $distributor_id, '=');
+    $query->condition('iad.version_flag', 1, '=');
+    $query->addExpression('MAX(version_created_time)', 'version_created_time');
+    $query->fields('iad', array('runsheet_number'));
+    $query->groupBy('ad.runsheet_number');
+
+    // Write the join conditions.
+    $join = new views_join();
+    $join->definition = array('table formula' => $query, 'left_field' => 'referenceNo', 'field' => 'referenceNo', 'left_table' => 'inventory_versioning_api_data');
+    $join->left_table = 'inventory_versioning_api_data'; // or wathever table you want to join with
+    $join->table = 'inventory_versioning_api_data';
+    $join->field = 'referenceNo';
+    $join->left_field = 'referenceNo'; // or wathever column you want to join with
+    $join->type = 'LEFT'; // if you want another join type play with this value
+    $join->extra = array(
+      array('field' => 'distributor_id', 'left_field' => 'distributor_id'),
+    );
+  }
 }
