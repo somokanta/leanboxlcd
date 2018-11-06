@@ -590,7 +590,27 @@ function get_delivery_cost_details_mtd($form, &$form_state) {
               }
             }
           }
-
+            // if vrs status is delivery confirmation pending then delivered value = return value,dp value,dp%,return %  = 0
+            foreach ($total_trips as $tripid_value) {
+            $check_vrs_status = check_trip_id_exists_or_not($dis_id, $tripid_value);
+            if ($check_vrs_status->field_vrs_status_value == -1) {
+              $flag = 1;
+            }
+            else {
+              $flag = 0;
+              break;
+            }
+          }
+          // flag to check vrs status  = delivery confirmation pending
+          // flag to check vrs status  = delivery confirmation pending
+          if ($flag == 1) {
+            $delivered_value_in_lak = 0;
+            $return_value_in_lak = 0;
+            $return_vs_delivered_percent = 0;
+            $dp_value_in_lak = 0;
+            $dp_percent = 0;
+            $dp_value_percent = 0;
+          }
           //echo $vehicle_per_day_cost;die;
           $total_trip_delivery_cost = ($delivery_boy_cost + $cashier_cost + $vehicle_per_day_cost) / $lak;
           $mtd_result[$value['vehicle_number']]['vehicle_type'] = $value['field_vehicle_type_value'];
