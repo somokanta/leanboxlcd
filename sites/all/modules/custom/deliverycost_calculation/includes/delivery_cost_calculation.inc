@@ -826,21 +826,43 @@ function get_delivery_cost_details($form, &$form_state) {
     $dis_date = _get_dispatch_date_using_trip_id($trip_id);
   }
   $dis_date = strtotime($dis_date);
+  $weekoff = get_resource_weekly_off_day();
   $year = date('Y', $dis_date);
   $month = date('m', $dis_date);
   $all_vehicles = get_all_active_vehicles_on_date_range($dis_date, $dis_date);
   $absent_vehilce_details = get_maintenance_dates_of_vehicle($dis_date, $dis_date);
   $absent_resource_details = get_leave_dates_of_resources($dis_date, $dis_date);
+  $resource_all_extra_working = get_resource_extra_working_days($dis_date, $dis_date);
   // delete absent resources from that list
   if (!empty($absent_resource_details)) {
     foreach($absent_resource_details as $key=>$absent_resource_data) {
       unset($all_resources[$key]);
     }
   }
-  
+  // remove resource weekly off day from resource list. If extra working defined on week off then no need to exclude week off
+  if (!empty($all_resources)) {
+    foreach ($all_resources as $resource_key => &$resource_value) {
+      if (empty($resource_all_extra_working[$resource_value])) {
+        if (!empty($resource_value['field_weekly_off_value'])) {
+          $res_selected_week_off = $resource_value['field_weekly_off_value'];
+        }
+        else {
+          $res_selected_week_off = $weekoff;
+        }
+        // - Resource weekly off day and checking no extra working day defined
+        if (strtolower(date('l', $dis_date)) == strtolower($res_selected_week_off) && empty($resource_all_extra_working[$resource_key][date('Y-m-d',$dis_date)])) {
+          unset($all_resources[$resource_key]);
+        }
+        // - Resource  leave on particaular day
+        if (!empty($absent_resource_details[$resource_key][date('Y-m-d',$dis_date)])) {
+          unset($all_resources[$resource_key]);
+        }
+      }
+    }
+  }
   $all_extra_working = get_extra_working_days($dis_date, $dis_date);
+  //print_r($resource_all_extra_working);die;
   $get_active_vehicles_on_dispatch_date = get_all_active_vehicles($dis_date);
-  $weekoff = get_resource_weekly_off_day();
   $resource_no_of_working_days = calculateWorkingDaysInMonth($year, $month);
   $lak = 100000;
   $active_vehicle_numbers = array_keys($all_vehicles);
@@ -991,6 +1013,9 @@ function get_delivery_cost_details($form, &$form_state) {
         if (!empty($cashier_data[$cashier_name]['cost_per_month'])) {
           $cashier_cost = $cashier_data[$cashier_name]['cost_per_month'] / $resource_no_of_working_days;
         }
+        if($resource_all_extra_working[$cashier_name]) {
+            unset($all_resources[$cashier_name]);
+        }
         // get delivery boy associated to trip
         $delivery_boy_trip = get_deliveryboys(array($key));
         if (!empty($delivery_boy_trip[$key]['delivery_boys'])) {
@@ -999,6 +1024,9 @@ function get_delivery_cost_details($form, &$form_state) {
             foreach ($delivery_boys as $delivery_boy_value) {
               if ($all_resources[$delivery_boy_value]) {
                 $trip_delivery_boys[$delivery_boy_value] = $delivery_boy_value;
+                unset($all_resources[$delivery_boy_value]);
+              }
+              if($resource_all_extra_working[$delivery_boy_value]) {
                 unset($all_resources[$delivery_boy_value]);
               }
               $input_resource_type = 'Delivery Boy';
@@ -1012,7 +1040,6 @@ function get_delivery_cost_details($form, &$form_state) {
             }
           }
         }
-      
         // Values will be calculated when trip status greater than -1 delivery confirmation pending
         if (!empty($value['tripids_cal'])) {
           $trip_ids_values = explode(',',$value['tripids_cal']);
@@ -1031,13 +1058,10 @@ function get_delivery_cost_details($form, &$form_state) {
               $delivered_value_in_lak = 0;
               $return_value_in_lak =0;
               $return_vs_delivered_percent = 0;
-              $return_vs_dispatched_percent = 0;
               $dp_value_in_lak = 0;
               $dp_percent = 0;
           }
         }
-        
-        
         $total_trip_delivery_cost = $delivery_boy_cost + $cashier_cost + $vehicle_per_day_cost;
         $total_dispatched_value += $dispatched_value_in_lak;
         $total_delivered_value += $delivered_value_in_lak;
@@ -1110,9 +1134,9 @@ function get_delivery_cost_details($form, &$form_state) {
           $counter++;
         }
       }
-  
       $resourc_not_utilized_cost = 0;
       if (!empty($rows)) {
+       
         if (!empty($all_resources) && $dipacth_date_filter == 1) {
           foreach ($all_resources as $trip_cashier_name=>$value) {
             $input_resource_type = Ucfirst(strtolower($value['resource_type']));
@@ -1121,10 +1145,12 @@ function get_delivery_cost_details($form, &$form_state) {
               $resource_not_utilized_cost += ($cashier_data[$trip_cashier_name]['cost_per_month'] / $resource_no_of_working_days);
             }
           }
+          
           $resource_not_utilized_cost = $resource_not_utilized_cost/$lak;
           $resource_not_utilized_cost = round($resource_not_utilized_cost,$round_off_no_digits_2);
           $total_cost_for_theday += $resource_not_utilized_cost;
         }
+       
         $total_dispatched_value = round($total_dispatched_value, $round_off_no_digits);
         $total_return_value = round($total_return_value, $round_off_no_digits);
         $total_return_vs_delivered_percent = round($total_return_vs_delivered_percent, $round_off_no_digits);
@@ -1147,11 +1173,12 @@ function get_delivery_cost_details($form, &$form_state) {
     }
   }
   // No trip created for that date then display all active vehicle with dispatch date.
-  if ($dipacth_date_filter == 1 && empty($res)) {
+  if ($dipacth_date_filter == 1 && empty($res)) { 
+    $counter = 1;
     $not_attempted_cost = 0;
     if (!empty($all_vehicles)) {
       foreach ($all_vehicles as $vehicle_number_value => $vehicle_values) {
-        $index++;
+        
         $date_array = explode('-', $dispatch_date);
         $currentdate = strtotime($dispatch_date);
         $year = $date_array[0];
@@ -1165,23 +1192,30 @@ function get_delivery_cost_details($form, &$form_state) {
         else if (!empty($vehicle_cost_calc[$vehicle_number_value]['cost_per_day'])) {
           $vehicle_per_day_cost = $vehicle_cost_calc[$vehicle_number_value]['cost_per_day'];
         }
-        if (!empty($all_extra_working[$vehicle_number_value])) {
+        if (!empty($all_extra_working[$vehicle_number_value])) { 
           $not_attempted_count++;
-          $not_attempted_cost += $vehicle_per_day_cost;
+          $not_attempted_cost += $vehicle_per_day_cost; 
+          $trip_not_created_reason = get_trip_not_created_reason(date('Y-m-d', $dis_date), $vehicle_number = $vehicle_number_value, $resource_name = null, $resource_nid = null);
+          if (empty($trip_not_created_reason)) {
+              $trip_not_created_reason = t('Trip Not Created');
+          }
+            $rows[] = array($counter, $vehicle_number_value, $trip_not_created_reason, $vehicle_values['field_vehicle_type_value'], $vehicle_values['field_vehicle_owner_value'], '', '', '', '', '', '', '', '', round($vehicle_per_day_cost / $lak, $round_off_no_digits_2), '', '');
+          $counter++;
         }
 
-        if (strtolower(date('l', $currentdate)) != strtolower($weekoff)) {
+        if (strtolower(date('l', $currentdate)) != strtolower($weekoff)) { 
           if (empty($absent_vehilce_details[$vehicle_number_value][$dispatch_date])) {
             $not_attempted_cost += $vehicle_per_day_cost;
             $trip_not_created_reason = get_trip_not_created_reason(date('Y-m-d', $dis_date), $vehicle_number = $vehicle_number_value, $resource_name = null, $resource_nid = null);
             if (empty($trip_not_created_reason)) {
               $trip_not_created_reason = t('Trip Not Created');
             }
-            $rows[] = array($index, $vehicle_number_value, $trip_not_created_reason, $vehicle_values['field_vehicle_type_value'], $vehicle_values['field_vehicle_owner_value'], '', '', '', '', '', '', '', '', round($vehicle_per_day_cost / $lak, $round_off_no_digits_2), '', '');
+            $rows[] = array($counter, $vehicle_number_value, $trip_not_created_reason, $vehicle_values['field_vehicle_type_value'], $vehicle_values['field_vehicle_owner_value'], '', '', '', '', '', '', '', '', round($vehicle_per_day_cost / $lak, $round_off_no_digits_2), '', '');
           }
           else {
-            $rows[] = array($index, $vehicle_number_value, 'On Leave', $vehicle_values['field_vehicle_type_value'], $vehicle_values['field_vehicle_owner_value'], '', '', '', '', '', '', '', '', 0, '', '');
+            $rows[] = array($counter, $vehicle_number_value, 'On Leave', $vehicle_values['field_vehicle_type_value'], $vehicle_values['field_vehicle_owner_value'], '', '', '', '', '', '', '', '', 0, '', '');
           }
+          $counter++;
         }
       }
       $resource_not_utilized_cost =0;
@@ -1193,15 +1227,16 @@ function get_delivery_cost_details($form, &$form_state) {
               $resource_not_utilized_cost += ($cashier_data[$trip_cashier_name]['cost_per_month'] / $resource_no_of_working_days);
             }
           }
+       
           $resource_not_utilized_cost_print = round($resource_not_utilized_cost / $lak, $round_off_no_digits_2);
           $not_attempted_cost += $resource_not_utilized_cost;
         }
-        
       $not_attempted_cost = round($not_attempted_cost / $lak, $round_off_no_digits_2);
-      $rows[] = array($index+1, t('Resources not utilized'), '', '', '', '', '', '', '', '', '', '', '', $resource_not_utilized_cost_print, '', '');
+      $rows[] = array($counter, t('Resources not utilized'), '', '', '', '', '', '', '', '', '', '', '', $resource_not_utilized_cost_print, '', '');
       $rows[] = array('', t('Total'), '', '', '', '', '', '', '', '', '', '', '', $not_attempted_cost);
     }
   }
+   //print_r($all_resources);die;
   $form_state['delivery_cost_details'] = $rows;
   $form_state['rebuild'] = TRUE;
 }
