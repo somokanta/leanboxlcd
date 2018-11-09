@@ -1625,6 +1625,7 @@ function get_all_active_vehicles_on_date_range($dispatch_from_date, $dispatch_to
     $query->join('node', 'vehicle_master', 'vehicle_master.nid = vehicle_ref.field_vehicle_number_ref_nid');
     $query->condition('vehicle_master.type', 'vehicle_master');
     $query->condition('vehicle_master.uid', $distributor_id);
+    $query->orderBy('n.nid','desc');
     if (!empty($vehicle_number)) {
        $query->condition('vehicle_master.title', $vehicle_number);
     }
@@ -1632,6 +1633,7 @@ function get_all_active_vehicles_on_date_range($dispatch_from_date, $dispatch_to
     $query->leftjoin('field_data_field_vehicle_type', 'vehicle_type', 'vehicle_type.entity_id = vehicle_master.nid');
     $query->leftjoin('field_data_field_vehicle_owner', 'vehicle_owner', 'vehicle_owner.entity_id = vehicle_master.nid');
     $query->addExpression("DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(end_period.field_end_period_value),'+00:00','+05:30'), '%Y-%m-%d')", 'end_period');
+    $query->addExpression("DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(start_period.field_start_period_value),'+00:00','+05:30'), '%Y-%m-%d')", 'start_period');
     $query->fields('vehicle_owner', array('field_vehicle_owner_value'));
     $query->fields('vehicle_type', array('field_vehicle_type_value'));
     $result = $query->execute()->fetchAll(PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
@@ -1655,18 +1657,24 @@ function get_all_active_resources_on_date_range($dispatch_from_date, $dispatch_t
     $query->condition('end_period.field_end_period_value', $dispatch_from_date, '>=');
     $query->condition('start_period.field_start_period_value', $dispatch_to_date, '<=');
     $query->condition('n.type', 'resources_contract');
+    $query->orderBy('n.nid', 'desc');
     $query->condition('n.uid', $distributor_id);
     $query->join('node', 'resource_master', 'resource_master.nid = resource_ref.field_resource_nid');
     $query->condition('resource_master.type', 'resource_master');
+    $query->leftjoin('field_data_field_weekly_off', 'weekly_off_selected', 'weekly_off_selected.entity_id = resource_master.nid');
     $query->condition('resource_master.uid', $distributor_id);
     $query->leftjoin('field_data_field_is_active', 'is_active', 'is_active.entity_id = resource_master.nid');
     $query->addExpression("DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(end_period.field_end_period_value),'+00:00','+05:30'), '%Y-%m-%d')", 'end_period');
+    $query->addExpression("DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(start_period.field_start_period_value),'+00:00','+05:30'), '%Y-%m-%d')", 'start_period');
     $query->addExpression("rt.field_resource_type_value", 'resource_type');
     $query->join('field_data_field_resource_type', 'rt', 'rt.entity_id = resource_master.nid');
     $query->condition('rt.field_resource_type_value', $resource_types, 'IN');
     $query->leftjoin('field_data_field_resource_name', 'resource', 'resource.entity_id = resource_master.nid');
     $query->fields('resource', array('field_resource_name_value'));
     $query->fields('rt', array('field_resource_type_value'));
+    $query->fields('weekly_off_selected', array('field_weekly_off_value'));
+    $query->leftjoin('field_data_field_cost_per_month', 'cost_per_month', 'cost_per_month.entity_id = resource_master.nid');
+    $query->addExpression('cost_per_month.field_cost_per_month_value', 'cost_per_month');
     if (!empty($resource_name)) {
       $query->condition('resource.field_resource_name_value', $resource_name);
     }

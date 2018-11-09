@@ -712,6 +712,7 @@ function get_delivery_cost_details_mtd($form, &$form_state,$export=0) {
       $ts1 = strtotime($dispatch_from_date);
       $ts2 = strtotime($dispatch_to_date);
       $contract_end_period = strtotime($vehicle_values['end_period']);
+      $contract_start_period = strtotime($vehicle_values['start_period']);
       $currentdate = $ts1;
       $year1 = date('Y', $ts1);
       $year2 = date('Y', $ts2);
@@ -721,7 +722,7 @@ function get_delivery_cost_details_mtd($form, &$form_state,$export=0) {
       
       while ($currentdate <= $ts2 && $currentdate <= $contract_end_period) {
         $day_of_month = date('Y-m-d', $currentdate);
-        if (strtolower(date('l', $currentdate)) != strtolower($weekoff)) {
+        if (strtolower(date('l', $currentdate)) != strtolower($weekoff) && $contract_start_period <= $currentdate) {
           if (empty($absent_vehilce_details[$vehicle_number_value][$day_of_month]) && empty($trip_created_days[$vehicle_number_value][$day_of_month])) {
             $days[$vehicle_number_value][$day_of_month] = $day_of_month;
           }
@@ -972,7 +973,6 @@ function get_delivery_cost_details($form, &$form_state,$export=0) {
         $vehicle_per_day_cost = 0;
         $vehilce_monthly_cost = 0;
         $cashier_cost = 0;
-        ;
         $delivered_value_in_lak = round($value['delivered_value'] / $lak, $round_off_no_digits);
         $return_percent = ($dispatched_value_in_lak / $return_value_in_lak) * 100;
         $return_vs_delivered_percent = ($return_value_in_lak / $delivered_value_in_lak) * 100;
@@ -1872,18 +1872,15 @@ function vehicle_day_wise_performance_form_submit($form, &$form_state,$export=0)
       $ts1 = strtotime($dispatch_from_date);
       $ts2 = strtotime($dispatch_to_date);
       $contract_end_period = strtotime($vehicle_values['end_period']);
+      $contract_start_period = strtotime($vehicle_values['start_period']);
       $currentdate = $ts1;
       $year1 = date('Y', $ts1);
       $year2 = date('Y', $ts2);
       $month1 = date('m', $ts1);
       $month2 = date('m', $ts2);
-      $diff = (($year2 - $year1) * 12) + ($month2 - $month1);
-      if ($diff > 0) {
-        
-      }
       while ($currentdate <= $ts2 && $currentdate <= $contract_end_period) {
         $day_of_month = date('Y-m-d', $currentdate);
-        if (strtolower(date('l', $currentdate)) != strtolower($weekoff)) {
+        if (strtolower(date('l', $currentdate)) != strtolower($weekoff) && $contract_start_period <= $currentdate) {
           if (empty($absent_vehilce_details[$vehicle_number_value][$day_of_month]) && empty($trip_created_days[$vehicle_number_value][$day_of_month])) {
             $days[$vehicle_number_value][$day_of_month] = $day_of_month;
           }
@@ -2292,6 +2289,7 @@ function resource_day_wise_performance_form_submit($form, &$form_state,$export=0
       $ts1 = strtotime($dispatch_from_date);
       $ts2 = strtotime($dispatch_to_date);
       $contract_end_period = strtotime($resource_values['end_period']);
+      $contract_start_period = strtotime($resource_values['start_period']);
       $currentdate = $ts1;
       $year1 = date('Y', $ts1);
       $year2 = date('Y', $ts2);
@@ -2303,7 +2301,7 @@ function resource_day_wise_performance_form_submit($form, &$form_state,$export=0
       }
       while ($currentdate <= $ts2 && $currentdate <= $contract_end_period) {
         $day_of_month = date('Y-m-d', $currentdate);
-        if (strtolower(date('l', $currentdate)) != strtolower($weekoff)) {
+        if (strtolower(date('l', $currentdate)) != strtolower($weekoff) && $contract_start_period <= $currentdate) {
           if (empty($absent_resource_details[$resource_name][$day_of_month]) && empty($trip_created_days[$resource_name][$day_of_month])) {
             $days[$resource_name][$day_of_month] = $day_of_month;
           }
@@ -2339,7 +2337,7 @@ function resource_day_wise_performance_form_submit($form, &$form_state,$export=0
       if (!empty($absent_resource_details[$resource_name])) {
         foreach ($absent_resource_details[$resource_name] as $date_key => $date_value) {
           //$rows[$resource_name][$date_key] =  array('vehicle_no'=>'','date'=>$date_key,'active'=>'On Leave','trip_ids'=>'','cashier_names'=>'','dispatched_value'=>'','delivered_value'=>'','cost'=>'','cost_vs_dispatched'=>'','cost_vs_delivered'=>'','leave_reason'=>$date_value);
-          $rows[$resource_name][$date_key] = array('resource_name' => '', 'resource_type' => $resource_values['resource_type'], 'date' => $date_key, 'active' => 'On Leave', 'trip_ids' => 'Trip Not Created', $previous_trip_status, 'cost' => 0, 'vehicle_number' => '', 'leave_reason' => $date_value);
+          $rows[$resource_name][$date_key] = array('resource_name' => '', 'resource_type' => '', 'date' => $date_key, 'active' => 'On Leave', 'trip_ids' => 'Trip Not Created', $previous_trip_status, 'cost' => 0, 'vehicle_number' => '', 'leave_reason' => $date_value);
         }
       }
       usort($rows[$resource_name], "sortFunction");
