@@ -34,7 +34,7 @@ class field_collection_mode extends views_handler_field {
     if (!empty($res_money_collect2_edit)) {
       return ucfirst($res_money_collect2_edit);
     }
-    else if (!empty($res_money_collect2)) {
+    else if ((!empty($res_money_collect2)) && ($res_money_collect2 != 'NA')) {
        return $res_money_collect2;
     }
     else if ($res_signed_bill_delivery_edit == 'Yes') {
