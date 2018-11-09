@@ -3790,8 +3790,8 @@ function dispatch_planning_views_query_alter(&$view, &$query) {
       }
     }
   }
-
-  if ($view->name == 'bill_return_report' && $view->name == 'views_data_export_2') {
+  
+  if ($view->name == 'bill_return_report' && $view->current_display == 'views_data_export_2') {
     global $user;
     $distributor_id = change_feeds_import_get_distributor_id($user->uid);
     $query = db_select('dispatch_planning_api_data', 'ad');
