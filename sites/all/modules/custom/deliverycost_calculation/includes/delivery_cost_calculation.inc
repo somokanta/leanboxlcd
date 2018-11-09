@@ -281,8 +281,8 @@ function delivery_cost_calculation_mtd_form($form, &$form_state) {
       '#suffix' => '</div>',
       '#sticky' => FALSE,
     );
-    cache_set('delivery_cost_download' . session_id(), $form['delivery_cost_table'], 'cache', time() + 60 * 10);
-    $rr = l('Download', "delivery_cost/export/mtd", array('attributes' => array("target" => "_blank")));
+    cache_set('delivery_cost_download_mtd' . session_id(), $form['delivery_cost_table'], 'cache', time() + 60 * 10);
+    $rr = l('Download', "delivery_cost/export/mtd", array('attributes' => array("target" => "_blank"), 'query' => array('dispatch_from_date' => $form_state['values']['dispatch_from_date'], 'dispatch_to_date' => $form_state['values']['dispatch_to_date'])));
     $form['download_mark'] = array(
       '#type' => 'markup',
       '#markup' => $rr,
@@ -436,7 +436,7 @@ function get_dp_value_vehicle_number($trip_id, $vehicle_number) {
   return $dp_value;
 }
 
-function get_delivery_cost_details_mtd($form, &$form_state) {
+function get_delivery_cost_details_mtd($form, &$form_state,$export=0) {
   global $user;
   $rows = array();
   $trip_ids = array();
@@ -718,9 +718,7 @@ function get_delivery_cost_details_mtd($form, &$form_state) {
       $month1 = date('m', $ts1);
       $month2 = date('m', $ts2);
       $diff = (($year2 - $year1) * 12) + ($month2 - $month1);
-      if ($diff > 0) {
-        
-      }
+      
       while ($currentdate <= $ts2 && $currentdate <= $contract_end_period) {
         $day_of_month = date('Y-m-d', $currentdate);
         if (strtolower(date('l', $currentdate)) != strtolower($weekoff)) {
@@ -760,7 +758,9 @@ function get_delivery_cost_details_mtd($form, &$form_state) {
       $rows[] = array($vehicle_number_value, '', 'Total', '', '', '', '', '', '', '', '', '', '', round($cost_per_sale_dispatched, $round_off_no_digits_2), round($cost_per_sale, $round_off_no_digits_2));
     }
   }
-
+  if ($export == 1) {
+    return $rows;
+  }
   $form_state['delivery_cost_details'] = $rows;
   $form_state['rebuild'] = TRUE;
 }
@@ -803,7 +803,7 @@ function get_extra_working_vehicles($dispatch_date) {
   return $result;
 }
 
-function get_delivery_cost_details($form, &$form_state) {
+function get_delivery_cost_details($form, &$form_state,$export=0) {
   global $user;
   $rows = array();
   $trip_ids = array();
@@ -1237,6 +1237,9 @@ function get_delivery_cost_details($form, &$form_state) {
     }
   }
    //print_r($all_resources);die;
+  if ($export == 1) {
+      return $rows;
+  }
   $form_state['delivery_cost_details'] = $rows;
   $form_state['rebuild'] = TRUE;
 }
@@ -1468,12 +1471,110 @@ function validate_delivery_cost_details(&$form, &$form_state) {
 }
 
 function delivery_cost_export() {
-  // arg3 is the file name
+  // this is for cache expired
+  $paramenters = drupal_get_query_parameters();
+  if (!empty($paramenters)) {
+    if (!empty($paramenters['dispatch_date'])) {
+      $form_state['values']['dispatch_date'] = $paramenters['dispatch_date'];
+    }
+    elseif (!empty($paramenters['trip_id'])) {
+      $form_state['values']['trip_id'] = $paramenters['trip_id'];
+    }
+    if (!empty($paramenters['dispatch_from_date']) && !empty($paramenters['dispatch_to_date'])) {
+      $form_state['values']['dispatch_from_date'] = $paramenters['dispatch_from_date'];
+      $form_state['values']['dispatch_to_date'] = $paramenters['dispatch_to_date'];
+    }
+  }
   $arg3 = arg(2);
   $label = $arg3;
-  $file = "hul_delivery_cost_$label" .'_' . date('d-M-Y') .'_'.time(). ".xls";
-  $data = cache_get('delivery_cost_download' . session_id());
-  $table = drupal_render($data->data);
+  $cache_name = '';
+  $file = "hul_delivery_cost_$label" . '_' . date('d-M-Y') . '_' . time() . ".xls";
+  // for MTD export
+  if ($label == 'mtd') {
+    $data = cache_get('delivery_cost_download_mtd' . session_id());
+    if (empty($data)) {
+      $options = get_delivery_cost_details_mtd($form, $form_state, $export = 1);
+      $header = array(
+        'Vehicle Number',
+        'Owner',
+        'Cashier',
+        'Trips',
+        'Dispatched Value(Rs Lakhs)',
+        'Delivered Value(Rs Lakhs)',
+        'Returns Value(Rs Lakhs)',
+        'Average Delivered Value Per Trip',
+        //'Total Cost (Rs Lakhs)',
+        'Average Cost Per Day (Rs Lakhs)',
+        'Return % Sale(vs Delivered)',
+        'Return % Sale(vs Dispatched)',
+        'DP Value',
+        'DP % Value',
+        //'Cost % Sale',
+        'Cost % Sale vs Dispatched',
+        'Cost % Sale vs Delivered',
+      );
+      $delivery_cost_table = array(
+        '#theme' => 'table',
+        '#prefix' => '<div class="delivery_cost_table custom_middle_table">',
+        '#tree' => TRUE,
+        '#header' => $header,
+        '#rows' => $options,
+        '#attributes' => array(
+          'class' => array('delivery_cost'),
+          'id' => 'delivery_cost'
+        ),
+        '#suffix' => '</div>',
+        '#sticky' => FALSE,
+      );
+      $table = drupal_render($delivery_cost_table);
+    }
+    else {
+      $table = drupal_render($data->data);
+    }
+  }
+  // Delivery cost export
+  else {
+    $data = cache_get('delivery_cost_download' . session_id());
+    // if session data is empty then calculate to get delivery cost export
+    if (empty($data->data)) {
+      $options = get_delivery_cost_details($form, $form_state, $export = 1);
+      $header = array(
+        '#',
+        'Vehicle Number',
+        'Trip ID',
+        'Vehicle Type',
+        'Owner',
+        'Cashier',
+        'Dispatched Value(Rs Lakhs)',
+        'Delivered Value(Rs Lakhs)',
+        'Returns Value(Rs Lakhs)',
+        'Returns %(vs Delivered)',
+        'Returns %(vs Dispatched)',
+        'DP Value',
+        'DP %',
+        'Total Cost for the day',
+        'Cost as a % of Dispatched Value',
+        'Cost as a % of Delivered Value',
+      );
+      $delivery_cost_table = array(
+        '#theme' => 'table',
+        '#prefix' => '<div class="delivery_cost_table">',
+        '#tree' => TRUE,
+        '#header' => $header,
+        '#rows' => $options,
+        '#attributes' => array(
+          'class' => array('delivery_cost'),
+          'id' => 'delivery_cost'
+        ),
+        '#suffix' => '</div>',
+        '#sticky' => FALSE,
+      );
+      $table = drupal_render($delivery_cost_table);
+    }
+    else {
+      $table = drupal_render($data->data);
+    }
+  }
   header("Content-type: application/vnd.ms-excel");
   header("Content-Disposition: attachment; filename=$file");
   echo $table;
@@ -1563,7 +1664,7 @@ function vehicle_day_wise_performance_form($form, &$form_state) {
       '#suffix' => '</div>',
       '#sticky' => FALSE,
     );
-    cache_set('delivery_cost_download' . session_id(), $form['delivery_cost_table'], 'cache', time() + 60 * 10);
+    cache_set('delivery_cost_download_vehicle' . session_id(), $form['delivery_cost_table'], 'cache', time() + 60 * 10);
     $rr = l('Download', "vehicle_daily_wise_report/export", array('attributes' => array("target" => "_blank"), 'query' => array('dispatch_from_date' => $form_state['values']['dispatch_from_date'], 'dispatch_to_date' => $form_state['values']['dispatch_to_date'], 'vehicle_number' => $form_state['values']['vehicle_number'])));
     $form['download_mark'] = array(
       '#type' => 'markup',
@@ -1573,7 +1674,7 @@ function vehicle_day_wise_performance_form($form, &$form_state) {
   return $form;
 }
 
-function vehicle_day_wise_performance_form_submit($form, &$form_state) {
+function vehicle_day_wise_performance_form_submit($form, &$form_state,$export=0) {
   global $user;
   $rows = array();
   $trip_ids = array();
@@ -1849,7 +1950,9 @@ function vehicle_day_wise_performance_form_submit($form, &$form_state) {
 
     // print_r($rows);die;
   }
-
+  if ($export==1) {
+      return $rows;
+  }
   $form_state['delivery_cost_details'] = $rows;
   $form_state['rebuild'] = TRUE;
 }
@@ -1860,14 +1963,49 @@ function sortFunction($a, $b) {
 
 function vehicle_daily_wise_report_export() {
   $query_parameters = drupal_get_query_parameters();
-  if (!empty($query_parameters['dispatch_from_date']) && !empty($query_parameters['dispatch_to_date'])) {
-    $vehicle_number = $query_parameters['vehicle_number'];
-    $from_date = $query_parameters['dispatch_from_date'];
-    $to_date = $query_parameters['dispatch_to_date'];
-  }
   $file = "hul_vehicle_daily_wise_report_" . date('d-M-Y') . ".xls";
-  $data = cache_get('delivery_cost_download' . session_id());
-  $table = drupal_render($data->data);
+  $data = cache_get('delivery_cost_download_vehicle' . session_id());
+  if (empty($data->data)) {
+    if (!empty($query_parameters['dispatch_from_date']) && !empty($query_parameters['dispatch_to_date'])) {
+      $form_state['values']['dispatch_from_date'] = $query_parameters['dispatch_from_date'];
+      $form_state['values']['dispatch_to_date'] = $query_parameters['dispatch_to_date'];
+      $form_state['values']['vehicle_number'] =  $query_parameters['vehicle_number'];;
+      $options = vehicle_day_wise_performance_form_submit($form, $form_state, $export = 1);
+    }
+    if (!empty($options)) {
+      $header = array(
+        'Vehicle Number',
+        'Date',
+        'Active/On Leave',
+        'Trip ID',
+        'Previous Trip Status',
+        'Cashier',
+        'Dispatched Value(Rs Lakhs)',
+        'Delivered Value(Rs Lakhs)',
+        'Cost(Rs Lakhs)',
+        'Cost % of Dispatched Value',
+        'Cost % of Delivered Value',
+        'Reason if on Leave/Maintenance',
+      );
+      $delivery_cost_table = array(
+        '#theme' => 'table',
+        '#prefix' => '<div class="delivery_cost_table custom_middle_table">',
+        '#tree' => TRUE,
+        '#header' => $header,
+        '#rows' => $options,
+        '#attributes' => array(
+          'class' => array('delivery_cost'),
+          'id' => 'delivery_cost'
+        ),
+        '#suffix' => '</div>',
+        '#sticky' => FALSE,
+      );
+      $table = drupal_render($delivery_cost_table);
+    }
+  }
+  else {
+    $table = drupal_render($data->data);
+  }
   header("Content-type: application/vnd.ms-excel");
   header("Content-Disposition: attachment; filename=$file");
   echo $table;
@@ -2016,7 +2154,7 @@ function resource_day_wise_performance_form($form, &$form_state) {
       '#suffix' => '</div>',
       '#sticky' => FALSE,
     );
-    cache_set('delivery_cost_download' . session_id(), $form['delivery_cost_table'], 'cache', time() + 60 * 10);
+    cache_set('delivery_cost_download_resource' . session_id(), $form['delivery_cost_table'], 'cache', time() + 60 * 10);
     $rr = l('Download', "resource_daily_wise_report/export", array('attributes' => array("target" => "_blank"), 'query' => array('dispatch_from_date' => $form_state['values']['dispatch_from_date'], 'dispatch_to_date' => $form_state['values']['dispatch_to_date'], 'resource_name' => $form_state['values']['resource_name'])));
     $form['download_mark'] = array(
       '#type' => 'markup',
@@ -2026,7 +2164,7 @@ function resource_day_wise_performance_form($form, &$form_state) {
   return $form;
 }
 
-function resource_day_wise_performance_form_submit($form, &$form_state) {
+function resource_day_wise_performance_form_submit($form, &$form_state,$export=0) {
   global $user;
   $rows = array();
   $trip_ids = array();
@@ -2223,21 +2361,55 @@ function resource_day_wise_performance_form_submit($form, &$form_state) {
 
     // print_r($rows);die;
   }
-
+  if ($export == 1) {
+    return $rows;
+  }
   $form_state['delivery_cost_details'] = $rows;
   $form_state['rebuild'] = TRUE;
 }
 
 function resource_daily_wise_report_export() {
   $query_parameters = drupal_get_query_parameters();
-  if (!empty($query_parameters['dispatch_from_date']) && !empty($query_parameters['dispatch_to_date'])) {
-    $vehicle_number = $query_parameters['vehicle_number'];
-    $from_date = $query_parameters['dispatch_from_date'];
-    $to_date = $query_parameters['dispatch_to_date'];
-  }
   $file = "hul_resource_daily_wise_report_" . date('d-M-Y') . ".xls";
-  $data = cache_get('delivery_cost_download' . session_id());
-  $table = drupal_render($data->data);
+  $data = cache_get('delivery_cost_download_resource' . session_id());
+  if (empty($data->data)) {
+    if (!empty($query_parameters['dispatch_from_date']) && !empty($query_parameters['dispatch_to_date'])) {
+      $form_state['values']['dispatch_from_date'] = $query_parameters['dispatch_from_date'];
+      $form_state['values']['dispatch_to_date'] = $query_parameters['dispatch_to_date'];
+      $form_state['values']['resource_name'] = $query_parameters['resource_name'];
+      $options = resource_day_wise_performance_form_submit($form, $form_state, $export = 1);
+    }
+    if (!empty($options)) {
+      $header = array(
+        'Resource Name',
+        'Resource Type',
+        'Dispatch Date',
+        'Active/On Leave',
+        'Trip ID',
+        'Previous Trip Status',
+        'Cost',
+        'Vehicle Number',
+        'Reason if on Leave/Maintenance',
+      );
+      $delivery_cost_table = array(
+        '#theme' => 'table',
+        '#prefix' => '<div class="delivery_cost_table custom_middle_table">',
+        '#tree' => TRUE,
+        '#header' => $header,
+        '#rows' => $options,
+        '#attributes' => array(
+          'class' => array('delivery_cost'),
+          'id' => 'delivery_cost'
+        ),
+        '#suffix' => '</div>',
+        '#sticky' => FALSE,
+      );
+      $table = drupal_render($delivery_cost_table);
+    }
+  }
+  else {
+    $table = drupal_render($data->data);
+  }
   header("Content-type: application/vnd.ms-excel");
   header("Content-Disposition: attachment; filename=$file");
   echo $table;
