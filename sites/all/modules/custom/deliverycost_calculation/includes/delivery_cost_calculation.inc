@@ -1092,6 +1092,8 @@ function get_delivery_cost_details($form, &$form_state, $export = 0) {
     $no_of_working_days = calculateWorkingDaysInMonth($year, $month, $weekoff);
     // Not considering weekly off only calendar days for resources
     $total_cost_for_theday = 0;
+    // variable that save only Trip status delivery confirmed cost
+    $total_cost_of_trip_delivred = 0;
     foreach ($res as $key => $value) {
       //$all_vehicles
       $trip_attempted_vehicles[$value['vehicle_number']] = $value['vehicle_number'];
@@ -1197,6 +1199,7 @@ function get_delivery_cost_details($form, &$form_state, $export = 0) {
             }
           }
         }
+        $total_trip_delivery_cost = $delivery_boy_cost + $cashier_cost + $vehicle_per_day_cost;
         // Values will be calculated when trip status greater than -1 delivery confirmation pending
         if (!empty($value['tripids_cal'])) {
           $trip_ids_values = explode(',', $value['tripids_cal']);
@@ -1217,9 +1220,10 @@ function get_delivery_cost_details($form, &$form_state, $export = 0) {
             $return_vs_delivered_percent = 0;
             $dp_value_in_lak = 0;
             $dp_percent = 0;
+            $total_trip_delivery_cost = 0;
           }
         }
-        $total_trip_delivery_cost = $delivery_boy_cost + $cashier_cost + $vehicle_per_day_cost;
+        
         $total_dispatched_value += $dispatched_value_in_lak;
         $total_delivered_value += $delivered_value_in_lak;
         $total_return_value += $return_value_in_lak;
@@ -1229,6 +1233,7 @@ function get_delivery_cost_details($form, &$form_state, $export = 0) {
         $total_return_vs_dispatched_percent += $return_vs_dispatched_percent;
         $total_dp_percent += $dp_percent;
         $total_cost_for_theday += $total_trip_delivery_cost / $lak;
+        $total_cost_of_trip_delivred += $total_trip_delivery_cost / $lak;
         $return_value_in_lak = round($return_value_in_lak, $round_off_no_digits);
         $return_vs_delivered_percent = round($return_vs_delivered_percent);
         $return_vs_dispatched_percent = round($return_vs_dispatched_percent);
@@ -1317,11 +1322,13 @@ function get_delivery_cost_details($form, &$form_state, $export = 0) {
         $total_delivered_value = round($total_delivered_value, $round_off_no_digits);
         $total_cost_for_theday = round($total_cost_for_theday, $round_off_no_digits_2);
 
-        $total_cost_vs_delivered = round(($total_cost_for_theday / $total_delivered_value) * 100, $round_off_no_digits_2);
+        //$total_cost_vs_delivered = round(($total_cost_for_theday / $total_delivered_value) * 100, $round_off_no_digits_2);
         $total_cost_vs_dispatched = round(($total_cost_for_theday / $total_dispatched_value) * 100, $round_off_no_digits_2);
         $total_return_vs_delivered_percent = round(($total_return_value / $total_delivered_value) * 100);
         $total_return_vs_dispatched_percent = round(($total_return_value / $total_dispatched_value) * 100);
         $total_dp_percent = round(($total_dp_value / $total_dispatched_value) * 100);
+        // replaced with only trip status is delivery confirmed
+        $total_cost_vs_delivered = round(($total_cost_of_trip_delivred / $total_delivered_value) * 100, $round_off_no_digits_2);  
         if ($dipacth_date_filter == 1) {
           $rows[] = array($counter, t('Resources not utilized'), '', '', '', '', '', '', '', '', '', '', '', $resource_not_utilized_cost, '', '');
         }
