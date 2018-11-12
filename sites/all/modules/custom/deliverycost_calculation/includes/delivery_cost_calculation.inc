@@ -1200,6 +1200,7 @@ function get_delivery_cost_details($form, &$form_state, $export = 0) {
           }
         }
         $total_trip_delivery_cost = $delivery_boy_cost + $cashier_cost + $vehicle_per_day_cost;
+        $trip_delivery_confirmed_delivery_cost = $total_trip_delivery_cost;
         // Values will be calculated when trip status greater than -1 delivery confirmation pending
         if (!empty($value['tripids_cal'])) {
           $trip_ids_values = explode(',', $value['tripids_cal']);
@@ -1220,7 +1221,8 @@ function get_delivery_cost_details($form, &$form_state, $export = 0) {
             $return_vs_delivered_percent = 0;
             $dp_value_in_lak = 0;
             $dp_percent = 0;
-            $total_trip_delivery_cost = 0;
+            $trip_delivery_confirmed_delivery_cost = 0;
+            
           }
         }
         
@@ -1233,7 +1235,7 @@ function get_delivery_cost_details($form, &$form_state, $export = 0) {
         $total_return_vs_dispatched_percent += $return_vs_dispatched_percent;
         $total_dp_percent += $dp_percent;
         $total_cost_for_theday += $total_trip_delivery_cost / $lak;
-        $total_cost_of_trip_delivred += $total_trip_delivery_cost / $lak;
+        $total_cost_of_trip_delivred += $trip_delivery_confirmed_delivery_cost / $lak;
         $return_value_in_lak = round($return_value_in_lak, $round_off_no_digits);
         $return_vs_delivered_percent = round($return_vs_delivered_percent);
         $return_vs_dispatched_percent = round($return_vs_dispatched_percent);
