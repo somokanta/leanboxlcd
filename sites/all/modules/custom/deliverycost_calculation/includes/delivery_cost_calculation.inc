@@ -358,6 +358,7 @@ function delivery_cost_calculation_form($form, &$form_state) {
       'DP Value',
       'DP %',
       'Total Cost for the day',
+      'Total Cost Delivered',
       'Cost as a % of Dispatched Value',
       'Cost as a % of Delivered Value',
     );
@@ -1249,7 +1250,7 @@ function get_delivery_cost_details($form, &$form_state, $export = 0) {
         $total_cost_vs_delivered += $cost_vs_delivered_cost;
         $total_cost_vs_dispatched += $cost_vs_dispatched;
         $total_trip_delivery_cost = round($total_trip_delivered_cost_in_lak, $round_off_no_digits);
-        $rows[] = array($counter, $value['vehicle_number'], $value['trip_ids'], $value['field_vehicle_type_value'], $value['field_vehicle_owner_value'], $value['cashiernames'], $dispatched_value_in_lak, $delivered_value_in_lak, $return_value_in_lak, $return_vs_delivered_percent, $return_vs_dispatched_percent, $dp_value_in_lak, $dp_percent, $total_trip_delivery_cost, round($cost_vs_dispatched, $round_off_no_digits_2), round($cost_vs_delivered_cost, $round_off_no_digits_2));
+        $rows[] = array($counter, $value['vehicle_number'], $value['trip_ids'], $value['field_vehicle_type_value'], $value['field_vehicle_owner_value'], $value['cashiernames'], $dispatched_value_in_lak, $delivered_value_in_lak, $return_value_in_lak, $return_vs_delivered_percent, $return_vs_dispatched_percent, $dp_value_in_lak, $dp_percent, $total_trip_delivery_cost,round($trip_delivery_confirmed_delivery_cost/$lak, $round_off_no_digits_2), round($cost_vs_dispatched, $round_off_no_digits_2), round($cost_vs_delivered_cost, $round_off_no_digits_2));
         $counter++;
       }
       if (strtolower(date('l', $dis_date)) != strtolower($weekoff)) {
@@ -1271,7 +1272,7 @@ function get_delivery_cost_details($form, &$form_state, $export = 0) {
             if (empty($trip_not_created_reason)) {
               $trip_not_created_reason = t('Trip Not Created');
             }
-            $rows[] = array($counter, $value, $trip_not_created_reason, $get_active_vehicles_on_dispatch_date[$value]['field_vehicle_type_value'], $get_active_vehicles_on_dispatch_date[$value]['field_vehicle_owner_value'], '', '', '', '', '', '', '', '', round($vehicle_per_day_cost / $lak, $round_off_no_digits_2), '', '');
+            $rows[] = array($counter, $value, $trip_not_created_reason, $get_active_vehicles_on_dispatch_date[$value]['field_vehicle_type_value'], $get_active_vehicles_on_dispatch_date[$value]['field_vehicle_owner_value'], '', '', '', '', '', '', '', '', round($vehicle_per_day_cost / $lak, $round_off_no_digits_2), '','', '');
             $counter++;
           }
         }
@@ -1286,7 +1287,7 @@ function get_delivery_cost_details($form, &$form_state, $export = 0) {
           }
           $total_trip_delivery_cost += (float) $value;
           $total_cost_for_theday += (float) $value / $lak;
-          $rows[] = array($counter, $key, $trip_not_created_reason, $get_active_vehicles_on_dispatch_date[$key]['field_vehicle_type_value'], $get_active_vehicles_on_dispatch_date[$key]['field_vehicle_owner_value'], '', '', '', '', '', '', '', '', round($value / $lak, $round_off_no_digits_2), '', '');
+          $rows[] = array($counter, $key, $trip_not_created_reason, $get_active_vehicles_on_dispatch_date[$key]['field_vehicle_type_value'], $get_active_vehicles_on_dispatch_date[$key]['field_vehicle_owner_value'], '', '', '', '', '', '', '', '', round($value / $lak, $round_off_no_digits_2),'', '', '');
           $counter++;
         }
       }
@@ -1294,7 +1295,7 @@ function get_delivery_cost_details($form, &$form_state, $export = 0) {
       if ($dipacth_date_filter == 1) {
         $absent_vehilce_details = get_maintenance_dates_of_vehicle($dis_date, $dis_date);
         foreach ($absent_vehilce_details as $ab_vehicle_number => $ab_vehiclevalue) {
-          $rows[] = array($counter, $ab_vehicle_number, 'On Leave', $get_active_vehicles_on_dispatch_date[$ab_vehicle_number]['field_vehicle_type_value'], $get_active_vehicles_on_dispatch_date[$ab_vehicle_number]['field_vehicle_owner_value'], '', '', '', '', '', '', '', '', 0, '', '');
+          $rows[] = array($counter, $ab_vehicle_number, 'On Leave', $get_active_vehicles_on_dispatch_date[$ab_vehicle_number]['field_vehicle_type_value'], $get_active_vehicles_on_dispatch_date[$ab_vehicle_number]['field_vehicle_owner_value'], '', '', '', '', '', '', '', '', 0, '', '','');
           $counter++;
         }
       }
@@ -1332,9 +1333,9 @@ function get_delivery_cost_details($form, &$form_state, $export = 0) {
         // replaced with only trip status is delivery confirmed
         $total_cost_vs_delivered = round(($total_cost_of_trip_delivred / $total_delivered_value) * 100, $round_off_no_digits_2);  
         if ($dipacth_date_filter == 1) {
-          $rows[] = array($counter, t('Resources not utilized'), '', '', '', '', '', '', '', '', '', '', '', $resource_not_utilized_cost, '', '');
+          $rows[] = array($counter, t('Resources not utilized'), '', '', '', '', '', '', '', '', '', '', '', $resource_not_utilized_cost, '', '','');
         }
-        $rows[] = array('', t('Total'), '', '', '', '', $total_dispatched_value, $total_delivered_value, $total_return_value, $total_return_vs_delivered_percent, $total_return_vs_dispatched_percent, $total_dp_value, $total_dp_percent, $total_cost_for_theday, $total_cost_vs_dispatched, $total_cost_vs_delivered);
+        $rows[] = array('', t('Total'), '', '', '', '', $total_dispatched_value, $total_delivered_value, $total_return_value, $total_return_vs_delivered_percent, $total_return_vs_dispatched_percent, $total_dp_value, $total_dp_percent, $total_cost_for_theday,round($total_cost_of_trip_delivred,$round_off_no_digits_2), $total_cost_vs_dispatched, $total_cost_vs_delivered);
       }
     }
   }
@@ -1365,7 +1366,7 @@ function get_delivery_cost_details($form, &$form_state, $export = 0) {
           if (empty($trip_not_created_reason)) {
             $trip_not_created_reason = t('Trip Not Created');
           }
-          $rows[] = array($counter, $vehicle_number_value, $trip_not_created_reason, $vehicle_values['field_vehicle_type_value'], $vehicle_values['field_vehicle_owner_value'], '', '', '', '', '', '', '', '', round($vehicle_per_day_cost / $lak, $round_off_no_digits_2), '', '');
+          $rows[] = array($counter, $vehicle_number_value, $trip_not_created_reason, $vehicle_values['field_vehicle_type_value'], $vehicle_values['field_vehicle_owner_value'], '', '', '', '', '', '', '', '', round($vehicle_per_day_cost / $lak, $round_off_no_digits_2),'', '', '');
           $counter++;
         }
 
@@ -1376,10 +1377,10 @@ function get_delivery_cost_details($form, &$form_state, $export = 0) {
             if (empty($trip_not_created_reason)) {
               $trip_not_created_reason = t('Trip Not Created');
             }
-            $rows[] = array($counter, $vehicle_number_value, $trip_not_created_reason, $vehicle_values['field_vehicle_type_value'], $vehicle_values['field_vehicle_owner_value'], '', '', '', '', '', '', '', '', round($vehicle_per_day_cost / $lak, $round_off_no_digits_2), '', '');
+            $rows[] = array($counter, $vehicle_number_value, $trip_not_created_reason, $vehicle_values['field_vehicle_type_value'], $vehicle_values['field_vehicle_owner_value'], '', '', '', '', '', '', '', '', round($vehicle_per_day_cost / $lak, $round_off_no_digits_2),'', '', '');
           }
           else {
-            $rows[] = array($counter, $vehicle_number_value, 'On Leave', $vehicle_values['field_vehicle_type_value'], $vehicle_values['field_vehicle_owner_value'], '', '', '', '', '', '', '', '', 0, '', '');
+            $rows[] = array($counter, $vehicle_number_value, 'On Leave', $vehicle_values['field_vehicle_type_value'], $vehicle_values['field_vehicle_owner_value'], '', '', '', '', '', '', '', '', 0, '', '','');
           }
           $counter++;
         }
@@ -1398,8 +1399,8 @@ function get_delivery_cost_details($form, &$form_state, $export = 0) {
         $not_attempted_cost += $resource_not_utilized_cost;
       }
       $not_attempted_cost = round($not_attempted_cost / $lak, $round_off_no_digits_2);
-      $rows[] = array($counter, t('Resources not utilized'), '', '', '', '', '', '', '', '', '', '', '', $resource_not_utilized_cost_print, '', '');
-      $rows[] = array('', t('Total'), '', '', '', '', '', '', '', '', '', '', '', $not_attempted_cost);
+      $rows[] = array($counter, t('Resources not utilized'), '', '', '', '', '', '', '', '', '', '', '', $resource_not_utilized_cost_print, '', '','');
+      $rows[] = array('', t('Total'), '', '', '', '', '', '', '', '', '', '', '', $not_attempted_cost,'','','');
     }
   }
   //print_r($all_resources);die;
@@ -1719,6 +1720,7 @@ function delivery_cost_export() {
         'DP Value',
         'DP %',
         'Total Cost for the day',
+        'Total Cost Delivered',
         'Cost as a % of Dispatched Value',
         'Cost as a % of Delivered Value',
       );
