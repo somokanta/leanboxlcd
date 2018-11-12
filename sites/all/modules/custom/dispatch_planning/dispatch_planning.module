@@ -738,7 +738,13 @@ function dispatch_planning_services_resources() {
               'source' => array('data' => 'put_qty_sum'),
               'optional' => FALSE,
             ),
-           
+            array(
+              'name' => 'box_id',
+              'type' => 'string',
+              'description' => 'Box ID',
+              'source' => array('data' => 'box_id'),
+              'optional' => TRUE,
+            ),
           ),
           'file' => array(
             'type' => 'inc',

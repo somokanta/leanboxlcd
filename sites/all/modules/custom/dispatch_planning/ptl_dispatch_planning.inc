@@ -829,8 +829,9 @@ function update_ptl_header_data($ptl_job ,$trip_id, $rs_code, $vehicle,$bill_lin
  * @param type $rs_code
  * @param type $line_count
  * @param type $put_qty_sum
+ * @param type $box_id
  */
-function update_ptl_put_qty_sum_data($ptl_job, $id, $rs_code, $api_time, $line_count, $put_qty_sum) {
+function update_ptl_put_qty_sum_data($ptl_job, $id, $rs_code, $api_time, $line_count, $put_qty_sum, $box_id) {
    $distributor_id = get_distributor_id_using_rscode($rs_code);
    // This code is for some testing. So uncommented actual code which is above this line
     $result = db_insert('ptl_put_qty')
@@ -842,6 +843,7 @@ function update_ptl_put_qty_sum_data($ptl_job, $id, $rs_code, $api_time, $line_c
          'rs_code' => $rs_code,
          'type' => 'TRIP', // same table diff is trip and master trip
          'created' => $api_time,
+         'box_id' => $box_id ? $box_id : '',
          'distributor_id' => $distributor_id ? $distributor_id : 0
        ))
        ->execute();

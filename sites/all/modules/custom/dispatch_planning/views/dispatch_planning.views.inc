@@ -200,7 +200,25 @@ function dispatch_planning_views_data() {
             'handler' => 'views_handler_argument_string',
         ),
     );
-    // end of MASTER-PTL_PUT_QTY
+    
+    $data['ptl_put_qty']['box_id'] = array(
+    'title' => t('Box Id'),
+    'help' => t('Box Id'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+  // end of MASTER-PTL_PUT_QTY
     // Add custom field
     $data['views']['field_van_loading_date'] = array(
         'title' => t('van_loading_date'),
