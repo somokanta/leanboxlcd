@@ -28,7 +28,7 @@ class field_cheque_date_handler extends views_handler_field {
     $res_cheque_date_edit = $data->dispatch_planning_api_data_res_cheque_date_edit ? $data->dispatch_planning_api_data_res_cheque_date_edit : '';
     
     if (!empty($res_cheque_date_edit)) {
-      return date('d-M-y',$res_cheque_date_edit);
+      return date('d-M-y',strtotime($res_cheque_date_edit));
     }
     else {
       return date('d-M-y',$res_cheque_date);
