@@ -1250,7 +1250,7 @@ function get_delivery_cost_details($form, &$form_state, $export = 0) {
         $total_cost_vs_delivered += $cost_vs_delivered_cost;
         $total_cost_vs_dispatched += $cost_vs_dispatched;
         $total_trip_delivery_cost = round($total_trip_delivered_cost_in_lak, $round_off_no_digits);
-        $rows[] = array($counter, $value['vehicle_number'], $value['trip_ids'], $value['field_vehicle_type_value'], $value['field_vehicle_owner_value'], $value['cashiernames'], $dispatched_value_in_lak, $delivered_value_in_lak, $return_value_in_lak, $return_vs_delivered_percent, $return_vs_dispatched_percent, $dp_value_in_lak, $dp_percent, $total_trip_delivery_cost,round($trip_delivery_confirmed_delivery_cost/$lak, $round_off_no_digits_2), round($cost_vs_dispatched, $round_off_no_digits_2), round($cost_vs_delivered_cost, $round_off_no_digits_2));
+        $rows[] = array($counter, $value['vehicle_number'], $value['trip_ids'], $value['field_vehicle_type_value'], $value['field_vehicle_owner_value'], $value['cashiernames'], $dispatched_value_in_lak, $delivered_value_in_lak, $return_value_in_lak, $return_vs_delivered_percent, $return_vs_dispatched_percent, $dp_value_in_lak, $dp_percent, $total_trip_delivery_cost,round($trip_delivery_confirmed_delivery_cost/$lak, $round_off_no_digits), round($cost_vs_dispatched, $round_off_no_digits_2), round($cost_vs_delivered_cost, $round_off_no_digits_2));
         $counter++;
       }
       if (strtolower(date('l', $dis_date)) != strtolower($weekoff)) {
