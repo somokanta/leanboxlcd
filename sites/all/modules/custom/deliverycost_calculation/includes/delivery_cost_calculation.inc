@@ -1220,6 +1220,7 @@ function get_delivery_cost_details($form, &$form_state, $export = 0) {
             $delivered_value_in_lak = 0;
             $return_value_in_lak = 0;
             $return_vs_delivered_percent = 0;
+            $return_vs_dispatched_percent = 0;
             $dp_value_in_lak = 0;
             $dp_percent = 0;
             $trip_delivery_confirmed_delivery_cost = 0;
