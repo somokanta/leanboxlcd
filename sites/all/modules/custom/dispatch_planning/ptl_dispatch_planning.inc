@@ -208,7 +208,7 @@ function ptl_loose_sheet_form($form, &$form_state) {
       '#markup' => $form_state['views_data'],
     );
     $trip_id = $form_state['values']['trip_id'];
-    $rr = l('Open PDF', "/download-loose-picking/$trip_id");
+    $rr = l('Open PDF', "/download-loose-picking/$trip_id", array('attributes' => array('target'=> '_blank')));
     $form['dowmload_mark'] = array(
       '#type' => 'markup',
       '#markup' => $rr,

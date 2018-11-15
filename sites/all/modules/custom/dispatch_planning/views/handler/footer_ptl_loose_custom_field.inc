@@ -29,7 +29,7 @@ class footer_ptl_loose_custom_field extends views_handler_field {
       if ($this->view->name === 'ptl_loose_sheet' && $this->view->current_display !== 'page_1') {
         $footer = "Total CLDs  $clds";
       }
-      return '<table border="0" width="100%" cellpadding="5"><tr> <td style="font-weight:bold; text-align:right">'.$footer.'</td></tr></table>
+      /*return '<table border="0" width="100%" cellpadding="5"><tr> <td style="font-weight:bold; text-align:right">'.$footer.'</td></tr></table>
         <table class = "preview_table" width = "100%" cellspacing = "0" style = "font-family:arial; font-size: 12px; color:#000;" cellpadding = "5" border = "0" align = "center">
       <tbody>
       <tr>
@@ -77,7 +77,7 @@ class footer_ptl_loose_custom_field extends views_handler_field {
       <td></td>
       </tr>
       </tbody>
-      </table><br>';
+      </table><br>';*/
     }
     else {
       return "";
