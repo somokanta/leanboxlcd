@@ -1,0 +1,42 @@
+<?php
+
+/**
+ * @file provides the PP-Non PP report module
+ */
+
+/**
+ * 
+ */
+function leanbox_reports_menu() {
+   $items = array();
+   // PP/NON PP report tab based menu
+   $items['pp-non-pp-report'] = array(
+    'title' => 'PP/Non-PP Report',
+    'description' => 'PTL(PP)  Report',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('van_planning_report'),
+    'access arguments' => array('dispatch planning screen'),
+    'file' => 'includes/pp_non_pp_report.inc',
+  );
+  $items['pp-non-pp-report/pp'] = array(
+    'title' => 'PP Trips',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => -10
+  );
+  $items['pp-non-pp-report/non_pp'] = array(
+    'title' => 'Non-PP Trips',
+    'type' => MENU_LOCAL_TASK,
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('van_planning_report'),
+    'access arguments' => array('dispatch planning screen'),
+    'file' => 'includes/pp_non_pp_report.inc',
+  );
+  $items['pp-non-pp-report-export'] = array(
+    'title' => 'Export Van planning report',
+    'description' => 'Export Van planning report',
+    'page callback' => array('van_planning_report_export'),
+    'file' => 'includes/pp_non_pp_report.inc',
+    'access callback' => TRUE,
+  );
+   return $items;
+}

@@ -1,0 +1,4 @@
+name = LeanBox Reports
+description = LeanBox Reports.
+package = Custom
+core = 7.x
