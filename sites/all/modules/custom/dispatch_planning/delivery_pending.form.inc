@@ -422,7 +422,8 @@ function delivery_pending_form_save_submit($form, &$form_state) {
         unset($node->field_trip_id_reference[LANGUAGE_NONE]);
         unset($node->field_dispatch_n_value[LANGUAGE_NONE]);
         unset($node->field_bill_sequence[LANGUAGE_NONE]);
-        unset($node->field_drs_sequence[LANGUAGE_NONE]);        
+        unset($node->field_drs_sequence[LANGUAGE_NONE]);
+        unset($node->field_deliver_n_value[LANGUAGE_NONE]);
       }
       else {
         $node->field_delivery_pending = array();
