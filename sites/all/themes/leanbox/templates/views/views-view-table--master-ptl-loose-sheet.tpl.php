@@ -19,6 +19,12 @@
  * @ingroup views_templates
  */
 ?>
+<?php $page_break = &drupal_static(__FUNCTION__);
+ if (!isset($page_break)) {
+   $page_break = TRUE;
+ }else{
+   print '<pagebreak />';
+ } ?>
 <table border="1" cellpadding="5" cellspacing="0" width="100%" style="color:#000; font-size: 13px; font-family: arial" <?php if ($classes) { print 'class="'. $classes . '" '; } ?><?php print $attributes; ?>>
    <?php if (!empty($title) || !empty($caption)) : ?>
      <caption><?php print $caption . $title; ?></caption>
@@ -35,14 +41,68 @@
     </thead>
   <?php endif; ?>
   <tbody>
+    <?php $counter_ser = 1; $cld_total = 0; ?> <!-- Counter initialization. -->
     <?php foreach ($rows as $row_count => $row): ?>
       <tr <?php if ($row_classes[$row_count]) { print 'class="' . implode(' ', $row_classes[$row_count]) .'"';  } ?>>
+        <?php $row['counter'] = $counter_ser; ?> <!-- Counter Reset -->
+        <?php $cld_total += $row['php']; ?> <!-- Count cld -->
         <?php foreach ($row as $field => $content): ?>
           <td <?php if (strpos(current_path(), 'download') !== false){ print 'style="color:#666; border:0.5px solid gray;"'; } else { print 'style="color:#666;"'; }?><?php if ($field_classes[$field][$row_count]) { print 'class="'. $field_classes[$field][$row_count] . '" '; } ?><?php print drupal_attributes($field_attributes[$field][$row_count]); ?>>
             <?php print $content; ?>
           </td>
         <?php endforeach; ?>
       </tr>
+      <?php $counter_ser++; ?> <!-- Counter Increment -->
     <?php endforeach; ?>
   </tbody>
 </table>
+<table border="0" width="100%" cellpadding="5"><tr> <td style="font-weight:bold; text-align:right"> <?php print $row['field_product_category'].' '."CLDs".' ' . $cld_total; ?></td></tr></table>
+<?php   print '<table class = "preview_table" width = "100%" cellspacing = "0" style = "font-family:arial; font-size: 12px; color:#000;" cellpadding = "5" border = "0" align = "center">
+      <tbody>
+      <tr>
+      <td></td>
+      <td>Picker Name:</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td>Loose Conf Name:</td>
+      <td></td>
+      <td></td>
+      </tr>
+      <tr>
+      <td></td>
+      <td>Start Time:</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td>Start Time:</td>
+      <td></td>
+      <td></td>
+      </tr>
+      <tr>
+      <td></td>
+      <td>End Time:</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td>End Time:</td>
+      <td></td>
+      <td></td>
+      </tr>
+      <tr>
+      <td></td>
+      <td>Sign:</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      </tr>
+      </tbody>
+      </table>';
+?>  <!--Add footer after every category table and comment footer in footer_master_ptl_loose_custom_field.-->
