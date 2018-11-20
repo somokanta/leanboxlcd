@@ -643,7 +643,7 @@ function get_non_pp_report_data($total_sales_nid_array, $distributor_id) {
         $res1[$val['category']]['sku_count'] += 1;
       }
       $cld = (int) ($val['total_qty'] / $val['field_unit_case_units__value']);
-      $loose = $val['total_qty'] % $val['field_unit_case_units__value'];
+      $loose = (int) ($val['total_qty'] % $val['field_unit_case_units__value']);
       $res1[$val['category']]['cld'] += 0;
       $res1[$val['category']]['no_of_clds'] += 0;
       $res1[$val['category']]['loose'] += 0;
@@ -673,7 +673,7 @@ function get_non_pp_report_data($total_sales_nid_array, $distributor_id) {
         $unique_sku[$val['category']]['loose']['total'] = $res1[$val['category']]['loose_value'];
         // not required
         //$res1[$val['category']]['no_loose_count'] += $loose;
-        $res1[$val['category']]['openable_cld'][$val['sku_code']]['no_loose_count'] += (int) $loose;
+        $res1[$val['category']]['openable_cld'][$val['sku_code']]['no_loose_count'] += (int) ($loose);
            // watchdog('loose', '<pre>' . print_r($loose, TRUE) . '</pre>');
       }
       $res1[$val['category']]['cld_lines'] = ($res1[$val['category']]['cld']);
