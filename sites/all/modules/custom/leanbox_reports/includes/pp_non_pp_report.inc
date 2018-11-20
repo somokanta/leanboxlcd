@@ -661,7 +661,8 @@ function get_non_pp_report_data($total_sales_nid_array, $distributor_id) {
         $unique_sku[$val['category']]['cld']['total'] = $res1[$val['category']]['cld_value'];
         
       }
-      if ($loose >= 1 && $val['sku_code']!='MTBT701') {
+      //if ($loose >= 1) {
+      if($unique_sku1[$val['category']][$val['sku_code']]['loose']>0) {
         if (!isset($unique_sku[$val['category']]['loose'][$val['sku_code']])) {
           $unique_sku[$val['category']]['loose'][$val['sku_code']] = 1;
           $res1[$val['category']]['loose'] += 1;
