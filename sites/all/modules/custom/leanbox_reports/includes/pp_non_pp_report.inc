@@ -684,7 +684,7 @@ function get_non_pp_report_data($total_sales_nid_array, $distributor_id) {
       $res1[$val['category']]['no_of_clds'] = ($res1[$val['category']]['no_of_clds']);
     }
   }
-  watchdog('unique_sku_lines1', '<pre>' . print_r($unique_sku, TRUE) . '</pre>');
+  watchdog('unique_sku_lines1', '<pre>' . print_r($unique_sku1, TRUE) . '</pre>');
   //print_r($res1[$val['category']]['openable_cld']);
   //$cld = (int) ($val['total_qty'] / $val['field_unit_case_units__value']);
   $total_loose_value = 0;
