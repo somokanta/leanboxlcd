@@ -646,7 +646,7 @@ function get_non_pp_report_data($total_sales_nid_array, $distributor_id) {
       $loose = (int) ($val['total_qty'] % $val['field_unit_case_units__value']);
       $res1[$val['category']]['cld'] += 0;
       $res1[$val['category']]['no_of_clds'] += 0;
-      $res1[$val['category']]['loose'] += 0;
+      //$res1[$val['category']]['loose'] += 0;
       $res1[$val['category']]['no_loose_count'] += 0;
       $res1[$val['category']]['loose_value'] += 0;
       $res1[$val['category']]['cld_value'] += 0;
@@ -661,9 +661,8 @@ function get_non_pp_report_data($total_sales_nid_array, $distributor_id) {
         $unique_sku[$val['category']]['cld']['total'] = $res1[$val['category']]['cld_value'];
         
       }
-      //if ($loose >= 1) {
-      if($unique_sku1[$val['category']][$val['sku_code']]['loose']>0) {
-        if (!isset($unique_sku[$val['category']]['loose'][$val['sku_code']])) {
+      if ($loose >= 1) {
+         if (!isset($unique_sku[$val['category']]['loose'][$val['sku_code']])) {
           $unique_sku[$val['category']]['loose'][$val['sku_code']] = 1;
           $res1[$val['category']]['loose'] += 1;
           
