@@ -1581,7 +1581,7 @@ function reverse_geocode_node_presave($node) {
       // code for One Time Updating Dispatch N Value
       $distributor_id = $node->uid;
       $dispatch_value = $node->field_dispatch_n_value[LANGUAGE_NONE][0]['value'];
-      $delivered_value = $node->field_deliver_n_value[LANGUAGE_NONE][0]['value'];
+      $delivered_value = trim($node->field_deliver_n_value[LANGUAGE_NONE][0]['value']);
       $bill_number = $node->title;
       $updated_pdd = $node->field_promised_date[LANGUAGE_NONE][0]['value'];
       $trip_nid = $node->field_trip_id_reference[LANGUAGE_NONE][0]['nid'];
@@ -2039,6 +2039,7 @@ function reverse_geocode_get_data_trip_wise($trip_id) {
  */
 function cal_delivery_n_val_by_cron() {
   $distributor_id = _DISTRIBUTOR_ID;
+  /* original
   //$status = array('deliver', 'partial_deliver');
   $query = db_select('dispatch_planning_api_data', 'ad')
     ->fields('ad', array('bill_number'))
@@ -2066,4 +2067,51 @@ function cal_delivery_n_val_by_cron() {
       node_save($node);
     }
   }
+   * 
+   */
+  $query = db_select('dispatch_planning_api_data', 'ad');
+  $query->fields('ad', array('id', 'bill_number'));
+  $query->addExpression("CASE WHEN res_updated_time !=0 THEN res_updated_time  ELSE updated_time END", 'derived_delivered_date');
+  $query->condition('ad.distributor_id', $distributor_id);
+  $query->condition('ad.delivered_date', '0');
+  $query->isNotNull('ad.res_status');
+  $query->condition('ad.res_status', '', '!=');
+  $query->condition('updated_time', '0', '!=');
+  $res = $query->execute()->fetchAll();
+
+  watchdog('cal_delivery_n_val_by_cron', '<pre>' . print_r($res, TRUE) . '</pre>');
+
+
+  foreach ($res as $val) {
+    $del_date = $val->derived_delivered_date;
+
+    $nid = check_node_title_exists_for_update($val->bill_number, $distributor_id);
+    $node = node_load($nid);
+    //logic
+    $updated_pdd = $node->field_promised_date[LANGUAGE_NONE][0]['value'];
+
+    if (!empty($del_date)) {
+      $del_date = strtotime(date('Y-m-d', $del_date));
+      if ($del_date <= $updated_pdd) {
+        $n_value = "N+2";
+      }
+      elseif (($del_date > $updated_pdd) && ( ($del_date - $updated_pdd) <= 86400)) {
+        $n_value = "N+3";
+      }
+      elseif (($del_date > $updated_pdd) && ( ($del_date - $updated_pdd) > 86400)) {
+        $n_value = "N+4";
+      }
+      $node->field_deliver_n_value[LANGUAGE_NONE][0]['value'] = $n_value;
+
+      //logic end
+      node_save($node);
+
+      // After node save update fareye table
+      db_update('dispatch_planning_api_data')
+        ->expression('delivered_date', "CASE WHEN res_updated_time !=0 THEN res_updated_time  ELSE updated_time END")
+        ->condition('id', $val->id)
+        ->execute();
+    }
+  }
+
 }
