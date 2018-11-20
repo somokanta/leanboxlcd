@@ -1868,7 +1868,7 @@ function vehicle_day_wise_performance_form_submit($form, &$form_state, $export =
   $dispatch_from_date = $form_state['values']['dispatch_from_date'];
   $dispatch_to_date = $form_state['values']['dispatch_to_date'];
   $round_off_no_digits = 3;
-  $round_off_no_digits_2 = 2;
+  $round_off_no_digits_2 = 4;
   $vehicle_number = $form_state['values']['vehicle_number'];
   $lak = 100000;
   if (!empty($dispatch_from_date) && !empty($dispatch_to_date)) {
