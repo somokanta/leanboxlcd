@@ -652,7 +652,7 @@ function get_non_pp_report_data($total_sales_nid_array, $distributor_id) {
       $res1[$val['category']]['cld_value'] += 0;
       $unique_sku1[$val['category']][$val['sku_code']] = array('cld'=>$cld,'loose'=>$loose,'total_qty'=>$val['total_qty'],'upc'=>$val['field_unit_case_units__value']);
       if ($cld >= 1) {
-        if (empty($unique_sku[$val['category']]['cld'][$val['sku_code']])) {
+        if (!isset($unique_sku[$val['category']]['cld'][$val['sku_code']])) {
           $unique_sku[$val['category']]['cld'][$val['sku_code']] = 1;
           $res1[$val['category']]['cld'] += 1;
           $res1[$val['category']]['no_of_clds'] += $cld;
@@ -661,8 +661,8 @@ function get_non_pp_report_data($total_sales_nid_array, $distributor_id) {
         $unique_sku[$val['category']]['cld']['total'] = $res1[$val['category']]['cld_value'];
         
       }
-      if ($loose >= 1) {
-        if (empty($unique_sku[$val['category']]['loose'][$val['sku_code']])) {
+      if ($loose >= 1 && $val['sku_code']!='MTBT701') {
+        if (!isset($unique_sku[$val['category']]['loose'][$val['sku_code']])) {
           $unique_sku[$val['category']]['loose'][$val['sku_code']] = 1;
           $res1[$val['category']]['loose'] += 1;
           
