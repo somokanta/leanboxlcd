@@ -656,6 +656,8 @@ function get_non_pp_report_data($total_sales_nid_array, $distributor_id) {
           $unique_sku[$val['category']]['cld'][$val['sku_code']] = 1;
           $res1[$val['category']]['cld'] += 1;
           $res1[$val['category']]['no_of_clds'] += $cld;
+          $res1[$val['category']]['cld_lines'] = ($res1[$val['category']]['cld']);
+          $res1[$val['category']]['no_of_clds'] = ($res1[$val['category']]['no_of_clds']);
         }
         $res1[$val['category']]['cld_value'] += ($val['sum_net_sales_value'] * $cld * $val['field_unit_case_units__value']) / $lak;
         $unique_sku[$val['category']]['cld']['total'] = $res1[$val['category']]['cld_value'];
@@ -665,6 +667,7 @@ function get_non_pp_report_data($total_sales_nid_array, $distributor_id) {
         if (!isset($unique_sku[$val['category']]['loose'][$val['sku_code']])) {
           $unique_sku[$val['category']]['loose'][$val['sku_code']] = 1;
           $res1[$val['category']]['loose'] += 1;
+          $res1[$val['category']]['loose_lines'] = $res1[$val['category']]['loose'];  
           
         }
         if (!isset($bill_wise_unique_sku['bill_wise_loose'][$val['category']][$val['sales_nid']][$val['sku_code']])) {
