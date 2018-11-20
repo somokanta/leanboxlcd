@@ -631,6 +631,7 @@ function get_non_pp_report_data($total_sales_nid_array, $distributor_id) {
   $query->addfield('sub_category', 'title', 'sub_category');
   $query->condition('n1.nid', $total_sales_nid_array, 'IN');
   $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+  watchdog('$res', '<pre>' . print_r($res, TRUE) . '</pre>');
   $unique_sku = $sku_array = $bill_wise_unique_sku = $unique_sku_co = array();
   $res1 = array();
   foreach ($res as &$val) {
@@ -646,7 +647,7 @@ function get_non_pp_report_data($total_sales_nid_array, $distributor_id) {
       $loose = (int) ($val['total_qty'] % $val['field_unit_case_units__value']);
       $res1[$val['category']]['cld'] += 0;
       $res1[$val['category']]['no_of_clds'] += 0;
-      //$res1[$val['category']]['loose'] += 0;
+      $res1[$val['category']]['loose'] += 0;
       $res1[$val['category']]['no_loose_count'] += 0;
       $res1[$val['category']]['loose_value'] += 0;
       $res1[$val['category']]['cld_value'] += 0;
