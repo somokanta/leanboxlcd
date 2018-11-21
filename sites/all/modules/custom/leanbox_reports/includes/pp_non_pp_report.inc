@@ -710,7 +710,7 @@ function get_non_pp_report_data($trip_id_bill_values,$bill_numbers, $distributor
     //$query->condition('n1.nid', $total_sales_nid_array, 'IN');
     $query->condition('bd.bill_number', $bill_numbers, 'IN');
     $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
-    watchdog('$res', '<pre>' . print_r($res, TRUE) . '</pre>');
+    //watchdog('$res', '<pre>' . print_r($res, TRUE) . '</pre>');
     
   foreach ($res as &$val) {
     if (empty($val['category'])) {
@@ -782,7 +782,7 @@ function get_non_pp_report_data($trip_id_bill_values,$bill_numbers, $distributor
          }
       }
     }
-      watchdog('openable_cld', '<pre>' . print_r($res1, TRUE) . '</pre>');
+     // watchdog('openable_cld', '<pre>' . print_r($res1, TRUE) . '</pre>');
     //watchdog('openable_cld', '<pre>' . print_r($res1, TRUE) . '</pre>');
     //$report['total']['total_loose_value'] = $total_loose_value;
     //$report['total']['total_cld_value'] = $total_cld_value;
