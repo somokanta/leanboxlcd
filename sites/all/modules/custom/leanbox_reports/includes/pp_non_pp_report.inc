@@ -678,6 +678,7 @@ function get_non_pp_report_data($trip_id_bill_values,$bill_numbers, $distributor
   $lak = 100000;
   $round_off = 3;
   $res1 = array();
+  $unique_sku = $sku_array = $bill_wise_unique_sku = $unique_sku_co = array();
   foreach ($trip_id_bill_values as $trip_id => $value) {
     $bill_numbers = $value['sales_nid'];
     $query = db_select('custom_billing_data', 'bd');
@@ -710,7 +711,7 @@ function get_non_pp_report_data($trip_id_bill_values,$bill_numbers, $distributor
     $query->condition('bd.bill_number', $bill_numbers, 'IN');
     $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
     watchdog('$res', '<pre>' . print_r($res, TRUE) . '</pre>');
-    $unique_sku = $sku_array = $bill_wise_unique_sku = $unique_sku_co = array();
+    
   foreach ($res as &$val) {
     if (empty($val['category'])) {
       $val['category'] = 'NA';
@@ -732,8 +733,8 @@ function get_non_pp_report_data($trip_id_bill_values,$bill_numbers, $distributor
         if (!isset($unique_sku[$val['category']]['cld'][$val['sku_code']])) {
           $unique_sku[$val['category']]['cld'][$val['sku_code']] = 1;
           $res1[$val['category']]['cld'] += 1;
-          $res1[$val['category']]['no_of_clds'] += $cld;
         }
+        $res1[$val['category']]['no_of_clds'] += $cld;
         $res1[$val['category']]['cld_value'] += ($val['sum_net_sales_value'] * $cld * $val['field_unit_case_units__value']) / $lak;
         $unique_sku[$val['category']]['cld']['total'] = $res1[$val['category']]['cld_value'];
         
