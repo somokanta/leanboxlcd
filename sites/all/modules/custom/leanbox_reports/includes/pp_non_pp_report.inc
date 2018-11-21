@@ -751,7 +751,8 @@ function get_non_pp_report_data($bill_numbers, $distributor_id) {
         $unique_sku[$val['category']]['loose']['total'] = $res1[$val['category']]['loose_value'];
         // not required
         //$res1[$val['category']]['no_loose_count'] += $loose;
-        $res1[$val['category']]['openable_cld'][$val['sku_code']]['no_loose_count'] += (int) ($loose);
+        $res1[$val['category']]['openable_cld'][$val['sku_code']]['no_loose_count'] += $loose;
+        $res1[$val['category']]['openable_cld'][$val['sku_code']]['upc'] = $val['field_unit_case_units__value'];
         
            // watchdog('loose', '<pre>' . print_r($loose, TRUE) . '</pre>');
       }
@@ -771,9 +772,9 @@ function get_non_pp_report_data($bill_numbers, $distributor_id) {
       $total_cld_value += $value['cld_value'];
       if (!empty($value['openable_cld'])) {
          foreach($value['openable_cld'] as $sku => $sku_loose_value) {
-           $upc = (int) get_sku_upc($sku);
-            if (!empty($upc) && !empty($sku_loose_value['no_loose_count'])) {
-             $openable_cld = (int) ($sku_loose_value['no_loose_count']/$upc); 
+           //$upc = (int) get_sku_upc($sku);
+            if (!empty($sku_loose_value['no_loose_count'])) {
+             $openable_cld = (int) ($sku_loose_value['no_loose_count']/$sku_loose_value['upc']); 
              $res1[$cat_key]['total_openable_cld'] += $openable_cld;
            }
          }
