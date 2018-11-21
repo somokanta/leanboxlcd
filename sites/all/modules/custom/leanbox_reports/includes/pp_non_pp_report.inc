@@ -551,7 +551,7 @@ function get_non_pp_report_submit($form, &$form_state, $export = 0) {
       $table1 .= '<td >' . '<b>' . t('Loose value %age by PL group') . '</b>' . '</td>';
       $table1 .= '</tr>';
       //$out_put_data = get_non_pp_report_data($value['sales_nid'], $distributor_id);
-      $out_put_data = get_non_pp_report_data($result['master_trip_data']['bill_numbers'], $distributor_id);
+      $out_put_data = get_non_pp_report_data($result['trip_wise'], $result['master_trip_data']['bill_numbers'], $distributor_id);
       $b_date = rtrim($b_date, ',');
       $table1 .= '<tr><td>' . $master_trip_id . '</td>';
       $table1 .= '<td>' . $result['master_trip_data']['bill_dates'] . '</td>';
@@ -674,42 +674,43 @@ function get_non_pp_report_submit($form, &$form_state, $export = 0) {
   $form_state['rebuild'] = TRUE;
 }
 
-function get_non_pp_report_data($bill_numbers, $distributor_id) {
+function get_non_pp_report_data($trip_id_bill_values,$bill_numbers, $distributor_id) {
   $lak = 100000;
   $round_off = 3;
   $res1 = array();
-  $query = db_select('custom_billing_data', 'bd');
-  //$query->addfield('bd', 'Sum_of_TOTAL_SALES_QTY', 'total_qty');
-  $query->addExpression('SUM(Sum_of_TOTAL_SALES_QTY)', 'total_qty');
-  $query->addfield('bd', 'sku7_code', 'sku_code');
-  //$query->addfield('bd', 'bill_number', 'bill_number');
-  $query->addExpression('ROUND(((Sum_of_NET_SALES_VALUE - ((Sum_of_OTHER_DISCOUNT + Sum_of_SCHEME_DISCOUNT)*(1 + (Sum_of_TAX_PERCENTAGE/100))))/Sum_of_TOTAL_SALES_QTY), 2)', 'sum_net_sales_value');
-  $query->groupBy('bd.sku7_code');
-  //$query->groupBy('bd.bill_number');
-  $query->condition('bd.distributor_id', $distributor_id);
-  $query->join('node', 'n', 'n.title = bd.sku7_code AND bd.distributor_id = n.uid');
-  $query->condition('n.type', 'sku7_code_master');
-  $query->join('field_data_field_unit_case_units_', 'fucu', 'fucu.entity_id = n.nid');
-  $query->fields('fucu', array('field_unit_case_units__value'));
-  //subcategory join
-  $query->leftjoin('field_data_field_sub_category', 'fc', 'fc.entity_id = n.nid');
-  $query->leftjoin('node', 'sub_category', "sub_category.nid = fc.field_sub_category_nid and sub_category.type = 'product_sub_category_master' ");
-  // Join with product category
-  $query->leftjoin('field_data_field_product_category', 'category_field', "category_field.entity_id = sub_category.nid ");
-  $query->leftjoin('node', 'category', "category.nid = category_field.field_product_category_nid and category.type = 'product_category_master' ");
-  //$query->join('node', 'n1', 'n1.title = bd.bill_number AND bd.distributor_id = n1.uid');
-  //$query->condition('n1.type', 'sales_register_data');
-  //$query->addfield('n1', 'nid', 'sales_nid');
-  //$query->addfield('n1', 'title', 'bill_no');
-  //$query->addfield('bd', 'party_code', 'party_code');
-  $query->addfield('category', 'title', 'category');
-  $query->addfield('sub_category', 'title', 'sub_category');
-  //$query->condition('n1.nid', $total_sales_nid_array, 'IN');
-  $query->condition('bd.bill_number', $bill_numbers, 'IN');
-  $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
-  watchdog('$res', '<pre>' . print_r($res, TRUE) . '</pre>');
-  $unique_sku = $sku_array = $bill_wise_unique_sku = $unique_sku_co = array();
-  $res1 = array();
+  foreach ($trip_id_bill_values as $trip_id => $value) {
+    $bill_numbers = $value['sales_nid'];
+    $query = db_select('custom_billing_data', 'bd');
+    //$query->addfield('bd', 'Sum_of_TOTAL_SALES_QTY', 'total_qty');
+    $query->addExpression('SUM(Sum_of_TOTAL_SALES_QTY)', 'total_qty');
+    $query->addfield('bd', 'sku7_code', 'sku_code');
+    //$query->addfield('bd', 'bill_number', 'bill_number');
+    $query->addExpression('ROUND(((Sum_of_NET_SALES_VALUE - ((Sum_of_OTHER_DISCOUNT + Sum_of_SCHEME_DISCOUNT)*(1 + (Sum_of_TAX_PERCENTAGE/100))))/Sum_of_TOTAL_SALES_QTY), 2)', 'sum_net_sales_value');
+    $query->groupBy('bd.sku7_code');
+    //$query->groupBy('bd.bill_number');
+    $query->condition('bd.distributor_id', $distributor_id);
+    $query->join('node', 'n', 'n.title = bd.sku7_code AND bd.distributor_id = n.uid');
+    $query->condition('n.type', 'sku7_code_master');
+    $query->join('field_data_field_unit_case_units_', 'fucu', 'fucu.entity_id = n.nid');
+    $query->fields('fucu', array('field_unit_case_units__value'));
+    //subcategory join
+    $query->leftjoin('field_data_field_sub_category', 'fc', 'fc.entity_id = n.nid');
+    $query->leftjoin('node', 'sub_category', "sub_category.nid = fc.field_sub_category_nid and sub_category.type = 'product_sub_category_master' ");
+    // Join with product category
+    $query->leftjoin('field_data_field_product_category', 'category_field', "category_field.entity_id = sub_category.nid ");
+    $query->leftjoin('node', 'category', "category.nid = category_field.field_product_category_nid and category.type = 'product_category_master' ");
+    //$query->join('node', 'n1', 'n1.title = bd.bill_number AND bd.distributor_id = n1.uid');
+    //$query->condition('n1.type', 'sales_register_data');
+    //$query->addfield('n1', 'nid', 'sales_nid');
+    //$query->addfield('n1', 'title', 'bill_no');
+    //$query->addfield('bd', 'party_code', 'party_code');
+    $query->addfield('category', 'title', 'category');
+    $query->addfield('sub_category', 'title', 'sub_category');
+    //$query->condition('n1.nid', $total_sales_nid_array, 'IN');
+    $query->condition('bd.bill_number', $bill_numbers, 'IN');
+    $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+    watchdog('$res', '<pre>' . print_r($res, TRUE) . '</pre>');
+    $unique_sku = $sku_array = $bill_wise_unique_sku = $unique_sku_co = array();
   foreach ($res as &$val) {
     if (empty($val['category'])) {
       $val['category'] = 'NA';
@@ -761,7 +762,7 @@ function get_non_pp_report_data($bill_numbers, $distributor_id) {
       $res1[$val['category']]['no_of_clds'] = ($res1[$val['category']]['no_of_clds']);
     }
   }
-
+  }
   //print_r($res1[$val['category']]['openable_cld']);
   //$cld = (int) ($val['total_qty'] / $val['field_unit_case_units__value']);
   $total_loose_value = 0;
