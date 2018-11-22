@@ -8,25 +8,40 @@ function pp_report_form($form, &$form_state) {
   $form = array();
   $form['#attached']['css'][] = drupal_get_path('module', 'deliverycost_calculation') . '/css/vehicle_resource_daily_status.css';
   $form['#attached']['css'][] = drupal_get_path('module', 'leanbox_reports') . '/css/pp_non_pp.css';
+  $form['#attached']['js'][] = drupal_get_path('module', 'leanbox_reports') . '/js/pp_non_pp.js';
   $form['#prefix'] = '<div id="itemlist-div" class="custom_form_wrapper">';
   $form['#suffix'] = '</div>';
+  $form['trip_id'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Trip ID'),
+    '#attributes'=>array('class'=>array('trip_id')),
+    '#prefix' => '<div class="form_row form_row2"><div class="col_3" style="width:200px">',
+    '#suffix' => '</div>'
+  );
+  
+    $form['markup'] = array(
+    '#type' => 'markup',
+    '#prefix' => '<div class="col_3" style="width:100px">',
+    '#suffix' => 'OR</div>'
+  );
+  
   $form['trip_creation_start_date'] = array(
     '#type' => 'date_popup',
     '#date_format' => 'm/d/y',
     '#title' => t('Trip Creation Start Date'),
+    '#attributes'=>array('class'=>array('trip_creation_start_date')),
     '#date_label_position' => '',
     '#date_year_range' => '-20:+1',
-    '#required' => TRUE,
-    '#prefix' => '<div class="form_row form_row2"><div class="col_3" style="width:200px">',
+     '#prefix' => '<div class="col_3" style="width:200px">',
     '#suffix' => '</div>'
   );
   $form['trip_creation_end_date'] = array(
     '#type' => 'date_popup',
     '#date_format' => 'm/d/y',
     '#title' => t('Trip Creation End Date'),
+    '#attributes'=>array('class'=>array('trip_creation_end_date')),
     '#date_label_position' => '',
     '#date_year_range' => '-20:+1',
-    '#required' => TRUE,
     '#prefix' => '<div class="col_3" style="width:200px">',
     '#suffix' => '</div></div>'
   );
@@ -124,10 +139,11 @@ function get_pp_report_submit($form, &$form_state, $export = 0) {
   }
   $start_date = $form_state['values']['trip_creation_start_date'];
   $end_date = $form_state['values']['trip_creation_end_date'];
-  if (!empty($start_date) && !empty($end_date)) {
+  $trip_id = $form_state['values']['trip_id'];
+  if (!empty($start_date) && !empty($end_date) || !empty($trip_id)) {
     $start_date = strtotime($form_state['values']['trip_creation_start_date']);
     $end_date = strtotime($form_state['values']['trip_creation_end_date']);
-    $result = get_pp_trips($start_date, $end_date);
+    $result = get_pp_trips($trip_id,$start_date, $end_date);
     if (!empty($result)) {
       $table1 = '<table class ="van-plan-report-table"  cellpadding="0" cellspacing="0" width="100%">';
       $table1 .= '<tr><td>' . '<b>' . t('Trip ID') . '</b>' . '</td>';
@@ -142,7 +158,7 @@ function get_pp_report_submit($form, &$form_state, $export = 0) {
       $table1 .= '<td >' . '<b>' . t('No. of CLDs (Pack/Retail)') . '</b>' . '</td>';
       $table1 .= '<td >' . '<b>' . t('CLD value (in lakhs)') . '</b>' . '</td>';
       $table1 .= '</tr>';
-      foreach ($result as $trip_id => $value) {
+      foreach ($result as $trip_id => $value) { 
         $out_put_data = get_pp_report_data($value['sales_nid'], $distributor_id);
         foreach ($value['bill_date'] as $bill_date) {
           $b_date = $bill_date . ',';
@@ -223,7 +239,7 @@ function get_pp_report_submit($form, &$form_state, $export = 0) {
   }
 }
 
-function get_pp_report_data($total_sales_nid_array, $distributor_id) {
+/*function get_pp_report_data($total_sales_nid_array, $distributor_id) {
   $lak = 100000;
   $round_off = 3;
   $res1 = array();
@@ -317,7 +333,7 @@ function get_pp_report_data($total_sales_nid_array, $distributor_id) {
   }
   return $res1;
 }
-
+*/
 function get_non_pp_report_data_trip_wise($bill_numbers, $distributor_id) {
   $lak = 100000;
   $round_off = 3;
@@ -391,30 +407,35 @@ function get_non_pp_report_data_trip_wise($bill_numbers, $distributor_id) {
 
   return $res1;
 }
-function get_pp_trips($start_date, $end_date) {
+function get_pp_trips($trip_id = null,$start_date = null, $end_date = null) {
   $result = array();
-  if (!empty($start_date) && !empty($end_date)) {
+  if (!empty($start_date) && !empty($end_date) || !empty($trip_id)) {
     $query = db_select('node', 'n');
     $query->condition('n.type', 'dispatch_data');
     $query->join('ptl_data_configuration', 'ptl', 'ptl.trip_id = n.title');
     $query->join('field_data_field_trip_creation_date', 'trip_created_date', 'trip_created_date.entity_id = n.nid');
-    $query->condition('trip_created_date.field_trip_creation_date_value', array($start_date, $end_date), 'BETWEEN');
+    if (!empty($start_date) && !empty($end_date)) {
+        $query->condition('trip_created_date.field_trip_creation_date_value', array($start_date, $end_date), 'BETWEEN');
+    }
+    else if(!empty($trip_id)) {
+       $query->condition('n.title', $trip_id);
+    }
     $query->addTag('node_distributor_access');
     $query->join('field_data_field_trip_id_reference', 'trip_bill_ref', 'trip_bill_ref.field_trip_id_reference_nid = n.nid');
     $query->join('node', 'sales_register', 'sales_register.nid = trip_bill_ref.entity_id');
     $query->condition('sales_register.type', 'sales_register_data');
     $query->join('field_data_field_sr_new_bill_date', 'bd', 'bd.entity_id = sales_register.nid');
     $query->addExpression("DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(bd.field_sr_new_bill_date_value),'+00:00','+05:30'), '%d-%m-%Y')", 'bill_date');
-    $query->fields('sales_register', array('nid'));
-    $query->fields('n', array('title'));
+    $query->fields('sales_register', array('title'));
+    $query->addfield('n', 'title', 'trip_id');
     $query->leftjoin('field_data_field_entered_prevan', 'pvan', 'pvan.entity_id = n.nid');
     $query->fields('pvan', array('field_entered_prevan_value'));
     $res = $query->execute()->fetchAll(PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
     if (!empty($res)) {
       foreach ($res as $bill_number => $value) {
-        $result[$value['title']]['sales_nid'][$bill_number] = $bill_number;
-        $result[$value['title']]['bill_date'][$value['bill_date']] = $value['bill_date'];
-        $result[$value['title']]['prevan'] = $value['field_entered_prevan_value'];
+        $result[$value['trip_id']]['sales_nid'][$bill_number] = $bill_number;
+        $result[$value['trip_id']]['bill_date'][$value['bill_date']] = $value['bill_date'];
+        $result[$value['trip_id']]['prevan'] = $value['field_entered_prevan_value'];
       }
     }
   }
@@ -434,14 +455,16 @@ function validate_pp_report($form, &$form_state) {
   }
   $start_date = $form_state['values']['trip_creation_start_date'];
   $end_date = $form_state['values']['trip_creation_end_date'];
-  if (!empty($start_date) && !empty($end_date)) {
+  $trip_id = $form_state['values']['trip_id'];
+  if (!empty($start_date) && !empty($end_date) || !empty($trip_id)) {
     $start_date = strtotime($form_state['values']['trip_creation_start_date']);
     $end_date = strtotime($form_state['values']['trip_creation_end_date']);
-    $result = get_pp_trips($start_date, $end_date);
+    $result = get_pp_trips($trip_id,$start_date, $end_date);
     if (empty($result)) {
       form_set_error('form', t('No records found.'));
     }
   }
+ 
 }
 
 // Non pp report
@@ -891,4 +914,94 @@ function get_sku_upc($sku_code) {
     $upc = $query->execute()->fetchField();
   }
   return $upc;
+}
+function get_pp_report_data($bill_numbers, $distributor_id) {
+  $lak = 100000;
+  $round_off = 3;
+  $res1 = array();
+  $query = db_select('custom_billing_data', 'bd');
+  $query->addExpression('SUM(Sum_of_TOTAL_SALES_QTY)', 'total_qty');
+  $query->addfield('bd', 'sku7_code', 'sku_code');
+ // $query->addfield('bd', 'bill_number', 'bill_number');
+  $query->addExpression('ROUND(((Sum_of_NET_SALES_VALUE - ((Sum_of_OTHER_DISCOUNT + Sum_of_SCHEME_DISCOUNT)*(1 + (Sum_of_TAX_PERCENTAGE/100))))/Sum_of_TOTAL_SALES_QTY), 2)', 'sum_net_sales_value');
+  $query->groupBy('bd.sku7_code');
+  //$query->groupBy('bd.bill_number');
+  $query->condition('bd.distributor_id', $distributor_id);
+  $query->join('node', 'n', 'n.title = bd.sku7_code AND bd.distributor_id = n.uid');
+  $query->condition('n.type', 'sku7_code_master');
+  $query->join('field_data_field_unit_case_units_', 'fucu', 'fucu.entity_id = n.nid');
+  $query->fields('fucu', array('field_unit_case_units__value'));
+  //subcategory join
+  $query->leftjoin('field_data_field_sub_category', 'fc', 'fc.entity_id = n.nid');
+  $query->leftjoin('node', 'sub_category', "sub_category.nid = fc.field_sub_category_nid and sub_category.type = 'product_sub_category_master' ");
+  // Join with product category
+  $query->leftjoin('field_data_field_product_category', 'category_field', "category_field.entity_id = sub_category.nid ");
+  $query->leftjoin('node', 'category', "category.nid = category_field.field_product_category_nid and category.type = 'product_category_master' ");
+  $query->addfield('category', 'title', 'category');
+  $query->addfield('sub_category', 'title', 'sub_category');
+  //$query->condition('n1.nid', $total_sales_nid_array, 'IN');
+  $query->condition('bd.bill_number', $bill_numbers, 'IN');
+  $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+  $unique_sku = $sku_array = $bill_wise_unique_sku = $unique_sku_co = array();
+  $res1 = array();
+  foreach ($res as &$val) {
+    if (empty($val['category'])) {
+      $val['category'] = 'NA';
+    }
+    if (!empty($val['category'])) {
+      if (!isset($unique_sku_co[$val['category']][$val['sku_code']])) {
+        $unique_sku_co[$val['category']][$val['sku_code']] = 1;
+        $res1[$val['category']]['sku_count'] += 1;
+      }
+      $cld = (int) ($val['total_qty'] / $val['field_unit_case_units__value']);
+      $loose = $val['total_qty'] % $val['field_unit_case_units__value'];
+      $res1[$val['category']]['cld'] += 0;
+      $res1[$val['category']]['no_of_clds'] += 0;
+      $res1[$val['category']]['loose'] += 0;
+      $res1[$val['category']]['no_loose_count'] += 0;
+      $res1[$val['category']]['loose_value'] += 0;
+      $res1[$val['category']]['cld_value'] += 0;
+      if ($cld >= 1) {
+        if (!isset($unique_sku[$val['category']]['cld'][$val['sku_code']])) {
+          $unique_sku[$val['category']]['cld'][$val['sku_code']] = 1;
+          $res1[$val['category']]['cld'] += 1;
+        }
+        $res1[$val['category']]['no_of_clds'] += $cld;
+        $res1[$val['category']]['cld_value'] += ($val['sum_net_sales_value'] * $cld * $val['field_unit_case_units__value']) / $lak;
+        $unique_sku[$val['category']]['cld']['total'] = $res1[$val['category']]['cld_value'];
+      }
+      if ($loose >= 1) {
+        if (!isset($unique_sku[$val['category']]['loose'][$val['sku_code']])) {
+          $unique_sku[$val['category']]['loose'][$val['sku_code']] = 1;
+          $res1[$val['category']]['loose'] += 1;
+        }
+        $res1[$val['category']]['no_loose_count'] += $loose;
+        if (!isset($bill_wise_unique_sku['bill_wise_loose'][$val['category']][$val['sales_nid']][$val['sku_code']])) {
+          $bill_wise_unique_sku['bill_wise_loose'][$val['category']][$val['sales_nid']][$val['sku_code']] = 1;
+          $res1[$val['category']]['bill_wise_loose'] += 1;
+        }
+        $res1[$val['category']]['loose_value'] += ($val['sum_net_sales_value'] * $loose) / $lak;
+        $unique_sku[$val['category']]['loose']['total'] = $res1[$val['category']]['loose_value'];
+      }
+      $res1[$val['category']]['cld_lines'] = ($res1[$val['category']]['cld']);
+      $res1[$val['category']]['loose_lines'] = $res1[$val['category']]['loose'];
+      $res1[$val['category']]['no_of_clds'] = ($res1[$val['category']]['no_of_clds']);
+    }
+  }
+  $total_loose_value = 0;
+  $total_cld_value = 0;
+  if (!empty($res1)) {
+    foreach ($res1 as $cat_key => $value) {
+      $total_loose_value += $value['loose_value'];
+      $total_cld_value += $value['cld_value'];
+    }
+    //$report['total']['total_loose_value'] = $total_loose_value;
+    //$report['total']['total_cld_value'] = $total_cld_value;
+    //for calculating percentage
+    foreach ($res1 as $cat_key => &$value) {
+      $loose_value_percentage_by_group = round($value['loose_value'] / $total_loose_value * 100);
+      $value['loose_value_percentage_by_group'] = $loose_value_percentage_by_group;
+    }
+  }
+  return $res1;
 }
