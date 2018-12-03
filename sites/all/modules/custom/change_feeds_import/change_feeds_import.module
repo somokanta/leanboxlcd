@@ -2608,7 +2608,8 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
   }
   if (($view->base_table == 'master_ptl_data') && ($view->name == 'master_ptl_loose_sheet')) {
     $query->add_orderby(NULL, "SUBSTRING(master_ptl_data.product_name, 1, 1)", 'ASC','order_master_ptl_data_product_name_first');
-    $query->add_orderby(NULL, "SUBSTRING_INDEX(SUBSTRING_INDEX(master_ptl_data.product_name,' ',2),' ',-1)", 'ASC','order_master_ptl_data_product_name');
+    $query->add_orderby(NULL, "SUBSTRING_INDEX(SUBSTRING_INDEX(master_ptl_data.product_name,' ',2),' ',-1)", 'ASC','order_master_ptl_data_product_name_second');
+    $query->add_orderby(NULL, "SUBSTRING(master_ptl_data.product_name, length(SUBSTRING_INDEX(master_ptl_data.product_name, ' ', 2))+2, length(master_ptl_data.product_name))", 'ASC','order_master_ptl_data_product_name_last');
   }
   if ($view->base_table == 'van_cld_data_table') {
     $query->add_where(0, 'van_cld_data_table.distributor_id', $distributor_id, '=');
