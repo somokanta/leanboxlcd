@@ -1003,5 +1003,6 @@ function get_pp_report_data($bill_numbers, $distributor_id) {
       $value['loose_value_percentage_by_group'] = $loose_value_percentage_by_group;
     }
   }
+  watchdog('unique_skus', '<pre>' . print_r($unique_sku, TRUE) . '</pre>');
   return $res1;
 }
