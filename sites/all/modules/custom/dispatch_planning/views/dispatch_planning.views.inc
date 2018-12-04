@@ -534,6 +534,14 @@ function dispatch_planning_views_data() {
         'help' => t("unique identifiers."),
             // 'weight' => -10,
     );
+    
+    // Join PTL PUT QTY.
+    $data['ptl_data_configuration']['table']['join']['ptl_put_qty'] = array(
+        'field' => 'ptl_job',
+        'left_field' => 'ptl_job',
+        'type' => 'LEFT',
+    );
+    
     // serial No
     $data['ptl_data_configuration']['id'] = array(
         'title' => t('ID'),
@@ -1404,6 +1412,14 @@ function dispatch_planning_views_data() {
         'help' => t("unique identifiers."),
             // 'weight' => -10,
     );
+    
+    // Join PTL PUT QTY.
+    $data['master_ptl_data']['table']['join']['ptl_put_qty'] = array(
+        'field' => 'ptl_job',
+        'left_field' => 'ptl_job',
+        'type' => 'LEFT',
+    );
+    
     // serial No
     $data['master_ptl_data']['id'] = array(
         'title' => t('ID'),
@@ -2270,7 +2286,7 @@ function dispatch_planning_views_data() {
             'label' => t('Id to !field_name', array('!field_name' => 'trip_bill_reference')),
         ),
     );
-
+    
     $data['dispatch_planning_api_data']['jobType'] = array(
         'title' => t('DP jobType'),
         'help' => t('Dispatch Planning jobType'),
