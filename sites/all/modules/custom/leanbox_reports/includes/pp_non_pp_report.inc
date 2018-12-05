@@ -857,8 +857,8 @@ function get_non_pp_trips($mater_trip_id) {
         $prevan[$value['field_entered_prevan_value']] = $value['field_entered_prevan_value'];
         $bill_date[$value['bill_date']] = $value['bill_date'];
       }
-      $trip_ids = implode(',', $trip_ids);
-      $prevan_data = implode(',', $prevan);
+      $trip_ids = implode(', ', $trip_ids);
+      $prevan_data = implode(', ', $prevan);
       $bill_dates = implode(',', $bill_date);
       $master_ptl_result['trip_ids'] = $trip_ids;
       $master_ptl_result['bill_numbers'] = $bills;
@@ -1005,6 +1005,6 @@ function get_pp_report_data($bill_numbers, $distributor_id) {
       $value['loose_value_percentage_by_group'] = $loose_value_percentage_by_group;
     }
   }
-  watchdog('unique_skus', '<pre>' . print_r($unique_sku, TRUE) . '</pre>');
+  //watchdog('unique_skus', '<pre>' . print_r($unique_sku, TRUE) . '</pre>');
   return $res1;
 }
