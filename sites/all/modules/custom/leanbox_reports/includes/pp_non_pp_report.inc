@@ -929,7 +929,7 @@ function get_pp_report_data($bill_numbers, $distributor_id) {
  // $query->addfield('bd', 'bill_number', 'bill_number');
   $query->addExpression('ROUND(((Sum_of_NET_SALES_VALUE - ((Sum_of_OTHER_DISCOUNT + Sum_of_SCHEME_DISCOUNT)*(1 + (Sum_of_TAX_PERCENTAGE/100))))/Sum_of_TOTAL_SALES_QTY), 2)', 'sum_net_sales_value');
   $query->groupBy('bd.sku7_code');
-  $query->groupBy('bd.bill_number');
+  //$query->groupBy('bd.bill_number');
   $query->condition('bd.distributor_id', $distributor_id);
   $query->join('node', 'n', 'n.title = bd.sku7_code AND bd.distributor_id = n.uid');
   $query->condition('n.type', 'sku7_code_master');
