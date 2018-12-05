@@ -562,7 +562,7 @@ function get_non_pp_report_submit($form, &$form_state, $export = 0) {
 
     if (!empty($result['master_trip_data']['bill_numbers'])) {
       $table1 = '<table class ="van-plan-report-table"  cellpadding="0" cellspacing="0" width="100%">';
-      $table1 .= '<tr><td>' . '<b>' . t('Master trip') . '</b>' . '</td>';
+      $table1 .= '<tr><td>' . '<b>' . t('Master Trip') . '</b>' . '</td>';
       $table1 .= '<td>' . '<b>' . t('Bill date') . '</b>' . '</td>';
       $table1 .= '<td>' . '<b>' . t('Trip ID') . '</b>' . '</td>';
       $table1 .= '<td >' . '<b>' . t('Van no') . '</b>' . '</td>';
@@ -576,10 +576,12 @@ function get_non_pp_report_submit($form, &$form_state, $export = 0) {
       //$out_put_data = get_non_pp_report_data($value['sales_nid'], $distributor_id);
       $out_put_data = get_non_pp_report_data($result['trip_wise'], $result['master_trip_data']['bill_numbers'], $distributor_id);
       $b_date = rtrim($b_date, ',');
+      $trip_ids_wrap = wordwrap($result['master_trip_data']['trip_ids'],14);
+      $prevan_wrap = wordwrap($result['master_trip_data']['prevan'],14);
       $table1 .= '<tr><td>' . $master_trip_id . '</td>';
       $table1 .= '<td>' . $result['master_trip_data']['bill_dates'] . '</td>';
-      $table1 .= '<td>' . $result['master_trip_data']['trip_ids'] . '</td>';
-      $table1 .= '<td>' . $result['master_trip_data']['prevan'] . '</td>';
+      $table1 .= '<td>' . $trip_ids_wrap . '</td>';
+      $table1 .= '<td>' . $prevan_wrap . '</td>';
       $table1 .= '<td>' . $van_type . '</td>';
       $table1 .= '<td>';
       $table1 .= '<table  cellpadding="0" cellspacing="0" width="100%">';

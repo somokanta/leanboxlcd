@@ -11,8 +11,8 @@ function leanbox_reports_menu() {
    $items = array();
    // PP/NON PP report tab based menu
    $items['pp-non-pp-report'] = array(
-    'title' => 'PP/Non-PP Report',
-    'description' => 'PTL(PP)  Report',
+    'title' => 'Pick Planning Report',
+    'description' => 'Pick Planning Report',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('pp_report_form'),
     'access arguments' => array('dispatch planning screen'),
