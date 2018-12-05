@@ -578,8 +578,9 @@ function get_non_pp_report_submit($form, &$form_state, $export = 0) {
       $b_date = rtrim($b_date, ',');
       $trip_ids_wrap = wordwrap($result['master_trip_data']['trip_ids'],14,"<br>\n");
       $prevan_wrap = wordwrap($result['master_trip_data']['prevan'],14,"<br>\n");
+      $bill_dates_wrap = wordwrap($result['master_trip_data']['bill_dates'],10,"<br>\n");
       $table1 .= '<tr><td>' . $master_trip_id . '</td>';
-      $table1 .= '<td>' . $result['master_trip_data']['bill_dates'] . '</td>';
+      $table1 .= '<td>' . $bill_dates_wrap . '</td>';
       $table1 .= '<td>' . $trip_ids_wrap . '</td>';
       $table1 .= '<td>' . $prevan_wrap . '</td>';
       $table1 .= '<td>' . $van_type . '</td>';
@@ -859,7 +860,7 @@ function get_non_pp_trips($mater_trip_id) {
       }
       $trip_ids = implode(', ', $trip_ids);
       $prevan_data = implode(', ', $prevan);
-      $bill_dates = implode(',', $bill_date);
+      $bill_dates = implode(', ', $bill_date);
       $master_ptl_result['trip_ids'] = $trip_ids;
       $master_ptl_result['bill_numbers'] = $bills;
       $master_ptl_result['prevan'] = $prevan_data;
