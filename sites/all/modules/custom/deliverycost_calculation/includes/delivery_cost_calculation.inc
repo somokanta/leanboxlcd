@@ -439,6 +439,23 @@ function get_dp_value_vehicle_number($trip_id, $vehicle_number) {
   return $dp_value;
 }
 
+// return value
+function get_return_value($trip_id) {
+  global $user;
+  $dis_id = change_feeds_import_get_distributor_id($user->uid);
+  $return_value = 0;
+  if (!empty($trip_id)) {
+    $query = db_select('dispatch_planning_api_data', 'ad');
+    $query->join('dispatch_planning_item_details', 'dpi', 'dpi.trip_bill_reference = ad.id');
+    $query->addExpression("SUM(dpi.return_qty * dpi.sum_net_sales_value)", 'return_value');
+    $query->condition('ad.distributor_id', $dis_id, '=');
+    $query->condition('ad.delivery_pending_flag', 1, '!=');
+    $query->condition('ad.runsheet_number', $trip_id, 'IN');
+    $return_value = $query->execute()->fetchField();
+  }
+  return $return_value;
+}
+
 function get_delivery_cost_details_mtd($form, &$form_state, $export = 0) {
   global $user;
   $rows = array();
@@ -570,7 +587,12 @@ function get_delivery_cost_details_mtd($form, &$form_state, $export = 0) {
           $total_trip_vrs_delivered_cost = 0;
           //$dispatched_value_in_lak = round($value['field_net_sales_bill_value_value'] / $lak, 2);
           $dispatched_value_in_lak = round($value['dispatched_value'] / $lak, $round_off_no_digits);
-          $return_value_in_lak = round($value['return_value'] / $lak, $round_off_no_digits);
+          // ignore dp bills
+          $return_value_trip_id = get_return_value($total_trips);
+          if (!empty($return_value_trip_id)) {
+            $return_value_in_lak = round($return_value_trip_id / $lak, $round_off_no_digits);
+          }
+          //$return_value_in_lak = round($value['return_value'] / $lak, $round_off_no_digits);
           $delivered_value_in_lak = round($value['delivered_value'] / $lak, $round_off_no_digits);
           $return_percent = ($dispatched_value_in_lak / $return_value_in_lak) * 100;
           $dp_value = get_dp_value($total_trips);
@@ -1056,7 +1078,6 @@ function get_delivery_cost_details($form, &$form_state, $export = 0) {
     }
     $query->join('dispatch_planning_item_details', 'item', 'item.trip_bill_reference = ad.id');
     $query->addExpression("SUM(item.return_qty * item.sum_net_sales_value)", 'return_value');
-    $query->addExpression("SUM((item.sum_net_sales_quantity-item.res_sku_actual_quantity1)* item.sum_net_sales_value)", 'return_value');
     $query->addExpression("SUM(item.res_sku_actual_quantity1 * item.sum_net_sales_value)", 'delivered_value');
     $query->addExpression("SUM(item.sum_net_sales_quantity * item.sum_net_sales_value)", 'dispatched_value');
     // Join with dispatch_data to check vrs status and return flage 
@@ -1146,7 +1167,13 @@ function get_delivery_cost_details($form, &$form_state, $export = 0) {
         $delivery_boy_cost = 0; // Multiple delivery boy will be in one trip
         $total_trip_delivery_cost = 0;
         $dispatched_value_in_lak = round($value['dispatched_value'] / $lak, $round_off_no_digits);
-        $return_value_in_lak = round($value['return_value'] / $lak, $round_off_no_digits);
+        $dp_trip_ids = explode(',', $value['tripids_cal']);
+        // ignore dp bills
+        $return_value_trip_id = get_return_value($dp_trip_ids);
+        if (!empty($return_value_trip_id)) {
+          $return_value_in_lak = round($return_value_trip_id / $lak, $round_off_no_digits);
+        }
+        
         $vehicle_per_day_cost = 0;
         $vehilce_monthly_cost = 0;
         $cashier_cost = 0;
@@ -1154,7 +1181,6 @@ function get_delivery_cost_details($form, &$form_state, $export = 0) {
         $return_percent = ($dispatched_value_in_lak / $return_value_in_lak) * 100;
         $return_vs_delivered_percent = ($return_value_in_lak / $delivered_value_in_lak) * 100;
         $return_vs_dispatched_percent = ($return_value_in_lak / $dispatched_value_in_lak) * 100;
-        $dp_trip_ids = explode(',', $value['tripids_cal']);
         if ($dipacth_date_filter == 1) {
           $dp_value = get_dp_value_vehicle_number($dp_trip_ids, $value['vehicle_number']);
         }
