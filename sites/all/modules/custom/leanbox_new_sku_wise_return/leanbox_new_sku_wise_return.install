@@ -1,0 +1,154 @@
+<?php
+
+/*
+ * Implement hook_schema.
+ */
+
+function leanbox_new_sku_wise_return_schema() {
+  $schema['temp_sku_wise_return'] = array(
+    'description' => 'Sequence for Trip ID',
+    'fields' => array(
+      'id' => array(
+        'description' => 'The primary identifier for a data',
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'trip_id' => array(
+        'description' => t('Trip ID'),
+        'type' => 'varchar',
+        'length' => 25,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'sku_code' => array(
+        'description' => t('SKU Code'),
+        'type' => 'varchar',
+        'length' => 50,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'actual_return_qty' => array(
+        'description' => t('Actual Return Quantity'),
+        'type' => 'varchar',
+        'length' => 50,
+      ),
+      'distributor_id' => array(
+        'description' => t('distributor_id'),
+        'type' => 'int',
+        'default' => 0,
+      ),
+    ),
+    'primary key' => array('id'),
+  );
+
+  $schema['excess_inventory_table'] = array(
+    'description' => 'Excess Inventory Table',
+    'fields' => array(
+      'id' => array(
+        'description' => 'The primary identifier for a data',
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'trip_id' => array(
+        'description' => t('Trip ID'),
+        'type' => 'varchar',
+        'length' => 25,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'product_name' => array(
+        'description' => t('Product name'),
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'mrp' => array(
+        'description' => t('MRP'),
+        'type' => 'varchar',
+        'length' => 25,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'excess_qty' => array(
+        'description' => t('Excess Quantity'),
+        'type' => 'int',
+        'default' => 0,
+      ),
+      'credit_to_cashier' => array(
+        'description' => t('Credit To Cashier'),
+        'type' => 'int',
+        'size' => 'tiny',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'excess_reason' => array(
+        'description' => 'Excess Reason',
+        'type' => 'varchar',
+        'length' => 50,
+        'default' => '',
+      ),
+      'remarks' => array(
+        'description' => 'Remarks',
+        'type' => 'varchar',
+        'length' => 255,
+        'default' => '',
+      ),
+      'distributor_id' => array(
+        'description' => t('distributor_id'),
+        'type' => 'int',
+        'default' => 0,
+      ),
+    ),
+    'primary key' => array('id'),
+  );
+
+  $schema['sku_wise_return_version'] = array(
+    'description' => 'Sequence for Trip ID',
+    'fields' => array(
+      'id' => array(
+        'description' => 'The primary identifier for a data',
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'trip_id' => array(
+        'description' => t('Trip ID'),
+        'type' => 'varchar',
+        'length' => 25,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'sku_code' => array(
+        'description' => t('SKU Code'),
+        'type' => 'varchar',
+        'length' => 50,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'actual_return_qty' => array(
+        'description' => t('Actual Return Quantity'),
+        'type' => 'varchar',
+        'length' => 25,
+      ),
+      'version_no' => array(
+        'description' => t('Version No'),
+        'type' => 'varchar',
+        'not null' => TRUE,
+        'length' => 100,
+      ),
+      'distributor_id' => array(
+        'description' => t('distributor_id'),
+        'type' => 'int',
+        'default' => 0,
+      ),
+      'created_date' => array(
+        'description' => t('Created Date'),
+        'type' => 'int',
+        'default' => 0,
+      ),
+    ),
+    'primary key' => array('id'),
+  );
+
+  return $schema;
+}

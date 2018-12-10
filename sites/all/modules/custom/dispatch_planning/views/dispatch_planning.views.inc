@@ -4239,6 +4239,131 @@ function dispatch_planning_views_data() {
         ),
     );
 
+    $data['dispatch_planning_item_details']['claimed_godown_short'] = array(
+        'title' => t('DP lines claimed_godown_short'),
+        'help' => t('Dispatch Planning lines claimed_godown_short'),
+        'field' => array(
+            'handler' => 'views_handler_field',
+            'click sortable' => TRUE,
+        ),
+        'sort' => array(
+            'handler' => 'views_handler_sort',
+        ),
+        'filter' => array(
+            'handler' => 'views_handler_filter_string',
+        ),
+        'argument' => array(
+            'handler' => 'views_handler_argument_string',
+        ),
+    );
+
+    $data['dispatch_planning_item_details']['claimed_godown_short_reason'] = array(
+        'title' => t('DP lines claimed_godown_short_reason'),
+        'help' => t('Dispatch Planning lines claimed_godown_short_reason'),
+        'field' => array(
+            'handler' => 'views_handler_field',
+            'click sortable' => TRUE,
+        ),
+        'sort' => array(
+            'handler' => 'views_handler_sort',
+        ),
+        'filter' => array(
+            'handler' => 'views_handler_filter_string',
+        ),
+        'argument' => array(
+            'handler' => 'views_handler_argument_string',
+        ),
+    );
+
+    $data['dispatch_planning_item_details']['approved_quantity'] = array(
+        'title' => t('DP lines approved_quantity'),
+        'help' => t('Dispatch Planning lines approved_quantity'),
+        'field' => array(
+            'handler' => 'views_handler_field',
+            'click sortable' => TRUE,
+        ),
+        'sort' => array(
+            'handler' => 'views_handler_sort',
+        ),
+        'filter' => array(
+            'handler' => 'views_handler_filter_string',
+        ),
+        'argument' => array(
+            'handler' => 'views_handler_argument_string',
+        ),
+    );
+
+    $data['dispatch_planning_item_details']['godown_short_reason'] = array(
+        'title' => t('DP lines godown_short_reason'),
+        'help' => t('Dispatch Planning lines godown_short_reason'),
+        'field' => array(
+            'handler' => 'views_handler_field',
+            'click sortable' => TRUE,
+        ),
+        'sort' => array(
+            'handler' => 'views_handler_sort',
+        ),
+        'filter' => array(
+            'handler' => 'views_handler_filter_string',
+        ),
+        'argument' => array(
+            'handler' => 'views_handler_argument_string',
+        ),
+    );
+
+    $data['dispatch_planning_item_details']['approved_by'] = array(
+        'title' => t('DP lines approved_by'),
+        'help' => t('Dispatch Planning lines approved_by'),
+        'field' => array(
+            'handler' => 'views_handler_field',
+            'click sortable' => TRUE,
+        ),
+        'sort' => array(
+            'handler' => 'views_handler_sort',
+        ),
+        'filter' => array(
+            'handler' => 'views_handler_filter_string',
+        ),
+        'argument' => array(
+            'handler' => 'views_handler_argument_string',
+        ),
+    );
+
+    $data['dispatch_planning_item_details']['remarks'] = array(
+        'title' => t('DP lines remarks'),
+        'help' => t('Dispatch Planning lines remarks'),
+        'field' => array(
+            'handler' => 'views_handler_field',
+            'click sortable' => TRUE,
+        ),
+        'sort' => array(
+            'handler' => 'views_handler_sort',
+        ),
+        'filter' => array(
+            'handler' => 'views_handler_filter_string',
+        ),
+        'argument' => array(
+            'handler' => 'views_handler_argument_string',
+        ),
+    );
+    $data['dispatch_planning_item_details']['declared_claimed_godown_short'] = array(
+        'title' => t('DP lines declared_claimed_godown_short'),
+        'help' => t('Dispatch Planning lines declared_claimed_godown_short'),
+        'field' => array(
+            'handler' => 'views_handler_field',
+            'click sortable' => TRUE,
+        ),
+        'sort' => array(
+            'handler' => 'views_handler_sort',
+        ),
+        'filter' => array(
+            'handler' => 'views_handler_filter_string',
+        ),
+        'argument' => array(
+            'handler' => 'views_handler_argument_string',
+        ),
+    );
+
     $base_table = 'dispatch_planning_api_data';
     $data[$base_table]['date_filter'] = array(
         'group' => t('Date'),

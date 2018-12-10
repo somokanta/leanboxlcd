@@ -1,4 +1,18 @@
 <?php
+function get_excess_declaration_cashier_data($trip_number, $distributor_id) {
+  if (!empty($trip_number) && !empty($distributor_id)){ 
+    $query = db_select('excess_inventory_table', 'eit');
+    $query->condition('eit.trip_id', $trip_number);
+    $query->condition('eit.distributor_id', $distributor_id);
+    $query->condition('eit.credit_to_cashier', 1);
+    $query->addExpression('SUM(eit.excess_qty)', 'excess_qty');
+    $query->addExpression('SUM(eit.excess_qty * eit.mrp)', 'excess_value');
+    $result = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+  }
+  return $result;
+}
+
+
 function get_current_vrs_version($trip_id, $dis_id) {
     if (!empty($trip_id) && !empty($dis_id)) {
         $query = db_select('node', 'disp_data');
@@ -179,7 +193,7 @@ function received_assets_count($trip_id, $dis_id) {
     }
     return $asset;
 }
-
+// Not exclude dp bills in shorts
 function get_return_short($trip_id, $distributor_id) {
     $short = array();
     if (!empty($trip_id) && !empty($distributor_id)) {

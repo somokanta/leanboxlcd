@@ -147,6 +147,8 @@ function vrs_confirmation_form($form, &$form_state) {
     '#prefix' => '<div class="col_2 col_2_2"> ',
     '#suffix' => '</div>'
   );
+  $excess_values = get_excess_declaration_cashier_data($trip_id, $dis_id);
+  //print_r($excess_values);die;
   if (!empty($options)) {
     // VRS edit screen load existing data
     $vrs_version = get_current_vrs_version($trip_id, $dis_id);
@@ -158,9 +160,12 @@ function vrs_confirmation_form($form, &$form_state) {
     $sum_cashier_short_value = $get_shorts['sum_cashier_short_value'] ? number_format((float) $get_shorts['sum_cashier_short_value'], 2, '.', '') : 0;
     $asset_short_qty = $asset['received_qty'] ? $asset['received_qty'] : 0;
     $asset_short_value = $asset['value'] ? $asset['value'] : 0;
+    $excessqty = $excess_values[0]['excess_qty'] ? $excess_values[0]['excess_qty'] : 0;
+    $excessvalue = $excess_values[0]['excess_value'] ? $excess_values[0]['excess_value'] : 0;
     $short_values[] = array('Godown Short', $sum_godown_short_qty, $sum_godown_short_value);
     $short_values[] = array('Cashier Short', $sum_cashier_short_qty, $sum_cashier_short_value);
     $short_values[] = array('Assets Short', $asset_short_qty, $asset_short_value);
+    $short_values[] = array('Excess', $excessqty, $excessvalue); 
     $asset_total = 0;
     $bills = array();
     // If VRS alraedy created fetch VRS value, footer value, Denominations value
@@ -182,10 +187,24 @@ function vrs_confirmation_form($form, &$form_state) {
     $return_changes = array();
     $field_cashier_name_set = 0;
     foreach ($options as $key => &$val) {
-      $sum_s_register_bill_value += (float) $val['field_bill_value_value'];
+      if(!empty($val['claimed_godown_short_qty'])) {
+          $form['claimed_godown_short_qty'] = array(
+                  '#type' => 'hidden',
+                  '#value' => $val['claimed_godown_short_qty'],
+                );
+            }
+      // Exclude dp bill_value from header table
+      if($val['delivery_pending_flag'] == 1){
+        $sum_s_register_bill_value += 0;
+        $sum_return_value += 0;
+      }
+      else {
+        $sum_s_register_bill_value += (float) $val['field_bill_value_value'];
+        $sum_return_value += $val['total_return_value'];
+      }
       $trip_execution_date = $val['trip_execution_date'];
       $field_cashier_name = $val['field_cashier_name_value'];
-      $sum_return_value += $val['total_return_value'];
+      
       $key = str_replace(' ', '', $key);
       //cashier name = handover that means handover trip, fetch existing bills cashier name
       if ($field_cashier_name == 'handover' && $field_cashier_name_set!==1) {
@@ -445,12 +464,14 @@ function vrs_confirmation_form($form, &$form_state) {
     'Remarks',
     'Pending',
     'Pending Reason',
-    'Delivery Pending'  
+    'Delivery Pending',
+    'Claimed GS'
   );
 
   if (!empty($options)) {
     $trip_header_values[] = array($trip_id, $field_cashier_name, $sum_s_register_bill_value, round($sum_return_value), $cash_count, $cheque_count, $signed_bill_count, $trip_execution_date);
-    $short_header = array('Short Name', 'Quantity', 'Value');
+    $short_header = array('Short Name/Excess', 'Quantity', 'Value');
+    $excess_header = array('Excess Quantity', 'Excess Value');
     $trip_header = array('Trip ID', 'Cashier Name', 'Total Bill Value', 'Returned Value', 'Cash Count', 'Cheque Count', 'Signed Bill Count', 'Trip Execution Date');
     $footer_header = array('Count of Bills', 'Total Delivery App (To be collected)', 'Total To be collected', 'Total Cash Collected', 'Total Signed Bill Collected', 'Total Cheque Collected','RTO Charges', 'Cashier Cash Short', 'Total Short', 'Total Cashier Debit Value');
     if (!empty($vrs_version)) {
@@ -522,6 +543,19 @@ function vrs_confirmation_form($form, &$form_state) {
       '#prefix' => '<div class="custom_header_table">',
       '#suffix' => '</div>',
     );
+    $excess_value = 0;
+    if (!empty($excess_values[0]['excess_value'])) {
+               
+        $form['excess_qty'] = array(
+          '#type' => 'hidden',
+          '#value' => $excess_values[0]['excess_qty'],
+        );
+        $form['excess_value'] = array(
+          '#type' => 'hidden',
+          '#value' => $excess_values[0]['excess_value'],
+        );
+        $excess_value = $excess_values[0]['excess_value'];
+    }
     $form['bill_details'] = array(
       '#theme' => 'table',
       '#prefix' => '<div class="custom_middle_table vrs_middle_table">',
@@ -569,6 +603,11 @@ function vrs_confirmation_form($form, &$form_state) {
     foreach ($options as $key => &$val) {
       $key = str_replace(' ', '', $key);
       //$val['sales_register_to_be_collected_amt'] = number_format((float) $val['sales_register_to_be_collected_amt'], 2, '.', '');
+      
+     //If Delivered Value <= Bill Level Discount, then:
+      if ($val['check_delivered_value_less'] == 1) {
+        $val['sales_register_to_be_collected_amt'] = 0;
+      }
       if ($val['res_status'] == 'undeliver') {
         $val['sales_register_to_be_collected_amt'] = 0;
       }
@@ -588,6 +627,14 @@ function vrs_confirmation_form($form, &$form_state) {
       {
           $delivery_pending = t('No');
       }
+      if(!empty($val['claimed_godown_short_qty'])){
+          $claimed_godownshort = t('Yes');
+      }
+      else
+      {
+          $claimed_godownshort = t('No');
+      }
+      
       $form['bill_details']['#rows'][$key][] = $val['bill_number'];
       $undeliver = 0;
       switch ($val['res_status']) {
@@ -693,7 +740,7 @@ function vrs_confirmation_form($form, &$form_state) {
 
       $actual_cash_collected = array(
         //'#id' => 'bill_details-' . $key . '-actual_cash_collected',
-        '#attributes' => array('class' => array('short_cal', 'actual_cash_collected', 'allownumericwithoutdecimal'), 'title' => t('Actual Cash Collected')),
+        '#attributes' => array('class' => array('short_cal','calculate_short_without_cash', 'actual_cash_collected', 'allownumericwithoutdecimal'), 'title' => t('Actual Cash Collected')),
         '#type' => 'textfield',
         '#size' => $text_box_size,
         '#default_value' => $vrs_total_id ? round($bills[$key]['actual_cash_amount']) : round($val['res_cash_amount']),
@@ -938,7 +985,7 @@ function vrs_confirmation_form($form, &$form_state) {
         $form['bill_details']['#rows'][$key][]['data']["non_bankable_reason_code"] = &$non_bankable_reason_code;
         $form['bill_details']['#rows'][$key][] = $delivery_pending;
       }
-      
+      $form['bill_details']['#rows'][$key][] = $claimed_godownshort;
       $form['bill_details']['#rows'][$key][] = $vrs_total_id ? $bills[$key]['bank_name'] : $val['res_bank_name'];
       
       unset($actual_cash_collected);
@@ -1016,7 +1063,7 @@ function vrs_confirmation_form($form, &$form_state) {
     $short_display = number_format($short_total, 2, '.', '');
     $total_cashier_cash_short_display = number_format($total_cashier_cash_short_value, 2, '.', '');
     //Total Cashier Debit Value = Cashier cash short at footer level + cashier short value from header
-    $total_cashier_debit_value = $total_cashier_cash_short_value + $sum_cashier_short_value + $asset_total;
+    $total_cashier_debit_value = $total_cashier_cash_short_value + $sum_cashier_short_value + $asset_total- $excess_value;
     $total_cashier_debit_value = number_format($total_cashier_debit_value, 2, '.', '');
     $total_cashier_cash_short = array(
       '#id' => 'footer_details-' . $key . '-total_cashier_cash_short',
@@ -1035,7 +1082,7 @@ function vrs_confirmation_form($form, &$form_state) {
     $total_cashier_debit_value_field = array(
       '#id' => 'footer_details-' . $key . '-total_cashier_debit_value',
       '#type' => 'textfield',
-      '#attributes' => array('class' => array('total_cashier_debit_value'), 'readonly' => 'readonly', 'data' => $sum_cashier_short_value, 'total_sregister' => $total_sales_register, 'asset_total' => $asset_total),
+      '#attributes' => array('class' => array('total_cashier_debit_value'), 'readonly' => 'readonly', 'data' => $sum_cashier_short_value, 'total_sregister' => $total_sales_register, 'asset_total' => $asset_total,'excess_value'=>$excess_value),
       '#size' => $text_box_size,
       '#default_value' => !empty($vrs_total[$total_key]) ? $vrs_total[$total_key]['total_cashier_debit_value'] : $total_cashier_debit_value,
     );
@@ -1266,7 +1313,10 @@ function display_vrs_trip_details($form, &$form_state) {
     $sub_query1 = db_select('dispatch_planning_item_details', 'dpi');
     $sub_query1->fields('dpi', array('trip_bill_reference'));
     $sub_query1->addExpression("SUM(dpi.return_qty * dpi.sum_net_sales_value)", 'return_value');
+    $sub_query1->addExpression('(SUM(dpi.sum_net_sales_value * dpi.res_sku_actual_quantity1))', 'delivered_value');
     $sub_query1->addExpression("SUM(dpi.res_cashier_short * dpi.sum_net_sales_value)", 'cashier_short_value');
+    $sub_query1->addExpression("SUM(dpi.claimed_godown_short)", 'claimed_godown_short_qty');
+    $sub_query1->addExpression("SUM(dpi.claimed_godown_short * dpi.sum_net_sales_value)", 'claimed_godown_short_value');
     $sub_query1->addExpression("SUM(dpi.res_godown_short * dpi.sum_net_sales_value)", 'godown_short_value');
     $sub_query1->join('dispatch_planning_api_data', 'dp_header', 'dpi.trip_bill_reference = dp_header.id AND dp_header.distributor_id ='.$dis_id);    
     $sub_query1->condition('dp_header.runsheet_number', $trip_id, '=');
@@ -1292,6 +1342,8 @@ function display_vrs_trip_details($form, &$form_state) {
         $query->join('node', 'oun', 'oun.nid = pc.field_party_code_reference_nid');
         $query->leftJoin('field_data_field_payment_terms', 'pt', 'pt.entity_id = oun.nid');
         $query->condition('oun.uid', $dis_id);
+        $query->leftJoin('field_data_field_bill_level_discount', 'bill_discount', 'bill_discount.entity_id = n.nid');
+        
         //---------------------------
         $query->condition('n.uid', $dis_id);
         $query->join('field_data_field_bill_value', 'bv', 'bv.entity_id = n.nid');
@@ -1309,14 +1361,19 @@ function display_vrs_trip_details($form, &$form_state) {
         $query->groupBy('ad.bill_number');
         $query->fields('ad', array('bill_number', 'res_bank_name', 'res_status', 'res_cheque_date', 'res_bank_name', 'res_photo_of_cheque', 'res_photo_of_signed_bill_delivery', 'photo_of_signed_bill_partial', 'res_moneyTransactionType'));
         $query->fields('item_details', array('trip_bill_reference'));
-        $query->fields('bv', array('field_bill_value_value'));
+        // As per new ptl_vrs change changed 
+        //$query->fields('bv', array('field_bill_value_value'));
         $query->fields('fld_cashier', array('field_cashier_name_value'));
+        //$query->fields('bill_discount', array('field_bill_level_discount_value'));
         // payment type
         $query->fields('pt', array('field_payment_terms_value'));
         // sales register to be collected amt
-        $query->addExpression("SUM(bv.field_bill_value_value - item_details.return_value - item_details.cashier_short_value - item_details.godown_short_value)", 'sales_register_to_be_collected_amt');
+        //$query->addExpression("SUM(bv.field_bill_value_value - item_details.return_value - item_details.cashier_short_value - item_details.godown_short_value)", 'sales_register_to_be_collected_amt');
+        // As per new ptl_vrs change changed sales register billvalue to farey bill_value
+        $query->addExpression("SUM(ad.bill_value - item_details.return_value - item_details.cashier_short_value - item_details.godown_short_value - item_details.claimed_godown_short_value)", 'sales_register_to_be_collected_amt');
         // Farery to be collected amt
-        $query->addExpression("SUM(ad.bill_value - item_details.return_value - item_details.cashier_short_value - item_details.godown_short_value)", 'to_be_collected_amt');
+        $query->addExpression("SUM(ad.bill_value - item_details.return_value - item_details.cashier_short_value - item_details.godown_short_value - item_details.claimed_godown_short_value)", 'to_be_collected_amt');
+        $query->addExpression('item_details.claimed_godown_short_qty', 'claimed_godown_short_qty');
         $query->addExpression('ad.res_cash_amount', 'res_cash_amount');
         $query->addExpression('ad.res_cheque_amount', 'res_cheque_amount');
         $query->addExpression('ad.bill_value', 'bill_value');
@@ -1328,7 +1385,10 @@ function display_vrs_trip_details($form, &$form_state) {
         $query->addExpression('ad.res_photo_of_signed_bill_delivery', 'res_photo_of_signed_bill_delivery');
         $query->addExpression('ad.photo_of_signed_bill_partial', 'photo_of_signed_bill_partial');
         $query->addExpression('ad.res_confirm_signed_bill_amount', 'res_confirm_signed_bill_amount');
-        $query->addExpression('bv.field_bill_value_value', 'field_bill_value_value');
+        //// As per new ptl_vrs change changed 
+        $query->addExpression('ad.bill_value', 'field_bill_value_value');
+        $query->addExpression('bill_discount.field_bill_level_discount_value', 'bill_level_discount');
+        $query->addexpression("(CASE WHEN bill_discount.field_bill_level_discount_value >= item_details.delivered_value THEN 1 ELSE 0 END)", 'check_delivered_value_less');
         $query->addExpression("DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(exe_date.field_trip_executon_date_value),'+00:00','+05:30'), '%d-%b-%Y')", 'trip_execution_date');
         $query->addExpression('ad.res_cheque_date_edit', 'res_cheque_date_edit');
         $query->addExpression('ad.res_photo_of_cheque_edit', 'res_photo_of_cheque_edit');
@@ -1351,6 +1411,7 @@ function display_vrs_trip_details($form, &$form_state) {
         $query->addExpression('ad.delivery_pending_flag', 'delivery_pending_flag');
         $query->orderBy('ad.res_status', 'asc');
         $res = $query->execute()->fetchAll(PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
+        //  watchdog('vrs', '<pre>' . print_r($res, TRUE) . '</pre>');
   }
         $form_state['vrs_confirmation']['bills'] = $res;
         $form_state['start_time'] = REQUEST_TIME;
@@ -1365,6 +1426,7 @@ function vrs_confirmation_validate($form, &$form_state) {
   if (empty($trip_id)) {
     $trip_id = $form_state['values']['trips'];
   }
+  $claimed_godown_short_qty = $form_state['values']['claimed_godown_short_qty'];
   $key_footer = key($form_state['values']['footer_details']);
   $to_be_collected = (float) $form_state['values']['footer_details'][$key_footer]['total_s_register'];
   $total_short = (float) $form_state['values']['footer_details'][$key_footer]['short_collected'];
@@ -1389,7 +1451,7 @@ function vrs_confirmation_validate($form, &$form_state) {
           
         }
         else {
-          $messages[] = t('Error:Bill Number:' . $key . '-To be collected amount should be equal to (Actual Cash Collected + Actual Cheque Amount + Actual Signed Bill + Short).');
+          //$messages[] = t('Error:Bill Number:' . $key . '-To be collected amount should be equal to (Actual Cash Collected + Actual Cheque Amount + Actual Signed Bill + Short).');
         }
         $short_collected = (float) $value['short_collected'];
         $non_bankable = $value['non_billable'];
@@ -1404,6 +1466,10 @@ function vrs_confirmation_validate($form, &$form_state) {
         }
         if (empty($non_bankable) && !empty($value['non_bankable_reason_code'])) {
           $messages[] = t('Error:Bill Number:' . $key . '- Please remove the Pending Reason.');
+        }
+        
+        if (!empty($claimed_godown_short_qty) && empty($non_bankable)) {
+            //$messages[] = t('Error:Bill Number:' . $key . '- Please select the  Pending Reason Code of Claimed Godown Short Qty.');
         }
         // Signed bill validation
 
@@ -1536,6 +1602,7 @@ function vrs_confirmation_form_submit($form, &$form_state) {
   $vrs_bill_trip_exist = check_vrs_trip_exist($trip_id, $dis_id);
 
   $key_footer = key($form_state['values']['footer_details']);
+  $claimed_godown_short_qty = $form_state['values']['claimed_godown_short_qty'];
   $to_be_collected = $form_state['values']['footer_details'][$key_footer]['total_s_register'];
   $total_short = (float) $form_state['values']['footer_details'][$key_footer]['short_collected'];
   $total_actual_cash = $form_state['values']['footer_details'][$key_footer]['total_actual_cash_collected'];
@@ -1686,7 +1753,7 @@ function vrs_confirmation_form_submit($form, &$form_state) {
           $trip_items[$key]['photo_signed_bill'] = '';
       }
     }
-    if ($no_billable == 1) {
+    if ($no_billable == 1 || !empty($claimed_godown_short_qty)) {
       $vrs_status = 3; // vrs pending
     }
     else {

@@ -78,13 +78,23 @@ function modify_views_forms_form_alter(&$form, &$form_state, $form_id) {
         $form['field_assignment_date_value']['value']['#attributes'] = array('required' => TRUE);
       }
    }
-   if ($form_id == 'editableviews_entity_form_vehicle_master') {
+   if ($form_id == 'editableviews_entity_form_vehicle_master') { 
+           //if ($form_state['form_error'] == 1) return;
        $form['#validate'][] = 'validate_vehilce_master_edit'; 
        $form['#attached']['js'][] = drupal_get_path('module', 'deliverycost_calculation') . '/js/delivery_cost_edit.js';
        foreach ($form['node'] as $key => $value) {
+           $mode_of_contract =  $value['#entity']->field_mode_of_contract[LANGUAGE_NONE][0]['value'];
+           if ($mode_of_contract == 'Contracted') {
+              // $form['node'][$key]['field_cost_per_day'][LANGUAGE_NONE][0]['value']['#attributes']['readonly']='readonly';
+           }
+           if ($mode_of_contract == 'Market') {
+                //$form['node'][$key]['field_cost_per_month'][LANGUAGE_NONE][0]['value']['#attributes']['readonly']='readonly';
+           }
            $form['node'][$key]['field_mode_of_contract'][LANGUAGE_NONE]['#attributes'] = array('class'=>array('mode_of_contract','mode_of_contract_'.$key),'vehicle_id'=>$key);
-           $form['node'][$key]['field_cost_per_day'][LANGUAGE_NONE][0]['value']['#attributes'] = array('class'=>array('allownumericwithoutdecimal','cost_per_day_all','cost_per_day_'.$key),'vehicle_id'=>$key);
-           $form['node'][$key]['field_cost_per_month'][LANGUAGE_NONE][0]['value']['#attributes'] = array('class'=>array('allownumericwithoutdecimal', 'cost_per_month_all','cost_per_month_'.$key),'vehicle_id'=>$key);
+           $form['node'][$key]['field_cost_per_day'][LANGUAGE_NONE][0]['value']['#attributes']['class']= array('allownumericwithoutdecimal','cost_per_day_all','cost_per_day_'.$key);
+           $form['node'][$key]['field_cost_per_month'][LANGUAGE_NONE][0]['value']['#attributes']['class'] = array('allownumericwithoutdecimal', 'cost_per_month_all','cost_per_month_'.$key);
+           $form['node'][$key]['field_cost_per_month'][LANGUAGE_NONE][0]['value']['#attributes']['vehicle_id'] = $key;
+           $form['node'][$key]['field_cost_per_day'][LANGUAGE_NONE][0]['value']['#attributes']['vehicle_id'] = $key;
            $form['node'][$key]['field_driver_phone_no'][LANGUAGE_NONE][0]['value']['#attributes'] = array('class'=>array('allownumericwithoutdecimal'),'maxlength'=>10);
        }
    }
@@ -712,7 +722,17 @@ function validate_vehilce_master_edit(&$form, &$form_state) {
     foreach ($form_state['values']['node'] as $nid => $form_data) {
         $vehicle_number = $form_data['title'];
         //$data = check_vehicle_contract_end_period($nid);
-        
+        $mode_of_contract = $form_data['field_mode_of_contract'][LANGUAGE_NONE][0]['value'];
+        if ($mode_of_contract == 'Contracted') {
+           if (empty($form_data['field_cost_per_month'][LANGUAGE_NONE][0][value])) {
+               $mess .= t("Please enter Cost per Month for Vehilce Number:$vehicle_number") . '<br>';
+           } 
+        }
+        elseif ($mode_of_contract == 'Market') {
+            if (empty($form_data['field_cost_per_day'][LANGUAGE_NONE][0][value])) {
+               $mess .= t("Please enter Cost per Day for Vehilce Number:$vehicle_number") . '<br>';
+           } 
+        }
         $mobile_number = trim($form_data['field_driver_phone_no'][LANGUAGE_NONE][0]['value']);
         $valid_mobile = validate_mobile($mobile_number);
         $field_is_active = trim($form_data['field_is_active'][LANGUAGE_NONE][0]['value']);
@@ -722,6 +742,7 @@ function validate_vehilce_master_edit(&$form, &$form_state) {
     }
     if (!empty($mess)) {
         form_set_error('form', $mess);
+        
     }
 }
 

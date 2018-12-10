@@ -137,15 +137,21 @@
             {
                 $('#bill_details tr:has(td)').each(function () {
                     var sum = 0;
+                    var cash_sum = 0;
                     $(this).find('td').each(function () {
                         sum += parseFloat($(this).find('.short_cal').val()) || 0;
+                        cash_sum += parseFloat($(this).find('.calculate_short_without_cash').val()) || 0;
                     });
                     var to_be_colelcted = parseFloat($(this).find('.short').attr('data'));
-
                     var row_total = to_be_colelcted - sum;
                     row_total = row_total.toFixed(2);
                     // Difference in RS 1  Short amt will be greater than RS 1
                     if (row_total <= 1 && row_total >= 0) {
+                        row_total = 0;
+                    }
+                     /*Calculate "Short" at Bill level only IF Actual Cash collected =0.
+                    // If Actual Cash collected > 0 then Short at bill level should be = 0.*/
+                    if(cash_sum>0) {
                         row_total = 0;
                     }
 
@@ -217,6 +223,8 @@
                 total_cashier_short_value = parseFloat($('.total_cashier_debit_value').attr('data'));
                 total_s_register = parseFloat($('.total_cashier_debit_value').attr('total_sregister'));
                 asset_total = parseFloat($('.total_cashier_debit_value').attr('asset_total'));
+                excess_total = parseFloat($('.total_cashier_debit_value').attr('excess_value'));
+                //alert(excess_total);
                 //if (calculated_total_sum>total_s_register) {
                 //alert("Total to be collected should be greater than Total Cash + Total Cheque + Total Signed Bill + Total Short.")
                 //}
@@ -226,7 +234,7 @@
                 // console.log(calculated_total_sum);
                 $(".total_cashier_cash_short").val(to_c_short);
                 initial_debit_value = total_cashier_short_value;
-                debit_val = (parseFloat(initial_debit_value) + parseFloat(to_c_short) + parseFloat(asset_total)).toFixed(2);
+                debit_val = (parseFloat(initial_debit_value) + parseFloat(to_c_short) + parseFloat(asset_total)- excess_total).toFixed(2) ;
                 $(".total_cashier_debit_value").val(debit_val);
             }
             $(".allownumericwithoutdecimal").on("keypress keyup blur paste", function (event) {
@@ -361,7 +369,7 @@
                 table = document.getElementById("bill_details");
                 tr = table.getElementsByTagName("tr");
                 for (i = 0; i < tr.length; i++) {
-                    td = tr[i].getElementsByTagName("td")[22];
+                    td = tr[i].getElementsByTagName("td")[23];
                     if (td) {
                         //document.getElementById("tabela").rows[n].cells[n].getElementsByTagName('input')[0].value;
                         //var bank_input =td.getElementsByTagName('input')[0];
