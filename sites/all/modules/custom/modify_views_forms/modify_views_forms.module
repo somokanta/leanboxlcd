@@ -116,24 +116,34 @@ function modify_views_forms_form_alter(&$form, &$form_state, $form_id) {
            $form['node'][$key]['field_cost_per_month'][LANGUAGE_NONE][0]['value']['#attributes'] = array('class'=>array('allownumericwithoutdecimal','resource_cost_per_month_all','resource_cost_per_month_'.$key),'resource_id'=>$key);
        }
    }
+   
    if ($form_id == 'editableviews_entity_form_dispatch_data_report') {
       $form['#attached']['js'][] = drupal_get_path('module', 'mrc_inventory_returns') . '/js/fSelect.js';
       $form['#attached']['css'][] = drupal_get_path('module', 'mrc_inventory_returns') . '/css/fSelect.css';  
       $form['#attached']['js'][] = drupal_get_path('module', 'deliverycost_calculation') . '/js/trip_dispatch_delivery_boy.js';
       $form['#attached']['css'][] = drupal_get_path('module', 'deliverycost_calculation') . '/css/delivery_cost.css';  
+      $form['#validate'][] = 'validate_bill_editing_confirmation'; //TP to Host Entru task
       $form['#validate'][] = 'validate_trip_status'; 
       $form['#validate'][] = 'validate_dispatch_time'; 
-      $form['#validate'][] = 'validate_working_day'; 
+      $form['#validate'][] = 'validate_working_day';
+      //$form['#validate'][] = 'validate_vehicle_reporting_time';
       // Validate trip status report dispatch start time and end time
-      
+
       $select = array('' => '- Select -');
       $vehicle = get_all_vehicle_data();
       $vehicle = $select + $vehicle;
       $delivery_boys = get_all_resources_by_type('Delivery Boy');
       $delivery_boys = $select + $delivery_boys;
+      
       //field-dispatch-status
-      foreach ($form['node'] as $key => $value) { 
-          
+      foreach ($form['node'] as $key => &$value) {
+//        $value['field_vehicle_reporting_date'][LANGUAGE_NONE][0]['#default_value']['value']=  $value['field_vehicle_reporting_date'][LANGUAGE_NONE][0]['#default_value']['value'] ? $value['field_vehicle_reporting_date'][LANGUAGE_NONE][0]['#default_value']['value'] : date('Y-m-d');
+//        $form['node'][$key]['field_vehicle_reporting_date'][LANGUAGE_NONE][0]['#required'] = TRUE;
+//        $form['node'][$key]['field_vehicle_reporting_time'][LANGUAGE_NONE][0]['value']['#required'] = TRUE;
+//        $form['node'][$key]['field_loading_dispatch_date'][LANGUAGE_NONE][0]['#required']  = TRUE;
+        $form['node'][$key]['field_dispatch_supervisor'][LANGUAGE_NONE][0]['value']['#required'] = TRUE;
+        $form['node'][$key]['field_cashier_name'][LANGUAGE_NONE][0]['value']['#required'] = TRUE;
+        
          $trip_status = $value['#entity']->field_dispatch_status[LANGUAGE_NONE][0]['value'];
          $form['node'][$key]['field_vehicle_no'][LANGUAGE_NONE][0]['value']['#type'] = 'textfield';
          //$form['node'][$key]['field_vehicle_no'][LANGUAGE_NONE][0]['value']['#multiple'] = FALSE;
@@ -154,15 +164,14 @@ function modify_views_forms_form_alter(&$form, &$form_state, $form_id) {
          $form['node'][$key]['field_delivery_boy'][LANGUAGE_NONE]['#multiple']    =  true;
          $form['node'][$key]['field_delivery_boy'][LANGUAGE_NONE]['#required']    =  true;
          $form['node'][$key]['field_delivery_boy'][LANGUAGE_NONE]['#attributes'] = array('class'=>array('delivery_boy'));
+         
          // if trip status is completed then delivery boy can't be editable
          if ($trip_status == 1) {
               $form['node'][$key]['field_delivery_boy']['#access'] = FALSE;
          }
-         
              // Not editable when dispatch start time alreay entered.
       }
-      // Delivery boy team create a delivery boy field in trip dispatch 
-      
+      // Delivery boy team create a delivery boy field in trip dispatch   
    }
 
    if ($form_id == 'editableviews_entity_form_signed_bills_upload' || $form_id == 'editableviews_entity_form_missing_bills_assignment') {
@@ -448,11 +457,24 @@ function check_active_vehicles($string) {
 }
 
 
+//This function is used to validate bill_editing_confirmation
+function validate_bill_editing_confirmation($form, &$form_state) {
+  $node_status = array();
+  foreach ($form['node'] as $key => $value) { // It is for fetching existing node values
+    if (isset($value['#entity']->title)) {
+      if ($value['#entity']->field_confirm_bill_edit_status['und'][0]['value'] != 1) {
+        form_set_error('form', t("Bill Confirmation status is not completed for trip: " . $value['#entity']->title));
+      }
+    }
+  }
+}
+
 // This function is used to validate trip status
 function validate_trip_status($form, &$form_state) {
     $node_status = array();
     foreach ($form['node'] as $key => $value) { // It is for fetching existing node values
             $node_status[$key]['trip_id'] = $value['#entity']->title;
+            
     }
    // This is user input values.  Edit screen, that if Pre-start or Start time is being entered/already entered for a Trip ID, then entering Cashier name is mandatory.
   foreach($form_state['values']['node'] as $nid => $form_data){
@@ -469,7 +491,17 @@ function validate_trip_status($form, &$form_state) {
           form_set_error('form', t("Please select active vehicle for Trip ID: ". $node_status[$nid]['trip_id'])); 
       }
      
-      if (!empty($pre_start_time) || !empty($dispatch_start_time)) {
+    if (empty($dispatch_date)) {
+      form_set_error('form', t("Please enter the Dispatch date for Trip ID: " . $node_status[$nid]['trip_id']));
+    }
+    if (empty($pre_start_time)) {
+      form_set_error('form', t("Please enter the Dispatch Start Time for Trip ID: " . $node_status[$nid]['trip_id']));
+    }
+    if (empty($dispatch_start_time)) {
+      form_set_error('form', t("Please enter the Dispatch End Time for Trip ID: " . $node_status[$nid]['trip_id']));
+    }
+
+    if (!empty($pre_start_time) || !empty($dispatch_start_time)) {
             if(empty($cashier_name)) {
                 form_set_error('form', t("Please enter the Cashier Name for Trip ID: ". $node_status[$nid]['trip_id'])); 
             }  
@@ -772,3 +804,88 @@ function check_vehicle_contract_end_period($vehicle_nid) {
         }
     }
 }
+
+// validate vehicle reporting start time and end time.
+//function validate_vehicle_reporting_time($form, &$form_state) {
+//  $mess = '';
+//  foreach ($form['node'] as $key => $value) { // It is for fetching existing node values
+//    $node_status[$key]['trip_id'] = $value['#entity']->title;
+//  }
+//    
+//  foreach ($form_state['values']['node'] as $nid => $form_data) {
+//    
+//    $vehicle_reporting_date = trim($form_data['field_vehicle_reporting_date'][LANGUAGE_NONE][0]['value']);
+//    $vehicle_reporting_date1 = explode(" ",$vehicle_reporting_date);
+//    $vehicle_reporting_date = strtotime($vehicle_reporting_date1[0]);
+//    
+//    $vehicle_time = trim($form_data['field_vehicle_reporting_time'][LANGUAGE_NONE][0]['value']);
+//    
+//    $vehicle_start_time = strtotime($vehicle_reporting_date1[0] . ' '. trim($form_data['field_vehicle_reporting_time'][LANGUAGE_NONE][0]['value']));
+//   
+//    $loading_dispatch_date = trim($form_data['field_loading_dispatch_date'][LANGUAGE_NONE][0]['value']);
+//    $loading_dispatch_date1 = explode(" ",$loading_dispatch_date);
+//    $loading_dispatch_date = strtotime($loading_dispatch_date1[0]);
+//    
+//    $dispatch_date = trim($form_data['field_dispatch_date'][LANGUAGE_NONE][0]['value']);
+//    $dispatch_date1 = explode(" ",$dispatch_date);
+//    $dispatch_date = strtotime($dispatch_date1[0]);
+//    
+//    $dispatch_pre_start_time = strtotime($dispatch_date1[0] .' '. trim($form_data['field_dispatch_pre_start_time'][LANGUAGE_NONE][0]['value']));
+//    
+//    $dispatch_start_time = strtotime($dispatch_date1[0] .' '. trim($form_data['field_dispatch_start_time'][LANGUAGE_NONE][0]['value']));
+//    
+//    $trip_id = $node_status[$nid]['trip_id'];
+//    $start_time_flag = 0;
+//   
+//    if (!empty($vehicle_time)) {
+//      $pre_start_time = explode(':', $vehicle_time);
+//      if (count($pre_start_time) != 2) {
+//        $start_time_flag = 1;
+//      }
+//      if (!empty($pre_start_time)) {
+//        $hour = (int) $pre_start_time[0];
+//        $minutes_array = explode(' ', $pre_start_time[1]);
+//        $minutes = (int) $minutes_array[0];
+//        $am_pm = strtolower(trim($minutes_array[1]));
+//      }
+//      if ($hour > 12 || !is_numeric($hour) || $hour <= 0) {
+//        $start_time_flag = 1;
+//      }
+//      if ($minutes > 60 && is_numeric($minutes)) {
+//        $start_time_flag = 1;
+//      }
+//      if ($minutes < 0 && !is_numeric($minutes)) {
+//        $start_time_flag = 1;
+//      }
+//      if ($minutes < 0) {
+//        $start_time_flag = 1;
+//      }
+//      if ($am_pm != 'am' && $am_pm != 'pm') {
+//        $start_time_flag = 1;
+//      }
+//    }
+//
+//    if ($start_time_flag == 1) {
+//      $mess .= t('Please enter valid vehicle reporting time for Trip ID:' . $trip_id . '.Allowed format is hh:mm AM/PM') . '<br>';
+//    }
+//
+//    if ($vehicle_start_time > $dispatch_pre_start_time && $vehicle_start_time > $dispatch_start_time) {
+//      $mess .= t('Vehicle Reporting time should be less than Dispatch Start & End Time for Trip ID:' . ' ' . $trip_id . '') . '<br>';
+//    }
+//    if ($vehicle_reporting_date > $dispatch_date) {
+//      $mess .= t('Vehicle Reporting Date should be equal to or less than Dispatch Date for Trip ID:' . ' ' . $trip_id . '') . '<br>';
+//    }
+//
+//    if ($loading_dispatch_date > $dispatch_date) {
+//      $mess .= t('Loading/Dispatch Date field should be equal to or less than Dispatch Date for Trip ID:' . ' ' . $trip_id . '') . '<br>';
+//    }
+//
+//    if ($vehicle_reporting_date > $loading_dispatch_date) {
+//      $mess .= t('Vehicle Reporting Date should be equal to or less than Loading/Dispatch Date for Trip ID:' . ' ' . $trip_id . '') . '<br>';
+//    }
+//  }
+// 
+//  if (!empty($mess)) {
+//    form_set_error('form', $mess);
+//  }
+//}

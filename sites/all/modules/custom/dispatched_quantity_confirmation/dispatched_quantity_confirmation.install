@@ -1,0 +1,310 @@
+<?php
+
+/*
+ * Implement hook_schema.
+ */
+
+function dispatched_quantity_confirmation_schema() {
+  $schema['dispatch_qty_confirmation'] = array(
+    'description' => 'Dispatched quantity confirmation',
+    'fields' => array(
+      'id' => array(
+        'description' => 'The primary identifier for a data',
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'trip_id' => array(
+        'description' => t('Trip ID'),
+        'type' => 'int',
+      ),
+      'bill_number' => array(
+        'description' => t('Bill Number'),
+        'type' => 'varchar',
+        'length' => 25,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'sku_code' => array(
+        'description' => t('SKU Code'),
+        'type' => 'varchar',
+        'length' => 25,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'product_name' => array(
+        'description' => t('Product name'),
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'mrp' => array(
+        'description' => t('MRP'),
+        'type' => 'varchar',
+        'length' => 10,
+        'default' => 0,
+      ),   
+      'tur' => array(
+        'description' => t('TUR'),
+        'type' => 'varchar',
+        'length' => 10,
+        'default' => 0,
+      ), 
+      'original_loose_qty' => array(
+        'description' => t('Original Loose Quantity'),
+        'type' => 'int',
+        'default' => 0,
+      ),
+      'ptl_put_qty' => array(
+        'description' => t('PTL Put Quantity'),
+        'type' => 'int',
+        'default' => 0,
+      ),
+      'pplc_confirmed_qty' => array(
+        'description' => t('PPLC Confirmed Quantity'),
+        'type' => 'int',
+        'default' => 0,
+      ),
+      'short_reason' => array(
+       'description' => t('Short Reason'),
+       'type' => 'varchar',
+       'length' => 255,
+       'default' => '',
+      ),
+     'dispatch_loose_qty' => array(
+        'description' => t('To Be Dispatched Quantity Loose Qty'),
+        'type' => 'int',
+        'default' => 0,
+      ),
+      'loose_close_flag' => array(
+        'description' => t('Loose Close flag'),
+        'type' => 'int',
+        'default' => 0,
+      ),
+      //loose end
+      'original_cld_qty' => array(
+        'description' => t('Original CLD Quantity'),
+        'type' => 'int',
+        'default' => 0,
+      ),
+      'upc' => array(
+        'description' => t('UPC'),
+        'type' => 'int',
+        'default' => 0,
+      ),
+      'cld_confirmed_qty' => array(
+        'description' => t('CLD Confirmed Quantity'),
+        'type' => 'int',
+        'default' => 0,
+      ),
+      'declared_cld_qty' => array(
+        'description' => t('Declared CLD Quantity'),
+        'type' => 'int',
+        'default' => 0,
+      ),
+      'cld_short_reason' => array(
+       'description' => t('CLD Short Reason'),
+       'type' => 'varchar',
+       'length' => 255,
+       'default' => '',
+      ), 
+      'dispatch_cld_qty' => array(
+        'description' => t('To Be Dispatched Quantity Cld Qty'),
+        'type' => 'int',
+        'default' => 0,
+      ),
+      'cld_close_flag' => array(
+        'description' => t('CLD Close Flag'),
+        'type' => 'int',
+        'default' => 0,
+      ),
+      //CLD END
+      'type' => array(
+        'description' => t('Type'),
+        'type' => 'varchar',
+        'length' => 25,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'original_qty' => array(
+        'description' => t('Original Quantity'),
+        'type' => 'int',
+        'default' => 0,
+      ),        
+      'to_be_dispatch_qty' => array(
+        'description' => t('To be Dispatch Quantity'),
+        'type' => 'int',
+        'default' => 0,
+      ),        
+      'created_date' => array(
+        'description' => 'Created Date',
+        'type' => 'int',
+        'default' => 0,
+      ),
+      'loose_created_date' => array(
+        'description' => 'Loose Created Date',
+        'type' => 'int',
+        'default' => 0,
+      ),         
+      'cld_created_date' => array(
+        'description' => 'CLD Created Date',
+        'type' => 'int',
+        'default' => 0,
+      ),
+      'cld_retail_confirmed_flag' => array(
+        'description' => t('CLD Confirmed Flag'),
+        'type' => 'int',
+        'default' => 0,
+      ),
+      'cld_loose_child_qty' => array(
+        'description' => t('CLD Loose child qty'),
+        'type' => 'int',
+        'default' => 0,
+      ),
+      'masterptl_short_qty' => array(
+        'description' => t('Master PTL short qty'),
+        'type' => 'int',
+        'default' => 0,
+      ),
+      'distributor_id' => array(
+        'description' => t('distributor_id'),
+         'type' => 'int',
+         'default' => 0,
+      ),
+    ),
+    'primary key' => array('id'),
+  );
+/*  
+  $schema['host_revised_quantity'] = array(
+    'description' => 'Host Revised Quantity',
+    'fields' => array(
+      'id' => array(
+        'description' => 'The primary identifier for a data',
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'bill_number' => array(
+        'description' => t('Bill Number'),
+        'type' => 'varchar',
+        'length' => 50,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'sku_code' => array(
+        'description' => t('SKU Code'),
+        'type' => 'varchar',
+        'length' => 50,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'revised_qty' => array(
+        'description' => t('Host Revised Quantity'),
+        'type' => 'int',
+        'default' => 0,
+      ),
+      'created_date' => array(
+        'description' => 'Created Date',
+        'type' => 'int',
+        'default' => 0,
+      ),
+      'distributor_id' => array(
+        'description' => t('distributor_id'),
+         'type' => 'int',
+         'default' => 0,
+      ),
+    ),
+    'primary key' => array('id'),
+  );
+  */
+  $schema['excess_qty'] = array(
+    'description' => 'Excess Quantity',
+    'fields' => array(
+      'id' => array(
+        'description' => 'The primary identifier for a data',
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'trip_id' => array(
+        'description' => t('Trip ID'),
+        'type' => 'int',
+      ),
+      'bill_number' => array(
+        'description' => t('Bill Number'),
+        'type' => 'varchar',
+        'length' => 25,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'sku_code' => array(
+        'description' => t('SKU code'),
+        'type' => 'varchar',
+        'length' => 25,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'product_name' => array(
+        'description' => t('product name'),
+        'type' => 'varchar',
+        'length' => 25,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'excess_qty' => array(
+        'description' => t('Excess Qty'),
+        'type' => 'int',
+        'default' => 0,
+      ),        
+      'reason_code' => array(
+       'description' => t('Reason Code'),
+       'type' => 'varchar',
+       'length' => 255,
+       'default' => '',
+      ),
+      'created_date' => array(
+        'description' => 'Created Date',
+        'type' => 'int',
+        'default' => 0,
+      ),
+      'distributor_id' => array(
+        'description' => t('distributor_id'),
+         'type' => 'int',
+         'default' => 0,
+      ),
+    ),
+    'primary key' => array('id'),
+  );
+  
+  // Dispatch Quantity Preprocess.
+  $schema['dispatch_qty_preprocess'] = array(
+    'description' => 'Dispatch Qty Preprocess',
+    'fields' => array(
+      'id' => array(
+        'description' => 'The primary identifier for a data',
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+     'trip_id' => array(
+        'description' => t('Trip ID'),
+        'type' => 'int',
+      ),
+      'created_date' => array(
+        'description' => 'Created Date',
+        'type' => 'int',
+        'default' => 0,
+      ),
+      'distributor_id' => array(
+        'description' => t('distributor_id'),
+         'type' => 'int',
+         'default' => 0,
+      ),
+      'flag' => array(
+        'description' => t('Flag'),
+        'type' => 'int',
+        'default' => 0,
+      ),
+    ),
+    'primary key' => array('id'),
+  );
+  
+  return $schema;
+}

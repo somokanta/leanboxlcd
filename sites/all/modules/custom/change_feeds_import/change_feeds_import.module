@@ -420,6 +420,36 @@ function change_feeds_import_menu() {
     'access callback' => 'check_if_fr_role_user_admin',
   );
 
+    // Upload form for revised billing data
+  $items['revised_billing_data/import'] = array(
+    'title' => 'Import Revised Billing Data',
+    'description' => 'Import Revised Billing Data Node',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('change_feeds_import_revised_billing_data_form'),
+    'access arguments' => array('Distributor Upload File'),
+    'file' => 'form/revised_billing_data.inc',
+  );
+  
+  // RE-Upload form for sales register data
+  $items['reupload_sales_register/import'] = array(
+    'title' => 'Re Upload Sales Register Data',
+    'description' => 'Re Upload Sales Register Data Node',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('change_feeds_import_reupload_sales_register_form'),
+    'access arguments' => array('Distributor Upload File'),
+    'file' => 'form/reupload_sales_register_data.inc',
+  );
+  
+  // DRS (Invoice vs Actual Dispatched) Report.
+  $items['drs-invoice-vs-actual-dispatched-report'] = array(
+    'title' => 'DRS (Invoice vs Actual Dispatched) Report',
+    'description' => 'DRS (Invoice vs Actual Dispatched) Report',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('drs_invoice_vs_actual_dispatched_report_form'),
+    'access arguments' => array('Distributor Upload File'),
+    'file' => 'drs_invoice_vs_actual_dispatched_report.inc',
+  );
+  
   return $items;
 }
 
@@ -531,6 +561,7 @@ function download_pdf($args) {
  * @return string
  */
 function download_pdf2($args) {
+  global $base_url; 
   if (!empty($args)) {
 
     // If Sum of Bill Value in Sales Register is not equal to Dispatch Value in Dispatch Table 
@@ -544,7 +575,13 @@ function download_pdf2($args) {
         $view->set_display('drs_report2');
         $view->set_arguments(array($args));
         $rendered_html = $view->render();
-        pdf_using_mpdf_api($rendered_html);
+        $trip_id = $args;
+        
+        // Remove xls image from pdf.
+        $xls_string = '<div class="feed-icon">
+      <a href="/drs2-download/'.$trip_id.'"><img typeof="foaf:Image" class="img-responsive" src="'.$base_url.'/sites/all/modules/contrib/views_data_export/images/xls.png" alt="XLS" title="XLS" /></a>    </div>';
+        $render = str_replace($xls_string,"",$rendered_html);
+        pdf_using_mpdf_api($render);
       }
       else {
         drupal_set_message(t('Mismatch between: Original Trip Bill Count and Present Trip Bill Count'), 'error');
@@ -869,6 +906,25 @@ function get_data_of_trip_id_2_form($form, &$form_state) {
 
 function get_data_of_trip_id_form_submit($form, &$form_state) {
   return $form;
+}
+
+//Added validation for bill edit confirmation TP to Host
+function get_data_of_trip_id_2_form_validate($form, &$form_state) {
+  $trip_id = $form_state['values']['trip_id'];
+  $nid = get_nid_from_title($trip_id, 'dispatch_data');
+  $node = node_load($nid);
+  if($node){
+    if ($node->field_confirm_bill_edit_status['und'][0]['value'] != 1) {
+      unset($form_state['complete form']['hhh']);
+      unset($form_state['complete form']['dowmload_mark']);
+      form_set_error('form', t("Bill Confirmation status is not completed for trip: " . $trip_id));
+    }
+  }else{
+      unset($form_state['complete form']['hhh']);
+      unset($form_state['complete form']['dowmload_mark']);
+    form_set_error('form', t("Trip not exists: " . $trip_id));
+  }
+
 }
 
 function get_data_of_trip_id_2_form_submit($form, &$form_state) {
@@ -1635,7 +1691,19 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
         $entity->field_sub_category['und'][0]['nid'] = $check_sub_category_nid;
       }
     }
-    
+
+    // sub-putaway group validation
+    $sub_putaway_grp = $item['sub-putaway group'];
+    $check_sub_putaway_grp_nid = check_sub_putaway_group_exist($sub_putaway_grp, $distributor_id);
+    if(!empty($sub_putaway_grp)) {
+      if(empty($check_sub_putaway_grp_nid)) {
+        drupal_set_message("Please enter correct sub putaway group for sku $sku", 'error');
+        $entity->feeds_item->skip = TRUE;
+      }
+      else {
+        $entity->field_sub_putaway_group['und'][0]['nid'] = $check_sub_putaway_grp_nid;
+      }
+    }
     
     // Update the sku7 code in SKU7_CODE field
     $entity->field_sku7_code['und'][0]['value'] = $sku;
@@ -1675,6 +1743,28 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
     else {
       if(empty($carton_wt)) {
         $entity->field_carton_weight['und'][0]['value'] = $sku_wt * $upc;
+      }
+    }
+  }
+  
+  // Godown Short Reason Master
+  if ($entity->feeds_item->id == 'godown_short_reason_master') {
+    $reason = $item['reason'];
+    $approval_flag = strtolower($item['approval flag']);
+    
+    if(!empty($reason)) {
+      if(empty($approval_flag)) {
+        drupal_set_message("Please enter the approval flag for reason $reason.", 'error');
+        $entity->feeds_item->skip = TRUE;
+      }
+      else {
+        if($approval_flag == 'yes' || $approval_flag == 'no') {
+          $entity->field_approval_flag['und'][0]['value'] = $approval_flag;
+        }
+        else {
+          drupal_set_message("Please enter the correct approval flag for reason $reason.", 'error');
+          $entity->feeds_item->skip = TRUE;
+        }
       }
     }
   }
@@ -2179,7 +2269,56 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
            $entity->feeds_item->skip = TRUE;
        }
   }
+  
+  if ($entity->feeds_item->id == 'putaway_group_master') {
+    $subputaway_grp = $entity->title;
+    $putaway_grp = $entity->field_putaway_group[LANGUAGE_NONE][0]['value'];
+    if(empty($subputaway_grp)) {
+      drupal_set_message("Sub-putaway group cannot be empty.", 'error');
+      $entity->feeds_item->skip = TRUE;
+    }
+    if(empty($putaway_grp)) {
+      drupal_set_message("Putaway group cannot be empty.", 'error');
+      $entity->feeds_item->skip = TRUE;
+    }
+  }
+  
+    if ($entity->feeds_item->id == 'dispatch_short_reason') {
+      global $user;
+      $dis_id = change_feeds_import_get_distributor_id($user->uid);
+      $trip_type = $item['type'];
+      $title = $entity->title;
+      $query = db_select('node', 'n');
+      $query->condition('n.type', 'dispatch_short_reason');
+      $query->condition('n.uid', $dis_id, "=");
+      $query->condition('n.title', $title, "=");
+      $query->condition('n.status', 1);
+      $query->join('field_data_field_dispatch_trip_type', 'tt', 'tt.entity_id = n.nid');
+      $query->condition('tt.field_dispatch_trip_type_value', $trip_type);
+      $query->fields('n', array('title'));
+      $short_reason = $query->execute()->fetchField();
+      if ($short_reason) {
+        drupal_set_message('Short reason and type already exists for short reason: ' . $short_reason, 'error');
+        $entity->feeds_item->skip = TRUE;
+      }
+      
+      $trip_type_exist = check_dp_dispatch_type_exist($trip_type);
+       if ($trip_type_exist == 0 && !empty($trip_type)) {
+           drupal_set_message("Type : $trip_type does not exists.", 'error');
+           $entity->feeds_item->skip = TRUE;
+       }
+    }
 }
+
+// function check trip type exist in system
+   function check_dp_dispatch_type_exist($trip_type) {
+       $field_dispatch_trip_type = field_info_field('field_dispatch_trip_type');
+       $field_dispatch_trip_type = list_allowed_values($field_dispatch_trip_type);
+       if(!isset($field_dispatch_trip_type[$trip_type])) {
+           return 0;
+       }
+          return 1;
+   }
 
 // function check reason type exist in system
    function check_dp_reason_type_exist($reason_type) {
@@ -2241,6 +2380,15 @@ function check_product_sub_category_exist($title, $distributor_id) {
 function check_product_category_exist($title, $distributor_id) {
   $query = db_select('node', 'n');
   $query->condition('n.type', 'product_category_master');
+  $query->fields('n', array('nid'));
+  $query->condition('n.title', $title);
+  $query->condition('n.uid', $distributor_id);
+  $results = $query->execute()->fetchField();
+  return $results;
+}
+function check_sub_putaway_group_exist($title, $distributor_id) {
+  $query = db_select('node', 'n');
+  $query->condition('n.type', 'putaway_group_master');
   $query->fields('n', array('nid'));
   $query->condition('n.title', $title);
   $query->condition('n.uid', $distributor_id);
@@ -2414,6 +2562,18 @@ function change_feeds_import_form_alter(&$form, &$form_state, $form_id) {
       $form['feeds']['FeedsCSVParser']['help']['final_text'] = array(
         '#theme' => 'item_list',
         '#items' => $allowed,
+      );
+    }
+     if ($form['#importer_id'] == 'dispatch_short_reason') {
+      $text = "<br>Please enter the below values in type field:";
+      $field = field_info_field('field_dispatch_trip_type');
+      $allowed_values = list_allowed_values($field);
+      $form['feeds']['FeedsCSVParser']['help']['title'] = array(
+        '#markup' => $text,
+      );
+      $form['feeds']['FeedsCSVParser']['help']['final_text'] = array(
+        '#theme' => 'item_list',
+        '#items' => $allowed_values,
       );
     }
   }
@@ -3483,4 +3643,153 @@ function get_weight_volume_by_skus($unique_skus, $distributor_id) {
   $query->addField('frc', 'field_rs_cft_value', 'rs_per_cft');
   $res = $query->execute()->fetchAll(PDO::FETCH_GROUP | PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
   return $res;
+}
+
+// DRS (Invoice vs Actual Dispatched) Report.
+function drs_invoice_vs_actual_dispatched_report_table($trip_id, $distributor_id) {
+  $query = db_select('custom_billing_data', 'cbd');
+  $query->join('dispatch_qty_confirmation', 'dqc', 'dqc.bill_number = cbd.bill_number and dqc.sku_code = cbd.sku7_code and dqc.distributor_id = cbd.distributor_id');
+  $query->join('node', 'n', 'n.title = dqc.bill_number AND n.uid = dqc.distributor_id');
+  $query->condition('n.type', 'sales_register_data', '=');
+  $query->join('field_data_field_party_code_reference', 'pc', 'pc.entity_id = n.nid');
+  $query->join('node', 'oun', 'oun.nid = pc.field_party_code_reference_nid');
+  $query->join('field_data_field_party_name', 'pn', 'oun.nid = pn.entity_id');
+  $query->condition('dqc.trip_id', $trip_id, '=');
+  $query->condition('cbd.distributor_id', $distributor_id, '=');
+  $query->addexpression("(CASE WHEN dqc.to_be_dispatch_qty != cbd.revised_host_quantity THEN cbd.bill_number END)", 'bill_number');
+  $query->addexpression("(CASE WHEN dqc.to_be_dispatch_qty != cbd.revised_host_quantity THEN cbd.sku7_code END)", 'sku7_code');
+  $query->addexpression("(CASE WHEN dqc.to_be_dispatch_qty != cbd.revised_host_quantity THEN cbd.product_name END)", 'product_name');
+  $query->addexpression("(CASE WHEN dqc.to_be_dispatch_qty != cbd.revised_host_quantity THEN cbd.revised_host_quantity END)", 'invoice_quantity');
+  $query->addexpression("(CASE WHEN dqc.to_be_dispatch_qty != cbd.revised_host_quantity THEN dqc.to_be_dispatch_qty END)", 'dispatched_quantity');
+  $query->addexpression("(cbd.revised_host_quantity - dqc.to_be_dispatch_qty)", 'difference');
+  $query->fields('pn', array('field_party_name_value'));
+  $query->havingCondition('invoice_quantity', 0, '>');
+  $result = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+
+  $row = array();
+  $sr_no = 0;
+  if (!empty($result)) {
+    
+    foreach ($result as $value) {
+      $sr_no++;
+      $row['sr_no'] = $sr_no;
+      $row['bill_number'] = $value['bill_number'];
+      $row['field_party_name_value'] = $value['field_party_name_value'];
+      $row['sku7_code'] = $value['sku7_code'];
+      $row['product_name'] = $value['product_name'];
+      $row['invoice_quantity'] = $value['invoice_quantity'];
+      $row['dispatched_quantity'] = $value['dispatched_quantity'];
+      $row['difference'] = $value['difference'];
+      $rows[] = $row;
+    }
+    $title = "<table border='0' width='100%' cellpadding='0'><tr> <td style='font-weight:bold; text-align:center'>DRS (Invoice vs Actual Dispatched) Report</td></tr></table>";
+    $header = array('Sr. No.', 'Bill Number', 'Party Name', 'SKU7 Code', 'Product Name', 'Invoice quantity', 'Dispatched quantity', 'Difference');
+    $html = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('width' => "100%", 'cellspacing' => "0", 'style' => "font-size: 13px; color:#000; font-family:arial", 'cellpadding' => "5", 'border' => "1", 'align' => "center", 'class' => "preview_table")));
+  }
+  return $title.$html;
+}
+
+// Manual VRS Report.
+function manual_vrs_report_table($trip_id, $distributor_id) {
+  $query = db_select('dispatch_qty_confirmation', 'dqc');
+  $query->join('node', 'n', 'n.title = dqc.bill_number AND n.uid = dqc.distributor_id');
+  $query->condition('n.type', 'sales_register_data', '=');
+  $query->join('field_data_field_party_code_reference', 'pc', 'pc.entity_id = n.nid');
+  $query->join('node', 'oun', 'oun.nid = pc.field_party_code_reference_nid');
+  $query->join('field_data_field_party_name', 'pn', 'oun.nid = pn.entity_id');
+  $query->condition('dqc.trip_id', $trip_id, '=');
+  $query->condition('dqc.distributor_id', $distributor_id, '=');
+  $query->fields('dqc', array('trip_id', 'bill_number'));
+  $query->fields('pn', array('field_party_name_value'));
+  $query->groupBy('dqc.bill_number');
+  $result = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+
+  $rows = array();
+  $sr_no = 0;
+  if (!empty($result)) {
+    foreach ($result as $value) {
+      $sundry_expenses = array();
+      $exchanged_notes = array();
+      $total = array();    
+      $sr_no++;
+      
+      $row['sr_no'] = $sr_no;
+      $sundry_expenses['sr_no'] = '';
+      $exchanged_notes['sr_no'] = '';
+      $total['sr_no'] = '';
+      $row['bill_number'] = $value['bill_number'];
+      $sundry_expenses['bill_number'] = '<b>Sundry Expenses</b>';
+      $exchanged_notes['bill_number'] = '<b>Exchanged Notes</b>';
+      $total['bill_number'] = '<b>Total</b>';
+      $row['field_party_name_value'] = $value['field_party_name_value'];
+      $sundry_expenses['field_party_name_value'] = '';
+      $exchanged_notes['field_party_name_value'] = '';
+      $total['field_party_name_value'] = '';
+      $row['collected_value'] = '';
+      $sundry_expenses['collected_value'] = '';
+      $exchanged_notes['collected_value'] = '';
+      $total['collected_value'] = '';
+      $row['returned_value'] = '';
+      $sundry_expenses['returned_value'] = '';
+      $exchanged_notes['returned_value'] = '';
+      $total['returned_value'] = '';
+      $row['2000'] = '';
+      $sundry_expenses['2000'] = '';
+      $exchanged_notes['2000'] = '';
+      $total['2000'] = '';
+      $row['500'] = '';
+      $sundry_expenses['500'] = '';
+      $exchanged_notes['500'] = '';
+      $total['500'] = '';
+      $row['200'] = '';
+      $sundry_expenses['200'] = '';
+      $exchanged_notes['200'] = '';
+      $total['200'] = '';
+      $row['100'] = '';
+      $sundry_expenses['100'] = '';
+      $exchanged_notes['100'] = '';
+      $total['100'] = '';
+      $row['50'] = '';
+      $sundry_expenses['50'] = '';
+      $exchanged_notes['50'] = '';
+      $total['50'] = '';
+      $row['20'] = '';
+      $sundry_expenses['20'] = '';
+      $exchanged_notes['20'] = '';
+      $total['20'] = '';
+      $row['10'] = '';
+      $sundry_expenses['10'] = '';
+      $exchanged_notes['10'] = '';
+      $total['10'] = '';
+      $row['coins'] = '';
+      $sundry_expenses['coins'] = '';
+      $exchanged_notes['coins'] = '';
+      $total['coins'] = '';
+      $row['exchanges_notes'] = '';
+      $sundry_expenses['exchanges_notes'] = '';
+      $exchanged_notes['exchanges_notes'] = '';
+      $total['exchanges_notes'] = '';
+      $row['cash_total'] = '';
+      $sundry_expenses['cash_total'] = '';
+      $exchanged_notes['cash_total'] = '';
+      $total['cash_total'] = '';
+      $row['cheque'] = '';
+      $sundry_expenses['cheque'] = '';
+      $exchanged_notes['cheque'] = '';
+      $total['cheque'] = '';
+      $row['signed_bill'] = '';
+      $sundry_expenses['signed_bill'] = '';
+      $exchanged_notes['signed_bill'] = '';
+      $total['signed_bill'] = '';
+      $rows[] = $row;
+    }
+    $rows[] = $sundry_expenses;
+    $rows[] = $exchanged_notes;
+    $rows[] = $total;
+    $header = array('S.N.', 'Bill Number', 'Party Name','Collected Value', 'Returned Value', '2000', '500', '200', '100', '50', '20', '10', 'Coins', 'Exchanged Notes (Rs.)', 'Cash Total', 'Cheque', 'Signed Bill',);
+    $output = "<h3 align='center'>Manual VRS Report</h3>";
+    $output .= "<table width='100%'><tr><td style='text-align:center'>Trip ID:$trip_id</td></tr></table>";
+    $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('width' => "100%", 'cellspacing' => "0", 'style' => "font-size: 13px; color:#000; font-family:arial", 'cellpadding' => "5", 'border' => "1", 'align' => "center", 'class' => "preview_table")));
+  }
+  return $output;
 }

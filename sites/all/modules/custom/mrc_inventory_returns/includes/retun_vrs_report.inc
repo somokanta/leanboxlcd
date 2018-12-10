@@ -163,6 +163,10 @@ function return_vrs_callback() {
        }
      }
     $row['field_dispatch_start_time_value'] = $val['field_dispatch_start_time_value'];
+    
+    // Vehicle Arrival Time.
+    $row['field_data_field_vehicle_arrival_date'] = date('d-M-y', $val['field_vehicle_arrival_date_value']) . ' ' .$val['field_vehicle_arrival_time_value'];
+    
     if(isset($val['field_received_asset_time_value'])){
       $row['field_received_asset_time_value'] = date('d-M-y H:i:s', $val['field_received_asset_time_value']);
     }else{

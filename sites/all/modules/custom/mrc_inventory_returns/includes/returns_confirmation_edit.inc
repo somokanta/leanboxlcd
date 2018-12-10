@@ -22,7 +22,6 @@ function returns_confirmation_edit_form($form, &$form_state) {
     '#size' => 10,
     '#required' => TRUE,
   );
-
   $form['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Check'),

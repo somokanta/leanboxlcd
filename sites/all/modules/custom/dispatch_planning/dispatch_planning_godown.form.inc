@@ -113,6 +113,19 @@ function _godown_callback_form($form, &$form_state) {
 //              '#rows' => $bill_details,
 //            );
         $exit = check_bill_and_trip_combination($trip_number, $bill_number);
+       
+        global $user;
+        $dis_id = change_feeds_import_get_distributor_id($user->uid);
+        $query = db_select('dispatch_planning_api_data', 'ad');
+        $query->condition('ad.runsheet_number', $trip_number, '=');
+        $query->condition('ad.distributor_id', $dis_id);
+        $query->condition('ad.bill_number', $bill_number);
+        $query->fields('ad', array('updated_flag'));
+        $res = $query->execute()->fetchField();        
+        if ($res == 1) {
+            drupal_set_message(t('Cannot edit Godown short for Bill Number '.$bill_number.'. Please go to SKU-wise Returns or Returns Manual edit screen to declare Godown Short'), 'error');
+        } else{
+
         if(!empty($exit)){
         $item_details = _get_editable_godown_delivered_item_details($trip_number, $bill_number);
         $item_details_header = array(
@@ -172,9 +185,10 @@ function _godown_callback_form($form, &$form_state) {
          else {
             drupal_set_message(t("Bill Number: $bill_number not found in the Trip: $trip_number"), 'error');
          }
-        }
       }
+        }
     }
+  }
   }
   return $form;
 }

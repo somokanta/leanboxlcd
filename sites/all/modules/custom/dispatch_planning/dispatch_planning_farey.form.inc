@@ -454,7 +454,7 @@ function _edit_trip_delivered_callback_form($form, &$form_state) {
                 '#suffix' => '</div>',
               );
 
-                $form['collection_mode'] = array(
+              $form['collection_mode'] = array(
                     '#type' => 'select',
                     '#options' => $lists,
                     '#title' => t('Collection Mode'),

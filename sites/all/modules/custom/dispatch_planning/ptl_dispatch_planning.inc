@@ -313,6 +313,51 @@ function delete_fetch_data_ptl_trip_form($form, &$form_state){
   return $form;
 }
 
+/**
+ * 
+ * @global type $user
+ * @param type $form
+ * @param type $form_state
+ */
+function delete_fetch_data_ptl_trip_form_validate($form, &$form_state) {
+  $trip_id = $form_state['values']['trip_id'];
+  
+  global $user;
+  $user_id = $user->uid;
+  $distributor_id = change_feeds_import_get_distributor_id($user_id);
+
+  //A Trip ID has been sent to PTL (i.e. data exists in PTL Complete report for that Trip ID)
+  $ptl_data_exist = check_trip_exist_in_ptl($trip_id,$distributor_id);
+  if (empty($ptl_data_exist)) {// empty data not found
+    form_set_error('trip_id', "Trip ID: $trip_id is not exist in PTL!");
+  }
+  
+  //PTL Loose confirmation has been done for that Trip ID
+  $loose_completed = check_ptl_loose_confirmation_for_trip($trip_id,$distributor_id);
+  if (!empty($loose_completed)) {
+    form_set_error('trip_id', "PTL Loose confirmation has been done for Trip ID: $trip_id");
+  }
+
+  //CLD Confirmation has been done for that Trip ID
+  $cld_completed = check_cld_confirmation_for_trip($trip_id,$distributor_id);
+  if (!empty($cld_completed)) {
+    form_set_error('trip_id', "CLD confirmation has been done for Trip ID: $trip_id");
+  }
+  
+  //CLD Confirmation has been done for that Trip ID
+  $cld_retail_confirmed = check_cld_retailer_confirmation_for_trip($trip_id,$distributor_id);
+  if (!empty($cld_retail_confirmed)) {
+    form_set_error('trip_id', "CLD retailer confirmation has been done for Trip ID: $trip_id");
+  }
+
+  //Re-upload of custom billing data has been done
+  $bill_reupload = check_reupload_for_any_bills_in_trip($trip_id,$distributor_id);
+  if (!empty($bill_reupload)) {
+    form_set_error('trip_id', "Re-upload of custom billing data has been done for the bills: $bill_reupload");
+  }
+
+}
+
 function delete_fetch_data_ptl_trip_form_submit($form, &$form_state) {
   global $user;
   
@@ -326,6 +371,10 @@ function delete_fetch_data_ptl_trip_form_submit($form, &$form_state) {
   
   if ($count) {
     drupal_set_message("Trip $trip_id Fetch data is deleted successfully!");
+    $nid = get_nid_from_title($trip_id, 'dispatch_data');
+    $node = node_load($nid);
+    $node->field_trip_type['und'][0]['value'] = 0; // make NON PTL
+    node_save($node);
   }
   else {
     drupal_set_message("Fetch data is not found for a trip $trip_id");
@@ -462,6 +511,11 @@ function create_fetch_data_ptl_trip_form_submit($form, &$form_state) {
       if($pending_bills){
         drupal_set_message("Did not send DP Bill Numbers: $pending_bills",'warning');
       }
+      // Assign trip type
+      $nid = get_nid_from_title($trip_id, 'dispatch_data');
+      $node = node_load($nid);
+      $node->field_trip_type['und'][0]['value'] = 1; // PTL
+      node_save($node);
     }
     else if(empty($trip_id_nid)){  
       drupal_set_message("Trip $trip_id is not created!",'warning');
@@ -941,4 +995,75 @@ function ptl_get_pending_bill_title_by_trip($trip_id_nid) {
     $query->isNotNull('dp.field_previous_trip_value');
     $sales_register_title = $query->execute()->fetchField();
   return $sales_register_title;
+}
+
+//*************PTL PDF CLD CONFIRMATION REPORT***************
+function ptl_cld_confirmation_sheet_form($form, &$form_state) {
+  $form['#prefix'] = '<div id="itemlist-div">';
+  $form['#suffix'] = '</div>';
+
+  $form['trip_id'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Trip Id'),
+    '#size' => 10,
+    '#required' => TRUE,
+  );
+
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('submit'),
+    '#submit' => array('ptl_cld_confirmation_sheet_form_submit'),
+    '#validate' => array('ptl_cld_confirmation_sheet_form_validate'),
+  );
+  if (!empty($form_state['views_data'])) {
+    $form['hhh'] = array(
+      '#type' => 'markup',
+      '#markup' => $form_state['views_data'],
+    );
+    $trip_id = $form_state['values']['trip_id'];
+    $rr = l('Open PDF', "/download-cld-confirmation/$trip_id", array('attributes'=>array("target" => "_blank")));
+    $form['dowmload_mark'] = array(
+      '#type' => 'markup',
+      '#markup' => $rr,
+    );
+  }
+  return $form;
+}
+
+function ptl_cld_confirmation_sheet_form_submit($form, &$form_state) {
+  $trip_id = $form_state['values']['trip_id'];
+  $view_name = "ptl_cld_confirmation_sheet";
+  $view = views_get_view($view_name, '');
+  $view->set_arguments(array($trip_id));
+  $rendered_html = $view->render();
+  $form_state['views_data'] = $rendered_html;
+  $form_state['rebuild'] = TRUE;
+}
+
+function download_ptl_cld_confirmation_sheet($args) {
+  $view_name = "ptl_cld_confirmation_sheet";
+  $view = views_get_view($view_name, '');
+  $view->set_arguments(array($args));
+  $rendered_html = $view->render();
+  pdf_using_mpdf_api($rendered_html);
+}
+
+function ptl_cld_confirmation_sheet_form_validate($form, &$form_state) {
+  global $user;
+  $user_id = $user->uid;
+  $distributor_id = change_feeds_import_get_distributor_id($user_id);
+  $trip_id = $form_state['values']['trip_id'];
+
+  if (!empty($trip_id)) { 
+    $query = db_select('dispatch_qty_confirmation', 'dqc');
+    $query->condition('dqc.trip_id', $trip_id, '=');
+    $query->condition('dqc.distributor_id', $distributor_id, '=');
+    $query->condition('dqc.cld_retail_confirmed_flag', 1, '=');
+    $query->fields('dqc', array('cld_retail_confirmed_flag'));
+    $result = $query->execute()->fetchField();
+    if (empty($result)) {
+      form_set_error('form', "CLDs for Trip ID $trip_id have not been confirmed");
+      drupal_goto('cld-confirmation-sheet');
+    }
+  }
 }

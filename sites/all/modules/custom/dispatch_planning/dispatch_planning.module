@@ -541,6 +541,23 @@ function dispatch_planning_menu() {
     'file' => 'delivery_confirmation_status_report.inc',
     'access callback' => TRUE,
   );
+  // CLD Confirmation Sheet.
+  $items['cld-confirmation-sheet'] = array(
+    'title' => 'CLD CONFIRMATION SHEET',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('ptl_cld_confirmation_sheet_form'),
+    'access arguments' => array('Distributor Upload File'),
+    'type' => MENU_CALLBACK,
+    'file' => 'ptl_dispatch_planning.inc',
+  );
+  $items['download-cld-confirmation/%'] = array(
+    'title' => 'CLD CONFIRMAION SHEET',
+    'page callback' => 'download_ptl_cld_confirmation_sheet',
+    'page arguments' => array(1),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'ptl_dispatch_planning.inc',
+  );
 
   return $items;
 }
@@ -2688,6 +2705,47 @@ function trip_id_ajax_validate($form, &$form_state) {
   if (empty($result)) {
     form_set_error('trip_id', 'Trip ID does not exist or is already deleted or is already dispatched');
   }
+  
+  //TP TO HOST ENTRY RELATED CHANGE
+  global $user;
+  $user_id = $user->uid;
+  $distributor_id = change_feeds_import_get_distributor_id($user_id);
+  
+  //A Trip ID has been sent to PTL (i.e. data exists in PTL Complete report for that Trip ID)
+  $ptl_data_exist = check_trip_exist_in_ptl($trip_id,$distributor_id);
+  if (!empty($ptl_data_exist)) {
+    form_set_error('trip_id', "Trip $trip_id data is already exist in PTL!");
+  }
+
+
+  //A Trip ID has been attached to a Master Trip
+  $master_trip_id = check_trip_attach_to_master_ptl($trip_id,$distributor_id);
+  if (!empty($master_trip_id)) {
+    form_set_error('trip_id', "Trip ID $trip_id has already been attached to a Master Trip ID $master_trip_id");
+  }
+
+
+  //PTL Loose confirmation has been done for that Trip ID
+  $loose_completed = check_ptl_loose_confirmation_for_trip($trip_id,$distributor_id);
+  if (!empty($loose_completed)) {
+    form_set_error('trip_id', "PTL Loose confirmation has been done for Trip ID: $trip_id");
+  }
+
+  //CLD Confirmation has been done for that Trip ID
+
+
+  $cld_completed = check_cld_confirmation_for_trip($trip_id,$distributor_id);
+  if (!empty($cld_completed)) {
+    form_set_error('trip_id', "CLD confirmation has been done for Trip ID: $trip_id");
+  }
+
+
+  //Re-upload of custom billing data has been done
+  $bill_reupload = check_reupload_for_any_bills_in_trip($trip_id,$distributor_id);
+  if (!empty($bill_reupload)) {
+    form_set_error('trip_id', "Re-upload of custom billing data has been done for the bills: $bill_reupload");
+  }
+
 }
 
 function trip_id_ajax_submit($form, &$form_state) {
@@ -2750,6 +2808,10 @@ function trip_delete_form_submit($form, &$form_state) {
   
   // Delete Farey table data dispatch_planning_api_data, dispatch_planning_item_details
   delete_data_from_farey_table($trip_id,$distributor_id);
+  
+  //Delete data from dispatch_qty_confirmation table
+  delete_data_from_dispatch_qty_confirmation($trip_id, $distributor_id);
+  
   drupal_set_message('Successfully deleted');
 }
 
@@ -3068,10 +3130,17 @@ function dispatch_planning_get_billing_data($node_uid, $bill_number) {
   $query->addfield('bd', 'Sum_of_NET_SALES_KGS', 'sum_net_sales_kgs');
   $query->addfield('bd', 'Sum_of_NET_SALES_QTY', 'og_Sum_of_NET_SALES_QTY');
   // send per unit value
-  //$query->addExpression('ROUND(((Sum_of_NET_SALES_VALUE - ((Sum_of_OTHER_DISCOUNT + Sum_of_SCHEME_DISCOUNT)*(1 + (Sum_of_TAX_PERCENTAGE/100))))/Sum_of_TOTAL_SALES_QTY), 2)', 'sum_net_sales_value');
-    $query->addExpression('ROUND(IFNULL((Sum_of_NET_SALES_VALUE - ((Sum_of_OTHER_DISCOUNT + Sum_of_SCHEME_DISCOUNT)*(1 + (Sum_of_TAX_PERCENTAGE/100))))/Sum_of_TOTAL_SALES_QTY,0), 2)', 'sum_net_sales_value');
+  //$query->addExpression('ROUND(IFNULL((Sum_of_NET_SALES_VALUE - ((Sum_of_OTHER_DISCOUNT + Sum_of_SCHEME_DISCOUNT)*(1 + (Sum_of_TAX_PERCENTAGE/100))))/Sum_of_TOTAL_SALES_QTY,0), 2)', 'sum_net_sales_value');
+  
+  //Added for TP and Host qty feature. Previous line was commented. we calculate while billing upload
+  $query->addExpression('ROUND(IFNULL(line_level_value,0), 2)', 'sum_net_sales_value');
+  
   $query->addfield('bd', 'product_name', 'sku_description');
   $query->orderBy('bd.product_name', 'DESC');
+  
+  //TP IMPORTANT: only those SKU which Sum_of_TOTAL_SALES_QTY is > 0
+  $query->condition('bd.Sum_of_TOTAL_SALES_QTY', 0 , '>'); 
+  
   $query->condition('bd.distributor_id', $node_uid);
   $query->condition('bd.bill_number', $bill_number);
   $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
@@ -3239,7 +3308,12 @@ function _update_dispatch_planning_api($node) {
             foreach ($res as $key => $val) {
                $sales_nid = $val['nid'];
                $sales_node = node_load($sales_nid);
-               $api_data[] = dispatch_planning_sales_reg_api($sales_node, $trip_dispatch_date, $vehicle_no, $cashier, $trip_id);
+               
+               //TP IMPORTANT: Send only those bills which sum(Sum_of_TOTAL_SALES_QTY) is > 0
+               $total_sales_qty  = get_total_sales_qty_from_custom_billing($sales_node->title,$dis_id);
+               if($total_sales_qty > 0){
+                $api_data[] = dispatch_planning_sales_reg_api($sales_node, $trip_dispatch_date, $vehicle_no, $cashier, $trip_id);
+               }
             }
          }
          // call api here
@@ -3820,4 +3894,24 @@ function dispatch_planning_views_query_alter(&$view, &$query) {
       array('field' => 'distributor_id', 'left_field' => 'distributor_id'),
     );
   }
+}
+
+// Get Trip Type.
+function get_trip_type_by_trip_id($trip_id) {
+  $query = db_select('dispatch_qty_confirmation', 'dqc');
+  $query->condition('dqc.trip_id', $trip_id);
+  $query->fields('dqc', array('type'));
+  $results = $query->execute()->fetchField();
+  return $results;
+}
+
+//get
+
+function get_total_sales_qty_from_custom_billing($bill_number,$dis_id){
+  $query = db_select('custom_billing_data', 'bd');
+  $query->addExpression('SUM(bd.Sum_of_TOTAL_SALES_QTY)', 'total_sales_qty');
+  $query->condition('bd.distributor_id', $dis_id);
+  $query->condition('bd.bill_number', $bill_number);
+  $total_sales_qty = $query->execute()->fetchField();
+  return $total_sales_qty;
 }

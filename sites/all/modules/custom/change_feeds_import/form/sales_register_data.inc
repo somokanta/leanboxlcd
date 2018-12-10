@@ -58,7 +58,15 @@ function change_feeds_import_sales_register_form_validate($form, &$form_state) {
         $type = 'error';
         $message = 'Header mismatch.';
         form_set_error('file_upload', t($message));
-      }
+      }else{ // Full else part is added for TP to Host qty feature
+        foreach($data as $val){
+          $all_bills[$val[0]] = $val[0];//Bill Number is at zero position(means first)
+        }
+//        $existing_bills = check_bill_exists_in_custom_billing($all_bills);
+//        if(!empty($existing_bills)){
+//          form_set_error('file_upload', "Custom billing data has been already uploaded for bills: <BR>".$existing_bills);
+//        }
+      } 
     }
     else {
       form_set_error('file_upload', t('Failed to write the uploaded file the site\'s file folder.'));
@@ -392,8 +400,15 @@ function change_feeds_import_create_sales_register_node($sales_data_result, $dis
 
         require_once drupal_get_path('module', 'change_feeds_import') . '/form/upload_billing_data.inc';
         // check to update node
-
+        
+        //tp to host entry flag wise bypass validation
+        $existing_bills = check_bill_exists_in_custom_billing(array($val['bill_no']));
+        $bypass_flag = get_dispatch_validation_flag_from_bills(array($val['bill_no']), $distributor_id);
+        if(empty($existing_bills) || !empty($bypass_flag)){
+        //above 3 line added
+          
         $nid = check_node_title_exists($val['bill_no'], 'sales_register_data');
+        
         if (empty($nid)) {
           $billing_error_validate = TRUE;
           $node = new stdClass();
@@ -470,6 +485,8 @@ function change_feeds_import_create_sales_register_node($sales_data_result, $dis
           $node->field_sales_updated_date[LANGUAGE_NONE][0]['value'] = time();                   
           node_save($node);
         }
+        
+        }//tp to host entry flag wise bypass validation end
         $count++;
       }
       $fid = $val['fid'];
@@ -672,4 +689,21 @@ function get_sales_register_sr_bill_date($bill_number, $distributor_id) {
   
   $sr_bill_dates = $query->execute()->fetchField();
   return $sr_bill_dates;
+}
+
+/**
+ * 
+ * @param type $all_bills
+ */
+function check_bill_exists_in_custom_billing($all_bills) {
+  global $user;
+  $user_id = $user->uid;
+  $distributor_id = change_feeds_import_get_distributor_id($user_id);
+  
+  $query = db_select('custom_billing_data', 'cb');
+  $query->condition('cb.bill_number', $all_bills, 'IN');
+  $query->condition('cb.distributor_id', $distributor_id, '=');
+  $query->addExpression("GROUP_CONCAT(DISTINCT bill_number separator ', ')",'bill_number');
+  $results = $query->execute()->fetchField();
+  return $results;
 }

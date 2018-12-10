@@ -330,6 +330,8 @@ function dispatch_planning_master_form_save_submit($form, &$form_state) {
             $total_bill_count += $trip_node->field_bill_count['und'][0]['value'];
             $total_bill_value += $trip_node->field_dispatch_bill_value['und'][0]['value'];
             $trip_node->field_master_trip_id_reference['und'][0]['nid'] = $master_trip_nid;
+            // For trip Type
+            $trip_node->field_trip_type['und'][0]['value'] = 2; // Master PTL
             node_save($trip_node);
          }
       }
@@ -417,6 +419,7 @@ function delete_master_dispatch_planning_form_submit($form, &$form_state) {
 
       foreach ($trip_nids as $dis_nid) {
         $dis_node = node_load($dis_nid->entity_id);
+        $dis_node->field_trip_type['und'][0]['value'] = 0; // Remove master ptl and assign default
         unset($dis_node->field_master_trip_id_reference['und']);
         node_save($dis_node);
       }

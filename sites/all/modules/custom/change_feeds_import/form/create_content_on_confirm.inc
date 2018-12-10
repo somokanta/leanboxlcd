@@ -141,7 +141,7 @@ function change_feeds_import_create_billing_data($max_billing_id) {
   $query->addField('cb', 'loading_date', 'loading_date');
   $query->addField('cb', 'bill_date', 'bill_date');
   $query->addExpression('SUM(cb.Sum_of_NET_SALES_VALUE)', 'sum_net_sales_value');
-
+  $query->addExpression('ROUND(SUM(Sum_of_NET_SALES_VALUE - ((Sum_of_OTHER_DISCOUNT + Sum_of_SCHEME_DISCOUNT)*(1 + (Sum_of_TAX_PERCENTAGE/100)))), 2)', 'total_bill_sales_value');
   $query->condition('cb.distributor_id', $distributor_id);
   $query->condition('cb.id', $max_billing_id, '>');
 
@@ -334,6 +334,12 @@ function change_feeds_import_insert_data_in_custom_billing_table($billing_data_r
                  $sku_wt_vl[$data['sku7_code']]['rs_per_cft']
               );
     //END
+    //TP to host calculation for line level value
+    $line_level_value = round(
+      (($data['Sum_of_NET_SALES_VALUE'] - 
+        (($data['Sum_of_SCHEME_DISCOUNT'] + $data['Sum_of_OTHER_DISCOUNT'])*
+         (1+($data['Sum_of_TAX_PERCENTAGE']/100)))) / $data['Sum_of_TOTAL_SALES_QTY'])
+      ,2);
     
     $loading_date = strtotime($data['loading_date']);
     $billing_date = strtotime($data['bill_date']);
@@ -373,6 +379,11 @@ function change_feeds_import_insert_data_in_custom_billing_table($billing_data_r
             'Derived_NET_SALES_VOLUME' => $sku_vl ? round($sku_vl,2) : 0,
             'distributor_id' => $distributor_id,
             'created_date' => $created_date,
+            
+            //TP to HOST entry fields
+            'original_Sum_of_TOTAL_SALES_QTY' => $data['Sum_of_TOTAL_SALES_QTY'],
+            'line_level_value' => $line_level_value
+            //END
           ))
           ->execute();
       
@@ -769,6 +780,12 @@ function change_feeds_import_create_billing($data, &$context) {
             // sum of net sales value from custom_billing_data to sales register
             // logic for pod flag below
             $sales_bill_value = $node->field_bill_value[LANGUAGE_NONE][0]['value'];
+            
+            //new feild bill level discount TP to Host entry
+            $bill_level_discount = $value->total_bill_sales_value - $sales_bill_value;
+            $bill_discount = ($bill_level_discount < 1) ? 0 : $bill_level_discount;
+            $node->field_bill_level_discount[LANGUAGE_NONE][0]['value'] = $bill_discount;
+            
             $pod_value = (($sum_of_net_sales_value - $sales_bill_value) / $sum_of_net_sales_value) * 100;
             $node_uid = $node->uid;
 

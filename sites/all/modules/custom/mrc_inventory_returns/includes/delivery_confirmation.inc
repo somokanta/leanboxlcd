@@ -84,13 +84,12 @@ function delivery_confirmation_form($form, &$form_state) {
     '#submit' => array('delivery_confirmation_form_submit'),
   );
 
-  $header = array('Trip ID', 'Dispatch Date', 'Cashier Name', 'Bill Count', 'Full Delivered Bill Count', 'Full Returned Bill Count', 'Partial Delivered Bill Count','Reattempt Bill Count','Pending Bill Count','Delivery Incharge Name','Asset Summary','Delivery Summary','Action');
+  $header = array('Trip ID', 'Dispatch Date', 'Cashier Name', 'Bill Count', 'Full Delivered Bill Count', 'Full Returned Bill Count', 'Partial Delivered Bill Count','Reattempt Bill Count','Pending Bill Count', 'Vehicle Arrival Date', 'Vehicle Arrival Time', 'Delivery Incharge Name','Asset Summary','Delivery Summary','Action');
 
   if (!isset($form_state['delivery_confirmation']['bills'])) {
     $form_state['delivery_confirmation']['bills'] = array();
   }
   $options = $form_state['delivery_confirmation']['bills'];
-
 
   if (!empty($options)) {
     $form['bill_details'] = array(
@@ -103,25 +102,41 @@ function delivery_confirmation_form($form, &$form_state) {
     );
   }
 
-  $form['bill_details']['#rows'] = $options;
-  foreach ($options as $key => $val) {
+  //$form['bill_details']['#rows'] = $options;
+  foreach ($options as $key => &$val) {
     $bill_count = $val['bill_count'];
     $full_delivered_bill_count = $val['full_delivered_bill_count'];
     $full_returned_bill_count = $val['full_returned_bill_count'];
     $partial_delivered_bill_count = $val['partial_delivered_bill_count'];
     $delivery_pending_bill_count = $val['delivery_pending_bill_count'];
-
-//    $pending_bill_count = array(
+    $vehicle_arrival_date_value = $val['vehicle_arrival_date'];
+    $vehicle_arrival_time_value = $val['vehicle_arrival_time'];
+    $delivery_incharge_name_value = $val['delivery_incharge_name'];
+    //$pending_bill_count = array(
 //      '#markup' => $bill_count - ($full_delivered_bill_count + $full_returned_bill_count + $partial_delivered_bill_count + $delivery_pending_bill_count),
 //      '#name' => "pending_bill_count_$key"
 //    );
     $pending_bill_count = $bill_count - ($full_delivered_bill_count + $full_returned_bill_count + $partial_delivered_bill_count + $delivery_pending_bill_count);
-    
+   
+    $vehicle_arrival_date = array(
+      '#type' => 'date_popup',
+      '#date_label_position' => 'within',
+      '#date_format' => 'Y-m-d',
+      '#default_value' => !empty($vehicle_arrival_date_value) ? date('Y-m-d', $vehicle_arrival_date_value) : date('Y-m-d'),
+    );
+
+    $vehicle_arrival_time = array(
+      '#type' => 'textfield',
+      '#size' => 20,
+      '#attributes' => array('class' => array('vehicle-arrival-time')),
+      '#default_value' => $vehicle_arrival_time_value,
+    );
     
     $delivery_incharge_name = array(
       '#type' => 'textfield',
        '#size' => 10,
       '#attributes' => array('class' => array('delivery-incharge-name')),
+      '#default_value' => $delivery_incharge_name_value,
     );
     
     $link = l('Received Assets', "received-assets-screen?title=$key", array('html' => TRUE, 'attributes' => array('target' => '_blank')));
@@ -152,20 +167,35 @@ function delivery_confirmation_form($form, &$form_state) {
       '#submit' => array('delivery_confirm_submit'),
       '#attributes' => array('class' => array('confirm-remove')),
     );
+    $form['bill_details']['#rows'][$key][] = $val['n_title'];
+    $form['bill_details']['#rows'][$key][] = $val['field_dispatch_date_value'];
+    $form['bill_details']['#rows'][$key][] = $val['field_cashier_name_value'];
+    $form['bill_details']['#rows'][$key][] = $val['bill_count'];
+    $form['bill_details']['#rows'][$key][] = $val['full_delivered_bill_count'];
+    $form['bill_details']['#rows'][$key][] = $val['full_returned_bill_count'];
+    $form['bill_details']['#rows'][$key][] = $val['partial_delivered_bill_count'];
+    $form['bill_details']['#rows'][$key][] = $val['delivery_pending_bill_count'];
+    $form['bill_details']['#rows'][$key][] = $pending_bill_count;
 
     //$form['bill_details'][$key]["pending_bill_count_{$key}"] = &$pending_bill_count;
+    $form['bill_details'][$key]["vehicle_arrival_date"] = &$vehicle_arrival_date;
+    $form['bill_details'][$key]["vehicle_arrival_time"] = &$vehicle_arrival_time;
     $form['bill_details'][$key]["delivery_incharge_name"] = &$delivery_incharge_name;
     //$form['bill_details'][$key]["asset_summary_{$key}"] = &$asset_summary;
     //$form['bill_details'][$key]["delivery_summary_{$key}"] = &$delivery_summary_printout;
     $form['bill_details'][$key]["confirm_submit"] = &$confirm_btn;
     
-    $form['bill_details']['#rows'][$key][] = $pending_bill_count;
+    
+    $form['bill_details']['#rows'][$key][]['data']["vehicle_arrival_date"] = &$vehicle_arrival_date;
+    $form['bill_details']['#rows'][$key][]['data']["vehicle_arrival_time"] = &$vehicle_arrival_time;
     $form['bill_details']['#rows'][$key][]['data']["delivery_incharge_name"] = &$delivery_incharge_name;
     $form['bill_details']['#rows'][$key][] = $asset_summary;
     $form['bill_details']['#rows'][$key][] = $delivery_summary_printout;
     $form['bill_details']['#rows'][$key][]['data']["confirm_btn"] = &$confirm_btn;
 
     //unset($pending_bill_count);
+    unset($vehicle_arrival_date);
+    unset($vehicle_arrival_time);
     unset($delivery_incharge_name);
     //unset($asset_summary);
     //unset($delivery_summary_printout);
@@ -251,6 +281,9 @@ function delivery_confirmation_form_submit($form, &$form_state) {
     $cashier_name = $form_state['values']['cashier_name'];
 
     $query = db_select('node', 'n');
+    $query->leftjoin('field_data_field_vehicle_arrival_date', 'vad', 'vad.entity_id = n.nid');
+    $query->leftjoin('field_data_field_vehicle_arrival_time', 'vat', 'vat.entity_id = n.nid');
+    $query->leftjoin('field_data_field_delivery_incharge_name', 'din', 'din.entity_id = n.nid');
     $query->condition('n.type', 'dispatch_data', '=');
     $query->condition('n.uid', $dis_id, '=');
     $query->leftjoin('field_data_field_vrs_status', 'vs', 'vs.entity_id = n.nid');
@@ -281,6 +314,9 @@ function delivery_confirmation_form_submit($form, &$form_state) {
     $query->addExpression("SUM(CASE WHEN (dpi.res_status = 'undeliver' and dpi.delivery_pending_flag != 1) THEN 1 ELSE 0 END)", 'full_returned_bill_count');
     $query->addExpression("SUM(CASE WHEN (dpi.res_status = 'partial_deliver') THEN 1 ELSE 0 END)", 'partial_delivered_bill_count');
     $query->addExpression("SUM(CASE WHEN (dpi.delivery_pending_flag = 1) THEN 1 ELSE 0 END)", 'delivery_pending_bill_count');
+    $query->addExpression('vad.field_vehicle_arrival_date_value', 'vehicle_arrival_date');
+    $query->addExpression('vat.field_vehicle_arrival_time_value', 'vehicle_arrival_time');
+    $query->addExpression('din.field_delivery_incharge_name_value', 'delivery_incharge_name');
     $res = $query->execute()->fetchAll(PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
     
     $form_state['delivery_confirmation']['bills'] = $res;
@@ -294,6 +330,7 @@ function delivery_confirmation_form_submit($form, &$form_state) {
 
 
 function delivery_confirm_validate(&$form, &$form_state) {
+  $mess = '';
   global $user;
   $dis_id = change_feeds_import_get_distributor_id($user->uid);
   
@@ -317,6 +354,66 @@ function delivery_confirm_validate(&$form, &$form_state) {
     form_set_error('form', "Please enter delivery incharge name for Trip id:$trip_id.");
   }
   
+  if (empty($form_state['values']['bill_details'][$trip_id]['vehicle_arrival_date'])) {
+    $mess .= t('Vehicle Arrival Date field is required for Trip ID:' . ' ' . $trip_id) . '<br>';
+  }
+
+  if (empty($form_state['values']['bill_details'][$trip_id]['vehicle_arrival_time'])) {
+    $mess .= t('Vehicle Arrival Time field is required for Trip ID:' . ' ' . $trip_id) . '<br>';
+  }
+  
+  // Validate Vehicle Arrival Time.
+  $vehicle_arrival_date = trim($form_state['values']['bill_details'][$trip_id]['vehicle_arrival_date']);
+  $vehicle_arrival_date1 = explode(" ", $vehicle_arrival_date);
+  $vehicle_arrival_date = strtotime($vehicle_arrival_date1[0]);
+
+  $vehicle_arrival_time = strtotime($vehicle_arrival_date1[0] .' '. trim($form_state['values']['bill_details'][$trip_id]['vehicle_arrival_time']));
+  
+  $start_time_flag = 0;
+  $current_time = strtotime(date('Y-m-d h:i a'));
+  
+  if (!empty($vehicle_arrival_time)) {
+    $pre_start_time = explode(':', date('h:i a', $vehicle_arrival_time));
+    if (count($pre_start_time) != 2) {
+      $start_time_flag = 1;
+    }
+    if (!empty($pre_start_time)) {
+      $hour = (int) $pre_start_time[0];
+      $minutes_array = explode(' ', $pre_start_time[1]);
+      $minutes = (int) $minutes_array[0];
+      $am_pm = strtolower(trim($minutes_array[1]));
+    }
+    if ($hour > 12 || !is_numeric($hour) || $hour <= 0) {
+      $start_time_flag = 1;
+    }
+    if ($minutes > 60 && is_numeric($minutes)) {
+      $start_time_flag = 1;
+    }
+    if ($minutes < 0 && !is_numeric($minutes)) {
+      $start_time_flag = 1;
+    }
+    if ($minutes < 0) {
+      $start_time_flag = 1;
+    }
+    if ($am_pm != 'am' && $am_pm != 'pm') {
+      $start_time_flag = 1;
+    }
+  }
+
+  if ($start_time_flag == 1) {
+  $form_state['rebuild']  = TRUE;
+    $mess .= t('Please enter valid vehicle reporting time for Trip ID:' . $trip_id . '.Allowed format is hh:mm AM/PM') . '<br>';
+  }
+
+  if ($vehicle_arrival_time > $current_time) {
+  $form_state['rebuild']  = TRUE;
+    $mess .= t('Vehicle Arrival Time cannot be greater than System Time for Trip ID:' . ' ' . $trip_id) . '<br>';
+  }
+
+  if (!empty($mess)) {
+    form_set_error('form', $mess);
+  }
+
   $query = db_select('node', 'n');
   $query->condition('n.type', 'assets_count');
   $query->condition('n.uid', $dis_id);
@@ -342,8 +439,10 @@ function delivery_confirm_submit($form, $form_state) {
   $exploded_name = explode('_', $get_trip_id);
   $trip_id = $exploded_name[2];
   
+  $vehicle_arrival_date = $form_state['values']['bill_details'][$trip_id]['vehicle_arrival_date'];
+  $vehicle_arrival_time = $form_state['values']['bill_details'][$trip_id]['vehicle_arrival_time'];
   $delivery_incharge_name = $form_state['values']['bill_details'][$trip_id]['delivery_incharge_name'];
-
+  
   $trip_nid = check_trip_id_exists_or_not($dis_id, $trip_id);
   if (!empty($trip_nid->nid)) {
       $node = node_load($trip_nid->nid);
@@ -363,6 +462,8 @@ function delivery_confirm_submit($form, $form_state) {
         $node->field_delivery_version['und'][0]['value'] = $version_no;
       }
 
+      $node->field_vehicle_arrival_date['und'][0]['value'] = strtotime($vehicle_arrival_date);
+      $node->field_vehicle_arrival_time['und'][0]['value'] = $vehicle_arrival_time;
       $node->field_delivery_incharge_name['und'][0]['value'] = $delivery_incharge_name;
       node_save($node);
       

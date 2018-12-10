@@ -3250,6 +3250,15 @@ function dispatch_planning_views_data() {
         ),
     );
 
+    $data['views']['drs_report_net_amt'] = array(
+        'title' => t('Drs Report2 Net Amt'),
+        'help' => t('Drs Report2 Net Amt'),
+        'real field' => 'id',
+        'field' => array(
+            'handler' => 'drs_report_net_amt',
+        ),
+    );
+    
     $data['dispatch_planning_api_data']['res_trackHalt'] = array(
         'title' => t('DP res_trackHalt'),
         'help' => t('Dispatch Planning res_trackHalt'),
@@ -5534,7 +5543,33 @@ function dispatch_planning_views_data() {
             'handler' => 'field_fresh_dp_van_handler',
         ),
     );
-
+    
+    // Header PTL CLD Confirmation custom field.
+    $data['views']['header_ptl_cld_confirmation_custom'] = array(
+        'title' => t('PTL CLD Confirmation Header'),
+        'help' => t('Just a field created for PTL CLD Confirmation Header.'),
+        'area' => array(
+            'handler' => 'header_ptl_cld_confirmation_custom_field',
+        ),
+    );
+    
+    // Footer PTL CLD Confirmation custom field.
+    $data['views']['footer_ptl_cld_confirmation_custom'] = array(
+        'title' => t('PTL CLD Confirmation Footer'),
+        'help' => t('Just a field created for PTL CLD Confirmation Footer.'),
+        'area' => array(
+            'handler' => 'footer_ptl_cld_confirmation_custom_field',
+        ),
+    );
+    
+    // Custom view field for Confirmed CLD.
+    $data['views']['confirmed_cld'] = array(
+        'title' => t('Confirmed CLD'),
+        'help' => t('Confirmed CLD.'),
+        'field' => array(
+            'handler' => 'field_confirmed_cld',
+        ),
+    );
 
     return $data;
 }
