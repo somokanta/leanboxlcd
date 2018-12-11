@@ -784,7 +784,7 @@ function change_feeds_import_create_billing($data, &$context) {
             //new feild bill level discount TP to Host entry
             $bill_level_discount = $value->total_bill_sales_value - $sales_bill_value;
             $bill_discount = ($bill_level_discount < 1) ? 0 : $bill_level_discount;
-            $node->field_bill_level_discount[LANGUAGE_NONE][0]['value'] = $bill_discount;
+            $node->field_bill_level_discount[LANGUAGE_NONE][0]['value'] = round($bill_discount,2);
             
             $pod_value = (($sum_of_net_sales_value - $sales_bill_value) / $sum_of_net_sales_value) * 100;
             $node_uid = $node->uid;
