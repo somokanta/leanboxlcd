@@ -3250,6 +3250,15 @@ function dispatch_planning_views_data() {
         ),
     );
 
+    $data['views']['drs_report_net_amt'] = array(
+        'title' => t('Drs Report2 Net Amt'),
+        'help' => t('Drs Report2 Net Amt'),
+        'real field' => 'id',
+        'field' => array(
+            'handler' => 'drs_report_net_amt',
+        ),
+    );
+    
     $data['dispatch_planning_api_data']['res_trackHalt'] = array(
         'title' => t('DP res_trackHalt'),
         'help' => t('Dispatch Planning res_trackHalt'),
@@ -4224,6 +4233,131 @@ function dispatch_planning_views_data() {
     $data['dispatch_planning_item_details']['line_level_status'] = array(
         'title' => t('DP Line level status'),
         'help' => t('Dispatch Planning lines level status'),
+        'field' => array(
+            'handler' => 'views_handler_field',
+            'click sortable' => TRUE,
+        ),
+        'sort' => array(
+            'handler' => 'views_handler_sort',
+        ),
+        'filter' => array(
+            'handler' => 'views_handler_filter_string',
+        ),
+        'argument' => array(
+            'handler' => 'views_handler_argument_string',
+        ),
+    );
+
+    $data['dispatch_planning_item_details']['claimed_godown_short'] = array(
+        'title' => t('DP lines claimed_godown_short'),
+        'help' => t('Dispatch Planning lines claimed_godown_short'),
+        'field' => array(
+            'handler' => 'views_handler_field',
+            'click sortable' => TRUE,
+        ),
+        'sort' => array(
+            'handler' => 'views_handler_sort',
+        ),
+        'filter' => array(
+            'handler' => 'views_handler_filter_string',
+        ),
+        'argument' => array(
+            'handler' => 'views_handler_argument_string',
+        ),
+    );
+
+    $data['dispatch_planning_item_details']['claimed_godown_short_reason'] = array(
+        'title' => t('DP lines claimed_godown_short_reason'),
+        'help' => t('Dispatch Planning lines claimed_godown_short_reason'),
+        'field' => array(
+            'handler' => 'views_handler_field',
+            'click sortable' => TRUE,
+        ),
+        'sort' => array(
+            'handler' => 'views_handler_sort',
+        ),
+        'filter' => array(
+            'handler' => 'views_handler_filter_string',
+        ),
+        'argument' => array(
+            'handler' => 'views_handler_argument_string',
+        ),
+    );
+
+    $data['dispatch_planning_item_details']['approved_quantity'] = array(
+        'title' => t('DP lines approved_quantity'),
+        'help' => t('Dispatch Planning lines approved_quantity'),
+        'field' => array(
+            'handler' => 'views_handler_field',
+            'click sortable' => TRUE,
+        ),
+        'sort' => array(
+            'handler' => 'views_handler_sort',
+        ),
+        'filter' => array(
+            'handler' => 'views_handler_filter_string',
+        ),
+        'argument' => array(
+            'handler' => 'views_handler_argument_string',
+        ),
+    );
+
+    $data['dispatch_planning_item_details']['godown_short_reason'] = array(
+        'title' => t('DP lines godown_short_reason'),
+        'help' => t('Dispatch Planning lines godown_short_reason'),
+        'field' => array(
+            'handler' => 'views_handler_field',
+            'click sortable' => TRUE,
+        ),
+        'sort' => array(
+            'handler' => 'views_handler_sort',
+        ),
+        'filter' => array(
+            'handler' => 'views_handler_filter_string',
+        ),
+        'argument' => array(
+            'handler' => 'views_handler_argument_string',
+        ),
+    );
+
+    $data['dispatch_planning_item_details']['approved_by'] = array(
+        'title' => t('DP lines approved_by'),
+        'help' => t('Dispatch Planning lines approved_by'),
+        'field' => array(
+            'handler' => 'views_handler_field',
+            'click sortable' => TRUE,
+        ),
+        'sort' => array(
+            'handler' => 'views_handler_sort',
+        ),
+        'filter' => array(
+            'handler' => 'views_handler_filter_string',
+        ),
+        'argument' => array(
+            'handler' => 'views_handler_argument_string',
+        ),
+    );
+
+    $data['dispatch_planning_item_details']['remarks'] = array(
+        'title' => t('DP lines remarks'),
+        'help' => t('Dispatch Planning lines remarks'),
+        'field' => array(
+            'handler' => 'views_handler_field',
+            'click sortable' => TRUE,
+        ),
+        'sort' => array(
+            'handler' => 'views_handler_sort',
+        ),
+        'filter' => array(
+            'handler' => 'views_handler_filter_string',
+        ),
+        'argument' => array(
+            'handler' => 'views_handler_argument_string',
+        ),
+    );
+    $data['dispatch_planning_item_details']['declared_claimed_godown_short'] = array(
+        'title' => t('DP lines declared_claimed_godown_short'),
+        'help' => t('Dispatch Planning lines declared_claimed_godown_short'),
         'field' => array(
             'handler' => 'views_handler_field',
             'click sortable' => TRUE,
@@ -5409,7 +5543,33 @@ function dispatch_planning_views_data() {
             'handler' => 'field_fresh_dp_van_handler',
         ),
     );
-
+    
+    // Header PTL CLD Confirmation custom field.
+    $data['views']['header_ptl_cld_confirmation_custom'] = array(
+        'title' => t('PTL CLD Confirmation Header'),
+        'help' => t('Just a field created for PTL CLD Confirmation Header.'),
+        'area' => array(
+            'handler' => 'header_ptl_cld_confirmation_custom_field',
+        ),
+    );
+    
+    // Footer PTL CLD Confirmation custom field.
+    $data['views']['footer_ptl_cld_confirmation_custom'] = array(
+        'title' => t('PTL CLD Confirmation Footer'),
+        'help' => t('Just a field created for PTL CLD Confirmation Footer.'),
+        'area' => array(
+            'handler' => 'footer_ptl_cld_confirmation_custom_field',
+        ),
+    );
+    
+    // Custom view field for Confirmed CLD.
+    $data['views']['confirmed_cld'] = array(
+        'title' => t('Confirmed CLD'),
+        'help' => t('Confirmed CLD.'),
+        'field' => array(
+            'handler' => 'field_confirmed_cld',
+        ),
+    );
 
     return $data;
 }

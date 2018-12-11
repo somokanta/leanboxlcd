@@ -2616,3 +2616,80 @@ function mrc_inventory_returns_update_7125() {
     }
   }
 }
+
+function mrc_inventory_returns_update_7126() {
+   $fields = array(
+    'claimed_godown_short' => array(
+       'description' => 'claimed_godown_short',
+       'type' => 'int',
+       'default' => 0, 
+    ),
+    'claimed_godown_short_reason' => array(
+       'description' => 'claimed godown short reason',
+       'type' => 'varchar',
+       'length' => 50,
+       'default' => '',
+    ),  
+    'approved_quantity' => array(
+       'description' => 'approved quantity',
+       'type' => 'int',
+       'default' => 0, 
+    ),
+    'approval_flag' => array(
+       'description' => 'approval flag',
+       'type' => 'varchar',
+       'length' => 25,
+       'default' => '',
+    ),
+    'godown_short_reason' => array(
+       'description' => 'godown short approval reason',
+       'type' => 'varchar',
+       'length' => 50,
+       'default' => '',
+    ),
+    'approved_by' => array(
+       'description' => 'approved by',
+       'type' => 'varchar',
+       'length' => 50,
+       'default' => '', 
+    ),
+    'remarks' => array(
+       'description' => 'remarks',
+       'type' => 'varchar',
+       'length' => 50,
+       'default' => '',
+    ),
+   'declared_claimed_godown_short' => array(
+    'description' => 'declared_claimed_godown_short',
+    'type' => 'int',
+    'default' => 0,
+    ),  
+     
+  );
+  foreach ($fields as $key => $field) {
+    if (!db_field_exists('inventory_versioning_item_details', $key)) {
+      db_add_field('inventory_versioning_item_details', $key, $field);
+    }
+  }
+}
+
+function mrc_inventory_returns_update_7127() {
+  $fields = array(
+    'delivery_boy' => array(
+      'description' => 'Delivery Boy',
+      'type' => 'varchar',
+      'length' => 255,
+      ),
+     'derived_money_collect' => array(
+       'description' => t('Derived money collect'),
+       'type' => 'varchar',
+       'length' => 50,
+       'default' => '',
+     ),    
+  );
+  foreach ($fields as $key => $field) {
+    if (!db_field_exists('inventory_versioning_api_data', $key)) {
+      db_add_field('inventory_versioning_api_data', $key, $field);
+    }  
+  }
+}

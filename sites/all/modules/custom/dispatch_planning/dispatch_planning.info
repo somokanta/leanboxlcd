@@ -34,3 +34,7 @@ files[] = views/handler/header_handler_delivery_summary_full_returned_reasons.in
 files[] = views/handler/field_cheque_date_handler.inc
 files[] = views/handler/field_bill_date_handler.inc
 files[] = views/handler/field_fresh_dp_van_handler.inc
+files[] = views/handler/header_ptl_cld_confirmation_custom_field.inc
+files[] = views/handler/footer_ptl_cld_confirmation_custom_field.inc
+files[] = views/handler/field_confirmed_cld.inc
+files[] =  views/handler/drs_report_net_amt.inc

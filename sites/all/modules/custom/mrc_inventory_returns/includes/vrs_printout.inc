@@ -445,12 +445,17 @@ function get_vrs_items($trip_id) {
         $sub_query1 = db_select('dispatch_planning_item_details', 'dpi');
         $sub_query1->fields('dpi', array('trip_bill_reference'));
         $sub_query1->addExpression("SUM(dpi.return_qty * dpi.sum_net_sales_value)", 'return_value');
+        $sub_query1->addExpression('(SUM(dpi.sum_net_sales_value * dpi.res_sku_actual_quantity1))', 'delivered_value');
         $sub_query1->addExpression("SUM(dpi.res_cashier_short * dpi.sum_net_sales_value)", 'cashier_short_value');
         $sub_query1->addExpression("SUM(dpi.res_godown_short * dpi.sum_net_sales_value)", 'godown_short_value');
         $sub_query1->addExpression('(SUM(dpi.return_qty * dpi.sum_net_sales_value))', 'total_delivered_value');
-        $sub_query1->groupBy('dpi.trip_bill_reference');
+        $sub_query1->addExpression("SUM(dpi.claimed_godown_short * dpi.sum_net_sales_value)", 'claimed_godown_short_value');
         $sub_query1->fields('dpi',array('return_qty','sum_net_sales_value'));
+        $sub_query1->join('dispatch_planning_api_data', 'dp_header', 'dpi.trip_bill_reference = dp_header.id AND dp_header.distributor_id ='.$dis_id);    
+        $sub_query1->condition('dp_header.runsheet_number', $trip_id, '=');
+        $sub_query1->groupBy('dpi.trip_bill_reference');
         $query = db_select('dispatch_planning_api_data', 'ad');
+        $query->condition('ad.delivery_pending_flag', 1, '!=');
         $query->condition('ad.distributor_id', $dis_id, '=');
         $query->condition('ad.runsheet_number', $trip_id, '=');
         $default_bill_status = array('partial_deliver','deliver','undeliver');
@@ -458,6 +463,7 @@ function get_vrs_items($trip_id) {
         $query->join('node', 'n', 'n.title = ad.bill_number AND n.uid = ad.distributor_id');
         $query->condition('n.type', 'sales_register_data', '=');
         $query->leftjoin('field_data_field_sr_bill_date', 'sr_bill_date', 'sr_bill_date.entity_id = n.nid');
+        $query->leftJoin('field_data_field_bill_level_discount', 'bill_discount', 'bill_discount.entity_id = n.nid');
 
        // Join with outlet master to fetch payment type
         $query->join('field_data_field_party_code_reference', 'pc', 'pc.entity_id = n.nid');
@@ -486,15 +492,21 @@ function get_vrs_items($trip_id) {
         $query->orderBy('item_details.trip_bill_reference');
         $query->fields('ad', array('bill_number', 'res_bank_name', 'res_status', 'res_cheque_date', 'res_bank_name', 'res_photo_of_cheque', 'res_photo_of_signed_bill_delivery', 'photo_of_signed_bill_partial', 'res_moneyTransactionType'));
         $query->fields('item_details', array('trip_bill_reference'));
-        $query->fields('bv',array('field_bill_value_value'));
+        //$query->fields('bv',array('field_bill_value_value'));
         $query->fields('fld_cashier',array('field_cashier_name_value'));
+        
         
         // payment type
         $query->fields('pt', array('field_payment_terms_value'));
         // sales register to be collected amt
-        $query->addExpression("SUM(bv.field_bill_value_value - item_details.return_value - item_details.cashier_short_value - item_details.godown_short_value)", 'sales_register_to_be_collected_amt');
+        //$query->addExpression("SUM(bv.field_bill_value_value - item_details.return_value - item_details.cashier_short_value - item_details.godown_short_value)", 'sales_register_to_be_collected_amt');
         // Farery to be collected amt
-        $query->addExpression("SUM(ad.bill_value - item_details.return_value - item_details.cashier_short_value - item_details.godown_short_value)", 'to_be_collected_amt');
+        //$query->addExpression("SUM(ad.bill_value - item_details.return_value - item_details.cashier_short_value - item_details.godown_short_value)", 'to_be_collected_amt');
+        // As per new ptl_vrs change changed sales register billvalue to farey bill_value
+        $query->addExpression("SUM(ad.bill_value - item_details.return_value - item_details.cashier_short_value - item_details.godown_short_value - item_details.claimed_godown_short_value)", 'sales_register_to_be_collected_amt');
+        // Farery to be collected amt
+        $query->addExpression("SUM(ad.bill_value - item_details.return_value - item_details.cashier_short_value - item_details.godown_short_value - item_details.claimed_godown_short_value)", 'to_be_collected_amt');
+        $query->addExpression("SUM(item_details.return_value + item_details.cashier_short_value + item_details.godown_short_value + item_details.claimed_godown_short_value)", 'unify_sales_return');
         $query->addExpression('ad.res_cash_amount', 'res_cash_amount');
         $query->addExpression('ad.res_cheque_amount', 'res_cheque_amount');
         $query->addExpression('ad.bill_value', 'bill_value');
@@ -506,7 +518,8 @@ function get_vrs_items($trip_id) {
         $query->addExpression('ad.res_photo_of_signed_bill_delivery', 'res_photo_of_signed_bill_delivery');
         $query->addExpression('ad.photo_of_signed_bill_partial', 'photo_of_signed_bill_partial');
         $query->addExpression('ad.res_confirm_signed_bill_amount', 'res_confirm_signed_bill_amount');
-        $query->addExpression('bv.field_bill_value_value', 'field_bill_value_value');
+        //// As per new ptl_vrs change changed 
+        $query->addExpression('ad.bill_value', 'field_bill_value_value');
         //$query->addExpression("DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(exe_date.field_trip_executon_date_value),'+00:00','+05:30'), '%d-%b-%Y')", 'trip_execution_date');
         $query->addExpression('ad.res_cheque_date_edit', 'res_cheque_date_edit');
         $query->addExpression('ad.res_photo_of_cheque_edit', 'res_photo_of_cheque_edit');
@@ -526,6 +539,8 @@ function get_vrs_items($trip_id) {
         $query->addExpression('(SUM(item_details.total_delivered_value))', 'total_delivered_value');
         $query->addExpression("DATE_FORMAT(ad.date,'%d-%b-%Y')", 'dispatch_date');
         $query->addExpression("DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(sr_bill_date.field_sr_bill_date_value),'+00:00','+05:30'), '%d-%b-%Y')", 'billing_date');
+        $query->addExpression('bill_discount.field_bill_level_discount_value', 'bill_level_discount');
+        $query->addexpression("(CASE WHEN bill_discount.field_bill_level_discount_value >= item_details.delivered_value THEN 1 ELSE 0 END)", 'check_delivered_value_less');
         $res = $query->execute()->fetchAll(PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
 }
                         return $res;
@@ -561,11 +576,18 @@ function get_vrs_print($trip_id) {
             $bills_records = array();
             $cheque_details = array();
             $signed_bill_details = array();
-            foreach ($options as $key => $val) {
+            foreach ($options as $key => &$val) {
                 $sum_s_register_bill_value += round($val['field_bill_value_value']);
                 $dispatch_date = $val['dispatch_date'];
                 $field_cashier_name = $val['field_cashier_name_value'];
                 $billing_date[$val['billing_date']] = $val['billing_date'];
+                if ($val['check_delivered_value_less'] == 1) {
+                  $val['sales_register_to_be_collected_amt'] = 0;
+               }
+               if ($val['res_status'] == 'undeliver') {
+                  $val['sales_register_to_be_collected_amt'] = 0;
+               }
+                
             }
             if (count($billing_date)>1) {
                $billing_dates = implode(',',$billing_date); 
@@ -613,7 +635,7 @@ function get_vrs_print($trip_id) {
                 $vrs_created_date = $vrs_total[$total_key]['vrs_created_date'];
                 $denominations = get_vrs_total_denominations($trip_id,$dis_id);
             }
-            foreach ($options as $key => $val) {
+            foreach ($options as $key => &$val) {
                switch ($val['res_status']) {
                     case 'partial_deliver';
                         $bill_status = t('Partial Delivered');
@@ -677,20 +699,16 @@ function get_vrs_print($trip_id) {
             // bill level
             $sum_unify_return = 0;
             $sum_actual_return_inventory = 0;
-            foreach ($options as $key => $val) {
+            foreach ($options as $key => &$val) {
                 $total_sales_register += round($val['sales_register_to_be_collected_amt']);
-                $unify_return_sheet = round($val['field_bill_value_value']) - round($val['sales_register_to_be_collected_amt']);
+                $unify_return_sheet = round($val['unify_sales_return']);
                 $sum_unify_return += $unify_return_sheet;
                 $sum_actual_return_inventory += round($val['total_delivered_value']);
             }
             $total_sales_register = $total_sales_register;
             $bill_count = count($options);
             $footer_table_values[] = array($bill_count,$total_sales_register,$vrs_total[$total_key]['total_actual_cash_amount'],$vrs_total[$total_key]['total_actual_signed_bill_amount'],$vrs_total[$total_key]['total_actual_cheque_amount'],$vrs_total[$total_key]['total_cashier_cash_short'],$vrs_total[$total_key]['total_short_amt'],$vrs_total[$total_key]['total_cashier_debit_value']);
-            
             $note_denominations = get_notes_denominations();
-            
-            
-            
             $table1= '<table border="1" cellpadding="5" cellspacing="0" width="100%" style="color:#000; font-size: 13px;" class="views-table cols-13 table table-hover table-striped">';
             $table1.='<tr><td>'.'<b>'.t('Trip ID').'</b>'.'</td>';
             $table1.='<td>'.$trip_id.'</td>';
@@ -909,81 +927,13 @@ function get_vrs_print($trip_id) {
             $table4.= '<td>'.$table3.'</td>';
             $table4.='</tr>';
             $table4.= '</table>';
-            
-            
-            
-         
-            $header_details1 = array(
-                '#theme' => 'table',
-                '#header' => $trip_header,
-                '#rows' => $trip_header_values,
-                '#attributes' => array(
-                    'class' => array('header_details', 'views-table cols-9', 'table table-hover', 'table-striped'),
-                    'id' => 'trip_header',
-                    'border' => 1,
-                    'cellpadding' => 2,
-                    'cellspacing' => 0,
-                    'width' => '100%',
-                    'style' => 'color:#000; font-size: 13px;',
-                ),
-            );
-            
-            $header_details2 = array(
-                '#theme' => 'table',
-                '#header' => $short_header,
-                '#rows' => $short_values,
-                '#attributes' => array(
-                    'class' => array('header_details', 'views-table cols-9', 'table table-hover', 'table-striped'),
-                    'id' => 'trip_header',
-                    'border' => 1,
-                    'cellpadding' => 2,
-                    'cellspacing' => 0,
-                    'width' => '100%',
-                    'style' => 'color:#000; font-size: 13px;margin-top:15px;',
-                ),
-            );
-            
-            $header_details3 = array(
-                '#theme' => 'table',
-                '#header' => $bill_header,
-                '#rows' => $bills_records,
-                '#attributes' => array(
-                    'class' => array('header_details', 'views-table cols-9', 'table table-hover', 'table-striped'),
-                    'id' => 'trip_header',
-                    'border' => 1,
-                    'cellpadding' => 2,
-                    'cellspacing' => 0,
-                    'width' => '100%',
-                    'style' => 'color:#000; font-size: 13px;margin-top:15px;',
-                ),
-            );
-            $header_details4 = array(
-                '#theme' => 'table',
-                '#header' => $footer_header,
-                '#rows' => $footer_table_values,
-                '#attributes' => array(
-                    'class' => array('header_details', 'views-table cols-9', 'table table-hover', 'table-striped'),
-                    'id' => 'trip_header',
-                    'border' => 1,
-                    'cellpadding' => 2,
-                    'cellspacing' => 0,
-                    'width' => '100%',
-                    'style' => 'color:#000; font-size: 13px;margin-top:15px;',
-                ),
-            );
             $output = render($table1);
-            
             $output1= render($table2);
             $output2= render($table3);
             $output.= render($table4);
             $output.= render($table5);
             $output.= render($table6);
-            //$output.= render($header_details1);
-            //$output.= render($header_details2);
-            //$output.= render($header_details3);
-            //$output.= render($header_details4);
-            
-            
+  
         }
     }
     return $output;

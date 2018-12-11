@@ -29,7 +29,10 @@ class bill_returns_report extends views_handler_field {
         $dispatch_planning_id = $data->id;
         // Get views current field value
         $views_current_field = $this->field;
-        $sales_bill_value = $data->_field_data['node_dispatch_planning_api_data_1_nid']['entity']->field_bill_value[LANGUAGE_NONE][0]['value'];
+        //$sales_bill_value = $data->_field_data['node_dispatch_planning_api_data_1_nid']['entity']->field_bill_value[LANGUAGE_NONE][0]['value'];
+        $bill_level_discount = $data->_field_data['node_dispatch_planning_api_data_1_nid']['entity']->field_bill_level_discount[LANGUAGE_NONE][0]['value'];
+        // Bill value from farery header table
+        $sales_bill_value = $data->dispatch_planning_api_data_bill_value;
         if (!empty($dispatch_planning_id) && !empty($distributor_id)) {
             $query = db_select('dispatch_planning_api_data', 'dpi');
             $query->condition('dpi.distributor_id', $distributor_id, '=');
@@ -37,6 +40,7 @@ class bill_returns_report extends views_handler_field {
             $query->join('dispatch_planning_item_details', 'ad', 'ad.trip_bill_reference = dpi.id');
             $query->addExpression('(SUM(ad.sum_net_sales_quantity))', 'total_sales_quantity');
             $query->addExpression('(SUM(ad.res_sku_actual_quantity1))', 'actual_delivered_qty');
+            $query->addExpression("SUM(ad.claimed_godown_short * ad.sum_net_sales_value)", 'claimed_godown_short_value');
             $query->addExpression('(SUM(ad.res_cashier_short))', 'cashier_short');
             $query->addExpression('(SUM(ad.farey_delivered_qty))', 'farey_delivered_qty');
             $query->addExpression('(SUM(ad.dispatch_qty))', 'dispatch_qty');
@@ -49,11 +53,18 @@ class bill_returns_report extends views_handler_field {
             $query->addExpression('(CASE WHEN (dpi.res_status = \'undeliver\') THEN dpi.res_reason_for_failure END)', 'reason_for_failure');
             $bill_return_report =$query->execute()->fetch(PDO::FETCH_ASSOC);
             if (!empty($sales_bill_value)) {
-                $to_be_collected = round($sales_bill_value - $bill_return_report['returned_value'] - $bill_return_report['cashier_short_value']- $bill_return_report['godown_short_value']);
+                $to_be_collected = round($sales_bill_value - $bill_return_report['returned_value'] - $bill_return_report['cashier_short_value']- $bill_return_report['godown_short_value'] - $bill_return_report['claimed_godown_short_value']);
+                if($to_be_collected<0) {
+                  $to_be_collected = 0;
+                }
+                
                 if ($data->dispatch_planning_api_data_res_status !== 'undeliver') {
                     $data->sales_to_be_collected = $to_be_collected;
                 }
                 else {
+                    $data->sales_to_be_collected = 0;
+                }
+                if (!empty($bill_level_discount) && !empty($bill_return_report['delivered_value']) && $bill_level_discount>$bill_return_report['delivered_value']) {
                     $data->sales_to_be_collected = 0;
                 }
                  

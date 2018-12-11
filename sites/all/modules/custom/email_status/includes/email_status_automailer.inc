@@ -662,6 +662,10 @@ function send_email_return_vrs_prod() {
   $query->join('node', 'n', 'n.title = ad.runsheet_number');
   $query->condition('n.type', 'dispatch_data', '=');
   $query->condition('n.uid',$distributor_id);
+  $query->join('field_data_field_vehicle_arrival_date', 'vad', 'vad.entity_id = n.nid');
+  $query->join('field_data_field_vehicle_arrival_time', 'vat', 'vat.entity_id = n.nid');
+  $query->fields('vad', array('field_vehicle_arrival_date_value'));
+  $query->fields('vat', array('field_vehicle_arrival_time_value'));
   $query->join('field_data_field_vrs_status', 'vs', 'vs.entity_id = n.nid');
   $query->fields('vs', array('field_vrs_status_value'));
   $query->leftjoin('field_data_field_returned_version', 'rv', 'rv.entity_id = n.nid');
@@ -714,7 +718,8 @@ function send_email_return_vrs_prod() {
     }
     $row['cashier_name'] = $val['fieldExecutiveName'];
     $row['vehicle'] = $val['vehicle'];
-    $row['arrival_to_asset_returns'] = '';
+    $row['field_vehicle_arrival_date'] = date('Y-m-d', $val['field_vehicle_arrival_date_value']) . ' ' .$val['field_vehicle_arrival_time_value'];
+    $row['arrival_to_asset_returns'] = $version_created_time - $row['field_vehicle_arrival_date'];
     
     //Delivery Confirmation time
     $query = db_select('inventory_versioning_api_data', 'iad');
@@ -777,7 +782,7 @@ function send_email_return_vrs_prod() {
 
     $rows[] = $row;
   }
-  $header = array('S.No.','Dispatch Date', 'Trip ID', 'Status', 'Cashier', 'Vehicle', 'Arrival to Delivery Confirmation (min)', 'Delivery Confirmation Time', 'Delivery Confirmation to Returns Start (min)', 'Returns Start to Returns End (min)', 'Returns Value(Rs.)/10 Min', 'Product Lines/10 Min','Total Returned Value(Rs.)','Returned SKU Quantity(w/o Sachets)','Returned Quantity of Sachets','Returns End to VRS Start (Min)', 'VRS Start to VRS End (Min)', 'VRS Value(Rs.)/10 Min', 'Cash %', 'Cheque %', 'Signed Bill %');
+  $header = array('S.No.','Dispatch Date', 'Trip ID', 'Status', 'Cashier', 'Vehicle', 'Vehicle Arrival Time', 'Arrival to Delivery Confirmation (min)', 'Delivery Confirmation Time', 'Delivery Confirmation to Returns Start (min)', 'Returns Start to Returns End (min)', 'Returns Value(Rs.)/10 Min', 'Product Lines/10 Min','Total Returned Value(Rs.)','Returned SKU Quantity(w/o Sachets)','Returned Quantity of Sachets','Returns End to VRS Start (Min)', 'VRS Start to VRS End (Min)', 'VRS Value(Rs.)/10 Min', 'Cash %', 'Cheque %', 'Signed Bill %');
 
   $html = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
 

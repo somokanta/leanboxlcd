@@ -1,0 +1,269 @@
+<?php
+
+/* 
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+
+/**
+ * Implements hook_menu
+ * @return string
+ */
+function leanbox_new_sku_wise_return_menu() {
+  $items = array();
+  
+  $items['sku-wise-return-new'] = array(
+     'title' => 'SKU-wise Returns New',
+     'page callback' => 'drupal_get_form',
+     'page arguments' => array('new_sku_wise_returns_form'),
+     'access arguments' => array('returns confirmation'),
+     'type' => MENU_NORMAL_ITEM,
+     'file' => 'includes/new_sku_wise_returns.inc',
+   );
+  
+   $items['sku-wise-return-new/bill-wise'] = array(
+     'title' => 'SKU-wise Returns New',
+     'page callback' => 'drupal_get_form',
+     'page arguments' => array('new_sku_wise_returns_form'),
+     'access arguments' => array('returns confirmation'),
+     'type' => MENU_NORMAL_ITEM,
+     'file' => 'includes/new_sku_wise_returns.inc',
+   );
+  
+  $items['all_products/autocomplete'] = array(
+    'title' => 'products autocomplete',
+    'page callback' => '_get_all_products',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  
+  $items['godown-short-approval'] = array(
+     'title' => 'Godown Short Approval',
+     'page callback' => 'drupal_get_form',
+     'page arguments' => array('godown_short_approval_form'),
+     'access arguments' => array('returns confirmation'),
+     'type' => MENU_NORMAL_ITEM,
+     'file' => 'includes/godown_short_approval.inc',
+   );
+  
+  return $items;
+}
+
+
+function get_all_putaway_groups($distributor_id) {
+  $query = db_select('node', 'n');
+  $query->condition('n.type', 'putaway_group_master');
+  $query->condition('n.uid', $distributor_id);
+  $query->join('field_data_field_putaway_group', 'pg', 'pg.entity_id = n.nid');
+  $query->addExpression('DISTINCT(pg.field_putaway_group_value)','putaway_group');
+  $result = $query->execute()->fetchAllKeyed(0, 0);
+  return $result;
+}
+
+function get_all_sub_putaway_groups($putaway, $distributor_id) {
+  $query = db_select('node', 'n');
+  $query->condition('n.type', 'putaway_group_master');
+  $query->condition('n.uid', $distributor_id);
+  if(!empty($putaway)) {
+    $query->join('field_data_field_putaway_group', 'pg', 'pg.entity_id = n.nid');
+    $query->condition('pg.field_putaway_group_value', $putaway, '=');
+  }
+  $query->fields('n', array('nid'));
+  $query->fields('n', array('title'));
+  $result = $query->execute()->fetchAllKeyed(0, 1);
+  return $result;
+}
+
+function get_default_actual_return_qty($trip_number, $sku_code, $distributor_id) {
+  $query = db_select('temp_sku_wise_return', 'tsr');
+  $query->condition('tsr.trip_id', $trip_number);
+  $query->condition('tsr.sku_code', $sku_code);
+  $query->condition('tsr.distributor_id', $distributor_id);
+  $query->fields('tsr', array('actual_return_qty'));
+  $result = $query->execute()->fetchField();
+  return $result;
+}
+
+function _get_all_products($string = '') {
+  global $user;
+  $dis_id = change_feeds_import_get_distributor_id($user->uid);
+  
+  if (!empty($string)) {
+    $query = db_select('node', 'n');
+    $query->condition('n.uid', $dis_id);
+    $query->join('field_data_field_product_name', 'pn', 'pn.entity_id = n.nid');
+    $query->condition('pn.field_product_name_value' , '%'.db_like($string) . '%', 'LIKE');
+    $query->fields('pn', array('field_product_name_value'));
+    $result = $query->execute()->fetchAllKeyed(0, 0);
+  }
+  drupal_json_output($result);
+}
+
+function get_excess_reason_list($dis_id) {
+  $query = db_select('node', 'n');
+  $query->condition('n.type', 'excess_reason_master');
+  $query->condition('n.uid', $dis_id);
+  $query->fields('n', array('title'));
+  $result = $query->execute()->fetchAllKeyed(0, 0);
+  return $result; 
+}
+
+function get_gs_claim_reason_list($dis_id) {
+  $query = db_select('node', 'n');
+  $query->condition('n.type', 'gs_claim_reason_master');
+  $query->condition('n.uid', $dis_id);
+  $query->fields('n', array('title'));
+  $result = $query->execute()->fetchAllKeyed(0, 0);
+  return $result; 
+}
+
+function get_mrp_from_product_name($product_name, $distributor_id) {
+  $result = array();
+  if (!empty($product_name)) {
+    $query = db_select('dispatch_planning_item_details', 'dpi');
+    $query->join('dispatch_planning_api_data', 'ad', 'dpi.trip_bill_reference = ad.id');
+    $query->condition('ad.distributor_id', $distributor_id);
+    $query->condition('dpi.product_name', $product_name, '=');
+    $query->fields('dpi', array('mrp'));
+    $result = $query->execute()->fetchAllKeyed(0, 0);  
+  }
+  return $result;
+}
+
+function get_excess_declaration_data($trip_number, $distributor_id) {
+  $query = db_select('excess_inventory_table', 'eit');
+  $query->condition('eit.trip_id', $trip_number);
+  $query->condition('eit.distributor_id', $distributor_id);
+  $query->fields('eit');
+  $result = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+  return $result;
+}
+
+function get_returns_incharge_list($dis_id) {
+  $query = db_select('node', 'n');
+  $query->condition('n.type', 'resource_master');
+  $query->condition('n.uid', $dis_id);
+  $query->join('field_data_field_resource_type', 'rt', 'rt.entity_id = n.nid');
+  $query->condition('rt.field_resource_type_value', 'Returns Incharge', '=');
+  $query->join('field_data_field_resource_name', 'rn', 'rn.entity_id = n.nid');
+  $query->fields('rn', array('field_resource_name_value'));
+  $result = $query->execute()->fetchAllKeyed(0, 0);
+  return $result; 
+}
+
+function get_dispatch_supervisor_list($dis_id) {
+  $query = db_select('node', 'n');
+  $query->condition('n.type', 'resource_master');
+  $query->condition('n.uid', $dis_id);
+  $query->join('field_data_field_resource_type', 'rt', 'rt.entity_id = n.nid');
+  $query->condition('rt.field_resource_type_value', 'Dispatch SUPERVISOR', '=');
+  $query->join('field_data_field_resource_name', 'rn', 'rn.entity_id = n.nid');
+  $query->fields('n', array('nid'));
+  $query->fields('rn', array('field_resource_name_value'));
+  $result = $query->execute()->fetchAllKeyed(0, 1);
+  return $result; 
+}
+
+/**
+ * 
+ * @param type $form
+ * @param type $form_state
+ * @return array
+ */
+// exclude dp bills
+function sku_wise_return_pop_up_table($trip_number, $sku_code, $dis_id) {
+  $query = db_select('dispatch_planning_item_details', 'dpi');
+  $query->join('dispatch_planning_api_data', 'ad', 'dpi.trip_bill_reference = ad.id');
+  $query->condition('ad.delivery_pending_flag' ,1,'!=');
+  $query->condition('ad.runsheet_number', $trip_number, '=');
+  $query->condition('ad.distributor_id', $dis_id);
+  $query->condition('dpi.sku_code', $sku_code, '=');
+  $query->condition('dpi.line_level_status', 'line_deliver', '!=');
+  $query->fields('ad', array('bill_number','bill_number'));
+  $query->fields('ad', array('party_name'));
+  $query->fields('dpi', array('sum_net_sales_quantity'));
+  $query->fields('dpi', array('res_godown_short'));
+  $query->fields('dpi', array('dispatch_qty'));
+  $query->fields('ad', array('res_status'));
+  $query->fields('ad', array('res_reason_for_failure'));
+  $query->fields('dpi', array('res_sku_reason'));
+  $query->fields('dpi', array('res_cashier_short'));
+  $query->fields('dpi', array('return_qty'));
+  $query->fields('dpi', array('claimed_godown_short'));
+  $query->fields('dpi', array('claimed_godown_short_reason'));
+  //$query->addExpression('(dpi.sum_net_sales_quantity - dpi.farey_delivered_qty)', 'to_be_returned_qty');
+  $query->fields('ad', array('updated_flag'));
+  // net sales qty
+  $query->fields('dpi', array('sum_net_sales_quantity'));
+  // farey delivered qty
+  $query->fields('dpi', array('farey_delivered_qty'));
+  // Actual delivered qty both from farey or from manual edit screen.
+  $query->fields('dpi', array('res_sku_actual_quantity1'));
+  $result = $query->execute()->fetchAll(PDO::FETCH_GROUP | PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
+  if(!empty($result)) {
+    foreach($result as $key=>&$val) {
+      // Manual update from manual edit screen
+      if ($val['updated_flag'] == 1) {
+        $val['to_be_returned_qty'] = $val['sum_net_sales_quantity'] - $val['res_sku_actual_quantity1'];
+      }
+      // udate from farey table
+      else if ($val['updated_flag'] == 2) {
+        $val['to_be_returned_qty'] = $val['sum_net_sales_quantity'] - $val['farey_delivered_qty'];
+      }
+    }
+  }
+
+  return $result;
+}
+
+function get_godown_short_reason_list($dis_id, $flag) {
+  $query = db_select('node', 'n');
+  $query->condition('n.type', 'godown_short_reason_master');
+  $query->condition('n.uid', $dis_id);
+  $query->join('field_data_field_approval_flag', 'af', 'af.entity_id = n.nid');
+  if($flag == 'yes') {
+    $query->condition('af.field_approval_flag_value', $flag);
+  }
+  if($flag == 'no') {
+    $query->condition('af.field_approval_flag_value', $flag);
+  }
+  $query->fields('n', array('title'));
+  $result = $query->execute()->fetchAllKeyed(0, 0);
+  return $result; 
+}
+
+function get_nids_of_selected_putaway($putaway, $distributor_id) {
+  $query = db_select('node', 'n');
+  $query->condition('n.type', 'putaway_group_master');
+  $query->condition('n.uid', $distributor_id);
+  $query->join('field_data_field_putaway_group', 'pg', 'pg.entity_id = n.nid');
+  $query->condition('pg.field_putaway_group_value', $putaway, '=');
+
+  $query->fields('n', array('nid'));
+  $result = $query->execute()->fetchCol();
+  return $result;
+}
+
+function get_trip_status($dis_id, $trip_id) {
+  $query = db_select('node', 'n');
+  $query->condition('n.type', 'dispatch_data');
+  $query->condition('n.uid', $dis_id);
+  $query->condition('n.title', $trip_id);
+  $query->leftjoin('field_data_field_vrs_status', 'vs', 'vs.entity_id = n.nid');
+  $query->fields('vs', array('field_vrs_status_value'));
+  $result = $query->execute()->fetchField();
+  
+  return $result;
+}
+
+function check_product_name($dis_id, $product_name) {
+  $query = db_select('node', 'n');
+  $query->condition('n.uid', $dis_id);
+  $query->join('field_data_field_product_name', 'pn', 'pn.entity_id = n.nid');
+  $query->condition('pn.field_product_name_value' , $product_name , '=');
+  $query->fields('n', array('nid'));
+  $result = $query->execute()->fetchField();
+  
+  return $result;
+}

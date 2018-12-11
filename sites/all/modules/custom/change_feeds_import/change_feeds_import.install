@@ -1303,3 +1303,50 @@ function change_feeds_import_update_7117() {
     }
   }
 }
+
+//New field of For TP Host QTY
+function change_feeds_import_update_7118() {
+  $fields = array(
+    'original_Sum_of_TOTAL_SALES_QTY' => array(
+      'description' => 'Original Sum_of_TOTAL_SALES_QTY',
+      'type' => 'int',
+    ),
+    'revised_host_quantity' => array(
+      'description' => 'Revised Host Qtuantity',
+      'type' => 'int',
+    ),
+    'updated_flag' => array(
+      'description' => 'Updated Flag',
+      'type' => 'int',
+    ),
+    //Revised newly added field
+    'revised_Sum_of_NET_SALES_VALUE' => array(
+        'description' => 'Revised Sum_of_NET_SALES_VALUE',
+        'type' => 'float',
+    ),
+    'revised_Sum_of_SCHEME_DISCOUNT' => array(
+        'description' => 'Revised Sum_of_SCHEME_DISCOUNT',
+        'type' => 'float',
+    ),
+    'revised_Sum_of_OTHER_DISCOUNT' => array(
+        'description' => 'Revised Sum_of_OTHER_DISCOUNT',
+        'type' => 'float',
+    ),
+    'revised_Sum_of_TAX_PERCENTAGE' => array(
+        'description' => 'Revised Sum_of_TAX_PERCENTAGE',
+        'type' => 'float',
+    ),
+    
+    'line_level_value' => array(
+        'description' => 'Line Level Value',
+        'type' => 'numeric',
+        'precision'=>10,
+        'scale'=>2,
+    ),
+  );
+  foreach ($fields as $key => $field) {
+    if (!db_field_exists('custom_billing_data', $key)) {
+      db_add_field('custom_billing_data', $key, $field);
+    }
+  }
+}

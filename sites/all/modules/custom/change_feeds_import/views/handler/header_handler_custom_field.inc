@@ -27,13 +27,37 @@ class header_handler_custom_field extends views_handler_field {
 
     global $user;
     $user_id = $user->uid;
+    $trip_id = $this->view->args[0];
+    $distributor_id = change_feeds_import_get_distributor_id($user->uid);
     $total_result = $this->view->result;
     foreach ($total_result as $key => $value) {
-      $bill_val += $value->field_field_bill_value[0]['raw']['value'];
+      if($this->view->current_display === 'page_1'){
+        $bill_val += $value->field_field_bill_value[0]['raw']['value'];
+      }else{
+        // for drs2 printout only
+        $bill_number = $value->node_title;
+        $bill_value = round($value->field_field_bill_value[0]['raw']['value'],2);
+        $bill_discount = round($value->field_field_bill_level_discount[0]['raw']['value'],2);
+        if (!empty($bill_number) && !empty($trip_id)) {
+          $query = db_select('dispatch_planning_api_data', 'dpi');
+          $query->condition('dpi.distributor_id', $distributor_id, '=');
+          $query->condition('dpi.runsheet_number', $trip_id, '=');
+          $query->condition('dpi.bill_number', $bill_number, '=');
+          $query->join('dispatch_planning_item_details', 'ad', 'ad.trip_bill_reference = dpi.id');
+          $query->addField('dpi', 'res_status', 'res_status');
+          $query->addExpression('ROUND(SUM(ad.sum_net_sales_value * ad.res_sku_actual_quantity1),2)', 'delivered_value');
+          $deliver_amt = $query->execute()->fetchAll();
+        }
+
+        if(!empty($deliver_amt[0]->res_status) && $deliver_amt[0]->delivered_value <= $bill_discount){
+          $bill_val += round(($bill_value + $bill_discount - $deliver_amt[0]->delivered_value),2);
+        }else{
+          $bill_val += $bill_value;
+        }
+      }
     }
     $this->view->custom_footer = $bill_val;
     $name = get_distrubutor_name_from_user_id($user_id);
-    $trip_id = $this->view->args[0];
     $result = get_data_from_trip_id($trip_id);
     $tp_van = get_tp_van_by_trip_id($trip_id);
 

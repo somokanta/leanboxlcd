@@ -1013,7 +1013,127 @@ function change_feeds_import_views_data() {
       'click sortable' => FALSE,
     ),
   );
-
+// Newly added field in custom_billing date related to TP host entry
+  $data['custom_billing_data']['original_Sum_of_TOTAL_SALES_QTY'] = array(
+    'title' => t('original_Sum_of_TOTAL_SALES_QTY'),
+    'help' => t('The record original_Sum_of_TOTAL_SALES_QTY.'),
+    'field' => array(
+      'handler' => 'views_handler_field_numeric',
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_numeric',
+    ),
+  );
+  $data['custom_billing_data']['revised_host_quantity'] = array(
+    'title' => t('revised_host_quantity'),
+    'help' => t('The record revised_host_quantity.'),
+    'field' => array(
+      'handler' => 'views_handler_field_numeric',
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_numeric',
+    ),
+  );
+  $data['custom_billing_data']['updated_flag'] = array(
+    'title' => t('updated_flag'),
+    'help' => t('The record updated_flag.'),
+    'field' => array(
+      'handler' => 'views_handler_field_numeric',
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_numeric',
+    ),
+  );
+  $data['custom_billing_data']['revised_Sum_of_NET_SALES_VALUE'] = array(
+    'title' => t('revised_Sum_of_NET_SALES_VALUE'),
+    'help' => t('The record revised_Sum_of_NET_SALES_VALUE.'),
+    'field' => array(
+      'handler' => 'views_handler_field_numeric',
+      'float' => TRUE
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_numeric',
+    ),
+  );
+  $data['custom_billing_data']['revised_Sum_of_SCHEME_DISCOUNT'] = array(
+    'title' => t('revised_Sum_of_SCHEME_DISCOUNT'),
+    'help' => t('The record revised_Sum_of_SCHEME_DISCOUNT.'),
+    'field' => array(
+      'handler' => 'views_handler_field_numeric',
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_numeric',
+    ),
+  );
+  $data['custom_billing_data']['revised_Sum_of_OTHER_DISCOUNT'] = array(
+    'title' => t('revised_Sum_of_OTHER_DISCOUNT'),
+    'help' => t('The record revised_Sum_of_OTHER_DISCOUNT.'),
+    'field' => array(
+      'handler' => 'views_handler_field_numeric',
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_numeric',
+    ),
+  );
+  $data['custom_billing_data']['revised_Sum_of_TAX_PERCENTAGE'] = array(
+    'title' => t('revised_Sum_of_TAX_PERCENTAGE'),
+    'help' => t('The record revised_Sum_of_TAX_PERCENTAGE.'),
+    'field' => array(
+      'handler' => 'views_handler_field_numeric',
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_numeric',
+    ),
+  );
+  $data['custom_billing_data']['line_level_value'] = array(
+    'title' => t('line_level_value'),
+    'help' => t('The record line_level_value.'),
+    'field' => array(
+      'handler' => 'views_handler_field_numeric',
+      'float' => TRUE
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_numeric',
+    ),
+  );
+  $data['custom_billing_data']['updated_date'] = array(
+    'title' => t('updated_date'),
+    'help' => t('The record updated_date.'),
+    'field' => array(
+      'handler' => 'views_handler_field_date',
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort_date',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_date',
+    ),
+  );  
+//END
   $data['van_cld_data_table']['table']['group'] = t('VAN CLD GROUP');
   $data['van_cld_data_table']['table']['base'] = array(
     'title' => t('VAN CLD Data'),
@@ -1203,5 +1323,14 @@ function change_feeds_import_views_data() {
      ),
   );
   
+  // Field for dispatched Value.
+  $data['views']['dispatched_value'] = array(
+    'title' => t('Dispatched Value'),
+    'help' => t('Field for Dispatched Value.'),
+    'field' => array(
+      'handler' => 'handler_dispatched_value_field',
+    ),
+  );
+
   return $data;
 }

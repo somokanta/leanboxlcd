@@ -322,6 +322,16 @@ function return_confirm_validate($form, $form_state) {
   $query->join('dispatch_planning_item_details', 'dpi', 'ad.id = dpi.trip_bill_reference');
   $query->condition('ad.runsheet_number', $trip_id, '=');
   $query->condition('ad.distributor_id', $dis_id);
+  $query->addexpression("GROUP_CONCAT(DISTINCT(CASE WHEN dpi.res_sku_actual_quantity1 < 0 THEN ad.bill_number END))", 'bill_deliver');
+  $bills = $query->execute()->fetchField();
+  if ($bills) {
+    form_set_error('form', "Please correct the Delivered Quantity for Bill Number $bills");
+  }
+  
+  $query = db_select('dispatch_planning_api_data', 'ad');
+  $query->join('dispatch_planning_item_details', 'dpi', 'ad.id = dpi.trip_bill_reference');
+  $query->condition('ad.runsheet_number', $trip_id, '=');
+  $query->condition('ad.distributor_id', $dis_id);
   $query->condition('ad.updated_flag', 2); //api
 
   $db_or = db_or();
@@ -432,7 +442,14 @@ function return_confirm_submit($form, $form_state) {
           'return_qty',
           'farey_delivered_qty',
           'money_collect_type',
-          'line_level_status'
+          'line_level_status',
+          'claimed_godown_short',
+          'claimed_godown_short_reason',
+          'approved_quantity',
+          'approval_flag',
+          'godown_short_reason',
+          'approved_by',
+          'remarks',
         );
         // add the child level data in new versioning child level table
         if (!empty($result_id)) {

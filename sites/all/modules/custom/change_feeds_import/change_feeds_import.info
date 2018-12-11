@@ -23,6 +23,7 @@ files[] = views/handler/billing_data_custom_hul_code.inc
 files[] = views/handler/billing_data_custom_drs_sequence.inc
 files[] = views/handler/basepack_sku7_code_custom_field.inc
 files[] = views/handler/views_handler_field_master_trip.inc
+files[] = views/handler/handler_dispatched_value_field.inc
 
 ; Plugins
 files[] = plugins/FeedsNodeCustomProcessor.inc

@@ -44,9 +44,9 @@ class header_ptl_cld_custom_field extends views_handler_field {
     $loading_sheet = ptl_loading_sheet_by_trip_id($trip_id,$rs_code);
     $no_of_bills = ptl_no_of_bills_by_trip_id($trip_id,$rs_code);
     $tp_van = get_tp_van_by_trip_id($trip_id);
+  
 
-
-    if (!empty($no_of_bills)) {
+   if (!empty($no_of_bills)) { 
 
       return '<table width = "100%" cellspacing = "0" style = "font-size: 13px; color:#000; font-family:arial" cellpadding = "5" border = "0" align = "center" class = "preview_table">
       <tr>
@@ -93,7 +93,7 @@ class header_ptl_cld_custom_field extends views_handler_field {
     }
     else {
       return "";
-    }
+   }
   }
 }
 

@@ -292,6 +292,54 @@ function delete_fetch_data_master_ptl_trip_form($form, &$form_state) {
   return $form;
 }
 
+/**
+ * 
+ * @global type $user
+ * @param type $form
+ * @param type $form_state
+ */
+function delete_fetch_data_master_ptl_trip_form_validate($form, &$form_state) {
+  $master_trip_id = $form_state['values']['master_trip_id'];
+
+  global $user;
+  $user_id = $user->uid;
+  $distributor_id = change_feeds_import_get_distributor_id($user_id);
+
+  //A Trip ID has been sent to PTL (i.e. data exists in PTL Complete report for that Trip ID)
+  $master_ptl_data_exist = check_trip_exist_in_master_ptl($master_trip_id, $distributor_id);
+  if (empty($master_ptl_data_exist)) {// empty data not found
+    form_set_error('trip_id', "Master Trip ID: $master_trip_id is not exist in Master PTL!");
+  }
+  
+  // check trip wise in loop
+  $all_trip_id = get_all_trip_by_master_ptl($master_trip_id, $distributor_id);
+  foreach ($all_trip_id as $trip_id) {
+    //PTL Loose confirmation has been done for that Trip ID
+    $loose_completed = check_ptl_loose_confirmation_for_trip($trip_id, $distributor_id);
+    if (!empty($loose_completed)) {
+      form_set_error('trip_id', "PTL Loose confirmation has been done for Trip ID: $trip_id");
+    }
+
+    //CLD Confirmation has been done for that Trip ID
+    $cld_completed = check_cld_confirmation_for_trip($trip_id, $distributor_id);
+    if (!empty($cld_completed)) {
+      form_set_error('trip_id', "CLD confirmation has been done for Trip ID: $trip_id");
+    }
+
+    //CLD Confirmation has been done for that Trip ID
+    $cld_retail_confirmed = check_cld_retailer_confirmation_for_trip($trip_id,$distributor_id);
+    if (!empty($cld_retail_confirmed)) {
+      form_set_error('trip_id', "CLD retailer confirmation has been done for Trip ID: $trip_id");
+    }    
+
+    //Re-upload of custom billing data has been done
+    $bill_reupload = check_reupload_for_any_bills_in_trip($trip_id, $distributor_id);
+    if (!empty($bill_reupload)) {
+      form_set_error('trip_id', "Re-upload of custom billing data has been done for the bills: $bill_reupload for a Trip ID: $trip_id");
+    }
+  }
+}
+
 function delete_fetch_data_master_ptl_trip_form_submit($form, &$form_state) {
   global $user;
 

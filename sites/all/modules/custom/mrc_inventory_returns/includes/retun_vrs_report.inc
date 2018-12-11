@@ -102,8 +102,24 @@ function return_vrs_callback() {
   $query->join('node', 'disp_data', 'disp_data.title = ad.runsheet_number');
   $query->condition('disp_data.type', 'dispatch_data');
   $query->condition('disp_data .uid', $distributor_id);
+  $query->join('field_data_field_vehicle_arrival_date', 'vad', 'vad.entity_id = disp_data.nid');
+  $query->join('field_data_field_vehicle_arrival_time', 'vat', 'vat.entity_id = disp_data.nid');
+  $query->fields('vad', array('field_vehicle_arrival_date_value'));
+  $query->fields('vat', array('field_vehicle_arrival_time_value'));
   $query->join('field_data_field_vrs_status', 'vs', 'vs.entity_id = disp_data.nid');
+  // Sku Wise
+  $query->leftjoin('field_data_field_sku_wise_return_start_time', 'sku_start_time', 'sku_start_time.entity_id = disp_data.nid');
+  $query->leftjoin('field_data_field_sku_wise_return_end_time', 'sku_end_time', 'sku_end_time.entity_id = disp_data.nid');
+  // Bill wise
+  $query->leftjoin('field_data_field_bill_wise_return_starttime', 'bill_start_time', 'bill_start_time.entity_id = disp_data.nid');
+  $query->leftjoin('field_data_field_bill_wise_return_end_time', 'bill_end_time', 'bill_end_time.entity_id = disp_data.nid');
+  
   $query->fields('vs', array('field_vrs_status_value'));
+  $query->fields('sku_start_time', array('field_sku_wise_return_start_time_value'));
+  $query->fields('sku_end_time', array('field_sku_wise_return_end_time_value'));
+  $query->fields('bill_start_time', array('field_bill_wise_return_starttime_value'));
+  $query->fields('bill_end_time', array('field_bill_wise_return_end_time_value'));
+  
   $query->leftjoin('field_data_field_dispatch_start_time', 'dst', 'dst.entity_id = disp_data.nid');
   $query->fields('dst', array('field_dispatch_start_time_value'));
   $query->addExpression('MIN(CASE WHEN (ad.updated_flag = 1) THEN ad.updated_time END)', 'min_updated_time');
@@ -128,8 +144,9 @@ function return_vrs_callback() {
   $query->addexpression("SUM(CASE WHEN pdr.field_product_devision_reference_nid NOT IN ($get_subdivision_nids) THEN idt.return_qty END)", 'return_sku_qty_wo_sachets');
   
   $result = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
-  $row = array();
+  $return_confirmed_vrs_status = array(1,2,3,4,5);
   foreach ($result as $val) {
+   
     $row['trip_id'] = $val['runsheet_number'];
     $dispatch_date = strtotime($val['date']); 
     if(isset($dispatch_date)){
@@ -146,6 +163,10 @@ function return_vrs_callback() {
        }
      }
     $row['field_dispatch_start_time_value'] = $val['field_dispatch_start_time_value'];
+    
+    // Vehicle Arrival Time.
+    $row['field_data_field_vehicle_arrival_date'] = date('d-M-y', $val['field_vehicle_arrival_date_value']) . ' ' .$val['field_vehicle_arrival_time_value'];
+    
     if(isset($val['field_received_asset_time_value'])){
       $row['field_received_asset_time_value'] = date('d-M-y H:i:s', $val['field_received_asset_time_value']);
     }else{
@@ -170,18 +191,41 @@ function return_vrs_callback() {
     }
     //Delivery Confirmation time
     
-    if(isset($val['min_updated_time'])){
-      $row['min_updated_time'] = date('d-M-y H:i:s', $val['min_updated_time']);
+    if(!empty($val['field_sku_wise_return_start_time_value'])){
+      $row['sku_start_time'] = date('d-M-y H:i:s', $val['field_sku_wise_return_start_time_value']);
+      $return_start_time  = $val['field_sku_wise_return_start_time_value'];
     }else{
-      $row['min_updated_time'] = '';
+      $row['sku_start_time'] = '';
     }
-    if(isset($val['max_updated_time'])){
-    $row['max_updated_time'] = date('d-M-y H:i:s', $val['max_updated_time']);
-    }else{
-      $row['max_updated_time'] = '';
+    
+    if (!empty($val['field_sku_wise_return_end_time_value'])) {
+      $row['sku_end_time'] = date('d-M-y H:i:s', $val['field_sku_wise_return_end_time_value']);
+      $sku_return_end_time = $val['field_sku_wise_return_end_time_value'];
     }
-    if(isset($val['total_return_time'])){
-    $row['total_return_time'] = gmdate('H:i:s', $val['total_return_time']);
+    else {
+      $row['sku_end_time'] = '';
+    }
+    if (!empty($val['field_bill_wise_return_starttime_value'])) {
+      $row['bill_start_time'] = date('d-M-y H:i:s', $val['field_bill_wise_return_starttime_value']);
+    }
+    else {
+      $row['bill_start_time'] = '';
+    }
+    if (!empty($val['field_bill_wise_return_end_time_value'])) {
+      $row['bill_end_time'] = date('d-M-y H:i:s', $val['field_bill_wise_return_end_time_value']);
+      $returns_end_time =  $val['field_bill_wise_return_end_time_value'];
+    }
+    else {
+      $row['bill_end_time'] = '';
+    }
+    if (empty($returns_end_time) && !empty($sku_return_end_time)) {
+       $returns_end_time = $sku_return_end_time;
+    }
+    if (in_array($val['field_vrs_status_value'],$return_confirmed_vrs_status) && !empty($returns_end_time) && !empty($return_start_time)) {
+       $total_return_time = $returns_end_time - $return_start_time; 
+    }
+    if(!empty($total_return_time)){
+    $row['total_return_time'] = gmdate('H:i:s', $total_return_time);
     }else{
       $row['total_return_time'] = '';
     }
@@ -210,7 +254,7 @@ function return_vrs_callback() {
     $rows[] = $row;
   }
 
-  $header = array('Trip ID', 'Dispatch Date', 'Cashier Name','Status', 'Dispatch Time', 'Received Assets Time', 'Delivery Confirmation Time' , 'Returns Start Time', 'Returns End Time', 'Total Returns Time taken', 'Total Returned Value','Returned SKU Quantity(w/o Sachets)','Returned Quantity of Sachets','Returns Productivity (Value/10 min)', 'VRS Start Time', 'VRS End Time', 'Total VRS Time taken', 'Cash Value', 'Cheque Value', 'Signed Bill Value');
+  $header = array('Trip ID', 'Dispatch Date', 'Cashier Name','Status', 'Dispatch Time', 'Vehicle Arrival Time', 'Received Assets Time', 'Delivery Confirmation Time' , 'SKU Wise Returns Start Time', 'SKU Wise Returns End Time','Bill Wise Returns Start Time', 'Bill Wise Returns End Time','Total Returns Time taken', 'Total Returned Value','Returned SKU Quantity(w/o Sachets)','Returned Quantity of Sachets','Returns Productivity (Value/10 min)', 'VRS Start Time', 'VRS End Time', 'Total VRS Time taken', 'Cash Value', 'Cheque Value', 'Signed Bill Value');
   $per_page = 10;
   // Initialize the pager
   $current_page = pager_default_initialize(count($rows), $per_page);

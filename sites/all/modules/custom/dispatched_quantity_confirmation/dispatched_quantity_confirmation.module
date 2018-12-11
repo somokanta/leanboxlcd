@@ -1,0 +1,955 @@
+<?php
+
+/* 
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+
+/**
+ * Implements hook_menu
+ * @return string
+ */
+function dispatched_quantity_confirmation_menu() {
+  $items = array();
+  
+  $items['ptl-loose-confirmation'] = array(
+     'title' => 'PTL loose confirmation',
+     'page callback' => 'drupal_get_form',
+     'page arguments' => array('ptl_loose_confirmation_form'),
+     'access arguments' => array('dispatched qty confirmation'),
+     'type' => MENU_NORMAL_ITEM,
+     'file' => 'includes/ptl_loose_confirmation.inc',
+   );
+  
+  $items['get-all-trips/autocomplete'] = array(
+    'title' => 'trip_autocomplete',
+    'page callback' => 'get_all_trips_autocomplete',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  
+  $items['get-all-bills/autocomplete/%'] = array(
+    'title' => 'bill_autocomplete_trip_wise',
+    'page callback' => 'get_all_bills_autocomplete',
+    'page arguments' => array(2),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  
+  $items['get-all-skus/autocomplete/%'] = array(
+    'title' => 'sku_autocomplete_bill_wise',
+    'page callback' => 'get_all_sku_autocomplete',
+    'page arguments' => array(2),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  
+   $items['ptl-cld-skus/autocomplete/%'] = array(
+    'title' => 'ptl-retail-cld-skus',
+    'page callback' => 'ptl_cld_sku_autocomplete',
+    'page arguments' => array(2),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  
+  $items['host-revised-qty/import'] = array(
+    'title' => 'Host Revised Qty Upload',
+    'description' => 'Host Revised Qty Upload',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('host_revised_qty_upload_form'),
+    'access arguments' => array('dispatched qty confirmation'),
+    'file' => 'includes/host_revised_quantity_upload.inc',
+  );
+  
+  $items['mismatch-data/export'] = array(
+    'title' => 'Mismatch Data Export',
+    'description' => 'Mismatch Data Export',
+    'page callback' => 'mismatch_data_table_export',
+    'access arguments' => array('dispatched qty confirmation'),
+    'file' => 'includes/host_revised_quantity_upload.inc',
+  );
+  
+  $items['master-ptl-loose-confirmation'] = array(
+     'title' => 'Master PTL loose confirmation',
+     'page callback' => 'drupal_get_form',
+     'page arguments' => array('master_ptl_loose_confirmation_form'),
+     'access arguments' => array('dispatched qty confirmation'),
+     'type' => MENU_NORMAL_ITEM,
+     'file' => 'includes/master_ptl_loose_confirmation.inc',
+   );
+  
+  $items['get-trips-not-dispatched/autocomplete'] = array(
+    'title' => 'trip_autocomplete_not_dispatched',
+    'page callback' => 'get_all_trips_not_dispatched',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  
+  //ptl retail cld
+  $items['ptl-retail-cld-confirmation'] = array(
+     'title' => 'PTL Retail CLD confirmation',
+     'page callback' => 'drupal_get_form',
+     'page arguments' => array('ptl_retail_cld_confirmation_form'),
+     'access arguments' => array('dispatched qty confirmation'),
+     'type' => MENU_NORMAL_ITEM,
+     'file' => 'includes/ptl_retail_cld_confirmation.inc',
+   );
+   $items['ptl-retail-cld-bills/autocomplete/%'] = array(
+    'title' => 'ptl-retail-cld-bills',
+    'page callback' => 'ptl_cld_bills_autocomplete',
+    'page arguments' => array(2),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+   $items['excess-quantity'] = array(
+     'title' => 'Excess Quantity',
+     'page callback' => 'drupal_get_form',
+     'page arguments' => array('excess_qty_form'),
+     'access arguments' => array('dispatched qty confirmation'),
+     'type' => MENU_NORMAL_ITEM,
+     'file' => 'includes/excess_quantity.inc',
+   );
+   $items['bill-wise-editing-cld'] = array(
+     'title' => 'Bill-wise editing for CLDs',
+     'page callback' => 'drupal_get_form',
+     'page arguments' => array('bill_wise_editing_cld_form'),
+     'access arguments' => array('dispatched qty confirmation'),
+     'type' => MENU_NORMAL_ITEM,
+     'file' => 'includes/bill_wise_editing_cld.inc',
+   );
+   $items['to-be-dispatched-qty-report'] = array(
+    'title' => 'To be dispatched Quantity Report',
+    'page callback' => array('to_be_dispatched_qty_callback'),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'includes/to_be_dispatched_qty_report.inc',
+  );
+   $items['to-be-dispatched-qty-report/export'] = array(
+    'title' => 'To be dispatched Quantity Report Export',
+    'description' => 'To be dispatched Quantity Report Export',
+    'page callback' => array('to_be_dispatched_qty_export'),
+    'file' => 'includes/to_be_dispatched_qty_report.inc',
+    'access callback' => TRUE,
+  );
+
+  $items['confirm-bill-editing-status'] = array(
+     'title' => 'Confirm Bill Editing Status',
+     'page callback' => 'drupal_get_form',
+     'page arguments' => array('confirm_bill_editing_status_form'),
+     'access arguments' => array('dispatched qty confirmation'),
+     'type' => MENU_NORMAL_ITEM,
+     'file' => 'includes/confirm_bill_editing_status.inc',
+   ); 
+   
+
+   $items['dispatch_qty_preprocess_after_trip'] = array(
+    'title' => 'Dispatch QTY Preprocess after trip',
+    'page callback' => '_dispatch_qty_preprocess',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+   
+  $items['delete-dispatch-qty-confirmation'] = array(
+     'title' => 'Delete from dispatch qty confirmation',
+     'page callback' => 'drupal_get_form',
+     'page arguments' => array('delete_dispatch_qty_confirmation_form'),
+     'access arguments' => array('dispatched qty confirmation'),
+     'type' => MENU_NORMAL_ITEM,
+     'file' => 'includes/delete_dispatch_qty_confirmation.inc',
+   ); 
+
+  $items['loose-packing-deviation-report'] = array(
+    'title' => 'Loose Packing Deviation Report',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('loose_packing_deviation_form'),
+    'access arguments' => array('dispatched qty confirmation'),
+    'type' => MENU_CALLBACK,
+    'file' => 'includes/loose_packing_deviation_report.inc',
+  );
+  
+  $items['loose-packing-deviation-report/export'] = array(
+    'title' => 'Loose Packing Deviation Report Export',
+    'description' => 'Loose Packing Deviation Report Export',
+    'page callback' => array('loose_packing_deviation_export'),
+    'file' => 'includes/loose_packing_deviation_report.inc',
+    'access callback' => TRUE,
+  );
+  
+  $items['cld-picking-deviation-report'] = array(
+    'title' => 'CLD Picking Deviation Report',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('cld_picking_deviation_form'),
+    'access arguments' => array('dispatched qty confirmation'),
+    'type' => MENU_CALLBACK,
+    'file' => 'includes/cld_picking_deviation_report.inc',
+  );
+  
+  $items['cld-picking-deviation-report/export'] = array(
+    'title' => 'CLD Picking Deviation Report Export',
+    'description' => 'CLD Picking Deviation Report Export',
+    'page callback' => array('cld_picking_deviation_export'),
+    'file' => 'includes/cld_picking_deviation_report.inc',
+    'access callback' => TRUE,
+  );
+  
+  $items['bill-editing-exception-report'] = array(
+    'title' => 'Bill Editing Exception Report',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('bill_editing_exception_form'),
+    'access arguments' => array('dispatched qty confirmation'),
+    'type' => MENU_CALLBACK,
+    'file' => 'includes/bill_editing_exception_report.inc',
+  );
+  
+  $items['bill-editing-exception-report/export'] = array(
+    'title' => 'Bill Editing Exception Report Export',
+    'description' => 'Bill Editing Exception Report Export',
+    'page callback' => array('bill_editing_exception_export'),
+    'file' => 'includes/bill_editing_exception_report.inc',
+    'access callback' => TRUE,
+  );
+  
+  $items['configurable-dispatch-qty-validation'] = array(
+    'title' => 'Configurable Dispatch Qty Validation',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('configurable_dispatch_qty_form'),
+    'access arguments' => array('dispatched qty confirmation'),
+    'type' => MENU_CALLBACK,
+    'file' => 'includes/configurable_dispatch_qty_validation.inc',
+    'access callback' => TRUE,
+  );
+  
+  return $items;
+}
+
+/**
+ * Implements hook_permission
+ * @return array
+ */
+function dispatched_quantity_confirmation_permission() {
+   return array(
+     'dispatched qty confirmation' => array(
+       'title' => t('Dispatched Qty Confirmation'),
+       'description' => t('Dispatched Qty Confirmation')
+     ),
+   );
+}
+
+function get_all_trips_not_dispatched($string = '') {
+  global $user;
+  $dis_id = change_feeds_import_get_distributor_id($user->uid);
+  $result = array();
+
+  if ($string) {
+    $query = db_select('node', 'n');
+    $query->condition('n.title', db_like($string).'%', 'LIKE');
+    $query->condition('n.type', 'dispatch_data');
+    $query->leftjoin('field_data_field_dispatch_status', 'ds', 'ds.entity_id = n.nid');
+    $query->condition('ds.field_dispatch_status_value', 1, "!=");
+    $query->fields('n', array('title'));
+    $query->condition('n.uid', $dis_id);
+    $result = $query->execute()->fetchAllKeyed(0, 0);
+  }
+
+  drupal_json_output($result);
+}
+
+function get_all_trips_autocomplete($string = '') {
+  global $user;
+  $dis_id = change_feeds_import_get_distributor_id($user->uid);
+  $result = array();
+
+  if ($string) {
+    $query = db_select('node', 'n');
+    $query->condition('n.title', db_like($string).'%', 'LIKE');
+    $query->condition('n.type', 'dispatch_data');
+    $query->leftjoin('field_data_field_dispatch_status', 'ds', 'ds.entity_id = n.nid');
+    $db_or = db_or();
+    $db_or->isNull('ds.field_dispatch_status_value');
+    $db_or->condition('ds.field_dispatch_status_value', 0);
+    $query->condition($db_or);
+    $query->fields('n', array('title'));
+    $query->condition('n.uid', $dis_id);
+    $result = $query->execute()->fetchAllKeyed(0, 0);
+  }
+
+  drupal_json_output($result);
+}
+
+function get_all_bills_autocomplete($trip_id, $string = '') {
+  global $user;
+  $dis_id = change_feeds_import_get_distributor_id($user->uid);
+  $result = array();
+
+  if ($string) {
+    if (!empty($trip_id)) {
+      $query = db_select('node', 'n');
+      $query->condition('n.title', $trip_id, '=');
+      $query->condition('n.type', 'dispatch_data');
+      $query->condition('n.uid', $dis_id);
+      $query->fields('n', array('nid'));
+      $trip_nid = $query->execute()->fetchField();
+    }
+    
+    $query = db_select('node', 'n');
+    $query->condition('n.type', 'sales_register_data');
+    $query->condition('n.uid', $dis_id);
+    $query->condition('n.title', '%'.db_like($string).'%', 'LIKE');
+    $query->join('field_data_field_trip_id_reference', 'ti', 'ti.entity_id = n.nid');
+    $query->condition('ti.field_trip_id_reference_nid', $trip_nid);
+    $query->fields('n', array('title'));
+    $result = $query->execute()->fetchAllKeyed(0, 0);
+  }
+
+  drupal_json_output($result);
+}
+
+function get_all_sku_autocomplete($bill_number, $string = '') {
+  global $user;
+  $dis_id = change_feeds_import_get_distributor_id($user->uid);
+  $result = array();
+
+  if ($string) {
+    $query = db_select('custom_billing_data', 'cb');
+    $query->condition('cb.distributor_id', $dis_id);
+    if(!empty($bill_number)) {
+      $query->condition('cb.bill_number', $bill_number);
+    }
+    $query->condition('cb.sku7_code', '%'.db_like($string).'%', 'LIKE');
+    $query->fields('cb', array('sku7_code'));
+    //$query->fields('cb', array('product_name'));
+    $result = $query->execute()->fetchAllKeyed(0, 0);
+  }
+
+  drupal_json_output($result);
+}
+
+function get_short_reason_list($dis_id,$type = 'PTL') {
+  $query = db_select('node', 'n');
+  $query->condition('n.type', 'dispatch_short_reason');
+  $query->join('field_data_field_dispatch_trip_type', 'tt', 'tt.entity_id = n.nid');
+  $query->condition('tt.field_dispatch_trip_type_value', $type);
+  $query->condition('n.uid', $dis_id);
+  $query->fields('n', array('title'));
+  $result = $query->execute()->fetchAllKeyed(0, 0);
+  return $result; 
+}
+
+function get_qty_default_values_pplc($trip_id, $bill, $sku, $dis_id) {
+  $query = db_select('dispatch_qty_confirmation', 'dc');
+  $query->condition('dc.trip_id', $trip_id, '=');
+  $query->condition('dc.bill_number', $bill, '=');
+  $query->condition('dc.sku_code', $sku, '=');
+  $query->condition('dc.distributor_id', $dis_id, '=');
+  $query->fields('dc',array('pplc_confirmed_qty','short_reason','dispatch_loose_qty'));
+  $result = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+  
+  return $result[0];
+}
+
+/**
+ * Implements of hook_views_api().
+ */
+function dispatched_quantity_confirmation_views_api() {
+  return array(
+    'api' => 3,
+    'path' => drupal_get_path('module', 'dispatched_quantity_confirmation') . '/views'
+  );
+}
+
+/**
+ * Implements hook_node_presave()
+ */
+function dispatched_quantity_confirmation_node_presave($node) {
+    if ($node->type == 'dispatch_data' && ($node->is_new))  {
+          global $user;
+          $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+          
+          db_insert('dispatch_qty_preprocess') // Table name no longer needs {}
+          ->fields(array(
+            'trip_id' => $node->title,
+            'distributor_id' => $distributor_id,
+            'flag' => 0,
+            'created_date' => REQUEST_TIME,
+          ))
+          ->execute();
+    }
+}
+
+// Dispatch Quantity Preprocess.
+function _dispatch_qty_preprocess() {
+  //Send data which is created 1min befor, to avoid data loose of Bills. It might getting created Yet
+  $time = time() - 60 * 1; 
+  
+  $query = db_select('dispatch_qty_preprocess', 'dqp');
+  $query->fields('dqp', array('trip_id','distributor_id'));
+  $query->orderBy('dqp.created_date');
+  $query->condition('dqp.flag', 0);
+  $query->condition('dqp.created_date', $time, '<');
+  $query->range(0, 3);
+  $result = $query->execute()->fetchAll();
+  
+  foreach($result as $val){
+      $trip_id = $val->trip_id;
+      $distributor_id = $val->distributor_id;
+   
+    //check trip should not exist in dispatch qty confirmation table or not  
+    $trip_exist =  check_trip_exists_before_insert($trip_id, $distributor_id);     
+    if (empty($trip_exist)) {
+      // Write here code. Check trip status as well
+      insert_trip_into_dispatch_qty_confirmation($trip_id, $distributor_id);
+    }
+    //Once data inserted then we mark flag as 1 in preprocess table.
+    db_update('dispatch_qty_preprocess')
+        ->fields(array('flag' => 1))
+        ->condition('trip_id', $trip_id)
+        ->condition('distributor_id', $distributor_id)
+        ->execute();
+  }
+}
+
+/**
+ * Insert trip data. and check trip status first
+ */
+function insert_trip_into_dispatch_qty_confirmation($trip_id,$distributor_id){
+    $query = db_select('node', 'n');
+    $query->addField('n', 'nid');
+    $query->condition('n.title', $trip_id);
+    $query->condition('n.uid', $distributor_id);
+    $query->condition('n.status', 1);
+    $query->condition('n.type', 'dispatch_data');
+    $trip_id_nid = $query->execute()->fetchField();
+    
+    // Don't insert DP bills
+    $dp_bills = check_dp_bills_in_trip($trip_id_nid);
+    if (!empty($trip_id_nid) && empty($dp_bills)) {
+        $bills = _bills_by_trip_nid($trip_id_nid);
+        if(!empty($bills)) {
+          $billing_data = get_billing_data_for_dispatch_qty_confirm($bills, $distributor_id);
+          dispatch_qty_confirmation_insert_data($billing_data, $trip_id, $distributor_id);
+        }
+    }
+}
+
+/**
+ * Function for  ptl_configuration_data_insert($insert_data);
+ */
+function dispatch_qty_confirmation_insert_data($billing_data, $trip_id, $distributor_id) {
+    if (!empty($billing_data)) {
+            foreach ($billing_data as $item_data) {
+
+                $sku7_code = $item_data['sku_code'];
+                $sku_unit_case = get_sku_unit_case($sku7_code, $distributor_id);
+
+                // Conversion of cld and loose
+                $cld = (int) ($item_data['sum_total_sales_quantity'] / $sku_unit_case); //petty
+                $loose = (int) ($item_data['sum_total_sales_quantity'] % $sku_unit_case); //loose
+
+                // New logic end
+                $query = db_insert('dispatch_qty_confirmation');
+                $fields = array(
+                    'trip_id' => $trip_id,
+                    'bill_number' => $item_data['bill_number'],
+                    'sku_code' => $sku7_code,
+                    'product_name' => $item_data['product_name'],
+                    
+                    'mrp' => $item_data['mrp'],
+                    'tur' => $item_data['tur'],
+                    
+                   'original_loose_qty' => $loose,
+                   //'ptl_put_qty'
+                   //'pplc_confirmed_qty'
+                   //'short_reason'
+                   //'dispatch_loose_qty'
+                   //'loose_close_flag'
+
+                   'original_cld_qty' => $cld,
+                   'upc' => $sku_unit_case ? $sku_unit_case : 0,
+                   //'cld_confirmed_qty'
+                   //'declared_cld_qty'
+                   //'cld_short_reason'
+                   //'dispatch_cld_qty'
+                   //'cld_close_flag'
+
+                   //'type'
+                   'original_qty' => $item_data['sum_total_sales_quantity'],
+                   //'to_be_dispatch_qty'
+                   'created_date' => REQUEST_TIME,
+                   //'loose_created_date'
+                   //'cld_created_date'
+                   'distributor_id' => $distributor_id,
+                );
+                $query->fields($fields);
+                $result_id = $query->execute();
+            }
+            
+          // Check if trip has no cld or loose then mark its closing flag as 1
+            auto_close_loose_or_cld_flag($trip_id,$distributor_id);
+        }
+}
+
+function get_billing_data_for_dispatch_qty_confirm($bills, $distributor_id) {           
+  $query = db_select('custom_billing_data', 'bd');
+  $query->fields('bd', array('tur', 'mrp', 'product_name','bill_number'));
+  $query->addfield('bd', 'Sum_of_TOTAL_SALES_QTY', 'sum_total_sales_quantity');
+  $query->addfield('bd', 'sku7_code', 'sku_code');
+  $query->condition('bd.distributor_id', $distributor_id);
+  $query->condition('bd.bill_number', $bills,'IN');
+  $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+  return $res;
+}
+
+function _bills_by_trip_nid($trip_id_nid) {
+    $query = db_select('field_data_field_trip_id_reference', 'tr');
+    $query->addField('n', 'title');
+    $query->Join('node', 'n', 'tr.entity_id = n.nid');
+    $query->condition('tr.field_trip_id_reference_nid', "$trip_id_nid");
+    $query->condition('tr.bundle', "sales_register_data");
+    //don't send pending bills. means which picking is done against previous trip attached
+    //this is not required here. but we kept it if in future we have to allow the Dp and non dp
+    //bills in same trip then don't send dp bills in disptach qty confirmation table
+    $query->leftJoin('field_data_field_previous_trip', 'dp', 'tr.entity_id = dp.entity_id');
+    $query->isNull('dp.field_previous_trip_value');
+    $sales_register_nid = $query->execute()->fetchCol();
+  return $sales_register_nid;
+}
+
+function check_dp_bills_in_trip($trip_id_nid) {
+    $res = 0;
+    if(!empty($trip_id_nid)){
+        $query = db_select('field_data_field_trip_id_reference', 'tr');
+        $query->addField('tr', 'entity_id');
+        $query->condition('tr.field_trip_id_reference_nid', $trip_id_nid);
+        $query->condition('tr.bundle', "sales_register_data");
+        //Find pending bills. If found any then don't push the data
+        $query->leftJoin('field_data_field_previous_trip', 'dp', 'tr.entity_id = dp.entity_id');
+        $query->isNotNull('dp.field_previous_trip_value');
+        $res = $query->execute()->fetchField();
+    }
+  return $res;
+}
+
+function ptl_cld_sku_autocomplete($trip_id, $string = ''){
+  global $user;
+  $dis_id = change_feeds_import_get_distributor_id($user->uid);
+  $result = array();
+
+  if ($trip_id) {
+    $query = db_select('dispatch_qty_confirmation', 'dc');
+    $query->condition('dc.trip_id', $trip_id, '=');
+    $query->condition('dc.original_cld_qty', 0, '>');
+    $query->condition('dc.sku_code', db_like($string).'%', 'LIKE');
+    $query->condition('dc.distributor_id', $dis_id);
+    $query->fields('dc', array('sku_code'));
+    $result = $query->execute()->fetchAllKeyed(0, 0);
+  }
+
+  drupal_json_output($result);
+}
+
+function get_trip_type($trip_id, $dis_id) {
+  $array = array(0 => 'Non PTL', 1 => 'PTL', 2 => 'Master PTL');
+
+  $query = db_select('node', 'n');
+  $query->condition('n.type', 'dispatch_data');
+  $query->leftjoin('field_data_field_trip_type', 'tv', 'tv.entity_id = n.nid');
+  $query->condition('n.title', $trip_id, '=');
+  $query->condition('n.uid', $dis_id, '=');
+  $query->fields('tv', array('field_trip_type_value'));
+  $results = $query->execute()->fetchField();
+  $results = $results ? $results : 0;
+  return $array[$results];
+  
+}
+
+function ptl_cld_bills_autocomplete($trip_id, $string = ''){
+  global $user;
+  $dis_id = change_feeds_import_get_distributor_id($user->uid);
+  $result = array();
+
+  if ($trip_id) {
+    $query = db_select('dispatch_qty_confirmation', 'dc');
+    $query->condition('dc.trip_id', $trip_id, '=');
+    $query->condition('dc.original_cld_qty', 0, '>');
+    $query->condition('dc.bill_number', db_like($string).'%', 'LIKE');
+    $query->condition('dc.distributor_id', $dis_id);
+    $query->fields('dc', array('bill_number'));
+    $result = $query->execute()->fetchAllKeyed(0, 0);
+  }
+
+  drupal_json_output($result);
+}
+
+function get_child_detials_by_parent_sku($sku7_code, $dis_id) {
+  $result = array();
+  $query = db_select('node', 'n');
+  $query->condition('n.type', 'sku7_code_master');
+  $query->condition('n.uid', $dis_id);
+  $query->condition('n.title', $sku7_code);
+  $query->leftjoin('field_data_field_child_sku', 'csk', 'csk.entity_id = n.nid');
+  $query->leftjoin('node', 'n1', 'n1.nid = csk.field_child_sku_nid');
+
+  $query->join('field_data_field_sku7_code', 'sc', 'sc.entity_id = n1.nid');
+  $query->fields('sc', array('field_sku7_code_value'));
+
+  $query->join('field_data_field_product_name', 'pn', 'pn.entity_id = n1.nid');
+  $query->fields('pn', array('field_product_name_value'));
+  $query->leftjoin('field_data_field_child_sku_qty‎', 'cskq', 'cskq.entity_id = n.nid');
+  $query->fields('cskq', array('field_child_sku_qty_value'));
+  $row = $query->execute()->fetch(PDO::FETCH_ASSOC);
+  
+  $result['child_sku'] = ($row['field_sku7_code_value']) ? $row['field_sku7_code_value'] : '';
+  $result['child_qty'] = ($row['field_child_sku_qty_value']) ? $row['field_child_sku_qty_value'] : '';
+  return $result;
+}
+
+/**
+ * 
+ * @param type $trip_id
+ * @param type $distributor_id
+ */
+function auto_close_loose_or_cld_flag($trip_id, $distributor_id) {
+  $all = get_all_parent_cld_skus_query_wise($trip_id, $distributor_id);
+  $child_sku = get_child_cld_sku_query_wise($all, $distributor_id);
+  
+  $query = db_select('dispatch_qty_confirmation', 'dqp');
+  $query->fields('dqp', array('id'));
+  $query->condition('dqp.distributor_id', $distributor_id);
+  $query->condition('dqp.trip_id', $trip_id);
+  $query->condition('dqp.original_loose_qty', 0, '>');
+  if (!empty($child_sku['child_sku'])) {
+      $query->condition('dqp.sku_code', $child_sku['child_sku'], 'NOT IN');
+  }
+  $original_loose_qty = $query->execute()->fetchField();
+  if (empty($original_loose_qty)) {
+    db_update('dispatch_qty_confirmation')
+      ->fields(array('loose_close_flag' => 1))
+      ->condition('trip_id', $trip_id)
+      ->condition('distributor_id', $distributor_id)
+      ->execute();
+    //update dispatch planning as well
+      $nid = _nid_from_title_distributor_wise($trip_id, 'dispatch_data', $distributor_id);
+      $node = node_load($nid);
+     if(!empty($node)){  
+      $node->field_loose_confirmation['und'][0]['value'] = 1;
+      node_save($node); 
+     } 
+  }
+
+  $query2 = db_select('dispatch_qty_confirmation', 'dqp');
+  $query2->fields('dqp', array('id'));
+  $query2->condition('dqp.distributor_id', $distributor_id);
+  $query2->condition('dqp.trip_id', $trip_id);
+  $query2->condition('dqp.original_cld_qty', 0, '>');
+  if (!empty($child_sku['child_sku'])) {
+      $query2->condition('dqp.sku_code', $child_sku['child_sku'], 'NOT IN');
+  }
+  $original_cld_qty = $query2->execute()->fetchField();
+  if (empty($original_cld_qty)) {
+    db_update('dispatch_qty_confirmation')
+      ->fields(array('cld_close_flag' => 1,'cld_retail_confirmed_flag' => 1))
+      ->condition('trip_id', $trip_id)
+      ->condition('distributor_id', $distributor_id)
+      ->execute();
+    //update dispatch planning as well
+    $nid = _nid_from_title_distributor_wise($trip_id, 'dispatch_data', $distributor_id);
+    $node = node_load($nid);
+    if(!empty($node)){
+      $node->field_cld_confirmation['und'][0]['value'] = 1;
+      node_save($node);
+    }
+  }
+}
+
+
+function _nid_from_title_distributor_wise($title, $type, $dis_id) {
+    $query = db_select('node', 'n');
+    $query->condition('n.title', $title);
+    $query->condition('n.type', $type);
+    $query->condition('n.uid', $dis_id);
+    $query->fields('n', array('nid'));
+    $result = $query->execute()->fetchField();
+  return $result;
+}
+
+function check_trip_exists_before_insert($trip_id, $dis_id){
+  $query = db_select('dispatch_qty_confirmation', 'dqp');
+  $query->condition('dqp.distributor_id', $dis_id);
+  $query->condition('dqp.trip_id', $trip_id);
+  $query->fields('dqp', array('trip_id'));
+  $result = $query->execute()->fetchField();
+  return $result;
+}
+
+/**
+ * 
+ * @param type $trip_id
+ * @param type $distributor_id
+ * Only trip data will be deleted if you want to repush the data from cron 
+ * then do change in preprocess table
+ */
+function delete_data_from_dispatch_qty_confirmation($trip_id, $distributor_id){
+    db_delete('dispatch_qty_confirmation')
+    ->condition('trip_id', $trip_id, '=')
+    ->condition('distributor_id', $distributor_id, '=')
+    ->execute();
+}
+
+/**
+ * 
+ * @param type $trip_id
+ * @param type $distributor_id
+ */
+function check_trip_exist_in_ptl($trip_id,$distributor_id){
+  $query = db_select('ptl_data_configuration', 'pdc');
+  $query->addField('pdc', 'id');
+  $query->condition('trip_id', $trip_id, '=');
+  $query->condition('distributor_id', $distributor_id, '=');
+  $ptl_data_exist = $query->execute()->fetchField();
+  return $ptl_data_exist;
+}
+
+/**
+ * 
+ * @param type $trip_id
+ * @param type $distributor_id
+ */
+function check_trip_exist_in_master_ptl($master_trip_id,$distributor_id){
+  $query = db_select('master_ptl_data', 'mpd');
+  $query->addField('mpd', 'id');
+  $query->condition('ptl_job', $master_trip_id, '=');
+  $query->condition('distributor_id', $distributor_id, '=');
+  $ptl_data_exist = $query->execute()->fetchField();
+  return $ptl_data_exist;
+}
+
+
+/**
+ * 
+ * @param type $trip_id
+ * @param type $distributor_id
+ */
+function check_trip_attach_to_master_ptl($trip_id,$distributor_id){
+  $query = db_select('node', 'n');
+  $query->condition('n.title', $trip_id);
+  $query->condition('n.uid', $distributor_id);
+  $query->condition('n.type', 'dispatch_data');
+  $query->join('field_data_field_master_trip_id_reference', 'mt', 'mt.entity_id = n.nid');
+  $query->join('node', 'n1', 'mt.field_master_trip_id_reference_nid = n1.nid');
+  $query->condition('n1.type', 'master_dispatch_data');
+  $query->addField('n1', 'title');
+  $master_trip_id = $query->execute()->fetchField();
+  return $master_trip_id;
+}
+
+/**
+ * 
+ * @param type $trip_id
+ * @param type $distributor_id
+ */
+function check_ptl_loose_confirmation_for_trip($trip_id,$distributor_id){
+  $query = db_select('dispatch_qty_confirmation', 'dqp');
+  $query->fields('dqp', array('id'));
+  $query->condition('dqp.distributor_id', $distributor_id);
+  $query->condition('dqp.trip_id', $trip_id);
+  $query->condition('dqp.original_loose_qty', 0, '>');
+  $query->condition('dqp.loose_close_flag', 1);
+  $loose_completed = $query->execute()->fetchField();
+  return $loose_completed;
+}
+
+/**
+ * 
+ * @param type $trip_id
+ * @param type $distributor_id
+ */
+function check_cld_confirmation_for_trip($trip_id,$distributor_id){
+  $query = db_select('dispatch_qty_confirmation', 'dqp');
+  $query->fields('dqp', array('id'));
+  $query->condition('dqp.distributor_id', $distributor_id);
+  $query->condition('dqp.trip_id', $trip_id);
+  $query->condition('dqp.original_cld_qty', 0, '>');
+  $query->condition('dqp.cld_close_flag', 1);
+  $cld_completed = $query->execute()->fetchField();
+  return $cld_completed;
+}
+
+/**
+ * 
+ * @param type $trip_id
+ * @param type $distributor_id
+ */
+function check_cld_retailer_confirmation_for_trip($trip_id,$distributor_id){
+  $query = db_select('dispatch_qty_confirmation', 'dqp');
+  $query->fields('dqp', array('id'));
+  $query->condition('dqp.distributor_id', $distributor_id);
+  $query->condition('dqp.trip_id', $trip_id);
+  $query->condition('dqp.original_cld_qty', 0, '>');
+  $query->condition('dqp.cld_retail_confirmed_flag', 1);
+  $cld_retail_confirmed = $query->execute()->fetchField();
+  return $cld_retail_confirmed;
+}
+
+/**
+ * 
+ * @param type $trip_id
+ * @param type $distributor_id
+ */
+function check_reupload_for_any_bills_in_trip($trip_id,$distributor_id){
+  $query = db_select('node', 'n');
+  $query->condition('n.title', $trip_id);
+  $query->condition('n.uid', $distributor_id);
+  $query->condition('n.type', 'dispatch_data');
+  $query->leftjoin('field_data_field_trip_id_reference','tr','n.nid = tr.field_trip_id_reference_nid');
+  $query->leftJoin('node', 'n1', 'n1.nid = tr.entity_id');    
+  $query->condition('tr.bundle', "sales_register_data");
+  $query->addField('n1', 'title');
+  $unique_bills = $query->execute()->fetchCol();
+
+  $query = db_select('custom_billing_data', 'cbd');
+  $query->condition('bill_number', $unique_bills, 'IN');
+  $query->condition('updated_flag', 1);
+  $query->condition('distributor_id', $distributor_id);
+  $query->addExpression("GROUP_CONCAT(DISTINCT bill_number separator ', ')",'bill_number');
+  $bill_reupload = $query->execute()->fetchField();
+  return $bill_reupload;
+}
+
+/**
+ * 
+ * @param type $trip_id
+ * @param type $distributor_id
+ */
+function get_all_trip_by_master_ptl($master_trip_id, $distributor_id){
+  $query = db_select('node', 'n');
+  $query->condition('n.title', $master_trip_id);
+  $query->condition('n.uid', $distributor_id);
+  $query->condition('n.type', 'master_dispatch_data');
+  $query->join('field_data_field_master_trip_id_reference', 'mt', 'mt.field_master_trip_id_reference_nid = n.nid');
+  $query->join('node', 'n1', 'mt.entity_id = n1.nid');
+  $query->condition('n1.type', 'dispatch_data');
+  $query->addField('n1', 'title');
+  $all_trip_id = $query->execute()->fetchCol();
+  return $all_trip_id;
+}
+
+// Get Trips from Trip Creation Date.
+function get_trips_from_trip_creation_date($trip_creation_start_date, $trip_creation_end_date, $distributor_id) {
+  $query = db_select('node', 'n');
+  $query->condition('n.type', 'dispatch_data');
+  $query->condition('n.uid', $distributor_id);
+  $query->join('field_data_field_trip_creation_date', 'tc', 'tc.entity_id = n.nid');
+  if (!empty($trip_creation_start_date) && !empty($trip_creation_end_date)) {
+    $query->condition('tc.field_trip_creation_date_value', array($trip_creation_start_date, $trip_creation_end_date), 'BETWEEN');
+  }
+  $query->fields('n', array('title'));
+  $trips = $query->execute()->fetchCol();
+  return $trips;
+}
+
+function get_child_cld_sku_query_wise($all_parent_sku, $dis_id){
+  if(!empty($all_parent_sku)){
+    $result = array();
+    $query = db_select('node', 'n');
+    $query->condition('n.type', 'sku7_code_master');
+    $query->condition('n.uid', $dis_id);
+    $query->condition('n.title', $all_parent_sku, 'IN');
+    $query->leftjoin('field_data_field_child_sku', 'csk', 'csk.entity_id = n.nid');
+    $query->leftjoin('node', 'n1', 'n1.nid = csk.field_child_sku_nid');
+
+    $query->join('field_data_field_sku7_code', 'sc', 'sc.entity_id = n1.nid');
+    $query->fields('sc', array('field_sku7_code_value'));
+    $result['child_sku'] = $query->execute()->fetchCol();
+    return $result;
+  }
+}
+
+function get_all_parent_cld_skus_query_wise($trip_number, $dis_id, $bill_num, $sku_code){
+  $query = db_select('dispatch_qty_confirmation', 'dqp');
+  $query->condition('dqp.distributor_id', $dis_id);
+  $query->condition('dqp.trip_id', $trip_number);
+  //$query->condition('dqp.original_cld_qty', 0 , '>');
+  if (!empty($sku_code)) {
+    $query->condition('dqp.sku_code',$sku_code);
+  }
+  if (!empty($bill_num)) {
+    $query->condition('dqp.bill_number',$bill_num);
+  }
+  $query->fields('dqp', array('sku_code'));
+  $query->groupBy('sku_code');
+  $result = $query->execute()->fetchCol();
+  return $result;
+  
+}
+
+function convert_cld_child_greater_then_upc($trip_id, $dis_id){
+  $query = db_select('dispatch_qty_confirmation', 'dqp');
+  $query->fields('dqp', array('id','upc','cld_loose_child_qty'));
+  $query->condition('dqp.distributor_id', $dis_id);
+  $query->condition('dqp.trip_id', $trip_id);
+  $query->addExpression("dqp.cld_loose_child_qty - dqp.upc", 'diff_qty'); 
+  $query->havingCondition('diff_qty', 0, '>'); 
+  $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+  foreach ($res as $key => $value) {
+    $child_loose = $value['cld_loose_child_qty'] % $value['upc'];
+    $child_cld = (int) ($value['cld_loose_child_qty'] / $value['upc']);
+    db_update('dispatch_qty_confirmation')
+      ->expression('cld_confirmed_qty', 'cld_confirmed_qty + :ccq', array(':ccq' => $child_cld))
+      ->expression('dispatch_cld_qty', 'dispatch_cld_qty + :dis', array(':dis' => $child_cld))
+      ->fields(array(
+        'cld_loose_child_qty' => $child_loose,
+        //'cld_short_reason' => $cld_short_reason ? $cld_short_reason : '',
+        //'type' => $type,
+      ))
+      ->condition('id',$val['id'], '=')
+      ->execute();
+  }  
+}
+
+function get_dispatch_validation_flag_from_bills($bills, $dis_id) {
+  $result = array();
+  if (!empty($bills)) {
+    $query = db_select('node', 'n');
+    $query->condition('n.title', $bills, 'IN');
+    $query->condition('n.uid', $dis_id);
+    $query->condition('n.type', 'sales_register_data');
+    $query->join('field_data_field_trip_id_reference', 'ft', 'ft.entity_id = n.nid');
+    $query->join('node', 'n1', 'ft.field_trip_id_reference_nid = n1.nid');
+    $query->join('field_data_field_dispatch_validation_flag', 'vf', 'vf.entity_id = n1.nid');
+    $query->condition('vf.field_dispatch_validation_flag_value', 2);
+    $query->fields('n', array('title'));
+    $result = $query->execute()->fetchCol();
+  }
+  return $result;
+}
+
+function get_all_parent_skus_from_skus($all_skus, $dis_id) {
+  if (!empty($all_skus)) {
+    $query = db_select('node', 'n');
+    $query->condition('n.type', 'sku7_code_master');
+    $query->condition('n.uid', $dis_id);
+    $query->condition('n.title', $all_skus, 'IN');
+    $query->join('field_data_field_unit_case_units_', 'uc', 'n.nid = uc.entity_id');
+    $query->join('field_data_field_child_sku', 'csk', 'n.nid = csk.entity_id');
+    $query->join('field_data_field_child_sku_qty', 'qty', 'n.nid = qty.entity_id');   	
+    $query->join('node', 'n1', 'n1.nid = csk.field_child_sku_nid');
+    $query->addField('n', 'title', 'parent_sku');
+    $query->addField('n1', 'title', 'child_sku');
+    $query->addField('uc', 'field_unit_case_units__value', 'upc');
+    $query->addField('qty', 'field_child_sku_qty_value', 'child_ratio');
+    $res = $query->execute()->fetchAll(PDO::FETCH_GROUP | PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
+  }
+  return $res;
+}
+
+function get_loose_cld_flag_trip_level($trip_id, $dis_id){
+  $result = array();
+  $nid = get_nid_from_title($trip_id, 'dispatch_data');
+  $node = node_load($nid);
+  $result['loose'] = $node->field_loose_confirmation['und'][0]['value'];
+  $result['cld'] = $node->field_cld_confirmation['und'][0]['value'];
+  $result['bill_wise'] = $node->field_dispatch_validation_flag['und'][0]['value'];
+  return $result;
+}
+

@@ -60,7 +60,7 @@
     <?php endforeach; ?>
   </tbody>
   </table>
-<table border="0" width="100%" cellpadding="5"><tr> <td style="font-weight:bold; text-align:right"> <?php print $row['field_product_category'].' '."CLDs".' ' . $cld_total; ?></td></tr></table>
+<table border="0" width="100%" cellpadding="5"><tr> <td style="font-weight:bold; text-align:right"> <?php print ltrim($title, 'Category:').' '."CLDs".' ' . $cld_total; ?></td></tr></table>
 <?php   print '<table class = "preview_table" width = "100%" cellspacing = "0" style = "font-family:arial; font-size: 12px; color:#000;" cellpadding = "5" border = "0" align = "center">
       <tbody>
       <tr>

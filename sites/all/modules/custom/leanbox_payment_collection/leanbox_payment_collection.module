@@ -221,7 +221,7 @@ function leanbox_payment_collection_node_presave($node) {
   
   // Update the original bill value
   if ($node->type == 'sales_register_data') {
-    if(empty($node->field_original_bill_value['und'][0]['value'])) {
+    if(!isset($node->field_original_bill_value['und'][0]['value'])) {//to handle zero bill value
       $node->field_original_bill_value['und'][0]['value'] = $node->original->field_bill_value['und'][0]['value'];
     }
   }

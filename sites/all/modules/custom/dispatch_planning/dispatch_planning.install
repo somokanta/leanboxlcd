@@ -2063,3 +2063,118 @@ function dispatch_planning_update_7133() {
     }
   }
 }
+
+function dispatch_planning_update_7134() {
+   $fields = array(
+    'claimed_godown_short' => array(
+       'description' => 'claimed_godown_short',
+       'type' => 'int',
+       'default' => 0, 
+    ),
+    'claimed_godown_short_reason' => array(
+       'description' => 'claimed godown short reason',
+       'type' => 'varchar',
+       'length' => 50,
+       'default' => '',
+    ),  
+    'approved_quantity' => array(
+       'description' => 'approved quantity',
+       'type' => 'int',
+       'default' => 0, 
+    ),
+    'approval_flag' => array(
+       'description' => 'approval flag',
+       'type' => 'varchar',
+       'length' => 25,
+       'default' => '',
+    ),
+    'godown_short_reason' => array(
+       'description' => 'godown short approval reason',
+       'type' => 'varchar',
+       'length' => 50,
+       'default' => '',
+    ),
+    'approved_by' => array(
+       'description' => 'approved by',
+       'type' => 'varchar',
+       'length' => 50,
+       'default' => '', 
+    ),
+    'remarks' => array(
+       'description' => 'remarks',
+       'type' => 'varchar',
+       'length' => 50,
+       'default' => '',
+    ),
+   'declared_claimed_godown_short' => array(
+    'description' => 'declared_claimed_godown_short',
+    'type' => 'int',
+    'default' => 0,
+    ), 
+  );
+  foreach ($fields as $key => $field) {
+    if (!db_field_exists('dispatch_planning_item_details', $key)) {
+      db_add_field('dispatch_planning_item_details', $key, $field);
+    }
+  }
+}
+
+/**
+ * Adding new fields in PTL table using hook_update_N()
+ * THIS IS CREATED ON LIVE FROM DEVEL
+ */
+function dispatch_planning_update_7135() {
+  $fields = array(
+    'reason_code' => array(
+      'description' => 'Reason Code',
+      'type' => 'varchar',
+      'length' => 50,
+      'not null' => TRUE,
+      'default' => '',
+    ),    
+  );
+  foreach ($fields as $key => $field) {
+    if (!db_field_exists('ptl_data_configuration', $key)) {
+      db_add_field('ptl_data_configuration', $key, $field);
+    }  
+  }
+}
+
+function dispatch_planning_update_7136() {
+  $fields = array(
+    'delivery_boy' => array(
+      'description' => 'Delivery Boy',
+      'type' => 'varchar',
+      'length' => 255,
+      ),
+    'derived_money_collect' => array(
+       'description' => t('Derived money collect'),
+       'type' => 'varchar',
+       'length' => 50,
+       'default' => '',
+     ),    
+  );
+  foreach ($fields as $key => $field) {
+    if (!db_field_exists('dispatch_planning_api_data', $key)) {
+      db_add_field('dispatch_planning_api_data', $key, $field);
+    }  
+  }
+}
+// Already run on live through devel. because previous field feature is not yet live
+function dispatch_planning_update_7138() {
+  $fields = array(
+    'box_id' => array(
+      'description' => 'Box ID',
+      'type' => 'varchar',
+      'length' => 25,
+      'not null' => TRUE,
+      'default' => '',
+    ),
+  );
+  foreach ($fields as $key => $field) {
+    if (!db_field_exists('ptl_put_qty', $key)) {
+      db_add_field('ptl_put_qty', $key, $field);
+    }
+  }
+}
+
