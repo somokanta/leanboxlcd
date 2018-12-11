@@ -285,6 +285,7 @@ function retail_cld_confirmation_submit($form, &$form_state) {
     $query->addExpression('dqc.product_name', 'product_name');
     $query->addExpression('SUM(dqc.original_cld_qty)', 'cld');
     $query->groupBy('dqc.sku_code');
+    $query->orderBy('dqc.product_name');
     $result = $query->execute()->fetchAll(PDO::FETCH_GROUP | PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
     $form_state['ptl_retail_cld_confirmation']['bills'] = $result;
   }
