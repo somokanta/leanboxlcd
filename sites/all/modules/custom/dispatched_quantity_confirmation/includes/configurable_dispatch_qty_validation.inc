@@ -96,6 +96,10 @@ function configurable_dispatch_qty_final_submit($form, &$form_state) {
     $node->field_loose_confirmation['und'][0]['value'] = 1;
     $node->field_cld_confirmation['und'][0]['value'] = 1;
     $node->field_confirm_bill_edit_status['und'][0]['value'] = 1;
+  }else{
+    $node->field_loose_confirmation['und'][0]['value'] = 0;
+    $node->field_cld_confirmation['und'][0]['value'] = 0;
+    $node->field_confirm_bill_edit_status['und'][0]['value'] = 0;
   }
   node_save($node);
   
