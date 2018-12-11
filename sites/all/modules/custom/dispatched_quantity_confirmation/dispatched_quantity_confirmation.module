@@ -412,24 +412,32 @@ function _dispatch_qty_preprocess() {
 /**
  * Insert trip data. and check trip status first
  */
-function insert_trip_into_dispatch_qty_confirmation($trip_id,$distributor_id){
-    $query = db_select('node', 'n');
-    $query->addField('n', 'nid');
-    $query->condition('n.title', $trip_id);
-    $query->condition('n.uid', $distributor_id);
-    $query->condition('n.status', 1);
-    $query->condition('n.type', 'dispatch_data');
-    $trip_id_nid = $query->execute()->fetchField();
-    
-    // Don't insert DP bills
-    $dp_bills = check_dp_bills_in_trip($trip_id_nid);
-    if (!empty($trip_id_nid) && empty($dp_bills)) {
-        $bills = _bills_by_trip_nid($trip_id_nid);
-        if(!empty($bills)) {
-          $billing_data = get_billing_data_for_dispatch_qty_confirm($bills, $distributor_id);
-          dispatch_qty_confirmation_insert_data($billing_data, $trip_id, $distributor_id);
-        }
+function insert_trip_into_dispatch_qty_confirmation($trip_id, $distributor_id) {
+  $query = db_select('node', 'n');
+  $query->addField('n', 'nid');
+  $query->condition('n.title', $trip_id);
+  $query->condition('n.uid', $distributor_id);
+  $query->condition('n.status', 1);
+  $query->condition('n.type', 'dispatch_data');
+  $trip_id_nid = $query->execute()->fetchField();
+
+  // Don't insert DP bills
+  $dp_bills = check_dp_bills_in_trip($trip_id_nid);
+  if (!empty($trip_id_nid) && empty($dp_bills)) {
+    $bills = _bills_by_trip_nid($trip_id_nid);
+    if (!empty($bills)) {
+      $billing_data = get_billing_data_for_dispatch_qty_confirm($bills, $distributor_id);
+      dispatch_qty_confirmation_insert_data($billing_data, $trip_id, $distributor_id);
     }
+  }
+  elseif (!empty($trip_id_nid) && !empty($dp_bills)) {// by pass for dp bills(not empty dp bills)
+    $node = node_load($trip_id_nid);
+    $node->field_dispatch_validation_flag['und'][0]['value'] = 2;
+    $node->field_loose_confirmation['und'][0]['value'] = 1;
+    $node->field_cld_confirmation['und'][0]['value'] = 1;
+    $node->field_confirm_bill_edit_status['und'][0]['value'] = 1;
+    node_save($node);
+  }
 }
 
 /**
