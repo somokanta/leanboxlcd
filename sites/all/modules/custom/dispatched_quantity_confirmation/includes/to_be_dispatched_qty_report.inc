@@ -228,18 +228,19 @@ function to_be_dispatched_qty_callback() {
       $query->havingCondition('diff_qty', 0, '>');
     }
     $query->condition('dqc.distributor_id', $distributor_id);
-    $query->fields('dqc', array('trip_id', 'bill_number', 'sku_code', 'original_qty', 'to_be_dispatch_qty'));
+    $query->fields('dqc', array('trip_id', 'bill_number', 'sku_code', 'product_name', 'original_qty', 'to_be_dispatch_qty'));
     $result = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
     $row = array();
     foreach ($result as $val) {
       $row['trip_id'] = $val['trip_id'];
       $row['bill_number'] = $val['bill_number'];
       $row['sku_code'] = $val['sku_code'];
+      $row['product_name'] = $val['product_name'];
       $row['original_qty'] = $val['original_qty'];
       $row['to_be_dispatch_qty'] = $val['to_be_dispatch_qty'];
       $rows[] = $row;
     }
-    $header = array('Trip ID', 'Bill Number', 'SKU Code', 'Original qty', 'To be dispatched quantity');
+    $header = array('Trip ID', 'Bill Number', 'SKU Code', 'Product Name', 'Original qty', 'To be dispatched quantity');
     $per_page = 10;
     // Initialize the pager
     $current_page = pager_default_initialize(count($rows), $per_page);
