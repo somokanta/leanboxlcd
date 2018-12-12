@@ -3690,7 +3690,7 @@ function drs_invoice_vs_actual_dispatched_report_table($trip_id, $distributor_id
 }
 
 // Manual VRS Report.
-function manual_vrs_report_table($trip_id, $distributor_id) {
+/*function manual_vrs_report_table($trip_id, $distributor_id) {
   $query = db_select('dispatch_qty_confirmation', 'dqc');
   $query->join('node', 'n', 'n.title = dqc.bill_number AND n.uid = dqc.distributor_id');
   $query->condition('n.type', 'sales_register_data', '=');
@@ -3792,4 +3792,4 @@ function manual_vrs_report_table($trip_id, $distributor_id) {
     $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('width' => "100%", 'cellspacing' => "0", 'style' => "font-size: 13px; color:#000; font-family:arial", 'cellpadding' => "5", 'border' => "1", 'align' => "center", 'class' => "preview_table")));
   }
   return $output;
-}
+}*/
