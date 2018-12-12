@@ -339,7 +339,7 @@ function change_feeds_import_insert_data_in_custom_billing_table($billing_data_r
       (($data['Sum_of_NET_SALES_VALUE'] - 
         (($data['Sum_of_SCHEME_DISCOUNT'] + $data['Sum_of_OTHER_DISCOUNT'])*
          (1+($data['Sum_of_TAX_PERCENTAGE']/100)))) / $data['Sum_of_TOTAL_SALES_QTY'])
-      ,2);
+      ,10);
     
     $loading_date = strtotime($data['loading_date']);
     $billing_date = strtotime($data['bill_date']);
