@@ -86,11 +86,11 @@ function return_vrs_callback() {
   $query = db_select('dispatch_planning_api_data', 'ad');
   $query->condition('ad.distributor_id', $distributor_id, '=');
   //$query->condition('ad.updated_flag', 1, '=');
-  if (!empty($dispatch_date)) {
-    $query->condition('ad.date', $dispatch_date, '=');
-  }
   if (!empty($trip_id)) {
     $query->condition('ad.runsheet_number', $trip_id, '=');
+  }
+  else if (!empty($dispatch_date)) {
+    $query->condition('ad.date', $dispatch_date, '=');
   }
   
   $query->fields('ad', array('runsheet_number'));
@@ -113,6 +113,11 @@ function return_vrs_callback() {
   // Bill wise
   $query->leftjoin('field_data_field_bill_wise_return_starttime', 'bill_start_time', 'bill_start_time.entity_id = disp_data.nid');
   $query->leftjoin('field_data_field_bill_wise_return_end_time', 'bill_end_time', 'bill_end_time.entity_id = disp_data.nid');
+  // Returns InCharge name
+  
+  $query->leftjoin('field_data_field_returns_incharge_name', 'returns_incharge', 'returns_incharge.entity_id = disp_data.nid');
+  $query->leftjoin('field_data_field_return_dispatch_supervisor', 'dispatch_supervisor', 'dispatch_supervisor.entity_id = disp_data.nid');
+  $query->leftjoin('field_data_field_resource_name', 'resource', 'resource.entity_id = dispatch_supervisor.field_return_dispatch_supervisor_nid');
   
   $query->fields('vs', array('field_vrs_status_value'));
   $query->fields('sku_start_time', array('field_sku_wise_return_start_time_value'));
@@ -122,6 +127,10 @@ function return_vrs_callback() {
   
   $query->leftjoin('field_data_field_dispatch_start_time', 'dst', 'dst.entity_id = disp_data.nid');
   $query->fields('dst', array('field_dispatch_start_time_value'));
+  
+  $query->addExpression('resource.field_resource_name_value', 'return_supervisor');
+  $query->addExpression('returns_incharge.field_returns_incharge_name_value', 'return_incharge');
+  
   $query->addExpression('MIN(CASE WHEN (ad.updated_flag = 1) THEN ad.updated_time END)', 'min_updated_time');
   $query->addExpression('MAX(CASE WHEN (ad.updated_flag = 1) THEN ad.updated_time END)', 'max_updated_time');
   $query->addExpression('(MAX(CASE WHEN (ad.updated_flag = 1) THEN ad.updated_time END) - MIN(CASE WHEN (ad.updated_flag = 1) THEN ad.updated_time END))', 'total_return_time');
@@ -205,6 +214,9 @@ function return_vrs_callback() {
     else {
       $row['sku_end_time'] = '';
     }
+    // returns incharge
+    $row['return_incharge'] = $val['return_incharge'];
+
     if (!empty($val['field_bill_wise_return_starttime_value'])) {
       $row['bill_start_time'] = date('d-M-y H:i:s', $val['field_bill_wise_return_starttime_value']);
     }
@@ -221,6 +233,8 @@ function return_vrs_callback() {
     if (empty($returns_end_time) && !empty($sku_return_end_time)) {
        $returns_end_time = $sku_return_end_time;
     }
+    // return supervisor incharge
+    $row['return_supervisor'] = $val['return_supervisor'];
     if (in_array($val['field_vrs_status_value'],$return_confirmed_vrs_status) && !empty($returns_end_time) && !empty($return_start_time)) {
        $total_return_time = $returns_end_time - $return_start_time; 
     }
@@ -252,9 +266,13 @@ function return_vrs_callback() {
     $row['total_actual_cheque_amount'] = $val['total_actual_cheque_amount'];
     $row['total_actual_signed_bill_amount'] = $val['total_actual_signed_bill_amount'];
     $rows[] = $row;
+    unset($returns_end_time);
+    unset($return_start_time);
+    unset($total_return_time);
+    unset($sku_return_end_time);
   }
 
-  $header = array('Trip ID', 'Dispatch Date', 'Cashier Name','Status', 'Dispatch Time', 'Vehicle Arrival Time', 'Received Assets Time', 'Delivery Confirmation Time' , 'SKU Wise Returns Start Time', 'SKU Wise Returns End Time','Bill Wise Returns Start Time', 'Bill Wise Returns End Time','Total Returns Time taken', 'Total Returned Value','Returned SKU Quantity(w/o Sachets)','Returned Quantity of Sachets','Returns Productivity (Value/10 min)', 'VRS Start Time', 'VRS End Time', 'Total VRS Time taken', 'Cash Value', 'Cheque Value', 'Signed Bill Value');
+  $header = array('Trip ID', 'Dispatch Date', 'Cashier Name','Status', 'Dispatch Time', 'Vehicle Arrival Time', 'Received Assets Time', 'Delivery Confirmation Time' , 'SKU Wise Returns Start Time', 'SKU Wise Returns End Time','Returns Incharge','Bill Wise Returns Start Time', 'Bill Wise Returns End Time','Bill Wise Return Superviser','Total Returns Time taken', 'Total Returned Value','Returned SKU Quantity(w/o Sachets)','Returned Quantity of Sachets','Returns Productivity (Value/10 min)', 'VRS Start Time', 'VRS End Time', 'Total VRS Time taken', 'Cash Value', 'Cheque Value', 'Signed Bill Value');
   $per_page = 10;
   // Initialize the pager
   $current_page = pager_default_initialize(count($rows), $per_page);
