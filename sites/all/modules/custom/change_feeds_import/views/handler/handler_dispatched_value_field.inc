@@ -34,7 +34,8 @@ class handler_dispatched_value_field extends views_handler_field {
     $query->condition('cbd.distributor_id', $distributor_id, '=');
     $query->addExpression("SUM(cbd.Sum_of_TOTAL_SALES_QTY * cbd.line_level_value)", 'dispatched_value');
     $result = $query->execute()->fetchField();
-    return $result;
+    $dispatched_value = round($result,2);
+    return $dispatched_value;
   }
 
 }
