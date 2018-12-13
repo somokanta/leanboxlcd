@@ -345,16 +345,6 @@ function save_ptl_retail_cld_confirmation_submit($form, &$form_state) {
     $sku7_code = $form_state['ptl_retail_cld_confirmation']['bills'][$key]['sku7_code'];
 
     if ($to_be_dispatched_qty !== '') {
-//        db_update('dispatch_qty_confirmation')
-//          ->fields(array(
-//            'cld_confirmed_qty' => (!empty($cld_confirmed_qty)) ? $cld_confirmed_qty : 0,
-//            'cld_short_reason' => $cld_short_reason,
-//            'dispatch_cld_qty' => (!empty($to_be_dispatched_qty) || $to_be_dispatched_qty === '0') ? $to_be_dispatched_qty : $put_qty,
-//            'type' => $tyoe,
-//          ))
-//          ->condition('trip_id', $trip_id, '=')
-//          ->condition('sku_code', $sku7_code, '=')
-//          ->execute();
 
       $cld_confirmed_qty = $cld_confirmed_qty ? $cld_confirmed_qty : 0;
       $to_be_dispatched_qty = $to_be_dispatched_qty ? $to_be_dispatched_qty : 0;
@@ -380,24 +370,6 @@ function save_ptl_retail_cld_confirmation_submit($form, &$form_state) {
 
           $cld_confirmed_qty -= $val->original_cld_qty;
 
-          //commented becauseif we use expression user can click save multiple time which will give wrong values  
-//            if ($child_sku) { //child sku calculation is done 
-//              $parent_qty = $val->original_cld_qty * $val->upc;
-//              $child_total_qty = $parent_qty * $child_ratio;
-//              $child_cld = (int) ($child_total_qty / $child_upc);
-//              $child_loose = (int) ($child_total_qty % $child_upc);
-//              db_update('dispatch_qty_confirmation')
-//                ->fields(array(
-//                  'cld_confirmed_qty' => $child_cld,
-//                  'cld_loose_child_qty' => $child_loose,
-//                  'cld_short_reason' => $cld_short_reason ? $cld_short_reason : '',
-//                  'dispatch_cld_qty' => $child_cld,
-//                  'type' => $type,
-//                ))
-//                ->condition('bill_number', $val->bill_number, '=')
-//                ->condition('sku_code', $child_sku['child_sku'], '=')
-//                ->execute();
-//            }
         }
         else {
           db_update('dispatch_qty_confirmation')
@@ -410,25 +382,7 @@ function save_ptl_retail_cld_confirmation_submit($form, &$form_state) {
             ->condition('id', $val->id, '=')
             ->execute();
           //break;
-          $cld_confirmed_qty = 0; // instead of break for remailining lines update 0 with reason
-          //commented because if we use expression user can click save multiple time  which will give wrong values
-//           if ($child_sku) { //child sku calculation is done
-//              $parent_qty = $cld_confirmed_qty * $val->upc;
-//              $child_total_qty = $parent_qty * $child_ratio;
-//              $child_cld = (int) ($child_total_qty / $child_upc);
-//              $child_loose = (int) ($child_total_qty % $child_upc);
-//              db_update('dispatch_qty_confirmation')
-//                ->fields(array(
-//                  'cld_confirmed_qty' => $child_cld,
-//                  'cld_loose_child_qty' => $child_loose,
-//                  'cld_short_reason' => $cld_short_reason ? $cld_short_reason : '',
-//                  'dispatch_cld_qty' => $child_cld,
-//                  'type' => $type,
-//                ))
-//                ->condition('bill_number', $val->bill_number, '=')
-//                ->condition('sku_code', $child_sku['child_sku'], '=')
-//                ->execute();
-//            }                         
+          $cld_confirmed_qty = 0; // instead of break for remailining lines update 0 with reason                        
         }
       }
     }
@@ -472,17 +426,6 @@ function ptl_retail_cld_confirmation_submit($form, &$form_state) {
     $to_be_dispatched_qty = $form_state['values']['bill_details'][$key]['to_be_dispatched_qty'];
 
     if ($to_be_dispatched_qty !== '' && !is_null($to_be_dispatched_qty)) {
-      //        db_update('dispatch_qty_confirmation')
-      //          ->fields(array(
-      //            'cld_confirmed_qty' => (!empty($cld_confirmed_qty)) ? $cld_confirmed_qty : 0,
-      //            'cld_short_reason' => $cld_short_reason,
-      //            'dispatch_cld_qty' => (!empty($to_be_dispatched_qty) || $to_be_dispatched_qty === '0') ? $to_be_dispatched_qty : $put_qty,
-      //            'type' => $tyoe,
-      //          ))
-      //          ->condition('trip_id', $trip_id, '=')
-      //          ->condition('sku_code', $sku7_code, '=')
-      //          ->execute();
-      //store at first line only
       $cld_confirmed_qty = $cld_confirmed_qty ? $cld_confirmed_qty : 0;
       $to_be_dispatched_qty = $to_be_dispatched_qty ? $to_be_dispatched_qty : 0;
       //db_query("update dispatch_qty_confirmation set cld_confirmed_qty = $cld_confirmed_qty,cld_short_reason = '$cld_short_reason',dispatch_cld_qty = $to_be_dispatched_qty,type = '$type' where trip_id = $trip_id and sku_code = '$sku7_code' and original_cld_qty > 0 limit 1");
@@ -504,28 +447,6 @@ function ptl_retail_cld_confirmation_submit($form, &$form_state) {
             ->execute();
 
           $cld_confirmed_qty -= $val->original_cld_qty;
-
-          if (!empty($child_sku) && $type == 'Master PTL') {
-            $parent_qty = $val->original_cld_qty * $val->upc;
-            $child_total_qty = $parent_qty * $child_ratio;
-            $child_cld = (int) ($child_total_qty / $child_upc);
-            $child_loose = (int) ($child_total_qty % $child_upc);
-            db_update('dispatch_qty_confirmation')
-              ->expression('cld_confirmed_qty', 'cld_confirmed_qty + :ccq', array(':ccq' => $child_cld))
-              ->expression('cld_loose_child_qty', 'cld_loose_child_qty + :clc', array(':clc' => $child_loose))
-              ->expression('dispatch_cld_qty', 'dispatch_cld_qty + :dis', array(':dis' => $child_cld))
-              ->fields(array(
-//                  'cld_confirmed_qty' => $child_cld,
-//                  'cld_loose_child_qty' => $child_loose,
-                'cld_short_reason' => $cld_short_reason ? $cld_short_reason : '',
-//                  'dispatch_cld_qty' => $child_cld,
-                'type' => $type,
-              ))
-              ->condition('trip_id', $trip_id, '=')
-              ->condition('bill_number', $val->bill_number, '=')
-              ->condition('sku_code', $child_sku['child_sku'], '=')
-              ->execute();
-          }
         }
         else {
           db_update('dispatch_qty_confirmation')
@@ -538,38 +459,13 @@ function ptl_retail_cld_confirmation_submit($form, &$form_state) {
             ->condition('id', $val->id, '=')
             ->execute();
 
-          if (!empty($child_sku) && $type == 'Master PTL') {
-            $parent_qty = $cld_confirmed_qty * $val->upc;
-            $child_total_qty = $parent_qty * $child_ratio;
-            $child_cld = (int) ($child_total_qty / $child_upc);
-            $child_loose = (int) ($child_total_qty % $child_upc);
-            db_update('dispatch_qty_confirmation')
-              ->expression('cld_confirmed_qty', 'cld_confirmed_qty + :ccq', array(':ccq' => $child_cld))
-              ->expression('cld_loose_child_qty', 'cld_loose_child_qty + :clc', array(':clc' => $child_loose))
-              ->expression('dispatch_cld_qty', 'dispatch_cld_qty + :dis', array(':dis' => $child_cld))
-              ->fields(array(
-                //'cld_confirmed_qty' => $child_cld,
-                //'cld_loose_child_qty' => $child_loose,
-                'cld_short_reason' => $cld_short_reason ? $cld_short_reason : '',
-                //'dispatch_cld_qty' => $child_cld,
-                'type' => $type,
-              ))
-              ->condition('trip_id', $trip_id, '=')
-              ->condition('bill_number', $val->bill_number, '=')
-              ->condition('sku_code', $child_sku['child_sku'], '=')
-              ->execute();
-          }
-
           //break;
           $cld_confirmed_qty = 0; // instead of break for remailining lines update 0 with reason
         }
       }
     }
   }
-  if ($type == 'Master PTL') {
-    convert_cld_child_greater_then_upc($trip_id, $dis_id);
-  }
-
+ 
   $validate = check_validation_trip_data_cld($trip_id, $dis_id);
 
   if ($validate['flag'] != 1) {
@@ -592,29 +488,6 @@ function ptl_retail_cld_confirmation_submit($form, &$form_state) {
     assign_cld_qty_no_sort($trip_id, $type, $dis_id);
     drupal_set_message(t("Trip ID $trip_id - CLD Confirmation Completed"));
   }
-
-  /*
-    //update all trip data based on trip type
-    if ($form_state['values']['trip_type'] == 'master_ptl') {
-    if ($validate['flag'] == 1) {
-    db_update('dispatch_qty_confirmation')
-    ->expression('dispatch_cld_qty', 'CASE WHEN cld_confirmed_qty = 0 THEN original_cld_qty ELSE cld_confirmed_qty END')
-    ->fields(array(
-    'cld_close_flag' => 1,
-    'type' => 'MASTER_PTL',
-    'cld_created_date' => REQUEST_TIME
-    ))
-    ->condition('trip_id', $trip_id, '=')
-    ->condition('original_cld_qty', 0, '>')
-    ->condition('type', 'MASTER_PTL', '=')
-    ->execute();
-    }
-    else {
-    drupal_set_message(t('CLD short reason should be mandatoryfor bill-sku ' . $bill_check), 'error');
-    $form_state['rebuild'] = TRUE;
-    }
-    }
-   */
   //update all trip data based on trip type
 }
 
@@ -680,21 +553,6 @@ function assign_cld_qty_no_sort($trip_id, $type, $dis_id) {
   $query->addExpression('sum(dqp.original_cld_qty) - sum(dqp.cld_confirmed_qty) ', 'final_qty');
   $query->havingCondition("final_qty", 0, "=");
   $original_cld_qty = $query->execute()->fetchAll();
-
-//  foreach ($original_cld_qty as $value) {
-//    db_update('dispatch_qty_confirmation')
-//      ->expression('cld_confirmed_qty', 'original_cld_qty')
-//      ->expression('dispatch_cld_qty', 'original_cld_qty')
-//      ->fields(array(
-//        //'cld_close_flag' => 1,
-//        'type' => $type,
-//        //'cld_created_date' => REQUEST_TIME
-//      ))
-//      ->condition('trip_id', $trip_id)
-//      ->condition('distributor_id', $dis_id)
-//      ->condition('sku_code', $value->sku_code)
-//      ->execute();
-//  }
 
   $query = db_select('dispatch_qty_confirmation', 'dqp');
   $query->fields('dqp', array('sku_code'));
@@ -763,10 +621,10 @@ function update_child_cld_for_noshort($trip_id,$all_skus,$dis_id,$type){
         $child_cld = (int) ($child_total_qty / $child_upc);
         $child_loose = (int) ($child_total_qty % $child_upc);
         db_update('dispatch_qty_confirmation')
+          ->expression('cld_confirmed_qty', 'cld_confirmed_qty + :ccq', array(':ccq' => $child_cld))
+          ->expression('cld_loose_child_qty', 'cld_loose_child_qty + :clc', array(':clc' => $child_loose))
+          ->expression('dispatch_cld_qty', 'dispatch_cld_qty + :dis', array(':dis' => $child_cld))
           ->fields(array(
-            'cld_confirmed_qty' => $child_cld,
-            'cld_loose_child_qty' => $child_loose,
-            'dispatch_cld_qty' => $child_cld,
             'type' => $type,
           ))
           ->condition('trip_id', $trip_id, '=')
