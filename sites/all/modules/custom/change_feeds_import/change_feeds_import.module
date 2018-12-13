@@ -895,7 +895,7 @@ function get_data_of_trip_id_2_form($form, &$form_state) {
       '#markup' => $form_state['views_data'],
     );
     $trip_id = $form_state['values']['trip_id'];
-    $rr = l('Open PDF', "/download-pdf2/$trip_id");
+    $rr = l('Open PDF', "/download-pdf2/$trip_id", array('attributes'=>array("target" => "_blank")));
     $form['dowmload_mark'] = array(
       '#type' => 'markup',
       '#markup' => $rr,
