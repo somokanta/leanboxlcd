@@ -132,15 +132,22 @@ function change_feeds_import_revised_billing_data_form_submit($form, &$form_stat
     $unique_bills = array_unique(array_map(function($elem) {
         return $elem['BILL_NUMBER'];
       }, $datas));
-      $cld_loose_pending_bills = check_bill_cld_loose_confirmation_pending($unique_bills, $distributor_id);
-//    if (empty($cld_loose_pending_bills)) {
-    
-      //upload only cld and loose confirmed bills
-      if(is_array($cld_loose_pending_bills)){
-        $bills_cl_confirmed = array_diff($unique_bills,$cld_loose_pending_bills);
-      }else{// if no pending then upload all bills
-        $bills_cl_confirmed = $unique_bills;
-      }
+
+        $bill_not_in_dis_qty_conf = find_bill_not_in_dispatch_qty_confirmation($unique_bills, $distributor_id);
+        //upload only cld and loose confirmed bills
+        if(is_array($bill_not_in_dis_qty_conf)){
+          $bills_present = array_diff($unique_bills,$bill_not_in_dis_qty_conf);
+        }else{// if no pending then upload all bills
+          $bills_present = $unique_bills;
+        }
+        
+        $cld_loose_pending_bills = check_bill_cld_loose_confirmation_pending($bills_present, $distributor_id);
+        //upload only cld and loose confirmed bills
+        if(is_array($cld_loose_pending_bills)){
+          $bills_cl_confirmed = array_diff($bills_present,$cld_loose_pending_bills);
+        }else{// if no pending then upload all bills
+          $bills_cl_confirmed = $bills_present;
+        }
       
       // check bill confirm edit in trip table for all bills. if its close then don't upload the data
       //we can send $unique_bills as well as $bills_cl_confirmed. because result is same
@@ -285,13 +292,9 @@ function change_feeds_import_revised_billing_validate($data, $distributor_id) {
  * @param type $distributor_id
  */
 function change_feeds_import_revised_billing_process($billing_data_result, $unique_bills, $distributor_id, &$context) {
-  //revised_host_quantity,updated_flag,revised_Sum_of_NET_SALES_VALUE, updated_date(preCreated)
-//revised_Sum_of_SCHEME_DISCOUNT,revised_Sum_of_OTHER_DISCOUNT,revised_Sum_of_TAX_PERCENTAGE
-  watchdog('testingg', '<pre>' . print_r($billing_data_result, TRUE) . '</pre>');
   foreach ($billing_data_result as $key => $data) {
     if (in_array($data['BILL_NUMBER'], $unique_bills)){
       $to_be_dispatch_qty = calculte_to_be_dispatch_qty($data['BILL_NUMBER'], $data['SKU7_CODE'], $distributor_id);
-      watchdog('testingg $to_be_dispatch_qty', '<pre>' . print_r($to_be_dispatch_qty, TRUE) . '</pre>');
       db_update('custom_billing_data')
         ->fields(array(
           //while reupload stor total sales qty in revised host qty field
@@ -450,6 +453,28 @@ function check_bill_cld_loose_confirmation_pending($unique_bills, $distributor_i
   $bill_numbers = $query->execute()->fetchAllKeyed(0, 0);
   return $bill_numbers;
 }
+/**
+ * 
+ * @param type $unique_bills
+ * @param type $distributor_id
+ * @return type
+ */
+function find_bill_not_in_dispatch_qty_confirmation($unique_bills, $distributor_id) {
+  $bills_not_present = array();
+  $query = db_select('dispatch_qty_confirmation', 'n');
+  $query->condition('n.bill_number', $unique_bills, "IN");
+  $query->condition('n.distributor_id', "$distributor_id");  
+  $query->addField('n', 'bill_number');
+  $query->groupBy('n.bill_number');
+  $bill_numbers = $query->execute()->fetchAllKeyed(0, 0);
+  //find bill not present in
+  if(!empty($bill_numbers)){
+    $bills_not_present = array_diff($unique_bills,$bill_numbers);
+  }
+  return $bills_not_present;
+}
+
+
 
 /**
  * 
