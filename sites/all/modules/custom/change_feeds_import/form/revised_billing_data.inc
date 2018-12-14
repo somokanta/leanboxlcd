@@ -160,12 +160,14 @@ function change_feeds_import_revised_billing_data_form_submit($form, &$form_stat
         }
 //      if (empty($confirmed_bills)) {
         $operations = array();
+        $operations[] = array('change_feeds_import_revised_updated_flag_unset', array($bills_upload, $distributor_id));
+        
         $data_chunk = array_chunk($datas, 1000);
         foreach ($data_chunk as $data) {
           $operations[] = array('change_feeds_import_revised_billing_process', array($data, $bills_upload, $distributor_id));
         }
 
-        //For bill update flag
+        //For bill update flag which are not present in file check isnull in function
         $operations[] = array('change_feeds_import_revised_billing_update_flag', array($bills_upload, $distributor_id));
         
         //Sales register Upload
@@ -291,6 +293,23 @@ function change_feeds_import_revised_billing_validate($data, $distributor_id) {
  * @param type $billing_data_result
  * @param type $distributor_id
  */
+function change_feeds_import_revised_updated_flag_unset($unique_bills, $distributor_id, &$context) {
+    if (is_array($unique_bills)){
+      db_update('custom_billing_data')
+        ->fields(array(
+          'updated_flag' => NULL
+        ))
+        ->condition('bill_number', $unique_bills, 'IN')
+        ->condition('distributor_id', $distributor_id)
+        ->execute();
+  }
+}
+
+/**
+ * 
+ * @param type $billing_data_result
+ * @param type $distributor_id
+ */
 function change_feeds_import_revised_billing_process($billing_data_result, $unique_bills, $distributor_id, &$context) {
   foreach ($billing_data_result as $key => $data) {
     if (in_array($data['BILL_NUMBER'], $unique_bills)){
@@ -322,7 +341,6 @@ function change_feeds_import_revised_billing_process($billing_data_result, $uniq
  * @param type $distributor_id
  */
 function change_feeds_import_revised_billing_update_flag($unique_bills, $distributor_id, &$context) {
-  watchdog('testingg $unique_bills', '<pre>' . print_r($unique_bills, TRUE) . '</pre>');
   $billing_data_result = db_select('custom_billing_data', 'cbd')
       ->condition('cbd.bill_number', $unique_bills, 'IN')
       ->isNull('updated_flag')
@@ -332,13 +350,15 @@ function change_feeds_import_revised_billing_update_flag($unique_bills, $distrib
 
   foreach ($billing_data_result as $key => $data) {
     $to_be_dispatch_qty = calculte_to_be_dispatch_qty($data['bill_number'], $data['sku7_code'], $distributor_id);
-    watchdog('testingg remaining $to_be_dispatch_qty', '<pre>' . print_r($to_be_dispatch_qty, TRUE) . '</pre>');
     db_update('custom_billing_data')
       ->fields(array(
-        //while reupload stor total sales qty in revised host qty field
-        //'revised_host_quantity' => $data['Sum_of_TOTAL_SALES_QTY'],
         //total sales qty is calculated from dispatch qty confirmation table based on bill sku
         'Sum_of_TOTAL_SALES_QTY' => $to_be_dispatch_qty ? $to_be_dispatch_qty : 0,
+        'revised_host_quantity' => 0, //it is set to zero for bills which sku is not found in csv.
+        'revised_Sum_of_NET_SALES_VALUE' => 0,
+        'revised_Sum_of_SCHEME_DISCOUNT' => 0,
+        'revised_Sum_of_OTHER_DISCOUNT' => 0,
+        'revised_Sum_of_TAX_PERCENTAGE' => 0,
         'updated_date' => REQUEST_TIME,
         'updated_flag' => 1
       ))
