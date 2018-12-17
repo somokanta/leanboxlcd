@@ -1705,6 +1705,15 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
       }
     }
     
+    // Brand Validation.
+    if (!empty($item['brand'])) {
+      $brand = brand_validate($distributor_id, $item['brand']);
+      if (empty($brand)) {
+        drupal_set_message("Brand " . $item['brand'] . " does not exist in Brand Master", 'error');
+        $entity->feeds_item->skip = TRUE;
+      }
+    }
+
     // Update the sku7 code in SKU7_CODE field
     $entity->field_sku7_code['und'][0]['value'] = $sku;
     
@@ -3793,3 +3802,15 @@ function drs_invoice_vs_actual_dispatched_report_table($trip_id, $distributor_id
   }
   return $output;
 }*/
+
+// Check Brand Master value and SKU7 Code Master uploader Brand column value.
+function brand_validate($distributor_id, $sku_brand) {
+  $query = db_select('node', 'n');
+  $query->condition('n.type', 'brand_master');
+  $query->condition('n.uid', $distributor_id);
+  $query->condition('n.title', $sku_brand, '=');
+  $query->fields('n', array('title'));
+  $result = $query->execute()->fetchField();
+
+  return $result; 
+}
