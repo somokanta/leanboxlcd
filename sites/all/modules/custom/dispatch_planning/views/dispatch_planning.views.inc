@@ -2806,6 +2806,17 @@ function dispatch_planning_views_data() {
         'argument' => array(
             'handler' => 'views_handler_argument_string',
         ),
+      'relationship' => array(
+            'title' => t('Dispatch Data Trip ID'),
+            'help' => t("Dispatch Data Trip ID"),
+            'handler' => 'views_handler_relationship',
+            'base' => 'node',
+            'base field' => 'title',
+            'extra' => array(
+                array('field' => 'type', 'value' => 'dispatch_data'),
+                array('field' => 'uid', 'left_field' => 'distributor_id'),
+            ),
+        ),
     );
     $data['dispatch_planning_api_data']['distributor_id'] = array(
         'title' => t('DP distributor_id'),
