@@ -101,6 +101,7 @@ function modify_views_forms_form_alter(&$form, &$form_state, $form_id) {
    
    if ($form_id == 'editableviews_entity_form_Resource_Master_Report') {
        $form['#attached']['css'][] = drupal_get_path('module', 'deliverycost_calculation') . '/css/delivery_cost.css';
+       $form['#validate'][] = 'validate_contact_number';  
        // This hidden field is to add calendar in resource master report.
        $form['calender_hide'] = array(
           '#type' => 'date_popup',
@@ -307,6 +308,20 @@ function modify_views_forms_form_alter(&$form, &$form_state, $form_id) {
        }
       
   }
+}
+
+// Contact Number Validation.
+function validate_contact_number(&$form, &$form_state) {  
+    $mess = '';
+    foreach ($form_state['values']['node'] as $nid => $form_data) {
+        $contact_number = $form_data['field_contact_number'][LANGUAGE_NONE][0]['value'];
+        if (!preg_match('/^[0-9]*$/', $contact_number)) {
+          $mess .= t("Contact Number must be numeric.");
+        }
+    }
+    if (!empty($mess)) {
+        form_set_error('form', $mess);    
+    }
 }
 
 function payment_collection_validate($form, &$form_state) {
