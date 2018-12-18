@@ -1109,10 +1109,13 @@ function _van_planning_callback_form($form, &$form_state) {
       '#validate' => array('_check_duplicates_validate'),
       '#submit' => array('_check_duplicates_submit'),
     );
+    drupal_add_js(drupal_get_path('module', 'van_planning') . '/js/prevent_multiple_click.js', 'file');
     $form['submit_vp']['create_van_planning'] = array(
       '#type' => 'submit',
       '#value' => 'Submit and Create Van Planning',
       '#name' => 'create_van_planning',
+      '#prefix' => "<div class='multiple_click'>",
+      '#suffix'=> "</div><div id = 'referesh_warning' style='display:none';><p><font color='red'>Van Planning is in progress. Please do not click on Submit again.</font></p></div>",
       '#validate' => array('_create_van_validate'),
       '#submit' => array('_create_van_submit'),
     );
