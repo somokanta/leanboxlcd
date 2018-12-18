@@ -1237,6 +1237,12 @@ function validate_resource_master(&$form, &$form_state) {
   if (!empty($resource_nid) && $resource_existing_nid != $resource_nid) {
     form_set_error('field_resource_name', t("Resource already exists."));
   }
+  
+  // Contact Number Validation.
+  $contact_number = $form_state['values']['field_contact_number'][LANGUAGE_NONE][0]['value'];
+  if (!preg_match('/^[0-9]*$/', $contact_number)) {
+    form_set_error('field_contact_number', t("Contact Number must be numeric."));
+  }
 }
 
 function validate_vehicle_master(&$form, &$form_state) {
