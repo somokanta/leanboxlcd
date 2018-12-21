@@ -218,7 +218,12 @@ function return_vrs_callback() {
     $row['return_incharge'] = $val['return_incharge'];
 
     if (!empty($val['field_bill_wise_return_starttime_value'])) {
-      $row['bill_start_time'] = date('d-M-y H:i:s', $val['field_bill_wise_return_starttime_value']);
+      if(in_array($val['field_vrs_status_value'],$return_confirmed_vrs_status) && empty($val['field_bill_wise_return_end_time_value'])) {
+        $row['bill_start_time'] = '';
+      }
+      else {
+          $row['bill_start_time'] = date('d-M-y H:i:s', $val['field_bill_wise_return_starttime_value']);
+      }
     }
     else {
       $row['bill_start_time'] = '';
