@@ -29,9 +29,18 @@ class field_box_id_ptl_count extends views_handler_field {
     $query1 = db_select('ptl_data_configuration', 'ptl');
     $query1->condition('ptl.trip_id', $trip_id, "=");
     $query1->condition('ptl.bill_number', $bill_number, "=");
-    $query1->addExpression("COUNT(DISTINCT ptl.box_id)", 'box_id');
+    $query1->addExpression("GROUP_CONCAT(DISTINCT ptl.box_id separator ', ')", 'box_id');
     $query1->condition('ptl.box_id', '', "!=");
-    $box_id = $query1->execute()->fetchField();
+    $result = $query1->execute()->fetchField();
+    //newly added
+    if(!empty($result)){
+      $arr = explode(',', "$result");
+      foreach ($arr as $val) {
+        $bid = trim($val);
+        $new_arr[$bid] =$bid; 
+      }
+      $box_id = count($new_arr);
+    }
     return $box_id;
    }
 }
