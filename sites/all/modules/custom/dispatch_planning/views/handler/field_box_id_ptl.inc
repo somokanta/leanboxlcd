@@ -31,7 +31,14 @@ class field_box_id_ptl extends views_handler_field {
     $query1->condition('ptl.bill_number', $bill_number, "=");
     $query1->addExpression("GROUP_CONCAT(DISTINCT ptl.box_id separator ', ')", 'box_id');
     $query1->condition('ptl.box_id', '', "!=");
-    $box_id = $query1->execute()->fetchField();
+    $result = $query1->execute()->fetchField();
+    //newly added
+    $arr = explode(',', "$result");
+    foreach ($arr as $val) {
+      $bid = trim($val);
+      $new_arr[$bid] =$bid; 
+    }
+    $box_id = implode(", ",$new_arr);
     return $box_id;
    }
 
