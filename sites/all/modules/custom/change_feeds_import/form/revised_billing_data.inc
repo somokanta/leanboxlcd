@@ -294,7 +294,7 @@ function change_feeds_import_revised_billing_validate($data, $distributor_id) {
  * @param type $distributor_id
  */
 function change_feeds_import_revised_updated_flag_unset($unique_bills, $distributor_id, &$context) {
-    if (is_array($unique_bills)){
+    if (is_array($unique_bills)&& !empty($unique_bills)){
       db_update('custom_billing_data')
         ->fields(array(
           'updated_flag' => NULL
@@ -341,31 +341,33 @@ function change_feeds_import_revised_billing_process($billing_data_result, $uniq
  * @param type $distributor_id
  */
 function change_feeds_import_revised_billing_update_flag($unique_bills, $distributor_id, &$context) {
-  $billing_data_result = db_select('custom_billing_data', 'cbd')
-      ->condition('cbd.bill_number', $unique_bills, 'IN')
-      ->isNull('updated_flag')
-      ->condition('distributor_id', $distributor_id)
-      ->fields('cbd')
-      ->execute()->fetchAll(PDO::FETCH_ASSOC);
+  if (is_array($unique_bills) && !empty($unique_bills)) {
+    $billing_data_result = db_select('custom_billing_data', 'cbd')
+        ->condition('cbd.bill_number', $unique_bills, 'IN')
+        ->isNull('updated_flag')
+        ->condition('distributor_id', $distributor_id)
+        ->fields('cbd')
+        ->execute()->fetchAll(PDO::FETCH_ASSOC);
 
-  foreach ($billing_data_result as $key => $data) {
-    $to_be_dispatch_qty = calculte_to_be_dispatch_qty($data['bill_number'], $data['sku7_code'], $distributor_id);
-    db_update('custom_billing_data')
-      ->fields(array(
-        //total sales qty is calculated from dispatch qty confirmation table based on bill sku
-        'Sum_of_TOTAL_SALES_QTY' => $to_be_dispatch_qty ? $to_be_dispatch_qty : 0,
-        'revised_host_quantity' => 0, //it is set to zero for bills which sku is not found in csv.
-        'revised_Sum_of_NET_SALES_VALUE' => 0,
-        'revised_Sum_of_SCHEME_DISCOUNT' => 0,
-        'revised_Sum_of_OTHER_DISCOUNT' => 0,
-        'revised_Sum_of_TAX_PERCENTAGE' => 0,
-        'updated_date' => REQUEST_TIME,
-        'updated_flag' => 1
-      ))
-      ->condition('bill_number', $data['bill_number'])
-      ->condition('sku7_code', $data['sku7_code'])
-      ->condition('distributor_id', $distributor_id)
-      ->execute();
+    foreach ($billing_data_result as $key => $data) {
+      $to_be_dispatch_qty = calculte_to_be_dispatch_qty($data['bill_number'], $data['sku7_code'], $distributor_id);
+      db_update('custom_billing_data')
+        ->fields(array(
+          //total sales qty is calculated from dispatch qty confirmation table based on bill sku
+          'Sum_of_TOTAL_SALES_QTY' => $to_be_dispatch_qty ? $to_be_dispatch_qty : 0,
+          'revised_host_quantity' => 0, //it is set to zero for bills which sku is not found in csv.
+          'revised_Sum_of_NET_SALES_VALUE' => 0,
+          'revised_Sum_of_SCHEME_DISCOUNT' => 0,
+          'revised_Sum_of_OTHER_DISCOUNT' => 0,
+          'revised_Sum_of_TAX_PERCENTAGE' => 0,
+          'updated_date' => REQUEST_TIME,
+          'updated_flag' => 1
+        ))
+        ->condition('bill_number', $data['bill_number'])
+        ->condition('sku7_code', $data['sku7_code'])
+        ->condition('distributor_id', $distributor_id)
+        ->execute();
+    }
   }
 }
 
@@ -503,14 +505,17 @@ function find_bill_not_in_dispatch_qty_confirmation($unique_bills, $distributor_
  * @return type
  */
 function sales_register_data_by_revised_billing_upload($unique_bills, $distributor_id) {
-  $query = db_select('custom_billing_data', 'cb');
-  $query->addField('cb', 'bill_number');
-  $query->addExpression('SUM(cb.Sum_of_NET_SALES_VALUE)', 'sum_net_sales_value');
-  $query->addExpression('SUM(Sum_of_TOTAL_SALES_QTY * line_level_value)', 'custom_bill_sales_value');
-  $query->condition('cb.distributor_id', $distributor_id);
-  $query->condition('cb.bill_number', $unique_bills, 'IN');
-  $query->groupBy('cb.bill_number');
-  $results = $query->execute()->fetchAll();
+  $results = array();
+  if (is_array($unique_bills) && !empty($unique_bills)) {
+    $query = db_select('custom_billing_data', 'cb');
+    $query->addField('cb', 'bill_number');
+    $query->addExpression('SUM(cb.Sum_of_NET_SALES_VALUE)', 'sum_net_sales_value');
+    $query->addExpression('SUM(Sum_of_TOTAL_SALES_QTY * line_level_value)', 'custom_bill_sales_value');
+    $query->condition('cb.distributor_id', $distributor_id);
+    $query->condition('cb.bill_number', $unique_bills, 'IN');
+    $query->groupBy('cb.bill_number');
+    $results = $query->execute()->fetchAll();
+  }
   return $results;
 }
 
