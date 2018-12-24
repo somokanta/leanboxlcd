@@ -1479,14 +1479,16 @@ function vrs_confirmation_validate($form, &$form_state) {
         If (!empty($value['signed_bill_collected'])) {
 
           if (empty($form_state['values']["photo_signed_bill_$key"]) && empty($_FILES['files']['name'][$photo_signed_bill])) {
-            $messages[] = t('Error:Bill Number:' . $key . '- Please upload signed bill image.');
+            // As per client comment,Commented on 24-12-2018
+            //$messages[] = t('Error:Bill Number:' . $key . '- Please upload signed bill image.');
           }
         }
         // Cheque Validation
         If (!empty($value['actual_cheque_collected'])) {
 
           if (empty($form_state['values']["photo_cheque_$key"]) && empty($_FILES['files']['name'][$photo_cheque])) {
-            $messages[] = t('Error:Bill Number:' . $key . '- Please upload cheque image.');
+            // As per client comment,Commented on 24-12-2018
+            //$messages[] = t('Error:Bill Number:' . $key . '- Please upload cheque image.');
           }
           if (empty($value["cheque_number"])) {
             $messages[] = t('Error:Bill Number:' . $key . '- Please enter cheque number.');
