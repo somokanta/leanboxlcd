@@ -442,16 +442,19 @@ function get_bill_sku_from_custom_billing($distributor_id) {
  * @param type $distributor_id
  */
 function check_bill_confirmation_complete($unique_bills, $distributor_id) {
-  $query = db_select('node', 'n');
-  $query->condition('n.type', "sales_register_data");
-  $query->condition('n.uid', "$distributor_id");
-  $query->condition('n.title', $unique_bills, 'IN');
-  $query->join('field_data_field_trip_id_reference', 'tir', 'tir.entity_id = n.nid');
-  $query->join('node', 'n2', 'n2.nid = tir.field_trip_id_reference_nid');
-  $query->leftjoin('field_data_field_confirm_bill_edit_status', 'bds', 'bds.entity_id = n2.nid');
-  $query->condition('bds.field_confirm_bill_edit_status_value', 1, '=');
-  $query->addField('n', 'title');
-  $confirmed_bills = $query->execute()->fetchAllKeyed(0, 0);
+  $confirmed_bills = array();
+  if (is_array($unique_bills) && !empty($unique_bills)) {
+    $query = db_select('node', 'n');
+    $query->condition('n.type', "sales_register_data");
+    $query->condition('n.uid', "$distributor_id");
+    $query->condition('n.title', $unique_bills, 'IN');
+    $query->join('field_data_field_trip_id_reference', 'tir', 'tir.entity_id = n.nid');
+    $query->join('node', 'n2', 'n2.nid = tir.field_trip_id_reference_nid');
+    $query->leftjoin('field_data_field_confirm_bill_edit_status', 'bds', 'bds.entity_id = n2.nid');
+    $query->condition('bds.field_confirm_bill_edit_status_value', 1, '=');
+    $query->addField('n', 'title');
+    $confirmed_bills = $query->execute()->fetchAllKeyed(0, 0);
+  }
   return $confirmed_bills;
 }
 
@@ -462,17 +465,20 @@ function check_bill_confirmation_complete($unique_bills, $distributor_id) {
  * @return type
  */
 function check_bill_cld_loose_confirmation_pending($unique_bills, $distributor_id) {
-  $query = db_select('dispatch_qty_confirmation', 'n');
-  $query->condition('n.bill_number', $unique_bills, "IN");
-  $query->condition('n.distributor_id', "$distributor_id");
-  
-  $db_or = db_or();
-  $db_or->condition('n.loose_close_flag', 0, '=');
-  $db_or->condition('n.cld_close_flag', 0, '=');
-  $query->condition($db_or);
-  
-  $query->addField('n', 'bill_number');
-  $bill_numbers = $query->execute()->fetchAllKeyed(0, 0);
+  $bill_numbers = array();
+  if (is_array($unique_bills) && !empty($unique_bills)) {
+    $query = db_select('dispatch_qty_confirmation', 'n');
+    $query->condition('n.bill_number', $unique_bills, "IN");
+    $query->condition('n.distributor_id', "$distributor_id");
+
+    $db_or = db_or();
+    $db_or->condition('n.loose_close_flag', 0, '=');
+    $db_or->condition('n.cld_close_flag', 0, '=');
+    $query->condition($db_or);
+
+    $query->addField('n', 'bill_number');
+    $bill_numbers = $query->execute()->fetchAllKeyed(0, 0);
+  }
   return $bill_numbers;
 }
 /**
@@ -483,15 +489,17 @@ function check_bill_cld_loose_confirmation_pending($unique_bills, $distributor_i
  */
 function find_bill_not_in_dispatch_qty_confirmation($unique_bills, $distributor_id) {
   $bills_not_present = array();
-  $query = db_select('dispatch_qty_confirmation', 'n');
-  $query->condition('n.bill_number', $unique_bills, "IN");
-  $query->condition('n.distributor_id', "$distributor_id");  
-  $query->addField('n', 'bill_number');
-  $query->groupBy('n.bill_number');
-  $bill_numbers = $query->execute()->fetchAllKeyed(0, 0);
-  //find bill not present in
-  if(!empty($bill_numbers)){
-    $bills_not_present = array_diff($unique_bills,$bill_numbers);
+  if (is_array($unique_bills) && !empty($unique_bills)) {
+    $query = db_select('dispatch_qty_confirmation', 'n');
+    $query->condition('n.bill_number', $unique_bills, "IN");
+    $query->condition('n.distributor_id', "$distributor_id");  
+    $query->addField('n', 'bill_number');
+    $query->groupBy('n.bill_number');
+    $bill_numbers = $query->execute()->fetchAllKeyed(0, 0);
+    //find bill not present in
+    if(!empty($bill_numbers)){
+      $bills_not_present = array_diff($unique_bills,$bill_numbers);
+    }
   }
   return $bills_not_present;
 }
