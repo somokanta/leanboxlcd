@@ -36,7 +36,7 @@ function godown_short_approval_form($form, &$form_state) {
     '#validate' => array('trip_id_validation'),
     '#suffix'=>'</div>'
   );
-  $link = $rr = l('View Pending for Approval', "claimed-gs-report", array('attributes' => array("target" => "_blank"),));
+  $link = $rr = l('View Pending for Approval', "pending-claimed-gs-report", array('attributes' => array("target" => "_blank"),));
   $form['view_pending_gs_approval_link'] = array(
     '#type' => 'markup',
     '#prefix'=>'<div class="gs_approval_link">'.$link,
