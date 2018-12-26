@@ -4377,10 +4377,10 @@ function dispatch_planning_views_data() {
             'handler' => 'views_handler_sort',
         ),
         'filter' => array(
-            'handler' => 'views_handler_filter_string',
+            'handler' => 'views_handler_filter_numeric',
         ),
         'argument' => array(
-            'handler' => 'views_handler_argument_string',
+            'handler' => 'views_handler_argument_numeric',
         ),
     );
 
