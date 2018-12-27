@@ -12,9 +12,10 @@
  * @param type $form_state
  * @return array
  */
+module_load_include('inc', 'dispatched_quantity_confirmation', 'includes/dispatch_qty_common');
 function ptl_loose_confirmation_form($form, &$form_state) {
   $form['#attached']['js'][] = drupal_get_path('module', 'dispatched_quantity_confirmation') . '/js/ptl_loose_confirmation.js';
-
+  $form['#attached']['css'][] = drupal_get_path('module', 'dispatched_quantity_confirmation') . '/css/dispatched_quantity_confirmation.css';
   global $user;
   $dis_id = change_feeds_import_get_distributor_id($user->uid);
 
@@ -86,6 +87,8 @@ function ptl_loose_confirmation_form($form, &$form_state) {
   $form['apply'] = array(
     '#type' => 'submit',
     '#value' => 'Apply',
+    '#prefix' => "<div><div style='float:left';width:50%>",
+    '#suffix' => '</div>',
     '#ajax' => array(
       'callback' => 'ptl_loose_confirmation_callback',
       'wrapper' => 'itemlist-div',
@@ -127,13 +130,35 @@ function ptl_loose_confirmation_form($form, &$form_state) {
         '#tree' => TRUE,
         '#header' => $header,
         '#rows' => array(),
-        '#prefix' => '<div class="custom_middle_table">',
+        '#prefix' => '<div class="custom_middle_table" style="float:left;clear:both;width:100%">',
         '#suffix' => '</div>',
       );
+      // Dispatch Supervisor
+        $incharge_name_option = array('' => 'Select');
+        $resource_type = 'Packing Auditor';
+        $dispatch_supervisor_name_option = array();
+        $dispatch_supervisor_options = get_ptl_supervisor_list($dis_id,$resource_type);
+        if (!empty($dispatch_supervisor_options)) {
+          $dispatch_supervisor_name_option = $incharge_name_option + $dispatch_supervisor_options;
+          $field = 'field_packing_auditor_loose';
+          $default_value_superviser = get_auditor_name($dis_id,$trip_id,$field);
+        }
+        $form['packing_auditor_name'] = array(
+          '#title' => t('Packing Auditor Name*'),
+          //'#required' => TRUE,
+          '#type' => 'select',
+          '#default_value'=>$default_value_superviser,
+          '#prefix'=>'<div class="packing_auditor_outer"><div class="packing_auditor_name">',
+          '#suffix'=>'</div></div>',
+          '#options' => $dispatch_supervisor_name_option,
+          '#attributes' => array('class' => array('return-incharge-name')),
+        );
 
       $form['save'] = array(
         '#type' => 'submit',
         '#value' => 'Save',
+        '#prefix' => "<div><div style='float:left';width:50%>",
+        '#suffix' => '</div>',
         '#ajax' => array(
           'callback' => 'ptl_loose_confirmation_callback',
           'wrapper' => 'itemlist-div',
@@ -146,8 +171,19 @@ function ptl_loose_confirmation_form($form, &$form_state) {
 
       $form['submit'] = array(
         '#type' => 'submit',
+        '#prefix' => "<div style='float:left';width:50%>",
+        '#suffix' => '</div></div>',
         '#value' => 'Close Trip',
         '#validate' => array('dispatched_qty_confirmation_save_validate'),
+        '#submit' => array('dispatched_qty_confirmation_submit'),
+      );
+    }else if(empty($options) && $form_state['triggering_element']['#value'] == 'Apply'){
+      $form['submit'] = array(
+        '#type' => 'submit',
+        '#value' => 'Close Trip',
+        '#prefix' => "<div style='float:left';width:50%>",
+        '#suffix' => '</div></div>',
+        //'#validate' => array('dispatched_qty_confirmation_save_validate'),
         '#submit' => array('dispatched_qty_confirmation_submit'),
       );
     }
@@ -440,6 +476,9 @@ function ptl_loose_confirmation_submit($form, &$form_state) {
       $query->addExpression('dqc.original_loose_qty', 'looses');
       $query->orderBy('pdc.sequence_no');
       $result = $query->execute()->fetchAll(PDO::FETCH_GROUP | PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
+      if (empty($result)) {
+        drupal_set_message("Trip ID $trip_number does not have any PTL short. If you want to complete PPLC then un-check the check-box & click on Apply or else close the Trip", 'warning');
+      }
     }
 
     $form_state['ptl_loose_confirmation']['bills'] = $result;
@@ -457,6 +496,10 @@ function dispatched_qty_confirmation_save_validate($form, &$form_state) {
   if ($trip_content_type != $trip_type) {
     drupal_set_message(t('Trip id ' . $trip_number . ' is of type ' . $trip_content_type), 'error');
     $form_state['rebuild'] = TRUE;
+  }
+  if(empty($form_state['values']['packing_auditor_name'])) {
+     drupal_set_message(t('Packing Auditor Name field is required'), 'error');
+     $form_state['rebuild'] = TRUE;
   }
 
   foreach ($form_state['values']['bill_details'] as $key => $val) {
@@ -575,7 +618,11 @@ function save_dispatched_qty_confirmation_submit($form, &$form_state) {
       }
     }
   }
-
+  //Saving packing auditor name
+  $supervisor_resource_nid = $form_state['values']['packing_auditor_name'];
+  $field = 'field_packing_auditor_loose';
+  save_dispatch_qty_supervisor_name($trip_id,$supervisor_resource_nid,$dis_id,$field);
+  
   drupal_set_message(t("Data saved successfully."));
   unset($form_state['ptl_loose_confirmation']['bills']);
   $form_state['rebuild'] = TRUE;
@@ -932,6 +979,9 @@ function dispatched_qty_confirmation_submit($form, &$form_state) {
   }
   if ($validate['flag'] == 1) {
     drupal_set_message(t("Trip ID $trip_id - Loose Confirmation Completed"));
+    $supervisor_resource_nid = $form_state['values']['packing_auditor_name'];
+    $field = 'field_packing_auditor_loose';
+    save_dispatch_qty_supervisor_name($trip_id,$supervisor_resource_nid,$dis_id,$field);
   }
 }
 

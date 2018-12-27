@@ -13,9 +13,10 @@
  * @return array
  */
 module_load_include('inc', 'dispatched_quantity_confirmation', 'includes/dispatch_qty_common');
-function ptl_retail_cld_confirmation_form($form, &$form_state) {
+function master_ptl_cld_confirmation_form($form, &$form_state) {
   $form['#attached']['js'][] = drupal_get_path('module', 'dispatched_quantity_confirmation') . '/js/ptl_retail_cld_confirmation.js';
   $form['#attached']['css'][] = drupal_get_path('module', 'dispatched_quantity_confirmation') . '/css/dispatched_quantity_confirmation.css';
+  
   global $user;
   $dis_id = change_feeds_import_get_distributor_id($user->uid);
 
@@ -28,7 +29,7 @@ function ptl_retail_cld_confirmation_form($form, &$form_state) {
     '#required' => TRUE,
     '#autocomplete_path' => 'get-all-trips/autocomplete',
     '#ajax' => array(
-      'callback' => 'ptl_cld_confirmation_callback',
+      'callback' => 'master_ptl_cld_callback',
       'wrapper' => 'itemlist-div',
       'method' => 'replace',
       'effect' => 'fade',
@@ -38,7 +39,7 @@ function ptl_retail_cld_confirmation_form($form, &$form_state) {
   $trip_id = $form_state['input']['trip_number'];
   if (isset($form_state['triggering_element']['#title']) || !empty($form_state['input']['trip_number'])) {
     if ($form_state['triggering_element']['#title'] === 'Trip ID' && $form_state['entered_trip_id'] != $form_state['input']['trip_number']) {
-      $form_state['ptl_retail_cld_confirmation']['bills'] = array();
+      $form_state['master_ptl_cld_confirmation']['bills'] = array();
     }
     $form_state['entered_trip_id'] = $form_state['input']['trip_number'];
 
@@ -52,13 +53,13 @@ function ptl_retail_cld_confirmation_form($form, &$form_state) {
     '#type' => 'submit',
     '#value' => 'Apply',
     '#ajax' => array(
-      'callback' => 'ptl_cld_confirmation_callback',
+      'callback' => 'master_ptl_cld_callback',
       'wrapper' => 'itemlist-div',
       'method' => 'replace',
       'effect' => 'fade',
     ),
     '#validate' => array('trip_id_validate'),
-    '#submit' => array('retail_cld_confirmation_submit'),
+    '#submit' => array('master_ptl_cld_confirmation_apply'),
   );
 
 
@@ -71,10 +72,10 @@ function ptl_retail_cld_confirmation_form($form, &$form_state) {
     'To Be Dispatched Qty - CLD Qty'
   );
 
-  if (!isset($form_state['ptl_retail_cld_confirmation']['bills'])) {
-    $form_state['ptl_retail_cld_confirmation']['bills'] = array();
+  if (!isset($form_state['master_ptl_cld_confirmation']['bills'])) {
+    $form_state['master_ptl_cld_confirmation']['bills'] = array();
   }
-  $options = $form_state['ptl_retail_cld_confirmation']['bills'];
+  $options = $form_state['master_ptl_cld_confirmation']['bills'];
 
   if (empty($form_state['trip_no_error'])) {
     if (!empty($options)) {
@@ -86,46 +87,46 @@ function ptl_retail_cld_confirmation_form($form, &$form_state) {
         '#prefix' => '<div class="custom_middle_table">',
         '#suffix' => '</div>',
       );
+      
       // Dispatch Supervisor
-        $incharge_name_option = array('' => 'Select');
-        $resource_type = 'Packing Auditor';
-        $dispatch_supervisor_name_option = array();
-        $dispatch_supervisor_options = get_ptl_supervisor_list($dis_id,$resource_type);
-        if (!empty($dispatch_supervisor_options)) {
-          $dispatch_supervisor_name_option = $incharge_name_option + $dispatch_supervisor_options;
-          $field = 'field_packing_auditor_cld';
-          $default_value_superviser = get_auditor_name($dis_id,$trip_id,$field);
-        }
-        $form['packing_auditor_name'] = array(
-          '#title' => t('Packing Auditor Name'),
-          '#required' => TRUE,
-          '#type' => 'select',
-          '#default_value'=>$default_value_superviser,
-          '#prefix'=>'<div class="packing_auditor_outer"><div class="packing_auditor_name">',
-          '#suffix'=>'</div></div>',
-          '#options' => $dispatch_supervisor_name_option,
-          '#attributes' => array('class' => array('return-incharge-name')),
-        );
-
+      $incharge_name_option = array('' => 'Select');
+      $resource_type = 'Packing Auditor';
+      $dispatch_supervisor_name_option = array();
+      $dispatch_supervisor_options = get_ptl_supervisor_list($dis_id, $resource_type);
+      if (!empty($dispatch_supervisor_options)) {
+        $dispatch_supervisor_name_option = $incharge_name_option + $dispatch_supervisor_options;
+        $field = 'field_packing_auditor_cld';
+        $default_value_superviser = get_auditor_name($dis_id, $trip_id, $field);
+      }
+      $form['packing_auditor_name'] = array(
+        '#title' => t('Packing Auditor Name'),
+        '#required' => TRUE,
+        '#type' => 'select',
+        '#default_value' => $default_value_superviser,
+        '#prefix' => '<div class="packing_auditor_outer"><div class="packing_auditor_name">',
+        '#suffix' => '</div></div>',
+        '#options' => $dispatch_supervisor_name_option,
+        '#attributes' => array('class' => array('return-incharge-name')),
+      );
 
       $form['save'] = array(
         '#type' => 'submit',
         '#value' => 'Save',
         '#ajax' => array(
-          'callback' => 'ptl_cld_confirmation_callback',
+          'callback' => 'master_ptl_cld_callback',
           'wrapper' => 'itemlist-div',
           'method' => 'replace',
           'effect' => 'fade',
         ),
-        '#validate' => array('ptl_retail_cld_confirmation_save_validate'),
-        '#submit' => array('save_ptl_retail_cld_confirmation_submit'),
+        '#validate' => array('master_ptl_cld_confirmation_save_validate'),
+        '#submit' => array('save_master_ptl_cld_confirmation_submit'),
       );
 
       $form['submit'] = array(
         '#type' => 'submit',
         '#value' => 'Close Trip',
-        '#validate' => array('ptl_retail_cld_confirmation_save_validate'),
-        '#submit' => array('ptl_retail_cld_confirmation_submit'),
+        '#validate' => array('master_ptl_cld_confirmation_save_validate'),
+        '#submit' => array('master_ptl_cld_confirmation_submit'),
       );
     }
 
@@ -186,7 +187,7 @@ function ptl_retail_cld_confirmation_form($form, &$form_state) {
  * @param type $form_state
  * @return array
  */
-function ptl_cld_confirmation_callback($form, &$form_state) {
+function master_ptl_cld_callback($form, &$form_state) {
   //return $form;
   $commands[] = ajax_command_replace('#itemlist-div', render($form));
   $commands[] = ajax_command_replace('.alert-danger', '');
@@ -203,13 +204,13 @@ function trip_id_validate($form, &$form_state) {
   $sku_code = $form_state['values']['sku'];
   $form_state['trip_no_error'] = '';
   if (!empty($trip_number)) {
+
     $type = get_trip_type($trip_number, $dis_id);
-    if ($type== 'Master PTL') {
-      $link = l('Master PTL CLD confirmation', '/master-ptl-cld-confirmation',array('attributes'=>array("target" => "_blank")));
-      drupal_set_message(t('Trip Id '.$trip_number.' is of type Master PTL. Please go to '.$link), 'warning');
+    if ($type != 'Master PTL') {
+      drupal_set_message(t('Trip Id not present in Master PTL'), 'error');
       $form_state['trip_no_error'] = 1;
     }
-    
+
     $bypass_flag = get_loose_cld_flag_trip_level($trip_number, $dis_id);
     if ($bypass_flag['cld'] == 1) {
       drupal_set_message(t("Trip ID $trip_number is already closed."), 'error');
@@ -243,6 +244,17 @@ function trip_id_validate($form, &$form_state) {
         drupal_set_message(t("Trip ID $trip_number is being processed, please try again in 4 mins"), 'error');
         $form_state['trip_no_error'] = 1;
       }
+      
+      $query = db_select('master_ptl_data', 'mpd');
+      $query->condition('mpd.trip_id', $trip_number);
+      $query->condition('mpd.distributor_id', $dis_id);
+      $query->fields('mpd', array('trip_id'));
+      $result = $query->execute()->fetchField();
+      if (empty($result)) {
+        drupal_set_message(t('Trip Id not present in Master PTL'), 'error');
+        $form_state['trip_no_error'] = 1;
+      }
+      
       //check dp bills in trip
       $dp_bills = check_dp_bills_in_trip($result);
       if (!empty($dp_bills)) {
@@ -289,7 +301,7 @@ function trip_id_validate($form, &$form_state) {
   }
 }
 
-function retail_cld_confirmation_submit($form, &$form_state) {
+function master_ptl_cld_confirmation_apply($form, &$form_state) {
   global $user;
   $dis_id = change_feeds_import_get_distributor_id($user->uid);
   $trip_number = $form_state['values']['trip_number'];
@@ -298,30 +310,29 @@ function retail_cld_confirmation_submit($form, &$form_state) {
   $child_sku = get_child_cld_sku_query_wise($all_parent_sku, $dis_id);
 
   if (empty($form_state['trip_no_error'])) {
-    $query = db_select('dispatch_qty_confirmation', 'dqc');
-    $query->condition('dqc.trip_id', $trip_number);
-    $query->condition('dqc.distributor_id', $dis_id);
+    $query = db_select('master_ptl_data', 'mpd');
+    $query->condition('mpd.trip_id', $trip_number);
+    $query->condition('mpd.distributor_id', $dis_id);
     if (!empty($sku_code)) {
-      $query->condition('dqc.sku_code', $sku_code);
+      $query->condition('mpd.sku_code', $sku_code);
     }
     //exclude child sku by default
     if (!empty($child_sku['child_sku'])) {
-      $query->condition('dqc.sku_code', $child_sku['child_sku'], 'NOT IN');
+      $query->condition('mpd.sku_code', $child_sku['child_sku'], 'NOT IN');
     }
-    $query->condition('dqc.original_cld_qty', 0, '>');
-    $query->addExpression('dqc.sku_code', 'sku_code');
-    $query->addExpression('dqc.sku_code', 'sku7_code');
-    $query->addExpression('dqc.product_name', 'product_name');
-    $query->addExpression('SUM(dqc.original_cld_qty)', 'cld');
-    $query->groupBy('dqc.sku_code');
-    $query->orderBy('dqc.product_name');
+    $query->condition('mpd.cld', 0, '>');
+    $query->addExpression('mpd.sku_code', 'sku_code');
+    $query->addExpression('mpd.sku_code', 'sku7_code');
+    $query->addExpression('mpd.product_name', 'product_name');
+    $query->addExpression('mpd.cld', 'cld');
+//    $query->groupBy('mpd.sku_code');
     $result = $query->execute()->fetchAll(PDO::FETCH_GROUP | PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
-    $form_state['ptl_retail_cld_confirmation']['bills'] = $result;
+    $form_state['master_ptl_cld_confirmation']['bills'] = $result;
   }
   $form_state['rebuild'] = TRUE;
 }
 
-function ptl_retail_cld_confirmation_save_validate($form, &$form_state) {
+function master_ptl_cld_confirmation_save_validate($form, &$form_state) {
   global $user;
   $dis_id = change_feeds_import_get_distributor_id($user->uid);
   $trip_id = $form_state['values']['trip_number'];
@@ -337,7 +348,7 @@ function ptl_retail_cld_confirmation_save_validate($form, &$form_state) {
         $form_state['rebuild'] = TRUE;
       }
       $cld_confirmed_qty = $val['cld_confirmed_qty'];
-      $original_cld_qty = $form_state['ptl_retail_cld_confirmation']['bills'][$key]['cld'];
+      $original_cld_qty = $form_state['master_ptl_cld_confirmation']['bills'][$key]['cld'];
       if ($cld_confirmed_qty > $original_cld_qty) {
         drupal_set_message(t("CLD confirmed qty cannot be greater than original cld qty for: $key."), 'error');
         $form_state['rebuild'] = TRUE;
@@ -358,20 +369,19 @@ function ptl_retail_cld_confirmation_save_validate($form, &$form_state) {
   }
 }
 
-function save_ptl_retail_cld_confirmation_submit($form, &$form_state) {
+function save_master_ptl_cld_confirmation_submit($form, &$form_state) {
   global $user;
   $dis_id = change_feeds_import_get_distributor_id($user->uid);
   $trip_id = $form_state['values']['trip_number'];
   $form_state['values']['trip_type'] = get_trip_type($trip_id, $dis_id);
   $type = $form_state['values']['trip_type'];
-
   foreach ($form_state['values']['bill_details'] as $key => $val) {
     //original cld qty value based on sequencing, if sequencing changed change this value also 
-    $original_cld_qty = $form['bill_details']['#rows'][$key][2]['data'];
+    $original_cld_qty = $form_state['master_ptl_cld_confirmation']['bills'][$key]['cld'];
     $cld_confirmed_qty = $form_state['values']['bill_details'][$key]['cld_confirmed_qty'];
     $cld_short_reason = ($original_cld_qty != $cld_confirmed_qty) ? $form_state['values']['bill_details'][$key]['cld_short_reason'] : '';
     $to_be_dispatched_qty = $form_state['values']['bill_details'][$key]['to_be_dispatched_qty'];
-    $sku7_code = $form_state['ptl_retail_cld_confirmation']['bills'][$key]['sku7_code'];
+    $sku7_code = $form_state['master_ptl_cld_confirmation']['bills'][$key]['sku7_code'];
 
     if ($to_be_dispatched_qty !== '') {
 
@@ -379,26 +389,21 @@ function save_ptl_retail_cld_confirmation_submit($form, &$form_state) {
       $to_be_dispatched_qty = $to_be_dispatched_qty ? $to_be_dispatched_qty : 0;
       //db_query("update dispatch_qty_confirmation set cld_confirmed_qty = $cld_confirmed_qty,cld_short_reason = '$cld_short_reason',dispatch_cld_qty = $to_be_dispatched_qty,type = '$type' where trip_id = $trip_id and sku_code = '$sku7_code' and original_cld_qty > 0 limit 1");           
       //update based on bills
-      $bills = get_bills_from_trip_sku($trip_id, $sku7_code, $dis_id);
+      $bills = get_mptl_bills_from_trip_sku($trip_id, $sku7_code, $dis_id);
 
-      $child_sku = get_child_detials_by_parent_sku($sku7_code, $dis_id);
-      $child_upc = get_sku_unit_case($child_sku['child_sku'], $dis_id);
-      $child_ratio = $child_sku['child_qty'];
-
-      foreach ($bills as $val) {
-        if ($val->original_cld_qty < $cld_confirmed_qty) {
+      foreach ($bills as $value) {
+        if ($value->original_cld_qty < $cld_confirmed_qty && $value->original_cld_qty != 0) {
           db_update('dispatch_qty_confirmation')
             ->fields(array(
-              'cld_confirmed_qty' => $val->original_cld_qty,
+              'cld_confirmed_qty' => $value->original_cld_qty,
               'cld_short_reason' => $cld_short_reason ? $cld_short_reason : '',
-              'dispatch_cld_qty' => $val->original_cld_qty,
+              'dispatch_cld_qty' => $value->original_cld_qty,
               'type' => $type,
             ))
-            ->condition('id', $val->id, '=')
+            ->condition('id', $value->id, '=')
             ->execute();
 
-          $cld_confirmed_qty -= $val->original_cld_qty;
-
+          $cld_confirmed_qty -= $value->original_cld_qty;
         }
         else {
           db_update('dispatch_qty_confirmation')
@@ -408,10 +413,9 @@ function save_ptl_retail_cld_confirmation_submit($form, &$form_state) {
               'dispatch_cld_qty' => $cld_confirmed_qty,
               'type' => $type,
             ))
-            ->condition('id', $val->id, '=')
+            ->condition('id', $value->id, '=')
             ->execute();
-          //break;
-          $cld_confirmed_qty = 0; // instead of break for remailining lines update 0 with reason                        
+          $cld_confirmed_qty = 0; // instead of break for remailining lines update 0 with reason
         }
       }
     }
@@ -420,11 +424,11 @@ function save_ptl_retail_cld_confirmation_submit($form, &$form_state) {
   $field = 'field_packing_auditor_cld';
   save_dispatch_qty_supervisor_name($trip_id,$supervisor_resource_nid,$dis_id,$field);
   drupal_set_message(t("Data saved successfully."));
-  unset($form_state['ptl_retail_cld_confirmation']['bills']);
+  unset($form_state['master_ptl_cld_confirmation']['bills']);
   $form_state['rebuild'] = TRUE;
 }
 
-function ptl_retail_cld_confirmation_submit($form, &$form_state) {
+function master_ptl_cld_confirmation_submit($form, &$form_state) {
   global $user;
   $dis_id = change_feeds_import_get_distributor_id($user->uid);
   $trip_id = $form_state['values']['trip_number'];
@@ -452,33 +456,31 @@ function ptl_retail_cld_confirmation_submit($form, &$form_state) {
     $product_name = $val['product_name'];
     $cld = $val['cld'];
     //original cld qty value based on sequencing, if sequencing changed change this value also 
-    $original_cld_qty = $form['bill_details']['#rows'][$key][2]['data'];
+    $original_cld_qty = $form_state['master_ptl_cld_confirmation']['bills'][$key]['cld'];
     $cld_confirmed_qty = $form_state['values']['bill_details'][$key]['cld_confirmed_qty'];
     $cld_short_reason = ($original_cld_qty != $cld_confirmed_qty) ? $form_state['values']['bill_details'][$key]['cld_short_reason'] : '';
     $to_be_dispatched_qty = $form_state['values']['bill_details'][$key]['to_be_dispatched_qty'];
 
     if ($to_be_dispatched_qty !== '' && !is_null($to_be_dispatched_qty)) {
+      //store at first line only
       $cld_confirmed_qty = $cld_confirmed_qty ? $cld_confirmed_qty : 0;
       $to_be_dispatched_qty = $to_be_dispatched_qty ? $to_be_dispatched_qty : 0;
       //db_query("update dispatch_qty_confirmation set cld_confirmed_qty = $cld_confirmed_qty,cld_short_reason = '$cld_short_reason',dispatch_cld_qty = $to_be_dispatched_qty,type = '$type' where trip_id = $trip_id and sku_code = '$sku7_code' and original_cld_qty > 0 limit 1");
       //update based on bills
-      $bills = get_bills_from_trip_sku($trip_id, $sku7_code, $dis_id);
-      $child_sku = get_child_detials_by_parent_sku($sku7_code, $dis_id);
-      $child_upc = get_sku_unit_case($child_sku['child_sku'], $dis_id);
-      $child_ratio = $child_sku['child_qty'];
-      foreach ($bills as $val) {
-        if ($val->original_cld_qty < $cld_confirmed_qty) {
+      $bills = get_mptl_bills_from_trip_sku($trip_id, $sku7_code, $dis_id);
+      foreach ($bills as $value) {
+        if ($value->original_cld_qty < $cld_confirmed_qty && $value->original_cld_qty != 0) {
           db_update('dispatch_qty_confirmation')
             ->fields(array(
-              'cld_confirmed_qty' => $val->original_cld_qty,
+              'cld_confirmed_qty' => $value->original_cld_qty,
               'cld_short_reason' => $cld_short_reason ? $cld_short_reason : '',
-              'dispatch_cld_qty' => $val->original_cld_qty,
+              'dispatch_cld_qty' => $value->original_cld_qty,
               'type' => $type,
             ))
-            ->condition('id', $val->id, '=')
+            ->condition('id', $value->id, '=')
             ->execute();
 
-          $cld_confirmed_qty -= $val->original_cld_qty;
+          $cld_confirmed_qty -= $value->original_cld_qty;
         }
         else {
           db_update('dispatch_qty_confirmation')
@@ -488,17 +490,15 @@ function ptl_retail_cld_confirmation_submit($form, &$form_state) {
               'dispatch_cld_qty' => $cld_confirmed_qty,
               'type' => $type,
             ))
-            ->condition('id', $val->id, '=')
+            ->condition('id', $value->id, '=')
             ->execute();
-
-          //break;
           $cld_confirmed_qty = 0; // instead of break for remailining lines update 0 with reason
         }
       }
     }
   }
- 
-  $validate = check_validation_trip_data_cld($trip_id, $dis_id);
+
+  $validate = check_mptl_validation_trip_data_cld($trip_id, $dis_id);
 
   if ($validate['flag'] != 1) {
     $skus = implode(',', $validate['sku']);
@@ -506,24 +506,37 @@ function ptl_retail_cld_confirmation_submit($form, &$form_state) {
     $form_state['rebuild'] = TRUE;
   }
   else {
+
     //cld confirmed flag update to 1 for cld confirmation
     db_update('dispatch_qty_confirmation')
       ->fields(array(
+        'type' => $type,
         'cld_retail_confirmed_flag' => 1,
+        'cld_close_flag' => 1,
+        'cld_created_date' => REQUEST_TIME
       ))
       ->condition('trip_id', $trip_id)
       ->condition('distributor_id', $dis_id)
       ->execute();
 
+    $flag = check_loose_cld_close_flag($trip_id, $dis_id);
+    if ($flag['loose'] == 1 && $flag['cld'] == 1) {
+      sync_mptl_loose_cld($trip_id, $dis_id);
+      update_mptl_child_cld($trip_id, $dis_id, 'Master PTL');
+    }
+
+    db_update('dispatch_qty_confirmation') // Table name no longer needs {}
+      ->expression('to_be_dispatch_qty', "dispatch_loose_qty + (dispatch_cld_qty * upc) + cld_loose_child_qty")
+      ->condition('trip_id', $trip_id, '=')
+      ->execute();
     //no short in a trip then do calculation close trip automatically 
     //needs to handle child in no short
-    assign_cld_qty_no_sort($trip_id, $type, $dis_id);
+    //assign_mptl_cld_qty_no_sort($trip_id, $type, $dis_id);
     $supervisor_resource_nid = $form_state['values']['packing_auditor_name'];
     $field = 'field_packing_auditor_cld';
     save_dispatch_qty_supervisor_name($trip_id,$supervisor_resource_nid,$dis_id,$field);
     drupal_set_message(t("Trip ID $trip_id - CLD Confirmation Completed"));
   }
-  //update all trip data based on trip type
 }
 
 function get_qty_default_values_cld($trip_id, $sku, $dis_id) {
@@ -531,8 +544,8 @@ function get_qty_default_values_cld($trip_id, $sku, $dis_id) {
   $query->condition('dc.trip_id', $trip_id, '=');
   $query->condition('dc.sku_code', $sku, '=');
   $query->condition('dc.distributor_id', $dis_id, '=');
-  $query->condition('dc.original_cld_qty', 0, '>');
-  $query->fields('dc', array('cld_confirmed_qty', 'cld_short_reason', 'dispatch_cld_qty'));
+  //$query->condition('dc.original_cld_qty', 0, '>');
+  //$query->fields('dc', array('cld_confirmed_qty', 'cld_short_reason', 'dispatch_cld_qty'));
   $query->addExpression('SUM(dc.cld_confirmed_qty)', 'cld_confirmed_qty');
   $query->addExpression('dc.cld_short_reason', 'cld_short_reason');
   $query->addExpression('SUM(dc.dispatch_cld_qty)', 'dispatch_cld_qty');
@@ -542,7 +555,7 @@ function get_qty_default_values_cld($trip_id, $sku, $dis_id) {
   return $result[0];
 }
 
-function check_validation_trip_data_cld($trip_id, $dis_id) {
+function check_mptl_validation_trip_data_cld($trip_id, $dis_id) {
   $all_parent_sku = get_all_parent_cld_skus_query_wise($trip_id, $dis_id);
   $child_sku = get_child_cld_sku_query_wise($all_parent_sku, $dis_id);
 
@@ -550,21 +563,24 @@ function check_validation_trip_data_cld($trip_id, $dis_id) {
   $query = db_select('dispatch_qty_confirmation', 'dc');
   $query->condition('dc.trip_id', $trip_id, '=');
   $query->condition('dc.distributor_id', $dis_id, '=');
-  $query->condition('dc.original_cld_qty', 0, '>');
+  //$query->condition('dc.original_cld_qty', 0, '>');
   //below condition is added to exclude child sku in validation on close trip
   if (!empty($child_sku['child_sku'])) {
     $query->condition('dc.sku_code', $child_sku['child_sku'], 'NOT IN');
   }
   $query->addExpression('SUM(dc.cld_confirmed_qty)', 'cld_confirmed_qty');
-  $query->addExpression('SUM(dc.original_cld_qty)', 'original_cld_qty');
+  $query->addExpression('SUM(dc.original_qty)', 'original_qty');
   $query->groupBy('dc.sku_code');
 
-  $query->fields('dc', array('sku_code', 'cld_short_reason'));
+  $query->fields('dc', array('sku_code', 'cld_short_reason','upc'));
   $result = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+  
   foreach ($result as $key => $value) {
-    $original_cld_qty = $value['original_cld_qty'];
+    $original_qty = $value['original_qty'];
     $cld_confirmed_qty = $value['cld_confirmed_qty'];
     $cld_short_reason = $value['cld_short_reason'];
+    $upc = $value['upc'];
+    $original_cld_qty = (int)($original_qty / $upc);
     if ($cld_confirmed_qty != $original_cld_qty && empty($cld_short_reason)) {
       $validation_pass['flag'] = 0;
       $validation_pass['sku'][$key] = $value['sku_code'];
@@ -573,99 +589,14 @@ function check_validation_trip_data_cld($trip_id, $dis_id) {
   return $validation_pass;
 }
 
-function assign_cld_qty_no_sort($trip_id, $type, $dis_id) {
-  $all_parent_sku = get_all_parent_cld_skus_query_wise($trip_id, $dis_id);
-  $child_sku = get_child_cld_sku_query_wise($all_parent_sku, $dis_id);
-
-  $query = db_select('dispatch_qty_confirmation', 'dqp');
-  $query->fields('dqp', array('sku_code'));
-  $query->condition('dqp.distributor_id', $dis_id);
-  $query->condition('dqp.trip_id', $trip_id);
-  if (!empty($child_sku['child_sku'])) {
-    $query->condition('dqp.sku_code', $child_sku['child_sku'], 'NOT IN');
-  }
-  $query->groupBy('dqp.sku_code');
-  $query->addExpression('sum(dqp.original_cld_qty) - sum(dqp.cld_confirmed_qty) ', 'final_qty');
-  $query->havingCondition("final_qty", 0, "=");
-  $original_cld_qty = $query->execute()->fetchAll();
-
-  $query = db_select('dispatch_qty_confirmation', 'dqp');
-  $query->fields('dqp', array('sku_code'));
-  $query->condition('dqp.distributor_id', $dis_id);
-  $query->condition('dqp.trip_id', $trip_id);
-  if (!empty($child_sku['child_sku'])) {
-    $query->condition('dqp.sku_code', $child_sku['child_sku'], 'NOT IN');
-  }
-  $query->groupBy('dqp.sku_code');
-  $all_skus = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
-
-  if (count($original_cld_qty) == count($all_skus)) {
-    
-    //assign child with in ration not in full quantity. because parent upc and child upc will
-    //differ. there are chance parent has cld but child not and vice-versa
-    update_child_cld_for_noshort($trip_id,$all_skus,$dis_id,$type);
-    //end
-    
-    //Sync To be Dispatch Qty
-    // have to update close flag
-    db_update('dispatch_qty_confirmation')
-      ->fields(array(
-        'type' => $type,
-        'cld_close_flag' => 1,
-        'cld_created_date' => REQUEST_TIME
-      ))
-      ->condition('trip_id', $trip_id)
-      ->condition('distributor_id', $dis_id)
-      ->execute();
-
-    db_update('dispatch_qty_confirmation') // Table name no longer needs {}
-      ->expression('to_be_dispatch_qty', "dispatch_loose_qty + (dispatch_cld_qty * upc) + cld_loose_child_qty")
-      ->condition('trip_id', $trip_id, '=')
-      ->execute();
-  }else{
-     db_update('dispatch_qty_confirmation') // Table name no longer needs {}
-      ->expression('to_be_dispatch_qty', "dispatch_loose_qty + (dispatch_cld_qty * upc) + cld_loose_child_qty")
-      ->condition('trip_id', $trip_id, '=')
-      ->execute();
-  }
-}
-
-function get_bills_from_trip_sku($trip_id, $sku, $dis_id) {
+function get_mptl_bills_from_trip_sku($trip_id, $sku, $dis_id) {
   $query = db_select('dispatch_qty_confirmation', 'dqp');
   $query->fields('dqp', array('id', 'bill_number', 'original_cld_qty', 'upc'));
   $query->condition('dqp.distributor_id', $dis_id);
   $query->condition('dqp.trip_id', $trip_id);
   $query->condition('dqp.sku_code', $sku);
-  $query->condition('dqp.original_cld_qty', 0, '>');
+  //$query->condition('dqp.original_cld_qty', 0, '>');
   $query->orderBy('dqp.original_cld_qty');
   $bills = $query->execute()->fetchAll();
   return $bills;
-}
-
-function update_child_cld_for_noshort($trip_id,$all_skus,$dis_id,$type){
-    $parent_details = get_all_parent_skus_from_skus($all_skus, $dis_id);
-    foreach ($parent_details as $parent_sku => $value) {
-      $bills = get_bills_from_trip_sku($trip_id, $parent_sku, $dis_id);
-      $child_sku = $value['child_sku'];
-      $child_upc = get_sku_unit_case($child_sku, $dis_id);
-      $child_ratio = $value['child_ratio'];
-
-      foreach ($bills as $val) {
-        $parent_qty = $val->original_cld_qty * $val->upc;
-        $child_total_qty = $parent_qty * $child_ratio;
-        $child_cld = (int) ($child_total_qty / $child_upc);
-        $child_loose = (int) ($child_total_qty % $child_upc);
-        db_update('dispatch_qty_confirmation')
-          ->expression('cld_confirmed_qty', 'cld_confirmed_qty + :ccq', array(':ccq' => $child_cld))
-          ->expression('cld_loose_child_qty', 'cld_loose_child_qty + :clc', array(':clc' => $child_loose))
-          ->expression('dispatch_cld_qty', 'dispatch_cld_qty + :dis', array(':dis' => $child_cld))
-          ->fields(array(
-            'type' => $type,
-          ))
-          ->condition('trip_id', $trip_id, '=')
-          ->condition('bill_number', $val->bill_number, '=')
-          ->condition('sku_code', $child_sku, '=')
-          ->execute();
-      }
-    }
 }

@@ -1,0 +1,19 @@
+/*
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+*/
+/* 
+    Created on : 12 Dec, 2018, 3:37:28 PM
+    Author     : user
+*/
+.packing_auditor_outer
+{
+    width:100%;
+    float:left;
+    margin-top:10px;
+    margin-bottom:10px;
+}
+.packing_auditor_name {
+    width:200px;
+}
