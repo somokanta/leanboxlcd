@@ -26,8 +26,8 @@ class field_asset_dispatch_count extends views_handler_field {
    function render($data) {
     global $user;
     $dis_id = change_feeds_import_get_distributor_id($user->uid);
-    $trip_id = $this->view->result[0]->field_field_trip_id[0]['raw']['value'];
-    
+    $trip_id = $data->field_field_trip_id[0]['raw']['value'];
+
     $query = db_select('node', 'n');
     $query->condition('n.type', 'assets_count');
     $query->condition('n.uid', $dis_id);
