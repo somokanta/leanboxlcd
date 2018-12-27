@@ -125,16 +125,15 @@ function dispatch_count_callback($form, &$form_state) {
 function _dispatch_assets_form_submit($form, &$form_state) {
   global $user;
   $dis_id = change_feeds_import_get_distributor_id($user->uid);
-
   $trip_id = $form_state['values']['trip_number'];
   $trip_data = $form_state['values']['trip_data'];
   $dispatch_count = $form_state['values']['dispatch_count'];
-  
-  foreach ($dispatch_count as $key => $asset_dispatch_count) {
-    if (!empty($asset_dispatch_count) || $asset_dispatch_count === "0") {
-      $asset_nid = get_asset_nid($trip_data[$key]['asset_type']);
-      $trip_nid = get_trip_nid($trip_id);
 
+  foreach ($dispatch_count as $key => $asset_dispatch_count) {
+    $asset_nid = get_asset_nid($trip_data[$key]['asset_type']);
+    $trip_nid = get_trip_nid($trip_id);
+    
+    if (!empty($asset_dispatch_count) || $asset_dispatch_count === "0") {
       $query = db_select('node', 'n');
       $query->condition('n.type', 'assets_count');
       $query->condition('n.uid', $dis_id);
@@ -168,6 +167,21 @@ function _dispatch_assets_form_submit($form, &$form_state) {
         node_save($assets_count);
       }
     }
+    else {
+      // When User delete Dispatch count value for Assets Type.
+      $query = db_select('node', 'n');
+      $query->condition('n.type', 'assets_count');
+      $query->condition('n.uid', $dis_id);
+      $query->condition('n.title', $trip_id);
+      $query->join('field_data_field_asset_type', 'at', 'at.entity_id = n.nid');
+      $query->condition('at.field_asset_type_nid', $asset_nid);
+      $query->leftjoin('field_data_field_dispatch_count', 'dc', 'dc.entity_id = n.nid');
+      $query->fields('dc', array('field_dispatch_count_value'));
+      $query->fields('n', array('nid'));
+      $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+      $nid = $res[0]['nid'];
+      node_delete($nid);  
+    }
   }
   drupal_set_message(t('Asset dispatched count saved successfully'));
 }
@@ -181,11 +195,22 @@ function _dispatch_assets_form_submit($form, &$form_state) {
 function _dispatch_assets_form_validate($form, &$form_state) {
   global $user;
   $dis_id = change_feeds_import_get_distributor_id($user->uid);
+  $trip_id = $form_state['values']['trip_number'];
 
   foreach ($form_state['values']['dispatch_count'] as $key => $val) {
     if (!empty($val) && !is_numeric($val)) {
       form_set_error('dispatch_count', 'Dispatched count should be numeric.');
+    } 
+    if(strlen($val) == 0){
+      $flag = 0;
     }
+    else {
+      $flag = 1;
+      break;
+    }
+  } 
+  if ($flag == 0) {
+    form_set_error('dispatch_count', 'Please enter Dispatched Assets for Trip ID ' . $trip_id);
   }
 }
 
