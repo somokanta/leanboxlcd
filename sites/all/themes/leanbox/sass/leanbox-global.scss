@@ -2007,11 +2007,13 @@ header[id="page-header"] {
 .page-ptl-loose-confirmation,
 .page-ptl-retail-cld-confirmation,
 .page-bill-wise-editing-cld,
-.page-master-ptl-loose-confirmation {
+.page-master-ptl-loose-confirmation,
+.page-master-ptl-cld-confirmation {
   [id^="ptl-loose-confirmation-form"],
   [id^="ptl-retail-cld-confirmation-form"],
   [id^="bill-wise-editing-cld-form"],
-  [id^="master-ptl-loose-confirmation-form"] {
+  [id^="master-ptl-loose-confirmation-form"],
+  [id^="master-ptl-cld-confirmation-form"] {
     .form-item-trip-number,
     .form-item-trip-type,
     .form-item-bill-number,
