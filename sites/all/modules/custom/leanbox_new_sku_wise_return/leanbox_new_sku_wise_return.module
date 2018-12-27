@@ -47,6 +47,15 @@ function leanbox_new_sku_wise_return_menu() {
      'file' => 'includes/godown_short_approval.inc',
    );
   
+  $items['godown-short-approval-delete'] = array(
+     'title' => 'Godown Short Approval Delete',
+     'page callback' => 'drupal_get_form',
+     'page arguments' => array('godown_short_approval_delete_form'),
+     'access arguments' => array('returns confirmation'),
+     'type' => MENU_NORMAL_ITEM,
+     'file' => 'includes/godown_short_approval_delete.inc',
+   );
+  
   return $items;
 }
 

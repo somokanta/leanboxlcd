@@ -138,6 +138,8 @@ function returns_confirmation_edit_form_validate($form, &$form_state) {
   $current_vrs_status = $check_trip_nid->field_vrs_status_value;
   $field_vrs_status = field_info_field('field_vrs_status');
   $vrs_status1 = list_allowed_values($field_vrs_status);
+  $claimed_godown_short = get_claimed_godown_short($trip_number, $dis_id);
+
   // return confirmed
   if ($current_vrs_status == '1') {
     unset($vrs_status1[1]);
@@ -149,7 +151,12 @@ function returns_confirmation_edit_form_validate($form, &$form_state) {
   if (isset($vrs_status1[$current_vrs_status])) {
     form_set_error('trip_number', "You cannot edit Trip ID :$trip_number is in $vrs_status1[$current_vrs_status] state.");
   }
-
+  
+  // Validation of delete Returns version on check approved flag is Yes.
+  if(!empty($claimed_godown_short)) {
+    form_set_error('form', "Please delete Claimed Godown Short.");
+    drupal_goto('returns-confirmation/edit');
+  }
   /*if ($vrs_status == -1) {
     form_set_error('trip_number', 'This trip is not confirmed yet. It is in delivery confirmation pending status.');
   }
@@ -209,4 +216,19 @@ function returns_confirmation_submit($form, $form_state) {
     
   }
   drupal_set_message(t("Inventory Returns deleted successfully for Trip ID: $trip_number."));
+}
+
+// Check Godown Short Approval.
+function get_claimed_godown_short($trip_id, $dis_id) {
+  $query = db_select('dispatch_planning_item_details', 'dpi');
+    $query->join('dispatch_planning_api_data', 'ad', 'dpi.trip_bill_reference = ad.id');
+    $query->condition('ad.runsheet_number', $trip_id);
+    $query->condition('ad.distributor_id', $dis_id);
+    $query->condition('dpi.claimed_godown_short', 0, '=');
+    $query->condition('dpi.approval_flag', 'yes', '=');
+    $query->fields('ad', array('bill_number'));
+    $query->fields('dpi', array('sku_code'));
+    $result = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+    
+    return $result; 
 }
