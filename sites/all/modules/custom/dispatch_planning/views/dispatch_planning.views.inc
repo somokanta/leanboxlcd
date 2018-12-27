@@ -5581,6 +5581,16 @@ function dispatch_planning_views_data() {
             'handler' => 'field_confirmed_cld',
         ),
     );
+    
+    // Custom view field Asset Dispatch Count for Trip Status Report.
+    $data['views']['assets'] = array(
+        'title' => t('Assets'),
+        'help' => t('Asset Dispatch Count.'),
+        'field' => array(
+            'handler' => 'field_asset_dispatch_count',
+        ),
+    );
+  
 
     return $data;
 }

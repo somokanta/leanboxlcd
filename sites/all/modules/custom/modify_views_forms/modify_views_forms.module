@@ -493,11 +493,14 @@ function validate_trip_status($form, &$form_state) {
     }
    // This is user input values.  Edit screen, that if Pre-start or Start time is being entered/already entered for a Trip ID, then entering Cashier name is mandatory.
   foreach($form_state['values']['node'] as $nid => $form_data){
+      global $user;
+      $dis_id = change_feeds_import_get_distributor_id($user->uid);
       $pre_start_time = trim($form_data[field_dispatch_pre_start_time][LANGUAGE_NONE][0]['value']);
       $dispatch_start_time = trim($form_data[field_dispatch_start_time][LANGUAGE_NONE][0]['value']);
       $cashier_name =  trim($form_data['field_cashier_name'][LANGUAGE_NONE][0]['value']);
       $dispatch_date = trim($form_data['field_dispatch_date'][LANGUAGE_NONE][0]['value']);
       $vehicle_no = trim($form_data['field_vehicle_no'][LANGUAGE_NONE][0]['value']);
+      
       if (!empty($vehicle_no) && empty(validate_vehicle_number($vehicle_no))) {
       form_set_error('form', t("Please enter valid Vehicle Number for Trip ID: " . $node_status[$nid]['trip_id']));
      }
@@ -524,6 +527,27 @@ function validate_trip_status($form, &$form_state) {
               form_set_error('form', t("Please enter the Dispatch date for Trip ID: ".$node_status[$nid]['trip_id']));
             }
       }
+      
+    // Validation for Dispatched Assets.
+    $query = db_select('node', 'n');
+    $query->condition('n.type', 'assets_count');
+    $query->condition('n.uid', $dis_id);
+    $query->condition('n.title', $node_status[$nid]['trip_id']);
+    $query->leftjoin('field_data_field_dispatch_count', 'dc', 'dc.entity_id = n.nid');
+    $query->addExpression("SUM(dc.field_dispatch_count_value)", 'total_dispatch_count_value');
+    $res = $query->execute()->fetchField();
+ 
+    if (strlen($res) == 0) {
+      $flag = 0;
+    }
+    else {
+      $flag = 1;
+      break;
+    }
+    if ($flag == 0) {
+      form_set_error('dispatch_count', 'Please enter Dispatched Assets for Trip ID ' . $node_status[$nid]['trip_id']);
+    }
+    // End Validation for Dispatched Assets.
   }
 }
 

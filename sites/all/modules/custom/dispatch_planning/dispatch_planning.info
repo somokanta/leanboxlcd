@@ -38,3 +38,4 @@ files[] = views/handler/header_ptl_cld_confirmation_custom_field.inc
 files[] = views/handler/footer_ptl_cld_confirmation_custom_field.inc
 files[] = views/handler/field_confirmed_cld.inc
 files[] =  views/handler/drs_report_net_amt.inc
+files[] =  views/handler/field_asset_dispatch_count.inc
