@@ -12,8 +12,10 @@
  * @param type $form_state
  * @return array
  */
+module_load_include('inc', 'dispatched_quantity_confirmation', 'includes/dispatch_qty_common');
 function master_ptl_loose_confirmation_form($form, &$form_state) {
   $form['#attached']['js'][] = drupal_get_path('module', 'dispatched_quantity_confirmation') . '/js/master_ptl_loose_confirmation.js';
+  $form['#attached']['css'][] = drupal_get_path('module', 'dispatched_quantity_confirmation') . '/css/dispatched_quantity_confirmation.css';
   global $user;
   $dis_id = change_feeds_import_get_distributor_id($user->uid);
 
@@ -29,7 +31,7 @@ function master_ptl_loose_confirmation_form($form, &$form_state) {
   // IF YOU ADD ANY FILTER THEN YOU HAVE TO CHANGE THE SUBMIT. LIKE OTHER SCREENS
   // Its look like illogical but its true
   $trip_number = $form_state['input']['trip_number'];
-
+  
   $form['apply'] = array(
     '#type' => 'submit',
     '#value' => 'Apply',
@@ -83,6 +85,26 @@ function master_ptl_loose_confirmation_form($form, &$form_state) {
         '#prefix' => '<div class="custom_middle_table" style="float:left;clear:both;width:100%">',
         '#suffix' => '</div>',
       );
+      // Dispatch Supervisor
+        $incharge_name_option = array('' => 'Select');
+        $resource_type = 'Packing Auditor';
+        $dispatch_supervisor_name_option = array();
+        $dispatch_supervisor_options = get_ptl_supervisor_list($dis_id,$resource_type);
+        if (!empty($dispatch_supervisor_options)) {
+          $dispatch_supervisor_name_option = $incharge_name_option + $dispatch_supervisor_options;
+          $field = 'field_packing_auditor_loose';
+          $default_value_superviser = get_auditor_name($dis_id,$trip_id,$field);
+        }
+        $form['packing_auditor_name'] = array(
+          '#title' => t('Packing Auditor Name'.'<span class="form-required" title="This field is required.">*</span>'),
+          //'#required' => TRUE,
+          '#type' => 'select',
+          '#default_value'=>$default_value_superviser,
+          '#prefix'=>'<div class="packing_auditor_outer"><div class="packing_auditor_name">',
+          '#suffix'=>'</div></div>',
+          '#options' => $dispatch_supervisor_name_option,
+          '#attributes' => array('class' => array('return-incharge-name')),
+        );
 
       $form['submit'] = array(
         '#type' => 'submit',
@@ -94,7 +116,7 @@ function master_ptl_loose_confirmation_form($form, &$form_state) {
       );
     }
 
-    $header2 = array('Bill Number', 'Party Name', 'Original Loose Qty', 'Short Qty', 'PPLC Reason', 'To be Dispatched Qty- Loose');
+    $header2 = array('Bill Number', 'Party Name', 'Original Loose Qty', 'Short Qty', 'Short Reason', 'To be Dispatched Qty- Loose');
 
     foreach ($options as $key => $val) {
       $sku_code = $val['sku_code'];
@@ -205,6 +227,7 @@ function trip_id_validate($form, &$form_state) {
   global $user;
   $dis_id = change_feeds_import_get_distributor_id($user->uid);
   $trip_number = $form_state['values']['trip_number'];
+  $form_state['trip_no_error'] = 0;
 
   $bypass_flag = get_loose_cld_flag_trip_level($trip_number, $dis_id);
   if ($bypass_flag['loose'] == 1) {
@@ -272,32 +295,21 @@ function master_ptl_loose_confirmation_submit($form, &$form_state) {
   global $user;
   $dis_id = change_feeds_import_get_distributor_id($user->uid);
   $trip_number = $form_state['values']['trip_number'];
-  //$child_sku = get_child_sku_mptl_query_wise($trip_number,$dis_id);
+  $child_sku = get_child_sku_mptl_query_wise($trip_number, $dis_id);
 
   if (empty($form_state['trip_no_error'])) {
     $query = db_select('master_ptl_data', 'mpd');
     $query->condition('mpd.trip_id', $trip_number);
     $query->condition('mpd.distributor_id', $dis_id);
     $query->condition('mpd.short_put_qty', 0, '>');
-    //to append child sku in form irrespective of short
-//        if (!empty($child_sku['child_sku'])) {
-//          $db_and1 = db_and();
-//          $db_and1->condition('mpd.short_put_qty', 0, '>');
-//          $db_and2 = db_and();
-//          $db_and2->condition('mpd.sku_code', $child_sku['child_sku'], 'IN');
-//          $db_or = db_or();
-//          $db_or->condition($db_and1);
-//          $db_or->condition($db_and2);
-//          $query->condition($db_or);
-//        }else{
-//          $query->condition('mpd.short_put_qty', 0, '>');
-//        }        
-
+    if (!empty($child_sku['child_sku'])) {
+      $query->condition('mpd.sku_code', $child_sku['child_sku'], 'NOT IN');
+    }
     $query->join('dispatch_qty_confirmation', 'dqc', ' dqc.trip_id = mpd.trip_id AND dqc.sku_code = mpd.sku_code AND mpd.distributor_id = dqc.distributor_id');
+    $query->condition('dqc.original_loose_qty', 0, '>');
     $query->addExpression('mpd.sku_code', 'sku');
     $query->addExpression('mpd.sku_code', 'sku_code');
     $query->addExpression('mpd.product_name', 'product_name');
-    //$query->addExpression('SUM(dqc.original_qty)', 'og');
     $query->addExpression('mpd.loose', 'looses');
     $query->addExpression('mpd.put_qty', 'put_qty');
     $query->addExpression("mpd.short_put_qty", 'short_qty');
@@ -332,7 +344,7 @@ function _masterptl_validate($form, &$form_state) {
         $form_state['mptl_error'] = 1;
       }
       if ($val['pplc_short_qty'] != '' && $val['pplc_short_qty'] != 0 && $val['master_short_reason'] == '') {
-        drupal_set_message(t("Enter PPLC reason for sku: " . $value['sku_code'] . " and bill $bill"), 'error');
+        drupal_set_message(t("Enter Short Reason for sku: " . $value['sku_code'] . " and bill $bill"), 'error');
         $form_state['mptl_error'] = 1;
       }
       if ($original_loose_qty < $val['pplc_short_qty']) {
@@ -348,6 +360,10 @@ function _masterptl_validate($form, &$form_state) {
       drupal_set_message(t("Short qty is not equal to sum of PPLC Short Qty for sku: " . $value['sku_code']), 'error');
       $form_state['mptl_error'] = 1;
     }
+  }
+  if(empty($form_state['values']['packing_auditor_name'])) {
+      drupal_set_message(t('Packing Auditor Name field is required'), 'error');
+      $form_state['mptl_error'] = 1;
   }
   if ($form_state['mptl_error'] == 1) {
     $form_state['rebuild'] = TRUE;
@@ -370,78 +386,75 @@ function _masterptl_submit($form, &$form_state) {
     }
     $query->addExpression('mpd.sku_code', 'sku_code');
     $query->addExpression('mpd.put_qty', 'put_qty');
-    $query->addExpression('dqc.bill_number', 'bill_number');
-    $query->addExpression('dqc.original_loose_qty', 'original_loose_qty');
+    $query->groupBy('dqc.sku_code');
+
     $result = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
-//        foreach ($form_state['master_ptl_loose_confirmation']['skus'] as $key => $value) {
-//          $put_qty = $form_state['values']['sku_details'][$key]['put_qty'];
     foreach ($result as $key => $value) {
-      $bill = $value['bill_number'];
       $sku_code = $value['sku_code'];
-      //$put_qty = isset($form_state['values']['sku_details'][$key]["put_qty"]) ? $form_state['values']['sku_details'][$key]["put_qty"] : $value['put_qty'];
-      $pplc_short_qty = $form_state['values']["sku_bill_table_" . $value['sku_code']][$bill]['pplc_short_qty'];
-      $to_be_dispatched_qty = $form_state['values']["sku_bill_table_" . $value['sku_code']][$bill]['to_be_dispatch'];
-      $master_short_reason = $form_state['input']["sku_bill_table_" . $value['sku_code']][$bill]['master_short_reason'];
-      if ($to_be_dispatched_qty !== '' && !is_null($to_be_dispatched_qty)) {
-        db_update('dispatch_qty_confirmation')
-          ->fields(array(
-            'loose_close_flag' => 1,
-            //'ptl_put_qty' => (!empty($put_qty)) ? $put_qty : 0,
-            'short_reason' => (!empty($pplc_short_qty)) ? $master_short_reason : '',
-            'masterptl_short_qty' => $pplc_short_qty,
-            'dispatch_loose_qty' => $to_be_dispatched_qty,
-          ))
-          ->condition('trip_id', $trip_number, '=')
-          ->condition('bill_number', $bill, '=')
-          ->condition('sku_code', $sku_code, '=')
-          ->execute();
+      $put_qty = $value['put_qty'];
+      $bills = get_bills_loose_from_trip_sku($trip_number, $sku_code, $dis_id);
+      foreach ($bills as $bill_details) {
 
-        $child_sku = get_child_detials_by_parent_sku($sku_code, $dis_id);
-        if (!empty($child_sku['child_sku'])) {
-          $child_ratio = $child_sku['child_qty'];
-
-          db_update('dispatch_qty_confirmation')
-            // ->expression('ptl_put_qty', 'ptl_put_qty + :qty', array(':qty' => $put_qty*$child_ratio))
-            ->expression('dispatch_loose_qty', 'dispatch_loose_qty + :dis', array(':dis' => $to_be_dispatched_qty * $child_ratio))
-            ->expression('masterptl_short_qty', 'masterptl_short_qty + :shrt', array(':shrt' => $pplc_short_qty * $child_ratio))
-            ->fields(array(
-              'loose_close_flag' => 1,
-              'short_reason' => !empty($master_short_reason) ? $master_short_reason : '',
-            ))
-            ->condition('trip_id', $trip_number, '=')
-            ->condition('bill_number', $bill, '=')
-            ->condition('sku_code', $child_sku['child_sku'], '=')
-            ->execute();
+        $original_loose_qty = $bill_details->original_loose_qty;
+        $bill = $bill_details->bill_number;
+        $pplc_short_qty = $form_state['values']["sku_bill_table_" . $sku_code][$bill]['pplc_short_qty'];
+        $to_be_dispatched_qty = $form_state['values']["sku_bill_table_" . $sku_code][$bill]['to_be_dispatch'];
+        $master_short_reason = $form_state['input']["sku_bill_table_" . $sku_code][$bill]['master_short_reason'];
+        if ($to_be_dispatched_qty !== '' && !is_null($to_be_dispatched_qty)) {
+          if ($original_loose_qty <= ($put_qty + $pplc_short_qty)) {
+            $dispatch_loose_qty = $original_loose_qty - $pplc_short_qty;
+            db_update('dispatch_qty_confirmation')
+              ->fields(array(
+                'masterptl_short_qty' => $pplc_short_qty,
+                'dispatch_loose_qty' => $dispatch_loose_qty,
+              ))
+              ->condition('trip_id', $trip_number, '=')
+              ->condition('bill_number', $bill, '=')
+              ->condition('sku_code', $sku_code, '=')
+              ->execute();
+            $put_qty -= $dispatch_loose_qty;
+          }
+          else {
+            $dispatch_loose_qty = $put_qty;
+            db_update('dispatch_qty_confirmation')
+              ->fields(array(
+                'masterptl_short_qty' => $pplc_short_qty,
+                'dispatch_loose_qty' => $dispatch_loose_qty,
+              ))
+              ->condition('trip_id', $trip_number, '=')
+              ->condition('bill_number', $bill, '=')
+              ->condition('sku_code', $sku_code, '=')
+              ->execute();
+            $put_qty -= $dispatch_loose_qty;
+          }
         }
-      }
-      else {
-        //update ptl qty for sku not exist in form  means no short             
-        db_update('dispatch_qty_confirmation')
-          ->expression('dispatch_loose_qty', 'original_loose_qty')
-          ->fields(array(
-            //'ptl_put_qty' => (!empty($put_qty)) ? $put_qty : 0,
-            'loose_close_flag' => 1,
-          ))
-          ->condition('trip_id', $trip_number, '=')
-          ->condition('bill_number', $bill, '=')
-          ->condition('sku_code', $sku_code, '=')
-          ->execute();
-
-        //child logic for not in form skus
-        $child_sku = get_child_detials_by_parent_sku($sku_code, $dis_id);
-        if (!empty($child_sku['child_sku'])) {
-          $child_ratio = $child_sku['child_qty'];
-          db_update('dispatch_qty_confirmation')
-            ->expression('dispatch_loose_qty', 'dispatch_loose_qty + :dis', array(':dis' => $value['original_loose_qty'] * $child_ratio))
-            ->fields(array(
-              'loose_close_flag' => 1
-            ))
-            ->condition('trip_id', $trip_number, '=')
-            ->condition('bill_number', $bill, '=')
-            ->condition('sku_code', $child_sku['child_sku'], '=')
-            ->execute();
+        else {
+          //no short qty. which are not in form
+          if ($bill_details->original_loose_qty < $put_qty) {
+            db_update('dispatch_qty_confirmation')
+              ->fields(array(
+                //'ptl_put_qty' => $put_qty,
+                'dispatch_loose_qty' => $bill_details->original_loose_qty,
+              ))
+              ->condition('trip_id', $trip_number, '=')
+              ->condition('bill_number', $bill_details->bill_number, '=')
+              ->condition('sku_code', $sku_code, '=')
+              ->execute();
+            $put_qty -= $val->original_loose_qty;
+          }
+          else {
+            db_update('dispatch_qty_confirmation')
+              ->fields(array(
+                //'ptl_put_qty' => $put_qty,
+                'dispatch_loose_qty' => $put_qty,
+              ))
+              ->condition('trip_id', $trip_number, '=')
+              ->condition('bill_number', $bill_details->bill_number, '=')
+              ->condition('sku_code', $sku_code, '=')
+              ->execute();
+            $put_qty = 0;
+          }
         }
-        //child logic end  
       }
     }
 
@@ -459,6 +472,13 @@ function _masterptl_submit($form, &$form_state) {
 //      ->condition('type', 'Master PTL', '=')     
       ->execute();
 
+    update_mptl_child_loose($trip_number, $dis_id, 'Master PTL');
+    $flag = check_loose_cld_close_flag($trip_number, $dis_id);
+    if ($flag['loose'] == 1 && $flag['cld'] == 1) {
+      sync_mptl_loose_cld($trip_number, $dis_id);
+      update_mptl_child_cld($trip_number, $dis_id, 'Master PTL');
+    }
+
     //Sync To be Dispatch Qty
     db_update('dispatch_qty_confirmation') // Table name no longer needs {}
       ->expression('to_be_dispatch_qty', "dispatch_loose_qty + (dispatch_cld_qty * upc) + cld_loose_child_qty")
@@ -470,6 +490,9 @@ function _masterptl_submit($form, &$form_state) {
     $node = node_load($nid);
     $node->field_loose_confirmation['und'][0]['value'] = 1;
     node_save($node);
+    $supervisor_resource_nid = $form_state['values']['packing_auditor_name'];
+    $field = 'field_packing_auditor_loose';
+    save_dispatch_qty_supervisor_name($trip_id,$supervisor_resource_nid,$dis_id,$field);
 
     drupal_set_message(t("Data submitted successfully."));
   }
@@ -521,7 +544,7 @@ function assign_master_ptl_loose_noshort($trip_number, $dis_id) {
   $query->join('dispatch_qty_confirmation', 'dqc', ' dqc.trip_id = mpd.trip_id AND dqc.sku_code = mpd.sku_code AND mpd.distributor_id = dqc.distributor_id');
   $query->condition('mpd.trip_id', $trip_number);
   if (!empty($child_sku['child_sku'])) {
-    $query->condition('mpd.sku_code', $child_sku['child_sku'], ' NOT IN');
+    $query->condition('mpd.sku_code', $child_sku['child_sku'], 'NOT IN');
   }
   //$query->condition('mpd.put_qty', 0, '>'); //for put qty > zero mean we selecting only parent sku
   $query->condition('mpd.distributor_id', $dis_id);
@@ -546,22 +569,7 @@ function assign_master_ptl_loose_noshort($trip_number, $dis_id) {
           ->condition('bill_number', $bill_details->bill_number, '=')
           ->condition('sku_code', $sku_code, '=')
           ->execute();
-        //child logic
-        $child_sku = get_child_detials_by_parent_sku($sku_code, $dis_id);
-        if ($child_sku) {
-          $child_ratio = $child_sku['child_qty'];
-          db_update('dispatch_qty_confirmation')
-            ->expression('ptl_put_qty', 'ptl_put_qty + :qty', array(':qty' => $bill_details->original_loose_qty * $child_ratio))
-            ->expression('dispatch_loose_qty', 'dispatch_loose_qty + :dis', array(':dis' => $bill_details->original_loose_qty * $child_ratio))
-            //            ->fields(array(
-            //              'dispatch_loose_qty' => $put_qty*$child_ratio,
-            //            ))
-            ->condition('trip_id', $trip_number, '=')
-            ->condition('bill_number', $bill_details->bill_number, '=')
-            ->condition('sku_code', $child_sku['child_sku'], '=')
-            ->execute();
-        }
-        $put_qty -= $val->original_cld_qty;
+        $put_qty -= $val->original_loose_qty;
       }
       else {
         db_update('dispatch_qty_confirmation')
@@ -573,19 +581,6 @@ function assign_master_ptl_loose_noshort($trip_number, $dis_id) {
           ->condition('bill_number', $bill_details->bill_number, '=')
           ->condition('sku_code', $sku_code, '=')
           ->execute();
-
-        //child logic
-        $child_sku = get_child_detials_by_parent_sku($sku_code, $dis_id);
-        if ($child_sku) {
-          $child_ratio = $child_sku['child_qty'];
-          db_update('dispatch_qty_confirmation')
-            ->expression('ptl_put_qty', 'ptl_put_qty + :qty', array(':qty' => $put_qty * $child_ratio))
-            ->expression('dispatch_loose_qty', 'dispatch_loose_qty + :dis', array(':dis' => $put_qty * $child_ratio))
-            ->condition('trip_id', $trip_number, '=')
-            ->condition('bill_number', $bill_details->bill_number, '=')
-            ->condition('sku_code', $child_sku['child_sku'], '=')
-            ->execute();
-        }
         $put_qty = 0;
       }
     }
@@ -600,17 +595,31 @@ function assign_master_ptl_loose_noshort($trip_number, $dis_id) {
 //    ))
 //    ->condition('trip_id', $trip_number, '=')
 //    ->execute();
-  //Sync To be Dispatch Qty
+  //Sync To be Dispatch Qty   
   db_update('dispatch_qty_confirmation') // Table name no longer needs {}
     ->expression('to_be_dispatch_qty', "dispatch_loose_qty + (dispatch_cld_qty * upc) + cld_loose_child_qty")
     ->fields(array(
-//       'loose_close_flag' => 1,
+      'loose_close_flag' => 1,
       'type' => 'Master PTL',
       'loose_created_date' => REQUEST_TIME,
     ))
     ->condition('trip_id', $trip_number, '=')
     ->execute();
   //End
+
+  update_mptl_child_loose($trip_number, $dis_id, 'Master PTL');
+  $flag = check_loose_cld_close_flag($trip_number, $dis_id);
+  if ($flag['loose'] == 1 && $flag['cld'] == 1) {
+    sync_mptl_loose_cld($trip_number, $dis_id);
+    update_mptl_child_cld($trip_number, $dis_id, 'Master PTL');
+  }
+
+  //Sync To be Dispatch Qty
+  db_update('dispatch_qty_confirmation') // Table name no longer needs {}
+    ->expression('to_be_dispatch_qty', "dispatch_loose_qty + (dispatch_cld_qty * upc) + cld_loose_child_qty")
+    ->condition('trip_id', $trip_number, '=')
+    ->execute();
+
   //update dispatch data
   $nid = get_nid_from_title($trip_number, 'dispatch_data');
   $node = node_load($nid);
@@ -642,11 +651,12 @@ function get_child_sku_mptl_query_wise($trip_number, $dis_id) {
 
 function get_all_parent_skus_mptl_query_wise($trip_number, $dis_id) {
   $query = db_select('dispatch_qty_confirmation', 'dqc');
-  $query->leftjoin('master_ptl_data', 'mpd', ' dqc.trip_id = mpd.trip_id AND dqc.sku_code = mpd.sku_code AND mpd.distributor_id = dqc.distributor_id');
+  //$query->leftjoin('master_ptl_data', 'mpd', ' dqc.trip_id = mpd.trip_id AND dqc.sku_code = mpd.sku_code AND mpd.distributor_id = dqc.distributor_id');
   $query->condition('dqc.trip_id', $trip_number);
   $query->condition('dqc.distributor_id', $dis_id);
   //$query->condition('mpd.short_put_qty', 0, '>');
   $query->addExpression('dqc.sku_code', 'sku_code');
+  $query->groupBy('dqc.sku_code');
   $result = $query->execute()->fetchCol();
   return $result;
 }
@@ -693,11 +703,9 @@ function master_ptl_loose_autoallocate($form, &$form_state) {
           ->condition('sku_code', $value['sku_code'], '=')
           ->execute();
         //break;
-        if ($short_qty > 0) {
-          $form_state['complete form']['sku_bill_table_' . $value['sku_code']]['#rows'][$bill][3]['data']['pplc_short_qty']['#value'] = $short_qty;
-          $form_state['complete form']['sku_bill_table_' . $value['sku_code']]['#rows'][$bill]['to_be_dispatch']['data']['to_be_dispatch']['#value'] = $original_loose_qty - $short_qty;
-        }
+        $form_state['complete form']['sku_bill_table_' . $value['sku_code']]['#rows'][$bill][3]['data']['pplc_short_qty']['#value'] = $short_qty;
         $form_state['complete form']['sku_bill_table_' . $value['sku_code']]['#rows'][$bill]['to_be_dispatch']['data']['to_be_dispatch']['#value'] = $original_loose_qty - $short_qty;
+
         $short_qty = 0; // instead of break for remailining lines update 0 with reason
       }
     }

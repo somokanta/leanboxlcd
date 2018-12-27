@@ -12,8 +12,10 @@
  * @param type $form_state
  * @return array
  */
+module_load_include('inc', 'dispatched_quantity_confirmation', 'includes/dispatch_qty_common');
 function bill_wise_editing_cld_form($form, &$form_state) {
   $form['#attached']['js'][] = drupal_get_path('module', 'dispatched_quantity_confirmation') . '/js/bill_wise_editing_cld.js';
+  $form['#attached']['css'][] = drupal_get_path('module', 'dispatched_quantity_confirmation') . '/css/dispatched_quantity_confirmation.css';
   global $user;
   $dis_id = change_feeds_import_get_distributor_id($user->uid);
 
@@ -96,7 +98,24 @@ function bill_wise_editing_cld_form($form, &$form_state) {
         '#prefix' => '<div class="custom_middle_table">',
         '#suffix' => '</div>',
       );
-
+                  // Dispatch Supervisor
+      $incharge_name_option = array('' => 'Select');
+      $resource_type = 'Bill Editor';
+      $dispatch_supervisor_name_option = array();
+      $dispatch_supervisor_options = get_ptl_supervisor_list($dis_id, $resource_type);
+      if (!empty($dispatch_supervisor_options)) {
+        $dispatch_supervisor_name_option = $incharge_name_option + $dispatch_supervisor_options;
+        $field = 'field_bill_cld_confirm_resource';
+        $default_value_superviser = get_auditor_name($dis_id,$trip_number,$field);
+      }
+      $form['bill_editor'] = array(
+        '#title' => t('Edited By*'),
+        '#type' => 'select',
+        '#prefix'=>'<div class="packing_auditor_outer"><div class="packing_auditor_name">',
+        '#suffix'=>'</div></div>',
+        '#default_value'=>$default_value_superviser,
+        '#options' => $dispatch_supervisor_name_option,
+      ); 
       $form['save'] = array(
         '#type' => 'submit',
         '#value' => 'Save',
@@ -205,6 +224,12 @@ function trip_id_validate($form, &$form_state) {
   $sku_code = $form_state['values']['sku_code'];
   $form_state['values']['trip_type'] = get_trip_type($trip_number, $dis_id);
   $type = $form_state['values']['trip_type'];
+  
+  if ($type == 'Master PTL') {
+    $link = l('Master PTL CLD confirmation', '/master-ptl-cld-confirmation',array('attributes'=>array("target" => "_blank")));
+    drupal_set_message(t('Trip Id '.$trip_number.' is of type Master PTL. Please go to '.$link), 'warning');
+    $form_state['trip_no_error'] = 1;
+  }
   
   $bypass_flag = get_loose_cld_flag_trip_level($trip_number, $dis_id);
     if ($bypass_flag['cld'] == 1) {
@@ -365,6 +390,10 @@ function billwise_editing_cld_validate($form, &$form_state) {
       $form_state['rebuild'] = TRUE;
     }
   }
+  if(empty($form_state['values']['bill_editor'])) {
+      drupal_set_message(t('Edited By field is required'), 'error');
+      $form_state['rebuild'] = TRUE;
+  }
 }
 
 function billwise_save_submit($form, &$form_state) {
@@ -419,6 +448,9 @@ function billwise_save_submit($form, &$form_state) {
       }
     }
   }
+  $supervisor_resource_nid = $form_state['values']['bill_editor'];
+  $field = 'field_bill_cld_confirm_resource';
+  save_dispatch_qty_supervisor_name($trip_id,$supervisor_resource_nid,$dis_id,$field);
   drupal_set_message(t("Data saved successfully."));
 }
 
@@ -571,6 +603,9 @@ function billwise_final_submit($form, &$form_state) {
     $node = node_load($nid);
     $node->field_cld_confirmation['und'][0]['value'] = 1;
     node_save($node);
+    $supervisor_resource_nid = $form_state['values']['bill_editor'];
+    $field = 'field_bill_cld_confirm_resource';
+    save_dispatch_qty_supervisor_name($trip_id,$supervisor_resource_nid,$dis_id,$field);
     drupal_set_message(t("Data closed successfully."));
   }
   else {
