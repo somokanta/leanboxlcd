@@ -5591,6 +5591,14 @@ function dispatch_planning_views_data() {
         ),
     );
   
+    // Original Qty, To be Dispatched Qty, Host Revised Qty fields in Sales Returns report.
+    $data['views']['original_Sum_of_TOTAL_SALES_QTY'] = array(
+      'title' => t('Original Qty, To be Dispatched Qty, Host Revised Qty fields handler'),
+      'help' => t('Original Qty, To be Dispatched Qty, Host Revised Qty fields handler'),
+      'field' => array(
+        'handler' => 'field_sales_returns_report_qty',
+      ),
+    );
 
     return $data;
 }
