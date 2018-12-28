@@ -252,10 +252,10 @@ function deliverycost_calculation_menu() {
     'type' => MENU_NORMAL_ITEM,
     'file' => 'includes/vehicle_resource_daily_status.inc',
   );
-  $items['get_active_resource_type/autocomplete'] = array(
+  $items['get_active_resource_type/autocomplete/%'] = array(
     'title' => 'get_active_resources autocomplete',
     'page callback' => '_get_active_resources_type',
-    'page arguments' => array(1),
+    'page arguments' => array(2),
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
