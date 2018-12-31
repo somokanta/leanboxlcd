@@ -529,6 +529,12 @@ function master_ptl_cld_confirmation_submit($form, &$form_state) {
       ->expression('to_be_dispatch_qty', "dispatch_loose_qty + (dispatch_cld_qty * upc) + cld_loose_child_qty")
       ->condition('trip_id', $trip_id, '=')
       ->execute();
+    
+    $nid = get_nid_from_title($trip_id, 'dispatch_data');
+    $node = node_load($nid);
+    $node->field_cld_confirmation['und'][0]['value'] = 1;
+    node_save($node);
+    
     //no short in a trip then do calculation close trip automatically 
     //needs to handle child in no short
     //assign_mptl_cld_qty_no_sort($trip_id, $type, $dis_id);
