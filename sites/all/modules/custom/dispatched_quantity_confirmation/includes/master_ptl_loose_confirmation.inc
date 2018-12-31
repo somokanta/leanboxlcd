@@ -492,7 +492,7 @@ function _masterptl_submit($form, &$form_state) {
     node_save($node);
     $supervisor_resource_nid = $form_state['values']['packing_auditor_name'];
     $field = 'field_packing_auditor_loose';
-    save_dispatch_qty_supervisor_name($trip_id,$supervisor_resource_nid,$dis_id,$field);
+    save_dispatch_qty_supervisor_name($trip_number,$supervisor_resource_nid,$dis_id,$field);
 
     drupal_set_message(t("Data submitted successfully."));
   }
