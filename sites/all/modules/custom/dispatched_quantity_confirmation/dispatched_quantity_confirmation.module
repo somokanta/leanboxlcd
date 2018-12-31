@@ -228,7 +228,7 @@ function dispatched_quantity_confirmation_menu() {
     'type' => MENU_NORMAL_ITEM,
     'file' => 'includes/master_ptl_cld_confirmation.inc',
   );
-
+  
   return $items;
 }
 
@@ -1122,8 +1122,6 @@ function update_mptl_child_cld($trip_id, $dis_id, $type) {
   $query->addExpression('dqc.sku_code', 'sku_code');
   $query->addExpression('dqc.upc', 'upc');
   $query->addExpression('dqc.bill_number', 'bill_number');
-  //$query->addExpression('dqc.original_loose_qty', 'original_loose_qty');
-  $query->addExpression('dqc.original_cld_qty', 'original_cld_qty');
   $query->addExpression('dqc.cld_confirmed_qty', 'cld_confirmed_qty');
   $query->addExpression('dqc.cld_short_reason', 'cld_short_reason');
   $query->addExpression('dqc.cld_loose_child_qty', 'cld_loose_child_qty');
@@ -1131,8 +1129,6 @@ function update_mptl_child_cld($trip_id, $dis_id, $type) {
   foreach ($result as $key => $value) {
     $sku7_code = $value['sku_code'];
     $bill_number = $value['bill_number'];
-    $product_name = $value['product_name'];
-    $original_cld_qty = $value['original_cld_qty'];
     $cld_confirmed_qty = $value['cld_confirmed_qty'];
     $cld_short_reason = $value['cld_short_reason'];
     $cld_loose_child_qty = $value['cld_loose_child_qty'];
@@ -1194,7 +1190,7 @@ function update_mptl_child_loose($trip_id, $dis_id, $type) {
   }
   $query->addExpression('dqc.sku_code', 'sku_code');
   $query->addExpression('dqc.bill_number', 'bill_number');
-  $query->addExpression('dqc.original_loose_qty', 'original_loose_qty');
+  //$query->addExpression('dqc.original_loose_qty', 'original_loose_qty');
   $query->addExpression('dqc.dispatch_loose_qty', 'dispatch_loose_qty');
   $query->addExpression('dqc.masterptl_short_qty', 'masterptl_short_qty');
   $query->addExpression('dqc.short_reason', 'short_reason');
@@ -1202,8 +1198,6 @@ function update_mptl_child_loose($trip_id, $dis_id, $type) {
   foreach ($result as $key => $value) {
     $sku7_code = $value['sku_code'];
     $bill_number = $value['bill_number'];
-    $product_name = $value['product_name'];
-    $original_loose_qty = $value['original_loose_qty'];
     $dispatch_loose_qty = $value['dispatch_loose_qty'];
     $pplc_short_qty = $value['masterptl_short_qty'];
     $short_reason = $value['short_reason'];
