@@ -172,8 +172,12 @@ function dispatched_quantity_confirmation_schema() {
          'default' => 0,
       ),
     ),
+    'indexes' => array(
+      'dqc_bill_number' => array('bill_number'),
+      'dqc_sku_code' => array('sku_code'),
+    ),
     'primary key' => array('id'),
-  );
+  );  
 /*  
   $schema['host_revised_quantity'] = array(
     'description' => 'Host Revised Quantity',

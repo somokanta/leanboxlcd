@@ -569,7 +569,7 @@ function assign_master_ptl_loose_noshort($trip_number, $dis_id) {
           ->condition('bill_number', $bill_details->bill_number, '=')
           ->condition('sku_code', $sku_code, '=')
           ->execute();
-        $put_qty -= $val->original_loose_qty;
+        $put_qty -= $bill_details->original_loose_qty;
       }
       else {
         db_update('dispatch_qty_confirmation')
@@ -597,7 +597,7 @@ function assign_master_ptl_loose_noshort($trip_number, $dis_id) {
 //    ->execute();
   //Sync To be Dispatch Qty   
   db_update('dispatch_qty_confirmation') // Table name no longer needs {}
-    ->expression('to_be_dispatch_qty', "dispatch_loose_qty + (dispatch_cld_qty * upc) + cld_loose_child_qty")
+    //->expression('to_be_dispatch_qty', "dispatch_loose_qty + (dispatch_cld_qty * upc) + cld_loose_child_qty")
     ->fields(array(
       'loose_close_flag' => 1,
       'type' => 'Master PTL',
