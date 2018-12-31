@@ -406,6 +406,7 @@ function _masterptl_submit($form, &$form_state) {
             db_update('dispatch_qty_confirmation')
               ->fields(array(
                 'masterptl_short_qty' => $pplc_short_qty,
+                'short_reason' => !empty($pplc_short_qty) ?  $master_short_reason : '',
                 'dispatch_loose_qty' => $dispatch_loose_qty,
               ))
               ->condition('trip_id', $trip_number, '=')
@@ -419,6 +420,7 @@ function _masterptl_submit($form, &$form_state) {
             db_update('dispatch_qty_confirmation')
               ->fields(array(
                 'masterptl_short_qty' => $pplc_short_qty,
+                'short_reason' => !empty($pplc_short_qty) ?  $master_short_reason : '',
                 'dispatch_loose_qty' => $dispatch_loose_qty,
               ))
               ->condition('trip_id', $trip_number, '=')

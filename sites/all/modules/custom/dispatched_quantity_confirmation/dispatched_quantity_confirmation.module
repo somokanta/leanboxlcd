@@ -999,7 +999,7 @@ function get_mptl_all_bills_from_trip_sku($trip_number, $sku, $dis_id) {
   $all_parent_sku = get_all_parent_cld_skus_query_wise($trip_number, $dis_id);
   $child_sku = get_child_cld_sku_query_wise($all_parent_sku, $dis_id);
   $query = db_select('dispatch_qty_confirmation', 'dqp');
-  $query->fields('dqp', array('bill_number', 'original_qty', 'original_cld_qty', 'original_loose_qty', 'dispatch_loose_qty', 'masterptl_short_qty', 'upc'));
+  $query->fields('dqp', array('bill_number', 'original_qty', 'original_cld_qty', 'original_loose_qty', 'dispatch_loose_qty', 'masterptl_short_qty','cld_short_reason', 'upc'));
   $query->condition('dqp.distributor_id', $dis_id);
   $query->condition('dqp.trip_id', $trip_number);
   $query->condition('dqp.sku_code', $sku);
@@ -1040,16 +1040,17 @@ function sync_mptl_loose_cld($trip_number, $dis_id) {
       $original_loose_qty = $val['original_loose_qty'];
       $dispatch_loose_qty = $val['dispatch_loose_qty'];
       $masterptl_short_qty = $val['masterptl_short_qty'];
+      $cld_short_reason = $val['cld_short_reason'];
       $upc = $val['upc'];
 
 
       // if cld exist at bill level but don't put > 0 condition.
       // because we have to remove cld confirmed qty
-      if ($original_cld_qty < $total_conf_cld) {
+      if ($original_cld_qty <= $total_conf_cld) {
         db_update('dispatch_qty_confirmation')
           ->fields(array(
             'cld_confirmed_qty' => $original_cld_qty,
-            //'cld_short_reason' => $cld_short_reason ? $cld_short_reason : '',
+            'cld_short_reason' =>  '',
             'dispatch_cld_qty' => $original_cld_qty,
             'type' => 'Master PTL',
           ))
@@ -1064,7 +1065,7 @@ function sync_mptl_loose_cld($trip_number, $dis_id) {
         db_update('dispatch_qty_confirmation')
           ->fields(array(
             'cld_confirmed_qty' => $total_conf_cld,
-            //'cld_short_reason' => $cld_short_reason ? $cld_short_reason : '',
+            'cld_short_reason' => $cld_short_reason ? $cld_short_reason : '',
             'dispatch_cld_qty' => $total_conf_cld,
             'type' => 'Master PTL',
           ))
@@ -1088,21 +1089,35 @@ function sync_mptl_loose_cld($trip_number, $dis_id) {
         $original_loose_qty = $val['original_loose_qty'];
         $dispatch_loose_qty = $val['dispatch_loose_qty'];
         $masterptl_short_qty = $val['masterptl_short_qty'];
+        $cld_short_reason = $val['cld_short_reason'];
         $upc = $val['upc'];
 
         if ($original_loose_qty) { // cld exist only in master ptl not at bill level. means combination of loose will becom cld
           $cld_loose = $original_loose_qty - ($dispatch_loose_qty + $masterptl_short_qty);
-
-          db_update('dispatch_qty_confirmation')
-            ->fields(array(
-              'cld_loose_child_qty' => $cld_loose,
-              //'cld_short_reason' => $cld_short_reason ? $cld_short_reason : '',
-            ))
-            ->condition('trip_id', $trip_number, '=')
-            ->condition('bill_number', $bill, '=')
-            ->condition('sku_code', $sku, '=')
-            ->execute();
-          $cld_final_qty -= $cld_loose;
+          if ($cld_loose <= $cld_final_qty) {
+            db_update('dispatch_qty_confirmation')
+              ->fields(array(
+                'cld_loose_child_qty' => $cld_loose,
+                'cld_short_reason' => '',
+              ))
+              ->condition('trip_id', $trip_number, '=')
+              ->condition('bill_number', $bill, '=')
+              ->condition('sku_code', $sku, '=')
+              ->execute();
+            $cld_final_qty -= $cld_loose;
+          }
+          else {
+            db_update('dispatch_qty_confirmation')
+              ->fields(array(
+                'cld_loose_child_qty' => $cld_final_qty,
+                'cld_short_reason' => !empty($cld_loose) ? $cld_short_reason : '',
+              ))
+              ->condition('trip_id', $trip_number, '=')
+              ->condition('bill_number', $bill, '=')
+              ->condition('sku_code', $sku, '=')
+              ->execute();
+            $cld_final_qty = 0;
+          }
         }
       }
     }
