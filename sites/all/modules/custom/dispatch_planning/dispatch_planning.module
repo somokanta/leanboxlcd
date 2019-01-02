@@ -3944,7 +3944,7 @@ function dispatch_planning_views_pre_render(&$view) {
       $query->addexpression("(CASE WHEN (dpid.res_godown_short + dpid.claimed_godown_short + dpid.return_qty + dpid.res_cashier_short) >= 0 THEN ((cbd.revised_host_quantity - cbd.Sum_of_TOTAL_SALES_QTY)+(dpid.res_godown_short + dpid.claimed_godown_short + dpid.return_qty + dpid.res_cashier_short)) END)", 'final_return_qty');
       $query->groupBy('cbd.sku7_code');
       $res = $query->execute()->fetchField();
-      if (empty($res)) {  
+      if ($res == 0) {  
         unset($view->result[$key]);
       }
     }
