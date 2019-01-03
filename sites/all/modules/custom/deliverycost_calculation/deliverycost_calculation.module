@@ -1642,9 +1642,9 @@ function get_all_active_vehicles_on_date_range($dispatch_from_date, $dispatch_to
     $query->addExpression("DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(start_period.field_start_period_value),'+00:00','+05:30'), '%Y-%m-%d')", 'start_period');
     $query->fields('vehicle_owner', array('field_vehicle_owner_value'));
     $query->fields('vehicle_type', array('field_vehicle_type_value'));
-    $result = $query->execute()->fetchAll(PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
-    return $result;
-    //$res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+    //$result = $query->execute()->fetchAll(PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
+    //return $result;
+    $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
     
     //$result = $query->execute()->fetchAll(PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
     if (!empty($res)) {
