@@ -2094,8 +2094,8 @@ function vehicle_day_wise_performance_form_submit($form, &$form_state, $export =
         $day_of_month = date('Y-m-d', $currentdate);
         if (strtolower(date('l', $currentdate)) != strtolower($weekoff) && $contract_start_period <= $currentdate) {
           //if (empty($absent_vehilce_details[$vehicle_number_value][$day_of_month]) && empty($trip_created_days[$vehicle_number_value][$day_of_month])) {
-          if (empty($trip_created_days[$vehicle_number_value][$day_of_month])) {  
-           $days[$vehicle_number_value][$day_of_month] = $day_of_month;
+          if (empty($absent_vehilce_details[$vehicle_number_value][$day_of_month])) {
+              $days[$vehicle_number_value][$day_of_month] = $day_of_month;
           }
         }
         $currentdate = strtotime('+1 day', $currentdate);
