@@ -1664,7 +1664,7 @@ function dispatch_planning_update_7121() {
     'box_id' => array(
       'description' => 'Box ID',
       'type' => 'varchar',
-      'length' => 25,
+      'length' => 100,
       'not null' => TRUE,
       'default' => '',
     ),
@@ -2166,7 +2166,7 @@ function dispatch_planning_update_7138() {
     'box_id' => array(
       'description' => 'Box ID',
       'type' => 'varchar',
-      'length' => 25,
+      'length' => 100,
       'not null' => TRUE,
       'default' => '',
     ),
