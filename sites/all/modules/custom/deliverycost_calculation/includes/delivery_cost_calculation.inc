@@ -1917,6 +1917,7 @@ function vehicle_day_wise_performance_form_submit($form, &$form_state, $export =
   $mtd_data = array();
   $rows = array();
   $trip_created_days = array();
+   watchdog('$all_vehicles', '<pre>' . print_r($all_vehicles, TRUE) . '</pre>');
   if (!empty($all_vehicles)) {
     foreach ($all_vehicles as $vehicle_number_value => $vehicle_values) {
       $vehicle_total_delivered_value = 0;
@@ -2152,6 +2153,7 @@ function vehicle_day_wise_performance_form_submit($form, &$form_state, $export =
     watchdog('absent', '<pre>' . print_r($absent_vehilce_details[$vehicle_number_value], TRUE) . '</pre>');
     watchdog('trip_created', '<pre>' . print_r($trip_created_days[$vehicle_number_value], TRUE) . '</pre>');
     watchdog('not created', '<pre>' . print_r($days[$vehicle_number_value], TRUE) . '</pre>');
+    
     if (!empty($datas)) {
       $rows = array();
       foreach ($datas as $key => $value) {
