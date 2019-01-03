@@ -1655,15 +1655,12 @@ function get_all_active_vehicles_on_date_range($dispatch_from_date, $dispatch_to
         //$result[$value['title']]['field_vehicle_type_value'] = $value['field_vehicle_type_value'];
         if ($i == 0) {
           $end_period = $value['end_period'];
-          //$result[$value['title']]['end_period'] = $end_period;
         }
         else if ($i == $len - 1) {
           $start_period = $value['start_period'];
-          //$result[$value['title']]['start_period'] = $start_period;
         }
         if ($len == 1) {
           $start_period = $value['start_period'];
-          //$result[$value['title']]['start_period'] = $start_period;
         }
 
         $i++;
