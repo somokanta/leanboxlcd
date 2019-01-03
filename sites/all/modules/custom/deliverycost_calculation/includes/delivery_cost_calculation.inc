@@ -2090,6 +2090,9 @@ function vehicle_day_wise_performance_form_submit($form, &$form_state, $export =
       $year2 = date('Y', $ts2);
       $month1 = date('m', $ts1);
       $month2 = date('m', $ts2);
+      watchdog('$currentdate', '<pre>' . print_r($currentdate, TRUE) . '</pre>');
+      watchdog('$contract_end_period', '<pre>' . print_r($contract_end_period, TRUE) . '</pre>');
+      watchdog('$contract_start_period', '<pre>' . print_r($contract_start_period, TRUE) . '</pre>');
       while ($currentdate <= $ts2 && $currentdate <= $contract_end_period) {
         $day_of_month = date('Y-m-d', $currentdate);
         if (strtolower(date('l', $currentdate)) != strtolower($weekoff) && $contract_start_period <= $currentdate) {
