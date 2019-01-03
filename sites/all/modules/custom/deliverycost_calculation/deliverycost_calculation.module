@@ -1706,6 +1706,28 @@ function get_all_active_resources_on_date_range($dispatch_from_date, $dispatch_t
       $query->condition('resource.field_resource_name_value', $resource_name);
     }
     $result = $query->execute()->fetchAll(PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
+    /*$res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+    if (!empty($res)) {
+      foreach ($res as $value) {
+          $resource_contract_periods[$value['field_resource_name_value']]['end_period'][] = $value['end_period'];
+          $resource_contract_periods[$value['field_resource_name_value']]['start_period'][] = $value['start_period'];
+          $resource_contract_periods[$value['field_resource_name_value']]['field_resource_type_value'] = $value['field_resource_type_value'];
+          $resource_contract_periods[$value['field_resource_name_value']]['resource_type'] = $value['resource_type'];
+          $resource_contract_periods[$value['field_resource_name_value']]['field_weekly_off_value'] = $value['field_weekly_off_value'];
+          $resource_contract_periods[$value['field_resource_name_value']]['cost_per_month'] = $value['cost_per_month'];
+        }
+      foreach($resource_contract_periods as $res_key=>$value) { 
+          $end_period = $value['end_period'][0]; 
+          end($value['start_period']);
+          $key = key($value['start_period']); 
+          $start_period = $value['start_period'][$key]; 
+          $result[$res_key] = array(     'field_resource_type_value'=>$value['field_resource_type_value'],
+                                         'field_weekly_off_value'=>$value['field_weekly_off_value']
+                                         ,'start_period'=>$start_period,'end_period'=>$end_period
+                                         ,'cost_per_month'=>$value['cost_per_month']
+                                         ,'resource_type'=>$value['resource_type']);
+        }
+    }*/
   }
   return $result;
 }
