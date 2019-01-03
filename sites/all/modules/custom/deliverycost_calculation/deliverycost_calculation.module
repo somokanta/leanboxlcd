@@ -1631,7 +1631,7 @@ function get_all_active_vehicles_on_date_range($dispatch_from_date, $dispatch_to
     $query->join('node', 'vehicle_master', 'vehicle_master.nid = vehicle_ref.field_vehicle_number_ref_nid');
     $query->condition('vehicle_master.type', 'vehicle_master');
     $query->condition('vehicle_master.uid', $distributor_id);
-    $query->orderBy('n.nid','desc');
+    $query->orderBy('n.created','desc');
     if (!empty($vehicle_number)) {
        $query->condition('vehicle_master.title', $vehicle_number);
     }
