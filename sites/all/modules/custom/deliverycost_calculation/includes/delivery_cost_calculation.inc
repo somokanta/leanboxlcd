@@ -2146,6 +2146,9 @@ function vehicle_day_wise_performance_form_submit($form, &$form_state, $export =
       $rows[$vehicle_number_value][0]['vehicle_no'] = $vehicle_number_value;
       $datas[$vehicle_number_value] = $rows[$vehicle_number_value];
     }
+    watchdog('absent', '<pre>' . print_r($absent_vehilce_details[$vehicle_number_value], TRUE) . '</pre>');
+    watchdog('trip_created', '<pre>' . print_r($trip_created_days[$vehicle_number_value], TRUE) . '</pre>');
+    watchdog('not created', '<pre>' . print_r($days[$vehicle_number_value], TRUE) . '</pre>');
     if (!empty($datas)) {
       $rows = array();
       foreach ($datas as $key => $value) {
