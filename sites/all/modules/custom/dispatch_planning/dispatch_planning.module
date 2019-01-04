@@ -3932,8 +3932,9 @@ function get_final_return_qty($trip_id, $bill_num, $sku_code, $distributor_id) {
   $query->condition('dpid.trip_bill_reference', $trip_bill_reference);
   $query->condition('cbd.distributor_id', $distributor_id);
   $query->addExpression("CASE WHEN(cbd.revised_host_quantity IS NULL) THEN ((0 - cbd.Sum_of_TOTAL_SALES_QTY) + (dpid.res_godown_short + dpid.claimed_godown_short + dpid.return_qty + dpid.res_cashier_short)) ELSE ((cbd.revised_host_quantity - cbd.Sum_of_TOTAL_SALES_QTY)+ (dpid.res_godown_short + dpid.claimed_godown_short + dpid.return_qty + dpid.res_cashier_short)) END", 'final_return_qty');
+  $query->addExpression("(dpid.res_godown_short + dpid.claimed_godown_short + dpid.return_qty + dpid.res_cashier_short)", 'return_qty');
   $query->groupBy('cbd.sku7_code');
-  $res = $query->execute()->fetchField();
+  $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
 
   return $res;
 }
@@ -3951,7 +3952,8 @@ function dispatch_planning_views_pre_render(&$view) {
       $sku_code = $val->dispatch_planning_item_details_dispatch_planning_api_data_sk;
       
       $get_final_return_qty = get_final_return_qty($trip_id, $bill_num, $sku_code, $distributor_id);
-      if (empty($get_final_return_qty)) {  
+
+      if (empty($get_final_return_qty[0]['final_return_qty']) && empty($get_final_return_qty[0]['return_qty'])) {  
         unset($view->result[$key]);
       }
     }
