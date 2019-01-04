@@ -3923,7 +3923,7 @@ function get_final_return_qty($trip_id, $bill_num, $sku_code, $distributor_id) {
   $query->condition('ad.runsheet_number', $trip_id);
   $query->condition('ad.bill_number', $bill_num);
   $query->condition('ad.distributor_id', $distributor_id);
-  $trip_bill_reference = $query->execute()->fetchAllKeyed(0, 0);
+  $trip_bill_reference = $query->execute()->fetchField();
 
   $query = db_select('custom_billing_data', 'cbd');
   $query->join('dispatch_planning_item_details', 'dpid', 'dpid.sku_code = cbd.sku7_code');
@@ -3931,7 +3931,7 @@ function get_final_return_qty($trip_id, $bill_num, $sku_code, $distributor_id) {
   $query->condition('cbd.sku7_code', $sku_code);
   $query->condition('dpid.trip_bill_reference', $trip_bill_reference);
   $query->condition('cbd.distributor_id', $distributor_id);
-  $query->addexpression("(CASE WHEN (dpid.res_godown_short + dpid.claimed_godown_short + dpid.return_qty + dpid.res_cashier_short) >= 0 THEN ((cbd.revised_host_quantity - cbd.Sum_of_TOTAL_SALES_QTY)+(dpid.res_godown_short + dpid.claimed_godown_short + dpid.return_qty + dpid.res_cashier_short)) END)", 'final_return_qty');
+  $query->addExpression("CASE WHEN(cbd.revised_host_quantity IS NULL) THEN ((0 - cbd.Sum_of_TOTAL_SALES_QTY) + (dpid.res_godown_short + dpid.claimed_godown_short + dpid.return_qty + dpid.res_cashier_short)) ELSE ((cbd.revised_host_quantity - cbd.Sum_of_TOTAL_SALES_QTY)+ (dpid.res_godown_short + dpid.claimed_godown_short + dpid.return_qty + dpid.res_cashier_short)) END", 'final_return_qty');
   $query->groupBy('cbd.sku7_code');
   $res = $query->execute()->fetchField();
 
@@ -3943,7 +3943,7 @@ function dispatch_planning_views_pre_render(&$view) {
   $user_id = $user->uid;
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
 
-   if (($view->name == 'trip_bill_sku_return_report') || ($view->name == 'trip_bill_sku_return_report' && $view->current_display == 'views_data_export_1')) {
+  if (($view->name == 'trip_bill_sku_return_report') || ($view->name == 'trip_bill_sku_return_report' && $view->current_display == 'views_data_export_1')) {
     $result = $view->result;
     foreach ($result as $key => $val) {
       $trip_id = $val->dispatch_planning_api_data_runsheet_number;
