@@ -1631,7 +1631,8 @@ function get_all_active_vehicles_on_date_range($dispatch_from_date, $dispatch_to
     $query->join('node', 'vehicle_master', 'vehicle_master.nid = vehicle_ref.field_vehicle_number_ref_nid');
     $query->condition('vehicle_master.type', 'vehicle_master');
     $query->condition('vehicle_master.uid', $distributor_id);
-    $query->orderBy('n.created','desc');
+    // it will return only last record from contract listing
+    $query->orderBy('n.created','asc');
     if (!empty($vehicle_number)) {
        $query->condition('vehicle_master.title', $vehicle_number);
     }
@@ -1684,7 +1685,6 @@ function get_all_active_resources_on_date_range($dispatch_from_date, $dispatch_t
     $query->condition('end_period.field_end_period_value', $dispatch_from_date, '>=');
     $query->condition('start_period.field_start_period_value', $dispatch_to_date, '<=');
     $query->condition('n.type', 'resources_contract');
-    $query->orderBy('n.nid', 'desc');
     $query->condition('n.uid', $distributor_id);
     $query->join('node', 'resource_master', 'resource_master.nid = resource_ref.field_resource_nid');
     $query->condition('resource_master.type', 'resource_master');
@@ -1702,6 +1702,8 @@ function get_all_active_resources_on_date_range($dispatch_from_date, $dispatch_t
     $query->fields('weekly_off_selected', array('field_weekly_off_value'));
     $query->leftjoin('field_data_field_cost_per_month', 'cost_per_month', 'cost_per_month.entity_id = resource_master.nid');
     $query->addExpression('cost_per_month.field_cost_per_month_value', 'cost_per_month');
+    //Get last valid contract details it will return only one record
+    $query->orderBy('n.created','asc');
     if (!empty($resource_name)) {
       $query->condition('resource.field_resource_name_value', $resource_name);
     }
