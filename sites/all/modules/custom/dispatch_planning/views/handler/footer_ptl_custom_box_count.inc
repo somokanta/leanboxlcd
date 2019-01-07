@@ -26,6 +26,7 @@ class footer_ptl_custom_box_count extends views_handler_field {
   function render($empty = FALSE) {
     $bill_val = $this->view->custom_footer;
     $trip_id = $this->view->args[0];
+    db_query("SET SESSION group_concat_max_len = 1000000")->execute();
     $query1 = db_select('ptl_data_configuration', 'ptl');
     $query1->condition('ptl.trip_id', $trip_id, "=");
     //$query1->addExpression("COUNT(DISTINCT ptl.box_id)", 'box_id');
