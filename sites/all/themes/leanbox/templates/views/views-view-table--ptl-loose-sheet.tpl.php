@@ -49,7 +49,7 @@
     <?php foreach ($rows as $row_count => $row): ?>    
     <tr <?php if ($row_classes[$row_count]) { print 'class="' . implode(' ', $row_classes[$row_count]) .'"';  } ?>>
         <?php $row['counter'] = $counter_ser; ?> <!-- Counter Reset -->
-          <?php $cld_total += $row['php']; ?> <!-- Count cld -->
+          <?php $cld_total += strip_tags($row['php']); ?> <!-- Count cld -->
           <?php foreach ($row as $field => $content): ?>  
           <td <?php if (strpos(current_path(), 'download') !== false){ print 'style="color:#666; border:0.5px solid gray;"'; } else { print 'style="color:#666;"'; }?><?php if ($field_classes[$field][$row_count]) { print 'class="'. $field_classes[$field][$row_count] . '" '; } ?><?php print drupal_attributes($field_attributes[$field][$row_count]); ?>>
             <?php print $content; ?>
