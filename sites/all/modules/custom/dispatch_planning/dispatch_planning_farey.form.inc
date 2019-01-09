@@ -497,9 +497,7 @@ function _edit_trip_delivered_callback_form($form, &$form_state) {
                   );
                   
                   if(!empty($res_cheque_date)) {
-                     if(empty(strtotime($res_cheque_date))) {
                         $res_cheque_date = date('Y-m-d', $res_cheque_date);
-                     }
                   }
                   $form['cheque_date'] = array(
                     '#type' => 'date_popup',
@@ -1080,6 +1078,7 @@ function _edit_trip_delivered_callback_form_submit($form, &$form_state) {
             'updated_flag' => 1,
             'updated_time' => REQUEST_TIME,  
             'res_money_collect2_edit' =>  isset($form_state['values']['collection_mode']) ? $form_state['values']['collection_mode'] : '',
+            'derived_money_collect' =>  isset($form_state['values']['collection_mode']) ? ucfirst($form_state['values']['collection_mode']) : '',
             'res_delivery_boy_edit' => !empty($form_state['values']['delivery_boy']) ? $form_state['values']['delivery_boy'] : '',
             
           ))
