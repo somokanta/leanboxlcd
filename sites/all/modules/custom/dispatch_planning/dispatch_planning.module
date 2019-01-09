@@ -3894,6 +3894,31 @@ function dispatch_planning_views_query_alter(&$view, &$query) {
       array('field' => 'distributor_id', 'left_field' => 'distributor_id'),
     );
   }
+
+  if (($view->name == 'trip_bill_sku_return_report') || ($view->name == 'trip_bill_sku_return_report' && $view->current_display == 'views_data_export_1')) {  
+      $join = new views_join();
+      //$join->definition = array('table formula' => $query1, 'left_field' => 'bill_number', 'field' => 'bill_number', 'left_table' => 'dispatch_planning_api_data');
+      $join->table = 'custom_billing_data'; // or wathever table you want to join with
+      $join->left_table = 'dispatch_planning_api_data';
+      $join->field = 'bill_number';
+      $join->left_field = 'bill_number'; // or wathever column you want to join with
+      $join->type = 'LEFT'; // if you want another join type play with this value
+      $join->extra = array(
+        array('field' => 'distributor_id', 'left_field' => 'distributor_id'),
+        array('field' => 'sku7_code', 'left_field' => 'sku_code', 'left_table' => 'dispatch_planning_item_details_dispatch_planning_api_data'),
+      );
+      $join->extra_type = 'AND';
+    
+      // Do the actual join
+      $query->table_queue['custom_billing_data'] = array(
+        'alias' => 'custom_billing_data', // I believe this is optional
+        'table' => 'custom_billing_data',
+        'relationship' => 'custom_billing_data',
+        'join' => $join,
+      );
+
+     $query->add_where_expression(0, '((dispatch_planning_item_details_dispatch_planning_api_data.res_godown_short + dispatch_planning_item_details_dispatch_planning_api_data.claimed_godown_short + dispatch_planning_item_details_dispatch_planning_api_data.return_qty + dispatch_planning_item_details_dispatch_planning_api_data.res_cashier_short) <> 0) OR ((CASE WHEN(custom_billing_data.revised_host_quantity IS NULL) THEN ((0 - custom_billing_data.Sum_of_TOTAL_SALES_QTY) + (dispatch_planning_item_details_dispatch_planning_api_data.res_godown_short + dispatch_planning_item_details_dispatch_planning_api_data.claimed_godown_short + dispatch_planning_item_details_dispatch_planning_api_data.return_qty + dispatch_planning_item_details_dispatch_planning_api_data.res_cashier_short)) ELSE ((custom_billing_data.revised_host_quantity - custom_billing_data.Sum_of_TOTAL_SALES_QTY)+ (dispatch_planning_item_details_dispatch_planning_api_data.res_godown_short + dispatch_planning_item_details_dispatch_planning_api_data.claimed_godown_short + dispatch_planning_item_details_dispatch_planning_api_data.return_qty + dispatch_planning_item_details_dispatch_planning_api_data.res_cashier_short)) END) <> 0)'); 
+  }
 }
 
 // Get Trip Type.
@@ -3914,48 +3939,4 @@ function get_total_sales_qty_from_custom_billing($bill_number,$dis_id){
   $query->condition('bd.bill_number', $bill_number);
   $total_sales_qty = $query->execute()->fetchField();
   return $total_sales_qty;
-}
-
-// Condition for Final Return Qty in Sales Returns Report.
-function get_final_return_qty($trip_id, $bill_num, $sku_code, $distributor_id) {
-  $query = db_select('dispatch_planning_api_data', 'ad');
-  $query->fields('ad', array('id'));
-  $query->condition('ad.runsheet_number', $trip_id);
-  $query->condition('ad.bill_number', $bill_num);
-  $query->condition('ad.distributor_id', $distributor_id);
-  $trip_bill_reference = $query->execute()->fetchField();
-
-  $query = db_select('custom_billing_data', 'cbd');
-  $query->join('dispatch_planning_item_details', 'dpid', 'dpid.sku_code = cbd.sku7_code');
-  $query->condition('cbd.bill_number', $bill_num);
-  $query->condition('cbd.sku7_code', $sku_code);
-  $query->condition('dpid.trip_bill_reference', $trip_bill_reference);
-  $query->condition('cbd.distributor_id', $distributor_id);
-  $query->addExpression("CASE WHEN(cbd.revised_host_quantity IS NULL) THEN ((0 - cbd.Sum_of_TOTAL_SALES_QTY) + (dpid.res_godown_short + dpid.claimed_godown_short + dpid.return_qty + dpid.res_cashier_short)) ELSE ((cbd.revised_host_quantity - cbd.Sum_of_TOTAL_SALES_QTY)+ (dpid.res_godown_short + dpid.claimed_godown_short + dpid.return_qty + dpid.res_cashier_short)) END", 'final_return_qty');
-  $query->addExpression("(dpid.res_godown_short + dpid.claimed_godown_short + dpid.return_qty + dpid.res_cashier_short)", 'return_qty');
-  $query->groupBy('cbd.sku7_code');
-  $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
-
-  return $res;
-}
-
-function dispatch_planning_views_pre_render(&$view) {
-  global $user;
-  $user_id = $user->uid;
-  $distributor_id = change_feeds_import_get_distributor_id($user_id);
-
-  if (($view->name == 'trip_bill_sku_return_report') || ($view->name == 'trip_bill_sku_return_report' && $view->current_display == 'views_data_export_1')) {
-    $result = $view->result;
-    foreach ($result as $key => $val) {
-      $trip_id = $val->dispatch_planning_api_data_runsheet_number;
-      $bill_num = $val->dispatch_planning_api_data_bill_number;
-      $sku_code = $val->dispatch_planning_item_details_dispatch_planning_api_data_sk;
-      
-      $get_final_return_qty = get_final_return_qty($trip_id, $bill_num, $sku_code, $distributor_id);
-
-      if (empty($get_final_return_qty[0]['final_return_qty']) && empty($get_final_return_qty[0]['return_qty'])) {  
-        unset($view->result[$key]);
-      }
-    }
-  }
 }
