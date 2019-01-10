@@ -137,7 +137,7 @@ function return_vrs_callback() {
   $query->groupBy('ad.runsheet_number');
   $query->join('dispatch_planning_item_details', 'idt', 'ad.id = idt.trip_bill_reference');
   $query->addexpression("SUM(idt.return_qty * idt.sum_net_sales_value)", 'return_value');
-  $query->addexpression("(SUM(CASE WHEN (ad.updated_flag = 1) THEN (idt.return_qty * idt.sum_net_sales_value * 10) END)) / ((MAX(CASE WHEN (ad.updated_flag = 1) THEN ad.updated_time END) - MIN(CASE WHEN (ad.updated_flag = 1) THEN ad.updated_time END)) / 60)", 'return_prod');
+  $query->addexpression("(SUM(idt.return_qty * idt.sum_net_sales_value))*5", 'return_prod');
   $query->leftjoin('vrs_trip_total_history', 'vtth', 'ad.runsheet_number = vtth.trip_id AND ad.distributor_id = vtth.distributor_id');
   $query->addExpression("CASE WHEN vtth.vrs_version_no = 'V1.0' THEN vtth.vrs_start_time END", 'vrs_start_time');
   $query->leftjoin('vrs_trip_total', 'vtt', 'ad.runsheet_number = vtt.trip_id AND ad.distributor_id = vtt.distributor_id');
@@ -151,7 +151,7 @@ function return_vrs_callback() {
   $query->leftjoin('field_data_field_product_devision_reference', 'pdr', 'pdr.entity_id = n2.nid');
   $query->addexpression("SUM(CASE WHEN pdr.field_product_devision_reference_nid IN ($get_subdivision_nids) THEN idt.return_qty END)", 'return_sku_qty_sachets');
   $query->addexpression("SUM(CASE WHEN pdr.field_product_devision_reference_nid NOT IN ($get_subdivision_nids) THEN idt.return_qty END)", 'return_sku_qty_wo_sachets');
-  
+  $query->addExpression("((vtt.total_actual_cash_amount + vtt.total_actual_cheque_amount + vtt.total_actual_signed_bill_amount)*10)/((vtt.vrs_end_time - (CASE WHEN vtth.vrs_version_no = 'V1.0' THEN vtth.vrs_start_time END))/60)", 'vrs_prod_value');
   $result = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
   $return_confirmed_vrs_status = array(1,2,3,4,5);
   foreach ($result as $val) {
@@ -251,7 +251,7 @@ function return_vrs_callback() {
     $row['return_value'] = round($val['return_value']);
     $row['return_qty_wo_sachets'] = $val['return_sku_qty_wo_sachets'];
     $row['return_qty_sachets'] = $val['return_sku_qty_sachets'];
-    $row['return_prod'] = round($val['return_prod']);
+    $row['return_prod'] = round($val['return_prod']/($total_return_time)*60);
     if(!empty($val['vrs_start_time'])){
     $row['vrs_start_time'] = date('d-M-y H:i:s', $val['vrs_start_time']);
     }else{
@@ -270,6 +270,7 @@ function return_vrs_callback() {
     $row['total_actual_cash_amount'] = $val['total_actual_cash_amount'];
     $row['total_actual_cheque_amount'] = $val['total_actual_cheque_amount'];
     $row['total_actual_signed_bill_amount'] = $val['total_actual_signed_bill_amount'];
+    $row['vrs_prod_value'] = round($val['vrs_prod_value']);
     $rows[] = $row;
     unset($returns_end_time);
     unset($return_start_time);
@@ -277,7 +278,7 @@ function return_vrs_callback() {
     unset($sku_return_end_time);
   }
 
-  $header = array('Trip ID', 'Dispatch Date', 'Cashier Name','Status', 'Dispatch Time', 'Vehicle Arrival Time', 'Received Assets Time', 'Delivery Confirmation Time' , 'SKU Wise Returns Start Time', 'SKU Wise Returns End Time','Returns Incharge','Bill Wise Returns Start Time', 'Bill Wise Returns End Time','Bill Wise Return Superviser','Total Returns Time taken', 'Total Returned Value','Returned SKU Quantity(w/o Sachets)','Returned Quantity of Sachets','Returns Productivity (Value/10 min)', 'VRS Start Time', 'VRS End Time', 'Total VRS Time taken', 'Cash Value', 'Cheque Value', 'Signed Bill Value');
+  $header = array('Trip ID', 'Dispatch Date', 'Cashier Name','Status', 'Dispatch Time', 'Vehicle Arrival Time', 'Received Assets Time', 'Delivery Confirmation Time' , 'SKU Wise Returns Start Time', 'SKU Wise Returns End Time','Returns Incharge','Bill Wise Returns Start Time', 'Bill Wise Returns End Time','Bill Wise Return Superviser','Total Returns Time taken', 'Total Returned Value','Returned SKU Quantity(w/o Sachets)','Returned Quantity of Sachets','Returns Productivity (Value/5 Min)', 'VRS Start Time', 'VRS End Time', 'Total VRS Time taken', 'Cash Value', 'Cheque Value', 'Signed Bill Value', 'VRS Productivity (Value / 10 Min)');
   $per_page = 10;
   // Initialize the pager
   $current_page = pager_default_initialize(count($rows), $per_page);

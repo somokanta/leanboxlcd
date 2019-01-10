@@ -193,6 +193,9 @@ function vrs_confirmation_form($form, &$form_state) {
                   '#value' => $val['claimed_godown_short_qty'],
                 );
             }
+        $sum_claimed_godown_short_qty += $val['claimed_godown_short_qty'];
+        $sum_claimed_godown_short_value += $val['claimed_gs_value'];
+     // claimed_gs_value      
       // Exclude dp bill_value from header table
       if($val['delivery_pending_flag'] == 1){
         $sum_s_register_bill_value += 0;
@@ -417,7 +420,7 @@ function vrs_confirmation_form($form, &$form_state) {
         }
         if ($return_edit == 1 && !empty($vrs_version)) {
         $bills_total_cashier_cash_short_value = round($val['sales_register_to_be_collected_amt']) - $bills_cash_amt - $bills_cheque_amt - $bills_signed_amt - $vrs_total[$total_key]['rto_charges'] - $bills_short_amt   ;
-        $bills_total_cashier_cash_short_debit_value  = $bills_total_cashier_cash_short_value + $sum_cashier_short_value + $asset_short_value;
+        $bills_total_cashier_cash_short_debit_value  = $bills_total_cashier_cash_short_value + $sum_cashier_short_value + $asset_short_value - $excessvalue;
         $vrs_total[$total_key]['total_cashier_cash_short'] =  $bills_total_cashier_cash_short_value ;
         $vrs_total[$total_key]['total_cashier_debit_value'] =  $bills_total_cashier_cash_short_debit_value ;
         $vrs_total[$total_key]['total_actual_cheque_amount'] =  $bills_cheque_amt ;
@@ -517,6 +520,20 @@ function vrs_confirmation_form($form, &$form_state) {
       '#type' => 'hidden',
       '#value' => $sum_cashier_short_value,
     );
+    // Sum of Claimed GS qty & Gs value;
+    if (!empty($sum_claimed_godown_short_qty) && !empty($sum_claimed_godown_short_value)) {
+      $sum_claimed_godown_short_value = round($sum_claimed_godown_short_value,2);
+        $form['sum_claimed_godown_short_qty'] = array(
+        '#type' => 'hidden',
+        '#value' => $sum_claimed_godown_short_qty,
+      );
+      $form['sum_claimed_godown_short_value'] = array(
+        '#type' => 'hidden',
+        '#value' => $sum_claimed_godown_short_value,
+      );  
+      //$short_values[] = array('Pending Claimed GS', $sum_claimed_godown_short_qty, $sum_claimed_godown_short_value); 
+    }
+    $short_values[] = array('Pending Claimed GS', $sum_claimed_godown_short_qty, $sum_claimed_godown_short_value); 
 
     $form['header_details1'] = array(
       '#theme' => 'table',
@@ -1063,7 +1080,7 @@ function vrs_confirmation_form($form, &$form_state) {
     $short_display = number_format($short_total, 2, '.', '');
     $total_cashier_cash_short_display = number_format($total_cashier_cash_short_value, 2, '.', '');
     //Total Cashier Debit Value = Cashier cash short at footer level + cashier short value from header
-    $total_cashier_debit_value = $total_cashier_cash_short_value + $sum_cashier_short_value + $asset_total- $excess_value;
+    $total_cashier_debit_value = $total_cashier_cash_short_value + $sum_cashier_short_value + $asset_total + $sum_claimed_godown_short_value - $excess_value;
     $total_cashier_debit_value = number_format($total_cashier_debit_value, 2, '.', '');
     $total_cashier_cash_short = array(
       '#id' => 'footer_details-' . $key . '-total_cashier_cash_short',
@@ -1082,7 +1099,7 @@ function vrs_confirmation_form($form, &$form_state) {
     $total_cashier_debit_value_field = array(
       '#id' => 'footer_details-' . $key . '-total_cashier_debit_value',
       '#type' => 'textfield',
-      '#attributes' => array('class' => array('total_cashier_debit_value'), 'readonly' => 'readonly', 'data' => $sum_cashier_short_value, 'total_sregister' => $total_sales_register, 'asset_total' => $asset_total,'excess_value'=>$excess_value),
+      '#attributes' => array('class' => array('total_cashier_debit_value'), 'readonly' => 'readonly', 'data' => $sum_cashier_short_value, 'total_sregister' => $total_sales_register, 'asset_total' => $asset_total,'excess_value'=>$excess_value,'sum_claimed_gs'=>$sum_claimed_godown_short_value),
       '#size' => $text_box_size,
       '#default_value' => !empty($vrs_total[$total_key]) ? $vrs_total[$total_key]['total_cashier_debit_value'] : $total_cashier_debit_value,
     );
@@ -1374,6 +1391,7 @@ function display_vrs_trip_details($form, &$form_state) {
         // Farery to be collected amt
         $query->addExpression("SUM(ad.bill_value - item_details.return_value - item_details.cashier_short_value - item_details.godown_short_value - item_details.claimed_godown_short_value)", 'to_be_collected_amt');
         $query->addExpression('item_details.claimed_godown_short_qty', 'claimed_godown_short_qty');
+        $query->addExpression("(item_details.claimed_godown_short_value)", 'claimed_gs_value');
         $query->addExpression('ad.res_cash_amount', 'res_cash_amount');
         $query->addExpression('ad.res_cheque_amount', 'res_cheque_amount');
         $query->addExpression('ad.bill_value', 'bill_value');

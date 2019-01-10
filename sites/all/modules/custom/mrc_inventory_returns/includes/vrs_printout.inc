@@ -450,6 +450,7 @@ function get_vrs_items($trip_id) {
         $sub_query1->addExpression("SUM(dpi.res_godown_short * dpi.sum_net_sales_value)", 'godown_short_value');
         $sub_query1->addExpression('(SUM(dpi.return_qty * dpi.sum_net_sales_value))', 'total_delivered_value');
         $sub_query1->addExpression("SUM(dpi.claimed_godown_short * dpi.sum_net_sales_value)", 'claimed_godown_short_value');
+        $sub_query1->addExpression("SUM(dpi.claimed_godown_short)", 'claimed_godown_short_qty');
         $sub_query1->fields('dpi',array('return_qty','sum_net_sales_value'));
         $sub_query1->join('dispatch_planning_api_data', 'dp_header', 'dpi.trip_bill_reference = dp_header.id AND dp_header.distributor_id ='.$dis_id);    
         $sub_query1->condition('dp_header.runsheet_number', $trip_id, '=');
@@ -474,6 +475,7 @@ function get_vrs_items($trip_id) {
         $query->condition('n.uid', $dis_id);
         $query->join('field_data_field_bill_value', 'bv', 'bv.entity_id = n.nid');
         $query->join($sub_query1, 'item_details', 'item_details.trip_bill_reference = ad.id');
+        $query->addExpression("(item_details.claimed_godown_short_value)", 'claimed_gs_value');
         // Join with dispatch_data to check vrs status and return flage 
         $query->join('node', 'disp_data', 'disp_data.title = ad.runsheet_number');
         $query->condition('disp_data.type', 'dispatch_data');
@@ -587,8 +589,11 @@ function get_vrs_print($trip_id) {
                if ($val['res_status'] == 'undeliver') {
                   $val['sales_register_to_be_collected_amt'] = 0;
                }
+               $sum_claimed_godown_short_qty += $val['claimed_godown_short_qty'];
+               $sum_claimed_godown_short_value += $val['claimed_gs_value'];
                 
             }
+            $sum_claimed_godown_short_value = round($sum_claimed_godown_short_value,2);
             if (count($billing_date)>1) {
                $billing_dates = implode(',',$billing_date); 
             }
@@ -626,6 +631,8 @@ function get_vrs_print($trip_id) {
             $short_values[] = array('Godown Short', $sum_godown_short_qty, $sum_godown_short_value);
             $short_values[] = array('Cashier Short', $sum_cashier_short_qty, $sum_cashier_short_value);
             $short_values[] = array('Assets Short', $asset_short_qty, $asset_short_value);
+            $excess_values = get_excess_declaration_cashier_data($trip_id, $dis_id);
+            $excessvalue = $excess_values[0]['excess_value'] ? $excess_values[0]['excess_value'] : 0;
             $asset_total = 0;
             if (!empty($vrs_version)) {
                 $bills = get_vrs_bill_items($trip_id, $dis_id, $vrs_version);
@@ -886,8 +893,20 @@ function get_vrs_print($trip_id) {
                 $table6.= '<td colspan="2">';
                 $table6.= '<table width="100%" border="1" cellpadding="0" cellspacing="0" style="border-color:white;border:1px solid black" >';        
                 $table6.='<tr>';
-                $table6.= '<td><b>'.t('Total Cashier Short.(E+H+J-I)').'<b></td>';
-                $table6.= '<td>'.$vrs_total[$total_key]['total_cashier_debit_value'].'</td>';      
+                $table6.= '<td><b>'.t('Pending claimed GS value (K)').'<b></td>';
+                //$sum_claimed_godown_short_value = round($sum_claimed_godown_short_value);
+                $table6.= '<td>'.$sum_claimed_godown_short_value.'</td>';  
+                $table6.= '</tr>';     
+                
+                $table6.='<tr>';
+                //$table6.= '<td><b>'.t('Total Cashier Short.(E+H+J-I)').'<b></td>';
+                $table6.= '<td><b>'.t('Total Cashier Short (E+H+J+K-I)').'<b></td>';
+                // cashier debit value calculation
+                $cashier_short_calculation = $vrs_total[$total_key]['total_to_be_collected_sales_register'] - $vrs_total[$total_key]['total_actual_cash_amount'] - $vrs_total[$total_key]['total_actual_cheque_amount'] - $vrs_total[$total_key]['total_actual_signed_bill_amount'] - $vrs_total[$total_key]['rto_charges'] - $vrs_total[$total_key]['total_short_amt'] ;
+                $cashier_debit_value = $cashier_short_calculation + $sum_cashier_short_value + $asset_short_value + $sum_claimed_godown_short_value - $excessvalue;
+                //$cashier_debit_value = round($cashier_debit_value);
+                //$table6.= '<td>'.$vrs_total[$total_key]['total_cashier_debit_value'].'</td>';   
+                $table6.= '<td>'.$cashier_debit_value.'</td>';  
                 $table6.= '</tr>';        
                 $table6.= '</table>';          
                 $table6.= '</td>';
