@@ -769,60 +769,18 @@ function save_sku_wise_return_validate($form, &$form_state) {
         $form_state['sku_excess_error'] = 1;
       }
     }
-
-    if ($form_state['values']['show_bills'] == 1) {
-      // Pop up table validation
-      // if (empty($form_state['no_discrepancy_sku'][$sku])) {
-      $actual_return_qty = $value['actual_returned_qty'];
-      if (!empty($actual_return_qty) || $actual_return_qty === '0') {
-        $total_qty_bill_wise = 0;
-
-        foreach ($form_state['input']["sku_bill_table_$sku"] as $bill => $val) {
-          // Bill level tobe_returned_qty of undelivered bill, it will set if
-          //  the bill status is undeliver
-          /*
-           * In SKU-Bill wise screen, put a check that if an SKU is present in a bill 
-           * for which bill status = undeliver, then To be returned qty 
-           * of that bill should be = actual returned qty of that bill + cashier short of
-           *  that bill + claimed godown short of that bill
-           */
-          $bill_level_tobe_returned_qty_undeliver = get_to_be_returned_qty_undeliver_bill($trip_number, $bill, $sku, $dis_id);
-          //echo $bill_level_tobe_returned_qty_undeliver;die;
-          if (!empty($bill_level_tobe_returned_qty_undeliver)) {
-            $actual_returned_qty_in_pop = $val['actual_returned_qty1'] + $val['cashier_short'] + $val['claimed_godown_short'];
-            if ($bill_level_tobe_returned_qty_undeliver != $actual_returned_qty_in_pop) {
-              $form_state['sku_excess_error'] = 1;
-              drupal_set_message(t("To be returned qty of Undeliver Bill Number:$bill of SKU:$sku should be equal to actual returned qty + cashier short + claimed godown short"), 'error');
-            }
-          }
-          $total_qty_bill_wise += $val['actual_returned_qty1'];
-          if (!empty($actual_return_qty) || $actual_return_qty == 0) {
-            if ($val['actual_returned_qty1'] > 0) {
-              if (empty($val['reason_code'])) {
-                $form_state['sku_excess_error'] = 1;
-                drupal_set_message(t("Reason code of sku:$sku is mandatory as actual returned qty is greater than zero of bill: $bill"), 'error');
-              }
-            }
-
-            if ($val['dispatch_qty'] < ($val['actual_returned_qty1'] + $val['cashier_short'] + $val['claimed_godown_short'])) {
-              $form_state['sku_excess_error'] = 1;
-              drupal_set_message(t("Return quantity,cashier short and claimed godown short for sku:$sku cannot be greater than Dispatch quantity of bill: $bill"), 'error');
-            }
-
-            if ($val['claimed_godown_short'] > 0) {
-              if (empty($val['reason_for_claim'])) {
-                $form_state['sku_excess_error'] = 1;
-                drupal_set_message(t("Reason for claim of sku:$sku is mandatory as claimed godown short is greater than zero of bill: $bill"), 'error');
-              }
-            }
-          }
-        }
-        if ($actual_return_qty != $total_qty_bill_wise) {
-          drupal_set_message(t("Actual Returned Qty for SKU: $sku is not equal to Sum of Actual Returned Qty at Bill Level"), 'error');
-          $form_state['sku_excess_error'] = 1;
-        }
+    $check_to_be_return = 0;
+    foreach ($form_state['input']['bill_details'] as $sku => $value) {
+      if ($value['actual_returned_qty'] != $form_state['sku_wise_return_confirm']['SKUs'][$sku]['to_be_return_qty']) {
+        $check_to_be_return = 1;
+        break;
       }
-      //}
+    }
+  
+  // if to_be_return_qty is equal to actual return qty of all sku then trip status will be return confirmed and version create and return incharge name is mandatory
+    if ($check_to_be_return == 0 && empty($form_state['input']['return_incharge_name'])) {
+        $form_state['rebuild'] = TRUE;
+        form_set_error('return_incharge_name', "Please select Return Incharge Name.");
     }
   }
 
@@ -860,6 +818,7 @@ function save_sku_wise_return_validate($form, &$form_state) {
 
 function get_to_be_returned_qty_undeliver_bill($trip_number, $bill_number, $sku_code, $dis_id) {
   $to_be_returned_qty = 0;
+  $bill_status = array('undeliver','partial_deliver');
   if (!empty($trip_number) && !empty($bill_number) && !empty($sku_code) && !empty($dis_id)) {
     $query = db_select('dispatch_planning_item_details', 'dpi');
     $query->join('dispatch_planning_api_data', 'ad', 'dpi.trip_bill_reference = ad.id');
@@ -867,7 +826,7 @@ function get_to_be_returned_qty_undeliver_bill($trip_number, $bill_number, $sku_
     $query->condition('ad.runsheet_number', $trip_number, '=');
     $query->condition('ad.distributor_id', $dis_id);
     $query->condition('dpi.sku_code', $sku_code, '=');
-    $query->condition('ad.res_status', 'undeliver', '=');
+    $query->condition('ad.res_status', $bill_status, 'IN');
     $query->condition('ad.bill_number', $bill_number);
     $query->fields('ad', array('bill_number'));
     $query->fields('dpi', array('sum_net_sales_quantity'));
@@ -1009,6 +968,7 @@ function save_return_final_version($trip_id, $dis_id, $returns_incharge_name = '
       }
     }
   }
+  return $version_no;
 }
 
 //Save btn function
@@ -1027,15 +987,26 @@ function save_sku_wise_return_submit($form, &$form_state) {
       $existing_return_start_time = check_skuwise_return_start_time_present($trip_id, $dis_id);
       // Returns start time empty then save return start time in db
       $type = 'sku_wise';
+      $return_name = 'skuwise_return_start_time';
       if (empty($existing_return_start_time)) {
         save_returns_start_time($type, $trip_id, $returns_start_time, $dis_id);
+        save_return_time($trip_id, $return_name,$returns_start_time, $version = null, $dis_id);
+      }
+      // insert data into return time history table
+      else {
+        save_return_time($trip_id, $return_name,$returns_start_time, $version = null, $dis_id);
       }
     }
     else {
       $type = 'bill_wise';
+      $return_name = 'billwise_return_start_time';
       $existing_bill_wise_return_start_time = check_billwise_return_start_time_present($trip_id, $dis_id);
       if (empty($existing_bill_wise_return_start_time)) {
         save_returns_start_time($type, $trip_id, $returns_start_time, $dis_id);
+        save_return_time($trip_id, $return_name,$returns_start_time, $version = null, $dis_id);
+      }
+       else {
+        save_return_time($trip_id, $return_name,$returns_start_time, $version = null, $dis_id);
       }
     }
     //Saving the excess inventory declaration data
@@ -1053,10 +1024,12 @@ function save_sku_wise_return_submit($form, &$form_state) {
     }
     // if to_be_return_qty is equal to actual return qty of all sku then trip status will be return confirmed and version create
     if ($check_to_be_return == 0) {
-      save_return_final_version($trip_id, $dis_id, $returns_incharge_name);
+      $version = save_return_final_version($trip_id, $dis_id, $returns_incharge_name);
       $end_time = time();
       $type = 'sku_wise';
       save_returns_end_time($type, $trip_id, $end_time, $dis_id);
+      $return_name = 'bill_wise_return_end_time';
+      save_return_time($trip_id,$return_name,$end_time,$version, $dis_id);
     }
     if ($form_state['values']['show_bills'] == 1 && empty($form_state['sku_excess_error'])) {
       foreach ($form_state['input']['bill_details'] as $sku => $value) {
@@ -1089,7 +1062,8 @@ function save_sku_wise_return_submit($form, &$form_state) {
 
             db_update('dispatch_planning_item_details') // Table name no longer needs {}
               ->fields(array(
-                'res_sku_actual_quantity1' => (int) $val['dispatch_qty'] - $val['actual_returned_qty1'] - $val['cashier_short'] - $val['claimed_godown_short'],
+                ///No need to update actual delivered qty while approving return
+               // 'res_sku_actual_quantity1' => (int) $val['dispatch_qty'] - $val['actual_returned_qty1'] - $val['cashier_short'] - $val['claimed_godown_short'],
                 'return_qty' => (int) $val['actual_returned_qty1'],
                 //'dispatch_qty' => $val['dispatch_qty'],
                 'res_sku_reason' => ($line_status != 'line_undeliver') ? $val['reason_code'] : '',
@@ -1158,14 +1132,15 @@ function save_sku_wise_return_submit($form, &$form_state) {
 
             db_update('dispatch_planning_item_details') // Table name no longer needs {}
               ->fields(array(
-                'res_sku_actual_quantity1' => (int) $val['dispatch_qty'] - $val['actual_returned_qty1'] - $val['cashier_short'] - $val['claimed_godown_short'],
+                ///No need to update actual delivered qty while approving return
+               // 'res_sku_actual_quantity1' => (int) $val['dispatch_qty'] - $val['actual_returned_qty1'] - $val['cashier_short'] - $val['claimed_godown_short'],
                 'return_qty' => (int) $val['actual_returned_qty1'],
                 // 'dispatch_qty' => $val['dispatch_qty'],
                 'res_sku_reason' => $val['reason_code'],
                 'res_cashier_short' => (int) $val['cashier_short'],
                 'claimed_godown_short' => (int) $val['claimed_godown_short'],
                 'claimed_godown_short_reason' => $val['reason_for_claim'],
-                'line_level_status' => $line_status, // line level status
+               // 'line_level_status' => $line_status, // line level status
                 'declared_claimed_godown_short'=>(int) $val['claimed_godown_short']
               ))
               ->condition('sku_code', $sku, '=')
@@ -1301,13 +1276,14 @@ function save_sku_wise_return_final_submit_version($form, &$form_state) {
     global $user;
     $dis_id = change_feeds_import_get_distributor_id($user->uid);
     $trip_id = $form_state['values']['trip_number'];
-    $returns_start_time = 0;
+    $returns_start_time = $form_state['returns_start_time'];
     $existing_return_start_time = check_skuwise_return_start_time_present($trip_id, $dis_id);
     // Returns start time empty then save return start time in db
     $type = 'sku_wise';
+    $return_name = 'skuwise_return_start_time';
     if (empty($existing_return_start_time)) {
-      $returns_start_time = $form_state['returns_start_time'];
       save_returns_start_time($type, $trip_id, $returns_start_time, $dis_id);
+      save_return_time($trip_id, $return_name,$returns_start_time,null,$dis_id);
     }
     $end_time = time();
     save_returns_end_time($type, $trip_id, $end_time, $dis_id);
@@ -1328,8 +1304,10 @@ function save_sku_wise_return_final_submit_version($form, &$form_state) {
     }
     // if to_be_return_qty is equal to actual return qty of all sku then trip status will be return confirmed and version create
     if ($check_to_be_return == 0) {
-      save_return_final_version($trip_id, $dis_id, $returns_incharge_name);
+      $version_no = save_return_final_version($trip_id, $dis_id, $returns_incharge_name);
       $end_time = time();
+      $return_name = 'billwise_return_end_time';
+      save_return_time($trip_id, $return_name,$end_time,$version_no,$dis_id);
     }
     if (!empty($trip_nid->nid) && $check_to_be_return == 1) {
       $node = node_load($trip_nid->nid);
@@ -1358,7 +1336,14 @@ function save_sku_wise_return_final_submit_version($form, &$form_state) {
         ->condition('runsheet_number', $trip_id, '=')
         ->condition('distributor_id', $dis_id, '=')
         ->execute();
+      $return_name = 'skuwise_return_end_time';
+      save_return_time($trip_id, $return_name,time(),$version_no,$dis_id);
+      
     }
+    If (!empty($existing_return_start_time)) {
+        $return_name = 'skuwise_return_start_time';  
+        save_return_time($trip_id, $return_name,$returns_start_time,$version_no,$dis_id);
+     }
     save_sku_return_version($version_no, $form_state['input']['bill_details'], $trip_id, $dis_id);
     drupal_set_message(t("Data saved successfully."));
   }
@@ -1443,7 +1428,8 @@ function sku_wise_return_validate($form, &$form_state) {
           $actual_returned_qty_in_pop = $val['actual_returned_qty1'] + $val['cashier_short'] + $val['claimed_godown_short'];
           if ($bill_level_tobe_returned_qty_undeliver != $actual_returned_qty_in_pop) {
             $form_state['sku_excess_error'] = 1;
-            drupal_set_message(t("To be returned qty of Undeliver Bill Number:$bill of SKU:$sku should be equal to actual returned qty + cashier short + claimed godown short"), 'error');
+            $mess.= t("To be returned qty of Bill Number:$bill of SKU:$sku should be equal to actual returned qty + cashier short + claimed godown short");
+            drupal_set_message(t("To be returned qty of Bill Number:$bill of SKU:$sku should be equal to actual returned qty + cashier short + claimed godown short"), 'error');
           }
         }
 
@@ -1540,6 +1526,17 @@ function sku_wise_return_submit($form, &$form_state) {
   $existing_bill_wise_return_start_time = 0;
   $existing_bill_wise_return_start_time = check_billwise_return_start_time_present($trip_id, $dis_id);
   if ($form_state['values']['show_bills'] == 1) {
+      if ($form_state['bill-wise'] == 1) {
+      $return_name = 'billwise_return_start_time';  
+      $type = 'bill_wise';
+      $end_time = time();
+      $existing_bill_wise_return_start_time = check_billwise_return_start_time_present($trip_id, $dis_id);
+      if (empty($existing_bill_wise_return_start_time)) {
+        save_returns_start_time($type, $trip_id, $returns_start_time, $dis_id);
+        save_return_time($trip_id, $return_name, $returns_start_time, $version = null, $dis_id);
+      } // Insert into return version table
+      save_returns_end_time($type, $trip_id, $end_time, $dis_id);
+    }
     foreach ($form_state['input']['bill_details'] as $sku => $value) {
       foreach ($form_state['input']["sku_bill_table_$sku"] as $bill => $val) {
         $query = db_select('dispatch_planning_item_details', 'dpi');
@@ -1553,16 +1550,6 @@ function sku_wise_return_submit($form, &$form_state) {
         $query->condition('ad.runsheet_number', $trip_id, '=');
         $itdatas = $query->execute()->fetchAll();
         $itdata = $itdatas[0];
-        // Save sku wise return start time
-        if ($form_state['bill-wise'] == 1) {
-          $type = 'bill_wise';
-          $end_time = time();
-          $existing_bill_wise_return_start_time = check_billwise_return_start_time_present($trip_id, $dis_id);
-          if (empty($existing_bill_wise_return_start_time)) {
-            save_returns_start_time($type, $trip_id, $returns_start_time, $dis_id);
-          }
-          save_returns_end_time($type, $trip_id, $end_time, $dis_id);
-        }
         if ($itdata->res_status == 'undeliver') {
           //6. Comment the code where Bill Status/Line Status is changing when Bill Status = Undeliver
           $ret_cash = $val['actual_returned_qty1'] + $val['cashier_short']; //Return Qty + Cashier Short  
@@ -1580,7 +1567,7 @@ function sku_wise_return_submit($form, &$form_state) {
 
           db_update('dispatch_planning_item_details') // Table name no longer needs {}
             ->fields(array(
-              'res_sku_actual_quantity1' => (int) $val['dispatch_qty'] - $val['actual_returned_qty1'] - $val['cashier_short'] - $val['claimed_godown_short'],
+              //'res_sku_actual_quantity1' => (int) $val['dispatch_qty'] - $val['actual_returned_qty1'] - $val['cashier_short'] - $val['claimed_godown_short'],
               'return_qty' => (int) $val['actual_returned_qty1'],
               //'dispatch_qty' => $val['dispatch_qty'],
               'res_sku_reason' => ($line_status != 'line_undeliver') ? $val['reason_code'] : '',
@@ -1646,17 +1633,23 @@ function sku_wise_return_submit($form, &$form_state) {
           else if ($ret_cash_godown == 0) {
             $line_status = 'line_deliver';
           }
+          /*
+            * 1. To be returned qty for each bill should be = actual returned qty of that bill + cashier short of that bill + claimed godown short of that bill. 
+             This should be the check for both Bill status = undeliver and partial_deliver. This validation needs to be put on Submit and not on Save.
+             2. Comment the code where we are updating the line level status (for both Bill Status undeliver and partial_deliver). Both at Save and Submit. This I have not tested though.
+             3. Comment the code line marked in RED below. Comment this both at Save and Submit:res_sku_actual_quantity1' => (int) $val['dispatch_qty'] - $val['actual_returned_qty1'] - $val['cashier_short'] - $val['claimed_godown_short'],
+           */
 
           db_update('dispatch_planning_item_details') // Table name no longer needs {}
             ->fields(array(
-              'res_sku_actual_quantity1' => (int) $val['dispatch_qty'] - $val['actual_returned_qty1'] - $val['cashier_short'] - $val['claimed_godown_short'],
+             // 'res_sku_actual_quantity1' => (int) $val['dispatch_qty'] - $val['actual_returned_qty1'] - $val['cashier_short'] - $val['claimed_godown_short'],
               'return_qty' => (int) $val['actual_returned_qty1'],
               //'dispatch_qty' => $val['dispatch_qty'],
               'res_sku_reason' => $val['reason_code'],
               'res_cashier_short' => (int) $val['cashier_short'],
               'claimed_godown_short' => (int) $val['claimed_godown_short'],
               'claimed_godown_short_reason' => $val['reason_for_claim'],
-              'line_level_status' => $line_status, // line level status
+              //'line_level_status' => $line_status, // line level status
               'declared_claimed_godown_short' => (int) $val['claimed_godown_short']
             ))
             ->condition('sku_code', $sku, '=')
@@ -1695,6 +1688,13 @@ function sku_wise_return_submit($form, &$form_state) {
       $node->field_returns_closure_id['und'][0]['value'] = "RC$trip_id";
       $node->field_return_dispatch_supervisor['und'][0]['nid'] = $returns_incharge_name;
       node_save($node);
+      $return_name = 'billwise_return_end_time';
+      save_return_time($trip_id, $return_name,time(),$version_no,$dis_id);
+      if (!empty($existing_bill_wise_return_start_time)) {
+          // Save sku wise return start time
+         $return_name = 'billwise_return_start_time';
+         save_return_time($trip_id, $return_name, $returns_start_time, $version_no, $dis_id);
+      }
 
       // Insert the Returns Incharge Name in Fareye Table
       /* db_update('dispatch_planning_api_data') // Table name no longer needs {}
@@ -1921,4 +1921,57 @@ function store_excess_inventory_declaration_data($all_excess_sku, $trip_id, $dis
         ->execute();
     }
   }
+}
+function save_return_time($trip_id,$return_name,$time_value,$version = null, $distributor_id) {
+  if (!empty($trip_id) && !empty($return_name) && !empty($time_value)) {
+    //sku_wise_return_time_history
+    $fields = array(
+      'trip_id',
+      'return_version_name',
+      'time_value',
+      'return_version_value',
+      'distributor_id',
+      'created_date',
+    );
+    $query = db_insert('sku_wise_return_time_history')->fields($fields);
+    $values['trip_id'] = $trip_id;
+    $values['return_version_name'] = $return_name;
+    $values['time_value'] = $time_value;
+    $values['return_version_value'] = $version;
+    $values['distributor_id'] = $distributor_id;
+    $values['created_date'] = time();
+    $query->values($values);
+    $query->execute();
+  }
+}
+// Checking return start time present
+function get_returns_start_time($trip_id,$return_name,$distributor_id) {
+  if (!empty($trip_id)&& !empty($return_name) && !empty($distributor_id)) {
+    $query = db_select('sku_wise_return_time_history','sku_time');
+             $query->condition('sku_time.trip_id',$trip_id);
+             $query->condition('sku_time.distributor_id',$distributor_id);
+             $query->condition('sku_time.return_version_name',$return_name);
+             $query->fields('sku_time','id');
+             $id = $query->execute()->fetchField();
+             
+  }
+  return $id;
+}
+
+// Checking return start time present
+function get_returns_end_time($trip_id,$distributor_id) {
+  $result = array();
+  if (!empty($trip_id) && !empty($distributor_id)) {
+    $query = db_select('sku_wise_return_time_history','sku_time');
+             $query->condition('sku_time.trip_id',$trip_id);
+             $query->condition('sku_time.distributor_id',$distributor_id);
+             $query->condition('sku_time.return_version_name',array('billwise_return_end_time','skuwise_return_end_time'),'IN');
+             $query->isNotNull('sku_time.return_version_value');
+             $query->fields('sku_time',array('return_version_name'));
+             $query->fields('sku_time',array('time_value'));
+             $query->orderBy('sku_time.id', 'desc');
+             $result= $query->execute()->fetchAllKeyed(0,1);
+             
+  }
+
 }
