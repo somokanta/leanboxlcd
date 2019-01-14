@@ -152,3 +152,56 @@ function leanbox_new_sku_wise_return_schema() {
 
   return $schema;
 }
+
+function leanbox_new_sku_wise_return_update_7114() {
+ $schema['sku_wise_return_time_history'] = array(
+    'description' => 'describes Sku wise return time values',
+    'fields' => array(
+      'id' => array(
+        'description' => t('Id Primary Key'),
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'trip_id' => array(
+        'description' => t('Trip ID'),
+        'type' => 'varchar',
+        'length' => 100,
+        'not null' => TRUE,
+      ),
+      'return_version_name' => array(
+        'description' => t('return_version_name'),
+        'type' => 'varchar',
+        'length' => 60, 
+        'not null' => TRUE,
+      ),
+      'time_value' => array(
+        'description' => t('return start time'),
+        'type' => 'int',
+        'not null' => TRUE,
+      ),
+      'return_version_value' => array(
+        'description' => 'return_version_value',
+        'type' => 'varchar',
+        'length' => 50, 
+      ),
+      'created_date' => array(
+        'description' => 'Created Date',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'distributor_id' => array(
+        'description' => t('distributor_id'),
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+     ),
+      'indexes' => array(
+      'trip_id' => array('trip_id'),
+    ),
+    'primary key' => array('id'),
+  );
+
+  db_create_table('sku_wise_return_time_history', $schema['sku_wise_return_time_history']);
+}
