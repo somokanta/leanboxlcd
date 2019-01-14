@@ -1428,8 +1428,8 @@ function sku_wise_return_validate($form, &$form_state) {
           $actual_returned_qty_in_pop = $val['actual_returned_qty1'] + $val['cashier_short'] + $val['claimed_godown_short'];
           if ($bill_level_tobe_returned_qty_undeliver != $actual_returned_qty_in_pop) {
             $form_state['sku_excess_error'] = 1;
-            $mess.= t("To be returned qty of Bill Number:$bill of SKU:$sku should be equal to actual returned qty + cashier short + claimed godown short");
-            drupal_set_message(t("To be returned qty of Bill Number:$bill of SKU:$sku should be equal to actual returned qty + cashier short + claimed godown short"), 'error');
+            $mess.= t("To be returned qty of Bill Number:$bill of SKU:$sku should be equal to actual returned qty + cashier short + claimed godown short").'<br>';
+            //drupal_set_message(t("To be returned qty of Bill Number:$bill of SKU:$sku should be equal to actual returned qty + cashier short + claimed godown short"), 'error');
           }
         }
 
