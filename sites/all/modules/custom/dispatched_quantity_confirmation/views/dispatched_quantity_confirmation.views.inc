@@ -820,5 +820,20 @@ function dispatched_quantity_confirmation_views_data() {
             'is date' => TRUE,
         ),
     );
+  $data['views']['collection_mode'] = array(
+    'title' => t('Field Collection Mode'),
+    'help' => t('Field Collection Mode'),
+    'field' => array(
+      'handler' => 'field_api_data_common_handler',
+    ),
+  );
+  
+  $data['views']['returned_qty'] = array(
+    'title' => t('Field Return Qty'),
+    'help' => t('Field Return Qty'),
+    'field' => array(
+      'handler' => 'field_item_details_common_handler',
+    ),
+  );
     return $data;
 }
