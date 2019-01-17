@@ -229,6 +229,22 @@ function dispatched_quantity_confirmation_menu() {
     'file' => 'includes/master_ptl_cld_confirmation.inc',
   );
   
+  $items['trip-confirmation-version-report'] = array(
+    'title' => 'Trip Confirmation Version Report',
+    'page callback' => array('trip_confirmation_version_callback'),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'includes/trip_confirmation_version_report.inc',
+  );
+  
+  $items['trip-confirmation-version-report/export'] = array(
+    'title' => 'Trip Confirmation Version Report Export',
+    'description' => 'Trip Confirmation Version Report Export',
+    'page callback' => array('trip_confirmation_version_export'),
+    'file' => 'includes/trip_confirmation_version_report.inc',
+    'access callback' => TRUE,
+  );
+
   return $items;
 }
 
@@ -1286,7 +1302,7 @@ function create_version_excess_qty_table($trip_number, $dis_id) {
   $version_no = get_current_version_excess_table($trip_number, $dis_id);
 
   if (empty($version_no)) {
-    $version_number = 'V_1.0';
+    $version_number = 'V_1.1';
   }else {
     $exploded_val = explode('_', $version_no);
     $updated_version = $exploded_val[1] + 0.1;
@@ -1321,7 +1337,7 @@ function create_version_dispatch_qty_conf($trip_number, $dis_id, $version_type) 
   $version_no = get_current_version($trip_number, $dis_id, $version_type);
   
   if (empty($version_no)) {
-    $version_number = 'V_1.0';
+    $version_number = 'V_1.1';
   }
   else {
     $exploded_val = explode('_', $version_no);
@@ -1340,4 +1356,48 @@ function create_version_dispatch_qty_conf($trip_number, $dis_id, $version_type) 
       $result_id = $query->execute();
     }
   }
+}
+
+// Difference Table.
+function get_all_details_difference($trip_number, $dis_id) {
+  $query = db_select('difference_qty', 'diff');
+  $query->condition('diff.trip_id', $trip_number);
+  $query->condition('diff.distributor_id', $dis_id);
+  $query->fields('diff');
+  $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+  return $res;
+}
+
+function create_version_difference_qty_table($trip_number, $dis_id) {
+  $all_diff_data = get_all_details_difference($trip_number, $dis_id);
+  $version_no = get_current_version_diff_table($trip_number, $dis_id);
+  if (empty($version_no)) {
+    $version_number = 'V_1.1';
+  }else {
+    $exploded_val = explode('_', $version_no);
+    $updated_version = $exploded_val[1] + 0.1;
+    $version_number = "V_$updated_version";
+  }
+  
+  foreach ($all_diff_data as $key => $val) {
+    if (!empty($val)) {
+      $query = db_insert('difference_table_versioning');
+      unset($val['id']);
+      $val['version_no'] = $version_number;
+      $val['version_created_time'] = REQUEST_TIME;
+      $query->fields($val);
+      $result_id = $query->execute();
+    }
+  }
+}
+// End Difference Table.
+
+// Bill not Edited Reason.
+function get_bill_not_edited_reason_list($dis_id) {
+  $query = db_select('node', 'n');
+  $query->condition('n.type', 'bill_not_edited_reason_master');
+  $query->condition('n.uid', $dis_id);
+  $query->fields('n', array('title'));
+  $result = $query->execute()->fetchAllKeyed(0, 0);
+  return $result; 
 }
