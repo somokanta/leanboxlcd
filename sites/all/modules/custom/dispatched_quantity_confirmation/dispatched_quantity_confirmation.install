@@ -310,5 +310,474 @@ function dispatched_quantity_confirmation_schema() {
     'primary key' => array('id'),
   );
   
+  $schema['dispatch_qty_confirmation_versioning'] = array(
+    'description' => 'Dispatched quantity confirmation',
+    'fields' => array(
+      'id' => array(
+        'description' => 'The primary identifier for a data',
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'trip_id' => array(
+        'description' => t('Trip ID'),
+        'type' => 'int',
+      ),
+      'bill_number' => array(
+        'description' => t('Bill Number'),
+        'type' => 'varchar',
+        'length' => 25,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'sku_code' => array(
+        'description' => t('SKU Code'),
+        'type' => 'varchar',
+        'length' => 25,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'product_name' => array(
+        'description' => t('Product name'),
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'mrp' => array(
+        'description' => t('MRP'),
+        'type' => 'varchar',
+        'length' => 10,
+        'default' => 0,
+      ),   
+      'tur' => array(
+        'description' => t('TUR'),
+        'type' => 'varchar',
+        'length' => 10,
+        'default' => 0,
+      ), 
+      'original_loose_qty' => array(
+        'description' => t('Original Loose Quantity'),
+        'type' => 'int',
+        'default' => 0,
+      ),
+      'ptl_put_qty' => array(
+        'description' => t('PTL Put Quantity'),
+        'type' => 'int',
+        'default' => 0,
+      ),
+      'pplc_confirmed_qty' => array(
+        'description' => t('PPLC Confirmed Quantity'),
+        'type' => 'int',
+        'default' => 0,
+      ),
+      'short_reason' => array(
+       'description' => t('Short Reason'),
+       'type' => 'varchar',
+       'length' => 255,
+       'default' => '',
+      ),
+     'dispatch_loose_qty' => array(
+        'description' => t('To Be Dispatched Quantity Loose Qty'),
+        'type' => 'int',
+        'default' => 0,
+      ),
+      'loose_close_flag' => array(
+        'description' => t('Loose Close flag'),
+        'type' => 'int',
+        'default' => 0,
+      ),
+      //loose end
+      'original_cld_qty' => array(
+        'description' => t('Original CLD Quantity'),
+        'type' => 'int',
+        'default' => 0,
+      ),
+      'upc' => array(
+        'description' => t('UPC'),
+        'type' => 'int',
+        'default' => 0,
+      ),
+      'cld_confirmed_qty' => array(
+        'description' => t('CLD Confirmed Quantity'),
+        'type' => 'int',
+        'default' => 0,
+      ),
+      'declared_cld_qty' => array(
+        'description' => t('Declared CLD Quantity'),
+        'type' => 'int',
+        'default' => 0,
+      ),
+      'cld_short_reason' => array(
+       'description' => t('CLD Short Reason'),
+       'type' => 'varchar',
+       'length' => 255,
+       'default' => '',
+      ), 
+      'dispatch_cld_qty' => array(
+        'description' => t('To Be Dispatched Quantity Cld Qty'),
+        'type' => 'int',
+        'default' => 0,
+      ),
+      'cld_close_flag' => array(
+        'description' => t('CLD Close Flag'),
+        'type' => 'int',
+        'default' => 0,
+      ),
+      //CLD END
+      'type' => array(
+        'description' => t('Type'),
+        'type' => 'varchar',
+        'length' => 25,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'original_qty' => array(
+        'description' => t('Original Quantity'),
+        'type' => 'int',
+        'default' => 0,
+      ),        
+      'to_be_dispatch_qty' => array(
+        'description' => t('To be Dispatch Quantity'),
+        'type' => 'int',
+        'default' => 0,
+      ),        
+      'created_date' => array(
+        'description' => 'Created Date',
+        'type' => 'int',
+        'default' => 0,
+      ),
+      'loose_created_date' => array(
+        'description' => 'Loose Created Date',
+        'type' => 'int',
+        'default' => 0,
+      ),         
+      'cld_created_date' => array(
+        'description' => 'CLD Created Date',
+        'type' => 'int',
+        'default' => 0,
+      ),
+      'cld_retail_confirmed_flag' => array(
+        'description' => t('CLD Confirmed Flag'),
+        'type' => 'int',
+        'default' => 0,
+      ),
+      'cld_loose_child_qty' => array(
+        'description' => t('CLD Loose child qty'),
+        'type' => 'int',
+        'default' => 0,
+      ),
+      'masterptl_short_qty' => array(
+        'description' => t('Master PTL short qty'),
+        'type' => 'int',
+        'default' => 0,
+      ),
+      'version_created_time' => array(
+      'description' => 'Version Created Time',
+      'type' => 'int',
+      'not null' => TRUE,
+      'default' => 0,
+      ),
+      'version_no' => array(
+        'description' => 'Version No',
+        'type' => 'varchar',
+        'length' => 25,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'version_type' => array(
+        'description' => t('VersionType'),
+        'type' => 'varchar',
+        'length' => 25,
+        'default' => '',
+      ),
+      'distributor_id' => array(
+        'description' => t('distributor_id'),
+         'type' => 'int',
+         'default' => 0,
+      ),
+    ),
+    'primary key' => array('id'),
+  );
+  
+  $schema['excess_qty_versioning'] = array(
+    'description' => 'Excess Quantity',
+    'fields' => array(
+      'id' => array(
+        'description' => 'The primary identifier for a data',
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'trip_id' => array(
+        'description' => t('Trip ID'),
+        'type' => 'int',
+      ),
+      'bill_number' => array(
+        'description' => t('Bill Number'),
+        'type' => 'varchar',
+        'length' => 25,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'sku_code' => array(
+        'description' => t('SKU code'),
+        'type' => 'varchar',
+        'length' => 25,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'product_name' => array(
+        'description' => t('product name'),
+        'type' => 'varchar',
+        'length' => 25,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'to_be_dispatch_qty' => array(
+        'description' => t('To Be Dispatch Qty'),
+        'type' => 'int',
+        'default' => 0,
+      ), 
+      
+      'revised_host_qty' => array(
+        'description' => t('Revised Host Qty'),
+        'type' => 'int',
+        'default' => 0,
+      ),
+      'excess_qty' => array(
+        'description' => t('Excess Qty'),
+        'type' => 'int',
+        'default' => 0,
+      ),        
+      'reason_code' => array(
+       'description' => t('Reason Code'),
+       'type' => 'varchar',
+       'length' => 255,
+       'default' => '',
+      ),
+      'created_date' => array(
+        'description' => 'Created Date',
+        'type' => 'int',
+        'default' => 0,
+      ),
+     'version_created_time' => array(
+        'description' => 'Version Created Time',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'version_no' => array(
+        'description' => 'Version No',
+        'type' => 'varchar',
+        'length' => 25,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'distributor_id' => array(
+        'description' => t('distributor_id'),
+         'type' => 'int',
+         'default' => 0,
+      ),
+      'excess_remarks' => array(
+       'description' => t('Excess Reason'),
+       'type' => 'varchar',
+       'length' => 255,
+       'default' => '',
+      ),
+    ),
+    'primary key' => array('id'),
+  );
+  
+  $schema['difference_table_versioning'] = array(
+    'description' => 'Difference table versioning',
+    'fields' => array(
+      'id' => array(
+        'description' => 'The primary identifier for a data',
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'trip_id' => array(
+        'description' => t('Trip ID'),
+        'type' => 'int',
+      ),
+      'bill_number' => array(
+        'description' => t('Bill Number'),
+        'type' => 'varchar',
+        'length' => 25,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'sku_code' => array(
+        'description' => t('SKU code'),
+        'type' => 'varchar',
+        'length' => 25,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'to_be_dispatch_qty' => array(
+        'description' => t('To Be Dispatch Qty'),
+        'type' => 'int',
+        'default' => 0,
+      ), 
+      
+      'revised_host_qty' => array(
+        'description' => t('Revised Host Qty'),
+        'type' => 'int',
+        'default' => 0,
+      ),
+            
+      'difference' => array(
+        'description' => t('Difference'),
+        'type' => 'int',
+        'default' => 0,
+      ),
+      'created_date' => array(
+        'description' => 'Created Date',
+        'type' => 'int',
+        'default' => 0,
+      ),
+     'version_created_time' => array(
+        'description' => 'Version Created Time',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'version_no' => array(
+        'description' => 'Version No',
+        'type' => 'varchar',
+        'length' => 25,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'distributor_id' => array(
+        'description' => t('distributor_id'),
+         'type' => 'int',
+         'default' => 0,
+      ),
+      'reason' => array(
+       'description' => t('Reason'),
+       'type' => 'varchar',
+       'length' => 255,
+       'default' => '',
+    ),
+    'remarks' => array(
+      'description' => t('Remarks'),
+      'type' => 'varchar',
+      'length' => 100,
+      'default' => NULL,
+    ),
+    'product_name' => array(
+      'description' => t('Product name'),
+      'type' => 'varchar',
+      'length' => 25,
+      'not null' => TRUE,
+      'default' => '',
+     ),
+    ),
+    'primary key' => array('id'),
+  );
+  
+  $schema['difference_qty'] = array(
+    'description' => 'Difference Quantity',
+    'fields' => array(
+      'id' => array(
+        'description' => 'The primary identifier for a data',
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'trip_id' => array(
+        'description' => t('Trip ID'),
+        'type' => 'int',
+      ),
+      'bill_number' => array(
+        'description' => t('Bill Number'),
+        'type' => 'varchar',
+        'length' => 25,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'sku_code' => array(
+        'description' => t('SKU code'),
+        'type' => 'varchar',
+        'length' => 25,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'product_name' => array(
+        'description' => t('Product name'),
+        'type' => 'varchar',
+        'length' => 25,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'difference' => array(
+        'description' => t('Difference_qty Qty'),
+        'type' => 'int',
+        'default' => 0,
+      ),        
+      'reason' => array(
+       'description' => t('Reason'),
+       'type' => 'varchar',
+       'length' => 255,
+       'default' => '',
+      ),
+      'created_date' => array(
+        'description' => 'Created Date',
+        'type' => 'int',
+        'default' => 0,
+      ),
+      'to_be_dispatch_qty' => array(
+        'description' => t('To Be Dispatch Qty'),
+        'type' => 'int',
+        'default' => 0,
+      ), 
+      
+      'revised_host_qty' => array(
+        'description' => t('Revised Host Qty'),
+        'type' => 'int',
+        'default' => 0,
+      ),
+      'distributor_id' => array(
+        'description' => t('distributor_id'),
+         'type' => 'int',
+         'default' => 0,
+      ),
+      'remarks' => array(
+        'description' => t('Remarks'),
+        'type' => 'varchar',
+        'length' => 100,
+        'default' => NULL,
+      ),
+    ),
+    'primary key' => array('id'),
+  );
+  
   return $schema;
+}
+
+
+function dispatched_quantity_confirmation_update_7001() {
+  $fields = array(
+    'to_be_dispatch_qty' => array(
+      'description' => t('To Be Dispatch Qty'),
+      'type' => 'int',
+      'default' => 0,
+    ), 
+
+    'revised_host_qty' => array(
+      'description' => t('Revised Host Qty'),
+      'type' => 'int',
+      'default' => 0,
+    ),
+    'excess_remarks' => array(
+      'description' => t('Excess Remarks'),
+      'type' => 'varchar',
+      'length' => 100,
+      'default' => NULL,
+    ), 
+  );
+  foreach ($fields as $key => $field) {
+    if (!db_field_exists('excess_qty', $key)) {
+      db_add_field('excess_qty', $key, $field);
+    }
+  }
 }

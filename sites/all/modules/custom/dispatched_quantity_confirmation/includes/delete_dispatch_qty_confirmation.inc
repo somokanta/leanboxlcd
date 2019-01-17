@@ -36,8 +36,8 @@ function delete_dispatch_qty_confirmation_form($form, &$form_state) {
   $form['apply'] = array(
     '#type' => 'submit',
     '#value' => 'Apply Changes',
-    '#attributes' => array( 
-         'onclick' => 'if(!confirm("Are you sure you want to confirm ?")){return false;}', 
+    '#attributes' => array(
+      'onclick' => 'if(!confirm("Are you sure you want to confirm ?")){return false;}',
     ),
     '#submit' => array('delete_dispatch_qty_confirmation_submit'),
   );
@@ -52,7 +52,10 @@ function delete_dispatch_qty_confirmation_submit($form, &$form_state) {
   $all = $form_state['values']['all'];
   $loose = $form_state['values']['loose'];
   $cld = $form_state['values']['cld'];
+  
   if ($all == 1) {
+    $version_type = 'All';
+    create_version_dispatch_qty_conf($trip_number, $dis_id,$version_type);    
     db_update('dispatch_qty_preprocess')
       ->fields(array(
         'flag' => 0,
@@ -71,15 +74,17 @@ function delete_dispatch_qty_confirmation_submit($form, &$form_state) {
     $node->field_loose_confirmation['und'][0]['value'] = 0;
     $node->field_cld_confirmation['und'][0]['value'] = 0;
     node_save($node);
-    
-   drupal_set_message(t('Trip id ' . $trip_number . ' is successfully deleted.')); 
+
+    drupal_set_message(t('Trip id ' . $trip_number . ' is successfully deleted.'));
   }
   if ($loose == 1) {
-
+    $version_type = 'Loose';
+    create_version_dispatch_qty_conf($trip_number, $dis_id, $version_type);
+    
     db_update('dispatch_qty_confirmation')
       ->fields(array(
         'loose_close_flag' => 0,
-        'type' => '',
+        //'type' => '',
         'loose_created_date' => 0,
         'ptl_put_qty' => 0,
         'short_reason' => '',
@@ -92,7 +97,7 @@ function delete_dispatch_qty_confirmation_submit($form, &$form_state) {
       //->condition('original_loose_qty', 0, '>')
       ->condition('distributor_id', $dis_id, '=')
       ->execute();
-
+    
     //Sync To be Dispatch Qty
     db_update('dispatch_qty_confirmation') // Table name no longer needs {}
       ->expression('to_be_dispatch_qty', "dispatch_loose_qty + (dispatch_cld_qty * upc) + cld_loose_child_qty")
@@ -103,14 +108,17 @@ function delete_dispatch_qty_confirmation_submit($form, &$form_state) {
     $node = node_load($nid);
     $node->field_loose_confirmation['und'][0]['value'] = 0;
     node_save($node);
-    
-    drupal_set_message(t('Trip id ' . $trip_number . ' loose changes are reset'));  
+
+    drupal_set_message(t('Trip id ' . $trip_number . ' loose changes are reset'));
   }
   if ($cld == 1) {
+    $version_type = 'CLD'; 
+    create_version_dispatch_qty_conf($trip_number, $dis_id, $version_type);   
+    
     db_update('dispatch_qty_confirmation')
       ->fields(array(
         'cld_close_flag' => 0,
-        'type' => '',
+        //'type' => '',
         'cld_short_reason' => '',
         'dispatch_cld_qty' => 0,
         'cld_confirmed_qty' => 0,
@@ -121,19 +129,19 @@ function delete_dispatch_qty_confirmation_submit($form, &$form_state) {
       //->condition('original_cld_qty', 0, '>')
       ->condition('distributor_id', $dis_id, '=')
       ->execute();
-
+    
     //Sync To be Dispatch Qty
     db_update('dispatch_qty_confirmation') // Table name no longer needs {}
       ->expression('to_be_dispatch_qty', "dispatch_loose_qty + (dispatch_cld_qty * upc) + cld_loose_child_qty")
       ->condition('trip_id', $trip_number, '=')
       ->execute();
     //End
-    
+
     $nid = get_nid_from_title($trip_number, 'dispatch_data');
     $node = node_load($nid);
     $node->field_cld_confirmation['und'][0]['value'] = 0;
     node_save($node);
-    
-    drupal_set_message(t('Trip id ' . $trip_number . ' cld changes are reset'));   
+
+    drupal_set_message(t('Trip id ' . $trip_number . ' cld changes are reset'));
   }
 }
