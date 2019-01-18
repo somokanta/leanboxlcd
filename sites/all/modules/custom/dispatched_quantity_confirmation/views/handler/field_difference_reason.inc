@@ -35,8 +35,8 @@ class field_difference_reason extends views_handler_field {
     $query->condition('diff.bill_number', $bill_number);
     $query->condition('diff.sku_code', $sku_code);
     $query->condition('diff.distributor_id', $dis_id);
-    $query->fields('diff', array('reason', 'remarks'));
-    $res = $query->execute()->fetchAll();
+    $query->fields('diff', array('reason'));
+    $res = $query->execute()->fetchField();
     
     return $res;
   }

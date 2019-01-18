@@ -2120,7 +2120,7 @@ function dispatched_quantity_confirmation_views_data() {
     'title' => t('Difference Remarks'),
     'help' => t('Difference Remarks field'),
     'field' => array(
-      'handler' => 'field_difference_reason',
+      'handler' => 'field_difference_remarks',
     ),
   );
   
@@ -2136,7 +2136,7 @@ function dispatched_quantity_confirmation_views_data() {
     'title' => t('Excess Remark'),
     'help' => t('Excess Remark field'),
     'field' => array(
-      'handler' => 'field_excess_reason',
+      'handler' => 'field_excess_remarks',
     ),
   );
   
