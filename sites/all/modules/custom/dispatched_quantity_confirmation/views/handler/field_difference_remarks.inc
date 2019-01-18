@@ -8,7 +8,7 @@
 /**
  * Provides a custom views field.
  */
-class field_excess_reason extends views_handler_field {
+class field_difference_remarks extends views_handler_field {
 
    function option_definition() {
       $options = parent::option_definition();
@@ -30,14 +30,15 @@ class field_excess_reason extends views_handler_field {
     $bill_number = $data->dispatch_qty_confirmation_bill_number;
     $sku_code = $data->dispatch_qty_confirmation_sku_code;
 
-    $query = db_select('excess_qty', 'exc');
-    $query->condition('exc.trip_id', $trip_id);
-    $query->condition('exc.bill_number', $bill_number);
-    $query->condition('exc.sku_code', $sku_code);
-    $query->condition('exc.distributor_id', $dis_id);
-    $query->fields('exc', array('reason_code'));
+    $query = db_select('difference_qty', 'diff');
+    $query->condition('diff.trip_id', $trip_id);
+    $query->condition('diff.bill_number', $bill_number);
+    $query->condition('diff.sku_code', $sku_code);
+    $query->condition('diff.distributor_id', $dis_id);
+    $query->fields('diff', array('remarks'));
     $res = $query->execute()->fetchField();
     
     return $res;
   }
 }
+

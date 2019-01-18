@@ -8,7 +8,7 @@
 /**
  * Provides a custom views field.
  */
-class field_excess_reason extends views_handler_field {
+class field_excess_remarks extends views_handler_field {
 
    function option_definition() {
       $options = parent::option_definition();
@@ -35,9 +35,10 @@ class field_excess_reason extends views_handler_field {
     $query->condition('exc.bill_number', $bill_number);
     $query->condition('exc.sku_code', $sku_code);
     $query->condition('exc.distributor_id', $dis_id);
-    $query->fields('exc', array('reason_code'));
+    $query->fields('exc', array('excess_remarks'));
     $res = $query->execute()->fetchField();
     
     return $res;
   }
 }
+
