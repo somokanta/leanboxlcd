@@ -1066,7 +1066,7 @@ function sync_mptl_loose_cld($trip_number, $dis_id) {
         db_update('dispatch_qty_confirmation')
           ->fields(array(
             'cld_confirmed_qty' => $original_cld_qty,
-            'cld_short_reason' =>  '',
+            'cld_short_reason' => $cld_short_reason ? $cld_short_reason : '', //earlier blank now hotfix
             'dispatch_cld_qty' => $original_cld_qty,
             'type' => 'Master PTL',
           ))
@@ -1138,6 +1138,13 @@ function sync_mptl_loose_cld($trip_number, $dis_id) {
       }
     }
   }
+  
+  //expression for cld short reason sync
+    db_update('dispatch_qty_confirmation')
+      ->expression('cld_short_reason', "CASE WHEN ((dispatch_cld_qty + cld_loose_child_qty + dispatch_loose_qty + masterptl_short_qty) = original_qty) THEN '' ELSE cld_short_reason END")  
+      ->condition('trip_id', $trip_number, '=')
+      ->condition('cld_short_reason', '', '!=')  
+      ->execute();
 }
 
 function update_mptl_child_cld($trip_id, $dis_id, $type) {
