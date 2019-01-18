@@ -13,7 +13,8 @@ function confirm_bill_editing_status_form($form, &$form_state) {
   global $user;
   $dis_id = change_feeds_import_get_distributor_id($user->uid);
   $form['#attached']['js'][] = drupal_get_path('module', 'dispatched_quantity_confirmation') . '/js/confirm_bill_editing_status.js';
-
+  $form['#attached']['css'][] = drupal_get_path('module', 'dispatched_quantity_confirmation') . '/css/dispatched_quantity_confirmation.css';
+  
   $form['#prefix'] = '<div id="itemlist-div">';
   $form['#suffix'] = '</div>';
 
@@ -41,22 +42,25 @@ function confirm_bill_editing_status_form($form, &$form_state) {
 
   $header = array('Bill Number',
     'SKU',
-    'Revised Host Qty',
     'To Be Dispatched Qty',
+    'IKEA Qty',
     'Excess Qty',
-    'Excess Reason');
+    'Excess Reason',
+    'Excess Remarks');
   
   $header1 = array('Bill Number',
     'SKU',
     'To Be Dispatched Qty',
-    'Revised Host Qty',
-    'Difference');
+    'IKEA Qty',
+    'Difference Qty',
+    'Difference Reason',
+    'Difference Remarks');
 
   if (!isset($form_state['confirm_bill_editing_status']['bills_sku'])) {
     $form_state['confirm_bill_editing_status']['bills_sku'] = array();
   }
   $options = $form_state['confirm_bill_editing_status']['bills_sku'];
-  
+
   if (!isset($form_state['confirm_bill_editing_status']['bills_sku_new'])) {
     $form_state['confirm_bill_editing_status']['bills_sku_new'] = array();
   }
@@ -121,6 +125,23 @@ function confirm_bill_editing_status_form($form, &$form_state) {
       );
     }
     
+    // Common Reason field for Difference Table.
+    if (!empty($options1)) {
+      $option = array('' => 'Select');
+      $bill_not_edited_reason_list = get_bill_not_edited_reason_list($dis_id);
+      if (!empty($bill_not_edited_reason_list)) {
+        $bill_not_edited_reason = $option + $bill_not_edited_reason_list;
+      }
+      $form['reason'] = array(
+        '#title' => t('Difference Reason'),
+        '#type' => 'select',
+        '#options' => $bill_not_edited_reason,
+        //'#required' => TRUE,
+        '#attributes' => array('class' => array('reason_all'),'id'=>'reason_all'),
+        '#prefix' => '<div class="common_reason difference_table_reason">',
+        '#suffix' => '</div>',
+      );
+    }
     if (!empty($options1)) {
        $form['bill_sku_details_new'] = array(
         '#theme' => 'table',
@@ -128,7 +149,7 @@ function confirm_bill_editing_status_form($form, &$form_state) {
         '#header' => $header1,
         '#rows' => $options1,
         '#caption' => "<b>Difference Table: </b>",
-        '#prefix' => '<div class="custom_middle_table">',
+        '#prefix' => '<div class="custom_middle_table difference_table">',
         '#suffix' => '</div>',
       );
     }
@@ -148,6 +169,7 @@ function confirm_bill_editing_status_form($form, &$form_state) {
       if (!empty($excess_reason_list)) {
         $reason_options = $reason_options + $excess_reason_list;
       }
+
       $excess_reason = array(
         '#type' => 'select',
         '#options' => $reason_options,
@@ -157,6 +179,45 @@ function confirm_bill_editing_status_form($form, &$form_state) {
       $form['bill_sku_details'][$key]["excess_reason"] = &$excess_reason;
       $form['bill_sku_details']['#rows'][$key][]['data']["excess_reason"] = &$excess_reason;
       unset($excess_reason);
+      
+      $excess_remark = array(
+        '#type' => 'textfield',
+        '#attributes' => array('class' => array('remarks')),
+        '#size' => 20,
+      );
+      $form['bill_sku_details'][$key]["excess_remark"] = &$excess_remark;
+      $form['bill_sku_details']['#rows'][$key][]['data']["excess_remark"] = &$excess_remark;
+      unset($excess_remark);
+    }
+    
+    // Bill not edited reason for difference table.
+    foreach ($options1 as $key1 => $val1) {
+      $get_bill_not_edited_reason_default = get_bill_not_edited_reason_default($trip_number, $val['bill_number'], $val['sku_code'], $dis_id);
+
+      $reason_option = array('' => 'Select');
+      $bill_not_edited_reason_list = get_bill_not_edited_reason_list($dis_id);
+      if (!empty($bill_not_edited_reason_list)) {
+        $bill_not_edited_reason_option = $reason_option + $bill_not_edited_reason_list;
+      }
+
+      $bill_not_edited_reason = array(
+        '#type' => 'select',
+        '#options' => $bill_not_edited_reason_option,
+        '#attributes' => array('class' => array('excess-reason_' . $key1, 'reason_bills')),
+        '#default_value' => $get_bill_not_edited_reason_default,
+      );
+      $form['bill_sku_details_new'][$key1]["reason"] = &$bill_not_edited_reason;
+      $form['bill_sku_details_new']['#rows'][$key1][]['data']["reason"] = &$bill_not_edited_reason;
+      unset($bill_not_edited_reason);
+      
+      $difference_remark = array(
+        '#type' => 'textfield',
+        '#attributes' => array('class' => array('remarks')),
+        '#size' => 20,
+      );
+      $form['bill_sku_details_new'][$key1]["difference_remark"] = &$difference_remark;
+      $form['bill_sku_details_new']['#rows'][$key1][]['data']["difference_remark"] = &$difference_remark;
+      unset($difference_remark);
     }
   }
 
@@ -239,8 +300,8 @@ function confirm_bill_editing_status_submit($form, &$form_state) {
     $query->addExpression("dqc.to_be_dispatch_qty - cbd.revised_host_quantity", 'diff_qty'); 
     $query->havingCondition('diff_qty', 0, '>'); 
     $query->fields('dqc', array('bill_number', 'sku_code'));
-    $query->fields('cbd', array('revised_host_quantity'));
     $query->fields('dqc', array('to_be_dispatch_qty'));
+    $query->fields('cbd', array('revised_host_quantity'));
     $result = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
     $form_state['confirm_bill_editing_status']['bills_sku'] = $result;
     
@@ -271,6 +332,15 @@ function confirm_bill_editing_status_final_validate($form, &$form_state) {
       $form_state['reason_error'] = 1;
     }
   }
+  
+  // Difference table Reason validation.
+  foreach ($form_state['confirm_bill_editing_status']['bills_sku_new'] as $key2 => $value2) {
+    if (empty($form_state['input']['bill_sku_details_new'][$key2]['reason'])) {
+      drupal_set_message(t('Please select Difference reason for bill number ' . $value2['bill_number'] . ' and sku ' . $value2['sku_code']), 'error');
+      $form_state['reason_error'] = 1;
+    }
+  }
+
   if ($form_state['reason_error'] == 1) {
     $form_state['rebuild'] = TRUE;
   }   
@@ -290,12 +360,12 @@ function confirm_bill_editing_status_final_submit($form, &$form_state) {
     $node->field_confirm_bill_edit_status['und'][0]['value'] = 1;
     $node->field_ikea_bill_editing_status['und'][0]['value'] = $ikea_bill_editing_status;
     $node->field_confirmed_by['und'][0]['nid'] = $confirmed_by;
+    $node->field_confirm_bill_edit_time['und'][0]['value'] = REQUEST_TIME;
     node_save($node);
 
     //insert in excess qty table 
     foreach ($form_state['confirm_bill_editing_status']['bills_sku'] as $key => $value) {
-      db_merge('excess_qty')
-        ->key(array('trip_id' => $trip_number, 'bill_number' => $value['bill_number'], 'sku_code' => $value['sku_code']))
+      db_insert('excess_qty')
         ->fields(array(
           'trip_id' => $trip_number,
           'bill_number' => $value['bill_number'],
@@ -304,6 +374,27 @@ function confirm_bill_editing_status_final_submit($form, &$form_state) {
           'excess_qty ' => $value['diff_qty'],
           'created_date ' => REQUEST_TIME,
           'distributor_id' => $dis_id,
+          'revised_host_qty' => $value['revised_host_quantity'],
+          'to_be_dispatch_qty' => $value['to_be_dispatch_qty'],
+          'excess_remarks' => $form_state['input']['bill_sku_details'][$key]['excess_remark']
+        ))
+        ->execute();
+    }
+    
+    //insert in difference qty table 
+    foreach ($form_state['confirm_bill_editing_status']['bills_sku_new'] as $key2 => $value2) {
+      db_insert('difference_qty')
+        ->fields(array(
+          'trip_id' => $trip_number,
+          'bill_number' => $value2['bill_number'],
+          'sku_code' => $value2['sku_code'],
+          'difference' => $value2['diff_qty'],
+          'reason' => $form_state['input']['bill_sku_details_new'][$key2]['reason'],
+          'created_date ' => REQUEST_TIME,
+          'distributor_id' => $dis_id,
+          'revised_host_qty' => $value2['revised_host_quantity'],
+          'to_be_dispatch_qty' => $value2['to_be_dispatch_qty'],
+          'remarks' => $form_state['input']['bill_sku_details_new'][$key2]['difference_remark'],
         ))
         ->execute();
     }
@@ -337,7 +428,26 @@ function confirm_bill_editing_status_undo_submit($form, &$form_state) {
   global $user;
   $dis_id = change_feeds_import_get_distributor_id($user->uid);
   $trip_number = $form_state['values']['trip_number'];
-
+  
+ //excess table versioning 
+  create_version_excess_qty_table($trip_number, $dis_id);
+  
+  //delete from excess qty as remaining may ledt in excess table.
+  db_delete('excess_qty')
+    ->condition('trip_id', $trip_number, '=')
+    ->condition('distributor_id', $dis_id, '=')
+    ->execute();
+  
+  //difference table versioning 
+  create_version_difference_qty_table($trip_number, $dis_id);
+  
+  //delete from difference qty as remaining may ledt in difference table.
+  db_delete('difference_qty')
+    ->condition('trip_id', $trip_number, '=')
+    ->condition('distributor_id', $dis_id, '=')
+    ->execute();
+  
+  //unset status
   $nid = get_nid_from_title($trip_number, 'dispatch_data');
   $node = node_load($nid);
   //$status = $node->field_dispatch_status['und'][0]['value'];
@@ -375,4 +485,15 @@ function check_bill_reupload_complete($bills, $distributor_id) {
     $reuploaded_bills = $query->execute()->fetchAllKeyed(0, 0);
   }
   return $reuploaded_bills;
+}
+
+function get_bill_not_edited_reason_default($trip_id, $bill_number, $sku_code, $dis_id) {
+  $query = db_select('difference_qty', 'eq');
+  $query->condition('eq.trip_id', $trip_id);
+  $query->condition('eq.bill_number', $bill_number);
+  $query->condition('eq.sku_code', $sku_code);
+  $query->condition('eq.distributor_id', $dis_id);
+  $query->fields('eq', array('reason'));
+  $reason_code = $query->execute()->fetchField();
+  return $reason_code;
 }

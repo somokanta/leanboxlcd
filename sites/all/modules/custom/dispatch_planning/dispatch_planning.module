@@ -3919,6 +3919,57 @@ function dispatch_planning_views_query_alter(&$view, &$query) {
 
      $query->add_where_expression(0, '((dispatch_planning_item_details_dispatch_planning_api_data.res_godown_short + dispatch_planning_item_details_dispatch_planning_api_data.claimed_godown_short + dispatch_planning_item_details_dispatch_planning_api_data.return_qty + dispatch_planning_item_details_dispatch_planning_api_data.res_cashier_short) <> 0) OR ((CASE WHEN(custom_billing_data.revised_host_quantity IS NULL) THEN ((0 - custom_billing_data.Sum_of_TOTAL_SALES_QTY) + (dispatch_planning_item_details_dispatch_planning_api_data.res_godown_short + dispatch_planning_item_details_dispatch_planning_api_data.claimed_godown_short + dispatch_planning_item_details_dispatch_planning_api_data.return_qty + dispatch_planning_item_details_dispatch_planning_api_data.res_cashier_short)) ELSE ((custom_billing_data.revised_host_quantity - custom_billing_data.Sum_of_TOTAL_SALES_QTY)+ (dispatch_planning_item_details_dispatch_planning_api_data.res_godown_short + dispatch_planning_item_details_dispatch_planning_api_data.claimed_godown_short + dispatch_planning_item_details_dispatch_planning_api_data.return_qty + dispatch_planning_item_details_dispatch_planning_api_data.res_cashier_short)) END) <> 0)'); 
   }
+  
+  if (($view->name == 'trip_bill_sku_return_report1') || ($view->name == 'trip_bill_sku_return_report1' && $view->current_display == 'views_data_export_1')) {  
+
+    // Join dispatch_planning_api_data and dispatch_qty_confirmation.
+      $join = new views_join();
+      $join->table = 'dispatch_planning_api_data'; // or wathever table you want to join with
+      $join->left_table = 'dispatch_qty_confirmation';
+      $join->field = 'bill_number';
+      $join->left_field = 'bill_number'; // or wathever column you want to join with
+      $join->type = 'LEFT'; // if you want another join type play with this value
+      $join->extra = array(
+        array('field' => 'distributor_id', 'left_field' => 'distributor_id'),
+        array('field' => 'runsheet_number', 'left_field' => 'trip_id'),
+      );
+      $join->extra_type = 'AND';
+    
+      // Do the actual join
+      $query->table_queue['api_data_qty_confirmation'] = array(
+        'alias' => 'api_data_qty_confirmation', // I believe this is optional
+        'table' => 'dispatch_planning_api_data',
+        'relationship' => 'dispatch_planning_api_data',
+        'join' => $join,
+      );
+      
+      $query->add_where_expression(0, 'api_data_qty_confirmation.delivery_pending_flag = 0');
+      
+      $query->orderby[1]['field'] = "api_data_qty_confirmation.res_status";
+      $query->orderby[1]['direction'] = "ASC";
+
+      // Join dispatch_planning_api_data and dispatch_qty_confirmation and dispatch_planning_item_details.
+      $join = new views_join();
+      $join->table = 'dispatch_planning_item_details'; // or wathever table you want to join with
+      $join->left_table = 'api_data_qty_confirmation';
+      $join->field = 'trip_bill_reference';
+      $join->left_field = 'id'; // or wathever column you want to join with
+      $join->type = 'LEFT'; // if you want another join type play with this value
+      $join->extra = array(
+        array('field' => 'sku_code', 'left_field' => 'sku7_code', 'left_table' => 'custom_billing_data_dispatch_qty_confirmation'),
+      );
+      $join->extra_type = 'AND';
+    
+      // Do the actual join
+      $query->table_queue['dispatch_planning_item_details'] = array(
+        'alias' => 'dispatch_planning_item_details', // I believe this is optional
+        'table' => 'dispatch_planning_api_data',
+        'relationship' => 'dispatch_planning_api_data',
+        'join' => $join,
+      );
+      
+      $query->add_where_expression(0, '(((CASE WHEN dispatch_planning_item_details.res_godown_short IS NULL THEN 0 ELSE dispatch_planning_item_details.res_godown_short END) + (CASE WHEN dispatch_planning_item_details.claimed_godown_short IS NULL THEN 0 ELSE dispatch_planning_item_details.claimed_godown_short END) + (CASE WHEN dispatch_planning_item_details.return_qty IS NULL THEN 0 ELSE dispatch_planning_item_details.return_qty END) + (CASE WHEN dispatch_planning_item_details.res_godown_short IS NULL THEN 0 ELSE dispatch_planning_item_details.res_godown_short END)) <> 0) OR ((CASE WHEN(custom_billing_data_dispatch_qty_confirmation.revised_host_quantity IS NULL) THEN ((0 - dispatch_qty_confirmation.to_be_dispatch_qty) + ((CASE WHEN dispatch_planning_item_details.res_godown_short IS NULL THEN 0 ELSE dispatch_planning_item_details.res_godown_short END) + (CASE WHEN dispatch_planning_item_details.claimed_godown_short IS NULL THEN 0 ELSE dispatch_planning_item_details.claimed_godown_short END) + (CASE WHEN dispatch_planning_item_details.return_qty IS NULL THEN 0 ELSE dispatch_planning_item_details.return_qty END) + (CASE WHEN dispatch_planning_item_details.res_godown_short IS NULL THEN 0 ELSE dispatch_planning_item_details.res_godown_short END))) ELSE ((custom_billing_data_dispatch_qty_confirmation.revised_host_quantity - dispatch_qty_confirmation.to_be_dispatch_qty)+ ((CASE WHEN dispatch_planning_item_details.res_godown_short IS NULL THEN 0 ELSE dispatch_planning_item_details.res_godown_short END) + (CASE WHEN dispatch_planning_item_details.claimed_godown_short IS NULL THEN 0 ELSE dispatch_planning_item_details.claimed_godown_short END) + (CASE WHEN dispatch_planning_item_details.return_qty IS NULL THEN 0 ELSE dispatch_planning_item_details.return_qty END) + (CASE WHEN dispatch_planning_item_details.res_godown_short IS NULL THEN 0 ELSE dispatch_planning_item_details.res_godown_short END))) END) <> 0)');
+  }
 }
 
 // Get Trip Type.

@@ -17,3 +17,23 @@ and open the template in the editor.
 .packing_auditor_name {
     width:200px;
 }
+
+/* Confirm Bill Editing Status Report Difference Table  */
+.difference_table_reason {
+    width: 145px;
+    position: absolute;
+    right: 23.8%;
+}
+.difference_table {
+    margin-top: 50px;
+}
+
+@media screen and (max-width: 767px) {
+  .difference_table {
+    margin-top: 90px;
+  }
+  .difference_table_reason {
+    right: 10px;
+  }
+}
+/* End Difference Table  */

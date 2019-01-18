@@ -1,3 +1,10 @@
 name = LeanBox Dispatched Quantity Confirmation
 description = TP and Host System To Be Dispatched Quantity
 core = 7.x
+
+files[] =  views/handler/field_difference_reason.inc
+files[] =  views/handler/field_excess_reason.inc
+files[] =  views/handler/field_api_data_common_handler.inc
+files[] =  views/handler/field_item_details_common_handler.inc
+files[] =  views/handler/field_excess_remarks.inc
+files[] =  views/handler/field_difference_remarks.inc

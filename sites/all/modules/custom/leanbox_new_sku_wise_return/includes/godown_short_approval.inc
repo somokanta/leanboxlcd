@@ -673,7 +673,8 @@ function godown_short_submit($form, &$form_state) {
 
       db_update('dispatch_planning_item_details') // Table name no longer needs {}
         ->fields(array(
-          'res_sku_actual_quantity1' => $itdata->dispatch_qty - $value['return_qty'] - $res_cashier_short - $res_godown_short,
+          //No need to update actual delivered qty while approving godown short
+          //'res_sku_actual_quantity1' => $itdata->dispatch_qty - $value['return_qty'] - $res_cashier_short - $res_godown_short,
           //$dispatch_qty replaced by $itdata->dispatch_qty
           //'return_qty' => $value['return_qty'],
           //'dispatch_qty' => $dispatch_qty, // as discussed with kusha
@@ -750,7 +751,8 @@ function godown_short_submit($form, &$form_state) {
 
       db_update('dispatch_planning_item_details') // Table name no longer needs {}
         ->fields(array(
-          'res_sku_actual_quantity1' => $itdata->dispatch_qty - $value['return_qty'] - $res_cashier_short - $res_godown_short,
+          //No need to update actual delivered qty while approving godown short
+          //'res_sku_actual_quantity1' => $itdata->dispatch_qty - $value['return_qty'] - $res_cashier_short - $res_godown_short,
           //$dispatch_qty replaced by $itdata->dispatch_qty
           //'return_qty' => $value['return_qty'],
           //'dispatch_qty' => $dispatch_qty,
