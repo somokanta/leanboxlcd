@@ -643,6 +643,18 @@ function change_feeds_import_views_data() {
     'filter' => array(
       'handler' => 'views_handler_filter_string',
     ),
+    'relationship' => array(
+      'title' => t('Sku code in sku7_code_master'),
+      'help' => t("Sku code in sku7_code_master"),
+      'base' => 'node',
+      'base field' => 'title',
+      'handler' => 'views_handler_relationship',
+      'label' => t('Sku code in sku7_code_master'),
+      'extra' => array(
+        array('field' => 'type', 'value' => 'sku7_code_master'),
+        array('field' => 'uid', 'left_field' => 'distributor_id'),
+      ),
+    ),
   );
 
   $data['custom_billing_data']['PRICELIST_GROUP'] = array(

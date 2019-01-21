@@ -3970,6 +3970,70 @@ function dispatch_planning_views_query_alter(&$view, &$query) {
       
       $query->add_where_expression(0, '(((CASE WHEN dispatch_planning_item_details.res_godown_short IS NULL THEN 0 ELSE dispatch_planning_item_details.res_godown_short END) + (CASE WHEN dispatch_planning_item_details.claimed_godown_short IS NULL THEN 0 ELSE dispatch_planning_item_details.claimed_godown_short END) + (CASE WHEN dispatch_planning_item_details.return_qty IS NULL THEN 0 ELSE dispatch_planning_item_details.return_qty END) + (CASE WHEN dispatch_planning_item_details.res_godown_short IS NULL THEN 0 ELSE dispatch_planning_item_details.res_godown_short END)) <> 0) OR ((CASE WHEN(custom_billing_data_dispatch_qty_confirmation.revised_host_quantity IS NULL) THEN ((0 - dispatch_qty_confirmation.to_be_dispatch_qty) + ((CASE WHEN dispatch_planning_item_details.res_godown_short IS NULL THEN 0 ELSE dispatch_planning_item_details.res_godown_short END) + (CASE WHEN dispatch_planning_item_details.claimed_godown_short IS NULL THEN 0 ELSE dispatch_planning_item_details.claimed_godown_short END) + (CASE WHEN dispatch_planning_item_details.return_qty IS NULL THEN 0 ELSE dispatch_planning_item_details.return_qty END) + (CASE WHEN dispatch_planning_item_details.res_godown_short IS NULL THEN 0 ELSE dispatch_planning_item_details.res_godown_short END))) ELSE ((custom_billing_data_dispatch_qty_confirmation.revised_host_quantity - dispatch_qty_confirmation.to_be_dispatch_qty)+ ((CASE WHEN dispatch_planning_item_details.res_godown_short IS NULL THEN 0 ELSE dispatch_planning_item_details.res_godown_short END) + (CASE WHEN dispatch_planning_item_details.claimed_godown_short IS NULL THEN 0 ELSE dispatch_planning_item_details.claimed_godown_short END) + (CASE WHEN dispatch_planning_item_details.return_qty IS NULL THEN 0 ELSE dispatch_planning_item_details.return_qty END) + (CASE WHEN dispatch_planning_item_details.res_godown_short IS NULL THEN 0 ELSE dispatch_planning_item_details.res_godown_short END))) END) <> 0)');
   }
+  
+  if (($view->name == 'trip_bill_sku_return_report2') || ($view->name == 'trip_bill_sku_return_report2' && $view->current_display == 'views_data_export_1')) {  
+    
+    // Join dispatch_planning_api_data and custom_billing_data
+      $join = new views_join();
+      $join->table = 'dispatch_planning_api_data'; // or wathever table you want to join with
+      $join->left_table = 'custom_billing_data';
+      $join->field = 'bill_number';
+      $join->left_field = 'bill_number'; // or wathever column you want to join with
+      $join->type = 'LEFT'; // if you want another join type play with this value
+      $join->extra = array(
+        array('field' => 'distributor_id', 'left_field' => 'distributor_id'),
+        array('field' => 'runsheet_number', 'left_field' => 'title', 'left_table' => 'node_field_data_field_trip_id_reference'),
+      );
+      $join->extra_type = 'AND';
+    
+      // Do the actual join
+      $query->table_queue['dispatch_planning_api_data'] = array(
+        'alias' => 'dispatch_planning_api_data', // I believe this is optional
+        'table' => 'dispatch_planning_api_data',
+        'relationship' => 'dispatch_planning_api_data',
+        'join' => $join,
+      );
+      
+      $query->add_field('dispatch_planning_api_data', 'res_status', 'res_status');
+      $query->add_field('dispatch_planning_api_data', 'res_money_collect2', 'res_money_collect2');
+      $query->add_field('dispatch_planning_api_data', 'res_money_collect2_edit', 'res_money_collect2_edit');
+      $query->add_field('dispatch_planning_api_data', 'res_signed_bill_delivery', 'res_signed_bill_delivery');
+      $query->add_field('dispatch_planning_api_data', 'res_signed_bill_delivery_edit', 'res_signed_bill_delivery_edit');
+      $query->add_field('dispatch_planning_api_data', 'res_signed_bill_partial', 'res_signed_bill_partial');
+      $query->add_field('dispatch_planning_api_data', 'res_signed_bill_partial_edit', 'res_signed_bill_partial_edit');
+      
+      $query->add_where_expression(0, 'dispatch_planning_api_data.delivery_pending_flag = 0 OR dispatch_planning_api_data.delivery_pending_flag IS NULL');
+      
+      $query->orderby[1]['field'] = "dispatch_planning_api_data.res_status";
+      $query->orderby[1]['direction'] = "ASC";
+      
+      // Join dispatch_planning_item_details and dispatch_planning_api_data
+      $join = new views_join();
+      $join->table = 'dispatch_planning_item_details'; // or wathever table you want to join with
+      $join->left_table = 'dispatch_planning_api_data';
+      $join->field = 'trip_bill_reference';
+      $join->left_field = 'id'; // or wathever column you want to join with
+      $join->type = 'LEFT'; // if you want another join type play with this value
+      $join->extra = array(
+        array('field' => 'sku_code', 'left_field' => 'sku7_code', 'left_table' => 'custom_billing_data'),
+      );
+      $join->extra_type = 'AND';
+    
+      // Do the actual join
+      $query->table_queue['dispatch_planning_item_details'] = array(
+        'alias' => 'dispatch_planning_item_details', // I believe this is optional
+        'table' => 'dispatch_planning_item_details',
+        'relationship' => 'dispatch_planning_item_details',
+        'join' => $join,
+      );
+      
+      $query->add_field('', 'res_godown_short', 'res_godown_short');
+      $query->add_field('', 'claimed_godown_short', 'claimed_godown_short');
+      $query->add_field('', 'return_qty', 'return_qty');
+      $query->add_field('', 'res_cashier_short', 'res_cashier_short');
+      
+      $query->add_where_expression(0, '(((CASE WHEN dispatch_planning_item_details.res_godown_short IS NULL THEN 0 ELSE dispatch_planning_item_details.res_godown_short END) + (CASE WHEN dispatch_planning_item_details.claimed_godown_short IS NULL THEN 0 ELSE dispatch_planning_item_details.claimed_godown_short END) + (CASE WHEN dispatch_planning_item_details.return_qty IS NULL THEN 0 ELSE dispatch_planning_item_details.return_qty END) + (CASE WHEN dispatch_planning_item_details.res_godown_short IS NULL THEN 0 ELSE dispatch_planning_item_details.res_godown_short END)) <> 0) OR ((CASE WHEN(custom_billing_data.revised_host_quantity IS NULL) THEN ((0 - custom_billing_data.sum_of_total_sales_qty) + ((CASE WHEN dispatch_planning_item_details.res_godown_short IS NULL THEN 0 ELSE dispatch_planning_item_details.res_godown_short END) + (CASE WHEN dispatch_planning_item_details.claimed_godown_short IS NULL THEN 0 ELSE dispatch_planning_item_details.claimed_godown_short END) + (CASE WHEN dispatch_planning_item_details.return_qty IS NULL THEN 0 ELSE dispatch_planning_item_details.return_qty END) + (CASE WHEN dispatch_planning_item_details.res_godown_short IS NULL THEN 0 ELSE dispatch_planning_item_details.res_godown_short END))) ELSE ((custom_billing_data.revised_host_quantity - custom_billing_data.sum_of_total_sales_qty)+ ((CASE WHEN dispatch_planning_item_details.res_godown_short IS NULL THEN 0 ELSE dispatch_planning_item_details.res_godown_short END) + (CASE WHEN dispatch_planning_item_details.claimed_godown_short IS NULL THEN 0 ELSE dispatch_planning_item_details.claimed_godown_short END) + (CASE WHEN dispatch_planning_item_details.return_qty IS NULL THEN 0 ELSE dispatch_planning_item_details.return_qty END) + (CASE WHEN dispatch_planning_item_details.res_godown_short IS NULL THEN 0 ELSE dispatch_planning_item_details.res_godown_short END))) END) <> 0) OR dispatch_planning_item_details.trip_bill_reference IS NULL');
+  }
 }
 
 // Get Trip Type.
