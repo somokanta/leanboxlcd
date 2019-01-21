@@ -442,7 +442,7 @@ function _masterptl_submit($form, &$form_state) {
               ->condition('bill_number', $bill_details->bill_number, '=')
               ->condition('sku_code', $sku_code, '=')
               ->execute();
-            $put_qty -= $val->original_loose_qty;
+            $put_qty -= $bill_details->original_loose_qty;
           }
           else {
             db_update('dispatch_qty_confirmation')
