@@ -98,6 +98,13 @@ function dispatch_related_config_form($form, $form_state) {
     '#default_value' => variable_get('party_bill_check', ''),
     '#required' => TRUE,
   );
+  $form['party_code_check'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Party Code'),
+    '#description' => t('You can enter Party codes in comma separated format'),
+    '#default_value' => variable_get('party_code_check', ''),
+    //'#required' => TRUE,
+  );
   return system_settings_form($form);
 }
 /**
