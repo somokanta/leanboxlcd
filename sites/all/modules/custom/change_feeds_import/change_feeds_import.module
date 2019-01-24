@@ -3668,26 +3668,39 @@ function drs_invoice_vs_actual_dispatched_report_table($trip_id, $distributor_id
   $query->fields('diff', array('bill_number', 'sku_code', 'revised_host_qty', 'to_be_dispatch_qty', 'difference', 'reason'));
   $query->addexpression("(CASE WHEN diff.to_be_dispatch_qty != diff.revised_host_qty THEN cbd.product_name END)", 'product_name');
   $query->fields('pn', array('field_party_name_value'));
+  $query->fields('cbd', array('line_level_value'));
   $query->havingCondition('revised_host_qty', 0, '>');
   $result = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
   
   $row = array();
+  $total = array();
   $sr_no = 0;
   if (!empty($result)) {
     
     foreach ($result as $value) {
       $sr_no++;
       $row['sr_no'] = $sr_no;
+      $total['sr_no'] = '';
       $row['bill_number'] = $value['bill_number'];
+      $total['bill_number'] = '';
       $row['field_party_name_value'] = $value['field_party_name_value'];
+      $total['field_party_name_value'] = '';
       $row['sku_code'] = $value['sku_code'];
+      $total['sku_code'] = '';
       $row['product_name'] = $value['product_name'];
+      $total['product_name'] = '';
       $row['revised_host_qty'] = $value['revised_host_qty'];
+      $total['revised_host_qty'] = '';
       $row['to_be_dispatch_qty'] = $value['to_be_dispatch_qty'];
+      $total['to_be_dispatch_qty'] = '<b>Difference Value</b>';
       $row['difference'] = $value['difference'];
+      $total['difference'] += ($value['difference']*$value['line_level_value']);
       $row['reason'] = $value['reason'];
+      $total['reason'] = '';
       $rows[] = $row;
+
     }
+    $rows[] = $total;
     $title = "<table border='0' width='100%' cellpadding='0'><tr> <td style='font-weight:bold; text-align:center'>DRS (Invoice vs Actual Dispatched) Report</td></tr></table>";
     $header = array('Sr. No.', 'Bill Number', 'Party Name', 'SKU7 Code', 'Product Name', 'Invoice quantity', 'Dispatched quantity', 'Difference', 'Difference Reason');
     $html = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('width' => "100%", 'cellspacing' => "0", 'style' => "font-size: 13px; color:#000; font-family:arial", 'cellpadding' => "5", 'border' => "1", 'align' => "center", 'class' => "preview_table")));
