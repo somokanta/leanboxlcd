@@ -5599,8 +5599,17 @@ function dispatch_planning_views_data() {
         'handler' => 'field_sales_returns_report_qty',
       ),
     );
+    
+    // Add Distance field in Bill Returns report.
+    $data['views']['distance_calculation'] = array(
+      'title' => t('Distance calculation handler'),
+      'help' => t('Distance calculation handler'),
+      'field' => array(
+        'handler' => 'distance_calculation',
+      ),
+    );
 
-    return $data;
+  return $data;
 }
 
 /**
