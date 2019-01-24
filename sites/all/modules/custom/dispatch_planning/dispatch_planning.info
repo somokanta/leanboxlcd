@@ -40,3 +40,4 @@ files[] = views/handler/field_confirmed_cld.inc
 files[] =  views/handler/drs_report_net_amt.inc
 files[] =  views/handler/field_asset_dispatch_count.inc
 files[] =  views/handler/field_sales_returns_report_qty.inc
+files[] =  views/handler/distance_calculation.inc
