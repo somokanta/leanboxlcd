@@ -1,0 +1,377 @@
+<?php
+
+/**
+ * 
+ * @return array
+ * hook menu
+ */
+function parkstop_calculation_menu() {
+  $items = array();
+  // setting form for Dispatch Planning
+  $items['admin/config/parkstop-conf'] = array(
+    'title' => 'Setting Form For Park Stop',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('parkstop_config_form'),
+    'access callback' => 'check_if_fr_role_user_admin',
+  );
+  $items['park-stop-plotting'] = array(
+    'title' => 'Park Stop Plotting',
+    'page callback' => 'park_stop_plotting',
+    'access arguments' => array('park stop plotting'),
+    'type' => MENU_CALLBACK,
+    'file' => 'park_stop_plotting.inc'
+  );
+  $items['park-stop-plotting-check'] = array(
+    'title' => 'Park Stop Plot check',
+    'description' => 'Park Stop Plot check',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('parkstop_check_form'),
+    'access arguments' => array('park stop plotting'),
+    'file' => 'park_stop_plotting_check.inc',
+  );
+  return $items;
+}
+
+function parkstop_calculation_permission() {
+  return array(
+    'park stop plotting' => array(
+      'title' => t('park stop plotting'),
+      'description' => t('park stop plotting')
+    ),
+  );
+}
+
+/**
+ * Implements of hook_views_api().
+ */
+function parkstop_calculation_views_api() {
+  return array(
+    'api' => 3,
+    'path' => drupal_get_path('module', 'parkstop_calculation') . '/views'
+  );
+}
+
+/**
+ * 
+ * @param type $form
+ * @param type $form_state
+ * @return type
+ * system setting form
+ */
+function parkstop_config_form($form, $form_state) {
+  // Views Name
+  $form['parkstop_api_url'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Park Stop API URL'),
+    '#description' => t('Park Stop API URL'),
+    '#default_value' => variable_get('parkstop_api_url', 'http://13.126.253.3:8000/api/v1/parkstop_calculation/'),
+    '#required' => TRUE,
+  );
+  $form['parkstop_radius'] = array(
+    '#type' => 'textfield',
+    '#title' => t('ParkstopRadius'),
+    '#description' => t('Parkstop Radius'),
+    '#default_value' => variable_get('parkstop_radius', 0.2),
+    '#required' => TRUE,
+  );
+  $form['walking_speed'] = array(
+    '#type' => 'textfield',
+    '#title' => t('WalkingSpeed'),
+    '#description' => t('Walking Speed'),
+    '#default_value' => variable_get('walking_speed', 5),
+    '#required' => TRUE,
+  );
+  $form['van_speed'] = array(
+    '#type' => 'textfield',
+    '#title' => t('VanSpeed'),
+    '#description' => t('Van Speed'),
+    '#default_value' => variable_get('van_speed', 30),
+    '#required' => TRUE,
+  );
+  return system_settings_form($form);
+}
+
+/**
+ * Park Stop calculation through API
+ * We are consuming Python API
+ */
+function parkstop_calculation_api($bills_nid, $distributor_id, $prevan = 'Van') {
+  //bill_nid,bill_val, lat , long
+  $results = get_bill_billVal_lat_lng($bills_nid, $distributor_id);
+
+  //Stop to be served. All bills in array. Key 0,1,2 etc
+  $req = array();
+  foreach ($results as $key => $val) {
+    $req['Van']['StopsToBeServed'][$key] = $val['bill_nid'];
+  }
+
+  //Find start location name, lat, long
+  $start = get_start_location_details($distributor_id); // by distributor
+  $req['Van']['StartPoint'] = $start['name'];
+  $req['Van']['ParkstopRadius'] = (float) variable_get('parkstop_radius', 0.2);
+
+  //All Stop distance from start location
+  foreach ($results as $key => $val) {
+    $distance = haversineGreatCircleDistance($start['lat'], $start['lng'], $val['lat'], $val['lng']);
+    $req['Van']['StartLocationArray'][$key]['To'] = $val['bill_nid'];
+    $req['Van']['StartLocationArray'][$key]['Distance'] = $distance;
+    $req['Van']['StartLocationArray'][$key]['From'] = $start['name'];
+    //$req['Van']['StartLocationArray'][$key]['To Lat Long'] = $val['lat'] . "," . $val['lng'];
+    //$req['Van']['StartLocationArray'][$key]['Lat Long'] = $start['lat'] . "," . $start['lng'];
+  }
+
+
+  $i = 0; // counter of array
+  foreach ($results as $v) {
+    //iterating bill for m*n distance.
+    foreach ($results as $key => $val) {
+      if ($v['bill_nid'] != $val['bill_nid']) {// M*N not M*M. Bypass for itself
+        $distance = haversineGreatCircleDistance($v['lat'], $v['lng'], $val['lat'], $val['lng']);
+        $req['Van']['StopDetails'][$i]['To'] = $val['bill_nid'];
+        $req['Van']['StopDetails'][$i]['Distance'] = $distance;
+        $req['Van']['StopDetails'][$i]['From'] = $v['bill_nid'];
+        //$req['Van']['StopDetails'][$i]['To Lat Long'] = $val['lat'] . "," . $val['lng'];
+        //$req['Van']['StopDetails'][$i]['Lat Long'] = $v['lat'] . "," . $v['lng'];
+        $i++;
+      }
+    }
+  }
+
+  $request['ClusterData'] = $req;
+  $request['TimeData']['WalkingSpeed'] = (int) variable_get('walking_speed', 5);
+  $request['TimeData']['VanSpeed'] = (int) variable_get('van_speed', 30);
+
+  $timeslab_array = get_value_and_delivery_range($distributor_id);
+  foreach ($timeslab_array as $key => $val) {
+    $request['TimeData']['TimeSlab'] = $timeslab_array['TimeSlab'];
+  }
+
+  foreach ($results as $key => $val) {
+    $request['TimeData']['BillValue'][$key]['StoreCode'] = $val['bill_nid'];
+    $request['TimeData']['BillValue'][$key]['BillAmount'] = (float) round($val['bill_val']);
+  }
+  $response = _call_parkstop_api($request, $prevan, $distributor_id);
+  return $response;
+}
+
+/**
+ * 
+ * @param type $request
+ * @return type
+ * Call Python API
+ */
+function _call_parkstop_api($request, $prevan, $distributor_id) {
+  $request_api = json_encode($request);
+  $req_header = array('Content-Type' => 'application/json');
+  $api_url = variable_get('parkstop_api_url', 'http://13.126.253.3:8000/api/v1/parkstop_calculation/');
+  $options = array('headers' => $req_header, 'method' => 'POST', 'data' => $request_api);
+  $response = drupal_http_request($api_url, $options);
+  //we can do database entry if needed. $response->request in request and $response->data in response
+  unset($response->request); // it return same input request in that. its a hug data
+
+  /* CURL (comment drupal_http_requesr line and uncomment this to run curl)
+    $curl = curl_init();
+    curl_setopt($curl, CURLOPT_URL, $api_url);
+    curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($curl, CURLOPT_POST, TRUE);
+    curl_setopt($curl, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
+    curl_setopt($curl, CURLOPT_POSTFIELDS, $request_api);
+
+    $response->data = curl_exec($curl);//same as drupal_http_request
+    $info = curl_getinfo($curl);
+    $response->code = $info['http_code'];//status 200 means success
+   * 
+   */
+
+  //Park stop log
+  insert_parkstop_plotting_log($prevan, $request_api, $response->data, $distributor_id);
+  return $response;
+}
+
+/**
+ * 
+ * @param type $bills
+ * @param int $distributor_id
+ * @return type
+ * get bill_nid bill_val and lat and long of bills party through Hul master
+ */
+function get_bill_billVal_lat_lng($bills_nid, $distributor_id) {
+  $query = db_select('node', 'n');
+  $query->condition('n.type', 'sales_register_data');
+  $query->condition('n.nid', $bills_nid, 'IN');
+  $query->condition('n.uid', $distributor_id);
+  $query->join('field_data_field_bill_value', 'bv', 'bv.entity_id = n.nid');
+  $query->join('field_data_field_party_code_reference', 'pc', 'pc.entity_id = n.nid');
+  $query->join('node', 'n1', 'n1.nid = pc.field_party_code_reference_nid');
+
+  $query->condition('n1.type', 'outlet_master');
+  $query->join('field_data_field_hul_code_reference', 'hcr', 'hcr.entity_id = n1.nid');
+  $query->join('node', 'n2', 'hcr.field_hul_code_reference_nid = n2.nid');
+  $query->leftjoin('field_data_field_hul_updated_lat', 'la', 'la.entity_id = n2.nid');
+  $query->leftjoin('field_data_field_hul_updated_long', 'lg', 'lg.entity_id = n2.nid');
+  $query->addfield('n', 'nid', 'bill_nid');
+  $query->addfield('bv', 'field_bill_value_value', 'bill_val');
+  $query->addfield('la', 'field_hul_updated_lat_value', 'lat');
+  $query->addfield('lg', 'field_hul_updated_long_value', 'lng');
+  $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+  return $res;
+}
+
+/**
+ * 
+ * @param type $distributor_id
+ * @return type
+ * Get van start location that is warehouse
+ * return name lat and long of warehouse
+ */
+function get_start_location_details($distributor_id) {
+  $start['name'] = 'Start';
+  $conf_nid = check_node_title_exists($distributor_id, 'van_stop_master');
+  $conf_node = node_load($conf_nid);
+  $start['lat'] = $conf_node->field_distributor_latitude[LANGUAGE_NONE][0]['value'];
+  $start['lng'] = $conf_node->field_distributor_longitude[LANGUAGE_NONE][0]['value'];
+  return $start;
+}
+
+/**
+ * 
+ * @param type $latitudeFrom
+ * @param type $longitudeFrom
+ * @param type $latitudeTo
+ * @param type $longitudeTo
+ * @param type $earthRadius
+ * @return type
+ * Calculate distance(Crow-Fly) between two point on earth using lat long
+ */
+function haversineGreatCircleDistance(
+$latitudeFrom, $longitudeFrom, $latitudeTo, $longitudeTo, $earthRadius = 6371) {
+  // convert from degrees to radians
+  $latFrom = deg2rad($latitudeFrom);
+  $lonFrom = deg2rad($longitudeFrom);
+  $latTo = deg2rad($latitudeTo);
+  $lonTo = deg2rad($longitudeTo);
+
+  $latDelta = $latTo - $latFrom;
+  $lonDelta = $lonTo - $lonFrom;
+
+  $angle = 2 * asin(sqrt(pow(sin($latDelta / 2), 2) +
+        cos($latFrom) * cos($latTo) * pow(sin($lonDelta / 2), 2)));
+  return $angle * $earthRadius;
+}
+
+/**
+ * 
+ * @param type $distributor_id
+ * @return int
+ * get value and delivery time array from master
+ */
+function get_value_and_delivery_range($distributor_id) {
+  // WE HAVE TO CREATE MASTER DISTRIBUTOR WISE AND FETCH DYNAMICALLY
+  $type = 'delivery_time_slab';
+  $query = new EntityFieldQuery;
+  $result = $query->entityCondition('entity_type', 'node')
+    ->entityCondition('bundle', $type)
+    ->propertyCondition('uid', $distributor_id)
+    ->fieldOrderBy('field_value_less_than', 'value', 'ASC')
+    ->execute();
+
+  $timeslab_array['TimeSlab'] = array();
+
+  if (!empty($result['node'])) {
+    $nids = array_keys($result['node']);
+    $nodes = node_load_multiple($nids);
+
+    foreach ($nodes as $curr_node) {
+      if (!empty($current_end_value)) {
+        $old_end_value = $current_end_value;
+        $current_start_value = $old_end_value + 1;
+      }
+      else {
+        $current_start_value = 0;
+      }
+      $wrapper = entity_metadata_wrapper('node', $curr_node);
+      $current_end_value = (int) $wrapper->field_value_less_than->value();
+      $delivery_time = (int) $wrapper->field_delivery_time->value();
+
+      $timeslab_array1[] = array('BillValueRange' => array($current_start_value, $current_end_value), 'DeliveryTime' => $delivery_time);
+    }
+    $timeslab_array['TimeSlab'] = $timeslab_array1;
+  }
+
+  return $timeslab_array;
+}
+
+function insert_parkstop_plotting_log($prevan, $request_api, $response_api, $distributor_id) {
+  $result = db_merge('parkstop_api_log')
+    ->key(array('prevan' => $prevan, 'trip_id' => NULL, 'session_id' => session_id(), 'distributor_id' => $distributor_id))
+    ->fields(array(
+      'created_time' => REQUEST_TIME,
+      'prevan' => $prevan,
+      'api_request' => $request_api,
+      'api_response' => $response_api,
+      'distributor_id' => $distributor_id
+    ))
+    ->execute();
+}
+
+function update_parkstop_plotting_log($prevan, $trip_id, $distributor_id) {
+  $result = db_update('parkstop_api_log')
+      ->fields(array(
+        'trip_id' => $trip_id
+      ))
+      ->condition('prevan', $prevan, '=')
+      ->isNull('trip_id')
+      ->condition('session_id', session_id(), 'LIKE')
+      ->condition('distributor_id', $distributor_id)
+      ->execute();
+}
+
+function save_parkstop_time_distance($res_decode, $van, $del_boy_actual = NULL) {
+
+  $in_area = $res_decode->VanInAreaKMs;
+  $vantime = $res_decode->VanInAreaTime;
+
+  if (is_null($del_boy_actual)) {
+    foreach ($vantime as $key => $val) {
+      $total_time[$key] = $val;
+    }
+    $time = min($total_time);
+    $del_boy_actual = array_search(min($total_time), $total_time);
+  }
+  else {
+    $time = $vantime->{$del_boy_actual . DeliveryBoysInAreaTime};
+  }
+
+  $_SESSION['park_stop'][$van]['del_boy'] = (int) $del_boy_actual;
+  $_SESSION['park_stop'][$van]['time'] = round($time / 60, 2);
+  $_SESSION['park_stop'][$van]['dist'] = round($in_area, 2);
+}
+
+function get_drs_bill_sequence_by_parkstop($res_decode, $van) {
+  $stops = $res_decode->Van;
+  $n = $p = 0;
+  $seq = array();
+  if (!isset($_SESSION['park_stop'][$van]['del_boy'])) {
+    save_parkstop_time_distance($res_decode, $van, NULL);
+  }
+  $delivery_boy = $_SESSION['park_stop'][$van]['del_boy'];
+
+  foreach ($stops as $key => $value) {
+    $bills = $value->OptimalStop;
+    $c = 0;
+    if (array_key_exists($bills, $seq) === FALSE) {//ignor if present at other place
+      $seq[$bills]['park_seq'] = ++$p . '.' . str_pad($c, 2, 0, STR_PAD_LEFT); //handle till .99
+      $seq[$bills]['sequence'] = ++$n;
+    }
+    $completion_time = $value->ApproxCompletionTime;
+    $clusterStops = $completion_time[$delivery_boy - 2]->ClusterStops;
+    foreach ($clusterStops as $child => $v2) {
+      $child_bills = $v2->ChildStop;
+      if (array_key_exists($child_bills, $seq) === FALSE) {//ignor if present at other place
+        $seq[$child_bills]['park_seq'] = $p . '.' . str_pad( ++$c, 2, 0, STR_PAD_LEFT);
+        $seq[$child_bills]['sequence'] = ++$n;
+      }
+    }
+  }
+  return $seq;
+}
