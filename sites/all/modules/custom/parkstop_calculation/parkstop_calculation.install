@@ -1,0 +1,56 @@
+<?php
+
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+
+function parkstop_calculation_schema() {
+
+  $schema['parkstop_api_log'] = array(
+    'description' => 'parkstop_api_log',
+    'fields' => array(
+      'id' => array(
+        'description' => 'The primary identifier for a data',
+        'type' => 'serial',
+        'not null' => TRUE
+      ),
+      'prevan' => array(
+        'description' => 'Prevan',
+        'type' => 'varchar',
+        'length' => 50,
+      ),
+      'trip_id' => array(
+        'description' => t('Trip ID'),
+        'type' => 'int',
+      ),
+      'api_request' => array(
+        'description' => 'Api Request',
+        'type' => 'text',
+        'size' => 'medium',
+      ),
+      'api_response' => array(
+        'description' => 'Api Response',
+        'type' => 'text',
+        'size' => 'medium',
+      ),
+      'session_id' => array(
+        'description' => 'Session id',
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+      'created_time' => array(
+        'description' => 'Data Created Time',
+        'type' => 'int'
+      ),
+      'distributor_id' => array(
+        'description' => t('distributor_id'),
+        'type' => 'int',
+        'default' => 0,
+      ),
+    ),
+    'primary key' => array('id'),
+  );
+  return $schema;
+}

@@ -19,7 +19,10 @@ function _van_planning_callback_form($form, &$form_state) {
   $user_id = $GLOBALS['user']->uid;
   $rs_code = dispatch_planning_get_rscode_using_uid($user_id);
   $dis_id = change_feeds_import_get_distributor_id($user_id);
-
+  if(empty($form_state['triggering_element'])){
+    // means url is hit. First time on this page
+    unset($_SESSION['park_stop']);
+  }
   $form['dis_id'] = array(
     '#type' => 'value',
     '#value' => $dis_id,
@@ -383,10 +386,17 @@ function _van_planning_callback_form($form, &$form_state) {
 
       // all latitude and longitude van wise
       $vanwise_all_latlong_array = $cld_loose_array['lat_long'];
-      $total_dist = $total_time = '';
+      $total_dist = $total_time = $total_del_boy = '';
       $bill_sequencing_array = array();// intialize because one van value can't go in another van
 
       if ($form_state['clicked_button']['#name'] == 'check_seq') {
+
+        //abhi test
+        $python_bills_nid = array_keys($vanwise_all_latlong_array);
+        $response_data = parkstop_calculation_api($python_bills_nid, $dis_id, $key);
+        //watchdog("$key", '<pre>' . print_r($python_response, TRUE) . '</pre>');
+        //abhi test end
+/*
         // call lat long sequencing api here
         $Locations['visits'] = array();
         foreach ($vanwise_all_latlong_array as $sales_nid => $lat_long_val) {
@@ -419,9 +429,10 @@ function _van_planning_callback_form($form, &$form_state) {
         $request_headers = array('Content-Type' => 'application/json', 'Authorization' => $authorization);
         $roitufic_api_url = variable_get('api_routific_url', 'https://api.routific.com/v1/vrp');
         $routific_options = array('headers' => $request_headers, 'method' => 'POST', 'data' => $Locations_data);
-        $response_data = drupal_http_request($roitufic_api_url, $routific_options);
+        //$response_data = drupal_http_request($roitufic_api_url, $routific_options);
         $response_data = json_decode($response_data->data);
-        if ($response_data->status != 'success') {
+ */
+        if (!empty($response_data->error)) {
           form_set_error('form', 'API Error' . $response_data->error);
         }
         $form_state['tim_dist_response'][$key] = $response_data;
@@ -430,16 +441,19 @@ function _van_planning_callback_form($form, &$form_state) {
       if (isset($form_state['tim_dist_response'][$key])) {
         $response_data = $form_state['tim_dist_response'][$key];
       }
-      if ($response_data->num_unserved) {
-        
-      }
-      if ($response_data->status === 'success') {
-        $response_array = $response_data->solution->origin;
-        $i = 1;
+      if ($response_data->status_message === 'OK') {
+        //$response_array = $response_data->solution->origin;
+        $bill_sequencing_array = get_drs_bill_sequence_by_parkstop(json_decode($response_data->data), $key);
 
         //Minus the first stop time and distance
-        $total_time = $response_data->total_working_time - (strtotime($response_array[1]->arrival_time) - strtotime($response_array[0]->arrival_time)) / 60;
-        $total_dist = round($response_data->total_distance - ($response_array[1]->distance / 1000), 1); // its in meter show convert in km and then minus
+        //$total_time = $response_data->total_working_time - (strtotime($response_array[1]->arrival_time) - strtotime($response_array[0]->arrival_time)) / 60;
+        //$total_dist = round($response_data->total_distance - ($response_array[1]->distance / 1000), 1); // its in meter show convert in km and then minus
+        
+        $total_time = $_SESSION['park_stop'][$key]['time'];
+        $total_dist = $_SESSION['park_stop'][$key]['dist'];//newly
+        $total_del_boy = $_SESSION['park_stop'][$key]['del_boy'];//newly
+        
+        /*
         foreach ($response_array as $k => $v) {
           if ($v->location_name !== 'origin') {
             $bill_sequencing_array[$v->location_name]['sequence'] = $i;
@@ -459,7 +473,7 @@ function _van_planning_callback_form($form, &$form_state) {
             //end
             $i++;
           }
-        }
+        }*/
       }
 
       if (isset($bill_sequencing_array) && !empty($bill_sequencing_array)) {
@@ -468,12 +482,14 @@ function _van_planning_callback_form($form, &$form_state) {
           if (isset($bill_sequencing_array[$bill])) {
             $vanwise_all_latlong_array[$bill]['sequence'] = $bill_sequencing_array[$bill]['sequence'];
             $total_bill_array[$bill]['sequence'] = $bill_sequencing_array[$bill]['sequence'];
-            $total_bill_array[$bill]['prev_travel_time'] = $bill_sequencing_array[$bill]['prev_travel_time'];
-            $total_bill_array[$bill]['prev_distance'] = $bill_sequencing_array[$bill]['prev_distance'];
+            $total_bill_array[$bill]['park_seq'] = $bill_sequencing_array[$bill]['park_seq'];
+            //$total_bill_array[$bill]['prev_travel_time'] = $bill_sequencing_array[$bill]['prev_travel_time'];
+            //$total_bill_array[$bill]['prev_distance'] = $bill_sequencing_array[$bill]['prev_distance'];
           }
           else {
             $vanwise_all_latlong_array[$bill]['sequence'] = ++$count;
             $total_bill_array[$bill]['sequence'] = $count;
+            $total_bill_array[$bill]['park_seq'] = $count;
           }
         }
       }
@@ -498,6 +514,7 @@ function _van_planning_callback_form($form, &$form_state) {
       $val1['total'][$key]['loose_value'] = $cld_loose_array['loose_value'];
       $val1['total'][$key]['time'] = $total_time;
       $val1['total'][$key]['dist'] = $total_dist;
+      $val1['total'][$key]['del_boy'] = $total_del_boy;
       $val1['total'][$key]['sku_count'] = $cld_loose_array['sku_count'];
       $val1['total'][$key]['area_code']['data'] = '';
       $val1['total'][$key]['area_code']['class'] = array('area_code_val');
@@ -510,12 +527,14 @@ function _van_planning_callback_form($form, &$form_state) {
       // prepare data for map
       $map_address_url = 'van-map-planning/' . $key;
       $val1['total'][$key]['map_data']['data'] = l(t('View Map'), $map_address_url, array('attributes' => array('target' => '_blank')));
+      $val1['total'][$key]['parkstop_link']['data'] = l(t('View Parkstop'), 'park-stop-plotting/' . $key, array('attributes' => array('target' => '_blank')));
 
       // create a rows for each van total row to use in final_van_planning table
       $vp_final_rows[$key] = $val1['total'][$key];
 
       $form_state['time_dist'][$key]['time'] = $total_time;
       $form_state['time_dist'][$key]['dist'] = $total_dist;
+      $form_state['time_dist'][$key]['del_boy'] = $total_del_boy;
 
       $form['editable_vp']['vp_group'][$key]['van_edit_' . $key] = array(
         '#type' => 'tableselect',
@@ -523,7 +542,8 @@ function _van_planning_callback_form($form, &$form_state) {
         '#empty' => t('No data available.'),
         '#multiple' => FALSE,
         '#js_select' => FALSE, //Dont give Select All checkbox
-        '#prefix' => '<div class = "van-edit"><h3>' . $key . '</h3>Area Codes: ' . $for_total_combined_area_codes . '<div class = "seq-time-dist"><div class = "total-time">In Area Time (Min) - ' . $total_time . '</div><div class = "total-time">In Area KMs - ' . $total_dist . '</div></div>',
+        //'<div class = "seq-time-dist"><div class = "total-time">In Area Time (Min) - ' . $total_time . '</div><div class = "total-time">In Area KMs - ' . $total_dist . '</div></div>'
+        '#prefix' => '<div class = "van-edit"><h3>' . $key . '</h3>Area Codes: ' . $for_total_combined_area_codes,
         '#header' => $van_header_array,
         '#options' => $val,
       );
@@ -543,18 +563,18 @@ function _van_planning_callback_form($form, &$form_state) {
       );
     }
 
-    $form['editable_vp']['vp_group'][$key]['check_seq'] = array(
-      '#type' => 'submit',
-      '#value' => 'Calculate Time-Distance',
-      '#name' => 'check_seq',
-      '#ajax' => array(
-        'wrapper' => 'van-itemlist-div',
-        'callback' => 'van_planning_ajax_callback', // eimple ajax callback
-        'method' => 'replace',
-        'effect' => 'fade',
-      ),
-      '#submit' => array('van_planning_filter_ajax_submit'),
-    );
+//    $form['editable_vp']['vp_group'][$key]['check_seq'] = array(
+//      '#type' => 'submit',
+//      '#value' => 'Calculate Time-Distance',
+//      '#name' => 'check_seq',
+//      '#ajax' => array(
+//        'wrapper' => 'van-itemlist-div',
+//        'callback' => 'van_planning_ajax_callback', // eimple ajax callback
+//        'method' => 'replace',
+//        'effect' => 'fade',
+//      ),
+//      '#submit' => array('van_planning_filter_ajax_submit'),
+//    );
 
     // New group created element 
     $bill_header_array = array(
@@ -998,6 +1018,10 @@ function _van_planning_callback_form($form, &$form_state) {
       'van_id' => array('data' => t('Van')),
       'area_codes' => array('data' => t('Area Code')),
       'map_data' => array('data' => t('Map')),
+      'parkstop_link' => array('data' => t('Parkstop link')),
+      'del_boy' => array('data' => t('Selected DB Count')),
+      'dist' => array('data' => t('In-Area KMs')),
+      'time' => array('data' => t('In-Area Time (Hrs)')),      
       'bill_count' => array('data' => t('Bills')),
       'sku_count' => array('data' => t('Sku Count')),
       'bill_value' => array('data' => t('Value-RsK')),
@@ -1008,8 +1032,6 @@ function _van_planning_callback_form($form, &$form_state) {
       'bill_wise_loose' => array('data' => t('Bill Loose Lines')),
       'cld_value' => array('data' => t('CLD Lines Value')),
       'loose_value' => array('data' => t('Loose Lines Value')),
-      'time' => array('data' => t('In Area Time')),
-      'dist' => array('data' => t('In Area Dist')),
       'sum_kg' => array('data' => t('Weight')),
       'sum_cft' => array('data' => t('Volume')),
       'rs_per_sum_kg' => array('data' => t('Rs/Kg')),
@@ -1017,7 +1039,7 @@ function _van_planning_callback_form($form, &$form_state) {
       'bill_no' => array('data' => t('bill_no'), 'class' => array('bill_no_val')),
       'vehicle' => array('data' => t('Vehicle')),
       'cashier' => array('data' => t('Cashier')),
-      'hht_id' => array('data' => t('HHT ID')),
+      'hht_id' => array('data' => t('HHT ID*')),
     );
     $form['submit_vp']['vp_final_table'] = array(
       '#empty' => t('No data available.'),
@@ -1047,6 +1069,10 @@ function _van_planning_callback_form($form, &$form_state) {
       $combined_area_codes = implode(", ", $combined_area_codes);
       $form['submit_vp']['vp_final_table']['#rows'][$k]['area_codes'] = $combined_area_codes;
       $form['submit_vp']['vp_final_table']['#rows'][$k]['map_data'] = $val['map_data'];
+      $form['submit_vp']['vp_final_table']['#rows'][$k]['parkstop_link'] = $val['parkstop_link'];
+      $form['submit_vp']['vp_final_table']['#rows'][$k]['del_boy'] = $val['del_boy'];
+      $form['submit_vp']['vp_final_table']['#rows'][$k]['dist'] = $val['dist'];
+      $form['submit_vp']['vp_final_table']['#rows'][$k]['time'] = $val['time'];
       $form['submit_vp']['vp_final_table']['#rows'][$k]['bill_count'] = $val['bill_count'];
       $form['submit_vp']['vp_final_table']['#rows'][$k]['sku_count'] = $val['sku_count'];
       $form['submit_vp']['vp_final_table']['#rows'][$k]['bill_value'] = $val['bill_value'];
@@ -1057,8 +1083,6 @@ function _van_planning_callback_form($form, &$form_state) {
       $form['submit_vp']['vp_final_table']['#rows'][$k]['bill_wise_loose'] = $val['bill_wise_loose'];
       $form['submit_vp']['vp_final_table']['#rows'][$k]['cld_value'] = $val['cld_value'];
       $form['submit_vp']['vp_final_table']['#rows'][$k]['loose_value'] = $val['loose_value'];
-      $form['submit_vp']['vp_final_table']['#rows'][$k]['time'] = $val['time'];
-      $form['submit_vp']['vp_final_table']['#rows'][$k]['dist'] = $val['dist'];
       $form['submit_vp']['vp_final_table']['#rows'][$k]['sum_kg'] = $val['sum_kg'];
       $form['submit_vp']['vp_final_table']['#rows'][$k]['sum_cft'] = $val['sum_cft'];
       $form['submit_vp']['vp_final_table']['#rows'][$k]['rs_per_sum_kg'] = $val['rs_per_sum_kg'];
@@ -1101,11 +1125,35 @@ function _van_planning_callback_form($form, &$form_state) {
       unset($cashier_list);
       unset($hht_id_list);
     }
-
+    $form['submit_vp']['check_seq'] = array(
+      '#type' => 'submit',
+      '#value' => 'Calculate Time/Distance',
+      '#name' => 'check_seq',
+      '#ajax' => array(
+        'wrapper' => 'van-itemlist-div',
+        'callback' => 'van_planning_ajax_callback', // eimple ajax callback
+        'method' => 'replace',
+        'effect' => 'fade',
+      ),
+      '#submit' => array('van_planning_filter_ajax_submit'),
+    );
+    $form['submit_vp']['sync_time_distance'] = array(
+      '#type' => 'submit',
+      '#value' => 'Refresh',
+      '#name' => 'sync_time_distance',
+      '#ajax' => array(
+        'wrapper' => 'van-itemlist-div',
+        'callback' => 'van_planning_ajax_callback', // eimple ajax callback
+        'method' => 'replace',
+        'effect' => 'fade',
+      ),
+      '#submit' => array('van_planning_filter_ajax_submit'),
+      //'#submit' => array('sync_parkstop_time_distance'),
+    );
     $form['submit_vp']['check_duplicates'] = array(
       '#type' => 'submit',
       '#value' => 'Check Duplicates',
-      '#name' => 'create_van_planning',
+      '#name' => 'check_duplicates',
       '#validate' => array('_check_duplicates_validate'),
       '#submit' => array('_check_duplicates_submit'),
     );
@@ -1220,6 +1268,9 @@ function create_move_to_van_submit($form, &$form_state) {
         }
       }
     }
+    //newly added in crete new van submit
+    unset($form_state['tim_dist_response'][$group_name]);
+    unset($_SESSION['park_stop'][$group_name]);
   }
   $form_state['rebuild'] = TRUE;
 }
@@ -1265,6 +1316,7 @@ function van_planning_remove_bill_ajax_submit($form, &$form_state) {
       // remove from $form_state['bill_array']
       unset($form_state['bill_array'][$key]);
       unset($form_state['tim_dist_response'][$unique_code]);
+      unset($_SESSION['park_stop'][$unique_code]);
     }
   }
 
@@ -1338,7 +1390,7 @@ function van_planning_unassigned_bills_ajax_submit($form, &$form_state) {
   $group_name = $form_state['selected_van_grp'];
   // recalculate time and distance routing api
   unset($form_state['tim_dist_response'][$group_name]);
-
+  unset($_SESSION['park_stop'][$group_name]);
   foreach ($form_state['values']['unassigned_bills_table'] as $key => $val) {
     if (!empty($val)) {
       $new_data = $exist_data = array();
@@ -1369,6 +1421,7 @@ function van_planning_unassigned_bills_ajax_submit($form, &$form_state) {
               // remove bill data array from hidden field
               unset($all_van_bill_array_data[$sales_nid]);
               unset($form_state['tim_dist_response'][$van_grp]);
+              unset($_SESSION['park_stop'][$van_grp]);
               unset($form_state['van_wise_bills'][$van_grp][$sales_nid]);
               // remove from selcted van grp
               unset($form_state['selected_modify_bill_array'][$van_grp][$sales_nid]);
@@ -2257,6 +2310,15 @@ function _check_duplicates_submit($form, &$form_state) {
 }
 
 /**
+ * 
+ * @param type $form
+ * @param array $form_state
+ */
+function sync_parkstop_time_distance($form, &$form_state) {
+  $form_state['rebuild'] = TRUE;
+}
+
+/**
  * Submit handler for create trip
  * @param type $form
  * @param type $form_state
@@ -2418,8 +2480,9 @@ function _create_van_submit($form, &$form_state) {
 
         if (!empty($form_state['time_dist'][$van]['dist']) && !empty($form_state['time_dist'][$van]['time'])) {
           $node1->field_sequence_method[LANGUAGE_NONE][0]['value'] = 1; // api
-          $node1->field_total_travel_time[LANGUAGE_NONE][0]['value'] = round($form_state['time_dist'][$van]['time'] / 60, 2);
-          $node1->field_total_distance[LANGUAGE_NONE][0]['value'] = round($form_state['time_dist'][$van]['dist'], 4);
+          $node1->field_total_travel_time[LANGUAGE_NONE][0]['value'] = $_SESSION['park_stop'][$van]['time'] ? $_SESSION['park_stop'][$van]['time'] : $form_state['time_dist'][$van]['time'];
+          $node1->field_total_distance[LANGUAGE_NONE][0]['value'] = $_SESSION['park_stop'][$van]['dist'] ? $_SESSION['park_stop'][$van]['dist'] : $form_state['time_dist'][$van]['dist'];
+          $node1->field_delivery_boy_count[LANGUAGE_NONE][0]['value'] = $_SESSION['park_stop'][$van]['del_boy'] ? $_SESSION['park_stop'][$van]['del_boy'] :$form_state['time_dist'][$van]['del_boy'];
         }
         else {
           $node1->field_sequence_method[LANGUAGE_NONE][0]['value'] = 0;
@@ -2441,23 +2504,27 @@ function _create_van_submit($form, &$form_state) {
         $node1 = node_submit($node1); // Prepare node for saving
         node_save($node1);
         $trip_nid = $node1->nid;
+        // update parkstop response log
+        if (!empty($form_state['time_dist'][$van]['dist']) && !empty($form_state['time_dist'][$van]['time'])) {
+          update_parkstop_plotting_log($van, $trip_id, $dis_id);
+        }
         //************************************* DISPATCH DATA END ********************************************//
 
         $count = 1;
         foreach ($disp_planning[$van]['bill_array'] as $nid => $value2) {
           $node = node_load($nid);
           if (!empty($form_state['time_dist'][$van]['dist']) && !empty($form_state['time_dist'][$van]['time'])) {
-            $node->field_bill_sequence[LANGUAGE_NONE][0]['value'] = $value2['sequence'] ? $value2['sequence'] : $count; // $count has no use. kept for safety
+            $node->field_bill_sequence[LANGUAGE_NONE][0]['value'] = $value2['park_seq'] ? $value2['park_seq'] : $count; // $count has no use. kept for safety
             $node->field_drs_sequence[LANGUAGE_NONE][0]['value'] = $value2['sequence'] ? $value2['sequence'] : $count++; //Increament the counter once
             // calculate time and distance
-            $node->field_prev_arrival_time[LANGUAGE_NONE][0]['value'] = $value2['prev_travel_time'];
-            $node->field_prev_distance[LANGUAGE_NONE][0]['value'] = $value2['prev_distance'];
+            //$node->field_prev_arrival_time[LANGUAGE_NONE][0]['value'] = $value2['prev_travel_time'];
+            //$node->field_prev_distance[LANGUAGE_NONE][0]['value'] = $value2['prev_distance'];
           }else{
             $node->field_bill_sequence[LANGUAGE_NONE][0]['value'] = $count;
             $node->field_drs_sequence[LANGUAGE_NONE][0]['value'] = $count++; //Increament the counter once
             // calculate time and distance
-            $node->field_prev_arrival_time[LANGUAGE_NONE][0]['value'] = '';
-            $node->field_prev_distance[LANGUAGE_NONE][0]['value'] = '';
+            //$node->field_prev_arrival_time[LANGUAGE_NONE][0]['value'] = '';
+            //$node->field_prev_distance[LANGUAGE_NONE][0]['value'] = '';
           }
           if (isset($node->field_delivery_pending[LANGUAGE_NONE])) {
             $node->field_delivery_pending = array();
