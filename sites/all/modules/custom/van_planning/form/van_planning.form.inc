@@ -434,6 +434,14 @@ function _van_planning_callback_form($form, &$form_state) {
  */
         if (!empty($response_data->error)) {
           form_set_error('form', 'API Error' . $response_data->error);
+          //emailer for notification start
+            global $base_url;
+            $params['subject'] = "Van Planning API Error on $base_url for van: $key";
+            $params['body'] = $response_data->error;
+            $mail_to = variable_get('parkstop_api_error_email',"abhishek.r@iksula.com,kusha@leanbox.in");
+            $from = "MIS.HELPDESK@leanbox.in";
+            drupal_mail('adhoc_task', 'bill_date_missing', $mail_to, LANGUAGE_NONE, $params, $from);
+            //emailer for notification end
         }
         $form_state['tim_dist_response'][$key] = $response_data;
       }

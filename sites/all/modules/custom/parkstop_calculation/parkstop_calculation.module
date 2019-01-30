@@ -164,7 +164,7 @@ function _call_parkstop_api($request, $prevan, $distributor_id) {
   $request_api = json_encode($request);
   $req_header = array('Content-Type' => 'application/json');
   $api_url = variable_get('parkstop_api_url', 'http://13.126.253.3:8000/api/v1/parkstop_calculation/');
-  $options = array('headers' => $req_header, 'method' => 'POST', 'data' => $request_api);
+  $options = array('headers' => $req_header, 'method' => 'POST', 'data' => $request_api); //'timeout'=> 2
   $response = drupal_http_request($api_url, $options);
   //we can do database entry if needed. $response->request in request and $response->data in response
   unset($response->request); // it return same input request in that. its a hug data
@@ -256,7 +256,7 @@ $latitudeFrom, $longitudeFrom, $latitudeTo, $longitudeTo, $earthRadius = 6371) {
 
   $angle = 2 * asin(sqrt(pow(sin($latDelta / 2), 2) +
         cos($latFrom) * cos($latTo) * pow(sin($lonDelta / 2), 2)));
-  return $angle * $earthRadius;
+  return $angle * $earthRadius * 1.3; // 1.3 we have made for approx rode distance (30jan19)
 }
 
 /**
