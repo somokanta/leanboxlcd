@@ -214,10 +214,14 @@ function park_stop_plotting_form($form, &$form_state, $args) {
   //child
     
     //add warehouse as first element in park stop
+    $first_element_marker_tooltip = '<div class="cell-address cell-hide"><table>'
+    . '<tr><td style="white-space:nowrap;color:#222">Lat Long</td><td>' . $origin_lat . ',' . $origin_long . '</td></tr>'
+    . '</table></div>';
+          
     $first_element = array(
       'parkname' => array('data' => 'Warehouse', 'class' => 'park_name-cell'),
       '#attributes' => array('data-lat' => $origin_lat, 'data-lng' => $origin_long, 'data-sr' => 'Warehouse'),
-      'details' => array('data' => array('#markup' => '<a class="cell-details" style="display:none;">On Map</a>'),),
+      'details' => array('data' => array('#markup' => '<a class="cell-details" style="display:none;">On Map</a>'.$first_element_marker_tooltip),'class' => 'details-cell'),
     );
     array_unshift($options, $first_element);
     $form_state['park_stop']['rows'] = $options;
