@@ -135,13 +135,13 @@ function park_stop_plotting_form($form, &$form_state, $args) {
     
     foreach ($seq1 as $key1 => $bill_nid) {
       $latlong = get_latlong_from_bills($bill_nid, $distributor_id);
-      $latitude = $latlong['lat'];
+      $lat = $latlong['lat'];
       $long = $latlong['lng'];
       $bill_number = $latlong['bill_num'];
       $party_code = $latlong['party_code'];
       $party_name = $latlong['party_name_value'];
       $park_name = 'Park Stop ' . ($key1);
-      $new_lat_long = $latitude . ',' . $long;
+      $new_lat_long = $lat . ',' . $long;
       $latlongnew[] = $new_lat_long;
 
       $marker_name = $park_name;
@@ -150,17 +150,18 @@ function park_stop_plotting_form($form, &$form_state, $args) {
         . '<tr><td style="white-space:nowrap;color:#222">Sequence</td><td>' . $key1 . '</td></tr>'
         . '<tr><td style="white-space:nowrap;color:#222">Party Code</td><td>' . $party_code . '</td></tr>'
         . '<tr><td style="white-space:nowrap;color:#222">Party Name</td><td>' . $party_name . '</td></tr>'
+        . '<tr><td style="white-space:nowrap;color:#222">Lat Long</td><td>' . $lat . ',' . $long . '</td></tr>'
         . '</table></div>';
 
 
       $options[$key1] = array(
         'parkname' => array('data' => $park_name, 'class' => 'park_name-cell'),
         'partyname' => array('data' => $party_name, 'class' => 'park_name-cell'),
-        '#attributes' => array('data-lat' => $latitude, 'data-lng' => $long, 'data-sr' => $marker_name),
+        '#attributes' => array('data-lat' => $lat, 'data-lng' => $long, 'data-sr' => $marker_name),
         'details' => array('data' => array('#markup' => '<a class="cell-details" style="display:none;">On Map</a>' . $marker_tooltip), 'class' => 'details-cell'),
       );
       if (count($seq1) == ($key1)) {
-        $options[$key1]['#attributes'] = array('latlong' => $latlongnew, 'data-lat' => $latitude, 'data-lng' => $long, 'data-sr' => $marker_name);
+        $options[$key1]['#attributes'] = array('latlong' => $latlongnew, 'data-lat' => $lat, 'data-lng' => $long, 'data-sr' => $marker_name);
       }
     }
 
@@ -193,6 +194,7 @@ function park_stop_plotting_form($form, &$form_state, $args) {
           . '<tr><td style="white-space:nowrap;color:#222">Bill Number</td><td> ' . $child_bill_no . '</td></tr>'
           . '<tr><td style="white-space:nowrap;color:#222">Party Code</td><td>' . $party_code_child . '</td></tr>'
           . '<tr><td style="white-space:nowrap;color:#222">Party Name</td><td>' . $party_name_child . '</td></tr>'
+          . '<tr><td style="white-space:nowrap;color:#222">Lat Long</td><td>' . $lat . ',' . $long . '</td></tr>'
           . '</table></div>';
 
 
