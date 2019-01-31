@@ -105,12 +105,18 @@ var marker = {};
 
 
 
-        $(document).on('click', '.select-all .form-checkbox', function () {
-            $("input:checkbox[name^=list_form_items],input:checkbox[name^=list_form_items1]").each(function () {
+        $(document).on('click', '.park-stop-main .select-all .form-checkbox', function () {
+            $("input:checkbox[name^=list_form_items]").each(function () {
                 $(this).trigger("change");
             });
         });
-
+        
+        $(document).on('click', '.park-stop-child .select-all .form-checkbox', function () {
+            $("input:checkbox[name^=list_form_items1]").each(function () {
+                $(this).trigger("change");
+            });
+        });
+        
         $(document).on('change', 'input[name^=list_form_items]', function () {
             if ($(this).prop('checked')) {
                 mapmyindia_number_on_marker($(this));
@@ -200,16 +206,26 @@ var marker = {};
             var data_sr = $final_res.attr("data-sr");
             var result = data_sr.split(" ");
             var final = result[2];
-            
 
-            $(".child-stop-click").each(function () {
+
+            $(".park_name-park-" + final).prev('td').find('.child-stop-click').each(function () {
                 var result_child = $(this).closest('tr').attr('data-sr');
                 if (result_child !== undefined) {
                     var final_result_child = result_child.split('.');
                     var final_result_aft = final_result_child[1];
                     var final_result_bef = final_result_child[0];
-                    if (final == final_result_bef) {
-                       $('[data-sr="' + final + '.' + final_result_aft + '"]').closest('tr').find('.child-stop-click').trigger('click');
+                    if ($final_res.find('.park-stop-click').prop("checked") == true) {
+                        if (final == final_result_bef) {
+                            if ($('[data-sr="' + final + '.' + final_result_aft + '"]').closest('tr').find('.child-stop-click').prop("checked") == false) {
+                                $('[data-sr="' + final + '.' + final_result_aft + '"]').closest('tr').find('.child-stop-click').trigger('click');
+                            }
+                        }
+                    } else {
+                        if (final == final_result_bef) {
+                            if ($('[data-sr="' + final + '.' + final_result_aft + '"]').closest('tr').find('.child-stop-click').prop("checked") == true) {
+                                $('[data-sr="' + final + '.' + final_result_aft + '"]').closest('tr').find('.child-stop-click').trigger('click');
+                            }
+                        }
                     }
                 }
             });

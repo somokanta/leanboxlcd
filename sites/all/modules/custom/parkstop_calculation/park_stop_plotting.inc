@@ -197,7 +197,7 @@ function park_stop_plotting_form($form, &$form_state, $args) {
 
 
         $options1[$final_bill_num] = array(
-          'parkname' => array('data' => 'Park Stop ' . ($key3), 'class' => 'park_name-cell'),
+          'parkname' => array('data' => 'Park Stop ' . ($key3), 'class' => 'park_name-park-'.$key3),
           'child_stop_name' => array('data' => $child_stop_name, 'class' => 'park_name-cell'),
           'partyname' => array('data' => $party_name_child, 'class' => 'park_name-cell'),
           '#attributes' => array('data-lat' => $lat, 'data-lng' => $lng, 'data-sr' => $marker_name),
@@ -219,6 +219,29 @@ function park_stop_plotting_form($form, &$form_state, $args) {
     );
     array_unshift($options, $first_element);
     $form_state['park_stop']['rows'] = $options;
+    
+    //Bill Count
+    $stops = $res_decode->Van;
+    $bill_seq = array();
+    foreach ($stops as $key => $value) {
+      $bills = $value->OptimalStop;
+      if (array_key_exists($bills, $bill_seq) === FALSE) {//ignor if present at other place
+        $bill_seq[$bills]['sequence'] = ++$n;
+      }
+      $completion_time = $value->ApproxCompletionTime;
+      $clusterStops = $completion_time[$selected_del_boy - 2]->ClusterStops;
+      foreach ($clusterStops as $child => $v2) {
+        $child_bills = $v2->ChildStop;
+        if (array_key_exists($child_bills, $bill_seq) === FALSE) {//ignor if present at other place
+          $bill_seq[$child_bills]['sequence'] = ++$n;
+        }
+      }
+    }
+
+    $form['bill_count'] = array(
+         '#markup' => '<div style="float:left;width:100%;clear:both;padding:10px 0 10px 0"><b>Bill Count</b> :'.count($bill_seq).'</div>'
+    );
+    //Bill Count
     
     //theme table
     $header2 = array('Delivery boy count', 'In Area (Kms)', 'Total (Kms)', 'In-Area Time(Hrs)');
@@ -279,7 +302,7 @@ function park_stop_plotting_form($form, &$form_state, $args) {
         '#type' => 'tableselect',
         '#header' => $headers,
         '#options' => $park_stop_data,
-        '#prefix' => '<div id="table-div" style="min-height: 100px;>',
+        '#prefix' => '<div class = "park-stop-main" id="table-div" style="min-height: 100px;>',
         '#suffix' => '</div>',
         '#empty' => t(''),
         '#attributes' => array('class' => $class),
@@ -307,7 +330,7 @@ function park_stop_plotting_form($form, &$form_state, $args) {
         '#type' => 'tableselect',
         '#header' => $headers1,
         '#options' => $child_stop_data,
-        '#prefix' => '<div id="table-div">',
+        '#prefix' => '<div class = "park-stop-child" id="table-div">',
         '#suffix' => '</div>',
         '#empty' => t(''),
         '#attributes' => array('class' => $class1),
