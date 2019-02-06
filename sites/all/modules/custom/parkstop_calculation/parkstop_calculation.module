@@ -29,6 +29,14 @@ function parkstop_calculation_menu() {
     'access arguments' => array('park stop plotting'),
     'file' => 'park_stop_plotting_check.inc',
   );
+  $items['trip-wise-park-stop-report'] = array(
+    'title' => 'Trip Parkstop Report',
+    'description' => 'Trip Parkstop Report',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('trip_wise_parkstop_form'),
+    'access arguments' => array('park stop plotting'),
+    'file' => 'trip_wise_parkstop.inc',
+  );
   return $items;
 }
 
