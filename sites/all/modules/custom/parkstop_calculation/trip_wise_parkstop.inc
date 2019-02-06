@@ -74,12 +74,12 @@ function trip_wise_parkstop_form($form, $form_state) {
       '2DeliveryBoysTotalTime' => array('data' => t('2DeliveryBoysTotalTime')),
       '2DeliveryBoysInAreaTime' => array('data' => t('2DeliveryBoysInAreaTime')),
       '2DeliveryBoysTotalWaitTime' => array('data' => t('2DeliveryBoysTotalWaitTime')),
-      '3DeliveryBoysTotalTime' => array('data' => t('2DeliveryBoysTotalTime')),
-      '3DeliveryBoysInAreaTime' => array('data' => t('2DeliveryBoysInAreaTime')),
-      '3DeliveryBoysTotalWaitTime' => array('data' => t('2DeliveryBoysTotalWaitTime')),
-      '4DeliveryBoysTotalTime' => array('data' => t('2DeliveryBoysTotalTime')),
-      '4DeliveryBoysInAreaTime' => array('data' => t('2DeliveryBoysInAreaTime')),
-      '4DeliveryBoysTotalWaitTime' => array('data' => t('2DeliveryBoysTotalWaitTime'))
+      '3DeliveryBoysTotalTime' => array('data' => t('3DeliveryBoysTotalTime')),
+      '3DeliveryBoysInAreaTime' => array('data' => t('3DeliveryBoysInAreaTime')),
+      '3DeliveryBoysTotalWaitTime' => array('data' => t('3DeliveryBoysTotalWaitTime')),
+      '4DeliveryBoysTotalTime' => array('data' => t('4DeliveryBoysTotalTime')),
+      '4DeliveryBoysInAreaTime' => array('data' => t('4DeliveryBoysInAreaTime')),
+      '4DeliveryBoysTotalWaitTime' => array('data' => t('4DeliveryBoysTotalWaitTime'))
     );
     $form['submit_vp']['main_table'] = array(
       '#empty' => t('No data available.'),
@@ -202,8 +202,8 @@ function parkstop_form_submit($form, &$form_state) {
           //increment the loop
           $below_data[$nid] = loop_again_to_write_row($value, $nid, $trip_id, $p, $k + 1, $i + 2, $distributor_id, $below_data[$nid], $n);
           $n = $below_data[$nid]['Sequence'];
-          $below_data[$nid]['Child Service Time'] = $clusterStops[0]->{'ChildServiceTime'};
-          $below_data[$nid]['Child Walking Time'] = $clusterStops[0]->{'ChildWalkingTime'};
+          $below_data[$nid]['Child Service Time'] = $clusterStops[$k]->{'ChildServiceTime'};
+          $below_data[$nid]['Child Walking Time'] = $clusterStops[$k]->{'ChildWalkingTime'};
         }
       }
     }
