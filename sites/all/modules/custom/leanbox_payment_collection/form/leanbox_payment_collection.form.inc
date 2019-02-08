@@ -234,6 +234,7 @@ function upload_signed_bill_callback($form, &$form_state) {
       $form['remaining_amt'] = array('#type' => 'value');
       $form['declaration_remark'] = array('#type' => 'value');
       $form['declaration_bill_value'] = array('#type' => 'value');
+      $form['bounce_cheque_reason'] = array('#type' => 'value');
    }
 
    return $form;
@@ -274,6 +275,8 @@ function upload_signed_bill_callback_validate($form, &$form_state) {
             $form_state['complete form']['bill_details_wrapper']['bill_details']['#options'][$bill_no]['cheque_date']['data']['#value'] = $cheque_date;
             $cheque_amt = $form_state['values']['cheque_amt'][$bill_no];
             $form_state['complete form']['bill_details_wrapper']['bill_details']['#options'][$bill_no]['cheque_amt']['data']['#value'] = $cheque_amt;
+            $bounce_cheque_reason = $form_state['values']['bounce_cheque_reason'][$bill_no];
+            $form_state['complete form']['bill_details_wrapper']['bill_details']['#options'][$bill_no]['bounce_cheque_reason']['data']['#value'] = $bounce_cheque_reason;
 
             if (empty($cheque_no)) {
                form_set_error('form', t("Cheque no for bill $bill_no is required."));
@@ -289,6 +292,9 @@ function upload_signed_bill_callback_validate($form, &$form_state) {
             }
             if (empty($cheque_amt) || !is_numeric($cheque_amt)) {
                form_set_error('form', t("Cheque amount for bill $bill_no is required and should be numeric"));
+            }
+            if (empty($bounce_cheque_reason)) {
+               form_set_error('form', t("Bounce Cheque Reason for bill $bill_no is required."));
             }
          }
          else if ($arg1 === 'signed') {
@@ -363,6 +369,7 @@ function upload_signed_bill_callback_submit($form, &$form_state) {
             $node->field_cheque_date[LANGUAGE_NONE][0]['value'] = $form_state['values']['cheque_date'][$bill_no];
             $node->field_cheque_amt[LANGUAGE_NONE][0]['value'] = $form_state['values']['cheque_amt'][$bill_no];
             $node->field_remaining_amt_collection[LANGUAGE_NONE][0]['value'] = $form_state['values']['cheque_amt'][$bill_no]; // should be same as cheque amt
+            $node->field_bounce_cheque_reason[LANGUAGE_NONE][0]['nid'] = get_nid_from_bounce_cheque_reason_title($form_state['values']['bounce_cheque_reason'][$bill_no], $dis_id);
             $bill_type = 'Bounced';
          }
          else {
@@ -508,7 +515,8 @@ function get_bill_details_using_bill_no_callback($bill_no, $dis_id, $arg1) {
            'Billvalue' => 'Bill value',
            'cheque_amt' => 'Cheque amount',
            'cheque_no' => 'Cheque no',
-           'cheque_date' => 'Cheque date'
+           'cheque_date' => 'Cheque date',
+           'bounce_cheque_reason' => 'Bounce Cheque Reason'
          );
       }
       else {
@@ -551,6 +559,25 @@ function get_bill_details_using_bill_no_callback($bill_no, $dis_id, $arg1) {
               '#name' => "cheque_date[$key]",
               '#attributes' => array('class' => array('cheque-date-field')),
               '#required' => TRUE,
+            );
+            
+            // Bounce Cheque Reason.
+            $option = array('' => 'Select');
+            $bounce_cheque_reason_list = get_bounce_cheque_reason_list($dis_id);
+            if (!empty($bounce_cheque_reason_list)) {
+              $bounce_cheque_reason = $option + $bounce_cheque_reason_list;
+            }
+            else {
+              $bounce_cheque_reason = $option;
+            }
+            $rows[$key]['bounce_cheque_reason']['data'] = array(
+              '#type' => 'select',
+              '#title' => t('Bounce Cheque Reason'),
+              '#title_display' => 'invisible',
+              '#name' => "bounce_cheque_reason[$key]",
+              '#required' => TRUE,
+              '#options' => $bounce_cheque_reason,
+              '#attributes' => array('class' => array('bounce-cheque-reason-field')),
             );
          }
       }
@@ -619,4 +646,16 @@ function remove_signed_bounced_flag($form, &$form_state) {
       $form_state['bills']['rows'] = array_diff_key($form_state['bills']['rows'], array_flip($checked));
    }
    $form_state['rebuild'] = TRUE;
+}
+
+// Get nid from bounce cheque reason title.
+function get_nid_from_bounce_cheque_reason_title($bounce_cheque_reason_title,$dis_id) {
+  $query = db_select('node', 'n');
+  $query->condition('n.type', 'bounce_cheque_reason_master');
+  $query->condition('n.uid', $dis_id);
+  $query->condition('n.title', $bounce_cheque_reason_title);
+  $query->fields('n', array('nid'));
+  $result = $query->execute()->fetchField();
+  
+  return $result;
 }

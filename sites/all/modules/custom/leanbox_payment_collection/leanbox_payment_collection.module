@@ -246,3 +246,13 @@ function download_bills_acknowledgement($arg1, $arg2) {
   //$rendered_html = views_embed_view('bills_assignment_acknowledgement','page_1', array$arg1, $arg2));
   pdf_using_mpdf_api($rendered_html);
 }
+
+// Bounce Cheque Reason.
+function get_bounce_cheque_reason_list($dis_id) {
+  $query = db_select('node', 'n');
+  $query->condition('n.type', 'bounce_cheque_reason_master');
+  $query->condition('n.uid', $dis_id);
+  $query->fields('n', array('title'));
+  $result = $query->execute()->fetchAllKeyed(0, 0);
+  return $result; 
+}

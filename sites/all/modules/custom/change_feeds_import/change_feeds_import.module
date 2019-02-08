@@ -1585,7 +1585,6 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
   global $user;
   // Store distributor id in author in each node
   $distributor_id = change_feeds_import_get_distributor_id($user->uid);
-
   if ($entity->feeds_item->id == 'sku7_code_master_leanbox') {
     $query = db_select('node', 'n');
     $query->condition('n.type', 'product_validation_master');
@@ -1760,7 +1759,6 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
   if ($entity->feeds_item->id == 'godown_short_reason_master') {
     $reason = $item['reason'];
     $approval_flag = strtolower($item['approval flag']);
-    
     if(!empty($reason)) {
       if(empty($approval_flag)) {
         drupal_set_message("Please enter the approval flag for reason $reason.", 'error');
@@ -2317,6 +2315,15 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
            $entity->feeds_item->skip = TRUE;
        }
     }
+    
+  // Bounce Cheque reason master uploader.
+  if ($entity->feeds_item->id == 'bounce_cheque_reason_master') {
+    $reason = $item['bounce cheque reason'];
+      if(empty($reason)) {
+        drupal_set_message("Please enter bounce check reason.", 'error');
+        $entity->feeds_item->skip = TRUE;
+      }
+  }
 }
 
 // function check trip type exist in system
@@ -2733,6 +2740,7 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
         }
         else {
           $query->table_queue[$key]['join']->extra[] = array('field' => 'uid', 'value' => $distributor_id);
+          //$query->table_queue[$key]['join']->extra[] = array('field' => 'uid', 'left_field' => 'uid', 'left_table'=>'node');
         }
       }
     }
