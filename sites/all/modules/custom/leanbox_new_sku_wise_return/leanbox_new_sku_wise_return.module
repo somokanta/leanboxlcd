@@ -276,3 +276,13 @@ function check_product_name($dis_id, $product_name) {
   
   return $result;
 }
+
+/**
+ * Implements of hook_views_api().
+ */
+function leanbox_new_sku_wise_return_views_api() {
+  return array(
+    'api' => 3,
+    'path' => drupal_get_path('module', 'leanbox_new_sku_wise_return') . '/views'
+  );
+}

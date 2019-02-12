@@ -37,6 +37,15 @@ function parkstop_calculation_menu() {
     'access arguments' => array('park stop plotting'),
     'file' => 'trip_wise_parkstop.inc',
   );
+  $items['parkstop-trip-report/export/%/%'] = array(
+    'title' => 'Trip Parkstop Report',
+    'description' => 'Trip Parkstop Report',
+    'page callback' => 'parkstop_trip_report_export',
+     'type' => MENU_CALLBACK,
+    'page arguments' => array(2,3),
+    'access arguments' => array('park stop plotting'),
+    'file' => 'trip_wise_parkstop.inc',
+  );
   return $items;
 }
 
