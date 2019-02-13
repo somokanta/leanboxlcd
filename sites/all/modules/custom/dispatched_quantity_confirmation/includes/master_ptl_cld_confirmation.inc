@@ -470,6 +470,7 @@ function master_ptl_cld_confirmation_submit($form, &$form_state) {
       $bills = get_mptl_bills_from_trip_sku($trip_id, $sku7_code, $dis_id);
       foreach ($bills as $value) {
         if ($value->original_cld_qty < $cld_confirmed_qty && $value->original_cld_qty != 0) {
+          dpm("$value->original_cld_qty < $cld_confirmed_qty",'TEST please ignore');
           db_update('dispatch_qty_confirmation')
             ->fields(array(
               'cld_confirmed_qty' => $value->original_cld_qty,
@@ -483,6 +484,7 @@ function master_ptl_cld_confirmation_submit($form, &$form_state) {
           $cld_confirmed_qty -= $value->original_cld_qty;
         }
         else {
+          dpm("$value->original_cld_qty < $cld_confirmed_qty",'TEST please ignore else');
           db_update('dispatch_qty_confirmation')
             ->fields(array(
               'cld_confirmed_qty' => $cld_confirmed_qty,
