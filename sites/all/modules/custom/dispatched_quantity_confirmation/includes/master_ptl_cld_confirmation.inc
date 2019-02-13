@@ -588,6 +588,9 @@ function check_mptl_validation_trip_data_cld($trip_id, $dis_id) {
     $upc = $value['upc'];
     $original_cld_qty = (int)($original_qty / $upc);
     if ($cld_confirmed_qty != $original_cld_qty && empty($cld_short_reason)) {
+      dpm($cld_confirmed_qty,'testingc');
+      dpm($original_cld_qty,'testingo');
+      dpm($cld_short_reason,'testingr');
       $validation_pass['flag'] = 0;
       $validation_pass['sku'][$key] = $value['sku_code'];
     }
