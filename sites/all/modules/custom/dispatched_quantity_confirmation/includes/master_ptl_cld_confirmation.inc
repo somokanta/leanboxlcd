@@ -390,9 +390,9 @@ function save_master_ptl_cld_confirmation_submit($form, &$form_state) {
       //db_query("update dispatch_qty_confirmation set cld_confirmed_qty = $cld_confirmed_qty,cld_short_reason = '$cld_short_reason',dispatch_cld_qty = $to_be_dispatched_qty,type = '$type' where trip_id = $trip_id and sku_code = '$sku7_code' and original_cld_qty > 0 limit 1");           
       //update based on bills
       $bills = get_mptl_bills_from_trip_sku($trip_id, $sku7_code, $dis_id);
-
-      foreach ($bills as $value) {
-        if ($value->original_cld_qty < $cld_confirmed_qty && $value->original_cld_qty != 0) {
+      $last_key = count($bills) - 1;// because key start from zero
+      foreach ($bills as $k => $value) {
+        if ($value->original_cld_qty < $cld_confirmed_qty && $value->original_cld_qty != 0 && $last_key != $k) {
           db_update('dispatch_qty_confirmation')
             ->fields(array(
               'cld_confirmed_qty' => $value->original_cld_qty,
@@ -468,8 +468,10 @@ function master_ptl_cld_confirmation_submit($form, &$form_state) {
       //db_query("update dispatch_qty_confirmation set cld_confirmed_qty = $cld_confirmed_qty,cld_short_reason = '$cld_short_reason',dispatch_cld_qty = $to_be_dispatched_qty,type = '$type' where trip_id = $trip_id and sku_code = '$sku7_code' and original_cld_qty > 0 limit 1");
       //update based on bills
       $bills = get_mptl_bills_from_trip_sku($trip_id, $sku7_code, $dis_id);
-      foreach ($bills as $value) {
-        if ($value->original_cld_qty < $cld_confirmed_qty && $value->original_cld_qty != 0) {
+      $last_key = count($bills) - 1;// because key start from zero
+      foreach ($bills as $k => $value) {
+        //last key != k added for updating remaining confirm cld is last record.
+        if ($value->original_cld_qty < $cld_confirmed_qty && $value->original_cld_qty != 0 && $last_key != $k) {
           db_update('dispatch_qty_confirmation')
             ->fields(array(
               'cld_confirmed_qty' => $value->original_cld_qty,
