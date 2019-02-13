@@ -471,7 +471,7 @@ function master_ptl_cld_confirmation_submit($form, &$form_state) {
       foreach ($bills as $value) {
         if ($value->original_cld_qty < $cld_confirmed_qty && $value->original_cld_qty != 0) {
           if($sku7_code == 'RSCM00A'){
-          dpm("$value->original_cld_qty < $cld_confirmed_qty",'TEST please ignore');
+          dpm("$value->original_cld_qty < $cld_confirmed_qty $value->id",'TEST please ignore');
           }
           db_update('dispatch_qty_confirmation')
             ->fields(array(
