@@ -483,7 +483,21 @@ function master_ptl_cld_confirmation_submit($form, &$form_state) {
             ->condition('id', $value->id, '=')
             ->execute();
 
-          $cld_confirmed_qty -= $value->original_cld_qty;
+          
+                    if($sku7_code == 'RSCM00A' && $value->id == 514848){
+                       db_update('dispatch_qty_confirmation')
+                        ->fields(array(
+                          'cld_confirmed_qty' => $cld_confirmed_qty,
+                          'cld_short_reason' => $cld_short_reason ? $cld_short_reason : '',
+                          'dispatch_cld_qty' => $cld_confirmed_qty,
+                          'type' => $type,
+                        ))
+                        ->condition('id', $value->id, '=')
+                        ->execute();
+                      $cld_confirmed_qty = 0;
+                    }
+                    $cld_confirmed_qty -= $value->original_cld_qty;
+          
         }
         else {
  if($sku7_code == 'RSCM00A'){
