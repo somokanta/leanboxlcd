@@ -2200,6 +2200,24 @@ function mrc_inventory_returns_views_data() {
       'handler' => 'views_handler_argument_string',
     ),
   );
+   
+  $data['inventory_versioning_api_data']['version_flag'] = array(
+    'title' => t('IV version_flag'),
+    'help' => t('Inventory Versioning version_flag'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
  
     //inventory_versioning_item_details Item Details
   $data['inventory_versioning_item_details']['table'] = array(
