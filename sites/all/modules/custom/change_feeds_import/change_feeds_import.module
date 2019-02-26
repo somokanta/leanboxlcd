@@ -2778,10 +2778,12 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
   if (($view->base_table == 'ptl_data_configuration') && ($view->name == 'ptl_data_report' || $view->name == 'ptl_loose_sheet' || $view->name == 'short_put_report' || $view->name == 'ptl_cld_sheet')) {
     $rs_code = dispatch_planning_get_rscode_using_uid($distributor_id);
     $query->add_where(0, 'ptl_data_configuration.rs_code', $rs_code, '=');
+    $query->add_where(0, 'ptl_data_configuration.distributor_id', $distributor_id, '=');
   }
   if (($view->base_table == 'master_ptl_data') && ($view->name == 'master_ptl_data_report' || $view->name == 'master_ptl_loose_sheet' || $view->name == 'master_short_put_report' || $view->name == 'master_ptl_cld_sheet')) {
     $rs_code = dispatch_planning_get_rscode_using_uid($distributor_id);
     $query->add_where(0, 'master_ptl_data.rs_code', $rs_code, '=');
+    $query->add_where(0, 'master_ptl_data.distributor_id', $distributor_id, '=');
   }
   if (($view->base_table == 'master_ptl_data') && ($view->name == 'master_ptl_loose_sheet')) {
     $query->add_orderby(NULL, "SUBSTRING(master_ptl_data.product_name, 1, 1)", 'ASC','order_master_ptl_data_product_name_first');
