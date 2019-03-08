@@ -687,6 +687,7 @@ function godown_short_submit($form, &$form_state) {
           'godown_short_reason' => $reason,
           'approved_by' => $approved_by,
           'remarks' => $remarks,
+          'claimed_gs_approve_date_time' => REQUEST_TIME,
           //'line_level_status' => $line_status, //5DEC
         ))
         ->condition('sku_code', $sku_code, '=')
@@ -698,7 +699,7 @@ function godown_short_submit($form, &$form_state) {
           ->fields(array(
             //'res_reason_for_failure' => $itdata->res_sku_reason ? $itdata->res_sku_reason : '',//5DEC
             'updated_flag' => 1,
-            'updated_time' => REQUEST_TIME,
+            //'updated_time' => REQUEST_TIME,
           ))
           ->condition('runsheet_number', $trip_id, '=')
           ->condition('id', $itdata->trip_bill_reference, '=')
@@ -710,7 +711,7 @@ function godown_short_submit($form, &$form_state) {
             //'res_status' => 'partial_deliver',//5DEC
             //'res_reason_for_failure' => '',//5DEC
             'updated_flag' => 1,
-            'updated_time' => REQUEST_TIME,
+            //'updated_time' => REQUEST_TIME,
           ))
           ->condition('runsheet_number', $trip_id, '=')
           ->condition('id', $itdata->trip_bill_reference, '=')
@@ -743,7 +744,7 @@ function godown_short_submit($form, &$form_state) {
       db_update('dispatch_planning_api_data') 
         ->fields(array(
           'updated_flag' => 1,
-          'updated_time' => REQUEST_TIME,
+          //'updated_time' => REQUEST_TIME,
         ))
         ->condition('runsheet_number', $trip_id, '=')
         ->condition('id', $itdata->trip_bill_reference, '=')
@@ -765,12 +766,12 @@ function godown_short_submit($form, &$form_state) {
           'godown_short_reason' => $reason,
           'approved_by' => $approved_by,
           'remarks' => $remarks,
+          'claimed_gs_approve_date_time' => REQUEST_TIME,
           //'line_level_status' => $line_status,  //5DEC
         ))
         ->condition('sku_code', $sku_code, '=')
         ->condition('id', $itdata->id, '=')
-        ->execute();
-
+        ->execute();    
 //5DEC
 //      db_update('godown_data') // Table name no longer needs {}
 //        ->fields(array(
@@ -784,7 +785,7 @@ function godown_short_submit($form, &$form_state) {
   }
 
   $get_trip_status = get_trip_status($dis_id, $trip_id);
-  if ($get_trip_status == 1) {
+  if ($get_trip_status == 1 || $get_trip_status == 3 || $get_trip_status == 6) {
     $trip_nid = check_trip_id_exists_or_not($dis_id, $trip_id);
     if (!empty($trip_nid->nid)) {
       $node = node_load($trip_nid->nid);
@@ -851,6 +852,7 @@ function godown_short_submit($form, &$form_state) {
         'godown_short_reason',
         'approved_by',
         'remarks',
+        'claimed_gs_approve_date_time'
       );
       // add the child level data in new versioning child level table
       if (!empty($result_id)) {
