@@ -5636,6 +5636,7 @@ function dispatch_planning_views_data() {
       'field' => array(
         'handler' => 'distance_calculation',
       ),
+   );
    $data['views']['delivery_confirmation_date'] = array(
         'title' => t('Delivery Confirmation Date field'),
         'help' => t('Provides Delivery Confirmation Date field.'),
