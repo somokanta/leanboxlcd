@@ -96,6 +96,7 @@ function godown_short_approval_delete_submit($form, &$form_state) {
           'approved_quantity' => 0,
           'approved_by' => '',
           'approval_flag' => '',
+          'claimed_gs_approve_date_time' => 0,
         ))
         ->condition('sku_code', $sku_code, '=')
         ->condition('id', $item_id, '=')

@@ -4383,8 +4383,37 @@ function dispatch_planning_views_data() {
             'handler' => 'views_handler_argument_numeric',
         ),
     );
+    $data['dispatch_planning_item_details']['claimed_gs_approve_date_time'] = array(
+        'title' => t('Claimed GS Approved Date/Time'),
+        'help' => t('Claimed GS Approved Date/Time'),
+        'field' => array(
+            'handler' => 'views_handler_field_date',
+            'click sortable' => TRUE,
+        ),
+        'sort' => array(
+            'handler' => 'views_handler_sort_date',
+        ),
+        'filter' => array(
+            'handler' => 'views_handler_filter_date',
+        ),
+        'argument' => array(
+            'handler' => 'views_handler_filter_date',
+        ),
+    );
 
     $base_table = 'dispatch_planning_api_data';
+    $data[$base_table]['date_filter'] = array(
+        'group' => t('Date'),
+        'title' => t('Date (!base_table)', array('!base_table' => $base_table)),
+        'help' => t('Filter any Views !base_table date field.', array('!base_table' => $base_table)),
+        'filter' => array(
+            'handler' => 'date_views_filter_handler',
+            'empty field name' => t('Undated'),
+            'is date' => TRUE,
+        ),
+    );
+    
+    $base_table = 'dispatch_planning_item_details';
     $data[$base_table]['date_filter'] = array(
         'group' => t('Date'),
         'title' => t('Date (!base_table)', array('!base_table' => $base_table)),

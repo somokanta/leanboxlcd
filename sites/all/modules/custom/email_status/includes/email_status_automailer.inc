@@ -814,33 +814,38 @@ function send_email_del_app_adoption() {
   $query->condition('ad.distributor_id', $distributor_id, '=');
   $query->condition('ad.dispatch_date', array($from_this_date, $yesterday_date), 'BETWEEN');
   $query->fields('ad', array('fieldExecutiveName'));
-  $query->addexpression("ROUND(COUNT(CASE WHEN ad.dispatch_date =  $yesterday_date AND  ad.res_updated_time != 0 THEN ad.bill_number END) / COUNT(CASE WHEN ad.dispatch_date =  $yesterday_date THEN ad.bill_number END) *100)", 'app_adoption');
-  $query->orderBy('app_adoption','DESC');
-  $query->addexpression("ROUND(COUNT(CASE WHEN ad.dispatch_date = $yesterday_date AND ad.res_updated_time !=0 AND ad.res_updated_time < (UNIX_TIMESTAMP(from_unixtime(ad.res_updated_time, '%Y-%m-%d'))+60*60*18-19800) THEN ad.bill_number END) / COUNT(CASE WHEN  ad.dispatch_date = $yesterday_date AND ad.res_updated_time != 0 THEN ad.bill_number END)*100)", 'entrybefsix');
-
-  $query->addexpression("ROUND(COUNT(CASE WHEN ad.dispatch_date = $yesterday_date AND ad.res_updated_time !=0 AND ad.res_updated_time >= (UNIX_TIMESTAMP(from_unixtime(ad.res_updated_time, '%Y-%m-%d'))+60*60*18-19800) THEN ad.bill_number END) / COUNT(CASE WHEN ad.dispatch_date = $yesterday_date AND ad.res_updated_time != 0 THEN ad.bill_number END)*100)", 'entryaftsix');
-
-  $query->addexpression("ROUND(COUNT(CASE WHEN ad.res_updated_time != 0 THEN ad.bill_number END) / COUNT(ad.bill_number) *100)", 'mtd_app_adoption');
-  $query->addexpression("ROUND(COUNT(CASE WHEN ad.res_updated_time !=0 AND ad.res_updated_time < (UNIX_TIMESTAMP(from_unixtime(ad.res_updated_time, '%Y-%m-%d'))+60*60*18-19800) THEN ad.bill_number END) / COUNT(CASE WHEN ad.res_updated_time != 0 THEN ad.bill_number END)*100)", 'mtd_entrybefsix');
-  $query->addexpression("ROUND(COUNT(CASE WHEN ad.res_updated_time !=0 AND ad.res_updated_time >= (UNIX_TIMESTAMP(from_unixtime(ad.res_updated_time, '%Y-%m-%d'))+60*60*18-19800) THEN ad.bill_number END) / COUNT(CASE WHEN ad.res_updated_time != 0 THEN ad.bill_number END)*100)", 'mtd_entryaftsix');
+  $query->addexpression("ROUND(COUNT(CASE WHEN ad.dispatch_date =  $yesterday_date AND  ad.res_updated_time != 0 THEN ad.bill_number END) / COUNT(CASE WHEN ad.dispatch_date =  $yesterday_date THEN ad.bill_number END)*100)", 'app_adoption_total');
+  //Distance calculate formula - (2 * asin(sqrt(pow(sin((RADIANS(ad.res_latitude) - RADIANS(ad.lat_longlatitude)) / 2), 2) +
+   //       cos(RADIANS(ad.lat_longlatitude)) * cos(RADIANS(ad.res_latitude)) * pow(sin(((RADIANS(ad.res_longitude)) - (RADIANS(ad.lat_longlongitude))) / 2), 2)))*6371)*1000
+  $query->orderBy('app_adoption_total','DESC');
+  $query->addexpression("ROUND(COUNT(CASE WHEN ad.dispatch_date =  $yesterday_date AND (2 * asin(sqrt(pow(sin((RADIANS(ad.res_latitude) - RADIANS(ad.lat_longlatitude)) / 2), 2) +
+          cos(RADIANS(ad.lat_longlatitude)) * cos(RADIANS(ad.res_latitude)) * pow(sin(((RADIANS(ad.res_longitude)) - (RADIANS(ad.lat_longlongitude))) / 2), 2)))*6371)*1000 < 500 THEN ad.bill_number END) / COUNT(CASE WHEN ad.dispatch_date =  $yesterday_date AND ad.res_updated_time != 0 THEN ad.bill_number END) *100)", 'entry_less');
+  $query->addexpression("ROUND(COUNT(CASE WHEN ad.dispatch_date =  $yesterday_date  AND (2 * asin(sqrt(pow(sin((RADIANS(ad.res_latitude) - RADIANS(ad.lat_longlatitude)) / 2), 2) +
+          cos(RADIANS(ad.lat_longlatitude)) * cos(RADIANS(ad.res_latitude)) * pow(sin(((RADIANS(ad.res_longitude)) - (RADIANS(ad.lat_longlongitude))) / 2), 2)))*6371)*1000 > 500 THEN ad.bill_number END) / COUNT(CASE WHEN ad.dispatch_date =  $yesterday_date AND ad.res_updated_time != 0 THEN ad.bill_number END) *100)", 'entry_greater');
+  $query->addexpression("ROUND(COUNT(CASE WHEN ad.res_updated_time != 0 THEN ad.bill_number END) / COUNT(ad.bill_number)*100)", 'mtd_app_adoption_total');
+  $query->addexpression("ROUND(COUNT(CASE WHEN (2 * asin(sqrt(pow(sin((RADIANS(ad.res_latitude) - RADIANS(ad.lat_longlatitude)) / 2), 2) +
+          cos(RADIANS(ad.lat_longlatitude)) * cos(RADIANS(ad.res_latitude)) * pow(sin(((RADIANS(ad.res_longitude)) - (RADIANS(ad.lat_longlongitude))) / 2), 2)))*6371)*1000 < 500 THEN ad.bill_number END) / COUNT(CASE WHEN ad.res_updated_time != 0 THEN ad.bill_number END) *100)", 'mtd_entry_less');
+  $query->addexpression("ROUND(COUNT(CASE WHEN (2 * asin(sqrt(pow(sin((RADIANS(ad.res_latitude) - RADIANS(ad.lat_longlatitude)) / 2), 2) +
+          cos(RADIANS(ad.lat_longlatitude)) * cos(RADIANS(ad.res_latitude)) * pow(sin(((RADIANS(ad.res_longitude)) - (RADIANS(ad.lat_longlongitude))) / 2), 2)))*6371)*1000 > 500 THEN ad.bill_number END) / COUNT(CASE WHEN ad.res_updated_time != 0 THEN ad.bill_number END) *100)", 'mtd_entry_greater');
   $query->groupBy('ad.fieldExecutiveName');
   $result = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
-  $rows[] = array('Cashier', 'Delivery App Adoption(%)', '% Entries before 6:00 PM', '% Entries after 6:00 PM', 'Delivery App Adoption(%)', '% Entries before 6:00 PM', '% Entries after 6:00 PM');
+  $rows[] = array(array('data' => 'Cashier'), array('data' => 'Total Delivery App Adoption %', 'colspan' => 0), array('data' => 'Distance Wise %', 'colspan' => 2), array('data' => 'Total Delivery App Adoption %', 'colspan' => 0), array('data' => 'Distance Wise %', 'colspan' => 2));
+  $rows[] = array('', '', '&lt; 500m', '> 500m', '', '&lt; 500m', '> 500m');
   foreach ($result as $value) {
     $row['fieldExecutiveName'] = $value['fieldExecutiveName'];
     $total['fieldExecutiveName'] = 'Total';
-    $row['app_adoption'] = $value['app_adoption'];
-    $total['app_adoption'] += $value['app_adoption'];
-    $row['entrybefsix'] = $value['entrybefsix'];
-    $total['entrybefsix'] += $value['entrybefsix'];
-    $row['entryaftsix'] = $value['entryaftsix'];
-    $total['entryaftsix'] += $value['entryaftsix'];
-    $row['mtd_app_adoption'] = $value['mtd_app_adoption'];
-    $total['mtd_app_adoption'] += $value['mtd_app_adoption'];
-    $row['mtd_entrybefsix'] = $value['mtd_entrybefsix'];
-    $total['mtd_entrybefsix'] += $value['mtd_entrybefsix'];
-    $row['mtd_entryaftsix'] = $value['mtd_entryaftsix'];
-    $total['mtd_entryaftsix'] += $value['mtd_entryaftsix'];
+    $row['app_adoption_total'] = $value['app_adoption_total'];
+    $total['app_adoption_total'] += $value['app_adoption_total'];  
+    $row['entry_less'] = $value['entry_less'];
+    $total['entry_less'] += $value['entry_less'];
+    $row['entry_greater'] = $value['entry_greater'];
+    $total['entry_greater'] += $value['entry_greater'];
+    $row['mtd_app_adoption_total'] = $value['mtd_app_adoption_total'];
+    $total['mtd_app_adoption_total'] += $value['mtd_app_adoption_total'];
+    $row['mtd_entry_less'] = $value['mtd_entry_less'];
+    $total['mtd_entry_less'] += $value['mtd_entry_less'];
+    $row['mtd_entry_greater'] = $value['mtd_entry_greater'];
+    $total['mtd_entry_greater'] += $value['mtd_entry_greater'];
     $rows[] = $row;
   }
   $rows[] = $total;

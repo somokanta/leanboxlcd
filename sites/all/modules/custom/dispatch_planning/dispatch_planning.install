@@ -2178,3 +2178,22 @@ function dispatch_planning_update_7138() {
   }
 }
 
+function dispatch_planning_update_7139() {
+  $fields = array(
+    'claimed_gs_approve_date_time' => array(
+        'description' => t('Claimed GS Approved Date/Time'),
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+  );
+  foreach ($fields as $key => $field) {
+    if (!db_field_exists('dispatch_planning_item_details', $key)) {
+      db_add_field('dispatch_planning_item_details', $key, $field);
+    }
+    if (!db_field_exists('inventory_versioning_item_details', $key)) {
+      db_add_field('inventory_versioning_item_details', $key, $field);
+    }
+  }
+}
+
