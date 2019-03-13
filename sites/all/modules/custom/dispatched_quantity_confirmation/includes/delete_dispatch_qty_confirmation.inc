@@ -54,6 +54,9 @@ function delete_dispatch_qty_confirmation_submit($form, &$form_state) {
   $cld = $form_state['values']['cld'];
   
   if ($all == 1) {
+    //reset updated flag and other in custom billing data.
+    reset_updated_flag_custom_billing($trip_number, $dis_id);
+    
     $version_type = 'All';
     create_version_dispatch_qty_conf($trip_number, $dis_id,$version_type);    
     db_update('dispatch_qty_preprocess')
@@ -78,6 +81,9 @@ function delete_dispatch_qty_confirmation_submit($form, &$form_state) {
     drupal_set_message(t('Trip id ' . $trip_number . ' is successfully deleted.'));
   }
   if ($loose == 1) {
+    //reset updated flag and other in custom billing data.
+    reset_updated_flag_custom_billing($trip_number, $dis_id);
+    
     $version_type = 'Loose';
     create_version_dispatch_qty_conf($trip_number, $dis_id, $version_type);
     
@@ -112,6 +118,9 @@ function delete_dispatch_qty_confirmation_submit($form, &$form_state) {
     drupal_set_message(t('Trip id ' . $trip_number . ' loose changes are reset'));
   }
   if ($cld == 1) {
+    //reset updated flag and other in custom billing data.
+    reset_updated_flag_custom_billing($trip_number, $dis_id);
+    
     $version_type = 'CLD'; 
     create_version_dispatch_qty_conf($trip_number, $dis_id, $version_type);   
     
@@ -144,4 +153,32 @@ function delete_dispatch_qty_confirmation_submit($form, &$form_state) {
 
     drupal_set_message(t('Trip id ' . $trip_number . ' cld changes are reset'));
   }
+}
+
+function reset_updated_flag_custom_billing($trip_number, $dis_id){
+    $query = db_select('dispatch_qty_confirmation', 'dqc');
+    $query->condition('dqc.trip_id', $trip_number);
+    $query->condition('dqc.distributor_id', $dis_id);
+    $query->fields('dqc', array('bill_number'));
+    $bills = $query->distinct()->execute()->fetchCol();
+    
+    if (!empty($bills)) {
+      db_update('custom_billing_data') // Table name no longer needs {}
+      ->expression('Sum_of_TOTAL_SALES_QTY', 'original_Sum_of_TOTAL_SALES_QTY')
+      ->fields(array(
+        'updated_flag' => NULL,
+        'updated_date' => NULL,
+      ))  
+      ->condition('bill_number', $bills, 'IN')
+      ->condition('distributor_id', $dis_id, '=')
+      ->execute();
+          
+      //original bill value to bill value in sales register
+      foreach ($bills as $val) {
+        $nid = get_nid_from_title($val, 'sales_register_data');
+        $node = node_load($nid);
+        $node->field_bill_value['und'][0]['value'] = $node->field_original_bill_value['und'][0]['value'];
+        node_save($node);       
+      }
+    }    
 }
