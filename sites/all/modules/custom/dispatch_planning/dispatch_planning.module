@@ -3859,18 +3859,17 @@ function get_tp_van_by_trip_id($trip_id) {
  * @param type $query
  */
 function dispatch_planning_views_query_alter(&$view, &$query) {
-
   // remove 19800 condition which is default added by view
   if ($view->base_table == 'dispatch_planning_api_data') {
     foreach ($query->where[1]['conditions'] as $key => $val) {
-      if ((strpos($val['field'], 'dispatch_planning_api_data.version_created_time') !== false)) {
+      if ((strpos($val['field'], 'dispatch_planning_api_data.version_created_time') !== false) || (strpos($val['field'], 'dispatch_planning_item_details_dispatch_planning_api_data.claimed_gs_approve_date_time') !== false)) {
         $data = str_replace('+ 19800', '', $val['field']);
         $data = str_replace('%Y-%m-%d\T%H:%i:%s', '%Y-%m-%d', $data);
         $query->where[1]['conditions'][$key]['field'] = $data;
       }
     }
   }
-  
+
   if ($view->name == 'bill_return_report' && $view->current_display == 'views_data_export_2') {
     global $user;
     $distributor_id = change_feeds_import_get_distributor_id($user->uid);
