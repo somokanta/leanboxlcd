@@ -37,6 +37,7 @@ class header_handler_custom_field extends views_handler_field {
         // for drs2 printout only
         $bill_number = $value->node_title;
         $bill_value = round($value->field_field_bill_value[0]['raw']['value'],2);
+        $bills_arr[] = $bill_number;
         $bill_discount = round($value->field_field_bill_level_discount[0]['raw']['value'],2);
         if (!empty($bill_number) && !empty($trip_id)) {
           $query = db_select('dispatch_planning_api_data', 'dpi');
@@ -65,7 +66,13 @@ class header_handler_custom_field extends views_handler_field {
       $trip_execution_date = $result['field_trip_executon_date_value'];
       $hht_id = $result['title'];
       $vehicle_no = $result['field_vehicle_no_value'];
-      $bill_count = $result['field_bill_count_value'];
+      if ($this->view->current_display === 'page_1') {
+        $bill_count = $result['field_bill_count_value'];
+      }
+      else {
+        $bills = get_bill_count_nonzero($bills_arr, $distributor_id);
+        $bill_count = count($bills);
+      }
       $cashier_name = $result['field_cashier_name_value'];
       $seq_method = $result['field_sequence_method_value'];
       
@@ -195,3 +202,17 @@ function get_distrubutor_name_from_user_id($user_id) {
   return $name;
 }
 
+function get_bill_count_nonzero($bill_number, $distributor_id) {
+  $final_bills = array();
+  if (is_array($bill_number) && !empty($bill_number)) {
+    $query = db_select('custom_billing_data', 'bd');
+    $query->condition('bd.distributor_id', $distributor_id);
+    $query->condition('bd.bill_number', $bill_number, 'IN');
+    $query->addExpression("SUM(bd.Sum_of_TOTAL_SALES_QTY)", 'Sum_of_TOTAL_SALES_QTY');
+    $query->havingCondition('Sum_of_TOTAL_SALES_QTY', 0, '>');
+    $query->fields('bd', array('bill_number'));
+    $query->groupBy('bd.bill_number');
+    $final_bills = $query->execute()->fetchCol();
+  }
+  return $final_bills;
+}
