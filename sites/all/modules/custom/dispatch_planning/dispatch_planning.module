@@ -4054,3 +4054,19 @@ function get_total_sales_qty_from_custom_billing($bill_number,$dis_id){
   $total_sales_qty = $query->execute()->fetchField();
   return $total_sales_qty;
 }
+
+function dispatch_planning_views_pre_render(&$view) {
+  global $user;
+  $user_id = $user->uid;
+  $distributor_id = change_feeds_import_get_distributor_id($user_id);
+  if (($view->name == 'drs_report2' && $view->current_display == 'drs_report2') || ($view->name == 'drs_report2' && $view->current_display == 'views_data_export_1')) {
+    $result = $view->result;
+    foreach ($result as $key => $val) {
+      $bill_num = $val->node_title;
+      $res = get_total_sales_qty_from_custom_billing($bill_num, $distributor_id);
+      if (empty($res)) {
+        unset($view->result[$key]);
+      }
+    }
+  }
+}
