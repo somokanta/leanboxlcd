@@ -366,39 +366,47 @@ function delivery_confirm_validate(&$form, &$form_state) {
   $vehicle_arrival_date = trim($form_state['values']['bill_details'][$trip_id]['vehicle_arrival_date']);
   $vehicle_arrival_date1 = explode(" ", $vehicle_arrival_date);
   $vehicle_arrival_date = strtotime($vehicle_arrival_date1[0]);
-
-  $vehicle_arrival_time = strtotime($vehicle_arrival_date1[0] .' '. trim($form_state['values']['bill_details'][$trip_id]['vehicle_arrival_time']));
+  $vehicle_time = trim($form_state['values']['bill_details'][$trip_id]['vehicle_arrival_time']);
   
+  $hrs = explode(':', trim($vehicle_time))[0];
+  if($hrs > 12){ 
+    $time_in_24hrs = explode(' ', trim($vehicle_time))[0];
+    $final_time  = date("g:i a", strtotime($time_in_24hrs));
+  }else{
+    $final_time = $vehicle_time;
+  }
+  $vehicle_arrival_time = strtotime($vehicle_arrival_date1[0] . ' '. $final_time);
+
   $start_time_flag = 0;
   $current_time = strtotime(date('Y-m-d h:i a'));
-  
-  if (!empty($vehicle_arrival_time)) {
-    $pre_start_time = explode(':', date('h:i a', $vehicle_arrival_time));
-    if (count($pre_start_time) != 2) {
-      $start_time_flag = 1;
+
+  if (!empty($vehicle_time)) {
+      $pre_start_time = explode(':', $vehicle_time);
+      if (count($pre_start_time) != 2) {
+        $start_time_flag = 1;
+      }
+      if (!empty($pre_start_time)) {
+        $hour = (int) $pre_start_time[0];
+        $minutes_array = explode(' ', $pre_start_time[1]);
+        $minutes = (int) $minutes_array[0];
+        $am_pm = strtolower(trim($minutes_array[1]));
+      }
+      if ($hour > 24 || !is_numeric($hour) || $hour <= 0) {
+        $start_time_flag = 1;
+      }
+      if ($minutes > 60 && is_numeric($minutes)) {
+        $start_time_flag = 1;
+      }
+      if ($minutes < 0 && !is_numeric($minutes)) {
+        $start_time_flag = 1;
+      }
+      if ($minutes < 0) {
+        $start_time_flag = 1;
+      }
+      if ($am_pm != 'am' && $am_pm != 'pm') {
+        $start_time_flag = 1;
+      }
     }
-    if (!empty($pre_start_time)) {
-      $hour = (int) $pre_start_time[0];
-      $minutes_array = explode(' ', $pre_start_time[1]);
-      $minutes = (int) $minutes_array[0];
-      $am_pm = strtolower(trim($minutes_array[1]));
-    }
-    if ($hour > 12 || !is_numeric($hour) || $hour <= 0) {
-      $start_time_flag = 1;
-    }
-    if ($minutes > 60 && is_numeric($minutes)) {
-      $start_time_flag = 1;
-    }
-    if ($minutes < 0 && !is_numeric($minutes)) {
-      $start_time_flag = 1;
-    }
-    if ($minutes < 0) {
-      $start_time_flag = 1;
-    }
-    if ($am_pm != 'am' && $am_pm != 'pm') {
-      $start_time_flag = 1;
-    }
-  }
 
   if ($start_time_flag == 1) {
   $form_state['rebuild']  = TRUE;
@@ -438,11 +446,15 @@ function delivery_confirm_submit($form, $form_state) {
   $get_trip_id = $form_state['triggering_element']['#name'];
   $exploded_name = explode('_', $get_trip_id);
   $trip_id = $exploded_name[2];
-  
   $vehicle_arrival_date = $form_state['values']['bill_details'][$trip_id]['vehicle_arrival_date'];
   $vehicle_arrival_time = $form_state['values']['bill_details'][$trip_id]['vehicle_arrival_time'];
   $delivery_incharge_name = $form_state['values']['bill_details'][$trip_id]['delivery_incharge_name'];
-  
+
+  $hrs = explode(':', trim($vehicle_arrival_time))[0];
+  if($hrs>12){
+    $time_in_24hrs = explode(' ', trim($vehicle_arrival_time))[0];
+    $vehicle_arrival_time  = date("g:i a", strtotime($time_in_24hrs));
+  }
   $trip_nid = check_trip_id_exists_or_not($dis_id, $trip_id);
   if (!empty($trip_nid->nid)) {
       $node = node_load($trip_nid->nid);
