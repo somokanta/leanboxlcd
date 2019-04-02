@@ -26,7 +26,7 @@ function dispatch_planning_schema() {
     ),
     'primary key' => array('id'),
   );
-$schema['ptl_put_qty'] = array(
+  $schema['ptl_put_qty'] = array(
     'description' => 'ptl_put_qty sum',
     'fields' => array(
       'id' => array(
@@ -37,8 +37,8 @@ $schema['ptl_put_qty'] = array(
       'ptl_job' => array(
         'description' => 'ptl_job',
         'type' => 'int',
-         'not null' => TRUE,
-         'default' => 0,
+        'not null' => TRUE,
+        'default' => 0,
       ),
       'line_count' => array(
         'description' => 'line_count',
@@ -72,7 +72,84 @@ $schema['ptl_put_qty'] = array(
     'primary key' => array('id'),
   );
 
-return $schema;
+  $schema['sms_integration_api_log'] = array(
+    'description' => 'describes Api log for SMS Integration',
+    'fields' => array(
+      'id' => array(
+        'description' => t('Id Primary Key'),
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'trip_id' => array(
+        'description' => t('Trip Id'),
+        'type' => 'varchar',
+        'length' => 25,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'message' => array(
+        'description' => t('Message'),
+        'type' => 'text',
+      ),
+      'mobile_no' => array(
+        'description' => t('Mobile No.'),
+        'type' => 'text',
+      ),
+      'response_data' => array(
+        'description' => t('API Details'),
+        'type' => 'text',
+      ),
+      'request_time' => array(
+        'description' => t('API Request time'),
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'distributor_id' => array(
+        'description' => 'distributor_id',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    ),
+    'indexes' => array(
+      'trip_id' => array('trip_id'),
+    ),
+    'primary key' => array('id'),
+  );
+
+  $schema['sms_preprocess'] = array(
+    'description' => 'SMS Integration Preprocess',
+    'fields' => array(
+      'id' => array(
+        'description' => 'The primary identifier for a data',
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'trip_id' => array(
+        'description' => t('Trip ID'),
+        'type' => 'int',
+      ),
+      'created_date' => array(
+        'description' => 'Created Date',
+        'type' => 'int',
+        'default' => 0,
+      ),
+      'distributor_id' => array(
+        'description' => t('distributor_id'),
+        'type' => 'int',
+        'default' => 0,
+      ),
+      'flag' => array(
+        'description' => t('Flag'),
+        'type' => 'int',
+        'default' => 0,
+      ),
+    ),
+    'primary key' => array('id'),
+  );
+
+  return $schema;
 }
 
 /**
@@ -118,7 +195,7 @@ function dispatch_planning_update_7102() {
       'api_success' => array(
         'description' => t('API Success'),
         'type' => 'int',
-        'length'=>1,
+        'length' => 1,
         'not null' => TRUE,
         'default' => 0,
       ),
@@ -133,7 +210,7 @@ function dispatch_planning_update_7102() {
 }
 
 function dispatch_planning_update_7103() {
-  db_change_field('dispatch_planning_api_log', 'request_data', 'request_data', array('type' => 'text','size'=>'medium'));
+  db_change_field('dispatch_planning_api_log', 'request_data', 'request_data', array('type' => 'text', 'size' => 'medium'));
 }
 
 /**
@@ -149,11 +226,11 @@ function dispatch_planning_update_7105() {
         'not null' => TRUE,
       ),
       'distributor_id' => array(
-         'description' => t('distributor_id'),
-         'type' => 'int',
-         'default' => 0,
-       ),
-       'jobType' => array(
+        'description' => t('distributor_id'),
+        'type' => 'int',
+        'default' => 0,
+      ),
+      'jobType' => array(
         'description' => t('Job type'),
         'type' => 'varchar',
         'length' => 50,
@@ -494,7 +571,7 @@ function dispatch_planning_update_7107() {
         'not null' => TRUE,
         'default' => '',
       ),
-     ), 
+    ),
     'primary key' => array('id'),
     'indexes' => array(
       'sku_code' => array('sku_code'),
@@ -530,11 +607,11 @@ function dispatch_planning_update_7108() {
 function dispatch_planning_update_7109() {
   $fields = array(
     'rs_code' => array(
-        'description' => t('RS Code'),
-        'type' => 'varchar',
-        'length' => 25,
-        'not null' => TRUE,
-        'default' => '',
+      'description' => t('RS Code'),
+      'type' => 'varchar',
+      'length' => 25,
+      'not null' => TRUE,
+      'default' => '',
     ),
     'update_time' => array(
       'description' => 'Update Time',
@@ -542,13 +619,13 @@ function dispatch_planning_update_7109() {
       'not null' => TRUE,
       'default' => 0,
     ),
-     'fetch_time' => array(
+    'fetch_time' => array(
       'description' => 'API Fetch Time',
       'type' => 'int',
       'not null' => TRUE,
       'default' => 0,
     ),
-     'created_time' => array(
+    'created_time' => array(
       'description' => 'DATA Created Time',
       'type' => 'int',
       'not null' => TRUE,
@@ -559,26 +636,26 @@ function dispatch_planning_update_7109() {
       'type' => 'int',
       'not null' => TRUE,
       'default' => 0,
-    ), 
-     'cld' => array(
+    ),
+    'cld' => array(
       'description' => 'CLD qty',
       'type' => 'int',
       'not null' => TRUE,
       'default' => 0,
-    ), 
-     'loose' => array(
+    ),
+    'loose' => array(
       'description' => 'Loose qty',
       'type' => 'int',
       'not null' => TRUE,
       'default' => 0,
     ),
-     'put_qty' => array(
+    'put_qty' => array(
       'description' => 'Put qty',
       'type' => 'int',
       'not null' => TRUE,
       'default' => 0,
     ),
-     'put_qty_time' => array(
+    'put_qty_time' => array(
       'description' => 'Put Qty Time',
       'type' => 'int',
       'not null' => TRUE,
@@ -621,19 +698,19 @@ function dispatch_planning_update_7110() {
 }
 
 function dispatch_planning_update_7111() {
-   $fields = array(
-     'distributor_id' => array(
-       'description' => 'distributor_id',
-       'type' => 'int',
-       'not null' => TRUE,
-       'default' => 0,
-     ),
-   );
-   foreach ($fields as $key => $field) {
-      if (!db_field_exists('dispatch_planning_api_log', $key)) {
-         db_add_field('dispatch_planning_api_log', $key, $field);
-      }
-   }
+  $fields = array(
+    'distributor_id' => array(
+      'description' => 'distributor_id',
+      'type' => 'int',
+      'not null' => TRUE,
+      'default' => 0,
+    ),
+  );
+  foreach ($fields as $key => $field) {
+    if (!db_field_exists('dispatch_planning_api_log', $key)) {
+      db_add_field('dispatch_planning_api_log', $key, $field);
+    }
+  }
 }
 
 /**
@@ -649,64 +726,63 @@ function dispatch_planning_update_7112() {
     ),
     'free_sku_description' => array(
       'description' => t('FREE SKU DESCRIPTION'),
-        'type' => 'varchar',
-        'length' => 255,
-        'not null' => TRUE,
-        'default' => '',
+      'type' => 'varchar',
+      'length' => 255,
+      'not null' => TRUE,
+      'default' => '',
     ),
-     'cp' => array(
+    'cp' => array(
       'description' => 'CP',
-        'type' => 'varchar',
-        'length' => 10,
-        'not null' => TRUE,
-        'default' => '',
+      'type' => 'varchar',
+      'length' => 10,
+      'not null' => TRUE,
+      'default' => '',
     ),
-     'ean' => array(
-    'description' => 'EAN',
-    'type' => 'varchar',
-    'length' => 25,
-    'not null' => TRUE,
-    'default' => '',
+    'ean' => array(
+      'description' => 'EAN',
+      'type' => 'varchar',
+      'length' => 25,
+      'not null' => TRUE,
+      'default' => '',
     ),
-     'free_cld' => array(
+    'free_cld' => array(
       'description' => 'Free CLD qty',
       'type' => 'int',
       'not null' => TRUE,
       'default' => 0,
-    ), 
-     'free_loose' => array(
+    ),
+    'free_loose' => array(
       'description' => 'Free Loose qty',
       'type' => 'int',
       'not null' => TRUE,
       'default' => 0,
     ),
-     'derived_free_qty' => array(
+    'derived_free_qty' => array(
       'description' => 'Derived free qty',
       'type' => 'int',
       'not null' => TRUE,
       'default' => 0,
     ),
-     'derived_cld' => array(
+    'derived_cld' => array(
       'description' => 'Drived CLD qty',
       'type' => 'numeric',
-      'precision'=>10,
-      'scale'=>2,
+      'precision' => 10,
+      'scale' => 2,
       'not null' => TRUE,
       'default' => 0
-    ), 
-     'derived_loose' => array(
+    ),
+    'derived_loose' => array(
       'description' => 'Drived Loose qty',
       'type' => 'int',
       'not null' => TRUE,
       'default' => 0,
     ),
-     'derived_upc' => array(
+    'derived_upc' => array(
       'description' => 'Drived UPC',
       'type' => 'int',
       'not null' => TRUE,
       'default' => 0,
     ),
-    
   );
   foreach ($fields as $key => $field) {
     if (!db_field_exists('ptl_data_configuration', $key)) {
@@ -714,7 +790,6 @@ function dispatch_planning_update_7112() {
     }
   }
 }
-
 
 /**
  * Create new database table using hook_update_N()
@@ -810,133 +885,133 @@ function dispatch_planning_update_7113() {
         'default' => '',
       ),
       'api_flag' => array(
-      'description' => 'Request flag field',
-      'type' => 'int',
-      'length' => 1,
-      'not null' => TRUE,
-      'default' => 0,
-    ),
+        'description' => 'Request flag field',
+        'type' => 'int',
+        'length' => 1,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
       'rs_code' => array(
         'description' => t('RS Code'),
         'type' => 'varchar',
         'length' => 25,
         'not null' => TRUE,
         'default' => '',
-    ),
-    'update_time' => array(
-      'description' => 'Update Time',
-      'type' => 'int',
-      'not null' => TRUE,
-      'default' => 0,
-    ),
-     'fetch_time' => array(
-      'description' => 'API Fetch Time',
-      'type' => 'int',
-      'not null' => TRUE,
-      'default' => 0,
-    ),
-     'created_time' => array(
-      'description' => 'DATA Created Time',
-      'type' => 'int',
-      'not null' => TRUE,
-      'default' => 0,
-    ),
-    'upc' => array(
-      'description' => 'UPC qty',
-      'type' => 'int',
-      'not null' => TRUE,
-      'default' => 0,
-    ), 
-     'cld' => array(
-      'description' => 'CLD qty',
-      'type' => 'int',
-      'not null' => TRUE,
-      'default' => 0,
-    ), 
-     'loose' => array(
-      'description' => 'Loose qty',
-      'type' => 'int',
-      'not null' => TRUE,
-      'default' => 0,
-    ),
-     'put_qty' => array(
-      'description' => 'Put qty',
-      'type' => 'int',
-      'not null' => TRUE,
-      'default' => 0,
-    ),
-     'put_qty_time' => array(
-      'description' => 'Put Qty Time',
-      'type' => 'int',
-      'not null' => TRUE,
-      'default' => 0,
-    ),
-    'sum_of_sales_free_qty' => array(
-      'description' => t('Sum_of_SALES_FREE_QTY'),
-      'type' => 'int',
-      'not null' => TRUE,
-      'default' => 0,
-    ),
-    'free_sku_description' => array(
-      'description' => t('FREE SKU DESCRIPTION'),
+      ),
+      'update_time' => array(
+        'description' => 'Update Time',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'fetch_time' => array(
+        'description' => 'API Fetch Time',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'created_time' => array(
+        'description' => 'DATA Created Time',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'upc' => array(
+        'description' => 'UPC qty',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'cld' => array(
+        'description' => 'CLD qty',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'loose' => array(
+        'description' => 'Loose qty',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'put_qty' => array(
+        'description' => 'Put qty',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'put_qty_time' => array(
+        'description' => 'Put Qty Time',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'sum_of_sales_free_qty' => array(
+        'description' => t('Sum_of_SALES_FREE_QTY'),
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'free_sku_description' => array(
+        'description' => t('FREE SKU DESCRIPTION'),
         'type' => 'varchar',
         'length' => 255,
         'not null' => TRUE,
         'default' => '',
-    ),
-     'cp' => array(
-      'description' => 'CP',
+      ),
+      'cp' => array(
+        'description' => 'CP',
         'type' => 'varchar',
         'length' => 10,
         'not null' => TRUE,
         'default' => '',
+      ),
+      'ean' => array(
+        'description' => 'EAN',
+        'type' => 'varchar',
+        'length' => 25,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'free_cld' => array(
+        'description' => 'Free CLD qty',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'free_loose' => array(
+        'description' => 'Free Loose qty',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'derived_free_qty' => array(
+        'description' => 'Derived free qty',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'derived_cld' => array(
+        'description' => 'Drived CLD qty',
+        'type' => 'numeric',
+        'precision' => 10,
+        'scale' => 2,
+        'not null' => TRUE,
+        'default' => 0
+      ),
+      'derived_loose' => array(
+        'description' => 'Drived Loose qty',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'derived_upc' => array(
+        'description' => 'Drived UPC',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
     ),
-     'ean' => array(
-    'description' => 'EAN',
-    'type' => 'varchar',
-    'length' => 25,
-    'not null' => TRUE,
-    'default' => '',
-    ),
-     'free_cld' => array(
-      'description' => 'Free CLD qty',
-      'type' => 'int',
-      'not null' => TRUE,
-      'default' => 0,
-    ), 
-     'free_loose' => array(
-      'description' => 'Free Loose qty',
-      'type' => 'int',
-      'not null' => TRUE,
-      'default' => 0,
-    ),
-     'derived_free_qty' => array(
-      'description' => 'Derived free qty',
-      'type' => 'int',
-      'not null' => TRUE,
-      'default' => 0,
-    ),
-     'derived_cld' => array(
-      'description' => 'Drived CLD qty',
-      'type' => 'numeric',
-      'precision'=>10,
-      'scale'=>2,
-      'not null' => TRUE,
-      'default' => 0
-    ), 
-     'derived_loose' => array(
-      'description' => 'Drived Loose qty',
-      'type' => 'int',
-      'not null' => TRUE,
-      'default' => 0,
-    ),
-     'derived_upc' => array(
-      'description' => 'Drived UPC',
-      'type' => 'int',
-      'not null' => TRUE,
-      'default' => 0,
-    ),      
-     ), 
     'primary key' => array('id'),
     'indexes' => array(
       'sku_code' => array('sku_code'),
@@ -947,273 +1022,240 @@ function dispatch_planning_update_7113() {
   db_create_table('master_ptl_data', $schema['master_ptl_data']);
 }
 
-
 /**
  * Update New Columns table using hook_update_N()
  */
 function dispatch_planning_update_7114() {
-    $fields1 = array(
-     'res_runsheetNo' => array(
-       'description' => t('response id'),
-       'type' => 'varchar',
+  $fields1 = array(
+    'res_runsheetNo' => array(
+      'description' => t('response id'),
+      'type' => 'varchar',
       'default' => NULL,
-       'length' => 50,
-     ),
-
-     'res_actualAmount' => array(
-       'description' => t('Response Actual Amount'),
-       'type' => 'varchar',
-       'length' => 50,
+      'length' => 50,
+    ),
+    'res_actualAmount' => array(
+      'description' => t('Response Actual Amount'),
+      'type' => 'varchar',
+      'length' => 50,
       'default' => NULL,
-
-     ),
-     'res_originalAmount' => array(
-       'description' => t('Response Original Amount Code_Bill Number'),
-       'type' => 'varchar',
-       'length' => 50,
+    ),
+    'res_originalAmount' => array(
+      'description' => t('Response Original Amount Code_Bill Number'),
+      'type' => 'varchar',
+      'length' => 50,
       'default' => NULL,
-
-     ),
-     'res_moneyTransactionType' => array(
-       'description' => t('Response moneyTransactionType'),
-       'type' => 'varchar',
-       'length' => 50,
+    ),
+    'res_moneyTransactionType' => array(
+      'description' => t('Response moneyTransactionType'),
+      'type' => 'varchar',
+      'length' => 50,
       'default' => NULL,
-
-     ),
-     'res_latitude' => array(
-       'description' => t('Response Lattitude'),
-       'type' => 'varchar',
-       'length' => 50,
+    ),
+    'res_latitude' => array(
+      'description' => t('Response Lattitude'),
+      'type' => 'varchar',
+      'length' => 50,
       'default' => NULL,
-
-     ),
-     'res_longitude' => array(
-       'description' => t('Response Longitude'),
-       'type' => 'varchar',
-       'length' => 50,
+    ),
+    'res_longitude' => array(
+      'description' => t('Response Longitude'),
+      'type' => 'varchar',
+      'length' => 50,
       'default' => NULL,
-
-     ),
-     'res_attemptCount' => array(
-       'description' => t('Response attemptCount'),
-       'type' => 'varchar',
-       'length' => 5,
+    ),
+    'res_attemptCount' => array(
+      'description' => t('Response attemptCount'),
+      'type' => 'varchar',
+      'length' => 5,
       'default' => NULL,
-
-     ),
-     'res_jobMasterId' => array(
-       'description' => t('Response jobMasterId'),
-       'type' => 'varchar',
-       'length' => 50,
+    ),
+    'res_jobMasterId' => array(
+      'description' => t('Response jobMasterId'),
+      'type' => 'varchar',
+      'length' => 50,
       'default' => NULL,
-
-     ),
-     'res_companyId' => array(
-       'description' => t('Response companyId'),
-       'type' => 'varchar',
-       'length' => 50,
+    ),
+    'res_companyId' => array(
+      'description' => t('Response companyId'),
+      'type' => 'varchar',
+      'length' => 50,
       'default' => NULL,
-
-     ),
-     'res_jobType' => array(
-       'description' => t('Response Job Type'),
-       'type' => 'varchar',
-       'length' => 50,
+    ),
+    'res_jobType' => array(
+      'description' => t('Response Job Type'),
+      'type' => 'varchar',
+      'length' => 50,
       'default' => NULL,
-
-     ),
-     'res_jobId' => array(
-       'description' => t('Response Job id'),
-       'type' => 'varchar',
-       'length' => 50,
+    ),
+    'res_jobId' => array(
+      'description' => t('Response Job id'),
+      'type' => 'varchar',
+      'length' => 50,
       'default' => NULL,
-
-     ),
-     'res_employeeCode' => array(
-       'description' => t('Response employeeCode'),
-       'type' => 'varchar',
-       'length' => 50,
+    ),
+    'res_employeeCode' => array(
+      'description' => t('Response employeeCode'),
+      'type' => 'varchar',
+      'length' => 50,
       'default' => NULL,
-
-     ),
+    ),
 //     'res_hubCode' => array(
 //       'description' => t('Response hubCode'),
 //       'type' => 'varchar',
 //       'length' => 50,
 //     ),
-     'res_status' => array(
-       'description' => t('Response status'),
-       'type' => 'varchar',
-       'length' => 25,
+    'res_status' => array(
+      'description' => t('Response status'),
+      'type' => 'varchar',
+      'length' => 25,
       'default' => NULL,
-
-     ),
-     'res_trackHalt' => array(
-       'description' => t('Response trackHalt'),
-       'type' => 'varchar',
-       'length' => 20,
+    ),
+    'res_trackHalt' => array(
+      'description' => t('Response trackHalt'),
+      'type' => 'varchar',
+      'length' => 20,
       'default' => NULL,
-
-     ),
-     'res_trackKm' => array(
-       'description' => t('Response trackKm'),
-       'type' => 'varchar',
-       'length' => 50,
+    ),
+    'res_trackKm' => array(
+      'description' => t('Response trackKm'),
+      'type' => 'varchar',
+      'length' => 50,
       'default' => NULL,
-
-     ),
-     'res_trackTransactionTimeSpent' => array(
-       'description' => t('Response trackTransactionTimeSpent'),
-       'type' => 'varchar',
-       'length' => 50,
+    ),
+    'res_trackTransactionTimeSpent' => array(
+      'description' => t('Response trackTransactionTimeSpent'),
+      'type' => 'varchar',
+      'length' => 50,
       'default' => NULL,
-
-     ),
-     'res_merchantCode' => array(
-       'description' => t('Response merchantCode'),
-       'type' => 'varchar',
-       'length' => 50,
+    ),
+    'res_merchantCode' => array(
+      'description' => t('Response merchantCode'),
+      'type' => 'varchar',
+      'length' => 50,
       'default' => NULL,
-
-     ),
-     'res_transactionDate' => array(
-       'description' => t('Response transactionDate'),
-       'type' => 'varchar',
-       'length' => 50,
+    ),
+    'res_transactionDate' => array(
+      'description' => t('Response transactionDate'),
+      'type' => 'varchar',
+      'length' => 50,
       'default' => NULL,
-
-     ),
-     'res_erpPushTime' => array(
-       'description' => t('Response erpPushTime'),
-       'type' => 'varchar',
-       'length' => 50,
+    ),
+    'res_erpPushTime' => array(
+      'description' => t('Response erpPushTime'),
+      'type' => 'varchar',
+      'length' => 50,
       'default' => NULL,
-
-     ),
-     'res_lastTransactionTime' => array(
-       'description' => t('Response lastTransactionTime'),
-       'type' => 'varchar',
-       'length' => 50,
+    ),
+    'res_lastTransactionTime' => array(
+      'description' => t('Response lastTransactionTime'),
+      'type' => 'varchar',
+      'length' => 50,
       'default' => NULL,
-
-     ),
-     'res_battery' => array(
-       'description' => t('Response battery'),
-       'type' => 'varchar',
-       'length' => 50,
+    ),
+    'res_battery' => array(
+      'description' => t('Response battery'),
+      'type' => 'varchar',
+      'length' => 50,
       'default' => NULL,
-
-     ),
-     'res_confirm_signed_bill_amount' => array(
-       'description' => t('Response confirm_signed_bill_amount'),
-       'type' => 'varchar',
-       'length' => 50,
+    ),
+    'res_confirm_signed_bill_amount' => array(
+      'description' => t('Response confirm_signed_bill_amount'),
+      'type' => 'varchar',
+      'length' => 50,
       'default' => NULL,
-
-     ),
-     'res_bank_name' => array(
-       'description' => t('Response Bank Name'),
-       'type' => 'varchar',
-       'length' => 50,
+    ),
+    'res_bank_name' => array(
+      'description' => t('Response Bank Name'),
+      'type' => 'varchar',
+      'length' => 50,
       'default' => NULL,
-
-     ),
-     'res_photo_of_signed_bill_delivery' => array(
-       'description' => t('Response photo_of_signed_bill_delivery'),
-       'type' => 'varchar',
+    ),
+    'res_photo_of_signed_bill_delivery' => array(
+      'description' => t('Response photo_of_signed_bill_delivery'),
+      'type' => 'varchar',
       'default' => NULL,
- 'length' => 255,
-     ),
-     'res_total_amount' => array(
-       'description' => t('Response total_amount'),
-       'type' => 'varchar',
-       'length' => 50,
+      'length' => 255,
+    ),
+    'res_total_amount' => array(
+      'description' => t('Response total_amount'),
+      'type' => 'varchar',
+      'length' => 50,
       'default' => NULL,
-
-     ),
-     'res_remarks' => array(
-       'description' => t('Response remarks'),
-       'type' => 'varchar',
-       'length' => 50,
+    ),
+    'res_remarks' => array(
+      'description' => t('Response remarks'),
+      'type' => 'varchar',
+      'length' => 50,
       'default' => NULL,
-
-     ),
-     'res_cheque_date' => array(
-       'description' => t('Response cheque_date'),
-       'type' => 'varchar',
-       'length' => 50,
+    ),
+    'res_cheque_date' => array(
+      'description' => t('Response cheque_date'),
+      'type' => 'varchar',
+      'length' => 50,
       'default' => NULL,
-
-     ),
-     'res_photo_of_cheque' => array(
-       'description' => t('Response photo_of_cheque'),
-       'type' => 'varchar',
+    ),
+    'res_photo_of_cheque' => array(
+      'description' => t('Response photo_of_cheque'),
+      'type' => 'varchar',
       'default' => NULL,
- 'length' => 255,
-     ),
-     'res_cheque_amount' => array(
-       'description' => t('Response cheque_amount'),
-       'type' => 'varchar',
-       'length' => 50,
+      'length' => 255,
+    ),
+    'res_cheque_amount' => array(
+      'description' => t('Response cheque_amount'),
+      'type' => 'varchar',
+      'length' => 50,
       'default' => NULL,
-
-     ),
-     'res_money_collect2' => array(
-       'description' => t('Response money_collect2'),
-       'type' => 'varchar',
-       'length' => 50,
+    ),
+    'res_money_collect2' => array(
+      'description' => t('Response money_collect2'),
+      'type' => 'varchar',
+      'length' => 50,
       'default' => NULL,
-
-     ),
-     'res_signed_bill_delivery' => array(
-       'description' => t('Response signed_bill_delivery'),
-       'type' => 'varchar',
-       'length' => 50,
+    ),
+    'res_signed_bill_delivery' => array(
+      'description' => t('Response signed_bill_delivery'),
+      'type' => 'varchar',
+      'length' => 50,
       'default' => NULL,
+    ),
+    'photo_of_signed_bill_partial' => array(
+      'description' => t('Response photo_of_signed_bill_partial'),
+      'type' => 'varchar',
+      'default' => NULL,
+      'length' => 255,
+    ),
+    'updated_flag' => array(
+      'description' => t('0 => no changes, 1 => manual entry, 2 => api response'),
+      'type' => 'int',
+      'default' => 0,
+      'length' => 3,
+    ),
+  );
+  $fields2 = array(
+    'res_sku_actual_quantity1' => array(
+      'description' => t('Response sku_actual_quantity1'),
+      'type' => 'varchar',
+      'length' => 30,
+    ),
+  );
 
-     ),
-     'photo_of_signed_bill_partial' => array(
-       'description' => t('Response photo_of_signed_bill_partial'),
-       'type' => 'varchar',
-       'default' => NULL,
-       'length' => 255,
-     ),
-     'updated_flag' => array(
-       'description' => t('0 => no changes, 1 => manual entry, 2 => api response'),
-       'type' => 'int',
-       'default' => 0,
-       'length' => 3,
-     ),
-   );
-   $fields2 = array(
+  foreach ($fields1 as $key => $field) {
+    db_add_field('dispatch_planning_api_data', $key, $field);
+  }
+  foreach ($fields2 as $key => $field) {
+    db_add_field('dispatch_planning_item_details', $key, $field);
+  }
 
-     'res_sku_actual_quantity1' => array(
-       'description' => t('Response sku_actual_quantity1'),
-       'type' => 'varchar',
-       'length' => 30,
-     ),
-   );
+  // Add indexing on reference no in dispatch_planning_api_data table
+  db_add_index('dispatch_planning_api_data', 'dp_referenceNo', array('referenceNo'));
 
-   foreach ($fields1 as $key => $field) {
-      db_add_field('dispatch_planning_api_data', $key, $field);
-   }
-   foreach ($fields2 as $key => $field) {
-      db_add_field('dispatch_planning_item_details', $key, $field);
-   }
-   
-   // Add indexing on reference no in dispatch_planning_api_data table
-   db_add_index('dispatch_planning_api_data', 'dp_referenceNo', array('referenceNo'));
-      
-   // Add indexing on sku code in dispatch_planning_item_details table
-   db_add_index('dispatch_planning_item_details', 'dp_sku_code', array('sku_code'));
-
+  // Add indexing on sku code in dispatch_planning_item_details table
+  db_add_index('dispatch_planning_item_details', 'dp_sku_code', array('sku_code'));
 }
 
 /**
  * Create new ptl_header_data table using hook_update_N()
  */
-
 function dispatch_planning_update_7115() {
   $schema['ptl_header_data'] = array(
     'description' => 'PTL Header Level Data',
@@ -1281,7 +1323,6 @@ function dispatch_planning_update_7115() {
         'not null' => TRUE,
         'default' => 0,
       ),
-
       'operator_id' => array(
         'description' => t('Operator ID'),
         'type' => 'varchar',
@@ -1324,77 +1365,73 @@ function dispatch_planning_update_7115() {
   db_create_table('ptl_header_data', $schema['ptl_header_data']);
 }
 
-
 function dispatch_planning_update_7116() {
 
-   db_change_field('dispatch_planning_api_data', 'fieldExecutive', 'fieldExecutive', array(
-     'description' => t('RS Code_cashier'),
-     'type' => 'varchar',
-     'length' => 50,
-     'not null' => TRUE,
-     'default' => '',
-   ));
-   db_change_field('dispatch_planning_api_data', 'fieldExecutiveName', 'fieldExecutiveName', array(
-     'description' => t('cashier name'),
-     'type' => 'varchar',
-     'length' => 50,
-     'not null' => TRUE,
-     'default' => '',
-   ));
+  db_change_field('dispatch_planning_api_data', 'fieldExecutive', 'fieldExecutive', array(
+    'description' => t('RS Code_cashier'),
+    'type' => 'varchar',
+    'length' => 50,
+    'not null' => TRUE,
+    'default' => '',
+  ));
+  db_change_field('dispatch_planning_api_data', 'fieldExecutiveName', 'fieldExecutiveName', array(
+    'description' => t('cashier name'),
+    'type' => 'varchar',
+    'length' => 50,
+    'not null' => TRUE,
+    'default' => '',
+  ));
 
-   $fields = array(
-     'og_sum_net_sales_quantity' => array(
-       'description' => 'og_sum_net_sales_quantity',
-       'type' => 'int',
-       'not null' => TRUE,
-       'default' => 0,
-     ),
-   );
-   foreach ($fields as $key => $field) {
-      if (!db_field_exists('dispatch_planning_item_details', $key)) {
-         db_add_field('dispatch_planning_item_details', $key, $field);
-      }
-   }
+  $fields = array(
+    'og_sum_net_sales_quantity' => array(
+      'description' => 'og_sum_net_sales_quantity',
+      'type' => 'int',
+      'not null' => TRUE,
+      'default' => 0,
+    ),
+  );
+  foreach ($fields as $key => $field) {
+    if (!db_field_exists('dispatch_planning_item_details', $key)) {
+      db_add_field('dispatch_planning_item_details', $key, $field);
+    }
+  }
 }
-
-
 
 function dispatch_planning_update_7117() {
 
-   $fields = array(
-     'res_cash_amount' => array(
-       'description' => 'res_cash_amount',
-       'type' => 'varchar',
-       'length' => 50,
-       'not null' => TRUE,
-       'default' => '',
-     ),
-     'res_to_be_collection' => array(
-       'description' => 'res_to_be_collection',
-       'type' => 'varchar',
-       'length' => 50,
-       'not null' => TRUE,
-       'default' => '',
-     ),
-     'res_signed_bill_partial' => array(
-       'description' => 'res_signed_bill_partial',
-       'type' => 'varchar',
-       'length' => 50,
-       'not null' => TRUE,
-       'default' => '',
-     ),
-   );
-   foreach ($fields as $key => $field) {
-      if (!db_field_exists('dispatch_planning_api_data', $key)) {
-         db_add_field('dispatch_planning_api_data', $key, $field);
-      }
-   }
+  $fields = array(
+    'res_cash_amount' => array(
+      'description' => 'res_cash_amount',
+      'type' => 'varchar',
+      'length' => 50,
+      'not null' => TRUE,
+      'default' => '',
+    ),
+    'res_to_be_collection' => array(
+      'description' => 'res_to_be_collection',
+      'type' => 'varchar',
+      'length' => 50,
+      'not null' => TRUE,
+      'default' => '',
+    ),
+    'res_signed_bill_partial' => array(
+      'description' => 'res_signed_bill_partial',
+      'type' => 'varchar',
+      'length' => 50,
+      'not null' => TRUE,
+      'default' => '',
+    ),
+  );
+  foreach ($fields as $key => $field) {
+    if (!db_field_exists('dispatch_planning_api_data', $key)) {
+      db_add_field('dispatch_planning_api_data', $key, $field);
+    }
+  }
 }
 
 /**
  * Create new dispatch_delivered_vrs_details table using hook_update_N()
  */
-
 function dispatch_planning_update_7118() {
   $schema['dispatch_delivered_vrs_details'] = array(
     'description' => 'dispatch_delivered_vrs_details Data',
@@ -1462,16 +1499,15 @@ function dispatch_planning_update_7118() {
         'description' => t('cash_app_value'),
         'type' => 'float',
       ),
-       'cash_actual_collected' => array(
+      'cash_actual_collected' => array(
         'description' => t('cash_actual_collected'),
         'type' => 'float',
       ),
-       'cash_difference' => array(
+      'cash_difference' => array(
         'description' => t('cash_difference'),
         'type' => 'float',
       ),
-      
-       'tbr_bill_count' => array(
+      'tbr_bill_count' => array(
         'description' => t('tbr_bill_count'),
         'type' => 'int',
       ),
@@ -1483,11 +1519,11 @@ function dispatch_planning_update_7118() {
         'description' => t('App ret inventory value'),
         'type' => 'float',
       ),
-       'tbr_actual_collected' => array(
+      'tbr_actual_collected' => array(
         'description' => t('Actual ret inventory value'),
         'type' => 'float',
       ),
-       'tbr_difference' => array(
+      'tbr_difference' => array(
         'description' => t('tbr_difference'),
         'type' => 'float',
       ),
@@ -1511,27 +1547,27 @@ function dispatch_planning_update_7118() {
         'description' => t('dis_id'),
         'type' => 'int',
       ),
-       'total_bill_count' => array(
+      'total_bill_count' => array(
         'description' => t('total_bill_count'),
         'type' => 'int',
       ),
-       'total_bill_value' => array(
+      'total_bill_value' => array(
         'description' => t('total_bill_value'),
         'type' => 'float',
       ),
-       'fr_bill_count' => array(
+      'fr_bill_count' => array(
         'description' => t('fr_bill_count'),
         'type' => 'int',
       ),
-       'fr_bill_value' => array(
+      'fr_bill_value' => array(
         'description' => t('fr_bill_value'),
         'type' => 'float',
       ),
-       'ws_bill_count' => array(
+      'ws_bill_count' => array(
         'description' => t('ws_bill_count'),
         'type' => 'float',
       ),
-       'ws_bill_value' => array(
+      'ws_bill_value' => array(
         'description' => t('ws_bill_value'),
         'type' => 'float',
       ),
@@ -1543,7 +1579,6 @@ function dispatch_planning_update_7118() {
   );
   db_create_table('dispatch_delivered_vrs_details', $schema['dispatch_delivered_vrs_details']);
 }
-
 
 /**
  * Adding new fields in PTL table using hook_update_N()
@@ -1578,56 +1613,55 @@ function dispatch_planning_update_7119() {
     }
     if (!db_field_exists('master_ptl_data', $key)) {
       db_add_field('master_ptl_data', $key, $field);
-    }    
+    }
   }
 }
-
 
 /**
  * Adding new fields in PTL table using hook_update_N()
  */
 function dispatch_planning_update_7120() {
-   $fields1 = array(
-     'res_reason_for_failure' => array(
-       'description' => 'res_reason_for_failure',
-       'type' => 'varchar',
-       'length' => 255,
-       'default' => '',
-     ),
-   );
+  $fields1 = array(
+    'res_reason_for_failure' => array(
+      'description' => 'res_reason_for_failure',
+      'type' => 'varchar',
+      'length' => 255,
+      'default' => '',
+    ),
+  );
 
-   $fields2 = array(
-     'res_sku_reason' => array(
-       'description' => 'res_sku_reason',
-       'type' => 'varchar',
-       'length' => 255,
-       'default' => '',
-     ),
-     'res_godown_short' => array(
-       'description' => 'res_godown_short',
-       'type' => 'varchar',
-       'length' => 255,
-       'default' => '',
-     ),
-     'res_cashier_short' => array(
-       'description' => 'res_cashier_short',
-       'type' => 'int',
-       'not null' => TRUE,
-       'default' => 0,
-     ),     
-   );
+  $fields2 = array(
+    'res_sku_reason' => array(
+      'description' => 'res_sku_reason',
+      'type' => 'varchar',
+      'length' => 255,
+      'default' => '',
+    ),
+    'res_godown_short' => array(
+      'description' => 'res_godown_short',
+      'type' => 'varchar',
+      'length' => 255,
+      'default' => '',
+    ),
+    'res_cashier_short' => array(
+      'description' => 'res_cashier_short',
+      'type' => 'int',
+      'not null' => TRUE,
+      'default' => 0,
+    ),
+  );
 
-   foreach ($fields1 as $key => $field) {
-      if (!db_field_exists('dispatch_planning_api_data', $key)) {
-         db_add_field('dispatch_planning_api_data', $key, $field);
-      }
-   }
-   foreach ($fields2 as $key => $field) {
+  foreach ($fields1 as $key => $field) {
+    if (!db_field_exists('dispatch_planning_api_data', $key)) {
+      db_add_field('dispatch_planning_api_data', $key, $field);
+    }
+  }
+  foreach ($fields2 as $key => $field) {
 
-      if (!db_field_exists('dispatch_planning_item_details', $key)) {
-         db_add_field('dispatch_planning_item_details', $key, $field);
-      }
-   }
+    if (!db_field_exists('dispatch_planning_item_details', $key)) {
+      db_add_field('dispatch_planning_item_details', $key, $field);
+    }
+  }
 }
 
 /**
@@ -1642,7 +1676,7 @@ function dispatch_planning_update_7121() {
       'not null' => TRUE,
       'default' => '',
     ),
-     'put_time' => array(
+    'put_time' => array(
       'description' => 'Put Time',
       'type' => 'int',
       'not null' => TRUE,
@@ -1655,7 +1689,7 @@ function dispatch_planning_update_7121() {
       'not null' => TRUE,
       'default' => '',
     ),
-     'close_time' => array(
+    'close_time' => array(
       'description' => 'Close Time',
       'type' => 'int',
       'not null' => TRUE,
@@ -1687,7 +1721,7 @@ function dispatch_planning_update_7121() {
     }
     if (!db_field_exists('master_ptl_data', $key)) {
       db_add_field('master_ptl_data', $key, $field);
-    }    
+    }
   }
 }
 
@@ -1706,8 +1740,8 @@ function dispatch_planning_update_7122() {
       'ptl_job' => array(
         'description' => 'ptl_job',
         'type' => 'int',
-         'not null' => TRUE,
-         'default' => 0,
+        'not null' => TRUE,
+        'default' => 0,
       ),
       'line_count' => array(
         'description' => 'line_count',
@@ -1757,7 +1791,7 @@ function dispatch_planning_update_7123() {
       'not null' => TRUE,
       'default' => 23466,
     ),
-  ); 
+  );
   foreach ($fields as $key => $field) {
     if (!db_field_exists('ptl_data_configuration', $key)) {
       db_add_field('ptl_data_configuration', $key, $field);
@@ -1767,11 +1801,11 @@ function dispatch_planning_update_7123() {
     }
     if (!db_field_exists('ptl_header_data', $key)) {
       db_add_field('ptl_header_data', $key, $field);
-    } 
+    }
     if (!db_field_exists('ptl_put_qty', $key)) {
       db_add_field('ptl_put_qty', $key, $field);
-    } 
-  }  
+    }
+  }
 }
 
 function dispatch_planning_update_7124() {
@@ -1796,10 +1830,10 @@ function dispatch_planning_update_7124() {
       'default' => '',
     ),
     'res_updated_time' => array(
-        'description' => t('FAREY Updated Time'),
-        'type' => 'int',
-        'not null' => TRUE,
-        'default' => 0,
+      'description' => t('FAREY Updated Time'),
+      'type' => 'int',
+      'not null' => TRUE,
+      'default' => 0,
     ),
     'res_cheque_date_edit' => array(
       'description' => t('Response cheque_date_edit'),
@@ -1850,42 +1884,42 @@ function dispatch_planning_update_7124() {
       'length' => 255,
     ),
     'res_cash_amount_edit' => array(
-       'description' => 'res_cash_amount_edit',
-       'type' => 'varchar',
-       'length' => 50,
-       'not null' => TRUE,
-       'default' => '',
+      'description' => 'res_cash_amount_edit',
+      'type' => 'varchar',
+      'length' => 50,
+      'not null' => TRUE,
+      'default' => '',
     ),
     'res_signed_bill_delivery_edit' => array(
-       'description' => t('Response signed_bill_delivery_edit'),
-       'type' => 'varchar',
-       'length' => 50,
+      'description' => t('Response signed_bill_delivery_edit'),
+      'type' => 'varchar',
+      'length' => 50,
       'default' => NULL,
     ),
     'res_signed_bill_partial_edit' => array(
-       'description' => t('Response signed_bill_delivery_edit'),
-       'type' => 'varchar',
-       'length' => 50,
+      'description' => t('Response signed_bill_delivery_edit'),
+      'type' => 'varchar',
+      'length' => 50,
       'default' => NULL,
-    ), 
+    ),
     'res_cheque_no' => array(
-       'description' => t('Response cheque_no'),
-       'type' => 'varchar',
-       'length' => 50,
-       'default' => NULL,
-     ),
+      'description' => t('Response cheque_no'),
+      'type' => 'varchar',
+      'length' => 50,
+      'default' => NULL,
+    ),
     'res_cheque_no_edit' => array(
-       'description' => t('Response cheque_no'),
-       'type' => 'varchar',
-       'length' => 50,
-       'default' => NULL,
-     ),
+      'description' => t('Response cheque_no'),
+      'type' => 'varchar',
+      'length' => 50,
+      'default' => NULL,
+    ),
     'res_delivery_boy' => array(
-       'description' => t('Response delivery_boy'),
-       'type' => 'varchar',
-       'length' => 50,
-       'default' => NULL,
-     ),
+      'description' => t('Response delivery_boy'),
+      'type' => 'varchar',
+      'length' => 50,
+      'default' => NULL,
+    ),
   );
   foreach ($fields as $key => $field) {
     if (!db_field_exists('dispatch_planning_api_data', $key)) {
@@ -1900,22 +1934,22 @@ function dispatch_planning_update_7125() {
       'description' => t('Dispatch Quantity'),
       'type' => 'int',
       'default' => 0,
-     ),
-     'return_qty' => array(
+    ),
+    'return_qty' => array(
       'description' => t('Return Quantity'),
       'type' => 'int',
       'default' => 0,
     ),
     'farey_delivered_qty' => array(
-       'description' => 'farey_delivered_qty',
-       'type' => 'int',
-       'default' => 0,
+      'description' => 'farey_delivered_qty',
+      'type' => 'int',
+      'default' => 0,
     ),
     'money_collect_type' => array(
-       'description' => 'money_collect_type',
-       'type' => 'varchar',
-       'length' => 20,
-       'default' => '',
+      'description' => 'money_collect_type',
+      'type' => 'varchar',
+      'length' => 20,
+      'default' => '',
     ),
     'line_level_status' => array(
       'description' => 'Line Level Status',
@@ -1982,10 +2016,10 @@ function dispatch_planning_update_7126() {
         'type' => 'int',
       ),
       'created_date' => array(
-      'description' => 'Created Date',
-      'type' => 'int',
+        'description' => 'Created Date',
+        'type' => 'int',
+      ),
     ),
-     ), 
     'primary key' => array('id'),
   );
   if (!db_table_exists('godown_data')) {
@@ -1994,10 +2028,10 @@ function dispatch_planning_update_7126() {
 }
 
 function dispatch_planning_update_7128() {
-   $fields = array(
+  $fields = array(
     'delivery_pending_reason' => array(
-       'description' => 'delivery_pending_reason.not send it to farey api',
-       'type' => 'int',
+      'description' => 'delivery_pending_reason.not send it to farey api',
+      'type' => 'int',
     ),
   );
   foreach ($fields as $key => $field) {
@@ -2008,54 +2042,51 @@ function dispatch_planning_update_7128() {
 }
 
 function dispatch_planning_update_7133() {
-   $fields = array(
+  $fields = array(
     'delivery_pending_flag' => array(
-       'description' => 'delivery_pending_flag if flag =1 it is in delivery pending mode.',
-       'type' => 'int',
-       'size'=>'tiny',
-       'not null' => TRUE,
-       'default'=>0, 
+      'description' => 'delivery_pending_flag if flag =1 it is in delivery pending mode.',
+      'type' => 'int',
+      'size' => 'tiny',
+      'not null' => TRUE,
+      'default' => 0,
     ),
     'delivery_pending_reason' => array(
-        'description' => 'delivery_pending_reason.not send it to farey api',
-        'type' => 'int',
-    ),   
+      'description' => 'delivery_pending_reason.not send it to farey api',
+      'type' => 'int',
+    ),
     'returns_incharge_name' => array(
-       'description' => t('Returns Incharge Name'),
-       'type' => 'varchar',
-       'length' => 50,
-       'default' => NULL,
-     ),
+      'description' => t('Returns Incharge Name'),
+      'type' => 'varchar',
+      'length' => 50,
+      'default' => NULL,
+    ),
     'res_delivery_boy_edit' => array(
-       'description' => t('Response delivery_boy Edit'),
-       'type' => 'varchar',
-       'length' => 50,
-       'default' => NULL,
-     ),
+      'description' => t('Response delivery_boy Edit'),
+      'type' => 'varchar',
+      'length' => 50,
+      'default' => NULL,
+    ),
     'dp_declaration_time' => array(
-       'description' => t('Delivery Pending Declaration time.'),
-       'type' => 'int',
-       'not null' => TRUE,
-       'default' => 0,
-     ),   
-     'delivery_incharge_name' => array(
-       'description' => t('Delivery Incharge Name'),
-       'type' => 'varchar',
-       'length' => 50,
-       'default' => NULL,
-     ),
-      'dispatch_date' => array(
-        'description' => t('Dispatch date'),
-        'type' => 'int',
-      ),
-
-
-      'delivered_date' => array(
+      'description' => t('Delivery Pending Declaration time.'),
+      'type' => 'int',
+      'not null' => TRUE,
+      'default' => 0,
+    ),
+    'delivery_incharge_name' => array(
+      'description' => t('Delivery Incharge Name'),
+      'type' => 'varchar',
+      'length' => 50,
+      'default' => NULL,
+    ),
+    'dispatch_date' => array(
+      'description' => t('Dispatch date'),
+      'type' => 'int',
+    ),
+    'delivered_date' => array(
       'description' => t('Delivered date'),
       'type' => 'int',
       'default' => 0
-      ),
-
+    ),
   );
   foreach ($fields as $key => $field) {
     if (!db_field_exists('dispatch_planning_api_data', $key)) {
@@ -2065,52 +2096,52 @@ function dispatch_planning_update_7133() {
 }
 
 function dispatch_planning_update_7134() {
-   $fields = array(
+  $fields = array(
     'claimed_godown_short' => array(
-       'description' => 'claimed_godown_short',
-       'type' => 'int',
-       'default' => 0, 
+      'description' => 'claimed_godown_short',
+      'type' => 'int',
+      'default' => 0,
     ),
     'claimed_godown_short_reason' => array(
-       'description' => 'claimed godown short reason',
-       'type' => 'varchar',
-       'length' => 50,
-       'default' => '',
-    ),  
+      'description' => 'claimed godown short reason',
+      'type' => 'varchar',
+      'length' => 50,
+      'default' => '',
+    ),
     'approved_quantity' => array(
-       'description' => 'approved quantity',
-       'type' => 'int',
-       'default' => 0, 
+      'description' => 'approved quantity',
+      'type' => 'int',
+      'default' => 0,
     ),
     'approval_flag' => array(
-       'description' => 'approval flag',
-       'type' => 'varchar',
-       'length' => 25,
-       'default' => '',
+      'description' => 'approval flag',
+      'type' => 'varchar',
+      'length' => 25,
+      'default' => '',
     ),
     'godown_short_reason' => array(
-       'description' => 'godown short approval reason',
-       'type' => 'varchar',
-       'length' => 50,
-       'default' => '',
+      'description' => 'godown short approval reason',
+      'type' => 'varchar',
+      'length' => 50,
+      'default' => '',
     ),
     'approved_by' => array(
-       'description' => 'approved by',
-       'type' => 'varchar',
-       'length' => 50,
-       'default' => '', 
+      'description' => 'approved by',
+      'type' => 'varchar',
+      'length' => 50,
+      'default' => '',
     ),
     'remarks' => array(
-       'description' => 'remarks',
-       'type' => 'varchar',
-       'length' => 50,
-       'default' => '',
+      'description' => 'remarks',
+      'type' => 'varchar',
+      'length' => 50,
+      'default' => '',
     ),
-   'declared_claimed_godown_short' => array(
-    'description' => 'declared_claimed_godown_short',
-    'type' => 'int',
-    'default' => 0,
-    ), 
+    'declared_claimed_godown_short' => array(
+      'description' => 'declared_claimed_godown_short',
+      'type' => 'int',
+      'default' => 0,
+    ),
   );
   foreach ($fields as $key => $field) {
     if (!db_field_exists('dispatch_planning_item_details', $key)) {
@@ -2131,12 +2162,12 @@ function dispatch_planning_update_7135() {
       'length' => 50,
       'not null' => TRUE,
       'default' => '',
-    ),    
+    ),
   );
   foreach ($fields as $key => $field) {
     if (!db_field_exists('ptl_data_configuration', $key)) {
       db_add_field('ptl_data_configuration', $key, $field);
-    }  
+    }
   }
 }
 
@@ -2146,20 +2177,21 @@ function dispatch_planning_update_7136() {
       'description' => 'Delivery Boy',
       'type' => 'varchar',
       'length' => 255,
-      ),
+    ),
     'derived_money_collect' => array(
-       'description' => t('Derived money collect'),
-       'type' => 'varchar',
-       'length' => 50,
-       'default' => '',
-     ),    
+      'description' => t('Derived money collect'),
+      'type' => 'varchar',
+      'length' => 50,
+      'default' => '',
+    ),
   );
   foreach ($fields as $key => $field) {
     if (!db_field_exists('dispatch_planning_api_data', $key)) {
       db_add_field('dispatch_planning_api_data', $key, $field);
-    }  
+    }
   }
 }
+
 // Already run on live through devel. because previous field feature is not yet live
 function dispatch_planning_update_7138() {
   $fields = array(
@@ -2181,11 +2213,11 @@ function dispatch_planning_update_7138() {
 function dispatch_planning_update_7139() {
   $fields = array(
     'claimed_gs_approve_date_time' => array(
-        'description' => t('Claimed GS Approved Date/Time'),
-        'type' => 'int',
-        'not null' => TRUE,
-        'default' => 0,
-      ),
+      'description' => t('Claimed GS Approved Date/Time'),
+      'type' => 'int',
+      'not null' => TRUE,
+      'default' => 0,
+    ),
   );
   foreach ($fields as $key => $field) {
     if (!db_field_exists('dispatch_planning_item_details', $key)) {
@@ -2197,3 +2229,32 @@ function dispatch_planning_update_7139() {
   }
 }
 
+function dispatch_planning_update_7140() {
+  $fields = array(
+    'dispatch_date' => array(
+      'description' => t('SMS API Dispatch Date'),
+      'type' => 'int',
+      'not null' => TRUE,
+      'default' => 0,
+    ),
+    'hul_code' => array(
+      'description' => t('SMS API Hul_Code'),
+      'type' => 'varchar',
+      'length' => 255,
+      'not null' => TRUE,
+      'default' => '',
+    ),
+    'bill_number' => array(
+      'description' => t('SMS API Bill Number'),
+      'type' => 'varchar',
+      'length' => 255,
+      'not null' => TRUE,
+      'default' => '',
+    ),
+  );
+  foreach ($fields as $key => $field) {
+    if (!db_field_exists('sms_integration_api_log', $key)) {
+      db_add_field('sms_integration_api_log', $key, $field);
+    }
+  }
+}
