@@ -142,6 +142,14 @@ function delete_fareye_dp_id_form_submit($form, $form_state) {
       $item_details_deleted = db_delete('dispatch_planning_item_details')
           ->condition('trip_bill_reference', $i)
           ->execute();
+      
+      $flag_updated = db_update('sms_preprocess')
+          ->fields(array(
+            'flag' => 0,
+          ))
+          ->condition('trip_id', $runsheet_number)
+          ->condition('distributor_id', $distributor_id)
+          ->execute();
     }
   }else if (!empty($runsheet_number) && empty($from_dp_id) && empty($tp_dp_id)) {
     $query = db_select('dispatch_planning_api_data', 'ad');
@@ -152,6 +160,14 @@ function delete_fareye_dp_id_form_submit($form, $form_state) {
     if (!empty($res)) {
       $num_deleted = db_delete('dispatch_planning_item_details')
           ->condition('trip_bill_reference', $res, 'IN')
+          ->execute();
+      
+      $flag_updated = db_update('sms_preprocess')
+          ->fields(array(
+            'flag' => 0,
+          ))
+          ->condition('trip_id', $runsheet_number)
+          ->condition('distributor_id', $distributor_id)
           ->execute();
     }
     $num_deleted = db_delete('dispatch_planning_api_data')
