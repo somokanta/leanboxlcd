@@ -1,6 +1,6 @@
 <?php
 
-/* 
+/*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
@@ -12,100 +12,100 @@
  */
 function mrc_inventory_returns_menu() {
   $items = array();
-  
+
   $items['delivery-confirmation'] = array(
-     'title' => 'Delivery Confirmation',
-     'page callback' => 'drupal_get_form',
-     'page arguments' => array('delivery_confirmation_form'),
-     'access arguments' => array('returns confirmation'),
-     'type' => MENU_NORMAL_ITEM,
-     'file' => 'includes/delivery_confirmation.inc',
-   );
-  
+    'title' => 'Delivery Confirmation',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('delivery_confirmation_form'),
+    'access arguments' => array('returns confirmation'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'includes/delivery_confirmation.inc',
+  );
+
   $items['returns-confirmation'] = array(
-     'title' => 'Returns Confirmation',
-     'page callback' => 'drupal_get_form',
-     'page arguments' => array('returns_confirmation_form'),
-     'access arguments' => array('returns confirmation'),
-     'type' => MENU_NORMAL_ITEM,
-     'file' => 'includes/returns_confirmation.inc',
-   );
-  
+    'title' => 'Returns Confirmation',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('returns_confirmation_form'),
+    'access arguments' => array('returns confirmation'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'includes/returns_confirmation.inc',
+  );
+
   $items['overall-summary-popup/%ctools_js/%'] = array(
     'page callback' => 'overall_summary_popup_callback',
     'page arguments' => array(1, 2),
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
-  
+
   $items['delivery-summary-popup/%ctools_js/%'] = array(
     'page callback' => 'delivery_summary_popup_callback',
     'page arguments' => array(1, 2),
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
-  
+
   $items['returns-confirmation/edit'] = array(
-     'title' => 'Returns Confirmation Edit',
-     'page callback' => 'drupal_get_form',
-     'page arguments' => array('returns_confirmation_edit_form'),
-     'access arguments' => array('returns confirmation'),
-     'type' => MENU_NORMAL_ITEM,
-     'file' => 'includes/returns_confirmation_edit.inc',
-   );
-  
+    'title' => 'Returns Confirmation Edit',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('returns_confirmation_edit_form'),
+    'access arguments' => array('returns confirmation'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'includes/returns_confirmation_edit.inc',
+  );
+
   $items['delivery-confirmation/edit'] = array(
-     'title' => 'Delivery Confirmation Edit',
-     'page callback' => 'drupal_get_form',
-     'page arguments' => array('delivery_confirmation_edit_form'),
-     'access arguments' => array('returns confirmation'),
-     'type' => MENU_NORMAL_ITEM,
-     'file' => 'includes/delivery_confirmation_edit.inc',
-   );
-   
+    'title' => 'Delivery Confirmation Edit',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('delivery_confirmation_edit_form'),
+    'access arguments' => array('returns confirmation'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'includes/delivery_confirmation_edit.inc',
+  );
+
   $items['vrs-confirmation'] = array(
-     'title' => 'VRS Confirmation',
-     'page callback' => 'drupal_get_form',
-     'page arguments' => array('vrs_confirmation_form'),
-     'access arguments' => array('returns confirmation'),
-     'type' => MENU_NORMAL_ITEM,
-     'file' => 'includes/vrs_confirmation.inc',
-   );
-  
+    'title' => 'VRS Confirmation',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('vrs_confirmation_form'),
+    'access arguments' => array('returns confirmation'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'includes/vrs_confirmation.inc',
+  );
+
   $items['vrs-confirmation/delete'] = array(
-     'title' => 'Delete Current VRS Version',
-     'page callback' => 'drupal_get_form',
-     'page arguments' => array('vrs_confirmation_delete_form'),
-     'access arguments' => array('returns confirmation'),
-     'type' => MENU_NORMAL_ITEM,
-     'file' => 'includes/vrs_confirmation_delete.inc',
-   );
+    'title' => 'Delete Current VRS Version',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('vrs_confirmation_delete_form'),
+    'access arguments' => array('returns confirmation'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'includes/vrs_confirmation_delete.inc',
+  );
 
   $items['handover-confirmation'] = array(
-     'title' => 'Handover Confirmation',
-     'page callback' => 'drupal_get_form',
-     'page arguments' => array('handover_confirmation_form'),
-     'access arguments' => array('returns confirmation'),
-     'type' => MENU_NORMAL_ITEM,
-     'file' => 'includes/handover_confirmation.inc',
-   );
-  
+    'title' => 'Handover Confirmation',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('handover_confirmation_form'),
+    'access arguments' => array('returns confirmation'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'includes/handover_confirmation.inc',
+  );
+
   $items['handover-acknowledgement-upload'] = array(
-     'title' => 'Handover Acknowledgement Upload',
-     'page callback' => 'drupal_get_form',
-     'page arguments' => array('handover_acknowledgement_form'),
-     'access arguments' => array('returns confirmation'),
-     'type' => MENU_NORMAL_ITEM,
-     'file' => 'includes/handover_acknowledgement_upload.inc',
-   );
-  
+    'title' => 'Handover Acknowledgement Upload',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('handover_acknowledgement_form'),
+    'access arguments' => array('returns confirmation'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'includes/handover_acknowledgement_upload.inc',
+  );
+
   $items['handover-id/list'] = array(
-     'title' => 'Get List of handover id',
-     'page callback' => 'get_list_of_handover_ids',
-     'access arguments' => array('returns confirmation'),
-     'type' => MENU_CALLBACK,
-   );
-  
+    'title' => 'Get List of handover id',
+    'page callback' => 'get_list_of_handover_ids',
+    'access arguments' => array('returns confirmation'),
+    'type' => MENU_CALLBACK,
+  );
+
   $items['vrs-printout'] = array(
     'title' => 'VRS Printout',
     'page callback' => 'drupal_get_form',
@@ -113,71 +113,81 @@ function mrc_inventory_returns_menu() {
     'access arguments' => array('returns confirmation'),
     'file' => 'includes/vrs_printout.inc',
   );
-  
+
+  $items['trip-vrs-printout'] = array(
+    'title' => 'Trip VRS Printout',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('get_data_of_trip_vrs_form'),
+    'access arguments' => array('returns confirmation'),
+    'file' => 'includes/trip_vrs_printout.inc',
+  );
+
+
+
   $items['download-vrs-report/%'] = array(
     'title' => 'Download VRS Report',
     'page callback' => 'download_vrs_report',
     'page arguments' => array(1),
     'access callback' => TRUE,
-    'access arguments' => array('returns confirmation'),  
+    'access arguments' => array('returns confirmation'),
     'type' => MENU_CALLBACK,
     'file' => 'includes/vrs_printout.inc',
   );
-  
+
   $items['download-bills-summary/%'] = array(
     'title' => 'Download Bills Summary',
     'page callback' => 'download_bills_summary',
     'page arguments' => array(1),
-    'access arguments' => array('returns confirmation'),  
+    'access arguments' => array('returns confirmation'),
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
-  
+
   $items['download-bills-delivery-summary/%'] = array(
     'title' => 'Download Bills Delivery Summary',
     'page callback' => 'download_bills_delivery_summary',
     'page arguments' => array(1),
-    'access arguments' => array('returns confirmation'),  
+    'access arguments' => array('returns confirmation'),
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
-  
+
   $items['get_all_vrs_versions/%'] = array(
     'title' => 'All Versions',
     'page callback' => 'get_vrs_versions',
     'page arguments' => array(1),
-    'access arguments' => array('returns confirmation'),  
+    'access arguments' => array('returns confirmation'),
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
     'file' => 'includes/vrs_printout.inc',
   );
-  
+
 
   $items['bank_names/autocomplete/%'] = array(
-      'title' => 'Autocomplete for Bank Name',
-      'page callback' => '_banks_autocomplete',
-      'page arguments' => array(2),
-      'access arguments' => array('returns confirmation'),  //or whatever permission makes sense
-      'type' => MENU_CALLBACK,
-      'file' => 'includes/vrs_confirmation.inc',
-    );
+    'title' => 'Autocomplete for Bank Name',
+    'page callback' => '_banks_autocomplete',
+    'page arguments' => array(2),
+    'access arguments' => array('returns confirmation'), //or whatever permission makes sense
+    'type' => MENU_CALLBACK,
+    'file' => 'includes/vrs_confirmation.inc',
+  );
 
   $items['handover-confirmation/delete'] = array(
     'title' => 'Handover Confirmation Delete',
-     'page callback' => 'drupal_get_form',
-     'page arguments' => array('handover_confirmation_delete_form'),
-     'access arguments' => array('returns confirmation'),
-     'type' => MENU_NORMAL_ITEM,
-     'file' => 'includes/handover_confirmation_delete.inc',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('handover_confirmation_delete_form'),
+    'access arguments' => array('returns confirmation'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'includes/handover_confirmation_delete.inc',
   );
-  
+
   $items['confirm_trips/autocomplete'] = array(
     'title' => 'confirm_trips/autocomplete',
     'page callback' => 'confirm_trips_autocomplete',
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
-  
+
   $items['cash-denomination-report'] = array(
     'title' => 'Trip Cash Denomination Report',
     'page callback' => 'drupal_get_form',
@@ -186,11 +196,11 @@ function mrc_inventory_returns_menu() {
     'file' => 'includes/trips_cash_denomination_report.inc',
   );
   $items['cash-denomination-report/export'] = array(
-     'title' => 'cash-denomination-report Download',
-     'description' => 'cash-denomination-report Download',
-     'page callback' => 'cash_denomination_report_export',
-     'access arguments' => array('returns confirmation'),
-     'file' => 'includes/trips_cash_denomination_report.inc',
+    'title' => 'cash-denomination-report Download',
+    'description' => 'cash-denomination-report Download',
+    'page callback' => 'cash_denomination_report_export',
+    'access arguments' => array('returns confirmation'),
+    'file' => 'includes/trips_cash_denomination_report.inc',
   );
   $items['return-vrs-time-report'] = array(
     'title' => 'Returns & VRS Productivity',
@@ -199,7 +209,7 @@ function mrc_inventory_returns_menu() {
     'type' => MENU_CALLBACK,
     'file' => 'includes/retun_vrs_report.inc',
   );
-  
+
   $items['return-vrs-time-report/export'] = array(
     'title' => 'Returns & VRS Productivity Export',
     'description' => 'Returns & VRS Productivity Export',
@@ -207,9 +217,24 @@ function mrc_inventory_returns_menu() {
     'file' => 'includes/retun_vrs_report.inc',
     'access callback' => TRUE,
   );
-    
-  return $items;
 
+  $items['trip-short-excess-report'] = array(
+    'title' => 'Trip Short & Excess Report',
+    'page callback' => array('trip_short_excess_form_callback'),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'includes/trip_short_report.inc',
+  );
+
+  $items['trip-short-excess-report/export'] = array(
+    'title' => 'Trip Short & Excess Report Export',
+    'description' => 'Trip Short & Excess Report Export',
+    'page callback' => array('trip_short_excess_report_export'),
+    'file' => 'includes/trip_short_report.inc',
+    'access callback' => TRUE,
+  );
+
+  return $items;
 }
 
 function confirm_trips_autocomplete($string = '') {
@@ -220,7 +245,7 @@ function confirm_trips_autocomplete($string = '') {
     $dis_id = change_feeds_import_get_distributor_id($user->uid);
     $query = db_select('vrs_handover', 'vh');
     $query->condition('vh.distributor_id', $dis_id, '=');
-    $query->condition('vh.trip_id', '%'. db_like($string) . '%', 'LIKE');
+    $query->condition('vh.trip_id', '%' . db_like($string) . '%', 'LIKE');
     $query->fields('vh', array('trip_id'));
     $result = $query->execute()->fetchAllKeyed(0, 0);
   }
@@ -233,17 +258,18 @@ function confirm_trips_autocomplete($string = '') {
  * @return array
  */
 function mrc_inventory_returns_permission() {
-   return array(
-     'returns confirmation' => array(
-       'title' => t('Returns Confirmation'),
-       'description' => t('Returns Confirmation')
-     ),
-   );
+  return array(
+    'returns confirmation' => array(
+      'title' => t('Returns Confirmation'),
+      'description' => t('Returns Confirmation')
+    ),
+  );
 }
 
 /*
  * Function to get all cashier names for select list
  */
+
 function get_all_cashier_names() {
   $query = db_select('node', 'n');
   $query->condition('n.type', 'dispatch_data');
@@ -258,6 +284,7 @@ function get_all_cashier_names() {
 /*
  * Get all data of Trip from Dispatch Data Table.
  */
+
 function check_trip_id_exists_or_not($dis_id, $trip_id) {
   $query = db_select('node', 'n');
   $query->condition('n.type', 'dispatch_data');
@@ -280,7 +307,7 @@ function overall_summary_popup_callback($ajax, $trip_number) {
   if ($ajax) {
     ctools_include('ajax');
     ctools_include('modal');
-    
+
     $view_name = "asset_summary";
     $view = views_get_view($view_name, '');
     $view->set_arguments(array($trip_number));
@@ -300,7 +327,7 @@ function delivery_summary_popup_callback($ajax, $trip_number) {
   if ($ajax) {
     ctools_include('ajax');
     ctools_include('modal');
-    
+
     $view_name = "delivery_summary";
     $view = views_get_view($view_name, '');
     $view->set_arguments(array($trip_number));
@@ -316,72 +343,72 @@ function delivery_summary_popup_callback($ajax, $trip_number) {
  * Ajax menu callback.
  * Full Returned Prinout Popup
  */
-/*function full_returns_popup_callback($ajax, $trip_number) {
+/* function full_returns_popup_callback($ajax, $trip_number) {
   if ($ajax) {
-    ctools_include('ajax');
-    ctools_include('modal');
-    
-    $view_name = "full_return_printout_popup";
-    $view = views_get_view($view_name, '');
-    $view->set_arguments(array($trip_number));
-    $view->use_ajax = TRUE;
-    $output[] = ctools_modal_command_display(t('Full Returned Prinout'), $view->render());
+  ctools_include('ajax');
+  ctools_include('modal');
 
-    print ajax_render($output);
-    drupal_exit();
+  $view_name = "full_return_printout_popup";
+  $view = views_get_view($view_name, '');
+  $view->set_arguments(array($trip_number));
+  $view->use_ajax = TRUE;
+  $output[] = ctools_modal_command_display(t('Full Returned Prinout'), $view->render());
+
+  print ajax_render($output);
+  drupal_exit();
   }
-}
+  }
 
 
-function partial_deliver_popup_callback($ajax, $trip_number) {
+  function partial_deliver_popup_callback($ajax, $trip_number) {
   if ($ajax) {
-    ctools_include('ajax');
-    ctools_include('modal');
-    
-    $view_name = "partial_return_printout_popup";
-    $view = views_get_view($view_name, '');
-    $view->set_arguments(array($trip_number));
-    $view->use_ajax = TRUE;
-    $output[] = ctools_modal_command_display(t('Partial Delivered Prinout'), $view->render());
+  ctools_include('ajax');
+  ctools_include('modal');
 
-    print ajax_render($output);
-    drupal_exit();
+  $view_name = "partial_return_printout_popup";
+  $view = views_get_view($view_name, '');
+  $view->set_arguments(array($trip_number));
+  $view->use_ajax = TRUE;
+  $output[] = ctools_modal_command_display(t('Partial Delivered Prinout'), $view->render());
+
+  print ajax_render($output);
+  drupal_exit();
   }
-}
+  }
 
-function asset_summary_popup_callback($ajax, $trip_number) {
+  function asset_summary_popup_callback($ajax, $trip_number) {
   if ($ajax) {
-    ctools_include('ajax');
-    ctools_include('modal');
-    
-    $view_name = "asset_summary";
-    $view = views_get_view($view_name, '');
-    $view->set_arguments(array($trip_number));
-    $view->use_ajax = TRUE;
-    $output[] = ctools_modal_command_display(t('Asset Summary'), $view->render());
+  ctools_include('ajax');
+  ctools_include('modal');
 
-    print ajax_render($output);
-    drupal_exit();
+  $view_name = "asset_summary";
+  $view = views_get_view($view_name, '');
+  $view->set_arguments(array($trip_number));
+  $view->use_ajax = TRUE;
+  $output[] = ctools_modal_command_display(t('Asset Summary'), $view->render());
+
+  print ajax_render($output);
+  drupal_exit();
   }
-}
+  }
 
-function bills_summary_popup_callback($ajax, $trip_number) {
+  function bills_summary_popup_callback($ajax, $trip_number) {
   if ($ajax) {
-    ctools_include('ajax');
-    ctools_include('modal');
-    
-    $get_bills_summary = get_bills_summary($trip_number);
-    $view->use_ajax = TRUE;
-    $output[] = ctools_modal_command_display(t('Bills Summary'), $get_bills_summary);
+  ctools_include('ajax');
+  ctools_include('modal');
 
-    print ajax_render($output);
-    drupal_exit();
+  $get_bills_summary = get_bills_summary($trip_number);
+  $view->use_ajax = TRUE;
+  $output[] = ctools_modal_command_display(t('Bills Summary'), $get_bills_summary);
+
+  print ajax_render($output);
+  drupal_exit();
   }
-}*/
+  } */
 
 // get notes denominations
 function get_notes_denominations() {
-    /*$query = db_select('node', 'n');
+  /* $query = db_select('node', 'n');
     $query->condition('n.type', 'notes_denominations');
     $query->condition('n.status',1);
     $query->fields('n', array('nid'));
@@ -389,47 +416,45 @@ function get_notes_denominations() {
     $query->orderBy('n.title','ASC');
     //$query->fields('n', array('nid', 'title'));
     $result = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
-    return $result;*/
-    
-    $query =  db_query("SELECT distinct CAST(title AS UNSIGNED) AS title,nid  FROM {node}"
-           . " WHERE type = 'notes_denominations'  and status =1 order by title desc");
-    $result = $query->fetchAll(PDO::FETCH_ASSOC);
-    return $result;
+    return $result; */
+
+  $query = db_query("SELECT distinct CAST(title AS UNSIGNED) AS title,nid  FROM {node}"
+    . " WHERE type = 'notes_denominations'  and status =1 order by title desc");
+  $result = $query->fetchAll(PDO::FETCH_ASSOC);
+  return $result;
 }
 
 function _get_trip_ids_using_dispatch_date($dispatch_date) {
-    $res = array();
-   if (!empty($dispatch_date)) {
-      global $user;
-      $dis_id = change_feeds_import_get_distributor_id($user->uid);
-      $query = db_select('node', 'n');
-      $query->condition('n.type', 'dispatch_data');
-      $query->condition('n.uid', $dis_id);
-      $query->join('field_data_field_dispatch_date', 't', 't.entity_id = n.nid');
-      $query->condition('t.field_dispatch_date_value', $dispatch_date);
-      $query->fields('n', array('title'));
-      $res = $query->execute()->fetchAllKeyed(0, 0);
-   }
-   return $res;
+  $res = array();
+  if (!empty($dispatch_date)) {
+    global $user;
+    $dis_id = change_feeds_import_get_distributor_id($user->uid);
+    $query = db_select('node', 'n');
+    $query->condition('n.type', 'dispatch_data');
+    $query->condition('n.uid', $dis_id);
+    $query->join('field_data_field_dispatch_date', 't', 't.entity_id = n.nid');
+    $query->condition('t.field_dispatch_date_value', $dispatch_date);
+    $query->fields('n', array('title'));
+    $res = $query->execute()->fetchAllKeyed(0, 0);
+  }
+  return $res;
 }
-
-
 
 // Get all vrs ids
 function get_all_vrs_ids() {
   global $user;
   $dis_id = change_feeds_import_get_distributor_id($user->uid);
   // Status will be VRS Confirmed, VRS Pending,  Handover InProgress
-  $status = array(2,3,4);
-  
+  $status = array(2, 3, 4);
+
   $query = db_select('node', 'n');
   $query->condition('n.type', 'dispatch_data');
   $query->condition('n.uid', $dis_id);
   $query->join('field_data_field_vrs_status', 'vs', 'vs.entity_id = n.nid');
   $query->condition('vs.field_vrs_status_value', $status, 'IN');
-  $query->join('field_data_field_vrs_closure_id', 'vid', 'vid.entity_id = n.nid');  
+  $query->join('field_data_field_vrs_closure_id', 'vid', 'vid.entity_id = n.nid');
   $query->fields('vid', array('field_vrs_closure_id_value'));
-  
+
   $results = $query->execute()->fetchAllKeyed(0, 0);
   return $results;
 }
@@ -439,8 +464,8 @@ function get_all_trip_ids() {
   global $user;
   $dis_id = change_feeds_import_get_distributor_id($user->uid);
   // Status will be VRS Confirmed, VRS Pending,  Handover InProgress
-  $status = array(2,3,4);
-  
+  $status = array(2, 3, 4);
+
   $query = db_select('node', 'n');
   $query->condition('n.type', 'dispatch_data');
   $query->condition('n.uid', $dis_id);
@@ -449,20 +474,20 @@ function get_all_trip_ids() {
   $query->join('field_data_field_vrs_closure_id', 'vid', 'vid.entity_id = n.nid');
   $query->fields('n', array('title'));
   $results = $query->execute()->fetchAllKeyed(0, 0);
-  
+
   return $results;
 }
 
 function get_all_handover_names() {
   global $user;
   $dis_id = change_feeds_import_get_distributor_id($user->uid);
-  
+
   $query = db_select('node', 'n');
   $query->condition('n.type', 'handover_master');
   $query->condition('n.uid', $dis_id);
   $query->fields('n', array('title'));
   $res = $query->execute()->fetchAllKeyed(0, 0);
-  
+
   return $res;
 }
 
@@ -483,39 +508,37 @@ function mrc_inventory_returns_views_api() {
  * @param type $string
  */
 function get_list_of_handover_ids($string = '') {
-   $res = '';
-   $user_id = $GLOBALS['user']->uid;
-   $distributor_id = change_feeds_import_get_distributor_id($user_id);
+  $res = '';
+  $user_id = $GLOBALS['user']->uid;
+  $distributor_id = change_feeds_import_get_distributor_id($user_id);
 
-   $length = strlen($string);
-   if ($length >= 2) {
+  $length = strlen($string);
+  if ($length >= 2) {
     if (!empty($distributor_id) && !empty($string)) {
-      $substring = strtolower(substr($string,0,2));
-       
+      $substring = strtolower(substr($string, 0, 2));
+
       $query = db_select('vrs_handover', 'vh');
       $query->condition('vh.distributor_id', $distributor_id);
-      if($substring == 'cs') {
-          $query->condition('vh.handover_id', db_like($string) . '%', 'LIKE');
-          $query->fields('vh', array('handover_id'));
+      if ($substring == 'cs') {
+        $query->condition('vh.handover_id', db_like($string) . '%', 'LIKE');
+        $query->fields('vh', array('handover_id'));
       }
-      
-      elseif($substring == 'cq') {
-          $query->condition('vh.handover_cheque_id', db_like($string) . '%', 'LIKE');
-          $query->fields('vh', array('handover_cheque_id'));
+      elseif ($substring == 'cq') {
+        $query->condition('vh.handover_cheque_id', db_like($string) . '%', 'LIKE');
+        $query->fields('vh', array('handover_cheque_id'));
       }
-      
       else {
-          $query->condition('vh.handover_signedbill_id', db_like($string) . '%', 'LIKE');
-          $query->fields('vh', array('handover_signedbill_id'));
+        $query->condition('vh.handover_signedbill_id', db_like($string) . '%', 'LIKE');
+        $query->fields('vh', array('handover_signedbill_id'));
       }
-     
+
       $query->range(0, 10);
       $res = $query->execute()->fetchAllKeyed(0, 0);
     }
 
-   
-   drupal_json_output($res);
-}
+
+    drupal_json_output($res);
+  }
 }
 
 function get_bills_summary($trip_number) {
@@ -567,12 +590,11 @@ function get_bills_summary($trip_number) {
   $rows[] = array('Cashier Short') + $results2[0];
   $rows[] = array('Godown Short') + $results3[0];
 
-  $header = array('Status','Bill Count', 'Bill Lines Count', 'Product Count', 'Returned Product Qty');
+  $header = array('Status', 'Bill Count', 'Bill Lines Count', 'Product Count', 'Returned Product Qty');
   $output = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
 
   return $output;
 }
-
 
 function download_bills_summary($args) {
   $view_name = "asset_summary";
@@ -591,35 +613,34 @@ function download_bills_delivery_summary($args) {
 }
 
 function ajax_redirect($path) {
-    if (!empty($path)) {
-            ctools_include('ajax');
-            ctools_add_js('ajax-responder');
-            $commands[] = ctools_ajax_command_redirect($path);
-            print ajax_render($commands);
-            exit;
-    }
+  if (!empty($path)) {
+    ctools_include('ajax');
+    ctools_add_js('ajax-responder');
+    $commands[] = ctools_ajax_command_redirect($path);
+    print ajax_render($commands);
+    exit;
+  }
   drupal_json_output($res);
 }
 
-
 // get notes denominations
 function get_short_reasons() {
-    $query = db_select('node', 'n');
-    $query->condition('n.type', 'short_reason_master');
-    $query->condition('n.status', 1);
-    $query->fields('n', array('nid','title'));
-    $result = $query->execute()->fetchAllKeyed(0,1);
-    return $result;
+  $query = db_select('node', 'n');
+  $query->condition('n.type', 'short_reason_master');
+  $query->condition('n.status', 1);
+  $query->fields('n', array('nid', 'title'));
+  $result = $query->execute()->fetchAllKeyed(0, 1);
+  return $result;
 }
 
 // get notes denominations
 function get_non_bankable_reasons() {
-    $query = db_select('node', 'n');
-    $query->condition('n.type', 'non_bankable_reason_master');
-    $query->condition('n.status', 1);
-    $query->fields('n', array('nid','title'));
-    $result = $query->execute()->fetchAllKeyed(0,1);
-    return $result;
+  $query = db_select('node', 'n');
+  $query->condition('n.type', 'non_bankable_reason_master');
+  $query->condition('n.status', 1);
+  $query->fields('n', array('nid', 'title'));
+  $result = $query->execute()->fetchAllKeyed(0, 1);
+  return $result;
 }
 
 function mrc_inventory_returns_feeds_presave($source, $entity, $item, $entity_id) {
@@ -630,7 +651,7 @@ function mrc_inventory_returns_feeds_presave($source, $entity, $item, $entity_id
       $entity->feeds_item->skip = TRUE;
     }
   }
-  
+
   if ($entity->feeds_item->id == 'handover_master') {
     $handover_entity_type_tid = $entity->field_handover_entity_type['und'][0]['tid'];
     if (empty($handover_entity_type_tid)) {
