@@ -2991,6 +2991,15 @@ function mrc_inventory_returns_views_data() {
       'handler' => 'views_handler_argument_string',
     ),
   );
-  
+
+  //Vrs Printout Excess Value.
+  $data['views']['excess_value'] = array(
+    'title' => t('Excess Value'),
+    'help' => t('Excess Value'),
+    'field' => array(
+      'handler' => 'vrs_printout_excess_value',
+    ),
+  );
+
   return $data;
 }

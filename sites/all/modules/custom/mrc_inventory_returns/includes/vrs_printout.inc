@@ -842,7 +842,7 @@ function get_vrs_print($trip_id) {
                 
                 $table6.='<tr>';
                 $table6.= '<td><b>'.t('B) Excess Inventory Value(MRP - 10%) or Actual as per "Sales Return Sheet"').'</b></td>';
-                $table6.= '<td>'.'</td>';
+                $table6.= '<td>'.$excessvalue.'</td>';
                 $table6.= '<td>';
                 if (!empty($assets_details)) {
                 
