@@ -6,7 +6,7 @@ function get_excess_declaration_cashier_data($trip_number, $distributor_id) {
     $query->condition('eit.distributor_id', $distributor_id);
     $query->condition('eit.credit_to_cashier', 1);
     $query->addExpression('SUM(eit.excess_qty)', 'excess_qty');
-    $query->addExpression('SUM(eit.excess_qty * eit.mrp)', 'excess_value');
+    $query->addExpression('ROUND(SUM(eit.excess_qty * eit.mrp * 0.9),2)', 'excess_value');
     $result = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
   }
   return $result;
