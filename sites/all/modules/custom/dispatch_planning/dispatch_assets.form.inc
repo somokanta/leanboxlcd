@@ -44,25 +44,44 @@ function _dispatch_assets_form($form, &$form_state) {
     // check trip if it is Handover Confirmed
     $trip_detail = check_trip_id_exists_or_not($distributor_id, $trip_number);
     $vrs_status = $trip_detail->field_vrs_status_value;
-    
-    if ($vrs_status == 0) {
-      drupal_set_message(t('Trip is already in returns confirmation pending status.'), 'error');
+      
+    $current_vrs_status = $vrs_status;
+    $field_vrs_status = field_info_field('field_vrs_status');
+    $vrs_status_values = list_allowed_values($field_vrs_status);
+    unset($vrs_status_values[-1]);
+    if(empty($trip_detail)) {
+      form_set_error('trip_number', t("Invalid Trip ID"));
     }
-    if ($vrs_status == 1) {
-      drupal_set_message(t('Trip is already in returns confirmed status.'), 'error');
+    else if (isset($vrs_status_values[$current_vrs_status])) {
+      form_set_error('form', t("Trip is already in $vrs_status_values[$current_vrs_status] status."));
+      //drupal_set_message(t("Trip is already in $vrs_status_values[$current_vrs_status] status."), 'error');
     }
-    else if ($vrs_status == 2) {
-      drupal_set_message(t('Trip is already in VRS confirmed status.'), 'error');
-    }
-    else if ($vrs_status == 3) {
-      drupal_set_message(t('Trip is already in VRS pending status.'), 'error');
-    }
-    else if ($vrs_status == 4) {
-      drupal_set_message(t('Trip is already in Handover pending status.'), 'error');
-    }
-    else if ($vrs_status == 5) {
-      drupal_set_message(t('Trip is already in Handover confirmed status.'), 'error');
-    }
+    /*
+      if ($vrs_status == 0) {
+        form_set_error('form', t('Trip is already in returns confirmation pending status.'));
+        //drupal_set_message(t('Trip is already in returns confirmation pending status.'), 'error');
+      }
+      if ($vrs_status == 1) {
+        form_set_error('form', t('Trip is already in returns confirmed status.'));
+        //drupal_set_message(t('Trip is already in returns confirmed status.'), 'error');
+      }
+      else if ($vrs_status == 2) {
+        form_set_error('form', t('Trip is already in VRS confirmed status.'));
+        //drupal_set_message(t('Trip is already in VRS confirmed status.'), 'error');
+      }
+      else if ($vrs_status == 3) {
+        form_set_error('form', t('Trip is already in VRS pending status.'));
+        //drupal_set_message(t('Trip is already in VRS pending status.'), 'error');
+      }
+      else if ($vrs_status == 4) {
+        form_set_error('form', t('Trip is already in Handover pending status.'));
+        //drupal_set_message(t('Trip is already in Handover pending status.'), 'error');
+      }
+      else if ($vrs_status == 5) {
+        form_set_error('form', t('Trip is already in Handover confirmed status.'));
+        //drupal_set_message(t('Trip is already in Handover confirmed status.'), 'error');
+      }
+    */
     else {
       $item_details = _get_all_assets_type($trip_number);
 
@@ -113,7 +132,12 @@ function _dispatch_assets_form($form, &$form_state) {
  * @return array
  */
 function dispatch_count_callback($form, &$form_state) {
-  return $form;
+  $commands[] = ajax_command_replace('#itemlist-div', render($form));
+  $commands[] = ajax_command_replace('.alert-danger', '');
+  $commands[] = ajax_command_replace('.alert-success', '');
+  $commands[] = ajax_command_prepend('#itemlist-div', theme('status_messages'));
+  return array('#type' => 'ajax', '#commands' => $commands);
+  //return $form;
 }
 
 /**

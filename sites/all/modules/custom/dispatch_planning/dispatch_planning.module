@@ -2894,28 +2894,44 @@ function received_assets_validation_callback($form, &$form_state) {
       screen creates assets count of node.
      */
     if (!empty($node)) {
-
       $trip_detail = check_trip_id_exists_or_not($dis_id, $trip_id);
       $vrs_status = $trip_detail->field_vrs_status_value;
 
-      if ($vrs_status == 0) {
-        drupal_set_message(t('Trip is already in returns confirmation pending status.'), 'error');
+      $current_vrs_status = $vrs_status;
+      $field_vrs_status = field_info_field('field_vrs_status');
+      $vrs_status_values = list_allowed_values($field_vrs_status);
+      unset($vrs_status_values[-1]);
+      if (isset($vrs_status_values[$current_vrs_status])) {
+        form_set_error('form', t("Trip is already in $vrs_status_values[$current_vrs_status] status."));
+        //drupal_set_message(t("Trip is already in $vrs_status_values[$current_vrs_status] status."), 'error');
       }
-      if ($vrs_status == 1) {
-        drupal_set_message(t('Trip is already in returns confirmed status.'), 'error');
-      }
-      else if ($vrs_status == 2) {
-        drupal_set_message(t('Trip is already in VRS confirmed status.'), 'error');
-      }
-      else if ($vrs_status == 3) {
-        drupal_set_message(t('Trip is already in VRS pending status.'), 'error');
-      }
-      else if ($vrs_status == 4) {
-        drupal_set_message(t('Trip is already in Handover pending status.'), 'error');
-      }
-      else if ($vrs_status == 5) {
-        drupal_set_message(t('Trip is already in Handover confirmed status.'), 'error');
-      }
+
+      /*
+        if ($vrs_status == 0) {
+        form_set_error('form', t('Trip is already in returns confirmation pending status.'));
+        //drupal_set_message(t('Trip is already in returns confirmation pending status.'), 'error');
+        }
+        if ($vrs_status == 1) {
+        form_set_error('form',  t('Trip is already in returns confirmed status.'));
+        //drupal_set_message(t('Trip is already in returns confirmed status.'), 'error');
+        }
+        else if ($vrs_status == 2) {
+        form_set_error('form',  t('Trip is already in VRS confirmed status.'));
+        //drupal_set_message(t('Trip is already in VRS confirmed status.'), 'error');
+        }
+        else if ($vrs_status == 3) {
+        form_set_error('form', t('Trip is already in VRS pending status.'));
+        //drupal_set_message(t('Trip is already in VRS pending status.'), 'error');
+        }
+        else if ($vrs_status == 4) {
+        form_set_error('form', t('Trip is already in Handover pending status.'));
+        //drupal_set_message(t('Trip is already in Handover pending status.'), 'error');
+        }
+        else if ($vrs_status == 5) {
+        form_set_error('form', t('Trip is already in Handover confirmed status.'));
+        //drupal_set_message(t('Trip is already in Handover confirmed status.'), 'error');
+        }
+       */
     }
     else {
       $dispatch_link = l(t(' Click here to enter Dispatch count'), 'dispatch-assets-screen/' . $trip_id, $target);
@@ -2935,7 +2951,7 @@ function get_delivery_boy_names($node_nid) {
 }
 
 /**
- * 
+ *
  * @param type $value
  * @param type $node
  * @param type $trip_execution_date

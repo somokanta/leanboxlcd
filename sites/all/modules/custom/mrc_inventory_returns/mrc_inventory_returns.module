@@ -134,6 +134,16 @@ function mrc_inventory_returns_menu() {
     'file' => 'includes/vrs_printout.inc',
   );
 
+  $items['download-trip-vrs-report'] = array(
+    'title' => 'Download VRS Report',
+    'page callback' => 'download_trip_vrs_report',
+    //'page arguments' => array(1),
+    'access callback' => TRUE,
+    'access arguments' => array('returns confirmation'),
+    'type' => MENU_CALLBACK,
+    'file' => 'includes/trip_vrs_printout.inc',
+  );
+
   $items['download-bills-summary/%'] = array(
     'title' => 'Download Bills Summary',
     'page callback' => 'download_bills_summary',
@@ -161,6 +171,16 @@ function mrc_inventory_returns_menu() {
     'type' => MENU_CALLBACK,
     'file' => 'includes/vrs_printout.inc',
   );
+
+//  $items['get-all-trip-vrs-versions'] = array(
+//    'title' => 'All Versions',
+//    'page callback' => 'get_trip_vrs_versions',
+//    //'page arguments' => array(1),
+//    'access arguments' => array('returns confirmation'),
+//    'access callback' => TRUE,
+//    'type' => MENU_CALLBACK,
+//    'file' => 'includes/trip_vrs_printout.inc',
+//  );
 
 
   $items['bank_names/autocomplete/%'] = array(
@@ -492,7 +512,7 @@ function get_all_handover_names() {
 }
 
 /**
- * 
+ *
  * @return type
  * View API
  */
@@ -688,4 +708,61 @@ function get_bill_items_details($trip_id, $dis_id) {
     $bills_item[$val['trip_bill_reference']][] = $val;
   }
   return $bills_item;
+}
+
+function get_cashier_names_as_per_dispatch_date_range($dispatch_date_from, $dispatch_date_to) {
+  global $user;
+  $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+  $results = array();
+  $vrs_status = array('2', '3', '4', '5');
+
+  if (!empty($dispatch_date_from && $dispatch_date_to)) {
+    /* $query = db_select('dispatch_planning_api_data', 'dpi');
+      $query->distinct('dpi.fieldExecutiveName');
+      $query->fields('dpi', array('fieldExecutiveName'));
+      $query->condition('dpi.date', array($dispatch_date_from, $dispatch_date_to), 'BETWEEN');
+      // $query->condition('dpi.date', $dispatch_date); // '2018-10-15'
+      $query->condition('dpi.distributor_id', $distributor_id);
+      $results = $query->execute()->fetchAllKeyed(0, 0); */
+
+    $query = db_select('dispatch_planning_api_data', 'dpi');
+    $query->join('node', 'n', 'dpi.distributor_id = n.uid AND dpi.runsheet_number = n.title');
+    $query->leftjoin('field_data_field_vrs_status', 'vs', 'vs.entity_id = n.nid');
+
+    $query->condition('dpi.date', array($dispatch_date_from, $dispatch_date_to), 'BETWEEN');
+    $query->condition('vs.field_vrs_status_value', $vrs_status, 'IN');
+    $query->condition('n.type', 'dispatch_data');
+    $query->condition('n.uid', $distributor_id);
+    $query->condition('dpi.distributor_id', $distributor_id);
+
+    $query->fields('dpi', array('fieldExecutiveName'));
+    $results = $query->execute()->fetchAllKeyed(0, 0);
+  }
+  return $results;
+}
+
+function get_trip_ids_by_date_range($dispatch_date_from = null, $dispatch_date_to = null, $cashier_name = null) {
+  $res = array();
+  global $user;
+  $vrs_status = array('2', '3', '4', '5');
+  $dis_id = change_feeds_import_get_distributor_id($user->uid);
+  if ((!empty($dispatch_date_from) && !empty($dispatch_date_to)) || !empty($cashier_name)) {
+
+    $query = db_select('vrs_trip_total', 'vtt');
+    $query->join('dispatch_planning_api_data', 'dpi', 'vtt.trip_id = dpi.runsheet_number AND vtt.distributor_id = dpi.distributor_id');
+    $query->join('node', 'n', 'vtt.distributor_id = n.uid AND vtt.trip_id = n.title');
+    $query->join('field_data_field_vrs_status', 'vs', 'vs.entity_id = n.nid');
+    $query->condition('dpi.date', array($dispatch_date_from, $dispatch_date_to), 'BETWEEN');
+
+    if (!empty($cashier_name)) {
+      $query->condition('dpi.fieldExecutiveName', $cashier_name);
+    }
+    $query->condition('n.type', 'dispatch_data');
+    $query->condition('n.uid', $dis_id);
+    $query->condition('dpi.distributor_id', $dis_id);
+    $query->condition('vs.field_vrs_status_value', $vrs_status, 'IN');
+    $query->addExpression("GROUP_CONCAT(DISTINCT(trip_id))", 'trip_ids');
+    $res = $query->execute()->fetchField();
+  }
+  return $res;
 }
