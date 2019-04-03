@@ -7,7 +7,7 @@
  */
 
 /**
- * 
+ *
  * @param array $form
  * @param type $form_state
  * @return array
@@ -21,6 +21,7 @@ function new_sku_wise_returns_form($form, &$form_state) {
     $form_state['bill-wise'] = 1;
   }
   $form['#attached']['js'][] = drupal_get_path('module', 'leanbox_new_sku_wise_return') . '/js/leanbox_new_sku_wise_return.js';
+  $form['#attached']['js'][] = drupal_get_path('module', 'leanbox_new_sku_wise_return') . '/js/leanbox_new_sku_wise_return_hide.js';
   global $user;
   $distributor_id = change_feeds_import_get_distributor_id($user->uid);
 
@@ -241,32 +242,32 @@ function new_sku_wise_returns_form($form, &$form_state) {
 
           $reason_type = $val1['res_status'];
           $reason_list = _get_bill_status_wise_reason_master_list($reason_type);
-          /*if ($reason_type == 'undeliver') {
-           $search = trim($val1['res_reason_for_failure']);
-          }
-          else {
-             $search = trim($val1['res_sku_reason']);
-          }
-          $check_key_exist = array_search(strtolower($search), array_map('strtolower', $reason_list));
-          // if farey reson_for_failure not equal to dispatch_planning _reason_list
-          if (!empty($check_key_exist)) {
+          /* if ($reason_type == 'undeliver') {
+            $search = trim($val1['res_reason_for_failure']);
+            }
+            else {
+            $search = trim($val1['res_sku_reason']);
+            }
+            $check_key_exist = array_search(strtolower($search), array_map('strtolower', $reason_list));
+            // if farey reson_for_failure not equal to dispatch_planning _reason_list
+            if (!empty($check_key_exist)) {
             unset($reason_list[$check_key_exist]);
             $reason_list["$search"] = $search;
-          }*/
+            } */
           //$reason_list = array("Damaged Product"=>"Damaged Product","No order/Wrong Order"=>"No order/Wrong Order","Outlet Closed"=>"Outlet Closed");
           if ($reason_type == 'undeliver') {
             $failure_reason = trim($val1['res_reason_for_failure']);
             $reason_code = array(
               '#type' => 'select',
-              '#default_value' =>"$failure_reason",
-              '#options' =>$reason_list,
-              '#attributes' =>array('class' => array("pop-up-reason-code")),
+              '#default_value' => "$failure_reason",
+              '#options' => $reason_list,
+              '#attributes' => array('class' => array("pop-up-reason-code")),
             );
           }
           else {
             $reason_code = array(
               '#type' => 'select',
-              '#default_value' =>"$val1[res_sku_reason]",
+              '#default_value' => "$val1[res_sku_reason]",
               '#options' => $reason_list,
               '#attributes' => array('class' => array("pop-up-reason-code")),
             );
@@ -328,6 +329,8 @@ function new_sku_wise_returns_form($form, &$form_state) {
       unset($form_state['excess_inventory']);
       unset($form_state['input']['excess_sku']);
     }
+    $deleted_skus = array();
+    $excess_remove = array();
     if (!empty($form_state['apply_clicked'])) {
       $form['excess_inventory_table'] = array(
         '#type' => 'fieldset',
@@ -339,7 +342,7 @@ function new_sku_wise_returns_form($form, &$form_state) {
       $form['excess_inventory_table']['excess_sku']['#prefix'] = '<div id="excess-declaration-screen">';
       $form['excess_inventory_table']['excess_sku']['#suffix'] = '</div>';
 
-      $header1 = array('Product Name', 'MRP', 'Excess Qty', 'Credit To Cashier', 'Excess Reason', 'Remarks');
+      $header1 = array('Product Name', 'MRP', 'New MRP', 'Excess Qty', 'Credit To Cashier', 'Excess Reason', 'Remarks', 'Delete Item');
 
       $form['excess_inventory_table']['excess_sku'] = array(
         '#theme' => 'table',
@@ -351,14 +354,29 @@ function new_sku_wise_returns_form($form, &$form_state) {
       );
 
       $excess_declaration_data = get_excess_declaration_data($trip_number, $distributor_id);
-
       if (!isset($form_state['excess_inventory'])) {
-        $form_state['excess_inventory'] = count($excess_declaration_data);
+        foreach ($excess_declaration_data as $k => $v) {
+          $form_state['excess_inventory'][$k] = $k;
+        }
+      }
+      if (strstr($form_state['triggering_element']['#id'], 'edit-excess-sku-') !== FALSE) {
+        $index = $form_state['triggering_element']['#array_parents'][2];
+
+        if (!empty($form_state['input']['excess_sku'][$index]['product_name']) && $excess_declaration_data[$index]['product_name'] != $form_state['input']['excess_sku'][$index]['product_name'] && !in_array($form_state['input']['excess_sku'][$index]['product_name'], $deleted_skus)) {
+          $deleted_skus[$form_state['input']['excess_sku'][$index]['product_name']] = $form_state['input']['excess_sku'][$index]['product_name'];
+
+          unset($excess_declaration_data[$index]);
+          unset($form_state['input']['excess_sku'][$index]['new_mrp']);
+          unset($form_state['input']['excess_sku'][$index]['excess_qty']);
+          unset($form_state['input']['excess_sku'][$index]['credit_to_cashier']);
+          unset($form_state['input']['excess_sku'][$index]['excess_reason']);
+          unset($form_state['input']['excess_sku'][$index]['remarks']);
+          unset($form_state['input']['excess_sku'][$index]['delete_item']);
+        }
       }
 
-      $counter = $form_state['excess_inventory'];
+      foreach ($form_state['excess_inventory'] as $i => $v) {
 
-      for ($i = 0; $i <= $counter; $i++) {
         $product_name = array(
           '#type' => 'textfield',
           '#autocomplete_path' => "all_products/autocomplete",
@@ -374,18 +392,29 @@ function new_sku_wise_returns_form($form, &$form_state) {
 
         if (!empty($excess_declaration_data[$i]['product_name'])) {
           $input_product_name = $excess_declaration_data[$i]['product_name'];
+          $default_qty = $excess_declaration_data[$i]['excess_qty'];
         }
         else {
           $input_product_name = $form_state['input']['excess_sku'][$i]['product_name'];
         }
         $initial_option = array('' => 'Select');
         $option = get_mrp_from_product_name($input_product_name, $distributor_id);
+
         $default_mrp = '';
+        if (!empty($option)) {
+          $is_excess_product_mrp = 1;
+        }
+        else {
+          $is_excess_product_mrp = 0;
+        }
         if (count($option) == 1) {
           $default_mrp = reset($option);
         }
         elseif (count($option) > 1 && isset($form_state['input']['excess_sku'][$i]['mrp'])) {
           $default_mrp = $form_state['input']['excess_sku'][$i]['mrp'];
+        }
+        if (empty($default_mrp)) {
+          $default_mrp = $excess_declaration_data[$i]['mrp'];
         }
         if (!empty($option)) {
           $initial_option = $initial_option + $option;
@@ -393,7 +422,6 @@ function new_sku_wise_returns_form($form, &$form_state) {
         if (isset($form_state['input']['excess_sku'][$i]['mrp'])) {
           unset($form_state['input']['excess_sku'][$i]['mrp']);
         }
-
         $mrp = array(
           '#type' => 'select',
           '#default_value' => $default_mrp,
@@ -406,6 +434,24 @@ function new_sku_wise_returns_form($form, &$form_state) {
           ),
           '#attributes' => array('class' => array('mrp-list')),
         );
+        //Make "New MRP" disabled if MRP is fetched by system automatically
+        if (!empty($is_excess_product_mrp)) {
+          $new_mrp = array(
+            '#type' => 'textfield',
+            '#attributes' => array('class' => array('allownumericwithoutdecimal', 'new-mrp')),
+            '#default_value' => $default_mrp,
+            '#disabled' => TRUE,
+            '#size' => 10,
+          );
+        }
+        else {
+          $new_mrp = array(
+            '#type' => 'textfield',
+            '#attributes' => array('class' => array('allownumericwithoutdecimal', 'new-mrp')),
+            '#default_value' => $default_mrp,
+            '#size' => 10,
+          );
+        }
 
         $excess_qty = array(
           '#type' => 'textfield',
@@ -438,20 +484,38 @@ function new_sku_wise_returns_form($form, &$form_state) {
           '#default_value' => $excess_declaration_data[$i]['remarks'],
           '#size' => 10,
         );
-
+        $delete_item = array(
+          '#type' => 'submit',
+          '#value' => t('X'),
+          '#name' => "delete-" . $i . "-" . $excess_declaration_data[$i]['id'],
+          '#submit' => array('product_remove_items'),
+          '#ajax' => array(
+            'callback' => 'trip_details_return_delete_callback',
+            'wrapper' => 'itemlist-div',
+            'method' => 'replace',
+            'effect' => 'fade',
+          ),
+          '#attributes' => array('class' => array('delete-item', 'product-' . $i)),
+        );
+        $form['excess_inventory_table']['excess_sku']['#rows'][$i]['class'][] = 'product-' . $i;
         $form['excess_inventory_table']['excess_sku'][$i]["product_name"] = &$product_name;
         $form['excess_inventory_table']['excess_sku'][$i]["mrp"] = &$mrp;
+        $form['excess_inventory_table']['excess_sku'][$i]["new_mrp"] = &$new_mrp;
         $form['excess_inventory_table']['excess_sku'][$i]["excess_qty"] = &$excess_qty;
         $form['excess_inventory_table']['excess_sku'][$i]["credit_to_cashier"] = &$credit_to_cashier;
         $form['excess_inventory_table']['excess_sku'][$i]["excess_reason"] = &$excess_reason;
         $form['excess_inventory_table']['excess_sku'][$i]["remarks"] = &$remarks;
+        $form['excess_inventory_table']['excess_sku'][$i]["delete_item"] = &$delete_item;
 
-        $form['excess_inventory_table']['excess_sku']['#rows'][$i][]['data']["product_name"] = &$product_name;
-        $form['excess_inventory_table']['excess_sku']['#rows'][$i][]['data']["mrp"] = &$mrp;
-        $form['excess_inventory_table']['excess_sku']['#rows'][$i][]['data']["excess_qty"] = &$excess_qty;
-        $form['excess_inventory_table']['excess_sku']['#rows'][$i][]['data']["credit_to_cashier"] = &$credit_to_cashier;
-        $form['excess_inventory_table']['excess_sku']['#rows'][$i][]['data']["excess_reason"] = &$excess_reason;
-        $form['excess_inventory_table']['excess_sku']['#rows'][$i][]['data']["remarks"] = &$remarks;
+
+        $form['excess_inventory_table']['excess_sku']['#rows'][$i]['data'][]['data']["product_name"] = &$product_name;
+        $form['excess_inventory_table']['excess_sku']['#rows'][$i]['data'][]['data']["mrp"] = &$mrp;
+        $form['excess_inventory_table']['excess_sku']['#rows'][$i]['data'][]['data']["new_mrp"] = &$new_mrp;
+        $form['excess_inventory_table']['excess_sku']['#rows'][$i]['data'][]['data']["excess_qty"] = &$excess_qty;
+        $form['excess_inventory_table']['excess_sku']['#rows'][$i]['data'][]['data']["credit_to_cashier"] = &$credit_to_cashier;
+        $form['excess_inventory_table']['excess_sku']['#rows'][$i]['data'][]['data']["excess_reason"] = &$excess_reason;
+        $form['excess_inventory_table']['excess_sku']['#rows'][$i]['data'][]['data']["remarks"] = &$remarks;
+        $form['excess_inventory_table']['excess_sku']['#rows'][$i]['data'][]['data']["delete_item"] = &$delete_item;
 
         unset($product_name);
         unset($mrp);
@@ -459,6 +523,8 @@ function new_sku_wise_returns_form($form, &$form_state) {
         unset($credit_to_cashier);
         unset($excess_reason);
         unset($remarks);
+        unset($new_mrp);
+        unset($delete_item);
       }
       $form['excess_inventory_table']['add_more_button'] = array(
         '#type' => 'submit',
@@ -548,13 +614,12 @@ function new_sku_wise_returns_form($form, &$form_state) {
 }
 
 /**
- * 
+ *
  * @param type $form
  * @param type $form_state
  * @return array
  */
 function trip_details_return_callback($form, &$form_state) {
-  //return $form;  
   $commands[] = ajax_command_replace('#itemlist-div', render($form));
   $commands[] = ajax_command_replace('.alert-danger', '');
   $commands[] = ajax_command_replace('.alert-success', '');
@@ -562,16 +627,33 @@ function trip_details_return_callback($form, &$form_state) {
   return array('#type' => 'ajax', '#commands' => $commands);
 }
 
-function inventory_table_add_more($form, &$form_state) {
-  $form_state['excess_inventory'] ++;
-  $form_state['rebuild'] = TRUE;
-  //return $form;
+/**
+ *
+ * @param type $form
+ * @param type $form_state
+ * @return array
+ */
+function trip_details_return_delete_callback($form, &$form_state) {
+  return $form;
 }
 
-//function add_more_excess_inventory_table_callback($form, &$form_state) {
-//  return $form['excess_inventory_table']['excess_sku'];
-//  //return $form;
-//}
+function inventory_table_add_more($form, &$form_state) {
+  $m = max($form_state['excess_inventory']);
+  $m = (empty($m) && $m !== 0) ? 0 : $m + 1;
+  $form_state['excess_inventory'][$m] = $m;
+  $form_state['rebuild'] = TRUE;
+}
+
+function delete_excess_inventory($product_id) {
+  $delete_flag = false;
+  if (!empty($product_id)) {
+    $del_existing_data = db_delete('excess_inventory_table')
+      ->condition('id', $product_id, '=')
+      ->execute();
+    $delete_flag = true;
+  }
+  return $delete_flag;
+}
 
 function trip_number_validation($form, &$form_state) {
   global $user;
@@ -636,6 +718,7 @@ function trip_number_validation($form, &$form_state) {
     $form_state['trip_no_error'] = 1;
     } */
 }
+
 // exclude dp bills in return
 function new_sku_wise_return_submit($form, &$form_state) {
   if ($form_state['trip_no_error'] != 1) {
@@ -679,6 +762,7 @@ function new_sku_wise_return_submit($form, &$form_state) {
     $query->fields('dpi', array('product_name'));
     $query->fields('dpi', array('mrp'));
     $query->fields('ad', array('updated_flag'));
+    $query->fields('ad', array('bill_number'));
     // net sales qty
     //$query->fields('dpi', array('sum_net_sales_quantity'));
     // farey delivered qty
@@ -690,19 +774,38 @@ function new_sku_wise_return_submit($form, &$form_state) {
     $query->addExpression('SUM(dpi.farey_delivered_qty)', 'farey_delivered_qty');
     $query->addExpression('SUM(dpi.sum_net_sales_quantity)', 'sum_net_sales_quantity');
 
-    //changed it to actual deliverd qty 
-    //$query->addExpression('SUM(dpi.sum_net_sales_quantity - dpi.farey_delivered_qty)', 'to_be_return_qty');
-    //$query->addExpression('SUM(dpi.sum_net_sales_quantity - dpi.res_sku_actual_quantity1)', 'to_be_return_qty');
+//changed it to actual deliverd qty
+//$query->addExpression('SUM(dpi.sum_net_sales_quantity - dpi.farey_delivered_qty)', 'to_be_return_qty');
+//$query->addExpression('SUM(dpi.sum_net_sales_quantity - dpi.res_sku_actual_quantity1)', 'to_be_return_qty');
     $query->groupBy('dpi.sku_code');
+    $query->groupBy('ad.bill_number');
     $query->orderBy('dpi.product_name');
-    $result = $query->execute()->fetchAll(PDO::FETCH_GROUP | PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
-
-    /*  In both SKU-wise screen and SKU-Bill wise screen, 
+    //$query->addExpression("SUM(CASE WHEN updated_flag = 1 THEN dpi.sum_net_sales_quantity-res_sku_actual_quantity1 END)", 'to_be_return_qty');
+    // $result = $query->execute()->fetchAll(PDO::FETCH_GROUP | PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
+    $result = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+    //dpm($result);
+    /*  In both SKU-wise screen and SKU-Bill wise screen,
      *  To Be returned qty should be = Net Sales Qty -  DP lines farey_delivered_qty
      *  if Updated flag = Api else To Be returned qty should be = Net Sales Qty - DP lines
      *  res_sku_actual_quantity1
      */
-    foreach ($result as $key => &$val) {
+    /* foreach ($result as $key => & $val) {
+      // Manual update from manual edit screen
+      if ($val['updated_flag'] == 1) {
+      $val['to_be_return_qty'] = $val['sum_net_sales_quantity'] - $val['res_sku_actual_quantity1'];
+      }
+      // Api  update from Farey screen
+      else if ($val['updated_flag'] == 2) {
+      $val['to_be_return_qty'] = $val['sum_net_sales_quantity'] - $val['farey_delivered_qty'];
+      }
+
+      // Not required records if to be return qty is zero.
+      if ($val['to_be_return_qty'] == 0) {
+      unset($result[$key]);
+      }
+      } */
+    $sku_result = array();
+    foreach ($result as $key => & $val) {
       // Manual update from manual edit screen
       if ($val['updated_flag'] == 1) {
         $val['to_be_return_qty'] = $val['sum_net_sales_quantity'] - $val['res_sku_actual_quantity1'];
@@ -711,12 +814,36 @@ function new_sku_wise_return_submit($form, &$form_state) {
       else if ($val['updated_flag'] == 2) {
         $val['to_be_return_qty'] = $val['sum_net_sales_quantity'] - $val['farey_delivered_qty'];
       }
+      $sku_result[$val['sku_code']]['product_name'] = $val['product_name'];
+      $sku_result[$val['sku_code']]['mrp'] = $val['mrp'];
+      $sku_result[$val['sku_code']]['updated_flag'] = $val['updated_flag'];
+      $sku_result[$val['sku_code']]['res_sku_actual_quantity1'] = $val['res_sku_actual_quantity1'];
+      $sku_result[$val['sku_code']]['farey_delivered_qty'] = $val['farey_delivered_qty'];
+      $sku_result[$val['sku_code']]['sum_net_sales_quantity'] = $val['sum_net_sales_quantity'];
+      $sku_result[$val['sku_code']]['to_be_return_qty'] = $sku_result[$val['sku_code']]['to_be_return_qty'] + $val['to_be_return_qty'];
+    }
 
+    foreach ($sku_result as $key => & $val) {
       // Not required records if to be return qty is zero.
       if ($val['to_be_return_qty'] == 0) {
-        unset($result[$key]);
+        unset($sku_result[$key]);
       }
     }
+
+    /* if (!empty($form_state['values']['show_skus'])) {
+      $subquery = db_select('temp_sku_wise_return', 'tr');
+      $subquery->condition('tr.trip_id', $trip_id);
+      $subquery->condition('tr.distributor_id', $dis_id);
+      $subquery->fields('tr', array('sku_code'));
+      $subquery->fields('tr', array('actual_return_qty'));
+      $res = $subquery->execute()->fetchAllKeyed(0, 1);
+      foreach ($result as $key => & $val) {
+      if ($val['to_be_return_qty'] == $res[$key]) {
+      unset($result[$key]);
+      }
+      }
+      } */
+    //Show only SKUs with discrepancy checkbox ticked
     if (!empty($form_state['values']['show_skus'])) {
       $subquery = db_select('temp_sku_wise_return', 'tr');
       $subquery->condition('tr.trip_id', $trip_id);
@@ -724,23 +851,25 @@ function new_sku_wise_return_submit($form, &$form_state) {
       $subquery->fields('tr', array('sku_code'));
       $subquery->fields('tr', array('actual_return_qty'));
       $res = $subquery->execute()->fetchAllKeyed(0, 1);
-      foreach ($result as $key => &$val) {
+      foreach ($sku_result as $key => & $val) {
         if ($val['to_be_return_qty'] == $res[$key]) {
-          unset($result[$key]);
+          unset($sku_result[$key]);
         }
       }
     }
-    // Capture Return Start Time
+    //dpm($sku_result);
+// Capture Return Start Time
     $form_state['returns_start_time'] = time();
 
-    $form_state['sku_wise_return_confirm']['SKUs'] = $result;
+    //$form_state['sku_wise_return_confirm']['SKUs'] = $sku_result;
+    $form_state['sku_wise_return_confirm']['SKUs'] = $sku_result;
   }
 
   $form_state['rebuild'] = TRUE;
 }
 
 function save_sku_wise_return_validate($form, &$form_state) {
-  // watchdog('form_validate', '<pre>' . print_r($form_state, TRUE) . '</pre>');
+// watchdog('form_validate', '<pre>' . print_r($form_state, TRUE) . '</pre>');
   global $user;
   $dis_id = change_feeds_import_get_distributor_id($user->uid);
 
@@ -763,7 +892,7 @@ function save_sku_wise_return_validate($form, &$form_state) {
       foreach ($main_page_actual_backend_return_qty as $aqty => $aqty_value) {
         $dispatched_qty += $aqty_value['dispatch_qty'];
       }
-      // total dispatched qty of that sku in all bills  should not greater than actual_returned_qty
+// total dispatched qty of that sku in all bills  should not greater than actual_returned_qty
       if ($dispatched_qty < $value['actual_returned_qty'] && !empty($value['actual_returned_qty'])) {
         drupal_set_message(t("Actual Returned Qty should not be greater than Dispatched quantity  for sku: " . $sku), 'error');
         $form_state['sku_excess_error'] = 1;
@@ -776,15 +905,15 @@ function save_sku_wise_return_validate($form, &$form_state) {
         break;
       }
     }
-  
-  // if to_be_return_qty is equal to actual return qty of all sku then trip status will be return confirmed and version create and return incharge name is mandatory
+
+// if to_be_return_qty is equal to actual return qty of all sku then trip status will be return confirmed and version create and return incharge name is mandatory
     if ($check_to_be_return == 0 && empty($form_state['input']['return_incharge_name'])) {
-        $form_state['rebuild'] = TRUE;
-        form_set_error('return_incharge_name', "Please select Return Incharge Name.");
+      $form_state['rebuild'] = TRUE;
+      form_set_error('return_incharge_name', "Please select Return Incharge Name.");
     }
   }
 
-  // Excess Inventory Table Validation
+// Excess Inventory Table Validation
   foreach ($form_state['input']['excess_sku'] as $k => $value) {
     if (!empty($value['product_name'])) {
       $check_product_name_exists = check_product_name($dis_id, $value['product_name']);
@@ -808,6 +937,10 @@ function save_sku_wise_return_validate($form, &$form_state) {
         $form_state['sku_excess_error'] = 1;
         drupal_set_message(t("Please enter excess reason for product: " . $value['product_name']), 'error');
       }
+      if (empty($value['mrp']) && empty($value['new_mrp'])) {
+        $form_state['sku_excess_error'] = 1;
+        drupal_set_message(t("Please enter New MRP for product: " . $value['product_name']), 'error');
+      }
     }
   }
 
@@ -818,7 +951,7 @@ function save_sku_wise_return_validate($form, &$form_state) {
 
 function get_to_be_returned_qty_undeliver_bill($trip_number, $bill_number, $sku_code, $dis_id) {
   $to_be_returned_qty = 0;
-  $bill_status = array('undeliver','partial_deliver');
+  $bill_status = array('undeliver', 'partial_deliver');
   if (!empty($trip_number) && !empty($bill_number) && !empty($sku_code) && !empty($dis_id)) {
     $query = db_select('dispatch_planning_item_details', 'dpi');
     $query->join('dispatch_planning_api_data', 'ad', 'dpi.trip_bill_reference = ad.id');
@@ -831,23 +964,23 @@ function get_to_be_returned_qty_undeliver_bill($trip_number, $bill_number, $sku_
     $query->fields('ad', array('bill_number'));
     $query->fields('dpi', array('sum_net_sales_quantity'));
     $query->fields('ad', array('updated_flag'));
-    // net sales qty
+// net sales qty
     $query->fields('dpi', array('sum_net_sales_quantity'));
-    // farey delivered qty
+// farey delivered qty
     $query->fields('dpi', array('farey_delivered_qty'));
-    // Actual delivered qty both from farey or from manual edit screen.
+// Actual delivered qty both from farey or from manual edit screen.
     $query->fields('dpi', array('res_sku_actual_quantity1'));
     $result = $query->execute()->fetchAll(PDO::FETCH_GROUP | PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
     if (!empty($result)) {
-      foreach ($result as $key => &$val) {
-        // udate from farey table
-        /*  In both SKU-wise screen and SKU-Bill wise screen, 
+      foreach ($result as $key => & $val) {
+// udate from farey table
+        /*  In both SKU-wise screen and SKU-Bill wise screen,
          *  To Be returned qty should be = Net Sales Qty -  DP lines farey_delivered_qty
          *  if Updated flag = Api else To Be returned qty should be = Net Sales Qty - DP lines
          *  res_sku_actual_quantity1
          */
 
-        // Manual update from manual edit screen
+// Manual update from manual edit screen
         if ($val['updated_flag'] == 1) {
           $to_be_returned_qty = $val['sum_net_sales_quantity'] - $val['res_sku_actual_quantity1'];
         }
@@ -866,14 +999,14 @@ function save_return_final_version($trip_id, $dis_id, $returns_incharge_name = '
     $trip_nid = check_trip_id_exists_or_not($dis_id, $trip_id);
     if (!empty($trip_nid->nid)) {
       $node = node_load($trip_nid->nid);
-      // Status updated to 'Returned Confirm'
+// Status updated to 'Returned Confirm'
       $node->field_vrs_status['und'][0]['value'] = 1;
       $returns_version = $node->field_returned_version['und'][0]['value'];
       if (empty($returns_version)) {
         $version_no = 'V_1.0';
         $node->field_returned_version['und'][0]['value'] = $version_no;
       }
-      // version increment
+// version increment
       else {
         $exploded_val = explode('_', $returns_version);
         $updated_version = $exploded_val[1] + 0.1;
@@ -885,7 +1018,7 @@ function save_return_final_version($trip_id, $dis_id, $returns_incharge_name = '
         $sku_version_no = 'V_1.0';
         $node->field_sku_return_version['und'][0]['value'] = $sku_version_no;
       }
-      // version increment
+// version increment
       else {
         $exploded_val = explode('_', $sku_returns_version);
         $updated_version = $exploded_val[1] + 0.1;
@@ -897,7 +1030,7 @@ function save_return_final_version($trip_id, $dis_id, $returns_incharge_name = '
       $node->field_returns_incharge_name['und'][0]['value'] = $returns_incharge_name;
       node_save($node);
 
-      // Insert the Returns Incharge Name in Fareye Table
+// Insert the Returns Incharge Name in Fareye Table
       db_update('dispatch_planning_api_data') // Table name no longer needs {}
         ->fields(array(
           'returns_incharge_name' => $returns_incharge_name,
@@ -913,7 +1046,7 @@ function save_return_final_version($trip_id, $dis_id, $returns_incharge_name = '
 
       $bills_items = get_bill_items_details($trip_id, $dis_id);
 
-      // add the header level data in new versioning header level table
+// add the header level data in new versioning header level table
       foreach ($res as $key => $val) {
         $query = db_insert('inventory_versioning_api_data');
         $cur_id = $val['id'];
@@ -955,7 +1088,7 @@ function save_return_final_version($trip_id, $dis_id, $returns_incharge_name = '
           'approved_by',
           'remarks',
         );
-        // add the child level data in new versioning child level table
+// add the child level data in new versioning child level table
         if (!empty($result_id)) {
           $query1 = db_insert('inventory_versioning_item_details')->fields($fields);
           foreach ($bills_items[$cur_id] as $value1) {
@@ -973,28 +1106,29 @@ function save_return_final_version($trip_id, $dis_id, $returns_incharge_name = '
 
 //Save btn function
 function save_sku_wise_return_submit($form, &$form_state) {
+//dpm($form_state, 'data');
   if (empty($form_state['sku_excess_error'])) {
     global $user;
     $dis_id = change_feeds_import_get_distributor_id($user->uid);
     $trip_id = $form_state['values']['trip_number'];
     $returns_start_time = $form_state['returns_start_time'];
     $returns_incharge_name = $form_state['input']['return_incharge_name'];
-    // Merging the sku data in temp table
+// Merging the sku data in temp table
     merge_sku_data_in_temp_table($form_state['input']['bill_details'], $trip_id, $dis_id);
     $existing_bill_wise_return_start_time = $existing_bill_wise_return_start_time = 0;
-    // Save sku wise return start time
+// Save sku wise return start time
     if ($form_state['bill-wise'] != 1) {
       $existing_return_start_time = check_skuwise_return_start_time_present($trip_id, $dis_id);
-      // Returns start time empty then save return start time in db
+// Returns start time empty then save return start time in db
       $type = 'sku_wise';
       $return_name = 'skuwise_return_start_time';
       if (empty($existing_return_start_time)) {
         save_returns_start_time($type, $trip_id, $returns_start_time, $dis_id);
-        save_return_time($trip_id, $return_name,$returns_start_time, $version = null, $dis_id);
+        save_return_time($trip_id, $return_name, $returns_start_time, $version = null, $dis_id);
       }
-      // insert data into return time history table
+// insert data into return time history table
       else {
-        save_return_time($trip_id, $return_name,$returns_start_time, $version = null, $dis_id);
+        save_return_time($trip_id, $return_name, $returns_start_time, $version = null, $dis_id);
       }
     }
     else {
@@ -1003,18 +1137,28 @@ function save_sku_wise_return_submit($form, &$form_state) {
       $existing_bill_wise_return_start_time = check_billwise_return_start_time_present($trip_id, $dis_id);
       if (empty($existing_bill_wise_return_start_time)) {
         save_returns_start_time($type, $trip_id, $returns_start_time, $dis_id);
-        save_return_time($trip_id, $return_name,$returns_start_time, $version = null, $dis_id);
+        save_return_time($trip_id, $return_name, $returns_start_time, $version = null, $dis_id);
       }
-       else {
-        save_return_time($trip_id, $return_name,$returns_start_time, $version = null, $dis_id);
+      else {
+        save_return_time($trip_id, $return_name, $returns_start_time, $version = null, $dis_id);
       }
     }
-    //Saving the excess inventory declaration data
+//Saving the excess inventory declaration data
     store_excess_inventory_declaration_data($form_state['input']['excess_sku'], $trip_id, $dis_id);
-    //print_r($form_state['sku_wise_return_confirm']['SKUs']);
-    //print_r($form_state['no_discrepancy_sku']);
-    //print_r($form_state['input']['bill_details']);
-    // Checking To be return qty is equal to actual return qty
+//print_r($form_state['sku_wise_return_confirm']['SKUs']);
+//print_r($form_state['no_discrepancy_sku']);
+//print_r($form_state['input']['bill_details']);
+// This is to set claimed_godownshort and cashier_short to zero
+    $selected_skus = array(); // this array has to_be_returned qty = actual returned qty skus
+    foreach ($form_state['input']['bill_details'] as $sku => $value) {
+      if ($value['actual_returned_qty'] == $form_state['sku_wise_return_confirm']['SKUs'][$sku]['to_be_return_qty']) {
+        $selected_skus[$sku] = $sku;
+      }
+    }
+    if (!empty($selected_skus)) {
+      delete_claimed_godownshort_and_cashier_short($trip_id, $dis_id, $selected_skus);
+    }
+// Checking To be return qty is equal to actual return qty
     $check_to_be_return = 0;
     foreach ($form_state['input']['bill_details'] as $sku => $value) {
       if ($value['actual_returned_qty'] != $form_state['sku_wise_return_confirm']['SKUs'][$sku]['to_be_return_qty']) {
@@ -1022,14 +1166,14 @@ function save_sku_wise_return_submit($form, &$form_state) {
         break;
       }
     }
-    // if to_be_return_qty is equal to actual return qty of all sku then trip status will be return confirmed and version create
+// if to_be_return_qty is equal to actual return qty of all sku then trip status will be return confirmed and version create
     if ($check_to_be_return == 0) {
       $version = save_return_final_version($trip_id, $dis_id, $returns_incharge_name);
       $end_time = time();
       $type = 'sku_wise';
       save_returns_end_time($type, $trip_id, $end_time, $dis_id);
       $return_name = 'bill_wise_return_end_time';
-      save_return_time($trip_id,$return_name,$end_time,$version, $dis_id);
+      save_return_time($trip_id, $return_name, $end_time, $version, $dis_id);
     }
     if ($form_state['values']['show_bills'] == 1 && empty($form_state['sku_excess_error'])) {
       foreach ($form_state['input']['bill_details'] as $sku => $value) {
@@ -1045,9 +1189,9 @@ function save_sku_wise_return_submit($form, &$form_state) {
           $query->condition('ad.runsheet_number', $trip_id, '=');
           $itdatas = $query->execute()->fetchAll();
           $itdata = $itdatas[0];
-          // Commented res_staus & line level status
+// Commented res_staus & line level status
           if ($itdata->res_status == 'undeliver') {
-            $ret_cash = $val['actual_returned_qty1'] + $val['cashier_short']; //Return Qty + Cashier Short  
+            $ret_cash = $val['actual_returned_qty1'] + $val['cashier_short']; //Return Qty + Cashier Short
             $ret_cash_godown = $ret_cash + $val['claimed_godown_short']; //Return Qty + Cashier Short + claimed Godown Short
             $line_status = '';
             if ($ret_cash_godown == $val['dispatch_qty']) {
@@ -1062,8 +1206,8 @@ function save_sku_wise_return_submit($form, &$form_state) {
 
             db_update('dispatch_planning_item_details') // Table name no longer needs {}
               ->fields(array(
-                ///No need to update actual delivered qty while approving return
-               // 'res_sku_actual_quantity1' => (int) $val['dispatch_qty'] - $val['actual_returned_qty1'] - $val['cashier_short'] - $val['claimed_godown_short'],
+///No need to update actual delivered qty while approving return
+// 'res_sku_actual_quantity1' => (int) $val['dispatch_qty'] - $val['actual_returned_qty1'] - $val['cashier_short'] - $val['claimed_godown_short'],
                 'return_qty' => (int) $val['actual_returned_qty1'],
                 //'dispatch_qty' => $val['dispatch_qty'],
                 'res_sku_reason' => ($line_status != 'line_undeliver') ? $val['reason_code'] : '',
@@ -1071,7 +1215,7 @@ function save_sku_wise_return_submit($form, &$form_state) {
                 'claimed_godown_short' => (int) $val['claimed_godown_short'],
                 'claimed_godown_short_reason' => $val['reason_for_claim'],
                 //'line_level_status' => $line_status, // line level status
-                'declared_claimed_godown_short'=>(int) $val['claimed_godown_short']
+                'declared_claimed_godown_short' => (int) $val['claimed_godown_short']
               ))
               ->condition('sku_code', $sku, '=')
               ->condition('id', $itdata->id, '=')
@@ -1103,7 +1247,7 @@ function save_sku_wise_return_submit($form, &$form_state) {
             else {
               db_update('dispatch_planning_api_data') // Table name no longer needs {}
                 ->fields(array(
-                  // 'res_status' => 'partial_deliver',
+// 'res_status' => 'partial_deliver',
                   'res_reason_for_failure' => '',
                   'updated_flag' => 1,
                   'updated_time' => REQUEST_TIME,
@@ -1115,7 +1259,7 @@ function save_sku_wise_return_submit($form, &$form_state) {
           }
           else if ($itdata->res_status == 'partial_deliver') {
 
-            $ret_cash = $val['actual_returned_qty1'] + $val['cashier_short']; //Return Qty + Cashier Short  
+            $ret_cash = $val['actual_returned_qty1'] + $val['cashier_short']; //Return Qty + Cashier Short
             $ret_cash_godown = $ret_cash + $val['claimed_godown_short']; //Return Qty + Cashier Short + Claimed Godown Short
             $line_status = '';
             if ($ret_cash_godown == $val['dispatch_qty']) {
@@ -1127,21 +1271,21 @@ function save_sku_wise_return_submit($form, &$form_state) {
             else if ($ret_cash_godown == 0) {
               $line_status = 'line_deliver';
             }
-            // Sku wise screen
+// Sku wise screen
 
 
             db_update('dispatch_planning_item_details') // Table name no longer needs {}
               ->fields(array(
-                ///No need to update actual delivered qty while approving return
-               // 'res_sku_actual_quantity1' => (int) $val['dispatch_qty'] - $val['actual_returned_qty1'] - $val['cashier_short'] - $val['claimed_godown_short'],
+///No need to update actual delivered qty while approving return
+// 'res_sku_actual_quantity1' => (int) $val['dispatch_qty'] - $val['actual_returned_qty1'] - $val['cashier_short'] - $val['claimed_godown_short'],
                 'return_qty' => (int) $val['actual_returned_qty1'],
                 // 'dispatch_qty' => $val['dispatch_qty'],
                 'res_sku_reason' => $val['reason_code'],
                 'res_cashier_short' => (int) $val['cashier_short'],
                 'claimed_godown_short' => (int) $val['claimed_godown_short'],
                 'claimed_godown_short_reason' => $val['reason_for_claim'],
-               // 'line_level_status' => $line_status, // line level status
-                'declared_claimed_godown_short'=>(int) $val['claimed_godown_short']
+                // 'line_level_status' => $line_status, // line level status
+                'declared_claimed_godown_short' => (int) $val['claimed_godown_short']
               ))
               ->condition('sku_code', $sku, '=')
               ->condition('id', $itdata->id, '=')
@@ -1150,14 +1294,21 @@ function save_sku_wise_return_submit($form, &$form_state) {
         }
       }
     }
+//    $trip_id = $form_state['values']['trip_number'];
+//    foreach ($form_state['values']['excess_sku'] as $excess_items) {
+//      if ($excess_items['delete_item'] == 1) {
+//        delete_excess_inventory($excess_items[product_name], $trip_id, $dis_id);
+//      }
+//
+//    }
     drupal_set_message(t("Data saved successfully."));
-    //ajax_redirect('sku-wise-return-new');
+//ajax_redirect('sku-wise-return-new');
   }
 }
 
 // first screen submit validation
 function save_sku_wise_return_final_validate_version($form, &$form_state) {
-  // watchdog('form_validate', '<pre>' . print_r($form_state, TRUE) . '</pre>');
+// watchdog('form_validate', '<pre>' . print_r($form_state, TRUE) . '</pre>');
   global $user;
   $dis_id = change_feeds_import_get_distributor_id($user->uid);
   $trip_number = $form_state['values']['trip_number'];
@@ -1187,7 +1338,7 @@ function save_sku_wise_return_final_validate_version($form, &$form_state) {
       foreach ($main_page_actual_backend_return_qty as $aqty => $aqty_value) {
         $dispatched_qty += $aqty_value['dispatch_qty'];
       }
-      // total dispatched qty of that sku in all bills  should not greater than actual_returned_qty
+// total dispatched qty of that sku in all bills  should not greater than actual_returned_qty
       if ($dispatched_qty < $value['actual_returned_qty'] && !empty($value['actual_returned_qty'])) {
         drupal_set_message(t("Actual Returned Qty should not be greater than Dispatched quantity  for sku: " . $sku), 'error');
         $form_state['sku_excess_error'] = 1;
@@ -1195,8 +1346,8 @@ function save_sku_wise_return_final_validate_version($form, &$form_state) {
     }
 
     if ($form_state['values']['show_bills'] == 1) {
-      // Pop up table validation
-      // if (empty($form_state['no_discrepancy_sku'][$sku])) {
+// Pop up table validation
+// if (empty($form_state['no_discrepancy_sku'][$sku])) {
       $actual_return_qty = $value['actual_returned_qty'];
       if (!empty($actual_return_qty) || $actual_return_qty === '0') {
         $total_qty_bill_wise = 0;
@@ -1229,11 +1380,11 @@ function save_sku_wise_return_final_validate_version($form, &$form_state) {
           $form_state['sku_excess_error'] = 1;
         }
       }
-      //}
+//}
     }
   }
 
-  // Excess Inventory Table Validation
+// Excess Inventory Table Validation
   foreach ($form_state['input']['excess_sku'] as $k => $value) {
     if (!empty($value['product_name'])) {
       $check_product_name_exists = check_product_name($dis_id, $value['product_name']);
@@ -1257,6 +1408,10 @@ function save_sku_wise_return_final_validate_version($form, &$form_state) {
         $form_state['sku_excess_error'] = 1;
         drupal_set_message(t("Please enter excess reason for product: " . $value['product_name']), 'error');
       }
+      if (empty($value['mrp']) && empty($value['new_mrp'])) {
+        $form_state['sku_excess_error'] = 1;
+        drupal_set_message(t("Please enter New MRP for product: " . $value['product_name']), 'error');
+      }
     }
   }
 
@@ -1278,23 +1433,33 @@ function save_sku_wise_return_final_submit_version($form, &$form_state) {
     $trip_id = $form_state['values']['trip_number'];
     $returns_start_time = $form_state['returns_start_time'];
     $existing_return_start_time = check_skuwise_return_start_time_present($trip_id, $dis_id);
-    // Returns start time empty then save return start time in db
+// Returns start time empty then save return start time in db
     $type = 'sku_wise';
     $return_name = 'skuwise_return_start_time';
     if (empty($existing_return_start_time)) {
       save_returns_start_time($type, $trip_id, $returns_start_time, $dis_id);
-      save_return_time($trip_id, $return_name,$returns_start_time,null,$dis_id);
+      save_return_time($trip_id, $return_name, $returns_start_time, null, $dis_id);
     }
     $end_time = time();
     save_returns_end_time($type, $trip_id, $end_time, $dis_id);
-    // Merging the sku data in temp table
+// Merging the sku data in temp table
     merge_sku_data_in_temp_table($form_state['input']['bill_details'], $trip_id, $dis_id);
-    //Saving the excess inventory declaration data
+//Saving the excess inventory declaration data
     store_excess_inventory_declaration_data($form_state['input']['excess_sku'], $trip_id, $dis_id);
-    // Save Return incharge name
+// Save Return incharge name
     $returns_incharge_name = $form_state['input']['return_incharge_name'];
     $trip_nid = check_trip_id_exists_or_not($dis_id, $trip_id);
-    // if to_be_return_qty is equal to actual return qty of all sku then trip status will be return confirmed and version create
+    $selected_skus = array(); // this array has to_be_returned qty = actual returned qty skus
+    foreach ($form_state['input']['bill_details'] as $sku => $value) {
+      if ($value['actual_returned_qty'] == $form_state['sku_wise_return_confirm']['SKUs'][$sku]['to_be_return_qty']) {
+        $selected_skus[$sku] = $sku;
+      }
+    }
+
+    if (!empty($selected_skus)) {
+      delete_claimed_godownshort_and_cashier_short($trip_id, $dis_id, $selected_skus);
+    }
+// if to_be_return_qty is equal to actual return qty of all sku then trip status will be return confirmed and version create
     $check_to_be_return = 0;
     foreach ($form_state['input']['bill_details'] as $sku => $value) {
       if ($value['actual_returned_qty'] != $form_state['sku_wise_return_confirm']['SKUs'][$sku]['to_be_return_qty']) {
@@ -1302,16 +1467,16 @@ function save_sku_wise_return_final_submit_version($form, &$form_state) {
         break;
       }
     }
-    // if to_be_return_qty is equal to actual return qty of all sku then trip status will be return confirmed and version create
+// if to_be_return_qty is equal to actual return qty of all sku then trip status will be return confirmed and version create
     if ($check_to_be_return == 0) {
       $version_no = save_return_final_version($trip_id, $dis_id, $returns_incharge_name);
       $end_time = time();
       $return_name = 'billwise_return_end_time';
-      save_return_time($trip_id, $return_name,$end_time,$version_no,$dis_id);
+      save_return_time($trip_id, $return_name, $end_time, $version_no, $dis_id);
     }
     if (!empty($trip_nid->nid) && $check_to_be_return == 1) {
       $node = node_load($trip_nid->nid);
-      //6|Returns Bill wise Confirmation Pending
+//6|Returns Bill wise Confirmation Pending
       $node->field_vrs_status['und'][0]['value'] = 6;
 
       $returns_version = $node->field_sku_return_version['und'][0]['value'];
@@ -1319,7 +1484,7 @@ function save_sku_wise_return_final_submit_version($form, &$form_state) {
         $version_no = 'V_1.0';
         $node->field_sku_return_version['und'][0]['value'] = $version_no;
       }
-      // version increment
+// version increment
       else {
         $exploded_val = explode('_', $returns_version);
         $updated_version = $exploded_val[1] + 0.1;
@@ -1328,7 +1493,7 @@ function save_sku_wise_return_final_submit_version($form, &$form_state) {
       }
       $node->field_returns_incharge_name['und'][0]['value'] = $returns_incharge_name;
       node_save($node);
-      // Insert the Returns Incharge Name in Fareye Table
+// Insert the Returns Incharge Name in Fareye Table
       db_update('dispatch_planning_api_data') // Table name no longer needs {}
         ->fields(array(
           'returns_incharge_name' => $returns_incharge_name,
@@ -1337,14 +1502,19 @@ function save_sku_wise_return_final_submit_version($form, &$form_state) {
         ->condition('distributor_id', $dis_id, '=')
         ->execute();
       $return_name = 'skuwise_return_end_time';
-      save_return_time($trip_id, $return_name,time(),$version_no,$dis_id);
-      
+      save_return_time($trip_id, $return_name, time(), $version_no, $dis_id);
     }
     If (!empty($existing_return_start_time)) {
-        $return_name = 'skuwise_return_start_time';  
-        save_return_time($trip_id, $return_name,$returns_start_time,$version_no,$dis_id);
-     }
+      $return_name = 'skuwise_return_start_time';
+      save_return_time($trip_id, $return_name, $returns_start_time, $version_no, $dis_id);
+    }
     save_sku_return_version($version_no, $form_state['input']['bill_details'], $trip_id, $dis_id);
+    $trip_id = $form_state['values']['trip_number'];
+    foreach ($form_state['values']['excess_sku'] as $excess_items) {
+//      if ($excess_items['delete_item'] == 1) {
+//        delete_excess_inventory($excess_items[product_name], $trip_id, $dis_id);
+//      }
+    }
     drupal_set_message(t("Data saved successfully."));
   }
 }
@@ -1363,7 +1533,7 @@ function get_temp_data($trip_id, $distributor_id) {
 }
 
 function sku_wise_return_validate($form, &$form_state) {
-  //watchdog('validate1', '<pre>' . print_r($form_state, TRUE) . '</pre>');  
+//watchdog('validate1', '<pre>' . print_r($form_state, TRUE) . '</pre>');
   global $user;
   $dis_id = change_feeds_import_get_distributor_id($user->uid);
   $trip_id = $form_state['values']['trip_number'];
@@ -1391,69 +1561,69 @@ function sku_wise_return_validate($form, &$form_state) {
   }
   if ($form_state['values']['show_bills'] != 1) {
     $form_state['rebuild'] = TRUE;
-    //form_set_error('form', 'Show bills as well should be checked.');
+//form_set_error('form', 'Show bills as well should be checked.');
     $mess .= t('Show bills as well should be checked.') . '<br>';
   }
   else {
     foreach ($form_state['input']['bill_details'] as $sku => $value) {
       if (!is_numeric($value['actual_returned_qty'])) {
         $form_state['rebuild'] = TRUE;
-        //form_set_error('form', "Please enter valid actual return quantity for sku: " . $sku);
+//form_set_error('form', "Please enter valid actual return quantity for sku: " . $sku);
         $mess .= t("Please enter valid actual return quantity for sku:$sku") . '<br>';
       }
       if (is_numeric($value['actual_returned_qty']) && (floor($value['actual_returned_qty']) != $value['actual_returned_qty'])) {
         $form_state['rebuild'] = TRUE;
-        //form_set_error('form', "Actual return quantity should not be decimal for sku: " . $sku);
+//form_set_error('form', "Actual return quantity should not be decimal for sku: " . $sku);
         $mess .= t("Actual return quantity should not be decimal for sku:$sku") . '<br>';
       }
-      //if (empty($form_state['no_discrepancy_sku'][$sku])) {
-      //if (!empty($actual_return_qty) || $actual_return_qty == 0) {
+//if (empty($form_state['no_discrepancy_sku'][$sku])) {
+//if (!empty($actual_return_qty) || $actual_return_qty == 0) {
       $actual_return_qty = $value['actual_returned_qty'];
 
       $total_qty_bill_wise = 0;
       $all_bills = sku_wise_return_pop_up_table($trip_id, $sku, $dis_id);
       foreach ($form_state['input']["sku_bill_table_$sku"] as $bill => $val) {
 
-        // Bill level tobe_returned_qty of undelivered bill, it will set if
-        //  the bill status is undeliver
+// Bill level tobe_returned_qty of undelivered bill, it will set if
+//  the bill status is undeliver
         /*
-         * In SKU-Bill wise screen, put a check that if an SKU is present in a bill 
-         * for which bill status = undeliver, then To be returned qty 
+         * In SKU-Bill wise screen, put a check that if an SKU is present in a bill
+         * for which bill status = undeliver, then To be returned qty
          * of that bill should be = actual returned qty of that bill + cashier short of
          *  that bill + claimed godown short of that bill
          */
         $bill_level_tobe_returned_qty_undeliver = get_to_be_returned_qty_undeliver_bill($trip_id, $bill, $sku, $dis_id);
-        //echo $bill_level_tobe_returned_qty_undeliver;die;
+//echo $bill_level_tobe_returned_qty_undeliver;die;
         if (!empty($bill_level_tobe_returned_qty_undeliver)) {
           $actual_returned_qty_in_pop = $val['actual_returned_qty1'] + $val['cashier_short'] + $val['claimed_godown_short'];
           if ($bill_level_tobe_returned_qty_undeliver != $actual_returned_qty_in_pop) {
             $form_state['sku_excess_error'] = 1;
-            $mess.= t("To be returned qty of Bill Number:$bill of SKU:$sku should be equal to actual returned qty + cashier short + claimed godown short").'<br>';
-            //drupal_set_message(t("To be returned qty of Bill Number:$bill of SKU:$sku should be equal to actual returned qty + cashier short + claimed godown short"), 'error');
+            $mess .= t("To be returned qty of Bill Number:$bill of SKU:$sku should be equal to actual returned qty + cashier short + claimed godown short") . '<br>';
+//drupal_set_message(t("To be returned qty of Bill Number:$bill of SKU:$sku should be equal to actual returned qty + cashier short + claimed godown short"), 'error');
           }
         }
 
         if (!empty($actual_return_qty) || $actual_return_qty == 0) {
           $total_qty_bill_wise += $val['actual_returned_qty1'];
-          // checking bill level to-be return qty = equal to actual return qty
+// checking bill level to-be return qty = equal to actual return qty
           if ($val['actual_returned_qty1'] > 0 && $all_bills[$bill]['to_be_returned_qty'] != $val['actual_returned_qty1']) {
             if (empty($val['reason_code'])) {
               $form_state['rebuild'] = TRUE;
-              //form_set_error('form', "Reason code of sku:$sku is mandatory as actual returned qty is greater than zero of bill: $bill");
+//form_set_error('form', "Reason code of sku:$sku is mandatory as actual returned qty is greater than zero of bill: $bill");
               $mess .= t("Reason code of sku:$sku is mandatory as actual returned qty is greater than zero of bill: $bill") . '<br>';
             }
           }
 
           if ($val['dispatch_qty'] < ($val['actual_returned_qty1'] + $val['cashier_short'] + $val['claimed_godown_short'])) {
             $form_state['rebuild'] = TRUE;
-            //form_set_error('form', "Return quantity,cashier short and claimed godown short for sku:$sku cannot be greater than Dispatch quantity of bill: $bill");
+//form_set_error('form', "Return quantity,cashier short and claimed godown short for sku:$sku cannot be greater than Dispatch quantity of bill: $bill");
             $mess .= t("Return quantity,cashier short and claimed godown short for sku:$sku cannot be greater than Dispatch quantity of bill: $bill") . '<br>';
           }
 
           if ($val['claimed_godown_short'] > 0) {
             if (empty($val['reason_for_claim'])) {
               $form_state['rebuild'] = TRUE;
-              //form_set_error('form', "Reason for claim of sku:$sku is mandatory as claimed godown short is greater than zero of bill: $bill");
+//form_set_error('form', "Reason for claim of sku:$sku is mandatory as claimed godown short is greater than zero of bill: $bill");
               $mess .= t("Reason for claim of sku:$sku is mandatory as claimed godown short is greater than zero of bill: $bill") . '<br>';
             }
           }
@@ -1462,44 +1632,48 @@ function sku_wise_return_validate($form, &$form_state) {
 
       if ($actual_return_qty != $total_qty_bill_wise) {
         $form_state['rebuild'] = TRUE;
-        //Actual Returned Qty for SKU <> is not equal to Sum of Actual Returned Qty at Bill Level
-        //form_set_error('form', "Actual Returned Qty for SKU: $sku is not equal to Sum of Actual Returned Qty at Bill Level");
+//Actual Returned Qty for SKU <> is not equal to Sum of Actual Returned Qty at Bill Level
+//form_set_error('form', "Actual Returned Qty for SKU: $sku is not equal to Sum of Actual Returned Qty at Bill Level");
         $mess .= t("Actual Returned Qty for SKU: $sku is not equal to Sum of Actual Returned Qty at Bill Level") . '<br>';
       }
-      //}
-      //}
+//}
+//}
     }
   }
 
 
-  // Excess Inventory Table Validation
+// Excess Inventory Table Validation
   foreach ($form_state['input']['excess_sku'] as $k => $value) {
     if (!empty($value['product_name'])) {
       $check_product_name_exists = check_product_name($dis_id, $value['product_name']);
       if (empty($check_product_name_exists)) {
         $form_state['sku_excess_error'] = 1;
-        //drupal_set_message(t("This product name " . $value['product_name'] . " does not exists."), 'error');
+//drupal_set_message(t("This product name " . $value['product_name'] . " does not exists."), 'error');
         $mess .= t("This product name " . $value['product_name'] . " does not exists.") . '<br>';
       }
       if (empty($value['excess_qty'])) {
         $form_state['rebuild'] = TRUE;
-        //form_set_error('form', "Please enter excess quantity for product: " . $value['product_name']);
+//form_set_error('form', "Please enter excess quantity for product: " . $value['product_name']);
         $mess .= t("Please enter excess quantity for product: " . $value['product_name']) . '<br>';
       }
       if (!empty($value['excess_qty']) && !is_numeric($value['excess_qty'])) {
         $form_state['rebuild'] = TRUE;
-        //form_set_error('form', "Excess qty should be numeric for product: " . $value['product_name']);
+//form_set_error('form', "Excess qty should be numeric for product: " . $value['product_name']);
         $mess .= t("Excess qty should be numeric for product: " . $value['product_name']) . '<br>';
       }
       if (is_numeric($value['excess_qty']) && (floor($value['excess_qty']) != $value['excess_qty'])) {
         $form_state['rebuild'] = TRUE;
-        //form_set_error('form', "Actual return quantity should not be decimal for product: " . $value['product_name']);
+//form_set_error('form', "Actual return quantity should not be decimal for product: " . $value['product_name']);
         $mess .= t("Actual return quantity should not be decimal for product: " . $value['product_name']) . '<br>';
       }
       if (!empty($value['credit_to_cashier']) && empty($value['excess_reason'])) {
         $form_state['rebuild'] = TRUE;
-        //form_set_error('form', "Please enter excess reason for product: " . $value['product_name']);
+//form_set_error('form', "Please enter excess reason for product: " . $value['product_name']);
         $mess .= t("Please enter excess reason for product: " . $value['product_name']) . '<br>';
+      }
+      if (empty($value['mrp']) && empty($value['new_mrp'])) {
+        $form_state['sku_excess_error'] = 1;
+        drupal_set_message(t("Please enter New MRP for product: " . $value['product_name']), 'error');
       }
     }
   }
@@ -1517,7 +1691,7 @@ function sku_wise_return_validate($form, &$form_state) {
 
 //Submit btn
 function sku_wise_return_submit($form, &$form_state) {
-  //watchdog('submit1', '<pre>' . print_r($form_state, TRUE) . '</pre>');
+//watchdog('submit1', '<pre>' . print_r($form_state, TRUE) . '</pre>');
   global $user;
   $dis_id = change_feeds_import_get_distributor_id($user->uid);
   $trip_id = $form_state['values']['trip_number'];
@@ -1526,8 +1700,8 @@ function sku_wise_return_submit($form, &$form_state) {
   $existing_bill_wise_return_start_time = 0;
   $existing_bill_wise_return_start_time = check_billwise_return_start_time_present($trip_id, $dis_id);
   if ($form_state['values']['show_bills'] == 1) {
-      if ($form_state['bill-wise'] == 1) {
-      $return_name = 'billwise_return_start_time';  
+    if ($form_state['bill-wise'] == 1) {
+      $return_name = 'billwise_return_start_time';
       $type = 'bill_wise';
       $end_time = time();
       $existing_bill_wise_return_start_time = check_billwise_return_start_time_present($trip_id, $dis_id);
@@ -1551,8 +1725,8 @@ function sku_wise_return_submit($form, &$form_state) {
         $itdatas = $query->execute()->fetchAll();
         $itdata = $itdatas[0];
         if ($itdata->res_status == 'undeliver') {
-          //6. Comment the code where Bill Status/Line Status is changing when Bill Status = Undeliver
-          $ret_cash = $val['actual_returned_qty1'] + $val['cashier_short']; //Return Qty + Cashier Short  
+//6. Comment the code where Bill Status/Line Status is changing when Bill Status = Undeliver
+          $ret_cash = $val['actual_returned_qty1'] + $val['cashier_short']; //Return Qty + Cashier Short
           $ret_cash_godown = $ret_cash + $val['claimed_godown_short']; //Return Qty + Cashier Short + claimed Godown Short
           $line_status = '';
           if ($ret_cash_godown == $val['dispatch_qty']) {
@@ -1567,7 +1741,7 @@ function sku_wise_return_submit($form, &$form_state) {
 
           db_update('dispatch_planning_item_details') // Table name no longer needs {}
             ->fields(array(
-              //'res_sku_actual_quantity1' => (int) $val['dispatch_qty'] - $val['actual_returned_qty1'] - $val['cashier_short'] - $val['claimed_godown_short'],
+//'res_sku_actual_quantity1' => (int) $val['dispatch_qty'] - $val['actual_returned_qty1'] - $val['cashier_short'] - $val['claimed_godown_short'],
               'return_qty' => (int) $val['actual_returned_qty1'],
               //'dispatch_qty' => $val['dispatch_qty'],
               'res_sku_reason' => ($line_status != 'line_undeliver') ? $val['reason_code'] : '',
@@ -1608,7 +1782,7 @@ function sku_wise_return_submit($form, &$form_state) {
             if ($form_state['bill-wise'] == 1) {
               db_update('dispatch_planning_api_data') // Table name no longer needs {}
                 ->fields(array(
-                  // 'res_status' => 'partial_deliver',
+// 'res_status' => 'partial_deliver',
                   'res_reason_for_failure' => '',
                   'updated_flag' => 1,
                   'updated_time' => REQUEST_TIME,
@@ -1621,7 +1795,7 @@ function sku_wise_return_submit($form, &$form_state) {
         }
         else if ($itdata->res_status == 'partial_deliver') {
 
-          $ret_cash = $val['actual_returned_qty1'] + $val['cashier_short']; //Return Qty + Cashier Short  
+          $ret_cash = $val['actual_returned_qty1'] + $val['cashier_short']; //Return Qty + Cashier Short
           $ret_cash_godown = $ret_cash + $val['claimed_godown_short']; //Return Qty + Cashier Short + Claimed Godown Short
           $line_status = '';
           if ($ret_cash_godown == $val['dispatch_qty']) {
@@ -1634,15 +1808,15 @@ function sku_wise_return_submit($form, &$form_state) {
             $line_status = 'line_deliver';
           }
           /*
-            * 1. To be returned qty for each bill should be = actual returned qty of that bill + cashier short of that bill + claimed godown short of that bill. 
-             This should be the check for both Bill status = undeliver and partial_deliver. This validation needs to be put on Submit and not on Save.
-             2. Comment the code where we are updating the line level status (for both Bill Status undeliver and partial_deliver). Both at Save and Submit. This I have not tested though.
-             3. Comment the code line marked in RED below. Comment this both at Save and Submit:res_sku_actual_quantity1' => (int) $val['dispatch_qty'] - $val['actual_returned_qty1'] - $val['cashier_short'] - $val['claimed_godown_short'],
+           * 1. To be returned qty for each bill should be = actual returned qty of that bill + cashier short of that bill + claimed godown short of that bill.
+            This should be the check for both Bill status = undeliver and partial_deliver. This validation needs to be put on Submit and not on Save.
+            2. Comment the code where we are updating the line level status (for both Bill Status undeliver and partial_deliver). Both at Save and Submit. This I have not tested though.
+            3. Comment the code line marked in RED below. Comment this both at Save and Submit:res_sku_actual_quantity1' => (int) $val['dispatch_qty'] - $val['actual_returned_qty1'] - $val['cashier_short'] - $val['claimed_godown_short'],
            */
 
           db_update('dispatch_planning_item_details') // Table name no longer needs {}
             ->fields(array(
-             // 'res_sku_actual_quantity1' => (int) $val['dispatch_qty'] - $val['actual_returned_qty1'] - $val['cashier_short'] - $val['claimed_godown_short'],
+// 'res_sku_actual_quantity1' => (int) $val['dispatch_qty'] - $val['actual_returned_qty1'] - $val['cashier_short'] - $val['claimed_godown_short'],
               'return_qty' => (int) $val['actual_returned_qty1'],
               //'dispatch_qty' => $val['dispatch_qty'],
               'res_sku_reason' => $val['reason_code'],
@@ -1659,17 +1833,17 @@ function sku_wise_return_submit($form, &$form_state) {
       }
     }
 
-    // Merging the sku data in temp table
+// Merging the sku data in temp table
     merge_sku_data_in_temp_table($form_state['input']['bill_details'], $trip_id, $dis_id);
 
-    //Saving the excess inventory declaration data
+//Saving the excess inventory declaration data
     store_excess_inventory_declaration_data($form_state['input']['excess_sku'], $trip_id, $dis_id);
 
     $returns_incharge_name = $form_state['input']['return_incharge_name'];
     $trip_nid = check_trip_id_exists_or_not($dis_id, $trip_id);
     if (!empty($trip_nid->nid)) {
       $node = node_load($trip_nid->nid);
-      // Status updated to 'Returned Confirm'
+// Status updated to 'Returned Confirm'
       $node->field_vrs_status['und'][0]['value'] = 1;
 
       $returns_version = $node->field_returned_version['und'][0]['value'];
@@ -1677,7 +1851,7 @@ function sku_wise_return_submit($form, &$form_state) {
         $version_no = 'V_1.0';
         $node->field_returned_version['und'][0]['value'] = $version_no;
       }
-      // version increment
+// version increment
       else {
         $exploded_val = explode('_', $returns_version);
         $updated_version = $exploded_val[1] + 0.1;
@@ -1689,14 +1863,14 @@ function sku_wise_return_submit($form, &$form_state) {
       $node->field_return_dispatch_supervisor['und'][0]['nid'] = $returns_incharge_name;
       node_save($node);
       $return_name = 'billwise_return_end_time';
-      save_return_time($trip_id, $return_name,time(),$version_no,$dis_id);
+      save_return_time($trip_id, $return_name, time(), $version_no, $dis_id);
       if (!empty($existing_bill_wise_return_start_time)) {
-          // Save sku wise return start time
-         $return_name = 'billwise_return_start_time';
-         save_return_time($trip_id, $return_name, $returns_start_time, $version_no, $dis_id);
+// Save sku wise return start time
+        $return_name = 'billwise_return_start_time';
+        save_return_time($trip_id, $return_name, $returns_start_time, $version_no, $dis_id);
       }
 
-      // Insert the Returns Incharge Name in Fareye Table
+// Insert the Returns Incharge Name in Fareye Table
       /* db_update('dispatch_planning_api_data') // Table name no longer needs {}
         ->fields(array(
         'returns_incharge_name' => $returns_incharge_name,
@@ -1713,7 +1887,7 @@ function sku_wise_return_submit($form, &$form_state) {
 
       $bills_items = get_bill_items_details($trip_id, $dis_id);
 
-      // add the header level data in new versioning header level table
+// add the header level data in new versioning header level table
       foreach ($res as $key => $val) {
         $query = db_insert('inventory_versioning_api_data');
         $cur_id = $val['id'];
@@ -1754,9 +1928,9 @@ function sku_wise_return_submit($form, &$form_state) {
           'godown_short_reason',
           'approved_by',
           'remarks',
-          'declared_claimed_godown_short' 
+          'declared_claimed_godown_short'
         );
-        // add the child level data in new versioning child level table
+// add the child level data in new versioning child level table
         if (!empty($result_id)) {
           $query1 = db_insert('inventory_versioning_item_details')->fields($fields);
           foreach ($bills_items[$cur_id] as $value1) {
@@ -1769,12 +1943,18 @@ function sku_wise_return_submit($form, &$form_state) {
       }
     }
   }
+//  $trip_id = $form_state['values']['trip_number'];
+//  foreach ($form_state['values']['excess_sku'] as $excess_items) {
+//    if ($excess_items['delete_item'] == 1) {
+//      delete_excess_inventory($excess_items[product_name], $trip_id, $dis_id);
+//    }
+//  }
   drupal_set_message(t("Data submit successfully."));
-  //form_ajax_redirect('sku-wise-return-new');
+//form_ajax_redirect('sku-wise-return-new');
 }
 
 function merge_sku_data_in_temp_table($bill_details, $trip_id, $dis_id) {
-  //watchdog('uppar_table', '<pre>' . print_r($value, TRUE) . '</pre>');
+//watchdog('uppar_table', '<pre>' . print_r($value, TRUE) . '</pre>');
   foreach ($bill_details as $sku => $value) {
     $actual_return_qty = $value['actual_returned_qty'];
 
@@ -1829,7 +2009,7 @@ function save_sku_return_version($version_no, $bill_details, $trip_id, $dis_id) 
       'distributor_id',
       'created_date',
     );
-    // add the child level data in new versioning child level table
+// add the child level data in new versioning child level table
     $query = db_insert('sku_wise_return_version')->fields($fields);
     $records = array();
     foreach ($bill_details as $sku => $value) {
@@ -1889,17 +2069,19 @@ function save_returns_end_time($type, $trip_id, $end_time, $distributor_id) {
 }
 
 function store_excess_inventory_declaration_data($all_excess_sku, $trip_id, $dis_id) {
-  // Firstly delete the existing excess inventory data for the particular trip
+// Firstly delete the existing excess inventory data for the particular trip
   $del_existing_data = db_delete('excess_inventory_table')
     ->condition('trip_id', $trip_id, '=')
     ->condition('distributor_id', $dis_id, '=')
     ->execute();
-
-  //Then save the fresh data
+//Then save the fresh data
   foreach ($all_excess_sku as $key => $value) {
-    // watchdog('lower_table', '<pre>' . print_r($value, TRUE) . '</pre>');
+// watchdog('lower_table', '<pre>' . print_r($value, TRUE) . '</pre>');
     $excess_product_name = $value['product_name'];
     $product_mrp = $value['mrp'];
+    if (empty($product_mrp)) {
+      $product_mrp = $value['new_mrp'];
+    }
     $excess_qty = $value['excess_qty'];
     $credit_to_cashier = $value['credit_to_cashier'];
     $excess_reason = $value['excess_reason'];
@@ -1922,9 +2104,10 @@ function store_excess_inventory_declaration_data($all_excess_sku, $trip_id, $dis
     }
   }
 }
-function save_return_time($trip_id,$return_name,$time_value,$version = null, $distributor_id) {
+
+function save_return_time($trip_id, $return_name, $time_value, $version = null, $distributor_id) {
   if (!empty($trip_id) && !empty($return_name) && !empty($time_value)) {
-    //sku_wise_return_time_history
+//sku_wise_return_time_history
     $fields = array(
       'trip_id',
       'return_version_name',
@@ -1944,34 +2127,77 @@ function save_return_time($trip_id,$return_name,$time_value,$version = null, $di
     $query->execute();
   }
 }
+
 // Checking return start time present
-function get_returns_start_time($trip_id,$return_name,$distributor_id) {
-  if (!empty($trip_id)&& !empty($return_name) && !empty($distributor_id)) {
-    $query = db_select('sku_wise_return_time_history','sku_time');
-             $query->condition('sku_time.trip_id',$trip_id);
-             $query->condition('sku_time.distributor_id',$distributor_id);
-             $query->condition('sku_time.return_version_name',$return_name);
-             $query->fields('sku_time','id');
-             $id = $query->execute()->fetchField();
-             
+function get_returns_start_time($trip_id, $return_name, $distributor_id) {
+  if (!empty($trip_id) && !empty($return_name) && !empty($distributor_id)) {
+    $query = db_select('sku_wise_return_time_history', 'sku_time');
+    $query->condition('sku_time.trip_id', $trip_id);
+    $query->condition('sku_time.distributor_id', $distributor_id);
+    $query->condition('sku_time.return_version_name', $return_name);
+    $query->fields('sku_time', 'id');
+    $id = $query->execute()->fetchField();
   }
   return $id;
 }
 
 // Checking return start time present
-function get_returns_end_time($trip_id,$distributor_id) {
+function get_returns_end_time($trip_id, $distributor_id) {
   $result = array();
   if (!empty($trip_id) && !empty($distributor_id)) {
-    $query = db_select('sku_wise_return_time_history','sku_time');
-             $query->condition('sku_time.trip_id',$trip_id);
-             $query->condition('sku_time.distributor_id',$distributor_id);
-             $query->condition('sku_time.return_version_name',array('billwise_return_end_time','skuwise_return_end_time'),'IN');
-             $query->isNotNull('sku_time.return_version_value');
-             $query->fields('sku_time',array('return_version_name'));
-             $query->fields('sku_time',array('time_value'));
-             $query->orderBy('sku_time.id', 'desc');
-             $result= $query->execute()->fetchAllKeyed(0,1);
-             
+    $query = db_select('sku_wise_return_time_history', 'sku_time');
+    $query->condition('sku_time.trip_id', $trip_id);
+    $query->condition('sku_time.distributor_id', $distributor_id);
+    $query->condition('sku_time.return_version_name', array('billwise_return_end_time', 'skuwise_return_end_time'), 'IN');
+    $query->isNotNull('sku_time.return_version_value');
+    $query->fields('sku_time', array('return_version_name'));
+    $query->fields('sku_time', array('time_value'));
+    $query->orderBy('sku_time.id', 'desc');
+    $result = $query->execute()->fetchAllKeyed(0, 1);
   }
+}
 
+/**
+ *
+ * @param type $form -
+ * @param type $form_state -
+ * @return type
+ */
+function product_remove_items($form, &$form_state) {
+  $index = $form_state['triggering_element']['#array_parents'][2];
+  $triggered_product = $form_state['clicked_button']['#name'];
+  $product_id = explode('-', $triggered_product)[2];
+  $product_counter = explode('-', $triggered_product)[1];
+  if (empty($product_id)) {
+    $form_state['complete form']['excess_inventory_table']['excess_sku']['#rows'] = array_values($form_state['complete form']['excess_inventory_table']['excess_sku']['#rows']);
+    unset($form_state['excess_inventory'][$product_counter]);
+    $form_state['rebuild'] = TRUE;
+  }
+  else {
+    global $user;
+    $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+    $trip_no = $form_state['input']['trip_number'];
+    $product_presence_arr = check_product_presence_in_db_by_trip_id($product_id, $distributor_id, $trip_no);
+    $product_presence_id = $product_presence_arr['id'];
+
+    if (!empty($product_presence_id)) {
+      $delete_status = delete_excess_inventory($product_presence_id);
+      if ($delete_status) {
+        drupal_set_message(t("Sucessfully deleted the excess product:" . $product_presence_arr['product_name']));
+        unset($form_state['excess_inventory'][$product_counter]);
+        $form_state['rebuild'] = TRUE;
+      }
+    }
+  }
+}
+
+function check_product_presence_in_db_by_trip_id($product_id, $distributor_id, $trip_number) {
+  $query = db_select('excess_inventory_table', 'eit');
+  $query->condition('eit.trip_id', $trip_number, '=');
+  $query->condition('eit.distributor_id', $distributor_id, '=');
+  $query->condition('eit.id', $product_id, '=');
+  $query->fields('eit', array('id'));
+  $query->fields('eit', array('product_name'));
+  $result = $query->execute()->fetchAssoc();
+  return $result;
 }

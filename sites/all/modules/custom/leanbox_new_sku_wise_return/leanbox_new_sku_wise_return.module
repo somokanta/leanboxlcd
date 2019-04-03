@@ -1,6 +1,6 @@
 <?php
 
-/* 
+/*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
@@ -12,60 +12,59 @@
  */
 function leanbox_new_sku_wise_return_menu() {
   $items = array();
-  
+
   $items['sku-wise-return-new'] = array(
-     'title' => 'SKU-wise Returns New',
-     'page callback' => 'drupal_get_form',
-     'page arguments' => array('new_sku_wise_returns_form'),
-     'access arguments' => array('returns confirmation'),
-     'type' => MENU_NORMAL_ITEM,
-     'file' => 'includes/new_sku_wise_returns.inc',
-   );
-  
-   $items['sku-wise-return-new/bill-wise'] = array(
-     'title' => 'SKU-wise Returns New',
-     'page callback' => 'drupal_get_form',
-     'page arguments' => array('new_sku_wise_returns_form'),
-     'access arguments' => array('returns confirmation'),
-     'type' => MENU_NORMAL_ITEM,
-     'file' => 'includes/new_sku_wise_returns.inc',
-   );
-  
+    'title' => 'SKU-wise Returns New',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('new_sku_wise_returns_form'),
+    'access arguments' => array('returns confirmation'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'includes/new_sku_wise_returns.inc',
+  );
+
+  $items['sku-wise-return-new/bill-wise'] = array(
+    'title' => 'SKU-wise Returns New',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('new_sku_wise_returns_form'),
+    'access arguments' => array('returns confirmation'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'includes/new_sku_wise_returns.inc',
+  );
+
   $items['all_products/autocomplete'] = array(
     'title' => 'products autocomplete',
     'page callback' => '_get_all_products',
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
-  
+
   $items['godown-short-approval'] = array(
-     'title' => 'Godown Short Approval',
-     'page callback' => 'drupal_get_form',
-     'page arguments' => array('godown_short_approval_form'),
-     'access arguments' => array('returns confirmation'),
-     'type' => MENU_NORMAL_ITEM,
-     'file' => 'includes/godown_short_approval.inc',
-   );
-  
+    'title' => 'Godown Short Approval',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('godown_short_approval_form'),
+    'access arguments' => array('returns confirmation'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'includes/godown_short_approval.inc',
+  );
+
   $items['godown-short-approval-delete'] = array(
-     'title' => 'Godown Short Approval Delete',
-     'page callback' => 'drupal_get_form',
-     'page arguments' => array('godown_short_approval_delete_form'),
-     'access arguments' => array('returns confirmation'),
-     'type' => MENU_NORMAL_ITEM,
-     'file' => 'includes/godown_short_approval_delete.inc',
-   );
-  
+    'title' => 'Godown Short Approval Delete',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('godown_short_approval_delete_form'),
+    'access arguments' => array('returns confirmation'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'includes/godown_short_approval_delete.inc',
+  );
+
   return $items;
 }
-
 
 function get_all_putaway_groups($distributor_id) {
   $query = db_select('node', 'n');
   $query->condition('n.type', 'putaway_group_master');
   $query->condition('n.uid', $distributor_id);
   $query->join('field_data_field_putaway_group', 'pg', 'pg.entity_id = n.nid');
-  $query->addExpression('DISTINCT(pg.field_putaway_group_value)','putaway_group');
+  $query->addExpression('DISTINCT(pg.field_putaway_group_value)', 'putaway_group');
   $result = $query->execute()->fetchAllKeyed(0, 0);
   return $result;
 }
@@ -74,7 +73,7 @@ function get_all_sub_putaway_groups($putaway, $distributor_id) {
   $query = db_select('node', 'n');
   $query->condition('n.type', 'putaway_group_master');
   $query->condition('n.uid', $distributor_id);
-  if(!empty($putaway)) {
+  if (!empty($putaway)) {
     $query->join('field_data_field_putaway_group', 'pg', 'pg.entity_id = n.nid');
     $query->condition('pg.field_putaway_group_value', $putaway, '=');
   }
@@ -97,12 +96,12 @@ function get_default_actual_return_qty($trip_number, $sku_code, $distributor_id)
 function _get_all_products($string = '') {
   global $user;
   $dis_id = change_feeds_import_get_distributor_id($user->uid);
-  
+
   if (!empty($string)) {
     $query = db_select('node', 'n');
     $query->condition('n.uid', $dis_id);
     $query->join('field_data_field_product_name', 'pn', 'pn.entity_id = n.nid');
-    $query->condition('pn.field_product_name_value' , '%'.db_like($string) . '%', 'LIKE');
+    $query->condition('pn.field_product_name_value', '%' . db_like($string) . '%', 'LIKE');
     $query->fields('pn', array('field_product_name_value'));
     $result = $query->execute()->fetchAllKeyed(0, 0);
   }
@@ -115,7 +114,7 @@ function get_excess_reason_list($dis_id) {
   $query->condition('n.uid', $dis_id);
   $query->fields('n', array('title'));
   $result = $query->execute()->fetchAllKeyed(0, 0);
-  return $result; 
+  return $result;
 }
 
 function get_gs_claim_reason_list($dis_id) {
@@ -124,7 +123,7 @@ function get_gs_claim_reason_list($dis_id) {
   $query->condition('n.uid', $dis_id);
   $query->fields('n', array('title'));
   $result = $query->execute()->fetchAllKeyed(0, 0);
-  return $result; 
+  return $result;
 }
 
 function get_mrp_from_product_name($product_name, $distributor_id) {
@@ -135,7 +134,7 @@ function get_mrp_from_product_name($product_name, $distributor_id) {
     $query->condition('ad.distributor_id', $distributor_id);
     $query->condition('dpi.product_name', $product_name, '=');
     $query->fields('dpi', array('mrp'));
-    $result = $query->execute()->fetchAllKeyed(0, 0);  
+    $result = $query->execute()->fetchAllKeyed(0, 0);
   }
   return $result;
 }
@@ -158,7 +157,7 @@ function get_returns_incharge_list($dis_id) {
   $query->join('field_data_field_resource_name', 'rn', 'rn.entity_id = n.nid');
   $query->fields('rn', array('field_resource_name_value'));
   $result = $query->execute()->fetchAllKeyed(0, 0);
-  return $result; 
+  return $result;
 }
 
 function get_dispatch_supervisor_list($dis_id) {
@@ -171,11 +170,11 @@ function get_dispatch_supervisor_list($dis_id) {
   $query->fields('n', array('nid'));
   $query->fields('rn', array('field_resource_name_value'));
   $result = $query->execute()->fetchAllKeyed(0, 1);
-  return $result; 
+  return $result;
 }
 
 /**
- * 
+ *
  * @param type $form
  * @param type $form_state
  * @return array
@@ -184,12 +183,12 @@ function get_dispatch_supervisor_list($dis_id) {
 function sku_wise_return_pop_up_table($trip_number, $sku_code, $dis_id) {
   $query = db_select('dispatch_planning_item_details', 'dpi');
   $query->join('dispatch_planning_api_data', 'ad', 'dpi.trip_bill_reference = ad.id');
-  $query->condition('ad.delivery_pending_flag' ,1,'!=');
+  $query->condition('ad.delivery_pending_flag', 1, '!=');
   $query->condition('ad.runsheet_number', $trip_number, '=');
   $query->condition('ad.distributor_id', $dis_id);
   $query->condition('dpi.sku_code', $sku_code, '=');
   $query->condition('dpi.line_level_status', 'line_deliver', '!=');
-  $query->fields('ad', array('bill_number','bill_number'));
+  $query->fields('ad', array('bill_number', 'bill_number'));
   $query->fields('ad', array('party_name'));
   $query->fields('dpi', array('sum_net_sales_quantity'));
   $query->fields('dpi', array('res_godown_short'));
@@ -210,8 +209,8 @@ function sku_wise_return_pop_up_table($trip_number, $sku_code, $dis_id) {
   // Actual delivered qty both from farey or from manual edit screen.
   $query->fields('dpi', array('res_sku_actual_quantity1'));
   $result = $query->execute()->fetchAll(PDO::FETCH_GROUP | PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
-  if(!empty($result)) {
-    foreach($result as $key=>&$val) {
+  if (!empty($result)) {
+    foreach ($result as $key => &$val) {
       // Manual update from manual edit screen
       if ($val['updated_flag'] == 1) {
         $val['to_be_returned_qty'] = $val['sum_net_sales_quantity'] - $val['res_sku_actual_quantity1'];
@@ -231,15 +230,15 @@ function get_godown_short_reason_list($dis_id, $flag) {
   $query->condition('n.type', 'godown_short_reason_master');
   $query->condition('n.uid', $dis_id);
   $query->join('field_data_field_approval_flag', 'af', 'af.entity_id = n.nid');
-  if($flag == 'yes') {
+  if ($flag == 'yes') {
     $query->condition('af.field_approval_flag_value', $flag);
   }
-  if($flag == 'no') {
+  if ($flag == 'no') {
     $query->condition('af.field_approval_flag_value', $flag);
   }
   $query->fields('n', array('title'));
   $result = $query->execute()->fetchAllKeyed(0, 0);
-  return $result; 
+  return $result;
 }
 
 function get_nids_of_selected_putaway($putaway, $distributor_id) {
@@ -262,7 +261,7 @@ function get_trip_status($dis_id, $trip_id) {
   $query->leftjoin('field_data_field_vrs_status', 'vs', 'vs.entity_id = n.nid');
   $query->fields('vs', array('field_vrs_status_value'));
   $result = $query->execute()->fetchField();
-  
+
   return $result;
 }
 
@@ -270,10 +269,10 @@ function check_product_name($dis_id, $product_name) {
   $query = db_select('node', 'n');
   $query->condition('n.uid', $dis_id);
   $query->join('field_data_field_product_name', 'pn', 'pn.entity_id = n.nid');
-  $query->condition('pn.field_product_name_value' , $product_name , '=');
+  $query->condition('pn.field_product_name_value', $product_name, '=');
   $query->fields('n', array('nid'));
   $result = $query->execute()->fetchField();
-  
+
   return $result;
 }
 
@@ -285,4 +284,62 @@ function leanbox_new_sku_wise_return_views_api() {
     'api' => 3,
     'path' => drupal_get_path('module', 'leanbox_new_sku_wise_return') . '/views'
   );
+}
+
+function delete_claimed_godownshort_and_cashier_short($trip_id, $distributor_id, $skus = null) {
+  if (!empty($trip_id) && !empty($distributor_id)) {
+
+    $db_or = db_or();
+    $db_or->condition('ad.declared_claimed_godown_short', 0, '>');
+    $db_or->condition('ad.res_cashier_short', 0, '>');
+
+    $query = db_select('dispatch_planning_api_data', 'dpi');
+    $query->condition('dpi.distributor_id', $distributor_id, '=');
+    $query->condition('dpi.runsheet_number', $trip_id, '=');
+    $query->join('dispatch_planning_item_details', 'ad', 'ad.trip_bill_reference = dpi.id');
+    $query->condition($db_or);
+    $query->addExpression('ad.declared_claimed_godown_short', 'declared_claimed_godown_short');
+    $query->addExpression('ad.claimed_godown_short', 'claimed_godown_short');
+    $query->addExpression('ad.godown_short_reason', 'godown_short_reason');
+    $query->addExpression('ad.res_cashier_short', 'cashier_short');
+    $query->addExpression('ad.res_godown_short', 'godown_short');
+    if (!empty($skus)) {
+      $query->condition('ad.sku_code', $skus, 'IN');
+    }
+    $query->addExpression('dpi.id', 'dpi_id');
+    $query->addExpression('dpi.bill_number', 'bill_number');
+    $query->addExpression('ad.sku_code', 'sku_code');
+    $query->addExpression('ad.approved_by', 'approved_by');
+    $query->addExpression('ad.id', 'item_id');
+    $query->addExpression('SUM(ad.res_sku_actual_quantity1)', 'res_sku_actual_quantity1');
+    $query->addExpression('SUM(ad.farey_delivered_qty)', 'farey_delivered_qty');
+    $query->addExpression('SUM(ad.sum_net_sales_quantity)', 'sum_net_sales_quantity');
+    $query->addExpression('dpi.updated_flag', 'updated_flag');
+    $query->groupBy('ad.sku_code');
+    $query->groupBy('dpi.bill_number');
+    $sku_result = array();
+    $result = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+    foreach ($result as $key => $val) {
+      // Manual update from manual edit screen
+      if ($val['updated_flag'] == 1) {
+        $to_be_return_qty = $val['sum_net_sales_quantity'] - $val['res_sku_actual_quantity1'];
+      }
+      // Api  update from Farey screen
+      else if ($val['updated_flag'] == 2) {
+        $to_be_return_qty = $val['sum_net_sales_quantity'] - $val['farey_delivered_qty'];
+      }
+
+      $item_id = $val['item_id'];
+      db_update('dispatch_planning_item_details') // Table name no longer needs {}
+        ->fields(array(
+          'res_cashier_short' => '0',
+          'declared_claimed_godown_short' => 0,
+          'claimed_godown_short' => 0,
+          'return_qty' => (int) $to_be_return_qty,
+          'claimed_godown_short_reason' => '',
+        ))
+        ->condition('id', $item_id, '=')
+        ->execute();
+    }
+  }
 }
