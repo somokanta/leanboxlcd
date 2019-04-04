@@ -144,11 +144,11 @@ function trip_short_excess_form_callback() {
     $query->join('node', 'n', "n.title = ad.runsheet_number AND n.uid = ad.distributor_id");
     $query->condition('n.type', 'dispatch_data');
     $query->leftjoin('field_data_field_vrs_status', 'vrs', 'n.nid = vrs.entity_id');
-    $query->leftjoin('inventory_versioning_api_data', 'vad', 'ad.referenceNo = vad.referenceNo');
     if (!empty($trip_status)) {
       $query->condition('vrs.field_vrs_status_value', $trip_status, '=');
     }
     if (!empty($confirm_date)) {
+      $query->leftjoin('inventory_versioning_api_data', 'vad', 'ad.runsheet_number = vad.runsheet_number and ad.distributor_id =vad.distributor_id');
       $query->addExpression("DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(vad.version_created_time),'+00:00','+05:30'), '%Y-%m-%d')", 'version_created_time');
       $query->havingCondition('version_created_time', $confirm_date, '=');
     }
@@ -165,9 +165,9 @@ function trip_short_excess_form_callback() {
       $final_invent_shrt_val = round($inventory_short_value, 2);
       $row['trip_id'] = $val->runsheet_number;
       $row['Inventory_Short_Value'] = $final_invent_shrt_val;
-      $row['total_cashier_cash_short'] = $val->total_cashier_cash_short;
-      $row['Excess_Value'] = $val->Total_Excess_Value;
-      $row['ExcessValueCreditedtoCashier'] = $val->ExcessValueCreditedtoCashier;
+      $row['total_cashier_cash_short'] = round($val->total_cashier_cash_short,2);
+      $row['Excess_Value'] = round($val->Total_Excess_Value,2);
+      $row['ExcessValueCreditedtoCashier'] = round($val->ExcessValueCreditedtoCashier,2);
       $rows[] = $row;
     }
     $header = array('Trip Id', 'Inventory Short Value', 'Cashier Cash Short', 'Excess Value', 'Excess Value Credited to Cashier');
