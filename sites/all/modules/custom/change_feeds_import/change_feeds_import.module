@@ -2260,6 +2260,38 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
         $entity->feeds_item->skip = TRUE;
       }
     }
+
+    $updated_by = $item['updated by'];
+    $resource_type = 'PT-CT Incharge';
+    $resource_name = check_resource_name_exists($updated_by, $resource_type, $distributor_id);
+    if(empty($resource_name) && !empty($updated_by)) {
+      drupal_set_message("Updated By name does not match with resource master - Resource type PT-CT Incharge for Party code: $entity->title.", 'error');
+      $entity->feeds_item->skip = TRUE;
+    }
+    
+    $party_code = $entity->title;
+    $reason_for_change = $item['reason for change'];
+    $get_change_reason = get_change_reason($reason_for_change, $distributor_id);
+    $check_party_code = check_exsiting_record_for_party_code($party_code, $distributor_id);
+
+    if(empty($get_change_reason) && !empty($check_party_code) && !empty($reason_for_change)) {
+      drupal_set_message("Reason for Change does not match with PT-CT Change Reason Master for Party code: $entity->title.", 'error');
+      $entity->feeds_item->skip = TRUE;
+    }
+    
+    if(empty($reason_for_change) && !empty($check_party_code)) {
+      drupal_set_message("Reason for Change field is required for Party code: $entity->title.", 'error');
+      $entity->feeds_item->skip = TRUE;
+    }
+    if(empty($updated_by)) {
+      drupal_set_message("Updated By field is required for Party code: $entity->title.", 'error');
+      $entity->feeds_item->skip = TRUE;
+    }
+    $payment_term = $entity->field_payment_terms[LANGUAGE_NONE][0]['value'];
+    if(empty($payment_term)) {
+      drupal_set_message("Payment Term field is required for Party code: $entity->title.", 'error');
+      $entity->feeds_item->skip = TRUE;
+    }
   }
   //dispatch planning reason master
   if ($entity->feeds_item->id == 'dispatch_planning_reason_master') {
@@ -2702,6 +2734,26 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
   if ($view->base_table == 'petty_cash') {
     foreach ($query->where[1]['conditions'] as $key => $val) {
       if ((strpos($val['field'], 'petty_cash.voucher_date') !== false) || (strpos($val['field'], 'petty_cash.file_date') !== false)) {
+        $data = str_replace('+ 19800', '', $val['field']);
+        $data = str_replace('%Y-%m-%d\T%H:%i:%s', '%Y-%m-%d', $data);
+        $query->where[1]['conditions'][$key]['field'] = $data;
+      }
+    }
+  }
+
+   if (($view->base_table == 'node') && ($view->name == 'payment_terms_view')) {
+    foreach ($query->where[1]['conditions'] as $key => $val) {
+      if ((strpos($val['field'], 'node.changed') !== false)) {
+        $data = str_replace('+ 19800', '', $val['field']);
+        $data = str_replace('%Y-%m-%d\T%H:%i:%s', '%Y-%m-%d', $data);
+        $query->where[1]['conditions'][$key]['field'] = $data;
+      }
+    }
+  }
+  
+  if (($view->base_table == 'node_revision') && ($view->name == 'pt_ct_history_download')) {
+    foreach ($query->where[1]['conditions'] as $key => $val) {
+      if ((strpos($val['field'], 'node_revision.timestamp') !== false)) {
         $data = str_replace('+ 19800', '', $val['field']);
         $data = str_replace('%Y-%m-%d\T%H:%i:%s', '%Y-%m-%d', $data);
         $query->where[1]['conditions'][$key]['field'] = $data;
@@ -3301,6 +3353,28 @@ function change_feeds_import_form_views_exposed_form_alter(&$form, &$form_state)
       $form['field_declaration_date_value']['min']['#title'] = 'Declaration Start Date';
       $form['field_declaration_date_value']['max']['#title'] = 'Declaration End Date';
     }
+  }
+
+  // Updated By filter in Payment Terms View.
+  if (isset($form['field_updated_by_nid']['#options'])) {
+    $default = array('All' => '- Any -');
+    global $user;
+    // Store distributor id in author in each node
+    $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+    $resource_type = 'PT-CT Incharge';
+
+    $query = db_select('node', 'n');
+    $query->condition('n.type', 'resource_master');
+    $query->join('field_data_field_resource_type', 'rt', 'rt.entity_id = n.nid');
+    if(!empty($resource_type)){
+      $query->condition('rt.field_resource_type_value', $resource_type);
+    }
+    $query->condition('n.uid', $distributor_id);
+    $query->fields('n', array('nid'));
+    $query->fields('n', array('title'));
+    $options = $query->execute()->fetchAllKeyed(0, 1);
+
+    $form['field_updated_by_nid']['#options'] = $default + $options;
   }
 }
 
