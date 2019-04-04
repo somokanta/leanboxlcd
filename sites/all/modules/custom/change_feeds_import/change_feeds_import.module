@@ -3945,3 +3945,42 @@ function drs_excess_table($trip_id, $distributor_id) {
   }
   return $title.$excess_table;
 }
+
+function check_resource_name_exists($title, $resource_type, $distributor_id) {
+  $query1 = db_select('node', 'n');
+  $query1->condition('n.type', 'resource_master');
+  $query1->join('field_data_field_resource_type', 'rt', 'rt.entity_id = n.nid');
+  if(!empty($resource_type)){
+    $query1->condition('rt.field_resource_type_value', $resource_type);
+  }
+  $query1->condition('n.title', $title);
+  $query1->condition('n.uid', $distributor_id);
+  $query1->fields('n', array('title'));
+  $res = $query1->execute()->fetchField();
+  return $res;
+}
+
+function get_change_reason($title, $distributor_id) {
+  $query = db_select('node', 'n');
+  $query->condition('n.type', 'pt_ct_change_reason_master');
+  $query->condition('n.title', $title);
+  $query->condition('n.uid', $distributor_id);
+  $query->fields('n', array('title'));
+  $res = $query->execute()->fetchField();
+  return $res;
+}
+
+function check_exsiting_record_for_party_code($party_code, $distributor_id) {
+  $query = db_select('node', 'n');
+  $query->condition('n.type', 'outlet_master');
+  $query->join('field_data_field_party_code', 'pc', 'pc.entity_id = n.nid');
+  $query->join('field_data_field_payment_terms', 'pt', 'pc.entity_id = pt.entity_id');
+  $query->condition('pc.field_party_code_value', $party_code);
+  $query->condition('n.uid', $distributor_id);
+  $query->fields('pt', array('field_payment_terms_value'));
+  $res = $query->execute()->fetchField();
+  
+  return $res;
+}
+
+
