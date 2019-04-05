@@ -45,7 +45,7 @@ function trip_short_excess_form($form, &$form_state) {
     '#date_year_range' => '-20:+2',
     '#default_value' => $dispatch_date,
     '#size' => 30,
-    '#prefix' => '<div class="col_3" id="dis_date">',
+    '#prefix' => '<div class="stat_3" id="dis_date">',
     '#suffix' => '</div>',
   );
 
@@ -69,7 +69,7 @@ function trip_short_excess_form($form, &$form_state) {
     '#date_year_range' => '-20:+2',
     '#size' => 30,
     '#default_value' => $confirm_date,
-    '#prefix' => '<div class="col_3">',
+    '#prefix' => '<div class="stat_3">',
     '#suffix' => '</div>'
   );
 
@@ -88,10 +88,6 @@ function trip_short_excess_form_validate($form, &$form_state) {
   $trip_status = $form_state['values']['trip_status'];
   $confirm_date = $form_state['values']['confirm_date'];
   if (empty($dispatch_date) && empty($trip_id) && (empty($trip_status) && empty($confirm_date))) {
-    /* $error_elements = array('trip_id', 'dispatch_date');
-      foreach ($error_elements as $element) :
-      form_set_error($element);
-      endforeach; */
     drupal_set_message(t('Please select any one filter'), 'error');
   }
 }
@@ -102,8 +98,8 @@ function trip_short_excess_form_submit($form, &$form_state) {
   $trip_status = $form_state['values']['trip_status'];
   $confirm_date = $form_state['values']['confirm_date'];
 
-  if (($form_state['values']["op"] == "Apply") && (arg(0) == 'trip-short-excess-report')) {
-    drupal_goto('trip-short-excess-report', array('query' => array('dispatch_date' => $dispatch_date, 'trip_id' => $trip_id, 'trip_status' => $trip_status, 'confirm_date' => $confirm_date)));
+  if (($form_state['values']["op"] == "Apply") && (arg(0) == 'reco-mismatch-report')) {
+    drupal_goto('reco-mismatch-report', array('query' => array('dispatch_date' => $dispatch_date, 'trip_id' => $trip_id, 'trip_status' => $trip_status, 'confirm_date' => $confirm_date)));
   }
 }
 
@@ -130,6 +126,7 @@ function trip_short_excess_form_callback() {
     $form = drupal_render(drupal_get_form('trip_short_excess_form'));
   }
   if (!empty($trip_id) || !empty($dispatch_date) || !empty($confirm_date) || !empty($trip_status)) {
+		 
     $query = db_select('dispatch_planning_api_data', 'ad');
     $query->condition('ad.distributor_id', $distributor_id, '=');
     if (!empty($trip_id)) {
@@ -148,9 +145,10 @@ function trip_short_excess_form_callback() {
       $query->condition('vrs.field_vrs_status_value', $trip_status, '=');
     }
     if (!empty($confirm_date)) {
-      $query->leftjoin('inventory_versioning_api_data', 'vad', 'ad.runsheet_number = vad.runsheet_number and ad.distributor_id =vad.distributor_id');
-      $query->addExpression("DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(vad.version_created_time),'+00:00','+05:30'), '%Y-%m-%d')", 'version_created_time');
-      $query->havingCondition('version_created_time', $confirm_date, '=');
+			$c_date = strtotime($confirm_date);
+			$c_end_date = strtotime($confirm_date) + 86399;
+			$query->join('inventory_versioning_api_data', 'vad', 'ad.runsheet_number = vad.runsheet_number');
+			$query->condition('vad.version_created_time', array($c_date, $c_end_date), 'BETWEEN');
     }
     $query->fields('ad', array('runsheet_number'));
     $query->fields('vtt', array('total_cashier_cash_short'));
