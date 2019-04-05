@@ -238,20 +238,20 @@ function mrc_inventory_returns_menu() {
     'access callback' => TRUE,
   );
 
-  $items['trip-short-excess-report'] = array(
-    'title' => 'Trip Short & Excess Report',
+  $items['reco-mismatch-report'] = array(
+    'title' => 'Reco Mismatch Report',
     'page callback' => array('trip_short_excess_form_callback'),
-    'access callback' => TRUE,
+    'access arguments' => array('returns confirmation'),
     'type' => MENU_CALLBACK,
-    'file' => 'includes/trip_short_report.inc',
+    'file' => 'includes/trip_short_report.inc'
   );
 
-  $items['trip-short-excess-report/export'] = array(
-    'title' => 'Trip Short & Excess Report Export',
-    'description' => 'Trip Short & Excess Report Export',
+  $items['reco-mismatch-report/export'] = array(
+    'title' => 'Reco Mismatch Report Export',
+    'description' => 'Reco Mismatch Report Export',
     'page callback' => array('trip_short_excess_report_export'),
     'file' => 'includes/trip_short_report.inc',
-    'access callback' => TRUE,
+    'access arguments' => array('returns confirmation')
   );
 
   return $items;
