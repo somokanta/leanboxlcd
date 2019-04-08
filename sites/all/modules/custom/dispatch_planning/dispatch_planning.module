@@ -565,6 +565,18 @@ function dispatch_planning_menu() {
     'page arguments' => array('sms_config_form'),
     'access callback' => 'check_if_fr_role_user_admin',
   );
+  $items['message-re-send/%'] = array(
+    'title' => 'Message Resend',
+    'page callback' => 'message_re_triggered',
+    'page arguments' => array(1),
+    'access arguments' => array('Distributor Upload File'),
+  );
+  $items['bill-wise-message-re-send/%'] = array(
+    'title' => 'Message Resend',
+    'page callback' => 'bill_message_re_triggered',
+    'page arguments' => array(1),
+    'access arguments' => array('Distributor Upload File'),
+  );
 
   return $items;
 }
@@ -4092,10 +4104,8 @@ function dispatch_planning_views_pre_render(&$view) {
 //}
 
 function _update_sms_integration_api($node) {
-  global $user;
-  $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+  $distributor_id = $node->uid;
   $trip_id = $node->title;
-
   if (!empty($trip_id)) {
     $query = db_select('node', 'n');
     $query->condition('n.type', 'sales_register_data');
@@ -4130,14 +4140,15 @@ function _update_sms_integration_api($node) {
     $query->fields('fcn', array('field_contact_number_value'));
     $query->fields('hp', array('field_hul_phone_no_value'));
     $query->fields('sms', array('field_sms_required_value'));
-    $query->fields('sms_flag', array('field_sms_flag_value	'));
-    $query->fields('rsn', array('field_resource_sms_name_value	'));
+    $query->fields('sms_flag', array('field_sms_flag_value'));
+    $query->fields('rsn', array('field_resource_sms_name_value'));
     $query->fields('dispatch_date', array('field_dispatch_date_value'));
     $query->fields('hc', array('field_hul_code_value'));
     $query->groupBy('n.title');
     $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
 
     $sms_flag = 0; //sms_preprocess_flag($trip_id, $distributor_id);
+    $preprocess_update_flag = 0;
     $sms_api_url = variable_get('sms_api_url');
     $username = variable_get('username');
     $msg_token = variable_get('msg_token');
@@ -4157,24 +4168,24 @@ function _update_sms_integration_api($node) {
       $hul_code_value = $value['field_hul_code_value'];
 
       $message = urlencode("Dear Customer, HUL products with Inv. " . $bill_number . " (Rs." . $bill_value . ") is out for delivery by " . $resource_sms_name . " - " . $contact_number . "." . " Payment Terms " . $payment_terms . "-" . $credit_days . " Day(s)");
-
       if ($sms_required == 'yes' && $sms_flag == 0 && $trip_sms_flag == 1) {
         $sql_ins_id = sms_integration_api_log($trip_id, $message, $mobile_no, $distributor_id, $dispatch_date, $bill_number, $hul_code_value);
 
         $order_api_url = $sms_api_url . '?username=' . $username . '&msg_token=' . $msg_token . '&sender_id=' . $sender_id . '&message=' . $message . '&mobile=' . $mobile_no;
         $options = array('method' => 'POST');
-        $response_data = drupal_http_request($order_api_url, $options);
-
-        $response_data = $response_data->data;
-        sms_integration_api_log_update($response_data, $sql_ins_id);
+        $res_data = drupal_http_request($order_api_url, $options);
+        $response_data = $res_data->data;
+        $log_data = $response_data ? $response_data : $res_data;
+        sms_integration_api_log_update($log_data, $sql_ins_id);
 
         // Update SMS flag = 1.
         if ((strpos($response_data, 'SUCCESS') !== false) && $trip_sms_flag == 1) {
-          sms_preprocess_update($trip_id, $distributor_id);
+          $preprocess_update_flag = 1;
         }
       }
     }
-    if (sms_preprocess_flag($trip_id, $distributor_id) == 1) {
+    if ($preprocess_update_flag == 1) {
+      sms_preprocess_update($trip_id, $distributor_id);
       drupal_set_message(t('Message successfully sent for Trip ID: ' . $trip_id));
     }
   }
@@ -4262,4 +4273,55 @@ function sms_config_form($form, $form_state) {
     '#required' => TRUE,
   );
   return system_settings_form($form);
+}
+
+function message_re_triggered($title) {
+  $sms = " ";
+  $nid = get_nid_from_title($title, 'dispatch_data');
+  $node = node_load($nid);
+  $trip_id = $node->title;
+  $distributor_id = $node->uid;
+  $preprocess_flag = sms_preprocess_flag($trip_id, $distributor_id);
+  $trip_exist = check_tripid_exist_in_farery_table($trip_id, $distributor_id);// if trip id exist return 0.
+  if($preprocess_flag == 0 && $trip_exist == 0) {
+    _update_sms_integration_api($node);
+  }
+  else if($trip_exist == 1) {
+    $sms = 'Trip ID does not exist in Delivery App.';
+  }
+  else{
+    $sms = 'Message already sent for Trip ID : '.$trip_id;
+  } 
+  return $sms;
+}
+
+function bill_message_re_triggered($sql_ins_id) {
+  //fetch with sql query by id from log table
+  $query = db_select('sms_integration_api_log', 'sms');
+  $query->fields('sms', array('message', 'mobile_no'));
+  $query->condition('sms.id', $sql_ins_id);
+  $res = $query->execute()->fetchAll();
+
+  $message = urlencode($res[0]->message);
+  $mobile_no = $res[0]->mobile_no;
+  $sms_api_url = variable_get('sms_api_url');
+  $username = variable_get('username');
+  $msg_token = variable_get('msg_token');
+  $sender_id = variable_get('sender_id');
+
+  $order_api_url = $sms_api_url . '?username=' . $username . '&msg_token=' . $msg_token . '&sender_id=' . $sender_id . '&message=' . $message . '&mobile=' . $mobile_no;
+  $options = array('method' => 'POST');
+  $res_data = drupal_http_request($order_api_url, $options);
+  $response_data = $res_data->data;
+  $log_data = $response_data ? $response_data : $res_data;
+  sms_integration_api_log_update($log_data, $sql_ins_id);
+
+  if (strpos($response_data, 'SUCCESS') !== false) {
+    drupal_set_message(t('Message successfully sent'));
+  }
+  else {
+    drupal_set_message(t('Message not sent'));
+  }
+
+  return " ";
 }
