@@ -5659,6 +5659,24 @@ function dispatch_planning_views_data() {
     'help' => t("unique identifiers."),
     // 'weight' => -10,
   );
+  
+  $data['sms_integration_api_log']['id'] = array(
+    'title' => t('ID'),
+    'help' => t('ID'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
 
   $data['sms_integration_api_log']['trip_id'] = array(
     'title' => t('Trip ID'),
