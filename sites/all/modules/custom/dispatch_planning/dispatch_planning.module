@@ -3279,8 +3279,16 @@ function dispatch_planning_node_update($node) {
       if (check_tripid_exist_in_farery_table($trip_id, $distributor_id) == 1) {
         drupal_register_shutdown_function('_update_dispatch_planning_api', $node);
 
-        if (sms_preprocess_flag($trip_id, $distributor_id) == 0) {
-          _update_sms_integration_api($node);
+        if ($node->field_sms_flag[LANGUAGE_NONE][0]['value']) {
+          //_update_sms_integration_api($node);
+              db_insert('sms_preprocess')
+              ->fields(array(
+                'trip_id' => $node->title,
+                'distributor_id' => $distributor_id,
+                'flag' => 0,
+                'created_date' => REQUEST_TIME,
+              ))
+              ->execute();
         }
       }
     }
@@ -4168,7 +4176,7 @@ function _update_sms_integration_api($node) {
       $hul_code_value = $value['field_hul_code_value'];
 
       $message = urlencode("Dear Customer, HUL products with Inv. " . $bill_number . " (Rs." . $bill_value . ") is out for delivery by " . $resource_sms_name . " - " . $contact_number . "." . " Payment Terms " . $payment_terms . "-" . $credit_days . " Day(s)");
-      if ($sms_required == 'yes' && $sms_flag == 0 && $trip_sms_flag == 1) {
+      if ($sms_required == 'yes' && $sms_flag != 1 && $trip_sms_flag == 1) {
         $sql_ins_id = sms_integration_api_log($trip_id, $message, $mobile_no, $distributor_id, $dispatch_date, $bill_number, $hul_code_value);
 
         $order_api_url = $sms_api_url . '?username=' . $username . '&msg_token=' . $msg_token . '&sender_id=' . $sender_id . '&message=' . $message . '&mobile=' . $mobile_no;
@@ -4187,6 +4195,15 @@ function _update_sms_integration_api($node) {
     if ($preprocess_update_flag == 1) {
       sms_preprocess_update($trip_id, $distributor_id);
       drupal_set_message(t('Message successfully sent for Trip ID: ' . $trip_id));
+    }
+    else {// Tried but not successfully message sent.
+      db_update('sms_preprocess')
+      ->fields(array(
+      'flag' => 2,
+      ))
+      ->condition('trip_id', $trip_id)
+      ->condition('distributor_id', $distributor_id)
+      ->execute();
     }
   }
 }
@@ -4283,7 +4300,7 @@ function message_re_triggered($title) {
   $distributor_id = $node->uid;
   $preprocess_flag = sms_preprocess_flag($trip_id, $distributor_id);
   $trip_exist = check_tripid_exist_in_farery_table($trip_id, $distributor_id);// if trip id exist return 0.
-  if($preprocess_flag == 0 && $trip_exist == 0) {
+  if($preprocess_flag != 1 && $trip_exist == 0) {
     _update_sms_integration_api($node);
   }
   else if($trip_exist == 1) {
@@ -4293,6 +4310,38 @@ function message_re_triggered($title) {
     $sms = 'Message already sent for Trip ID : '.$trip_id;
   } 
   return $sms;
+}
+
+
+function message_triggered_cron() {
+  $time = time() - 60 * 1;
+
+  $query = db_select('sms_preprocess', 'sms');
+  $query->fields('sms', array('trip_id', 'distributor_id'));
+  $query->orderBy('sms.created_date');
+  $query->condition('sms.flag', 0);
+  $query->condition('sms.created_date', $time, '<');
+  $query->range(0, 10);
+  $result = $query->execute()->fetchAll();
+
+  foreach ($result as $val) {
+    $trip_id = $val->trip_id;
+    $distributor_id = $val->distributor_id;
+
+    $query = db_select('node', 'n');
+    $query->condition('n.title', $trip_id);
+    $query->condition('n.type', 'dispatch_data');
+    $query->condition('n.uid', $distributor_id);
+    $query->fields('n', array('nid'));
+    $nid = $query->execute()->fetchField();
+    
+    $node = node_load($nid);
+
+    $trip_exist = check_tripid_exist_in_farery_table($trip_id, $distributor_id);// if trip id exist return 0.
+    if($trip_exist == 0) {
+      _update_sms_integration_api($node);
+    }
+  }
 }
 
 function bill_message_re_triggered($sql_ins_id) {

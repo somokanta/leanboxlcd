@@ -1405,13 +1405,11 @@ function send_email_to_fill_zoho() {
   if (date('N') < 6) {
     // holiday list: key->month and value->days
     $holiday_list[1] = array(1, 26);
-    $holiday_list[3] = array(2, 30);
+    $holiday_list[3] = array(21);
     $holiday_list[5] = array(1);
-    $holiday_list[6] = array(15);
+    $holiday_list[6] = array(5);
     $holiday_list[8] = array(15);
-    $holiday_list[9] = array(3);
-    $holiday_list[10] = array(2);
-    $holiday_list[11] = array(7);
+    $holiday_list[10] = array(2,8,28);
     $holiday_list[12] = array(25);
 
 

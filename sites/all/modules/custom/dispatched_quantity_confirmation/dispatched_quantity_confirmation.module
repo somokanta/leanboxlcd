@@ -399,15 +399,6 @@ function dispatched_quantity_confirmation_node_presave($node) {
         'created_date' => REQUEST_TIME,
       ))
       ->execute();
-    
-    db_insert('sms_preprocess') // Table name no longer needs {}
-      ->fields(array(
-        'trip_id' => $node->title,
-        'distributor_id' => $distributor_id,
-        'flag' => 0,
-        'created_date' => REQUEST_TIME,
-      ))
-      ->execute();
   }
 }
 
