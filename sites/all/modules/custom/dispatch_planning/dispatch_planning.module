@@ -4155,7 +4155,6 @@ function _update_sms_integration_api($node) {
     $query->groupBy('n.title');
     $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
 
-    $sms_flag = 0; //sms_preprocess_flag($trip_id, $distributor_id);
     $preprocess_update_flag = 0;
     $sms_api_url = variable_get('sms_api_url');
     $username = variable_get('username');
@@ -4176,7 +4175,7 @@ function _update_sms_integration_api($node) {
       $hul_code_value = $value['field_hul_code_value'];
 
       $message = urlencode("Dear Customer, HUL products with Inv. " . $bill_number . " (Rs." . $bill_value . ") is out for delivery by " . $resource_sms_name . " - " . $contact_number . "." . " Payment Terms " . $payment_terms . "-" . $credit_days . " Day(s)");
-      if ($sms_required == 'yes' && $sms_flag != 1 && $trip_sms_flag == 1) {
+      if ($sms_required == 'yes' && $trip_sms_flag == 1) {
         $sql_ins_id = sms_integration_api_log($trip_id, $message, $mobile_no, $distributor_id, $dispatch_date, $bill_number, $hul_code_value);
 
         $order_api_url = $sms_api_url . '?username=' . $username . '&msg_token=' . $msg_token . '&sender_id=' . $sender_id . '&message=' . $message . '&mobile=' . $mobile_no;
