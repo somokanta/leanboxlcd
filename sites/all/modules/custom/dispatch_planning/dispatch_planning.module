@@ -3293,6 +3293,7 @@ function dispatch_planning_node_update($node) {
                 'distributor_id' => $distributor_id,
                 'flag' => 0,
                 'created_date' => REQUEST_TIME,
+                'dispatch_date' => strtotime($dispatch_date),
               ))
               ->execute();
         }
@@ -4103,20 +4104,6 @@ function dispatch_planning_views_pre_render(&$view) {
   }
 }
 
-// SMS Preprocess.
-//function sms_preprocess() {
-//  //Send data which is created 1min befor, to avoid data loose of Bills. It might getting created Yet
-//  $time = time() - 60 * 1;
-//
-//  $query = db_select('sms_preprocess', 'sp');
-//  $query->fields('sp', array('trip_id', 'distributor_id'));
-//  $query->orderBy('sp.created_date');
-//  $query->condition('sp.flag', 0);
-//  $query->condition('sp.created_date', $time, '<');
-//  $query->range(0, 3);
-//  $result = $query->execute()->fetchAll();
-//}
-
 function _update_sms_integration_api($node) {
   $distributor_id = $node->uid;
   $trip_id = $node->title;
@@ -4187,6 +4174,7 @@ function _update_sms_integration_api($node) {
         $order_api_url = $sms_api_url . '?username=' . $username . '&msg_token=' . $msg_token . '&sender_id=' . $sender_id . '&message=' . $message . '&mobile=' . $mobile_no;
         $options = array('method' => 'POST');
         $res_data = drupal_http_request($order_api_url, $options);
+
         $response_data = $res_data->data;
         $log_data = $response_data ? $response_data : $res_data;
         sms_integration_api_log_update($log_data, $sql_ins_id);
@@ -4233,6 +4221,7 @@ function sms_integration_api_log_update($response_data, $sql_ins_id) {
   db_update('sms_integration_api_log')
     ->fields(array(
       'response_data' => $response_data,
+      'response_time' => time(),
     ))
     ->condition('id', $sql_ins_id, '=')
     ->execute();
@@ -4326,7 +4315,7 @@ function message_triggered_cron() {
   $query->orderBy('sms.created_date');
   $query->condition('sms.flag', 0);
   $query->condition('sms.created_date', $time, '<');
-  $query->range(0, 5);
+  $query->range(0, 3);
   $result = $query->execute()->fetchAll();
 
   foreach ($result as $val) {
@@ -4350,32 +4339,42 @@ function message_triggered_cron() {
 }
 
 function bill_message_re_triggered($sql_ins_id) {
-  //fetch with sql query by id from log table
   $query = db_select('sms_integration_api_log', 'sms');
-  $query->fields('sms', array('message', 'mobile_no'));
+  $query->fields('sms', array('message', 'mobile_no', 'distributor_id', 'trip_id', 'response_data', 'dispatch_date', 'hul_code', 'bill_number', 'response_time'));//all column
   $query->condition('sms.id', $sql_ins_id);
   $res = $query->execute()->fetchAll();
 
-  $message = urlencode($res[0]->message);
-  $mobile_no = $res[0]->mobile_no;
-  $sms_api_url = variable_get('sms_api_url');
-  $username = variable_get('username');
-  $msg_token = variable_get('msg_token');
-  $sender_id = variable_get('sender_id');
+  $response_data = $res[0]->response_data;
+  if (strpos($response_data, 'SUCCESS') === false) { 
+    $msg = $res[0]->message;
+    $mobile_no = $res[0]->mobile_no;
+    $distributor_id = $res[0]->distributor_id;
+    $trip_id = $res[0]->trip_id;
+    $dispatch_date = $res[0]->dispatch_date;
+    $bill_number = $res[0]->bill_number;
+    $hul_code_value = $res[0]->hul_code;
+    
+    $sql_ins_id_new = sms_integration_api_log($trip_id, $msg, $mobile_no, $distributor_id, $dispatch_date, $bill_number, $hul_code_value);
+    
+    $message = urlencode($msg);//urlencode to send the message
+    $sms_api_url = variable_get('sms_api_url');
+    $username = variable_get('username');
+    $msg_token = variable_get('msg_token');
+    $sender_id = variable_get('sender_id');
 
-  $order_api_url = $sms_api_url . '?username=' . $username . '&msg_token=' . $msg_token . '&sender_id=' . $sender_id . '&message=' . $message . '&mobile=' . $mobile_no;
-  $options = array('method' => 'POST');
-  $res_data = drupal_http_request($order_api_url, $options);
-  $response_data = $res_data->data;
-  $log_data = $response_data ? $response_data : $res_data;
-  sms_integration_api_log_update($log_data, $sql_ins_id);
+    $order_api_url = $sms_api_url . '?username=' . $username . '&msg_token=' . $msg_token . '&sender_id=' . $sender_id . '&message=' . $message . '&mobile=' . $mobile_no;
+    $options = array('method' => 'POST');
+    $res_data = drupal_http_request($order_api_url, $options);
+    $response_data = $res_data->data;
+    $log_data = $response_data ? $response_data : $res_data;
+    sms_integration_api_log_update($log_data, $sql_ins_id_new);
 
-  if (strpos($response_data, 'SUCCESS') !== false) {
-    drupal_set_message(t('Message successfully sent'));
+    if (strpos($response_data, 'SUCCESS') !== false) {
+      drupal_set_message(t('Message successfully sent'));
+    }
+    else {
+      drupal_set_message(t('Message not sent'));
+    }
   }
-  else {
-    drupal_set_message(t('Message not sent'));
-  }
-
   return " ";
 }

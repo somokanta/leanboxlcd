@@ -5827,6 +5827,24 @@ function dispatch_planning_views_data() {
       'handler' => 'views_handler_argument_string',
     ),
   );
+  
+  $data['sms_integration_api_log']['response_time'] = array(
+    'title' => t('Response Date'),
+    'help' => t('Response Date'),
+    'field' => array(
+      'handler' => 'views_handler_field_date',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort_date',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_date',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_filter_date',
+    ),
+  );
 
   $base_table = 'sms_integration_api_log';
   $data[$base_table]['date_filter'] = array(
@@ -5912,6 +5930,24 @@ function dispatch_planning_views_data() {
     ),
     'argument' => array(
       'handler' => 'views_handler_argument_string',
+    ),
+  );
+  
+  $data['sms_preprocess']['dispatch_date'] = array(
+    'title' => t('Dispatch Date'),
+    'help' => t('Dispatch Date'),
+    'field' => array(
+      'handler' => 'views_handler_field_date',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort_date',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_date',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_filter_date',
     ),
   );
 

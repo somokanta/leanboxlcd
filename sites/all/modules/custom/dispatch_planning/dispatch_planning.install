@@ -111,6 +111,12 @@ function dispatch_planning_schema() {
         'not null' => TRUE,
         'default' => 0,
       ),
+      'response_time' => array(
+        'description' => t('API Response time'),
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
     ),
     'indexes' => array(
       'trip_id' => array('trip_id'),
@@ -143,6 +149,12 @@ function dispatch_planning_schema() {
       'flag' => array(
         'description' => t('Flag'),
         'type' => 'int',
+        'default' => 0,
+      ),
+      'dispatch_date' => array(
+        'description' => t('SMS Dispatch Date'),
+        'type' => 'int',
+        'not null' => TRUE,
         'default' => 0,
       ),
     ),
