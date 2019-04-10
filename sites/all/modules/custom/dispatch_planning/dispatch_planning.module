@@ -571,6 +571,12 @@ function dispatch_planning_menu() {
     'page arguments' => array(1),
     'access arguments' => array('Distributor Upload File'),
   );
+  $items['message-send-cron'] = array(
+    'title' => 'Message Send Cron',
+    'page callback' => 'message_triggered_cron',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );  
   $items['bill-wise-message-re-send/%'] = array(
     'title' => 'Message Resend',
     'page callback' => 'bill_message_re_triggered',
