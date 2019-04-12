@@ -2848,11 +2848,15 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
     $query->add_where(0, 'ptl_header_data.distributor_id', $distributor_id, '=');
   }
   
-  if (($view->base_table == 'master_ptl_data') && ($view->name == 'master_ptl_loose_sheet')) {
-    $query->add_orderby(NULL, "SUBSTRING(master_ptl_data.product_name, 1, 1)", 'ASC','order_master_ptl_data_product_name_first');
-    $query->add_orderby(NULL, "SUBSTRING_INDEX(SUBSTRING_INDEX(master_ptl_data.product_name,' ',2),' ',-1)", 'ASC','order_master_ptl_data_product_name_second');
-    $query->add_orderby(NULL, "SUBSTRING(master_ptl_data.product_name, length(SUBSTRING_INDEX(master_ptl_data.product_name, ' ', 2))+2, length(master_ptl_data.product_name))", 'ASC','order_master_ptl_data_product_name_last');
-  }
+  //if (($view->base_table == 'master_ptl_data') && ($view->name == 'master_ptl_loose_sheet')) {
+    //$query->add_orderby(NULL, "SUBSTRING(master_ptl_data.product_name, 1, 1)", 'ASC','order_master_ptl_data_product_name_first');
+    //$query->add_orderby(NULL, "SUBSTRING_INDEX(SUBSTRING_INDEX(master_ptl_data.product_name,' ',2),' ',-1)", 'ASC','order_master_ptl_data_product_name_second');
+    //$query->add_orderby(NULL, "SUBSTRING(master_ptl_data.product_name, length(SUBSTRING_INDEX(master_ptl_data.product_name, ' ', 2))+2, length(master_ptl_data.product_name))", 'ASC','order_master_ptl_data_product_name_last');
+
+    //new condition added
+    //$query->add_orderby(NULL, "CASE WHEN node_field_data_field_product_category.title in ('FNB','PP','PP-A','PP-B') THEN node_field_data_field_brand.title END", 'ASC','master_ptl_data_fnb_pp_brand');
+    //$query->add_orderby(NULL, "CASE WHEN node_field_data_field_product_category.title not in ('FNB','PP','PP-A','PP-B') THEN node_field_data_field_product_devision_reference__field_data_field_product_sequence.field_product_sequence_value END", 'ASC','master_ptl_data_fnb_pp_else_sequence');
+  //}
   if ($view->base_table == 'van_cld_data_table') {
     $query->add_where(0, 'van_cld_data_table.distributor_id', $distributor_id, '=');
   }
