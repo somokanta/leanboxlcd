@@ -350,11 +350,17 @@ and open the template in the editor.
 #trip-short-excess-form > div > div {
   width: 24.5%;
   float: left;
- 
+  margin-bottom: 15px;
+  margin-right: 40px; 
 } 
 #trip-short-excess-form .container-inline-date .form-type-date-popup {
-  margin-left: 10px;
+/*  margin-left: 10px;*/
 }
 #trip-short-excess-form #trip_id input[type="text"] {
   width: 100%;
+}
+form#trip-short-excess-form .form-submit {
+  display: block;
+  clear: both;
+  text-align: left;
 }
