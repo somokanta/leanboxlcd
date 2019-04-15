@@ -152,23 +152,23 @@ function trip_short_excess_form_callback() {
     }
     $query->fields('ad', array('runsheet_number'));
     $query->fields('vtt', array('total_cashier_cash_short'));
-    $query->addExpression("SUM(distinct(CASE WHEN dit.res_cashier_short > 0 AND dit.res_cashier_short != '' THEN dit.res_cashier_short*dit.sum_net_sales_value END))", 'Inventory_Short_Value');
-    $query->addExpression("SUM(distinct(eit.excess_qty * eit.mrp * 0.9) )", 'Total_Excess_Value');
-    $query->addExpression("SUM(distinct(CASE WHEN eit.credit_to_cashier = 1 THEN (eit.excess_qty * eit.mrp * 0.9) END))", 'ExcessValueCreditedtoCashier');
+    $query->addExpression("SUM(distinct(CASE WHEN dit.res_cashier_short > 0 AND dit.res_cashier_short != '' THEN dit.res_cashier_short*dit.sum_net_sales_value END))", 'inventory_short_value');
+    $query->addExpression("SUM(distinct(eit.excess_qty * eit.mrp * 0.9) )", 'total_excess_value');
+    $query->addExpression("SUM(distinct(CASE WHEN eit.credit_to_cashier = 1 THEN (eit.excess_qty * eit.mrp * 0.9) END))", 'excess_value_credited_to_cashier');
+		$query->addExpression("SUM(CASE WHEN dit.claimed_godown_short > 0 THEN(dit.claimed_godown_short * dit.sum_net_sales_value) END)", 'pending_claimed_godown_short_value');
 
     $query->groupBy('ad.runsheet_number');
     $res = $query->execute()->fetchAll();
     foreach ($res as $val) {
-      $inventory_short_value = $val->Inventory_Short_Value;
-      $final_invent_shrt_val = round($inventory_short_value, 2);
-      $row['trip_id'] = $val->runsheet_number;
-      $row['Inventory_Short_Value'] = $final_invent_shrt_val;
-      $row['total_cashier_cash_short'] = round($val->total_cashier_cash_short,2);
-      $row['Excess_Value'] = round($val->Total_Excess_Value,2);
-      $row['ExcessValueCreditedtoCashier'] = round($val->ExcessValueCreditedtoCashier,2);
-      $rows[] = $row;
-    }
-    $header = array('Trip Id', 'Inventory Short Value', 'Cashier Cash Short', 'Excess Value', 'Excess Value Credited to Cashier');
+			$row['trip_id'] = $val->runsheet_number;
+			$row['inventory_short_value'] = round($val->inventory_short_value, 2);
+			$row['pending_claimed_godown_short_value'] = round($val->pending_claimed_godown_short_value, 2);
+			$row['total_cashier_cash_short'] = round($val->total_cashier_cash_short, 2);
+			$row['total_excess_value'] = round($val->total_excess_value, 2);
+			$row['excess_value_credited_to_cashier'] = round($val->excess_value_credited_to_cashier, 2);
+			$rows[] = $row;
+		}
+		$header = array('Trip Id', 'Inventory Short Value', 'Pending Claimed GS Value','Cashier Cash Short', 'Total Excess Value', 'Excess Value Credited to Cashier');
     $per_page = 10;
     // Initialize the pager
     $current_page = pager_default_initialize(count($rows), $per_page);
@@ -180,16 +180,16 @@ function trip_short_excess_form_callback() {
     $output .= theme('pager', array('quantity', count($rows)));
 
     $html = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('width' => '100%')));
-    cache_set('trip-short-excess-report' . session_id(), $html, 'cache', time() + 60 * 10);
-    $output .= l(t('XLS'), 'trip-short-excess-report/export', array('query' => array($data)));
+    cache_set('reco-mismatch-report' . session_id(), $html, 'cache', time() + 60 * 10);
+    $output .= l(t('XLS'), 'reco-mismatch-report/export', array('query' => array($data)));
   }
   return $form . $output;
   $form_state['rebuild'] = TRUE;
 }
 
 function trip_short_excess_report_export() {
-  $file = "trip_short_excess_report.xls";
-  $data = cache_get('trip-short-excess-report' . session_id());
+  $file = "reco-mismatch-report.xls";
+  $data = cache_get('reco-mismatch-report' . session_id());
   if (empty($data)) {
     $table = trip_short_excess_form_callback();
   }
