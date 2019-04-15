@@ -3,7 +3,7 @@ To change this license header, choose License Headers in Project Properties.
 To change this template file, choose Tools | Templates
 and open the template in the editor.
 */
-/* 
+/*
     Created on : 21 May, 2018, 1:03:51 PM
     Author     : user
 */
@@ -340,7 +340,21 @@ and open the template in the editor.
 /*#trip-id
 {
   width : 26%;
-}*/
-
-
-
+}
+*/
+#trip-short-excess-form > div {
+  display : inline-block;
+  align-items: center;
+  justify-content: center;
+}
+#trip-short-excess-form > div > div {
+  width: 24.5%;
+  float: left;
+ 
+} 
+#trip-short-excess-form .container-inline-date .form-type-date-popup {
+  margin-left: 10px;
+}
+#trip-short-excess-form #trip_id input[type="text"] {
+  width: 100%;
+}
