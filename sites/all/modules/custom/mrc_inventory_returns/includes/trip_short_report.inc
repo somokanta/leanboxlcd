@@ -14,8 +14,11 @@ function trip_short_excess_form($form, &$form_state) {
   }
 
   //$dispatch_date = date('Y-m-d');
-  if (isset($_GET['dispatch_date'])) {
-    $dispatch_date = $_GET['dispatch_date'];
+  if (isset($_GET['from_dispatch_date'])) {
+    $from_dispatch_date = $_GET['from_dispatch_date'];
+  }
+  if (isset($_GET['to_dispatch_date'])) {
+    $to_dispatch_date = $_GET['to_dispatch_date'];
   }
   //$confirm_date = date('Y-m-d');
   if (isset($_GET['confirm_date'])) {
@@ -36,14 +39,27 @@ function trip_short_excess_form($form, &$form_state) {
   );
 
 
-  $form['dispatch_date'] = array(
+  $form['from_dispatch_date'] = array(
     '#type' => 'date_popup',
-    '#title' => t('Dispatch Date'),
+    '#title' => t('From Dispatch Date'),
     '#date_format' => 'Y-m-d',
     '#attributes' => array('class' => array('dispatch_date')),
     '#date_label_position' => '',
     '#date_year_range' => '-20:+2',
-    '#default_value' => $dispatch_date,
+    '#default_value' => $from_dispatch_date,
+    '#size' => 30,
+    '#prefix' => '<div class="stat_3" id="dis_date">',
+    '#suffix' => '</div>',
+  );
+  
+  $form['to_dispatch_date'] = array(
+    '#type' => 'date_popup',
+    '#title' => t('To Dispatch Date'),
+    '#date_format' => 'Y-m-d',
+    '#attributes' => array('class' => array('dispatch_date')),
+    '#date_label_position' => '',
+    '#date_year_range' => '-20:+2',
+    '#default_value' => $to_dispatch_date,
     '#size' => 30,
     '#prefix' => '<div class="stat_3" id="dis_date">',
     '#suffix' => '</div>',
@@ -83,23 +99,25 @@ function trip_short_excess_form($form, &$form_state) {
 }
 
 function trip_short_excess_form_validate($form, &$form_state) {
-  $dispatch_date = $form_state['values']['dispatch_date'];
+  $from_dispatch_date = $form_state['values']['from_dispatch_date'];
+  $to_dispatch_date = $form_state['values']['to_dispatch_date'];
   $trip_id = $form_state['values']['trip_id'];
   $trip_status = $form_state['values']['trip_status'];
   $confirm_date = $form_state['values']['confirm_date'];
-  if (empty($dispatch_date) && empty($trip_id) && (empty($trip_status) && empty($confirm_date))) {
+  if (empty($from_dispatch_date && $to_dispatch_date) && empty($trip_id) && (empty($trip_status) && empty($confirm_date))) {
     drupal_set_message(t('Please select any one filter'), 'error');
   }
 }
 
 function trip_short_excess_form_submit($form, &$form_state) {
-  $dispatch_date = $form_state['values']['dispatch_date'];
+  $from_dispatch_date = $form_state['values']['from_dispatch_date'];
+  $to_dispatch_date = $form_state['values']['to_dispatch_date'];
   $trip_id = $form_state['values']['trip_id'];
   $trip_status = $form_state['values']['trip_status'];
   $confirm_date = $form_state['values']['confirm_date'];
 
   if (($form_state['values']["op"] == "Apply") && (arg(0) == 'reco-mismatch-report')) {
-    drupal_goto('reco-mismatch-report', array('query' => array('dispatch_date' => $dispatch_date, 'trip_id' => $trip_id, 'trip_status' => $trip_status, 'confirm_date' => $confirm_date)));
+    drupal_goto('reco-mismatch-report', array('query' => array('from_dispatch_date' => $from_dispatch_date, 'to_dispatch_date' => $to_dispatch_date, 'trip_id' => $trip_id, 'trip_status' => $trip_status, 'confirm_date' => $confirm_date)));
   }
 }
 
@@ -111,8 +129,11 @@ function trip_short_excess_form_callback() {
   if (isset($_GET['trip_id'])) {
     $trip_id = $_GET['trip_id'];
   }
-  if (isset($_GET['dispatch_date'])) {
-    $dispatch_date = $_GET['dispatch_date'];
+  if (isset($_GET['from_dispatch_date'])) {
+    $from_dispatch_date = $_GET['from_dispatch_date'];
+  }
+  if (isset($_GET['to_dispatch_date'])) {
+    $to_dispatch_date = $_GET['to_dispatch_date'];
   }
   if (isset($_GET['confirm_date'])) {
     $confirm_date = $_GET['confirm_date'];
@@ -125,15 +146,15 @@ function trip_short_excess_form_callback() {
   if (arg(1) != 'export') {
     $form = drupal_render(drupal_get_form('trip_short_excess_form'));
   }
-  if (!empty($trip_id) || !empty($dispatch_date) || !empty($confirm_date) || !empty($trip_status)) {
+  if (!empty($trip_id) || !empty($from_dispatch_date && $to_dispatch_date)  || !empty($confirm_date) || !empty($trip_status)) {
 		 
     $query = db_select('dispatch_planning_api_data', 'ad');
     $query->condition('ad.distributor_id', $distributor_id, '=');
     if (!empty($trip_id)) {
       $query->condition('ad.runsheet_number', $trip_id, '=');
     }
-    if (!empty($dispatch_date)) {
-      $query->condition('ad.date', $dispatch_date, '=');
+    if (!empty($from_dispatch_date) && !empty($to_dispatch_date)) {
+      $query->condition('ad.date', array($from_dispatch_date, $to_dispatch_date), 'BETWEEN');
     }
     $query->leftjoin('vrs_trip_total', 'vtt', 'ad.runsheet_number = vtt.trip_id AND ad.distributor_id = vtt.distributor_id');
     $query->join('dispatch_planning_item_details', 'dit', 'ad.id = dit.trip_bill_reference');
