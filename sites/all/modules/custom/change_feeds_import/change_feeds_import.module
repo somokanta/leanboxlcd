@@ -1711,6 +1711,9 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
         drupal_set_message("Brand " . $item['brand'] . " does not exist in Brand Master", 'error');
         $entity->feeds_item->skip = TRUE;
       }
+    }else{
+      drupal_set_message("Please enter Brand for SKU Code- $sku.", 'error');
+      $entity->feeds_item->skip = TRUE;
     }
 
     // Update the sku7 code in SKU7_CODE field
@@ -2623,6 +2626,28 @@ function change_feeds_import_form_alter(&$form, &$form_state, $form_id) {
         '#theme' => 'item_list',
         '#items' => $allowed_values,
       );
+    }
+    
+    if($form['#importer_id'] == 'sku7_code_master_leanbox'){
+      /*
+      $res = feeds_tamper_load_by_importer($form['#importer_id']);
+      $required_column_arr = array();
+      $required_column_str = "";
+      foreach($res as $key => $value){
+        if($value[0]->plugin_id == 'required'){
+          array_push($required_column_arr, $key);
+        }
+      }   
+      array_push($required_column_arr, 'Brand');
+      $required_column_str = implode(', ', $required_column_arr);
+      //$description_help_text = 'Import <a href="http://en.wikipedia.org/wiki/Comma-separated_values">CSV files</a> with these mandatory columns: '.$required_column_str;
+      */
+      
+      $description_help_text = ''; 
+      $form['feeds']['FeedsCSVParser']['help']['description']['#markup'] = $description_help_text;
+      
+      $list_help_text = t('Column <strong>SKU7 CODE</strong> is considered unique: only one item per SKU7 CODE value will be created.');
+      $form['feeds']['FeedsCSVParser']['help']['list']['#items'][0] = $list_help_text;
     }
   }
   if ($form_id == 'user_register_form' || $form_id == 'user_profile_form') {
