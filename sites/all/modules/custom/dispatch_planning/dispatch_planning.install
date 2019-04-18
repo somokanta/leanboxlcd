@@ -2270,3 +2270,37 @@ function dispatch_planning_update_7140() {
     }
   }
 }
+
+function dispatch_planning_update_7141() {
+  $fields = array(
+    'payment_outcome' => array(
+      'description' => t('App payment outcome'),
+      'type' => 'varchar',
+      'length' => 50,
+      'default' => NULL,
+    ),
+  );
+
+  $fields1 = array(
+    'app_return_qty' => array(
+      'description' => t('App Return Quantity'),
+      'type' => 'int',
+      'default' => 0,
+    ),
+  );
+  foreach ($fields as $key => $field) {
+    if (!db_field_exists('dispatch_planning_api_data', $key)) {
+      db_add_field('dispatch_planning_api_data', $key, $field);
+      db_add_field('inventory_versioning_api_data', $key, $field);
+      
+      db_change_field('dispatch_planning_api_data', 'derived_money_collect', 'derived_payment_outcome',array('description' => t('Derived payment outcome'),'type' => 'varchar','length' => 50,'default' => ''));
+      db_change_field('inventory_versioning_api_data', 'derived_money_collect', 'derived_payment_outcome',array('description' => t('Derived payment outcome'),'type' => 'varchar','length' => 50,'default' => ''));
+    }
+  }
+  foreach ($fields1 as $key => $field) {
+    if (!db_field_exists('dispatch_planning_item_details', $key)) {
+      db_add_field('dispatch_planning_item_details', $key, $field);
+      db_add_field('inventory_versioning_item_details', $key, $field);
+    }
+  }
+}

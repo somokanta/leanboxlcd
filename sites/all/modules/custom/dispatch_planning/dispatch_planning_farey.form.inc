@@ -304,8 +304,8 @@ function _edit_trip_delivered_callback_form($form, &$form_state) {
                $res_cheque_date = $bill_details[0]['res_cheque_date'];
                $res_photo_of_cheque = $bill_details[0]['res_photo_of_cheque'];
                $res_cash_amount = $bill_details[0]['res_cash_amount'];
-               $res_money_collect2 = strtolower($bill_details[0]['res_money_collect2']);
-               $res_money_collect2_edit = strtolower($bill_details[0]['res_money_collect2_edit']);
+               //$res_money_collect2 = strtolower($bill_details[0]['res_money_collect2']);
+               //$res_money_collect2_edit = strtolower($bill_details[0]['res_money_collect2_edit']);
                $res_confirm_signed_bill_amount_edit = $bill_details[0]['res_confirm_signed_bill_amount_edit'];
                $res_photo_of_signed_bill_delivery_edit = $bill_details[0]['res_photo_of_signed_bill_delivery_edit'];
                $res_bank_name_edit = $bill_details[0]['res_bank_name_edit'];
@@ -313,16 +313,17 @@ function _edit_trip_delivered_callback_form($form, &$form_state) {
                $res_cheque_date_edit = $bill_details[0]['res_cheque_date_edit'];
                $res_photo_of_cheque_edit = $bill_details[0]['res_photo_of_cheque_edit'];
                $res_cash_amount_edit = $bill_details[0]['res_cash_amount_edit'];
-               $res_signed_bill_delivery = $bill_details[0]['res_signed_bill_delivery'];
-               $res_signed_bill_partial = $bill_details[0]['res_signed_bill_partial'];
-               $res_signed_bill_delivery_edit = $bill_details[0]['res_signed_bill_delivery_edit'];
-               $res_signed_bill_partial_edit = $bill_details[0]['res_signed_bill_partial_edit'];
+               //$res_signed_bill_delivery = $bill_details[0]['res_signed_bill_delivery'];
+               //$res_signed_bill_partial = $bill_details[0]['res_signed_bill_partial'];
+               //$res_signed_bill_delivery_edit = $bill_details[0]['res_signed_bill_delivery_edit'];
+               //$res_signed_bill_partial_edit = $bill_details[0]['res_signed_bill_partial_edit'];
                $res_cheque_no = $bill_details[0]['res_cheque_no'];
                $res_cheque_no_edit = $bill_details[0]['res_cheque_no_edit'];
                $photo_of_signed_bill_partial = $bill_details[0]['photo_of_signed_bill_partial'];
                $photo_of_signed_bill_partial_edit = $bill_details[0]['photo_of_signed_bill_partial_edit'];
                $res_delivery_boy = $bill_details[0]['res_delivery_boy'];
                $res_delivery_boy_edit = $bill_details[0]['res_delivery_boy_edit'];
+               $derived_payment_outcome = $bill_details[0]['derived_payment_outcome'];
 
                // unset all keys 
                unset($bill_details[0]['res_reason_for_failure']);
@@ -352,6 +353,7 @@ function _edit_trip_delivered_callback_form($form, &$form_state) {
                unset($bill_details[0]['photo_of_signed_bill_partial_edit']);
                unset($bill_details[0]['res_delivery_boy']);
                unset($bill_details[0]['res_delivery_boy_edit']);
+               unset($bill_details[0]['derived_payment_outcome']);
                
                //unset form input for signed,cheque and cash amounts
                unset($form_state['input']['collection_mode']);
@@ -413,21 +415,23 @@ function _edit_trip_delivered_callback_form($form, &$form_state) {
                }
                else { 
                  
-                if(!empty($res_money_collect2_edit)) {
-                  $col_mode = $res_money_collect2_edit;
-                }else if (!empty($res_money_collect2)) {
-                  $col_mode = $res_money_collect2;
-                }else if ($res_signed_bill_delivery_edit == 'Yes') {
-                  $col_mode = 'signed';
-                }else if ($res_signed_bill_delivery == 'Yes') {
-                  $col_mode = 'signed';
-                }else if ($res_signed_bill_partial_edit == 'Yes') {
-                  $col_mode = 'signed';
-                }else if ($res_signed_bill_partial == 'Yes') {
-                  $col_mode = 'signed';
-                }else{
-                  $col_mode = '';
-                }
+//                if(!empty($res_money_collect2_edit)) {
+//                  $col_mode = $res_money_collect2_edit;
+//                }else if (!empty($res_money_collect2)) {
+//                  $col_mode = $res_money_collect2;
+//                }else if ($res_signed_bill_delivery_edit == 'Yes') {
+//                  $col_mode = 'signed';
+//                }else if ($res_signed_bill_delivery == 'Yes') {
+//                  $col_mode = 'signed';
+//                }else if ($res_signed_bill_partial_edit == 'Yes') {
+//                  $col_mode = 'signed';
+//                }else if ($res_signed_bill_partial == 'Yes') {
+//                  $col_mode = 'signed';
+//                }else{
+//                  $col_mode = '';
+//                }
+                 
+              $col_mode = strtolower($derived_payment_outcome);
                 
               $query = db_select('dispatch_planning_api_data', 'ad');
               $query->condition('ad.runsheet_number', $trip_number);
@@ -817,8 +821,7 @@ function _get_noneditable_delivered_trip_details($trip_number, $rs_code, $bill_n
      'res_photo_of_signed_bill_delivery', 'res_bank_name', 'res_cheque_amount', 
      'res_cheque_date', 'res_photo_of_cheque', 'res_cash_amount', 'res_money_collect2',
      'res_money_collect2_edit','res_confirm_signed_bill_amount_edit','res_photo_of_signed_bill_delivery_edit',
-     'res_bank_name_edit','res_cheque_amount_edit','res_cheque_date_edit','res_photo_of_cheque_edit','res_cash_amount_edit',
-     'res_signed_bill_delivery','res_signed_bill_partial','res_signed_bill_delivery_edit','res_signed_bill_partial_edit','res_cheque_no','res_cheque_no_edit','photo_of_signed_bill_partial','photo_of_signed_bill_partial_edit','res_delivery_boy','res_delivery_boy_edit'));
+     'res_bank_name_edit','res_cheque_amount_edit','res_cheque_date_edit','res_photo_of_cheque_edit','res_cash_amount_edit','res_cheque_no','res_cheque_no_edit','photo_of_signed_bill_partial','photo_of_signed_bill_partial_edit','res_delivery_boy','res_delivery_boy_edit','derived_payment_outcome'));
    $rows = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
    return $rows;
 }
@@ -1078,9 +1081,9 @@ function _edit_trip_delivered_callback_form_submit($form, &$form_state) {
             'updated_flag' => 1,
             'updated_time' => REQUEST_TIME,  
             'res_money_collect2_edit' =>  isset($form_state['values']['collection_mode']) ? $form_state['values']['collection_mode'] : '',
-            'derived_money_collect' =>  isset($form_state['values']['collection_mode']) ? ucfirst($form_state['values']['collection_mode']) : '',
+            'derived_payment_outcome' =>  isset($form_state['values']['collection_mode']) ? ucfirst($form_state['values']['collection_mode']) : '',
             'res_delivery_boy_edit' => !empty($form_state['values']['delivery_boy']) ? $form_state['values']['delivery_boy'] : '',
-            
+
           ))
           ->condition('runsheet_number', $trip_number, '=')
           ->condition('bill_number', $bill_number, '=')

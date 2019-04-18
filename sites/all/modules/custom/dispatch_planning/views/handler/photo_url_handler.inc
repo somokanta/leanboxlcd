@@ -37,18 +37,18 @@ class photo_url_handler extends views_handler_field {
       $res_photo_of_signed_bill_delivery = $data->dispatch_planning_api_data_res_photo_of_signed_bill_delivery;
     }
     
-    $na_position = strpos($res_photo_of_cheque, '/NA');
-    if (!empty($na_position)) {
+    $na_position = strpos($res_photo_of_cheque, 'NA');
+    if ($na_position !== FALSE) {
       unset($res_photo_of_cheque);
     }
     
-    $na_position = strpos($photo_of_signed_bill_partial, '/NA');
-    if (!empty($na_position)) {
+    $na_position = strpos($photo_of_signed_bill_partial, 'NA');
+    if ($na_position !== FALSE) {
       unset($photo_of_signed_bill_partial);
     }
     
-    $na_position = strpos($res_photo_of_signed_bill_delivery, '/NA');
-    if (!empty($na_position)) {
+    $na_position = strpos($res_photo_of_signed_bill_delivery, 'NA');
+    if ($na_position !== FALSE) {
       unset($res_photo_of_signed_bill_delivery);
     }
     

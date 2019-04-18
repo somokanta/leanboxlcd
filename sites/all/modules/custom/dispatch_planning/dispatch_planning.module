@@ -2889,6 +2889,24 @@ function dispatch_planning_form_views_exposed_form_alter(&$form, &$form_state) {
   if ($form['#id'] == 'views-exposed-form-returned-assets-page') {
     array_unshift($form['#validate'], 'received_assets_validation_callback');
   }
+  if ($form['#id'] == 'views-exposed-form-bill-return-report-page') {
+    $select = array('' => '- Select -');
+    $derived_payment_outcome = array(
+      'Cheque' => 'Cheque',
+      'Cash' => 'Cash',
+      'Signed' => 'Signed',
+      'Cheque,Cheque' => 'Cheque,Cheque',
+      'Cash,Cash' => 'Cash,Cash',
+      'Cash,Cheque' => 'Cash,Cheque',
+      'Cheque,Cash' => 'Cheque,Cash',
+    );
+    $derived_payment_outcome = $select + $derived_payment_outcome;
+
+    $form['derived_payment_outcome']['#type'] = 'select';
+    $form['derived_payment_outcome']['#size'] = 1;
+    $form['derived_payment_outcome']['#options'] = $derived_payment_outcome;
+    $form['derived_payment_outcome']['#validated'] = TRUE;
+  }
 }
 
 function received_assets_validation_callback($form, &$form_state) {
@@ -3019,7 +3037,18 @@ function dispatch_planning_sales_reg_api($node, $trip_execution_date, $vehicle_n
   if (empty($outlet_data_details['field_hul_updated_long_value'])) {
     $outlet_data_details['field_hul_updated_long_value'] = 0;
   }
-  $job_type = variable_get('dispatch_job_type', 'delivery1');
+  
+  //Delivery App changes as per trips from configuration
+  $trips = variable_get('new_trip_ids');
+  $trip_ids = explode(',', $trips);
+
+  if (in_array($trip_id, $trip_ids)) {
+    $job_type = variable_get('new_dispatch_job_type', 'delivery');
+  }else{
+    $job_type = variable_get('dispatch_job_type', 'delivery1');
+  } 
+  //Delivery App changes as per trips from configuration  
+  
   $api_data['jobType'] = $job_type;  // delivery1 for hul
   $api_data['merchantCode'] = 'hul';  // hul for Merchant code
 
@@ -3359,11 +3388,22 @@ function _update_dispatch_planning_api($node) {
         // request log
         $api_type = 'dispatch_planning';
         $sql_ins_id = dispatch_planning_api_log($json_api_data, $trip_id, $api_type, $dis_id);
-
-
-        $request_headers = array('Content-Type' => 'application/json');
+         
         //$order_api_url = 'https://staging.fareye.co/api/v1/job?api_key=l1S6xa5mnxUXDuqv12q7lerLBL9l1ICq';
-        $order_api_url = variable_get('dispatch_uri_settings', 'https://staging.fareye.co/api/v1/job?api_key=l1S6xa5mnxUXDuqv12q7lerLBL9l1ICq');
+          
+       //Delivery App changes as per trips from conf
+        $trips = variable_get('new_trip_ids');
+        $trip_ids = explode(',', $trips);
+
+        if (in_array($trip_id, $trip_ids)) {
+          $request_headers = array('Content-Type' => 'application/json','Authorization' => 'Token 2972f506c41448cb3456c1c074aed6102183aff9');
+          $order_api_url = variable_get('new_dispatch_uri_settings', 'http://13.127.160.72:8080/api/order/v1/manifest/');
+        }else{
+          $request_headers = array('Content-Type' => 'application/json');
+          $order_api_url = variable_get('dispatch_uri_settings', 'https://staging.fareye.co/api/v1/job?api_key=l1S6xa5mnxUXDuqv12q7lerLBL9l1ICq');
+        }
+        //Delivery App changes as per trips from configuration
+        
         $options = array('headers' => $request_headers, 'method' => 'POST', 'data' => $json_api_data);
         $response_data = drupal_http_request($order_api_url, $options);
 
