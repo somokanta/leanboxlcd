@@ -14,10 +14,18 @@ function fetch_dispatch_planning_api_data($data) {
       $dis_id = leanbox_mobile_get_distributor_using_rscode($data['hubCode']);
       $json_data = json_encode($data);
       dispatch_planning_api_log($json_data, $data['jobData']['runsheet_number'], 'farey_sales_deliver', $dis_id, 1);
-
       $bill_row_id = _get_bill_row_id_manual_using_reference_no($data['referenceNumber']);
       if (!empty($bill_row_id)) {
-              
+      
+      //payment outcome response will come from our delivery app  
+      if (isset($data['fieldData']['payment_outcome'])) {
+          if (is_array($data['fieldData']['payment_outcome'])) {
+                $money_collect = implode(",", $data['fieldData']['payment_outcome']);
+          } else {
+                $money_collect = str_replace("&", ",", $data['fieldData']['payment_outcome']);
+          }
+      }  
+        
       if (isset($data['fieldData']['money_collect2'])) {
           if (is_array($data['fieldData']['money_collect2'])) {
                 $money_collect = implode(",", $data['fieldData']['money_collect2']);
@@ -64,6 +72,8 @@ function fetch_dispatch_planning_api_data($data) {
             'res_photo_of_cheque' => isset($data['fieldData']['photo_of_cheque']) ? $data['fieldData']['photo_of_cheque'] : '',
             'res_cheque_amount' => isset($data['fieldData']['cheque_amount']) ? $data['fieldData']['cheque_amount'] : '',
             'res_money_collect2' => !empty($money_collect) ? $money_collect : '',
+            'derived_payment_outcome' => (!empty($money_collect) && ($money_collect != 'NA')) ? $money_collect  : (($data['fieldData']['signed_bill_delivery'] == 'Yes' || $data['fieldData']['signed_bill_partial'] == 'Yes') ? 'Signed' : ''),
+            'payment_outcome' => isset($data['fieldData']['payment_outcome']) ? $money_collect  : '',
             'res_signed_bill_delivery' => isset($data['fieldData']['signed_bill_delivery']) ? $data['fieldData']['signed_bill_delivery'] : '',
             'res_cash_amount' => isset($data['fieldData']['cash_amount']) ? $data['fieldData']['cash_amount'] : '',
             'res_to_be_collection' => isset($data['fieldData']['to_be_collection']) ? $data['fieldData']['to_be_collection'] : '',
@@ -80,14 +90,8 @@ function fetch_dispatch_planning_api_data($data) {
           ->condition('referenceNo', $data['referenceNumber'], '=')
           ->execute();
 
-      // add trip id condition also in db_update
-      //       ->condition('referenceNo', $data[''referenceNumber], '=')
-
-
-      watchdog('updated row id', '<pre>' . print_r($updated_bill_row_id, TRUE) . '</pre>');
-
       if (!empty($bill_row_id) && isset($data['fieldData']['item_details1']) && !empty($data['fieldData']['item_details1'])) {
-         watchdog('farey data full', '<pre>' . print_r($data['fieldData']['item_details'], TRUE) . '</pre>');
+         watchdog('farey data 1', '<pre>' . print_r($data['fieldData']['item_details1'], TRUE) . '</pre>');
 
          foreach ($data['fieldData']['item_details1'] as $key => $value) {
             
@@ -96,8 +100,8 @@ function fetch_dispatch_planning_api_data($data) {
             if (!is_array($value)) {
                continue;
             }
-            $data = _get_dispatch_qty_item_details($bill_row_id, $value['sku_code1']);
-            $return_qty = $data['dispatch_qty'] - $value['sku_actual_quantity1'] - $data['res_cashier_short'];
+            $res_data = _get_dispatch_qty_item_details($bill_row_id, $value['sku_code1']);
+            $return_qty = $res_data['dispatch_qty'] - $value['sku_actual_quantity1'] - $res_data['res_cashier_short'];
             
             db_update('dispatch_planning_item_details') // Table name no longer needs {}
                 ->fields(array(
@@ -114,7 +118,7 @@ function fetch_dispatch_planning_api_data($data) {
       }
 
       if (!empty($updated_bill_row_id) && isset($data['fieldData']['item_details']) && !empty($data['fieldData']['item_details'])) {
-         watchdog('farey data partial', '<pre>' . print_r($data['fieldData']['item_details'], TRUE) . '</pre>');
+         watchdog('farey data', '<pre>' . print_r($data['fieldData']['item_details'], TRUE) . '</pre>');
 
 
          foreach ($data['fieldData']['item_details'] as $key => $value) {
@@ -124,12 +128,12 @@ function fetch_dispatch_planning_api_data($data) {
                continue;
             }
             
-            $data = _get_dispatch_qty_item_details($bill_row_id, $value['sku_code']);
-            $return_qty = $data['dispatch_qty'] - $value['sku_actual_quantity'] - $data['res_cashier_short'];
+            $res_data = _get_dispatch_qty_item_details($bill_row_id, $value['sku_code']);
+            $return_qty = $res_data['dispatch_qty'] - $value['sku_actual_quantity'] - $res_data['res_cashier_short'];
             $line_status = '';
-            $ret_cash = $return_qty + $data['res_cashier_short']; //Return Qty + Cashier Short  
-            $ret_cash_godown = $ret_cash + $data['res_godown_short']; //Return Qty + Cashier Short + Godown Short
-            if ($ret_cash == $data['dispatch_qty'] ) {
+            $ret_cash = $return_qty + $res_data['res_cashier_short']; //Return Qty + Cashier Short  
+            $ret_cash_godown = $ret_cash + $res_data['res_godown_short']; //Return Qty + Cashier Short + Godown Short
+            if ($ret_cash == $res_data['dispatch_qty'] ) {
              $line_status = 'line_undeliver';
             }else if ($ret_cash_godown > 0) {
               $line_status = 'line_partial_deliver';
@@ -143,6 +147,7 @@ function fetch_dispatch_planning_api_data($data) {
                   'farey_delivered_qty' => isset($value['sku_actual_quantity']) ? $value['sku_actual_quantity'] : 0,
                   'res_sku_reason' => isset($value['sku_reason']) ? $value['sku_reason'] : '',
                   'return_qty' => $return_qty,
+                  'app_return_qty' => isset($value['sku_actual_ret_quantity']) ? $value['sku_actual_ret_quantity'] : 0, //app return qty
                   'line_level_status' => $line_status, // line level status
                 ))
                 ->condition('trip_bill_reference', $bill_row_id, '=')
@@ -151,23 +156,16 @@ function fetch_dispatch_planning_api_data($data) {
          }
       }
       if ($data['status'] == 'undeliver' && !empty($updated_bill_row_id)) {
-         watchdog('farey data undeliver', '<pre>' . print_r($data['fieldData']['item_details'], TRUE) . '</pre>');
-         $sku_list = _get_dispatch_qty_undeliver($bill_row_id);
-         foreach ($sku_list as $key => $val) {
-            $sku_code = $val['sku_code'];
-            $dispatch_qty = $val['dispatch_qty'];
-         
-          db_update('dispatch_planning_item_details') // Table name no longer needs {}
-              ->fields(array(
-                'res_sku_actual_quantity1' => 0,
-                'return_qty' => $dispatch_qty,
-                'farey_delivered_qty' => 0,
-                'line_level_status'=> 'line_undeliver', // line level status
-              ))
-              ->condition('trip_bill_reference', $bill_row_id, '=')
-              ->condition('sku_code', $sku_code, '=')
-              ->execute();
-         }
+        watchdog('farey data undeliver', '<pre>' . print_r($data['fieldData']['item_details'], TRUE) . '</pre>');
+        db_update('dispatch_planning_item_details')
+          ->expression('return_qty', 'dispatch_qty')
+          ->fields(array(
+            'res_sku_actual_quantity1' => 0,
+            'farey_delivered_qty' => 0,
+            'line_level_status' => 'line_undeliver',
+          ))
+          ->condition('trip_bill_reference', $bill_row_id, '=')
+          ->execute();
       }
       $results['flag'] = '1';
       $results['result'] = 'Data updated Sucessfully.';

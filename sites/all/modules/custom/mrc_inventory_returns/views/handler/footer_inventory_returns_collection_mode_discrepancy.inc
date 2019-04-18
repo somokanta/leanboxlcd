@@ -51,14 +51,15 @@ class footer_inventory_returns_collection_mode_discrepancy extends views_handler
     $query->fields('ad', array('res_confirm_signed_bill_amount'));
     $query->fields('ad', array('res_confirm_signed_bill_amount_edit'));
     $query->fields('ad', array('res_money_collect2_edit'));
-    $query->fields('ad', array('res_signed_bill_delivery'));
-    $query->fields('ad', array('res_signed_bill_partial'));
+    $query->fields('ad', array('derived_payment_outcome'));
+    //$query->fields('ad', array('res_signed_bill_delivery'));
+    //$query->fields('ad', array('res_signed_bill_partial'));
     $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
 
     $count = 1;
     $rows = array();
     foreach ($res as $val) {
-      if (empty($val['res_money_collect2_edit']) && ($val['res_signed_bill_delivery'] == 'Yes' || $val['res_signed_bill_partial'] == 'Yes')) {
+      if (empty($val['res_money_collect2_edit']) && ($val['derived_payment_outcome'] == 'Signed')) {
         $row['counter'] = $count++;
         $row['bill_number'] = $val['bill_number'];
         $row['party_code'] = $val['party_code'];
@@ -70,18 +71,18 @@ class footer_inventory_returns_collection_mode_discrepancy extends views_handler
         $total_collected_value += $val['res_confirm_signed_bill_amount'];
         $rows[] = $row;
       }
-      else if ($val['res_money_collect2_edit'] == 'signed') {
-        $row['counter'] = $count++;
-        $row['bill_number'] = $val['bill_number'];
-        $row['party_code'] = $val['party_code'];
-        $row['party_name'] = $val['party_name'];
-        $row['payment_term'] = $val['field_payment_terms_value'];
-        $row['collection_mode'] = 'Signed Bill';
-        $row['collected_value'] = (!empty($val['res_confirm_signed_bill_amount_edit'])) ? $val['res_confirm_signed_bill_amount_edit'] : $val['res_confirm_signed_bill_amount'];
-
-        $total_collected_value += (!empty($val['res_confirm_signed_bill_amount_edit'])) ? $val['res_confirm_signed_bill_amount_edit'] : $val['res_confirm_signed_bill_amount'];
-        $rows[] = $row;
-      }
+//      else if ($val['res_money_collect2_edit'] == 'signed') {
+//        $row['counter'] = $count++;
+//        $row['bill_number'] = $val['bill_number'];
+//        $row['party_code'] = $val['party_code'];
+//        $row['party_name'] = $val['party_name'];
+//        $row['payment_term'] = $val['field_payment_terms_value'];
+//        $row['collection_mode'] = 'Signed Bill';
+//        $row['collected_value'] = (!empty($val['res_confirm_signed_bill_amount_edit'])) ? $val['res_confirm_signed_bill_amount_edit'] : $val['res_confirm_signed_bill_amount'];
+//
+//        $total_collected_value += (!empty($val['res_confirm_signed_bill_amount_edit'])) ? $val['res_confirm_signed_bill_amount_edit'] : $val['res_confirm_signed_bill_amount'];
+//        $rows[] = $row;
+//      }
     }
 
     if (!empty($rows)) {

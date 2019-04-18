@@ -3913,8 +3913,43 @@ function dispatch_planning_views_data() {
       'handler' => 'views_handler_argument_string',
     ),
   );
-
-
+  
+  $data['dispatch_planning_api_data']['payment_outcome'] = array(
+    'title' => t('DP payment_outcome'),
+    'help' => t('Dispatch Planning payment_outcome'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+  
+  
+  $data['dispatch_planning_api_data']['derived_payment_outcome'] = array(
+    'title' => t('DP derived_payment_outcome'),
+    'help' => t('Dispatch Planning derived_payment_outcome'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
 
   //Dispatch Panning API Log
   $data['dispatch_planning_item_details']['table'] = array(
@@ -4398,6 +4433,24 @@ function dispatch_planning_views_data() {
     ),
     'argument' => array(
       'handler' => 'views_handler_filter_date',
+    ),
+  );
+  
+  $data['dispatch_planning_item_details']['app_return_qty'] = array(
+    'title' => t('DP app_return_qty'),
+    'help' => t('Dispatch Planning lines app_return_qty'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
     ),
   );
 
