@@ -32,6 +32,9 @@ function get_live_tracking_van_api_data($data) {
             'extra3' => $value['extra3'],
             'distributor_id' => $distributor_id ? $distributor_id : 0, // hardcoded value because no parameter in api
             'created_time' => REQUEST_TIME,
+            'reference_no' => $value['referenceNo'], // added new field
+            'field_executive_name' => $value['fieldExecutiveName'], // added new field
+            'hub' => $value['hub'] // added new field
           ))
           ->execute();
       }

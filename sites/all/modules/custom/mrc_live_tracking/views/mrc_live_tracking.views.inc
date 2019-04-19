@@ -296,6 +296,64 @@ function mrc_live_tracking_views_data() {
       'handler' => 'views_handler_filter_date',
     ),
   );
+  
+  // added new fields
+  $data['van_live_tracking']['reference_no'] = array(
+    'title' => t('Reference No'),
+    'help' => t('Reference No'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+  
+  // added new fields
+  $data['van_live_tracking']['field_executive_name'] = array(
+    'title' => t('Field Executive Name'),
+    'help' => t('Field Executive Name'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+  
+  // added new fields
+  $data['van_live_tracking']['hub'] = array(
+    'title' => t('Hub'),
+    'help' => t('Hub'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+  
   $van_live_tracking = 'van_live_tracking';
   $data[$van_live_tracking]['date_filter'] = array(
     'group' => t('Date'),
