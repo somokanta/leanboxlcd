@@ -51,8 +51,8 @@ function get_short_values($trip_number, $distributor_id){
   $query = db_select('dispatch_planning_api_data', 'ad');
   $query->leftjoin('vrs_trip_total', 'vtt', 'ad.runsheet_number = vtt.trip_id AND ad.distributor_id = vtt.distributor_id');
   $query->join('dispatch_planning_item_details', 'dit', 'ad.id = dit.trip_bill_reference');
-  $query->addExpression("SUM(distinct(CASE WHEN dit.res_cashier_short != '' THEN dit.res_cashier_short*dit.tur END))", 'inventory_short_value'); //formula changes (EARLIER: dit.res_cashier_short*dit.sum_net_sales_value)
-  $query->addExpression("SUM(distinct(CASE WHEN dit.claimed_godown_short > 0 THEN dit.claimed_godown_short*dit.tur END))", 'pending_claimed_gs_value'); //formula changes (EARLIER: dit.claimed_godown_short*dit.sum_net_sales_value)
+  $query->addExpression("SUM(distinct(CASE WHEN dit.res_cashier_short != '' THEN dit.res_cashier_short*dit.sum_net_sales_value END))", 'inventory_short_value'); //formula changes (EARLIER: dit.res_cashier_short*dit.sum_net_sales_value)
+  $query->addExpression("SUM(distinct(CASE WHEN dit.claimed_godown_short > 0 THEN dit.claimed_godown_short*dit.sum_net_sales_value END))", 'pending_claimed_gs_value'); //formula changes (EARLIER: dit.claimed_godown_short*dit.sum_net_sales_value)
   $query->condition('ad.distributor_id', $distributor_id, '=');
   $query->condition('ad.runsheet_number', $trip_number, '=');
   $query->groupBy('ad.runsheet_number');
