@@ -9,3 +9,5 @@ files[] = views/handler/footer_inventory_returns_collection_mode_discrepancy.inc
 files[] = views/handler/vrs_printout_total_bill_value.inc
 files[] = views/handler/credit_terms_discrepancy.inc
 files[] = views/handler/vrs_printout_excess_value.inc
+files[] = views/handler/vrs_inventory_short_value.inc
+

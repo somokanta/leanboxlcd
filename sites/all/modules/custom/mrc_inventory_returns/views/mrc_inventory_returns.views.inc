@@ -760,6 +760,49 @@ function mrc_inventory_returns_views_data() {
     ),
   );
   
+  $data['vrs_trip_total']['distributor_id'] = array(
+    'title' => t('Distributor ID'),
+    'help' => t('Distributor ID'),
+    'field' => array(
+      'handler' => 'views_handler_field_numeric',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_numeric',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_arument_numeric',
+    ),
+  );
+  
+  // Add custom field Inventory Short Value
+  $data['views']['inventory_short_value'] = array(
+    'title' => t('Inventory Short Value'),
+    'help' => t('inventory short value.'),
+    'field' => array(
+      'handler' => 'vrs_inventory_short_value',
+    ),
+  );
+  
+  $data['views']['asset_short_value'] = array(
+    'title' => t('Asset Short Value'),
+    'help' => t('asset short value.'),
+    'field' => array(
+      'handler' => 'vrs_inventory_short_value',
+    ),
+  );
+  
+  $data['views']['pending_claimed_gs_value'] = array(
+    'title' => t('Pending Claimed GS Value'),
+    'help' => t('Pending Claimed GS Value.'),
+    'field' => array(
+      'handler' => 'vrs_inventory_short_value',
+    ),
+  );
+
   $vrs_trip_total = 'vrs_trip_total';
   $data[$vrs_trip_total]['date_filter'] = array(
     'group' => t('Date'),
