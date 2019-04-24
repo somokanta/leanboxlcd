@@ -2295,6 +2295,10 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
       drupal_set_message("Payment Term field is required for Party code: $entity->title.", 'error');
       $entity->feeds_item->skip = TRUE;
     }
+
+    $updated_by_name = $item['updated by'];
+    $updated_by_name_nid = get_nid_of_resource($updated_by_name);
+    $entity->field_updated_by['und'][0]['nid'] = $updated_by_name_nid;
   }
   //dispatch planning reason master
   if ($entity->feeds_item->id == 'dispatch_planning_reason_master') {
@@ -4017,5 +4021,14 @@ function check_exsiting_record_for_party_code($party_code, $distributor_id) {
   
   return $res;
 }
+function get_nid_of_resource($updated_by_name) {
+  $query = db_select('node', 'n');
+  $query->condition('n.type', 'resource_master');
+  $query->condition('n.title', $updated_by_name);
+  $query->join('field_data_field_resource_type', 'rt', 'rt.entity_id = n.nid');
+  $query->condition('rt.field_resource_type_value', 'PT-CT Incharge');
+  $query->fields('n', array('nid'));
+  $result = $query->execute()->fetchField();
 
-
+  return $result;
+}
