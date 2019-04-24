@@ -3066,6 +3066,12 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
     if ($view->base_table == 'delivery_details') {
       $query->add_where(0, 'delivery_details.distributor_id', $distributor_id, '=');
     }
+
+    if ($view->name == 'latest_live_tracking_report') {
+      if ($view->base_table == 'van_live_tracking') {
+        $query->add_groupby('van_live_tracking.employeecode');
+      }
+    }
 }
 
 /**
