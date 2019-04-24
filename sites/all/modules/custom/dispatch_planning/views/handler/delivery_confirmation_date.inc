@@ -34,8 +34,8 @@ class delivery_confirmation_date extends views_handler_field {
    $query->condition('vad.distributor_id', $distributor_id, '=');
    $query->range(0, 1);
    $result = $query->execute()->fetchField();
-   
-   $delivery_confirmation_date = date('d-M-y h:i', $result);
+   $delivery_confirmation_date = !empty($result) ? date('d-M-y h:i', $result) : '';
+   //$delivery_confirmation_date = date('d-M-y h:i', $result);
    return $delivery_confirmation_date;
  }
 
