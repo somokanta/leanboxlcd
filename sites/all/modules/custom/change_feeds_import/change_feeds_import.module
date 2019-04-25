@@ -2264,41 +2264,41 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
       }
     }
 
-    $updated_by = $item['updated by'];
-    $resource_type = 'PT-CT Incharge';
-    $resource_name = check_resource_name_exists($updated_by, $resource_type, $distributor_id);
-    if(empty($resource_name) && !empty($updated_by)) {
-      drupal_set_message("Updated By name does not match with resource master - Resource type PT-CT Incharge for Party code: $entity->title.", 'error');
-      $entity->feeds_item->skip = TRUE;
-    }
-    
-    $party_code = $entity->title;
-    $reason_for_change = $item['reason for change'];
-    $get_change_reason = get_change_reason($reason_for_change, $distributor_id);
-    $check_party_code = check_exsiting_record_for_party_code($party_code, $distributor_id);
-
-    if(empty($get_change_reason) && !empty($check_party_code) && !empty($reason_for_change)) {
-      drupal_set_message("Reason for Change does not match with PT-CT Change Reason Master for Party code: $entity->title.", 'error');
-      $entity->feeds_item->skip = TRUE;
-    }
-    
-    if(empty($reason_for_change) && !empty($check_party_code)) {
-      drupal_set_message("Reason for Change field is required for Party code: $entity->title.", 'error');
-      $entity->feeds_item->skip = TRUE;
-    }
-    if(empty($updated_by)) {
-      drupal_set_message("Updated By field is required for Party code: $entity->title.", 'error');
-      $entity->feeds_item->skip = TRUE;
-    }
+//    $updated_by = $item['updated by'];
+//    $resource_type = 'PT-CT Incharge';
+//    $resource_name = check_resource_name_exists($updated_by, $resource_type, $distributor_id);
+//    if(empty($resource_name) && !empty($updated_by)) {
+//      drupal_set_message("Updated By name does not match with resource master - Resource type PT-CT Incharge for Party code: $entity->title.", 'error');
+//      $entity->feeds_item->skip = TRUE;
+//    }
+//    
+//    $party_code = $entity->title;
+//    $reason_for_change = $item['reason for change'];
+//    $get_change_reason = get_change_reason($reason_for_change, $distributor_id);
+//    $check_party_code = check_exsiting_record_for_party_code($party_code, $distributor_id);
+//
+//    if(empty($get_change_reason) && !empty($check_party_code) && !empty($reason_for_change)) {
+//      drupal_set_message("Reason for Change does not match with PT-CT Change Reason Master for Party code: $entity->title.", 'error');
+//      $entity->feeds_item->skip = TRUE;
+//    }
+//    
+//    if(empty($reason_for_change) && !empty($check_party_code)) {
+//      drupal_set_message("Reason for Change field is required for Party code: $entity->title.", 'error');
+//      $entity->feeds_item->skip = TRUE;
+//    }
+//    if(empty($updated_by)) {
+//      drupal_set_message("Updated By field is required for Party code: $entity->title.", 'error');
+//      $entity->feeds_item->skip = TRUE;
+//    }
     $payment_term = $entity->field_payment_terms[LANGUAGE_NONE][0]['value'];
     if(empty($payment_term)) {
       drupal_set_message("Payment Term field is required for Party code: $entity->title.", 'error');
       $entity->feeds_item->skip = TRUE;
     }
 
-    $updated_by_name = $item['updated by'];
-    $updated_by_name_nid = get_nid_of_resource($updated_by_name);
-    $entity->field_updated_by['und'][0]['nid'] = $updated_by_name_nid;
+//    $updated_by_name = $item['updated by'];
+//    $updated_by_name_nid = get_nid_of_resource($updated_by_name);
+//    $entity->field_updated_by['und'][0]['nid'] = $updated_by_name_nid;
   }
   //dispatch planning reason master
   if ($entity->feeds_item->id == 'dispatch_planning_reason_master') {
