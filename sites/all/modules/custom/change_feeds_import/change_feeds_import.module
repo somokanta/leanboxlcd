@@ -2143,14 +2143,19 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
     if (!empty($existing_uid) && ($existing_uid != $distributor_id)) {
       drupal_set_message("You can not update hul_code_master because same title is already uploaded by another distributor", 'error', FALSE);
       $entity->feeds_item->skip = TRUE;
-    }
-    $ph_no = $entity->field_hul_phone_no[LANGUAGE_NONE][0]['value'];
+    } 
+    
+    $ph_no = trim($entity->field_hul_phone_no[LANGUAGE_NONE][0]['value']);
     $hul_address = $entity->field_hul_address[LANGUAGE_NONE][0]['value'];
     $hul_lat = $entity->field_hul_lat[LANGUAGE_NONE][0]['value'];
     $hul_long = $entity->field_hul_long[LANGUAGE_NONE][0]['value'];
-
-    if (empty($ph_no)) {
-      drupal_set_message("Hul Phone No Can Not Be Null", 'error', FALSE);
+    if (!empty($ph_no)) {
+      if (!preg_match('/^[0-9]*$/', $ph_no)) {
+        drupal_set_message("Hul Phone No must be numeric for HUL Code - $title", 'error', FALSE);
+      }
+      else if (strlen($ph_no) != 10) {
+        drupal_set_message("Hul Phone No has to be 10 digits for HUL Code - $title", 'error', FALSE);
+      }
       $entity->feeds_item->skip = TRUE;
     }
     if (empty($hul_address)) {
