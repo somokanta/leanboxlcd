@@ -308,8 +308,31 @@ function modify_views_forms_form_alter(&$form, &$form_state, $form_id) {
        }
       
   }
+  
+  if ($form_id == 'editableviews_entity_form_hul_code_master') {
+    $form['#validate'][] = 'hul_phone_no_validate';
+  }
 }
 
+function hul_phone_no_validate(&$form, &$form_state) {
+  $mess = '';
+  foreach($form['node'] as $key => $value) {
+    $node_phone_number[$key]['hul_code'] = $value['#entity']->title;
+  }
+  foreach($form_state['values']['node'] as $nid => $form_data) {
+    $hul_code = $form_state['values']['node'][$nid];
+    $hul_phone_no = $form_data['field_hul_phone_no'][LANGUAGE_NONE][0]['value'];
+    if (!preg_match('/^[0-9]*$/', $hul_phone_no)) {
+      $mess .= t("Phone number must be numeric for HUL Code - " . $node_phone_number[$nid]['hul_code'] . '<br>');
+    }
+    else if (strlen($hul_phone_no) != 10) {
+      $mess .= t("Phone number has to be 10 digits for HUL Code - " . $node_phone_number[$nid]['hul_code'] . '<br>');
+    }
+  }
+  if(!empty($mess)) {
+    form_set_error('form', $mess);
+  }
+}
 // Contact Number Validation.
 function validate_contact_number(&$form, &$form_state) {  
     $mess = '';
