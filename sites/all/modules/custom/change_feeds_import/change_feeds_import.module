@@ -2296,9 +2296,9 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
       $entity->feeds_item->skip = TRUE;
     }
 
-//    $updated_by_name = $item['updated by'];
-//    $updated_by_name_nid = get_nid_of_resource($updated_by_name);
-//    $entity->field_updated_by['und'][0]['nid'] = $updated_by_name_nid;
+    $updated_by_name = $item['updated by'];
+    $updated_by_name_nid = get_nid_of_resource($updated_by_name);
+    $entity->field_updated_by['und'][0]['nid'] = $updated_by_name_nid;
   }
   //dispatch planning reason master
   if ($entity->feeds_item->id == 'dispatch_planning_reason_master') {
