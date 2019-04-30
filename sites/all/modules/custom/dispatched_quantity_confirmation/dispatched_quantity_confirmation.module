@@ -244,6 +244,14 @@ function dispatched_quantity_confirmation_menu() {
     'file' => 'includes/trip_confirmation_version_report.inc',
     'access callback' => TRUE,
   );
+  
+  // setting form for dispatch-qty-validation of Party code
+  $items['admin/config/dispatch-qty-validation'] = array(
+    'title' => 'Setting Form For Dispatch Qty Validation',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('dispatch_qty_config_form'),
+    'access callback' => 'check_if_fr_role_user_admin',
+  );
 
   return $items;
 }
@@ -445,7 +453,6 @@ function insert_trip_into_dispatch_qty_confirmation($trip_id, $distributor_id) {
   $query->condition('n.status', 1);
   $query->condition('n.type', 'dispatch_data');
   $trip_id_nid = $query->execute()->fetchField();
-
   // Don't insert DP bills
   $dp_bills = check_dp_bills_in_trip($trip_id_nid);
   if (!empty($trip_id_nid) && empty($dp_bills)) {
@@ -454,6 +461,7 @@ function insert_trip_into_dispatch_qty_confirmation($trip_id, $distributor_id) {
       $billing_data = get_billing_data_for_dispatch_qty_confirm($bills, $distributor_id);
       dispatch_qty_confirmation_insert_data($billing_data, $trip_id, $distributor_id);
     }
+    $by_pass_trip = by_pass_trip_if_certain_party_exist($bills,$trip_id_nid, $distributor_id);   
   }
   elseif (!empty($trip_id_nid) && !empty($dp_bills)) {// by pass for dp bills(not empty dp bills)
     $node = node_load($trip_id_nid);
@@ -1407,4 +1415,49 @@ function get_bill_not_edited_reason_list($dis_id) {
   $query->fields('n', array('title'));
   $result = $query->execute()->fetchAllKeyed(0, 0);
   return $result; 
+}
+
+// Party code Bypass validation
+function dispatch_qty_validation_submit($form, $form_state) {
+
+}
+
+// setting form for dispatch-qty-validation of Party code
+function dispatch_qty_config_form($form, $form_state) {
+  $form['party_code'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Party Code'),
+    '#description' => t('You can enter Party codes in comma separated format'),
+    '#default_value' => variable_get('party_code', ''),  
+    //'#required' => TRUE,
+  );
+  
+  $form['#submit'][] = 'dispatch_qty_validation_submit';
+  
+  return system_settings_form($form);
+}
+
+// byPass trip if certain Party code exist.
+function by_pass_trip_if_certain_party_exist($bills,$trip_id_nid, $distributor_id) {
+  $party_code = explode(',', variable_get('party_code'));
+
+  if(!empty($party_code)){
+    $query = db_select('node', 'n');
+    $query->condition('n.type', 'sales_register_data');
+    $query->join('custom_billing_data', 'cbd', "cbd.bill_number = n.title and cbd.distributor_id = n.uid");
+    $query->condition('cbd.bill_number', $bills , 'IN');
+    $query->condition('cbd.party_code', $party_code , 'IN');
+    $query->condition('n.uid', $distributor_id);
+    $query->fields('n', array('title'));
+    $party_bill = $query->execute()->fetchAllKeyed(0, 0);
+
+    if(!empty($party_bill)) {
+          $node = node_load($trip_id_nid);
+          $node->field_loose_confirmation['und'][0]['value'] = 1;
+          $node->field_cld_confirmation['und'][0]['value'] = 1;
+          $node->field_confirm_bill_edit_status['und'][0]['value'] = 1;
+          $node->field_dispatch_validation_flag['und'][0]['value'] = 2;
+          node_save($node);
+    }
+  }
 }
