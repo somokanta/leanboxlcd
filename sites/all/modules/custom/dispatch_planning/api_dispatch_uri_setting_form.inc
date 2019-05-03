@@ -34,7 +34,7 @@ function api_dispatch_uri_setting_form($form, &$form_state) {
   
   $form['del_app']['new_trip_ids'] = array(
     '#type' => 'textfield',
-    '#title' => t('Delivery App Trip IDs'),
+    '#title' => t('TRIP IDs NOT SEND TO DELIVERY APP'),
     '#description' => t('Enter Trip IDs comma separated'),
     '#default_value' => variable_get('new_trip_ids'),
     //'#size' => 10,
