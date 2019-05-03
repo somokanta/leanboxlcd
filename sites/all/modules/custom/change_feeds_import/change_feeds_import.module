@@ -2369,6 +2369,21 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
         $entity->feeds_item->skip = TRUE;
       }
   }
+  
+  if($entity->feeds_item->id == 'cancel_discard_reason_master_importer'){
+    $reason = trim($item['cancel/discard reason']);
+    $reason_type = trim($item['reason type']);
+    
+    $field = field_info_field('field_type');
+    $allowed_values = list_allowed_values($field);
+    $allowed_reason_types = array_keys($allowed_values);
+    $allowed_reason_types_str = implode(' or ', $allowed_reason_types);
+    
+    if(!in_array($reason_type, $allowed_reason_types)){
+      drupal_set_message("Invalid Reason Type- $reason_type given for Reason- $reason (Allowed Reason Type is $allowed_reason_types_str)", 'error');
+      $entity->feeds_item->skip = TRUE;
+    }
+  }
 }
 
 // function check trip type exist in system

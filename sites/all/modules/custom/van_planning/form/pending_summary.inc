@@ -88,7 +88,7 @@ function pending_summary_callback() {
 
   $query->leftJoin('field_data_field_trip_id_reference', 'ft', 'ft.entity_id = n3.nid');
   $query->leftJoin('field_data_field_delivery_pending', 'dp', 'n3.nid = dp.entity_id');
-
+  $query->leftjoin('field_data_field_bill_status', 'bs', 'bs.entity_id = n3.nid');
 //  $db_or = db_or();
 //  $db_or->isNull('ft.field_trip_id_reference_nid');
 //  $db_or->condition('dp.field_delivery_pending_value', 1);
@@ -97,6 +97,7 @@ function pending_summary_callback() {
   // Exclude delivery pending bills. commented above line and inserted below line
   $query->isNull('ft.field_trip_id_reference_nid');
   $query->isNull('dp.field_delivery_pending_value');
+  $query->isNull('bs.field_bill_status_value'); //new condition added
 
   //$query->addField('n3', 'nid', 'sales_nid');
   $query->join('field_data_field_sr_bill_date', 'sbd', 'sbd.entity_id = n3.nid');
@@ -170,16 +171,17 @@ function pending_summary_callback() {
 
   // join sales register data
   $query->join('field_data_field_party_code_reference', 'pcr', 'pcr.field_party_code_reference_nid = n2.nid');
-
+  
   $query->join('node', 'n3', 'n3.nid = pcr.entity_id');
   $query->condition('n3.type', 'sales_register_data');
   $query->condition('n3.uid', $dis_id);
 
   $query->leftJoin('field_data_field_trip_id_reference', 'ft', 'ft.entity_id = n3.nid');
   $query->leftJoin('field_data_field_delivery_pending', 'dp', 'n3.nid = dp.entity_id');
-
+  $query->leftjoin('field_data_field_bill_status', 'bs', 'bs.entity_id = n3.nid');
   // Query for pending delivery.
   $query->condition('dp.field_delivery_pending_value', 1);
+  $query->isNull('bs.field_bill_status_value'); //new condition added
 
   //$query->addField('n3', 'nid', 'sales_nid');
   $query->join('field_data_field_sr_bill_date', 'sbd', 'sbd.entity_id = n3.nid');

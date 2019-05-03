@@ -237,6 +237,21 @@ function dispatch_planning_menu() {
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
+
+  $items['bill-not-attached-to-trip/autocomplete'] = array(
+    'title' => 'Bill not attached to trip autocomplete',
+    'page callback' => 'bill_not_attached_to_trip_autocomplete',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  
+  $items['cancel-discard-bills/autocomplete'] = array(
+    'title' => 'Bill not attached to trip autocomplete',
+    'page callback' => 'cancel_discard_bills_autocomplete',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+
   $items['vrswise-trip/autocomplete'] = array(
     'title' => 'trip_autocomplete',
     'page callback' => 'vrswise_trip_id_autocomplete',
@@ -565,6 +580,23 @@ function dispatch_planning_menu() {
     'page arguments' => array('sms_config_form'),
     'access callback' => 'check_if_fr_role_user_admin',
   );
+
+  $items['cancel-discard-bills'] = array(
+    'title' => 'Cancel/Discard Bills',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('get_cancel_discard_bills'),
+    'access arguments' => array('dispatch planning screen'),
+    'file' => 'get_cancel_discard_bills.inc' 
+  );
+  
+  $items['undo-cancel-discard-bills'] = array(
+    'title' => 'Undo Cancel/Discard Bills',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('undo_cancel_discard_bills'),
+    'access arguments' => array('dispatch planning screen'),
+    'file' => 'undo_cancel_discard_bills.inc'
+  );
+  
   $items['message-re-send/%'] = array(
     'title' => 'Message Resend',
     'page callback' => 'message_re_triggered',
@@ -1628,6 +1660,11 @@ function bill_number_ajax_validate($form, &$form_state) {
 
   if (empty($result)) {
     form_set_error('bill_number', 'Bill number does not exist');
+  }else{
+    $res = is_bill_cancelled_discarded($bill_number);
+    if(!empty($res)){
+      form_set_error('bill_number', 'This Bill Number got cancelled/discarded.');
+    }
   }
 }
 
@@ -2151,6 +2188,7 @@ function get_bill_info($bill_number, $van = NULL, $loading_date = NULL, $beat_na
 
   $query->leftJoin('field_data_field_party_name', 'pn', 'pn.entity_id = oun.nid');
   $query->leftJoin('field_data_field_beat_name', 'bn', 'bn.entity_id = oun.nid');
+  $query->leftjoin('field_data_field_bill_status', 'bs', 'bs.entity_id = n.nid');
 
 
   $query->addField('n', 'nid', 'nid');
@@ -2172,7 +2210,7 @@ function get_bill_info($bill_number, $van = NULL, $loading_date = NULL, $beat_na
 //  $db_or->isNull('pc.bundle');
 //
 //  $query->condition($db_or);
-
+  $query->isNull('bs.field_bill_status_value'); //new condition added
   if (!is_null($bill_number)) {
     $query->condition('n.title', $bill_number);
   }
@@ -2317,7 +2355,7 @@ function bill_autocomplete($string = '', $delivery_pending = NULL) {
     $query->leftJoin('field_data_field_delivery_pending', 'dp', 'n.nid = dp.entity_id');
     $query->condition('n.title', db_like($string) . '%', 'LIKE');
     $query->condition('n.type', 'sales_register_data');
-
+    $query->leftjoin('field_data_field_bill_status', 'bs', 'n.nid = bs.entity_id');
     if (is_null($delivery_pending)) {
       $db_or = db_or();
       $db_or->isNull('ft.field_trip_id_reference_nid');
@@ -2327,7 +2365,7 @@ function bill_autocomplete($string = '', $delivery_pending = NULL) {
     else {
       $query->isNotNull('ft.field_trip_id_reference_nid');
     }
-
+    $query->isNull('bs.field_bill_status_value'); //new condition added
     $query->fields('n', array('title'));
     $query->range(0, 15);
     $query->addTag('node_distributor_access');
@@ -4328,6 +4366,125 @@ function sms_config_form($form, $form_state) {
   return system_settings_form($form);
 }
 
+function bill_number_exist($bill_number){
+  $result = array();
+  if(!empty($bill_number)){
+    $query = db_select('node', 'n');
+    
+    $query->condition('n.title', $bill_number);
+    $query->condition('n.type', 'sales_register_data');
+    $query->fields('n', array('title'));
+    $query->addTag('node_distributor_access');
+    $result = $query->execute()->fetchField();
+  }
+  return $result;
+}
+
+function check_bill_not_attached_to_trip($bill_number){
+  global $user;
+  $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+  $result = array();
+
+  if($bill_number){
+    $query = db_select('node', 'n');
+
+    $query->leftJoin('field_data_field_trip_id_reference', 't', 'n.nid = t.entity_id');
+    $query->leftJoin('node', 'nt', 'nt.nid = t.field_trip_id_reference_nid');
+    //$query->isNull('t.field_trip_id_reference_nid');
+
+    $query->condition('n.title', $bill_number);
+    $query->condition('n.type', 'sales_register_data');
+    $query->condition('n.uid', $distributor_id);
+    //$query->fields('n', array('title'));
+    $query->fields('t', array('field_trip_id_reference_nid'));
+    $query->addTag('node_distributor_access');
+    $result = $query->execute()->fetchField();
+  }
+  return $result;
+}
+
+function get_bills_data($bill_number = NULL, $bill_date_from = NULL, $bill_date_to = NULL){
+  global $user;
+  $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+  $result = array();
+
+  if(!empty($bill_number) || (!empty($bill_date_from) && !empty($bill_date_to))){
+    $bill_date_from = strtotime($bill_date_from);
+    $bill_date_to = strtotime($bill_date_to);
+    $query = db_select('node', 'n');
+    $query->leftjoin('field_data_field_sr_bill_date', 'bd', 'n.nid = bd.entity_id'); //bill date
+    $query->leftjoin('field_data_field_bill_value', 'bv', 'n.nid = bv.entity_id'); //bill value
+    $query->leftJoin('field_data_field_party_code_reference', 'pc', 'pc.entity_id = n.nid'); 
+    $query->leftjoin('node', 'oun', 'oun.nid = pc.field_party_code_reference_nid');
+    $query->leftJoin('field_data_field_party_name', 'pn', 'pn.entity_id = oun.nid');
+    $query->leftJoin('field_data_field_trip_id_reference', 't', 'n.nid = t.entity_id');
+    $query->leftjoin('field_data_field_bill_status', 'bs', 'bs.entity_id = n.nid');
+    $query->condition('n.uid', $distributor_id);
+    $query->condition('n.type', 'sales_register_data');
+    $query->condition('oun.type', 'outlet_master');
+    $query->isNull('t.field_trip_id_reference_nid');
+    $query->isNull('bs.field_bill_status_value');
+    
+    if(!empty($bill_number)){
+      $query->condition('n.title', $bill_number);
+    }
+    if(!empty($bill_date_from) && !empty($bill_date_to)){
+      $query->condition('bd.field_sr_bill_date_value', array($bill_date_from, $bill_date_to), 'BETWEEN');
+    }
+
+    $query->addField('n', 'nid', 'nid');
+    $query->addField('n', 'title', 'bill_number');
+    $query->addExpression("DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(bd.field_sr_bill_date_value),'+00:00','+05:30'), '%Y-%m-%d')", 'bill_date');
+   //$query->addField('bd', 'field_sr_bill_date_value', 'bill_date');
+    $query->addField('oun', 'title', 'party_code');
+    $query->addField('pn', 'field_party_name_value', 'party_name');
+    $query->addField('bv', 'field_bill_value_value', 'bill_value');
+    $result = $query->execute()->fetchAll(PDO::FETCH_GROUP | PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
+    }
+  return $result;
+}
+
+function get_bill_reasons_as_per_action($action_selected){
+  $result = array();
+  global $user;
+  $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+  if(!empty($action_selected)){
+    $query = db_select('node', 'n');
+    $query->join('field_data_field_type', 't', 'n.nid = t.entity_id');
+    $query->condition('t.field_type_value', $action_selected);
+    $query->condition('n.type', 'cancel_discard_reason_master');
+    $query->condition('n.uid', $distributor_id);
+    $query->fields('n', array('nid', 'title'));
+    //$query->fields('n', array('title'));
+    $result = $query->execute()->fetchAllKeyed(0, 1);
+  } 
+  return $result;
+}
+
+function bill_not_attached_to_trip_autocomplete($string = ''){
+  $result = array();
+  global $user;
+  $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+  
+  if($string){
+    $query = db_select('node', 'n');
+    
+    $query->leftjoin('field_data_field_bill_status', 'bs', 'bs.entity_id = n.nid');
+    $query->leftJoin('field_data_field_trip_id_reference', 'ft', 'ft.entity_id = n.nid');
+    $query->join('field_data_field_sr_new_bill_date', 'bd', 'n.nid = bd.entity_id');
+    $query->isNull('ft.field_trip_id_reference_nid');
+    $query->isNull('bs.field_bill_status_value');
+    $query->condition('n.type', 'sales_register_data');
+    $query->condition('n.title', db_like($string).'%', 'LIKE');
+    $query->condition('n.status', 1, '=');
+    $query->condition('n.uid', $distributor_id);
+    $query->fields('n', array('title'));
+    $query->range(0, 15);
+    $result = $query->execute()->fetchAllKeyed(0, 0);
+  }
+  drupal_json_output($result);
+}
+
 function message_re_triggered($title) {
   $sms = " ";
   $nid = get_nid_from_title($title, 'dispatch_data');
@@ -4419,4 +4576,123 @@ function bill_message_re_triggered($sql_ins_id) {
     }
   }
   return " ";
+}
+
+function cancel_discard_bills_autocomplete($string = ''){
+  $result = array();
+  global $user;
+  $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+
+  if($string){
+    $query = db_select('node', 'n');
+
+    $query->join('field_data_field_bill_status', 'bs', 'bs.entity_id = n.nid');
+    $query->leftJoin('field_data_field_trip_id_reference', 'ft', 'ft.entity_id = n.nid');
+    $query->join('field_data_field_sr_new_bill_date', 'bd', 'n.nid = bd.entity_id');
+    $query->isNull('ft.field_trip_id_reference_nid');
+
+    $query->condition('n.type', 'sales_register_data');
+    $query->condition('n.title', db_like($string).'%', 'LIKE');
+    $query->condition('n.status', 1, '=');
+    $query->condition('n.uid', $distributor_id);
+    $query->condition('bs.field_bill_status_value', array('cancel', 'discard'), 'IN');
+
+    $query->fields('n', array('title'));
+    $query->range(0, 15);
+    $result = $query->execute()->fetchAllKeyed(0, 0);
+  }
+  drupal_json_output($result); 
+}
+
+function get_cancel_discard_bills_data($bill_number = NULL, $bill_date_from = NULL, $bill_date_to = NULL){
+  global $user;
+  $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+  $result = array();
+
+  if(!empty($bill_number) || (!empty($bill_date_from) && !empty($bill_date_to))){
+    $bill_date_from = strtotime($bill_date_from);
+    $bill_date_to = strtotime($bill_date_to);
+    
+    $query = db_select('node', 'n');
+    $query->leftjoin('field_data_field_reasons_ref', 'res', 'res.entity_id = n.nid'); 
+    $query->leftjoin('node', 'n1', 'n1.nid = res.field_reasons_ref_nid');
+    $query->leftjoin('field_data_field_updated_by_resource_master', 'rm', 'rm.entity_id = n.nid'); 
+    $query->leftjoin('node', 'n2', 'n2.nid = rm.field_updated_by_resource_master_nid');
+    $query->leftjoin('field_data_field_remark', 'rem', 'rem.entity_id = n.nid');
+    $query->leftjoin('field_data_field_action', 'ac', 'ac.entity_id = n.nid');
+    $query->leftjoin('field_data_field_cancel_date', 'dt', 'dt.entity_id = n.nid');
+    $query->leftjoin('field_data_field_sales_register_bill_ref', 'srd', 'srd.entity_id = n.nid'); 
+    $query->leftjoin('node', 'n3', 'n3.nid = srd.field_sales_register_bill_ref_nid');
+    $query->leftjoin('field_data_field_sr_bill_date', 'bd', 'n3.nid = bd.entity_id'); //bill date
+    $query->condition('n.uid', $distributor_id);
+    $query->condition('n.type', 'cancel_discard_bills');
+    $query->condition('n1.type', 'cancel_discard_reason_master');
+    $query->condition('n2.type', 'resource_master ');
+    $query->condition('n3.type', 'sales_register_data ');
+    
+    if(!empty($bill_number)){
+      $query->condition('n.title', $bill_number);
+    }
+    else if(!empty($bill_date_from) && !empty($bill_date_to)){
+      $query->condition('bd.field_sr_bill_date_value', array($bill_date_from, $bill_date_to), 'BETWEEN');
+    }
+    $query->addField('n', 'nid', 'nid');
+    $query->addField('n', 'title', 'bill_number'); //bill number
+    $query->addField('n1', 'title', 'reason'); //reason
+    $query->addField('n2', 'title', 'resource_master_name');
+    $query->addField('dt', 'field_cancel_date_value', 'cancel_date');
+    $query->addField('rem', 'field_remark_value', 'remark');
+    $query->addExpression('CONCAT(UCASE(LEFT(ac.field_action_value, 1)),SUBSTRING(ac.field_action_value, 2))', 'status');
+    $result = $query->execute()->fetchAll(PDO::FETCH_GROUP | PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
+  }
+  return $result;
+}
+
+function check_bill_cancel_status($bill_number){
+  global $user;
+  $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+  $result = array();
+  
+  if($bill_number){
+    $query = db_select('node', 'n');
+    $query->leftjoin('field_data_field_bill_status', 'bs', 'bs.entity_id = n.nid');
+    $query->condition('n.title', $bill_number);
+    $query->condition('n.type', 'sales_register_data');
+    $query->condition('bs.field_bill_status_value', array('cancel', 'discard'), 'IN');
+    $query->condition('n.uid', $distributor_id);
+    
+    $query->fields('bs', array('field_bill_status_value'));
+    $result = $query->execute()->fetchField();
+  }
+  return $result;
+}
+
+function get_sku_nid($sku7_code, $distributor_id) {
+  $res = array();
+  if(!empty($sku7_code) && !empty($distributor_id)) {
+    $query = db_select('node', 'n');
+    $query->leftjoin('field_data_field_exclude_from_ptl', 'ex', 'ex.entity_id = n.nid');
+    $query->condition('n.type', 'sku7_code_master');
+    $query->condition('n.title', $sku7_code, '=');
+    $query->condition('n.uid', $distributor_id, '=');
+    $query->addField('n', 'nid', 'sku_nid');
+    $query->addField('ex', 'field_exclude_from_ptl_value', 'is_excluded');
+    $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+  }
+  return $res;
+}
+
+function is_bill_cancelled_discarded($bill_number){
+  $res = array();
+  if(!empty($bill_number)){
+    $query = db_select('node', 'n');
+    $query->leftjoin('field_data_field_bill_status', 'bs', 'bs.entity_id = n.nid');
+    $query->condition('n.title', $bill_number);
+    $query->condition('n.type', 'sales_register_data');
+    $query->isNotNull('bs.field_bill_status_value');
+    $query->fields('n', array('title'));
+    $query->addTag('node_distributor_access');
+    $res = $query->execute()->fetchField();
+  }
+  return $res;
 }

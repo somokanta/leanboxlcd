@@ -1159,11 +1159,21 @@ function _edit_trip_delivered_callback_form_submit($form, &$form_state) {
                 ->execute();
          }
       }
-
+          
+      $query = db_select('node', 'n');
+      $query->condition('n.title', $bill_number);
+      $query->condition('n.type', 'sales_register_data');
+      $query->condition('n.uid', $dis_id);
+      $query->fields('n', array('nid'));
+      $sales_register_data_nid = $query->execute()->fetchField();
+      
+      $node = node_load($sales_register_data_nid);
+      $node->field_bill_status['und'][0]['value'] = $order_status;
+      node_save($node);
+      
       drupal_set_message(t('Data submitted successfully'));
       $form_state['storage']['trip_id'] = $trip_number;
       $form_state['rebuild'] = TRUE;
-      // }
    }
 }
 

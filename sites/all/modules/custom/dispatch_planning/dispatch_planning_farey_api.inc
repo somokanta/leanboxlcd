@@ -167,6 +167,22 @@ function fetch_dispatch_planning_api_data($data) {
           ->condition('trip_bill_reference', $bill_row_id, '=')
           ->execute();
       }
+      
+      $bill_number = $data['jobData']['bill_number'];      
+      $query = db_select('node', 'n');
+      $query->condition('n.title', $bill_number);
+      $query->condition('n.type', 'sales_register_data');
+      $query->condition('n.uid', $dis_id);
+      $query->fields('n', array('nid'));
+      $sales_register_data_nid = $query->execute()->fetchField();
+    
+
+      $node = node_load($sales_register_data_nid);
+      if(!empty($node)){
+        $node->field_bill_status['und'][0]['value'] = $data['status'];
+        node_save($node);
+      }
+        
       $results['flag'] = '1';
       $results['result'] = 'Data updated Sucessfully.';
       }else{

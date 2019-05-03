@@ -424,6 +424,8 @@ function delivery_pending_form_save_submit($form, &$form_state) {
         unset($node->field_bill_sequence[LANGUAGE_NONE]);
         unset($node->field_drs_sequence[LANGUAGE_NONE]);
         unset($node->field_deliver_n_value[LANGUAGE_NONE]);
+        
+        unset($node->field_bill_status[LANGUAGE_NONE]); // Unseting Bill Status to NULL so that, bill number will available for Van Planning
       }
       else {
         $node->field_delivery_pending = array();
