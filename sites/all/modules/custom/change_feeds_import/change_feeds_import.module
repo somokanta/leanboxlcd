@@ -2640,6 +2640,24 @@ function change_feeds_import_form_alter(&$form, &$form_state, $form_id) {
         '#items' => $allowed,
       );
     }
+    
+    if ($form['#importer_id'] == 'cancel_discard_reason_master_importer') {
+      $text = "<br>Please enter the below values in reason type field:";
+      $field = field_info_field('field_type');
+      $allowed_values = list_allowed_values($field);
+      foreach ($allowed_values as $key => $value) {
+        $allowed[] = $value;
+      }
+      $form['feeds']['FeedsCSVParser']['help']['title'] = array(
+        '#markup' => $text,
+      );
+      $form['feeds']['FeedsCSVParser']['help']['final_text'] = array(
+        '#theme' => 'item_list',
+        '#items' => $allowed,
+      );
+    }
+    
+    
      if ($form['#importer_id'] == 'dispatch_short_reason') {
       $text = "<br>Please enter the below values in type field:";
       $field = field_info_field('field_dispatch_trip_type');
