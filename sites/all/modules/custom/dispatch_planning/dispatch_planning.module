@@ -3080,7 +3080,7 @@ function dispatch_planning_sales_reg_api($node, $trip_execution_date, $vehicle_n
   $trips = variable_get('new_trip_ids');
   $trip_ids = explode(',', $trips);
 
-  if (in_array($trip_id, $trip_ids)) {
+  if (!in_array($trip_id, $trip_ids)) {
     $job_type = variable_get('new_dispatch_job_type', 'delivery');
   }else{
     $job_type = variable_get('dispatch_job_type', 'delivery1');
@@ -3433,7 +3433,7 @@ function _update_dispatch_planning_api($node) {
         $trips = variable_get('new_trip_ids');
         $trip_ids = explode(',', $trips);
 
-        if (in_array($trip_id, $trip_ids)) {
+        if (!in_array($trip_id, $trip_ids)) {
           $request_headers = array('Content-Type' => 'application/json','Authorization' => 'Token 2972f506c41448cb3456c1c074aed6102183aff9');
           $order_api_url = variable_get('new_dispatch_uri_settings', 'http://13.127.160.72:8080/api/order/v1/manifest/');
         }else{
