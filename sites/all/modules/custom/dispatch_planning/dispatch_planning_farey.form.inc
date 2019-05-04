@@ -1022,6 +1022,7 @@ function _edit_trip_delivered_callback_form_submit($form, &$form_state) {
    // dpm($bill_number, '$bill_number');
    // get logged in users rs id
    $user_id = $GLOBALS['user']->uid;
+   $dis_id = change_feeds_import_get_distributor_id($user_id);
    $rs_code = dispatch_planning_get_rscode_using_uid($user_id);
    // dpm($rs_code, '$rs_code');
    if (!empty($trip_number) && !empty($bill_number) && !empty($rs_code)) {
@@ -1168,8 +1169,10 @@ function _edit_trip_delivered_callback_form_submit($form, &$form_state) {
       $sales_register_data_nid = $query->execute()->fetchField();
       
       $node = node_load($sales_register_data_nid);
-      $node->field_bill_status['und'][0]['value'] = $order_status;
-      node_save($node);
+      if(!empty($node)){
+        $node->field_bill_status['und'][0]['value'] = $order_status;
+        node_save($node);
+      }
       
       drupal_set_message(t('Data submitted successfully'));
       $form_state['storage']['trip_id'] = $trip_number;
