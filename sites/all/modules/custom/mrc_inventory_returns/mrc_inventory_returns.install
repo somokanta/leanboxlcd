@@ -2656,7 +2656,7 @@ function mrc_inventory_returns_update_7126() {
     'remarks' => array(
        'description' => 'remarks',
        'type' => 'varchar',
-       'length' => 50,
+       'length' => 255,
        'default' => '',
     ),
    'declared_claimed_godown_short' => array(
