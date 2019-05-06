@@ -4689,7 +4689,8 @@ function is_bill_cancelled_discarded($bill_number){
     $query->leftjoin('field_data_field_bill_status', 'bs', 'bs.entity_id = n.nid');
     $query->condition('n.title', $bill_number);
     $query->condition('n.type', 'sales_register_data');
-    $query->isNotNull('bs.field_bill_status_value');
+    //$query->isNotNull('bs.field_bill_status_value');
+    $query->condition('bs.field_bill_status_value', array('cancel', 'discard'), 'IN');
     $query->fields('n', array('title'));
     $query->addTag('node_distributor_access');
     $res = $query->execute()->fetchField();
