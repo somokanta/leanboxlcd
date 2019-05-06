@@ -336,6 +336,11 @@ function get_attachment_pending_for_collection($distributor_id) {
   $query->leftjoin('field_data_field_party_code_reference', 'pcr', 'pcr.entity_id = sbrf.field_sales_bill_no_ref_nid');
   $query->join('node', 'pp', 'pp.nid = pcr.field_party_code_reference_nid');
   
+  //new
+  //field_hul_code_reference
+  $query->leftjoin('field_data_field_hul_code_reference', 'hcr', 'hcr.entity_id = pp.nid');
+  $query->join('node', 'hc', 'hc.nid = hcr.field_hul_code_reference_nid');
+  
   $query->leftjoin('field_data_field_party_name', 'opn', 'opn.entity_id = pcr.field_party_code_reference_nid');
   $query->leftjoin('field_data_field_payment_terms', 'pt', 'pt.entity_id = pcr.field_party_code_reference_nid');
   $query->leftjoin('field_data_field_credit_days', 'ct', 'ct.entity_id = pcr.field_party_code_reference_nid');
@@ -363,6 +368,7 @@ function get_attachment_pending_for_collection($distributor_id) {
   $query->fields('sr', array('field_sr_bill_date_value'));
   $query->fields('ff', array('field_flag_value'));
   $query->fields('pp', array('title'));
+  $query->fields('hc', array('title'));
   $query->fields('opn', array('field_party_name_value'));
   $query->fields('pt', array('field_payment_terms_value'));
   $query->fields('ct', array('field_credit_days_value'));
@@ -415,6 +421,7 @@ function get_attachment_pending_for_collection($distributor_id) {
     $row['bill_date'] = date('d-M-Y', $data['field_sr_bill_date_value']);
     $row['type'] = $data['field_flag_value'];
     $row['party_code'] = $data['pp_title'];
+    $row['hul_code'] = $data['hc_title'];
     $row['party_name'] = $data['field_party_name_value'];
     $row['payment_terms'] = $data['field_payment_terms_value'];
     $row['credit_days'] = $data['field_credit_days_value'];
@@ -498,7 +505,7 @@ function get_attachment_pending_for_collection($distributor_id) {
     $rows[] = $row;
   }
 
-  $header = array('Nid', 'Bill No.', 'Bill Date', 'Type', 'Party Code', 'Party Name', 'PT', 'CT', 'Beat Name', 'Salesman', 'Salesman Code', 'Bill Value', 'To Be Collected', 'Declaration Date', 'Old Cheque No.', 'Old Cheque Date', 'File Upload Date', 'Assigned To', 'Assignment Date', 'Collection Status', 'Cash Collected Amt', 'Cheque Collected Amt', 'Total Amt Collected', 'Difference Amt', 'Latest Collection Date', 'Returned Bill Flag', 'Declaration Remarks', 'Return Remarks', 'Partial Collection Remarks', 'Fine Amt', 'Final Closure', 'Final Closure Remarks', 'Ageing');
+  $header = array('Nid', 'Bill No.', 'Bill Date', 'Type', 'Party Code', 'Hul Code','Party Name', 'PT', 'CT', 'Beat Name', 'Salesman', 'Salesman Code', 'Bill Value', 'To Be Collected', 'Declaration Date', 'Old Cheque No.', 'Old Cheque Date', 'File Upload Date', 'Assigned To', 'Assignment Date', 'Collection Status', 'Cash Collected Amt', 'Cheque Collected Amt', 'Total Amt Collected', 'Difference Amt', 'Latest Collection Date', 'Returned Bill Flag', 'Declaration Remarks', 'Return Remarks', 'Partial Collection Remarks', 'Fine Amt', 'Final Closure', 'Final Closure Remarks', 'Ageing');
 
   $output1['header'] = $header;
   $output1['rows'] = $rows;
