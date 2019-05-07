@@ -82,7 +82,25 @@ function return_vrs_callback() {
   }
   
   $get_subdivision_nids = check_product_validation($distributor_id);
-
+  if (!empty($trip_id)) {
+    $trip_ids = array($trip_id);
+  }
+  else if (!empty($dispatch_date)) {
+    $trip_ids = _get_trip_ids_using_dispatch_date($dispatch_date);
+  }
+  
+  if(!empty($trip_ids)){
+    $sub_query = db_select('node', 'n1');
+    $sub_query->condition('n1.uid', $distributor_id, '=');
+    $sub_query->condition('n1.type', 'assets_count', '=');
+    $sub_query->condition('n1.title', $trip_ids , 'IN');
+    $sub_query->leftjoin('field_data_field_received_asset_time', 'at', 'at.entity_id = n1.nid');
+    $sub_query->fields('at', array('field_received_asset_time_value'));
+    $sub_query->fields('n1', array('title'));
+    $sub_query->distinct();
+    $sub_query->groupBy('n1.title');
+  }
+  
   $query = db_select('dispatch_planning_api_data', 'ad');
   $query->condition('ad.distributor_id', $distributor_id, '=');
   //$query->condition('ad.updated_flag', 1, '=');
@@ -96,9 +114,14 @@ function return_vrs_callback() {
   $query->fields('ad', array('runsheet_number'));
   $query->fields('ad', array('date'));
   $query->fields('ad', array('fieldExecutiveName'));
-  $query->leftjoin('node', 'n1', "n1.title = ad.runsheet_number and n1.type ='assets_count' and n1.uid = $distributor_id");
-  $query->leftjoin('field_data_field_received_asset_time', 'at', 'at.entity_id = n1.nid');
-  $query->fields('at', array('field_received_asset_time_value'));
+//  $query->leftjoin('node', 'n1', "n1.title = ad.runsheet_number and n1.type ='assets_count' and n1.uid = $distributor_id");
+//  $query->leftjoin('field_data_field_received_asset_time', 'at', 'at.entity_id = n1.nid');
+//  $query->fields('at', array('field_received_asset_time_value'));
+  if(!empty($trip_ids)){
+    $query->leftjoin($sub_query, 'asset_count', 'asset_count.title = ad.runsheet_number');
+    $query->fields('asset_count', array('field_received_asset_time_value'));
+  }
+  
   $query->join('node', 'disp_data', 'disp_data.title = ad.runsheet_number');
   $query->condition('disp_data.type', 'dispatch_data');
   $query->condition('disp_data .uid', $distributor_id);
@@ -155,7 +178,6 @@ function return_vrs_callback() {
   $result = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
   $return_confirmed_vrs_status = array(1,2,3,4,5);
   foreach ($result as $val) {
-   
     $row['trip_id'] = $val['runsheet_number'];
     $dispatch_date = strtotime($val['date']); 
     if(isset($dispatch_date)){
