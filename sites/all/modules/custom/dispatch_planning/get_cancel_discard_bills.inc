@@ -11,7 +11,8 @@ function get_cancel_discard_bills($form, &$form_state){
 
   $form['#prefix'] = '<div id="itemlist-div" class="custom_form_wrapper trip_autocomplete_textbox">';
   $form['#suffix'] = '</div>';
-
+  
+  $form['#attached']['js'][] = drupal_get_path('module', 'dispatch_planning') . '/js/dispatch_planning_form.js';
   $form['bill_number'] = array(
     //'#prefix' => '<div class="textfield-wrapper">',
     '#type' => 'textfield',
@@ -70,19 +71,83 @@ function get_cancel_discard_bills($form, &$form_state){
   }
   $bill_rows = $form_state['bills_data']['bills'];
 
-  $header = array(
+  $headers = array(
     'bill_number' => 'Bill Number',
     'bill_date' => 'Bill Date',
     'party_code' => 'Party Code',
+    'pl_group'=> 'PL Group',
     'party_name' => 'Party Name',
     'bill_value' => 'Bill Value'
   );
+    
+  foreach ($headers as $key => $value) {
+    $sort_options[$key . ':asc'] = $value . ' - Asc';
+    $sort_options[$key . ':desc'] = $value . ' - Desc';
+  }
 
+  $form['sort'] = array(
+    '#type' => 'select',
+    '#options' => $sort_options,
+    '#ajax' => array(
+      'wrapper' => 'itemlist-div',
+      'callback' => 'custom_ajax_sort_callback',
+      'method' => 'replace',
+      'effect' => 'fade',
+    ),
+    '#attributes' => array(
+      'class' => array('sort-select', 'element-invisible'),
+    ),
+  );
+    
+  if (isset($form_state['triggering_element']) && ($form_state['triggering_element']['#name'] == 'sort')) {
+    $active = explode(':', $form_state['values']['sort']);
+    $form_state['bills_data']['sort_field'] = $active[0];
+    $form_state['bills_data']['sort_order'] = $active[1];
+  }
+
+  if (isset($form_state['bills_data']['sort_field'])) {
+    $active_sort = $form_state['bills_data']['sort_field'];
+  }
+  if (isset($form_state['bills_data']['sort_order'])) {
+    $active_order = $form_state['bills_data']['sort_order'];
+  }
+  if ($active_order == 'asc') {
+    $next_order = 'desc';
+  }
+  elseif ($active_order == 'desc') {
+    $next_order = 'asc';
+  }
+  
+  foreach ($headers as $k => $header) {
+    if($k == 'bill_value'){
+      $header_array[$k] = array(
+        'data' => array(
+          '#type' => 'link',
+          '#title' => $header . (($active_sort == $k && $next_order) ? theme('tablesort_indicator', array('style' => $next_order)) : ''),
+          '#href' => '',
+          '#attributes' => array(
+            'class' => ($active_sort == $k) ? array('active', 'header-link') : array('header-link'),
+            'id' => $k,
+            'data-sort' => ($active_sort == $k && $next_order) ? $next_order : '',
+          ),
+          '#options' => array(
+            'html' => true,
+          )
+        ),
+      );
+    }else{
+      $header_array[$k] = array('data' => $header);
+    }
+  }
+  
   if($bill_rows){
+    if (isset($active_sort)) {
+      $bill_rows = _get_header_sort($bill_rows, $active_sort, $active_order);
+    }
     //dpm($bill_rows, 'bill_rows: ');
     $form['table_items'] = array(
       '#type' => 'tableselect',
-      '#header' => $header,
+      '#header' => $header_array,
       '#options' => $bill_rows,
       '#prefix' => '<div id="table-div">',
       '#suffix' => '</div>',
@@ -157,6 +222,10 @@ function get_cancel_discard_bills($form, &$form_state){
   }
   return $form;
 } 
+
+function custom_ajax_sort_callback($form, &$form_state) {
+  return $form;
+}
 
 function action_ajax_callback($form, &$form_state){
   return $form['reason'];

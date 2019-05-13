@@ -4420,6 +4420,7 @@ function get_bills_data($bill_number = NULL, $bill_date_from = NULL, $bill_date_
     $query->leftJoin('field_data_field_party_name', 'pn', 'pn.entity_id = oun.nid');
     $query->leftJoin('field_data_field_trip_id_reference', 't', 'n.nid = t.entity_id');
     $query->leftjoin('field_data_field_bill_status', 'bs', 'bs.entity_id = n.nid');
+    $query->leftjoin('field_data_field_pl_group', 'pl', 'pl.entity_id = pc.field_party_code_reference_nid'); //new added
     $query->condition('n.uid', $distributor_id);
     $query->condition('n.type', 'sales_register_data');
     $query->condition('oun.type', 'outlet_master');
@@ -4440,6 +4441,7 @@ function get_bills_data($bill_number = NULL, $bill_date_from = NULL, $bill_date_
     $query->addField('oun', 'title', 'party_code');
     $query->addField('pn', 'field_party_name_value', 'party_name');
     $query->addField('bv', 'field_bill_value_value', 'bill_value');
+    $query->addField('pl', 'field_pl_group_value', 'pl_group'); //new field added
     $result = $query->execute()->fetchAll(PDO::FETCH_GROUP | PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
     }
   return $result;
