@@ -205,3 +205,24 @@ function leanbox_new_sku_wise_return_update_7114() {
 
   db_create_table('sku_wise_return_time_history', $schema['sku_wise_return_time_history']);
 }
+
+
+function leanbox_new_sku_wise_return_update_7115() {
+  $fields = array(
+    'tur' => array(
+      'description' => t('Excess Inventory Tur Field'),
+      'type' => 'varchar',
+			'length' => 20,
+    ),
+    'sku_code' => array(
+      'description' => t('Excess Inventory Sku Code Field'),
+      'type' => 'varchar',
+      'length' => 255,
+    ),
+  );
+	foreach ($fields as $key => $field) {
+    if (!db_field_exists('excess_inventory_table', $key)) {
+      db_add_field('excess_inventory_table', $key, $field);
+    }
+  }
+}
