@@ -167,6 +167,40 @@ function leanbox_new_sku_wise_return_views_data() {
             'handler' => 'views_handler_argument_string',
         ),
     );
+	$data['excess_inventory_table']['tur'] = array(
+        'title' => t('Tur'),
+        'help' => t('Tur'),
+        'field' => array(
+            'handler' => 'views_handler_field',
+            'click sortable' => TRUE,
+        ),
+        'sort' => array(
+            'handler' => 'views_handler_sort',
+        ),
+        'filter' => array(
+            'handler' => 'views_handler_filter_string',
+        ),
+        'argument' => array(
+            'handler' => 'views_handler_argument_string',
+        ),
+    );
+	$data['excess_inventory_table']['sku_code'] = array(
+        'title' => t('SKU Code'),
+        'help' => t('SKU Code'),
+        'field' => array(
+            'handler' => 'views_handler_field',
+            'click sortable' => TRUE,
+        ),
+        'sort' => array(
+            'handler' => 'views_handler_sort',
+        ),
+        'filter' => array(
+            'handler' => 'views_handler_filter_string',
+        ),
+        'argument' => array(
+            'handler' => 'views_handler_argument_string',
+        ),
+    );
   $base_table = 'excess_inventory_table';
     $data[$base_table]['date_filter'] = array(
         'group' => t('Date'),
