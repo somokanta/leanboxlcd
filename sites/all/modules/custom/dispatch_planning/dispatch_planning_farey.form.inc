@@ -366,6 +366,12 @@ function _edit_trip_delivered_callback_form($form, &$form_state) {
                unset($form_state['input']['sb_file']);
                unset($form_state['input']['cheque_no']);
                unset($form_state['input']['delivery_boy']);
+               unset($form_state['input']['cash_cheque_cash_amt']);
+               unset($form_state['input']['cash_cheque_bank_name']);
+               unset($form_state['input']['cash_cheque_cheque_amt']);
+               unset($form_state['input']['cash_cheque_cheque_date']);
+               unset($form_state['input']['cash_cheque_res_photo_of_cheque']);
+               unset($form_state['input']['cash_cheque_cheque_no']);
 
                $bill_details_header = array('Bill value', 'Party name');
 
@@ -405,7 +411,7 @@ function _edit_trip_delivered_callback_form($form, &$form_state) {
                  '#default_value' => !empty($reason_for_failure) ? $reason_for_failure : '',
                );
                // collection mode
-               $lists = array('' => '-select-', 'signed' => 'Signed', 'cheque' => 'Cheque', 'cash' => 'Cash');
+               $lists = array('' => '-select-', 'signed' => 'Signed', 'cheque' => 'Cheque', 'cash' => 'Cash', 'cash,cheque' => 'Cash,Cheque');
 
                if (!empty($order_status) && $order_status == 'undeliver') {
                   $form['collection_mode'] = array(
@@ -479,6 +485,19 @@ function _edit_trip_delivered_callback_form($form, &$form_state) {
                     ),
                     '#default_value' => !empty($res_bank_name_edit) ? $res_bank_name_edit : $res_bank_name,
                   );
+                  
+                  $form['cash_cheque_bank_name'] = array(
+                    '#type' => 'textfield',
+                    '#title' => t('Bank Name'),
+                    '#autocomplete_path' => 'get_bank_names/autocomplete',
+                    '#states' => array(
+                      'visible' => array(
+                        ':input[name="collection_mode"]' => array('value' => 'cash,cheque'),
+                      ),
+                    ),
+                    '#default_value' => !empty($res_bank_name_edit) ? $res_bank_name_edit : $res_bank_name,
+                  );
+                  
                   $form['cheque_amt'] = array(
                     '#type' => 'textfield',
                     '#title' => t('Cheque Amt'),
@@ -489,12 +508,32 @@ function _edit_trip_delivered_callback_form($form, &$form_state) {
                     ),
                     '#default_value' => isset($res_cheque_amount_edit) ? $res_cheque_amount_edit : $res_cheque_amount,
                   );
+                  $form['cash_cheque_cheque_amt'] = array(
+                    '#type' => 'textfield',
+                    '#title' => t('Cheque Amt'),
+                    '#states' => array(
+                      'visible' => array(
+                        ':input[name="collection_mode"]' => array('value' => 'cash,cheque'),
+                      ),
+                    ),
+                    '#default_value' => isset($res_cheque_amount_edit) ? $res_cheque_amount_edit : $res_cheque_amount,
+                  );
                   $form['cheque_no'] = array(
                     '#type' => 'textfield',
                     '#title' => t('Cheque Number'),
                     '#states' => array(
                       'visible' => array(
                         ':input[name="collection_mode"]' => array('value' => 'cheque'),
+                      ),
+                    ),
+                    '#default_value' => isset($res_cheque_no_edit) ? $res_cheque_no_edit : $res_cheque_no,
+                  );
+                  $form['cash_cheque_cheque_no'] = array(
+                    '#type' => 'textfield',
+                    '#title' => t('Cheque Number'),
+                    '#states' => array(
+                      'visible' => array(
+                        ':input[name="collection_mode"]' => array('value' => 'cash,cheque'),
                       ),
                     ),
                     '#default_value' => isset($res_cheque_no_edit) ? $res_cheque_no_edit : $res_cheque_no,
@@ -515,6 +554,18 @@ function _edit_trip_delivered_callback_form($form, &$form_state) {
                     '#default_value' => !empty($res_cheque_date_edit) ? $res_cheque_date_edit : $res_cheque_date,
                     '#date_format' => 'Y-m-d',
                   );
+                  $form['cash_cheque_cheque_date'] = array(
+                    '#type' => 'date_popup',
+                    '#title' => t('Cheque Date'),
+                    '#date_label_position' => 'none',
+                    '#states' => array(
+                      'visible' => array(
+                        ':input[name="collection_mode"]' => array('value' => 'cash,cheque'),
+                      ),
+                    ),
+                    '#default_value' => !empty($res_cheque_date_edit) ? $res_cheque_date_edit : $res_cheque_date,
+                    '#date_format' => 'Y-m-d',
+                  );
                   $form['cheque_file'] = array(
                     '#title' => t('Photo of Cheque Copy'),
                     '#type' => 'file',
@@ -522,6 +573,16 @@ function _edit_trip_delivered_callback_form($form, &$form_state) {
                     '#states' => array(
                       'visible' => array(
                         ':input[name="collection_mode"]' => array('value' => 'cheque'),
+                      ),
+                    ),
+                  );
+                  $form['cash_cheque_cheque_file'] = array(
+                    '#title' => t('Photo of Cheque Copy'),
+                    '#type' => 'file',
+                    '#description' => t('Allowed extensions: pdf png jpg jpeg txt'),
+                    '#states' => array(
+                      'visible' => array(
+                        ':input[name="collection_mode"]' => array('value' => 'cash,cheque'),
                       ),
                     ),
                   );
@@ -556,6 +617,15 @@ function _edit_trip_delivered_callback_form($form, &$form_state) {
                        '#states' => array(
                          'visible' => array(
                            ':input[name="collection_mode"]' => array('value' => 'cheque'),
+                         ),
+                       ),
+                     );
+                     $form['cash_cheque_res_photo_of_cheque'] = array(
+                       '#type' => 'item',
+                       '#markup' => l("$file", $path,  array('attributes' => array('target'=> '_blank'))) . '<div></div></br>',
+                       '#states' => array(
+                         'visible' => array(
+                           ':input[name="collection_mode"]' => array('value' => 'cash,cheque'),
                          ),
                        ),
                      );
@@ -640,6 +710,16 @@ function _edit_trip_delivered_callback_form($form, &$form_state) {
                     '#states' => array(
                       'visible' => array(
                         ':input[name="collection_mode"]' => array('value' => 'cash'),
+                      ),
+                    ),
+                    '#default_value' => !empty($res_cash_amount_edit) ? $res_cash_amount_edit : $res_cash_amount,
+                  );
+                  $form['cash_cheque_cash_amt'] = array(
+                    '#type' => 'textfield',
+                    '#title' => t('Cash Amt'),
+                    '#states' => array(
+                      'visible' => array(
+                        ':input[name="collection_mode"]' => array('value' => 'cash,cheque'),
                       ),
                     ),
                     '#default_value' => !empty($res_cash_amount_edit) ? $res_cash_amount_edit : $res_cash_amount,
@@ -934,6 +1014,12 @@ function _edit_trip_delivered_callback_form_validate($form, &$form_state) {
           form_set_error('cash_amt', t('Cash amount can not be empty and should be greater than zero'));
       }
    }
+   if ($collc_mode == 'cash,cheque') {
+      $cash_amt = $form_state['values']['cash_cheque_cash_amt'];
+      if (empty($cash_amt) || !is_numeric($cash_amt)) {
+          form_set_error('cash_cheque_cash_amt', t('Cash amount can not be empty and should be greater than zero'));
+      }
+   }
    if ($collc_mode == 'signed') {
       $sb_amt = $form_state['values']['sb_amt'];
       if (empty($sb_amt) || !is_numeric($sb_amt)) {
@@ -985,6 +1071,50 @@ function _edit_trip_delivered_callback_form_validate($form, &$form_state) {
          //form_set_error('cheque_file', t('Photo of Cheque cannot be empty'));
       }
    }
+   if ($collc_mode == 'cash,cheque') {
+      $cheque_date = $form_state['values']['cash_cheque_cheque_date'];
+      if (empty($cheque_date)) {
+          form_set_error('cash_cheque_cheque_date', t('Cheque date can not be empty'));
+      }
+      $cheque_amt = $form_state['values']['cash_cheque_cheque_amt'];
+      if (empty($cheque_amt) || !is_numeric($cheque_amt)) {
+          form_set_error('cash_cheque_cheque_amt', t('Cheque amount can not be empty'));
+      }
+      $bank_name = $form_state['values']['cash_cheque_bank_name'];
+      if (empty($bank_name) || $bank_name == 'NA') {
+          form_set_error('cash_cheque_bank_name', t('Bank name can not be empty'));
+      }
+      if(empty(check_bank_name_exist($bank_name))){
+        form_set_error('cash_cheque_bank_name', t('Please select correct bank name'));
+      }
+      $cheque_no = $form_state['values']['cash_cheque_cheque_no'];
+      if (empty($cheque_no) || !is_numeric($cheque_no)) {
+          form_set_error('cash_cheque_cheque_no', t('Cheque number can not be empty'));
+      }
+
+
+      $file = file_save_upload('cash_cheque_cheque_file', array(
+        'file_validate_extensions' => array('pdf png jpg jpeg txt'), // Validate extensions.
+      ));
+
+      // If the file passed validation:
+      if ($file) {
+         // Change the status
+         $file->status = FILE_STATUS_PERMANENT;
+         // Update the file status into the database
+         file_save($file);
+         // Move the file, into the Drupal file system
+         if ($file = file_move($file, 'public://')) {
+            // Save the file for use in the submit handler.
+            $form_state['storage']['cash_cheque_cheque_file'] = $file;
+         }
+         else {
+            form_set_error('cash_cheque_cheque_file', t('Failed to write the uploaded bill file the site\'s file folder.'));
+         }
+      }else if (empty($res_photo_of_cheque) && empty($res_photo_of_cheque_edit)) {
+         //form_set_error('cheque_file', t('Photo of Cheque cannot be empty'));
+      }
+   }
    if ($collc_mode == 'signed') {
       $file = file_save_upload('sb_file', array(
         'file_validate_extensions' => array('pdf png jpg jpeg txt'), // Validate extensions.
@@ -1030,8 +1160,10 @@ function _edit_trip_delivered_callback_form_submit($form, &$form_state) {
       $collc_mode = $form_state['values']['collection_mode'];
 
       $cheque_file = ($form_state['storage']['cheque_file']);
+      $cash_cheque_cheque_file = ($form_state['storage']['cash_cheque_cheque_file']);
       $sb_file = ($form_state['storage']['sb_file']);
       $cheque_file_uri = $cheque_file->uri;
+      $cash_cheque_file_uri = $cash_cheque_cheque_file->uri;
       $sb_file_uri = $sb_file->uri;
       $reason_for_failure = isset($form_state['values']['undeliver_reason']) ? $form_state['values']['undeliver_reason'] : '';
       $og_array = $form_state['values']['og_array']; // dispatch_qty 
@@ -1063,16 +1195,28 @@ function _edit_trip_delivered_callback_form_submit($form, &$form_state) {
           $cheque_bill_file_url = $cheque_bill_url;
         }
       }
-
+      
+      if($collc_mode == 'cash,cheque' && empty($cash_cheque_file_uri)) {
+        $query = db_select('dispatch_planning_api_data', 'dpi');
+        $query->condition('dpi.hub', $rs_code, '=');
+        $query->condition('dpi.runsheet_number', $trip_number, '=');
+        $query->condition('dpi.bill_number', $bill_number, '=');
+        $query->fields('dpi', array('res_photo_of_cheque'));
+        $cash_cheque_bill_url = $query->execute()->fetchField();
+        if(!empty($cash_cheque_bill_url)) {
+          $cash_cheque_bill_file_url = $cash_cheque_bill_url;
+        }
+      }
+      
       $updated_bill_rows = db_update('dispatch_planning_api_data') // Table name no longer needs {}
           ->fields(array(
             'res_status' => $order_status,
-            'res_cash_amount_edit' => ($collc_mode == 'cash') ? $form_state['values']['cash_amt'] : '',
-            'res_cheque_amount_edit' => ($collc_mode == 'cheque') ? $form_state['values']['cheque_amt'] : '',
-            'res_cheque_no_edit' => ($collc_mode == 'cheque') ? $form_state['values']['cheque_no'] : '',
-            'res_bank_name_edit' => ($collc_mode == 'cheque') ? $form_state['values']['bank_name'] : '',
-            'res_cheque_date_edit' => ($collc_mode == 'cheque') ? $form_state['values']['cheque_date'] : '',
-            'res_photo_of_cheque_edit' => ($collc_mode == 'cheque' && !empty($cheque_file_uri)) ? $cheque_file_uri : $cheque_bill_file_url,
+            'res_cash_amount_edit' => ($collc_mode == 'cash') ? $form_state['values']['cash_amt'] : (($collc_mode == 'cash,cheque') ? $form_state['values']['cash_cheque_cash_amt'] : ''),
+            'res_cheque_amount_edit' => ($collc_mode == 'cheque') ? $form_state['values']['cheque_amt'] : (($collc_mode == 'cash,cheque') ? $form_state['values']['cash_cheque_cheque_amt'] : ''),
+            'res_cheque_no_edit' => ($collc_mode == 'cheque') ? $form_state['values']['cheque_no'] : (($collc_mode == 'cash,cheque') ? $form_state['values']['cash_cheque_cheque_no'] : ''),
+            'res_bank_name_edit' => ($collc_mode == 'cheque') ? $form_state['values']['bank_name'] : ($collc_mode == 'cash,cheque') ? $form_state['values']['cash_cheque_bank_name'] : '',
+            'res_cheque_date_edit' => ($collc_mode == 'cheque') ? $form_state['values']['cheque_date'] : ($collc_mode == 'cash,cheque') ? $form_state['values']['cash_cheque_cheque_date'] : '',
+            'res_photo_of_cheque_edit' => ($collc_mode == 'cheque' && !empty($cheque_file_uri)) ? $cheque_file_uri : (($collc_mode == 'cash,cheque' && !empty($cash_cheque_file_uri)) ? $cash_cheque_file_uri : $cash_cheque_bill_file_url),   
             'res_confirm_signed_bill_amount_edit' => ($collc_mode == 'signed') ? $form_state['values']['sb_amt'] : '',
             'res_photo_of_signed_bill_delivery_edit' => ($collc_mode == 'signed' && $order_status == 'deliver' && !empty($sb_file_uri)) ? $sb_file_uri : $signed_bill_deliver_url,
             'photo_of_signed_bill_partial_edit' => ($collc_mode == 'signed'&& $order_status == 'partial_deliver' && !empty($sb_file_uri)) ? $sb_file_uri : $signed_bill_partial_url,
