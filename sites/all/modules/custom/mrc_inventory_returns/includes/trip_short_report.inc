@@ -158,7 +158,7 @@ function trip_short_excess_form_callback() {
     }
     $query->leftjoin('vrs_trip_total', 'vtt', 'ad.runsheet_number = vtt.trip_id AND ad.distributor_id = vtt.distributor_id');
     $query->join('dispatch_planning_item_details', 'dit', 'ad.id = dit.trip_bill_reference');
-    $query->leftjoin('excess_inventory_table', 'eit', 'ad.runsheet_number = eit.trip_id AND ad.distributor_id = eit.distributor_id');
+    //$query->leftjoin('excess_inventory_table', 'eit', 'ad.runsheet_number = eit.trip_id AND ad.distributor_id = eit.distributor_id');
     $query->join('node', 'n', "n.title = ad.runsheet_number AND n.uid = ad.distributor_id");
     $query->condition('n.type', 'dispatch_data');
     $query->leftjoin('field_data_field_vrs_status', 'vrs', 'n.nid = vrs.entity_id');
@@ -173,20 +173,31 @@ function trip_short_excess_form_callback() {
     }
     $query->fields('ad', array('runsheet_number'));
     $query->fields('vtt', array('total_cashier_cash_short'));
-    $query->addExpression("SUM(distinct(CASE WHEN dit.res_cashier_short > 0 AND dit.res_cashier_short != '' THEN dit.res_cashier_short*dit.sum_net_sales_value END))", 'inventory_short_value');
-    $query->addExpression("SUM(distinct(eit.excess_qty * eit.mrp * 0.9) )", 'total_excess_value');
-    $query->addExpression("SUM(distinct(CASE WHEN eit.credit_to_cashier = 1 THEN (eit.excess_qty * eit.mrp * 0.9) END))", 'excess_value_credited_to_cashier');
-		$query->addExpression("SUM(CASE WHEN dit.claimed_godown_short > 0 THEN(dit.claimed_godown_short * dit.sum_net_sales_value) END)", 'pending_claimed_godown_short_value');
+    $query->addExpression("SUM(distinct(CASE WHEN dit.res_cashier_short > 0 AND dit.res_cashier_short != '' THEN dit.res_cashier_short*dit.tur END))", 'inventory_short_value'); //formula changed (EARLIER: dit.res_cashier_short*dit.sum_net_sales_value)
+   // $query->addExpression("SUM(distinct(eit.excess_qty * eit.tur))", 'total_excess_value'); //formula changed (EARLIER: eit.excess_qty * eit.mrp * 0.9)
+		//$query->addExpression("ROUND(SUM(distinct(CASE WHEN eit.tur != '' THEN (eit.excess_qty * eit.tur) ELSE (eit.excess_qty * eit.mrp * 0.9) END)),2)", 'total_excess_value');
+		
+   // $query->addExpression("SUM(distinct(CASE WHEN eit.credit_to_cashier = 1 THEN (eit.excess_qty * eit.tur) END))", 'excess_value_credited_to_cashier'); //formula changed (EARLIER: eit.excess_qty * eit.mrp * 0.9)
+		//$query->addExpression("SUM(distinct(CASE WHEN eit.credit_to_cashier = 1 AND  eit.tur != '' THEN (eit.excess_qty * eit.tur) ELSE (eit.excess_qty * eit.mrp * 0.9) END))", 'excess_value_credited_to_cashier');
+		
+		$query->addExpression("SUM(distinct(CASE WHEN dit.claimed_godown_short > 0 THEN(dit.claimed_godown_short * dit.tur) END))", 'pending_claimed_godown_short_value'); //formula changed (EARLIER: dit.claimed_godown_short * dit.sum_net_sales_value)
 
     $query->groupBy('ad.runsheet_number');
     $res = $query->execute()->fetchAll();
+		if (!empty($res)) {
+			foreach($res as $key=>$val) {
+				$trips[$val->runsheet_number] = $val->runsheet_number;
+			}
+		}
+			// get excess value from excess inventory
+		$excess_data= get_trip_wise_excess_value($trips,$distributor_id);		
     foreach ($res as $val) {
 			$row['trip_id'] = $val->runsheet_number;
 			$row['inventory_short_value'] = round($val->inventory_short_value, 2);
 			$row['pending_claimed_godown_short_value'] = round($val->pending_claimed_godown_short_value, 2);
 			$row['total_cashier_cash_short'] = round($val->total_cashier_cash_short, 2);
-			$row['total_excess_value'] = round($val->total_excess_value, 2);
-			$row['excess_value_credited_to_cashier'] = round($val->excess_value_credited_to_cashier, 2);
+			$row['total_excess_value'] = round($excess_data[$val->runsheet_number]['total_excess_value'],2); //round($val->total_excess_value, 2);
+			$row['excess_value_credited_to_cashier'] = round($excess_data[$val->runsheet_number]['excess_value_credited_to_cashier'],2); //round($val->excess_value_credited_to_cashier, 2);
 			$rows[] = $row;
 		}
 		$header = array('Trip Id', 'Inventory Short Value', 'Pending Claimed GS Value','Cashier Cash Short', 'Total Excess Value', 'Excess Value Credited to Cashier');
@@ -220,4 +231,23 @@ function trip_short_excess_report_export() {
   header("Content-type: application/vnd.ms-excel");
   header("Content-Disposition: attachment; filename=$file");
   echo $table;
+}
+
+
+function get_trip_wise_excess_value($all_trips, $distributor_id) {
+	if (!empty($all_trips) && !empty($distributor_id)) {
+		$query = db_select('excess_inventory_table', 'eit');
+		$query->condition('eit.distributor_id', $distributor_id, '=');
+		$query->condition('eit.trip_id', $all_trips, 'IN');
+		$query->groupBy('eit.trip_id');
+		$query->fields('eit', array('trip_id'));
+		//$query->fields('eit', array('credit_to_cashier'));
+		$query->addExpression("SUM(CASE WHEN eit.tur != '' THEN (eit.excess_qty * eit.tur) ELSE (eit.excess_qty * eit.mrp * 0.9) END)", 'total_excess_value');
+		
+		$query->addExpression("SUM(CASE WHEN eit.credit_to_cashier = 1 AND  eit.tur != '' THEN (eit.excess_qty * eit.tur) ELSE (CASE WHEN eit.credit_to_cashier = 1 AND  eit.tur IS Null THEN (eit.excess_qty * eit.mrp * 0.9) END) END)", 'excess_value_credited_to_cashier');
+		
+		
+		$res = $query->execute()->fetchAll(PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
+	}
+	return $res;
 }

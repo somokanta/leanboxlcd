@@ -6,7 +6,9 @@ function get_excess_declaration_cashier_data($trip_number, $distributor_id) {
     $query->condition('eit.distributor_id', $distributor_id);
     $query->condition('eit.credit_to_cashier', 1);
     $query->addExpression('SUM(eit.excess_qty)', 'excess_qty');
-    $query->addExpression('ROUND(SUM(eit.excess_qty * eit.mrp * 0.9),2)', 'excess_value');
+		//$query->addExpression('ROUND(SUM(distinct(eit.excess_qty * eit.tur)),2)', 'excess_value'); //formula changed (EARLIER: eit.excess_qty * eit.mrp * 0.9)
+		$query->addExpression("ROUND(SUM(CASE WHEN eit.tur != '' THEN eit.excess_qty * eit.tur ELSE eit.excess_qty * eit.mrp * 0.9 END),2)", 'excess_value');
+		$query->groupBy("eit.trip_id");
     $result = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
   }
   return $result;
