@@ -107,6 +107,23 @@ function _get_all_products($string = '') {
   }
   drupal_json_output($result);
 }
+function _get_sku_code($product_names) {
+  global $user;
+  $dis_id = change_feeds_import_get_distributor_id($user->uid);
+
+  if (!empty($product_names)) {
+    $query = db_select('node', 'n');
+    $query->condition('n.uid', $dis_id);
+    $query->join('field_data_field_product_name', 'pn', 'pn.entity_id = n.nid');
+		$query->join('field_data_field_sku7_code', 'sku', 'sku.entity_id = n.nid');
+    $query->condition('pn.field_product_name_value', $product_names, 'IN');
+    $query->fields('pn', array('field_product_name_value'));
+		$query->fields('sku', array('field_sku7_code_value'));
+    $result = $query->execute()->fetchAllKeyed(0, 1);
+  }
+  return $result;
+}
+
 
 function get_excess_reason_list($dis_id) {
   $query = db_select('node', 'n');
@@ -342,4 +359,31 @@ function delete_claimed_godownshort_and_cashier_short($trip_id, $distributor_id,
         ->execute();
     }
   }
+}
+
+
+
+
+function get_product_sku_tur_data($sku_codes) {
+	if (!empty($sku_codes)) {
+		$query = db_select('dispatch_planning_item_details', 'dpi');
+		$query->condition('dpi.sku_code', $sku_codes, 'IN');
+		$query->fields('dpi', array('product_name', 'tur', 'sku_code'));
+		$query->groupBy('dpi.product_name');
+		$result = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+		return $result;
+	}
+}
+
+
+function get_sku_tur_data($sku_codes)
+{
+		if (!empty($sku_codes)) {
+		$query = db_select('dispatch_planning_item_details', 'dpi');
+		$query->condition('dpi.sku_code', $sku_codes, 'IN');
+		$query->fields('dpi', array('sku_code', 'tur'));
+		$query->groupBy('dpi.product_name');
+		$result = $query->execute()->fetchAllKeyed(0,1);
+		return $result;
+	}
 }

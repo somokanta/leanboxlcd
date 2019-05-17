@@ -783,7 +783,6 @@ function new_sku_wise_return_submit($form, &$form_state) {
     //$query->addExpression("SUM(CASE WHEN updated_flag = 1 THEN dpi.sum_net_sales_quantity-res_sku_actual_quantity1 END)", 'to_be_return_qty');
     // $result = $query->execute()->fetchAll(PDO::FETCH_GROUP | PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
     $result = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
-    //dpm($result);
     /*  In both SKU-wise screen and SKU-Bill wise screen,
      *  To Be returned qty should be = Net Sales Qty -  DP lines farey_delivered_qty
      *  if Updated flag = Api else To Be returned qty should be = Net Sales Qty - DP lines
@@ -1106,7 +1105,6 @@ function save_return_final_version($trip_id, $dis_id, $returns_incharge_name = '
 
 //Save btn function
 function save_sku_wise_return_submit($form, &$form_state) {
-//dpm($form_state, 'data');
   if (empty($form_state['sku_excess_error'])) {
     global $user;
     $dis_id = change_feeds_import_get_distributor_id($user->uid);
@@ -2070,39 +2068,53 @@ function save_returns_end_time($type, $trip_id, $end_time, $distributor_id) {
 
 function store_excess_inventory_declaration_data($all_excess_sku, $trip_id, $dis_id) {
 // Firstly delete the existing excess inventory data for the particular trip
-  $del_existing_data = db_delete('excess_inventory_table')
-    ->condition('trip_id', $trip_id, '=')
-    ->condition('distributor_id', $dis_id, '=')
-    ->execute();
-//Then save the fresh data
-  foreach ($all_excess_sku as $key => $value) {
-// watchdog('lower_table', '<pre>' . print_r($value, TRUE) . '</pre>');
-    $excess_product_name = $value['product_name'];
-    $product_mrp = $value['mrp'];
-    if (empty($product_mrp)) {
-      $product_mrp = $value['new_mrp'];
-    }
-    $excess_qty = $value['excess_qty'];
-    $credit_to_cashier = $value['credit_to_cashier'];
-    $excess_reason = $value['excess_reason'];
-    $remarks = $value['remarks'];
+	$del_existing_data = db_delete('excess_inventory_table')
+		->condition('trip_id', $trip_id, '=')
+		->condition('distributor_id', $dis_id, '=')
+		->execute();
 
-    if (!empty($excess_product_name)) {
-      db_merge('excess_inventory_table')
-        ->key(array('trip_id' => $trip_id, 'product_name' => $excess_product_name))
-        ->fields(array(
-          'trip_id' => $trip_id,
-          'product_name' => $excess_product_name,
-          'mrp' => !empty($product_mrp) ? $product_mrp : '',
-          'excess_qty' => !empty($excess_qty) ? $excess_qty : 0,
-          'credit_to_cashier' => !empty($credit_to_cashier) ? $credit_to_cashier : 0,
-          'excess_reason' => !empty($excess_reason) ? $excess_reason : '',
-          'remarks' => !empty($remarks) ? $remarks : '',
-          'distributor_id' => $dis_id,
-        ))
-        ->execute();
-    }
-  }
+	// Store all the excess product names in array
+
+	$product_names = array();
+	foreach ($all_excess_sku as $key => $value) {
+		$product_names[] = $value['product_name'];
+	}
+	// get sku code from farey table
+	$sku_codes = _get_sku_code($product_names);
+	// get tur of  skucode from farey table
+	$excess_sku_tur = get_sku_tur_data($sku_codes);
+	//print_r($sku_codes);die;
+	
+	foreach ($all_excess_sku as $key => $value) {
+		$excess_product_name = $value['product_name'];
+		$product_mrp = $value['mrp'];
+		if (empty($product_mrp)) {
+			$product_mrp = $value['new_mrp'];
+		}
+		$excess_qty = $value['excess_qty'];
+		$credit_to_cashier = $value['credit_to_cashier'];
+		$excess_reason = $value['excess_reason'];
+		$remarks = $value['remarks'];
+		$sku_code = $sku_codes[$excess_product_name];
+	  $tur = $excess_sku_tur[$sku_code];
+	  if (!empty($excess_product_name)) {
+			db_merge('excess_inventory_table')
+				->key(array('trip_id' => $trip_id, 'product_name' => $excess_product_name))
+				->fields(array(
+					'trip_id' => $trip_id,
+					'product_name' => $excess_product_name,
+					'mrp' => !empty($product_mrp) ? $product_mrp : '',
+					'excess_qty' => !empty($excess_qty) ? $excess_qty : 0,
+					'credit_to_cashier' => !empty($credit_to_cashier) ? $credit_to_cashier : 0,
+					'excess_reason' => !empty($excess_reason) ? $excess_reason : '',
+					'remarks' => !empty($remarks) ? $remarks : '',
+					'distributor_id' => $dis_id,
+					'tur' => !empty($tur) ? $tur : NULL,
+					'sku_code' => !empty($sku_code) ? $sku_code : NULL,
+				))
+				->execute();
+		}
+	}
 }
 
 function save_return_time($trip_id, $return_name, $time_value, $version = null, $distributor_id) {
