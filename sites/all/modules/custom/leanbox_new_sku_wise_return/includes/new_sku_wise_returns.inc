@@ -21,7 +21,6 @@ function new_sku_wise_returns_form($form, &$form_state) {
     $form_state['bill-wise'] = 1;
   }
   $form['#attached']['js'][] = drupal_get_path('module', 'leanbox_new_sku_wise_return') . '/js/leanbox_new_sku_wise_return.js';
-  $form['#attached']['js'][] = drupal_get_path('module', 'leanbox_new_sku_wise_return') . '/js/leanbox_new_sku_wise_return_hide.js';
   global $user;
   $distributor_id = change_feeds_import_get_distributor_id($user->uid);
 
@@ -485,19 +484,42 @@ function new_sku_wise_returns_form($form, &$form_state) {
           '#size' => 10,
         );
         $delete_item = array(
-          '#type' => 'submit',
-          '#value' => t('X'),
-          '#name' => "delete-" . $i . "-" . $excess_declaration_data[$i]['id'],
-          '#submit' => array('product_remove_items'),
-          '#ajax' => array(
-            'callback' => 'trip_details_return_delete_callback',
-            'wrapper' => 'itemlist-div',
-            'method' => 'replace',
-            'effect' => 'fade',
-          ),
-          '#attributes' => array('class' => array('delete-item', 'product-' . $i)),
-        );
-        $form['excess_inventory_table']['excess_sku']['#rows'][$i]['class'][] = 'product-' . $i;
+					'#type' => 'submit',
+					'#value' => t('X'),
+					'#name' => "delete-" . $i . "-" . $excess_declaration_data[$i]['id'],
+					'#ajax' => array(
+						'callback' => 'trip_details_return_delete_callback',
+						'wrapper' => 'itemlist-div',
+						'method' => 'replace',
+						'effect' => 'fade',
+					),
+					'#submit' => array('delete_confirmation_form_submit'),
+					'#attributes' => array('class' => array('delete-item', 'product-' . $i)),
+				);
+				 if ($form_state['delete_confirmation'] == 1) {
+					$form['delete'] = array(
+						'#type' => 'markup',
+						'#prefix' => '<div id ="pop_up_bill_" class="pop-up_table"><div class="popup_overlay"></div><div class="popup_wrap"><div class="pop_content" style="width:50% !important"><div class="popup_border">',
+						'#markup' => "Are you sure you want to delete Product : " . "<b>" . $form_state['clicked_product_name'] . "</b>" . ":? ",
+					);
+
+					$form['submit_newdelete'] = array(
+						'#type' => 'submit',
+						'#value' => 'Yes',
+						'#prefix'=>'<div>',
+						'#name' => 'submit_button',
+						'#submit' => array('product_remove_items'),
+					);
+					$form['cancel_newdelete'] = array(
+						'#type' => 'submit',
+						'#value' => 'No',
+						'#name' => 'cancel_button',
+						'#suffix' => '</div></div></div></div>',
+						'#submit' => array('handover_confirmation_close_ajax_submit'),
+					);
+				}
+
+				$form['excess_inventory_table']['excess_sku']['#rows'][$i]['class'][] = 'product-' . $i;
         $form['excess_inventory_table']['excess_sku'][$i]["product_name"] = &$product_name;
         $form['excess_inventory_table']['excess_sku'][$i]["mrp"] = &$mrp;
         $form['excess_inventory_table']['excess_sku'][$i]["new_mrp"] = &$new_mrp;
@@ -2176,31 +2198,33 @@ function get_returns_end_time($trip_id, $distributor_id) {
  * @return type
  */
 function product_remove_items($form, &$form_state) {
-  $index = $form_state['triggering_element']['#array_parents'][2];
-  $triggered_product = $form_state['clicked_button']['#name'];
-  $product_id = explode('-', $triggered_product)[2];
-  $product_counter = explode('-', $triggered_product)[1];
-  if (empty($product_id)) {
-    $form_state['complete form']['excess_inventory_table']['excess_sku']['#rows'] = array_values($form_state['complete form']['excess_inventory_table']['excess_sku']['#rows']);
-    unset($form_state['excess_inventory'][$product_counter]);
-    $form_state['rebuild'] = TRUE;
-  }
-  else {
-    global $user;
-    $distributor_id = change_feeds_import_get_distributor_id($user->uid);
-    $trip_no = $form_state['input']['trip_number'];
-    $product_presence_arr = check_product_presence_in_db_by_trip_id($product_id, $distributor_id, $trip_no);
-    $product_presence_id = $product_presence_arr['id'];
 
-    if (!empty($product_presence_id)) {
-      $delete_status = delete_excess_inventory($product_presence_id);
-      if ($delete_status) {
-        drupal_set_message(t("Sucessfully deleted the excess product:" . $product_presence_arr['product_name']));
-        unset($form_state['excess_inventory'][$product_counter]);
-        $form_state['rebuild'] = TRUE;
-      }
-    }
-  }
+	$triggered_product = $form_state['have_to_delete'];
+	$product_id = explode('-', $triggered_product)[2];
+	$product_counter = explode('-', $triggered_product)[1];
+	if (empty($product_id)) {
+		$form_state['complete form']['excess_inventory_table']['excess_sku']['#rows'] = array_values($form_state['complete form']['excess_inventory_table']['excess_sku']['#rows']);
+		unset($form_state['excess_inventory'][$product_counter]);
+		unset($form_state['delete_confirmation']);
+		$form_state['rebuild'] = TRUE;
+	}
+	else {
+		global $user;
+		$distributor_id = change_feeds_import_get_distributor_id($user->uid);
+		$trip_no = $form_state['input']['trip_number'];
+		$product_presence_arr = check_product_presence_in_db_by_trip_id($product_id, $distributor_id, $trip_no);
+		$product_presence_id = $product_presence_arr['id'];
+
+		if (!empty($product_presence_id)) {
+			$delete_status = delete_excess_inventory($product_presence_id);
+			if ($delete_status) {
+				drupal_set_message(t("Sucessfully deleted the excess product:" . $product_presence_arr['product_name']));
+				unset($form_state['excess_inventory'][$product_counter]);
+				unset($form_state['delete_confirmation']);
+				$form_state['rebuild'] = TRUE;
+			}
+		}
+	}
 }
 
 function check_product_presence_in_db_by_trip_id($product_id, $distributor_id, $trip_number) {
@@ -2212,4 +2236,28 @@ function check_product_presence_in_db_by_trip_id($product_id, $distributor_id, $
   $query->fields('eit', array('product_name'));
   $result = $query->execute()->fetchAssoc();
   return $result;
+}
+
+function delete_confirmation_form_submit($form, &$form_state){
+	$form_state['delete_confirmation'] = 1;
+	$form_state['have_to_delete'] = $form_state['clicked_button']['#name'];
+
+	$form_state['clicked_product_id'] = $form_state['triggering_element']['#array_parents'][2];
+$form_state['clicked_product_name']	= $form_state['input']['excess_sku'][$form_state['clicked_product_id']]['product_name'];
+	$form_state['rebuild'] = TRUE;
+}
+
+function handover_confirmation_close_ajax_submit($form, &$form_state){
+	unset($form_state['delete_confirmation']);
+	unset($form_state['have_to_delete']);
+	$form_state['rebuild'] = TRUE;
+}
+
+function find_matches($product_name, $data, $all_excess_sku) {
+	foreach ($all_excess_sku as $key => $value) {
+		$res = array_search($product_name, $value);
+		if (!empty($res)) {
+			return $key;
+		}
+	}
 }
