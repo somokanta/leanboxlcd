@@ -346,12 +346,13 @@ function bills_form_submit($form, &$form_state){
   } //end of foreach()
   if($success){
     $bill_number_str = implode(', ', $bill_number_arr);
+    $cancel_bill_count = count($bill_number_arr);
     if($action == 'cancel'){
       $action_text = 'Cancelled';
     }else if($action == 'discard'){
       $action_text = 'Discarded';
     }
-    drupal_set_message(t($action_text.' successfully for Bill No.- '.$bill_number_str));
+    drupal_set_message(t("Successfully $action_text $cancel_bill_count Bills. (Bill Number - $bill_number_str)"));
   }
   //return $form;
 }

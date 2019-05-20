@@ -766,3 +766,25 @@ function get_trip_ids_by_date_range($dispatch_date_from = null, $dispatch_date_t
   }
   return $res;
 }
+
+function get_total_bill_value($trip_ids) {
+  $res = array();
+  global $user;
+  $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+  if (!empty($trip_ids)) {
+    $query = db_select('node', 'disp_data');
+    $query->condition('disp_data.type', 'dispatch_data');
+    $query->condition('disp_data .uid', $distributor_id);
+    $query->condition('disp_data.title', $trip_ids, 'IN');
+    $query->join('field_data_field_trip_id_reference', 'tr', 'tr.field_trip_id_reference_nid = disp_data.nid');
+    $query->join('node', 'sr', 'sr.nid =tr.entity_id');
+    $query->condition('sr.type', 'sales_register_data');
+    $query->condition('sr.uid', $distributor_id);
+    $query->join('field_data_field_bill_value', 'bv', 'bv.entity_id = sr.nid');
+    $query->groupBy('disp_data.title');
+    $query->fields('disp_data', array('title'));
+    $query->addExpression("SUM(bv.field_bill_value_value)", 'field_bill_value_value');
+    $res = $query->execute()->fetchAllKeyed(0, 1); //fetchField();
+  }
+  return $res;
+}

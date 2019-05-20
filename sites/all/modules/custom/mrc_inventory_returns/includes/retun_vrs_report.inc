@@ -175,7 +175,15 @@ function return_vrs_callback() {
   $query->addexpression("SUM(CASE WHEN pdr.field_product_devision_reference_nid IN ($get_subdivision_nids) THEN idt.return_qty END)", 'return_sku_qty_sachets');
   $query->addexpression("SUM(CASE WHEN pdr.field_product_devision_reference_nid NOT IN ($get_subdivision_nids) THEN idt.return_qty END)", 'return_sku_qty_wo_sachets');
   $query->addExpression("((vtt.total_actual_cash_amount + vtt.total_actual_cheque_amount + vtt.total_actual_signed_bill_amount)*10)/((vtt.vrs_end_time - (CASE WHEN vtth.vrs_version_no = 'V1.0' THEN vtth.vrs_start_time END))/60)", 'vrs_prod_value');
+  
+  //$query->addExpression("SUM(ad.bill_value)", 'van_value'); //new field added
+  $query->addExpression("SUM(idt.dispatch_qty * idt.sum_net_sales_value)", 'dispatched_value'); //new field added
+  $query->fields('vtt', array('total_cashier_cash_short', 'total_short_amt')); //new field added ()
+  
   $result = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+  if(!empty($result)){
+    $bill_value_result = get_total_bill_value($trip_ids);
+  }
   $return_confirmed_vrs_status = array(1,2,3,4,5);
   foreach ($result as $val) {
     $row['trip_id'] = $val['runsheet_number'];
@@ -293,6 +301,16 @@ function return_vrs_callback() {
     $row['total_actual_cheque_amount'] = $val['total_actual_cheque_amount'];
     $row['total_actual_signed_bill_amount'] = $val['total_actual_signed_bill_amount'];
     $row['vrs_prod_value'] = round($val['vrs_prod_value']);
+    
+    $row['van_value'] = $bill_value_result[$val['runsheet_number']]; //new added 
+    $row['dispatched_value'] = round($val['dispatched_value']); //new added
+    $row['total_cashier_cash_short'] = $val['total_cashier_cash_short']; //new added
+    $row['total_short_amt'] = $val['total_short_amt']; //new added
+    
+    $collected_value = $val['total_actual_cash_amount']+$val['total_actual_cheque_amount']+$val['total_actual_signed_bill_amount'];
+    $reco_diff = $bill_value_result[$val['runsheet_number']] - ($collected_value + $val['total_cashier_cash_short'] + $val['total_short_amt'] + round($val['return_value']));
+    $row['reco_diff'] = $reco_diff; //new added
+    
     $rows[] = $row;
     unset($returns_end_time);
     unset($return_start_time);
@@ -300,7 +318,7 @@ function return_vrs_callback() {
     unset($sku_return_end_time);
   }
 
-  $header = array('Trip ID', 'Dispatch Date', 'Cashier Name','Status', 'Dispatch Time', 'Vehicle Arrival Time', 'Received Assets Time', 'Delivery Confirmation Time' , 'SKU Wise Returns Start Time', 'SKU Wise Returns End Time','Returns Incharge','Bill Wise Returns Start Time', 'Bill Wise Returns End Time','Bill Wise Return Superviser','Total Returns Time taken', 'Total Returned Value','Returned SKU Quantity(w/o Sachets)','Returned Quantity of Sachets','Returns Productivity (Value/5 Min)', 'VRS Start Time', 'VRS End Time', 'Total VRS Time taken', 'Cash Value', 'Cheque Value', 'Signed Bill Value', 'VRS Productivity (Value / 10 Min)');
+  $header = array('Trip ID', 'Dispatch Date', 'Cashier Name','Status', 'Dispatch Time', 'Vehicle Arrival Time', 'Received Assets Time', 'Delivery Confirmation Time' , 'SKU Wise Returns Start Time', 'SKU Wise Returns End Time','Returns Incharge','Bill Wise Returns Start Time', 'Bill Wise Returns End Time','Bill Wise Return Superviser','Total Returns Time taken', 'Total Returned Value','Returned SKU Quantity(w/o Sachets)','Returned Quantity of Sachets','Returns Productivity (Value/5 Min)', 'VRS Start Time', 'VRS End Time', 'Total VRS Time taken', 'Cash Value', 'Cheque Value', 'Signed Bill Value', 'VRS Productivity (Value / 10 Min)','Van Value', 'Dispatched Value', 'Cash Short By Cashier', 'Outlet Adjustment', 'Reco Difference');
   $per_page = 10;
   // Initialize the pager
   $current_page = pager_default_initialize(count($rows), $per_page);
