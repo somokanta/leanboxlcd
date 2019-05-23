@@ -450,6 +450,37 @@ function change_feeds_import_menu() {
     'file' => 'drs_invoice_vs_actual_dispatched_report.inc',
   );
   
+  $items['outlet-working-hours'] = array(
+    'title' => 'Outlet Working Hours',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('outlet_working_hours_form'),
+    'type' => MENU_NORMAL_ITEM,
+    'access arguments' => array('Distributor Upload File'),
+    'file' => 'includes/outlet_working_hours.inc',
+  );
+  
+  $items['hul-code/autocomplete'] = array(
+    'title' => 'trip_autocomplete',
+    'page callback' => '_get_hul_code_autocomplete',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  
+  $items['working-hours-report'] = array(
+    'title' => 'Outlet Working Hours Report',
+    'page callback' => array('working_hours_form_callback'),
+    'access arguments' => array('returns confirmation'),
+    'type' => MENU_CALLBACK,
+    'file' => 'includes/outlet_working_hours_report.inc',
+  );
+
+  $items['working-hours-report/export'] = array(
+    'title' => 'Outlet Working Hours Report Export',
+    'description' => 'Outlet Working Hours Report Export',
+    'page callback' => array('working_hours_report_export'),
+    'file' => 'includes/outlet_working_hours_report.inc',
+    'access arguments' => array('returns confirmation')
+  );
   return $items;
 }
 
@@ -4059,6 +4090,27 @@ function check_exsiting_record_for_party_code($party_code, $distributor_id) {
   $res = $query->execute()->fetchField();
   
   return $res;
+}
+
+/**
+ * 
+ * @param type $string
+ */
+function _get_hul_code_autocomplete($string = '') {
+   $result = array();
+
+   if ($string) {
+      $query = db_select('node', 'n');
+      $query->condition('n.type', 'hul_code_master');
+      $query->addField('n', 'title', 'hul_code');
+      $query->condition('n.title', db_like($string) . '%', 'LIKE');
+      $query->fields('n', array('title'));
+      $query->range(0, 15);
+      $query->addTag('node_distributor_access');
+      $result = $query->execute()->fetchAllKeyed(0, 0);
+   }
+
+   drupal_json_output($result);
 }
 function get_nid_of_resource($updated_by_name) {
   $query = db_select('node', 'n');
