@@ -2065,3 +2065,206 @@ header[id="page-header"] {
     }
   }
 }
+
+/* page-outlet-working-hours */
+
+.page-outlet-working-hours {
+  .main-wrapper {
+   border: 1px solid #ccc;
+   padding: 20px;
+ }
+ .from-field, .to-field {
+  border: none !important;
+  border-bottom: 1px solid #ccc !important;
+  box-shadow: none !important;
+}
+
+.add_special_days {
+  background-color: white !important;
+  color: #082c8a !important;
+  border: 1px solid #000 !important;
+ /* border-bottom: none !important;*/
+  border-radius: unset !important;
+  margin-left: 10px !important;
+   font-size: 1.5em;
+}
+
+.toggle_area {
+  margin: 0 0px 0 15px;
+}
+
+div.submit-wrapper {
+  flex-flow: row-reverse;
+  display: flex;
+}
+
+.special-outlet-text.special-open-close {
+  padding: 0 85px 0 42px;
+}
+
+.special-container-inline {
+  padding: 0px 67px 0 0px;
+}
+
+#working-hours-itemlist-div form {
+  .form-wrapper {
+    display: flex;
+    margin-bottom: 15px;
+    > div {
+      min-width: 100px;
+    }
+  }
+  .hul_code_details {
+    margin-bottom: 20px;
+  }
+  .days-field {
+    font-weight: bold;
+  }
+  .add-button .btn {
+    background: transparent !important;
+    color: #5278de;
+    font-weight: bold;
+    &:hover {
+      background: transparent !important;
+      color: #5278de;
+      font-weight: bold;
+    }
+  }
+  .remove-button.btn {
+    background: transparent !important;
+    color: #5278de;
+    font-weight: bold;
+  }
+}
+
+.special-days-container-wrapper .special-time-field {
+  .special-button-small, .btn-success {
+    background: transparent !important;
+    color: #5278de;
+    font-weight: bold;
+  }
+}
+
+#special-elements-wrapper .special-delete-button {
+  background: transparent !important;
+  color: #5278de;
+  font-weight: bold;
+  &:hover {
+    background: transparent !important;
+    color: #5278de;
+    font-weight: bold;
+  }
+}
+
+#working-hours-itemlist-div form {
+  .add-button .btn {
+    float: right;
+  }
+  .remove-button.btn {
+    color: #555555;
+    font-size: 17px;
+  }
+}
+
+.special-days-container-wrapper .special-time-field .special-button-small {
+  color: #555555;
+  font-size: 17px;
+}
+
+#special-elements-wrapper .form-wrapper {
+  width: 100%;
+  display: block !important;
+}
+
+.special-days-wrapper .special-days {
+  display: inline-block;
+}
+
+#special-elements-wrapper {
+  .special-days-container-wrapper {
+    display: flex;
+  }
+  .form-type-date-popup label {
+    display: none;
+  }
+  .special-days-container-wrapper > div {
+    min-width: 100px;
+  }
+  #special-time-container {
+    .form-wrapper  {
+      label {
+        .form-required {
+          display: none;
+        }
+      }
+    }
+  }
+}
+
+.special-days-wrapper {
+  margin-bottom: 20px;
+}
+
+input[type="checkbox"]:focus {
+  outline: 0;
+}
+
+.working-checkbox {
+  position: relative;
+  background: grey;
+  width: 50px;
+  height: 15px;
+  -webkit-appearance: initial;
+  border-radius: 3px;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+  outline: 0;
+  font-size: 14px;
+  font-family: Trebuchet, Arial, sans-serif;
+  font-weight: bold;
+  cursor: pointer;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  &:active, &:focus {
+    outline: none !important;
+  }
+  &:after {
+    position: absolute;
+    top: -50%;
+    display: block;
+    line-height: 32px;
+    width: 50%;
+    height: 200%;
+    background: #fff;
+    box-sizing: border-box;
+    text-align: center;
+    transition: all 0.3s ease-in 0s;
+    color: black;
+    border: grey 1px solid;
+    border-radius: 15px;
+    outline: 0;
+    left: 0%;
+    content: "";
+  }
+  &:checked {
+    background: #8d9fce;
+    &:after {
+      left: 53%;
+      content: "";
+      background: #5278de;
+      border: #5278de 1px solid;
+    }
+  }
+}
+#outlet-hul-code {
+   display: inline-block;
+   margin-right: 33px;
+}
+#outlet-party-name {
+   display: inline-block;
+}
+}
+
+
+
+ 
+

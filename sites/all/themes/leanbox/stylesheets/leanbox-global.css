@@ -3015,3 +3015,203 @@ header[id="page-header"] ul, header[id="page-header"] li {
 .page-to-be-dispatched-qty-report [id^="to-be-dispatched-qty-form"] .col_3 .container-inline-date .date-padding {
   float: none;
 }
+
+/* page-outlet-working-hours */
+/* line 2072, ../sass/leanbox-global.scss */
+.page-outlet-working-hours .main-wrapper {
+  border: 1px solid #ccc;
+  padding: 20px;
+}
+/* line 2076, ../sass/leanbox-global.scss */
+.page-outlet-working-hours .from-field, .page-outlet-working-hours .to-field {
+  border: none !important;
+  border-bottom: 1px solid #ccc !important;
+  box-shadow: none !important;
+}
+/* line 2082, ../sass/leanbox-global.scss */
+.page-outlet-working-hours .add_special_days {
+  background-color: white !important;
+  color: #082c8a !important;
+  border: 1px solid #000 !important;
+  /* border-bottom: none !important;*/
+  border-radius: unset !important;
+  margin-left: 10px !important;
+  font-size: 1.5em;
+}
+/* line 2092, ../sass/leanbox-global.scss */
+.page-outlet-working-hours .toggle_area {
+  margin: 0 0px 0 15px;
+}
+/* line 2096, ../sass/leanbox-global.scss */
+.page-outlet-working-hours div.submit-wrapper {
+  flex-flow: row-reverse;
+  display: flex;
+}
+/* line 2101, ../sass/leanbox-global.scss */
+.page-outlet-working-hours .special-outlet-text.special-open-close {
+  padding: 0 85px 0 42px;
+}
+/* line 2105, ../sass/leanbox-global.scss */
+.page-outlet-working-hours .special-container-inline {
+  padding: 0px 67px 0 0px;
+}
+/* line 2110, ../sass/leanbox-global.scss */
+.page-outlet-working-hours #working-hours-itemlist-div form .form-wrapper {
+  display: flex;
+  margin-bottom: 15px;
+}
+/* line 2113, ../sass/leanbox-global.scss */
+.page-outlet-working-hours #working-hours-itemlist-div form .form-wrapper > div {
+  min-width: 100px;
+}
+/* line 2117, ../sass/leanbox-global.scss */
+.page-outlet-working-hours #working-hours-itemlist-div form .hul_code_details {
+  margin-bottom: 20px;
+}
+/* line 2120, ../sass/leanbox-global.scss */
+.page-outlet-working-hours #working-hours-itemlist-div form .days-field {
+  font-weight: bold;
+}
+/* line 2123, ../sass/leanbox-global.scss */
+.page-outlet-working-hours #working-hours-itemlist-div form .add-button .btn {
+  background: transparent !important;
+  color: #5278de;
+  font-weight: bold;
+}
+/* line 2127, ../sass/leanbox-global.scss */
+.page-outlet-working-hours #working-hours-itemlist-div form .add-button .btn:hover {
+  background: transparent !important;
+  color: #5278de;
+  font-weight: bold;
+}
+/* line 2133, ../sass/leanbox-global.scss */
+.page-outlet-working-hours #working-hours-itemlist-div form .remove-button.btn {
+  background: transparent !important;
+  color: #5278de;
+  font-weight: bold;
+}
+/* line 2141, ../sass/leanbox-global.scss */
+.page-outlet-working-hours .special-days-container-wrapper .special-time-field .special-button-small, .page-outlet-working-hours .special-days-container-wrapper .special-time-field .btn-success {
+  background: transparent !important;
+  color: #5278de;
+  font-weight: bold;
+}
+/* line 2148, ../sass/leanbox-global.scss */
+.page-outlet-working-hours #special-elements-wrapper .special-delete-button {
+  background: transparent !important;
+  color: #5278de;
+  font-weight: bold;
+}
+/* line 2152, ../sass/leanbox-global.scss */
+.page-outlet-working-hours #special-elements-wrapper .special-delete-button:hover {
+  background: transparent !important;
+  color: #5278de;
+  font-weight: bold;
+}
+/* line 2160, ../sass/leanbox-global.scss */
+.page-outlet-working-hours #working-hours-itemlist-div form .add-button .btn {
+  float: right;
+}
+/* line 2163, ../sass/leanbox-global.scss */
+.page-outlet-working-hours #working-hours-itemlist-div form .remove-button.btn {
+  color: #555555;
+  font-size: 17px;
+}
+/* line 2169, ../sass/leanbox-global.scss */
+.page-outlet-working-hours .special-days-container-wrapper .special-time-field .special-button-small {
+  color: #555555;
+  font-size: 17px;
+}
+/* line 2174, ../sass/leanbox-global.scss */
+.page-outlet-working-hours #special-elements-wrapper .form-wrapper {
+  width: 100%;
+  display: block !important;
+}
+/* line 2179, ../sass/leanbox-global.scss */
+.page-outlet-working-hours .special-days-wrapper .special-days {
+  display: inline-block;
+}
+/* line 2184, ../sass/leanbox-global.scss */
+.page-outlet-working-hours #special-elements-wrapper .special-days-container-wrapper {
+  display: flex;
+}
+/* line 2187, ../sass/leanbox-global.scss */
+.page-outlet-working-hours #special-elements-wrapper .form-type-date-popup label {
+  display: none;
+}
+/* line 2190, ../sass/leanbox-global.scss */
+.page-outlet-working-hours #special-elements-wrapper .special-days-container-wrapper > div {
+  min-width: 100px;
+}
+/* line 2196, ../sass/leanbox-global.scss */
+.page-outlet-working-hours #special-elements-wrapper #special-time-container .form-wrapper label .form-required {
+  display: none;
+}
+/* line 2204, ../sass/leanbox-global.scss */
+.page-outlet-working-hours .special-days-wrapper {
+  margin-bottom: 20px;
+}
+/* line 2208, ../sass/leanbox-global.scss */
+.page-outlet-working-hours input[type="checkbox"]:focus {
+  outline: 0;
+}
+/* line 2212, ../sass/leanbox-global.scss */
+.page-outlet-working-hours .working-checkbox {
+  position: relative;
+  background: grey;
+  width: 50px;
+  height: 15px;
+  -webkit-appearance: initial;
+  border-radius: 3px;
+  -webkit-tap-highlight-color: transparent;
+  outline: 0;
+  font-size: 14px;
+  font-family: Trebuchet, Arial, sans-serif;
+  font-weight: bold;
+  cursor: pointer;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+}
+/* line 2227, ../sass/leanbox-global.scss */
+.page-outlet-working-hours .working-checkbox:active, .page-outlet-working-hours .working-checkbox:focus {
+  outline: none !important;
+}
+/* line 2230, ../sass/leanbox-global.scss */
+.page-outlet-working-hours .working-checkbox:after {
+  position: absolute;
+  top: -50%;
+  display: block;
+  line-height: 32px;
+  width: 50%;
+  height: 200%;
+  background: #fff;
+  box-sizing: border-box;
+  text-align: center;
+  transition: all 0.3s ease-in 0s;
+  color: black;
+  border: grey 1px solid;
+  border-radius: 15px;
+  outline: 0;
+  left: 0%;
+  content: "";
+}
+/* line 2248, ../sass/leanbox-global.scss */
+.page-outlet-working-hours .working-checkbox:checked {
+  background: #8d9fce;
+}
+/* line 2250, ../sass/leanbox-global.scss */
+.page-outlet-working-hours .working-checkbox:checked:after {
+  left: 53%;
+  content: "";
+  background: #5278de;
+  border: #5278de 1px solid;
+}
+/* line 2258, ../sass/leanbox-global.scss */
+.page-outlet-working-hours #outlet-hul-code {
+  display: inline-block;
+  margin-right: 33px;
+}
+/* line 2262, ../sass/leanbox-global.scss */
+.page-outlet-working-hours #outlet-party-name {
+  display: inline-block;
+}
