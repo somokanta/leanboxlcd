@@ -796,6 +796,49 @@ function change_feeds_import_schema() {
        'i_distributor_id' => array('distributor_id'),
      ),
    );
+  
+  $schema['outlet_working_hours'] = array(
+    'description' => 'Outlet Working Hours',
+    'fields' => array(
+      'id' => array(
+        'description' => 'The primary identifier for a data',
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'hul_code' => array(
+        'description' => 'HUL Code',
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+      'days' => array(
+        'description' => 'Outlet Days',
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+      'from_time' => array(
+        'description' => 'Outlet From Time',
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+      'to_time' => array(
+        'description' => 'Outlet To Time',
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+      'special_days' => array(
+        'description' => 'Outlet Special Days',
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+      'updated_time' => array(
+        'description' => t('Updated time'),
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    ),
+    'primary key' => array('id'),
+  );
 
    return $schema;
 }
