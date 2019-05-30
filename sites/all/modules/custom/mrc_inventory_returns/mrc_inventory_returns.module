@@ -774,7 +774,7 @@ function get_total_bill_value($trip_ids) {
   if (!empty($trip_ids)) {
     $query = db_select('node', 'disp_data');
     $query->condition('disp_data.type', 'dispatch_data');
-    $query->condition('disp_data .uid', $distributor_id);
+    $query->condition('disp_data.uid', $distributor_id);
     $query->condition('disp_data.title', $trip_ids, 'IN');
     $query->join('field_data_field_trip_id_reference', 'tr', 'tr.field_trip_id_reference_nid = disp_data.nid');
     $query->join('node', 'sr', 'sr.nid =tr.entity_id');
