@@ -426,7 +426,7 @@ function get_csv_file_header_for_revised_billing() {
  * @param type $distributor_id
  */
 function get_bill_sku_from_custom_billing($distributor_id) {
-  $time = strtotime('-20 days');  // last 1 month
+  $time = strtotime('-45 days');  // last 1 month
 
   $query = db_select('custom_billing_data', 'cbd');
   $query->condition('cbd.distributor_id', $distributor_id);
