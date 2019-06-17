@@ -49,6 +49,7 @@ function park_stop_plotting_form($form, &$form_state, $args) {
   }
   else {
     $query->condition('ps.session_id', $session_id, 'LIKE');
+    $query->isnull('ps.trip_id');
   }
   $query->condition('ps.prevan', $prevan, '=');
   $query->fields('ps', array('prevan', 'api_response'));
