@@ -29,7 +29,7 @@ function trip_short_excess_form($form, &$form_state) {
   }
   $form['trip_id'] = array(
     '#type' => 'textfield',
-    '#title' => t('Trip ID*'),
+    '#title' => t('Trip ID'),
     '#size' => 20,
     '#default_value' => $trip_id,
     '#maxlength' => 50,
@@ -171,9 +171,12 @@ function trip_short_excess_form_callback() {
 			$query->join('inventory_versioning_api_data', 'vad', 'ad.runsheet_number = vad.runsheet_number');
 			$query->condition('vad.version_created_time', array($c_date, $c_end_date), 'BETWEEN');
     }
-    $query->fields('ad', array('runsheet_number'));
+    $query->fields('ad', array('runsheet_number')); //
+    $query->fields('ad', array('dispatch_date'));
+    $query->fields('ad', array('fieldExecutiveName'));
     $query->fields('vtt', array('total_cashier_cash_short'));
-    $query->addExpression("SUM(distinct(CASE WHEN dit.res_cashier_short > 0 AND dit.res_cashier_short != '' THEN dit.res_cashier_short*dit.tur END))", 'inventory_short_value'); //formula changed (EARLIER: dit.res_cashier_short*dit.sum_net_sales_value)
+    $query->addExpression("SUM(distinct(CASE WHEN dit.res_cashier_short != '' THEN dit.res_cashier_short*dit.tur END))", 'inventory_short_value');
+    //$query->addExpression("SUM(distinct(CASE WHEN dit.res_cashier_short > 0 AND dit.res_cashier_short != '' THEN dit.res_cashier_short*dit.tur END))", 'inventory_short_value'); //formula changed (EARLIER: dit.res_cashier_short*dit.sum_net_sales_value)
    // $query->addExpression("SUM(distinct(eit.excess_qty * eit.tur))", 'total_excess_value'); //formula changed (EARLIER: eit.excess_qty * eit.mrp * 0.9)
 		//$query->addExpression("ROUND(SUM(distinct(CASE WHEN eit.tur != '' THEN (eit.excess_qty * eit.tur) ELSE (eit.excess_qty * eit.mrp * 0.9) END)),2)", 'total_excess_value');
 		
@@ -198,9 +201,13 @@ function trip_short_excess_form_callback() {
 			$row['total_cashier_cash_short'] = round($val->total_cashier_cash_short, 2);
 			$row['total_excess_value'] = round($excess_data[$val->runsheet_number]['total_excess_value'],2); //round($val->total_excess_value, 2);
 			$row['excess_value_credited_to_cashier'] = round($excess_data[$val->runsheet_number]['excess_value_credited_to_cashier'],2); //round($val->excess_value_credited_to_cashier, 2);
-			$rows[] = $row;
+			$row['dispatch_date'] = date('d-M-y ', $val->dispatch_date);
+      $row['cashier_name'] = $val->fieldExecutiveName;
+      $rows[] = $row;
+			
+			//$row['excess_value'] = $excess_data[$val->runsheet_number];
 		}
-		$header = array('Trip Id', 'Inventory Short Value', 'Pending Claimed GS Value','Cashier Cash Short', 'Total Excess Value', 'Excess Value Credited to Cashier');
+		$header = array('Trip Id', 'Inventory Short Value', 'Pending Claimed GS Value','Cashier Cash Short', 'Total Excess Value', 'Excess Value Credited to Cashier', 'Dispatch Date', 'Cashier Name');
     $per_page = 10;
     // Initialize the pager
     $current_page = pager_default_initialize(count($rows), $per_page);
