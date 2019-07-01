@@ -1,0 +1,50 @@
+<?php
+
+/* 
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+
+
+function lb_product_api_services_resources() {
+  $resource = array(
+    '#api_version' => 3002
+  );
+  $resource = array(
+    'lb-product-api' => array(
+      'actions' => array(
+        'lb-product-data' => array(
+          'help' => 'Get LB Product Api Data',
+          'callback' => 'get_lb_product_api_data',
+          'args' => array(
+            array(
+              'name' => 'data',
+              'type' => 'array',
+              'description' => 'Post data',
+              'source' => 'data',
+              'optional' => TRUE,
+            ),
+          ),
+          'file' => array(
+            'type' => 'inc',
+            'module' => 'lb_product_api',
+            'name' => 'includes/lb_product_api'
+          ),
+          'access arguments' => array('services_access_lb_product_api'),
+        ),
+      ),
+    ),
+  );
+  return $resource;
+}
+
+function lb_product_api_permission() {
+
+  return array(
+    'services_access_lb_product_api' => array(
+      'title' => t('Lb product Api access'),
+      'description' => t('Lb product Api access')
+    )
+  );
+}
