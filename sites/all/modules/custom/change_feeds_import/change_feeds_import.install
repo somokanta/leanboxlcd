@@ -1396,12 +1396,12 @@ function change_feeds_import_update_7118() {
 // new fields for custom_sales_data
 function change_feeds_import_update_7119() {
   $fields = array(
-      'Outlet_Order_No' => array(
+      'outlet_order_no' => array(
         'description' => 'Outlet order number',
         'type' => 'varchar',
          'length' => 255,
       ),
-      'Crate_ID' => array(
+      'crate_id' => array(
         'description' => 'Crate ID',
         'type' => 'varchar',
         'length' => 255,
