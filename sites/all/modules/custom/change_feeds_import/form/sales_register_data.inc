@@ -48,7 +48,7 @@ function change_feeds_import_sales_register_form_validate($form, &$form_state) {
     'PARTY_CODE',
     'BILL_VALUE',
     'Outlet_Order_No',
-    'Crate ID', 
+    'Crate_ID', 
   );
   if ($file) {
     if ($file = file_move($file, 'public://')) {
@@ -405,6 +405,7 @@ function change_feeds_import_sales_create_confirm_content($fid) {
 
 function change_feeds_import_create_sales_register_node($sales_data_result, $distributor_id, &$context) {
   if (!empty($sales_data_result)) {
+      dpm($sales_data_result,'sales-data');
     $billing_error_validate = FALSE;
     $count = 0;
     foreach ($sales_data_result as $key => $val) {
