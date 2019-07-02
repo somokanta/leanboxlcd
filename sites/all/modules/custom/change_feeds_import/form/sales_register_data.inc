@@ -151,7 +151,7 @@ function change_feeds_import_sales_register_batch_fix_process($data, $distributo
           $value['error_message'] .= $k . " can not be empty or  less than 0(Zero) for bill no " . $value['BILL_NUMBER'] . ".";
         }
       }
-      else {
+      else if($k != 'Crate_ID'){
         if (empty($v)) {
           $value['error_message'] .= $k . " can not be empty for bill no " . $value['BILL_NUMBER'] . ".";
         }
@@ -272,12 +272,6 @@ function change_feeds_import_sales_register_batch_fix_process($data, $distributo
           }
         }
     }
-       if (isset($value['Outlet_Order_No']) && !empty($value['Outlet_Order_No'])) {
-            $value['Outlet_Order_No'] = trim($value['Outlet_Order_No']);
-        }
-        if (isset($value['Crate_ID']) && !empty($value['Crate_ID'])) {
-            $value['Crate_ID'] = trim($value['Crate_ID']);
-        }
 
         // insert into custom sales table
     change_feeds_import_insert_data_in_custom_sales_table($value, $fid, $distributor_id);
@@ -405,7 +399,6 @@ function change_feeds_import_sales_create_confirm_content($fid) {
 
 function change_feeds_import_create_sales_register_node($sales_data_result, $distributor_id, &$context) {
   if (!empty($sales_data_result)) {
-      dpm($sales_data_result,'sales-data');
     $billing_error_validate = FALSE;
     $count = 0;
     foreach ($sales_data_result as $key => $val) {
