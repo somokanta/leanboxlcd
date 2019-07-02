@@ -303,8 +303,8 @@ function change_feeds_import_insert_data_in_custom_sales_table($value, $fid, $di
         'fid' => $fid,
         'party_code' => $value['PARTY_CODE'],
         'distributor_id' => $distributor_id,
-        'Outlet_Order_No'=> $value['Outlet_Order_No'],
-        'Crate_ID'=> $value['Crate_ID'],
+        'outlet_order_no'=> $value['Outlet_Order_No'],
+        'crate_id'=> $value['Crate_ID'],
       ))
       ->execute();
 }
