@@ -9,7 +9,7 @@
 function get_lb_product_api_data($data) {
   if (!empty($data)) {
 
-    foreach ($data as $value) {
+    foreach ($data as $val) {
       $nid = check_content_node_title_exists($val['field_lb_sku_id'], 'lb_product_master');
       if (empty($nid)) {
         $node = new stdClass();
