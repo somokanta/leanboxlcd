@@ -1393,3 +1393,24 @@ function change_feeds_import_update_7118() {
     }
   }
 }
+// new fields for custom_sales_data
+function change_feeds_import_update_7119() {
+  $fields = array(
+      'Outlet_Order_No' => array(
+        'description' => 'Outlet order number',
+        'type' => 'varchar',
+         'length' => 255,
+      ),
+      'Crate_ID' => array(
+        'description' => 'Crate ID',
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+
+  );
+  foreach ($fields as $key => $field) {
+    if (!db_field_exists('custom_sales_data', $key)) {
+      db_add_field('custom_sales_data', $key, $field);
+    }
+  }
+}

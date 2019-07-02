@@ -47,6 +47,8 @@ function change_feeds_import_sales_register_form_validate($form, &$form_state) {
     'BILL_DATE',
     'PARTY_CODE',
     'BILL_VALUE',
+    'Outlet_Order_No',
+    'Crate ID', 
   );
   if ($file) {
     if ($file = file_move($file, 'public://')) {
@@ -141,7 +143,6 @@ function change_feeds_import_sales_register_batch_fix_process($data, $distributo
     $context['results']['unique_combination'] = array();
   }
    foreach ($data as $key => $value) {
-     
     foreach ($value as $k => $v) {
       $error_text = '';
       $v = trim($v);
@@ -271,8 +272,14 @@ function change_feeds_import_sales_register_batch_fix_process($data, $distributo
           }
         }
     }
-    
-    // insert into custom sales table
+       if (isset($value['Outlet_Order_No']) && !empty($value['Outlet_Order_No'])) {
+            $value['Outlet_Order_No'] = trim($value['Outlet_Order_No']);
+        }
+        if (isset($value['Crate_ID']) && !empty($value['Crate_ID'])) {
+            $value['Crate_ID'] = trim($value['Crate_ID']);
+        }
+
+        // insert into custom sales table
     change_feeds_import_insert_data_in_custom_sales_table($value, $fid, $distributor_id);
 
     $context['results']['fid'] = $fid;
@@ -302,6 +309,8 @@ function change_feeds_import_insert_data_in_custom_sales_table($value, $fid, $di
         'fid' => $fid,
         'party_code' => $value['PARTY_CODE'],
         'distributor_id' => $distributor_id,
+        'Outlet_Order_No'=> $value['Outlet_Order_No'],
+        'Crate_ID'=> $value['Crate_ID'],
       ))
       ->execute();
 }
@@ -444,6 +453,8 @@ function change_feeds_import_create_sales_register_node($sales_data_result, $dis
 //bod end
           $node->field_bill_value[LANGUAGE_NONE][0]['value'] = $val['bill_value'];
           $node->field_sales_party_code[LANGUAGE_NONE][0]['value'] = $val['party_code'];
+          $node->field_outlet_order_no[LANGUAGE_NONE][0]['value'] = $val['Outlet_Order_No'];
+          $node->field_crate_id[LANGUAGE_NONE][0]['value'] = $val['Crate_ID'];
           $node->field_sales_updated_date[LANGUAGE_NONE][0]['value'] = time();
           node_save($node);
         }
@@ -485,6 +496,8 @@ function change_feeds_import_create_sales_register_node($sales_data_result, $dis
           
           $node->field_bill_value[LANGUAGE_NONE][0]['value'] = $val['bill_value'];
           $node->field_sales_party_code[LANGUAGE_NONE][0]['value'] = $val['party_code'];
+          $node->field_outlet_order_no[LANGUAGE_NONE][0]['value'] = $val['Outlet_Order_No'];
+          $node->field_crate_id[LANGUAGE_NONE][0]['value'] = $val['Crate_ID'];
           $node->field_sales_updated_date[LANGUAGE_NONE][0]['value'] = time();                   
           node_save($node);
         }
