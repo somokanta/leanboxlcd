@@ -11,7 +11,7 @@ function get_lb_product_api_data($data) {
     watchdog('d8 lb product master', '<pre>' . print_r($data, TRUE) . '</pre>');
     foreach ($data as $val) {
       try {
-        $nid = check_content_node_title_exists($val['field_lb_sku_id'], 'lb_product_master');
+        $nid = check_content_node_title_exists($val['field_lb_sku_id'], 'lb_product_master', 23466);
         if (empty($nid)) {
           $node = new stdClass();
           $node->title = $val['field_lb_sku_id'];
@@ -68,8 +68,8 @@ function check_content_node_title_exists($title, $type) {
   $query1 = db_select('node', 'n');
   $query1->condition('n.type', $type);
   $query1->condition('n.title', $title);
+  $query1->condition('n.uid', 23466);
   $query1->fields('n', array('nid'));
-  $query1->addTag('node_uid');
   $nid = $query1->execute()->fetchField();
   return $nid;
 }
