@@ -11,7 +11,7 @@ function get_lb_product_api_data($data) {
     watchdog('d8 lb product master', '<pre>' . print_r($data, TRUE) . '</pre>');
     foreach ($data as $val) {
       try {
-        $nid = check_content_node_title_exists($val['field_lb_sku_id'], 'lb_product_master', 23466);
+        $nid = check_content_node_title_exists($val['field_lb_sku_id'], 'lb_product_master');
         if (empty($nid)) {
           $node = new stdClass();
           $node->title = $val['field_lb_sku_id'];
