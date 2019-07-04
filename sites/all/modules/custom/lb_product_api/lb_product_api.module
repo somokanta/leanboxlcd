@@ -48,3 +48,29 @@ function lb_product_api_permission() {
     )
   );
 }
+
+/**
+ * Implements hook_menu
+ * @return string
+ */
+function lb_product_api_menu() {
+  $items = array();
+  
+  $items['trip-product-wise-returns'] = array(
+    'title' => 'Trip Product Wise Returns',
+    'page callback' => array('trip_product_wise_returns_form_callback'),
+    'access arguments' => array('returns confirmation'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'includes/trip_product_wise_returns.inc',
+  );
+  
+   $items['trip-product-wise-returns/export'] = array(
+    'title' => 'Trip Product Wise Returns',
+    'description' => 'Trip product wise returns Export report',
+    'page callback' => array('trip_product_wise_report_export'),
+    'file' => 'includes/trip_product_wise_returns.inc',
+    'access arguments' => array('returns confirmation')
+  );
+  
+  return $items;
+}
