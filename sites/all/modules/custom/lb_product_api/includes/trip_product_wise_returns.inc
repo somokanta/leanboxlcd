@@ -126,6 +126,7 @@ function trip_product_wise_returns_form_callback(){
     $query->addExpression("SUM(distinct(CASE WHEN dit.res_godown_short != '' AND dit.res_godown_short != 0 AND dit.res_godown_short > 0  THEN dit.res_godown_short END))", 'total_godown_short');
     $query->addExpression("SUM(distinct(CASE WHEN dit.claimed_godown_short != '' AND dit.claimed_godown_short > 0 THEN(dit.claimed_godown_short) END))", 'pending_claimed_godown_short'); //formula changed (EARLIER: dit.claimed_godown_short * dit.sum_net_sales_value)
     $query->groupBy('dit.sku_code');
+    $query->groupBy('dit.mrp');
     $res = $query->execute()->fetchAll();
 		if (!empty($res)) {
 			foreach($res as $key=>$val) {
@@ -146,10 +147,10 @@ function trip_product_wise_returns_form_callback(){
                         $row['total_godown_short'] = round($val->total_godown_short, 2);
                         $row['pending_claimed_godown_short'] = round($val->pending_claimed_godown_short, 2);
                         
-			
-      $rows[] = $row;
-			
-		}
+		if(($row['total_return_qty'] != 0) || ($row['total_excess_quantity'] != 0) || ($row['total_cashier_cash_short'] != 0) || ($row['total_godown_short'] != 0) || ($row['pending_claimed_godown_short'] != 0)){
+                    $rows[] = $row;
+                }		
+    }
 		$header = array('Trip Id', 'Dispatch Date', 'Product Name','Sku7 Code', 'MRP', 'Returned Quantity', 'Excess Quantity', 'Cashier Short','Godown Short','Pending Claimed Godown Short');
     $per_page = 10;
     // Initialize the pager
@@ -189,6 +190,7 @@ function get_sku_wise_excess_quantity($all_skus, $distributor_id) {
 		$query->condition('eit.distributor_id', $distributor_id, '=');
 		$query->condition('eit.sku_code', $all_skus, 'IN');
 		$query->groupBy('eit.sku_code');
+                $query->groupBy('eit.mrp');
 		//$query->fields('eit', array('excess_qty'));
 		$query->addExpression("SUM(CASE WHEN eit.excess_qty != '' THEN (eit.excess_qty) END)", 'total_excess_quantity');
 		
