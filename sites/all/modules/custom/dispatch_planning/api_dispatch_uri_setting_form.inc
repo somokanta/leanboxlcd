@@ -54,5 +54,14 @@ function api_dispatch_uri_setting_form($form, &$form_state) {
     '#default_value' => variable_get('new_dispatch_job_type'),
     //'#size' => 10,
   );
+  
+  $form['dispatch_bypass'] = array(
+    '#type' => 'select',
+    '#title' => t('Yes will bypass the validation'),
+    '#options' => array(1=>'Yes',0=>'No'),
+    '#default_value' => variable_get('dispatch_bypass', 1),  
+    //'#size' => 10,
+  );
+  
   return system_settings_form($form);
 }
