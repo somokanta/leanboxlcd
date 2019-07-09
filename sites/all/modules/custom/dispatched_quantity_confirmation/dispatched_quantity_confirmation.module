@@ -461,7 +461,10 @@ function insert_trip_into_dispatch_qty_confirmation($trip_id, $distributor_id) {
       $billing_data = get_billing_data_for_dispatch_qty_confirm($bills, $distributor_id);
       dispatch_qty_confirmation_insert_data($billing_data, $trip_id, $distributor_id);
     }
-    $by_pass_trip = by_pass_trip_if_certain_party_exist($bills,$trip_id_nid, $distributor_id);   
+    //Now for Lakme we have to bypass all the trip
+    //So commenting party code condition and bypass the all trips
+    //$by_pass_trip = by_pass_trip_if_certain_party_exist($bills,$trip_id_nid, $distributor_id);   
+     by_pass_all_trip_for_lakme($trip_id_nid);       
   }
   elseif (!empty($trip_id_nid) && !empty($dp_bills)) {// by pass for dp bills(not empty dp bills)
     $node = node_load($trip_id_nid);
@@ -1460,4 +1463,16 @@ function by_pass_trip_if_certain_party_exist($bills,$trip_id_nid, $distributor_i
           node_save($node);
     }
   }
+}
+
+// byPass al trip
+function by_pass_all_trip_for_lakme($trip_id_nid) {
+    if(!empty($trip_id_nid)) {
+        $node = node_load($trip_id_nid);
+        $node->field_loose_confirmation['und'][0]['value'] = 1;
+        $node->field_cld_confirmation['und'][0]['value'] = 1;
+        $node->field_confirm_bill_edit_status['und'][0]['value'] = 1;
+        $node->field_dispatch_validation_flag['und'][0]['value'] = 2;
+        node_save($node);
+    }
 }
