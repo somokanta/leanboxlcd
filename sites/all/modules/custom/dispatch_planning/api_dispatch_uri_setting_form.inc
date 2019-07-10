@@ -57,9 +57,10 @@ function api_dispatch_uri_setting_form($form, &$form_state) {
   
   $form['dispatch_bypass'] = array(
     '#type' => 'select',
-    '#title' => t('Yes will bypass the validation'),
+    '#title' => t('Bypass Trip'),
     '#options' => array(1=>'Yes',0=>'No'),
     '#default_value' => variable_get('dispatch_bypass', 1),  
+    '#description' => t('Yes will bypass the dispatch Qty validation'),
     //'#size' => 10,
   );
   
