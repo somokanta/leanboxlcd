@@ -2097,7 +2097,15 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
   else {
     $node->field_sequence_method[$node->language][0]['value'] = 0;
   }
-
+  
+    //Now for Lakme we have to bypass all the trip
+    if(variable_get('dispatch_bypass', 1)){
+        $node->field_loose_confirmation['und'][0]['value'] = 1;
+        $node->field_cld_confirmation['und'][0]['value'] = 1;
+        $node->field_confirm_bill_edit_status['und'][0]['value'] = 1;
+        $node->field_dispatch_validation_flag['und'][0]['value'] = 2;
+    }
+    
   $node = node_submit($node); // Prepare node for saving
   node_save($node);
 
