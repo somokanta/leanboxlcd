@@ -2522,7 +2522,14 @@ function _create_van_submit($form, &$form_state) {
         $node1->field_bill_loose_lines[LANGUAGE_NONE][0]['value'] = $disp_planning[$van]['field_bill_loose_lines'];
         $node1->field_cld_lines_value[LANGUAGE_NONE][0]['value'] = $disp_planning[$van]['field_cld_lines_value'];
         $node1->field_loose_lines_value[LANGUAGE_NONE][0]['value'] = $disp_planning[$van]['field_loose_lines_value'];
-
+        
+        //Now for Lakme we have to bypass all the trip
+        if(variable_get('dispatch_bypass', 1)){
+            $node1->field_loose_confirmation['und'][0]['value'] = 1;
+            $node1->field_cld_confirmation['und'][0]['value'] = 1;
+            $node1->field_confirm_bill_edit_status['und'][0]['value'] = 1;
+            $node1->field_dispatch_validation_flag['und'][0]['value'] = 2;
+        }
         $node1 = node_submit($node1); // Prepare node for saving
         node_save($node1);
         $trip_nid = $node1->nid;

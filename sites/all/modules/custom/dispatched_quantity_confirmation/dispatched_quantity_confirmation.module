@@ -396,6 +396,7 @@ function dispatched_quantity_confirmation_views_api() {
  */
 function dispatched_quantity_confirmation_node_presave($node) {
   if ($node->type == 'dispatch_data' && ($node->is_new)) {
+  /*
     global $user;
     $distributor_id = change_feeds_import_get_distributor_id($user->uid);
 
@@ -407,6 +408,8 @@ function dispatched_quantity_confirmation_node_presave($node) {
         'created_date' => REQUEST_TIME,
       ))
       ->execute();
+   * 
+   */
   }
 }
 
@@ -464,7 +467,9 @@ function insert_trip_into_dispatch_qty_confirmation($trip_id, $distributor_id) {
     //Now for Lakme we have to bypass all the trip
     //So commenting party code condition and bypass the all trips
     //$by_pass_trip = by_pass_trip_if_certain_party_exist($bills,$trip_id_nid, $distributor_id);   
-     by_pass_all_trip_for_lakme($trip_id_nid);       
+    if(variable_get('dispatch_bypass', 1)){
+        by_pass_all_trip_for_lakme($trip_id_nid); 
+    }
   }
   elseif (!empty($trip_id_nid) && !empty($dp_bills)) {// by pass for dp bills(not empty dp bills)
     $node = node_load($trip_id_nid);
