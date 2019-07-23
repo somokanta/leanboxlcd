@@ -1,0 +1,76 @@
+<?php
+
+/* 
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+
+
+function lb_product_api_services_resources() {
+  $resource = array(
+    '#api_version' => 3002
+  );
+  $resource = array(
+    'lb-product-api' => array(
+      'actions' => array(
+        'lb-product-data' => array(
+          'help' => 'Get LB Product Api Data',
+          'callback' => 'get_lb_product_api_data',
+          'args' => array(
+            array(
+              'name' => 'data',
+              'type' => 'array',
+              'description' => 'Post data',
+              'source' => 'data',
+              'optional' => TRUE,
+            ),
+          ),
+          'file' => array(
+            'type' => 'inc',
+            'module' => 'lb_product_api',
+            'name' => 'includes/lb_product_api'
+          ),
+          'access arguments' => array('services_access_lb_product_api'),
+        ),
+      ),
+    ),
+  );
+  return $resource;
+}
+
+function lb_product_api_permission() {
+
+  return array(
+    'services_access_lb_product_api' => array(
+      'title' => t('Lb product Api access'),
+      'description' => t('Lb product Api access')
+    )
+  );
+}
+
+/**
+ * Implements hook_menu
+ * @return string
+ */
+function lb_product_api_menu() {
+  $items = array();
+  
+  $items['trip-product-wise-returns'] = array(
+    'title' => 'Trip Product Wise Returns',
+    'page callback' => array('trip_product_wise_returns_form_callback'),
+    'access arguments' => array('returns confirmation'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'includes/trip_product_wise_returns.inc',
+  );
+  
+   $items['trip-product-wise-returns/export'] = array(
+    'title' => 'Trip Product Wise Returns',
+    'description' => 'Trip product wise returns Export report',
+    'page callback' => array('trip_product_wise_report_export'),
+    'file' => 'includes/trip_product_wise_returns.inc',
+    'access arguments' => array('returns confirmation')
+  );
+  
+  return $items;
+}

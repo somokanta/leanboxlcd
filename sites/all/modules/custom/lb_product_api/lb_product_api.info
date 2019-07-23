@@ -1,0 +1,4 @@
+name = LB Product Api
+description = LB Product Api.
+package = Custom
+core = 7.x
