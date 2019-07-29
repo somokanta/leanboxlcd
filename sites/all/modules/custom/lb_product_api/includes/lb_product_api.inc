@@ -30,7 +30,7 @@ function get_lb_product_api_data($data) {
         $node->field_lb_brand[LANGUAGE_NONE][0]['value'] = $val['field_brand'];
         $node->field_lb_category[LANGUAGE_NONE][0]['value'] = $val['field_category1'];
         $node->field_lb_cbu_code[LANGUAGE_NONE][0]['value'] = $val['field_cbu_code'];
-        $node->field_lb_company[LANGUAGE_NONE][0]['value'] = $val['field_company'];
+        $node->field_company[LANGUAGE_NONE][0]['value'] = $val['field_company'];
         $node->field_lb_ean[LANGUAGE_NONE][0]['value'] = $val['field_ean'];
         $node->field_lb_icld_volume[LANGUAGE_NONE][0]['value'] = $val['field_icld_volume'];
         $node->field_lb_sku_product_name[LANGUAGE_NONE][0]['value'] = $val['field_lb_sku_product_name'];
