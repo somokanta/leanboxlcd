@@ -3146,9 +3146,6 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
         $query->add_groupby('van_live_tracking.employeecode');
       }
     }
-    if($view->name == 'trip_bill_sku_return_report2' && $view->current_display = 'page'){
-      $query->add_where(1, 'dispatch_planning_item_details.return_qty', 0, '>');
-    }
 }
 
 /**
