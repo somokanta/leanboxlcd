@@ -4120,6 +4120,5 @@ function get_nid_of_resource($updated_by_name) {
   $query->condition('rt.field_resource_type_value', 'PT-CT Incharge');
   $query->fields('n', array('nid'));
   $result = $query->execute()->fetchField();
-
   return $result;
 }
