@@ -1639,10 +1639,12 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
       if (isset($item['sub division'])) {
         $sub_division = $item['sub division'];
       }
-      if (($sub_division != $product_name_first_word ) || (!in_array($product_name_first_word, $product_list_array))) {
-        drupal_set_message("Please enter correct name and sub division for sku $sku", 'error');
-        $entity->feeds_item->skip = TRUE;
-      }
+      // temporary fix
+//      if (($sub_division != $product_name_first_word ) || (!in_array($product_name_first_word, $product_list_array))) {
+//        drupal_set_message("Please enter correct name and sub division for sku $sku", 'error');
+//        $entity->feeds_item->skip = TRUE;
+//      }
+      // temporary fix
     }
     
     //columns validation
