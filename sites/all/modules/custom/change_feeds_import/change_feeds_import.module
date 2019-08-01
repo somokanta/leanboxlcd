@@ -1639,10 +1639,12 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
       if (isset($item['sub division'])) {
         $sub_division = $item['sub division'];
       }
-      if (($sub_division != $product_name_first_word ) || (!in_array($product_name_first_word, $product_list_array))) {
-        drupal_set_message("Please enter correct name and sub division for sku $sku", 'error');
-        $entity->feeds_item->skip = TRUE;
-      }
+      // temporary fix
+//      if (($sub_division != $product_name_first_word ) || (!in_array($product_name_first_word, $product_list_array))) {
+//        drupal_set_message("Please enter correct name and sub division for sku $sku", 'error');
+//        $entity->feeds_item->skip = TRUE;
+//      }
+      // temporary fix
     }
     
     //columns validation
@@ -1725,16 +1727,18 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
     // sub-putaway group validation
     $sub_putaway_grp = $item['sub-putaway group'];
     $check_sub_putaway_grp_nid = check_sub_putaway_group_exist($sub_putaway_grp, $distributor_id);
-    if(!empty($sub_putaway_grp)) {
-      if(empty($check_sub_putaway_grp_nid)) {
-        drupal_set_message("Please enter correct sub putaway group for sku $sku", 'error');
-        $entity->feeds_item->skip = TRUE;
-      }
-      else {
-        $entity->field_sub_putaway_group['und'][0]['nid'] = $check_sub_putaway_grp_nid;
-      }
-    }
-    
+    //temporary fix
+//    if(!empty($sub_putaway_grp)) {
+//      if(empty($check_sub_putaway_grp_nid)) {
+//        drupal_set_message("Please enter correct sub putaway group for sku $sku", 'error');
+//        $entity->feeds_item->skip = TRUE;
+//      }
+//      else {
+//        $entity->field_sub_putaway_group['und'][0]['nid'] = $check_sub_putaway_grp_nid;
+//      }
+//    }
+    //temporary fix
+   
     // Brand Validation.
     if (!empty($item['brand'])) {
       $brand = brand_validate($distributor_id, $item['brand']);
