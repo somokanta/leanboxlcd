@@ -1616,6 +1616,7 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
   global $user;
   // Store distributor id in author in each node
   $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+  watchdog('entitytest', '<pre>' . print_r($entity, TRUE) . '</pre>');
   if ($entity->feeds_item->id == 'sku7_code_master_leanbox') {
     $query = db_select('node', 'n');
     $query->condition('n.type', 'product_validation_master');
@@ -1634,7 +1635,6 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
       //$sku = $entity->field_sku7_code['und'][0]['value'];
       $sku = $entity->title;
       $product_name = $entity->field_product_name['und'][0]['value'];
-      watchdog('entitytest', '<pre>' . print_r($entity, TRUE) . '</pre>');
       $product_name = explode(" ", $product_name);
       $product_name_first_word = trim($product_name[0]);
       if (isset($item['sub division'])) {
