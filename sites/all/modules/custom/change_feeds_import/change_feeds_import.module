@@ -1622,7 +1622,8 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
     $query->condition('n.uid', $distributor_id);
     $query->fields('n', array('title'));
     $product_list_array = $query->execute()->fetchAllKeyed(0, 0);
-
+    
+    $sku = $entity->title;
     if (!empty($product_list_array)) {
 
       // commenting old code
@@ -1632,10 +1633,8 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
 //            $product_list_array[] = strtolower(trim($val));
 //         }
       //$sku = $entity->field_sku7_code['und'][0]['value'];
-      $sku = $entity->title;
-      dpm($entity);
+//      $sku = $entity->title;
       $product_name = $entity->field_product_name['und'][0]['value'];
-      dpm($product_name,'prod_name');
       $product_name = explode(" ", $product_name);
       $product_name_first_word = trim($product_name[0]);
       if (isset($item['sub division'])) {
