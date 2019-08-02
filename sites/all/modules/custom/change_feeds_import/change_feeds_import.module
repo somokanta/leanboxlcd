@@ -1619,6 +1619,7 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
   watchdog('entity', '<pre>' . print_r($entity, TRUE) . '</pre>');
   if ($entity->feeds_item->id == 'sku7_code_master_leanbox') {
     watchdog('entitytitle', '<pre>' . print_r($entity->title, TRUE) . '</pre>');
+    watchdog('entityfull', '<pre>' . print_r($entity, TRUE) . '</pre>');
     $query = db_select('node', 'n');
     $query->condition('n.type', 'product_validation_master');
     $query->condition('n.uid', $distributor_id);
