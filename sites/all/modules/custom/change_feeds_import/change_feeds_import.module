@@ -1635,6 +1635,7 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
       $sku = $entity->title;
       dpm($entity);
       $product_name = $entity->field_product_name['und'][0]['value'];
+      dpm($product_name,'prod_name');
       $product_name = explode(" ", $product_name);
       $product_name_first_word = trim($product_name[0]);
       if (isset($item['sub division'])) {
