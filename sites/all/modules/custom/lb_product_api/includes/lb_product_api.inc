@@ -48,6 +48,7 @@ function get_lb_product_api_data($data) {
         $node->field_lb_volume[LANGUAGE_NONE][0]['value'] = $val['field_volume'];
         $node->field_lb_weight[LANGUAGE_NONE][0]['value'] = $val['field_weight'];
         $node->field_lb_sub_brand[LANGUAGE_NONE][0]['value'] = $val['field_sub_brand1'];
+        $node->field_icld_ean[LANGUAGE_NONE][0]['value'] = $val['field_icld_ean'];
         node_save($node);       
       }catch (Exception $ex) {
         watchdog('lb product master api error', '<pre>' . print_r($ex->getMessage(), TRUE) . '</pre>');
