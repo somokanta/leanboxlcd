@@ -39,8 +39,10 @@
       <tr <?php if ($row_classes[$row_count]) { print 'class="' . implode(' ', $row_classes[$row_count]) .'"';  } ?>>
         <?php foreach ($row as $field => $content): ?>
         <!-- Add CSS for field Net Amount.-->
-        <?php if($field == 'drs_report_net_amt'){ ?>
-            <?php $attr = "style='color:#000;font-weight:bold;'"; ?>
+        <?php if($field == 'drs_report_net_amt' || $field == 'dispatched_value'){ ?>
+          <?php $attr = "style='color:#000;font-weight:bold;'"; ?>
+       <?php } else if($field == 'field_crate_id'){ ?>
+          <?php $attr = "style='color: #666;font-size:16px;'"; ?>
        <?php } else{ $attr = "style='color:#666;'"; }?>
         <!-- End CSS -->
           <td <?php echo $attr; if ($field_classes[$field][$row_count]) { print 'class="'. $field_classes[$field][$row_count] . '" '; } ?><?php print drupal_attributes($field_attributes[$field][$row_count]); ?>>
