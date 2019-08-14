@@ -1,0 +1,42 @@
+<?php
+
+/*
+ * Implement hook_schema.
+ */
+
+function custom_order_box_id_schema() {
+
+  $schema['outlet_order_crate'] = array(
+    'description' => 'Outlet Order Crate',
+    'fields' => array(
+      'id' => array(
+        'description' => 'The primary identifier for a data',
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'outlet_order_no' => array(
+        'description' => t('Outlet Order No'),
+        'type' => 'varchar',
+        'length' => 25,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'crate_id' => array(
+        'description' => t('Crate Id'),
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'created_time' => array(
+       'description' => 'DATA Created Time',
+       'type' => 'int',
+       'not null' => TRUE,
+       'default' => 0,
+    ),
+    ),
+    'primary key' => array('id'),
+  );
+
+  return $schema;
+}
