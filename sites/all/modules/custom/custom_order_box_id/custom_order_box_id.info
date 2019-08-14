@@ -1,0 +1,4 @@
+name = Custom Order Box Id
+description = Custom Order Box Id.
+package = Custom
+core = 7.x
