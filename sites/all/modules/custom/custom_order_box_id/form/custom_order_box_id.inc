@@ -128,8 +128,30 @@ function custom_order_box_id_upload_form_submit($form, &$form_state) {
   }
   $operations = array();
   $data_chunk = array_chunk($datas, 1000);
-  foreach ($data_chunk as $data){
-    //dpm($data);
+  dpm($data_chunk, 'DATA in');
+  foreach ($data_chunk as $data) {
+    
+    $operations[] = array('custom_order_box_id_process', array($max, $data, $distributor_id, $file_name));
+  }
+  
+  $batch = array(
+    'title' => t('Reading CSV Data'),
+    'operations' => $operations,
+    'init_message' => t("Please wait..."),
+    'progress_message' => t('Processed @current out of @total.'),
+    'error_message' => t('Upload data processing has encountered an error.'),
+    'finished' => 'order_vs_bill_data_csv_finished',
+    'file' => drupal_get_path('module', 'custom_order_box_id') . '/form/custom_order_box_id.inc',
+  );
+  batch_set($batch);
+}
+
+function order_vs_bill_data_csv_finished($success, $results, $operations){
+  if ($success) {
+         drupal_set_message('Success');
+  }
+  else {
+    drupal_set_message('There is Error Occured in batch process');
   }
 }
 
@@ -148,6 +170,39 @@ function check_bill_exist($bill_number){
   return $results;
 }
 
+
+function custom_order_box_id_process($max, $data, $distributor_id, $file_name, &$context){
+  foreach ($data as $key => &$value) {
+    $order_date = trim($value['ORDER DATE']);
+    $outlet_order_ref = strtotime(trim($value['OUTLET ORDER REF']));
+    $bill_number = trim($value['BILL NUMBER']);
+    
+    $query = db_select('outlet_order_crate', 'ooc');
+    $query->condition('ooc.outlet_order_no ', $outlet_order_ref);
+    $query->fields('ooc', array('crate_id '));
+    $crate_id = $query->execute()->fetchField();
+    
+    if(!empty($crate_id)){
+      $query = db_select('node', 'n');
+      $query->condition('n.title', $bill_number);
+      $query->condition('n.type', 'sales_register_data');
+      $query->condition('n.uid', $distributor_id);
+      $query->fields('n', array('nid'));
+      $sales_register_data_nid = $query->execute()->fetchField();
+      //dpm($sales_register_data_nid, 'sales_register_data_nid: ');
+
+      $node = node_load($sales_register_data_nid);
+      if(!empty($node)){
+        $node->field_crate_id['und'][0]['value'] = $crate_id; //field_crate_id //
+        $node->field_outlet_order_no['und'][0]['value'] = $outlet_order_ref;
+        node_save($node);
+      }
+    }else{
+      drupal_set_message('error', "Crate id not found of $outlet_order_ref");
+    }
+    //$context['results']['total_lines']++;
+  }
+}
 //$date1 = '2019-08-12 00:00:0'; // actual date =  2019-08-14 00:00:00
 //$date1 = explode('-', $date1);
 ////dpm($date1, 'date');
