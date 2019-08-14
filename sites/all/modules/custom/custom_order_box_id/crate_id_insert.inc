@@ -6,7 +6,7 @@
  * and open the template in the editor.
  */
 
-function update_ptl_put_qty_sum_data($outlet_order_ref, $bill_number) {
+function update_crate_id_data($outlet_order_ref, $bill_number) {
    $result = db_merge('outlet_order_crate')
     ->key(array('outlet_order_no' => $outlet_order_ref))
     ->fields(array(
