@@ -151,7 +151,7 @@ function custom_order_box_id_upload_form_submit($form, &$form_state) {
 
 function order_vs_bill_data_csv_finished($success, $results, $operations){
   if ($success) {
-         drupal_set_message('Success');
+         drupal_set_message('Sales Register Data Updated successfully');
   }
   else {
     drupal_set_message('There is Error Occured in batch process');
@@ -184,7 +184,6 @@ function custom_order_box_id_process($max, $data, $distributor_id, $file_name, &
     $query->condition('ooc.outlet_order_no ', $outlet_order_ref);
     $query->fields('ooc', array('crate_id '));
     $crate_id = $query->execute()->fetchField();
-    dpm($crate_id,'outlet-order gives crate id');
     if(!empty($crate_id)){
       $query = db_select('node', 'n');
       $query->condition('n.title', $bill_number);
@@ -192,16 +191,13 @@ function custom_order_box_id_process($max, $data, $distributor_id, $file_name, &
       $query->condition('n.uid', $distributor_id);
       $query->fields('n', array('nid'));
       $sales_register_data_nid = $query->execute()->fetchField();
-      dpm($sales_register_data_nid, 'sales_register_data_nid:bill number gives ');
 
       $node = node_load($sales_register_data_nid);
-      dpm($node,'before');
       if(!empty($node)){
         $node->field_crate_id['und'][0]['value'] = $crate_id; //field_crate_id //
         $node->field_outlet_order_no['und'][0]['value'] = $outlet_order_ref;
         node_save($node);
       }
-      dpm($node,'After check crate and outlet order');
     }
     else{
       drupal_set_message('error', "Crate id not found of $outlet_order_ref");
