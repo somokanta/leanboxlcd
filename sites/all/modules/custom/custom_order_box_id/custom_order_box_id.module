@@ -39,6 +39,7 @@ function custom_order_box_id_services_resources() {
               'source' => array('data' => 'bill_number'),
               'optional' => FALSE,
             ),
+           )
             'file' => array(
               'type' => 'inc',
               'module' => 'custom_order_box_id',
@@ -48,7 +49,6 @@ function custom_order_box_id_services_resources() {
           ),
         ),
       ),
-    )
   );
   return $box_id_resource;
 }
