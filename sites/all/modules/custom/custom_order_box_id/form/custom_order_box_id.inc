@@ -35,8 +35,9 @@ function custom_order_box_id_upload_form_validate($form, &$form_state) {
     'file_validate_extensions' => array('csv'),
   ));
   $header_array_from_xsd = array(
-    'BILL_NUMBER',
-    'Outlet_Order_No'
+    'ORDER DATE',
+    'OUTLET ORDER REF',
+    'BILL NUMBER'
   );
 
   if ($file) {
@@ -45,9 +46,9 @@ function custom_order_box_id_upload_form_validate($form, &$form_state) {
       $filepath = $form_state['values']['file']->uri;
       $data = array_map("str_getcsv", file($filepath, FILE_SKIP_EMPTY_LINES));
       $header_from_csv = array_shift($data);
-      //dpm($header_from_csv);
       if ($header_array_from_xsd != $header_from_csv) {
         $type = 'error';
+        $error_message = '';
         $message = 'Header mismatch.';
         form_set_error('file_upload', t($message));
         // log
@@ -63,13 +64,24 @@ function custom_order_box_id_upload_form_validate($form, &$form_state) {
         }
 
         foreach ($data as $key => $value) {
-          $bill_no = $value[0];
+          $order_date = $value[0];
           $outlet_order_no = $value[1];
-          $unique_comb = $bill_no . $outlet_order_no;
+          $bill_no = $value[2];
+          if(empty($order_date)){
+            $error_message .= "order date should not be empty at line ".($key+2).'<br>';
+          }
+          if(empty($outlet_order_no)){
+            $error_message .= "outlet order ref should not be empty at line ".($key+2).'<br>';
+          }
+          $unique_comb = $outlet_order_no . $bill_no;
           if (array_key_exists($unique_comb, $res['unique_combination'])) {
             form_set_error('duplicate_data', t('Duplicate Data Found , Please Remove Duplicate Data and Upload Again.'));
           }
           $res['unique_combination'][$unique_comb] = $unique_comb;
+          $exist_bills= check_bill_exist($bill_no);
+          if(empty($exist_bills[0])){
+            $error_message .= "Bill Number $bill_no does not exist at line ".($key+2).'<br>';
+          }
         }
       }
     }
@@ -80,6 +92,9 @@ function custom_order_box_id_upload_form_validate($form, &$form_state) {
   else {
     form_set_error('file', t('No file was uploaded.'));
   }
+  if(!empty($error_message)){
+    form_set_error('file', t($error_message));
+  }
 }
 
 /**
@@ -89,7 +104,6 @@ function custom_order_box_id_upload_form_validate($form, &$form_state) {
  * @param type $form_state
  */
 function custom_order_box_id_upload_form_submit($form, &$form_state) {
-  /*
   global $user;
   $user_id = $user->uid;
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
@@ -97,13 +111,11 @@ function custom_order_box_id_upload_form_submit($form, &$form_state) {
   $file = $form_state['values']['file'];
   $file_name = $file->filename;
   $filepath = $file->uri;
-
-  $max = count(file($file->uri));
+  $max = count(file($file->uri));// count of row
   $datas = array();
   // Making data as associative array with header.
   if (($handle = fopen($filepath, "r")) !== FALSE) {
     $header = fgetcsv($handle, 0, ',', '"');
-
     while (($row = fgetcsv($handle) ) !== FALSE) {
 
       foreach ($row as $key => &$value) {
@@ -114,71 +126,45 @@ function custom_order_box_id_upload_form_submit($form, &$form_state) {
     }
     fclose($handle);
   }
-
-  $error = change_feeds_import_revised_billing_validate($datas, $distributor_id);
-  if (!empty($error)) {
-    // show error here
-    $error_line = implode("<br>", $error);
-    drupal_set_message("The following error occured while processing: <br>" . $error_line, 'error');
+  $operations = array();
+  $data_chunk = array_chunk($datas, 1000);
+  foreach ($data_chunk as $data){
+    //dpm($data);
   }
-  else {
-
-    $unique_bills = array_unique(array_map(function($elem) {
-        return $elem['BILL_NUMBER'];
-      }, $datas));
-
-        $bill_not_in_dis_qty_conf = find_bill_not_in_dispatch_qty_confirmation($unique_bills, $distributor_id);
-        //upload only cld and loose confirmed bills
-        if(is_array($bill_not_in_dis_qty_conf)){
-          $bills_present = array_diff($unique_bills,$bill_not_in_dis_qty_conf);
-        }else{// if no pending then upload all bills
-          $bills_present = $unique_bills;
-        }
-        
-        $cld_loose_pending_bills = check_bill_cld_loose_confirmation_pending($bills_present, $distributor_id);
-        //upload only cld and loose confirmed bills
-        if(is_array($cld_loose_pending_bills)){
-          $bills_cl_confirmed = array_diff($bills_present,$cld_loose_pending_bills);
-        }else{// if no pending then upload all bills
-          $bills_cl_confirmed = $bills_present;
-        }
-      
-      // check bill confirm edit in trip table for all bills. if its close then don't upload the data
-      //we can send $unique_bills as well as $bills_cl_confirmed. because result is same
-        $confirmed_bills = check_bill_confirmation_complete($bills_cl_confirmed, $distributor_id);
-        if (is_array($confirmed_bills)) {
-          $bills_upload = array_diff($bills_cl_confirmed, $confirmed_bills);
-        }
-        else {
-          $bills_upload = $bills_cl_confirmed;
-        }
-//      if (empty($confirmed_bills)) {
-        $operations = array();
-        $operations[] = array('change_feeds_import_revised_updated_flag_unset', array($bills_upload, $distributor_id));
-        
-        $data_chunk = array_chunk($datas, 1000);
-        foreach ($data_chunk as $data) {
-          $operations[] = array('change_feeds_import_revised_billing_process', array($data, $bills_upload, $distributor_id));
-        }
-
-        //For bill update flag which are not present in file check isnull in function
-        $operations[] = array('change_feeds_import_revised_billing_update_flag', array($bills_upload, $distributor_id));
-        
-        //Sales register Upload
-        $unique_bills_chunk = array_chunk($bills_upload, 300);
-        foreach ($unique_bills_chunk as $bills_chunk) {
-          $operations[] = array('sales_register_update_create_billing', array($bills_chunk,$distributor_id));
-        }
-        $batch = array(
-          'title' => t('Reading Billing Data Csv'),
-          'operations' => $operations,
-          'init_message' => t("Batch is starting."),
-          'progress_message' => t('Processed @current out of @total.'),
-          'error_message' => t('Upload data processing has encountered an error.'),
-          'finished' => 'revised_billing_data_csv_finished',
-          'file' => drupal_get_path('module', 'change_feeds_import') . '/form/revised_billing_data.inc',
-        );
-
-        batch_set($batch);
-  }*/
 }
+
+function check_bill_exist($bill_number){
+  if (!empty($bill_number)) {
+    global $user;
+    $user_id = $user->uid;
+    $distributor_id = change_feeds_import_get_distributor_id($user_id);
+    $query = db_select('node', 'n');
+    $query->condition('n.uid', $distributor_id);
+    $query->condition('n.type', 'sales_register_data');
+    $query->condition('n.title', $bill_number);
+    $query->fields('n', array('title'));
+    $results = $query->execute()->fetchCol();
+  }
+  return $results;
+}
+
+//$date1 = '2019-08-12 00:00:0'; // actual date =  2019-08-14 00:00:00
+//$date1 = explode('-', $date1);
+////dpm($date1, 'date');
+//if (strlen($date1[0]) == 4 && strlen($date1[1]) == 2) {
+//  $dd_hh_mm_ii_data = explode(' ', $date1[2]);
+//  //dpm($dd_hh_mm_ii_data);
+//  if (strlen($dd_hh_mm_ii_data[0]) == 2) {
+//    $hh_mm_ii_data = explode(':',$dd_hh_mm_ii_data[1]);
+//     dpm($hh_mm_ii_data);
+//    if (strlen($hh_mm_ii_data[0]) == 2 && strlen($hh_mm_ii_data[1]) == 2 && strlen($hh_mm_ii_data[2]) == 2) {
+//      
+//    }
+//    else {
+//      dpm('hh-mm-ii is incorrect');
+//    }
+//  }
+//  else {
+//    dpm('dd format iscorrect');
+//  }
+//}

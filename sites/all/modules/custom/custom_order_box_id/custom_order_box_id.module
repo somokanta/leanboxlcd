@@ -1,7 +1,8 @@
 <?php
+
 function custom_order_box_id_menu() {
   $items = array();
-  
+
   $items['custom-order-box-id-import'] = array(
     'title' => 'Import Custom Order Box Id',
     'description' => 'Import Custom Order Box Id',
@@ -9,6 +10,45 @@ function custom_order_box_id_menu() {
     'page arguments' => array('custom_order_box_id_upload_form'),
     'access arguments' => true,
     'file' => 'form/custom_order_box_id.inc',
-  ); 
+  );
   return $items;
+}
+
+function custom_order_box_id_services_resources() {
+  $box_id_resource = array(
+    '#api_version' => 3002,
+  );
+  $box_id_resource = array(
+    'outlet-box-id' => array(
+      'actions' => array(
+        'outlet-box-id-api' => array(
+          'help' => 'update crate id data in outlet-order-crate',
+          'callback' => 'update_crate_id_data',
+          'args' => array(
+            array(
+              'name' => 'outlet_order_ref',
+              'type' => 'string',
+              'description' => 'outlet order no',
+              'source' => array('data' => 'outlet_order_ref'),
+              'optional' => FALSE,
+            ),
+            array(
+              'name' => 'bill_number',
+              'type' => 'string',
+              'description' => 'bill number',
+              'source' => array('data' => 'bill_number'),
+              'optional' => FALSE,
+            ),
+            'file' => array(
+              'type' => 'inc',
+              'module' => 'custom_order_box_id',
+              'name' => 'crate_id_insert'
+            ),
+            'access arguments' => array('services_access_ptl_api'),
+          ),
+        ),
+      ),
+    )
+  );
+  return $box_id_resource;
 }
