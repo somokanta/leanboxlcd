@@ -78,10 +78,14 @@ function custom_order_box_id_upload_form_validate($form, &$form_state) {
             form_set_error('duplicate_data', t('Duplicate Data Found , Please Remove Duplicate Data and Upload Again.'));
           }
           $res['unique_combination'][$unique_comb] = $unique_comb;
-          $exist_bills= check_bill_exist($bill_no);
+          $exist_bills= check_bill_exist($bill_no);// check bill number in sales register
           if(empty($exist_bills[0])){
             $error_message .= "Bill Number $bill_no does not exist at line ".($key+2).'<br>';
           }
+          $crate_ids = check_crate_id_exist($outlet_order_no);// check crate id in outlet order crate is exist or not 
+          if(empty($crate_ids[0])){
+            $error_message .= "Crate Id for  $bill_no does not exist at line ".($key+2).'<br>';
+          } 
         }
       }
     }
@@ -128,7 +132,6 @@ function custom_order_box_id_upload_form_submit($form, &$form_state) {
   }
   $operations = array();
   $data_chunk = array_chunk($datas, 1000);
-  dpm($data_chunk, 'DATA in');
   foreach ($data_chunk as $data) {
     
     $operations[] = array('custom_order_box_id_process', array($max, $data, $distributor_id, $file_name));
@@ -174,14 +177,14 @@ function check_bill_exist($bill_number){
 function custom_order_box_id_process($max, $data, $distributor_id, $file_name, &$context){
   foreach ($data as $key => &$value) {
     $order_date = trim($value['ORDER DATE']);
-    $outlet_order_ref = strtotime(trim($value['OUTLET ORDER REF']));
+    $outlet_order_ref = trim($value['OUTLET ORDER REF']);
     $bill_number = trim($value['BILL NUMBER']);
     
     $query = db_select('outlet_order_crate', 'ooc');
     $query->condition('ooc.outlet_order_no ', $outlet_order_ref);
     $query->fields('ooc', array('crate_id '));
     $crate_id = $query->execute()->fetchField();
-    
+    dpm($crate_id,'outlet-order gives crate id');
     if(!empty($crate_id)){
       $query = db_select('node', 'n');
       $query->condition('n.title', $bill_number);
@@ -189,20 +192,34 @@ function custom_order_box_id_process($max, $data, $distributor_id, $file_name, &
       $query->condition('n.uid', $distributor_id);
       $query->fields('n', array('nid'));
       $sales_register_data_nid = $query->execute()->fetchField();
-      //dpm($sales_register_data_nid, 'sales_register_data_nid: ');
+      dpm($sales_register_data_nid, 'sales_register_data_nid:bill number gives ');
 
       $node = node_load($sales_register_data_nid);
+      dpm($node,'before');
       if(!empty($node)){
         $node->field_crate_id['und'][0]['value'] = $crate_id; //field_crate_id //
         $node->field_outlet_order_no['und'][0]['value'] = $outlet_order_ref;
         node_save($node);
       }
-    }else{
+      dpm($node,'After check crate and outlet order');
+    }
+    else{
       drupal_set_message('error', "Crate id not found of $outlet_order_ref");
     }
     //$context['results']['total_lines']++;
   }
 }
+
+function check_crate_id_exist($outlet_order_no){
+  if(!empty($outlet_order_no)){
+    $query = db_select('outlet_order_crate', 'ooc');
+    $query->condition('ooc.outlet_order_no', $outlet_order_no);
+    $query->fields('ooc', array('crate_id'));
+    $results = $query->execute()->fetchCol();
+  }
+  return $results;
+}
+
 //$date1 = '2019-08-12 00:00:0'; // actual date =  2019-08-14 00:00:00
 //$date1 = explode('-', $date1);
 ////dpm($date1, 'date');
