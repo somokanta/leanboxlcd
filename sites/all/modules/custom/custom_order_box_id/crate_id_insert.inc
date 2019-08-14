@@ -12,7 +12,7 @@ function update_ptl_put_qty_sum_data($outlet_order_ref, $bill_number) {
     ->fields(array(
          'outlet_order_no' => $outlet_order_ref,
          'crate_id' => $bill_number,
-         'created' => REQUEST_TIME,
+         'created_time' => REQUEST_TIME,
        ))
        ->execute();
 
