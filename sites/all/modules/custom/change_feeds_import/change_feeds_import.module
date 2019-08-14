@@ -3152,7 +3152,7 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
       }
     }
     
-    if ($view->name == 'trip_bill_sku_return_report2' && $view->current_display == 'page') {
+    if ($view->name == 'trip_bill_sku_return_report2' && ($view->current_display == 'page' || $view->current_display == 'views_data_export_1')) {
     $query->add_where(1, 'dispatch_planning_item_details.return_qty', 0, '>');
   }
 }
