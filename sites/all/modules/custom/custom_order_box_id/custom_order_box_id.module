@@ -33,10 +33,10 @@ function custom_order_box_id_services_resources() {
               'optional' => FALSE,
             ),
             array(
-              'name' => 'bill_number',
+              'name' => 'crate_id',
               'type' => 'string',
-              'description' => 'bill number',
-              'source' => array('data' => 'bill_number'),
+              'description' => 'crate_id',
+              'source' => array('data' => 'crate_id'),
               'optional' => FALSE,
             ),
            ),
