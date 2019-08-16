@@ -47,8 +47,8 @@ function change_feeds_import_sales_register_form_validate($form, &$form_state) {
     'BILL_DATE',
     'PARTY_CODE',
     'BILL_VALUE',
-    'Outlet_Order_No',
-    'Crate_ID', 
+//    'Outlet_Order_No',
+//    'Crate_ID', 
   );
   if ($file) {
     if ($file = file_move($file, 'public://')) {
@@ -303,8 +303,8 @@ function change_feeds_import_insert_data_in_custom_sales_table($value, $fid, $di
         'fid' => $fid,
         'party_code' => $value['PARTY_CODE'],
         'distributor_id' => $distributor_id,
-        'outlet_order_no'=> $value['Outlet_Order_No'],
-        'crate_id'=> $value['Crate_ID'],
+//        'outlet_order_no'=> $value['Outlet_Order_No'],
+//        'crate_id'=> $value['Crate_ID'],
       ))
       ->execute();
 }
@@ -447,8 +447,8 @@ function change_feeds_import_create_sales_register_node($sales_data_result, $dis
 //bod end
           $node->field_bill_value[LANGUAGE_NONE][0]['value'] = $val['bill_value'];
           $node->field_sales_party_code[LANGUAGE_NONE][0]['value'] = $val['party_code'];
-          $node->field_outlet_order_no[LANGUAGE_NONE][0]['value'] = $val['outlet_order_no'];
-          $node->field_crate_id[LANGUAGE_NONE][0]['value'] = $val['crate_id'];
+//          $node->field_outlet_order_no[LANGUAGE_NONE][0]['value'] = $val['outlet_order_no'];
+//          $node->field_crate_id[LANGUAGE_NONE][0]['value'] = $val['crate_id'];
           $node->field_sales_updated_date[LANGUAGE_NONE][0]['value'] = time();
           node_save($node);
         }
@@ -490,8 +490,8 @@ function change_feeds_import_create_sales_register_node($sales_data_result, $dis
           
           $node->field_bill_value[LANGUAGE_NONE][0]['value'] = $val['bill_value'];
           $node->field_sales_party_code[LANGUAGE_NONE][0]['value'] = $val['party_code'];
-          $node->field_outlet_order_no[LANGUAGE_NONE][0]['value'] = $val['outlet_order_no'];
-          $node->field_crate_id[LANGUAGE_NONE][0]['value'] = $val['crate_id'];
+//          $node->field_outlet_order_no[LANGUAGE_NONE][0]['value'] = $val['outlet_order_no'];
+//          $node->field_crate_id[LANGUAGE_NONE][0]['value'] = $val['crate_id'];
           $node->field_sales_updated_date[LANGUAGE_NONE][0]['value'] = time();                   
           node_save($node);
         }
