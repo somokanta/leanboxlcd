@@ -11,7 +11,7 @@ function update_crate_id_data($outlet_order_ref, $crate_id) {
     ->key(array('outlet_order_no' => $outlet_order_ref))
     ->fields(array(
          'outlet_order_no' => $outlet_order_ref,
-         'crate_id' => $crate_id,
+         'crate_id' => $crate_id ? $crate_id : '',
          'created_time' => REQUEST_TIME,
        ))
        ->execute();

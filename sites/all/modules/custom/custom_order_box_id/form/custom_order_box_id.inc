@@ -82,10 +82,10 @@ function custom_order_box_id_upload_form_validate($form, &$form_state) {
           if(empty($exist_bills[0])){
             $error_message .= "Bill Number $bill_no does not exist at line ".($key+2).'<br>';
           }
-          $crate_ids = check_crate_id_exist($outlet_order_no);// check crate id in outlet order crate is exist or not 
-          if(empty($crate_ids[0])){
-            $error_message .= "Crate Id for  $bill_no does not exist at line ".($key+2).'<br>';
-          } 
+//          $crate_ids = check_crate_id_exist($outlet_order_no);// check crate id in outlet order crate is exist or not 
+//          if(empty($crate_ids[0])){
+//            $error_message .= "Crate Id for  $bill_no does not exist at line ".($key+2).'<br>';
+//          } 
         }
       }
     }
@@ -131,7 +131,7 @@ function custom_order_box_id_upload_form_submit($form, &$form_state) {
     fclose($handle);
   }
   $operations = array();
-  $data_chunk = array_chunk($datas, 1000);
+  $data_chunk = array_chunk($datas, 300);
   foreach ($data_chunk as $data) {
     
     $operations[] = array('custom_order_box_id_process', array($max, $data, $distributor_id, $file_name));
@@ -180,10 +180,8 @@ function custom_order_box_id_process($max, $data, $distributor_id, $file_name, &
     $outlet_order_ref = trim($value['OUTLET ORDER REF']);
     $bill_number = trim($value['BILL NUMBER']);
     
-    $query = db_select('outlet_order_crate', 'ooc');
-    $query->condition('ooc.outlet_order_no ', $outlet_order_ref);
-    $query->fields('ooc', array('crate_id '));
-    $crate_id = $query->execute()->fetchField();
+    $crate_id = check_crate_id_exist($outlet_order_ref);
+    
     if(!empty($crate_id)){
       $query = db_select('node', 'n');
       $query->condition('n.title', $bill_number);
@@ -215,24 +213,3 @@ function check_crate_id_exist($outlet_order_no){
   }
   return $results;
 }
-
-//$date1 = '2019-08-12 00:00:0'; // actual date =  2019-08-14 00:00:00
-//$date1 = explode('-', $date1);
-////dpm($date1, 'date');
-//if (strlen($date1[0]) == 4 && strlen($date1[1]) == 2) {
-//  $dd_hh_mm_ii_data = explode(' ', $date1[2]);
-//  //dpm($dd_hh_mm_ii_data);
-//  if (strlen($dd_hh_mm_ii_data[0]) == 2) {
-//    $hh_mm_ii_data = explode(':',$dd_hh_mm_ii_data[1]);
-//     dpm($hh_mm_ii_data);
-//    if (strlen($hh_mm_ii_data[0]) == 2 && strlen($hh_mm_ii_data[1]) == 2 && strlen($hh_mm_ii_data[2]) == 2) {
-//      
-//    }
-//    else {
-//      dpm('hh-mm-ii is incorrect');
-//    }
-//  }
-//  else {
-//    dpm('dd format iscorrect');
-//  }
-//}
