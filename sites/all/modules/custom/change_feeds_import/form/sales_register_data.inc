@@ -487,7 +487,7 @@ function change_feeds_import_create_sales_register_node($sales_data_result, $dis
 //              $node->field_call_type[LANGUAGE_NONE][0]['value'] = 'sd';
 //            }
 //          }
-          
+          dpm($val['bill_value']);
           $node->field_bill_value[LANGUAGE_NONE][0]['value'] = $val['bill_value'];
           $node->field_sales_party_code[LANGUAGE_NONE][0]['value'] = $val['party_code'];
 //          $node->field_outlet_order_no[LANGUAGE_NONE][0]['value'] = $val['outlet_order_no'];
