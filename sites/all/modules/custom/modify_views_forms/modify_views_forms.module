@@ -137,7 +137,7 @@ function modify_views_forms_form_alter(&$form, &$form_state, $form_id) {
       $delivery_boys = $select + $delivery_boys;
       
       //field-dispatch-status
-      foreach ($form['node'] as $key => &$value) {
+      foreach ($form['node'] as $key => $value) {
 //        $value['field_vehicle_reporting_date'][LANGUAGE_NONE][0]['#default_value']['value']=  $value['field_vehicle_reporting_date'][LANGUAGE_NONE][0]['#default_value']['value'] ? $value['field_vehicle_reporting_date'][LANGUAGE_NONE][0]['#default_value']['value'] : date('Y-m-d');
 //        $form['node'][$key]['field_vehicle_reporting_date'][LANGUAGE_NONE][0]['#required'] = TRUE;
 //        $form['node'][$key]['field_vehicle_reporting_time'][LANGUAGE_NONE][0]['value']['#required'] = TRUE;
