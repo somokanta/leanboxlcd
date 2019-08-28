@@ -3744,6 +3744,8 @@ function change_feeds_import_form_feeds_import_form_alter(&$form, $form_state, $
  * // This for validate HUL_Address Confirmation
  */
 function hul_code_address_confirmation($form, &$form_state) {
+   global $user;
+  $dis_id = change_feeds_import_get_distributor_id($user->uid);
  // it for address confirmation checking user has permission to confirm address after outlet upload & sales register upload   
  if (user_access('hul_address_confirm_upload')) {
      global $base_url;
@@ -3774,6 +3776,11 @@ function hul_code_address_confirmation($form, &$form_state) {
            $arugments = '?pl_group=' . urlencode($pl_group) . '&sales_day=' . urlencode($sales_day) . '&beat_name=' . urlencode($beat_name) . '&hul_status=' . urlencode(0);
           $url = $page_url . $arugments;
           drupal_set_message('Please confirm the address for Party Code:  ' . l($party_code . '- (HUL Code:' . $hu_code . ')', $url, array('attributes' => array('target' => '_blank'))), 'error');
+        }
+        $pt_ct_status = check_exsiting_record_for_party_code($party_code, $dis_id);
+        if (empty($pt_ct_status)) {
+          $url = $base_url . '/import/payment_terms';
+          drupal_set_message('Please maintain PT-CT for Party Code:  ' . l($party_code, $url, array('attributes' => array('target' => '_blank'))), 'error');
         }
         if ($hu_code) {
           if (!in_array($hu_code, $area_code_warning)) {
