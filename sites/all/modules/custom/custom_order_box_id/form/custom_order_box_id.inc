@@ -151,7 +151,9 @@ function custom_order_box_id_upload_form_submit($form, &$form_state) {
 
 function order_vs_bill_data_csv_finished($success, $results, $operations){
   if ($success) {
-         drupal_set_message('Sales Register Data Updated successfully');
+      if(!empty($results)){
+         drupal_set_message('Sales Register Data Upload Completed successfully');
+      }
   }
   else {
     drupal_set_message('There is Error Occured in batch process');
@@ -195,10 +197,11 @@ function custom_order_box_id_process($max, $data, $distributor_id, $file_name, &
         $node->field_crate_id['und'][0]['value'] = $crate_id; //field_crate_id //
         $node->field_outlet_order_no['und'][0]['value'] = $outlet_order_ref;
         node_save($node);
+        $context['results'][] = $node->nid;
       }
     }
     else{
-      drupal_set_message('error', "Crate id not found of $outlet_order_ref");
+      drupal_set_message("Crate id not found for OUTLET ORDER REF: $outlet_order_ref", 'warning');
     }
     //$context['results']['total_lines']++;
   }
