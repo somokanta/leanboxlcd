@@ -13,13 +13,13 @@ function custom_order_box_id_upload_form($form, $form_state) {
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
   $form['file'] = array(
     '#type' => 'file',
-    '#title' => t('Choose a CSV file for custom order box id upload'),
+    '#title' => t('Choose a CSV file for order vs bill upload'),
   );
   $form['template_download'] = array(
     '#type' => 'markup',
     '#prefix' => '<div id="template_wrapper">',
     '#suffix' => '</div>',
-    '#markup' => l("Download Template", drupal_get_path('module', 'custom_order_box_id') . '/custom_order_box_id_template.csv'),
+    '#markup' => l("Download Template", drupal_get_path('module', 'custom_order_box_id') . '/order_vs_bill_import_template.csv'),
   );
   $form['submit'] = array(
     '#type' => 'submit',
