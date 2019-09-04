@@ -6,12 +6,13 @@
  * and open the template in the editor.
  */
 
-function update_crate_id_data($outlet_order_ref, $crate_id) {
+function update_crate_id_data($outlet_order_ref, $crate_id, $order_date) {
    $result = db_merge('outlet_order_crate')
     ->key(array('outlet_order_no' => $outlet_order_ref))
     ->fields(array(
          'outlet_order_no' => $outlet_order_ref,
          'crate_id' => $crate_id ? $crate_id : '',
+         'order_date' => $order_date ? $order_date : '',
          'created_time' => REQUEST_TIME,
        ))
        ->execute();

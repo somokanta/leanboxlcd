@@ -54,7 +54,23 @@ function custom_order_box_id_views_data() {
       'handler' => 'views_handler_filter_string',
     ),
   );
-  
+  $data['outlet_order_crate']['order_date'] = array(
+     'title' => t('Order Date'),
+     'help' => t('Order Date'),
+     'field' => array(
+       'handler' => 'views_handler_field_date',
+       'click sortable' => TRUE,
+     ),
+     'sort' => array(
+       'handler' => 'views_handler_sort_date',
+     ),
+     'filter' => array(
+       'handler' => 'views_handler_filter_date',
+     ),
+     'argument' => array(
+       'handler' => 'views_handler_filter_date',
+     ),
+   );  
   $data['outlet_order_crate']['created_time'] = array(
      'title' => t('Created Time'),
      'help' => t('created_time'),

@@ -39,6 +39,13 @@ function custom_order_box_id_services_resources() {
               'source' => array('data' => 'crate_id'),
               'optional' => FALSE,
             ),
+            array(
+              'name' => 'order_date',
+              'type' => 'string',
+              'description' => 'order_date',
+              'source' => array('data' => 'order_date'),
+              'optional' => FALSE,
+            ),  
            ),
             'file' => array(
               'type' => 'inc',

@@ -28,6 +28,12 @@ function custom_order_box_id_schema() {
         'not null' => TRUE,
         'default' => '',
       ),
+      'order_date' => array(
+       'description' => 'Order Date',
+       'type' => 'int',
+       'not null' => TRUE,
+       'default' => 0,
+      ),        
       'created_time' => array(
        'description' => 'DATA Created Time',
        'type' => 'int',
