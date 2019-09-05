@@ -1619,15 +1619,15 @@ function van_planning_ajax_submit($area_codes, $van_pl_group, $pl_group, $bill_d
 //  $db_or->isNull('ft.field_trip_id_reference_nid');
 //  $db_or->condition('dp.field_delivery_pending_value', 1);
 //  $query->condition($db_or);
+  
+  //Exclude delivery pending bills. commented above line and inserted below line
+  //$query->isNull('ft.field_trip_id_reference_nid');
+  //$query->isNull('dp.field_delivery_pending_value');
 
   //Bill Status should not be cancel or Discard or anything
   $query->leftJoin('field_data_field_bill_status', 'bs', 'bs.entity_id = n3.nid');
   $query->isNull('bs.field_bill_status_value');
   
-  //Exclude delivery pending bills. commented above line and inserted below line
-  $query->isNull('ft.field_trip_id_reference_nid');
-  $query->isNull('dp.field_delivery_pending_value');
-
   $query->addField('n3', 'nid', 'sales_nid');
   $query->join('field_data_field_sr_bill_date', 'sbd', 'sbd.entity_id = n3.nid');
   $query->condition('sbd.field_sr_bill_date_value', array($billing_start_date, $billing_end_date), 'BETWEEN');
@@ -1826,8 +1826,8 @@ function _get_van_planning_bill_wise_data($bill_area_code, $bill_pl_group, $bill
 //  $query->condition($db_or);
 
   //Exclude delivery pending bills. commented above line and inserted below line
-  $query->isNull('ft.field_trip_id_reference_nid');
-  $query->isNull('dp.field_delivery_pending_value');
+  //$query->isNull('ft.field_trip_id_reference_nid');
+  //$query->isNull('dp.field_delivery_pending_value');
   
   
   //Bill Status should not be cancel or Discard or anything
@@ -1964,8 +1964,8 @@ function _get_van_planning_bill_wise_data1($bill_area_code, $bill_pl_group, $bil
 //  $query->condition($db_or);
   
   //Exclude delivery pending bills. commented above line and inserted below line
-  $query->isNull('ft.field_trip_id_reference_nid');
-  $query->isNull('dp.field_delivery_pending_value');
+  //$query->isNull('ft.field_trip_id_reference_nid');
+  //$query->isNull('dp.field_delivery_pending_value');
 
   
   //Bill Status should not be cancel or Discard or anything

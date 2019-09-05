@@ -3,12 +3,12 @@
 function custom_order_box_id_menu() {
   $items = array();
 
-  $items['custom-order-box-id-import'] = array(
-    'title' => 'Import Custom Order Box Id',
-    'description' => 'Import Custom Order Box Id',
+  $items['order-vs-bill-import'] = array(
+    'title' => 'Order vs Bill Importer',
+    'description' => 'Order vs Bill Import',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('custom_order_box_id_upload_form'),
-    'access arguments' => true,
+    'access arguments' => array('Delivery details Upload'),
     'file' => 'form/custom_order_box_id.inc',
   );
   return $items;
@@ -37,6 +37,20 @@ function custom_order_box_id_services_resources() {
               'type' => 'string',
               'description' => 'crate_id',
               'source' => array('data' => 'crate_id'),
+              'optional' => FALSE,
+            ),
+            array(
+              'name' => 'order_date',
+              'type' => 'string',
+              'description' => 'order_date',
+              'source' => array('data' => 'order_date'),
+              'optional' => FALSE,
+            ), 
+            array(
+              'name' => 'party_name',
+              'type' => 'string',
+              'description' => 'party_name',
+              'source' => array('data' => 'party_name'),
               'optional' => FALSE,
             ),
            ),
