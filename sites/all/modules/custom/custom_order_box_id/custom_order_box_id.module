@@ -45,7 +45,14 @@ function custom_order_box_id_services_resources() {
               'description' => 'order_date',
               'source' => array('data' => 'order_date'),
               'optional' => FALSE,
-            ),  
+            ), 
+            array(
+              'name' => 'party_name',
+              'type' => 'string',
+              'description' => 'party_name',
+              'source' => array('data' => 'party_name'),
+              'optional' => FALSE,
+            ),
            ),
             'file' => array(
               'type' => 'inc',
