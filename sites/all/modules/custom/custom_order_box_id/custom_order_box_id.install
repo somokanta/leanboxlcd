@@ -35,7 +35,7 @@ function custom_order_box_id_schema() {
        'default' => 0,
       ),
       'party_name' => array(
-       'description' => 'Order Date',
+       'description' => t('Party name'),
        'type' => 'varchar',
        'length' => 25,
        'not null' => TRUE,
