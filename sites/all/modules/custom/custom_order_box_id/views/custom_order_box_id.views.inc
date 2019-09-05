@@ -70,7 +70,20 @@ function custom_order_box_id_views_data() {
      'argument' => array(
        'handler' => 'views_handler_filter_date',
      ),
-   );  
+   );
+  $data['outlet_order_crate']['party_name'] = array(
+    'title' => t('Party Name Value'),
+    'help' => t('The Party Name  Value.'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+  );
   $data['outlet_order_crate']['created_time'] = array(
      'title' => t('Created Time'),
      'help' => t('created_time'),

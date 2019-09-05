@@ -33,7 +33,14 @@ function custom_order_box_id_schema() {
        'type' => 'int',
        'not null' => TRUE,
        'default' => 0,
-      ),        
+      ),
+      'party_name' => array(
+       'description' => 'Order Date',
+       'type' => 'varchar',
+       'length' => 25,
+       'not null' => TRUE,
+       'default' => '',
+      ),
       'created_time' => array(
        'description' => 'DATA Created Time',
        'type' => 'int',
