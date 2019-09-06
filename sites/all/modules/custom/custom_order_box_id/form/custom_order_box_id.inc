@@ -199,7 +199,7 @@ function custom_order_box_id_process($max, $data, $distributor_id, $file_name, &
         node_save($node);
         $context['results'][] = $node->nid;
         if(empty($crate_id)){
-          drupal_set_message("Crate id is not present for : $outlet_order_ref");
+          drupal_set_message("Crate id is not present for OUTLET ORDER REF  : $outlet_order_ref");
         }
       }
     }
