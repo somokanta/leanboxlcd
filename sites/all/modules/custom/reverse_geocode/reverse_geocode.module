@@ -1773,7 +1773,8 @@ function reverse_geocode_node_presave($node) {
     
     // code for Updating hul_code_reference field in outlet master type
       $hul_code_data = $node->field_hul_code[LANGUAGE_NONE][0]['value'];
-      if ($node->original->field_hul_code[LANGUAGE_NONE][0]['value'] != $hul_code_data) {
+      $hul_ref_field = $node->field_hul_code_reference[LANGUAGE_NONE][0]['nid'];
+      if (($node->original->field_hul_code[LANGUAGE_NONE][0]['value'] != $hul_code_data)|| empty($hul_ref_field)) {
          if (!empty($hul_code_data)) {
             $query = db_select('node', 'n');
             $query->condition('n.type', 'hul_code_master');
