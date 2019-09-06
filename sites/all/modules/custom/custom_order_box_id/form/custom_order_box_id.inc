@@ -194,7 +194,7 @@ function custom_order_box_id_process($max, $data, $distributor_id, $file_name, &
 
       $node = node_load($sales_register_data_nid);
       if(!empty($node)){
-        $node->field_crate_id['und'][0]['value'] = $crate_id; //field_crate_id //
+        $node->field_crate_id['und'][0]['value'] = $crate_id ? $crate_id : ''; //field_crate_id //
         $node->field_outlet_order_no['und'][0]['value'] = $outlet_order_ref;
         node_save($node);
         $context['results'][] = $node->nid;
