@@ -184,7 +184,7 @@ function custom_order_box_id_process($max, $data, $distributor_id, $file_name, &
     
     $crate_id = check_crate_id_exist($outlet_order_ref);
     
-    if(!empty($crate_id)){
+    if(!empty($outlet_order_ref)){
       $query = db_select('node', 'n');
       $query->condition('n.title', $bill_number);
       $query->condition('n.type', 'sales_register_data');
@@ -201,7 +201,7 @@ function custom_order_box_id_process($max, $data, $distributor_id, $file_name, &
       }
     }
     else{
-      drupal_set_message("Crate id not found for OUTLET ORDER REF: $outlet_order_ref", 'warning');
+      drupal_set_message("OUTLET ORDER REF number can't be blank for bill: $bill_number", 'warning');
     }
     //$context['results']['total_lines']++;
   }
