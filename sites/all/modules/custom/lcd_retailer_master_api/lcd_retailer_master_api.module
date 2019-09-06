@@ -29,7 +29,8 @@ function get_node_titles_using_multiple_nids($nids) {
 function lcd_retailer_master_api_node_presave($node) {
     $retailer_masters = array('outlet_master', 'area_code_master', 'hul_code_master');
     if (in_array($node->type, $retailer_masters)) {
-        $hul_code = get_node_title_using_nid($node->field_hul_code_reference[LANGUAGE_NONE][0]['nid']);
+        //$hul_code = get_node_title_using_nid($node->field_hul_code_reference[LANGUAGE_NONE][0]['nid']);
+        $hul_code = $node->field_hul_code[LANGUAGE_NONE][0]['value'];
         if ($node->type == 'outlet_master') {
             $api_data['type'] = 'outlet_master';
             $api_data['title'] = $node->title;
