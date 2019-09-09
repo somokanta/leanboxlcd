@@ -68,10 +68,10 @@ function custom_order_box_id_upload_form_validate($form, &$form_state) {
           $order_date = $value[1];
           $bill_no = $value[2];
           if(empty($order_date)){
-            $error_message .= "order date should not be empty at line ".($key+2).'<br>';
+            $error_message .= "Order Date should not be empty at line ".($key+2).'<br>';
           }
           if(empty($outlet_order_no)){
-            $error_message .= "outlet order ref should not be empty at line ".($key+2).'<br>';
+            $error_message .= "Order Number should not be empty at line ".($key+2).'<br>';
           }
           $unique_comb = $outlet_order_no . $bill_no;
           if (array_key_exists($unique_comb, $res['unique_combination'])) {
@@ -80,7 +80,7 @@ function custom_order_box_id_upload_form_validate($form, &$form_state) {
           $res['unique_combination'][$unique_comb] = $unique_comb;
           $exist_bills= check_bill_exist($bill_no);// check bill number in sales register
           if(empty($exist_bills[0])){
-            $error_message .= "Bill Number $bill_no does not exist at line ".($key+2).'<br>';
+            $error_message .= "Bill Number Ref $bill_no does not exist at line ".($key+2).'<br>';
           }
 //          $crate_ids = check_crate_id_exist($outlet_order_no);// check crate id in outlet order crate is exist or not 
 //          if(empty($crate_ids[0])){
@@ -199,12 +199,12 @@ function custom_order_box_id_process($max, $data, $distributor_id, $file_name, &
         node_save($node);
         $context['results'][] = $node->nid;
         if(empty($crate_id)){
-          drupal_set_message("Crate id is not present for OUTLET ORDER REF  : $outlet_order_ref");
+          drupal_set_message("Crate Id is not present for  Order Number  : $outlet_order_ref");
         }
       }
     }
     else{
-      drupal_set_message("OUTLET ORDER REF number can't be blank for bill: $bill_number", 'warning');
+      drupal_set_message("Order Number can't be blank for Bill Number Ref : $bill_number", 'warning');
     }
     //$context['results']['total_lines']++;
   }
