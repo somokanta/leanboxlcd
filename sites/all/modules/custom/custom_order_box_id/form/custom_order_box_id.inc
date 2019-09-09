@@ -35,9 +35,9 @@ function custom_order_box_id_upload_form_validate($form, &$form_state) {
     'file_validate_extensions' => array('csv'),
   ));
   $header_array_from_xsd = array(
-    'ORDER DATE',
-    'OUTLET ORDER REF',
-    'BILL NUMBER'
+    'Order Number',
+    'Order Date',
+    'Bill Ref. No'
   );
 
   if ($file) {
@@ -64,8 +64,8 @@ function custom_order_box_id_upload_form_validate($form, &$form_state) {
         }
 
         foreach ($data as $key => $value) {
-          $order_date = $value[0];
-          $outlet_order_no = $value[1];
+          $outlet_order_no = $value[0];
+          $order_date = $value[1];
           $bill_no = $value[2];
           if(empty($order_date)){
             $error_message .= "order date should not be empty at line ".($key+2).'<br>';
@@ -178,9 +178,9 @@ function check_bill_exist($bill_number){
 
 function custom_order_box_id_process($max, $data, $distributor_id, $file_name, &$context){
   foreach ($data as $key => &$value) {
-    $order_date = trim($value['ORDER DATE']);
-    $outlet_order_ref = trim($value['OUTLET ORDER REF']);
-    $bill_number = trim($value['BILL NUMBER']);
+    $outlet_order_ref = trim($value['Order Number']);//Order Number//
+    $order_date = trim($value['Order Date']);//Order Date//
+    $bill_number = trim($value['Bill Ref. No']);//Bill Ref. No
     
     $crate_id = check_crate_id_exist($outlet_order_ref);
     
