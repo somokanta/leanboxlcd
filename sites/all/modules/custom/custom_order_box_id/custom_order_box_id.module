@@ -1,0 +1,78 @@
+<?php
+
+function custom_order_box_id_menu() {
+  $items = array();
+
+  $items['order-vs-bill-import'] = array(
+    'title' => 'Order vs Bill Importer',
+    'description' => 'Order vs Bill Import',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('custom_order_box_id_upload_form'),
+    'access arguments' => array('Delivery details Upload'),
+    'file' => 'form/custom_order_box_id.inc',
+  );
+  return $items;
+}
+
+function custom_order_box_id_services_resources() {
+  $box_id_resource = array(
+    '#api_version' => 3002,
+  );
+  $box_id_resource = array(
+    'outlet-box-id' => array(
+      'actions' => array(
+        'outlet-box-id-api' => array(
+          'help' => 'update crate id data in outlet-order-crate',
+          'callback' => 'update_crate_id_data',
+          'args' => array(
+            array(
+              'name' => 'outlet_order_ref',
+              'type' => 'string',
+              'description' => 'outlet order no',
+              'source' => array('data' => 'outlet_order_ref'),
+              'optional' => FALSE,
+            ),
+            array(
+              'name' => 'crate_id',
+              'type' => 'string',
+              'description' => 'crate_id',
+              'source' => array('data' => 'crate_id'),
+              'optional' => FALSE,
+            ),
+            array(
+              'name' => 'order_date',
+              'type' => 'string',
+              'description' => 'order_date',
+              'source' => array('data' => 'order_date'),
+              'optional' => FALSE,
+            ), 
+            array(
+              'name' => 'party_name',
+              'type' => 'string',
+              'description' => 'party_name',
+              'source' => array('data' => 'party_name'),
+              'optional' => FALSE,
+            ),
+           ),
+            'file' => array(
+              'type' => 'inc',
+              'module' => 'custom_order_box_id',
+              'name' => 'crate_id_insert'
+            ),
+            'access arguments' => array('services_access_ptl_api'),
+          ),
+        ),
+      ),
+  );
+  return $box_id_resource;
+}
+
+/**
+ * Implements of hook_views_api().
+ */
+function custom_order_box_id_views_api() {
+   return array(
+     'api' => 3,
+     'path' => drupal_get_path('module', 'custom_order_box_id') . '/views'
+   );
+}
