@@ -426,7 +426,8 @@ function send_email_ofd_report() {
   $ofd_html2 = "<h3>Pending Van Till : " . $todays_date . " (Today)</h3>";
   $ofd_html2 .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
 
-  $params['subject'] = "OFD - $distributor_name";
+  $brand_name = variable_get('email_brand_name','Lakme');
+  $params['subject'] = "$brand_name - OFD - $distributor_name";
   $params['body'] = $ofd_html . "<br>" . $ofd_html2;
   $mail_to = variable_get('ofd_to_email');
   $from = variable_get('from_email');
@@ -629,8 +630,8 @@ function send_email_daily_data() {
 <td>$egir_pending_percentage %</td>
 </tr>
 </table>";
-
-  $params['subject'] = "Operations Progress Status - $distributor_name";
+  $brand_name = variable_get('email_brand_name','Lakme');        
+  $params['subject'] = "$brand_name - Operations Progress Status - $distributor_name";
   $params['body'] = $egir_html . "<br>" . $party_packing_html . "<br>" . $picking_html;
 
 //  $mail_to = "dhirendra.mishra@iksula.com";
@@ -749,8 +750,8 @@ function send_email_channel_emailer($distributor_name, $distributor_id = 60) {
   else {
     $mtd_two_day_before_html .= $mtd_two_day_before_data;
   }
-
-  $params['subject'] = "Channel Wise OTIF - $distributor_name";
+  $brand_name = variable_get('email_brand_name','Lakme');        
+  $params['subject'] = "$brand_name - Channel Wise OTIF - $distributor_name";
   $params['body'] = $yesterday_html . "<br>" . $day_before_yesterday_html . "<br>" . $twoday_before_yesterday_html . "<br>" . $mtd_html . "<br>" . $mtd_one_day_before_html . "<br>" . $mtd_two_day_before_html;
   // $mail_to = variable_get('to_email');
 //  $mail_to = "dhirendra.mishra@iksula.com";
@@ -863,8 +864,8 @@ function send_email_cron_pl_emailer($distributor_name, $distributor_id = 60) {
   else {
     $mtd_two_day_before_html .= $mtd_two_day_before_data;
   }
-
-  $params['subject'] = "PL GROUP Wise OTIF - $distributor_name";
+  $brand_name = variable_get('email_brand_name','Lakme');        
+  $params['subject'] = "$brand_name - PL GROUP Wise OTIF - $distributor_name";
   $params['body'] = $yesterday_html . "<br>" . $day_before_yesterday_html . "<br>" . $twoday_before_yesterday_html . "<br>" . $mtd_html . "<br>" . $mtd_one_day_before_html . "<br>" . $mtd_two_day_before_html;
   $mail_to = variable_get('pl_grp_otif_to_email');
   $from = variable_get('from_email');
@@ -992,8 +993,8 @@ function send_email_pl_group_emailer() {
 //  else {
 //    $mtd_two_day_before_html .= $mtd_two_day_before_data;
 //  }
-
-  $params['subject'] = "PL Group Wise Bill Pendency-$distributor_name";
+  $brand_name = variable_get('email_brand_name','Lakme');        
+  $params['subject'] = "$brand_name - PL Group Wise Bill Pendency-$distributor_name";
   //$params['body'] = $yesterday_html . "<br>" . $day_before_yesterday_html . "<br>" . $twoday_before_yesterday_html . "<br>" . $mtd_html . "<br>" . $mtd_one_day_before_html . "<br>" . $mtd_two_day_before_html;
   $params['body'] = $mtd_html . "<br>" . $mtd_pending_bill_count_html . "<br>" . $mtd_pending_bill_value_html;
   $mail_to = variable_get('pl_grp_wise_to_email');
@@ -1232,8 +1233,8 @@ function send_email_productivity_emailer($todays_date_date, $distributor_name, $
     $picking_godown_wise_html .= "</tr></table>";
   }
 
-
-  $params['subject'] = "Productivity Progress Status-$distributor_name";
+  $brand_name = variable_get('email_brand_name','Lakme');        
+  $params['subject'] = "$brand_name - Productivity Progress Status-$distributor_name";
   $params['body'] = $party_pack_type_wsie_html . "<br>" . $party_pack_superwise_html . "<br>" . $picking_godown_wise_html . "<br>" . $picking_supervisor_wise_html;
   //$mail_to = variable_get('to_email');
   //$from = variable_get('from_email');
@@ -1280,8 +1281,8 @@ function send_party_packingand_picking_productivity_emailer() {
   //Loading Productivity Mailer
   //$loading_html = get_email_productivity_data_for_loading($end_date, $todays_date_date, $distributor_id);
 
-
-  $params['subject'] = "Pick/Party Packing/LC Productivity Status-$distributor_name";
+  $brand_name = variable_get('email_brand_name','Lakme');        
+  $params['subject'] = "$brand_name - Pick/Party Packing/LC Productivity Status-$distributor_name";
   $params['body'] = $party_packing_html . "<br>" . $picking_html . "<br>" . $loose_confirmation_html;
   $mail_to = variable_get('productivity_status_to_email');
   $from = variable_get('from_email');
@@ -1572,8 +1573,8 @@ function send_loading_productivity_emailer() {
   
   //Loading Productivity Mailer
   $loading_html = get_email_productivity_data_for_loading($end_date, $todays_date_date, $distributor_id);
-  
-  $params['subject'] = "Loading Productivity Status-$distributor_name";
+  $brand_name = variable_get('email_brand_name','Lakme');
+  $params['subject'] = "$brand_name - Loading Productivity Status-$distributor_name";
   $params['body'] = $loading_html;
   $mail_to = variable_get('loading_productivity_status_to_email');
   $from = variable_get('from_email');
@@ -3446,8 +3447,8 @@ function send_email_pending_ofd_salesbeatwise_data() {
   $output = "<h3>Pending OFD Sales Beat Wise For Last 7 Days Till Yesterday</h3>";
   $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
 
-
-  $params['subject'] = "Pending OFD Sales Beat Wise - " . $distributor_name;
+  $brand_name = variable_get('email_brand_name','Lakme');        
+  $params['subject'] = "$brand_name - Pending OFD Sales Beat Wise - " . $distributor_name;
   $params['body'] = $output;
   $mail_to = variable_get('ofd_salesbeatwise_to_email');
   $from = variable_get('from_email');

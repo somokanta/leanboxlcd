@@ -118,8 +118,8 @@ function send_email_monthly_trip_summary() {
   
   $output = "<h3>Monthly Trip Summary</h3>";
   $output .= theme('table', array('header' => $header, 'rows' => $full_table, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0'), 'empty' => t('No Records has been found')));
-  
-  $params['subject'] = "Monthly Trip Summary";
+  $brand_name = variable_get('email_brand_name','Lakme');
+  $params['subject'] = "$brand_name - Monthly Trip Summary";
   $params['body'] = $output;
   $mail_to = variable_get('monthly_trip_summary_to_email');
   $from = variable_get('from_email');
@@ -148,8 +148,8 @@ function send_email_exception_mis() {
   
   // CRM Status of Full Returned Bills
   $crm_status_full_returned_html = get_email_crm_status_full_returned_bills($distributor_id);
-  
-  $params['subject'] = "Exception MIS";
+  $brand_name = variable_get('email_brand_name','Lakme');
+  $params['subject'] = "$brand_name - Exception MIS";
   $params['body'] = $pt_ct_not_maintained_html . "<br>" . $child_not_maintained_html . "<br>" . $crm_status_high_discounted_bills_html . "<br>" . $crm_status_signed_bill_html . "<br>" . $crm_status_full_returned_html;
   $mail_to = variable_get('exception_mis_to_email');
   $from = variable_get('from_email');
@@ -785,8 +785,8 @@ function send_email_return_vrs_prod() {
   $header = array('S.No.','Dispatch Date', 'Trip ID', 'Status', 'Cashier', 'Vehicle', 'Vehicle Arrival Time', 'Arrival to Delivery Confirmation (min)', 'Delivery Confirmation Time', 'Delivery Confirmation to Returns Start (min)', 'Returns Start to Returns End (min)', 'Returns Value(Rs.)/10 Min', 'Product Lines/10 Min','Total Returned Value(Rs.)','Returned SKU Quantity(w/o Sachets)','Returned Quantity of Sachets','Returns End to VRS Start (Min)', 'VRS Start to VRS End (Min)', 'VRS Value(Rs.)/10 Min', 'Cash %', 'Cheque %', 'Signed Bill %');
 
   $html = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
-
-  $params['subject'] = "Returns & VRS Productivity";
+  $brand_name = variable_get('email_brand_name','Lakme');
+  $params['subject'] = "$brand_name - Returns & VRS Productivity";
   $params['body'] = $html;
   $mail_to = variable_get('return_vrs_to_email');
   $from = variable_get('from_email');
@@ -852,7 +852,8 @@ function send_email_del_app_adoption() {
   $header = array(array('data' => 'Dispatch Date:' . date('d-M-y', strtotime("-1 days")), 'colspan' => 4), array('data' => 'MTD', 'colspan' => 3));
   $output = "<h3>Delivery App Adoption - RS Jogs</h3>";
   $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0'), 'empty' => t('No Records has been found')));
-  $params['subject'] = "Delivery App Adoption - RS Jogs";
+  $brand_name = variable_get('email_brand_name','Lakme');
+  $params['subject'] = "$brand_name - Delivery App Adoption - RS Jogs";
   $params['body'] = $output;
   $mail_to = variable_get('return_del_app_adoption');
   $from = variable_get('from_email');
@@ -1012,7 +1013,8 @@ function send_email_del_pending() {
 
   //$output = "<h3>Delivery Pending Report</h3>";
   $output .= theme('table', array('header' => $header, 'rows' => $final_arr, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0'), 'empty' => t('No Records has been found')));
-  $params['subject'] = "DP Bills Status Report";
+  $brand_name = variable_get('email_brand_name','Lakme');
+  $params['subject'] = "$brand_name - DP Bills Status Report";
   $params['body'] = $output;
   $mail_to = variable_get('return_del_pending');
   $from = variable_get('from_email');
@@ -1136,7 +1138,8 @@ function send_email_pt_compliance() {
 
   $output = "<h3>PT Compliance Report</h3>";
   $output .= theme('table', array('header' => $header, 'rows' => $final_result, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0'), 'empty' => t('No Records has been found')));
-  $params['subject'] = "PT Compliance Report";
+  $brand_name = variable_get('email_brand_name','Lakme');
+  $params['subject'] = "$brand_name - PT Compliance Report";
   $params['body'] = $output;
   $mail_to = variable_get('pt_compliance');
   $from = variable_get('from_email');
