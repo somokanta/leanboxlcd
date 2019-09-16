@@ -1621,7 +1621,7 @@ function van_planning_ajax_submit($area_codes, $van_pl_group, $pl_group, $bill_d
 //  $query->condition($db_or);
   
   //Exclude delivery pending bills. commented above line and inserted below line
-  //$query->isNull('ft.field_trip_id_reference_nid');
+  $query->isNull('ft.field_trip_id_reference_nid');
   //$query->isNull('dp.field_delivery_pending_value');
 
   //Bill Status should not be cancel or Discard or anything
@@ -1826,7 +1826,7 @@ function _get_van_planning_bill_wise_data($bill_area_code, $bill_pl_group, $bill
 //  $query->condition($db_or);
 
   //Exclude delivery pending bills. commented above line and inserted below line
-  //$query->isNull('ft.field_trip_id_reference_nid');
+  $query->isNull('ft.field_trip_id_reference_nid');
   //$query->isNull('dp.field_delivery_pending_value');
   
   
@@ -1964,7 +1964,7 @@ function _get_van_planning_bill_wise_data1($bill_area_code, $bill_pl_group, $bil
 //  $query->condition($db_or);
   
   //Exclude delivery pending bills. commented above line and inserted below line
-  //$query->isNull('ft.field_trip_id_reference_nid');
+  $query->isNull('ft.field_trip_id_reference_nid');
   //$query->isNull('dp.field_delivery_pending_value');
 
   
