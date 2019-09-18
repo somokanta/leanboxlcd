@@ -1976,7 +1976,7 @@ function dispatch_planning_form_save_validate($form, &$form_state) {
     $request_headers = array('Content-Type' => 'application/json', 'Authorization' => $authorization);
     $roitufic_api_url = variable_get('api_routific_url', 'https://api.routific.com/v1/vrp');
     $routific_options = array('headers' => $request_headers, 'method' => 'POST', 'data' => $Locations_data);
-
+dpm($routific_options);
     $response_data = drupal_http_request($roitufic_api_url, $routific_options);
     dpm($response_data,'API RESPONSE');
     $response_data = json_decode($response_data->data);
