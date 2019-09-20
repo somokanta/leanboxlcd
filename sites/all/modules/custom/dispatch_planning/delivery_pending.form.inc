@@ -47,9 +47,11 @@ function delivery_pending_form($form, &$form_state) {
     '#default_value'=>arg(3),
     '#autocomplete_path' => 'dp_trip/autocomplete',
     '#ajax' => array(
-      'callback' => 'trip_id_ajaxcallback',
       'wrapper' => 'itemlist-div',
-    ),  
+      'callback' => 'custom_ajax_callback',
+      'method' => 'replace',
+      'effect' => 'fade',
+    ),
   );
   $trip_id = arg(3);
   if (!empty($trip_id)) {
