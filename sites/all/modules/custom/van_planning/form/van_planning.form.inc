@@ -1074,13 +1074,22 @@ function _van_planning_callback_form($form, &$form_state) {
           $bill_betwn_five_thou['value'] +=$data_for_final_tb['bill_value'];
         }
       }
+      
+      // add new Total Travel Time format.
+      $trave_time = $val['time'];
+      $hour_minute = explode('.',$trave_time);
+      $hour = $hour_minute[0].'H';
+      $minute = str_pad($hour_minute[1], 2, "0", STR_PAD_RIGHT);
+      $minute = round($minute*0.6).'M';
+      $total_travel_time = $hour <= 9 ? '0'.$hour.','.$minute : $hour.','.$minute;
+      
       $combined_area_codes = implode(", ", $combined_area_codes);
       $form['submit_vp']['vp_final_table']['#rows'][$k]['area_codes'] = $combined_area_codes;
       $form['submit_vp']['vp_final_table']['#rows'][$k]['map_data'] = $val['map_data'];
       $form['submit_vp']['vp_final_table']['#rows'][$k]['parkstop_link'] = $val['parkstop_link'];
       $form['submit_vp']['vp_final_table']['#rows'][$k]['del_boy'] = $val['del_boy'];
       $form['submit_vp']['vp_final_table']['#rows'][$k]['dist'] = $val['dist'];
-      $form['submit_vp']['vp_final_table']['#rows'][$k]['time'] = $val['time'];
+      $form['submit_vp']['vp_final_table']['#rows'][$k]['time'] = $val['time'] ? $total_travel_time : $val['time'];//$val['time'];
       $form['submit_vp']['vp_final_table']['#rows'][$k]['bill_count'] = $val['bill_count'];
       $form['submit_vp']['vp_final_table']['#rows'][$k]['sku_count'] = $val['sku_count'];
       $form['submit_vp']['vp_final_table']['#rows'][$k]['bill_value'] = $val['bill_value'];
