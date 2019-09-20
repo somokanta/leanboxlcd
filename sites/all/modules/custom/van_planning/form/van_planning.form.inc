@@ -1089,7 +1089,7 @@ function _van_planning_callback_form($form, &$form_state) {
       $form['submit_vp']['vp_final_table']['#rows'][$k]['parkstop_link'] = $val['parkstop_link'];
       $form['submit_vp']['vp_final_table']['#rows'][$k]['del_boy'] = $val['del_boy'];
       $form['submit_vp']['vp_final_table']['#rows'][$k]['dist'] = $val['dist'];
-      $form['submit_vp']['vp_final_table']['#rows'][$k]['time'] = $total_travel_time;//$val['time'];
+      $form['submit_vp']['vp_final_table']['#rows'][$k]['time'] = $val['time'] ? $total_travel_time : $val['time'];//$val['time'];
       $form['submit_vp']['vp_final_table']['#rows'][$k]['bill_count'] = $val['bill_count'];
       $form['submit_vp']['vp_final_table']['#rows'][$k]['sku_count'] = $val['sku_count'];
       $form['submit_vp']['vp_final_table']['#rows'][$k]['bill_value'] = $val['bill_value'];
