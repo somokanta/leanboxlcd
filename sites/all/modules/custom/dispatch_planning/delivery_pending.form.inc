@@ -49,7 +49,7 @@ function delivery_pending_form($form, &$form_state) {
     '#ajax' => array(
       'wrapper' => 'itemlist-div',
       'callback' => 'custom_ajax_callback',
-      'method' => 'replace',
+      'method' => 'replace', 
       'effect' => 'fade',
     ),
   );
