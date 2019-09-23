@@ -38,13 +38,13 @@ class total_travel_time_handler extends views_handler_field {
     $query->fields('ttt', array('field_total_travel_time_value'));
     $res = $query->execute()->fetchField();
 
-    if(!empty($res)) {
+    //if(!empty($res)) {
       $hour_minute = explode('.',$res);
       $hour = $hour_minute[0].'H';
       $minute = str_pad($hour_minute[1], 2, "0", STR_PAD_RIGHT);
       $minute = round($minute*0.6).'M';
       $total_travel_time = $hour <= 9 ? '0'.$hour.','.$minute : $hour.','.$minute;
-    }
+    //}
     return $total_travel_time;
   }
 
