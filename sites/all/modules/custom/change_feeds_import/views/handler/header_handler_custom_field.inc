@@ -78,12 +78,14 @@ class header_handler_custom_field extends views_handler_field {
       
       $total_distance = round($result['field_total_distance_value'],1);
       $total_travel_time = round($result['field_total_travel_time_value'],1);
-      $hour_minute = explode('.',$total_travel_time);
-      $hour = $hour_minute[0].'H';
-      $minute = str_pad($hour_minute[1], 2, "0", STR_PAD_RIGHT);
-      $minute = round($minute*0.6).'M';
-      $total_travel_time = $hour <= 9 ? '0'.$hour.','.$minute : $hour.','.$minute;
-      
+      if(!empty($total_travel_time)) {
+        $hour_minute = explode('.',$total_travel_time);
+        $hour = $hour_minute[0].'H';
+        $minute = str_pad($hour_minute[1], 2, "0", STR_PAD_RIGHT);
+        $minute = round($minute*0.6).'M';
+        $total_travel_time = $hour <= 9 ? '0'.$hour.','.$minute : $hour.','.$minute;
+      }
+
       if($seq_method == "0" || empty($seq_method)){
         $sequence = "MANUAL";
       }else{

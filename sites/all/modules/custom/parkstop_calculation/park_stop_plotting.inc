@@ -110,12 +110,14 @@ function park_stop_plotting_form($form, &$form_state, $args) {
       //$delboy[$k]['time'] = round(($val / 60), 2); // old
       // New format of Total Travel Time field.
       $trave_time = round(($val / 60), 2);
-      $hour_minute = explode('.',$trave_time);
-      $hour = $hour_minute[0].'H';
-      $minute = str_pad($hour_minute[1], 2, "0", STR_PAD_RIGHT);
-      $minute = round($minute*0.6).'M';
-      $total_travel_time = $hour <= 9 ? '0'.$hour.','.$minute : $hour.','.$minute;
-      $delboy[$k]['time'] = $total_travel_time;
+      if(!empty($trave_time)) {
+        $hour_minute = explode('.',$trave_time);
+        $hour = $hour_minute[0].'H';
+        $minute = str_pad($hour_minute[1], 2, "0", STR_PAD_RIGHT);
+        $minute = round($minute*0.6).'M';
+        $total_travel_time = $hour <= 9 ? '0'.$hour.','.$minute : $hour.','.$minute;
+        $delboy[$k]['time'] = $total_travel_time;
+      }
     }
     $form_state['total_distance'] = $delboy;
     //total time of delivery boy
