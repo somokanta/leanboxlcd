@@ -1,0 +1,54 @@
+<?php 
+
+function trip_undispatch_update_schema() {
+  $schema = array();
+  $schema['delivery_app_update_undispatch_api_log'] = array(
+    'description' => 'describes Api log for Delivery App update undispatch',
+    'fields' => array(
+      'id' => array(
+        'description' => t('Id Primary Key'),
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'request_data' => array(
+        'description' => t('API Details'),
+        'type' => 'text',
+      ),
+      'response_data' => array(
+        'description' => t('API Details'),
+        'type' => 'text',
+      ),
+      'request_time' => array(
+        'description' => t('API Request time'),
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'trip_id' => array(
+        'description' => t('Trip Id'),
+        'type' => 'varchar',
+        'length' => 25,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'api_type' => array(
+        'description' => t('API Type'),
+        'type' => 'varchar',
+        'length' => 25,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'distributor_id' => array(
+        'description' => 'distributor_id',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    ),
+    'indexes' => array(
+      'trip_id' => array('trip_id'),
+    ),
+    'primary key' => array('id'),
+  );
+  return $schema;
+}
