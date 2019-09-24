@@ -335,6 +335,7 @@ function del_app_undispatch_submit($form, &$form_state){
   delivery_app_update_undispatch_api_log_update($response_data, $sql_ins_id);
   
   drupal_set_message('Undispatched Trip ID'. $trip_id);
+  $form_state['redirect'] = array('delivery-app-update/edit');
 }
 
 function del_app_ajax_submit($form, &$form_state) {
