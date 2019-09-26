@@ -30,7 +30,7 @@ function pdd_add_form($form, &$form_state) {
     '#type' => 'textfield',
     '#title' => t('Delivery days'),
     '#required' => TRUE,
-    '#element_validate' => array('element_validate_integer_positive'),
+    //'#element_validate' => array('element_validate_integer_positive'),
     '#default_value' => $pdd,
   );
 
@@ -67,6 +67,12 @@ function pdd_add_form_validate($form, &$form_state) {
         form_set_error('weekly_off', t('Enter correct comma seperated days'));
       }
     }
+  }
+  
+  // Delivery Days validation. 
+  $value = $form_state['values']['pdd'];
+  if ($value !== '' && (!is_numeric($value) || intval($value) != $value || $value < 0)) {
+    form_set_error('pdd', t('Delivery days must be a positive integer.'));
   }
 }
 
