@@ -2173,6 +2173,20 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
 //      $entity->feeds_item->skip = TRUE;
 //    }
   }
+  if ($entity->feeds_item->id == 'hul_code_area_code_mapping') {
+    $hul_code = $entity->title;
+    $area_code = $item['area code'];
+    $areacode_exist = check_hul_area_code_exist($area_code,$distributor_id);
+    $existing_uid = check_hul_code_exist($title);
+    if (!empty($existing_uid) && ($existing_uid != $distributor_id)) {
+      drupal_set_message("Invalid HUL Code:$hul_code", 'error', FALSE);
+      $entity->feeds_item->skip = TRUE;
+    } 
+    if (empty($areacode_exist)) {
+        drupal_set_message("Area Code :$area_code does not exist.", 'error', FALSE);
+        $entity->feeds_item->skip = TRUE;
+    }
+  }
   if ($entity->feeds_item->id == 'hul_code_master') {
     $title = $entity->title;
     $existing_uid = check_hul_code_exist($title);
@@ -2471,6 +2485,15 @@ function check_hul_code_exist($title) {
   $query->condition('n.type', 'hul_code_master');
   $query->fields('n', array('uid'));
   $query->condition('n.title', $title);
+  $results = $query->execute()->fetchField();
+  return $results;
+}
+function check_hul_area_code_exist($title,$distributor_id) {
+  $query = db_select('node', 'n');
+  $query->condition('n.type', 'area_code_master');
+  $query->fields('n', array('title'));
+  $query->condition('n.title', $title);
+  $query->condition('n.uid', $distributor_id);
   $results = $query->execute()->fetchField();
   return $results;
 }
