@@ -11,6 +11,16 @@ function trip_undispatch_update_menu() {
   return $items;
 }
 
+/**
+ * Implements of hook_views_api().
+ */
+function trip_undispatch_update_views_api() {
+  return array(
+    'api' => 3,
+    'path' => drupal_get_path('module', 'trip_undispatch_update') . '/views'
+  );
+}
+
 function update_undispatch_config_form($form, $form_state) {
   $form['update_api_url'] = array(
     '#type' => 'textfield',
