@@ -47,9 +47,11 @@ function delivery_pending_form($form, &$form_state) {
     '#default_value'=>arg(3),
     '#autocomplete_path' => 'dp_trip/autocomplete',
     '#ajax' => array(
-      'callback' => 'trip_id_ajaxcallback',
       'wrapper' => 'itemlist-div',
-    ),  
+      'callback' => 'custom_ajax_callback',
+      'method' => 'replace', 
+      'effect' => 'fade',
+    ),
   );
   $trip_id = arg(3);
   if (!empty($trip_id)) {
@@ -89,6 +91,7 @@ function delivery_pending_form($form, &$form_state) {
   }
   $options = $form_state['dispatch_planning']['bills'];
   $headers = array(
+    'trip_id' => 'Trip ID',
     'bill_number' => 'Bill Number',
     'party_name' => 'Party name',
     'bill_value' => 'Value',
@@ -271,6 +274,10 @@ function delivery_pending_bill_number_ajax_submit($form, &$form_state) {
       '#name' => "delivery_pending[$key]",
       '#options' => array('' => 'Select', 1 => 'Yes')
     );*/
+        
+    //trip id display
+    $bill_info[$key]['trip_id'] = $trip_id; 
+    
     $bill_info[$key]['delivery_pending']['data'][$key]['dp_pending'] = array(
                     '#type' => 'select',
                     '#title' => t('Delivery Pending Reason'),
@@ -408,45 +415,55 @@ function delivery_pending_form_save_submit($form, &$form_state) {
   foreach ($bill_nids as $nid => $value) {
     $node = node_load($nid);
     if ($node) {
-      if ($value) {
-        $node->field_delivery_pending[LANGUAGE_NONE][0]['value'] = 1;
-        //Maintain previous trip        
-        $trip_nid = $node->field_trip_id_reference[LANGUAGE_NONE][0]['nid'];
-        $query = db_select('node', 'n');
-        $query->condition('n.nid', $trip_nid);
-        $query->condition('n.type', 'dispatch_data');
-        $query->fields('n', array('title'));
-        $trip_title = $query->execute()->fetchField();
-        $dp_reason = $value;
-        $node->field_previous_trip[LANGUAGE_NONE][0]['value'] = $trip_title;
-        unset($node->field_trip_id_reference[LANGUAGE_NONE]);
-        unset($node->field_dispatch_n_value[LANGUAGE_NONE]);
-        unset($node->field_bill_sequence[LANGUAGE_NONE]);
-        unset($node->field_drs_sequence[LANGUAGE_NONE]);
-        unset($node->field_deliver_n_value[LANGUAGE_NONE]);
-        
-        unset($node->field_bill_status[LANGUAGE_NONE]); // Unseting Bill Status to NULL so that, bill number will available for Van Planning
-      }
-      else {
-        $node->field_delivery_pending = array();
-      }
-       node_save($node);
-       // update dispatch data with party van or NON PP van field
-       $trip_node = update_trip_data($trip_id,$is_party_pack,$dis_id);
-       // fetch farey dp_id & res_status, 
-       $bill_rows = fetch_dispatch_planning_api_id($trip_id, $node->title, $dis_id);
-       $bill_row_id = key($bill_rows);
-       if (!empty($trip_node)) {
+      $transaction = db_transaction();
+      try {
+        if ($value) {
+          $dp_reason = $value;
+
+          //Maintain previous trip        
+          $trip_nid = $node->field_trip_id_reference[LANGUAGE_NONE][0]['nid'];
+          $query = db_select('node', 'n');
+          $query->condition('n.nid', $trip_nid);
+          $query->condition('n.type', 'dispatch_data');
+          $query->fields('n', array('title'));
+          $trip_title = $query->execute()->fetchField();
+
+          // update dispatch data with party van or NON PP van field
+          $trip_node = update_trip_data($trip_title, $is_party_pack, $dis_id);
+          // fetch farey dp_id & res_status, 
+          $bill_rows = fetch_dispatch_planning_api_id($trip_title, $node->title, $dis_id);
+          $bill_row_id = key($bill_rows);
+          if (!empty($trip_node)) {
             // if res_status == undeliver then update delivery_pending flag = 1
             if (!empty(($bill_rows[$bill_row_id]))) {
-                    update_farery_delivery_pending_flag($node->title,$trip_id,$dis_id,$dp_reason);
+              update_farery_delivery_pending_flag($node->title, $trip_title, $dis_id, $dp_reason);
             }
-           //if res_status == blank then return_qty = dispatch_qty no entry for this bill in farey so update return qty
-           else {
-                 update_farery_bill_status($node->title,$trip_id,$dis_id,$dp_reason);
-                 $bill_row_id = update_dp_return_qty($bill_row_id) ;
-           }
-       }
+            //if res_status == blank then return_qty = dispatch_qty no entry for this bill in farey so update return qty
+            else {
+              update_farery_bill_status($node->title, $trip_title, $dis_id, $dp_reason);
+              $bill_row_id = update_dp_return_qty($bill_row_id);
+            }
+          }
+
+          $node->field_delivery_pending[LANGUAGE_NONE][0]['value'] = 1;
+          $node->field_previous_trip[LANGUAGE_NONE][0]['value'] = $trip_title;
+          unset($node->field_trip_id_reference[LANGUAGE_NONE]);
+          unset($node->field_dispatch_n_value[LANGUAGE_NONE]);
+          unset($node->field_bill_sequence[LANGUAGE_NONE]);
+          unset($node->field_drs_sequence[LANGUAGE_NONE]);
+          unset($node->field_deliver_n_value[LANGUAGE_NONE]);
+
+          unset($node->field_bill_status[LANGUAGE_NONE]); // Unseting Bill Status to NULL so that, bill number will available for Van Planning
+        }
+        else {
+          $node->field_delivery_pending = array();
+        }
+        node_save($node);
+      }
+      catch (Exception $ex) {
+        $transaction->rollback();
+        drupal_set_message("Something went wrong", 'error');
+      }
     }
   }
 
