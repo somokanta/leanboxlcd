@@ -2174,6 +2174,7 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
 //    }
   }
   if ($entity->feeds_item->id == 'hul_code_area_code_mapping') {
+    $entity->changetype = 'hul_code_area_code_mapping';
     $hul_code = $entity->title;
     $area_code = $item['area code'];
     $areacode_exist = check_hul_area_code_exist($area_code,$distributor_id);
