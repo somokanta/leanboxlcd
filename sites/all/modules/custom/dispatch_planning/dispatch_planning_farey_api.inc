@@ -182,7 +182,39 @@ function fetch_dispatch_planning_api_data($data) {
         $node->field_bill_status['und'][0]['value'] = $data['status'];
         node_save($node);
       }
+      
+      
+     /**
+       * New code for 
+       * Inarea_Reached_DateTime
+       * Inarea_Reached_Latitude
+       * Inarea_Reached_Longitude
+       */
+      $Inarea_Reached_DateTime = $data['Inarea_Reached_DateTime'];
+      $Inarea_Reached_Latitude = $data['Inarea_Reached_Latitude'];
+      $Inarea_Reached_Longitude = $data['Inarea_Reached_Longitude'];
+      if(!empty($Inarea_Reached_DateTime) || !empty($Inarea_Reached_Latitude) || !empty($Inarea_Reached_Longitude) ){
+        $trip_id = $data['jobData']['runsheet_number'];
         
+        $query = db_select('node', 'n');
+        $query->condition('n.title', $trip_id);
+        $query->condition('n.type', 'dispatch_data');
+        $query->condition('n.uid', $dis_id);
+        $query->fields('n', array('nid'));
+        $dispatch_data_nid = $query->execute()->fetchField();
+
+
+        $dispatch_node = node_load($dispatch_data_nid);
+        if(!empty($dispatch_node)){
+          $dispatch_node->field_inarea_reached_datetime['und'][0]['value'] = $Inarea_Reached_DateTime;
+          $dispatch_node->field_inarea_reached_latitude['und'][0]['value'] = $Inarea_Reached_Latitude;
+          $dispatch_node->field_inarea_reached_longitude['und'][0]['value'] = $Inarea_Reached_Longitude;
+          node_save($dispatch_node);
+        }
+      }
+      //END
+      
+      
       $results['flag'] = '1';
       $results['result'] = 'Data updated Sucessfully.';
       }else{
