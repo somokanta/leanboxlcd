@@ -175,7 +175,7 @@ function trip_short_excess_form_callback() {
     $query->fields('ad', array('dispatch_date'));
     $query->fields('ad', array('fieldExecutiveName'));
     $query->fields('vtt', array('total_cashier_cash_short'));
-    $query->addExpression("SUM(distinct(CASE WHEN dit.res_cashier_short != '' THEN dit.res_cashier_short*dit.tur END))", 'inventory_short_value');
+    $query->addExpression("SUM(CASE WHEN dit.res_cashier_short != '' THEN dit.res_cashier_short*dit.sum_net_sales_value END)", 'inventory_short_value');
     //$query->addExpression("SUM(distinct(CASE WHEN dit.res_cashier_short > 0 AND dit.res_cashier_short != '' THEN dit.res_cashier_short*dit.tur END))", 'inventory_short_value'); //formula changed (EARLIER: dit.res_cashier_short*dit.sum_net_sales_value)
    // $query->addExpression("SUM(distinct(eit.excess_qty * eit.tur))", 'total_excess_value'); //formula changed (EARLIER: eit.excess_qty * eit.mrp * 0.9)
 		//$query->addExpression("ROUND(SUM(distinct(CASE WHEN eit.tur != '' THEN (eit.excess_qty * eit.tur) ELSE (eit.excess_qty * eit.mrp * 0.9) END)),2)", 'total_excess_value');
@@ -183,7 +183,7 @@ function trip_short_excess_form_callback() {
    // $query->addExpression("SUM(distinct(CASE WHEN eit.credit_to_cashier = 1 THEN (eit.excess_qty * eit.tur) END))", 'excess_value_credited_to_cashier'); //formula changed (EARLIER: eit.excess_qty * eit.mrp * 0.9)
 		//$query->addExpression("SUM(distinct(CASE WHEN eit.credit_to_cashier = 1 AND  eit.tur != '' THEN (eit.excess_qty * eit.tur) ELSE (eit.excess_qty * eit.mrp * 0.9) END))", 'excess_value_credited_to_cashier');
 		
-		$query->addExpression("SUM(distinct(CASE WHEN dit.claimed_godown_short > 0 THEN(dit.claimed_godown_short * dit.tur) END))", 'pending_claimed_godown_short_value'); //formula changed (EARLIER: dit.claimed_godown_short * dit.sum_net_sales_value)
+		$query->addExpression("SUM(CASE WHEN dit.claimed_godown_short > 0 THEN(dit.claimed_godown_short * dit.sum_net_sales_value) END)", 'pending_claimed_godown_short_value'); //formula changed (EARLIER: dit.claimed_godown_short * dit.sum_net_sales_value)
 
     $query->groupBy('ad.runsheet_number');
     $res = $query->execute()->fetchAll();
