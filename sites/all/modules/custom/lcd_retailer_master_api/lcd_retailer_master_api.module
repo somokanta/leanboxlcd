@@ -81,16 +81,12 @@ function lcd_retailer_master_api_node_presave($node) {
             $api_data['sub_area_codes'] = $sub_area_codes_values;
         }
         $data = json_encode($api_data);
-
-        //dsm($node,'node');
-        // dsm($api_data);
         // $authorization = 'bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1ODgzOWY4ZjYyZmQyMzkzMGE4NjQwYjEiLCJpYXQiOjE1MDQ2Nzg4NTl9.AzJLVp6HDk6lbXCWxI1T8Y7US6R0panNjkY5B-pkdqg';
         $request_headers = array('Content-Type' => 'application/json', 'Authorization' => $authorization);
         $api_url = variable_get('retailer_api_master_url', 'http://dev-lak.leanbox.in/retailer_master/update_retailer_master_data');
-        //$api_url = variable_get('retailer_api_master_url', 'http://localhost/lak/web/retailer_master/update_retailer_master_data');
+        //$api_url = variable_get('retailer_api_master_url', 'http://192.168.4.244/21/lak/web/retailer_master/update_retailer_master_data');
         $api_options = array('headers' => $request_headers, 'method' => 'POST', 'data' => $data);
         $response_data = drupal_http_request($api_url, $api_options);
-        //dpm($response_data,'API RESPONSE');
         //$response_data = json_decode($response_data->data);
     }
 }
