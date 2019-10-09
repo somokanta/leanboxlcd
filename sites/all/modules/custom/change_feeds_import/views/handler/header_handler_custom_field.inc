@@ -76,8 +76,8 @@ class header_handler_custom_field extends views_handler_field {
       $cashier_name = $result['field_cashier_name_value'];
       $seq_method = $result['field_sequence_method_value'];
       
-      $total_distance = round($result['field_total_distance_value'],1);
-      $total_travel_time = round($result['field_total_travel_time_value'],1);
+      $total_distance = round($result['field_total_distance_value'],2);
+      $total_travel_time = round($result['field_total_travel_time_value'],2);
       if(!empty($total_travel_time)) {
         $hour_minute = explode('.',$total_travel_time);
         $hour = $hour_minute[0].'H';
