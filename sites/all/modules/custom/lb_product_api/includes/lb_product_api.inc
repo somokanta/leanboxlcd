@@ -43,6 +43,7 @@ function get_lb_product_api_data($data) {
         $node->field_lb_storage_type[LANGUAGE_NONE][0]['value'] = $val['field_storage_type'];
         $node->field_lb_subcategory[LANGUAGE_NONE][0]['value'] = $val['field_subcategory'];
         $node->field_lb_tester[LANGUAGE_NONE][0]['value'] = $val['field_tester'];
+        $node->field_lb_tester_ratio[LANGUAGE_NONE][0]['value'] = $val['field_tester_ratio'];
         $node->field_lb_uom[LANGUAGE_NONE][0]['value'] = $val['field_uom'];
         $node->field_lb_upc[LANGUAGE_NONE][0]['value'] = $val['field_upc'];
         $node->field_lb_volume[LANGUAGE_NONE][0]['value'] = $val['field_volume'];

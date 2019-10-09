@@ -2173,7 +2173,46 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
 //      $entity->feeds_item->skip = TRUE;
 //    }
   }
-  if ($entity->feeds_item->id == 'hul_code_master') {
+  if ($entity->feeds_item->id == 'hul_code_area_code_mapping') {
+    $hul_code = $entity->title;
+    $area_code = $item['area code'];
+    $areacode_exist = check_hul_area_code_exist($area_code,$distributor_id);
+    $existing_uid = check_hul_code_exist($title);
+    if (!empty($existing_uid) && ($existing_uid != $distributor_id)) {
+      drupal_set_message("Invalid HUL Code:$hul_code", 'error', FALSE);
+      $entity->feeds_item->skip = TRUE;
+    } 
+    if (empty($areacode_exist)) {
+        drupal_set_message("Area Code :$area_code does not exist.", 'error', FALSE);
+        $entity->feeds_item->skip = TRUE;
+    }
+  }
+  if ($entity->feeds_item->id == 'area_code_master') {
+        $area_code = trim($entity->title);
+        $nearby_area_code = trim($item['nearby area code']);
+        if ($area_code == $nearby_area_code) {
+            drupal_set_message("Area Code:$area_code and Nearby Area Code :$nearby_area_code can not be same. ", 'error', FALSE);
+            $entity->feeds_item->skip = TRUE;
+        }
+        else {
+            $near_by_areacode_nid = check_hul_area_code_exist($nearby_area_code, $distributor_id);
+            // Create nearby area code first
+            if (empty($near_by_areacode_nid) && !empty($nearby_area_code)) {
+                //drupal_set_message("Nearby Area Code :$nearby_area_code does not exist.Please create $nearby_area_code first. ", 'error', FALSE);
+                //$entity->feeds_item->skip = TRUE;
+                $node = new StdClass();
+                $node->type = 'area_code_master';
+                $node->status = 1;
+                $node->title = $nearby_area_code;
+                $node->language = '';
+                node_save($node);
+                if (!empty($node->nid)) {
+                    $entity->field_linked_area_code[LANGUAGE_NONE][0]['nid'] = $node->nid;
+                }
+            }
+        }
+    }
+    if ($entity->feeds_item->id == 'hul_code_master') {
     $title = $entity->title;
     $existing_uid = check_hul_code_exist($title);
     if (!empty($existing_uid) && ($existing_uid != $distributor_id)) {
@@ -2472,6 +2511,17 @@ function check_hul_code_exist($title) {
   $query->fields('n', array('uid'));
   $query->condition('n.title', $title);
   $results = $query->execute()->fetchField();
+  return $results;
+}
+function check_hul_area_code_exist($title,$distributor_id) {
+  if (!empty($title)) {
+    $query = db_select('node', 'n');
+    $query->condition('n.type', 'area_code_master');
+    $query->fields('n', array('title'));
+    $query->condition('n.title', $title);
+    $query->condition('n.uid', $distributor_id);
+    $results = $query->execute()->fetchField();
+  }
   return $results;
 }
 

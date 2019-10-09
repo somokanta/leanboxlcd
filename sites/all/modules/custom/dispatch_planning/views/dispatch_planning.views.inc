@@ -6015,6 +6015,14 @@ function dispatch_planning_views_data() {
       'is date' => TRUE,
     ),
   );
+  
+  $data['views']['field_total_travel_time'] = array(
+    'title' => t('Total Travel Time'),
+    'help' => t('Handler for Total Travel Time.'),
+    'field' => array(
+      'handler' => 'total_travel_time_handler',
+    ),
+  );
 
   return $data;
 }
