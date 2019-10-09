@@ -185,7 +185,7 @@ function fetch_dispatch_planning_api_data($data) {
       
       
      /**
-       * New code for 
+       * New code. Create below three field on dispatch data content type
        * Inarea_Reached_DateTime
        * Inarea_Reached_Latitude
        * Inarea_Reached_Longitude
