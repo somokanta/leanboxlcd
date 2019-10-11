@@ -3056,7 +3056,7 @@ function dispatch_planning_sales_reg_api($node, $trip_execution_date, $vehicle_n
   $bill_value = $node->field_bill_value[LANGUAGE_NONE][0]['value'];
   $party_code = $node->field_sales_party_code[LANGUAGE_NONE][0]['value'];
 //  $store_sequence = $node->field_drs_sequence[LANGUAGE_NONE][0]['value'];
-  $store_sequence = floor($node->field_bill_sequence[LANGUAGE_NONE][0]['value']*100)/100;
+  $store_sequence = number_format(floor($node->field_bill_sequence[LANGUAGE_NONE][0]['value']*100)/100, 2);
 
   $billing_data_details = $billing_data_details_insert = dispatch_planning_get_billing_data($node_uid, $bill_number);
   $outlet_data_details = dispatch_planning_get_outlet_data($node_uid, $party_code);
