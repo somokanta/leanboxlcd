@@ -213,6 +213,11 @@ function trip_undispatch_update_form_alter(&$form, &$form_state, $form_id) {
           form_set_error('form', 'Trip ID ' . $trip_id . ' has not been dispatched yet');
         }
     }
+
+    $bill_status = get_bill_status_from_trip($trip_id, $dis_id);
+    if ($bill_status) {
+      form_set_error('form', "Bill Status has been entered for bills in Trip ID: " . $trip_id);
+    }
   }
 } //end of fucntion
 
@@ -236,10 +241,10 @@ function del_app_undispatch_validate($form, &$form_state){
     form_set_error('form', t("Please enter Updated By for Trip ID: " . $trip_id));
   }
 
-  $bill_status = get_bill_status_from_trip($trip_id, $dis_id);
-  if ($bill_status) {
-    form_set_error('form', "Bill Status has been entered for bills in Trip ID: " . $trip_id);
-  }
+  // $bill_status = get_bill_status_from_trip($trip_id, $dis_id);
+  // if ($bill_status) {
+  //   form_set_error('form', "Bill Status has been entered for bills in Trip ID: " . $trip_id);
+  // }
   
   // Validation for Dispatched Assets.
   $query = db_select('node', 'n');
