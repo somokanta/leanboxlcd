@@ -1,0 +1,602 @@
+<?php
+
+// configuration form for API Url
+function trip_undispatch_update_menu() {
+  $items['admin/config/update-undispatch-apis-config'] = array(
+    'title' => 'Setting Form For Update Undispatch APIs Config',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('update_undispatch_config_form'),
+    'access callback' => 'check_if_fr_role_user_admin',
+  );
+  return $items;
+}
+
+/**
+ * Implements of hook_views_api().
+ */
+function trip_undispatch_update_views_api() {
+  return array(
+    'api' => 3,
+    'path' => drupal_get_path('module', 'trip_undispatch_update') . '/views'
+  );
+}
+
+function update_undispatch_config_form($form, $form_state) {
+  $form['update_api_url'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Update API URL'),
+    '#description' => t('Update API URL'),
+    '#default_value' => variable_get('update_api_url'),
+    '#required' => TRUE,
+  );
+  
+  $form['undispatch_api_url'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Undispatch API URL'),
+    '#description' => t('Undispatch API URL'),
+    '#default_value' => variable_get('undispatch_api_url'),
+    '#required' => TRUE,
+  );
+  
+  return system_settings_form($form);
+}
+
+function trip_undispatch_update_form_alter(&$form, &$form_state, $form_id) {
+  if($form['#view_name'] == 'delivery_app_update' && $form['#view_display_name'] == 'page_1'){
+    $form['#attached']['js'][] = drupal_get_path('module', 'mrc_inventory_returns') . '/js/fSelect.js';
+    $form['#attached']['css'][] = drupal_get_path('module', 'mrc_inventory_returns') . '/css/fSelect.css';
+    $form['#attached']['js'][] = drupal_get_path('module', 'deliverycost_calculation') . '/js/trip_dispatch_delivery_boy.js';
+    $form['#attached']['css'][] = drupal_get_path('module', 'deliverycost_calculation') . '/css/delivery_cost.css';
+
+    $trip_nid = $form['#entity_ids']['node'][0]; //key($form['node']); 
+    $trip_id = $form['node'][$trip_nid]['#entity']->title;
+    $confirm_status = $form['node'][$trip_nid]['#entity']->field_confirm_bill_edit_status['und'][0]['value'];
+
+    //$distributor_id = get_distributorid_of_trip($trip_id);
+    global $user;
+    $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+    $form_state['distributor_id'] = $distributor_id;
+
+    $form_state['trip_nid'] = $trip_nid;
+    $form_state['trip_id'] = $trip_id;
+    $form_state['confirm_status'] = $confirm_status;
+
+    $undispatch_trip_nid = $form['node'][$trip_nid]['#entity']->field_undispatch_trip_ref['und'][0]['nid'];
+    if(!empty($undispatch_trip_nid)){
+      $default_values_arr = get_default_values($undispatch_trip_nid, 'update');
+    }
+
+    $form['remark_textfield'] = array(
+      '#title' => 'Remark',
+      '#type' => 'textfield',
+      '#size' => 20,
+      '#default_value' => !empty($default_values_arr) ? $default_values_arr['remark'] : '',
+    );
+
+    $form['updated_by_dropdown'] = array(
+      '#title' => 'Updated By',
+      '#type' => 'select',
+      '#options' => array('' => '--Select--') + get_updated_by_drpdwn_values($distributor_id, 'Trip Update Incharge'),
+      '#default_value' => !empty($default_values_arr) ? $default_values_arr['updated_by'] : '',
+      //'#size' => 20,
+    );
+
+    $form['reason_by_dropdown'] = array(
+      '#title' => 'Reason',
+      '#type' => 'select',
+      '#options' => array('' => '--Select--') + get_all_reasons_for_update($distributor_id),
+      '#default_value' => !empty($default_values_arr) ? $default_values_arr['update_reason'] : '',
+     // '#size' => 10,
+    );
+
+    $form['actions']['submit'] = array(
+      '#type' => 'submit',
+      '#value' => 'Save',
+      '#validate' => array('del_app_update_validate'),
+      '#submit' => array('del_app_update_submit'),
+    );
+
+    $select = array('' => '- Select -');
+    $vehicle = get_all_vehicle_data();
+    $vehicle = $select + $vehicle;
+
+    $form['node'][$trip_nid]['field_cashier_name'][LANGUAGE_NONE][0]['value']['#type'] = 'select';
+    $form['node'][$trip_nid]['field_cashier_name'][LANGUAGE_NONE][0]['value']['#multiple'] = FALSE;
+    $form['node'][$trip_nid]['field_cashier_name'][LANGUAGE_NONE][0]['value']['#options'] = $select + get_updated_by_drpdwn_values($distributor_id, 'Cashier', 1);
+    $form['node'][$trip_nid]['field_cashier_name'][LANGUAGE_NONE][0]['value']['#size'] = 1;
+    $form['node'][$trip_nid]['field_cashier_name'][LANGUAGE_NONE][0]['value']['#required'] = TRUE;
+
+    // Not editable when dispatch start time already entered.
+    $form['node'][$trip_nid]['field_delivery_boy'][LANGUAGE_NONE]['#options'] = $select + get_updated_by_drpdwn_values($distributor_id, 'Delivery Boy');
+    $form['node'][$trip_nid]['field_delivery_boy'][LANGUAGE_NONE]['#multiple'] = true;
+    $form['node'][$trip_nid]['field_delivery_boy'][LANGUAGE_NONE]['#required'] = true;
+    $form['node'][$trip_nid]['field_delivery_boy'][LANGUAGE_NONE]['#attributes'] = array('class' => array('delivery_boy'));
+  }
+
+  else if($form['#view_name'] == 'delivery_app_update' && $form['#view_display_name'] == 'page_2'){
+    $form['#attached']['js'][] = drupal_get_path('module', 'dispatched_quantity_confirmation') . '/js/confirm_bill_editing_status.js';
+    $form['#attached']['css'][] = drupal_get_path('module', 'dispatched_quantity_confirmation') . '/css/dispatched_quantity_confirmation.css';
+
+    $trip_nid = $form['#entity_ids']['node'][0]; //key($form['node']); 
+    $trip_id = $form['node'][$trip_nid]['#entity']->title;
+    $confirm_status = $form['node'][$trip_nid]['#entity']->field_confirm_bill_edit_status['und'][0]['value'];
+    $undispatch_trip_nid = $form['node'][$trip_nid]['#entity']->field_undispatch_trip_ref['und'][0]['nid'];
+
+    global $user;
+    //$distributor_id = get_distributorid_of_trip($trip_id);
+    $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+    $form_state['distributor_id'] = $distributor_id;
+
+    $form_state['trip_nid'] = $trip_nid;
+    $form_state['trip_id'] = $trip_id;
+    $form_state['confirm_status'] = $confirm_status;
+    $form_state['undispatch_trip_nid'] = $undispatch_trip_nid;
+
+    if(!empty($undispatch_trip_nid)){
+      $default_values_arr = get_default_values($undispatch_trip_nid, 'undispatch');
+    }
+
+    $form['actions']['submit'] = array(
+      '#disabled' => 1,
+    );
+
+    $form['remark_textfield'] = array(
+      '#title' => 'Remark',
+      '#type' => 'textfield',
+      '#size' => 20,
+      '#default_value' => !empty($default_values_arr) ? $default_values_arr['remark'] : '',
+    );
+
+    $form['updated_by_dropdown'] = array(
+      '#title' => 'Updated By',
+      '#type' => 'select',
+      '#options' => array('' => '--Select--') + get_updated_by_drpdwn_values($distributor_id, 'Trip Update Incharge'),
+      '#default_value' => !empty($default_values_arr) ? $default_values_arr['updated_by'] : '',
+      //'#size' => 20,
+    );
+
+    $form['reason_by_dropdown'] = array(
+      '#title' => 'Reason',
+      '#type' => 'select',
+      '#options' => array('' => '--Select--') + get_all_reasons_for_update($distributor_id),
+      '#default_value' => !empty($default_values_arr) ? $default_values_arr['update_reason'] : '',
+     // '#size' => 10,
+    );
+
+    $form['final_submit'] = array(
+      '#type' => 'submit',
+      '#value' => t('Undispatch'),
+      '#validate' => array('del_app_undispatch_validate'),
+      '#submit' => array('del_app_ajax_submit'),
+    );
+
+    if ($form_state['delete_confirmation'] == 1) {
+      $form['data'] = array(
+        '#type' => 'markup',
+        '#prefix' => '<div id ="pop_up_bill_" class="pop-up_table" style="display:none;"><div class="popup_overlay"></div><div class="popup_wrap"><div class="pop_content"><div class="popup_border">'
+        . '<img sku_key="" class="close-pop-up-button" id="close_pop_up_bill_" src="sites/all/modules/custom/mrc_inventory_returns/images/close_btn.png">',
+        '#markup' => "Are you sure you want to Un-dispatch Trip ID ".$trip_id."?",
+      );
+      $form['yes'] = array(
+        '#type' => 'submit',
+        '#value' => 'Yes',
+        '#submit' => array('del_app_undispatch_submit'),
+        '#prefix' => '<div>',
+      );
+
+      $form['no'] = array(
+        '#type' => 'markup',
+        '#prefix' => '<input type = "button"  class="close-pop-up-button1 btn btn-default" value= "No">',
+        '#suffix' => '</div>'
+      );
+    }
+
+  } //end of elseif
+
+  if (arg(0) == 'delivery-app-update' && (arg(1) == 'view' || arg(1) == 'edit')) {
+    global $user;
+    $trip_id = $form_state['input']['title'];
+    $dis_id = change_feeds_import_get_distributor_id($user->uid);
+    //$dis_id = get_distributorid_of_trip($trip_id); //change_feeds_import_get_distributor_id($user->uid);
+    
+    if ($trip_id) {
+      $query = db_select('node', 'n');
+      $query->condition('n.title', $trip_id, '=');
+      $query->condition('n.uid', $dis_id, '=');
+      $query->condition('n.type', 'dispatch_data');
+      $query->condition('n.status', 1);
+      $query->leftjoin('field_data_field_dispatch_status', 'ds', 'ds.entity_id = n.nid');
+      $query->condition('ds.field_dispatch_status_value', 1);
+      $query->fields('n', array('nid'));
+      $result = $query->execute()->fetchField();
+        if (empty($result)) {
+          form_set_error('form', 'Trip ID ' . $trip_id . ' has not been dispatched yet');
+        }
+    }
+
+    $bill_status = get_bill_status_from_trip($trip_id, $dis_id);
+    if ($bill_status) {
+      form_set_error('form', "Bill Status has been entered for bills in Trip ID: " . $trip_id);
+    }
+  }
+} //end of fucntion
+
+function del_app_undispatch_validate($form, &$form_state){
+  $user_id = $GLOBALS['user']->uid;
+  $dis_id = $form_state['distributor_id']; //change_feeds_import_get_distributor_id($user_id);
+  $trip_id = $form_state['trip_id'];
+  $trip_nid = $form_state['trip_nid'];
+  $confirm_status = $form_state['confirm_status'];
+
+  $field_reason_for_update = $form_state['values']['reason_by_dropdown'];
+  $field_updated_by_resource = $form_state['values']['updated_by_dropdown'];
+
+  // if ($confirm_status != 1) { // not in MRC
+  //   form_set_error('form', t("Bill Confirmation status is not completed for trip: " . $trip_id));
+  // }
+  if (empty($field_reason_for_update)) {
+    form_set_error('form', t("Please enter the Reason for Update for Trip ID: " . $trip_id));
+  }
+  if (empty($field_updated_by_resource)) {
+    form_set_error('form', t("Please enter Updated By for Trip ID: " . $trip_id));
+  }
+
+  // $bill_status = get_bill_status_from_trip($trip_id, $dis_id);
+  // if ($bill_status) {
+  //   form_set_error('form', "Bill Status has been entered for bills in Trip ID: " . $trip_id);
+  // }
+  
+  // Validation for Dispatched Assets.
+  $query = db_select('node', 'n');
+  $query->condition('n.type', 'assets_count');
+  $query->condition('n.title', $trip_id);
+  $query->condition('n.uid', $dis_id);
+  $query->leftjoin('field_data_field_dispatch_count', 'dc', 'dc.entity_id = n.nid');
+  $query->addExpression("SUM(dc.field_dispatch_count_value)", 'total_dispatch_count_value');
+  $res = $query->execute()->fetchField();
+
+  if (strlen($res) == 0) {
+    $flag = 0;
+  }else{
+    $flag = 1;
+  }
+  if ($flag == 0) {
+    form_set_error('dispatch_count', 'Please enter Dispatched Assets for Trip ID ' . $trip_id);
+  }
+}
+
+
+function del_app_undispatch_submit($form, &$form_state){
+  global $user;
+  $distributor_id = $form_state['distributor_id']; //change_feeds_import_get_distributor_id($user->uid);
+  $rs_code = dispatch_planning_get_rscode_using_uid($user->uid);
+  $trip_id = $form_state['trip_id'];
+  $trip_nid = $form_state['trip_nid'];
+
+  //unset dispatch data fields
+  $node = node_load($trip_nid);
+  //dpm($node, 'NODE of trip data: ');
+  $node->field_dispatch_status['und'][0]['value'] = 0;
+
+  // check if undispatch_trip_ref field is empty or not - 
+  if(!empty($node->field_undispatch_trip_ref)){
+    $undispatch_trip_nid = $node->field_undispatch_trip_ref['und'][0]['nid'];
+    $undispatch_trip_node = node_load($undispatch_trip_nid);
+    //dpm($undispatch_trip_node, 'undispatch_trip_node: ');
+
+    $undispatch_trip_node->field_undispatch_updated_by['und'][0]['nid'] = trim($form_state['values']['updated_by_dropdown']);
+    $undispatch_trip_node->field_undispatch_reason['und'][0]['nid'] = trim($form_state['values']['reason_by_dropdown']);
+    $undispatch_trip_node->field_undispatch_remark['und'][0]['value'] = trim($form_state['values']['remark_textfield']);
+    $undispatch_trip_node->field_undispatch_updated_time['und'][0]['value'] = time();
+    node_save($undispatch_trip_node);
+  }else{
+    $nodeObj = new stdClass();
+    $nodeObj->title = $trip_id;
+    $nodeObj->type = "trip_undispatch_reasons";
+    $nodeObj->uid = $user->uid;
+    $nodeObj->status = 1;
+
+    $nodeObj->field_undispatch_updated_by['und'][0]['nid'] = trim($form_state['values']['updated_by_dropdown']);
+    $nodeObj->field_undispatch_reason['und'][0]['nid'] = trim($form_state['values']['reason_by_dropdown']);
+    $nodeObj->field_undispatch_remark['und'][0]['value'] = trim($form_state['values']['remark_textfield']);
+    $nodeObj->field_undispatch_updated_time['und'][0]['value'] = time();
+    $nodeObj = node_submit($nodeObj); // Prepare node for saving
+    node_save($nodeObj);
+    //dpm($nodeObj, 'New nodeObj: ');
+    if(!empty($nodeObj)){
+      $node->field_undispatch_trip_ref['und'][0]['nid'] = $nodeObj->nid;
+    }
+  }
+  //unsetting
+  unset($node->field_return_dispatch_supervisor['und']);
+  unset($node->field_cashier_name['und']);
+  unset($node->field_vehicle_no['und']);
+  unset($node->field_dispatch_loader_team_count['und']);
+  unset($node->field_dispatch_date['und']);
+  unset($node->field_dispatch_pre_start_time['und']);
+  unset($node->field_dispatch_start_time['und']);
+  unset($node->field_delivery_boy['und']);
+  node_save($node);
+    
+  //delete from del app table
+  $query = db_select('dispatch_planning_api_data', 'ad');
+  $query->fields('ad', array('id'));
+  $query->condition('ad.runsheet_number', $trip_id);
+  $query->condition('ad.distributor_id', $distributor_id);
+  $res = $query->execute()->fetchAllKeyed(0, 0);
+  if (!empty($res)) {
+    $num_deleted = db_delete('dispatch_planning_item_details')
+      ->condition('trip_bill_reference', $res, 'IN')
+      ->execute();
+    $num_deleted1 = db_delete('dispatch_planning_api_data')
+      ->condition('runsheet_number', $trip_id)
+      ->condition('id', $res)
+      ->execute();
+  }
+    
+  $bills = get_sales_reg_bills_from_trip_id($trip_id);
+  foreach ($bills as $val) {
+    $ref_no[] = $trip_id . '_' . $rs_code . '_' . $val;
+  }
+  $request_arr = array('jobType' => 'delivery','merchantCode' => 'marico','hub' => $rs_code,'runsheet_number' => $trip_id,'fieldExecutiveName' => '', 'dispatch_date' => '', 'array_delivery_boy' => '', 'type' => 'undispatch', 'referenceNo' => $ref_no);
+  $request_json = json_encode($request_arr);
+    //dpm($request_json);
+  $sql_ins_id = delivery_app_update_undispatch_api_log($request_json, $trip_id, 'undispatch', $distributor_id);
+  $request_headers = array('Content-Type' => 'application/json','Authorization' => 'Token 2972f506c41448cb3456c1c074aed6102183aff9');
+  $api_url = variable_get('undispatch_api_url', 'http://uat-mobilityapi.leanbox.in/utility/v1/updatetrip/');
+  $options = array('headers' => $request_headers, 'method' => 'POST', 'data' => $request_json);
+  $response_data = drupal_http_request($api_url, $options);
+  $response_data = $response_data->data;
+  delivery_app_update_undispatch_api_log_update($response_data, $sql_ins_id);
+  
+  drupal_set_message('Undispatched Trip ID'. $trip_id);
+  $form_state['redirect'] = array('delivery-app-update/edit');
+}
+
+function del_app_ajax_submit($form, &$form_state) {
+  $form_state['delete_confirmation'] = 1;
+	$form_state['rebuild'] = TRUE;
+}
+
+function del_app_update_validate($form, &$form_state){
+  $user_id = $GLOBALS['user']->uid;
+  $dis_id = $form_state['distributor_id']; //change_feeds_import_get_distributor_id($user_id);
+
+  $trip_id = $form_state['trip_id'];
+  $trip_nid = $form_state['trip_nid'];
+  $confirm_status = $form_state['confirm_status'];
+  $dispatch_date = trim($form_state['values']['node'][$trip_nid]['field_dispatch_date']['und'][0]['value']);
+  $field_updated_by_resource = trim($form_state['values']['updated_by_dropdown']);
+  $field_reason_for_update = trim($form_state['values']['reason_by_dropdown']);
+
+  // if ($confirm_status != 1) { // not in MRC
+  //   form_set_error('form', t("Bill Confirmation status is not completed for trip: " . $trip_id));
+  // }
+  if (empty($dispatch_date)) {
+    form_set_error('form', t("Please enter the Dispatch date for Trip ID: " . $trip_id));
+  }
+  if (empty($field_reason_for_update)) {
+    form_set_error('form', t("Please enter the Reason for Update for Trip ID: " . $trip_id));
+  }
+  if (empty($field_updated_by_resource)) {
+    form_set_error('form', t("Please enter Updated By for Trip ID: " . $trip_id));
+  }
+
+  // Validation for Dispatched Assets.
+  $query = db_select('node', 'n');
+  $query->condition('n.type', 'assets_count');
+  $query->condition('n.title', $trip_id);
+  $query->condition('n.uid', $dis_id);
+  $query->leftjoin('field_data_field_dispatch_count', 'dc', 'dc.entity_id = n.nid');
+  $query->addExpression("SUM(dc.field_dispatch_count_value)", 'total_dispatch_count_value');
+  $res = $query->execute()->fetchField();
+
+  if (strlen($res) == 0) {
+    $flag = 0;
+  }else{
+    $flag = 1;
+  }
+  if ($flag == 0) {
+    form_set_error('dispatch_count', 'Please enter Dispatched Assets for Trip ID ' . $trip_id);
+  }
+}
+
+function del_app_update_submit($form, &$form_state) {
+  //dpm($form_state, 'form_state: ');
+  global $user;
+  $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+  
+  $trip_id = $form_state['trip_id'];
+  $trip_nid = $form_state['trip_nid'];
+  $rs_code = dispatch_planning_get_rscode_using_uid($user->uid);
+  //$distributor_id = get_distributorid_of_trip($trip_id);
+  
+  //save the data
+  
+  $node = node_load($trip_nid); 
+  
+  //delivery boy changes
+  foreach ($form_state['values']['node'][$trip_nid]['field_delivery_boy']['und'] as $k => $v){
+    $del_boy_form_nids[] = $v['nid'];
+    $del_boy_node[] = $node->field_delivery_boy['und'][$k]['nid']; 
+  }
+  $result = array_diff($del_boy_form_nids, $del_boy_node);
+  if (!empty($result)) {
+    unset($node->field_delivery_boy[LANGUAGE_NONE]);
+    foreach ($form_state['values']['node'][$trip_nid]['field_delivery_boy']['und'] as $k => $v) {
+      $node->field_delivery_boy['und'][$k]['nid'] = $v['nid'];
+    }
+  }
+  $del_boys_str = get_resource_name_from_del_boy_nids($del_boy_form_nids);
+  $del_boys = explode(',', $del_boys_str);
+  //delivery boy changes
+  
+  $cashier_form = $form_state['values']['node'][$trip_nid]['field_cashier_name']['und'][0]['value'];
+  $dispatch_date_form =  $form_state['values']['node'][$trip_nid]['field_dispatch_date']['und'][0]['value'];
+  $dispatch_date = explode(" ", $dispatch_date_form);
+  $dis_date = $dispatch_date[0];
+  
+  $bills = get_sales_reg_bills_from_trip_id($trip_id);
+  foreach ($bills as $val){
+    $ref_no[] = $trip_id.'_'.$rs_code.'_'.$val;
+  }
+  //on change condition
+  if($node->field_cashier_name['und'][0]['value'] != $cashier_form || $node->field_dispatch_date['und'][0]['value'] != $dispatch_date_form  || !empty($result)){
+    $request_arr = array('jobType' => 'delivery','merchantCode' => 'marico','hub' => $rs_code,'runsheet_number' => $trip_id,'fieldExecutive' => $rs_code . '_' . $cashier_form,'fieldExecutiveName' => $cashier_form, 'dispatch_date' => $dis_date, 'array_delivery_boy' => $del_boys, 'type' => 'update', 'referenceNo' => $ref_no);
+    $request_json = json_encode($request_arr);
+
+    $sql_ins_id = delivery_app_update_undispatch_api_log($request_json, $trip_id, 'update', $distributor_id);
+    $request_headers = array('Content-Type' => 'application/json','Authorization' => 'Token 2972f506c41448cb3456c1c074aed6102183aff9');
+    $api_url = variable_get('update_api_url', 'http://uat-mobilityapi.leanbox.in/utility/v1/updatetrip/');
+    $options = array('headers' => $request_headers, 'method' => 'POST', 'data' => $request_json);
+    $response_data = drupal_http_request($api_url, $options);
+    $response_data = $response_data->data;
+    delivery_app_update_undispatch_api_log_update($response_data, $sql_ins_id);
+  } 
+  
+  $node->field_cashier_name['und'][0]['value'] = $form_state['values']['node'][$trip_nid]['field_cashier_name']['und'][0]['value'];
+  $node->field_dispatch_date['und'][0]['value'] = $form_state['values']['node'][$trip_nid]['field_dispatch_date']['und'][0]['value'];
+  //$node->field_remarks_used['und'][0]['value'] = $form_state['values']['node'][$trip_nid]['field_remarks_used']['und'][0]['value'];
+  
+  if(!empty($node->field_undispatch_trip_ref)){
+    $updated_trip_nid = $node->field_undispatch_trip_ref['und'][0]['nid'];
+    $updated_trip_node = node_load($updated_trip_nid);
+    //dpm($updated_trip_node, 'updated_trip_node: ');
+
+    $updated_trip_node->field_trip_updated_by['und'][0]['nid'] = trim($form_state['values']['updated_by_dropdown']);
+    $updated_trip_node->field_trip_update_reason['und'][0]['nid'] = trim($form_state['values']['reason_by_dropdown']);
+    $updated_trip_node->field_trip_update_remark['und'][0]['value'] = trim($form_state['values']['remark_textfield']);
+    $updated_trip_node->field_trip_updated_time['und'][0]['value'] = time();
+    node_save($updated_trip_node);
+  }else{
+    $nodeObj = new stdClass();
+    $nodeObj->title = $trip_id;
+    $nodeObj->type = "trip_undispatch_reasons";
+    $nodeObj->uid = $user->uid;
+    $nodeObj->status = 1;
+
+    $nodeObj->field_trip_updated_by['und'][0]['nid'] = trim($form_state['values']['updated_by_dropdown']);
+    $nodeObj->field_trip_update_reason['und'][0]['nid'] = trim($form_state['values']['reason_by_dropdown']);
+    $nodeObj->field_trip_update_remark['und'][0]['value'] = trim($form_state['values']['remark_textfield']);
+    $nodeObj->field_trip_updated_time['und'][0]['value'] = time();
+    $nodeObj = node_submit($nodeObj); // Prepare node for saving
+    node_save($nodeObj);
+    //dpm($nodeObj, 'New nodeObj: ');
+    if(!empty($nodeObj)){
+      $node->field_undispatch_trip_ref['und'][0]['nid'] = $nodeObj->nid;
+    }
+  }
+
+  node_save($node); 
+  drupal_set_message('Updated Trip ID '. $trip_id);
+}
+
+
+function get_default_values($undispatch_trip_nid, $which_screen){
+  $default_values_arr = array();
+  if(!empty($undispatch_trip_nid)){
+    $node_data = node_load($undispatch_trip_nid);
+    if($which_screen == 'update'){
+      $default_values_arr['remark'] = $node_data->field_trip_update_remark['und'][0]['value'];
+      $default_values_arr['updated_by'] = $node_data->field_trip_updated_by['und'][0]['nid'];
+      $default_values_arr['update_reason'] = $node_data->field_trip_update_reason['und'][0]['nid'];
+    }
+    else if($which_screen == 'undispatch'){
+      $default_values_arr['remark'] = $node_data->field_undispatch_remark['und'][0]['value'];
+      $default_values_arr['updated_by'] = $node_data->field_undispatch_updated_by['und'][0]['nid'];
+      $default_values_arr['update_reason'] = $node_data->field_undispatch_reason['und'][0]['nid'];
+    }
+  }
+  return $default_values_arr;
+}
+
+function get_updated_by_drpdwn_values($distributor_id, $resource_type = null, $cashier_flag = 0) {
+  $query = db_select('node', 'n');
+  $query->condition('n.type', 'resource_master');
+  $query->condition('n.uid', $distributor_id); //$query->condition('n.uid', $central_distributor_id);
+  $query->join('field_data_field_resource_type', 'rt', 'rt.entity_id = n.nid');
+  if (!empty($resource_type)) {
+    $query->condition('rt.field_resource_type_value', $resource_type);
+  }
+  $query->join('field_data_field_resource_name', 'rn', 'rn.entity_id = n.nid');
+  // $query->join('field_data_field_is_active', 'is_active', 'is_active.entity_id = n.nid');
+  // $query->condition('is_active.field_is_active_value', 1);
+  if ($cashier_flag == 1) {
+    //$query->fields('n', array('title'));
+    $query->fields('rn', array('field_resource_name_value'));
+    $result = $query->execute()->fetchAllKeyed(0, 0);
+  }
+  else {
+    $query->fields('n', array('nid', 'title'));
+    $result = $query->execute()->fetchAllKeyed(0, 1);
+  }
+  //$query->fields('rn', array('field_resource_name_value'));
+  return $result;
+}
+
+
+function get_all_reasons_for_update($distributor_id) {
+  $query = db_select('node', 'n');
+  $query->condition('n.type', 'reason_for_update_master');
+  $query->condition('n.uid', $distributor_id);
+  $query->fields('n', array('nid', 'title'));
+  $result = $query->execute()->fetchAllKeyed(0, 1);
+  return $result;
+}
+
+function get_resource_name_from_del_boy_nids($del_boy_nids) {
+  if (!empty($del_boy_nids)) {
+    $query = db_select('field_data_field_delivery_boy', 'db');
+    $query->condition('db.field_delivery_boy_nid', $del_boy_nids, 'IN');
+    $query->leftjoin('node', 'n', 'db.field_delivery_boy_nid = n.nid');
+    $query->leftjoin('field_data_field_resource_name', 'res', 'res.entity_id = n.nid');
+    $query->addExpression('GROUP_CONCAT(DISTINCT res.field_resource_name_value)', 'delivery_boys');
+    $res = $query->execute()->fetchField();
+    return $res;
+  }
+}
+
+function get_sales_reg_bills_from_trip_id($trip_id){
+  $query = db_select('node', 'n');
+  $query->condition('n.title', $trip_id);
+  $query->condition('n.type', 'dispatch_data');
+  $query->join('field_data_field_trip_id_reference', 'ft', 'ft.field_trip_id_reference_nid = n.nid');
+  $query->join('node', 'n1', 'ft.entity_id = n1.nid');
+  $query->fields('n1', array('title'));
+  $query->addTag('node_distributor_access');
+  $res = $query->execute()->fetchCol();
+  return $res;
+}
+
+function delivery_app_update_undispatch_api_log($json_api_data, $trip_id, $api_type, $dis_id) {
+  $sql_ins_id = db_insert('delivery_app_update_undispatch_api_log')
+    ->fields(array(
+      'trip_id' => $trip_id,
+      'distributor_id' => $dis_id,
+      'request_data' => $json_api_data,
+      'api_type' => $api_type, // pass vraiable defined in oxigen wallet configuratation form
+      'request_time' => time(),
+    ))
+    ->execute();
+  return $sql_ins_id;
+}
+
+function delivery_app_update_undispatch_api_log_update($response_data, $sql_ins_id) {
+  db_update('delivery_app_update_undispatch_api_log')
+    ->fields(array(
+      'response_data' => $response_data,
+    ))
+    ->condition('id', $sql_ins_id, '=')
+    ->execute();
+}
+
+function get_bill_status_from_trip($trip_id, $distributor_id) {
+  $query = db_select('dispatch_planning_api_data', 'dpi');
+  $query->condition('dpi.distributor_id', $distributor_id, '=');
+  $query->condition('dpi.runsheet_number', $trip_id, '=');
+  $query->isNotNull('dpi.res_status');
+  $query->condition('dpi.res_status', '', '!=');
+  $query->fields('dpi', array('res_status'));
+  $res = $query->execute()->fetchField();
+  return $res;
+}
