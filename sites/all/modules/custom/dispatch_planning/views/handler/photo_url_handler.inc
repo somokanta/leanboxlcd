@@ -75,8 +75,10 @@ class photo_url_handler extends views_handler_field {
         $bill_photo .= '</a>';
       }
     }
-
-    return $bill_photo;
+    if ($data->dispatch_planning_api_data_res_status == 'undeliver') {
+            $bill_photo = '';
+    }
+        return $bill_photo;
   }
 
 }
