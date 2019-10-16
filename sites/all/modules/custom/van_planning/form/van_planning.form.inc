@@ -2488,6 +2488,7 @@ function _create_van_submit($form, &$form_state) {
         $dispatch_bill_value = $query->execute()->fetchField();
         
         // dispatch_data node creation
+        $parkstop_count = (int) max(array_column($disp_planning[$van]['bill_array'], 'park_seq'));
         $node1 = new stdClass();
         $node1->title = $trip_id;
         $node1->type = "dispatch_data";
@@ -2508,6 +2509,7 @@ function _create_van_submit($form, &$form_state) {
         $node1->field_trip_creation_date[LANGUAGE_NONE][0]['value'] = strtotime(date('Y/m/d 00:00:00'));
         $node1->field_trip_executon_date[LANGUAGE_NONE][0]['value'] = $trip_execution_date;
         $node1->field_hht_id[LANGUAGE_NONE][0]['nid'] = get_nid_from_hht_id($val1['hht_id_list']);
+        $node1->field_parkstop_count[LANGUAGE_NONE][0]['value'] = $parkstop_count;
 
         if (!empty($form_state['time_dist'][$van]['dist']) && !empty($form_state['time_dist'][$van]['time'])) {
           $node1->field_sequence_method[LANGUAGE_NONE][0]['value'] = 1; // api
