@@ -19,7 +19,7 @@ function get_lb_product_api_data($data) {
           node_object_prepare($node); // Sets some defaults. Invokes hook_prepare() and hook_node_prepare().
           $node->language = LANGUAGE_NONE; // Or e.g. 'en' if locale is enabled
           $node->uid = 23466;
-          $node->status = 1; //(1 or 0): published or not
+          $node->status = $val['status']; //(1 or 0): published or not
           $node->comment = 0; // 0 = comments disabled, 1 = read only, 2 = read/write
         }
         else {
@@ -43,12 +43,14 @@ function get_lb_product_api_data($data) {
         $node->field_lb_storage_type[LANGUAGE_NONE][0]['value'] = $val['field_storage_type'];
         $node->field_lb_subcategory[LANGUAGE_NONE][0]['value'] = $val['field_subcategory'];
         $node->field_lb_tester[LANGUAGE_NONE][0]['value'] = $val['field_tester'];
+        $node->field_lb_tester_ratio[LANGUAGE_NONE][0]['value'] = $val['field_tester_ratio'];
         $node->field_lb_uom[LANGUAGE_NONE][0]['value'] = $val['field_uom'];
         $node->field_lb_upc[LANGUAGE_NONE][0]['value'] = $val['field_upc'];
         $node->field_lb_volume[LANGUAGE_NONE][0]['value'] = $val['field_volume'];
         $node->field_lb_weight[LANGUAGE_NONE][0]['value'] = $val['field_weight'];
         $node->field_lb_sub_brand[LANGUAGE_NONE][0]['value'] = $val['field_sub_brand1'];
         $node->field_icld_ean[LANGUAGE_NONE][0]['value'] = $val['field_icld_ean'];
+        $node->status = $val['status']; 
         node_save($node);       
       }catch (Exception $ex) {
         watchdog('lb product master api error', '<pre>' . print_r($ex->getMessage(), TRUE) . '</pre>');
