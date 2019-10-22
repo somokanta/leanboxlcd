@@ -4189,3 +4189,47 @@ function get_nid_of_resource($updated_by_name) {
   $result = $query->execute()->fetchField();
   return $result;
 }
+
+function update_parkstop_count($distributor_id) {
+    if (!empty($distributor_id)) {
+        $transaction = db_transaction();
+            $query = db_select('node', 'n');
+            $query->condition('n.type', 'dispatch_data');
+            $query->condition('n.uid', $distributor_id);
+            $query->join('field_data_field_delivery_boy_count', 'dboy_cnt', 'dboy_cnt.entity_id = n.nid');
+            $query->condition('api_log.distributor_id', $distributor_id);
+            $query->join('parkstop_api_log', 'api_log', 'api_log.trip_id = n.title');
+            $query->fields('api_log', array('trip_id', 'api_response'));
+            $parkstop_data = $query->execute()->fetchAllKeyed(0, 1);
+            foreach ($parkstop_data as $trip_id => $api_response) {
+                $res_decode = json_decode($api_response);
+                $stops = $res_decode->Van;
+                $n = $p = 0;
+                $seq = array();
+                foreach ($stops as $key => $value) {
+                    $bills = $value->OptimalStop;
+                    $c = 0;
+                    if (array_key_exists($bills, $seq) === FALSE) {//ignor if present at other place
+                        $seq[$bills]['park_seq'] = ++$p . '.' . str_pad($c, 2, 0, STR_PAD_LEFT); //handle till .99
+                        $seq[$bills]['sequence'] = ++$n;
+                    }
+                    $completion_time = $value->ApproxCompletionTime;
+                    $clusterStops = $completion_time[$delivery_boy - 2]->ClusterStops;
+                    foreach ($clusterStops as $child => $v2) {
+                        $child_bills = $v2->ChildStop;
+                        if (array_key_exists($child_bills, $seq) === FALSE) {//ignor if present at other place
+                            $seq[$child_bills]['park_seq'] = $p . '.' . str_pad( ++$c, 2, 0, STR_PAD_LEFT);
+                            $seq[$child_bills]['sequence'] = ++$n;
+                        }
+                    }
+                }
+                $parkstop_count = $p;
+                $nodes = node_load_multiple(NULL, array("title" => $trip_id, 'type' => 'dispatch_data', 'uid' => $distributor_id));
+                $node = current($nodes);
+                $node->field_parkstop_count[LANGUAGE_NONE][0]['value'] = $parkstop_count;
+                node_save($node);
+            }
+        
+        
+    }
+}
