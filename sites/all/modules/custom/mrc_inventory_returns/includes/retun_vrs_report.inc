@@ -103,7 +103,7 @@ function return_vrs_callback() {
   
   $query = db_select('dispatch_planning_api_data', 'ad');
   $query->condition('ad.distributor_id', $distributor_id, '=');
-  //$query->condition('ad.updated_flag', 1, '=');
+  $query->condition('ad.delivery_pending_flag', 1, '!=');
   if (!empty($trip_id)) {
     $query->condition('ad.runsheet_number', $trip_id, '=');
   }
