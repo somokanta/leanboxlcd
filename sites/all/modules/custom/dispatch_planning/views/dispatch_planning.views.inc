@@ -3970,6 +3970,17 @@ function dispatch_planning_views_data() {
         'handler' => 'views_handler_argument_string',
       ),
     );
+      
+      
+        // proof of undelivery handler
+    
+    $data['views']['proof_of_undelivery'] = array(
+      'title' => t('Photo of Proof of Undelivery'),
+      'help' => t('Photo of Proof of Undelivery handler.'),
+      'field' => array(
+        'handler' => 'proof_of_undelivery_handler',
+      ),
+    );
 
   //Dispatch Panning API Log
   $data['dispatch_planning_item_details']['table'] = array(
