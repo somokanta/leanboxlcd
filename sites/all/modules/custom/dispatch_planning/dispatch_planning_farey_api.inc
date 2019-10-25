@@ -40,6 +40,13 @@ function fetch_dispatch_planning_api_data($data) {
                 $money_collect = str_replace("&", ",", $data['fieldData']['money_collect3']);
             }
         }
+        if (isset($data['fieldData']['proof_of_undelivery'])) {
+            if (is_array($data['fieldData']['proof_of_undelivery'])) {
+                $proof_of_undelivery = implode(",", $data['fieldData']['proof_of_undelivery']);
+          } else {
+                $money_collect = str_replace("&", ",", $data['fieldData']['proof_of_undelivery']);
+            }
+      }
       $updated_bill_row_id = db_update('dispatch_planning_api_data') // Table name no longer needs {}
           ->fields(array(
             'res_runsheetNo' => isset($data['runsheetNo']) ? $data['runsheetNo'] : '',
@@ -82,6 +89,7 @@ function fetch_dispatch_planning_api_data($data) {
             'photo_of_signed_bill_partial' => isset($data['fieldData']['photo_of_signed_bill_partial']) ? $data['fieldData']['photo_of_signed_bill_partial'] : '',
             'res_cheque_no' => isset($data['fieldData']['cheque_no']) ? $data['fieldData']['cheque_no'] : 'NA',
             'res_delivery_boy' => isset($data['fieldData']['delivery_b']['delivery_boy_value']) ? $data['fieldData']['delivery_b']['delivery_boy_value'] : '',
+            'res_proof_of_undelivery' => !empty($proof_of_undelivery) ? $proof_of_undelivery : '',
             'updated_flag' => 2,
             'updated_time' => REQUEST_TIME,  
             'res_updated_time' => REQUEST_TIME,
