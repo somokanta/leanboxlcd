@@ -1,0 +1,4 @@
+name = LCD Retailer Master Api
+description = This Module push any changes in hul code master,outlet master to D8 System
+package = Custom
+core = 7.x
