@@ -2930,8 +2930,13 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
   // Store distributor id in author in each node
   $distributor_id = change_feeds_import_get_distributor_id($user->uid);
 
+  // This view will be visible to all authenticated user in the sytem
   $all_views_names = variable_get('views_name');
+  // area-code-master,product-sub-category-master,sku-cp-view,brand-master-report,bank-master-download,non-bankable-reason-master,cancel-discard-reason-master,reason-for-update,sku7-code-master-report,product-category-master,sku7-ean-and-mrp,product-sub-division,pdd-master,notes-denominations-download,short-reason-master,non-bankable-reason-master,handover-master
+  $admin_view_names = variable_get('admin_views');
   $views_array = explode(",", $all_views_names);
+  $admin_views = explode(",", $admin_view_names);
+
 //  $views_array = array('central_bill_trip', 'channel_master_central_report' , 
 //    'central_picking_report' ,  'central_party_pack_report',  'central_unloading_form', 
 //    'central_mobile_return_analysis', 'user_manual',  'hul_impact_delete', 'impact_delivery_cron_2', 
@@ -2939,7 +2944,8 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
 //    'hul_code_distributor_wise', 'van_stop_master_report', 'update_sales_register_party_code',
 //    'central_outlet_master_report', 'central_party_pack_master_report','ofd_mailer','ofd_mailer2');
 
-  if (!in_array($view->name, $views_array)) {
+  //&& !in_array($view->name,$admin_views)
+  if (!in_array($view->name, $views_array) ) {
     foreach ($query->table_queue as $key => $val) {
       if (($val['table'] == 'node')) {
         if (empty($val['join'])) {
@@ -2968,6 +2974,11 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
       }
     }
   }
+  $distributor_views = array('parkstop_api_log','dispatch_planning_api_log','dispatch_planning_api_data');
+  if (in_array($view->base_table,$distributor_views)) {
+       $query->add_where(0, "$view->base_table.distributor_id", $distributor_id, '=');
+  }
+  
   if ($view->base_table == 'custom_billing_data' && ($view->name != 'impact_delivery_cron_2') && ($view->name != 'impact_delivery_cron_evening_2')) {
     $query->add_where(0, 'custom_billing_data.distributor_id', $distributor_id, '=');
   }
