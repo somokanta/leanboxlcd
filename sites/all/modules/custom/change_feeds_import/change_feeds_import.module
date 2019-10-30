@@ -2982,7 +2982,7 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
       }
     }
   }
-  $distributor_views = array('parkstop_api_log','dispatch_planning_api_log','dispatch_planning_api_data');
+  $distributor_views = array('parkstop_api_log','dispatch_planning_api_log','dispatch_planning_api_data','sms_integration_api_log');
   if (in_array($view->base_table,$distributor_views)) {
        $query->add_where(0, "$view->base_table.distributor_id", $distributor_id, '=');
   }
