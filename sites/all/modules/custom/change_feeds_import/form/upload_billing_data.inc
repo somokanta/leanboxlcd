@@ -648,7 +648,6 @@ function get_node_titles($type) {
   $query1->condition('n.type', $type, 'IN');
   $query1->condition('n.created', $time, '>');
   $query1->fields('n', array('type', 'title'));
-  if (!in_array())
   $query1->addTag('node_uid');
   $titles = $query1->execute()->fetchAll();
   foreach ($titles as $k => $v) {
