@@ -4033,6 +4033,7 @@ function _get_bank_names($string) {
     $query->condition('n.title', '%' . db_like($string) . '%', 'LIKE');
     $query->condition('n.status', 1); // publish
     $query->fields('n', array('title'));
+    $query->addTag('node_distributor_access');
     $bank_names = $query->execute()->fetchAllKeyed(0, 0);
   }
   print json_encode($bank_names);
