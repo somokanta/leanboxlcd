@@ -2565,11 +2565,19 @@ function check_sub_putaway_group_exist($title, $distributor_id) {
  * @param text $content_type
  */
 function modify_views_forms_master_feed_validate($feed_title, $content_type) {
+  /* Distributor ID condition not required in 
+'channel_master'
+'pl_group_master'  
+   * *
+   */
+  $system_level_content_types = array('channel_master','pl_group_master');  
   $query = db_select('node', 'n');
   $query->fields('n', array('title'));
   $query->condition('n.type', $content_type);
   $query->condition('n.title', $feed_title);
-  $query->addTag('node_uid');
+  if (!in_array($content_type,$system_level_content_types)) {
+    $query->addTag('node_uid');
+  }
   $result = $query->execute()->fetchField();
   return $result;
 }

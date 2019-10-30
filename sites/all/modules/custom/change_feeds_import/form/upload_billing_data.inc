@@ -640,6 +640,7 @@ function get_csv_file_header() {
  */
 function get_node_titles($type) {
   
+  //$system_level_content_types = array('pricelist_group_master', 'product_division_master');
   $time = strtotime('-30 days');  // last 1 month
   $type = array('sales_register_data');
   
@@ -647,17 +648,19 @@ function get_node_titles($type) {
   $query1->condition('n.type', $type, 'IN');
   $query1->condition('n.created', $time, '>');
   $query1->fields('n', array('type', 'title'));
+  if (!in_array())
   $query1->addTag('node_uid');
   $titles = $query1->execute()->fetchAll();
   foreach ($titles as $k => $v) {
     $result[$v->type][$v->title] = $v->title;
   }
   
+  // these are system level content type not required distributor id condition
   $type = array('pricelist_group_master', 'product_division_master');
   $query1 = db_select('node', 'n');
   $query1->condition('n.type', $type, 'IN');
   $query1->fields('n', array('type', 'title'));
-  $query1->addTag('node_uid');
+  //$query1->addTag('node_uid');
   $titles = $query1->execute()->fetchAll();
   foreach ($titles as $k => $v) {
     $result[$v->type][$v->title] = $v->title;
