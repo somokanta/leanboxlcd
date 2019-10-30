@@ -680,7 +680,8 @@ function outlet_working_hours_submit($form, &$form_state) {
             'days' => $value,
             'from_time' => $from_field_val,
             'to_time' => $to_field_val,
-            'updated_time' => time()
+            'updated_time' => time(),
+            'distributor_id'=>$distributor_id,    
           ));
           $insert->execute();
       }
@@ -691,7 +692,8 @@ function outlet_working_hours_submit($form, &$form_state) {
             'days' => $value,
             'from_time' => 'Closed',
             'to_time' => 'Closed',
-            'updated_time' => time()
+            'updated_time' => time(),
+            'distributor_id'=>$distributor_id,        
           ));
           $insert->execute();
       }  
@@ -714,7 +716,8 @@ function outlet_working_hours_submit($form, &$form_state) {
               'special_days' => $special_date,
               'from_time' => $specialfromtime,
               'to_time' => $specialtotime,
-              'updated_time' => time()
+              'updated_time' => time(),
+              'distributor_id'=>$distributor_id,        
             ));
             $insert->execute();
         }else if ($form_state['values']['special_field_container'][$spe_field_key]['special_outlet_checkbox'] == 0) {
@@ -724,7 +727,8 @@ function outlet_working_hours_submit($form, &$form_state) {
               'special_days' => $special_date,
               'from_time' => 'Closed',
               'to_time' => 'Closed',
-              'updated_time' => time()
+              'updated_time' => time(),
+              'distributor_id'=>$distributor_id,        
             ));
             $insert->execute();
         }   

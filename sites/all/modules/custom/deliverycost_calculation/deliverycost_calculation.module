@@ -1175,7 +1175,7 @@ function get_all_resource_types() {
   $distributor_id = change_feeds_import_get_distributor_id($user->uid);
   $query = db_select('node', 'n');
   $query->condition('n.type', 'resource_type');
-  $query->condition('n.uid', $distributor_id);
+  //$query->condition('n.uid', $distributor_id);
   $query->fields('n', array('title'));
   $result = $query->execute()->fetchAllKeyed(0, 0);
   return $result;
