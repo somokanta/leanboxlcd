@@ -102,6 +102,7 @@ function create_sku7code_master($val = array()) {
         $node->uid = 1;
         $node->status = $val['status']; //(1 or 0): published or not
         $node->field_unit_case_units_[LANGUAGE_NONE][0]['value'] = $val['field_upc'];
+        $node->field_product_name[LANGUAGE_NONE][0]['value'] = $val['field_lb_sku_product_name'];
         $node->comment = 0; // 0 = comments disabled, 1 = read only, 2 = read/write
         $brand_nid = get_nid_from_title($val['field_brand'], 'brand_master');
         $sucate_nid = get_nid_from_title($val['field_subcategory'], 'product_sub_category_master');
