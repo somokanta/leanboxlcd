@@ -6,8 +6,8 @@
  * and open the template in the editor.
  */
 
-function update_crate_id_data($outlet_order_ref, $crate_id, $order_date,$party_name,$facility_code) {
-   $distributor_id = get_distributor_id_of_outlet($party_name); 
+function update_crate_id_data($outlet_order_ref, $crate_id, $order_date,$party_name,$facility_code,$distributor_id) {
+   //$distributor_id = get_distributor_id_of_outlet($party_name); 
    $result = db_merge('outlet_order_crate')
     ->key(array('outlet_order_no' => $outlet_order_ref))
     ->fields(array(
