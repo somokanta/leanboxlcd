@@ -3951,6 +3951,64 @@ function dispatch_planning_views_data() {
     ),
   );
 
+  // ============== change
+
+  $data['dispatch_planning_api_data']['rev_geocode_area'] = array(
+    'title' => t('DP rev_geocode_area'),
+    'help' => t('Dispatch Planning rev_geocode_area'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+
+  $data['dispatch_planning_api_data']['rev_geocode_sub_area'] = array(
+    'title' => t('DP rev_geocode_sub_area'),
+    'help' => t('Dispatch Planning rev_geocode_sub_area'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+
+  $data['dispatch_planning_api_data']['rev_geocode_street'] = array(
+    'title' => t('DP rev_geocode_street'),
+    'help' => t('Dispatch Planning rev_geocode_street'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+
+  // ============== change
+
   //Dispatch Panning API Log
   $data['dispatch_planning_item_details']['table'] = array(
     'group' => t('dispatch_planning_item_details lines'),
