@@ -84,6 +84,19 @@ function custom_order_box_id_views_data() {
       'handler' => 'views_handler_filter_string',
     ),
   );
+  $data['outlet_order_crate']['facility_code'] = array(
+    'title' => t('Facility Code'),
+    'help' => t('Facility Code'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+  );
   
   $data['outlet_order_crate']['created_time'] = array(
      'title' => t('Created Time'),
@@ -113,5 +126,18 @@ function custom_order_box_id_views_data() {
      //'skip base' => $base_table,
      ),
    );
+   $data['outlet_order_crate']['distributor_id'] = array(
+    'title' => t('distributor_id'),
+    'help' => t('The record distributor_id.'),
+    'field' => array(
+      'handler' => 'views_handler_field_numeric',
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_numeric',
+    ),
+  );
   return $data;
 }

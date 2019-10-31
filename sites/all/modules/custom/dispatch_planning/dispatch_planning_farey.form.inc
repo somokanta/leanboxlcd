@@ -229,8 +229,10 @@ function _edit_trip_delivered_callback_form($form, &$form_state) {
         // check trip if it is VRS Confirmed
         $trip_detail = check_trip_id_exists_or_not($distributor_id, $trip_number);
         $vrs_status = $trip_detail->field_vrs_status_value;
-        
-        if($vrs_status == 0) {
+        if(empty($vrs_status) && $vrs_status!=0) {
+            drupal_set_message(t("Invalid Trip ID:$trip_number"), 'error');
+        }
+        else if($vrs_status === 0) {
            drupal_set_message(t('You cannot edit because this trip is Delivery confirmation done.'), 'error');
         }
         else if($vrs_status == 1) {

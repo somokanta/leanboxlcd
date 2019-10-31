@@ -2565,11 +2565,19 @@ function check_sub_putaway_group_exist($title, $distributor_id) {
  * @param text $content_type
  */
 function modify_views_forms_master_feed_validate($feed_title, $content_type) {
+  /* Distributor ID condition not required in 
+'channel_master'
+'pl_group_master'  
+   * *
+   */
+  $system_level_content_types = array('channel_master','pl_group_master');  
   $query = db_select('node', 'n');
   $query->fields('n', array('title'));
   $query->condition('n.type', $content_type);
   $query->condition('n.title', $feed_title);
-  $query->addTag('node_uid');
+  if (!in_array($content_type,$system_level_content_types)) {
+    $query->addTag('node_uid');
+  }
   $result = $query->execute()->fetchField();
   return $result;
 }
@@ -2930,8 +2938,13 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
   // Store distributor id in author in each node
   $distributor_id = change_feeds_import_get_distributor_id($user->uid);
 
+  // This view will be visible to all authenticated user in the sytem
   $all_views_names = variable_get('views_name');
+  // area-code-master,product-sub-category-master,sku-cp-view,brand-master-report,bank-master-download,non-bankable-reason-master,cancel-discard-reason-master,reason-for-update,sku7-code-master-report,product-category-master,sku7-ean-and-mrp,product-sub-division,pdd-master,notes-denominations-download,short-reason-master,non-bankable-reason-master,handover-master
+  $admin_view_names = variable_get('admin_views');
   $views_array = explode(",", $all_views_names);
+  $admin_views = explode(",", $admin_view_names);
+
 //  $views_array = array('central_bill_trip', 'channel_master_central_report' , 
 //    'central_picking_report' ,  'central_party_pack_report',  'central_unloading_form', 
 //    'central_mobile_return_analysis', 'user_manual',  'hul_impact_delete', 'impact_delivery_cron_2', 
@@ -2939,7 +2952,8 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
 //    'hul_code_distributor_wise', 'van_stop_master_report', 'update_sales_register_party_code',
 //    'central_outlet_master_report', 'central_party_pack_master_report','ofd_mailer','ofd_mailer2');
 
-  if (!in_array($view->name, $views_array)) {
+  //&& !in_array($view->name,$admin_views)
+  if (!in_array($view->name, $views_array) ) {
     foreach ($query->table_queue as $key => $val) {
       if (($val['table'] == 'node')) {
         if (empty($val['join'])) {
@@ -2968,6 +2982,11 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
       }
     }
   }
+  $distributor_views = array('parkstop_api_log','dispatch_planning_api_log','dispatch_planning_api_data','sms_integration_api_log');
+  if (in_array($view->base_table,$distributor_views)) {
+       $query->add_where(0, "$view->base_table.distributor_id", $distributor_id, '=');
+  }
+  
   if ($view->base_table == 'custom_billing_data' && ($view->name != 'impact_delivery_cron_2') && ($view->name != 'impact_delivery_cron_evening_2')) {
     $query->add_where(0, 'custom_billing_data.distributor_id', $distributor_id, '=');
   }
@@ -4188,4 +4207,48 @@ function get_nid_of_resource($updated_by_name) {
   $query->fields('n', array('nid'));
   $result = $query->execute()->fetchField();
   return $result;
+}
+
+function update_parkstop_count($distributor_id) {
+    if (!empty($distributor_id)) {
+        $transaction = db_transaction();
+            $query = db_select('node', 'n');
+            $query->condition('n.type', 'dispatch_data');
+            $query->condition('n.uid', $distributor_id);
+            $query->join('field_data_field_delivery_boy_count', 'dboy_cnt', 'dboy_cnt.entity_id = n.nid');
+            $query->condition('api_log.distributor_id', $distributor_id);
+            $query->join('parkstop_api_log', 'api_log', 'api_log.trip_id = n.title');
+            $query->fields('api_log', array('trip_id', 'api_response'));
+            $parkstop_data = $query->execute()->fetchAllKeyed(0, 1);
+            foreach ($parkstop_data as $trip_id => $api_response) {
+                $res_decode = json_decode($api_response);
+                $stops = $res_decode->Van;
+                $n = $p = 0;
+                $seq = array();
+                foreach ($stops as $key => $value) {
+                    $bills = $value->OptimalStop;
+                    $c = 0;
+                    if (array_key_exists($bills, $seq) === FALSE) {//ignor if present at other place
+                        $seq[$bills]['park_seq'] = ++$p . '.' . str_pad($c, 2, 0, STR_PAD_LEFT); //handle till .99
+                        $seq[$bills]['sequence'] = ++$n;
+                    }
+                    $completion_time = $value->ApproxCompletionTime;
+                    $clusterStops = $completion_time[$delivery_boy - 2]->ClusterStops;
+                    foreach ($clusterStops as $child => $v2) {
+                        $child_bills = $v2->ChildStop;
+                        if (array_key_exists($child_bills, $seq) === FALSE) {//ignor if present at other place
+                            $seq[$child_bills]['park_seq'] = $p . '.' . str_pad( ++$c, 2, 0, STR_PAD_LEFT);
+                            $seq[$child_bills]['sequence'] = ++$n;
+                        }
+                    }
+                }
+                $parkstop_count = $p;
+                $nodes = node_load_multiple(NULL, array("title" => $trip_id, 'type' => 'dispatch_data', 'uid' => $distributor_id));
+                $node = current($nodes);
+                $node->field_parkstop_count[LANGUAGE_NONE][0]['value'] = $parkstop_count;
+                node_save($node);
+            }
+        
+        
+    }
 }

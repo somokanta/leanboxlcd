@@ -2305,9 +2305,26 @@ function dispatch_planning_update_7141() {
   }
 }
 
-
-// new change - added on 29 Nov, 2019
 function dispatch_planning_update_7142() {
+  $fields = array(
+    'res_proof_of_undelivery' => array(
+      'description' => t('Res Proof Of Undelivery'),
+      'type' => 'text',
+      'not null' => FALSE
+    ),
+  ); 
+  foreach ($fields as $key => $field) {
+    if (!db_field_exists('dispatch_planning_api_data', $key)) {
+      db_add_field('dispatch_planning_api_data', $key, $field);
+    }
+    if (!db_field_exists('inventory_versioning_api_data', $key)) {
+      db_add_field('inventory_versioning_api_data', $key, $field);
+    }
+  }
+}
+
+// new change - added on 31 Oct, 2019
+function dispatch_planning_update_7143() {
   $fields = array(
     'rev_geocode_area' => array(
       'description' => t('Reverse Geocode Area'),
@@ -2328,7 +2345,6 @@ function dispatch_planning_update_7142() {
       'not null' => FALSE
     ),
   );
-
 
   foreach ($fields as $key => $field) {
     if (!db_field_exists('dispatch_planning_api_data', $key)) {
