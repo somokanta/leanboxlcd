@@ -103,9 +103,10 @@ function create_sku7code_master($val = array()) {
         $node->status = $val['status']; //(1 or 0): published or not
         $node->field_unit_case_units_[LANGUAGE_NONE][0]['value'] = $val['field_upc'];
         $node->field_product_name[LANGUAGE_NONE][0]['value'] = $val['field_lb_sku_product_name'];
+        $node->field_sku7_code[LANGUAGE_NONE][0]['value'] = $val['title'];
         $node->comment = 0; // 0 = comments disabled, 1 = read only, 2 = read/write
-        $brand_nid = get_nid_from_title($val['field_brand'], 'brand_master');
-        $sucate_nid = get_nid_from_title($val['field_subcategory'], 'product_sub_category_master');
+        $brand_nid = get_node_nid($val['field_brand'], 'brand_master');
+        $sucate_nid = get_node_nid($val['field_subcategory'], 'product_sub_category_master');
         if (!empty($brand_nid)) {
             $node->field_brand[LANGUAGE_NONE][0]['nid'] = $brand_nid;
         }
@@ -114,4 +115,14 @@ function create_sku7code_master($val = array()) {
         }
         node_save($node);
     }
+}
+
+
+function get_node_nid($title, $type) {
+    $query1 = db_select('node', 'n');
+    $query1->condition('n.type', $type);
+    $query1->condition('n.title', $title);
+    $query1->fields('n', array('nid'));
+    $nid = $query1->execute()->fetchField();
+    return $nid;
 }
