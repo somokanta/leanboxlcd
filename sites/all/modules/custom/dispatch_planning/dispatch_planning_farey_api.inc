@@ -237,7 +237,7 @@ function fetch_dispatch_planning_api_data($data) {
 
         $dispatch_node = node_load($dispatch_data_nid);
         if(!empty($dispatch_node)){
-          $dispatch_node->field_inarea_reached_datetime['und'][0]['value'] = $Inarea_Reached_DateTime;
+          $dispatch_node->field_inarea_reached_datetime['und'][0]['value'] = strtotime($Inarea_Reached_DateTime);
           $dispatch_node->field_inarea_reached_latitude['und'][0]['value'] = $Inarea_Reached_Latitude;
           $dispatch_node->field_inarea_reached_longitude['und'][0]['value'] = $Inarea_Reached_Longitude;
           node_save($dispatch_node);
