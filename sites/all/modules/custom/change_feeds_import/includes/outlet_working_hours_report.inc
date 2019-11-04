@@ -55,6 +55,8 @@ function working_hours_form_submit($form, &$form_state) {
 }
 
 function working_hours_form_callback() {
+  global $user;
+  $distributor_id = change_feeds_import_get_distributor_id($user->uid);
   $output = '';
   if (isset($_GET['hul_code'])) {
     $hul_code = $_GET['hul_code'];
@@ -73,6 +75,7 @@ function working_hours_form_callback() {
     $query1->condition('wh.hul_code', $hul_code, '=');
   }
   $query1->join('node', 'n', 'n.title = wh.hul_code');
+  $query1->condition('wh.distributor_id',$distributor_id );
   $query1->leftjoin('field_data_field_hul_party_name', 'pn', 'pn.entity_id = n.nid');
   if (!empty($party_name)) {
     $query1->condition('pn.field_hul_party_name_value', $party_name, '=');
@@ -294,7 +297,10 @@ function working_hours_file($uri, $headers) {
 
 function working_hours_data_report($hul_code, $party_name) {
   //Days Data table
+  global $user;
+  $distributor_id = change_feeds_import_get_distributor_id($user->uid);  
   $query1 = db_select('outlet_working_hours', 'wh');
+  $query1->condition('wh.distributor_id',$distributor_id, '=');
   if (!empty($hul_code)) {
     $query1->condition('wh.hul_code', $hul_code, '=');
   }
@@ -363,6 +369,5 @@ function working_hours_data_report($hul_code, $party_name) {
     }
   }
   $table['main_data'] = $row;
-
   return $table;
 }

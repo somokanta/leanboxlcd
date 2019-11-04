@@ -1,7 +1,10 @@
 <?php
 
 module_load_include('inc', 'change_feeds_import', 'form/upload_billing_data');
-
+global $table_name ;
+global $table_column ;
+$table_name = 'field_data_field_distributor_name';
+$table_column = 'field_distributor_name_value';
 /*
  *  hook_permission()
  */
@@ -2565,11 +2568,19 @@ function check_sub_putaway_group_exist($title, $distributor_id) {
  * @param text $content_type
  */
 function modify_views_forms_master_feed_validate($feed_title, $content_type) {
+  /* Distributor ID condition not required in 
+'channel_master'
+'pl_group_master'  
+   * *
+   */
+  $system_level_content_types = array('channel_master','pl_group_master');  
   $query = db_select('node', 'n');
   $query->fields('n', array('title'));
   $query->condition('n.type', $content_type);
   $query->condition('n.title', $feed_title);
-  $query->addTag('node_uid');
+  if (!in_array($content_type,$system_level_content_types)) {
+    $query->addTag('node_uid');
+  }
   $result = $query->execute()->fetchField();
   return $result;
 }
@@ -2929,9 +2940,17 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
   global $user;
   // Store distributor id in author in each node
   $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+   // Do the actual join
+  // This function returns distributor_ids based on  super central,central,child distributor role
+  $distributor_ids = get_distributor_ids();
 
+  // This view will be visible to all authenticated user in the sytem
   $all_views_names = variable_get('views_name');
+  // area-code-master,product-sub-category-master,sku-cp-view,brand-master-report,bank-master-download,non-bankable-reason-master,cancel-discard-reason-master,reason-for-update,sku7-code-master-report,product-category-master,sku7-ean-and-mrp,product-sub-division,pdd-master,notes-denominations-download,short-reason-master,non-bankable-reason-master,handover-master
+  $admin_view_names = variable_get('admin_views');
   $views_array = explode(",", $all_views_names);
+  $admin_views = explode(",", $admin_view_names);
+
 //  $views_array = array('central_bill_trip', 'channel_master_central_report' , 
 //    'central_picking_report' ,  'central_party_pack_report',  'central_unloading_form', 
 //    'central_mobile_return_analysis', 'user_manual',  'hul_impact_delete', 'impact_delivery_cron_2', 
@@ -2939,17 +2958,37 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
 //    'hul_code_distributor_wise', 'van_stop_master_report', 'update_sales_register_party_code',
 //    'central_outlet_master_report', 'central_party_pack_master_report','ofd_mailer','ofd_mailer2');
 
-  if (!in_array($view->name, $views_array)) {
+  //&& !in_array($view->name,$admin_views)
+  if (!in_array($view->name, $views_array) && !in_array($view->name,$admin_views) ) {
     foreach ($query->table_queue as $key => $val) {
       if (($val['table'] == 'node')) {
         if (empty($val['join'])) {
-          $query->add_where(0, $val['alias'] . '.uid', $distributor_id, '=');
+          $query->add_where(0, $val['alias'] . '.uid', $distributor_ids, 'IN');
         }
         else {
-          $query->table_queue[$key]['join']->extra[] = array('field' => 'uid', 'value' => $distributor_id);
+         // $query->table_queue[$key]['join']->extra[] = array('field' => 'uid', 'value' => $distributor_id);
           //$query->table_queue[$key]['join']->extra[] = array('field' => 'uid', 'left_field' => 'uid', 'left_table'=>'node');
         }
       }
+    }
+  }
+  
+  //Custom Table join query 
+  //Custom tables require distributor_id condition
+  // mrc_inventory,mrc_inventory_new,custom_billing_data,godown_data,primary_data_upload,petty_cash,petty_cash_sequence_table,ptl_data_configuration,master_ptl_data,dispatch_planning_api_data,van_cld_data_table,closing_stock,vrs_handover,vrs_handover_history,vrs_trip_denominations,vrs_trip_denominations_history,vrs_trip_items,vrs_trip_items_history,vrs_trip_total,vrs_trip_total_history,custom_sales_data,dispatch_planning_api_log,dispatch_qty_confirmation,dispatch_delivered_vrs_details,dispatch_qty_preprocess,excess_qty,impact_data,inventory_versioning_api_data,ptl_header_data,ptl_put_qty,sku_ean_mrp,stage_billing_data,trip_id_sequence,van_live_tracking,handover_confirmation_new,inventory_ledger,inventory_opening
+  $custom_tables = explode(',', variable_get('custom_tables'));
+  if (!empty($custom_tables)) {
+    if (false !== $table_key = array_search($view->base_table, $custom_tables)) { 
+      // Sku Master is central distributor Data
+      if ($view->base_table == 'sku_ean_mrp') {
+          $distributor_ids = array();
+          $distributor_ids[] = $central_distributor_id;
+      } 
+      $query->add_where(0, "$custom_tables[$table_key].distributor_id", $distributor_ids, 'IN');
+    }
+    else {
+      // do something else
+     
     }
   }
 
@@ -2968,6 +3007,11 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
       }
     }
   }
+  /*$distributor_views_tables = array('parkstop_api_log','dispatch_planning_api_log','dispatch_planning_api_data','sms_integration_api_log','outlet_order_crate');
+  if (in_array($view->base_table,$distributor_views_tables)) {
+       $query->add_where(0, "$view->base_table.distributor_id", $distributor_id, '=');
+  }
+  
   if ($view->base_table == 'custom_billing_data' && ($view->name != 'impact_delivery_cron_2') && ($view->name != 'impact_delivery_cron_evening_2')) {
     $query->add_where(0, 'custom_billing_data.distributor_id', $distributor_id, '=');
   }
@@ -2977,9 +3021,31 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
       'value' => $distributor_id,
       'operator' => '=',
     );
+  }*/
+  
+
+
+  /*if ($view->base_table == 'mrc_inventory') {
+    $query->add_where(0, 'mrc_inventory.distributor_id', $distributor_id, '=');
+  }*
+  if ($view->base_table == 'custom_billing_data' && ($view->name != 'impact_delivery_cron_2') && ($view->name != 'impact_delivery_cron_evening_2')) {
+    //$query->add_where(0, 'custom_billing_data.distributor_id', $distributor_id, '=');
+  }*/
+  if (($view->base_table == 'taxonomy_term_data') && ($view->name == 'petty_cash_edit')) {
+    /*$query->where[0]['conditions'][] = array(
+      'field' => 'field_data_field_petty_cash_distributor.field_petty_cash_distributor_uid',
+      'value' => $distributor_id,
+      'operator' => '=',
+    );*/
+    $query->where[0]['conditions'][] = array(
+      'field' => 'field_data_field_petty_cash_distributor.field_petty_cash_distributor_uid',
+      'value' => $distributor_ids,
+      'operator' => 'IN',
+    );
+    
   }
 
-  if ($view->base_table == 'petty_cash') {
+  /*if ($view->base_table == 'petty_cash') {
     $query->add_where(0, 'petty_cash.distributor_id', $distributor_id, '=');
   }
   if (($view->base_table == 'ptl_data_configuration') && ($view->name == 'ptl_data_report' || $view->name == 'ptl_loose_sheet' || $view->name == 'short_put_report' || $view->name == 'ptl_cld_sheet')) {
@@ -3014,7 +3080,7 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
   //}
   if ($view->base_table == 'van_cld_data_table') {
     $query->add_where(0, 'van_cld_data_table.distributor_id', $distributor_id, '=');
-  }
+  }*/
   if ($view->name == 'pending_delivery_outstanding_report') {
     $query->add_field('custom_billing_data', 'bill_number', 'custom_billing_data_bill_number', array('function' => 'groupby'));
     $query->add_groupby('custom_billing_data.bill_number');
@@ -3194,7 +3260,7 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
     }
   }
     if ($view->base_table == 'delivery_details') {
-      $query->add_where(0, 'delivery_details.distributor_id', $distributor_id, '=');
+      //$query->add_where(0, 'delivery_details.distributor_id', $distributor_id, '=');
     }
 
     if ($view->name == 'latest_live_tracking_report') {
@@ -4232,4 +4298,104 @@ function update_parkstop_count($distributor_id) {
         
         
     }
+}
+// This function returns logged user related distributor_ids
+function get_distributor_ids() {
+  global $user;
+  $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+  $distributor_ids = array();
+  /*/Super Central Distributor login it returns childs of super central such as central_rs1,central_rs2
+   *  Having to fech child distributor_id of each central rs
+   */
+ if (in_array('super_central_distributor', $user->roles)) {
+    $central_rs_distributor_ids = get_child_distributor_ids($distributor_id);
+    if (!empty($central_rs_distributor_ids)) {
+        foreach($central_rs_distributor_ids as $central_rs_distributor_id){
+            $child_distributor_ids =  get_child_distributor_ids($central_rs_distributor_id);
+            if (!empty($child_distributor_ids)) {
+                $distributor_ids+=  $child_distributor_ids;
+            }
+        }
+    }
+  }
+  // if central rs logged in central child's returns
+  else if (in_array('central_distributor', $user->roles)) {
+    $distributor_ids = get_child_distributor_ids($distributor_id);
+    if (empty($distributor_ids)) {
+      $distributor_ids = array();
+    }
+  }
+  // child distributor logged in 
+  else {
+    // have to fetch parent distributor id
+    $central_distributor_id = get_central_distributor_id($distributor_id);
+    if (!empty($central_distributor_id)) {
+      $distributor_ids[] = $central_distributor_id;
+    }
+  }
+  $distributor_ids[$distributor_id] = $distributor_id;
+  //array_push($distributor_ids, $distributor_id);
+  return $distributor_ids;
+}
+
+function get_child_distributor_ids($distributor_id) {
+    $distributorids = array();
+  if (!empty($distributor_id)) {
+    global $user;
+    $query = db_select('field_data_field_central_distributorid_ref', 'central_ref');
+    $query->condition('central_ref.field_central_distributorid_ref_uid', $distributor_id, '=');
+    $query->fields('central_ref', array('entity_id'));
+    $distributor_uids = $query->execute()->fetchCol();
+    $distributorids = get_distributor_id($distributor_uids);
+  }
+  return $distributorids;
+}
+
+function get_distributor_id($user_ids) {
+  $distributor_ids = array();
+  if (!empty($user_ids)) {
+    $query = db_select('users', 'u');
+    $query->innerjoin('field_data_field_distributor', 'd', 'd.entity_id = u.uid');
+    $query->condition('d.entity_id', $user_ids, 'IN');
+    $query->fields('d', array('field_distributor_value'));
+    $distributor_ids = $query->execute()->fetchAllKeyed(0,0);
+  }
+  return $distributor_ids;
+}
+
+function get_central_distributor_id($child_distributor_id) {
+  $parent_dist = 0;
+  if (!empty($child_distributor_id)) {
+    $query = db_select('field_data_field_central_distributorid_ref', 'central_ref');
+    $query->isNotNull('central_ref.field_central_distributorid_ref_uid');
+    $query->condition('central_ref.entity_id', $child_distributor_id);
+    $query->fields('central_ref', array('field_central_distributorid_ref_uid'));
+    $parent_dist = $query->execute()->fetchField();
+    if (empty($parent_dist)) {
+      $central_distributor_role = 'central_distributor';
+      $query = db_select('users_roles', 'ur');
+      $query->condition('ur.uid', $child_distributor_id, '=');
+      $query->join('role', 'role', 'role.rid = ur.rid');
+      $query->condition('role.name', $central_distributor_role, '=');
+      $query->fields('ur', array('uid'));
+      $parent_dist = $query->execute()->fetchField();
+    }
+  }
+  return $parent_dist;
+}
+
+function get_child_distributor_rsname($distributor_id){
+  $res = array();
+  global $table_name;
+  global $table_column;
+  if(!empty($distributor_id)){
+    $query = db_select('field_data_field_central_distributorid_ref', 'cdr');
+    $query->join($table_name, 'rs', 'cdr.entity_id = rs.entity_id');
+    $query->join('field_data_field_distributor','distributor', 'cdr.entity_id = distributor.entity_id');
+    $query->condition('cdr.field_central_distributorid_ref_uid', $distributor_id, '=');
+    $query->fields('distributor', array('field_distributor_value'));
+    $query->fields('rs', array($table_column));
+    $res = $query->execute()->fetchAllKeyed(0, 1); // will get child uids=>rs_name
+  }
+  return $res;
 }

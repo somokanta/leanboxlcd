@@ -53,6 +53,20 @@ function custom_order_box_id_services_resources() {
               'source' => array('data' => 'party_name'),
               'optional' => FALSE,
             ),
+            array(
+              'name' => 'facility_code',
+              'type' => 'string',
+              'description' => 'facility_code',
+              'source' => array('data' => 'facility_code'),
+              'optional' => FALSE,
+            ),
+            array(
+              'name' => 'distributor_id',
+              'type' => 'string',
+              'description' => 'distributor_id',
+              'source' => array('data' => 'distributor_id'),
+              'optional' => FALSE,
+            ),  
            ),
             'file' => array(
               'type' => 'inc',
