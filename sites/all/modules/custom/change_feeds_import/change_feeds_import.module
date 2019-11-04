@@ -4399,3 +4399,51 @@ function get_child_distributor_rsname($distributor_id){
   }
   return $res;
 }
+
+function change_feeds_import_importer_template($importer_id) {
+  global $user;
+  $importer = feeds_importer($importer_id);
+  if ($importer->parser instanceof FeedsCSVParser) {
+    $mappings = feeds_importer($importer_id)->processor->config['mappings'];
+    $sources = $uniques = array();
+    foreach ($mappings as $mapping) {
+      if (!empty($mapping['unique'])) {
+        $uniques[] = check_plain($mapping['source']);
+      }
+      else {
+        $sources[] = check_plain($mapping['source']);
+      }
+    }
+    $sep = ',';
+    $columns = array();
+    foreach (array_merge($uniques, $sources) as $col) {
+      if (strpos($col, $sep) !== FALSE) {
+        $col = '"' . str_replace('"', '""', $col) . '"';
+      }
+      $columns[] = $col;
+    }
+    // If central RS or administrator is   logged in then only DistributorID column will be display
+    if (in_array('super_central_rs', $user->roles) || in_array('central_distributor', $user->roles)) {
+      // get distributor wise feed template
+      $distributor_wise_template = explode(',',variable_get('distributor_feed_importer'));
+      if(in_array($importer_id,$distributor_wise_template)){
+          $columns[] = 'Distributor Name';
+      }
+    }
+    drupal_add_http_header('Cache-Control', 'max-age=60, must-revalidate');
+    drupal_add_http_header('Content-Disposition', 'attachment; filename="' . $importer_id . '_template.csv"');
+    drupal_add_http_header('Content-type', 'text/csv; charset=utf-8');
+    ob_clean();
+    print implode($sep, $columns);
+    return;
+  }
+  return drupal_not_found();
+}
+
+function change_feeds_import_menu_alter(&$items) {
+  ob_clean();
+  $items['import/%/template']['access callback'] = TRUE;
+  $items['import/%/template']['page arguments'] = array(1);
+  $items['import/%/template']['access arguments'] = array('import', 1);
+  $items['import/%/template']['page callback'] = 'change_feeds_import_importer_template';
+}
