@@ -1,0 +1,3 @@
+name = Capture Cashier Attendance Module
+description =  To capture the attendance of each cashier who has logged into the delivery app.
+core = 7.x

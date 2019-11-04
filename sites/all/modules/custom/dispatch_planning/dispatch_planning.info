@@ -43,3 +43,4 @@ files[] =  views/handler/field_sales_returns_report_qty.inc
 files[] =  views/handler/distance_calculation.inc
 files[] =  views/handler/delivery_confirmation_date.inc
 files[] =  views/handler/total_travel_time_handler.inc
+files[] =  views/handler/proof_of_undelivery_handler.inc
