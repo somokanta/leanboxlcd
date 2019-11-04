@@ -318,6 +318,7 @@ function change_feeds_import_batch_fix_process($max, $data, $distributor_id, $fi
             break;
 
           case 'PRICELIST_GROUP':
+             $v = strtolower($v);
             if (!isset($context['results']['master_result']['pricelist_group_master'][$v])) {
               $error_text = $v . " is not present in PRICELIST_GROUP Master";
               $flag = 1;
@@ -326,6 +327,7 @@ function change_feeds_import_batch_fix_process($max, $data, $distributor_id, $fi
             break;
 
           case 'PRODUCT_DIVISION':
+              $v = strtolower($v);
             if (!isset($context['results']['master_result']['product_division_master'][$v])) {
               $error_text = $v . " is not present in PRODUCT_DIVISION Master";
               $flag = 1;
@@ -662,7 +664,8 @@ function get_node_titles($type) {
   //$query1->addTag('node_uid');
   $titles = $query1->execute()->fetchAll();
   foreach ($titles as $k => $v) {
-    $result[$v->type][$v->title] = $v->title;
+    $node_title = strtolower($v->title);  
+    $result[$v->type][$node_title] = $node_title;
   }
   
 
