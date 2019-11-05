@@ -174,6 +174,40 @@ function fetch_dispatch_planning_api_data($data) {
           ))
           ->condition('trip_bill_reference', $bill_row_id, '=')
           ->execute();
+        
+          // new change - added on 31 Oct, 2019
+        if(!empty($data['latitude']) && !empty($data['longitude']) ){
+          try{
+            $api_result = get_reverse_geocode_data($data['latitude'], $data['longitude']); // call to mapmyindia api //reverse_geocode_results($data['latitude'], $data['longitude']);
+            watchdog('map my india api result: ', '<pre>' . print_r($api_result, TRUE) . '</pre>');
+            if(!empty($api_result)){
+              $decoded_locality = $api_result[0]->locality; // area
+              $decoded_sublocality = $api_result[0]->subLocality; //subarea
+              $decoded_street = $api_result[0]->street;
+
+              db_update('dispatch_planning_api_data')
+                ->fields(array(
+                    'rev_geocode_area' => isset($decoded_locality) ? $decoded_locality : '',
+                    'rev_geocode_sub_area' => isset($decoded_sublocality) ? $decoded_sublocality : '',
+                    'rev_geocode_street' => isset($decoded_street) ? $decoded_street : ''
+                ))
+                ->condition('referenceNo', $data['referenceNumber'], '=')
+                ->execute();
+            }
+          }
+          catch(Exception $e){
+            //emailer for notification start
+            global $base_url;
+            $bill_ref_no = $data['referenceNumber'];
+            $params['subject'] = "MapMyIndia API Exception on $base_url for Bill Reference No: $bill_ref_no";
+            $params['body'] = $e->getMessage();
+            $mail_to = variable_get('mapmyindia_exception_email',"abhishek.r@iksula.com,rahul.maurya@iksulaops.com"); //kusha@leanbox.in
+            $from = "MIS.HELPDESK@leanbox.in";
+            drupal_mail('dispatch_planning', 'bill_date_missing', $mail_to, LANGUAGE_NONE, $params, $from);
+            //emailer for notification end
+          }
+        }
+
       }
       
       $bill_number = $data['jobData']['bill_number'];      
@@ -234,4 +268,21 @@ function _get_dispatch_qty_undeliver($bill_row_id) {
    $query->condition('ad.trip_bill_reference', $bill_row_id);
    $sku_list = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
    return $sku_list;
+}
+
+
+// new change - added on 31 Oct, 2019
+function get_reverse_geocode_data($latitude, $longitude){
+  $api_result = array();
+  if(!empty($latitude) && !empty($longitude)){
+     $license_key = variable_get('mapmyindia_rest_key', 'z94i9hvuqcsz7amywt76aknw8dx9o15z');   
+     $url = "https://apis.mapmyindia.com/advancedmaps/v1/$license_key/rev_geocode?lng=$longitude&lat=$latitude";
+     $options = array('method' => 'GET');
+     $result = drupal_http_request($url, $options);
+     if($result->status_message === 'OK'){
+        $decoded_data = json_decode($result->data);
+        $api_result = $decoded_data->results;
+     }
+  }
+  return $api_result;
 }
