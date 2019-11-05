@@ -481,6 +481,13 @@ function change_feeds_import_menu() {
     'file' => 'includes/outlet_working_hours_report.inc',
     'access arguments' => array('returns confirmation')
   );
+  
+  $items['admin/config/apis-config'] = array(
+      'title' => 'Setting Form For Master APIs Config',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('master_api_config_form'),
+      'access callback' => 'check_if_fr_role_user_admin',
+    );
   return $items;
 }
 
@@ -4426,4 +4433,32 @@ function update_parkstop_count($distributor_id) {
         
         
     }
+}
+
+function master_api_config_form($form, $form_state) {
+    $form['bank_master_api_url'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Bank Master API URL'),
+      '#description' => t('Bank Master URL'),
+      '#default_value' => variable_get('bank_master_api_url'),
+      '#required' => TRUE,
+    );
+
+    $form['reason_code_master_api_url'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Reason Code Master API URL'),
+      '#description' => t(' Reason Code Master API URL'),
+      '#default_value' => variable_get('reason_code_master_api_url'),
+      '#required' => TRUE,
+    );
+
+    $form['outlet_master_api_url'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Location Master API URL'),
+      '#description' => t('Location Master API URL'),
+      '#default_value' => variable_get('outlet_master_api_url'),
+      '#required' => TRUE,
+    );
+
+    return system_settings_form($form);
 }
