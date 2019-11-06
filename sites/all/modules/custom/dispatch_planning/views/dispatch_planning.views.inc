@@ -4040,6 +4040,93 @@ function dispatch_planning_views_data() {
 
   // ============== change
 
+
+
+  // ========= Map My INDIA API LOG START ============
+
+  $data['map_my_india_api_log']['table']['group'] = t('Map My India Api Log');
+  $data['map_my_india_api_log']['table']['base'] = array(
+    'title' => t('Map My India Api Log'),
+    'help' => t('Map My India Api Log'),
+  );
+  
+  $data['map_my_india_api_log']['id'] = array(
+    'title' => t('ID'),
+    'help' => t('The record ID.'),
+    'field' => array(
+      'handler' => 'views_handler_field_numeric',
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_numeric',
+    ),
+
+  );
+
+  $data['map_my_india_api_log']['reference_number'] = array(
+    'title' => t('Reference Number'),
+    'help' => t('Reference Number'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+  );
+
+  $data['map_my_india_api_log']['request_data'] = array(
+    'title' => t('Request Data'),
+    'help' => t('Request Data'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+  );
+
+  $data['map_my_india_api_log']['response_data'] = array(
+    'title' => t('Response Data'),
+    'help' => t('Response Data'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+  );
+
+  $data['map_my_india_api_log']['request_time'] = array(
+    'title' => t('Request Time'),
+    'help' => t('Request Time'),
+    'field' => array(
+      'handler' => 'views_handler_field_date',
+      'click sortable' => TRUE,
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_date',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_filter_date',
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort_date',
+    ),
+  );
+
+  // ======== Map My INDIA API LOG END ===========
+
   //Dispatch Panning API Log
   $data['dispatch_planning_item_details']['table'] = array(
     'group' => t('dispatch_planning_item_details lines'),
