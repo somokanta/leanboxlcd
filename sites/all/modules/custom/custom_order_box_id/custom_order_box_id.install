@@ -24,7 +24,7 @@ function custom_order_box_id_schema() {
       'crate_id' => array(
         'description' => t('Crate Id'),
         'type' => 'varchar',
-        'length' => 1024,
+        'length' => 4000,
         'not null' => TRUE,
         'default' => '',
       ),
