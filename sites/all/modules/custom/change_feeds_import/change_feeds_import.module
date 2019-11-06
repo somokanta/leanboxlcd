@@ -4223,7 +4223,7 @@ function call_bank_master_api($node) {
     $api_type = 'bank_master';
 
     if (!empty($bank_name) && ($bank_name != $original_bank_name)) {
-        $bank_name_arr = array(array('bank_name' => $bank_name));
+        $bank_name_arr = array(array('bank_name' => $bank_name,'merchant' => array(array('name'=>'hul'))));
         $bank_name_json = json_encode($bank_name_arr);
 
         $sql_ins_id = bank_master_api_log($bank_name, $bank_name_json, $api_type, $dis_id);
@@ -4282,7 +4282,7 @@ function call_location_api($node) {
         $long = $res[0]['field_hul_updated_long_value'];
         $area_code = $res[0]['n1_title'];
 
-        $location_arr = array(array('party_code' => $party_code, 'party_name' => $party_name, 'location_type' => $location_type));
+        $location_arr = array(array('party_code' => $party_code, 'party_name' => $party_name, 'location_type' => $location_type,'merchant' => array(array('name'=>'hul'))));
         if (!empty($hul_code)) {
             $location_arr[0]['hul_code'] = $hul_code;
         }
