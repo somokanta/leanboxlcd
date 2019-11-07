@@ -106,6 +106,16 @@ class bill_returns_report extends views_handler_field {
                     case 'to_be_collected_amount';
                         return $data->sales_to_be_collected;
                         break;
+                    case 'global_delivery_boy':
+                        $res_delivery_boy = $data->dispatch_planning_api_data_res_delivery_boy ? $data->dispatch_planning_api_data_res_delivery_boy : '';
+                        $res_delivery_boy_edit = $data->dispatch_planning_api_data_res_delivery_boy_edit ? $data->dispatch_planning_api_data_res_delivery_boy_edit : '';
+                        if (!empty($res_delivery_boy_edit)) {
+                            return $res_delivery_boy_edit;
+                        }
+                        else {
+                            return $res_delivery_boy;
+                        }
+                        break;
                     default:
                         return '';
                 }
