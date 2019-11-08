@@ -1001,18 +1001,16 @@ function _edit_trip_delivered_callback_form_validate($form, &$form_state) {
       }
    }
 
-
-   if ($order_status != 'undeliver') {
-      $delivery_boy = $form_state['values']['delivery_boy'];
-        if(empty($delivery_boy)) {
-          form_set_error('delivery_boy', t('Delivery boy field can not be empty.'));
+    $delivery_boy = $form_state['values']['delivery_boy'];
+    if(empty($delivery_boy)) {
+      form_set_error('delivery_boy', t('Delivery boy field can not be empty.'));
     }
-
+    if ($order_status != 'undeliver') {
       $collc_mode = $form_state['values']['collection_mode'];
       if(empty($collc_mode)) {
         form_set_error('collection_mode', t('Collection mode can not be empty.'));
       }
-   }
+    }
 
    if ($collc_mode == 'cash') {
       $cash_amt = $form_state['values']['cash_amt'];
