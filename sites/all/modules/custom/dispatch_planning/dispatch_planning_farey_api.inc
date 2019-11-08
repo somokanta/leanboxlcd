@@ -178,7 +178,7 @@ function fetch_dispatch_planning_api_data($data) {
           // new change - added on 31 Oct, 2019
         if(!empty($data['latitude']) && !empty($data['longitude']) ){
           try{
-            $api_result = get_reverse_geocode_data($data['latitude'], $data['longitude']); // call to mapmyindia api //reverse_geocode_results($data['latitude'], $data['longitude']);
+            $api_result = get_reverse_geocode_data($data['latitude'], $data['longitude'], $data['referenceNumber']); // call to mapmyindia api //reverse_geocode_results($data['latitude'], $data['longitude']);
             watchdog('map my india api result: ', '<pre>' . print_r($api_result, TRUE) . '</pre>');
             if(!empty($api_result)){
               $decoded_locality = $api_result[0]->locality; // area
