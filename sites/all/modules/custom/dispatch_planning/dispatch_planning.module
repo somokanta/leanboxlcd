@@ -1925,7 +1925,7 @@ function dispatch_planning_form_save_validate($form, &$form_state) {
     $enable_routing = check_dynamic_routing_configuration($distributor_id);
   }
 
-  $bill_sequence_array = array();
+  $bill_sequence_array = $python_bill_sequence_array = array();
   if (($no_area || $no_sequence || $area_hook_group_name || count($area_hook_group_name) > 1) && !$skip_sequencing && $origin_lat && $origin_long && $enable_routing) {
 
     //$params['vehicles'][] = array('vehicle_id' => 'origin', 'start_address' => array('location_id' => 'origin', 'lon' => (double)$origin_long, 'lat' => (double)$origin_lat), 'return_to_depot' => true);
@@ -1967,56 +1967,135 @@ function dispatch_planning_form_save_validate($form, &$form_state) {
       }
       }
       } */
-    //NEW API ROUTIFIC
-    $Locations['options']['shortest_distance'] = true;
-    $Locations['options']['polylines'] = true;
-    //dpm($Locations);
-    $Locations_data = json_encode($Locations);
-    $authorization = 'bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1ODgzOWY4ZjYyZmQyMzkzMGE4NjQwYjEiLCJpYXQiOjE1MDQ2Nzg4NTl9.AzJLVp6HDk6lbXCWxI1T8Y7US6R0panNjkY5B-pkdqg';
-    $request_headers = array('Content-Type' => 'application/json', 'Authorization' => $authorization);
-    $roitufic_api_url = variable_get('api_routific_url', 'https://api.routific.com/v1/vrp');
-    $routific_options = array('headers' => $request_headers, 'method' => 'POST', 'data' => $Locations_data);
 
-    $response_data = drupal_http_request($roitufic_api_url, $routific_options);
-    //dpm($response_data,'API RESPONSE');
-    $response_data = json_decode($response_data->data);
 
-    if ($response_data->num_unserved) {
-      //dpm($response_data->unserved,'unserved');
+
+    /*****
+      ################################ PYTHON API CALLING START ################################
+    *****/
+
+    //dpm($bill_nids, 'bill_nids: ');
+    $python_api_response_data = parkstop_calculation_api($bill_nids, $distributor_id, 'dispatch');
+    //dpm($python_api_response_data, 'python_api_response_data: ');
+
+    if (!empty($python_api_response_data->error)) {
+      form_set_error('form', 'Python API Error' . $python_api_response_data->error);
+      //emailer for notification start
+        global $base_url;
+        $params['subject'] = "Dispatch Planning Python API Error on $base_url for van: $hht_id";
+        $params['body'] = $python_api_response_data->error;
+        $mail_to = variable_get('parkstop_api_error_email',"abhishek.r@iksula.com,rahul.maurya@iksulaops.com"); //kusha@leanbox.in
+        $from = "MIS.HELPDESK@leanbox.in";
+        drupal_mail('adhoc_task', 'bill_date_missing', $mail_to, LANGUAGE_NONE, $params, $from);
+        //emailer for notification end
     }
-    if ($response_data->status === 'success') {
-      $response_array = $response_data->solution->origin;
-      $i = 1;
-      $form_state['dispatch_planning']['total_travel_time'] = $response_data->total_working_time; //total_travel_time
-      $form_state['dispatch_planning']['total_distance'] = $response_data->total_distance;
-      foreach ($response_array as $k => $v) {
-        if ($v->location_name !== 'origin') {
-          $bill_sequence_array[$i]['nid'] = $v->location_name;
-
-          if ($k == 0) {
+    $form_state['python_api_tim_dist_response'][$hht_id] = $python_api_response_data;
+    $python_api_response_data = '';
+    if (isset($form_state['python_api_tim_dist_response'][$hht_id])) {
+      $python_api_response_data = $form_state['python_api_tim_dist_response'][$hht_id];
+    }
+    
+    if($python_api_response_data->status_message === 'OK') { 
+      $bill_sequencing_array = get_drs_bill_sequence_by_parkstop(json_decode($python_api_response_data->data), $hht_id);
+      //dpm($bill_sequencing_array, 'bill_sequencing_array: ');
+      $form_state['dispatch_planning']['total_travel_time'] = $_SESSION['park_stop'][$hht_id]['time']; // $total_time
+      $form_state['dispatch_planning']['total_distance'] = $_SESSION['park_stop'][$hht_id]['dist'];//newly // $total_dist
+      $form_state['dispatch_planning']['van_total_time'] = $_SESSION['park_stop'][$hht_id]['van_total_time'];
+      $form_state['dispatch_planning']['van_total_dist'] = $_SESSION['park_stop'][$hht_id]['van_total_dist'];
+      foreach ($bill_sequencing_array as $key => $value) {
+        $sequence_no = $value['sequence'];
+        $python_bill_sequence_array[$sequence_no]['nid'] = $key;
+        $python_bill_sequence_array[$sequence_no]['bill_seq_from_python'] = $value['park_seq'];
+        /*
+          if ($sequence_no == 0) {
             $travel_time = 0;
           }
-          else if ($k == 1) {
-            $travel_time = strtotime($response_array[$k]->arrival_time) - strtotime($response_array[$k - 1]->arrival_time);
+          else if ($sequence_no == 1) {
+            $travel_time = strtotime($value[$arrival_time]) - strtotime($value[$arrival_time - 1]);
           }
           else {
-            $travel_time = strtotime($response_array[$k]->arrival_time) - strtotime($response_array[$k - 1]->finish_time);
+            $travel_time = strtotime($value[$arrival_time]) - strtotime($value[$arrival_time - 1]->finish_time);
           }
           $travel_time = $travel_time / 60; // min
-          $bill_sequence_array[$i]['prev_travel_time'] = $travel_time;
-          $bill_sequence_array[$i]['prev_distance'] = round(($v->distance) / 1000, 2);
-          $i++;
-        }
+          $python_bill_sequence_array[$sequence_no]['prev_travel_time'] = $travel_time;
+          $python_bill_sequence_array[$sequence_no]['prev_distance'] = round(($v->distance) / 1000, 2);
+        */
       }
+    
+    }else{
+        if (!empty($python_api_response_data->error)) {// if error exist then sequencing is clicked
+          $_SESSION['park_stop'][$hht_id] = array();//empty previous store data for same van
+        }
     }
 
-    if (!empty($bill_sequence_array)) {
-      $form_state['dispatch_planning']['bill_sequence_array'] = $bill_sequence_array;
+    //dpm($python_bill_sequence_array, 'python_bill_sequence_array: ');
+    if (!empty($python_bill_sequence_array)) {
+      $form_state['dispatch_planning']['python_bill_sequence_array'] = $python_bill_sequence_array;
     }
     else {
       // form_set_error('list_form_items', 'An error occured while generating sequence');
-      form_set_error('list_form_items', 'API Error' . $response_data->error);
+      form_set_error('list_form_items', 'Python API Error' . $python_api_response_data->error);
     }
+
+    /*****
+      ################################ PYTHON API CALLING END ################################
+    *****/
+
+    /*
+      COMMENTED on 27 OCT, 2019 AS WE ARE USING PYTHON API INSTEAD OF ROUTIFIC
+
+      //NEW API ROUTIFIC
+      $Locations['options']['shortest_distance'] = true;
+      $Locations['options']['polylines'] = true;
+      //dpm($Locations);
+      $Locations_data = json_encode($Locations);
+      $authorization = 'bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1ODgzOWY4ZjYyZmQyMzkzMGE4NjQwYjEiLCJpYXQiOjE1MDQ2Nzg4NTl9.AzJLVp6HDk6lbXCWxI1T8Y7US6R0panNjkY5B-pkdqg';
+      $request_headers = array('Content-Type' => 'application/json', 'Authorization' => $authorization);
+      $roitufic_api_url = variable_get('api_routific_url', 'https://api.routific.com/v1/vrp');
+      $routific_options = array('headers' => $request_headers, 'method' => 'POST', 'data' => $Locations_data);
+      dpm($routific_options);
+      $response_data = drupal_http_request($roitufic_api_url, $routific_options);
+      dpm($response_data,'API RESPONSE');
+      $response_data = json_decode($response_data->data);
+
+      if ($response_data->num_unserved) {
+        //dpm($response_data->unserved,'unserved');
+      }
+      if ($response_data->status === 'success') {
+        $response_array = $response_data->solution->origin;
+        $i = 1;
+        $form_state['dispatch_planning']['total_travel_time'] = $response_data->total_working_time; //total_travel_time
+        $form_state['dispatch_planning']['total_distance'] = $response_data->total_distance;
+        foreach ($response_array as $k => $v) {
+          if ($v->location_name !== 'origin') {
+            $bill_sequence_array[$i]['nid'] = $v->location_name;
+
+            if ($k == 0) {
+              $travel_time = 0;
+            }
+            else if ($k == 1) {
+              $travel_time = strtotime($response_array[$k]->arrival_time) - strtotime($response_array[$k - 1]->arrival_time);
+            }
+            else {
+              $travel_time = strtotime($response_array[$k]->arrival_time) - strtotime($response_array[$k - 1]->finish_time);
+            }
+            $travel_time = $travel_time / 60; // min
+            $bill_sequence_array[$i]['prev_travel_time'] = $travel_time;
+            $bill_sequence_array[$i]['prev_distance'] = round(($v->distance) / 1000, 2);
+            $i++;
+          }
+        }
+      }
+
+      if (!empty($bill_sequence_array)) {
+        $form_state['dispatch_planning']['bill_sequence_array'] = $bill_sequence_array;
+      }
+      else {
+        // form_set_error('list_form_items', 'An error occured while generating sequence');
+        form_set_error('list_form_items', 'API Error' . $response_data->error);
+      }
+
+    */
   }
   $form_state['dispatch_planning']['manual_drs_sequence'] = $manual_drs_sequence;
   ##############################################################################
@@ -2038,10 +2117,15 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
   $user_id = $user->uid;
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
 
-  if (isset($form_state['dispatch_planning']['bill_sequence_array']) && !empty($form_state['dispatch_planning']['bill_sequence_array'])) {
-    $bill_sequence = $form_state['dispatch_planning']['bill_sequence_array'];
+  //if (isset($form_state['dispatch_planning']['bill_sequence_array']) && !empty($form_state['dispatch_planning']['bill_sequence_array'])) {
+  if (isset($form_state['dispatch_planning']['python_bill_sequence_array']) && !empty($form_state['dispatch_planning']['python_bill_sequence_array'])) {  
+    //$bill_sequence = $form_state['dispatch_planning']['bill_sequence_array'];
+    $bill_sequence = $python_bill_sequence = $form_state['dispatch_planning']['python_bill_sequence_array'];
+    //dpm($bill_sequence, 'bill_sequence: ');
     $total_travel_time = $form_state['dispatch_planning']['total_travel_time'];
     $total_distance = $form_state['dispatch_planning']['total_distance'];
+    $van_total_dist = $form_state['dispatch_planning']['van_total_dist'];
+    $van_total_time = $form_state['dispatch_planning']['van_total_time'];
 
     $seq_flag = 1;
   }
@@ -2091,8 +2175,11 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
 
   if ($seq_flag) {
     $node->field_sequence_method[$node->language][0]['value'] = 1;
-    $node->field_total_travel_time[$node->language][0]['value'] = round($total_travel_time / 60, 2);
+    $node->field_total_travel_time[$node->language][0]['value'] = $total_travel_time; //round($total_travel_time / 60, 2);
     $node->field_total_distance[$node->language][0]['value'] = round($total_distance, 4);
+
+    $node->field_van_total_distance[$node->language][0]['value'] = round($van_total_dist);
+    $node->field_van_total_travel_time[$node->language][0]['value'] = round($van_total_time);
   }
   else {
     $node->field_sequence_method[$node->language][0]['value'] = 0;
@@ -2109,6 +2196,10 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
   $node = node_submit($node); // Prepare node for saving
   node_save($node);
 
+  if (!empty($total_distance) && !empty($total_travel_time)) {
+    update_parkstop_plotting_log('dispatch', $trip_id, $distributor_id);
+  }
+
   $nid = $node->nid;
 
   $sequence_array = $form_state['dispatch_planning']['sequence_array'];
@@ -2120,7 +2211,7 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
       $bill_sequence_new[$key] = $value['nid'];
       $node = node_load($value['nid']);
 
-      $node->field_bill_sequence[LANGUAGE_NONE][0]['value'] = $key;
+      $node->field_bill_sequence[LANGUAGE_NONE][0]['value'] = $value['bill_seq_from_python']; //$key;
       $node->field_drs_sequence[LANGUAGE_NONE][0]['value'] = $key;
       if (isset($node->field_delivery_pending[LANGUAGE_NONE])) {
         $node->field_delivery_pending = array();
@@ -2128,8 +2219,10 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
       $node->field_trip_id_reference[LANGUAGE_NONE][0]['nid'] = $nid;
       // calculate time and distance
 
-      $node->field_prev_arrival_time[LANGUAGE_NONE][0]['value'] = $value['prev_travel_time'];
-      $node->field_prev_distance[LANGUAGE_NONE][0]['value'] = $value['prev_distance'];
+      /* COMMENTED on 22 Oct, 2019
+        $node->field_prev_arrival_time[LANGUAGE_NONE][0]['value'] = $value['prev_travel_time'];
+        $node->field_prev_distance[LANGUAGE_NONE][0]['value'] = $value['prev_distance'];
+      */
       node_save($node);
     }
 
@@ -3940,6 +4033,7 @@ function _get_bank_names($string) {
     $query->condition('n.title', '%' . db_like($string) . '%', 'LIKE');
     $query->condition('n.status', 1); // publish
     $query->fields('n', array('title'));
+    $query->addTag('node_distributor_access');
     $bank_names = $query->execute()->fetchAllKeyed(0, 0);
   }
   print json_encode($bank_names);
