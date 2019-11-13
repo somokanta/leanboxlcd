@@ -61,7 +61,10 @@ function fetch_cashier_attendance_api_data($cashier_attendance_data){
       $employee_code = $value['employee_code'];
       $attendance_lat = $value['attendance_lat'];
       $attendance_lon = $value['attendance_lon'];
-      $distance_from_warehouse_in_km = haversineGreatCircleDistance($lat_long['field_distributor_latitude_value'],$lat_long['field_distributor_longitude_value'],$attendance_lat,$attendance_lon);
+      
+      if(!empty($attendance_lat) && !empty($attendance_lon)){
+        $distance_from_warehouse_in_km = haversineGreatCircleDistance($lat_long['field_distributor_latitude_value'], $lat_long['field_distributor_longitude_value'], $attendance_lat, $attendance_lon);
+      }
       $attendance_datetime = $value['attendance_datetime'];
       $integration_datetime = $value['integration_datetime'];
 
@@ -89,7 +92,7 @@ function fetch_cashier_attendance_api_data($cashier_attendance_data){
         node_save($node_obj);
       }
       catch(Exception $e){
-        watchdog('cashier_attendance_data_exception', '<pre>' . print_r($e, TRUE) . '</pre>');
+        watchdog('cashier_attendance_data_exception', '<pre>' . print_r($e->getMessage(), TRUE) . '</pre>');
       }
     } // end of foreach()
 
