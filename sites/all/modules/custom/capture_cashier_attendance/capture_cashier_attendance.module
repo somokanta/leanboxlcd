@@ -159,7 +159,7 @@ function get_warehouse_lat_lang($distributor_id){
     if(!empty($distributor_id)){
      $query = db_select('node', 'van');
      $query->condition('van.type', 'van_stop_master');
-     $query->condition('van.title', '23466');
+     $query->condition('van.title', $distributor_id);
      $query->join('field_data_field_distributor_latitude', 'lat','lat.entity_id = van.nid');
      $query->join('field_data_field_distributor_longitude', 'lng','lng.entity_id = van.nid');
      $query->fields('lat', array('field_distributor_latitude_value'));
