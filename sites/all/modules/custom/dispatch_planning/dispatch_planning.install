@@ -2413,19 +2413,3 @@ function dispatch_planning_update_7145() {
     }
   }
 }
-function get_facility_code_of_distributor($distributor_id) {
-   $facility_code = '';
-  if (!empty($distributor_id))  {
-    $query = db_select('users', 'u');
-    $query->innerjoin('field_data_field_distributor', 'd', 'd.entity_id = u.uid');
-    $query->condition('d.field_distributor_value', $distributor_id, '=');
-    $query->innerjoin('field_data_field_facility_code', 'facility_code', 'facility_code.entity_id = u.uid');
-    $query->fields('facility_code', array('field_facility_code_tid'));
-    $facility_term_id = $query->execute()->fetchField();
-    if (!empty($facility_term_id)) {
-        $term_obj = taxonomy_term_load($facility_term_id);
-        $facility_code = $term_obj->name;
-    }
-  }
-  return $facility_code;
-}
