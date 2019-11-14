@@ -23,6 +23,11 @@ function dispatch_planning_schema() {
         'type' => 'varchar',
         'length' => 255,
       ),
+      'facility_code' => array(
+        'description' => 'facility_code',
+        'type' => 'varchar',
+        'length' => 150,
+      ),  
     ),
     'primary key' => array('id'),
   );
@@ -2393,4 +2398,19 @@ function dispatch_planning_update_7144() {
   );
 
   db_create_table('map_my_india_api_log', $schema['map_my_india_api_log']);
+}
+
+function dispatch_planning_update_7145() {
+     $fields = array(
+     'facility_code' => array(
+        'description' => 'facility_code',
+        'type' => 'varchar',
+        'length' => 100,
+      ),
+  );
+  foreach ($fields as $key => $field) {
+    if (!db_field_exists('trip_id_sequence', $key)) {
+      db_add_field('trip_id_sequence', $key, $field);
+    }
+  }
 }
