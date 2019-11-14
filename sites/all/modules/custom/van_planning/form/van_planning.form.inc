@@ -2452,11 +2452,12 @@ function _create_van_submit($form, &$form_state) {
 //***************************************** PREVAN DATA END****************************************//
 //************************************ DISPATCH DATA START****************************************//
         $txn = db_transaction();
-
+        $distributor_facility_code = get_facility_code_of_distributor($dis_id);
         $query = db_select('trip_id_sequence', 'ts');
         $query->forUpdate();
         $query->addField('ts', 'next_id');
-        $query->condition('ts.distributor_id', $dis_id);
+        //$query->condition('ts.distributor_id', $dis_id);
+        $query->condition('ts.facility_code', $distributor_facility_code);
         $trip_id = $query->execute()->fetchField();
 
 
@@ -2464,14 +2465,16 @@ function _create_van_submit($form, &$form_state) {
           // Increment the next_value.
           db_update('trip_id_sequence')
             ->fields(array('next_id' => $trip_id + 1))
-            ->condition('distributor_id', $dis_id)
+            // ->condition('distributor_id', $dis_id)
+            ->condition('facility_code', $distributor_facility_code)    
             ->execute();
         }
         else {
           $trip_id = 1;
           $insert = db_insert('trip_id_sequence')
             ->fields(array(
-            'distributor_id' => $dis_id,
+            //'distributor_id' => $dis_id,
+            'facility_code' => $distributor_facility_code,  
             'next_id' => $trip_id + 1
           ));
           $insert->execute();
