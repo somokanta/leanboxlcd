@@ -2144,7 +2144,7 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
     // Increment the next_value.
     db_update('trip_id_sequence')
       ->fields(array('next_id' => $trip_id + 1))
-      ->condition('facility_code', $distributor_facility_code);      
+      ->condition('facility_code', $distributor_facility_code)      
      // ->condition('distributor_id', $distributor_id)
       ->execute();
   }
