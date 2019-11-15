@@ -2247,6 +2247,9 @@ function _create_van_validate($form, &$form_state) {
       $form_state['error_occur'] = 1;
       drupal_set_message(t('Please enter a valid vehicle number'), 'error');
     }
+    if(!isset($_SESSION['park_stop'][$group])){
+      form_set_error('form', "Please click on Calculate Time & Distance and select the Delivery boys."); 
+    }
 
     $hht_array[] = $hht_id;
   }
