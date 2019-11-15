@@ -232,7 +232,7 @@ function _edit_trip_delivered_callback_form($form, &$form_state) {
         if(empty($vrs_status) && $vrs_status!=0) {
             drupal_set_message(t("Invalid Trip ID:$trip_number"), 'error');
         }
-        else if($vrs_status === 0) {
+        else if($vrs_status == 0) {
            drupal_set_message(t('You cannot edit because this trip is Delivery confirmation done.'), 'error');
         }
         else if($vrs_status == 1) {
