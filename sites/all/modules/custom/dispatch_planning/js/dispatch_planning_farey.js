@@ -4,6 +4,7 @@
             $("div.error-msg").hide();
             $(".form-submit").show();
             $('.sku_reason_list').prop('disabled', 'disabled');
+            $('.cashier_short_list').prop('disabled', 'disabled');
 //$(".sku_reason_list").each(function () {
 //    
 //}
