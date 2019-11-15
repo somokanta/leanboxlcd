@@ -145,14 +145,9 @@
                     var to_be_colelcted = parseFloat($(this).find('.short').attr('data'));
                     var row_total = to_be_colelcted - sum;
                     row_total = row_total.toFixed(2);
-                    row_total_previous_value = row_total;
-                    row_total = Math.abs(row_total);
                     // Difference in RS 1  Short amt will be greater than RS 1
                     if (row_total <= 1 && row_total >= 0) {
                         row_total = 0;
-                    }
-                    else {
-                        row_total = row_total_previous_value;
                     }
                      /*Calculate "Short" at Bill level only IF Actual Cash collected =0.
                     // If Actual Cash collected > 0 then Short at bill level should be = 0.*/
@@ -229,8 +224,6 @@
                 total_s_register = parseFloat($('.total_cashier_debit_value').attr('total_sregister'));
                 asset_total = parseFloat($('.total_cashier_debit_value').attr('asset_total'));
                 excess_total = parseFloat($('.total_cashier_debit_value').attr('excess_value'));
-                // sum of claimed gs
-                sum_claimed_gs = parseFloat($('.total_cashier_debit_value').attr('sum_claimed_gs'));
                 //alert(excess_total);
                 //if (calculated_total_sum>total_s_register) {
                 //alert("Total to be collected should be greater than Total Cash + Total Cheque + Total Signed Bill + Total Short.")
@@ -241,7 +234,7 @@
                 // console.log(calculated_total_sum);
                 $(".total_cashier_cash_short").val(to_c_short);
                 initial_debit_value = total_cashier_short_value;
-                debit_val = (parseFloat(initial_debit_value) + parseFloat(to_c_short) + parseFloat(asset_total) + parseFloat(sum_claimed_gs)- excess_total).toFixed(2) ;
+                debit_val = (parseFloat(initial_debit_value) + parseFloat(to_c_short) + parseFloat(asset_total)- excess_total).toFixed(2) ;
                 $(".total_cashier_debit_value").val(debit_val);
             }
             $(".allownumericwithoutdecimal").on("keypress keyup blur paste", function (event) {
