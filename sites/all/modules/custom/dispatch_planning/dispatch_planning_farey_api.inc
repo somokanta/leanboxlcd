@@ -177,25 +177,36 @@ function fetch_dispatch_planning_api_data($data) {
         
           // new change - added on 31 Oct, 2019
         if(!empty($data['latitude']) && !empty($data['longitude']) ){
-          watchdog('Lat: ', '<pre>' . print_r($data['latitude'], TRUE) . '</pre>');
-          watchdog('Long: ', '<pre>' . print_r($data['longitude'], TRUE) . '</pre>');
-          $api_result = get_reverse_geocode_data($data['latitude'], $data['longitude']); // call to mapmyindia api //reverse_geocode_results($data['latitude'], $data['longitude']);
-          watchdog('map my india api result: ', '<pre>' . print_r($api_result, TRUE) . '</pre>');
-          if(!empty($api_result)){
-            $decoded_locality = $api_result[0]->locality; // area
-            $decoded_sublocality = $api_result[0]->subLocality; //subarea
-            $decoded_street = $api_result[0]->street;
+          try{
+            $api_result = get_reverse_geocode_data($data['latitude'], $data['longitude'], $data['referenceNumber']); // call to mapmyindia api //reverse_geocode_results($data['latitude'], $data['longitude']);
+            watchdog('map my india api result: ', '<pre>' . print_r($api_result, TRUE) . '</pre>');
+            if(!empty($api_result)){
+              $decoded_locality = $api_result[0]->locality; // area
+              $decoded_sublocality = $api_result[0]->subLocality; //subarea
+              $decoded_street = $api_result[0]->street;
 
-            db_update('dispatch_planning_api_data')
-              ->fields(array(
-                  'rev_geocode_area' => isset($decoded_locality) ? $decoded_locality : '',
-                  'rev_geocode_sub_area' => isset($decoded_sublocality) ? $decoded_sublocality : '',
-                  'rev_geocode_street' => isset($decoded_street) ? $decoded_street : ''
-              ))
-              ->condition('referenceNo', $data['referenceNumber'], '=')
-              ->execute();
+              db_update('dispatch_planning_api_data')
+                ->fields(array(
+                    'rev_geocode_area' => isset($decoded_locality) ? $decoded_locality : '',
+                    'rev_geocode_sub_area' => isset($decoded_sublocality) ? $decoded_sublocality : '',
+                    'rev_geocode_street' => isset($decoded_street) ? $decoded_street : ''
+                ))
+                ->condition('referenceNo', $data['referenceNumber'], '=')
+                ->execute();
+            }
           }
-       }
+          catch(Exception $e){
+            //emailer for notification start
+            global $base_url;
+            $bill_ref_no = $data['referenceNumber'];
+            $params['subject'] = "MapMyIndia API Exception on $base_url for Bill Reference No: $bill_ref_no";
+            $params['body'] = $e->getMessage();
+            $mail_to = variable_get('mapmyindia_exception_email',"abhishek.r@iksula.com,rahul.maurya@iksulaops.com"); //kusha@leanbox.in
+            $from = "MIS.HELPDESK@leanbox.in";
+            drupal_mail('dispatch_planning', 'bill_date_missing', $mail_to, LANGUAGE_NONE, $params, $from);
+            //emailer for notification end
+          }
+        }
 
       }
       
@@ -293,17 +304,40 @@ function _get_dispatch_qty_undeliver($bill_row_id) {
 
 
 // new change - added on 31 Oct, 2019
-function get_reverse_geocode_data($latitude, $longitude){
+function get_reverse_geocode_data($latitude, $longitude, $reference_number){
   $api_result = array();
   if(!empty($latitude) && !empty($longitude)){
-     $license_key = variable_get('mapmyindia_rest_key', 'z94i9hvuqcsz7amywt76aknw8dx9o15z');   
-     $url = "https://apis.mapmyindia.com/advancedmaps/v1/$license_key/rev_geocode?lng=$longitude&lat=$latitude";
-     $options = array('method' => 'GET');
-     $result = drupal_http_request($url, $options);
-     if($result->status_message === 'OK'){
-        $decoded_data = json_decode($result->data);
-        $api_result = $decoded_data->results;
-     }
+      $license_key = variable_get('mapmyindia_rest_key', 'z94i9hvuqcsz7amywt76aknw8dx9o15z');   
+      $url = "https://apis.mapmyindia.com/advancedmaps/v1/$license_key/rev_geocode?lng=$longitude&lat=$latitude";
+      $sql_ins_id = insert_map_my_india_api_log($url, $reference_number);
+      $options = array('method' => 'GET');
+      $result = drupal_http_request($url, $options);
+      update_map_my_india_api_log($sql_ins_id, json_encode($result));
+      if($result->status_message === 'OK'){
+          $decoded_data = json_decode($result->data);
+          $api_result = $decoded_data->results;
+      }
   }
   return $api_result;
+}
+
+function insert_map_my_india_api_log($url, $reference_number){
+  $sql_ins_id = db_insert('map_my_india_api_log')
+     ->fields(array(
+        'reference_number' => $reference_number,
+        'request_data' => $url,
+        'request_time' => time()
+     ))
+     ->execute();
+
+  return $sql_ins_id;
+}
+
+function update_map_my_india_api_log($sql_ins_id, $response_json){
+  db_update('map_my_india_api_log')
+     ->fields(array(
+     'response_data' => $response_json,
+     ))
+     ->condition('id', $sql_ins_id, '=')
+     ->execute();
 }

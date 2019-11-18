@@ -24,7 +24,7 @@ function custom_order_box_id_schema() {
       'crate_id' => array(
         'description' => t('Crate Id'),
         'type' => 'varchar',
-        'length' => 255,
+        'length' => 4000,
         'not null' => TRUE,
         'default' => '',
       ),
@@ -66,6 +66,21 @@ function custom_order_box_id_update_7120() {
        'description' => t('Facility Code'),
        'type' => 'varchar',
        'length' => 100,
+    ),  
+  );
+  foreach ($fields as $key => $field) {
+    if (!db_field_exists('outlet_order_crate', $key)) {
+      db_add_field('outlet_order_crate', $key, $field);
+    }
+  }
+}
+
+function custom_order_box_id_update_7121() {
+  $fields = array(
+   'distributor_id' => array(
+       'description' => t('Distributor ID'),
+       'type' => 'varchar',
+       'length' => 15,
     ),  
   );
   foreach ($fields as $key => $field) {

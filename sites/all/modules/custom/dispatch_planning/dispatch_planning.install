@@ -23,6 +23,11 @@ function dispatch_planning_schema() {
         'type' => 'varchar',
         'length' => 255,
       ),
+      'facility_code' => array(
+        'description' => 'facility_code',
+        'type' => 'varchar',
+        'length' => 150,
+      ),    
     ),
     'primary key' => array('id'),
   );
@@ -2352,6 +2357,59 @@ function dispatch_planning_update_7143() {
     }
     if (!db_field_exists('inventory_versioning_api_data', $key)) {
       db_add_field('inventory_versioning_api_data', $key, $field);
+    }
+  }
+}
+
+function dispatch_planning_update_7144() {
+  $schema['map_my_india_api_log'] = array(
+    'description' => 'describes Api log for Map my india',
+    'fields' => array(
+      'id' => array(
+        'description' => t('Id Primary Key'),
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'reference_number' => array(
+        'description' => t('Reference Number'),
+        'type' => 'varchar',
+        'length' => 50,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'request_data' => array(
+        'description' => t('Request Data'),
+        'type' => 'text',
+        'size'=> 'medium'
+      ),
+      'response_data' => array(
+        'description' => t('API Response'),
+        'type' => 'text',
+        'size'=> 'medium'
+      ),
+      'request_time' => array(
+        'description' => t('API Request time'),
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      )
+    ),
+    'primary key' => array('id'),
+  );
+
+  db_create_table('map_my_india_api_log', $schema['map_my_india_api_log']);
+}
+function dispatch_planning_update_7145() {
+     $fields = array(
+     'facility_code' => array(
+        'description' => 'facility_code',
+        'type' => 'varchar',
+        'length' => 150,
+      ),
+  );
+  foreach ($fields as $key => $field) {
+    if (!db_field_exists('trip_id_sequence', $key)) {
+      db_add_field('trip_id_sequence', $key, $field);
     }
   }
 }

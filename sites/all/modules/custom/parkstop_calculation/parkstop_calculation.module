@@ -133,8 +133,8 @@ function parkstop_calculation_api($bills_nid, $distributor_id, $prevan = 'Van') 
     $req['Van']['StartLocationArray'][$key]['To'] = $val['bill_nid'];
     $req['Van']['StartLocationArray'][$key]['Distance'] = $distance;
     $req['Van']['StartLocationArray'][$key]['From'] = $start['name'];
-    //$req['Van']['StartLocationArray'][$key]['To Lat Long'] = $val['lat'] . "," . $val['lng'];
-    //$req['Van']['StartLocationArray'][$key]['Lat Long'] = $start['lat'] . "," . $start['lng'];
+    $req['Van']['StartLocationArray'][$key]['To Lat Long'] = $val['lat'] . "," . $val['lng'];
+    $req['Van']['StartLocationArray'][$key]['Lat Long'] = $start['lat'] . "," . $start['lng'];
   }
 
 
@@ -147,8 +147,8 @@ function parkstop_calculation_api($bills_nid, $distributor_id, $prevan = 'Van') 
         $req['Van']['StopDetails'][$i]['To'] = $val['bill_nid'];
         $req['Van']['StopDetails'][$i]['Distance'] = $distance;
         $req['Van']['StopDetails'][$i]['From'] = $v['bill_nid'];
-        //$req['Van']['StopDetails'][$i]['To Lat Long'] = $val['lat'] . "," . $val['lng'];
-        //$req['Van']['StopDetails'][$i]['Lat Long'] = $v['lat'] . "," . $v['lng'];
+        $req['Van']['StopDetails'][$i]['To Lat Long'] = $val['lat'] . "," . $val['lng'];
+        $req['Van']['StopDetails'][$i]['Lat Long'] = $v['lat'] . "," . $v['lng'];
         $i++;
       }
     }

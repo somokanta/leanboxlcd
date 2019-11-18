@@ -232,7 +232,7 @@ function _edit_trip_delivered_callback_form($form, &$form_state) {
         if(empty($vrs_status) && $vrs_status!=0) {
             drupal_set_message(t("Invalid Trip ID:$trip_number"), 'error');
         }
-        else if($vrs_status === 0) {
+        else if($vrs_status == 0) {
            drupal_set_message(t('You cannot edit because this trip is Delivery confirmation done.'), 'error');
         }
         else if($vrs_status == 1) {
@@ -415,6 +415,33 @@ function _edit_trip_delivered_callback_form($form, &$form_state) {
                // collection mode
                $lists = array('' => '-select-', 'signed' => 'Signed', 'cheque' => 'Cheque', 'cash' => 'Cash', 'cash,cheque' => 'Cash,Cheque');
 
+              // ================ Delivery Boy Change Start =================== 
+              $query = db_select('dispatch_planning_api_data', 'ad');
+              $query->condition('ad.runsheet_number', $trip_number);
+              $query->condition('ad.bill_number', $bill_number);
+              $query->fields('ad', array('delivery_boy', 'res_delivery_boy', 'res_delivery_boy_edit'));
+              $delivery_boy = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+              $delivery_boy_key = array_keys($delivery_boy);
+              $select = array('' => 'Select');
+              $delivery_boy_arr = explode(",", $delivery_boy[0]['delivery_boy']);
+              $delivery_boys = array();
+              if (!empty($delivery_boy_arr)) {
+                foreach ($delivery_boy_arr as $deliveryboy_key => $deliveryboy_value) {
+                  $delivery_boys[$deliveryboy_value] = $deliveryboy_value;
+                }
+                $res_delivery_boy = $delivery_boy[0]['res_delivery_boy_edit']?$delivery_boy[0]['res_delivery_boy_edit']:$delivery_boy[0]['res_delivery_boy'];
+              }
+              $del_boy_val = array_values($delivery_boy_arr);
+              $form['delivery_boy'] = array(
+                '#type' => 'select',
+                '#title' => t('Delivery Boy'),
+                '#prefix' => '<div class="form_row form_row2"><div id="get_tripid_dropdown" class="col_3" style="width:200px">',
+                '#options' => $select + $delivery_boys,
+                '#default_value' => $res_delivery_boy,
+                '#suffix' => '</div>',
+              );
+              // ================ Delivery Boy Change End =================
+
                if (!empty($order_status) && $order_status == 'undeliver') {
                   $form['collection_mode'] = array(
                     '#type' => 'value',
@@ -441,30 +468,7 @@ function _edit_trip_delivered_callback_form($form, &$form_state) {
                  
               $col_mode = strtolower($derived_payment_outcome);
                 
-              $query = db_select('dispatch_planning_api_data', 'ad');
-              $query->condition('ad.runsheet_number', $trip_number);
-              $query->condition('ad.bill_number', $bill_number);
-              $query->fields('ad', array('delivery_boy', 'res_delivery_boy', 'res_delivery_boy_edit'));
-              $delivery_boy = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
-              $delivery_boy_key = array_keys($delivery_boy);
-              $select = array('' => 'Select');
-              $delivery_boy_arr = explode(",", $delivery_boy[0]['delivery_boy']);
-              $delivery_boys = array();
-              if (!empty($delivery_boy_arr)) {
-                foreach ($delivery_boy_arr as $deliveryboy_key => $deliveryboy_value) {
-                  $delivery_boys[$deliveryboy_value] = $deliveryboy_value;
-                }
-                $res_delivery_boy = $delivery_boy[0]['res_delivery_boy_edit']?$delivery_boy[0]['res_delivery_boy_edit']:$delivery_boy[0]['res_delivery_boy'];
-              }
-              $del_boy_val = array_values($delivery_boy_arr);
-              $form['delivery_boy'] = array(
-                '#type' => 'select',
-                '#title' => t('Delivery Boy'),
-                '#prefix' => '<div class="form_row form_row2"><div id="get_tripid_dropdown" class="col_3" style="width:200px">',
-                '#options' => $select + $delivery_boys,
-                '#default_value' => $res_delivery_boy,
-                '#suffix' => '</div>',
-              );
+              // ==== removed delivery boy form element code from here and moved it before if ======
 
               $form['collection_mode'] = array(
                     '#type' => 'select',
@@ -997,18 +1001,16 @@ function _edit_trip_delivered_callback_form_validate($form, &$form_state) {
       }
    }
 
-
-   if ($order_status != 'undeliver') {
-      $delivery_boy = $form_state['values']['delivery_boy'];
-        if(empty($delivery_boy)) {
-          form_set_error('delivery_boy', t('Delivery boy field can not be empty.'));
+    $delivery_boy = $form_state['values']['delivery_boy'];
+    if(empty($delivery_boy)) {
+      form_set_error('delivery_boy', t('Delivery boy field can not be empty.'));
     }
-
+    if ($order_status != 'undeliver') {
       $collc_mode = $form_state['values']['collection_mode'];
       if(empty($collc_mode)) {
         form_set_error('collection_mode', t('Collection mode can not be empty.'));
       }
-   }
+    }
 
    if ($collc_mode == 'cash') {
       $cash_amt = $form_state['values']['cash_amt'];
