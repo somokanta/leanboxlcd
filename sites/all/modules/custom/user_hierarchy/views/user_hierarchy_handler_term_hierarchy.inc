@@ -51,6 +51,23 @@ class user_hierarchy_handler_term_hierarchy extends views_handler_field {
         }
         if (!empty($view) && !empty($selected_facility_code)) {
             // Fetch all distributor ids of selected facility code
+            $query = db_select('field_data_field_central_distributorid_ref', 'cdr');
+            $query->join('field_data_field_distributor', 'distributor', 'cdr.entity_id = distributor.entity_id');
+            $query->join('field_data_field_facility_code', 'facility_code', 'facility_code.entity_id = distributor.entity_id');
+            $query->condition('facility_code.field_facility_code_tid', $selected_facility_code, '=');
+            $query->fields('distributor', array('field_distributor_value'));
+            $facility_distributor_ids = $query->execute()->fetchAllKeyed(0, 0); // will get child uids=>rs_name
+            if (!empty($facility_distributor_ids)) {
+                $custom_tables = explode(',', variable_get('custom_tables'));
+                if (!empty($custom_tables)) {
+                    if (false !== $table_key = array_search($view->base_table, $custom_tables)) {
+                        $this->query->add_where(0, "$custom_tables[$table_key].distributor_id", $facility_distributor_ids, 'IN');
+                    }
+                }
+                if ($view->base_table == 'node') {
+                    $this->query->add_where(0, 'node.uid', $facility_distributor_ids);
+                }
+            }
         }
     }
 
@@ -98,7 +115,7 @@ class user_hierarchy_handler_term_hierarchy extends views_handler_field {
             $vocabulary = taxonomy_vocabulary_machine_name_load('facility_code');
             $terms_obj = entity_load('taxonomy_term', FALSE, array('vid' => $vocabulary->vid));
             if (!empty($terms_obj)) {
-                foreach($terms_obj as $key=>$value){
+                foreach ($terms_obj as $key => $value) {
                     $facility[$value->tid] = $value->name;
                 }
                 $facility = array('' => 'Select') + $facility;
