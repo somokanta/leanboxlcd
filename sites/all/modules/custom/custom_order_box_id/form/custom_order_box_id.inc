@@ -82,7 +82,7 @@ function custom_order_box_id_upload_form_validate($form, &$form_state) {
                     if (empty($exist_bills[0])) {
                         $error_message .= "Bill Number Ref $bill_no does not exist at line " . ($key + 2) . '<br>';
                     }
-                    $crate_ids = check_crate_id_exist($outlet_order_no, $distributor_id); // check crate id in outlet order crate is exist or not 
+                    $crate_ids = check_crate_id_exist($outlet_order_no,$bill_no, $distributor_id); // check crate id in outlet order crate is exist or not 
                     if (empty($crate_ids[0])) {
                         $error_message .= "Invalid Order Number/Bill Number mapping Or Crate Id for  $bill_no does not exist at line " . ($key + 2) . '<br>';
                     }
@@ -178,7 +178,7 @@ function custom_order_box_id_process($max, $data, $distributor_id, $file_name, &
         $order_date = trim($value['Order Date']); //Order Date//
         $bill_number = trim($value['Bill Ref. No']); //Bill Ref. No
 
-        $crate_id = check_crate_id_exist($outlet_order_ref, $distributor_id);
+        $crate_id = check_crate_id_exist($outlet_order_ref,$bill_number,$distributor_id);
 
         if (!empty($outlet_order_ref)) {
             $query = db_select('node', 'n');
@@ -205,12 +205,30 @@ function custom_order_box_id_process($max, $data, $distributor_id, $file_name, &
     }
 }
 
-function check_crate_id_exist($outlet_order_no, $distributor_id) {
+/*function check_crate_id_exist($outlet_order_no, $distributor_id) {
 
     if (!empty($outlet_order_no) && !empty($distributor_id)) {
         $query = db_select('outlet_order_crate', 'ooc');
         $query->condition('ooc.outlet_order_no', $outlet_order_no);
         $query->condition('ooc.distributor_id', $distributor_id);
+        $query->fields('ooc', array('crate_id'));
+        $results = $query->execute()->fetchCol();
+    }
+    return $results;
+}*/
+function check_crate_id_exist($outlet_order_no, $bill_number, $distributor_id) {
+    if (!empty($outlet_order_no) && !empty($distributor_id) && !empty($bill_number)) {
+        $query = db_select('outlet_order_crate', 'ooc');
+        $query->condition('ooc.outlet_order_no', $outlet_order_no);
+        // Join with party name table to validate party code of bill number
+        $query->join('field_data_field_party_name', 'party_name', 'party_name.field_party_name_value = ooc.party_name');
+        // join with party code reference field in sales register
+        $query->join('field_data_field_party_code_reference', 'party_ref', 'party_ref.field_party_code_reference_nid = party_name.entity_id');
+        // join with bill number
+        $query->join('node', 'sales_register', 'sales_register.nid = party_ref.entity_id');
+        $query->condition('sales_register.type', 'sales_register_data');
+        $query->condition('sales_register.uid', $distributor_id);
+        $query->condition('sales_register.title', $bill_number);
         $query->fields('ooc', array('crate_id'));
         $results = $query->execute()->fetchCol();
     }
