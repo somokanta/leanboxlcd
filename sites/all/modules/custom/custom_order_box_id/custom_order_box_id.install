@@ -74,3 +74,18 @@ function custom_order_box_id_update_7120() {
     }
   }
 }
+
+function custom_order_box_id_update_7121() {
+  $fields = array(
+   'distributor_id' => array(
+       'description' => t('Distributor ID'),
+       'type' => 'varchar',
+       'length' => 15,
+    ),  
+  );
+  foreach ($fields as $key => $field) {
+    if (!db_field_exists('outlet_order_crate', $key)) {
+      db_add_field('outlet_order_crate', $key, $field);
+    }
+  }
+}
