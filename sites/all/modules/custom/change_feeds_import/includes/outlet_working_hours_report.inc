@@ -7,7 +7,7 @@
  */
 
 function working_hours_form($form, &$form_state) {
-$form['#attached']['css'][] = drupal_get_path('module', 'outlet_working_hours') . '/css/outlet_working_hours.css';
+$form['#attached']['css'][] = drupal_get_path('module', 'change_feeds_import') . '/css/outlet_working_hours.css';
   if (isset($_GET['hul_code'])) {
     $hul_code = $_GET['hul_code'];
   }
