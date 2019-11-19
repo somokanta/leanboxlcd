@@ -462,10 +462,11 @@ function change_feeds_import_menu() {
         'file' => 'includes/outlet_working_hours.inc',
     );
 
-    $items['hul-code/autocomplete'] = array(
+     $items['hul-code/autocomplete/%'] = array(
         'title' => 'trip_autocomplete',
         'page callback' => '_get_hul_code_autocomplete',
         'access callback' => TRUE,
+        'page arguments' => array(2),
         'type' => MENU_CALLBACK,
     );
 
@@ -3707,6 +3708,7 @@ function get_van_pl($van, $day, $name) {
  * @param type $batch_redirect
  */
 function change_feeds_import_views_data_export_batch_alter(&$batch, &$batch_redirect) {
+    
     watchdog('cron1', '<pre>' . print_r(array(), TRUE) . '</pre>');
 
     $views_names = array('impact_delivery_cron_2', 'impact_party_master', 'impact_delivery_cron_evening_2', 'impact_party_master_morning'); //  Download files for this Views only
@@ -4255,22 +4257,25 @@ function check_exsiting_record_for_party_code($party_code, $distributor_id) {
  * 
  * @param type $string
  */
-function _get_hul_code_autocomplete($string = '') {
-    $result = array();
+function _get_hul_code_autocomplete($distributor_id,$string = '') {
+   $result = array();
 
-    if ($string) {
-        $query = db_select('node', 'n');
-        $query->condition('n.type', 'hul_code_master');
-        $query->addField('n', 'title', 'hul_code');
-        $query->condition('n.title', db_like($string) . '%', 'LIKE');
-        $query->fields('n', array('title'));
-        $query->range(0, 15);
-        $query->addTag('node_distributor_access');
-        $result = $query->execute()->fetchAllKeyed(0, 0);
-    }
+    watchdog('hulcode', '<pre>' . print_r(array($distributor_id,$string), TRUE) . '</pre>');
+   if ($string) {
+      $query = db_select('node', 'n');
+      $query->condition('n.type', 'hul_code_master');
+      $query->condition('n.uid', $distributor_id);
+      $query->addField('n', 'title', 'hul_code');
+      $query->condition('n.title', db_like($string) . '%', 'LIKE');
+      $query->fields('n', array('title'));
+      $query->range(0, 15);
+      //$query->addTag('node_distributor_access');
+      $result = $query->execute()->fetchAllKeyed(0, 0);
+   }
 
-    drupal_json_output($result);
+   drupal_json_output($result);
 }
+
 
 function call_bank_master_api($node) {
     $bank_name = $node->title;
