@@ -2200,7 +2200,7 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
   $node = node_submit($node); // Prepare node for saving
   node_save($node);
 
-  if (!empty($total_distance) && !empty($total_travel_time)) {
+  if (!empty($node->title)) { //!empty($total_distance) && !empty($total_travel_time)
     update_parkstop_plotting_log('dispatch', $trip_id, $distributor_id);
   }
 
