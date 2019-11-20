@@ -1638,7 +1638,7 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
     if ($entity->feeds_item->id == 'sku7_code_master_leanbox') {
         $query = db_select('node', 'n');
         $query->condition('n.type', 'product_validation_master');
-        $query->condition('n.uid', $distributor_id);
+        //$query->condition('n.uid', $distributor_id);
         $query->fields('n', array('title'));
         $product_list_array = $query->execute()->fetchAllKeyed(0, 0);
 
@@ -1731,7 +1731,7 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
 
         // sub category validation
         $sub_category = $item['sub category'];
-        $check_sub_category_nid = check_product_sub_category_exist($sub_category, $distributor_id);
+        $check_sub_category_nid = check_product_sub_category_exist($sub_category);
         if (!empty($sub_category)) {
             if (empty($check_sub_category_nid)) {
                 drupal_set_message("Please enter correct sub category for sku $sku", 'error');
@@ -1743,7 +1743,7 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
 
         // sub-putaway group validation
         $sub_putaway_grp = $item['sub-putaway group'];
-        $check_sub_putaway_grp_nid = check_sub_putaway_group_exist($sub_putaway_grp, $distributor_id);
+        $check_sub_putaway_grp_nid = check_sub_putaway_group_exist($sub_putaway_grp);
         //temporary fix
 //    if(!empty($sub_putaway_grp)) {
 //      if(empty($check_sub_putaway_grp_nid)) {
@@ -1757,7 +1757,7 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
         //temporary fix
         // Brand Validation.
         if (!empty($item['brand'])) {
-            $brand = brand_validate($distributor_id, $item['brand']);
+            $brand = brand_validate($item['brand']);
             if (empty($brand)) {
                 drupal_set_message("Brand " . $item['brand'] . " does not exist in Brand Master", 'error');
                 $entity->feeds_item->skip = TRUE;
@@ -2550,7 +2550,7 @@ function check_product_sub_category_exist($title, $distributor_id) {
     $query->condition('n.type', 'product_sub_category_master');
     $query->fields('n', array('nid'));
     $query->condition('n.title', $title);
-    $query->condition('n.uid', $distributor_id);
+   // $query->condition('n.uid', $distributor_id);
     $results = $query->execute()->fetchField();
     return $results;
 }
@@ -2570,7 +2570,7 @@ function check_sub_putaway_group_exist($title, $distributor_id) {
     $query->condition('n.type', 'putaway_group_master');
     $query->fields('n', array('nid'));
     $query->condition('n.title', $title);
-    $query->condition('n.uid', $distributor_id);
+    //$query->condition('n.uid', $distributor_id);
     $results = $query->execute()->fetchField();
     return $results;
 }
@@ -4198,7 +4198,7 @@ function drs_invoice_vs_actual_dispatched_report_table($trip_id, $distributor_id
 function brand_validate($distributor_id, $sku_brand) {
     $query = db_select('node', 'n');
     $query->condition('n.type', 'brand_master');
-    $query->condition('n.uid', $distributor_id);
+    //$query->condition('n.uid', $distributor_id);
     $query->condition('n.title', $sku_brand, '=');
     $query->fields('n', array('title'));
     $result = $query->execute()->fetchField();
