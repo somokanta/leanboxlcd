@@ -4195,7 +4195,7 @@ function drs_invoice_vs_actual_dispatched_report_table($trip_id, $distributor_id
   } */
 
 // Check Brand Master value and SKU7 Code Master uploader Brand column value.
-function brand_validate($distributor_id, $sku_brand) {
+function brand_validate($sku_brand) {
     $query = db_select('node', 'n');
     $query->condition('n.type', 'brand_master');
     //$query->condition('n.uid', $distributor_id);
