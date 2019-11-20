@@ -2331,7 +2331,7 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
     // Validate Payment Terms Importer
     if ($entity->feeds_item->id == 'payment_terms') {
         $title = $entity->title;
-        $res = check_node_title_exists($title, 'outlet_master');
+        $res = validate_outlet_master_data($title, $distributor_id);
         // Outlet Master node is updated for existing party code.
         // No new node will be created.
         if (empty($res)) {
@@ -2360,7 +2360,7 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
 
         $updated_by = $item['updated by'];
         $resource_type = 'PT-CT Incharge';
-        $resource_name = check_resource_name_exists($updated_by, $resource_type, $distributor_id);
+        $resource_name = check_resource_name_exists($updated_by, $resource_type, $central_distributor_id);
         if (empty($resource_name) && !empty($updated_by)) {
             drupal_set_message("Updated By name does not match with resource master - Resource type PT-CT Incharge for Party code: $entity->title.", 'error');
             $entity->feeds_item->skip = TRUE;
@@ -4242,12 +4242,13 @@ function check_resource_name_exists($title, $resource_type, $distributor_id) {
     $res = $query1->execute()->fetchField();
     return $res;
 }
-
+// Not required distributor id all reason masters
 function get_change_reason($title, $distributor_id) {
     $query = db_select('node', 'n');
     $query->condition('n.type', 'pt_ct_change_reason_master');
     $query->condition('n.title', $title);
-    $query->condition('n.uid', $distributor_id);
+    // Not required distributor id all reason masters
+    //$query->condition('n.uid', $distributor_id);
     $query->fields('n', array('title'));
     $res = $query->execute()->fetchField();
     return $res;
@@ -4785,4 +4786,15 @@ function check_valid_distributor($distributor_id) {
       }
   } 
   return 0;
+}
+function validate_outlet_master_data($title,$distributor_id) {
+  if (!empty($title) && !empty($distributor_id))   {
+    $query1 = db_select('node', 'n');
+    $query1->condition('n.type', 'outlet_master');
+    $query1->condition('n.title', $title);
+    $query1->fields('n', array('nid'));
+    $query1->condition('n.uid',$distributor_id);
+    $nid = $query1->execute()->fetchField();
+  }
+  return $nid;
 }
