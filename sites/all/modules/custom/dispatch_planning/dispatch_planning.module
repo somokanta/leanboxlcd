@@ -1984,7 +1984,7 @@ function dispatch_planning_form_save_validate($form, &$form_state) {
         global $base_url;
         $params['subject'] = "Dispatch Planning Python API Error on $base_url for van: $hht_id";
         $params['body'] = $python_api_response_data->error;
-        $mail_to = variable_get('parkstop_api_error_email',"abhishek.r@iksula.com,rahul.maurya@iksulaops.com"); //kusha@leanbox.in
+        $mail_to = variable_get('parkstop_api_error_email',"rahul.maurya@iksulaops.com"); //kusha@leanbox.in abhishek.r@iksula.com,
         $from = "MIS.HELPDESK@leanbox.in";
         drupal_mail('adhoc_task', 'bill_date_missing', $mail_to, LANGUAGE_NONE, $params, $from);
         //emailer for notification end
@@ -2196,7 +2196,7 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
   $node = node_submit($node); // Prepare node for saving
   node_save($node);
 
-  if (!empty($total_distance) && !empty($total_travel_time)) {
+  if (!empty($node->title)) { //!empty($total_distance) && !empty($total_travel_time)
     update_parkstop_plotting_log('dispatch', $trip_id, $distributor_id);
   }
 
