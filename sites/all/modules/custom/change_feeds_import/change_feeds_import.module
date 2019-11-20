@@ -2988,6 +2988,7 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
     $admin_views = explode(",", $admin_view_names);
     $central_distributor_master_views = explode(',', variable_get('central_distributor_master_views'));
     $logged_in_distributor_id = $distributor_id;
+     
    
     if (in_array('central_distributor', $user->roles)) {
         $central_distributor_id = $logged_in_distributor_id;
@@ -2999,6 +3000,10 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
          $central_distributor_id = get_central_distributor_id($logged_in_distributor_id);
          $distributor_ids[] = $central_distributor_id;
     }
+    if (in_array($view->name, $central_distributor_master_views)) {
+            $distributor_ids = array();
+            $distributor_ids[] = $central_distributor_id;
+     }
     $distributor_ids = array_unique($distributor_ids); 
 //  $views_array = array('central_bill_trip', 'channel_master_central_report' , 
 //    'central_picking_report' ,  'central_party_pack_report',  'central_unloading_form', 
@@ -3007,7 +3012,6 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
 //    'hul_code_distributor_wise', 'van_stop_master_report', 'update_sales_register_party_code',
 //    'central_outlet_master_report', 'central_party_pack_master_report','ofd_mailer','ofd_mailer2');
     //&& !in_array($view->name,$admin_views)
-
     if (!in_array($view->name, $views_array) && !in_array($view->name, $admin_views)) {
          foreach ($query->table_queue as $key => $val) {
             if (($val['table'] == 'node')) {
@@ -3041,7 +3045,7 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
     }
 
     // Alter the distributor id of role leanbox in ofd_mailer view.
-    $views_array = array('ofd_mailer', 'ofd_mailer2', 'lb_product_master');
+    $views_array = array('ofd_mailer', 'ofd_mailer2');
     //$dist_id = 23466;
     if (in_array($view->name, $views_array)) {
         foreach ($query->table_queue as $key => $val) {
