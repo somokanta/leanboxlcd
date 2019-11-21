@@ -10,7 +10,7 @@
 /**
  * Description of what my handler does.
  */
-class user_hierarchy_handler_term_hierarchy extends views_handler_field {
+class facility_code_filter_handler_term_hierarchy extends views_handler_field {
 
     /**
      * Determine if User Hierarchy field can be exposed.
@@ -36,25 +36,13 @@ class user_hierarchy_handler_term_hierarchy extends views_handler_field {
         global $user;
         $view = $this->view;
         $selected_distributor_id = $view->exposed_input['user_hierarchy_values'];
-        $selected_facility_code = $view->exposed_input['facility_code'];
-        if (!empty($view) && !empty($selected_distributor_id)) {
-            //Custom Table join query 
-            $custom_tables = explode(',', variable_get('custom_tables'));
-            if (!empty($custom_tables)) {
-                if (false !== $table_key = array_search($view->base_table, $custom_tables)) {
-                    $this->query->add_where(0, "$custom_tables[$table_key].distributor_id", $selected_distributor_id, '=');
-                }
-            }
-            if ($view->base_table == 'node') {
-                $this->query->add_where(0, 'node.uid', $selected_distributor_id);
-            }
-        }
-        /*if (!empty($view) && !empty($selected_facility_code)) {
+        $selected_facility_codes = $view->exposed_input['facility_code'];
+        if (!empty($view) && !empty($selected_facility_codes)) {
             // Fetch all distributor ids of selected facility code
             $query = db_select('field_data_field_central_distributorid_ref', 'cdr');
             $query->join('field_data_field_distributor', 'distributor', 'cdr.entity_id = distributor.entity_id');
             $query->join('field_data_field_facility_code', 'facility_code', 'facility_code.entity_id = distributor.entity_id');
-            $query->condition('facility_code.field_facility_code_tid', $selected_facility_code, '=');
+            $query->condition('facility_code.field_facility_code_tid', $selected_facility_codes, 'IN');
             $query->fields('distributor', array('field_distributor_value'));
             $facility_distributor_ids = $query->execute()->fetchAllKeyed(0, 0); // will get child uids=>rs_name
             if (!empty($facility_distributor_ids)) {
@@ -68,7 +56,7 @@ class user_hierarchy_handler_term_hierarchy extends views_handler_field {
                     $this->query->add_where(0, 'node.uid', $facility_distributor_ids);
                 }
             }
-        }*/
+        }
     }
 
     function render($values) {
@@ -90,27 +78,7 @@ class user_hierarchy_handler_term_hierarchy extends views_handler_field {
     // required for expose form  
     function exposed_form(&$form, &$form_state) {
         global $user;
-        if (in_array("administrator", $user->roles) || in_array("central_distributor", $user->roles) || in_array("super_central_distributor", $user->roles)) {
-            //$distributor_ids = get_distributor_ids();
-            $distributor_id = change_feeds_import_get_distributor_id($user->uid);
-            //unset($distributor_ids[$distributor_id]);
-            //$distributor_ids = array(''=>'All') + $distributor_ids;
-            $child_distributors = get_child_distributor_rsname($distributor_id);
-            $distributor_ids = array('' => 'Select') + $child_distributors;
-        }
-        if (isset($_GET['user_hierarchy_values'])) {
-            $default_value = $_GET['user_hierarchy_values'];
-        }
-
-        $form['expose']['user_hierarchy_values'] = array(
-            '#title' => t('Select Distributor Name'),
-            '#type' => 'select',
-            '#description' => 'Select Distributor Name.',
-            '#default_value' => $default_value,
-            '#options' => $distributor_ids,
-            '#weight' => -1,
-        );
-        /*if (in_array("super_central_distributor", $user->roles) || in_array("administrator", $user->roles)) {
+        if (in_array("super_central_distributor", $user->roles) || in_array("administrator", $user->roles)) {
 
             $vocabulary = taxonomy_vocabulary_machine_name_load('facility_code');
             $terms_obj = entity_load('taxonomy_term', FALSE, array('vid' => $vocabulary->vid));
@@ -124,11 +92,13 @@ class user_hierarchy_handler_term_hierarchy extends views_handler_field {
                 '#title' => t('Select Facility Code'),
                 '#type' => 'select',
                 '#description' => 'Facility Code.',
+                '#attributes'=>array('style'=>"height:70px;"),
+                '#multiple' => TRUE,
                 '#default_value' => $default_value,
                 '#options' => $facility,
                 '#weight' => 1,
             );
-        }*/
+        }
         return $form;
     }
 

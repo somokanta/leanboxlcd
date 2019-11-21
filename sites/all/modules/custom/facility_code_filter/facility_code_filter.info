@@ -1,0 +1,5 @@
+name = Facility Code Filter
+description = Facility Code Filter Hanlder.
+package = Custom
+core = 7.x
+files[] = views/facility_code_filter_handler_term_hierarchy.inc
