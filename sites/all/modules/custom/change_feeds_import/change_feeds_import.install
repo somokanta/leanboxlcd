@@ -596,6 +596,11 @@ function change_feeds_import_schema() {
         'description' => 'DATE AND TIME',
         'type' => 'int',
       ),
+      'distributor_id' => array(
+        'description' => 'distributor_id',
+        'type' => 'int',
+        'length' => 32,
+      ),   
     ),
     'primary key' => array('id'),
   );
@@ -646,6 +651,11 @@ function change_feeds_import_schema() {
         'type' => 'int',
         'length' => 32,
       ),
+      'created_by_distributor_id' => array(
+        'description' => 'created_by_distributor_id',
+        'type' => 'int',
+        'length' => 32,
+      ),   
     ),
     'primary key' => array('id'),
     'foreign keys' => array(
@@ -1511,4 +1521,46 @@ function change_feeds_import_update_7121() {
   );
    
   db_create_table('masters_api_log', $schema['masters_api_log']);  
+}
+
+function change_feeds_import_update_7127() {
+  $fields = array(
+    'created_by_distributor_id' => array(
+        'description' => 'created_by_distributor_id',
+        'type' => 'int',
+        'default'=>0,
+        'length' => 32,
+      ),
+  );
+  foreach ($fields as $key => $field) {
+    if (!db_field_exists('error_billing_data', $key)) {
+      db_add_field('error_billing_data', $key, $field);
+    }
+    if (!db_field_exists('custom_sales_data', $key)) {
+      db_add_field('custom_sales_data', $key, $field);
+    }
+    
+  }
+  $fields = array('distributor_id' => array(
+        'description' => 'distributor_id',
+        'type' => 'int',
+        'default'=>0,
+        'length' => 32,
+      ),
+  );
+  foreach ($fields as $key => $field) {
+    if (!db_field_exists('stage_billing_data', $key)) {
+      db_add_field('stage_billing_data', $key, $field);
+    }
+  }
+  
+}
+ 
+function change_feeds_import_update_7128() {
+  $fields = array("bill_number", "sku7_code", "distributor_id");
+  $table = "stage_billing_data";
+  $name = "check_duplicate_in_stage";
+  db_drop_unique_key($table, $name);
+  db_add_unique_key($table, $name, $fields);
+  //db_drop_unique_key($table, $name)
 }

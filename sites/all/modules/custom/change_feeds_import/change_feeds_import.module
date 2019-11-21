@@ -4805,3 +4805,26 @@ function validate_outlet_master_data($title,$distributor_id) {
   }
   return $nid;
 }
+function check_node_title_exist_of_distributor($title, $type,$sales_data = FALSE, $dis_id) {
+  $query1 = db_select('node', 'n');
+  $query1->condition('n.type', $type);
+  $query1->condition('n.title', $title);
+  $query1->condition('n.uid', $dis_id);
+  $query1->fields('n', array('nid'));
+  //$query1->addTag('node_uid');
+  if ($sales_data) {
+    $date = strtotime(date('Y-m-d'));
+    $query1->join('field_data_field_sr_bill_date', 'd', 'd.entity_id = n.nid');
+    $query1->condition('d.field_sr_bill_date_value', $date);
+  }
+  $nid = $query1->execute()->fetchField();
+  return $nid;
+}
+function get_distributor_name($distributor_id) {
+  $query = db_select('field_data_field_distributor', 'd');
+  $query->innerjoin('field_data_field_distributor_name', 'n', 'n.entity_id = d.entity_id');
+  $query->condition('n.entity_id', $distributor_id, '=');
+  $query->fields('n', array('field_distributor_name_value'));
+  $distributor_name = $query->execute()->fetchField();
+  return $distributor_name;
+}
