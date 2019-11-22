@@ -12,6 +12,15 @@ function custom_order_box_id_upload_form($form, &$form_state) {
     $user_id = $user->uid;
     $distributor_id = change_feeds_import_get_distributor_id($user_id);
     $form_state['distributor_id'] = $distributor_id;
+    //add distributor id columns for central distributor
+    if (in_array('central_distributor', $user->roles)) {
+        $template = 'order_vs_bill_import_template_central.csv';
+        $form_state['central_distributor_id'] = $distributor_id;
+    } else {
+        $form_state['central_distributor_id'] = get_central_distributor_id($distributor_id);
+        $template = 'order_vs_bill_import_template.csv';
+    }
+
     $form['file'] = array(
         '#type' => 'file',
         '#title' => t('Choose a CSV file for order vs bill upload'),
@@ -20,7 +29,7 @@ function custom_order_box_id_upload_form($form, &$form_state) {
         '#type' => 'markup',
         '#prefix' => '<div id="template_wrapper">',
         '#suffix' => '</div>',
-        '#markup' => l("Download Template", drupal_get_path('module', 'custom_order_box_id') . '/order_vs_bill_import_template.csv'),
+        '#markup' => l("Download Template", drupal_get_path('module', 'custom_order_box_id') . '/' . $template),
     );
     $form['submit'] = array(
         '#type' => 'submit',
@@ -31,15 +40,26 @@ function custom_order_box_id_upload_form($form, &$form_state) {
 }
 
 function custom_order_box_id_upload_form_validate($form, &$form_state) {
-
+    global $user;
     $file = file_save_upload('file', array(
         'file_validate_extensions' => array('csv'),
     ));
-    $header_array_from_xsd = array(
-        'Order Number',
-        'Order Date',
-        'Bill Ref. No'
-    );
+    //headers matching for different roles form diff distributors
+    if (in_array('central_distributor', $user->roles)) {
+        $header_array_from_xsd = array(
+            'Order Number',
+            'Order Date',
+            'Bill Ref. No',
+            'Distributor Name'
+        );
+    } else {
+        $header_array_from_xsd = array(
+            'Order Number',
+            'Order Date',
+            'Bill Ref. No'
+        );
+    }
+
     $distributor_id = $form_state['distributor_id'];
     if ($file) {
         if ($file = file_move($file, 'public://')) {// move from source to destination source = file object & destination = 'public dir'
@@ -59,33 +79,48 @@ function custom_order_box_id_upload_form_validate($form, &$form_state) {
                 $message = 'File Row Count should not be greater than 15000';
                 form_set_error('file_upload', t($message));
             } else {
-                if (!isset($res['unique_combination'])) {
-                    $res['unique_combination'] = array();
-                }
+
 
                 foreach ($data as $key => $value) {
+                    
                     $outlet_order_no = $value[0];
                     $order_date = $value[1];
                     $bill_no = $value[2];
+
+                    if (in_array('central_distributor', $user->roles)) {
+                        $distributor_name = $value[3];
+                        // passing distributor_name
+                        $distributor_id = validate_distributor_name($distributor_name);
+
+                        if (empty(check_valid_distributor($distributor_id))) {
+                            $error_message .= t('Invalid Distributor Name: ' . $distributor_name) . '<br>';
+                        }
+                        // valid Distributor Name
+                        else {
+                            $form_state['unique_distributor_ids'][] = $distributor_id;
+                            $form_state['distributor_data'][$distributor_name] = $distributor_id;
+                        }
+                    }
                     if (empty($order_date)) {
-                        $error_message .= "Order Date should not be empty at line " . ($key + 2) . '<br>';
-                    }
-                    if (empty($outlet_order_no)) {
-                        $error_message .= "Order Number should not be empty at line " . ($key + 2) . '<br>';
-                    }
-                    $unique_comb = $outlet_order_no . $bill_no;
-                    if (array_key_exists($unique_comb, $res['unique_combination'])) {
-                        form_set_error('duplicate_data', t('Duplicate Data Found , Please Remove Duplicate Data and Upload Again.'));
-                    }
-                    $res['unique_combination'][$unique_comb] = $unique_comb;
-                    $exist_bills = check_bill_exist($bill_no); // check bill number in sales register
-                    if (empty($exist_bills[0])) {
-                        $error_message .= "Bill Number Ref $bill_no does not exist at line " . ($key + 2) . '<br>';
-                    }
-                    $crate_ids = check_crate_id_exist($outlet_order_no,$bill_no, $distributor_id); // check crate id in outlet order crate is exist or not 
-                    if (empty($crate_ids[0])) {
-                        $error_message .= "Invalid Order Number/Bill Number mapping Or Crate Id for  $bill_no does not exist at line " . ($key + 2) . '<br>';
-                    }
+                            $error_message .= "Order Date should not be empty at line " . ($key + 2) . '<br>';
+                        }
+                        if (empty($outlet_order_no)) {
+                            $error_message .= "Order Number should not be empty at line " . ($key + 2) . '<br>';
+                        }
+                        $unique_comb = $outlet_order_no . $bill_no.$distributor_id;
+                        if (array_key_exists($unique_comb, $res['unique_combination'])) {
+                            form_set_error('duplicate_data', t('Duplicate Data Found , Please Remove Duplicate Data and Upload Again.'));
+                        }
+                        $res['unique_combination'][$unique_comb] = $unique_comb;
+                        $exist_bills = check_bill_exist($bill_no,$distributor_id); // check bill number in sales register
+                        if (empty($exist_bills[0])) {
+                            $error_message .= "Bill Number Ref $bill_no does not exist at line " . ($key + 2) . '<br>';
+                        }
+                        $crate_ids = check_crate_id_exist($outlet_order_no, $bill_no, $distributor_id); // check crate id in outlet order crate is exist or not 
+                        if (empty($crate_ids[0])) {
+                            $error_message .= "Invalid Order Number/Bill Number mapping Or Crate Id for  $bill_no does not exist at line " . ($key + 2) . '<br>';
+                        }
+                    
                 }
             }
         } else {
@@ -132,7 +167,7 @@ function custom_order_box_id_upload_form_submit($form, &$form_state) {
     $data_chunk = array_chunk($datas, 300);
     foreach ($data_chunk as $data) {
 
-        $operations[] = array('custom_order_box_id_process', array($max, $data, $distributor_id, $file_name));
+        $operations[] = array('custom_order_box_id_process', array($max, $data, $distributor_id, $file_name, $form_state['distributor_data']));
     }
 
     $batch = array(
@@ -157,11 +192,11 @@ function order_vs_bill_data_csv_finished($success, $results, $operations) {
     }
 }
 
-function check_bill_exist($bill_number) {
+function check_bill_exist($bill_number,$distributor_id) {
     if (!empty($bill_number)) {
-        global $user;
-        $user_id = $user->uid;
-        $distributor_id = change_feeds_import_get_distributor_id($user_id);
+        //global $user;
+        //$user_id = $user->uid;
+        //$distributor_id = change_feeds_import_get_distributor_id($user_id);
         $query = db_select('node', 'n');
         $query->condition('n.uid', $distributor_id);
         $query->condition('n.type', 'sales_register_data');
@@ -172,19 +207,22 @@ function check_bill_exist($bill_number) {
     return $results;
 }
 
-function custom_order_box_id_process($max, $data, $distributor_id, $file_name, &$context) {
+function custom_order_box_id_process($max, $data, $distributor_id, $file_name, $csv_distributor_ids, &$context) {
     foreach ($data as $key => &$value) {
         $outlet_order_ref = trim($value['Order Number']); //Order Number//
         $order_date = trim($value['Order Date']); //Order Date//
         $bill_number = trim($value['Bill Ref. No']); //Bill Ref. No
+        $csv_dist_id = $csv_distributor_ids[trim($value['Distributor Name'])];
+        $dis_id = $csv_dist_id ? $csv_dist_id : $distributor_id;
+        $distributorname = $value['Distributor Name'] ? trim($value['Distributor Name']) : get_distributor_name($dis_id);
 
-        $crate_id = check_crate_id_exist($outlet_order_ref,$bill_number,$distributor_id);
+        $crate_id = check_crate_id_exist($outlet_order_ref, $bill_number, $dis_id);
 
         if (!empty($outlet_order_ref)) {
             $query = db_select('node', 'n');
             $query->condition('n.title', $bill_number);
             $query->condition('n.type', 'sales_register_data');
-            $query->condition('n.uid', $distributor_id);
+            $query->condition('n.uid', $dis_id);
             $query->fields('n', array('nid'));
             $sales_register_data_nid = $query->execute()->fetchField();
 
@@ -205,17 +243,18 @@ function custom_order_box_id_process($max, $data, $distributor_id, $file_name, &
     }
 }
 
-/*function check_crate_id_exist($outlet_order_no, $distributor_id) {
+/* function check_crate_id_exist($outlet_order_no, $distributor_id) {
 
-    if (!empty($outlet_order_no) && !empty($distributor_id)) {
-        $query = db_select('outlet_order_crate', 'ooc');
-        $query->condition('ooc.outlet_order_no', $outlet_order_no);
-        $query->condition('ooc.distributor_id', $distributor_id);
-        $query->fields('ooc', array('crate_id'));
-        $results = $query->execute()->fetchCol();
-    }
-    return $results;
-}*/
+  if (!empty($outlet_order_no) && !empty($distributor_id)) {
+  $query = db_select('outlet_order_crate', 'ooc');
+  $query->condition('ooc.outlet_order_no', $outlet_order_no);
+  $query->condition('ooc.distributor_id', $distributor_id);
+  $query->fields('ooc', array('crate_id'));
+  $results = $query->execute()->fetchCol();
+  }
+  return $results;
+  } */
+
 function check_crate_id_exist($outlet_order_no, $bill_number, $distributor_id) {
     if (!empty($outlet_order_no) && !empty($distributor_id) && !empty($bill_number)) {
         $query = db_select('outlet_order_crate', 'ooc');
