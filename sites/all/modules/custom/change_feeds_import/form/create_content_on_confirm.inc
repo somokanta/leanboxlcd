@@ -45,6 +45,7 @@ function change_feeds_import_create_confirm_content($id) {
   /**
    * Debugging
    */
+
     $mail_query = db_select('custom_billing_data', 'cb');
     $mail_query->addExpression('count(id)', 'max');
     //$mail_query->condition('distributor_id', $distributor_id);
@@ -87,7 +88,8 @@ function change_feeds_import_create_confirm_content($id) {
             foreach ($create_billing_data_chunk as $data) {
                 $operations[] = array('change_feeds_import_create_billing', array($data));
             }
-
+            // As discussed with kusha, commented this code as of now.
+            /*
             $create_picking_data = change_feeds_import_create_picking_data($max_billing_id_new);
             $create_picking_data_chunk = array_chunk($create_picking_data, 1200);
             foreach ($create_picking_data_chunk as $data) {
@@ -109,8 +111,7 @@ function change_feeds_import_create_confirm_content($id) {
                 $operations[] = array('change_feeds_import_create_van_cld_report', array($data));
             }
 
-
-            $operations[] = array('change_feeds_import_create_party_packing', array($max_billing_id_new));
+            $operations[] = array('change_feeds_import_create_party_packing', array($max_billing_id_new));*/
         }
 
         $batch = array(
@@ -148,8 +149,8 @@ function change_feeds_import_create_confirm_content($id) {
 
 function change_feeds_import_create_billing_data($max_billing_id,$distributor_id) {
   global $user;
-  $user_id = $user->uid;
-  $distributor_id = change_feeds_import_get_distributor_id($user_id);
+  //$user_id = $user->uid;
+  //$distributor_id = change_feeds_import_get_distributor_id($user_id);
   $query = db_select('custom_billing_data', 'cb');
 
   $query->addField('cb', 'bill_number');
@@ -166,15 +167,15 @@ function change_feeds_import_create_billing_data($max_billing_id,$distributor_id
   return $results;
 }
 
-function change_feeds_import_create_picking_data($max_billing_id) {
-  global $user;
-  $user_id = $user->uid;
-  $distributor_id = change_feeds_import_get_distributor_id($user_id);
+function change_feeds_import_create_picking_data($max_billing_id,$distributor_id) {
+  //global $user;
+  //$user_id = $user->uid;
+  //$distributor_id = change_feeds_import_get_distributor_id($user_id);
   $query = db_select('custom_billing_data', 'cb');
   $query->join('field_data_field_sku7_code', 'gaisc', 'gaisc.field_sku7_code_value = cb.sku7_code');
   $query->condition('gaisc.bundle', 'sku7_code_master', '=');
   $query->join('node', 'nd', 'nd.nid = gaisc.entity_id');
-  $query->condition('nd.uid', $distributor_id, '=');
+  //$query->condition('nd.uid', $distributor_id, '=');
 //    $query->join('field_data_field_godown_area_id', 'gai', 'gaisc.entity_id = gai.entity_id');
 //    $query->condition('gai.bundle', 'sku7_code_master', '=');
 //    $query->join('field_data_field_pack_size', 'fps', 'fps.entity_id = gaisc.entity_id');
@@ -329,10 +330,12 @@ function change_feeds_import_insert_data_in_custom_billing_table($billing_data_r
 
   // For weight and volume calculation
   $unique_skus = array_unique(array_map(function($elem){return $elem['sku7_code'];}, $billing_data_result));
-  $sku_wt_vl = get_weight_volume_by_skus($unique_skus,$distributor_id);
+  $unique_skus1 = array_map('trim', $unique_skus);
+  $sku_wt_vl = get_weight_volume_by_skus($unique_skus1,$distributor_id);
   
   foreach ($billing_data_result as $key => $data) {
     // For weight and volume calculation
+    $data = array_map('trim', $data);
     $sku_wt = $data['Sum_of_NET_SALES_KGS'];
     if(empty($sku_wt)){
       $sku_wt = $sku_wt_vl[$data['sku7_code']]['weight'] ?
@@ -349,7 +352,7 @@ function change_feeds_import_insert_data_in_custom_billing_table($billing_data_r
                 ($data['Sum_of_TOTAL_SALES_QTY'] *($data['tur'] ? $data['tur'] : $data['mrp'] * .9)) /
                  $sku_wt_vl[$data['sku7_code']]['rs_per_cft']
               );
-    //END
+       //END
     //TP to host calculation for line level value
     $line_level_value = round(
       (($data['Sum_of_NET_SALES_VALUE'] - 
@@ -359,6 +362,7 @@ function change_feeds_import_insert_data_in_custom_billing_table($billing_data_r
     
     $loading_date = strtotime($data['loading_date']);
     $billing_date = strtotime($data['bill_date']);
+    $distributor_id = $data['distributor_id'];
     try {
       $stage_billing_data = db_insert('custom_billing_data') // Table name no longer needs {}
           ->fields(array(
@@ -408,10 +412,12 @@ function change_feeds_import_insert_data_in_custom_billing_table($billing_data_r
       }
       
     }
+    
     catch (Exception $ex) {
       
     }
   }
+
   return $first_instered_id;
 }
 
@@ -456,9 +462,10 @@ function change_feeds_import_create_picking($data, &$context) {
     $context['sandbox']['progress'] = 0;
   }
   $context['message'] = t('Now Creating Picking Data');
-  global $user;
-  $user_id = $user->uid;
-  $distributor_id = change_feeds_import_get_distributor_id($user_id);
+  //global $user;
+  //$user_id = $user->uid;
+  //$distributor_id = change_feeds_import_get_distributor_id($user_id);
+  $distributor_id = $value['distributorf_id'];
   foreach ($data as $key => &$value) {
     if ($value->total_cld > 0 || $value->total_eaches > 0) {
       $node = new stdClass();
@@ -784,6 +791,7 @@ function change_feeds_import_create_billing($data, &$context) {
   $context['message'] = t('Now Creating Billing Data');
 
   foreach ($data as $key => $value) {
+      
     try {
       $nid = check_node_title_exists($value->bill_number, 'sales_register_data');
       $node = node_load($nid);
@@ -828,7 +836,8 @@ function change_feeds_import_create_billing($data, &$context) {
       //Write mail logic
       global $user;
       $user_id = $user->uid;
-      $distributor_id = change_feeds_import_get_distributor_id($user_id);
+      //$distributor_id = change_feeds_import_get_distributor_id($user_id);
+      $distributor_id = $value['distributorf_id'];
       $batch = & batch_get();
       $batch_id = $batch['id'];
 

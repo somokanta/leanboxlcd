@@ -624,13 +624,12 @@ function check_party_code_exist_or_not($distributor_ids,$csv_party_code) {
 }
 
 function check_sku7_code_exist_or_not($csv_skus) {
- 
+    $csv_skus1 = array_map('trim', $csv_skus);
     $query2 = db_select('field_data_field_sku7_code', 'sc');
     $query2->join('node', 'n', 'n.nid = sc.entity_id');
     $query2->fields('sc', array('field_sku7_code_value'));
-    $query2->condition('sc.field_sku7_code_value', $csv_skus, '=');
+    $query2->condition('n.title', $csv_skus1, 'IN');
     $query2->condition('sc.bundle', 'sku7_code_master', '=');
-    //$query2->addTag('node_uid');
     $sku_code_result = $query2->execute()->fetchAllKeyed(0, 0);
     return $sku_code_result;
 }
@@ -797,11 +796,12 @@ function get_node_titles($types, $distributor_ids = array()) {
         }
         $query1 = db_select('node', 'n');
         $query1->condition('n.type', $types, 'IN');
-        $query1->condition('n.created', $time, '>');
+        //$query1->condition('n.created', $time, '>');
         $query1->fields('n', array('type', 'title'));
         $titles = $query1->execute()->fetchAll();
         foreach ($titles as $k => $v) {
-            $result[$v->type][$v->title] = $v->title;
+            $node_title = strtolower($v->title);
+            $result[$v->type][$node_title] = $node_title;
         }
     }
     return $result;

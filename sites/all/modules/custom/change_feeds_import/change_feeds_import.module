@@ -4022,7 +4022,7 @@ function get_weight_volume_by_skus($unique_skus, $distributor_id) {
     $query = db_select('node', 'n');
     $query->condition('n.type', 'sku7_code_master');
     $query->condition('n.title', $unique_skus, 'IN');
-    $query->condition('n.uid', $distributor_id);
+    //$query->condition('n.uid', $distributor_id);
     $query->leftjoin('field_data_field_sku_weight', 'fsw', 'fsw.entity_id = n.nid'); //MRC_WEIGHT
     $query->leftjoin('field_data_field_sku_volume', 'fsv', 'fsv.entity_id = n.nid');
     $query->leftjoin('field_data_field_sub_category', 'fc', 'fc.entity_id = n.nid');
