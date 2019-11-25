@@ -212,7 +212,7 @@ function change_feeds_import_create_picking_data($max_billing_id,$distributor_id
   return $results;
 }
 
-function change_feeds_import_create_pick_confirm_data($max_billing_id) {
+/*function change_feeds_import_create_pick_confirm_data($max_billing_id) {
   global $user;
   $user_id = $user->uid;
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
@@ -272,7 +272,7 @@ function change_feeds_import_create_van_cld_report_data($max_billing_id) {
   $results = $query->execute()->fetchAll();
 
   return $results;
-}
+}*/
 
 function change_feeds_import_finished($success, $results, $operations) {
   if ($success) {
@@ -324,9 +324,9 @@ function change_feeds_import_finished($success, $results, $operations) {
 function change_feeds_import_insert_data_in_custom_billing_table($billing_data_result) {
   $created_date = time();
   $first_instered_id = '';
-  global $user;
-  $user_id = $user->uid;
-  $distributor_id = change_feeds_import_get_distributor_id($user_id);
+  //global $user;
+  //$user_id = $user->uid;
+  //$distributor_id = change_feeds_import_get_distributor_id($user_id);
 
   // For weight and volume calculation
   $unique_skus = array_unique(array_map(function($elem){return $elem['sku7_code'];}, $billing_data_result));
@@ -421,7 +421,7 @@ function change_feeds_import_insert_data_in_custom_billing_table($billing_data_r
   return $first_instered_id;
 }
 
-function change_feeds_import_create_van_cld_report($data, &$context) {
+/*function change_feeds_import_create_van_cld_report($data, &$context) {
   if (!isset($context['sandbox']['progress'])) {
     $context['sandbox']['progress'] = 0;
   } 
@@ -782,7 +782,7 @@ function get_party_packing_from_party_code($party_code = NULL, $distributor_id) 
   $query->fields('pc', array('field_party_code_value'));
   return $query->execute()->fetchAllKeyed(0, 1);
 }
-
+*/
 function change_feeds_import_create_billing($data, &$context) {
   
   if (!isset($context['sandbox']['progress'])) {
@@ -791,9 +791,9 @@ function change_feeds_import_create_billing($data, &$context) {
   $context['message'] = t('Now Creating Billing Data');
 
   foreach ($data as $key => $value) {
-      
+    $distributor_id = $value->distributor_id;  
     try {
-      $nid = check_node_title_exists($value->bill_number, 'sales_register_data');
+      $nid = check_node_title_exists($value->bill_number, 'sales_register_data',FALSE,$distributor_id);
       $node = node_load($nid);
       if ($node) {
             $node->field_billing_van[LANGUAGE_NONE][0]['value'] = $value->vehicle;

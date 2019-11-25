@@ -671,12 +671,12 @@ function get_beat_name_from_party_code($party_code) {
     return $beat_name;
 }
 
-function check_node_title_exists($title, $type, $sales_data = FALSE) {
+function check_node_title_exists($title, $type, $sales_data = FALSE,$distributor_id) {
     $query1 = db_select('node', 'n');
     $query1->condition('n.type', $type);
     $query1->condition('n.title', $title);
     $query1->fields('n', array('nid'));
-    $query1->addTag('node_uid');
+    $query1->condition('n.uid',$distributor_id);;
     if ($sales_data) {
         $date = strtotime(date('Y-m-d'));
         $query1->join('field_data_field_sr_bill_date', 'd', 'd.entity_id = n.nid');
