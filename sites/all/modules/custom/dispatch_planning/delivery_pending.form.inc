@@ -16,16 +16,21 @@ function _get_dp_reasons($reason_type) {
    $query->join('field_data_field_dp_reason', 'dr', 'dr.entity_id = n.nid');
    $query->condition('rt.field_reason_type_value', $reason_type);
    $query->condition('n.type', 'dispatch_planning_reason_master');
+   //$query->condition('n.uid', $disid);
    $query->fields('n', array('nid'));
    $query->fields('dr', array('field_dp_reason_value'));
-   $query->addTag('node_distributor_access');
+   //$query->addTag('node_distributor_access');
    $res = $query->execute()->fetchAllKeyed(0,1);
    $res1 = array('' => '- select -');
    $response = $res1 + $res;
    return $response;
-
 }
+
 function delivery_pending_form($form, &$form_state) {
+  global $user;  
+  $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+  $rs_code = get_rs_code_of_distributor($distributor_id);  
+  //$facility_code = get_facility_
   $form['#prefix'] = '<div id="itemlist-div">';
   $form['#suffix'] = '</div>';
   $form['#attached']['js'][] = drupal_get_path('module', 'dispatch_planning') . '/js/dispatch_planning_form.js';
@@ -45,7 +50,7 @@ function delivery_pending_form($form, &$form_state) {
     '#suffix' => '</div>',
     '#required' => TRUE,
     '#default_value'=>arg(3),
-    '#autocomplete_path' => 'dp_trip/autocomplete',
+    '#autocomplete_path' => 'dp_trip/autocomplete/'.$rs_code,
     '#ajax' => array(
       'wrapper' => 'itemlist-div',
       'callback' => 'custom_ajax_callback',
@@ -58,6 +63,24 @@ function delivery_pending_form($form, &$form_state) {
       $form_state['input']['trip_id'] = $trip_id;
   }
   $trip_id = $form_state['input']['trip_id'];
+    
+  if (in_array("central_distributor", $user->roles)) {
+    $central_disid = $distributor_id;
+  }
+  else {
+    $central_disid = get_central_distributor_id($distributor_id);
+  }
+    
+  $form['central_disid'] = array(
+    '#type' => 'hidden',
+    '#value' => $central_disid,
+  ); 
+  
+  $distributor_id = get_distributorid_of_trip($trip_id);
+  $form['distributor_id'] = array(
+    '#type' => 'hidden',
+    '#value' => $distributor_id,
+  );
   $form['bill_number'] = array(
     '#prefix' => '<div class="textfield-wrapper dp_bill_number">',
     '#type' => 'textfield',
@@ -406,7 +429,8 @@ function delivery_pending_form_save_submit($form, &$form_state) {
   global $base_url;
   $path_segment = explode('/',request_uri());
   $path = $path_segment[1].'/'.$path_segment[2].'/'.$path_segment[3];
-  $dis_id = change_feeds_import_get_distributor_id($user->uid);  
+  $dis_id = $form_state['values']['distributor_id'];
+  $central_disid = $form_state['values']['central_disid'];
   $trip_id = $form_state['values']['trip_id'];
   $is_party_pack = $form_state['values']['is_party_pack'];
   $rows = $form_state['values']['delivery_pending'];

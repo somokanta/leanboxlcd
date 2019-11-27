@@ -4828,3 +4828,32 @@ function get_distributor_name($distributor_id) {
   $distributor_name = $query->execute()->fetchField();
   return $distributor_name;
 }
+
+function get_rs_code_of_distributor($distributor_id) {
+  global $user;
+  if (empty($distributor_id)) {
+   $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+  }
+  if(!empty($distributor_id)) {
+    $query = db_select('field_data_field_third_party_username', 'rs');
+    $query->condition('rs.entity_id', $distributor_id);
+    $query->fields('rs', array('field_third_party_username_value'));
+    $rs_code = $query->execute()->fetchField();
+  }
+  return $rs_code;
+}
+function get_distributorid_of_trip($trip_id) {
+  $distributor_id = 0;
+  if (!empty($trip_id)) {
+    $distributor_ids = get_distributor_ids();
+    if (!empty($distributor_ids)) {
+      $query = db_select('node', 'n');
+      $query->condition('type', 'dispatch_data');
+      $query->condition('uid', $distributor_ids, 'IN');
+      $query->condition('title',$trip_id);
+      $query->fields('n',array('uid'));
+      $distributor_id = $query->execute()->fetchField();
+    }
+  }
+  return $distributor_id;
+}
