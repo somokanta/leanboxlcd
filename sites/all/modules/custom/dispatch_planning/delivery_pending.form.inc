@@ -88,7 +88,7 @@ function delivery_pending_form($form, &$form_state) {
     '#suffix' => '</div>',    
     '#size'=>20,
     '#attributes'=>array('class'=>array('dp_bill_number')),  
-    '#autocomplete_path' => 'bill/pending/autocomplete/'.$trip_id,
+    '#autocomplete_path' => 'bill/pending/autocomplete/'.$trip_id.'/'. $distributor_id,
     
   );
   $form['bill_number_submit'] = array(
@@ -269,8 +269,8 @@ function delivery_pending_form($form, &$form_state) {
 function delivery_pending_bill_number_ajax_submit($form, &$form_state) {
   $bill_number = $form_state['values']['bill_number'];
   $trip_id = $form_state['values']['trip_id'];
-  $distributor_id = $form_state['values']['distributor_id'];
-  $central_disid = $form_state['values']['central_disid'];
+  $distributor_id = $form_state['input']['distributor_id'];
+  $central_disid = $form_state['input']['central_disid'];
   unset($form_state['input']['bill_number']);
   $rows = $form_state['input']['list_form_items'];
     if (!empty($rows)) {
