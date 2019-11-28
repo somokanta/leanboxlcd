@@ -5,6 +5,14 @@
  * hook_form_alter()
  */
 function modify_views_forms_form_alter(&$form, &$form_state, $form_id) {
+    global $user;
+    if (in_array('central_distributor', $user->roles)) {
+         $central_distributor_id = change_feeds_import_get_distributor_id($user->uid);
+    }
+    else {
+         // have to fetch parent distributor id
+         $central_distributor_id = get_central_distributor_id($user->uid);
+    }
   // custom validator for node title unique value
   $node_type = array('hul_code_master', 'pricelist_group_master', 'product_division_master', 'resource_type', 'vehicle_master');
   if (isset($form['#node']) && !isset($form['#node']->nid) && in_array($form['#node']->type, $node_type)) {
@@ -129,9 +137,8 @@ function modify_views_forms_form_alter(&$form, &$form_state, $form_id) {
       $form['#validate'][] = 'validate_working_day';
       //$form['#validate'][] = 'validate_vehicle_reporting_time';
       // Validate trip status report dispatch start time and end time
-
       $select = array('' => '- Select -');
-      $vehicle = get_all_vehicle_data();
+      $vehicle = get_all_vehicle_data($central_distributor_id);
       $vehicle = $select + $vehicle;
       $delivery_boys = get_all_resources_by_type('Delivery Boy');
       $delivery_boys = $select + $delivery_boys;
@@ -153,7 +160,7 @@ function modify_views_forms_form_alter(&$form, &$form_state, $form_id) {
          $form['node'][$key]['field_vehicle_no'][LANGUAGE_NONE][0]['value']['#prefix'] = '<div class="trip_staus_vehicle">';
          $form['node'][$key]['field_vehicle_no'][LANGUAGE_NONE][0]['value']['#required']    =  true;
          $form['node'][$key]['field_vehicle_no'][LANGUAGE_NONE][0]['value']['#suffix'] = '</div>';
-         $form['node'][$key]['field_vehicle_no'][LANGUAGE_NONE][0]['value']['#autocomplete_path'] = 'vehicle_maintenance/autocomplete';
+         $form['node'][$key]['field_vehicle_no'][LANGUAGE_NONE][0]['value']['#autocomplete_path'] = 'vehicle_maintenance/autocomplete/'.$central_distributor_id;
          // Not editable when dispatch start time alreay entered.
          $dispatch_pre_start_time = trim($value['#entity']->field_dispatch_pre_start_time[LANGUAGE_NONE][0]['value']);
          if (!empty($dispatch_pre_start_time)) {
@@ -208,37 +215,42 @@ function modify_views_forms_form_alter(&$form, &$form_state, $form_id) {
     $query = db_select('field_data_field_resource_name', 'fps');
     $query->join('field_data_field_resource_type','fst','fst.entity_id = fps.entity_id');
     $query->join('node','n', 'n.nid = fps.entity_id');
-    $query->condition('n.uid', $distributor_id);
+    
     
     if($form_id == 'editableviews_entity_form_pick_confirm_report') {
       $query->condition('fst.field_resource_type_value', 'PICK CONFIRM SUPERVISOR');
       $field_supervisor = 'field_pc_pick_supervisor';
      // $field_count = 'field_picking_picking_team_count';
+      $query->condition('n.uid', $distributor_id);
     }
     if($form_id == 'editableviews_entity_form_picking_report') {
       $query->condition('fst.field_resource_type_value', 'PICKING SUPERVISOR');
       $field_supervisor = 'field_picking_pick_supervisor';
      // $field_count = 'field_picking_picking_team_count';
+      $query->condition('n.uid', $distributor_id);
     }
     if($form_id == 'editableviews_entity_form_party_packing_report') {
       $query->condition('fst.field_resource_type_value', 'PARTY PACKING SUPERVISOR');
       $field_supervisor = 'field_party_packing_supervisor';
+      $query->condition('n.uid', $distributor_id);
      // $field_count = 'field_party_packer_team_count';
     }
     if($form_id == 'editableviews_entity_form_unloading_form') {
       $query->condition('fst.field_resource_type_value', 'Unloading SUPERVISOR');
       $field_supervisor = 'field_unloading_supervisor';
      // $field_count = 'field_unloading_team_count';
+      $query->condition('n.uid', $distributor_id);
     }
     if ($form_id == 'editableviews_entity_form_dispatch_data_report') {
-      $query->condition('fst.field_resource_type_value', 'Dispatch SUPERVISOR');
+       $query->condition('fst.field_resource_type_value', 'Dispatch SUPERVISOR');
       $field_supervisor = 'field_dispatch_supervisor';
+      $query->condition('n.uid', $central_distributor_id);
     }
 
     $query->fields('fps', array('field_resource_name_value'));
     $options = $query->execute()->FetchCol();
     $multi_supervisor = array_combine($options, $options);
-    $multi_supervisor = array_merge(array(" "=>'SELECT'),$multi_supervisor);
+    //$multi_supervisor = array_merge(array(" "=>'SELECT'),$multi_supervisor);
     //$count_array = array('1'=>'1','2'=>'2','3'=>'3','4'=>'4','5'=>'5','6'=>'6','7'=>'7','8'=>'8','9'=>'9');
     $count_array = array(1,2,3,4,5,6,7,8,9);
     $multi_count = array_merge(array("0"=>'SELECT'), $count_array);
@@ -263,6 +275,7 @@ function modify_views_forms_form_alter(&$form, &$form_state, $form_id) {
     if ($form_id == 'editableviews_entity_form_dispatch_data_report') {
       $query->condition('fst.field_resource_type_value', 'CASHIER');
       $field_packer = 'field_cashier_name';
+      $query->condition('n.uid', $central_distributor_id);
     }
 
     $query->fields('fps', array('field_resource_name_value'));
@@ -475,18 +488,16 @@ function validate_dispatch_time($form, &$form_state) {
   }
 }
 
-function check_active_vehicles($string) {
+function check_active_vehicles($string,$central_distributor_id) {
   $result = array();
-  global $user;
-  $distributor_id = change_feeds_import_get_distributor_id($user->uid);
-  if (!empty($string)) {
+  if (!empty($string) && !empty($central_distributor_id)) {
     $query = db_select('node', 'n');
     $query->leftjoin('field_data_field_is_active', 'is_active', 'is_active.entity_id = n.nid');
     //$query->join('field_data_field_mode_of_contract', 'mode_contract', 'mode_contract.entity_id = n.nid');
     $query->condition('n.type', 'vehicle_master');
     $query->condition('is_active.field_is_active_value', 1);
     //$query->condition('mode_contract.field_mode_of_contract_value', 'Contracted');
-    $query->condition('n.uid', $distributor_id);
+    $query->condition('n.uid', $central_distributor_id);
     $query->condition('n.title', $string);
     $query->fields('n', array('title', 'nid'));
     $result = $query->execute()->fetchAllKeyed(0, 0);
@@ -510,24 +521,32 @@ function validate_bill_editing_confirmation($form, &$form_state) {
 // This function is used to validate trip status
 function validate_trip_status($form, &$form_state) {
     $node_status = array();
+    global $user;
+    $dis_id = change_feeds_import_get_distributor_id($user->uid);
+    if (in_array('central_distributor', $user->roles)) {
+         $central_distributor_id = change_feeds_import_get_distributor_id($user->uid);
+    }
+    else {
+         // have to fetch parent distributor id
+         $central_distributor_id = get_central_distributor_id($user->uid);
+    }
     foreach ($form['node'] as $key => $value) { // It is for fetching existing node values
             $node_status[$key]['trip_id'] = $value['#entity']->title;
+            $node_status[$key]['distributor_id'] = $value['#entity']->uid;
             
     }
    // This is user input values.  Edit screen, that if Pre-start or Start time is being entered/already entered for a Trip ID, then entering Cashier name is mandatory.
   foreach($form_state['values']['node'] as $nid => $form_data){
-      global $user;
-      $dis_id = change_feeds_import_get_distributor_id($user->uid);
       $pre_start_time = trim($form_data[field_dispatch_pre_start_time][LANGUAGE_NONE][0]['value']);
       $dispatch_start_time = trim($form_data[field_dispatch_start_time][LANGUAGE_NONE][0]['value']);
       $cashier_name =  trim($form_data['field_cashier_name'][LANGUAGE_NONE][0]['value']);
       $dispatch_date = trim($form_data['field_dispatch_date'][LANGUAGE_NONE][0]['value']);
       $vehicle_no = trim($form_data['field_vehicle_no'][LANGUAGE_NONE][0]['value']);
       
-      if (!empty($vehicle_no) && empty(validate_vehicle_number($vehicle_no))) {
+      if (!empty($vehicle_no) && empty(validate_vehicle_number($vehicle_no,$central_distributor_id))) {
       form_set_error('form', t("Please enter valid Vehicle Number for Trip ID: " . $node_status[$nid]['trip_id']));
      }
-      $active_vehicle = check_active_vehicles($vehicle_no);
+      $active_vehicle = check_active_vehicles($vehicle_no,$central_distributor_id);
       if (empty($active_vehicle) && !empty($vehicle_no)) {
           form_set_error('form', t("Please select active vehicle for Trip ID: ". $node_status[$nid]['trip_id'])); 
       }
@@ -554,7 +573,7 @@ function validate_trip_status($form, &$form_state) {
     // Validation for Dispatched Assets.
     $query = db_select('node', 'n');
     $query->condition('n.type', 'assets_count');
-    $query->condition('n.uid', $dis_id);
+    $query->condition('n.uid',$node_status[$nid]['distributor_id']);
     $query->condition('n.title', $node_status[$nid]['trip_id']);
     $query->leftjoin('field_data_field_dispatch_count', 'dc', 'dc.entity_id = n.nid');
     $query->addExpression("SUM(dc.field_dispatch_count_value)", 'total_dispatch_count_value');
@@ -792,15 +811,15 @@ function _get_distributors_sales_status_option($user_field) {
 }
 
 
-function get_all_vehicle_data() {
+function get_all_vehicle_data($central_distributor_id) {
    $res = array();
-   $user_id = $GLOBALS['user']->uid;
-   $distributor_id = change_feeds_import_get_distributor_id($user_id);
+   //$user_id = $GLOBALS['user']->uid;
+   //$distributor_id = change_feeds_import_get_distributor_id($user_id);
    if (!empty($distributor_id)) {
       $query = db_select('node', 'n');
       $query->fields('n', array('title'));
       $query->condition('n.type', 'vehicle_master');
-      $query->condition('n.uid', $distributor_id);
+      $query->condition('n.uid', $central_distributor_id);
       // New condition for fetching active vehicles only
       $query->leftjoin('field_data_field_is_active', 'is_active', 'is_active.entity_id = n.nid');
     //$query->join('field_data_field_mode_of_contract', 'mode_contract', 'mode_contract.entity_id = n.nid');
