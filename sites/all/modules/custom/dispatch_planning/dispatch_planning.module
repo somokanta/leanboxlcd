@@ -2565,10 +2565,11 @@ function bill_autocomplete($string = '',$distributor_id) {
   drupal_json_output($result);
 }
 
-function bill_pending_autocomplete($trip_id, $string = '') {
+function bill_pending_autocomplete($trip_id, $distributor_id,$string = '') {
   $result = array();
-  global $user;
-  $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+  //global $user;
+  //$distributor_id = change_feeds_import_get_distributor_id($user->uid);
+  $distributor_id = get_distributorid_of_trip($trip_id);
   $res_status = array('undeliver', '');
   if (!empty($trip_id)) {
     $node_obj = node_load_multiple(NULL, array('title' => $trip_id, 'type' => 'dispatch_data', 'uid' => $distributor_id));
@@ -2595,7 +2596,6 @@ function bill_pending_autocomplete($trip_id, $string = '') {
       $query->condition('vs.field_vrs_status_value', '-1', '=');
     }
     $query->fields('n', array('title'));
-    $query->addTag('node_distributor_access');
     $result = $query->execute()->fetchAllKeyed(0, 0);
   }
   drupal_json_output($result);
@@ -2635,9 +2635,10 @@ function vrswise_trip_id_autocomplete($string = '') {
 
 function dp_trip_id_autocomplete($string = '',$rs_code) {
   $result = array();
-  global $user;
-  $distributor_id = change_feeds_import_get_distributor_id($user->uid);
-   if (!empty($string) && !empty($rs_code)){
+  //global $user;
+  //$distributor_id = change_feeds_import_get_distributor_id($user->uid);
+  watchdog('form_state_values', '<pre>' . print_r(array($rs_code,$string), TRUE) . '</pre>');
+  if (!empty($string) && !empty($rs_code)){
     $query = db_select('node', 'n');
     $query->condition('n.title', db_like($string) . '%', 'LIKE');
     $query->condition('n.type', 'dispatch_data');
@@ -2645,13 +2646,13 @@ function dp_trip_id_autocomplete($string = '',$rs_code) {
     $query->leftjoin('field_data_field_vrs_status', 'vs', 'vs.entity_id = n.nid');
     $query->condition('vs.field_vrs_status_value', -1);
     $query->fields('n', array('title'));
-    //$query->condition('ad.distributor_id', $distributor_id);
-    //$query->condition('n.uid', $distributor_id);
     $query->condition('ad.hub', $rs_code);
+    //$query->condition('n.uid', $distributor_id);
     $result = $query->execute()->fetchAllKeyed(0, 0);
   }
   drupal_json_output($result);
 }
+
 
 function _get_header_sort($array, $field_name, $order) {
   if ($order == 'asc') {

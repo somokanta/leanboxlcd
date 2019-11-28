@@ -11,7 +11,12 @@ function fetch_dispatch_planning_api_data($data) {
 
       // first entry in log table
       // get dis id using rs code
-      $dis_id = leanbox_mobile_get_distributor_using_rscode($data['hubCode']);
+      //$dis_id = leanbox_mobile_get_distributor_using_rscode($data['hubCode']);
+      $referenceNumber = explode("_",$data['referenceNumber']);
+      $actual_trip = $referenceNumber[0];
+      $actual_rs = $referenceNumber[1];
+      //$dis_id = get_distributorid_of_trip($actual_trip);
+      $dis_id = get_trip_distributor_id_using_rs_code($actual_rs,$actual_trip);  
       $json_data = json_encode($data);
       dispatch_planning_api_log($json_data, $data['jobData']['runsheet_number'], 'farey_sales_deliver', $dis_id, 1);
       $bill_row_id = _get_bill_row_id_manual_using_reference_no($data['referenceNumber']);

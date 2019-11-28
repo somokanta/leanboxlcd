@@ -269,6 +269,8 @@ function delivery_pending_form($form, &$form_state) {
 function delivery_pending_bill_number_ajax_submit($form, &$form_state) {
   $bill_number = $form_state['values']['bill_number'];
   $trip_id = $form_state['values']['trip_id'];
+  $distributor_id = $form_state['values']['distributor_id'];
+  $central_disid = $form_state['values']['central_disid'];
   unset($form_state['input']['bill_number']);
   $rows = $form_state['input']['list_form_items'];
     if (!empty($rows)) {
@@ -284,7 +286,7 @@ function delivery_pending_bill_number_ajax_submit($form, &$form_state) {
         //$form_state['dp_pending_reason_all']['#value']= $form_state['input']['dp_pending_reason_all'];
     }
   $res_status = array('undeliver','');
-  $bill_info = get_bill_info($bill_number, $van = NULL, $loading_date = NULL, $beat_name = NULL, $trip_id , $delivery_pending = TRUE,$res_status);
+  $bill_info = get_bill_info($bill_number, $van = NULL, $loading_date = NULL, $beat_name = NULL, $trip_id , $delivery_pending = TRUE,$res_status,$distributor_id);
   $dp_reason_list = _get_dp_reasons('delivery_pending');
   foreach ($bill_info as $key => $value) {
     

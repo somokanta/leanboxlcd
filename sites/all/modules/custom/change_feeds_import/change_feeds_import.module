@@ -4857,3 +4857,16 @@ function get_distributorid_of_trip($trip_id) {
   }
   return $distributor_id;
 }
+function get_trip_distributor_id_using_rs_code($rs_code,$trip_id) {
+  $distributor_id = '';
+  if(!empty($rs_code) && !empty($trip_id)) {
+     $query = db_select('dispatch_planning_api_data', 'ad');
+     $query->join('node', 'n', 'n.title = ad.runsheet_number and n.uid = ad.distributor_id');
+     $query->condition('ad.hub', $rs_code, '=');
+     $query->condition('n.type', 'dispatch_data', '=');
+     $query->condition('ad.runsheet_number', $trip_id, '=');
+     $query->fields('ad', array('distributor_id'));
+     $distributor_id = $query->execute()->fetchField();
+  }
+  return $distributor_id;
+}
