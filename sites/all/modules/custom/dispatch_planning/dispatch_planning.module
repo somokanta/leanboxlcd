@@ -1672,8 +1672,8 @@ function custom_ajax_callback($form, &$form_state) {
 
 function distributor_callback($form, &$form_state) {
     $path_segment = explode('/',$form_state['request_uri']);
-    //$path = '/'.$path_segment[0].'/'.$path_segment[1];
-    $path = '/'.$path_segment[1].'/'.$path_segment[2];
+    $path = '/'.$path_segment[0].'/'.$path_segment[1];
+   // $path = '/'.$path_segment[1].'/'.$path_segment[2];
     $distributor_id = $form_state['values']['distributor_id'];
     ajax_redirect($path.'/'.$distributor_id);
     return $form;
