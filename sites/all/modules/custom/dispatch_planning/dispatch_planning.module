@@ -2605,12 +2605,14 @@ function bill_pending_autocomplete($trip_id, $distributor_id,$string = '') {
 function trip_id_autocomplete($string = '') {
   $result = array();
   if ($string) {
+    $distributor_id = get_distributorid_of_trip($string);
     $query = db_select('node', 'n');
     $query->condition('n.title', db_like($string) . '%', 'LIKE');
     $query->condition('n.type', 'dispatch_data');
     $query->fields('n', array('title'));
     $query->range(0, 15);
-    $query->addTag('node_distributor_access');
+    //$query->addTag('node_distributor_access');
+    $query->condition('n.uid',$distributor_id);
     $result = $query->execute()->fetchAllKeyed(0, 0);
   }
   drupal_json_output($result);
