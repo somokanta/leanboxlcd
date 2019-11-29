@@ -2834,7 +2834,16 @@ function dispatch_planning_views_data() {
     'argument' => array(
       'handler' => 'views_handler_argument_string',
     ),
-  );
+    'relationship' => array(
+            'title' => t('Distributor ID to Distributor Name'),
+            'help' => t("Distributor ID to Distributor Name"),
+            'handler' => 'views_handler_relationship',
+            'base' => 'users',
+            //'entity type' => 'file',
+            'base field' => 'uid',
+            'label' => t('Distributor Name relation !field_name', array('!field_name' => 'distributor_id')),
+        ),
+    );
   $data['dispatch_planning_api_data']['res_runsheetNo'] = array(
     'title' => t('DP res_runsheetNo'),
     'help' => t('Dispatch Planning res_runsheetNo'),
