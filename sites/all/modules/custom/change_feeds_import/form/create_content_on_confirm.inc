@@ -83,6 +83,7 @@ function change_feeds_import_create_confirm_content($id) {
     $billing_data_result = NULL; // better memory optimisation (it contents large data)
     $operations = array();
  foreach ($unique_distributors as $unique_distributor_id) {
+     //print_r(array($unique_distributor_id));die;
             $create_billing_data = change_feeds_import_create_billing_data($max_billing_id_new, $unique_distributor_id);
             $create_billing_data_chunk = array_chunk($create_billing_data, 200);
             foreach ($create_billing_data_chunk as $data) {
@@ -157,6 +158,7 @@ function change_feeds_import_create_billing_data($max_billing_id,$distributor_id
   $query->addField('cb', 'vehicle', 'vehicle');
   $query->addField('cb', 'loading_date', 'loading_date');
   $query->addField('cb', 'bill_date', 'bill_date');
+  $query->addField('cb', 'distributor_id', 'distributor_id');
   $query->addExpression('SUM(cb.Sum_of_NET_SALES_VALUE)', 'sum_net_sales_value');
   $query->addExpression('ROUND(SUM(Sum_of_NET_SALES_VALUE - ((Sum_of_OTHER_DISCOUNT + Sum_of_SCHEME_DISCOUNT)*(1 + (Sum_of_TAX_PERCENTAGE/100)))), 2)', 'total_bill_sales_value');
   $query->condition('cb.distributor_id', $distributor_id);
