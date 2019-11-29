@@ -3663,9 +3663,11 @@ function change_feeds_import_form_views_exposed_form_alter(&$form, &$form_state)
 }
 
 function get_all_beatname_data() {
+    $distributor_ids = get_distributor_ids();
     $query = db_select('node', 'n');
     $query->condition('n.type', 'outlet_master');
-    $query->addTag('node_uid');
+    $query->condition('n.uid', $distributor_ids,'IN');
+    //$query->addTag('node_uid');
     $query->join('field_data_field_beat_name', 'bn', 'bn.entity_id = n.nid');
     $query->fields('bn', array('field_beat_name_value'));
 
@@ -3674,9 +3676,10 @@ function get_all_beatname_data() {
 }
 
 function get_all_cashier_data() {
+    $distributor_ids = get_distributor_ids();
     $query = db_select('node', 'n');
     $query->condition('n.type', 'dispatch_data');
-    $query->addTag('node_uid');
+    $query->condition('n.uid',$distributor_ids,'IN');
     $query->join('field_data_field_cashier_name', 'cn', 'cn.entity_id = n.nid');
     $query->fields('cn', array('field_cashier_name_value'));
 
@@ -3685,9 +3688,10 @@ function get_all_cashier_data() {
 }
 
 function get_all_salesman_data($salesman, $salesman_code) {
+    $distributor_ids = get_distributor_ids();
     $query = db_select('node', 'n');
     $query->condition('n.type', 'outlet_master');
-    $query->addTag('node_uid');
+    //$query->addTag('node_uid');
     if (!is_null($salesman)) {
         $query->join('field_data_field_salesman', 'fs', 'fs.entity_id = n.nid');
         $query->fields('fs', array('field_salesman_value'));
@@ -3696,6 +3700,7 @@ function get_all_salesman_data($salesman, $salesman_code) {
         $query->join('field_data_field_salesman_code', 'fsc', 'fsc.entity_id = n.nid');
         $query->fields('fsc', array('field_salesman_code_value'));
     }
+    $query->condition('n.uid',$distributor_ids,'IN');
     $results = $query->execute()->fetchAllKeyed(0, 0);
     return $results;
 }
