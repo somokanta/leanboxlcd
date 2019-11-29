@@ -3110,7 +3110,7 @@ function dispatch_planning_views_data() {
       'base field' => 'nid',
       'extra' => array(
         array('field' => 'type', 'value' => 'dispatch_planning_reason_master'),
-        array('field' => 'uid', 'left_field' => 'distributor_id'),
+       // array('field' => 'uid', 'left_field' => 'distributor_id'),
       )),
   );
 
