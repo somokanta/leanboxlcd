@@ -3939,14 +3939,20 @@ function hul_code_address_confirmation($form, &$form_state) {
                 $sales_day = $item['Sales Day'];
                 $beat_name = $item['Beat Name'];
                 $hu_code = $item['HUL_Code'];
-                $dist =  validate_distributor_name(trim($item['distributor name']));
+                $dist =  validate_distributor_name(trim($item['Distributor Name']));
                 $distributor_id = $dist? $dist: $logged_in_distributor_id; 
                 // returns hul code
                 $hul_code_exist = check_hul_code_exists($hu_code,$distributor_id); //returns hul_code, 
-                if (!empty($hul_code_exist)) {
+                /*if (!empty($hul_code_exist)) {
                     $arugments = '?pl_group=' . urlencode($pl_group) . '&sales_day=' . urlencode($sales_day) . '&beat_name=' . urlencode($beat_name) . '&hul_status=' . urlencode(0);
                     $url = $page_url . $arugments;
                     drupal_set_message('Please confirm the address for Party Code:  ' . l($party_code . '- (HUL Code:' . $hu_code . ')', $url, array('attributes' => array('target' => '_blank'))), 'error');
+                }*/
+                $hul_code_exist = check_hul_code_exists($hu_code,$distributor_id); //returns hul_code, 
+                if (!empty($hul_code_exist)) {
+                  $arugments = '?pl_group=' . urlencode($pl_group) . '&sales_day=' . urlencode($sales_day) . '&beat_name=' . urlencode($beat_name) . '&hul_status=' . urlencode(0). '&distributor_id=' .$distributor_id;
+                  $url = $page_url . $arugments;
+                  drupal_set_message('Please confirm the address for Party Code:  ' . l($party_code . '- (HUL Code:' . $hu_code . ')', $url, array('attributes' => array('target' => '_blank'))), 'error');
                 }
                 $pt_ct_status = check_exsiting_record_for_party_code($party_code, $distributor_id);
                 if (empty($pt_ct_status)) {
