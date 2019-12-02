@@ -2047,9 +2047,9 @@ function check_resource_leave_already_exist($master_nid, $start_period, $end_per
   return $result;
 }
 
-function get_nid_from_title($title, $type) {
-  global $user;
-  $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+function get_nid_from_title($title, $type,$distributor_id) {
+  //global $user;
+  //$distributor_id = change_feeds_import_get_distributor_id($user->uid);
   if (!empty($title)) {
     $query = db_select('node', 'n');
     $query->condition('n.title', $title);

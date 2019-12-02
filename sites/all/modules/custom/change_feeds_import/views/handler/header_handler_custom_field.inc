@@ -28,7 +28,7 @@ class header_handler_custom_field extends views_handler_field {
     global $user;
     $user_id = $user->uid;
     $trip_id = $this->view->args[0];
-    $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+    $distributor_id = get_distributorid_of_trip($trip_id);
     $total_result = $this->view->result;
     foreach ($total_result as $key => $value) {
       if($this->view->current_display === 'page_1'){
@@ -58,9 +58,9 @@ class header_handler_custom_field extends views_handler_field {
       }
     }
     $this->view->custom_footer = $bill_val;
-    $name = get_distrubutor_name_from_user_id($user_id);
-    $result = get_data_from_trip_id($trip_id);
-    $tp_van = get_tp_van_by_trip_id($trip_id);
+    $name = get_distrubutor_name_from_user_id($distributor_id);
+    $result = get_data_from_trip_id($trip_id,$distributor_id);
+    $tp_van = get_tp_van_by_trip_id($trip_id,$distributor_id);
 
     if (!empty($result)) {
       $trip_execution_date = $result['field_trip_executon_date_value'];
@@ -167,13 +167,13 @@ class header_handler_custom_field extends views_handler_field {
 
 }
 
-function get_data_from_trip_id($trip_id) {
+function get_data_from_trip_id($trip_id,$distributor_id) {
 
   $query1 = db_select('node', 'n');
   $query1->condition('n.title', $trip_id, "=");
   $query1->condition('n.type', 'dispatch_data');
   $query1->condition('n.status', 1);
-  $query1->addTag('node_distributor_access');
+  $query1->condition('n.uid',$distributor_id);
   $query1->join('field_data_field_trip_executon_date', 'trip_exe', 'trip_exe.entity_id = n.nid');
   $query1->join('field_data_field_hht_id', 'hht', 'hht.entity_id = n.nid');
   $query1->join('node', 'dd', 'dd.nid = hht.field_hht_id_nid');

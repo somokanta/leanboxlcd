@@ -4146,10 +4146,10 @@ function get_cashier_name($trip_id) {
  * @param type $trip_id
  * @return type
  */
-function get_tp_van_by_trip_id($trip_id) {
+function get_tp_van_by_trip_id($trip_id,$distributor_id) {
   $query = db_select('node', 'n');
   $query->condition('n.type', 'dispatch_data');
-  $query->addTag('node_uid');
+  $query->condition('n.uid',$distributor_id);
   $query->condition('n.title', $trip_id);
   $query->join('field_data_field_entered_prevan', 'ep', 'ep.entity_id = n.nid');
   $query->fields('ep', array('field_entered_prevan_value'));
@@ -4370,6 +4370,7 @@ function dispatch_planning_views_pre_render(&$view) {
     $result = $view->result;
     foreach ($result as $key => $val) {
       $bill_num = $val->node_title;
+      $distributor_id = $val->node_uid;
       $res = get_total_sales_qty_from_custom_billing($bill_num, $distributor_id);
       if (empty($res)) {
         unset($view->result[$key]);
