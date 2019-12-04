@@ -291,9 +291,12 @@ function mrc_inventory_returns_permission() {
  */
 
 function get_all_cashier_names() {
+  $results = array();
+  $distributor_ids = get_distributor_ids();  
   $query = db_select('node', 'n');
   $query->condition('n.type', 'dispatch_data');
-  $query->addTag('node_uid');
+  $query->condition('n.uid',$distributor_ids,'IN');
+  //$query->addTag('node_uid');
   $query->join('field_data_field_cashier_name', 'cn', 'cn.entity_id = n.nid');
   $query->fields('cn', array('field_cashier_name_value'));
 
