@@ -3867,9 +3867,10 @@ function _get_van_loading_combination_by_trip($dispatch_data_nid) {
  * @param type $ref_no
  * @return type
  */
-function _get_bill_row_id_using_reference_no($ref_no) {
+function _get_bill_row_id_using_reference_no($ref_no,$distributor_id) {
   $query = db_select('dispatch_planning_api_data', 'dp');
   $query->fields('dp', array('id'));
+  $query->condition('dp.distributor_id', $distributor_id);
   $query->condition('dp.referenceNo', $ref_no);
   $res = $query->execute()->fetchField();
   return $res;
@@ -3891,21 +3892,18 @@ function _get_bill_row_id_manual_using_reference_no($ref_no) {
  */
 function _get_all_tripsbill($trip_id, $string = '') {
   $result = array();
-
-  $user_id = $GLOBALS['user']->uid;
-  $rs_code = dispatch_planning_get_rscode_using_uid($user_id);
+  $dis_id = get_distributorid_of_trip($trip_id);
 
   if (!empty($trip_id) && !empty($string)) {
     $query = db_select('dispatch_planning_api_data', 'ad');
-    $query->condition('ad.runsheet_number', $trip_id);
-    $query->condition('ad.bill_number', '%' . db_like($string) . '%', 'LIKE');
-    //not required delivery pending bills of that trip
-    $query->condition('ad.delivery_pending_flag', 1, '!=');
-    $query->condition('ad.hub', $rs_code);
+    $query->condition('ad.runsheet_number' , $trip_id);
+    $query->condition('ad.bill_number' ,  '%' . db_like($string) . '%', 'LIKE');
+    $query->condition('ad.distributor_id', $dis_id, '=');
+		$query->condition('ad.delivery_pending_flag',1, '!=');
     $query->fields('ad', array('bill_number'));
     $query->range(0, 15);
     $result = $query->execute()->fetchAllKeyed(0, 0);
-
+    
 //    $query = db_select('node', 'n');
 //    $query->Join('field_data_field_trip_id_reference', 'ft', 'ft.entity_id = n.nid');
 //    $query->Join('node', 'n1', 'n1.nid = ft.field_trip_id_reference_nid');
@@ -3916,6 +3914,7 @@ function _get_all_tripsbill($trip_id, $string = '') {
 //    $query->range(0, 15);
 //    $query->addTag('node_distributor_access');
 //    $result = $query->execute()->fetchAllKeyed(0, 0);
+      
   }
 
   drupal_json_output($result);
