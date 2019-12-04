@@ -3954,11 +3954,12 @@ function check_bill_status($trip_id) {
   return $res;
 }
 
-function get_trip_exec_date_from_trip_id($trip_id) {
+function get_trip_exec_date_from_trip_id($trip_id,$distributor_id) {
+    
   $query = db_select('node', 'n');
   $query->condition('n.title', $trip_id, "=");
   $query->condition('n.status', 1);
-  $query->addTag('node_distributor_access');
+  $query->condition('n.uid',$distributor_id);
   $query->join('field_data_field_trip_executon_date', 'trip_exe', 'trip_exe.entity_id = n.nid');
   $query->fields('trip_exe', array('field_trip_executon_date_value'));
   $trip_id_result = $query->execute()->fetchAssoc();
@@ -4027,19 +4028,19 @@ function get_partial_popup_return_data_from_trip_id($trip_id) {
   return $trip_id_result;
 }
 
-function get_delivery_summary_full_return_reason_header($trip_id) {
-  global $user;
+function get_delivery_summary_full_return_reason_header($trip_id,$distributor_id) {
+ // global $user;
   $trip_id_result = array();
-  $user_id = $user->uid;
-  $distributor_id = change_feeds_import_get_distributor_id($user_id);
-  if (!empty($trip_id)) {
-    $rs_code = dispatch_planning_get_rscode_using_uid($user_id);
+  //$user_id = $user->uid;
+  if (!empty($trip_id) && !empty($distributor_id)) {
+    //$distributor_id = get_distributorid_of_trip($trip_id);  
+    //$rs_code = dispatch_planning_get_rscode_using_uid($user_id);
     $query = db_select('dispatch_planning_api_data', 'ad');
     $query->condition('ad.delivery_pending_flag', 1, "!=");
     $query->condition('ad.runsheet_number', $trip_id, "=");
     $query->condition('ad.res_status', 'undeliver', "=");
     $query->isNotNull('ad.res_reason_for_failure');
-    $query->condition('ad.hub', $rs_code, "=");
+    //$query->condition('ad.hub', $rs_code, "=");
     $query->condition('ad.distributor_id', $distributor_id, "=");
     $query->addExpression("COUNT(DISTINCT ad.bill_number)", 'bill_number');
     $query->addExpression("GROUP_CONCAT(DISTINCT ad.bill_number ORDER BY ad.bill_number separator ', ' )", 'bill_number');
