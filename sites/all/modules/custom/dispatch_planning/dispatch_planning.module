@@ -4047,11 +4047,8 @@ function get_delivery_summary_full_return_reason_header($trip_id,$distributor_id
 }
 
 // Function to return VAN type of a trip
-function get_van_type($trip_id) {
+function get_van_type($trip_id,$distributor_id) {
   if (!empty($trip_id)) {
-    global $user;
-    $user_id = $user->uid;
-    $distributor_id = change_feeds_import_get_distributor_id($user_id);
     $node_obj = node_load_multiple(NULL, array('title' => $trip_id, 'type' => 'dispatch_data', 'uid' => $distributor_id));
     $trip_nid = key($node_obj);
     $node = $node_obj[$trip_nid];
@@ -4062,12 +4059,9 @@ function get_van_type($trip_id) {
   return $allowed_values[$selected_option];
 }
 
-function get_delivery_pending_data($trip_id) {
+function get_delivery_pending_data($trip_id,$distributor_id) {
   $trip_id_result = array();
-  if (!empty($trip_id)) {
-    global $user;
-    $user_id = $user->uid;
-    $distributor_id = change_feeds_import_get_distributor_id($user_id);
+  if (!empty($trip_id) && !empty($distributor_id)) {
     $query = db_select('dispatch_planning_api_data', 'ad');
     //$query->join('dispatch_planning_item_details', 'idt', 'ad.id =idt.trip_bill_reference');
     //$query->condition('idt.res_sku_reason','', "!=");
@@ -4084,12 +4078,9 @@ function get_delivery_pending_data($trip_id) {
 }
 
 // get delivery_pending data dispatch date and cashier name
-function get_delivery_pending_header_data($trip_id) {
+function get_delivery_pending_header_data($trip_id,$distributor_id) {
   $result = array();
-  if (!empty($trip_id)) {
-    global $user;
-    $user_id = $user->uid;
-    $distributor_id = change_feeds_import_get_distributor_id($user_id);
+  if (!empty($trip_id) && !empty($distributor_id)) {
     $query = db_select('dispatch_planning_api_data', 'ad');
     $query->condition('ad.runsheet_number', $trip_id, "=");
     $query->condition('ad.delivery_pending_flag', 1);
