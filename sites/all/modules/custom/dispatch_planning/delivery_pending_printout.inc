@@ -68,11 +68,9 @@ function get_data_of_delivery_pending_form_validate($form, &$form_state){
        form_set_error('bill_option', "Please selct Bill wise or SKU wise option to view.");
   }
 }
-function check_delivery_pending_bill_exists($trip_id) {
-        global $user;
-        $distributor_id = change_feeds_import_get_distributor_id( $user->uid);
+function check_delivery_pending_bill_exists($trip_id,$distributor_id) {
         $dp_rows = array();
-    if (!empty($trip_id)) {
+    if (!empty($trip_id) && !empty($distributor_id)) {
         $query = db_select('dispatch_planning_api_data', 'ad');
         $query->fields('ad', array('id'));
         $query->condition('runsheet_number', $trip_id, '=');
@@ -88,14 +86,13 @@ function get_data_of_delivery_pending_form_submit($form, &$form_state) {
   $trip_id = $form_state['values']['trip_id'];
   $bill_option = $form_state['values']['bill_option'];
   $view_name = "delivery_pending_printout_pp_van";
-  global $user;
-  $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+  $distributor_id = get_distributorid_of_trip($trip_id);
   $check_trip_id = check_trip_id_exists_or_not($distributor_id, $trip_id);
     if (empty($check_trip_id->nid)) {
       form_set_error('trip_id', "Trip ID :$trip_id does not exists.");
     }
   //delivery_pending_printout_non_pp
-  $van_type = check_trip_van_type($trip_id);
+  $van_type = check_trip_van_type($trip_id,$distributor_id);
   //$van_type == 1 Party Pack VAN 2 == NON PP VAN
   if ($bill_option == 'bill_wise') {
     $view_name = "delivery_pending_printout_pp_van";
@@ -103,7 +100,7 @@ function get_data_of_delivery_pending_form_submit($form, &$form_state) {
   else if($bill_option == 'sku_wise') {
       $view_name = "delivery_pending_printout_non_pp";
   }
-  $delivery_pending_bills = check_delivery_pending_bill_exists($trip_id);
+  $delivery_pending_bills = check_delivery_pending_bill_exists($trip_id,$distributor_id);
   if (!empty($delivery_pending_bills)) {
     $view = views_get_view($view_name, '');
     $view->set_arguments(array($trip_id));
@@ -120,7 +117,8 @@ function get_data_of_delivery_pending_form_submit($form, &$form_state) {
 function download_delivery_pending($trip_id,$bill_option){
   $view_name = "delivery_pending_printout_pp_van";
   //delivery_pending_printout_non_pp
-  $van_type = check_trip_van_type($trip_id);
+  $distributor_id = get_distributorid_of_trip($trip_id);
+   $van_type = check_trip_van_type($trip_id,$distributor_id);
   //$van_type == 1 Party Pack VAN 2 == NON PP VAN
   if ($bill_option == 'bill_wise') {
     $view_name = "delivery_pending_printout_pp_van";
@@ -134,12 +132,9 @@ function download_delivery_pending($trip_id,$bill_option){
   pdf_using_mpdf_api($rendered_html);
 }
 // This for checking Delivery pending Dp Van type
-function check_trip_van_type($trip_id) {
+function check_trip_van_type($trip_id,$distributor_id) {
     $selected_option = 0;
-    global $user;
-    if (!empty($trip_id)) {
-        $user_id = $user->uid;
-        $distributor_id = change_feeds_import_get_distributor_id($user_id);
+    if (!empty($trip_id) && !empty($distributor_id)) {
         $node_obj = node_load_multiple(NULL, array('title' => $trip_id, 'type' => 'dispatch_data', 'uid' => $distributor_id));
         $trip_nid = key($node_obj);
         $node = $node_obj[$trip_nid];
