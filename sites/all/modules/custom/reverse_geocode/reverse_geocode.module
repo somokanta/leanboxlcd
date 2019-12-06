@@ -1478,7 +1478,8 @@ function reverse_geocode_node_presave($node) {
          }
       }
 
-      if(!empty($node->field_sales_party_code['und'][0]['value']) && empty($node->field_party_code_reference['und'][0]['nid'])) {
+      //if(!empty($node->field_sales_party_code['und'][0]['value']) && empty($node->field_party_code_reference['und'][0]['nid'])) {
+      if(!empty($node->field_sales_party_code['und'][0]['value'])) {
         // write a logic here to fetch same distributors party code reference 
         // and store here in node
         
