@@ -1984,7 +1984,7 @@ function dispatch_planning_form_save_validate($form, &$form_state) {
         global $base_url;
         $params['subject'] = "Dispatch Planning Python API Error on $base_url for van: $hht_id";
         $params['body'] = $python_api_response_data->error;
-        $mail_to = variable_get('parkstop_api_error_email',"abhishek.r@iksula.com,rahul.maurya@iksulaops.com"); //kusha@leanbox.in
+        $mail_to = variable_get('parkstop_api_error_email',"rahul.maurya@iksulaops.com"); //kusha@leanbox.in abhishek.r@iksula.com,
         $from = "MIS.HELPDESK@leanbox.in";
         drupal_mail('adhoc_task', 'bill_date_missing', $mail_to, LANGUAGE_NONE, $params, $from);
         //emailer for notification end
@@ -2131,11 +2131,12 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
   }
 
   $txn = db_transaction();
-
+  $distributor_facility_code = get_facility_code_of_distributor($distributor_id);
   $query = db_select('trip_id_sequence', 'ts');
   $query->forUpdate();
   $query->addField('ts', 'next_id');
-  $query->condition('ts.distributor_id', $distributor_id);
+  $query->condition('ts.facility_code', $distributor_facility_code);
+  //$query->condition('ts.distributor_id', $distributor_id);
   $trip_id = $query->execute()->fetchField();
 
 
@@ -2143,7 +2144,8 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
     // Increment the next_value.
     db_update('trip_id_sequence')
       ->fields(array('next_id' => $trip_id + 1))
-      ->condition('distributor_id', $distributor_id)
+      ->condition('facility_code', $distributor_facility_code)      
+     // ->condition('distributor_id', $distributor_id)
       ->execute();
   }
   else {
@@ -2151,6 +2153,8 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
     $insert = db_insert('trip_id_sequence')
       ->fields(array(
       'distributor_id' => $distributor_id,
+      //'distributor_id' => $distributor_id,
+      'facility_code'=> $distributor_facility_code,   
       'next_id' => $trip_id + 1
     ));
     $insert->execute();
@@ -2196,7 +2200,7 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
   $node = node_submit($node); // Prepare node for saving
   node_save($node);
 
-  if (!empty($total_distance) && !empty($total_travel_time)) {
+  if (!empty($node->title)) { //!empty($total_distance) && !empty($total_travel_time)
     update_parkstop_plotting_log('dispatch', $trip_id, $distributor_id);
   }
 
@@ -4803,4 +4807,20 @@ function is_bill_cancelled_discarded($bill_number){
     $res = $query->execute()->fetchField();
   }
   return $res;
+}
+function get_facility_code_of_distributor($distributor_id) {
+   $facility_code = '';
+  if (!empty($distributor_id))  {
+    $query = db_select('users', 'u');
+    $query->innerjoin('field_data_field_distributor', 'd', 'd.entity_id = u.uid');
+    $query->condition('d.field_distributor_value', $distributor_id, '=');
+    $query->innerjoin('field_data_field_facility_code', 'facility_code', 'facility_code.entity_id = u.uid');
+    $query->fields('facility_code', array('field_facility_code_tid'));
+    $facility_term_id = $query->execute()->fetchField();
+    if (!empty($facility_term_id)) {
+        $term_obj = taxonomy_term_load($facility_term_id);
+        $facility_code = $term_obj->name;
+    }
+  }
+  return $facility_code;
 }
