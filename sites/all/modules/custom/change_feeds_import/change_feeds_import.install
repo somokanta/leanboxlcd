@@ -1512,3 +1512,7 @@ function change_feeds_import_update_7121() {
    
   db_create_table('masters_api_log', $schema['masters_api_log']);  
 }
+
+function change_feeds_import_update_7122() {
+    db_change_field('outlet_order_crate', 'outlet_order_no', 'outlet_order_no', array('type' => 'varchar','length'=>100,'not null'=>TRUE));
+}
