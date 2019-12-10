@@ -1564,3 +1564,6 @@ function change_feeds_import_update_7128() {
   db_add_unique_key($table, $name, $fields);
   //db_drop_unique_key($table, $name)
 }
+function change_feeds_import_update_7129() {
+    db_change_field('outlet_order_crate', 'outlet_order_no', 'outlet_order_no', array('type' => 'varchar','length'=>100,'not null'=>TRUE));
+}
