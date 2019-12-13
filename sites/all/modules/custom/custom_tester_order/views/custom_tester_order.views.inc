@@ -2,15 +2,15 @@
 
 function tester_order_data_views_data() {
     $data['tester_order_data']['table'] = array(
-        'group' => t('Custom tester Order'),
-        'title' => t('Custom tester Order'),
-        'help' => t('Custom tester Order.'),
+        'group' => t('Tester Order Data'),
+        'title' => t('Tester Order Data'),
+        'help' => t('Tester Order data.'),
     );
     // Define this as a base table.
     $data['tester_order_data']['table']['base'] = array(
         'field' => 'id',
-        'title' => t('Custom Tester Order'),
-        'help' => t("Custom tester Order unique identifiers."),
+        'title' => t('Tester Order Data'),
+        'help' => t("Tester Order Data unique identifiers."),
             // 'weight' => -10,
     );
     $data['tester_order_data']['id'] = array(
