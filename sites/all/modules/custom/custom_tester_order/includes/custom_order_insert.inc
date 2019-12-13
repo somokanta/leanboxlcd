@@ -10,7 +10,7 @@ function update_tester_order_data($data) {
 
     $results['flag'] = '0';
     $results['result'] = "0 Row Updated";
-
+    watchdog('tester order data', '<pre>' . print_r($data, TRUE) . '</pre>');
     foreach ($data as $value) {
         $result = db_merge('tester_order_data')
                 ->key(array('tester_order_number' => $value['tester_order_number'], 'distributor_id' => $value['distributor_id'], 'facility_code' => $value['lcd_facility_code']))
