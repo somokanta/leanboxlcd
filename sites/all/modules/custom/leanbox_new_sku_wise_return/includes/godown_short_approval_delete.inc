@@ -41,9 +41,10 @@ function godown_short_approval_delete_form($form, &$form_state) {
 // Check Trip status.
 function trip_id_status_validation($form, &$form_state) {
   global $user;
-  $dis_id = change_feeds_import_get_distributor_id($user->uid);
+  //$dis_id = change_feeds_import_get_distributor_id($user->uid);
   $form_state['trip_no_error'] = '';
   $trip_number = $form_state['input']['trip_number'];
+  $dis_id = get_distributorid_of_trip($trip_number);
   $form_state['trip_no_error'] = 0;
   $trip_detail = check_trip_id_exists_or_not($dis_id, $trip_number);
   $vrs_status = $trip_detail->field_vrs_status_value;
@@ -60,8 +61,9 @@ function trip_id_status_validation($form, &$form_state) {
 
 function godown_short_approval_delete_submit($form, &$form_state) {
   global $user;
-  $dis_id = change_feeds_import_get_distributor_id($user->uid);
+  //$dis_id = change_feeds_import_get_distributor_id($user->uid);
   $trip_id = $form_state['values']['trip_number'];
+  $dis_id = get_distributorid_of_trip($trip_id);
   if (empty($form_state['trip_no_error'])) {
     $query = db_select('dispatch_planning_api_data', 'dpi');
     $query->condition('dpi.distributor_id', $dis_id, '=');

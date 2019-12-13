@@ -448,19 +448,18 @@ function get_notes_denominations() {
 }
 
 function _get_trip_ids_using_dispatch_date($dispatch_date) {
-  $res = array();
-  if (!empty($dispatch_date)) {
-    global $user;
-    $dis_id = change_feeds_import_get_distributor_id($user->uid);
-    $query = db_select('node', 'n');
-    $query->condition('n.type', 'dispatch_data');
-    $query->condition('n.uid', $dis_id);
-    $query->join('field_data_field_dispatch_date', 't', 't.entity_id = n.nid');
-    $query->condition('t.field_dispatch_date_value', $dispatch_date);
-    $query->fields('n', array('title'));
-    $res = $query->execute()->fetchAllKeyed(0, 0);
-  }
-  return $res;
+    $res = array();
+    $distributor_ids = get_distributor_ids();
+   if (!empty($dispatch_date)) {
+      $query = db_select('node', 'n');
+      $query->condition('n.type', 'dispatch_data');
+      $query->condition('n.uid', $distributor_ids,'IN');
+      $query->join('field_data_field_dispatch_date', 't', 't.entity_id = n.nid');
+      $query->condition('t.field_dispatch_date_value', $dispatch_date);
+      $query->fields('n', array('title'));
+      $res = $query->execute()->fetchAllKeyed(0, 0);
+   }
+   return $res;
 }
 
 // Get all vrs ids
