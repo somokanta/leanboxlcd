@@ -4,7 +4,7 @@
  * Implement hook_schema.
  */
 
-function custom_order_box_id_schema() {
+function custom_tester_order_schema() {
 
   $schema['tester_order_data'] = [
     'description' => 'The base table for Lb SKU EAN.',
