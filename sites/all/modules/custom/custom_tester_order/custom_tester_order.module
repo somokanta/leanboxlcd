@@ -36,7 +36,7 @@ function custom_tester_order_services_resources() {
 /**
  * permission
  */
-function lb_product_api_permission() {
+function custom_tester_order_permission() {
 
   return array(
     'tester_order_api' => array(
@@ -48,7 +48,7 @@ function lb_product_api_permission() {
 /**
  * Implements of hook_views_api().
  */
-function custom_order_box_id_views_api() {
+function custom_tester_order_views_api() {
    return array(
      'api' => 3,
      'path' => drupal_get_path('module', 'custom_tester_order') . '/views'
