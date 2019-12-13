@@ -1,0 +1,4 @@
+name = Custom Tester Order
+description = Custom Tester Order.
+package = Custom
+core = 7.x
