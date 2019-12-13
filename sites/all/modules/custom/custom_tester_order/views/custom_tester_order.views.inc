@@ -186,19 +186,6 @@ function custom_tester_order_views_data() {
             'handler' => 'views_handler_filter_string',
         ),
     );
-    $data['custom_tester_order']['crate_id'] = array(
-        'title' => t('Crate Id'),
-        'help' => t('Crate Id'),
-        'field' => array(
-            'handler' => 'views_handler_field',
-        ),
-        'sort' => array(
-            'handler' => 'views_handler_sort',
-        ),
-        'filter' => array(
-            'handler' => 'views_handler_filter_string',
-        ),
-    );
     $data['custom_tester_order']['distributor_id'] = array(
         'title' => t('Distributor Id'),
         'help' => t('Distributor Id'),

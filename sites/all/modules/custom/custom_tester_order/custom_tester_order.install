@@ -81,7 +81,7 @@ function custom_tester_order_schema() {
       ],
        //rename as tester qty nothing but order quantity 
       'tester_qty' => [
-        'description' => 'Order Qty',
+        'description' => 'Tester Qty',
         'type' => 'int',
         'not null' => TRUE,
         'default' => 0,
