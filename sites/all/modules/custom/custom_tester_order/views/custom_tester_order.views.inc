@@ -1,6 +1,6 @@
 <?php
 
-function tester_order_data_views_data() {
+function custom_tester_order_views_data() {
     $data['tester_order_data']['table'] = array(
         'group' => t('Tester Order Data'),
         'title' => t('Tester Order Data'),
