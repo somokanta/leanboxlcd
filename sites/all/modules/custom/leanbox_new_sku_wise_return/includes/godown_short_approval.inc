@@ -17,8 +17,14 @@ function godown_short_approval_form($form, &$form_state) {
   $form['#attached']['css'][] = drupal_get_path('module', 'leanbox_new_sku_wise_return') . '/css/leanbox_new_sku_wise_return.css';
   global $user;
   $distributor_id = change_feeds_import_get_distributor_id($user->uid);
-
-  $form['#prefix'] = '<div id="itemlist-div">';
+    $logged_in_dis_id = $distributor_id;
+    if (in_array("central_distributor", $user->roles)) {
+        $central_distributor_id = $logged_in_dis_id;
+    } else {
+        $central_distributor_id = get_central_distributor_id($logged_in_dis_id);
+    }
+    $form_state['central_distributor_id'] = $central_distributor_id;
+    $form['#prefix'] = '<div id="itemlist-div">';
   $form['#suffix'] = '</div>';
 
   $form['trip_number'] = array(
@@ -197,7 +203,7 @@ function godown_short_approval_form($form, &$form_state) {
     $initial_option = array('' => 'Select');
     if ($flag_value == 'yes') {
       $flag = 'yes';
-      $reason_list = get_godown_short_reason_list($distributor_id, $flag);
+      $reason_list = get_godown_short_reason_list($flag);
       $reason = array(
         '#type' => 'select',
         '#options' => $initial_option + $reason_list,
@@ -205,7 +211,7 @@ function godown_short_approval_form($form, &$form_state) {
     }
     else if ($flag_value == 'no') {
       $flag = 'no';
-      $reason_list = get_godown_short_reason_list($distributor_id, $flag);
+      $reason_list = get_godown_short_reason_list($flag);
       $reason = array(
         '#type' => 'select',
         '#options' => $initial_option + $reason_list,
@@ -314,10 +320,11 @@ function short_approval_callback_select($form, &$form_state) {
 }
 
 function trip_id_validation($form, &$form_state) {
-  global $user;
-  $dis_id = change_feeds_import_get_distributor_id($user->uid);
+  //global $user;
+  //$dis_id = change_feeds_import_get_distributor_id($user->uid);
   $form_state['trip_no_error'] = '';
   $trip_number = $form_state['input']['trip_number'];
+  $dis_id = get_distributorid_of_trip($trip_number);
 
   $trip_detail = check_trip_id_exists_or_not($dis_id, $trip_number);
   $vrs_status = $trip_detail->field_vrs_status_value;
@@ -342,11 +349,11 @@ function trip_id_validation($form, &$form_state) {
 
 function godown_short_approval_submit($form, &$form_state) {
   if ($form_state['trip_no_error'] != 1) {
-    global $user;
-    $dis_id = change_feeds_import_get_distributor_id($user->uid);
+    //global $user;
+    //$dis_id = change_feeds_import_get_distributor_id($user->uid);
 
     $trip_id = $form_state['values']['trip_number'];
-
+    $dis_id = get_distributorid_of_trip($trip_id);
     $query = db_select('dispatch_planning_item_details', 'dpi');
     $query->join('dispatch_planning_api_data', 'ad', 'dpi.trip_bill_reference = ad.id');
     $query->condition('ad.delivery_pending_flag', 1, '!=');
@@ -607,10 +614,11 @@ function godown_short_validate($form, &$form_state) {
 }
 
 function godown_short_submit($form, &$form_state) {
-  global $user;
-  $dis_id = change_feeds_import_get_distributor_id($user->uid);
+  //global $user;
+  //$dis_id = change_feeds_import_get_distributor_id($user->uid);
 
   $trip_id = $form_state['values']['trip_number'];
+  $dis_id = get_distributorid_of_trip($trip_id);
 
   foreach ($form_state['godown_short_approval']['bills'] as $key => $value) {
     $bill_number = $value['bill_number'];

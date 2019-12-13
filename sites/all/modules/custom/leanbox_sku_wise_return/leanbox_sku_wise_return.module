@@ -22,12 +22,13 @@ function leanbox_sku_wise_return_menu() {
      'file' => 'includes/sku_wise_returns.inc',
    );
   
-  $items['sku-wise-trip/autocomplete'] = array(
-    'title' => 'trip_autocomplete',
-    'page callback' => 'sku_wise_trip_id_autocomplete',
-    'access callback' => TRUE,
-    'type' => MENU_CALLBACK,
-  );
+  $items['sku-wise-trip/autocomplete/%'] = array(
+      'title' => 'trip_autocomplete',
+      'page arguments' => array(2),
+      'page callback' => 'sku_wise_trip_id_autocomplete',
+      'access callback' => TRUE,
+      'type' => MENU_CALLBACK,
+    );
   
   $items['sku/autocomplete/%'] = array(
     'title' => 'sku autocomplete',
@@ -40,9 +41,8 @@ function leanbox_sku_wise_return_menu() {
   return $items;
 }
 
-function sku_wise_trip_id_autocomplete($string = '') {
-  global $user;
-  $dis_id = change_feeds_import_get_distributor_id($user->uid);
+function sku_wise_trip_id_autocomplete($trip_id,$string = '') {
+  $dis_id = get_distributorid_of_trip($trip_id);
   $result = array();
 
   if ($string) {
@@ -122,15 +122,3 @@ function get_to_be_returned_qty($trip_number, $sku_name, $mrp) {
   return $result;
 }
 
-function _get_bill_status_wise_reason_master_list($reason_type) {
-  $query = db_select('node', 'n');
-  $query->join('field_data_field_reason_type', 'rt', 'rt.entity_id = n.nid');
-  $query->join('field_data_field_dp_reason', 'dr', 'dr.entity_id = n.nid');
-  $query->condition('rt.field_reason_type_value', $reason_type);
-  $query->fields('dr', array('field_dp_reason_value'));
-  $query->addTag('node_distributor_access');
-  $res = $query->execute()->fetchAllKeyed(0, 0);
-  $res1 = array('' => '- select -');
-  $response = $res1 + $res;
-  return $response;
-}
