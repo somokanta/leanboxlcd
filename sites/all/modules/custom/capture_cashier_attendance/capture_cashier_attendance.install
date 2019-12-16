@@ -35,10 +35,24 @@ function capture_cashier_attendance_schema() {
         'description' => 'Distributor Id',
         'type' => 'int',
         'default' => 0,
-      )
+      ),
+      'facility_code' => array(
+        'description' => t('Facility Code'),
+        'type' => 'varchar',
+        'length' => 100,
+      ),   
     ),
     'primary key' => array('id'),
   );
     
   return $schema;
+}
+
+function capture_cashier_attendance_update_7106() {
+
+  db_add_field('cashier_attendance_api_log', 'facility_code', array(
+    'type' => 'varchar',
+    'length' => 100,
+    'default' => 0,
+  ));
 }

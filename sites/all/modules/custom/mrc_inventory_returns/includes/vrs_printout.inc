@@ -7,8 +7,15 @@
  */
 module_load_include('inc', 'mrc_inventory_returns', 'includes/vrs_common');
 function get_data_of_vrs_form($form, &$form_state){
-  global $user;  
-  $dis_id = change_feeds_import_get_distributor_id($user->uid);
+  global $user;
+  if (in_array("central_distributor", $user->roles)) {
+        $central_distributor_id = $logged_in_dis_id;
+  }
+  else {
+        $central_distributor_id = get_central_distributor_id($logged_in_dis_id);
+  }
+  $logged_in_dis_id = change_feeds_import_get_distributor_id($user->uid);
+  $form_state['central_distributor_id'] = $central_distributor_id;
   $form['#attached']['js'][] = drupal_get_path('module', 'mrc_inventory_returns') . '/js/vrs_printout.js';  
   $form['#prefix'] = '<div id="itemlist-div">';
   $form['#suffix'] = '</div>';
@@ -38,6 +45,7 @@ function get_data_of_vrs_form($form, &$form_state){
       '#markup' => $form_state['views_data'],
     );
     $trip_id = $form_state['values']['trip_id'];
+    $dis_id = get_distributorid_of_trip($trip_id);
     $check_returns_flag = check_trip_id_exists_or_not($dis_id, $trip_id);
     if ($check_returns_flag->field_vrs_status_value>=2) {
         $rr = l('VRS Printout',"/download-vrs-report/$trip_id", array('attributes'=>array("target" => "_blank")));
@@ -73,13 +81,12 @@ function vrs_form_submit($form, &$form_state) {
 }
 
 function get_data_of_vrs_form_validate($form, &$form_state){
-  global $user;  
+  global $user;
   $trip_id = $form_state['values']['trip_id'];
-  $dis_id = change_feeds_import_get_distributor_id($user->uid);
+  $dis_id = get_distributorid_of_trip($trip_id);
   $check_trip_nid = check_trip_id_exists_or_not($dis_id, $trip_id);
   $vrs_status = $check_trip_nid->field_vrs_status_value;
-  $trip_id = $form_state['values']['trip_id'];
-    if (!empty($trip_id)) {
+  if (!empty($trip_id)) {
         //1- Return confirmed, 3- Vrs pending
         // Checking VRS Status 
         /*0|Manual Edit
@@ -190,7 +197,7 @@ function get_vrs_versions($trip_id){
             'distributor_id',
             'rto_charges'            
     );
-        $dis_id = change_feeds_import_get_distributor_id($user->uid);
+        $dis_id = get_distributorid_of_trip($trip_id);
         $query = db_select('vrs_trip_items_history', 'vr_items');
         $query->condition('vr_items.distributor_id', $dis_id, '=');
         $query->condition('vr_items.trip_id', $trip_id, '=');
@@ -438,7 +445,7 @@ function transfer_file($file, $headers) {
 
 function get_vrs_items($trip_id) {
     global $user;
-    $dis_id = change_feeds_import_get_distributor_id($user->uid);
+    $dis_id = get_distributorid_of_trip($trip_id);
     $bill_status_undeliver = $form_state['values']['bill_status_undeliver'];
     $res = array();
     if (!empty($trip_id)) {
@@ -571,7 +578,7 @@ function get_vrs_print($trip_id) {
     $output = '';
     if (!empty($trip_id)) {
         global $user;
-        $dis_id = change_feeds_import_get_distributor_id($user->uid);
+        $dis_id = get_distributorid_of_trip($trip_id);
         $options = get_vrs_items($trip_id);
         if (!empty($options)) {
             // VRS edit screen load existing data
