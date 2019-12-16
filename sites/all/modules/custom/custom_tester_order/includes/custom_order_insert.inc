@@ -19,7 +19,7 @@ function update_tester_order_data($data) {
                     'order_date' => $value['order_date'],
                     'party_code' => $value['party_code'] ? $value['party_code'] : '',
                     'party_name' => $value['party_name'] ? $value['party_name'] : '',
-                    'sales_beat' => $value['beat_name'] ? $value['beat_name'] : '',
+                    'beat_name' => $value['beat_name'] ? $value['beat_name'] : '',
                     'basepack_code' => $value['basepack_code'],
                     'shade_code' => $value['shade_code'] ? $value['shade_code'] : '',
                     'shade_name' => $value['shade_name'] ? $value['shade_name'] : '',

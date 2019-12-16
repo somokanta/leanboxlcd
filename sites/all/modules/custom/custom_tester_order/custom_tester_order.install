@@ -44,8 +44,8 @@ function custom_tester_order_schema() {
         'default' => '0',
       ],
      // New added sales beat   
-     'sales_beat' => [
-        'description' => 'Sales beat',
+     'beat_name' => [
+        'description' => 'Beat Name',
         'type' => 'varchar',
         'length' => 255,
         'not null' => TRUE,

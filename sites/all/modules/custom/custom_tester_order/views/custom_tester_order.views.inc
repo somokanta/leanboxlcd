@@ -82,9 +82,9 @@ function custom_tester_order_views_data() {
             'handler' => 'views_handler_filter_string',
         ),
     );
-    $data['tester_order_data']['sales_beat'] = array(
-        'title' => t('Sales beat'),
-        'help' => t('Sales Beat'),
+    $data['tester_order_data']['beat_name'] = array(
+        'title' => t('Beat Name'),
+        'help' => t('Beat Name'),
         'field' => array(
             'handler' => 'views_handler_field',
         ),
