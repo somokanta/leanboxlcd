@@ -44,7 +44,7 @@ function update_tester_order_data($data) {
 
 
 function insert_tester_order_data_in_sales_register($tester_order_data) {
-    watchdog('tester order data sales register', '<pre>' . print_r($data, TRUE) . '</pre>');
+    watchdog('tester order data sales register', '<pre>' . print_r($tester_order_data, TRUE) . '</pre>');
     foreach ($tester_order_data as $key => $data) {
         if(!empty($data['tester_order_number'])){
             $distributor_id = $data['distributor_id'];
@@ -71,7 +71,7 @@ function insert_tester_order_data_in_sales_register($tester_order_data) {
                 $node->field_bill_value[LANGUAGE_NONE][0]['value'] = 0;
                 $node->field_sales_party_code[LANGUAGE_NONE][0]['value'] = $data['party_code'];
                 $node->field_sales_updated_date[LANGUAGE_NONE][0]['value'] = time();
-                $node->field_crate_id['und'][0]['value'] = $value['box_id'] ? $value['box_id'] : '';
+                $node->field_crate_id['und'][0]['value'] = $data['box_id'] ? $data['box_id'] : '';
                 $node->field_outlet_order_no['und'][0]['value'] = $data['tester_order_number'];
                 node_save($node);
             } else {
@@ -81,7 +81,7 @@ function insert_tester_order_data_in_sales_register($tester_order_data) {
                 $node->field_bill_value[LANGUAGE_NONE][0]['value'] = 0;
                 $node->field_sales_party_code[LANGUAGE_NONE][0]['value'] = $data['party_code'];
                 $node->field_sales_updated_date[LANGUAGE_NONE][0]['value'] = time();
-                $node->field_crate_id['und'][0]['value'] = $value['box_id'] ? $value['box_id'] : '';
+                $node->field_crate_id['und'][0]['value'] = $data['box_id'] ? $data['box_id'] : '';
                 $node->field_outlet_order_no['und'][0]['value'] = $data['tester_order_number'];
             }
         }
@@ -90,7 +90,7 @@ function insert_tester_order_data_in_sales_register($tester_order_data) {
 
 
 function insert_tester_order_data_in_custom_billing_table($tester_order_data) {
-    watchdog('tester order data custom billing', '<pre>' . print_r($data, TRUE) . '</pre>');
+    watchdog('tester order data custom billing', '<pre>' . print_r($tester_order_data, TRUE) . '</pre>');
     foreach ($tester_order_data as $key => $data) {
         if(!empty($data['tester_order_number'])){
             $distributor_id = $data['distributor_id'];
