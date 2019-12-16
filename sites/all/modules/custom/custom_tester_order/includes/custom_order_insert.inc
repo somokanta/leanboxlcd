@@ -67,6 +67,7 @@ function insert_tester_order_data_in_sales_register($tester_order_data) {
                 $node->comment = 0; // 0 = comments disabled, 1 = read only, 2 = read/write
 
                 $node->field_sr_new_bill_date[LANGUAGE_NONE][0]['value'] = $data['order_date'];
+                $node->field_sr_new_bill_date[LANGUAGE_NONE][0]['value'] = $data['order_date'];
                 $node->field_bill_value[LANGUAGE_NONE][0]['value'] = 0;
                 $node->field_sales_party_code[LANGUAGE_NONE][0]['value'] = $data['party_code'];
                 $node->field_sales_updated_date[LANGUAGE_NONE][0]['value'] = time();
@@ -76,6 +77,7 @@ function insert_tester_order_data_in_sales_register($tester_order_data) {
             } else {
                 $node = node_load($nid);
                 $node->field_sr_new_bill_date[LANGUAGE_NONE][0]['value'] = $data['order_date'];
+                $node->field_sr_bill_date[LANGUAGE_NONE][0]['value'] = $data['order_date'];
                 $node->field_bill_value[LANGUAGE_NONE][0]['value'] = 0;
                 $node->field_sales_party_code[LANGUAGE_NONE][0]['value'] = $data['party_code'];
                 $node->field_sales_updated_date[LANGUAGE_NONE][0]['value'] = time();
