@@ -47,9 +47,9 @@ function capture_cashier_attendance_services_resources(){
 function fetch_cashier_attendance_api_data($cashier_attendance_data){
   watchdog('cashier_attendance_data', '<pre>' . print_r($cashier_attendance_data, TRUE) . '</pre>');
   if (!empty($cashier_attendance_data)) {
-    global $user;
-    $distributor_id = change_feeds_import_get_distributor_id($user->uid);
-    $lat_long = get_warehouse_lat_lang($distributor_id);
+    //global $user;
+    //$distributor_id = change_feeds_import_get_distributor_id($user->uid);
+    $lat_long = get_warehouse_lat_lang();
     $sql_ins_id = insert_cashier_attendance_api_log($cashier_attendance_data);
     $cashier_count_from_api = count($cashier_attendance_data['attendance']);
     foreach($cashier_attendance_data['attendance'] as $key => $value){
@@ -59,9 +59,13 @@ function fetch_cashier_attendance_api_data($cashier_attendance_data){
       $employee_code = $value['employee_code'];
       $attendance_lat = $value['attendance_lat'];
       $attendance_lon = $value['attendance_lon'];
-      
-      if(!empty($attendance_lat) && !empty($attendance_lon)){
-        $distance_from_warehouse_in_km = haversineGreatCircleDistance($lat_long['field_distributor_latitude_value'], $lat_long['field_distributor_longitude_value'], $attendance_lat, $attendance_lon);
+      $facility_code = $value['facility_code'];
+      $facility_code_in_lower = strtolower($facility_code);
+      // warehouse latitude and longitude.
+      $lat = $lat_long[$facility_code_in_lower]['lat'];
+      $lng = $lat_long[$facility_code_in_lower]['lng'];
+      if(!empty($attendance_lat) && !empty($attendance_lon) && !empty($lat) && !empty($lng)){
+        $distance_from_warehouse_in_km = haversineGreatCircleDistance($lat, $lng, $attendance_lat, $attendance_lon);
       }
       $attendance_datetime = $value['attendance_datetime'];
       $integration_datetime = $value['integration_datetime'];
@@ -83,6 +87,7 @@ function fetch_cashier_attendance_api_data($cashier_attendance_data){
       $node_obj->field_attendance_datetime[$node_obj->language][0]['value'] = isset($attendance_datetime) ? strtotime($attendance_datetime) : ''; //"2019-10-15 10:12:01"
       $node_obj->field_integration_datetime[$node_obj->language][0]['value'] = isset($integration_datetime) ? strtotime($integration_datetime) : ''; //"2019-10-15 10:12:01"
       $node_obj->field_distance_from_warehouse[$node_obj->language][0]['value'] = isset($distance_from_warehouse_in_km) ? $distance_from_warehouse_in_km : ''; 
+      $node_obj->field_facility_code_name[$node_obj->language][0]['value'] = $facility_code;
       
       try{
         $node_obj = node_submit($node_obj); // Prepare node for saving
@@ -152,17 +157,24 @@ function capture_cashier_attendance_views_query_alter(&$view, &$query){
   }
 }
 
-function get_warehouse_lat_lang($distributor_id){
-    $res = array();
-    if(!empty($distributor_id)){
-     $query = db_select('node', 'van');
+function get_warehouse_lat_lang(){
+    $res = $result = array();
+    $query = db_select('node', 'van');
      $query->condition('van.type', 'van_stop_master');
-     $query->condition('van.title', $distributor_id);
+     //$query->condition('van.title', $distributor_id);
      $query->join('field_data_field_distributor_latitude', 'lat','lat.entity_id = van.nid');
      $query->join('field_data_field_distributor_longitude', 'lng','lng.entity_id = van.nid');
      $query->fields('lat', array('field_distributor_latitude_value'));
      $query->fields('lng', array('field_distributor_longitude_value'));
-     $res = $query->execute()->fetch(PDO::FETCH_ASSOC);   
-    }
-    return $res;
+     $query->fields('facility_code', array('field_vanstop_facility_code_value'));
+     $query->join('field_data_field_vanstop_facility_code', 'facility_code','facility_code.entity_id = van.nid');
+     //$query->groupBy('facility_code.field_vanstop_facility_code_value');
+     $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);   
+     if (!empty($res)) {
+         foreach($res as $key=>$value){
+             $facility_code = strtolower($value['field_vanstop_facility_code_value']);
+             $result[$facility_code] = array('lat'=>$value['field_distributor_latitude_value'],'lng'=>$value['field_distributor_longitude_value']);
+         }
+     }
+    return $result;
 }
