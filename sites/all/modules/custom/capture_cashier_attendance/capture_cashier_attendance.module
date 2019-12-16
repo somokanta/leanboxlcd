@@ -47,8 +47,9 @@ function capture_cashier_attendance_services_resources(){
 function fetch_cashier_attendance_api_data($cashier_attendance_data){
   watchdog('cashier_attendance_data', '<pre>' . print_r($cashier_attendance_data, TRUE) . '</pre>');
   if (!empty($cashier_attendance_data)) {
-    global $user;
-    $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+    //global $user;
+    //$distributor_id = change_feeds_import_get_distributor_id($user->uid);
+    $distributor_id = 23466;// Modified as discussed with Shylaja R 
     $lat_long = get_warehouse_lat_lang($distributor_id);
     $sql_ins_id = insert_cashier_attendance_api_log($cashier_attendance_data);
     $cashier_count_from_api = count($cashier_attendance_data['attendance']);
