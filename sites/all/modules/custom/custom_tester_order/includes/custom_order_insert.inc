@@ -94,25 +94,27 @@ function insert_tester_order_data_in_custom_billing_table($tester_order_data) {
     foreach ($tester_order_data as $key => $data) {
         if(!empty($data['tester_order_number'])){
             $distributor_id = $data['distributor_id'];
+            
+            $tb_id = db_query("select id from custom_billing_data where distributor_id = $distributor_id and  bill_number = '".$data['tester_order_number']."' limit 1")->fetchField();
+            if(empty($tb_id)){
+                //Fetch SKU7_CODE
+                $query = db_select('field_data_field_lb_sku7_code', 'sku');
+                $query->leftjoin('field_data_field_lb_basepack_code', 'bc', 'bc.entity_id = sku.entity_id');
+                $query->leftjoin('node', 'n', 'n.nid = sku.entity_id');
+                $query->condition('n.type', 'lb_product_master');
+                $query->condition('n.status', 1);
+                $query->condition('bc.field_lb_basepack_code_value', $data['basepack_code']);
+                $query->addField('sku', 'field_lb_sku7_code_value', 'sku7_code');
+                $data['sku7_code'] = $query->execute()->fetchField();
 
-            //Fetch SKU7_CODE
-            $query = db_select('field_data_field_lb_sku7_code', 'sku');
-            $query->leftjoin('field_data_field_lb_basepack_code', 'bc', 'bc.entity_id = sku.entity_id');
-            $query->leftjoin('node', 'n', 'n.nid = sku.entity_id');
-            $query->condition('n.type', 'lb_product_master');
-            $query->condition('n.status', 1);
-            $query->condition('bc.field_lb_basepack_code_value', $data['basepack_code']);
-            $query->addField('sku', 'field_lb_sku7_code_value', 'sku7_code');
-            $data['sku7_code'] = $query->execute()->fetchField();
+                // For weight and volume calculation
+                $sku_wt = 0;
+                $sku_vl = 0;
+                //TP to host calculation for line level value
+                $line_level_value = 0;
 
-            // For weight and volume calculation
-            $sku_wt = 0;
-            $sku_vl = 0;
-            //TP to host calculation for line level value
-            $line_level_value = 0;
-
-    //Fetch SKU7 code – based on basepack code (since multiple SKU7 codes will be found, fetch anyone)
-            $stage_billing_data = db_insert('custom_billing_data') // Table name no longer needs {}
+                //Fetch SKU7 code – based on basepack code (since multiple SKU7 codes will be found, fetch anyone)
+                $stage_billing_data = db_insert('custom_billing_data') // Table name no longer needs {}
                     ->fields(array(
                         //'vehicle' => $data['vehicle'],
                         'loading_date' => $data['order_date'], //T
@@ -148,6 +150,9 @@ function insert_tester_order_data_in_custom_billing_table($tester_order_data) {
                             //END
                     ))
                     ->execute();
+            }else{
+                //duplicate entry. hit twice
+            }
         }
     }
 }
