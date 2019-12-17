@@ -66,7 +66,14 @@ function custom_order_box_id_services_resources() {
               'description' => 'distributor_id',
               'source' => array('data' => 'distributor_id'),
               'optional' => FALSE,
-            ),  
+            ),
+            array(
+              'name' => 'party_code',
+              'type' => 'string',
+              'description' => 'party_code',
+              'source' => array('data' => 'party_code'),
+              'optional' => FALSE,
+            ),
            ),
             'file' => array(
               'type' => 'inc',
