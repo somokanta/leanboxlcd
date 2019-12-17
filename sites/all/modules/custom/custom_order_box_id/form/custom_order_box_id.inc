@@ -88,6 +88,8 @@ function custom_order_box_id_upload_form_validate($form, &$form_state) {
                     }
                     $order_party_code = get_party_code_of_order_no($outlet_order_no);
                     $bill_party_code = get_party_code_of_bill_no($bill_no);
+                    $order_party_code = strtolower($order_party_code);
+                    $bill_party_code = strtolower($bill_party_code);
                     if($order_party_code !== $bill_party_code){
                       $error_message .= "Order Number $outlet_order_no has Party Code $order_party_code whereas its Bill Number $bill_no has Party Code $bill_party_code at line" . ($key + 2) . '<br>';
                     }
