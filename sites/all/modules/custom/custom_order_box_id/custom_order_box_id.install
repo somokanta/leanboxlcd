@@ -89,7 +89,7 @@ function custom_order_box_id_update_7121() {
     }
   }
 }
-function custom_order_box_id_update_7122() {  
+function custom_order_box_id_update_7122() { 
   $fields = array(
     'party_code' => array(
       'description' => t('Party code'),
@@ -104,10 +104,7 @@ function custom_order_box_id_update_7122() {
       db_add_field('outlet_order_crate', $key, $field);
     }
   }
-}
-
-function custom_order_box_id_update_7123() {
-  $fields = array(
+    $fields = array(
     'order_upload_datetime' => array(
       'description' => t('Order Upload Datetime'),
       'type' => 'int',
