@@ -1686,7 +1686,7 @@ function van_planning_ajax_submit($area_codes, $van_pl_group, $pl_group, $bill_d
     }
   }
   $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
-
+dpq($query,'abhishek test');
   foreach ($res as $key => $val) {
     foreach ($val as $key1 => $val1) {
       if ($key1 == 'bill_no') {
