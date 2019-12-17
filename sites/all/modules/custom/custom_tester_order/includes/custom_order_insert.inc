@@ -13,7 +13,7 @@ function update_tester_order_data($data) {
     watchdog('tester order data', '<pre>' . print_r($data, TRUE) . '</pre>');
     foreach ($data as $value) {
         $result = db_merge('tester_order_data')
-                ->key(array('tester_order_number' => $value['tester_order_number'], 'distributor_id' => $value['distributor_id'], 'facility_code' => $value['lcd_facility_code']))
+                ->key(array('tester_order_number' => $value['tester_order_number'], 'basepack_code' => $value['basepack_code'], 'distributor_id' => $value['distributor_id'], 'facility_code' => $value['lcd_facility_code']))
                 ->fields(array(
                     'tester_order_number' => $value['tester_order_number'],
                     'order_date' => $value['order_date'],
@@ -44,45 +44,49 @@ function update_tester_order_data($data) {
 
 
 function insert_tester_order_data_in_sales_register($tester_order_data) {
-    watchdog('tester order data sales register', '<pre>' . print_r($tester_order_data, TRUE) . '</pre>');
+    $test_order_arr = array();
     foreach ($tester_order_data as $key => $data) {
         if(!empty($data['tester_order_number'])){
-            $distributor_id = $data['distributor_id'];
+            if (!array_key_exists($data['tester_order_number'], $test_order_arr)) {
+                $test_order_arr[$data['tester_order_number']] = $data['tester_order_number'];
+                watchdog('tester order data sales register', '<pre>' . print_r($data, TRUE) . '</pre>');
+                $distributor_id = $data['distributor_id'];
 
-            $query = db_select('node', 'n');
-            $query->condition('n.type', 'sales_register_data');
-            $query->condition('n.title', $data['tester_order_number']);
-            $query->condition('n.uid', $distributor_id);
-            $query->fields('n', array('nid'));
-            $nid = $query->execute()->fetchField();
+                $query = db_select('node', 'n');
+                $query->condition('n.type', 'sales_register_data');
+                $query->condition('n.title', $data['tester_order_number']);
+                $query->condition('n.uid', $distributor_id);
+                $query->fields('n', array('nid'));
+                $nid = $query->execute()->fetchField();
 
-            if (empty($nid)) {
-                $node = new stdClass();
-                $node->title = $data['tester_order_number'];
-                $node->type = "sales_register_data";
-                node_object_prepare($node); // Sets some defaults. Invokes hook_prepare() and hook_node_prepare().
-                $node->language = LANGUAGE_NONE; // Or e.g. 'en' if locale is enabled
-                $node->uid = $distributor_id;
-                $node->status = 1; //(1 or 0): published or not
-                $node->comment = 0; // 0 = comments disabled, 1 = read only, 2 = read/write
+                if (empty($nid)) {
+                    $node = new stdClass();
+                    $node->title = $data['tester_order_number'];
+                    $node->type = "sales_register_data";
+                    node_object_prepare($node); // Sets some defaults. Invokes hook_prepare() and hook_node_prepare().
+                    $node->language = LANGUAGE_NONE; // Or e.g. 'en' if locale is enabled
+                    $node->uid = $distributor_id;
+                    $node->status = 1; //(1 or 0): published or not
+                    $node->comment = 0; // 0 = comments disabled, 1 = read only, 2 = read/write
 
-                $node->field_sr_new_bill_date[LANGUAGE_NONE][0]['value'] = $data['order_date'];
-                $node->field_sr_new_bill_date[LANGUAGE_NONE][0]['value'] = $data['order_date'];
-                $node->field_bill_value[LANGUAGE_NONE][0]['value'] = 0;
-                $node->field_sales_party_code[LANGUAGE_NONE][0]['value'] = $data['party_code'];
-                $node->field_sales_updated_date[LANGUAGE_NONE][0]['value'] = time();
-                $node->field_crate_id['und'][0]['value'] = $data['box_id'] ? $data['box_id'] : '';
-                $node->field_outlet_order_no['und'][0]['value'] = $data['tester_order_number'];
-                node_save($node);
-            } else {
-                $node = node_load($nid);
-                $node->field_sr_new_bill_date[LANGUAGE_NONE][0]['value'] = $data['order_date'];
-                $node->field_sr_bill_date[LANGUAGE_NONE][0]['value'] = $data['order_date'];
-                $node->field_bill_value[LANGUAGE_NONE][0]['value'] = 0;
-                $node->field_sales_party_code[LANGUAGE_NONE][0]['value'] = $data['party_code'];
-                $node->field_sales_updated_date[LANGUAGE_NONE][0]['value'] = time();
-                $node->field_crate_id['und'][0]['value'] = $data['box_id'] ? $data['box_id'] : '';
-                $node->field_outlet_order_no['und'][0]['value'] = $data['tester_order_number'];
+                    $node->field_sr_new_bill_date[LANGUAGE_NONE][0]['value'] = $data['order_date'];
+                    $node->field_sr_bill_date[LANGUAGE_NONE][0]['value'] = $data['order_date'];
+                    $node->field_bill_value[LANGUAGE_NONE][0]['value'] = 0;
+                    $node->field_sales_party_code[LANGUAGE_NONE][0]['value'] = $data['party_code'];
+                    $node->field_sales_updated_date[LANGUAGE_NONE][0]['value'] = time();
+                    $node->field_crate_id['und'][0]['value'] = $data['box_id'] ? $data['box_id'] : '';
+                    $node->field_outlet_order_no['und'][0]['value'] = $data['tester_order_number'];
+                    node_save($node);
+                } else {
+                    $node = node_load($nid);
+                    $node->field_sr_new_bill_date[LANGUAGE_NONE][0]['value'] = $data['order_date'];
+                    $node->field_sr_bill_date[LANGUAGE_NONE][0]['value'] = $data['order_date'];
+                    $node->field_bill_value[LANGUAGE_NONE][0]['value'] = 0;
+                    $node->field_sales_party_code[LANGUAGE_NONE][0]['value'] = $data['party_code'];
+                    $node->field_sales_updated_date[LANGUAGE_NONE][0]['value'] = time();
+                    $node->field_crate_id['und'][0]['value'] = $data['box_id'] ? $data['box_id'] : '';
+                    $node->field_outlet_order_no['und'][0]['value'] = $data['tester_order_number'];
+                }
             }
         }
     }
@@ -90,12 +94,12 @@ function insert_tester_order_data_in_sales_register($tester_order_data) {
 
 
 function insert_tester_order_data_in_custom_billing_table($tester_order_data) {
-    watchdog('tester order data custom billing', '<pre>' . print_r($tester_order_data, TRUE) . '</pre>');
     foreach ($tester_order_data as $key => $data) {
         if(!empty($data['tester_order_number'])){
+            watchdog('tester order data custom billing', '<pre>' . print_r($data, TRUE) . '</pre>');
             $distributor_id = $data['distributor_id'];
             
-            $tb_id = db_query("select id from custom_billing_data where distributor_id = $distributor_id and  bill_number = '".$data['tester_order_number']."' limit 1")->fetchField();
+            $tb_id = db_query("select id from custom_billing_data where distributor_id = $distributor_id and  bill_number = '".$data['tester_order_number']."' and BASEPACK_CODE ='".$data['basepack_code']."' limit 1")->fetchField();
             if(empty($tb_id)){
                 //Fetch SKU7_CODE
                 $query = db_select('field_data_field_lb_sku7_code', 'sku');
@@ -151,7 +155,7 @@ function insert_tester_order_data_in_custom_billing_table($tester_order_data) {
                     ))
                     ->execute();
             }else{
-                //duplicate entry. hit twice
+                //duplicate entry. hit twice so ignor
             }
         }
     }
