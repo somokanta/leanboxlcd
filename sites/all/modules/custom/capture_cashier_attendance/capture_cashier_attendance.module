@@ -54,13 +54,13 @@ function fetch_cashier_attendance_api_data($cashier_attendance_data){
     $cashier_count_from_api = count($cashier_attendance_data['attendance']);
     foreach($cashier_attendance_data['attendance'] as $key => $value){
       $jobtype = $value['jobtype'];
-      $hub_code = $value['hub_code'];
+      $hub_code = $value['hub_code']; // sending facility code here
       $merchant_code = $value['merchant_code'];
       $employee_code = $value['employee_code'];
       $attendance_lat = $value['attendance_lat'];
       $attendance_lon = $value['attendance_lon'];
-      $facility_code = $value['facility_code'];
-      $facility_code_in_lower = strtolower($facility_code);
+      $facility_code = $hub_code;
+      $facility_code_in_lower = strtolower($hub_code);
       // warehouse latitude and longitude.
       $lat = $lat_long[$facility_code_in_lower]['lat'];
       $lng = $lat_long[$facility_code_in_lower]['lng'];
@@ -87,7 +87,7 @@ function fetch_cashier_attendance_api_data($cashier_attendance_data){
       $node_obj->field_attendance_datetime[$node_obj->language][0]['value'] = isset($attendance_datetime) ? strtotime($attendance_datetime) : ''; //"2019-10-15 10:12:01"
       $node_obj->field_integration_datetime[$node_obj->language][0]['value'] = isset($integration_datetime) ? strtotime($integration_datetime) : ''; //"2019-10-15 10:12:01"
       $node_obj->field_distance_from_warehouse[$node_obj->language][0]['value'] = isset($distance_from_warehouse_in_km) ? $distance_from_warehouse_in_km : ''; 
-      $node_obj->field_facility_code_name[$node_obj->language][0]['value'] = $facility_code;
+      //$node_obj->field_facility_code_name[$node_obj->language][0]['value'] = $facility_code;
       
       try{
         $node_obj = node_submit($node_obj); // Prepare node for saving
@@ -168,6 +168,7 @@ function get_warehouse_lat_lang(){
      $query->fields('lng', array('field_distributor_longitude_value'));
      $query->fields('facility_code', array('field_vanstop_facility_code_value'));
      $query->join('field_data_field_vanstop_facility_code', 'facility_code','facility_code.entity_id = van.nid');
+     //$query->condition('facility_code.field_vanstop_facility_code_value', 'van_stop_master');
      //$query->groupBy('facility_code.field_vanstop_facility_code_value');
      $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);   
      if (!empty($res)) {

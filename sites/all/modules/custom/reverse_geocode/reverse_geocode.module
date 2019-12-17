@@ -2252,13 +2252,13 @@ function reverse_geocode_node_access($node, $op, $account) {
 }
 
 function reverse_geocode_get_data_trip_wise($trip_id) {
-  global $user;
-  $user_id = $user->uid;
-  $distributor_id = change_feeds_import_get_distributor_id($user_id);
+  //global $user;
+  //$user_id = $user->uid;
+  $distributor_id = get_distributorid_of_trip($trip_id);
 
   $query = db_select('node', 'n');
   $query->condition('n.type', 'sales_register_data');
-  $query->addTag('node_uid');
+  $query->condition('n.uid',$distributor_id);
   $query->join('field_data_field_drs_sequence', 'drs_se', 'drs_se.entity_id = n.nid');
   $query->leftjoin('field_data_field_bill_sequence', 'drs_bse', 'drs_bse.entity_id = n.nid');
 
@@ -2312,6 +2312,7 @@ function reverse_geocode_get_data_trip_wise($trip_id) {
  */
 function cal_delivery_n_val_by_cron() {
   $distributor_id = _DISTRIBUTOR_ID;
+  $distributor_ids = get_distributor_ids();
   /* original
   //$status = array('deliver', 'partial_deliver');
   $query = db_select('dispatch_planning_api_data', 'ad')

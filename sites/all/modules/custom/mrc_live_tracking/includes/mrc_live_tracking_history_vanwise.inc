@@ -38,7 +38,7 @@ function van_live_tracking_history_vanwise_form($form, &$form_state) {
   global $user;
   $distributor_id = change_feeds_import_get_distributor_id($user->uid);
   $rs_code = dispatch_planning_get_rscode_using_uid($user->uid);
-
+  $distributor_ids = get_distributor_ids();
   drupal_add_js(drupal_get_path('module', 'mrc_live_tracking') . '/js/live_tracking_page_refresh.js');
   $form = array();
   $form['#prefix'] = '<div id="address-selection-map">';
@@ -214,13 +214,18 @@ function van_live_tracking_history_vanwise_form_validate($form, &$form_state) {
 
 function van_live_tracking_history_vanwise_form_submit($form, &$form_state) {
   global $user;
-  $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+  //$distributor_id = change_feeds_import_get_distributor_id($user->uid);
   $rs_code = dispatch_planning_get_rscode_using_uid($user->uid);
   $trip_id = $form_state['values']['trip_id'];
   $trip_ids_new = $form_state['values']['trip_ids'];
   $dispatch_date = $form_state['values']['dispatch_date'];
   $cashier_name = strtolower($form_state['values']['cashier_name']);
-
+  if (!empty($trip_ids_new)){
+      $distributor_id = get_distributorid_of_trip($trip_ids_new);
+  }
+  else if (!empty($trip_id)){
+      $distributor_id = get_distributorid_of_trip($trip_id);
+  }
   $query1 = db_select('dispatch_planning_api_data', 'ad');
   $query1->condition('ad.distributor_id', $distributor_id, '=');
   if (!empty($dispatch_date)) {
@@ -398,9 +403,9 @@ function _get_cashier_name_using_dispatch_date($dispatch_date) {
   $res = array();
   if (!empty($dispatch_date)) {
     global $user;
-    $dis_id = change_feeds_import_get_distributor_id($user->uid);
+    $dis_ids =  get_distributor_ids();
     $query = db_select('dispatch_planning_api_data', 'ad');
-    $query->condition('ad.distributor_id', $dis_id);
+    $query->condition('ad.distributor_id', $dis_ids,'IN');
     $query->condition('ad.date', $dispatch_date);
     $query->fields('ad', array('fieldExecutiveName'));
     $res = $query->execute()->fetchAllKeyed(0, 0);
@@ -410,8 +415,7 @@ function _get_cashier_name_using_dispatch_date($dispatch_date) {
 function _get_cashier_name_using_trip_id($trip_id) {
   $res = array();
   if (!empty($trip_id)) {
-    global $user;
-    $dis_id = change_feeds_import_get_distributor_id($user->uid);
+    $dis_id = get_distributorid_of_trip($trip_id);
     $query = db_select('node', 'n');
     $query->condition('n.type', 'dispatch_data');
     $query->condition('n.uid', $dis_id);
