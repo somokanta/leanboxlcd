@@ -89,7 +89,7 @@ function custom_order_box_id_update_7121() {
     }
   }
 }
-function custom_order_box_id_update_7122() { 
+function custom_order_box_id_update_7123() {
   $fields = array(
     'party_code' => array(
       'description' => t('Party code'),
