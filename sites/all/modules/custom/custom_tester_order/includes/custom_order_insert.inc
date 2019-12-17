@@ -71,21 +71,27 @@ function insert_tester_order_data_in_sales_register($tester_order_data) {
 
                     $node->field_sr_new_bill_date[LANGUAGE_NONE][0]['value'] = $data['order_date'];
                     $node->field_sr_bill_date[LANGUAGE_NONE][0]['value'] = $data['order_date'];
+                    $node->field_billing_loading_date[LANGUAGE_NONE][0]['value'] = $data['order_date'];
                     $node->field_bill_value[LANGUAGE_NONE][0]['value'] = 0;
                     $node->field_sales_party_code[LANGUAGE_NONE][0]['value'] = $data['party_code'];
                     $node->field_sales_updated_date[LANGUAGE_NONE][0]['value'] = time();
                     $node->field_crate_id['und'][0]['value'] = $data['box_id'] ? $data['box_id'] : '';
                     $node->field_outlet_order_no['und'][0]['value'] = $data['tester_order_number'];
+                    $node->field_billing_van[LANGUAGE_NONE][0]['value'] = 'Van - 1';
+                    $node->field_bill_net_sales[LANGUAGE_NONE][0]['value'] = 0;
                     node_save($node);
                 } else {
                     $node = node_load($nid);
                     $node->field_sr_new_bill_date[LANGUAGE_NONE][0]['value'] = $data['order_date'];
                     $node->field_sr_bill_date[LANGUAGE_NONE][0]['value'] = $data['order_date'];
+                    $node->field_billing_loading_date[LANGUAGE_NONE][0]['value'] = $data['order_date'];
                     $node->field_bill_value[LANGUAGE_NONE][0]['value'] = 0;
                     $node->field_sales_party_code[LANGUAGE_NONE][0]['value'] = $data['party_code'];
                     $node->field_sales_updated_date[LANGUAGE_NONE][0]['value'] = time();
                     $node->field_crate_id['und'][0]['value'] = $data['box_id'] ? $data['box_id'] : '';
                     $node->field_outlet_order_no['und'][0]['value'] = $data['tester_order_number'];
+                    $node->field_billing_van[LANGUAGE_NONE][0]['value'] = 'Van - 1';
+                    $node->field_bill_net_sales[LANGUAGE_NONE][0]['value'] = 0;
                 }
             }
         }
