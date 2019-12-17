@@ -4265,6 +4265,7 @@ function dispatch_planning_views_query_alter(&$view, &$query) {
   if (($view->name == 'trip_bill_sku_return_report2') || ($view->name == 'trip_bill_sku_return_report2' && $view->current_display == 'views_data_export_1')) {
 
     // Join dispatch_planning_api_data and custom_billing_data
+ 
     $join = new views_join();
     $join->table = 'dispatch_planning_api_data'; // or wathever table you want to join with
     $join->left_table = 'custom_billing_data';
@@ -4276,6 +4277,7 @@ function dispatch_planning_views_query_alter(&$view, &$query) {
       array('field' => 'runsheet_number', 'left_field' => 'title', 'left_table' => 'node_field_data_field_trip_id_reference'),
     );
     $join->extra_type = 'AND';
+    
 
     // Do the actual join
     $query->table_queue['dispatch_planning_api_data'] = array(
@@ -4292,9 +4294,9 @@ function dispatch_planning_views_query_alter(&$view, &$query) {
     $query->add_field('dispatch_planning_api_data', 'res_signed_bill_delivery_edit', 'res_signed_bill_delivery_edit');
     $query->add_field('dispatch_planning_api_data', 'res_signed_bill_partial', 'res_signed_bill_partial');
     $query->add_field('dispatch_planning_api_data', 'res_signed_bill_partial_edit', 'res_signed_bill_partial_edit');
-
+  
     $query->add_where_expression(0, 'dispatch_planning_api_data.delivery_pending_flag = 0 OR dispatch_planning_api_data.delivery_pending_flag IS NULL');
-
+     
     $query->orderby[1]['field'] = "dispatch_planning_api_data.res_status";
     $query->orderby[1]['direction'] = "ASC";
 
