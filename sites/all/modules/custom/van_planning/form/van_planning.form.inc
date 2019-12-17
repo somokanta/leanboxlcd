@@ -1686,7 +1686,8 @@ function van_planning_ajax_submit($area_codes, $van_pl_group, $pl_group, $bill_d
       $query->havingCondition('sum_cft', $volume, $bill_range_op);
     }
   }
-  watchdog('van planning', '<pre>' . print_r($query, TRUE) . '</pre>');
+  dpq($query);
+  watchdog('van planning', '<pre>' . print_r(dpq($query), TRUE) . '</pre>');
   $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
 
   foreach ($res as $key => $val) {
