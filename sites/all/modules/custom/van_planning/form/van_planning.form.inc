@@ -286,7 +286,6 @@ function _van_planning_callback_form($form, &$form_state) {
     if (isset($form_state['bill_array'])) {
       $bill_array = $form_state['bill_array'];
     }
-    dpm("test");
     $options = van_planning_ajax_submit($area_codes, $van_pl_group, $pl_group, $bill_date, $bill_range_op, $bill_value, $weight, $volume, $bill_array, $outlet_area_hook_grp);
     $form['editable_vp']['vp']['list_form_items'] = array(
       '#type' => 'tableselect',
@@ -1687,7 +1686,6 @@ function van_planning_ajax_submit($area_codes, $van_pl_group, $pl_group, $bill_d
     }
   }
   dpq($query);
-  watchdog('van planning', '<pre>' . print_r(dpq($query), TRUE) . '</pre>');
   $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
 
   foreach ($res as $key => $val) {
