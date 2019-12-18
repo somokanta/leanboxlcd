@@ -570,7 +570,7 @@ function get_sales_reg_bills_from_trip_id($trip_id,$distributor_id){
   $query->join('field_data_field_trip_id_reference', 'ft', 'ft.field_trip_id_reference_nid = n.nid');
   $query->join('node', 'n1', 'ft.entity_id = n1.nid');
   $query->fields('n1', array('title'));
-  $query->condtion('n.uid',$distributor_id);
+  $query->condition('n.uid',$distributor_id);
   $res = $query->execute()->fetchCol();
   return $res;
 }
