@@ -1,0 +1,36 @@
+<?php
+
+function order_packing_slip_services_resources(){
+  //$cashier_resource = array();
+  $order_packing_slip_resource = array(
+    '#api_version' => 3002,
+  );
+
+  $order_packing_slip_resource = [
+    'order-packing-slip-data' => [
+      'actions' => [
+        'order-packing-api' => [
+          'help' => 'Retrieves Order Packing Slip data',
+          'callback' => 'fetch_order_packing_slip_api_data',
+          'args' => array(
+            array(
+              'name' => 'data',
+              'type' => 'array',
+              'description' => 'Post data',
+              'source' => 'data',
+              'optional' => TRUE,
+            ),
+          ),
+          'access arguments' => array('services_access_farey_api'),
+        ]
+      ]
+    ],
+  ];
+
+  return $order_packing_slip_resource;
+}
+
+function fetch_order_packing_slip_api_data($order_packing_slip_data){
+  watchdog('cashier_attendance_data', '<pre>' . print_r($order_packing_slip_data, TRUE) . '</pre>');
+  
+}
