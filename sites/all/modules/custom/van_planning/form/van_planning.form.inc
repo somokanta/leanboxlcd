@@ -393,6 +393,7 @@ function _van_planning_callback_form($form, &$form_state) {
 
         //abhi test
         $python_bills_nid = array_keys($vanwise_all_latlong_array);
+        dpm($python_bills_nid,'$python_bills_nid test');
         $response_data = parkstop_calculation_api($python_bills_nid, $dis_id, $key);
         //watchdog("$key", '<pre>' . print_r($python_response, TRUE) . '</pre>');
         //abhi test end

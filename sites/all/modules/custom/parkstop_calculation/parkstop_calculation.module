@@ -167,6 +167,9 @@ function parkstop_calculation_api($bills_nid, $distributor_id, $prevan = 'Van') 
     $request['TimeData']['BillValue'][$key]['StoreCode'] = $val['bill_nid'];
     $request['TimeData']['BillValue'][$key]['BillAmount'] = (float) round($val['bill_val']);
   }
+  dpm($request);
+  $response->error = 'abhishek';
+  return $response;
   $response = _call_parkstop_api($request, $prevan, $distributor_id);
   return $response;
 }
