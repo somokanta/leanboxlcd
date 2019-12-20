@@ -4229,7 +4229,7 @@ function call_bank_master_api($node) {
     $api_type = 'bank_master';
 
     if (!empty($bank_name) && ($bank_name != $original_bank_name)) {
-        $bank_name_arr = array(array('bank_name' => $bank_name,'merchant' => array(array('name'=>'hul'))));
+        $bank_name_arr = array(array('bank_name' => $bank_name,'merchant' => array(array('name'=>'lakme'))));
         $bank_name_json = json_encode($bank_name_arr);
 
         $sql_ins_id = bank_master_api_log($bank_name, $bank_name_json, $api_type, $dis_id);
@@ -4252,7 +4252,7 @@ function call_reason_code_master_api($node) {
     $api_type = 'reason_code_master';
 
     if (!empty($reason) && !empty($reason_type) && ($reason != $og_reason || $reason_type != $og_reason_type)) {
-        $reason_arr = array(array('reason_text' => $reason, 'reason_description' => $reason, 'reason_type' => $reason_type, 'is_active' => True,'merchant' => array(array('name'=>'hul'))));
+        $reason_arr = array(array('reason_text' => $reason, 'reason_description' => $reason, 'reason_type' => $reason_type, 'is_active' => True,'merchant' => array(array('name'=>'lakme'))));
         $reason_json = json_encode($reason_arr);
 
         $sql_ins_id = reason_code_master_api_log($reason, $reason_type, $reason_json, $api_type, $dis_id);
@@ -4288,7 +4288,7 @@ function call_location_api($node) {
         $long = $res[0]['field_hul_updated_long_value'];
         $area_code = $res[0]['n1_title'];
 
-        $location_arr = array(array('party_code' => $party_code, 'party_name' => $party_name, 'location_type' => $location_type,'merchant' => array(array('name'=>'hul'))));
+        $location_arr = array(array('party_code' => $party_code, 'party_name' => $party_name, 'location_type' => $location_type,'merchant' => array(array('name'=>'lakme'))));
         if (!empty($hul_code)) {
             $location_arr[0]['hul_code'] = $hul_code;
         }
@@ -4467,4 +4467,16 @@ function master_api_config_form($form, $form_state) {
     );
 
     return system_settings_form($form);
+}
+
+function get_facility_code($distributor_id) {
+    $facility_code = '';
+    if (!empty($distributor_id)) {
+        $query = db_select('field_data_field_facility_code', 'facility_code');
+        $query->condition('facility_code.entity_id', $distributor_id);
+        $query->join('taxonomy_term_data', 'term_data', 'term_data.tid = facility_code.field_facility_code_tid');
+        $query->fields('term_data', array('name'));
+        $facility_code = $query->execute()->fetchField();
+    }
+    return $facility_code;
 }
