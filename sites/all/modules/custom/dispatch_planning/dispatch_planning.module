@@ -3536,9 +3536,6 @@ function _update_dispatch_planning_api($node) {
         // request log
         $api_type = 'dispatch_planning';
         watchdog('dispatch_planning', '<pre>' . print_r($json_api_data, TRUE) . '</pre>');
-        watchdog('dispatch_planning$trip_id', '<pre>' . print_r($trip_id, TRUE) . '</pre>');
-        watchdog('dispatch_planning$api_type', '<pre>' . print_r($api_type, TRUE) . '</pre>');
-        watchdog('dispatch_planning$dis_id', '<pre>' . print_r($dis_id, TRUE) . '</pre>');
         $sql_ins_id = dispatch_planning_api_log($json_api_data, $trip_id, $api_type, $dis_id);
          
         //$order_api_url = 'https://staging.fareye.co/api/v1/job?api_key=l1S6xa5mnxUXDuqv12q7lerLBL9l1ICq';
