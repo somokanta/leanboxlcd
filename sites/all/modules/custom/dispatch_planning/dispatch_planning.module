@@ -3147,6 +3147,7 @@ function dispatch_planning_sales_reg_api($node, $trip_execution_date, $vehicle_n
   $node_uid = $node->uid;
   $node_nid = $node->nid;
   $rs_code = dispatch_planning_get_rscode_using_uid($node_uid);
+  $facility_code = get_facility_code($node_uid);
   $bill_number = $node->title;
   $vehicle = $node->field_billing_van[LANGUAGE_NONE][0]['value'];
   $bill_date = date('Y-m-d', $node->field_sr_bill_date[LANGUAGE_NONE][0]['value']);
@@ -3197,12 +3198,14 @@ function dispatch_planning_sales_reg_api($node, $trip_execution_date, $vehicle_n
   $api_data['jobType'] = $job_type;  // delivery1 for hul
   $api_data['merchantCode'] = 'lakme';  // hul for Merchant code
 
-  $reference_no = $trip_id . '_' . $rs_code . '_' . $bill_number;
+  //$reference_no = $trip_id . '_' . $rs_code . '_' . $bill_number;
+  $reference_no = $trip_id . '_' . $facility_code . '_' . $bill_number;
   $api_data['referenceNo'] = $reference_no;
   $api_data['date'] = date('Y-m-d', $trip_execution_date);
   $api_data['city'] = 'Mumbai';
   // $api_data['hub'] = $rs_code;
-  $api_data['hub'] = $rs_code; // need to remove when moving to HUL
+  //$api_data['hub'] = $rs_code; // need to remove when moving to HUL
+  $api_data['hub'] =  $facility_code;
   $api_data['fieldExecutive'] = $rs_code . '_' . $cashier;
   $api_data['fieldExecutiveName'] = $cashier;
 
