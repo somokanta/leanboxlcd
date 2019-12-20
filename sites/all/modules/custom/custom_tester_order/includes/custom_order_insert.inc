@@ -140,13 +140,13 @@ function insert_tester_order_data_in_custom_billing_table($tester_order_data) {
                         //'PRODUCT_CATEGORY' => $data['PRODUCT_CATEGORY'],
                         //'PRODUCT_SUB_CATEGORY' => $data['PRODUCT_SUB_CATEGORY'],
                         'mrp' => 0, //T
-                        //'tur' => $data['tur'],
+                        'tur' => 0,
                         'Sum_of_TOTAL_SALES_QTY' => $data['picked_qty'], //T
                         'Sum_of_NET_SALES_QTY' => $data['picked_qty'], //T
                         //'Sum_of_SALES_FREE_QTY' => $data['Sum_of_SALES_FREE_QTY'],
                         'Sum_of_NET_SALES_VALUE' => 0, //T
-                        //'Sum_of_NET_SALES_CASES' => $data['Sum_of_NET_SALES_CASES'],
-                        //'Sum_of_NET_SALES_KGS' => $data['Sum_of_NET_SALES_KGS'],
+                        'Sum_of_NET_SALES_CASES' => 0,
+                        'Sum_of_NET_SALES_KGS' => 0,
                         //'Sum_of_SCHEME_DISCOUNT' => $data['Sum_of_SCHEME_DISCOUNT'],
                         //'Sum_of_OTHER_DISCOUNT' => $data['Sum_of_OTHER_DISCOUNT'],
                         //'Sum_of_TAX_PERCENTAGE' => $data['Sum_of_TAX_PERCENTAGE'],
