@@ -3206,7 +3206,8 @@ function dispatch_planning_sales_reg_api($node, $trip_execution_date, $vehicle_n
   // $api_data['hub'] = $rs_code;
   //$api_data['hub'] = $rs_code; // need to remove when moving to HUL
   $api_data['hub'] =  $facility_code;
-  $api_data['fieldExecutive'] = $rs_code . '_' . $cashier;
+  //$api_data['fieldExecutive'] = $rs_code . '_' . $cashier;
+  $api_data['fieldExecutive'] = $facility_code . '_' . $cashier;
   $api_data['fieldExecutiveName'] = $cashier;
 
   $api_data['jobData']['vehicle'] = $vehicle_no;
