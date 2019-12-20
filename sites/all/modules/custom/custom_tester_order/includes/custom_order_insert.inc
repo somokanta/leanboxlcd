@@ -126,7 +126,7 @@ function insert_tester_order_data_in_custom_billing_table($tester_order_data) {
                 //Fetch SKU7 code – based on basepack code (since multiple SKU7 codes will be found, fetch anyone)
                 $stage_billing_data = db_insert('custom_billing_data') // Table name no longer needs {}
                     ->fields(array(
-                        //'vehicle' => $data['vehicle'],
+                        'vehicle' => 'Van - 1',
                         'loading_date' => $data['order_date'], //T
                         'party_code' => $data['party_code'], //T
                         'BEAT_NAME' => $data['beat_name'], //T
