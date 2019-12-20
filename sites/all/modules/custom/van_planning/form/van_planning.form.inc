@@ -2455,7 +2455,7 @@ function _create_van_submit($form, &$form_state) {
 //***************************************** PREVAN DATA END****************************************//
 //************************************ DISPATCH DATA START****************************************//
         $txn = db_transaction();
-        $distributor_facility_code = get_facility_code_of_distributor($dis_id);
+        $distributor_facility_code = get_facility_code($dis_id);
         $query = db_select('trip_id_sequence', 'ts');
         $query->forUpdate();
         $query->addField('ts', 'next_id');
