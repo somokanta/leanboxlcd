@@ -4263,6 +4263,7 @@ function call_reason_code_master_api($node) {
     $og_reason_type = $node->original->field_reason_type['und'][0]['value'];
     $dis_id = $node->uid;
     $api_type = 'reason_code_master';
+    $merchant_code = variable_get('merchant_code_conf');
 
     if (!empty($reason) && !empty($reason_type) && ($reason != $og_reason || $reason_type != $og_reason_type)) {
         $reason_arr = array(array('reason_text' => $reason, 'reason_description' => $reason, 'reason_type' => $reason_type, 'is_active' => True,'merchant' => array(array('name'=> $merchant_code))));
@@ -4294,6 +4295,7 @@ function call_location_api($node) {
     $og_nid = $node->original->field_hul_code_reference['und'][0]['nid'];
     $dis_id = $node->uid;
     $api_type = 'location_master';
+    $merchant_code = variable_get('merchant_code_conf');
 
     if (!empty($party_code) && !empty($party_name) && ($party_code != $og_party_code || $hul_code != $og_hul_code || $party_name != $og_party_name || $payment_term != $og_payment_term || $credit_days != $og_credit_days || $nid != $og_nid)) {
         $res = get_lat_long_and_area_code($nid);
