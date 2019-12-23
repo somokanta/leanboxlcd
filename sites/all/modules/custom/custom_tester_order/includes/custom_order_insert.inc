@@ -79,6 +79,10 @@ function insert_tester_order_data_in_sales_register($tester_order_data) {
                     $node->field_outlet_order_no['und'][0]['value'] = $data['tester_order_number'];
                     $node->field_billing_van[LANGUAGE_NONE][0]['value'] = 'Van - 1';
                     $node->field_bill_net_sales[LANGUAGE_NONE][0]['value'] = 0;
+                    
+                    //PDD calculation
+                    $pdd = get_promised_delivery_date_tester($data['order_date'], $distributor_id);
+                    $node->field_promised_date[LANGUAGE_NONE][0]['value'] = $pdd;
                     node_save($node);
                 } else {
                     $node = node_load($nid);
@@ -92,6 +96,11 @@ function insert_tester_order_data_in_sales_register($tester_order_data) {
                     $node->field_outlet_order_no['und'][0]['value'] = $data['tester_order_number'];
                     $node->field_billing_van[LANGUAGE_NONE][0]['value'] = 'Van - 1';
                     $node->field_bill_net_sales[LANGUAGE_NONE][0]['value'] = 0;
+                    
+                    //PDD calculation
+                    $pdd = get_promised_delivery_date_tester($data['order_date'], $distributor_id);
+                    $node->field_promised_date[LANGUAGE_NONE][0]['value'] = $pdd;
+                    node_save($node);
                 }
             }
         }
@@ -165,4 +174,31 @@ function insert_tester_order_data_in_custom_billing_table($tester_order_data) {
             }
         }
     }
+}          
+          
+function get_promised_delivery_date_tester($date, $distributor_id) {
+  $query = db_select('node', 'n');
+  $query->condition('n.uid', $distributor_id);
+  $query->condition('n.type', 'pdd_master');
+  $query->fields('n', array('nid'));
+  $pdd_value_result = $query->execute()->fetchField();
+  
+  $pdd_data = node_load($pdd_value_result);
+  $pdd_value = $pdd_data->field_pdd[LANGUAGE_NONE][0]['value'];
+  $weekly = $pdd_data->field_day[LANGUAGE_NONE];
+  foreach ($weekly as $key => $val) {
+    $weeklyoff[] = $val['value'];
+  }
+
+  $query = db_select('node', 'n');
+  $query->condition('n.uid', $distributor_id);
+  $query->condition('n.type', 'holiday_master');
+  $query->leftjoin('field_data_field_holiday', 'hday', 'hday.entity_id = n.nid');
+  $query->addExpression("DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(hday.field_holiday_value),'+00:00','+05:30'), '%Y-%m-%d')", 'hdate');
+  $holiday_result = $query->execute()->fetchCol();
+
+  $billing_date_stamp = $date;
+  $pdd = holiday_get_working_day($billing_date_stamp, $pdd_value, $holiday_result, $weeklyoff);
+  
+  return strtotime($pdd);
 }
