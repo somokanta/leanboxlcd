@@ -298,7 +298,7 @@ function _get_noneditable_godown_delivered_bill_details($trip_number, $rs_code, 
 
   $query = db_select('dispatch_planning_api_data', 'ad');
   $query->condition('ad.runsheet_number', $trip_number);
-  $query->condition('ad.hub', $rs_code);
+  $query->condition('ad.distributor_id', $dis_id);
   $query->condition('ad.bill_number', $bill_no);
   $query->fields('ad', array('bill_value', 'party_name'));
   $rows = $query->execute()->fetchAll(PDO::FETCH_ASSOC);

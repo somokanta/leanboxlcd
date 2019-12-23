@@ -2131,7 +2131,7 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
   }
 
   $txn = db_transaction();
-  $distributor_facility_code = get_facility_code_of_distributor($distributor_id);
+  $distributor_facility_code = get_facility_code($distributor_id);
   $query = db_select('trip_id_sequence', 'ts');
   $query->forUpdate();
   $query->addField('ts', 'next_id');
@@ -3147,6 +3147,7 @@ function dispatch_planning_sales_reg_api($node, $trip_execution_date, $vehicle_n
   $node_uid = $node->uid;
   $node_nid = $node->nid;
   $rs_code = dispatch_planning_get_rscode_using_uid($node_uid);
+  $facility_code = get_facility_code($node_uid);
   $bill_number = $node->title;
   $vehicle = $node->field_billing_van[LANGUAGE_NONE][0]['value'];
   $bill_date = date('Y-m-d', $node->field_sr_bill_date[LANGUAGE_NONE][0]['value']);
@@ -3197,13 +3198,16 @@ function dispatch_planning_sales_reg_api($node, $trip_execution_date, $vehicle_n
   $api_data['jobType'] = $job_type;  // delivery1 for hul
   $api_data['merchantCode'] = 'lakme';  // hul for Merchant code
 
-  $reference_no = $trip_id . '_' . $rs_code . '_' . $bill_number;
+  //$reference_no = $trip_id . '_' . $rs_code . '_' . $bill_number;
+  $reference_no = $trip_id . '_' . $facility_code . '_' . $bill_number;
   $api_data['referenceNo'] = $reference_no;
   $api_data['date'] = date('Y-m-d', $trip_execution_date);
   $api_data['city'] = 'Mumbai';
   // $api_data['hub'] = $rs_code;
-  $api_data['hub'] = $rs_code; // need to remove when moving to HUL
-  $api_data['fieldExecutive'] = $rs_code . '_' . $cashier;
+  //$api_data['hub'] = $rs_code; // need to remove when moving to HUL
+  $api_data['hub'] =  $facility_code;
+  //$api_data['fieldExecutive'] = $rs_code . '_' . $cashier;
+  $api_data['fieldExecutive'] = $facility_code . '_' . $cashier;
   $api_data['fieldExecutiveName'] = $cashier;
 
   $api_data['jobData']['vehicle'] = $vehicle_no;
@@ -3532,6 +3536,7 @@ function _update_dispatch_planning_api($node) {
         $json_api_data = json_encode($api_data);
         // request log
         $api_type = 'dispatch_planning';
+        watchdog('dispatch_planning', '<pre>' . print_r($json_api_data, TRUE) . '</pre>');
         $sql_ins_id = dispatch_planning_api_log($json_api_data, $trip_id, $api_type, $dis_id);
          
         //$order_api_url = 'https://staging.fareye.co/api/v1/job?api_key=l1S6xa5mnxUXDuqv12q7lerLBL9l1ICq';
@@ -3588,7 +3593,7 @@ function _dispatch_planning_get_all_sales_nid($nid) {
   if (!empty($nid)) {
     $query = db_select('node', 'n');
     $query->condition('n.type', 'sales_register_data');
-    $query->join('field_data_field_promised_date', 'pro_date', 'pro_date.entity_id = n.nid');
+    $query->leftjoin('field_data_field_promised_date', 'pro_date', 'pro_date.entity_id = n.nid');
     $query->join('field_data_field_trip_id_reference', 'ti', 'ti.entity_id = n.nid');
     $query->join('field_data_field_drs_sequence', 'ds', 'ds.entity_id = n.nid');
     $query->orderBy('ds.field_drs_sequence_value', 'ASC');
@@ -3789,6 +3794,17 @@ function _get_bill_row_id_using_reference_no($ref_no) {
   $res = $query->execute()->fetchField();
   return $res;
 }
+function _get_bill_row_id($trip_id,$bill_number,$distributor_id) {
+  if (!empty($trip_id) && !empty($bill_number) && !empty($distributor_id))   {
+    $query = db_select('dispatch_planning_api_data', 'dp');
+    $query->fields('dp', array('id'));
+    $query->condition('dp.bill_number', $bill_number);
+    $query->condition('dp.distributor_id', $distributor_id);
+    $query->condition('dp.runsheet_number', $trip_id);
+    $res = $query->execute()->fetchField();
+  }
+  return $res;
+}
 
 function _get_bill_row_id_manual_using_reference_no($ref_no) {
   $query = db_select('dispatch_planning_api_data', 'dp');
@@ -3806,9 +3822,10 @@ function _get_bill_row_id_manual_using_reference_no($ref_no) {
  */
 function _get_all_tripsbill($trip_id, $string = '') {
   $result = array();
-
   $user_id = $GLOBALS['user']->uid;
-  $rs_code = dispatch_planning_get_rscode_using_uid($user_id);
+  $distributor_id = change_feeds_import_get_distributor_id($user_id);
+  //$rs_code = dispatch_planning_get_rscode_using_uid($user_id);
+  //$hub = get_facility_code_of_distributor($user_id);
 
   if (!empty($trip_id) && !empty($string)) {
     $query = db_select('dispatch_planning_api_data', 'ad');
@@ -3816,7 +3833,8 @@ function _get_all_tripsbill($trip_id, $string = '') {
     $query->condition('ad.bill_number', '%' . db_like($string) . '%', 'LIKE');
     //not required delivery pending bills of that trip
     $query->condition('ad.delivery_pending_flag', 1, '!=');
-    $query->condition('ad.hub', $rs_code);
+    //$query->condition('ad.hub', $rs_code);
+    $query->condition('ad.distributor_id', $distributor_id);
     $query->fields('ad', array('bill_number'));
     $query->range(0, 15);
     $result = $query->execute()->fetchAllKeyed(0, 0);
@@ -3840,7 +3858,7 @@ function _get_all_tripsbill_from_sales_register($trip_id, $string = '') {
   $result = array();
 
   $user_id = $GLOBALS['user']->uid;
-  $rs_code = dispatch_planning_get_rscode_using_uid($user_id);
+  //$rs_code = dispatch_planning_get_rscode_using_uid($user_id);
 
   if (!empty($trip_id) && !empty($string)) {
     $query = db_select('node', 'n');
@@ -3859,10 +3877,10 @@ function _get_all_tripsbill_from_sales_register($trip_id, $string = '') {
 
 function check_bill_status($trip_id) {
   global $user;
-  $rs_code = dispatch_planning_get_rscode_using_uid($user->uid);
+  $distributor_id = change_feeds_import_get_distributor_id($user->uid);
   $query = db_select('dispatch_planning_api_data', 'ad');
   $query->condition('ad.runsheet_number', $trip_id);
-  $query->condition('ad.hub', $rs_code);
+  $query->condition('ad.distributor_id', $distributor_id);
   $query->isNull('ad.res_status');
   $query->addExpression("GROUP_CONCAT(ad.bill_number ORDER BY ad.bill_number separator ', ' )", 'bill_number');
   $res = $query->execute()->fetchField();
@@ -3883,12 +3901,13 @@ function get_trip_exec_date_from_trip_id($trip_id) {
 
 function get_full_return_data_from_trip_id($trip_id) {
   $user_id = $GLOBALS['user']->uid;
-  $rs_code = dispatch_planning_get_rscode_using_uid($user_id);
+  $distributor_id = change_feeds_import_get_distributor_id($user_id);
+  //$rs_code = dispatch_planning_get_rscode_using_uid($user_id);
   $query1 = db_select('dispatch_planning_api_data', 'ad');
   $query1->condition('ad.runsheet_number', $trip_id, "=");
   $query1->condition('ad.delivery_pending_flag', 1, "!=");
   $query1->condition('ad.res_status', 'undeliver', "=");
-  $query1->condition('ad.hub', $rs_code, "=");
+  $query1->condition('ad.distributor_id', $distributor_id, "=");
   $query1->addExpression("COUNT(DISTINCT ad.bill_number)", 'bill_number');
   $query1->addExpression("GROUP_CONCAT(DISTINCT ad.bill_number ORDER BY ad.bill_number separator ', ' )", 'bill_number');
   $query1->fields('ad', array('fieldExecutiveName'));
@@ -3898,13 +3917,13 @@ function get_full_return_data_from_trip_id($trip_id) {
 
 function get_partial_return_data_from_trip_id($trip_id) {
   $user_id = $GLOBALS['user']->uid;
-  $rs_code = dispatch_planning_get_rscode_using_uid($user_id);
+  $distributor_id = change_feeds_import_get_distributor_id($user_id);
   $query1 = db_select('dispatch_planning_api_data', 'ad');
   $query1->join('dispatch_planning_item_details', 'idt', 'ad.id =idt.trip_bill_reference');
   $query1->condition('idt.res_sku_reason', '', "!=");
   $query1->condition('ad.runsheet_number', $trip_id, "=");
   $query1->condition('ad.res_status', 'partial_deliver', "=");
-  $query1->condition('ad.hub', $rs_code, "=");
+  $query1->condition('ad.distributor_id', $distributor_id, "=");
   $query1->addExpression("COUNT(DISTINCT ad.bill_number)", 'bill_number');
   $query1->addExpression("GROUP_CONCAT(DISTINCT ad.bill_number ORDER BY ad.bill_number separator ', ' )", 'bill_number');
   $query1->fields('ad', array('fieldExecutiveName'));
@@ -3914,7 +3933,7 @@ function get_partial_return_data_from_trip_id($trip_id) {
 
 function get_partial_popup_return_data_from_trip_id($trip_id) {
   $user_id = $GLOBALS['user']->uid;
-  $rs_code = dispatch_planning_get_rscode_using_uid($user_id);
+  $distributor_id = change_feeds_import_get_distributor_id($user_id);
   $query1 = db_select('dispatch_planning_api_data', 'ad');
   $query1->condition('ad.delivery_pending_flag', 1, "!=");
   $query1->join('dispatch_planning_item_details', 'idt', 'ad.id =idt.trip_bill_reference');
@@ -3934,7 +3953,7 @@ function get_partial_popup_return_data_from_trip_id($trip_id) {
 
   $query1->condition($db_or);
 
-  $query1->condition('ad.hub', $rs_code, "=");
+  $query1->condition('ad.distributor_id', $distributor_id, "=");
   $query1->addExpression("COUNT(DISTINCT ad.bill_number)", 'bill_number');
   $query1->addExpression("GROUP_CONCAT(DISTINCT ad.bill_number ORDER BY ad.bill_number separator ', ' )", 'bill_number');
   //$query1->fields('ad', array('fieldExecutiveName'));
@@ -3948,13 +3967,11 @@ function get_delivery_summary_full_return_reason_header($trip_id) {
   $user_id = $user->uid;
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
   if (!empty($trip_id)) {
-    $rs_code = dispatch_planning_get_rscode_using_uid($user_id);
     $query = db_select('dispatch_planning_api_data', 'ad');
     $query->condition('ad.delivery_pending_flag', 1, "!=");
     $query->condition('ad.runsheet_number', $trip_id, "=");
     $query->condition('ad.res_status', 'undeliver', "=");
     $query->isNotNull('ad.res_reason_for_failure');
-    $query->condition('ad.hub', $rs_code, "=");
     $query->condition('ad.distributor_id', $distributor_id, "=");
     $query->addExpression("COUNT(DISTINCT ad.bill_number)", 'bill_number');
     $query->addExpression("GROUP_CONCAT(DISTINCT ad.bill_number ORDER BY ad.bill_number separator ', ' )", 'bill_number');
@@ -4807,20 +4824,4 @@ function is_bill_cancelled_discarded($bill_number){
     $res = $query->execute()->fetchField();
   }
   return $res;
-}
-function get_facility_code_of_distributor($distributor_id) {
-   $facility_code = '';
-  if (!empty($distributor_id))  {
-    $query = db_select('users', 'u');
-    $query->innerjoin('field_data_field_distributor', 'd', 'd.entity_id = u.uid');
-    $query->condition('d.field_distributor_value', $distributor_id, '=');
-    $query->innerjoin('field_data_field_facility_code', 'facility_code', 'facility_code.entity_id = u.uid');
-    $query->fields('facility_code', array('field_facility_code_tid'));
-    $facility_term_id = $query->execute()->fetchField();
-    if (!empty($facility_term_id)) {
-        $term_obj = taxonomy_term_load($facility_term_id);
-        $facility_code = $term_obj->name;
-    }
-  }
-  return $facility_code;
 }
