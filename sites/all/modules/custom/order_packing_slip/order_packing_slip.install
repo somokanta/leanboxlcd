@@ -71,6 +71,12 @@ function order_packing_slip_schema() {
         'type' => 'int',
         'default' => 0,
       ),
+      'facility_code' => array(
+        'description' => 'Facility Code.',
+        'type' => 'varchar',
+        'length' => 100,
+        'default' => '',
+      ),
     ),
     'primary key' => array('id'),
   );
