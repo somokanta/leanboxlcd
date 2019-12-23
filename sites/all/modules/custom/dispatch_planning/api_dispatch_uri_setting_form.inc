@@ -64,5 +64,11 @@ function api_dispatch_uri_setting_form($form, &$form_state) {
     //'#size' => 10,
   );
   
+    $form['merchant_code_conf'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Enter Merchant Code'),
+    '#default_value' => variable_get('merchant_code_conf'),
+  );
+  
   return system_settings_form($form);
 }
