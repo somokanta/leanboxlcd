@@ -78,7 +78,7 @@ function custom_order_box_id_upload_form_validate($form, &$form_state) {
                         form_set_error('duplicate_data', t('Duplicate Data Found , Please Remove Duplicate Data and Upload Again.'));
                     }
                     $res['unique_combination'][$unique_comb] = $unique_comb;
-                    $exist_bills = check_bill_exist($bill_no); // check bill number in sales register
+                    $exist_bills = check_bill_exist($bill_no,$distributor_id); // check bill number in sales register
                     if (empty($exist_bills[0])) {
                         $error_message .= "Bill Number Ref $bill_no does not exist at line " . ($key + 2) . '<br>';
                     }
@@ -86,8 +86,8 @@ function custom_order_box_id_upload_form_validate($form, &$form_state) {
                     if (empty($crate_ids[0])) {
                         $error_message .= "Invalid Order Number/Bill Number mapping Or Crate Id for  $bill_no does not exist at line " . ($key + 2) . '<br>';
                     }
-                    $order_party_code = get_party_code_of_order_no($outlet_order_no);
-                    $bill_party_code = get_party_code_of_bill_no($bill_no);
+                    $order_party_code = get_party_code_of_order_no($outlet_order_no,$distributor_id);
+                    $bill_party_code = get_party_code_of_bill_no($bill_no,$distributor_id);
                     $order_party_code = strtolower($order_party_code);
                     $bill_party_code = strtolower($bill_party_code);
                     if($order_party_code !== $bill_party_code){
@@ -164,11 +164,8 @@ function order_vs_bill_data_csv_finished($success, $results, $operations) {
     }
 }
 
-function check_bill_exist($bill_number) {
-    if (!empty($bill_number)) {
-        global $user;
-        $user_id = $user->uid;
-        $distributor_id = change_feeds_import_get_distributor_id($user_id);
+function check_bill_exist($bill_number,$distributor_id) {
+    if (!empty($bill_number) && !empty($distributor_id)) {
         $query = db_select('node', 'n');
         $query->condition('n.uid', $distributor_id);
         $query->condition('n.type', 'sales_register_data');
@@ -241,6 +238,7 @@ function check_crate_id_exist($outlet_order_no, $bill_number, $distributor_id) {
         $query->join('node', 'sales_register', 'sales_register.nid = party_ref.entity_id');
         $query->condition('sales_register.type', 'sales_register_data');
         $query->condition('sales_register.uid', $distributor_id);
+        $query->condition('outlet_order_crate.distributor_id', $distributor_id);
         $query->condition('sales_register.title', $bill_number);
         $query->fields('ooc', array('crate_id'));
         $results = $query->execute()->fetchCol();
@@ -248,21 +246,24 @@ function check_crate_id_exist($outlet_order_no, $bill_number, $distributor_id) {
     return $results;
 }
 
-function get_party_code_of_order_no($outlet_order_no){
+function get_party_code_of_order_no($outlet_order_no,$distributor_id){
   $query = db_select('outlet_order_crate', 'ooc');
   $query->condition('ooc.outlet_order_no', $outlet_order_no);
+  $query->condition('ooc.distributor_id', $distributor_id);
   $query->fields('ooc', array('party_code'));
   $party_code = $query->execute()->fetchField();
   return $party_code;
 }
 
-function get_party_code_of_bill_no($bill_no){
+function get_party_code_of_bill_no($bill_no,$distributor_id){
   $query = db_select('node', 'sales_data');
   $query->condition('sales_data.title', $bill_no);
+  $query->condition('sales_data.uid', $distributor_id);
   $query->condition('sales_data.type', 'sales_register_data');
   $query->join('field_data_field_party_code_reference', 'party_ref' , 'party_ref.entity_id = sales_data.nid');
   $query->join('node', 'outlet_master', 'outlet_master.nid = party_ref.field_party_code_reference_nid');
   $query->condition('outlet_master.type', 'outlet_master');
+  $query->condition('outlet_master.uid', $distributor_id);
   $query->fields('outlet_master', array('title'));
   $party_code = $query->execute()->fetchField();
   return $party_code;
