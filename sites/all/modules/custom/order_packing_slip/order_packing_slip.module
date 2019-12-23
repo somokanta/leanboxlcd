@@ -32,5 +32,14 @@ function order_packing_slip_services_resources(){
 
 function fetch_order_packing_slip_api_data($order_packing_slip_data){
   watchdog('cashier_attendance_data', '<pre>' . print_r($order_packing_slip_data, TRUE) . '</pre>');
+  if(!empty($order_packing_slip_data)){
+ 
+    $result['flag'] = '1';
+    $result['result'] = 'Data updated Sucessfully.';
+  }else{
+    $result['flag'] = '0';
+    $result['result'] = 'No data was updated.';
+  }
   
+  return $result;
 }
