@@ -66,6 +66,11 @@ function order_packing_slip_schema() {
         'not null' => TRUE,
         'default' => 0,
       ),
+      'distributor_id' => array(
+        'description' => 'Distributor Id',
+        'type' => 'int',
+        'default' => 0,
+      ),
     ),
     'primary key' => array('id'),
   );
