@@ -1,0 +1,78 @@
+<?php 
+/* 
+ * Implement Hook schema
+ */
+function order_packing_slip_schema() {
+  $schema = [];
+  $schema['order_packing_slip_api_data'] = array(
+    'description' => 'order packing slip data',
+    'fields' => array(
+      'id' => array(
+        'description' => t('The primary identifier for a data'),
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'order_date' => array(
+        'description' => t('Order Date'),
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'party_name' => array(
+       'description' => t('Party name'),
+       'type' => 'varchar',
+       'length' => 255,
+       'not null' => TRUE,
+       'default' => '',
+      ),
+      'box_id' => array(
+        'description' => t('Box id'),
+        'type' => 'varchar',
+        'length' => 4000,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'seal_number' => array(
+        'description' => t('Box seal number'),
+        'type' => 'varchar',
+        'length' => 4000,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+       'ptl_id' => array(
+        'description' => 'PTL Id.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'total_qty' => array(
+        'description' => 'Total qty',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'header_data' => array(
+        'description' => t('Header API Received Data'),
+        'type' => 'text',
+      ),
+      'row_data' => array(
+        'description' => t('Row API Received Data'),
+        'type' => 'text',
+      ),
+      'request_time' => array(
+        'description' => t('API Request Time'),
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'distributor_id' => array(
+        'description' => 'Distributor Id',
+        'type' => 'int',
+        'default' => 0,
+      ),
+    ),
+    'primary key' => array('id'),
+  );
+  return $schema;
+}

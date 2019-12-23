@@ -1,0 +1,4 @@
+name = Order Packing Slip Api
+description = This Module pull order packing slip data from D8 System to D7 system
+package = Custom
+core = 7.x
