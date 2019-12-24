@@ -2717,16 +2717,27 @@ function change_feeds_import_get_distributor_id($user_id) {
   return $distributor_id;
 }
 function get_sibling_distributor_id($distributor_id) {
-    $result = array();
+  $result = array();
   if (!empty($distributor_id))  {
     $query = db_select('users', 'u');
     $query->innerjoin('field_data_field_distributor', 'd', 'd.entity_id = u.uid');
-    $query->leftjoin('field_data_field_sibling_distributor_id', 'sibling_dist', 'sibling_dist.entity_id = u.uid');
+    $query->join('field_data_field_sibling_distributor_id', 'sibling_dist', 'sibling_dist.entity_id = u.uid');
     $query->condition('sibling_dist.field_sibling_distributor_id_uid', $distributor_id, '=');
-    $query->fields('d', array('entity_id'));
+    $query->fields('d', array('field_distributor_value'));
     $result = $query->execute()->fetchAllKeyed(0,0);
   }
   return $result;
+}
+function get_distributor_id_of_bill($bill_number) {
+    $distributor_id = '';
+    if(!empty($bill_number)) {
+        $query = db_select('node', 'n');
+        $query->condition('n.type', 'sales_register_data', '=');
+        $query->condition('n.title', $bill_number, '=');
+        $query->fields('n', array('uid'));
+        $distributor_id = $query->execute()->fetchField();
+    }
+    return $distributor_id;
 }
 
 function change_feeds_import_get_distributor_name($distributor_id) {
