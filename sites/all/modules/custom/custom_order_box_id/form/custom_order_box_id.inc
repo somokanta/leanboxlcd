@@ -238,7 +238,7 @@ function check_crate_id_exist($outlet_order_no, $bill_number, $distributor_id) {
         $query->join('node', 'sales_register', 'sales_register.nid = party_ref.entity_id');
         $query->condition('sales_register.type', 'sales_register_data');
         $query->condition('sales_register.uid', $distributor_id);
-        $query->condition('outlet_order_crate.distributor_id', $distributor_id);
+        $query->condition('ooc.distributor_id', $distributor_id);
         $query->condition('sales_register.title', $bill_number);
         $query->fields('ooc', array('crate_id'));
         $results = $query->execute()->fetchCol();
