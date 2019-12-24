@@ -1580,7 +1580,7 @@ function leanbox_dashboard_user_presave(&$edit, $account, $category) {
   $roles = $account->roles;
   $dfe_role_id = get_role_by_name('DFE');
   $rs_role_id = get_role_by_name('RS Admin');
-  if (!empty($edit['field_sibling_distributor_id'])) {
+  /*if (!empty($edit['field_sibling_distributor_id'])) {
       foreach($edit['field_sibling_distributor_id'][LANGUAGE_NONE] as $key=>$value){
           $total_uids[$value['uid']] = $value['uid'];
       }
@@ -1599,7 +1599,7 @@ function leanbox_dashboard_user_presave(&$edit, $account, $category) {
         $sibling_object->field_sibling_distributor_id[LANGUAGE_NONE][]['uid'] = $current_uid;
         user_save($sibling_object);
       }
-  }
+  }*/
 //print_r($edit['field_sibling_distributor_id']);die;
   if (!empty($roles[$dfe_role_id]) || !empty($roles[$rs_role_id])) {
     $dis_id = $account->field_distributor['und'][0]['value'];
