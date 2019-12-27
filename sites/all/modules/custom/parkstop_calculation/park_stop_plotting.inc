@@ -33,6 +33,12 @@ function park_stop_plotting() {
 function park_stop_plotting_form($form, &$form_state, $args) {
   global $user;
   $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+  if (in_array("central_distributor", $user->roles)) {
+      $central_distributor_id = $distributor_id;
+  }
+  else {
+    $central_distributor_id = get_central_distributor_id($distributor_id);
+  }
 
   $form = array();
   $form['#prefix'] = '<div id="address-selection-map">';
@@ -43,9 +49,11 @@ function park_stop_plotting_form($form, &$form_state, $args) {
   $session_id = session_id();
 
   $query = db_select('parkstop_api_log', 'ps');
-  $query->condition('ps.distributor_id', $distributor_id, '=');
   if (!empty($trip_id)) {
     $query->condition('ps.trip_id', $trip_id, '=');
+    $trip_distributor_id = get_distributorid_of_trip($trip_id); ;
+    $distributor_id = $trip_distributor_id;
+    $query->condition('ps.distributor_id', $trip_distributor_id, '=');
   }
   else {
     $query->condition('ps.session_id', $session_id, 'LIKE');
@@ -90,7 +98,7 @@ function park_stop_plotting_form($form, &$form_state, $args) {
       $form_state['values']['delivery_boy'] = 2;
     }
     
-    $conf_nid = check_node_title_exists($distributor_id, 'van_stop_master');
+    $conf_nid = check_node_title_exists($central_distributor_id, 'van_stop_master');
     $conf_node = node_load($conf_nid);
     $origin_lat = $conf_node->field_distributor_latitude[LANGUAGE_NONE][0]['value'];
     $origin_long = $conf_node->field_distributor_longitude[LANGUAGE_NONE][0]['value'];
@@ -145,7 +153,7 @@ function park_stop_plotting_form($form, &$form_state, $args) {
     }
     
     foreach ($seq1 as $key1 => $bill_nid) {
-      $latlong = get_latlong_from_bills($bill_nid, $distributor_id);
+      $latlong = get_latlong_from_bills($bill_nid);
       $lat = $latlong['lat'];
       $long = $latlong['lng'];
       $bill_number = $latlong['bill_num'];
@@ -182,7 +190,7 @@ function park_stop_plotting_form($form, &$form_state, $args) {
     foreach ($seq2 as $key3 => $bills) {
       $i = 0;
       unset($latlongchild);
-      $parent_lat_long = get_latlong_from_bills($seq3[$key3], $distributor_id);
+      $parent_lat_long = get_latlong_from_bills($seq3[$key3]);
       $lat_parent = $parent_lat_long['lat'];
       $long_parent = $parent_lat_long['lng'];
       $new_lat_long_parent = $lat_parent . ',' . $long_parent;
@@ -190,7 +198,7 @@ function park_stop_plotting_form($form, &$form_state, $args) {
 
       foreach ($bills as $final_bill_num) {
         $i++;
-        $latlong_child = get_latlong_from_bills($final_bill_num, $distributor_id);
+        $latlong_child = get_latlong_from_bills($final_bill_num);
         $lat = $latlong_child['lat'];
         $lng = $latlong_child['lng'];
         $child_bill_no = $latlong_child['bill_num'];
@@ -382,11 +390,11 @@ function deliveryboy_actual_form_submit($form, &$form_state) {
   $form_state['rebuild'] = TRUE;
 }
 
-function get_latlong_from_bills($bills_nid, $distributor_id) {
+function get_latlong_from_bills($bills_nid) {
   $query = db_select('node', 'n');
   $query->condition('n.type', 'sales_register_data');
   $query->condition('n.nid', $bills_nid, '=');
-  $query->condition('n.uid', $distributor_id);
+  //$query->condition('n.uid', $distributor_id);
   $query->join('field_data_field_bill_value', 'bv', 'bv.entity_id = n.nid');
   $query->join('field_data_field_party_code_reference', 'pc', 'pc.entity_id = n.nid');
   $query->join('node', 'n1', 'n1.nid = pc.field_party_code_reference_nid');

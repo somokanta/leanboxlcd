@@ -121,6 +121,8 @@ function parkstop_calculation_api($bills_nid, $distributor_ids, $prevan = 'Van',
     $dis_ids = get_distributor_ids();
   }  
   $results = get_bill_billVal_lat_lng($bills_nid, $dis_ids);
+  //print_r($results);die;
+  //print_r(array($central_distributor_id));die;
 
   //Stop to be served. All bills in array. Key 0,1,2 etc
   $req = array();
@@ -224,7 +226,7 @@ function get_bill_billVal_lat_lng($bills_nid, $distributor_ids) {
   $query = db_select('node', 'n');
   $query->condition('n.type', 'sales_register_data');
   $query->condition('n.nid', $bills_nid, 'IN');
-  $query->condition('n.uid', $distributor_id,'IN');
+  $query->condition('n.uid', $distributor_ids,'IN');
   $query->join('field_data_field_bill_value', 'bv', 'bv.entity_id = n.nid');
   $query->join('field_data_field_party_code_reference', 'pc', 'pc.entity_id = n.nid');
   $query->join('node', 'n1', 'n1.nid = pc.field_party_code_reference_nid');
@@ -334,21 +336,22 @@ function insert_parkstop_plotting_log($prevan, $request_api, $response_api, $dis
       'prevan' => $prevan,
       'api_request' => $request_api,
       'api_response' => $response_api,
-      'distributor_id' => $distributor_id
+  
     ))
     ->execute();
 }
 
 function update_parkstop_plotting_log($prevan, $trip_id, $distributor_id,$created_by_distributor_id) {
+    
   $result = db_update('parkstop_api_log')
       ->fields(array(
-        'trip_id' => $trip_id
+        'trip_id' => $trip_id,
+        'distributor_id' => $distributor_id  
       ))
       ->condition('prevan', $prevan, '=')
       ->isNull('trip_id')
       ->condition('session_id', session_id(), 'LIKE')
       ->condition('created_by_distributor_id', $created_by_distributor_id)    
-      ->condition('distributor_id', $distributor_id)
       ->execute();
 }
 

@@ -16,7 +16,8 @@ function fetch_dispatch_planning_api_data($data) {
       $actual_trip = $referenceNumber[0];
       $actual_rs = $referenceNumber[1];
       //$dis_id = get_distributorid_of_trip($actual_trip);
-      $dis_id = get_trip_distributor_id_using_rs_code($actual_rs,$actual_trip);  
+      //$dis_id = get_trip_distributor_id_using_rs_code($actual_rs,$actual_trip); 
+      $dis_id = get_distributor_id_from_reference_number(trim($data['referenceNumber']));
       $json_data = json_encode($data);
       dispatch_planning_api_log($json_data, $data['jobData']['runsheet_number'], 'farey_sales_deliver', $dis_id, 1);
       $bill_row_id = _get_bill_row_id_manual_using_reference_no($data['referenceNumber']);
@@ -345,4 +346,17 @@ function update_map_my_india_api_log($sql_ins_id, $response_json){
      ))
      ->condition('id', $sql_ins_id, '=')
      ->execute();
+}
+
+function get_distributor_id_from_reference_number($reference_no) {
+   $distributor_id = ''; 
+  if (!empty($reference_no)) {
+     $query = db_select('dispatch_planning_api_data', 'ad');
+     $query->join('node', 'n', 'n.title = ad.runsheet_number and n.uid = ad.distributor_id');
+     $query->condition('ad.referenceNo', $reference_no, '=');
+     $query->condition('n.type', 'dispatch_data', '=');
+     $query->fields('ad', array('distributor_id'));
+     $distributor_id = $query->execute()->fetchField();
+  }  
+  return $distributor_id;
 }

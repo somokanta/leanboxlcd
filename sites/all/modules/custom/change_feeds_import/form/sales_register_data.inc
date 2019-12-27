@@ -235,6 +235,11 @@ function change_feeds_import_sales_register_batch_fix_process($data, $distributo
         }
         if (isset($value['BILL_NUMBER'])) {
             $unique_comb = $value['BILL_NUMBER'] . '-' . $dis_id;
+            $bill_distributor_id = get_distributor_id_of_bill($value['BILL_NUMBER'],$dis_id);
+      
+            if (in_array($bill_distributor_id,$sibling_distributor_ids) && !empty($bill_distributor_id) && $bill_distributor_id!=$dis_id) {
+                $value['error_message'] .= "Bill Number: " . $value['BILL_NUMBER'] . ' already exist'. ". </br>";
+            }
             if (in_array($unique_comb, $context['results']['unique_combination'])) {
                 $value['error_message'] .= "BILL_NUMBER " . $value['BILL_NUMBER'] . " is Repeated.  ";
             } else {

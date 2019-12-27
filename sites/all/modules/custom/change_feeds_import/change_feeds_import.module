@@ -2176,20 +2176,24 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
 //    }
     }
     if ($entity->feeds_item->id == 'hul_code_area_code_mapping') {
-        $entity->changetype = 'hul_code_area_code_mapping';
-        $hul_code = $entity->title;
-        $area_code = $item['area code'];
-        $areacode_exist = check_hul_area_code_exist($area_code, $central_distributor_id);
-        $existing_uid = check_hul_code_exist($title);
-        if (!empty($existing_uid) && ($existing_uid != $distributor_id)) {
-            drupal_set_message("Invalid HUL Code:$hul_code", 'error', FALSE);
-            $entity->feeds_item->skip = TRUE;
-        }
-        if (empty($areacode_exist)) {
-            drupal_set_message("Area Code :$area_code does not exist.", 'error', FALSE);
-            $entity->feeds_item->skip = TRUE;
-        }
+    $entity->changetype = 'hul_code_area_code_mapping';
+    $hul_code = $entity->title;
+    $area_code = $item['area code'];
+    //returns area code nid
+    $areacode_nid = check_hul_area_code_exist($area_code,$distributor_id);
+    $existing_uid = check_hul_code_exist($title);
+    if (!empty($existing_uid) && ($existing_uid != $distributor_id)) {
+      drupal_set_message("Invalid HUL Code:$hul_code", 'error', FALSE);
+      $entity->feeds_item->skip = TRUE;
+    } 
+    if (empty($areacode_nid)) {
+        drupal_set_message("Area Code :$area_code does not exist.", 'error', FALSE);
+        $entity->feeds_item->skip = TRUE;
     }
+    else {
+         $entity->field_area_code[LANGUAGE_NONE][0]['nid'] = $areacode_nid;
+    }
+  }
     if ($entity->feeds_item->id == 'area_code_master') {
         $area_code = trim($entity->title);
         $nearby_area_code = trim($item['nearby area code']);
@@ -2535,7 +2539,7 @@ function check_hul_area_code_exist($title, $distributor_id) {
     if (!empty($title)) {
         $query = db_select('node', 'n');
         $query->condition('n.type', 'area_code_master');
-        $query->fields('n', array('title'));
+        $query->fields('n', array('nid'));
         $query->condition('n.title', $title);
         $query->condition('n.uid', $distributor_id);
         $results = $query->execute()->fetchField();
@@ -4281,9 +4285,9 @@ function call_bank_master_api($node) {
     $original_bank_name = $node->original->title;
     $dis_id = $node->uid;
     $api_type = 'bank_master';
-
+    $merchant_code = variable_get('merchant_code_conf','lakme');
     if (!empty($bank_name) && ($bank_name != $original_bank_name)) {
-        $bank_name_arr = array(array('bank_name' => $bank_name, 'merchant' => array(array('name' => 'hul'))));
+        $bank_name_arr = array(array('bank_name' => $bank_name, 'merchant' => array(array('name' => $merchant_code))));
         $bank_name_json = json_encode($bank_name_arr);
 
         $sql_ins_id = bank_master_api_log($bank_name, $bank_name_json, $api_type, $dis_id);
@@ -4304,9 +4308,10 @@ function call_reason_code_master_api($node) {
     $og_reason_type = $node->original->field_reason_type['und'][0]['value'];
     $dis_id = $node->uid;
     $api_type = 'reason_code_master';
+    $merchant_code = variable_get('merchant_code_conf','lakme');
 
     if (!empty($reason) && !empty($reason_type) && ($reason != $og_reason || $reason_type != $og_reason_type)) {
-        $reason_arr = array(array('reason_text' => $reason, 'reason_description' => $reason, 'reason_type' => $reason_type, 'is_active' => True, 'merchant' => array(array('name' => 'hul'))));
+        $reason_arr = array(array('reason_text' => $reason, 'reason_description' => $reason, 'reason_type' => $reason_type, 'is_active' => True, 'merchant' => array(array('name' => $merchant_code))));
         $reason_json = json_encode($reason_arr);
 
         $sql_ins_id = reason_code_master_api_log($reason, $reason_type, $reason_json, $api_type, $dis_id);
@@ -4335,6 +4340,7 @@ function call_location_api($node) {
     $og_nid = $node->original->field_hul_code_reference['und'][0]['nid'];
     $dis_id = $node->uid;
     $api_type = 'location_master';
+    $merchant_code = variable_get('merchant_code_conf','lakme');
 
     if (!empty($party_code) && !empty($party_name) && ($party_code != $og_party_code || $hul_code != $og_hul_code || $party_name != $og_party_name || $payment_term != $og_payment_term || $credit_days != $og_credit_days || $nid != $og_nid)) {
         $res = get_lat_long_and_area_code($nid);
@@ -4342,7 +4348,7 @@ function call_location_api($node) {
         $long = $res[0]['field_hul_updated_long_value'];
         $area_code = $res[0]['n1_title'];
 
-        $location_arr = array(array('party_code' => $party_code, 'party_name' => $party_name, 'location_type' => $location_type, 'merchant' => array(array('name' => 'hul'))));
+        $location_arr = array(array('party_code' => $party_code, 'party_name' => $party_name, 'location_type' => $location_type, 'merchant' => array(array('name' => $merchant_code))));
         if (!empty($hul_code)) {
             $location_arr[0]['hul_code'] = $hul_code;
         }
@@ -4849,4 +4855,40 @@ function get_trip_distributor_id_using_rs_code($rs_code,$trip_id) {
      $distributor_id = $query->execute()->fetchField();
   }
   return $distributor_id;
+}
+
+function get_facility_code($distributor_id) {
+    $facility_code = '';
+    if (!empty($distributor_id)) {
+        $query = db_select('field_data_field_facility_code', 'facility_code');
+        $query->condition('facility_code.entity_id', $distributor_id);
+        $query->join('taxonomy_term_data', 'term_data', 'term_data.tid = facility_code.field_facility_code_tid');
+        $query->fields('term_data', array('name'));
+        $facility_code = $query->execute()->fetchField();
+    }
+    return $facility_code;
+}
+function get_sibling_distributor_id($distributor_id) {
+  $result = array();
+  if (!empty($distributor_id))  {
+    $query = db_select('users', 'u');
+    $query->innerjoin('field_data_field_distributor', 'd', 'd.entity_id = u.uid');
+    $query->join('field_data_field_sibling_distributor_id', 'sibling_dist', 'sibling_dist.entity_id = u.uid');
+    $query->condition('sibling_dist.field_sibling_distributor_id_uid', $distributor_id, '=');
+    $query->fields('d', array('field_distributor_value'));
+    $result = $query->execute()->fetchAllKeyed(0,0);
+  }
+  return $result;
+}
+function get_distributor_id_of_bill($bill_number,$distributor_id) {
+    $distributor_id = '';
+    if(!empty($bill_number) && !empty($distributor_id)) {
+        $query = db_select('node', 'n');
+        $query->condition('n.type', 'sales_register_data', '=');
+        $query->condition('n.uid', $distributor_id, '=');
+        $query->condition('n.title', $bill_number, '=');
+        $query->fields('n', array('uid'));
+        $distributor_id = $query->execute()->fetchField();
+    }
+    return $distributor_id;
 }
