@@ -12,6 +12,13 @@ function order_packing_slip_schema() {
         'type' => 'serial',
         'not null' => TRUE,
       ),
+      'order_no' => array(
+        'description' => t('Order No'),
+        'type' => 'varchar',
+        'length' => 25,
+        'not null' => TRUE,
+        'default' => '',
+      ),
       'order_date' => array(
         'description' => t('Order Date'),
         'type' => 'int',
