@@ -2699,12 +2699,11 @@ function dispatch_planning_query_node_distributor_access_alter(QueryAlterableInt
 function cashier_names_autocomplete($string = '') {
   $result = array();
   global $user;
-  $distributor_id = change_feeds_import_get_distributor_id($user->uid);
-  if (in_array('central_distributor', $user->roles)) {
-       $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+ if (in_array('central_distributor', $user->roles)) {
+       $central_distributor_id = change_feeds_import_get_distributor_id($user->uid);
    }
    else {
-     $distributor_id = get_central_distributor_id($distributor_id);
+     $central_distributor_id = get_central_distributor_id($user->uid);
    }
 
   if ($string) {
@@ -2717,7 +2716,7 @@ function cashier_names_autocomplete($string = '') {
     $query->condition('field_resource_type_value', 'CASHIER');
     $query->fields('rn', array('field_resource_name_value'));
     //$query->addTag('node_distributor_access');
-    $query->condition('n.uid',$distributor_id);
+    $query->condition('n.uid',$central_distributor_id);
     $result = $query->execute()->fetchAllKeyed(0, 0);
   }
 
@@ -2750,7 +2749,7 @@ function hht_id_autocomplete($date, $string) {
   global $user;
   $distributor_id = change_feeds_import_get_distributor_id($user->uid);
    if (!in_array('central_distributor', $user->roles)) {
-       $distributor_id = get_central_distributor_id($distributor_id);
+       $distributor_id = get_central_distributor_id($user->uid);
    }
 
 //  if ($string) {
