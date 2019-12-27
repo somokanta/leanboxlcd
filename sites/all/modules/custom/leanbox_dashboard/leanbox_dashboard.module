@@ -1580,7 +1580,27 @@ function leanbox_dashboard_user_presave(&$edit, $account, $category) {
   $roles = $account->roles;
   $dfe_role_id = get_role_by_name('DFE');
   $rs_role_id = get_role_by_name('RS Admin');
+  /*if (!empty($edit['field_sibling_distributor_id'])) {
+      foreach($edit['field_sibling_distributor_id'][LANGUAGE_NONE] as $key=>$value){
+          $total_uids[$value['uid']] = $value['uid'];
+      }
+      foreach($total_uids as $user_idkey=>$user_uid) {
+         $sibling_uid = $user_uid;
+         $sibling_object = user_load($sibling_uid);  
+         unset($sibling_object->field_sibling_distributor_id[LANGUAGE_NONE]);
+         user_save($sibling_object);
+        foreach($edit['field_sibling_distributor_id'][LANGUAGE_NONE] as $key=>$value){
+            $current_uid =  $account->uid;
+            if ($value['uid'] !== $sibling_uid) {
+              $sibling_object->field_sibling_distributor_id[LANGUAGE_NONE][]['uid'] = $value['uid'];
+            }
 
+        }
+        $sibling_object->field_sibling_distributor_id[LANGUAGE_NONE][]['uid'] = $current_uid;
+        user_save($sibling_object);
+      }
+  }*/
+//print_r($edit['field_sibling_distributor_id']);die;
   if (!empty($roles[$dfe_role_id]) || !empty($roles[$rs_role_id])) {
     $dis_id = $account->field_distributor['und'][0]['value'];
     $user_details = leanbox_dashboard_get_username_and_rs_code($dis_id);
