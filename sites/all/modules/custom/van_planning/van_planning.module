@@ -31,12 +31,13 @@ function van_planning_menu() {
      'access callback' => TRUE,
      'type' => MENU_CALLBACK,
    );
-   $items['areacode-master/autocomplete'] = array(
-     'title' => '',
-     'page callback' => '_get_areacode_master_autocomplete',
-     'access callback' => TRUE,
-     'type' => MENU_CALLBACK,
-   );
+   $items['areacode-master/autocomplete/%'] = array(
+		'title' => 'area code autocomplete',
+		'page callback' => '_get_areacode_master_autocomplete',
+		'page arguments' => array(2),
+    'access callback' => TRUE,
+		'type' => MENU_CALLBACK,
+	);
    $items['plgroup-master/autocomplete'] = array(
      'title' => '',
      'page callback' => '_get_plgroup_master_autocomplete',
@@ -121,7 +122,7 @@ function _get_areacode_master_autocomplete($string = '') {
       $query->condition('n.title', db_like($string) . '%', 'LIKE');
       $query->fields('n', array('title'));
       $query->range(0, 15);
-      $query->addTag('node_distributor_access');
+     // $query->addTag('node_distributor_access');
       $result = $query->execute()->fetchAllKeyed(0, 0);
    }
 
@@ -164,7 +165,7 @@ function _get_vanplgroup_master_autocomplete($string = '') {
       $query->condition('vpg.field_van_pl_group_value', db_like($string) . '%', 'LIKE');
       $query->fields('vpg', array('field_van_pl_group_value'));
       $query->range(0, 15);
-      $query->addTag('node_distributor_access');
+      //$query->addTag('node_distributor_access');
       $result = $query->execute()->fetchAllKeyed(0, 0);
    }
    drupal_json_output($result);
@@ -185,7 +186,7 @@ function _get_outlet_areahookgrp_master_autocomplete($string = '') {
       $query->condition('ah.field_dva_area_hook_group_name_value', db_like($string) . '%', 'LIKE');
       $query->fields('ah', array('field_dva_area_hook_group_name_value'));
       $query->range(0, 15);
-      $query->addTag('node_distributor_access');
+      //$query->addTag('node_distributor_access');
       $result = $query->execute()->fetchAllKeyed(0, 0);
    }
    drupal_json_output($result);
@@ -208,4 +209,11 @@ function hht_id_master_autocomplete($string = '') {
       $result = $query->execute()->fetchAllKeyed(0, 0);
    }
    drupal_json_output($result);
+}
+function get_author_id_of_content($nids){
+        $query1 = db_select('node','n');
+        $query1->condition('n.nid',$nids,'IN');
+        $query1->fields('n',array('uid'));
+        $node_uids = $query1->execute()->fetchAllKeyed(0,0);
+        return $node_uids;
 }

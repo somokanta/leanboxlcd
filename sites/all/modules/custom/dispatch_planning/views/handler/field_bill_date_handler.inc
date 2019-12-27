@@ -24,11 +24,8 @@ class field_bill_date_handler extends views_handler_field {
    }
 
    function render($data) {
-    
-    global $user;
-    $user_id = $user->uid;
-    $distributor_id = change_feeds_import_get_distributor_id($user_id);
     $trip_id = $data->node_title;
+    $distributor_id = get_distributorid_of_trip($trip_id);
     
     $query = db_select('field_data_field_trip_id_reference', 'tr');
     $query->join('node', 'n', 'n.nid = tr.field_trip_id_reference_nid');

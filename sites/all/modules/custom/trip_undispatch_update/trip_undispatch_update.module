@@ -335,7 +335,8 @@ function del_app_undispatch_submit($form, &$form_state){
   foreach ($bills as $val) {
     $ref_no[] = $trip_id . '_' . $rs_code . '_' . $val;
   }
-  $request_arr = array('jobType' => 'delivery','merchantCode' => 'marico','hub' => $rs_code,'runsheet_number' => $trip_id,'fieldExecutiveName' => '', 'dispatch_date' => '', 'array_delivery_boy' => '', 'type' => 'undispatch', 'referenceNo' => $ref_no);
+  $merchant_code = variable_get('merchant_code_conf','lakme');
+  $request_arr = array('jobType' => 'delivery','merchantCode' => $merchant_code,'hub' => $rs_code,'runsheet_number' => $trip_id,'fieldExecutiveName' => '', 'dispatch_date' => '', 'array_delivery_boy' => '', 'type' => 'undispatch', 'referenceNo' => $ref_no);
   $request_json = json_encode($request_arr);
     //dpm($request_json);
   $sql_ins_id = delivery_app_update_undispatch_api_log($request_json, $trip_id, 'undispatch', $distributor_id);
@@ -438,8 +439,9 @@ function del_app_update_submit($form, &$form_state) {
     $ref_no[] = $trip_id.'_'.$rs_code.'_'.$val;
   }
   //on change condition
+  $merchant_code = variable_get('merchant_code_conf','lakme');
   if($node->field_cashier_name['und'][0]['value'] != $cashier_form || $node->field_dispatch_date['und'][0]['value'] != $dispatch_date_form  || !empty($result)){
-    $request_arr = array('jobType' => 'delivery','merchantCode' => 'marico','hub' => $rs_code,'runsheet_number' => $trip_id,'fieldExecutive' => $rs_code . '_' . $cashier_form,'fieldExecutiveName' => $cashier_form, 'dispatch_date' => $dis_date, 'array_delivery_boy' => $del_boys, 'type' => 'update', 'referenceNo' => $ref_no);
+    $request_arr = array('jobType' => 'delivery','merchantCode' => $merchant_code,'hub' => $rs_code,'runsheet_number' => $trip_id,'fieldExecutive' => $rs_code . '_' . $cashier_form,'fieldExecutiveName' => $cashier_form, 'dispatch_date' => $dis_date, 'array_delivery_boy' => $del_boys, 'type' => 'update', 'referenceNo' => $ref_no);
     $request_json = json_encode($request_arr);
 
     $sql_ins_id = delivery_app_update_undispatch_api_log($request_json, $trip_id, 'update', $distributor_id);
