@@ -240,7 +240,7 @@ function download_order_packing_slip($from_bill_date,$to_bill_date){
         </table><br>';
       $table .= get_html_table($header, $row_data_arr);
       if(count($row_data_arr) !== $i){
-        $table.'<pagebreak/>';
+        $table."<pagebreak />";
       }
       $i++;
     }
