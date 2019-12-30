@@ -120,6 +120,11 @@ function insert_tester_order_data_in_custom_billing_table($tester_order_data) {
                 $query = db_select('field_data_field_lb_sku7_code', 'sku');
                 $query->leftjoin('field_data_field_lb_basepack_code', 'bc', 'bc.entity_id = sku.entity_id');
                 $query->leftjoin('node', 'n', 'n.nid = sku.entity_id');
+                
+                //Newly added on 30th dec20. check its sku7 master should be present
+                $query->leftjoin('node', 'n2', 'n2.title = sku.field_lb_sku7_code_value');
+                $query->condition('n2.type', 'sku7_code_master');
+                
                 $query->condition('n.type', 'lb_product_master');
                 $query->condition('n.status', 1);
                 $query->condition('bc.field_lb_basepack_code_value', $data['basepack_code']);
@@ -133,7 +138,7 @@ function insert_tester_order_data_in_custom_billing_table($tester_order_data) {
                 $line_level_value = 0;
 
                 //Fetch SKU7 code – based on basepack code (since multiple SKU7 codes will be found, fetch anyone)
-                $stage_billing_data = db_insert('custom_billing_data') // Table name no longer needs {}
+                db_insert('custom_billing_data')
                     ->fields(array(
                         'vehicle' => 'Van - 1',
                         'loading_date' => $data['order_date'], //T
@@ -170,7 +175,16 @@ function insert_tester_order_data_in_custom_billing_table($tester_order_data) {
                     ))
                     ->execute();
             }else{
-                //duplicate entry. hit twice so ignor
+                //duplicate entry. hit twice so update the qty only
+                db_update('custom_billing_data')
+                ->fields(array(
+                    'Sum_of_TOTAL_SALES_QTY' => $data['picked_qty'], //T
+                    'Sum_of_NET_SALES_QTY' => $data['picked_qty'], //T
+                    'updated_date' => REQUEST_TIME,
+                    'updated_flag' => 1
+                ))
+                ->condition('id', $tb_id, '=')
+                ->execute();
             }
         }
     }
