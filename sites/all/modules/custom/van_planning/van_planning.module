@@ -52,7 +52,7 @@ function van_planning_menu() {
    );
    $items['hht-id-master/autocomplete'] = array(
     'title' => 'hht_id_master_autocomplete',
-    'page callback' => 'hht_id_master_autocomplete',
+    'page callback' => 'van_planning_hht_id_master_autocomplete',
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
@@ -193,27 +193,32 @@ function _get_outlet_areahookgrp_master_autocomplete($string = '') {
 }
 
 
-/**
- * 
- * @param type $string
- */
-function hht_id_master_autocomplete($string = '') {
-   $result = array();
-
-   if ($string) {
-      $query = db_select('node', 'n');
-      $query->condition('n.type', 'hht_master');
-      $query->fields('n', array('title'));
-      $query->condition('n.title', db_like($string) . '%', 'LIKE');
-      $query->addTag('node_distributor_access');
-      $result = $query->execute()->fetchAllKeyed(0, 0);
-   }
-   drupal_json_output($result);
+function get_author_id_of_content($nids) {
+    $query1 = db_select('node', 'n');
+    $query1->condition('n.nid', $nids, 'IN');
+    $query1->fields('n', array('uid'));
+    $node_uids = $query1->execute()->fetchAllKeyed(0, 0);
+    return $node_uids;
 }
-function get_author_id_of_content($nids){
-        $query1 = db_select('node','n');
-        $query1->condition('n.nid',$nids,'IN');
-        $query1->fields('n',array('uid'));
-        $node_uids = $query1->execute()->fetchAllKeyed(0,0);
-        return $node_uids;
+
+function van_planning_hht_id_master_autocomplete($string) {
+    $result = array();
+    global $user;
+    $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+    if (!in_array('central_distributor', $user->roles)) {
+        $central_distributor_id = get_central_distributor_id($distributor_id);
+    }
+    else {
+        $central_distributor_id = $distributor_id;
+    }
+    if ($string) {
+
+        $query = db_select('node', 'n');
+        $query->condition('n.type', 'hht_master');
+        $query->fields('n', array('title'));
+        $query->condition('n.title', db_like($string) . '%', 'LIKE');
+        $query->condition('n.uid', $central_distributor_id);
+        $result = $query->execute()->fetchAllKeyed(0, 0);
+    }
+    drupal_json_output($result);
 }
