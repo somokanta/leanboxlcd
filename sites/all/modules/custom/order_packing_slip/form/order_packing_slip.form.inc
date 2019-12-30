@@ -239,9 +239,9 @@ function download_order_packing_slip($from_bill_date,$to_bill_date){
         </tbody>
         </table><br>';
       $table .= get_html_table($header, $row_data_arr);
-      //if(count($row_data_arr) !== $i){
-        $table."<pagebreak/>";
-      //}
+      if(count($row_data_arr) !== $i){
+        $table .= "<pagebreak />";
+      }
       $i++;
     }
     pdf_using_mpdf_api($table);
