@@ -2749,9 +2749,14 @@ function hht_id_autocomplete($date, $string) {
   global $user;
   $distributor_id = change_feeds_import_get_distributor_id($user->uid);
    if (!in_array('central_distributor', $user->roles)) {
-       $distributor_id = get_central_distributor_id($user->uid);
+       $central_distributor_id = get_central_distributor_id($distributor_id);
    }
-
+   else {
+       $central_distributor_id = $distributor_id;
+   }
+watchdog('hht_id_autocomplete_date', '<pre>' . print_r(array($date), TRUE) . '</pre>');
+watchdog('hht_id_autocomplete_central_distributor_id', '<pre>' . print_r(array($central_distributor_id), TRUE) . '</pre>');
+watchdog('hht_id_autocomplete_date_string', '<pre>' . print_r(array($string), TRUE) . '</pre>');
 //  if ($string) {
 //    $query = db_select('node', 'n');
 //    $query->condition('type', 'hht_master');
@@ -2796,7 +2801,7 @@ function hht_id_autocomplete($date, $string) {
   $query->leftJoin('field_data_field_trip_executon_date', 'fd', 'fh.entity_id = fd.entity_id');
   $query->groupBy('n.title');
   //$query->addTag('node_distributor_access');
-  $query->condition('n.uid',$distributor_id);
+  $query->condition('n.uid',$central_distributor_id);
   $res = $query->execute()->fetchAll();
 
   $date_string = date('m/d/Y', $date);
