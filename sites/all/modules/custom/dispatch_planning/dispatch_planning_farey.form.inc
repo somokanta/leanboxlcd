@@ -240,7 +240,7 @@ function _edit_trip_delivered_callback_form($form, &$form_state) {
       $order_status = $form_state['input']['order_status'];
    }
    else {
-      if (!empty($trip_number) && !empty($rs_code)) {
+      if (!empty($trip_number)) {
          //$options = _get_all_tripsbill($trip_number);
          //if (!empty($options)) {
          // order status
@@ -311,7 +311,7 @@ function _edit_trip_delivered_callback_form($form, &$form_state) {
          //}
          
          $bill_number = $form_state['input']['bill_number'];
-         if (!empty($trip_number) && !empty($rs_code) && !empty($bill_number)) {
+         if (!empty($trip_number)  && !empty($bill_number)) {
   
             $bill_details = _get_noneditable_delivered_trip_details($trip_number, $rs_code, $bill_number,$dis_id);
             //print_r($bill_details);die;
@@ -951,6 +951,7 @@ function _get_editable_delivered_trip_details($trip_number, $rs_code, $bill_no,$
    $query->join('dispatch_planning_api_data', 'ad', 'dpi.trip_bill_reference = ad.id');
    $query->condition('ad.runsheet_number', $trip_number);
    //$query->condition('ad.hub', $rs_code);
+   $query->condition('ad.distributor_id', $dis_id);
    $query->condition('ad.bill_number', $bill_no);
    $query->fields('dpi', array('id', 'sku_code', 'sku_description', 
      'mrp', 'sum_net_sales_quantity',

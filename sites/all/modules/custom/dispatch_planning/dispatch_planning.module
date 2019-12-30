@@ -2754,9 +2754,9 @@ function hht_id_autocomplete($date, $string) {
    else {
        $central_distributor_id = $distributor_id;
    }
-watchdog('hht_id_autocomplete_date', '<pre>' . print_r(array($date), TRUE) . '</pre>');
+/*watchdog('hht_id_autocomplete_date', '<pre>' . print_r(array($date), TRUE) . '</pre>');
 watchdog('hht_id_autocomplete_central_distributor_id', '<pre>' . print_r(array($central_distributor_id), TRUE) . '</pre>');
-watchdog('hht_id_autocomplete_date_string', '<pre>' . print_r(array($string), TRUE) . '</pre>');
+watchdog('hht_id_autocomplete_date_string', '<pre>' . print_r(array($string), TRUE) . '</pre>');*/
 //  if ($string) {
 //    $query = db_select('node', 'n');
 //    $query->condition('type', 'hht_master');
