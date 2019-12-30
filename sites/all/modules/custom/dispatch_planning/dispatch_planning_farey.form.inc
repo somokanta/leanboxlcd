@@ -227,7 +227,7 @@ function _edit_trip_delivered_callback_form($form, &$form_state) {
         '#title' => t('Bill Number'),
         '#required' => TRUE,
         //'#options' => $options,
-        '#autocomplete_path' => "bills/autocomplete/$trip_no",
+        '#autocomplete_path' => "bills/autocomplete/$trip_number",
         '#ajax' => array(
           'wrapper' => 'itemlist-div',
           'callback' => 'trip_details_remove_callback',
