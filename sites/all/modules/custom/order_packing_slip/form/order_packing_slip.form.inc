@@ -76,7 +76,7 @@ function order_packing_slip_form($form, &$form_state){
      $from_bill_date = $form_state['values']['from_bill_date'];
      $to_bill_date = $form_state['values']['to_bill_date'];
     
-    $open_pdf_link = l('Open PDF', "/download-order-packing-data/$from_bill_date/$to_bill_date");
+    $open_pdf_link = l('Open PDF', "/download-order-packing-data/$from_bill_date/$to_bill_date" ,array('attributes'=>array("target" => "_blank")));
     $form['dowmload_mark'] = array(
       '#type' => 'markup',
       '#markup' => $open_pdf_link,
@@ -209,6 +209,7 @@ function download_order_packing_slip($from_bill_date,$to_bill_date){
     $main_title = '<table style ="margin-left:39%;"><tr><th><h1>Order Packing Slip</h1></th></tr></table>';
     $i = 1;
     $table = '';
+    $table.= $main_title;
     foreach($table_row_data as $key => $val){
       $header_data_arr = json_decode($val['header_data'], true);
       $row_data_arr = json_decode($val['row_data'], true);   
@@ -241,6 +242,7 @@ function download_order_packing_slip($from_bill_date,$to_bill_date){
       if(count($row_data_arr) !== $i){
         $table.'<pagebreak/>';
       }
+      $i++;
     }
     pdf_using_mpdf_api($table);
   }
