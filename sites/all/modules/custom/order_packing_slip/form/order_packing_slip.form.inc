@@ -134,11 +134,13 @@ function order_packing_slip_form_submit($form,&$form_state){
     }
     
     $unique_orders_arr = array_keys($order_numbers);
-    $query4 = db_select('order_packing_slip_api_data', 'opad');
-    $query4->fields('opad', array('order_no','party_name','box_id','seal_number','total_qty','header_data', 'row_data')); 
-    $query4->condition('opad.order_no', $unique_orders_arr, 'IN');  //$unique_crate_ids
-    $table_data = $query4->execute()->fetchAll(\PDO::FETCH_ASSOC);
-    //dpm($table_data, 'table_data: ');
+    $table_data = array();
+    if(!empty($unique_orders_arr)){
+      $query4 = db_select('order_packing_slip_api_data', 'opad');
+      $query4->fields('opad', array('order_no','party_name','box_id','seal_number','total_qty','header_data', 'row_data')); 
+      $query4->condition('opad.order_no', $unique_orders_arr, 'IN');  //$unique_crate_ids
+      $table_data = $query4->execute()->fetchAll(\PDO::FETCH_ASSOC);
+    }
     $form_state['values']['table_data'] = $table_data;
     $form_state['values']['order_numbers'] = $order_numbers;
     $form_state['values']['from_bill_date'] = $from_bill_date;
@@ -185,13 +187,14 @@ function download_order_packing_slip($from_bill_date,$to_bill_date){
         $order_numbers[$val['field_outlet_order_no_value']]['party_name'] = $val['field_party_name_value'];
       }
     }
-    
+    $table_data = array();
     $unique_orders_arr = array_keys($order_numbers);
-    $query4 = db_select('order_packing_slip_api_data', 'opad');
-    $query4->fields('opad', array('order_no','party_name','box_id','seal_number','total_qty','header_data', 'row_data')); 
-    $query4->condition('opad.order_no', $unique_orders_arr, 'IN');  //$unique_crate_ids
-    $table_data = $query4->execute()->fetchAll(\PDO::FETCH_ASSOC);
-    
+    if(!empty($unique_orders_arr)){
+      $query4 = db_select('order_packing_slip_api_data', 'opad');
+      $query4->fields('opad', array('order_no','party_name','box_id','seal_number','total_qty','header_data', 'row_data')); 
+      $query4->condition('opad.order_no', $unique_orders_arr, 'IN');  //$unique_crate_ids
+      $table_data = $query4->execute()->fetchAll(\PDO::FETCH_ASSOC);
+    }
     $table_row_data = $table_data;
     //dpm($table_row_data);
     $table_header_data = $order_numbers;
