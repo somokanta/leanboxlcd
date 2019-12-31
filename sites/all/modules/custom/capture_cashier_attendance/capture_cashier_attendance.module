@@ -196,7 +196,7 @@ function capture_cashier_attendance_views_query_alter(&$view, &$query) {
     }
     if (($view->name == 'cashier_attendance_api_log')) {
         if (!empty($distributor_facility_code)) {
-            //$query->add_where(0, 'cashier_attendance_api_log.facility_code', $distributor_facility_code, '=');
+            $query->add_where(0, 'cashier_attendance_api_log.facility_code', $distributor_facility_code, '=');
         }
     }
 }
