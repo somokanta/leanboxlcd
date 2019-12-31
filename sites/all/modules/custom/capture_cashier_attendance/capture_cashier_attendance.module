@@ -125,7 +125,7 @@ function get_uid_by_username($user_name) {
 }
 
 function insert_cashier_attendance_api_log($cashier_attendance_data, $facility_code) {
-     watchdog('cashier_data', '<pre>' . print_r($cashier_attendance_data, TRUE) . '</pre>');
+    watchdog('cashier_data', '<pre>' . print_r($cashier_attendance_data, TRUE) . '</pre>');
     if (!empty($facility_code)) {
         $sql_ins_id = db_insert('cashier_attendance_api_log')
           ->fields(array(
@@ -154,26 +154,49 @@ function capture_cashier_attendance_views_query_alter(&$view, &$query) {
     $distributor_facility_code = get_facility_code($distributor_id);
     if ($view->name == 'cashier_attendance') {
         foreach ($query->where[1]['conditions'] as $key => $val) {
-            watchdog('cashier_attendance_data', '<pre>' . print_r(array($key,$val), TRUE) . '</pre>');
+            watchdog('cashier_attendance_data', '<pre>' . print_r(array($key, $val), TRUE) . '</pre>');
             if ((strpos($val['field'], 'field_data_field_attendance_datetime.field_attendance_datetime_value') !== false) || (strpos($val['field'], 'field_data_field_attendance_datetime.field_attendance_datetime_value') !== false)) {
                 $data = str_replace('+ 19800', '', $val['field']);
                 $data = str_replace('%Y-%m-%d\T%H:%i:%s', '%Y-%m-%d', $data);
-                //$query->where[1]['conditions'][$key]['field'] = $data;
+                $query->where[1]['conditions'][$key]['field'] = $data;
             }
-            if ('field_data_field_hub_code.field_hub_code_value' == $distributor_facility_code)  {
+
+
+            if ('field_data_field_hub_code.field_hub_code_value' == $distributor_facility_code) {
                 $data = str_replace('+ 19800', '', $val['field']);
                 $data = str_replace('%Y-%m-%d\T%H:%i:%s', '%Y-%m-%d', $data);
-                //$query->where[1]['conditions'][$key]['field'] = $data;
+                $query->where[1]['conditions'][$key]['field'] = $data;
             }
         }
+        $join = new views_join();
+        $join->table = 'node';
+        $join->left_table = 'field_data_field_hub_code'; // or wathever table you want to join with
+        $join->field = 'nid';
+        $join->left_field = 'entity_id'; // or wathever column you want to join with
+        $join->type = 'INNER JOIN '; // if you want another join type play with this value
+        // Do the actual join
+        $query->table_queue['facility_code'] = array(
+          'alias' => 'facility_code_value', // I believe this is optional
+          'table' => 'node',
+          'join' => $join,
+        );
+        $query->where[] = array(
+          'conditions' => array(
+            array(
+              'field' => 'field_data_field_hub_code_value',
+              'value' => $language,
+              'operator' => '=',
+            ),
+          // add more conditions if you want to
+          ),
+          //'type' => 'OR' ,// I believe this is an operator for multiple conditions
+        );
     }
     if (($view->name == 'cashier_attendance_api_log')) {
         if (!empty($distributor_facility_code)) {
             $query->add_where(0, 'cashier_attendance_api_log.facility_code', $distributor_facility_code, '=');
         }
     }
-    
-    
 }
 
 function get_warehouse_lat_lang() {
