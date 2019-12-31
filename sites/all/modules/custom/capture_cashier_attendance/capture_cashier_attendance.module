@@ -173,11 +173,10 @@ function capture_cashier_attendance_views_query_alter(&$view, &$query) {
         $join->left_table = 'field_data_field_hub_code'; // or wathever table you want to join with
         $join->field = 'nid';
         $join->left_field = 'entity_id'; // or wathever column you want to join with
-        $join->type = 'INNER JOIN '; // if you want another join type play with this value
+        $join->type = 'INNER'; // if you want another join type play with this value
         // Do the actual join
         $query->table_queue['facility_code'] = array(
-          'alias' => 'facility_code_value', // I believe this is optional
-          'table' => 'node',
+         'table' => 'node',
           'join' => $join,
         );
         $query->where[] = array(
