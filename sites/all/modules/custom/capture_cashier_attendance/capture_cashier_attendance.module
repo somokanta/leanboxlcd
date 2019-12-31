@@ -152,6 +152,9 @@ function capture_cashier_attendance_views_query_alter(&$view, &$query) {
     // Store distributor id in author in each node
     $distributor_id = change_feeds_import_get_distributor_id($user->uid);
     $distributor_facility_code = get_facility_code($distributor_id);
+    if (!empty($distributor_facility_code)) {
+        $distributor_facility_code = strtolower($distributor_facility_code);
+    }
     if ($view->name == 'cashier_attendance') {
         foreach ($query->where[1]['conditions'] as $key => $val) {
             watchdog('cashier_attendance_data', '<pre>' . print_r(array($key, $val), TRUE) . '</pre>');
