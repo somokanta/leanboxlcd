@@ -99,3 +99,13 @@ function fetch_order_packing_slip_api_data($order_packing_slip_data){
   
   return $result;
 }
+
+/**
+ * Implements of hook_views_api().
+ */
+function order_packing_slip_views_api() {
+   return array(
+     'api' => 3,
+     'path' => drupal_get_path('module', 'order_packing_slip') . '/views'
+   );
+}
