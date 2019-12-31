@@ -1,6 +1,9 @@
 <?php
 
 function order_packing_slip_form($form, &$form_state){
+  $form = array();
+  $form['#prefix'] = '<div id="order-packing-slip-div">';
+  $form['#suffix'] = '</div>';
   global $user;
   $user_id = $user->uid;
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
@@ -23,7 +26,15 @@ function order_packing_slip_form($form, &$form_state){
   
   $form['save'] = array(
     '#type' => 'submit',
-    '#value' => 'Submit'
+    '#value' => 'Submit',
+    '#ajax' => array(
+        'callback' => 'order_packing_slip_ajax',
+          'wrapper' => 'order-packing-slip-div',
+          'method' => 'replace',
+          'effect' => 'fade',
+     ),
+    '#validate' => array('order_packing_slip_form_validate'),
+    '#submit' => array('order_packing_slip_form_submit'),
   );
   $table_header_data = $form_state['values']['order_numbers'];
   $table_row_data = $form_state['values']['table_data'];
@@ -64,7 +75,7 @@ function order_packing_slip_form($form, &$form_state){
         </tr> 
         </tbody>
         </table><br>';
-        $form[$key]['order_table_data'] = array(
+        $form['order_table_data'][$key] = array(
           '#prefix' => '<div>'.$main_header, //$main_title.
           '#theme' => 'table',
           '#header' => $header,
@@ -89,7 +100,9 @@ function order_packing_slip_form_validate($form,&$form_state){
   $from_bill_date = $form_state['values']['from_date'];
   $to_bill_date = $form_state['values']['to_date'];
   if(empty($from_bill_date) || empty($to_bill_date)){
-    form_error($form, "Please Select From and To date");
+    form_set_error('form', "Please Select From and To date");
+    unset($form_state['complete form']['order_table_data']);
+    unset($form_state['complete form']['dowmload_mark']);
   }
 }
 
@@ -269,3 +282,7 @@ function get_html_table($headers, $datas) {
   }
   return $table;
  }
+ 
+ function order_packing_slip_ajax($form, &$form_state) {
+   return $form;
+}
