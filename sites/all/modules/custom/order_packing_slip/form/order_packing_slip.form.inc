@@ -210,6 +210,10 @@ function download_order_packing_slip($from_bill_date,$to_bill_date){
     $i = 1;
     $table = '';
     $table.= $main_title;
+    dpm($table_row_data ,'table-row-data');
+    dpm(count($table_row_data,'table-row-data'));
+    dpm($table_header_data ,'table-header-data');
+    dpm(count($table_header_data,'table-header-data'));
     foreach($table_row_data as $key => $val){
       $header_data_arr = json_decode($val['header_data'], true);
       $row_data_arr = json_decode($val['row_data'], true);   
