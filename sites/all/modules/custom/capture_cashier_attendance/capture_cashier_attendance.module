@@ -189,7 +189,7 @@ function capture_cashier_attendance_views_query_alter(&$view, &$query) {
           'conditions' => array(
             array(
               'field' => 'field_data_field_hub_code.field_hub_code_value',
-              'value' => $todays_start_time,
+              'value' => $distributor_facility_code,
               'operator' => '=',
             ),
           ),
