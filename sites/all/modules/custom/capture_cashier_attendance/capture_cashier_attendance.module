@@ -169,14 +169,14 @@ function capture_cashier_attendance_views_query_alter(&$view, &$query) {
             }
         }
         $join = new views_join();
-        $join->table = 'node';
-        $join->left_table = 'field_data_field_hub_code'; // or wathever table you want to join with
-        $join->field = 'nid';
-        $join->left_field = 'entity_id'; // or wathever column you want to join with
+        $join->table = 'field_data_field_hub_code';
+        $join->left_table = 'node'; // or wathever table you want to join with
+        $join->field = 'entity_id';
+        $join->left_field = 'nid'; // or wathever column you want to join with
         $join->type = 'INNER'; // if you want another join type play with this value
         // Do the actual join
         $query->table_queue['facility_code'] = array(
-         'table' => 'node',
+         'table' => 'field_data_field_hub_code',
           'join' => $join,
         );
         $query->where[] = array(
