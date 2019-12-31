@@ -158,12 +158,12 @@ function capture_cashier_attendance_views_query_alter(&$view, &$query) {
             if ((strpos($val['field'], 'field_data_field_attendance_datetime.field_attendance_datetime_value') !== false) || (strpos($val['field'], 'field_data_field_attendance_datetime.field_attendance_datetime_value') !== false)) {
                 $data = str_replace('+ 19800', '', $val['field']);
                 $data = str_replace('%Y-%m-%d\T%H:%i:%s', '%Y-%m-%d', $data);
-                $query->where[1]['conditions'][$key]['field'] = $data;
+                //$query->where[1]['conditions'][$key]['field'] = $data;
             }
             if ('field_data_field_hub_code.field_hub_code_value' == $distributor_facility_code)  {
                 $data = str_replace('+ 19800', '', $val['field']);
                 $data = str_replace('%Y-%m-%d\T%H:%i:%s', '%Y-%m-%d', $data);
-                $query->where[1]['conditions'][$key]['field'] = $data;
+                //$query->where[1]['conditions'][$key]['field'] = $data;
             }
         }
     }
