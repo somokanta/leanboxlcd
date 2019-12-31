@@ -168,28 +168,34 @@ function capture_cashier_attendance_views_query_alter(&$view, &$query) {
                 $query->where[1]['conditions'][$key]['field'] = $data;
             }
         }
+        
         $join = new views_join();
         $join->table = 'field_data_field_hub_code';
-        $join->left_table = 'node'; // or wathever table you want to join with
         $join->field = 'entity_id';
-        $join->left_field = 'nid'; // or wathever column you want to join with
-        $join->type = 'INNER'; // if you want another join type play with this value
-        // Do the actual join
-        $query->table_queue['facility_code'] = array(
-         'table' => 'field_data_field_hub_code',
+        $join->left_table = 'node';
+        $join->left_field = 'nid';
+        $join->type = 'INNER';
+
+        // Append to current query.
+        $query->table_queue['field_data_field_hub_code__node'] = array(
+          'table' => 'field_data_field_hub_code',
+          'alias' => 'field_data_field_hub_code',
+         // 'relationship' => 'commerce_order',
           'join' => $join,
         );
+
+        // Add extra where conditions.
         $query->where[] = array(
           'conditions' => array(
             array(
-              'field' => 'field_data_field_hub_code_value',
-              'value' => $language,
+              'field' => 'field_data_field_hub_code.field_hub_code_value',
+              'value' => $todays_start_time,
               'operator' => '=',
             ),
-          // add more conditions if you want to
           ),
-          //'type' => 'OR' ,// I believe this is an operator for multiple conditions
+          'type' => 'AND',
         );
+       
     }
     if (($view->name == 'cashier_attendance_api_log')) {
         if (!empty($distributor_facility_code)) {
