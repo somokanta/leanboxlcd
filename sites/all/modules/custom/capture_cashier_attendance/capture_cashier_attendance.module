@@ -43,7 +43,7 @@ function capture_cashier_attendance_services_resources() {
 }
 
 function fetch_cashier_attendance_api_data($cashier_attendance_data) {
-    watchdog('cashier_attendance_data', '<pre>' . print_r($cashier_attendance_data, TRUE) . '</pre>');
+    watchdog('cashier_attendance_data_api', '<pre>' . print_r($cashier_attendance_data, TRUE) . '</pre>');
     if (!empty($cashier_attendance_data)) {
         foreach ($cashier_attendance_data['attendance'] as $key => $value) {
             $facility_code = $value['hub_code'];
@@ -157,19 +157,13 @@ function capture_cashier_attendance_views_query_alter(&$view, &$query) {
     }
     if ($view->name == 'cashier_attendance') {
         foreach ($query->where[1]['conditions'] as $key => $val) {
-            watchdog('cashier_attendance_data', '<pre>' . print_r(array($key, $val), TRUE) . '</pre>');
+           // watchdog('cashier_attendance_data', '<pre>' . print_r(array($key, $val), TRUE) . '</pre>');
             if ((strpos($val['field'], 'field_data_field_attendance_datetime.field_attendance_datetime_value') !== false) || (strpos($val['field'], 'field_data_field_attendance_datetime.field_attendance_datetime_value') !== false)) {
                 $data = str_replace('+ 19800', '', $val['field']);
                 $data = str_replace('%Y-%m-%d\T%H:%i:%s', '%Y-%m-%d', $data);
                 $query->where[1]['conditions'][$key]['field'] = $data;
             }
-
-
-            if ('field_data_field_hub_code.field_hub_code_value' == $distributor_facility_code) {
-                $data = str_replace('+ 19800', '', $val['field']);
-                $data = str_replace('%Y-%m-%d\T%H:%i:%s', '%Y-%m-%d', $data);
-                $query->where[1]['conditions'][$key]['field'] = $data;
-            }
+         
         }
         
         $join = new views_join();
