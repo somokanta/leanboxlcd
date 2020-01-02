@@ -2949,6 +2949,8 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
             }
         }
     }
+    
+    
 
     if (($view->base_table == 'node') && ($view->name == 'payment_terms_view')) {
         foreach ($query->where[1]['conditions'] as $key => $val) {
@@ -2983,6 +2985,9 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
     global $user;
     // Store distributor id in author in each node
     $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+
+    
+
     // Do the actual join
     // This function returns distributor_ids based on  super central,central,child distributor role
     $distributor_ids = get_distributor_ids();
@@ -3096,11 +3101,11 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
           'value' => $distributor_id,
           'operator' => '=',
           ); */
-        $query->where[0]['conditions'][] = array(
+       /* $query->where[0]['conditions'][] = array(
             'field' => 'field_data_field_petty_cash_distributor.field_petty_cash_distributor_uid',
             'value' => $distributor_ids,
             'operator' => 'IN',
-        );
+        );*/
     }
 
     /* if ($view->base_table == 'petty_cash') {
