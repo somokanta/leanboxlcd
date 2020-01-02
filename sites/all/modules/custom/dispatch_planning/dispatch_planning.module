@@ -3898,6 +3898,7 @@ function _get_bill_row_id_manual_using_reference_no($ref_no) {
  * @param type $trip_id
  */
 function _get_all_tripsbill($trip_id, $string = '') {
+  watchdog('cron1', '<pre>' . print_r(array($trip_id,$string), TRUE) . '</pre>');
   $result = array();
   $dis_id = get_distributorid_of_trip($trip_id);
 

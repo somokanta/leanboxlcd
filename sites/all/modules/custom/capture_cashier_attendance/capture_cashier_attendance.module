@@ -2,180 +2,216 @@
 
 use TYPO3\PharStreamWrapper\Exception;
 
-
 /**
  * Implements of hook_views_api().
  */
 function capture_cashier_attendance_views_api() {
-  return array(
-    'api' => 3,
-    'path' => drupal_get_path('module', 'capture_cashier_attendance') . '/views'
-  );
+    return array(
+      'api' => 3,
+      'path' => drupal_get_path('module', 'capture_cashier_attendance') . '/views'
+    );
 }
 
-function capture_cashier_attendance_services_resources(){
-  //$cashier_resource = array();
-  $cashier_resource = array(
-    '#api_version' => 3002,
-  );
+function capture_cashier_attendance_services_resources() {
+    //$cashier_resource = array();
+    $cashier_resource = array(
+      '#api_version' => 3002,
+    );
 
-  $cashier_resource = [
-    'cashier-api-data' => [
-      'actions' => [
-        'capture-cashier-attendance' => [
-          'help' => 'Retrieves Cashier Attendance Data',
-          'callback' => 'fetch_cashier_attendance_api_data',
-          'args' => array(
+    $cashier_resource = [
+      'cashier-api-data' => [
+        'actions' => [
+          'capture-cashier-attendance' => [
+            'help' => 'Retrieves Cashier Attendance Data',
+            'callback' => 'fetch_cashier_attendance_api_data',
+            'args' => array(
+              array(
+                'name' => 'data',
+                'type' => 'array',
+                'description' => 'Post data',
+                'source' => 'data',
+                'optional' => TRUE,
+              ),
+            ),
+            'access arguments' => array('services_access_farey_api'),
+          ]
+        ]
+      ],
+    ];
+
+    return $cashier_resource;
+}
+
+function fetch_cashier_attendance_api_data($cashier_attendance_data) {
+    watchdog('cashier_attendance_data', '<pre>' . print_r($cashier_attendance_data, TRUE) . '</pre>');
+    if (!empty($cashier_attendance_data)) {
+        //global $user;
+        //$distributor_id = change_feeds_import_get_distributor_id($user->uid);
+        foreach ($cashier_attendance_data['attendance'] as $key => $value) {
+            $facility_code = $value['hub_code'];
+        }
+        $lat_long = get_warehouse_lat_lang();
+        $sql_ins_id = insert_cashier_attendance_api_log($cashier_attendance_data, $facility_code);
+        $cashier_count_from_api = count($cashier_attendance_data['attendance']);
+        foreach ($cashier_attendance_data['attendance'] as $key => $value) {
+            $jobtype = $value['jobtype'];
+            $hub_code = $value['hub_code']; // sending facility code here
+            $merchant_code = $value['merchant_code'];
+            $employee_code = $value['employee_code'];
+            $attendance_lat = $value['attendance_lat'];
+            $attendance_lon = $value['attendance_lon'];
+            $facility_code = $hub_code;
+            $facility_code_in_lower = strtolower($hub_code);
+            // warehouse latitude and longitude.
+            $lat = $lat_long[$facility_code_in_lower]['lat'];
+            $lng = $lat_long[$facility_code_in_lower]['lng'];
+            if (!empty($attendance_lat) && !empty($attendance_lon) && !empty($lat) && !empty($lng)) {
+                $distance_from_warehouse_in_km = haversineGreatCircleDistance($lat, $lng, $attendance_lat, $attendance_lon);
+            }
+            $attendance_datetime = $value['attendance_datetime'];
+            $integration_datetime = $value['integration_datetime'];
+
+            $node_obj = new stdClass();
+            $node_obj->title = $employee_code;
+            $node_obj->type = "capture_attendence";
+            node_object_prepare($node_obj); // Sets some sdefaults. Invokes hook_prepare() and hook_node_prepare().
+            $node_obj->language = LANGUAGE_NONE; // Or e.g. 'en' if locale is enabled
+            $node_obj->uid = 0; //$distributor_id;
+            $node_obj->status = 1; //(1 or 0): published or not
+
+            $node_obj->field_job_type[$node_obj->language][0]['value'] = isset($jobtype) ? $jobtype : '';
+            $node_obj->field_hub_code[$node_obj->language][0]['value'] = isset($hub_code) ? $hub_code : '';
+            $node_obj->field_merchant_code[$node_obj->language][0]['value'] = isset($merchant_code) ? $merchant_code : '';
+            $node_obj->field_cashier_employee_code[$node_obj->language][0]['value'] = isset($employee_code) ? $employee_code : '';
+            $node_obj->field_attendance_lat[$node_obj->language][0]['value'] = isset($attendance_lat) ? $attendance_lat : '';
+            $node_obj->field_attendance_long[$node_obj->language][0]['value'] = isset($attendance_lon) ? $attendance_lon : '';
+            $node_obj->field_attendance_datetime[$node_obj->language][0]['value'] = isset($attendance_datetime) ? strtotime($attendance_datetime) : ''; //"2019-10-15 10:12:01"
+            $node_obj->field_integration_datetime[$node_obj->language][0]['value'] = isset($integration_datetime) ? strtotime($integration_datetime) : ''; //"2019-10-15 10:12:01"
+            $node_obj->field_distance_from_warehouse[$node_obj->language][0]['value'] = isset($distance_from_warehouse_in_km) ? $distance_from_warehouse_in_km : '';
+            //$node_obj->field_facility_code_name[$node_obj->language][0]['value'] = $facility_code;
+
+            try {
+                $node_obj = node_submit($node_obj); // Prepare node for saving
+                $new_cashier_created_nid[] = $node_obj->nid;
+                node_save($node_obj);
+            }
+            catch (Exception $e) {
+                watchdog('cashier_attendance_data_exception', '<pre>' . print_r($e->getMessage(), TRUE) . '</pre>');
+            }
+        } // end of foreach()
+
+        if (!empty($new_cashier_created_nid)) {
+            watchdog('new_cashier_created_nid', '<pre>' . print_r($new_cashier_created_nid, TRUE) . '</pre>');
+            //$result['new_cashier_created'] = $new_cashier_created_nid;
+            $result['flag'] = '1';
+            $result['result'] = 'Data updated Sucessfully.';
+        }
+    }
+    else {
+        $result['flag'] = '0';
+        $result['result'] = 'No data was updated.';
+    }
+    update_cashier_attendance_api_log($sql_ins_id, $result['flag']);
+    return $result;
+}
+
+function get_uid_by_username($user_name) {
+    $res = array();
+    if (!empty($user_name)) {
+        $query = db_select('users', 'u');
+        $query->condition('u.name', $user_name);
+        $query->fields('u', array('uid'));
+        $res = $query->execute()->fetchField();
+    }
+    return $res;
+}
+
+function insert_cashier_attendance_api_log($cashier_attendance_data, $facility_code) {
+    $sql_ins_id = db_insert('cashier_attendance_api_log')
+      ->fields(array(
+        'received_data' => json_encode($cashier_attendance_data),
+        'request_time' => time(),
+        'facility_code' => $facility_code
+      ))
+      ->execute();
+    return $sql_ins_id;
+}
+
+function update_cashier_attendance_api_log($sql_ins_id, $response_flag) {
+    db_update('cashier_attendance_api_log')
+      ->fields(array(
+        'response_flag' => $response_flag,
+      ))
+      ->condition('id', $sql_ins_id, '=')
+      ->execute();
+}
+
+function capture_cashier_attendance_views_query_alter(&$view, &$query) {
+    global $user;
+    // Store distributor id in author in each node
+    $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+    $distributor_facility_code = get_facility_code($distributor_id);
+    if ($view->name == 'cashier_attendance') {
+        foreach ($query->where[1]['conditions'] as $key => $val) {
+           if ((strpos($val['field'], 'field_data_field_attendance_datetime.field_attendance_datetime_value') !== false) || (strpos($val['field'], 'field_data_field_attendance_datetime.field_attendance_datetime_value') !== false)) {
+                $data = str_replace('+ 19800', '', $val['field']);
+                $data = str_replace('%Y-%m-%d\T%H:%i:%s', '%Y-%m-%d', $data);
+                $query->where[1]['conditions'][$key]['field'] = $data;
+            }
+        }
+        $join = new views_join();
+        $join->table = 'field_data_field_hub_code';
+        $join->field = 'entity_id';
+        $join->left_table = 'node';
+        $join->left_field = 'nid';
+        $join->type = 'INNER';
+
+        // Append to current query.
+        $query->table_queue['field_data_field_hub_code__node'] = array(
+          'table' => 'field_data_field_hub_code',
+          'alias' => 'field_data_field_hub_code',
+          // 'relationship' => 'commerce_order',
+          'join' => $join,
+        );
+
+        // Add extra where conditions.
+        $query->where[] = array(
+          'conditions' => array(
             array(
-              'name' => 'data',
-              'type' => 'array',
-              'description' => 'Post data',
-              'source' => 'data',
-              'optional' => TRUE,
+              'field' => 'field_data_field_hub_code.field_hub_code_value',
+              'value' => $distributor_facility_code,
+              'operator' => '=',
             ),
           ),
-          'access arguments' => array('services_access_farey_api'),
-        ]
-      ]
-    ],
-  ];
-
-  return $cashier_resource;
-}
-
-
-function fetch_cashier_attendance_api_data($cashier_attendance_data){
-  watchdog('cashier_attendance_data', '<pre>' . print_r($cashier_attendance_data, TRUE) . '</pre>');
-  if (!empty($cashier_attendance_data)) {
-    //global $user;
-    //$distributor_id = change_feeds_import_get_distributor_id($user->uid);
-    $lat_long = get_warehouse_lat_lang();
-    $sql_ins_id = insert_cashier_attendance_api_log($cashier_attendance_data);
-    $cashier_count_from_api = count($cashier_attendance_data['attendance']);
-    foreach($cashier_attendance_data['attendance'] as $key => $value){
-      $jobtype = $value['jobtype'];
-      $hub_code = $value['hub_code']; // sending facility code here
-      $merchant_code = $value['merchant_code'];
-      $employee_code = $value['employee_code'];
-      $attendance_lat = $value['attendance_lat'];
-      $attendance_lon = $value['attendance_lon'];
-      $facility_code = $hub_code;
-      $facility_code_in_lower = strtolower($hub_code);
-      // warehouse latitude and longitude.
-      $lat = $lat_long[$facility_code_in_lower]['lat'];
-      $lng = $lat_long[$facility_code_in_lower]['lng'];
-      if(!empty($attendance_lat) && !empty($attendance_lon) && !empty($lat) && !empty($lng)){
-        $distance_from_warehouse_in_km = haversineGreatCircleDistance($lat, $lng, $attendance_lat, $attendance_lon);
-      }
-      $attendance_datetime = $value['attendance_datetime'];
-      $integration_datetime = $value['integration_datetime'];
-
-      $node_obj = new stdClass();
-      $node_obj->title = $employee_code;
-      $node_obj->type = "capture_attendence";
-      node_object_prepare($node_obj); // Sets some sdefaults. Invokes hook_prepare() and hook_node_prepare().
-      $node_obj->language = LANGUAGE_NONE; // Or e.g. 'en' if locale is enabled
-      $node_obj->uid = 0; //$distributor_id;
-      $node_obj->status = 1; //(1 or 0): published or not
-  
-      $node_obj->field_job_type[$node_obj->language][0]['value'] = isset($jobtype) ? $jobtype : '';
-      $node_obj->field_hub_code[$node_obj->language][0]['value'] = isset($hub_code) ? $hub_code : '';
-      $node_obj->field_merchant_code[$node_obj->language][0]['value'] = isset($merchant_code) ? $merchant_code : '';
-      $node_obj->field_cashier_employee_code[$node_obj->language][0]['value'] = isset($employee_code) ? $employee_code : '';
-      $node_obj->field_attendance_lat[$node_obj->language][0]['value'] = isset($attendance_lat) ? $attendance_lat : '';
-      $node_obj->field_attendance_long[$node_obj->language][0]['value'] = isset($attendance_lon) ? $attendance_lon : '';
-      $node_obj->field_attendance_datetime[$node_obj->language][0]['value'] = isset($attendance_datetime) ? strtotime($attendance_datetime) : ''; //"2019-10-15 10:12:01"
-      $node_obj->field_integration_datetime[$node_obj->language][0]['value'] = isset($integration_datetime) ? strtotime($integration_datetime) : ''; //"2019-10-15 10:12:01"
-      $node_obj->field_distance_from_warehouse[$node_obj->language][0]['value'] = isset($distance_from_warehouse_in_km) ? $distance_from_warehouse_in_km : ''; 
-      //$node_obj->field_facility_code_name[$node_obj->language][0]['value'] = $facility_code;
-      
-      try{
-        $node_obj = node_submit($node_obj); // Prepare node for saving
-        $new_cashier_created_nid[] = $node_obj->nid;
-        node_save($node_obj);
-      }
-      catch(Exception $e){
-        watchdog('cashier_attendance_data_exception', '<pre>' . print_r($e->getMessage(), TRUE) . '</pre>');
-      }
-    } // end of foreach()
-
-    if(!empty($new_cashier_created_nid)){
-      watchdog('new_cashier_created_nid', '<pre>' . print_r($new_cashier_created_nid, TRUE) . '</pre>');
-      //$result['new_cashier_created'] = $new_cashier_created_nid;
-      $result['flag'] = '1';
-      $result['result'] = 'Data updated Sucessfully.';
-     
+          'type' => 'AND',
+        );
     }
-  }
-  else {
-    $result['flag'] = '0';
-    $result['result'] = 'No data was updated.';
-  }
-  update_cashier_attendance_api_log($sql_ins_id, $result['flag']);
-  return $result;
-}
-
-function get_uid_by_username($user_name){
-  $res = array();
-  if(!empty($user_name)){
-    $query = db_select('users', 'u');
-    $query->condition('u.name', $user_name);
-    $query->fields('u', array('uid'));
-    $res = $query->execute()->fetchField();
-  }
-  return $res;
-}
-
-function insert_cashier_attendance_api_log($cashier_attendance_data){
-  $sql_ins_id = db_insert('cashier_attendance_api_log')
-    ->fields(array(
-      'received_data' => json_encode($cashier_attendance_data),
-      'request_time' => time()
-    ))
-    ->execute();
-  return $sql_ins_id;
-}
-
-function update_cashier_attendance_api_log($sql_ins_id, $response_flag){
-  db_update('cashier_attendance_api_log')
-  ->fields(array(
-    'response_flag' => $response_flag,
-  ))
-  ->condition('id', $sql_ins_id, '=')
-  ->execute();
-}
-
-function capture_cashier_attendance_views_query_alter(&$view, &$query){
-  if ($view->name == 'cashier_attendance') {
-    foreach ($query->where[1]['conditions'] as $key => $val) {
-      if ((strpos($val['field'], 'field_data_field_attendance_datetime.field_attendance_datetime_value') !== false) || (strpos($val['field'], 'field_data_field_attendance_datetime.field_attendance_datetime_value') !== false)) {
-        $data = str_replace('+ 19800', '', $val['field']);
-        $data = str_replace('%Y-%m-%d\T%H:%i:%s', '%Y-%m-%d', $data);
-        $query->where[1]['conditions'][$key]['field'] = $data;
-      }
+    if (($view->name == 'cashier_attendance_api_log')) {
+        $distributor_facility_code = get_facility_code($distributor_id);
+        if (!empty($distributor_facility_code)) {
+            $query->add_where(0, 'cashier_attendance_api_log.facility_code', $distributor_facility_code, '=');
+        }
     }
-  }
 }
 
-function get_warehouse_lat_lang(){
+function get_warehouse_lat_lang() {
     $res = $result = array();
     $query = db_select('node', 'van');
-     $query->condition('van.type', 'van_stop_master');
-     //$query->condition('van.title', $distributor_id);
-     $query->join('field_data_field_distributor_latitude', 'lat','lat.entity_id = van.nid');
-     $query->join('field_data_field_distributor_longitude', 'lng','lng.entity_id = van.nid');
-     $query->fields('lat', array('field_distributor_latitude_value'));
-     $query->fields('lng', array('field_distributor_longitude_value'));
-     $query->fields('facility_code', array('field_vanstop_facility_code_value'));
-     $query->join('field_data_field_vanstop_facility_code', 'facility_code','facility_code.entity_id = van.nid');
-     //$query->condition('facility_code.field_vanstop_facility_code_value', 'van_stop_master');
-     //$query->groupBy('facility_code.field_vanstop_facility_code_value');
-     $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);   
-     if (!empty($res)) {
-         foreach($res as $key=>$value){
-             $facility_code = strtolower($value['field_vanstop_facility_code_value']);
-             $result[$facility_code] = array('lat'=>$value['field_distributor_latitude_value'],'lng'=>$value['field_distributor_longitude_value']);
-         }
-     }
+    $query->condition('van.type', 'van_stop_master');
+    //$query->condition('van.title', $distributor_id);
+    $query->join('field_data_field_distributor_latitude', 'lat', 'lat.entity_id = van.nid');
+    $query->join('field_data_field_distributor_longitude', 'lng', 'lng.entity_id = van.nid');
+    $query->fields('lat', array('field_distributor_latitude_value'));
+    $query->fields('lng', array('field_distributor_longitude_value'));
+    $query->join('field_data_field_vanstop_facility_code', 'facility_code', 'facility_code.entity_id = van.nid');
+    $query->join('taxonomy_term_data', 'term_data', 'term_data.tid = facility_code.field_vanstop_facility_code_tid');
+    $query->fields('term_data', array('name'));
+    $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+    if (!empty($res)) {
+        foreach ($res as $key => $value) {
+            $facility_code = strtolower($value['name']);
+            $result[$facility_code] = array('lat' => $value['field_distributor_latitude_value'], 'lng' => $value['field_distributor_longitude_value']);
+        }
+    }
     return $result;
 }

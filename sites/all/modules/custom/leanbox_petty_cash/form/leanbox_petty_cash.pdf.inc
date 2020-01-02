@@ -40,7 +40,8 @@ function _petty_cash_pdf_details_form($form, &$form_state) {
 
    if (isset($form_state['values']['voucher']) && !empty($form_state['values']['voucher'])) {
       $voucher = $form_state['values']['voucher'];
-      $html = _leanbox_petty_cash_pdf_details($voucher, $distributor_id);
+      $distributor_ids = get_distributor_ids();
+      $html = _leanbox_petty_cash_pdf_details($voucher, $distributor_ids);
       if (!empty($html)) {
          $form['voucher_details'] = array(
            '#markup' => $html,
@@ -70,15 +71,14 @@ function _petty_cash_pdf_generate_form($voucher_arg) {
    $html = '';
    if (!empty($voucher_arg)) {
       // get logged in users distributor id
-      $user_id = $GLOBALS['user']->uid;
-      $distributor_id = change_feeds_import_get_distributor_id($user_id);
+       $distributor_ids = get_distributor_ids();
       // fetch data from cache if available
       //$data = cache_get($distributor_id . $voucher_arg . '_petty_cash');
       //if (!empty($data)) {
       //  $html = $data->data;
       //}
       // else {
-      $html = _leanbox_petty_cash_pdf_details($voucher_arg, $distributor_id);
+      $html = _leanbox_petty_cash_pdf_details($voucher_arg, $distributor_ids);
       //}
       // return pdf by rendering html
       pdf_using_mpdf_api($html);

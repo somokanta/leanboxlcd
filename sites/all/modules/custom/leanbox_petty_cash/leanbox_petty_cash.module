@@ -155,15 +155,16 @@ function _get_latest_balance($distributor_id) {
  */
 function get_list_of_voucher_details($string = '') {
    $res = array();
-   $user_id = $GLOBALS['user']->uid;
-   $distributor_id = change_feeds_import_get_distributor_id($user_id);
+   //$user_id = $GLOBALS['user']->uid;
+   //$distributor_id = change_feeds_import_get_distributor_id($user_id);
+   $distributor_ids = get_distributor_ids();
    $length = strlen($string);
    if ($length > 2) {
-      if (!empty($distributor_id) && !empty($string)) {
+      if (!empty($distributor_ids) && !empty($string)) {
          $query = db_select('petty_cash', 'pc');
          $query->isNull('pc.voucher_reference_no');
          $query->isNull('pc.deleted');
-         $query->condition('pc.distributor_id', $distributor_id);
+         $query->condition('pc.distributor_id', $distributor_ids,'IN');
          $query->condition('pc.voucher_no', db_like($string) . '%', 'LIKE');
          $query->fields('pc', array('voucher_no'));
          $query->range(0, 10);
@@ -173,29 +174,28 @@ function get_list_of_voucher_details($string = '') {
    drupal_json_output($res);
 }
 
-function _update_unique_coupon($distributor_id) {
+function _update_unique_coupon($distributor_id,$facility_code) {
    $coupon_id = 0;
    if (!empty($distributor_id)) {
       $txn = db_transaction();
-
       $query = db_select('petty_cash_sequence_table', 'ts');
       $query->forUpdate();
       $query->addField('ts', 'next_id');
-      $query->condition('ts.distributor_id', $distributor_id);
+      $query->condition('ts.facility_code', $facility_code);
       $coupon_id = $query->execute()->fetchField();
 
       if ($coupon_id) {
 // Increment the next_value.
          db_update('petty_cash_sequence_table')
              ->fields(array('next_id' => $coupon_id + 1))
-             ->condition('distributor_id', $distributor_id)
+             ->condition('facility_code', $facility_code)
              ->execute();
       }
       else {
          $coupon_id = 1;
          $insert = db_insert('petty_cash_sequence_table')
              ->fields(array(
-           'distributor_id' => $distributor_id,
+           'facility_code' => $facility_code,
            'next_id' => $coupon_id + 1
          ));
          $insert->execute();
@@ -209,13 +209,13 @@ function _update_unique_coupon($distributor_id) {
  * @param type $distributor_id
  * @param type $voucher
  */
-function _get_voucher_details_distributor_wise($distributor_id, $voucher) {
+function _get_voucher_details_distributor_wise($distributor_ids, $voucher) {
    $output = array();
-   if (!empty($distributor_id) && !empty($voucher)) {
+   if (!empty($distributor_ids) && !empty($voucher)) {
       $query = db_select('petty_cash', 'pc');
       $query->isNull('pc.voucher_reference_no');
       $query->isNull('pc.deleted');
-      $query->condition('pc.distributor_id', $distributor_id);
+      $query->condition('pc.distributor_id', $distributor_ids,'IN');
       $query->condition('pc.voucher_no', $voucher);
       $query->fields('pc', array('id', 'voucher_date', 'head', 'subhead', 'amount', 'person_name', 'bill_available', 'bill_no', 'type', 'description'));
       $query->leftjoin('file_managed', 'fm', 'fm.fid = pc.file');
@@ -263,13 +263,13 @@ function leanbox_petty_cash_views_api() {
    );
 }
 
-function _leanbox_petty_cash_pdf_details($voucher, $distributor_id) {
+function _leanbox_petty_cash_pdf_details($voucher, $distributor_ids) {
    $html = '';
-   if (!empty($voucher) && !empty($distributor_id)) {
+   if (!empty($voucher) && !empty($distributor_ids)) {
       $query = db_select('petty_cash', 'pc');
       $query->isNull('pc.voucher_reference_no');
       $query->isNull('pc.deleted');
-      $query->condition('pc.distributor_id', $distributor_id);
+      $query->condition('pc.distributor_id', $distributor_ids,'IN');
       $query->condition('pc.voucher_no', $voucher);
       $query->fields('pc', array('head'));
       $head = $query->execute()->fetchField();
@@ -300,10 +300,10 @@ function leanbox_petty_cash_preprocess_leanbox_petty_cash_pdf(&$variables) {
    $voucher = $variables['voucher'];
    $distributor_id = $variables['distributor_id'];
    $head = trim(strtolower($variables['head']));
-
+   $distributor_ids = get_distributor_ids();
    $query = db_select('petty_cash', 'pc');
    $query->isNull('pc.voucher_reference_no');
-   $query->condition('pc.distributor_id', $distributor_id);
+   $query->condition('pc.distributor_id', $distributor_ids,'IN');
    $query->condition('pc.voucher_no', $voucher);
    if ($head == S_ADVANCE || $head == E_ADVANCE) {
       $query->fields('pc', array('voucher_no', 'voucher_date', 'head', 'subhead', 'amount', 'person_name', 'type', 'description'));
@@ -445,11 +445,11 @@ function leanbox_petty_cash_form_views_exposed_form_alter(&$form, &$form_state) 
 }
 
 function get_pettycash_type() {
-  $user_id = $GLOBALS['user']->uid;
-  $distributor_id = change_feeds_import_get_distributor_id($user_id);
+  //$user_id = $GLOBALS['user']->uid;
+ // $distributor_id = change_feeds_import_get_distributor_id($user_id);
   $query = db_select('field_data_field_petty_cash_type', 'ct');
   $query->join('field_data_field_petty_cash_distributor', 'd', 'd.entity_id = ct.entity_id');
-  $query->condition('d.field_petty_cash_distributor_uid', $distributor_id);
+ // $query->condition('d.field_petty_cash_distributor_uid', $distributor_id);
   $query->fields('ct', array('field_petty_cash_type_value'));
   $res = $query->execute()->fetchAllKeyed(0,0);
   return $res;
@@ -457,20 +457,20 @@ function get_pettycash_type() {
 
 function get_pettycash_head() {
   $user_id = $GLOBALS['user']->uid;
-  $distributor_id = change_feeds_import_get_distributor_id($user_id);
+  //$distributor_id = change_feeds_import_get_distributor_id($user_id);
   $query = db_select('field_data_field_petty_cash_head', 'ch');
   $query->join('field_data_field_petty_cash_distributor', 'd', 'd.entity_id = ch.entity_id');
-  $query->condition('d.field_petty_cash_distributor_uid', $distributor_id);
+ // $query->condition('d.field_petty_cash_distributor_uid', $distributor_id);
   $query->fields('ch', array('field_petty_cash_head_value'));
   $res = $query->execute()->fetchAllKeyed(0,0);
   return $res;
 }
 function get_pettycash_subhead() {
-  $user_id = $GLOBALS['user']->uid;
-  $distributor_id = change_feeds_import_get_distributor_id($user_id);
+  //$user_id = $GLOBALS['user']->uid;
+  //$distributor_id = change_feeds_import_get_distributor_id($user_id);
   $query = db_select('field_data_field_petty_cash_subhead', 'cs');
   $query->join('field_data_field_petty_cash_distributor', 'd', 'd.entity_id = cs.entity_id');
-  $query->condition('d.field_petty_cash_distributor_uid', $distributor_id);
+ // $query->condition('d.field_petty_cash_distributor_uid', $distributor_id);
   $query->fields('cs', array('field_petty_cash_subhead_value'));
   $res = $query->execute()->fetchAllKeyed(0,0);
   return $res;
