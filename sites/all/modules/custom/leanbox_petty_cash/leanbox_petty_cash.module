@@ -448,7 +448,7 @@ function get_pettycash_type() {
   //$user_id = $GLOBALS['user']->uid;
  // $distributor_id = change_feeds_import_get_distributor_id($user_id);
   $query = db_select('field_data_field_petty_cash_type', 'ct');
-  $query->join('field_data_field_petty_cash_distributor', 'd', 'd.entity_id = ct.entity_id');
+  //$query->join('field_data_field_petty_cash_distributor', 'd', 'd.entity_id = ct.entity_id');
  // $query->condition('d.field_petty_cash_distributor_uid', $distributor_id);
   $query->fields('ct', array('field_petty_cash_type_value'));
   $res = $query->execute()->fetchAllKeyed(0,0);
