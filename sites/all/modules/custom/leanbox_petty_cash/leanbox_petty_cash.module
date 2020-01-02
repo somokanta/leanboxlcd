@@ -459,7 +459,7 @@ function get_pettycash_head() {
   $user_id = $GLOBALS['user']->uid;
   //$distributor_id = change_feeds_import_get_distributor_id($user_id);
   $query = db_select('field_data_field_petty_cash_head', 'ch');
-  $query->join('field_data_field_petty_cash_distributor', 'd', 'd.entity_id = ch.entity_id');
+ // $query->join('field_data_field_petty_cash_distributor', 'd', 'd.entity_id = ch.entity_id');
  // $query->condition('d.field_petty_cash_distributor_uid', $distributor_id);
   $query->fields('ch', array('field_petty_cash_head_value'));
   $res = $query->execute()->fetchAllKeyed(0,0);
@@ -469,7 +469,7 @@ function get_pettycash_subhead() {
   //$user_id = $GLOBALS['user']->uid;
   //$distributor_id = change_feeds_import_get_distributor_id($user_id);
   $query = db_select('field_data_field_petty_cash_subhead', 'cs');
-  $query->join('field_data_field_petty_cash_distributor', 'd', 'd.entity_id = cs.entity_id');
+ // $query->join('field_data_field_petty_cash_distributor', 'd', 'd.entity_id = cs.entity_id');
  // $query->condition('d.field_petty_cash_distributor_uid', $distributor_id);
   $query->fields('cs', array('field_petty_cash_subhead_value'));
   $res = $query->execute()->fetchAllKeyed(0,0);

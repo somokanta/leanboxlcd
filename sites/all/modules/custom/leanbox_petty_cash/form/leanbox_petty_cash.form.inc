@@ -190,7 +190,7 @@ function get_list_of_head_option($arg1, $distributor_id) {
         $query = db_select('field_data_field_petty_cash_type', 'ct');
         $query->condition('ct.field_petty_cash_type_value', $arg1);
         $query->join('field_data_field_petty_cash_head', 'ch', 'ch.entity_id = ct.entity_id');
-        $query->join('field_data_field_petty_cash_distributor', 'cds', 'cds.entity_id = ct.entity_id');
+        //$query->join('field_data_field_petty_cash_distributor', 'cds', 'cds.entity_id = ct.entity_id');
         //$query->condition('cds.field_petty_cash_distributor_uid', $distributor_id);
         $query->fields('ch', array('field_petty_cash_head_value'));
         $header = $query->execute()->fetchAllKeyed(0, 0);
@@ -225,7 +225,7 @@ function get_list_of_subhead_option_using_head($arg1, $distributor_id, $head) {
         $query->condition('ct.field_petty_cash_type_value', $arg1);
         $query->join('field_data_field_petty_cash_head', 'ch', 'ch.entity_id = ct.entity_id');
         $query->join('field_data_field_petty_cash_subhead', 'csu', 'csu.entity_id = ct.entity_id');
-        $query->join('field_data_field_petty_cash_distributor', 'cds', 'cds.entity_id = ct.entity_id');
+        //$query->join('field_data_field_petty_cash_distributor', 'cds', 'cds.entity_id = ct.entity_id');
       //  $query->condition('cds.field_petty_cash_distributor_uid', $distributor_id);
         $query->condition('ch.field_petty_cash_head_value', $head);
 
