@@ -272,7 +272,7 @@ function del_app_undispatch_submit($form, &$form_state){
   $rs_code = dispatch_planning_get_rscode_using_uid($user->uid);
   $trip_id = $form_state['trip_id'];
   $trip_nid = $form_state['trip_nid'];
-
+  $merchant_code = variable_get('merchant_code_conf','lakme');
   //unset dispatch data fields
   $node = node_load($trip_nid);
   //dpm($node, 'NODE of trip data: ');
@@ -435,7 +435,7 @@ function del_app_update_submit($form, &$form_state) {
   $dispatch_date_form =  $form_state['values']['node'][$trip_nid]['field_dispatch_date']['und'][0]['value'];
   $dispatch_date = explode(" ", $dispatch_date_form);
   $dis_date = $dispatch_date[0];
-  $merchant_code = variable_get('merchant_code_conf');// as discussed with shylaja set merchant code previousely it was hardcoded marico
+  $merchant_code = variable_get('merchant_code_conf','lakme');// as discussed with shylaja set merchant code previousely it was hardcoded marico
   
   $bills = get_sales_reg_bills_from_trip_id($trip_id);
   foreach ($bills as $val){

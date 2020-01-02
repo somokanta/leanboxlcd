@@ -3196,7 +3196,7 @@ function dispatch_planning_sales_reg_api($node, $trip_execution_date, $vehicle_n
   //Delivery App changes as per trips from configuration  
   
   $api_data['jobType'] = $job_type;  // delivery1 for hul
-  $merchant_code = variable_get('merchant_code_conf');
+  $merchant_code = variable_get('merchant_code_conf','lakme');
   $api_data['merchantCode'] = $merchant_code;  // hul for Merchant code
 
   //$reference_no = $trip_id . '_' . $rs_code . '_' . $bill_number;
