@@ -49,6 +49,7 @@ function get_lb_product_api_data($data) {
                 $node->field_lb_weight[LANGUAGE_NONE][0]['value'] = $val['field_weight'];
                 $node->field_lb_sub_brand[LANGUAGE_NONE][0]['value'] = $val['field_sub_brand1'];
                 $node->field_icld_ean[LANGUAGE_NONE][0]['value'] = $val['field_icld_ean'];
+                $node->field_cbu_tester_flag[LANGUAGE_NONE][0]['value'] = $val['field_cbu_tester_flag'];
                 $node->status = $val['status'];
                 $sku7_code_nid = check_sku7_code_exists($val['title']);
                 // Create SKU7 code master
