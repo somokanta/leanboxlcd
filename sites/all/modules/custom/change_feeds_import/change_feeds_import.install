@@ -1414,3 +1414,77 @@ function change_feeds_import_update_7119() {
     }
   }
 }
+
+function change_feeds_import_update_7120() {
+   
+  //master api
+   $schema['masters_api_log'] = array(
+    'description' => 'describes Api log for outlet_master',
+    'fields' => array(
+      'id' => array(
+        'description' => t('Id Primary Key'),
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'bank_name' => array(
+        'description' => t('Bank name'),
+        'type' => 'varchar',
+        'length' => 50,
+        'default' => '',
+      ),
+      'reason' => array(
+        'description' => t('reason'),
+        'type' => 'varchar',
+        'length' => 25,
+        'default' => '',
+      ),
+      'reason_type' => array(
+        'description' => t('reason type'),
+        'type' => 'varchar',
+        'length' => 25,
+        'default' => '',
+      ),
+      'party_code' => array(
+        'description' => t('party_code'),
+        'type' => 'varchar',
+        'length' => 25,
+        'default' => '',
+      ),
+      'request_data' => array(
+        'description' => t('API Details'),
+        'type' => 'text',
+      ),
+      'response_data' => array(
+        'description' => t('API Details'),
+        'type' => 'text',
+      ),
+      'request_time' => array(
+        'description' => t('API Request time'),
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'response_time' => array(
+        'description' => t('API Response time'),
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'api_type' => array(
+        'description' => t('API Type'),
+        'type' => 'varchar',
+        'length' => 25,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'distributor_id' => array(
+        'description' => t('distributor_id'),
+        'type' => 'int',
+        'default' => 0,
+      ),
+    ),
+    'primary key' => array('id'),
+  );
+   
+  db_create_table('masters_api_log', $schema['masters_api_log']);  
+}

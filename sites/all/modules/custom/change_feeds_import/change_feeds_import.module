@@ -481,6 +481,13 @@ function change_feeds_import_menu() {
     'file' => 'includes/outlet_working_hours_report.inc',
     'access arguments' => array('returns confirmation')
   );
+  
+  $items['admin/config/apis-config'] = array(
+      'title' => 'Setting Form For Master APIs Config',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('master_api_config_form'),
+      'access callback' => 'check_if_fr_role_user_admin',
+    );
   return $items;
 }
 
@@ -2646,6 +2653,8 @@ function change_feeds_import_node_presave($node) {
     if(!empty($reason_type) && !empty($dp_reason)) {
       $node->title = $reason_type.'_'.$dp_reason;
     }
+            //Update reason in API
+        call_reason_code_master_api($node);
   }
   
   // Saving the date time stamp in received assets screen
@@ -2654,6 +2663,14 @@ function change_feeds_import_node_presave($node) {
       $node->field_received_asset_time[LANGUAGE_NONE][0]['value'] = REQUEST_TIME;
     }
   }
+  
+  if ($node->type == 'bank_master') {
+        call_bank_master_api($node);
+    }
+    
+  if ($node->type == 'outlet_master') {
+        call_location_api($node);
+    }
 }
 
 function holiday_get_working_day($date_timestamp, $day, $holidays, $weeklyoff) {
@@ -4178,6 +4195,174 @@ function _get_hul_code_autocomplete($string = '') {
 
    drupal_json_output($result);
 }
+
+function call_bank_master_api($node) {
+    $bank_name = $node->title;
+    $original_bank_name = $node->original->title;
+    $dis_id = $node->uid;
+    $api_type = 'bank_master';
+    $merchant_code = variable_get('merchant_code_conf','lakme');
+
+    if (!empty($bank_name) && ($bank_name != $original_bank_name)) {
+        $bank_name_arr = array(array('bank_name' => $bank_name,'merchant' => array(array('name'=> $merchant_code))));
+        $bank_name_json = json_encode($bank_name_arr);
+
+        $sql_ins_id = bank_master_api_log($bank_name, $bank_name_json, $api_type, $dis_id);
+
+        $request_headers = array('Content-Type' => 'application/json', 'Authorization' => 'Token 2972f506c41448cb3456c1c074aed6102183aff9');
+        $order_api_url = variable_get('bank_master_api_url');
+        $options = array('headers' => $request_headers, 'method' => 'POST', 'data' => $bank_name_json);
+        $response_data = drupal_http_request($order_api_url, $options);
+        $response = $response_data->data;
+        masters_api_log_update($response, $sql_ins_id);
+    }
+}
+
+function call_reason_code_master_api($node) {
+    $reason = $node->field_dp_reason['und'][0]['value'];
+    $og_reason = $node->original->field_dp_reason['und'][0]['value'];
+    $reason_type = $node->field_reason_type['und'][0]['value'];
+    $og_reason_type = $node->original->field_reason_type['und'][0]['value'];
+    $dis_id = $node->uid;
+    $api_type = 'reason_code_master';
+    $merchant_code = variable_get('merchant_code_conf','lakme');
+
+    if (!empty($reason) && !empty($reason_type) && ($reason != $og_reason || $reason_type != $og_reason_type)) {
+        $reason_arr = array(array('reason_text' => $reason, 'reason_description' => $reason, 'reason_type' => $reason_type, 'is_active' => True,'merchant' => array(array('name'=> $merchant_code))));
+        $reason_json = json_encode($reason_arr);
+
+        $sql_ins_id = reason_code_master_api_log($reason, $reason_type, $reason_json, $api_type, $dis_id);
+        $request_headers = array('Content-Type' => 'application/json', 'Authorization' => 'Token 2972f506c41448cb3456c1c074aed6102183aff9');
+        $order_api_url = variable_get('reason_code_master_api_url');
+        $options = array('headers' => $request_headers, 'method' => 'POST', 'data' => $reason_json);
+        $response_data = drupal_http_request($order_api_url, $options);
+        $response = $response_data->data;
+        masters_api_log_update($response, $sql_ins_id);
+    }
+}
+
+function call_location_api($node) {
+    $location_type = 'Retailer';
+    $party_code = $node->field_party_code['und'][0]['value'];
+    $og_party_code = $node->original->field_party_code['und'][0]['value'];
+    $hul_code = $node->field_hul_code['und'][0]['value'];
+    $og_hul_code = $node->original->field_hul_code['und'][0]['value'];
+    $party_name = $node->field_party_name['und'][0]['value'];
+    $og_party_name = $node->original->field_party_name['und'][0]['value'];
+    $payment_term = $node->field_payment_terms['und'][0]['value'];
+    $og_payment_term = $node->original->field_payment_terms['und'][0]['value'];
+    $credit_days = $node->field_credit_days['und'][0]['value'];
+    $og_credit_days = $node->original->field_credit_days['und'][0]['value'];
+    $nid = $node->field_hul_code_reference['und'][0]['nid'];
+    $og_nid = $node->original->field_hul_code_reference['und'][0]['nid'];
+    $dis_id = $node->uid;
+    $api_type = 'location_master';
+    $merchant_code = variable_get('merchant_code_conf','lakme');
+
+    if (!empty($party_code) && !empty($party_name) && ($party_code != $og_party_code || $hul_code != $og_hul_code || $party_name != $og_party_name || $payment_term != $og_payment_term || $credit_days != $og_credit_days || $nid != $og_nid)) {
+        $res = get_lat_long_and_area_code($nid);
+        $lat = $res[0]['field_hul_updated_lat_value'];
+        $long = $res[0]['field_hul_updated_long_value'];
+        $area_code = $res[0]['n1_title'];
+
+        $location_arr = array(array('party_code' => $party_code, 'party_name' => $party_name, 'location_type' => $location_type,'merchant' => array(array('name'=> $merchant_code))));
+        if (!empty($hul_code)) {
+            $location_arr[0]['hul_code'] = $hul_code;
+        }
+        if (!empty($lat)) {
+            $location_arr[0]['latitude'] = $lat;
+        }
+        if (!empty($long)) {
+            $location_arr[0]['longitude'] = $long;
+        }
+        if (!empty($area_code)) {
+            $location_arr[0]['area_code'] = $area_code;
+        }
+        if (!empty($payment_term)) {
+            $location_arr[0]['payment_term'] = $payment_term;
+        }
+        if (!empty($credit_days)) {
+            $location_arr[0]['credit_days'] = $credit_days;
+        }
+        $location_json = json_encode($location_arr);
+
+        $sql_ins_id = outlet_master_api_log($party_code, $location_json, $api_type, $dis_id);
+
+        $request_headers = array('Content-Type' => 'application/json', 'Authorization' => 'Token 2972f506c41448cb3456c1c074aed6102183aff9');
+        $order_api_url = variable_get('outlet_master_api_url');
+        $options = array('headers' => $request_headers, 'method' => 'POST', 'data' => $location_json);
+        $response_data = drupal_http_request($order_api_url, $options);
+        $response = $response_data->data;
+        masters_api_log_update($response, $sql_ins_id);
+    }
+}
+
+function bank_master_api_log($bank_name, $bank_name_json, $api_type, $dis_id) {
+    $sql_ins_id = db_insert('masters_api_log')
+      ->fields(array(
+        'bank_name' => $bank_name,
+        'api_type' => $api_type,
+        'distributor_id' => $dis_id,
+        'request_data' => $bank_name_json,
+        'request_time' => time(),
+      ))
+      ->execute();
+    return $sql_ins_id;
+}
+
+function outlet_master_api_log($party_code, $location_json, $api_type, $dis_id) {
+    $sql_ins_id = db_insert('masters_api_log')
+      ->fields(array(
+        'party_code' => $party_code,
+        'api_type' => $api_type,
+        'distributor_id' => $dis_id,
+        'request_data' => $location_json,
+        'request_time' => time(),
+      ))
+      ->execute();
+    return $sql_ins_id;
+}
+function reason_code_master_api_log($reason, $reason_type, $reason_json, $api_type, $dis_id) {
+    $sql_ins_id = db_insert('masters_api_log')
+      ->fields(array(
+        'reason' => $reason,
+        'reason_type' => $reason_type,
+        'api_type' => $api_type,
+        'distributor_id' => $dis_id,
+        'request_data' => $reason_json,
+        'request_time' => time(),
+      ))
+      ->execute();
+    return $sql_ins_id;
+}
+
+function masters_api_log_update($response, $sql_ins_id) {
+    db_update('masters_api_log')
+      ->fields(array(
+        'response_data' => $response,
+        'response_time' => time(),
+      ))
+      ->condition('id', $sql_ins_id, '=')
+      ->execute();
+}
+
+
+function get_lat_long_and_area_code($nid) {
+    $query = db_select('node', 'n');
+    $query->condition('n.type', 'hul_code_master');
+    $query->condition('n.nid', $nid);
+    $query->fields('n', array('title'));
+    $query->addTag('node_distributor_access');
+    $query->leftjoin('field_data_field_hul_updated_lat', 'lat', 'n.nid = lat.entity_id');
+    $query->leftjoin('field_data_field_hul_updated_long', 'long1', 'n.nid = long1.entity_id');
+    $query->leftjoin('field_data_field_area_code', 'area', 'n.nid = area.entity_id');
+    $query->join('node', 'n1', 'n1.nid = area.field_area_code_nid');
+    $query->fields('lat', array('field_hul_updated_lat_value'));
+    $query->fields('long1', array('field_hul_updated_long_value'));
+    $query->fields('n1', array('title'));
+    $result = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+    return $result;
+}
 function get_nid_of_resource($updated_by_name) {
   $query = db_select('node', 'n');
   $query->condition('n.type', 'resource_master');
@@ -4188,3 +4373,32 @@ function get_nid_of_resource($updated_by_name) {
   $result = $query->execute()->fetchField();
   return $result;
 }
+
+function master_api_config_form($form, $form_state) {
+    $form['bank_master_api_url'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Bank Master API URL'),
+      '#description' => t('Bank Master URL'),
+      '#default_value' => variable_get('bank_master_api_url'),
+      '#required' => TRUE,
+    );
+
+    $form['reason_code_master_api_url'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Reason Code Master API URL'),
+      '#description' => t(' Reason Code Master API URL'),
+      '#default_value' => variable_get('reason_code_master_api_url'),
+      '#required' => TRUE,
+    );
+
+    $form['outlet_master_api_url'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Location Master API URL'),
+      '#description' => t('Location Master API URL'),
+      '#default_value' => variable_get('outlet_master_api_url'),
+      '#required' => TRUE,
+    );
+
+    return system_settings_form($form);
+}
+

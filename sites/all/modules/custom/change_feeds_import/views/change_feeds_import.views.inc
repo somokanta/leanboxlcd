@@ -200,6 +200,185 @@ function change_feeds_import_views_data_alter(&$data) {
 //      'handler' => 'change_feeds_import_handler_Sum_of_NET_SALES_VALUE',
 //    ),
 //  );
+           // master API
+  $data['masters_api_log']['table'] = array(
+    'group' => t('masters_api_log Logs'),
+    'title' => t('masters_api_log Logs'),
+    'help' => t('masters_api_log Logs.'),
+  );
+
+  // Define this as a base table.
+  $data['masters_api_log']['table']['base'] = array(
+    'field' => 'id',
+    'title' => t('masters_api_log'),
+    'help' => t("unique identifiers."),
+    // 'weight' => -10,
+  );
+
+
+  
+  $data['masters_api_log']['party_code'] = array(
+    'title' => t('Party code'),
+    'help' => t('Party code'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+  
+  $data['masters_api_log']['bank_name'] = array(
+    'title' => t('Bank name'),
+    'help' => t('Bank name'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+  
+  $data['masters_api_log']['reason'] = array(
+    'title' => t('reason'),
+    'help' => t('reason'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+  
+  $data['masters_api_log']['reason_type'] = array(
+    'title' => t('Reason type'),
+    'help' => t('Reason type'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+  
+  $data['masters_api_log']['api_type'] = array(
+    'title' => t('API type'),
+    'help' => t('API type'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+
+  //Request Data of API
+  $data['masters_api_log']['request_data'] = array(
+    'title' => t('Request Data'),
+    'help' => t('Request Data'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+
+  //Response Data of API
+  $data['masters_api_log']['response_data'] = array(
+    'title' => t('Response Data'),
+    'help' => t('Response Data'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+
+  // API Request Time
+  $data['masters_api_log']['request_time'] = array(
+    'title' => t('Request Time'),
+    'help' => t('Request Time'),
+    'field' => array(
+      'handler' => 'views_handler_field_date',
+      'click sortable' => TRUE,
+    ),
+  );
+  
+  $data['masters_api_log']['response_time'] = array(
+    'title' => t('Response Time'),
+    'help' => t('Response Time'),
+    'field' => array(
+      'handler' => 'views_handler_field_date',
+      'click sortable' => TRUE,
+    ),
+  );
+
+  $data['masters_api_log']['distributor_id'] = array(
+    'title' => t('Distributor id in api'),
+    'help' => t('Distributor id in api'),
+    'field' => array(
+      'handler' => 'views_handler_field_numeric',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_numeric',
+    ),
+  );
+  
 }
 
 
