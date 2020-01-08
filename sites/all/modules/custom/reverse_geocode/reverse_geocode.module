@@ -5,13 +5,13 @@
  * Implements hook_menu().
  */
 function reverse_geocode_menu() {
-  $items['reverse-geocode'] = array(
-    'title' => 'reverse geocode',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('reverse_geocode_form'),
-    'access callback' => TRUE,
-    'type' => MENU_NORMAL_ITEM,
-  );
+//  $items['reverse-geocode'] = array(
+//    'title' => 'reverse geocode',
+//    'page callback' => 'drupal_get_form',
+//    'page arguments' => array('reverse_geocode_form'),
+//    'access callback' => TRUE,
+//    'type' => MENU_NORMAL_ITEM,
+//  );
 
   $items['address/confirm'] = array(
     'title' => 'Address Confirmation',
@@ -104,12 +104,12 @@ function reverse_geocode_menu() {
     'type' => MENU_CALLBACK
   );
 
-  $items['reverse-geocode/get'] = array(
-    'title' => 'reverse_geocode',
-    'page callback' => 'get_reverse_geocode_from_lat_long',
-    'access callback' => TRUE,
-    'type' => MENU_CALLBACK,
-  );
+//  $items['reverse-geocode/get'] = array(
+//    'title' => 'reverse_geocode',
+//    'page callback' => 'get_reverse_geocode_from_lat_long',
+//    'access callback' => TRUE,
+//    'type' => MENU_CALLBACK,
+//  );
 
   $items['get/lat-lng'] = array(
     'title' => 'Get Lat Lng',
@@ -1145,12 +1145,12 @@ function party_filters_submit(&$form, &$form_state) {
   
 }
 
-function get_reverse_geocode_from_lat_long() {
-  $lat = $_GET['lat'];
-  $lng = $_GET['lng'];
-//  $ result = reverse_geocode_results($lat, $lng);
-  echo $result;
-}
+//function get_reverse_geocode_from_lat_long() {
+//  $lat = $_GET['lat'];
+//  $lng = $_GET['lng'];
+////  $ result = reverse_geocode_results($lat, $lng);
+//  echo $result;
+//}
 
 function get_lat_long_from_area_hook() {
   $area_hook = $_GET['area_hook'];
