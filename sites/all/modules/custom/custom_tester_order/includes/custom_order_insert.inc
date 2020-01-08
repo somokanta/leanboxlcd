@@ -13,7 +13,7 @@ function update_tester_order_data($data) {
     watchdog('tester order data', '<pre>' . print_r($data, TRUE) . '</pre>');
     foreach ($data as $value) {
         $result = db_merge('tester_order_data')
-                ->key(array('tester_order_number' => $value['tester_order_number'], 'basepack_code' => $value['basepack_code'], 'distributor_id' => $value['distributor_id'], 'facility_code' => $value['lcd_facility_code']))
+                ->key(array('tester_order_number' => $value['tester_order_number'], 'basepack_code' => $value['basepack_code'], 'distributor_id' => $value['lcd_distributor_id'], 'facility_code' => $value['lcd_facility_code']))
                 ->fields(array(
                     'tester_order_number' => $value['tester_order_number'],
                     'order_date' => $value['order_date'],
@@ -27,7 +27,7 @@ function update_tester_order_data($data) {
                     'tester_qty' => $value['picked_qty'] ? $value['picked_qty'] : 0,// rest all key is same
                     'seal_number' => $value['seal_number'] ? $value['seal_number'] : 0,
                     'box_id' => $value['box_id'] ? $value['box_id'] : 0,
-                    'distributor_id' => $value['distributor_id'],
+                    'distributor_id' => $value['lcd_distributor_id'],
                     'facility_code' => $value['lcd_facility_code'],
                     'created_time' => REQUEST_TIME
                 ))
@@ -50,7 +50,7 @@ function insert_tester_order_data_in_sales_register($tester_order_data) {
             if (!array_key_exists($data['tester_order_number'], $test_order_arr)) {
                 $test_order_arr[$data['tester_order_number']] = $data['tester_order_number'];
                 watchdog('tester order data sales register', '<pre>' . print_r($data, TRUE) . '</pre>');
-                $distributor_id = $data['distributor_id'];
+                $distributor_id = $data['lcd_distributor_id'];
 
                 $query = db_select('node', 'n');
                 $query->condition('n.type', 'sales_register_data');
@@ -112,7 +112,7 @@ function insert_tester_order_data_in_custom_billing_table($tester_order_data) {
     foreach ($tester_order_data as $key => $data) {
         if(!empty($data['tester_order_number'])){
             watchdog('tester order data custom billing', '<pre>' . print_r($data, TRUE) . '</pre>');
-            $distributor_id = $data['distributor_id'];
+            $distributor_id = $data['lcd_distributor_id'];
             
             $tb_id = db_query("select id from custom_billing_data where distributor_id = $distributor_id and  bill_number = '".$data['tester_order_number']."' and BASEPACK_CODE ='".$data['basepack_code']."' limit 1")->fetchField();
             if(empty($tb_id)){
