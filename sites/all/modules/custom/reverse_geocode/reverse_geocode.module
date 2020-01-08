@@ -1290,6 +1290,15 @@ function reverse_geocode_results($lat, $lng) {
   //echo $errors;
     curl_close($curl);
   }
+  db_insert('map_my_india_api_log')
+     ->fields(array(
+        'reference_number' => $current_path,
+        'request_data' => $url,
+        'request_time' => time(),
+        'response_data' => $result,
+     ))
+     ->execute();
+
   return $result;
 }
 
