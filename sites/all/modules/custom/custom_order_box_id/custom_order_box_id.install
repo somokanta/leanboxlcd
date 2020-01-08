@@ -79,8 +79,7 @@ function custom_order_box_id_update_7121() {
   $fields = array(
    'distributor_id' => array(
        'description' => t('Distributor ID'),
-       'type' => 'varchar',
-       'length' => 15,
+       'type' => 'int',
     ),  
   );
   foreach ($fields as $key => $field) {
@@ -94,9 +93,7 @@ function custom_order_box_id_update_7122() {
     'party_code' => array(
       'description' => t('Party code'),
       'type' => 'varchar',
-      'length'=> 75,
-      'not null' => TRUE,
-      'default' => '',
+      'length'=> 100,
     ),  
   );
   foreach ($fields as $key => $field) {
@@ -117,4 +114,9 @@ function custom_order_box_id_update_7122() {
       db_add_field('outlet_order_crate', $key, $field);
     }
   }
+}
+
+function change_feeds_import_update_7123() {
+    db_change_field('outlet_order_crate', 'distributor_id', 'distributor_id', array('type' => 'int'));
+    db_change_field('outlet_order_crate', 'party_code', 'party_code', array('type' => 'varchar','length'=>100));
 }
