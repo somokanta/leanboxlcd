@@ -307,19 +307,23 @@ function _get_dispatch_qty_undeliver($bill_row_id) {
 // new change - added on 31 Oct, 2019
 function get_reverse_geocode_data($latitude, $longitude, $reference_number){
   $api_result = array();
-  if(!empty($latitude) && !empty($longitude)){
-      $license_key = variable_get('mapmyindia_rest_key', 'z94i9hvuqcsz7amywt76aknw8dx9o15z');   
-      $url = "https://apis.mapmyindia.com/advancedmaps/v1/$license_key/rev_geocode?lng=$longitude&lat=$latitude";
-      $sql_ins_id = insert_map_my_india_api_log($url, $reference_number);
-      $options = array('method' => 'GET');
-      $result = drupal_http_request($url, $options);
-      update_map_my_india_api_log($sql_ins_id, json_encode($result));
-      if($result->status_message === 'OK'){
-          $decoded_data = json_decode($result->data);
-          $api_result = $decoded_data->results;
-      }
-  }
-  return $api_result;
+  if (!empty($latitude) && !empty($longitude)) {
+        $license_key = variable_get('mapmyindia_rest_key', 'z94i9hvuqcsz7amywt76aknw8dx9o15z');
+        $url = "https://apis.mapmyindia.com/advancedmaps/v1/$license_key/rev_geocode?lng=$longitude&lat=$latitude";
+        $sql_ins_id = insert_map_my_india_api_log($url, $reference_number);
+        if (trim($longitude, 0) == 1.11 || trim($latitude, 0) == 1.11) {
+            $result = '';
+        } else {
+            $options = array('method' => 'GET');
+            $result = drupal_http_request($url, $options);
+        }
+        update_map_my_india_api_log($sql_ins_id, json_encode($result));
+        if ($result->status_message === 'OK') {
+            $decoded_data = json_decode($result->data);
+            $api_result = $decoded_data->results;
+        }
+    }
+    return $api_result;
 }
 
 function insert_map_my_india_api_log($url, $reference_number){
