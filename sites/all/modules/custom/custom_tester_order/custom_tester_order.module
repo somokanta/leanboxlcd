@@ -1,0 +1,56 @@
+<?php
+
+function custom_tester_order_services_resources() {
+  $tester_order_resource = array(
+    '#api_version' => 3001,
+  );
+  $tester_order_resource = array(
+    'tester-order' => array(
+      'actions' => array(
+        'tester-order-api' => array(
+          'help' => 'update tester order',
+          'callback' => 'update_tester_order_data',
+          'args' => array(
+            array(
+              'name' => 'data',
+              'type' => 'array',
+              'description' => 'Post data',
+              'source' => 'data',
+              'optional' => TRUE,
+            )
+           ),
+            'file' => array(
+              'type' => 'inc',
+              'module' => 'custom_tester_order',
+              'name' => 'includes/custom_order_insert'
+            ),
+            'access arguments' => array('tester_order_api'),
+          ),
+        ),
+      ),
+  );
+  return $tester_order_resource;
+}
+
+
+/**
+ * permission
+ */
+function custom_tester_order_permission() {
+
+  return array(
+    'tester_order_api' => array(
+      'title' => t('Tester Order Api'),
+      'description' => t('Tester Order Api')
+    )
+  );
+}
+/**
+ * Implements of hook_views_api().
+ */
+function custom_tester_order_views_api() {
+   return array(
+     'api' => 3,
+     'path' => drupal_get_path('module', 'custom_tester_order') . '/views'
+   );
+}

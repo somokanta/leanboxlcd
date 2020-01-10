@@ -90,6 +90,7 @@ function lcd_retailer_master_api_node_presave($node) {
       $api_data['area_code'] = $node->title;
       $api_data['sub_area_codes'] = $sub_area_codes_values;
     }
+    $api_data['distributor_id'] = $node->uid;
     $data = json_encode($api_data);
     // $authorization = 'bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1ODgzOWY4ZjYyZmQyMzkzMGE4NjQwYjEiLCJpYXQiOjE1MDQ2Nzg4NTl9.AzJLVp6HDk6lbXCWxI1T8Y7US6R0panNjkY5B-pkdqg';
     $request_headers = array('Content-Type' => 'application/json', 'Authorization' => $authorization);

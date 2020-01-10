@@ -11,7 +11,8 @@ function fetch_dispatch_planning_api_data($data) {
 
       // first entry in log table
       // get dis id using rs code
-      $dis_id = leanbox_mobile_get_distributor_using_rscode($data['hubCode']);
+      $dis_id = get_distributor_id_from_reference_number(trim($data['referenceNumber']));
+      //$dis_id = leanbox_mobile_get_distributor_using_rscode($data['hubCode']);
       $json_data = json_encode($data);
       dispatch_planning_api_log($json_data, $data['jobData']['runsheet_number'], 'farey_sales_deliver', $dis_id, 1);
       $bill_row_id = _get_bill_row_id_manual_using_reference_no($data['referenceNumber']);
@@ -224,7 +225,39 @@ function fetch_dispatch_planning_api_data($data) {
         $node->field_bill_status['und'][0]['value'] = $data['status'];
         node_save($node);
       }
+      
+      
+     /**
+       * New code. Create below three field on dispatch data content type
+       * Inarea_Reached_DateTime
+       * Inarea_Reached_Latitude
+       * Inarea_Reached_Longitude
+       */
+      $Inarea_Reached_DateTime = $data['Inarea_Reached_DateTime'];
+      $Inarea_Reached_Latitude = $data['Inarea_Reached_Latitude'];
+      $Inarea_Reached_Longitude = $data['Inarea_Reached_Longitude'];
+      if(!empty($Inarea_Reached_DateTime) || !empty($Inarea_Reached_Latitude) || !empty($Inarea_Reached_Longitude) ){
+        $trip_id = $data['jobData']['runsheet_number'];
         
+        $query = db_select('node', 'n');
+        $query->condition('n.title', $trip_id);
+        $query->condition('n.type', 'dispatch_data');
+        $query->condition('n.uid', $dis_id);
+        $query->fields('n', array('nid'));
+        $dispatch_data_nid = $query->execute()->fetchField();
+
+
+        $dispatch_node = node_load($dispatch_data_nid);
+        if(!empty($dispatch_node)){
+          $dispatch_node->field_inarea_reached_datetime['und'][0]['value'] = strtotime($Inarea_Reached_DateTime);
+          $dispatch_node->field_inarea_reached_latitude['und'][0]['value'] = $Inarea_Reached_Latitude;
+          $dispatch_node->field_inarea_reached_longitude['und'][0]['value'] = $Inarea_Reached_Longitude;
+          node_save($dispatch_node);
+        }
+      }
+      //END
+      
+      
       $results['flag'] = '1';
       $results['result'] = 'Data updated Sucessfully.';
       }else{
@@ -274,19 +307,23 @@ function _get_dispatch_qty_undeliver($bill_row_id) {
 // new change - added on 31 Oct, 2019
 function get_reverse_geocode_data($latitude, $longitude, $reference_number){
   $api_result = array();
-  if(!empty($latitude) && !empty($longitude)){
-      $license_key = variable_get('mapmyindia_rest_key', 'z94i9hvuqcsz7amywt76aknw8dx9o15z');   
-      $url = "https://apis.mapmyindia.com/advancedmaps/v1/$license_key/rev_geocode?lng=$longitude&lat=$latitude";
-      $sql_ins_id = insert_map_my_india_api_log($url, $reference_number);
-      $options = array('method' => 'GET');
-      $result = drupal_http_request($url, $options);
-      update_map_my_india_api_log($sql_ins_id, json_encode($result));
-      if($result->status_message === 'OK'){
-          $decoded_data = json_decode($result->data);
-          $api_result = $decoded_data->results;
-      }
-  }
-  return $api_result;
+  if (!empty($latitude) && !empty($longitude)) {
+        $license_key = variable_get('mapmyindia_rest_key', 'z94i9hvuqcsz7amywt76aknw8dx9o15z');
+        $url = "https://apis.mapmyindia.com/advancedmaps/v1/$license_key/rev_geocode?lng=$longitude&lat=$latitude";
+        $sql_ins_id = insert_map_my_india_api_log($url, $reference_number);
+        if (trim($longitude, 0) == 1.11 || trim($latitude, 0) == 1.11) {
+            $result = '';
+        } else {
+            $options = array('method' => 'GET');
+            $result = drupal_http_request($url, $options);
+        }
+        update_map_my_india_api_log($sql_ins_id, json_encode($result));
+        if ($result->status_message === 'OK') {
+            $decoded_data = json_decode($result->data);
+            $api_result = $decoded_data->results;
+        }
+    }
+    return $api_result;
 }
 
 function insert_map_my_india_api_log($url, $reference_number){
@@ -308,4 +345,16 @@ function update_map_my_india_api_log($sql_ins_id, $response_json){
      ))
      ->condition('id', $sql_ins_id, '=')
      ->execute();
+}
+function get_distributor_id_from_reference_number($reference_no) {
+   $distributor_id = ''; 
+  if (!empty($reference_no)) {
+     $query = db_select('dispatch_planning_api_data', 'ad');
+     $query->join('node', 'n', 'n.title = ad.runsheet_number and n.uid = ad.distributor_id');
+     $query->condition('ad.referenceNo', $reference_no, '=');
+     $query->condition('n.type', 'dispatch_data', '=');
+     $query->fields('ad', array('distributor_id'));
+     $distributor_id = $query->execute()->fetchField();
+  }  
+  return $distributor_id;
 }

@@ -2181,17 +2181,22 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
 //    }
   }
   if ($entity->feeds_item->id == 'hul_code_area_code_mapping') {
+    $entity->changetype = 'hul_code_area_code_mapping';
     $hul_code = $entity->title;
     $area_code = $item['area code'];
-    $areacode_exist = check_hul_area_code_exist($area_code,$distributor_id);
+    //returns area code nid
+    $areacode_nid = check_hul_area_code_exist($area_code,$distributor_id);
     $existing_uid = check_hul_code_exist($title);
     if (!empty($existing_uid) && ($existing_uid != $distributor_id)) {
       drupal_set_message("Invalid HUL Code:$hul_code", 'error', FALSE);
       $entity->feeds_item->skip = TRUE;
     } 
-    if (empty($areacode_exist)) {
+    if (empty($areacode_nid)) {
         drupal_set_message("Area Code :$area_code does not exist.", 'error', FALSE);
         $entity->feeds_item->skip = TRUE;
+    }
+    else {
+         $entity->field_area_code[LANGUAGE_NONE][0]['nid'] = $areacode_nid;
     }
   }
   if ($entity->feeds_item->id == 'area_code_master') {
@@ -2524,7 +2529,7 @@ function check_hul_area_code_exist($title,$distributor_id) {
   if (!empty($title)) {
     $query = db_select('node', 'n');
     $query->condition('n.type', 'area_code_master');
-    $query->fields('n', array('title'));
+    $query->fields('n', array('nid'));
     $query->condition('n.title', $title);
     $query->condition('n.uid', $distributor_id);
     $results = $query->execute()->fetchField();
@@ -2571,11 +2576,19 @@ function check_sub_putaway_group_exist($title, $distributor_id) {
  * @param text $content_type
  */
 function modify_views_forms_master_feed_validate($feed_title, $content_type) {
+  /* Distributor ID condition not required in 
+'channel_master'
+'pl_group_master'  
+   * *
+   */
+  $system_level_content_types = array('channel_master','pl_group_master');  
   $query = db_select('node', 'n');
   $query->fields('n', array('title'));
   $query->condition('n.type', $content_type);
   $query->condition('n.title', $feed_title);
-  $query->addTag('node_uid');
+  if (!in_array($content_type,$system_level_content_types)) {
+    $query->addTag('node_uid');
+  }
   $result = $query->execute()->fetchField();
   return $result;
 }
@@ -2702,6 +2715,29 @@ function change_feeds_import_get_distributor_id($user_id) {
   $result = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
   $distributor_id = $result[0]['field_distributor_value'];
   return $distributor_id;
+}
+function get_sibling_distributor_id($distributor_id) {
+  $result = array();
+  if (!empty($distributor_id))  {
+    $query = db_select('users', 'u');
+    $query->innerjoin('field_data_field_distributor', 'd', 'd.entity_id = u.uid');
+    $query->join('field_data_field_sibling_distributor_id', 'sibling_dist', 'sibling_dist.entity_id = u.uid');
+    $query->condition('sibling_dist.field_sibling_distributor_id_uid', $distributor_id, '=');
+    $query->fields('d', array('field_distributor_value'));
+    $result = $query->execute()->fetchAllKeyed(0,0);
+  }
+  return $result;
+}
+function get_distributor_id_of_bill($bill_number) {
+    $distributor_id = '';
+    if(!empty($bill_number)) {
+        $query = db_select('node', 'n');
+        $query->condition('n.type', 'sales_register_data', '=');
+        $query->condition('n.title', $bill_number, '=');
+        $query->fields('n', array('uid'));
+        $distributor_id = $query->execute()->fetchField();
+    }
+    return $distributor_id;
 }
 
 function change_feeds_import_get_distributor_name($distributor_id) {
@@ -2970,7 +3006,7 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
   }
 
   // Alter the distributor id of role leanbox in ofd_mailer view.
-  $views_array = array('ofd_mailer', 'ofd_mailer2');
+  $views_array = array('ofd_mailer', 'ofd_mailer2','lb_product_master');
   //$dist_id = 23466;
   if (in_array($view->name, $views_array)) {
     foreach ($query->table_queue as $key => $val) {
@@ -2984,6 +3020,11 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
       }
     }
   }
+  $distributor_views_tables = array('parkstop_api_log','dispatch_planning_api_log','dispatch_planning_api_data','sms_integration_api_log','outlet_order_crate');
+  if (in_array($view->base_table,$distributor_views_tables)) {
+       $query->add_where(0, "$view->base_table.distributor_id", $distributor_id, '=');
+  }
+  
   if ($view->base_table == 'custom_billing_data' && ($view->name != 'impact_delivery_cron_2') && ($view->name != 'impact_delivery_cron_evening_2')) {
     $query->add_where(0, 'custom_billing_data.distributor_id', $distributor_id, '=');
   }
@@ -3018,7 +3059,9 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
     $query->add_where(0, 'ptl_header_data.rs_code', $rs_code, '=');
     $query->add_where(0, 'ptl_header_data.distributor_id', $distributor_id, '=');
   }
-  
+  if ($view->base_table == 'tester_order_data'){
+    $query->add_where(0, 'tester_order_data.distributor_id', $distributor_id, '=');
+  }  
   //if (($view->base_table == 'master_ptl_data') && ($view->name == 'master_ptl_loose_sheet')) {
     //$query->add_orderby(NULL, "SUBSTRING(master_ptl_data.product_name, 1, 1)", 'ASC','order_master_ptl_data_product_name_first');
     //$query->add_orderby(NULL, "SUBSTRING_INDEX(SUBSTRING_INDEX(master_ptl_data.product_name,' ',2),' ',-1)", 'ASC','order_master_ptl_data_product_name_second');
@@ -4400,5 +4443,17 @@ function master_api_config_form($form, $form_state) {
     );
 
     return system_settings_form($form);
+}
+
+function get_facility_code($distributor_id) {
+    $facility_code = '';
+    if (!empty($distributor_id)) {
+        $query = db_select('field_data_field_facility_code', 'facility_code');
+        $query->condition('facility_code.entity_id', $distributor_id);
+        $query->join('taxonomy_term_data', 'term_data', 'term_data.tid = facility_code.field_facility_code_tid');
+        $query->fields('term_data', array('name'));
+        $facility_code = $query->execute()->fetchField();
+    }
+    return $facility_code;
 }
 

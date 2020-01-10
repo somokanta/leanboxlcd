@@ -5,13 +5,13 @@
  * Implements hook_menu().
  */
 function reverse_geocode_menu() {
-  $items['reverse-geocode'] = array(
-    'title' => 'reverse geocode',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('reverse_geocode_form'),
-    'access callback' => TRUE,
-    'type' => MENU_NORMAL_ITEM,
-  );
+//  $items['reverse-geocode'] = array(
+//    'title' => 'reverse geocode',
+//    'page callback' => 'drupal_get_form',
+//    'page arguments' => array('reverse_geocode_form'),
+//    'access callback' => TRUE,
+//    'type' => MENU_NORMAL_ITEM,
+//  );
 
   $items['address/confirm'] = array(
     'title' => 'Address Confirmation',
@@ -104,12 +104,12 @@ function reverse_geocode_menu() {
     'type' => MENU_CALLBACK
   );
 
-  $items['reverse-geocode/get'] = array(
-    'title' => 'reverse_geocode',
-    'page callback' => 'get_reverse_geocode_from_lat_long',
-    'access callback' => TRUE,
-    'type' => MENU_CALLBACK,
-  );
+//  $items['reverse-geocode/get'] = array(
+//    'title' => 'reverse_geocode',
+//    'page callback' => 'get_reverse_geocode_from_lat_long',
+//    'access callback' => TRUE,
+//    'type' => MENU_CALLBACK,
+//  );
 
   $items['get/lat-lng'] = array(
     'title' => 'Get Lat Lng',
@@ -205,36 +205,36 @@ function reverse_geocode_form_submit($form, &$form_state) {
   $codes = explode("\r\n", $form_state['values']['codes']);
 
 
-  foreach ($codes as $code) {
-    $location = explode(',', $code);
-
-    $hul = $location[0];
-    $lat = $location[1];
-    $lng = $location[2];
-
-    $license_key = variable_get('mapmyindia_rest_key', 'z94i9hvuqcsz7amywt76aknw8dx9o15z');
-
-    $url = "https://apis.mapmyindia.com/advancedmaps/v1/$license_key/rev_geocode" . "?lng=$lng&lat=$lat";
-    $curl = curl_init();
-    curl_setopt($curl, CURLOPT_URL, $url);
-    curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-    curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 0);
-    curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, 0);
-    $result = curl_exec($curl);
-
-    $info = curl_getinfo($curl);
-
-// also get the error and response code
-//$errors = curl_error($curl);
-//echo $errors;
-    curl_close($curl);
-
-    $res = json_decode($result, 1);
-
-    if ($res['responseCode'] == 200) {
-      $csv_rows[] = array('hul' => $hul) + $res['results'][0];
-    }
-  }
+//  foreach ($codes as $code) {
+//    $location = explode(',', $code);
+//
+//    $hul = $location[0];
+//    $lat = $location[1];
+//    $lng = $location[2];
+//
+//    $license_key = variable_get('mapmyindia_rest_key', 'z94i9hvuqcsz7amywt76aknw8dx9o15z');
+//
+//    $url = "https://apis.mapmyindia.com/advancedmaps/v1/$license_key/rev_geocode" . "?lng=$lng&lat=$lat";
+//    $curl = curl_init();
+//    curl_setopt($curl, CURLOPT_URL, $url);
+//    curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+//    curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 0);
+//    curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, 0);
+//    $result = curl_exec($curl);
+//
+//    $info = curl_getinfo($curl);
+//
+//// also get the error and response code
+////$errors = curl_error($curl);
+////echo $errors;
+//    curl_close($curl);
+//
+//    $res = json_decode($result, 1);
+//
+//    if ($res['responseCode'] == 200) {
+//      $csv_rows[] = array('hul' => $hul) + $res['results'][0];
+//    }
+//  }
 
   $header = array(
     'HUL',
@@ -262,9 +262,9 @@ function reverse_geocode_form_submit($form, &$form_state) {
   header('Content-Disposition: attachment; filename=RG.csv');
   $fp = fopen('php://output', 'w');
   fputcsv($fp, $header);
-  foreach ($csv_rows as $k => $v) {
-    fputcsv($fp, $v);
-  }
+//  foreach ($csv_rows as $k => $v) {
+//    fputcsv($fp, $v);
+//  }
   fclose($fp);
   exit;
 }
@@ -1145,12 +1145,12 @@ function party_filters_submit(&$form, &$form_state) {
   
 }
 
-function get_reverse_geocode_from_lat_long() {
-  $lat = $_GET['lat'];
-  $lng = $_GET['lng'];
-  $result = reverse_geocode_results($lat, $lng);
-  echo $result;
-}
+//function get_reverse_geocode_from_lat_long() {
+//  $lat = $_GET['lat'];
+//  $lng = $_GET['lng'];
+////  $ result = reverse_geocode_results($lat, $lng);
+//  echo $result;
+//}
 
 function get_lat_long_from_area_hook() {
   $area_hook = $_GET['area_hook'];
@@ -1267,22 +1267,37 @@ function lat_lng_results($area_hook, $sales_day, $van_pl_group) {
 }
 
 function reverse_geocode_results($lat, $lng) {
+  global $base_url;
+  $current_path = $base_url . '/' . current_path();
   $license_key = variable_get('mapmyindia_rest_key', 'z94i9hvuqcsz7amywt76aknw8dx9o15z');
 
   $url = "https://apis.mapmyindia.com/advancedmaps/v1/$license_key/rev_geocode" . "?lng=$lng&lat=$lat";
-  $curl = curl_init();
-  curl_setopt($curl, CURLOPT_URL, $url);
-  curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-  curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 0);
-  curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, 0);
-  $result = curl_exec($curl);
+  if(trim($lng, 0) == 1.11 || trim($lat, 0) == 1.11) {
+     $result = ''; 
+  }
+  else {
+    $curl = curl_init();
+    curl_setopt($curl, CURLOPT_URL, $url);
+    curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 0);
+    curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, 0);
+    $result = curl_exec($curl);
 
-  $info = curl_getinfo($curl);
+    $info = curl_getinfo($curl);
 
-// also get the error and response code
-//$errors = curl_error($curl);
-//echo $errors;
-  curl_close($curl);
+  // also get the error and response code
+  //$errors = curl_error($curl);
+  //echo $errors;
+    curl_close($curl);
+  }
+  db_insert('map_my_india_api_log')
+     ->fields(array(
+        'reference_number' => $current_path,
+        'request_data' => $url,
+        'request_time' => time(),
+        'response_data' => $result,
+     ))
+     ->execute();
 
   return $result;
 }
@@ -1603,12 +1618,15 @@ function reverse_geocode_node_presave($node) {
          if (!empty($disp_date)) {
             $dispatch_date = strtotime($disp_date);
             if ($dispatch_date <= $updated_pdd) {
-               $n_value = "N+2";
+               $n_value = "N+1";
             }
             elseif (($dispatch_date > $updated_pdd) && ( ($dispatch_date - $updated_pdd) <= 86400)) {
+               $n_value = "N+2";
+            }
+            elseif (($dispatch_date > $updated_pdd) && ( ($dispatch_date - $updated_pdd) <= (86400*2))) {
                $n_value = "N+3";
             }
-            elseif (($dispatch_date > $updated_pdd) && ( ($dispatch_date - $updated_pdd) > 86400)) {
+            elseif (($dispatch_date > $updated_pdd) && ( ($dispatch_date - $updated_pdd) > (86400*2))) {
                $n_value = "N+4";
             }
             $node->field_dispatch_n_value[LANGUAGE_NONE][0]['value'] = $n_value;
@@ -1625,12 +1643,15 @@ function reverse_geocode_node_presave($node) {
          if (!empty($del_date)) {
             $del_date = strtotime(date('Y-m-d',$del_date));  
             if ($del_date <= $updated_pdd) {
-               $n_value = "N+2";
+               $n_value = "N+1";
             }
             elseif (($del_date > $updated_pdd) && ( ($del_date - $updated_pdd) <= 86400)) {
+               $n_value = "N+2";
+            }
+            elseif (($del_date > $updated_pdd) && ( ($del_date - $updated_pdd) <= (86400*2))) {
                $n_value = "N+3";
             }
-            elseif (($del_date > $updated_pdd) && ( ($del_date - $updated_pdd) > 86400)) {
+            elseif (($del_date > $updated_pdd) && ( ($del_date - $updated_pdd) > (86400*2))) {
                $n_value = "N+4";
             }
             $node->field_deliver_n_value[LANGUAGE_NONE][0]['value'] = $n_value;
@@ -1664,12 +1685,15 @@ function reverse_geocode_node_presave($node) {
          if (!empty($disp_date)) {
             $dispatch_date = strtotime($disp_date);
             if ($dispatch_date <= $updated_pdd) {
-               $n_value = "N+2";
+               $n_value = "N+1";
             }
             elseif (($dispatch_date > $updated_pdd) && ( ($dispatch_date - $updated_pdd) <= 86400)) {
+               $n_value = "N+2";
+            }
+            elseif (($dispatch_date > $updated_pdd) && ( ($dispatch_date - $updated_pdd) <= (86400*2))) {
                $n_value = "N+3";
             }
-            elseif (($dispatch_date > $updated_pdd) && ( ($dispatch_date - $updated_pdd) > 86400)) {
+            elseif (($dispatch_date > $updated_pdd) && ( ($dispatch_date - $updated_pdd) > (86400*2))) {
                $n_value = "N+4";
             }
             $node->field_dispatch_n_value[LANGUAGE_NONE][0]['value'] = $n_value;
@@ -1684,12 +1708,15 @@ function reverse_geocode_node_presave($node) {
          if (!empty($del_date)) {
            $del_date = strtotime(date('Y-m-d',$del_date));
             if ($del_date <= $updated_pdd) {
-               $n_value = "N+2";
+               $n_value = "N+1";
             }
             elseif (($del_date > $updated_pdd) && ( ($del_date - $updated_pdd) <= 86400)) {
+               $n_value = "N+2";
+            }
+            elseif (($del_date > $updated_pdd) && ( ($del_date - $updated_pdd) <= (86400*2))) {
                $n_value = "N+3";
             }
-            elseif (($del_date > $updated_pdd) && ( ($del_date - $updated_pdd) > 86400)) {
+            elseif (($del_date > $updated_pdd) && ( ($del_date - $updated_pdd) > (86400*2))) {
                $n_value = "N+4";
             }
             $node->field_deliver_n_value[LANGUAGE_NONE][0]['value'] = $n_value;
@@ -1828,12 +1855,15 @@ function reverse_geocode_node_presave($node) {
                $promised_date = $val['field_promised_date_value'];
                $nid = $val['nid'];
                if ($dispatch_date <= $promised_date) {
-                  $n_value = "N+2";
+                  $n_value = "N+1";
                }
                elseif (($dispatch_date > $promised_date) && ( ($dispatch_date - $promised_date) <= 86400)) {
+                  $n_value = "N+2";
+               }
+               elseif (($dispatch_date > $promised_date) && ( ($dispatch_date - $promised_date) <= (86400*2))) {
                   $n_value = "N+3";
                }
-               elseif (($dispatch_date > $promised_date) && ( ($dispatch_date - $promised_date) > 86400)) {
+               elseif (($dispatch_date > $promised_date) && ( ($dispatch_date - $promised_date) > (86400*2))) {
                   $n_value = "N+4";
                }
 
@@ -2093,12 +2123,15 @@ function cal_delivery_n_val_by_cron() {
     if (!empty($del_date)) {
       $del_date = strtotime(date('Y-m-d', $del_date));
       if ($del_date <= $updated_pdd) {
-        $n_value = "N+2";
+        $n_value = "N+1";
       }
       elseif (($del_date > $updated_pdd) && ( ($del_date - $updated_pdd) <= 86400)) {
+        $n_value = "N+2";
+      }
+      elseif (($del_date > $updated_pdd) && ( ($del_date - $updated_pdd) <= (86400*2))) {
         $n_value = "N+3";
       }
-      elseif (($del_date > $updated_pdd) && ( ($del_date - $updated_pdd) > 86400)) {
+      elseif (($del_date > $updated_pdd) && ( ($del_date - $updated_pdd) > (86400*2))) {
         $n_value = "N+4";
       }
       $node->field_deliver_n_value[LANGUAGE_NONE][0]['value'] = $n_value;

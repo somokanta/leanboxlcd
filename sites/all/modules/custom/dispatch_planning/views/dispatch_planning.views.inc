@@ -3156,7 +3156,15 @@ function dispatch_planning_views_data() {
       'handler' => 'views_handler_argument_string',
     ),
   );
-
+  // Considering edit/res fields
+  $data['views']['global_delivery_boy'] = array(
+    'title' => t('Delivery Boy'),
+    'help' => t('Global Delivery Boy Field.Considering Edit field'),
+    'field' => array(
+      'handler' => 'bill_returns_report',
+    ),
+  );
+  
   $data['views']['total_sales_quantity'] = array(
     'title' => t('Total Sales Quantity'),
     'help' => t('Total Sales Quantity.'),

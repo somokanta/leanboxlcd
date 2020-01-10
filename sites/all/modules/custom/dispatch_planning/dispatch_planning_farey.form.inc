@@ -111,7 +111,7 @@ function _get_farey_delivered_trip_details($trip_number, $rs_code) {
    $query->leftjoin('node', 'n1', 'n1.nid = chs.field_child_sku_nid');
    $query->join('dispatch_planning_api_data', 'ad', 'id.trip_bill_reference = ad.id');
    $query->condition('ad.runsheet_number', $trip_number, '=');
-   $query->condition('ad.hub', $rs_code, '=');
+   $query->condition('ad.distributor_id', $dis_id, '=');
    $query->condition('id.og_sum_net_sales_quantity', 0, '!=');
    $query->condition('id.res_sku_actual_quantity1', '', '!=');
    $query->condition('id.res_sku_actual_quantity1', 'NULL', '!=');
@@ -229,8 +229,10 @@ function _edit_trip_delivered_callback_form($form, &$form_state) {
         // check trip if it is VRS Confirmed
         $trip_detail = check_trip_id_exists_or_not($distributor_id, $trip_number);
         $vrs_status = $trip_detail->field_vrs_status_value;
-        
-        if($vrs_status == 0) {
+        if(empty($vrs_status) && $vrs_status!=0) {
+            drupal_set_message(t("Invalid Trip ID:$trip_number"), 'error');
+        }
+        else if($vrs_status == 0) {
            drupal_set_message(t('You cannot edit because this trip is Delivery confirmation done.'), 'error');
         }
         else if($vrs_status == 1) {
@@ -734,7 +736,7 @@ function _edit_trip_delivered_callback_form($form, &$form_state) {
                $item_details = _get_editable_delivered_trip_details($trip_number, $rs_code, $bill_number);
                $query = db_select('dispatch_planning_api_data', 'ad');
                                   $query->condition('ad.runsheet_number', $trip_number);
-                                  $query->condition('ad.hub', $rs_code);
+                                  $query->condition('ad.distributor_id', $distributor_id);
                                   $query->condition('ad.bill_number', $bill_number);
                                   $query->fields('ad', array('res_status'));
                $original_order_status = $query->execute()->fetchField();
@@ -892,7 +894,7 @@ function _get_noneditable_delivered_trip_details($trip_number, $rs_code, $bill_n
 
    $query = db_select('dispatch_planning_api_data', 'ad');
    $query->condition('ad.runsheet_number', $trip_number);
-   $query->condition('ad.hub', $rs_code);
+   $query->condition('ad.distributor_id', $dis_id);
    //not required delivery pending bills of that trip
    $query->condition('ad.delivery_pending_flag' ,1,'!=');
    $query->condition('ad.bill_number', $bill_no);
@@ -921,7 +923,7 @@ function _get_editable_delivered_trip_details($trip_number, $rs_code, $bill_no) 
    $query = db_select('dispatch_planning_item_details', 'dpi');
    $query->join('dispatch_planning_api_data', 'ad', 'dpi.trip_bill_reference = ad.id');
    $query->condition('ad.runsheet_number', $trip_number);
-   $query->condition('ad.hub', $rs_code);
+   $query->condition('ad.distributor_id', $dis_id);
    $query->condition('ad.bill_number', $bill_no);
    $query->fields('dpi', array('id', 'sku_code', 'sku_description', 
      'mrp', 'sum_net_sales_quantity',
@@ -1170,7 +1172,7 @@ function _edit_trip_delivered_callback_form_submit($form, &$form_state) {
       
       if($collc_mode == 'signed' && empty($sb_file_uri)) {
         $query = db_select('dispatch_planning_api_data', 'dpi');
-        $query->condition('dpi.hub', $rs_code, '=');
+        $query->condition('dpi.distributor_id', $dis_id, '=');
         $query->condition('dpi.runsheet_number', $trip_number, '=');
         $query->condition('dpi.bill_number', $bill_number, '=');
         $query->fields('dpi', array('res_photo_of_signed_bill_delivery'));
@@ -1186,7 +1188,7 @@ function _edit_trip_delivered_callback_form_submit($form, &$form_state) {
       
       if($collc_mode == 'cheque' && empty($cheque_file_uri)) {
         $query = db_select('dispatch_planning_api_data', 'dpi');
-        $query->condition('dpi.hub', $rs_code, '=');
+        $query->condition('dpi.distributor_id', $dis_id, '=');
         $query->condition('dpi.runsheet_number', $trip_number, '=');
         $query->condition('dpi.bill_number', $bill_number, '=');
         $query->fields('dpi', array('res_photo_of_cheque'));
@@ -1198,7 +1200,7 @@ function _edit_trip_delivered_callback_form_submit($form, &$form_state) {
       
       if($collc_mode == 'cash,cheque' && empty($cash_cheque_file_uri)) {
         $query = db_select('dispatch_planning_api_data', 'dpi');
-        $query->condition('dpi.hub', $rs_code, '=');
+        $query->condition('dpi.distributor_id', $dis_id, '=');
         $query->condition('dpi.runsheet_number', $trip_number, '=');
         $query->condition('dpi.bill_number', $bill_number, '=');
         $query->fields('dpi', array('res_photo_of_cheque'));
@@ -1232,12 +1234,15 @@ function _edit_trip_delivered_callback_form_submit($form, &$form_state) {
           ))
           ->condition('runsheet_number', $trip_number, '=')
           ->condition('bill_number', $bill_number, '=')
-          ->condition('hub', $rs_code, '=')
+          ->condition('distributor_id', $dis_id, '=')
           ->execute();
+      $facility_code = get_facility_code($dis_id);
       // dpm($updated_bill_rows, '$updated_bill_rows');
       // if (!empty($updated_bill_rows)) {
-      $reference_no = $trip_number . '_' . $rs_code . '_' . $bill_number;
-      $bill_row_id = _get_bill_row_id_using_reference_no($reference_no);
+      $reference_no = $trip_number . '_' . $facility_code . '_' . $bill_number;
+     
+      //$bill_row_id = _get_bill_row_id_using_reference_no($reference_no);
+      $bill_row_id = _get_bill_row_id($trip_number,$bill_number,$dis_id);
       //  dpm($bill_row_id, '$bill_row_id');
 
       if ($order_status == 'deliver') {

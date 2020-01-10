@@ -60,6 +60,7 @@ function full_deliver_upload_form_validate($form, &$form_state) {
 
       global $user;
       $rs_code = dispatch_planning_get_rscode_using_uid($user->uid);
+      $distributor_id = change_feeds_import_get_distributor_id($user->uid);
       foreach ($datas as $key => $val) {
         $bill_Number = $val['Bill Number'];
         $trip_id = $val['Trip Id'];
@@ -93,7 +94,7 @@ function full_deliver_upload_form_validate($form, &$form_state) {
         $query->fields('ad', array('bill_number'));
         $query->condition('ad.bill_number', $bill_Number);
         $query->condition('ad.runsheet_number', $trip_id);
-        $query->condition('ad.hub', $rs_code);
+        $query->condition('ad.distributor_id', $distributor_id);
         $query->isNull('ad.res_status');
         $res = $query->execute()->fetchField();
         if (empty($res)) {
@@ -165,8 +166,8 @@ function full_deliver_upload_form_finished($success, $results, $operations) {
 
 function update_data_in_dispatch_data_table($data) {
   global $user;
-  $rs_code = dispatch_planning_get_rscode_using_uid($user->uid);
-
+  $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+  $facility_code = get_facility_code($distributor_id);
   foreach ($data as $v) {
     $bill_number = $v['Bill Number'];
     $trip_id = $v['Trip Id'];
@@ -181,7 +182,7 @@ function update_data_in_dispatch_data_table($data) {
         ))
         ->condition('bill_number', $bill_number, '=')
         ->condition('runsheet_number', $trip_id, '=')
-        ->condition('hub', $rs_code, '=')
+        ->condition('distributor_id', $distributor_id, '=')
         ->execute();
 
     $reference_no = $trip_id . '_' . $rs_code . '_' . $bill_number;

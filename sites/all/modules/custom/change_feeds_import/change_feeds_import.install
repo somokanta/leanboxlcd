@@ -1488,3 +1488,28 @@ function change_feeds_import_update_7120() {
    
   db_create_table('masters_api_log', $schema['masters_api_log']);  
 }
+
+function change_feeds_import_update_7121() {
+  $fields = array(
+   'distributor_id' => array(
+        'description' => 'distributor_id',
+        'type' => 'int',
+        'length' => 32,
+    ),
+  );
+  foreach ($fields as $key => $field) {
+    if (!db_field_exists('outlet_working_hours', $key)) {
+      db_add_field('outlet_working_hours', $key, $field);
+    }
+    if (!db_field_exists('outlet_order_crate', $key)) {
+      db_add_field('outlet_order_crate', $key, $field);
+    }
+    if (!db_field_exists('sku_ean_mrp', $key)) {
+      db_add_field('sku_ean_mrp', $key, $field);
+    }
+    
+  }
+}
+function change_feeds_import_update_7122() {
+    db_change_field('outlet_order_crate', 'outlet_order_no', 'outlet_order_no', array('type' => 'varchar','length'=>100,'not null'=>TRUE));
+}

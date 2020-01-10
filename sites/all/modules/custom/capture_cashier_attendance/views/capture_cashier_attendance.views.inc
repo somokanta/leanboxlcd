@@ -90,6 +90,20 @@ function capture_cashier_attendance_views_data() {
       'handler' => 'views_handler_arument_numeric',
     ),
   );
+  
+  $data['cashier_attendance_api_log']['facility_code'] = array(
+    'title' => t('Facility Code'),
+    'help' => t('Facility Code'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+  );
 
   return $data;
 }

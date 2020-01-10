@@ -24,7 +24,7 @@ function custom_order_box_id_schema() {
       'crate_id' => array(
         'description' => t('Crate Id'),
         'type' => 'varchar',
-        'length' => 255,
+        'length' => 4000,
         'not null' => TRUE,
         'default' => '',
       ),
@@ -41,6 +41,11 @@ function custom_order_box_id_schema() {
        'not null' => TRUE,
        'default' => '',
       ),
+      'facility_code' => array(
+       'description' => t('Facility Code'),
+       'type' => 'varchar',
+       'length' => 100,
+      ),
       'created_time' => array(
        'description' => 'DATA Created Time',
        'type' => 'int',
@@ -53,3 +58,62 @@ function custom_order_box_id_schema() {
 
   return $schema;
 }
+
+
+function custom_order_box_id_update_7120() {
+  $fields = array(
+   'facility_code' => array(
+       'description' => t('Facility Code'),
+       'type' => 'varchar',
+       'length' => 100,
+    ),  
+  );
+  foreach ($fields as $key => $field) {
+    if (!db_field_exists('outlet_order_crate', $key)) {
+      db_add_field('outlet_order_crate', $key, $field);
+    }
+  }
+}
+
+function custom_order_box_id_update_7121() {
+  $fields = array(
+   'distributor_id' => array(
+       'description' => t('Distributor ID'),
+       'type' => 'int',
+    ),  
+  );
+  foreach ($fields as $key => $field) {
+    if (!db_field_exists('outlet_order_crate', $key)) {
+      db_add_field('outlet_order_crate', $key, $field);
+    }
+  }
+}
+function custom_order_box_id_update_7122() {
+  $fields = array(
+    'party_code' => array(
+      'description' => t('Party code'),
+      'type' => 'varchar',
+      'length'=> 100,
+    ),  
+  );
+  foreach ($fields as $key => $field) {
+    if (!db_field_exists('outlet_order_crate', $key)) {
+      db_add_field('outlet_order_crate', $key, $field);
+    }
+  }
+    $fields = array(
+    'order_upload_datetime' => array(
+      'description' => t('Order Upload Datetime'),
+      'type' => 'int',
+      'not null' => TRUE,
+      'default' => 0,
+    ),  
+  );
+  foreach ($fields as $key => $field) {
+    if (!db_field_exists('outlet_order_crate', $key)) {
+      db_add_field('outlet_order_crate', $key, $field);
+    }
+  }
+}
+
+

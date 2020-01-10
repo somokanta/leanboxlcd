@@ -1,0 +1,111 @@
+<?php
+function order_packing_slip_menu(){
+  $items = array();
+  $items['order-packing-slip-report'] =array(
+    'title' => 'Order Packing Slip Report',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('order_packing_slip_form'),
+    'access arguments' => array('order packing slip'),
+    'type' => MENU_CALLBACK,
+    'file' => 'form/order_packing_slip.form.inc',
+  );
+  
+    $items['download-order-packing-data/%/%'] =array(
+    'title' => 'Download Order Packing Slip Report',
+    'page callback' => 'download_order_packing_slip',
+    'page arguments' => array(1, 2),
+    'access arguments' => array('order packing slip'),
+    'type' => MENU_CALLBACK,
+    'file' => 'form/order_packing_slip.form.inc',
+  );
+  return $items;
+}
+
+function order_packing_slip_permission() {
+  return array(
+    'order packing slip' => array(
+      'title' => t('order packing slip'),
+      'description' => t('screen for order box id mapping.'),
+    ),
+  );
+}
+function order_packing_slip_services_resources(){
+  //$cashier_resource = array();
+  $order_packing_slip_resource = array(
+    '#api_version' => 3002,
+  );
+
+  $order_packing_slip_resource = [
+    'order-packing-slip-data' => [
+      'actions' => [
+        'order-packing-api' => [
+          'help' => 'Retrieves Order Packing Slip data',
+          'callback' => 'fetch_order_packing_slip_api_data',
+          'args' => array(
+            array(
+              'name' => 'data',
+              'type' => 'array',
+              'description' => 'Post data',
+              'source' => 'data',
+              'optional' => TRUE,
+            ),
+          ),
+          'access arguments' => array('services_access_farey_api'),
+        ]
+      ]
+    ],
+  ];
+
+  return $order_packing_slip_resource;
+}
+
+function fetch_order_packing_slip_api_data($order_packing_slip_data){
+  watchdog('orderpackdata', '<pre>' . print_r($order_packing_slip_data, TRUE) . '</pre>');
+  if(!empty($order_packing_slip_data)){  
+      $party_name = $order_packing_slip_data['party_name'];
+      $order_number = $order_packing_slip_data['order_number'];
+      $order_date = $order_packing_slip_data['order_date'];
+      $seal_number = $order_packing_slip_data['seal_number'];
+      $box_id = $order_packing_slip_data['box_id'];
+      $ptl_id = $order_packing_slip_data['ptl_id'];
+      $total_qty = $order_packing_slip_data['total_qty'];
+      $dist_id = $order_packing_slip_data['distributor_id'];
+      $facility_code = $order_packing_slip_data['facility_code'];
+      $header_data = $order_packing_slip_data['header_data']['header'];
+      $row_data = $order_packing_slip_data['row_data'];
+      
+        $orderpacking_data = db_insert('order_packing_slip_api_data') // Table name no longer needs {}
+      ->fields(array(
+        'order_no' => $order_number,
+        'order_date' => strtotime($order_date),
+        'party_name' => $party_name,
+        'box_id' => $box_id,
+        'seal_number' => $seal_number,
+        'ptl_id' => $ptl_id,
+        'total_qty' => $total_qty,
+        'header_data' => json_encode($header_data),
+        'row_data' => json_encode($row_data),
+        'request_time' => time(),
+        'distributor_id' => $dist_id,
+        'facility_code' => $facility_code,
+      ))
+      ->execute();
+    $result['flag'] = '1';
+    $result['result'] = 'Data updated Sucessfully.';
+  }else{
+    $result['flag'] = '0';
+    $result['result'] = 'No data was updated.';
+  }
+  
+  return $result;
+}
+
+/**
+ * Implements of hook_views_api().
+ */
+function order_packing_slip_views_api() {
+   return array(
+     'api' => 3,
+     'path' => drupal_get_path('module', 'order_packing_slip') . '/views'
+   );
+}
