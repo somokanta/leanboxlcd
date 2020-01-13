@@ -15,7 +15,7 @@ function update_crate_id_data($outlet_order_ref, $crate_id, $order_date, $party_
                 'crate_id' => $crate_id ? $crate_id : '',
                 'order_date' => $order_date ? $order_date : '',
                 'party_name' => $party_name ? $party_name : '',
-                'distributor_id' => $distributor_id ? $distributor_id : '',
+                'distributor_id' => $distributor_id ? $distributor_id : 0,
                 'facility_code' => $facility_code ? $facility_code : '',
                 'party_code' => $party_code ? $party_code : '',
                 'created_time' => REQUEST_TIME,
