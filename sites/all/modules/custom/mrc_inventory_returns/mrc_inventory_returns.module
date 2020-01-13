@@ -440,7 +440,7 @@ function get_notes_denominations() {
   global $user;
   $dis_id = change_feeds_import_get_distributor_id($user->uid);
   $query = db_query("SELECT distinct CAST(title AS UNSIGNED) AS title,nid  FROM {node}"
-    . " WHERE type = 'notes_denominations'  and status =1 and n.uid= $dis_id order by title desc");
+    . " WHERE type = 'notes_denominations'  and status =1 and node.uid= $dis_id order by title desc");
   $result = $query->fetchAll(PDO::FETCH_ASSOC);
   return $result;
 }
