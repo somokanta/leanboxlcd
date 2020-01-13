@@ -1848,6 +1848,10 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
     }
         // category validation
     $category = $item['category'];
+    if(empty($category)) {
+        drupal_set_message("Category can't be empty for sub category $sub_category.", 'error');
+        $entity->feeds_item->skip = TRUE;
+    }
     $check_category_nid = check_product_category_exist($category, $distributor_id);
     if(!empty($category)) {
       if(empty($check_category_nid)) {
