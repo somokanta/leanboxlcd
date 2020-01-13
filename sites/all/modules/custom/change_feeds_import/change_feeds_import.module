@@ -1735,6 +1735,9 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
     // sub-putaway group validation
     $sub_putaway_grp = $item['sub-putaway group'];
     $check_sub_putaway_grp_nid = check_sub_putaway_group_exist($sub_putaway_grp, $distributor_id);
+    if (!empty($check_sub_putaway_grp_nid)) {
+        $entity->field_sub_putaway_group['und'][0]['nid'] = $check_sub_putaway_grp_nid;
+    }
     //temporary fix
 //    if(!empty($sub_putaway_grp)) {
 //      if(empty($check_sub_putaway_grp_nid)) {

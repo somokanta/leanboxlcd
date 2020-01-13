@@ -109,7 +109,8 @@ function create_sku7code_master($val = array(),$distributor_id) {
         node_object_prepare($node); // Sets some defaults. Invokes hook_prepare() and hook_node_prepare().
         $node->language = LANGUAGE_NONE; // Or e.g. 'en' if locale is enabled
         $node->uid = $distributor_id;
-        $node->status = $val['status']; //(1 or 0): published or not
+        //$node->status = $val['status']; //(1 or 0): published or not
+        $node->status = 1;
         $node->field_unit_case_units_[LANGUAGE_NONE][0]['value'] = $val['field_upc'];
         $node->field_product_name[LANGUAGE_NONE][0]['value'] = $val['field_lb_sku_product_name'];
         $node->field_sku7_code[LANGUAGE_NONE][0]['value'] = $val['title'];
