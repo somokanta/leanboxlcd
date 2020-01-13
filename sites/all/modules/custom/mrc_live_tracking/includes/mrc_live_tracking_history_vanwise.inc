@@ -37,7 +37,7 @@ function van_live_tracking_history_vanwise() {
 function van_live_tracking_history_vanwise_form($form, &$form_state) {
   global $user;
   $distributor_id = change_feeds_import_get_distributor_id($user->uid);
-  $rs_code = dispatch_planning_get_rscode_using_uid($user->uid);
+//  $rs_code = dispatch_planning_get_rscode_using_uid($user->uid);
 
   drupal_add_js(drupal_get_path('module', 'mrc_live_tracking') . '/js/live_tracking_page_refresh.js');
   $form = array();
@@ -215,7 +215,7 @@ function van_live_tracking_history_vanwise_form_validate($form, &$form_state) {
 function van_live_tracking_history_vanwise_form_submit($form, &$form_state) {
   global $user;
   $distributor_id = change_feeds_import_get_distributor_id($user->uid);
-  $rs_code = dispatch_planning_get_rscode_using_uid($user->uid);
+//  $rs_code = dispatch_planning_get_rscode_using_uid($user->uid);
   $trip_id = $form_state['values']['trip_id'];
   $trip_ids_new = $form_state['values']['trip_ids'];
   $dispatch_date = $form_state['values']['dispatch_date'];
@@ -273,7 +273,7 @@ function van_live_tracking_history_vanwise_form_submit($form, &$form_state) {
     //Driver wise data
     $query = db_select('van_live_tracking', 'vlt');
     $query->condition('vlt.distributor_id', $distributor_id, '=');
-    $query->condition('vlt.employeecode', db_like($rs_code) . '%', 'LIKE');
+//    $query->condition('vlt.employeecode', db_like($rs_code) . '%', 'LIKE');
     if (!empty($cashier_name)) {
       $query->condition('vlt.employeecode', '%' . db_like($cashier_name) . '%', 'LIKE');
     }

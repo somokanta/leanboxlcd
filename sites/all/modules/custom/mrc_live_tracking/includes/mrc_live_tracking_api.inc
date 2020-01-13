@@ -12,6 +12,10 @@ function get_live_tracking_van_api_data($data) {
       $rs_code_string = explode("_", $value['employeeCode']);
       $rs_code = $rs_code_string[0];
       $distributor_id = get_distributor_id_using_rscode($rs_code);
+       if(empty($distributor_id)){
+         $rs_code = $rs_code == 1 ? 'lakme' : $rs_code;
+         $distributor_id = get_distributor_id_using_rscode($rs_code);
+     }
       if (!empty($distributor_id)) {
 //        db_merge('van_live_tracking')
 //          ->key(array('employeecode' => $value['employeeCode']))

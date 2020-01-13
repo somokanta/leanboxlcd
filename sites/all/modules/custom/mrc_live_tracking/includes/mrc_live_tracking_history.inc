@@ -35,7 +35,7 @@ function van_live_tracking_history() {
 function van_live_tracking_history_form($form, &$form_state) {
   global $user;
   $distributor_id = change_feeds_import_get_distributor_id($user->uid);
-  $rs_code = dispatch_planning_get_rscode_using_uid($user->uid);
+//  $rs_code = dispatch_planning_get_rscode_using_uid($user->uid);
   
   drupal_add_js(drupal_get_path('module', 'mrc_live_tracking') . '/js/live_tracking_page_refresh.js');
   $form = array();
@@ -53,7 +53,7 @@ function van_live_tracking_history_form($form, &$form_state) {
   $query = db_select('van_live_tracking', 'vlt');
   $query->condition('vlt.distributor_id', $distributor_id, '=');
   $query->condition('vlt.tracktime', $today_timestamp, '>=');
-  $query->condition('vlt.employeecode', db_like($rs_code) . '%', 'LIKE');  
+//  $query->condition('vlt.employeecode', db_like($rs_code) . '%', 'LIKE');
   $query->fields('vlt', array('employeecode', 'tracktime','battery','speed','latitude', 'longitude'));
   $query->orderBy('vlt.employeecode', 'asc');
   $query->orderBy('vlt.id', 'asc');
