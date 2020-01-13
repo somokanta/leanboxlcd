@@ -134,6 +134,7 @@ function working_hours_form_callback() {
   if (!empty($party_name)) {
     $query->condition('pn.field_hul_party_name_value', $party_name, '=');
   }
+  $query->condition('wh.distributor_id',$distributor_id );
   $query->fields('wh', array('hul_code', 'from_time', 'to_time', 'special_days', 'updated_time'));
   $query->fields('pn', array('field_hul_party_name_value'));
   $query->orderBy('wh.id');
@@ -304,11 +305,12 @@ function working_hours_data_report($hul_code, $party_name) {
   if (!empty($hul_code)) {
     $query1->condition('wh.hul_code', $hul_code, '=');
   }
-  $query1->join('node', 'n', 'n.title = wh.hul_code');
+  $query1->leftjoin('node', 'n', 'n.title = wh.hul_code');
   $query1->leftjoin('field_data_field_hul_party_name', 'pn', 'pn.entity_id = n.nid');
   if (!empty($party_name)) {
     $query1->condition('pn.field_hul_party_name_value', $party_name, '=');
   }
+  $query1->condition('wh.distributor_id',$distributor_id );
   $query1->fields('wh', array('hul_code', 'days', 'from_time', 'to_time', 'updated_time'));
   $query1->fields('pn', array('field_hul_party_name_value'));
   $query1->orderBy('wh.id');
@@ -337,11 +339,12 @@ function working_hours_data_report($hul_code, $party_name) {
   if (!empty($hul_code)) {
     $query->condition('wh.hul_code', $hul_code, '=');
   }
-  $query->join('node', 'n', 'n.title = wh.hul_code');
+  $query->leftjoin('node', 'n', 'n.title = wh.hul_code');
   $query->leftjoin('field_data_field_hul_party_name', 'pn', 'pn.entity_id = n.nid');
   if (!empty($party_name)) {
     $query->condition('pn.field_hul_party_name_value', $party_name, '=');
   }
+  $query->condition('wh.distributor_id',$distributor_id );
   $query->fields('wh', array('hul_code', 'from_time', 'to_time', 'special_days', 'updated_time'));
   $query->fields('pn', array('field_hul_party_name_value'));
   $query->orderBy('wh.id');
