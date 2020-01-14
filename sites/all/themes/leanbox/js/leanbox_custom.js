@@ -16,5 +16,7 @@ jQuery(document).ready(function($){
     	$(".menu_overlay").toggle();
     	$(".menu_dropdown").stop(true,true).slideUp();
     });
+    
+    $('.printpdf').click(function (){ window.print();});
 
 });
