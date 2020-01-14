@@ -87,7 +87,7 @@ function order_packing_slip_form($form, &$form_state){
      $from_bill_date = $form_state['values']['from_bill_date'];
      $to_bill_date = $form_state['values']['to_bill_date'];
     
-    $open_pdf_link = l('Open PDF', "/download-order-packing-data/$from_bill_date/$to_bill_date" ,array('attributes'=>array('class' => array('printpdf'))));
+    $open_pdf_link = l('Open PDF', "/download-order-packing-data/$from_bill_date/$to_bill_date" ,array('attributes'=>array("target" => "_blank",'class' => array('print-pdf'))));
     $form['dowmload_mark'] = array(
       '#type' => 'markup',
       '#markup' => $open_pdf_link,
