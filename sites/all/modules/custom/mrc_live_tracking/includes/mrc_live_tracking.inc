@@ -53,7 +53,7 @@ function van_live_tracking_form($form, &$form_state) {
   $query = db_select('van_live_tracking', 'vlt');
   $query->condition('vlt.distributor_id', $distributor_id, '=');
   $query->condition('vlt.tracktime', $today_timestamp, '>=');
-  $query->condition('vlt.employeecode', db_like($rs_code) . '%', 'LIKE');  
+  //$query->condition('vlt.employeecode', db_like($rs_code) . '%', 'LIKE');  
   $query->fields('vlt', array('employeecode', 'tracktime','battery','speed','latitude', 'longitude'));
   $query->orderBy('vlt.employeecode', 'asc');
   $query->orderBy('vlt.id', 'asc');
