@@ -75,7 +75,7 @@ function fetch_order_packing_slip_api_data($order_packing_slip_data){
     $row_data = $order_packing_slip_data['row_data'];
 
     $orderpacking_data = db_merge('order_packing_slip_api_data') // Table name no longer needs {}
-      ->key(array('outlet_order_no' => $order_number, 'box_id' => $box_id))
+      ->key(array('outlet_order_no' => $order_number, 'box_id' => $box_id,'distributor_id' => $dist_id))
       ->fields(array(
         'order_no' => $order_number,
         'order_date' => strtotime($order_date),
