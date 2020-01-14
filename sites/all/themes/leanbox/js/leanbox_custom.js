@@ -17,7 +17,7 @@ jQuery(document).ready(function($){
     	$(".menu_dropdown").stop(true,true).slideUp();
     });
     
-    $('.printpdf').click(function (event){
+    $('.print-pdf').click(function (event){
         console.log("print");
         event.preventDefault();
         window.print();});
