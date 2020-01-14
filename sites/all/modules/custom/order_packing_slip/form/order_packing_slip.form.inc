@@ -165,6 +165,7 @@ function order_packing_slip_form_submit($form,&$form_state){
 function download_order_packing_slip($from_bill_date,$to_bill_date){
   global $user;
   $user_id = $user->uid;
+  drupal_add_js(drupal_get_path('module', 'order_packing_slip') . '/js/pdf_print.js');
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
    if(!empty($from_bill_date) && !empty($to_bill_date)){
     $query = db_select('node', 'n');
