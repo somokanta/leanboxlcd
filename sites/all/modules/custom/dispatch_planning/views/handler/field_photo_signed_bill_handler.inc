@@ -35,6 +35,8 @@ class field_photo_signed_bill_handler extends views_handler_field {
     $query->fields('vrs_trip', array('photo_signed_bill'));
     $photo_signed_bill = $query->execute()->fetchField();
     
+    $photo_signed_bill = '<a target="_blank" href="' . $photo_signed_bill . '">' . $photo_signed_bill;
+
     return $photo_signed_bill;
    }
 

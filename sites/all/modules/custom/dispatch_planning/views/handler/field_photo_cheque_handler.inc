@@ -35,6 +35,8 @@ class field_photo_cheque_handler extends views_handler_field {
     $query->fields('vrs_trip', array('photo_cheque'));
     $photo_cheque = $query->execute()->fetchField();
     
+    $photo_cheque = '<a target="_blank" href="' . $photo_cheque . '">' . $photo_cheque;
+
     return $photo_cheque;
    }
 
