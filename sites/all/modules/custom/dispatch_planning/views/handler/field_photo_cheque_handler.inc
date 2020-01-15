@@ -24,7 +24,6 @@ class field_photo_cheque_handler extends views_handler_field {
    }
 
    function render($data) {
-       dpm($data);
     $trip_id = $data->dispatch_planning_api_data_runsheet_number;
     $bill_number = $data->dispatch_planning_api_data_bill_number;
     $distributor_id = $data->dispatch_planning_api_data_distributor_id;
