@@ -26,10 +26,12 @@ class field_photo_signed_bill_handler extends views_handler_field {
    function render($data) {
     $trip_id = $data->dispatch_planning_api_data_runsheet_number;
     $bill_number = $data->dispatch_planning_api_data_bill_number;
+    $distributor_id = $data->dispatch_planning_api_data_distributor_id;
     
     $query = db_select('vrs_trip_items', 'vrs_trip');
     $query->condition('vrs_trip.trip_id', $trip_id, "=");
     $query->condition('vrs_trip.bill_number', $bill_number, "=");
+    $query->condition('vrs_trip.distributor_id', $distributor_id, "=");
     $query->fields('vrs_trip', array('photo_signed_bill'));
     $photo_signed_bill = $query->execute()->fetchField();
     
