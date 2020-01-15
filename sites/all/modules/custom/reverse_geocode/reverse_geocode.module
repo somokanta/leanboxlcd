@@ -712,7 +712,7 @@ function trip_filters_submit($form, &$form_state) {
 
     if (!empty($lat) && !empty($lng)) {
       if (empty($street) && empty($locality) && empty($sublocality) && empty($poi)) {
-        $result = reverse_geocode_results($lat, $lng);
+        $result = reverse_geocode_results($lat, $lng, 'trip_filters_submit');
         $decoded_data = json_decode($result);
         $decoded_result = $decoded_data->results;
         $decoded_city = $decoded_result[0]->city;
@@ -1019,7 +1019,7 @@ function party_filters_submit(&$form, &$form_state) {
 
     if (!empty($lat) && !empty($lng)) {
       if (empty($street) && empty($locality) && empty($sublocality) && empty($poi)) {
-        $result = reverse_geocode_results($lat, $lng);
+        $result = reverse_geocode_results($lat, $lng, 'party_filters_submit');
         $decoded_data = json_decode($result);
         $decoded_result = $decoded_data->results;
         $decoded_city = $decoded_result[0]->city;
@@ -1266,9 +1266,7 @@ function lat_lng_results($area_hook, $sales_day, $van_pl_group) {
   echo json_encode($res);
 }
 
-function reverse_geocode_results($lat, $lng) {
-  global $base_url;
-  $current_path = $base_url . '/' . current_path();
+function reverse_geocode_results($lat, $lng, $page_name ='default') {
   $license_key = variable_get('mapmyindia_rest_key', 'z94i9hvuqcsz7amywt76aknw8dx9o15z');
 
   $url = "https://apis.mapmyindia.com/advancedmaps/v1/$license_key/rev_geocode" . "?lng=$lng&lat=$lat";
@@ -1292,7 +1290,7 @@ function reverse_geocode_results($lat, $lng) {
   }
   db_insert('map_my_india_api_log')
      ->fields(array(
-        'reference_number' => $current_path,
+        'reference_number' => $page_name,
         'request_data' => $url,
         'request_time' => time(),
         'response_data' => $result,
@@ -1406,7 +1404,7 @@ function reverse_geocode_update_hul_lat_lng($hul_code, $lat, $lng) {
 
     try {
       //Call Reverse Geo code API to get details
-      $json_response = reverse_geocode_results($lat, $lng);
+      $json_response = reverse_geocode_results($lat, $lng, 'reverse_geocode_update_hul_lat_lng');
       $node = node_load($nid);
       $node->field_hul_updated_lat[LANGUAGE_NONE][0]['value'] = $lat;
       $node->field_hul_updated_long[LANGUAGE_NONE][0]['value'] = $lng;
@@ -1537,7 +1535,7 @@ function reverse_geocode_node_presave($node) {
 
 
         if (!empty($street) || !empty($locality) || !empty($sublocality) || !empty($poi)) {
-          $result = reverse_geocode_results($new_hul_lat, $new_hul_long);
+          $result = reverse_geocode_results($new_hul_lat, $new_hul_long, 'reverse_geocode_node_presave');
           $decoded_data = json_decode($result);
           $decoded_result = $decoded_data->results;
 
