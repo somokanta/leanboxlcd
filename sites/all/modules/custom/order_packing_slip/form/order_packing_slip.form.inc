@@ -259,6 +259,7 @@ function download_order_packing_slip($from_bill_date,$to_bill_date){
       $i++;
     }
     pdf_using_mpdf_api($table);
+    echo '<script type="text/javascript"> window.print(); </script>';
   }
 }
 

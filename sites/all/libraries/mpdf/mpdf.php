@@ -9394,7 +9394,7 @@ watchdog('testest2p', '<pre>' . print_r($dest, TRUE) . '</pre>');
 			switch ($dest) {
 				case 'I':
 					if ($this->debug && !$this->allow_output_buffering && ob_get_contents()) {
-						echo "<p>Output has already been sent from the script - PDF file generation aborted.</p>";  watchdog('testest2', '<pre>' . print_r($dest, TRUE) . '</pre>');
+						echo "<p>Output has already been sent from the script - PDF file generation aborted.</p>";  
 						exit;
 					}
 					//Send to standard output
@@ -9405,14 +9405,14 @@ watchdog('testest2p', '<pre>' . print_r($dest, TRUE) . '</pre>');
 							throw new MpdfException('Some data has already been output to browser, can\'t send PDF file');
 						if (!isset($_SERVER['HTTP_ACCEPT_ENCODING']) OR empty($_SERVER['HTTP_ACCEPT_ENCODING'])) {
 							// don't use length if server using compression
-							header('Content-Length: ' . strlen($this->buffer));
+							header('Content-Length: ' . strlen($this->buffer)); watchdog('testestheader', '<pre>' . print_r($dest, TRUE) . '</pre>');
 						}
 						header('Content-disposition: inline; filename="' . $name . '"');
 						header('Cache-Control: public, must-revalidate, max-age=0');
 						header('Pragma: public');
 						header('Expires: Sat, 26 Jul 1997 05:00:00 GMT');
 						header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT');
-					}
+          }else{ watchdog('testestelse', '<pre>' . print_r($dest, TRUE) . '</pre>'); }
 					echo $this->buffer;
 					break;
 				case 'D':
