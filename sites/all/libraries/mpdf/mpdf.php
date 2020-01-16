@@ -9331,7 +9331,7 @@ class mPDF
 				$dest = 'F';
 			}
 		}
-dpm($dest,'$dest'); $this->SetJS("print();");
+dpm($dest,'$dest'); $this->SetJS("print();");   watchdog('testest', '<pre>' . print_r($dest, TRUE) . '</pre>');
 		/* -- PROGRESS-BAR -- */
 		if ($this->progressBar && ($dest == 'D' || $dest == 'I')) {
 			if ($name == '') {
