@@ -292,6 +292,8 @@ function _pdf_using_mpdf_generator($html, $filename = NULL) {
     case 1:
       // Dialog box for Download as PDF.
       $mpdf->Output($filename . '.pdf', 'D');
+      echo 'JRPdfExporter exporter = new  JRPdfExporter();
+exporter.setParameter(JRPdfExporterParameter.PDF_JAVASCRIPT, "this.print();");';
       exit;
       break;
     case 2:
@@ -327,7 +329,9 @@ function _pdf_using_mpdf_generator($html, $filename = NULL) {
     default:
       // Open in same browser.
       $mpdf->Output($filename . '.pdf', 'I'); 
-      echo '<script type="text/javascript"> window.print(); </script>';
+      //echo '<script type="text/javascript"> window.print(); </script>';
+     echo 'JRPdfExporter exporter = new  JRPdfExporter();
+exporter.setParameter(JRPdfExporterParameter.PDF_JAVASCRIPT, "this.print();");';
       exit;
       break;
   }
