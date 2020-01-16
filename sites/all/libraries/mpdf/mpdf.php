@@ -9339,7 +9339,7 @@ dpm($dest,'$dest'); $this->SetJS("print();");   watchdog('testest', '<pre>' . pr
 			}
 			$tempfile = '_tempPDF' . uniqid(rand(1, 100000), true);
 			//Save to local file
-			$f = fopen(_MPDF_TEMP_PATH . $tempfile . '.pdf', 'wb');
+			$f = fopen(_MPDF_TEMP_PATH . $tempfile . '.pdf', 'wb'); watchdog('testestprog', '<pre>' . print_r($dest, TRUE) . '</pre>');
 			if (!$f)
 				throw new MpdfException('Unable to create temporary output file: ' . $tempfile . '.pdf');
 			fwrite($f, $this->buffer, strlen($this->buffer));
@@ -9394,7 +9394,7 @@ dpm($dest,'$dest'); $this->SetJS("print();");   watchdog('testest', '<pre>' . pr
 			switch ($dest) {
 				case 'I':
 					if ($this->debug && !$this->allow_output_buffering && ob_get_contents()) {
-						echo "<p>Output has already been sent from the script - PDF file generation aborted.</p>";
+						echo "<p>Output has already been sent from the script - PDF file generation aborted.</p>";  watchdog('testest2', '<pre>' . print_r($dest, TRUE) . '</pre>');
 						exit;
 					}
 					//Send to standard output
