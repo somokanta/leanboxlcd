@@ -287,7 +287,6 @@ function _pdf_using_mpdf_generator($html, $filename = NULL) {
 
   // Writing html content for pdf buffer.
   $mpdf->WriteHTML($html);
-$mpdf->SetJS("print();");
   // Generating PDF File.
   switch(variable_get('pdf_using_mpdf_pdf_save_option')) {
     case 1:
@@ -328,6 +327,7 @@ $mpdf->SetJS("print();");
     default:
       // Open in same browser.
       $mpdf->Output($filename . '.pdf', 'I'); 
+      echo '<script type="text/javascript"> window.print(); </script>';
       exit;
       break;
   }
