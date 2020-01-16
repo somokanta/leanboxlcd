@@ -9331,7 +9331,7 @@ class mPDF
 				$dest = 'F';
 			}
 		}
-dpm($dest,'$dest'); $this->SetJS("print();");   watchdog('testest', '<pre>' . print_r($dest, TRUE) . '</pre>');
+
 		/* -- PROGRESS-BAR -- */
 		if ($this->progressBar && ($dest == 'D' || $dest == 'I')) {
 			if ($name == '') {
@@ -9339,7 +9339,7 @@ dpm($dest,'$dest'); $this->SetJS("print();");   watchdog('testest', '<pre>' . pr
 			}
 			$tempfile = '_tempPDF' . uniqid(rand(1, 100000), true);
 			//Save to local file
-			$f = fopen(_MPDF_TEMP_PATH . $tempfile . '.pdf', 'wb'); watchdog('testestprog', '<pre>' . print_r($dest, TRUE) . '</pre>');
+			$f = fopen(_MPDF_TEMP_PATH . $tempfile . '.pdf', 'wb');
 			if (!$f)
 				throw new MpdfException('Unable to create temporary output file: ' . $tempfile . '.pdf');
 			fwrite($f, $this->buffer, strlen($this->buffer));
@@ -9390,15 +9390,15 @@ dpm($dest,'$dest'); $this->SetJS("print();");   watchdog('testest', '<pre>' . pr
 				$this->UpdateProgressBar(3, '', 'Finished');
 			}
 			/* -- END PROGRESS-BAR -- */
-watchdog('testest2p', '<pre>' . print_r($dest, TRUE) . '</pre>');
+
 			switch ($dest) {
 				case 'I':
-					if ($this->debug && !$this->allow_output_buffering && ob_get_contents()) { watchdog('testestheaderfirst', '<pre>' . print_r($dest, TRUE) . '</pre>');
+					if ($this->debug && !$this->allow_output_buffering && ob_get_contents()) {
 						echo "<p>Output has already been sent from the script - PDF file generation aborted.</p>";  
 						exit;
 					}
 					//Send to standard output
-					if (PHP_SAPI != 'cli') { watchdog('testestheaderr', '<pre>' . print_r($dest, TRUE) . '</pre>');
+					if (PHP_SAPI != 'cli') {
 						//We send to a browser
 						header('Content-Type: application/pdf');
 						if (headers_sent())
@@ -9412,7 +9412,7 @@ watchdog('testest2p', '<pre>' . print_r($dest, TRUE) . '</pre>');
 						header('Pragma: public');
 						header('Expires: Sat, 26 Jul 1997 05:00:00 GMT');
 						header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT');
-          }else{ watchdog('testestelse', '<pre>' . print_r($dest, TRUE) . '</pre>'); }
+					}
 					echo $this->buffer;
 					break;
 				case 'D':
