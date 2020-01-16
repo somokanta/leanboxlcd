@@ -89,3 +89,7 @@ function order_packing_slip_schema() {
   );
   return $schema;
 }
+
+function order_packing_slip_update_7120() {
+    db_change_field('order_packing_slip_api_data', 'order_no', 'order_no', array('type' => 'varchar','length'=>100));
+}
