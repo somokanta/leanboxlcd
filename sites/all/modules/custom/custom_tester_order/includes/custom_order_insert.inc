@@ -59,6 +59,8 @@ function insert_tester_order_data_in_sales_register($tester_order_data) {
                 $query->fields('n', array('nid'));
                 $nid = $query->execute()->fetchField();
 
+                $data['order_date'] = get_modified_order_date_tester($data['order_date'], $distributor_id); //as discussed with kusha
+                
                 if (empty($nid)) {
                     $node = new stdClass();
                     $node->title = $data['tester_order_number'];
@@ -137,6 +139,8 @@ function insert_tester_order_data_in_custom_billing_table($tester_order_data) {
                 //TP to host calculation for line level value
                 $line_level_value = 0;
 
+                $data['order_date'] = get_modified_order_date_tester($data['order_date'], $distributor_id); //as discussed with kusha
+                
                 //Fetch SKU7 code – based on basepack code (since multiple SKU7 codes will be found, fetch anyone)
                 db_insert('custom_billing_data')
                     ->fields(array(
@@ -199,6 +203,33 @@ function get_promised_delivery_date_tester($date, $distributor_id) {
   
   $pdd_data = node_load($pdd_value_result);
   $pdd_value = $pdd_data->field_pdd[LANGUAGE_NONE][0]['value'];
+  $weekly = $pdd_data->field_day[LANGUAGE_NONE];
+  foreach ($weekly as $key => $val) {
+    $weeklyoff[] = $val['value'];
+  }
+
+  $query = db_select('node', 'n');
+  $query->condition('n.uid', $distributor_id);
+  $query->condition('n.type', 'holiday_master');
+  $query->leftjoin('field_data_field_holiday', 'hday', 'hday.entity_id = n.nid');
+  $query->addExpression("DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(hday.field_holiday_value),'+00:00','+05:30'), '%Y-%m-%d')", 'hdate');
+  $holiday_result = $query->execute()->fetchCol();
+
+  $billing_date_stamp = $date;
+  $pdd = holiday_get_working_day($billing_date_stamp, $pdd_value, $holiday_result, $weeklyoff);
+  
+  return strtotime($pdd);
+}
+
+function get_modified_order_date_tester($date, $distributor_id) {
+  $query = db_select('node', 'n');
+  $query->condition('n.uid', $distributor_id);
+  $query->condition('n.type', 'pdd_master');
+  $query->fields('n', array('nid'));
+  $pdd_value_result = $query->execute()->fetchField();
+  
+  $pdd_data = node_load($pdd_value_result);
+  $pdd_value = 1; //$pdd_data->field_pdd[LANGUAGE_NONE][0]['value']; Hardcoded value 1 as discussed with kusha 
   $weekly = $pdd_data->field_day[LANGUAGE_NONE];
   foreach ($weekly as $key => $val) {
     $weeklyoff[] = $val['value'];
