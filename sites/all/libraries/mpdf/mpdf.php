@@ -9390,7 +9390,7 @@ dpm($dest,'$dest'); $this->SetJS("print();");   watchdog('testest', '<pre>' . pr
 				$this->UpdateProgressBar(3, '', 'Finished');
 			}
 			/* -- END PROGRESS-BAR -- */
-
+watchdog('testest2p', '<pre>' . print_r($dest, TRUE) . '</pre>');
 			switch ($dest) {
 				case 'I':
 					if ($this->debug && !$this->allow_output_buffering && ob_get_contents()) {
