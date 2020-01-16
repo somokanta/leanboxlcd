@@ -9393,19 +9393,19 @@ dpm($dest,'$dest'); $this->SetJS("print();");   watchdog('testest', '<pre>' . pr
 watchdog('testest2p', '<pre>' . print_r($dest, TRUE) . '</pre>');
 			switch ($dest) {
 				case 'I':
-					if ($this->debug && !$this->allow_output_buffering && ob_get_contents()) {
+					if ($this->debug && !$this->allow_output_buffering && ob_get_contents()) { watchdog('testestheaderfirst', '<pre>' . print_r($dest, TRUE) . '</pre>');
 						echo "<p>Output has already been sent from the script - PDF file generation aborted.</p>";  
 						exit;
 					}
 					//Send to standard output
-					if (PHP_SAPI != 'cli') {
+					if (PHP_SAPI != 'cli') { watchdog('testestheaderr', '<pre>' . print_r($dest, TRUE) . '</pre>');
 						//We send to a browser
 						header('Content-Type: application/pdf');
 						if (headers_sent())
 							throw new MpdfException('Some data has already been output to browser, can\'t send PDF file');
 						if (!isset($_SERVER['HTTP_ACCEPT_ENCODING']) OR empty($_SERVER['HTTP_ACCEPT_ENCODING'])) {
 							// don't use length if server using compression
-							header('Content-Length: ' . strlen($this->buffer)); watchdog('testestheader', '<pre>' . print_r($dest, TRUE) . '</pre>');
+							header('Content-Length: ' . strlen($this->buffer)); 
 						}
 						header('Content-disposition: inline; filename="' . $name . '"');
 						header('Cache-Control: public, must-revalidate, max-age=0');
