@@ -294,6 +294,7 @@ function _pdf_using_mpdf_generator($html, $filename = NULL) {
     case 1:
       // Dialog box for Download as PDF.
       $mpdf->Output($filename . '.pdf', 'D');
+      $mpdf->SetJS('this.print();');
       exit;
       break;
     case 2:
