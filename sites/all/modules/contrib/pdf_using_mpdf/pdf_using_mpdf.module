@@ -286,15 +286,15 @@ function _pdf_using_mpdf_generator($html, $filename = NULL) {
   }
 
   // Writing html content for pdf buffer.
-  $mpdf->SetJS('this.print();');
+  //$mpdf->SetJS('this.print();');
   $mpdf->WriteHTML($html);
 
   // Generating PDF File.
   switch(variable_get('pdf_using_mpdf_pdf_save_option')) {
     case 1:
       // Dialog box for Download as PDF.
+      watchdog('download', '<pre>' . print_r(2222, TRUE) . '</pre>');
       $mpdf->Output($filename . '.pdf', 'D');
-      $mpdf->SetJS('this.print();');
       exit;
       break;
     case 2:
