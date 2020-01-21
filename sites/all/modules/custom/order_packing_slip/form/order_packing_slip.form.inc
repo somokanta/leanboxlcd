@@ -152,6 +152,7 @@ function order_packing_slip_form_submit($form,&$form_state){
       $query4 = db_select('order_packing_slip_api_data', 'opad');
       $query4->fields('opad', array('order_no','party_name','box_id','seal_number','total_qty','header_data', 'row_data')); 
       $query4->condition('opad.order_no', $unique_orders_arr, 'IN');  //$unique_crate_ids
+      $query4->condition('opad.distributor_id', $distributor_id);  // distributor id
       $table_data = $query4->execute()->fetchAll(\PDO::FETCH_ASSOC);
     }
     $form_state['values']['table_data'] = $table_data;
@@ -207,6 +208,7 @@ function download_order_packing_slip($from_bill_date,$to_bill_date){
       $query4 = db_select('order_packing_slip_api_data', 'opad');
       $query4->fields('opad', array('order_no','party_name','box_id','seal_number','total_qty','header_data', 'row_data')); 
       $query4->condition('opad.order_no', $unique_orders_arr, 'IN');  //$unique_crate_ids
+      $query4->condition('opad.distributor_id', $distributor_id);  // distributor id
       $table_data = $query4->execute()->fetchAll(\PDO::FETCH_ASSOC);
     }
     $table_row_data = $table_data;
