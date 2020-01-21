@@ -206,6 +206,7 @@ function custom_order_box_id_process($max, $data, $distributor_id, $file_name, &
               db_update('outlet_order_crate')
               ->fields(array('order_upload_datetime' =>  REQUEST_TIME))
               ->condition('outlet_order_no', $outlet_order_ref, '=')
+              ->condition('distributor_id', $distributor_id, '=')  
               ->execute();
             
         } else {
