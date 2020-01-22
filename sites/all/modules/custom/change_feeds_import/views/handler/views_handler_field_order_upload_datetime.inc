@@ -12,7 +12,7 @@
 class views_handler_field_order_upload_datetime extends views_handler_field {
 
   function render($values) {
-   $outlet_order_number = $values->_field_data[$this->field_alias]['entity']->field_outlet_order_no['und'][0]['value'];
+   $outlet_order_number= $values->field_field_outlet_order_no[0]['raw']['value'];
    $node_uid = $values->node_uid;
    $order_upload_datetime_result = '';
    if(!empty($outlet_order_number) && !empty($node_uid)){
@@ -24,7 +24,6 @@ class views_handler_field_order_upload_datetime extends views_handler_field {
     if($order_upload_datetime != 0){
       $order_upload_datetime_result = date('d-M-y H:i',$order_upload_datetime); 
     }
-    return $order_upload_datetime_result;  
    }
    return $order_upload_datetime_result;
   }
