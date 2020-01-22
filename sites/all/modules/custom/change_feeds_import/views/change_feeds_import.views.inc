@@ -378,22 +378,6 @@ function change_feeds_import_views_data_alter(&$data) {
       'handler' => 'views_handler_argument_numeric',
     ),
   );
-  
-  $data['field_data_field_outlet_order_no']['table']['group'] = t('Outlet Crate Relationship');
-    $data['field_data_field_outlet_order_no']['dummy_name'] = array(
-    'title' => t('Outlet Crate Relationship'),
-    'help' => t('Outlet Crate Relationship'),
-    'relationship' => array(
-      'title' => 'outletordernumber',
-      'base' => 'outlet_order_crate', // Table we're joining to.
-      'base field' => 'outlet_order_no', // Field on the joined table.
-      'field' => 'field_outlet_order_no_value', // Real field name on the 'foo' table.
-      'handler' => 'views_handler_relationship',
-      'label' => t('outlet order crate and sales data relationship'),
-      'title' => t('outlet order crate and sales data relationship'),
-      'help' => t('More information about relationship.'),
-    ),
-  );
 }
 
 
