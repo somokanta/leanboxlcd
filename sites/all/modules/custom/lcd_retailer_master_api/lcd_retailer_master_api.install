@@ -1,0 +1,56 @@
+<?php
+/*
+ * Implement hook_schema
+ */
+function lcd_retailer_master_api_schema() {
+  $schema = [];
+  $schema['retailer_master_api_cron'] = array(
+    'fields' => array(
+      'id' => array(
+        'description' => 'The primary identifier for a data',
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'title' => array(
+        'description' => t('Node Title'),
+        'type' => 'varchar',
+        'length' => 100,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'node_type' => array(
+        'description' => t('Node Type'),
+        'type' => 'varchar',
+        'length' => 100,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'distributor_id' => array(
+        'description' => t('Distributor ID'),
+        'type' => 'int',
+        'default' => 0,
+      ),
+      'response_flag' => array(
+        'description' => t('Response Flag'),
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'response_remarks' => array(
+        'description' => t('Response Remarks'),
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'created_time' => array(
+       'description' => 'DATA Created Time',
+       'type' => 'int',
+       'not null' => TRUE,
+       'default' => 0,
+      ),
+    ),
+    'primary key' => array('id'),
+  );
+  return $schema;
+}
