@@ -11,18 +11,18 @@ $table_column = 'field_distributor_name_value';
 
 function change_feeds_import_permission() {
     return array(
-        'Distributor Upload File' => array(
-            'title' => t('Distributor Upload File'),
-            'description' => t('Distributor Upload File')
-        ),
-        'Distributor Upload File DFE and RS admin wise' => array(
-            'title' => t('Distributor Upload File DFE and RS admin wise'),
-            'description' => t('Distributor Upload File DFE and RS admin wise')
-        ),
-        'Delete Billing Data' => array(
-            'title' => t('Delete Billing Data'),
-            'description' => t('Delete Billing Data')
-        ),
+      'Distributor Upload File' => array(
+        'title' => t('Distributor Upload File'),
+        'description' => t('Distributor Upload File')
+      ),
+      'Distributor Upload File DFE and RS admin wise' => array(
+        'title' => t('Distributor Upload File DFE and RS admin wise'),
+        'description' => t('Distributor Upload File DFE and RS admin wise')
+      ),
+      'Delete Billing Data' => array(
+        'title' => t('Delete Billing Data'),
+        'description' => t('Delete Billing Data')
+      ),
     );
 }
 
@@ -34,463 +34,463 @@ function change_feeds_import_menu() {
     $items = array();
 
     $items['update-billing-data'] = array(
-        'title' => 'Update Billing Data',
-        'page callback' => 'update_billing_data',
-        'access callback' => TRUE,
-        'type' => MENU_CALLBACK,
+      'title' => 'Update Billing Data',
+      'page callback' => 'update_billing_data',
+      'access callback' => TRUE,
+      'type' => MENU_CALLBACK,
     );
 
     $items['update-billing-data-thankyou'] = array(
-        'title' => 'Update Billing Data Thankyou',
-        'page callback' => 'update_billing_data_thankyou',
-        'access callback' => TRUE,
-        'type' => MENU_CALLBACK,
+      'title' => 'Update Billing Data Thankyou',
+      'page callback' => 'update_billing_data_thankyou',
+      'access callback' => TRUE,
+      'type' => MENU_CALLBACK,
     );
 
 
     // Manually Delete Billing Data
     $items['delete-billing-data'] = array(
-        'title' => 'Delete Billing Data',
-        'page callback' => 'drupal_get_form',
-        'page arguments' => array('delete_billing_form'),
-        'access arguments' => array('Delete Billing Data'),
-        'type' => MENU_CALLBACK,
+      'title' => 'Delete Billing Data',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('delete_billing_form'),
+      'access arguments' => array('Delete Billing Data'),
+      'type' => MENU_CALLBACK,
     );
 
     $items['impact-delivery-cron'] = array(
-        'title' => 'Impact Delivery Report',
-        'page callback' => 'impact_delivery_cron',
-        'access callback' => TRUE,
-        'type' => MENU_CALLBACK,
+      'title' => 'Impact Delivery Report',
+      'page callback' => 'impact_delivery_cron',
+      'access callback' => TRUE,
+      'type' => MENU_CALLBACK,
     );
     $items['impact-delivery-partypack-cron'] = array(
-        'title' => 'Partypack cron Report',
-        'page callback' => 'impact_delivery_partypack_cron',
-        'access callback' => TRUE,
-        'type' => MENU_CALLBACK,
+      'title' => 'Partypack cron Report',
+      'page callback' => 'impact_delivery_partypack_cron',
+      'access callback' => TRUE,
+      'type' => MENU_CALLBACK,
     );
 
     $items['drs-report'] = array(
-        'title' => 'DRS Report',
-        'page callback' => 'drupal_get_form',
-        'page arguments' => array('get_data_of_trip_id_form'),
-        'access arguments' => array('Distributor Upload File'),
-        'type' => MENU_CALLBACK,
+      'title' => 'DRS Report',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('get_data_of_trip_id_form'),
+      'access arguments' => array('Distributor Upload File'),
+      'type' => MENU_CALLBACK,
     );
 
 
 
     $items['download-pdf/%'] = array(
-        'title' => 'Download PDF',
-        'page callback' => 'download_pdf',
-        'page arguments' => array(1),
-        'access callback' => TRUE,
-        'type' => MENU_CALLBACK,
+      'title' => 'Download PDF',
+      'page callback' => 'download_pdf',
+      'page arguments' => array(1),
+      'access callback' => TRUE,
+      'type' => MENU_CALLBACK,
     );
 
 
     $items['drs-report2'] = array(
-        'title' => 'DRS Report',
-        'page callback' => 'drupal_get_form',
-        'page arguments' => array('get_data_of_trip_id_2_form'),
-        'access arguments' => array('Distributor Upload File'),
-        'type' => MENU_CALLBACK,
+      'title' => 'DRS Report',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('get_data_of_trip_id_2_form'),
+      'access arguments' => array('Distributor Upload File'),
+      'type' => MENU_CALLBACK,
     );
 
 
     $items['download-pdf2/%'] = array(
-        'title' => 'Download PDF',
-        'page callback' => 'download_pdf2',
-        'page arguments' => array(1),
-        'access callback' => TRUE,
-        'type' => MENU_CALLBACK,
+      'title' => 'Download PDF',
+      'page callback' => 'download_pdf2',
+      'page arguments' => array(1),
+      'access callback' => TRUE,
+      'type' => MENU_CALLBACK,
     );
 
     // setting form for flat table
     $items['admin/config/flat-table'] = array(
-        'title' => 'Setting Form For Flat Table',
-        'page callback' => 'drupal_get_form',
-        'page arguments' => array('change_feeds_import_setting_form'),
-        'access callback' => 'check_if_fr_role_user_admin',
+      'title' => 'Setting Form For Flat Table',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('change_feeds_import_setting_form'),
+      'access callback' => 'check_if_fr_role_user_admin',
     );
 
     // Upload form for sales register data
     $items['outlet-area-hook/import'] = array(
-        'title' => 'Outlet Area Hook',
-        'description' => 'Import Outlet Area Hook',
-        'page callback' => 'drupal_get_form',
-        'page arguments' => array('change_feeds_import_outlet_area_hook_form'),
-        'access arguments' => array('Distributor Upload File DFE and RS admin wise'),
-        'file' => 'form/outlet_area_hook.inc',
+      'title' => 'Outlet Area Hook',
+      'description' => 'Import Outlet Area Hook',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('change_feeds_import_outlet_area_hook_form'),
+      'access arguments' => array('Distributor Upload File DFE and RS admin wise'),
+      'file' => 'form/outlet_area_hook.inc',
     );
 
     $items['outlet-area-hook-confirm/%'] = array(
-        'title' => 'Outlet Area Hook Confirm Table',
-        'description' => 'Outlet Area Hook Confirm Table',
-        'page callback' => 'change_feeds_import_outlet_area_hook_confirm_content',
-        'page arguments' => array(1),
-        'access arguments' => array('Distributor Upload File'),
-        'file' => 'form/outlet_area_hook.inc',
+      'title' => 'Outlet Area Hook Confirm Table',
+      'description' => 'Outlet Area Hook Confirm Table',
+      'page callback' => 'change_feeds_import_outlet_area_hook_confirm_content',
+      'page arguments' => array(1),
+      'access arguments' => array('Distributor Upload File'),
+      'file' => 'form/outlet_area_hook.inc',
     );
 
     // when confirm is clicked
     $items['outlet-area-hook-confirm/create_content/%'] = array(
-        'title' => 'Outlet content',
-        'description' => 'Outlet Area Hook create Update node of outlet_master',
-        'page callback' => 'change_feeds_import_outlet_area_hook_create_confirm_content',
-        'page arguments' => array(2),
-        'access arguments' => array('Distributor Upload File'),
-        'file' => 'form/outlet_area_hook.inc',
+      'title' => 'Outlet content',
+      'description' => 'Outlet Area Hook create Update node of outlet_master',
+      'page callback' => 'change_feeds_import_outlet_area_hook_create_confirm_content',
+      'page arguments' => array(2),
+      'access arguments' => array('Distributor Upload File'),
+      'file' => 'form/outlet_area_hook.inc',
     );
 
     // when discard is clicked
     $items['outlet-area-hook-discard/%'] = array(
-        'title' => 'Outlet Area Hook delete',
-        'description' => 'Outlet Area Hook Data',
-        'page callback' => 'change_feeds_import_outlet_area_hook_discard_data',
-        'page arguments' => array(1),
-        'access arguments' => array('Distributor Upload File'),
-        'file' => 'form/outlet_area_hook.inc',
+      'title' => 'Outlet Area Hook delete',
+      'description' => 'Outlet Area Hook Data',
+      'page callback' => 'change_feeds_import_outlet_area_hook_discard_data',
+      'page arguments' => array(1),
+      'access arguments' => array('Distributor Upload File'),
+      'file' => 'form/outlet_area_hook.inc',
     );
 
     // Upload form for sales register data
     $items['sales-delivery-data/import'] = array(
-        'title' => 'Sales Delivery Data',
-        'description' => 'Import Sales Delivery Data',
-        'page callback' => 'drupal_get_form',
-        'page arguments' => array('change_feeds_import_sales_delivery_form'),
-        'access arguments' => array('Distributor Upload File'),
-        'file' => 'form/sales_delivery_data.inc',
+      'title' => 'Sales Delivery Data',
+      'description' => 'Import Sales Delivery Data',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('change_feeds_import_sales_delivery_form'),
+      'access arguments' => array('Distributor Upload File'),
+      'file' => 'form/sales_delivery_data.inc',
     );
 
     // Upload form for sales register data
     $items['sales-delivery-data1/import'] = array(
-        'title' => 'Sales Delivery Data',
-        'description' => 'Import Sales Delivery Data',
-        'page callback' => 'drupal_get_form',
-        'page arguments' => array('change_feeds_import_sales_delivery1_form'),
-        'access arguments' => array('Distributor Upload File'),
-        'file' => 'form/sales_delivery_data.inc',
+      'title' => 'Sales Delivery Data',
+      'description' => 'Import Sales Delivery Data',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('change_feeds_import_sales_delivery1_form'),
+      'access arguments' => array('Distributor Upload File'),
+      'file' => 'form/sales_delivery_data.inc',
     );
 
 
     $items['sales-delivery-data-confirm/%'] = array(
-        'title' => 'Sales Delivery Data  Confirm Table',
-        'description' => 'Sales Delivery Data Confirm Table',
-        'page callback' => 'change_feeds_import_sales_delivery_confirm_content',
-        'page arguments' => array(1),
-        'access arguments' => array('Distributor Upload File'),
-        'file' => 'form/sales_delivery_data.inc',
+      'title' => 'Sales Delivery Data  Confirm Table',
+      'description' => 'Sales Delivery Data Confirm Table',
+      'page callback' => 'change_feeds_import_sales_delivery_confirm_content',
+      'page arguments' => array(1),
+      'access arguments' => array('Distributor Upload File'),
+      'file' => 'form/sales_delivery_data.inc',
     );
 
     // when confirm is clicked
     $items['sales-delivery-data-confirm/create_content/%'] = array(
-        'title' => 'Sales Delivery content',
-        'description' => 'Sales Delivery Data create node of sales register',
-        'page callback' => 'change_feeds_import_sales_delivery_create_confirm_content',
-        'page arguments' => array(2),
-        'access arguments' => array('Distributor Upload File'),
-        'file' => 'form/sales_delivery_data.inc',
+      'title' => 'Sales Delivery content',
+      'description' => 'Sales Delivery Data create node of sales register',
+      'page callback' => 'change_feeds_import_sales_delivery_create_confirm_content',
+      'page arguments' => array(2),
+      'access arguments' => array('Distributor Upload File'),
+      'file' => 'form/sales_delivery_data.inc',
     );
 
     // when discard is clicked
     $items['sales-delivery-data-discard/%'] = array(
-        'title' => 'Sales Delivery data delete',
-        'description' => 'Sales Delivery delete Data',
-        'page callback' => 'change_feeds_import_sales_delivery_discard_data',
-        'page arguments' => array(1),
-        'access arguments' => array('Distributor Upload File'),
-        'file' => 'form/sales_delivery_data.inc',
+      'title' => 'Sales Delivery data delete',
+      'description' => 'Sales Delivery delete Data',
+      'page callback' => 'change_feeds_import_sales_delivery_discard_data',
+      'page arguments' => array(1),
+      'access arguments' => array('Distributor Upload File'),
+      'file' => 'form/sales_delivery_data.inc',
     );
 
     // Upload form for sales register data
     $items['outstanding-activity/import'] = array(
-        'title' => 'Import Outstanding Activity Data',
-        'description' => 'Import Outstanding Activity Node',
-        'page callback' => 'drupal_get_form',
-        'page arguments' => array('change_feeds_import_outstanding_activity_form'),
-        'access arguments' => array('Distributor Upload File'),
-        'file' => 'form/outstanding_activity_data.inc',
+      'title' => 'Import Outstanding Activity Data',
+      'description' => 'Import Outstanding Activity Node',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('change_feeds_import_outstanding_activity_form'),
+      'access arguments' => array('Distributor Upload File'),
+      'file' => 'form/outstanding_activity_data.inc',
     );
 
     $items['outstanding-activity-confirm/%'] = array(
-        'title' => 'Outstanding Activity  Confirm Table',
-        'description' => 'Outstanding Activity  Confirm Table',
-        'page callback' => 'change_feeds_import_outstanding_activity_confirm_content',
-        'page arguments' => array(1),
-        'access arguments' => array('Distributor Upload File'),
-        'file' => 'form/outstanding_activity_data.inc',
+      'title' => 'Outstanding Activity  Confirm Table',
+      'description' => 'Outstanding Activity  Confirm Table',
+      'page callback' => 'change_feeds_import_outstanding_activity_confirm_content',
+      'page arguments' => array(1),
+      'access arguments' => array('Distributor Upload File'),
+      'file' => 'form/outstanding_activity_data.inc',
     );
 
     // when confirm is clicked
     $items['outstanding-activity-confirm/create_content/%'] = array(
-        'title' => 'confirm',
-        'description' => 'Confirm to create Outstanding Activity contents',
-        'page callback' => 'change_feeds_import_outstanding_activity_create_confirm_content',
-        'page arguments' => array(2),
-        'access arguments' => array('Distributor Upload File'),
-        'file' => 'form/outstanding_activity_data.inc',
+      'title' => 'confirm',
+      'description' => 'Confirm to create Outstanding Activity contents',
+      'page callback' => 'change_feeds_import_outstanding_activity_create_confirm_content',
+      'page arguments' => array(2),
+      'access arguments' => array('Distributor Upload File'),
+      'file' => 'form/outstanding_activity_data.inc',
     );
 
     // when discard is clicked
     $items['outstanding-activity-discard/%'] = array(
-        'title' => 'Outstanding Activity delete',
-        'description' => 'Outstanding Activity delete Data',
-        'page callback' => 'change_feeds_import_outstanding_activity_discard_data',
-        'page arguments' => array(1),
-        'access arguments' => array('Distributor Upload File'),
-        'file' => 'form/outstanding_activity_data.inc',
+      'title' => 'Outstanding Activity delete',
+      'description' => 'Outstanding Activity delete Data',
+      'page callback' => 'change_feeds_import_outstanding_activity_discard_data',
+      'page arguments' => array(1),
+      'access arguments' => array('Distributor Upload File'),
+      'file' => 'form/outstanding_activity_data.inc',
     );
 
     // Upload form for sales register data
     $items['sales-register/import'] = array(
-        'title' => 'Import Sales Register Data',
-        'description' => 'Import Sales Register Data Node',
-        'page callback' => 'drupal_get_form',
-        'page arguments' => array('change_feeds_import_sales_register_form'),
-        'access arguments' => array('Distributor Upload File'),
-        'file' => 'form/sales_register_data.inc',
+      'title' => 'Import Sales Register Data',
+      'description' => 'Import Sales Register Data Node',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('change_feeds_import_sales_register_form'),
+      'access arguments' => array('Distributor Upload File'),
+      'file' => 'form/sales_register_data.inc',
     );
 
 
 
     $items['sales-confirm/%'] = array(
-        'title' => 'Sales Confirm Table',
-        'description' => 'Sales Register Confirm Table',
-        'page callback' => 'change_feeds_import_sales_confirm_content',
-        'page arguments' => array(1),
-        'access arguments' => array('Distributor Upload File'),
-        'file' => 'form/sales_register_data.inc',
+      'title' => 'Sales Confirm Table',
+      'description' => 'Sales Register Confirm Table',
+      'page callback' => 'change_feeds_import_sales_confirm_content',
+      'page arguments' => array(1),
+      'access arguments' => array('Distributor Upload File'),
+      'file' => 'form/sales_register_data.inc',
     );
 
 
 
     // when confirm is clicked
     $items['sales-confirm/create_content/%'] = array(
-        'title' => 'confirm',
-        'description' => 'Confirm to create sales register contents',
-        'page callback' => 'change_feeds_import_sales_create_confirm_content',
-        'page arguments' => array(2),
-        'access arguments' => array('Distributor Upload File'),
-        'file' => 'form/sales_register_data.inc',
+      'title' => 'confirm',
+      'description' => 'Confirm to create sales register contents',
+      'page callback' => 'change_feeds_import_sales_create_confirm_content',
+      'page arguments' => array(2),
+      'access arguments' => array('Distributor Upload File'),
+      'file' => 'form/sales_register_data.inc',
     );
 
     // when discard is clicked
     $items['sales-discard/%'] = array(
-        'title' => 'sales Discard',
-        'description' => 'sales Discard Data',
-        'page callback' => 'change_feeds_import_sales_discard_data',
-        'page arguments' => array(1),
-        'access arguments' => array('Distributor Upload File'),
-        'file' => 'form/sales_register_data.inc',
+      'title' => 'sales Discard',
+      'description' => 'sales Discard Data',
+      'page callback' => 'change_feeds_import_sales_discard_data',
+      'page arguments' => array(1),
+      'access arguments' => array('Distributor Upload File'),
+      'file' => 'form/sales_register_data.inc',
     );
 
 
     // Upload form for Area Hook Group Master.
     $items['area-hook-grp/import'] = array(
-        'title' => 'Area Hook Group Master',
-        'description' => 'Import Area Hook Group Master Data',
-        'page callback' => 'drupal_get_form',
-        'page arguments' => array('change_feeds_import_area_hook_grp_form'),
-        'access arguments' => array('Distributor Upload File DFE and RS admin wise'),
-        'file' => 'form/area_hook_grp_data.inc',
+      'title' => 'Area Hook Group Master',
+      'description' => 'Import Area Hook Group Master Data',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('change_feeds_import_area_hook_grp_form'),
+      'access arguments' => array('Distributor Upload File DFE and RS admin wise'),
+      'file' => 'form/area_hook_grp_data.inc',
     );
 
 
     $items['area-hook-grp-confirm/%'] = array(
-        'title' => 'Area Hook Group Master Confirm Table',
-        'description' => 'Area Hook Group Master Confirm Table',
-        'page callback' => 'change_feeds_import_area_hook_grp_confirm_content',
-        'page arguments' => array(1),
-        'access arguments' => array('Distributor Upload File'),
-        'file' => 'form/area_hook_grp_data.inc',
+      'title' => 'Area Hook Group Master Confirm Table',
+      'description' => 'Area Hook Group Master Confirm Table',
+      'page callback' => 'change_feeds_import_area_hook_grp_confirm_content',
+      'page arguments' => array(1),
+      'access arguments' => array('Distributor Upload File'),
+      'file' => 'form/area_hook_grp_data.inc',
     );
 
     // when confirm is clicked
     $items['area-hook-grp-confirm/create_content/%'] = array(
-        'title' => 'confirm',
-        'description' => 'Confirm to Area Hook Group Master contents',
-        'page callback' => 'change_feeds_import_area_hook_grp_create_confirm_content',
-        'page arguments' => array(2),
-        'access arguments' => array('Distributor Upload File'),
-        'file' => 'form/area_hook_grp_data.inc',
+      'title' => 'confirm',
+      'description' => 'Confirm to Area Hook Group Master contents',
+      'page callback' => 'change_feeds_import_area_hook_grp_create_confirm_content',
+      'page arguments' => array(2),
+      'access arguments' => array('Distributor Upload File'),
+      'file' => 'form/area_hook_grp_data.inc',
     );
 
     // when discard is clicked
     $items['area-hook-grp-discard/%'] = array(
-        'title' => 'Area Hook Group Master Discard',
-        'description' => 'Area Hook Group Master Discard Data',
-        'page callback' => 'change_feeds_import_area_hook_grp_discard_data',
-        'page arguments' => array(1),
-        'access arguments' => array('Distributor Upload File'),
-        'file' => 'form/area_hook_grp_data.inc',
+      'title' => 'Area Hook Group Master Discard',
+      'description' => 'Area Hook Group Master Discard Data',
+      'page callback' => 'change_feeds_import_area_hook_grp_discard_data',
+      'page arguments' => array(1),
+      'access arguments' => array('Distributor Upload File'),
+      'file' => 'form/area_hook_grp_data.inc',
     );
 
     // Upload form for Sales Day-Van Pl Group Area Grouping.
     $items['day-van-area/import'] = array(
-        'title' => 'Day-Van Pl Group Area Grouping',
-        'description' => 'Import Sales Day-Van Pl Group Area Grouping Data',
-        'page callback' => 'drupal_get_form',
-        'page arguments' => array('change_feeds_import_day_van_area_form'),
-        'access arguments' => array('Distributor Upload File'),
-        'file' => 'form/day_van_area_data.inc',
+      'title' => 'Day-Van Pl Group Area Grouping',
+      'description' => 'Import Sales Day-Van Pl Group Area Grouping Data',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('change_feeds_import_day_van_area_form'),
+      'access arguments' => array('Distributor Upload File'),
+      'file' => 'form/day_van_area_data.inc',
     );
 
     $items['day-van-area-confirm/%'] = array(
-        'title' => 'Day-Van-Area Confirm Table',
-        'description' => 'Day-Van-Area Confirm Table',
-        'page callback' => 'change_feeds_import_day_van_area_confirm_content',
-        'page arguments' => array(1),
-        'access arguments' => array('Distributor Upload File'),
-        'file' => 'form/day_van_area_data.inc',
+      'title' => 'Day-Van-Area Confirm Table',
+      'description' => 'Day-Van-Area Confirm Table',
+      'page callback' => 'change_feeds_import_day_van_area_confirm_content',
+      'page arguments' => array(1),
+      'access arguments' => array('Distributor Upload File'),
+      'file' => 'form/day_van_area_data.inc',
     );
 
     // when confirm is clicked
     $items['day-van-area-confirm/create_content/%'] = array(
-        'title' => 'confirm',
-        'description' => 'Confirm to Day-Van-Area contents',
-        'page callback' => 'change_feeds_import_day_van_area_create_confirm_content',
-        'page arguments' => array(2),
-        'access arguments' => array('Distributor Upload File'),
-        'file' => 'form/day_van_area_data.inc',
+      'title' => 'confirm',
+      'description' => 'Confirm to Day-Van-Area contents',
+      'page callback' => 'change_feeds_import_day_van_area_create_confirm_content',
+      'page arguments' => array(2),
+      'access arguments' => array('Distributor Upload File'),
+      'file' => 'form/day_van_area_data.inc',
     );
 
     // when discard is clicked
     $items['day-van-area-discard/%'] = array(
-        'title' => 'Day-Van-Area Discard',
-        'description' => 'Day-Van-Area Discard Data',
-        'page callback' => 'change_feeds_import_day_van_area_discard_data',
-        'page arguments' => array(1),
-        'access arguments' => array('Distributor Upload File'),
-        'file' => 'form/day_van_area_data.inc',
+      'title' => 'Day-Van-Area Discard',
+      'description' => 'Day-Van-Area Discard Data',
+      'page callback' => 'change_feeds_import_day_van_area_discard_data',
+      'page arguments' => array(1),
+      'access arguments' => array('Distributor Upload File'),
+      'file' => 'form/day_van_area_data.inc',
     );
 
     // Upload form for billing data
     $items['billing_data/import'] = array(
-        'title' => 'Import Billing Data',
-        'description' => 'Import Billing Data Node',
-        'page callback' => 'drupal_get_form',
-        'page arguments' => array('change_feeds_import_billing_data_form'),
-        'access arguments' => array('Distributor Upload File'),
-        'file' => 'form/upload_billing_data.inc',
+      'title' => 'Import Billing Data',
+      'description' => 'Import Billing Data Node',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('change_feeds_import_billing_data_form'),
+      'access arguments' => array('Distributor Upload File'),
+      'file' => 'form/upload_billing_data.inc',
     );
 
     // error validate confirm screen for data
     $items['confirm/%'] = array(
-        'title' => 'Confirm Table',
-        'description' => 'Confirm Table',
-        'page callback' => 'change_feeds_import_confirm_content',
-        'page arguments' => array(1),
-        'access arguments' => array('Distributor Upload File'),
-        'file' => 'form/show_confirm_table.inc',
+      'title' => 'Confirm Table',
+      'description' => 'Confirm Table',
+      'page callback' => 'change_feeds_import_confirm_content',
+      'page arguments' => array(1),
+      'access arguments' => array('Distributor Upload File'),
+      'file' => 'form/show_confirm_table.inc',
     );
 
     // when validate is clicked
     $items['validate/%'] = array(
-        'title' => 'Validate Data',
-        'description' => 'Validate Data',
-        'page callback' => 'change_feeds_import_validate_content',
-        'page arguments' => array(1),
-        'access arguments' => array('Distributor Upload File'),
-        'file' => 'form/validate_content.inc',
+      'title' => 'Validate Data',
+      'description' => 'Validate Data',
+      'page callback' => 'change_feeds_import_validate_content',
+      'page arguments' => array(1),
+      'access arguments' => array('Distributor Upload File'),
+      'file' => 'form/validate_content.inc',
     );
 
     // when confirm is clicked
     $items['confirm/create_content/%'] = array(
-        'title' => 'confirm',
-        'description' => 'Confirm to create billing packing and picking contents',
-        'page callback' => 'change_feeds_import_create_confirm_content',
-        'page arguments' => array(2),
-        'access arguments' => array('Distributor Upload File'),
-        'file' => 'form/create_content_on_confirm.inc',
+      'title' => 'confirm',
+      'description' => 'Confirm to create billing packing and picking contents',
+      'page callback' => 'change_feeds_import_create_confirm_content',
+      'page arguments' => array(2),
+      'access arguments' => array('Distributor Upload File'),
+      'file' => 'form/create_content_on_confirm.inc',
     );
 
     // when discard is clicked
     $items['discard/%'] = array(
-        'title' => 'Discard',
-        'description' => 'Discard Data',
-        'page callback' => 'change_feeds_import_discard_data',
-        'page arguments' => array(1),
-        'access arguments' => array('Distributor Upload File'),
-        'file' => 'form/discard_content.inc',
+      'title' => 'Discard',
+      'description' => 'Discard Data',
+      'page callback' => 'change_feeds_import_discard_data',
+      'page arguments' => array(1),
+      'access arguments' => array('Distributor Upload File'),
+      'file' => 'form/discard_content.inc',
     );
 
     // setting form for views name used in hook_views_query_alter
     $items['admin/config/views-name-conf'] = array(
-        'title' => 'Setting Form For Storing Views Name',
-        'page callback' => 'drupal_get_form',
-        'page arguments' => array('storing_views_name_form'),
-        'access callback' => 'check_if_fr_role_user_admin',
+      'title' => 'Setting Form For Storing Views Name',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('storing_views_name_form'),
+      'access callback' => 'check_if_fr_role_user_admin',
     );
 
     // Upload form for revised billing data
     $items['revised_billing_data/import'] = array(
-        'title' => 'Import Revised Billing Data',
-        'description' => 'Import Revised Billing Data Node',
-        'page callback' => 'drupal_get_form',
-        'page arguments' => array('change_feeds_import_revised_billing_data_form'),
-        'access arguments' => array('Distributor Upload File'),
-        'file' => 'form/revised_billing_data.inc',
+      'title' => 'Import Revised Billing Data',
+      'description' => 'Import Revised Billing Data Node',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('change_feeds_import_revised_billing_data_form'),
+      'access arguments' => array('Distributor Upload File'),
+      'file' => 'form/revised_billing_data.inc',
     );
 
     // RE-Upload form for sales register data
     $items['reupload_sales_register/import'] = array(
-        'title' => 'Re Upload Sales Register Data',
-        'description' => 'Re Upload Sales Register Data Node',
-        'page callback' => 'drupal_get_form',
-        'page arguments' => array('change_feeds_import_reupload_sales_register_form'),
-        'access arguments' => array('Distributor Upload File'),
-        'file' => 'form/reupload_sales_register_data.inc',
+      'title' => 'Re Upload Sales Register Data',
+      'description' => 'Re Upload Sales Register Data Node',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('change_feeds_import_reupload_sales_register_form'),
+      'access arguments' => array('Distributor Upload File'),
+      'file' => 'form/reupload_sales_register_data.inc',
     );
 
     // DRS (Invoice vs Actual Dispatched) Report.
     $items['drs-invoice-vs-actual-dispatched-report'] = array(
-        'title' => 'DRS (Invoice vs Actual Dispatched) Report',
-        'description' => 'DRS (Invoice vs Actual Dispatched) Report',
-        'page callback' => 'drupal_get_form',
-        'page arguments' => array('drs_invoice_vs_actual_dispatched_report_form'),
-        'access arguments' => array('Distributor Upload File'),
-        'file' => 'drs_invoice_vs_actual_dispatched_report.inc',
+      'title' => 'DRS (Invoice vs Actual Dispatched) Report',
+      'description' => 'DRS (Invoice vs Actual Dispatched) Report',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('drs_invoice_vs_actual_dispatched_report_form'),
+      'access arguments' => array('Distributor Upload File'),
+      'file' => 'drs_invoice_vs_actual_dispatched_report.inc',
     );
 
     $items['outlet-working-hours'] = array(
-        'title' => 'Outlet Working Hours',
-        'page callback' => 'drupal_get_form',
-        'page arguments' => array('outlet_working_hours_form'),
-        'type' => MENU_NORMAL_ITEM,
-        'access arguments' => array('Distributor Upload File'),
-        'file' => 'includes/outlet_working_hours.inc',
+      'title' => 'Outlet Working Hours',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('outlet_working_hours_form'),
+      'type' => MENU_NORMAL_ITEM,
+      'access arguments' => array('Distributor Upload File'),
+      'file' => 'includes/outlet_working_hours.inc',
     );
 
-     $items['hul-code/autocomplete/%'] = array(
-        'title' => 'trip_autocomplete',
-        'page callback' => '_get_hul_code_autocomplete',
-        'access callback' => TRUE,
-        'page arguments' => array(2),
-        'type' => MENU_CALLBACK,
+    $items['hul-code/autocomplete/%'] = array(
+      'title' => 'trip_autocomplete',
+      'page callback' => '_get_hul_code_autocomplete',
+      'access callback' => TRUE,
+      'page arguments' => array(2),
+      'type' => MENU_CALLBACK,
     );
 
     $items['working-hours-report'] = array(
-        'title' => 'Outlet Working Hours Report',
-        'page callback' => array('working_hours_form_callback'),
-        'access arguments' => array('returns confirmation'),
-        'type' => MENU_CALLBACK,
-        'file' => 'includes/outlet_working_hours_report.inc',
+      'title' => 'Outlet Working Hours Report',
+      'page callback' => array('working_hours_form_callback'),
+      'access arguments' => array('returns confirmation'),
+      'type' => MENU_CALLBACK,
+      'file' => 'includes/outlet_working_hours_report.inc',
     );
 
     $items['working-hours-report/export'] = array(
-        'title' => 'Outlet Working Hours Report Export',
-        'description' => 'Outlet Working Hours Report Export',
-        'page callback' => array('working_hours_report_export'),
-        'file' => 'includes/outlet_working_hours_report.inc',
-        'access arguments' => array('returns confirmation')
+      'title' => 'Outlet Working Hours Report Export',
+      'description' => 'Outlet Working Hours Report Export',
+      'page callback' => array('working_hours_report_export'),
+      'file' => 'includes/outlet_working_hours_report.inc',
+      'access arguments' => array('returns confirmation')
     );
 
     $items['admin/config/apis-config'] = array(
-        'title' => 'Setting Form For Master APIs Config',
-        'page callback' => 'drupal_get_form',
-        'page arguments' => array('master_api_config_form'),
-        'access callback' => 'check_if_fr_role_user_admin',
+      'title' => 'Setting Form For Master APIs Config',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('master_api_config_form'),
+      'access callback' => 'check_if_fr_role_user_admin',
     );
     return $items;
 }
@@ -500,13 +500,13 @@ function storing_views_name_form($form, $form_state) {
 
     // Views Name
     $form['views_name'] = array(
-        '#type' => 'textarea',
-        '#title' => t('Views Name'),
-        '#description' => t('Above views will be skipped from default logged in distributor condition written in hook_views_query_alter.'),
-        '#default_value' => variable_get('views_name', ''),
-        '#required' => TRUE,
-        '#size' => 60,
-        '#maxlength' => 2048,
+      '#type' => 'textarea',
+      '#title' => t('Views Name'),
+      '#description' => t('Above views will be skipped from default logged in distributor condition written in hook_views_query_alter.'),
+      '#default_value' => variable_get('views_name', ''),
+      '#required' => TRUE,
+      '#size' => 60,
+      '#maxlength' => 2048,
     );
 
     return system_settings_form($form);
@@ -519,15 +519,15 @@ function update_billing_data_thankyou() {
 
 function update_billing_data() {
     $batch = array(
-        'operations' => array(
-            array('change_feeds_import_update_billing', array()),
-        ),
-        'finished' => 'change_feeds_import_update',
-        'title' => t('Creating Billing Data'),
-        'init_message' => t('Billing Data Batch Creation is starting.'),
-        'progress_message' => t('Processed @current out of @total.'),
-        'error_message' => t('Billing Data Batch has encountered an error.'),
-        'file' => drupal_get_path('module', 'change_feeds_import')
+      'operations' => array(
+        array('change_feeds_import_update_billing', array()),
+      ),
+      'finished' => 'change_feeds_import_update',
+      'title' => t('Creating Billing Data'),
+      'init_message' => t('Billing Data Batch Creation is starting.'),
+      'progress_message' => t('Processed @current out of @total.'),
+      'error_message' => t('Billing Data Batch has encountered an error.'),
+      'file' => drupal_get_path('module', 'change_feeds_import')
     );
     batch_set($batch);
     batch_process('update-billing-data-thankyou');
@@ -573,7 +573,8 @@ function change_feeds_import_update_billing(&$context) {
     $context['sandbox']['progress'] = $i;
     if ($context['sandbox']['progress'] < $context['sandbox']['max']) {
         $context['finished'] = $context['sandbox']['progress'] / $context['sandbox']['max'];
-    } else {
+    }
+    else {
         $context['finished'] = 1;
     }
 }
@@ -606,7 +607,7 @@ function download_pdf2($args) {
     if (!empty($args)) {
         $distributor_id = get_distributorid_of_trip($args);
         // If Sum of Bill Value in Sales Register is not equal to Dispatch Value in Dispatch Table 
-        $res = _check_dispatch_value_and_bill_value_mismatch($args,$distributor_id);
+        $res = _check_dispatch_value_and_bill_value_mismatch($args, $distributor_id);
         if (!empty($res['dispatch_bill_value'])) {
             $sum_of_sales_value = $res['sales_bill_value'];
             $dispatch_value = $res['dispatch_bill_value'];
@@ -623,7 +624,8 @@ function download_pdf2($args) {
       <a href="/drs2-download/' . $trip_id . '"><img typeof="foaf:Image" class="img-responsive" src="' . $base_url . '/sites/all/modules/contrib/views_data_export/images/xls.png" alt="XLS" title="XLS" /></a>    </div>';
                 $render = str_replace($xls_string, "", $rendered_html);
                 pdf_using_mpdf_api($render);
-            } else {
+            }
+            else {
                 drupal_set_message(t('Mismatch between: Original Trip Bill Count and Present Trip Bill Count'), 'error');
             }
         }
@@ -637,32 +639,32 @@ function get_data_of_trip_id_form($form, &$form_state) {
     $form['#suffix'] = '</div>';
 
     $form['trip_id'] = array(
-        '#type' => 'textfield',
-        '#title' => t('Trip Id'),
-        '#required' => TRUE,
+      '#type' => 'textfield',
+      '#title' => t('Trip Id'),
+      '#required' => TRUE,
     );
 
     $form['submit'] = array(
-        '#type' => 'submit',
-        '#value' => t('submit'),
-        '#ajax' => array(
-            'wrapper' => 'itemlist-div',
-            'callback' => 'get_data_of_trip_id_form_submit',
-            'method' => 'replace',
-            'effect' => 'fade',
-        ),
-        '#submit' => array('trip_form_submit'),
+      '#type' => 'submit',
+      '#value' => t('submit'),
+      '#ajax' => array(
+        'wrapper' => 'itemlist-div',
+        'callback' => 'get_data_of_trip_id_form_submit',
+        'method' => 'replace',
+        'effect' => 'fade',
+      ),
+      '#submit' => array('trip_form_submit'),
     );
     if (!empty($form_state['views_data'])) {
         $form['hhh'] = array(
-            '#type' => 'markup',
-            '#markup' => $form_state['views_data'],
+          '#type' => 'markup',
+          '#markup' => $form_state['views_data'],
         );
         $trip_id = $form_state['values']['trip_id'];
         $rr = l('Open PDF', "/download-pdf/$trip_id");
         $form['dowmload_mark'] = array(
-            '#type' => 'markup',
-            '#markup' => $rr,
+          '#type' => 'markup',
+          '#markup' => $rr,
         );
     }
     return $form;
@@ -681,50 +683,51 @@ function delete_billing_form($form, &$form_state) {
 
     // selected date for deleting data of billing data by admin
     $form['to_date'] = array(
-        '#type' => 'date_popup',
-        '#date_format' => 'd-m-Y h:i A',
-        '#required' => TRUE,
+      '#type' => 'date_popup',
+      '#date_format' => 'd-m-Y h:i A',
+      '#required' => TRUE,
     );
 
 
     $users = get_list_of_users(); // get all registerd users.
     // Here admin can choose user
     $form['user'] = array(
-        '#type' => 'select',
-        '#title' => t('User'),
-        '#options' => $users,
-        '#required' => TRUE,
+      '#type' => 'select',
+      '#title' => t('User'),
+      '#options' => $users,
+      '#required' => TRUE,
     );
 
 
     $form['check'] = array(
-        '#type' => 'submit',
-        '#value' => t('Check Records'),
-        '#ajax' => array(
-            'wrapper' => 'itemlist-div',
-            'callback' => 'ajax_form_submit',
-            'method' => 'replace',
-            'effect' => 'fade',
-        ),
-        '#submit' => array('check_records_submit'),
+      '#type' => 'submit',
+      '#value' => t('Check Records'),
+      '#ajax' => array(
+        'wrapper' => 'itemlist-div',
+        'callback' => 'ajax_form_submit',
+        'method' => 'replace',
+        'effect' => 'fade',
+      ),
+      '#submit' => array('check_records_submit'),
     );
 
     if (!empty($form_state['values']['billing_count'])) {
         $billing_count = $form_state['values']['billing_count'];
         if ($billing_count == "empty") {
             $msg = "There is no data to delete";
-        } else {
+        }
+        else {
             $msg = "NUmber of Record Going To Delete = $billing_count";
             $form['submit'] = array(
-                '#type' => 'submit',
-                '#value' => t('Delete'),
-                '#submit' => array('delete_billing_form_submit'),
+              '#type' => 'submit',
+              '#value' => t('Delete'),
+              '#submit' => array('delete_billing_form_submit'),
             );
         }
 
         $form['data'] = array(
-            '#type' => 'markup',
-            '#markup' => $msg,
+          '#type' => 'markup',
+          '#markup' => $msg,
         );
     }
 
@@ -747,7 +750,8 @@ function check_records_submit($form, &$form_state) {
     $billing_data = get_custom_data($pass, $start_date, $end_date, $user);
     if (!empty($billing_data)) {
         $billing_count = count($billing_data);
-    } else {
+    }
+    else {
         $billing_count = "empty";
     }
     $form_state['values']['billing_count'] = $billing_count;
@@ -806,8 +810,8 @@ function delete_billing_form_submit($form, &$form_state) {
     foreach ($billing_data as $key => $val) {
         $id = $val['id'];
         $num_deleted = db_delete('custom_billing_data')
-                ->condition('id', $id)
-                ->execute();
+          ->condition('id', $id)
+          ->execute();
     }
 
     // update data(billing_van,billing_loading_date) from Sales register's node's for selected date and user (custom_billing_data).
@@ -909,34 +913,34 @@ function get_data_of_trip_id_2_form($form, &$form_state) {
     $form['#suffix'] = '</div>';
 
     $form['trip_id'] = array(
-        '#type' => 'textfield',
-        '#title' => t('Trip Id'),
-        '#size' => 10,
-        '#required' => TRUE,
-        '#id' => 'drs-report2'
+      '#type' => 'textfield',
+      '#title' => t('Trip Id'),
+      '#size' => 10,
+      '#required' => TRUE,
+      '#id' => 'drs-report2'
     );
 
     $form['submit'] = array(
-        '#type' => 'submit',
-        '#value' => t('submit'),
-        '#ajax' => array(
-            'wrapper' => 'itemlist-div',
-            'callback' => 'get_data_of_trip_id_2_form_submit',
-            'method' => 'replace',
-            'effect' => 'fade',
-        ),
-        '#submit' => array('trip_2_form_submit'),
+      '#type' => 'submit',
+      '#value' => t('submit'),
+      '#ajax' => array(
+        'wrapper' => 'itemlist-div',
+        'callback' => 'get_data_of_trip_id_2_form_submit',
+        'method' => 'replace',
+        'effect' => 'fade',
+      ),
+      '#submit' => array('trip_2_form_submit'),
     );
     if (!empty($form_state['views_data'])) {
         $form['hhh'] = array(
-            '#type' => 'markup',
-            '#markup' => $form_state['views_data'],
+          '#type' => 'markup',
+          '#markup' => $form_state['views_data'],
         );
         $trip_id = $form_state['values']['trip_id'];
         $rr = l('Open PDF', "/download-pdf2/$trip_id", array('attributes' => array("target" => "_blank")));
         $form['dowmload_mark'] = array(
-            '#type' => 'markup',
-            '#markup' => $rr,
+          '#type' => 'markup',
+          '#markup' => $rr,
         );
     }
     return $form;
@@ -950,7 +954,7 @@ function get_data_of_trip_id_form_submit($form, &$form_state) {
 function get_data_of_trip_id_2_form_validate($form, &$form_state) {
     $trip_id = $form_state['values']['trip_id'];
     $distributor_id = get_distributorid_of_trip($trip_id);
-    $nid = get_nid_from_title($trip_id,'dispatch_data',$distributor_id);
+    $nid = get_nid_from_title($trip_id, 'dispatch_data', $distributor_id);
     $node = node_load($nid);
     if ($node) {
         if ($node->field_confirm_bill_edit_status['und'][0]['value'] != 1) {
@@ -958,7 +962,8 @@ function get_data_of_trip_id_2_form_validate($form, &$form_state) {
             unset($form_state['complete form']['dowmload_mark']);
             form_set_error('form', t("Bill Confirmation status is not completed for trip: " . $trip_id));
         }
-    } else {
+    }
+    else {
         unset($form_state['complete form']['hhh']);
         unset($form_state['complete form']['dowmload_mark']);
         form_set_error('form', t("Trip not exists: " . $trip_id));
@@ -970,26 +975,25 @@ function get_data_of_trip_id_2_form_submit($form, &$form_state) {
 }
 
 function trip_2_form_submit($form, &$form_state) {
-  $trip_id = $form_state['values']['trip_id'];
-  $distributor_id = get_distributorid_of_trip($trip_id);
-  $view_name = "drs_report2";
-  $view = views_get_view($view_name, '');
-  // If Sum of Bill Value in Sales Register is not equal to Dispatch Value in Dispatch Table 
-  $res = _check_dispatch_value_and_bill_value_mismatch($trip_id,$distributor_id);
-  if (!empty($res['dispatch_bill_value'])) {
-    $sum_of_sales_value = $res['sales_bill_value'];
-    $dispatch_value = $res['dispatch_bill_value'];
-    if ($sum_of_sales_value != $dispatch_value) {
-      unset($view->display['views_data_export_1']);
+    $trip_id = $form_state['values']['trip_id'];
+    $distributor_id = get_distributorid_of_trip($trip_id);
+    $view_name = "drs_report2";
+    $view = views_get_view($view_name, '');
+    // If Sum of Bill Value in Sales Register is not equal to Dispatch Value in Dispatch Table 
+    $res = _check_dispatch_value_and_bill_value_mismatch($trip_id, $distributor_id);
+    if (!empty($res['dispatch_bill_value'])) {
+        $sum_of_sales_value = $res['sales_bill_value'];
+        $dispatch_value = $res['dispatch_bill_value'];
+        if ($sum_of_sales_value != $dispatch_value) {
+            unset($view->display['views_data_export_1']);
+        }
     }
-  }
-  $view->set_display('drs_report2');
-  $view->set_arguments(array($trip_id));
-  $rendered_html = $view->render();
-  $form_state['views_data'] = $rendered_html;
-  $form_state['rebuild'] = TRUE;
+    $view->set_display('drs_report2');
+    $view->set_arguments(array($trip_id));
+    $rendered_html = $view->render();
+    $form_state['views_data'] = $rendered_html;
+    $form_state['rebuild'] = TRUE;
 }
-
 
 function trip_form_submit($form, &$form_state) {
     $trip_id = $form_state['values']['trip_id'];
@@ -1006,7 +1010,8 @@ function check_if_fr_role_user_admin() {
     global $user;
     if (in_array('administrator', $user->roles)) {
         return TRUE;
-    } else {
+    }
+    else {
         return FALSE;
     }
 }
@@ -1016,50 +1021,50 @@ function change_feeds_import_setting_form($form, $form_state) {
 
     // PARTY PACKING PRODUCTIVITY LINES/Hr
     $form['party_packing_productivity_lines'] = array(
-        '#type' => 'textfield',
-        '#title' => t('PARTY PACKING PRODUCTIVITY LINES/Hr'),
-        '#default_value' => variable_get('party_packing_productivity_lines', ''),
-        '#required' => TRUE,
+      '#type' => 'textfield',
+      '#title' => t('PARTY PACKING PRODUCTIVITY LINES/Hr'),
+      '#default_value' => variable_get('party_packing_productivity_lines', ''),
+      '#required' => TRUE,
     );
 
     // PARTY PACKING COMPLIANCE
     $form['party_packing_compliance'] = array(
-        '#type' => 'textfield',
-        '#title' => t('PARTY PACKING COMPLIANCE'),
-        '#default_value' => variable_get('party_packing_compliance', ''),
-        '#required' => TRUE,
+      '#type' => 'textfield',
+      '#title' => t('PARTY PACKING COMPLIANCE'),
+      '#default_value' => variable_get('party_packing_compliance', ''),
+      '#required' => TRUE,
     );
 
     // Pick Productivity Pick
     $form['pick_productivity_pick'] = array(
-        '#type' => 'textfield',
-        '#title' => t('Pick Productivity Pick / Hr'),
-        '#default_value' => variable_get('pick_productivity_pick', ''),
-        '#required' => TRUE,
+      '#type' => 'textfield',
+      '#title' => t('Pick Productivity Pick / Hr'),
+      '#default_value' => variable_get('pick_productivity_pick', ''),
+      '#required' => TRUE,
     );
 
     // Picking Compliance
     $form['picking_compliance'] = array(
-        '#type' => 'textfield',
-        '#title' => t('Picking Compliance'),
-        '#default_value' => variable_get('picking_compliance', ''),
-        '#required' => TRUE,
+      '#type' => 'textfield',
+      '#title' => t('Picking Compliance'),
+      '#default_value' => variable_get('picking_compliance', ''),
+      '#required' => TRUE,
     );
 
     // EGIR End Time Cut-Off 
     $form['egir_end_time_cutoff'] = array(
-        '#type' => 'textfield',
-        '#title' => t('EGIR End time - Cutoff'),
-        '#default_value' => variable_get('egir_end_time_cutoff', ''),
-        '#required' => TRUE,
+      '#type' => 'textfield',
+      '#title' => t('EGIR End time - Cutoff'),
+      '#default_value' => variable_get('egir_end_time_cutoff', ''),
+      '#required' => TRUE,
     );
 
     // Unloading End Time Cutoff
     $form['unloading_end_time_cutOff'] = array(
-        '#type' => 'textfield',
-        '#title' => t('Unloading End Time - CutOff'),
-        '#default_value' => variable_get('unloading_end_time_cutOff', ''),
-        '#required' => TRUE,
+      '#type' => 'textfield',
+      '#title' => t('Unloading End Time - CutOff'),
+      '#default_value' => variable_get('unloading_end_time_cutOff', ''),
+      '#required' => TRUE,
     );
 
     return system_settings_form($form);
@@ -1158,9 +1163,11 @@ function change_feeds_import_node_insert($node) {
 
             if ($diff == 0 || $diff < 0) {
                 $result[$key]['delay_range'] = "N+2";
-            } elseif ($diff == 1) {
+            }
+            elseif ($diff == 1) {
                 $result[$key]['delay_range'] = "N+3";
-            } else {
+            }
+            else {
                 $result[$key]['delay_range'] = ">N+2";
             }
 
@@ -1175,7 +1182,8 @@ function change_feeds_import_node_insert($node) {
             if ($billing_loading_day < 21) {
                 $month = date("m", $billing_loading_timestamp);
                 $result[$key]['MOC'] = "MOC" . $month;
-            } else {
+            }
+            else {
                 $newdate = strtotime('+1 month', strtotime($billing_loading_date));
                 $next_month = date("m", $newdate);
                 $result[$key]['MOC'] = "MOC" . $next_month;
@@ -1184,9 +1192,11 @@ function change_feeds_import_node_insert($node) {
             ######### Loagic for TDP #######
             if (($billing_loading_day >= 1) && ($billing_loading_day <= 10)) {
                 $result[$key]['TDP'] = "TDP2";
-            } elseif (($billing_loading_day >= 11) && ($billing_loading_day <= 20)) {
+            }
+            elseif (($billing_loading_day >= 11) && ($billing_loading_day <= 20)) {
                 $result[$key]['TDP'] = "TDP3";
-            } else {
+            }
+            else {
                 $result[$key]['TDP'] = "TDP1";
             }
             ########### End Logic for TDP #######
@@ -1198,7 +1208,8 @@ function change_feeds_import_node_insert($node) {
             $party_packing_status = $value['field__party_packingstatus_value'];
             if ($party_packing_status == 2) {
                 $status = "Yes";
-            } else {
+            }
+            else {
                 $status = "No";
             }
 
@@ -1208,33 +1219,33 @@ function change_feeds_import_node_insert($node) {
 
             // insert in flat_billing_data table when node update.(if record is not in table then create new record)
             db_merge('flat_billing_data')
-                    ->key(array('nid' => $node->nid))
-                    ->fields(array(
-                        'nid' => $node->nid,
-                        'bill_number' => $result[$key]['field_bill_number_value'],
-                        'bill_date' => strtotime($result[$key]['field_bill_date_value']) ? strtotime($result[$key]['field_bill_date_value']) : 0,
-                        'vehicle' => $result[$key]['field_vehicle_value'],
-                        'loading_date' => strtotime($result[$key]['field_loading_date_value']) ? strtotime($result[$key]['field_loading_date_value']) : 0,
-                        // 'sum_of_sales_value' => $result[$key]['Sum_of_SALES_VALUE'] ? $result[$key]['Sum_of_SALES_VALUE'] : 0,
-                        //  'sum_of_sales_ret_value' => $result[$key]['Sum_of_SALES_RET_VALUE'] ? $result[$key]['Sum_of_SALES_RET_VALUE'] : 0,
-                        'promised_delivery_date' => strtotime($result[$key]['field_promised_delivery_date_value']) ? strtotime($result[$key]['field_promised_delivery_date_value']) : 0,
-                        'dispatch_date' => strtotime($result[$key]['field_dispatch_date_value']) ? strtotime($result[$key]['field_dispatch_date_value']) : 0,
-                        'delay_days' => $result[$key]['delay_days'] ? $result[$key]['delay_days'] : 0,
-                        'delay_range' => $result[$key]['delay_range'],
-                        // 'return_type' => $return_type,
-                        'ideal_party_packing' => $result[$key]['field_party_packing_value'],
-                        'actual_party_packing' => $status,
-                        'day' => $result[$key]['Day'],
-                        'tdp' => $result[$key]['TDP'],
-                        'month' => $result[$key]['month'],
-                        'moc' => $result[$key]['MOC'],
-                        'week_day' => $result[$key]['Week_day'],
-                        'party_code' => $result[$key]['field_party_code_value'],
-                        'pl_group' => $result[$key]['field_pl_group_value'],
-                        'channel' => $result[$key]['field_channel_value'],
-                        'distributor_name' => $distributor_name
-                    ))
-                    ->execute();
+              ->key(array('nid' => $node->nid))
+              ->fields(array(
+                'nid' => $node->nid,
+                'bill_number' => $result[$key]['field_bill_number_value'],
+                'bill_date' => strtotime($result[$key]['field_bill_date_value']) ? strtotime($result[$key]['field_bill_date_value']) : 0,
+                'vehicle' => $result[$key]['field_vehicle_value'],
+                'loading_date' => strtotime($result[$key]['field_loading_date_value']) ? strtotime($result[$key]['field_loading_date_value']) : 0,
+                // 'sum_of_sales_value' => $result[$key]['Sum_of_SALES_VALUE'] ? $result[$key]['Sum_of_SALES_VALUE'] : 0,
+                //  'sum_of_sales_ret_value' => $result[$key]['Sum_of_SALES_RET_VALUE'] ? $result[$key]['Sum_of_SALES_RET_VALUE'] : 0,
+                'promised_delivery_date' => strtotime($result[$key]['field_promised_delivery_date_value']) ? strtotime($result[$key]['field_promised_delivery_date_value']) : 0,
+                'dispatch_date' => strtotime($result[$key]['field_dispatch_date_value']) ? strtotime($result[$key]['field_dispatch_date_value']) : 0,
+                'delay_days' => $result[$key]['delay_days'] ? $result[$key]['delay_days'] : 0,
+                'delay_range' => $result[$key]['delay_range'],
+                // 'return_type' => $return_type,
+                'ideal_party_packing' => $result[$key]['field_party_packing_value'],
+                'actual_party_packing' => $status,
+                'day' => $result[$key]['Day'],
+                'tdp' => $result[$key]['TDP'],
+                'month' => $result[$key]['month'],
+                'moc' => $result[$key]['MOC'],
+                'week_day' => $result[$key]['Week_day'],
+                'party_code' => $result[$key]['field_party_code_value'],
+                'pl_group' => $result[$key]['field_pl_group_value'],
+                'channel' => $result[$key]['field_channel_value'],
+                'distributor_name' => $distributor_name
+              ))
+              ->execute();
         }
     }
 }
@@ -1253,7 +1264,8 @@ function change_feeds_import_node_update($node) {
         if ($party_picking_ld_stamp < 21) {
             $month = date("m", $timestamp);
             $node->MOC = "MOC" . $month;
-        } else {
+        }
+        else {
             $newdate = strtotime('+1 month', strtotime($party_picking_ld));
             $next_month = date("m", $newdate);
             $node->MOC = "MOC" . $next_month;
@@ -1263,9 +1275,11 @@ function change_feeds_import_node_update($node) {
         ######  logic for TDP ####
         if (($party_picking_ld_stamp >= 1) && ($party_picking_ld_stamp <= 10)) {
             $node->TDP = "TDP2";
-        } elseif (($party_picking_ld_stamp >= 11) && ($party_picking_ld_stamp <= 20)) {
+        }
+        elseif (($party_picking_ld_stamp >= 11) && ($party_picking_ld_stamp <= 20)) {
             $node->TDP = "TDP3";
-        } else {
+        }
+        else {
             $node->TDP = "TDP1";
         }
         ##### End TDP logic #######
@@ -1279,10 +1293,12 @@ function change_feeds_import_node_update($node) {
         ######  logic for Compliant ####
         if (empty($end_time)) {
             $node->compliance = "";
-        } else {
+        }
+        else {
             if ($end_time > $compliance_seconds) {
                 $node->compliance = "Non Compliant";
-            } else {
+            }
+            else {
                 $node->compliance = "Compliant";
             }
         }
@@ -1291,9 +1307,11 @@ function change_feeds_import_node_update($node) {
         $status = $node->field__party_packingstatus['und'][0]['value'];
         if ($status == 1) {
             $status = "In Process";
-        } else if ($status == 2) {
+        }
+        else if ($status == 2) {
             $status = "Completed";
-        } else {
+        }
+        else {
             $status = "Null";
         }
         $distributor_id = $node->field_distributor_uid['und'][0]['value'];
@@ -1302,29 +1320,29 @@ function change_feeds_import_node_update($node) {
 
         // insert in flat_party_packing table when node update.(if record is not in table then create new record)
         db_merge('flat_party_packing')
-                ->key(array('nid' => $node->nid))
-                ->fields(array(
-                    'nid' => $node->nid,
-                    'vehicle' => $node->field_party_packing_vehicle['und'][0]['value'],
-                    'loading_date' => $node->field_party_packing_loading_date['und'][0]['value'] ? $node->field_party_packing_loading_date['und'][0]['value'] : 0,
-                    'party_packing_date' => $node->field_party_packing_date['und'][0]['value'] ? $node->field_party_packing_date['und'][0]['value'] : 0,
-                    'loading_sheet_line' => $node->field_loading_sheet_line['und'][0]['value'] ? $node->field_loading_sheet_line['und'][0]['value'] : 0,
-                    'bill_lines' => $node->field_bill_lines['und'][0]['value'] ? $node->field_bill_lines['und'][0]['value'] : 0,
-                    'each_units' => $node->field_each_units['und'][0]['value'] ? $node->field_each_units['und'][0]['value'] : 0,
-                    'party_packing_start_time' => $start_time ? $start_time : 0,
-                    'party_packing_end_time' => $end_time ? $end_time : 0,
-                    'supervisor' => $node->field_party_packing_supervisor['und'][0]['value'],
-                    'packer_name' => $node->field_party_packer_name['und'][0]['value'],
-                    'team_count' => $node->field_party_packer_team_count['und'][0]['value'] ? $node->field_party_packer_team_count['und'][0]['value'] : 0,
-                    'status' => $status,
-                    'productivity_lines' => $node->party_packing_productivity_lines ? $node->party_packing_productivity_lines : 0,
-                    'party_packing_compliance' => $compliance_seconds ? $compliance_seconds : 0,
-                    'compliance' => $node->compliance,
-                    'tdp' => $node->TDP,
-                    'moc' => $node->MOC,
-                    'distributor_name' => $distributor_name
-                ))
-                ->execute();
+          ->key(array('nid' => $node->nid))
+          ->fields(array(
+            'nid' => $node->nid,
+            'vehicle' => $node->field_party_packing_vehicle['und'][0]['value'],
+            'loading_date' => $node->field_party_packing_loading_date['und'][0]['value'] ? $node->field_party_packing_loading_date['und'][0]['value'] : 0,
+            'party_packing_date' => $node->field_party_packing_date['und'][0]['value'] ? $node->field_party_packing_date['und'][0]['value'] : 0,
+            'loading_sheet_line' => $node->field_loading_sheet_line['und'][0]['value'] ? $node->field_loading_sheet_line['und'][0]['value'] : 0,
+            'bill_lines' => $node->field_bill_lines['und'][0]['value'] ? $node->field_bill_lines['und'][0]['value'] : 0,
+            'each_units' => $node->field_each_units['und'][0]['value'] ? $node->field_each_units['und'][0]['value'] : 0,
+            'party_packing_start_time' => $start_time ? $start_time : 0,
+            'party_packing_end_time' => $end_time ? $end_time : 0,
+            'supervisor' => $node->field_party_packing_supervisor['und'][0]['value'],
+            'packer_name' => $node->field_party_packer_name['und'][0]['value'],
+            'team_count' => $node->field_party_packer_team_count['und'][0]['value'] ? $node->field_party_packer_team_count['und'][0]['value'] : 0,
+            'status' => $status,
+            'productivity_lines' => $node->party_packing_productivity_lines ? $node->party_packing_productivity_lines : 0,
+            'party_packing_compliance' => $compliance_seconds ? $compliance_seconds : 0,
+            'compliance' => $node->compliance,
+            'tdp' => $node->TDP,
+            'moc' => $node->MOC,
+            'distributor_name' => $distributor_name
+          ))
+          ->execute();
     }
 
     if ($node->type == 'picking') {
@@ -1337,7 +1355,8 @@ function change_feeds_import_node_update($node) {
         if ($picking_ld_stamp < 21) {
             $month = date("m", $timestamp);
             $node->MOC = "MOC" . $month;
-        } else {
+        }
+        else {
             $newdate = strtotime('+1 month', strtotime($picking_ld));
             $next_month = date("m", $newdate);
             $node->MOC = "MOC" . $next_month;
@@ -1347,9 +1366,11 @@ function change_feeds_import_node_update($node) {
         ######  logic for TDP ####
         if (($picking_ld_stamp >= 1) && ($picking_ld_stamp <= 10)) {
             $node->TDP = "TDP2";
-        } elseif (($picking_ld_stamp >= 11) && ($picking_ld_stamp <= 20)) {
+        }
+        elseif (($picking_ld_stamp >= 11) && ($picking_ld_stamp <= 20)) {
             $node->TDP = "TDP3";
-        } else {
+        }
+        else {
             $node->TDP = "TDP1";
         }
         ##### End TDP logic #######
@@ -1364,10 +1385,12 @@ function change_feeds_import_node_update($node) {
 
         if (empty($end_time)) {
             $node->compliance = "";
-        } else {
+        }
+        else {
             if ($end_time > $compliance_seconds) {
                 $node->compliance = "Non Compliant";
-            } else {
+            }
+            else {
                 $node->compliance = "Compliant";
             }
         }
@@ -1377,40 +1400,42 @@ function change_feeds_import_node_update($node) {
         $status = $node->field_picking_status['und'][0]['value'];
         if ($status == 1) {
             $status = "In Process";
-        } else if ($status == 2) {
+        }
+        else if ($status == 2) {
             $status = "Completed";
-        } else {
+        }
+        else {
             $status = "Null";
         }
         $distributor_id = $node->field_distributor_uid['und'][0]['value'];
         $distributor_name = change_feeds_import_get_distributor_name($distributor_id);
 
         db_merge('flat_picking')
-                ->key(array('nid' => $node->nid))
-                ->fields(array(
-                    'nid' => $node->nid,
-                    'van_id' => $node->field_picking_van_id['und'][0]['value'] ? $node->field_picking_van_id['und'][0]['value'] : 0,
-                    'loading_date' => $node->field_picking_loading_date['und'][0]['value'] ? $node->field_picking_loading_date['und'][0]['value'] : 0,
-                    'godown_area_id' => $node->field_picking_godown_area_id['und'][0]['value'],
-                    'picking_type' => $node->field_picking_picking_type['und'][0]['value'],
-                    'picking_date' => $node->field_picking_picking_date['und'][0]['value'] ? $node->field_picking_picking_date['und'][0]['value'] : 0,
-                    'picking_start_time' => $start_time ? $start_time : 0,
-                    'picking_end_time' => $end_time ? $end_time : 0,
-                    'pick_lines' => $node->field_pick_lines['und'][0]['value'] ? $node->field_pick_lines['und'][0]['value'] : 0,
-                    'pick_units' => $node->field_pick_units['und'][0]['value'],
-                    'pick_clds' => $node->field_pick_clds['und'][0]['value'] ? $node->field_pick_clds['und'][0]['value'] : 0,
-                    'pick_supervisor' => $node->field_picking_pick_supervisor['und'][0]['value'],
-                    'picker_name' => $node->field_picking_picker_name['und'][0]['value'],
-                    'picking_team_count' => $node->field_picking_picking_team_count['und'][0]['value'] ? $node->field_picking_picking_team_count['und'][0]['value'] : 0,
-                    'status' => $status,
-                    'pick_productivity_pick' => $node->pick_productivity_pick ? $node->pick_productivity_pick : 0,
-                    'picking_compliance' => $compliance_seconds ? $compliance_seconds : 0,
-                    'moc' => $node->MOC,
-                    'tdp' => $node->TDP,
-                    'complaince' => $node->compliance,
-                    'distributor_name' => $distributor_name
-                ))
-                ->execute();
+          ->key(array('nid' => $node->nid))
+          ->fields(array(
+            'nid' => $node->nid,
+            'van_id' => $node->field_picking_van_id['und'][0]['value'] ? $node->field_picking_van_id['und'][0]['value'] : 0,
+            'loading_date' => $node->field_picking_loading_date['und'][0]['value'] ? $node->field_picking_loading_date['und'][0]['value'] : 0,
+            'godown_area_id' => $node->field_picking_godown_area_id['und'][0]['value'],
+            'picking_type' => $node->field_picking_picking_type['und'][0]['value'],
+            'picking_date' => $node->field_picking_picking_date['und'][0]['value'] ? $node->field_picking_picking_date['und'][0]['value'] : 0,
+            'picking_start_time' => $start_time ? $start_time : 0,
+            'picking_end_time' => $end_time ? $end_time : 0,
+            'pick_lines' => $node->field_pick_lines['und'][0]['value'] ? $node->field_pick_lines['und'][0]['value'] : 0,
+            'pick_units' => $node->field_pick_units['und'][0]['value'],
+            'pick_clds' => $node->field_pick_clds['und'][0]['value'] ? $node->field_pick_clds['und'][0]['value'] : 0,
+            'pick_supervisor' => $node->field_picking_pick_supervisor['und'][0]['value'],
+            'picker_name' => $node->field_picking_picker_name['und'][0]['value'],
+            'picking_team_count' => $node->field_picking_picking_team_count['und'][0]['value'] ? $node->field_picking_picking_team_count['und'][0]['value'] : 0,
+            'status' => $status,
+            'pick_productivity_pick' => $node->pick_productivity_pick ? $node->pick_productivity_pick : 0,
+            'picking_compliance' => $compliance_seconds ? $compliance_seconds : 0,
+            'moc' => $node->MOC,
+            'tdp' => $node->TDP,
+            'complaince' => $node->compliance,
+            'distributor_name' => $distributor_name
+          ))
+          ->execute();
     }
 
     if ($node->type == 'egir') { // if content type is EGIR
@@ -1428,7 +1453,8 @@ function change_feeds_import_node_update($node) {
         if ($uploading_stamp < 21) {
             $month = date("m", $uploading_timestamp);
             $node->MOC = "MOC" . $month;
-        } else {
+        }
+        else {
             $newdate = strtotime('+1 month', strtotime($uploading_date));
             $next_month = date("m", $newdate);
             $node->MOC = "MOC" . $next_month;
@@ -1437,9 +1463,11 @@ function change_feeds_import_node_update($node) {
         ######### Loagic for TDP #######
         if (($uploading_stamp >= 1) && ($uploading_stamp <= 10)) {
             $node->TDP = "TDP2";
-        } elseif (($uploading_stamp >= 11) && ($uploading_stamp <= 20)) {
+        }
+        elseif (($uploading_stamp >= 11) && ($uploading_stamp <= 20)) {
             $node->TDP = "TDP3";
-        } else {
+        }
+        else {
             $node->TDP = "TDP1";
         }
         ########### End Logic for TDP #######
@@ -1460,10 +1488,12 @@ function change_feeds_import_node_update($node) {
 
         if (empty($egir_end_time)) {
             $node->compliance = "";
-        } else {
+        }
+        else {
             if ($egir_end_time > $egir_cutoff_seconds) {
                 $node->compliance = "Non Compliant";
-            } else {
+            }
+            else {
                 $node->compliance = "Compliant";
             }
         }
@@ -1479,10 +1509,12 @@ function change_feeds_import_node_update($node) {
 
         if (empty($unloading_end_time)) {
             $node->compliance = "";
-        } else {
+        }
+        else {
             if ($unloading_end_time > $unloading_cutoff_seconds) {
                 $node->compliance = "Non Compliant";
-            } else {
+            }
+            else {
                 $node->compliance = "Compliant";
             }
         }
@@ -1492,38 +1524,40 @@ function change_feeds_import_node_update($node) {
         $status = $node->field_unloading_status['und'][0]['value'];
         if ($status == 1) {
             $status = "In Process";
-        } else if ($status == 2) {
+        }
+        else if ($status == 2) {
             $status = "Completed";
-        } else {
+        }
+        else {
             $status = "Null";
         }
         $distributor_id = $node->field_distributor_uid['und'][0]['value'];
         $distributor_name = change_feeds_import_get_distributor_name($distributor_id);
         // insert in flat_unloading table when node update.(if record is not in table then create new record)
         db_merge('flat_unloading')
-                ->key(array('nid' => $node->nid))
-                ->fields(array(
-                    'nid' => $node->nid,
-                    'invoice_number' => $node->field_invoice_number['und'][0]['value'],
-                    'invoice_date' => $node->field_invoice_date['und'][0]['value'] ? $node->field_invoice_date['und'][0]['value'] : 0,
-                    'truck_no' => $node->field_truck_no['und'][0]['value'],
-                    'from_location' => $node->field_from_location['und'][0]['value'],
-                    'unloading_date' => $node->field_unloading_date['und'][0]['value'] ? $node->field_unloading_date['und'][0]['value'] : 0,
-                    'unloading_start_time' => strtotime($node->field_unloading_start_time['und'][0]['value']) ? strtotime($node->field_unloading_start_time['und'][0]['value']) : 0,
-                    'unloading_end_time' => strtotime($node->field_unloading_end_time['und'][0]['value']) ? strtotime($node->field_unloading_end_time['und'][0]['value']) : 0,
-                    'status' => $status,
-                    'egir_date' => $node->field_egir_date['und'][0]['value'] ? $node->field_egir_date['und'][0]['value'] : 0,
-                    'egir_start_time' => strtotime($node->field_egir_start_time['und'][0]['value']) ? strtotime($node->field_egir_start_time['und'][0]['value']) : 0,
-                    'egir_end_time' => strtotime($node->field_egir_end_time['und'][0]['value']) ? strtotime($node->field_egir_end_time['und'][0]['value']) : 0,
-                    'egir_end_cutoff' => $egir_cutoff_seconds ? $egir_cutoff_seconds : 0,
-                    'unloading_end_cutoff' => $unloading_cutoff_seconds ? $unloading_cutoff_seconds : 0,
-                    'tdp' => $node->TDP,
-                    'moc' => $node->MOC,
-                    'unloading_compliance' => $node->unloading_end_time_cutOff,
-                    'egir_complaince' => $node->compliance,
-                    'distributor_name' => $distributor_name
-                ))
-                ->execute();
+          ->key(array('nid' => $node->nid))
+          ->fields(array(
+            'nid' => $node->nid,
+            'invoice_number' => $node->field_invoice_number['und'][0]['value'],
+            'invoice_date' => $node->field_invoice_date['und'][0]['value'] ? $node->field_invoice_date['und'][0]['value'] : 0,
+            'truck_no' => $node->field_truck_no['und'][0]['value'],
+            'from_location' => $node->field_from_location['und'][0]['value'],
+            'unloading_date' => $node->field_unloading_date['und'][0]['value'] ? $node->field_unloading_date['und'][0]['value'] : 0,
+            'unloading_start_time' => strtotime($node->field_unloading_start_time['und'][0]['value']) ? strtotime($node->field_unloading_start_time['und'][0]['value']) : 0,
+            'unloading_end_time' => strtotime($node->field_unloading_end_time['und'][0]['value']) ? strtotime($node->field_unloading_end_time['und'][0]['value']) : 0,
+            'status' => $status,
+            'egir_date' => $node->field_egir_date['und'][0]['value'] ? $node->field_egir_date['und'][0]['value'] : 0,
+            'egir_start_time' => strtotime($node->field_egir_start_time['und'][0]['value']) ? strtotime($node->field_egir_start_time['und'][0]['value']) : 0,
+            'egir_end_time' => strtotime($node->field_egir_end_time['und'][0]['value']) ? strtotime($node->field_egir_end_time['und'][0]['value']) : 0,
+            'egir_end_cutoff' => $egir_cutoff_seconds ? $egir_cutoff_seconds : 0,
+            'unloading_end_cutoff' => $unloading_cutoff_seconds ? $unloading_cutoff_seconds : 0,
+            'tdp' => $node->TDP,
+            'moc' => $node->MOC,
+            'unloading_compliance' => $node->unloading_end_time_cutOff,
+            'egir_complaince' => $node->compliance,
+            'distributor_name' => $distributor_name
+          ))
+          ->execute();
     }
 }
 
@@ -1536,33 +1570,33 @@ function change_feeds_import_node_delete($node) {
     // Delete Nid's entry from  party_packing Flat table  on deletion of Party Packing Node
     if ($node->type == 'party_packing') {
         db_delete('flat_party_packing')
-                ->condition('nid', $node->nid)
-                ->execute();
+          ->condition('nid', $node->nid)
+          ->execute();
     }
     // Delete Nid's entry from  EGIR Flat table  on deletion of EGIR Node
     if ($node->type == 'egir') {
         db_delete('flat_unloading')
-                ->condition('nid', $node->nid)
-                ->execute();
+          ->condition('nid', $node->nid)
+          ->execute();
     }
 
     // Delete Nid's entry from  packing Flat table  on deletion of EGIR Node
     if ($node->type == 'picking') {
         db_delete('flat_picking')
-                ->condition('nid', $node->nid)
-                ->execute();
+          ->condition('nid', $node->nid)
+          ->execute();
     }
 
     // Delete Nid's entry from  OTIF Flat table  on deletion of EGIR Node
     if ($node->type == 'billing_data') {
         db_delete('flat_billing_data')
-                ->condition('nid', $node->nid)
-                ->execute();
+          ->condition('nid', $node->nid)
+          ->execute();
     }
 }
 
 // Required hul code & distributor id only to check hul address verified or not
-function check_hul_code_exists($hul_code,$distributor_id) {
+function check_hul_code_exists($hul_code, $distributor_id) {
     //global $user;
     $hu_code = '';
     //$distributor_id = change_feeds_import_get_distributor_id($user->uid);
@@ -1604,7 +1638,8 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
                 drupal_set_message("Distributor Name Column Missing", 'error');
                 $entity->feeds_item->skip = TRUE;
                 return;
-            } else {
+            }
+            else {
                 $distributor_id = validate_distributor_name(trim($item['distributor name']));
                 if (empty($distributor_id)) {
                     drupal_set_message("Invalid Distributor Name:" . $item['distributor name'], 'error');
@@ -1621,7 +1656,8 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
             if (!empty($item['distributor name'])) {
                 drupal_set_message("Template Mismatch.", 'error');
                 $entity->feeds_item->skip = TRUE;
-            } else {
+            }
+            else {
                 $distributor_id = $distributor_id;
                 $entity->distributorid = $distributor_id;
             }
@@ -1724,10 +1760,12 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
         if (empty($col_carton_len) && (!empty($col_carton_bh) || !empty($col_carton_ht))) {
             drupal_set_message("Please enter carton length for sku $sku", 'error');
             $entity->feeds_item->skip = TRUE;
-        } else if (empty($col_carton_bh) && (!empty($col_carton_len) || !empty($col_carton_ht))) {
+        }
+        else if (empty($col_carton_bh) && (!empty($col_carton_len) || !empty($col_carton_ht))) {
             drupal_set_message("Please enter carton breadth for sku $sku", 'error');
             $entity->feeds_item->skip = TRUE;
-        } else if (empty($col_carton_ht) && (!empty($col_carton_len) || !empty($col_carton_bh))) {
+        }
+        else if (empty($col_carton_ht) && (!empty($col_carton_len) || !empty($col_carton_bh))) {
             drupal_set_message("Please enter carton height for sku $sku", 'error');
             $entity->feeds_item->skip = TRUE;
         }
@@ -1739,7 +1777,8 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
             if (empty($check_sub_category_nid)) {
                 drupal_set_message("Please enter correct sub category for sku $sku", 'error');
                 $entity->feeds_item->skip = TRUE;
-            } else {
+            }
+            else {
                 $entity->field_sub_category['und'][0]['nid'] = $check_sub_category_nid;
             }
         }
@@ -1765,7 +1804,8 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
                 drupal_set_message("Brand " . $item['brand'] . " does not exist in Brand Master", 'error');
                 $entity->feeds_item->skip = TRUE;
             }
-        } else {
+        }
+        else {
             drupal_set_message("Please enter Brand for SKU Code- $sku.", 'error');
             $entity->feeds_item->skip = TRUE;
         }
@@ -1785,7 +1825,8 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
         //if(empty($sku_vol)) {
         if (!empty($carton_vol)) {
             $entity->field_sku_volume['und'][0]['value'] = round(($carton_vol / $upc), 2);
-        } else {
+        }
+        else {
             $carton_volume = $carton_length * $carton_breadth * $carton_height;
             $entity->field_sku_volume['und'][0]['value'] = round(($carton_volume / $upc), 2);
             $entity->field_carton_volume['und'][0]['value'] = $carton_volume;
@@ -1802,7 +1843,8 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
 
         if (empty($sku_wt)) {
             $entity->field_sku_weight['und'][0]['value'] = round(($carton_wt / $upc), 2);
-        } else {
+        }
+        else {
             if (empty($carton_wt)) {
                 $entity->field_carton_weight['und'][0]['value'] = $sku_wt * $upc;
             }
@@ -1817,10 +1859,12 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
             if (empty($approval_flag)) {
                 drupal_set_message("Please enter the approval flag for reason $reason.", 'error');
                 $entity->feeds_item->skip = TRUE;
-            } else {
+            }
+            else {
                 if ($approval_flag == 'yes' || $approval_flag == 'no') {
                     $entity->field_approval_flag['und'][0]['value'] = $approval_flag;
-                } else {
+                }
+                else {
                     drupal_set_message("Please enter the correct approval flag for reason $reason.", 'error');
                     $entity->feeds_item->skip = TRUE;
                 }
@@ -1856,7 +1900,8 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
             if (empty($check_category_nid)) {
                 drupal_set_message("Please enter correct category for sub category $sub_category", 'error');
                 $entity->feeds_item->skip = TRUE;
-            } else {
+            }
+            else {
                 $entity->field_product_category['und'][0]['nid'] = $check_category_nid;
             }
         }
@@ -1894,7 +1939,8 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
         if (!empty($dis_id)) {
             $entity->title = $dis_id; // storing dis id here
             $entity->uid = $dis_id;   // storing dis id in author
-        } else {
+        }
+        else {
             drupal_set_message("Please enter correct Rs Code $node_title", 'error');
             $entity->feeds_item->skip = TRUE;
         }
@@ -1912,7 +1958,8 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
             if (empty($pp_finish_time)) {
                 drupal_set_message("Please enter correct value for PP finish time", 'error');
                 $entity->feeds_item->skip = TRUE;
-            } else {
+            }
+            else {
                 $entity->field_pp_finish_time['und'][0]['value'] = date('h:i A', $pp_finish_time);
             }
         }
@@ -1922,7 +1969,8 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
             if (empty($picking_finish_time)) {
                 drupal_set_message("Please enter correct value for Picking finish time", 'error');
                 $entity->feeds_item->skip = TRUE;
-            } else {
+            }
+            else {
                 $entity->field_picking_finish_time['und'][0]['value'] = date('h:i A', $picking_finish_time);
             }
         }
@@ -1932,7 +1980,8 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
             if (empty($unloading_finish_time)) {
                 drupal_set_message("Please enter correct value for Unloading finish time", 'error');
                 $entity->feeds_item->skip = TRUE;
-            } else {
+            }
+            else {
                 $entity->field_unloading_finish_time['und'][0]['value'] = date('h:i A', $unloading_finish_time);
             }
         }
@@ -1942,7 +1991,8 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
             if (empty($otf_finish_time)) {
                 drupal_set_message("Please enter correct value for otif finish time", 'error');
                 $entity->feeds_item->skip = TRUE;
-            } else {
+            }
+            else {
                 $entity->field_otif_finish_time['und'][0]['value'] = date('h:i A', $otf_finish_time);
             }
         }
@@ -1995,7 +2045,8 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
         if (empty($res)) {
             drupal_set_message("$title Party code does not exist in Outlet master", 'error');
             $entity->feeds_item->skip = TRUE;
-        } else {
+        }
+        else {
             $query = db_select('node', 'n');
             $query->fields('n', array('nid'));
             $query->addTag('node_uid');
@@ -2097,7 +2148,8 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
         if (empty($res2)) {
             drupal_set_message("$channel does not exist in Channel Master", 'error');
             $entity->feeds_item->skip = TRUE;
-        } else if (empty($res3)) {
+        }
+        else if (empty($res3)) {
             drupal_set_message("$pl_group does not exist in PL Group Master", 'error');
             $entity->feeds_item->skip = TRUE;
         }
@@ -2108,10 +2160,12 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
         elseif (( (strpos($party_packing, 'y') !== false) || (strpos($party_packing, 'Y') !== false) ) && ($party_packing != "YES")) {
             drupal_set_message("$party_packing Should be YES", 'error');
             $entity->feeds_item->skip = TRUE;
-        } elseif ((strpos($party_packing, 'n') !== false) || (strpos($party_packing, 'N') !== false) && ($party_packing != "NO")) {
+        }
+        elseif ((strpos($party_packing, 'n') !== false) || (strpos($party_packing, 'N') !== false) && ($party_packing != "NO")) {
             drupal_set_message("$party_packing Should be NO", 'error');
             $entity->feeds_item->skip = TRUE;
-        } else {
+        }
+        else {
             if (($party_packing != "YES") && ($party_packing != "NO")) {
                 drupal_set_message("$party_packing Should be YES or NO", 'error');
                 $entity->feeds_item->skip = TRUE;
@@ -2176,31 +2230,32 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
 //    }
     }
     if ($entity->feeds_item->id == 'hul_code_area_code_mapping') {
-    $entity->changetype = 'hul_code_area_code_mapping';
-    $hul_code = $entity->title;
-    $area_code = $item['area code'];
-    //returns area code nid
-    $areacode_nid = check_hul_area_code_exist($area_code,$distributor_id);
-    $existing_uid = check_hul_code_exist($title);
-    if (!empty($existing_uid) && ($existing_uid != $distributor_id)) {
-      drupal_set_message("Invalid HUL Code:$hul_code", 'error', FALSE);
-      $entity->feeds_item->skip = TRUE;
-    } 
-    if (empty($areacode_nid)) {
-        drupal_set_message("Area Code :$area_code does not exist.", 'error', FALSE);
-        $entity->feeds_item->skip = TRUE;
+        $entity->changetype = 'hul_code_area_code_mapping';
+        $hul_code = $entity->title;
+        $area_code = $item['area code'];
+        //returns area code nid
+        $areacode_nid = check_hul_area_code_exist($area_code, $distributor_id);
+        $existing_uid = check_hul_code_exist($title);
+        if (!empty($existing_uid) && ($existing_uid != $distributor_id)) {
+            drupal_set_message("Invalid HUL Code:$hul_code", 'error', FALSE);
+            $entity->feeds_item->skip = TRUE;
+        }
+        if (empty($areacode_nid)) {
+            drupal_set_message("Area Code :$area_code does not exist.", 'error', FALSE);
+            $entity->feeds_item->skip = TRUE;
+        }
+        else {
+            $entity->field_area_code[LANGUAGE_NONE][0]['nid'] = $areacode_nid;
+        }
     }
-    else {
-         $entity->field_area_code[LANGUAGE_NONE][0]['nid'] = $areacode_nid;
-    }
-  }
     if ($entity->feeds_item->id == 'area_code_master') {
         $area_code = trim($entity->title);
         $nearby_area_code = trim($item['nearby area code']);
         if ($area_code == $nearby_area_code) {
             drupal_set_message("Area Code:$area_code and Nearby Area Code :$nearby_area_code can not be same. ", 'error', FALSE);
             $entity->feeds_item->skip = TRUE;
-        } else {
+        }
+        else {
             $near_by_areacode_nid = check_hul_area_code_exist($nearby_area_code, $central_distributor_id);
             // Create nearby area code first
             if (empty($near_by_areacode_nid) && !empty($nearby_area_code)) {
@@ -2234,7 +2289,8 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
             if (!preg_match('/^[0-9]*$/', $ph_no)) {
                 drupal_set_message("Hul Phone No must be numeric for HUL Code - $title", 'error', FALSE);
                 $entity->feeds_item->skip = TRUE;
-            } else if (strlen($ph_no) != 10) {
+            }
+            else if (strlen($ph_no) != 10) {
                 drupal_set_message("Hul Phone No has to be 10 digits for HUL Code - $title", 'error', FALSE);
                 $entity->feeds_item->skip = TRUE;
             }
@@ -2356,7 +2412,8 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
         if (!is_numeric($credit_days)) {
             drupal_set_message("The credit days of party code- .'$entity->title'. should be numeric.", 'error');
             $entity->feeds_item->skip = TRUE;
-        } else {
+        }
+        else {
             $whole_number = floor($credit_days);
             $fraction = ($credit_days - $whole_number);
             if (($fraction != 0) || ($credit_days < 0)) {
@@ -2557,7 +2614,7 @@ function check_product_sub_category_exist($title, $distributor_id) {
     $query->condition('n.type', 'product_sub_category_master');
     $query->fields('n', array('nid'));
     $query->condition('n.title', $title);
-   // $query->condition('n.uid', $distributor_id);
+    // $query->condition('n.uid', $distributor_id);
     $results = $query->execute()->fetchField();
     return $results;
 }
@@ -2607,8 +2664,8 @@ function modify_views_forms_master_feed_validate($feed_title, $content_type) {
 
 function change_feeds_import_views_api() {
     return array(
-        'api' => '3.0',
-        'path' => drupal_get_path('module', 'change_feeds_import') . '/views',
+      'api' => '3.0',
+      'path' => drupal_get_path('module', 'change_feeds_import') . '/views',
     );
 }
 
@@ -2636,7 +2693,8 @@ function change_feeds_import_node_presave($node) {
             if (!empty($distributor_id) && ($node->is_new == TRUE)) {
                 if (!empty($node->distributorid)) {
                     $node->uid = $node->distributorid;
-                } else {
+                }
+                else {
                     $node->uid = $distributor_id;
                 }
             }
@@ -2724,9 +2782,11 @@ function holiday_get_working_day($date_timestamp, $day, $holidays, $weeklyoff) {
         $day_name = date("l", $date_timestamp);
         if (in_array($date, $holidays)) {
             
-        } elseif (in_array($day_name, $weeklyoff)) {
+        }
+        elseif (in_array($day_name, $weeklyoff)) {
             
-        } else {
+        }
+        else {
             $day--;
         }
     }
@@ -2776,11 +2836,11 @@ function change_feeds_import_form_alter(&$form, &$form_state, $form_id) {
                 $allowed[] = $value;
             }
             $form['feeds']['FeedsCSVParser']['help']['title'] = array(
-                '#markup' => $text,
+              '#markup' => $text,
             );
             $form['feeds']['FeedsCSVParser']['help']['final_text'] = array(
-                '#theme' => 'item_list',
-                '#items' => $allowed,
+              '#theme' => 'item_list',
+              '#items' => $allowed,
             );
         }
 
@@ -2792,11 +2852,11 @@ function change_feeds_import_form_alter(&$form, &$form_state, $form_id) {
                 $allowed[] = $value;
             }
             $form['feeds']['FeedsCSVParser']['help']['title'] = array(
-                '#markup' => $text,
+              '#markup' => $text,
             );
             $form['feeds']['FeedsCSVParser']['help']['final_text'] = array(
-                '#theme' => 'item_list',
-                '#items' => $allowed,
+              '#theme' => 'item_list',
+              '#items' => $allowed,
             );
         }
 
@@ -2806,11 +2866,11 @@ function change_feeds_import_form_alter(&$form, &$form_state, $form_id) {
             $field = field_info_field('field_dispatch_trip_type');
             $allowed_values = list_allowed_values($field);
             $form['feeds']['FeedsCSVParser']['help']['title'] = array(
-                '#markup' => $text,
+              '#markup' => $text,
             );
             $form['feeds']['FeedsCSVParser']['help']['final_text'] = array(
-                '#theme' => 'item_list',
-                '#items' => $allowed_values,
+              '#theme' => 'item_list',
+              '#items' => $allowed_values,
             );
         }
 
@@ -2852,9 +2912,11 @@ function change_feeds_import_form_alter(&$form, &$form_state, $form_id) {
 
     if ($form_id == 'user_register') {
         drupal_set_title(t('Transaction Platform'));
-    } elseif ($form_id == 'user_pass') {
+    }
+    elseif ($form_id == 'user_pass') {
         drupal_set_title(t('Transaction Platform'));
-    } elseif ($form_id == 'user_login') {
+    }
+    elseif ($form_id == 'user_login') {
         drupal_set_title(t('Transaction Platform'));
     }
 }
@@ -2884,45 +2946,45 @@ function change_feeds_import_change_status_of_error_billing_table() {
     $distributor_id = change_feeds_import_get_distributor_id($user_id);
 
     $status_updated = db_update('error_billing_data') // update status in error_billing_data condition based on (Distributor Id )
-            ->fields(array(
-                'status' => "Validate",
-            ))
-            ->condition('distributor_id', $distributor_id, '=')
-            ->condition('status', 'Error', '=')
-            ->execute();
+      ->fields(array(
+        'status' => "Validate",
+      ))
+      ->condition('distributor_id', $distributor_id, '=')
+      ->condition('status', 'Error', '=')
+      ->execute();
 }
 
 function change_feeds_import_services_resources() {
     $android_services_resource = array(
-        '#api_version' => 3002,
+      '#api_version' => 3002,
     );
     $android_services_resource = array(
-        'loading' => array(
-            'actions' => array(
-                'get-details' => array(
-                    'help' => 'Get data according party packing or not',
-                    'callback' => 'change_feeds_import_check_party_packing_or_not',
-                    'args' => array(
-                        array(
-                            'name' => 'van_type',
-                            'type' => 'string',
-                            'description' => 'pass param as van_type',
-                            'source' => array('data' => 'van_type'),
-                            'optional' => FALSE,
-                        ),
-                        array(
-                            'name' => 'nid',
-                            'type' => 'string',
-                            'description' => 'pass param as nid',
-                            'source' => array('data' => 'nid'),
-                            'optional' => FALSE,
-                        ),
-                    ),
-                    'access arguments' => array('Distributor Upload File'),
-                    'file' => array('type' => 'inc', 'module' => 'change_feeds_import', 'name' => 'includes/change_feeds_import_loading'),
-                ),
+      'loading' => array(
+        'actions' => array(
+          'get-details' => array(
+            'help' => 'Get data according party packing or not',
+            'callback' => 'change_feeds_import_check_party_packing_or_not',
+            'args' => array(
+              array(
+                'name' => 'van_type',
+                'type' => 'string',
+                'description' => 'pass param as van_type',
+                'source' => array('data' => 'van_type'),
+                'optional' => FALSE,
+              ),
+              array(
+                'name' => 'nid',
+                'type' => 'string',
+                'description' => 'pass param as nid',
+                'source' => array('data' => 'nid'),
+                'optional' => FALSE,
+              ),
             ),
+            'access arguments' => array('Distributor Upload File'),
+            'file' => array('type' => 'inc', 'module' => 'change_feeds_import', 'name' => 'includes/change_feeds_import_loading'),
+          ),
         ),
+      ),
     );
     return $android_services_resource;
 }
@@ -2949,8 +3011,8 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
             }
         }
     }
-    
-    
+
+
 
     if (($view->base_table == 'node') && ($view->name == 'payment_terms_view')) {
         foreach ($query->where[1]['conditions'] as $key => $val) {
@@ -2986,13 +3048,12 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
     // Store distributor id in author in each node
     $distributor_id = change_feeds_import_get_distributor_id($user->uid);
 
-    
+
 
     // Do the actual join
     // This function returns distributor_ids based on  super central,central,child distributor role
     $distributor_ids = get_distributor_ids();
     //print_r($distributor_ids);die;
-
     // This view will be visible to all authenticated user in the sytem
     $all_views_names = variable_get('views_name');
     // area-code-master,product-sub-category-master,sku-cp-view,brand-master-report,bank-master-download,non-bankable-reason-master,cancel-discard-reason-master,reason-for-update,sku7-code-master-report,product-category-master,sku7-ean-and-mrp,product-sub-division,pdd-master,notes-denominations-download,short-reason-master,non-bankable-reason-master,handover-master
@@ -3001,23 +3062,23 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
     $admin_views = explode(",", $admin_view_names);
     $central_distributor_master_views = explode(',', variable_get('central_distributor_master_views'));
     $logged_in_distributor_id = $distributor_id;
-     
-   
+
+
     if (in_array('central_distributor', $user->roles)) {
         $central_distributor_id = $logged_in_distributor_id;
     }
     else if (in_array('super_central_distributor', $user->roles)) {
-        $distributor_ids+= get_child_distributor_ids($logged_in_distributor_id);
+        $distributor_ids += get_child_distributor_ids($logged_in_distributor_id);
     }
     else {
-         $central_distributor_id = get_central_distributor_id($logged_in_distributor_id);
-         $distributor_ids[] = $central_distributor_id;
+        $central_distributor_id = get_central_distributor_id($logged_in_distributor_id);
+        $distributor_ids[] = $central_distributor_id;
     }
     if (in_array($view->name, $central_distributor_master_views)) {
-            $distributor_ids = array();
-            $distributor_ids[] = $central_distributor_id;
-     }
-    $distributor_ids = array_unique($distributor_ids); 
+        $distributor_ids = array();
+        $distributor_ids[] = $central_distributor_id;
+    }
+    $distributor_ids = array_unique($distributor_ids);
 //  $views_array = array('central_bill_trip', 'channel_master_central_report' , 
 //    'central_picking_report' ,  'central_party_pack_report',  'central_unloading_form', 
 //    'central_mobile_return_analysis', 'user_manual',  'hul_impact_delete', 'impact_delivery_cron_2', 
@@ -3026,12 +3087,13 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
 //    'central_outlet_master_report', 'central_party_pack_master_report','ofd_mailer','ofd_mailer2');
     //&& !in_array($view->name,$admin_views)
     if (!in_array($view->name, $views_array) && !in_array($view->name, $admin_views)) {
-         foreach ($query->table_queue as $key => $val) {
+        foreach ($query->table_queue as $key => $val) {
             if (($val['table'] == 'node')) {
-               
-                if (empty($val['join'])) { 
+
+                if (empty($val['join'])) {
                     $query->add_where(0, $val['alias'] . '.uid', $distributor_ids, 'IN');
-                } else {
+                }
+                else {
                     $query->table_queue[$key]['join']->extra[] = array('field' => 'uid', 'value' => $distributor_ids, 'operator' => 'IN');
                     // $query->table_queue[$key]['join']->extra[] = array('field' => 'uid', 'value' => $distributor_id);
                     //$query->table_queue[$key]['join']->extra[] = array('field' => 'uid', 'left_field' => 'uid', 'left_table'=>'node');
@@ -3052,7 +3114,8 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
               $distributor_ids[] = $central_distributor_id;
               } */
             $query->add_where(0, "$custom_tables[$table_key].distributor_id", $distributor_ids, 'IN');
-        } else {
+        }
+        else {
             // do something else
         }
     }
@@ -3065,7 +3128,8 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
             if (($val['table'] == 'node')) {
                 if (empty($val['join'])) {
                     $query->add_where(0, $val['alias'] . '.uid', _DISTRIBUTOR_ID, '=');
-                } else {
+                }
+                else {
                     $query->table_queue[$key]['join']->extra[] = array('field' => 'uid', 'value' => _DISTRIBUTOR_ID);
                 }
             }
@@ -3101,11 +3165,11 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
           'value' => $distributor_id,
           'operator' => '=',
           ); */
-       /* $query->where[0]['conditions'][] = array(
-            'field' => 'field_data_field_petty_cash_distributor.field_petty_cash_distributor_uid',
-            'value' => $distributor_ids,
-            'operator' => 'IN',
-        );*/
+        /* $query->where[0]['conditions'][] = array(
+          'field' => 'field_data_field_petty_cash_distributor.field_petty_cash_distributor_uid',
+          'value' => $distributor_ids,
+          'operator' => 'IN',
+          ); */
     }
 
     /* if ($view->base_table == 'petty_cash') {
@@ -3174,7 +3238,8 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
             $sub_query->condition('fd.field_trip_executon_date_value', $next_day_end, '<=');
             $sub_query->condition('b.distributor_id', $dis_ids, 'IN');
             // $sub_query->condition('n.uid', $dis_ids, 'IN');
-        } else {
+        }
+        else {
             $sub_query->join('node', 'n', 'n.title = b.bill_number');
             $sub_query->condition('b.distributor_id', $distributor_id);
             $sub_query->condition('n.uid', $distributor_id);
@@ -3221,18 +3286,18 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
         $join->left_field = 'bill_number'; // or wathever column you want to join with
         $join->type = 'LEFT'; // if you want another join type play with this value
         $join->extra = array(
-            array('field' => 'minimum', 'left_field' => 'sku7_code'),
-            array('field' => 'distributor_id', 'left_field' => 'distributor_id'),
+          array('field' => 'minimum', 'left_field' => 'sku7_code'),
+          array('field' => 'distributor_id', 'left_field' => 'distributor_id'),
         );
 
         $join->extra_type = 'AND';
 
         // Do the actual join
         $query->table_queue['temp'] = array(
-            'alias' => 'temp', // I believe this is optional
-            'table' => $sub_query,
-            'relationship' => 'custom_billing_data',
-            'join' => $join,
+          'alias' => 'temp', // I believe this is optional
+          'table' => $sub_query,
+          'relationship' => 'custom_billing_data',
+          'join' => $join,
         );
 
         $query->add_field('temp', 'field_bill_value_value');
@@ -3338,26 +3403,26 @@ function change_feeds_import_query_node_uid_alter(QueryAlterableInterface $query
 function change_feeds_import_feeds_plugins() {
     $path = drupal_get_path('module', 'change_feeds_import') . '/plugins';
     $info['FeedsNodeCustomProcessor'] = array(
-        'name' => 'Custom Node processor',
-        'description' => 'Create and update nodes.',
-        'help' => 'Create and update nodes from parsed content.',
-        'handler' => array(
-            'parent' => 'FeedsNodeProcessor',
-            'class' => 'FeedsNodeCustomProcessor',
-            'file' => 'FeedsNodeCustomProcessor.inc',
-            'path' => $path,
-        ),
+      'name' => 'Custom Node processor',
+      'description' => 'Create and update nodes.',
+      'help' => 'Create and update nodes from parsed content.',
+      'handler' => array(
+        'parent' => 'FeedsNodeProcessor',
+        'class' => 'FeedsNodeCustomProcessor',
+        'file' => 'FeedsNodeCustomProcessor.inc',
+        'path' => $path,
+      ),
     );
     $info['FeedsNodeTargetMasterProcessor'] = array(
-        'name' => 'Target Master Node processor',
-        'description' => 'Create and update nodes.',
-        'help' => 'Create and update nodes from parsed content.',
-        'handler' => array(
-            'parent' => 'FeedsNodeProcessor',
-            'class' => 'FeedsNodeTargetMasterProcessor',
-            'file' => 'FeedsNodeTargetMasterProcessor.inc',
-            'path' => $path,
-        ),
+      'name' => 'Target Master Node processor',
+      'description' => 'Create and update nodes.',
+      'help' => 'Create and update nodes from parsed content.',
+      'handler' => array(
+        'parent' => 'FeedsNodeProcessor',
+        'class' => 'FeedsNodeTargetMasterProcessor',
+        'file' => 'FeedsNodeTargetMasterProcessor.inc',
+        'path' => $path,
+      ),
     );
     return $info;
 }
@@ -3642,7 +3707,7 @@ function get_all_beatname_data() {
     $distributor_ids = get_distributor_ids();
     $query = db_select('node', 'n');
     $query->condition('n.type', 'outlet_master');
-    $query->condition('n.uid', $distributor_ids,'IN');
+    $query->condition('n.uid', $distributor_ids, 'IN');
     //$query->addTag('node_uid');
     $query->join('field_data_field_beat_name', 'bn', 'bn.entity_id = n.nid');
     $query->fields('bn', array('field_beat_name_value'));
@@ -3655,7 +3720,7 @@ function get_all_cashier_data() {
     $distributor_ids = get_distributor_ids();
     $query = db_select('node', 'n');
     $query->condition('n.type', 'dispatch_data');
-    $query->condition('n.uid',$distributor_ids,'IN');
+    $query->condition('n.uid', $distributor_ids, 'IN');
     $query->join('field_data_field_cashier_name', 'cn', 'cn.entity_id = n.nid');
     $query->fields('cn', array('field_cashier_name_value'));
 
@@ -3676,7 +3741,7 @@ function get_all_salesman_data($salesman, $salesman_code) {
         $query->join('field_data_field_salesman_code', 'fsc', 'fsc.entity_id = n.nid');
         $query->fields('fsc', array('field_salesman_code_value'));
     }
-    $query->condition('n.uid',$distributor_ids,'IN');
+    $query->condition('n.uid', $distributor_ids, 'IN');
     $results = $query->execute()->fetchAllKeyed(0, 0);
     return $results;
 }
@@ -3709,7 +3774,7 @@ function get_van_pl($van, $day, $name) {
  * @param type $batch_redirect
  */
 function change_feeds_import_views_data_export_batch_alter(&$batch, &$batch_redirect) {
-    
+
     watchdog('cron1', '<pre>' . print_r(array(), TRUE) . '</pre>');
 
     $views_names = array('impact_delivery_cron_2', 'impact_party_master', 'impact_delivery_cron_evening_2', 'impact_party_master_morning'); //  Download files for this Views only
@@ -3717,7 +3782,7 @@ function change_feeds_import_views_data_export_batch_alter(&$batch, &$batch_redi
     if (in_array($batch['view_name'], $views_names)) {
 
         $batch['operations'][] = array(
-            'change_feeds_import_views_data_export_batch_finish', array($batch['eid'], $batch['view_name']),
+          'change_feeds_import_views_data_export_batch_finish', array($batch['eid'], $batch['view_name']),
         );
     }
 }
@@ -3735,7 +3800,8 @@ function change_feeds_import_views_data_export_batch_finish($eid, $view_name) {
     // change file name for file sent in mornings
     if ($view_name == 'impact_delivery_cron_2' || $view_name == 'impact_party_master_morning') {
         $date = date('Ymdhis') . '_' . date('dmY');
-    } else {
+    }
+    else {
         $date = date('Ymdhis') . '_' . date('dmY', strtotime("+1 days"));
     }
 
@@ -3758,7 +3824,8 @@ function change_feeds_import_views_data_export_batch_finish($eid, $view_name) {
         $uri_path = file_unmanaged_copy($temp_file, $file_uri, FILE_EXISTS_REPLACE);
 
         $files = file_load_multiple(array(), array('uri' => $uri_path));
-    } else {
+    }
+    else {
         watchdog('PARTYMASTER', '<pre>' . print_r(array(), TRUE) . '</pre>');
         $view->set_display($export->view_display_id);
         $view->display_handler->batched_execution_state = $export;
@@ -3829,7 +3896,8 @@ function _send_file_using_sftp($file_name, $file_uri) {
             $data['file_uri'] = $file_uri;
             watchdog('File error', '<pre>' . print_r($data, TRUE) . '</pre>');
         }
-    } else {
+    }
+    else {
         return '';
     }
 }
@@ -3870,10 +3938,10 @@ function fetch_rs_field_data() {
 function change_feeds_import_form_feeds_import_form_alter(&$form, $form_state, $form_id) {
     if ($form['#importer_id'] == 'target_master_import') {
         $form['feeds']['download_template'] = array(
-            '#type' => 'link',
-            '#title' => t('Download target master'),
-            '#href' => 'central-van-stop-master-report-download',
-            '#weight' => -10,
+          '#type' => 'link',
+          '#title' => t('Download target master'),
+          '#href' => 'central-van-stop-master-report-download',
+          '#weight' => -10,
         );
     }
     // This for validate HUL_Address Confirmation
@@ -3889,7 +3957,7 @@ function change_feeds_import_form_feeds_import_form_alter(&$form, $form_state, $
  */
 
 function hul_code_address_confirmation($form, &$form_state) {
-    global $base_url,$user;
+    global $base_url, $user;
     $dis_id = change_feeds_import_get_distributor_id($user->uid);
     $logged_in_distributor_id = change_feeds_import_get_distributor_id($user->uid);
     // it for address confirmation checking user has permission to confirm address after outlet upload & sales register upload   
@@ -3915,20 +3983,20 @@ function hul_code_address_confirmation($form, &$form_state) {
                 $sales_day = $item['Sales Day'];
                 $beat_name = $item['Beat Name'];
                 $hu_code = $item['HUL_Code'];
-                $dist =  validate_distributor_name(trim($item['Distributor Name']));
-                $distributor_id = $dist? $dist: $logged_in_distributor_id; 
+                $dist = validate_distributor_name(trim($item['Distributor Name']));
+                $distributor_id = $dist ? $dist : $logged_in_distributor_id;
                 // returns hul code
-                $hul_code_exist = check_hul_code_exists($hu_code,$distributor_id); //returns hul_code, 
-                /*if (!empty($hul_code_exist)) {
-                    $arugments = '?pl_group=' . urlencode($pl_group) . '&sales_day=' . urlencode($sales_day) . '&beat_name=' . urlencode($beat_name) . '&hul_status=' . urlencode(0);
-                    $url = $page_url . $arugments;
-                    drupal_set_message('Please confirm the address for Party Code:  ' . l($party_code . '- (HUL Code:' . $hu_code . ')', $url, array('attributes' => array('target' => '_blank'))), 'error');
-                }*/
-                $hul_code_exist = check_hul_code_exists($hu_code,$distributor_id); //returns hul_code, 
-                if (!empty($hul_code_exist)) {
-                  $arugments = '?pl_group=' . urlencode($pl_group) . '&sales_day=' . urlencode($sales_day) . '&beat_name=' . urlencode($beat_name) . '&hul_status=' . urlencode(0). '&distributor_id=' .$distributor_id;
+                $hul_code_exist = check_hul_code_exists($hu_code, $distributor_id); //returns hul_code, 
+                /* if (!empty($hul_code_exist)) {
+                  $arugments = '?pl_group=' . urlencode($pl_group) . '&sales_day=' . urlencode($sales_day) . '&beat_name=' . urlencode($beat_name) . '&hul_status=' . urlencode(0);
                   $url = $page_url . $arugments;
                   drupal_set_message('Please confirm the address for Party Code:  ' . l($party_code . '- (HUL Code:' . $hu_code . ')', $url, array('attributes' => array('target' => '_blank'))), 'error');
+                  } */
+                $hul_code_exist = check_hul_code_exists($hu_code, $distributor_id); //returns hul_code, 
+                if (!empty($hul_code_exist)) {
+                    $arugments = '?pl_group=' . urlencode($pl_group) . '&sales_day=' . urlencode($sales_day) . '&beat_name=' . urlencode($beat_name) . '&hul_status=' . urlencode(0) . '&distributor_id=' . $distributor_id;
+                    $url = $page_url . $arugments;
+                    drupal_set_message('Please confirm the address for Party Code:  ' . l($party_code . '- (HUL Code:' . $hu_code . ')', $url, array('attributes' => array('target' => '_blank'))), 'error');
                 }
                 $pt_ct_status = check_exsiting_record_for_party_code($party_code, $distributor_id);
                 if (empty($pt_ct_status)) {
@@ -3938,7 +4006,7 @@ function hul_code_address_confirmation($form, &$form_state) {
                 if ($hu_code) {
                     if (!in_array($hu_code, $area_code_warning)) {
                         $area_code_warning[] = $hu_code;
-                        $area_code_exist = check_area_code_exist_in_hul_code($hu_code,$distributor_id);
+                        $area_code_exist = check_area_code_exist_in_hul_code($hu_code, $distributor_id);
                         if (empty($area_code_exist)) {
                             $url = 'import/hul_code_area_code_mapping';
                             drupal_set_message("Please link Area Code in Hul Code:" . l($hu_code, $url, array('attributes' => array('target' => '_blank'))), 'warning');
@@ -3956,7 +4024,7 @@ function hul_code_address_confirmation($form, &$form_state) {
  * @param type $trip_id
  * @return array
  */
-function _check_dispatch_value_and_bill_value_mismatch($trip_id,$dis_id) {
+function _check_dispatch_value_and_bill_value_mismatch($trip_id, $dis_id) {
     //global $user;
     // Store distributor id in author in each node
     //$dis_id = change_feeds_import_get_distributor_id($user->uid);
@@ -3984,7 +4052,7 @@ function check_dispatch_date($trip_id) {
     return $dispatch_date;
 }
 
-function check_area_code_exist_in_hul_code($hul_code,$distributor_id) {
+function check_area_code_exist_in_hul_code($hul_code, $distributor_id) {
     global $user;
     $hu_code = '';
     //$distributor_id = change_feeds_import_get_distributor_id($user->uid);
@@ -4236,6 +4304,7 @@ function check_resource_name_exists($title, $resource_type, $distributor_id) {
     $res = $query1->execute()->fetchField();
     return $res;
 }
+
 // Not required distributor id all reason masters
 function get_change_reason($title, $distributor_id) {
     $query = db_select('node', 'n');
@@ -4265,32 +4334,31 @@ function check_exsiting_record_for_party_code($party_code, $distributor_id) {
  * 
  * @param type $string
  */
-function _get_hul_code_autocomplete($distributor_id,$string = '') {
-   $result = array();
+function _get_hul_code_autocomplete($distributor_id, $string = '') {
+    $result = array();
 
-    watchdog('hulcode', '<pre>' . print_r(array($distributor_id,$string), TRUE) . '</pre>');
-   if ($string) {
-      $query = db_select('node', 'n');
-      $query->condition('n.type', 'hul_code_master');
-      $query->condition('n.uid', $distributor_id);
-      $query->addField('n', 'title', 'hul_code');
-      $query->condition('n.title', db_like($string) . '%', 'LIKE');
-      $query->fields('n', array('title'));
-      $query->range(0, 15);
-      //$query->addTag('node_distributor_access');
-      $result = $query->execute()->fetchAllKeyed(0, 0);
-   }
+    watchdog('hulcode', '<pre>' . print_r(array($distributor_id, $string), TRUE) . '</pre>');
+    if ($string) {
+        $query = db_select('node', 'n');
+        $query->condition('n.type', 'hul_code_master');
+        $query->condition('n.uid', $distributor_id);
+        $query->addField('n', 'title', 'hul_code');
+        $query->condition('n.title', db_like($string) . '%', 'LIKE');
+        $query->fields('n', array('title'));
+        $query->range(0, 15);
+        //$query->addTag('node_distributor_access');
+        $result = $query->execute()->fetchAllKeyed(0, 0);
+    }
 
-   drupal_json_output($result);
+    drupal_json_output($result);
 }
-
 
 function call_bank_master_api($node) {
     $bank_name = $node->title;
     $original_bank_name = $node->original->title;
     $dis_id = $node->uid;
     $api_type = 'bank_master';
-    $merchant_code = variable_get('merchant_code_conf','lakme');
+    $merchant_code = variable_get('merchant_code_conf', 'lakme');
     if (!empty($bank_name) && ($bank_name != $original_bank_name)) {
         $bank_name_arr = array(array('bank_name' => $bank_name, 'merchant' => array(array('name' => $merchant_code))));
         $bank_name_json = json_encode($bank_name_arr);
@@ -4313,7 +4381,7 @@ function call_reason_code_master_api($node) {
     $og_reason_type = $node->original->field_reason_type['und'][0]['value'];
     $dis_id = $node->uid;
     $api_type = 'reason_code_master';
-    $merchant_code = variable_get('merchant_code_conf','lakme');
+    $merchant_code = variable_get('merchant_code_conf', 'lakme');
 
     if (!empty($reason) && !empty($reason_type) && ($reason != $og_reason || $reason_type != $og_reason_type)) {
         $reason_arr = array(array('reason_text' => $reason, 'reason_description' => $reason, 'reason_type' => $reason_type, 'is_active' => True, 'merchant' => array(array('name' => $merchant_code))));
@@ -4345,7 +4413,7 @@ function call_location_api($node) {
     $og_nid = $node->original->field_hul_code_reference['und'][0]['nid'];
     $dis_id = $node->uid;
     $api_type = 'location_master';
-    $merchant_code = variable_get('merchant_code_conf','lakme');
+    $merchant_code = variable_get('merchant_code_conf', 'lakme');
 
     if (!empty($party_code) && !empty($party_name) && ($party_code != $og_party_code || $hul_code != $og_hul_code || $party_name != $og_party_name || $payment_term != $og_payment_term || $credit_days != $og_credit_days || $nid != $og_nid)) {
         $res = get_lat_long_and_area_code($nid);
@@ -4387,52 +4455,52 @@ function call_location_api($node) {
 
 function bank_master_api_log($bank_name, $bank_name_json, $api_type, $dis_id) {
     $sql_ins_id = db_insert('masters_api_log')
-            ->fields(array(
-                'bank_name' => $bank_name,
-                'api_type' => $api_type,
-                'distributor_id' => $dis_id,
-                'request_data' => $bank_name_json,
-                'request_time' => time(),
-            ))
-            ->execute();
+      ->fields(array(
+        'bank_name' => $bank_name,
+        'api_type' => $api_type,
+        'distributor_id' => $dis_id,
+        'request_data' => $bank_name_json,
+        'request_time' => time(),
+      ))
+      ->execute();
     return $sql_ins_id;
 }
 
 function outlet_master_api_log($party_code, $location_json, $api_type, $dis_id) {
     $sql_ins_id = db_insert('masters_api_log')
-            ->fields(array(
-                'party_code' => $party_code,
-                'api_type' => $api_type,
-                'distributor_id' => $dis_id,
-                'request_data' => $location_json,
-                'request_time' => time(),
-            ))
-            ->execute();
+      ->fields(array(
+        'party_code' => $party_code,
+        'api_type' => $api_type,
+        'distributor_id' => $dis_id,
+        'request_data' => $location_json,
+        'request_time' => time(),
+      ))
+      ->execute();
     return $sql_ins_id;
 }
 
 function reason_code_master_api_log($reason, $reason_type, $reason_json, $api_type, $dis_id) {
     $sql_ins_id = db_insert('masters_api_log')
-            ->fields(array(
-                'reason' => $reason,
-                'reason_type' => $reason_type,
-                'api_type' => $api_type,
-                'distributor_id' => $dis_id,
-                'request_data' => $reason_json,
-                'request_time' => time(),
-            ))
-            ->execute();
+      ->fields(array(
+        'reason' => $reason,
+        'reason_type' => $reason_type,
+        'api_type' => $api_type,
+        'distributor_id' => $dis_id,
+        'request_data' => $reason_json,
+        'request_time' => time(),
+      ))
+      ->execute();
     return $sql_ins_id;
 }
 
 function masters_api_log_update($response, $sql_ins_id) {
     db_update('masters_api_log')
-            ->fields(array(
-                'response_data' => $response,
-                'response_time' => time(),
-            ))
-            ->condition('id', $sql_ins_id, '=')
-            ->execute();
+      ->fields(array(
+        'response_data' => $response,
+        'response_time' => time(),
+      ))
+      ->condition('id', $sql_ins_id, '=')
+      ->execute();
 }
 
 function get_lat_long_and_area_code($nid) {
@@ -4491,7 +4559,7 @@ function update_parkstop_count($distributor_id) {
                 foreach ($clusterStops as $child => $v2) {
                     $child_bills = $v2->ChildStop;
                     if (array_key_exists($child_bills, $seq) === FALSE) {//ignor if present at other place
-                        $seq[$child_bills]['park_seq'] = $p . '.' . str_pad( ++$c, 2, 0, STR_PAD_LEFT);
+                        $seq[$child_bills]['park_seq'] = $p . '.' . str_pad(++$c, 2, 0, STR_PAD_LEFT);
                         $seq[$child_bills]['sequence'] = ++$n;
                     }
                 }
@@ -4514,17 +4582,17 @@ function get_distributor_ids() {
      *  Having to fech child distributor_id of each central rs
      */
     if (in_array('super_central_distributor', $user->roles) || in_array('administrator', $user->roles)) {
-       
+
         $central_rs_distributor_ids = get_child_distributor_ids($distributor_id);
         if (!empty($central_rs_distributor_ids)) {
             foreach ($central_rs_distributor_ids as $central_rs_distributor_id) {
                 $child_distributor_ids = get_child_distributor_ids($central_rs_distributor_id);
                 if (!empty($child_distributor_ids)) {
-                    $distributor_ids+= $child_distributor_ids;
+                    $distributor_ids += $child_distributor_ids;
                 }
             }
             // Central distributor id passing
-            $distributor_ids+= $central_rs_distributor_ids;
+            $distributor_ids += $central_rs_distributor_ids;
         }
     }
     // if central rs logged in central child's returns
@@ -4640,7 +4708,7 @@ function get_child_distributor_rsname() {
             foreach ($central_rs_distributor_ids as $central_rs_distributor_id) {
                 $child_distributor_ids = get_child_distributor_ids($central_rs_distributor_id);
                 if (!empty($child_distributor_ids)) {
-                    $distributor_ids+= $child_distributor_ids;
+                    $distributor_ids += $child_distributor_ids;
                 }
             }
         }
@@ -4674,7 +4742,8 @@ function change_feeds_import_importer_template($importer_id) {
         foreach ($mappings as $mapping) {
             if (!empty($mapping['unique'])) {
                 $uniques[] = check_plain($mapping['source']);
-            } else {
+            }
+            else {
                 $sources[] = check_plain($mapping['source']);
             }
         }
@@ -4714,27 +4783,27 @@ function change_feeds_import_menu_alter(&$items) {
 
 function master_api_config_form($form, $form_state) {
     $form['bank_master_api_url'] = array(
-        '#type' => 'textfield',
-        '#title' => t('Bank Master API URL'),
-        '#description' => t('Bank Master URL'),
-        '#default_value' => variable_get('bank_master_api_url'),
-        '#required' => TRUE,
+      '#type' => 'textfield',
+      '#title' => t('Bank Master API URL'),
+      '#description' => t('Bank Master URL'),
+      '#default_value' => variable_get('bank_master_api_url'),
+      '#required' => TRUE,
     );
 
     $form['reason_code_master_api_url'] = array(
-        '#type' => 'textfield',
-        '#title' => t('Reason Code Master API URL'),
-        '#description' => t(' Reason Code Master API URL'),
-        '#default_value' => variable_get('reason_code_master_api_url'),
-        '#required' => TRUE,
+      '#type' => 'textfield',
+      '#title' => t('Reason Code Master API URL'),
+      '#description' => t(' Reason Code Master API URL'),
+      '#default_value' => variable_get('reason_code_master_api_url'),
+      '#required' => TRUE,
     );
 
     $form['outlet_master_api_url'] = array(
-        '#type' => 'textfield',
-        '#title' => t('Location Master API URL'),
-        '#description' => t('Location Master API URL'),
-        '#default_value' => variable_get('outlet_master_api_url'),
-        '#required' => TRUE,
+      '#type' => 'textfield',
+      '#title' => t('Location Master API URL'),
+      '#description' => t('Location Master API URL'),
+      '#default_value' => variable_get('outlet_master_api_url'),
+      '#required' => TRUE,
     );
 
     return system_settings_form($form);
@@ -4774,92 +4843,99 @@ function validate_master_data($feed_title, $content_type) {
     $result = $query->execute()->fetchField();
     return $result;
 }
+
 function check_valid_distributor($distributor_id) {
-  if (!empty($distributor_id)) {
-      $dis_ids = get_distributor_ids();
-      if (in_array($distributor_id, $dis_ids)) {
-        return $distributor_id;
-      }else {
-        return 0;
-      }
-  } 
-  return 0;
+    if (!empty($distributor_id)) {
+        $dis_ids = get_distributor_ids();
+        if (in_array($distributor_id, $dis_ids)) {
+            return $distributor_id;
+        }
+        else {
+            return 0;
+        }
+    }
+    return 0;
 }
-function validate_outlet_master_data($title,$distributor_id) {
-  if (!empty($title) && !empty($distributor_id))   {
+
+function validate_outlet_master_data($title, $distributor_id) {
+    if (!empty($title) && !empty($distributor_id)) {
+        $query1 = db_select('node', 'n');
+        $query1->condition('n.type', 'outlet_master');
+        $query1->condition('n.title', $title);
+        $query1->fields('n', array('nid'));
+        $query1->condition('n.uid', $distributor_id);
+        $nid = $query1->execute()->fetchField();
+    }
+    return $nid;
+}
+
+function check_node_title_exist_of_distributor($title, $type, $sales_data = FALSE, $dis_id) {
     $query1 = db_select('node', 'n');
-    $query1->condition('n.type', 'outlet_master');
+    $query1->condition('n.type', $type);
     $query1->condition('n.title', $title);
+    $query1->condition('n.uid', $dis_id);
     $query1->fields('n', array('nid'));
-    $query1->condition('n.uid',$distributor_id);
+    //$query1->addTag('node_uid');
+    if ($sales_data) {
+        $date = strtotime(date('Y-m-d'));
+        $query1->join('field_data_field_sr_bill_date', 'd', 'd.entity_id = n.nid');
+        $query1->condition('d.field_sr_bill_date_value', $date);
+    }
     $nid = $query1->execute()->fetchField();
-  }
-  return $nid;
+    return $nid;
 }
-function check_node_title_exist_of_distributor($title, $type,$sales_data = FALSE, $dis_id) {
-  $query1 = db_select('node', 'n');
-  $query1->condition('n.type', $type);
-  $query1->condition('n.title', $title);
-  $query1->condition('n.uid', $dis_id);
-  $query1->fields('n', array('nid'));
-  //$query1->addTag('node_uid');
-  if ($sales_data) {
-    $date = strtotime(date('Y-m-d'));
-    $query1->join('field_data_field_sr_bill_date', 'd', 'd.entity_id = n.nid');
-    $query1->condition('d.field_sr_bill_date_value', $date);
-  }
-  $nid = $query1->execute()->fetchField();
-  return $nid;
-}
+
 function get_distributor_name($distributor_id) {
-  $query = db_select('field_data_field_distributor', 'd');
-  $query->innerjoin('field_data_field_distributor_name', 'n', 'n.entity_id = d.entity_id');
-  $query->condition('n.entity_id', $distributor_id, '=');
-  $query->fields('n', array('field_distributor_name_value'));
-  $distributor_name = $query->execute()->fetchField();
-  return $distributor_name;
+    $query = db_select('field_data_field_distributor', 'd');
+    $query->innerjoin('field_data_field_distributor_name', 'n', 'n.entity_id = d.entity_id');
+    $query->condition('n.entity_id', $distributor_id, '=');
+    $query->fields('n', array('field_distributor_name_value'));
+    $distributor_name = $query->execute()->fetchField();
+    return $distributor_name;
 }
 
 function get_rs_code_of_distributor($distributor_id) {
-  global $user;
-  if (empty($distributor_id)) {
-   $distributor_id = change_feeds_import_get_distributor_id($user->uid);
-  }
-  if(!empty($distributor_id)) {
-    $query = db_select('field_data_field_third_party_username', 'rs');
-    $query->condition('rs.entity_id', $distributor_id);
-    $query->fields('rs', array('field_third_party_username_value'));
-    $rs_code = $query->execute()->fetchField();
-  }
-  return $rs_code;
-}
-function get_distributorid_of_trip($trip_id) {
-  $distributor_id = 0;
-  if (!empty($trip_id)) {
-    $distributor_ids = get_distributor_ids();
-    if (!empty($distributor_ids)) {
-      $query = db_select('node', 'n');
-      $query->condition('type', 'dispatch_data');
-      $query->condition('uid', $distributor_ids, 'IN');
-      $query->condition('title',$trip_id);
-      $query->fields('n',array('uid'));
-      $distributor_id = $query->execute()->fetchField();
+    global $user;
+    if (empty($distributor_id)) {
+        $distributor_id = change_feeds_import_get_distributor_id($user->uid);
     }
-  }
-  return $distributor_id;
+    if (!empty($distributor_id)) {
+        $query = db_select('field_data_field_third_party_username', 'rs');
+        $query->condition('rs.entity_id', $distributor_id);
+        $query->fields('rs', array('field_third_party_username_value'));
+        $rs_code = $query->execute()->fetchField();
+    }
+    return $rs_code;
 }
-function get_trip_distributor_id_using_rs_code($rs_code,$trip_id) {
-  $distributor_id = '';
-  if(!empty($rs_code) && !empty($trip_id)) {
-     $query = db_select('dispatch_planning_api_data', 'ad');
-     $query->join('node', 'n', 'n.title = ad.runsheet_number and n.uid = ad.distributor_id');
-     $query->condition('ad.hub', $rs_code, '=');
-     $query->condition('n.type', 'dispatch_data', '=');
-     $query->condition('ad.runsheet_number', $trip_id, '=');
-     $query->fields('ad', array('distributor_id'));
-     $distributor_id = $query->execute()->fetchField();
-  }
-  return $distributor_id;
+
+function get_distributorid_of_trip($trip_id) {
+    $distributor_id = 0;
+    if (!empty($trip_id)) {
+        $distributor_ids = get_distributor_ids();
+        if (!empty($distributor_ids)) {
+            $query = db_select('node', 'n');
+            $query->condition('type', 'dispatch_data');
+            $query->condition('uid', $distributor_ids, 'IN');
+            $query->condition('title', $trip_id);
+            $query->fields('n', array('uid'));
+            $distributor_id = $query->execute()->fetchField();
+        }
+    }
+    return $distributor_id;
+}
+
+function get_trip_distributor_id_using_rs_code($rs_code, $trip_id) {
+    $distributor_id = '';
+    if (!empty($rs_code) && !empty($trip_id)) {
+        $query = db_select('dispatch_planning_api_data', 'ad');
+        $query->join('node', 'n', 'n.title = ad.runsheet_number and n.uid = ad.distributor_id');
+        $query->condition('ad.hub', $rs_code, '=');
+        $query->condition('n.type', 'dispatch_data', '=');
+        $query->condition('ad.runsheet_number', $trip_id, '=');
+        $query->fields('ad', array('distributor_id'));
+        $distributor_id = $query->execute()->fetchField();
+    }
+    return $distributor_id;
 }
 
 function get_facility_code($distributor_id) {
@@ -4873,21 +4949,23 @@ function get_facility_code($distributor_id) {
     }
     return $facility_code;
 }
+
 function get_sibling_distributor_id($distributor_id) {
-  $result = array();
-  if (!empty($distributor_id))  {
-    $query = db_select('users', 'u');
-    $query->innerjoin('field_data_field_distributor', 'd', 'd.entity_id = u.uid');
-    $query->join('field_data_field_sibling_distributor_id', 'sibling_dist', 'sibling_dist.entity_id = u.uid');
-    $query->condition('sibling_dist.field_sibling_distributor_id_uid', $distributor_id, '=');
-    $query->fields('d', array('field_distributor_value'));
-    $result = $query->execute()->fetchAllKeyed(0,0);
-  }
-  return $result;
+    $result = array();
+    if (!empty($distributor_id)) {
+        $query = db_select('users', 'u');
+        $query->innerjoin('field_data_field_distributor', 'd', 'd.entity_id = u.uid');
+        $query->join('field_data_field_sibling_distributor_id', 'sibling_dist', 'sibling_dist.entity_id = u.uid');
+        $query->condition('sibling_dist.field_sibling_distributor_id_uid', $distributor_id, '=');
+        $query->fields('d', array('field_distributor_value'));
+        $result = $query->execute()->fetchAllKeyed(0, 0);
+    }
+    return $result;
 }
-function get_distributor_id_of_bill($bill_number,$distributor_id) {
+
+function get_distributor_id_of_bill($bill_number, $distributor_id) {
     $distributor_id = '';
-    if(!empty($bill_number) && !empty($distributor_id)) {
+    if (!empty($bill_number) && !empty($distributor_id)) {
         $query = db_select('node', 'n');
         $query->condition('n.type', 'sales_register_data', '=');
         $query->condition('n.uid', $distributor_id, '=');
@@ -4896,4 +4974,13 @@ function get_distributor_id_of_bill($bill_number,$distributor_id) {
         $distributor_id = $query->execute()->fetchField();
     }
     return $distributor_id;
+}
+
+function get_all_facility_codes() {
+    $facility_codes = '';
+    $query = db_select('field_data_field_facility_code', 'facility_code');
+    $query->join('taxonomy_term_data', 'term_data', 'term_data.tid = facility_code.field_facility_code_tid');
+    $query->fields('term_data', array('name'));
+    $facility_codes = $query->execute()->fetchColumn();
+    return $facility_codes;
 }
