@@ -13,7 +13,7 @@ function update_tester_order_data($data) {
     watchdog('tester order data', '<pre>' . print_r($data, TRUE) . '</pre>');
     foreach ($data as $value) {
         $result = db_merge('tester_order_data')
-                ->key(array('tester_order_number' => $value['tester_order_number'], 'basepack_code' => $value['basepack_code'], 'distributor_id' => $value['distributor_id'], 'facility_code' => $value['lcd_facility_code']))
+                ->key(array('tester_order_number' => $value['tester_order_number'], 'basepack_code' => $value['basepack_code'], 'distributor_id' => $value['lcd_distributor_id'], 'facility_code' => $value['lcd_facility_code']))
                 ->fields(array(
                     'tester_order_number' => $value['tester_order_number'],
                     'order_date' => $value['order_date'],
@@ -27,7 +27,7 @@ function update_tester_order_data($data) {
                     'tester_qty' => $value['picked_qty'] ? $value['picked_qty'] : 0,// rest all key is same
                     'seal_number' => $value['seal_number'] ? $value['seal_number'] : 0,
                     'box_id' => $value['box_id'] ? $value['box_id'] : 0,
-                    'distributor_id' => $value['distributor_id'],
+                    'distributor_id' => $value['lcd_distributor_id'],
                     'facility_code' => $value['lcd_facility_code'],
                     'created_time' => REQUEST_TIME
                 ))
@@ -50,7 +50,7 @@ function insert_tester_order_data_in_sales_register($tester_order_data) {
             if (!array_key_exists($data['tester_order_number'], $test_order_arr)) {
                 $test_order_arr[$data['tester_order_number']] = $data['tester_order_number'];
                 watchdog('tester order data sales register', '<pre>' . print_r($data, TRUE) . '</pre>');
-                $distributor_id = $data['distributor_id'];
+                $distributor_id = $data['lcd_distributor_id'];
 
                 $query = db_select('node', 'n');
                 $query->condition('n.type', 'sales_register_data');
@@ -59,6 +59,8 @@ function insert_tester_order_data_in_sales_register($tester_order_data) {
                 $query->fields('n', array('nid'));
                 $nid = $query->execute()->fetchField();
 
+                $data['order_date'] = get_modified_order_date_tester($data['order_date'], $distributor_id); //as discussed with kusha
+                
                 if (empty($nid)) {
                     $node = new stdClass();
                     $node->title = $data['tester_order_number'];
@@ -109,11 +111,12 @@ function insert_tester_order_data_in_sales_register($tester_order_data) {
 
 
 function insert_tester_order_data_in_custom_billing_table($tester_order_data) {
+    
     foreach ($tester_order_data as $key => $data) {
         if(!empty($data['tester_order_number'])){
             watchdog('tester order data custom billing', '<pre>' . print_r($data, TRUE) . '</pre>');
-            $distributor_id = $data['distributor_id'];
-            
+            $distributor_id = $data['lcd_distributor_id'];
+            $central_distributor_id = get_central_distributor_id($distributor_id);
             $tb_id = db_query("select id from custom_billing_data where distributor_id = $distributor_id and  bill_number = '".$data['tester_order_number']."' and BASEPACK_CODE ='".$data['basepack_code']."' limit 1")->fetchField();
             if(empty($tb_id)){
                 //Fetch SKU7_CODE
@@ -137,6 +140,8 @@ function insert_tester_order_data_in_custom_billing_table($tester_order_data) {
                 //TP to host calculation for line level value
                 $line_level_value = 0;
 
+                $data['order_date'] = get_modified_order_date_tester($data['order_date'], $central_distributor_id); //as discussed with kusha
+                
                 //Fetch SKU7 code – based on basepack code (since multiple SKU7 codes will be found, fetch anyone)
                 db_insert('custom_billing_data')
                     ->fields(array(
@@ -200,6 +205,33 @@ function get_promised_delivery_date_tester($date, $distributor_id) {
   
   $pdd_data = node_load($pdd_value_result);
   $pdd_value = $pdd_data->field_pdd[LANGUAGE_NONE][0]['value'];
+  $weekly = $pdd_data->field_day[LANGUAGE_NONE];
+  foreach ($weekly as $key => $val) {
+    $weeklyoff[] = $val['value'];
+  }
+
+  $query = db_select('node', 'n');
+  $query->condition('n.uid', $central_distributor_id);
+  $query->condition('n.type', 'holiday_master');
+  $query->leftjoin('field_data_field_holiday', 'hday', 'hday.entity_id = n.nid');
+  $query->addExpression("DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(hday.field_holiday_value),'+00:00','+05:30'), '%Y-%m-%d')", 'hdate');
+  $holiday_result = $query->execute()->fetchCol();
+
+  $billing_date_stamp = $date;
+  $pdd = holiday_get_working_day($billing_date_stamp, $pdd_value, $holiday_result, $weeklyoff);
+  
+  return strtotime($pdd);
+}
+
+function get_modified_order_date_tester($date, $central_distributor_id) {
+  $query = db_select('node', 'n');
+  $query->condition('n.uid', $central_distributor_id);
+  $query->condition('n.type', 'pdd_master');
+  $query->fields('n', array('nid'));
+  $pdd_value_result = $query->execute()->fetchField();
+  
+  $pdd_data = node_load($pdd_value_result);
+  $pdd_value = 1; //$pdd_data->field_pdd[LANGUAGE_NONE][0]['value']; Hardcoded value 1 as discussed with kusha 
   $weekly = $pdd_data->field_day[LANGUAGE_NONE];
   foreach ($weekly as $key => $val) {
     $weeklyoff[] = $val['value'];

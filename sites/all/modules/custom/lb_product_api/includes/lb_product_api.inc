@@ -9,6 +9,7 @@
 function get_lb_product_api_data($data) {
     if (!empty($data)) {
         watchdog('d8 lb product master', '<pre>' . print_r($data, TRUE) . '</pre>');
+        $uid = get_uid_by_username('subadmin');
         foreach ($data as $val) {
             try {
                 $nid = check_content_node_title_exists($val['field_lb_sku_id'], 'lb_product_master');
@@ -18,8 +19,8 @@ function get_lb_product_api_data($data) {
                     $node->type = "lb_product_master";
                     node_object_prepare($node); // Sets some defaults. Invokes hook_prepare() and hook_node_prepare().
                     $node->language = LANGUAGE_NONE; // Or e.g. 'en' if locale is enabled
-                    $node->uid = 23466;
-                    $node->status = $val['status']; //(1 or 0): published or not
+                    $node->uid = $uid;
+                    $node->status = 1; //(1 or 0): published or not
                     $node->comment = 0; // 0 = comments disabled, 1 = read only, 2 = read/write
                 } else {
                     $node = node_load($nid);
@@ -53,7 +54,7 @@ function get_lb_product_api_data($data) {
                 $sku7_code_nid = check_sku7_code_exists($val['title']);
                 // Create SKU7 code master
                 if (empty($sku7_code_nid)) {
-                    create_sku7code_master($val);
+                    create_sku7code_master($val,$uid);
                 }
                 node_save($node);
             } catch (Exception $ex) {
@@ -75,7 +76,6 @@ function check_content_node_title_exists($title, $type) {
     $query1 = db_select('node', 'n');
     $query1->condition('n.type', $type);
     $query1->condition('n.title', $title);
-    $query1->condition('n.uid', 23466);
     $query1->fields('n', array('nid'));
     $nid = $query1->execute()->fetchField();
     return $nid;
@@ -92,14 +92,14 @@ function check_sku7_code_exists($title) {
     return $nid;
 }
 
-function create_sku7code_master($val = array()) {
+function create_sku7code_master($val = array(),$uid) {
     if (!empty($val)) {
         $node = new stdClass();
         $node->title = $val['title'];
         $node->type = "sku7_code_master";
         node_object_prepare($node); // Sets some defaults. Invokes hook_prepare() and hook_node_prepare().
         $node->language = LANGUAGE_NONE; // Or e.g. 'en' if locale is enabled
-        $node->uid = 1;
+        $node->uid = $uid;
         $node->status = $val['status']; //(1 or 0): published or not
         $node->field_unit_case_units_[LANGUAGE_NONE][0]['value'] = $val['field_upc'];
         $node->field_product_name[LANGUAGE_NONE][0]['value'] = $val['field_lb_sku_product_name'];

@@ -139,5 +139,35 @@ function custom_order_box_id_views_data() {
       'handler' => 'views_handler_filter_numeric',
     ),
   );
+    $data['outlet_order_crate']['party_code'] = array(
+    'title' => t('Party Code Value'),
+    'help' => t('The Party Code Value.'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+  );
+  $data['outlet_order_crate']['order_upload_datetime'] = array(
+  'title' => t('Order Upload Datetime'),
+  'help' => t('Order Upload Datetime.'),
+     'field' => array(
+       'handler' => 'views_handler_field_date',
+       'click sortable' => TRUE,
+     ),
+     'sort' => array(
+       'handler' => 'views_handler_sort_date',
+     ),
+     'filter' => array(
+       'handler' => 'views_handler_filter_date',
+     ),
+     'argument' => array(
+       'handler' => 'views_handler_filter_date',
+     ),
+);
   return $data;
 }

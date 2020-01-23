@@ -6,17 +6,18 @@
  * and open the template in the editor.
  */
 
-function update_crate_id_data($outlet_order_ref, $crate_id, $order_date, $party_name, $facility_code, $distributor_id) {
+function update_crate_id_data($outlet_order_ref, $crate_id, $order_date, $party_name, $facility_code, $distributor_id,$party_code) {
     //$distributor_id = get_distributor_id_of_outlet($party_name); 
     $result = db_merge('outlet_order_crate')
-            ->key(array('outlet_order_no' => $outlet_order_ref))
+            ->key(array('outlet_order_no' => $outlet_order_ref,'distributor_id'=>$distributor_id))
             ->fields(array(
                 'outlet_order_no' => $outlet_order_ref,
                 'crate_id' => $crate_id ? $crate_id : '',
                 'order_date' => $order_date ? $order_date : '',
                 'party_name' => $party_name ? $party_name : '',
-                'distributor_id' => $distributor_id ? $distributor_id : '',
+                'distributor_id' => $distributor_id ? $distributor_id : 0,
                 'facility_code' => $facility_code ? $facility_code : '',
+                'party_code' => $party_code ? $party_code : '',
                 'created_time' => REQUEST_TIME,
             ))
             ->execute();

@@ -317,7 +317,13 @@ function get_reverse_geocode_data($latitude, $longitude, $reference_number){
       $url = "https://apis.mapmyindia.com/advancedmaps/v1/$license_key/rev_geocode?lng=$longitude&lat=$latitude";
       $sql_ins_id = insert_map_my_india_api_log($url, $reference_number);
       $options = array('method' => 'GET');
-      $result = drupal_http_request($url, $options);
+      //$result = drupal_http_request($url, $options);
+      if (trim($longitude, 0) == 1.11 || trim($latitude, 0) == 1.11) {
+            $result = '';
+        } else {
+            $options = array('method' => 'GET');
+            $result = drupal_http_request($url, $options);
+        }
       update_map_my_india_api_log($sql_ins_id, json_encode($result));
       if($result->status_message === 'OK'){
           $decoded_data = json_decode($result->data);
@@ -347,7 +353,6 @@ function update_map_my_india_api_log($sql_ins_id, $response_json){
      ->condition('id', $sql_ins_id, '=')
      ->execute();
 }
-
 function get_distributor_id_from_reference_number($reference_no) {
    $distributor_id = ''; 
   if (!empty($reference_no)) {
