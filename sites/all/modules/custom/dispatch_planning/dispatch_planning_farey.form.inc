@@ -111,7 +111,7 @@ function _get_farey_delivered_trip_details($trip_number, $rs_code) {
    $query->leftjoin('node', 'n1', 'n1.nid = chs.field_child_sku_nid');
    $query->join('dispatch_planning_api_data', 'ad', 'id.trip_bill_reference = ad.id');
    $query->condition('ad.runsheet_number', $trip_number, '=');
-   $query->condition('ad.hub', $rs_code, '=');
+   $query->condition('ad.distributor_id', $dis_id, '=');
    $query->condition('id.og_sum_net_sales_quantity', 0, '!=');
    $query->condition('id.res_sku_actual_quantity1', '', '!=');
    $query->condition('id.res_sku_actual_quantity1', 'NULL', '!=');
@@ -1200,7 +1200,6 @@ function _edit_trip_delivered_callback_form_submit($form, &$form_state) {
       
       if($collc_mode == 'signed' && empty($sb_file_uri)) {
         $query = db_select('dispatch_planning_api_data', 'dpi');
-        //$query->condition('dpi.hub', $rs_code, '=');
         $query->condition('dpi.distributor_id', $dis_id, '=');
         $query->condition('dpi.runsheet_number', $trip_number, '=');
         $query->condition('dpi.bill_number', $bill_number, '=');
@@ -1217,7 +1216,6 @@ function _edit_trip_delivered_callback_form_submit($form, &$form_state) {
       
       if($collc_mode == 'cheque' && empty($cheque_file_uri)) {
         $query = db_select('dispatch_planning_api_data', 'dpi');
-        //$query->condition('dpi.hub', $rs_code, '=');
         $query->condition('dpi.distributor_id', $dis_id, '=');
         $query->condition('dpi.runsheet_number', $trip_number, '=');
         $query->condition('dpi.bill_number', $bill_number, '=');
@@ -1230,7 +1228,6 @@ function _edit_trip_delivered_callback_form_submit($form, &$form_state) {
       
       if($collc_mode == 'cash,cheque' && empty($cash_cheque_file_uri)) {
         $query = db_select('dispatch_planning_api_data', 'dpi');
-        //$query->condition('dpi.hub', $rs_code, '=');
         $query->condition('dpi.distributor_id', $dis_id, '=');
         $query->condition('dpi.runsheet_number', $trip_number, '=');
         $query->condition('dpi.bill_number', $bill_number, '=');

@@ -127,13 +127,16 @@ function get_uid_by_username($user_name) {
 }
 
 function insert_cashier_attendance_api_log($cashier_attendance_data, $facility_code) {
-    $sql_ins_id = db_insert('cashier_attendance_api_log')
-      ->fields(array(
-        'received_data' => json_encode($cashier_attendance_data),
-        'request_time' => time(),
-        'facility_code' => $facility_code
-      ))
-      ->execute();
+    watchdog('cashier_data', '<pre>' . print_r($cashier_attendance_data, TRUE) . '</pre>');
+    if (!empty($facility_code)) {
+        $sql_ins_id = db_insert('cashier_attendance_api_log')
+          ->fields(array(
+            'received_data' => json_encode($cashier_attendance_data),
+            'request_time' => time(),
+            'facility_code' => $facility_code
+          ))
+          ->execute();
+    }
     return $sql_ins_id;
 }
 
@@ -151,6 +154,9 @@ function capture_cashier_attendance_views_query_alter(&$view, &$query) {
     // Store distributor id in author in each node
     $distributor_id = change_feeds_import_get_distributor_id($user->uid);
     $distributor_facility_code = get_facility_code($distributor_id);
+    if (!empty($distributor_facility_code)) {
+        $distributor_facility_code = strtolower($distributor_facility_code);
+    }
     if ($view->name == 'cashier_attendance') {
         foreach ($query->where[1]['conditions'] as $key => $val) {
            if ((strpos($val['field'], 'field_data_field_attendance_datetime.field_attendance_datetime_value') !== false) || (strpos($val['field'], 'field_data_field_attendance_datetime.field_attendance_datetime_value') !== false)) {

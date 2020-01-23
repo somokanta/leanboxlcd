@@ -61,20 +61,21 @@ function order_packing_slip_services_resources(){
 
 function fetch_order_packing_slip_api_data($order_packing_slip_data){
   watchdog('orderpackdata', '<pre>' . print_r($order_packing_slip_data, TRUE) . '</pre>');
-  if(!empty($order_packing_slip_data)){  
-      $party_name = $order_packing_slip_data['party_name'];
-      $order_number = $order_packing_slip_data['order_number'];
-      $order_date = $order_packing_slip_data['order_date'];
-      $seal_number = $order_packing_slip_data['seal_number'];
-      $box_id = $order_packing_slip_data['box_id'];
-      $ptl_id = $order_packing_slip_data['ptl_id'];
-      $total_qty = $order_packing_slip_data['total_qty'];
-      $dist_id = $order_packing_slip_data['distributor_id'];
-      $facility_code = $order_packing_slip_data['facility_code'];
-      $header_data = $order_packing_slip_data['header_data']['header'];
-      $row_data = $order_packing_slip_data['row_data'];
-      
-        $orderpacking_data = db_insert('order_packing_slip_api_data') // Table name no longer needs {}
+  if (!empty($order_packing_slip_data)) {
+    $party_name = $order_packing_slip_data['party_name'];
+    $order_number = $order_packing_slip_data['order_number'];
+    $order_date = $order_packing_slip_data['order_date'];
+    $seal_number = $order_packing_slip_data['seal_number'];
+    $box_id = $order_packing_slip_data['box_id'];
+    $ptl_id = $order_packing_slip_data['ptl_id'];
+    $total_qty = $order_packing_slip_data['total_qty'];
+    $dist_id = $order_packing_slip_data['distributor_id'];
+    $facility_code = $order_packing_slip_data['facility_code'];
+    $header_data = $order_packing_slip_data['header_data']['header'];
+    $row_data = $order_packing_slip_data['row_data'];
+
+    $orderpacking_data = db_merge('order_packing_slip_api_data') // Table name no longer needs {}
+      ->key(array('order_no' => $order_number, 'box_id' => $box_id,'distributor_id' => $dist_id))
       ->fields(array(
         'order_no' => $order_number,
         'order_date' => strtotime($order_date),
@@ -92,14 +93,17 @@ function fetch_order_packing_slip_api_data($order_packing_slip_data){
       ->execute();
     $result['flag'] = '1';
     $result['result'] = 'Data updated Sucessfully.';
-  }else{
+  }
+  else {
     $result['flag'] = '0';
     $result['result'] = 'No data was updated.';
   }
-  
   return $result;
 }
 
+/**
+ * Implements of hook_views_api().
+ */
 function order_packing_slip_views_api() {
    return array(
      'api' => 3,

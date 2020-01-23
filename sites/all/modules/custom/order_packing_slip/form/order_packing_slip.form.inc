@@ -15,7 +15,7 @@ function order_packing_slip_form($form, &$form_state){
     $distributor_ids = array('' => 'Select') + $child_distributors;
     $form['central_outer'] = array(
       '#type' => 'markup',
-      '#prefix' => '<div style="color:red"><h3>Note: Select any one  Distributor Name before creating a Trip</h3></div>',  
+      '#prefix' => '<div style="color:red"><h3>Note: Select any one  Distributor Name</h3></div>',  
     );
     $form['distributor_id'] = array(
       '#title' => t('Select Distributor Name'),
@@ -112,7 +112,7 @@ function order_packing_slip_form($form, &$form_state){
      $from_bill_date = $form_state['values']['from_bill_date'];
      $to_bill_date = $form_state['values']['to_bill_date'];
     
-    $open_pdf_link = l('Open PDF', "/download-order-packing-data/$from_bill_date/$to_bill_date" ,array('attributes'=>array("target" => "_blank")));
+    $open_pdf_link = l('Open PDF', "/download-order-packing-data/$from_bill_date/$to_bill_date" ,array('attributes'=>array("target" => "_blank",'class' => array('print-pdf'))));
     $form['dowmload_mark'] = array(
       '#type' => 'markup',
       '#markup' => $open_pdf_link,
@@ -178,6 +178,7 @@ function order_packing_slip_form_submit($form,&$form_state){
       $query4 = db_select('order_packing_slip_api_data', 'opad');
       $query4->fields('opad', array('order_no','party_name','box_id','seal_number','total_qty','header_data', 'row_data')); 
       $query4->condition('opad.order_no', $unique_orders_arr, 'IN');  //$unique_crate_ids
+      $query4->condition('opad.distributor_id', $distributor_id);  // distributor id
       $table_data = $query4->execute()->fetchAll(\PDO::FETCH_ASSOC);
     }
     $form_state['values']['table_data'] = $table_data;
@@ -233,6 +234,7 @@ function download_order_packing_slip($from_bill_date,$to_bill_date){
       $query4 = db_select('order_packing_slip_api_data', 'opad');
       $query4->fields('opad', array('order_no','party_name','box_id','seal_number','total_qty','header_data', 'row_data')); 
       $query4->condition('opad.order_no', $unique_orders_arr, 'IN');  //$unique_crate_ids
+      $query4->condition('opad.distributor_id', $distributor_ids,'IN');  // distributor id
       $table_data = $query4->execute()->fetchAll(\PDO::FETCH_ASSOC);
     }
     $table_row_data = $table_data;

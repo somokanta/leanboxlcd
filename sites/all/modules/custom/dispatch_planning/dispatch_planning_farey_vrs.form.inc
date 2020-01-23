@@ -107,9 +107,9 @@ function _delivered_tripwise_vrs_data_callback($form, &$form_state) {
    $trip_number = $form_state['input']['trip_number'];
 
    if (!empty($trip_number) && !empty($rs_code)) {
-      $trip_details = _get_farey_delivered_tripwise_vrs_details($trip_number, $rs_code);
-      $trip_amt_details = _get_farey_delivered_tripwise_vrs_amt_details($trip_number, $rs_code);
-      $ret_trip_amt_details = _get_farey_returned_delivered_trip_details($trip_number, $rs_code);
+      $trip_details = _get_farey_delivered_tripwise_vrs_details($trip_number, $dis_id);
+      $trip_amt_details = _get_farey_delivered_tripwise_vrs_amt_details($trip_number, $dis_id);
+      $ret_trip_amt_details = _get_farey_returned_delivered_trip_details($trip_number, $dis_id);
 
       if (!empty($trip_details['Total Bills'][1])) {
          $trip_details_header = array('', 'Bill count', 'Bill value');
@@ -181,14 +181,14 @@ function _delivered_tripwise_vrs_data_callback($form, &$form_state) {
  * @param type $trip_number
  * @param type $rs_code
  */
-function _get_farey_delivered_tripwise_vrs_details($trip_number, $rs_code) {
+function _get_farey_delivered_tripwise_vrs_details($trip_number, $dis_id) {
    global $user;
    $data = array();
    $query = db_select('dispatch_planning_api_data', 'ad');
    $query->condition('ad.runsheet_number', $trip_number, '=');
    $query->leftjoin('dispatch_delivered_vrs_details', 'vd', 'vd.trip_id = ad.runsheet_number');
    $query->isNull('vd.trip_id');
-   $query->condition('ad.hub', $rs_code, '=');
+   $query->condition('ad.distributor_id', $dis_id, '=');
    $query->addExpression('Count(ad.id)', 'Count_of_bills');
    $query->addExpression('SUM(ad.bill_value)', 'Sum_of_bills');
 
@@ -220,13 +220,13 @@ function _get_farey_delivered_tripwise_vrs_details($trip_number, $rs_code) {
  * @param type $trip_number
  * @param type $rs_code
  */
-function _get_farey_delivered_tripwise_vrs_amt_details($trip_number, $rs_code) {
+function _get_farey_delivered_tripwise_vrs_amt_details($trip_number, $distributor_id) {
    global $user;
    $data = array();
 
    $query = db_select('dispatch_planning_api_data', 'ad');
    $query->condition('ad.runsheet_number', $trip_number, '=');
-   $query->condition('ad.hub', $rs_code, '=');
+   $query->condition('ad.distributor_id', $distributor_id, '=');
    $query->leftjoin('dispatch_delivered_vrs_details', 'vd', 'vd.trip_id = ad.runsheet_number');
    $query->isNull('vd.trip_id');
    $query->addExpression('SUM(CASE WHEN (res_confirm_signed_bill_amount IS NOT NULL AND res_confirm_signed_bill_amount != \'NA\' AND res_confirm_signed_bill_amount != \'\') THEN 1 ELSE 0 END)', 'Count_signed_bills');
@@ -299,19 +299,16 @@ function tripwise_vrs_details_remove_callback($form, &$form_state) {
    return $form;
 }
 
-function _get_farey_returned_delivered_trip_details($trip_number, $rs_code) {
-   global $user;
-   $dis_id = change_feeds_import_get_distributor_id($user->uid);
-
+function _get_farey_returned_delivered_trip_details($trip_number, $distributor_id) {
    $query = db_select('dispatch_planning_item_details', 'id');
    $query->join('node', 'n', 'n.title = id.sku_code');
-   $query->condition('n.uid', $dis_id);
+   $query->condition('n.uid', $distributor_id);
    $query->condition('n.type', 'sku7_code_master');
    $query->leftjoin('field_data_field_child_sku', 'chs', 'chs.entity_id = n.nid');
    $query->leftjoin('node', 'n1', 'n1.nid = chs.field_child_sku_nid');
    $query->join('dispatch_planning_api_data', 'ad', 'id.trip_bill_reference = ad.id');
    $query->condition('ad.runsheet_number', $trip_number, '=');
-   $query->condition('ad.hub', $rs_code, '=');
+   $query->condition('ad.distributor_id', $distributor_id, '=');
    $query->condition('id.og_sum_net_sales_quantity', 0, '!=');
    $query->condition('id.res_sku_actual_quantity1', '', '!=');
    $query->condition('id.res_sku_actual_quantity1', 'NULL', '!=');
@@ -357,9 +354,9 @@ function _delivered_tripwise_vrs_data_callback_submit($form, &$form_state) {
 
    if (!empty($trip_id) && !empty($rs_code)) {
 
-      $trip_details = _get_farey_delivered_tripwise_vrs_details($trip_id, $rs_code);
-      $trip_amt_details = _get_farey_delivered_tripwise_vrs_amt_details($trip_id, $rs_code);
-      $ret_trip_amt_details = _get_farey_returned_delivered_trip_details($trip_id, $rs_code);
+      $trip_details = _get_farey_delivered_tripwise_vrs_details($trip_id, $dis_id);
+      $trip_amt_details = _get_farey_delivered_tripwise_vrs_amt_details($trip_id, $dis_id);
+      $ret_trip_amt_details = _get_farey_returned_delivered_trip_details($trip_id, $dis_id);
 
       // insert new or update if already created
       db_merge('dispatch_delivered_vrs_details')
