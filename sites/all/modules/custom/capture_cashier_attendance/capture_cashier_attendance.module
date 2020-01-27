@@ -154,6 +154,12 @@ function capture_cashier_attendance_views_query_alter(&$view, &$query) {
     $distributor_facility_code = get_facility_code($distributor_id);
     if (!empty($distributor_facility_code)) {
         $distributor_facility_code = strtolower($distributor_facility_code);
+        if ($distributor_facility_code == 1) {
+            $distributor_facility_codes  = array($distributor_facility_code,'lakme');
+        }
+        else {
+          $distributor_facility_codes  = array($distributor_facility_code);
+        }
     }
     if ($view->name == 'cashier_attendance') {
         foreach ($query->where[1]['conditions'] as $key => $val) {
@@ -186,8 +192,8 @@ function capture_cashier_attendance_views_query_alter(&$view, &$query) {
           'conditions' => array(
             array(
               'field' => 'field_data_field_hub_code.field_hub_code_value',
-              'value' => $distributor_facility_code,
-              'operator' => '=',
+              'value' => $distributor_facility_codes,
+              'operator' => 'IN',
             ),
           ),
           'type' => 'AND',
@@ -195,8 +201,8 @@ function capture_cashier_attendance_views_query_alter(&$view, &$query) {
        
     }
     if (($view->name == 'cashier_attendance_api_log')) {
-        if (!empty($distributor_facility_code)) {
-            $query->add_where(0, 'cashier_attendance_api_log.facility_code', $distributor_facility_code, '=');
+        if (!empty($distributor_facility_codes)) {
+            $query->add_where(0, 'cashier_attendance_api_log.facility_code', $distributor_facility_codes, 'IN');
         }
     }
 }
