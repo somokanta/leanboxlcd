@@ -40,14 +40,14 @@ class field_photo_signed_bill_handler extends views_handler_field {
         if (!empty($wrapper)) {
           $path = $wrapper->getExternalUrl();
         }
-        $photo_signed_bill .= '<a target="_blank" href="' . $path . '">';
-        $photo_signed_bill .= t('File');
-        $photo_signed_bill .= '</a>';
+        $signed_bill .= '<a target="_blank" href="' . $path . '">';
+        $signed_bill .= t($photo_signed_bill);
+        $signed_bill .= '</a>';
     }
 
     //$photo_signed_bill = '<a target="_blank" href="' . $photo_signed_bill . '">' . $photo_signed_bill;
 
-    return $photo_signed_bill;
+    return $signed_bill;
    }
 
 }
