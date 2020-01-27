@@ -35,7 +35,17 @@ class field_photo_signed_bill_handler extends views_handler_field {
     $query->fields('vrs_trip', array('photo_signed_bill'));
     $photo_signed_bill = $query->execute()->fetchField();
     
-    $photo_signed_bill = '<a target="_blank" href="' . $photo_signed_bill . '">' . $photo_signed_bill;
+    if(!empty($photo_signed_bill)) {
+        $wrapper = file_stream_wrapper_get_instance_by_uri($photo_signed_bill);
+        if (!empty($wrapper)) {
+          $path = $wrapper->getExternalUrl();
+        }
+        $photo_signed_bill .= '<a target="_blank" href="' . $path . '">';
+        $photo_signed_bill .= t('File');
+        $photo_signed_bill .= '</a>';
+    }
+
+    //$photo_signed_bill = '<a target="_blank" href="' . $photo_signed_bill . '">' . $photo_signed_bill;
 
     return $photo_signed_bill;
    }
