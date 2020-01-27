@@ -40,14 +40,11 @@ class field_photo_cheque_handler extends views_handler_field {
         if (!empty($wrapper)) {
           $path = $wrapper->getExternalUrl();
         }
-        if(!empty($path) && !empty($photo_cheque)) {
-            $ph_cheque .= '<a target="_blank" href="' . $path . '">';
-            $ph_cheque .= t($photo_cheque);
-            $ph_cheque .= '</a>'; 
+        elseif(empty($path) && !empty($photo_cheque)) {
+             $path = $photo_cheque;
         }
-        else {
-            $ph_cheque = '<a target="_blank" href="' . $photo_cheque . '">' . $photo_cheque;
-        }
+        
+        $ph_cheque = '<a target="_blank" href="' . $path . '">' . $photo_cheque; 
     }
 
     return $ph_cheque;
