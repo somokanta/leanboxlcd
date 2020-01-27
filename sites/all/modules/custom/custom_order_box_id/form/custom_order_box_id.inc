@@ -232,10 +232,12 @@ function check_crate_id_exist($outlet_order_no, $bill_number, $distributor_id) {
         $query = db_select('outlet_order_crate', 'ooc');
         $query->condition('ooc.outlet_order_no', $outlet_order_no);
         // Join with party name table to validate party code of bill number
-        $query->join('field_data_field_party_name', 'party_name', 'party_name.field_party_name_value = ooc.party_name');
+        //$query->join('field_data_field_party_name', 'party_name', 'party_name.field_party_name_value = ooc.party_name');
         // join with party code reference field in sales register
-        $query->join('field_data_field_party_code_reference', 'party_ref', 'party_ref.field_party_code_reference_nid = party_name.entity_id');
+        //$query->join('field_data_field_party_code_reference', 'party_ref', 'party_ref.field_party_code_reference_nid = party_name.entity_id');
         // join with bill number
+        $query->join('node', 'outlet_master', 'outlet_master.title = ooc.party_code AND outlet_master.uid = ooc.distributor_id');
+        $query->join('field_data_field_party_code_reference', 'party_ref', 'party_ref.field_party_code_reference_nid = outlet_master.nid');
         $query->join('node', 'sales_register', 'sales_register.nid = party_ref.entity_id');
         $query->condition('sales_register.type', 'sales_register_data');
         $query->condition('sales_register.uid', $distributor_id);
