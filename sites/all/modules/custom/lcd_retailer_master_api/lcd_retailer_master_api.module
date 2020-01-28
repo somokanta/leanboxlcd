@@ -7,13 +7,14 @@
  */
 function lcd_retailer_master_api_menu() {
   $items = array();
-  $items['masters-data-movement-cron'] = array(
+  // cron url for hul code master,area code master,outlet master 
+  $items['reatailer-masters-movement-cron'] = array(
     'title' => 'Masters Data Movement Cron',
     'page callback' => 'cron_data_callback',
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
-  
+  // mobility server api cron data
   $items['mobility-outlet-api-cron'] = array(
   'title' => 'Mobility Server Api Data Cron',
   'page callback' => 'moblity_outlet_api_cron',
@@ -107,7 +108,6 @@ function insert_mobility_server_api_retailer_cron($api_data){
   }
 }
 function cron_data_callback() {
-  watchdog('Testcron', '<pre>' . print_r('masters-data', TRUE) . '</pre>');
   $master_datas = array();
   $api_data = array();
   $query = db_select('retailer_master_api_cron', 'cron');
@@ -121,7 +121,9 @@ function cron_data_callback() {
       $node_type = 'hul_code_master';
     }
     $node_nid = get_node_nid($node_type, $val['title'], $val['distributor_id']);
-    $node = node_load($node_nid);
+    if(!empty($node_nid)){
+       $node = node_load($node_nid);
+    }
     // area code master
     if ($node->type == 'area_code_master') {
       $sub_area_codes = $node->field_linked_area_code[LANGUAGE_NONE];
@@ -203,7 +205,9 @@ function moblity_outlet_api_cron() {
   $results = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
   foreach ($results as $key => $val) {
     $node_nid = get_node_nid($node_type, $val['title'], $val['distributor_id']);
-    $node = node_load($node_nid);
+    if(!empty($node_nid)){
+      $node = node_load($node_nid);
+    }
     $location_type = 'Retailer';
     $party_code = $node->field_party_code['und'][0]['value'];
     $og_party_code = $node->original->field_party_code['und'][0]['value'];
