@@ -182,10 +182,11 @@ function cron_data_callback(){
     $api_options = array('headers' => $request_headers, 'method' => 'POST', 'data' => $data);
     $response_data = drupal_http_request($api_url, $api_options);
     $response_data = json_decode($response_data->data);
-    if(!empty($response_data->response) && ($response_data->response == 'success')){
+    $response_flag = ($response_data->response == 'success') ? 1 : 0;
+    if(!empty($response_data->response)){
         $status_updated = db_update('retailer_master_api_cron') // Table name no longer needs {}
       ->fields(array(
-        'response_flag' => 1,
+        'response_flag' => $response_flag,
         'response_remarks'=> $response_data->response,
       ))
       ->condition('id', $val['id'], '=')
@@ -257,10 +258,12 @@ function moblity_outlet_api_cron() {
         $response_data = drupal_http_request($order_api_url, $options);
         $response = $response_data->data;
         masters_api_log_update($response, $sql_ins_id);
-        if(!empty($response_data->response) && ($response_data->response == 'success')){
+        
+        $response_flag = ($response_data->response == 'success') ? 1 : 0;
+        if(!empty($response_data->response)){
           $status_updated = db_update('retailer_master_api_cron') // Table name no longer needs {}
           ->fields(array(
-        'response_flag' => 1,
+        'response_flag' => $response_flag,
         'response_remarks'=> $response_data->response,
       ))
       ->condition('id', $val['id'], '=')
