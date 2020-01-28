@@ -87,7 +87,7 @@ function order_packing_slip_form($form, &$form_state){
      $from_bill_date = $form_state['values']['from_bill_date'];
      $to_bill_date = $form_state['values']['to_bill_date'];
     
-    $open_pdf_link = l('Open PDF', "/download-order-packing-data/$from_bill_date/$to_bill_date" ,array('attributes'=>array("target" => "_blank")));
+    $open_pdf_link = l('Open PDF', "/download-order-packing-data/$from_bill_date/$to_bill_date" ,array('attributes'=>array("target" => "_blank",'class' => array('print-pdf'))));
     $form['dowmload_mark'] = array(
       '#type' => 'markup',
       '#markup' => $open_pdf_link,
@@ -152,6 +152,7 @@ function order_packing_slip_form_submit($form,&$form_state){
       $query4 = db_select('order_packing_slip_api_data', 'opad');
       $query4->fields('opad', array('order_no','party_name','box_id','seal_number','total_qty','header_data', 'row_data')); 
       $query4->condition('opad.order_no', $unique_orders_arr, 'IN');  //$unique_crate_ids
+      $query4->condition('opad.distributor_id', $distributor_id);  // distributor id
       $table_data = $query4->execute()->fetchAll(\PDO::FETCH_ASSOC);
     }
     $form_state['values']['table_data'] = $table_data;
@@ -165,6 +166,7 @@ function order_packing_slip_form_submit($form,&$form_state){
 function download_order_packing_slip($from_bill_date,$to_bill_date){
   global $user;
   $user_id = $user->uid;
+  drupal_add_js(drupal_get_path('module', 'order_packing_slip') . '/js/pdf_print.js');
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
    if(!empty($from_bill_date) && !empty($to_bill_date)){
     $query = db_select('node', 'n');
@@ -206,6 +208,7 @@ function download_order_packing_slip($from_bill_date,$to_bill_date){
       $query4 = db_select('order_packing_slip_api_data', 'opad');
       $query4->fields('opad', array('order_no','party_name','box_id','seal_number','total_qty','header_data', 'row_data')); 
       $query4->condition('opad.order_no', $unique_orders_arr, 'IN');  //$unique_crate_ids
+      $query4->condition('opad.distributor_id', $distributor_id);  // distributor id
       $table_data = $query4->execute()->fetchAll(\PDO::FETCH_ASSOC);
     }
     $table_row_data = $table_data;
