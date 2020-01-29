@@ -94,7 +94,7 @@ function custom_order_box_id_upload_form_validate($form, &$form_state) {
                     }
                     $crate_ids = check_crate_id_exist($outlet_order_no,$bill_no, $distributor_id,$hul_code); // check crate id in outlet order crate is exist or not 
                     if (empty($crate_ids[0])) {
-                        $error_message .= "Invalid Order Number/Bill Number mapping Or Crate Id for  $bill_no does not exist at line " . ($key + 2) . '<br>';
+                        $error_message .= "Invalid Order Number/Bill Number mapping Or Invalid Hul code Or Crate Id for  $bill_no does not exist at line " . ($key + 2) . '<br>';
                     }
                     $order_party_code = get_party_code_of_order_no($outlet_order_no,$distributor_id);
                     $bill_party_code = get_party_code_of_bill_no($bill_no,$distributor_id);
