@@ -38,7 +38,8 @@ function custom_order_box_id_upload_form_validate($form, &$form_state) {
     $header_array_from_xsd = array(
         'Order Number',
         'Order Date',
-        'Bill Ref. No'
+        'Bill Ref. No',
+        'Hul Code'
     );
     $distributor_id = $form_state['distributor_id'];
     if ($file) {
