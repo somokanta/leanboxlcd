@@ -247,16 +247,17 @@ function check_crate_id_exist($outlet_order_no, $bill_number, $distributor_id,$h
         // join with party code reference field in sales register
         //$query->join('field_data_field_party_code_reference', 'party_ref', 'party_ref.field_party_code_reference_nid = party_name.entity_id');
         // join with bill number
-        $query->join('node', 'outlet_master', 'outlet_master.title = ooc.party_code AND outlet_master.uid = ooc.distributor_id');
+        $query->join('node', 'outlet_master', 'outlet_master.title = ooc.party_code AND outlet_master.uid = ooc.distributor_id');//outlet node
         $query->join('field_data_field_party_code_reference', 'party_ref', 'party_ref.field_party_code_reference_nid = outlet_master.nid');
-        $query->join('node', 'hu_code', 'hu_code.nid = outlet_master.field_hul_code_reference_nid');
-        $query->condition('hu_code.title', $hul_code);
-        $query->join('node', 'sales_register', 'sales_register.nid = party_ref.entity_id');
+        $query->join('field_data_field_hul_code_reference', 'hul_code_ref', 'outlet_master.nid = hul_code_ref.entity_id');
+        $query->join('node', 'hul_code', 'hul_code.nid = hul_code_ref.field_hul_code_reference_nid');//hul node
+        $query->join('node', 'sales_register', 'sales_register.nid = party_ref.entity_id');// sales node
         $query->condition('sales_register.type', 'sales_register_data');
         $query->condition('sales_register.uid', $distributor_id);
         $query->condition('ooc.distributor_id', $distributor_id);
-        $query->condition('hu_code.uid', $distributor_id);
+        $query->condition('hul_code.uid', $distributor_id);
         $query->condition('ooc.hul_code', $hul_code);
+        $query->condition('hul_code.title', $hul_code);
         $query->condition('sales_register.title', $bill_number);
         $query->fields('ooc', array('crate_id'));
         $results = $query->execute()->fetchCol();
