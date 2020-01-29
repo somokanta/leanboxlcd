@@ -116,10 +116,6 @@ function custom_order_box_id_update_7122() {
   }
 }
 
-function change_feeds_import_update_7123() {
-    db_change_field('outlet_order_crate', 'distributor_id', 'distributor_id', array('type' => 'int'));
-    db_change_field('outlet_order_crate', 'party_code', 'party_code', array('type' => 'varchar','length'=>100));
-}
 
 function custom_order_box_id_update_7124() {
   $fields = array(
@@ -135,3 +131,4 @@ function custom_order_box_id_update_7124() {
     }
   }
 }
+
