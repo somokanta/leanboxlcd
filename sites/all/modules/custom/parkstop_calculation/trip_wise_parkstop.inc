@@ -7,8 +7,8 @@
  */
 
 function trip_wise_parkstop_form($form, $form_state) {
-  global $user;
-  $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+  //global $user;
+  //$distributor_id = change_feeds_import_get_distributor_id($user->uid);
   
   $form['#prefix'] = '<div id="itemlist-div">';
   $form['#suffix'] = '</div>';
@@ -102,6 +102,8 @@ function trip_wise_parkstop_form($form, $form_state) {
 
     // Download trip details
     $trip_id = $form_state['input']['trip_number'];
+    $distributor_id = get_distributorid_of_trip($trip_id);
+    $form_state['distributor_id'] = $distributor_id;
     $url = "/parkstop-trip-report/export/$trip_id/$distributor_id";
     if (!empty($form_state['enable_download'])) {
       $form['download_link'] = array(
@@ -121,8 +123,9 @@ function get_data_of_parkstop_form($form, &$form_state) {
 
 function parkstop_form_validate($form, &$form_state) {
   $trip_id = $form_state['values']['trip_number'];
-  global $user;
-  $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+  //global $user;
+  //$distributor_id = change_feeds_import_get_distributor_id($user->uid);
+  $distributor_id =  $form_state['distributor_id'];
   $query = db_select('node', 'n');
   $query->condition('n.type', 'dispatch_data');
   $query->condition('n.title', $trip_id, '=');
@@ -137,8 +140,9 @@ function parkstop_form_validate($form, &$form_state) {
 
 function parkstop_form_submit($form, &$form_state) {
   $trip_id = $form_state['values']['trip_number'];
-  global $user;
-  $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+  //global $user;
+  $//distributor_id = change_feeds_import_get_distributor_id($user->uid);
+   $distributor_id =  $form_state['distributor_id'];
 
   $parkstop_data_report = parkstop_data_report($trip_id, $distributor_id);
   $form_state['below_data'] = $parkstop_data_report['below_data'];

@@ -3088,6 +3088,7 @@ function delete_data_from_farey_table($trip_id, $distributor_id) {
     }
     $num_deleted = db_delete('dispatch_planning_api_data')
       ->condition('runsheet_number', $trip_id)
+      ->condition('distributor_id', $distributor_id)  
       ->execute();
   }
 }
