@@ -212,7 +212,7 @@ function moblity_outlet_api_cron() {
   $results = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
   if(!empty($results)){
     foreach ($results as $key => $val) {
-      $node_nid = get_node_nid($node_type, $val['title'], $val['distributor_id']);
+      $node_nid = get_node_nid($val['node_type'], $val['title'], $val['distributor_id']);
       if(!empty($node_nid)){
         $node = node_load($node_nid);
       }
