@@ -55,6 +55,7 @@ function lcd_retailer_master_api_node_presave($node) {
     if ($node->type == 'outlet_master') {
       $api_data['type'] = 'outlet_master';
       $api_data['title'] = $node->title;
+      $api_data['distributor_id'] = $node->uid;
       $sql_ins_id = insert_mobility_server_api_retailer_cron($api_data);//mobility_server_api_retailer_cron
     }
     if ($node->type == 'hul_code_master') {
@@ -109,157 +110,81 @@ function insert_mobility_server_api_retailer_cron($api_data){
 }
 function cron_data_callback() {
   $master_datas = array();
-  $api_data = array();
+  
   $query = db_select('retailer_master_api_cron', 'cron');
   $query->condition('cron.response_flag', 0, '=');
   $query->range(0, 50);
   $query->fields('cron', array('title', 'node_type', 'distributor_id', 'id'));
   $results = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
-  foreach ($results as $key => $val) {
-    $node_type = $val['node_type'];
-    if ($val['node_type'] == 'hul_code_area_code_mapping') {
-      $node_type = 'hul_code_master';
-    }
-    $node_nid = get_node_nid($node_type, $val['title'], $val['distributor_id']);
-    if(!empty($node_nid)){
-       $node = node_load($node_nid);
-    }
-    // area code master
-    if ($node->type == 'area_code_master') {
-      $sub_area_codes = $node->field_linked_area_code[LANGUAGE_NONE];
-      foreach ($node->field_linked_area_code[LANGUAGE_NONE] as $key => $area_code_nid) {
-        $sub_area_code_nids[$area_code_nid['nid']] = $area_code_nid['nid'];
+  if(!empty($results)) {
+    foreach ($results as $key => $val) {
+      $api_data = array();
+      $node_type = $val['node_type'];
+      if ($val['node_type'] == 'hul_code_area_code_mapping') {
+        $node_type = 'hul_code_master';
       }
-      $sub_areas = get_node_titles_using_multiple_nids($sub_area_code_nids);
-      if (!empty($sub_areas)) {
-        $sub_area_codes_values = implode(',', $sub_areas);
+      $node_nid = get_node_nid($node_type, $val['title'], $val['distributor_id']);
+      if(!empty($node_nid)){
+         $node = node_load($node_nid);
       }
-      if (empty($sub_area_codes_values)) {
-        $sub_area_codes_values = '';
+      // area code master
+      if ($node->type == 'area_code_master') {
+        $sub_area_codes = $node->field_linked_area_code[LANGUAGE_NONE];
+        foreach ($node->field_linked_area_code[LANGUAGE_NONE] as $key => $area_code_nid) {
+          $sub_area_code_nids[$area_code_nid['nid']] = $area_code_nid['nid'];
+        }
+        $sub_areas = get_node_titles_using_multiple_nids($sub_area_code_nids);
+        if (!empty($sub_areas)) {
+          $sub_area_codes_values = implode(',', $sub_areas);
+        }
+        if (empty($sub_area_codes_values)) {
+          $sub_area_codes_values = '';
+        }
+        $api_data['type'] = 'area_code_master';
+        $api_data['area_code'] = $node->title;
+        $api_data['sub_area_codes'] = $sub_area_codes_values;
       }
-      $api_data['type'] = 'area_code_master';
-      $api_data['area_code'] = $node->title;
-      $api_data['sub_area_codes'] = $sub_area_codes_values;
-    }
-    // hul code master
-    if ($node->type == 'hul_code_master') {
-      $area_code = get_node_title_using_nid($node->field_area_code[LANGUAGE_NONE][0]['nid']);
-      if (empty($area_code)) {
-        $area_code = '';
+      // hul code master
+      else if ($node->type == 'hul_code_master') {
+        $area_code = get_node_title_using_nid($node->field_area_code[LANGUAGE_NONE][0]['nid']);
+        if (empty($area_code)) {
+          $area_code = '';
+        }
+        $api_data['type'] = $node_type;
+        $api_data['hul_code'] = $node->title;
+        $api_data['field_hul_address'] = $node->field_hul_address[LANGUAGE_NONE][0]['value'];
+        $api_data['field_hul_area'] = $node->field_hul_area[LANGUAGE_NONE][0]['value'];
+        $api_data['field_area_code'] = $area_code;
+        $api_data['field_hul_lat'] = $node->field_hul_lat[LANGUAGE_NONE][0]['value'];
+        $api_data['field_hul_long'] = $node->field_hul_long[LANGUAGE_NONE][0]['value'];
+        $api_data['field_hul_phone_no'] = $node->field_hul_phone_no[LANGUAGE_NONE][0]['value'];
+        $api_data['field_hul_street'] = $node->field_hul_street[LANGUAGE_NONE][0]['value'];
+        $api_data['field_hul_sub_area'] = $node->field_hul_sub_area[LANGUAGE_NONE][0]['value'];
+        $api_data['field_party_name'] = $node->field_hul_party_name[LANGUAGE_NONE][0]['value'];
+        $api_data['field_sms_required'] = $node->field_sms_required[LANGUAGE_NONE][0]['value'];
       }
-      $api_data['type'] = $val['node_type'];
-      $api_data['hul_code'] = $node->title;
-      $api_data['field_hul_address'] = $node->field_hul_address[LANGUAGE_NONE][0]['value'];
-      $api_data['field_hul_area'] = $node->field_hul_area[LANGUAGE_NONE][0]['value'];
-      $api_data['field_area_code'] = $area_code;
-      $api_data['field_hul_lat'] = $node->field_hul_lat[LANGUAGE_NONE][0]['value'];
-      $api_data['field_hul_long'] = $node->field_hul_long[LANGUAGE_NONE][0]['value'];
-      $api_data['field_hul_phone_no'] = $node->field_hul_phone_no[LANGUAGE_NONE][0]['value'];
-      $api_data['field_hul_street'] = $node->field_hul_street[LANGUAGE_NONE][0]['value'];
-      $api_data['field_hul_sub_area'] = $node->field_hul_sub_area[LANGUAGE_NONE][0]['value'];
-      $api_data['field_party_name'] = $node->field_hul_party_name[LANGUAGE_NONE][0]['value'];
-      $api_data['field_sms_required'] = $node->field_sms_required[LANGUAGE_NONE][0]['value'];
-    }
-    //outlet master
-    if ($node->type == 'outlet_master') {
-      $api_data['type'] = 'outlet_master';
-      $api_data['title'] = $node->title;
-      $api_data['field_beat_name'] = $node->field_beat_name[LANGUAGE_NONE][0]['value'];
-      $api_data['field_hul_code_ref'] = $hul_code;
-      $api_data['field_outlet_channel'] = $node->field_channel[LANGUAGE_NONE][0]['value'];
-      $api_data['field_party_name'] = $node->field_party_name[LANGUAGE_NONE][0]['value'];
-      $api_data['field_pl_group'] = $node->field_pl_group[LANGUAGE_NONE][0]['value'];
-      $api_data['field_sales_day'] = $node->field_sales_day[LANGUAGE_NONE][0]['value'];
-      $api_data['field_salesman'] = $node->field_salesman[LANGUAGE_NONE][0]['value'];
-      $api_data['field_salesman_code'] = $node->field_salesman_code[LANGUAGE_NONE][0]['value'];
-    }
-    $api_data['distributor_id'] = $node->uid;
-    $data = json_encode($api_data);
-    // $authorization = 'bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1ODgzOWY4ZjYyZmQyMzkzMGE4NjQwYjEiLCJpYXQiOjE1MDQ2Nzg4NTl9.AzJLVp6HDk6lbXCWxI1T8Y7US6R0panNjkY5B-pkdqg';
-    $request_headers = array('Content-Type' => 'application/json', 'Authorization' => $authorization);
-    //$api_url = variable_get('retailer_api_master_url', 'http://dev-lak.leanbox.in/retailer_master/update_retailer_master_data');
-    $api_url = variable_get('retailer_api_master_url', 'http://localhost/lakme/web/retailer_master/update_retailer_master_data');
-    $api_options = array('headers' => $request_headers, 'method' => 'POST', 'data' => $data);
-    $response_data = drupal_http_request($api_url, $api_options);
-    $response_data = json_decode($response_data->data);
-    $response_flag = ($response_data->response == 'success') ? 1 : 0;
-    if (!empty($response_data->response)) {
-      $status_updated = db_update('retailer_master_api_cron') // Table name no longer needs {}
-        ->fields(array(
-          'response_flag' => $response_flag,
-          'response_remarks' => $response_data->response,
-        ))
-        ->condition('id', $val['id'], '=')
-        ->execute();
-    }
-  }
-}
-
-function moblity_outlet_api_cron() {
-  $master_datas = array();
-  $api_data = array();
-  $query = db_select('mobility_server_api_retailer_cron', 'cron');
-  $query->condition('cron.response_flag', 0, '=');
-  $query->range(0, 50);
-  $query->fields('cron', array('title', 'node_type', 'distributor_id', 'id'));
-  $results = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
-  foreach ($results as $key => $val) {
-    $node_nid = get_node_nid($node_type, $val['title'], $val['distributor_id']);
-    if(!empty($node_nid)){
-      $node = node_load($node_nid);
-    }
-    $location_type = 'Retailer';
-    $party_code = $node->field_party_code['und'][0]['value'];
-    $og_party_code = $node->original->field_party_code['und'][0]['value'];
-    $hul_code = $node->field_hul_code['und'][0]['value'];
-    $og_hul_code = $node->original->field_hul_code['und'][0]['value'];
-    $party_name = $node->field_party_name['und'][0]['value'];
-    $og_party_name = $node->original->field_party_name['und'][0]['value'];
-    $payment_term = $node->field_payment_terms['und'][0]['value'];
-    $og_payment_term = $node->original->field_payment_terms['und'][0]['value'];
-    $credit_days = $node->field_credit_days['und'][0]['value'];
-    $og_credit_days = $node->original->field_credit_days['und'][0]['value'];
-    $nid = $node->field_hul_code_reference['und'][0]['nid'];
-    $og_nid = $node->original->field_hul_code_reference['und'][0]['nid'];
-    $dis_id = $node->uid;
-    $api_type = 'location_master';
-    $merchant_code = variable_get('merchant_code_conf', 'lakme');
-    if (!empty($party_code) && !empty($party_name) && ($party_code != $og_party_code || $hul_code != $og_hul_code || $party_name != $og_party_name || $payment_term != $og_payment_term || $credit_days != $og_credit_days || $nid != $og_nid)) {
-      $res = get_lat_long_and_area_code($nid);
-      $lat = $res[0]['field_hul_updated_lat_value'];
-      $long = $res[0]['field_hul_updated_long_value'];
-      $area_code = $res[0]['n1_title'];
-
-      $location_arr = array(array('party_code' => $party_code, 'party_name' => $party_name, 'location_type' => $location_type, 'merchant' => array(array('name' => $merchant_code))));
-      if (!empty($hul_code)) {
-        $location_arr[0]['hul_code'] = $hul_code;
+      //outlet master
+      else if ($node->type == 'outlet_master') {
+        $api_data['type'] = 'outlet_master';
+        $api_data['title'] = $node->title;
+        $api_data['field_beat_name'] = $node->field_beat_name[LANGUAGE_NONE][0]['value'];
+        $api_data['field_hul_code_ref'] = $hul_code;
+        $api_data['field_outlet_channel'] = $node->field_channel[LANGUAGE_NONE][0]['value'];
+        $api_data['field_party_name'] = $node->field_party_name[LANGUAGE_NONE][0]['value'];
+        $api_data['field_pl_group'] = $node->field_pl_group[LANGUAGE_NONE][0]['value'];
+        $api_data['field_sales_day'] = $node->field_sales_day[LANGUAGE_NONE][0]['value'];
+        $api_data['field_salesman'] = $node->field_salesman[LANGUAGE_NONE][0]['value'];
+        $api_data['field_salesman_code'] = $node->field_salesman_code[LANGUAGE_NONE][0]['value'];
       }
-      if (!empty($lat)) {
-        $location_arr[0]['latitude'] = $lat;
-      }
-      if (!empty($long)) {
-        $location_arr[0]['longitude'] = $long;
-      }
-      if (!empty($area_code)) {
-        $location_arr[0]['area_code'] = $area_code;
-      }
-      if (!empty($payment_term)) {
-        $location_arr[0]['payment_term'] = $payment_term;
-      }
-      if (!empty($credit_days)) {
-        $location_arr[0]['credit_days'] = $credit_days;
-      }
-      $location_json = json_encode($location_arr);
-
-      $sql_ins_id = outlet_master_api_log($party_code, $location_json, $api_type, $dis_id);
-
-      $request_headers = array('Content-Type' => 'application/json', 'Authorization' => 'Token 2972f506c41448cb3456c1c074aed6102183aff9');
-      $order_api_url = variable_get('outlet_master_api_url');
-      $options = array('headers' => $request_headers, 'method' => 'POST', 'data' => $location_json);
-      $response_data = drupal_http_request($order_api_url, $options);
-      $response = $response_data->data;
-      masters_api_log_update($response, $sql_ins_id);
-
+      $api_data['distributor_id'] = $node->uid;
+      $data = json_encode($api_data);
+      // $authorization = 'bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1ODgzOWY4ZjYyZmQyMzkzMGE4NjQwYjEiLCJpYXQiOjE1MDQ2Nzg4NTl9.AzJLVp6HDk6lbXCWxI1T8Y7US6R0panNjkY5B-pkdqg';
+      $request_headers = array('Content-Type' => 'application/json', 'Authorization' => $authorization);
+      $api_url = variable_get('retailer_api_master_url', 'http://dev-lak.leanbox.in/retailer_master/update_retailer_master_data');
+      //$api_url = variable_get('retailer_api_master_url', 'http://localhost/lakme/web/retailer_master/update_retailer_master_data');
+      $api_options = array('headers' => $request_headers, 'method' => 'POST', 'data' => $data);
+      $response_data = drupal_http_request($api_url, $api_options);
+      $response_data = json_decode($response_data->data);
       $response_flag = ($response_data->response == 'success') ? 1 : 0;
       if (!empty($response_data->response)) {
         $status_updated = db_update('retailer_master_api_cron') // Table name no longer needs {}
@@ -270,8 +195,92 @@ function moblity_outlet_api_cron() {
           ->condition('id', $val['id'], '=')
           ->execute();
       }
-    }
+    }    
+    
   }
+
+}
+
+function moblity_outlet_api_cron() {
+  $master_datas = array();
+  $api_data = array();
+  $query = db_select('mobility_server_api_retailer_cron', 'cron');
+  $query->condition('cron.response_flag', 0, '=');
+  $query->range(0, 50);
+  $query->fields('cron', array('title', 'node_type', 'distributor_id', 'id'));
+  $results = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+  if(!empty($results)){
+    foreach ($results as $key => $val) {
+      $node_nid = get_node_nid($node_type, $val['title'], $val['distributor_id']);
+      if(!empty($node_nid)){
+        $node = node_load($node_nid);
+      }
+      $location_type = 'Retailer';
+      $party_code = $node->field_party_code['und'][0]['value'];
+      $og_party_code = $node->original->field_party_code['und'][0]['value'];
+      $hul_code = $node->field_hul_code['und'][0]['value'];
+      $og_hul_code = $node->original->field_hul_code['und'][0]['value'];
+      $party_name = $node->field_party_name['und'][0]['value'];
+      $og_party_name = $node->original->field_party_name['und'][0]['value'];
+      $payment_term = $node->field_payment_terms['und'][0]['value'];
+      $og_payment_term = $node->original->field_payment_terms['und'][0]['value'];
+      $credit_days = $node->field_credit_days['und'][0]['value'];
+      $og_credit_days = $node->original->field_credit_days['und'][0]['value'];
+      $nid = $node->field_hul_code_reference['und'][0]['nid'];
+      $og_nid = $node->original->field_hul_code_reference['und'][0]['nid'];
+      $dis_id = $node->uid;
+      $api_type = 'location_master';
+      $merchant_code = variable_get('merchant_code_conf', 'lakme');
+      if (!empty($party_code) && !empty($party_name) && ($party_code != $og_party_code || $hul_code != $og_hul_code || $party_name != $og_party_name || $payment_term != $og_payment_term || $credit_days != $og_credit_days || $nid != $og_nid)) {
+        $res = get_lat_long_and_area_code($nid);
+        $lat = $res[0]['field_hul_updated_lat_value'];
+        $long = $res[0]['field_hul_updated_long_value'];
+        $area_code = $res[0]['n1_title'];
+
+        $location_arr = array(array('party_code' => $party_code, 'party_name' => $party_name, 'location_type' => $location_type, 'merchant' => array(array('name' => $merchant_code))));
+        if (!empty($hul_code)) {
+          $location_arr[0]['hul_code'] = $hul_code;
+        }
+        if (!empty($lat)) {
+          $location_arr[0]['latitude'] = $lat;
+        }
+        if (!empty($long)) {
+          $location_arr[0]['longitude'] = $long;
+        }
+        if (!empty($area_code)) {
+          $location_arr[0]['area_code'] = $area_code;
+        }
+        if (!empty($payment_term)) {
+          $location_arr[0]['payment_term'] = $payment_term;
+        }
+        if (!empty($credit_days)) {
+          $location_arr[0]['credit_days'] = $credit_days;
+        }
+        $location_json = json_encode($location_arr);
+
+        $sql_ins_id = outlet_master_api_log($party_code, $location_json, $api_type, $dis_id);
+
+        $request_headers = array('Content-Type' => 'application/json', 'Authorization' => 'Token 2972f506c41448cb3456c1c074aed6102183aff9');
+        $order_api_url = variable_get('outlet_master_api_url');
+        $options = array('headers' => $request_headers, 'method' => 'POST', 'data' => $location_json);
+        $response_data = drupal_http_request($order_api_url, $options);
+        $response = $response_data->data;
+        masters_api_log_update($response, $sql_ins_id);
+
+        $response_flag = ($response_data->response == 'success') ? 1 : 0;
+        if (!empty($response_data->response)) {
+          $status_updated = db_update('mobility_server_api_retailer_cron') // Table name no longer needs {}
+            ->fields(array(
+              'response_flag' => $response_flag,
+              'response_remarks' => $response_data->response,
+            ))
+            ->condition('id', $val['id'], '=')
+            ->execute();
+        }
+      }
+    }    
+  }
+
 }
 
 function get_node_nid($node_type,$node_title,$distributor_id){
