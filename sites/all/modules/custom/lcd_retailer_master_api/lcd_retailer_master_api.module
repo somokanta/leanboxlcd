@@ -265,10 +265,8 @@ function moblity_outlet_api_cron() {
         $order_api_url = variable_get('outlet_master_api_url');
         $options = array('headers' => $request_headers, 'method' => 'POST', 'data' => $location_json);
         $response_data = drupal_http_request($order_api_url, $options);
-        watchdog('mobility', '<pre>' . print_r($response_data, TRUE) . '</pre>');
         $response = $response_data->data;
         masters_api_log_update($response, $sql_ins_id);
-        //$data  = '[{"success":true,"data":"","message":"Updated Successfully","party_code":"Newparty1"}]';
         $response_data = json_decode($response) ;
         $response_flag = ($response_data[0]->success == 1) ? 1 : 0;
         if (!empty($response_data->response)) {
