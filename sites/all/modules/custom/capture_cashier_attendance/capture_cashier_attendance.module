@@ -45,8 +45,6 @@ function capture_cashier_attendance_services_resources() {
 function fetch_cashier_attendance_api_data($cashier_attendance_data) {
     watchdog('cashier_attendance_data', '<pre>' . print_r($cashier_attendance_data, TRUE) . '</pre>');
     if (!empty($cashier_attendance_data)) {
-        //global $user;
-        //$distributor_id = change_feeds_import_get_distributor_id($user->uid);
         foreach ($cashier_attendance_data['attendance'] as $key => $value) {
             $facility_code = $value['hub_code'];
         }

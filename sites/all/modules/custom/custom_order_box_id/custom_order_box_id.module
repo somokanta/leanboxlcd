@@ -74,6 +74,13 @@ function custom_order_box_id_services_resources() {
               'source' => array('data' => 'party_code'),
               'optional' => FALSE,
             ),
+            array(
+              'name' => 'hul_code',
+              'type' => 'string',
+              'description' => 'hul_code',
+              'source' => array('data' => 'hul_code'),
+              'optional' => FALSE,
+            ),
            ),
             'file' => array(
               'type' => 'inc',

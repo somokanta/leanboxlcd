@@ -1544,6 +1544,16 @@ function change_feeds_import_views_data() {
       'handler' => 'handler_dispatched_value_field',
     ),
   );
+  
+  $data['node']['order_upload_datetime'] = array(
+    'title' => t('Order Upload Datetime'),
+    'help' => t('Orders Upload Datetime Value'),
+    'real field' => 'nid',
+    'field' => array(
+      'handler' => 'views_handler_field_order_upload_datetime',
+      'click sortable' => FALSE,
+     ),
+  );
 
   return $data;
 }
