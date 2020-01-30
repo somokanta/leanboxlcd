@@ -38,7 +38,8 @@ function custom_order_box_id_upload_form_validate($form, &$form_state) {
     $header_array_from_xsd = array(
         'Order Number',
         'Order Date',
-        'Bill Ref. No'
+        'Bill Ref. No',
+        'Hul Code'
     );
     $distributor_id = $form_state['distributor_id'];
     if ($file) {
@@ -67,11 +68,21 @@ function custom_order_box_id_upload_form_validate($form, &$form_state) {
                     $outlet_order_no = $value[0];
                     $order_date = $value[1];
                     $bill_no = $value[2];
+                    $hul_code = $value[3];
                     if (empty($order_date)) {
                         $error_message .= "Order Date should not be empty at line " . ($key + 2) . '<br>';
                     }
                     if (empty($outlet_order_no)) {
                         $error_message .= "Order Number should not be empty at line " . ($key + 2) . '<br>';
+                    }
+                    if (empty($hul_code)) {
+                        $error_message .= "Hul code should not be empty at line " . ($key + 2) . '<br>';
+                    }
+                    else {
+                      $hul_code = validate_hul_code($hul_code, $distributor_id);
+                      if (empty($hul_code)) {
+                        $error_message .= "HUL Code does not exist in HUL Code Master" . ($key + 2) . '<br>';
+                      }
                     }
                     $unique_comb = $outlet_order_no . $bill_no;
                     if (array_key_exists($unique_comb, $res['unique_combination'])) {
@@ -82,9 +93,9 @@ function custom_order_box_id_upload_form_validate($form, &$form_state) {
                     if (empty($exist_bills[0])) {
                         $error_message .= "Bill Number Ref $bill_no does not exist at line " . ($key + 2) . '<br>';
                     }
-                    $crate_ids = check_crate_id_exist($outlet_order_no,$bill_no, $distributor_id); // check crate id in outlet order crate is exist or not 
+                    $crate_ids = check_crate_id_exist($outlet_order_no,$bill_no, $distributor_id,$hul_code); // check crate id in outlet order crate is exist or not 
                     if (empty($crate_ids[0])) {
-                        $error_message .= "Invalid Order Number/Bill Number mapping Or Crate Id for  $bill_no does not exist at line " . ($key + 2) . '<br>';
+                        $error_message .= "Invalid Order Number/Bill Number mapping Or Invalid Hul code Or Crate Id for  $bill_no does not exist at line " . ($key + 2) . '<br>';
                     }
                     $order_party_code = get_party_code_of_order_no($outlet_order_no,$distributor_id);
                     $bill_party_code = get_party_code_of_bill_no($bill_no,$distributor_id);
@@ -181,8 +192,8 @@ function custom_order_box_id_process($max, $data, $distributor_id, $file_name, &
         $outlet_order_ref = trim($value['Order Number']); //Order Number//
         $order_date = trim($value['Order Date']); //Order Date//
         $bill_number = trim($value['Bill Ref. No']); //Bill Ref. No
-
-        $crate_id = check_crate_id_exist($outlet_order_ref,$bill_number,$distributor_id);
+        $hul_code = trim($value['Hul Code']);
+        $crate_id = check_crate_id_exist($outlet_order_ref,$bill_number,$distributor_id,$hul_code);
 
         if (!empty($outlet_order_ref)) {
             $query = db_select('node', 'n');
@@ -227,7 +238,7 @@ function custom_order_box_id_process($max, $data, $distributor_id, $file_name, &
     }
     return $results;
 }*/
-function check_crate_id_exist($outlet_order_no, $bill_number, $distributor_id) {
+function check_crate_id_exist($outlet_order_no, $bill_number, $distributor_id,$hul_code) {
     if (!empty($outlet_order_no) && !empty($distributor_id) && !empty($bill_number)) {
         $query = db_select('outlet_order_crate', 'ooc');
         $query->condition('ooc.outlet_order_no', $outlet_order_no);
@@ -236,12 +247,17 @@ function check_crate_id_exist($outlet_order_no, $bill_number, $distributor_id) {
         // join with party code reference field in sales register
         //$query->join('field_data_field_party_code_reference', 'party_ref', 'party_ref.field_party_code_reference_nid = party_name.entity_id');
         // join with bill number
-        $query->join('node', 'outlet_master', 'outlet_master.title = ooc.party_code AND outlet_master.uid = ooc.distributor_id');
+        $query->join('node', 'outlet_master', 'outlet_master.title = ooc.party_code AND outlet_master.uid = ooc.distributor_id');//outlet node
         $query->join('field_data_field_party_code_reference', 'party_ref', 'party_ref.field_party_code_reference_nid = outlet_master.nid');
-        $query->join('node', 'sales_register', 'sales_register.nid = party_ref.entity_id');
+        $query->join('field_data_field_hul_code_reference', 'hul_code_ref', 'outlet_master.nid = hul_code_ref.entity_id');
+        $query->join('node', 'hul_code', 'hul_code.nid = hul_code_ref.field_hul_code_reference_nid');//hul node
+        $query->join('node', 'sales_register', 'sales_register.nid = party_ref.entity_id');// sales node
         $query->condition('sales_register.type', 'sales_register_data');
         $query->condition('sales_register.uid', $distributor_id);
         $query->condition('ooc.distributor_id', $distributor_id);
+        $query->condition('hul_code.uid', $distributor_id);
+        $query->condition('ooc.hul_code', $hul_code);
+        $query->condition('hul_code.title', $hul_code);
         $query->condition('sales_register.title', $bill_number);
         $query->fields('ooc', array('crate_id'));
         $results = $query->execute()->fetchCol();
@@ -270,4 +286,14 @@ function get_party_code_of_bill_no($bill_no,$distributor_id){
   $query->fields('outlet_master', array('title'));
   $party_code = $query->execute()->fetchField();
   return $party_code;
+}
+
+function validate_hul_code($hul_code,$distributor_id){
+  $query = db_select('node', 'n');
+  $query->condition('n.type', 'hul_code_master');
+  $query->condition('n.title', $hul_code);
+  $query->condition('n.uid', $distributor_id);
+  $query->fields('n', array('title'));
+  $result = $query->execute()->fetchField();
+  return $result;
 }
