@@ -5,7 +5,6 @@
  */
 
 function lcd_retailer_master_api_schema() {
-
   $schema['retailer_master_api_cron'] = array(
     'description' => 'Masters Api Cron data',
     'fields' => array(
