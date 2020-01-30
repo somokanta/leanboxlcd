@@ -165,6 +165,7 @@ function cron_data_callback() {
       }
       //outlet master
       else if ($node->type == 'outlet_master') {
+        $hul_code = $node->field_hul_code[LANGUAGE_NONE][0]['value'];
         $api_data['type'] = 'outlet_master';
         $api_data['title'] = $node->title;
         $api_data['field_beat_name'] = $node->field_beat_name[LANGUAGE_NONE][0]['value'];
