@@ -97,7 +97,8 @@ function change_feeds_import_sales_register_form_validate($form, &$form_state) {
         foreach ($data as $key => $value) {
             if (in_array('central_distributor', $user->roles)) {
                 // passing distributor_name
-                $distributor_name = trim($value[4]);
+                echo $value[3];
+                echo $distributor_name = trim($value[4]);die;
                 $distributor_id = validate_distributor_name($distributor_name);
 
                 if (empty(check_valid_distributor($distributor_id))) {
