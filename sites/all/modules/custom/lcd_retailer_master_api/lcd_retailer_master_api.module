@@ -153,13 +153,13 @@ function cron_data_callback() {
         $api_data['type'] = $node_type;
         $api_data['hul_code'] = $node->title;
         $api_data['field_hul_address'] = $node->field_hul_address[LANGUAGE_NONE][0]['value'];
-        $api_data['field_hul_area'] = $node->field_hul_area[LANGUAGE_NONE][0]['value'];
+        $api_data['field_hul_area'] = $node->field_updated_address[LANGUAGE_NONE][0]['locality'];
         $api_data['field_area_code'] = $area_code;
         $api_data['field_hul_lat'] = $node->field_hul_lat[LANGUAGE_NONE][0]['value'];
         $api_data['field_hul_long'] = $node->field_hul_long[LANGUAGE_NONE][0]['value'];
         $api_data['field_hul_phone_no'] = $node->field_hul_phone_no[LANGUAGE_NONE][0]['value'];
-        $api_data['field_hul_street'] = $node->field_hul_street[LANGUAGE_NONE][0]['value'];
-        $api_data['field_hul_sub_area'] = $node->field_hul_sub_area[LANGUAGE_NONE][0]['value'];
+        $api_data['field_hul_street'] = $node->field_updated_address[LANGUAGE_NONE][0]['sub_premise'];
+        $api_data['field_hul_sub_area'] = $node->field_updated_address[LANGUAGE_NONE][0]['dependent_locality'];
         $api_data['field_party_name'] = $node->field_hul_party_name[LANGUAGE_NONE][0]['value'];
         $api_data['field_sms_required'] = $node->field_sms_required[LANGUAGE_NONE][0]['value'];
       }
