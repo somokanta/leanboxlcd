@@ -95,6 +95,7 @@ function change_feeds_import_sales_register_form_validate($form, &$form_state) {
         }
         $mess = '';
         foreach ($data as $key => $value) {
+            print_r($value);die;
             if (in_array('central_distributor', $user->roles)) {
                 // passing distributor_name
                 $distributor_name = trim($value[4]);
