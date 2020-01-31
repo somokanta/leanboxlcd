@@ -95,13 +95,14 @@ function change_feeds_import_sales_register_form_validate($form, &$form_state) {
         }
         $mess = '';
         foreach ($data as $key => $value) {
-            if (in_array('central_distributor', $user->roles)) {
+            if (in_array('central_distributor', $user->roles) && $key!==0) {
+               // echo $key;
                 // passing distributor_name
-                $distributor_name = 'distributor1';
+                $distributor_name = trim($value[4]);
                 $distributor_id = validate_distributor_name($distributor_name);
 
                 if (empty(check_valid_distributor($distributor_id))) {
-                    $mess .= t('Invalid Distributor Name: ' . $distributor_name) . '<br>';
+                   $mess .= t('Invalid Distributor Name: ' . $distributor_name) . '<br>';
                 }
                 // valid Distributor Name
                 else {
