@@ -4845,6 +4845,8 @@ function validate_master_data($feed_title, $content_type) {
 }
 
 function check_valid_distributor($distributor_id) {
+       $dis_ids = get_distributor_ids();
+        print_r($dis_ids);die;
     if (!empty($distributor_id)) {
         $dis_ids = get_distributor_ids();
         print_r($dis_ids);die;
