@@ -4827,3 +4827,16 @@ function is_bill_cancelled_discarded($bill_number){
   }
   return $res;
 }
+function get_node_created_time($title, $type, $distributor_id) {
+    if (!empty($title) && !empty($type) && !empty($distributor_id)) {
+        $query = db_select('node', 'n');
+        $query->condition('n.title', $title);
+        if (!empty($type)) {
+            $query->condition('n.type', $type);
+        }
+        $query->condition('n.uid', $distributor_id);
+        $query->fields('n', array('created'));
+        $return_created_time = $query->execute()->fetchField();
+    }
+    return $return_created_time;
+}
