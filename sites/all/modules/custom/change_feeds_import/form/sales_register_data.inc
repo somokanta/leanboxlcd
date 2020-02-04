@@ -192,8 +192,14 @@ function change_feeds_import_sales_register_batch_fix_process($data, $distributo
             if (empty($value['DISTRIBUTOR NAME'])) {
                 $value['error_message'] .= "Distributor Name Column Missing for bill number " . $value['BILL_NUMBER'] . ".";
             }
+            else {
+                $csv_dist_id = $csv_distributor_ids[trim($value['DISTRIBUTOR NAME'])];
+                if (empty($csv_dist_id)) {
+                    $value['error_message'] .= "Invalid Distributor Name:".$value['DISTRIBUTOR NAME'];
+                }
+            }
         }
-        $csv_dist_id = $csv_distributor_ids[trim($value['DISTRIBUTOR NAME'])];
+        
         $dis_id = $csv_dist_id ? $csv_dist_id : $distributor_id; 
         $distributorname = $value['DISTRIBUTOR NAME']?trim($value['DISTRIBUTOR NAME']):get_distributor_name($dis_id);
         foreach ($value as $k => $v) {
