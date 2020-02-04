@@ -165,7 +165,6 @@ function cron_data_callback() {
       }
       //outlet master
       else if ($node->type == 'outlet_master') {
-        dpm($node);die;
         $hul_code = $node->field_hul_code[LANGUAGE_NONE][0]['value'];
         $api_data['type'] = 'outlet_master';
         $api_data['title'] = $node->title;
@@ -177,12 +176,11 @@ function cron_data_callback() {
         $api_data['field_sales_day'] = $node->field_sales_day[LANGUAGE_NONE][0]['value'];
         $api_data['field_salesman'] = $node->field_salesman[LANGUAGE_NONE][0]['value'];
         $api_data['field_salesman_code'] = $node->field_salesman_code[LANGUAGE_NONE][0]['value'];
-        $api_data['field_payment_terms'] = $node->field_payment_terms[LANGUAGE_NONE][0]['value'];
+        //$api_data['field_payment_terms'] = $node->field_payment_terms[LANGUAGE_NONE][0]['value'];
         $api_data['field_credit_days'] = $node->field_credit_days[LANGUAGE_NONE][0]['value'];
-        $api_data['field_updated_by'] = $node->field_updated_by[LANGUAGE_NONE][0]['value'];
-        $api_data['field_reason_for_change'] = $node->field_reason_for_change[LANGUAGE_NONE][0]['value'];
-        $api_data['field_pt_ct_remarks'] = $node->field_pt_ct_remarks[LANGUAGE_NONE][0]['value'];
-        //dpm($api_data);die();
+        $resourse_name_nid = $node->field_updated_by[LANGUAGE_NONE][0]['nid'];
+        $resourse_name = get_title_of_nid($resourse_name_nid);
+        $api_data['field_updated_by'] = $resourse_name;
       }
       $api_data['distributor_id'] = $node->uid;
       $data = json_encode($api_data);
@@ -299,4 +297,12 @@ function get_node_nid($node_type,$node_title,$distributor_id){
   $query->fields('n', array('nid'));
   $nid = $query->execute()->fetchField();
   return $nid;
+}
+
+function get_title_of_nid($node_nid){
+  $query = db_select('node', 'n');
+  $query->condition('n.nid', $node_nid, '=');
+  $query->fields('n', array('title'));
+  $node_title = $query->execute()->fetchField();
+  return $node_title;
 }
