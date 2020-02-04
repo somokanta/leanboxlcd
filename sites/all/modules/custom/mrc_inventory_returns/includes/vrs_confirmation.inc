@@ -1817,7 +1817,7 @@ function vrs_confirmation_form_submit($form, &$form_state) {
     $trip_items_total['distributor_id'] = $dis_id;
     $vrs_total_id_insert = insert_vrs_trip_total($trip_items_total, $trip_id);
      // Delete existing denominations  before insert new denominations
-    delete_existing_denominations($trip_id);
+    delete_existing_denominations($trip_id,$dis_id);
     if (!empty($vrs_total_id))
       $vrs_total_id = $vrs_total_id;
     else
@@ -1951,11 +1951,13 @@ function insert_vrs_bill_items($values, $trip_id, $version_number, $distributor_
   $query->execute();
 }
 
-function delete_existing_denominations($trip_id) {
+function delete_existing_denominations($trip_id,$dis_id) {
   if (!empty($trip_id)) {
     // Deleting existing denomination entry
     $del = db_delete('vrs_trip_denominations');
-    $del->condition('trip_id', $trip_id)->execute();
+    $del->condition('trip_id', $trip_id);
+    $del->condition('distributor_id', $dis_id);
+    $del->execute();
   }
 }
 
