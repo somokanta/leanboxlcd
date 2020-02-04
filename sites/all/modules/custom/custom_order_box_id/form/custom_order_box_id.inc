@@ -81,7 +81,7 @@ function custom_order_box_id_upload_form_validate($form, &$form_state) {
                     else {
                       $hul_code = validate_hul_code($hul_code, $distributor_id);
                       if (empty($hul_code)) {
-                        $error_message .= "HUL Code does not exist in HUL Code Master" . ($key + 2) . '<br>';
+                        $error_message .= "HUL Code does not exist in HUL Code Master at line" . ($key + 2) . '<br>';
                       }
                     }
                     $unique_comb = $outlet_order_no . $bill_no;

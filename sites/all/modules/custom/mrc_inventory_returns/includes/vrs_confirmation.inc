@@ -1817,7 +1817,7 @@ function vrs_confirmation_form_submit($form, &$form_state) {
     $trip_items_total['distributor_id'] = $dis_id;
     $vrs_total_id_insert = insert_vrs_trip_total($trip_items_total, $trip_id);
      // Delete existing denominations  before insert new denominations
-    delete_existing_denominations($trip_id);
+    delete_existing_denominations($trip_id,$dis_id);
     if (!empty($vrs_total_id))
       $vrs_total_id = $vrs_total_id;
     else
@@ -1865,6 +1865,8 @@ function vrs_confirmation_form_submit($form, &$form_state) {
 }
 
 function insert_vrs_trip_total($values, $trip_id) {
+  global $user;
+  $dis_id = change_feeds_import_get_distributor_id($user->uid);  
   $vrs_trip_total_field = array('trip_id',
     'vrs_id',
     'bill_count',
@@ -1889,6 +1891,7 @@ function insert_vrs_trip_total($values, $trip_id) {
   $res = db_merge('vrs_trip_total') // Table name no longer needs {}
     ->fields($values)
     ->condition('trip_id', $trip_id)
+    ->condition('distributor_id', $dis_id)
     ->execute();
   // Always insert into vrs_trip_total_history table
   $res1 = db_insert('vrs_trip_total_history')->fields($values)->execute();
@@ -1927,6 +1930,7 @@ function insert_vrs_bill_items($values, $trip_id, $version_number, $distributor_
       db_merge('vrs_trip_items')
         ->fields($record)
         ->condition('trip_id', $trip_id)
+        ->condition('distributor_id', $distributor_id)
         ->condition('bill_number', $record['bill_number'])
         ->execute();
     }
@@ -1947,11 +1951,13 @@ function insert_vrs_bill_items($values, $trip_id, $version_number, $distributor_
   $query->execute();
 }
 
-function delete_existing_denominations($trip_id) {
+function delete_existing_denominations($trip_id,$dis_id) {
   if (!empty($trip_id)) {
     // Deleting existing denomination entry
     $del = db_delete('vrs_trip_denominations');
-    $del->condition('trip_id', $trip_id)->execute();
+    $del->condition('trip_id', $trip_id);
+    $del->condition('distributor_id', $dis_id);
+    $del->execute();
   }
 }
 
