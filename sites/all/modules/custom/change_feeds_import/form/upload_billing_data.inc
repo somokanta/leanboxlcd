@@ -414,7 +414,7 @@ function change_feeds_import_batch_fix_process($max, $data, $distributor_id, $fi
                         if (!empty($sr_new_bill_date)) {
                             //$context['results']['sr_bill_dates'][$bill_number]);one month bill _number dates
                             //b123<br>1233333 [billnumber<br>billdate
-                            $bill_date_key = $bill_number.$distributor_id;
+                            $bill_date_key = trim($bill_number).trim($distributor_id);
                             print_r(array($bill_date_key));
                             print_r($context['results']['sr_bill_dates']);
                             if ($sr_new_bill_date != $context['results']['sr_bill_dates'][$bill_date_key]) {
