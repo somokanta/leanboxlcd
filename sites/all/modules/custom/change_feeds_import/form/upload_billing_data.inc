@@ -292,6 +292,7 @@ function change_feeds_import_batch_fix_process($max, $data, $distributor_id, $fi
         $context['results']['bill_result'] = $bill_result; // check bill number is not exist.
         $context['results']['master_result'] = get_node_titles(array('pricelist_group_master', 'product_division_master'), $distributor_ids);
         $context['results']['sr_bill_dates'] = get_sales_register_bill_date($distributor_ids);
+        print_r($context['results']['sr_bill_dates']);die;
     }
 
     $last_id = $context['results']['last_id'];
