@@ -244,20 +244,21 @@ function change_feeds_import_update_data_in_error_billing_table_after_confirm($l
 
 // fetch sales register bill date
 function get_sales_register_bill_date($distributor_ids) {
-   
+
     $sr_bill_dates = array();
     $time = strtotime('-30 days');  // last 1 month
     if (!empty($distributor_ids)) {
         $query = db_select('node', 'n');
         $query->leftjoin('field_data_field_sr_new_bill_date', 'sr_bill', 'sr_bill.entity_id = n.nid');
-        $query->condition('n.uid', $distributor_ids,'IN');
+        $query->condition('n.uid', $distributor_ids, 'IN');
         $query->condition('n.type', 'sales_register_data');
-        $query->fields('n', array('title'));
-        $query->fields('sr_bill', array('field_sr_new_bill_date_value'));
+        $query->addExpression("CONCAT(n.title,'<br>',n.uid)", 'bill_number_key');
+        $query->addExpression('sr_bill.field_sr_new_bill_date_value', 'field_sr_new_bill_date_value');
+        //$query->fields('n', array('title'));
         $query->condition('n.created', $time, '>');
         $sr_bill_dates = $query->execute()->fetchAllKeyed(0, 1);
     }
-      return $sr_bill_dates;
+    return $sr_bill_dates;
 }
 
 function change_feeds_import_batch_fix_process($max, $data, $distributor_id, $file_name, $party_code_result, $sku_code_result, $bill_result, $master_result, $csv_distributor_ids, &$context) {
@@ -289,7 +290,7 @@ function change_feeds_import_batch_fix_process($max, $data, $distributor_id, $fi
         $context['results']['party_code_result'] = $party_code_result; // check party code present or not.
         $context['results']['sku_code_result'] = $sku_code_result; // check sku7 code is present or not.
         $context['results']['bill_result'] = $bill_result; // check bill number is not exist.
-        $context['results']['master_result'] = get_node_titles(array('pricelist_group_master', 'product_division_master','sales_register_data'), $distributor_ids);
+        $context['results']['master_result'] = get_node_titles(array('pricelist_group_master', 'product_division_master'), $distributor_ids);
         $context['results']['sr_bill_dates'] = get_sales_register_bill_date($distributor_ids);
     }
 
@@ -412,7 +413,9 @@ function change_feeds_import_batch_fix_process($max, $data, $distributor_id, $fi
                         }
                         if (!empty($sr_new_bill_date)) {
                             //$context['results']['sr_bill_dates'][$bill_number]);one month bill _number dates
-                            if ($sr_new_bill_date != $context['results']['sr_bill_dates'][$bill_number]) {
+                            //b123<br>1233333 [billnumber<br>billdate
+                            $bill_date_key = $bill_number.'<br>'.$distributor_id;
+                            if ($sr_new_bill_date != $context['results']['sr_bill_dates'][$bill_date_key]) {
                                 $flag = 1;
                                 $error_text = "Loading/Billing Date - $v : Does not match with Sales register Billing Date.";
                             } else {
