@@ -95,7 +95,7 @@ function change_feeds_import_sales_register_form_validate($form, &$form_state) {
         }
         $mess = '';
         foreach ($data as $key => $value) {
-            if (in_array('central_distributor', $user->roles) && $key!==0) {
+            if (in_array('central_distributor', $user->roles)) {
                // echo $key;
                 // passing distributor_name
                 $distributor_name = trim($value[4]);
@@ -113,6 +113,9 @@ function change_feeds_import_sales_register_form_validate($form, &$form_state) {
         }
         if (!empty($mess)) {
             form_set_error('form', $mess);
+        }
+        else {
+            //print_r($form_state['distributor_data']);die;
         }
     } else {
         form_set_error('file', t('No file was uploaded.'));
@@ -234,18 +237,20 @@ function change_feeds_import_sales_register_batch_fix_process($data, $distributo
                 }
             }
         }
-        if (isset($value['BILL_NUMBER'])) {
+        if (!empty($value['BILL_NUMBER'])) {
             $unique_comb = $value['BILL_NUMBER'] . '-' . $dis_id;
             $bill_distributor_id = get_distributor_id_of_bill($value['BILL_NUMBER'],$dis_id);
-      
             if (in_array($bill_distributor_id,$sibling_distributor_ids) && !empty($bill_distributor_id) && $bill_distributor_id!=$dis_id) {
                 $value['error_message'] .= "Bill Number: " . $value['BILL_NUMBER'] . ' already exist'. ". </br>";
             }
             if (in_array($unique_comb, $context['results']['unique_combination'])) {
                 $value['error_message'] .= "BILL_NUMBER " . $value['BILL_NUMBER'] . " is Repeated.  ";
             } else {
-                $context['results']['unique_combination'][] = $unique_comb;
+                $context['results']['unique_combination'][$unique_comb] = $unique_comb;
             }
+        }
+        else {
+             $value['error_message'] .= "BILL_NUMBER Can't be blank. " ;
         }
 //      $value['BILL_NUMBER'] = trim($value['BILL_NUMBER']);
 //      // Check if bill no already created as a node in content type sales_register_data

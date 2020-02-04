@@ -1941,6 +1941,7 @@ function insert_vrs_bill_items($values, $trip_id, $version_number, $distributor_
       db_merge('vrs_trip_items')
         ->fields($record)
         ->condition('trip_id', $trip_id)
+        ->condition('distributor_id', $distributor_id)
         ->condition('bill_number', $record['bill_number'])
         ->execute();
     }

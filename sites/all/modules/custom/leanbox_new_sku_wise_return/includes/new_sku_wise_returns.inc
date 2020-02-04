@@ -1992,7 +1992,7 @@ function merge_sku_data_in_temp_table($bill_details, $trip_id, $dis_id) {
     $actual_return_qty = $value['actual_returned_qty'];
 
     db_merge('temp_sku_wise_return')
-      ->key(array('trip_id' => $trip_id, 'sku_code' => $sku))
+      ->key(array('trip_id' => $trip_id, 'sku_code' => $sku,'distributor_id'=>$dis_id))
       ->fields(array(
         'trip_id' => $trip_id,
         'sku_code' => $sku,
@@ -2134,7 +2134,7 @@ function store_excess_inventory_declaration_data($all_excess_sku, $trip_id, $dis
 	  $tur = $excess_sku_tur[$sku_code];
 	  if (!empty($excess_product_name)) {
 			db_merge('excess_inventory_table')
-				->key(array('trip_id' => $trip_id, 'product_name' => $excess_product_name))
+				->key(array('trip_id' => $trip_id, 'product_name' => $excess_product_name,'distributor_id'=>$dis_id))
 				->fields(array(
 					'trip_id' => $trip_id,
 					'product_name' => $excess_product_name,
