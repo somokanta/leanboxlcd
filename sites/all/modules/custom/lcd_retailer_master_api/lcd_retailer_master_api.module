@@ -179,7 +179,10 @@ function cron_data_callback() {
         //$api_data['field_payment_terms'] = $node->field_payment_terms[LANGUAGE_NONE][0]['value'];
         $api_data['field_credit_days'] = $node->field_credit_days[LANGUAGE_NONE][0]['value'];
         $resourse_name_nid = $node->field_updated_by[LANGUAGE_NONE][0]['nid'];
-        $resourse_name = get_title_of_nid($resourse_name_nid);
+        $resourse_name = '';
+        if(!empty($resourse_name_nid)){
+          $resourse_name = get_node_title_using_nid($resourse_name_nid);
+        }
         $api_data['field_updated_by'] = $resourse_name;
       }
       $api_data['distributor_id'] = $node->uid;
@@ -297,12 +300,4 @@ function get_retailer_node_nid($node_type,$node_title,$distributor_id){
   $query->fields('n', array('nid'));
   $nid = $query->execute()->fetchField();
   return $nid;
-}
-
-function get_title_of_nid($node_nid){
-  $query = db_select('node', 'n');
-  $query->condition('n.nid', $node_nid, '=');
-  $query->fields('n', array('title'));
-  $node_title = $query->execute()->fetchField();
-  return $node_title;
 }
