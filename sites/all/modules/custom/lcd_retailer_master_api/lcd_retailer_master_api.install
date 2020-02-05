@@ -1,0 +1,99 @@
+<?php
+
+/*
+ * Implement hook_schema.
+ */
+
+function lcd_retailer_master_api_schema() {
+  $schema['retailer_master_api_cron'] = array(
+    'description' => 'Masters Api Cron data',
+    'fields' => array(
+      'id' => array(
+        'description' => 'The primary identifier for a data',
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'title' => array(
+        'description' => 'node_title',
+        'type' => 'varchar',
+        'length' => 100,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'node_type' => array(
+        'description' => 'node_type',
+        'type' => 'varchar',
+        'length' => 100,
+        'not null' => TRUE,
+        'default' => '',        
+      ),
+      'distributor_id' => array(
+        'description' => 'distributor_id',
+        'type' => 'int',
+      ), 
+      'response_flag' => array(
+        'description' => 'response_flag',
+        'type' => 'int',
+      ),
+      'response_remarks' => array(
+        'description' => 'response_remarks',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',        
+      ),
+      'created_time' => array(
+        'description' => 'created_time',
+        'type' => 'int',      
+      ), 
+    ),
+    'primary key' => array('id'),
+  );
+  
+    $schema['mobility_server_api_retailer_cron'] = array(
+    'description' => 'Mobility Server api data',
+    'fields' => array(
+      'id' => array(
+        'description' => 'The primary identifier for a data',
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'title' => array(
+        'description' => 'node_title',
+        'type' => 'varchar',
+        'length' => 100,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'node_type' => array(
+        'description' => 'node_type',
+        'type' => 'varchar',
+        'length' => 100,
+        'not null' => TRUE,
+        'default' => '',        
+      ),
+      'distributor_id' => array(
+        'description' => 'distributor_id',
+        'type' => 'int',
+      ), 
+      'response_flag' => array(
+        'description' => 'response_flag',
+        'type' => 'int',
+      ),
+      'response_remarks' => array(
+        'description' => 'response_remarks',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',        
+      ),
+      'created_time' => array(
+        'description' => 'created_time',
+        'type' => 'int',      
+      ), 
+    ),
+    'primary key' => array('id'),
+  );
+
+  return $schema;
+}
