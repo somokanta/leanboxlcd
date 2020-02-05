@@ -186,7 +186,9 @@ function cron_data_callback() {
         $api_data['field_updated_by'] = $resourse_name;
       }
       $api_data['distributor_id'] = $node->uid;
+      watchdog('outlet data to be sent', '<pre>' . print_r($api_data, TRUE) . '</pre>');
       $data = json_encode($api_data);
+      watchdog('after encode', '<pre>' . print_r($data, TRUE) . '</pre>');
       // $authorization = 'bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1ODgzOWY4ZjYyZmQyMzkzMGE4NjQwYjEiLCJpYXQiOjE1MDQ2Nzg4NTl9.AzJLVp6HDk6lbXCWxI1T8Y7US6R0panNjkY5B-pkdqg';
       $request_headers = array('Content-Type' => 'application/json', 'Authorization' => $authorization);
       $api_url = variable_get('retailer_api_master_url', 'http://dev-lak.leanbox.in/retailer_master/update_retailer_master_data');
