@@ -3023,7 +3023,7 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
       }
     }
   }
-  $distributor_views_tables = array('parkstop_api_log','dispatch_planning_api_log','dispatch_planning_api_data','sms_integration_api_log','outlet_order_crate');
+  $distributor_views_tables = array('van_live_tracking','parkstop_api_log','dispatch_planning_api_log','dispatch_planning_api_data','sms_integration_api_log','outlet_order_crate');
   if (in_array($view->base_table,$distributor_views_tables)) {
        $query->add_where(0, "$view->base_table.distributor_id", $distributor_id, '=');
   }
