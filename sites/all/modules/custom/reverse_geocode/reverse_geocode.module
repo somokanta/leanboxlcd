@@ -1269,12 +1269,13 @@ function lat_lng_results($area_hook, $sales_day, $van_pl_group) {
 function reverse_geocode_results($lat, $lng, $page_name ='default') {
   $license_key = variable_get('mapmyindia_rest_key', 'z94i9hvuqcsz7amywt76aknw8dx9o15z');
 
-  $url = "https://apis.mapmyindia.com/advancedmaps/v1/$license_key/rev_geocode" . "?lng=$lng&lat=$lat";
+//  $url = "https://apis.mapmyindia.com/advancedmaps/v1/$license_key/rev_geocode" . "?lng=$lng&lat=$lat";
 //  if(trim($lng, 0) == 1.11 || trim($lat, 0) == 1.11) {
   if((explode('.', $lng)[0]) <= 1 || (explode('.', $lat)[0]) <= 1) {
      $result = ''; 
   }
   else {
+    $url = "https://apis.mapmyindia.com/advancedmaps/v1/$license_key/rev_geocode" . "?lng=$lng&lat=$lat";
     $curl = curl_init();
     curl_setopt($curl, CURLOPT_URL, $url);
     curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
