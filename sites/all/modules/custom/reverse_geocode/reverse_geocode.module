@@ -1270,7 +1270,8 @@ function reverse_geocode_results($lat, $lng, $page_name ='default') {
   $license_key = variable_get('mapmyindia_rest_key', 'z94i9hvuqcsz7amywt76aknw8dx9o15z');
 
   $url = "https://apis.mapmyindia.com/advancedmaps/v1/$license_key/rev_geocode" . "?lng=$lng&lat=$lat";
-  if(trim($lng, 0) == 1.11 || trim($lat, 0) == 1.11) {
+//  if(trim($lng, 0) == 1.11 || trim($lat, 0) == 1.11) {
+  if((explode('.', $lng)[0]) <= 1 || (explode('.', $lat)[0]) <= 1) {
      $result = ''; 
   }
   else {

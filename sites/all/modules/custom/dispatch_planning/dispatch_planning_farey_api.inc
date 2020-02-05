@@ -311,7 +311,8 @@ function get_reverse_geocode_data($latitude, $longitude, $reference_number){
         $license_key = variable_get('mapmyindia_rest_key', 'z94i9hvuqcsz7amywt76aknw8dx9o15z');
         $url = "https://apis.mapmyindia.com/advancedmaps/v1/$license_key/rev_geocode?lng=$longitude&lat=$latitude";
         $sql_ins_id = insert_map_my_india_api_log($url, $reference_number);
-        if (trim($longitude, 0) == 1.11 || trim($latitude, 0) == 1.11) {
+//        if (trim($longitude, 0) == 1.11 || trim($latitude, 0) == 1.11) {
+        if((explode('.', $longitude)[0]) <= 1 || (explode('.', $latitude)[0]) <= 1) {
             $result = '';
         } else {
             $options = array('method' => 'GET');
