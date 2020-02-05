@@ -2997,7 +2997,7 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
   global $user;
   // Store distributor id in author in each node
   $distributor_id = change_feeds_import_get_distributor_id($user->uid);
-
+  $distributor_facility_code = get_facility_code($distributor_id);
   // This view will be visible to all authenticated user in the sytem
   $all_views_names = variable_get('views_name');
   // area-code-master,product-sub-category-master,sku-cp-view,brand-master-report,bank-master-download,non-bankable-reason-master,cancel-discard-reason-master,reason-for-update,sku7-code-master-report,product-category-master,sku7-ean-and-mrp,product-sub-division,pdd-master,notes-denominations-download,short-reason-master,non-bankable-reason-master,handover-master
@@ -3042,7 +3042,7 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
       }
     }
   }
-  $distributor_views_tables = array('parkstop_api_log','dispatch_planning_api_log','dispatch_planning_api_data','sms_integration_api_log','outlet_order_crate');
+  $distributor_views_tables = array('van_live_tracking','parkstop_api_log','dispatch_planning_api_log','dispatch_planning_api_data','sms_integration_api_log','outlet_order_crate');
   if (in_array($view->base_table,$distributor_views_tables)) {
        $query->add_where(0, "$view->base_table.distributor_id", $distributor_id, '=');
   }
@@ -3290,6 +3290,8 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
     if ($view->name == 'trip_bill_sku_return_report2' && ($view->current_display == 'page' || $view->current_display == 'views_data_export_1')) {
     //$query->add_where(1, 'dispatch_planning_item_details.return_qty', 0, '>');
   }
+  
+
 }
 
 /**
