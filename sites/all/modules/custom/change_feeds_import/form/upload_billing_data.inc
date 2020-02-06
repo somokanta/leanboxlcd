@@ -271,7 +271,6 @@ function change_feeds_import_batch_fix_process($max, $data, $distributor_id, $fi
         $error_link = NULL;
         $status = NULL;
         $last_id = change_feeds_import_insert_data_in_error_billing_table($file_name, $date, $bill_uploaded, $total_lines, $sum_of_total_sales_qty, $error_link, $status, $distributor_id);
-        watchdog('last_id1',print_r($last_id,1));
         if (!empty($csv_distributor_ids)) {
             $distributor_ids = $csv_distributor_ids;
         }
@@ -494,8 +493,6 @@ function change_feeds_import_batch_fix_process($max, $data, $distributor_id, $fi
         $pass_data = $value;
 
         try {
-            watchdog('last_id_context',print_r($context['results']['last_id'],1));
-                   watchdog('last_id_variable',print_r($last_id,1));
             change_feeds_import_insert_data_in_staging_billing_table($pass_data, $error_bool, $last_id, REQUEST_TIME, $distributor_id, $created_by_distributor_id);
         } catch (Exception $ex) {
             
@@ -533,14 +530,14 @@ function change_feeds_import_insert_data_in_error_billing_table($file_name, $dat
 }
 
 function change_feeds_import_insert_data_in_staging_billing_table($value, $error_boolean, $last_id, $date, $distributor_id, $created_by_distributor_id) {
-//if (empty($last_id)) {
+if (empty($last_id)) {
         global $user;
         $created_by_distributor_id = change_feeds_import_get_distributor_id($user->uid);
         $st_query = db_select('error_billing_data', 'err');
         $st_query->condition('err.created_by_distributor_id', $created_by_distributor_id);
         $st_query->addExpression('Max(id)', 'max');
         $last_id = $st_query->execute()->fetchField();
-   // }
+    }
     $stage_billing_data = db_insert('stage_billing_data') // Table name no longer needs {}
             ->fields(array(
                 'vehicle' => $value['VEHICLE'],
@@ -571,8 +568,8 @@ function change_feeds_import_insert_data_in_staging_billing_table($value, $error
                 'Sum_of_SCHEME_DISCOUNT' => isset($value['Sum of SCHEME_DISCOUNT']) ? $value['Sum of SCHEME_DISCOUNT'] : NULL,
                 'Sum_of_OTHER_DISCOUNT' => isset($value['Sum of OTHER_DISCOUNT']) ? $value['Sum of OTHER_DISCOUNT'] : NULL,
                 'Sum_of_TAX_PERCENTAGE' => isset($value['Sum of TAX_PERCENTAGE']) ? $value['Sum of TAX_PERCENTAGE'] : NULL,
-                'error' => $error_boolean,
-                'error_id' => $last_id,
+               // 'error' => $error_boolean,
+               // 'error_id' => $last_id,
                 'date' => $date,
                 'distributor_id' => $distributor_id,
             ))
