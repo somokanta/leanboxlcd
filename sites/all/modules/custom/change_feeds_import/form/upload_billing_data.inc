@@ -271,6 +271,7 @@ function change_feeds_import_batch_fix_process($max, $data, $distributor_id, $fi
         $error_link = NULL;
         $status = NULL;
         $last_id = change_feeds_import_insert_data_in_error_billing_table($file_name, $date, $bill_uploaded, $total_lines, $sum_of_total_sales_qty, $error_link, $status, $distributor_id);
+        watchdog('last_id1',print_r($last_id,1));
         if (!empty($csv_distributor_ids)) {
             $distributor_ids = $csv_distributor_ids;
         }
@@ -493,6 +494,7 @@ function change_feeds_import_batch_fix_process($max, $data, $distributor_id, $fi
         $pass_data = $value;
 
         try {
+            watchdog('last_id_context',print_r($context['results']['last_id'],1));
             change_feeds_import_insert_data_in_staging_billing_table($pass_data, $error_bool, $last_id, REQUEST_TIME, $distributor_id, $created_by_distributor_id);
         } catch (Exception $ex) {
             
