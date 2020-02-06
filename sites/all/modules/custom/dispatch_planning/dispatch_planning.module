@@ -2062,9 +2062,9 @@ function dispatch_planning_form_save_validate($form, &$form_state) {
       $python_api_response_data = $form_state['python_api_tim_dist_response'][$hht_id];
     }
     
+       watchdog('bill_sequencing_array: ',print_r($python_api_response_data,1));
     if($python_api_response_data->status_message === 'OK') { 
       $bill_sequencing_array = get_drs_bill_sequence_by_parkstop(json_decode($python_api_response_data->data), $hht_id);
-      watchdog('bill_sequencing_array: ',print_r($bill_sequencing_array,1));
       $form_state['dispatch_planning']['total_travel_time'] = $_SESSION['park_stop'][$hht_id]['time']; // $total_time
       $form_state['dispatch_planning']['total_distance'] = $_SESSION['park_stop'][$hht_id]['dist'];//newly // $total_dist
       $form_state['dispatch_planning']['van_total_time'] = $_SESSION['park_stop'][$hht_id]['van_total_time'];
