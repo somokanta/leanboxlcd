@@ -538,8 +538,8 @@ if (empty($last_id)) {
         $st_query->addExpression('Max(id)', 'max');
         $last_id = $st_query->execute()->fetchField();
     }
-    return;
-    $stage_billing_data = db_insert('stage_billing_data') // Table name no longer needs {}
+    
+   /* $stage_billing_data = db_insert('stage_billing_data') // Table name no longer needs {}
             ->fields(array(
                 'vehicle' => $value['VEHICLE'],
                 'loading_date' => $value['LOADING_DATE'],
@@ -574,7 +574,7 @@ if (empty($last_id)) {
                 'date' => $date,
                 'distributor_id' => $distributor_id,
             ))
-            ->execute();
+            ->execute();*/
 }
 
 function check_party_code_exist_or_not1() {
