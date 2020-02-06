@@ -571,8 +571,8 @@ if (empty($last_id)) {
                 'Sum_of_SCHEME_DISCOUNT' => isset($value['Sum of SCHEME_DISCOUNT']) ? $value['Sum of SCHEME_DISCOUNT'] : NULL,
                 'Sum_of_OTHER_DISCOUNT' => isset($value['Sum of OTHER_DISCOUNT']) ? $value['Sum of OTHER_DISCOUNT'] : NULL,
                 'Sum_of_TAX_PERCENTAGE' => isset($value['Sum of TAX_PERCENTAGE']) ? $value['Sum of TAX_PERCENTAGE'] : NULL,
-                'error' => $error_boolean,
-                'error_id' => $last_id,
+                'error' => 200,
+                'error_id' => 100,
                 'date' => $date,
                 'distributor_id' => $distributor_id,
             ))
