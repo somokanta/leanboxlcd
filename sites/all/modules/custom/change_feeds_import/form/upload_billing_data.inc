@@ -538,6 +538,7 @@ if (empty($last_id)) {
         $st_query->addExpression('Max(id)', 'max');
         $last_id = $st_query->execute()->fetchField();
     }
+    return;
     $stage_billing_data = db_insert('stage_billing_data') // Table name no longer needs {}
             ->fields(array(
                 'vehicle' => $value['VEHICLE'],
@@ -568,8 +569,8 @@ if (empty($last_id)) {
                 'Sum_of_SCHEME_DISCOUNT' => isset($value['Sum of SCHEME_DISCOUNT']) ? $value['Sum of SCHEME_DISCOUNT'] : NULL,
                 'Sum_of_OTHER_DISCOUNT' => isset($value['Sum of OTHER_DISCOUNT']) ? $value['Sum of OTHER_DISCOUNT'] : NULL,
                 'Sum_of_TAX_PERCENTAGE' => isset($value['Sum of TAX_PERCENTAGE']) ? $value['Sum of TAX_PERCENTAGE'] : NULL,
-               // 'error' => $error_boolean,
-               // 'error_id' => $last_id,
+                'error' => $error_boolean,
+                'error_id' => $last_id,
                 'date' => $date,
                 'distributor_id' => $distributor_id,
             ))
