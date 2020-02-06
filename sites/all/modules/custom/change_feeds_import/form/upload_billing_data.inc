@@ -533,14 +533,14 @@ function change_feeds_import_insert_data_in_error_billing_table($file_name, $dat
 }
 
 function change_feeds_import_insert_data_in_staging_billing_table($value, $error_boolean, $last_id, $date, $distributor_id, $created_by_distributor_id) {
-if (empty($last_id)) {
+//if (empty($last_id)) {
         global $user;
         $created_by_distributor_id = change_feeds_import_get_distributor_id($user->uid);
         $st_query = db_select('error_billing_data', 'err');
         $st_query->condition('err.created_by_distributor_id', $created_by_distributor_id);
         $st_query->addExpression('Max(id)', 'max');
         $last_id = $st_query->execute()->fetchField();
-    }
+   // }
     $stage_billing_data = db_insert('stage_billing_data') // Table name no longer needs {}
             ->fields(array(
                 'vehicle' => $value['VEHICLE'],
