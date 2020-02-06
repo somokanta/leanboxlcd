@@ -151,6 +151,19 @@ function custom_order_box_id_views_data() {
     'filter' => array(
       'handler' => 'views_handler_filter_string',
     ),
+  ); 
+    $data['outlet_order_crate']['hul_code'] = array(
+    'title' => t('Hul Code Value'),
+    'help' => t('The Hul Code Value.'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
   );
   $data['outlet_order_crate']['order_upload_datetime'] = array(
   'title' => t('Order Upload Datetime'),
