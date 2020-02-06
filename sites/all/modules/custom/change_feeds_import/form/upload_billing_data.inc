@@ -495,6 +495,7 @@ function change_feeds_import_batch_fix_process($max, $data, $distributor_id, $fi
 
         try {
             watchdog('last_id_context',print_r($context['results']['last_id'],1));
+                   watchdog('last_id_variable',print_r($last_id,1));
             change_feeds_import_insert_data_in_staging_billing_table($pass_data, $error_bool, $last_id, REQUEST_TIME, $distributor_id, $created_by_distributor_id);
         } catch (Exception $ex) {
             
