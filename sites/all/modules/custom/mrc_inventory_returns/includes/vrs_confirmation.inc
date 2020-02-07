@@ -1576,33 +1576,7 @@ function vrs_confirmation_validate($form, &$form_state) {
   }
 }
 
-/**
- * 
- * @param array $form
- * @param array $form_state
- * @return array
- */
-function get_vrs_total_id($trip_id, $dis_id) {
-  if (!empty($trip_id) && !empty($dis_id)) {
-    $query = db_select('vrs_trip_total', 'v_total');
-    $query->condition('v_total.trip_id', $trip_id);
-    $query->condition('v_total.distributor_id', $dis_id);
-    $query->fields('v_total', array('id', 'vrs_created_date'));
-    $res = $query->execute()->fetchAll(PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
-  }
-  return $res;
-}
 
-function check_vrs_trip_exist($trip_id, $dis_id) {
-  if (!empty($trip_id) && !empty($dis_id)) {
-    $query = db_select('vrs_trip_items', 'vrs_bills');
-    $query->condition('vrs_bills.trip_id', $trip_id);
-    $query->condition('vrs_bills.distributor_id', $dis_id);
-    $query->fields('vrs_bills', array('trip_id'));
-    $res = $query->execute()->fetchField();
-  }
-  return $res;
-}
 
 function vrs_confirmation_form_submit($form, &$form_state) {
   $vrs_start_time = $form_state['start_time'];
@@ -2068,21 +2042,5 @@ function validate_bank_names($bank_name, $trip_id) {
     }
   }
   return 0;
-}
-
-function _get_cashier_name_using_trip_id($trip_id) {
-  $res = array();
-  if (!empty($trip_id)) {
-    global $user;
-    $dis_id = change_feeds_import_get_distributor_id($user->uid);
-    $query = db_select('node', 'n');
-    $query->condition('n.type', 'dispatch_data');
-    $query->condition('n.uid', $dis_id);
-    $query->leftjoin('field_data_field_cashier_name', 'cn', 'cn.entity_id = n.nid');
-    $query->fields('cn', array('field_cashier_name_value'));
-    $query->condition('n.title', $trip_id);
-    $res = $query->execute()->fetchAllKeyed(0, 0);
-  }
-  return $res;
 }
 
