@@ -253,7 +253,8 @@ function get_bill_billVal_lat_lng($bills_nid, $distributor_ids) {
  */
 function get_start_location_details($central_distributor_id) {
   $start['name'] = 'Start';
-  $conf_nid = check_node_title_exists($central_distributor_id, 'van_stop_master');
+  //$title, $type, $sales_data = FALSE,$distributor_id
+  $conf_nid = check_node_title_exists($central_distributor_id, 'van_stop_master',FALSE,$central_distributor_id);
   $conf_node = node_load($conf_nid);
   $start['lat'] = $conf_node->field_distributor_latitude[LANGUAGE_NONE][0]['value'];
   $start['lng'] = $conf_node->field_distributor_longitude[LANGUAGE_NONE][0]['value'];
