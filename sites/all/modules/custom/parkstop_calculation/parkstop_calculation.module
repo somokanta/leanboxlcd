@@ -338,7 +338,7 @@ function insert_parkstop_plotting_log($prevan, $request_api, $response_api, $dis
       'api_request' => $request_api,
       'api_response' => $response_api,
       'distributor_id' => $distributor_id,
-      'created_by_distributor_id'=>$created_by_distributor_id
+      'created_by_distributor_id'=>$distributor_id
     ))
     ->execute();
 }
@@ -353,8 +353,8 @@ function update_parkstop_plotting_log($prevan, $trip_id, $distributor_id,$create
       ->condition('prevan', $prevan, '=')
       ->isNull('trip_id')
       ->condition('session_id', session_id(), 'LIKE')
-      ->condition('distributor_id',$created_by_distributor_id) 
-      ->condition('created_by_distributor_id',$created_by_distributor_id)    
+    //  ->condition('distributor_id',$distributor_id) 
+   //   ->condition('created_by_distributor_id',$created_by_distributor_id)    
       ->execute();
 }
 
