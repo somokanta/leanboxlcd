@@ -1197,6 +1197,7 @@ function party_filter_validate(&$form, &$form_state) {
 }
 
 function reverse_geocode_get_data_hul_code_wise($sales_day, $pl_group, $sales_person, $hul_status, $beat_name, $type,$distributor_id) {
+
   $query = db_select('node', 'n');
   $query->condition('n.type', 'outlet_master');
   $query->condition('n.uid', $distributor_id, '=');
@@ -1617,13 +1618,14 @@ function update_lat_lng_submit(&$form, &$form_state) {
     foreach ($form_state['reverse_geocode']['rows'] as $key => &$value) {
       $value['sr_no'] = $value['#attributes']['data-sr'] = ++$i;
     }
+    drupal_set_message('Successfully updated');
   }
   $form_state['rebuild'] = TRUE;
 }
 
 function reverse_geocode_update_hul_status($hul_code,$distributor_id) {
   module_load_include('inc', 'change_feeds_import', 'form/upload_billing_data');
-  $nid = check_node_title_exists($hul_code, 'hul_code_master',$distributor_id);
+  $nid = check_node_title_exists($hul_code, 'hul_code_master',FALSE,$distributor_id);
 
   if ($nid) {
     $node = node_load($nid);
