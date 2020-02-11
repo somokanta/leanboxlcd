@@ -98,7 +98,7 @@ function park_stop_plotting_form($form, &$form_state, $args) {
       $form_state['values']['delivery_boy'] = 2;
     }
     
-    $conf_nid = check_node_title_exists($central_distributor_id, 'van_stop_master');
+    $conf_nid = check_node_title_exists($central_distributor_id, 'van_stop_master',FALSE,$central_distributor_id);
     $conf_node = node_load($conf_nid);
     $origin_lat = $conf_node->field_distributor_latitude[LANGUAGE_NONE][0]['value'];
     $origin_long = $conf_node->field_distributor_longitude[LANGUAGE_NONE][0]['value'];
