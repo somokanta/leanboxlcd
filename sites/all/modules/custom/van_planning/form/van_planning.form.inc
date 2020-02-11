@@ -2283,7 +2283,24 @@ function _create_van_validate($form, &$form_state) {
   $form_state['error_occur'] = 0;
   $trip_execution_date = strtotime($form_state['values']['trip_execution_date']);
 
-  // Trip Execution Date validation
+  $data = $form_state['values']['vp_final_table'];
+  $rs_code = get_rs_code_of_distributor($dis_id);
+  $trip_execution_date = $form_state['values']['trip_execution_date'];
+    if (!empty($data) && empty($dis_id)) {
+        foreach ($data as $van => $val1) {
+            $disp_planning[$van]['bill_array'] = json_decode($form_state['complete form']['submit_vp']['vp_final_table']['#rows'][$van]['bill_no']['data-value'], 1);
+            $sales_nids = array_keys($disp_planning[$van]['bill_array']);
+            $trip_distributor_ids = get_author_id_of_content($sales_nids);
+            if (count($trip_distributor_ids)>1){
+                 $form_state['error_occur'] = 1;
+                 drupal_set_message(t('VAN:'.$van .' has different distributor bills. Please remove it.'), 'error');
+            }
+            
+        }
+          
+    
+    }
+    // Trip Execution Date validation
   if (empty($trip_execution_date)) {
     $form_state['error_occur'] = 1;
     drupal_set_message(t('Trip execution date should not be empty.'), 'error');
@@ -2467,7 +2484,12 @@ function _create_van_submit($form, &$form_state) {
         $disp_planning[$van]['field_bill_loose_lines'] = $form_state['complete form']['submit_vp']['vp_final_table']['#rows'][$van]['bill_wise_loose'];
         $disp_planning[$van]['field_cld_lines_value'] = $form_state['complete form']['submit_vp']['vp_final_table']['#rows'][$van]['cld_value'];
         $disp_planning[$van]['field_loose_lines_value'] = $form_state['complete form']['submit_vp']['vp_final_table']['#rows'][$van]['loose_value'];
-
+        $sales_nids = array_keys($disp_planning[$van]['bill_array']);
+        $trip_distributor_ids = get_author_id_of_content($sales_nids);
+        $trip_distributor_id = key($trip_distributor_ids);
+        if (empty($dis_id)) {
+            $dis_id =$trip_distributor_id;
+        }
 //***************************************** PREVAN DATA START****************************************//
         /*        $todays_date = strtotime(date('Y-m-d'));
 
@@ -2570,7 +2592,7 @@ function _create_van_submit($form, &$form_state) {
         }
         
         
-        $sales_nids = array_keys($disp_planning[$van]['bill_array']);
+   
         $query = db_select('node', 'n');
         $query->condition('n.type', 'sales_register_data');
         $query->condition('n.uid', $dis_id);
