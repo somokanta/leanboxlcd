@@ -3102,6 +3102,13 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
             }
         }
     }
+    
+    // Subadmin Uid for sku7,lb product master views etc..
+    
+    if (in_array($view->name, $admin_views) ) {
+        $subadmin_distributor_id = get_uid_by_username('subadmin');
+        $query->add_where(0, $val['alias'] . '.uid', $subadmin_distributor_id);
+    }
 
     //Custom Table join query 
     //Custom tables require distributor_id condition
