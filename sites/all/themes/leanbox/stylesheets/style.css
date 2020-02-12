@@ -13121,3 +13121,10 @@ header[id="page-header"] ul, header[id="page-header"] li {
 .page-outlet-working-hours #outlet-party-name {
   display: inline-block;
 }
+
+header[id="page-header"] .menu_dropdown .menu li ul {
+    display: none !important;
+}
+header[id="page-header"] .menu_dropdown .menu li:hover > ul {
+    display: block !important;
+}
