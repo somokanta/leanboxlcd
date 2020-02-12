@@ -3105,11 +3105,15 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
     
     // Subadmin Uid for sku7,lb product master views etc..
     
-    if (in_array($view->name, $admin_views)  && !empty($distributor_id)) {
+    if (in_array($view->name, $admin_views) && !empty($distributor_id)) {
         $subadmin_distributor_id = get_uid_by_username('subadmin');
-        $query->add_where(0, $val['alias'] . '.uid', $subadmin_distributor_id,'=');
-    }
+        foreach ($query->table_queue as $key => $val) {
+            if (($val['table'] == 'node')) {
 
+                $query->add_where(0, $val['alias'] . '.uid', $subadmin_distributor_id, '=');
+            }
+        }
+    }
     //Custom Table join query 
     //Custom tables require distributor_id condition
     // mrc_inventory,mrc_inventory_new,custom_billing_data,godown_data,primary_data_upload,petty_cash,petty_cash_sequence_table,ptl_data_configuration,master_ptl_data,dispatch_planning_api_data,van_cld_data_table,closing_stock,vrs_handover,vrs_handover_history,vrs_trip_denominations,vrs_trip_denominations_history,vrs_trip_items,vrs_trip_items_history,vrs_trip_total,vrs_trip_total_history,custom_sales_data,dispatch_planning_api_log,dispatch_qty_confirmation,dispatch_delivered_vrs_details,dispatch_qty_preprocess,excess_qty,impact_data,inventory_versioning_api_data,ptl_header_data,ptl_put_qty,sku_ean_mrp,stage_billing_data,trip_id_sequence,van_live_tracking,handover_confirmation_new,inventory_ledger,inventory_opening
