@@ -2693,3 +2693,11 @@ function mrc_inventory_returns_update_7127() {
     }  
   }
 }
+
+
+function mrc_inventory_returns_update_7128() {
+    db_change_field('vrs_trip_items', '	vrs_id', 'vrs_id', array('type' => 'varchar','length'=>100));
+    db_change_field('vrs_trip_items', 'vrs_version_no', 'vrs_version_no', array('type' => 'varchar','length'=>25));
+    db_change_field('vrs_trip_items', 'vrs_created_date', 'vrs_created_date', array('type' => 'int'));
+    db_change_field('vrs_trip_items', 'vrs_confirm_date', 'vrs_confirm_date', array('type' => 'int'));
+}

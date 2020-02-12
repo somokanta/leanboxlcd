@@ -253,6 +253,14 @@ function mrc_inventory_returns_menu() {
     'file' => 'includes/trip_short_report.inc',
     'access arguments' => array('returns confirmation')
   );
+  $items['upload-signed-bill-and-cheque'] = array(
+    'title' => 'Upload Signed Bill & Cheque',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('upload_signed_bill_cheque_form'),
+    'access arguments' => array('returns confirmation'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'includes/upload_signed_bill_cheque.inc',
+  );
 
   return $items;
 }
