@@ -148,10 +148,8 @@ function upload_signed_bill_cheque_form($form, &$form_state) {
   );
   
   if (!empty($options)) {
-    $vrs_version = get_current_vrs_version($trip_id, $dis_id);
-    if (!empty($vrs_version)) {
-      $bills = get_vrs_bill_items($trip_id, $dis_id, $vrs_version);
-    }    
+      $bills = get_signed_bill_cheque_images($trip_id, $dis_id);
+ 
   }
 
   $form['bank_name'] = array(
@@ -527,26 +525,8 @@ function upload_signed_bill_cheque_form_submit($form, &$form_state){
   $trip_items = array();
   $dir = 'public://bills';
   file_prepare_directory($dir, FILE_CREATE_DIRECTORY);
-  $vrs_version = get_current_vrs_version($trip_id, $dis_id);
-  if (empty($vrs_version)) {
-    $version_number = 'V1.0';
-  }
-  else {
-    $v_number = substr($vrs_version, 1);
-    $v_number = (float) $v_number + 0.1;
-    $version_number = 'V' . $v_number;
-  }
-    // vrs created date 
-    $vrs_total_data = get_vrs_total_id($trip_id, $dis_id);
-  if (!empty($vrs_total_data)) {
-    $vrs_total_id = key($vrs_total_data);
-    $vrs_created_date = $vrs_total_data[$vrs_total_id]['vrs_created_date'];
-  }
-  // vrs created date
   $bill_numbers = array_keys($form_state['values']['bill_details']);
-  $bill_status = get_bill_details($bill_numbers, $trip_id);
-    if (!empty($form_state['values']['bill_details'])) {
-    $vrs_id = "VRS$trip_id";
+  if (!empty($form_state['values']['bill_details'])) {
     foreach ($form_state['values']['bill_details'] as $key => $value) {
       $photo_cheque = "cheque_$key";
       $photo_signed_bill = "signedbill_$key";
@@ -583,18 +563,7 @@ function upload_signed_bill_cheque_form_submit($form, &$form_state){
       unset($photo_signed_bill);
       unset($photo_cheque);
       $trip_items[$key]['trip_id'] = $trip_id;
-      $trip_items[$key]['vrs_id'] = $vrs_id;
       $trip_items[$key]['bill_number'] = $key;
-      $trip_items[$key]['bill_status'] = $bill_status[$key]['res_status'];
-      if (!empty($vrs_created_date)) {
-        $trip_items[$key]['vrs_created_date'] = $vrs_created_date;
-      }
-      else {
-        $trip_items[$key]['vrs_created_date'] = time();
-      }
-      $trip_items[$key]['vrs_confirm_date'] = time();
-      //$trip_items[$key]['vrs_version_no'] = $version_number;
-    
       $trip_items[$key]['distributor_id'] = $dis_id;
       if (!empty($form_state['values']["photo_signed_bill_$key"]) && empty($trip_items[$key]['photo_signed_bill'])) {
         $trip_items[$key]['photo_signed_bill'] = $form_state['values']["photo_signed_bill_$key"];
@@ -610,12 +579,7 @@ function upload_signed_bill_cheque_form_submit($form, &$form_state){
 function insert_signed_bill_cheque_images($values,$trip_id,$dis_id){
   $bill_number  = array_keys($values);
     $vrs_trip_field = array('trip_id',
-    'vrs_id',
     'bill_number',
-    'bill_status',
-    //'vrs_version_no',
-    'vrs_created_date',
-    'vrs_confirm_date',
     'distributor_id',
     'photo_signed_bill',  
     'photo_cheque',
@@ -635,4 +599,22 @@ function insert_signed_bill_cheque_images($values,$trip_id,$dis_id){
   else {
     drupal_set_message(t('Failed to Uploade data for Trip ID:' . $trip_id), 'error');
   }
+}
+
+
+
+// function to fetch vrs bill items
+function get_signed_bill_cheque_images($trip_id, $distributor_id) {
+    $res = array();
+    if (!empty($trip_id) && !empty($distributor_id)) {
+        $query = db_select('vrs_trip_items', 'bills');
+        $query->condition('bills.trip_id', $trip_id);
+        $query->condition('bills.distributor_id', $distributor_id);
+        $query->fields('bills', array('bill_number', 'bill_status', 'to_be_collected_amt_sales_register'
+            , 'to_be_collected_amt', 'actual_cash_amount', 'actual_cheque_amount',
+            'actual_signed_bill_amount', 'cheque_number', 'cheque_date', 'bank_name'
+            , 'short_amt', 'reason_code', 'vrs_version_no', 'trip_id', 'remarks', 'non_billable', 'photo_cheque', 'photo_signed_bill','non_bank_reason_code','vrs_confirm_date'));
+        $res = $query->execute()->fetchAll(PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
+    }
+    return $res;
 }
