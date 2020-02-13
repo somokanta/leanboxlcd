@@ -3235,6 +3235,7 @@ function dispatch_planning_sales_reg_api($node, $trip_execution_date, $vehicle_n
   $api_data = array();
   // get billing data details
   $node_uid = $node->uid;
+  $node_nid = $node->nid;
   $rs_code = dispatch_planning_get_rscode_using_uid($node_uid);
   $facility_code = get_facility_code($node_uid);
   $bill_number = $node->title;
