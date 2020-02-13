@@ -149,6 +149,7 @@ function upload_signed_bill_cheque_form($form, &$form_state) {
   
   if (!empty($options)) {
       $bills = get_signed_bill_cheque_images($trip_id, $dis_id);
+
  
   }
 
@@ -228,10 +229,15 @@ foreach($options as $key => &$val){
   $form['bill_details']['#rows'][$key][] = $bill_status;
   $form['bill_details']['#rows'][$key][] = $val['field_payment_terms_value'];
   $form['bill_details']['#rows'][$key][] = $payments_terms;
+  
  $ph_cheque = '<div class ="vrs_signed_bill_image">';
       $ph_flag = 0;
       $span_class = '<span style = "margin-left:18px;"></span>';
       if (!empty($bills[$key]['photo_cheque'])) {
+        $files = file_load_multiple(array(), array('uri' => $bills[$key]['photo_cheque']));
+        $file = reset($files);   
+        $photo_cheque_fid = $file->fid;
+       
         $url = $bills[$key]['photo_cheque'];
         $path = $url;
         $na_position = strpos($url, '/NA');
@@ -279,19 +285,26 @@ foreach($options as $key => &$val){
 
       $ph_cheque .= '</div>';
       $photo_cheque = array(
-        '#type' => 'file',
+        '#type' => 'managed_file',
         '#attributes' => array('title' => t('Cheque Image')),
+        '#default_value'=>$photo_cheque_fid,  
         '#name' => 'files[cheque_' . $key . ']',
         // '#id' => 'bill_details_' . $key . '_photo_cheque',
-        '#prefix' => '<div>' . $ph_cheque,
+        '#upload_location' => 'public://bills/',    
+        '#prefix' => '<div class="texdt">' . $ph_cheque,
         '#suffix' => '</div>',
       );
       unset($path);
       unset($url);
       unset($wrapper);
+ unset($file);
+
       $ph_sign_flag = 0;
       $ph_signed_bill = '<div class ="vrs_signed_bill_image">';
       if (!empty($bills[$key]['photo_signed_bill'])) {
+        $files = file_load_multiple(array(), array('uri' => $bills[$key]['photo_signed_bill']));
+        $file = reset($files);   
+        $photo_signed_fid = $file->fid;  
         $url = $bills[$key]['photo_signed_bill'];
         $path = $url;
         $na_position = strpos($url, '/NA');
@@ -343,8 +356,10 @@ foreach($options as $key => &$val){
       $photo_signed_bill = array(
         //'#id' => 'bill_details-' . $key . '-photo_signed_bill',
         '#name' => 'files[signedbill_' . $key . ']',
-        '#type' => 'file',
+        '#type' => 'managed_file',
+        '#upload_location' => 'public://bills/',  
         '#prefix' => '<div>' . $ph_signed_bill,
+          '#default_value'=>$photo_signed_fid,    
         '#suffix' => '</div>',
         '#attributes' => array('class' => array('photo_signed_bill'), 'title' => t('Signed Bill Image')),
       );
@@ -355,7 +370,8 @@ foreach($options as $key => &$val){
       $form['bill_details']['#rows'][$key][]['data']["photo_cheque"] = &$photo_cheque;
       $form['bill_details']['#rows'][$key][]['data']["photo_signed_bill"] = &$photo_signed_bill;
       
-      
+           unset($photo_cheque_fid);
+      unset($photo_signed_fid);
       unset($photo_cheque);
       unset($photo_signed_bill);
 
@@ -437,7 +453,7 @@ function validate_upload_signed_bill_cheque_trip_details($form, &$form_state){
       form_set_error('trip_id', "Trip ID :$trip_id is in $vrs_status[$current_vrs_status] state.");
       ajax_redirect('upload-signed-bill-and-cheque');
     }
-    else if (empty($check_returns_flag->field_vrs_status_value)) {
+    else if (($check_returns_flag->field_vrs_status_value == -1)) {
       unset($form_state['vrs_confirmation']['bills']);
       form_set_error('trip_id', "Trip ID:$trip_id-Please confirm Delivery Confirmation.");
       ajax_redirect('upload-signed-bill-and-cheque');
@@ -490,9 +506,9 @@ function display_upload_signed_bill_cheque_trip_details($form, &$form_state) {
       $query->condition('disp_data .uid', $dis_id);
       $query->leftjoin('field_data_field_vrs_status', 'vs', 'vs.entity_id = disp_data.nid');
       // VRS Screen Return flag = 1 and VRS status = 1, 3 Means VRS pending
-      $vrs_status = array('1', '3');
-      $query->condition('vs.field_vrs_status_value', $vrs_status, 'IN');
-      $query->groupBy('ad.bill_number');
+      $vrs_status = array('1', '5','0','2','3','4','6');
+      $query->condition('vs.field_vrs_status_value', '-1', '!=');
+      $query->groupBy('ad.bill_number,ad.distributor_id');
       $query->fields('ad', array('bill_number','res_status', 'bill_value'));
       $query->addExpression('ad.bill_number', 'bill_number');
       $query->addExpression('ad.res_photo_of_cheque', 'res_photo_of_cheque');
@@ -525,43 +541,30 @@ function upload_signed_bill_cheque_form_submit($form, &$form_state){
   $trip_items = array();
   $dir = 'public://bills';
   file_prepare_directory($dir, FILE_CREATE_DIRECTORY);
+  //print_r($form_state['values']['bill_details']);die;
   $bill_numbers = array_keys($form_state['values']['bill_details']);
   if (!empty($form_state['values']['bill_details'])) {
     foreach ($form_state['values']['bill_details'] as $key => $value) {
-      $photo_cheque = "cheque_$key";
-      $photo_signed_bill = "signedbill_$key";
-      if (isset($_FILES['files']['name'][$photo_cheque])) {
-        $fname = explode('.', $_FILES['files']['name'][$photo_cheque]);
-        $file_rename = $photo_cheque . '.' . $fname[1];
-        $file = file_save_upload($photo_cheque, array('file_validate_extensions' => array('png gif jpg jpeg pdf')), "public://", FILE_EXISTS_REPLACE);
-        if ($file && !empty($fname[1])) {
-          if ($file = file_move($file, $dir . '/' . $file_rename, FILE_EXISTS_REPLACE)) {
-            $file->status = FILE_STATUS_PERMANENT;
-            file_save($file);
-            $trip_items[$key]['photo_cheque'] = $file->uri;
-          }
-          else {
-            form_set_error('file', t('Failed to write the uploaded file the site\'s file folder.'));
-          }
-        }
+       $trip_items[$key]['photo_cheque'] = $trip_items[$key]['photo_signed_bill'] = '';
+      if (!empty($value['photo_cheque']))   {
+         $photo_cheque_file = file_load($value['photo_cheque']);
+         $photo_cheque_file->status = FILE_STATUS_PERMANENT;
+         $photo_cheque_file =file_save($photo_cheque_file);
+         $file_object = file_load($value['photo_cheque']);
+         $trip_items[$key]['photo_cheque'] = $file_object->uri;
+         file_usage_add($file_object, 'mrc_inventory_returns', 'vrs', $value['photo_cheque']);
       }
-      if (isset($_FILES['files']['name'][$photo_signed_bill])) {
-        $fname = explode('.', $_FILES['files']['name'][$photo_signed_bill]);
-        $file_rename = $photo_signed_bill . '.' . $fname[1];
-        $file = file_save_upload($photo_signed_bill, array('file_validate_extensions' => array('png gif jpg jpeg pdf')), "public://", FILE_EXISTS_REPLACE);
-        if ($file && !empty($fname[1])) {
-          if ($file = file_move($file, $dir . '/' . $file_rename, FILE_EXISTS_REPLACE)) {
-            $file->status = FILE_STATUS_PERMANENT;
-            file_save($file);
-            $trip_items[$key]['photo_signed_bill'] = $file->uri;
-          }
-          else {
-            form_set_error('file', t('Failed to write the uploaded file the site\'s file folder.'));
-          }
-        }
-      }
-      unset($photo_signed_bill);
-      unset($photo_cheque);
+   
+      if (!empty($value['photo_signed_bill']))   {
+         $photo_signed_file = file_load($value['photo_signed_bill']);
+         $photo_signed_file->status = FILE_STATUS_PERMANENT;
+         $photo_signed_file =file_save($photo_signed_file);
+         $file_object = file_load($value['photo_signed_bill']);
+         $trip_items[$key]['photo_signed_bill'] = $file_object->uri;
+         file_usage_add($file_object, 'mrc_inventory_returns', 'vrs', $value['photo_signed_bill']);
+       }
+      unset($photo_signed_file);
+      unset($photo_cheque_file);
       $trip_items[$key]['trip_id'] = $trip_id;
       $trip_items[$key]['bill_number'] = $key;
       $trip_items[$key]['distributor_id'] = $dis_id;
@@ -590,7 +593,7 @@ function insert_signed_bill_cheque_images($values,$trip_id,$dis_id){
       ->fields($record)
       ->condition('trip_id', $trip_id)
       ->condition('distributor_id', $dis_id)
-      ->condition('bill_number', $bill_number[0])
+      ->condition('bill_number', $record['bill_number'])
       ->execute();
     }
     $message = t('Data Uploaded Successfully:for Trip ID:' . $trip_id);
