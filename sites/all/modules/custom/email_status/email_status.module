@@ -101,6 +101,14 @@ function email_status_menu() {
     'page arguments' => array('email_status_email_form'),
     'access callback' => 'check_if_fr_role_user_admin',
   );
+  
+  $items['email-bills-not-attached-to-trip'] = array(
+    'title' => 'Send Email Of Bills Not Attached To Trip',
+    'page callback' => 'send_email_bills_not_attached_to_trip',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'includes/email_status_automailer.inc',
+  );
   return $items;
 }
 
@@ -269,6 +277,18 @@ function email_status_email_form($form, $form_state) {
     '#title' => t('Sender'),
     '#default_value' => variable_get('from_email', ''),
     '#required' => TRUE,
+  );
+
+  // Bills Not Attached To Trip (MRC)
+  $form['bills_not_attached_to_trip_to_email'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Receiver'),
+    //'#description' => t('Bills Not Attached To Trip'),
+    '#description' => l($click_here.t('Bills Not Attached To Trip'), 'email-bills-not-attached-to-trip',$target).t(' (Format: <b>abc@gmail.com</b> &nbsp;OR&nbsp; <b>101000:abc@gmail.com</b> &nbsp;OR&nbsp; <b>101000,105403:abc@gmail.com</b> &nbsp;OR&nbsp; <b>101000:abc@gmail.com;105403:xyz@gmail.com</b>)'),    
+    '#default_value' => variable_get('bills_not_attached_to_trip_to_email', ''),
+    '#required' => TRUE,
+    '#size' => 60,
+    '#maxlength' => 2048,
   );
 
   return system_settings_form($form);
