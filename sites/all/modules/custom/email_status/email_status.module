@@ -109,14 +109,23 @@ function email_status_menu() {
     'type' => MENU_CALLBACK,
     'file' => 'includes/email_status_automailer.inc',
   );
-  
+  // not working
     $items['email-bills-status-not-updated'] = array(
     'title' => 'Send Email Of Bills With Status Not Updated',
     'page callback' => 'send_email_bills_status_not_updated',
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
-    'file' => 'includes/email_status_mrc_automailer.inc',
+    'file' => 'includes/email_status_automailer.inc',
   );
+    //not working
+    
+  $items['email-dispatched-quantity-mismatch'] = array(
+    'title' => 'Send Email Of Dispatch Quantity Mismatch',
+    'page callback' => 'send_email_dispatched_quantity_mismatch',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'includes/email_status_automailer.inc',
+  );    
   return $items;
 }
 
@@ -309,6 +318,18 @@ function email_status_email_form($form, $form_state) {
     '#size' => 60,
     '#maxlength' => 2048,
   );
+    
+    
+  $form['quantity_mismatched_to_email'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Receiver'),
+    //'#description' => t('Quantity Mismatched'),
+    '#description' => l($click_here.t('Quantity Mismatched'), 'email-dispatched-quantity-mismatch',$target).t(' (Format: <b>abc@gmail.com</b> &nbsp;OR&nbsp; <b>101000:abc@gmail.com</b> &nbsp;OR&nbsp; <b>101000,105403:abc@gmail.com</b> &nbsp;OR&nbsp; <b>101000:abc@gmail.com;105403:xyz@gmail.com</b>)'),
+    '#default_value' => variable_get('quantity_mismatched_to_email', ''),
+    '#required' => TRUE,
+    '#size' => 60,
+    '#maxlength' => 2048,
+  );     
 
   return system_settings_form($form);
 }

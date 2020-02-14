@@ -1469,3 +1469,128 @@ function build_not_attached_trip_table_rows($all_bills){
 
   return $output;
 }
+
+
+
+/** Function to send auto mailer of quantity mismatch
+ */
+function send_email_dispatched_quantity_mismatch() {
+
+  $receiver_email_str = variable_get('quantity_mismatched_to_email');
+  $receiver_email_arr = explode(';', $receiver_email_str); //explode(PHP_EOL, $receiver_email_str); //first exploding by new line (i.e PHP_EOL)
+
+  foreach($receiver_email_arr as $key => $value){
+    $dist_ids_str = $to_email_str = "";
+    $individual_line_arr = $dist_ids_arr = array();
+
+    if(strpos($value, ':')){
+      $individual_line_arr = explode(':', $value);
+      $dist_ids_str = $individual_line_arr[0];
+      $to_email_str = $individual_line_arr[1];
+      $dist_ids_arr = explode(',', $dist_ids_str);
+      if(count($dist_ids_arr) > 1){
+        send_email_quantity_mismatch($to_email_str, $dist_ids_arr);
+      }else{
+        $only_one_distributor_id = trim($dist_ids_arr[0]);  
+        send_email_quantity_mismatch($to_email_str, array($only_one_distributor_id));
+      }
+    }else{
+      $active_distributors_id_arr = get_all_active_distributors_id();
+      $receiver_email = $receiver_email_arr[0];
+      //$dist_id = _MARICO_DISTRIBUTOR_ID;
+      send_email_quantity_mismatch($receiver_email, $active_distributors_id_arr); //array($dist_id)
+    }  
+  } //end of foreach()
+}
+
+
+/** Function to send mails to receiver for dispatched_quantity_mismatch
+ */
+function send_email_quantity_mismatch($receiver_email_str, $dist_ids_arr){
+
+  //$distributor_name = change_feeds_import_get_distributor_name($dist_ids_arr[0]);
+  
+  $rows = $rows1 = array();
+  $distributor_name_arr = array();
+  foreach ($dist_ids_arr as $key => $id_value) {
+
+    $distributor_id = $id_value;//$dist_id; //_MARICO_DISTRIBUTOR_ID;
+    $distributor_name = change_feeds_import_get_distributor_name($distributor_id);
+    if(!empty($distributor_name) && isset($distributor_name)){
+      array_push($distributor_name_arr, $distributor_name);
+    }
+  
+    $bill_date = strtotime('-2 day', strtotime(date('Y-m-d')));
+  
+    $check_todays_day = date('N');
+    $bill_date_for_monday = strtotime('-3 day', strtotime(date('Y-m-d')));
+  
+    $query = db_select('dispatch_planning_api_data', 'dpi');
+    $query->condition('dpi.distributor_id', $distributor_id, '=');
+    $query->join('dispatch_planning_item_details', 'ad', 'ad.trip_bill_reference = dpi.id');
+    $query->join('field_data_field_name', 'rs_name', 'dpi.distributor_id = rs_name.entity_id');
+    $query->isNotNull('dpi.res_status');
+    // check if today is Monday
+    if ($check_todays_day == 1) {
+      $query->condition('dpi.bill_date', $bill_date_for_monday, '<=');
+    }
+    else {
+      $query->condition('dpi.bill_date', $bill_date, '<=');
+    }
+  
+    $query->fields('dpi', array('runsheet_number'));
+    $query->fields('dpi', array('bill_number'));
+    $query->fields('dpi', array('bill_date'));
+    $query->fields('dpi', array('fieldExecutiveName'));
+    $query->fields('rs_name', array('field_name_value'));
+    $query->addExpression('(SUM(ad.sum_net_sales_quantity - ad.res_godown_short))', 'Dispatched_Sales_Qty');
+    $query->addExpression('(SUM(ad.dispatch_qty))', 'Dispatch_Qty');
+    $query->addExpression('(SUM(ad.dispatch_qty - ad.return_qty - ad.res_cashier_short))', 'Delivered_Sales_Qty');
+    $query->addExpression('(SUM(ad.res_sku_actual_quantity1))', 'Delivered_Qty');
+    $query->groupBy('ad.trip_bill_reference');
+    $all_trips = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+    $arr = build_quntity_mismatch_table_rows($all_trips);
+    foreach ($arr['rows'] as $key1 => $val1) {
+      $rows[] = $val1;
+    }
+
+    foreach($arr['rows1'] as $key2 => $val2){
+      $rows1[] = $val2;
+    }
+  }
+  $multiple_distributor_name = implode(', ', $distributor_name_arr);
+  $params['subject'] = "Quantity Mismatched - ".$multiple_distributor_name;
+  
+  $header = array('RS Name', 'Trip ID', 'Bill No.', 'Bill Date', 'Cashier Name');
+  $output = "<h3>Quantity Mismatched (Dispatched quantity IS NOT equal to Total Sales quantity - Godown Short)</h3>";
+  $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0'), 'empty' => t('No Records has been found')));
+
+  $output1 = "<h3>Quantity Mismatched (Delivered quantity IS NOT equal to Dispatched Quantity - Returned Quantity - Cashier Short)</h3>";
+  $output1 .= theme('table', array('header' => $header, 'rows' => $rows1, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0'), 'empty' => t('No Records has been found')));
+
+  $params['body'] = $output.$output1; // build_quntity_mismatch_table_rows($id_value); 
+  $mail_to = $receiver_email_str; //variable_get('quantity_mismatched_to_email');
+  $from = variable_get('from_email');
+  drupal_mail('email_status', 'daily_data', $mail_to, LANGUAGE_NONE, $params, $from);  
+}
+
+/* function to build mail body of dispatched quantity mismatch  */
+function build_quntity_mismatch_table_rows($all_trips){
+  $row = array();
+  foreach ($all_trips as $value) {
+    $row['rs_name'] = $value['field_name_value'];
+    $row['trip_id'] = $value['runsheet_number'];
+    $row['bill_no'] = $value['bill_number'];
+    $row['bill_date'] = date('d-M-y', $value['bill_date']);
+    $row['cashier_name'] = $value['fieldExecutiveName'];
+    // Condition Of Dispatch qty is not equal to Total Sales Qty - Godown short
+    if ($value['Dispatched_Sales_Qty'] != $value['Dispatch_Qty']) {
+      $rows[] = $row;
+    }
+    // Condition Of Delivered quantity IS NOT equal to Dispatched Quantity - Returned Quantity - Cashier Short
+    if ($value['Delivered_Sales_Qty'] != $value['Delivered_Qty']) {
+      $rows1[] = $row;
+    }
+  }
+  return array("rows"=>$rows, "rows1"=>$rows1);
+}
