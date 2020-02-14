@@ -2234,7 +2234,7 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
         $hul_code = $entity->title;
         $area_code = $item['area code'];
         //returns area code nid
-        $areacode_nid = check_hul_area_code_exist($area_code, $distributor_id);
+        $areacode_nid = check_hul_area_code_exist($area_code, $central_distributor_id);
         $existing_uid = check_hul_code_exist($hul_code);
         if (!empty($existing_uid) && ($existing_uid != $distributor_id)) {
             drupal_set_message("Invalid HUL Code:$hul_code", 'error', FALSE);
