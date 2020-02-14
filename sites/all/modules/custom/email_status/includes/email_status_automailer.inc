@@ -1193,3 +1193,112 @@ function send_email_pt_compliance() {
 //2nd end
   drupal_mail('email_status', 'productivity_status', $mail_to, LANGUAGE_NONE, $params, $from);
 }
+
+function send_email_bills_not_attached_to_trip(){
+  $receiver_email_str = variable_get('bills_not_attached_to_trip_to_email');
+  $receiver_email_arr = explode(';', $receiver_email_str);
+  //if (!empty($receiver_email_arr)) {
+    foreach ($receiver_email_arr as $key => $value) {
+      $dist_ids_str = $to_email_str = "";
+      $individual_line_arr = $dist_ids_arr = array();
+      
+      if (strpos($value, ':')) {
+        $individual_line_arr = explode(':', $value);
+        $dist_ids_str = $individual_line_arr[0];
+        $to_email_str = $individual_line_arr[1];
+        $dist_ids_arr = explode(',', $dist_ids_str);
+        if (count($dist_ids_arr) > 1) {
+          send_email_not_attached_trip($to_email_str, $dist_ids_arr); //$to_email_str = abc@.com,dfg@.com $dist_ids_arr = 101000,101000
+        }
+        else {
+          dpm('inside-one');
+          $only_one_distributor_id = trim($dist_ids_arr[0]);
+          send_email_not_attached_trip($to_email_str, array($only_one_distributor_id)); //$to_email_str = abc@.com/abc@.com/sdf@.com
+        }
+      }
+      else {
+        $active_distributors_id_arr = get_all_active_distributors_id();
+        $receiver_email = $receiver_email_arr[0]; /// it is coming empty as no dis id is maintaine at config level
+        send_email_not_attached_trip($receiver_email, $active_distributors_id_arr); //array($dist_id)
+      }
+    } //end of foreach()
+  //}
+}
+
+
+function get_all_active_distributors_id(){
+  $query = db_select('users', 'u');
+  $query->join('field_data_field_third_party_username', 'rss_code', 'u.uid = rss_code.entity_id');
+  $query->join('field_data_field_distributor', 'dis', 'u.uid = dis.entity_id');
+  $query->condition('u.status','1','=');
+  //$query->condition('rss_code.field_third_party_username_value','marico','='); //marico condition
+  $query->fields('dis', array('field_distributor_value'))->distinct();
+  //$query->fields('u', array('name'));
+  $active_distributors_id_arr = $query->execute()->fetchCol(); //fetchAll(PDO::FETCH_ASSOC); 
+  return $active_distributors_id_arr;
+}
+
+
+function send_email_not_attached_trip($receiver_email_str, $dist_ids_arr){
+  $rows = array();
+  $distributor_name_arr = array();
+  
+  $distributor_name = change_feeds_import_get_distributor_name($distributor_id);
+  foreach ($dist_ids_arr as $key => $id_value) {
+    $distributor_id = $id_value;
+    $distributor_name = change_feeds_import_get_distributor_name($distributor_id);
+    if(!empty($distributor_name) && isset($distributor_name)){
+      array_push($distributor_name_arr, $distributor_name);
+    }
+
+    $yesterday_date = strtotime('-1 day', strtotime(date('Y-m-d')));
+    $query = db_select('node', 'n');
+    $query->condition('n.type', 'sales_register_data');
+    $query->condition('n.uid', $distributor_id, '=');
+    $query->join('field_data_field_sr_bill_date', 'bd', 'bd.entity_id = n.nid');
+    $query->condition('bd.field_sr_bill_date_value', $yesterday_date, '<=');
+    $query->join('field_data_field_bill_value', 'bv', 'bv.entity_id = n.nid');
+    $query->join('field_data_field_name', 'rs_name', 'rs_name.entity_id = n.uid');
+    $query->leftjoin('field_data_field_previous_trip', 'pt', 'pt.entity_id = n.nid');
+    $query->leftjoin('field_data_field_trip_id_reference', 'tr', 'tr.entity_id = n.nid');
+    $query->isNULL('tr.field_trip_id_reference_nid');
+
+    $query->fields('n', array('nid'));
+    $query->fields('n', array('title'));
+    $query->fields('bd', array('field_sr_bill_date_value'));
+    $query->fields('bv', array('field_bill_value_value'));
+    $query->fields('pt', array('field_previous_trip_value'));
+    $query->fields('rs_name', array('field_name_value'));
+    $all_bills = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+    $arr = build_not_attached_trip_table_rows($all_bills);
+      foreach ($arr['rows'] as $key1 => $val1) {
+      $rows[] = $val1;
+    }
+  }
+  $multiple_distributor_name = implode(', ', $distributor_name_arr);
+  $params['subject'] = "Bills Not Attached To Trip - ".$multiple_distributor_name;
+
+  $header = array('RS Name', 'Bill No.', 'Bill Date', 'Total Value', 'Previous Trip No');
+  $output = "<h3>Bills Not Attached To Trip</h3>";
+  $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0'), 'empty' => t('No Records has been found')));
+
+  $params['body'] = $output;
+  $mail_to = $receiver_email_str; //variable_get('quantity_mismatched_to_email');
+  $from = variable_get('from_email');
+  drupal_mail('email_status', 'daily_data', $mail_to, LANGUAGE_NONE, $params, $from);   
+}
+
+
+function build_not_attached_trip_table_rows($all_bills){
+  $row = array();
+  foreach ($all_bills as $value) {
+    $row['rs_name'] = $value['field_name_value'];
+    $row['bill_no'] = $value['title'];
+    $row['bill_date'] = date('d-M-y', $value['field_sr_bill_date_value']);
+    $row['bill_value'] = $value['field_bill_value_value'];
+    $row['prev_trip'] = $value['field_previous_trip_value'];
+
+    $rows[] = $row;
+  }
+  return array("rows"=>$rows);
+}
