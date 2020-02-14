@@ -289,15 +289,14 @@ foreach($options as $key => &$val){
         '#attributes' => array('title' => t('Cheque Image')),
         '#default_value'=>$photo_cheque_fid,  
         '#name' => 'files[cheque_' . $key . ']',
-        // '#id' => 'bill_details_' . $key . '_photo_cheque',
+         '#upload_validators' => array('file_validate_extensions' => array('gif png jpg jpeg pdf doc docx'),
+         ),
         '#upload_location' => 'public://bills/',    
-        '#prefix' => '<div class="texdt">' . $ph_cheque,
-        '#suffix' => '</div>',
-      );
+       );
       unset($path);
       unset($url);
       unset($wrapper);
- unset($file);
+      unset($file);
 
       $ph_sign_flag = 0;
       $ph_signed_bill = '<div class ="vrs_signed_bill_image">';
@@ -358,9 +357,9 @@ foreach($options as $key => &$val){
         '#name' => 'files[signedbill_' . $key . ']',
         '#type' => 'managed_file',
         '#upload_location' => 'public://bills/',  
-        '#prefix' => '<div>' . $ph_signed_bill,
-          '#default_value'=>$photo_signed_fid,    
-        '#suffix' => '</div>',
+        '#default_value'=>$photo_signed_fid,    
+        '#upload_validators' => array('file_validate_extensions' => array('gif png jpg jpeg pdf doc docx'),
+         ),
         '#attributes' => array('class' => array('photo_signed_bill'), 'title' => t('Signed Bill Image')),
       );
       
