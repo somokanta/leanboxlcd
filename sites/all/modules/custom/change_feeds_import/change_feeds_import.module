@@ -1627,8 +1627,8 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
         }
     }
     global $user;
+   //     watchdog('hul_code_area_code', '<pre>' . print_r($item, TRUE) . '</pre>');
     // Store distributor id in author in each node
-    $distributor_id = change_feeds_import_get_distributor_id($user->uid);
     $distributor_id = change_feeds_import_get_distributor_id($user->uid);
     $logged_in_distributor_id = $distributor_id;
     $distributor_wise_template = explode(',', variable_get('distributor_feed_importer'));
@@ -1640,6 +1640,7 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
                 return;
             }
             else {
+              
                 $distributor_id = validate_distributor_name(trim($item['distributor name']));
                 if (empty($distributor_id)) {
                     drupal_set_message("Invalid Distributor Name:" . $item['distributor name'], 'error');
@@ -2236,6 +2237,14 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
         //returns area code nid
         $areacode_nid = check_hul_area_code_exist($area_code, $central_distributor_id);
         $existing_uid = check_hul_code_exist($hul_code);
+        if (empty($existing_uid)) {
+            drupal_set_message("Invalid HUL Code:$hul_code", 'error', FALSE);
+            $entity->feeds_item->skip = TRUE;
+        }
+        if (empty($distributor_id)) {
+            drupal_set_message("Invalid Distributor Name:" . $item['distributor name'], 'error', FALSE);
+            $entity->feeds_item->skip = TRUE;
+        }
         if (!empty($existing_uid) && ($existing_uid != $distributor_id)) {
             drupal_set_message("Invalid HUL Code:$hul_code", 'error', FALSE);
             $entity->feeds_item->skip = TRUE;

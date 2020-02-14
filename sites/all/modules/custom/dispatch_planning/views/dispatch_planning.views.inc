@@ -6216,6 +6216,21 @@ function dispatch_planning_views_data() {
       'handler' => 'total_travel_time_handler',
     ),
   );
+    $data['views']['photo_signed_bill_handler'] = array(
+    'title' => t('Photo Signed Bill Handler'),
+    'help' => t('Photo Signed Bill Handler.'),
+    'field' => array(
+      'handler' => 'field_photo_signed_bill_handler',
+    ),
+  );
+  
+  $data['views']['photo_cheque_handler'] = array(
+    'title' => t('Photo Cheque Handler'),
+    'help' => t('Photo Cheque Handler.'),
+    'field' => array(
+      'handler' => 'field_photo_cheque_handler',
+    ),
+  );
 
   return $data;
 }
