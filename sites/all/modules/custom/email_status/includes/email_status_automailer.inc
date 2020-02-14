@@ -1211,7 +1211,6 @@ function send_email_bills_not_attached_to_trip(){
           send_email_not_attached_trip($to_email_str, $dist_ids_arr); //$to_email_str = abc@.com,dfg@.com $dist_ids_arr = 101000,101000
         }
         else {
-          dpm('inside-one');
           $only_one_distributor_id = trim($dist_ids_arr[0]);
           send_email_not_attached_trip($to_email_str, array($only_one_distributor_id)); //$to_email_str = abc@.com/abc@.com/sdf@.com
         }
@@ -1223,6 +1222,35 @@ function send_email_bills_not_attached_to_trip(){
       }
     } //end of foreach()
   //}
+}
+
+// bill status not updated 
+
+function send_email_bills_status_not_updated() {
+
+  $receiver_email_str = variable_get('bills_with_status_not_updated_to_email');
+  $receiver_email_arr = explode(';', $receiver_email_str); //explode(PHP_EOL, $receiver_email_str); //first exploding by new line (i.e PHP_EOL)
+  foreach($receiver_email_arr as $key => $value){
+    $dist_ids_str = $to_email_str = "";
+    $individual_line_arr = $dist_ids_arr = array();
+
+    if(strpos($value, ':')){
+      $individual_line_arr = explode(':', $value);
+      $dist_ids_str = $individual_line_arr[0];
+      $to_email_str = $individual_line_arr[1];
+      $dist_ids_arr = explode(',', $dist_ids_str);
+      if(count($dist_ids_arr) > 1){
+        send_email_status_not_updated($to_email_str, $dist_ids_arr);
+      }else{
+        $only_one_distributor_id = trim($dist_ids_arr[0]);
+        send_email_status_not_updated($to_email_str, array($only_one_distributor_id));
+      }
+    }else{
+      $active_distributors_id_arr = get_all_active_distributors_id();
+      $receiver_email = $receiver_email_arr[0];
+      send_email_status_not_updated($receiver_email, $active_distributors_id_arr); //array($dist_id)
+    }  
+  } //end of foreach()
 }
 
 
@@ -1301,4 +1329,143 @@ function build_not_attached_trip_table_rows($all_bills){
     $rows[] = $row;
   }
   return array("rows"=>$rows);
+}
+
+
+
+ function send_email_status_not_updated($receiver_email_str , $dist_ids_arr){
+  $rows1 = array();
+  $distributor_name_arr = array();
+  foreach ($dist_ids_arr as $key => $id_value) {
+    $distributor_id = $id_value; //_MARICO_DISTRIBUTOR_ID;    
+    $distributor_name = change_feeds_import_get_distributor_name($distributor_id);
+    if(!empty($distributor_name) && isset($distributor_name)){
+      array_push($distributor_name_arr, $distributor_name);
+    }
+  }
+    $end = strtotime(date('Y-m-d', strtotime("-2 days"))); //5 march
+    $start = strtotime(date('Y-m-d', strtotime("-8 days"))); // 27 march
+
+    $check_todays_day = date('N');
+    $end_date_for_monday = strtotime(date('Y-m-d', strtotime("-3 days")));
+
+    // Table OF Summary Of Bills Count
+    $query = db_select('dispatch_planning_api_data', 'dpi');
+    $query->join('field_data_field_name', 'rs_name', 'dpi.distributor_id = rs_name.entity_id');
+
+    $query->condition('dpi.distributor_id', $distributor_id, '=');
+
+    // check if today is Monday
+    if ($check_todays_day == 1) {
+      $query->condition('dpi.bill_date', array($start, $end_date_for_monday), 'BETWEEN');
+    }
+    else {
+      $query->condition('dpi.bill_date', array($start, $end), 'BETWEEN');
+    }
+    //$query->fields('dpi', array('runsheet_number'));
+    //$query->fields('dpi', array('fieldExecutiveName'));
+    $query->fields('dpi', array('bill_date'));
+    $query->fields('rs_name', array('field_name_value'));
+    $query->addExpression('(COUNT(dpi.bill_number))', 'Total_Bills_Count');
+    $query->addExpression('SUM(CASE WHEN (dpi.res_status IS NULL) THEN 1 ELSE 0 END)', 'Bills_Count_Empty_Status');
+
+    //$query->groupBy('dpi.runsheet_number');
+    $query->groupBy('dpi.bill_date');
+
+    //$query->orderBy('dpi.runsheet_number', 'DESC');
+    $query->orderBy('dpi.bill_date', 'DESC');
+    $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+    $arr = build_status_not_updated_table_rows($res);
+    foreach($arr['rows1'] as $key2 => $val2){
+      $rows1[] = $val2;
+    }
+
+
+    $file_name = 'Bills_With_Status_Not_Updated.csv';
+    $file_uri = 'public://Bills_Status/' . $file_name;
+    // create directory if not exist
+    $dir = 'public://Bills_Status';
+    file_prepare_directory($dir, FILE_CREATE_DIRECTORY);
+  
+    $file = fopen($file_uri, 'w');
+    $table = get_attachment_bills_status_not_updated($distributor_id);
+    fputcsv($file, $table['header']);
+    foreach ($table['rows'] as $line) {
+      fputcsv($file, $line);
+    }
+  
+    fclose($file);
+    $params['attachment']= array(
+      'filecontent' => file_get_contents($file_uri),
+      'filename' => $file_name,
+      'filemime' => 'text/csv',
+    );
+  $multiple_distributor_name = implode(', ', $distributor_name_arr);
+  $params['subject'] = "Bills With Status Not Updated - ".$multiple_distributor_name;
+  
+  $header1 = array('RS Name', 'Bill Date', 'Total Bill Count', 'Bill Count-Status Not Updated');
+  $output1 = "<h3>Summary (Date Range from N-8 to N-2 Bill Date (N is Today's Date))</h3>";
+  $output1 .= theme('table', array('header' => $header1, 'rows' => $rows1, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0'), 'empty' => t('No Records has been found')));
+  $params['body'] = $output1;
+  $mail_to = $receiver_email_str; //variable_get('quantity_mismatched_to_email');
+  $from = variable_get('from_email');
+  drupal_mail('email_status', 'daily_data', $mail_to, LANGUAGE_NONE, $params, $from);    
+ }
+ 
+ function get_attachment_bills_status_not_updated($distributor_id) {
+
+  $end = strtotime(date('Y-m-d', strtotime("-2 days")));
+  $start = strtotime(date('Y-m-d', strtotime("-8 days")));
+
+  $check_todays_day = date('N');
+  $end_date_for_monday = strtotime(date('Y-m-d', strtotime("-3 days")));
+
+  $query = db_select('dispatch_planning_api_data', 'dpi');
+  $query->condition('dpi.distributor_id', $distributor_id, '=');
+  $query->isNull('dpi.res_status');
+  $query->join('dispatch_planning_item_details', 'ad', 'ad.trip_bill_reference = dpi.id');
+  $query->join('node', 'n', 'n.title = dpi.bill_number');
+  $query->join('field_data_field_name', 'rs_name', 'dpi.distributor_id = rs_name.entity_id');
+  $query->condition('n.uid', $distributor_id);
+  $query->condition('n.type', 'sales_register_data');
+  $query->join('field_data_field_bill_value', 'bv', 'bv.entity_id = n.nid');
+
+  $query->orderBy('dpi.runsheet_number', 'DESC');
+  $query->orderBy('dpi.bill_number', 'DESC');
+
+  // check if today is Monday
+  if ($check_todays_day == 1) {
+    $query->condition('dpi.bill_date', array($start, $end_date_for_monday), 'BETWEEN');
+  }
+  else {
+    $query->condition('dpi.bill_date', array($start, $end), 'BETWEEN');
+  }
+
+  $query->fields('dpi', array('runsheet_number'));
+  $query->fields('dpi', array('bill_number'));
+  $query->fields('dpi', array('bill_date'));
+  $query->fields('rs_name', array('field_name_value'));
+  $query->fields('dpi', array('fieldExecutiveName'));
+  $query->addExpression('(SUM(ad.sum_net_sales_quantity))', 'Total_Sales_Qty');
+  $query->fields('bv', array('field_bill_value_value'));
+  $query->groupBy('ad.trip_bill_reference');
+  $all_trips = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+
+  $row = array();
+  foreach ($all_trips as $value) {
+    $row['rs_name'] = $value['field_name_value'];
+    $row['trip_id'] = $value['runsheet_number'];
+    $row['bill_no'] = $value['bill_number'];
+    $row['bill_date'] = date('d-M-y', $value['bill_date']);
+    $row['total_sales_qty'] = $value['Total_Sales_Qty'];
+    $row['total_value'] = $value['field_bill_value_value'];
+    $row['cashier_name'] = $value['fieldExecutiveName'];
+    $rows[] = $row;
+  }
+
+  $header = array('RS Name', 'Trip ID', 'Bill No.', 'Bill Date', 'Total Sales Qty', 'Total Value', 'Cashier Name');
+  $output['header'] = $header;
+  $output['rows'] = $rows;
+
+  return $output;
 }
