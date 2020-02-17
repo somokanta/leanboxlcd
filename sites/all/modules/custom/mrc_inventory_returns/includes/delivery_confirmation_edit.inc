@@ -111,34 +111,17 @@ function delivery_confirmation_edit_form_submit($form, &$form_state) {
  * @return type
  */
 function delivery_confirmation_edit_form_validate($form, &$form_state) {
-  $trip_number = $form_state['values']['trip_number'];
-  $dis_id = get_distributorid_of_trip($trip_number);
-  $check_trip_nid = check_trip_id_exists_or_not($dis_id, $trip_number);
-  $vrs_status = $check_trip_nid->field_vrs_status_value;
-
-  if ($vrs_status == -1) {
-    form_set_error('trip_number', 'This trip is not confirmed yet.It is in delivery confirmation pending status.');
-  }
-
-  if ($vrs_status == 1) {
-    form_set_error('trip_number', 'This trip is Returns Confirmed. So first delete from Returns Confirmed.');
-  }
-
-  if ($vrs_status == 2 ) {
-    form_set_error('trip_number', 'This trip is VRS Confirmed. So first delete from VRS Confirmed.');
-  }
-  
-  if ($vrs_status == 3 ) {
-    form_set_error('trip_number', 'This trip is VRS Pending. So first delete from VRS Pending.');
-  }
-  
-  if ($vrs_status == 4 ) {
-    form_set_error('trip_number', 'This trip is Handover Pending. So first delete from Handover Pending.');
-  }
-  
-  if ($vrs_status == 5 ) {
-    form_set_error('trip_number', 'This trip is Handover Confirmed. So first delete from Handover Confirmed.');
-  }
+    $trip_number = $form_state['values']['trip_number'];
+    $dis_id = get_distributorid_of_trip($trip_number);
+    $check_trip_nid = check_trip_id_exists_or_not($dis_id, $trip_number);
+    $vrs_status = $check_trip_nid->field_vrs_status_value;
+    $current_vrs_status = $vrs_status;
+    $field_vrs_status = field_info_field('field_vrs_status');
+    $vrs_status = list_allowed_values($field_vrs_status);
+    unset($vrs_status[0]); // Return SKU Wise confirmation Pending
+    if (isset($vrs_status[$current_vrs_status])) {
+        form_set_error('trip_id', "Trip ID :$trip_number is in $vrs_status[$current_vrs_status] state.");
+    }
 }
 
 /**

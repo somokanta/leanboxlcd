@@ -2413,3 +2413,19 @@ function dispatch_planning_update_7145() {
     }
   }
 }
+
+
+function dispatch_planning_update_7146() {
+     $fields = array(
+     'distributor_id' => array(
+        'description' => 'distributor_id',
+        'type' => 'int',
+        'default' => 0,
+      ),
+  );
+  foreach ($fields as $key => $field) {
+    if (!db_field_exists('map_my_india_api_log', $key)) {
+      db_add_field('map_my_india_api_log', $key, $field);
+    }
+  }
+}
