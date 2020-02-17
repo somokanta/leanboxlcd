@@ -383,6 +383,7 @@ function _van_planning_callback_form($form, &$form_state) {
         $combined_area_codes = array();
         $total_sales_nid_array1 = $bills_distributor_ids = array();
         $val_bill_numbers = json_decode($revised_bill['bill_no']['data-value'], 1);
+        watchdog('van-planning',print_r($val_bill_numbers,1));
         foreach ($val_bill_numbers as $nid => $bill_array) {
           $total_sales_nid_array1[$nid] = $nid;
           $bills_distributor_ids[$bill_array['bill_distributor_id']] = $bill_array['bill_distributor_id'];
