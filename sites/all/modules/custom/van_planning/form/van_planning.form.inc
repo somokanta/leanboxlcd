@@ -423,7 +423,7 @@ function _van_planning_callback_form($form, &$form_state) {
       $val1['total'][$key]['rs_per_sum_cft'] = round($val1['total'][$key]['bill_value'] / $val1['total'][$key]['sum_cft'], 2);
 
       $val1['total'][$key]['bill_value'] = number_format($val1['total'][$key]['bill_value']);
-         watchdog('rs-distributor_id',print_r($form_state['rs_distributor_ids'],1));
+      // watchdog('rs-distributor_id',print_r($form_state['rs_distributor_ids'],1));
       // pass third variable TRUE to fetch lat and long for each bill
       $cld_loose_array = _get_skus_cld_loose_count($total_sales_nid_array,$total_bills_distributor_ids, TRUE, $central_distributor_id, $form_state['rs_distributor_ids']);
 
@@ -2196,7 +2196,7 @@ function _get_skus_cld_loose_count($total_sales_nid_array, $distributor_ids, $la
   $query->groupBy('bd.bill_number');
 
   $query->condition('bd.distributor_id', $dis_ids,'IN');
-  $query->join('node', 'n', 'n.title = bd.sku7_code AND bd.distributor_id = n.uid');
+  $query->join('node', 'n', 'n.title = bd.sku7_code');
   $query->condition('n.type', 'sku7_code_master');
   $query->join('field_data_field_unit_case_units_', 'fucu', 'fucu.entity_id = n.nid');
   $query->fields('fucu', array('field_unit_case_units__value'));
