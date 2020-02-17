@@ -423,7 +423,7 @@ function _van_planning_callback_form($form, &$form_state) {
       $val1['total'][$key]['rs_per_sum_cft'] = round($val1['total'][$key]['bill_value'] / $val1['total'][$key]['sum_cft'], 2);
 
       $val1['total'][$key]['bill_value'] = number_format($val1['total'][$key]['bill_value']);
-         watchdog('van-planning-sales-nid',print_r($total_sales_nid_array,1));
+         watchdog('rs-distributor_id',print_r($form_state['rs_distributor_ids'],1));
       // pass third variable TRUE to fetch lat and long for each bill
       $cld_loose_array = _get_skus_cld_loose_count($total_sales_nid_array,$total_bills_distributor_ids, TRUE, $central_distributor_id, $form_state['rs_distributor_ids']);
 
@@ -2179,7 +2179,7 @@ function _get_nearby_area_codes($area_code, $dis_id) {
  * @param type $distributor_id
  * @return array
  */
-function _get_skus_cld_loose_count($total_sales_nid_array, $distributor_id, $lat_long = FALSE, $central_distributor_id, $rs_distributor_ids = array()) {
+function _get_skus_cld_loose_count($total_sales_nid_array, $distributor_ids, $lat_long = FALSE, $central_distributor_id, $rs_distributor_ids = array()) {
   if (!empty($distributor_ids)) {
         $dis_ids = $distributor_ids;
   } else {
