@@ -55,12 +55,12 @@ function new_sku_wise_returns_form($form, &$form_state) {
   
   $trip_detail = check_trip_id_exists_or_not($distributor_id, $trip_number);
   $current_vrs_status = $trip_detail->field_vrs_status_value;
-    if ($current_vrs_status == '0' || $current_vrs_status == '6') {
+    if ($current_vrs_status == 0 || $current_vrs_status == 6) {
         if ($form_state['bill-wise'] == 1 && $current_vrs_status != 6) {
-            $form_state['trip_no_error'] = 1; // Return Bill Wise Confirmation Pending
+            $form_state['trip_no_error'] = 1; // second Screen
         }
         else if (empty($form_state['bill-wise']) && $current_vrs_status != 0) {
-            $form_state['trip_no_error'] = 1; //  Returns SKU wise Confirmation Pending
+            $form_state['trip_no_error'] = 1; //  first Screen 
         }
     }
     else {
@@ -780,9 +780,9 @@ function new_sku_wise_return_submit($form, &$form_state) {
     $putaway_group = $form_state['values']['putaway_group'];
     $query = db_select('dispatch_planning_item_details', 'dpi');
     $query->join('dispatch_planning_api_data', 'ad', 'dpi.trip_bill_reference = ad.id');
-    $query->join('node', 'dispatch_data', 'dispatch_data.title = ad.runsheet_number and dispatch_data.uid = ad.distributor_id');
-    $query->leftjoin('field_data_field_vrs_status', 'vs', 'vs.entity_id = dispatch_data.nid');
-    $query->condition('vs.field_vrs_status_value', $vrs_status);
+    //$query->join('node', 'dispatch_data', 'dispatch_data.title = ad.runsheet_number and dispatch_data.uid = ad.distributor_id');
+   // $query->leftjoin('field_data_field_vrs_status', 'vs', 'vs.entity_id = dispatch_data.nid');
+    //$query->condition('vs.field_vrs_status_value', $vrs_status);
     $query->condition('ad.delivery_pending_flag', 1, '!=');
     $query->condition('ad.runsheet_number', $trip_id);
     $query->condition('ad.distributor_id', $dis_id);
