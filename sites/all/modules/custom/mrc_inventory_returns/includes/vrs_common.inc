@@ -22,7 +22,7 @@ function get_current_vrs_version($trip_id, $dis_id) {
         $query->condition('disp_data.title', $trip_id);
         $query->condition('disp_data.status', 1);
         $query->condition('disp_data .uid', $dis_id);
-        $query->leftjoin('field_data_field_vrs_version', 'vc', 'vc.entity_id = disp_data.nid');
+        $query->join('field_data_field_vrs_version', 'vc', 'vc.entity_id = disp_data.nid');
         $query->fields('vc', array('field_vrs_version_value'));
         $vrs_closure_id = $query->execute()->fetchField();
         return $vrs_closure_id;
