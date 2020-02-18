@@ -713,10 +713,34 @@ function vrs_confirmation_form($form, &$form_state) {
       $total_signed_bill_value += round($val['res_confirm_signed_bill_amount']);
       $total_actual_cash_collected_value += round($val['res_cash_amount']);
       $total_cheque_collected_value += round($val['res_cheque_amount']);
-      if(strtolower($val['res_bank_name'] == 'na') || strtolower($val['res_bank_name']) == 'na'){
+      if(strtolower($val['res_bank_name']) == 'na'){
           unset($val['res_bank_name']);
+      }
+      if(strtolower($val['res_cheque_no']) == 'na'){
+          unset($val['res_cheque_no']);
       }  
-      
+      if(strtolower($val['res_cheque_date']) == 'na'){
+          unset($val['res_cheque_date']);
+      }
+      if(strtolower($val['res_cash_amount']) == 'na'){
+          unset($val['res_cash_amount']);
+      }
+      if(strtolower($val['res_confirm_signed_bill_amount']) == 'na'){
+          unset($val['res_confirm_signed_bill_amount']);
+      }
+      if(strtolower($val['res_cheque_amount']) == 'na'){
+          unset($val['res_cheque_amount']);
+      }
+      if(strtolower($val['res_photo_of_cheque']) == 'na'){
+          unset($val['res_photo_of_cheque']);
+     }
+     if(strtolower($val['res_photo_of_signed_bill_delivery']) == 'na') {
+         unset($val['res_photo_of_signed_bill_delivery']);
+     }
+     if(strtolower($val['photo_of_signed_bill_partial']) == 'na') {
+         unset($val['photo_of_signed_bill_partial']);
+     }
+               
       $bank_name = array(
         //'#id' => 'bill_details-' . $key . '-bank_name',
         '#attributes' => array('class' => array('bank_name'), 'title' => t('Bank Name')),
