@@ -262,6 +262,9 @@ function vrs_confirmation_form($form, &$form_state) {
             $val['res_cheque_amount'] =  round($val['res_cheque_amount']);
             $val['res_confirm_signed_bill_amount'] = round($val['res_confirm_signed_bill_amount']);
       }
+      if(strtolower($val['res_bank_name'] == 'na')){
+          unset($val['res_bank_name']);
+      }
       // to be collected,total cash, signed bill all  should be zero in the case of undeliver
       // Payment outcome is undeliver then cash collected = zero,cheque collected =zero signed bill = Zero
       if ($val['res_status'] == 'undeliver') {

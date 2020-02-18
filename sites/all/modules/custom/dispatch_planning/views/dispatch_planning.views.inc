@@ -4141,6 +4141,20 @@ function dispatch_planning_views_data() {
       'handler' => 'views_handler_sort_date',
     ),
   );
+  
+    $data['map_my_india_api_log']['distributor_id'] = array(
+    'title' => t('Distributor ID'),
+    'help' => t('Distributor ID'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+  );
 
   // ======== Map My INDIA API LOG END ===========
 

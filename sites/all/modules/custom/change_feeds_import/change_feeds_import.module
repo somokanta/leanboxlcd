@@ -2464,7 +2464,7 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
         }
 
         $updated_by_name = $item['updated by'];
-        $updated_by_name_nid = get_nid_of_resource($updated_by_name);
+        $updated_by_name_nid = get_nid_of_resource($updated_by_name,$central_distributor_id);
         $entity->field_updated_by['und'][0]['nid'] = $updated_by_name_nid;
     }
     //dispatch planning reason master
@@ -4541,9 +4541,10 @@ function get_lat_long_and_area_code($nid) {
     return $result;
 }
 
-function get_nid_of_resource($updated_by_name) {
+function get_nid_of_resource($updated_by_name,$central_distributor_id) {
     $query = db_select('node', 'n');
     $query->condition('n.type', 'resource_master');
+    $query->condition('n.uid', $central_distributor_id);
     $query->condition('n.title', $updated_by_name);
     $query->join('field_data_field_resource_type', 'rt', 'rt.entity_id = n.nid');
     $query->condition('rt.field_resource_type_value', 'PT-CT Incharge');
