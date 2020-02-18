@@ -768,7 +768,7 @@ function new_sku_wise_return_submit($form, &$form_state) {
     $query->join('dispatch_planning_api_data', 'ad', 'dpi.trip_bill_reference = ad.id');
     $query->join('node', 'dispatch_data', 'dispatch_data.title = ad.runsheet_number and dispatch_data.uid = ad.distributor_id');
     $query->join('field_data_field_vrs_status', 'vs', 'vs.entity_id = dispatch_data.nid');
-    $query->condition('vs.field_vrs_status_value', $vrs_status);
+    //$query->condition('vs.field_vrs_status_value', $vrs_status);
     $query->condition('ad.delivery_pending_flag', 1, '!=');
     $query->condition('ad.runsheet_number', $trip_id);
     $query->condition('ad.distributor_id', $dis_id);
