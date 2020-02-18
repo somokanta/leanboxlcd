@@ -109,7 +109,6 @@ function email_status_menu() {
     'type' => MENU_CALLBACK,
     'file' => 'includes/email_status_automailer.inc',
   );
-  // not working
     $items['email-bills-status-not-updated'] = array(
     'title' => 'Send Email Of Bills With Status Not Updated',
     'page callback' => 'send_email_bills_status_not_updated',
@@ -117,7 +116,6 @@ function email_status_menu() {
     'type' => MENU_CALLBACK,
     'file' => 'includes/email_status_automailer.inc',
   );
-    //not working
     
   $items['email-dispatched-quantity-mismatch'] = array(
     'title' => 'Send Email Of Dispatch Quantity Mismatch',

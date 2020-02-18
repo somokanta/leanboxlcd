@@ -1270,8 +1270,6 @@ function get_all_active_distributors_id(){
 function send_email_not_attached_trip($receiver_email_str, $dist_ids_arr){
   $rows = array();
   $distributor_name_arr = array();
-  
-  $distributor_name = change_feeds_import_get_distributor_name($distributor_id);
   foreach ($dist_ids_arr as $key => $id_value) {
     $distributor_id = $id_value;
     $distributor_name = change_feeds_import_get_distributor_name($distributor_id);
@@ -1299,9 +1297,15 @@ function send_email_not_attached_trip($receiver_email_str, $dist_ids_arr){
     $query->fields('rs_name', array('field_name_value'));
     $all_bills = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
     $arr = build_not_attached_trip_table_rows($all_bills);
+    if(!empty($arr)){
       foreach ($arr['rows'] as $key1 => $val1) {
       $rows[] = $val1;
+      }      
     }
+    else {
+      $rows = array();
+    }
+
   }
   $multiple_distributor_name = implode(', ', $distributor_name_arr);
   $params['subject'] = "Bills Not Attached To Trip - ".$multiple_distributor_name;
@@ -1319,14 +1323,19 @@ function send_email_not_attached_trip($receiver_email_str, $dist_ids_arr){
 
 function build_not_attached_trip_table_rows($all_bills){
   $row = array();
-  foreach ($all_bills as $value) {
-    $row['rs_name'] = $value['field_name_value'];
-    $row['bill_no'] = $value['title'];
-    $row['bill_date'] = date('d-M-y', $value['field_sr_bill_date_value']);
-    $row['bill_value'] = $value['field_bill_value_value'];
-    $row['prev_trip'] = $value['field_previous_trip_value'];
+  if(!empty($all_bills)){
+    foreach ($all_bills as $value) {
+      $row['rs_name'] = $value['field_name_value'];
+      $row['bill_no'] = $value['title'];
+      $row['bill_date'] = date('d-M-y', $value['field_sr_bill_date_value']);
+      $row['bill_value'] = $value['field_bill_value_value'];
+      $row['prev_trip'] = $value['field_previous_trip_value'];
 
-    $rows[] = $row;
+      $rows[] = $row;
+    }    
+  }
+  else{
+    $rows = $row;
   }
   return array("rows"=>$rows);
 }
@@ -1602,7 +1611,6 @@ function send_email_live_tracking_data() {
   $distributor_id = _DISTRIBUTOR_ID;
   
   $today_timestamp = date("Y-m-d H:i:s");
-  
   if($today_timestamp >= date('Y-m-d 09:00:00') && $today_timestamp <= date('Y-m-d 19:00:00')) {
     $query = db_select('van_live_tracking', 'vlt');
     $query->condition('vlt.distributor_id', $distributor_id, '=');
@@ -1618,7 +1626,6 @@ function send_email_live_tracking_data() {
     $diff =  $duration->format("%H:%I:%S");
     $timesplit=explode(':',$diff);
     $min=($timesplit[0]*60)+($timesplit[1])+($timesplit[2]>30?1:0);
-
     if($min > 60) {
       $output = '<h3>Data not received from Live Tracking Report past 1 Hour</h3>';
 
