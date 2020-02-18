@@ -1384,6 +1384,7 @@ function build_not_attached_trip_table_rows($all_bills){
     //$query->orderBy('dpi.runsheet_number', 'DESC');
     $query->orderBy('dpi.bill_date', 'DESC');
     $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+    watchdog('bill-status-notipdated-query', '<pre>' . print_r($res, TRUE) . '</pre>');
     $arr = build_status_not_updated_table_rows($res);
     foreach($arr['rows1'] as $key2 => $val2){
       $rows1[] = $val2;
@@ -1418,6 +1419,7 @@ function build_not_attached_trip_table_rows($all_bills){
   $params['body'] = $output1;
   $mail_to = $receiver_email_str; //variable_get('quantity_mismatched_to_email');
   $from = variable_get('from_email');
+  watchdog('bill-status-not-updated-email-data', '<pre>' . print_r($from,$params,$mail_to,$output1, TRUE) . '</pre>');
   drupal_mail('email_status', 'daily_data', $mail_to, LANGUAGE_NONE, $params, $from);    
  }
  
