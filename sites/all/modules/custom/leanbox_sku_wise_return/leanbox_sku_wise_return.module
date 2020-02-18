@@ -22,9 +22,8 @@ function leanbox_sku_wise_return_menu() {
      'file' => 'includes/sku_wise_returns.inc',
    );
   
-  $items['sku-wise-trip/autocomplete/%'] = array(
+  $items['sku-wise-trip/autocomplete'] = array(
       'title' => 'trip_autocomplete',
-      'page arguments' => array(2),
       'page callback' => 'sku_wise_trip_id_autocomplete',
       'access callback' => TRUE,
       'type' => MENU_CALLBACK,
@@ -41,13 +40,12 @@ function leanbox_sku_wise_return_menu() {
   return $items;
 }
 
-function sku_wise_trip_id_autocomplete($trip_id,$string = '') {
+function sku_wise_trip_id_autocomplete($trip_id) {
   $dis_id = get_distributorid_of_trip($trip_id);
   $result = array();
-
-  if ($string) {
+  if ($trip_id) {
     $query = db_select('node', 'n');
-    $query->condition('n.title', db_like($string) . '%', 'LIKE');
+    $query->condition('n.title', db_like($trip_id) . '%', 'LIKE');
     $query->condition('n.type', 'dispatch_data');
     $query->join('dispatch_planning_api_data', 'ad', 'ad.runsheet_number = n.title');
     //not required delivery pending bills of that trip
