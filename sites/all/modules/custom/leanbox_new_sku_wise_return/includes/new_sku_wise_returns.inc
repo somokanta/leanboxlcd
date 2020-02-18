@@ -55,11 +55,11 @@ function new_sku_wise_returns_form($form, &$form_state) {
   
   $trip_detail = check_trip_id_exists_or_not($distributor_id, $trip_number);
   $current_vrs_status = $trip_detail->field_vrs_status_value;
-    if ($current_vrs_status == 0 || $current_vrs_status == 6) {
-        if ($form_state['bill-wise'] == 1 && $current_vrs_status != 0) {
+    if ($current_vrs_status == '0' || $current_vrs_status == '6') {
+        if ($form_state['bill-wise'] == 1 && $current_vrs_status != 6) {
             $form_state['trip_no_error'] = 1; // Return Bill Wise Confirmation Pending
         }
-        else if (empty($form_state['bill-wise']) && $current_vrs_status != -1) {
+        else if (empty($form_state['bill-wise']) && $current_vrs_status != 0) {
             $form_state['trip_no_error'] = 1; //  Returns SKU wise Confirmation Pending
         }
     }
