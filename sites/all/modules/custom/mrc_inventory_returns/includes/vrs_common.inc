@@ -25,7 +25,12 @@ function get_current_vrs_version($trip_id, $dis_id) {
         $query->join('field_data_field_vrs_version', 'vc', 'vc.entity_id = disp_data.nid');
         $query->fields('vc', array('field_vrs_version_value'));
         $vrs_closure_id = $query->execute()->fetchField();
-        return $vrs_closure_id;
+        if (empty($vrs_closure_id)) {
+            return 0;
+        }
+        else {
+            return $vrs_closure_id;
+        }
     }
 }
 // function to fetch vrs bill items
