@@ -1594,3 +1594,39 @@ function build_quntity_mismatch_table_rows($all_trips){
   }
   return array("rows"=>$rows, "rows1"=>$rows1);
 }
+
+/*
+ * Function to send auto mailer of live tracking data
+ */
+function send_email_live_tracking_data() {
+  $distributor_id = _DISTRIBUTOR_ID;
+  
+  $today_timestamp = date("Y-m-d H:i:s");
+  
+  if($today_timestamp >= date('Y-m-d 09:00:00') && $today_timestamp <= date('Y-m-d 19:00:00')) {
+    $query = db_select('van_live_tracking', 'vlt');
+    $query->condition('vlt.distributor_id', $distributor_id, '=');
+    $query->fields('vlt', array('tracktime'));
+    $query->orderBy('vlt.tracktime', 'desc');
+    $query->range(0,1);
+    $latest_tracktime = $query->execute()->fetchField();
+    
+    $date_tracktime = date('Y-m-d H:i:s', $latest_tracktime);
+    $tracktime = new DateTime($date_tracktime);
+    $current_time = new DateTime($today_timestamp);
+    $duration = $tracktime->diff($current_time); //$duration is a DateInterval object
+    $diff =  $duration->format("%H:%I:%S");
+    $timesplit=explode(':',$diff);
+    $min=($timesplit[0]*60)+($timesplit[1])+($timesplit[2]>30?1:0);
+
+    if($min > 60) {
+      $output = '<h3>Data not received from Live Tracking Report past 1 Hour</h3>';
+
+      $params['subject'] = "Live Tracking Data";
+      $params['body'] = $output;
+      $mail_to = variable_get('live_tracking_data_to_email');
+      $from = variable_get('from_email');
+      drupal_mail('email_status', 'daily_data', $mail_to, LANGUAGE_NONE, $params, $from);
+    }
+  }
+}
