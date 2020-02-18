@@ -1639,3 +1639,26 @@ function send_email_live_tracking_data() {
     }
   }
 }
+
+
+function build_status_not_updated_table_rows($res){
+  $row1 = array();
+  if(!empty($res)){
+    foreach ($res as $val) {
+      if ($val['Bills_Count_Empty_Status'] != 0) {
+        //$row1['trip_id'] = $val['runsheet_number'];
+        //$row1['cashier_name'] = $val['fieldExecutiveName'];
+        $row1['rs_name'] = $val['field_name_value'];
+        $row1['bill_date'] = date('d-M-y', $val['bill_date']);
+        $row1['total_bills_count'] = $val['Total_Bills_Count'];
+        $row1['bill_count_empty_status'] = $val['Bills_Count_Empty_Status'];
+
+        $rows1[] = $row1;
+      }
+    } 
+  }
+  else {
+    $rows1[] = $row1;
+  }
+  return array('rows1'=>$rows1); //$output1;
+}
