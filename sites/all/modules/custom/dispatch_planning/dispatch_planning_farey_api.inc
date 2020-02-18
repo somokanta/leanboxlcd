@@ -179,7 +179,7 @@ function fetch_dispatch_planning_api_data($data) {
           // new change - added on 31 Oct, 2019
         if(!empty($data['latitude']) && !empty($data['longitude']) ){
           try{
-            $api_result = get_reverse_geocode_data($data['latitude'], $data['longitude'], $data['referenceNumber']); // call to mapmyindia api //reverse_geocode_results($data['latitude'], $data['longitude']);
+            $api_result = get_reverse_geocode_data($data['latitude'], $data['longitude'], $data['referenceNumber'],$dis_id); // call to mapmyindia api //reverse_geocode_results($data['latitude'], $data['longitude']);
             watchdog('map my india api result: ', '<pre>' . print_r($api_result, TRUE) . '</pre>');
             if(!empty($api_result)){
               $decoded_locality = $api_result[0]->locality; // area
@@ -305,12 +305,12 @@ function _get_dispatch_qty_undeliver($bill_row_id) {
 
 
 // new change - added on 31 Oct, 2019
-function get_reverse_geocode_data($latitude, $longitude, $reference_number){
+function get_reverse_geocode_data($latitude, $longitude, $reference_number,$dis_id){
   $api_result = array();
   if (!empty($latitude) && !empty($longitude)) {
         $license_key = variable_get('mapmyindia_rest_key', 'z94i9hvuqcsz7amywt76aknw8dx9o15z');
         $url = "https://apis.mapmyindia.com/advancedmaps/v1/$license_key/rev_geocode?lng=$longitude&lat=$latitude";
-        $sql_ins_id = insert_map_my_india_api_log($url, $reference_number);
+        $sql_ins_id = insert_map_my_india_api_log($url, $reference_number,$dis_id);
 //        if (trim($longitude, 0) == 1.11 || trim($latitude, 0) == 1.11) {
         if((explode('.', $longitude)[0]) <= 1 || (explode('.', $latitude)[0]) <= 1) {
             $result = '';
@@ -327,12 +327,13 @@ function get_reverse_geocode_data($latitude, $longitude, $reference_number){
     return $api_result;
 }
 
-function insert_map_my_india_api_log($url, $reference_number){
+function insert_map_my_india_api_log($url, $reference_number,$dis_id=0){
   $sql_ins_id = db_insert('map_my_india_api_log')
      ->fields(array(
         'reference_number' => $reference_number,
         'request_data' => $url,
-        'request_time' => time()
+        'request_time' => time(),
+        'distributor_id'=>$dis_id,
      ))
      ->execute();
 
