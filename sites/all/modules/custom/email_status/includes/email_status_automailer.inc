@@ -1270,8 +1270,6 @@ function get_all_active_distributors_id(){
 function send_email_not_attached_trip($receiver_email_str, $dist_ids_arr){
   $rows = array();
   $distributor_name_arr = array();
-  
-  $distributor_name = change_feeds_import_get_distributor_name($distributor_id);
   foreach ($dist_ids_arr as $key => $id_value) {
     $distributor_id = $id_value;
     $distributor_name = change_feeds_import_get_distributor_name($distributor_id);
@@ -1299,9 +1297,15 @@ function send_email_not_attached_trip($receiver_email_str, $dist_ids_arr){
     $query->fields('rs_name', array('field_name_value'));
     $all_bills = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
     $arr = build_not_attached_trip_table_rows($all_bills);
+    if(!empty($arr)){
       foreach ($arr['rows'] as $key1 => $val1) {
       $rows[] = $val1;
+      }      
     }
+    else {
+      $rows = array();
+    }
+
   }
   $multiple_distributor_name = implode(', ', $distributor_name_arr);
   $params['subject'] = "Bills Not Attached To Trip - ".$multiple_distributor_name;
@@ -1319,14 +1323,19 @@ function send_email_not_attached_trip($receiver_email_str, $dist_ids_arr){
 
 function build_not_attached_trip_table_rows($all_bills){
   $row = array();
-  foreach ($all_bills as $value) {
-    $row['rs_name'] = $value['field_name_value'];
-    $row['bill_no'] = $value['title'];
-    $row['bill_date'] = date('d-M-y', $value['field_sr_bill_date_value']);
-    $row['bill_value'] = $value['field_bill_value_value'];
-    $row['prev_trip'] = $value['field_previous_trip_value'];
+  if(!empty($all_bills)){
+    foreach ($all_bills as $value) {
+      $row['rs_name'] = $value['field_name_value'];
+      $row['bill_no'] = $value['title'];
+      $row['bill_date'] = date('d-M-y', $value['field_sr_bill_date_value']);
+      $row['bill_value'] = $value['field_bill_value_value'];
+      $row['prev_trip'] = $value['field_previous_trip_value'];
 
-    $rows[] = $row;
+      $rows[] = $row;
+    }    
+  }
+  else{
+    $rows = $row;
   }
   return array("rows"=>$rows);
 }
@@ -1375,6 +1384,7 @@ function build_not_attached_trip_table_rows($all_bills){
     //$query->orderBy('dpi.runsheet_number', 'DESC');
     $query->orderBy('dpi.bill_date', 'DESC');
     $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+    watchdog('bill-status-notipdated-query', '<pre>' . print_r($res, TRUE) . '</pre>');
     $arr = build_status_not_updated_table_rows($res);
     foreach($arr['rows1'] as $key2 => $val2){
       $rows1[] = $val2;
@@ -1409,6 +1419,7 @@ function build_not_attached_trip_table_rows($all_bills){
   $params['body'] = $output1;
   $mail_to = $receiver_email_str; //variable_get('quantity_mismatched_to_email');
   $from = variable_get('from_email');
+  watchdog('bill-status-not-updated-email-data', '<pre>' . print_r($from,$params,$mail_to,$output1, TRUE) . '</pre>');
   drupal_mail('email_status', 'daily_data', $mail_to, LANGUAGE_NONE, $params, $from);    
  }
  
@@ -1593,4 +1604,61 @@ function build_quntity_mismatch_table_rows($all_trips){
     }
   }
   return array("rows"=>$rows, "rows1"=>$rows1);
+}
+
+/*
+ * Function to send auto mailer of live tracking data
+ */
+function send_email_live_tracking_data() {
+  $distributor_id = _DISTRIBUTOR_ID;
+  
+  $today_timestamp = date("Y-m-d H:i:s");
+  if($today_timestamp >= date('Y-m-d 09:00:00') && $today_timestamp <= date('Y-m-d 19:00:00')) {
+    $query = db_select('van_live_tracking', 'vlt');
+    $query->condition('vlt.distributor_id', $distributor_id, '=');
+    $query->fields('vlt', array('tracktime'));
+    $query->orderBy('vlt.tracktime', 'desc');
+    $query->range(0,1);
+    $latest_tracktime = $query->execute()->fetchField();
+    
+    $date_tracktime = date('Y-m-d H:i:s', $latest_tracktime);
+    $tracktime = new DateTime($date_tracktime);
+    $current_time = new DateTime($today_timestamp);
+    $duration = $tracktime->diff($current_time); //$duration is a DateInterval object
+    $diff =  $duration->format("%H:%I:%S");
+    $timesplit=explode(':',$diff);
+    $min=($timesplit[0]*60)+($timesplit[1])+($timesplit[2]>30?1:0);
+    if($min > 60) {
+      $output = '<h3>Data not received from Live Tracking Report past 1 Hour</h3>';
+
+      $params['subject'] = "Live Tracking Data";
+      $params['body'] = $output;
+      $mail_to = variable_get('live_tracking_data_to_email');
+      $from = variable_get('from_email');
+      drupal_mail('email_status', 'daily_data', $mail_to, LANGUAGE_NONE, $params, $from);
+    }
+  }
+}
+
+
+function build_status_not_updated_table_rows($res){
+  $row1 = array();
+  if(!empty($res)){
+    foreach ($res as $val) {
+      if ($val['Bills_Count_Empty_Status'] != 0) {
+        //$row1['trip_id'] = $val['runsheet_number'];
+        //$row1['cashier_name'] = $val['fieldExecutiveName'];
+        $row1['rs_name'] = $val['field_name_value'];
+        $row1['bill_date'] = date('d-M-y', $val['bill_date']);
+        $row1['total_bills_count'] = $val['Total_Bills_Count'];
+        $row1['bill_count_empty_status'] = $val['Bills_Count_Empty_Status'];
+
+        $rows1[] = $row1;
+      }
+    } 
+  }
+  else {
+    $rows1[] = $row1;
+  }
+  return array('rows1'=>$rows1); //$output1;
 }
