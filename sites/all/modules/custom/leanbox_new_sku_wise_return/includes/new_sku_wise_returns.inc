@@ -755,11 +755,20 @@ function new_sku_wise_return_submit($form, &$form_state) {
     $central_distributor_id = $form_state['central_distributor_id'];
     $trip_id = $form_state['values']['trip_number'];
     $dis_id = get_distributorid_of_trip($trip_id);
+    if ($form_state['bill-wise'] == 1) {
+        $vrs_status = 0;
+    }
+    else  {
+        $vrs_status = -1;
+    }
     $selected_bill_status = $form_state['values']['bill_status'];
     $sub_putaway_group = $form_state['values']['sub_putaway_group'];
     $putaway_group = $form_state['values']['putaway_group'];
     $query = db_select('dispatch_planning_item_details', 'dpi');
     $query->join('dispatch_planning_api_data', 'ad', 'dpi.trip_bill_reference = ad.id');
+    $query->join('node', 'dispatch_data', 'dispatch_data.title = ad.runsheet_number and dispatch_data.uid = ad.distributor_id');
+    $query->join('field_data_field_vrs_status', 'vs', 'vs.entity_id = dispatch_data.nid');
+    $query->condition('vs.field_vrs_status_value', $vrs_status);
     $query->condition('ad.delivery_pending_flag', 1, '!=');
     $query->condition('ad.runsheet_number', $trip_id);
     $query->condition('ad.distributor_id', $dis_id);
@@ -774,7 +783,7 @@ function new_sku_wise_return_submit($form, &$form_state) {
       $query->condition('ad.res_status', 'undeliver', '=');
     }
     if (!empty($sub_putaway_group)) {
-      $query->join('node', 'n', 'n.title = dpi.sku_code and n.uid = ad.distributor_id');
+      $query->join('node', 'n', 'n.title = dpi.sku_code');
       $query->condition('n.type', 'sku7_code_master', '=');
       $query->join('field_data_field_sub_putaway_group', 'spg', 'spg.entity_id = n.nid');
       $query->condition('spg.field_sub_putaway_group_nid', $sub_putaway_group, '=');
@@ -782,7 +791,7 @@ function new_sku_wise_return_submit($form, &$form_state) {
     if (!empty($putaway_group) && empty($sub_putaway_group)) {
       $sub_putaway_nids = get_nids_of_selected_putaway($putaway_group, $dis_id);
 
-      $query->join('node', 'n', 'n.title = dpi.sku_code and n.uid = ad.distributor_id');
+      $query->join('node', 'n', 'n.title = dpi.sku_code');
       $query->condition('n.type', 'sku7_code_master', '=');
       $query->join('field_data_field_sub_putaway_group', 'spg', 'spg.entity_id = n.nid');
       $query->condition('spg.field_sub_putaway_group_nid', $sub_putaway_nids, 'IN');
