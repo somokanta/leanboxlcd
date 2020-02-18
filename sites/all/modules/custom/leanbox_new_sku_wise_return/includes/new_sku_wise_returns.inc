@@ -52,7 +52,21 @@ function new_sku_wise_returns_form($form, &$form_state) {
   );
   $trip_number = $form_state['input']['trip_number'];
   $distributor_id = get_distributorid_of_trip($trip_number);
-  if (!empty($trip_number) && empty($form_state['trip_no_error'])) {
+  
+  $trip_detail = check_trip_id_exists_or_not($distributor_id, $trip_number);
+  $current_vrs_status = $trip_detail->field_vrs_status_value;
+    if ($current_vrs_status == 0 || $current_vrs_status == 6) {
+        if ($form_state['bill-wise'] == 1 && $current_vrs_status != 0) {
+            $form_state['trip_no_error'] = 1; // Return Bill Wise Confirmation Pending
+        }
+        else if (empty($form_state['bill-wise']) && $current_vrs_status != -1) {
+            $form_state['trip_no_error'] = 1; //  Returns SKU wise Confirmation Pending
+        }
+    }
+    else {
+        $form_state['trip_no_error'] = 1;
+    }
+    if (!empty($trip_number) && empty($form_state['trip_no_error'])) {
     $putaway_initial_option = array('' => 'Select');
     $putaway_group_options = get_all_putaway_groups($distributor_id);
     if (!empty($putaway_group_options)) {

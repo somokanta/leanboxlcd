@@ -47,7 +47,7 @@ function sku_wise_trip_id_autocomplete($trip_id) {
     $query = db_select('node', 'n');
     $query->condition('n.title', db_like($trip_id) . '%', 'LIKE');
     $query->condition('n.type', 'dispatch_data');
-    $query->join('dispatch_planning_api_data', 'ad', 'ad.runsheet_number = n.title');
+    $query->join('dispatch_planning_api_data', 'ad', 'ad.runsheet_number = n.title and ad.distributor_id = n.uid');
     //not required delivery pending bills of that trip
     $query->condition('ad.delivery_pending_flag' ,1,'!=');
     $query->fields('n', array('title'));
