@@ -756,10 +756,10 @@ function new_sku_wise_return_submit($form, &$form_state) {
     $trip_id = $form_state['values']['trip_number'];
     $dis_id = get_distributorid_of_trip($trip_id);
     if ($form_state['bill-wise'] == 1) {
-        $vrs_status = 0;
+        $vrs_status = '0';
     }
     else  {
-        $vrs_status = -1;
+        $vrs_status = '-1';
     }
     $selected_bill_status = $form_state['values']['bill_status'];
     $sub_putaway_group = $form_state['values']['sub_putaway_group'];
