@@ -1181,9 +1181,8 @@ function _edit_trip_delivered_callback_form_submit($form, &$form_state) {
    $bill_number = $form_state['values']['bill_number'];
    // dpm($bill_number, '$bill_number');
    // get logged in users rs id
-   $user_id = $GLOBALS['user']->uid;
-   $dis_id =  $form_state['values']['dis_id'];
-   $rs_code = dispatch_planning_get_rscode_using_uid($dis_id);
+   $dis_id = get_distributorid_of_trip($trip_number);
+   $rs_code = get_facility_code($dis_id);
    // dpm($rs_code, '$rs_code');
    if (!empty($trip_number) && !empty($bill_number) && !empty($dis_id)) {
       $order_status = $form_state['values']['order_status'];
