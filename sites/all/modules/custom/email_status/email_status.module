@@ -125,7 +125,15 @@ function email_status_menu() {
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
     'file' => 'includes/email_status_automailer.inc',
-  );    
+  );
+  
+  $items['email-live-tracking-data'] = array(
+    'title' => 'Send Email of Live Tracking Data',
+    'page callback' => 'send_email_live_tracking_data',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'includes/email_status_automailer.inc',
+  );
   return $items;
 }
 
@@ -329,7 +337,17 @@ function email_status_email_form($form, $form_state) {
     '#required' => TRUE,
     '#size' => 60,
     '#maxlength' => 2048,
-  );     
+  ); 
+  
+  $form['live_tracking_data_to_email'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Receiver'),
+    '#description' => l($click_here.t('Live Tracking Data'), 'email-live-tracking-data',$target),     
+    '#default_value' => variable_get('live_tracking_data_to_email', ''),
+    '#required' => TRUE,
+    '#size' => 60,
+    '#maxlength' => 2048,
+  );  
 
   return system_settings_form($form);
 }
