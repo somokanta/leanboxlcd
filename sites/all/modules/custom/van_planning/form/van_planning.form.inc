@@ -1984,6 +1984,8 @@ function _get_van_planning_bill_wise_data($bill_area_code, $bill_pl_group, $bill
 function _get_van_planning_bill_wise_data1($bill_area_code, $bill_pl_group, $bill_wise_range_op, $bill_wise_value, $bill_wise_weight, $bill_wise_volume, $bill_wise_rs_kg, $bill_wise_rs_cft, $bill_wise_array, $child_bill_wise_date = '', $user_selected_distributor_id, $central_distributor_id, $rs_distributor_id = array()) {
   global $table_name;
   global $table_column;
+  //$table_name = 'field_data_field_distributor_name';
+  //$table_column = 'field_distributor_name_value';
   if (!empty($user_selected_distributor_id)) {
     $dis_ids = array($user_selected_distributor_id);
   }
@@ -1991,7 +1993,6 @@ function _get_van_planning_bill_wise_data1($bill_area_code, $bill_pl_group, $bil
     $dis_ids = $rs_distributor_id;
   }
   $user_id = $GLOBALS['user']->uid;
-  $dis_id = change_feeds_import_get_distributor_id($user_id);
 
   $billing_start_date = '';
   $billing_end_date = '';
@@ -2038,7 +2039,7 @@ function _get_van_planning_bill_wise_data1($bill_area_code, $bill_pl_group, $bil
 
   $query->leftJoin('field_data_field_trip_id_reference', 'ft', 'ft.entity_id = n3.nid');
   $query->leftJoin('field_data_field_delivery_pending', 'dp', 'n3.nid = dp.entity_id');
-
+  $query->leftjoin($table_name, 'rs', 'n.uid = rs.entity_id');
 //  $db_or = db_or();
 //  $db_or->isNull('ft.field_trip_id_reference_nid');
 //  $db_or->condition('dp.field_delivery_pending_value', 1);
