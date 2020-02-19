@@ -73,10 +73,8 @@ function _delivered_trip_data_download_callback() {
 
    if (isset($_GET['trip_number']) && !empty($_GET['trip_number'])) {
       $trip_number = $_GET['trip_number'];
-      // get logged in users rs id
-      $user_id = $GLOBALS['user']->uid;
-      $rs_code = dispatch_planning_get_rscode_using_uid($user_id);
-      $trip_details = _get_farey_delivered_trip_details($trip_number, $rs_code);
+      $distributor_id = get_distributorid_of_trip($trip_number);
+      $trip_details = _get_farey_delivered_trip_details($trip_number, $distributor_id);
       
       $header = array('SKU7Code', 'Description', 'Free Product', 'Value/Unit', 'Sum of Net Sales Qty', 'Actual Qty', 'Returned Qty');
       $rows = $trip_details['rows'];
@@ -99,10 +97,7 @@ function _delivered_trip_data_download_callback() {
  * @param type $trip_number
  * @param type $rs_code
  */
-function _get_farey_delivered_trip_details($trip_number, $rs_code) {
-   global $user;
-   $dis_id = change_feeds_import_get_distributor_id($user->uid);
-
+function _get_farey_delivered_trip_details($trip_number, $dis_id) {
    $query = db_select('dispatch_planning_item_details', 'id');
    $query->join('node', 'n', 'n.title = id.sku_code');
    $query->condition('n.uid', $dis_id);
@@ -179,7 +174,7 @@ function _edit_trip_delivered_callback_form($form, &$form_state) {
      ),
    );
    //global $user;
-  $trip_number = $form_state['input']['trip_number'];
+    $trip_number = $form_state['input']['trip_number'];
     //$dis_id = change_feeds_import_get_distributor_id($user->uid);
     $dis_id = get_distributorid_of_trip($trip_number);
     $rs_code = get_rs_code_of_distributor($dis_id);
@@ -971,7 +966,7 @@ function _edit_trip_delivered_callback_form_validate($form, &$form_state) {
   //$user_id = $GLOBALS['user']->uid;
   //$rs_code = dispatch_planning_get_rscode_using_uid($user_id);
   $trip_number = $form_state['values']['trip_number'];
-  $dis_id = $form_state['values']['dis_id'];
+  $dis_id = get_distributorid_of_trip($trip_number);
   $bill_number = $form_state['values']['bill_number'];
   $bill_details = _get_noneditable_delivered_trip_details($trip_number, $rs_code, $bill_number,$dis_id);
   

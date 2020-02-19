@@ -84,7 +84,8 @@ class facility_code_filter_handler_term_hierarchy extends views_handler_field {
             $terms_obj = entity_load('taxonomy_term', FALSE, array('vid' => $vocabulary->vid));
             if (!empty($terms_obj)) {
                 foreach ($terms_obj as $key => $value) {
-                    $facility[$value->tid] = $value->name;
+                   //$facility[$value->tid] = $value->name;
+                    $facility[$value->tid] = $value->field_facility_name[LANGUAGE_NONE][0]['value'];
                 }
                 $facility = array('' => 'Select') + $facility;
             }
