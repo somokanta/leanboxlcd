@@ -123,6 +123,9 @@ function _van_planning_callback_form($form, &$form_state) {
     $selected_distributor_id = $dis_id;
     $form_state['central_distributor_id'] = $central_distributor_id;
   }
+
+  $form_state['central_distributor_id'] = $central_distributor_id;
+
   $form['editable_vp']['vp']['outlet_area_hook_grp'] = array(
     '#type' => 'textfield',
     '#title' => t('Area Hook Group'),
@@ -132,7 +135,7 @@ function _van_planning_callback_form($form, &$form_state) {
       'method' => 'replace',
       'effect' => 'fade',
     ),
-    '#autocomplete_path' => 'outlet-areahookgrp-master/autocomplete',
+    '#autocomplete_path' => 'outlet-areahookgrp-master/autocomplete/' . $selected_distributor_id,
     '#prefix' => '<div class="form_row">',
   );
   $form['editable_vp']['vp']['area_code'] = array(
@@ -144,7 +147,7 @@ function _van_planning_callback_form($form, &$form_state) {
       'method' => 'replace',
       'effect' => 'fade',
     ),
-    '#autocomplete_path' => 'areacode-master/autocomplete',
+    '#autocomplete_path' => 'areacode-master/autocomplete' . '/' . $central_distributor_id,
     '#prefix' => '<div class="form_row">',
   );
   $form['editable_vp']['vp']['pl_group'] = array(
@@ -156,7 +159,7 @@ function _van_planning_callback_form($form, &$form_state) {
       'method' => 'replace',
       'effect' => 'fade',
     ),
-    '#autocomplete_path' => 'plgroup-master/autocomplete',
+    '#autocomplete_path' => 'plgroup-master/autocomplete' . '/' . $selected_distributor_id,
   );
   $form['editable_vp']['vp']['van_pl_group'] = array(
     '#type' => 'textfield',
@@ -795,6 +798,7 @@ function _van_planning_callback_form($form, &$form_state) {
         $bill_wise_volume = $form_state['input']['bill_wise_volume'];
         $bill_wise_rs_kg = $form_state['input']['bill_wise_rs_kg'];
         $bill_wise_rs_cft = $form_state['input']['bill_wise_rs_cft'];
+        $bil_distributor_id = $form_state['input']['bill_distributor_id'];
         if (!empty($bill_area_code) ||
           !empty($bill_pl_group) ||
           !empty($bill_wise_range_op) ||
@@ -802,6 +806,7 @@ function _van_planning_callback_form($form, &$form_state) {
           !empty($bill_wise_weight) ||
           !empty($bill_wise_volume) ||
           !empty($bill_wise_rs_kg) ||
+          !empty($bil_distributor_id) ||
           !empty($bill_wise_rs_cft)) {
           $bill_wise_input_data = TRUE;
         }
@@ -868,7 +873,7 @@ function _van_planning_callback_form($form, &$form_state) {
               'method' => 'replace',
               'effect' => 'fade',
             ),
-            '#autocomplete_path' => 'areacode-master/autocomplete',
+            '#autocomplete_path' => 'areacode-master/autocomplete' . '/' . $central_distributor_id,
             '#name' => 'child_bill_area_code',
             '#prefix' => '<div class="form_row">',
           );
@@ -990,6 +995,7 @@ function _van_planning_callback_form($form, &$form_state) {
           $bill_wise_volume = $form_state['input']['child_bill_wise_volume'];
           $bill_wise_rs_kg = $form_state['input']['child_bill_wise_rs_kg'];
           $bill_wise_rs_cft = $form_state['input']['child_bill_wise_rs_cft'];
+          $add_bill_child_distributor_id = $form_state['input']['child_bill_distributor_id'];
           $bill_wise_input_data = FALSE;
           if (!empty($bill_area_code) ||
             !empty($bill_pl_group) ||
@@ -999,6 +1005,7 @@ function _van_planning_callback_form($form, &$form_state) {
             !empty($bill_wise_weight) ||
             !empty($bill_wise_volume) ||
             !empty($bill_wise_rs_kg) ||
+            !empty($add_bill_child_distributor_id) ||
             !empty($bill_wise_rs_cft)) {
             $bill_wise_input_data = TRUE;
           }
@@ -1618,9 +1625,6 @@ function van_planning_ajax_submit($area_codes, $van_pl_group, $pl_group, $bill_d
   else {
     $dis_ids = $rs_distributor_ids;
   }
- 
-  $user_id = $GLOBALS['user']->uid;
-  $dis_id = change_feeds_import_get_distributor_id($user_id);
   $no_of_days = variable_get('van_planning_dates', 15);
   $billing_start_date = strtotime(date('Y-m-d') . "- $no_of_days days"); // @todo replace 15 this line
   $billing_end_date = strtotime(date("Y-m-d"));
@@ -1630,8 +1634,7 @@ function van_planning_ajax_submit($area_codes, $van_pl_group, $pl_group, $bill_d
   $query->leftjoin('field_data_field_area_code', 'ac', 'ac.entity_id = n.nid');
   $query->condition('n.uid', $dis_ids,'IN');
   $query->leftjoin($table_name, 'rs', 'n.uid = rs.entity_id');
-  $query->addExpression("rs.$table_column", 'rs_name');
-   
+    
 
   // join area code master
 
@@ -1716,6 +1719,7 @@ function van_planning_ajax_submit($area_codes, $van_pl_group, $pl_group, $bill_d
   // join sku7 code master
   $query->addExpression('ROUND(SUM(cb.Derived_NET_SALES_KGS))', 'sum_kg');
   $query->addExpression('ROUND(SUM(cb.Derived_NET_SALES_VOLUME))', 'sum_cft');
+  $query->addExpression("rs.$table_column", 'rs_name');
 
   // join Party Pack Master (Van pl group)
   if (!empty($van_pl_group)) {
