@@ -63,7 +63,7 @@ function change_feeds_import_create_confirm_content($id) {
     $message .= "Actual First inserted id: $return_true and insert time $from_time - $to_time .";
     $params['subject'] = "Batch Proccess Billing Upload count Mismatch";
     $params['body'] = $message;
-    $mail_to = "abhishek.r@iksula.com";
+    $mail_to = "shylaja.r@iksula.com";
     $from = "MIS.HELPDESK@leanbox.in";
     drupal_mail('adhoc_task', 'bill_date_missing', $mail_to, LANGUAGE_NONE, $params, $from);
 
@@ -317,7 +317,7 @@ function change_feeds_import_finished($success, $results, $operations) {
 
     $params['subject'] = "Batch Proccess Billing Upload Error";
     $params['body'] = $msg;
-    $mail_to = "abhishek.r@iksula.com";
+    $mail_to = "shylaja.r@iksula.com";
     $from = "MIS.HELPDESK@leanbox.in";
     drupal_mail('adhoc_task', 'bill_date_missing', $mail_to, LANGUAGE_NONE, $params, $from);
   }

@@ -449,7 +449,7 @@ function get_notes_denominations() {
     $result = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
     return $result; */
   $result = array();  
-  $distributor_id = get_uid_by_username('subadmin');
+  $distributor_id = get_uid_by_role('sub_admin');
   if (!empty($distributor_id)) {
     $query = db_query("SELECT distinct CAST(title AS UNSIGNED) AS title,nid  FROM {node}"
       . " WHERE type = 'notes_denominations'  and status =1 and node.uid = $distributor_id order by title desc");

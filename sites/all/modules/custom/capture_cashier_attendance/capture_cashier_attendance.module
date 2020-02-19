@@ -112,12 +112,16 @@ function fetch_cashier_attendance_api_data($cashier_attendance_data) {
     update_cashier_attendance_api_log($sql_ins_id, $result['flag']);
     return $result;
 }
-
-function get_uid_by_username($user_name) {
-    $res = array();
-    if (!empty($user_name)) {
+// Will create first user of corresponding role
+function get_uid_by_role($role_name) {
+    $res = '';
+    if (!empty($role_name)) {
         $query = db_select('users', 'u');
-        $query->condition('u.name', $user_name);
+        $query->innerJoin('users_roles', 'ur', 'ur.uid = u.uid');
+        $query->join('role', 'role', 'role.rid = ur.rid');
+        $query->condition('role.name', $role_name, '=');
+        $query->orderBy('u.created','asc');
+        $query->range(0,1);
         $query->fields('u', array('uid'));
         $res = $query->execute()->fetchField();
     }
