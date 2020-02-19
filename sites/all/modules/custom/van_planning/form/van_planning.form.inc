@@ -638,7 +638,8 @@ function _van_planning_callback_form($form, &$form_state) {
       'rs_per_sum_kg' => array('data' => t('Rs/Kg')),
       'rs_per_sum_cft' => array('data' => t('Rs/Cft')),
       'party_code_val'=>array('data'=>t('Party Code')),//NEWFIELD
-      'party_name_val'=>array('data'=>t('Party Name'))
+      'party_name_val'=>array('data'=>t('Party Name')),
+      'rs_name' => array('data' => t('Distributor Name'))
     );
 
     // find selected van no in popup
@@ -1019,6 +1020,7 @@ function _van_planning_callback_form($form, &$form_state) {
             'rs_per_sum_cft' => array('data' => t('Rs/Cft')),
             'party_code_val'=>array('data'=>t('Party Code')),//NEWFIELD
             'party_name_val'=>array('data'=>t('Party Name')),
+            'rs_name' => array('data' => t('Distributor Name')),
             'bill_group' => array('data' => t('bill_group'), 'class' => array('bill_no_val')),
           );
           // show result in pop up's pop up form
@@ -1627,6 +1629,9 @@ function van_planning_ajax_submit($area_codes, $van_pl_group, $pl_group, $bill_d
   $query->condition('n.type', 'hul_code_master');
   $query->leftjoin('field_data_field_area_code', 'ac', 'ac.entity_id = n.nid');
   $query->condition('n.uid', $dis_ids,'IN');
+  $query->leftjoin($table_name, 'rs', 'n.uid = rs.entity_id');
+  $query->addExpression("rs.$table_column", 'rs_name');
+   
 
   // join area code master
 
@@ -1771,6 +1776,7 @@ function van_planning_ajax_submit($area_codes, $van_pl_group, $pl_group, $bill_d
       'rs_per_sum_cft' => round($val['bill_value'] / $val['sum_cft'], 2),
       'party_code_val'=>$val['party_code_val'],//NEWFIELD
       'party_name_val'=>$val['party_name_val'],
+      'rs_name' => $val['rs_name'],
       'bill_distributor_id'=>$val['bill_distributor_id'],  
     );
 
@@ -2137,6 +2143,7 @@ function _get_van_planning_bill_wise_data1($bill_area_code, $bill_pl_group, $bil
       'rs_per_sum_cft' => round($val['bill_value'] / $val['sum_cft'], 2),
       'party_code_val'=>$val['party_code_val'],//NEWFIELD
       'party_name_val'=>$val['party_name_val'],
+      'rs_name' => $val['rs_name'],
       'bill_distributor_id'=>$val['bill_distributor_id'],
       );
 
