@@ -2301,9 +2301,9 @@ function _create_van_validate($form, &$form_state) {
   $data = $form_state['values']['vp_final_table'];
  // watchdog('van_table_data',print_r(json_decode($form_state['complete form']['submit_vp']['vp_final_table']['#rows']['a']['bill_no']['data-value'])),TRUE);
   //watchdog('submitted_data',print_r($form_state,TRUE));
-   $form_state['error_occur'] = 1;
+  $form_state['error_occur'] = 1;
   $rs_code = get_rs_code_of_distributor($dis_id);
-  if (!empty($data) && empty($dis_id)) {
+  if (!empty($data)) {
         foreach ($data as $van => $val1) {
             $disp_planning[$van]['bill_array'] = json_decode($form_state['complete form']['submit_vp']['vp_final_table']['#rows'][$van]['bill_no']['data-value'], 1);
             $sales_nids = array_keys($disp_planning[$van]['bill_array']);
