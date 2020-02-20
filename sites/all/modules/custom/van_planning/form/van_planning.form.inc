@@ -110,7 +110,8 @@ function _van_planning_callback_form($form, &$form_state) {
         'method' => 'replace',
         'effect' => 'fade',
       ),
-      '#prefix' => '<div class="form_row">',
+      '#prefix' => '<div class="form_row"><div style="font-color:red;">',
+      '#suffix'=>'</div>'
     );
     $selected_distributor_id = $form_state['values']['distributor_id'];
     $central_distributor_id = $dis_id;
