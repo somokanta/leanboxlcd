@@ -6245,8 +6245,216 @@ function dispatch_planning_views_data() {
       'handler' => 'field_photo_cheque_handler',
     ),
   );
+  
+  // ========= Van Planning API to SDR App START ============
 
-  return $data;
+    $data['sdr_app_log']['table']['group'] = t('SDR App Log');
+    $data['sdr_app_log']['table']['base'] = array(
+        'title' => t('SDR App Log'),
+        'help' => t('SDR App Log'),
+    );
+
+    $data['sdr_app_log']['id'] = array(
+        'title' => t('ID'),
+        'help' => t('The record ID.'),
+        'field' => array(
+            'handler' => 'views_handler_field_numeric',
+        ),
+        'sort' => array(
+            'handler' => 'views_handler_sort',
+        ),
+        'filter' => array(
+            'handler' => 'views_handler_filter_numeric',
+        ),
+    );
+
+    $data['sdr_app_log']['request_data'] = array(
+        'title' => t('Request Data'),
+        'help' => t('Request Data'),
+        'field' => array(
+            'handler' => 'views_handler_field',
+        ),
+        'sort' => array(
+            'handler' => 'views_handler_sort',
+        ),
+        'filter' => array(
+            'handler' => 'views_handler_filter_string',
+        ),
+    );
+
+    $data['sdr_app_log']['response_data'] = array(
+        'title' => t('Response Data'),
+        'help' => t('Response Data'),
+        'field' => array(
+            'handler' => 'views_handler_field',
+        ),
+        'sort' => array(
+            'handler' => 'views_handler_sort',
+        ),
+        'filter' => array(
+            'handler' => 'views_handler_filter_string',
+        ),
+    );
+
+    $data['sdr_app_log']['request_time'] = array(
+        'title' => t('Request Time'),
+        'help' => t('Request Time'),
+        'field' => array(
+            'handler' => 'views_handler_field_date',
+            'click sortable' => TRUE,
+        ),
+        'filter' => array(
+            'handler' => 'views_handler_filter_date',
+        ),
+        'argument' => array(
+            'handler' => 'views_handler_filter_date',
+        ),
+        'sort' => array(
+            'handler' => 'views_handler_sort_date',
+        ),
+    );
+
+    $data['sdr_app_log']['response_time'] = array(
+        'title' => t('Response Time'),
+        'help' => t('Response Time'),
+        'field' => array(
+            'handler' => 'views_handler_field_date',
+            'click sortable' => TRUE,
+        ),
+        'filter' => array(
+            'handler' => 'views_handler_filter_date',
+        ),
+        'argument' => array(
+            'handler' => 'views_handler_filter_date',
+        ),
+        'sort' => array(
+            'handler' => 'views_handler_sort_date',
+        ),
+    );
+
+    $data['sdr_app_log']['trip_id'] = array(
+        'title' => t('Trip ID'),
+        'help' => t('Trip ID'),
+        'field' => array(
+            'handler' => 'views_handler_field',
+            'click sortable' => TRUE,
+        ),
+        'sort' => array(
+            'handler' => 'views_handler_sort',
+        ),
+        'filter' => array(
+            'handler' => 'views_handler_filter_string',
+        ),
+        'argument' => array(
+            'handler' => 'views_handler_argument_string',
+        ),
+    );
+
+    $data['sdr_app_log']['distributor_id'] = array(
+        'title' => t('Distributor ID'),
+        'help' => t('Distributor ID'),
+        'field' => array(
+            'handler' => 'views_handler_field',
+        ),
+        'sort' => array(
+            'handler' => 'views_handler_sort',
+        ),
+        'filter' => array(
+            'handler' => 'views_handler_filter_string',
+        ),
+    );
+
+    $data['sdr_app_log_preprocess']['table']['group'] = t('SDR App Preprocess');
+    $data['sdr_app_log_preprocess']['table']['base'] = array(
+        'title' => t('SDR App Preprocess'),
+        'help' => t('SDR App Preprocess'),
+    );
+
+    $data['sdr_app_log_preprocess']['id'] = array(
+        'title' => t('ID'),
+        'help' => t('The record ID.'),
+        'field' => array(
+            'handler' => 'views_handler_field_numeric',
+        ),
+        'sort' => array(
+            'handler' => 'views_handler_sort',
+        ),
+        'filter' => array(
+            'handler' => 'views_handler_filter_numeric',
+        ),
+    );
+
+    $data['sdr_app_log_preprocess']['trip_id'] = array(
+        'title' => t('Trip ID'),
+        'help' => t('Trip ID'),
+        'field' => array(
+            'handler' => 'views_handler_field',
+            'click sortable' => TRUE,
+        ),
+        'sort' => array(
+            'handler' => 'views_handler_sort',
+        ),
+        'filter' => array(
+            'handler' => 'views_handler_filter_string',
+        ),
+        'argument' => array(
+            'handler' => 'views_handler_argument_string',
+        ),
+    );
+
+    $data['sdr_app_log_preprocess']['distributor_id'] = array(
+        'title' => t('Distributor ID'),
+        'help' => t('Distributor ID'),
+        'field' => array(
+            'handler' => 'views_handler_field',
+        ),
+        'sort' => array(
+            'handler' => 'views_handler_sort',
+        ),
+        'filter' => array(
+            'handler' => 'views_handler_filter_string',
+        ),
+    );
+
+    $data['sdr_app_log_preprocess']['created_date'] = array(
+        'title' => t('Created Date'),
+        'help' => t('Created Date'),
+        'field' => array(
+            'handler' => 'views_handler_field_date',
+            'click sortable' => TRUE,
+        ),
+        'sort' => array(
+            'handler' => 'views_handler_sort_date',
+        ),
+        'filter' => array(
+            'handler' => 'views_handler_filter_date',
+        ),
+        'argument' => array(
+            'handler' => 'views_handler_filter_date',
+        ),
+    );
+
+    $data['sdr_app_log_preprocess']['flag'] = array(
+        'title' => t('Trip Flag'),
+        'help' => t('Trip Flag'),
+        'field' => array(
+            'handler' => 'views_handler_field',
+            'click sortable' => TRUE,
+        ),
+        'sort' => array(
+            'handler' => 'views_handler_sort',
+        ),
+        'filter' => array(
+            'handler' => 'views_handler_filter_string',
+        ),
+        'argument' => array(
+            'handler' => 'views_handler_argument_string',
+        ),
+    );
+
+    // ======== Van Planning API to SDR App END ===========
+
+    return $data;
 }
 
 /**
