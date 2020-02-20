@@ -2299,7 +2299,7 @@ function _create_van_validate($form, &$form_state) {
   $trip_execution_date = strtotime($form_state['values']['trip_execution_date']);
 
   $data = $form_state['values']['vp_final_table'];
-  watchdog('submitted_data',print_r($form_state['values'],TRUE));
+  watchdog('van_table_data',print_r(json_decode($form_state['complete form']['submit_vp']['vp_final_table']['#rows']['a']['bill_no']['data-value']), 1),TRUE);
   //watchdog('submitted_data',print_r($form_state,TRUE));
    $form_state['error_occur'] = 1;
   $rs_code = get_rs_code_of_distributor($dis_id);
