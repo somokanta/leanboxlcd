@@ -106,7 +106,7 @@
                     }
                 }
                 bill_status_undeliver_filter();
-            }
+            } 
 
             function bill_status_filter() {
                 var input, filter, table, tr, td, i, check_all;
