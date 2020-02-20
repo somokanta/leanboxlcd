@@ -2300,7 +2300,7 @@ function _create_van_validate($form, &$form_state) {
 
   $data = $form_state['values']['vp_final_table'];
   watchdog('submitted_data',print_r($form_state['values'],TRUE));
-  watchdog('submitted_data',print_r($form_state,TRUE));
+  //watchdog('submitted_data',print_r($form_state,TRUE));
    $form_state['error_occur'] = 1;
   $rs_code = get_rs_code_of_distributor($dis_id);
   if (!empty($data) && empty($dis_id)) {
