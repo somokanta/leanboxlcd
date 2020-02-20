@@ -2002,7 +2002,7 @@ function _get_van_planning_bill_wise_data1($bill_area_code, $bill_pl_group, $bil
   else {
     $dis_ids = $rs_distributor_id;
   }
-  $user_id = $GLOBALS['user']->uid;
+  //$user_id = $GLOBALS['user']->uid;
 
   $billing_start_date = '';
   $billing_end_date = '';
@@ -2063,8 +2063,6 @@ function _get_van_planning_bill_wise_data1($bill_area_code, $bill_pl_group, $bil
   //Bill Status should not be cancel or Discard or anything
   $query->leftJoin('field_data_field_bill_status', 'bs', 'bs.entity_id = n3.nid');
   $query->isNull('bs.field_bill_status_value');
-  $query->addExpression("rs.$table_column", 'rs_name');
-  
   $query->join('field_data_field_sr_bill_date', 'sbd', 'sbd.entity_id = n3.nid');
   if (!empty($child_bill_wise_date)) {
     $query->condition('sbd.field_sr_bill_date_value', $child_bill_wise_date);
@@ -2086,7 +2084,7 @@ function _get_van_planning_bill_wise_data1($bill_area_code, $bill_pl_group, $bil
   $query->addExpression('n3.uid', 'bill_distributor_id');
 
   $query->addExpression('ROUND(bv.field_bill_net_sales_value)', 'bill_value');
-
+  $query->addExpression("rs.$table_column", 'rs_name');
 
   // custom billing data
   $query->join('custom_billing_data', 'cb', 'cb.bill_number = n3.title');
@@ -2122,6 +2120,7 @@ function _get_van_planning_bill_wise_data1($bill_area_code, $bill_pl_group, $bil
     }
   }
   $res = $query->execute()->fetchAll(PDO::FETCH_GROUP | PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
+  watchdog('van-bills',print_r($res,TRUE));
   foreach ($res as $key => $val) {
     if (isset($val['bill_value'])) {
 
