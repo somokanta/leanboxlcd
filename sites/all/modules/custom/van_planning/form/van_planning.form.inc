@@ -102,6 +102,7 @@ function _van_planning_callback_form($form, &$form_state) {
     $form['editable_vp']['vp']['distributor_id'] = array(
       '#type' => 'select',
       '#title' => t('Distributor Name'),
+      '#required' => TRUE,
       '#options' => array('' => t('Select')) + $child_distributors,
       '#ajax' => array(
         'wrapper' => 'van-itemlist-div',
@@ -2120,7 +2121,6 @@ function _get_van_planning_bill_wise_data1($bill_area_code, $bill_pl_group, $bil
     }
   }
   $res = $query->execute()->fetchAll(PDO::FETCH_GROUP | PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
-  watchdog('van-bills',print_r($res,TRUE));
   foreach ($res as $key => $val) {
     if (isset($val['bill_value'])) {
 
