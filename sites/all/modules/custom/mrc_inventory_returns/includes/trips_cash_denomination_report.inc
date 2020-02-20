@@ -32,25 +32,27 @@ function trips_denominations_form($form, &$form_state){
   
   return $form;
 }
+
 function _get_vrs_trip_ids_using_dispatch_date($dispatch_date) {
     $res = array();
-   if (!empty($dispatch_date)) {
-      global $user;
-      $dis_id = change_feeds_import_get_distributor_id($user->uid);
-      $query = db_select('node', 'n');
-      $query->condition('n.type', 'dispatch_data');
-      $query->condition('n.uid', $dis_id);
-      $query->join('field_data_field_dispatch_date', 't', 't.entity_id = n.nid');
-      $query->join('field_data_field_vrs_status', 'vs', 'vs.entity_id = n.nid');
-      $query->join('vrs_trip_denominations', 'deno', 'deno.trip_id = n.title');
-      $query->condition('deno.distributor_id', $dis_id);
-      $vrs_status = array('1','0');
-      $query->condition('vs.field_vrs_status_value', $vrs_status,'NOT IN');
-      $query->condition('t.field_dispatch_date_value', $dispatch_date);
-      $query->fields('n', array('title'));
-      $res = $query->execute()->fetchAllKeyed(0, 0);
-   }
-   return $res;
+    if (!empty($dispatch_date)) {
+        global $user;
+        //$dis_id = change_feeds_import_get_distributor_id($user->uid);
+        $dis_ids = get_distributor_ids();
+        $query = db_select('node', 'n');
+        $query->condition('n.type', 'dispatch_data');
+        $query->condition('n.uid', $dis_ids,'IN');
+        $query->join('field_data_field_dispatch_date', 't', 't.entity_id = n.nid');
+        $query->join('field_data_field_vrs_status', 'vs', 'vs.entity_id = n.nid');
+        $query->join('vrs_trip_denominations', 'deno', 'deno.trip_id = n.title');
+        $query->condition('deno.distributor_id', $dis_ids,'IN');
+        $vrs_status = array('1', '0');
+        $query->condition('vs.field_vrs_status_value', $vrs_status, 'NOT IN');
+        $query->condition('t.field_dispatch_date_value', $dispatch_date);
+        $query->fields('n', array('title'));
+        $res = $query->execute()->fetchAllKeyed(0, 0);
+    }
+    return $res;
 }
 
 function trips_denominations_form_validate($form, &$form_state) {
@@ -70,13 +72,21 @@ function trips_denominations_form_submit($form,&$form_state) {
   $dispatch_date = $form_state['values']['dispatch_date'];
   global $user;  
   $dis_id = change_feeds_import_get_distributor_id($user->uid);
+  $logged_in_dis_id = $dis_id;
+  if (in_array("central_distributor", $user->roles)) {
+        $central_distributor_id = $logged_in_dis_id;
+  }
+  else {
+        $central_distributor_id = get_central_distributor_id($logged_in_dis_id);
+  }
   if (!empty($dispatch_date)) {
     $trip_ids =  _get_vrs_trip_ids_using_dispatch_date($dispatch_date);
     $note_denominations = get_notes_denominations(); 
+    $distributor_ids = get_distributor_ids();
     if(!empty($trip_ids)) {
-      $vrs_trips_denominations =  get_vrs_trips_denominations($trip_ids,$dis_id);
-      $coins_sum = get_vrs_coins_value($trip_ids,$dis_id);
-      $deno_details = get_vrs_trips_deno_details($trip_ids,$dis_id);
+      $vrs_trips_denominations =  get_vrs_trips_denominations($trip_ids,$distributor_ids);
+      $coins_sum = get_vrs_coins_value($trip_ids,$distributor_ids);
+      $deno_details = get_vrs_trips_deno_details($trip_ids,$distributor_ids);
       $counter = count($note_denominations) + 2;
       if (!empty($deno_details)) {
           $table2 = '<table width="100%" border="1"><tr><th>Trip ID</th>';

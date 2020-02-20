@@ -4,9 +4,9 @@
   echo "you have permission";
   } */
 
-function check_hul_address_confirmed_or_not($party_code = array()) {
-    global $user;
-    $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+function check_hul_address_confirmed_or_not($party_code = array(),$distributor_id) {
+    //global $user;
+    //$distributor_id = change_feeds_import_get_distributor_id($user->uid);
     $res = array();
     if (!empty($party_code)) {
         $query = db_select('node', 'n');

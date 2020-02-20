@@ -2834,7 +2834,16 @@ function dispatch_planning_views_data() {
     'argument' => array(
       'handler' => 'views_handler_argument_string',
     ),
-  );
+    'relationship' => array(
+            'title' => t('Distributor ID to Distributor Name'),
+            'help' => t("Distributor ID to Distributor Name"),
+            'handler' => 'views_handler_relationship',
+            'base' => 'users',
+            //'entity type' => 'file',
+            'base field' => 'uid',
+            'label' => t('Distributor Name relation !field_name', array('!field_name' => 'distributor_id')),
+        ),
+    );
   $data['dispatch_planning_api_data']['res_runsheetNo'] = array(
     'title' => t('DP res_runsheetNo'),
     'help' => t('Dispatch Planning res_runsheetNo'),
@@ -3101,7 +3110,7 @@ function dispatch_planning_views_data() {
       'base field' => 'nid',
       'extra' => array(
         array('field' => 'type', 'value' => 'dispatch_planning_reason_master'),
-        array('field' => 'uid', 'left_field' => 'distributor_id'),
+       // array('field' => 'uid', 'left_field' => 'distributor_id'),
       )),
   );
 
@@ -4130,6 +4139,20 @@ function dispatch_planning_views_data() {
     ),
     'sort' => array(
       'handler' => 'views_handler_sort_date',
+    ),
+  );
+  
+    $data['map_my_india_api_log']['distributor_id'] = array(
+    'title' => t('Distributor ID'),
+    'help' => t('Distributor ID'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
     ),
   );
 
@@ -6207,8 +6230,7 @@ function dispatch_planning_views_data() {
       'handler' => 'total_travel_time_handler',
     ),
   );
-  
-  $data['views']['photo_signed_bill_handler'] = array(
+    $data['views']['photo_signed_bill_handler'] = array(
     'title' => t('Photo Signed Bill Handler'),
     'help' => t('Photo Signed Bill Handler.'),
     'field' => array(

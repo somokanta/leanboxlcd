@@ -308,18 +308,6 @@ function sku_wise_return_table($trip_number, $sku_name, $mrp, $selected_bill_sta
   return $result;
 }
 
-function _get_bill_status_wise_reason_master_list($reason_type) {
-  $query = db_select('node', 'n');
-  $query->join('field_data_field_reason_type', 'rt', 'rt.entity_id = n.nid');
-  $query->join('field_data_field_dp_reason', 'dr', 'dr.entity_id = n.nid');
-  $query->condition('rt.field_reason_type_value', $reason_type);
-  $query->fields('dr', array('field_dp_reason_value'));
-  $query->addTag('node_distributor_access');
-  $res = $query->execute()->fetchAllKeyed(0, 0);
-  $res1 = array('' => '- select -');
-  $response = $res1 + $res;
-  return $response;
-}
 
 function sku_wise_return_confirm_submit($form, &$form_state) {
   global $user;

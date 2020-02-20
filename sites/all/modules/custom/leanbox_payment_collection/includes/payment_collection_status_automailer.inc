@@ -1172,10 +1172,10 @@ function get_email_pending_for_yesterday_assignment($distributor_id) {
 
 function get_email_today_petty_cash_transaction($distributor_id) {
   $start_date = strtotime(date('Y-m-d'));
-
+  $distributor_ids = get_distributor_ids();
   $query = db_select('petty_cash', 'pc');
   $query->condition('pc.voucher_date', $start_date, '>');
-  $query->condition('pc.distributor_id', $distributor_id, '=');
+  $query->condition('pc.distributor_id', $distributor_ids, 'IN');
   $query->fields('pc');
   $result = $query->execute()->fetchAll();
 

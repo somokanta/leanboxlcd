@@ -40,13 +40,10 @@ class total_travel_time_handler extends views_handler_field {
 
     if(!empty($res)) {
       $hour_minute = explode('.',$res);
-//      $hour = $hour_minute[0].'H';
-      $hour = $hour_minute[0];
+      $hour = $hour_minute[0].'H';
       $minute = str_pad($hour_minute[1], 2, "0", STR_PAD_RIGHT);
-//      $minute = round($minute*0.6).'M';
-      $minute = round($minute*0.6);
-//      $total_travel_time = $hour <= 9 ? '0'.$hour.','.$minute : $hour.','.$minute;
-      $total_travel_time = $hour <= 9 ? '0'.$hour.':'.$minute : $hour.':'.$minute;
+      $minute = round($minute*0.6).'M';
+      $total_travel_time = $hour <= 9 ? '0'.$hour.','.$minute : $hour.','.$minute;
     }
     return $total_travel_time;
   }

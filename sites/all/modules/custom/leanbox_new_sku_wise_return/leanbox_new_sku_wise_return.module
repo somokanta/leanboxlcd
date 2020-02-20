@@ -62,7 +62,7 @@ function leanbox_new_sku_wise_return_menu() {
 function get_all_putaway_groups($distributor_id) {
   $query = db_select('node', 'n');
   $query->condition('n.type', 'putaway_group_master');
-  $query->condition('n.uid', $distributor_id);
+  //$query->condition('n.uid', $distributor_id);
   $query->join('field_data_field_putaway_group', 'pg', 'pg.entity_id = n.nid');
   $query->addExpression('DISTINCT(pg.field_putaway_group_value)', 'putaway_group');
   $result = $query->execute()->fetchAllKeyed(0, 0);
@@ -72,7 +72,7 @@ function get_all_putaway_groups($distributor_id) {
 function get_all_sub_putaway_groups($putaway, $distributor_id) {
   $query = db_select('node', 'n');
   $query->condition('n.type', 'putaway_group_master');
-  $query->condition('n.uid', $distributor_id);
+ // $query->condition('n.uid', $distributor_id);
   if (!empty($putaway)) {
     $query->join('field_data_field_putaway_group', 'pg', 'pg.entity_id = n.nid');
     $query->condition('pg.field_putaway_group_value', $putaway, '=');
@@ -94,12 +94,12 @@ function get_default_actual_return_qty($trip_number, $sku_code, $distributor_id)
 }
 
 function _get_all_products($string = '') {
-  global $user;
-  $dis_id = change_feeds_import_get_distributor_id($user->uid);
+ // global $user;
+ // $dis_id = change_feeds_import_get_distributor_id($user->uid);
 
   if (!empty($string)) {
     $query = db_select('node', 'n');
-    $query->condition('n.uid', $dis_id);
+    //$query->condition('n.uid', $dis_id);
     $query->join('field_data_field_product_name', 'pn', 'pn.entity_id = n.nid');
     $query->condition('pn.field_product_name_value', '%' . db_like($string) . '%', 'LIKE');
     $query->fields('pn', array('field_product_name_value'));
@@ -137,7 +137,7 @@ function get_excess_reason_list($dis_id) {
 function get_gs_claim_reason_list($dis_id) {
   $query = db_select('node', 'n');
   $query->condition('n.type', 'gs_claim_reason_master');
-  $query->condition('n.uid', $dis_id);
+  //$query->condition('n.uid', $dis_id);
   $query->fields('n', array('title'));
   $result = $query->execute()->fetchAllKeyed(0, 0);
   return $result;
@@ -242,10 +242,10 @@ function sku_wise_return_pop_up_table($trip_number, $sku_code, $dis_id) {
   return $result;
 }
 
-function get_godown_short_reason_list($dis_id, $flag) {
+function get_godown_short_reason_list($flag) {
   $query = db_select('node', 'n');
   $query->condition('n.type', 'godown_short_reason_master');
-  $query->condition('n.uid', $dis_id);
+  //$query->condition('n.uid', $dis_id);
   $query->join('field_data_field_approval_flag', 'af', 'af.entity_id = n.nid');
   if ($flag == 'yes') {
     $query->condition('af.field_approval_flag_value', $flag);
@@ -261,7 +261,7 @@ function get_godown_short_reason_list($dis_id, $flag) {
 function get_nids_of_selected_putaway($putaway, $distributor_id) {
   $query = db_select('node', 'n');
   $query->condition('n.type', 'putaway_group_master');
-  $query->condition('n.uid', $distributor_id);
+  //$query->condition('n.uid', $distributor_id);
   $query->join('field_data_field_putaway_group', 'pg', 'pg.entity_id = n.nid');
   $query->condition('pg.field_putaway_group_value', $putaway, '=');
 
@@ -284,7 +284,7 @@ function get_trip_status($dis_id, $trip_id) {
 
 function check_product_name($dis_id, $product_name) {
   $query = db_select('node', 'n');
-  $query->condition('n.uid', $dis_id);
+  //$query->condition('n.uid', $dis_id);
   $query->join('field_data_field_product_name', 'pn', 'pn.entity_id = n.nid');
   $query->condition('pn.field_product_name_value', $product_name, '=');
   $query->fields('n', array('nid'));
@@ -386,4 +386,17 @@ function get_sku_tur_data($sku_codes)
 		$result = $query->execute()->fetchAllKeyed(0,1);
 		return $result;
 	}
+}
+
+function _get_bill_status_wise_reason_master_list($reason_type) {
+  $query = db_select('node', 'n');
+  $query->join('field_data_field_reason_type', 'rt', 'rt.entity_id = n.nid');
+  $query->join('field_data_field_dp_reason', 'dr', 'dr.entity_id = n.nid');
+  $query->condition('rt.field_reason_type_value', $reason_type);
+  $query->fields('dr', array('field_dp_reason_value'));
+  //$query->addTag('node_distributor_access');
+  $res = $query->execute()->fetchAllKeyed(0, 0);
+  $res1 = array('' => '- select -');
+  $response = $res1 + $res;
+  return $response;
 }

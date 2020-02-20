@@ -26,7 +26,7 @@ class drs_report_net_amt extends views_handler_field {
 
   function render($data) {
     global $user;
-    $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+    $distributor_id =  $data->node_uid;
     $bill_number = $data->node_title;
     $trip_id = $this->view->args[0];
     $bill_value = round($data->field_field_bill_value[0]['raw']['value'],2);

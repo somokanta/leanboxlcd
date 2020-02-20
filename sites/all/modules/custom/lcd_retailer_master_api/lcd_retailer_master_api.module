@@ -123,7 +123,7 @@ function cron_data_callback() {
       if ($val['node_type'] == 'hul_code_area_code_mapping') {
         $node_type = 'hul_code_master';
       }
-      $node_nid = get_retailer_node_nid($node_type, $val['title'], $val['distributor_id']);
+      $node_nid = get_node_nid($node_type, $val['title'], $val['distributor_id']);
       if(!empty($node_nid)){
          $node = node_load($node_nid);
       }
@@ -176,19 +176,9 @@ function cron_data_callback() {
         $api_data['field_sales_day'] = $node->field_sales_day[LANGUAGE_NONE][0]['value'];
         $api_data['field_salesman'] = $node->field_salesman[LANGUAGE_NONE][0]['value'];
         $api_data['field_salesman_code'] = $node->field_salesman_code[LANGUAGE_NONE][0]['value'];
-        //$api_data['field_payment_terms'] = $node->field_payment_terms[LANGUAGE_NONE][0]['value'];
-        $api_data['field_credit_days'] = $node->field_credit_days[LANGUAGE_NONE][0]['value'];
-        $resourse_name_nid = $node->field_updated_by[LANGUAGE_NONE][0]['nid'];
-        $resourse_name = '';
-        if(!empty($resourse_name_nid)){
-          $resourse_name = get_node_title_using_nid($resourse_name_nid);
-        }
-        $api_data['field_updated_by'] = $resourse_name;
       }
       $api_data['distributor_id'] = $node->uid;
-      watchdog('outlet data to be sent', '<pre>' . print_r($api_data, TRUE) . '</pre>');
       $data = json_encode($api_data);
-      watchdog('after encode', '<pre>' . print_r($data, TRUE) . '</pre>');
       // $authorization = 'bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1ODgzOWY4ZjYyZmQyMzkzMGE4NjQwYjEiLCJpYXQiOjE1MDQ2Nzg4NTl9.AzJLVp6HDk6lbXCWxI1T8Y7US6R0panNjkY5B-pkdqg';
       $request_headers = array('Content-Type' => 'application/json', 'Authorization' => $authorization);
       $api_url = variable_get('retailer_api_master_url', 'http://dev-lak.leanbox.in/retailer_master/update_retailer_master_data');
@@ -222,7 +212,7 @@ function moblity_outlet_api_cron() {
   $results = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
   if(!empty($results)){
     foreach ($results as $key => $val) {
-      $node_nid = get_retailer_node_nid($val['node_type'], $val['title'], $val['distributor_id']);
+      $node_nid = get_node_nid($val['node_type'], $val['title'], $val['distributor_id']);
       if(!empty($node_nid)){
         $node = node_load($node_nid);
       }
@@ -277,9 +267,9 @@ function moblity_outlet_api_cron() {
         $response_data = drupal_http_request($order_api_url, $options);
         $response = $response_data->data;
         masters_api_log_update($response, $sql_ins_id);
-        $response_info = json_decode($response) ;
-        $response_flag = ($response_info[0]->success == 1) ? 1 : 0;
-        if (!empty($response_info)) {
+        $response_data = json_decode($response) ;
+        $response_flag = ($response_data[0]->success == 1) ? 1 : 0;
+        if (!empty($response_data->response)) {
           $status_updated = db_update('mobility_server_api_retailer_cron') // Table name no longer needs {}
             ->fields(array(
               'response_flag' => $response_flag,
@@ -294,7 +284,7 @@ function moblity_outlet_api_cron() {
 
 }
 
-function get_retailer_node_nid($node_type,$node_title,$distributor_id){
+function get_node_nid($node_type,$node_title,$distributor_id){
   $query = db_select('node', 'n');
   $query->condition('n.uid', $distributor_id, '=');
   $query->condition('n.type', $node_type, '=');

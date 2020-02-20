@@ -25,7 +25,7 @@ class handler_dispatched_value_field extends views_handler_field {
 
   function render($data) {
     global $user;
-    $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+    $distributor_id = $data->node_uid;
     $trip_id = $this->view->args[0];
     $bill_number = $data->node_title;
 

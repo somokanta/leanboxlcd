@@ -3,11 +3,13 @@
 function delivery_confirmation_status_callback() {
 
   // Show last 3 days data.
+  $distributor_ids = get_distributor_ids();  
   for ($i = 1; $i <= 3; $i++) {
     $current_date = date('Y-m-d', strtotime("-$i days"));
     $nex_load = get_next_day_load_count($i);
     $query = db_select('node', 'n');
     $query->condition('n.type', 'dispatch_data');
+    $query->condition('n.uid', $distributor_ids, 'IN');
     $query->join('field_data_field_vrs_status', 'fdfvs', 'fdfvs.entity_id = n.nid');
     $query->join('field_data_field_dispatch_date', 'fdfdd', 'fdfdd.entity_id = n.nid');
     $query->join('field_data_field_cashier_name', 'fcn', 'fcn.entity_id = n.nid');
@@ -38,6 +40,7 @@ function delivery_confirmation_status_callback() {
   $last_date = date('Y-m-d', strtotime("-10 days"));
   $query = db_select('node', 'n');
   $query->condition('n.type', 'dispatch_data');
+  $query->condition('n.uid', $distributor_ids, 'IN');
   $query->join('field_data_field_vrs_status', 'fdfvs', 'fdfvs.entity_id = n.nid');
   $query->join('field_data_field_dispatch_date', 'fdfdd', 'fdfdd.entity_id = n.nid');
   $query->join('field_data_field_cashier_name', 'fcn', 'fcn.entity_id = n.nid');
@@ -86,10 +89,12 @@ function delivery_confirmation_status_export() {
 }
 
 function get_next_day_load_count($i) {
+  $distributor_ids = get_distributor_ids();    
   $current_date = date('Y-m-d', strtotime("-$i days"));
   $current_day_cashiers = get_current_day_cashier_names($current_date);
   $query = db_select('node', 'n');
   $query->condition('n.type', 'dispatch_data');
+  $query->condition('n.uid', $distributor_ids, 'IN');
   $query->join('field_data_field_vrs_status', 'fdfvs', 'fdfvs.entity_id = n.nid');
   $query->join('field_data_field_dispatch_date', 'fdfdd', 'fdfdd.entity_id = n.nid');
   $query->join('field_data_field_cashier_name', 'fcn', 'fcn.entity_id = n.nid');
@@ -102,8 +107,10 @@ function get_next_day_load_count($i) {
 
 function get_current_day_cashier_names($current_date) {
   if (!empty($current_date)) {
+    $distributor_ids = get_distributor_ids();    
     $query = db_select('node', 'n');
     $query->condition('n.type', 'dispatch_data');
+    $query->condition('n.uid', $distributor_ids, 'IN');
     $query->join('field_data_field_vrs_status', 'fdfvs', 'fdfvs.entity_id = n.nid');
     $query->join('field_data_field_dispatch_date', 'fdfdd', 'fdfdd.entity_id = n.nid');
     $query->join('field_data_field_cashier_name', 'fcn', 'fcn.entity_id = n.nid');

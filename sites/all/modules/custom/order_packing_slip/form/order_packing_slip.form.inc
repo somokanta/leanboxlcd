@@ -7,7 +7,32 @@ function order_packing_slip_form($form, &$form_state){
   global $user;
   $user_id = $user->uid;
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
-  $form_state['distributor_id'] = $distributor_id;
+  $logged_in_distributor_id = $distributor_id;
+  if (in_array("administrator", $user->roles) || in_array("central_distributor", $user->roles)) {
+    $distributor_ids = get_distributor_ids();
+    unset($distributor_ids[$distributor_id]);
+    $child_distributors = get_child_distributor_rsname($logged_in_distributor_id);
+    $distributor_ids = array('' => 'Select') + $child_distributors;
+    $form['central_outer'] = array(
+      '#type' => 'markup',
+      '#prefix' => '<div style="color:red"><h3>Note: Select any one  Distributor Name</h3></div>',  
+    );
+    $form['distributor_id'] = array(
+      '#title' => t('Select Distributor Name'),
+      '#type' => 'select',
+      '#options' => $distributor_ids,
+      '#required' => TRUE,
+    );
+    $distributor_id = $form_state['input']['distributor_id'];
+  }
+  // Child distributor logged in
+  else {
+    $form['distributor_id'] = array(
+      '#type' => 'hidden',
+      '#value' => $distributor_id,
+    );
+  }
+  
   $form['from_date'] = array(
     '#type' => 'date_popup',
     '#title' => 'Bill From date',
@@ -122,6 +147,7 @@ function order_packing_slip_form_submit($form,&$form_state){
     $query->leftjoin('field_data_field_party_code_reference','party_code_ref','party_code_ref.entity_id = n.nid');
     $query->leftjoin('node','n1','n1.nid = party_code_ref.field_party_code_reference_nid');
     $query->condition('n1.type', 'outlet_master');
+    $query->condition('n1.uid', $distributor_id);
     $query->leftjoin('field_data_field_party_code','party_code','n1.nid = party_code.entity_id');
     $query->leftjoin('field_data_field_party_name','party_name','n1.nid = party_name.entity_id');
     $query->leftjoin('field_data_field_beat_name','beat_name','n1.nid = beat_name.entity_id');
@@ -166,12 +192,11 @@ function order_packing_slip_form_submit($form,&$form_state){
 function download_order_packing_slip($from_bill_date,$to_bill_date){
   global $user;
   $user_id = $user->uid;
-  drupal_add_js(drupal_get_path('module', 'order_packing_slip') . '/js/pdf_print.js');
-  $distributor_id = change_feeds_import_get_distributor_id($user_id);
+  $distributor_ids = get_distributor_ids();
    if(!empty($from_bill_date) && !empty($to_bill_date)){
     $query = db_select('node', 'n');
     $query->condition('n.type', 'sales_register_data');
-    $query->condition('n.uid', $distributor_id, '=');
+    $query->condition('n.uid', $distributor_ids, 'IN');
     $query->leftjoin('field_data_field_sr_new_bill_date', 'bd', 'n.nid = bd.entity_id');
     $query->condition('bd.field_sr_new_bill_date_value',array($from_bill_date, $to_bill_date), 'BETWEEN');
     $query->leftjoin('field_data_field_crate_id', 'crate', 'n.nid = crate.entity_id');
@@ -179,6 +204,7 @@ function download_order_packing_slip($from_bill_date,$to_bill_date){
     $query->leftjoin('field_data_field_party_code_reference','party_code_ref','party_code_ref.entity_id = n.nid');
     $query->leftjoin('node','n1','n1.nid = party_code_ref.field_party_code_reference_nid');
     $query->condition('n1.type', 'outlet_master');
+    $query->condition('n1.uid', $distributor_ids,'IN');
     $query->leftjoin('field_data_field_party_code','party_code','n1.nid = party_code.entity_id');
     $query->leftjoin('field_data_field_party_name','party_name','n1.nid = party_name.entity_id');
     $query->leftjoin('field_data_field_beat_name','beat_name','n1.nid = beat_name.entity_id');
@@ -208,7 +234,7 @@ function download_order_packing_slip($from_bill_date,$to_bill_date){
       $query4 = db_select('order_packing_slip_api_data', 'opad');
       $query4->fields('opad', array('order_no','party_name','box_id','seal_number','total_qty','header_data', 'row_data')); 
       $query4->condition('opad.order_no', $unique_orders_arr, 'IN');  //$unique_crate_ids
-      $query4->condition('opad.distributor_id', $distributor_id);  // distributor id
+      $query4->condition('opad.distributor_id', $distributor_ids,'IN');  // distributor id
       $table_data = $query4->execute()->fetchAll(\PDO::FETCH_ASSOC);
     }
     $table_row_data = $table_data;

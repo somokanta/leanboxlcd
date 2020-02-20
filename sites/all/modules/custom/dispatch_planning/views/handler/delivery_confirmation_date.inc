@@ -23,8 +23,9 @@ class delivery_confirmation_date extends views_handler_field {
  }
 
  function render(&$data) {
-   global $user;
-   $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+  // global $user;
+   //$distributor_id = change_feeds_import_get_distributor_id($user->uid);
+   $distributor_id = $data->dispatch_planning_api_data_distributor_id;  
    $trip_id = $data->dispatch_planning_api_data_runsheet_number;
    
    $query = db_select('inventory_versioning_api_data', 'vad');

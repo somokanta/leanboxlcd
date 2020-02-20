@@ -6,7 +6,7 @@ function pdd_add_form($form, &$form_state) {
   global $user;
   $user_id = $user->uid;
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
-  $nid = $form_state['leanbox_misc']['nid'] = check_node_title_exists($distributor_id, 'pdd_master');
+  $nid = $form_state['leanbox_misc']['nid'] = check_node_title_exists($distributor_id, 'pdd_master',FALSE,$distributor_id);
 
   if ($nid) {
     $node = node_load($nid);
@@ -117,7 +117,7 @@ function holiday_add_form($form, &$form_state) {
   global $user;
   $user_id = $user->uid;
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
-  $nid = $form_state['leanbox_misc']['nid'] = check_node_title_exists($distributor_id, 'holiday_master');
+  $nid = $form_state['leanbox_misc']['nid'] = check_node_title_exists($distributor_id, 'holiday_master',FALSE,$distributor_id);
   if ($nid) {
     $node = node_load($nid);
 

@@ -401,13 +401,7 @@ function create_fetch_data_ptl_trip_form_validate($form, &$form_state) {
   $user_id = $user->uid;
   $trip_id = $form_state['values']['trip_id'];
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
-  $node_created_time = get_node_created_time($trip_id, 'dispatch_data', $distributor_id);
-  $diff_minutes = abs(time() - $node_created_time) / 60;
-    // Should be  atleast 2 minutes delay after creating Trip otherwise all bill related fields values would not update.
-   if ($diff_minutes < 2) {
-       form_set_error('trip_id', "Please wait for 2 minutes to send Trip ID:$trip_id in PTL station.");
-   }
-
+  
     $query = db_select('node', 'n');
     $query->condition('n.title', $trip_id);
     $query->condition('n.uid', $distributor_id);
