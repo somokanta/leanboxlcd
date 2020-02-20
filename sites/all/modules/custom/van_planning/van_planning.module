@@ -144,7 +144,6 @@ function _get_plgroup_master_autocomplete($string = '') {
       $query->condition('vpg.field_pl_group_value', db_like($string) . '%', 'LIKE');
       $query->fields('vpg', array('field_pl_group_value'));
       $query->range(0, 15);
-      $query->addTag('node_distributor_access');
       $result = $query->execute()->fetchAllKeyed(0, 0);
    }
    drupal_json_output($result);
