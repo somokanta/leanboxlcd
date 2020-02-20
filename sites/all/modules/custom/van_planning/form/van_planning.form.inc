@@ -2299,7 +2299,7 @@ function _create_van_validate($form, &$form_state) {
   $trip_execution_date = strtotime($form_state['values']['trip_execution_date']);
 
   $data = $form_state['values']['vp_final_table'];
-  watchdog('submitted_data',print_r($data,TRUE));
+  watchdog('submitted_data',print_r($form_state['values'],TRUE));
   $rs_code = get_rs_code_of_distributor($dis_id);
   if (!empty($data) && empty($dis_id)) {
         foreach ($data as $van => $val1) {
