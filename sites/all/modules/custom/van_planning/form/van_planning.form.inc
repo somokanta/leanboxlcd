@@ -317,7 +317,9 @@ function _van_planning_callback_form($form, &$form_state) {
     !empty($outlet_area_hook_grp) ||
     !empty($weight) ||
     !empty($volume)) {
-    $input_data = TRUE;
+    if(!empty($user_selected_distributor_id)) {  
+         $input_data = TRUE;
+    }
   }
   if ($input_data) {
     $area_codes = 'no_input';
