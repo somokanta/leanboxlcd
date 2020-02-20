@@ -300,7 +300,7 @@ function change_feeds_import_finished($success, $results, $operations) {
     drupal_set_message('Error Occure while uploading billing data. Please Contact LeanBox HELP DESK', 'error');
   }
 
-  if (!$success || !array_key_exists('billing', $results) || !array_key_exists('picking', $results) || !array_key_exists('party_packing', $results)) {
+  if (!$success || !array_key_exists('billing', $results)) {
     // An error occurred.
     // $operations contains the operations that remained unprocessed.
     global $user;
@@ -847,7 +847,7 @@ function change_feeds_import_create_billing($data, &$context) {
       $message .= t('An error MSG:  %error_msg with arguments: @arguments', array('%error_msg' => $ex->getMessage(), '@arguments' => print_r($value, TRUE)));
       $params['subject'] = "Billing Upload Error in Batch Proccess-sales-data ";
       $params['body'] = $message;
-      $mail_to = "abhishek.r@iksula.com";
+      $mail_to = "shylaja.r@iksula.com";
       $from = "MIS.HELPDESK@leanbox.in";
       drupal_mail('adhoc_task', 'bill_date_missing', $mail_to, LANGUAGE_NONE, $params, $from);
     }

@@ -136,7 +136,7 @@ function _van_planning_callback_form($form, &$form_state) {
       'method' => 'replace',
       'effect' => 'fade',
     ),
-    '#autocomplete_path' => 'outlet-areahookgrp-master/autocomplete/' . $selected_distributor_id,
+    '#autocomplete_path' => 'outlet-areahookgrp-master/autocomplete/' . $central_distributor_id,
     '#prefix' => '<div class="form_row">',
   );
   $form['editable_vp']['vp']['area_code'] = array(
@@ -160,7 +160,7 @@ function _van_planning_callback_form($form, &$form_state) {
       'method' => 'replace',
       'effect' => 'fade',
     ),
-    '#autocomplete_path' => 'plgroup-master/autocomplete' . '/' . $selected_distributor_id,
+    '#autocomplete_path' => 'plgroup-master/autocomplete' ,
   );
   $form['editable_vp']['vp']['van_pl_group'] = array(
     '#type' => 'textfield',
