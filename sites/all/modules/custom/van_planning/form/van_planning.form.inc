@@ -68,6 +68,8 @@ function _van_planning_callback_form($form, &$form_state) {
     unset($form_state['input']['pb_weight']);
     unset($form_state['input']['pb_volume']);
     unset($form_state['input']['outlet_area_hook_grp']);
+    unset($form_state['input']['pb_from_date']['date']);
+    unset($form_state['input']['pb_to_date']['date']);
   }
   // For reset in modify van table- popup
   if($form_state['clicked_button']['#name'] == 'bill_wise_reset'){
@@ -174,10 +176,36 @@ function _van_planning_callback_form($form, &$form_state) {
     ),
     '#autocomplete_path' => 'vanplgroup-master/autocomplete',
   );
-  $form['editable_vp']['vp']['pb_date'] = array(
+  /*$form['editable_vp']['vp']['pb_date'] = array(
     '#type' => 'date_popup',
     '#date_label_position' => '',
     '#title' => t('Bill Date'),
+    '#date_format' => 'Y-m-d',
+    '#ajax' => array(
+      'wrapper' => 'van-itemlist-div',
+      'callback' => 'van_planning_filter_ajax_callback',
+      'method' => 'replace',
+      'effect' => 'fade',
+    ),
+  );*/
+  
+  $form['editable_vp']['vp']['pb_from_date'] = array(
+    '#type' => 'date_popup',
+    '#date_label_position' => '',
+    '#title' => t('Bill From Date'),
+    '#date_format' => 'Y-m-d',
+    '#ajax' => array(
+      'wrapper' => 'van-itemlist-div',
+      'callback' => 'van_planning_filter_ajax_callback',
+      'method' => 'replace',
+      'effect' => 'fade',
+    ),
+  );
+  
+   $form['editable_vp']['vp']['pb_to_date'] = array(
+    '#type' => 'date_popup',
+    '#date_label_position' => '',
+    '#title' => t('Bill To Date'),
     '#date_format' => 'Y-m-d',
     '#ajax' => array(
       'wrapper' => 'van-itemlist-div',
@@ -301,7 +329,9 @@ function _van_planning_callback_form($form, &$form_state) {
   $area_code = $form_state['input']['area_code'];
   $van_pl_group = $form_state['input']['van_pl_group'];
   $pl_group = $form_state['input']['pl_group'];
-  $bill_date = strtotime($form_state['input']['pb_date']['date']);
+  //$bill_date = strtotime($form_state['input']['pb_date']['date']);
+  $bill_from_date = strtotime($form_state['input']['pb_from_date']['date']);
+  $bill_to_date = strtotime($form_state['input']['pb_to_date']['date']);
   $bill_range_op = $form_state['input']['pb_range_op'];
   $bill_value = $form_state['input']['pb_value'];
   $weight = $form_state['input']['pb_weight'];
@@ -313,7 +343,8 @@ function _van_planning_callback_form($form, &$form_state) {
     (!empty($bill_range_op) && (!empty($bill_value) || !empty($weight) || !empty($volume))) ||
     !empty($pl_group) ||
     !empty($user_selected_distributor_id) ||      
-    !empty($bill_date) ||
+   // !empty($bill_date) ||
+    (!empty($bill_from_date) && !empty($bill_to_date)) ||
     !empty($bill_value) ||
     !empty($outlet_area_hook_grp) ||
     !empty($weight) ||
@@ -331,7 +362,7 @@ function _van_planning_callback_form($form, &$form_state) {
     if (isset($form_state['bill_array'])) {
       $bill_array = $form_state['bill_array'];
     }
-    $options = van_planning_ajax_submit($area_codes, $van_pl_group, $pl_group, $bill_date, $bill_range_op, $bill_value, $weight, $volume, $bill_array, $outlet_area_hook_grp, $user_selected_distributor_id, $central_distributor_id, $form_state['rs_distributor_ids']);
+    $options = van_planning_ajax_submit($area_codes, $van_pl_group, $pl_group, $bill_from_date, $bill_to_date, $bill_range_op, $bill_value, $weight, $volume, $bill_array, $outlet_area_hook_grp, $user_selected_distributor_id, $central_distributor_id, $form_state['rs_distributor_ids']);
     $form['editable_vp']['vp']['list_form_items'] = array(
       '#type' => 'tableselect',
       '#header' => $header_array,
@@ -1621,7 +1652,7 @@ function show_move_to_ajax($form, &$form_state) {
  * @param type $form
  * @param type $form_state
  */
-function van_planning_ajax_submit($area_codes, $van_pl_group, $pl_group, $bill_date, $bill_range_op, $bill_value, $weight, $volume, $bill_array, $outlet_area_hook_grp,$user_selected_distributor_id = null, $central_distributor_id = null, $rs_distributor_ids = null) {
+function van_planning_ajax_submit($area_codes, $van_pl_group, $pl_group, $bill_from_date, $bill_to_date, $bill_range_op, $bill_value, $weight, $volume, $bill_array, $outlet_area_hook_grp,$user_selected_distributor_id = null, $central_distributor_id = null, $rs_distributor_ids = null) {
   global $table_name,$table_column;
     if (!empty($user_selected_distributor_id)) {
     $dis_ids = array($user_selected_distributor_id);
@@ -1705,8 +1736,11 @@ function van_planning_ajax_submit($area_codes, $van_pl_group, $pl_group, $bill_d
   $query->join('field_data_field_sr_bill_date', 'sbd', 'sbd.entity_id = n3.nid');
   $query->condition('sbd.field_sr_bill_date_value', array($billing_start_date, $billing_end_date), 'BETWEEN');
 
-  if (!empty($bill_date)) {
+ /* if (!empty($bill_date)) {
     $query->condition('sbd.field_sr_bill_date_value', $bill_date);
+  }*/
+  if (!empty($bill_from_date) && !empty($bill_to_date)) {
+      $query->condition('sbd.field_sr_bill_date_value', array($bill_from_date, $bill_to_date), 'BETWEEN');
   }
   if (!empty($bill_array)) {
     $query->condition('n3.title', $bill_array, 'NOT IN');
