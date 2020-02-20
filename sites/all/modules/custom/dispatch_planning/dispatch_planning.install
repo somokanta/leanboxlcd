@@ -2429,3 +2429,86 @@ function dispatch_planning_update_7146() {
     }
   }
 }
+
+function dispatch_planning_update_7147() {
+  $schema['sdr_app_log_preprocess'] = array(
+    'description' => 'SDR App Preprocess',
+    'fields' => array(
+      'id' => array(
+        'description' => 'The primary identifier for a data',
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'trip_id' => array(
+        'description' => t('Trip ID'),
+        'type' => 'int',
+      ),
+      'created_date' => array(
+        'description' => 'Created Date',
+        'type' => 'int',
+        'default' => 0,
+      ),
+      'distributor_id' => array(
+        'description' => t('distributor_id'),
+        'type' => 'int',
+        'default' => 0,
+      ),
+      'flag' => array(
+        'description' => t('Flag'),
+        'type' => 'int',
+        'default' => 0,
+      ),
+    ),
+    'primary key' => array('id'),
+  );
+  
+  $schema['sdr_app_log'] = array(
+    'description' => 'describes Api log for Van Planning/Dispatch Planning API to SDR App',
+    'fields' => array(
+      'id' => array(
+        'description' => t('Id Primary Key'),
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'request_data' => array(
+        'description' => t('API Details'),
+        'type' => 'text',
+      ),
+      'response_data' => array(
+        'description' => t('API Details'),
+        'type' => 'text',
+      ),
+      'request_time' => array(
+        'description' => t('API Request time'),
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'response_time' => array(
+        'description' => t('API Response time'),
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'trip_id' => array(
+        'description' => t('Trip Id'),
+        'type' => 'varchar',
+        'length' => 25,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'distributor_id' => array(
+        'description' => t('Distributor ID'),
+        'type' => 'int',
+        'default' => 0,
+      ),
+    ),
+    'indexes' => array(
+      'trip_id' => array('trip_id'),
+    ),
+    'primary key' => array('id'),
+  );
+
+  db_create_table('sdr_app_log_preprocess', $schema['sdr_app_log_preprocess']);
+  db_create_table('sdr_app_log', $schema['sdr_app_log']);
+}
