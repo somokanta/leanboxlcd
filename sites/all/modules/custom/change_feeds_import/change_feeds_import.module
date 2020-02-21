@@ -3100,11 +3100,11 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
 //    'central_outlet_master_report', 'central_party_pack_master_report','ofd_mailer','ofd_mailer2');
     //&& !in_array($view->name,$admin_views)
    
-    $is_present_views_array = in_array($view->name, $views_array);
-    $is_present_admin_views_array = in_array($view->name, $admin_views);
-    echo $is_present_views_array;
-    echo $is_present_admin_views_array;
-    if (empty($is_present_views_array) && empty($is_present_admin_views_array)) {
+    //$is_present_views_array = in_array($view->name, $views_array);
+    //$is_present_admin_views_array = in_array($view->name, $views_array);
+   // array_search("red",$a)
+    if (!array_search($view->name, $views_array) && !array_search($view->name, $admin_views)) {
+        echo "here";
         foreach ($query->table_queue as $key => $val) {
             if (($val['table'] == 'node')) {
 
