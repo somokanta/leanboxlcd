@@ -3072,6 +3072,7 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
     $admin_view_names = variable_get('admin_views');
     $views_array = explode(",", $all_views_names);
     print_r($views_array);
+    echo $view->name;
     $admin_views = explode(",", $admin_view_names);
     $central_distributor_master_views = explode(',', variable_get('central_distributor_master_views'));
     $logged_in_distributor_id = $distributor_id;
