@@ -3087,7 +3087,7 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
         $distributor_ids[] = $central_distributor_id;
     }
     if (in_array($view->name, $central_distributor_master_views)) {
-        $distributor_ids = array();
+        //$distributor_ids = array();
         $distributor_ids[] = $central_distributor_id;
     }
     $distributor_ids = array_unique($distributor_ids);
