@@ -3104,7 +3104,7 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
     //$is_present_admin_views_array = in_array($view->name, $views_array);
    // array_search("red",$a)
     if (!array_search($view->name, $views_array) && !array_search($view->name, $admin_views)) {
-        echo "here";
+        //echo "here";
         foreach ($query->table_queue as $key => $val) {
             if (($val['table'] == 'node')) {
 
