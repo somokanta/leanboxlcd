@@ -332,3 +332,12 @@ function get_party_code_of_bill_no($bill_no, $distributor_id) {
     $party_code = $query->execute()->fetchField();
     return $party_code;
 }
+function validate_hul_code($hul_code,$distributor_id){
+  $query = db_select('node', 'n');
+  $query->condition('n.type', 'hul_code_master');
+  $query->condition('n.title', $hul_code);
+  $query->condition('n.uid', $distributor_id);
+  $query->fields('n', array('title'));
+  $result = $query->execute()->fetchField();
+  return $result;
+}
