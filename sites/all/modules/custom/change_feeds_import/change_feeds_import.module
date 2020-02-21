@@ -3071,7 +3071,6 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
     // area-code-master,product-sub-category-master,sku-cp-view,brand-master-report,bank-master-download,non-bankable-reason-master,cancel-discard-reason-master,reason-for-update,sku7-code-master-report,product-category-master,sku7-ean-and-mrp,product-sub-division,pdd-master,notes-denominations-download,short-reason-master,non-bankable-reason-master,handover-master
     $admin_view_names = variable_get('admin_views');
     $views_array = explode(",", $all_views_names);
-    print_r($views_array);
     $admin_views = explode(",", $admin_view_names);
     $central_distributor_master_views = explode(',', variable_get('central_distributor_master_views'));
     $logged_in_distributor_id = $distributor_id;
