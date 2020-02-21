@@ -43,9 +43,10 @@ function asset_return_form_submit($form, &$form_state) {
 }
 
 function get_data_of_asset_summary_return_form_validate($form, &$form_state){
-  global $user;
-  $rs_code = dispatch_planning_get_rscode_using_uid($user->uid);
+  //global $user;
+  //$rs_code = dispatch_planning_get_rscode_using_uid($user->uid);
   $trip_id = $form_state['values']['trip_id'];
+  $distributor_id = get_distributorid_of_trip($trip_id);
   if (!is_numeric($trip_id)) {
     unset($form_state['complete form']['asset_return']);
     unset($form_state['complete form']['dowmload_mark']);
@@ -54,7 +55,7 @@ function get_data_of_asset_summary_return_form_validate($form, &$form_state){
 
   $query = db_select('dispatch_planning_api_data', 'ad');
   $query->condition('ad.runsheet_number', $trip_id);
-  $query->condition('ad.hub', $rs_code);
+  $query->condition('ad.distributor_id', $distributor_id);
   $query->fields('ad', array('runsheet_number'));
   $result = $query->execute()->fetchField();
   if (empty($result)) {
