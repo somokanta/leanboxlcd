@@ -1489,6 +1489,13 @@ function deliverycost_calculation_node_presave($node) {
   if ($node->type == 'resource_master') {
     //activate_ressource($node);
   }
+  if ($node->type == 'lb_product_master') {
+    //activate_ressource($node);
+      if ($node->uid ==23466) {
+          $node->uid = 154013; // subadmin
+      }
+  }
+
 }
 
 // . Check resource weekly off already exist
