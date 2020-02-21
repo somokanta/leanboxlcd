@@ -3107,7 +3107,8 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
       // Not add distributor id condition
     }
     else {
-          //echo "here";
+         print_r($views_array);
+         echo $view->name;
         foreach ($query->table_queue as $key => $val) {
             if (($val['table'] == 'node')) {
 
