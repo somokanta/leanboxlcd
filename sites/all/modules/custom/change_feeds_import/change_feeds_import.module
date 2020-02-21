@@ -3103,6 +3103,8 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
     //$is_present_views_array = in_array($view->name, $views_array);
     //$is_present_admin_views_array = in_array($view->name, $views_array);
    // array_search("red",$a)
+    print_r($views_array);
+    print_r($view->name);
     if (in_array($view->name, $views_array)) {
       // Not add distributor id condition
     }
