@@ -3099,12 +3099,10 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
 //    'hul_code_distributor_wise', 'van_stop_master_report', 'update_sales_register_party_code',
 //    'central_outlet_master_report', 'central_party_pack_master_report','ofd_mailer','ofd_mailer2');
     //&& !in_array($view->name,$admin_views)
-     if (!in_array(trim($view->name),$views_array))
-     { 
-         print_r($views_array);
-         echo $view->name;
-     }
-    if (!in_array($view->name, $views_array) && !in_array($view->name, $admin_views)) {
+   
+    $is_present_views_array = in_array($view->name, $views_array);
+    $is_present_admin_views_array = in_array($view->name, $admin_views);
+    if (empty($is_present_views_array) && empty($is_present_admin_views_array)) {
         foreach ($query->table_queue as $key => $val) {
             if (($val['table'] == 'node')) {
 
