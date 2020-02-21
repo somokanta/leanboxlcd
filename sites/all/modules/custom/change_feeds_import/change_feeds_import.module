@@ -3091,7 +3091,7 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
         $distributor_ids[] = $central_distributor_id;
     }
     $distributor_ids = array_unique($distributor_ids);
-    print_r($distributor_ids);
+    //print_r($distributor_ids);
 //  $views_array = array('central_bill_trip', 'channel_master_central_report' , 
 //    'central_picking_report' ,  'central_party_pack_report',  'central_unloading_form', 
 //    'central_mobile_return_analysis', 'user_manual',  'hul_impact_delete', 'impact_delivery_cron_2', 
