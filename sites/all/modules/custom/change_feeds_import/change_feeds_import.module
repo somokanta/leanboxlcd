@@ -3109,13 +3109,16 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
       // Not add distributor id condition
     }
     else {
+        dpm("else");
         foreach ($query->table_queue as $key => $val) {
             if (($val['table'] == 'node')) {
 
                 if (empty($val['join'])) {
+                    dpm("inside empty join");
                     $query->add_where(0, $val['alias'] . '.uid', $distributor_ids, 'IN');
                 }
                 else {
+                    dpm("else empty join");
                     $query->table_queue[$key]['join']->extra[] = array('field' => 'uid', 'value' => $distributor_ids, 'operator' => 'IN');
                     // $query->table_queue[$key]['join']->extra[] = array('field' => 'uid', 'value' => $distributor_id);
                     //$query->table_queue[$key]['join']->extra[] = array('field' => 'uid', 'left_field' => 'uid', 'left_table'=>'node');
