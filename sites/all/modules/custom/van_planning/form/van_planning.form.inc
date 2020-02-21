@@ -127,6 +127,8 @@ function _van_planning_callback_form($form, &$form_state) {
     $selected_distributor_id = $dis_id;
     $form_state['central_distributor_id'] = $central_distributor_id;
   }
+  
+  
 
   $form_state['central_distributor_id'] = $central_distributor_id;
 
