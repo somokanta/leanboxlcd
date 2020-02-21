@@ -4935,8 +4935,7 @@ function van_planning_api_to_sdr_config_form($form, $form_state) {
 
 function dispatch_planning_node_presave($node) {
   if ($node->type == 'dispatch_data' && ($node->is_new)) {
-    global $user;
-    $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+    $distributor_id = get_distributor_ids();
 
     db_insert('sdr_app_log_preprocess') // Table name no longer needs {}
       ->fields(array(
@@ -4991,7 +4990,7 @@ function sdr_api_cron() {
         $query->groupBy('order_no.field_outlet_order_no_value');
         $result = $query->execute()->fetchAll();
 
-        $facility_code = get_facility_code($distributor_id);
+        $facility_code = get_facility_code_of_distributor($distributor_id);
 
         foreach($result as $key => $value){
              $trip_id = $value->title;
