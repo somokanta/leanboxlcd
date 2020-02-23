@@ -1877,12 +1877,15 @@ function reverse_geocode_node_presave($node) {
          if (!empty($disp_date)) {
             $dispatch_date = strtotime($disp_date);
             if ($dispatch_date <= $updated_pdd) {
-               $n_value = "N+2";
+               $n_value = "N+1";
             }
             elseif (($dispatch_date > $updated_pdd) && ( ($dispatch_date - $updated_pdd) <= 86400)) {
+               $n_value = "N+2";
+            }
+            elseif (($dispatch_date > $updated_pdd) && ( ($dispatch_date - $updated_pdd) <= (86400*2))) {
                $n_value = "N+3";
             }
-            elseif (($dispatch_date > $updated_pdd) && ( ($dispatch_date - $updated_pdd) > 86400)) {
+            elseif (($dispatch_date > $updated_pdd) && ( ($dispatch_date - $updated_pdd) > (86400*2))) {
                $n_value = "N+4";
             }
             $node->field_dispatch_n_value[LANGUAGE_NONE][0]['value'] = $n_value;
@@ -1899,12 +1902,15 @@ function reverse_geocode_node_presave($node) {
          if (!empty($del_date)) {
             $del_date = strtotime(date('Y-m-d',$del_date));  
             if ($del_date <= $updated_pdd) {
-               $n_value = "N+2";
+               $n_value = "N+1";
             }
             elseif (($del_date > $updated_pdd) && ( ($del_date - $updated_pdd) <= 86400)) {
+               $n_value = "N+2";
+            }
+            elseif (($del_date > $updated_pdd) && ( ($del_date - $updated_pdd) <= (86400*2))) {
                $n_value = "N+3";
             }
-            elseif (($del_date > $updated_pdd) && ( ($del_date - $updated_pdd) > 86400)) {
+            elseif (($del_date > $updated_pdd) && ( ($del_date - $updated_pdd) > (86400*2))) {
                $n_value = "N+4";
             }
             $node->field_deliver_n_value[LANGUAGE_NONE][0]['value'] = $n_value;
@@ -1938,12 +1944,15 @@ function reverse_geocode_node_presave($node) {
          if (!empty($disp_date)) {
             $dispatch_date = strtotime($disp_date);
             if ($dispatch_date <= $updated_pdd) {
-               $n_value = "N+2";
+               $n_value = "N+1";
             }
             elseif (($dispatch_date > $updated_pdd) && ( ($dispatch_date - $updated_pdd) <= 86400)) {
+               $n_value = "N+2";
+            }
+            elseif (($dispatch_date > $updated_pdd) && ( ($dispatch_date - $updated_pdd) <= (86400*2))) {
                $n_value = "N+3";
             }
-            elseif (($dispatch_date > $updated_pdd) && ( ($dispatch_date - $updated_pdd) > 86400)) {
+            elseif (($dispatch_date > $updated_pdd) && ( ($dispatch_date - $updated_pdd) > (86400*2))) {
                $n_value = "N+4";
             }
             $node->field_dispatch_n_value[LANGUAGE_NONE][0]['value'] = $n_value;
@@ -1958,12 +1967,15 @@ function reverse_geocode_node_presave($node) {
          if (!empty($del_date)) {
            $del_date = strtotime(date('Y-m-d',$del_date));
             if ($del_date <= $updated_pdd) {
-               $n_value = "N+2";
+               $n_value = "N+1";
             }
             elseif (($del_date > $updated_pdd) && ( ($del_date - $updated_pdd) <= 86400)) {
+               $n_value = "N+2";
+            }
+            elseif (($del_date > $updated_pdd) && ( ($del_date - $updated_pdd) <= (86400*2))) {
                $n_value = "N+3";
             }
-            elseif (($del_date > $updated_pdd) && ( ($del_date - $updated_pdd) > 86400)) {
+            elseif (($del_date > $updated_pdd) && ( ($del_date - $updated_pdd) > (86400*2))) {
                $n_value = "N+4";
             }
             $node->field_deliver_n_value[LANGUAGE_NONE][0]['value'] = $n_value;
@@ -2103,12 +2115,15 @@ function reverse_geocode_node_presave($node) {
                $promised_date = $val['field_promised_date_value'];
                $nid = $val['nid'];
                if ($dispatch_date <= $promised_date) {
-                  $n_value = "N+2";
+                  $n_value = "N+1";
                }
                elseif (($dispatch_date > $promised_date) && ( ($dispatch_date - $promised_date) <= 86400)) {
+                  $n_value = "N+2";
+               }
+               elseif (($dispatch_date > $promised_date) && ( ($dispatch_date - $promised_date) <= (86400*2))) {
                   $n_value = "N+3";
                }
-               elseif (($dispatch_date > $promised_date) && ( ($dispatch_date - $promised_date) > 86400)) {
+               elseif (($dispatch_date > $promised_date) && ( ($dispatch_date - $promised_date) > (86400*2))) {
                   $n_value = "N+4";
                }
 
@@ -2369,12 +2384,15 @@ function cal_delivery_n_val_by_cron() {
     if (!empty($del_date)) {
       $del_date = strtotime(date('Y-m-d', $del_date));
       if ($del_date <= $updated_pdd) {
-        $n_value = "N+2";
+        $n_value = "N+1";
       }
       elseif (($del_date > $updated_pdd) && ( ($del_date - $updated_pdd) <= 86400)) {
+        $n_value = "N+2";
+      }
+      elseif (($del_date > $updated_pdd) && ( ($del_date - $updated_pdd) <= (86400*2))) {
         $n_value = "N+3";
       }
-      elseif (($del_date > $updated_pdd) && ( ($del_date - $updated_pdd) > 86400)) {
+      elseif (($del_date > $updated_pdd) && ( ($del_date - $updated_pdd) > (86400*2))) {
         $n_value = "N+4";
       }
       $node->field_deliver_n_value[LANGUAGE_NONE][0]['value'] = $n_value;

@@ -12,11 +12,12 @@ function change_feeds_import_sales_register_form($form, $form_state) {
     if (in_array('central_distributor', $user->roles)) {
         $template = 'sales_register_template_central.csv';
         $form_state['central_distributor_id'] = $distributor_id;
-    } else {
+    }
+    else {
         $form_state['central_distributor_id'] = get_central_distributor_id($distributor_id);
         $template = 'sales_register_template.csv';
     }
-    
+
     // check distributor incompleted upload
     $query = db_select('custom_sales_data', 'sd');
     $query->condition('sd.created_by_distributor_id', $distributor_id, '=');
@@ -28,18 +29,18 @@ function change_feeds_import_sales_register_form($form, $form_state) {
     }
 
     $form['file'] = array(
-        '#type' => 'file',
-        '#title' => t('Choose a CSV file for sales data upload'),
+      '#type' => 'file',
+      '#title' => t('Choose a CSV file for sales data upload'),
     );
     $form['template_download'] = array(
-        '#type' => 'markup',
-        '#prefix' => '<div id="template_wrapper">',
-        '#suffix' => '</div>',
-        '#markup' => l("Download Template", drupal_get_path('module', 'change_feeds_import') . '/'.$template),
+      '#type' => 'markup',
+      '#prefix' => '<div id="template_wrapper">',
+      '#suffix' => '</div>',
+      '#markup' => l("Download Template", drupal_get_path('module', 'change_feeds_import') . '/' . $template),
     );
     $form['submit'] = array(
-        '#type' => 'submit',
-        '#value' => t('Upload'),
+      '#type' => 'submit',
+      '#value' => t('Upload'),
     );
 
 
@@ -52,23 +53,24 @@ function change_feeds_import_sales_register_form_validate($form, &$form_state) {
     $user_id = $user->uid;
     $distributor_id = change_feeds_import_get_distributor_id($user_id);
     $file = file_save_upload('file', array(
-        'file_validate_extensions' => array('csv'),
+      'file_validate_extensions' => array('csv'),
     ));
 //headers matching for different roles form diff distributors
     if (in_array('central_distributor', $user->roles)) {
         $header_array_from_xsd = array(
-            'BILL_NUMBER',
-            'BILL_DATE',
-            'PARTY_CODE',
-            'BILL_VALUE',
-            'DISTRIBUTOR NAME',
+          'BILL_NUMBER',
+          'BILL_DATE',
+          'PARTY_CODE',
+          'BILL_VALUE',
+          'DISTRIBUTOR NAME',
         );
-    } else {
+    }
+    else {
         $header_array_from_xsd = array(
-            'BILL_NUMBER',
-            'BILL_DATE',
-            'PARTY_CODE',
-            'BILL_VALUE',
+          'BILL_NUMBER',
+          'BILL_DATE',
+          'PARTY_CODE',
+          'BILL_VALUE',
         );
     }
     if ($file) {
@@ -77,11 +79,12 @@ function change_feeds_import_sales_register_form_validate($form, &$form_state) {
             $filepath = $form_state['values']['file']->uri;
             $data = array_map("str_getcsv", file($filepath, FILE_SKIP_EMPTY_LINES));
             $header_from_csv = array_shift($data);
-           if ($header_array_from_xsd != $header_from_csv) {
+            if ($header_array_from_xsd != $header_from_csv) {
                 $type = 'error';
                 $message = 'Header mismatch.';
                 form_set_error('file_upload', t($message));
-            } else { // Full else part is added for TP to Host qty feature
+            }
+            else { // Full else part is added for TP to Host qty feature
                 foreach ($data as $val) {
                     $all_bills[$val[0]] = $val[0]; //Bill Number is at zero position(means first)
                 }
@@ -90,19 +93,20 @@ function change_feeds_import_sales_register_form_validate($form, &$form_state) {
 //          form_set_error('file_upload', "Custom billing data has been already uploaded for bills: <BR>".$existing_bills);
 //        }
             }
-        } else {
+        }
+        else {
             form_set_error('file_upload', t('Failed to write the uploaded file the site\'s file folder.'));
         }
         $mess = '';
         foreach ($data as $key => $value) {
             if (in_array('central_distributor', $user->roles)) {
-               // echo $key;
+                // echo $key;
                 // passing distributor_name
                 $distributor_name = trim($value[4]);
                 $distributor_id = validate_distributor_name($distributor_name);
 
                 if (empty(check_valid_distributor($distributor_id))) {
-                   $mess .= t('Invalid Distributor Name: ' . $distributor_name) . '<br>';
+                    $mess .= t('Invalid Distributor Name: ' . $distributor_name) . '<br>';
                 }
                 // valid Distributor Name
                 else {
@@ -117,7 +121,8 @@ function change_feeds_import_sales_register_form_validate($form, &$form_state) {
         else {
             //print_r($form_state['distributor_data']);die;
         }
-    } else {
+    }
+    else {
         form_set_error('file', t('No file was uploaded.'));
     }
 }
@@ -162,21 +167,21 @@ function change_feeds_import_sales_register_form_submit($form, &$form_state) {
     $operations = array();
     $data_chunk = array_chunk($datas, 1000);
     foreach ($data_chunk as $data) {
-        $operations[] = array('change_feeds_import_sales_register_batch_fix_process', array($data, $distributor_id, $file_name, $fid, $no_of_days,$form_state['distributor_data']));
+        $operations[] = array('change_feeds_import_sales_register_batch_fix_process', array($data, $distributor_id, $file_name, $fid, $no_of_days, $form_state['distributor_data']));
     }
     $batch = array(
-        'title' => t('Reading sales Data Csv'),
-        'operations' => $operations,
-        'init_message' => t("Please wait..."),
-        'progress_message' => t('Processed @current out of @total.'),
-        'error_message' => t('Upload data processing has encountered an error.'),
-        'finished' => 'sales_register_data_csv_finished',
-        'file' => drupal_get_path('module', 'change_feeds_import') . '/form/sales_register_data.inc',
+      'title' => t('Reading sales Data Csv'),
+      'operations' => $operations,
+      'init_message' => t("Please wait..."),
+      'progress_message' => t('Processed @current out of @total.'),
+      'error_message' => t('Upload data processing has encountered an error.'),
+      'finished' => 'sales_register_data_csv_finished',
+      'file' => drupal_get_path('module', 'change_feeds_import') . '/form/sales_register_data.inc',
     );
     batch_set($batch);
 }
 
-function change_feeds_import_sales_register_batch_fix_process($data, $distributor_id, $file_name, $fid, $no_of_days,$csv_distributor_ids, &$context) {
+function change_feeds_import_sales_register_batch_fix_process($data, $distributor_id, $file_name, $fid, $no_of_days, $csv_distributor_ids, &$context) {
     global $user;
     if (empty($distributor_id)) {
         drupal_set_message(t('Please check your Distributor code'), 'error');
@@ -195,13 +200,13 @@ function change_feeds_import_sales_register_batch_fix_process($data, $distributo
             else {
                 $csv_dist_id = $csv_distributor_ids[trim($value['DISTRIBUTOR NAME'])];
                 if (empty($csv_dist_id)) {
-                    $value['error_message'] .= "Invalid Distributor Name:".$value['DISTRIBUTOR NAME'];
+                    $value['error_message'] .= "Invalid Distributor Name:" . $value['DISTRIBUTOR NAME'];
                 }
             }
         }
-        
-        $dis_id = $csv_dist_id ? $csv_dist_id : $distributor_id; 
-        $distributorname = $value['DISTRIBUTOR NAME']?trim($value['DISTRIBUTOR NAME']):get_distributor_name($dis_id);
+
+        $dis_id = $csv_dist_id ? $csv_dist_id : $distributor_id;
+        $distributorname = $value['DISTRIBUTOR NAME'] ? trim($value['DISTRIBUTOR NAME']) : get_distributor_name($dis_id);
         foreach ($value as $k => $v) {
             $error_text = '';
             $v = trim($v);
@@ -209,7 +214,8 @@ function change_feeds_import_sales_register_batch_fix_process($data, $distributo
                 if ((empty($v) && ($v != '0') ) || $v < '0') {
                     $value['error_message'] .= $k . " can not be empty or  less than 0(Zero) for bill no " . $value['BILL_NUMBER'] . ".";
                 }
-            } else if ($k != 'Crate_ID') {
+            }
+            else if ($k != 'Crate_ID') {
                 if (empty($v)) {
                     $value['error_message'] .= $k . " can not be empty for bill no " . $value['BILL_NUMBER'] . ".";
                 }
@@ -224,7 +230,8 @@ function change_feeds_import_sales_register_batch_fix_process($data, $distributo
             if ($is_not_valid_date === 1) {
                 $value['error_message'] .= " Please Enter  Bill Date for Bill No:" . $value['BILL_NUMBER'] . " in corect format. 
                                              Acceptable formats are e.g. 2-4-18 or 2/4/18 or 2-Apr-18 or 2/Apr/18 or 2-4-2018 or 2/4/2018 .";
-            } else {
+            }
+            else {
                 $value['BILL_DATE'] = date('d-m-Y', strtotime($is_not_valid_date));
             }
             $value['BILL_DATE'] = strtotime($value['BILL_DATE']);
@@ -238,25 +245,27 @@ function change_feeds_import_sales_register_batch_fix_process($data, $distributo
                     if (!empty($sr_bill_date) && $sr_bill_date != $value['BILL_DATE']) {
                         $value['error_message'] .= "Bill Date should be equal to previously uploaded bill date for Bill No " . $value['BILL_NUMBER'] . ".";
                     }
-                } else {
+                }
+                else {
                     $value['error_message'] .= "Enter correct Bill Date for Bill No " . $value['BILL_NUMBER'] . ".";
                 }
             }
         }
         if (!empty($value['BILL_NUMBER'])) {
             $unique_comb = $value['BILL_NUMBER'] . '-' . $dis_id;
-            $bill_distributor_id = get_distributor_id_of_bill($value['BILL_NUMBER'],$dis_id);
-            if (in_array($bill_distributor_id,$sibling_distributor_ids) && !empty($bill_distributor_id) && $bill_distributor_id!=$dis_id) {
-                $value['error_message'] .= "Bill Number: " . $value['BILL_NUMBER'] . ' already exist'. ". </br>";
+            $bill_distributor_id = get_distributor_id_of_bill($value['BILL_NUMBER'], $dis_id);
+            if (in_array($bill_distributor_id, $sibling_distributor_ids) && !empty($bill_distributor_id) && $bill_distributor_id != $dis_id) {
+                $value['error_message'] .= "Bill Number: " . $value['BILL_NUMBER'] . ' already exist' . ". </br>";
             }
             if (in_array($unique_comb, $context['results']['unique_combination'])) {
                 $value['error_message'] .= "BILL_NUMBER " . $value['BILL_NUMBER'] . " is Repeated.  ";
-            } else {
+            }
+            else {
                 $context['results']['unique_combination'][$unique_comb] = $unique_comb;
             }
         }
         else {
-             $value['error_message'] .= "BILL_NUMBER Can't be blank. " ;
+            $value['error_message'] .= "BILL_NUMBER Can't be blank. ";
         }
 //      $value['BILL_NUMBER'] = trim($value['BILL_NUMBER']);
 //      // Check if bill no already created as a node in content type sales_register_data
@@ -290,7 +299,7 @@ function change_feeds_import_sales_register_batch_fix_process($data, $distributo
             if (user_access('hul_address_confirm_upload') && !empty($value['PARTY_CODE'])) {
                 global $base_url;
                 $page_url = $base_url . '/address/confirm';
-                $hul_details = check_hul_address_confirmed_or_not($value['PARTY_CODE'],$dis_id); //returns hul_code, 
+                $hul_details = check_hul_address_confirmed_or_not($value['PARTY_CODE'], $dis_id); //returns hul_code, 
                 if (!empty($hul_details)) {
                     foreach ($hul_details as $key => $details) {
                         if (!in_array($details['party_code'], $party_codes)) {
@@ -304,9 +313,9 @@ function change_feeds_import_sales_register_batch_fix_process($data, $distributo
                 }
             }
         }
-        /*if (empty($distributor_id)) {
-            $value['error_message'] .= " Please check your Distributor code";
-        }*/
+        /* if (empty($distributor_id)) {
+          $value['error_message'] .= " Please check your Distributor code";
+          } */
 
         if (variable_get('party_bill_check') == 1) {
             if (isset($value['PARTY_CODE']) && isset($value['BILL_NUMBER']) && isset($value['BILL_DATE'])) {
@@ -316,7 +325,8 @@ function change_feeds_import_sales_register_batch_fix_process($data, $distributo
                 if (!in_array($value['PARTY_CODE'], $config_party_code)) {
                     if (count($context['results']['unique_party_billdate'][$unique_comb]) > 1) {
                         $value['error_message'] .= "Duplicate Bills are found for party code " . $value['PARTY_CODE'];
-                    } else {
+                    }
+                    else {
                         $query = db_select('node', 'n');
                         $query->condition('n.type', 'sales_register_data');
                         $query->condition('n.uid', $dis_id, '=');
@@ -337,7 +347,7 @@ function change_feeds_import_sales_register_batch_fix_process($data, $distributo
         }
 
         // insert into custom sales table
-        change_feeds_import_insert_data_in_custom_sales_table($value, $fid,  $dis_id, $distributor_id);
+        change_feeds_import_insert_data_in_custom_sales_table($value, $fid, $dis_id, $distributor_id);
 
         $context['results']['fid'] = $fid;
     }
@@ -348,7 +358,8 @@ function sales_register_data_csv_finished($success, $results, $operations) {
         $fid = $results['fid'];
         //drupal_goto("sales-confirm/" . $fid);
         $_GET['destination'] = "sales-confirm/" . $fid;
-    } else {
+    }
+    else {
         drupal_set_message('There is Error Occured in batch process');
     }
 }
@@ -356,20 +367,20 @@ function sales_register_data_csv_finished($success, $results, $operations) {
 function change_feeds_import_insert_data_in_custom_sales_table($value, $fid, $dis_id, $created_by_distributor_id) {
 
     $sales_data = db_insert('custom_sales_data') // Table name no longer needs {}
-            ->fields(array(
-                'bill_no' => $value['BILL_NUMBER'],
-                'date' => $value['BILL_DATE'],
-                'bill_value' => $value['BILL_VALUE'],
-                'created' => time(),
-                'error_message' => $value['error_message'],
-                'fid' => $fid,
-                'party_code' => $value['PARTY_CODE'],
-                'distributor_id' => $dis_id,
-                'created_by_distributor_id' => $created_by_distributor_id,
+      ->fields(array(
+        'bill_no' => $value['BILL_NUMBER'],
+        'date' => $value['BILL_DATE'],
+        'bill_value' => $value['BILL_VALUE'],
+        'created' => time(),
+        'error_message' => $value['error_message'],
+        'fid' => $fid,
+        'party_code' => $value['PARTY_CODE'],
+        'distributor_id' => $dis_id,
+        'created_by_distributor_id' => $created_by_distributor_id,
 //        'outlet_order_no'=> $value['Outlet_Order_No'],
 //        'crate_id'=> $value['Crate_ID'],
-            ))
-            ->execute();
+      ))
+      ->execute();
 }
 
 // show table after file is uploaded
@@ -410,15 +421,16 @@ function change_feeds_import_sales_confirm_content($fid) {
 
     if ($error_flag) {
         $rows['action'] = $discard_link;
-    } else {
+    }
+    else {
         $rows['action'] = $action_link . '/' . $discard_link;
     }
 
     $build['pager_table'] = array(
-        '#theme' => 'table',
-        '#header' => $header,
-        '#rows' => array($rows),
-        '#empty' => t('There are no date formats found.'),
+      '#theme' => 'table',
+      '#header' => $header,
+      '#rows' => array($rows),
+      '#empty' => t('There are no date formats found.'),
     );
 
     return $build;
@@ -435,10 +447,10 @@ function change_feeds_import_sales_create_confirm_content($fid) {
     $distributor_id = change_feeds_import_get_distributor_id($user_id);
     // select data from stage table
     $sales_data_result = db_select('custom_sales_data', 'sd')
-                    ->condition('sd.fid', $fid, '=')
-                    ->condition('sd.created_by_distributor_id', $distributor_id, '=')
-                    ->fields('sd')
-                    ->execute()->fetchAll(PDO::FETCH_ASSOC);
+        ->condition('sd.fid', $fid, '=')
+        ->condition('sd.created_by_distributor_id', $distributor_id, '=')
+        ->fields('sd')
+        ->execute()->fetchAll(PDO::FETCH_ASSOC);
 
     $operations = array();
     $data_chunk = array_chunk($sales_data_result, 100);
@@ -447,13 +459,13 @@ function change_feeds_import_sales_create_confirm_content($fid) {
     }
 
     $batch = array(
-        'operations' => $operations,
-        'finished' => 'change_feeds_import_sales_reg_finished',
-        'title' => t('Creating Sales register Data'),
-        'init_message' => t('Sales Data Batch Creation is starting.'),
-        'progress_message' => t('Processed @current out of @total.'),
-        'error_message' => t('Sales Data Batch has encountered an error.'),
-        'file' => drupal_get_path('module', 'change_feeds_import') . '/form/sales_register_data.inc'
+      'operations' => $operations,
+      'finished' => 'change_feeds_import_sales_reg_finished',
+      'title' => t('Creating Sales register Data'),
+      'init_message' => t('Sales Data Batch Creation is starting.'),
+      'progress_message' => t('Processed @current out of @total.'),
+      'error_message' => t('Sales Data Batch has encountered an error.'),
+      'file' => drupal_get_path('module', 'change_feeds_import') . '/form/sales_register_data.inc'
     );
     batch_set($batch);
     batch_process('sales-register/import');
@@ -469,11 +481,10 @@ function change_feeds_import_create_sales_register_node($sales_data_result, $dis
                 require_once drupal_get_path('module', 'change_feeds_import') . '/form/upload_billing_data.inc';
                 // check to update node
                 //tp to host entry flag wise bypass validation
-                $existing_bills = check_bill_exists_in_custom_billing(array($val['bill_no']),$val['distributor_id']);
+                $existing_bills = check_bill_exists_in_custom_billing(array($val['bill_no']), $val['distributor_id']);
                 $bypass_flag = get_dispatch_validation_flag_from_bills(array($val['bill_no']), $val['distributor_id']);
                 if (empty($existing_bills) || !empty($bypass_flag)) {
                     //above 3 line added
-
                     //$nid = check_node_title_exists($val['bill_no'], 'sales_register_data');
                     $nid = check_node_title_exist_of_distributor($val['bill_no'], 'sales_register_data', FALSE, $val['distributor_id']);
 
@@ -485,7 +496,7 @@ function change_feeds_import_create_sales_register_node($sales_data_result, $dis
                         node_object_prepare($node); // Sets some defaults. Invokes hook_prepare() and hook_node_prepare().
                         $node->language = LANGUAGE_NONE; // Or e.g. 'en' if locale is enabled
                         //$node->uid = $val['distributor_id'];
-                         $node->distributorid = $val['distributor_id'];
+                        $node->distributorid = $val['distributor_id'];
                         $node->status = 1; //(1 or 0): published or not
                         $node->comment = 0; // 0 = comments disabled, 1 = read only, 2 = read/write
 
@@ -493,14 +504,15 @@ function change_feeds_import_create_sales_register_node($sales_data_result, $dis
 
                         if (isset($context['results']['dates'][$val['date']])) {
                             $pdd = $context['results']['dates'][$val['date']];
-                        } else {
+                        }
+                        else {
                             $pdd = get_promised_delivery_date($val['date'], $val['distributor_id']);
                             $context['results']['dates'][$val['date']] = $pdd;
                         }
 
                         $node->field_promised_date[LANGUAGE_NONE][0]['value'] = $pdd;
 //bod 
-                        $bod = get_bod_date($val['date'],$val['distributor_id']);
+                        $bod = get_bod_date($val['date'], $val['distributor_id']);
                         $outlet_nid = get_outlet_master_nid($val['distributor_id'], $val['party_code']);
                         $bod_flag = get_bod_flag($bod, $outlet_nid);
 
@@ -513,7 +525,8 @@ function change_feeds_import_create_sales_register_node($sales_data_result, $dis
 //          $node->field_crate_id[LANGUAGE_NONE][0]['value'] = $val['crate_id'];
                         $node->field_sales_updated_date[LANGUAGE_NONE][0]['value'] = time();
                         node_save($node);
-                    } else {
+                    }
+                    else {
                         $node = node_load($nid);
 
                         //if ($node->field_sr_bill_date[LANGUAGE_NONE][0]['value'] != $val['date']) {
@@ -521,15 +534,16 @@ function change_feeds_import_create_sales_register_node($sales_data_result, $dis
 
                         if (isset($context['results']['dates'][$val['date']])) {
                             $pdd = $context['results']['dates'][$val['date']];
-                        } else {
-                            $pdd = get_promised_delivery_date($val['date'],$val['distributor_id']);
+                        }
+                        else {
+                            $pdd = get_promised_delivery_date($val['date'], $val['distributor_id']);
                             $context['results']['dates'][$val['date']] = $pdd;
                         }
 
                         $node->field_promised_date[LANGUAGE_NONE][0]['value'] = $pdd;
 
 //bod 
-                        $bod = get_bod_date($val['date'],$val['distributor_id']);
+                        $bod = get_bod_date($val['date'], $val['distributor_id']);
                         $outlet_nid = get_outlet_master_nid($val['distributor_id'], $val['party_code']);
                         $bod_flag = get_bod_flag($bod, $outlet_nid);
 
@@ -584,15 +598,16 @@ function change_feeds_import_sales_reg_finished($success, $results, $operations)
         $count = $results['count'];
         if (!empty($fid)) {
             db_delete('custom_sales_data')
-                    ->condition('fid', $fid, '=')
-                    ->condition('created_by_distributor_id', $distributor_id, '=')
-                    ->execute();
+              ->condition('fid', $fid, '=')
+              ->condition('created_by_distributor_id', $distributor_id, '=')
+              ->execute();
         }
 
         drupal_set_message(t("$count node was created"));
         //drupal_goto("sales-register/import");
         $_GET['destination'] = "sales-register/import";
-    } else {
+    }
+    else {
         drupal_set_message('There is Error Occured in batch process');
     }
 }
@@ -609,9 +624,9 @@ function change_feeds_import_sales_discard_data($fid) {
         $distributor_id = change_feeds_import_get_distributor_id($user_id);
         if (!empty($distributor_id)) {
             db_delete('custom_sales_data')
-                    ->condition('fid', $fid, '=')
-                    ->condition('created_by_distributor_id', $distributor_id, '=')
-                    ->execute();
+              ->condition('fid', $fid, '=')
+              ->condition('created_by_distributor_id', $distributor_id, '=')
+              ->execute();
 
             // Redirect to import page
             drupal_goto("sales-register/import");
@@ -651,7 +666,7 @@ function get_promised_delivery_date($date, $distributor_id) {
     return strtotime($pdd);
 }
 
-function get_bod_date($date,$distributor_id) {
+function get_bod_date($date, $distributor_id) {
     //global $user;
     //$user_id = $user->uid;
     //$distributor_id = change_feeds_import_get_distributor_id($user_id);
@@ -692,9 +707,11 @@ function holiday_get_working_day_for_bod($date_timestamp, $day, $holidays, $week
         $day_name = date("l", $date_timestamp);
         if (in_array($date, $holidays)) {
             
-        } elseif (in_array($day_name, $weeklyoff)) {
+        }
+        elseif (in_array($day_name, $weeklyoff)) {
             
-        } else {
+        }
+        else {
             $day--;
         }
     }
@@ -754,11 +771,7 @@ function get_sales_register_sr_bill_date($bill_number, $distributor_id) {
  * 
  * @param type $all_bills
  */
-function check_bill_exists_in_custom_billing($all_bills,$distributor_id) {
-    global $user;
-    $user_id = $user->uid;
-    $distributor_id = change_feeds_import_get_distributor_id($user_id);
-
+function check_bill_exists_in_custom_billing($all_bills, $distributor_id) {
     $query = db_select('custom_billing_data', 'cb');
     $query->condition('cb.bill_number', $all_bills, 'IN');
     $query->condition('cb.distributor_id', $distributor_id, '=');

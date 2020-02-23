@@ -13,12 +13,13 @@ function change_feeds_import_billing_data_form($form, $form_state) {
     //add distributor id columns for central distributor
     if (in_array('central_distributor', $user->roles)) {
         $template = 'billing_data_template_central.csv';
-    } else {
+    }
+    else {
         $template = 'billing_data_template.csv';
     }
     $form['distributor_id'] = array(
-        '#type' => 'hidden',
-        '#value' => $distributor_id,
+      '#type' => 'hidden',
+      '#value' => $distributor_id,
     );
 
 //  $link = l(t('Master Upload Imports'), 'content/master-upload'); // all master upload link.
@@ -27,18 +28,18 @@ function change_feeds_import_billing_data_form($form, $form_state) {
 //  );
 
     $form['file'] = array(
-        '#type' => 'file',
-        '#title' => t('Choose a CSV file for billing data upload'),
+      '#type' => 'file',
+      '#title' => t('Choose a CSV file for billing data upload'),
     );
     $form['template_download'] = array(
-        '#type' => 'markup',
-        '#prefix' => '<div id="template_wrapper">',
-        '#suffix' => '</div>',
-        '#markup' => l("Download Template", drupal_get_path('module', 'change_feeds_import') . '/' . $template),
+      '#type' => 'markup',
+      '#prefix' => '<div id="template_wrapper">',
+      '#suffix' => '</div>',
+      '#markup' => l("Download Template", drupal_get_path('module', 'change_feeds_import') . '/' . $template),
     );
     $form['submit'] = array(
-        '#type' => 'submit',
-        '#value' => t('Upload'),
+      '#type' => 'submit',
+      '#value' => t('Upload'),
     );
 
 
@@ -49,7 +50,7 @@ function change_feeds_import_billing_data_form($form, $form_state) {
 function change_feeds_import_billing_data_form_validate($form, &$form_state) {
     global $user;
     $file = file_save_upload('file', array(
-        'file_validate_extensions' => array('csv'),
+      'file_validate_extensions' => array('csv'),
     ));
 
     $header_array_from_xsd = get_csv_file_header();
@@ -70,7 +71,8 @@ function change_feeds_import_billing_data_form_validate($form, &$form_state) {
                 // Count includes header count as well
                 $message = 'File Row Count should not be greater than 15000';
                 form_set_error('file_upload', t($message));
-            } else {
+            }
+            else {
                 if (!isset($res['unique_combination'])) {
                     $res['unique_combination'] = array();
                 }
@@ -91,7 +93,8 @@ function change_feeds_import_billing_data_form_validate($form, &$form_state) {
                             $form_state['distributor_data'][$distributor_name] = $distributor_id;
                         }
                         $unique_comb = $bill_no . $sku . $distributor_id;
-                    } else {
+                    }
+                    else {
                         $unique_comb = $bill_no . $sku;
                     }
                     if (array_key_exists($unique_comb, $res['unique_combination'])) {
@@ -103,10 +106,12 @@ function change_feeds_import_billing_data_form_validate($form, &$form_state) {
                     form_set_error('form', $mess);
                 }
             }
-        } else {
+        }
+        else {
             form_set_error('file_upload', t('Failed to write the uploaded file the site\'s file folder.'));
         }
-    } else {
+    }
+    else {
         form_set_error('file', t('No file was uploaded.'));
     }
 }
@@ -156,14 +161,14 @@ function change_feeds_import_billing_data_form_submit($form, &$form_state) {
         $central_distributor_id = get_central_distributor_id($distributor_id);
     }
     $unique_bills = array_unique(array_map(function($elem) {
-                return $elem['BILL_NUMBER'];
-            }, $datas));
+          return $elem['BILL_NUMBER'];
+      }, $datas));
     $unique_skus = array_unique(array_map(function($elem) {
-                return $elem['SKU7_CODE'];
-            }, $datas));
+          return $elem['SKU7_CODE'];
+      }, $datas));
     $unique_party_code = array_unique(array_map(function($elem) {
-                return $elem['PARTY_CODE'];
-            }, $datas));
+          return $elem['PARTY_CODE'];
+      }, $datas));
     $party_code_result = check_party_code_exist_or_not($unique_distributors, $unique_party_code);
     // check sku7 code is present or not.
     $sku_code_result = check_sku7_code_exist_or_not($unique_skus);
@@ -172,16 +177,16 @@ function change_feeds_import_billing_data_form_submit($form, &$form_state) {
     $operations = array();
     $data_chunk = array_chunk($datas, 1000);
     foreach ($data_chunk as $data) {
-        $operations[] = array('change_feeds_import_batch_fix_process', array($max, $data, $distributor_id, $file_name, $party_code_result, $sku_code_result, $bill_result, $master_result,$form_state['distributor_data']));
+        $operations[] = array('change_feeds_import_batch_fix_process', array($max, $data, $distributor_id, $file_name, $party_code_result, $sku_code_result, $bill_result, $master_result, $form_state['distributor_data']));
     }
     $batch = array(
-        'title' => t('Reading Billing Data Csv'),
-        'operations' => $operations,
-        'init_message' => t("Batch is starting."),
-        'progress_message' => t('Processed @current out of @total.'),
-        'error_message' => t('Upload data processing has encountered an error.'),
-        'finished' => 'billing_data_csv_finished',
-        'file' => drupal_get_path('module', 'change_feeds_import') . '/form/upload_billing_data.inc',
+      'title' => t('Reading Billing Data Csv'),
+      'operations' => $operations,
+      'init_message' => t("Batch is starting."),
+      'progress_message' => t('Processed @current out of @total.'),
+      'error_message' => t('Upload data processing has encountered an error.'),
+      'finished' => 'billing_data_csv_finished',
+      'file' => drupal_get_path('module', 'change_feeds_import') . '/form/upload_billing_data.inc',
     );
 
     batch_set($batch);
@@ -209,7 +214,8 @@ function billing_data_csv_finished($success, $results, $operations) {
             $error = $results['error'];
             convert_array_to_csv_export($error, $base_path . "/sites/default/files/billing_data/$csv_file");
             $_SESSION['error_link'] = $error_link;
-        } else {
+        }
+        else {
             $error_link = "";
             $status = "Confirm";
         }
@@ -224,22 +230,23 @@ function billing_data_csv_finished($success, $results, $operations) {
 
         //drupal_goto("confirm/" . $last_id);
         $_GET['destination'] = "confirm/" . $last_id;
-    } else {
+    }
+    else {
         drupal_set_message('There is Error Occured in batch process');
     }
 }
 
 function change_feeds_import_update_data_in_error_billing_table_after_confirm($last_id, $bill_uploaded, $total_lines, $sum_of_total_sales_qty, $error_link, $status) {
     $status_updated = db_update('error_billing_data') // update status in error_billing_data condition based on (Distributor Id )
-            ->fields(array(
-                'total_bill_uploaded' => $bill_uploaded,
-                'total_line_uploaded' => $total_lines,
-                'Sum_of_TOTAL_SALES_QTY' => $sum_of_total_sales_qty,
-                'error_file' => $error_link,
-                'status' => $status,
-            ))
-            ->condition('id', $last_id, '=')
-            ->execute();
+      ->fields(array(
+        'total_bill_uploaded' => $bill_uploaded,
+        'total_line_uploaded' => $total_lines,
+        'Sum_of_TOTAL_SALES_QTY' => $sum_of_total_sales_qty,
+        'error_file' => $error_link,
+        'status' => $status,
+      ))
+      ->condition('id', $last_id, '=')
+      ->execute();
 }
 
 // fetch sales register bill date
@@ -324,7 +331,8 @@ function change_feeds_import_batch_fix_process($max, $data, $distributor_id, $fi
             if (empty($v) && $v !== '0') {
                 $flag = 1;
                 $error_text = "$k can not be null";
-            } else {
+            }
+            else {
 
                 switch ($k) {
                     case 'VEHICLE':
@@ -365,7 +373,8 @@ function change_feeds_import_batch_fix_process($max, $data, $distributor_id, $fi
                         if (in_array($unique_comb, $context['results']['unique_combination'])) {
                             $flag = 1;
                             $error_text = "BILL_NUMBER " . $value['BILL_NUMBER'] . " and SKU7_CODE " . $value['SKU7_CODE'] . " is Repeated.  ";
-                        } else {
+                        }
+                        else {
                             $context['results']['unique_combination'][] = $unique_comb;
                         }
 
@@ -408,19 +417,21 @@ function change_feeds_import_batch_fix_process($max, $data, $distributor_id, $fi
                         if ($is_not_valid_date === 1) {
                             $flag = 1;
                             $error_text = "$v Not a valid date format.Acceptable formats are e.g. 2-4-18 or 2/4/18 or 2-Apr-18 or 2/Apr/18 or 2-4-2018 or 2/4/2018 .";
-                        } else {
+                        }
+                        else {
                             $sr_new_bill_date = strtotime($is_not_valid_date);
                         }
                         if (!empty($sr_new_bill_date)) {
                             //$context['results']['sr_bill_dates'][$bill_number]);one month bill _number dates
                             //b123<br>1233333 [billnumber<br>billdate
-                            $bill_date_key = trim($bill_number).trim($distributor_id);
+                            $bill_date_key = trim($bill_number) . trim($distributor_id);
                             //print_r(array($bill_date_key));
                             //print_r($context['results']['sr_bill_dates']);
                             if ($sr_new_bill_date != $context['results']['sr_bill_dates'][$bill_date_key]) {
                                 $flag = 1;
                                 $error_text = "Loading/Billing Date - $v : Does not match with Sales register Billing Date.";
-                            } else {
+                            }
+                            else {
                                 // strtotitme value
                                 $value[$k] = date('d-m-Y', $sr_new_bill_date);
                             }
@@ -444,7 +455,8 @@ function change_feeds_import_batch_fix_process($max, $data, $distributor_id, $fi
                     if (!is_numeric($v)) {
                         $flag = 1;
                         $error_text = "$v in $k Should be numeric";
-                    } else {
+                    }
+                    else {
                         if ($k == 'Sum of TOTAL_SALES_QTY') {
 
                             if ($total_qty != $net_sales_qty + $sales_free_qty) {
@@ -476,7 +488,8 @@ function change_feeds_import_batch_fix_process($max, $data, $distributor_id, $fi
             if ($flag) {
                 $error[$k] = $error_text;
                 $error_bool = 1;
-            } else {
+            }
+            else {
                 $error[$k] = $v;
             }
         }
@@ -494,7 +507,8 @@ function change_feeds_import_batch_fix_process($max, $data, $distributor_id, $fi
 
         try {
             change_feeds_import_insert_data_in_staging_billing_table($pass_data, $error_bool, $last_id, REQUEST_TIME, $distributor_id, $created_by_distributor_id);
-        } catch (Exception $ex) {
+        }
+        catch (Exception $ex) {
             
         }
 
@@ -513,24 +527,24 @@ function convert_array_to_csv_export($array, $filename) {
 
 function change_feeds_import_insert_data_in_error_billing_table($file_name, $date, $bill_uploaded, $total_lines, $sum_of_total_sales_qty, $error_link, $status, $distributor_id) {
     $error_billing_data = db_insert('error_billing_data') // Table name no longer needs {}
-            ->fields(array(
-                'file_name' => $file_name,
-                'date' => $date,
-                'total_bill_uploaded' => $bill_uploaded,
-                'total_line_uploaded' => $total_lines,
-                'Sum_of_TOTAL_SALES_QTY' => $sum_of_total_sales_qty,
-                'error_file' => $error_link,
-                'status' => $status,
-                'distributor_id' => $distributor_id,
-                'created_by_distributor_id' => $distributor_id,
-            ))
-            ->execute();
+      ->fields(array(
+        'file_name' => $file_name,
+        'date' => $date,
+        'total_bill_uploaded' => $bill_uploaded,
+        'total_line_uploaded' => $total_lines,
+        'Sum_of_TOTAL_SALES_QTY' => $sum_of_total_sales_qty,
+        'error_file' => $error_link,
+        'status' => $status,
+        'distributor_id' => $distributor_id,
+        'created_by_distributor_id' => $distributor_id,
+      ))
+      ->execute();
 
     return $error_billing_data;
 }
 
 function change_feeds_import_insert_data_in_staging_billing_table($value, $error_boolean, $last_id, $date, $distributor_id, $created_by_distributor_id) {
-if (empty($last_id)) {
+    if (empty($last_id)) {
         global $user;
         $created_by_distributor_id = change_feeds_import_get_distributor_id($user->uid);
         $st_query = db_select('error_billing_data', 'err');
@@ -538,43 +552,43 @@ if (empty($last_id)) {
         $st_query->addExpression('Max(id)', 'max');
         $last_id = $st_query->execute()->fetchField();
     }
-    
+
     $stage_billing_data = db_insert('stage_billing_data') // Table name no longer needs {}
-            ->fields(array(
-                'vehicle' => $value['VEHICLE'],
-                'loading_date' => $value['LOADING_DATE'],
-                'party_code' => $value['PARTY_CODE'],
-                'BEAT_NAME' => $value['BEAT_NAME'],
-                'bill_number' => $value['BILL_NUMBER'],
-                'bill_date' => $value['BILL_DATE'],
-                'BASEPACK_CODE' => $value['BASEPACK_CODE'],
-                'product_name' => $value['PRODUCT_NAME'],
-                'sku7_code' => $value['SKU7_CODE'],
-                'PRICELIST_GROUP' => $value['PRICELIST_GROUP'],
-                'PRODUCT_DIVISION' => $value['PRODUCT_DIVISION'],
-                'PRODUCT_CATEGORY' => $value['PRODUCT_CATEGORY'],
-                'PRODUCT_SUB_CATEGORY' => $value['PRODUCT_SUB_CATEGORY'],
-                'mrp' => isset($value['MRP']) ? $value['MRP'] : NULL,
-                'tur' => isset($value['TUR']) ? $value['TUR'] : NULL,
-                'Sum_of_TOTAL_SALES_QTY' => isset($value['Sum of TOTAL_SALES_QTY']) ? $value['Sum of TOTAL_SALES_QTY'] : NULL,
-                // 'Sum_of_TOTAL_SALES_RET_QTY' => isset($value['Sum of TOTAL_SALES_RET_QTY']) ? $value['Sum of TOTAL_SALES_RET_QTY'] : NULL,
-                'Sum_of_NET_SALES_QTY' => isset($value['Sum of NET_SALES_QTY']) ? $value['Sum of NET_SALES_QTY'] : NULL,
-                'Sum_of_SALES_FREE_QTY' => isset($value['Sum of SALES_FREE_QTY']) ? $value['Sum of SALES_FREE_QTY'] : NULL,
-                //  'Sum_of_SALES_RET_FREE_QTY' => isset($value['Sum of SALES_RET_FREE_QTY']) ? $value['Sum of SALES_RET_FREE_QTY'] : NULL,
-                //  'Sum_of_SALES_VALUE' => isset($value['Sum of SALES_VALUE']) ? $value['Sum of SALES_VALUE'] : NULL,
-                //  'Sum_of_SALES_RET_VALUE' => isset($value['Sum of SALES_RET_VALUE']) ? $value['Sum of SALES_RET_VALUE'] : NULL,
-                'Sum_of_NET_SALES_VALUE' => isset($value['Sum of NET_SALES_VALUE']) ? $value['Sum of NET_SALES_VALUE'] : NULL,
-                'Sum_of_NET_SALES_CASES' => isset($value['Sum of NET_SALES_CASES']) ? $value['Sum of NET_SALES_CASES'] : NULL,
-                'Sum_of_NET_SALES_KGS' => isset($value['Sum of NET_SALES_KGS']) ? $value['Sum of NET_SALES_KGS'] : NULL,
-                'Sum_of_SCHEME_DISCOUNT' => isset($value['Sum of SCHEME_DISCOUNT']) ? $value['Sum of SCHEME_DISCOUNT'] : NULL,
-                'Sum_of_OTHER_DISCOUNT' => isset($value['Sum of OTHER_DISCOUNT']) ? $value['Sum of OTHER_DISCOUNT'] : NULL,
-                'Sum_of_TAX_PERCENTAGE' => isset($value['Sum of TAX_PERCENTAGE']) ? $value['Sum of TAX_PERCENTAGE'] : NULL,
-                'error' => $error_boolean,
-                'error_id' => $last_id,
-                'date' => $date,
-                'distributor_id' => $distributor_id,
-            ))
-            ->execute();
+      ->fields(array(
+        'vehicle' => $value['VEHICLE'],
+        'loading_date' => $value['LOADING_DATE'],
+        'party_code' => $value['PARTY_CODE'],
+        'BEAT_NAME' => $value['BEAT_NAME'],
+        'bill_number' => $value['BILL_NUMBER'],
+        'bill_date' => $value['BILL_DATE'],
+        'BASEPACK_CODE' => $value['BASEPACK_CODE'],
+        'product_name' => $value['PRODUCT_NAME'],
+        'sku7_code' => $value['SKU7_CODE'],
+        'PRICELIST_GROUP' => $value['PRICELIST_GROUP'],
+        'PRODUCT_DIVISION' => $value['PRODUCT_DIVISION'],
+        'PRODUCT_CATEGORY' => $value['PRODUCT_CATEGORY'],
+        'PRODUCT_SUB_CATEGORY' => $value['PRODUCT_SUB_CATEGORY'],
+        'mrp' => isset($value['MRP']) ? $value['MRP'] : NULL,
+        'tur' => isset($value['TUR']) ? $value['TUR'] : NULL,
+        'Sum_of_TOTAL_SALES_QTY' => isset($value['Sum of TOTAL_SALES_QTY']) ? $value['Sum of TOTAL_SALES_QTY'] : NULL,
+        // 'Sum_of_TOTAL_SALES_RET_QTY' => isset($value['Sum of TOTAL_SALES_RET_QTY']) ? $value['Sum of TOTAL_SALES_RET_QTY'] : NULL,
+        'Sum_of_NET_SALES_QTY' => isset($value['Sum of NET_SALES_QTY']) ? $value['Sum of NET_SALES_QTY'] : NULL,
+        'Sum_of_SALES_FREE_QTY' => isset($value['Sum of SALES_FREE_QTY']) ? $value['Sum of SALES_FREE_QTY'] : NULL,
+        //  'Sum_of_SALES_RET_FREE_QTY' => isset($value['Sum of SALES_RET_FREE_QTY']) ? $value['Sum of SALES_RET_FREE_QTY'] : NULL,
+        //  'Sum_of_SALES_VALUE' => isset($value['Sum of SALES_VALUE']) ? $value['Sum of SALES_VALUE'] : NULL,
+        //  'Sum_of_SALES_RET_VALUE' => isset($value['Sum of SALES_RET_VALUE']) ? $value['Sum of SALES_RET_VALUE'] : NULL,
+        'Sum_of_NET_SALES_VALUE' => isset($value['Sum of NET_SALES_VALUE']) ? $value['Sum of NET_SALES_VALUE'] : NULL,
+        'Sum_of_NET_SALES_CASES' => isset($value['Sum of NET_SALES_CASES']) ? $value['Sum of NET_SALES_CASES'] : NULL,
+        'Sum_of_NET_SALES_KGS' => isset($value['Sum of NET_SALES_KGS']) ? $value['Sum of NET_SALES_KGS'] : NULL,
+        'Sum_of_SCHEME_DISCOUNT' => isset($value['Sum of SCHEME_DISCOUNT']) ? $value['Sum of SCHEME_DISCOUNT'] : NULL,
+        'Sum_of_OTHER_DISCOUNT' => isset($value['Sum of OTHER_DISCOUNT']) ? $value['Sum of OTHER_DISCOUNT'] : NULL,
+        'Sum_of_TAX_PERCENTAGE' => isset($value['Sum of TAX_PERCENTAGE']) ? $value['Sum of TAX_PERCENTAGE'] : NULL,
+        'error' => $error_boolean,
+        'error_id' => $last_id,
+        'date' => $date,
+        'distributor_id' => $distributor_id,
+      ))
+      ->execute();
 }
 
 function check_party_code_exist_or_not1() {
@@ -587,19 +601,19 @@ function check_party_code_exist_or_not1() {
 //  return $party_code_result;
 
 
-   /* $query1 = db_select('field_data_field_party_code', 'pc');
-    $query1->join('node', 'n', 'n.nid = pc.entity_id');
-    $query1->join('field_data_field_beat_name', 'bn', 'bn.entity_id = pc.entity_id');
-    $query1->condition('pc.bundle', "outlet_master");
-    $query1->fields('pc', array('field_party_code_value'));
-    $query1->fields('bn', array('field_beat_name_value'));
-    $query1->addTag('node_uid');
-    $party_code_result = $query1->execute()->fetchAllKeyed(0, 1);
-    return $party_code_result;*/
+    /* $query1 = db_select('field_data_field_party_code', 'pc');
+      $query1->join('node', 'n', 'n.nid = pc.entity_id');
+      $query1->join('field_data_field_beat_name', 'bn', 'bn.entity_id = pc.entity_id');
+      $query1->condition('pc.bundle', "outlet_master");
+      $query1->fields('pc', array('field_party_code_value'));
+      $query1->fields('bn', array('field_beat_name_value'));
+      $query1->addTag('node_uid');
+      $party_code_result = $query1->execute()->fetchAllKeyed(0, 1);
+      return $party_code_result; */
 }
 
 // @$csv_party_code = party code present in the csv file
-function check_party_code_exist_or_not($distributor_ids,$csv_party_code) {
+function check_party_code_exist_or_not($distributor_ids, $csv_party_code) {
 //  $query1 = db_select('node', 'n');
 //  $query1->condition('n.type', "outlet_master", '=');
 //  $query1->join('field_data_field_party_code', 'pc', 'pc.entity_id = n.nid');
@@ -607,26 +621,26 @@ function check_party_code_exist_or_not($distributor_ids,$csv_party_code) {
 //  $query1->fields('n', array('nid'));
 //  $party_code_result = $query1->execute()->fetchAllKeyed(0, 1);
 //  return $party_code_result;
-   $party_code_result = array();
-  if (!empty($distributor_ids)) {
-    $query1 = db_select('field_data_field_party_code', 'pc');
-    $query1->join('node', 'n', 'n.nid = pc.entity_id');
-    $query1->join('field_data_field_beat_name', 'bn', 'bn.entity_id = pc.entity_id');
-    $query1->condition('pc.bundle', "outlet_master");
-    $query1->fields('pc', array('field_party_code_value'));
-    $query1->fields('bn', array('field_beat_name_value'));
-    $query1->fields('n', array('uid'));
-    //$query1->addTag('node_uid');
-    $query1->condition('uid',$distributor_ids,'IN');
-    //$party_code_result = $query1->execute()->fetchAllKeyed(0, 1);
-    $result = $query1->execute()->fetchAll(PDO::FETCH_ASSOC);
-    if(!empty($result)) {
-      foreach($result as $key=>$value){
-        $party_code_result[$value['uid']][$value['field_party_code_value']] = $value['field_beat_name_value'];
-      }
+    $party_code_result = array();
+    if (!empty($distributor_ids)) {
+        $query1 = db_select('field_data_field_party_code', 'pc');
+        $query1->join('node', 'n', 'n.nid = pc.entity_id');
+        $query1->join('field_data_field_beat_name', 'bn', 'bn.entity_id = pc.entity_id');
+        $query1->condition('pc.bundle', "outlet_master");
+        $query1->fields('pc', array('field_party_code_value'));
+        $query1->fields('bn', array('field_beat_name_value'));
+        $query1->fields('n', array('uid'));
+        //$query1->addTag('node_uid');
+        $query1->condition('uid', $distributor_ids, 'IN');
+        //$party_code_result = $query1->execute()->fetchAllKeyed(0, 1);
+        $result = $query1->execute()->fetchAll(PDO::FETCH_ASSOC);
+        if (!empty($result)) {
+            foreach ($result as $key => $value) {
+                $party_code_result[$value['uid']][$value['field_party_code_value']] = $value['field_beat_name_value'];
+            }
+        }
     }
-  }
-  return $party_code_result;
+    return $party_code_result;
 }
 
 function check_sku7_code_exist_or_not($csv_skus) {
@@ -656,12 +670,12 @@ function check_bill_number_exist() {
 
 function check_distributor_incompleted_upload($distributor_id) {
     $result = db_select('error_billing_data', 'bd')
-            ->fields('bd', array('id'))
-            ->condition('status', 'Completed', '!=')
-            ->condition('status', 'Stopped', '!=')
-            ->condition('distributor_id', $distributor_id, '=')
-            ->execute()
-            ->fetchAssoc();
+      ->fields('bd', array('id'))
+      ->condition('status', 'Completed', '!=')
+      ->condition('status', 'Stopped', '!=')
+      ->condition('distributor_id', $distributor_id, '=')
+      ->execute()
+      ->fetchAssoc();
 
     $did = $result['id'];
     return $did;
@@ -677,12 +691,13 @@ function get_beat_name_from_party_code($party_code) {
     return $beat_name;
 }
 
-function check_node_title_exists($title, $type, $sales_data = FALSE,$distributor_id) {
+function check_node_title_exists($title, $type, $sales_data = FALSE, $distributor_id) {
     $query1 = db_select('node', 'n');
     $query1->condition('n.type', $type);
     $query1->condition('n.title', $title);
     $query1->fields('n', array('nid'));
-    $query1->condition('n.uid',$distributor_id);;
+    $query1->condition('n.uid', $distributor_id);
+    ;
     if ($sales_data) {
         $date = strtotime(date('Y-m-d'));
         $query1->join('field_data_field_sr_bill_date', 'd', 'd.entity_id = n.nid');
@@ -718,30 +733,30 @@ function get_csv_file_header() {
     global $user;
 
     $header = array(
-        'VEHICLE',
-        'LOADING_DATE',
-        'PARTY_CODE',
-        'BEAT_NAME',
-        'BILL_NUMBER',
-        'BILL_DATE',
-        'BASEPACK_CODE',
-        'SKU7_CODE',
-        'PRODUCT_NAME',
-        'PRICELIST_GROUP',
-        'PRODUCT_DIVISION',
-        'PRODUCT_CATEGORY',
-        'PRODUCT_SUB_CATEGORY',
-        'MRP',
-        'TUR',
-        'Sum of TOTAL_SALES_QTY',
-        'Sum of NET_SALES_QTY',
-        'Sum of SALES_FREE_QTY',
-        'Sum of NET_SALES_VALUE',
-        'Sum of NET_SALES_CASES',
-        'Sum of NET_SALES_KGS',
-        'Sum of SCHEME_DISCOUNT',
-        'Sum of OTHER_DISCOUNT',
-        'Sum of TAX_PERCENTAGE',
+      'VEHICLE',
+      'LOADING_DATE',
+      'PARTY_CODE',
+      'BEAT_NAME',
+      'BILL_NUMBER',
+      'BILL_DATE',
+      'BASEPACK_CODE',
+      'SKU7_CODE',
+      'PRODUCT_NAME',
+      'PRICELIST_GROUP',
+      'PRODUCT_DIVISION',
+      'PRODUCT_CATEGORY',
+      'PRODUCT_SUB_CATEGORY',
+      'MRP',
+      'TUR',
+      'Sum of TOTAL_SALES_QTY',
+      'Sum of NET_SALES_QTY',
+      'Sum of SALES_FREE_QTY',
+      'Sum of NET_SALES_VALUE',
+      'Sum of NET_SALES_CASES',
+      'Sum of NET_SALES_KGS',
+      'Sum of SCHEME_DISCOUNT',
+      'Sum of OTHER_DISCOUNT',
+      'Sum of TAX_PERCENTAGE',
     );
     if (in_array('central_distributor', $user->roles)) {
         array_push($header, 'Distributor Name');
