@@ -546,9 +546,10 @@ function get_updated_by_drpdwn_values($distributor_id, $resource_type = null, $c
 
 
 function get_all_reasons_for_update($distributor_id) {
+  $subadmin_uid = get_uid_by_role('sub_admin');
   $query = db_select('node', 'n');
   $query->condition('n.type', 'reason_for_update_master');
-  //$query->condition('n.uid', $distributor_id);
+  $query->condition('n.uid', $subadmin_uid);
   $query->fields('n', array('nid', 'title'));
   $result = $query->execute()->fetchAllKeyed(0, 1);
   return $result;
