@@ -1631,6 +1631,7 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
     // Store distributor id in author in each node
     $distributor_id = change_feeds_import_get_distributor_id($user->uid);
     $logged_in_distributor_id = $distributor_id;
+    $child_distributor_logged = 0;
     $distributor_wise_template = explode(',', variable_get('distributor_feed_importer'));
     if (in_array($entity->feeds_item->id, $distributor_wise_template)) {
         if (in_array('administrator', $user->roles) || in_array('central_distributor', $user->roles)) {
@@ -1653,6 +1654,7 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
         }
         // if child distributor logged in 
         else {
+            $child_distributor_logged = 1;
             $central_distributor_id = get_central_distributor_id($logged_in_distributor_id);
             if (!empty($item['distributor name'])) {
                 drupal_set_message("Template Mismatch.", 'error');
@@ -1682,7 +1684,13 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
         $subadmin_uid = get_uid_by_role('sub_admin');
         $entity->distributorid = $subadmin_uid;
         $distributor_id = $subadmin_uid;
-     }    
+     } 
+     $central_masters = array('area_code_master','hht_importer');
+     if(in_array($entity->feeds_item->id,$central_masters) && $child_distributor_logged ==1 ){
+        $entity->distributorid = $central_distributor_id;
+        $distributor_id = $central_distributor_id;
+     } 
+
     if ($entity->feeds_item->id == 'sku7_code_master_leanbox') {
         $query = db_select('node', 'n');
         $query->condition('n.type', 'product_validation_master');

@@ -100,12 +100,17 @@ function _van_planning_callback_form($form, &$form_state) {
   if (in_array("administrator", $user->roles) || in_array("central_distributor", $user->roles)) {
     $child_distributors = get_child_distributor_rsname($dis_id);
     $form_state['central_distributor_id'] = $dis_id;
+    if (count($child_distributors) == 1) {
+        $default_distributor_data = array_keys($child_distributors);
+        $default_distributor_id = $default_distributor_data[0];
+    }
 
     $form['editable_vp']['vp']['distributor_id'] = array(
       '#type' => 'select',
       '#title' => t('Distributor Name'),
       '#required' => TRUE,
       '#options' => array('' => t('Select')) + $child_distributors,
+      '#default_value'=>$default_distributor_id,
       '#ajax' => array(
         'wrapper' => 'van-itemlist-div',
         'callback' => 'van_planning_filter_ajax_callback',
