@@ -264,7 +264,7 @@ function _get_all_assets_type($trip_number,$distributor_id) {
   // Asset Type master belongs to central distributor
   $query = db_select('node', 'n');
   $query->condition('n.type', 'asset_type_master');
- // $query->condition('n.uid', $central_distributor_id);
+  $query->condition('n.uid', $central_distributor_id);
   $query->fields('n', array('nid', 'title'));
   $results = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
   if (!empty($results)) {
@@ -302,7 +302,7 @@ function get_asset_nid($asset_name,$central_distributor_id) {
     $query = db_select('node', 'n');
     $query->condition('n.type', 'asset_type_master');
     //$query->condition('n.uid', $dis_id);
-  //  $query->condition('n.uid', $central_distributor_id);
+    $query->condition('n.uid', $central_distributor_id);
     $query->condition('n.title', $asset_name);
     $query->fields('n', array('nid'));
     $results = $query->execute()->fetchField();

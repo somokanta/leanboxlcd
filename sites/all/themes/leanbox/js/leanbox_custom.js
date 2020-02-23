@@ -16,5 +16,10 @@ jQuery(document).ready(function($){
     	$(".menu_overlay").toggle();
     	$(".menu_dropdown").stop(true,true).slideUp();
     });
+    
+    $('.print-pdf').click(function (event){
+        console.log("print");
+        event.preventDefault();
+        window.print();});
 
 });
