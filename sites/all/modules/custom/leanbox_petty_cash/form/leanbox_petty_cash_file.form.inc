@@ -23,7 +23,7 @@ function file_upload_petty_cash_callback($form, &$form_state) {
     '#title' => t('Voucher No'),
     '#type' => 'textfield',
     '#size' => 20,
-    '#maxlength' => 20,
+    //'#maxlength' => 20,
     '#autocomplete_path' => 'voucher-no/list',
     '#ajax' => array(
       'callback' => '_petty_cash_file_ajax',
@@ -38,17 +38,17 @@ function file_upload_petty_cash_callback($form, &$form_state) {
   );
   if (isset($form_state['input']['voucher']) && !empty($form_state['input']['voucher'])) {
     $user_id = $GLOBALS['user']->uid;
-    $distributor_id = change_feeds_import_get_distributor_id($user_id);
+    $distributor_ids = get_distributor_ids();
     $voucher = $form_state['values']['voucher'];
     $query = db_select('petty_cash', 'pc');
     $query->fields('pc', array('file', 'bill_file'));
-    $query->condition('pc.distributor_id', $distributor_id);
+    $query->condition('pc.distributor_id', $distributor_ids,'IN');
     $query->condition('pc.voucher_no', $voucher);
     $rows = $query->execute()->fetch();
     if (!empty($rows->file) || !empty($rows->bill_file)) {
       drupal_set_message(t('Voucher or Bill copy has already been uploaded for this Voucher'), 'error');
     }
-    $output = _get_voucher_details_distributor_wise($distributor_id, $voucher);
+    $output = _get_voucher_details_distributor_wise($distributor_ids, $voucher);
     if (!empty($output['rows'])) {
 
       $form['old_voucher_table_id'] = array(
@@ -151,10 +151,10 @@ function _petty_cash_file_ajax($form, &$form_state) {
  * @param type $form_state
  */
 function file_upload_petty_cash_callback_submit($form, &$form_state) {
-  if (!empty($form_state['values']['voucher']) && !empty($form_state['values']['distributor_id'])) {
-
+    $distributor_ids = get_distributor_ids();
+  if (!empty($form_state['values']['voucher']) && !empty($distributor_ids)) {
     $old_voucher = $form_state['values']['voucher'];
-    $distributor_id = $form_state['values']['distributor_id'];
+    //$distributor_id = $form_state['values']['distributor_id'];
     $voucher = $form_state['values']['voucher'];
     //adding file and updating fid in petty_cash
     $file = ($form_state['storage']['file']);
@@ -164,7 +164,7 @@ function file_upload_petty_cash_callback_submit($form, &$form_state) {
     if (empty($file_id) || empty($bill_file_id)) {
       $query = db_select('petty_cash', 'pc');
       $query->fields('pc', array('file', 'bill_file'));
-      $query->condition('pc.distributor_id', $distributor_id);
+      $query->condition('pc.distributor_id', $distributor_ids,'IN');
       $query->condition('pc.voucher_no', $voucher);
       $rows = $query->execute()->fetch();
       $file_db_id = $rows->file;

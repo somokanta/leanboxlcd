@@ -11,8 +11,13 @@ function fetch_dispatch_planning_api_data($data) {
 
       // first entry in log table
       // get dis id using rs code
-      $dis_id = get_distributor_id_from_reference_number(trim($data['referenceNumber']));
       //$dis_id = leanbox_mobile_get_distributor_using_rscode($data['hubCode']);
+      $referenceNumber = explode("_",$data['referenceNumber']);
+      $actual_trip = $referenceNumber[0];
+      $actual_rs = $referenceNumber[1];
+      //$dis_id = get_distributorid_of_trip($actual_trip);
+      //$dis_id = get_trip_distributor_id_using_rs_code($actual_rs,$actual_trip); 
+      $dis_id = get_distributor_id_from_reference_number(trim($data['referenceNumber']));
       $json_data = json_encode($data);
       dispatch_planning_api_log($json_data, $data['jobData']['runsheet_number'], 'farey_sales_deliver', $dis_id, 1);
       $bill_row_id = _get_bill_row_id_manual_using_reference_no($data['referenceNumber']);
@@ -179,7 +184,7 @@ function fetch_dispatch_planning_api_data($data) {
           // new change - added on 31 Oct, 2019
         if(!empty($data['latitude']) && !empty($data['longitude']) ){
           try{
-            $api_result = get_reverse_geocode_data($data['latitude'], $data['longitude'], $data['referenceNumber']); // call to mapmyindia api //reverse_geocode_results($data['latitude'], $data['longitude']);
+            $api_result = get_reverse_geocode_data($data['latitude'], $data['longitude'], $data['referenceNumber'],$dis_id); // call to mapmyindia api //reverse_geocode_results($data['latitude'], $data['longitude']);
             watchdog('map my india api result: ', '<pre>' . print_r($api_result, TRUE) . '</pre>');
             if(!empty($api_result)){
               $decoded_locality = $api_result[0]->locality; // area
@@ -305,33 +310,36 @@ function _get_dispatch_qty_undeliver($bill_row_id) {
 
 
 // new change - added on 31 Oct, 2019
-function get_reverse_geocode_data($latitude, $longitude, $reference_number){
+function get_reverse_geocode_data($latitude, $longitude, $reference_number,$dis_id=0){
   $api_result = array();
-  if (!empty($latitude) && !empty($longitude)) {
-        $license_key = variable_get('mapmyindia_rest_key', 'z94i9hvuqcsz7amywt76aknw8dx9o15z');
-        $url = "https://apis.mapmyindia.com/advancedmaps/v1/$license_key/rev_geocode?lng=$longitude&lat=$latitude";
-        $sql_ins_id = insert_map_my_india_api_log($url, $reference_number);
-        if (trim($longitude, 0) == 1.11 || trim($latitude, 0) == 1.11) {
+  if(!empty($latitude) && !empty($longitude)){
+      $license_key = variable_get('mapmyindia_rest_key', 'z94i9hvuqcsz7amywt76aknw8dx9o15z');   
+      $url = "https://apis.mapmyindia.com/advancedmaps/v1/$license_key/rev_geocode?lng=$longitude&lat=$latitude";
+      $sql_ins_id = insert_map_my_india_api_log($url, $reference_number,$dis_id);
+      $options = array('method' => 'GET');
+      //$result = drupal_http_request($url, $options);
+      if (trim($longitude, 0) == 1.11 || trim($latitude, 0) == 1.11) {
             $result = '';
         } else {
             $options = array('method' => 'GET');
             $result = drupal_http_request($url, $options);
         }
-        update_map_my_india_api_log($sql_ins_id, json_encode($result));
-        if ($result->status_message === 'OK') {
-            $decoded_data = json_decode($result->data);
-            $api_result = $decoded_data->results;
-        }
-    }
-    return $api_result;
+      update_map_my_india_api_log($sql_ins_id, json_encode($result));
+      if($result->status_message === 'OK'){
+          $decoded_data = json_decode($result->data);
+          $api_result = $decoded_data->results;
+      }
+  }
+  return $api_result;
 }
 
-function insert_map_my_india_api_log($url, $reference_number){
+function insert_map_my_india_api_log($url, $reference_number,$dis_id){
   $sql_ins_id = db_insert('map_my_india_api_log')
      ->fields(array(
         'reference_number' => $reference_number,
         'request_data' => $url,
-        'request_time' => time()
+        'request_time' => time(),
+        'distributor_id'=>$dis_id,
      ))
      ->execute();
 

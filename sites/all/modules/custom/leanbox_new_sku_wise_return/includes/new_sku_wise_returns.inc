@@ -15,6 +15,15 @@
 function new_sku_wise_returns_form($form, &$form_state) {
   // show bill wise entry
   global $base_url;
+  global $user;
+  $logged_in_dis_id = change_feeds_import_get_distributor_id($user->uid);
+  if (in_array("central_distributor", $user->roles)) {
+        $central_distributor_id = $logged_in_dis_id;
+   }
+   else {
+        $central_distributor_id = get_central_distributor_id($logged_in_dis_id);
+   }
+   $form_state['central_distributor_id'] = $central_distributor_id;
   $image_path = drupal_get_path('module', 'mrc_inventory_returns');
   $bill_wise = arg(1);
   if ($bill_wise == 'bill-wise') {
@@ -42,8 +51,22 @@ function new_sku_wise_returns_form($form, &$form_state) {
     '#validate' => array('trip_number_validation'),
   );
   $trip_number = $form_state['input']['trip_number'];
-
-  if (!empty($trip_number) && empty($form_state['trip_no_error'])) {
+  $distributor_id = get_distributorid_of_trip($trip_number);
+  
+  $trip_detail = check_trip_id_exists_or_not($distributor_id, $trip_number);
+  $current_vrs_status = $trip_detail->field_vrs_status_value;
+    if ($current_vrs_status == 0 || $current_vrs_status == 6) {
+        if ($form_state['bill-wise'] == 1 && $current_vrs_status != 6) {
+            $form_state['trip_no_error'] = 1; // second Screen
+        }
+        else if (empty($form_state['bill-wise']) && $current_vrs_status != 0) {
+            $form_state['trip_no_error'] = 1; //  first Screen 
+        }
+    }
+    else {
+        $form_state['trip_no_error'] = 1;
+    }
+    if (!empty($trip_number) && empty($form_state['trip_no_error'])) {
     $putaway_initial_option = array('' => 'Select');
     $putaway_group_options = get_all_putaway_groups($distributor_id);
     if (!empty($putaway_group_options)) {
@@ -240,8 +263,9 @@ function new_sku_wise_returns_form($form, &$form_state) {
           );
 
           $reason_type = $val1['res_status'];
+ 
           $reason_list = _get_bill_status_wise_reason_master_list($reason_type);
-          /* if ($reason_type == 'undeliver') {
+           /* if ($reason_type == 'undeliver') {
             $search = trim($val1['res_reason_for_failure']);
             }
             else {
@@ -562,7 +586,7 @@ function new_sku_wise_returns_form($form, &$form_state) {
       if ($form_state['bill-wise'] == 1) {
         // Dispatch Supervisor
         $incharge_name_option = array('' => 'Select');
-        $dispatch_supervisor_options = get_dispatch_supervisor_list($distributor_id);
+        $dispatch_supervisor_options = get_dispatch_supervisor_list($central_distributor_id);
         if (!empty($dispatch_supervisor_options)) {
           $dispatch_supervisor_name_option = $incharge_name_option + $dispatch_supervisor_options;
         }
@@ -575,7 +599,7 @@ function new_sku_wise_returns_form($form, &$form_state) {
       }
       else {
         $incharge_name_option = array('' => 'Select');
-        $return_incharge_options = get_returns_incharge_list($distributor_id);
+        $return_incharge_options = get_returns_incharge_list($central_distributor_id);
         if (!empty($return_incharge_options)) {
           $incharge_name_option = $incharge_name_option + $return_incharge_options;
         }
@@ -678,11 +702,9 @@ function delete_excess_inventory($product_id) {
 }
 
 function trip_number_validation($form, &$form_state) {
-  global $user;
-  $dis_id = change_feeds_import_get_distributor_id($user->uid);
   $form_state['trip_no_error'] = '';
   $trip_number = $form_state['input']['trip_number'];
-
+  $dis_id = get_distributorid_of_trip($trip_number);
   $query = db_select('dispatch_planning_api_data', 'ad');
   $query->condition('ad.runsheet_number', $trip_number, '=');
   $query->condition('ad.distributor_id', $dis_id);
@@ -744,14 +766,23 @@ function trip_number_validation($form, &$form_state) {
 // exclude dp bills in return
 function new_sku_wise_return_submit($form, &$form_state) {
   if ($form_state['trip_no_error'] != 1) {
-    global $user;
-    $dis_id = change_feeds_import_get_distributor_id($user->uid);
+    $central_distributor_id = $form_state['central_distributor_id'];
     $trip_id = $form_state['values']['trip_number'];
+    $dis_id = get_distributorid_of_trip($trip_id);
+    if ($form_state['bill-wise'] == 1) {
+        $vrs_status = '0';
+    }
+    else  {
+        $vrs_status = '-1';
+    }
     $selected_bill_status = $form_state['values']['bill_status'];
     $sub_putaway_group = $form_state['values']['sub_putaway_group'];
     $putaway_group = $form_state['values']['putaway_group'];
     $query = db_select('dispatch_planning_item_details', 'dpi');
     $query->join('dispatch_planning_api_data', 'ad', 'dpi.trip_bill_reference = ad.id');
+    //$query->join('node', 'dispatch_data', 'dispatch_data.title = ad.runsheet_number and dispatch_data.uid = ad.distributor_id');
+   // $query->leftjoin('field_data_field_vrs_status', 'vs', 'vs.entity_id = dispatch_data.nid');
+    //$query->condition('vs.field_vrs_status_value', $vrs_status);
     $query->condition('ad.delivery_pending_flag', 1, '!=');
     $query->condition('ad.runsheet_number', $trip_id);
     $query->condition('ad.distributor_id', $dis_id);
@@ -766,7 +797,7 @@ function new_sku_wise_return_submit($form, &$form_state) {
       $query->condition('ad.res_status', 'undeliver', '=');
     }
     if (!empty($sub_putaway_group)) {
-      $query->join('node', 'n', 'n.title = dpi.sku_code and n.uid = ad.distributor_id');
+      $query->join('node', 'n', 'n.title = dpi.sku_code');
       $query->condition('n.type', 'sku7_code_master', '=');
       $query->join('field_data_field_sub_putaway_group', 'spg', 'spg.entity_id = n.nid');
       $query->condition('spg.field_sub_putaway_group_nid', $sub_putaway_group, '=');
@@ -774,7 +805,7 @@ function new_sku_wise_return_submit($form, &$form_state) {
     if (!empty($putaway_group) && empty($sub_putaway_group)) {
       $sub_putaway_nids = get_nids_of_selected_putaway($putaway_group, $dis_id);
 
-      $query->join('node', 'n', 'n.title = dpi.sku_code and n.uid = ad.distributor_id');
+      $query->join('node', 'n', 'n.title = dpi.sku_code');
       $query->condition('n.type', 'sku7_code_master', '=');
       $query->join('field_data_field_sub_putaway_group', 'spg', 'spg.entity_id = n.nid');
       $query->condition('spg.field_sub_putaway_group_nid', $sub_putaway_nids, 'IN');
@@ -891,9 +922,9 @@ function new_sku_wise_return_submit($form, &$form_state) {
 
 function save_sku_wise_return_validate($form, &$form_state) {
 // watchdog('form_validate', '<pre>' . print_r($form_state, TRUE) . '</pre>');
-  global $user;
-  $dis_id = change_feeds_import_get_distributor_id($user->uid);
-
+  $trip_number = $form_state['values']['trip_number'];
+  $dis_id = get_distributorid_of_trip($trip_number);
+  $central_distributor_id = $form_state['central_distributor_id'];
   $form_state['sku_excess_error'] = 0;
   foreach ($form_state['input']['bill_details'] as $sku => $value) {
     $dispatched_qty = 0;
@@ -1128,9 +1159,8 @@ function save_return_final_version($trip_id, $dis_id, $returns_incharge_name = '
 //Save btn function
 function save_sku_wise_return_submit($form, &$form_state) {
   if (empty($form_state['sku_excess_error'])) {
-    global $user;
-    $dis_id = change_feeds_import_get_distributor_id($user->uid);
     $trip_id = $form_state['values']['trip_number'];
+    $dis_id = get_distributorid_of_trip($trip_id);
     $returns_start_time = $form_state['returns_start_time'];
     $returns_incharge_name = $form_state['input']['return_incharge_name'];
 // Merging the sku data in temp table
@@ -1330,8 +1360,10 @@ function save_sku_wise_return_submit($form, &$form_state) {
 function save_sku_wise_return_final_validate_version($form, &$form_state) {
 // watchdog('form_validate', '<pre>' . print_r($form_state, TRUE) . '</pre>');
   global $user;
-  $dis_id = change_feeds_import_get_distributor_id($user->uid);
+    //$dis_id = change_feeds_import_get_distributor_id($user->uid);
   $trip_number = $form_state['values']['trip_number'];
+  $central_distributor_id = $form_state['central_distributor_id'];
+  $dis_id = get_distributorid_of_trip($trip_number);
   $form_state['sku_excess_error'] = 0;
   $temp_data = get_temp_data($trip_number, $dis_id);
   $actual_return_qty_not_declared = 0;
@@ -1449,8 +1481,10 @@ function save_sku_wise_return_final_validate_version($form, &$form_state) {
 function save_sku_wise_return_final_submit_version($form, &$form_state) {
   if (empty($form_state['sku_excess_error'])) {
     global $user;
-    $dis_id = change_feeds_import_get_distributor_id($user->uid);
+    //$dis_id = change_feeds_import_get_distributor_id($user->uid);
     $trip_id = $form_state['values']['trip_number'];
+    $central_distributor_id = $form_state['central_distributor_id'];
+    $dis_id = get_distributorid_of_trip($trip_id);
     $returns_start_time = $form_state['returns_start_time'];
     $existing_return_start_time = check_skuwise_return_start_time_present($trip_id, $dis_id);
 // Returns start time empty then save return start time in db
@@ -1554,9 +1588,9 @@ function get_temp_data($trip_id, $distributor_id) {
 
 function sku_wise_return_validate($form, &$form_state) {
 //watchdog('validate1', '<pre>' . print_r($form_state, TRUE) . '</pre>');
-  global $user;
-  $dis_id = change_feeds_import_get_distributor_id($user->uid);
   $trip_id = $form_state['values']['trip_number'];
+  $dis_id = get_distributorid_of_trip($trip_id);
+  $central_distributor_id = $form_state['central_distributor_id'];
   $temp_data = get_temp_data($trip_id, $dis_id);
   $query = db_select('dispatch_planning_item_details', 'dpi');
   $query->join('dispatch_planning_api_data', 'ad', 'dpi.trip_bill_reference = ad.id');
@@ -1713,8 +1747,10 @@ function sku_wise_return_validate($form, &$form_state) {
 function sku_wise_return_submit($form, &$form_state) {
 //watchdog('submit1', '<pre>' . print_r($form_state, TRUE) . '</pre>');
   global $user;
-  $dis_id = change_feeds_import_get_distributor_id($user->uid);
+    //$dis_id = change_feeds_import_get_distributor_id($user->uid);
   $trip_id = $form_state['values']['trip_number'];
+  $dis_id = get_distributorid_of_trip($trip_id);
+  $central_distributor_id = $form_state['central_distributor_id'];
   $returns_end_time = time();
   $returns_start_time = $form_state['returns_start_time'];
   $existing_bill_wise_return_start_time = 0;
@@ -2209,9 +2245,9 @@ function product_remove_items($form, &$form_state) {
 		$form_state['rebuild'] = TRUE;
 	}
 	else {
-		global $user;
-		$distributor_id = change_feeds_import_get_distributor_id($user->uid);
+		
 		$trip_no = $form_state['input']['trip_number'];
+                $distributor_id = get_distributorid_of_trip($trip_no);
 		$product_presence_arr = check_product_presence_in_db_by_trip_id($product_id, $distributor_id, $trip_no);
 		$product_presence_id = $product_presence_arr['id'];
 

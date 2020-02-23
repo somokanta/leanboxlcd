@@ -111,11 +111,12 @@ function insert_tester_order_data_in_sales_register($tester_order_data) {
 
 
 function insert_tester_order_data_in_custom_billing_table($tester_order_data) {
+    
     foreach ($tester_order_data as $key => $data) {
         if(!empty($data['tester_order_number'])){
             watchdog('tester order data custom billing', '<pre>' . print_r($data, TRUE) . '</pre>');
             $distributor_id = $data['lcd_distributor_id'];
-            
+            $central_distributor_id = get_central_distributor_id($distributor_id);
             $tb_id = db_query("select id from custom_billing_data where distributor_id = $distributor_id and  bill_number = '".$data['tester_order_number']."' and BASEPACK_CODE ='".$data['basepack_code']."' limit 1")->fetchField();
             if(empty($tb_id)){
                 //Fetch SKU7_CODE
@@ -139,7 +140,7 @@ function insert_tester_order_data_in_custom_billing_table($tester_order_data) {
                 //TP to host calculation for line level value
                 $line_level_value = 0;
 
-                $data['order_date'] = get_modified_order_date_tester($data['order_date'], $distributor_id); //as discussed with kusha
+                $data['order_date'] = get_modified_order_date_tester($data['order_date'], $central_distributor_id); //as discussed with kusha
                 
                 //Fetch SKU7 code – based on basepack code (since multiple SKU7 codes will be found, fetch anyone)
                 db_insert('custom_billing_data')
@@ -195,8 +196,9 @@ function insert_tester_order_data_in_custom_billing_table($tester_order_data) {
 }          
           
 function get_promised_delivery_date_tester($date, $distributor_id) {
+  $central_distributor_id = get_central_distributor_id($distributor_id);
   $query = db_select('node', 'n');
-  $query->condition('n.uid', $distributor_id);
+  $query->condition('n.uid', $central_distributor_id);
   $query->condition('n.type', 'pdd_master');
   $query->fields('n', array('nid'));
   $pdd_value_result = $query->execute()->fetchField();
@@ -209,7 +211,7 @@ function get_promised_delivery_date_tester($date, $distributor_id) {
   }
 
   $query = db_select('node', 'n');
-  $query->condition('n.uid', $distributor_id);
+  $query->condition('n.uid', $central_distributor_id);
   $query->condition('n.type', 'holiday_master');
   $query->leftjoin('field_data_field_holiday', 'hday', 'hday.entity_id = n.nid');
   $query->addExpression("DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(hday.field_holiday_value),'+00:00','+05:30'), '%Y-%m-%d')", 'hdate');
@@ -221,9 +223,9 @@ function get_promised_delivery_date_tester($date, $distributor_id) {
   return strtotime($pdd);
 }
 
-function get_modified_order_date_tester($date, $distributor_id) {
+function get_modified_order_date_tester($date, $central_distributor_id) {
   $query = db_select('node', 'n');
-  $query->condition('n.uid', $distributor_id);
+  $query->condition('n.uid', $central_distributor_id);
   $query->condition('n.type', 'pdd_master');
   $query->fields('n', array('nid'));
   $pdd_value_result = $query->execute()->fetchField();
@@ -236,7 +238,7 @@ function get_modified_order_date_tester($date, $distributor_id) {
   }
 
   $query = db_select('node', 'n');
-  $query->condition('n.uid', $distributor_id);
+  $query->condition('n.uid', $central_distributor_id);
   $query->condition('n.type', 'holiday_master');
   $query->leftjoin('field_data_field_holiday', 'hday', 'hday.entity_id = n.nid');
   $query->addExpression("DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(hday.field_holiday_value),'+00:00','+05:30'), '%Y-%m-%d')", 'hdate');

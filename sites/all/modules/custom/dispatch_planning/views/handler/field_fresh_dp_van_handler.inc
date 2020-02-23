@@ -25,10 +25,9 @@ class field_fresh_dp_van_handler extends views_handler_field {
    }
    
    function render($data) {
-    global $user;
-    $user_id = $user->uid;
-    $distributor_id = change_feeds_import_get_distributor_id($user_id);
+    
     $trip_id = $data->node_title;
+    $distributor_id = get_distributorid_of_trip($trip_id);
     
     $query = db_select('node', 'n');
     $query->condition('n.type', 'sales_register_data');

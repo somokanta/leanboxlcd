@@ -27,6 +27,14 @@ function vrs_confirmation_form($form, &$form_state) {
   $sum_s_register_bill_value = 0;
   global $user;
   $dis_id = change_feeds_import_get_distributor_id($user->uid);
+  $logged_in_dis_id = $dis_id;
+  if (in_array("central_distributor", $user->roles)) {
+        $central_distributor_id = $logged_in_dis_id;
+  } else {
+        $central_distributor_id = get_central_distributor_id($logged_in_dis_id);
+  }
+  $form_state['central_distributor_id'] = $central_distributor_id;
+  $dis_id = get_distributorid_of_trip($trip_id);
   $form['#attached']['js'][] = drupal_get_path('module', 'mrc_inventory_returns') . '/js/vrs_confirmation.js';
   $form['#attributes'] = array('enctype' => 'multipart/form-data');
   $form['#prefix'] = '<div id="itemlist-div" class="custom_form_wrapper">';
@@ -254,6 +262,8 @@ function vrs_confirmation_form($form, &$form_state) {
             $val['res_cheque_amount'] =  round($val['res_cheque_amount']);
             $val['res_confirm_signed_bill_amount'] = round($val['res_confirm_signed_bill_amount']);
       }
+      
+      
       // to be collected,total cash, signed bill all  should be zero in the case of undeliver
       // Payment outcome is undeliver then cash collected = zero,cheque collected =zero signed bill = Zero
       if ($val['res_status'] == 'undeliver') {
@@ -703,7 +713,34 @@ function vrs_confirmation_form($form, &$form_state) {
       $total_signed_bill_value += round($val['res_confirm_signed_bill_amount']);
       $total_actual_cash_collected_value += round($val['res_cash_amount']);
       $total_cheque_collected_value += round($val['res_cheque_amount']);
-
+      if(strtolower($val['res_bank_name']) == 'na'){
+          unset($val['res_bank_name']);
+      }
+      if(strtolower($val['res_cheque_no']) == 'na'){
+          unset($val['res_cheque_no']);
+      }  
+      if(strtolower($val['res_cheque_date']) == 'na'){
+          unset($val['res_cheque_date']);
+      }
+      if(strtolower($val['res_cash_amount']) == 'na'){
+          unset($val['res_cash_amount']);
+      }
+      if(strtolower($val['res_confirm_signed_bill_amount']) == 'na'){
+          unset($val['res_confirm_signed_bill_amount']);
+      }
+      if(strtolower($val['res_cheque_amount']) == 'na'){
+          unset($val['res_cheque_amount']);
+      }
+      if(strtolower($val['res_photo_of_cheque']) == 'na'){
+          unset($val['res_photo_of_cheque']);
+     }
+     if(strtolower($val['res_photo_of_signed_bill_delivery']) == 'na') {
+         unset($val['res_photo_of_signed_bill_delivery']);
+     }
+     if(strtolower($val['photo_of_signed_bill_partial']) == 'na') {
+         unset($val['photo_of_signed_bill_partial']);
+     }
+               
       $bank_name = array(
         //'#id' => 'bill_details-' . $key . '-bank_name',
         '#attributes' => array('class' => array('bank_name'), 'title' => t('Bank Name')),
@@ -1246,12 +1283,13 @@ function vrs_confirmation_select_trip_id_callback($form, &$form_state) {
 }
 
 function validate_vrs_trip_details($form, &$form_state) {
-  global $user;
-  $dis_id = change_feeds_import_get_distributor_id($user->uid);
+  //global $user;
+  //$dis_id = change_feeds_import_get_distributor_id($user->uid);
   $trip_id = $form_state['values']['trip_id'];
   if (empty($trip_id)) {
     $trip_id = $form_state['values']['trips'];
   }
+  $dis_id = get_distributorid_of_trip($trip_id);
   if (!empty($trip_id)) {
     //1- Return confirmed, 3- Vrs pending
     // Checking VRS Status 
@@ -1314,9 +1352,9 @@ function validate_vrs_trip_details($form, &$form_state) {
 }
 
 function display_vrs_trip_details($form, &$form_state) {
-  global $user;
+  //global $user;
   $res = array();
-  $dis_id = change_feeds_import_get_distributor_id($user->uid);
+  //$dis_id = change_feeds_import_get_distributor_id($user->uid);
   $trip_id = $form_state['values']['trip_id'];
   $dispatch_date = $form_state['values']['dispatch_date'];
   $cashier_name = $form_state['values']['cashier_name'];
@@ -1326,6 +1364,7 @@ function display_vrs_trip_details($form, &$form_state) {
   if (empty($trip_id)) {
     $trip_id = $form_state['values']['trips'];
   }
+  $dis_id = get_distributorid_of_trip($trip_id);
   if (!empty($trip_id)) {
     $sub_query1 = db_select('dispatch_planning_item_details', 'dpi');
     $sub_query1->fields('dpi', array('trip_bill_reference'));
@@ -1437,13 +1476,14 @@ function display_vrs_trip_details($form, &$form_state) {
 }
 
 function vrs_confirmation_validate($form, &$form_state) {
-  global $user;
+  //global $user;
   $messages = array();
-  $dis_id = change_feeds_import_get_distributor_id($user->uid);
+  //$dis_id = change_feeds_import_get_distributor_id($user->uid);
   $trip_id = $form_state['values']['trip_id'];
   if (empty($trip_id)) {
     $trip_id = $form_state['values']['trips'];
   }
+  $dis_id = get_distributorid_of_trip($trip_id);
   $claimed_godown_short_qty = $form_state['values']['claimed_godown_short_qty'];
   $key_footer = key($form_state['values']['footer_details']);
   $to_be_collected = (float) $form_state['values']['footer_details'][$key_footer]['total_s_register'];
@@ -1607,11 +1647,13 @@ function check_vrs_trip_exist($trip_id, $dis_id) {
 function vrs_confirmation_form_submit($form, &$form_state) {
   $vrs_start_time = $form_state['start_time'];
   global $user;
-  $dis_id = change_feeds_import_get_distributor_id($user->uid);
+  //$dis_id = change_feeds_import_get_distributor_id($user->uid);
+  $central_distributor_id = $form_state['central_distributor_id'];
   $trip_id = $form_state['values']['trip_id'];
   if (empty($trip_id)) {
     $trip_id = $form_state['values']['trips'];
   }
+  $dis_id = get_distributorid_of_trip($trip_id);
   // Checking VRS Total field values present or not
   $vrs_total_data = get_vrs_total_id($trip_id, $dis_id);
   if (!empty($vrs_total_data)) {
@@ -1815,7 +1857,7 @@ function vrs_confirmation_form_submit($form, &$form_state) {
     }
     $trip_items_total['vrs_confirm_date'] = time();
     $trip_items_total['distributor_id'] = $dis_id;
-    $vrs_total_id_insert = insert_vrs_trip_total($trip_items_total, $trip_id);
+    $vrs_total_id_insert = insert_vrs_trip_total($trip_items_total, $trip_id,$dis_id);
      // Delete existing denominations  before insert new denominations
     delete_existing_denominations($trip_id,$dis_id);
     if (!empty($vrs_total_id))
@@ -1864,9 +1906,7 @@ function vrs_confirmation_form_submit($form, &$form_state) {
   }
 }
 
-function insert_vrs_trip_total($values, $trip_id) {
-  global $user;
-  $dis_id = change_feeds_import_get_distributor_id($user->uid);  
+function insert_vrs_trip_total($values, $trip_id,$distributor_id) {
   $vrs_trip_total_field = array('trip_id',
     'vrs_id',
     'bill_count',
@@ -1891,7 +1931,7 @@ function insert_vrs_trip_total($values, $trip_id) {
   $res = db_merge('vrs_trip_total') // Table name no longer needs {}
     ->fields($values)
     ->condition('trip_id', $trip_id)
-    ->condition('distributor_id', $dis_id)
+    ->condition('distributor_id', $distributor_id)      
     ->execute();
   // Always insert into vrs_trip_total_history table
   $res1 = db_insert('vrs_trip_total_history')->fields($values)->execute();
@@ -1951,13 +1991,11 @@ function insert_vrs_bill_items($values, $trip_id, $version_number, $distributor_
   $query->execute();
 }
 
-function delete_existing_denominations($trip_id,$dis_id) {
+function delete_existing_denominations($trip_id) {
   if (!empty($trip_id)) {
     // Deleting existing denomination entry
     $del = db_delete('vrs_trip_denominations');
-    $del->condition('trip_id', $trip_id);
-    $del->condition('distributor_id', $dis_id);
-    $del->execute();
+    $del->condition('trip_id', $trip_id)->execute();
   }
 }
 
@@ -2007,9 +2045,10 @@ function _banks_autocomplete($trip_id, $string) {
   $bank_names = array();
   if (!empty($trip_id)) {
     global $user;
-    $dis_id = change_feeds_import_get_distributor_id($user->uid);
+    //$dis_id = change_feeds_import_get_distributor_id($user->uid);
+    $dis_ids = get_distributor_ids();
     $query = db_select('dispatch_planning_api_data', 'ad');
-    $query->condition('ad.distributor_id', $dis_id, '=');
+    $query->condition('ad.distributor_id', $dis_ids, 'IN');
     $query->condition('ad.runsheet_number', $trip_id, '=');
     $query->leftJoin('vrs_trip_items', 'vt', 'vt.trip_id = ad.runsheet_number');
     $db_or = db_or();
@@ -2073,8 +2112,9 @@ function validate_bank_names($bank_name, $trip_id) {
 function _get_cashier_name_using_trip_id($trip_id) {
   $res = array();
   if (!empty($trip_id)) {
-    global $user;
-    $dis_id = change_feeds_import_get_distributor_id($user->uid);
+    //global $user;
+    //$dis_id = change_feeds_import_get_distributor_id($user->uid);
+    $dis_id = get_distributorid_of_trip($trip_id);  
     $query = db_select('node', 'n');
     $query->condition('n.type', 'dispatch_data');
     $query->condition('n.uid', $dis_id);

@@ -167,7 +167,7 @@ function _get_feeds_url_for_sku_callabck($callback_arg1, $arg2) {
    $roles = $user->roles;
    $url_arg0 = arg(0);
    $url_arg = arg(1);
-   if (in_array('leanbox', $roles)) {
+   if (in_array('leanbox', $roles)|| in_array('central_distributor', $roles)) {
       if ($url_arg0 == 'import' && $url_arg == 'sku7_code_master') {
          drupal_goto('import/sku7_code_master_leanbox');
       }

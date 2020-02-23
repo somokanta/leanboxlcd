@@ -45,7 +45,7 @@ function custom_order_box_id_schema() {
        'description' => t('Facility Code'),
        'type' => 'varchar',
        'length' => 100,
-      ),
+      ),  
       'created_time' => array(
        'description' => 'DATA Created Time',
        'type' => 'int',
@@ -79,7 +79,8 @@ function custom_order_box_id_update_7121() {
   $fields = array(
    'distributor_id' => array(
        'description' => t('Distributor ID'),
-       'type' => 'int',
+       'type' => 'varchar',
+       'length' => 15,
     ),  
   );
   foreach ($fields as $key => $field) {
@@ -117,7 +118,7 @@ function custom_order_box_id_update_7122() {
 }
 
 
-function custom_order_box_id_update_7123() {
+function custom_order_box_id_update_7124() {
   $fields = array(
    'hul_code' => array(
        'description' => t('Hul Code'),
@@ -131,4 +132,3 @@ function custom_order_box_id_update_7123() {
     }
   }
 }
-

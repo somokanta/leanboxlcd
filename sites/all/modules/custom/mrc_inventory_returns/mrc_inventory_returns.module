@@ -253,6 +253,14 @@ function mrc_inventory_returns_menu() {
     'file' => 'includes/trip_short_report.inc',
     'access arguments' => array('returns confirmation')
   );
+  $items['upload-signed-bill-and-cheque'] = array(
+    'title' => 'Upload Signed Bill & Cheque',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('upload_signed_bill_cheque_form'),
+    'access arguments' => array('returns confirmation'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'includes/upload_signed_bill_cheque.inc',
+  );
 
   return $items;
 }
@@ -291,9 +299,12 @@ function mrc_inventory_returns_permission() {
  */
 
 function get_all_cashier_names() {
+  $results = array();
+  $distributor_ids = get_distributor_ids();  
   $query = db_select('node', 'n');
   $query->condition('n.type', 'dispatch_data');
-  $query->addTag('node_uid');
+  $query->condition('n.uid',$distributor_ids,'IN');
+  //$query->addTag('node_uid');
   $query->join('field_data_field_cashier_name', 'cn', 'cn.entity_id = n.nid');
   $query->fields('cn', array('field_cashier_name_value'));
 
@@ -437,28 +448,29 @@ function get_notes_denominations() {
     //$query->fields('n', array('nid', 'title'));
     $result = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
     return $result; */
-  global $user;
-  $dis_id = change_feeds_import_get_distributor_id($user->uid);
-  $query = db_query("SELECT distinct CAST(title AS UNSIGNED) AS title,nid  FROM {node}"
-    . " WHERE type = 'notes_denominations'  and status =1 and node.uid= $dis_id order by title desc");
-  $result = $query->fetchAll(PDO::FETCH_ASSOC);
+  $result = array();  
+  $distributor_id = get_uid_by_role('sub_admin');
+  if (!empty($distributor_id)) {
+    $query = db_query("SELECT distinct CAST(title AS UNSIGNED) AS title,nid  FROM {node}"
+      . " WHERE type = 'notes_denominations'  and status =1 and node.uid = $distributor_id order by title desc");
+    $result = $query->fetchAll(PDO::FETCH_ASSOC);
+  }
   return $result;
 }
 
 function _get_trip_ids_using_dispatch_date($dispatch_date) {
-  $res = array();
-  if (!empty($dispatch_date)) {
-    global $user;
-    $dis_id = change_feeds_import_get_distributor_id($user->uid);
-    $query = db_select('node', 'n');
-    $query->condition('n.type', 'dispatch_data');
-    $query->condition('n.uid', $dis_id);
-    $query->join('field_data_field_dispatch_date', 't', 't.entity_id = n.nid');
-    $query->condition('t.field_dispatch_date_value', $dispatch_date);
-    $query->fields('n', array('title'));
-    $res = $query->execute()->fetchAllKeyed(0, 0);
-  }
-  return $res;
+    $res = array();
+    $distributor_ids = get_distributor_ids();
+   if (!empty($dispatch_date)) {
+      $query = db_select('node', 'n');
+      $query->condition('n.type', 'dispatch_data');
+      $query->condition('n.uid', $distributor_ids,'IN');
+      $query->join('field_data_field_dispatch_date', 't', 't.entity_id = n.nid');
+      $query->condition('t.field_dispatch_date_value', $dispatch_date);
+      $query->fields('n', array('title'));
+      $res = $query->execute()->fetchAllKeyed(0, 0);
+   }
+   return $res;
 }
 
 // Get all vrs ids
@@ -769,23 +781,23 @@ function get_trip_ids_by_date_range($dispatch_date_from = null, $dispatch_date_t
 }
 
 function get_total_bill_value($trip_ids) {
-  $res = array();
-  global $user;
-  $distributor_id = change_feeds_import_get_distributor_id($user->uid);
-  if (!empty($trip_ids)) {
-    $query = db_select('node', 'disp_data');
-    $query->condition('disp_data.type', 'dispatch_data');
-    $query->condition('disp_data.uid', $distributor_id);
-    $query->condition('disp_data.title', $trip_ids, 'IN');
-    $query->join('field_data_field_trip_id_reference', 'tr', 'tr.field_trip_id_reference_nid = disp_data.nid');
-    $query->join('node', 'sr', 'sr.nid =tr.entity_id');
-    $query->condition('sr.type', 'sales_register_data');
-    $query->condition('sr.uid', $distributor_id);
-    $query->join('field_data_field_bill_value', 'bv', 'bv.entity_id = sr.nid');
-    $query->groupBy('disp_data.title');
-    $query->fields('disp_data', array('title'));
-    $query->addExpression("SUM(bv.field_bill_value_value)", 'field_bill_value_value');
-    $res = $query->execute()->fetchAllKeyed(0, 1); //fetchField();
-  }
-  return $res;
+    $res = array();
+    global $user;
+    $distributor_ids = get_distributor_ids();
+    if (!empty($trip_ids)) {
+        $query = db_select('node', 'disp_data');
+        $query->condition('disp_data.type', 'dispatch_data');
+        $query->condition('disp_data.uid', $distributor_ids,'IN');
+        $query->condition('disp_data.title', $trip_ids, 'IN');
+        $query->join('field_data_field_trip_id_reference', 'tr', 'tr.field_trip_id_reference_nid = disp_data.nid');
+        $query->join('node', 'sr', 'sr.nid =tr.entity_id');
+        $query->condition('sr.type', 'sales_register_data');
+        $query->condition('sr.uid',  $distributor_ids,'IN');
+        $query->join('field_data_field_bill_value', 'bv', 'bv.entity_id = sr.nid');
+        $query->groupBy('disp_data.title');
+        $query->fields('disp_data', array('title'));
+        $query->addExpression("SUM(bv.field_bill_value_value)", 'field_bill_value_value');
+        $res = $query->execute()->fetchAllKeyed(0, 1); //fetchField();
+    }
+    return $res;
 }

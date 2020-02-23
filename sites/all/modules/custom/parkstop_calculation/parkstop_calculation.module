@@ -112,9 +112,17 @@ function parkstop_config_form($form, $form_state) {
  * Park Stop calculation through API
  * We are consuming Python API
  */
-function parkstop_calculation_api($bills_nid, $distributor_id, $prevan = 'Van') {
+function parkstop_calculation_api($bills_nid, $distributor_ids, $prevan = 'Van',$central_distributor_id) {
   //bill_nid,bill_val, lat , long
-  $results = get_bill_billVal_lat_lng($bills_nid, $distributor_id);
+   if (!empty($distributor_ids)) {
+    $dis_ids = $distributor_ids;
+  }
+  else {
+    $dis_ids = get_distributor_ids();
+  }  
+  $results = get_bill_billVal_lat_lng($bills_nid, $dis_ids);
+  //print_r($results);die;
+  //print_r(array($central_distributor_id));die;
 
   //Stop to be served. All bills in array. Key 0,1,2 etc
   $req = array();
@@ -123,7 +131,7 @@ function parkstop_calculation_api($bills_nid, $distributor_id, $prevan = 'Van') 
   }
 
   //Find start location name, lat, long
-  $start = get_start_location_details($distributor_id); // by distributor
+  $start = get_start_location_details($central_distributor_id); // by distributor
   $req['Van']['StartPoint'] = $start['name'];
   $req['Van']['ParkstopRadius'] = (float) variable_get('parkstop_radius', 0.2);
 
@@ -158,7 +166,7 @@ function parkstop_calculation_api($bills_nid, $distributor_id, $prevan = 'Van') 
   $request['TimeData']['WalkingSpeed'] = (int) variable_get('walking_speed', 5);
   $request['TimeData']['VanSpeed'] = (int) variable_get('van_speed', 30);
 
-  $timeslab_array = get_value_and_delivery_range($distributor_id);
+  $timeslab_array = get_value_and_delivery_range($central_distributor_id);
   foreach ($timeslab_array as $key => $val) {
     $request['TimeData']['TimeSlab'] = $timeslab_array['TimeSlab'];
   }
@@ -167,7 +175,7 @@ function parkstop_calculation_api($bills_nid, $distributor_id, $prevan = 'Van') 
     $request['TimeData']['BillValue'][$key]['StoreCode'] = $val['bill_nid'];
     $request['TimeData']['BillValue'][$key]['BillAmount'] = (float) round($val['bill_val']);
   }
-  $response = _call_parkstop_api($request, $prevan, $distributor_id);
+  $response = _call_parkstop_api($request, $prevan, $dis_ids);
   return $response;
 }
 
@@ -201,7 +209,9 @@ function _call_parkstop_api($request, $prevan, $distributor_id) {
    */
 
   //Park stop log
-  insert_parkstop_plotting_log($prevan, $request_api, $response->data, $distributor_id);
+  global $user;
+  $logged_in_distributor_id = change_feeds_import_get_distributor_id($user->uid);
+  insert_parkstop_plotting_log($prevan, $request_api, $response->data, $logged_in_distributor_id);
   return $response;
 }
 
@@ -212,11 +222,11 @@ function _call_parkstop_api($request, $prevan, $distributor_id) {
  * @return type
  * get bill_nid bill_val and lat and long of bills party through Hul master
  */
-function get_bill_billVal_lat_lng($bills_nid, $distributor_id) {
+function get_bill_billVal_lat_lng($bills_nid, $distributor_ids) {
   $query = db_select('node', 'n');
   $query->condition('n.type', 'sales_register_data');
   $query->condition('n.nid', $bills_nid, 'IN');
-  $query->condition('n.uid', $distributor_id);
+  $query->condition('n.uid', $distributor_ids,'IN');
   $query->join('field_data_field_bill_value', 'bv', 'bv.entity_id = n.nid');
   $query->join('field_data_field_party_code_reference', 'pc', 'pc.entity_id = n.nid');
   $query->join('node', 'n1', 'n1.nid = pc.field_party_code_reference_nid');
@@ -241,9 +251,10 @@ function get_bill_billVal_lat_lng($bills_nid, $distributor_id) {
  * Get van start location that is warehouse
  * return name lat and long of warehouse
  */
-function get_start_location_details($distributor_id) {
+function get_start_location_details($central_distributor_id) {
   $start['name'] = 'Start';
-  $conf_nid = check_node_title_exists($distributor_id, 'van_stop_master');
+  //$title, $type, $sales_data = FALSE,$distributor_id
+  $conf_nid = check_node_title_exists($central_distributor_id, 'van_stop_master',FALSE,$central_distributor_id);
   $conf_node = node_load($conf_nid);
   $start['lat'] = $conf_node->field_distributor_latitude[LANGUAGE_NONE][0]['value'];
   $start['lng'] = $conf_node->field_distributor_longitude[LANGUAGE_NONE][0]['value'];
@@ -320,26 +331,30 @@ function get_value_and_delivery_range($distributor_id) {
 
 function insert_parkstop_plotting_log($prevan, $request_api, $response_api, $distributor_id) {
   $result = db_merge('parkstop_api_log')
-    ->key(array('prevan' => $prevan, 'trip_id' => NULL, 'session_id' => session_id(), 'distributor_id' => $distributor_id))
+    ->key(array('prevan' => $prevan, 'trip_id' => NULL, 'session_id' => session_id(), 'created_by_distributor_id' =>$distributor_id,'distributor_id'=>$distributor_id))
     ->fields(array(
       'created_time' => REQUEST_TIME,
       'prevan' => $prevan,
       'api_request' => $request_api,
       'api_response' => $response_api,
-      'distributor_id' => $distributor_id
+      'distributor_id' => $distributor_id,
+      'created_by_distributor_id'=>$distributor_id
     ))
     ->execute();
 }
 
-function update_parkstop_plotting_log($prevan, $trip_id, $distributor_id) {
+function update_parkstop_plotting_log($prevan, $trip_id, $distributor_id,$created_by_distributor_id) {
+    
   $result = db_update('parkstop_api_log')
       ->fields(array(
-        'trip_id' => $trip_id
+        'trip_id' => $trip_id,
+        'distributor_id' => $distributor_id  
       ))
       ->condition('prevan', $prevan, '=')
       ->isNull('trip_id')
       ->condition('session_id', session_id(), 'LIKE')
-      ->condition('distributor_id', $distributor_id)
+    //  ->condition('distributor_id',$distributor_id) 
+   //   ->condition('created_by_distributor_id',$created_by_distributor_id)    
       ->execute();
 }
 

@@ -43,9 +43,10 @@ function delivery_summary_callback($form, &$form_state) {
 }
 
 function get_data_of_delivery_summary_return_form_validate($form, &$form_state){
-  global $user;
-  $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+  //global $user;
+  //$rs_code = dispatch_planning_get_rscode_using_uid($user->uid);
   $trip_id = $form_state['values']['trip_id'];
+  $distributor_id = get_distributorid_of_trip($trip_id);
   if (!is_numeric($trip_id)) {
     unset($form_state['complete form']['asset_return']);
     unset($form_state['complete form']['dowmload_mark']);

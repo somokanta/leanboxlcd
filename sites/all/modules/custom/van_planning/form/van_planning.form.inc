@@ -10,7 +10,12 @@
  * @param type $form_state
  * @return array
  */
+global $table_name ;
+global $table_column ;
+$table_name = 'field_data_field_distributor_name';
+$table_column = 'field_distributor_name_value';
 function _van_planning_callback_form($form, &$form_state) {
+  global $user;
   $form = array();
   $form['#prefix'] = '<div id="van-itemlist-div">';
   $form['#suffix'] = '</div>';
@@ -57,13 +62,14 @@ function _van_planning_callback_form($form, &$form_state) {
     unset($form_state['input']['area_code']);
     unset($form_state['input']['van_pl_group']);
     unset($form_state['input']['pl_group']);
-    unset($form_state['input']['pb_from_date']['date']);
-    unset($form_state['input']['pb_to_date']['date']);
+    unset($form_state['input']['pb_date']['date']);
     unset($form_state['input']['pb_range_op']);
     unset($form_state['input']['pb_value']);
     unset($form_state['input']['pb_weight']);
     unset($form_state['input']['pb_volume']);
     unset($form_state['input']['outlet_area_hook_grp']);
+    unset($form_state['input']['pb_from_date']['date']);
+    unset($form_state['input']['pb_to_date']['date']);
   }
   // For reset in modify van table- popup
   if($form_state['clicked_button']['#name'] == 'bill_wise_reset'){
@@ -88,6 +94,49 @@ function _van_planning_callback_form($form, &$form_state) {
     unset($form_state['input']['child_bill_wise_rs_kg']);
     unset($form_state['input']['child_bill_wise_rs_cft']);
   }
+  if (empty($form_state['rs_distributor_ids'])) {
+    $form_state['rs_distributor_ids'] = get_distributor_ids();
+  }
+  if (in_array("administrator", $user->roles) || in_array("central_distributor", $user->roles)) {
+    $child_distributors = get_child_distributor_rsname($dis_id);
+    $form_state['central_distributor_id'] = $dis_id;
+    if (count($child_distributors) == 1) {
+        $default_distributor_data = array_keys($child_distributors);
+        $default_distributor_id = $default_distributor_data[0];
+    }
+
+    $form['editable_vp']['vp']['distributor_id'] = array(
+      '#type' => 'select',
+      '#title' => t('Distributor Name'),
+      '#required' => TRUE,
+      '#options' => array('' => t('Select')) + $child_distributors,
+      '#default_value'=>$default_distributor_id,
+      '#ajax' => array(
+        'wrapper' => 'van-itemlist-div',
+        'callback' => 'van_planning_filter_ajax_callback',
+        'method' => 'replace',
+        'effect' => 'fade',
+      ),
+      '#prefix' => '<div class="form_row"><div style="color:red;">',
+      '#suffix'=>'</div>'
+    );
+    $selected_distributor_id = $form_state['values']['distributor_id'];
+    $central_distributor_id = $dis_id;
+  }
+  else {
+    $central_distributor_id = get_central_distributor_id($dis_id);
+    $form['distributor_id'] = array(
+      '#type' => 'hidden',
+      '#value' => $dis_id,
+    );
+    $selected_distributor_id = $dis_id;
+    $form_state['central_distributor_id'] = $central_distributor_id;
+  }
+  
+  
+
+  $form_state['central_distributor_id'] = $central_distributor_id;
+
   $form['editable_vp']['vp']['outlet_area_hook_grp'] = array(
     '#type' => 'textfield',
     '#title' => t('Area Hook Group'),
@@ -97,7 +146,7 @@ function _van_planning_callback_form($form, &$form_state) {
       'method' => 'replace',
       'effect' => 'fade',
     ),
-    '#autocomplete_path' => 'outlet-areahookgrp-master/autocomplete',
+    '#autocomplete_path' => 'outlet-areahookgrp-master/autocomplete/' . $central_distributor_id,
     '#prefix' => '<div class="form_row">',
   );
   $form['editable_vp']['vp']['area_code'] = array(
@@ -109,7 +158,7 @@ function _van_planning_callback_form($form, &$form_state) {
       'method' => 'replace',
       'effect' => 'fade',
     ),
-    '#autocomplete_path' => 'areacode-master/autocomplete',
+    '#autocomplete_path' => 'areacode-master/autocomplete' . '/' . $central_distributor_id,
     '#prefix' => '<div class="form_row">',
   );
   $form['editable_vp']['vp']['pl_group'] = array(
@@ -121,7 +170,7 @@ function _van_planning_callback_form($form, &$form_state) {
       'method' => 'replace',
       'effect' => 'fade',
     ),
-    '#autocomplete_path' => 'plgroup-master/autocomplete',
+    '#autocomplete_path' => 'plgroup-master/autocomplete' ,
   );
   $form['editable_vp']['vp']['van_pl_group'] = array(
     '#type' => 'textfield',
@@ -134,6 +183,19 @@ function _van_planning_callback_form($form, &$form_state) {
     ),
     '#autocomplete_path' => 'vanplgroup-master/autocomplete',
   );
+  /*$form['editable_vp']['vp']['pb_date'] = array(
+    '#type' => 'date_popup',
+    '#date_label_position' => '',
+    '#title' => t('Bill Date'),
+    '#date_format' => 'Y-m-d',
+    '#ajax' => array(
+      'wrapper' => 'van-itemlist-div',
+      'callback' => 'van_planning_filter_ajax_callback',
+      'method' => 'replace',
+      'effect' => 'fade',
+    ),
+  );*/
+  
   $form['editable_vp']['vp']['pb_from_date'] = array(
     '#type' => 'date_popup',
     '#date_label_position' => '',
@@ -274,6 +336,7 @@ function _van_planning_callback_form($form, &$form_state) {
   $area_code = $form_state['input']['area_code'];
   $van_pl_group = $form_state['input']['van_pl_group'];
   $pl_group = $form_state['input']['pl_group'];
+  //$bill_date = strtotime($form_state['input']['pb_date']['date']);
   $bill_from_date = strtotime($form_state['input']['pb_from_date']['date']);
   $bill_to_date = strtotime($form_state['input']['pb_to_date']['date']);
   $bill_range_op = $form_state['input']['pb_range_op'];
@@ -281,27 +344,32 @@ function _van_planning_callback_form($form, &$form_state) {
   $weight = $form_state['input']['pb_weight'];
   $volume = $form_state['input']['pb_volume'];
   $outlet_area_hook_grp = $form_state['input']['outlet_area_hook_grp'];
+  $user_selected_distributor_id = $form_state['input']['distributor_id'];
   if (!empty($area_code) ||
     !empty($van_pl_group) ||
     (!empty($bill_range_op) && (!empty($bill_value) || !empty($weight) || !empty($volume))) ||
     !empty($pl_group) ||
+    !empty($user_selected_distributor_id) ||      
+   // !empty($bill_date) ||
     (!empty($bill_from_date) && !empty($bill_to_date)) ||
     !empty($bill_value) ||
     !empty($outlet_area_hook_grp) ||
     !empty($weight) ||
     !empty($volume)) {
-    $input_data = TRUE;
+    if(!empty($user_selected_distributor_id)) {  
+         $input_data = TRUE;
+    }
   }
   if ($input_data) {
     $area_codes = 'no_input';
     if (!empty($area_code)) {
-      $area_codes = _get_nearby_area_codes($area_code, $dis_id);
+      $area_codes = _get_nearby_area_codes($area_code, $central_distributor_id);
     }
     $bill_array = array();
     if (isset($form_state['bill_array'])) {
       $bill_array = $form_state['bill_array'];
     }
-    $options = van_planning_ajax_submit($area_codes, $van_pl_group, $pl_group, $bill_from_date, $bill_to_date, $bill_range_op, $bill_value, $weight, $volume, $bill_array, $outlet_area_hook_grp);
+    $options = van_planning_ajax_submit($area_codes, $van_pl_group, $pl_group, $bill_from_date, $bill_to_date, $bill_range_op, $bill_value, $weight, $volume, $bill_array, $outlet_area_hook_grp, $user_selected_distributor_id, $central_distributor_id, $form_state['rs_distributor_ids']);
     $form['editable_vp']['vp']['list_form_items'] = array(
       '#type' => 'tableselect',
       '#header' => $header_array,
@@ -348,6 +416,7 @@ function _van_planning_callback_form($form, &$form_state) {
 
     $val['total']['bill_count'] = $val['total']['bill_value'] = $val['total']['sum_kg'] = $val['total']['sum_cft'] = 0;
     foreach ($form_state['new_dispatch_planning'] as $key => $val) {
+      $total_bills_distributor_ids = $total_bill_array = $total_sales_nid_array = array();  
       $total_bill_array = $total_sales_nid_array = array();
       $val1['total'][$key]['bill_count'] = $val1['total'][$key]['bill_value'] = 0;
       $val1['total'][$key]['sum_kg'] = $val1['total'][$key]['sum_cft'];
@@ -357,20 +426,23 @@ function _van_planning_callback_form($form, &$form_state) {
         $val[$group]['bill_value'] = number_format($bill_value);
         $total_sales_nid_array1 = array();
         $combined_area_codes = array();
+        $total_sales_nid_array1 = $bills_distributor_ids = array();
         $val_bill_numbers = json_decode($revised_bill['bill_no']['data-value'], 1);
         foreach ($val_bill_numbers as $nid => $bill_array) {
           $total_sales_nid_array1[$nid] = $nid;
+          $bills_distributor_ids[$bill_array['bill_distributor_id']] = $bill_array['bill_distributor_id'];
           $combined_area_codes[$bill_array['area_code']] = $bill_array['area_code']; //for area code
           $for_total_combined_area_codes[$bill_array['area_code']] = $bill_array['area_code']; //for area code
         }
         $combined_area_codes = implode(",", $combined_area_codes);
         $val[$group]['area_code'] = $combined_area_codes;
-        $cld_loose_array = _get_skus_cld_loose_count($total_sales_nid_array1, $dis_id);
+        $cld_loose_array = _get_skus_cld_loose_count($total_sales_nid_array1, $bills_distributor_ids,FALSE, $central_distributor_id, $form_state['rs_distributor_ids']);
         $val[$group]['cld'] = $cld_loose_array['cld'];
         $val[$group]['loose'] = $cld_loose_array['loose'];
         $val[$group]['sku_count'] = $cld_loose_array['sku_count'];
 
         $total_bill_array += $val_bill_numbers;
+        $total_bills_distributor_ids += $bills_distributor_ids;
         $total_sales_nid_array += $total_sales_nid_array1;
         $val['total']['pl_group'] = '<b>TOTAL</b>';
         $val['total']['bill_count'] += $val[$group]['bill_count'];
@@ -396,8 +468,9 @@ function _van_planning_callback_form($form, &$form_state) {
       $val1['total'][$key]['rs_per_sum_cft'] = round($val1['total'][$key]['bill_value'] / $val1['total'][$key]['sum_cft'], 2);
 
       $val1['total'][$key]['bill_value'] = number_format($val1['total'][$key]['bill_value']);
+      // watchdog('rs-distributor_id',print_r($form_state['rs_distributor_ids'],1));
       // pass third variable TRUE to fetch lat and long for each bill
-      $cld_loose_array = _get_skus_cld_loose_count($total_sales_nid_array, $dis_id, TRUE);
+      $cld_loose_array = _get_skus_cld_loose_count($total_sales_nid_array,$total_bills_distributor_ids, TRUE, $central_distributor_id, $form_state['rs_distributor_ids']);
 
       // all latitude and longitude van wise
       $vanwise_all_latlong_array = $cld_loose_array['lat_long'];
@@ -408,7 +481,7 @@ function _van_planning_callback_form($form, &$form_state) {
 
         //abhi test
         $python_bills_nid = array_keys($vanwise_all_latlong_array);
-        $response_data = parkstop_calculation_api($python_bills_nid, $dis_id, $key);
+        $response_data = parkstop_calculation_api($python_bills_nid, $total_bills_distributor_ids, $key, $central_distributor_id, $form_state['rs_distributor_ids']);
         //watchdog("$key", '<pre>' . print_r($python_response, TRUE) . '</pre>');
         //abhi test end
 /*
@@ -497,10 +570,6 @@ function _van_planning_callback_form($form, &$form_state) {
             $i++;
           }
         }*/
-      }else{
-          if (!empty($response_data->error)) {// if error exist then sequencing is clicked
-            $_SESSION['park_stop'][$key] = array();//empty previous store data for same van
-          }
       }
 
       if (isset($bill_sequencing_array) && !empty($bill_sequencing_array)) {
@@ -614,7 +683,8 @@ function _van_planning_callback_form($form, &$form_state) {
       'rs_per_sum_kg' => array('data' => t('Rs/Kg')),
       'rs_per_sum_cft' => array('data' => t('Rs/Cft')),
       'party_code_val'=>array('data'=>t('Party Code')),//NEWFIELD
-      'party_name_val'=>array('data'=>t('Party Name'))
+      'party_name_val'=>array('data'=>t('Party Name')),
+      'rs_name' => array('data' => t('Distributor Name'))
     );
 
     // find selected van no in popup
@@ -661,7 +731,7 @@ function _van_planning_callback_form($form, &$form_state) {
             'method' => 'replace',
             'effect' => 'fade',
           ),
-          '#autocomplete_path' => 'areacode-master/autocomplete',
+          '#autocomplete_path' => 'areacode-master/autocomplete' . '/' . $central_distributor_id,
           '#name' => 'bill_area_code',
           '#prefix' => '<div class="form_row">',
         );
@@ -770,6 +840,7 @@ function _van_planning_callback_form($form, &$form_state) {
         $bill_wise_volume = $form_state['input']['bill_wise_volume'];
         $bill_wise_rs_kg = $form_state['input']['bill_wise_rs_kg'];
         $bill_wise_rs_cft = $form_state['input']['bill_wise_rs_cft'];
+        $bil_distributor_id = $form_state['input']['bill_distributor_id'];
         if (!empty($bill_area_code) ||
           !empty($bill_pl_group) ||
           !empty($bill_wise_range_op) ||
@@ -777,6 +848,7 @@ function _van_planning_callback_form($form, &$form_state) {
           !empty($bill_wise_weight) ||
           !empty($bill_wise_volume) ||
           !empty($bill_wise_rs_kg) ||
+          !empty($bil_distributor_id) ||
           !empty($bill_wise_rs_cft)) {
           $bill_wise_input_data = TRUE;
         }
@@ -789,7 +861,7 @@ function _van_planning_callback_form($form, &$form_state) {
         }
         if ($bill_wise_input_data) {
 
-          $all_bill_options = _get_van_planning_bill_wise_data($bill_area_code, $bill_pl_group, $bill_wise_range_op, $bill_wise_value, $bill_wise_weight, $bill_wise_volume, $bill_wise_rs_kg, $bill_wise_rs_cft, $bill_wise_array);
+          $all_bill_options = _get_van_planning_bill_wise_data($bill_area_code, $bill_pl_group, $bill_wise_range_op, $bill_wise_value, $bill_wise_weight, $bill_wise_volume, $bill_wise_rs_kg, $bill_wise_rs_cft, $bill_wise_array,$user_selected_distributor_id, $central_distributor_id, $form_state['rs_distributor_ids']);
         }
 
         // show result in pop up form
@@ -843,7 +915,7 @@ function _van_planning_callback_form($form, &$form_state) {
               'method' => 'replace',
               'effect' => 'fade',
             ),
-            '#autocomplete_path' => 'areacode-master/autocomplete',
+            '#autocomplete_path' => 'areacode-master/autocomplete' . '/' . $central_distributor_id,
             '#name' => 'child_bill_area_code',
             '#prefix' => '<div class="form_row">',
           );
@@ -965,6 +1037,7 @@ function _van_planning_callback_form($form, &$form_state) {
           $bill_wise_volume = $form_state['input']['child_bill_wise_volume'];
           $bill_wise_rs_kg = $form_state['input']['child_bill_wise_rs_kg'];
           $bill_wise_rs_cft = $form_state['input']['child_bill_wise_rs_cft'];
+          $add_bill_child_distributor_id = $form_state['input']['child_bill_distributor_id'];
           $bill_wise_input_data = FALSE;
           if (!empty($bill_area_code) ||
             !empty($bill_pl_group) ||
@@ -974,6 +1047,7 @@ function _van_planning_callback_form($form, &$form_state) {
             !empty($bill_wise_weight) ||
             !empty($bill_wise_volume) ||
             !empty($bill_wise_rs_kg) ||
+            !empty($add_bill_child_distributor_id) ||
             !empty($bill_wise_rs_cft)) {
             $bill_wise_input_data = TRUE;
           }
@@ -981,7 +1055,7 @@ function _van_planning_callback_form($form, &$form_state) {
           // Without filter don't show the value. Show commented below codes
           //$constant_bill_array1 = _get_van_planning_bill_wise_data1($bill_area_code, $bill_pl_group, $bill_wise_range_op, $bill_wise_value, $bill_wise_weight, $bill_wise_volume, $bill_wise_rs_kg, $bill_wise_rs_cft, $bill_wise_array);
           if ($bill_wise_input_data) {
-            $constant_bill_array1 = _get_van_planning_bill_wise_data1($bill_area_code, $bill_pl_group, $bill_wise_range_op, $bill_wise_value, $bill_wise_weight, $bill_wise_volume, $bill_wise_rs_kg, $bill_wise_rs_cft, $bill_wise_array, $child_bill_wise_date);
+            $constant_bill_array1 = _get_van_planning_bill_wise_data1($bill_area_code, $bill_pl_group, $bill_wise_range_op, $bill_wise_value, $bill_wise_weight, $bill_wise_volume, $bill_wise_rs_kg, $bill_wise_rs_cft, $bill_wise_array, $child_bill_wise_date, $user_selected_distributor_id, $central_distributor_id, $form_state['rs_distributor_ids']);
           }
           // New group created element 
           $child_bill_header_array = array(
@@ -995,6 +1069,7 @@ function _van_planning_callback_form($form, &$form_state) {
             'rs_per_sum_cft' => array('data' => t('Rs/Cft')),
             'party_code_val'=>array('data'=>t('Party Code')),//NEWFIELD
             'party_name_val'=>array('data'=>t('Party Name')),
+            'rs_name' => array('data' => t('Distributor Name')),
             'bill_group' => array('data' => t('bill_group'), 'class' => array('bill_no_val')),
           );
           // show result in pop up's pop up form
@@ -1392,7 +1467,8 @@ function van_planning_remove_bill_ajax_submit($form, &$form_state) {
         'rs_per_sum_kg' => round($val['bill_value'] / $val['sum_kg'], 2),
         'rs_per_sum_cft' => round($val['bill_value'] / $val['sum_cft'], 2),
         'party_code_val'=>$val['party_code_val'],//NEWFIELD
-        'party_name_val'=>$val['party_name_val']
+        'party_name_val'=>$val['party_name_val'],
+        'bill_distributor_id'=>$val['bill_distributor_id']      
       );
     }
 
@@ -1583,9 +1659,14 @@ function show_move_to_ajax($form, &$form_state) {
  * @param type $form
  * @param type $form_state
  */
-function van_planning_ajax_submit($area_codes, $van_pl_group, $pl_group, $bill_from_date, $bill_to_date, $bill_range_op, $bill_value, $weight, $volume, $bill_array, $outlet_area_hook_grp) {
-  $user_id = $GLOBALS['user']->uid;
-  $dis_id = change_feeds_import_get_distributor_id($user_id);
+function van_planning_ajax_submit($area_codes, $van_pl_group, $pl_group, $bill_from_date, $bill_to_date, $bill_range_op, $bill_value, $weight, $volume, $bill_array, $outlet_area_hook_grp,$user_selected_distributor_id = null, $central_distributor_id = null, $rs_distributor_ids = null) {
+  global $table_name,$table_column;
+    if (!empty($user_selected_distributor_id)) {
+    $dis_ids = array($user_selected_distributor_id);
+  }
+  else {
+    $dis_ids = $rs_distributor_ids;
+  }
   $no_of_days = variable_get('van_planning_dates', 15);
   $billing_start_date = strtotime(date('Y-m-d') . "- $no_of_days days"); // @todo replace 15 this line
   $billing_end_date = strtotime(date("Y-m-d"));
@@ -1593,11 +1674,13 @@ function van_planning_ajax_submit($area_codes, $van_pl_group, $pl_group, $bill_f
   $query = db_select('node', 'n');
   $query->condition('n.type', 'hul_code_master');
   $query->leftjoin('field_data_field_area_code', 'ac', 'ac.entity_id = n.nid');
-  $query->condition('n.uid', $dis_id);
+  $query->condition('n.uid', $dis_ids,'IN');
+  $query->leftjoin($table_name, 'rs', 'n.uid = rs.entity_id');
+    
 
   // join area code master
 
-  $query->leftjoin('node', 'n1', "n1.nid = ac.field_area_code_nid and n1.type ='area_code_master' and n1.uid = $dis_id ");
+  $query->leftjoin('node', 'n1', "n1.nid = ac.field_area_code_nid and n1.type ='area_code_master' and n1.uid = $central_distributor_id ");
   $query->addExpression("CASE WHEN (n1.title IS NOT NULL) THEN n1.title ELSE 'NA' END", 'area_code');
   $query->groupBy('n1.title'); // group by Area code
   if (!empty($area_codes)) {
@@ -1613,7 +1696,7 @@ function van_planning_ajax_submit($area_codes, $van_pl_group, $pl_group, $bill_f
   $query->join('field_data_field_hul_code_reference', 'hcr', 'hcr.field_hul_code_reference_nid = n.nid');
   $query->join('node', 'n2', 'n2.nid = hcr.entity_id');
   $query->condition('n2.type', 'outlet_master');
-  $query->condition('n2.uid', $dis_id);
+  $query->condition('n2.uid', $dis_ids,'IN');
   $query->join('field_data_field_pl_group', 'fpg', 'fpg.entity_id = n2.nid');
   $query->groupBy('fpg.field_pl_group_value'); // group by Pl Group
   $query->addField('fpg', 'field_pl_group_value', 'pl_group');
@@ -1630,7 +1713,7 @@ function van_planning_ajax_submit($area_codes, $van_pl_group, $pl_group, $bill_f
     $query->join('field_data_field_area_hook', 'ah', 'ah.entity_id = n2.nid'); // Wrong join pcr.entity_id
     $query->join('node', 'n10', 'n10.nid = ah.field_area_hook_nid');
     $query->condition('n10.type', 'day_van_pl_gp_area_hook_grouping');
-    $query->condition('n10.uid', $dis_id);
+    $query->condition('n10.uid', $dis_ids,'IN');
 
     $query->join('field_data_field_dva_area_hook_group_name', 'dvah', 'dvah.entity_id = n10.nid'); // Wrong join pcr.entity_id
     $query->condition('dvah.field_dva_area_hook_group_name_value', $outlet_area_hook_grp);
@@ -1638,7 +1721,7 @@ function van_planning_ajax_submit($area_codes, $van_pl_group, $pl_group, $bill_f
 
   $query->join('node', 'n3', 'n3.nid = pcr.entity_id');
   $query->condition('n3.type', 'sales_register_data');
-  $query->condition('n3.uid', $dis_id);
+  $query->condition('n3.uid', $dis_ids,'IN');
 
   $query->leftJoin('field_data_field_trip_id_reference', 'ft', 'ft.entity_id = n3.nid');
   $query->leftJoin('field_data_field_delivery_pending', 'dp', 'n3.nid = dp.entity_id');
@@ -1660,23 +1743,28 @@ function van_planning_ajax_submit($area_codes, $van_pl_group, $pl_group, $bill_f
   $query->join('field_data_field_sr_bill_date', 'sbd', 'sbd.entity_id = n3.nid');
   $query->condition('sbd.field_sr_bill_date_value', array($billing_start_date, $billing_end_date), 'BETWEEN');
 
+ /* if (!empty($bill_date)) {
+    $query->condition('sbd.field_sr_bill_date_value', $bill_date);
+  }*/
   if (!empty($bill_from_date) && !empty($bill_to_date)) {
-    $query->condition('sbd.field_sr_bill_date_value', array($bill_from_date, $bill_to_date), 'BETWEEN');
+      $query->condition('sbd.field_sr_bill_date_value', array($bill_from_date, $bill_to_date), 'BETWEEN');
   }
   if (!empty($bill_array)) {
     $query->condition('n3.title', $bill_array, 'NOT IN');
   }
   $query->join('field_data_field_bill_net_sales', 'bv', 'bv.entity_id = n3.nid');
   $query->addField('n3', 'title', 'bill_no');
+  $query->addField('n3', 'uid', 'bill_distributor_id');
   $query->addExpression('ROUND(bv.field_bill_net_sales_value)', 'bill_value');
 
   // custom billing data
   $query->join('custom_billing_data', 'cb', 'cb.bill_number = n3.title');
-  $query->condition('cb.distributor_id', $dis_id);
+  $query->condition('cb.distributor_id', $dis_ids, 'IN');
   $query->groupBy('cb.bill_number');
   // join sku7 code master
   $query->addExpression('ROUND(SUM(cb.Derived_NET_SALES_KGS))', 'sum_kg');
   $query->addExpression('ROUND(SUM(cb.Derived_NET_SALES_VOLUME))', 'sum_cft');
+  $query->addExpression("rs.$table_column", 'rs_name');
 
   // join Party Pack Master (Van pl group)
   if (!empty($van_pl_group)) {
@@ -1684,7 +1772,7 @@ function van_planning_ajax_submit($area_codes, $van_pl_group, $pl_group, $bill_f
     $query->join('node', 'n5', 'n5.nid = ppr.field_pp_master_reference_nid');
     $query->join('field_data_field_van_pl_group', 'vpg', 'vpg.entity_id = n5.nid');
     $query->condition('n5.type', 'party_pack_master');
-    $query->condition('n5.uid', $dis_id);
+    $query->condition('n5.uid', $dis_ids,'IN');
     $query->condition('vpg.field_van_pl_group_value', $van_pl_group);
   }
   // Party code and party Name NEWFIELD
@@ -1736,7 +1824,9 @@ function van_planning_ajax_submit($area_codes, $van_pl_group, $pl_group, $bill_f
       'rs_per_sum_kg' => round($val['bill_value'] / $val['sum_kg'], 2),
       'rs_per_sum_cft' => round($val['bill_value'] / $val['sum_cft'], 2),
       'party_code_val'=>$val['party_code_val'],//NEWFIELD
-      'party_name_val'=>$val['party_name_val']
+      'party_name_val'=>$val['party_name_val'],
+      'rs_name' => $val['rs_name'],
+      'bill_distributor_id'=>$val['bill_distributor_id'],  
     );
 
     $res1[$val['area_code'] . '#' . $val['pl_group']]['bill_no'] = array('data' => '', 'class' => array('bill_no_val'), 'data-value' => json_encode($res_1[$val['area_code'] . '#' . $val['pl_group']]));
@@ -1809,17 +1899,25 @@ function van_planning_ajax_submit($area_codes, $van_pl_group, $pl_group, $bill_f
  * @param type $bill_wise_rs_cft
  * @param type $selected_modify_bill_array
  */
-function _get_van_planning_bill_wise_data($bill_area_code, $bill_pl_group, $bill_wise_range_op, $bill_wise_value, $bill_wise_weight, $bill_wise_volume, $bill_wise_rs_kg, $bill_wise_rs_cft, $bill_wise_array) {
+function _get_van_planning_bill_wise_data($bill_area_code, $bill_pl_group, $bill_wise_range_op, $bill_wise_value, $bill_wise_weight, $bill_wise_volume, $bill_wise_rs_kg, $bill_wise_rs_cft, $bill_wise_array, $user_selected_distributor_id = null, $central_distributor_id = null, $rs_distributor_ids) {
   $user_id = $GLOBALS['user']->uid;
-  $dis_id = change_feeds_import_get_distributor_id($user_id);
+  //$dis_id = change_feeds_import_get_distributor_id($user_id);
+  global $table_name;
+  global $table_column;
+  if (!empty($user_selected_distributor_id)) {
+    $dis_ids = array($user_selected_distributor_id);
+  }
+  else {
+    $dis_ids = $rs_distributor_ids;
+  }
 
   $query = db_select('node', 'n');
   $query->condition('n.type', 'hul_code_master');
   $query->leftjoin('field_data_field_area_code', 'ac', 'ac.entity_id = n.nid');
-  $query->condition('n.uid', $dis_id);
-
+  $query->condition('n.uid', $dis_ids,'IN');
+  $query->leftjoin($table_name, 'rs', 'n.uid = rs.entity_id');
   // join area code master
-  $query->leftjoin('node', 'n1', "n1.nid = ac.field_area_code_nid and n1.type ='area_code_master' and n1.uid = $dis_id ");
+  $query->leftjoin('node', 'n1', "n1.nid = ac.field_area_code_nid and n1.type ='area_code_master' and n1.uid = $central_distributor_id ");
   $query->groupBy('n1.title'); // group by Area code
   if (!empty($bill_area_code)) {
     $query->condition('n1.title', $bill_area_code); // condition for Area code
@@ -1829,7 +1927,7 @@ function _get_van_planning_bill_wise_data($bill_area_code, $bill_pl_group, $bill
   $query->join('field_data_field_hul_code_reference', 'hcr', 'hcr.field_hul_code_reference_nid = n.nid');
   $query->join('node', 'n2', 'n2.nid = hcr.entity_id');
   $query->condition('n2.type', 'outlet_master');
-  $query->condition('n2.uid', $dis_id);
+  $query->condition('n2.uid', $dis_ids,'IN');
   $query->join('field_data_field_pl_group', 'fpg', 'fpg.entity_id = n2.nid');
   $query->groupBy('fpg.field_pl_group_value'); // group by Pl Group
   if (!empty($bill_pl_group)) {
@@ -1843,7 +1941,7 @@ function _get_van_planning_bill_wise_data($bill_area_code, $bill_pl_group, $bill
   $query->join('field_data_field_party_code_reference', 'pcr', 'pcr.field_party_code_reference_nid = n2.nid');
   $query->join('node', 'n3', 'n3.nid = pcr.entity_id');
   $query->condition('n3.type', 'sales_register_data');
-  $query->condition('n3.uid', $dis_id);
+  $query->condition('n3.uid', $dis_ids,'IN');
 
   $query->leftJoin('field_data_field_trip_id_reference', 'ft', 'ft.entity_id = n3.nid');
   $query->leftJoin('field_data_field_delivery_pending', 'dp', 'n3.nid = dp.entity_id');
@@ -1867,6 +1965,8 @@ function _get_van_planning_bill_wise_data($bill_area_code, $bill_pl_group, $bill
   }
   $query->join('field_data_field_bill_net_sales', 'bv', 'bv.entity_id = n3.nid');
   $query->addExpression('n3.nid', 'sales_nid');
+  $query->addExpression('n3.uid', 'bill_distributor_id');
+  $query->addExpression("rs.$table_column", 'rs_name');
   $query->addExpression("CASE WHEN (n1.title IS NOT NULL) THEN n1.title ELSE 'NA' END", 'area_code');
   $query->addExpression('fpg.field_pl_group_value', 'pl_group');
 
@@ -1876,7 +1976,7 @@ function _get_van_planning_bill_wise_data($bill_area_code, $bill_pl_group, $bill
 
   // custom billing data
   $query->join('custom_billing_data', 'cb', 'cb.bill_number = n3.title');
-  $query->condition('cb.distributor_id', $dis_id);
+  $query->condition('cb.distributor_id', $dis_ids,'IN');
   $query->groupBy('cb.bill_number');
   // join sku7 code master
   $query->addExpression('ROUND(SUM(cb.Derived_NET_SALES_KGS))', 'sum_kg');
@@ -1936,9 +2036,18 @@ function _get_van_planning_bill_wise_data($bill_area_code, $bill_pl_group, $bill
  * @param type $bill_wise_rs_cft
  * @param type $selected_modify_bill_array
  */
-function _get_van_planning_bill_wise_data1($bill_area_code, $bill_pl_group, $bill_wise_range_op, $bill_wise_value, $bill_wise_weight, $bill_wise_volume, $bill_wise_rs_kg, $bill_wise_rs_cft, $bill_wise_array, $child_bill_wise_date = '') {
-  $user_id = $GLOBALS['user']->uid;
-  $dis_id = change_feeds_import_get_distributor_id($user_id);
+function _get_van_planning_bill_wise_data1($bill_area_code, $bill_pl_group, $bill_wise_range_op, $bill_wise_value, $bill_wise_weight, $bill_wise_volume, $bill_wise_rs_kg, $bill_wise_rs_cft, $bill_wise_array, $child_bill_wise_date = '', $user_selected_distributor_id, $central_distributor_id, $rs_distributor_id = array()) {
+  global $table_name;
+  global $table_column;
+  //$table_name = 'field_data_field_distributor_name';
+  //$table_column = 'field_distributor_name_value';
+  if (!empty($user_selected_distributor_id)) {
+    $dis_ids = array($user_selected_distributor_id);
+  }
+  else {
+    $dis_ids = $rs_distributor_id;
+  }
+  //$user_id = $GLOBALS['user']->uid;
 
   $billing_start_date = '';
   $billing_end_date = '';
@@ -1954,10 +2063,10 @@ function _get_van_planning_bill_wise_data1($bill_area_code, $bill_pl_group, $bil
   $query = db_select('node', 'n');
   $query->condition('n.type', 'hul_code_master');
   $query->leftjoin('field_data_field_area_code', 'ac', 'ac.entity_id = n.nid');
-  $query->condition('n.uid', $dis_id);
+  $query->condition('n.uid', $dis_ids,'IN');
 
   // join area code master
-  $query->leftjoin('node', 'n1', "n1.nid = ac.field_area_code_nid and n1.type ='area_code_master' and n1.uid = $dis_id ");
+  $query->leftjoin('node', 'n1', "n1.nid = ac.field_area_code_nid and n1.type ='area_code_master' and n1.uid = $central_distributor_id ");
   $query->groupBy('n1.title'); // group by Area code
   if (!empty($bill_area_code)) {
     $query->condition('n1.title', $bill_area_code); // condition for Area code
@@ -1967,7 +2076,7 @@ function _get_van_planning_bill_wise_data1($bill_area_code, $bill_pl_group, $bil
   $query->join('field_data_field_hul_code_reference', 'hcr', 'hcr.field_hul_code_reference_nid = n.nid');
   $query->join('node', 'n2', 'n2.nid = hcr.entity_id');
   $query->condition('n2.type', 'outlet_master');
-  $query->condition('n2.uid', $dis_id);
+  $query->condition('n2.uid', $dis_ids,'IN');
   $query->join('field_data_field_pl_group', 'fpg', 'fpg.entity_id = n2.nid');
   $query->groupBy('fpg.field_pl_group_value'); // group by Pl Group
   if (!empty($bill_pl_group)) {
@@ -1981,11 +2090,11 @@ function _get_van_planning_bill_wise_data1($bill_area_code, $bill_pl_group, $bil
   $query->join('field_data_field_party_code_reference', 'pcr', 'pcr.field_party_code_reference_nid = n2.nid');
   $query->join('node', 'n3', 'n3.nid = pcr.entity_id');
   $query->condition('n3.type', 'sales_register_data');
-  $query->condition('n3.uid', $dis_id);
+  $query->condition('n3.uid', $dis_ids,'IN');
 
   $query->leftJoin('field_data_field_trip_id_reference', 'ft', 'ft.entity_id = n3.nid');
   $query->leftJoin('field_data_field_delivery_pending', 'dp', 'n3.nid = dp.entity_id');
-
+  $query->leftjoin($table_name, 'rs', 'n.uid = rs.entity_id');
 //  $db_or = db_or();
 //  $db_or->isNull('ft.field_trip_id_reference_nid');
 //  $db_or->condition('dp.field_delivery_pending_value', 1);
@@ -1999,7 +2108,6 @@ function _get_van_planning_bill_wise_data1($bill_area_code, $bill_pl_group, $bil
   //Bill Status should not be cancel or Discard or anything
   $query->leftJoin('field_data_field_bill_status', 'bs', 'bs.entity_id = n3.nid');
   $query->isNull('bs.field_bill_status_value');
-  
   $query->join('field_data_field_sr_bill_date', 'sbd', 'sbd.entity_id = n3.nid');
   if (!empty($child_bill_wise_date)) {
     $query->condition('sbd.field_sr_bill_date_value', $child_bill_wise_date);
@@ -2018,13 +2126,14 @@ function _get_van_planning_bill_wise_data1($bill_area_code, $bill_pl_group, $bil
   $query->addExpression('fpg.field_pl_group_value', 'pl_group');
 
   $query->addExpression('n3.title', 'bill_no');
+  $query->addExpression('n3.uid', 'bill_distributor_id');
 
   $query->addExpression('ROUND(bv.field_bill_net_sales_value)', 'bill_value');
-
+  $query->addExpression("rs.$table_column", 'rs_name');
 
   // custom billing data
   $query->join('custom_billing_data', 'cb', 'cb.bill_number = n3.title');
-  $query->condition('cb.distributor_id', $dis_id);
+  $query->condition('cb.distributor_id', $dis_ids,'IN');
   $query->groupBy('cb.bill_number');
   // join sku7 code master
   $query->addExpression('ROUND(SUM(cb.Derived_NET_SALES_KGS))', 'sum_kg'); //MRC_WEIGHT
@@ -2080,7 +2189,9 @@ function _get_van_planning_bill_wise_data1($bill_area_code, $bill_pl_group, $bil
       'rs_per_sum_kg' => round($val['bill_value'] / $val['sum_kg'], 2),
       'rs_per_sum_cft' => round($val['bill_value'] / $val['sum_cft'], 2),
       'party_code_val'=>$val['party_code_val'],//NEWFIELD
-      'party_name_val'=>$val['party_name_val']
+      'party_name_val'=>$val['party_name_val'],
+      'rs_name' => $val['rs_name'],
+      'bill_distributor_id'=>$val['bill_distributor_id'],
       );
 
     $res[$key]['bill_group'] = array('data' => '',
@@ -2123,8 +2234,12 @@ function _get_nearby_area_codes($area_code, $dis_id) {
  * @param type $distributor_id
  * @return array
  */
-function _get_skus_cld_loose_count($total_sales_nid_array, $distributor_id, $lat_long = FALSE) {
-
+function _get_skus_cld_loose_count($total_sales_nid_array, $distributor_ids, $lat_long = FALSE, $central_distributor_id, $rs_distributor_ids = array()) {
+  if (!empty($distributor_ids)) {
+        $dis_ids = $distributor_ids;
+  } else {
+        $dis_ids = $rs_distributor_ids;
+  }
   $res1 = array();
   $query = db_select('custom_billing_data', 'bd');
   $query->addfield('bd', 'Sum_of_TOTAL_SALES_QTY', 'total_qty');
@@ -2135,8 +2250,8 @@ function _get_skus_cld_loose_count($total_sales_nid_array, $distributor_id, $lat
   $query->groupBy('bd.sku7_code');
   $query->groupBy('bd.bill_number');
 
-  $query->condition('bd.distributor_id', $distributor_id);
-  $query->join('node', 'n', 'n.title = bd.sku7_code AND bd.distributor_id = n.uid');
+  $query->condition('bd.distributor_id', $dis_ids,'IN');
+  $query->join('node', 'n', 'n.title = bd.sku7_code');
   $query->condition('n.type', 'sku7_code_master');
   $query->join('field_data_field_unit_case_units_', 'fucu', 'fucu.entity_id = n.nid');
   $query->fields('fucu', array('field_unit_case_units__value'));
@@ -2219,11 +2334,25 @@ function _get_header_sort_data($array, $field_name) {
  * @param type $form_state
  */
 function _create_van_validate($form, &$form_state) {
-  $dis_id = $form_state['values']['dis_id'];
+  $dis_id = $form_state['values']['distributor_id'];
+  $central_distributor_id = $form_state['central_distributor_id'];
   $form_state['error_occur'] = 0;
   $trip_execution_date = strtotime($form_state['values']['trip_execution_date']);
-
-  // Trip Execution Date validation
+  $data = $form_state['values']['vp_final_table'];
+ // watchdog('van_table_data',print_r(json_decode($form_state['complete form']['submit_vp']['vp_final_table']['#rows']['a']['bill_no']['data-value'])),TRUE);
+  //watchdog('submitted_data',print_r($form_state,TRUE));
+  if (!empty($data)) {
+        foreach ($data as $van => $val1) {
+            $disp_planning[$van]['bill_array'] = json_decode($form_state['complete form']['submit_vp']['vp_final_table']['#rows'][$van]['bill_no']['data-value'], 1);
+            $sales_nids = array_keys($disp_planning[$van]['bill_array']);
+            $trip_distributor_ids = get_author_id_of_content($sales_nids);
+            if (count($trip_distributor_ids)>1){
+                 $form_state['error_occur'] = 1;
+                 drupal_set_message(t('VAN:'.$van .' has different distributor bills. Please remove it.'), 'error');
+            }
+        }
+    }
+    // Trip Execution Date validation
   if (empty($trip_execution_date)) {
     $form_state['error_occur'] = 1;
     drupal_set_message(t('Trip execution date should not be empty.'), 'error');
@@ -2249,24 +2378,23 @@ function _create_van_validate($form, &$form_state) {
 
     // Validation for HHT ID
     if (!empty($hht_id) && !empty($trip_execution_date)) {
-      if (empty(validate_hht_id($trip_execution_date, $hht_id))) {
+      if (empty(validate_hht_id($trip_execution_date, $hht_id,$central_distributor_id))) {
         $form_state['error_occur'] = 1;
         drupal_set_message(t("HHT id: $hht_id is invalid or already exists for this date"), 'error');
       }
     }
 
     // Validation for Cashier
-    if (!empty($cashier) && empty(validate_cashier($cashier))) {
+    if (!empty($cashier) && empty(validate_cashier($cashier,$central_distributor_id))) {
       $form_state['error_occur'] = 1;
       drupal_set_message(t('Please enter a valid cashier'), 'error');
     }
 
     // Validation for Vehicle
-    if (!empty($vehicle_number) && empty(validate_vehicle_number($vehicle_number))) {
+    if (!empty($vehicle_number) && empty(validate_vehicle_number($vehicle_number,$central_distributor_id))) {
       $form_state['error_occur'] = 1;
       drupal_set_message(t('Please enter a valid vehicle number'), 'error');
     }
-    
     if(!isset($_SESSION['park_stop'][$group])){
       form_set_error('form', "Please click on Calculate Time & Distance and select the Delivery boys."); 
     }
@@ -2292,7 +2420,7 @@ function _create_van_validate($form, &$form_state) {
  * @param type $form_state
  */
 function _check_duplicates_validate($form, &$form_state) {
-  $dis_id = $form_state['values']['dis_id'];
+  $dis_id = $form_state['values']['distributor_id'];
   $form_state['error_occur'] = 0;
 
   // Same HUL Code should not be present in multiple van
@@ -2302,20 +2430,25 @@ function _check_duplicates_validate($form, &$form_state) {
     foreach ($data as $van => $val1) {
       $data_sales_nids = json_decode($form_state['complete form']['submit_vp']['vp_final_table']['#rows'][$van]['bill_no']['data-value'], 1);
       $sales_nids = array_keys($data_sales_nids);
+      // Fetch Node uids of particular bill selected
+        $query1 = db_select('node', 'n');
+        $query1->condition('n.nid', $sales_nids, 'IN');
+        $query1->fields('n', array('uid'));
+        $node_uids = $query1->execute()->fetchAllKeyed(0, 0);
       if (!empty($data_sales_nids)) {
         $query = db_select('node', 'n');
         $query->condition('n.type', 'hul_code_master');
-        $query->condition('n.uid', $dis_id);
+        $query->condition('n.uid', $node_uids, 'IN');
 
         $query->join('field_data_field_hul_code_reference', 'hcr', 'hcr.field_hul_code_reference_nid = n.nid');
         $query->join('node', 'n2', 'n2.nid = hcr.entity_id');
         $query->condition('n2.type', 'outlet_master');
-        $query->condition('n2.uid', $dis_id);
+        $query->condition('n2.uid', $node_uids,'IN');
 
         $query->join('field_data_field_party_code_reference', 'pcr', 'pcr.field_party_code_reference_nid = n2.nid');
         $query->join('node', 'n3', 'n3.nid = pcr.entity_id');
         $query->condition('n3.type', 'sales_register_data');
-        $query->condition('n3.uid', $dis_id);
+        $query->condition('n3.uid', $node_uids,'IN');
         $query->condition('n3.nid', $sales_nids, 'IN');
         $query->addField('n3', 'title', 'bill_number');
         $query->addField('n', 'title', 'party_code');
@@ -2380,9 +2513,11 @@ function sync_parkstop_time_distance($form, &$form_state) {
 function _create_van_submit($form, &$form_state) {
   // logic to create trip
   if (empty($form_state['error_occur'])) {
-    $dis_id = $form_state['values']['dis_id'];
+    $dis_id = $form_state['values']['distributor_id'];
+    $central_distributor_id = $form_state['central_distributor_id'];
     $user_id = $form_state['values']['user_id'];
     $data = $form_state['values']['vp_final_table'];
+    $rs_code = get_rs_code_of_distributor($dis_id);
     $trip_execution_date = $form_state['values']['trip_execution_date'];
     if (!empty($data)) {
       foreach ($data as $van => $val1) {
@@ -2401,7 +2536,12 @@ function _create_van_submit($form, &$form_state) {
         $disp_planning[$van]['field_bill_loose_lines'] = $form_state['complete form']['submit_vp']['vp_final_table']['#rows'][$van]['bill_wise_loose'];
         $disp_planning[$van]['field_cld_lines_value'] = $form_state['complete form']['submit_vp']['vp_final_table']['#rows'][$van]['cld_value'];
         $disp_planning[$van]['field_loose_lines_value'] = $form_state['complete form']['submit_vp']['vp_final_table']['#rows'][$van]['loose_value'];
-
+        $sales_nids = array_keys($disp_planning[$van]['bill_array']);
+        $trip_distributor_ids = get_author_id_of_content($sales_nids);
+        $trip_distributor_id = key($trip_distributor_ids);
+        if (empty($dis_id)) {
+            $dis_id =$trip_distributor_id;
+        }
 //***************************************** PREVAN DATA START****************************************//
         /*        $todays_date = strtotime(date('Y-m-d'));
 
@@ -2475,7 +2615,7 @@ function _create_van_submit($form, &$form_state) {
 //***************************************** PREVAN DATA END****************************************//
 //************************************ DISPATCH DATA START****************************************//
         $txn = db_transaction();
-        $distributor_facility_code = get_facility_code($dis_id);
+        $distributor_facility_code = get_facility_code_of_distributor($dis_id);
         $query = db_select('trip_id_sequence', 'ts');
         $query->forUpdate();
         $query->addField('ts', 'next_id');
@@ -2504,7 +2644,7 @@ function _create_van_submit($form, &$form_state) {
         }
         
         
-        $sales_nids = array_keys($disp_planning[$van]['bill_array']);
+   
         $query = db_select('node', 'n');
         $query->condition('n.type', 'sales_register_data');
         $query->condition('n.uid', $dis_id);
@@ -2513,6 +2653,9 @@ function _create_van_submit($form, &$form_state) {
         $query->addExpression('ROUND(SUM(bv.field_bill_value_value))', 'bill_value');
         $dispatch_bill_value = $query->execute()->fetchField();
         
+        $trip_distributor_ids = get_author_id_of_content($sales_nids);
+        $trip_distributor_id = key($trip_distributor_ids);
+        
         // dispatch_data node creation
         $parkstop_count = (int) max(array_column($disp_planning[$van]['bill_array'], 'park_seq'));
         $node1 = new stdClass();
@@ -2520,7 +2663,7 @@ function _create_van_submit($form, &$form_state) {
         $node1->type = "dispatch_data";
         node_object_prepare($node1); // Sets some defaults. Invokes hook_prepare() and hook_node_prepare().
         $node1->language = LANGUAGE_NONE; // Or e.g. 'en' if locale is enabled
-        $node1->uid = $user->uid;
+        ///$node1->uid = $user->uid;
         $node1->status = 1; //(1 or 0): published or not
         $node1->comment = 0; // 0 = comments disabled, 1 = read only, 2 = read/write
         $node1->field_bill_count[LANGUAGE_NONE][0]['value'] = $disp_planning[$van]['bill_count'];
@@ -2534,7 +2677,7 @@ function _create_van_submit($form, &$form_state) {
         $node1->field_trip_id[LANGUAGE_NONE][0]['value'] = $trip_id;
         $node1->field_trip_creation_date[LANGUAGE_NONE][0]['value'] = strtotime(date('Y/m/d 00:00:00'));
         $node1->field_trip_executon_date[LANGUAGE_NONE][0]['value'] = $trip_execution_date;
-        $node1->field_hht_id[LANGUAGE_NONE][0]['nid'] = get_nid_from_hht_id($val1['hht_id_list']);
+        $node1->field_hht_id[LANGUAGE_NONE][0]['nid'] = get_nid_from_hht_id($val1['hht_id_list'],$central_distributor_id);
         $node1->field_parkstop_count[LANGUAGE_NONE][0]['value'] = $parkstop_count;
 
         if (!empty($form_state['time_dist'][$van]['dist']) && !empty($form_state['time_dist'][$van]['time'])) {
@@ -2567,12 +2710,14 @@ function _create_van_submit($form, &$form_state) {
             $node1->field_confirm_bill_edit_status['und'][0]['value'] = 1;
             $node1->field_dispatch_validation_flag['und'][0]['value'] = 2;
         }
+        $node1->distributorid = $trip_distributor_id;
+        $node1->uid = $trip_distributor_id;
         $node1 = node_submit($node1); // Prepare node for saving
         node_save($node1);
         $trip_nid = $node1->nid;
         // update parkstop response log
         if (!empty($form_state['time_dist'][$van]['dist']) && !empty($form_state['time_dist'][$van]['time'])) {
-          update_parkstop_plotting_log($van, $trip_id, $dis_id);
+          update_parkstop_plotting_log($van, $trip_id, $dis_id,$central_distributor_id);
         }
         //************************************* DISPATCH DATA END ********************************************//
 

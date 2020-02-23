@@ -54,3 +54,18 @@ function parkstop_calculation_schema() {
   );
   return $schema;
 }
+
+function parkstop_calculation_update_7142() {
+  $fields = array(
+     'created_by_distributor_id' => array(
+        'description' => t('Created By distributor_id'),
+        'type' => 'int',
+        'default' => 0,
+      ),
+  );
+  foreach ($fields as $key => $field) {
+    if (!db_field_exists('parkstop_api_log', $key)) {
+      db_add_field('parkstop_api_log', $key, $field);
+    }
+  }
+}

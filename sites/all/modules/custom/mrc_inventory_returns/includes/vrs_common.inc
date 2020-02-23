@@ -90,14 +90,13 @@ function get_vrs_total_denominations($trip_id,$distributor_id) {
 }
 
 // function to fetch all trips denomination
-function get_vrs_trips_denominations($trip_ids, $dis_id) {
-    if (!empty($trip_ids) && !empty($dis_id)) {
+function get_vrs_trips_denominations($trip_ids, $dis_ids) {
+    if (!empty($trip_ids) && !empty($dis_ids)) {
         $query = db_select('node', 'n');
         $query->condition('n.type', 'notes_denominations');
-        $query->condition('n.uid', $dis_id);
         $query->join('vrs_trip_denominations', 'deno', 'deno.denominations_nid = n.nid');
         $query->condition('deno.trip_id', $trip_ids, 'IN');
-        $query->condition('deno.distributor_id', $dis_id);
+        $query->condition('deno.distributor_id', $dis_ids,'IN');
         $query->addExpression('Sum(deno.no_of_notes)', 'no_notes');
         $query->addExpression('Sum(deno.coins)', 'sum_coins');
         $query->addExpression('convert(n.title,unsigned)', 'note_value');
@@ -113,15 +112,15 @@ function get_vrs_trips_denominations($trip_ids, $dis_id) {
     return $res;
 }
 
-function  get_vrs_coins_value($trip_ids,$dis_id){
+function  get_vrs_coins_value($trip_ids,$dis_ids){
     $res = 0;
-   if (!empty($trip_ids) && !empty($dis_id)) { 
+   if (!empty($trip_ids) && !empty($dis_ids)) { 
         $query = db_select('node', 'n');
         $query->condition('n.type', 'notes_denominations');
-        $query->condition('n.uid', $dis_id);
+        //$query->condition('n.uid', $dis_id);
         $query->join('vrs_trip_denominations', 'deno', 'deno.denominations_nid = n.nid');
         $query->condition('deno.trip_id', $trip_ids,'IN');
-        $query->condition('deno.distributor_id', $dis_id);
+        $query->condition('deno.distributor_id', $dis_ids);
         $query->addExpression('Sum( distinct deno.coins)', 'sum_coins');
         $query->groupBy('deno.distributor_id');
         $res = $query->execute()->fetchField();
@@ -129,14 +128,14 @@ function  get_vrs_coins_value($trip_ids,$dis_id){
    return $res;
 }
 
-function get_vrs_trips_deno_details($trip_ids, $dis_id) {
-    if (!empty($trip_ids) && !empty($dis_id)) {
+function get_vrs_trips_deno_details($trip_ids, $dis_ids) {
+    if (!empty($trip_ids) && !empty($dis_ids)) {
         $query = db_select('node', 'n');
         $query->condition('n.type', 'notes_denominations');
-        $query->condition('n.uid', $dis_id);
+        //$query->condition('n.uid', $dis_ids,'IN');
         $query->join('vrs_trip_denominations', 'deno', 'deno.denominations_nid = n.nid');
         $query->condition('deno.trip_id', $trip_ids, 'IN');
-        $query->condition('deno.distributor_id', $dis_id);
+        $query->condition('deno.distributor_id', $dis_ids,'IN');
         $query->addExpression('convert(n.title,unsigned)', 'note_value');
         $query->fields('n', array('title', 'nid'));
         $query->fields('deno', array('denominations_nid', 'trip_id', 'no_of_notes', 'coins'));

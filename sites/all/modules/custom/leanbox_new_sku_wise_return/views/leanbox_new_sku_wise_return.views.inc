@@ -184,6 +184,29 @@ function leanbox_new_sku_wise_return_views_data() {
             'handler' => 'views_handler_argument_string',
         ),
     );
+  
+  $data['excess_inventory_table']['distributor_id'] = array(
+     'title' => t('Distributor Id'),
+     'help' => t('Distributor Id'),
+     'field' => array(
+         'handler' => 'views_handler_field_numeric',
+     ),
+     'sort' => array(
+         'handler' => 'views_handler_sort',
+     ),
+     'filter' => array(
+         'handler' => 'views_handler_filter_numeric',
+     ),
+     'relationship' => array(
+         'title' => t('Distributor ID to Distributor Name'),
+         'help' => t("Distributor ID to Distributor Name"),
+         'handler' => 'views_handler_relationship',
+         'base' => 'users',
+         //'entity type' => 'file',
+         'base field' => 'uid',
+         'label' => t('Distributor Name relation !field_name', array('!field_name' => 'distributor_id')),
+     )      
+  );
 	$data['excess_inventory_table']['sku_code'] = array(
         'title' => t('SKU Code'),
         'help' => t('SKU Code'),

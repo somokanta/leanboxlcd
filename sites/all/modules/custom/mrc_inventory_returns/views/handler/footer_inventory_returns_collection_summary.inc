@@ -25,9 +25,7 @@ class footer_inventory_returns_collection_summary extends views_handler_field {
 
   function render($empty = FALSE) {
     $trip_number = $this->view->args[0];
-
-    $user_id = $GLOBALS['user']->uid;
-    $distributor_id = change_feeds_import_get_distributor_id($user_id);
+    $distributor_id = get_distributorid_of_trip($trip_number);
     $query = db_select('dispatch_planning_api_data', 'ad');
     $query->condition('ad.delivery_pending_flag', 1, '!=');
     $query->condition('ad.distributor_id', $distributor_id, '=');

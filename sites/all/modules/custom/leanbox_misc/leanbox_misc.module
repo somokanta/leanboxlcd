@@ -13,6 +13,7 @@ function leanbox_misc_menu() {
   $items['pdd/add/pdd'] = array(
     'title' => 'PDD',
     'type' => MENU_DEFAULT_LOCAL_TASK,
+    'access arguments' => array('pdd_master'),
     'weight' => 0,
     'file' => 'includes/pdd_holiday_master.inc',
       // Access callback, page callback, and theme callback will be inherited
@@ -23,7 +24,7 @@ function leanbox_misc_menu() {
     'type' => MENU_LOCAL_TASK,
     'page callback' => 'drupal_get_form',
     'page arguments' => array('holiday_add_form'),
-    'access arguments' => array('dispatch planning screen'),
+    'access arguments' => array('pdd_master'),
     'weight' => 2,
     'file' => 'includes/pdd_holiday_master.inc',
       // Page callback and theme callback will be inherited from
@@ -138,7 +139,11 @@ function leanbox_misc_permission() {
     'sales beat wise ofd permission' => array(
       'title' => 'sales beat wise ofd permission',
       'description' => 'sales beat wise ofd permission'
-    ),   
+    ),
+    'pdd_master' => array(
+      'title' => 'Pdd Master',
+      'description' => 'Pdd Master'
+    ),
   );
 }
 
@@ -230,7 +235,7 @@ function van_stop_master_form($form, &$form_state) {
   global $user;
   $user_id = $user->uid;
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
-  $nid = $form_state['leanbox_misc']['nid'] = check_node_title_exists($distributor_id, 'van_stop_master');
+  $nid = $form_state['leanbox_misc']['nid'] = check_node_title_exists($distributor_id, 'van_stop_master',$sales_data = FALSE,$distributor_id);
 
   if ($nid) {
     $node = node_load($nid);
@@ -438,5 +443,9 @@ function van_stop_master_form_submit($form, &$form_state) {
     $node->field_distributor_longitude[LANGUAGE_NONE][0]['value'] = $form_state['values']['field_distributor_longitude'];
     $node->field_no_of_days_for_sales_reg[LANGUAGE_NONE][0]['value'] = $form_state['values']['no_of_days'];
     node_save($node);
+    
+  }
+  if ($node) {
+      drupal_set_message(t('Successfully Saved'), 'sucess');
   }
 }

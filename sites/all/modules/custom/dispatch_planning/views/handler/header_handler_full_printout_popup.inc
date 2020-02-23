@@ -24,13 +24,11 @@ class header_handler_full_printout_popup extends views_handler_field {
   }
 
   function render($empty = FALSE) {
-
-    global $user;
-    $user_id = $user->uid;
     $total_result = $this->view->result;
     $trip_id = $this->view->args[0];
-    $result = get_full_return_data_from_trip_id($trip_id);
-    $result1 = get_trip_exec_date_from_trip_id($trip_id);
+    $distributor_id = get_distributorid_of_trip($trip_id);
+    $result = get_full_return_data_from_trip_id($trip_id,$distributor_id);
+    $result1 = get_trip_exec_date_from_trip_id($trip_id,$distributor_id);
 
     if (!empty($result)) {
       $bill_count = $result['bill_number'];

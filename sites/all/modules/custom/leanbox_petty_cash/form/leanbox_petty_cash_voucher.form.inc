@@ -12,12 +12,40 @@
  */
 function revert_petty_cash_callback($form, &$form_state) {
    $form = array();
+   global $user;
    $form['#prefix'] = '<div id="petty-cash-div">';
    $form['#suffix'] = '</div>';
 
    // get logged in users distributor id
    $user_id = $GLOBALS['user']->uid;
    $distributor_id = change_feeds_import_get_distributor_id($user_id);
+   $distributor_ids = get_distributor_ids();
+   if (in_array("administrator", $user->roles) || in_array("central_distributor", $user->roles)) {
+        $distributor_id_from_url = arg(2);
+        $distributor_ids = get_distributor_ids();
+        unset($distributor_ids[$distributor_id]);
+        $child_distributors = get_child_distributor_rsname($logged_in_distributor_id);
+        $distributor_ids = array('' => 'Select') + $child_distributors;
+        $form['central_outer'] = array(
+          '#type' => 'markup',
+          '#prefix' => '<div style="color:red"><h3>Note: Select any one  Distributor Name </h3></div>',
+        );
+        $form['distributor_id'] = array(
+          '#title' => t('Select Distributor Name'),
+          '#type' => 'select',
+          '#options' => $distributor_ids,
+          '#default_value' => $distributor_id_from_url,
+          '#required' => TRUE,
+          );
+        $distributor_id = $form_state['input']['distributor_id'] ;
+    }
+    // Child distributor logged in
+    else {
+        $form['distributor_id'] = array(
+          '#type' => 'hidden',
+          '#value' => $distributor_id,
+        );
+    }
 
    $form['voucher'] = array(
      '#title' => t('Voucher No'),
@@ -32,12 +60,9 @@ function revert_petty_cash_callback($form, &$form_state) {
        'effect' => 'fade',
      ),
    );
-   $form['distributor_id'] = array(
-     '#type' => 'value',
-     '#value' => $distributor_id,
-   );
+   
    if (isset($form_state['values']['voucher']) && !empty($form_state['values']['voucher'])) {
-      $output = _get_voucher_details_distributor_wise($distributor_id, $form_state['values']['voucher']);
+      $output = _get_voucher_details_distributor_wise($distributor_ids, $form_state['values']['voucher']);
       if (!empty($output['rows'])) {
          $form['old_voucher_id'] = array(
            '#type' => 'value',
@@ -96,12 +121,13 @@ function revert_petty_cash_callback_submit($form, &$form_state) {
    if (!empty($form_state['values']['old_voucher_id']) && !empty($form_state['values']['distributor_id'])) {
       $old_voucher = $form_state['values']['old_voucher_id'];
       $distributor_id = $form_state['values']['distributor_id'];
+      $facility_code = get_facility_code($distributor_id);
       $balance = _get_latest_balance($distributor_id);
-      $coupon_id = _update_unique_coupon($distributor_id);
+      $coupon_id = _update_unique_coupon($distributor_id,$facility_code);
       $arg1 = $form_state['values']['arg'];
-      $user_details = leanbox_dashboard_get_username_and_rs_code($distributor_id);
-      $rs_code = $user_details['field_third_party_username_value'];
-      $complete_voucher_no = "delete-$rs_code-$coupon_id";
+      //$user_details = leanbox_dashboard_get_username_and_rs_code($distributor_id);
+     // $rs_code = $user_details['field_third_party_username_value'];
+      $complete_voucher_no = "delete-$facility_code-$coupon_id";
 
       $old_voucher_details = $form_state['values']['voucher_rows'];
       $old_amount = $old_voucher_details[0]['amount'];

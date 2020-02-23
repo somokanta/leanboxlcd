@@ -300,7 +300,6 @@ function tripwise_vrs_details_remove_callback($form, &$form_state) {
 }
 
 function _get_farey_returned_delivered_trip_details($trip_number, $distributor_id) {
-   global $user;
    $query = db_select('dispatch_planning_item_details', 'id');
    $query->join('node', 'n', 'n.title = id.sku_code');
    $query->condition('n.uid', $distributor_id);

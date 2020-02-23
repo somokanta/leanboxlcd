@@ -27,8 +27,9 @@ function returns_confirmation_edit_form($form, &$form_state) {
     '#value' => t('Check'),
   );
   global $user;
-  $dis_id = change_feeds_import_get_distributor_id($user->uid);
+  //$dis_id = change_feeds_import_get_distributor_id($user->uid);
   $trip_number = $form_state['values']['trip_number'];
+  $dis_id = get_distributorid_of_trip($trip_number);
   $check_trip_nid = check_trip_id_exists_or_not($dis_id, $trip_number);
   $current_vrs_status = $check_trip_nid->field_vrs_status_value;
   //return Confirmed
@@ -83,9 +84,10 @@ function returns_confirm_edit_form_callback($form, &$form_state) {
  * @return type
  */
 function returns_confirmation_edit_form_submit($form, &$form_state) {
-  global $user;
-  $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+  //global $user;
+  //$distributor_id = change_feeds_import_get_distributor_id($user->uid);
   $trip_number = $form_state['values']['trip_number'];
+  $distributor_id = get_distributorid_of_trip($trip_number);
   $check_trip_nid = check_trip_id_exists_or_not($distributor_id, $trip_number);
   $current_vrs_status = $check_trip_nid->field_vrs_status_value;
   $query = db_select('node', 'n');
@@ -131,8 +133,9 @@ function returns_confirmation_edit_form_submit($form, &$form_state) {
  */
 function returns_confirmation_edit_form_validate($form, &$form_state) {
   global $user;
-  $dis_id = change_feeds_import_get_distributor_id($user->uid);
+  //$dis_id = change_feeds_import_get_distributor_id($user->uid);
   $trip_number = $form_state['values']['trip_number'];
+  $dis_id =get_distributorid_of_trip($trip_number);
   $check_trip_nid = check_trip_id_exists_or_not($dis_id, $trip_number);
   $vrs_status = $check_trip_nid->field_vrs_status_value;
   $current_vrs_status = $check_trip_nid->field_vrs_status_value;
@@ -194,8 +197,9 @@ function returns_confirmation_edit_form_validate($form, &$form_state) {
  */
 function returns_confirmation_submit($form, $form_state) {
   global $user;
-  $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+  //$distributor_id = change_feeds_import_get_distributor_id($user->uid);
   $trip_number = $form_state['values']['trip_number'];
+  $distributor_id = get_distributorid_of_trip($trip_number);
   $trip_nid = check_trip_id_exists_or_not($distributor_id, $trip_number);
   $current_vrs_status = $trip_nid->field_vrs_status_value;
  

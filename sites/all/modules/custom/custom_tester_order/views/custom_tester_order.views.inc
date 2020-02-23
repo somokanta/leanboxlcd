@@ -198,6 +198,15 @@ function custom_tester_order_views_data() {
         'filter' => array(
             'handler' => 'views_handler_filter_numeric',
         ),
+        'relationship' => array(
+            'title' => t('Distributor ID to Distributor Name'),
+            'help' => t("Distributor ID to Distributor Name"),
+            'handler' => 'views_handler_relationship',
+            'base' => 'users',
+            //'entity type' => 'file',
+            'base field' => 'uid',
+            'label' => t('Distributor Name relation !field_name', array('!field_name' => 'distributor_id')),
+        )      
     );
     $data['tester_order_data']['facility_code'] = array(
         'title' => t('Facility Code'),

@@ -34,8 +34,9 @@ function van_live_tracking() {
  */
 function van_live_tracking_form($form, &$form_state) {
   global $user;
-  $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+  //$distributor_id = change_feeds_import_get_distributor_id($user->uid);
   $rs_code = dispatch_planning_get_rscode_using_uid($user->uid);
+   $distributor_ids = get_distributor_ids();
   
   drupal_add_js(drupal_get_path('module', 'mrc_live_tracking') . '/js/live_tracking_page_refresh.js');
   $form = array();
@@ -51,7 +52,7 @@ function van_live_tracking_form($form, &$form_state) {
   );
   $today_timestamp = strtotime(date("Y-m-d"));
   $query = db_select('van_live_tracking', 'vlt');
-  $query->condition('vlt.distributor_id', $distributor_id, '=');
+  $query->condition('vlt.distributor_id', $distributor_ids, 'IN');
   $query->condition('vlt.tracktime', $today_timestamp, '>=');
   //$query->condition('vlt.employeecode', db_like($rs_code) . '%', 'LIKE');  
   $query->fields('vlt', array('employeecode', 'tracktime','battery','speed','latitude', 'longitude'));
@@ -119,7 +120,7 @@ function van_live_tracking_form($form, &$form_state) {
   $dispatch_from_date = $dispatch_to_date = date('Y-m-d'); // uncomment while testing on dev
 
   $query = db_select('dispatch_planning_api_data', 'ad');
-  $query->condition('ad.distributor_id', $distributor_id, '=');
+  $query->condition('ad.distributor_id', $distributor_ids, 'IN');
   $query->condition('ad.fieldExecutiveName', $drivername_arr, 'IN');
   $query->fields('ad', array('fieldExecutiveName'));
   $query->addExpression('GROUP_CONCAT(DISTINCT ad.runsheet_number)', 'runsheet_number');

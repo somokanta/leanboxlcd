@@ -14,6 +14,14 @@
  */
 function delivery_confirmation_form($form, &$form_state) {
   $form = array();
+    global $user;
+    $logged_in_dis_id = change_feeds_import_get_distributor_id($user->uid);
+    if (in_array("central_distributor", $user->roles)) {
+        $central_distributor_id = $logged_in_dis_id;
+    }
+    else {
+        $central_distributor_id = get_central_distributor_id($logged_in_dis_id);
+    }
 
   $arr['ajaxConfirm']['confirm-remove'] = array('title' => 'Confirmation Dialog', 'text' => 'Are you sure you want to confirm this Trip ID?', 'buttons' => array('button_confirm' => array('text' => 'Yes'), 'button_reject' => array('text' => 'No')));
   drupal_add_js($arr, 'setting');
@@ -215,8 +223,10 @@ function delivery_confirmation_callback($form, &$form_state) {
  * @return array
  */
 function delivery_confirmation_form_validate($form, &$form_state) {
-  global $user;
-  $dis_id = change_feeds_import_get_distributor_id($user->uid);
+    global $user;
+  //$dis_id = change_feeds_import_get_distributor_id($user->uid);
+    $dis_id = get_distributorid_of_trip($form_state['values']['trip_id']);
+    $trip_id = $form_state['values']['trip_id'];  
 
   if (empty($form_state['values']['trip_id']) && empty($form_state['values']['dispatch_from_date'])) {
     drupal_set_message(t("Please select either trip id or dispatch date."), 'error');
@@ -271,26 +281,28 @@ function delivery_confirmation_form_validate($form, &$form_state) {
 function delivery_confirmation_form_submit($form, &$form_state) {
   if ($form_state['error_flag'] != 1) {
     global $user;
-    $dis_id = change_feeds_import_get_distributor_id($user->uid);
-
+    //$dis_id = change_feeds_import_get_distributor_id($user->uid);
     $trip_id = $form_state['values']['trip_id'];
-
     $dispatch_from_date = $form_state['values']['dispatch_from_date'];
     $dispatch_to_date = $form_state['values']['dispatch_to_date'];
-
     $cashier_name = $form_state['values']['cashier_name'];
+     if (!empty($trip_id)) {
+        $dis_id = get_distributorid_of_trip($trip_id);
+        $dis_ids = array($dis_id);
+     } else if (!empty($dispatch_from_date) && !empty($dispatch_to_date)) {
+        $dis_ids = get_distributor_ids();
+     }
 
     $query = db_select('node', 'n');
     $query->leftjoin('field_data_field_vehicle_arrival_date', 'vad', 'vad.entity_id = n.nid');
     $query->leftjoin('field_data_field_vehicle_arrival_time', 'vat', 'vat.entity_id = n.nid');
     $query->leftjoin('field_data_field_delivery_incharge_name', 'din', 'din.entity_id = n.nid');
     $query->condition('n.type', 'dispatch_data', '=');
-    $query->condition('n.uid', $dis_id, '=');
+    $query->condition('n.uid', $dis_ids, 'IN');
     $query->leftjoin('field_data_field_vrs_status', 'vs', 'vs.entity_id = n.nid');
     $query->condition('vs.field_vrs_status_value', '-1', '=');
-    
     if (!empty($trip_id)) {
-      $query->condition('n.title', $trip_id, '=');
+     $query->condition('n.title', $trip_id, '=');
     }
 
     $query->leftjoin('field_data_field_dispatch_date', 'disp_date', 'disp_date.entity_id = n.nid');
@@ -303,7 +315,8 @@ function delivery_confirmation_form_submit($form, &$form_state) {
       $query->condition('cn.field_cashier_name_value', $cashier_name, '=');
     }
 
-    $query->join('dispatch_planning_api_data', 'dpi', "dpi.runsheet_number = n.title and dpi.distributor_id = $dis_id ");
+    $query->join('dispatch_planning_api_data', 'dpi', "dpi.runsheet_number = n.title");
+    $query->condition('dpi.distributor_id',$dis_ids,'IN');
     $query->groupBy('n.title');
 
     $query->fields('n', array('title', 'title'));
@@ -318,7 +331,6 @@ function delivery_confirmation_form_submit($form, &$form_state) {
     $query->addExpression('vat.field_vehicle_arrival_time_value', 'vehicle_arrival_time');
     $query->addExpression('din.field_delivery_incharge_name_value', 'delivery_incharge_name');
     $res = $query->execute()->fetchAll(PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
-    
     $form_state['delivery_confirmation']['bills'] = $res;
   }
   else {
@@ -332,11 +344,12 @@ function delivery_confirmation_form_submit($form, &$form_state) {
 function delivery_confirm_validate(&$form, &$form_state) {
   $mess = '';
   global $user;
-  $dis_id = change_feeds_import_get_distributor_id($user->uid);
+  //$dis_id = change_feeds_import_get_distributor_id($user->uid);
   
   $get_trip_id = $form_state['triggering_element']['#name'];
   $exploded_name = explode('_', $get_trip_id);
   $trip_id = $exploded_name[2];
+  $dis_id = get_distributorid_of_trip($trip_id);
   
   // Validation of Total bill count should be equal to sum of Full delivered bill count + full returned bill count + partial delivered bill count + delivery pending bill count
   $validation_on_bill_count = get_bill_count_validation($trip_id, $dis_id);
@@ -441,11 +454,12 @@ function delivery_confirm_validate(&$form, &$form_state) {
  */
 function delivery_confirm_submit($form, $form_state) {
   global $user;
-  $dis_id = change_feeds_import_get_distributor_id($user->uid);
+  //$dis_id = change_feeds_import_get_distributor_id($user->uid);
 
   $get_trip_id = $form_state['triggering_element']['#name'];
   $exploded_name = explode('_', $get_trip_id);
   $trip_id = $exploded_name[2];
+  $dis_id = get_distributorid_of_trip($trip_id);
   $vehicle_arrival_date = $form_state['values']['bill_details'][$trip_id]['vehicle_arrival_date'];
   $vehicle_arrival_time = $form_state['values']['bill_details'][$trip_id]['vehicle_arrival_time'];
   $delivery_incharge_name = $form_state['values']['bill_details'][$trip_id]['delivery_incharge_name'];

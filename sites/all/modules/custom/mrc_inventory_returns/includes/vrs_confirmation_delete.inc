@@ -76,8 +76,8 @@ function returns_confirm_edit_form_callback($form, &$form_state) {
 function vrs_confirmation_delete_form_submit($form, &$form_state) {
   global $user;
   $vrs_status = array('3','2');
-  $distributor_id = change_feeds_import_get_distributor_id($user->uid);
   $trip_number = $form_state['values']['trip_number'];
+  $distributor_id = get_distributorid_of_trip($trip_number);
 
   $query = db_select('node', 'n');
   $query->condition('n.type', 'sales_register_data', '=');
@@ -118,9 +118,9 @@ function vrs_confirmation_delete_form_submit($form, &$form_state) {
  */
 function vrs_confirmation_delete_form_validate($form, &$form_state) {
   global $user;
-  $dis_id = change_feeds_import_get_distributor_id($user->uid);
-
+  //$dis_id = change_feeds_import_get_distributor_id($user->uid);
   $trip_id = $form_state['values']['trip_number'];
+  $dis_id = get_distributorid_of_trip($trip_id);
 
   if (!empty($trip_id)) {
         //1- Return confirmed, 3- Vrs pending
@@ -162,10 +162,8 @@ function vrs_confirmation_delete_form_validate($form, &$form_state) {
  * @return type
  */
 function vrs_confirmation_submit($form, $form_state) {
-  global $user;
-  $distributor_id = change_feeds_import_get_distributor_id($user->uid);
-
   $trip_number = $form_state['values']['trip_number'];
+  $distributor_id = get_distributorid_of_trip($trip_number);
 
   $trip_nid = check_trip_id_exists_or_not($distributor_id, $trip_number);
   if (!empty($trip_nid->nid)) {
