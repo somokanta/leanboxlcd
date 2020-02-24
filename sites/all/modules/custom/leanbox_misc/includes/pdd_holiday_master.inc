@@ -5,7 +5,7 @@ function pdd_add_form($form, &$form_state) {
   global $user;
   $user_id = $user->uid;
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
-  if (in_array("administrator", $user->roles) || in_array("central_distributor", $user->roles)) {
+  if (in_array("central_distributor", $user->roles)) {
       // central distributor ID
       $distributor_id = $distributor_id;
   }
@@ -88,7 +88,7 @@ function pdd_add_form_submit($form, &$form_state) {
   global $user;
   $user_id = $user->uid;
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
-  if (in_array("administrator", $user->roles) || in_array("central_distributor", $user->roles)) {
+  if (in_array("central_distributor", $user->roles)) {
       // central distributor ID
       $distributor_id = $distributor_id;
   }
@@ -133,7 +133,7 @@ function holiday_add_form($form, &$form_state) {
   global $user;
   $user_id = $user->uid;
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
-  if (in_array("administrator", $user->roles) || in_array("central_distributor", $user->roles)) {
+  if (in_array("central_distributor", $user->roles)) {
       // central distributor ID
       $distributor_id = $distributor_id;
   }
@@ -204,7 +204,7 @@ function holiday_add_form_submit($form, &$form_state) {
   global $user;
   $user_id = $user->uid;
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
-  if (in_array("administrator", $user->roles) || in_array("central_distributor", $user->roles)) {
+  if (in_array("central_distributor", $user->roles)) {
       // central distributor ID
       $distributor_id = $distributor_id;
   }

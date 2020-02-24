@@ -514,7 +514,7 @@ function get_contract_leave_details($resource_nid, $node_type, $type, $extra_wor
   if (in_array("super_central_distributor", $user->roles)) {
       $distributor_ids = get_disributor_ids($logged_in_distributor_id);
   }
-  else if (in_array("administrator", $user->roles) || in_array("central_distributor", $user->roles)) {
+  else if (in_array("central_distributor", $user->roles)) {
       $distributor_ids = array($logged_in_distributor_id);
   }
   else {

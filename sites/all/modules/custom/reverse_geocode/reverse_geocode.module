@@ -638,7 +638,7 @@ function hul_code_form($form, &$form_state, $type) {
        }
   }
    // Central Distributor Logged IN
-  if (in_array("administrator", $user->roles) || in_array("central_distributor", $user->roles)) {
+  if (in_array("central_distributor", $user->roles)) {
     $distributor_id_from_url =$url_parms['distributor_id'];
      $distributor_ids = get_distributor_ids();
     unset($distributor_ids[$distributor_id]);

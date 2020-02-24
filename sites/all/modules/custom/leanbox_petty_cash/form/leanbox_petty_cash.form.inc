@@ -31,7 +31,7 @@ function upload_petty_cash_callback($form, &$form_state) {
       '#type' => 'value',
       '#value' => $arg1,
     );
-    if (in_array("administrator", $user->roles) || in_array("central_distributor", $user->roles)) {
+    if (in_array("central_distributor", $user->roles)) {
         $distributor_id_from_url = arg(2);
         $distributor_ids = get_distributor_ids();
         unset($distributor_ids[$distributor_id]);

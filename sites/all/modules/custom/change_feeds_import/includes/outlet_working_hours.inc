@@ -20,7 +20,7 @@ function outlet_working_hours_form($form, &$form_state) {
     $form['#prefix'] = '<div id="working-hours-itemlist-div" class="custom_form_wrap">';
     $form['#suffix'] = '</div>';
     // Central Distributor Logged IN
-    if (in_array("administrator", $user->roles) || in_array("central_distributor", $user->roles)) {
+    if (in_array("central_distributor", $user->roles)) {
         $distributor_ids = get_distributor_ids();
         unset($distributor_ids[$distributor_id]);
         $child_distributors = get_child_distributor_rsname($logged_in_distributor_id);

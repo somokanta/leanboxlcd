@@ -97,7 +97,7 @@ function _van_planning_callback_form($form, &$form_state) {
   if (empty($form_state['rs_distributor_ids'])) {
     $form_state['rs_distributor_ids'] = get_distributor_ids();
   }
-  if (in_array("administrator", $user->roles) || in_array("central_distributor", $user->roles)) {
+  if (in_array("central_distributor", $user->roles)) {
     $child_distributors = get_child_distributor_rsname($dis_id);
     $form_state['central_distributor_id'] = $dis_id;
     if (count($child_distributors) == 1) {
