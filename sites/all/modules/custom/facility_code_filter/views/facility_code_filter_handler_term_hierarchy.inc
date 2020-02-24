@@ -22,7 +22,7 @@ class facility_code_filter_handler_term_hierarchy extends views_handler_field {
     // required for expose form  
     function can_expose() {
         global $user;
-        if (in_array("administrator", $user->roles) || in_array("central_distributor", $user->roles) || in_array("super_central_distributor", $user->roles)) {
+        if (in_array("central_distributor", $user->roles) || in_array("super_central_distributor", $user->roles)) {
             return TRUE;
         } else {
             return FALSE;

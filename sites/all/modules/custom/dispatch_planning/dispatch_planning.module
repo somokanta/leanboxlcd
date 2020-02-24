@@ -1321,7 +1321,7 @@ function dispatch_planning_form($form, &$form_state) {
   $form['#attached']['js'][] = drupal_get_path('module', 'dispatch_planning') . '/js/dispatch_planning_form.js';
   $form['#attached']['css'][] = drupal_get_path('module', 'dispatch_planning') . '/css/dispatch_planning.css';
   // Central Distributor Logged IN
-  if (in_array("administrator", $user->roles) || in_array("central_distributor", $user->roles)) {
+  if (in_array("central_distributor", $user->roles)) {
     $distributor_id_from_url = arg(2);
     $distributor_ids = get_distributor_ids();
     unset($distributor_ids[$distributor_id]);

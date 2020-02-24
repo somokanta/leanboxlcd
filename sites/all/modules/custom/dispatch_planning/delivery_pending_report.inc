@@ -28,7 +28,7 @@ function delivery_pending_report_form($form, &$form_state) {
     $pending = $_GET['pending'];
   }
   // Central Distributor Logged IN
-  if (in_array("administrator", $user->roles) || in_array("central_distributor", $user->roles)) {
+  if (in_array("central_distributor", $user->roles)) {
     $distributor_ids = get_distributor_ids();
     unset($distributor_ids[$distributor_id]);
     $distributor_ids = array('' => 'Select') + $distributor_ids;
