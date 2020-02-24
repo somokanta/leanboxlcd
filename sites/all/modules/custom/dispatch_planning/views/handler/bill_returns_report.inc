@@ -116,6 +116,9 @@ class bill_returns_report extends views_handler_field {
                             return $res_delivery_boy;
                         }
                         break;
+                    case 'global_facility_name':
+                        return get_facility_name($distributor_id);
+                        break;
                     default:
                         return '';
                 }

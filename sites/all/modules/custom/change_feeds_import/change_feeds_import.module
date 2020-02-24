@@ -4940,6 +4940,19 @@ function get_facility_code($distributor_id) {
     return $facility_code;
 }
 
+function get_facility_name($distributor_id) {
+    $facility_name = '';
+    if (!empty($distributor_id)) {
+        $query = db_select('field_data_field_facility_code', 'facility_code');
+        $query->condition('facility_code.entity_id', $distributor_id);
+        $query->join('taxonomy_term_data', 'term_data', 'term_data.tid = facility_code.field_facility_code_tid');
+        $query->join('field_data_field_facility_name', 'facility_name', 'facility_name.entity_id = term_data.tid');
+        $query->fields('facility_name', array('field_facility_name_value'));
+        $facility_name = $query->execute()->fetchField();
+    }
+    return $facility_name;
+}
+
 function get_sibling_distributor_id($distributor_id) {
     $result = array();
     if (!empty($distributor_id)) {
