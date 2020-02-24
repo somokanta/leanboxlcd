@@ -4805,7 +4805,7 @@ function validate_distributor_name($distributor_name) {
         $query->condition("dn.$table_column", $distributor_name);
         // Fetching central logged user's child
         if (!empty($central_login)) {
-            $query->condition("dn.entity_id", $child_distributor_ids,'IN');
+            //$query->condition("dn.entity_id", $child_distributor_ids,'IN');
         }
         $query->fields('distributor_id', array('field_distributor_value'));
         $distributor_id = $query->execute()->fetchField();
