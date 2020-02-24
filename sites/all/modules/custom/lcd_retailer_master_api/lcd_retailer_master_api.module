@@ -123,7 +123,7 @@ function cron_data_callback() {
       if ($val['node_type'] == 'hul_code_area_code_mapping') {
         $node_type = 'hul_code_master';
       }
-      $node_nid = get_node_nid($node_type, $val['title'], $val['distributor_id']);
+      $node_nid = get_retailer_node_nid($node_type, $val['title'], $val['distributor_id']);
       if(!empty($node_nid)){
          $node = node_load($node_nid);
       }
@@ -222,7 +222,7 @@ function moblity_outlet_api_cron() {
   $results = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
   if(!empty($results)){
     foreach ($results as $key => $val) {
-      $node_nid = get_node_nid($val['node_type'], $val['title'], $val['distributor_id']);
+      $node_nid = get_retailer_node_nid($val['node_type'], $val['title'], $val['distributor_id']);
       if(!empty($node_nid)){
         $node = node_load($node_nid);
       }
@@ -294,7 +294,7 @@ function moblity_outlet_api_cron() {
 
 }
 
-function get_node_nid($node_type,$node_title,$distributor_id){
+function get_retailer_node_nid($node_type,$node_title,$distributor_id){
   $query = db_select('node', 'n');
   $query->condition('n.uid', $distributor_id, '=');
   $query->condition('n.type', $node_type, '=');
