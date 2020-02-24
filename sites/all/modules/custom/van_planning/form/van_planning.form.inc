@@ -570,6 +570,10 @@ function _van_planning_callback_form($form, &$form_state) {
             $i++;
           }
         }*/
+      }else{
+        if (!empty($response_data->error)) {// if error exist then sequencing is clicked
+            $_SESSION['park_stop'][$key] = array();//empty previous store data for same van
+        }
       }
 
       if (isset($bill_sequencing_array) && !empty($bill_sequencing_array)) {
