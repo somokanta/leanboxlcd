@@ -2795,10 +2795,6 @@ function change_feeds_import_node_presave($node) {
     if ($node->type == 'bank_master') {
         call_bank_master_api($node);
     }
-
-    if ($node->type == 'outlet_master') {
-        call_location_api($node);
-    }
 }
 
 function holiday_get_working_day($date_timestamp, $day, $holidays, $weeklyoff) {
@@ -4430,62 +4426,6 @@ function call_reason_code_master_api($node) {
         $request_headers = array('Content-Type' => 'application/json', 'Authorization' => 'Token 2972f506c41448cb3456c1c074aed6102183aff9');
         $order_api_url = variable_get('reason_code_master_api_url');
         $options = array('headers' => $request_headers, 'method' => 'POST', 'data' => $reason_json);
-        $response_data = drupal_http_request($order_api_url, $options);
-        $response = $response_data->data;
-        masters_api_log_update($response, $sql_ins_id);
-    }
-}
-
-function call_location_api($node) {
-    $location_type = 'Retailer';
-    $party_code = $node->field_party_code['und'][0]['value'];
-    $og_party_code = $node->original->field_party_code['und'][0]['value'];
-    $hul_code = $node->field_hul_code['und'][0]['value'];
-    $og_hul_code = $node->original->field_hul_code['und'][0]['value'];
-    $party_name = $node->field_party_name['und'][0]['value'];
-    $og_party_name = $node->original->field_party_name['und'][0]['value'];
-    $payment_term = $node->field_payment_terms['und'][0]['value'];
-    $og_payment_term = $node->original->field_payment_terms['und'][0]['value'];
-    $credit_days = $node->field_credit_days['und'][0]['value'];
-    $og_credit_days = $node->original->field_credit_days['und'][0]['value'];
-    $nid = $node->field_hul_code_reference['und'][0]['nid'];
-    $og_nid = $node->original->field_hul_code_reference['und'][0]['nid'];
-    $dis_id = $node->uid;
-    $api_type = 'location_master';
-    $merchant_code = variable_get('merchant_code_conf', 'lakme');
-
-    if (!empty($party_code) && !empty($party_name) && ($party_code != $og_party_code || $hul_code != $og_hul_code || $party_name != $og_party_name || $payment_term != $og_payment_term || $credit_days != $og_credit_days || $nid != $og_nid)) {
-        $res = get_lat_long_and_area_code($nid);
-        $lat = $res[0]['field_hul_updated_lat_value'];
-        $long = $res[0]['field_hul_updated_long_value'];
-        $area_code = $res[0]['n1_title'];
-
-        $location_arr = array(array('party_code' => $party_code, 'party_name' => $party_name, 'location_type' => $location_type, 'merchant' => array(array('name' => $merchant_code))));
-        if (!empty($hul_code)) {
-            $location_arr[0]['hul_code'] = $hul_code;
-        }
-        if (!empty($lat)) {
-            $location_arr[0]['latitude'] = $lat;
-        }
-        if (!empty($long)) {
-            $location_arr[0]['longitude'] = $long;
-        }
-        if (!empty($area_code)) {
-            $location_arr[0]['area_code'] = $area_code;
-        }
-        if (!empty($payment_term)) {
-            $location_arr[0]['payment_term'] = $payment_term;
-        }
-        if (!empty($credit_days)) {
-            $location_arr[0]['credit_days'] = $credit_days;
-        }
-        $location_json = json_encode($location_arr);
-
-        $sql_ins_id = outlet_master_api_log($party_code, $location_json, $api_type, $dis_id);
-
-        $request_headers = array('Content-Type' => 'application/json', 'Authorization' => 'Token 2972f506c41448cb3456c1c074aed6102183aff9');
-        $order_api_url = variable_get('outlet_master_api_url');
-        $options = array('headers' => $request_headers, 'method' => 'POST', 'data' => $location_json);
         $response_data = drupal_http_request($order_api_url, $options);
         $response = $response_data->data;
         masters_api_log_update($response, $sql_ins_id);
