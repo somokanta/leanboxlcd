@@ -1537,6 +1537,9 @@ function lat_lng_results($area_hook, $sales_day, $van_pl_group) {
 }
 
 function reverse_geocode_results($lat, $lng, $page_name ='default') {
+  global $user;
+  $user_id = $user->uid;
+  $dis_id = change_feeds_import_get_distributor_id($user_id);
   $license_key = variable_get('mapmyindia_rest_key', 'z94i9hvuqcsz7amywt76aknw8dx9o15z');
 
   $url = "https://apis.mapmyindia.com/advancedmaps/v1/$license_key/rev_geocode" . "?lng=$lng&lat=$lat";
@@ -1565,6 +1568,7 @@ function reverse_geocode_results($lat, $lng, $page_name ='default') {
         'request_data' => $url,
         'request_time' => time(),
         'response_data' => $result,
+        'distributor_id'=>$dis_id
      ))
      ->execute();
 
