@@ -55,6 +55,7 @@ function lcd_retailer_master_api_node_presave($node) {
     if ($node->type == 'outlet_master') {
       $api_data['type'] = 'outlet_master';
       $api_data['title'] = $node->title;
+      $api_data['distributor_id'] = $node->uid;
       $sql_ins_id = insert_mobility_server_api_retailer_cron($api_data);//mobility_server_api_retailer_cron
     }
     if ($node->type == 'hul_code_master') {
