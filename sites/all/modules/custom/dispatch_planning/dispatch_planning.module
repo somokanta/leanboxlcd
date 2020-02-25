@@ -617,21 +617,20 @@ function dispatch_planning_menu() {
     'page arguments' => array(1),
     'access arguments' => array('Distributor Upload File'),
   );
+
+  $items['admin/config/van-planning-to-sdr-config'] = array(
+      'title' => 'Setting Form For Van Planning APIs to SDR App Config',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('van_planning_api_to_sdr_config_form'),
+      'access callback' => 'check_if_fr_role_user_admin',
+    );
   
-  // prashans code
-//  $items['admin/config/van-planning-to-sdr-config'] = array(
-//      'title' => 'Setting Form For Van Planning APIs to SDR App Config',
-//      'page callback' => 'drupal_get_form',
-//      'page arguments' => array('van_planning_api_to_sdr_config_form'),
-//      'access callback' => 'check_if_fr_role_user_admin',
-//    );
-  
-//  $items['van-planning-sdr-cron'] = array(
-//    'title' => 'Van Planning APIs to SDR App Cron',
-//    'page callback' => 'sdr_api_cron',
-//    'access callback' => TRUE,
-//    'type' => MENU_CALLBACK,
-//  );
+  $items['van-planning-sdr-cron'] = array(
+    'title' => 'Van Planning APIs to SDR App Cron',
+    'page callback' => 'sdr_api_cron',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
   return $items;
 }
 
@@ -1321,12 +1320,16 @@ function dispatch_planning_form($form, &$form_state) {
   $form['#attached']['js'][] = drupal_get_path('module', 'dispatch_planning') . '/js/dispatch_planning_form.js';
   $form['#attached']['css'][] = drupal_get_path('module', 'dispatch_planning') . '/css/dispatch_planning.css';
   // Central Distributor Logged IN
-  if (in_array("administrator", $user->roles) || in_array("central_distributor", $user->roles)) {
+  if (in_array("central_distributor", $user->roles)) {
     $distributor_id_from_url = arg(2);
     $distributor_ids = get_distributor_ids();
     unset($distributor_ids[$distributor_id]);
     $child_distributors = get_child_distributor_rsname($logged_in_distributor_id);
     $distributor_ids = array('' => 'Select') + $child_distributors;
+  if (count($child_distributors) == 1) {
+        $default_distributor_data = array_keys($child_distributors);
+        $default_distributor_id = $default_distributor_data[0];
+    }
     $form['central_outer'] = array(
       '#type' => 'markup',
       '#prefix' => '<div style="color:red"><h3>Note: Select any one  Distributor Name before creating a Trip</h3></div>',  
@@ -1335,7 +1338,7 @@ function dispatch_planning_form($form, &$form_state) {
       '#title' => t('Select Distributor Name'),
       '#type' => 'select',
       '#options' => $distributor_ids,
-      '#default_value'=>$distributor_id_from_url,
+      '#default_value'=>$distributor_id_from_url?$distributor_id_from_url:$default_distributor_id,
       '#required' => TRUE,
       '#ajax' => array(
       'wrapper' => 'itemlist-div',
@@ -4923,156 +4926,170 @@ function get_facility_code_of_distributor($distributor_id) {
   return $facility_code;
 }
 
-//function van_planning_api_to_sdr_config_form($form, $form_state) {
-//  $form['van_planning_api_to_sdr_url'] = array(
-//      '#type' => 'textfield',
-//      '#title' => t('Van Planning API to SDR App URL'),
-//      '#description' => t('Van Planning API to SDR App URL'),
-//      '#default_value' => variable_get('van_planning_api_to_sdr_url'),
-//      '#required' => TRUE,
-//    );
-//  return system_settings_form($form);
-//}
-    // prashants code 
-//function dispatch_planning_node_presave($node) {
-//  if ($node->type == 'dispatch_data' && ($node->is_new)) {
-//        $distributor_id = $node->uid;
-//
-//    db_insert('sdr_app_log_preprocess') // Table name no longer needs {}
-//      ->fields(array(
-//        'trip_id' => $node->title,
-//        'distributor_id' => $distributor_id,
-//        'flag' => 0,
-//        'created_date' => REQUEST_TIME,
-//      ))
-//      ->execute();
-//  }
-//}
+function van_planning_api_to_sdr_config_form($form, $form_state) {
+  $form['van_planning_api_to_sdr_url'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Van Planning API to SDR App URL'),
+      '#description' => t('Van Planning API to SDR App URL'),
+      '#default_value' => variable_get('van_planning_api_to_sdr_url'),
+      '#required' => TRUE,
+    );
+  return system_settings_form($form);
+}
+ 
+function dispatch_planning_node_presave($node) {
+  if ($node->type == 'dispatch_data' && ($node->is_new)) {
+        $distributor_id = $node->uid;
 
-//function sdr_api_cron() {
-//    $query = db_select('sdr_app_log_preprocess', 'sdr');
-//    $query->fields('sdr', array('trip_id', 'distributor_id'));
-//    $query->orderBy('sdr.created_date');
-//    $query->condition('sdr.flag', 0);
-//    $query->range(0, 1);
-//    $trip_id_result = $query->execute()->fetchAll();
-//
-//    foreach($trip_id_result as $trip_value){
-//        $trip = $trip_value->trip_id;
-//        $distributor_id = $trip_value->distributor_id;
-//
-//        $query = db_select('node', 'n');
-//        $query->condition('n.type', 'dispatch_data');
-//        $query->leftjoin('field_data_field_cashier_name', 'cashier', 'cashier.entity_id = n.nid');
-//        $query->leftjoin('field_data_field_entered_prevan', 'ep', 'ep.entity_id = n.nid');
-//        $query->leftjoin('field_data_field_trip_id_reference', 'trip_ref', 'trip_ref.field_trip_id_reference_nid = n.nid');
-//        $query->leftjoin('node', 'n1', 'trip_ref.entity_id = n1.nid');
-//        $query->condition('n1.type', 'sales_register_data');
-//        $query->leftjoin('field_data_field_outlet_order_no', 'order_no', 'order_no.entity_id = n1.nid');
-//        $query->leftjoin('field_data_field_crate_id', 'crate_id', 'crate_id.entity_id = n1.nid');
-//        $query->leftjoin('field_data_field_party_code_reference', 'party_code', 'party_code.entity_id = n1.nid');
-//        $query->leftjoin('node', 'n2', 'party_code.field_party_code_reference_nid = n2.nid');
-//        $query->condition('n2.type', 'outlet_master');
-//        $query->leftjoin('field_data_field_party_name', 'party_name', 'party_name.entity_id = n2.nid');
-//        $query->leftjoin('field_data_field_hul_code_reference', 'hul_code_ref', 'hul_code_ref.entity_id = n2.nid');
-//        $query->leftjoin('node', 'n3', 'hul_code_ref.field_hul_code_reference_nid = n3.nid');
-//        $query->condition('n3.type', 'hul_code_master');
-//        $query->condition('n.title', $trip, '=');
-//        $query->condition('n.uid', $distributor_id);
-//        $query->fields('n', array('title', 'uid'));
-//        $query->fields('cashier', array('field_cashier_name_value'));
-//        $query->fields('ep', array('field_entered_prevan_value'));
-//        $query->fields('n1', array('title'));
-//        $query->fields('order_no', array('field_outlet_order_no_value'));
-//        $query->fields('crate_id', array('field_crate_id_value'));
-//        $query->fields('n2', array('title'));
-//        $query->fields('party_name', array('field_party_name_value'));
-//        $query->fields('n3', array('title'));
-//        $query->groupBy('order_no.field_outlet_order_no_value');
-//        $result = $query->execute()->fetchAll();
-//
-//        $facility_code = get_facility_code_of_distributor($distributor_id);
-//
-//        foreach($result as $key => $value){
-//             $trip_id = $value->title;
-//             $crossdock_distributor_id = $value->uid;
-//             $cashier_name = $value->field_cashier_name_value;
-//             $van_id = $value->field_entered_prevan_value;
-//             $bill_number = $value->n1_title;
-//             $order_number = $value->field_outlet_order_no_value;
-//             $box_id = $value->field_crate_id_value;
-//             $party_code = $value->n2_title;
-//             $party_name = $value->field_party_name_value;
-//             $parent_party_code = $value->n3_title;
-//
-//            // Trip_Details_Crossdock
-//             $results['Trip_Details_Crossdock'][$trip_id]['Crossdock_Facility_code'] = $facility_code;
-//             $results['Trip_Details_Crossdock'][$trip_id]['Crossdock_Trip_ID'] = $trip_id;
-//             $results['Trip_Details_Crossdock'][$trip_id]['Cashier_Name'] = $cashier_name;
-//             $results['Trip_Details_Crossdock'][$trip_id]['Van_ID'] = $van_id;
-//
-//            // Order_Box_Details
-//             $order_box_details[$trip_id]['Order_Box_Details'][$order_number]['Order_Number'] = $order_number;
-//             $order_box_details[$trip_id]['Order_Box_Details'][$order_number]['Bill_Number'] = $bill_number;
-//             $order_box_details[$trip_id]['Order_Box_Details'][$order_number]['Box_ID'] = $box_id;
-//             $order_box_details[$trip_id]['Order_Box_Details'][$order_number]['Party_Code'] = $party_code;
-//             $order_box_details[$trip_id]['Order_Box_Details'][$order_number]['Party_Name'] = $party_name;
-//             $order_box_details[$trip_id]['Order_Box_Details'][$order_number]['Parent_Party_Code'] = $parent_party_code;
-//             $order_box_details[$trip_id]['Order_Box_Details'][$order_number]['Crossdock_Distributor_ID'] = $crossdock_distributor_id;
-//        }
-//
-//
-//        foreach ($order_box_details as $trip_id => $order_box_details_value) {
-//            foreach ($order_box_details_value['Order_Box_Details'] as $order_box_details_value) {
-//                $results['Trip_Details_Crossdock'][$trip_id]['Order_Box_Details'][] = $order_box_details_value;
-//            }
-//        }
-//
-//        foreach ($results as $res) {
-//            foreach ($res as $res1) {
-//                $res_main['Trip_Details_Crossdock'][] = $res1;
-//            }
-//        }
-//        $trip_json = json_encode($res_main);
-//
-//        $sql_ins_id = insert_sdr_app_log($trip, $distributor_id, $trip_json);
-//        $request_headers = array('Content-Type' => 'application/json', 'Authorization' => 'Token 2972f506c41448cb3456c1c074aed6102183aff9');
-//        $sdr_api_url = variable_get('van_planning_api_to_sdr_url');
-//        $options = array('headers' => $request_headers, 'method' => 'POST', 'data' => $trip_json);
-//        $response_data = drupal_http_request($sdr_api_url, $options);
-//        $response = $response_data->data;
-//        $log_data = $response ? $response : $response_data;
-//        update_sdr_app_log($log_data, $sql_ins_id);
-//
-//        db_update('sdr_app_log_preprocess')
-//            ->fields(array(
-//              'flag' => 1
-//            ))
-//            ->condition('trip_id', $trip, '=')
-//            ->execute();
-//    }
-//
-//  return " ";
-//}
+    db_insert('sdr_app_log_preprocess') // Table name no longer needs {}
+      ->fields(array(
+        'trip_id' => $node->title,
+        'distributor_id' => $distributor_id,
+        'flag' => 0,
+        'created_date' => REQUEST_TIME,
+      ))
+      ->execute();
+  }
+}
 
-//function insert_sdr_app_log($trip, $distributor_id, $trip_json) {
-//    $sql_ins_id = db_insert('sdr_app_log')
-//      ->fields(array(
-//        'trip_id' => $trip,
-//        'distributor_id' => $distributor_id,
-//        'request_data' => $trip_json,
-//        'request_time' => time(),
-//      ))
-//      ->execute();
-//    return $sql_ins_id;
-//}
-//
-//function update_sdr_app_log($response, $sql_ins_id) {
-//    db_update('sdr_app_log')
-//      ->fields(array(
-//        'response_data' => $response,
-//        'response_time' => time(),
-//      ))
-//      ->condition('id', $sql_ins_id, '=')
-//      ->execute();
-//}
+function sdr_api_cron() {
+    $query = db_select('sdr_app_log_preprocess', 'sdr');
+    $query->fields('sdr', array('trip_id', 'distributor_id'));
+    $query->orderBy('sdr.created_date');
+    $query->condition('sdr.flag', 0);
+    $query->range(0, 1);
+    $trip_id_result = $query->execute()->fetchAll();
+
+    foreach($trip_id_result as $trip_value){
+        $trip = $trip_value->trip_id;
+        $distributor_id = $trip_value->distributor_id;
+
+        $query = db_select('node', 'n');
+        $query->condition('n.type', 'dispatch_data');
+        $query->leftjoin('field_data_field_cashier_name', 'cashier', 'cashier.entity_id = n.nid');
+        $query->leftjoin('field_data_field_entered_prevan', 'ep', 'ep.entity_id = n.nid');
+        $query->leftjoin('field_data_field_trip_id_reference', 'trip_ref', 'trip_ref.field_trip_id_reference_nid = n.nid');
+        $query->leftjoin('node', 'n1', 'trip_ref.entity_id = n1.nid');
+        $query->condition('n1.type', 'sales_register_data');
+        $query->leftjoin('field_data_field_outlet_order_no', 'order_no', 'order_no.entity_id = n1.nid');
+        $query->leftjoin('field_data_field_crate_id', 'crate_id', 'crate_id.entity_id = n1.nid');
+        $query->leftjoin('field_data_field_party_code_reference', 'party_code', 'party_code.entity_id = n1.nid');
+        $query->leftjoin('node', 'n2', 'party_code.field_party_code_reference_nid = n2.nid');
+        $query->condition('n2.type', 'outlet_master');
+        $query->leftjoin('field_data_field_party_name', 'party_name', 'party_name.entity_id = n2.nid');
+        $query->leftjoin('field_data_field_hul_code_reference', 'hul_code_ref', 'hul_code_ref.entity_id = n2.nid');
+        $query->leftjoin('node', 'n3', 'hul_code_ref.field_hul_code_reference_nid = n3.nid');
+        $query->condition('n3.type', 'hul_code_master');
+        $query->condition('n.title', $trip, '=');
+        $query->condition('n.uid', $distributor_id);
+        $query->fields('n', array('title', 'uid'));
+        $query->fields('cashier', array('field_cashier_name_value'));
+        $query->fields('ep', array('field_entered_prevan_value'));
+        $query->fields('n1', array('title'));
+        $query->fields('order_no', array('field_outlet_order_no_value'));
+        $query->fields('crate_id', array('field_crate_id_value'));
+        $query->fields('n2', array('title'));
+        $query->fields('party_name', array('field_party_name_value'));
+        $query->fields('n3', array('title'));
+        $query->groupBy('order_no.field_outlet_order_no_value');
+        $result = $query->execute()->fetchAll();
+
+        $facility_code = get_facility_code_of_distributor($distributor_id);
+
+        foreach($result as $key => $value){
+             $trip_id = $value->title;
+             $crossdock_distributor_id = $value->uid;
+             $cashier_name = $value->field_cashier_name_value;
+             $van_id = $value->field_entered_prevan_value;
+             $bill_number = $value->n1_title;
+             $order_number = $value->field_outlet_order_no_value;
+             $box_id = $value->field_crate_id_value;
+             $party_code = $value->n2_title;
+             $party_name = $value->field_party_name_value;
+             $parent_party_code = $value->n3_title;
+
+            // Trip_Details_Crossdock
+             $results['Trip_Details_Crossdock'][$trip_id]['Crossdock_Facility_code'] = $facility_code;
+             $results['Trip_Details_Crossdock'][$trip_id]['Crossdock_Trip_ID'] = $trip_id;
+             $results['Trip_Details_Crossdock'][$trip_id]['Cashier_Name'] = $cashier_name;
+             $results['Trip_Details_Crossdock'][$trip_id]['Van_ID'] = $van_id;
+
+            // Order_Box_Details
+             $order_box_details[$trip_id]['Order_Box_Details'][$order_number]['Order_Number'] = $order_number;
+             $order_box_details[$trip_id]['Order_Box_Details'][$order_number]['Bill_Number'] = $bill_number;
+             $order_box_details[$trip_id]['Order_Box_Details'][$order_number]['Box_ID'] = $box_id;
+             $order_box_details[$trip_id]['Order_Box_Details'][$order_number]['Party_Code'] = $party_code;
+             $order_box_details[$trip_id]['Order_Box_Details'][$order_number]['Party_Name'] = $party_name;
+             $order_box_details[$trip_id]['Order_Box_Details'][$order_number]['Parent_Party_Code'] = $parent_party_code;
+             $order_box_details[$trip_id]['Order_Box_Details'][$order_number]['Crossdock_Distributor_ID'] = $crossdock_distributor_id;
+        }
+
+
+        foreach ($order_box_details as $trip_id => $order_box_details_value) {
+            foreach ($order_box_details_value['Order_Box_Details'] as $order_box_details_value) {
+                $results['Trip_Details_Crossdock'][$trip_id]['Order_Box_Details'][] = $order_box_details_value;
+            }
+        }
+
+        foreach ($results as $res) {
+            foreach ($res as $res1) {
+                $res_main['Trip_Details_Crossdock'][] = $res1;
+            }
+        }
+        $trip_json = json_encode($res_main);
+
+        $sql_ins_id = insert_sdr_app_log($trip, $distributor_id, $trip_json);
+        $request_headers = array('Content-Type' => 'application/json', 'Authorization' => 'Token 2972f506c41448cb3456c1c074aed6102183aff9');
+        $sdr_api_url = variable_get('van_planning_api_to_sdr_url');
+        $options = array('headers' => $request_headers, 'method' => 'POST', 'data' => $trip_json);
+        $response_data = drupal_http_request($sdr_api_url, $options);
+        $response = $response_data->data;
+        $log_data = $response ? $response : $response_data;
+        update_sdr_app_log($log_data, $sql_ins_id);
+
+        db_update('sdr_app_log_preprocess')
+            ->fields(array(
+              'flag' => 1
+            ))
+            ->condition('trip_id', $trip, '=')
+            ->execute();
+    }
+
+  return " ";
+}
+
+function insert_sdr_app_log($trip, $distributor_id, $trip_json) {
+    $sql_ins_id = db_insert('sdr_app_log')
+      ->fields(array(
+        'trip_id' => $trip,
+        'distributor_id' => $distributor_id,
+        'request_data' => $trip_json,
+        'request_time' => time(),
+      ))
+      ->execute();
+    return $sql_ins_id;
+}
+
+function update_sdr_app_log($response, $sql_ins_id) {
+    db_update('sdr_app_log')
+      ->fields(array(
+        'response_data' => $response,
+        'response_time' => time(),
+      ))
+      ->condition('id', $sql_ins_id, '=')
+      ->execute();
+}
+
+function get_node_created_time($title, $type, $distributor_id) {
+    if (!empty($title) && !empty($type) && !empty($distributor_id)) {
+        $query = db_select('node', 'n');
+        $query->condition('n.title', $title);
+        if (!empty($type)) {
+            $query->condition('n.type', $type);
+        }
+        $query->condition('n.uid', $distributor_id);
+        $query->fields('n', array('created'));
+        $return_created_time = $query->execute()->fetchField();
+    }
+    return $return_created_time;
+}

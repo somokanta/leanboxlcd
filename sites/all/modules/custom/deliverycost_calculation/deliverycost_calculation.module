@@ -514,7 +514,7 @@ function get_contract_leave_details($resource_nid, $node_type, $type, $extra_wor
   if (in_array("super_central_distributor", $user->roles)) {
       $distributor_ids = get_disributor_ids($logged_in_distributor_id);
   }
-  else if (in_array("administrator", $user->roles) || in_array("central_distributor", $user->roles)) {
+  else if (in_array("central_distributor", $user->roles)) {
       $distributor_ids = array($logged_in_distributor_id);
   }
   else {
@@ -1488,12 +1488,6 @@ function deliverycost_calculation_node_insert($node) {
 function deliverycost_calculation_node_presave($node) {
   if ($node->type == 'resource_master') {
     //activate_ressource($node);
-  }
-  if ($node->type == 'lb_product_master') {
-    //activate_ressource($node);
-      if ($node->uid ==23466) {
-          $node->uid = 154013; // subadmin
-      }
   }
 
 }

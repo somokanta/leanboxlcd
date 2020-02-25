@@ -3173,6 +3173,14 @@ function dispatch_planning_views_data() {
       'handler' => 'bill_returns_report',
     ),
   );
+  // This is for custom table facility name
+$data['views']['global_facility_name'] = array(
+    'title' => t('Facility Name'),
+    'help' => t('Facility Name'),
+    'field' => array(
+      'handler' => 'bill_returns_report',
+    ),
+  );  
   
   $data['views']['total_sales_quantity'] = array(
     'title' => t('Total Sales Quantity'),

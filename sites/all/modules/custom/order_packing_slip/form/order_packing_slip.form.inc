@@ -8,7 +8,7 @@ function order_packing_slip_form($form, &$form_state){
   $user_id = $user->uid;
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
   $logged_in_distributor_id = $distributor_id;
-  if (in_array("administrator", $user->roles) || in_array("central_distributor", $user->roles)) {
+  if (in_array("central_distributor", $user->roles)) {
     $distributor_ids = get_distributor_ids();
     unset($distributor_ids[$distributor_id]);
     $child_distributors = get_child_distributor_rsname($logged_in_distributor_id);

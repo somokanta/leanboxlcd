@@ -175,12 +175,22 @@ function cron_data_callback() {
         $api_data['field_sales_day'] = $node->field_sales_day[LANGUAGE_NONE][0]['value'];
         $api_data['field_salesman'] = $node->field_salesman[LANGUAGE_NONE][0]['value'];
         $api_data['field_salesman_code'] = $node->field_salesman_code[LANGUAGE_NONE][0]['value'];
+        //$api_data['field_payment_terms'] = $node->field_payment_terms[LANGUAGE_NONE][0]['value'];
+        $api_data['field_credit_days'] = $node->field_credit_days[LANGUAGE_NONE][0]['value'];
+        $resourse_name_nid = $node->field_updated_by[LANGUAGE_NONE][0]['nid'];
+        $resourse_name = '';
+        if(!empty($resourse_name_nid)){
+          $resourse_name = get_node_title_using_nid($resourse_name_nid);
+        }
+        $api_data['field_updated_by'] = $resourse_name;
       }
       $api_data['distributor_id'] = $node->uid;
+      watchdog('outlet data to be sent', '<pre>' . print_r($api_data, TRUE) . '</pre>');
       $data = json_encode($api_data);
+      watchdog('after encode', '<pre>' . print_r($data, TRUE) . '</pre>');
       // $authorization = 'bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1ODgzOWY4ZjYyZmQyMzkzMGE4NjQwYjEiLCJpYXQiOjE1MDQ2Nzg4NTl9.AzJLVp6HDk6lbXCWxI1T8Y7US6R0panNjkY5B-pkdqg';
       $request_headers = array('Content-Type' => 'application/json', 'Authorization' => $authorization);
-      $api_url = variable_get('retailer_api_master_url', 'http://dev-lak.leanbox.in/retailer_master/update_retailer_master_data');
+      $api_url = variable_get('retailer_api_master_url', 'http://lak.leanbox.in/retailer_master/update_retailer_master_data');
       //$api_url = variable_get('retailer_api_master_url', 'http://localhost/lakme/web/retailer_master/update_retailer_master_data');
       $api_options = array('headers' => $request_headers, 'method' => 'POST', 'data' => $data);
       $response_data = drupal_http_request($api_url, $api_options);
