@@ -305,7 +305,7 @@ function change_feeds_import_sales_register_batch_fix_process($data, $distributo
                         if (!in_array($details['party_code'], $party_codes)) {
                             $party_codes[] = $details['party_code'];
 
-                            $arugments = '?pl_group=' . urlencode($details['pl_group']) . '&sales_day=' . urlencode($details['sales_day']) . '&beat_name=' . urlencode($details['beat_name']) . '&hul_status=' . urlencode(0);
+                            $arugments = '?pl_group=' . urlencode($details['pl_group']) . '&sales_day=' . urlencode($details['sales_day']) . '&beat_name=' . urlencode($details['beat_name']) . '&hul_status=' . urlencode(0) . '&distributor_id=' . urlencode($dis_id);
                             $url = $page_url . $arugments;
                             $value['error_message'] = t('Address not confirmed for Party Code: ' . l($details['party_code'] . '- (HUL Code:' . $details['hul_code'] . ')', $url, array('attributes' => array('target' => '_blank'))));
                         }
