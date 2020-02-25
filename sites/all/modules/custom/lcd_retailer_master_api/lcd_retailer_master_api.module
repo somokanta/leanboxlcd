@@ -108,8 +108,8 @@ function insert_mobility_server_api_retailer_cron($api_data){
   }
 }
 function cron_data_callback() {
+  global $base_url;
   $master_datas = array();
-  
   $query = db_select('retailer_master_api_cron', 'cron');
   $query->condition('cron.response_flag', 0, '=');
   $query->range(0, 50);
@@ -190,8 +190,8 @@ function cron_data_callback() {
       watchdog('after encode', '<pre>' . print_r($data, TRUE) . '</pre>');
       // $authorization = 'bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1ODgzOWY4ZjYyZmQyMzkzMGE4NjQwYjEiLCJpYXQiOjE1MDQ2Nzg4NTl9.AzJLVp6HDk6lbXCWxI1T8Y7US6R0panNjkY5B-pkdqg';
       $request_headers = array('Content-Type' => 'application/json', 'Authorization' => $authorization);
-      $api_url = variable_get('retailer_api_master_url', 'http://lak.leanbox.in/retailer_master/update_retailer_master_data');
-      //$api_url = variable_get('retailer_api_master_url', 'http://localhost/lakme/web/retailer_master/update_retailer_master_data');
+      $calling_url = str_replace("lcd", "lak", $base_url); //call drupal 7 URL
+      $api_url = $calling_url. '/retailer_master/update_retailer_master_data';
       $api_options = array('headers' => $request_headers, 'method' => 'POST', 'data' => $data);
       $response_data = drupal_http_request($api_url, $api_options);
       $response_data = json_decode($response_data->data);
