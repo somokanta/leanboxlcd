@@ -25,10 +25,8 @@ class total_travel_time_handler extends views_handler_field {
   }
 
   function render($data) {
-    global $user;
-    $dis_id = change_feeds_import_get_distributor_id($user->uid);
     $trip_id = $data->_field_data['nid']['entity']->title;
-
+    $dis_id = get_distributorid_of_trip($trip_id);
     $query = db_select('node', 'n');
     $query->condition('n.title', $trip_id, "=");
     $query->condition('n.uid', $dis_id);
