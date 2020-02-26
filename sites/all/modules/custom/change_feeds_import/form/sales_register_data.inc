@@ -192,6 +192,7 @@ function change_feeds_import_sales_register_batch_fix_process($data, $distributo
     if (!isset($context['results']['unique_combination'])) {
         $context['results']['unique_combination'] = array();
     }
+    $sibling_distributor_ids = get_sibling_distributor_id($distributor_id);
     foreach ($data as $key => $value) {
         if (in_array('central_distributor', $user->roles)) {
             if (empty($value['DISTRIBUTOR NAME'])) {
