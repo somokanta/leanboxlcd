@@ -254,8 +254,9 @@ function change_feeds_import_sales_register_batch_fix_process($data, $distributo
         }
         if (!empty($value['BILL_NUMBER'])) {
             $unique_comb = $value['BILL_NUMBER'] . '-' . $dis_id;
-           // $bill_distributor_id = get_distributor_id_of_bill($value['BILL_NUMBER'], $dis_id);
-            if (!empty($sibling_distributor_ids)) {
+            // checking sibling have same bill
+            $bill_distributor_id = get_distributor_id_of_bill($value['BILL_NUMBER'], $sibling_distributor_ids);
+            if (!empty($bill_distributor_id) && $bill_distributor_id!=$dis_id) {
                 $value['error_message'] .= "Bill Number: " . $value['BILL_NUMBER'] . ' already exist' . ". </br>";
             }
             if (in_array($unique_comb, $context['results']['unique_combination'])) {
