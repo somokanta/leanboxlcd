@@ -23,6 +23,11 @@ function change_feeds_import_permission() {
         'title' => t('Delete Billing Data'),
         'description' => t('Delete Billing Data')
       ),
+     'Sibling Central Sales Register Upload' => array(
+        'title' => t('Sibling Central Sales Register Upload'),
+        'description' => t('Sibling Central Sales Register Upload')
+      ),
+   
     );
 }
 
@@ -491,6 +496,15 @@ function change_feeds_import_menu() {
       'page callback' => 'drupal_get_form',
       'page arguments' => array('master_api_config_form'),
       'access callback' => 'check_if_fr_role_user_admin',
+    );
+    
+      $items['sibling/sales-register/import'] = array(
+      'title' => 'Import Sales Register Data',
+      'description' => 'Import Sales Register Data Node',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('change_feeds_import_sales_register_sibling_form'),
+      'access arguments' => array('Sibling Central Sales Register Upload'),
+      'file' => 'form/sales_register_data.inc',
     );
     return $items;
 }
@@ -4983,7 +4997,6 @@ function get_sibling_distributor_id($distributor_id) {
 }
 
 function get_distributor_id_of_bill($bill_number, $distributor_id) {
-    $distributor_id = '';
     if (!empty($bill_number) && !empty($distributor_id)) {
         $query = db_select('node', 'n');
         $query->condition('n.type', 'sales_register_data', '=');
