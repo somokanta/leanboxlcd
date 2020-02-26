@@ -193,6 +193,8 @@ function change_feeds_import_sales_register_batch_fix_process($data, $distributo
         $context['results']['unique_combination'] = array();
     }
     foreach ($data as $key => $value) {
+        unset($bill_distributor_id);
+        unset($sibling_distributor_ids);
         if (in_array('central_distributor', $user->roles)) {
             if (empty($value['DISTRIBUTOR NAME'])) {
                 $value['error_message'] .= "Distributor Name Column Missing for bill number " . $value['BILL_NUMBER'] . ".";
