@@ -7,8 +7,10 @@ function change_feeds_import_sales_register_form($form, $form_state) {
     global $user;
     $user_id = $user->uid;
     $distributor_id = change_feeds_import_get_distributor_id($user_id);
-    //add distributor id columns for central distributor
-    //add distributor id columns for central distributor
+    // If sibling distributor logged in then redirect to sibling sales register upload page
+    if (in_array('sibling_central_distributor', $user->roles)) {
+         drupal_goto("sibling/sales-register/import");
+    }
     if (in_array('central_distributor', $user->roles)) {
         $template = 'sales_register_template_central.csv';
         $form_state['central_distributor_id'] = $distributor_id;
@@ -139,7 +141,7 @@ function change_feeds_import_sales_register_form_submit($form, &$form_state) {
     $query->condition('n.title', $central_distributor_id);
     $query->join('field_data_field_no_of_days_for_sales_reg', 'no_da', 'no_da.entity_id = n.nid');
     $query->fields('no_da', array('field_no_of_days_for_sales_reg_value'));
-    $query->addTag('node_uid');
+    $query->condition('n.uid',$central_distributor_id);
     $days = $query->execute()->fetchAll();
     $no_of_days = $days[0]->field_no_of_days_for_sales_reg_value;
 
