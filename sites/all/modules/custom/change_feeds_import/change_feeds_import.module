@@ -4073,8 +4073,8 @@ function hul_code_address_confirmation($form, &$form_state) {
                 $pt_ct_status = check_exsiting_record_for_party_code($party_code, $distributor_id);
                 $sibling_distributor_ids = get_sibling_distributor_id($distributor_id);
                 $party_code_distributor_id = get_distributor_id_of_party_code($party_code,$sibling_distributor_ids);
-                watchdog('$party_code_distributor_id',print_r($party_code_distributor_id,TRUE));
-                watchdog('$distributor_id',print_r($distributor_id,TRUE));
+                //watchdog('$party_code_distributor_id',print_r($party_code_distributor_id,TRUE));
+               // watchdog('$distributor_id',print_r($distributor_id,TRUE));
                 $pc_ct_flag =0;
                 if (empty($party_code_distributor_id)|| $party_code_distributor_id == $distributor_id) {
                     $pc_ct_flag = 1;
