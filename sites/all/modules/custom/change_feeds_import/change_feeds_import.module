@@ -4982,18 +4982,19 @@ function get_sibling_distributor_id($distributor_id) {
     return $result;
 }
 
-function get_distributor_id_of_bill($bill_number, $distributor_id) {
-    $distributor_id = '';
-    if (!empty($bill_number) && !empty($distributor_id)) {
+function get_distributor_id_of_bill($bill_number, $sibling_distributor_ids) {
+    $distributor_id = 0;
+    if (!empty($bill_number) && !empty($sibling_distributor_ids)) {
         $query = db_select('node', 'n');
         $query->condition('n.type', 'sales_register_data', '=');
-        $query->condition('n.uid', $distributor_id, '=');
+        $query->condition('n.uid', $sibling_distributor_ids, 'IN');
         $query->condition('n.title', $bill_number, '=');
         $query->fields('n', array('uid'));
         $distributor_id = $query->execute()->fetchField();
     }
     return $distributor_id;
 }
+
 
 function get_all_facility_codes() {
     $facility_codes = '';
