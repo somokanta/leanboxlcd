@@ -238,7 +238,7 @@ function change_feeds_import_sales_register_sibling_batch_fix_process($data, $di
                 if (($check_date >= $from) && ($check_date <= $to)) {
                     //Check sales register_sibling is already updated then validate with field_sr_bill_date
                     $sr_bill_date = get_sales_register_sibling_sr_bill_date(trim($value['BILL_NUMBER']),$dis_id);
-                   if (!empty($sr_bill_date) && $sr_bill_date != $value['BILL_DATE']) {
+                    if (!empty($sr_bill_date) && $sr_bill_date != $value['BILL_DATE']) {
                         $value['error_message'] .= "Bill Date should be equal to previously uploaded bill date for Bill No " . $value['BILL_NUMBER'] . ".";
                     }
                 }
@@ -381,9 +381,10 @@ function change_feeds_import_insert_data_in_sibling_custom_sales_table($value, $
 }
 
 function get_sales_register_sibling_sr_bill_date($bill_number, $distributor_id) {
+    $bill_number = trim($bill_number);
     $query = db_select('node', 'n');
     $query->condition('n.uid', $distributor_id);
-   // $query->condition('n.type', 'sales_register_data');
+    $query->condition('n.type', 'sales_register_data');
     $query->condition('n.title', $bill_number, '=');
     $query->join('field_data_field_sr_bill_date', 'sr_bill', 'sr_bill.entity_id = n.nid');
     $query->fields('sr_bill', array('field_sr_bill_date_value'));

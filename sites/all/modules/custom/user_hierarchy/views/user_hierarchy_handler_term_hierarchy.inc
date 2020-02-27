@@ -22,7 +22,7 @@ class user_hierarchy_handler_term_hierarchy extends views_handler_field {
     // required for expose form  
     function can_expose() {
         global $user;
-        if (in_array("administrator", $user->roles) || in_array("central_distributor", $user->roles) || in_array("super_central_distributor", $user->roles)) {
+        if (in_array("administrator", $user->roles) || in_array("central_distributor", $user->roles) || in_array("super_central_distributor", $user->roles)  || in_array("sibling_central_distributor", $user->roles)) {
             return TRUE;
         } else {
             return FALSE;
@@ -90,7 +90,7 @@ class user_hierarchy_handler_term_hierarchy extends views_handler_field {
     // required for expose form  
     function exposed_form(&$form, &$form_state) {
         global $user;
-        if (in_array("administrator", $user->roles) || in_array("central_distributor", $user->roles) || in_array("super_central_distributor", $user->roles)) {
+        if (in_array("administrator", $user->roles) || in_array("central_distributor", $user->roles) || in_array("super_central_distributor", $user->roles)|| in_array("sibling_central_distributor", $user->roles)) {
             //$distributor_ids = get_distributor_ids();
             $distributor_id = change_feeds_import_get_distributor_id($user->uid);
             //unset($distributor_ids[$distributor_id]);
