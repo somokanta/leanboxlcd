@@ -183,7 +183,6 @@ if(!empty($options)){
     '#suffix' => '</div>',
     // '#sticky' => FALSE,
   );
-  dpm($options);
 foreach($options as $key => &$val){
   $key = str_replace(' ', '', $key);
   $form['bill_details']['#rows'][$key][] = $val['bill_number'];
