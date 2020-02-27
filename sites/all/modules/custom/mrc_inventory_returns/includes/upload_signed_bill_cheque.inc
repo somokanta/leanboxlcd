@@ -100,7 +100,7 @@ function upload_signed_bill_cheque_form($form, &$form_state) {
       'method' => 'replace',
       'effect' => 'fade',
     ),
-    '#attributes' => array('class' => array('vrs-trip-submit')),
+    '#attributes' => array('class' => array('vrs-trip-submit'),'id' => 'show-button'),
     '#submit' => array('display_upload_signed_bill_cheque_trip_details'),//display_vrs_trip_details
     '#validate' => array('validate_upload_signed_bill_cheque_trip_details'),//validate_vrs_trip_details
     '#prefix' => '',
@@ -124,7 +124,7 @@ function upload_signed_bill_cheque_form($form, &$form_state) {
     '#type' => 'checkbox',
     '#id' => 'bill_status_undeliver',
     '#title' => 'Show Full Returned as well',
-    '#prefix' => '<div class="bill_status_delivered bill_status">',
+    '#prefix' => '<div class="bill_status_delivered bill_status" id="bill_status_undeliver">',
     '#suffix' => '</div></div>'
   );
   $form['bill_number'] = array(
@@ -135,13 +135,13 @@ function upload_signed_bill_cheque_form($form, &$form_state) {
     '#prefix' => '<div class="col_2 col_2_2"> ',
     '#suffix' => '</div>'
   );
-  $payment_out_come = array('Cash' => 'Cash', 'Cheque' => 'Cheque', 'Signed Bill' => 'Signed Bill');
+  $payment_out_come = array('Cash' => 'Cash', 'Cheque' => 'Cheque', 'Signed' => 'Signed','Cheque,Cash' => 'Cheque,Cash');
   $form['payment_outcome'] = array(
     '#type' => 'select',
     '#attributes' => array('class' => array('payment_outcome', 'auto_complete'), 'style' => "height:32px"),
     '#id' => 'payment_outcome',
     '#title' => 'Payment Outcome',
-    '#default_value' => $payment_out_come['Signed Bill'],
+    '#default_value' => $payment_out_come['Signed'],
     '#options' => array('' => 'Select') + $payment_out_come,
     '#prefix' => '<div class="col_2 col_2_2"> ',
     '#suffix' => '</div>'
@@ -149,8 +149,6 @@ function upload_signed_bill_cheque_form($form, &$form_state) {
   
   if (!empty($options)) {
       $bills = get_signed_bill_cheque_images($trip_id, $dis_id);
-
- 
   }
 
   $form['bank_name'] = array(
@@ -171,7 +169,6 @@ function upload_signed_bill_cheque_form($form, &$form_state) {
     'Cheque Image & Upload',
   );
 if(!empty($options)){
-
   $form['bill_details'] = array(
     '#theme' => 'table',
     '#prefix' => '<div class="custom_middle_table vrs_middle_table">',
@@ -189,6 +186,7 @@ foreach($options as $key => &$val){
   $key = str_replace(' ', '', $key);
   $form['bill_details']['#rows'][$key][] = $val['bill_number'];
   $undeliver = 0;
+  
   switch ($val['res_status']) {
     case 'partial_deliver';
       $bill_status = t('Partial Delivered');
@@ -207,7 +205,7 @@ foreach($options as $key => &$val){
   }
   if (empty($bills[$key]['payment_term'])) {
     if (($bills[$key]['actual_signed_bill_amount'] > 0) || ($val['res_confirm_signed_bill_amount'] > 0)) {
-      $payment_term[] = t('Signed Bill');
+      $payment_term[] = t('Signed');
     }
     if (($bills[$key]['actual_cheque_amount'] > 0) || ($val['res_cheque_amount'] > 0)) {
       $payment_term[] = t('Cheque');
@@ -229,7 +227,6 @@ foreach($options as $key => &$val){
   $form['bill_details']['#rows'][$key][] = $bill_status;
   $form['bill_details']['#rows'][$key][] = $val['field_payment_terms_value'];
   $form['bill_details']['#rows'][$key][] = $payments_terms;
-  
  $ph_cheque = '<div class ="vrs_signed_bill_image">';
       $ph_flag = 0;
       $span_class = '<span style = "margin-left:18px;"></span>';
@@ -289,8 +286,9 @@ foreach($options as $key => &$val){
         '#attributes' => array('title' => t('Cheque Image')),
         '#default_value'=>$photo_cheque_fid,  
         '#name' => 'files[cheque_' . $key . ']',
+        // '#id' => 'bill_details_' . $key . '_photo_cheque',
+        '#attributes' => array('id' => 'ph_cheque'),
          '#upload_validators' => array('file_validate_extensions' => array('gif png jpg jpeg pdf doc docx'),
-         ),
         '#upload_location' => 'public://bills/',    
        );
       unset($path);
@@ -357,12 +355,16 @@ foreach($options as $key => &$val){
         '#name' => 'files[signedbill_' . $key . ']',
         '#type' => 'managed_file',
         '#upload_location' => 'public://bills/',  
+        '#prefix' => '<div>' . $ph_signed_bill,
+          '#default_value'=>$photo_signed_fid,    
+        '#suffix' => '</div>',
+        '#attributes' => array('class' => array('photo_signed_bill'), 'id' => 'ph_sign', 'title' => t('Signed Bill Image')),
         '#default_value'=>$photo_signed_fid,    
         '#upload_validators' => array('file_validate_extensions' => array('gif png jpg jpeg pdf doc docx'),
          ),
         '#attributes' => array('class' => array('photo_signed_bill'), 'title' => t('Signed Bill Image')),
       );
-      
+          
      // if else removed 
       $form['bill_details'][$key]["photo_cheque"] = &$photo_cheque;
       $form['bill_details'][$key]["photo_signed_bill"] = &$photo_signed_bill;
@@ -492,6 +494,9 @@ function display_upload_signed_bill_cheque_trip_details($form, &$form_state) {
     if(!empty($bill_number)){
       $query->condition('ad.bill_number', $bill_number);
     }
+    if(!empty($payment_outcome)){
+      //$query->condition('ad.res_money_collect2', $payment_outcome);
+    }
     // Join with outlet master to fetch payment type
       $query->join('node', 'n', 'n.title = ad.bill_number AND n.uid = ad.distributor_id');
       $query->condition('n.type', 'sales_register_data', '=');
@@ -513,6 +518,10 @@ function display_upload_signed_bill_cheque_trip_details($form, &$form_state) {
       $query->addExpression('ad.res_photo_of_cheque', 'res_photo_of_cheque');
       $query->addExpression('ad.res_photo_of_signed_bill_delivery', 'res_photo_of_signed_bill_delivery');
       $query->addExpression('ad.photo_of_signed_bill_partial', 'photo_of_signed_bill_partial');
+      $query->addExpression('ad.res_confirm_signed_bill_amount', 'res_confirm_signed_bill_amount');
+      $query->addExpression('ad.res_cheque_amount', 'res_cheque_amount');
+      $query->addExpression('ad.res_cash_amount', 'res_cash_amount');
+      $query->addExpression('ad.res_money_collect2', 'payment_outcome');//payment outcome value
       // payment type
       $query->fields('pt', array('field_payment_terms_value'));
       $query->leftJoin('vrs_trip_items','vrs','vrs.trip_id = ad.runsheet_number AND vrs.bill_number = ad.bill_number AND vrs.distributor_id = ad.distributor_id');
