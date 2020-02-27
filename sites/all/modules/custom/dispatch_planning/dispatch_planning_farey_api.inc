@@ -98,7 +98,7 @@ function fetch_dispatch_planning_api_data($data) {
             'res_proof_of_undelivery' => !empty($proof_of_undelivery) ? $proof_of_undelivery : '',
             'updated_flag' => 2,
             'updated_time' => REQUEST_TIME,  
-            'res_updated_time' => REQUEST_TIME,
+            'res_updated_time' => isset($data['transactionDate']) ? strtotime($data['transactionDate']) : 0,//REQUEST_TIME,
 
           ))
           ->condition('referenceNo', $data['referenceNumber'], '=')
