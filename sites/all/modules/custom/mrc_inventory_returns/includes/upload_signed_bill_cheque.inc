@@ -492,7 +492,7 @@ function display_upload_signed_bill_cheque_trip_details($form, &$form_state) {
       $query->condition('ad.date', $dispatch_date, '=');
     }
     $default_bill_status = array('partial_deliver', 'deliver');//delivery outcome filter based
-    //$query->condition('ad.res_status', $default_bill_status, 'IN');
+    $query->condition('ad.res_status', $default_bill_status, 'IN');
     if(!empty($bill_number)){
       $query->condition('ad.bill_number', $bill_number);
     }
