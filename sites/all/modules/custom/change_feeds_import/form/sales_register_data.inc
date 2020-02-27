@@ -134,8 +134,6 @@ function change_feeds_import_sales_register_form_submit($form, &$form_state) {
     $user_id = $user->uid;
     $distributor_id = change_feeds_import_get_distributor_id($user_id);
     $central_distributor_id = $form_state['central_distributor_id'];
-
-
     $query = db_select('node', 'n');
     $query->condition('n.type', 'van_stop_master');
     $query->condition('n.title', $central_distributor_id);
