@@ -136,7 +136,7 @@ function upload_signed_bill_cheque_form($form, &$form_state) {
     '#prefix' => '<div class="col_2 col_2_2"> ',
     '#suffix' => '</div>'
   );
-  $payment_out_come = array('Cash' => 'Cash', 'Cheque' => 'Cheque', 'Signed' => 'Signed','Cheque,Cash' => 'Cheque,Cash');
+  $payment_out_come = array('Cash' => 'Cash', 'Cheque' => 'Cheque', 'Signed' => 'Signed','Cheque,Cash' => 'Cheque,Cash','Cash,cheque' => 'Cash,cheque');
   $form['payment_outcome'] = array(
     '#type' => 'select',
     '#attributes' => array('class' => array('payment_outcome', 'auto_complete'), 'style' => "height:32px"),
