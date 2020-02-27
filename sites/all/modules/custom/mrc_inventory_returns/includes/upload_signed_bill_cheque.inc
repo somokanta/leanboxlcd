@@ -13,6 +13,7 @@
  * @return array
  */
 module_load_include('inc', 'mrc_inventory_returns', 'includes/vrs_common');
+module_load_include('inc', 'mrc_inventory_returns', 'includes/vrs_confirmation');
 
 function upload_signed_bill_cheque_form($form, &$form_state) {
   if (!empty($form_state['values']['trip_id']) || !empty($form_state['values']['trips'])) {
@@ -287,10 +288,11 @@ foreach($options as $key => &$val){
         '#default_value'=>$photo_cheque_fid,  
         '#name' => 'files[cheque_' . $key . ']',
         // '#id' => 'bill_details_' . $key . '_photo_cheque',
-        '#attributes' => array('id' => 'ph_cheque'),
-         '#upload_validators' => array('file_validate_extensions' => array('gif png jpg jpeg pdf doc docx'),
+        '#attributes' => array('id' => 'ph_cheque_'.key),
+        '#upload_validators' => array('file_validate_extensions' => array('gif png jpg jpeg pdf doc docx'),
         '#upload_location' => 'public://bills/',    
-       );
+        ),
+      );
       unset($path);
       unset($url);
       unset($wrapper);
@@ -358,7 +360,7 @@ foreach($options as $key => &$val){
         '#prefix' => '<div>' . $ph_signed_bill,
           '#default_value'=>$photo_signed_fid,    
         '#suffix' => '</div>',
-        '#attributes' => array('class' => array('photo_signed_bill'), 'id' => 'ph_sign', 'title' => t('Signed Bill Image')),
+        '#attributes' => array('class' => array('photo_signed_bill'), 'id' => 'ph_sign_'.$key, 'title' => t('Signed Bill Image')),
         '#default_value'=>$photo_signed_fid,    
         '#upload_validators' => array('file_validate_extensions' => array('gif png jpg jpeg pdf doc docx'),
          ),
@@ -428,6 +430,10 @@ function upload_signed_bill_cheque_callback($form, &$form_state) {
 }
 
 function validate_upload_signed_bill_cheque_trip_details($form, &$form_state){
+  if($form_state['triggering_element']['#name'] == 'show'){
+    unset($form_state['complete form']['bill_details']);
+    unset($form_state['complete form']['confirm_vrs']);
+  }
   $trip_id = $form_state['values']['trip_id'];
   if (empty($trip_id)) {
     $trip_id = $form_state['values']['trips'];
@@ -438,7 +444,6 @@ function validate_upload_signed_bill_cheque_trip_details($form, &$form_state){
     $check_returns_flag = check_trip_id_exists_or_not($dis_id, $trip_id);
     if (empty($check_returns_flag)) {
        form_set_error('trip_id', "Trip ID :$trip_id does not exists.");
-      ajax_redirect('upload-signed-bill-and-cheque');
     }
     $current_vrs_status = $check_returns_flag->field_vrs_status_value;
     $field_vrs_status = field_info_field('field_vrs_status');
@@ -452,18 +457,15 @@ function validate_upload_signed_bill_cheque_trip_details($form, &$form_state){
     unset($vrs_status[6]);
     if (isset($vrs_status[$current_vrs_status])) {
       form_set_error('trip_id', "Trip ID :$trip_id is in $vrs_status[$current_vrs_status] state.");
-      ajax_redirect('upload-signed-bill-and-cheque');
     }
     else if (($check_returns_flag->field_vrs_status_value == -1)) {
       unset($form_state['vrs_confirmation']['bills']);
       form_set_error('trip_id', "Trip ID:$trip_id-Please confirm Delivery Confirmation.");
-      ajax_redirect('upload-signed-bill-and-cheque');
     }
   }
   else {
     form_set_error('trip_id', '');
     form_set_error('trips', 'Please select or enter Trip ID.');
-    ajax_redirect('upload-signed-bill-and-cheque');
   }
 }
 function display_upload_signed_bill_cheque_trip_details($form, &$form_state) {
@@ -493,9 +495,6 @@ function display_upload_signed_bill_cheque_trip_details($form, &$form_state) {
     $query->condition('ad.res_status', $default_bill_status, 'IN');
     if(!empty($bill_number)){
       $query->condition('ad.bill_number', $bill_number);
-    }
-    if(!empty($payment_outcome)){
-      //$query->condition('ad.res_money_collect2', $payment_outcome);
     }
     // Join with outlet master to fetch payment type
       $query->join('node', 'n', 'n.title = ad.bill_number AND n.uid = ad.distributor_id');
@@ -549,7 +548,6 @@ function upload_signed_bill_cheque_form_submit($form, &$form_state){
   $trip_items = array();
   $dir = 'public://bills';
   file_prepare_directory($dir, FILE_CREATE_DIRECTORY);
-  //print_r($form_state['values']['bill_details']);die;
   $bill_numbers = array_keys($form_state['values']['bill_details']);
   if (!empty($form_state['values']['bill_details'])) {
     foreach ($form_state['values']['bill_details'] as $key => $value) {
