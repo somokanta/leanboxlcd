@@ -26,27 +26,23 @@
             });
             
             // show hide based on payment outcome
-              billtable = document.getElementById("bill_details_one");
-
-            if(billtable != null){
+            billtable = document.getElementById("bill_details_one");
+            if (billtable != null) {
                 billtr = billtable.getElementsByTagName("tr");
-                if(billtr != null){
+                if (billtr != null) {
                     for (i = 0; i < billtr.length; i++) {
                         billtd = billtr[i].getElementsByTagName("td")[3];
-                        if(billtd != null){
+                        if (billtd != null) {
                             pay_outcome = billtd.innerText;
-                            if(pay_outcome == 'Cash'){
-                               signtd = billtr[i].getElementsByTagName("td")[4].style.visibility = 'hidden';
-                               cheqtd = billtr[i].getElementsByTagName("td")[5].style.visibility = 'hidden';
-                            }   
+                            if (pay_outcome == 'Cash') {
+                                signtd = billtr[i].getElementsByTagName("td")[4].style.visibility = 'hidden';
+                                cheqtd = billtr[i].getElementsByTagName("td")[5].style.visibility = 'hidden';
+                            }
                         }
-                    }                    
+                    }
                 }
 
-           }
-                        
-            
-            
+            }
             //show hide based on payment outcome
 
 
@@ -119,6 +115,7 @@
                 //var select = $('#bank_name');
                 //select.val($('options:first', select).val());
                 $("#bank_name").val('');
+                $("#payment_outcome").val('');
 
                 $("#bill_status_undeliver").prop('checked', false);
                 if (input == 'deliver') {
