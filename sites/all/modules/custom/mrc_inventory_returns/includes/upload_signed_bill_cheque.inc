@@ -520,7 +520,7 @@ function display_upload_signed_bill_cheque_trip_details($form, &$form_state) {
       $query->addExpression('ad.res_confirm_signed_bill_amount', 'res_confirm_signed_bill_amount');
       $query->addExpression('ad.res_cheque_amount', 'res_cheque_amount');
       $query->addExpression('ad.res_cash_amount', 'res_cash_amount');
-      $query->addExpression('ad.res_money_collect2', 'payment_outcome');//payment outcome value
+      $query->addExpression('ad.derived_payment_outcome', 'payment_outcome');//as dicussed with adil chnaged res_money_collect2(old column) to derived
       // payment type
       $query->fields('pt', array('field_payment_terms_value'));
       $query->leftJoin('vrs_trip_items','vrs','vrs.trip_id = ad.runsheet_number AND vrs.bill_number = ad.bill_number AND vrs.distributor_id = ad.distributor_id');
