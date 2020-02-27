@@ -248,7 +248,7 @@ function change_feeds_import_sales_register_sibling_batch_fix_process($data, $di
             }
         }
         if (!empty($value['BILL_NUMBER'])) {
-            $unique_comb = $value['BILL_NUMBER'] . '-' . $dis_id;
+            $unique_comb = $value['BILL_NUMBER'] ;
             $bill_distributor_id = get_distributor_id_of_bill(trim($value['BILL_NUMBER']),$sibling_distributor_ids);
             if (!empty($bill_distributor_id) && $bill_distributor_id!=$dis_id) {
                 $value['error_message'] .= "Bill Number: " . $value['BILL_NUMBER'] . ' already exist' . ". </br>";
