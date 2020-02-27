@@ -22,6 +22,11 @@ function leanbox_petty_cash_schema() {
          'description' => 'distributor_id',
          'type' => 'int',
        ),
+       'facility_code' => array(
+         'description' => 'type',
+         'type' => 'varchar',
+         'length' => 20,
+       ),
      ),
      'primary key' => array('id'),
    );
@@ -125,3 +130,20 @@ function leanbox_petty_cash_schema() {
 
    return $schema;
 }
+
+
+function leanbox_petty_cash_update_7127() {
+  $fields = array(
+    'facility_code' => array(
+         'description' => 'Facility Code',
+         'type' => 'varchar',
+         'length' => 20,
+       ),
+  );
+  foreach ($fields as $key => $field) {
+    if (!db_field_exists('petty_cash_sequence_table', $key)) {
+      db_add_field('petty_cash_sequence_table', $key, $field);
+    }  
+  }
+}
+  

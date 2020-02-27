@@ -7,7 +7,8 @@
  */
 
 function delivery_pending_report_form($form, &$form_state) {
-
+  global $user;
+  $distributor_id = change_feeds_import_get_distributor_id($user->uid);
   if (isset($_GET['from_dispatch_date'])) {
     $from_dispatch_date = $_GET['from_dispatch_date'];
   }
@@ -25,6 +26,31 @@ function delivery_pending_report_form($form, &$form_state) {
   }
   if (isset($_GET['pending'])) {
     $pending = $_GET['pending'];
+  }
+  // Central Distributor Logged IN
+  if (in_array("central_distributor", $user->roles)) {
+    $distributor_ids = get_distributor_ids();
+    unset($distributor_ids[$distributor_id]);
+    $distributor_ids = array('' => 'Select') + $distributor_ids;
+       
+    if (isset($_GET['distributor_id'])) {
+      $distributor_id = $_GET['distributor_id'];
+    }
+    
+    $form['distributor_id'] = array(
+      '#title' => t('Select DistributorID'),
+      '#type' => 'select',
+      '#description' => 'Select DistributorID.',
+      '#options' => $distributor_ids,
+      '#default_value' => $distributor_id,
+    );
+  }
+  // Child distributor logged in
+  else {
+    $form['distributor_id'] = array(
+      '#type' => 'hidden',
+      '#value' => $distributor_id,
+    );
   }
 
   $form['from_dispatch_date'] = array(
@@ -89,15 +115,15 @@ function delivery_pending_report_form_submit($form, &$form_state) {
   $to_bill_date = $form_state['values']['to_bill_date'];
   $bill_num = $form_state['values']['bill_num'];
   $pending = $form_state['values']['pending'];
-
+  $distributor_id = $form_state['values']['distributor_id'];
   if (($form_state['values']["op"] == "Apply") && (arg(0) == 'delivery-pending-report')) {
-    drupal_goto('delivery-pending-report', array('query' => array('from_dispatch_date' => $from_dispatch_date, 'to_dispatch_date' => $to_dispatch_date, 'from_bill_date' => $from_bill_date, 'to_bill_date' => $to_bill_date, 'bill_num' => $bill_num, 'pending' => $pending)));
+    drupal_goto('delivery-pending-report', array('query' => array('from_dispatch_date' => $from_dispatch_date, 'to_dispatch_date' => $to_dispatch_date, 'from_bill_date' => $from_bill_date, 'to_bill_date' => $to_bill_date, 'bill_num' => $bill_num, 'pending' => $pending,$distributor_id)));
   }
 }
 
 function delivery_pending_report_callback() {
-  global $user;
-  $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+  //global $user;
+  //$distributor_id = change_feeds_import_get_distributor_id($user->uid);
 
   if (isset($_GET['from_dispatch_date'])) {
     $from_dispatch_date = strtotime($_GET['from_dispatch_date']);
@@ -119,6 +145,9 @@ function delivery_pending_report_callback() {
   }
   if (arg(1) != 'export') {
     $form = drupal_render(drupal_get_form('delivery_pending_report_form'));
+  }
+  if (isset($_GET['distributor_id'])) {
+    $distributor_id = $_GET['distributor_id'];
   }
 
 //Find all bills which are DP

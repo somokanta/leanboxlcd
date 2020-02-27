@@ -378,6 +378,22 @@ function change_feeds_import_views_data_alter(&$data) {
       'handler' => 'views_handler_argument_numeric',
     ),
   );
+  
+  $data['field_data_field_outlet_order_no']['table']['group'] = t('Outlet Crate Relationship');
+    $data['field_data_field_outlet_order_no']['dummy_name'] = array(
+    'title' => t('Outlet Crate Relationship'),
+    'help' => t('Outlet Crate Relationship'),
+    'relationship' => array(
+      'title' => 'outletordernumber',
+      'base' => 'outlet_order_crate', // Table we're joining to.
+      'base field' => 'outlet_order_no', // Field on the joined table.
+      'field' => 'field_outlet_order_no_value', // Real field name on the 'foo' table.
+      'handler' => 'views_handler_relationship',
+      'label' => t('outlet order crate and sales data relationship'),
+      'title' => t('outlet order crate and sales data relationship'),
+      'help' => t('More information about relationship.'),
+    ),
+  );
 }
 
 
@@ -1323,6 +1339,29 @@ function change_feeds_import_views_data() {
       'handler' => 'views_handler_filter_date',
     ),
   );  
+    $data['custom_billing_data']['distributor_id'] = array(
+        'title' => t('distributor_id'),
+        'help' => t('The record distributor_id.'),
+        'field' => array(
+            'handler' => 'views_handler_field_numeric',
+        ),
+        'sort' => array(
+            'handler' => 'views_handler_sort',
+        ),
+        'filter' => array(
+            'handler' => 'views_handler_filter_numeric',
+        ),
+        'relationship' => array(
+            'title' => t('Distributor ID to Distributor Name'),
+            'help' => t("Distributor ID to Distributor Name"),
+            'handler' => 'views_handler_relationship',
+            'base' => 'users',
+            //'entity type' => 'file',
+            'base field' => 'uid',
+            'label' => t('Distributor Name relation !field_name', array('!field_name' => 'distributor_id')),
+        )
+    );
+
 //END
   $data['van_cld_data_table']['table']['group'] = t('VAN CLD GROUP');
   $data['van_cld_data_table']['table']['base'] = array(

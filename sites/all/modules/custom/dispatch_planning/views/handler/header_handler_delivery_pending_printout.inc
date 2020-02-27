@@ -24,13 +24,14 @@ class header_handler_delivery_pending_printout extends views_handler_field {
     }
 
     function render($empty = FALSE) {
-        global $user;
-        $user_id = $user->uid;
+        //global $user;
+        //$user_id = $user->uid;
         $total_result = $this->view->result;
         $view_key = key($this->view->result);
         $trip_id = $this->view->args[0];
-        $result = get_delivery_pending_data($trip_id);
-        $result1 = get_delivery_pending_header_data($trip_id);
+        $distributor_id = get_distributorid_of_trip($trip_id);
+        $result = get_delivery_pending_data($trip_id,$distributor_id);
+        $result1 = get_delivery_pending_header_data($trip_id,$distributor_id);
         $dispatch_date = $result1['date'];
         $cashier_name = $result1['fieldExecutiveName'];
         if (!empty($dispatch_date)) {
@@ -44,8 +45,8 @@ class header_handler_delivery_pending_printout extends views_handler_field {
         if (!empty($result)) {
             $bill_count = $result['bill_count'];
             $bill_number = $result['bill_number'];
-            $van_type = get_van_type($trip_id);
-            $name= get_distrubutor_name_full_from_user_id($user_id);;
+            $van_type = get_van_type($trip_id,$distributor_id);
+            $name= get_distrubutor_name_full_from_user_id($distributor_id);;
             return '
            <table width = "100%" cellspacing = "0" style = "font-size: 13px; color:#000; font-family:arial" cellpadding = "5" border = "0" align = "center" class = "preview_table">
       <tr>

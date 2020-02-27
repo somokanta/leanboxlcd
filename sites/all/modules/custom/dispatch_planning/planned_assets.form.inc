@@ -30,8 +30,29 @@ function _planned_assets_form($form, &$form_state) {
   $trip_number = $form_state['input']['trip_number'];
 
   if (!empty($trip_number)) {
-    $user_id = $GLOBALS['user']->uid;
-    $distributor_id = change_feeds_import_get_distributor_id($user_id);
+    //$user_id = $GLOBALS['user']->uid;
+    //$distributor_id = change_feeds_import_get_distributor_id($user_id);
+    global $user;
+    $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+
+    if (in_array('central_distributor', $user->roles)) {
+      $central_disid = $distributor_id;
+    }
+    else {
+      $central_disid = get_central_distributor_id($distributor_id);
+    }
+    
+    $distributor_id = get_distributorid_of_trip($trip_number);
+    
+    $form['central_disid'] = array(
+      '#type' => 'value',
+      '#value' => $central_disid,
+    );
+    
+    $form['distributor_id'] = array(
+      '#type' => 'value',
+      '#value' => $distributor_id,
+    );
     // check trip if it is Returns Confirmed
     // check trip if it is VRS Confirmed
     // check trip if it is Handover Confirmed
@@ -76,7 +97,7 @@ function _planned_assets_form($form, &$form_state) {
       }
     */
     else {
-      $item_details = _get_all_assets_type($trip_number);
+      $item_details = _get_all_assets_type($trip_number,$distributor_id);
 
       $item_details_header = array(
         'ASSET_TYPE' => 'ASSET NAME',
@@ -137,17 +158,16 @@ function planned_count_callback($form, &$form_state) {
  * @return array
  */
 function _planned_assets_form_submit($form, &$form_state) {
-  global $user;
-  $dis_id = change_feeds_import_get_distributor_id($user->uid);
-
   $trip_id = $form_state['values']['trip_number'];
   $trip_data = $form_state['values']['trip_data'];
   $planned_count = $form_state['values']['planned_count'];
+  $dis_id = $form_state['values']['distributor_id'];
+  $central_disid = $form_state['values']['central_disid'];
 
   foreach ($planned_count as $key => $asset_planned_count) {
     if (!empty($asset_planned_count)) {
       $asset_nid = get_asset_nid($trip_data[$key]['asset_type']);
-      $trip_nid = get_trip_nid($trip_id);
+      $trip_nid = get_trip_nid($trip_id,$dis_id);
 
       $query = db_select('node', 'n');
       $query->condition('n.type', 'assets_count');
@@ -171,7 +191,7 @@ function _planned_assets_form_submit($form, &$form_state) {
         $assets_count->type = 'assets_count';
         node_object_prepare($assets_count); // Sets some defaults. Invokes hook_prepare() and hook_node_prepare().
         $assets_count->language = LANGUAGE_NONE; // Or e.g. 'en' if locale is enabled
-        $assets_count->uid = $dis_id;
+        $assets_count->distributorid = $dis_id;
         $assets_count->status = 1; //(1 or 0): published or not
         $assets_count->comment = 0; // 0 = comments disabled, 1 = read only, 2 = read/write
         $assets_count->title = $trip_id;
@@ -203,13 +223,13 @@ function _planned_assets_form_validate($form, &$form_state) {
   }
 }
 
-function _get_all_assets_type($trip_number) {
-  global $user;
-  $dis_id = change_feeds_import_get_distributor_id($user->uid);
+function _get_all_assets_type($trip_number,$dis_id) {
+  //global $user;
+  //$dis_id = change_feeds_import_get_distributor_id($user->uid);
 
   $query = db_select('node', 'n');
   $query->condition('n.type', 'asset_type_master');
-  $query->condition('n.uid', $dis_id);
+ // $query->condition('n.uid', $dis_id);
   $query->fields('n', array('nid', 'title'));
   $results = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
   if (!empty($results)) {
@@ -237,12 +257,11 @@ function _get_all_assets_type($trip_number) {
 }
 
 function get_asset_nid($asset_name) {
-  global $user;
-  $dis_id = change_feeds_import_get_distributor_id($user->uid);
-
+ // global $user;
+ // $dis_id = change_feeds_import_get_distributor_id($user->uid);
   $query = db_select('node', 'n');
   $query->condition('n.type', 'asset_type_master');
-  $query->condition('n.uid', $dis_id);
+  //$query->condition('n.uid', $dis_id);
   $query->condition('n.title', $asset_name);
   $query->fields('n', array('nid'));
   $results = $query->execute()->fetchField();
@@ -250,9 +269,10 @@ function get_asset_nid($asset_name) {
   return $results;
 }
 
-function get_trip_nid($trip_id) {
-  global $user;
-  $dis_id = change_feeds_import_get_distributor_id($user->uid);
+
+function get_trip_nid($trip_id, $dis_id) {
+//  global $user;
+//  $dis_id = change_feeds_import_get_distributor_id($user->uid);
 
   $query = db_select('node', 'n');
   $query->condition('n.type', 'dispatch_data');

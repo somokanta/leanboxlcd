@@ -51,16 +51,12 @@ function trip_undispatch_update_form_alter(&$form, &$form_state, $form_id) {
     $trip_nid = $form['#entity_ids']['node'][0]; //key($form['node']); 
     $trip_id = $form['node'][$trip_nid]['#entity']->title;
     $confirm_status = $form['node'][$trip_nid]['#entity']->field_confirm_bill_edit_status['und'][0]['value'];
-
-    //$distributor_id = get_distributorid_of_trip($trip_id);
+    $distributor_id = get_distributorid_of_trip($trip_id);
     global $user;
-    $distributor_id = change_feeds_import_get_distributor_id($user->uid);
-    $form_state['distributor_id'] = $distributor_id;
-
     $form_state['trip_nid'] = $trip_nid;
     $form_state['trip_id'] = $trip_id;
     $form_state['confirm_status'] = $confirm_status;
-
+    $form_state['distributor_id'] = $distributor_id;
     $undispatch_trip_nid = $form['node'][$trip_nid]['#entity']->field_undispatch_trip_ref['und'][0]['nid'];
     if(!empty($undispatch_trip_nid)){
       $default_values_arr = get_default_values($undispatch_trip_nid, 'update');
@@ -123,8 +119,8 @@ function trip_undispatch_update_form_alter(&$form, &$form_state, $form_id) {
     $undispatch_trip_nid = $form['node'][$trip_nid]['#entity']->field_undispatch_trip_ref['und'][0]['nid'];
 
     global $user;
-    //$distributor_id = get_distributorid_of_trip($trip_id);
-    $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+    $distributor_id = get_distributorid_of_trip($trip_id);
+    //$distributor_id = change_feeds_import_get_distributor_id($user->uid);
     $form_state['distributor_id'] = $distributor_id;
 
     $form_state['trip_nid'] = $trip_nid;
@@ -194,10 +190,10 @@ function trip_undispatch_update_form_alter(&$form, &$form_state, $form_id) {
   } //end of elseif
 
   if (arg(0) == 'delivery-app-update' && (arg(1) == 'view' || arg(1) == 'edit')) {
-    global $user;
+    //global $user;
     $trip_id = $form_state['input']['title'];
-    $dis_id = change_feeds_import_get_distributor_id($user->uid);
-    //$dis_id = get_distributorid_of_trip($trip_id); //change_feeds_import_get_distributor_id($user->uid);
+    //$dis_id = change_feeds_import_get_distributor_id($user->uid);
+    $dis_id = get_distributorid_of_trip($trip_id); //change_feeds_import_get_distributor_id($user->uid);
     
     if ($trip_id) {
       $query = db_select('node', 'n');
@@ -223,11 +219,11 @@ function trip_undispatch_update_form_alter(&$form, &$form_state, $form_id) {
 
 function del_app_undispatch_validate($form, &$form_state){
   $user_id = $GLOBALS['user']->uid;
-  $dis_id = $form_state['distributor_id']; //change_feeds_import_get_distributor_id($user_id);
+  //$dis_id = $form_state['distributor_id']; //change_feeds_import_get_distributor_id($user_id);
   $trip_id = $form_state['trip_id'];
   $trip_nid = $form_state['trip_nid'];
   $confirm_status = $form_state['confirm_status'];
-
+  $dis_id = get_distributorid_of_trip($trip_id);
   $field_reason_for_update = $form_state['values']['reason_by_dropdown'];
   $field_updated_by_resource = $form_state['values']['updated_by_dropdown'];
 
@@ -268,17 +264,18 @@ function del_app_undispatch_validate($form, &$form_state){
 
 function del_app_undispatch_submit($form, &$form_state){
   global $user;
-  $distributor_id = $form_state['distributor_id']; //change_feeds_import_get_distributor_id($user->uid);
+  //$distributor_id = $form_state['distributor_id']; //change_feeds_import_get_distributor_id($user->uid);
   //$rs_code = dispatch_planning_get_rscode_using_uid($user->uid);
-  $rs_code = get_facility_code($distributor_id);
   $trip_id = $form_state['trip_id'];
+
   $trip_nid = $form_state['trip_nid'];
   $merchant_code = variable_get('merchant_code_conf','lakme');
   //unset dispatch data fields
   $node = node_load($trip_nid);
   //dpm($node, 'NODE of trip data: ');
   $node->field_dispatch_status['und'][0]['value'] = 0;
-
+  $distributor_id = $node->uid;
+  $rs_code = get_facility_code($distributor_id);
   // check if undispatch_trip_ref field is empty or not - 
   if(!empty($node->field_undispatch_trip_ref)){
     $undispatch_trip_nid = $node->field_undispatch_trip_ref['und'][0]['nid'];
@@ -294,7 +291,7 @@ function del_app_undispatch_submit($form, &$form_state){
     $nodeObj = new stdClass();
     $nodeObj->title = $trip_id;
     $nodeObj->type = "trip_undispatch_reasons";
-    $nodeObj->uid = $user->uid;
+    $nodeObj->uid = $distributor_id;
     $nodeObj->status = 1;
 
     $nodeObj->field_undispatch_updated_by['und'][0]['nid'] = trim($form_state['values']['updated_by_dropdown']);
@@ -335,10 +332,11 @@ function del_app_undispatch_submit($form, &$form_state){
       ->execute();
   }
     
-  $bills = get_sales_reg_bills_from_trip_id($trip_id);
+  $bills = get_sales_reg_bills_from_trip_id($trip_id,$distributor_id);
   foreach ($bills as $val) {
     $ref_no[] = $trip_id . '_' . $rs_code . '_' . $val;
   }
+  $merchant_code = variable_get('merchant_code_conf','lakme');
   $request_arr = array('jobType' => 'delivery','merchantCode' => $merchant_code,'hub' => $rs_code,'runsheet_number' => $trip_id,'fieldExecutiveName' => '', 'dispatch_date' => '', 'array_delivery_boy' => '', 'type' => 'undispatch', 'referenceNo' => $ref_no);
   $request_json = json_encode($request_arr);
     //dpm($request_json);
@@ -405,13 +403,13 @@ function del_app_update_validate($form, &$form_state){
 function del_app_update_submit($form, &$form_state) {
   //dpm($form_state, 'form_state: ');
   global $user;
-  $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+  //$distributor_id = change_feeds_import_get_distributor_id($user->uid);
   
   $trip_id = $form_state['trip_id'];
+  $trip_nid = $form_state['trip_nid'];
   //$rs_code = dispatch_planning_get_rscode_using_uid($user->uid);
+  $distributor_id = get_distributorid_of_trip($trip_id);
   $rs_code = get_facility_code($distributor_id);
-  //$distributor_id = get_distributorid_of_trip($trip_id);
-  
   //save the data
   
   $node = node_load($trip_nid); 
@@ -436,13 +434,13 @@ function del_app_update_submit($form, &$form_state) {
   $dispatch_date_form =  $form_state['values']['node'][$trip_nid]['field_dispatch_date']['und'][0]['value'];
   $dispatch_date = explode(" ", $dispatch_date_form);
   $dis_date = $dispatch_date[0];
-  $merchant_code = variable_get('merchant_code_conf','lakme');// as discussed with shylaja set merchant code previousely it was hardcoded marico
   
-  $bills = get_sales_reg_bills_from_trip_id($trip_id);
+  $bills = get_sales_reg_bills_from_trip_id($trip_id,$distributor_id);
   foreach ($bills as $val){
     $ref_no[] = $trip_id.'_'.$rs_code.'_'.$val;
   }
   //on change condition
+  $merchant_code = variable_get('merchant_code_conf','lakme');
   if($node->field_cashier_name['und'][0]['value'] != $cashier_form || $node->field_dispatch_date['und'][0]['value'] != $dispatch_date_form  || !empty($result)){
     $request_arr = array('jobType' => 'delivery','merchantCode' => $merchant_code,'hub' => $rs_code,'runsheet_number' => $trip_id,'fieldExecutive' => $rs_code . '_' . $cashier_form,'fieldExecutiveName' => $cashier_form, 'dispatch_date' => $dis_date, 'array_delivery_boy' => $del_boys, 'type' => 'update', 'referenceNo' => $ref_no);
     $request_json = json_encode($request_arr);
@@ -474,7 +472,7 @@ function del_app_update_submit($form, &$form_state) {
     $nodeObj = new stdClass();
     $nodeObj->title = $trip_id;
     $nodeObj->type = "trip_undispatch_reasons";
-    $nodeObj->uid = $user->uid;
+    $nodeObj->uid = $distributor_id;
     $nodeObj->status = 1;
 
     $nodeObj->field_trip_updated_by['und'][0]['nid'] = trim($form_state['values']['updated_by_dropdown']);
@@ -513,9 +511,19 @@ function get_default_values($undispatch_trip_nid, $which_screen){
 }
 
 function get_updated_by_drpdwn_values($distributor_id, $resource_type = null, $cashier_flag = 0) {
+  global $user;
+  $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+  if (in_array('central_distributor', $user->roles)) {
+        $central_distributor_id = $distributor_id;
+  }
+   // child distributor logged in return its id + central_distributor_id
+  else {
+      // have to fetch parent distributor id
+        $central_distributor_id = get_central_distributor_id($distributor_id);
+  }  
   $query = db_select('node', 'n');
   $query->condition('n.type', 'resource_master');
-  $query->condition('n.uid', $distributor_id); //$query->condition('n.uid', $central_distributor_id);
+  $query->condition('n.uid', $central_distributor_id); //$query->condition('n.uid', $central_distributor_id);
   $query->join('field_data_field_resource_type', 'rt', 'rt.entity_id = n.nid');
   if (!empty($resource_type)) {
     $query->condition('rt.field_resource_type_value', $resource_type);
@@ -538,9 +546,10 @@ function get_updated_by_drpdwn_values($distributor_id, $resource_type = null, $c
 
 
 function get_all_reasons_for_update($distributor_id) {
+  $subadmin_uid = get_uid_by_role('sub_admin');
   $query = db_select('node', 'n');
   $query->condition('n.type', 'reason_for_update_master');
-  $query->condition('n.uid', $distributor_id);
+  $query->condition('n.uid', $subadmin_uid);
   $query->fields('n', array('nid', 'title'));
   $result = $query->execute()->fetchAllKeyed(0, 1);
   return $result;
@@ -558,14 +567,14 @@ function get_resource_name_from_del_boy_nids($del_boy_nids) {
   }
 }
 
-function get_sales_reg_bills_from_trip_id($trip_id){
+function get_sales_reg_bills_from_trip_id($trip_id,$distributor_id){
   $query = db_select('node', 'n');
   $query->condition('n.title', $trip_id);
   $query->condition('n.type', 'dispatch_data');
   $query->join('field_data_field_trip_id_reference', 'ft', 'ft.field_trip_id_reference_nid = n.nid');
   $query->join('node', 'n1', 'ft.entity_id = n1.nid');
   $query->fields('n1', array('title'));
-  $query->addTag('node_distributor_access');
+  $query->condition('n.uid',$distributor_id);
   $res = $query->execute()->fetchCol();
   return $res;
 }

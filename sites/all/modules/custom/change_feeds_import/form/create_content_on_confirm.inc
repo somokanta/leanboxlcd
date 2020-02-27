@@ -7,15 +7,21 @@ function change_feeds_import_create_confirm_content($id) {
   global $user;
   $user_id = $user->uid;
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
-  
+  if (in_array('central_distributor', $user->roles)) {
+    $central_distributor_id = $distributor_id;
+  }
+  // child distributor_id
+  else {
+    $central_distributor_id = get_central_distributor_id($distributor_id);
+  }
   /*$query = db_select('custom_billing_data', 'cb');
   $query->addExpression('MAX(id)', 'max');
   $query->condition('distributor_id', $distributor_id);
   $max_billing_id_new = $query->execute()->fetchField();
   */
   
-  $max_billing_id_new = db_query("select id from custom_billing_data where distributor_id = $distributor_id order by id desc limit 1")->fetchField();
-  $max_billing_id_new = $max_billing_id_new ? $max_billing_id_new : 0;
+  //$max_billing_id_new = db_query("select id from custom_billing_data where distributor_id = $distributor_id order by id desc limit 1")->fetchField();
+ // $max_billing_id_new = $max_billing_id_new ? $max_billing_id_new : 0;
   
   $csv_file = $distributor_id . "_error.csv";
   // select data from stage table
@@ -23,17 +29,27 @@ function change_feeds_import_create_confirm_content($id) {
           ->condition('sbd.error_id', $id, '=')
           ->fields('sbd')
           ->execute()->fetchAll(PDO::FETCH_ASSOC);
+  $unique_distributors = array_unique(array_map(function($elem) {
+      return $elem['distributor_id'];
+    }, $billing_data_result));
   
-  $from_time = time() - 60;
-  $return_true = change_feeds_import_insert_data_in_custom_billing_table($billing_data_result);
+    $query = db_select('custom_billing_data', 'cb');
+    $query->addExpression('MAX(id)', 'max');
+    $query->condition('distributor_id', $unique_distributors, 'IN');
+    $max_billing_id_new = $query->execute()->fetchField();
+    $max_billing_id_new = $max_billing_id_new ? $max_billing_id_new : 0;
+    $from_time = time() - 60;
+  $return_true = change_feeds_import_insert_data_in_custom_billing_table($billing_data_result,$central_distributor_id);
   $to_time = time(); 
 
   /**
    * Debugging
    */
+
     $mail_query = db_select('custom_billing_data', 'cb');
     $mail_query->addExpression('count(id)', 'max');
-    $mail_query->condition('distributor_id', $distributor_id);
+    //$mail_query->condition('distributor_id', $distributor_id);
+    $mail_query->condition('distributor_id', $unique_distributors, 'IN');
     $mail_query->condition('id', $max_billing_id_new,'>');
     $mail_row_diff = $mail_query->execute()->fetchField();
     
@@ -47,7 +63,7 @@ function change_feeds_import_create_confirm_content($id) {
     $message .= "Actual First inserted id: $return_true and insert time $from_time - $to_time .";
     $params['subject'] = "Batch Proccess Billing Upload count Mismatch";
     $params['body'] = $message;
-    $mail_to = "abhishek.r@iksula.com";
+    $mail_to = "shylaja.r@iksula.com";
     $from = "MIS.HELPDESK@leanbox.in";
     drupal_mail('adhoc_task', 'bill_date_missing', $mail_to, LANGUAGE_NONE, $params, $from);
 
@@ -66,38 +82,40 @@ function change_feeds_import_create_confirm_content($id) {
      */
     $billing_data_result = NULL; // better memory optimisation (it contents large data)
     $operations = array();
+ foreach ($unique_distributors as $unique_distributor_id) {
+     //print_r(array($unique_distributor_id));die;
+            $create_billing_data = change_feeds_import_create_billing_data($max_billing_id_new, $unique_distributor_id);
+            $create_billing_data_chunk = array_chunk($create_billing_data, 200);
+            foreach ($create_billing_data_chunk as $data) {
+                $operations[] = array('change_feeds_import_create_billing', array($data));
+            }
+            // As discussed with kusha, commented this code as of now.
+            /*
+            $create_picking_data = change_feeds_import_create_picking_data($max_billing_id_new);
+            $create_picking_data_chunk = array_chunk($create_picking_data, 1200);
+            foreach ($create_picking_data_chunk as $data) {
+                $operations[] = array('change_feeds_import_create_picking', array($data));
+            }
 
-    $create_billing_data = change_feeds_import_create_billing_data($max_billing_id_new);
-    $create_billing_data_chunk = array_chunk($create_billing_data, 200);
-    foreach ($create_billing_data_chunk as $data) {
-      $operations[] = array('change_feeds_import_create_billing', array($data));
-    }
+            $roles = $user->roles;
+            if (in_array("leanbox", $roles)) {
+                $create_pick_confirm_data = change_feeds_import_create_pick_confirm_data($max_billing_id_new);
+                $create_pick_confirm_data_chunk = array_chunk($create_pick_confirm_data, 1200);
+                foreach ($create_pick_confirm_data_chunk as $data) {
+                    $operations[] = array('change_feeds_import_create_pick_confirm', array($data));
+                }
+            }
 
-    $create_picking_data = change_feeds_import_create_picking_data($max_billing_id_new);
-    $create_picking_data_chunk = array_chunk($create_picking_data, 1200);
-    foreach ($create_picking_data_chunk as $data) {
-      $operations[] = array('change_feeds_import_create_picking', array($data));
-    }
+            $van_cld_report_data = change_feeds_import_create_van_cld_report_data($max_billing_id_new);
+            $van_cld_report_data_chunk = array_chunk($van_cld_report_data, 1200); // simple table insert
+            foreach ($van_cld_report_data_chunk as $data) {
+                $operations[] = array('change_feeds_import_create_van_cld_report', array($data));
+            }
 
-    $roles = $user->roles;
-    if (in_array("leanbox", $roles)) {
-      $create_pick_confirm_data = change_feeds_import_create_pick_confirm_data($max_billing_id_new);
-      $create_pick_confirm_data_chunk = array_chunk($create_pick_confirm_data, 1200);
-      foreach ($create_pick_confirm_data_chunk as $data) {
-        $operations[] = array('change_feeds_import_create_pick_confirm', array($data));
-      }
-    }
+            $operations[] = array('change_feeds_import_create_party_packing', array($max_billing_id_new));*/
+        }
 
-    $van_cld_report_data = change_feeds_import_create_van_cld_report_data($max_billing_id_new);
-    $van_cld_report_data_chunk = array_chunk($van_cld_report_data, 1200); // simple table insert
-    foreach ($van_cld_report_data_chunk as $data) {
-      $operations[] = array('change_feeds_import_create_van_cld_report', array($data));
-    }
-
-
-    $operations[] = array('change_feeds_import_create_party_packing', array($max_billing_id_new));
-
-    $batch = array(
+        $batch = array(
       'operations' => $operations,
       'finished' => 'change_feeds_import_finished',
       'title' => t('Creating Billing Data'),
@@ -130,16 +148,17 @@ function change_feeds_import_create_confirm_content($id) {
   }
 }
 
-function change_feeds_import_create_billing_data($max_billing_id) {
+function change_feeds_import_create_billing_data($max_billing_id,$distributor_id) {
   global $user;
-  $user_id = $user->uid;
-  $distributor_id = change_feeds_import_get_distributor_id($user_id);
+  //$user_id = $user->uid;
+  //$distributor_id = change_feeds_import_get_distributor_id($user_id);
   $query = db_select('custom_billing_data', 'cb');
 
   $query->addField('cb', 'bill_number');
   $query->addField('cb', 'vehicle', 'vehicle');
   $query->addField('cb', 'loading_date', 'loading_date');
   $query->addField('cb', 'bill_date', 'bill_date');
+  $query->addField('cb', 'distributor_id', 'distributor_id');
   $query->addExpression('SUM(cb.Sum_of_NET_SALES_VALUE)', 'sum_net_sales_value');
   $query->addExpression('ROUND(SUM(Sum_of_NET_SALES_VALUE - ((Sum_of_OTHER_DISCOUNT + Sum_of_SCHEME_DISCOUNT)*(1 + (Sum_of_TAX_PERCENTAGE/100)))), 2)', 'total_bill_sales_value');
   $query->condition('cb.distributor_id', $distributor_id);
@@ -150,15 +169,15 @@ function change_feeds_import_create_billing_data($max_billing_id) {
   return $results;
 }
 
-function change_feeds_import_create_picking_data($max_billing_id) {
-  global $user;
-  $user_id = $user->uid;
-  $distributor_id = change_feeds_import_get_distributor_id($user_id);
+function change_feeds_import_create_picking_data($max_billing_id,$distributor_id) {
+  //global $user;
+  //$user_id = $user->uid;
+  //$distributor_id = change_feeds_import_get_distributor_id($user_id);
   $query = db_select('custom_billing_data', 'cb');
   $query->join('field_data_field_sku7_code', 'gaisc', 'gaisc.field_sku7_code_value = cb.sku7_code');
   $query->condition('gaisc.bundle', 'sku7_code_master', '=');
   $query->join('node', 'nd', 'nd.nid = gaisc.entity_id');
-  $query->condition('nd.uid', $distributor_id, '=');
+  //$query->condition('nd.uid', $distributor_id, '=');
 //    $query->join('field_data_field_godown_area_id', 'gai', 'gaisc.entity_id = gai.entity_id');
 //    $query->condition('gai.bundle', 'sku7_code_master', '=');
 //    $query->join('field_data_field_pack_size', 'fps', 'fps.entity_id = gaisc.entity_id');
@@ -195,7 +214,7 @@ function change_feeds_import_create_picking_data($max_billing_id) {
   return $results;
 }
 
-function change_feeds_import_create_pick_confirm_data($max_billing_id) {
+/*function change_feeds_import_create_pick_confirm_data($max_billing_id) {
   global $user;
   $user_id = $user->uid;
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
@@ -255,7 +274,7 @@ function change_feeds_import_create_van_cld_report_data($max_billing_id) {
   $results = $query->execute()->fetchAll();
 
   return $results;
-}
+}*/
 
 function change_feeds_import_finished($success, $results, $operations) {
   if ($success) {
@@ -281,7 +300,7 @@ function change_feeds_import_finished($success, $results, $operations) {
     drupal_set_message('Error Occure while uploading billing data. Please Contact LeanBox HELP DESK', 'error');
   }
 
-  if (!$success || !array_key_exists('billing', $results) || !array_key_exists('picking', $results) || !array_key_exists('party_packing', $results)) {
+  if (!$success || !array_key_exists('billing', $results)) {
     // An error occurred.
     // $operations contains the operations that remained unprocessed.
     global $user;
@@ -298,7 +317,7 @@ function change_feeds_import_finished($success, $results, $operations) {
 
     $params['subject'] = "Batch Proccess Billing Upload Error";
     $params['body'] = $msg;
-    $mail_to = "abhishek.r@iksula.com";
+    $mail_to = "shylaja.r@iksula.com";
     $from = "MIS.HELPDESK@leanbox.in";
     drupal_mail('adhoc_task', 'bill_date_missing', $mail_to, LANGUAGE_NONE, $params, $from);
   }
@@ -307,16 +326,18 @@ function change_feeds_import_finished($success, $results, $operations) {
 function change_feeds_import_insert_data_in_custom_billing_table($billing_data_result) {
   $created_date = time();
   $first_instered_id = '';
-  global $user;
-  $user_id = $user->uid;
-  $distributor_id = change_feeds_import_get_distributor_id($user_id);
+  //global $user;
+  //$user_id = $user->uid;
+  //$distributor_id = change_feeds_import_get_distributor_id($user_id);
 
   // For weight and volume calculation
   $unique_skus = array_unique(array_map(function($elem){return $elem['sku7_code'];}, $billing_data_result));
-  $sku_wt_vl = get_weight_volume_by_skus($unique_skus,$distributor_id);
+  $unique_skus1 = array_map('trim', $unique_skus);
+  $sku_wt_vl = get_weight_volume_by_skus($unique_skus1,$distributor_id);
   
   foreach ($billing_data_result as $key => $data) {
     // For weight and volume calculation
+    $data = array_map('trim', $data);
     $sku_wt = $data['Sum_of_NET_SALES_KGS'];
     if(empty($sku_wt)){
       $sku_wt = $sku_wt_vl[$data['sku7_code']]['weight'] ?
@@ -333,7 +354,7 @@ function change_feeds_import_insert_data_in_custom_billing_table($billing_data_r
                 ($data['Sum_of_TOTAL_SALES_QTY'] *($data['tur'] ? $data['tur'] : $data['mrp'] * .9)) /
                  $sku_wt_vl[$data['sku7_code']]['rs_per_cft']
               );
-    //END
+       //END
     //TP to host calculation for line level value
     $line_level_value = round(
       (($data['Sum_of_NET_SALES_VALUE'] - 
@@ -343,6 +364,7 @@ function change_feeds_import_insert_data_in_custom_billing_table($billing_data_r
     
     $loading_date = strtotime($data['loading_date']);
     $billing_date = strtotime($data['bill_date']);
+    $distributor_id = $data['distributor_id'];
     try {
       $stage_billing_data = db_insert('custom_billing_data') // Table name no longer needs {}
           ->fields(array(
@@ -392,14 +414,16 @@ function change_feeds_import_insert_data_in_custom_billing_table($billing_data_r
       }
       
     }
+    
     catch (Exception $ex) {
       
     }
   }
+
   return $first_instered_id;
 }
 
-function change_feeds_import_create_van_cld_report($data, &$context) {
+/*function change_feeds_import_create_van_cld_report($data, &$context) {
   if (!isset($context['sandbox']['progress'])) {
     $context['sandbox']['progress'] = 0;
   } 
@@ -440,9 +464,10 @@ function change_feeds_import_create_picking($data, &$context) {
     $context['sandbox']['progress'] = 0;
   }
   $context['message'] = t('Now Creating Picking Data');
-  global $user;
-  $user_id = $user->uid;
-  $distributor_id = change_feeds_import_get_distributor_id($user_id);
+  //global $user;
+  //$user_id = $user->uid;
+  //$distributor_id = change_feeds_import_get_distributor_id($user_id);
+  $distributor_id = $value['distributorf_id'];
   foreach ($data as $key => &$value) {
     if ($value->total_cld > 0 || $value->total_eaches > 0) {
       $node = new stdClass();
@@ -759,7 +784,7 @@ function get_party_packing_from_party_code($party_code = NULL, $distributor_id) 
   $query->fields('pc', array('field_party_code_value'));
   return $query->execute()->fetchAllKeyed(0, 1);
 }
-
+*/
 function change_feeds_import_create_billing($data, &$context) {
   
   if (!isset($context['sandbox']['progress'])) {
@@ -768,8 +793,9 @@ function change_feeds_import_create_billing($data, &$context) {
   $context['message'] = t('Now Creating Billing Data');
 
   foreach ($data as $key => $value) {
+    $distributor_id = $value->distributor_id;  
     try {
-      $nid = check_node_title_exists($value->bill_number, 'sales_register_data');
+      $nid = check_node_title_exists($value->bill_number, 'sales_register_data',FALSE,$distributor_id);
       $node = node_load($nid);
       if ($node) {
             $node->field_billing_van[LANGUAGE_NONE][0]['value'] = $value->vehicle;
@@ -812,7 +838,8 @@ function change_feeds_import_create_billing($data, &$context) {
       //Write mail logic
       global $user;
       $user_id = $user->uid;
-      $distributor_id = change_feeds_import_get_distributor_id($user_id);
+      //$distributor_id = change_feeds_import_get_distributor_id($user_id);
+      $distributor_id = $value['distributorf_id'];
       $batch = & batch_get();
       $batch_id = $batch['id'];
 
@@ -820,7 +847,7 @@ function change_feeds_import_create_billing($data, &$context) {
       $message .= t('An error MSG:  %error_msg with arguments: @arguments', array('%error_msg' => $ex->getMessage(), '@arguments' => print_r($value, TRUE)));
       $params['subject'] = "Billing Upload Error in Batch Proccess-sales-data ";
       $params['body'] = $message;
-      $mail_to = "abhishek.r@iksula.com";
+      $mail_to = "shylaja.r@iksula.com";
       $from = "MIS.HELPDESK@leanbox.in";
       drupal_mail('adhoc_task', 'bill_date_missing', $mail_to, LANGUAGE_NONE, $params, $from);
     }

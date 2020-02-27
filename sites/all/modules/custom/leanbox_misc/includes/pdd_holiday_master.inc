@@ -2,11 +2,19 @@
 
 function pdd_add_form($form, &$form_state) {
   require_once drupal_get_path('module', 'change_feeds_import') . '/form/upload_billing_data.inc';
-
   global $user;
   $user_id = $user->uid;
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
-  $nid = $form_state['leanbox_misc']['nid'] = check_node_title_exists($distributor_id, 'pdd_master');
+  if (in_array("central_distributor", $user->roles)) {
+      // central distributor ID
+      $distributor_id = $distributor_id;
+  }
+  else {
+      // Central Distributor ID
+      $distributor_id = get_central_distributor_id($distributor_id);
+  }
+  
+  $nid = $form_state['leanbox_misc']['nid'] = check_node_title_exists($distributor_id, 'pdd_master',FALSE,$distributor_id);
 
   if ($nid) {
     $node = node_load($nid);
@@ -80,6 +88,14 @@ function pdd_add_form_submit($form, &$form_state) {
   global $user;
   $user_id = $user->uid;
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
+  if (in_array("central_distributor", $user->roles)) {
+      // central distributor ID
+      $distributor_id = $distributor_id;
+  }
+  else {
+      // Central Distributor ID
+      $distributor_id = get_central_distributor_id($distributor_id);
+  }
 
   if (empty($form_state['leanbox_misc']['nid'])) {
     $node = new stdClass();
@@ -117,7 +133,15 @@ function holiday_add_form($form, &$form_state) {
   global $user;
   $user_id = $user->uid;
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
-  $nid = $form_state['leanbox_misc']['nid'] = check_node_title_exists($distributor_id, 'holiday_master');
+  if (in_array("central_distributor", $user->roles)) {
+      // central distributor ID
+      $distributor_id = $distributor_id;
+  }
+  else {
+      // Central Distributor ID
+      $distributor_id = get_central_distributor_id($distributor_id);
+  }
+  $nid = $form_state['leanbox_misc']['nid'] = check_node_title_exists($distributor_id, 'holiday_master',FALSE,$distributor_id);
   if ($nid) {
     $node = node_load($nid);
 
@@ -180,6 +204,14 @@ function holiday_add_form_submit($form, &$form_state) {
   global $user;
   $user_id = $user->uid;
   $distributor_id = change_feeds_import_get_distributor_id($user_id);
+  if (in_array("central_distributor", $user->roles)) {
+      // central distributor ID
+      $distributor_id = $distributor_id;
+  }
+  else {
+      // Central Distributor ID
+      $distributor_id = get_central_distributor_id($distributor_id);
+  }
 
   foreach ($form_state['values']['urls_fieldset'] as $key => $value) {
     if (!empty($value['url']) && is_array($value))

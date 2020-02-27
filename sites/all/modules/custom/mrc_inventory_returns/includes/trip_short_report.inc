@@ -147,9 +147,15 @@ function trip_short_excess_form_callback() {
     $form = drupal_render(drupal_get_form('trip_short_excess_form'));
   }
   if (!empty($trip_id) || !empty($from_dispatch_date && $to_dispatch_date)  || !empty($confirm_date) || !empty($trip_status)) {
+    if (!empty($trip_id)) {
+        $distributor_ids = (array) get_distributorid_of_trip($trip_id);
+    }
+    else  {
+        $distributor_ids = get_distributor_ids();
+    }
 		 
     $query = db_select('dispatch_planning_api_data', 'ad');
-    $query->condition('ad.distributor_id', $distributor_id, '=');
+    $query->condition('ad.distributor_id', $distributor_ids, 'IN');
     if (!empty($trip_id)) {
       $query->condition('ad.runsheet_number', $trip_id, '=');
     }
@@ -193,7 +199,7 @@ function trip_short_excess_form_callback() {
 			}
 		}
 			// get excess value from excess inventory
-		$excess_data= get_trip_wise_excess_value($trips,$distributor_id);		
+		$excess_data= get_trip_wise_excess_value($trips,$distributor_ids);		
     foreach ($res as $val) {
 			$row['trip_id'] = $val->runsheet_number;
 			$row['inventory_short_value'] = round($val->inventory_short_value, 2);
@@ -241,10 +247,10 @@ function trip_short_excess_report_export() {
 }
 
 
-function get_trip_wise_excess_value($all_trips, $distributor_id) {
-	if (!empty($all_trips) && !empty($distributor_id)) {
+function get_trip_wise_excess_value($all_trips, $distributor_ids) {
+	if (!empty($all_trips) && !empty($distributor_ids)) {
 		$query = db_select('excess_inventory_table', 'eit');
-		$query->condition('eit.distributor_id', $distributor_id, '=');
+		$query->condition('eit.distributor_id', $distributor_ids, 'IN');
 		$query->condition('eit.trip_id', $all_trips, 'IN');
 		$query->groupBy('eit.trip_id');
 		$query->fields('eit', array('trip_id'));

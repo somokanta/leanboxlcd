@@ -31,12 +31,13 @@ function van_planning_menu() {
      'access callback' => TRUE,
      'type' => MENU_CALLBACK,
    );
-   $items['areacode-master/autocomplete'] = array(
-     'title' => '',
-     'page callback' => '_get_areacode_master_autocomplete',
-     'access callback' => TRUE,
-     'type' => MENU_CALLBACK,
-   );
+   $items['areacode-master/autocomplete/%'] = array(
+		'title' => 'area code autocomplete',
+		'page callback' => '_get_areacode_master_autocomplete',
+		'page arguments' => array(2),
+    'access callback' => TRUE,
+		'type' => MENU_CALLBACK,
+	);
    $items['plgroup-master/autocomplete'] = array(
      'title' => '',
      'page callback' => '_get_plgroup_master_autocomplete',
@@ -51,7 +52,7 @@ function van_planning_menu() {
    );
    $items['hht-id-master/autocomplete'] = array(
     'title' => 'hht_id_master_autocomplete',
-    'page callback' => 'hht_id_master_autocomplete',
+    'page callback' => 'van_planning_hht_id_master_autocomplete',
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
@@ -111,7 +112,7 @@ function dispatch_related_config_form($form, $form_state) {
  * 
  * @param type $string
  */
-function _get_areacode_master_autocomplete($string = '') {
+function _get_areacode_master_autocomplete($central_distributor_id,$string = '') {
    $result = array();
 
    if ($string) {
@@ -121,7 +122,7 @@ function _get_areacode_master_autocomplete($string = '') {
       $query->condition('n.title', db_like($string) . '%', 'LIKE');
       $query->fields('n', array('title'));
       $query->range(0, 15);
-      $query->addTag('node_distributor_access');
+      $query->condition('n.uid',$central_distributor_id);
       $result = $query->execute()->fetchAllKeyed(0, 0);
    }
 
@@ -143,7 +144,6 @@ function _get_plgroup_master_autocomplete($string = '') {
       $query->condition('vpg.field_pl_group_value', db_like($string) . '%', 'LIKE');
       $query->fields('vpg', array('field_pl_group_value'));
       $query->range(0, 15);
-      $query->addTag('node_distributor_access');
       $result = $query->execute()->fetchAllKeyed(0, 0);
    }
    drupal_json_output($result);
@@ -164,7 +164,7 @@ function _get_vanplgroup_master_autocomplete($string = '') {
       $query->condition('vpg.field_van_pl_group_value', db_like($string) . '%', 'LIKE');
       $query->fields('vpg', array('field_van_pl_group_value'));
       $query->range(0, 15);
-      $query->addTag('node_distributor_access');
+      //$query->addTag('node_distributor_access');
       $result = $query->execute()->fetchAllKeyed(0, 0);
    }
    drupal_json_output($result);
@@ -174,7 +174,7 @@ function _get_vanplgroup_master_autocomplete($string = '') {
  * 
  * @param type $string
  */
-function _get_outlet_areahookgrp_master_autocomplete($string = '') {
+function _get_outlet_areahookgrp_master_autocomplete($central_distributor_id,$string = '') {
    $result = array();
 
    if ($string) {
@@ -185,27 +185,39 @@ function _get_outlet_areahookgrp_master_autocomplete($string = '') {
       $query->condition('ah.field_dva_area_hook_group_name_value', db_like($string) . '%', 'LIKE');
       $query->fields('ah', array('field_dva_area_hook_group_name_value'));
       $query->range(0, 15);
-      $query->addTag('node_distributor_access');
+      $query->condition('n.uid',$central_distributor_id);
       $result = $query->execute()->fetchAllKeyed(0, 0);
    }
    drupal_json_output($result);
 }
 
 
-/**
- * 
- * @param type $string
- */
-function hht_id_master_autocomplete($string = '') {
-   $result = array();
+function get_author_id_of_content($nids) {
+    $query1 = db_select('node', 'n');
+    $query1->condition('n.nid', $nids, 'IN');
+    $query1->fields('n', array('uid'));
+    $node_uids = $query1->execute()->fetchAllKeyed(0, 0);
+    return $node_uids;
+}
 
-   if ($string) {
-      $query = db_select('node', 'n');
-      $query->condition('n.type', 'hht_master');
-      $query->fields('n', array('title'));
-      $query->condition('n.title', db_like($string) . '%', 'LIKE');
-      $query->addTag('node_distributor_access');
-      $result = $query->execute()->fetchAllKeyed(0, 0);
-   }
-   drupal_json_output($result);
+function van_planning_hht_id_master_autocomplete($string) {
+    $result = array();
+    global $user;
+    $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+    if (!in_array('central_distributor', $user->roles)) {
+        $central_distributor_id = get_central_distributor_id($distributor_id);
+    }
+    else {
+        $central_distributor_id = $distributor_id;
+    }
+    if ($string) {
+
+        $query = db_select('node', 'n');
+        $query->condition('n.type', 'hht_master');
+        $query->fields('n', array('title'));
+        $query->condition('n.title', db_like($string) . '%', 'LIKE');
+        $query->condition('n.uid', $central_distributor_id);
+        $result = $query->execute()->fetchAllKeyed(0, 0);
+    }
+    drupal_json_output($result);
 }

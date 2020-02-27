@@ -73,10 +73,8 @@ function _delivered_trip_data_download_callback() {
 
    if (isset($_GET['trip_number']) && !empty($_GET['trip_number'])) {
       $trip_number = $_GET['trip_number'];
-      // get logged in users rs id
-      $user_id = $GLOBALS['user']->uid;
-      $rs_code = dispatch_planning_get_rscode_using_uid($user_id);
-      $trip_details = _get_farey_delivered_trip_details($trip_number, $rs_code);
+      $distributor_id = get_distributorid_of_trip($trip_number);
+      $trip_details = _get_farey_delivered_trip_details($trip_number, $distributor_id);
       
       $header = array('SKU7Code', 'Description', 'Free Product', 'Value/Unit', 'Sum of Net Sales Qty', 'Actual Qty', 'Returned Qty');
       $rows = $trip_details['rows'];
@@ -99,10 +97,7 @@ function _delivered_trip_data_download_callback() {
  * @param type $trip_number
  * @param type $rs_code
  */
-function _get_farey_delivered_trip_details($trip_number, $rs_code) {
-   global $user;
-   $dis_id = change_feeds_import_get_distributor_id($user->uid);
-
+function _get_farey_delivered_trip_details($trip_number, $dis_id) {
    $query = db_select('dispatch_planning_item_details', 'id');
    $query->join('node', 'n', 'n.title = id.sku_code');
    $query->condition('n.uid', $dis_id);
@@ -161,9 +156,9 @@ function _edit_trip_delivered_callback_form($form, &$form_state) {
    $form['#attached']['js'][] = drupal_get_path('module', 'dispatch_planning') . '/js/dispatch_planning_farey.js';
 
    // get logged in users rs id
-   $user_id = $GLOBALS['user']->uid;
-   $rs_code = dispatch_planning_get_rscode_using_uid($user_id);
-   $distributor_id = change_feeds_import_get_distributor_id($user_id);
+   //$user_id = $GLOBALS['user']->uid;
+   //$rs_code = dispatch_planning_get_rscode_using_uid($user_id);
+   //$distributor_id = change_feeds_import_get_distributor_id($user_id);
 
    $form['trip_number'] = array(
      '#prefix' => '<div class="textfield-wrapper">',
@@ -178,9 +173,29 @@ function _edit_trip_delivered_callback_form($form, &$form_state) {
        'effect' => 'fade',
      ),
    );
-    
-   $trip_number = $form_state['input']['trip_number'];
-   if (isset($form_state['triggering_element']['#title']) && ($form_state['triggering_element']['#title'] == 'Bill Number') && !empty($form_state['input']['bill_number'])) {
+   //global $user;
+    $trip_number = $form_state['input']['trip_number'];
+    //$dis_id = change_feeds_import_get_distributor_id($user->uid);
+    $dis_id = get_distributorid_of_trip($trip_number);
+    $rs_code = get_rs_code_of_distributor($dis_id);
+    $central_disid = get_central_distributor_id($dis_id);
+
+    $form['dis_id'] = array(
+        '#type' => 'value',
+        '#value' => $dis_id,
+    );
+
+    $form['rs_code'] = array(
+        '#type' => 'value',
+        '#value' => $rs_code,
+    );
+
+    $form['central_disid'] = array(
+        '#type' => 'value',
+        '#value' => $central_disid,
+    );
+
+    if (isset($form_state['triggering_element']['#title']) && ($form_state['triggering_element']['#title'] == 'Bill Number') && !empty($form_state['input']['bill_number'])) {
      unset($form_state['storage']['trip_id']);
    }
    if (isset($form_state['storage']['trip_id']) && !empty($form_state['storage']['trip_id'])) {
@@ -207,7 +222,7 @@ function _edit_trip_delivered_callback_form($form, &$form_state) {
         '#title' => t('Bill Number'),
         '#required' => TRUE,
         //'#options' => $options,
-        '#autocomplete_path' => "bills/autocomplete/$trip_no",
+        '#autocomplete_path' => "bills/autocomplete/$trip_number",
         '#ajax' => array(
           'wrapper' => 'itemlist-div',
           'callback' => 'trip_details_remove_callback',
@@ -220,14 +235,14 @@ function _edit_trip_delivered_callback_form($form, &$form_state) {
       $order_status = $form_state['input']['order_status'];
    }
    else {
-      if (!empty($trip_number) && !empty($rs_code)) {
+      if (!empty($trip_number)) {
          //$options = _get_all_tripsbill($trip_number);
          //if (!empty($options)) {
          // order status
         
         // check trip if it is Returns Confirmed
         // check trip if it is VRS Confirmed
-        $trip_detail = check_trip_id_exists_or_not($distributor_id, $trip_number);
+        $trip_detail = check_trip_id_exists_or_not($dis_id, $trip_number);
         $vrs_status = $trip_detail->field_vrs_status_value;
         if(empty($vrs_status) && $vrs_status!=0) {
             drupal_set_message(t("Invalid Trip ID:$trip_number"), 'error');
@@ -291,9 +306,10 @@ function _edit_trip_delivered_callback_form($form, &$form_state) {
          //}
          
          $bill_number = $form_state['input']['bill_number'];
-         if (!empty($trip_number) && !empty($rs_code) && !empty($bill_number)) {
+         if (!empty($trip_number)  && !empty($bill_number)) {
   
-            $bill_details = _get_noneditable_delivered_trip_details($trip_number, $rs_code, $bill_number);
+            $bill_details = _get_noneditable_delivered_trip_details($trip_number, $rs_code, $bill_number,$dis_id);
+            //print_r($bill_details);die;
             //dpm($bill_details, '$bill_details');
             if (!empty($bill_details)) {
               
@@ -419,6 +435,7 @@ function _edit_trip_delivered_callback_form($form, &$form_state) {
               $query = db_select('dispatch_planning_api_data', 'ad');
               $query->condition('ad.runsheet_number', $trip_number);
               $query->condition('ad.bill_number', $bill_number);
+              $query->condition('ad.distributor_id', $dis_id);
               $query->fields('ad', array('delivery_boy', 'res_delivery_boy', 'res_delivery_boy_edit'));
               $delivery_boy = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
               $delivery_boy_key = array_keys($delivery_boy);
@@ -737,10 +754,10 @@ function _edit_trip_delivered_callback_form($form, &$form_state) {
                  '#suffix' => '</div>',
                );
 
-               $item_details = _get_editable_delivered_trip_details($trip_number, $rs_code, $bill_number);
+               $item_details = _get_editable_delivered_trip_details($trip_number, $rs_code, $bill_number,$dis_id);
                $query = db_select('dispatch_planning_api_data', 'ad');
                                   $query->condition('ad.runsheet_number', $trip_number);
-                                  $query->condition('ad.distributor_id', $distributor_id);
+                                  $query->condition('ad.distributor_id', $dis_id);
                                   $query->condition('ad.bill_number', $bill_number);
                                   $query->fields('ad', array('res_status'));
                $original_order_status = $query->execute()->fetchField();
@@ -892,13 +909,14 @@ function _edit_trip_delivered_callback_form($form, &$form_state) {
  * @param type $bill_no
  * @return type
  */
-function _get_noneditable_delivered_trip_details($trip_number, $rs_code, $bill_no) {
-   global $user;
-   $dis_id = change_feeds_import_get_distributor_id($user->uid);
+function _get_noneditable_delivered_trip_details($trip_number, $rs_code, $bill_no,$dis_id) {
+   //global $user;
+   //$dis_id = change_feeds_import_get_distributor_id($user->uid);
 
    $query = db_select('dispatch_planning_api_data', 'ad');
    $query->condition('ad.runsheet_number', $trip_number);
-   $query->condition('ad.distributor_id', $dis_id);
+   //$query->condition('ad.hub', $rs_code);
+   $query->condition('ad.distributor_id', $dis_id, '=');
    //not required delivery pending bills of that trip
    $query->condition('ad.delivery_pending_flag' ,1,'!=');
    $query->condition('ad.bill_number', $bill_no);
@@ -920,13 +938,14 @@ function _get_noneditable_delivered_trip_details($trip_number, $rs_code, $bill_n
  * @param type $bill_no
  * @return type
  */
-function _get_editable_delivered_trip_details($trip_number, $rs_code, $bill_no) {
-   global $user;
-   $dis_id = change_feeds_import_get_distributor_id($user->uid);
+function _get_editable_delivered_trip_details($trip_number, $rs_code, $bill_no,$dis_id) {
+   //global $user;
+   //$dis_id = change_feeds_import_get_distributor_id($user->uid);
 
    $query = db_select('dispatch_planning_item_details', 'dpi');
    $query->join('dispatch_planning_api_data', 'ad', 'dpi.trip_bill_reference = ad.id');
    $query->condition('ad.runsheet_number', $trip_number);
+   //$query->condition('ad.hub', $rs_code);
    $query->condition('ad.distributor_id', $dis_id);
    $query->condition('ad.bill_number', $bill_no);
    $query->fields('dpi', array('id', 'sku_code', 'sku_description', 
@@ -944,11 +963,12 @@ function _get_editable_delivered_trip_details($trip_number, $rs_code, $bill_no) 
  * @param type $form_state
  */
 function _edit_trip_delivered_callback_form_validate($form, &$form_state) {
-  $user_id = $GLOBALS['user']->uid;
-  $rs_code = dispatch_planning_get_rscode_using_uid($user_id);
+  //$user_id = $GLOBALS['user']->uid;
+  //$rs_code = dispatch_planning_get_rscode_using_uid($user_id);
   $trip_number = $form_state['values']['trip_number'];
+  $dis_id = get_distributorid_of_trip($trip_number);
   $bill_number = $form_state['values']['bill_number'];
-  $bill_details = _get_noneditable_delivered_trip_details($trip_number, $rs_code, $bill_number);
+  $bill_details = _get_noneditable_delivered_trip_details($trip_number, $rs_code, $bill_number,$dis_id);
   
   $res_photo_of_cheque_edit = strpos($bill_details[0]['res_photo_of_cheque_edit'], '/NA') ? '' : $bill_details[0]['res_photo_of_cheque_edit'];
   $res_photo_of_cheque = strpos($bill_details[0]['res_photo_of_cheque'], '/NA') ? '' : $bill_details[0]['res_photo_of_cheque'];
@@ -1072,7 +1092,7 @@ function _edit_trip_delivered_callback_form_validate($form, &$form_state) {
             form_set_error('cheque_file', t('Failed to write the uploaded bill file the site\'s file folder.'));
          }
       }else if (empty($res_photo_of_cheque) && empty($res_photo_of_cheque_edit)) {
-         form_set_error('cheque_file', t('Photo of Cheque cannot be empty'));
+         //form_set_error('cheque_file', t('Photo of Cheque cannot be empty'));
       }
    }
    if ($collc_mode == 'cash,cheque') {
@@ -1116,7 +1136,7 @@ function _edit_trip_delivered_callback_form_validate($form, &$form_state) {
             form_set_error('cash_cheque_cheque_file', t('Failed to write the uploaded bill file the site\'s file folder.'));
          }
       }else if (empty($res_photo_of_cheque) && empty($res_photo_of_cheque_edit)) {
-         form_set_error('cheque_file', t('Photo of Cheque cannot be empty'));
+         //form_set_error('cheque_file', t('Photo of Cheque cannot be empty'));
       }
    }
    if ($collc_mode == 'signed') {
@@ -1138,7 +1158,7 @@ function _edit_trip_delivered_callback_form_validate($form, &$form_state) {
             form_set_error('sb_file', t('Failed to write the uploaded bill file the site\'s file folder.'));
          }
       }else if (empty($res_photo_of_signed_bill_delivery) && empty($res_photo_of_signed_bill_delivery_edit) && empty($photo_of_signed_bill_partial_edit) && empty($photo_of_signed_bill_partial)) {
-      form_set_error('sb_file', t('Photo of Signed Bill cannot be empty'));
+      //form_set_error('sb_file', t('Photo of Signed Bill cannot be empty'));
     }
   }
 }
@@ -1151,15 +1171,15 @@ function _edit_trip_delivered_callback_form_validate($form, &$form_state) {
 function _edit_trip_delivered_callback_form_submit($form, &$form_state) {
   // dpm($form_state, '$form_state');
    $trip_number = $form_state['values']['trip_number'];
+   
    // dpm($trip_number, '$trip_number');
    $bill_number = $form_state['values']['bill_number'];
    // dpm($bill_number, '$bill_number');
    // get logged in users rs id
-   $user_id = $GLOBALS['user']->uid;
-   $dis_id = change_feeds_import_get_distributor_id($user_id);
-   $rs_code = dispatch_planning_get_rscode_using_uid($user_id);
+   $dis_id = get_distributorid_of_trip($trip_number);
+   $rs_code = get_facility_code($dis_id);
    // dpm($rs_code, '$rs_code');
-   if (!empty($trip_number) && !empty($bill_number) && !empty($rs_code)) {
+   if (!empty($trip_number) && !empty($bill_number) && !empty($dis_id)) {
       $order_status = $form_state['values']['order_status'];
       $collc_mode = $form_state['values']['collection_mode'];
 
@@ -1238,13 +1258,10 @@ function _edit_trip_delivered_callback_form_submit($form, &$form_state) {
           ->condition('bill_number', $bill_number, '=')
           ->condition('distributor_id', $dis_id, '=')
           ->execute();
-      $facility_code = get_facility_code($dis_id);
       // dpm($updated_bill_rows, '$updated_bill_rows');
       // if (!empty($updated_bill_rows)) {
-      $reference_no = $trip_number . '_' . $facility_code . '_' . $bill_number;
-     
-      //$bill_row_id = _get_bill_row_id_using_reference_no($reference_no);
-      $bill_row_id = _get_bill_row_id($trip_number,$bill_number,$dis_id);
+      $reference_no = $trip_number . '_' . $rs_code . '_' . $bill_number;
+      $bill_row_id = _get_bill_row_id_using_reference_no($reference_no,$dis_id);
       //  dpm($bill_row_id, '$bill_row_id');
 
       if ($order_status == 'deliver') {
@@ -1281,7 +1298,6 @@ function _edit_trip_delivered_callback_form_submit($form, &$form_state) {
       }
       else if ($order_status == 'partial_deliver') {
          foreach ($form_state['values']['actual_qty'] as $key => $value) {
-          
           $query = db_select('dispatch_planning_item_details','it')
            ->fields('it',array('res_godown_short'))
              ->condition('trip_bill_reference', $bill_row_id, '=')
@@ -1338,7 +1354,7 @@ function _get_dispatch_planning_reason_master_list($reason_type) {
    $query->join('field_data_field_dp_reason', 'dr', 'dr.entity_id = n.nid');
    $query->condition('rt.field_reason_type_value', $reason_type);
    $query->fields('dr', array('field_dp_reason_value'));
-   $query->addTag('node_distributor_access');
+   //$query->addTag('node_distributor_access');
    $res = $query->execute()->fetchAllKeyed(0,0);
    $res1 = array('' => '- select -');
    $response = $res1 + $res;
@@ -1347,12 +1363,12 @@ function _get_dispatch_planning_reason_master_list($reason_type) {
 }
 
 function check_bank_name_exist($bank_name) {
-  global $user;
-  $dis_id = change_feeds_import_get_distributor_id($user->uid);
+  //global $user;
+  //$dis_id = change_feeds_import_get_distributor_id($user->uid);
   $query = db_select('node', 'n');
   $query->condition('n.type', 'bank_master');
   $query->condition('n.title', $bank_name);
-  $query->condition('n.uid', $dis_id, '=');
+  //$query->condition('n.uid', $dis_id, '=');
   $query->condition('n.status', 1); // publish
   $query->fields('n', array('title'));
   $bank_names = $query->execute()->fetchField();

@@ -24,19 +24,17 @@ class header_handler_partial_printout_popup extends views_handler_field {
   }
 
   function render($empty = FALSE) {
-
-    global $user;
-    $user_id = $user->uid;
     $total_result = $this->view->result;
     $trip_id = $this->view->args[0];
-    $result = get_partial_popup_return_data_from_trip_id($trip_id);
-    $result1 = get_trip_exec_date_from_trip_id($trip_id);
+    $distributor_id = get_distributorid_of_trip($trip_id);
+    $result = get_partial_popup_return_data_from_trip_id($trip_id,$distributor_id);
+    $result1 = get_trip_exec_date_from_trip_id($trip_id,$distributor_id);
 
     if (!empty($result)) { 
       $bill_count = $result['bill_number'];
       $bill_number = $result['bill_number_2'];
       //$cashier_name = $result['fieldExecutiveName'];
-      $cashier_name = get_cashier_name($trip_id);
+      $cashier_name = get_cashier_name($trip_id,$distributor_id);
       $trip_execution_date = $result1['field_trip_executon_date_value'];
       //$name= get_distrubutor_name_partial_from_user_id($user_id);
 

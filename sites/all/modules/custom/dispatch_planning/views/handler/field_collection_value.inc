@@ -24,9 +24,10 @@ class field_collection_value extends views_handler_field {
     }
 
     function render($data) {
-        global $user;
-        $user_id = $user->uid;
-        $distributor_id = change_feeds_import_get_distributor_id($user_id);
+        //global $user;
+        //$user_id = $user->uid;
+        //$distributor_id = change_feeds_import_get_distributor_id($user_id);
+        $distributor_id = $data->dispatch_planning_api_data_distributor_id;
         $trip_id = $data->dispatch_planning_api_data_runsheet_number;
         $bill_num = $data->dispatch_planning_api_data_bill_number;
         $bill_num = preg_replace('/\s+/', '', $bill_num);

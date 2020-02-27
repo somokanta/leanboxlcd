@@ -43,7 +43,7 @@ function capture_cashier_attendance_services_resources() {
 }
 
 function fetch_cashier_attendance_api_data($cashier_attendance_data) {
-    watchdog('cashier_attendance_data_api', '<pre>' . print_r($cashier_attendance_data, TRUE) . '</pre>');
+    watchdog('cashier_attendance_data', '<pre>' . print_r($cashier_attendance_data, TRUE) . '</pre>');
     if (!empty($cashier_attendance_data)) {
         foreach ($cashier_attendance_data['attendance'] as $key => $value) {
             $facility_code = $value['hub_code'];
@@ -112,12 +112,16 @@ function fetch_cashier_attendance_api_data($cashier_attendance_data) {
     update_cashier_attendance_api_log($sql_ins_id, $result['flag']);
     return $result;
 }
-
-function get_uid_by_username($user_name) {
-    $res = array();
-    if (!empty($user_name)) {
+// Will create first user of corresponding role
+function get_uid_by_role($role_name) {
+    $res = '';
+    if (!empty($role_name)) {
         $query = db_select('users', 'u');
-        $query->condition('u.name', $user_name);
+        $query->innerJoin('users_roles', 'ur', 'ur.uid = u.uid');
+        $query->join('role', 'role', 'role.rid = ur.rid');
+        $query->condition('role.name', $role_name, '=');
+        $query->orderBy('u.created','asc');
+        $query->range(0,1);
         $query->fields('u', array('uid'));
         $res = $query->execute()->fetchField();
     }
@@ -149,29 +153,25 @@ function update_cashier_attendance_api_log($sql_ins_id, $response_flag) {
 
 function capture_cashier_attendance_views_query_alter(&$view, &$query) {
     global $user;
+    if (in_array('super_central_distributor', $user->roles)) {
+        $distributor_facility_codes = get_all_facility_codes();
+    }
     // Store distributor id in author in each node
-    $distributor_id = change_feeds_import_get_distributor_id($user->uid);
-    $distributor_facility_code = get_facility_code($distributor_id);
-    if (!empty($distributor_facility_code)) {
-        $distributor_facility_code = strtolower($distributor_facility_code);
-        if ($distributor_facility_code == 1) {
-            $distributor_facility_codes  = array($distributor_facility_code,'lakme');
-        }
-        else {
-          $distributor_facility_codes  = array($distributor_facility_code);
+    else {
+        $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+        $distributor_facility_code = get_facility_code($distributor_id);
+        if (!empty($distributor_facility_code)) {
+            $distributor_facility_codes = array($distributor_facility_code);
         }
     }
     if ($view->name == 'cashier_attendance') {
         foreach ($query->where[1]['conditions'] as $key => $val) {
-           // watchdog('cashier_attendance_data', '<pre>' . print_r(array($key, $val), TRUE) . '</pre>');
             if ((strpos($val['field'], 'field_data_field_attendance_datetime.field_attendance_datetime_value') !== false) || (strpos($val['field'], 'field_data_field_attendance_datetime.field_attendance_datetime_value') !== false)) {
                 $data = str_replace('+ 19800', '', $val['field']);
                 $data = str_replace('%Y-%m-%d\T%H:%i:%s', '%Y-%m-%d', $data);
                 $query->where[1]['conditions'][$key]['field'] = $data;
             }
-         
         }
-        
         $join = new views_join();
         $join->table = 'field_data_field_hub_code';
         $join->field = 'entity_id';
@@ -183,7 +183,7 @@ function capture_cashier_attendance_views_query_alter(&$view, &$query) {
         $query->table_queue['field_data_field_hub_code__node'] = array(
           'table' => 'field_data_field_hub_code',
           'alias' => 'field_data_field_hub_code',
-         // 'relationship' => 'commerce_order',
+          // 'relationship' => 'commerce_order',
           'join' => $join,
         );
 
@@ -198,10 +198,9 @@ function capture_cashier_attendance_views_query_alter(&$view, &$query) {
           ),
           'type' => 'AND',
         );
-       
     }
     if (($view->name == 'cashier_attendance_api_log')) {
-        if (!empty($distributor_facility_codes)) {
+        if (!empty($distributor_facility_code)) {
             $query->add_where(0, 'cashier_attendance_api_log.facility_code', $distributor_facility_codes, 'IN');
         }
     }

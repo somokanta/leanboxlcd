@@ -25,9 +25,9 @@ function upload_signed_bill_cheque_form($form, &$form_state) {
   }
   $options = $form_state['vrs_confirmation']['bills'];
   // variable need  
-  global $user;
-  $dis_id = change_feeds_import_get_distributor_id($user->uid);
-  //$dis_id = get_distributorid_of_trip($trip_id);
+  //global $user;
+  //$dis_id = change_feeds_import_get_distributor_id($user->uid);
+  $dis_id = get_distributorid_of_trip($trip_id);
   //$form['#attached']['js'][] = drupal_get_path('module', 'mrc_inventory_returns') . '/js/vrs_confirmation.js';
   $form['#attached']['js'][] = drupal_get_path('module', 'mrc_inventory_returns') . '/js/upload_signed_bill_cheque.js';
   $form['#attributes'] = array('enctype' => 'multipart/form-data');
@@ -288,14 +288,13 @@ foreach($options as $key => &$val){
         '#name' => 'files[cheque_' . $key . ']',
         // '#id' => 'bill_details_' . $key . '_photo_cheque',
         '#attributes' => array('id' => 'ph_cheque'),
+         '#upload_validators' => array('file_validate_extensions' => array('gif png jpg jpeg pdf doc docx'),
         '#upload_location' => 'public://bills/',    
-        '#prefix' => '<div class="texdt">' . $ph_cheque,
-        '#suffix' => '</div>',
-      );
+       );
       unset($path);
       unset($url);
       unset($wrapper);
- unset($file);
+      unset($file);
 
       $ph_sign_flag = 0;
       $ph_signed_bill = '<div class ="vrs_signed_bill_image">';
@@ -360,6 +359,10 @@ foreach($options as $key => &$val){
           '#default_value'=>$photo_signed_fid,    
         '#suffix' => '</div>',
         '#attributes' => array('class' => array('photo_signed_bill'), 'id' => 'ph_sign', 'title' => t('Signed Bill Image')),
+        '#default_value'=>$photo_signed_fid,    
+        '#upload_validators' => array('file_validate_extensions' => array('gif png jpg jpeg pdf doc docx'),
+         ),
+        '#attributes' => array('class' => array('photo_signed_bill'), 'title' => t('Signed Bill Image')),
       );
           
      // if else removed 
@@ -429,8 +432,7 @@ function validate_upload_signed_bill_cheque_trip_details($form, &$form_state){
   if (empty($trip_id)) {
     $trip_id = $form_state['values']['trips'];
   }
-  global $user;
-  $dis_id = change_feeds_import_get_distributor_id($user->uid);
+  $dis_id = get_distributorid_of_trip($trip_id);
   $error = '';
   if (!empty($trip_id)) {
     $check_returns_flag = check_trip_id_exists_or_not($dis_id, $trip_id);
@@ -477,8 +479,7 @@ function display_upload_signed_bill_cheque_trip_details($form, &$form_state) {
   if (empty($trip_id)) {
     $trip_id = $form_state['values']['trips'];
   }
-  global $user;
-  $dis_id = change_feeds_import_get_distributor_id($user->uid);
+   $dis_id = get_distributorid_of_trip($trip_id);
   if (!empty($trip_id)) {
     $query = db_select('dispatch_planning_api_data', 'ad');
     $query->condition('ad.runsheet_number', $trip_id);
@@ -538,13 +539,13 @@ function upload_signed_bill_cheque_validate($form, &$form_state){
 }
 function upload_signed_bill_cheque_form_submit($form, &$form_state){
   $vrs_start_time = $form_state['start_time'];
-  global $user;
-  $dis_id = change_feeds_import_get_distributor_id($user->uid);
+  //global $user;
+  //$dis_id = change_feeds_import_get_distributor_id($user->uid);
   $trip_id = $form_state['values']['trip_id'];
   if (empty($trip_id)) {
     $trip_id = $form_state['values']['trips'];
   }
-  //$dis_id = get_distributorid_of_trip($trip_id);
+  $dis_id = get_distributorid_of_trip($trip_id);
   $trip_items = array();
   $dir = 'public://bills';
   file_prepare_directory($dir, FILE_CREATE_DIRECTORY);
