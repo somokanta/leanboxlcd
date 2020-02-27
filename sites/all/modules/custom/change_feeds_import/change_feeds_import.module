@@ -27,6 +27,10 @@ function change_feeds_import_permission() {
         'title' => t('Sibling Central Sales Register Upload'),
         'description' => t('Sibling Central Sales Register Upload')
       ),
+      'Sibling Central Custom Billing Upload' => array(
+        'title' => t('Sibling Central Custom Billing Upload'),
+        'description' => t('Sibling Central Custom Billing Upload')
+      ),
    
     );
 }
@@ -501,6 +505,15 @@ function change_feeds_import_menu() {
       'access arguments' => array('Sibling Central Sales Register Upload'),
       'file' => 'form/sales_register_data_sibling.inc',
     );
+      // Upload form for billing data
+    $items['sibling/billing_data/import'] = array(
+      'title' => 'Import Billing Data',
+      'description' => 'Import Billing Data Node',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('change_feeds_import_billing_data_sibling_form'),
+      'access arguments' => array('Sibling Central Custom Billing Upload'),
+      'file' => 'form/upload_billing_data_sibling.inc',
+    );  
     return $items;
 }
 
@@ -4870,6 +4883,49 @@ function master_api_config_form($form, $form_state) {
     return system_settings_form($form);
 }
 
+function validate_distributor_names($distributor_names) {
+    $distributor_id = $central_login = $sibling_central_login =0;
+    global $table_name;
+    global $table_column;
+    global $user;
+    $logged_in_distributor_id = change_feeds_import_get_distributor_id($user->uid);
+    if (in_array('central_distributor', $user->roles)) {
+        $central_distributor_id = $logged_in_distributor_id;
+        $child_distributor_ids  = get_child_distributor_ids($central_distributor_id);
+        $central_login = 1;
+    }
+    if (in_array('sibling_central_distributor', $user->roles)) {
+        $sibling_central_distributor_id = $logged_in_distributor_id;
+        $sibling_child_distributor_ids  = get_sibling_child_distributor_ids($sibling_central_distributor_id);
+        $sibling_central_login = 1;
+    }
+    if (!empty($distributor_names)) {
+        $query = db_select($table_name, 'dn');
+        $query->join('field_data_field_distributor', 'distributor_id', 'distributor_id.entity_id=dn.entity_id');
+        $query->condition("dn.$table_column", $distributor_names,'IN');
+        // Fetching central logged user's child
+        if (!empty($central_login)) {
+            $query->condition("dn.entity_id", $child_distributor_ids,'IN');
+        }
+        if (!empty($sibling_central_login)) {
+            $query->condition("dn.entity_id", $sibling_child_distributor_ids,'IN');
+        }
+        //$query->fields('distributor_id', array('field_distributor_value'));
+        //$query->fields('dn', array($table_column));
+        $query->addExpression("LOWER(dn.$table_column)", 'distributor_name');
+        if ($sibling_central_login) {
+            // Will return multiple child distributorids 
+            $distributor_id = $query->execute()->fetchAllKeyed(0,0);
+        }
+        else {
+            $distributor_id = $query->execute()->fetchField();
+        }
+        
+    }
+    return $distributor_id;
+}
+
+
 function validate_distributor_name($distributor_name) {
     $distributor_id = $central_login = $sibling_central_login =0;
     global $table_name;
@@ -5073,6 +5129,20 @@ function get_distributor_id_of_bill($bill_number, $sibling_distributor_ids) {
         $distributor_id = $query->execute()->fetchField();
     }
     return $distributor_id;
+}
+
+function get_distributor_id_of_bills($bill_numbers, $sibling_distributor_ids) {
+    $distributor_ids = array();
+    if (!empty($bill_numbers) && !empty($sibling_distributor_ids)) {
+        $query = db_select('node', 'n');
+        $query->condition('n.type', 'sales_register_data', '=');
+        $query->condition('n.uid', $sibling_distributor_ids, 'IN');
+        $query->condition('n.title', $bill_numbers, 'IN');
+        $query->fields('n', array('title'));
+        $query->fields('n', array('uid'));
+        $distributor_ids = $query->execute()->fetchAllKeyed(0,1);
+    }
+    return $distributor_ids;
 }
 function get_distributor_id_of_party_code($party_code, $sibling_distributor_ids) {
     $distributor_id = 0;
