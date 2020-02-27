@@ -3,19 +3,19 @@
 // upload form for billing data
 module_load_include('inc', 'leanbox_address_confirm', 'includes/address_confirm');
 
-function change_feeds_import_sales_register_form($form, $form_state) {
+function change_feeds_import_sales_register_sibling_form($form, $form_state) {
     global $user;
     $user_id = $user->uid;
     $distributor_id = change_feeds_import_get_distributor_id($user_id);
     //add distributor id columns for central distributor
     //add distributor id columns for central distributor
-    if (in_array('central_distributor', $user->roles)) {
-        $template = 'sales_register_template_central.csv';
+    if (in_array('sibling_central_distributor', $user->roles)) {
+        $template = 'sales_register_sibling_template_central.csv';
         $form_state['central_distributor_id'] = $distributor_id;
     }
     else {
         $form_state['central_distributor_id'] = get_central_distributor_id($distributor_id);
-        $template = 'sales_register_template.csv';
+        $template = 'sales_register_sibling_template.csv';
     }
 
     // check distributor incompleted upload
@@ -48,7 +48,7 @@ function change_feeds_import_sales_register_form($form, $form_state) {
     return $form;
 }
 
-function change_feeds_import_sales_register_form_validate($form, &$form_state) {
+function change_feeds_import_sales_register_sibling_form_validate($form, &$form_state) {
     global $user;
     $user_id = $user->uid;
     $distributor_id = change_feeds_import_get_distributor_id($user_id);
@@ -127,7 +127,7 @@ function change_feeds_import_sales_register_form_validate($form, &$form_state) {
     }
 }
 
-function change_feeds_import_sales_register_form_submit($form, &$form_state) {
+function change_feeds_import_sales_register_sibling_form_submit($form, &$form_state) {
     global $user;
     $user_id = $user->uid;
     $distributor_id = change_feeds_import_get_distributor_id($user_id);
@@ -167,7 +167,7 @@ function change_feeds_import_sales_register_form_submit($form, &$form_state) {
     $operations = array();
     $data_chunk = array_chunk($datas, 1000);
     foreach ($data_chunk as $data) {
-        $operations[] = array('change_feeds_import_sales_register_batch_fix_process', array($data, $distributor_id, $file_name, $fid, $no_of_days, $form_state['distributor_data']));
+        $operations[] = array('change_feeds_import_sales_register_sibling_batch_fix_process', array($data, $distributor_id, $file_name, $fid, $no_of_days, $form_state['distributor_data']));
     }
     $batch = array(
       'title' => t('Reading sales Data Csv'),
@@ -175,13 +175,13 @@ function change_feeds_import_sales_register_form_submit($form, &$form_state) {
       'init_message' => t("Please wait..."),
       'progress_message' => t('Processed @current out of @total.'),
       'error_message' => t('Upload data processing has encountered an error.'),
-      'finished' => 'sales_register_data_csv_finished',
-      'file' => drupal_get_path('module', 'change_feeds_import') . '/form/sales_register_data.inc',
+      'finished' => 'sales_register_sibling_data_csv_finished',
+      'file' => drupal_get_path('module', 'change_feeds_import') . '/form/sales_register_sibling_data.inc',
     );
     batch_set($batch);
 }
 
-function change_feeds_import_sales_register_batch_fix_process($data, $distributor_id, $file_name, $fid, $no_of_days, $csv_distributor_ids, &$context) {
+function change_feeds_import_sales_register_sibling_batch_fix_process($data, $distributor_id, $file_name, $fid, $no_of_days, $csv_distributor_ids, &$context) {
     global $user;
     if (empty($distributor_id)) {
         drupal_set_message(t('Please check your Distributor code'), 'error');
@@ -206,7 +206,6 @@ function change_feeds_import_sales_register_batch_fix_process($data, $distributo
         }
 
         $dis_id = $csv_dist_id ? $csv_dist_id : $distributor_id;
-        $sibling_distributor_ids = get_sibling_distributor_id($dis_id);
         $distributorname = $value['DISTRIBUTOR NAME'] ? trim($value['DISTRIBUTOR NAME']) : get_distributor_name($dis_id);
         foreach ($value as $k => $v) {
             $error_text = '';
@@ -241,8 +240,8 @@ function change_feeds_import_sales_register_batch_fix_process($data, $distributo
                 $from = strtotime(date('Y-m-d', strtotime("-$no_of_days days")));
                 $to = strtotime(date('Y-m-d'));
                 if (($check_date >= $from) && ($check_date <= $to)) {
-                    //Check sales register is already updated then validate with field_sr_bill_date
-                    $sr_bill_date = get_sales_register_sr_bill_date($value['BILL_NUMBER'], $dis_id);
+                    //Check sales register_sibling is already updated then validate with field_sr_bill_date
+                    $sr_bill_date = get_sales_register_sibling_sr_bill_date($value['BILL_NUMBER'], $dis_id);
                     if (!empty($sr_bill_date) && $sr_bill_date != $value['BILL_DATE']) {
                         $value['error_message'] .= "Bill Date should be equal to previously uploaded bill date for Bill No " . $value['BILL_NUMBER'] . ".";
                     }
@@ -254,9 +253,8 @@ function change_feeds_import_sales_register_batch_fix_process($data, $distributo
         }
         if (!empty($value['BILL_NUMBER'])) {
             $unique_comb = $value['BILL_NUMBER'] . '-' . $dis_id;
-            // checking sibling have same bill
-            $bill_distributor_id = get_distributor_id_of_bill($value['BILL_NUMBER'], $sibling_distributor_ids);
-            if (!empty($bill_distributor_id) && $bill_distributor_id!=$dis_id) {
+            $bill_distributor_id = get_distributor_id_of_bill($value['BILL_NUMBER'], $dis_id);
+            if (in_array($bill_distributor_id, $sibling_distributor_ids) && !empty($bill_distributor_id) && $bill_distributor_id != $dis_id) {
                 $value['error_message'] .= "Bill Number: " . $value['BILL_NUMBER'] . ' already exist' . ". </br>";
             }
             if (in_array($unique_comb, $context['results']['unique_combination'])) {
@@ -265,18 +263,16 @@ function change_feeds_import_sales_register_batch_fix_process($data, $distributo
             else {
                 $context['results']['unique_combination'][$unique_comb] = $unique_comb;
             }
-            unset($bill_distributor_id);
-            unset($sibling_distributor_ids);
         }
         else {
             $value['error_message'] .= "BILL_NUMBER Can't be blank. ";
         }
 //      $value['BILL_NUMBER'] = trim($value['BILL_NUMBER']);
-//      // Check if bill no already created as a node in content type sales_register_data
-//      $title1 = check_node_title_exists($value['BILL_NUMBER'], 'sales_register_data');
+//      // Check if bill no already created as a node in content type sales_register_sibling_data
+//      $title1 = check_node_title_exists($value['BILL_NUMBER'], 'sales_register_sibling_data');
 //      if (!empty($title1)) {
 //       
-//        $title2 = check_node_title_exists($value['BILL_NUMBER'], 'sales_register_data', TRUE);
+//        $title2 = check_node_title_exists($value['BILL_NUMBER'], 'sales_register_sibling_data', TRUE);
 //        if (!empty($title2)) {
 //          // will have to ovveride the node in this case
 //        }
@@ -287,7 +283,7 @@ function change_feeds_import_sales_register_batch_fix_process($data, $distributo
 //    }
         if (isset($value['BILL_VALUE'])) {
 
-            // Check if bill no already created as a node in content type sales_register_data
+            // Check if bill no already created as a node in content type sales_register_sibling_data
             if (!is_numeric($value['BILL_VALUE'])) {
                 $value['error_message'] .= " Bill no " . $value['BILL_NUMBER'] . ' should have numeric bill value.';
             }
@@ -311,7 +307,7 @@ function change_feeds_import_sales_register_batch_fix_process($data, $distributo
 
                             $arugments = '?pl_group=' . urlencode($details['pl_group']) . '&sales_day=' . urlencode($details['sales_day']) . '&beat_name=' . urlencode($details['beat_name']) . '&hul_status=' . urlencode(0) . '&distributor_id=' . urlencode($dis_id);
                             $url = $page_url . $arugments;
-                            $value['error_message'].= t('Address not confirmed for Party Code: ' . l($details['party_code'] . '- (HUL Code:' . $details['hul_code'] . ')', $url, array('attributes' => array('target' => '_blank'))));
+                            $value['error_message'] = t('Address not confirmed for Party Code: ' . l($details['party_code'] . '- (HUL Code:' . $details['hul_code'] . ')', $url, array('attributes' => array('target' => '_blank'))));
                         }
                     }
                 }
@@ -332,7 +328,7 @@ function change_feeds_import_sales_register_batch_fix_process($data, $distributo
                     }
                     else {
                         $query = db_select('node', 'n');
-                        $query->condition('n.type', 'sales_register_data');
+                        $query->condition('n.type', 'sales_register_sibling_data');
                         $query->condition('n.uid', $dis_id, '=');
                         $query->condition('n.title', $value['BILL_NUMBER'], '!=');
                         $query->join('field_data_field_sr_new_bill_date', 'bd', 'n.nid = bd.entity_id');
@@ -351,13 +347,13 @@ function change_feeds_import_sales_register_batch_fix_process($data, $distributo
         }
 
         // insert into custom sales table
-        change_feeds_import_insert_data_in_custom_sales_table($value, $fid, $dis_id, $distributor_id);
+        change_feeds_import_insert_data_in_sibling_custom_sales_table($value, $fid, $dis_id, $distributor_id);
 
         $context['results']['fid'] = $fid;
     }
 }
 
-function sales_register_data_csv_finished($success, $results, $operations) {
+function sales_register_sibling_data_csv_finished($success, $results, $operations) {
     if ($success) {
         $fid = $results['fid'];
         //drupal_goto("sales-confirm/" . $fid);
@@ -368,7 +364,7 @@ function sales_register_data_csv_finished($success, $results, $operations) {
     }
 }
 
-function change_feeds_import_insert_data_in_custom_sales_table($value, $fid, $dis_id, $created_by_distributor_id) {
+function change_feeds_import_insert_data_in_sibling_custom_sales_table($value, $fid, $dis_id, $created_by_distributor_id) {
 
     $sales_data = db_insert('custom_sales_data') // Table name no longer needs {}
       ->fields(array(
@@ -389,7 +385,7 @@ function change_feeds_import_insert_data_in_custom_sales_table($value, $fid, $di
 
 // show table after file is uploaded
 
-function change_feeds_import_sales_confirm_content($fid) {
+function change_feeds_import_sibling_sales_confirm_content($fid) {
     global $base_url, $user;
     $user_id = $user->uid;
     $distributor_id = change_feeds_import_get_distributor_id($user_id);
@@ -445,7 +441,7 @@ function change_feeds_import_sales_confirm_content($fid) {
  * Called when confirm is clicked
  * @param int $id
  */
-function change_feeds_import_sales_create_confirm_content($fid) {
+function change_feeds_import_sibling_sales_create_confirm_content($fid) {
     global $user;
     $user_id = $user->uid;
     $distributor_id = change_feeds_import_get_distributor_id($user_id);
@@ -459,23 +455,23 @@ function change_feeds_import_sales_create_confirm_content($fid) {
     $operations = array();
     $data_chunk = array_chunk($sales_data_result, 100);
     foreach ($data_chunk as $data) {
-        $operations[] = array('change_feeds_import_create_sales_register_node', array($data, $distributor_id));
+        $operations[] = array('change_feeds_import_create_sales_register_sibling_node_sibling', array($data, $distributor_id));
     }
 
     $batch = array(
       'operations' => $operations,
-      'finished' => 'change_feeds_import_sales_reg_finished',
-      'title' => t('Creating Sales register Data'),
+      'finished' => 'change_feeds_import_sales_reg_sibling_finished',
+      'title' => t('Creating Sales register_sibling Data'),
       'init_message' => t('Sales Data Batch Creation is starting.'),
       'progress_message' => t('Processed @current out of @total.'),
       'error_message' => t('Sales Data Batch has encountered an error.'),
-      'file' => drupal_get_path('module', 'change_feeds_import') . '/form/sales_register_data.inc'
+      'file' => drupal_get_path('module', 'change_feeds_import') . '/form/sales_register_sibling_data.inc'
     );
     batch_set($batch);
-    batch_process('sales-register/import');
+    batch_process('sales-register_sibling/import');
 }
 
-function change_feeds_import_create_sales_register_node($sales_data_result, $distributor_id, &$context) {
+function change_feeds_import_create_sales_register_node_sibling($sales_data_result, $distributor_id, &$context) {
     if (!empty($sales_data_result)) {
         $billing_error_validate = FALSE;
         $count = 0;
@@ -485,11 +481,11 @@ function change_feeds_import_create_sales_register_node($sales_data_result, $dis
                 require_once drupal_get_path('module', 'change_feeds_import') . '/form/upload_billing_data.inc';
                 // check to update node
                 //tp to host entry flag wise bypass validation
-                $existing_bills = check_bill_exists_in_custom_billing(array($val['bill_no']), $val['distributor_id']);
+                $existing_bills = check_bill_exists_in_custom_billing_sibling(array($val['bill_no']), $val['distributor_id']);
                 $bypass_flag = get_dispatch_validation_flag_from_bills(array($val['bill_no']), $val['distributor_id']);
                 if (empty($existing_bills) || !empty($bypass_flag)) {
                     //above 3 line added
-                    //$nid = check_node_title_exists($val['bill_no'], 'sales_register_data');
+                    //$nid = check_node_title_exists($val['bill_no'], 'sales_register_sibling_data');
                     $nid = check_node_title_exist_of_distributor($val['bill_no'], 'sales_register_data', FALSE, $val['distributor_id']);
 
                     if (empty($nid)) {
@@ -592,7 +588,7 @@ function change_feeds_import_create_sales_register_node($sales_data_result, $dis
  * @param array $results
  * @param array $operations
  */
-function change_feeds_import_sales_reg_finished($success, $results, $operations) {
+function change_feeds_import_sales_reg_sibling_finished($success, $results, $operations) {
     if ($success) {
         global $user;
         $user_id = $user->uid;
@@ -608,8 +604,8 @@ function change_feeds_import_sales_reg_finished($success, $results, $operations)
         }
 
         drupal_set_message(t("$count node was created"));
-        //drupal_goto("sales-register/import");
-        $_GET['destination'] = "sales-register/import";
+        //drupal_goto("sales-register_sibling/import");
+        $_GET['destination'] = "sales-register_sibling/import";
     }
     else {
         drupal_set_message('There is Error Occured in batch process');
@@ -621,7 +617,7 @@ function change_feeds_import_sales_reg_finished($success, $results, $operations)
  * 
  * @param int $fid
  */
-function change_feeds_import_sales_discard_data($fid) {
+function change_feeds_import_sales_discard_data_sibling($fid) {
     if (!empty($fid)) {
         global $user;
         $user_id = $user->uid;
@@ -633,13 +629,13 @@ function change_feeds_import_sales_discard_data($fid) {
               ->execute();
 
             // Redirect to import page
-            drupal_goto("sales-register/import");
+            drupal_goto("sales-register_sibling/import");
         }
     }
     drupal_set_message(t('Something went wrong'), 'error');
 }
 
-function get_promised_delivery_date($date, $distributor_id) {
+function get_promised_delivery_date_sibling($date, $distributor_id) {
     //global $user;
     //$user_id = $user->uid;
     //$distributor_id = change_feeds_import_get_distributor_id($user_id);
@@ -670,7 +666,7 @@ function get_promised_delivery_date($date, $distributor_id) {
     return strtotime($pdd);
 }
 
-function get_bod_date($date, $distributor_id) {
+function get_bod_date_sibling($date, $distributor_id) {
     //global $user;
     //$user_id = $user->uid;
     //$distributor_id = change_feeds_import_get_distributor_id($user_id);
@@ -702,7 +698,7 @@ function get_bod_date($date, $distributor_id) {
     return strtotime($bod);
 }
 
-function holiday_get_working_day_for_bod($date_timestamp, $day, $holidays, $weeklyoff) {
+function holiday_get_working_day_for_bod_sibling($date_timestamp, $day, $holidays, $weeklyoff) {
     $date = date('Y-m-d', $date_timestamp);
 
     while ($day != 0) {
@@ -722,7 +718,7 @@ function holiday_get_working_day_for_bod($date_timestamp, $day, $holidays, $week
     return $date;
 }
 
-function get_outlet_master_nid($node_author, $party_code) {
+function get_outlet_master_nid_sibling($node_author, $party_code) {
     $query = db_select('node', 'n');
     $query->fields('n', array('nid'));
     $query->condition('n.type', 'outlet_master');
@@ -733,7 +729,7 @@ function get_outlet_master_nid($node_author, $party_code) {
     return $outlet_nid;
 }
 
-function get_bod_flag($bod_date, $outlet_nid) {
+function get_bod_flag_sibling($bod_date, $outlet_nid) {
     $srd_day = date('l', $bod_date);
     $flag = 0;
 
@@ -759,10 +755,10 @@ function get_bod_flag($bod_date, $outlet_nid) {
  * @param type $distributor_id
  * @return type
  */
-function get_sales_register_sr_bill_date($bill_number, $distributor_id) {
+function get_sales_register_sibling_sr_bill_date_sibling($bill_number, $distributor_id) {
     $query = db_select('node', 'n');
     $query->condition('n.uid', $distributor_id);
-    $query->condition('n.type', 'sales_register_data');
+    $query->condition('n.type', 'sales_register_sibling_data');
     $query->condition('n.title', $bill_number, '=');
     $query->join('field_data_field_sr_bill_date', 'sr_bill', 'sr_bill.entity_id = n.nid');
     $query->fields('sr_bill', array('field_sr_bill_date_value'));
@@ -775,7 +771,7 @@ function get_sales_register_sr_bill_date($bill_number, $distributor_id) {
  * 
  * @param type $all_bills
  */
-function check_bill_exists_in_custom_billing($all_bills, $distributor_id) {
+function check_bill_exists_in_custom_billing_sibling($all_bills, $distributor_id) {
     $query = db_select('custom_billing_data', 'cb');
     $query->condition('cb.bill_number', $all_bills, 'IN');
     $query->condition('cb.distributor_id', $distributor_id, '=');

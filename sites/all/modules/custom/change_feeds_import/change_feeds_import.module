@@ -23,6 +23,11 @@ function change_feeds_import_permission() {
         'title' => t('Delete Billing Data'),
         'description' => t('Delete Billing Data')
       ),
+     'Sibling Central Sales Register Upload' => array(
+        'title' => t('Sibling Central Sales Register Upload'),
+        'description' => t('Sibling Central Sales Register Upload')
+      ),
+   
     );
 }
 
@@ -491,6 +496,15 @@ function change_feeds_import_menu() {
       'page callback' => 'drupal_get_form',
       'page arguments' => array('master_api_config_form'),
       'access callback' => 'check_if_fr_role_user_admin',
+    );
+    
+      $items['sibling/sales-register/import'] = array(
+      'title' => 'Import Sales Register Data',
+      'description' => 'Import Sales Register Data Node',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('change_feeds_import_sales_register_sibling_form'),
+      'access arguments' => array('Sibling Central Sales Register Upload'),
+      'file' => 'form/sales_register_data.inc',
     );
     return $items;
 }
@@ -2341,7 +2355,14 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
     }
 
     if ($entity->feeds_item->id == 'outlet_master') {
-
+        $party_code =  $entity->title;
+        $entity->field_party_code[LANGUAGE_NONE][0]['value'] = $party_code;
+        $sibling_distributor_ids = get_sibling_distributor_id($distributor_id);
+        $distributor_id_of_party_code = get_distributor_id_of_party_code($party_code,$sibling_distributor_ids);
+        if (!empty($distributor_id_of_party_code) && $distributor_id_of_party_code!=$distributor_id) {
+             drupal_set_message("Party Code:$party_code already exist.", 'error');
+             $entity->feeds_item->skip = TRUE;    
+        }
         $sales_day = strtolower($entity->field_sales_day[LANGUAGE_NONE][0]['value']);
         $delivery_day = strtolower($entity->field_delivery_day[LANGUAGE_NONE][0]['value']);
         $sales_day_tid = leanbox_check_taxonomy_exists_by_name($sales_day, 'Outlet days');
@@ -4050,7 +4071,15 @@ function hul_code_address_confirmation($form, &$form_state) {
                     drupal_set_message('Please confirm the address for Party Code:  ' . l($party_code . '- (HUL Code:' . $hu_code . ')', $url, array('attributes' => array('target' => '_blank'))), 'error');
                 }
                 $pt_ct_status = check_exsiting_record_for_party_code($party_code, $distributor_id);
-                if (empty($pt_ct_status)) {
+                $sibling_distributor_ids = get_sibling_distributor_id($distributor_id);
+                $party_code_distributor_id = get_distributor_id_of_party_code($party_code,$sibling_distributor_ids);
+                //watchdog('$party_code_distributor_id',print_r($party_code_distributor_id,TRUE));
+               // watchdog('$distributor_id',print_r($distributor_id,TRUE));
+                $pc_ct_flag =0;
+                if (empty($party_code_distributor_id)|| $party_code_distributor_id == $distributor_id) {
+                    $pc_ct_flag = 1;
+                }
+                if (empty($pt_ct_status) && !empty($pc_ct_flag)) {
                     $url = $base_url . '/import/payment_terms';
                     drupal_set_message('Please maintain PT-CT for Party Code:  ' . l($party_code, $url, array('attributes' => array('target' => '_blank'))), 'error');
                 }
@@ -4982,13 +5011,25 @@ function get_sibling_distributor_id($distributor_id) {
     return $result;
 }
 
-function get_distributor_id_of_bill($bill_number, $distributor_id) {
-    $distributor_id = '';
-    if (!empty($bill_number) && !empty($distributor_id)) {
+function get_distributor_id_of_bill($bill_number, $sibling_distributor_ids) {
+    $distributor_id = 0;
+    if (!empty($bill_number) && !empty($sibling_distributor_ids)) {
         $query = db_select('node', 'n');
         $query->condition('n.type', 'sales_register_data', '=');
-        $query->condition('n.uid', $distributor_id, '=');
+        $query->condition('n.uid', $sibling_distributor_ids, 'IN');
         $query->condition('n.title', $bill_number, '=');
+        $query->fields('n', array('uid'));
+        $distributor_id = $query->execute()->fetchField();
+    }
+    return $distributor_id;
+}
+function get_distributor_id_of_party_code($party_code, $sibling_distributor_ids) {
+    $distributor_id = 0;
+    if (!empty($party_code) && !empty($sibling_distributor_ids)) {
+        $query = db_select('node', 'n');
+        $query->condition('n.type', 'outlet_master', '=');
+        $query->condition('n.uid', $sibling_distributor_ids, 'IN');
+        $query->condition('n.title', $party_code, '=');
         $query->fields('n', array('uid'));
         $distributor_id = $query->execute()->fetchField();
     }
