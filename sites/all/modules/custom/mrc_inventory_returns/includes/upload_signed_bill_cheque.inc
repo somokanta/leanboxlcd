@@ -136,7 +136,7 @@ function upload_signed_bill_cheque_form($form, &$form_state) {
     '#prefix' => '<div class="col_2 col_2_2"> ',
     '#suffix' => '</div>'
   );
-  $payment_out_come = array('Cash' => 'Cash', 'Cheque' => 'Cheque', 'Signed' => 'Signed','Cheque,Cash' => 'Cheque,Cash','Cash,cheque' => 'Cash,cheque');
+  $payment_out_come = array('Cash' => 'Cash', 'Cheque' => 'Cheque', 'Signed' => 'Signed','Cheque,Cash' => 'Cheque,Cash');
   $form['payment_outcome'] = array(
     '#type' => 'select',
     '#attributes' => array('class' => array('payment_outcome', 'auto_complete'), 'style' => "height:32px"),
@@ -183,6 +183,7 @@ if(!empty($options)){
     '#suffix' => '</div>',
     // '#sticky' => FALSE,
   );
+  dpm($options);
 foreach($options as $key => &$val){
   $key = str_replace(' ', '', $key);
   $form['bill_details']['#rows'][$key][] = $val['bill_number'];
@@ -205,13 +206,13 @@ foreach($options as $key => &$val){
       $bill_status = t('NA');
   }
   if (empty($bills[$key]['payment_term'])) {
-    if (($bills[$key]['actual_signed_bill_amount'] > 0) || ($val['res_confirm_signed_bill_amount'] > 0)) {
+    if (($bills[$key]['actual_signed_bill_amount'] > 0) || ($val['res_confirm_signed_bill_amount'] > 0) || ($val['res_confirm_signed_bill_amount_edit'] > 0)){
       $payment_term[] = t('Signed');
     }
-    if (($bills[$key]['actual_cheque_amount'] > 0) || ($val['res_cheque_amount'] > 0)) {
+    if (($bills[$key]['actual_cheque_amount'] > 0) || ($val['res_cheque_amount'] > 0) || ($val['res_cheque_amount_edit'] > 0)){// || $val['res_cheque_amount_edit'] 
       $payment_term[] = t('Cheque');
     }
-    if (($bills[$key]['actual_cash_amount'] > 0) || ($val['res_cash_amount'] > 0)) {
+    if (($bills[$key]['actual_cash_amount'] > 0) || ($val['res_cash_amount'] > 0) || ($val['res_cash_amount_edit'] > 0)){//// || $val['res_cash_amount_edit'] 
       $payment_term[] = t('Cash');
     }
     if (!empty($payment_term)) {
@@ -492,7 +493,7 @@ function display_upload_signed_bill_cheque_trip_details($form, &$form_state) {
       $query->condition('ad.date', $dispatch_date, '=');
     }
     $default_bill_status = array('partial_deliver', 'deliver');//delivery outcome filter based
-    $query->condition('ad.res_status', $default_bill_status, 'IN');
+    //$query->condition('ad.res_status', $default_bill_status, 'IN');
     if(!empty($bill_number)){
       $query->condition('ad.bill_number', $bill_number);
     }
@@ -509,7 +510,7 @@ function display_upload_signed_bill_cheque_trip_details($form, &$form_state) {
       $query->condition('disp_data .uid', $dis_id);
       $query->leftjoin('field_data_field_vrs_status', 'vs', 'vs.entity_id = disp_data.nid');
       // VRS Screen Return flag = 1 and VRS status = 1, 3 Means VRS pending
-      $vrs_status = array('1', '5','0','2','3','4','6');
+      //$vrs_status = array('1', '5','0','2','3','4','6');
       $query->condition('vs.field_vrs_status_value', '-1', '!=');
       $query->groupBy('ad.bill_number,ad.distributor_id');
       $query->fields('ad', array('bill_number','res_status', 'bill_value'));
@@ -518,8 +519,11 @@ function display_upload_signed_bill_cheque_trip_details($form, &$form_state) {
       $query->addExpression('ad.res_photo_of_signed_bill_delivery', 'res_photo_of_signed_bill_delivery');
       $query->addExpression('ad.photo_of_signed_bill_partial', 'photo_of_signed_bill_partial');
       $query->addExpression('ad.res_confirm_signed_bill_amount', 'res_confirm_signed_bill_amount');
+      $query->addExpression('ad.res_confirm_signed_bill_amount', 'res_confirm_signed_bill_amount_edit');
       $query->addExpression('ad.res_cheque_amount', 'res_cheque_amount');
+      $query->addExpression('ad.res_cheque_amount_edit', 'res_cheque_amount_edit');
       $query->addExpression('ad.res_cash_amount', 'res_cash_amount');
+      $query->addExpression('ad.res_cash_amount_edit', 'res_cash_amount_edit');
       $query->addExpression('ad.derived_payment_outcome', 'payment_outcome');//as dicussed with adil chnaged res_money_collect2(old column) to derived
       // payment type
       $query->fields('pt', array('field_payment_terms_value'));
