@@ -134,7 +134,7 @@ function order_packing_slip_form_validate($form,&$form_state){
 function order_packing_slip_form_submit($form,&$form_state){
   $from_bill_date = strtotime($form_state['values']['from_date']);
   $to_bill_date = strtotime($form_state['values']['to_date']);
-  $distributor_id = $form_state['distributor_id'];
+  $distributor_id = $form_state['values']['distributor_id'];
   //dpm($distributor_id, 'distributor_id: ');
   if(!empty($from_bill_date) && !empty($to_bill_date)){
     $query = db_select('node', 'n');
