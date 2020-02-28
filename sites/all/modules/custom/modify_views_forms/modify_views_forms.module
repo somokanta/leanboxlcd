@@ -151,7 +151,6 @@ function modify_views_forms_form_alter(&$form, &$form_state, $form_id) {
 //        $form['node'][$key]['field_loading_dispatch_date'][LANGUAGE_NONE][0]['#required']  = TRUE;
         $form['node'][$key]['field_dispatch_supervisor'][LANGUAGE_NONE][0]['value']['#required'] = TRUE;
         $form['node'][$key]['field_cashier_name'][LANGUAGE_NONE][0]['value']['#required'] = TRUE;
-        $form['node'][$key]['field_delivery_boy'][LANGUAGE_NONE][0]['value']['#required'] = TRUE; // new add
         
          $trip_status = $value['#entity']->field_dispatch_status[LANGUAGE_NONE][0]['value'];
          $form['node'][$key]['field_vehicle_no'][LANGUAGE_NONE][0]['value']['#type'] = 'textfield';
@@ -543,7 +542,6 @@ function validate_trip_status($form, &$form_state) {
       $cashier_name =  trim($form_data['field_cashier_name'][LANGUAGE_NONE][0]['value']);
       $dispatch_date = trim($form_data['field_dispatch_date'][LANGUAGE_NONE][0]['value']);
       $vehicle_no = trim($form_data['field_vehicle_no'][LANGUAGE_NONE][0]['value']);
-      $selected_delivery_boy = trim($form_data['field_delivery_boy'][LANGUAGE_NONE][0]['nid']);// New add
 
       if (!empty($vehicle_no) && empty(validate_vehicle_number($vehicle_no,$central_distributor_id))) {
       form_set_error('form', t("Please enter valid Vehicle Number for Trip ID: " . $node_status[$nid]['trip_id']));
@@ -572,9 +570,9 @@ function validate_trip_status($form, &$form_state) {
             }
       }
 
-    // New add
-    if(empty($selected_delivery_boy)) {
-        form_set_error('form', t("Please select the Delivery Name for Trip ID: ". $node_status[$nid]['trip_id']));
+    //delivery boy validation
+    if(empty($form_data['field_delivery_boy']['und'][0]['nid'])){
+        form_set_error('field_delivery_boy', t("Please select the Delivery Boy for Trip ID: ". $node_status[$nid]['trip_id']));
     }
 
     // Validation for Dispatched Assets.
@@ -591,7 +589,7 @@ function validate_trip_status($form, &$form_state) {
     }
     else {
       $flag = 1;
-      break;
+      //break;
     }
     if ($flag == 0) {
       form_set_error('dispatch_count', 'Please enter Dispatched Assets for Trip ID ' . $node_status[$nid]['trip_id']);
