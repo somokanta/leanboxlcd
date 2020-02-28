@@ -12,6 +12,9 @@ function custom_order_box_id_upload_form($form, &$form_state) {
     $user_id = $user->uid;
     $distributor_id = change_feeds_import_get_distributor_id($user_id);
     $form_state['distributor_id'] = $distributor_id;
+    if (in_array('sibling_central_distributor', $user->roles)) {
+         drupal_goto("sibling/order-vs-bill-import");
+    }
     //add distributor id columns for central distributor
     if (in_array('central_distributor', $user->roles)) {
         $template = 'order_vs_bill_import_template_central.csv';
