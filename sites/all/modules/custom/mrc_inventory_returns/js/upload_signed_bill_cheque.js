@@ -38,6 +38,18 @@
                                 signtd = billtr[i].getElementsByTagName("td")[4].style.visibility = 'hidden';
                                 cheqtd = billtr[i].getElementsByTagName("td")[5].style.visibility = 'hidden';
                             }
+                            if (pay_outcome == 'Signed') {
+                                //signtd = billtr[i].getElementsByTagName("td")[4].style.visibility = 'hidden';
+                                cheqtd = billtr[i].getElementsByTagName("td")[5].style.visibility = 'hidden';
+                            }
+                            if (pay_outcome == 'Cheque,Cash') {
+                                signtd = billtr[i].getElementsByTagName("td")[4].style.visibility = 'hidden';
+                                //cheqtd = billtr[i].getElementsByTagName("td")[5].style.visibility = 'hidden';
+                            }
+                            if (pay_outcome == 'Cheque') {
+                                signtd = billtr[i].getElementsByTagName("td")[4].style.visibility = 'hidden';
+                                //cheqtd = billtr[i].getElementsByTagName("td")[5].style.visibility = 'hidden';
+                            }                             
                         }
                     }
                 }
