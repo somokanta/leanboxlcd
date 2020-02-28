@@ -10,10 +10,10 @@ function order_packing_slip_menu(){
     'file' => 'form/order_packing_slip.form.inc',
   );
   
-    $items['download-order-packing-data/%/%'] =array(
+    $items['download-order-packing-data/%/%/%'] =array(
     'title' => 'Download Order Packing Slip Report',
     'page callback' => 'download_order_packing_slip',
-    'page arguments' => array(1, 2),
+    'page arguments' => array(1, 2, 3),
     'access arguments' => array('order packing slip'),
     'type' => MENU_CALLBACK,
     'file' => 'form/order_packing_slip.form.inc',
