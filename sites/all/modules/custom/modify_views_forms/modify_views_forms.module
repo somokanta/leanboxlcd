@@ -542,7 +542,7 @@ function validate_trip_status($form, &$form_state) {
       $cashier_name =  trim($form_data['field_cashier_name'][LANGUAGE_NONE][0]['value']);
       $dispatch_date = trim($form_data['field_dispatch_date'][LANGUAGE_NONE][0]['value']);
       $vehicle_no = trim($form_data['field_vehicle_no'][LANGUAGE_NONE][0]['value']);
-      
+
       if (!empty($vehicle_no) && empty(validate_vehicle_number($vehicle_no,$central_distributor_id))) {
       form_set_error('form', t("Please enter valid Vehicle Number for Trip ID: " . $node_status[$nid]['trip_id']));
      }
@@ -569,7 +569,12 @@ function validate_trip_status($form, &$form_state) {
               form_set_error('form', t("Please enter the Dispatch date for Trip ID: ".$node_status[$nid]['trip_id']));
             }
       }
-      
+
+    //delivery boy validation
+    if(empty($form_data['field_delivery_boy']['und'][0]['nid'])){
+        form_set_error('field_delivery_boy', t("Please select the Delivery Boy for Trip ID: ". $node_status[$nid]['trip_id']));
+    }
+
     // Validation for Dispatched Assets.
     $query = db_select('node', 'n');
     $query->condition('n.type', 'assets_count');
@@ -584,7 +589,7 @@ function validate_trip_status($form, &$form_state) {
     }
     else {
       $flag = 1;
-      break;
+      //break;
     }
     if ($flag == 0) {
       form_set_error('dispatch_count', 'Please enter Dispatched Assets for Trip ID ' . $node_status[$nid]['trip_id']);
