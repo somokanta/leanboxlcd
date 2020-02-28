@@ -1,13 +1,16 @@
 (function ($) {
     Drupal.behaviors.upload_signed_bill_cheque = {
         attach: function (context, settings) {
+            var billtable,billtr,billtd,pay_outcome,signtd,cheqtd;
             if ($('.error').is(':visible')) {
                 bill_status_undeliver_filter();
             }
+            $("#bill_status_undeliver").hide();
 
             $("#bill_number").keyup(function () {
                 bill_filter();
             });
+            payment_outcome_filter();
             $("#payment_outcome").on('change', function () {
                 payment_outcome_filter();
             });
@@ -21,6 +24,26 @@
             $("#bill_status_undeliver").on('change', function () {
                 bill_status_undeliver_filter();
             });
+            
+            // show hide based on payment outcome
+            billtable = document.getElementById("bill_details_one");
+            if (billtable != null) {
+                billtr = billtable.getElementsByTagName("tr");
+                if (billtr != null) {
+                    for (i = 0; i < billtr.length; i++) {
+                        billtd = billtr[i].getElementsByTagName("td")[3];
+                        if (billtd != null) {
+                            pay_outcome = billtd.innerText;
+                            if (pay_outcome == 'Cash') {
+                                signtd = billtr[i].getElementsByTagName("td")[4].style.visibility = 'hidden';
+                                cheqtd = billtr[i].getElementsByTagName("td")[5].style.visibility = 'hidden';
+                            }
+                        }
+                    }
+                }
+
+            }
+            //show hide based on payment outcome
 
 
             // Reseting filters
@@ -75,7 +98,7 @@
                 for (i = 0; i < tr.length; i++) {
                     td = tr[i].getElementsByTagName("td")[3];
                     if (td) {
-                        if (td.innerHTML.toUpperCase().indexOf(filter) > -1) {
+                        if (td.innerHTML.toUpperCase() == filter) {
                             tr[i].style.display = "";
                         } else {
                             tr[i].style.display = "none";
@@ -92,6 +115,7 @@
                 //var select = $('#bank_name');
                 //select.val($('options:first', select).val());
                 $("#bank_name").val('');
+                $("#payment_outcome").val('');
 
                 $("#bill_status_undeliver").prop('checked', false);
                 if (input == 'deliver') {
