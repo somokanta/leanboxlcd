@@ -5132,7 +5132,7 @@ function get_distributor_id_of_bill($bill_number, $sibling_distributor_ids) {
 }
 
 function get_distributor_id_of_bills($bill_numbers, $sibling_distributor_ids) {
-    $distributor_ids = array();
+    $res = array();
     if (!empty($bill_numbers) && !empty($sibling_distributor_ids)) {
         $query = db_select('node', 'n');
         $query->condition('n.type', 'sales_register_data', '=');
@@ -5140,9 +5140,23 @@ function get_distributor_id_of_bills($bill_numbers, $sibling_distributor_ids) {
         $query->condition('n.title', $bill_numbers, 'IN');
         $query->fields('n', array('title'));
         $query->fields('n', array('uid'));
-        $distributor_ids = $query->execute()->fetchAllKeyed(0,1);
+        $res = $query->execute()->fetchAllKeyed(0,1);
     }
-    return $distributor_ids;
+    return $res;
+}
+
+function get_distributor_id_of_hul_codes($hul_codes, $sibling_distributor_ids) {
+    $res = array();
+    if (!empty($hul_codes) && !empty($sibling_distributor_ids)) {
+        $query = db_select('node', 'n');
+        $query->condition('n.type', 'hul_code_master', '=');
+        $query->condition('n.uid', $sibling_distributor_ids, 'IN');
+        $query->condition('n.title', $hul_codes, 'IN');
+        $query->fields('n', array('title'));
+        $query->fields('n', array('uid'));
+        $res = $query->execute()->fetchAllKeyed(0,1);
+    }
+    return $res;
 }
 function get_distributor_id_of_party_code($party_code, $sibling_distributor_ids) {
     $distributor_id = 0;
@@ -5163,6 +5177,17 @@ function check_same_party_code_exist_for_sibling($party_code, $sibling_distribut
         $query->condition('n.type', 'outlet_master', '=');
         $query->condition('n.uid', $sibling_distributor_ids, 'IN');
         $query->condition('n.title', $party_code, '=');
+        $query->fields('n', array('uid'));
+        $distributor_ids = $query->execute()->fetchAllKeyed(0,0);
+    }
+    return count($distributor_ids);
+}
+function check_same_bill_number_exist_for_sibling($bill_number, $sibling_distributor_ids) {
+    if (!empty($bill_number) && !empty($sibling_distributor_ids)) {
+        $query = db_select('node', 'n');
+        $query->condition('n.type', 'sales_register_data', '=');
+        $query->condition('n.uid', $sibling_distributor_ids, 'IN');
+        $query->condition('n.title', $bill_number, '=');
         $query->fields('n', array('uid'));
         $distributor_ids = $query->execute()->fetchAllKeyed(0,0);
     }
