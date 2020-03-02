@@ -49,7 +49,8 @@ function bill_pending_for_planning_cron() {
     }
 
     dpm($json);
-    dpm(json_encode($json));
+    dpm($bill_pending_for_planning = json_encode($json));
+    watchdog('bill_pending_for_planning', '<pre>' . print_r($bill_pending_for_planning, TRUE) . '</pre>');
 }
 
 function get_all_bills_under_facilty_code($crossdoc_facility_code) {
