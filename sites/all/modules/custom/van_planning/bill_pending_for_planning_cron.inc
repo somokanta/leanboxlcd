@@ -50,71 +50,71 @@ function bill_pending_for_planning_cron() {
 
     dpm($json);
     dpm(json_encode($json));
+}
 
-    function get_all_bills_under_facilty_code($crossdoc_facility_code) {
+function get_all_bills_under_facilty_code($crossdoc_facility_code) {
 
-        $query = db_select('field_data_field_distributor', 'dis_id');
-        $query->innerjoin('field_data_field_facility_code', 'facility_code', 'dis_id.entity_id = facility_code.entity_id');
-        $query->join('taxonomy_term_data', 'term_data', 'term_data.tid = facility_code.field_facility_code_tid');
-        $query->fields('dis_id', array('field_distributor_value'));
-        $query->condition('term_data.name', $crossdoc_facility_code);
-        $all_distributor = $query->execute()->fetchAllKeyed(0, 0);
+    $query = db_select('field_data_field_distributor', 'dis_id');
+    $query->innerjoin('field_data_field_facility_code', 'facility_code', 'dis_id.entity_id = facility_code.entity_id');
+    $query->join('taxonomy_term_data', 'term_data', 'term_data.tid = facility_code.field_facility_code_tid');
+    $query->fields('dis_id', array('field_distributor_value'));
+    $query->condition('term_data.name', $crossdoc_facility_code);
+    $all_distributor = $query->execute()->fetchAllKeyed(0, 0);
 
-        $query = db_select('field_data_field_facility_code', 'facility_code');
-        $query->join('taxonomy_term_data', 'term_data', 'term_data.tid = facility_code.field_facility_code_tid');
-        $query->join('users_roles', 'ur', 'ur.uid = facility_code.entity_id');
-        $query->join('role', 'role', 'role.rid = ur.rid');
-        $query->condition('role.name', 'central_distributor', '=');
-        $query->fields('ur', array('uid'));
-        $query->condition('term_data.name', $crossdoc_facility_code);
-        $central_distributor_id = $query->execute()->fetchField();
+    $query = db_select('field_data_field_facility_code', 'facility_code');
+    $query->join('taxonomy_term_data', 'term_data', 'term_data.tid = facility_code.field_facility_code_tid');
+    $query->join('users_roles', 'ur', 'ur.uid = facility_code.entity_id');
+    $query->join('role', 'role', 'role.rid = ur.rid');
+    $query->condition('role.name', 'central_distributor', '=');
+    $query->fields('ur', array('uid'));
+    $query->condition('term_data.name', $crossdoc_facility_code);
+    $central_distributor_id = $query->execute()->fetchField();
 
-        $facility_bills = array();
-        $no_of_days = variable_get('van_planning_dates', 15);
-        $billing_start_date = strtotime(date('Y-m-d') . "- $no_of_days days");
-        $billing_end_date = strtotime(date("Y-m-d"));
+    $facility_bills = array();
+    $no_of_days = variable_get('van_planning_dates', 15);
+    $billing_start_date = strtotime(date('Y-m-d') . "- $no_of_days days");
+    $billing_end_date = strtotime(date("Y-m-d"));
 
-        if (!empty($all_distributor) && !empty($central_distributor_id)) {
-            $query = db_select('node', 'n');
-            $query->condition('n.type', 'hul_code_master');
-            $query->addField('n', 'title', 'hul_code');
-            $query->leftjoin('field_data_field_area_code', 'ac', 'ac.entity_id = n.nid');
-            $query->condition('n.uid', $all_distributor, 'IN');
-            $query->leftjoin('node', 'n1', "n1.nid = ac.field_area_code_nid and n1.type ='area_code_master' and n1.uid = $central_distributor_id ");
-            $query->addExpression("CASE WHEN (n1.title IS NOT NULL) THEN n1.title ELSE 'NA' END", 'area_code');
-            $query->join('field_data_field_hul_code_reference', 'hcr', 'hcr.field_hul_code_reference_nid = n.nid');
-            $query->join('node', 'n2', 'n2.nid = hcr.entity_id');
-            $query->condition('n2.type', 'outlet_master');
-            $query->condition('n2.uid', $all_distributor, 'IN');
-            $query->join('field_data_field_party_code', 'fpc', 'fpc.entity_id = n2.nid');
-            $query->join('field_data_field_party_name', 'fpn', 'fpn.entity_id = n2.nid');
-            $query->join('field_data_field_sales_day', 'fsd', 'fsd.entity_id = n2.nid');
-            $query->join('field_data_field_beat_name', 'fbn', 'fbn.entity_id = n2.nid');
-            $query->addField('fsd', 'field_sales_day_value', 'field_sales_day_value');
-            $query->addField('fbn', 'field_beat_name_value', 'field_beat_name_value');
-            $query->join('field_data_field_hul_updated_lat', 'lat', 'lat.entity_id = n.nid');
-            $query->join('field_data_field_hul_updated_long', 'lng', 'lng.entity_id = n.nid');
-            $query->addField('lat', 'field_hul_updated_lat_value', 'field_hul_updated_lat_value');
-            $query->addField('lng', 'field_hul_updated_long_value', 'field_hul_updated_long_value');
-            $query->join('field_data_field_party_code_reference', 'pcr', 'pcr.field_party_code_reference_nid = n2.nid');
-            $query->join('node', 'n3', 'n3.nid = pcr.entity_id');
-            $query->condition('n3.type', 'sales_register_data');
-            $query->condition('n3.uid', $all_distributor, 'IN');
-            $query->leftJoin('field_data_field_trip_id_reference', 'ft', 'ft.entity_id = n3.nid');
-            $query->leftJoin('field_data_field_delivery_pending', 'dp', 'n3.nid = dp.entity_id');
-            $query->isNull('ft.field_trip_id_reference_nid');
-            $query->leftJoin('field_data_field_bill_status', 'bs', 'bs.entity_id = n3.nid');
-            $query->isNull('bs.field_bill_status_value');
-            $query->join('field_data_field_sr_bill_date', 'sbd', 'sbd.entity_id = n3.nid');
-            $query->condition('sbd.field_sr_bill_date_value', array($billing_start_date, $billing_end_date), 'BETWEEN');
-            $query->addField('sbd', 'field_sr_bill_date_value', 'field_sr_bill_date_value');
-            $query->join('field_data_field_bill_net_sales', 'bv', 'bv.entity_id = n3.nid');
-            $query->addField('n3', 'title', 'bill_no');
-            $query->addExpression('ROUND(bv.field_bill_net_sales_value)', 'bill_value');
-            $query->addExpression('fpc.field_party_code_value', 'party_code_val');
-            $query->addExpression('fpn.field_party_name_value', 'party_name_val');
-            $facility_bills = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
-        }
-        return $facility_bills;
+    if (!empty($all_distributor) && !empty($central_distributor_id)) {
+        $query = db_select('node', 'n');
+        $query->condition('n.type', 'hul_code_master');
+        $query->addField('n', 'title', 'hul_code');
+        $query->leftjoin('field_data_field_area_code', 'ac', 'ac.entity_id = n.nid');
+        $query->condition('n.uid', $all_distributor, 'IN');
+        $query->leftjoin('node', 'n1', "n1.nid = ac.field_area_code_nid and n1.type ='area_code_master' and n1.uid = $central_distributor_id ");
+        $query->addExpression("CASE WHEN (n1.title IS NOT NULL) THEN n1.title ELSE 'NA' END", 'area_code');
+        $query->join('field_data_field_hul_code_reference', 'hcr', 'hcr.field_hul_code_reference_nid = n.nid');
+        $query->join('node', 'n2', 'n2.nid = hcr.entity_id');
+        $query->condition('n2.type', 'outlet_master');
+        $query->condition('n2.uid', $all_distributor, 'IN');
+        $query->join('field_data_field_party_code', 'fpc', 'fpc.entity_id = n2.nid');
+        $query->join('field_data_field_party_name', 'fpn', 'fpn.entity_id = n2.nid');
+        $query->join('field_data_field_sales_day', 'fsd', 'fsd.entity_id = n2.nid');
+        $query->join('field_data_field_beat_name', 'fbn', 'fbn.entity_id = n2.nid');
+        $query->addField('fsd', 'field_sales_day_value', 'field_sales_day_value');
+        $query->addField('fbn', 'field_beat_name_value', 'field_beat_name_value');
+        $query->join('field_data_field_hul_updated_lat', 'lat', 'lat.entity_id = n.nid');
+        $query->join('field_data_field_hul_updated_long', 'lng', 'lng.entity_id = n.nid');
+        $query->addField('lat', 'field_hul_updated_lat_value', 'field_hul_updated_lat_value');
+        $query->addField('lng', 'field_hul_updated_long_value', 'field_hul_updated_long_value');
+        $query->join('field_data_field_party_code_reference', 'pcr', 'pcr.field_party_code_reference_nid = n2.nid');
+        $query->join('node', 'n3', 'n3.nid = pcr.entity_id');
+        $query->condition('n3.type', 'sales_register_data');
+        $query->condition('n3.uid', $all_distributor, 'IN');
+        $query->leftJoin('field_data_field_trip_id_reference', 'ft', 'ft.entity_id = n3.nid');
+        $query->leftJoin('field_data_field_delivery_pending', 'dp', 'n3.nid = dp.entity_id');
+        $query->isNull('ft.field_trip_id_reference_nid');
+        $query->leftJoin('field_data_field_bill_status', 'bs', 'bs.entity_id = n3.nid');
+        $query->isNull('bs.field_bill_status_value');
+        $query->join('field_data_field_sr_bill_date', 'sbd', 'sbd.entity_id = n3.nid');
+        $query->condition('sbd.field_sr_bill_date_value', array($billing_start_date, $billing_end_date), 'BETWEEN');
+        $query->addField('sbd', 'field_sr_bill_date_value', 'field_sr_bill_date_value');
+        $query->join('field_data_field_bill_net_sales', 'bv', 'bv.entity_id = n3.nid');
+        $query->addField('n3', 'title', 'bill_no');
+        $query->addExpression('ROUND(bv.field_bill_net_sales_value)', 'bill_value');
+        $query->addExpression('fpc.field_party_code_value', 'party_code_val');
+        $query->addExpression('fpn.field_party_name_value', 'party_name_val');
+        $facility_bills = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
     }
+    return $facility_bills;
 }
