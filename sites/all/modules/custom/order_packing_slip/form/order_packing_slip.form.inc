@@ -112,7 +112,7 @@ function order_packing_slip_form($form, &$form_state){
      $from_bill_date = $form_state['values']['from_bill_date'];
      $to_bill_date = $form_state['values']['to_bill_date'];
     
-    $open_pdf_link = l('Open PDF', "/download-order-packing-data/$from_bill_date/$to_bill_date" ,array('attributes'=>array("target" => "_blank",'class' => array('print-pdf'))));
+    $open_pdf_link = l('Open PDF', "/download-order-packing-data/$from_bill_date/$to_bill_date/$distributor_id" ,array('attributes'=>array("target" => "_blank",'class' => array('print-pdf'))));
     $form['dowmload_mark'] = array(
       '#type' => 'markup',
       '#markup' => $open_pdf_link,
@@ -134,7 +134,7 @@ function order_packing_slip_form_validate($form,&$form_state){
 function order_packing_slip_form_submit($form,&$form_state){
   $from_bill_date = strtotime($form_state['values']['from_date']);
   $to_bill_date = strtotime($form_state['values']['to_date']);
-  $distributor_id = $form_state['distributor_id'];
+  $distributor_id = $form_state['values']['distributor_id'];
   //dpm($distributor_id, 'distributor_id: ');
   if(!empty($from_bill_date) && !empty($to_bill_date)){
     $query = db_select('node', 'n');
@@ -189,14 +189,14 @@ function order_packing_slip_form_submit($form,&$form_state){
   }
 }
 
-function download_order_packing_slip($from_bill_date,$to_bill_date){
+function download_order_packing_slip($from_bill_date,$to_bill_date, $distributor_id){
   global $user;
   $user_id = $user->uid;
   $distributor_ids = get_distributor_ids();
    if(!empty($from_bill_date) && !empty($to_bill_date)){
     $query = db_select('node', 'n');
     $query->condition('n.type', 'sales_register_data');
-    $query->condition('n.uid', $distributor_ids, 'IN');
+    $query->condition('n.uid', $distributor_id, '=');
     $query->leftjoin('field_data_field_sr_new_bill_date', 'bd', 'n.nid = bd.entity_id');
     $query->condition('bd.field_sr_new_bill_date_value',array($from_bill_date, $to_bill_date), 'BETWEEN');
     $query->leftjoin('field_data_field_crate_id', 'crate', 'n.nid = crate.entity_id');
@@ -204,7 +204,7 @@ function download_order_packing_slip($from_bill_date,$to_bill_date){
     $query->leftjoin('field_data_field_party_code_reference','party_code_ref','party_code_ref.entity_id = n.nid');
     $query->leftjoin('node','n1','n1.nid = party_code_ref.field_party_code_reference_nid');
     $query->condition('n1.type', 'outlet_master');
-    $query->condition('n1.uid', $distributor_ids,'IN');
+    $query->condition('n1.uid', $distributor_id,'=');
     $query->leftjoin('field_data_field_party_code','party_code','n1.nid = party_code.entity_id');
     $query->leftjoin('field_data_field_party_name','party_name','n1.nid = party_name.entity_id');
     $query->leftjoin('field_data_field_beat_name','beat_name','n1.nid = beat_name.entity_id');
@@ -234,7 +234,7 @@ function download_order_packing_slip($from_bill_date,$to_bill_date){
       $query4 = db_select('order_packing_slip_api_data', 'opad');
       $query4->fields('opad', array('order_no','party_name','box_id','seal_number','total_qty','header_data', 'row_data')); 
       $query4->condition('opad.order_no', $unique_orders_arr, 'IN');  //$unique_crate_ids
-      $query4->condition('opad.distributor_id', $distributor_ids,'IN');  // distributor id
+      $query4->condition('opad.distributor_id', $distributor_id,'=');  // distributor id
       $table_data = $query4->execute()->fetchAll(\PDO::FETCH_ASSOC);
     }
     $table_row_data = $table_data;
