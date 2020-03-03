@@ -287,7 +287,7 @@ foreach($options as $key => &$val){
         '#attributes' => array('title' => t('Cheque Image')),
         '#default_value'=>$photo_cheque_fid,  
         '#name' => 'files[cheque_' . $key . ']',
-        // '#id' => 'bill_details_' . $key . '_photo_cheque',
+        '#prefix' => $ph_cheque,
         '#attributes' => array('id' => 'ph_cheque_'.key),
         '#upload_validators' => array('file_validate_extensions' => array('gif png jpg jpeg pdf doc docx'),
         '#upload_location' => 'public://bills/',    
