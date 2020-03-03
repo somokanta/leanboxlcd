@@ -210,7 +210,7 @@ foreach($options as $key => &$val){
       $payment_term[] = t('Cash');
     }
     if (!empty($payment_term)) {
-      $payments_terms = implode(',', $payment_term);
+      $payments_outcome = implode(',', $payment_term);
     }
   }
   else {
@@ -379,6 +379,7 @@ foreach($options as $key => &$val){
       unset($url);
       unset($payment_term);
       unset($payments_terms);
+      unset($payments_outcome);
       
   }
     
