@@ -25,6 +25,7 @@ function upload_signed_bill_cheque_form($form, &$form_state) {
     $form_state['vrs_confirmation']['bills'] = array();
   }
   $options = $form_state['vrs_confirmation']['bills'];
+  dpm($options,'query-data');
   $dis_id = get_distributorid_of_trip($trip_id);
   //$form['#attached']['js'][] = drupal_get_path('module', 'mrc_inventory_returns') . '/js/vrs_confirmation.js';
   $form['#attached']['js'][] = drupal_get_path('module', 'mrc_inventory_returns') . '/js/upload_signed_bill_cheque.js';
@@ -146,6 +147,7 @@ function upload_signed_bill_cheque_form($form, &$form_state) {
   );
   if (!empty($options)) {
       $bills = get_signed_bill_cheque_images($trip_id, $dis_id);
+        dpm($bills,'bill-data');
   }
   $form['bank_name'] = array(
     '#type' => 'textfield',
@@ -220,6 +222,10 @@ foreach($options as $key => &$val){
   if ($undeliver == 1) {
     $payments_terms = 'NA';
   }
+  if($key == 'ALBL424520'){
+    dpm($val['field_payment_terms_value']);
+  }
+  dpm($val['field_payment_terms_value'],'payment-terms-value');
   $form['bill_details']['#rows'][$key][] = $bill_status;
   $form['bill_details']['#rows'][$key][] = $val['field_payment_terms_value'];
   $form['bill_details']['#rows'][$key][] = $payments_terms;
