@@ -607,7 +607,7 @@ function insert_signed_bill_cheque_images($values,$trip_id,$dis_id){
 
 
 
-// function to fetch vrs bill items
+// function to fetch vrs bill items 
 function get_signed_bill_cheque_images($trip_id, $distributor_id) {
     $res = array();
     if (!empty($trip_id) && !empty($distributor_id)) {
