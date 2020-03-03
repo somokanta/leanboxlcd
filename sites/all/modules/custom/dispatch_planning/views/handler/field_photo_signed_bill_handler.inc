@@ -44,7 +44,7 @@ class field_photo_signed_bill_handler extends views_handler_field {
              $path = $photo_signed_bill;
         }
         
-        $signed_bill = '<a target="_blank" href="' . $path . '">' . t('Signed Bill Link'); 
+        $signed_bill = '<a target="_blank" href="' . $path . '">' . $path; 
     }
 
     return $signed_bill;

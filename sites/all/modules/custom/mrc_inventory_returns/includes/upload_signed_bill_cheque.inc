@@ -25,9 +25,6 @@ function upload_signed_bill_cheque_form($form, &$form_state) {
     $form_state['vrs_confirmation']['bills'] = array();
   }
   $options = $form_state['vrs_confirmation']['bills'];
-  // variable need  
-  //global $user;
-  //$dis_id = change_feeds_import_get_distributor_id($user->uid);
   $dis_id = get_distributorid_of_trip($trip_id);
   //$form['#attached']['js'][] = drupal_get_path('module', 'mrc_inventory_returns') . '/js/vrs_confirmation.js';
   $form['#attached']['js'][] = drupal_get_path('module', 'mrc_inventory_returns') . '/js/upload_signed_bill_cheque.js';
@@ -147,11 +144,9 @@ function upload_signed_bill_cheque_form($form, &$form_state) {
     '#prefix' => '<div class="col_2 col_2_2"> ',
     '#suffix' => '</div>'
   );
-  
   if (!empty($options)) {
       $bills = get_signed_bill_cheque_images($trip_id, $dis_id);
   }
-
   $form['bank_name'] = array(
     '#type' => 'textfield',
     '#title' => 'Bank Name',
@@ -228,12 +223,13 @@ foreach($options as $key => &$val){
   $form['bill_details']['#rows'][$key][] = $bill_status;
   $form['bill_details']['#rows'][$key][] = $val['field_payment_terms_value'];
   $form['bill_details']['#rows'][$key][] = $payments_terms;
- $ph_cheque = '<div class ="vrs_signed_bill_image">';
+ $ph_cheque = '<div class ="vrs_cheque_bill_image">';
       $ph_flag = 0;
       $span_class = '<span style = "margin-left:18px;"></span>';
+
       if (!empty($bills[$key]['photo_cheque'])) {
         $files = file_load_multiple(array(), array('uri' => $bills[$key]['photo_cheque']));
-        $file = reset($files);   
+        $file = reset($files); 
         $photo_cheque_fid = $file->fid;
        
         $url = $bills[$key]['photo_cheque'];
@@ -280,14 +276,14 @@ foreach($options as $key => &$val){
           '#value' => $path,
         );
       }
-
       $ph_cheque .= '</div>';
       $photo_cheque = array(
         '#type' => 'managed_file',
         '#attributes' => array('title' => t('Cheque Image')),
         '#default_value'=>$photo_cheque_fid,  
         '#name' => 'files[cheque_' . $key . ']',
-        // '#id' => 'bill_details_' . $key . '_photo_cheque',
+        '#prefix' => '<div>' . $ph_cheque,  
+        '#suffix' => '</div>',
         '#attributes' => array('id' => 'ph_cheque_'.key),
         '#upload_validators' => array('file_validate_extensions' => array('gif png jpg jpeg pdf doc docx'),
         '#upload_location' => 'public://bills/',    
@@ -297,13 +293,16 @@ foreach($options as $key => &$val){
       unset($url);
       unset($wrapper);
       unset($file);
+      unset($na_position);
 
       $ph_sign_flag = 0;
       $ph_signed_bill = '<div class ="vrs_signed_bill_image">';
       if (!empty($bills[$key]['photo_signed_bill'])) {
         $files = file_load_multiple(array(), array('uri' => $bills[$key]['photo_signed_bill']));
         $file = reset($files);   
-        $photo_signed_fid = $file->fid;  
+        
+        $photo_signed_fid = $file->fid;
+
         $url = $bills[$key]['photo_signed_bill'];
         $path = $url;
         $na_position = strpos($url, '/NA');
@@ -321,7 +320,7 @@ foreach($options as $key => &$val){
           $ph_sign_flag = 0;
         }
       }
-      elseif (!empty($val['res_photo_of_signed_bill_delivery']) || !empty($val['photo_of_signed_bill_partial'])) {
+      else if (!empty($val['res_photo_of_signed_bill_delivery']) || !empty($val['photo_of_signed_bill_partial'])) {
         $url = $val['photo_of_signed_bill_partial'];
         if (empty($url)) {
           $url = $val['res_photo_of_signed_bill_delivery'];
@@ -353,12 +352,10 @@ foreach($options as $key => &$val){
       }
       $ph_signed_bill .= '</div>';
       $photo_signed_bill = array(
-        //'#id' => 'bill_details-' . $key . '-photo_signed_bill',
         '#name' => 'files[signedbill_' . $key . ']',
         '#type' => 'managed_file',
         '#upload_location' => 'public://bills/',  
-        '#prefix' => '<div>' . $ph_signed_bill,
-          '#default_value'=>$photo_signed_fid,    
+        '#prefix' => '<div>' . $ph_signed_bill,  
         '#suffix' => '</div>',
         '#attributes' => array('class' => array('photo_signed_bill'), 'id' => 'ph_sign_'.$key, 'title' => t('Signed Bill Image')),
         '#default_value'=>$photo_signed_fid,    
@@ -366,14 +363,13 @@ foreach($options as $key => &$val){
          ),
         '#attributes' => array('class' => array('photo_signed_bill'), 'title' => t('Signed Bill Image')),
       );
-          
-     // if else removed 
-      $form['bill_details'][$key]["photo_cheque"] = &$photo_cheque;
-      $form['bill_details'][$key]["photo_signed_bill"] = &$photo_signed_bill;
-      $form['bill_details']['#rows'][$key][]['data']["photo_cheque"] = &$photo_cheque;
-      $form['bill_details']['#rows'][$key][]['data']["photo_signed_bill"] = &$photo_signed_bill;
       
-           unset($photo_cheque_fid);
+     // if else removed 
+      $form['bill_details'][$key]["photo_signed_bill"] = &$photo_signed_bill;
+      $form['bill_details'][$key]["photo_cheque"] = &$photo_cheque;
+      $form['bill_details']['#rows'][$key][]['data']["photo_signed_bill"] = &$photo_signed_bill;
+      $form['bill_details']['#rows'][$key][]['data']["photo_cheque"] = &$photo_cheque;
+      unset($photo_cheque_fid);
       unset($photo_signed_fid);
       unset($photo_cheque);
       unset($photo_signed_bill);
@@ -384,7 +380,7 @@ foreach($options as $key => &$val){
       unset($payment_term);
       unset($payments_terms);
       
-    }
+  }
     
     if (!empty($bank_names)) {
       $form['bank_name']['#options'] = array('' => 'All') + $bank_names;
@@ -537,7 +533,6 @@ function display_upload_signed_bill_cheque_trip_details($form, &$form_state) {
 }
 
 function upload_signed_bill_cheque_validate($form, &$form_state){
-
 }
 function upload_signed_bill_cheque_form_submit($form, &$form_state){
   $vrs_start_time = $form_state['start_time'];
@@ -551,36 +546,33 @@ function upload_signed_bill_cheque_form_submit($form, &$form_state){
   $trip_items = array();
   $dir = 'public://bills';
   file_prepare_directory($dir, FILE_CREATE_DIRECTORY);
-  $bill_numbers = array_keys($form_state['values']['bill_details']);
   if (!empty($form_state['values']['bill_details'])) {
     foreach ($form_state['values']['bill_details'] as $key => $value) {
        $trip_items[$key]['photo_cheque'] = $trip_items[$key]['photo_signed_bill'] = '';
-      if (!empty($value['photo_cheque']))   {
-         $photo_cheque_file = file_load($value['photo_cheque']);
-         $photo_cheque_file->status = FILE_STATUS_PERMANENT;
-         $photo_cheque_file =file_save($photo_cheque_file);
-         $file_object = file_load($value['photo_cheque']);
-         $trip_items[$key]['photo_cheque'] = $file_object->uri;
-         file_usage_add($file_object, 'mrc_inventory_returns', 'vrs', $value['photo_cheque']);
+      if (!empty($value['photo_cheque'])) {
+        $photo_cheque_file = file_load($value['photo_cheque']);
+        $photo_cheque_file->status = FILE_STATUS_PERMANENT;
+        $photo_cheque_file = file_save($photo_cheque_file);
+        $trip_items[$key]['photo_cheque'] = $photo_cheque_file->uri;
+        file_usage_add($photo_cheque_file, 'mrc_inventory_returns', 'vrs', $value['photo_cheque']);
       }
-   
-      if (!empty($value['photo_signed_bill']))   {
-         $photo_signed_file = file_load($value['photo_signed_bill']);
-         $photo_signed_file->status = FILE_STATUS_PERMANENT;
-         $photo_signed_file =file_save($photo_signed_file);
-         $file_object = file_load($value['photo_signed_bill']);
-         $trip_items[$key]['photo_signed_bill'] = $file_object->uri;
-         file_usage_add($file_object, 'mrc_inventory_returns', 'vrs', $value['photo_signed_bill']);
-       }
+
+      if (!empty($value['photo_signed_bill'])) {
+        $photo_signed_file = file_load($value['photo_signed_bill']);
+        $photo_signed_file->status = FILE_STATUS_PERMANENT;
+        $photo_signed_file = file_save($photo_signed_file);
+        $trip_items[$key]['photo_signed_bill'] = $photo_signed_file->uri;
+        file_usage_add($photo_signed_file, 'mrc_inventory_returns', 'vrs', $value['photo_signed_bill']);
+      }
       unset($photo_signed_file);
       unset($photo_cheque_file);
       $trip_items[$key]['trip_id'] = $trip_id;
       $trip_items[$key]['bill_number'] = $key;
       $trip_items[$key]['distributor_id'] = $dis_id;
-      if (!empty($form_state['values']["photo_signed_bill_$key"]) && empty($trip_items[$key]['photo_signed_bill'])) {
+      if (!empty($form_state['values']["photo_signed_bill_$key"]) && !empty($trip_items[$key]['photo_signed_bill'])) {
         $trip_items[$key]['photo_signed_bill'] = $form_state['values']["photo_signed_bill_$key"];
       }
-      if (!empty($form_state['values']["photo_cheque_$key"]) && empty($trip_items[$key]['photo_cheque'])) {
+      if (!empty($form_state['values']["photo_cheque_$key"]) && !empty($trip_items[$key]['photo_cheque'])) {
         $trip_items[$key]['photo_cheque'] = $form_state['values']["photo_cheque_$key"];
       }
     }
@@ -615,7 +607,7 @@ function insert_signed_bill_cheque_images($values,$trip_id,$dis_id){
 
 
 
-// function to fetch vrs bill items
+// function to fetch vrs bill items 
 function get_signed_bill_cheque_images($trip_id, $distributor_id) {
     $res = array();
     if (!empty($trip_id) && !empty($distributor_id)) {
