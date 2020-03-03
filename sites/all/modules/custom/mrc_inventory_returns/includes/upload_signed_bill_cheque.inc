@@ -25,6 +25,7 @@ function upload_signed_bill_cheque_form($form, &$form_state) {
     $form_state['vrs_confirmation']['bills'] = array();
   }
   $options = $form_state['vrs_confirmation']['bills'];
+  dpm($options,'query-data');
   // variable need  
   //global $user;
   //$dis_id = change_feeds_import_get_distributor_id($user->uid);
@@ -150,6 +151,7 @@ function upload_signed_bill_cheque_form($form, &$form_state) {
   
   if (!empty($options)) {
       $bills = get_signed_bill_cheque_images($trip_id, $dis_id);
+      dpm($bills,'bills');
   }
 
   $form['bank_name'] = array(
@@ -224,6 +226,10 @@ foreach($options as $key => &$val){
   }
   if ($undeliver == 1) {
     $payments_terms = 'NA';
+  }
+  if($key == 'ALBL424520'){
+     dpm($val['field_payment_terms_value'],'ALBL424520'); 
+     $payments_terms;
   }
   $form['bill_details']['#rows'][$key][] = $bill_status;
   $form['bill_details']['#rows'][$key][] = $val['field_payment_terms_value'];
