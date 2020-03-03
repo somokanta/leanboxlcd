@@ -25,7 +25,6 @@ function upload_signed_bill_cheque_form($form, &$form_state) {
     $form_state['vrs_confirmation']['bills'] = array();
   }
   $options = $form_state['vrs_confirmation']['bills'];
-  dpm($options,'query-data');
   $dis_id = get_distributorid_of_trip($trip_id);
   //$form['#attached']['js'][] = drupal_get_path('module', 'mrc_inventory_returns') . '/js/vrs_confirmation.js';
   $form['#attached']['js'][] = drupal_get_path('module', 'mrc_inventory_returns') . '/js/upload_signed_bill_cheque.js';
@@ -147,7 +146,6 @@ function upload_signed_bill_cheque_form($form, &$form_state) {
   );
   if (!empty($options)) {
       $bills = get_signed_bill_cheque_images($trip_id, $dis_id);
-        dpm($bills,'bill-data');
   }
   $form['bank_name'] = array(
     '#type' => 'textfield',
@@ -217,18 +215,14 @@ foreach($options as $key => &$val){
   }
   else {
       $payment_term = $bills[$key]['payment_term'];
-      $payments_terms = implode(',', $payment_term);
+      $payments_outcome = implode(',', $payment_term);
   }
   if ($undeliver == 1) {
-    $payments_terms = 'NA';
+    $payments_outcome = 'NA';
   }
-  if($key == 'ALBL424520'){
-    dpm($val['field_payment_terms_value']);
-  }
-  dpm($val['field_payment_terms_value'],'payment-terms-value');
   $form['bill_details']['#rows'][$key][] = $bill_status;
   $form['bill_details']['#rows'][$key][] = $val['field_payment_terms_value'];
-  $form['bill_details']['#rows'][$key][] = $payments_terms;
+  $form['bill_details']['#rows'][$key][] = $payments_outcome;
  $ph_cheque = '<div class ="vrs_cheque_bill_image">';
       $ph_flag = 0;
       $span_class = '<span style = "margin-left:18px;"></span>';
@@ -520,7 +514,7 @@ function display_upload_signed_bill_cheque_trip_details($form, &$form_state) {
       $query->addExpression('ad.res_photo_of_signed_bill_delivery', 'res_photo_of_signed_bill_delivery');
       $query->addExpression('ad.photo_of_signed_bill_partial', 'photo_of_signed_bill_partial');
       $query->addExpression('ad.res_confirm_signed_bill_amount', 'res_confirm_signed_bill_amount');
-      $query->addExpression('ad.res_confirm_signed_bill_amount', 'res_confirm_signed_bill_amount_edit');
+      $query->addExpression('ad.res_confirm_signed_bill_amount_edit', 'res_confirm_signed_bill_amount_edit');
       $query->addExpression('ad.res_cheque_amount', 'res_cheque_amount');
       $query->addExpression('ad.res_cheque_amount_edit', 'res_cheque_amount_edit');
       $query->addExpression('ad.res_cash_amount', 'res_cash_amount');
