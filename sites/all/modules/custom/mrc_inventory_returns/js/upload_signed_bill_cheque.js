@@ -83,7 +83,8 @@
 
                 filter = input.value.toUpperCase();
                 table = document.getElementById("bill_details_one");
-                tr = table.getElementsByTagName("tr");
+                if(table != null){
+                                    tr = table.getElementsByTagName("tr");
                 for (i = 0; i < tr.length; i++) {
                     td = tr[i].getElementsByTagName("td")[0];
                     if (td) {
@@ -95,6 +96,8 @@
                     }
                 }
                 bill_status_undeliver_filter();
+                }
+
             }
             function payment_outcome_filter() {
                 var input, filter, table, tr, td, i;
@@ -106,18 +109,21 @@
                 $("#bill_number").val('');
                 filter = input.value.toUpperCase();
                 table = document.getElementById("bill_details_one");
-                tr = table.getElementsByTagName("tr");
-                for (i = 0; i < tr.length; i++) {
-                    td = tr[i].getElementsByTagName("td")[3];
-                    if (td) {
-                        if (td.innerHTML.toUpperCase() == filter) {
-                            tr[i].style.display = "";
-                        } else {
-                            tr[i].style.display = "none";
+                if(table != null){
+                    tr = table.getElementsByTagName("tr");
+                    for (i = 0; i < tr.length; i++) {
+                        td = tr[i].getElementsByTagName("td")[3];
+                        if (td) {
+                            if (td.innerHTML.toUpperCase() == filter) {
+                                tr[i].style.display = "";
+                            } else {
+                                tr[i].style.display = "none";
+                            }
                         }
                     }
+                    bill_status_undeliver_filter();                    
                 }
-                bill_status_undeliver_filter();
+
             }
 
             function bill_status_filter() {
@@ -141,24 +147,27 @@
                 }
 
                 table = document.getElementById("bill_details_one");
-                tr = table.getElementsByTagName("tr");
-                for (i = 0; i < tr.length; i++) {
-                    td = tr[i].getElementsByTagName("td")[1];
-                    if (td) {
-                        if (check_all == 0) {
-                            if (td.innerHTML.indexOf(filter) === 0) {
-                                tr[i].style.display = "";
+                if(table != null){
+                    tr = table.getElementsByTagName("tr");
+                    for (i = 0; i < tr.length; i++) {
+                        td = tr[i].getElementsByTagName("td")[1];
+                        if (td) {
+                            if (check_all == 0) {
+                                if (td.innerHTML.indexOf(filter) === 0) {
+                                    tr[i].style.display = "";
+                                } else {
+                                    tr[i].style.display = "none";
+                                }
                             } else {
-                                tr[i].style.display = "none";
-                            }
-                        } else {
-                            if (td.innerHTML.indexOf('Full Returned') !== 0) {
-                                tr[i].style.display = "";
+                                if (td.innerHTML.indexOf('Full Returned') !== 0) {
+                                    tr[i].style.display = "";
+                                }
                             }
                         }
                     }
+                    bill_status_undeliver_filter();                    
                 }
-                bill_status_undeliver_filter();
+
             }
 
             function bank_name_filter() {
