@@ -117,7 +117,7 @@ function delivery_pending_report_form_submit($form, &$form_state) {
   $pending = $form_state['values']['pending'];
   $distributor_id = $form_state['values']['distributor_id'];
   if (($form_state['values']["op"] == "Apply") && (arg(0) == 'delivery-pending-report')) {
-    drupal_goto('delivery-pending-report', array('query' => array('from_dispatch_date' => $from_dispatch_date, 'to_dispatch_date' => $to_dispatch_date, 'from_bill_date' => $from_bill_date, 'to_bill_date' => $to_bill_date, 'bill_num' => $bill_num, 'pending' => $pending,$distributor_id)));
+    drupal_goto('delivery-pending-report', array('query' => array('from_dispatch_date' => $from_dispatch_date, 'to_dispatch_date' => $to_dispatch_date, 'from_bill_date' => $from_bill_date, 'to_bill_date' => $to_bill_date, 'bill_num' => $bill_num, 'pending' => $pending, 'distributor_id' => $distributor_id)));
   }
 }
 
