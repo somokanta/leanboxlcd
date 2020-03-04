@@ -59,17 +59,15 @@ function pending_summary_callback() {
   }
   
   $form = drupal_render(drupal_get_form('pending_summary_form'));
-  
   $user_id = $GLOBALS['user']->uid;
   $dis_id = change_feeds_import_get_distributor_id($user_id);
   if (in_array("central_distributor", $user->roles)) {
       $central_distributor_id = $dis_id;
   } 
   else {
-      $central_distributor_id = get_central_distributor_id();
+      $central_distributor_id = get_central_distributor_id($dis_id);
   }
   $distributor_ids = get_distributor_ids();
-  
   $query = db_select('node', 'n');
   $query->condition('n.type', 'hul_code_master');
   $query->leftjoin('field_data_field_area_code', 'ac', 'ac.entity_id = n.nid');
@@ -107,10 +105,6 @@ function pending_summary_callback() {
   $query->isNull('dp.field_delivery_pending_value');
   $query->isNull('bs.field_bill_status_value'); //new condition added
 
-  //$query->addField('n3', 'nid', 'sales_nid');
-  $query->join('field_data_field_sr_bill_date', 'sbd', 'sbd.entity_id = n3.nid');
-  $query->condition('sbd.field_sr_bill_date_value', array($billing_start_date, $billing_end_date), 'BETWEEN');
-
   // custom billing data
   $query->join('custom_billing_data', 'cb', 'cb.bill_number = n3.title');
   $query->condition('cb.distributor_id', $distributor_ids,'IN');
@@ -120,7 +114,12 @@ function pending_summary_callback() {
   $query->join('field_data_field_bill_value', 'bv', 'bv.entity_id = n3.nid');
   $query->addField('n3', 'title', 'bill_no');
   $query->addExpression('ROUND(bv.field_bill_value_value)', 'bill_value');
-  
+
+  $query->join('field_data_field_sr_bill_date', 'sbd', 'sbd.entity_id = n3.nid');
+
+  $query->condition('sbd.field_sr_bill_date_value', array($billing_start_date, $billing_end_date), 'BETWEEN');
+  $query->addExpression("GROUP_CONCAT(DISTINCT(DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(sbd.field_sr_bill_date_value),'+00:00','+05:30'), '%d-%b-%y')))", 'bill_date');
+  $query->addExpression("GROUP_CONCAT(DISTINCT(if (n1.title ='', 'null', n1.title)))", 'area_code');
   $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
   $total = array();
   foreach ($res as $key => $val) {
@@ -140,9 +139,23 @@ function pending_summary_callback() {
         $res1[$val['pl_group']][$key1] += $val1;
         $total['sum_kg'] += $val1;
       }
-      else {
+      else if ($key1 == 'pl_group') {
         $res1[$val['pl_group']][$key1] = $val1;
         $total['others'] = '<b>Total</b>';
+      }
+      else if ($key1 == 'bill_date') {
+        if(!isset($res1[$val['pl_group']][$key1])){
+          $res1[$val['pl_group']][$key1] = $val1;
+        }else{
+          $res1[$val['pl_group']][$key1] .= ','.$val1;
+        }
+      }
+      else if ($key1 == 'area_code') {
+          if (!isset($res1[$val['pl_group']][$key1])) {
+            $res1[$val['pl_group']][$key1] = $val1;
+          }else{
+              $res1[$val['pl_group']][$key1] .= ',' . $val1; 
+          }
       }
     }
   }
@@ -150,6 +163,14 @@ function pending_summary_callback() {
     if(!empty($val['bill_value'])){
       $res1[$key]['bill_value'] = number_format($val['bill_value']);
     }
+    if(!empty($val['bill_date'])){
+      $res1[$key]['bill_date'] = implode(",",array_unique(explode(",",$val['bill_date'])));
+    }
+    
+    if(!empty($val['area_code'])){
+      $res1[$key]['area_code'] = implode(",",array_unique(explode(",",$val['area_code'])));
+    }    
+    
   }
   foreach($total as $key => $val){
     if($key == 'bill_value'){
@@ -191,10 +212,6 @@ function pending_summary_callback() {
   $query->condition('dp.field_delivery_pending_value', 1);
   $query->isNull('bs.field_bill_status_value'); //new condition added
 
-  //$query->addField('n3', 'nid', 'sales_nid');
-  $query->join('field_data_field_sr_bill_date', 'sbd', 'sbd.entity_id = n3.nid');
-  $query->condition('sbd.field_sr_bill_date_value', array($billing_start_date, $billing_end_date), 'BETWEEN');
-
   // custom billing data
   $query->join('custom_billing_data', 'cb', 'cb.bill_number = n3.title');
   $query->condition('cb.distributor_id', $distributor_ids,'IN');
@@ -204,6 +221,11 @@ function pending_summary_callback() {
   $query->join('field_data_field_bill_value', 'bv', 'bv.entity_id = n3.nid');
   $query->addField('n3', 'title', 'bill_no');
   $query->addExpression('ROUND(bv.field_bill_value_value)', 'bill_value');
+  $query->join('field_data_field_sr_bill_date', 'sbd', 'sbd.entity_id = n3.nid');
+
+  $query->condition('sbd.field_sr_bill_date_value', array($billing_start_date, $billing_end_date), 'BETWEEN');
+  $query->addExpression("GROUP_CONCAT(DISTINCT(DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(sbd.field_sr_bill_date_value),'+00:00','+05:30'), '%d-%b-%y')))", 'bill_date');
+  $query->addExpression("GROUP_CONCAT(DISTINCT(if (n1.title ='', 'null', n1.title)))", 'area_code');  
  
   $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
   $total = array();
@@ -224,16 +246,38 @@ function pending_summary_callback() {
         $res2[$val['pl_group']][$key1] += $val1;
         $total['sum_kg'] += $val1;
       }
-      else {
+      else if($key1 == 'pl_group'){
         $res2[$val['pl_group']][$key1] = $val1;
         $total['others'] = '<b>Total</b>';
       }
+      else if ($key1 == 'bill_date') {
+        if(!isset($res2[$val['pl_group']][$key1])){
+          $res2[$val['pl_group']][$key1] = $val1;
+        }else{
+          $res2[$val['pl_group']][$key1] .= ','.$val1;
+        }
+      }
+      else if ($key1 == 'area_code') {
+          if (!isset($res2[$val['pl_group']][$key1])) {
+            $res2[$val['pl_group']][$key1] = $val1;
+          }else{
+              $res2[$val['pl_group']][$key1] .= ',' . $val1; 
+          }
+      }      
     }
   }
   foreach($res2 as $key=>$val){
     if(!empty($val['bill_value'])){
       $res2[$key]['bill_value'] = number_format($val['bill_value']);
     }
+    
+    if(!empty($val['bill_date'])){
+      $res2[$key]['bill_date'] = implode(",",array_unique(explode(",",$val['bill_date'])));
+    }
+    
+    if(!empty($val['area_code'])){
+      $res2[$key]['area_code'] = implode(",",array_unique(explode(",",$val['area_code'])));
+    }    
   }
   foreach($total as $key => $val){
     if($key == 'bill_value'){
@@ -244,7 +288,7 @@ function pending_summary_callback() {
   }
   // End DP Bills.
 
-  $header = array('PL Group','Bill Count','Weight (KGs)','Total Value');
+  $header = array('PL Group','Bill Count','Weight (KGs)','Total Value','Bill Date','Area Code');
 
   /*
   $per_page = 10;
