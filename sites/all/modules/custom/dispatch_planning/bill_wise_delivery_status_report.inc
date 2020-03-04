@@ -9,7 +9,7 @@
 function bill_wise_delivery_status_report_form($form, &$form_state) {
   global $user;
   $distributor_id = change_feeds_import_get_distributor_id($user->uid);
-  
+
   if (isset($_GET['from_bill_date'])) {
     $from_bill_date = $_GET['from_bill_date'];
   }
@@ -131,7 +131,7 @@ function bill_wise_delivery_status_report_form_submit($form, &$form_state) {
   $party_code = $form_state['values']['party_code'];
   $distributor_id = $form_state['values']['distributor_id'];
   if (($form_state['values']["op"] == "Apply") && (arg(0) == 'bill-wise-delivery-status-report')) {
-    drupal_goto('bill-wise-delivery-status-report', array('query' => array('from_bill_date' => $from_bill_date, 'to_bill_date' => $to_bill_date, 'from_dispatch_date' => $from_dispatch_date, 'to_dispatch_date' => $to_dispatch_date, 'bill_number' => $bill_number, 'party_code' => $party_code,$distributor_id)));
+    drupal_goto('bill-wise-delivery-status-report', array('query' => array('from_bill_date' => $from_bill_date, 'to_bill_date' => $to_bill_date, 'from_dispatch_date' => $from_dispatch_date, 'to_dispatch_date' => $to_dispatch_date, 'bill_number' => $bill_number, 'party_code' => $party_code, 'distributor_id' => $distributor_id)));
   }
 }
 
@@ -166,11 +166,11 @@ function bill_wise_delivery_status_report_callback() {
     $distributor_id = $_GET['distributor_id'];
   }
 
-//Find all bills which are DP
+//Find all bills
   $query = db_select('dispatch_planning_api_data', 'ad');
   $query->condition('ad.distributor_id', $distributor_id, '=');
-  if (!empty($bill_num)) {
-    $query->condition('ad.bill_number', $bill_num, '=');
+  if (!empty($bill_number)) {
+    $query->condition('ad.bill_number', $bill_number, '=');
   }
   if (!empty($from_dispatch_date) && !empty($to_dispatch_date)) {
     $query->condition('ad.dispatch_date', array($from_dispatch_date, $to_dispatch_date), 'BETWEEN');
@@ -178,7 +178,7 @@ function bill_wise_delivery_status_report_callback() {
   if (!empty($from_bill_date) && !empty($to_bill_date)) {
     $query->condition('ad.bill_date', array($from_bill_date, $to_bill_date), 'BETWEEN');
   }
-  $query->condition('ad.delivery_pending_flag', 1, '=');
+//  $query->condition('ad.delivery_pending_flag', 1, '=');
   $query->fields('ad', array('bill_number'));
   $query->groupBy('ad.bill_number');
   $bills = $query->execute()->fetchCol();
@@ -188,8 +188,7 @@ function bill_wise_delivery_status_report_callback() {
   if (!empty($bills)) {
     $query->condition('ad.bill_number', $bills, 'IN');
   }
-  $query->fields('ad', array('bill_number'));
-  $query->fields('ad', array('bill_date'));
+  $query->fields('ad', array('bill_number', 'bill_date', 'beat_name', 'party_code', 'party_name', 'bill_value'));
   $query->addexpression("CASE WHEN (ad.delivery_pending_flag = 0 and (ad.res_status IS NOT NULL or ad.res_status !='')) THEN 'Completed' ELSE 'Pending' END", 'attempted_status');
   $query->addexpression("CASE WHEN ad.delivery_pending_flag = 0 THEN ad.res_status END", 'current_bill_status');
   $query->addexpression("CASE WHEN ad.delivery_pending_flag = 0 AND res_status ='undeliver'  THEN ad.res_reason_for_failure END", 'reason_for_failure');
@@ -198,66 +197,74 @@ function bill_wise_delivery_status_report_callback() {
   $query->leftjoin('field_data_field_dp_reason', 'dpr', 'dpr.entity_id = ad.delivery_pending_reason');
   $query->fields('dpr', array('field_dp_reason_value'));
   $query->addexpression("ad.fieldExecutiveName", 'fieldExecutiveName');
+  
   $query->join('node', 'n', 'n.title = ad.runsheet_number');
   $query->condition('n.type', 'dispatch_data', '=');
-  $query->condition('n.uid', $distributor_id);
-  $query->join('field_data_field_vrs_status', 'vs', 'vs.entity_id = n.nid');
-  $query->fields('vs', array('field_vrs_status_value'));
+  
+  $query->join('field_data_field_trip_id_reference', 'trip_ref', 'trip_ref.field_trip_id_reference_nid = n.nid');
+  $query->join('node', 'n1', 'n1.nid = trip_ref.entity_id');
+  $query->condition('n1.type', 'sales_register_data', '=');
+  $query->leftjoin('field_data_field_sr_new_bill_date', 'bill_date', 'bill_date.entity_id = n1.nid');
+  $query->leftjoin('field_data_field_outlet_order_no', 'order_no', 'order_no.entity_id = n1.nid');
+  
+  $query->leftjoin('field_data_field_bill_area_codes', 'bill_area', 'bill_area.entity_id = n.nid');
+//  $query->leftjoin('node', 'n2', 'bill_area.field_bill_area_codes_value = n2.title');
+//  $query->condition('n2.type', 'area_code_master', '=');
+//  $query->addexpression("n2.title", 'area_code');
+  $query->fields('bill_date', array('field_sr_new_bill_date_value'));
+  $query->fields('order_no', array('field_outlet_order_no_value'));
+  $query->fields('bill_area', array('field_bill_area_codes_value'));
+  
   $query->groupBy('ad.bill_number,ad.runsheet_number');
   $query->orderBy('ad.id');
   $result = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+  
   $arr = array();
   $header_new = array();
 
-  foreach ($result as $val) {
-      $arr[$val['bill_number']]['bill_number'] = $val['bill_number'];
+  foreach ($result as $val) {      
+      $arr[$val['bill_number']]['order_date'] = date('d-M-y', $val['field_sr_new_bill_date_value']);
+      $arr[$val['bill_number']]['order_no'] = $val['field_outlet_order_no_value'];
       $arr[$val['bill_number']]['bill_date'] = date('d-M-y', $val['bill_date']);
-      $arr[$val['bill_number']]['attempted_status'] = $val['attempted_status'];
-      $arr[$val['bill_number']]['current_bill_status'] = $val['current_bill_status'];
-      $arr[$val['bill_number']]['reason_for_failure'] = $val['reason_for_failure'];
+      $arr[$val['bill_number']]['bill_number'] = $val['bill_number'];
+      $arr[$val['bill_number']]['beat_name'] = $val['beat_name'];
+      $arr[$val['bill_number']]['area_code'] = $val['field_bill_area_codes_value'];
+      $arr[$val['bill_number']]['party_code'] = $val['party_code'];
+      $arr[$val['bill_number']]['party_name'] = $val['party_name'];
+      $arr[$val['bill_number']]['bill_value'] = $val['bill_value'];
+      $arr[$val['bill_number']]['dispatch_date' . $counter] = date('d-M-y', $val['dispatch_date']);
       $arr[$val['bill_number']]['trip_count'] += 1;
       $counter = $arr[$val['bill_number']]['trip_count'];
       $arr[$val['bill_number']]['trip_number' . $counter] = $val['trip_number'];
-      $arr[$val['bill_number']]['dispatch_date' . $counter] = date('d-M-y', $val['dispatch_date']);
-      $arr[$val['bill_number']]['delivery_pending_reason' . $counter] = $val['field_dp_reason_value'];
+      $arr[$val['bill_number']]['attempted_status'] = $val['attempted_status'];
+      $arr[$val['bill_number']]['current_bill_status'] = $val['current_bill_status'];
+      $arr[$val['bill_number']]['reason_for_failure'] = $val['reason_for_failure'];
       $arr[$val['bill_number']]['fieldExecutiveName' . $counter] = $val['fieldExecutiveName'];
-      $field = field_info_field('field_vrs_status');
-      $allowed_values = list_allowed_values($field);
-      foreach ($allowed_values as $key => $value) {
-        if ($key == $val['field_vrs_status_value']) {
-          $arr[$val['bill_number']]['vrs_status' . $counter] = $value;
-        }
-      }
+
+      $header_new['dispatch_date' . $counter] = '1st Dispatch Date';
       $header_new['trip_id' . $counter] = 'Trip ' . $counter;
-      $header_new['dispatch_date' . $counter] = 'Trip ' . $counter . ' Dispatch Date';
-      $header_new['dp_reason' . $counter] = 'Trip ' . $counter . ' DP Reason';
+      
       $header_new['cashier' . $counter] = 'Trip ' . $counter . ' Cashier';
-      $header_new['status' . $counter] = 'Trip ' . $counter . ' Status';
+  
   }
-  $header = array('Bill Number', 'Bill Date', 'DP Attempted Status', 'Current Bill Status', 'Reason if full returned', 'Count of Trips');
+  $header = array('Order date', 'Order Number', 'Bill Date', 'Bill No.', 'Beat name', 'Area code', 'Party Code', 'Party name', 'Sales Value');
   foreach ($header_new as $val) {
     $header[] = $val;
   }
-
-//  foreach ($result as $val) {
-//    for ($i = 1; $i <= getMax($arr); $i++) {
-//      if (!isset($arr[$val['bill_number']]['trip_number' . $i])) {
-//        $arr[$val['bill_number']]['trip_number' . $i] = '';
-//      }
-//      if (!isset($arr[$val['bill_number']]['dispatch_date' . $i])) {
-//        $arr[$val['bill_number']]['dispatch_date' . $i] = '';
-//      }
-//      if (!isset($arr[$val['bill_number']]['delivery_pending_reason' . $i])) {
-//        $arr[$val['bill_number']]['delivery_pending_reason' . $i] = '';
-//      }
-//      if (!isset($arr[$val['bill_number']]['fieldExecutiveName' . $i])) {
-//        $arr[$val['bill_number']]['fieldExecutiveName' . $i] = '';
-//      }
-//      if (!isset($arr[$val['bill_number']]['vrs_status' . $i])) {
-//        $arr[$val['bill_number']]['vrs_status' . $i] = '';
-//      }
-//    }
-//  }
+  
+  foreach ($result as $val) {
+    for ($i = 1; $i <= getMax($arr); $i++) {
+      if (!isset($arr[$val['bill_number']]['trip_number' . $i])) {
+        $arr[$val['bill_number']]['trip_number' . $i] = '';
+      }
+      if (!isset($arr[$val['bill_number']]['dispatch_date' . $i])) {
+        $arr[$val['bill_number']]['dispatch_date' . $i] = '';
+      }
+      if (!isset($arr[$val['bill_number']]['fieldExecutiveName' . $i])) {
+        $arr[$val['bill_number']]['fieldExecutiveName' . $i] = '';
+      }
+    }
+  }
   // Sorting By Pending first and also pending not equal to one condition for not taking pending values of checkbox
   $res_set1 = $res_set2 = array();
   foreach($arr as $key => $val){
