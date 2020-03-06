@@ -27,9 +27,7 @@ class field_corrected_images_handler extends views_handler_field {
     $corrected_latlong_images = $data->dispatch_planning_api_data_corrected_latlong_images;
     
     if(!empty($corrected_latlong_images)) {
-        $cor_images = '<a target="_blank" href="' . $path . '">' . $path ;
-        $cor_images .= '</a> ,';
-        $img = explode(",",$cor_images);
+        $img = explode(",",$corrected_latlong_images);
         foreach($img as $v){
          $url = rtrim('<a target="_blank" href="' . $v . '">' . $v. '</a> ,', ",");
         }        
