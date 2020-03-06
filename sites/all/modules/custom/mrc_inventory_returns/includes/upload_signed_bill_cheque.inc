@@ -146,7 +146,6 @@ function upload_signed_bill_cheque_form($form, &$form_state) {
   );
   if (!empty($options)) {
       $bills = get_signed_bill_cheque_images($trip_id, $dis_id);
-      dpm($bills,'bills');
   }
   $form['bank_name'] = array(
     '#type' => 'textfield',
@@ -220,10 +219,6 @@ foreach($options as $key => &$val){
   }
   if ($undeliver == 1) {
     $payments_outcome = 'NA';
-  }
-  if($key == 'ALBL424520'){
-     dpm($val['field_payment_terms_value'],'ALBL424520'); 
-     $payments_terms;
   }
   $form['bill_details']['#rows'][$key][] = $bill_status;
   $form['bill_details']['#rows'][$key][] = $val['field_payment_terms_value'];

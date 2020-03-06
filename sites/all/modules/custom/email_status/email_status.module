@@ -4294,7 +4294,7 @@ function getMax($arr) {
   }
   return $max;
 }
-
+    
 
 function send_email_pt_compliance_callback($receiver_email_str, $dist_ids_arr){
     foreach ($dist_ids_arr as $key => $id_value) {

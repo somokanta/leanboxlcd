@@ -1220,7 +1220,7 @@ function send_email_pending_ofd_salesbeatwise_data() {
 
 /*
  * OFD Report
- */
+ */ 
 
 //   Function to send auto mailer of Monthly Trip Summary  
 function send_email_monthly_trip_summary() {
