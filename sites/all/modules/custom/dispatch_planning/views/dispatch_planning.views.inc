@@ -6327,6 +6327,14 @@ $data['views']['global_facility_name'] = array(
     ),
   );
   
+    $data['views']['field_corrected_images_handler'] = array(
+    'title' => t('Corrected Images Handler'),
+    'help' => t('Corrected Images Handler.'),
+    'field' => array(
+      'handler' => 'field_corrected_images_handler',
+    ),
+  );
+  
   // ========= Van Planning API to SDR App START ============
 
     $data['sdr_app_log']['table']['group'] = t('SDR App Log');
