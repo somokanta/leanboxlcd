@@ -29,7 +29,7 @@ class field_corrected_images_handler extends views_handler_field {
     if(!empty($corrected_latlong_images)) {
         $img = explode(",",$corrected_latlong_images);
         foreach($img as &$url){
-            $url = "<a href=\"$url\">$url</a>";
+            $url = "<a target='_blank' href=\"$url\">$url</a>";
         }
         $final_url = implode(", ", $img);      
     }
