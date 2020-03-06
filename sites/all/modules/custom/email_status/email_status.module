@@ -10,41 +10,49 @@ function email_status_menu() {
   $items['email/daily-data'] = array(
     'title' => 'Send Email Of Daily Data',
     //'page callback' => 'send_email_daily_data',
-    'page callback' => 'send_email_pl_group_emailer',
+    'page callback' => 'send_email_pl_group_emailer_callback',
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
+    'file' => 'includes/email_status_automailer.inc',
   );
   $items['email-productivity-data'] = array(
     'title' => 'Send Email Of Productivity Data',
-    'page callback' => 'send_party_packingand_picking_productivity_emailer',
+    'page callback' => 'send_party_packingand_picking_productivity_emailer_callback',
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
+    'file' => 'includes/email_status_automailer.inc',
   );
   $items['email-loading-productivity'] = array(
     'title' => 'Send Email Of Loading Productivity Data',
     'page callback' => 'send_loading_productivity_emailer',
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
+    'file' => 'includes/email_status_automailer.inc',
   );
   $items['email/pending-ofd-salesbeatwise'] = array(
     'title' => 'Send Email Of Pending OFD Sales Beat Wise',
     'page callback' => 'send_email_pending_ofd_salesbeatwise_data',
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
+    'file' => 'includes/email_status_automailer.inc',
   );
-  $items['email/daily-data-pl'] = array(
-    'title' => 'Send Email Of Daily Data',
-    'page callback' => 'send_email_daily_cron_pl_data',
-    'access callback' => TRUE,
-    'type' => MENU_CALLBACK,
-  );
+  
+  // As per Kusha commented
+//  $items['email/daily-data-pl'] = array(
+//    'title' => 'Send Email Of Daily Data',
+//    'page callback' => 'send_email_daily_cron_pl_data',
+//    'access callback' => TRUE,
+//    'type' => MENU_CALLBACK,
+//  );
 
-  $items['email/ofd-report'] = array(
-    'title' => 'Send Email Of OFD Report',
-    'page callback' => 'send_email_ofd_report',
-    'access callback' => TRUE,
-    'type' => MENU_CALLBACK,
-  );
+          // need to discuss with abhishek
+//  $items['email/ofd-report'] = array(
+//    'title' => 'Send Email Of OFD Report',
+//    'page callback' => 'send_email_ofd_report',
+//    'access callback' => TRUE,
+//    'type' => MENU_CALLBACK,
+//    'file' => 'includes/email_status_automailer.inc',
+//  );
   
   $items['email/monthly-trip-summary'] = array(
     'title' => 'Send Email Of Monthly Trip Summary',
@@ -350,165 +358,7 @@ function email_status_email_form($form, $form_state) {
   return system_settings_form($form);
 }
 
-/*
- * Function to send auto mailer of OFD Report.
- */
 
-function send_email_ofd_report() {
-  $distributor_id = _DISTRIBUTOR_ID;
-  $distributor_name = change_feeds_import_get_distributor_name($distributor_id);
-  // Today's Date
-  $todays_date = date('d-M-Y');
-
-  $view_name = "ofd_mailer";
-  $arg1 = date("mdY");
-  $results = views_get_view_result($view_name, 'page', $arg1);
-  $encoded_data = json_encode($results);
-  $data = json_decode($encoded_data);
-
-  $rows = array();
-  $total_bill_count = 0;
-  $total_dispatch_bill_value = 0;
-  $total_dispatch_loader_team_count = 0;
-  $counter = 1;
-  $table_style = 'border: 1px solid #000;';
-  $header = array('Sr. No.', 'Trip Creation Date', 'Trip Execution Date', 'Trip ID', 'HHT ID', 'Bill Count', 'Dispatch Bill Value', 'Dispatch Supervisor', 'Cashier Name', 'Vehicle No', 'Dispatch Loader Team Count', 'Dispatch Date', 'Dispatch Start Time', 'Dispatch End Time', 'Sequence Method');
-  foreach ($data as $result) {
-    $trip_creation_date = $result->_field_data->nid->entity->field_trip_creation_date->und[0]->value;
-    $row1['data'] = date('d-M-y', $trip_creation_date);
-    $row1['style'] = $table_style;
-    $trip_execution_date = $result->_field_data->nid->entity->field_trip_executon_date->und[0]->value;
-    $row2['data'] = date('d-M-y', $trip_execution_date);
-    $row2['style'] = $table_style;
-    $row3['data'] = $result->_field_data->nid->entity->field_trip_id->und[0]->value;
-    $row3['style'] = $table_style;
-    $hht_id = $result->_field_data->nid->entity->field_hht_id->und[0]->nid;
-    $query = db_select('node', 'n');
-    $query->fields('n', array('title'));
-    $query->condition('n.nid', $hht_id, '=');
-    $hht_id_title = $query->execute()->fetchfield();
-    $row4['data'] = $hht_id_title;
-    $row4['style'] = $table_style;
-    $row5['data'] = $result->_field_data->nid->entity->field_bill_count->und[0]->value;
-    $row5['style'] = $table_style;
-    $row6['data'] = $result->_field_data->nid->entity->field_dispatch_bill_value->und[0]->value;
-    $row6['style'] = $table_style;
-    $row7['data'] = $result->_field_data->nid->entity->field_dispatch_supervisor->und[0]->value;
-    $row7['style'] = $table_style;
-    $row8['data'] = $result->_field_data->nid->entity->field_cashier_name->und[0]->value;
-    $row8['style'] = $table_style;
-    $row9['data'] = $result->_field_data->nid->entity->field_vehicle_no->und[0]->value;
-    $row9['style'] = $table_style;
-    $row10['data'] = $result->_field_data->nid->entity->field_dispatch_loader_team_count->und[0]->value;
-    $row10['style'] = $table_style;
-    $dispatch_date = strtotime($result->_field_data->nid->entity->field_dispatch_date->und[0]->value);
-    $row11['data'] = date('d-M-y', $dispatch_date);
-    $row11['style'] = $table_style;
-    $row12['data'] = $result->_field_data->nid->entity->field_dispatch_pre_start_time->und[0]->value;
-    $row12['style'] = $table_style;
-    $row13['data'] = $result->_field_data->nid->entity->field_dispatch_start_time->und[0]->value;
-    $row13['style'] = $table_style;
-    if ($result->_field_data->nid->entity->field_sequence_method->und[0]->value == 1) {
-      $seq_method = 'API';
-    }
-    elseif ($result->_field_data->nid->entity->field_sequence_method->und[0]->value == 0) {
-      $seq_method = 'MANUAL';
-    }
-    else {
-      $seq_method = '';
-    }
-    $row14['data'] = $seq_method;
-    $row14['style'] = $table_style;
-
-    $total_bill_count += $row5['data'];
-    $total_dispatch_bill_value += $row6['data'];
-    $total_dispatch_loader_team_count += $row10['data'];
-    $row0['data'] = $counter++;
-    $row0['style'] = $table_style;
-
-    $rows[] = array($row0, $row1, $row2, $row3, $row4, $row5, $row6, $row7, $row8, $row9, $row10, $row11, $row12, $row13, $row14);
-  }
-  $rows[] = array('SUM', '', '', '', '', $total_bill_count, $total_dispatch_bill_value, '', '', '', $total_dispatch_loader_team_count, '', '', '', '');
-
-
-  $ofd_html = "<h3>Dispatch Date : " . $todays_date . " (Today)</h3>";
-  $ofd_html .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
-
-  $view_name2 = "ofd_mailer2";
-  $results = views_get_view_result($view_name2, 'page');
-  $encoded_data = json_encode($results);
-  $data = json_decode($encoded_data);
-
-  $rows = array();
-  $total_bill_count = 0;
-  $total_dispatch_bill_value = 0;
-  $counter = 1;
-  $table_style = 'border: 1px solid #000;';
-  $header = array('Sr. No.', 'Trip Creation Date', 'Trip Execution Date', 'Trip ID', 'HHT ID', 'Bill Count', 'Dispatch Bill Value', 'Dispatch Supervisor', 'Cashier Name', 'Vehicle No', 'Dispatch Loader Team Count', 'Dispatch Date', 'Dispatch Start Time', 'Sequence Method');
-  foreach ($data as $result) {
-    $trip_creation_date = $result->_field_data->nid->entity->field_trip_creation_date->und[0]->value;
-    $row1['data'] = date('d-M-y', $trip_creation_date);
-    $row1['style'] = $table_style;
-    $trip_execution_date = $result->_field_data->nid->entity->field_trip_executon_date->und[0]->value;
-    $row2['data'] = date('d-M-y', $trip_execution_date);
-    $row2['style'] = $table_style;
-    $row3['data'] = $result->_field_data->nid->entity->field_trip_id->und[0]->value;
-    $row3['style'] = $table_style;
-    $hht_id = $result->_field_data->nid->entity->field_hht_id->und[0]->nid;
-    $query = db_select('node', 'n');
-    $query->fields('n', array('title'));
-    $query->condition('n.nid', $hht_id, '=');
-    $hht_id_title = $query->execute()->fetchfield();
-    $row4['data'] = $hht_id_title;
-    $row4['style'] = $table_style;
-    $row5['data'] = $result->_field_data->nid->entity->field_bill_count->und[0]->value;
-    $row5['style'] = $table_style;
-    $row6['data'] = $result->_field_data->nid->entity->field_dispatch_bill_value->und[0]->value;
-    $row6['style'] = $table_style;
-    $row7['data'] = $result->_field_data->nid->entity->field_dispatch_supervisor->und[0]->value;
-    $row7['style'] = $table_style;
-    $row8['data'] = $result->_field_data->nid->entity->field_cashier_name->und[0]->value;
-    $row8['style'] = $table_style;
-    $row9['data'] = $result->_field_data->nid->entity->field_vehicle_no->und[0]->value;
-    $row9['style'] = $table_style;
-    $row10['data'] = $result->_field_data->nid->entity->field_dispatch_loader_team_count->und[0]->value;
-    $row10['style'] = $table_style;
-    $row11['data'] = $result->_field_data->nid->entity->field_dispatch_date->und[0]->value;
-    $row11['style'] = $table_style;
-    $row12['data'] = $result->_field_data->nid->entity->field_dispatch_start_time->und[0]->value;
-    $row12['style'] = $table_style;
-    if ($result->_field_data->nid->entity->field_sequence_method->und[0]->value == 1) {
-      $seq_method = 'API';
-    }
-    elseif ($result->_field_data->nid->entity->field_sequence_method->und[0]->value == 0) {
-      $seq_method = 'MANUAL';
-    }
-    else {
-      $seq_method = '';
-    }
-    $row13['data'] = $seq_method;
-    $row13['style'] = $table_style;
-
-    $total_bill_count += $row5['data'];
-    $total_dispatch_bill_value += $row6['data'];
-    $row0['data'] = $counter++;
-    $row0['style'] = $table_style;
-
-    $rows[] = array($row0, $row1, $row2, $row3, $row4, $row5, $row6, $row7, $row8, $row9, $row10, $row11, $row12, $row13);
-  }
-  $rows[] = array('SUM', '', '', '', '', $total_bill_count, $total_dispatch_bill_value, '', '', '', '', '', '', '');
-
-
-  $ofd_html2 = "<h3>Pending Van Till : " . $todays_date . " (Today)</h3>";
-  $ofd_html2 .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
-
-  $brand_name = variable_get('email_brand_name','Lakme');
-  $params['subject'] = "$brand_name - OFD - $distributor_name";
-  $params['body'] = $ofd_html . "<br>" . $ofd_html2;
-  $mail_to = variable_get('ofd_to_email');
-  $from = variable_get('from_email');
-  drupal_mail('email_status', 'ofd_report', $mail_to, LANGUAGE_NONE, $params, $from);
-}
 
 function send_email_daily_data() {
   //global $user;
@@ -722,12 +572,12 @@ function send_email_daily_data() {
   //send_email_channel_emailer($distributor_name, $distributor_id);
 }
 
-function send_email_daily_cron_pl_data() {
-  $distributor_id = _DISTRIBUTOR_ID;
-  $distributor_name = change_feeds_import_get_distributor_name($distributor_id);
-
-  send_email_cron_pl_emailer($distributor_name, $distributor_id);
-}
+//function send_email_daily_cron_pl_data() {
+//  $distributor_id = _DISTRIBUTOR_ID;
+//  $distributor_name = change_feeds_import_get_distributor_name($distributor_id);
+//
+//  send_email_cron_pl_emailer($distributor_name, $distributor_id);
+//}
 
 function send_email_channel_emailer($distributor_name, $distributor_id = 60) {
 //  global $user;
@@ -843,240 +693,112 @@ function send_email_channel_emailer($distributor_name, $distributor_id = 60) {
  * @param type $distributor_name
  * @param type $distributor_id
  */
-function send_email_cron_pl_emailer($distributor_name, $distributor_id = 60) {
-
-  $todays_date_date = date('Y-m-d');
-  $todays_date_date_timestamp = strtotime(date($todays_date_date));
-  $current_day = date("d", $todays_date_date_timestamp);
-  $yesterday = strtotime('-1 day', strtotime($todays_date_date));
-  $yesterday_date = date('d-M-Y', strtotime("-1 days"));
-  $day_before_yesterday = strtotime('-2 day', strtotime($todays_date_date));
-  $day_before_yesterday_date = date('d-M-Y', strtotime("-2 days"));
-  $twoday_before_yesterday = strtotime('-3 day', strtotime($todays_date_date));
-  $twoday_before_yesterday_date = date('d-M-Y', strtotime("-3 days"));
-
-  if ($current_day == 22) {
-    $this_month = date("m", $todays_date_date_timestamp);
-    $this_date = $yesterday;
-  }
-  elseif ($current_day <= 21) {
-    $old_date = strtotime('-1 month', strtotime($todays_date_date));
-    $last_month = date("m", $old_date);
-    if($last_month == 12) {
-      $last_year = date("Y",strtotime("-1 year"));
-      $this_date = strtotime(date("$last_year-$last_month-21"));
-    }
-    else {
-      $this_date = strtotime(date("Y-$last_month-21"));
-    } 
-  }
-  else {
-    $this_month = date("m", $todays_date_date_timestamp);
-    $this_date = strtotime(date("Y-$this_month-21"));
-  }
-
-  $twoday_before_yesterday_html = "<h3>Billing Date : " . $twoday_before_yesterday_date . " (Two Days Before Yesterday)</h3>";
-  $twoday_before_yesterday_data = get_cron_common_data_for_pl_datewise($twoday_before_yesterday, $twoday_before_yesterday, $distributor_id);
-  if ($twoday_before_yesterday_data == "No Result Found") {
-    $header = get_header_of_chhanel(TRUE, TRUE);
-    $twoday_before_yesterday_rows[] = array("<td colspan='10' style='text-align: center;'> There is No Activity</td>");
-    $twoday_before_yesterday_html .= theme('table', array('header' => $header, 'rows' => $twoday_before_yesterday_rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
-  }
-  else {
-    $twoday_before_yesterday_html .= $twoday_before_yesterday_data;
-  }
-
-  $day_before_yesterday_html = "<h3>Billing Date : " . $day_before_yesterday_date . " (One Day Before Yesterday)</h3>";
-  $day_before_yesterday_data = get_cron_common_data_for_pl_datewise($day_before_yesterday, $day_before_yesterday, $distributor_id);
-  if ($day_before_yesterday_data == "No Result Found") {
-    $header = get_header_of_chhanel(TRUE, TRUE);
-    $day_before_yesterday_rows[] = array("<td colspan='10' style='text-align: center;'> There is No Activity</td>");
-    $day_before_yesterday_html .= theme('table', array('header' => $header, 'rows' => $day_before_yesterday_rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
-  }
-  else {
-    $day_before_yesterday_html .= $day_before_yesterday_data;
-  }
-
-  $yesterday_html = "<h3>Billing Date : " . $yesterday_date . " (Yesterday)</h3>";
-  $yesterday_data = get_cron_common_data_for_pl_datewise($yesterday, $yesterday, $distributor_id);
-  if ($yesterday_data == "No Result Found") {
-    $header = get_header_of_chhanel(TRUE, TRUE);
-    $yesterday_rows[] = array("<td colspan='10' style='text-align: center;'> There is No Activity</td>");
-    $yesterday_html .= theme('table', array('header' => $header, 'rows' => $yesterday_rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
-  }
-  else {
-    $yesterday_html .= $yesterday_data;
-  }
-
-  $mtd_html = "<h3>MTD Wise: " . $yesterday_date . " (Yesterday)</h3>";
-  $mtd_data .= get_cron_common_data_for_pl_datewise($this_date, $yesterday, $distributor_id);
-  if ($mtd_data == "No Result Found") {
-    $header = get_header_of_chhanel(TRUE, TRUE);
-    $mtd_rows[] = array("<td colspan='10' style='text-align: center;'> There is No Activity</td>");
-    $mtd_html .= theme('table', array('header' => $header, 'rows' => $mtd_rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
-  }
-  else {
-    $mtd_html .= $mtd_data;
-  }
-
-  $mtd_one_day_before_html = "<h3>MTD Wise: " . $day_before_yesterday_date . " (One Day Before Yesterday)</h3>";
-  $mtd_one_day_before_data .= get_cron_common_data_for_pl_datewise($this_date, $day_before_yesterday, $distributor_id);
-  if ($mtd_one_day_before_data == "No Result Found") {
-    $header = get_header_of_chhanel(TRUE, TRUE);
-    $mtd_one_day_before_rows[] = array("<td colspan='10' style='text-align: center;'> There is No Activity</td>");
-    $mtd_one_day_before_html .= theme('table', array('header' => $header, 'rows' => $mtd_one_day_before_rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
-  }
-  else {
-    $mtd_one_day_before_html .= $mtd_one_day_before_data;
-  }
-
-  $mtd_two_day_before_html = "<h3>MTD Wise: " . $twoday_before_yesterday_date . " (Two Day Before Yesterday)</h3>";
-  $mtd_two_day_before_data .= get_cron_common_data_for_pl_datewise($this_date, $twoday_before_yesterday, $distributor_id);
-  if ($mtd_two_day_before_data == "No Result Found") {
-    $header = get_header_of_chhanel(TRUE, TRUE);
-    $mtd_two_day_before_rows[] = array("<td colspan='10' style='text-align: center;'> There is No Activity</td>");
-    $mtd_two_day_before_html .= theme('table', array('header' => $header, 'rows' => $mtd_two_day_before_rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
-  }
-  else {
-    $mtd_two_day_before_html .= $mtd_two_day_before_data;
-  }
-  $brand_name = variable_get('email_brand_name','Lakme');        
-  $params['subject'] = "$brand_name - PL GROUP Wise OTIF - $distributor_name";
-  $params['body'] = $yesterday_html . "<br>" . $day_before_yesterday_html . "<br>" . $twoday_before_yesterday_html . "<br>" . $mtd_html . "<br>" . $mtd_one_day_before_html . "<br>" . $mtd_two_day_before_html;
-  $mail_to = variable_get('pl_grp_otif_to_email');
-  $from = variable_get('from_email');
-  drupal_mail('email_status', 'channel_status', $mail_to, LANGUAGE_NONE, $params, $from);
-}
-
-function send_email_pl_group_emailer() {
-  $distributor_id = _DISTRIBUTOR_ID;
-  $distributor_name = change_feeds_import_get_distributor_name($distributor_id);
-
-  $todays_date_date = date('Y-m-d');
-  //$todays_date_date = "2017-03-20";
-  // $todays_date_date = "2017-03-17 00:00:00";
-  $todays_date_date_timestamp = strtotime(date($todays_date_date));
-  $current_day = date("d", $todays_date_date_timestamp);
-  $yesterday = strtotime('-1 day', strtotime($todays_date_date));
-  $yesterday_date = date('d-M-Y', strtotime("-1 days"));
-  $day_before_yesterday = strtotime('-2 day', strtotime($todays_date_date));
-  $day_before_yesterday_date = date('d-M-Y', strtotime("-2 days"));
-  $twoday_before_yesterday = strtotime('-3 day', strtotime($todays_date_date));
-  $twoday_before_yesterday_date = date('d-M-Y', strtotime("-3 days"));
-  $twelveday_before_today = strtotime('-12 day', strtotime(date('Y-m-d')));
-
-  if ($current_day == 22) {
-    $this_month = date("m", $todays_date_date_timestamp);
-    $this_date = $yesterday;
-  }
-  elseif ($current_day <= 21) {
-    $old_date = strtotime('-1 month', strtotime($todays_date_date));
-    $last_month = date("m", $old_date);
-    $this_date = strtotime(date("Y-$last_month-21"));
-  }
-  else {
-    $this_month = date("m", $todays_date_date_timestamp);
-    $this_date = strtotime(date("Y-$this_month-21"));
-  }
-
-//  $twoday_before_yesterday_html = "<h3>Billing Date : " . $twoday_before_yesterday_date ." (Two Days Before Yesterday)</h3>";
-//  $twoday_before_yesterday_data = get_twoday_before_yesterday_data_pl_groupwise($twoday_before_yesterday, $twoday_before_yesterday, $distributor_id);
+//function send_email_cron_pl_emailer($distributor_name, $distributor_id = 60) {
+//
+//  $todays_date_date = date('Y-m-d');
+//  $todays_date_date_timestamp = strtotime(date($todays_date_date));
+//  $current_day = date("d", $todays_date_date_timestamp);
+//  $yesterday = strtotime('-1 day', strtotime($todays_date_date));
+//  $yesterday_date = date('d-M-Y', strtotime("-1 days"));
+//  $day_before_yesterday = strtotime('-2 day', strtotime($todays_date_date));
+//  $day_before_yesterday_date = date('d-M-Y', strtotime("-2 days"));
+//  $twoday_before_yesterday = strtotime('-3 day', strtotime($todays_date_date));
+//  $twoday_before_yesterday_date = date('d-M-Y', strtotime("-3 days"));
+//
+//  if ($current_day == 22) {
+//    $this_month = date("m", $todays_date_date_timestamp);
+//    $this_date = $yesterday;
+//  }
+//  elseif ($current_day <= 21) {
+//    $old_date = strtotime('-1 month', strtotime($todays_date_date));
+//    $last_month = date("m", $old_date);
+//    if($last_month == 12) {
+//      $last_year = date("Y",strtotime("-1 year"));
+//      $this_date = strtotime(date("$last_year-$last_month-21"));
+//    }
+//    else {
+//      $this_date = strtotime(date("Y-$last_month-21"));
+//    } 
+//  }
+//  else {
+//    $this_month = date("m", $todays_date_date_timestamp);
+//    $this_date = strtotime(date("Y-$this_month-21"));
+//  }
+//
+//  $twoday_before_yesterday_html = "<h3>Billing Date : " . $twoday_before_yesterday_date . " (Two Days Before Yesterday)</h3>";
+//  $twoday_before_yesterday_data = get_cron_common_data_for_pl_datewise($twoday_before_yesterday, $twoday_before_yesterday, $distributor_id);
 //  if ($twoday_before_yesterday_data == "No Result Found") {
-//    $header = get_header_of_pl_group();
+//    $header = get_header_of_chhanel(TRUE, TRUE);
 //    $twoday_before_yesterday_rows[] = array("<td colspan='10' style='text-align: center;'> There is No Activity</td>");
 //    $twoday_before_yesterday_html .= theme('table', array('header' => $header, 'rows' => $twoday_before_yesterday_rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
 //  }
 //  else {
 //    $twoday_before_yesterday_html .= $twoday_before_yesterday_data;
 //  }
-//  
-//  $day_before_yesterday_html = "<h3>Billing Date : " . $day_before_yesterday_date ." (One Day Before Yesterday)</h3>";
-//  $day_before_yesterday_data = get_day_before_yesterday_data_pl_groupwise($day_before_yesterday, $day_before_yesterday, $distributor_id);
+//
+//  $day_before_yesterday_html = "<h3>Billing Date : " . $day_before_yesterday_date . " (One Day Before Yesterday)</h3>";
+//  $day_before_yesterday_data = get_cron_common_data_for_pl_datewise($day_before_yesterday, $day_before_yesterday, $distributor_id);
 //  if ($day_before_yesterday_data == "No Result Found") {
-//    $header = get_header_of_pl_group();
+//    $header = get_header_of_chhanel(TRUE, TRUE);
 //    $day_before_yesterday_rows[] = array("<td colspan='10' style='text-align: center;'> There is No Activity</td>");
 //    $day_before_yesterday_html .= theme('table', array('header' => $header, 'rows' => $day_before_yesterday_rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
 //  }
 //  else {
 //    $day_before_yesterday_html .= $day_before_yesterday_data;
 //  }
-//  
-//  $yesterday_html = "<h3>Billing Date : " . $yesterday_date ." (Yesterday)</h3>";
-//  $yesterday_data = get_yesterday_data_pl_groupwise($yesterday, $yesterday, $distributor_id);
+//
+//  $yesterday_html = "<h3>Billing Date : " . $yesterday_date . " (Yesterday)</h3>";
+//  $yesterday_data = get_cron_common_data_for_pl_datewise($yesterday, $yesterday, $distributor_id);
 //  if ($yesterday_data == "No Result Found") {
-//    $header = get_header_of_pl_group();
+//    $header = get_header_of_chhanel(TRUE, TRUE);
 //    $yesterday_rows[] = array("<td colspan='10' style='text-align: center;'> There is No Activity</td>");
 //    $yesterday_html .= theme('table', array('header' => $header, 'rows' => $yesterday_rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
 //  }
 //  else {
 //    $yesterday_html .= $yesterday_data;
 //  }
-
-  $mtd_html = "<h3>Last 10 Days Pending Bills Summary till yesterday (" . $yesterday_date . ")</h3>";
-  $mtd_data .= get_pending_bills_pl_group_datewise($twelveday_before_today, $yesterday, $distributor_id);
-  if ($mtd_data == "No Result Found") {
-    //$header = get_header_of_pl_group();
-    $header = array('PL Group', 'Bill Count', 'Bill Value', 'Dispatch Count', 'Dispatch Value', 'Pending Bill', 'Pending Bill Value');
-    $mtd_rows[] = array("<td colspan='10' style='text-align: center;'> There is No Activity</td>");
-    $mtd_html .= theme('table', array('header' => $header, 'rows' => $mtd_rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
-  }
-  else {
-    $mtd_html .= $mtd_data;
-  }
-
-  $mtd_pending_bill_count_html = "<h3>Last 10 Days Pending Bills Count by Billing Date</h3>";
-  $mtd_type = 'bill_count';
-  $mtd_pending_bill_count_data .= get_mtd_data_pending_bills_count_value_pl_groupwise($distributor_id, $mtd_type);
-  if ($mtd_pending_bill_count_data == "No Result Found") {
-    $header = array('PL Group', date('dS M', strtotime('-1 day')), date('dS M', strtotime('-2 days')), date('dS M', strtotime('-3 days')), date('dS M', strtotime('-4 days')), '>4 Days', 'Total Bills');
-    $mtd_pending_bill_count_rows[] = array("<td colspan='10' style='text-align: center;'> There is No Activity</td>");
-    $mtd_pending_bill_count_html .= theme('table', array('header' => $header, 'rows' => $mtd_pending_bill_count_rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
-  }
-  else {
-    $mtd_pending_bill_count_html .= $mtd_pending_bill_count_data;
-  }
-
-  $mtd_pending_bill_value_html = "<h3>Last 10 Days Pending Bills Value by Billing Date</h3>";
-  $mtd_type = 'bill_value';
-  $mtd_pending_bill_value_data .= get_mtd_data_pending_bills_count_value_pl_groupwise($distributor_id, $mtd_type);
-  if ($mtd_pending_bill_value_data == "No Result Found") {
-    $header = array('PL Group', date('dS M', strtotime('-1 day')), date('dS M', strtotime('-2 days')), date('dS M', strtotime('-3 days')), date('dS M', strtotime('-4 days')), '>4 Days', 'Total Bill Value');
-    $mtd_pending_bill_value_rows[] = array("<td colspan='10' style='text-align: center;'> There is No Activity</td>");
-    $mtd_pending_bill_value_html .= theme('table', array('header' => $header, 'rows' => $mtd_pending_bill_value_rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
-  }
-  else {
-    $mtd_pending_bill_value_html .= $mtd_pending_bill_value_data;
-  }
-
-//  $mtd_one_day_before_html = "<h3>MTD Wise: ". $day_before_yesterday_date ." (One Day Before Yesterday)</h3>";
-//  $mtd_one_day_before_data .= get_one_day_before_mtd_data_pl_groupwise($this_date, $day_before_yesterday, $distributor_id);
+//
+//  $mtd_html = "<h3>MTD Wise: " . $yesterday_date . " (Yesterday)</h3>";
+//  $mtd_data .= get_cron_common_data_for_pl_datewise($this_date, $yesterday, $distributor_id);
+//  if ($mtd_data == "No Result Found") {
+//    $header = get_header_of_chhanel(TRUE, TRUE);
+//    $mtd_rows[] = array("<td colspan='10' style='text-align: center;'> There is No Activity</td>");
+//    $mtd_html .= theme('table', array('header' => $header, 'rows' => $mtd_rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
+//  }
+//  else {
+//    $mtd_html .= $mtd_data;
+//  }
+//
+//  $mtd_one_day_before_html = "<h3>MTD Wise: " . $day_before_yesterday_date . " (One Day Before Yesterday)</h3>";
+//  $mtd_one_day_before_data .= get_cron_common_data_for_pl_datewise($this_date, $day_before_yesterday, $distributor_id);
 //  if ($mtd_one_day_before_data == "No Result Found") {
-//    $header = get_header_of_pl_group();
+//    $header = get_header_of_chhanel(TRUE, TRUE);
 //    $mtd_one_day_before_rows[] = array("<td colspan='10' style='text-align: center;'> There is No Activity</td>");
 //    $mtd_one_day_before_html .= theme('table', array('header' => $header, 'rows' => $mtd_one_day_before_rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
 //  }
 //  else {
 //    $mtd_one_day_before_html .= $mtd_one_day_before_data;
 //  }
-//  
-//  $mtd_two_day_before_html = "<h3>MTD Wise: ". $twoday_before_yesterday_date ." (Two Day Before Yesterday)</h3>";
-//  $mtd_two_day_before_data .= get_two_day_before_mtd_data_pl_groupwise($this_date, $twoday_before_yesterday, $distributor_id);
+//
+//  $mtd_two_day_before_html = "<h3>MTD Wise: " . $twoday_before_yesterday_date . " (Two Day Before Yesterday)</h3>";
+//  $mtd_two_day_before_data .= get_cron_common_data_for_pl_datewise($this_date, $twoday_before_yesterday, $distributor_id);
 //  if ($mtd_two_day_before_data == "No Result Found") {
-//    $header = get_header_of_pl_group();
+//    $header = get_header_of_chhanel(TRUE, TRUE);
 //    $mtd_two_day_before_rows[] = array("<td colspan='10' style='text-align: center;'> There is No Activity</td>");
 //    $mtd_two_day_before_html .= theme('table', array('header' => $header, 'rows' => $mtd_two_day_before_rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
 //  }
 //  else {
 //    $mtd_two_day_before_html .= $mtd_two_day_before_data;
 //  }
-  $brand_name = variable_get('email_brand_name','Lakme');        
-  $params['subject'] = "$brand_name - PL Group Wise Bill Pendency-$distributor_name";
-  //$params['body'] = $yesterday_html . "<br>" . $day_before_yesterday_html . "<br>" . $twoday_before_yesterday_html . "<br>" . $mtd_html . "<br>" . $mtd_one_day_before_html . "<br>" . $mtd_two_day_before_html;
-  $params['body'] = $mtd_html . "<br>" . $mtd_pending_bill_count_html . "<br>" . $mtd_pending_bill_value_html;
-  $mail_to = variable_get('pl_grp_wise_to_email');
-  $from = variable_get('from_email');
-  drupal_mail('email_status', 'pl_group_status', $mail_to, LANGUAGE_NONE, $params, $from);
-}
+//  $brand_name = variable_get('email_brand_name','Lakme');        
+//  $params['subject'] = "$brand_name - PL GROUP Wise OTIF - $distributor_name";
+//  $params['body'] = $yesterday_html . "<br>" . $day_before_yesterday_html . "<br>" . $twoday_before_yesterday_html . "<br>" . $mtd_html . "<br>" . $mtd_one_day_before_html . "<br>" . $mtd_two_day_before_html;
+//  $mail_to = variable_get('pl_grp_otif_to_email');
+//  $from = variable_get('from_email');
+//  drupal_mail('email_status', 'channel_status', $mail_to, LANGUAGE_NONE, $params, $from);
+//}
+
+
 
 function send_email_productivity_emailer($todays_date_date, $distributor_name, $end_date = FALSE, $chart = FALSE, $type = '', $distributor_id = 60) {
   $target_data = leanbox_dashboard_target_value_using_voc_name('productivity target');
@@ -1326,117 +1048,7 @@ function send_email_productivity_emailer($todays_date_date, $distributor_name, $
   }
 }
 
-/**
- *  Send Particular Email 
- * @param type $todays_date_date
- * @param type $distributor_name
- * @param type $end_date
- * @param type $chart
- * @param type $type
- * @param type $distributor_id
- * @return type
- */
-function send_party_packingand_picking_productivity_emailer() {
-  $distributor_id = _DISTRIBUTOR_ID;
-  $distributor_name = change_feeds_import_get_distributor_name($distributor_id);
-  //$end_date = strtotime('-7 day', date('Y-m-d'));
-  //$todays_date_date = strtotime(date('Y-m-d 00:00:00'));
-  $end_date = date('Y-m-d', strtotime('-7 day', strtotime(date('Y-m-d'))));
-  $todays_date_date = date('Y-m-d');
-  $target_data = leanbox_dashboard_target_value_using_voc_name('productivity target');
 
-  // Party Packing productivity
-  $party_packing_html = get_email_productivity_data_for_party_packing($end_date, $todays_date_date, $distributor_id);
-
-  // Picking productivity
-  $picking_html = get_email_productivity_data_for_picking($end_date, $todays_date_date, $distributor_id);
-
-  //Loose Confirmation Productivity Mailer
-  $loose_confirmation_html = get_email_productivity_data_for_loose_confirmation($end_date, $todays_date_date, $distributor_id);
-
-  //Loading Productivity Mailer
-  //$loading_html = get_email_productivity_data_for_loading($end_date, $todays_date_date, $distributor_id);
-
-  $brand_name = variable_get('email_brand_name','Lakme');        
-  $params['subject'] = "$brand_name - Pick/Party Packing/LC Productivity Status-$distributor_name";
-  $params['body'] = $party_packing_html . "<br>" . $picking_html . "<br>" . $loose_confirmation_html;
-  $mail_to = variable_get('productivity_status_to_email');
-  $from = variable_get('from_email');
-  
-  // Attach File For Party Packing
-  $file1_name = 'Productivity_Data_Party_Packing.csv';
-  $file1_uri = 'public://PRODUCTIVITY_DATA/' . $file1_name;
-
-  // create directory if not exist
-  $dir = 'public://PRODUCTIVITY_DATA';
-  file_prepare_directory($dir, FILE_CREATE_DIRECTORY);
-
-  $file1 = fopen($file1_uri, 'w');
-
-  $table1 = get_attachment_productivity_data_for_party_packing($end_date, $todays_date_date, $distributor_id);
-  fputcsv($file1, $table1['header']);
-  foreach ($table1['rows'] as $line) {
-    fputcsv($file1, $line);
-  }
-
-  fclose($file1);
-
-  $params['attachment'] = array(
-    'filecontent' => file_get_contents($file1_uri),
-    'filename' => $file1_name,
-    'filemime' => 'text/csv',
-  );
-  
-  // Attach File For Picking
-  $file2_name = 'Productivity_Data_Picking.csv';
-  $file2_uri = 'public://PRODUCTIVITY_DATA/' . $file2_name;
-
-  // create directory if not exist
-  $dir = 'public://PRODUCTIVITY_DATA';
-  file_prepare_directory($dir, FILE_CREATE_DIRECTORY);
-
-  $file2 = fopen($file2_uri, 'w');
-
-  $table2 = get_attachment_productivity_data_for_picking($end_date, $todays_date_date, $distributor_id);
-  fputcsv($file2, $table2['header']);
-  foreach ($table2['rows'] as $line) {
-    fputcsv($file2, $line);
-  }
-
-  fclose($file2);
-
-  $params['attachment2'] = array(
-    'filecontent' => file_get_contents($file2_uri),
-    'filename' => $file2_name,
-    'filemime' => 'text/csv',
-  );
-  
-  // Attach File For Loose Confirmation
-  $file3_name = 'Productivity_Data_Loose_confirmation.csv';
-  $file3_uri = 'public://PRODUCTIVITY_DATA/' . $file3_name;
-
-  // create directory if not exist
-  $dir = 'public://PRODUCTIVITY_DATA';
-  file_prepare_directory($dir, FILE_CREATE_DIRECTORY);
-
-  $file3 = fopen($file3_uri, 'w');
-
-  $table3 = get_attachment_productivity_data_for_loose_confirmation($end_date, $todays_date_date, $distributor_id);
-  fputcsv($file3, $table3['header']);
-  foreach ($table3['rows'] as $line) {
-    fputcsv($file3, $line);
-  }
-
-  fclose($file3);
-
-  $params['attachment3'] = array(
-    'filecontent' => file_get_contents($file3_uri),
-    'filename' => $file3_name,
-    'filemime' => 'text/csv',
-  );
-  
-  drupal_mail('email_status', 'productivity_status', $mail_to, LANGUAGE_NONE, $params, $from);
-}
 
 /*
  * Function to attach with automailer for party packing
@@ -1445,7 +1057,7 @@ function get_attachment_productivity_data_for_party_packing($start_date, $end_da
   $query = db_select('node', 'n');
   $query->condition('n.type', 'party_packing');
   $query->join('field_data_field_distributor', 'fd', 'fd.entity_id = n.uid');
-  $query->condition('fd.entity_id', $dis_id, '=');
+  $query->condition('fd.entity_id', $dis_id, 'IN');
   $query->leftjoin('field_data_field_bill_lines', 'bl', 'bl.entity_id = n.nid');
   $query->leftjoin('field_data_field_party_packer_team_count', 'tc', 'tc.entity_id = n.nid');
   $query->leftjoin('field_data_field_party_packing_start_time', 'st', 'st.entity_id = n.nid');
@@ -1516,7 +1128,7 @@ function get_attachment_productivity_data_for_picking($start_date, $end_date = F
   $query = db_select('node', 'n');
   $query->condition('n.type', 'picking');
   $query->join('field_data_field_distributor', 'fd', 'fd.entity_id = n.uid');
-  $query->condition('fd.entity_id', $dis_id, '=');
+  $query->condition('fd.entity_id', $dis_id, 'IN');
   $query->join('field_data_field_picking_picking_date', 'ppd', 'ppd.entity_id = n.nid');
   $query->condition('ppd.field_picking_picking_date_value', array($start_date, $end_date), 'BETWEEN');
   $query->orderBy('ppd.field_picking_picking_date_value', 'DESC');
@@ -1638,25 +1250,6 @@ function get_attachment_productivity_data_for_loose_confirmation($start_date, $e
   return $output1;
 }
 
-function send_loading_productivity_emailer() {
-  $distributor_id = _DISTRIBUTOR_ID;
-  $distributor_name = change_feeds_import_get_distributor_name($distributor_id);
-  //$end_date = strtotime('-7 day', date('Y-m-d'));
-  //$todays_date_date = strtotime(date('Y-m-d 00:00:00'));
-  $end_date = date('Y-m-d', strtotime('-7 day', strtotime(date('Y-m-d'))));
-  $todays_date_date = date('Y-m-d');
-  $target_data = leanbox_dashboard_target_value_using_voc_name('productivity target');
-  
-  //Loading Productivity Mailer
-  $loading_html = get_email_productivity_data_for_loading($end_date, $todays_date_date, $distributor_id);
-  $brand_name = variable_get('email_brand_name','Lakme');
-  $params['subject'] = "$brand_name - Loading Productivity Status-$distributor_name";
-  $params['body'] = $loading_html;
-  $mail_to = variable_get('loading_productivity_status_to_email');
-  $from = variable_get('from_email');
-
-  drupal_mail('email_status', 'daily_data', $mail_to, LANGUAGE_NONE, $params, $from);
-}
 
 function get_todays_party_packing_created_data($loading_date, $distributor_id = 60) {
   $query = db_select('node', 'n');
@@ -1888,8 +1481,8 @@ function get_email_productivity_data_for_loading($start_date, $end_date = FALSE,
     $table_data[$date][$supervisor]['bill_count'] += $value['field_bill_count_value'];
     $table_data[$date][$supervisor]['total_time'] += $time_per_transaction;
   }
-
-  $loading_productivity_html = "<h3>Loading Productivity For Last 7 Days</h3></br><h3>Loading Status (status:Completed)</h3><table class = 'pp-superwise-table' border='1' cellpadding='5' cellspacing='0'  style='color:#000; font-size: 13px;font-family: arial'>"
+  $distributor_name = change_feeds_import_get_distributor_name($dis_id);
+  $loading_productivity_html = "<h3>Loading Productivity For Last 7 Days</h3> : <b>$distributor_name</b></br><h3>Loading Status (status:Completed)</h3><table class = 'pp-superwise-table' border='1' cellpadding='5' cellspacing='0'  style='color:#000; font-size: 13px;font-family: arial'>"
     . "<th>Transaction Date</th>"
     . "<th>Loading Supervisor</th>"
     . "<th>Count of Vehicle Loaded</th>"
@@ -3466,71 +3059,6 @@ function get_header_of_chhanel_impact() {
   return $header;
 }
 
-/*
- * Function to send auto mailer of Pending OFD Sales Beat Wise Report.
- */
-
-function send_email_pending_ofd_salesbeatwise_data() {
-  $distributor_id = _DISTRIBUTOR_ID;
-  $distributor_name = change_feeds_import_get_distributor_name($distributor_id);
-  $start_date = strtotime('-7 day', strtotime(date('Y-m-d')));
-  $end_date = strtotime('-1 day', strtotime(date('Y-m-d')));
-  $query = db_select('node', 'n');
-  $query->condition('n.type', 'sales_register_data');
-  $query->condition('n.uid', $distributor_id, '=');
-  $query->join('field_data_field_sr_bill_date', 'bd', 'bd.entity_id = n.nid');
-  $query->groupBy('field_sr_bill_date_value');
-  $query->condition('bd.field_sr_bill_date_value', array($start_date, $end_date), 'BETWEEN');
-  $query->orderBy('field_sr_bill_date_value', 'DESC');
-  $query->join('field_data_field_bill_value', 'bv', 'bv.entity_id = n.nid');
-  $query->join('field_data_field_party_code_reference', 'pc', 'pc.entity_id = n.nid');
-  $query->join('field_data_field_beat_name', 'sb', 'sb.entity_id = pc.field_party_code_reference_nid');
-  $query->groupBy('field_beat_name_value');
-  $query->join('field_data_field_salesman', 'sm', 'sm.entity_id = pc.field_party_code_reference_nid');
-  $query->groupBy('field_salesman_value');
-
-  $query->leftjoin('field_data_field_trip_id_reference', 'ti', 'ti.entity_id = n.nid');
-  $query->leftjoin('field_data_field_dispatch_date', 'disp_date', 'disp_date.entity_id = ti.field_trip_id_reference_nid');
-
-  // bill counts
-  $query->addExpression('SUM(CASE WHEN (disp_date.field_dispatch_date_value IS NULL) THEN 1 ELSE 0 END)', 'bill_count');
-
-  // bill values
-  $query->addExpression('SUM(CASE WHEN (disp_date.field_dispatch_date_value IS NULL) THEN field_bill_value_value ELSE 0 END)', 'bill_value');
-
-  $query->fields('bd', array('field_sr_bill_date_value'));
-  $query->fields('sb', array('field_beat_name_value'));
-  $query->fields('sm', array('field_salesman_value'));
-
-  $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
-
-  $header = array('Sr. No.', 'Bill Date', 'Sales Beat', 'Salesman', 'Bill Count', 'Bill Value');
-  $row = array();
-  $counter = 1;
-  foreach ($res as $key => $data) {
-    if ($data['bill_count'] != 0 && $data['bill_value'] != 0) {
-      $row['serial_no'] = $counter++;
-      $row['bill_date'] = date('d-m-Y', $data['field_sr_bill_date_value']);
-      $row['beat_name'] = check_plain($data['field_beat_name_value']);
-      $row['salesman'] = check_plain($data['field_salesman_value']);
-      $row['bill_count'] = $data['bill_count'];
-      $row['bill_value'] = $data['bill_value'];
-
-      $rows[] = $row;
-    }
-  }
-
-  $output = "<h3>Pending OFD Sales Beat Wise For Last 7 Days Till Yesterday</h3>";
-  $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
-
-  $brand_name = variable_get('email_brand_name','Lakme');        
-  $params['subject'] = "$brand_name - Pending OFD Sales Beat Wise - " . $distributor_name;
-  $params['body'] = $output;
-  $mail_to = variable_get('ofd_salesbeatwise_to_email');
-  $from = variable_get('from_email');
-
-  drupal_mail('email_status', 'ofd_report_salesbeatwise', $mail_to, LANGUAGE_NONE, $params, $from);
-}
 
 function email_status_mail($key, &$message, $params) {
   switch ($key) {
@@ -3591,4 +3119,1389 @@ function check_product_validation($distributor_id) {
     $all_nids = 0;
   }
   return $all_nids; 
+}
+
+//PL Group Wise Bill Pendency mailer first in form configuration
+function send_email_pl_group_emailer($receiver_email_str,$dist_ids_arr){
+  $todays_date_date = date('Y-m-d');
+  $todays_date_date_timestamp = strtotime(date($todays_date_date));
+  $current_day = date("d", $todays_date_date_timestamp);
+  $yesterday = strtotime('-1 day', strtotime($todays_date_date));
+  $yesterday_date = date('d-M-Y', strtotime("-1 days"));
+  $day_before_yesterday = strtotime('-2 day', strtotime($todays_date_date));
+  $day_before_yesterday_date = date('d-M-Y', strtotime("-2 days"));
+  $twoday_before_yesterday = strtotime('-3 day', strtotime($todays_date_date));
+  $twoday_before_yesterday_date = date('d-M-Y', strtotime("-3 days"));
+  $twelveday_before_today = strtotime('-12 day', strtotime(date('Y-m-d')));
+
+  if ($current_day == 22) {
+    $this_month = date("m", $todays_date_date_timestamp);
+    $this_date = $yesterday;
+  }
+  elseif ($current_day <= 21) {
+    $old_date = strtotime('-1 month', strtotime($todays_date_date));
+    $last_month = date("m", $old_date);
+    $this_date = strtotime(date("Y-$last_month-21"));
+  }
+  else {
+    $this_month = date("m", $todays_date_date_timestamp);
+    $this_date = strtotime(date("Y-$this_month-21"));
+  }
+
+//  $twoday_before_yesterday_html = "<h3>Billing Date : " . $twoday_before_yesterday_date ." (Two Days Before Yesterday)</h3>";
+//  $twoday_before_yesterday_data = get_twoday_before_yesterday_data_pl_groupwise($twoday_before_yesterday, $twoday_before_yesterday, $distributor_id);
+//  if ($twoday_before_yesterday_data == "No Result Found") {
+//    $header = get_header_of_pl_group();
+//    $twoday_before_yesterday_rows[] = array("<td colspan='10' style='text-align: center;'> There is No Activity</td>");
+//    $twoday_before_yesterday_html .= theme('table', array('header' => $header, 'rows' => $twoday_before_yesterday_rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
+//  }
+//  else {
+//    $twoday_before_yesterday_html .= $twoday_before_yesterday_data;
+//  }
+//  
+//  $day_before_yesterday_html = "<h3>Billing Date : " . $day_before_yesterday_date ." (One Day Before Yesterday)</h3>";
+//  $day_before_yesterday_data = get_day_before_yesterday_data_pl_groupwise($day_before_yesterday, $day_before_yesterday, $distributor_id);
+//  if ($day_before_yesterday_data == "No Result Found") {
+//    $header = get_header_of_pl_group();
+//    $day_before_yesterday_rows[] = array("<td colspan='10' style='text-align: center;'> There is No Activity</td>");
+//    $day_before_yesterday_html .= theme('table', array('header' => $header, 'rows' => $day_before_yesterday_rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
+//  }
+//  else {
+//    $day_before_yesterday_html .= $day_before_yesterday_data;
+//  }
+//  
+//  $yesterday_html = "<h3>Billing Date : " . $yesterday_date ." (Yesterday)</h3>";
+//  $yesterday_data = get_yesterday_data_pl_groupwise($yesterday, $yesterday, $distributor_id);
+//  if ($yesterday_data == "No Result Found") {
+//    $header = get_header_of_pl_group();
+//    $yesterday_rows[] = array("<td colspan='10' style='text-align: center;'> There is No Activity</td>");
+//    $yesterday_html .= theme('table', array('header' => $header, 'rows' => $yesterday_rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
+//  }
+//  else {
+//    $yesterday_html .= $yesterday_data;
+//  }
+  foreach ($dist_ids_arr as $key => $id_value){
+    $distributor_id = $id_value;
+    $distributor_name = change_feeds_import_get_distributor_name($distributor_id);
+    if(!empty($distributor_name) && isset($distributor_name)){
+      array_push($distributor_name_arr, $distributor_name);
+    }
+    $mtd_html = "<h3>Last 10 Days Pending Bills Summary till yesterday (" . $yesterday_date .":"."<b>".$distributor_name."</b>". ")</h3>";
+    $mtd_data .= get_pending_bills_pl_group_datewise($twelveday_before_today, $yesterday, $distributor_id);
+    if ($mtd_data == "No Result Found") {
+      //$header = get_header_of_pl_group();
+      $header = array('PL Group', 'Bill Count', 'Bill Value', 'Dispatch Count', 'Dispatch Value', 'Pending Bill', 'Pending Bill Value');
+      $mtd_rows[] = array("<td colspan='10' style='text-align: center;'> There is No Activity</td>");
+      $mtd_html .= theme('table', array('header' => $header, 'rows' => $mtd_rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
+    }
+    else {
+      $mtd_html .= $mtd_data;
+    }
+
+    $mtd_pending_bill_count_html = "<h3>Last 10 Days Pending Bills Count by Billing Date</h3><b>".$distributor_name."</b>";
+    $mtd_type = 'bill_count';
+    $mtd_pending_bill_count_data .= get_mtd_data_pending_bills_count_value_pl_groupwise($distributor_id, $mtd_type);
+    if ($mtd_pending_bill_count_data == "No Result Found") {
+      $header = array('PL Group', date('dS M', strtotime('-1 day')), date('dS M', strtotime('-2 days')), date('dS M', strtotime('-3 days')), date('dS M', strtotime('-4 days')), '>4 Days', 'Total Bills');
+      $mtd_pending_bill_count_rows[] = array("<td colspan='10' style='text-align: center;'> There is No Activity</td>");
+      $mtd_pending_bill_count_html .= theme('table', array('header' => $header, 'rows' => $mtd_pending_bill_count_rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
+    }
+    else {
+      $mtd_pending_bill_count_html .= $mtd_pending_bill_count_data;
+    }
+
+    $mtd_pending_bill_value_html = "<h3>Last 10 Days Pending Bills Value by Billing Date</h3>"."<b>".$distributor_name."</b>";
+    $mtd_type = 'bill_value';
+    $mtd_pending_bill_value_data .= get_mtd_data_pending_bills_count_value_pl_groupwise($distributor_id, $mtd_type);
+    if ($mtd_pending_bill_value_data == "No Result Found") {
+      $header = array('PL Group', date('dS M', strtotime('-1 day')), date('dS M', strtotime('-2 days')), date('dS M', strtotime('-3 days')), date('dS M', strtotime('-4 days')), '>4 Days', 'Total Bill Value');
+      $mtd_pending_bill_value_rows[] = array("<td colspan='10' style='text-align: center;'> There is No Activity</td>");
+      $mtd_pending_bill_value_html .= theme('table', array('header' => $header, 'rows' => $mtd_pending_bill_value_rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
+    }
+    else {
+      $mtd_pending_bill_value_html .= $mtd_pending_bill_value_data;
+    }
+
+  //  $mtd_one_day_before_html = "<h3>MTD Wise: ". $day_before_yesterday_date ." (One Day Before Yesterday)</h3>";
+  //  $mtd_one_day_before_data .= get_one_day_before_mtd_data_pl_groupwise($this_date, $day_before_yesterday, $distributor_id);
+  //  if ($mtd_one_day_before_data == "No Result Found") {
+  //    $header = get_header_of_pl_group();
+  //    $mtd_one_day_before_rows[] = array("<td colspan='10' style='text-align: center;'> There is No Activity</td>");
+  //    $mtd_one_day_before_html .= theme('table', array('header' => $header, 'rows' => $mtd_one_day_before_rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
+  //  }
+  //  else {
+  //    $mtd_one_day_before_html .= $mtd_one_day_before_data;
+  //  }
+  //  
+  //  $mtd_two_day_before_html = "<h3>MTD Wise: ". $twoday_before_yesterday_date ." (Two Day Before Yesterday)</h3>";
+  //  $mtd_two_day_before_data .= get_two_day_before_mtd_data_pl_groupwise($this_date, $twoday_before_yesterday, $distributor_id);
+  //  if ($mtd_two_day_before_data == "No Result Found") {
+  //    $header = get_header_of_pl_group();
+  //    $mtd_two_day_before_rows[] = array("<td colspan='10' style='text-align: center;'> There is No Activity</td>");
+  //    $mtd_two_day_before_html .= theme('table', array('header' => $header, 'rows' => $mtd_two_day_before_rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
+  //  }
+  //  else {
+  //    $mtd_two_day_before_html .= $mtd_two_day_before_data;
+  //  }
+    $multiple_distributor_name = implode(', ', $distributor_name_arr);
+    $brand_name = variable_get('email_brand_name','Lakme');        
+    $params['subject'] = "$brand_name - PL Group Wise Bill Pendency-".$multiple_distributor_name;
+    //$params['body'] = $yesterday_html . "<br>" . $day_before_yesterday_html . "<br>" . $twoday_before_yesterday_html . "<br>" . $mtd_html . "<br>" . $mtd_one_day_before_html . "<br>" . $mtd_two_day_before_html;
+    $params['body'] = $mtd_html . "<br>" . $mtd_pending_bill_count_html . "<br>" . $mtd_pending_bill_value_html;  
+  }
+  
+    $mail_to = $receiver_email_str;
+    $from = variable_get('from_email');
+
+    drupal_mail('email_status', 'pl_group_status', $mail_to, LANGUAGE_NONE, $params, $from);  
+
+}
+//PL Group Wise Bill Pendency second in form configuration
+
+
+//Productivity Progress Status
+function send_party_packingand_picking_productivity_mailer($receiver_email_str,$dist_ids_arr) {
+  $distributor_name_arr = array();
+  foreach ($dist_ids_arr as $key => $id_value) { 
+    $distributor_id = $id_value;   
+    $distributor_name = change_feeds_import_get_distributor_name($distributor_id);
+    if(!empty($distributor_name) && isset($distributor_name)){
+      array_push($distributor_name_arr, $distributor_name);
+    }
+    $distributor_name = change_feeds_import_get_distributor_name($distributor_id);
+    //$end_date = strtotime('-7 day', date('Y-m-d'));
+    //$todays_date_date = strtotime(date('Y-m-d 00:00:00'));
+    $end_date = date('Y-m-d', strtotime('-7 day', strtotime(date('Y-m-d'))));
+    $todays_date_date = date('Y-m-d');
+    $party_packing_html = get_email_productivity_data_for_party_packing($end_date, $todays_date_date, $distributor_id);
+    // ============
+    $target_data = leanbox_dashboard_target_value_using_voc_name('productivity target');
+    //================
+    // Picking productivity
+    $picking_html = get_email_productivity_data_for_picking($end_date, $todays_date_date, $distributor_id);
+    //Loose Confirmation Productivity Mailer
+    $loose_confirmation_html = get_email_productivity_data_for_loose_confirmation($end_date, $todays_date_date, $distributor_id);
+    //Loading Productivity Mailer
+    //$loading_html = get_email_productivity_data_for_loading($end_date, $todays_date_date, $distributor_id);
+    $brand_name = variable_get('email_brand_name', 'Lakme');
+    $params['body'] .= $party_packing_html . "<br>" . $picking_html . "<br>" . $loose_confirmation_html;
+  } 
+  
+   $multiple_distributor_name = implode(',',$distributor_name_arr);
+  
+  $params['subject'] = "$brand_name - Pick/Party Packing/LC Productivity Status- $multiple_distributor_name"; 
+  $mail_to =  $receiver_email_str;
+  $from = variable_get('from_email');
+      // Attach File For Party Packing
+  $file1_name = 'Productivity_Data_Party_Packing.csv';
+  $file1_uri = 'public://PRODUCTIVITY_DATA/' . $file1_name;
+
+  // create directory if not exist
+  $dir = 'public://PRODUCTIVITY_DATA';
+  file_prepare_directory($dir, FILE_CREATE_DIRECTORY);
+
+  $file1 = fopen($file1_uri, 'w');  
+
+  $table1 = get_attachment_productivity_data_for_party_packing($end_date, $todays_date_date, $dist_ids_arr);
+  fputcsv($file1, $table1['header']);
+  foreach ($table1['rows'] as $line) {
+    fputcsv($file1, $line);
+  }
+
+  fclose($file1);
+
+  $params['attachment'] = array(
+    'filecontent' => file_get_contents($file1_uri),
+    'filename' => $file1_name,
+    'filemime' => 'text/csv',
+  );
+ // Attach File For Picking
+  $file2_name = 'Productivity_Data_Picking.csv';
+  $file2_uri = 'public://PRODUCTIVITY_DATA/' . $file2_name;
+
+  // create directory if not exist
+  $dir = 'public://PRODUCTIVITY_DATA';
+  file_prepare_directory($dir, FILE_CREATE_DIRECTORY);
+
+  $file2 = fopen($file2_uri, 'w');
+
+  $table2 = get_attachment_productivity_data_for_picking($end_date, $todays_date_date, $dist_ids_arr);
+  fputcsv($file2, $table2['header']);
+  foreach ($table2['rows'] as $line) {
+    fputcsv($file2, $line);
+  }
+
+  fclose($file2);
+
+  $params['attachment2'] = array(
+    'filecontent' => file_get_contents($file2_uri),
+    'filename' => $file2_name,
+    'filemime' => 'text/csv',
+  );
+
+  // Attach File For Loose Confirmation
+  $file3_name = 'Productivity_Data_Loose_confirmation.csv';
+  $file3_uri = 'public://PRODUCTIVITY_DATA/' . $file3_name;
+
+  // create directory if not exist
+  $dir = 'public://PRODUCTIVITY_DATA';
+  file_prepare_directory($dir, FILE_CREATE_DIRECTORY);
+
+  $file3 = fopen($file3_uri, 'w');
+
+  $table3 = get_attachment_productivity_data_for_loose_confirmation($end_date, $todays_date_date, $dist_ids_arr);
+  fputcsv($file3, $table3['header']);
+  foreach ($table3['rows'] as $line) {
+    fputcsv($file3, $line);
+  }
+
+  fclose($file3);
+
+  $params['attachment3'] = array(
+    'filecontent' => file_get_contents($file3_uri),
+    'filename' => $file3_name,
+    'filemime' => 'text/csv',
+  );
+  drupal_mail('email_status', 'productivity_status', $mail_to, LANGUAGE_NONE, $params, $from);
+}
+
+//PL Group Wise Bill Pendency second in form configuration
+
+  
+  
+  
+  
+//Loading Productivity Progress Status third in form configuration
+
+  function send_loading_productivity_mailer($receiver_email_str,$dist_ids_arr){
+    $distributor_name_arr = array();
+    foreach ($dist_ids_arr as $key => $id_value) { 
+      $distributor_id = $id_value;   
+      $distributor_name = change_feeds_import_get_distributor_name($distributor_id);
+      if(!empty($distributor_name) && isset($distributor_name)){
+        array_push($distributor_name_arr, $distributor_name);
+      }
+
+      $end_date = date('Y-m-d', strtotime('-7 day', strtotime(date('Y-m-d'))));
+      $todays_date_date = date('Y-m-d');
+      $target_data = leanbox_dashboard_target_value_using_voc_name('productivity target');//unused
+
+      //Loading Productivity Mailer
+      $loading_html = get_email_productivity_data_for_loading($end_date, $todays_date_date, $distributor_id);
+      $brand_name = variable_get('email_brand_name','Lakme');
+      $params['body'] .= $loading_html;
+      $params['body'] .= "<br>";
+    }
+      $multiple_distributor_name = implode(', ', $distributor_name_arr);
+      $params['subject'] = "$brand_name - Loading Productivity Status-$multiple_distributor_name";
+      $mail_to = $receiver_email_str;
+      $from = variable_get('from_email');
+      drupal_mail('email_status', 'daily_data', $mail_to, LANGUAGE_NONE, $params, $from); 
+  }
+//Loading Productivity Progress Status third in form configuration  
+  
+  
+//Pending OFD Sales Beat Wise fourth in form configuration  
+
+  function send_email_pending_ofd_salesbeatwise_data_mailer($receiver_email_str,$dist_ids_arr){
+    foreach($dist_ids_arr as $key => $id_value) {
+      $distributor_id = $id_value;   
+      $distributor_name = change_feeds_import_get_distributor_name($distributor_id);
+        if(!empty($distributor_name) && isset($distributor_name)){
+          array_push($distributor_name_arr, $distributor_name);
+        }
+        $start_date = strtotime('-7 day', strtotime(date('Y-m-d')));
+        $end_date = strtotime('-1 day', strtotime(date('Y-m-d')));
+        $query = db_select('node', 'n');
+        $query->condition('n.type', 'sales_register_data');
+        $query->condition('n.uid', $distributor_id, '=');
+        $query->join('field_data_field_sr_bill_date', 'bd', 'bd.entity_id = n.nid');
+        $query->groupBy('field_sr_bill_date_value');
+        $query->condition('bd.field_sr_bill_date_value', array($start_date, $end_date), 'BETWEEN');
+        $query->orderBy('field_sr_bill_date_value', 'DESC');
+        $query->join('field_data_field_bill_value', 'bv', 'bv.entity_id = n.nid');
+        $query->join('field_data_field_party_code_reference', 'pc', 'pc.entity_id = n.nid');
+        $query->join('field_data_field_beat_name', 'sb', 'sb.entity_id = pc.field_party_code_reference_nid');
+        $query->groupBy('field_beat_name_value');
+        $query->join('field_data_field_salesman', 'sm', 'sm.entity_id = pc.field_party_code_reference_nid');
+        $query->groupBy('field_salesman_value');
+
+        $query->leftjoin('field_data_field_trip_id_reference', 'ti', 'ti.entity_id = n.nid');
+        $query->leftjoin('field_data_field_dispatch_date', 'disp_date', 'disp_date.entity_id = ti.field_trip_id_reference_nid');
+
+        // bill counts
+        $query->addExpression('SUM(CASE WHEN (disp_date.field_dispatch_date_value IS NULL) THEN 1 ELSE 0 END)', 'bill_count');
+
+        // bill values
+        $query->addExpression('SUM(CASE WHEN (disp_date.field_dispatch_date_value IS NULL) THEN field_bill_value_value ELSE 0 END)', 'bill_value');
+
+        $query->fields('bd', array('field_sr_bill_date_value'));
+        $query->fields('sb', array('field_beat_name_value'));
+        $query->fields('sm', array('field_salesman_value'));
+
+        $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+    
+        $header = array('Sr. No.', 'Bill Date', 'Sales Beat', 'Salesman', 'Bill Count', 'Bill Value');
+        $rows = [];
+        $counter = 1;
+        foreach ($res as $key => $data) {
+          $row = array();
+          if ($data['bill_count'] != 0 && $data['bill_value'] != 0) {
+            $row['serial_no'] = $counter++;
+            $row['bill_date'] = date('d-m-Y', $data['field_sr_bill_date_value']);
+            $row['beat_name'] = check_plain($data['field_beat_name_value']);
+            $row['salesman'] = check_plain($data['field_salesman_value']);
+            $row['bill_count'] = $data['bill_count'];
+            $row['bill_value'] = $data['bill_value'];
+
+            $rows[] = $row;
+          }
+        }
+        
+        $output .= "<h3>Pending OFD Sales Beat Wise For Last 7 Days Till Yesterday</h3>".$distributor_name;
+        $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));        
+        $output .= '<br>';
+  }
+        $multiple_distributor_name = implode(', ', $distributor_name_arr);
+        $brand_name = variable_get('email_brand_name','Lakme');        
+        $params['subject'] = "$brand_name - Pending OFD Sales Beat Wise - " . $multiple_distributor_name;
+        $params['body'] = $output;
+        $mail_to = $receiver_email_str;
+        $from = variable_get('from_email');
+        $mail_to = $receiver_email_str;    
+
+        drupal_mail('email_status', 'ofd_report_salesbeatwise', $mail_to, LANGUAGE_NONE, $params, $from); 
+   
+}
+
+//Pending OFD Sales Beat Wise fourth in form configuration
+
+
+ //OFD Report fifth in form configuration
+//
+//function send_email_ofd_report_callback($receiver_email_str,$dist_ids_arr){
+//  foreach($dist_ids_arr as $key => $id_value) {
+//      $distributor_id = $id_value;   
+//      $distributor_name = change_feeds_import_get_distributor_name($distributor_id);
+//        if(!empty($distributor_name) && isset($distributor_name)){
+//          array_push($distributor_name_arr, $distributor_name);
+//        }
+//        $todays_date = date('d-M-Y');
+//        $view_name = "ofd_mailer";
+//        $arg1 = date("mdY");
+//        $results = views_get_view_result($view_name, 'page', $arg1);
+//        $encoded_data = json_encode($results);
+//        $data = json_decode($encoded_data);
+//
+//        $rows = array();
+//        $total_bill_count = 0;
+//        $total_dispatch_bill_value = 0;
+//        $total_dispatch_loader_team_count = 0;
+//        $counter = 1;
+//        $table_style = 'border: 1px solid #000;';
+//        $header = array('Sr. No.', 'Trip Creation Date', 'Trip Execution Date', 'Trip ID', 'HHT ID', 'Bill Count', 'Dispatch Bill Value', 'Dispatch Supervisor', 'Cashier Name', 'Vehicle No', 'Dispatch Loader Team Count', 'Dispatch Date', 'Dispatch Start Time', 'Dispatch End Time', 'Sequence Method');
+//        foreach ($data as $result) {
+//          $trip_creation_date = $result->_field_data->nid->entity->field_trip_creation_date->und[0]->value;
+//          $row1['data'] = date('d-M-y', $trip_creation_date);
+//          $row1['style'] = $table_style;
+//          $trip_execution_date = $result->_field_data->nid->entity->field_trip_executon_date->und[0]->value;
+//          $row2['data'] = date('d-M-y', $trip_execution_date);
+//          $row2['style'] = $table_style;
+//          $row3['data'] = $result->_field_data->nid->entity->field_trip_id->und[0]->value;
+//          $row3['style'] = $table_style;
+//          $hht_id = $result->_field_data->nid->entity->field_hht_id->und[0]->nid;
+//          $query = db_select('node', 'n');
+//          $query->fields('n', array('title'));
+//          $query->condition('n.nid', $hht_id, '=');
+//          $hht_id_title = $query->execute()->fetchfield();
+//          $row4['data'] = $hht_id_title;
+//          $row4['style'] = $table_style;
+//          $row5['data'] = $result->_field_data->nid->entity->field_bill_count->und[0]->value;
+//          $row5['style'] = $table_style;
+//          $row6['data'] = $result->_field_data->nid->entity->field_dispatch_bill_value->und[0]->value;
+//          $row6['style'] = $table_style;
+//          $row7['data'] = $result->_field_data->nid->entity->field_dispatch_supervisor->und[0]->value;
+//          $row7['style'] = $table_style;
+//          $row8['data'] = $result->_field_data->nid->entity->field_cashier_name->und[0]->value;
+//          $row8['style'] = $table_style;
+//          $row9['data'] = $result->_field_data->nid->entity->field_vehicle_no->und[0]->value;
+//          $row9['style'] = $table_style;
+//          $row10['data'] = $result->_field_data->nid->entity->field_dispatch_loader_team_count->und[0]->value;
+//          $row10['style'] = $table_style;
+//          $dispatch_date = strtotime($result->_field_data->nid->entity->field_dispatch_date->und[0]->value);
+//          $row11['data'] = date('d-M-y', $dispatch_date);
+//          $row11['style'] = $table_style;
+//          $row12['data'] = $result->_field_data->nid->entity->field_dispatch_pre_start_time->und[0]->value;
+//          $row12['style'] = $table_style;
+//          $row13['data'] = $result->_field_data->nid->entity->field_dispatch_start_time->und[0]->value;
+//          $row13['style'] = $table_style;
+//          if ($result->_field_data->nid->entity->field_sequence_method->und[0]->value == 1) {
+//            $seq_method = 'API';
+//          }
+//          elseif ($result->_field_data->nid->entity->field_sequence_method->und[0]->value == 0) {
+//            $seq_method = 'MANUAL';
+//          }
+//          else {
+//            $seq_method = '';
+//          }
+//          $row14['data'] = $seq_method;
+//          $row14['style'] = $table_style;
+//
+//          $total_bill_count += $row5['data'];
+//          $total_dispatch_bill_value += $row6['data'];
+//          $total_dispatch_loader_team_count += $row10['data'];
+//          $row0['data'] = $counter++;
+//          $row0['style'] = $table_style;
+//
+//          $rows[] = array($row0, $row1, $row2, $row3, $row4, $row5, $row6, $row7, $row8, $row9, $row10, $row11, $row12, $row13, $row14);
+//        }
+//        $rows[] = array('SUM', '', '', '', '', $total_bill_count, $total_dispatch_bill_value, '', '', '', $total_dispatch_loader_team_count, '', '', '', '');
+//
+//
+//        $ofd_html .= "<h3>Dispatch Date : " . $todays_date . " (Today)</h3>";
+//        $ofd_html .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));  
+//        //second view
+//        $view_name2 = "ofd_mailer2";
+//        $results = views_get_view_result($view_name2, 'page');
+//        $encoded_data = json_encode($results);
+//        $data = json_decode($encoded_data);
+//
+//        $rows = array();
+//        $total_bill_count = 0;
+//        $total_dispatch_bill_value = 0;
+//        $counter = 1;
+//        $table_style = 'border: 1px solid #000;';
+//        $header = array('Sr. No.', 'Trip Creation Date', 'Trip Execution Date', 'Trip ID', 'HHT ID', 'Bill Count', 'Dispatch Bill Value', 'Dispatch Supervisor', 'Cashier Name', 'Vehicle No', 'Dispatch Loader Team Count', 'Dispatch Date', 'Dispatch Start Time', 'Sequence Method');
+//        foreach ($data as $result) {
+//          $trip_creation_date = $result->_field_data->nid->entity->field_trip_creation_date->und[0]->value;
+//          $row1['data'] = date('d-M-y', $trip_creation_date);
+//          $row1['style'] = $table_style;
+//          $trip_execution_date = $result->_field_data->nid->entity->field_trip_executon_date->und[0]->value;
+//          $row2['data'] = date('d-M-y', $trip_execution_date);
+//          $row2['style'] = $table_style;
+//          $row3['data'] = $result->_field_data->nid->entity->field_trip_id->und[0]->value;
+//          $row3['style'] = $table_style;
+//          $hht_id = $result->_field_data->nid->entity->field_hht_id->und[0]->nid;
+//          $query = db_select('node', 'n');
+//          $query->fields('n', array('title'));
+//          $query->condition('n.nid', $hht_id, '=');
+//          $hht_id_title = $query->execute()->fetchfield();
+//          $row4['data'] = $hht_id_title;
+//          $row4['style'] = $table_style;
+//          $row5['data'] = $result->_field_data->nid->entity->field_bill_count->und[0]->value;
+//          $row5['style'] = $table_style;
+//          $row6['data'] = $result->_field_data->nid->entity->field_dispatch_bill_value->und[0]->value;
+//          $row6['style'] = $table_style;
+//          $row7['data'] = $result->_field_data->nid->entity->field_dispatch_supervisor->und[0]->value;
+//          $row7['style'] = $table_style;
+//          $row8['data'] = $result->_field_data->nid->entity->field_cashier_name->und[0]->value;
+//          $row8['style'] = $table_style;
+//          $row9['data'] = $result->_field_data->nid->entity->field_vehicle_no->und[0]->value;
+//          $row9['style'] = $table_style;
+//          $row10['data'] = $result->_field_data->nid->entity->field_dispatch_loader_team_count->und[0]->value;
+//          $row10['style'] = $table_style;
+//          $row11['data'] = $result->_field_data->nid->entity->field_dispatch_date->und[0]->value;
+//          $row11['style'] = $table_style;
+//          $row12['data'] = $result->_field_data->nid->entity->field_dispatch_start_time->und[0]->value;
+//          $row12['style'] = $table_style;
+//          if ($result->_field_data->nid->entity->field_sequence_method->und[0]->value == 1) {
+//            $seq_method = 'API';
+//          }
+//          elseif ($result->_field_data->nid->entity->field_sequence_method->und[0]->value == 0) {
+//            $seq_method = 'MANUAL';
+//          }
+//          else {
+//            $seq_method = '';
+//          }
+//          $row13['data'] = $seq_method;
+//          $row13['style'] = $table_style;
+//
+//          $total_bill_count += $row5['data'];
+//          $total_dispatch_bill_value += $row6['data'];
+//          $row0['data'] = $counter++;
+//          $row0['style'] = $table_style;
+//
+//          $rows[] = array($row0, $row1, $row2, $row3, $row4, $row5, $row6, $row7, $row8, $row9, $row10, $row11, $row12, $row13);
+//        }
+//  $rows[] = array('SUM', '', '', '', '', $total_bill_count, $total_dispatch_bill_value, '', '', '', '', '', '', '');
+//
+//
+//  $ofd_html2 = "<h3>Pending Van Till : " . $todays_date . " (Today)</h3>";
+//  $ofd_html2 .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
+//
+//  $brand_name = variable_get('email_brand_name','Lakme');
+//  $params['subject'] .= "$brand_name - OFD - $distributor_name";
+//  $params['body'] .= $ofd_html . "<br>" . $ofd_html2;
+//        
+//  }
+//  
+//  $mail_to = variable_get('ofd_to_email');
+//  $from = variable_get('from_email');
+//  drupal_mail('email_status', 'ofd_report', $mail_to, LANGUAGE_NONE, $params, $from);    
+//  
+//}
+// OFD Report fifth in form configuration
+
+
+/*
+ * Function to send auto mailer of Monthly Trip Summary .
+ */
+function send_email_monthly_trip_summary_callback($receiver_email_str,$dist_ids_arr) {
+  //$distributor_name = change_feeds_import_get_distributor_name($distributor_id);
+  foreach($dist_ids_arr as $key => $id_value){
+      $distributor_id = $id_value;   
+      $distributor_name = change_feeds_import_get_distributor_name($distributor_id);
+        if(!empty($distributor_name) && isset($distributor_name)){
+          array_push($distributor_name_arr, $distributor_name);
+        }    
+      $start_date = date('Y-m-01');
+      $end_date = date('Y-m-d');
+
+      $query = db_select('node', 'n');
+      $query->condition('n.type', 'dispatch_data');
+      $query->join('field_data_field_cashier_name', 'cn', 'cn.entity_id = n.nid');
+      $query->condition('cn.field_cashier_name_value', '', '!=');
+      $query->orderBy('field_cashier_name_value');
+      $query->condition('n.uid', $distributor_id, '=');
+      $query->join('field_data_field_vehicle_no', 'vn', 'vn.entity_id = n.nid');
+      $query->orderBy('field_vehicle_no_value');
+      $query->join('field_data_field_trip_id', 'td', 'td.entity_id = n.nid');
+      $query->join('field_data_field_bill_count', 'bc', 'bc.entity_id = n.nid');
+      $query->join('field_data_field_dispatch_bill_value', 'dbv', 'dbv.entity_id = n.nid');
+      $query->join('field_data_field_dispatch_date', 'd', 'd.entity_id = n.nid');
+      $query->condition('d.field_dispatch_date_value', array($start_date, $end_date), 'BETWEEN');
+      $query->join('field_data_field_dispatch_loader_team_count', 'tc', 'tc.entity_id = n.nid');
+
+      $query->fields('n', array('nid'));
+      $query->fields('cn', array('field_cashier_name_value'));
+      $query->fields('vn', array('field_vehicle_no_value'));
+      $query->fields('td', array('field_trip_id_value'));
+      $query->fields('bc', array('field_bill_count_value'));
+      $query->fields('dbv', array('field_dispatch_bill_value_value'));
+      $query->fields('d', array('field_dispatch_date_value'));
+      $query->fields('tc', array('field_dispatch_loader_team_count_value'));
+
+      $all_trip_data = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+      // For each trip fetch the van and loading date        
+    foreach ($all_trip_data as $key => $one_trip) {
+      $query = db_select('field_data_field_trip_id_reference', 'n');
+      $query->condition('n.bundle', 'sales_register_data');
+      $query->join('field_data_field_billing_van', 'bv', 'bv.entity_id = n.entity_id');
+      $query->join('field_data_field_billing_loading_date', 'ld', 'ld.entity_id = n.entity_id');
+      $query->fields('bv', array('field_billing_van_value'));
+      $query->fields('ld', array('field_billing_loading_date_value'));
+      $query->condition('n.field_trip_id_reference_nid', $one_trip['nid'], '=');
+
+      $query->groupBy('bv.field_billing_van_value,ld.field_billing_loading_date_value');
+      $van_loading_date = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+
+      // Get the Party Packing Loading Date on th basis of above combination of Van and Loading Date
+      $party_packing_flag = 'NO';
+      foreach ($van_loading_date as $one_van_loading) {
+        $packing_loading_date = date('Y-m-d', $one_van_loading['field_billing_loading_date_value']);
+        $query = db_select('node', 'n');
+        $query->condition('n.type', 'party_packing');
+        $query->join('field_data_field_party_packing_vehicle', 'pv', 'pv.entity_id = n.nid');
+        $query->condition('pv.field_party_packing_vehicle_value', $one_van_loading['field_billing_van_value'], '=');
+        $query->condition('n.uid', $distributor_id, '=');
+        $query->join('field_data_field_party_packing_loading_date', 'ld', 'ld.entity_id = n.nid');
+        $query->condition('ld.field_party_packing_loading_date_value', $packing_loading_date, '=');
+
+        $query->leftjoin('field_data_field_party_packing_date', 'pd', 'pd.entity_id = n.nid');
+        $query->condition('pd.field_party_packing_date_value', '1970-01-01 05:30:00', '<>');
+        $query->fields('n', array('nid'));
+        $query->fields('pv', array('field_party_packing_vehicle_value'));
+        $query->fields('ld', array('field_party_packing_loading_date_value'));
+        $query->fields('pd', array('field_party_packing_date_value'));
+
+        $party_packing = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+        // If Packing Loading Date exists then flag will be "Yes" else "No"
+        if ($party_packing) {
+          $party_packing_flag = 'YES';
+          break;
+        }
+      }
+      $all_trip_data[$key]['party_packing_flag'] = $party_packing_flag;
+    }
+    
+      $full_table = array();
+      foreach($all_trip_data as $value){
+        $cashier = $value['field_cashier_name_value'];
+        $vehicle_no = $value['field_vehicle_no_value'];
+        $trip_id = $value['field_trip_id_value'];
+        $bill_count = $value['field_bill_count_value'];
+        $bill_value = $value['field_dispatch_bill_value_value'];
+        $loader_team_count = $value['field_dispatch_loader_team_count_value'];
+        $flag = $value['party_packing_flag'];
+
+        // Create the table Group By Cashier , Vehicle No and Party Packing flag
+        $full_table[$cashier.'/'.$vehicle_no.'/'.$flag]['cashier'] = $cashier;
+        $full_table[$cashier.'/'.$vehicle_no.'/'.$flag]['vehicle_no'] = $vehicle_no;
+        $full_table[$cashier.'/'.$vehicle_no.'/'.$flag]['flag'] = $flag;
+        $full_table[$cashier.'/'.$vehicle_no.'/'.$flag]['trip_id_count'] += 1;
+        $full_table[$cashier.'/'.$vehicle_no.'/'.$flag]['bill_count'] += $bill_count;
+        $full_table[$cashier.'/'.$vehicle_no.'/'.$flag]['bill_value'] += $bill_value;
+        $full_table[$cashier.'/'.$vehicle_no.'/'.$flag]['loader_team_count'] += $loader_team_count;
+        $full_table[$cashier.'/'.$vehicle_no.'/'.$flag]['average_bills_per_trip'] = (int) ($full_table[$cashier.'/'.$vehicle_no.'/'.$flag]['bill_count']/$full_table[$cashier.'/'.$vehicle_no.'/'.$flag]['trip_id_count']);
+        $full_table[$cashier.'/'.$vehicle_no.'/'.$flag]['average_bill_value_trip'] = (int) ($full_table[$cashier.'/'.$vehicle_no.'/'.$flag]['bill_value']/$full_table[$cashier.'/'.$vehicle_no.'/'.$flag]['trip_id_count']);    
+
+        $total_trip_count +=  1;
+        $total_bill_count += $bill_count;
+        $total_bill_value += $bill_value;
+        $total_team_count += $loader_team_count;
+        $total_avg_bills_per_trip = (int) ($total_bill_count / $total_trip_count);
+        $total_avg_bills_value = (int) ($total_bill_value / $total_trip_count);
+      }
+
+      if(!empty($full_table)){
+        $full_table[]  = array('Total', '', '', $total_trip_count, $total_bill_count, $total_bill_value, $total_team_count, $total_avg_bills_per_trip, $total_avg_bills_value);
+      }
+
+      $header = array('Cashier Name', 'Vehicle No', 'Party Packing', 'Trip Count', 'Bill Count', 'Dispatch Bill Value', 'Dispatch Loader Team Count','Average Bill Count/Trip','Average Bill Value/Trip');
+
+      $output .= "<h3>Monthly Trip Summary <b>$distributor_name</b> </h3>";
+      $output .= theme('table', array('header' => $header, 'rows' => $full_table, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0'), 'empty' => t('No Records has been found')));
+      $brand_name = variable_get('email_brand_name','Lakme');
+  }
+      $multiple_distributor_name = implode(', ', $distributor_name_arr);
+      $params['subject'] = "$brand_name - Monthly Trip Summary".$multiple_distributor_name; 
+      $mail_to = $receiver_email_str;
+      $from = variable_get('from_email');
+      $params['body'] = $output;    
+      drupal_mail('email_status', 'daily_data', $mail_to, LANGUAGE_NONE, $params, $from);   
+}
+// * Function to send auto mailer of Monthly Trip Summary .
+
+
+function send_email_exception_mis_callback($receiver_email_str, $dist_ids_arr) {
+  foreach ($dist_ids_arr as $key => $id_value) {
+    $distributor_id = $id_value;
+    $distributor_name = change_feeds_import_get_distributor_name($distributor_id);
+    if (!empty($distributor_name) && isset($distributor_name)) {
+      array_push($distributor_name_arr, $distributor_name);
+    }
+    //$distributor_id = _DISTRIBUTOR_ID;
+    $distributor_name = change_feeds_import_get_distributor_name($distributor_id);
+
+    // PT-CT Not Maintained
+    $pt_ct_not_maintained_html = get_email_pt_ct_not_maintained($distributor_id);
+
+    // Child Not Maintained
+    $child_not_maintained_html = get_email_child_not_maintained($distributor_id);
+
+    // CRM Status of High Discounted Bills
+    $crm_status_high_discounted_bills_html = get_email_crm_status_high_discounted_bills($distributor_id);
+
+    // CRM Status of Signed Bills Edit
+    $crm_status_signed_bill_html = get_email_crm_status_signed_bills($distributor_id);
+
+    // CRM Status of Full Returned Bills
+    $crm_status_full_returned_html = get_email_crm_status_full_returned_bills($distributor_id);
+    $brand_name = variable_get('email_brand_name','Lakme');
+    $params['body'] .= $pt_ct_not_maintained_html . "<br>" . $child_not_maintained_html . "<br>" . $crm_status_high_discounted_bills_html . "<br>" . $crm_status_signed_bill_html . "<br>" . $crm_status_full_returned_html;    
+  }
+    $multiple_distributor_name = implode(', ', $distributor_name_arr);
+  
+    $params['subject'] = "$brand_name - Exception MIS. : $multiple_distributor_name";
+    $from = variable_get('from_email');
+    $mail_to = $receiver_email_str;
+    
+
+    // Attachment for Highly Discounted Bills
+    // create directory if not exist
+    $dir = 'public://CRM_STATUS';
+    file_prepare_directory($dir, FILE_CREATE_DIRECTORY);
+
+    $file_name = 'Highly_Discounted_Bills.csv';
+    $file_uri = 'public://CRM_STATUS/' . $file_name;
+
+    $file = fopen($file_uri, 'w');
+
+    $table = get_attachment_high_discounted_bills($dist_ids_arr);
+    fputcsv($file, $table['header']);
+    foreach ($table['rows'] as $line) {
+      fputcsv($file, $line);
+    }
+
+    fclose($file);
+
+    $params['attachment'] = array(
+      'filecontent' => file_get_contents($file_uri),
+      'filename' => $file_name,
+      'filemime' => 'text/csv',
+    );
+
+    // Attachment for Signed Bills
+    $file2_name = 'Signed_Bills.csv';
+    $file2_uri = 'public://CRM_STATUS/' . $file2_name;
+
+
+    $file2 = fopen($file2_uri, 'w');
+
+    $table2 = get_attachment_signed_bills($dist_ids_arr);
+    fputcsv($file2, $table2['header']);
+    foreach ($table2['rows'] as $line) {
+      fputcsv($file2, $line);
+    }
+
+    fclose($file2);
+
+    $params['attachment2'] = array(
+      'filecontent' => file_get_contents($file2_uri),
+      'filename' => $file2_name,
+      'filemime' => 'text/csv',
+    );
+
+
+    // Attachment for Full Returned Bills
+    $file3_name = 'Full_Returned_Bills.csv';
+    $file3_uri = 'public://CRM_STATUS/' . $file3_name;
+
+    $file3 = fopen($file3_uri, 'w');
+
+    $table3 = get_attachment_full_returned_bills($dist_ids_arr);
+    fputcsv($file3, $table3['header']);
+    foreach ($table3['rows'] as $line) {
+      fputcsv($file3, $line);
+    }
+
+    fclose($file3);
+
+    $params['attachment3'] = array(
+      'filecontent' => file_get_contents($file3_uri),
+      'filename' => $file3_name,
+      'filemime' => 'text/csv',
+    ); 
+
+  drupal_mail('email_status', 'exception_mis', $mail_to, LANGUAGE_NONE, $params, $from);    
+}
+
+
+function send_email_return_vrs_prod_callback($receiver_email_str, $dist_ids_arr){
+    foreach ($dist_ids_arr as $key => $id_value) {
+      $distributor_id = $id_value;
+      $distributor_name = change_feeds_import_get_distributor_name($distributor_id);
+      if (!empty($distributor_name) && isset($distributor_name)) {
+        array_push($distributor_name_arr, $distributor_name);
+      }
+      $get_subdivision_nids = check_product_validation($distributor_id);
+    
+      $yesterday_date = date('Y-m-d', strtotime("-1 days"));
+      $query = db_select('dispatch_planning_api_data', 'ad');
+      $query->condition('ad.distributor_id', $distributor_id, '=');
+      $query->fields('ad', array('date'));
+      $query->condition('ad.date', $yesterday_date, '=');
+      $query->fields('ad', array('runsheet_number'));
+      $query->join('node', 'n', 'n.title = ad.runsheet_number');
+      $query->condition('n.type', 'dispatch_data', '=');
+      $query->condition('n.uid',$distributor_id);
+      $query->join('field_data_field_vehicle_arrival_date', 'vad', 'vad.entity_id = n.nid');
+      $query->join('field_data_field_vehicle_arrival_time', 'vat', 'vat.entity_id = n.nid');
+      $query->fields('vad', array('field_vehicle_arrival_date_value'));
+      $query->fields('vat', array('field_vehicle_arrival_time_value'));
+      $query->join('field_data_field_vrs_status', 'vs', 'vs.entity_id = n.nid');
+      $query->fields('vs', array('field_vrs_status_value'));
+      $query->leftjoin('field_data_field_returned_version', 'rv', 'rv.entity_id = n.nid');
+      $query->fields('rv', array('field_returned_version_value'));
+      $query->leftjoin('field_data_field_vrs_version', 'vv', 'vv.entity_id = n.nid');
+      $query->fields('vv', array('field_vrs_version_value'));
+      $query->fields('ad', array('fieldExecutiveName'));
+      $query->fields('ad', array('vehicle'));
+      $query->addExpression('((MAX(CASE WHEN (ad.updated_flag = 1) THEN ad.updated_time END) - MIN(CASE WHEN (ad.updated_flag = 1) THEN ad.updated_time END)) / 60)', 'total_return_time');
+      $query->addExpression('MIN(CASE WHEN (ad.updated_flag = 1) THEN ad.updated_time END)', 'return_start_time');
+      $query->groupBy('ad.runsheet_number');
+      $query->join('dispatch_planning_item_details', 'dpi', 'ad.id = dpi.trip_bill_reference');
+      $query->addexpression("SUM(dpi.return_qty * dpi.sum_net_sales_value)", 'return_value');
+      $query->addexpression("(SUM(CASE WHEN (ad.updated_flag = 1) THEN (dpi.return_qty * dpi.sum_net_sales_value * 10) END)) / ((MAX(CASE WHEN (ad.updated_flag = 1) THEN ad.updated_time END) - MIN(CASE WHEN (ad.updated_flag = 1) THEN ad.updated_time END)) / 60)", 'return_prod');
+
+      $query->addExpression('(COUNT(DISTINCT(CASE WHEN (dpi.line_level_status = \'line_partial_deliver\'  or dpi.line_level_status = \'line_undeliver\') THEN dpi.sku_code END)) * 10) /  ((MAX(CASE WHEN (ad.updated_flag = 1) THEN ad.updated_time END) - MIN(CASE WHEN (ad.updated_flag = 1) THEN ad.updated_time END)) / 60)', 'product_lines');
+
+      $query->leftjoin('vrs_trip_total_history', 'vtth', 'ad.runsheet_number = vtth.trip_id AND ad.distributor_id = vtth.distributor_id');
+      //$query->condition('vtth.vrs_version_no', 'V1.0', '=');
+      $query->addexpression("(CASE WHEN vtth.vrs_version_no = 'V1.0' THEN vtth.vrs_start_time END) - MAX(CASE WHEN (ad.updated_flag = 1) THEN ad.updated_time END)", 'vrs_start_return_end');
+      $query->leftjoin('vrs_trip_total', 'vtt', 'ad.runsheet_number = vtt.trip_id AND ad.distributor_id = vtt.distributor_id');
+      $query->addexpression("((vtt.vrs_end_time - (CASE WHEN vtth.vrs_version_no = 'V1.0' THEN vtth.vrs_start_time END)) / 60)", 'vrs_time_difference');
+      $query->addexpression("((vtt.total_to_be_collected_amt * 10) / ((vtt.vrs_end_time - (CASE WHEN vtth.vrs_version_no = 'V1.0' THEN vtth.vrs_start_time END)) / 60))", 'vrs_value');
+      $query->addexpression("(vtt.total_actual_cash_amount * 100) / (vtt.total_actual_cash_amount + vtth.total_actual_cheque_amount + vtt.total_actual_signed_bill_amount)", 'cash_percentage');
+      $query->addexpression("(vtt.total_actual_cheque_amount * 100) / (vtt.total_actual_cash_amount + vtth.total_actual_cheque_amount + vtt.total_actual_signed_bill_amount)", 'cheque_percentage');
+      $query->addexpression("(vtt.total_actual_signed_bill_amount * 100) / (vtt.total_actual_cash_amount + vtth.total_actual_cheque_amount + vtt.total_actual_signed_bill_amount)", 'signed_percentage');
+      $query->orderBy('vs.field_vrs_status_value', 'DESC');
+
+      $query->join('node', 'n1', "n1.title = dpi.sku_code");
+      $query->condition('n1.type', 'sku7_code_master', '=');
+      $query->condition('n1.uid',$distributor_id);
+      $query->leftjoin('field_data_field_product_devision_reference', 'pdr', 'pdr.entity_id = n1.nid');
+      $query->addexpression("SUM(CASE WHEN pdr.field_product_devision_reference_nid IN ($get_subdivision_nids) THEN dpi.return_qty END)", 'return_sku_qty_sachets');
+      $query->addexpression("SUM(CASE WHEN pdr.field_product_devision_reference_nid NOT IN ($get_subdivision_nids) THEN dpi.return_qty END)", 'return_sku_qty_wo_sachets');
+
+      $result = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+
+      $rows = array();
+      $counter = 1;
+        foreach ($result as $val) {
+          $row = [];
+          $row['sr_no']= $counter++;// newly added
+          $row['dispatch_date'] = $val['date'];
+          $row['trip_id'] = $val['runsheet_number'];
+
+          $field = field_info_field('field_vrs_status');
+          $allowed_values = list_allowed_values($field);
+          foreach ($allowed_values as $key => $value) {
+            if ($key == $val['field_vrs_status_value']) {
+              $row['status'] = $value;
+            }
+          }
+          $row['cashier_name'] = $val['fieldExecutiveName'];
+          $row['vehicle'] = $val['vehicle'];
+          $row['field_vehicle_arrival_date'] = date('Y-m-d', $val['field_vehicle_arrival_date_value']) . ' ' .$val['field_vehicle_arrival_time_value'];
+          $row['arrival_to_asset_returns'] = $version_created_time - $row['field_vehicle_arrival_date'];
+
+          //Delivery Confirmation time
+          $query = db_select('inventory_versioning_api_data', 'iad');
+          $query->condition('iad.distributor_id', $distributor_id, '=');
+          $query->condition('iad.version_flag', 1, '=');
+          $query->condition('iad.runsheet_number', $val['runsheet_number'], '=');
+          $query->fields('iad', array('version_created_time'));
+          $query->orderBy('iad.id','DESC');
+          $query->range(0, 1);
+          $version_created_time = $query->execute()->fetchField();
+
+          if (!empty($version_created_time)) {
+            $row['version_created_time'] = date('d-M-y H:i:s', $version_created_time);
+          }
+          else {
+            $row['version_created_time'] = '';
+          }
+          if (!empty($val['return_start_time']) && ($val['return_start_time'] - $version_created_time)> 0) {
+            $row['arrival_to_returns_start'] = gmdate('i', ($val['return_start_time'] - $version_created_time));
+          }else {
+            $row['arrival_to_returns_start'] = '';
+          }
+
+          $return_version_value = $val['field_returned_version_value'];
+          if (empty($return_version_value) || ($val['field_vrs_status_value'] < 1 && !empty($return_version_value))) {
+            $row['returns_time_difference'] = '';
+            $row['return_prod'] = '';
+            $row['product_lines'] = '';
+          }
+          else {
+            $row['returns_time_difference'] = round($val['total_return_time']);
+            $row['return_prod'] = round($val['return_prod']);
+            $row['product_lines'] = round($val['product_lines']);
+          }
+
+          $row['return_value'] = round($val['return_value']);
+          $row['return_qty_wo_sachets'] = $val['return_sku_qty_wo_sachets'];
+          $row['return_qty_sachets'] = $val['return_sku_qty_sachets'];
+
+        $vrs_version_value = $val['field_vrs_version_value'];
+
+
+        if (empty($return_version_value) || ($val['field_vrs_status_value'] < 2 && !empty($vrs_version_value))) {
+          $row['returns_end_to_vrs_start'] = '';
+          $row['vrs_time_difference'] = '';
+          $row['vrs_value'] = '';
+          $row['cash_percentage'] = '';
+          $row['cheque_percentage'] = '';
+          $row['signed_percentage'] = '';
+        }
+        else {
+
+          $row['returns_end_to_vrs_start'] = gmdate('i', $val['vrs_start_return_end']);
+          $row['vrs_time_difference'] = round($val['vrs_time_difference']);
+          $row['vrs_value'] = round($val['vrs_value']);
+          $row['cash_percentage'] = round($val['cash_percentage']);
+          $row['cheque_percentage'] = round($val['cheque_percentage']);
+          $row['signed_percentage'] = round($val['signed_percentage']);
+        }
+
+        $rows[] = $row;
+
+        $header .= array('S.No.','Dispatch Date', 'Trip ID', 'Status', 'Cashier', 'Vehicle', 'Vehicle Arrival Time', 'Arrival to Delivery Confirmation (min)', 'Delivery Confirmation Time', 'Delivery Confirmation to Returns Start (min)', 'Returns Start to Returns End (min)', 'Returns Value(Rs.)/10 Min', 'Product Lines/10 Min','Total Returned Value(Rs.)','Returned SKU Quantity(w/o Sachets)','Returned Quantity of Sachets','Returns End to VRS Start (Min)', 'VRS Start to VRS End (Min)', 'VRS Value(Rs.)/10 Min', 'Cash %', 'Cheque %', 'Signed Bill %');
+        $html .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0')));
+      }
+    }
+    
+      $multiple_distributor_name = implode(', ', $distributor_name_arr);
+      $params['subject'] = "$brand_name - Returns & VRS Productivity".$multiple_distributor_name;
+      $mail_to = $receiver_email_str;
+      $from = variable_get('from_email');
+      $params['body'] = $html; 
+      drupal_mail('email_status', 'daily_data', $mail_to, LANGUAGE_NONE, $params, $from);   
+}
+
+
+
+
+
+
+
+function send_email_del_app_adoption_callback($receiver_email_str, $dist_ids_arr) {
+  foreach ($dist_ids_arr as $key => $id_value) {
+    $distributor_id = $id_value;   
+    $distributor_name = change_feeds_import_get_distributor_name($distributor_id);
+      if(!empty($distributor_name) && isset($distributor_name)){
+        array_push($distributor_name_arr, $distributor_name);
+      }
+      
+    $todays_date = date('Y-m-d');
+    $todays_date_timestamp = strtotime($todays_date);
+    $current_day = date("d", $todays_date_timestamp);
+    if ($current_day <= '21') {
+      $old_date = strtotime('-1 month', strtotime($todays_date));
+      $last_month = date("m", $old_date);
+      $last_year = date("Y", $old_date);
+      $from_this_date = strtotime(date("$last_year-$last_month-21"));
+    }
+    else {
+      $this_month = date("m", $todays_date_timestamp);
+      $from_this_date = strtotime(date("Y-$this_month-21"));
+    }
+    $yesterday_date = strtotime(date('Y-m-d', strtotime("-1 days"))) ;
+    $query = db_select('dispatch_planning_api_data', 'ad');
+    $query->condition('ad.distributor_id', $distributor_id, '=');
+    $query->condition('ad.dispatch_date', array($from_this_date, $yesterday_date), 'BETWEEN');
+    $query->fields('ad', array('fieldExecutiveName'));
+    $query->addexpression("ROUND(COUNT(CASE WHEN ad.dispatch_date =  $yesterday_date AND  ad.res_updated_time != 0 THEN ad.bill_number END) / COUNT(CASE WHEN ad.dispatch_date =  $yesterday_date THEN ad.bill_number END)*100)", 'app_adoption_total');
+    //Distance calculate formula - (2 * asin(sqrt(pow(sin((RADIANS(ad.res_latitude) - RADIANS(ad.lat_longlatitude)) / 2), 2) +
+     //       cos(RADIANS(ad.lat_longlatitude)) * cos(RADIANS(ad.res_latitude)) * pow(sin(((RADIANS(ad.res_longitude)) - (RADIANS(ad.lat_longlongitude))) / 2), 2)))*6371)*1000
+    $query->orderBy('app_adoption_total','DESC');
+    $query->addexpression("ROUND(COUNT(CASE WHEN ad.dispatch_date =  $yesterday_date AND (2 * asin(sqrt(pow(sin((RADIANS(ad.res_latitude) - RADIANS(ad.lat_longlatitude)) / 2), 2) +
+            cos(RADIANS(ad.lat_longlatitude)) * cos(RADIANS(ad.res_latitude)) * pow(sin(((RADIANS(ad.res_longitude)) - (RADIANS(ad.lat_longlongitude))) / 2), 2)))*6371)*1000 < 500 THEN ad.bill_number END) / COUNT(CASE WHEN ad.dispatch_date =  $yesterday_date AND ad.res_updated_time != 0 THEN ad.bill_number END) *100)", 'entry_less');
+    $query->addexpression("ROUND(COUNT(CASE WHEN ad.dispatch_date =  $yesterday_date  AND (2 * asin(sqrt(pow(sin((RADIANS(ad.res_latitude) - RADIANS(ad.lat_longlatitude)) / 2), 2) +
+            cos(RADIANS(ad.lat_longlatitude)) * cos(RADIANS(ad.res_latitude)) * pow(sin(((RADIANS(ad.res_longitude)) - (RADIANS(ad.lat_longlongitude))) / 2), 2)))*6371)*1000 > 500 THEN ad.bill_number END) / COUNT(CASE WHEN ad.dispatch_date =  $yesterday_date AND ad.res_updated_time != 0 THEN ad.bill_number END) *100)", 'entry_greater');
+    $query->addexpression("ROUND(COUNT(CASE WHEN ad.res_updated_time != 0 THEN ad.bill_number END) / COUNT(ad.bill_number)*100)", 'mtd_app_adoption_total');
+    $query->addexpression("ROUND(COUNT(CASE WHEN (2 * asin(sqrt(pow(sin((RADIANS(ad.res_latitude) - RADIANS(ad.lat_longlatitude)) / 2), 2) +
+            cos(RADIANS(ad.lat_longlatitude)) * cos(RADIANS(ad.res_latitude)) * pow(sin(((RADIANS(ad.res_longitude)) - (RADIANS(ad.lat_longlongitude))) / 2), 2)))*6371)*1000 < 500 THEN ad.bill_number END) / COUNT(CASE WHEN ad.res_updated_time != 0 THEN ad.bill_number END) *100)", 'mtd_entry_less');
+    $query->addexpression("ROUND(COUNT(CASE WHEN (2 * asin(sqrt(pow(sin((RADIANS(ad.res_latitude) - RADIANS(ad.lat_longlatitude)) / 2), 2) +
+            cos(RADIANS(ad.lat_longlatitude)) * cos(RADIANS(ad.res_latitude)) * pow(sin(((RADIANS(ad.res_longitude)) - (RADIANS(ad.lat_longlongitude))) / 2), 2)))*6371)*1000 > 500 THEN ad.bill_number END) / COUNT(CASE WHEN ad.res_updated_time != 0 THEN ad.bill_number END) *100)", 'mtd_entry_greater');
+    $query->groupBy('ad.fieldExecutiveName');
+    $result = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+    $rows[] = array(array('data' => 'Cashier'), array('data' => 'Total Delivery App Adoption %', 'colspan' => 0), array('data' => 'Distance Wise %', 'colspan' => 2), array('data' => 'Total Delivery App Adoption %', 'colspan' => 0), array('data' => 'Distance Wise %', 'colspan' => 2));
+    $rows[] = array('', '', '&lt; 500m', '> 500m', '', '&lt; 500m', '> 500m');
+    foreach ($result as $value) {
+      $row = [];
+      $row['fieldExecutiveName'] = $value['fieldExecutiveName'];
+      $total['fieldExecutiveName'] = 'Total';
+      $row['app_adoption_total'] = $value['app_adoption_total'];
+      $total['app_adoption_total'] += $value['app_adoption_total'];  
+      $row['entry_less'] = $value['entry_less'];
+      $total['entry_less'] += $value['entry_less'];
+      $row['entry_greater'] = $value['entry_greater'];
+      $total['entry_greater'] += $value['entry_greater'];
+      $row['mtd_app_adoption_total'] = $value['mtd_app_adoption_total'];
+      $total['mtd_app_adoption_total'] += $value['mtd_app_adoption_total'];
+      $row['mtd_entry_less'] = $value['mtd_entry_less'];
+      $total['mtd_entry_less'] += $value['mtd_entry_less'];
+      $row['mtd_entry_greater'] = $value['mtd_entry_greater'];
+      $total['mtd_entry_greater'] += $value['mtd_entry_greater'];
+      $rows[] = $row;
+    }
+    $rows[] = $total;
+    $header .= array(array('data' => 'Dispatch Date:' . date('d-M-y', strtotime("-1 days")), 'colspan' => 4), array('data' => 'MTD', 'colspan' => 3));
+    $output .= "<h3>Delivery App Adoption - RS Jogs <b>$distributor_name</b></h3>";
+    $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0'), 'empty' => t('No Records has been found')));
+    }
+
+    $brand_name = variable_get('email_brand_name','Lakme');
+    $multiple_distributor_name = implode(', ', $distributor_name_arr);
+    $params['subject'] = "$brand_name - Delivery App Adoption - RS Jogs".$multiple_distributor_name;
+    $params['body'] = $output;
+    $mail_to = $receiver_email_str;
+    $from = variable_get('from_email');
+
+    drupal_mail('email_status', 'daily_data', $mail_to, LANGUAGE_NONE, $params, $from);
+}
+
+
+// Delivery pending callback 
+
+function send_email_del_pekding_callback($receiver_email_str, $dist_ids_arr){
+    foreach ($dist_ids_arr as $key => $id_value) {
+        $distributor_id = $id_value;   
+        $distributor_name = change_feeds_import_get_distributor_name($distributor_id);
+        if(!empty($distributor_name) && isset($distributor_name)){
+          array_push($distributor_name_arr, $distributor_name);
+        }        
+        $start_date = strtotime(date('Y-m-d', strtotime("-15 days")));
+        $todays_date = strtotime(date('Y-m-d'));
+
+      //Find all bills which are DP
+        $query = db_select('dispatch_planning_api_data', 'ad');
+        $query->condition('ad.distributor_id', $distributor_id, '=');
+        $query->condition('ad.dispatch_date', array($start_date, $todays_date), 'BETWEEN');
+        $query->condition('ad.delivery_pending_flag', 1, '=');
+        $query->fields('ad', array('bill_number'));
+        $query->groupBy('ad.bill_number');
+        $bills = $query->execute()->fetchCol();
+
+        $query = db_select('dispatch_planning_api_data', 'ad');
+        $query->condition('ad.distributor_id', $distributor_id, '=');
+        $query->condition('ad.dispatch_date', array($start_date, $todays_date), 'BETWEEN');
+        if (!empty($bills)) {
+            $query->condition('ad.bill_number', $bills, 'IN');
+        }
+        $query->fields('ad', array('bill_number'));
+        $query->fields('ad', array('bill_date'));
+        $query->addexpression("CASE WHEN (ad.delivery_pending_flag = 0 and (ad.res_status IS NOT NULL or ad.res_status !='')) THEN 'Completed' ELSE 'Pending' END", 'attempted_status');
+        $query->addexpression("CASE WHEN ad.delivery_pending_flag = 0 THEN ad.res_status END", 'current_bill_status');
+        $query->addexpression("CASE WHEN ad.delivery_pending_flag = 0 AND res_status ='undeliver'  THEN ad.res_reason_for_failure END", 'reason_for_failure');
+        $query->addexpression("ad.runsheet_number", 'trip_number');
+        $query->addexpression("ad.dispatch_date", 'dispatch_date');
+        $query->leftjoin('field_data_field_dp_reason', 'dpr', 'dpr.entity_id = ad.delivery_pending_reason');
+        $query->fields('dpr', array('field_dp_reason_value'));
+        $query->addexpression("ad.fieldExecutiveName", 'fieldExecutiveName');
+        $query->join('node', 'n', 'n.title = ad.runsheet_number');
+        $query->condition('n.type', 'dispatch_data', '=');
+        $query->condition('n.uid', $distributor_id);
+        $query->join('field_data_field_vrs_status', 'vs', 'vs.entity_id = n.nid');
+        $query->fields('vs', array('field_vrs_status_value'));
+        $query->groupBy('ad.bill_number,ad.runsheet_number');
+        $query->orderBy('ad.id');
+        $result = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+        $arr = array();
+        $header_new = array();
+        $final_summ = [];
+        $row = [];
+        foreach ($result as $val) {
+          $arr[$val['bill_number']]['bill_number'] = $val['bill_number'];
+          $arr[$val['bill_number']]['bill_date'] = date('d-M-y', $val['bill_date']);
+          $arr[$val['bill_number']]['attempted_status'] = $val['attempted_status'];
+          $arr[$val['bill_number']]['current_bill_status'] = $val['current_bill_status'];
+          $arr[$val['bill_number']]['reason_for_failure'] = $val['reason_for_failure'];
+          $arr[$val['bill_number']]['trip_count'] += 1;
+          $counter = $arr[$val['bill_number']]['trip_count'];
+          $arr[$val['bill_number']]['trip_number' . $counter] = $val['trip_number'];
+          $arr[$val['bill_number']]['dispatch_date' . $counter] = date('d-M-y', $val['dispatch_date']);
+          $arr[$val['bill_number']]['delivery_pending_reason' . $counter] = $val['field_dp_reason_value'];
+          $arr[$val['bill_number']]['fieldExecutiveName' . $counter] = $val['fieldExecutiveName'];
+          $field = field_info_field('field_vrs_status');
+          $allowed_values = list_allowed_values($field);
+          foreach ($allowed_values as $key => $value) {
+            if ($key == $val['field_vrs_status_value']) {
+              $arr[$val['bill_number']]['vrs_status' . $counter] = $value;
+            }
+          }
+          $header_new['trip_id' . $counter] = 'Trip ' . $counter;
+          $header_new['dispatch_date' . $counter] = 'Trip ' . $counter . ' Dispatch Date';
+          $header_new['dp_reason' . $counter] = 'Trip ' . $counter . ' DP Reason';
+          $header_new['cashier' . $counter] = 'Trip ' . $counter . ' Cashier';
+          $header_new['status' . $counter] = 'Trip ' . $counter . ' Status';
+        }
+        $header = array('Bill Number', 'Bill Date', 'DP Attempted Status', 'Current Bill Status', 'Reason if full returned', 'Count of Trips');
+        foreach ($header_new as $val) {
+          $header[] = $val;
+        }
+
+        //Summary Table
+        $header_summ = array('DP Attempted Status', 'Total Count of Trips', 'Bill Count','Remarks');
+        foreach ($arr as $val) {
+          $row[$val['attempted_status']][$val['trip_count']] += 1;
+        }
+
+        $p = $row['Pending'];
+        $c = $row['Completed'];
+        ksort($p);
+        ksort($c);
+
+         $i = 0;
+         //$final_summ = [];
+        foreach ($p as $key => $val) {  
+         $final_summ[$i][] = 'Pending';
+          $final_summ[$i][] = $key;
+          $final_summ[$i][] = $val;
+          if ($key == 1) {
+            $final_summ[$i][] = 'These are the count of DP Bills which have yet not been dispatched'; // change the message
+          }
+          elseif ($key == 2) {
+            $final_summ[$i][] = 'These are the count of DP Bills which have been dispatched but delivery outcome has not been updated in TP'; // change the message
+          }
+          else if ($key == 3){
+            $final_summ[$i][] = '- These are the count of DP Bills which have been dispatched but delivery outcome has not been updated in TP. <br> -These DP Bills were dispatched twice i.e. they were declared Delivery Pending twice'; // change the message
+          }
+          else{
+            $final_summ[$i][] = ''; // change the message
+          }
+          $i++;
+        }
+
+        foreach ($c as $key => $val) {
+          $final_summ[$i][] = 'Completed';
+          $final_summ[$i][] = $key;
+          $final_summ[$i][] = $val;
+          if ($key == 2) {
+            $final_summ[$i][] = 'These are the count of DP bills which have been dispatched and their delivery outcome has also been updated in TP'; // change the message
+          }
+          else {
+            $final_summ[$i][] = ''; // change the message
+          }
+          $i++;
+        }
+
+        $output .= "<h3>DP Bills Status Report : <b>$distributor_name<b></h3>";
+        $output .= theme('table', array('header' => $header_summ, 'rows' => $final_summ, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0'), 'empty' => t('No Records has been found')));
+        $output .= '<br><br>';
+        //Summary Table
+
+        foreach ($result as $val) {
+          for ($i = 1; $i <= getMax($arr); $i++) {
+            if (!isset($arr[$val['bill_number']]['trip_number' . $i])) {
+              $arr[$val['bill_number']]['trip_number' . $i] = '';
+            }
+            if (!isset($arr[$val['bill_number']]['dispatch_date' . $i])) {
+              $arr[$val['bill_number']]['dispatch_date' . $i] = '';
+            }
+            if (!isset($arr[$val['bill_number']]['delivery_pending_reason' . $i])) {
+              $arr[$val['bill_number']]['delivery_pending_reason' . $i] = '';
+            }
+            if (!isset($arr[$val['bill_number']]['fieldExecutiveName' . $i])) {
+              $arr[$val['bill_number']]['fieldExecutiveName' . $i] = '';
+            }
+            if (!isset($arr[$val['bill_number']]['vrs_status' . $i])) {
+              $arr[$val['bill_number']]['vrs_status' . $i] = '';
+            }
+          }
+        }
+        $res_set1 = $res_set2 = array();
+        foreach($arr as $key => $val){
+          if($val['attempted_status'] == 'Pending'){
+            $res_set1[$key] = $val; 
+          }else{
+            $res_set2[$key] = $val;
+          }
+        }
+
+        $final_arr = $res_set1 + $res_set2;
+
+        //$output = "<h3>Delivery Pending Report</h3>";
+        $output .= theme('table', array('header' => $header, 'rows' => $final_arr, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0'), 'empty' => t('No Records has been found')));
+    }
+        $multiple_dist_name = implode(',',$distributor_name_arr);
+        $brand_name = variable_get('email_brand_name','Lakme');
+        $params['subject'] = "$brand_name - DP Bills Status Report : $multiple_dist_name";
+        $params['body'] = $output;
+        $mail_to = $receiver_email_str;
+        $from = variable_get('from_email');
+        drupal_mail('email_status', 'daily_data', $mail_to, LANGUAGE_NONE, $params, $from);        
+    
+}
+
+
+function getMax($arr) {
+  $max = 0;
+  foreach ($arr as $k => $v) {
+    $max = max(array($max, $v['trip_count']));
+  }
+  return $max;
+}
+
+
+function send_email_pt_compliance_callback($receiver_email_str, $dist_ids_arr){
+    foreach ($dist_ids_arr as $key => $id_value) {
+      $distributor_id = $id_value;   
+      $distributor_name = change_feeds_import_get_distributor_name($distributor_id);
+      if(!empty($distributor_name) && isset($distributor_name)){
+        array_push($distributor_name_arr, $distributor_name);
+      }
+     $header[] = array('data' => 'Delivery Confirmation Date');
+    for ($i = 1; $i <= 7; $i++) {
+      $header[] = array('data' => date('d-M-y', strtotime("-$i days")), 'colspan' => 3);
+      $yesterday_date = strtotime(date('Y-m-d', strtotime("-$i days")));
+      $yesterday_date_tillnight = $yesterday_date + 86399; // till 11:59:59
+      $cash_chq_arr = array('Cash', 'Cheque', 'Cash,Cheque', 'Cheque,Cash', 'Cash,Cash', 'Cheque,Cheque');
+      $cash_chq = implode("','", $cash_chq_arr);
+      $cash_chq = "'" . $cash_chq . "'";
+      $cash_chq_lower = array_map("strtolower", $cash_chq_arr);
+      $cash_chq_lower = implode("','", $cash_chq_lower);
+      $cash_chq_lower = "'" . $cash_chq_lower . "'";
+      $cash_chq_sb_arr = array('Cash', 'Cheque', 'Cash,Cheque', 'Cheque,Cash', 'Cash,Cash', 'Cheque,Cheque', 'Signed');
+      $cash_chq_sb = implode("','", $cash_chq_sb_arr);
+      $cash_chq_sb = "'" . $cash_chq_sb . "'";
+      $cash_chq_sb_lower = array_map("strtolower", $cash_chq_sb_arr);
+      $cash_chq_sb_lower = implode("','", $cash_chq_sb_lower);
+      $cash_chq_sb_lower = "'" . $cash_chq_sb_lower . "'";
+
+      $query = db_select('dispatch_planning_api_data', 'ad');
+      $query->join('inventory_versioning_api_data', 'iad', 'iad.referenceNo = ad.referenceNo');
+      $query->condition('ad.distributor_id', $distributor_id, '=');
+      $query->condition('ad.delivery_pending_flag', 0, '=');
+      $query->condition('iad.version_created_time', array($yesterday_date, $yesterday_date_tillnight), 'BETWEEN');
+      $query->condition('iad.version_flag', 1, '=');
+
+      $db_or = db_or();
+      $db_or->condition('ad.res_status', NULL);
+      $db_or->condition('ad.res_status', '');
+      $db_or->condition('ad.res_status', 'undeliver', '!=');
+      $query->condition($db_or);
+
+      $query->join('node', 'n', 'ad.party_code = n.title');
+      $query->condition('n.type', 'outlet_master');
+      $query->condition('n.uid', $distributor_id, '=');
+      $query->join('field_data_field_payment_terms', 'pt', 'pt.entity_id = n.nid ');
+
+  //Cash/Chq
+      $query->addexpression("COUNT(CASE WHEN  pt.field_payment_terms_value = 'Cash/Chq' AND (CASE WHEN ad.res_money_collect2_edit IN ($cash_chq_lower) THEN 1 ELSE  ad.res_money_collect2 IN ($cash_chq) END) THEN ad.bill_number END)", 'count_cash_chq');
+      $query->addexpression("count(CASE WHEN  pt.field_payment_terms_value = 'Cash/Chq' AND (CASE WHEN ad.res_money_collect2_edit NOT IN ($cash_chq_lower) THEN 1 ELSE ((ad.res_money_collect2 NOT IN ($cash_chq) and ad.res_money_collect2 !='') or (ad.res_money_collect2 ='' and ad.derived_payment_outcome = 'Signed')) END) THEN ad.bill_number END)", 'not_count_cash_chq');
+    //$query->addexpression("COUNT(CASE WHEN  pt.field_payment_terms_value = 'Cash/Chq' AND (CASE WHEN ad.res_money_collect2_edit NOT IN ($cash_chq_lower) THEN 1 ELSE  ad.res_money_collect2  NOT IN ($cash_chq) and  (ad.res_money_collect2 =''  and ad.res_signed_bill_delivery <> 'No'   and ad.res_signed_bill_partial <> 'No') END) THEN ad.bill_number END)", 'not_count_cash_chq');
+      $query->addexpression("COUNT(CASE WHEN  pt.field_payment_terms_value = 'Cash/Chq' AND ((ad.res_money_collect2 is null  and ad.res_money_collect2_edit is null) or (ad.res_money_collect2 is null  and ad.res_money_collect2_edit ='') or (ad.res_money_collect2 ='' and  ad.derived_payment_outcome <> 'Signed') )  THEN ad.bill_number END)", 'count_cash_blank');
+
+  //Cash/Chq/SB
+      $query->addexpression("COUNT(CASE WHEN  pt.field_payment_terms_value = 'Cash/Chq/SB'  AND (CASE WHEN ad.res_money_collect2_edit IN ($cash_chq_sb_lower) THEN 1 ELSE  (ad.res_money_collect2 IN ($cash_chq_sb) OR ad.derived_payment_outcome = 'Signed'  ) END) THEN ad.bill_number END)", 'count_cash_chq_sb');
+      $query->addexpression("COUNT(CASE WHEN  pt.field_payment_terms_value = 'Cash/Chq/SB' AND (CASE WHEN ad.res_money_collect2_edit NOT IN ($cash_chq_sb_lower) THEN 1 ELSE  (ad.res_money_collect2  NOT IN ($cash_chq_sb) AND ad.derived_payment_outcome != 'Signed' ) END) THEN ad.bill_number END)", 'not_count_cash_chq_sb');
+      $query->addexpression("COUNT(CASE WHEN  pt.field_payment_terms_value = 'Cash/Chq/SB' AND ((ad.res_money_collect2 is null  and ad.res_money_collect2_edit is null) or (ad.res_money_collect2 is null  and ad.res_money_collect2_edit ='') or (ad.res_money_collect2 ='' and  ad.derived_payment_outcome <> 'Signed') ) THEN ad.bill_number END)", 'count_cash_sb_blank');
+
+  //Only Cash
+      $query->addexpression("COUNT(CASE WHEN  pt.field_payment_terms_value = 'Only Cash' AND (CASE WHEN ad.res_money_collect2_edit IN ('cash') THEN 1 ELSE  ad.res_money_collect2 IN ('Cash','Cash,Cash')  END) THEN ad.bill_number END)", 'count_only_cash');
+      $query->addexpression("COUNT(CASE WHEN  pt.field_payment_terms_value = 'Only Cash'  AND (CASE WHEN ad.res_money_collect2_edit NOT IN ('cash') THEN 1 ELSE  ((ad.res_money_collect2  NOT IN ('Cash','Cash,Cash') and  ad.res_money_collect2 !='' ) or (ad.res_money_collect2 =''  and ad.derived_payment_outcome = 'Signed')) END) THEN ad.bill_number END)", 'not_count_only_cash');
+      $query->addexpression("COUNT(CASE WHEN  pt.field_payment_terms_value = 'Only Cash'  AND ((ad.res_money_collect2 is null  and ad.res_money_collect2_edit is null) or (ad.res_money_collect2 is null  and ad.res_money_collect2_edit ='') or (ad.res_money_collect2 =''  and ad.derived_payment_outcome <> 'Signed') ) THEN ad.bill_number END)", 'count_only_cash_blank');
+
+  //Cash PF
+      $query->addexpression("COUNT(CASE WHEN  pt.field_payment_terms_value = 'Cash-PF' AND (CASE WHEN ad.res_money_collect2_edit IN ('cash') THEN 1 ELSE  ad.res_money_collect2 IN ('Cash','Cash,Cash')  END) THEN ad.bill_number END)", 'count_only_cash_pf');
+      $query->addexpression("COUNT(CASE WHEN  pt.field_payment_terms_value = 'Cash-PF' AND (CASE WHEN ad.res_money_collect2_edit NOT IN ('cash') THEN 1 ELSE  ((ad.res_money_collect2  NOT IN ('Cash','Cash,Cash') and  ad.res_money_collect2 !='' ) or (ad.res_money_collect2 =''  and ad.derived_payment_outcome = 'Signed')) END) THEN ad.bill_number END)",  'not_count_only_cash_pf');
+      $query->addexpression("COUNT(CASE WHEN  pt.field_payment_terms_value = 'Cash-PF'  AND ((ad.res_money_collect2 is null  and ad.res_money_collect2_edit is null) or (ad.res_money_collect2 is null  and ad.res_money_collect2_edit ='') or (ad.res_money_collect2 =''  and ad.derived_payment_outcome <> 'Signed') ) THEN ad.bill_number END)", 'count_only_cash_blank_pf');
+
+      $result = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+
+      foreach ($result as $val) {
+        //PT header
+        $payment['pt']['name'] = 'PT';
+        $payment['pt']['count_cash_chq' . $i] = 'Compliant';
+        $payment['pt']['not_count_cash_chq' . $i] = 'Not Compliant';
+        $payment['pt']['count_cash_blank' . $i] = 'Not Entered';
+
+        //Cash/Chq
+        $payment['cash_chq']['payment_terms_chq'] = 'Cash/Chq';
+        $payment['cash_chq']['count_cash_chq' . $i] = $val['count_cash_chq'];
+        $payment['cash_chq']['not_count_cash_chq' . $i] = $val['not_count_cash_chq'];
+        $payment['cash_chq']['count_cash_blank' . $i] = $val['count_cash_blank'];
+
+        //Cash/Chq/Sb
+        $payment['cash_chq_sb']['payment_terms_cash_chq_sb'] = 'Cash/Chq/SB';
+        $payment['cash_chq_sb']['count_cash_chq_sb' . $i] = $val['count_cash_chq_sb'];
+        $payment['cash_chq_sb']['not_count_cash_chq_sb' . $i] = $val['not_count_cash_chq_sb'];
+        $payment['cash_chq_sb']['count_cash_sb_blank' . $i] = $val['count_cash_sb_blank'];
+
+        //Only Cash
+        $payment['only_cash']['payment_terms_cash'] = 'Only Cash';
+        $payment['only_cash']['count_only_cash' . $i] = $val['count_only_cash'];
+        $payment['only_cash']['not_count_only_cash' . $i] = $val['not_count_only_cash'];
+        $payment['only_cash']['count_only_cash_blank' . $i] = $val['count_only_cash_blank'];
+
+        //Cash-PF
+        $payment['cash_pf']['payment_terms_cash_pf'] = 'Cash-PF';
+        $payment['cash_pf']['count_only_cash_pf' . $i] = $val['count_only_cash_pf'];
+        $payment['cash_pf']['not_count_only_cash_pf' . $i] = $val['not_count_only_cash_pf'];
+        $payment['cash_pf']['count_only_cash_blank_pf' . $i] = $val['count_only_cash_blank_pf'];
+      }
+    }
+
+
+    foreach ($payment as $key1 => $val1) {
+      $final_result[$key1] = $val1;
+      $j = 0;
+      foreach ($val1 as $k => $v) {
+        $r[$j++] += $v;
+      }
+    }
+    $r[0] = 'Grand Total';
+    $final_result['total'] = $r;
+
+    $output .= "<h3>PT Compliance Report<b> : $distributor_name</b></h3>";
+    $output .= theme('table', array('header' => $header, 'rows' => $final_result, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0'), 'empty' => t('No Records has been found')));
+  
+  }
+  $muldistname = implode(',',$distributor_name_arr);
+  $brand_name = variable_get('email_brand_name','Lakme');
+  $params['subject'] = "$brand_name - PT Compliance Report. $muldistname";
+  $params['body'] = $output;
+  $mail_to = $receiver_email_str;
+  $from = variable_get('from_email');
+
+  $file_name = 'PT_Compliance.csv';
+  $file_uri = 'public://PT_COMPLIANCE/' . $file_name;
+
+  // create directory if not exist
+  $dir = 'public://PT_COMPLIANCE';
+  file_prepare_directory($dir, FILE_CREATE_DIRECTORY);
+
+  $file = fopen($file_uri, 'w');
+
+  $table['header'] = $header;
+  $table['rows'] = $final_result;
+
+  foreach ($table['header'] as $line1) {
+    $all_header[] = $line1['data'];
+    if (!empty($line1['colspan'])) {
+      for ($x = 1; $x < $line1['colspan']; $x++) {
+        $all_header[] = $line1['data'];
+      }
+    }
+  }
+  fputcsv($file, $all_header);
+
+  foreach ($table['rows'] as $line) {
+    fputcsv($file, $line);
+  }
+
+  fclose($file);
+
+  $params['attachment'] = array(
+    'filecontent' => file_get_contents($file_uri),
+    'filename' => $file_name,
+    'filemime' => 'text/csv',
+  );
+  
+  //2nd
+  $file1_name = 'PT_Compliance_Full_Report.csv';
+  $file1_uri = 'public://PT_COMPLIANCE/' . $file1_name;
+
+  $view_output = views_embed_view('bill_return_report', 'views_data_export_2', '');
+  $return = file_unmanaged_save_data($view_output, "$file1_uri", FILE_EXISTS_REPLACE);
+
+  $params['attachment2'] = array(
+    'filecontent' => file_get_contents($file1_uri),
+    'filename' => $file1_name,
+    'filemime' => 'text/csv',
+  );
+//2nd end
+  drupal_mail('email_status', 'productivity_status', $mail_to, LANGUAGE_NONE, $params, $from);
+}
+
+
+function send_email_live_tracking_data_callback($receiver_email_str, $dist_ids_arr){
+    foreach ($dist_ids_arr as $key => $id_value) {
+    $distributor_id = $id_value;   
+    $distributor_name = change_feeds_import_get_distributor_name($distributor_id);
+    if(!empty($distributor_name) && isset($distributor_name)){
+      array_push($distributor_name_arr, $distributor_name);
+    }
+    
+    $today_timestamp = date("Y-m-d H:i:s");
+    if($today_timestamp >= date('Y-m-d 09:00:00') && $today_timestamp <= date('Y-m-d 19:00:00')) {
+      $query = db_select('van_live_tracking', 'vlt');
+      $query->condition('vlt.distributor_id', $distributor_id, '=');
+      $query->fields('vlt', array('tracktime'));
+      $query->orderBy('vlt.tracktime', 'desc');
+      $query->range(0,1);
+      $latest_tracktime = $query->execute()->fetchField();
+
+      $date_tracktime = date('Y-m-d H:i:s', $latest_tracktime);
+      $tracktime = new DateTime($date_tracktime);
+      $current_time = new DateTime($today_timestamp);
+      $duration = $tracktime->diff($current_time); //$duration is a DateInterval object
+      $diff =  $duration->format("%H:%I:%S");
+      $timesplit=explode(':',$diff);
+      $min=($timesplit[0]*60)+($timesplit[1])+($timesplit[2]>30?1:0);
+      if($min > 60) {
+        $output .= "<h3>Data not received from Live Tracking Report past 1 Hour <b>$distributor_name</b></h3>";
+      }
+    }
+  }
+
+        $mul_dist_name = implode(',',$distributor_name_arr);
+        $params['subject'] = "Live Tracking Data. : $mul_dist_name";
+        $params['body'] = $output;
+        $mail_to = variable_get('live_tracking_data_to_email');
+        $from = variable_get('from_email');
+        drupal_mail('email_status', 'daily_data', $mail_to, LANGUAGE_NONE, $params, $from);
 }
