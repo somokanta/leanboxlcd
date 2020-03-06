@@ -206,7 +206,6 @@ function bill_wise_delivery_status_report_callback() {
     $query->fields('order_no', array('field_outlet_order_no_value'));
     $query->fields('bill_area', array('field_bill_area_codes_value'));
     $query->groupBy('ad.bill_number');
-    $query->orderBy('ad.runsheet_number');
     $result = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
 
     $query = db_select('node', 'n');
