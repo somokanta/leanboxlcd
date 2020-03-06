@@ -4062,6 +4062,79 @@ $data['views']['global_facility_name'] = array(
       'handler' => 'views_handler_argument_string',
     ),
   );
+  
+    $data['dispatch_planning_api_data']['corrected_latitude'] = array(
+    'title' => t('Corrected_Latitude'),
+    'help' => t('Corrected_Latitude'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+    
+   $data['dispatch_planning_api_data']['corrected_longitude'] = array(
+    'title' => t('Corrected_Longitude'),
+    'help' => t('Corrected_Longitude'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  ); 
+   
+    $data['dispatch_planning_api_data']['corrected_latlong_timestamp'] = array(
+    'title' => t('Corrected_LatLong_Timestamp'),
+    'help' => t('Corrected_LatLong_Timestamp'),
+    'field' => array(
+      'handler' => 'views_handler_field_date',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort_date',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_date',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_filter_date',
+    ),
+  ); 
+    
+    $data['dispatch_planning_api_data']['corrected_latlong_images'] = array(
+    'title' => t('Corrected_Latlong_Images'),
+    'help' => t('Corrected_Latlong_Images'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );   
+
 
   // ============== change
 
