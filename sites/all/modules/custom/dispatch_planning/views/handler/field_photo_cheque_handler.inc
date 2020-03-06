@@ -44,7 +44,8 @@ class field_photo_cheque_handler extends views_handler_field {
              $path = $photo_cheque;
         }
         
-        $ph_cheque = '<a target="_blank" href="' . $path . '">' . t('Cheque Bill Link'); 
+        $ph_cheque = '<a target="_blank" href="' . $path . '">' . $path ;
+                $ph_cheque .= '</a>';
     }
 
     return $ph_cheque;

@@ -631,6 +631,23 @@ function dispatch_planning_menu() {
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
+
+  $items['bill-wise-delivery-status-report'] = array(
+    'title' => 'Bill wise Delivery Status report',
+    'page callback' => array('bill_wise_delivery_status_report_callback'),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'bill_wise_delivery_status_report.inc',
+  );
+
+  $items['bill-wise-delivery-status-report/export'] = array(
+    'title' => 'Bill wise Delivery Status report Export',
+    'description' => 'Bill wise Delivery Status report Export',
+    'page callback' => array('bill_wise_delivery_status_report_export'),
+    'file' => 'bill_wise_delivery_status_report.inc',
+    'access callback' => TRUE,
+  );
+
   return $items;
 }
 
