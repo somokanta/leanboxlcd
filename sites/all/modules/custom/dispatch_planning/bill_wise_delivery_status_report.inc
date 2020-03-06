@@ -175,23 +175,19 @@ function bill_wise_delivery_status_report_callback() {
     if (!empty($from_bill_date) && !empty($to_bill_date)) {
         $query->condition('ad.bill_date', array($from_bill_date, $to_bill_date), 'BETWEEN');
     }
-    $query->fields('ad', array('bill_number', 'bill_date', 'beat_name', 'party_code', 'party_name', 'bill_value', 'res_status', 'delivery_pending_flag'));
+    $query->fields('ad', array('bill_number', 'bill_date', 'beat_name', 'party_code', 'party_name', 'bill_value'));
     $query->addexpression("MAX(ad.runsheet_number)", 'trip_number');
     $query->addExpression('MIN(ad.dispatch_date)', 'first_dispatch_date');
     $query->addExpression('MAX(ad.dispatch_date)', 'last_dispatch_date');
     $query->addexpression("COUNT(DISTINCT(ad.dispatch_date))", 'count_dispatch_date');
-    $query->addexpression("COUNT(DISTINCT(ad.runsheet_number))", 'trip_count');
     $query->addexpression("ad.fieldExecutiveName", 'fieldExecutiveName');
     $query->addexpression("(CASE WHEN (ad.id = MAX(ad.id)) THEN ad.res_status END)", 'current_bill_status');
-    $query->addexpression("MAX(ad.id)", 'max_id');
-
+    $query->addexpression("(CASE WHEN (ad.id = MAX(ad.id)) THEN ad.delivery_pending_flag END)", 'delivery_pending_flag');
     $query->addexpression("COUNT(DISTINCT(CASE WHEN ad.res_reason_for_failure != 'Outlet not attempted' THEN ad.runsheet_number END))", 'counts_of_attempts');
     $query->addexpression("MIN(CASE WHEN ad.res_reason_for_failure != 'Outlet not attempted' THEN ad.dispatch_date END)", 'first_attempt_date');
-
     $query->addexpression("CASE WHEN (ad.delivery_pending_flag = 0 and (ad.res_status IS NOT NULL or ad.res_status !='')) THEN ad.dispatch_date END", 'delivery_full_returned_date');
     $query->addexpression("CASE WHEN (ad.delivery_pending_flag = 0 and (ad.res_status IS NOT NULL or ad.res_status !='')) THEN ad.runsheet_number END", 'delivered_full_returned_trip_id');
     $query->addexpression("CASE WHEN (ad.delivery_pending_flag = 0 and (ad.res_status IS NOT NULL or ad.res_status !='')) THEN ad.fieldExecutiveName END", 'delivery_full_returned_cashier');
-
     $query->addexpression("(MAX(CASE WHEN ad.res_reason_for_failure != 'Outlet not attempted' THEN ad.dispatch_date END))", 'last_attempt_date');
 
     $query->join('node', 'n', 'n.title = ad.runsheet_number');
@@ -203,16 +199,12 @@ function bill_wise_delivery_status_report_callback() {
     $query->condition('n1.uid', $distributor_id);
     $query->leftjoin('field_data_field_sr_new_bill_date', 'bill_date', 'bill_date.entity_id = n1.nid');
     $query->leftjoin('field_data_field_outlet_order_no', 'order_no', 'order_no.entity_id = n1.nid');
-
     $query->leftjoin('field_data_field_bill_area_codes', 'bill_area', 'bill_area.entity_id = n.nid');
-
     $query->join('dispatch_planning_item_details', 'item_details', 'item_details.trip_bill_reference = ad.id');
     $query->addexpression("COUNT(item_details.sku_code)", 'count_sku_code');
-
     $query->fields('bill_date', array('field_sr_new_bill_date_value'));
     $query->fields('order_no', array('field_outlet_order_no_value'));
     $query->fields('bill_area', array('field_bill_area_codes_value'));
-
     $query->groupBy('ad.bill_number');
     $query->orderBy('ad.runsheet_number');
     $result = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
@@ -238,18 +230,18 @@ function bill_wise_delivery_status_report_callback() {
         $end = new DateTime(date('d-M-y', $val['last_attempt_date']));
         $end->modify('+1 day');
         $interval = $end->diff($start);
-        // total days
-        $days = $interval->days;
-        // create an iterateable period of date (P1D equates to 1 day)
-        $period = new DatePeriod($start, new DateInterval('P1D'), $end);
+        
         if ($val['delivery_pending_flag'] == 0) {
+            // total days
+            $days = $interval->days;
+            // create an iterateable period of date (P1D equates to 1 day)
+            $period = new DatePeriod($start, new DateInterval('P1D'), $end);
+
             foreach ($period as $dt) {
                 $curr = $dt->format('l');
                 if (in_array($curr, $weeklyoff)) {
                     $days--;
-                }
-
-                if (in_array($dt->format('Y-m-d'), $holiday_result)) {
+                } elseif (in_array($dt->format('Y-m-d'), $holiday_result)) {
                     $days--;
                 }
             }
@@ -273,7 +265,6 @@ function bill_wise_delivery_status_report_callback() {
         $row['party_name'] = $val['party_name'];
         $row['count_sku_code'] = $val['count_sku_code'];
         $row['bill_value'] = $val['bill_value'];
-        $row['trip_count'] = $val['trip_count'];
         $row['first_dispatch_date'] = $val['first_dispatch_date'] ? date('d-M-y', $val['first_dispatch_date']) : '';
         $row['count_of_dispatches'] = $val['count_dispatch_date'];
         $row['last_dispatch_date'] = $val['last_dispatch_date'] ? date('d-M-y', $val['last_dispatch_date']) : '';
@@ -288,7 +279,7 @@ function bill_wise_delivery_status_report_callback() {
         $row['delivery_full_returned_cashier'] = $val['delivery_full_returned_cashier'];
         $rows[] = $row;
     }
-    $header = array('Order date', 'Order Number', 'Bill Date', 'Bill No.', 'Beat name', 'Area code', 'Party Code', 'Party name', 'Count of bill lines', 'Sales Value', 'Trip Count', '1st Dispatch Date', 'Count of dispatches', 'Last Dispatch Date', 'Counts of Attempts', '1st Attempt Date', 'Exception status', 'Exception Reason', 'Delivery Days', 'Current Delivery Status', 'Delivery/Full Returned date', 'Delivered/Full Returned Trip id', 'Delivery/Full Returned Cashier');
+    $header = array('Order date', 'Order Number', 'Bill Date', 'Bill No.', 'Beat name', 'Area code', 'Party Code', 'Party name', 'Count of bill lines', 'Sales Value', '1st Dispatch Date', 'Count of dispatches', 'Last Dispatch Date', 'Counts of Attempts', '1st Attempt Date', 'Exception status', 'Exception Reason', 'Delivery Days', 'Current Delivery Status', 'Delivery/Full Returned date', 'Delivered/Full Returned Trip id', 'Delivery/Full Returned Cashier');
 
     $per_page = 10;
     // Initialize the pager
