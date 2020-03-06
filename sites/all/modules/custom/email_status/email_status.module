@@ -1600,8 +1600,8 @@ function get_email_productivity_data_for_loose_confirmation($start_date, $end_da
     $picking[$transaction_date][$picker_name][$type]['pick_confirm_date'] = date('d-m-Y', $pick_confirm_date);
     $picking[$transaction_date][$picker_name][$type]['picking_type'] = $type;
   }
-
-  $loose_confirm_productivity_html = "<h3>Loose Confirmation Productivity For Last 7 Days</h3></br><h3>Loose Confirmation (status:Completed)</h3><table class = 'pp-superwise-table' border='1' cellpadding='5' cellspacing='0'  style='color:#000; font-size: 13px;font-family: arial'>"
+  $distributor_name = change_feeds_import_get_distributor_name($dis_id);
+  $loose_confirm_productivity_html = "<h3>Loose Confirmation Productivity For Last 7 Days : <b>$distributor_name</b></h3></br><h3>Loose Confirmation (status:Completed)</h3><table class = 'pp-superwise-table' border='1' cellpadding='5' cellspacing='0'  style='color:#000; font-size: 13px;font-family: arial'>"
     . "<th>Transaction Date</th>"
     . "<th>Pick Confirm Name</th>"
     . "<th>Pick Confirm Supervisor</th>"
@@ -1728,9 +1728,9 @@ function get_email_productivity_data_for_party_packing($start_date, $end_date = 
     $party_packing[$transaction_date][$party_packer_n][$type]['supervisor_name'] = $value['field_party_packing_supervisor_value'];
     $party_packing[$transaction_date][$party_packer_n][$type]['party_packer_name'] = $party_packer_n;
   }
-
+  $distributor_name = change_feeds_import_get_distributor_name($dis_id);
   $target_data = leanbox_dashboard_target_value_using_voc_name('productivity target');
-  $party_pack_datewise_html = "<h3>Party Packing Productivity For Last 7 Days</h3></br><h3>Party Packing (status:Completed)</h3><table class = 'pp-superwise-table' border='1' cellpadding='5' cellspacing='0'  style='color:#000; font-size: 13px;font-family: arial'>"
+  $party_pack_datewise_html = "<h3>Party Packing Productivity For Last 7 Days : <b> $distributor_name </b></h3></br><h3>Party Packing (status:Completed)</h3><table class = 'pp-superwise-table' border='1' cellpadding='5' cellspacing='0'  style='color:#000; font-size: 13px;font-family: arial'>"
     . "<th>Transaction Date</th>"
     . "<th>Party Packer name</th>"
     . "<th>Party Packing Supervisor</th>"
@@ -1860,9 +1860,10 @@ function get_email_productivity_data_for_picking($start_date, $end_date = FALSE,
     $picking_date = strtotime($transaction_date);
     $picking[$transaction_date][$picker_n][$type][$godown]['picking_date'] = date('d-m-Y',$picking_date);
   }
-
+    //$dis_id
+  $distributor_name = change_feeds_import_get_distributor_name($dis_id);
   $target_data = leanbox_dashboard_target_value_using_voc_name('productivity target');
-  $picking_datewise_html = "<h3>Picking Productivity For Last 7 Days</h3></br><h3>Picking (status:Completed)</h3><table class = 'pp-superwise-table' border='1' cellpadding='5' cellspacing='0'  style='color:#000; font-size: 13px;font-family: arial'>"
+  $picking_datewise_html = "<h3>Picking Productivity For Last 7 Days : <b>$distributor_name</b> </h3></br><h3>Picking (status:Completed)</h3><table class = 'pp-superwise-table' border='1' cellpadding='5' cellspacing='0'  style='color:#000; font-size: 13px;font-family: arial'>"
     . "<th>Transaction Date</th>"
     . "<th>Picker Name</th>"
     . "<th>Picking Supervisor</th>"
@@ -3198,7 +3199,7 @@ function send_email_pl_group_emailer($receiver_email_str,$dist_ids_arr){
       $mtd_html .= $mtd_data;
     }
 
-    $mtd_pending_bill_count_html = "<h3>Last 10 Days Pending Bills Count by Billing Date</h3><b>".$distributor_name."</b>";
+    $mtd_pending_bill_count_html = "<h3>Last 10 Days Pending Bills Count by Billing Date : <b>$distributor_name</b></h3>";
     $mtd_type = 'bill_count';
     $mtd_pending_bill_count_data .= get_mtd_data_pending_bills_count_value_pl_groupwise($distributor_id, $mtd_type);
     if ($mtd_pending_bill_count_data == "No Result Found") {
@@ -3210,7 +3211,7 @@ function send_email_pl_group_emailer($receiver_email_str,$dist_ids_arr){
       $mtd_pending_bill_count_html .= $mtd_pending_bill_count_data;
     }
 
-    $mtd_pending_bill_value_html = "<h3>Last 10 Days Pending Bills Value by Billing Date</h3>"."<b>".$distributor_name."</b>";
+    $mtd_pending_bill_value_html = "<h3>Last 10 Days Pending Bills Value by Billing Date : <b>$distributor_name</b></h3>"
     $mtd_type = 'bill_value';
     $mtd_pending_bill_value_data .= get_mtd_data_pending_bills_count_value_pl_groupwise($distributor_id, $mtd_type);
     if ($mtd_pending_bill_value_data == "No Result Found") {
@@ -3243,12 +3244,15 @@ function send_email_pl_group_emailer($receiver_email_str,$dist_ids_arr){
   //  else {
   //    $mtd_two_day_before_html .= $mtd_two_day_before_data;
   //  }
-    $multiple_distributor_name = implode(', ', $distributor_name_arr);
+
+    //$params['body'] = $yesterday_html . "<br>" . $day_before_yesterday_html . "<br>" . $twoday_before_yesterday_html . "<br>" . $mtd_html . "<br>" . $mtd_one_day_before_html . "<br>" . $mtd_two_day_before_html;
+    $params['body'] .= $mtd_html . "<br>" . $mtd_pending_bill_count_html . "<br>" . $mtd_pending_bill_value_html;  
+    $params['body'] .= "<br>";
+  }
+  
+    $multiple_distributor_name = implode(',', $distributor_name_arr);
     $brand_name = variable_get('email_brand_name','Lakme');        
     $params['subject'] = "$brand_name - PL Group Wise Bill Pendency-".$multiple_distributor_name;
-    //$params['body'] = $yesterday_html . "<br>" . $day_before_yesterday_html . "<br>" . $twoday_before_yesterday_html . "<br>" . $mtd_html . "<br>" . $mtd_one_day_before_html . "<br>" . $mtd_two_day_before_html;
-    $params['body'] = $mtd_html . "<br>" . $mtd_pending_bill_count_html . "<br>" . $mtd_pending_bill_value_html;  
-  }
   
     $mail_to = $receiver_email_str;
     $from = variable_get('from_email');
@@ -3392,8 +3396,8 @@ function send_party_packingand_picking_productivity_mailer($receiver_email_str,$
       $params['body'] .= $loading_html;
       $params['body'] .= "<br>";
     }
-      $multiple_distributor_name = implode(', ', $distributor_name_arr);
-      $params['subject'] = "$brand_name - Loading Productivity Status-$multiple_distributor_name";
+      $multiple_distributor_name = implode(',', $distributor_name_arr);
+      $params['subject'] = "$brand_name - Loading Productivity Status- $multiple_distributor_name";
       $mail_to = $receiver_email_str;
       $from = variable_get('from_email');
       drupal_mail('email_status', 'daily_data', $mail_to, LANGUAGE_NONE, $params, $from); 
@@ -3761,8 +3765,9 @@ function send_email_monthly_trip_summary_callback($receiver_email_str,$dist_ids_
 
       $output .= "<h3>Monthly Trip Summary <b>$distributor_name</b> </h3>";
       $output .= theme('table', array('header' => $header, 'rows' => $full_table, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0'), 'empty' => t('No Records has been found')));
-      $brand_name = variable_get('email_brand_name','Lakme');
+      
   }
+      $brand_name = variable_get('email_brand_name','Lakme');
       $multiple_distributor_name = implode(', ', $distributor_name_arr);
       $params['subject'] = "$brand_name - Monthly Trip Summary".$multiple_distributor_name; 
       $mail_to = $receiver_email_str;
@@ -3798,7 +3803,8 @@ function send_email_exception_mis_callback($receiver_email_str, $dist_ids_arr) {
     // CRM Status of Full Returned Bills
     $crm_status_full_returned_html = get_email_crm_status_full_returned_bills($distributor_id);
     $brand_name = variable_get('email_brand_name','Lakme');
-    $params['body'] .= $pt_ct_not_maintained_html . "<br>" . $child_not_maintained_html . "<br>" . $crm_status_high_discounted_bills_html . "<br>" . $crm_status_signed_bill_html . "<br>" . $crm_status_full_returned_html;    
+    $params['body'] .= $pt_ct_not_maintained_html . "<br>" . $child_not_maintained_html . "<br>" . $crm_status_high_discounted_bills_html . "<br>" . $crm_status_signed_bill_html . "<br>" . $crm_status_full_returned_html;
+    $params['body'] = "<br>";
   }
     $multiple_distributor_name = implode(', ', $distributor_name_arr);
   
