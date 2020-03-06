@@ -106,10 +106,10 @@ function fetch_dispatch_planning_api_data($data) {
             'updated_flag' => 2,
             'updated_time' => REQUEST_TIME,  
             'res_updated_time' => isset($data['transactionDate']) ? strtotime($data['transactionDate']) : 0,//REQUEST_TIME,
-            'corrected_latitude' => isset($data['OutletDetail']['latitude']) ? $data['OutletDetail']['latitude'] : '',//REQUEST_TIME,
-            'corrected_longitude' =>  isset($data['OutletDetail']['longitude']) ? $data['OutletDetail']['longitude'] : '',//REQUEST_TIME,
-            'corrected_latlong_timestamp' => isset($data['OutletDetail']['update_time']) ? strtotime($data['OutletDetail']['update_time']) : 0,//REQUEST_TIME,
-            'corrected_latlong_images' => !empty($corrected_latlong_images) ? $corrected_latlong_images : '',//REQUEST_TIME,
+            'corrected_latitude' => isset($data['OutletDetail']['latitude']) ? $data['OutletDetail']['latitude'] : '',
+            'corrected_longitude' =>  isset($data['OutletDetail']['longitude']) ? $data['OutletDetail']['longitude'] : '',
+            'corrected_latlong_timestamp' => isset($data['OutletDetail']['update_time']) ? strtotime($data['OutletDetail']['update_time']) : 0,
+            'corrected_latlong_images' => !empty($corrected_latlong_images) ? $corrected_latlong_images : '',
 
           ))
           ->condition('referenceNo', $data['referenceNumber'], '=')
