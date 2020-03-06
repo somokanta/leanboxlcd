@@ -226,6 +226,7 @@ function bill_wise_delivery_status_report_callback() {
     $row = array();
 
     foreach ($result as $val) {
+        // Calculate Delivery Days.
         $start = new DateTime(date('d-M-y', $val['bill_date']));
         $end = new DateTime(date('d-M-y', $val['last_attempt_date']));
         $end->modify('+1 day');
@@ -246,6 +247,7 @@ function bill_wise_delivery_status_report_callback() {
                 }
             }
         }
+        // End Delivery Days.
 
         if ($val['current_bill_status'] == 'deliver') {
             $bill_status = 'Delivered';
