@@ -3211,7 +3211,7 @@ function send_email_pl_group_emailer($receiver_email_str,$dist_ids_arr){
       $mtd_pending_bill_count_html .= $mtd_pending_bill_count_data;
     }
 
-    $mtd_pending_bill_value_html = "<h3>Last 10 Days Pending Bills Value by Billing Date : <b>$distributor_name</b></h3>"
+    $mtd_pending_bill_value_html = "<h3>Last 10 Days Pending Bills Value by Billing Date : <b>$distributor_name</b></h3>";
     $mtd_type = 'bill_value';
     $mtd_pending_bill_value_data .= get_mtd_data_pending_bills_count_value_pl_groupwise($distributor_id, $mtd_type);
     if ($mtd_pending_bill_value_data == "No Result Found") {
