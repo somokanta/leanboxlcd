@@ -696,7 +696,7 @@ function send_email_not_attached_trip($receiver_email_str, $dist_ids_arr){
   $output .= "<h3>Bills Not Attached To Trip $distributor_name</h3>";
   $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('border' => '1', 'cellpadding' => '5', 'cellspacing' => '0'), 'empty' => t('No Records has been found')));    
   }
-  $multiple_distributor_name = implode(', ', $distributor_name_arr);
+  $multiple_distributor_name = implode(',', $distributor_name_arr);
   $params['subject'] = "Bills Not Attached To Trip - ".$multiple_distributor_name;
 
   $params['body'] = $output;
