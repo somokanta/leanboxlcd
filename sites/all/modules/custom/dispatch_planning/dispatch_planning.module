@@ -3661,7 +3661,7 @@ function _update_dispatch_planning_api($node) {
         }
         //Delivery App changes as per trips from configuration
         
-        $options = array('headers' => $request_headers, 'method' => 'POST', 'data' => $json_api_data);
+        $options = array('headers' => $request_headers, 'method' => 'POST', 'data' => $json_api_data, 'timeout'=> 300);
         $response_data = drupal_http_request($order_api_url, $options);
 
         $response_data = $response_data->data;
