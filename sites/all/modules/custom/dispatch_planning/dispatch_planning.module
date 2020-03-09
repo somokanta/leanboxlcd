@@ -5020,7 +5020,9 @@ function sdr_api_cron() {
              $van_id = $value->field_entered_prevan_value;
              $bill_number = $value->n1_title;
              $order_number = $value->field_outlet_order_no_value;
-             $box_id = $value->field_crate_id_value;
+             $box_ids = $value->field_crate_id_value;
+             $string = str_replace(' ', '', $box_ids);
+             $box_id = implode(',',array_unique(explode(',', $string)));
              $party_code = $value->n2_title;
              $party_name = $value->field_party_name_value;
              $parent_party_code = $value->n3_title;
