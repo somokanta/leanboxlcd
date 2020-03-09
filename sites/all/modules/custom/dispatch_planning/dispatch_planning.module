@@ -5034,7 +5034,7 @@ function sdr_api_cron() {
             // Order_Box_Details
              $order_box_details[$trip_id]['Order_Box_Details'][$order_number]['Order_Number'] = $order_number;
              $order_box_details[$trip_id]['Order_Box_Details'][$order_number]['Bill_Number'] = $bill_number;
-             $order_box_details[$trip_id]['Order_Box_Details'][$order_number]['Box_ID'] = $box_id;
+             $order_box_details[$trip_id]['Order_Box_Details'][$order_number]['Box_ID'] = explode(",", $box_id);
              $order_box_details[$trip_id]['Order_Box_Details'][$order_number]['Party_Code'] = $party_code;
              $order_box_details[$trip_id]['Order_Box_Details'][$order_number]['Party_Name'] = $party_name;
              $order_box_details[$trip_id]['Order_Box_Details'][$order_number]['Parent_Party_Code'] = $parent_party_code;
