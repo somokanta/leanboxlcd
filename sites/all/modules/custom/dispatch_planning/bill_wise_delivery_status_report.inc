@@ -181,7 +181,7 @@ function bill_wise_delivery_status_report_callback() {
     $query->addExpression('MAX(ad.dispatch_date)', 'last_dispatch_date');
     $query->addexpression("COUNT(DISTINCT(ad.dispatch_date))", 'count_dispatch_date');
     $query->addexpression("ad.fieldExecutiveName", 'fieldExecutiveName');
-    $query->addexpression("(CASE WHEN (ad.id = MAX(ad.id)) AND ad.delivery_pending_flag = 0 THEN ad.res_status END)", 'current_bill_status');
+    $query->addexpression("(CASE WHEN (ad.id = MAX(ad.id)) THEN ad.res_status END)", 'current_bill_status');
     $query->addexpression("(CASE WHEN (ad.id = MAX(ad.id)) THEN ad.delivery_pending_flag END)", 'delivery_pending_flag');
     $query->addexpression("COUNT(DISTINCT(CASE WHEN ad.res_reason_for_failure != 'Outlet not attempted' THEN ad.runsheet_number END))", 'counts_of_attempts');
     $query->addexpression("MIN(CASE WHEN ad.res_reason_for_failure != 'Outlet not attempted' THEN ad.dispatch_date END)", 'first_attempt_date');
@@ -248,12 +248,16 @@ function bill_wise_delivery_status_report_callback() {
         }
         // End Delivery Days.
 
-        if ($val['current_bill_status'] == 'deliver') {
-            $bill_status = 'Delivered';
-        } elseif ($val['current_bill_status'] == 'partial_deliver') {
-            $bill_status = 'Partial Delivered';
-        } elseif ($val['current_bill_status'] == 'undeliver') {
-            $bill_status = 'Full Returned';
+        if ($val['delivery_pending_flag'] == 0) {
+            if ($val['current_bill_status'] == 'deliver') {
+                $bill_status = 'Delivered';
+            } elseif ($val['current_bill_status'] == 'partial_deliver') {
+                $bill_status = 'Partial Delivered';
+            } elseif ($val['current_bill_status'] == 'undeliver') {
+                $bill_status = 'Full Returned';
+            }
+        }else {
+            $bill_status = 'Undeliver';
         }
 
         $row['order_date'] = date('d-M-y', $val['field_sr_new_bill_date_value']);
