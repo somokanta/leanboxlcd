@@ -257,7 +257,7 @@ function bill_wise_delivery_status_report_callback() {
                 $bill_status = 'Full Returned';
             }
         }else {
-            $bill_status = 'Delivery Pending';
+            $bill_status = variable_get('current_delivery_status');;
         }
 
         $row['order_date'] = date('d-M-y', $val['field_sr_new_bill_date_value']);
