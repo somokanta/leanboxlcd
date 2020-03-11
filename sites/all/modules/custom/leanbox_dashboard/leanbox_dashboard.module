@@ -1089,10 +1089,10 @@ function leanbox_dashboard_preprocess_page(&$vars) {
   if ($arg == 'dashboard') {
     drupal_add_js(drupal_get_path('module', 'leanbox_dashboard') . '/js/leanbox_dashboard.js');
   }
-  if (in_array("hul_admin", $roles) && !($arg0 == 'email' && $arg1 == 'weekly-billing-report') || (in_array("super_central_distributor", $roles))) {
+  if (in_array("hul_admin", $roles) && !($arg0 == 'email' && $arg1 == 'weekly-billing-report')) {
     unset($vars['tabs']);
   }
-  if ($arg0 == 'user' && $arg2 == 'edit' && !(in_array("administrator", $roles)) && !(in_array("super_central_distributor", $roles))) {
+  if ($arg0 == 'user' && $arg2 == 'edit' && !(in_array("administrator", $roles))) {
     leanbox_dashboard_removetab('Edit', $vars);
   }
 }
