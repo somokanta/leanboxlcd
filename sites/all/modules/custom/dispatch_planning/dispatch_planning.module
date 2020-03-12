@@ -649,6 +649,12 @@ function dispatch_planning_menu() {
     'access callback' => TRUE,
   );
 
+  $items['admin/config/global-config'] = array(
+      'title' => 'Setting Form For Global Config',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('global_config_form'),
+      'access callback' => 'check_if_fr_role_user_admin',
+    );
   return $items;
 }
 
@@ -5110,4 +5116,16 @@ function get_node_created_time($title, $type, $distributor_id) {
         $return_created_time = $query->execute()->fetchField();
     }
     return $return_created_time;
+}
+
+// Global Configuration form
+function global_config_form($form, $form_state) {
+  $form['current_delivery_status'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Current Delivery Status'),
+      '#description' => t('Bill wise Delivery status report(Current Delivery Status if Bill is declared as Delivery Pending)'),
+      '#default_value' => variable_get('current_delivery_status'),
+      '#required' => TRUE,
+    );
+  return system_settings_form($form);
 }

@@ -201,10 +201,20 @@ function bill_wise_delivery_status_report_callback() {
     $query->leftjoin('field_data_field_outlet_order_no', 'order_no', 'order_no.entity_id = n1.nid');
     $query->leftjoin('field_data_field_bill_area_codes', 'bill_area', 'bill_area.entity_id = n.nid');
     $query->join('dispatch_planning_item_details', 'item_details', 'item_details.trip_bill_reference = ad.id');
+    
+    $query->join('node', 'n2', 'n2.title = ad.party_hll_code');
+    $query->condition('n2.type', 'hul_code_master', '=');
+    $query->condition('n2.uid', $distributor_id);
+    $query->leftjoin('field_data_field_area_code', 'ac', 'ac.entity_id = n2.nid');
+    
+    $query->leftjoin('node', 'n3', 'ac.field_area_code_nid = n3.nid');
+//    $query->condition('n3.type', 'area_code_master', '=');
+    
     $query->addexpression("COUNT(item_details.sku_code)", 'count_sku_code');
     $query->fields('bill_date', array('field_sr_new_bill_date_value'));
     $query->fields('order_no', array('field_outlet_order_no_value'));
     $query->fields('bill_area', array('field_bill_area_codes_value'));
+    $query->fields('n3', array('title'));
     $query->groupBy('ad.bill_number');
     $result = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
 
@@ -228,7 +238,7 @@ function bill_wise_delivery_status_report_callback() {
         // Calculate Delivery Days.
         $start = new DateTime(date('d-M-y', $val['bill_date']));
         $end = new DateTime(date('d-M-y', $val['last_attempt_date']));
-        $end->modify('+1 day');
+//        $end->modify('+1 day');
         $interval = $end->diff($start);
         
         if ($val['delivery_pending_flag'] == 0) {
@@ -257,7 +267,7 @@ function bill_wise_delivery_status_report_callback() {
                 $bill_status = 'Full Returned';
             }
         }else {
-            $bill_status = 'Delivery Pending';
+            $bill_status = variable_get('current_delivery_status');;
         }
 
         $row['order_date'] = date('d-M-y', $val['field_sr_new_bill_date_value']);
@@ -265,7 +275,7 @@ function bill_wise_delivery_status_report_callback() {
         $row['bill_date'] = date('d-M-y', $val['bill_date']);
         $row['bill_number'] = $val['bill_number'];
         $row['beat_name'] = $val['beat_name'];
-        $row['area_code'] = $val['field_bill_area_codes_value'];
+        $row['area_code'] = $val['title'];
         $row['party_code'] = $val['party_code'];
         $row['party_name'] = $val['party_name'];
         $row['count_sku_code'] = $val['count_sku_code'];
