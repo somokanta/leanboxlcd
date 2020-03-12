@@ -5124,7 +5124,7 @@ function global_config_form($form, $form_state) {
   $form['current_delivery_status'] = array(
       '#type' => 'textfield',
       '#title' => t('Current Delivery Status'),
-      '#description' => t('Current Delivery Status'),
+      '#description' => t('Bill wise Delivery status report(Current Delivery Status)'),
       '#default_value' => variable_get('current_delivery_status'),
       '#required' => TRUE,
     );
