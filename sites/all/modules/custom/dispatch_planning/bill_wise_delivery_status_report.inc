@@ -207,11 +207,15 @@ function bill_wise_delivery_status_report_callback() {
     $query->condition('n2.uid', $distributor_id);
     $query->leftjoin('field_data_field_area_code', 'ac', 'ac.entity_id = n2.nid');
     
+    $query->join('node', 'n3', 'ac.field_area_code_nid = n2.nid');
+    $query->condition('n3.type', 'area_code_master', '=');
+    $query->condition('n3.uid', $distributor_id);
+    
     $query->addexpression("COUNT(item_details.sku_code)", 'count_sku_code');
     $query->fields('bill_date', array('field_sr_new_bill_date_value'));
     $query->fields('order_no', array('field_outlet_order_no_value'));
     $query->fields('bill_area', array('field_bill_area_codes_value'));
-    $query->fields('ac', array('field_area_code_value'));
+    $query->fields('n3', array('title'));
     $query->groupBy('ad.bill_number');
     $result = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
 
@@ -272,7 +276,7 @@ function bill_wise_delivery_status_report_callback() {
         $row['bill_date'] = date('d-M-y', $val['bill_date']);
         $row['bill_number'] = $val['bill_number'];
         $row['beat_name'] = $val['beat_name'];
-        $row['area_code'] = $val['field_area_code_value'];
+        $row['area_code'] = $val['title'];
         $row['party_code'] = $val['party_code'];
         $row['party_name'] = $val['party_name'];
         $row['count_sku_code'] = $val['count_sku_code'];
