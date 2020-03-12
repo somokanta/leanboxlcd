@@ -207,8 +207,8 @@ function bill_wise_delivery_status_report_callback() {
     $query->condition('n2.uid', $distributor_id);
     $query->leftjoin('field_data_field_area_code', 'ac', 'ac.entity_id = n2.nid');
     
-    $query->join('node', 'n3', 'ac.field_area_code_nid = n3.nid');
-    $query->condition('n3.type', 'area_code_master', '=');
+    $query->leftjoin('node', 'n3', 'ac.field_area_code_nid = n3.nid');
+//    $query->condition('n3.type', 'area_code_master', '=');
     
     $query->addexpression("COUNT(item_details.sku_code)", 'count_sku_code');
     $query->fields('bill_date', array('field_sr_new_bill_date_value'));
