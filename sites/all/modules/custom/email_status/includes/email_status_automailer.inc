@@ -658,9 +658,10 @@ function send_email_not_attached_trip($receiver_email_str, $dist_ids_arr){
   $distributor_name_arr = array();
   foreach ($dist_ids_arr as $key => $id_value) {
     $distributor_id = $id_value;
-    $distributor_name = change_feeds_import_get_distributor_name($distributor_id);
+    $distributor_name = get_distributor_name($distributor_id);
     if(!empty($distributor_name) && isset($distributor_name)){
-      array_push($distributor_name_arr, $distributor_name);
+      $distributor_name_id_mapping = $distributor_name.'-'.$distributor_id;
+      array_push($distributor_name_arr, $distributor_name_id_mapping);
     }
 
     $yesterday_date = strtotime('-1 day', strtotime(date('Y-m-d')));
@@ -732,9 +733,10 @@ function build_not_attached_trip_table_rows($all_bills){
   $distributor_name_arr = array();
   foreach ($dist_ids_arr as $key => $id_value) {
     $distributor_id = $id_value; //_MARICO_DISTRIBUTOR_ID;    
-    $distributor_name = change_feeds_import_get_distributor_name($distributor_id);
+    $distributor_name = get_distributor_name($distributor_id);
     if(!empty($distributor_name) && isset($distributor_name)){
-      array_push($distributor_name_arr, $distributor_name);
+        $distributor_name_id_mapping = $distributor_name.'-'.$distributor_id;
+        array_push($distributor_name_arr, $distributor_name_id_mapping);
     }
   
     $end = strtotime(date('Y-m-d', strtotime("-2 days"))); //5 march
@@ -799,7 +801,7 @@ function build_not_attached_trip_table_rows($all_bills){
       'filename' => $file_name,
       'filemime' => 'text/csv',
     );
-  $multiple_distributor_name = implode(', ', $distributor_name_arr);
+  $multiple_distributor_name = implode(',', $distributor_name_arr);
   $params['subject'] = "Bills With Status Not Updated - ".$multiple_distributor_name;
   
   $params['body'] = $output1;
@@ -912,9 +914,10 @@ function send_email_quantity_mismatch($receiver_email_str, $dist_ids_arr){
   foreach ($dist_ids_arr as $key => $id_value) {
 
     $distributor_id = $id_value;//$dist_id; //_MARICO_DISTRIBUTOR_ID;
-    $distributor_name = change_feeds_import_get_distributor_name($distributor_id);
+    $distributor_name = get_distributor_name($distributor_id);
     if(!empty($distributor_name) && isset($distributor_name)){
-      array_push($distributor_name_arr, $distributor_name);
+        $distributor_name_id_mapping = $distributor_name.'-'.$distributor_id;
+        array_push($distributor_name_arr, $distributor_name_id_mapping);
     }
   
     $bill_date = strtotime('-2 day', strtotime(date('Y-m-d')));
@@ -955,7 +958,7 @@ function send_email_quantity_mismatch($receiver_email_str, $dist_ids_arr){
       $rows1[] = $val2;
     }
   }
-  $multiple_distributor_name = implode(', ', $distributor_name_arr);
+  $multiple_distributor_name = implode(',', $distributor_name_arr);
   $params['subject'] = "Quantity Mismatched - ".$multiple_distributor_name;
   
   $header = array('RS Name', 'Trip ID', 'Bill No.', 'Bill Date', 'Cashier Name');

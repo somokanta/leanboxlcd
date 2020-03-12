@@ -193,15 +193,15 @@ function email_status_email_form($form, $form_state) {
   );
 
   // PL GROUP Wise OTIF
-  $form['pl_grp_otif_to_email'] = array(
-    '#type' => 'textarea',
-    '#title' => t('Receiver'),
-    '#description' => l($click_here.t('PL GROUP Wise OTIF'), 'email/daily-data-pl',$target),
-    '#default_value' => variable_get('pl_grp_otif_to_email', ''),
-    '#required' => TRUE,
-    '#size' => 60,
-    '#maxlength' => 2048,
-  );
+//  $form['pl_grp_otif_to_email'] = array(
+//    '#type' => 'textarea',
+//    '#title' => t('Receiver'),
+//    '#description' => l($click_here.t('PL GROUP Wise OTIF'), 'email/daily-data-pl',$target),
+//    '#default_value' => variable_get('pl_grp_otif_to_email', ''),
+//    '#required' => TRUE,
+//    '#size' => 60,
+//    '#maxlength' => 2048,
+//  );
 
   // OFD Report
   $form['ofd_to_email'] = array(
@@ -215,15 +215,15 @@ function email_status_email_form($form, $form_state) {
   );
 
   // Payment Collection Status
-  $form['collection_status_to_email'] = array(
-    '#type' => 'textarea',
-    '#title' => t('Receiver'),
-    '#description' =>  l($click_here.t('Payment Collection Status'), 'email/payment-collection-status',$target),
-    '#default_value' => variable_get('collection_status_to_email', ''),
-    '#required' => TRUE,
-    '#size' => 60,
-    '#maxlength' => 2048,
-  );
+//  $form['collection_status_to_email'] = array(
+//    '#type' => 'textarea',
+//    '#title' => t('Receiver'),
+//    '#description' =>  l($click_here.t('Payment Collection Status'), 'email/payment-collection-status',$target),
+//    '#default_value' => variable_get('collection_status_to_email', ''),
+//    '#required' => TRUE,
+//    '#size' => 60,
+//    '#maxlength' => 2048,
+//  );
   
   // Monthly Trip Summary
   $form['monthly_trip_summary_to_email'] = array(
@@ -247,16 +247,16 @@ function email_status_email_form($form, $form_state) {
     '#maxlength' => 2048,
   );
   
-  // Impact Unprocessed
-  $form['impact_unprocessed_to_email'] = array(
-    '#type' => 'textarea',
-    '#title' => t('Receiver'),
-    '#description' => l($click_here.t('Impact Unprocessed'), 'email/impact_unprocessed',$target),
-    '#default_value' => variable_get('impact_unprocessed_to_email', ''),
-    '#required' => TRUE,
-    '#size' => 60,
-    '#maxlength' => 2048,
-  );
+//   Impact Unprocessed
+//  $form['impact_unprocessed_to_email'] = array(
+//    '#type' => 'textarea',
+//    '#title' => t('Receiver'),
+//    '#description' => l($click_here.t('Impact Unprocessed'), 'email/impact_unprocessed',$target),
+//    '#default_value' => variable_get('impact_unprocessed_to_email', ''),
+//    '#required' => TRUE,
+//    '#size' => 60,
+//    '#maxlength' => 2048,
+//  );
   
   // Returns & VRS Productivity
   $form['return_vrs_to_email'] = array(
@@ -302,14 +302,6 @@ function email_status_email_form($form, $form_state) {
     '#maxlength' => 2048,
   );
 
-  // From Email
-  $form['from_email'] = array(
-    '#type' => 'textarea',
-    '#title' => t('Sender'),
-    '#default_value' => variable_get('from_email', ''),
-    '#required' => TRUE,
-  );
-
   // Bills Not Attached To Trip (MRC)
   $form['bills_not_attached_to_trip_to_email'] = array(
     '#type' => 'textarea',
@@ -353,7 +345,15 @@ function email_status_email_form($form, $form_state) {
     '#required' => TRUE,
     '#size' => 60,
     '#maxlength' => 2048,
-  );  
+  );
+
+    // From Email
+  $form['from_email'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Sender'),
+    '#default_value' => variable_get('from_email', ''),
+    '#required' => TRUE,
+  );        
 
   return system_settings_form($form);
 }
@@ -1481,7 +1481,7 @@ function get_email_productivity_data_for_loading($start_date, $end_date = FALSE,
     $table_data[$date][$supervisor]['bill_count'] += $value['field_bill_count_value'];
     $table_data[$date][$supervisor]['total_time'] += $time_per_transaction;
   }
-  $distributor_name = change_feeds_import_get_distributor_name($dis_id);
+  $distributor_name = get_distributor_name($dis_id);
   $loading_productivity_html = "<h3>Loading Productivity For Last 7 Days</h3> : <b>$distributor_name</b></br><h3>Loading Status (status:Completed)</h3><table class = 'pp-superwise-table' border='1' cellpadding='5' cellspacing='0'  style='color:#000; font-size: 13px;font-family: arial'>"
     . "<th>Transaction Date</th>"
     . "<th>Loading Supervisor</th>"
@@ -1600,7 +1600,7 @@ function get_email_productivity_data_for_loose_confirmation($start_date, $end_da
     $picking[$transaction_date][$picker_name][$type]['pick_confirm_date'] = date('d-m-Y', $pick_confirm_date);
     $picking[$transaction_date][$picker_name][$type]['picking_type'] = $type;
   }
-  $distributor_name = change_feeds_import_get_distributor_name($dis_id);
+  $distributor_name = get_distributor_name($dis_id);
   $loose_confirm_productivity_html = "<h3>Loose Confirmation Productivity For Last 7 Days : <b>$distributor_name</b></h3></br><h3>Loose Confirmation (status:Completed)</h3><table class = 'pp-superwise-table' border='1' cellpadding='5' cellspacing='0'  style='color:#000; font-size: 13px;font-family: arial'>"
     . "<th>Transaction Date</th>"
     . "<th>Pick Confirm Name</th>"
@@ -1728,7 +1728,7 @@ function get_email_productivity_data_for_party_packing($start_date, $end_date = 
     $party_packing[$transaction_date][$party_packer_n][$type]['supervisor_name'] = $value['field_party_packing_supervisor_value'];
     $party_packing[$transaction_date][$party_packer_n][$type]['party_packer_name'] = $party_packer_n;
   }
-  $distributor_name = change_feeds_import_get_distributor_name($dis_id);
+  $distributor_name = get_distributor_name($dis_id);
   $target_data = leanbox_dashboard_target_value_using_voc_name('productivity target');
   $party_pack_datewise_html = "<h3>Party Packing Productivity For Last 7 Days : <b> $distributor_name </b></h3></br><h3>Party Packing (status:Completed)</h3><table class = 'pp-superwise-table' border='1' cellpadding='5' cellspacing='0'  style='color:#000; font-size: 13px;font-family: arial'>"
     . "<th>Transaction Date</th>"
@@ -1861,7 +1861,7 @@ function get_email_productivity_data_for_picking($start_date, $end_date = FALSE,
     $picking[$transaction_date][$picker_n][$type][$godown]['picking_date'] = date('d-m-Y',$picking_date);
   }
     //$dis_id
-  $distributor_name = change_feeds_import_get_distributor_name($dis_id);
+  $distributor_name = get_distributor_name($dis_id);
   $target_data = leanbox_dashboard_target_value_using_voc_name('productivity target');
   $picking_datewise_html = "<h3>Picking Productivity For Last 7 Days : <b>$distributor_name</b> </h3></br><h3>Picking (status:Completed)</h3><table class = 'pp-superwise-table' border='1' cellpadding='5' cellspacing='0'  style='color:#000; font-size: 13px;font-family: arial'>"
     . "<th>Transaction Date</th>"
@@ -3124,6 +3124,7 @@ function check_product_validation($distributor_id) {
 
 //PL Group Wise Bill Pendency mailer first in form configuration
 function send_email_pl_group_emailer($receiver_email_str,$dist_ids_arr){
+  $distributor_name_arr = [];
   $todays_date_date = date('Y-m-d');
   $todays_date_date_timestamp = strtotime(date($todays_date_date));
   $current_day = date("d", $todays_date_date_timestamp);
@@ -3183,11 +3184,12 @@ function send_email_pl_group_emailer($receiver_email_str,$dist_ids_arr){
 //  }
   foreach ($dist_ids_arr as $key => $id_value){
     $distributor_id = $id_value;
-    $distributor_name = change_feeds_import_get_distributor_name($distributor_id);
+    $distributor_name = get_distributor_name($distributor_id);
     if(!empty($distributor_name) && isset($distributor_name)){
-      array_push($distributor_name_arr, $distributor_name);
+        $distributor_name_id_mapping = $distributor_name.'-'.$distributor_id;
+        array_push($distributor_name_arr, $distributor_name_id_mapping);
     }
-    $mtd_html = "<h3>Last 10 Days Pending Bills Summary till yesterday (" . $yesterday_date .":"."<b>".$distributor_name."</b>". ")</h3>";
+    $mtd_html = "<h3>Last 10 Days Pending Bills Summary till yesterday (" . $yesterday_date .":"."<b>".$distributor_name_id_mapping."</b>". ")</h3>";
     $mtd_data .= get_pending_bills_pl_group_datewise($twelveday_before_today, $yesterday, $distributor_id);
     if ($mtd_data == "No Result Found") {
       //$header = get_header_of_pl_group();
@@ -3199,7 +3201,7 @@ function send_email_pl_group_emailer($receiver_email_str,$dist_ids_arr){
       $mtd_html .= $mtd_data;
     }
 
-    $mtd_pending_bill_count_html = "<h3>Last 10 Days Pending Bills Count by Billing Date : <b>$distributor_name</b></h3>";
+    $mtd_pending_bill_count_html = "<h3>Last 10 Days Pending Bills Count by Billing Date : <b>$distributor_name_id_mapping</b></h3>";
     $mtd_type = 'bill_count';
     $mtd_pending_bill_count_data .= get_mtd_data_pending_bills_count_value_pl_groupwise($distributor_id, $mtd_type);
     if ($mtd_pending_bill_count_data == "No Result Found") {
@@ -3211,7 +3213,7 @@ function send_email_pl_group_emailer($receiver_email_str,$dist_ids_arr){
       $mtd_pending_bill_count_html .= $mtd_pending_bill_count_data;
     }
 
-    $mtd_pending_bill_value_html = "<h3>Last 10 Days Pending Bills Value by Billing Date : <b>$distributor_name</b></h3>";
+    $mtd_pending_bill_value_html = "<h3>Last 10 Days Pending Bills Value by Billing Date : <b>$distributor_name_id_mapping</b></h3>";
     $mtd_type = 'bill_value';
     $mtd_pending_bill_value_data .= get_mtd_data_pending_bills_count_value_pl_groupwise($distributor_id, $mtd_type);
     if ($mtd_pending_bill_value_data == "No Result Found") {
@@ -3268,11 +3270,11 @@ function send_party_packingand_picking_productivity_mailer($receiver_email_str,$
   $distributor_name_arr = array();
   foreach ($dist_ids_arr as $key => $id_value) { 
     $distributor_id = $id_value;   
-    $distributor_name = change_feeds_import_get_distributor_name($distributor_id);
+    $distributor_name = get_distributor_name($distributor_id);
     if(!empty($distributor_name) && isset($distributor_name)){
-      array_push($distributor_name_arr, $distributor_name);
+        $distributor_name_id_mapping = $distributor_name.'-'.$distributor_id;
+        array_push($distributor_name_arr, $distributor_name_id_mapping);
     }
-    $distributor_name = change_feeds_import_get_distributor_name($distributor_id);
     //$end_date = strtotime('-7 day', date('Y-m-d'));
     //$todays_date_date = strtotime(date('Y-m-d 00:00:00'));
     $end_date = date('Y-m-d', strtotime('-7 day', strtotime(date('Y-m-d'))));
@@ -3381,9 +3383,10 @@ function send_party_packingand_picking_productivity_mailer($receiver_email_str,$
     $distributor_name_arr = array();
     foreach ($dist_ids_arr as $key => $id_value) { 
       $distributor_id = $id_value;   
-      $distributor_name = change_feeds_import_get_distributor_name($distributor_id);
+      $distributor_name = get_distributor_name($distributor_id);
       if(!empty($distributor_name) && isset($distributor_name)){
-        array_push($distributor_name_arr, $distributor_name);
+        $distributor_name_id_mapping = $distributor_name.'-'.$distributor_id;
+        array_push($distributor_name_arr, $distributor_name_id_mapping);
       }
 
       $end_date = date('Y-m-d', strtotime('-7 day', strtotime(date('Y-m-d'))));
@@ -3408,11 +3411,13 @@ function send_party_packingand_picking_productivity_mailer($receiver_email_str,$
 //Pending OFD Sales Beat Wise fourth in form configuration  
 
   function send_email_pending_ofd_salesbeatwise_data_mailer($receiver_email_str,$dist_ids_arr){
+      $distributor_name_arr = [];
     foreach($dist_ids_arr as $key => $id_value) {
       $distributor_id = $id_value;   
-      $distributor_name = change_feeds_import_get_distributor_name($distributor_id);
+      $distributor_name = get_distributor_name($distributor_id);
         if(!empty($distributor_name) && isset($distributor_name)){
-          array_push($distributor_name_arr, $distributor_name);
+            $distributor_name_id_mapping = $distributor_name.'-'.$distributor_id;
+            array_push($distributor_name_arr, $distributor_name_id_mapping);
         }
         $start_date = strtotime('-7 day', strtotime(date('Y-m-d')));
         $end_date = strtotime('-1 day', strtotime(date('Y-m-d')));
@@ -3651,12 +3656,14 @@ function send_party_packingand_picking_productivity_mailer($receiver_email_str,$
  * Function to send auto mailer of Monthly Trip Summary .
  */
 function send_email_monthly_trip_summary_callback($receiver_email_str,$dist_ids_arr) {
+    $distributor_name_arr = [];
   //$distributor_name = change_feeds_import_get_distributor_name($distributor_id);
   foreach($dist_ids_arr as $key => $id_value){
       $distributor_id = $id_value;   
-      $distributor_name = change_feeds_import_get_distributor_name($distributor_id);
+      $distributor_name = get_distributor_name($distributor_id);
         if(!empty($distributor_name) && isset($distributor_name)){
-          array_push($distributor_name_arr, $distributor_name);
+            $distributor_name_id_mapping = $distributor_name.'-'.$distributor_id;
+            array_push($distributor_name_arr, $distributor_name_id_mapping);
         }    
       $start_date = date('Y-m-01');
       $end_date = date('Y-m-d');
@@ -3779,33 +3786,34 @@ function send_email_monthly_trip_summary_callback($receiver_email_str,$dist_ids_
 
 
 function send_email_exception_mis_callback($receiver_email_str, $dist_ids_arr) {
-  foreach ($dist_ids_arr as $key => $id_value) {
-    $distributor_id = $id_value;
-    $distributor_name = change_feeds_import_get_distributor_name($distributor_id);
-    if (!empty($distributor_name) && isset($distributor_name)) {
-      array_push($distributor_name_arr, $distributor_name);
+    $distributor_name_arr = [];
+    foreach ($dist_ids_arr as $key => $id_value) {
+      $distributor_id = $id_value;
+      $distributor_name = get_distributor_name($distributor_id);
+      if (!empty($distributor_name) && isset($distributor_name)) {
+          $distributor_name_id_mapping = $distributor_name.'-'.$distributor_id;
+          array_push($distributor_name_arr, $distributor_name_id_mapping);
+      }
+      //$distributor_id = _DISTRIBUTOR_ID;
+
+      // PT-CT Not Maintained
+      $pt_ct_not_maintained_html = get_email_pt_ct_not_maintained($distributor_id);
+
+      // Child Not Maintained
+      $child_not_maintained_html = get_email_child_not_maintained($distributor_id);
+
+      // CRM Status of High Discounted Bills
+      $crm_status_high_discounted_bills_html = get_email_crm_status_high_discounted_bills($distributor_id);
+
+      // CRM Status of Signed Bills Edit
+      $crm_status_signed_bill_html = get_email_crm_status_signed_bills($distributor_id);
+
+      // CRM Status of Full Returned Bills
+      $crm_status_full_returned_html = get_email_crm_status_full_returned_bills($distributor_id);
+      $brand_name = variable_get('email_brand_name','Lakme');
+      $params['body'] .= $pt_ct_not_maintained_html . "<br>" . $child_not_maintained_html . "<br>" . $crm_status_high_discounted_bills_html . "<br>" . $crm_status_signed_bill_html . "<br>" . $crm_status_full_returned_html;
+      $params['body'] = "<br>";
     }
-    //$distributor_id = _DISTRIBUTOR_ID;
-    $distributor_name = change_feeds_import_get_distributor_name($distributor_id);
-
-    // PT-CT Not Maintained
-    $pt_ct_not_maintained_html = get_email_pt_ct_not_maintained($distributor_id);
-
-    // Child Not Maintained
-    $child_not_maintained_html = get_email_child_not_maintained($distributor_id);
-
-    // CRM Status of High Discounted Bills
-    $crm_status_high_discounted_bills_html = get_email_crm_status_high_discounted_bills($distributor_id);
-
-    // CRM Status of Signed Bills Edit
-    $crm_status_signed_bill_html = get_email_crm_status_signed_bills($distributor_id);
-
-    // CRM Status of Full Returned Bills
-    $crm_status_full_returned_html = get_email_crm_status_full_returned_bills($distributor_id);
-    $brand_name = variable_get('email_brand_name','Lakme');
-    $params['body'] .= $pt_ct_not_maintained_html . "<br>" . $child_not_maintained_html . "<br>" . $crm_status_high_discounted_bills_html . "<br>" . $crm_status_signed_bill_html . "<br>" . $crm_status_full_returned_html;
-    $params['body'] = "<br>";
-  }
     $multiple_distributor_name = implode(', ', $distributor_name_arr);
   
     $params['subject'] = "$brand_name - Exception MIS. : $multiple_distributor_name";
@@ -3884,11 +3892,13 @@ function send_email_exception_mis_callback($receiver_email_str, $dist_ids_arr) {
 
 
 function send_email_return_vrs_prod_callback($receiver_email_str, $dist_ids_arr){
+    $distributor_name_arr = [];
     foreach ($dist_ids_arr as $key => $id_value) {
       $distributor_id = $id_value;
-      $distributor_name = change_feeds_import_get_distributor_name($distributor_id);
+      $distributor_name = get_distributor_name($distributor_id);
       if (!empty($distributor_name) && isset($distributor_name)) {
-        array_push($distributor_name_arr, $distributor_name);
+          $distributor_name_id_mapping = $distributor_name.'-'.$distributor_id;
+          array_push($distributor_name_arr, $distributor_name_id_mapping);
       }
       $get_subdivision_nids = check_product_validation($distributor_id);
     
@@ -4043,11 +4053,13 @@ function send_email_return_vrs_prod_callback($receiver_email_str, $dist_ids_arr)
 
 
 function send_email_del_app_adoption_callback($receiver_email_str, $dist_ids_arr) {
+  $distributor_name_arr = [];
   foreach ($dist_ids_arr as $key => $id_value) {
     $distributor_id = $id_value;   
-    $distributor_name = change_feeds_import_get_distributor_name($distributor_id);
+    $distributor_name = get_distributor_name($distributor_id);
       if(!empty($distributor_name) && isset($distributor_name)){
-        array_push($distributor_name_arr, $distributor_name);
+          $distributor_name_id_mapping = $distributor_name.'-'.$distributor_id;
+          array_push($distributor_name_arr, $distributor_name_id_mapping);
       }
       
     $todays_date = date('Y-m-d');
@@ -4123,11 +4135,13 @@ function send_email_del_app_adoption_callback($receiver_email_str, $dist_ids_arr
 // Delivery pending callback 
 
 function send_email_del_pekding_callback($receiver_email_str, $dist_ids_arr){
+    $distributor_name_arr = [];
     foreach ($dist_ids_arr as $key => $id_value) {
         $distributor_id = $id_value;   
-        $distributor_name = change_feeds_import_get_distributor_name($distributor_id);
+        $distributor_name = get_distributor_name($distributor_id);
         if(!empty($distributor_name) && isset($distributor_name)){
-          array_push($distributor_name_arr, $distributor_name);
+            $distributor_name_id_mapping = $distributor_name.'-'.$distributor_id;
+            array_push($distributor_name_arr, $distributor_name_id_mapping);
         }        
         $start_date = strtotime(date('Y-m-d', strtotime("-15 days")));
         $todays_date = strtotime(date('Y-m-d'));
@@ -4303,11 +4317,13 @@ function getMax($arr) {
     
 
 function send_email_pt_compliance_callback($receiver_email_str, $dist_ids_arr){
+    $distributor_name_arr = [];
     foreach ($dist_ids_arr as $key => $id_value) {
       $distributor_id = $id_value;   
-      $distributor_name = change_feeds_import_get_distributor_name($distributor_id);
+      $distributor_name = get_distributor_name($distributor_id);
       if(!empty($distributor_name) && isset($distributor_name)){
-        array_push($distributor_name_arr, $distributor_name);
+        $distributor_name_id_mapping = $distributor_name.'-'.$distributor_id;
+        array_push($distributor_name_arr, $distributor_name_id_mapping);
       }
      $header[] = array('data' => 'Delivery Confirmation Date');
     for ($i = 1; $i <= 7; $i++) {
@@ -4475,11 +4491,13 @@ function send_email_pt_compliance_callback($receiver_email_str, $dist_ids_arr){
 
 
 function send_email_live_tracking_data_callback($receiver_email_str, $dist_ids_arr){
+    $distributor_name_arr = [];
     foreach ($dist_ids_arr as $key => $id_value) {
     $distributor_id = $id_value;   
-    $distributor_name = change_feeds_import_get_distributor_name($distributor_id);
+    $distributor_name = get_distributor_name($distributor_id);
     if(!empty($distributor_name) && isset($distributor_name)){
-      array_push($distributor_name_arr, $distributor_name);
+        $distributor_name_id_mapping = $distributor_name.'-'.$distributor_id;
+        array_push($distributor_name_arr, $distributor_name_id_mapping);
     }
     
     $today_timestamp = date("Y-m-d H:i:s");
