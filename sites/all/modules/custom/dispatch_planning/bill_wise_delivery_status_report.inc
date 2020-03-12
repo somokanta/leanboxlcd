@@ -217,7 +217,7 @@ function bill_wise_delivery_status_report_callback() {
     $query->fields('n3', array('title'));
     $query->groupBy('ad.bill_number');
     $result = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
-dpm($result);
+
     $query = db_select('node', 'n');
     $query->condition('n.title', $distributor_id);
     $query->condition('n.type', 'pdd_master');
