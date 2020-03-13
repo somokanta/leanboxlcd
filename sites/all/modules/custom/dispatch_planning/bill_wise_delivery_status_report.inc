@@ -251,7 +251,8 @@ function bill_wise_delivery_status_report_callback() {
                 $curr = $dt->format('l');
                 if (in_array($curr, $weeklyoff)) {
                     $days--;
-                } elseif (in_array($dt->format('Y-m-d'), $holiday_result)) {
+                } 
+                if (in_array($dt->format('Y-m-d'), $holiday_result)) {
                     $days--;
                 }
             }
@@ -287,7 +288,7 @@ function bill_wise_delivery_status_report_callback() {
         $row['first_attempt_date'] = $val['first_attempt_date'] ? date('d-M-y', $val['first_attempt_date']) : '';
         $row['exception_status'] = $val['exception_status'];
         $row['exception_reason'] = $val['exception_reason'];
-        $row['delivery_days'] = !empty($val['last_attempt_date']) ? $days : ''; //round($datediff / (60 * 60 * 24));
+        $row['delivery_days'] = (!empty($val['last_attempt_date']) || $val['current_bill_status'] != 'undeliver') ? $days : ''; //round($datediff / (60 * 60 * 24));
         $row['current_delivery_status'] = $bill_status;
         $row['delivery_full_returned_date'] = $val['delivery_full_returned_date'] ? date('d-M-y', $val['delivery_full_returned_date']) : '';
         $row['delivered_full_returned_trip_id'] = $val['delivered_full_returned_trip_id'];
