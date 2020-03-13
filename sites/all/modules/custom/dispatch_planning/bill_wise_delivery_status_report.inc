@@ -31,6 +31,7 @@ function bill_wise_delivery_status_report_form($form, &$form_state) {
     }
     // Central Distributor Logged IN
     if (in_array("central_distributor", $user->roles)) {
+        $central_distributor_id = $distributor_id;
         $distributor_ids = get_distributor_ids();
         unset($distributor_ids[$distributor_id]);
         $distributor_ids = array('' => 'Select') + $distributor_ids;
@@ -47,11 +48,17 @@ function bill_wise_delivery_status_report_form($form, &$form_state) {
     }
     // Child distributor logged in
     else {
+        $central_distributor_id = get_central_distributor_id($distributor_id);
         $form['distributor_id'] = array(
             '#type' => 'hidden',
             '#value' => $distributor_id,
         );
     }
+    
+    $form['central_distributor_id'] = array(
+        '#type' => 'hidden',
+        '#value' => $central_distributor_id,
+    );
 
     $form['from_bill_date'] = array(
         '#type' => 'date_popup',
@@ -128,8 +135,9 @@ function bill_wise_delivery_status_report_form_submit($form, &$form_state) {
     $bill_number = $form_state['values']['bill_number'];
     $party_code = $form_state['values']['party_code'];
     $distributor_id = $form_state['values']['distributor_id'];
+    $central_distributor_id = $form_state['values']['central_distributor_id'];
     if (($form_state['values']["op"] == "Apply") && (arg(0) == 'bill-wise-delivery-status-report')) {
-        drupal_goto('bill-wise-delivery-status-report', array('query' => array('from_bill_date' => $from_bill_date, 'to_bill_date' => $to_bill_date, 'from_dispatch_date' => $from_dispatch_date, 'to_dispatch_date' => $to_dispatch_date, 'bill_number' => $bill_number, 'party_code' => $party_code, 'distributor_id' => $distributor_id)));
+        drupal_goto('bill-wise-delivery-status-report', array('query' => array('from_bill_date' => $from_bill_date, 'to_bill_date' => $to_bill_date, 'from_dispatch_date' => $from_dispatch_date, 'to_dispatch_date' => $to_dispatch_date, 'bill_number' => $bill_number, 'party_code' => $party_code, 'distributor_id' => $distributor_id, 'central_distributor_id' => $central_distributor_id)));
     }
 }
 
@@ -159,6 +167,9 @@ function bill_wise_delivery_status_report_callback() {
     }
     if (isset($_GET['distributor_id'])) {
         $distributor_id = $_GET['distributor_id'];
+    }
+    if (isset($_GET['central_distributor_id'])) {
+        $central_distributor_id = $_GET['central_distributor_id'];
     }
 
     $query = db_select('dispatch_planning_api_data', 'ad');
@@ -217,16 +228,16 @@ function bill_wise_delivery_status_report_callback() {
     $query->fields('n3', array('title'));
     $query->groupBy('ad.bill_number');
     $result = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
-
+    
     $query = db_select('node', 'n');
-    $query->condition('n.title', $distributor_id);
+    $query->condition('n.uid', $central_distributor_id, '=');
     $query->condition('n.type', 'pdd_master');
     $query->leftjoin('field_data_field_day', 'fd', 'fd.entity_id = n.nid');
     $query->fields('fd', array('field_day_value'));
     $weeklyoff = $query->execute()->fetchCol();
 
     $query = db_select('node', 'n');
-    $query->condition('n.title', $distributor_id);
+    $query->condition('n.uid', $central_distributor_id, '=');
     $query->condition('n.type', 'holiday_master');
     $query->leftjoin('field_data_field_holiday', 'hday', 'hday.entity_id = n.nid');
     $query->addExpression("DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(hday.field_holiday_value),'+00:00','+05:30'), '%Y-%m-%d')", 'hdate');
