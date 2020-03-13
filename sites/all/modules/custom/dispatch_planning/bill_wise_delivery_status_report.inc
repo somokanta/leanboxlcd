@@ -218,15 +218,17 @@ function bill_wise_delivery_status_report_callback() {
     $query->groupBy('ad.bill_number');
     $result = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
 
+    $dist_ids = get_distributor_ids();
+    
     $query = db_select('node', 'n');
-    $query->condition('n.title', $distributor_id);
+    $query->condition('n.title', $dist_ids, 'IN');
     $query->condition('n.type', 'pdd_master');
     $query->leftjoin('field_data_field_day', 'fd', 'fd.entity_id = n.nid');
     $query->fields('fd', array('field_day_value'));
     $weeklyoff = $query->execute()->fetchCol();
 
     $query = db_select('node', 'n');
-    $query->condition('n.title', $distributor_id);
+    $query->condition('n.title', $dist_ids, 'IN');
     $query->condition('n.type', 'holiday_master');
     $query->leftjoin('field_data_field_holiday', 'hday', 'hday.entity_id = n.nid');
     $query->addExpression("DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(hday.field_holiday_value),'+00:00','+05:30'), '%Y-%m-%d')", 'hdate');
