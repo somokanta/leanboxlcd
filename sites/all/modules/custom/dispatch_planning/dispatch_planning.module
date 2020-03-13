@@ -5128,5 +5128,26 @@ function global_config_form($form, $form_state) {
       '#default_value' => variable_get('current_delivery_status'),
       '#required' => TRUE,
     );
+  $form['deliver_status'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Deliver Status'),
+      '#description' => t('Bill wise Delivery status report(Current Delivery Status is deliver)'),
+      '#default_value' => variable_get('deliver_status'),
+      '#required' => TRUE,
+    );
+  $form['partial_deliver_status'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Partial Deliver Status'),
+      '#description' => t('Bill wise Delivery status report(Current Delivery Status is partial_deliver)'),
+      '#default_value' => variable_get('partial_deliver_status'),
+      '#required' => TRUE,
+    );
+  $form['undeliver_status'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Undeliver Status'),
+      '#description' => t('Bill wise Delivery status report(Current Delivery Status is undeliver)'),
+      '#default_value' => variable_get('undeliver_status'),
+      '#required' => TRUE,
+    );
   return system_settings_form($form);
 }

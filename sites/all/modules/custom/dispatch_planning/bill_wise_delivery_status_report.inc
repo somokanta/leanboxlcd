@@ -260,14 +260,14 @@ function bill_wise_delivery_status_report_callback() {
 
         if ($val['delivery_pending_flag'] == 0) {
             if ($val['current_bill_status'] == 'deliver') {
-                $bill_status = 'Delivered';
+                $bill_status = variable_get('deliver_status');//'Delivered';
             } elseif ($val['current_bill_status'] == 'partial_deliver') {
-                $bill_status = 'Partial Delivered';
+                $bill_status = variable_get('partial_deliver_status');//'Partial Delivered';
             } elseif ($val['current_bill_status'] == 'undeliver') {
-                $bill_status = 'Full Returned';
+                $bill_status = variable_get('undeliver_status');//'Full Returned';
             }
         }else {
-            $bill_status = variable_get('current_delivery_status');;
+            $bill_status = variable_get('current_delivery_status');
         }
 
         $row['order_date'] = date('d-M-y', $val['field_sr_new_bill_date_value']);
