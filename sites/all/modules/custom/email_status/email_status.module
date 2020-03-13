@@ -1195,7 +1195,7 @@ function get_attachment_productivity_data_for_loose_confirmation($start_date, $e
   $query = db_select('node', 'n');
   $query->condition('n.type', 'pick_confirm');
   $query->join('field_data_field_distributor', 'fd', 'fd.entity_id = n.uid');
-  $query->condition('fd.entity_id', $dis_id, '=');
+  $query->condition('fd.entity_id', $dis_id, 'IN');
   $query->join('field_data_field_pc_picking_date', 'ppd', 'ppd.entity_id = n.nid');
   $query->condition('ppd.field_pc_picking_date_value', array($start_date, $end_date), 'BETWEEN');
   $query->orderBy('ppd.field_pc_picking_date_value', 'DESC');
