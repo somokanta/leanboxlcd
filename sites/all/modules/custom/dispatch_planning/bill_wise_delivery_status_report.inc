@@ -248,8 +248,9 @@ function bill_wise_delivery_status_report_callback() {
     foreach ($result as $val) {
         // Calculate Delivery Days.
         $start = new DateTime(date('d-M-y', $val['bill_date']));
+        $start->modify('+1 day');
         $end = new DateTime(date('d-M-y', $val['last_attempt_date']));
-//        $end->modify('+1 day');
+        $end->modify('+1 day');
         $interval = $end->diff($start);
         
         if ($val['delivery_pending_flag'] == 0) {
