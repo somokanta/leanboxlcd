@@ -204,15 +204,15 @@ function email_status_email_form($form, $form_state) {
 //  );
 
   // OFD Report
-  $form['ofd_to_email'] = array(
-    '#type' => 'textarea',
-    '#title' => t('Receiver'),
-    '#description' => l($click_here.t('OFD Report'), 'email/ofd-report',$target),
-    '#default_value' => variable_get('ofd_to_email', ''),
-    '#required' => TRUE,
-    '#size' => 60,
-    '#maxlength' => 2048,
-  );
+//  $form['ofd_to_email'] = array(
+//    '#type' => 'textarea',
+//    '#title' => t('Receiver'),
+//    '#description' => l($click_here.t('OFD Report'), 'email/ofd-report',$target),
+//    '#default_value' => variable_get('ofd_to_email', ''),
+//    '#required' => TRUE,
+//    '#size' => 60,
+//    '#maxlength' => 2048,
+//  );
 
   // Payment Collection Status
 //  $form['collection_status_to_email'] = array(
