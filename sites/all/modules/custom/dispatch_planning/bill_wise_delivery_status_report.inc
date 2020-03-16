@@ -31,6 +31,7 @@ function bill_wise_delivery_status_report_form($form, &$form_state) {
     }
     // Central Distributor Logged IN
     if (in_array("central_distributor", $user->roles)) {
+        $central_distributor_id = $distributor_id;
         $distributor_ids = get_distributor_ids();
         unset($distributor_ids[$distributor_id]);
         $distributor_ids = array('' => 'Select') + $distributor_ids;
@@ -47,11 +48,17 @@ function bill_wise_delivery_status_report_form($form, &$form_state) {
     }
     // Child distributor logged in
     else {
+        $central_distributor_id = get_central_distributor_id($distributor_id);
         $form['distributor_id'] = array(
             '#type' => 'hidden',
             '#value' => $distributor_id,
         );
     }
+    
+    $form['central_distributor_id'] = array(
+        '#type' => 'hidden',
+        '#value' => $central_distributor_id,
+    );
 
     $form['from_bill_date'] = array(
         '#type' => 'date_popup',
@@ -128,8 +135,9 @@ function bill_wise_delivery_status_report_form_submit($form, &$form_state) {
     $bill_number = $form_state['values']['bill_number'];
     $party_code = $form_state['values']['party_code'];
     $distributor_id = $form_state['values']['distributor_id'];
+    $central_distributor_id = $form_state['values']['central_distributor_id'];
     if (($form_state['values']["op"] == "Apply") && (arg(0) == 'bill-wise-delivery-status-report')) {
-        drupal_goto('bill-wise-delivery-status-report', array('query' => array('from_bill_date' => $from_bill_date, 'to_bill_date' => $to_bill_date, 'from_dispatch_date' => $from_dispatch_date, 'to_dispatch_date' => $to_dispatch_date, 'bill_number' => $bill_number, 'party_code' => $party_code, 'distributor_id' => $distributor_id)));
+        drupal_goto('bill-wise-delivery-status-report', array('query' => array('from_bill_date' => $from_bill_date, 'to_bill_date' => $to_bill_date, 'from_dispatch_date' => $from_dispatch_date, 'to_dispatch_date' => $to_dispatch_date, 'bill_number' => $bill_number, 'party_code' => $party_code, 'distributor_id' => $distributor_id, 'central_distributor_id' => $central_distributor_id)));
     }
 }
 
@@ -160,6 +168,9 @@ function bill_wise_delivery_status_report_callback() {
     if (isset($_GET['distributor_id'])) {
         $distributor_id = $_GET['distributor_id'];
     }
+    if (isset($_GET['central_distributor_id'])) {
+        $central_distributor_id = $_GET['central_distributor_id'];
+    }
 
     $query = db_select('dispatch_planning_api_data', 'ad');
     $query->condition('ad.distributor_id', $distributor_id, '=');
@@ -181,13 +192,13 @@ function bill_wise_delivery_status_report_callback() {
     $query->addExpression('MAX(ad.dispatch_date)', 'last_dispatch_date');
     $query->addexpression("COUNT(DISTINCT(ad.dispatch_date))", 'count_dispatch_date');
     $query->addexpression("ad.fieldExecutiveName", 'fieldExecutiveName');
-    $query->addexpression("(CASE WHEN (ad.id = MAX(ad.id)) THEN ad.res_status END)", 'current_bill_status');
+    $query->addexpression("MAX(CASE WHEN ad.delivery_pending_flag = 0 THEN ad.res_status END)", 'current_bill_status');
     $query->addexpression("(CASE WHEN (ad.id = MAX(ad.id)) THEN ad.delivery_pending_flag END)", 'delivery_pending_flag');
     $query->addexpression("COUNT(DISTINCT(CASE WHEN ad.res_reason_for_failure != 'Outlet not attempted' THEN ad.runsheet_number END))", 'counts_of_attempts');
     $query->addexpression("MIN(CASE WHEN ad.res_reason_for_failure != 'Outlet not attempted' THEN ad.dispatch_date END)", 'first_attempt_date');
-    $query->addexpression("CASE WHEN (ad.delivery_pending_flag = 0 and (ad.res_status IS NOT NULL or ad.res_status !='')) THEN ad.dispatch_date END", 'delivery_full_returned_date');
-    $query->addexpression("CASE WHEN (ad.delivery_pending_flag = 0 and (ad.res_status IS NOT NULL or ad.res_status !='')) THEN ad.runsheet_number END", 'delivered_full_returned_trip_id');
-    $query->addexpression("CASE WHEN (ad.delivery_pending_flag = 0 and (ad.res_status IS NOT NULL or ad.res_status !='')) THEN ad.fieldExecutiveName END", 'delivery_full_returned_cashier');
+    $query->addexpression("MAX(CASE WHEN (ad.delivery_pending_flag = 0 and (ad.res_status IS NOT NULL or ad.res_status !='')) THEN ad.dispatch_date END)", 'delivery_full_returned_date');
+    $query->addexpression("MAX(CASE WHEN (ad.delivery_pending_flag = 0 and (ad.res_status IS NOT NULL or ad.res_status !='')) THEN ad.runsheet_number END)", 'delivered_full_returned_trip_id');
+    $query->addexpression("MAX(CASE WHEN (ad.delivery_pending_flag = 0 and (ad.res_status IS NOT NULL or ad.res_status !='')) THEN ad.fieldExecutiveName END)", 'delivery_full_returned_cashier');
     $query->addexpression("(MAX(CASE WHEN ad.res_reason_for_failure != 'Outlet not attempted' THEN ad.dispatch_date END))", 'last_attempt_date');
 
     $query->join('node', 'n', 'n.title = ad.runsheet_number');
@@ -217,16 +228,16 @@ function bill_wise_delivery_status_report_callback() {
     $query->fields('n3', array('title'));
     $query->groupBy('ad.bill_number');
     $result = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
-
+    
     $query = db_select('node', 'n');
-    $query->condition('n.title', $distributor_id);
+    $query->condition('n.uid', $central_distributor_id, '=');
     $query->condition('n.type', 'pdd_master');
     $query->leftjoin('field_data_field_day', 'fd', 'fd.entity_id = n.nid');
     $query->fields('fd', array('field_day_value'));
     $weeklyoff = $query->execute()->fetchCol();
 
     $query = db_select('node', 'n');
-    $query->condition('n.title', $distributor_id);
+    $query->condition('n.uid', $central_distributor_id, '=');
     $query->condition('n.type', 'holiday_master');
     $query->leftjoin('field_data_field_holiday', 'hday', 'hday.entity_id = n.nid');
     $query->addExpression("DATE_FORMAT(CONVERT_TZ(FROM_UNIXTIME(hday.field_holiday_value),'+00:00','+05:30'), '%Y-%m-%d')", 'hdate');
@@ -237,8 +248,9 @@ function bill_wise_delivery_status_report_callback() {
     foreach ($result as $val) {
         // Calculate Delivery Days.
         $start = new DateTime(date('d-M-y', $val['bill_date']));
+        $start->modify('+1 day');
         $end = new DateTime(date('d-M-y', $val['last_attempt_date']));
-//        $end->modify('+1 day');
+        $end->modify('+1 day');
         $interval = $end->diff($start);
         
         if ($val['delivery_pending_flag'] == 0) {
@@ -251,7 +263,8 @@ function bill_wise_delivery_status_report_callback() {
                 $curr = $dt->format('l');
                 if (in_array($curr, $weeklyoff)) {
                     $days--;
-                } elseif (in_array($dt->format('Y-m-d'), $holiday_result)) {
+                } 
+                if (in_array($dt->format('Y-m-d'), $holiday_result)) {
                     $days--;
                 }
             }
@@ -260,14 +273,14 @@ function bill_wise_delivery_status_report_callback() {
 
         if ($val['delivery_pending_flag'] == 0) {
             if ($val['current_bill_status'] == 'deliver') {
-                $bill_status = 'Delivered';
+                $bill_status = variable_get('deliver_status');//'Delivered';
             } elseif ($val['current_bill_status'] == 'partial_deliver') {
-                $bill_status = 'Partial Delivered';
+                $bill_status = variable_get('partial_deliver_status');//'Partial Delivered';
             } elseif ($val['current_bill_status'] == 'undeliver') {
-                $bill_status = 'Full Returned';
+                $bill_status = variable_get('undeliver_status');//'Full Returned';
             }
         }else {
-            $bill_status = variable_get('current_delivery_status');;
+            $bill_status = variable_get('current_delivery_status');
         }
 
         $row['order_date'] = date('d-M-y', $val['field_sr_new_bill_date_value']);
@@ -287,7 +300,7 @@ function bill_wise_delivery_status_report_callback() {
         $row['first_attempt_date'] = $val['first_attempt_date'] ? date('d-M-y', $val['first_attempt_date']) : '';
         $row['exception_status'] = $val['exception_status'];
         $row['exception_reason'] = $val['exception_reason'];
-        $row['delivery_days'] = !empty($val['last_attempt_date']) ? $days : ''; //round($datediff / (60 * 60 * 24));
+        $row['delivery_days'] = (!empty($val['last_attempt_date']) && $val['current_bill_status'] != 'undeliver') ? $days : ''; //round($datediff / (60 * 60 * 24));
         $row['current_delivery_status'] = $bill_status;
         $row['delivery_full_returned_date'] = $val['delivery_full_returned_date'] ? date('d-M-y', $val['delivery_full_returned_date']) : '';
         $row['delivered_full_returned_trip_id'] = $val['delivered_full_returned_trip_id'];

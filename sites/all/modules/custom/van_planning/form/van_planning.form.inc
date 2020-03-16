@@ -2684,7 +2684,7 @@ function _create_van_submit($form, &$form_state) {
         $node1->field_hht_id[LANGUAGE_NONE][0]['nid'] = get_nid_from_hht_id($val1['hht_id_list'],$central_distributor_id);
         $node1->field_parkstop_count[LANGUAGE_NONE][0]['value'] = $parkstop_count;
 
-        if (!empty($form_state['time_dist'][$van]['dist']) && !empty($form_state['time_dist'][$van]['time'])) {
+        if (!empty($form_state['time_dist'][$van]['dist']) || !empty($form_state['time_dist'][$van]['time'])) {
           $node1->field_sequence_method[LANGUAGE_NONE][0]['value'] = 1; // api
           $node1->field_total_travel_time[LANGUAGE_NONE][0]['value'] = $_SESSION['park_stop'][$van]['time'] ? $_SESSION['park_stop'][$van]['time'] : $form_state['time_dist'][$van]['time'];
           $node1->field_total_distance[LANGUAGE_NONE][0]['value'] = $_SESSION['park_stop'][$van]['dist'] ? $_SESSION['park_stop'][$van]['dist'] : $form_state['time_dist'][$van]['dist'];
@@ -2720,7 +2720,7 @@ function _create_van_submit($form, &$form_state) {
         node_save($node1);
         $trip_nid = $node1->nid;
         // update parkstop response log
-        if (!empty($form_state['time_dist'][$van]['dist']) && !empty($form_state['time_dist'][$van]['time'])) {
+        if (!empty($form_state['time_dist'][$van]['dist']) || !empty($form_state['time_dist'][$van]['time'])) {
           update_parkstop_plotting_log($van, $trip_id, $dis_id,$central_distributor_id);
         }
         //************************************* DISPATCH DATA END ********************************************//
@@ -2728,7 +2728,7 @@ function _create_van_submit($form, &$form_state) {
         $count = 1;
         foreach ($disp_planning[$van]['bill_array'] as $nid => $value2) {
           $node = node_load($nid);
-          if (!empty($form_state['time_dist'][$van]['dist']) && !empty($form_state['time_dist'][$van]['time'])) {
+          if (!empty($form_state['time_dist'][$van]['dist']) || !empty($form_state['time_dist'][$van]['time'])) {
             $node->field_bill_sequence[LANGUAGE_NONE][0]['value'] = $value2['park_seq'] ? $value2['park_seq'] : $count; // $count has no use. kept for safety
             $node->field_drs_sequence[LANGUAGE_NONE][0]['value'] = $value2['sequence'] ? $value2['sequence'] : $count++; //Increament the counter once
             // calculate time and distance
