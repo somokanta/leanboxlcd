@@ -27,7 +27,7 @@ function lcd_retailer_master_api_menu() {
 function get_node_title_using_nid($nid) {
   if (!empty($nid)) {
     $query = db_select('node', 'n');
-    $query->condition('n.nid', $nid,'IN');
+    $query->condition('n.nid', $nid,'=');
     $query->fields('n', array('title'));
     $title = $query->execute()->fetchField();
   }
