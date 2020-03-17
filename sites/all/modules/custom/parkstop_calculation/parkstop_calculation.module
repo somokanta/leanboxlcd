@@ -161,6 +161,18 @@ function parkstop_calculation_api($bills_nid, $distributor_ids, $prevan = 'Van',
       }
     }
   }
+  
+  // M*M for single bill and distance is zero
+  if(empty($req['Van']['StopDetails']) && count($results) == 1){
+    foreach ($results as $key => $val) {
+        $req['Van']['StopDetails'][$i]['To'] = $val['bill_nid'];
+        $req['Van']['StopDetails'][$i]['Distance'] = 0;
+        $req['Van']['StopDetails'][$i]['From'] = $val['bill_nid'];
+        $req['Van']['StopDetails'][$i]['To Lat Long'] = $val['lat'] . "," . $val['lng'];
+        $req['Van']['StopDetails'][$i]['Lat Long'] = $val['lat'] . "," . $val['lng'];
+        $i++; 
+    }
+  }
 
   $request['ClusterData'] = $req;
   $request['TimeData']['WalkingSpeed'] = (int) variable_get('walking_speed', 5);
