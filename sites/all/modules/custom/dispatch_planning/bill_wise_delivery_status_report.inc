@@ -7,8 +7,6 @@
  */
 
 function bill_wise_delivery_status_report_form($form, &$form_state) {
-    global $user;
-    $distributor_id = change_feeds_import_get_distributor_id($user->uid);
 
     if (isset($_GET['from_bill_date'])) {
         $from_bill_date = $_GET['from_bill_date'];
@@ -29,22 +27,30 @@ function bill_wise_delivery_status_report_form($form, &$form_state) {
     if (isset($_GET['party_code'])) {
         $party_code = $_GET['party_code'];
     }
-    // Central Distributor Logged IN
+
+    global $user;
+    $user_id = $user->uid;
+    $distributor_id = change_feeds_import_get_distributor_id($user_id);
+    $central_distributor_id = $distributor_id;
+    $logged_in_distributor_id = $distributor_id;
     if (in_array("central_distributor", $user->roles)) {
-        $central_distributor_id = $distributor_id;
         $distributor_ids = get_distributor_ids();
         unset($distributor_ids[$distributor_id]);
-        $distributor_ids = array('' => 'Select') + $distributor_ids;
-        if (isset($_GET['distributor_id'])) {
-            $distributor_id = $_GET['distributor_id'];
-        }
-        $form['distributor_id'] = array(
-            '#title' => t('Select DistributorID'),
-            '#type' => 'select',
-            '#description' => 'Select DistributorID.',
-            '#options' => $distributor_ids,
-            '#default_value' => $distributor_id,
+        $child_distributors = get_child_distributor_rsname($logged_in_distributor_id);
+        $distributor_ids = array('' => 'Select') + $child_distributors;
+        $form['central_outer'] = array(
+            '#type' => 'markup',
+            '#prefix' => '<div style="color:red"><h3>Note: Select any one  Distributor Name</h3></div>',
         );
+        $form['distributor_id'] = array(
+            '#title' => t('Select Distributor Name'),
+            '#type' => 'select',
+            '#options' => $distributor_ids,
+            '#required' => TRUE,
+            '#prefix' => '<div class="distributor-filter" style="display:inline-block; margin-bottom:20px;">',
+            '#suffix' => '</div>'
+        );
+        $distributor_id = $form_state['input']['distributor_id'];
     }
     // Child distributor logged in
     else {
@@ -54,7 +60,7 @@ function bill_wise_delivery_status_report_form($form, &$form_state) {
             '#value' => $distributor_id,
         );
     }
-    
+
     $form['central_distributor_id'] = array(
         '#type' => 'hidden',
         '#value' => $central_distributor_id,
@@ -220,12 +226,15 @@ function bill_wise_delivery_status_report_callback() {
     
     $query->leftjoin('node', 'n3', 'ac.field_area_code_nid = n3.nid');
 //    $query->condition('n3.type', 'area_code_master', '=');
+    $query->join('users', 'u', 'u.uid = ad.distributor_id');
+    $query->join('field_data_field_distributor_name', 'dn', 'u.uid = dn.entity_id');
     
     $query->addexpression("COUNT(item_details.sku_code)", 'count_sku_code');
     $query->fields('bill_date', array('field_sr_new_bill_date_value'));
     $query->fields('order_no', array('field_outlet_order_no_value'));
     $query->fields('bill_area', array('field_bill_area_codes_value'));
     $query->fields('n3', array('title'));
+    $query->fields('dn', array('field_distributor_name_value'));
     $query->groupBy('ad.bill_number');
     $result = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
     
@@ -305,9 +314,10 @@ function bill_wise_delivery_status_report_callback() {
         $row['delivery_full_returned_date'] = $val['delivery_full_returned_date'] ? date('d-M-y', $val['delivery_full_returned_date']) : '';
         $row['delivered_full_returned_trip_id'] = $val['delivered_full_returned_trip_id'];
         $row['delivery_full_returned_cashier'] = $val['delivery_full_returned_cashier'];
+        $row['distributor_name'] = $val['field_distributor_name_value'];
         $rows[] = $row;
     }
-    $header = array('Order date', 'Order Number', 'Bill Date', 'Bill No.', 'Beat name', 'Area code', 'Party Code', 'Party name', 'Count of bill lines', 'Sales Value', '1st Dispatch Date', 'Count of dispatches', 'Last Dispatch Date', 'Counts of Attempts', '1st Attempt Date', 'Exception status', 'Exception Reason', 'Delivery Days', 'Current Delivery Status', 'Delivery/Full Returned date', 'Delivered/Full Returned Trip id', 'Delivery/Full Returned Cashier');
+    $header = array('Order date', 'Order Number', 'Bill Date', 'Bill No.', 'Beat name', 'Area code', 'Party Code', 'Party name', 'Count of bill lines', 'Sales Value', '1st Dispatch Date', 'Count of dispatches', 'Last Dispatch Date', 'Counts of Attempts', '1st Attempt Date', 'Exception status', 'Exception Reason', 'Delivery Days', 'Current Delivery Status', 'Delivery/Full Returned date', 'Delivered/Full Returned Trip id', 'Delivery/Full Returned Cashier', 'Distributor Name');
 
     $per_page = 10;
     // Initialize the pager
