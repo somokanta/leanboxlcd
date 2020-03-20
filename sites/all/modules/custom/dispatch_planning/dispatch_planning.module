@@ -5033,7 +5033,7 @@ function sdr_api_cron() {
              $party_name = $value->field_party_name_value;
              $parent_party_code = $value->n3_title;
              
-             $box_ids_arr[] = $value->field_crate_id_value;
+//             $box_ids_arr[$bill_number] = $value->field_crate_id_value;
              
             // Trip_Details_Crossdock
              $results['Trip_Details_Crossdock'][$trip_id]['Crossdock_Facility_code'] = $facility_code ? $facility_code : '';
@@ -5066,7 +5066,7 @@ function sdr_api_cron() {
 
         $sql_ins_id = insert_sdr_app_log($trip, $distributor_id, $trip_json);
         
-        if(!in_array('', $box_ids_arr)){
+//        if(!empty($box_ids_arr)){
             $request_headers = array('Content-Type' => 'application/json', 'Authorization' => 'Token 2972f506c41448cb3456c1c074aed6102183aff9');
             $sdr_api_url = variable_get('van_planning_api_to_sdr_url');
             $options = array('headers' => $request_headers, 'method' => 'POST', 'data' => $trip_json);
@@ -5081,7 +5081,7 @@ function sdr_api_cron() {
                 ))
                 ->condition('trip_id', $trip, '=')
                 ->execute();
-        }
+       // }
     }
 
   return " ";
