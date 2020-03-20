@@ -108,7 +108,7 @@ function fetch_dispatch_planning_api_data($data) {
             'res_updated_time' => isset($data['transactionDate']) ? strtotime($data['transactionDate']) : 0,//REQUEST_TIME,
             'corrected_latitude' => isset($data['OutletDetail']['latitude']) ? $data['OutletDetail']['latitude'] : '',
             'corrected_longitude' =>  isset($data['OutletDetail']['longitude']) ? $data['OutletDetail']['longitude'] : '',
-            'corrected_latlong_timestamp' => isset($data['OutletDetail']['update_time']) ? strtotime($data['OutletDetail']['update_time']) : 0,
+            'corrected_latlong_timestamp' => isset($data['OutletDetail']['update_time']) ? ($data['OutletDetail']['update_time']) : 0,
             'corrected_latlong_images' => !empty($corrected_latlong_images) ? $corrected_latlong_images : '',
 
           ))
