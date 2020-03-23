@@ -2750,8 +2750,9 @@ function change_feeds_import_node_presave($node) {
       }
       } */
     // Child user going to upload central master content author id will be 
-    $central_distributor_contents = array('resource_master', 'vehicle_master', 'area_code_master', 'asset_type_master', 'hht_master');
-    if (!in_array('central_distributor', $user->roles) && in_array($node->type,$central_distributor_contents)) {
+    $central_distributor_contents = array('resource_master', 'vehicle_master', 'area_code_master', 'asset_type_master', 'hht_master', 'resources_contract', 'vehicle_contract', 'vehicle_extra_working', 'resource_extra_working');
+    
+    if (!in_array('central_distributor', $user->roles) && in_array($node->type, $central_distributor_contents)) {
         $node->distributorid = get_central_distributor_id($distributor_id);
     }
 
