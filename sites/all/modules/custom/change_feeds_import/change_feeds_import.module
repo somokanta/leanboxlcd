@@ -2752,7 +2752,7 @@ function change_feeds_import_node_presave($node) {
       }
       } */
     // Child user going to upload central master content author id will be 
-    $central_distributor_contents = array('resource_master', 'vehicle_master', 'area_code_master', 'asset_type_master', 'hht_master', 'resources_contract', 'vehicle_contract', 'vehicle_extra_working', 'resource_extra_working', 'resource_leaves');
+    $central_distributor_contents = array('resource_master', 'vehicle_master', 'area_code_master', 'asset_type_master', 'hht_master', 'resources_contract', 'vehicle_contract', 'vehicle_extra_working', 'resource_extra_working', 'resource_leaves','pdd_master','holiday_master','delivery_time_slab','van_stop_master');
     $subadmin_contents = array('sku7_code_master', 'product_category_master', 'product_division_master', 'product_sub_category_master', 'product_validation_master', 'putaway_group_master', 'resource_type', 'reason_for_update_master', 'short_reason_master', 'skill_master', 'trip_undispatch_reasons', 'pricelist_group_master', 'notes_denominations', 'non_bankable_reason_master', 'lb_product_master', 'godown_short_reason_master', 'godown_master', 'gs_claim_reason_master', 'excess_reason_master', 'dispatch_short_reason', 'dispatch_planning_reason_master', 'cancel_discard_reason_master', 'cancel_discard_bills', 'channel_master', 'brand_master', 'bill_not_edited_reason_master', 'bank_master');
     if (!in_array('central_distributor', $user->roles) && in_array($node->type, $central_distributor_contents)) {
         $node->distributorid = get_central_distributor_id($distributor_id);
