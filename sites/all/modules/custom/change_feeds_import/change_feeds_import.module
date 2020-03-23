@@ -1699,7 +1699,7 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
         $entity->feeds_item->skip = TRUE;
     }
     //product_category_master,product_sub_category_master,pt_ct_change_reason_master,sku7_code_master,brand_master,bank_master,denomination_master,short_reason_master,non_bankable_reason_master,cancel_discard_reason_master_importer(custom),reason_for_update_master(custom),
-    $central_level_feeds = array('product_category_master', 'product_sub_category_master', 'pt_ct_change_reason_master', 'sku7_code_master', 'brand_master', 'bank_master', 'denomination_master', 'short_reason_master', 'non_bankable_reason_master', 'cancel_discard_reason_master_importer', 'reason_for_update_master', 'channel_master,pl_group_master');
+    $central_level_feeds = array('product_category_master', 'product_sub_category_master', 'pt_ct_change_reason_master', 'sku7_code_master', 'brand_master', 'bank_master', 'denomination_master', 'short_reason_master', 'non_bankable_reason_master', 'cancel_discard_reason_master_importer', 'reason_for_update_master', 'channel_master','pl_group_master');
 
     if (in_array($entity->feeds_item->id, $central_level_feeds)) {
         $subadmin_uid = get_uid_by_role('sub_admin');
@@ -2755,7 +2755,7 @@ function change_feeds_import_node_presave($node) {
     if (!in_array('central_distributor', $user->roles) && in_array($node->type, $central_distributor_contents)) {
         $node->distributorid = get_central_distributor_id($distributor_id);
     }
-    elseif (!in_array('central_distributor', $user->roles) && in_array($node->type, $subadmin_contents)) {
+    elseif (in_array($node->type, $subadmin_contents)) {
         $subadmin_distributor_id = get_uid_by_role('sub_admin');
         $node->distributorid = $subadmin_distributor_id;
     }
