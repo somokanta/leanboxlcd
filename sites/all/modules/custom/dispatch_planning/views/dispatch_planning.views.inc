@@ -6451,6 +6451,15 @@ $data['views']['global_facility_name'] = array(
         'filter' => array(
             'handler' => 'views_handler_filter_string',
         ),
+        'relationship' => array(
+            'title' => t('SDR APP Distributor ID to Distributor Name'),
+            'help' => t("SDR APP Distributor ID to Distributor Name"),
+            'handler' => 'views_handler_relationship',
+            'base' => 'users',
+            //'entity type' => 'file',
+            'base field' => 'uid',
+            'label' => t('SDR APP Distributor Name relation !field_name', array('!field_name' => 'distributor_id')),
+        ),
     );
 
     $data['sdr_app_log_preprocess']['table']['group'] = t('SDR App Preprocess');
