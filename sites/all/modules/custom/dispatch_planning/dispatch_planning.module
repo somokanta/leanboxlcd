@@ -4970,7 +4970,6 @@ function dispatch_planning_node_presave($node) {
         'distributor_id' => $distributor_id,
         'flag' => 0,
         'created_date' => REQUEST_TIME,
-        'bills' => ''
       ))
       ->execute();
   }
@@ -4978,7 +4977,7 @@ function dispatch_planning_node_presave($node) {
 
 function sdr_api_cron() {
     $query = db_select('sdr_app_log_preprocess', 'sdr');
-    $query->fields('sdr', array('id', 'trip_id', 'distributor_id', 'bills'));
+    $query->fields('sdr', array('id', 'trip_id', 'distributor_id'));
     $query->orderBy('sdr.created_date');
     $query->condition('sdr.flag', 0);
     $query->range(0, 4);
