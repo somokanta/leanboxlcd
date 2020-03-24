@@ -2443,6 +2443,12 @@ function dispatch_planning_update_7147() {
         'description' => t('Trip ID'),
         'type' => 'int',
       ),
+      'bills' => array(
+        'description' => t('Bill Number'),
+        'type' => 'varchar',
+        'length' => 255,
+        'default' => '',
+      ),
       'created_date' => array(
         'description' => 'Created Date',
         'type' => 'int',
