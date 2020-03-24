@@ -116,15 +116,15 @@ function custom_order_box_id_upload_form_validate($form, &$form_state) {
                     if (empty($outlet_order_no)) {
                         $error_message .= "Order Number should not be empty at line " . ($key + 2) . '<br>';
                     }
-//                    if (empty($hul_code)) {
-//                        $error_message .= "Hul code should not be empty at line " . ($key + 2) . '<br>';
-//                    }
-//                    else {
-//                        $hul_code = validate_hul_code($hul_code, $distributor_id);
-//                        if (empty($hul_code)) {
-//                            $error_message .= "HUL Code does not exist in HUL Code Master" . ($key + 2) . '<br>';
-//                        }
-//                    }
+                    if (empty($hul_code)) {
+                        $error_message .= "Hul code should not be empty at line " . ($key + 2) . '<br>';
+                    }
+                    else {
+                        $hul_code = validate_hul_code($hul_code, $distributor_id);
+                        if (empty($hul_code)) {
+                            $error_message .= "HUL Code does not exist in HUL Code Master" . ($key + 2) . '<br>';
+                        }
+                    }
                     $unique_comb = $outlet_order_no . $bill_no . $distributor_id;
                     if (array_key_exists($unique_comb, $res['unique_combination'])) {
                         form_set_error('duplicate_data', t('Duplicate Data Found , Please Remove Duplicate Data and Upload Again.'));
@@ -135,9 +135,9 @@ function custom_order_box_id_upload_form_validate($form, &$form_state) {
                         $error_message .= "Bill Number Ref $bill_no does not exist at line " . ($key + 2) . '<br>';
                     }
                     $crate_ids = check_crate_id_exist($outlet_order_no, $bill_no, $distributor_id,$hul_code); // check crate id in outlet order crate is exist or not
-//                    if (empty($crate_ids[0])) {
-//                        $error_message .= "Invalid Order Number/Bill Number mapping Or Invalid Hul code Or Crate Id for  $bill_no does not exist at line " . ($key + 2) . '<br>';
-//                    }
+                    if (empty($crate_ids[0])) {
+                        $error_message .= "Invalid Order Number/Bill Number mapping Or Invalid Hul code Or Crate Id for  $bill_no does not exist at line " . ($key + 2) . '<br>';
+                    }
                     $order_party_code = get_party_code_of_order_no($outlet_order_no, $distributor_id);
                     $bill_party_code = get_party_code_of_bill_no($bill_no, $distributor_id);
                     $order_party_code = strtolower($order_party_code);
