@@ -116,15 +116,15 @@ function custom_order_box_id_upload_form_validate($form, &$form_state) {
                     if (empty($outlet_order_no)) {
                         $error_message .= "Order Number should not be empty at line " . ($key + 2) . '<br>';
                     }
-                    if (empty($hul_code)) {
-                        $error_message .= "Hul code should not be empty at line " . ($key + 2) . '<br>';
-                    }
-                    else {
-                        $hul_code = validate_hul_code($hul_code, $distributor_id);
-                        if (empty($hul_code)) {
-                            $error_message .= "HUL Code does not exist in HUL Code Master" . ($key + 2) . '<br>';
-                        }
-                    }
+//                    if (empty($hul_code)) {
+//                        $error_message .= "Hul code should not be empty at line " . ($key + 2) . '<br>';
+//                    }
+//                    else {
+//                        $hul_code = validate_hul_code($hul_code, $distributor_id);
+//                        if (empty($hul_code)) {
+//                            $error_message .= "HUL Code does not exist in HUL Code Master" . ($key + 2) . '<br>';
+//                        }
+//                    }
                     $unique_comb = $outlet_order_no . $bill_no . $distributor_id;
                     if (array_key_exists($unique_comb, $res['unique_combination'])) {
                         form_set_error('duplicate_data', t('Duplicate Data Found , Please Remove Duplicate Data and Upload Again.'));
@@ -134,10 +134,10 @@ function custom_order_box_id_upload_form_validate($form, &$form_state) {
                     if (empty($exist_bills[0])) {
                         $error_message .= "Bill Number Ref $bill_no does not exist at line " . ($key + 2) . '<br>';
                     }
-                    $crate_ids = check_crate_id_exist($outlet_order_no, $bill_no, $distributor_id,$hul_code); // check crate id in outlet order crate is exist or not 
-                    if (empty($crate_ids[0])) {
-                        $error_message .= "Invalid Order Number/Bill Number mapping Or Invalid Hul code Or Crate Id for  $bill_no does not exist at line " . ($key + 2) . '<br>';
-                    }
+                    $crate_ids = check_crate_id_exist($outlet_order_no, $bill_no, $distributor_id,$hul_code); // check crate id in outlet order crate is exist or not
+//                    if (empty($crate_ids[0])) {
+//                        $error_message .= "Invalid Order Number/Bill Number mapping Or Invalid Hul code Or Crate Id for  $bill_no does not exist at line " . ($key + 2) . '<br>';
+//                    }
                     $order_party_code = get_party_code_of_order_no($outlet_order_no, $distributor_id);
                     $bill_party_code = get_party_code_of_bill_no($bill_no, $distributor_id);
                     $order_party_code = strtolower($order_party_code);
@@ -192,7 +192,6 @@ function custom_order_box_id_upload_form_submit($form, &$form_state) {
     $operations = array();
     $data_chunk = array_chunk($datas, 300);
     foreach ($data_chunk as $data) {
-
         $operations[] = array('custom_order_box_id_process', array($max, $data, $distributor_id, $file_name, $form_state['distributor_data']));
     }
 
@@ -241,6 +240,8 @@ function custom_order_box_id_process($max, $data, $distributor_id, $file_name, $
         $distributorname = $value['Distributor Name'] ? trim($value['Distributor Name']) : get_distributor_name($dis_id);
         $hul_code = trim($value['Hul Code']);
         $crate_id = check_crate_id_exist($outlet_order_ref, $bill_number, $dis_id,$hul_code);
+        
+        $bill_number_arr[] = trim($value['Bill Ref. No']);
 
         if (!empty($outlet_order_ref)) {
             $query = db_select('node', 'n');
@@ -265,13 +266,31 @@ function custom_order_box_id_process($max, $data, $distributor_id, $file_name, $
               ->fields(array('order_upload_datetime' => REQUEST_TIME))
               ->condition('outlet_order_no', $outlet_order_ref, '=')
               ->condition('distributor_id', $dis_id, '=')
-              ->execute();
+              ->execute();            
         }
         else {
             drupal_set_message("Order Number can't be blank for Bill Number Ref : $bill_number", 'warning');
         }
         //$context['results']['total_lines']++;
     }
+        $trip_id_res = get_trip_from_bill($bill_number_arr, $dis_id);
+        foreach($trip_id_res as $val) {
+            dpm($val);
+            $trip_id = $val->runsheet_number;
+            $bill_numbers = $val->bill_number;
+            if (!empty($trip_id)) {
+                db_insert('sdr_app_log_preprocess') // Table name no longer needs {}
+                        ->fields(array(
+                            'trip_id' => $trip_id,
+                            'distributor_id' => $dis_id,
+                            'flag' => 0,
+                            'created_date' => REQUEST_TIME,
+                            'bills' => $bill_numbers
+                        ))
+                        ->execute();
+            }
+        }
+        
 }
 
 /* function check_crate_id_exist($outlet_order_no, $distributor_id) {
@@ -343,4 +362,27 @@ function validate_hul_code($hul_code,$distributor_id){
   $query->fields('n', array('title'));
   $result = $query->execute()->fetchField();
   return $result;
+}
+
+function get_trip_from_bill($bill_number, $distributor_id) {
+    $query = db_select('dispatch_planning_api_data', 'dp');
+    $query->condition('dp.bill_number', $bill_number, 'IN');
+    $query->condition('dp.distributor_id', $distributor_id);
+    $query->fields('dp', array('runsheet_number'));
+    $query->addExpression("GROUP_CONCAT(DISTINCT bill_number separator ', ')", 'bill_number');
+    $query->groupBy('dp.runsheet_number');
+    $trip_id = $query->execute()->fetchAll();
+    
+//    $query = db_select('node', 'n');
+//    $query->condition('n.title', $bill_number, 'IN');
+//    $query->condition('n.type', 'sales_register_data');
+//    $query->leftjoin('field_data_field_trip_id_reference', 'tr', 'rt.entity_id = n.nid');
+//    $query->leftjoin('node', 'n1', 'rt.field_trip_id_reference_nid = n1.nid');
+//    $query->condition('n1.type', 'dispatch_data');
+//    $query->condition('n.uid', $distributor_id);
+//    $query->fields('n1', array('title'));
+//    $query->groupBy('n1.title');
+//    $trip_id = $query->execute()->fetchCol();
+            
+    return $trip_id;
 }

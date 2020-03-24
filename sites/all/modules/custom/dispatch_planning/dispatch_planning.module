@@ -4970,6 +4970,7 @@ function dispatch_planning_node_presave($node) {
         'distributor_id' => $distributor_id,
         'flag' => 0,
         'created_date' => REQUEST_TIME,
+        'bills' => ''
       ))
       ->execute();
   }
@@ -4977,7 +4978,7 @@ function dispatch_planning_node_presave($node) {
 
 function sdr_api_cron() {
     $query = db_select('sdr_app_log_preprocess', 'sdr');
-    $query->fields('sdr', array('id', 'trip_id', 'distributor_id'));
+    $query->fields('sdr', array('id', 'trip_id', 'distributor_id', 'bills'));
     $query->orderBy('sdr.created_date');
     $query->condition('sdr.flag', 0);
     $query->range(0, 4);
@@ -4986,7 +4987,9 @@ function sdr_api_cron() {
      foreach($trip_id_result as $trip_value){
         $trip = $trip_value->trip_id;
         $distributor_id = $trip_value->distributor_id;
-
+        $bills = array_filter(explode(',',$trip_value->bills));
+        $id = $trip_value->id;
+        
         $query = db_select('node', 'n');
         $query->condition('n.type', 'dispatch_data');
         $query->leftjoin('field_data_field_cashier_name', 'cashier', 'cashier.entity_id = n.nid');
@@ -5005,6 +5008,10 @@ function sdr_api_cron() {
         $query->condition('n3.type', 'hul_code_master');
         $query->condition('n.title', $trip, '=');
         $query->condition('n.uid', $distributor_id);
+        if(!empty($bills)) {
+           $query->condition('n1.title', $bills, 'IN'); 
+        }
+        $query->condition('crate_id.field_crate_id_value', '', '!=');
         $query->isNotNull('crate_id.field_crate_id_value');
         $query->fields('n', array('title', 'uid'));
         $query->fields('cashier', array('field_cashier_name_value'));
@@ -5019,70 +5026,71 @@ function sdr_api_cron() {
         $result = $query->execute()->fetchAll();
 
         $facility_code = get_facility_code_of_distributor($distributor_id);
+        if(!empty($result)) {
+            foreach($result as $key => $value){
+                 $trip_id = $value->title;
+                 $crossdock_distributor_id = $value->uid;
+                 $cashier_name = $value->field_cashier_name_value;
+                 $van_id = $value->field_entered_prevan_value;
+                 $bill_number = $value->n1_title;
+                 $order_number = $value->field_outlet_order_no_value;
+                 $box_ids = $value->field_crate_id_value;
+                 $string = str_replace(' ', '', $box_ids);
+                 $box_id = implode(',',array_unique(explode(',', $string)));
+                 $party_code = $value->n2_title;
+                 $party_name = $value->field_party_name_value;
+                 $parent_party_code = $value->n3_title;
 
-        foreach($result as $key => $value){
-             $trip_id = $value->title;
-             $crossdock_distributor_id = $value->uid;
-             $cashier_name = $value->field_cashier_name_value;
-             $van_id = $value->field_entered_prevan_value;
-             $bill_number = $value->n1_title;
-             $order_number = $value->field_outlet_order_no_value;
-             $box_ids = $value->field_crate_id_value;
-             $string = str_replace(' ', '', $box_ids);
-             $box_id = implode(',',array_unique(explode(',', $string)));
-             $party_code = $value->n2_title;
-             $party_name = $value->field_party_name_value;
-             $parent_party_code = $value->n3_title;
+                // Trip_Details_Crossdock
+                 $results['Trip_Details_Crossdock'][$trip_id]['Crossdock_Facility_code'] = $facility_code ? $facility_code : '';
+                 $results['Trip_Details_Crossdock'][$trip_id]['Crossdock_Trip_ID'] = $trip_id ? $trip_id : '';
+                 $results['Trip_Details_Crossdock'][$trip_id]['Cashier_Name'] = $cashier_name ? $cashier_name : '';
+                 $results['Trip_Details_Crossdock'][$trip_id]['Van_ID'] = $van_id ? $van_id : '';
 
-            // Trip_Details_Crossdock
-             $results['Trip_Details_Crossdock'][$trip_id]['Crossdock_Facility_code'] = $facility_code ? $facility_code : '';
-             $results['Trip_Details_Crossdock'][$trip_id]['Crossdock_Trip_ID'] = $trip_id ? $trip_id : '';
-             $results['Trip_Details_Crossdock'][$trip_id]['Cashier_Name'] = $cashier_name ? $cashier_name : '';
-             $results['Trip_Details_Crossdock'][$trip_id]['Van_ID'] = $van_id ? $van_id : '';
+                // Order_Box_Details
+                 $order_box_details[$trip_id]['Order_Box_Details'][$order_number]['Order_Number'] = $order_number ? $order_number : '';
+                 $order_box_details[$trip_id]['Order_Box_Details'][$order_number]['Bill_Number'] = $bill_number ? $bill_number : '';
+                 $order_box_details[$trip_id]['Order_Box_Details'][$order_number]['Box_ID'] = $box_id ? explode(",", $box_id) : '';
+                 $order_box_details[$trip_id]['Order_Box_Details'][$order_number]['Party_Code'] = $party_code ? $party_code : '';
+                 $order_box_details[$trip_id]['Order_Box_Details'][$order_number]['Party_Name'] = $party_name ? $party_name : '';
+                 $order_box_details[$trip_id]['Order_Box_Details'][$order_number]['Parent_Party_Code'] = $parent_party_code ? $parent_party_code : '';
+                 $order_box_details[$trip_id]['Order_Box_Details'][$order_number]['Crossdock_Distributor_ID'] = $crossdock_distributor_id ? $crossdock_distributor_id : '';
+            }
+            foreach ($order_box_details as $trip_id => $order_box_details_value) {
+                  foreach ($order_box_details_value['Order_Box_Details'] as $order_box_details_value) {
+                      $results['Trip_Details_Crossdock'][$trip_id]['Order_Box_Details'][] = $order_box_details_value;
+                  }
+             }
 
-            // Order_Box_Details
-             $order_box_details[$trip_id]['Order_Box_Details'][$order_number]['Order_Number'] = $order_number ? $order_number : '';
-             $order_box_details[$trip_id]['Order_Box_Details'][$order_number]['Bill_Number'] = $bill_number ? $bill_number : '';
-             $order_box_details[$trip_id]['Order_Box_Details'][$order_number]['Box_ID'] = $box_id ? explode(",", $box_id) : '';
-             $order_box_details[$trip_id]['Order_Box_Details'][$order_number]['Party_Code'] = $party_code ? $party_code : '';
-             $order_box_details[$trip_id]['Order_Box_Details'][$order_number]['Party_Name'] = $party_name ? $party_name : '';
-             $order_box_details[$trip_id]['Order_Box_Details'][$order_number]['Parent_Party_Code'] = $parent_party_code ? $parent_party_code : '';
-             $order_box_details[$trip_id]['Order_Box_Details'][$order_number]['Crossdock_Distributor_ID'] = $crossdock_distributor_id ? $crossdock_distributor_id : '';
+            foreach ($results as $res) {
+                   foreach ($res as $res1) {
+                        $res_main['Trip_Details_Crossdock'] = $res1;
+                  }
+             }
+
+            $trip_json = json_encode($res_main);
+
+            $sql_ins_id = insert_sdr_app_log($trip, $distributor_id, $trip_json);
+
+            $request_headers = array('Content-Type' => 'application/json', 'Authorization' => 'Token 2972f506c41448cb3456c1c074aed6102183aff9');
+            $sdr_api_url = variable_get('van_planning_api_to_sdr_url');
+            $options = array('headers' => $request_headers, 'method' => 'POST', 'data' => $trip_json);
+            $response_data = drupal_http_request($sdr_api_url, $options);
+            $response = $response_data->data;
+            $log_data = $response ? $response : $response_data;
+            update_sdr_app_log($log_data, $sql_ins_id);
         }
-        foreach ($order_box_details as $trip_id => $order_box_details_value) {
-              foreach ($order_box_details_value['Order_Box_Details'] as $order_box_details_value) {
-                  $results['Trip_Details_Crossdock'][$trip_id]['Order_Box_Details'][] = $order_box_details_value;
-              }
-         }
-
-        foreach ($results as $res) {
-               foreach ($res as $res1) {
-                    $res_main['Trip_Details_Crossdock'] = $res1;
-              }
-         }
-
-         unset($order_box_details);
-         unset($results);
-
-        $trip_json = json_encode($res_main);
-
-        $sql_ins_id = insert_sdr_app_log($trip, $distributor_id, $trip_json);
-        
-        $request_headers = array('Content-Type' => 'application/json', 'Authorization' => 'Token 2972f506c41448cb3456c1c074aed6102183aff9');
-        $sdr_api_url = variable_get('van_planning_api_to_sdr_url');
-        $options = array('headers' => $request_headers, 'method' => 'POST', 'data' => $trip_json);
-        $response_data = drupal_http_request($sdr_api_url, $options);
-        $response = $response_data->data;
-        $log_data = $response ? $response : $response_data;
-        update_sdr_app_log($log_data, $sql_ins_id);
-
         db_update('sdr_app_log_preprocess')
             ->fields(array(
               'flag' => 1
             ))
             ->condition('trip_id', $trip, '=')
+            ->condition('id', $id, '=')
             ->execute();
+        
+        
     }
+    unset($res_main);
 
   return " ";
 }
