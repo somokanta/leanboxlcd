@@ -4977,13 +4977,13 @@ function dispatch_planning_node_presave($node) {
 
 function sdr_api_cron() {
     $query = db_select('sdr_app_log_preprocess', 'sdr');
-    $query->fields('sdr', array('trip_id', 'distributor_id'));
+    $query->fields('sdr', array('id', 'trip_id', 'distributor_id'));
     $query->orderBy('sdr.created_date');
     $query->condition('sdr.flag', 0);
     $query->range(0, 4);
     $trip_id_result = $query->execute()->fetchAll();
 
-    foreach($trip_id_result as $trip_value){
+     foreach($trip_id_result as $trip_value){
         $trip = $trip_value->trip_id;
         $distributor_id = $trip_value->distributor_id;
 
@@ -5033,7 +5033,7 @@ function sdr_api_cron() {
              $party_code = $value->n2_title;
              $party_name = $value->field_party_name_value;
              $parent_party_code = $value->n3_title;
-             
+
             // Trip_Details_Crossdock
              $results['Trip_Details_Crossdock'][$trip_id]['Crossdock_Facility_code'] = $facility_code ? $facility_code : '';
              $results['Trip_Details_Crossdock'][$trip_id]['Crossdock_Trip_ID'] = $trip_id ? $trip_id : '';
@@ -5049,18 +5049,21 @@ function sdr_api_cron() {
              $order_box_details[$trip_id]['Order_Box_Details'][$order_number]['Parent_Party_Code'] = $parent_party_code ? $parent_party_code : '';
              $order_box_details[$trip_id]['Order_Box_Details'][$order_number]['Crossdock_Distributor_ID'] = $crossdock_distributor_id ? $crossdock_distributor_id : '';
         }
-
         foreach ($order_box_details as $trip_id => $order_box_details_value) {
-            foreach ($order_box_details_value['Order_Box_Details'] as $order_box_details_value) {
-                $results['Trip_Details_Crossdock'][$trip_id]['Order_Box_Details'][] = $order_box_details_value;
-            }
-        }
+              foreach ($order_box_details_value['Order_Box_Details'] as $order_box_details_value) {
+                  $results['Trip_Details_Crossdock'][$trip_id]['Order_Box_Details'][] = $order_box_details_value;
+              }
+         }
 
         foreach ($results as $res) {
-            foreach ($res as $res1) {
-                $res_main['Trip_Details_Crossdock'][] = $res1;
-            }
-        }
+               foreach ($res as $res1) {
+                    $res_main['Trip_Details_Crossdock'] = $res1;
+              }
+         }
+
+         unset($order_box_details);
+         unset($results);
+
         $trip_json = json_encode($res_main);
 
         $sql_ins_id = insert_sdr_app_log($trip, $distributor_id, $trip_json);
