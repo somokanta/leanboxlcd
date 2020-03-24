@@ -266,7 +266,7 @@ function custom_order_box_id_process($max, $data, $distributor_id, $file_name, $
               ->fields(array('order_upload_datetime' => REQUEST_TIME))
               ->condition('outlet_order_no', $outlet_order_ref, '=')
               ->condition('distributor_id', $dis_id, '=')
-              ->execute();            
+              ->execute();
         }
         else {
             drupal_set_message("Order Number can't be blank for Bill Number Ref : $bill_number", 'warning');
@@ -275,7 +275,6 @@ function custom_order_box_id_process($max, $data, $distributor_id, $file_name, $
     }
         $trip_id_res = get_trip_from_bill($bill_number_arr, $dis_id);
         foreach($trip_id_res as $val) {
-            dpm($val);
             $trip_id = $val->runsheet_number;
             $bill_numbers = $val->bill_number;
             if (!empty($trip_id)) {
@@ -372,17 +371,6 @@ function get_trip_from_bill($bill_number, $distributor_id) {
     $query->addExpression("GROUP_CONCAT(DISTINCT bill_number separator ', ')", 'bill_number');
     $query->groupBy('dp.runsheet_number');
     $trip_id = $query->execute()->fetchAll();
-    
-//    $query = db_select('node', 'n');
-//    $query->condition('n.title', $bill_number, 'IN');
-//    $query->condition('n.type', 'sales_register_data');
-//    $query->leftjoin('field_data_field_trip_id_reference', 'tr', 'rt.entity_id = n.nid');
-//    $query->leftjoin('node', 'n1', 'rt.field_trip_id_reference_nid = n1.nid');
-//    $query->condition('n1.type', 'dispatch_data');
-//    $query->condition('n.uid', $distributor_id);
-//    $query->fields('n1', array('title'));
-//    $query->groupBy('n1.title');
-//    $trip_id = $query->execute()->fetchCol();
             
     return $trip_id;
 }
