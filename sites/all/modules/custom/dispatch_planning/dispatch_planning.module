@@ -4985,9 +4985,12 @@ function sdr_api_cron() {
     $trip_id_result = $query->execute()->fetchAll();
 
      foreach($trip_id_result as $trip_value){
+        //Abhishek unset all array inside this foreach so that for next trip i won't concate.
+        $results = $res_main = $order_box_details = [];
+
         $trip = $trip_value->trip_id;
         $distributor_id = $trip_value->distributor_id;
-        $bills = array_filter(explode(',',$trip_value->bills));
+        $bills = array_filter(explode(', ',$trip_value->bills));
         $id = $trip_value->id;
         
         $query = db_select('node', 'n');
@@ -5064,7 +5067,7 @@ function sdr_api_cron() {
 
             foreach ($results as $res) {
                    foreach ($res as $res1) {
-                        $res_main['Trip_Details_Crossdock'] = $res1;
+                        $res_main['Trip_Details_Crossdock'][] = $res1;
                   }
              }
 
@@ -5086,11 +5089,8 @@ function sdr_api_cron() {
             ))
             ->condition('trip_id', $trip, '=')
             ->condition('id', $id, '=')
-            ->execute();
-        
-        
+            ->execute();  
     }
-    unset($res_main);
 
   return " ";
 }
