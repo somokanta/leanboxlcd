@@ -26,10 +26,10 @@ class FeedsNodeCustomProcessor extends FeedsNodeProcessor {
                         $distributor_id = !empty($dist) ? $dist : $distributor_id;
                     }
                      // if any of the child logged in to update central master content
-                    elseif (!in_array('central_distributor', $user->roles) && in_array($source->id,$central_distributor_contents)) {
+                    if (!in_array('central_distributor', $user->roles) && in_array($source->id,$central_distributor_contents)) {
                         $distributor_id = get_central_distributor_id($distributor_id);
                     }
-                    elseif (in_array($source->id, $subadmin_contents)) {
+                    if (in_array($source->id, $subadmin_contents)) {
                         $subadmin_distributor_id = get_uid_by_role('sub_admin');
                         $distributor_id = $subadmin_distributor_id;
                     }
