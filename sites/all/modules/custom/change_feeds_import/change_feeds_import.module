@@ -2597,8 +2597,6 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
             $entity->feeds_item->skip = TRUE;
         }
     }
-  
-    
 }
 
 // function check trip type exist in system
@@ -2752,7 +2750,7 @@ function change_feeds_import_node_presave($node) {
       }
       } */
     // Child user going to upload central master content author id will be 
-    $central_distributor_contents = array('resource_master', 'vehicle_master', 'area_code_master', 'asset_type_master', 'hht_master', 'resources_contract', 'vehicle_contract', 'vehicle_extra_working', 'resource_extra_working', 'resource_leaves','pdd_master','holiday_master','delivery_time_slab','van_stop_master');
+    $central_distributor_contents = array('resource_master', 'vehicle_master', 'area_code_master', 'asset_type_master', 'hht_master', 'resources_contract', 'vehicle_contract', 'vehicle_extra_working', 'resource_extra_working', 'resource_leaves', 'pdd_master', 'holiday_master', 'delivery_time_slab', 'van_stop_master');
     $subadmin_contents = array('sku7_code_master', 'product_category_master', 'product_division_master', 'product_sub_category_master', 'product_validation_master', 'putaway_group_master', 'resource_type', 'reason_for_update_master', 'short_reason_master', 'skill_master', 'trip_undispatch_reasons', 'pricelist_group_master', 'notes_denominations', 'non_bankable_reason_master', 'lb_product_master', 'godown_short_reason_master', 'godown_master', 'gs_claim_reason_master', 'excess_reason_master', 'dispatch_short_reason', 'dispatch_planning_reason_master', 'cancel_discard_reason_master', 'cancel_discard_bills', 'channel_master', 'brand_master', 'bill_not_edited_reason_master', 'bank_master');
     if (!in_array('central_distributor', $user->roles) && in_array($node->type, $central_distributor_contents)) {
         $node->distributorid = get_central_distributor_id($distributor_id);
@@ -4749,19 +4747,21 @@ function get_central_distributor_id($child_distributor_id) {
  */
 
 // This function returns logged user related distributor_ids
-function get_child_distributor_rsname() {
+function get_child_distributor_rsname($central_rs_distributor_ids = null) {
     global $user;
     $res = array();
     global $table_name;
     global $table_column;
-    $sibling_filter = 0;
+    $sibling_filter = $super_central_filter = 0;
     $distributor_id = change_feeds_import_get_distributor_id($user->uid);
     $distributor_ids = array();
     /* /Super Central Distributor login it returns childs of super central such as central_rs1,central_rs2
      *  Having to fech child distributor_id of each central rs
      */
     if (in_array('super_central_distributor', $user->roles)) {
-        $central_rs_distributor_ids = get_child_distributor_ids($distributor_id);
+        if (empty($central_rs_distributor_ids)) {
+            $central_rs_distributor_ids = get_child_distributor_ids($distributor_id);
+        }
         if (!empty($central_rs_distributor_ids)) {
             foreach ($central_rs_distributor_ids as $central_rs_distributor_id) {
                 $child_distributor_ids = get_child_distributor_ids($central_rs_distributor_id);
@@ -4770,6 +4770,8 @@ function get_child_distributor_rsname() {
                 }
             }
         }
+        
+        $super_central_filter = 1;
     }
     // if central rs logged in central child's returns
     else if (in_array('central_distributor', $user->roles)) {
@@ -4786,8 +4788,10 @@ function get_child_distributor_rsname() {
         }
         $sibling_filter = 1;
     }
+    // Sibling Central,super central get same distributor name in multiple
+    // facility code  so that append distributorname-facility code name
 
-    if ($sibling_filter == 1 && !empty($distributor_ids)) {
+    if (($sibling_filter == 1 || $super_central_filter == 1) && !empty($distributor_ids)) {
         // Here distributor name is same for two location so have to append location name after-distributor name
         $query = db_select('field_data_field_central_distributorid_ref', 'cdr');
         $query->join($table_name, 'rs', 'cdr.entity_id = rs.entity_id');
