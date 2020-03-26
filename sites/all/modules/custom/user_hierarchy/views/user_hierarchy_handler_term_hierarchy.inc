@@ -106,7 +106,7 @@ class user_hierarchy_handler_term_hierarchy extends views_handler_field {
                 $distributor_id = get_central_distributor_id_of_facility_code($facility_code);
             }
             $child_distributors = get_child_distributor_rsname($distributor_id);
-            $distributor_ids = array('' => 'Select') + $child_distributors;
+            $distributor_ids = array('0' => 'Select') + $child_distributors;
         }
         if (isset($_GET['user_hierarchy_values'])) {
             $default_value = $_GET['user_hierarchy_values'];
