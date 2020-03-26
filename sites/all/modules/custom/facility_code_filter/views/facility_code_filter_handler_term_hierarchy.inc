@@ -36,13 +36,13 @@ class facility_code_filter_handler_term_hierarchy extends views_handler_field {
         global $user;
         $view = $this->view;
         $selected_distributor_id = $view->exposed_input['user_hierarchy_values'];
-        $selected_facility_codes = $view->exposed_input['facility_code'];
-        if (!empty($view) && !empty($selected_facility_codes)) {
+        $selected_facility_code = $view->exposed_input['facility_code'];
+        if (!empty($view) && !empty($selected_facility_code)) {
             // Fetch all distributor ids of selected facility code
             $query = db_select('field_data_field_central_distributorid_ref', 'cdr');
             $query->join('field_data_field_distributor', 'distributor', 'cdr.entity_id = distributor.entity_id');
             $query->join('field_data_field_facility_code', 'facility_code', 'facility_code.entity_id = distributor.entity_id');
-            $query->condition('facility_code.field_facility_code_tid', $selected_facility_codes, 'IN');
+            $query->condition('facility_code.field_facility_code_tid', $selected_facility_code, '=');
             $query->fields('distributor', array('field_distributor_value'));
             $facility_distributor_ids = $query->execute()->fetchAllKeyed(0, 0); // will get child uids=>rs_name
             if (!empty($facility_distributor_ids)) {
@@ -93,11 +93,11 @@ class facility_code_filter_handler_term_hierarchy extends views_handler_field {
                 '#title' => t('Select Facility Code'),
                 '#type' => 'select',
                 '#description' => 'Facility Code.',
-                '#attributes'=>array('style'=>"height:70px;"),
-                '#multiple' => TRUE,
+               // '#attributes'=>array('style'=>"height:70px;"),
+               // '#multiple' => TRUE,
                 '#default_value' => $default_value,
                 '#options' => $facility,
-                '#weight' => 1,
+                '#weight' => -25,
             );
         }
         return $form;
