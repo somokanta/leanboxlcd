@@ -236,3 +236,18 @@ function user_hierarchy_user_register_validate($form, &$form_state) {
     $form_state['values']['field_distributor']['und'][0]['value'] = $form_state['values']['field_distributor_custom'];
   }
 }
+
+function get_central_distributor_id_of_facility_code($facility_code) {
+    if (!empty($facility_code)) {
+        $query = db_select('field_data_field_central_distributorid_ref', 'cdr');
+        $query->join('field_data_field_distributor', 'distributor', 'cdr.entity_id = distributor.entity_id');
+        $query->join('field_data_field_facility_code', 'facility_code', 'facility_code.entity_id = distributor.entity_id');
+        $query->condition('facility_code.field_facility_code_tid', $facility_code, '=');
+        $query->fields('distributor', array('field_distributor_value'));
+        $query->join('users_roles', 'users_roles', 'users_roles.uid = distributor.entity_id');
+        $query->join('role', 'role', 'role.rid = users_roles.rid');
+        $query->condition('role.name', 'central_distributor', '=');
+        $facility_central_distributor_ids = $query->execute()->fetchAllKeyed(0, 0);
+    }
+    return $facility_central_distributor_ids;
+}
