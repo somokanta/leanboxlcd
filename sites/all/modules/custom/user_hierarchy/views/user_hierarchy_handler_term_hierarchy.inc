@@ -104,13 +104,15 @@ class user_hierarchy_handler_term_hierarchy extends views_handler_field {
                 $facility_code = $_GET['facility_code'];
                 // central Distributor ID of facility Code
                 $distributor_id = get_central_distributor_id_of_facility_code($facility_code);
-             
             }
             $child_distributors = get_child_distributor_rsname($distributor_id);
             $distributor_ids = array('' => 'Select') + $child_distributors;
         }
         if (isset($_GET['user_hierarchy_values'])) {
             $default_value = $_GET['user_hierarchy_values'];
+        }
+        if (!isset($_GET['user_hierarchy_values'])) {
+            $_GET['user_hierarchy_values'] = 'All';
         }
         $form['expose']['user_hierarchy_values'] = array(
           '#title' => t('Select Distributor Name'),
@@ -206,4 +208,3 @@ class user_hierarchy_handler_term_hierarchy extends views_handler_field {
     }
 
 }
-
