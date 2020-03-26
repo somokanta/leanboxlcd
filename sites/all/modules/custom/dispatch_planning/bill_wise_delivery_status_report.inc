@@ -27,13 +27,86 @@ function bill_wise_delivery_status_report_form($form, &$form_state) {
     if (isset($_GET['party_code'])) {
         $party_code = $_GET['party_code'];
     }
+    if (isset($_GET['facility_code'])) {
+        $default_facility_code = $_GET['facility_code'];
+    }
+    if (isset($_GET['distributor_id'])) {
+        $default_distributor_id = $_GET['distributor_id'];
+    }
+    if (isset($_GET['central_distributor_id'])) {
+        $default_central_distributor_id = $_GET['central_distributor_id'];
+    }
 
     global $user;
     $user_id = $user->uid;
     $distributor_id = change_feeds_import_get_distributor_id($user_id);
     $central_distributor_id = $distributor_id;
     $logged_in_distributor_id = $distributor_id;
-    if (in_array("central_distributor", $user->roles)) {
+    
+    if (in_array("super_central_distributor", $user->roles)) {
+
+        $form['central_outer'] = array(
+            '#type' => 'markup',
+            '#prefix' => '<div style="color:red"><h3>Note: Select any one  Facility Code</h3></div>',
+        );
+        $vocabulary = taxonomy_vocabulary_machine_name_load('facility_code');
+        $terms_obj = entity_load('taxonomy_term', FALSE, array('vid' => $vocabulary->vid));
+        if (!empty($terms_obj)) {
+            foreach ($terms_obj as $key => $value) {
+                $facility[$value->tid] = $value->name;
+            }
+            $facility = array('' => 'Select') + $facility;
+        }
+
+        $form['facility_code'] = array(
+            '#title' => t('Select Facility Code'),
+            '#type' => 'select',
+            '#options' => $facility,
+//            '#required' => TRUE,
+            '#ajax' => array(
+                'event' => 'change',
+                'callback' => 'facility_code_ajax_callback',
+                'wrapper' => 'dropdown-distributor-id',
+            ),
+            '#default_value' => $default_facility_code,
+            '#prefix' => '<div class="facility-filter" style="display:block; margin: 0 87% 1% 0;">',
+            '#suffix' => '</div>'
+        );
+
+
+        $facility_code = $form_state['input']['facility_code'];
+        // central Distributor ID of facility Code
+        $distributor_id = get_central_distributor_id_of_facility_code($facility_code);
+        $central_distributor_id = $distributor_id;
+        if (!empty($distributor_id)) {
+            $child_distributors = get_child_distributor_rsname($distributor_id);
+            $distributor_ids = array('' => 'Select') + $child_distributors;
+        } else {
+            $distributor_ids = array('' => 'Select');
+        }
+
+        $form['expose'] = array(
+            '#prefix' => '<div id="dropdown-distributor-id">',
+            '#suffix' => '</div>'
+        );
+
+        $default_value = get_distributor_name($default_distributor_id);
+
+        $form['expose']['distributor_id'] = array(
+            '#title' => t('Select Distributor Name'),
+            '#type' => 'select',
+            '#description' => 'Select Distributor Name.',
+            '#default_value' => $default_value,
+            '#options' => $distributor_ids,
+            '#weight' => 1,
+            '#prefix' => '<div class="distributor-filter" style="display:inline-block; margin-bottom:20px;">',
+            '#suffix' => '</div>'
+        );
+
+        $distributor_id = $form_state['input']['distributor_id'];
+
+    } elseif (in_array("central_distributor", $user->roles)) {
+        $central_distributor_id = $logged_in_distributor_id;
         $distributor_ids = get_distributor_ids();
         unset($distributor_ids[$distributor_id]);
         $child_distributors = get_child_distributor_rsname($logged_in_distributor_id);
@@ -142,8 +215,9 @@ function bill_wise_delivery_status_report_form_submit($form, &$form_state) {
     $party_code = $form_state['values']['party_code'];
     $distributor_id = $form_state['values']['distributor_id'];
     $central_distributor_id = $form_state['values']['central_distributor_id'];
+    $facility_code = $form_state['values']['facility_code'];
     if (($form_state['values']["op"] == "Apply") && (arg(0) == 'bill-wise-delivery-status-report')) {
-        drupal_goto('bill-wise-delivery-status-report', array('query' => array('from_bill_date' => $from_bill_date, 'to_bill_date' => $to_bill_date, 'from_dispatch_date' => $from_dispatch_date, 'to_dispatch_date' => $to_dispatch_date, 'bill_number' => $bill_number, 'party_code' => $party_code, 'distributor_id' => $distributor_id, 'central_distributor_id' => $central_distributor_id)));
+        drupal_goto('bill-wise-delivery-status-report', array('query' => array('from_bill_date' => $from_bill_date, 'to_bill_date' => $to_bill_date, 'from_dispatch_date' => $from_dispatch_date, 'to_dispatch_date' => $to_dispatch_date, 'bill_number' => $bill_number, 'party_code' => $party_code, 'distributor_id' => $distributor_id, 'central_distributor_id' => $central_distributor_id, 'facility_code' => $facility_code)));
     }
 }
 
@@ -179,7 +253,10 @@ function bill_wise_delivery_status_report_callback() {
     }
 
     $query = db_select('dispatch_planning_api_data', 'ad');
-    $query->condition('ad.distributor_id', $distributor_id, '=');
+    //if(!empty(($distributor_id))) {
+        $query->condition('ad.distributor_id', $distributor_id, '=');
+    //}
+    
     if (!empty($bill_number)) {
         $query->condition('ad.bill_number', $bill_number, '=');
     }
@@ -209,11 +286,14 @@ function bill_wise_delivery_status_report_callback() {
 
     $query->join('node', 'n', 'n.title = ad.runsheet_number');
     $query->condition('n.type', 'dispatch_data', '=');
-    $query->condition('n.uid', $distributor_id);
-
+    //if(!empty(($distributor_id))) {
+        $query->condition('n.uid', $distributor_id);
+    //}
     $query->join('node', 'n1', 'n1.title = ad.bill_number');
     $query->condition('n1.type', 'sales_register_data', '=');
-    $query->condition('n1.uid', $distributor_id);
+    //if(!empty(($distributor_id))) {
+        $query->condition('n1.uid', $distributor_id);
+    //}
     $query->leftjoin('field_data_field_sr_new_bill_date', 'bill_date', 'bill_date.entity_id = n1.nid');
     $query->leftjoin('field_data_field_outlet_order_no', 'order_no', 'order_no.entity_id = n1.nid');
     $query->leftjoin('field_data_field_bill_area_codes', 'bill_area', 'bill_area.entity_id = n.nid');
@@ -221,7 +301,9 @@ function bill_wise_delivery_status_report_callback() {
     
     $query->join('node', 'n2', 'n2.title = ad.party_hll_code');
     $query->condition('n2.type', 'hul_code_master', '=');
-    $query->condition('n2.uid', $distributor_id);
+    //if(!empty(($distributor_id))) {
+        $query->condition('n2.uid', $distributor_id);
+    //}
     $query->leftjoin('field_data_field_area_code', 'ac', 'ac.entity_id = n2.nid');
     
     $query->leftjoin('node', 'n3', 'ac.field_area_code_nid = n3.nid');
@@ -237,7 +319,7 @@ function bill_wise_delivery_status_report_callback() {
     $query->fields('dn', array('field_distributor_name_value'));
     $query->groupBy('ad.bill_number');
     $result = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
-    
+
     $query = db_select('node', 'n');
     $query->condition('n.uid', $central_distributor_id, '=');
     $query->condition('n.type', 'pdd_master');
@@ -347,4 +429,8 @@ function bill_wise_delivery_status_report_export() {
     header("Content-type: application/vnd.ms-excel");
     header("Content-Disposition: attachment; filename=$file");
     echo $table;
+}
+
+function facility_code_ajax_callback($form, &$form_state) {
+    return $form['expose'];
 }
