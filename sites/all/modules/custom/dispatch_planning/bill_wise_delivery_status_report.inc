@@ -96,8 +96,7 @@ function bill_wise_delivery_status_report_form($form, &$form_state) {
             '#suffix' => '</div>'
         );
 
-//        $distributor_id = $form_state['input']['distributor_id'];
-        $form_state['input']['distributor_id'] = $child_distributors;
+        $_SESSION['distributor_id'] = $child_distributors;
 
     } elseif (in_array("central_distributor", $user->roles)) {
         $central_distributor_id = $logged_in_distributor_id;
@@ -210,6 +209,7 @@ function bill_wise_delivery_status_report_form_submit($form, &$form_state) {
     $distributor_id = $form_state['values']['distributor_id'];
     $central_distributor_id = $form_state['values']['central_distributor_id'];
     $facility_code = $form_state['values']['facility_code'];
+
     if (($form_state['values']["op"] == "Apply") && (arg(0) == 'bill-wise-delivery-status-report')) {
         drupal_goto('bill-wise-delivery-status-report', array('query' => array('from_bill_date' => $from_bill_date, 'to_bill_date' => $to_bill_date, 'from_dispatch_date' => $from_dispatch_date, 'to_dispatch_date' => $to_dispatch_date, 'bill_number' => $bill_number, 'party_code' => $party_code, 'distributor_id' => $distributor_id, 'central_distributor_id' => $central_distributor_id, 'facility_code' => $facility_code)));
     }
@@ -246,10 +246,21 @@ function bill_wise_delivery_status_report_callback() {
         $central_distributor_id = $_GET['central_distributor_id'];
     }
 
+    if(empty($distributor_id)) {
+        $distributor_id = $_SESSION['distributor_id'];
+    }
+    else {
+       $distributor_id = $distributor_id; 
+    }
+
+    // Fetch data from table
     $query = db_select('dispatch_planning_api_data', 'ad');
 //    if(!empty(($distributor_id))) {
         $query->condition('ad.distributor_id', $distributor_id, '=');
 //    }
+//    else {
+//        $query->condition('ad.distributor_id', $distributor_id, 'IN');
+//    }  
     
     if (!empty($bill_number)) {
         $query->condition('ad.bill_number', $bill_number, '=');
@@ -280,14 +291,20 @@ function bill_wise_delivery_status_report_callback() {
 
     $query->join('node', 'n', 'n.title = ad.runsheet_number');
     $query->condition('n.type', 'dispatch_data', '=');
-    //if(!empty(($distributor_id))) {
+//    if(!empty(($distributor_id))) {
         $query->condition('n.uid', $distributor_id);
-    //}
+//    }
+//    else {
+//        $query->condition('n.uid', $distributor_id, 'IN');
+//    }
     $query->join('node', 'n1', 'n1.title = ad.bill_number');
     $query->condition('n1.type', 'sales_register_data', '=');
-    //if(!empty(($distributor_id))) {
+//    if(!empty(($distributor_id))) {
         $query->condition('n1.uid', $distributor_id);
-    //}
+//    }
+//    else {
+//        $query->condition('n1.uid', $distributor_id, 'IN');
+//    }
     $query->leftjoin('field_data_field_sr_new_bill_date', 'bill_date', 'bill_date.entity_id = n1.nid');
     $query->leftjoin('field_data_field_outlet_order_no', 'order_no', 'order_no.entity_id = n1.nid');
     $query->leftjoin('field_data_field_bill_area_codes', 'bill_area', 'bill_area.entity_id = n.nid');
@@ -295,9 +312,12 @@ function bill_wise_delivery_status_report_callback() {
     
     $query->join('node', 'n2', 'n2.title = ad.party_hll_code');
     $query->condition('n2.type', 'hul_code_master', '=');
-    //if(!empty(($distributor_id))) {
+//    if(!empty(($distributor_id))) {
         $query->condition('n2.uid', $distributor_id);
-    //}
+//    }
+//    else {
+//       $query->condition('n2.uid', $distributor_id, 'IN'); 
+//    }
     $query->leftjoin('field_data_field_area_code', 'ac', 'ac.entity_id = n2.nid');
     
     $query->leftjoin('node', 'n3', 'ac.field_area_code_nid = n3.nid');
