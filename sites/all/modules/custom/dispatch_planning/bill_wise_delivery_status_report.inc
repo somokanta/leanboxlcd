@@ -40,7 +40,7 @@ function bill_wise_delivery_status_report_form($form, &$form_state) {
     global $user;
     $user_id = $user->uid;
     $distributor_id = change_feeds_import_get_distributor_id($user_id);
-    $central_distributor_id = $distributor_id;
+//    $central_distributor_id = $distributor_id;
     $logged_in_distributor_id = $distributor_id;
     
     if (in_array("super_central_distributor", $user->roles)) {
@@ -62,7 +62,7 @@ function bill_wise_delivery_status_report_form($form, &$form_state) {
             '#title' => t('Select Facility Code'),
             '#type' => 'select',
             '#options' => $facility,
-//            '#required' => TRUE,
+            '#required' => TRUE,
             '#ajax' => array(
                 'event' => 'change',
                 'callback' => 'facility_code_ajax_callback',
@@ -76,34 +76,28 @@ function bill_wise_delivery_status_report_form($form, &$form_state) {
 
         $facility_code = $form_state['input']['facility_code'];
         // central Distributor ID of facility Code
-        $distributor_id = get_central_distributor_id_of_facility_code($facility_code);
-        $central_distributor_id = $distributor_id;
-        if (!empty($distributor_id)) {
-            $child_distributors = get_child_distributor_rsname($distributor_id);
+        $central_distributor_id = get_central_distributor_id_of_facility_code($facility_code);
+        if (!empty($central_distributor_id)) {
+            $child_distributors = get_child_distributor_rsname($central_distributor_id);
             $distributor_ids = array('' => 'Select') + $child_distributors;
         } else {
             $distributor_ids = array('' => 'Select');
         }
 
-        $form['expose'] = array(
-            '#prefix' => '<div id="dropdown-distributor-id">',
-            '#suffix' => '</div>'
-        );
-
         $default_value = get_distributor_name($default_distributor_id);
 
-        $form['expose']['distributor_id'] = array(
+        $form['distributor_id'] = array(
             '#title' => t('Select Distributor Name'),
             '#type' => 'select',
             '#description' => 'Select Distributor Name.',
             '#default_value' => $default_value,
             '#options' => $distributor_ids,
-            '#weight' => 1,
-            '#prefix' => '<div class="distributor-filter" style="display:inline-block; margin-bottom:20px;">',
+            '#prefix' => '<div id="dropdown-distributor-id" class="distributor-filter" style="display:inline-block; margin-bottom:20px;">',
             '#suffix' => '</div>'
         );
 
-        $distributor_id = $form_state['input']['distributor_id'];
+//        $distributor_id = $form_state['input']['distributor_id'];
+        $form_state['input']['distributor_id'] = $child_distributors;
 
     } elseif (in_array("central_distributor", $user->roles)) {
         $central_distributor_id = $logged_in_distributor_id;
@@ -253,9 +247,9 @@ function bill_wise_delivery_status_report_callback() {
     }
 
     $query = db_select('dispatch_planning_api_data', 'ad');
-    //if(!empty(($distributor_id))) {
+//    if(!empty(($distributor_id))) {
         $query->condition('ad.distributor_id', $distributor_id, '=');
-    //}
+//    }
     
     if (!empty($bill_number)) {
         $query->condition('ad.bill_number', $bill_number, '=');
@@ -432,5 +426,5 @@ function bill_wise_delivery_status_report_export() {
 }
 
 function facility_code_ajax_callback($form, &$form_state) {
-    return $form['expose'];
+    return $form['distributor_id'];
 }
