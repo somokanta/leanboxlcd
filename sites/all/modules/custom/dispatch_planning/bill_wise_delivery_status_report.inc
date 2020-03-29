@@ -74,7 +74,7 @@ function bill_wise_delivery_status_report_form($form, &$form_state) {
         );
 
 
-        $facility_code = $form_state['input']['facility_code'];
+        $facility_code = !empty($form_state['input']['facility_code'])?$form_state['input']['facility_code']:$_GET['facility_code'];
         // central Distributor ID of facility Code
         $central_distributor_id = get_central_distributor_id_of_facility_code($facility_code);
         if (!empty($central_distributor_id)) {
@@ -83,8 +83,9 @@ function bill_wise_delivery_status_report_form($form, &$form_state) {
         } else {
             $distributor_ids = array('' => 'Select');
         }
-
-        $default_value = get_distributor_name($default_distributor_id);
+        
+        $default_value = !empty($form_state['input']['distributor_id'])?$form_state['input']['distributor_id']:$_GET['distributor_id'];
+        //print_r($default_value);
 
         $form['distributor_id'] = array(
             '#title' => t('Select Distributor Name'),
@@ -216,6 +217,7 @@ function bill_wise_delivery_status_report_form_submit($form, &$form_state) {
 }
 
 function bill_wise_delivery_status_report_callback() {
+    global $user;
     if (isset($_GET['from_bill_date'])) {
         $from_bill_date = strtotime($_GET['from_bill_date']);
     }
@@ -247,7 +249,7 @@ function bill_wise_delivery_status_report_callback() {
     }
 
     if(empty($distributor_id)) {
-        $distributor_id = $_SESSION['distributor_id'];
+        $distributor_id =  change_feeds_import_get_distributor_id($user->uid);
     }
     else {
        $distributor_id = $distributor_id; 
