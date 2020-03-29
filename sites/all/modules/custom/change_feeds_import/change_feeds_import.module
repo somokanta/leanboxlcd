@@ -5239,3 +5239,12 @@ function get_allowed_payment_terms() {
     $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC | PDO::FETCH_UNIQUE);
     return array_keys($res);
 }
+
+function get_facility_code_from_tid($facility_tid) {
+    $query = db_select('taxonomy_term_data', 't');
+    $query->condition('t.tid', $facility_tid, '=');
+    $query->fields('t', array('name'));
+    $facility_code = $query->execute()->fetchField();
+    
+    return $facility_code;
+}

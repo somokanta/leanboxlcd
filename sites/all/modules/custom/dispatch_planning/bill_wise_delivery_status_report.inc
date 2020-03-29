@@ -353,6 +353,7 @@ function bill_wise_delivery_status_report_callback() {
 //    $query->condition('n3.type', 'area_code_master', '=');
     $query->join('users', 'u', 'u.uid = ad.distributor_id');
     $query->join('field_data_field_distributor_name', 'dn', 'u.uid = dn.entity_id');
+    $query->join('field_data_field_facility_code', 'fc', 'u.uid = fc.entity_id');
 
     $query->addexpression("COUNT(item_details.sku_code)", 'count_sku_code');
     $query->fields('bill_date', array('field_sr_new_bill_date_value'));
@@ -360,6 +361,7 @@ function bill_wise_delivery_status_report_callback() {
     $query->fields('bill_area', array('field_bill_area_codes_value'));
     $query->fields('n3', array('title'));
     $query->fields('dn', array('field_distributor_name_value'));
+    $query->fields('fc', array('field_facility_code_tid'));
     $query->groupBy('ad.bill_number');
     $result = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
 
@@ -420,6 +422,8 @@ function bill_wise_delivery_status_report_callback() {
             $bill_status = variable_get('current_delivery_status');
         }
 
+        $facility_code = get_facility_code_from_tid($val['field_facility_code_tid']);
+
         $row['order_date'] = date('d-M-y', $val['field_sr_new_bill_date_value']);
         $row['order_no'] = $val['field_outlet_order_no_value'];
         $row['bill_date'] = date('d-M-y', $val['bill_date']);
@@ -443,9 +447,10 @@ function bill_wise_delivery_status_report_callback() {
         $row['delivered_full_returned_trip_id'] = $val['delivered_full_returned_trip_id'];
         $row['delivery_full_returned_cashier'] = $val['delivery_full_returned_cashier'];
         $row['distributor_name'] = $val['field_distributor_name_value'];
+        $row['facility_code'] = $facility_code;
         $rows[] = $row;
     }
-    $header = array('Order date', 'Order Number', 'Bill Date', 'Bill No.', 'Beat name', 'Area code', 'Party Code', 'Party name', 'Count of bill lines', 'Sales Value', '1st Dispatch Date', 'Count of dispatches', 'Last Dispatch Date', 'Counts of Attempts', '1st Attempt Date', 'Exception status', 'Exception Reason', 'Delivery Days', 'Current Delivery Status', 'Delivery/Full Returned date', 'Delivered/Full Returned Trip id', 'Delivery/Full Returned Cashier', 'Distributor Name');
+    $header = array('Order date', 'Order Number', 'Bill Date', 'Bill No.', 'Beat name', 'Area code', 'Party Code', 'Party name', 'Count of bill lines', 'Sales Value', '1st Dispatch Date', 'Count of dispatches', 'Last Dispatch Date', 'Counts of Attempts', '1st Attempt Date', 'Exception status', 'Exception Reason', 'Delivery Days', 'Current Delivery Status', 'Delivery/Full Returned date', 'Delivered/Full Returned Trip id', 'Delivery/Full Returned Cashier', 'Distributor Name', 'Facility Code');
 
     $per_page = 10;
     // Initialize the pager
