@@ -2755,7 +2755,7 @@ function change_feeds_import_node_presave($node) {
     if (!in_array('central_distributor', $user->roles) && in_array($node->type, $central_distributor_contents)) {
         $node->distributorid = get_central_distributor_id($distributor_id);
     }
-    elseif (in_array($node->type, $subadmin_contents)) {
+    if (in_array($node->type, $subadmin_contents)) {
         $subadmin_distributor_id = get_uid_by_role('sub_admin');
         $node->distributorid = $subadmin_distributor_id;
     }
