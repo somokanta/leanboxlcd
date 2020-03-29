@@ -42,12 +42,12 @@ function bill_wise_delivery_status_report_form($form, &$form_state) {
     $distributor_id = change_feeds_import_get_distributor_id($user_id);
 //    $central_distributor_id = $distributor_id;
     $logged_in_distributor_id = $distributor_id;
-    
+
     if (in_array("super_central_distributor", $user->roles)) {
 
         $form['central_outer'] = array(
-            '#type' => 'markup',
-            '#prefix' => '<div style="color:red"><h3>Note: Select any one  Facility Code</h3></div>',
+          '#type' => 'markup',
+          '#prefix' => '<div style="color:red"><h3>Note: Select any one  Facility Code</h3></div>',
         );
         $vocabulary = taxonomy_vocabulary_machine_name_load('facility_code');
         $terms_obj = entity_load('taxonomy_term', FALSE, array('vid' => $vocabulary->vid));
@@ -59,63 +59,66 @@ function bill_wise_delivery_status_report_form($form, &$form_state) {
         }
 
         $form['facility_code'] = array(
-            '#title' => t('Select Facility Code'),
-            '#type' => 'select',
-            '#options' => $facility,
-            '#required' => TRUE,
-            '#ajax' => array(
-                'event' => 'change',
-                'callback' => 'facility_code_ajax_callback',
-                'wrapper' => 'dropdown-distributor-id',
-            ),
-            '#default_value' => $default_facility_code,
-            '#prefix' => '<div class="facility-filter" style="display:block; margin: 0 87% 1% 0;">',
-            '#suffix' => '</div>'
+          '#title' => t('Select Facility Code'),
+          '#type' => 'select',
+          '#options' => $facility,
+         // '#required' => TRUE,
+          '#ajax' => array(
+            'event' => 'change',
+            'callback' => 'facility_code_ajax_callback',
+            'wrapper' => 'dropdown-distributor-id',
+          ),
+          '#default_value' => $default_facility_code,
+          '#prefix' => '<div class="facility-filter" style="display:block; margin: 0 87% 1% 0;">',
+          '#suffix' => '</div>'
         );
 
 
-        $facility_code = !empty($form_state['input']['facility_code'])?$form_state['input']['facility_code']:$_GET['facility_code'];
+        $facility_code = !empty($form_state['input']['facility_code']) ? $form_state['input']['facility_code'] : $_GET['facility_code'];
         // central Distributor ID of facility Code
         $central_distributor_id = get_central_distributor_id_of_facility_code($facility_code);
         if (!empty($central_distributor_id)) {
             $child_distributors = get_child_distributor_rsname($central_distributor_id);
             $distributor_ids = array('' => 'Select') + $child_distributors;
-        } else {
+        }
+        else {
             $distributor_ids = array('' => 'Select');
         }
-        
-        $default_value = !empty($form_state['input']['distributor_id'])?$form_state['input']['distributor_id']:$_GET['distributor_id'];
+
+        $default_value = !empty($form_state['input']['distributor_id']) ? $form_state['input']['distributor_id'] : $_GET['distributor_id'];
         //print_r($default_value);
 
         $form['distributor_id'] = array(
-            '#title' => t('Select Distributor Name'),
-            '#type' => 'select',
-            '#description' => 'Select Distributor Name.',
-            '#default_value' => $default_value,
-            '#options' => $distributor_ids,
-            '#prefix' => '<div id="dropdown-distributor-id" class="distributor-filter" style="display:inline-block; margin-bottom:20px;">',
-            '#suffix' => '</div>'
+          '#title' => t('Select Distributor Name'),
+          '#type' => 'select',
+          '#description' => 'Select Distributor Name.',
+          '#default_value' => $default_value,
+          '#options' => $distributor_ids,
+          '#prefix' => '<div id="dropdown-distributor-id" class="distributor-filter" style="display:inline-block; margin-bottom:20px;">',
+          '#suffix' => '</div>'
         );
 
         $_SESSION['distributor_id'] = $child_distributors;
-
-    } elseif (in_array("central_distributor", $user->roles)) {
+    }
+    elseif (in_array("central_distributor", $user->roles)) {
         $central_distributor_id = $logged_in_distributor_id;
         $distributor_ids = get_distributor_ids();
         unset($distributor_ids[$distributor_id]);
         $child_distributors = get_child_distributor_rsname($logged_in_distributor_id);
         $distributor_ids = array('' => 'Select') + $child_distributors;
         $form['central_outer'] = array(
-            '#type' => 'markup',
-            '#prefix' => '<div style="color:red"><h3>Note: Select any one  Distributor Name</h3></div>',
+          '#type' => 'markup',
+          '#prefix' => '<div style="color:red"><h3>Note: Select any one  Distributor Name</h3></div>',
         );
+        $default_value = !empty($form_state['input']['distributor_id']) ? $form_state['input']['distributor_id'] : $_GET['distributor_id'];
         $form['distributor_id'] = array(
-            '#title' => t('Select Distributor Name'),
-            '#type' => 'select',
-            '#options' => $distributor_ids,
-            '#required' => TRUE,
-            '#prefix' => '<div class="distributor-filter" style="display:inline-block; margin-bottom:20px;">',
-            '#suffix' => '</div>'
+          '#title' => t('Select Distributor Name'),
+          '#type' => 'select',
+          '#options' => $distributor_ids,
+          '#default_value' => $default_value,
+          '#required' => TRUE,
+          '#prefix' => '<div class="distributor-filter" style="display:inline-block; margin-bottom:20px;">',
+          '#suffix' => '</div>'
         );
         $distributor_id = $form_state['input']['distributor_id'];
     }
@@ -123,78 +126,78 @@ function bill_wise_delivery_status_report_form($form, &$form_state) {
     else {
         $central_distributor_id = get_central_distributor_id($distributor_id);
         $form['distributor_id'] = array(
-            '#type' => 'hidden',
-            '#value' => $distributor_id,
+          '#type' => 'hidden',
+          '#value' => $distributor_id,
         );
     }
 
     $form['central_distributor_id'] = array(
-        '#type' => 'hidden',
-        '#value' => $central_distributor_id,
+      '#type' => 'hidden',
+      '#value' => $central_distributor_id,
     );
 
     $form['from_bill_date'] = array(
-        '#type' => 'date_popup',
-        '#title' => 'Bill From date',
-        '#date_label_position' => 'within',
-        '#date_format' => 'Y-m-d',
-        '#default_value' => $from_bill_date,
-        '#prefix' => '<div class="date-filter"><div class="from-bill-date" style="display:inline-block;">'
+      '#type' => 'date_popup',
+      '#title' => 'Bill From date',
+      '#date_label_position' => 'within',
+      '#date_format' => 'Y-m-d',
+      '#default_value' => $from_bill_date,
+      '#prefix' => '<div class="date-filter"><div class="from-bill-date" style="display:inline-block;">'
     );
 
     $form['to_bill_date'] = array(
-        '#type' => 'date_popup',
-        '#title' => 'Bill To date',
-        '#date_label_position' => 'within',
-        '#date_format' => 'Y-m-d',
-        '#default_value' => $to_bill_date,
-        '#suffix' => '</div>'
+      '#type' => 'date_popup',
+      '#title' => 'Bill To date',
+      '#date_label_position' => 'within',
+      '#date_format' => 'Y-m-d',
+      '#default_value' => $to_bill_date,
+      '#suffix' => '</div>'
     );
 
     $form['from_dispatch_date'] = array(
-        '#type' => 'date_popup',
-        '#title' => 'Dispatch From date',
-        '#date_label_position' => 'within',
-        '#date_format' => 'Y-m-d',
-        '#default_value' => $from_dispatch_date,
-        '#prefix' => '<div class="from-dispatch-date" style="display:inline-block;">'
+      '#type' => 'date_popup',
+      '#title' => 'Dispatch From date',
+      '#date_label_position' => 'within',
+      '#date_format' => 'Y-m-d',
+      '#default_value' => $from_dispatch_date,
+      '#prefix' => '<div class="from-dispatch-date" style="display:inline-block;">'
     );
 
     $form['to_dispatch_date'] = array(
-        '#type' => 'date_popup',
-        '#title' => 'Dispatch To date',
-        '#date_label_position' => 'within',
-        '#date_format' => 'Y-m-d',
-        '#default_value' => $to_dispatch_date,
-        '#suffix' => '</div></div>'
+      '#type' => 'date_popup',
+      '#title' => 'Dispatch To date',
+      '#date_label_position' => 'within',
+      '#date_format' => 'Y-m-d',
+      '#default_value' => $to_dispatch_date,
+      '#suffix' => '</div></div>'
     );
 
     $form['bill_number'] = array(
-        '#type' => 'textfield',
-        '#title' => t('Bill Number'),
-        '#size' => 20,
-        '#default_value' => $bill_number,
-        '#maxlength' => 50,
-        '#prefix' => '<div class="bill-number" style="display:inline-block;margin: 20px 101px 0 0;">',
-        '#suffix' => '</div>'
+      '#type' => 'textfield',
+      '#title' => t('Bill Number'),
+      '#size' => 20,
+      '#default_value' => $bill_number,
+      '#maxlength' => 50,
+      '#prefix' => '<div class="bill-number" style="display:inline-block;margin: 20px 101px 0 0;">',
+      '#suffix' => '</div>'
     );
 
     $form['party_code'] = array(
-        '#type' => 'textfield',
-        '#title' => t('Party Code'),
-        '#size' => 20,
-        '#default_value' => $party_code,
-        '#maxlength' => 50,
-        '#prefix' => '<div class="party-code" style="display:inline-block;">',
-        '#suffix' => '</div>'
+      '#type' => 'textfield',
+      '#title' => t('Party Code'),
+      '#size' => 20,
+      '#default_value' => $party_code,
+      '#maxlength' => 50,
+      '#prefix' => '<div class="party-code" style="display:inline-block;">',
+      '#suffix' => '</div>'
     );
 
     $form['submit'] = array(
-        '#type' => 'submit',
-        '#value' => t('Apply'),
-        '#submit' => array('bill_wise_delivery_status_report_form_submit'),
-        '#prefix' => '<div>',
-        '#suffix' => '</div>'
+      '#type' => 'submit',
+      '#value' => t('Apply'),
+      '#submit' => array('bill_wise_delivery_status_report_form_submit'),
+      '#prefix' => '<div>',
+      '#suffix' => '</div>'
     );
 
     return $form;
@@ -247,23 +250,47 @@ function bill_wise_delivery_status_report_callback() {
     if (isset($_GET['central_distributor_id'])) {
         $central_distributor_id = $_GET['central_distributor_id'];
     }
-
-    if(empty($distributor_id)) {
-        $distributor_id =  change_feeds_import_get_distributor_id($user->uid);
+    if (!empty($_GET['facility_code'])) {
+        $facility_code = $_GET['facility_code'];
+    }
+    if (empty($distributor_id)) {
+        $distributor_id = change_feeds_import_get_distributor_id($user->uid);
     }
     else {
-       $distributor_id = $distributor_id; 
+        $distributor_id = $distributor_id;
     }
+    // child logged in  
+    if (empty($central_distributor_id) && !in_array("central_distributor", $user->roles) && !in_array("super_central_distributor", $user->roles)) {
+        $central_distributor_id = get_central_distributor_id($distributor_id);
+    }
+    if ((in_array("central_distributor", $user->roles) || in_array("super_central_distributor", $user->roles)) && empty($_GET['distributor_id'])) {
+        if (!empty($facility_code)) {
+            $central_distributor_id = get_central_distributor_id_of_facility_code($facility_code);
+            if (!empty($central_distributor_id)) {
+                $child_distributors = get_child_distributor_rsname($central_distributor_id);
+                $distributor_ids = array_keys($child_distributors);
+            }
+        }
+        else {
+            $distributor_ids = get_distributor_ids();
+        }
+        
+    }
+    elseif (empty($distributor_ids) && !empty($distributor_id)) {
+        $distributor_ids = array($distributor_id);
+    }
+   // print_r($distributor_ids);
+
 
     // Fetch data from table
     $query = db_select('dispatch_planning_api_data', 'ad');
 //    if(!empty(($distributor_id))) {
-        $query->condition('ad.distributor_id', $distributor_id, '=');
+    $query->condition('ad.distributor_id', $distributor_ids, 'IN');
 //    }
 //    else {
 //        $query->condition('ad.distributor_id', $distributor_id, 'IN');
 //    }  
-    
+
     if (!empty($bill_number)) {
         $query->condition('ad.bill_number', $bill_number, '=');
     }
@@ -294,7 +321,7 @@ function bill_wise_delivery_status_report_callback() {
     $query->join('node', 'n', 'n.title = ad.runsheet_number');
     $query->condition('n.type', 'dispatch_data', '=');
 //    if(!empty(($distributor_id))) {
-        $query->condition('n.uid', $distributor_id);
+    $query->condition('n.uid', $distributor_ids, 'IN');
 //    }
 //    else {
 //        $query->condition('n.uid', $distributor_id, 'IN');
@@ -302,7 +329,7 @@ function bill_wise_delivery_status_report_callback() {
     $query->join('node', 'n1', 'n1.title = ad.bill_number');
     $query->condition('n1.type', 'sales_register_data', '=');
 //    if(!empty(($distributor_id))) {
-        $query->condition('n1.uid', $distributor_id);
+    $query->condition('n1.uid', $distributor_ids, 'IN');
 //    }
 //    else {
 //        $query->condition('n1.uid', $distributor_id, 'IN');
@@ -311,22 +338,22 @@ function bill_wise_delivery_status_report_callback() {
     $query->leftjoin('field_data_field_outlet_order_no', 'order_no', 'order_no.entity_id = n1.nid');
     $query->leftjoin('field_data_field_bill_area_codes', 'bill_area', 'bill_area.entity_id = n.nid');
     $query->join('dispatch_planning_item_details', 'item_details', 'item_details.trip_bill_reference = ad.id');
-    
+
     $query->join('node', 'n2', 'n2.title = ad.party_hll_code');
     $query->condition('n2.type', 'hul_code_master', '=');
 //    if(!empty(($distributor_id))) {
-        $query->condition('n2.uid', $distributor_id);
+    $query->condition('n2.uid', $distributor_ids, 'IN');
 //    }
 //    else {
 //       $query->condition('n2.uid', $distributor_id, 'IN'); 
 //    }
     $query->leftjoin('field_data_field_area_code', 'ac', 'ac.entity_id = n2.nid');
-    
+
     $query->leftjoin('node', 'n3', 'ac.field_area_code_nid = n3.nid');
 //    $query->condition('n3.type', 'area_code_master', '=');
     $query->join('users', 'u', 'u.uid = ad.distributor_id');
     $query->join('field_data_field_distributor_name', 'dn', 'u.uid = dn.entity_id');
-    
+
     $query->addexpression("COUNT(item_details.sku_code)", 'count_sku_code');
     $query->fields('bill_date', array('field_sr_new_bill_date_value'));
     $query->fields('order_no', array('field_outlet_order_no_value'));
@@ -359,7 +386,7 @@ function bill_wise_delivery_status_report_callback() {
         $end = new DateTime(date('d-M-y', $val['last_attempt_date']));
         $end->modify('+1 day');
         $interval = $end->diff($start);
-        
+
         if ($val['delivery_pending_flag'] == 0) {
             // total days
             $days = $interval->days;
@@ -370,7 +397,7 @@ function bill_wise_delivery_status_report_callback() {
                 $curr = $dt->format('l');
                 if (in_array($curr, $weeklyoff)) {
                     $days--;
-                } 
+                }
                 if (in_array($dt->format('Y-m-d'), $holiday_result)) {
                     $days--;
                 }
@@ -380,13 +407,16 @@ function bill_wise_delivery_status_report_callback() {
 
         if ($val['delivery_pending_flag'] == 0) {
             if ($val['current_bill_status'] == 'deliver') {
-                $bill_status = variable_get('deliver_status');//'Delivered';
-            } elseif ($val['current_bill_status'] == 'partial_deliver') {
-                $bill_status = variable_get('partial_deliver_status');//'Partial Delivered';
-            } elseif ($val['current_bill_status'] == 'undeliver') {
-                $bill_status = variable_get('undeliver_status');//'Full Returned';
+                $bill_status = variable_get('deliver_status'); //'Delivered';
             }
-        }else {
+            elseif ($val['current_bill_status'] == 'partial_deliver') {
+                $bill_status = variable_get('partial_deliver_status'); //'Partial Delivered';
+            }
+            elseif ($val['current_bill_status'] == 'undeliver') {
+                $bill_status = variable_get('undeliver_status'); //'Full Returned';
+            }
+        }
+        else {
             $bill_status = variable_get('current_delivery_status');
         }
 
@@ -439,7 +469,8 @@ function bill_wise_delivery_status_report_export() {
     $data = cache_get('bill-wise-delivery-status-report' . session_id());
     if (empty($data)) {
         $table = delivery_pending_report_callback();
-    } else {
+    }
+    else {
         $table = $data->data;
     }
     header("Content-type: application/vnd.ms-excel");
