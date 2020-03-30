@@ -14,7 +14,7 @@ drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
 
 if($param = $_SERVER['argv'][1]) {
   $trips = explode(',', $param);
-  watchdog('test_abhi_multithread param', '<pre>' . print_r($trips, TRUE) . '</pre>');
+  watchdog('test_abhi_multithread param', '<pre>' . print_r($trips.' '.time(), TRUE) . '</pre>');
   leanbox_test_multithread($trips);
 }
 
