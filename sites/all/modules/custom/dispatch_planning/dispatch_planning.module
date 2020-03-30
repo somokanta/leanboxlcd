@@ -5178,7 +5178,7 @@ function global_config_form($form, $form_state) {
       '#description' => t('Number of thrip to process in one thread'),
       '#default_value' => variable_get('no-trip-per-thread',3),
     );
-      $form['attempted_bill_status'] = array(
+    $form['attempted_bill_status'] = array(
       '#type' => 'textfield',
       '#title' => t('Attempted Bill Status'),
       '#description' => t('Attempted Bill Status'),
