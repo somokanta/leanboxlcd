@@ -45,7 +45,7 @@ function leanbox_get_available_trip_to_push($total) {
     $query->orderBy('sdr.created_date');
     $query->condition('sdr.flag', 0);
     $query->range(0, $total);
-    $trip_id_result = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+    $trip_id_result = $query->execute()->fetchCol();
     return $trip_id_result;
 }
 
