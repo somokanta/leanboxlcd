@@ -30,7 +30,7 @@ function leanbox_test_multithread($trips) {
     foreach ($trips as $trip) {
       //actual function to process
         watchdog('test_abhi_multithread', '<pre>' . print_r($trip, TRUE) . '</pre>');
-        sleep(1);
+        sleep(10);
     }
     return 'success';
   }
