@@ -29,7 +29,7 @@ function leanbox_test_multithread($trips) {
   if (!empty($trips)) {
     foreach ($trips as $trip) {
       //actual function to process
-        watchdog('test_abhi_multithread', '<pre>' . print_r($trip, TRUE) . '</pre>');
+        watchdog('test_abhi_multithread', '<pre>' . print_r($trip.' '.time(), TRUE) . '</pre>');
         sleep(10);
     }
     return 'success';
