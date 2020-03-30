@@ -1,0 +1,4 @@
+name = Tester Invoice Memo Api
+description = This Module pull Tester invoice data from D8 System to D7 system
+package = Custom
+core = 7.x
