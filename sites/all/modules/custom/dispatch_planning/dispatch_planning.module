@@ -5178,5 +5178,18 @@ function global_config_form($form, $form_state) {
       '#description' => t('Number of thrip to process in one thread'),
       '#default_value' => variable_get('no-trip-per-thread',3),
     );
+      $form['attempted_bill_status'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Attempted Bill Status'),
+      '#description' => t('Attempted Bill Status'),
+      '#default_value' => variable_get('attempted_bill_status'),
+    );
+    
+    $form['attempted_reason_for_failure'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Attempted Reason for Failure'),
+    '#description' => t('Attempted Reason for Failure'),
+    '#default_value' => variable_get('attempted_reason_for_failure'),
+   );     
   return system_settings_form($form);
 }
