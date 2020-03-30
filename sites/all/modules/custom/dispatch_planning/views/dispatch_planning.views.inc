@@ -4133,8 +4133,25 @@ $data['views']['global_facility_name'] = array(
     'argument' => array(
       'handler' => 'views_handler_argument_string',
     ),
-  );   
-
+  );  
+    
+   $data['dispatch_planning_api_data']['attempted_status'] = array(
+    'title' => t('Attempted Status'),
+    'help' => t('Attempted Status'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );     
 
   // ============== change
 
