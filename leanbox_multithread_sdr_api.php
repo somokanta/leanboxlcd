@@ -12,8 +12,8 @@ require_once DRUPAL_ROOT . '/includes/bootstrap.inc';
 drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
 
 if ($param = $_SERVER['argv'][1]) {
+    watchdog('test_abhi_multithread param', '<pre>' . print_r($param . ' ' . time(), TRUE) . '</pre>');
     $trips = explode(',', $param);
-    watchdog('test_abhi_multithread param', '<pre>' . print_r($trips . ' ' . time(), TRUE) . '</pre>');
     sdr_api_process($trips); //call actual function to process
 }
 
