@@ -13,8 +13,17 @@ drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
 
 if ($param = $_SERVER['argv'][1]) {
     watchdog('test_abhi_multithread param', '<pre>' . print_r($param . ' ' . time(), TRUE) . '</pre>');
-    $trips = explode(',', $param);
-    sdr_api_process($trips); //call actual function to process
+    $ids = explode(',', $param);
+    
+    if (!empty($ids)) {
+        $query = db_select('sdr_app_log_preprocess', 'sdr');
+        $query->fields('sdr', array('id', 'trip_id', 'distributor_id', 'bills'));
+        $query->orderBy('sdr.created_date');
+        $query->condition('sdr.id', $ids, 'IN');
+        $trips = $query->execute()->fetchAll();
+
+        sdr_api_process($trips); //call actual function to process
+    }
 }
 
 exit;

@@ -41,11 +41,11 @@ function leanbox_get_available_trip_to_push($total) {
 //apply range to find the $total no of trip pending not more than that
     $total = $total ? $total : 5;
     $query = db_select('sdr_app_log_preprocess', 'sdr');
-    $query->fields('sdr', array('id', 'trip_id', 'distributor_id', 'bills'));
+    $query->fields('sdr', array('id'));
     $query->orderBy('sdr.created_date');
     $query->condition('sdr.flag', 0);
     $query->range(0, $total);
-    $trip_id_result = $query->execute()->fetchAll();
+    $trip_id_result = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
     return $trip_id_result;
 }
 
