@@ -4984,6 +4984,13 @@ function sdr_api_cron() {
     $query->range(0, 4);
     $trip_id_result = $query->execute()->fetchAll();
 
+    sdr_api_process($trip_id_result);
+    
+  return " ";
+}
+
+function sdr_api_process($trip_id_result) {
+
      foreach($trip_id_result as $trip_value){
         //Abhishek unset all array inside this foreach so that for next trip i won't concate.
         $results = $res_main = $order_box_details = [];
@@ -5089,11 +5096,13 @@ function sdr_api_cron() {
             ))
             ->condition('trip_id', $trip, '=')
             ->condition('id', $id, '=')
-            ->execute();  
+            ->execute();
+          watchdog('test_abhi_multithread', '<pre>' . print_r($trip.' '.time(), TRUE) . '</pre>');
     }
 
   return " ";
 }
+
 
 function insert_sdr_app_log($trip, $distributor_id, $trip_json) {
     $sql_ins_id = db_insert('sdr_app_log')
@@ -5156,6 +5165,18 @@ function global_config_form($form, $form_state) {
       '#title' => t('Undeliver Status'),
       '#description' => t('Bill wise Delivery status report(Current Delivery Status is undeliver)'),
       '#default_value' => variable_get('undeliver_status'),
+    );
+  $form['number_thread'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Number Of Thread To Run'),
+      '#description' => t('No of thread'),
+      '#default_value' => variable_get('no-thread',2),
+    );
+  $form['trip_per_thread'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Trip Per Thread'),
+      '#description' => t('Number of thrip to process in one thread'),
+      '#default_value' => variable_get('no-trip-per-thread',3),
     );
   return system_settings_form($form);
 }
