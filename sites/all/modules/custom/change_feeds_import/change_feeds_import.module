@@ -2755,7 +2755,7 @@ function change_feeds_import_node_presave($node) {
     if (!in_array('central_distributor', $user->roles) && in_array($node->type, $central_distributor_contents)) {
         $node->distributorid = get_central_distributor_id($distributor_id);
     }
-    elseif (in_array($node->type, $subadmin_contents)) {
+    if (in_array($node->type, $subadmin_contents)) {
         $subadmin_distributor_id = get_uid_by_role('sub_admin');
         $node->distributorid = $subadmin_distributor_id;
     }
@@ -5238,4 +5238,13 @@ function get_allowed_payment_terms() {
     $query->condition('pay_terms.bundle', $type, '=');
     $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC | PDO::FETCH_UNIQUE);
     return array_keys($res);
+}
+
+function get_facility_code_from_tid($facility_tid) {
+    $query = db_select('taxonomy_term_data', 't');
+    $query->condition('t.tid', $facility_tid, '=');
+    $query->fields('t', array('name'));
+    $facility_code = $query->execute()->fetchField();
+    
+    return $facility_code;
 }
