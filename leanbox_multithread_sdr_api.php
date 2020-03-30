@@ -13,23 +13,24 @@ require_once DRUPAL_ROOT . '/includes/bootstrap.inc';
 drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
 
 if($param = $_SERVER['argv'][1]) {
-  $orders = explode(',', $param);
-  leanbox_test_multithread($orders);
+  $trips = explode(',', $param);
+  watchdog('test_abhi_multithread param', '<pre>' . print_r($trips, TRUE) . '</pre>');
+  leanbox_test_multithread($trips);
 }
 
 /**
  * 
- * @param type $orders
+ * @param type $trips
  * @return string
  *  Functions for pushing order to API Asynchronously
  */
-function leanbox_test_multithread($orders) {  
+function leanbox_test_multithread($trips) {  
   $users = $type = $sap_return = $result = array();
-  if (!empty($orders)) {
-    foreach ($orders as $order_id) {
+  if (!empty($trips)) {
+    foreach ($trips as $trip) {
       //actual function to process
-        watchdog('test_abhi_multithread', '<pre>' . print_r($order_id, TRUE) . '</pre>');
-        //sleep(1);
+        watchdog('test_abhi_multithread', '<pre>' . print_r($trip, TRUE) . '</pre>');
+        sleep(1);
     }
     return 'success';
   }
