@@ -1232,6 +1232,10 @@ function _edit_trip_delivered_callback_form_submit($form, &$form_state) {
         }
       }
       
+      //attempted status
+      $attempted_status = variable_get('attempted_bill_status');
+      $attempted_reason_for_failure = variable_get('attempted_reason_for_failure');
+      
       $updated_bill_rows = db_update('dispatch_planning_api_data') // Table name no longer needs {}
           ->fields(array(
             'res_status' => $order_status,
@@ -1252,6 +1256,7 @@ function _edit_trip_delivered_callback_form_submit($form, &$form_state) {
             'res_money_collect2_edit' =>  isset($form_state['values']['collection_mode']) ? $form_state['values']['collection_mode'] : '',
             'derived_payment_outcome' =>  isset($form_state['values']['collection_mode']) ? ucfirst($form_state['values']['collection_mode']) : '',
             'res_delivery_boy_edit' => !empty($form_state['values']['delivery_boy']) ? $form_state['values']['delivery_boy'] : '',
+            'attempted_status' => ($order_status == $attempted_status && strtolower($reason_for_failure) == strtolower($attempted_reason_for_failure)) ? 'No' : 'Yes', //attempted_status 
 
           ))
           ->condition('runsheet_number', $trip_number, '=')

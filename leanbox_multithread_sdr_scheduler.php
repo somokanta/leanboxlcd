@@ -21,7 +21,7 @@ $length = variable_get('no-trip-per-thread', '3');
 
 $total = $thread * $length;
 $trips = leanbox_get_available_trip_to_push($total);
-
+watchdog('test_abhi_multithread cron', '<pre>' . print_r($trips, TRUE) . '</pre>');
 if ($trips) {
     $trips_chunk = array_chunk($trips, $length);
     foreach ($trips_chunk as $value) {
@@ -39,8 +39,14 @@ if ($trips) {
  */
 function leanbox_get_available_trip_to_push($total) {
 //apply range to find the $total no of trip pending not more than that
-    $trips = array(1, 2, 3, 4, 5, 6);
-    return $trips;
+    $total = $total ? $total : 5;
+    $query = db_select('sdr_app_log_preprocess', 'sdr');
+    $query->fields('sdr', array('id'));
+    $query->orderBy('sdr.created_date');
+    $query->condition('sdr.flag', 0);
+    $query->range(0, $total);
+    $trip_id_result = $query->execute()->fetchCol();
+    return $trip_id_result;
 }
 
 ?>

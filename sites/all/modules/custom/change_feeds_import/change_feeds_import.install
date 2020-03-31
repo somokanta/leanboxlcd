@@ -1425,9 +1425,7 @@ function change_feeds_import_update_7119() {
   }
 }
 
-
-
-function change_feeds_import_update_7120() {
+function change_feeds_import_update_7121() {
   $fields = array(
    'distributor_id' => array(
         'description' => 'distributor_id',
@@ -1449,7 +1447,7 @@ function change_feeds_import_update_7120() {
   }
 }
 
-function change_feeds_import_update_7121() {
+function change_feeds_import_update_7120() {
    
   //master api
    $schema['masters_api_log'] = array(
