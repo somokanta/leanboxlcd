@@ -5169,13 +5169,13 @@ function global_config_form($form, $form_state) {
   $form['number_thread'] = array(
       '#type' => 'textfield',
       '#title' => t('Number Of Thread To Run'),
-      '#description' => t('No of thread'),
+      '#description' => t('No of thread for Van planning to SDR App integration'),
       '#default_value' => variable_get('no-thread',2),
     );
   $form['trip_per_thread'] = array(
       '#type' => 'textfield',
       '#title' => t('Trip Per Thread'),
-      '#description' => t('Number of thrip to process in one thread'),
+      '#description' => t('Number of trips to process in one thread for Van planning to SDR app integration'),
       '#default_value' => variable_get('no-trip-per-thread',3),
     );
     $form['attempted_bill_status'] = array(
