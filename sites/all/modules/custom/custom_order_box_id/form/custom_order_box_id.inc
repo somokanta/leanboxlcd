@@ -275,7 +275,7 @@ function custom_order_box_id_process($max, $data, $distributor_id, $file_name, $
     }
         $trip_id_res = get_trip_from_bill($bill_number_arr, $dis_id);
         foreach($trip_id_res as $val) {
-            $trip_id = $val->runsheet_number;
+            $trip_id = $val->title;
             $bill_numbers = $val->bill_number;
             if (!empty($trip_id)) {
                 db_insert('sdr_app_log_preprocess') // Table name no longer needs {}
@@ -364,12 +364,15 @@ function validate_hul_code($hul_code,$distributor_id){
 }
 
 function get_trip_from_bill($bill_number, $distributor_id) {
-    $query = db_select('dispatch_planning_api_data', 'dp');
-    $query->condition('dp.bill_number', $bill_number, 'IN');
-    $query->condition('dp.distributor_id', $distributor_id);
-    $query->fields('dp', array('runsheet_number'));
-    $query->addExpression("GROUP_CONCAT(DISTINCT bill_number separator ', ')", 'bill_number');
-    $query->groupBy('dp.runsheet_number');
+    $query = db_select('node', 'n');
+    $query->condition('n.type', 'sales_register_data');
+    $query->join('field_data_field_trip_id_reference', 'tr', 'tr.entity_id = n.nid');
+    $query->join('node', 'n1', 'tr.field_trip_id_reference_nid = n1.nid');
+    $query->condition('n.title', $bill_number, 'IN');
+    $query->condition('n.uid', $distributor_id);
+    $query->fields('n1', array('title'));
+    $query->addExpression("GROUP_CONCAT(DISTINCT n.title separator ', ')", 'bill_number');
+    $query->groupBy('n1.title');
     $trip_id = $query->execute()->fetchAll();
             
     return $trip_id;
