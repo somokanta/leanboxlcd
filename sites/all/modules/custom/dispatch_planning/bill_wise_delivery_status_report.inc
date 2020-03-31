@@ -308,7 +308,7 @@ function bill_wise_delivery_status_report_callback() {
     if (!empty($from_bill_date) && !empty($to_bill_date)) {
         $query->condition('ad.bill_date', array($from_bill_date, $to_bill_date), 'BETWEEN');
     }
-    $query->fields('ad', array('bill_number', 'bill_date', 'beat_name', 'party_code', 'party_name', 'bill_value'));
+    $query->fields('ad', array('bill_number', 'bill_date', 'beat_name', 'party_code', 'party_name', 'bill_value', 'attempted_status'));
     $query->addexpression("MAX(ad.runsheet_number)", 'trip_number');
     $query->addExpression('MIN(ad.dispatch_date)', 'first_dispatch_date');
     $query->addExpression('MAX(ad.dispatch_date)', 'last_dispatch_date');
@@ -427,7 +427,9 @@ function bill_wise_delivery_status_report_callback() {
         }
 
         $facility_code = get_facility_code_from_tid($val['field_facility_code_tid']);
-
+        if($val['attempted_status'] == 'Yes') {
+            $counts_of_attempts = count($val['attempted_status']);
+        }
         $row['order_date'] = date('d-M-y', $val['field_sr_new_bill_date_value']);
         $row['order_no'] = $val['field_outlet_order_no_value'];
         $row['bill_date'] = date('d-M-y', $val['bill_date']);
@@ -441,7 +443,7 @@ function bill_wise_delivery_status_report_callback() {
         $row['first_dispatch_date'] = $val['first_dispatch_date'] ? date('d-M-y', $val['first_dispatch_date']) : '';
         $row['count_of_dispatches'] = $val['count_dispatch_date'];
         $row['last_dispatch_date'] = $val['last_dispatch_date'] ? date('d-M-y', $val['last_dispatch_date']) : '';
-        $row['counts_of_attempts'] = $val['counts_of_attempts'];
+        $row['counts_of_attempts'] = $counts_of_attempts;//$val['counts_of_attempts'];
         $row['first_attempt_date'] = $val['first_attempt_date'] ? date('d-M-y', $val['first_attempt_date']) : '';
         $row['exception_status'] = $val['exception_status'];
         $row['exception_reason'] = $val['exception_reason'];
