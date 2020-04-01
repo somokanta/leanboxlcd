@@ -189,7 +189,7 @@ function download_tester_invoice_slip($from_date,$to_date,$order_number,$distrib
       $header_data_arr = json_decode($val['header_data'], true);
       $row_data_arr = json_decode($val['row_data'], true);
       $unique_box_ids= array_unique(explode(',', $header_data_arr['box_id']));
-      $main_header = '<table class = "preview_table" width = "100%" cellspacing = "0" style = "font-family:arial; font-size: 13px; color:#000;" cellpadding = "5" border = "0" align = "center">
+      $table .= '<table class = "preview_table" width = "100%" cellspacing = "0" style = "font-family:arial; font-size: 13px; color:#000;" cellpadding = "5" border = "0" align = "center">
         <tbody>
         <tr>
           <td>Invoice Number:</td>
