@@ -274,8 +274,3 @@ function get_tester_invoice_memo ($from_date,$to_date,$order_number,$distributor
     }
     return $invoice_data;
 }
-
-
-function get_tester_invoice_memo_one ($from_date,$to_date,$order_number,$distributor_id) {
-    return 1;
-}
