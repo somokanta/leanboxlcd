@@ -654,6 +654,23 @@ function dispatch_planning_menu() {
       'page arguments' => array('global_config_form'),
       'access callback' => 'check_if_fr_role_user_admin',
     );
+  
+   $items['bill-wise-dispatch-no-attempt-report'] = array(
+    'title' => 'Bill-wise Dispatch with No Attempt report',
+    'page callback' => array('bill_wise_dispatch_no_attempt_report_callback'),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'bill_wise_dispatch_no_attempt_report.inc',
+  );
+
+  $items['bill-wise-dispatch-no-attempt-report/export'] = array(
+    'title' => 'Bill-wise Dispatch with No Attempt report Export',
+    'description' => 'Bill-wise Dispatch with No Attempt report Export',
+    'page callback' => array('bill_wise_dispatch_no_attempt_report_export'),
+    'file' => 'bill_wise_dispatch_no_attempt_report.inc',
+    'access callback' => TRUE,
+  );
+  
   return $items;
 }
 
@@ -5178,18 +5195,25 @@ function global_config_form($form, $form_state) {
       '#description' => t('Number of trips to process in one thread for Van planning to SDR app integration'),
       '#default_value' => variable_get('no-trip-per-thread',3),
     );
-    $form['attempted_bill_status'] = array(
+    $form['not_attempted_bill_status'] = array(
       '#type' => 'textfield',
-      '#title' => t('Attempted Bill Status'),
-      '#description' => t('Attempted Bill Status'),
-      '#default_value' => variable_get('attempted_bill_status'),
+      '#title' => t('Not attempted Bill Status'),
+      '#description' => t('Not attempted Bill Status'),
+      '#default_value' => variable_get('not_attempted_bill_status'),
     );
     
-    $form['attempted_reason_for_failure'] = array(
+    $form['not_attempted_reason_for_failure'] = array(
     '#type' => 'textfield',
-    '#title' => t('Attempted Reason for Failure'),
-    '#description' => t('Attempted Reason for Failure'),
-    '#default_value' => variable_get('attempted_reason_for_failure'),
+    '#title' => t('Not attempted Reason for Failure'),
+    '#description' => t('Not attempted Reason for Failure'),
+    '#default_value' => variable_get('not_attempted_reason_for_failure'),
    );     
   return system_settings_form($form);
+}
+
+function get_bill_status_from_api_table() {
+  $query = db_select('dispatch_planning_api_data', 'ad');
+  $query->fields('ad', array('res_status'));
+  $res = $query->distinct()->execute()->fetchAllKeyed(0,0);
+  return $res;
 }
