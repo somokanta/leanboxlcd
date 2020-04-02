@@ -235,28 +235,6 @@ function download_tester_invoice_slip($from_date,$to_date,$order_number,$distrib
 }
 
 
-function get_html_table($headers, $datas) {
-  if (!empty($headers) && !empty($datas)) {
-    $border_class = " style='border:0.1pt solid black;border-collapse: collapse;'";
-    $table = '<table ' . $border_class . ' cellspadding="0" cellspacing="0"><tr>';
-    foreach ($headers as $key => $value) {
-      $table .= '<th' . $border_class . '>' . $value . '</th>';
-    }
-    $table .= '</tr>';
-    foreach ($datas as $key => $row) {
-      $table .= '<tr>';
-      foreach ($row as $row_id => $row_value) {
-        $table .= '<td' . $border_class . '>' . $row_value . '</td>';
-      }
-      $table .= '</tr>';
-    }
-
-    $table .= '</table>';
-  }
-  return $table;
- }
-
-
 
 function get_tester_invoice_memo ($from_date,$to_date,$order_number,$distributor_id) {
     $invoice_data = [];
