@@ -367,7 +367,7 @@ function bill_wise_delivery_attempt_report_callback() {
 
     foreach ($result as $val) {
         
-        if ($val['delivery_pending_flag'] == 0) {
+//        if ($val['delivery_pending_flag'] == 0) {
             if ($val['current_bill_status'] == 'deliver') {
                 $bill_status = variable_get('deliver_status'); //'Delivered';
             } elseif ($val['current_bill_status'] == 'partial_deliver') {
@@ -375,9 +375,9 @@ function bill_wise_delivery_attempt_report_callback() {
             } elseif ($val['current_bill_status'] == 'undeliver') {
                 $bill_status = variable_get('undeliver_status'); //'Full Returned';
             }
-        } else {
-            $bill_status = variable_get('current_delivery_status');
-        }
+//        } else {
+//            $bill_status = variable_get('current_delivery_status');
+//        }
         
         if($val['res_status'] == 'undeliver') {
             $reason_for_failure = $val['res_reason_for_failure'];
