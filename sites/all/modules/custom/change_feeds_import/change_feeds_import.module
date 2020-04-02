@@ -672,7 +672,7 @@ function download_pdf2($args) {
                 $render = "<table width = '100%' cellspacing = '0' cellpadding = '5' border = '0' >
                 
                 <tr>
-                  <td align = 'center'><b>Outlet Daily Operating Timings  For :.$args. </b></td>
+                  <h1 align = 'center'><b>Outlet Daily Operating Timings  For :.$args. </b></h1>
                 </tr>       
                 
                 </table><br>";
