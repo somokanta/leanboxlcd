@@ -676,6 +676,7 @@ function download_pdf2($args) {
                 </tr       
                 </thead>
                 </table><br>";
+                $render = "<table border='0' width='100%' cellpadding='6'><tr><td style='font-weight:bold; text-align:right'>Total Box Id Count $box_id</td><td style='font-weight:bold; text-align:right;'>Total $bill_val</td></tr></table>";
                 $trip_id = $args;
 
                 // Remove xls image from pdf.
