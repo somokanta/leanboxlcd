@@ -5069,6 +5069,7 @@ function sdr_api_process($trip_id_result) {
         $query->leftjoin('field_data_field_outlet_order_no', 'order_no', 'order_no.entity_id = n1.nid');
         $query->leftjoin('field_data_field_crate_id', 'crate_id', 'crate_id.entity_id = n1.nid');
         $query->leftjoin('field_data_field_party_code_reference', 'party_code', 'party_code.entity_id = n1.nid');
+        $query->leftjoin('field_data_field_bill_sequence', 'bs', 'bs.entity_id = n1.nid');
         $query->leftjoin('node', 'n2', 'party_code.field_party_code_reference_nid = n2.nid');
         $query->condition('n2.type', 'outlet_master');
         $query->leftjoin('field_data_field_party_name', 'party_name', 'party_name.entity_id = n2.nid');
@@ -5091,6 +5092,7 @@ function sdr_api_process($trip_id_result) {
         $query->fields('n2', array('title'));
         $query->fields('party_name', array('field_party_name_value'));
         $query->fields('n3', array('title'));
+        $query->addexpression("FLOOR(bs.field_bill_sequence_value)", 'parkstop_id');
         $query->groupBy('order_no.field_outlet_order_no_value');
         $result = $query->execute()->fetchAll();
 
@@ -5109,6 +5111,7 @@ function sdr_api_process($trip_id_result) {
                  $party_code = $value->n2_title;
                  $party_name = $value->field_party_name_value;
                  $parent_party_code = $value->n3_title;
+                 $parkstop_id = $value->parkstop_id;
 
                 // Trip_Details_Crossdock
                  $results['Trip_Details_Crossdock'][$trip_id]['Crossdock_Facility_code'] = $facility_code ? $facility_code : '';
@@ -5123,6 +5126,7 @@ function sdr_api_process($trip_id_result) {
                  $order_box_details[$trip_id]['Order_Box_Details'][$order_number]['Party_Code'] = $party_code ? $party_code : '';
                  $order_box_details[$trip_id]['Order_Box_Details'][$order_number]['Party_Name'] = $party_name ? $party_name : '';
                  $order_box_details[$trip_id]['Order_Box_Details'][$order_number]['Parent_Party_Code'] = $parent_party_code ? $parent_party_code : '';
+                 $order_box_details[$trip_id]['Order_Box_Details'][$order_number]['Parkstop_ID'] = $parkstop_id ? $parkstop_id : '';
                  $order_box_details[$trip_id]['Order_Box_Details'][$order_number]['Crossdock_Distributor_ID'] = $crossdock_distributor_id ? $crossdock_distributor_id : '';
             }
             foreach ($order_box_details as $trip_id => $order_box_details_value) {
