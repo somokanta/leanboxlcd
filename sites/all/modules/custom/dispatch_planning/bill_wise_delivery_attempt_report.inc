@@ -312,7 +312,8 @@ function bill_wise_delivery_attempt_report_callback() {
         $query->condition('ad.party_code', $party_code, '=');
     }
      if (!empty($bill_status)) {
-        $query->condition('ad.res_status', $bill_status, '=');
+        //$query->condition('ad.res_status', $bill_status, '=');
+        $query->havingCondition('current_bill_status', $bill_status, '=');
     }
     if (!empty($from_dispatch_date) && !empty($to_dispatch_date)) {
         $query->condition('ad.dispatch_date', array($from_dispatch_date, $to_dispatch_date), 'BETWEEN');
