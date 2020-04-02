@@ -652,35 +652,28 @@ function download_pdf2($args) {
                 'Sat' => 'Sat',
                 'Sun' => 'Sun'
                 );               
-                $outlet_time_table_header = '<table class = "preview_table" width = "100%" cellspacing = "0" style = "font-family:arial; font-size: 13px; color:#000;" cellpadding = "5" border = "0" align = "center">
+                $outlet_time_table_header .= '<table class = "preview_table" width = "100%" cellspacing = "0" style = "font-family:arial; font-size: 13px; color:#000;" cellpadding = "5" border = "0" align = "center">
                 <thead>
                 <tr>
-                  <h1 align = "center"><b>Outlet Daily Operating Timings  For :'.$args.'</b></h1>
+                  <td align = "center"><h1><b>Outlet Daily Operating Timings  For :'.$args.'</b></h1></tds>
                 </tr>
                 <tr>
-                  <h4 align = "left">Trip Id : '.$args.'</h4>
-                  <h4 align = "right">Bill Count : '.count($outlet_table_row_data['row']).'</h4>
+                  <td align = "left">Trip Id : '.$args.'</td>
+                  <td align = "right">Bill Count : '.count($outlet_table_row_data['row']).'</td>
                 </tr>
                 <tr>
-                  <h4 align = "right">Cashier Name: '.$outlet_table_row_data['cashier_name'].'</h4>
+                  <td align = "right">Cashier Name: '.$outlet_table_row_data['cashier_name'].'</td>
                 </tr>         
                 </thead>
                 </table><br>';
-                //$render = $rendered_html;
-                //$render .= "<pagebreak />";
-                $outlet_time_table = get_html_table($below_header_array,$outlet_table_row_data['row']);
-                $render = "<table width = '100%' cellspacing = '0' cellpadding = '5' border = '0' >
-                
-                <tr>
-                  <td align = 'center'><h1><b>Outlet Daily Operating Timings  For :.$args. </b></h1></td>
-                </tr>       
-                
-                </table><br>";
-                //$render = "<table border='0' width='100%' cellpadding='6'><tr><td style='font-weight:bold; text-align:right'>Total Box Id Count $box_id</td><td style='font-weight:bold; text-align:right;'>Total $bill_val</td></tr></table>";
+                $render .= $rendered_html;
+                $render .= "<pagebreak />";
+                $outlet_time_table .= get_html_table($below_header_array,$outlet_table_row_data['row']);
+                $render .= $outlet_time_table_header.$outlet_time_table;
                 $trip_id = $args;
 
                 // Remove xls image from pdf.
-                $xls_string = '<div class="feed-icon">s
+                $xls_string = '<div class="feed-icon">
       <a href="/drs2-download/' . $trip_id . '"><img typeof="foaf:Image" class="img-responsive" src="' . $base_url . '/sites/all/modules/contrib/views_data_export/images/xls.png" alt="XLS" title="XLS" /></a>    </div>';
                 $render = str_replace($xls_string, "", $render);
                 pdf_using_mpdf_api($render);
