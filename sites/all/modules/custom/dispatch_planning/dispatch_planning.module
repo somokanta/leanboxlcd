@@ -671,6 +671,22 @@ function dispatch_planning_menu() {
     'access callback' => TRUE,
   );
   
+  $items['bill-wise-delivery-attempt-report'] = array(
+    'title' => 'Bill-wise Delivery Attempt Log',
+    'page callback' => array('bill_wise_delivery_attempt_report_callback'),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'bill_wise_delivery_attempt_report.inc',
+  );
+
+  $items['bill-wise-deliveryo-attempt-report/export'] = array(
+    'title' => 'Bill-wise Delivery Attempt Log Export',
+    'description' => 'Bill-wise Delivery Attempt Log Export',
+    'page callback' => array('bill_wise_delivery_attempt_report_export'),
+    'file' => 'bill_wise_delivery_attempt_report.inc',
+    'access callback' => TRUE,
+  );
+  
   return $items;
 }
 
