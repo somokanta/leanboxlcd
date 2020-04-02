@@ -639,22 +639,20 @@ function download_pdf2($args) {
                 $view->set_arguments(array($args));
                 $rendered_html = $view->render();
                 $outlet_table_row_data = outlet_daily_opearting_time_table($args,$distributor_id);
-                
-                // header outlet table
                 $below_header_array = array(
-                'Sr No' => array('data' => t('Sr No')),
-                'Trip Id' => array('data' => t('Trip Id')),
-                'Bill No' => array('data' => t('Bill No')),
-                'Party Name' => array('data' => t('Party Name')),
-                'Mon' => array('data' => t('Mon')),
-                'Tue' => array('data' => t('Tue')),
-                'Wed' => array('data' => t('Wed')),
-                'Thu' => array('data' => t('Thu')),
-                'Fri' => array('data' => t('Fri')),
-                'Sat' => array('data' => t('Sat')),
-                'Sun' => array('data' => t('Sun'))
-                );
-                $outlet_table_html = theme('table', array('header' => $below_header_array, 'rows' => $outlet_table_row_data['row'], 'attributes' => array('width' => '100%')));
+                'Sr No' => 'Sr No',
+                'Trip Id' => 'Trip Id',
+                'Bill No' => 'Bill No',
+                'Party Name' => 'Party Name',
+                'Mon' => 'Mon',
+                'Tue' => 'Tue',
+                'Wed' => 'Wed',
+                'Thu' => 'Thu',
+                'Fri' => 'Fri',
+                'Sat' => 'Sat',
+                'Sun' => 'Sun'
+                );               
+                //$outlet_table_html = theme('table', array('header' => $below_header_array, 'rows' => $outlet_table_row_data['row'], 'attributes' => array('width' => '100%')));
                 $outlet_table .= '<table class = "preview_table" width = "100%" cellspacing = "0" style = "font-family:arial; font-size: 13px; color:#000;" cellpadding = "5" border = "0" align = "center">
                 <thead>
                 <tr>
@@ -671,7 +669,7 @@ function download_pdf2($args) {
                 </table><br>';
                 $render .= $rendered_html;
                 $render .= "<pagebreak />";
-                $outlet_table .= $outlet_table_html;
+                $outlet_table .= get_html_table($below_header_array,$outlet_table_row_data['row']);
                 $render .= $outlet_table;
                 $data .= $render;
                 $trip_id = $args;
