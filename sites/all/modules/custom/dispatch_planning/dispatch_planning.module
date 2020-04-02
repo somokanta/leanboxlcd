@@ -316,12 +316,13 @@ function dispatch_planning_menu() {
     'file' => 'delete_fareye_dp_id_form.inc',
   );
 
-// $items['dispatch-planning-cron'] = array(
-//    'title' => '',
-//    'page callback' => 'dispatch_planning_cron_callback',
-//    'access callback' => TRUE,
-//    'type' => MENU_NORMAL_ITEM,
-//  );
+ $items['dispatch-planning-cron'] = array(
+    'title' => '',
+    'page callback' => 'dispatch_planning_cron_callback',
+    'access callback' => TRUE,
+    'type' => MENU_NORMAL_ITEM,
+  );
+ 
   $items['loose-picking-sheet'] = array(
     'title' => 'Loose PICKING SHEET',
     'page callback' => 'drupal_get_form',
@@ -1323,39 +1324,51 @@ function dispatch_planning_views_api() {
  */
 function dispatch_planning_cron_callback() {
   $query = db_select('dispatch_planning_api_log', 'a');
-  $query->fields('a', array('request_data', 'id'));
+  $query->fields('a', array('request_data', 'id', 'trip_id'));
   $query->condition('a.request_flag', 0);
   $query->condition('a.api_type', 'dispatch_planning');
 
-  $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+  $res = $query->range(0,50)->execute()->fetchAll(PDO::FETCH_ASSOC);
 
   if (!empty($res)) {
     foreach ($res as $key => $val) {
 
-// Write logic to hit API Here
+      // Write logic to hit API Here
       $json_api_data = $val['request_data'];
       $sql_ins_id = $val['id'];
+      $trip_id = $val['trip_id'];
+      
+        //Delivery App changes as per trips from conf
+        $trips = variable_get('new_trip_ids');
+        $trip_ids = explode(',', $trips);
 
-      $request_headers = array('Content-Type' => 'application/json');
-      $order_api_url = variable_get('dispatch_uri_settings');
-      $options = array('headers' => $request_headers, 'method' => 'POST', 'data' => $json_api_data);
-      $response = drupal_http_request($order_api_url, $options);
+        if (!in_array($trip_id, $trip_ids)) { 
+          $request_headers = array('Content-Type' => 'application/json', 'Authorization' => 'Token 2972f506c41448cb3456c1c074aed6102183aff9');
+          $order_api_url = variable_get('new_dispatch_uri_settings', 'http://13.127.160.72:8080/api/order/v1/manifest/');
+        }
+        else {
+          $request_headers = array('Content-Type' => 'application/json');
+          $order_api_url = variable_get('dispatch_uri_settings', 'https://staging.fareye.co/api/v1/job?api_key=l1S6xa5mnxUXDuqv12q7lerLBL9l1ICq');
+        }
+        //Delivery App changes as per trips from configuration
 
-      $response_data = $response->data;
-      if ($response_data) {
-        $api_success = json_decode($response_data);
-        $api_success = (isset($api_success->failCount) && $api_success->failCount == 0) ? 1 : 0;
-        // create response log entry
-        dispatch_planning_api_log_update($response_data, $sql_ins_id, $api_success);
-      }
-      else {
-        //dpm($response);
-      }
+        //$request_headers = array('Content-Type' => 'application/json');
+        //$order_api_url = 'https://staging.fareye.co/api/v1/job?api_key=l1S6xa5mnxUXDuqv12q7lerLBL9l1ICq';
+        //$order_api_url = variable_get('dispatch_uri_settings', 'https://staging.fareye.co/api/v1/job?api_key=l1S6xa5mnxUXDuqv12q7lerLBL9l1ICq');
+        $options = array('headers' => $request_headers, 'method' => 'POST', 'data' => $json_api_data, 'timeout'=> 300);
+        $response_data = drupal_http_request($order_api_url, $options);
+
+        $response_data = $response_data->data;
+        if ($response_data) {
+            $api_success = json_decode($response_data);
+            $api_success = ($api_success->failCount == 0) ? 1 : 0;
+            // create response log entry
+            dispatch_planning_api_log_update($response_data, $sql_ins_id, $api_success);
+        }
     }
   }
   return "1";
 }
-
 /**
  * @param type $form
  * @param type $form_state
@@ -3303,7 +3316,7 @@ function get_delivery_boy_names($node_nid) {
  * @param type $trip_id
  * @return array
  */
-function dispatch_planning_sales_reg_api($node, $trip_execution_date, $vehicle_no, $cashier, $trip_id) {
+function dispatch_planning_sales_reg_api($node, $trip_execution_date, $vehicle_no, $cashier, $trip_id, $total_bill) {
 
   $api_data = array();
   // get billing data details
@@ -3370,6 +3383,7 @@ function dispatch_planning_sales_reg_api($node, $trip_execution_date, $vehicle_n
   //$api_data['hub'] = $rs_code; // need to remove when moving to HUL
   $api_data['hub'] =  $facility_code;
   $api_data['fieldExecutive'] = $facility_code . '_' . $cashier;
+  $api_data['totalBillCount'] = $total_bill;
   $api_data['fieldExecutiveName'] = $cashier;
 
   $api_data['jobData']['vehicle'] = $vehicle_no;
@@ -3407,7 +3421,18 @@ function dispatch_planning_sales_reg_api($node, $trip_execution_date, $vehicle_n
    * Insert data into dispatch_planning_item_details table
    */
   dispatch_planning_item_details($billing_data_details_insert, $id);
-  return $api_data;
+    
+  //Accoring to the new development
+  $apidata = array();
+  $apidata[] = $api_data;
+  $dis_id = $node_uid;
+    if (!empty($apidata)) {
+        $json_api_data = json_encode($apidata);
+        // request log
+        $api_type = 'dispatch_planning';
+        $sql_ins_id = dispatch_planning_api_log($json_api_data, $trip_id, $api_type, $dis_id);
+    }
+  return 1;
 }
 
 /*
@@ -3682,6 +3707,7 @@ function _update_dispatch_planning_api($node) {
       $res = _dispatch_planning_get_all_sales_nid($nid);
 
       if (!empty($res)) {
+        $total_bill = count($res);
         foreach ($res as $key => $val) {
           $sales_nid = $val['nid'];
           $sales_node = node_load($sales_nid);
@@ -3689,42 +3715,42 @@ function _update_dispatch_planning_api($node) {
           //TP IMPORTANT: Send only those bills which sum(Sum_of_TOTAL_SALES_QTY) is > 0
           $total_sales_qty = get_total_sales_qty_from_custom_billing($sales_node->title, $dis_id);
           if ($total_sales_qty > 0) {
-            $api_data[] = dispatch_planning_sales_reg_api($sales_node, $trip_dispatch_date, $vehicle_no, $cashier, $trip_id);
+            $api_data[] = dispatch_planning_sales_reg_api($sales_node, $trip_dispatch_date, $vehicle_no, $cashier, $trip_id, $total_bill);
           }
         }
       }
       // call api here
       // Call Dispatch API Here
-      if (!empty($api_data)) {
-        $json_api_data = json_encode($api_data);
-        // request log
-        $api_type = 'dispatch_planning';
-        $sql_ins_id = dispatch_planning_api_log($json_api_data, $trip_id, $api_type, $dis_id);
-         
-        //$order_api_url = 'https://staging.fareye.co/api/v1/job?api_key=l1S6xa5mnxUXDuqv12q7lerLBL9l1ICq';
-          
-       //Delivery App changes as per trips from conf
-        $trips = variable_get('new_trip_ids');
-        $trip_ids = explode(',', $trips);
-
-        if (!in_array($trip_id, $trip_ids)) {
-          $request_headers = array('Content-Type' => 'application/json','Authorization' => 'Token 2972f506c41448cb3456c1c074aed6102183aff9');
-          $order_api_url = variable_get('new_dispatch_uri_settings', 'http://13.127.160.72:8080/api/order/v1/manifest/');
-        }else{
-          $request_headers = array('Content-Type' => 'application/json');
-          $order_api_url = variable_get('dispatch_uri_settings', 'https://staging.fareye.co/api/v1/job?api_key=l1S6xa5mnxUXDuqv12q7lerLBL9l1ICq');
-        }
-        //Delivery App changes as per trips from configuration
-        
-        $options = array('headers' => $request_headers, 'method' => 'POST', 'data' => $json_api_data, 'timeout'=> 300);
-        $response_data = drupal_http_request($order_api_url, $options);
-
-        $response_data = $response_data->data;
-        $api_success = json_decode($response_data);
-        $api_success = ($api_success->failCount == 0) ? 1 : 0;
-        // create response log entry
-        dispatch_planning_api_log_update($response_data, $sql_ins_id, $api_success);
-      }
+//      if (!empty($api_data)) {
+//        $json_api_data = json_encode($api_data);
+//        // request log
+//        $api_type = 'dispatch_planning';
+//        $sql_ins_id = dispatch_planning_api_log($json_api_data, $trip_id, $api_type, $dis_id);
+//         
+//        //$order_api_url = 'https://staging.fareye.co/api/v1/job?api_key=l1S6xa5mnxUXDuqv12q7lerLBL9l1ICq';
+//          
+//       //Delivery App changes as per trips from conf
+//        $trips = variable_get('new_trip_ids');
+//        $trip_ids = explode(',', $trips);
+//
+//        if (!in_array($trip_id, $trip_ids)) {
+//          $request_headers = array('Content-Type' => 'application/json','Authorization' => 'Token 2972f506c41448cb3456c1c074aed6102183aff9');
+//          $order_api_url = variable_get('new_dispatch_uri_settings', 'http://13.127.160.72:8080/api/order/v1/manifest/');
+//        }else{
+//          $request_headers = array('Content-Type' => 'application/json');
+//          $order_api_url = variable_get('dispatch_uri_settings', 'https://staging.fareye.co/api/v1/job?api_key=l1S6xa5mnxUXDuqv12q7lerLBL9l1ICq');
+//        }
+//        //Delivery App changes as per trips from configuration
+//        
+//        $options = array('headers' => $request_headers, 'method' => 'POST', 'data' => $json_api_data, 'timeout'=> 300);
+//        $response_data = drupal_http_request($order_api_url, $options);
+//
+//        $response_data = $response_data->data;
+//        $api_success = json_decode($response_data);
+//        $api_success = ($api_success->failCount == 0) ? 1 : 0;
+//        // create response log entry
+//        dispatch_planning_api_log_update($response_data, $sql_ins_id, $api_success);
+//      }
     }
   }
 }
