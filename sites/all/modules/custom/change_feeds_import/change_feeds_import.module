@@ -655,14 +655,14 @@ function download_pdf2($args) {
                 $outlet_time_table_header .= '<table class = "preview_table" width = "100%" cellspacing = "0" style = "font-family:arial; font-size: 13px; color:#000;" cellpadding = "5" border = "0" align = "center">
                 <thead>
                 <tr>
-                  <td align = "center"><h1><b>Outlet Daily Operating Timings  For :'.$args.'</b></h1></tds>
+                  <th align = "center"><h1><b>Outlet Daily Operating Timings  For :'.$args.'</b></h1></th>
                 </tr>
                 <tr>
                   <td align = "left">Trip Id : '.$args.'</td>
                   <td align = "right">Bill Count : '.count($outlet_table_row_data['row']).'</td>
                 </tr>
                 <tr>
-                  <td align = "right">Cashier Name: '.$outlet_table_row_data['cashier_name'].'</td>
+                  <td align = "left">Cashier Name: '.$outlet_table_row_data['cashier_name'].'</td>
                 </tr>         
                 </thead>
                 </table><br>';
