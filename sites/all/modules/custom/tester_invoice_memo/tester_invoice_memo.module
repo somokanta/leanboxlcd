@@ -86,7 +86,7 @@ function fetch_tester_invoice_api_data($tester_invoice_api_data){
                     'total_picked_qty' => $val['total_picked_qty'],
                     'facility_code' => $val['lcd_facility_code'],
                     'distributor_id' => $val['lcd_distributor_id'],
-                    'header_data' => json_encode($val[headar_data]),
+                    'header_data' => json_encode($val['headar_data']),
                     'row_data' => json_encode($val['row_data']),
                     'ptl_id' => $val['ptl_id'],
                     'request_time' => REQUEST_TIME

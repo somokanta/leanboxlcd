@@ -85,13 +85,12 @@ function tester_invoice_memo_schema() {
         'type' => 'int',
         'default' => 0,
       ),
-       'ptl_id' => array(
+      'ptl_id' => array(
          'description' => 'PTL Id.',
-         'type' => 'int',
-         'unsigned' => TRUE,
-         'not null' => TRUE,
-         'default' => 0,
-       ),
+         'type' => 'varchar',
+         'length' => 100,
+         'default' => '',
+      ),
       'header_data' => array(
         'description' => t('Header API Received Data'),
         'type' => 'text',
