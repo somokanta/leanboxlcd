@@ -5314,17 +5314,15 @@ function get_facility_code_from_tid($facility_tid) {
 
 function outlet_daily_opearting_time_table ($trip_id,$distributor_id) {
     $outlet_table_data = [];
-    if(!empty($trip_id) || !empty($distributor_id)) {
+    if(!empty($trip_id) && !empty($distributor_id)) {
         $query = db_select('node', 'n');
         $query->condition('n.type','sales_register_data');
-        $query->leftjoin('field_data_field_trip_id_reference', 'trip_id_ref', 'trip_id_ref.entity_id = n.nid');
+        $query->join('field_data_field_trip_id_reference', 'trip_id_ref', 'trip_id_ref.entity_id = n.nid');
         $query->condition('n.uid', $distributor_id);
             // trip id
         $query->join('node', 'dispatch_data', 'trip_id_ref.field_trip_id_reference_nid = dispatch_data.nid');
         $query->condition('dispatch_data.uid', $distributor_id);
-        if($trip_id) {
-            $query->condition('dispatch_data.title', $trip_id);
-        }
+        $query->condition('dispatch_data.title', $trip_id);
         // cashier name
         $query->join('field_data_field_cashier_name', 'cashier_name', 'cashier_name.entity_id = dispatch_data.nid');
 
@@ -5343,6 +5341,7 @@ function outlet_daily_opearting_time_table ($trip_id,$distributor_id) {
         $query->condition('hul_data.uid', $distributor_id);
         // days 
         $query->join('outlet_working_hours', 'working_hours', 'working_hours.hul_code = hul_data.title'); // hul code
+        $query->condition('working_hours.distributor_id', $distributor_id);
         $query->addfield('n', 'title', 'bill_number');
         $query->addfield('dispatch_data', 'title', 'trip_id');
         $query->addfield('party_name', 'field_party_name_value', 'party_name');
@@ -5379,4 +5378,3 @@ function outlet_daily_opearting_time_table ($trip_id,$distributor_id) {
         return $outlet_table_data;
     }
 }
-
