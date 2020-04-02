@@ -654,8 +654,8 @@ function download_pdf2($args) {
                 'Sat' => array('data' => t('Sat')),
                 'Sun' => array('data' => t('Sun'))
                 );
-                $outlet_table_html = theme('table', array('header' => $below_header_array, 'rows' => $outlet_table_row_data['row'], 'attributes' => array('width' => '100%')));
-                $outlet_table_header = '<table class = "preview_table" width = "100%" cellspacing = "0" style = "font-family:arial; font-size: 13px; color:#000;" cellpadding = "5" border = "0" align = "center">
+                //$outlet_table_html = theme('table', array('header' => $below_header_array, 'rows' => $outlet_table_row_data['row'], 'attributes' => array('width' => '100%')));
+                $outlet_table .= '<table class = "preview_table" width = "100%" cellspacing = "0" style = "font-family:arial; font-size: 13px; color:#000;" cellpadding = "5" border = "0" align = "center">
                 <thead>
                 <tr>
                   <h1 align = "center"><b>Outlet Daily Operating Timings  For :'.$args.'</b></h1>
@@ -669,13 +669,18 @@ function download_pdf2($args) {
                 </tr>         
                 </thead>
                 </table><br>';
-                $data  = $rendered_html.'<br><br>'.$outlet_table_header.$outlet_table_html;
+                $outlet_table .= get_html_table($below_header_array, $outlet_table_row_data['row']);
+                $render .= $rendered_html;
+                $render .= "<pagebreak />";
+                $data .= $outlet_table;
+                //$data  = $rendered_html.'<br><br>'.$outlet_table.$outlet_table_html;
                 $trip_id = $args;
 
                 // Remove xls image from pdf.
                 $xls_string = '<div class="feed-icon">
       <a href="/drs2-download/' . $trip_id . '"><img typeof="foaf:Image" class="img-responsive" src="' . $base_url . '/sites/all/modules/contrib/views_data_export/images/xls.png" alt="XLS" title="XLS" /></a>    </div>';
                 $render = str_replace($xls_string, "", $data);
+
                 pdf_using_mpdf_api($render);
             }
             else {
@@ -5378,3 +5383,24 @@ function outlet_daily_opearting_time_table ($trip_id,$distributor_id) {
         return $outlet_table_data;
     }
 }
+
+function get_html_table($headers, $datas) {
+  if (!empty($headers) && !empty($datas)) {
+    $border_class = " style='border:0.1pt solid black;border-collapse: collapse;'";
+    $table = '<table ' . $border_class . ' cellspadding="0" cellspacing="0"><tr>';
+    foreach ($headers as $key => $value) {
+      $table .= '<th' . $border_class . '>' . $value . '</th>';
+    }
+    $table .= '</tr>';
+    foreach ($datas as $key => $row) {
+      $table .= '<tr>';
+      foreach ($row as $row_id => $row_value) {
+        $table .= '<td' . $border_class . '>' . $row_value . '</td>';
+      }
+      $table .= '</tr>';
+    }
+
+    $table .= '</table>';
+  }
+  return $table;
+ }
