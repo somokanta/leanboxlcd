@@ -300,7 +300,7 @@ function bill_wise_delivery_attempt_report_callback() {
     } elseif (empty($distributor_ids) && !empty($distributor_id)) {
         $distributor_ids = array($distributor_id);
     }
-
+    dpm($distributor_ids);
     // Fetch data from table
     $query = db_select('dispatch_planning_api_data', 'ad');
     $query->condition('ad.distributor_id', $distributor_ids, 'IN');
@@ -320,17 +320,8 @@ function bill_wise_delivery_attempt_report_callback() {
     if (!empty($from_bill_date) && !empty($to_bill_date)) {
         $query->condition('ad.bill_date', array($from_bill_date, $to_bill_date), 'BETWEEN');
     }
-//    $query->condition('ad.attempted_status', 'Yes', '=');
     $query->condition('ad.res_reason_for_failure', 'Outlet not attempted', '!=');
-    $query->fields('ad', array('runsheet_number','dispatch_date','bill_number', 'bill_date', 'beat_name', 'party_name', 'fieldExecutiveName', 'res_status', 'res_reason_for_failure'));
-   // $query->addexpression("COUNT(DISTINCT(ad.dispatch_date))", 'count_dispatch_date');
-    //$query->addexpression("MAX(CASE WHEN ad.delivery_pending_flag = 0 THEN ad.res_status END)", 'current_bill_status');
-    //$query->addexpression("(CASE WHEN (ad.id = MAX(ad.id)) THEN ad.delivery_pending_flag END)", 'delivery_pending_flag');
-    //$query->addexpression("(CASE WHEN (ad.id = MAX(ad.id)) THEN ad.res_reason_for_failure END)", 'res_reason_for_failure');
-    //$query->addexpression("MAX(ad.runsheet_number)", 'runsheet_number');
-    //$query->addExpression('MAX(ad.dispatch_date)', 'dispatch_date');
-//    $query->addexpression("COUNT(CASE WHEN (ad.attempted_status = 'Yes') THEN ad.attempted_status END)", 'count_attempted_status');
-    
+    $query->fields('ad', array('runsheet_number','dispatch_date','bill_number', 'bill_date', 'beat_name', 'party_name', 'fieldExecutiveName', 'res_status', 'res_reason_for_failure'));    
     $query->join('node', 'n', 'n.title = ad.runsheet_number');
     $query->condition('n.type', 'dispatch_data', '=');
     $query->condition('n.uid', $distributor_ids, 'IN');
@@ -340,7 +331,6 @@ function bill_wise_delivery_attempt_report_callback() {
 
     $query->leftjoin('field_data_field_sr_new_bill_date', 'bill_date', 'bill_date.entity_id = n1.nid');
     $query->leftjoin('field_data_field_outlet_order_no', 'order_no', 'order_no.entity_id = n1.nid');
-    $query->leftjoin('field_data_field_bill_area_codes', 'bill_area', 'bill_area.entity_id = n.nid');
 
     $query->join('node', 'n2', 'n2.title = ad.party_hll_code');
     $query->condition('n2.type', 'hul_code_master', '=');
@@ -348,7 +338,6 @@ function bill_wise_delivery_attempt_report_callback() {
     $query->leftjoin('field_data_field_area_code', 'ac', 'ac.entity_id = n2.nid');
 
     $query->leftjoin('node', 'n3', 'ac.field_area_code_nid = n3.nid');
-//    $query->condition('n3.type', 'area_code_master', '=');
     $query->join('users', 'u', 'u.uid = ad.distributor_id');
     $query->join('field_data_field_distributor_name', 'dn', 'u.uid = dn.entity_id');
     $query->join('field_data_field_facility_code', 'fc', 'u.uid = fc.entity_id');
@@ -356,12 +345,8 @@ function bill_wise_delivery_attempt_report_callback() {
     $query->fields('bill_date', array('field_sr_new_bill_date_value'));
     $query->fields('order_no', array('field_outlet_order_no_value'));
     $query->fields('dn', array('field_distributor_name_value'));
-    $query->fields('bill_area', array('field_bill_area_codes_value'));
     $query->fields('n3', array('title'));
     $query->fields('fc', array('field_facility_code_tid'));
-//    $query->havingCondition('count_attempted_status', 1, '>');
-    //$query->groupBy('ad.bill_number');
-    //$query->groupBy('ad.distributor_id');
     $result = $query->distinct()->execute()->fetchAll(PDO::FETCH_ASSOC);
 
     $row = array();
