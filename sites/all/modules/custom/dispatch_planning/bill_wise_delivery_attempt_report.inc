@@ -321,12 +321,13 @@ function bill_wise_delivery_attempt_report_callback() {
         $query->condition('ad.bill_date', array($from_bill_date, $to_bill_date), 'BETWEEN');
     }
 
-    $query->fields('ad', array('bill_number', 'bill_date', 'beat_name', 'party_name', 'fieldExecutiveName', 'res_status', 'res_reason_for_failure'));
+    $query->fields('ad', array('bill_number', 'bill_date', 'beat_name', 'party_name', 'fieldExecutiveName', 'res_status'));
     $query->addexpression("COUNT(DISTINCT(ad.dispatch_date))", 'count_dispatch_date');
     $query->addexpression("MAX(CASE WHEN ad.delivery_pending_flag = 0 THEN ad.res_status END)", 'current_bill_status');
     $query->addexpression("(CASE WHEN (ad.id = MAX(ad.id)) THEN ad.delivery_pending_flag END)", 'delivery_pending_flag');
-    $query->addexpression("(CASE WHEN (ad.id = MAX(ad.id)) THEN ad.runsheet_number END)", 'runsheet_number');
-    $query->addexpression("(CASE WHEN (ad.id = MAX(ad.id)) THEN ad.dispatch_date END)", 'dispatch_date');
+    $query->addexpression("(CASE WHEN (ad.id = MAX(ad.id)) THEN ad.res_reason_for_failure END)", 'res_reason_for_failure');
+    $query->addexpression("MAX(ad.runsheet_number)", 'runsheet_number');
+    $query->addExpression('MAX(ad.dispatch_date)', 'dispatch_date');
     $query->addexpression("COUNT(CASE WHEN (ad.attempted_status = 'Yes') THEN ad.attempted_status END)", 'count_attempted_status');
     
     $query->join('node', 'n', 'n.title = ad.runsheet_number');
