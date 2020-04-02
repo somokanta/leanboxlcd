@@ -300,7 +300,7 @@ function bill_wise_delivery_attempt_report_callback() {
     } elseif (empty($distributor_ids) && !empty($distributor_id)) {
         $distributor_ids = array($distributor_id);
     }
-    dpm($distributor_ids);
+
     // Fetch data from table
     $query = db_select('dispatch_planning_api_data', 'ad');
     $query->condition('ad.distributor_id', $distributor_ids, 'IN');
