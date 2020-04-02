@@ -654,7 +654,7 @@ function download_pdf2($args) {
                 'Sat' => array('data' => t('Sat')),
                 'Sun' => array('data' => t('Sun'))
                 );
-                //$outlet_table_html = theme('table', array('header' => $below_header_array, 'rows' => $outlet_table_row_data['row'], 'attributes' => array('width' => '100%')));
+                $outlet_table_html = theme('table', array('header' => $below_header_array, 'rows' => $outlet_table_row_data['row'], 'attributes' => array('width' => '100%')));
                 $outlet_table .= '<table class = "preview_table" width = "100%" cellspacing = "0" style = "font-family:arial; font-size: 13px; color:#000;" cellpadding = "5" border = "0" align = "center">
                 <thead>
                 <tr>
@@ -669,11 +669,11 @@ function download_pdf2($args) {
                 </tr>         
                 </thead>
                 </table><br>';
-                $outlet_table .= get_html_table($below_header_array, $outlet_table_row_data['row']);
                 $render .= $rendered_html;
                 $render .= "<pagebreak />";
-                $data .= $outlet_table;
-                //$data  = $rendered_html.'<br><br>'.$outlet_table.$outlet_table_html;
+                $outlet_table .= $outlet_table_html;
+                $render .= $outlet_table;
+                $data .= $render;
                 $trip_id = $args;
 
                 // Remove xls image from pdf.
