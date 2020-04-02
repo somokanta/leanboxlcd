@@ -652,7 +652,7 @@ function download_pdf2($args) {
                 'Sat' => 'Sat',
                 'Sun' => 'Sun'
                 );               
-                $outlet_time_table_header .= '<table class = "preview_table" width = "100%" cellspacing = "0" style = "font-family:arial; font-size: 13px; color:#000;" cellpadding = "5" border = "0" align = "center">
+                $outlet_time_table_header = '<table class = "preview_table" width = "100%" cellspacing = "0" style = "font-family:arial; font-size: 13px; color:#000;" cellpadding = "5" border = "0" align = "center">
                 <thead>
                 <tr>
                   <h1 align = "center"><b>Outlet Daily Operating Timings  For :'.$args.'</b></h1>
@@ -668,7 +668,7 @@ function download_pdf2($args) {
                 </table><br>';
                 $render .= $rendered_html;
                 $render .= "<pagebreak />";
-                $outlet_time_table .= get_html_table($below_header_array,$outlet_table_row_data['row']);
+                $outlet_time_table = get_html_table($below_header_array,$outlet_table_row_data['row']);
                 $render .= $outlet_time_table_header.$outlet_time_table;
                 $trip_id = $args;
 
