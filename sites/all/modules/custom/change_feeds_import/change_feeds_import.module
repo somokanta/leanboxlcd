@@ -638,12 +638,44 @@ function download_pdf2($args) {
                 $view->set_display('drs_report2');
                 $view->set_arguments(array($args));
                 $rendered_html = $view->render();
+                $outlet_table_row_data = outlet_daily_opearting_time_table($args,$distributor_id);
+                
+                // header outlet table
+                $below_header_array = array(
+                'Sr No' => array('data' => t('Sr No')),
+                'Trip Id' => array('data' => t('Trip Id')),
+                'Bill No' => array('data' => t('Bill No')),
+                'Party Name' => array('data' => t('Party Name')),
+                'Mon' => array('data' => t('Mon')),
+                'Tue' => array('data' => t('Tue')),
+                'Wed' => array('data' => t('Wed')),
+                'Thu' => array('data' => t('Thu')),
+                'Fri' => array('data' => t('Fri')),
+                'Sat' => array('data' => t('Sat')),
+                'Sun' => array('data' => t('Sun'))
+                );
+                $outlet_table_html = theme('table', array('header' => $below_header_array, 'rows' => $outlet_table_row_data['row'], 'attributes' => array('width' => '100%')));
+                $outlet_table_header = '<table class = "preview_table" width = "100%" cellspacing = "0" style = "font-family:arial; font-size: 13px; color:#000;" cellpadding = "5" border = "0" align = "center">
+                <thead>
+                <tr>
+                  <h1 align = "center"><b>Outlet Daily Operating Timings  For :'.$args.'</b></h1>
+                </tr>
+                <tr>
+                  <h4 align = "left">Trip Id : '.$args.'</h4>
+                  <h4 align = "right">Bill Count : '.count($outlet_table_row_data['row']).'</h4>
+                </tr>
+                <tr>
+                  <h4 align = "right">Cashier Name: '.$outlet_table_row_data['cashier_name'].'</h4>
+                </tr>         
+                </thead>
+                </table><br>';
+                $data  = $rendered_html.'<br><br>'.$outlet_table_header.$outlet_table_html;
                 $trip_id = $args;
 
                 // Remove xls image from pdf.
                 $xls_string = '<div class="feed-icon">
       <a href="/drs2-download/' . $trip_id . '"><img typeof="foaf:Image" class="img-responsive" src="' . $base_url . '/sites/all/modules/contrib/views_data_export/images/xls.png" alt="XLS" title="XLS" /></a>    </div>';
-                $render = str_replace($xls_string, "", $rendered_html);
+                $render = str_replace($xls_string, "", $data);
                 pdf_using_mpdf_api($render);
             }
             else {
@@ -1011,8 +1043,39 @@ function trip_2_form_submit($form, &$form_state) {
     }
     $view->set_display('drs_report2');
     $view->set_arguments(array($trip_id));
-    $rendered_html = $view->render();
-    $form_state['views_data'] = $rendered_html;
+    $rendered_html = $view->render();  
+    $outlet_table_row_data = outlet_daily_opearting_time_table($trip_id,$distributor_id);
+    // header outlet table
+    $below_header_array = array(
+    'Sr No' => array('data' => t('Sr No')),
+    'Trip Id' => array('data' => t('Trip Id')),
+    'Bill No' => array('data' => t('Bill No')),
+    'Party Name' => array('data' => t('Party Name')),
+    'Mon' => array('data' => t('Mon')),
+    'Tue' => array('data' => t('Tue')),
+    'Wed' => array('data' => t('Wed')),
+    'Thu' => array('data' => t('Thu')),
+    'Fri' => array('data' => t('Fri')),
+    'Sat' => array('data' => t('Sat')),
+    'Sun' => array('data' => t('Sun'))
+    );
+    $outlet_table_html = theme('table', array('header' => $below_header_array, 'rows' => $outlet_table_row_data['row'], 'attributes' => array('width' => '100%')));
+    $outlet_table_header = '<table class = "preview_table" width = "100%" cellspacing = "0" style = "font-family:arial; font-size: 13px; color:#000;" cellpadding = "5" border = "0" align = "center">
+        <thead>
+        <tr>
+          <h1 align = "center"><b>Outlet Daily Operating Timings  For :'.$trip_id.'</b></h1>
+        </tr>
+        <tr>
+          <h4 align = "left">Trip Id : '.$trip_id.'</h4>
+          <h4 align = "right">Bill Count : '.count($outlet_table_row_data['row']).'</h4>
+        </tr>
+        <tr>
+          <h4 align = "right">Cashier Name: '.$outlet_table_row_data['cashier_name'].'</h4>
+        </tr>         
+        </thead>
+        </table><br>';
+    $data  = $rendered_html.'<br><br>'.$outlet_table_header.$outlet_table_html;
+    $form_state['views_data'] = $data;
     $form_state['rebuild'] = TRUE;
 }
 
@@ -5248,3 +5311,72 @@ function get_facility_code_from_tid($facility_tid) {
     
     return $facility_code;
 }
+
+function outlet_daily_opearting_time_table ($trip_id,$distributor_id) {
+    $outlet_table_data = [];
+    if(!empty($trip_id) || !empty($distributor_id)) {
+        $query = db_select('node', 'n');
+        $query->condition('n.type','sales_register_data');
+        $query->leftjoin('field_data_field_trip_id_reference', 'trip_id_ref', 'trip_id_ref.entity_id = n.nid');
+        $query->condition('n.uid', $distributor_id);
+            // trip id
+        $query->join('node', 'dispatch_data', 'trip_id_ref.field_trip_id_reference_nid = dispatch_data.nid');
+        $query->condition('dispatch_data.uid', $distributor_id);
+        if($trip_id) {
+            $query->condition('dispatch_data.title', $trip_id);
+        }
+        // cashier name
+        $query->join('field_data_field_cashier_name', 'cashier_name', 'cashier_name.entity_id = dispatch_data.nid');
+
+
+        // party code
+        $query->leftjoin('field_data_field_party_code_reference', 'party_code_ref', 'party_code_ref.entity_id = n.nid');
+        $query->leftjoin('node', 'outlet_data', 'outlet_data.nid = party_code_ref.field_party_code_reference_nid');//outlet data join
+
+        //party name
+        $query->leftjoin('field_data_field_party_name', 'party_name', 'party_name.entity_id = outlet_data.nid');//outlet data join
+        $query->condition('outlet_data.uid', $distributor_id);
+
+        // hul code
+        $query->leftjoin('field_data_field_hul_code_reference', 'hul_code_ref', 'hul_code_ref.entity_id = outlet_data.nid');
+        $query->leftjoin('node', 'hul_data', 'hul_data.nid = hul_code_ref.field_hul_code_reference_nid');
+        $query->condition('hul_data.uid', $distributor_id);
+        // days 
+        $query->join('outlet_working_hours', 'working_hours', 'working_hours.hul_code = hul_data.title'); // hul code
+        $query->addfield('n', 'title', 'bill_number');
+        $query->addfield('dispatch_data', 'title', 'trip_id');
+        $query->addfield('party_name', 'field_party_name_value', 'party_name');
+        $query->addfield('hul_data', 'title', 'hul_code');
+        $query->addfield('cashier_name', 'field_cashier_name_value', 'cashier_name');
+        $query->addfield('working_hours', 'days', 'days');
+        $query->addfield('working_hours', 'from_time', 'from_time');
+        $query->addfield('working_hours', 'to_time', 'to_time');//updated_time
+        $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+        $row = [];
+        if(!empty($res)) {
+            $sr_no = 0;
+            foreach ($res as $key => $val_days) {
+                $days_time_value = $val_days['from_time'] . '-' . $val_days['to_time'];
+                if (!empty($val_days['days'])) {
+                    if(empty($row[$val_days['bill_number']]['sr_no'])) {
+                        $row[$val_days['bill_number']]['sr_no'] = ++$sr_no;  
+                    }
+                    $row[$val_days['bill_number']]['trip_id'] = $val_days['trip_id'];
+                    $row[$val_days['bill_number']]['bill_number'] = $val_days['bill_number'];
+                    $row[$val_days['bill_number']]['party_name'] = $val_days['party_name'];
+                    if ($days_time_value == 'Closed-Closed') {
+                      $row[$val_days['bill_number']][$val_days['days']] = 'Closed';
+                    }
+                    else {
+                      $row[$val_days['bill_number']][$val_days['days']] = ltrim($val_days[$val_days['bill_number']]['days'] . ',' . $days_time_value, ',');
+                    }
+                       
+                }
+            }
+        }
+        $outlet_table_data['row'] = $row;
+        $outlet_table_data['cashier_name'] = $val_days['cashier_name'];
+        return $outlet_table_data;
+    }
+}
+
