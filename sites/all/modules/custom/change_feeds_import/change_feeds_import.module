@@ -667,9 +667,9 @@ function download_pdf2($args) {
                 </thead>
                 </table><br>';
                 //$render = $rendered_html;
-                $render .= "<pagebreak />";
+                //$render .= "<pagebreak />";
                 $outlet_time_table = get_html_table($below_header_array,$outlet_table_row_data['row']);
-                $render .= $outlet_time_table_header;//.$outlet_time_table;
+                $render .= $outlet_time_table_header.'hello test';//.$outlet_time_table;
                 $trip_id = $args;
 
                 // Remove xls image from pdf.
