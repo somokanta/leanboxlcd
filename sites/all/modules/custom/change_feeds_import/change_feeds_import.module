@@ -669,7 +669,7 @@ function download_pdf2($args) {
                 //$render = $rendered_html;
                 //$render .= "<pagebreak />";
                 $outlet_time_table = get_html_table($below_header_array,$outlet_table_row_data['row']);
-                $render = "<table class = 'preview_table' width = '100%' cellspacing = '0' style = 'font-family:arial; font-size: 13px; color:#000;' cellpadding = '5' border = '0' align = 'center'>
+                $render = "<table width = '100%' cellspacing = '0' style = 'font-family:arial; font-size: 13px; color:#000;' cellpadding = '5' border = '0' align = 'center'>
                 
                 <tr>
                   <h1 align = 'center'><b>Outlet Daily Operating Timings  For :.$args. </b></h1>
