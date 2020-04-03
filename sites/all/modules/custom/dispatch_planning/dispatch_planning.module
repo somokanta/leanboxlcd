@@ -5263,3 +5263,4 @@ function get_bill_status_from_api_table() {
   $res = $query->distinct()->execute()->fetchAllKeyed(0,0);
   return $res;
 }
+
