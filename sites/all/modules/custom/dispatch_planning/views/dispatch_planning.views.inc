@@ -3285,6 +3285,15 @@ $data['views']['global_facility_name'] = array(
       'handler' => 'bill_returns_report',
     ),
   );
+  //res_cashier_short in item level
+  $data['views']['delivery_status'] = array(
+    'title' => t('Delivery Status'),
+    'help' => t('Delivery Status'),
+    'real field' => 'id',
+    'field' => array(
+      'handler' => 'bill_returns_report',
+    ),
+  );
 
   $data['views']['drs_report_net_amt'] = array(
     'title' => t('Drs Report2 Net Amt'),
