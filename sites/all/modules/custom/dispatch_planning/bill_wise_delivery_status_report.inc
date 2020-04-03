@@ -36,9 +36,13 @@ function bill_wise_delivery_status_report_form($form, &$form_state) {
     if (isset($_GET['central_distributor_id'])) {
         $default_central_distributor_id = $_GET['central_distributor_id'];
     }
-    if (empty($from_bill_date) && empty($to_bill_date)) {
-        $to_bill_date = date('Y-m-d');
-        $from_bill_date =  date('Y-m-d', strtotime('-2 day', strtotime(date('Y-m-d'))));
+    $from_bill_date = date('Y-m-d', strtotime('-2 day', strtotime(date('Y-m-d'))));
+    if (isset($_GET['from_bill_date'])) {
+        $from_bill_date = $_GET['from_bill_date'];
+    }
+    $to_bill_date = date('Y-m-d');
+    if (isset($_GET['to_bill_date'])) {
+        $to_bill_date = $_GET['to_bill_date'];
     }
 
     global $user;
