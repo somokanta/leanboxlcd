@@ -398,7 +398,7 @@ function bill_wise_delivery_attempt_report_callback() {
 
     $html = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('cellpadding' => '5', 'cellspacing' => '0'), 'empty' => t('No Records has been found')));
 
-    cache_set('bill-wise-delivery-status-report' . session_id(), $html, 'cache', time() + 60 * 10);
+    cache_set('bill-wise-delivery-attempt-report' . session_id(), $html, 'cache', time() + 60 * 10);
     $output .= l(t('XLS'), 'bill-wise-delivery-attempt-report/export', array('query' => array($data)));
     return $form . $output;
 }
@@ -408,7 +408,8 @@ function bill_wise_delivery_attempt_report_export() {
     $data = cache_get('bill-wise-delivery-attempt-report' . session_id());
     if (empty($data)) {
         $table = bill_wise_delivery_attempt_report_callback();
-    } else {
+    }
+    else {
         $table = $data->data;
     }
     header("Content-type: application/vnd.ms-excel");
