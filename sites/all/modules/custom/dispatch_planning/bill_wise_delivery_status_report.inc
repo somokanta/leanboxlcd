@@ -295,7 +295,10 @@ function bill_wise_delivery_status_report_callback() {
     elseif (empty($distributor_ids) && !empty($distributor_id)) {
         $distributor_ids = array($distributor_id);
     }
-
+    if (empty($from_bill_date) && empty($to_bill_date)) {
+        $to_bill_date = date('Y-m-d');
+        $from_bill_date =  date('Y-m-d', strtotime('-2 day', strtotime(date('Y-m-d'))));
+    }
     // Fetch data from table
     $query = db_select('dispatch_planning_api_data', 'ad');
     $query->condition('ad.distributor_id', $distributor_ids, 'IN');

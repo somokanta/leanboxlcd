@@ -3285,6 +3285,13 @@ $data['views']['global_facility_name'] = array(
       'handler' => 'bill_returns_report',
     ),
   );
+  $data['views']['delivery_status'] = array(
+    'title' => t('Delivery Status'),
+    'help' => t('Delivery Status'),
+    'field' => array(
+      'handler' => 'bill_returns_report',
+    ),
+  );
 
   $data['views']['drs_report_net_amt'] = array(
     'title' => t('Drs Report2 Net Amt'),
