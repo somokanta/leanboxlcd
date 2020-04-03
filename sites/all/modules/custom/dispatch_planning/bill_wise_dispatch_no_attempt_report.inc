@@ -326,7 +326,8 @@ function bill_wise_dispatch_no_attempt_report_callback() {
         $query->condition('ad.bill_date', array($from_bill_date, $to_bill_date), 'BETWEEN');
     }
     $query->condition('ad.attempted_status', 'No', '=');
-    $query->fields('ad', array('bill_number', 'bill_date', 'beat_name', 'party_name','runsheet_number','dispatch_date'));
+    $query->fields('ad', array('bill_number', 'bill_date', 'beat_name', 'party_name','dispatch_date'));
+    $query->addexpression("MAX((ad.runsheet_number))", 'runsheet_number');
     $query->addexpression("COUNT(DISTINCT(ad.runsheet_number))", 'count_dispatch_date');
     $query->addexpression("MAX(CASE WHEN ad.delivery_pending_flag = 0 THEN ad.res_status END)", 'current_bill_status');
     $query->addexpression("(CASE WHEN (ad.id = MAX(ad.id)) THEN ad.delivery_pending_flag END)", 'delivery_pending_flag');
