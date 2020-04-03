@@ -1325,7 +1325,7 @@ function dispatch_planning_cron_callback() {
   $total = $thread * $length;
     
   $query = db_select('dispatch_planning_api_log', 'a');
-  $query->fields('a', array('request_data', 'id', 'trip_id'));
+  $query->fields('a', array('id'));
   $query->condition('a.request_flag', 0);
   $query->condition('a.api_type', 'dispatch_planning');
   $res = $query->range(0,$total)->execute()->fetchCol();
