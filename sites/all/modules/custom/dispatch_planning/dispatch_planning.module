@@ -1319,54 +1319,74 @@ function dispatch_planning_views_api() {
     );
 }
 
-/**
- * dispatch planning cron page callback function
- */
 function dispatch_planning_cron_callback() {
-    $query = db_select('dispatch_planning_api_log', 'a');
-    $query->fields('a', array('request_data', 'id', 'trip_id'));
-    $query->condition('a.request_flag', 0);
-    $query->condition('a.api_type', 'dispatch_planning');
+  $thread = variable_get('dispatch-thread', '3'); // number of thread 
+  $length = variable_get('dispatch-bill-per-thread', '50');
+  $total = $thread * $length;
+    
+  $query = db_select('dispatch_planning_api_log', 'a');
+  $query->fields('a', array('request_data', 'id', 'trip_id'));
+  $query->condition('a.request_flag', 0);
+  $query->condition('a.api_type', 'dispatch_planning');
+  $res = $query->range(0,$total)->execute()->fetchCol();
+  
+  //Multi thread
+    $script_name = '/leanbox_dispatch_planning_cron_process.php';
+    $php_script = getcwd() . $script_name;
 
-    $res = $query->range(0, 50)->execute()->fetchAll(PDO::FETCH_ASSOC);
-
-    if (!empty($res)) {
-        foreach ($res as $key => $val) {
-
-            // Write logic to hit API Here
-            $json_api_data = $val['request_data'];
-            $sql_ins_id = $val['id'];
-            $trip_id = $val['trip_id'];
-
-            //Delivery App changes as per trips from conf
-            $trips = variable_get('new_trip_ids');
-            $trip_ids = explode(',', $trips);
-
-            if (!in_array($trip_id, $trip_ids)) {
-                $request_headers = array('Content-Type' => 'application/json', 'Authorization' => 'Token 2972f506c41448cb3456c1c074aed6102183aff9');
-                $order_api_url = variable_get('new_dispatch_uri_settings', 'http://13.127.160.72:8080/api/order/v1/manifest/');
-            }
-            else {
-                $request_headers = array('Content-Type' => 'application/json');
-                $order_api_url = variable_get('dispatch_uri_settings', 'https://staging.fareye.co/api/v1/job?api_key=l1S6xa5mnxUXDuqv12q7lerLBL9l1ICq');
-            }
-            //Delivery App changes as per trips from configuration
-            //$request_headers = array('Content-Type' => 'application/json');
-            //$order_api_url = 'https://staging.fareye.co/api/v1/job?api_key=l1S6xa5mnxUXDuqv12q7lerLBL9l1ICq';
-            //$order_api_url = variable_get('dispatch_uri_settings', 'https://staging.fareye.co/api/v1/job?api_key=l1S6xa5mnxUXDuqv12q7lerLBL9l1ICq');
-            $options = array('headers' => $request_headers, 'method' => 'POST', 'data' => $json_api_data, 'timeout' => 300);
-            $response_data = drupal_http_request($order_api_url, $options);
-
-            $response_data = $response_data->data;
-            if ($response_data) {
-                $api_success = json_decode($response_data);
-                $api_success = ($api_success->failCount == 0) ? 1 : 0;
-                // create response log entry
-                dispatch_planning_api_log_update($response_data, $sql_ins_id, $api_success);
-            }
+    /* * **** Script for push order to dispatch APP */
+    if ($res) {
+        watchdog('test_abhi_multithread cron', '<pre>' . print_r($res, TRUE) . '</pre>');
+        $chunk = array_chunk($res, $length);
+        foreach ($chunk as $value) {
+            $param = implode(',', $value);
+            $str = "nohup nice php -f '$php_script' '$param' > /dev/null &";
+            shell_exec($str);
         }
     }
-    return "1";
+   //End
+
+  return "1";
+}
+
+function dispatch_planning_cron_process($res){
+  if (!empty($res)) {
+    foreach ($res as $key => $val) {
+
+      // Write logic to hit API Here
+      $json_api_data = $val['request_data'];
+      $sql_ins_id = $val['id'];
+      $trip_id = $val['trip_id'];
+      
+        //Delivery App changes as per trips from conf
+        $trips = variable_get('new_trip_ids');
+        $trip_ids = explode(',', $trips);
+
+        if (!in_array($trip_id, $trip_ids)) { 
+          $request_headers = array('Content-Type' => 'application/json', 'Authorization' => 'Token 2972f506c41448cb3456c1c074aed6102183aff9');
+          $order_api_url = variable_get('new_dispatch_uri_settings', 'http://13.127.160.72:8080/api/order/v1/manifest/');
+        }
+        else {
+          $request_headers = array('Content-Type' => 'application/json');
+          $order_api_url = variable_get('dispatch_uri_settings', 'https://staging.fareye.co/api/v1/job?api_key=l1S6xa5mnxUXDuqv12q7lerLBL9l1ICq');
+        }
+        //Delivery App changes as per trips from configuration
+
+        //$request_headers = array('Content-Type' => 'application/json');
+        //$order_api_url = 'https://staging.fareye.co/api/v1/job?api_key=l1S6xa5mnxUXDuqv12q7lerLBL9l1ICq';
+        //$order_api_url = variable_get('dispatch_uri_settings', 'https://staging.fareye.co/api/v1/job?api_key=l1S6xa5mnxUXDuqv12q7lerLBL9l1ICq');
+        $options = array('headers' => $request_headers, 'method' => 'POST', 'data' => $json_api_data, 'timeout'=> 300);
+        $response_data = drupal_http_request($order_api_url, $options);
+
+        $response_data = $response_data->data;
+        if ($response_data) {
+            $api_success = json_decode($response_data);
+            $api_success = ($api_success->failCount == 0) ? 1 : 0;
+            // create response log entry
+            dispatch_planning_api_log_update($response_data, $sql_ins_id, $api_success);
+        }
+    }
+  }
 }
 
 /**
