@@ -5215,7 +5215,7 @@ function get_node_created_time($title, $type, $distributor_id) {
 function global_config_form($form, $form_state) {
     $form['current_delivery_status'] = array(
       '#type' => 'textfield',
-      '#title' => t('Current Delivery Status'),
+      '#title' => t('Delivery Pending Status'),
       '#description' => t('Bill wise Delivery status report(Current Delivery Status if Bill is declared as Delivery Pending)'),
       '#default_value' => variable_get('current_delivery_status'),
     );
@@ -5266,10 +5266,20 @@ function global_config_form($form, $form_state) {
 }
 
 function get_bill_status_from_api_table() {
-    $query = db_select('dispatch_planning_api_data', 'ad');
-    $query->fields('ad', array('res_status'));
-    $res = $query->distinct()->execute()->fetchAllKeyed(0, 0);
-    return $res;
+  $query = db_select('dispatch_planning_api_data', 'ad');
+  $query->fields('ad', array('res_status'));
+  $res = $query->distinct()->execute()->fetchAllKeyed(0,0);
+  if ($res['deliver'] == 'deliver') {
+         $res['deliver'] = variable_get('deliver_status'); //'Delivered';
+  } 
+  if ($res['partial_deliver'] == 'partial_deliver') {
+         $res['partial_deliver'] = variable_get('partial_deliver_status'); //'Partial Delivered';
+  }
+  if ($res['undeliver'] == 'undeliver') {
+         $res['undeliver'] = variable_get('undeliver_status'); //'Full Returned';
+  }
+  
+  return $res;
 }
 // this function returns res_status value from global configuration
 function get_res_status_value($res_status) {
