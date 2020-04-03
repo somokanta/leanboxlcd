@@ -36,9 +36,13 @@ function bill_wise_delivery_status_report_form($form, &$form_state) {
     if (isset($_GET['central_distributor_id'])) {
         $default_central_distributor_id = $_GET['central_distributor_id'];
     }
-    if (empty($from_bill_date) && empty($to_bill_date)) {
-        $to_bill_date = date('Y-m-d');
-        $from_bill_date =  date('Y-m-d', strtotime('-2 day', strtotime(date('Y-m-d'))));
+    $from_bill_date = date('Y-m-d', strtotime('-2 day', strtotime(date('Y-m-d'))));
+    if (isset($_GET['from_bill_date'])) {
+        $from_bill_date = $_GET['from_bill_date'];
+    }
+    $to_bill_date = date('Y-m-d');
+    if (isset($_GET['to_bill_date'])) {
+        $to_bill_date = $_GET['to_bill_date'];
     }
 
     global $user;
@@ -295,10 +299,6 @@ function bill_wise_delivery_status_report_callback() {
     elseif (empty($distributor_ids) && !empty($distributor_id)) {
         $distributor_ids = array($distributor_id);
     }
-    if (empty($from_bill_date) && empty($to_bill_date)) {
-        $to_bill_date = date('Y-m-d');
-        $from_bill_date =  date('Y-m-d', strtotime('-2 day', strtotime(date('Y-m-d'))));
-    }
     // Fetch data from table
     $query = db_select('dispatch_planning_api_data', 'ad');
     $query->condition('ad.distributor_id', $distributor_ids, 'IN');
@@ -484,7 +484,7 @@ function bill_wise_delivery_status_report_export() {
     $file = "Bill_Wise_Delivery_Status_Report.xls";
     $data = cache_get('bill-wise-delivery-status-report' . session_id());
     if (empty($data)) {
-        $table = delivery_pending_report_callback();
+        $table = bill_wise_delivery_status_report_callback();
     }
     else {
         $table = $data->data;
