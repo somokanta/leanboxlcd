@@ -1352,7 +1352,7 @@ function dispatch_planning_cron_callback() {
 function dispatch_planning_cron_process($res){
   if (!empty($res)) {
     foreach ($res as $key => $val) {
-
+sleep(20);
       // Write logic to hit API Here
       $json_api_data = $val['request_data'];
       $sql_ins_id = $val['id'];
