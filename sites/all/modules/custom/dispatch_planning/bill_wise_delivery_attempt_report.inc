@@ -27,7 +27,7 @@ function bill_wise_delivery_attempt_report_form($form, &$form_state) {
     if (isset($_GET['party_code'])) {
         $party_code = $_GET['party_code'];
     }
-    if (isset($_GET['bill_status'])) {
+    if (!empty($_GET['bill_status'])) {
         $bill_status_default = $_GET['bill_status'];
     }
     if (isset($_GET['facility_code'])) {
@@ -197,9 +197,10 @@ function bill_wise_delivery_attempt_report_form($form, &$form_state) {
     $form['bill_status'] = array(
         '#title' => t('Bill Status'),
         '#type' => 'select',
-        '#options' => $bill_status,      
+        '#options' => $bill_status,
+        '#multiple' => true,
         '#default_value' => $bill_status_default,
-        '#prefix' => '<div class="bill-status" style="display:inline-block;margin: 20px 101px 0 50px;">',
+        '#prefix' => '<div class="bill-status" style="display:inline-block;margin: 20px 101px 0 50px; ">',
         '#suffix' => '</div>'
     );
 
@@ -222,6 +223,7 @@ function bill_wise_delivery_attempt_report_submit($form, &$form_state) {
     $bill_number = $form_state['values']['bill_number'];
     $party_code = $form_state['values']['party_code'];
     $bill_status = $form_state['values']['bill_status'];
+    $bill_status = implode(",", $bill_status);
     $distributor_id = $form_state['values']['distributor_id'];
     $central_distributor_id = $form_state['values']['central_distributor_id'];
     $facility_code = $form_state['values']['facility_code'];
@@ -253,8 +255,8 @@ function bill_wise_delivery_attempt_report_callback() {
     if (isset($_GET['party_code'])) {
         $party_code = $_GET['party_code'];
     }
-    if (isset($_GET['bill_status'])) {
-        $bill_status = $_GET['bill_status'];
+    if (!empty($_GET['bill_status'])) {
+        $bill_status = explode(",", $_GET['bill_status']);
     }
     if (arg(1) != 'export') {
         $form = drupal_render(drupal_get_form('bill_wise_delivery_attempt_report_form'));
@@ -300,7 +302,8 @@ function bill_wise_delivery_attempt_report_callback() {
     } elseif (empty($distributor_ids) && !empty($distributor_id)) {
         $distributor_ids = array($distributor_id);
     }
-
+    dpm($bill_status, '$bill_status');
+    dpm($bill_number, '$bill_number');
     // Fetch data from table
     $query = db_select('dispatch_planning_api_data', 'ad');
     $query->condition('ad.distributor_id', $distributor_ids, 'IN');
@@ -312,7 +315,7 @@ function bill_wise_delivery_attempt_report_callback() {
      $query->condition('ad.party_code', $party_code, '=');
     }
     if (!empty($bill_status)) {
-        $query->condition('ad.res_status', $bill_status, '=');
+        $query->condition('ad.res_status', $bill_status, 'IN');
     }
     if (!empty($from_dispatch_date) && !empty($to_dispatch_date)) {
         $query->condition('ad.dispatch_date', array($from_dispatch_date, $to_dispatch_date), 'BETWEEN');
@@ -327,7 +330,7 @@ function bill_wise_delivery_attempt_report_callback() {
     $query->fields('ad', array('bill_number'));
     $query->groupBy('ad.bill_number');
     $bills_result = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
-
+    dpm($bills_result, '$bills_result');
     if (!empty($bills_result)) {
         foreach ($bills_result as $key => $val) {
             $bill_numbers[] = $val['bill_number'];
@@ -338,6 +341,9 @@ function bill_wise_delivery_attempt_report_callback() {
 
         if (!empty($bill_numbers)) {
             $query->condition('ad.bill_number', $bill_numbers, 'IN');
+        }
+        if (!empty($bill_status)) {
+            $query->condition('ad.res_status', $bill_status, 'IN');
         }
         $query->condition('ad.res_reason_for_failure', 'Outlet not attempted', '!=');
         $query->fields('ad', array('runsheet_number', 'dispatch_date', 'bill_number', 'bill_date', 'beat_name', 'party_name', 'fieldExecutiveName', 'res_status', 'res_reason_for_failure'));
@@ -368,7 +374,7 @@ function bill_wise_delivery_attempt_report_callback() {
         $query->fields('fc', array('field_facility_code_tid'));
         $result = $query->distinct()->execute()->fetchAll(PDO::FETCH_ASSOC);
     }
-
+    dpm($result, '$result');
     $row = array();
 
     foreach ($result as $val) {
