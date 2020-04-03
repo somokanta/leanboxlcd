@@ -14,7 +14,7 @@ drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
 if ($param = $_SERVER['argv'][1]) {
     watchdog('test_abhi_multithread dispatch param', '<pre>' . print_r($param . ' ' . time(), TRUE) . '</pre>');
     $ids = explode(',', $param);
-    
+
     if (!empty($ids)) {
         $query = db_select('dispatch_planning_api_log', 'a');
         $query->fields('a', array('request_data', 'id', 'trip_id'));
