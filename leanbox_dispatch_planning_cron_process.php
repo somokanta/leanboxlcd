@@ -18,7 +18,7 @@ if ($param = $_SERVER['argv'][1]) {
     if (!empty($ids)) {
         $query = db_select('dispatch_planning_api_log', 'a');
         $query->fields('a', array('request_data', 'id', 'trip_id'));
-        $query->condition('sdr.id', $ids, 'IN');
+        $query->condition('a.id', $ids, 'IN');
         $query->condition('a.api_type', 'dispatch_planning');
         $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
 
