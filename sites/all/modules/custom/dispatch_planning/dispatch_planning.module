@@ -1323,13 +1323,36 @@ function dispatch_planning_views_api() {
  * dispatch planning cron page callback function
  */
 function dispatch_planning_cron_callback() {
+  $thread = variable_get('dispatch-thread', '3'); // number of thread 
+  $length = variable_get('dispatch-bill-per-thread', '50');
+  $total = $thread * $length;
+    
   $query = db_select('dispatch_planning_api_log', 'a');
   $query->fields('a', array('request_data', 'id', 'trip_id'));
   $query->condition('a.request_flag', 0);
   $query->condition('a.api_type', 'dispatch_planning');
+  $res = $query->range(0,$total)->execute()->fetchCol();
+  
+  //Multi thread
+    $script_name = '/leanbox_dispatch_planning_cron_process.php';
+    $php_script = getcwd() . $script_name;
 
-  $res = $query->range(0,50)->execute()->fetchAll(PDO::FETCH_ASSOC);
+    /* * **** Script for push order to dispatch APP */
+    if ($res) {
+        watchdog('test_abhi_multithread cron', '<pre>' . print_r($res, TRUE) . '</pre>');
+        $chunk = array_chunk($res, $length);
+        foreach ($chunk as $value) {
+            $param = implode(',', $value);
+            $str = "nohup nice php -f '$php_script' '$param' > /dev/null &";
+            shell_exec($str);
+        }
+    }
+   //End
 
+  return "1";
+}
+
+function dispatch_planning_cron_process($res){
   if (!empty($res)) {
     foreach ($res as $key => $val) {
 
@@ -1367,7 +1390,6 @@ function dispatch_planning_cron_callback() {
         }
     }
   }
-  return "1";
 }
 /**
  * @param type $form
