@@ -302,8 +302,7 @@ function bill_wise_delivery_attempt_report_callback() {
     } elseif (empty($distributor_ids) && !empty($distributor_id)) {
         $distributor_ids = array($distributor_id);
     }
-    dpm($bill_status, '$bill_status');
-    dpm($bill_number, '$bill_number');
+
     // Fetch data from table
     $query = db_select('dispatch_planning_api_data', 'ad');
     $query->condition('ad.distributor_id', $distributor_ids, 'IN');
@@ -330,7 +329,7 @@ function bill_wise_delivery_attempt_report_callback() {
     $query->fields('ad', array('bill_number'));
     $query->groupBy('ad.bill_number');
     $bills_result = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
-    dpm($bills_result, '$bills_result');
+
     if (!empty($bills_result)) {
         foreach ($bills_result as $key => $val) {
             $bill_numbers[] = $val['bill_number'];
@@ -374,7 +373,7 @@ function bill_wise_delivery_attempt_report_callback() {
         $query->fields('fc', array('field_facility_code_tid'));
         $result = $query->distinct()->execute()->fetchAll(PDO::FETCH_ASSOC);
     }
-    dpm($result, '$result');
+
     $row = array();
 
     foreach ($result as $val) {
