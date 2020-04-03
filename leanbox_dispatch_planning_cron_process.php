@@ -12,7 +12,7 @@ require_once DRUPAL_ROOT . '/includes/bootstrap.inc';
 drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
 
 if ($param = $_SERVER['argv'][1]) {
-    watchdog('test_abhi_multithread param', '<pre>' . print_r($param . ' ' . time(), TRUE) . '</pre>');
+    watchdog('test_abhi_multithread dispatch param', '<pre>' . print_r($param . ' ' . time(), TRUE) . '</pre>');
     $ids = explode(',', $param);
     
     if (!empty($ids)) {
