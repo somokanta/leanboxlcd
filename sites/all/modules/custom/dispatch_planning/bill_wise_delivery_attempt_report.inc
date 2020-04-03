@@ -312,8 +312,7 @@ function bill_wise_delivery_attempt_report_callback() {
         $query->condition('ad.party_code', $party_code, '=');
     }
      if (!empty($bill_status)) {
-        //$query->condition('ad.res_status', $bill_status, '=');
-        $query->havingCondition('current_bill_status', $bill_status, '=');
+        $query->condition('ad.res_status', $bill_status, '=');
     }
     if (!empty($from_dispatch_date) && !empty($to_dispatch_date)) {
         $query->condition('ad.dispatch_date', array($from_dispatch_date, $to_dispatch_date), 'BETWEEN');
@@ -321,16 +320,8 @@ function bill_wise_delivery_attempt_report_callback() {
     if (!empty($from_bill_date) && !empty($to_bill_date)) {
         $query->condition('ad.bill_date', array($from_bill_date, $to_bill_date), 'BETWEEN');
     }
-
-    $query->fields('ad', array('bill_number', 'bill_date', 'beat_name', 'party_name', 'fieldExecutiveName', 'res_status'));
-    $query->addexpression("COUNT(DISTINCT(ad.dispatch_date))", 'count_dispatch_date');
-    $query->addexpression("MAX(CASE WHEN ad.delivery_pending_flag = 0 THEN ad.res_status END)", 'current_bill_status');
-    $query->addexpression("(CASE WHEN (ad.id = MAX(ad.id)) THEN ad.delivery_pending_flag END)", 'delivery_pending_flag');
-    $query->addexpression("(CASE WHEN (ad.id = MAX(ad.id)) THEN ad.res_reason_for_failure END)", 'res_reason_for_failure');
-    $query->addexpression("MAX(ad.runsheet_number)", 'runsheet_number');
-    $query->addExpression('MAX(ad.dispatch_date)', 'dispatch_date');
-    $query->addexpression("COUNT(CASE WHEN (ad.attempted_status = 'Yes') THEN ad.attempted_status END)", 'count_attempted_status');
-    
+    $query->condition('ad.res_reason_for_failure', 'Outlet not attempted', '!=');
+    $query->fields('ad', array('runsheet_number','dispatch_date','bill_number', 'bill_date', 'beat_name', 'party_name', 'fieldExecutiveName', 'res_status', 'res_reason_for_failure'));    
     $query->join('node', 'n', 'n.title = ad.runsheet_number');
     $query->condition('n.type', 'dispatch_data', '=');
     $query->condition('n.uid', $distributor_ids, 'IN');
@@ -340,7 +331,6 @@ function bill_wise_delivery_attempt_report_callback() {
 
     $query->leftjoin('field_data_field_sr_new_bill_date', 'bill_date', 'bill_date.entity_id = n1.nid');
     $query->leftjoin('field_data_field_outlet_order_no', 'order_no', 'order_no.entity_id = n1.nid');
-    $query->leftjoin('field_data_field_bill_area_codes', 'bill_area', 'bill_area.entity_id = n.nid');
 
     $query->join('node', 'n2', 'n2.title = ad.party_hll_code');
     $query->condition('n2.type', 'hul_code_master', '=');
@@ -348,7 +338,6 @@ function bill_wise_delivery_attempt_report_callback() {
     $query->leftjoin('field_data_field_area_code', 'ac', 'ac.entity_id = n2.nid');
 
     $query->leftjoin('node', 'n3', 'ac.field_area_code_nid = n3.nid');
-//    $query->condition('n3.type', 'area_code_master', '=');
     $query->join('users', 'u', 'u.uid = ad.distributor_id');
     $query->join('field_data_field_distributor_name', 'dn', 'u.uid = dn.entity_id');
     $query->join('field_data_field_facility_code', 'fc', 'u.uid = fc.entity_id');
@@ -356,27 +345,26 @@ function bill_wise_delivery_attempt_report_callback() {
     $query->fields('bill_date', array('field_sr_new_bill_date_value'));
     $query->fields('order_no', array('field_outlet_order_no_value'));
     $query->fields('dn', array('field_distributor_name_value'));
-    $query->fields('bill_area', array('field_bill_area_codes_value'));
     $query->fields('n3', array('title'));
     $query->fields('fc', array('field_facility_code_tid'));
-    $query->havingCondition('count_attempted_status', 1, '>');
-    $query->groupBy('ad.bill_number');
-    $query->groupBy('ad.distributor_id');
-    $result = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+    $result = $query->distinct()->execute()->fetchAll(PDO::FETCH_ASSOC);
 
     $row = array();
 
     foreach ($result as $val) {
-       if ($val['current_bill_status'] == 'deliver') {
+       if ($val['res_status'] == 'deliver') {
             $bill_status = variable_get('deliver_status'); //'Delivered';
-        } elseif ($val['current_bill_status'] == 'partial_deliver') {
+        } elseif ($val['res_status'] == 'partial_deliver') {
             $bill_status = variable_get('partial_deliver_status'); //'Partial Delivered';
-        } elseif ($val['current_bill_status'] == 'undeliver') {
+        } elseif ($val['res_status'] == 'undeliver') {
             $bill_status = variable_get('undeliver_status'); //'Full Returned';
         }
         
         if($val['res_status'] == 'undeliver') {
             $reason_for_failure = $val['res_reason_for_failure'];
+        }
+        else {
+            $reason_for_failure = '';
         }
 
         $facility_code = get_facility_code_from_tid($val['field_facility_code_tid']);
@@ -396,7 +384,7 @@ function bill_wise_delivery_attempt_report_callback() {
         $row['facility_code'] = $facility_code;
         $rows[] = $row;
     }
-    $header = array('Order date', 'Order Number', 'Bill Date', 'Bill No.', 'Beat name', 'Party name', 'Trip Id', 'Cashier Name', 'Area code', 'Dispatch Date', 'Reason for Failure', 'Latest Outcome', 'Distributor Name', 'Facility Code');
+    $header = array('Order Date', 'Order Number', 'Bill Date', 'Bill No.', 'Beat Name', 'Party Name', 'Trip ID', 'Cashier Name', 'Area Code', 'Dispatch Date', 'Reason for Failure', 'Latest Outcome', 'Distributor Name', 'Facility Code');
 
     $per_page = 10;
     // Initialize the pager
@@ -410,7 +398,7 @@ function bill_wise_delivery_attempt_report_callback() {
 
     $html = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('cellpadding' => '5', 'cellspacing' => '0'), 'empty' => t('No Records has been found')));
 
-    cache_set('bill-wise-delivery-status-report' . session_id(), $html, 'cache', time() + 60 * 10);
+    cache_set('bill-wise-delivery-attempt-report' . session_id(), $html, 'cache', time() + 60 * 10);
     $output .= l(t('XLS'), 'bill-wise-delivery-attempt-report/export', array('query' => array($data)));
     return $form . $output;
 }
@@ -420,7 +408,8 @@ function bill_wise_delivery_attempt_report_export() {
     $data = cache_get('bill-wise-delivery-attempt-report' . session_id());
     if (empty($data)) {
         $table = bill_wise_delivery_attempt_report_callback();
-    } else {
+    }
+    else {
         $table = $data->data;
     }
     header("Content-type: application/vnd.ms-excel");

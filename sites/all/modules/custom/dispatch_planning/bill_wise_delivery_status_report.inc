@@ -483,7 +483,7 @@ function bill_wise_delivery_status_report_export() {
     $file = "Bill_Wise_Delivery_Status_Report.xls";
     $data = cache_get('bill-wise-delivery-status-report' . session_id());
     if (empty($data)) {
-        $table = delivery_pending_report_callback();
+        $table = bill_wise_delivery_status_report_callback();
     }
     else {
         $table = $data->data;
