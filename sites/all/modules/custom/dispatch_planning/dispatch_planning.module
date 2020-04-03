@@ -1356,7 +1356,6 @@ function dispatch_planning_cron_process($res){
       $json_api_data = $val['request_data'];
       $sql_ins_id = $val['id'];
       $trip_id = $val['trip_id'];
-      
         //Delivery App changes as per trips from conf
         $trips = variable_get('new_trip_ids');
         $trip_ids = explode(',', $trips);
@@ -1369,8 +1368,6 @@ function dispatch_planning_cron_process($res){
           $request_headers = array('Content-Type' => 'application/json');
           $order_api_url = variable_get('dispatch_uri_settings', 'https://staging.fareye.co/api/v1/job?api_key=l1S6xa5mnxUXDuqv12q7lerLBL9l1ICq');
         }
-        //Delivery App changes as per trips from configuration
-
         //$request_headers = array('Content-Type' => 'application/json');
         //$order_api_url = 'https://staging.fareye.co/api/v1/job?api_key=l1S6xa5mnxUXDuqv12q7lerLBL9l1ICq';
         //$order_api_url = variable_get('dispatch_uri_settings', 'https://staging.fareye.co/api/v1/job?api_key=l1S6xa5mnxUXDuqv12q7lerLBL9l1ICq');
