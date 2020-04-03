@@ -5367,7 +5367,7 @@ function outlet_daily_opearting_time_table ($trip_id,$distributor_id) {
                       $row[$val_days['bill_number']][$val_days['days']] = 'Closed';
                     }
                     else {
-                      $row[$val_days['bill_number']][$val_days['days']] = ltrim($val_days[$val_days['bill_number']]['days'] . ',' . $days_time_value, ',');
+                      $row[$val_days['bill_number']][$val_days['days']] = ltrim($row[$val_days['bill_number']][$val_days['days']] . ',' . $days_time_value, ',');
                     }
                        
                 }
