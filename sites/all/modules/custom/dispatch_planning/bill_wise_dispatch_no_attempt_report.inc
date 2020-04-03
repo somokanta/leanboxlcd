@@ -193,7 +193,8 @@ function bill_wise_dispatch_no_attempt_report_form($form, &$form_state) {
         '#suffix' => '</div>'
     );
     
-    $bill_status = array('' => '-Select-') + get_bill_status_from_api_table();
+    $dp_status = variable_get('current_delivery_status');
+    $bill_status = array('' => '-Select-') + get_bill_status_from_api_table()+ array('delivery_pending' => $dp_status);
     $form['bill_status'] = array(
         '#title' => t('Bill Status'),
         '#type' => 'select',
@@ -311,8 +312,12 @@ function bill_wise_dispatch_no_attempt_report_callback() {
     if (!empty($party_code)) {
         $query->condition('ad.party_code', $party_code, '=');
     }
-     if (!empty($bill_status)) {
-        $query->condition('ad.res_status', $bill_status, '=');
+    if (!empty($bill_status)) {
+        if ($bill_status != 'delivery_pending') {
+            $query->condition('ad.res_status', $bill_status, '=');
+        } else {
+            $query->condition('ad.delivery_pending_flag', 1, '=');
+        }
     }
     if (!empty($from_dispatch_date) && !empty($to_dispatch_date)) {
         $query->condition('ad.dispatch_date', array($from_dispatch_date, $to_dispatch_date), 'BETWEEN');
@@ -404,14 +409,14 @@ function bill_wise_dispatch_no_attempt_report_callback() {
 
     $html = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('cellpadding' => '5', 'cellspacing' => '0'), 'empty' => t('No Records has been found')));
 
-    cache_set('bill-wise-delivery-status-report' . session_id(), $html, 'cache', time() + 60 * 10);
-    $output .= l(t('XLS'), 'bill-wise-delivery-status-report/export', array('query' => array($data)));
+    cache_set('bill-wise-dispatch-no-attempt-report' . session_id(), $html, 'cache', time() + 60 * 10);
+    $output .= l(t('XLS'), 'bill-wise-dispatch-no-attempt-report/export', array('query' => array($data)));
     return $form . $output;
 }
 
 function bill_wise_dispatch_no_attempt_report_export() {
-    $file = "Bill_Wise_Delivery_Status_Report.xls";
-    $data = cache_get('bill-wise-delivery-status-report' . session_id());
+    $file = "Bill_Wise_No_Attempt_Report.xls";
+    $data = cache_get('bill-wise-dispatch-no-attempt-report' . session_id());
     if (empty($data)) {
         $table = bill_wise_dispatch_no_attempt_report_callback();
     } else {
