@@ -125,7 +125,6 @@ class bill_returns_report extends views_handler_field {
                     case 'delivery_status';
                         //return $res_status;
                         if ($delivery_pending!= 'no' || $delivery_pending!= 0) {
-                           // print_r($bill_number);die;
                             $res_status = 'delivery_pending';
                         }
                         return get_res_status_value($res_status);
