@@ -28,6 +28,8 @@ class bill_returns_report extends views_handler_field {
         $distributor_id = $data->dispatch_planning_api_data_distributor_id;
         $dispatch_planning_id = $data->id;
         $res_status = $data->dispatch_planning_api_data_res_status;
+        $delivery_pending = $data->dispatch_planning_api_data_delivery_pending_flag;
+        $bill_number =  $data->dispatch_planning_api_data_bill_number;
         // Get views current field value
         $views_current_field = $this->field;
         //$sales_bill_value = $data->_field_data['node_dispatch_planning_api_data_1_nid']['entity']->field_bill_value[LANGUAGE_NONE][0]['value'];
@@ -121,6 +123,11 @@ class bill_returns_report extends views_handler_field {
                         return get_facility_name($distributor_id);
                         break;
                     case 'delivery_status';
+                        //return $res_status;
+                        if ($delivery_pending == 1) {
+                           // print_r($bill_number);die;
+                            $res_status = 'delivery_pending';
+                        }
                         return get_res_status_value($res_status);
 
                     default:

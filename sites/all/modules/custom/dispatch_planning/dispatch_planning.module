@@ -3238,16 +3238,27 @@ function dispatch_planning_form_views_exposed_form_alter(&$form, &$form_state) {
         $form['derived_payment_outcome']['#options'] = $derived_payment_outcome;
         $form['derived_payment_outcome']['#validated'] = TRUE;
     }
+
     $form_ids = array('views-exposed-form-bill-return-report-page');
     if (in_array($form['#id'], $form_ids)) {
-        $select = array('' => '- Select -');
+        $select = array('' => '- Select All -');
         $delivered = variable_get('deliver_status'); //'Delivered';
         $partial_delivered = variable_get('partial_deliver_status'); //'Partial Delivered';
         $un_delivered = variable_get('undeliver_status');
-        $derived_outcome['deliver'] = $delivered;
-        $derived_outcome['partial_deliver'] = $partial_delivered;
-        $derived_outcome['undeliver'] = $un_delivered;
+        $delivery_pending = variable_get('current_delivery_status');
+        //$derived_outcome['select_all'] = t('Select All');
+        // global config pe deliver and partial deliver are same
+        if ($delivered == $partial_delivered) {
+            $derived_outcome['deliver'] = $delivered;
+        }
+        else {
+            $derived_outcome['deliver'] = $delivered;
+            $derived_outcome['partial_deliver'] = $partial_delivered;
+        }
 
+        $derived_outcome['undeliver'] = $un_delivered;
+        $derived_outcome['delivery_pending'] = $delivery_pending;
+        $form['res_status_1']['#attributes'] = array('style' => 'height:50px');
         $form['res_status_1']['#type'] = 'select';
         $form['res_status_1']['#size'] = 1;
         $form['res_status_1']['#options'] = $select + $derived_outcome;
@@ -4317,6 +4328,68 @@ function dispatch_planning_views_query_alter(&$view, &$query) {
         $join->extra = array(
           array('field' => 'distributor_id', 'left_field' => 'distributor_id'),
         );
+    }
+    if ($view->name == 'bill_return_report') {
+        // this is an array
+        $bill_status = $view->exposed_input['res_status_1'];
+        $delivered = variable_get('deliver_status'); //'Delivered';
+        $partial_delivered = variable_get('partial_deliver_status'); //'Partial Delivered';
+        $un_delivered = variable_get('undeliver_status');
+        $delivery_pending = variable_get('current_delivery_status');
+        // global config pe deliver and partial deliver are same
+        if ($delivered == $partial_delivered && in_array('deliver', $bill_status)) {
+            $view->exposed_input['res_status_1'] = $bill_status;
+            foreach ($query->where[1]['conditions'] as $key => &$val) {
+                if ($val['field'] == 'dispatch_planning_api_data.res_status') {
+                    $val['value'][] = 'partial_deliver';
+                }
+            }
+            
+        }
+        if (!in_array('delivery_pending', $bill_status) && !empty($bill_status[0])) {
+            $query->add_where(0,"dispatch_planning_api_data.delivery_pending_flag", 0, '=');
+        }
+        if (empty($bill_status[0])) { 
+                foreach ($query->where[1]['conditions'] as $key => &$val) {
+                   if ($val['field'] == 'dispatch_planning_api_data.res_status') {
+                    $val['value'][] = 'deliver';
+                    $val['value'][] = 'partial_deliver';
+                    $val['value'][] = 'undeliver';
+                }
+            }
+            $query->add_where(0,"dispatch_planning_api_data.delivery_pending_flag", array(1,0), 'IN');
+        }
+        $count_bill_status = count($bill_status);
+        // User selected only Delivery Pending
+        if (in_array('delivery_pending', $bill_status) && $count_bill_status == 1) {
+                foreach ($query->where[1]['conditions'] as $key => &$val) {
+                if ($val['field'] == 'dispatch_planning_api_data.res_status') {
+                    $val['value'][] = 'undeliver';
+                }
+            }
+            $query->add_where(0,"dispatch_planning_api_data.delivery_pending_flag", array(1), 'IN');
+        }
+        if (in_array('delivery_pending', $bill_status) && $count_bill_status >1) {
+                foreach ($query->where[1]['conditions'] as $key => &$val) {
+                if ($val['field'] == 'dispatch_planning_api_data.res_status') {
+                    $val['value'][] = 'undeliver';
+                }
+                $query->add_where(0,"dispatch_planning_api_data.delivery_pending_flag", array(1,0), 'IN');
+            }
+            //$query->add_where(0,"dispatch_planning_api_data.delivery_pending_flag = 1 && dispatch_planning_api_data.res_status = 'undeliver'");
+            //$query->add_where(0, 'dispatch_planning_api_data.res_status', 'undeliver');
+            //$query->group_operator = 'OR';
+           // $query->add_where(0, 'dispatch_planning_api_data.delivery_pending_flag', '1');
+           // $query->add_where(1, 'dispatch_planning_api_data.res_status', 'undeliver');
+            //$query->add_where(1, 'dispatch_planning_api_data.delivery_pending_flag','1');
+            //$meme_banners = array(13);
+            //$or_statement = db_or()->condition('dispatch_planning_api_data.delivery_pending_flag',1, '=');
+           /* $or = db_and()
+            ->condition('dispatch_planning_api_data.delivery_pending_flag', '1', '=')
+            ->condition('dispatch_planning_api_data.res_status', 'undeliver', '=');
+            $query->add_where(1,$or);*/
+           //$query->add_where(1, $or_statement);
+        }
     }
 
     // trip_bill_sku_return_report is not used currently use trip_bill_sku_return_report2.
