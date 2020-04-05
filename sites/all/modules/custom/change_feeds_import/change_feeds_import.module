@@ -3218,6 +3218,8 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
         // $distributor_ids = array();
         $distributor_ids[] = $central_distributor_id;
     }
+    $subadmin_uid = get_uid_by_role('sub_admin');
+    $distributor_ids[] = $subadmin_uid;
     $distributor_ids = array_unique($distributor_ids);
 //  $views_array = array('central_bill_trip', 'channel_master_central_report' , 
 //    'central_picking_report' ,  'central_party_pack_report',  'central_unloading_form', 
