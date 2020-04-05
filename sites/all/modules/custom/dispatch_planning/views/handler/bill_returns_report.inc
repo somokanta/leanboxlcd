@@ -28,7 +28,7 @@ class bill_returns_report extends views_handler_field {
         $distributor_id = $data->dispatch_planning_api_data_distributor_id;
         $dispatch_planning_id = $data->id;
         $res_status = $data->dispatch_planning_api_data_res_status;
-        $delivery_pending = strtolower($data->dispatch_planning_api_data_delivery_pending_flag);
+        $delivery_pending = $data->dispatch_planning_api_data_delivery_pending_flag;
         $bill_number =  $data->dispatch_planning_api_data_bill_number;
         // Get views current field value
         $views_current_field = $this->field;
@@ -124,7 +124,7 @@ class bill_returns_report extends views_handler_field {
                         break;
                     case 'delivery_status';
                         //return $res_status;
-                        if ($delivery_pending!= 'no' || $delivery_pending!= 0) {
+                        if ($delivery_pending == 1) {
                             $res_status = 'delivery_pending';
                         }
                         return get_res_status_value($res_status);

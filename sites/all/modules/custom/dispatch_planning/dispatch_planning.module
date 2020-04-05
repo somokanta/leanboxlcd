@@ -3258,7 +3258,7 @@ function dispatch_planning_form_views_exposed_form_alter(&$form, &$form_state) {
 
         $derived_outcome['undeliver'] = $un_delivered;
         $derived_outcome['delivery_pending'] = $delivery_pending;
-        $form['res_status_1']['#attributes'] = array('style' => 'height:50px');
+        $form['res_status_1']['#attributes'] = array('style' => 'height:100px');
         $form['res_status_1']['#type'] = 'select';
         $form['res_status_1']['#size'] = 1;
         $form['res_status_1']['#options'] = $select + $derived_outcome;
@@ -5376,9 +5376,11 @@ function get_res_status_value($res_status) {
     $delivered = variable_get('deliver_status'); //'Delivered';
     $partial_delivered = variable_get('partial_deliver_status'); //'Partial Delivered';
     $un_delivered = variable_get('undeliver_status');
+    $delivery_pending = variable_get('current_delivery_status');
     
     $derived_outcome['deliver'] = $delivered;
     $derived_outcome['partial_deliver'] = $partial_delivered;
     $derived_outcome['undeliver'] = $un_delivered;
+    $derived_outcome['delivery_pending'] = $delivery_pending;
     return  $derived_outcome[$res_status];
 }
