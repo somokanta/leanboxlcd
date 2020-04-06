@@ -16,8 +16,8 @@ $script_name = '/leanbox_multithread_sdr_api.php';
 $php_script = getcwd() . $script_name;
 
 /* * **** Script for push order to SDR APP */
-$thread = variable_get('no-thread', '2'); // number of thread 
-$length = variable_get('no-trip-per-thread', '3');
+$thread = variable_get('no_thread', '2'); // number of thread 
+$length = variable_get('no_trip_per_thread', '3');
 
 $total = $thread * $length;
 $trips = leanbox_get_available_trip_to_push($total);

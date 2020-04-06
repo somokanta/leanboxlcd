@@ -1320,8 +1320,8 @@ function dispatch_planning_views_api() {
 }
 
 function dispatch_planning_cron_callback() {
-  $thread = variable_get('dispatch-thread', '3'); // number of thread 
-  $length = variable_get('dispatch-bill-per-thread', '50');
+  $thread = variable_get('dispatch_thread', '3'); // number of thread 
+  $length = variable_get('dispatch_bill_per_thread', '50');
   $total = $thread * $length;
     
   $query = db_select('dispatch_planning_api_log', 'a');
@@ -5326,30 +5326,30 @@ function global_config_form($form, $form_state) {
       '#description' => t('Bill wise Delivery status report(Current Delivery Status is undeliver)'),
       '#default_value' => variable_get('undeliver_status'),
     );
-    $form['no-thread'] = array(
+    $form['no_thread'] = array(
       '#type' => 'textfield',
       '#title' => t('Number Of Thread To Run For SDR App'),
       '#description' => t('No of thread for Van planning to SDR App integration'),
-      '#default_value' => variable_get('no-thread', 2),
+      '#default_value' => variable_get('no_thread', 2),
     );
-    $form['trip_per_thread'] = array(
+    $form['no_trip_per_thread'] = array(
       '#type' => 'textfield',
       '#title' => t('Trip Per Thread'),
       '#description' => t('Number of trips to process in one thread for Van planning to SDR app integration'),
-      '#default_value' => variable_get('no-trip-per-thread', 3),
+      '#default_value' => variable_get('no_trip_per_thread', 3),
     );
     
     $form['dispatch_thread'] = array(
       '#type' => 'textfield',
       '#title' => t('Number Of Thread To Run For Dispatch Planning'),
       '#description' => t('No of thread for Dispatch planning to Delivery App integration'),
-      '#default_value' => variable_get('dispatch-thread', 3),
+      '#default_value' => variable_get('dispatch_thread', 3),
     );
     $form['dispatch_bill_per_thread'] = array(
       '#type' => 'textfield',
       '#title' => t('Bills Per Thread'),
       '#description' => t('Number of Bills to process in one thread for Dispatch planning to Delivery app integration'),
-      '#default_value' => variable_get('dispatch-bill-per-thread', 50),
+      '#default_value' => variable_get('dispatch_bill_per_thread', 50),
     );  
     
     $form['not_attempted_bill_status'] = array(
