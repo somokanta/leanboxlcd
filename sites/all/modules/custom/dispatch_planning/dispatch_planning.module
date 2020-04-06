@@ -5326,7 +5326,7 @@ function global_config_form($form, $form_state) {
       '#description' => t('Bill wise Delivery status report(Current Delivery Status is undeliver)'),
       '#default_value' => variable_get('undeliver_status'),
     );
-    $form['number_thread'] = array(
+    $form['no-thread'] = array(
       '#type' => 'textfield',
       '#title' => t('Number Of Thread To Run For SDR App'),
       '#description' => t('No of thread for Van planning to SDR App integration'),
