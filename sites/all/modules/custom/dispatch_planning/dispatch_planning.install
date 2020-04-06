@@ -2512,3 +2512,44 @@ function dispatch_planning_update_7147() {
   db_create_table('sdr_app_log_preprocess', $schema['sdr_app_log_preprocess']);
   db_create_table('sdr_app_log', $schema['sdr_app_log']);
 }
+
+function dispatch_planning_update_7148() {
+  $fields = array(
+      'corrected_latitude' => array(
+        'description' => t('Corrected_Latitude'),
+        'type' => 'varchar',
+        'length' => 50,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'corrected_longitude' => array(
+        'description' => t('Corrected_Longitude'),
+        'type' => 'varchar',
+        'length' => 50,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+     'corrected_latlong_timestamp' => array(
+       'description' => t('Corrected_LatLong_Timestamp'),
+       'type' => 'int',
+       'not null' => TRUE,
+       'default' => 0
+     ),
+     'corrected_latlong_images' => array(
+        'description' => t('Corrected_Latlong_Images'),
+        'type' => 'varchar',
+        'length' => 4096,
+        'not null' => TRUE,
+        'default' => '',
+     ),
+  );
+  foreach ($fields as $key => $field) {
+    if (!db_field_exists('dispatch_planning_api_data', $key)) {
+      db_add_field('dispatch_planning_api_data', $key, $field);
+    }
+    if (!db_field_exists('inventory_versioning_api_data', $key)) {
+      db_add_field('inventory_versioning_api_data', $key, $field);
+    }
+  }
+}
+
