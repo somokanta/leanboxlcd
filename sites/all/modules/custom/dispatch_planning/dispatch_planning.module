@@ -4407,7 +4407,7 @@ function dispatch_planning_views_query_alter(&$view, &$query) {
         }
         //print_r($operator);
       // print_r($view->exposed_input['res_status_1']);
-        if (in_array('delivery_pending', $bill_status) && $operator!= 'not in') {
+        if (in_array('delivery_pending', $bill_status)) {
                 foreach ($query->where[1]['conditions'] as $key => &$val) {
                 if ($val['field'] == 'dispatch_planning_api_data.res_status') {
                     $val['value'][] = 'undeliver';
