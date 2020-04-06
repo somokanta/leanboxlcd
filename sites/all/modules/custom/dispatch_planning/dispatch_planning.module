@@ -5328,7 +5328,7 @@ function global_config_form($form, $form_state) {
     );
     $form['number_thread'] = array(
       '#type' => 'textfield',
-      '#title' => t('Number Of Thread To Run'),
+      '#title' => t('Number Of Thread To Run For SDR App'),
       '#description' => t('No of thread for Van planning to SDR App integration'),
       '#default_value' => variable_get('no-thread', 2),
     );
@@ -5338,6 +5338,20 @@ function global_config_form($form, $form_state) {
       '#description' => t('Number of trips to process in one thread for Van planning to SDR app integration'),
       '#default_value' => variable_get('no-trip-per-thread', 3),
     );
+    
+    $form['dispatch_thread'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Number Of Thread To Run For Dispatch Planning'),
+      '#description' => t('No of thread for Dispatch planning to Delivery App integration'),
+      '#default_value' => variable_get('dispatch-thread', 3),
+    );
+    $form['dispatch_bill_per_thread'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Bills Per Thread'),
+      '#description' => t('Number of Bills to process in one thread for Dispatch planning to Delivery app integration'),
+      '#default_value' => variable_get('dispatch-bill-per-thread', 50),
+    );  
+    
     $form['not_attempted_bill_status'] = array(
       '#type' => 'textfield',
       '#title' => t('Not attempted Bill Status'),
