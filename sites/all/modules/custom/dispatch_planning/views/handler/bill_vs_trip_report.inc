@@ -45,15 +45,17 @@ class bill_vs_trip_report extends views_handler_field {
             //print_r($to_be_collected);die;
             if (!empty($views_current_field)) {
                 switch ($views_current_field) {
-                  
+
                     case 'billtrip_return_value';
-                        return round($bill_trip_report['returned_value'],2);
+                        $return_value = $bill_trip_report['returned_value'] ? round($bill_trip_report['returned_value'], 2) : 0;
+                        return $return_value;
                         break;
                     case 'billtrip_net_sales_value';
-                        return round($bill_trip_report['sum_net_sales_value'],2);
+                        $sum_net_sales_value = $bill_trip_report['sum_net_sales_value'] ? round($bill_trip_report['sum_net_sales_value'], 2) : 0;
+                        return $sum_net_sales_value;
                         break;
-                     case 'billtrip_reason_for_failure';
-                         return $bill_trip_report['reason_for_failure'];
+                    case 'billtrip_reason_for_failure';
+                        return $bill_trip_report['reason_for_failure'];
                         break;
 
                     default:
@@ -61,7 +63,7 @@ class bill_vs_trip_report extends views_handler_field {
                 }
             }
         }
-        
+
         return $bill_trip_report;
     }
 
