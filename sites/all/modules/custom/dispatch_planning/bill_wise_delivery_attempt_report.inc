@@ -27,7 +27,7 @@ function bill_wise_delivery_attempt_report_form($form, &$form_state) {
     if (isset($_GET['party_code'])) {
         $party_code = $_GET['party_code'];
     }
-    if (isset($_GET['bill_status'])) {
+    if (!empty($_GET['bill_status'])) {
         $bill_status_default = $_GET['bill_status'];
     }
     if (isset($_GET['facility_code'])) {
@@ -197,9 +197,10 @@ function bill_wise_delivery_attempt_report_form($form, &$form_state) {
     $form['bill_status'] = array(
         '#title' => t('Bill Status'),
         '#type' => 'select',
-        '#options' => $bill_status,      
+        '#options' => $bill_status,
+        '#multiple' => true,
         '#default_value' => $bill_status_default,
-        '#prefix' => '<div class="bill-status" style="display:inline-block;margin: 20px 101px 0 50px;">',
+        '#prefix' => '<div class="bill-status" style="display:inline-block;margin: 20px 101px 0 50px; ">',
         '#suffix' => '</div>'
     );
 
@@ -222,6 +223,7 @@ function bill_wise_delivery_attempt_report_submit($form, &$form_state) {
     $bill_number = $form_state['values']['bill_number'];
     $party_code = $form_state['values']['party_code'];
     $bill_status = $form_state['values']['bill_status'];
+    $bill_status = implode(",", $bill_status);
     $distributor_id = $form_state['values']['distributor_id'];
     $central_distributor_id = $form_state['values']['central_distributor_id'];
     $facility_code = $form_state['values']['facility_code'];
@@ -253,8 +255,8 @@ function bill_wise_delivery_attempt_report_callback() {
     if (isset($_GET['party_code'])) {
         $party_code = $_GET['party_code'];
     }
-    if (isset($_GET['bill_status'])) {
-        $bill_status = $_GET['bill_status'];
+    if (!empty($_GET['bill_status'])) {
+        $bill_status = explode(",", $_GET['bill_status']);
     }
     if (arg(1) != 'export') {
         $form = drupal_render(drupal_get_form('bill_wise_delivery_attempt_report_form'));
@@ -309,10 +311,10 @@ function bill_wise_delivery_attempt_report_callback() {
         $query->condition('ad.bill_number', $bill_number, '=');
     }
     if (!empty($party_code)) {
-        $query->condition('ad.party_code', $party_code, '=');
+     $query->condition('ad.party_code', $party_code, '=');
     }
-     if (!empty($bill_status)) {
-        $query->condition('ad.res_status', $bill_status, '=');
+    if (!empty($bill_status)) {
+        $query->condition('ad.res_status', $bill_status, 'IN');
     }
     if (!empty($from_dispatch_date) && !empty($to_dispatch_date)) {
         $query->condition('ad.dispatch_date', array($from_dispatch_date, $to_dispatch_date), 'BETWEEN');
@@ -320,34 +322,57 @@ function bill_wise_delivery_attempt_report_callback() {
     if (!empty($from_bill_date) && !empty($to_bill_date)) {
         $query->condition('ad.bill_date', array($from_bill_date, $to_bill_date), 'BETWEEN');
     }
+    $query->addexpression("COUNT((ad.attempted_status))", 'count_attempted_status');
+    $query->havingCondition('count_attempted_status', 1, '>=');
+    $query->condition('ad.res_status', 'undeliver', '=');
     $query->condition('ad.res_reason_for_failure', 'Outlet not attempted', '!=');
-    $query->fields('ad', array('runsheet_number','dispatch_date','bill_number', 'bill_date', 'beat_name', 'party_name', 'fieldExecutiveName', 'res_status', 'res_reason_for_failure'));    
-    $query->join('node', 'n', 'n.title = ad.runsheet_number');
-    $query->condition('n.type', 'dispatch_data', '=');
-    $query->condition('n.uid', $distributor_ids, 'IN');
-    $query->join('node', 'n1', 'n1.title = ad.bill_number');
-    $query->condition('n1.type', 'sales_register_data', '=');
-    $query->condition('n1.uid', $distributor_ids, 'IN');
+    $query->fields('ad', array('bill_number'));
+    $query->groupBy('ad.bill_number');
+    $bills_result = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
 
-    $query->leftjoin('field_data_field_sr_new_bill_date', 'bill_date', 'bill_date.entity_id = n1.nid');
-    $query->leftjoin('field_data_field_outlet_order_no', 'order_no', 'order_no.entity_id = n1.nid');
+    if (!empty($bills_result)) {
+        foreach ($bills_result as $key => $val) {
+            $bill_numbers[] = $val['bill_number'];
+        }
 
-    $query->join('node', 'n2', 'n2.title = ad.party_hll_code');
-    $query->condition('n2.type', 'hul_code_master', '=');
-    $query->condition('n2.uid', $distributor_ids, 'IN');
-    $query->leftjoin('field_data_field_area_code', 'ac', 'ac.entity_id = n2.nid');
+        $query = db_select('dispatch_planning_api_data', 'ad');
+        $query->condition('ad.distributor_id', $distributor_ids, 'IN');
 
-    $query->leftjoin('node', 'n3', 'ac.field_area_code_nid = n3.nid');
-    $query->join('users', 'u', 'u.uid = ad.distributor_id');
-    $query->join('field_data_field_distributor_name', 'dn', 'u.uid = dn.entity_id');
-    $query->join('field_data_field_facility_code', 'fc', 'u.uid = fc.entity_id');
+        if (!empty($bill_numbers)) {
+            $query->condition('ad.bill_number', $bill_numbers, 'IN');
+        }
+        if (!empty($bill_status)) {
+            $query->condition('ad.res_status', $bill_status, 'IN');
+        }
+        $query->condition('ad.res_reason_for_failure', 'Outlet not attempted', '!=');
+        $query->fields('ad', array('runsheet_number', 'dispatch_date', 'bill_number', 'bill_date', 'beat_name', 'party_name', 'fieldExecutiveName', 'res_status', 'res_reason_for_failure'));
+        $query->join('node', 'n', 'n.title = ad.runsheet_number');
+        $query->condition('n.type', 'dispatch_data', '=');
+        $query->condition('n.uid', $distributor_ids, 'IN');
+        $query->join('node', 'n1', 'n1.title = ad.bill_number');
+        $query->condition('n1.type', 'sales_register_data', '=');
+        $query->condition('n1.uid', $distributor_ids, 'IN');
 
-    $query->fields('bill_date', array('field_sr_new_bill_date_value'));
-    $query->fields('order_no', array('field_outlet_order_no_value'));
-    $query->fields('dn', array('field_distributor_name_value'));
-    $query->fields('n3', array('title'));
-    $query->fields('fc', array('field_facility_code_tid'));
-    $result = $query->distinct()->execute()->fetchAll(PDO::FETCH_ASSOC);
+        $query->leftjoin('field_data_field_sr_new_bill_date', 'bill_date', 'bill_date.entity_id = n1.nid');
+        $query->leftjoin('field_data_field_outlet_order_no', 'order_no', 'order_no.entity_id = n1.nid');
+
+        $query->join('node', 'n2', 'n2.title = ad.party_hll_code');
+        $query->condition('n2.type', 'hul_code_master', '=');
+        $query->condition('n2.uid', $distributor_ids, 'IN');
+        $query->leftjoin('field_data_field_area_code', 'ac', 'ac.entity_id = n2.nid');
+
+        $query->leftjoin('node', 'n3', 'ac.field_area_code_nid = n3.nid');
+        $query->join('users', 'u', 'u.uid = ad.distributor_id');
+        $query->join('field_data_field_distributor_name', 'dn', 'u.uid = dn.entity_id');
+        $query->join('field_data_field_facility_code', 'fc', 'u.uid = fc.entity_id');
+
+        $query->fields('bill_date', array('field_sr_new_bill_date_value'));
+        $query->fields('order_no', array('field_outlet_order_no_value'));
+        $query->fields('dn', array('field_distributor_name_value'));
+        $query->fields('n3', array('title'));
+        $query->fields('fc', array('field_facility_code_tid'));
+        $result = $query->distinct()->execute()->fetchAll(PDO::FETCH_ASSOC);
+    }
 
     $row = array();
 

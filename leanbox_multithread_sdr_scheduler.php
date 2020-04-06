@@ -21,8 +21,9 @@ $length = variable_get('no-trip-per-thread', '3');
 
 $total = $thread * $length;
 $trips = leanbox_get_available_trip_to_push($total);
-watchdog('test_abhi_multithread cron', '<pre>' . print_r($trips, TRUE) . '</pre>');
+
 if ($trips) {
+    watchdog('test_abhi_multithread cron', '<pre>' . print_r($trips, TRUE) . '</pre>');
     $trips_chunk = array_chunk($trips, $length);
     foreach ($trips_chunk as $value) {
         $trip_param = implode(',', $value);
