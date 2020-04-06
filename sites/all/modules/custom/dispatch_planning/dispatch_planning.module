@@ -4414,6 +4414,13 @@ function dispatch_planning_views_query_alter(&$view, &$query) {
                 }
                 $query->add_where(0,"dispatch_planning_api_data.delivery_pending_flag", 1, '=');
         }
+        if ($bill_status == 'undeliver') {
+                foreach ($query->where[1]['conditions'] as $key => &$val) {
+                if ($val['field'] == 'dispatch_planning_api_data.res_status') {
+                    $val['value'][] = 'undeliver';
+                }
+                $query->add_where(0,"dispatch_planning_api_data.delivery_pending_flag", 0, '=');
+        }
             //$query->add_where(0,"dispatch_planning_api_data.delivery_pending_flag = 1 && dispatch_planning_api_data.res_status = 'undeliver'");
             //$query->add_where(0, 'dispatch_planning_api_data.res_status', 'undeliver');
             //$query->group_operator = 'OR';
