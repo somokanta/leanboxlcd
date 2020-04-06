@@ -3158,6 +3158,8 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
        // $distributor_ids = array();
         $distributor_ids[] = $central_distributor_id;
     }
+    $subadmin_uid = get_uid_by_role('sub_admin');
+    $distributor_ids[] = $subadmin_uid;
     $distributor_ids = array_unique($distributor_ids);
 //  $views_array = array('central_bill_trip', 'channel_master_central_report' , 
 //    'central_picking_report' ,  'central_party_pack_report',  'central_unloading_form', 
@@ -4750,19 +4752,21 @@ function get_central_distributor_id($child_distributor_id) {
  */
 
 // This function returns logged user related distributor_ids
-function get_child_distributor_rsname() {
+function get_child_distributor_rsname($central_rs_distributor_ids = null) {
     global $user;
     $res = array();
     global $table_name;
     global $table_column;
-    $sibling_filter = 0;
+    $sibling_filter = $super_central_filter = 0;
     $distributor_id = change_feeds_import_get_distributor_id($user->uid);
     $distributor_ids = array();
     /* /Super Central Distributor login it returns childs of super central such as central_rs1,central_rs2
      *  Having to fech child distributor_id of each central rs
      */
     if (in_array('super_central_distributor', $user->roles)) {
-        $central_rs_distributor_ids = get_child_distributor_ids($distributor_id);
+        if (empty($central_rs_distributor_ids)) {
+            $central_rs_distributor_ids = get_child_distributor_ids($distributor_id);
+        }
         if (!empty($central_rs_distributor_ids)) {
             foreach ($central_rs_distributor_ids as $central_rs_distributor_id) {
                 $child_distributor_ids = get_child_distributor_ids($central_rs_distributor_id);
@@ -4771,6 +4775,8 @@ function get_child_distributor_rsname() {
                 }
             }
         }
+        
+        $super_central_filter = 1;
     }
     // if central rs logged in central child's returns
     else if (in_array('central_distributor', $user->roles)) {
@@ -4787,8 +4793,10 @@ function get_child_distributor_rsname() {
         }
         $sibling_filter = 1;
     }
-    
-    if ($sibling_filter == 1 &&  !empty($distributor_ids)) {
+    // Sibling Central,super central get same distributor name in multiple
+    // facility code  so that append distributorname-facility code name
+
+    if (($sibling_filter == 1 || $super_central_filter == 1) && !empty($distributor_ids)) {
         // Here distributor name is same for two location so have to append location name after-distributor name
         $query = db_select('field_data_field_central_distributorid_ref', 'cdr');
         $query->join($table_name, 'rs', 'cdr.entity_id = rs.entity_id');
@@ -4798,10 +4806,9 @@ function get_child_distributor_rsname() {
         $query->fields('rs', array($table_column));
         $res = $query->execute()->fetchAllKeyed(0, 1); // will get child uids=>rs_name
         if (!empty($res)) {
-            foreach($res as $distributor_id_key=>$value) {
+            foreach ($res as $distributor_id_key => $value) {
                 $facility_name = get_facility_name($distributor_id_key);
-                $options[$distributor_id_key] = $value.'-'.$facility_name;
-                
+                $options[$distributor_id_key] = $value . '-' . $facility_name;
             }
             $res = $options;
         }
