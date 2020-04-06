@@ -195,6 +195,7 @@ function bill_wise_dispatch_no_attempt_report_form($form, &$form_state) {
 
     $dp_status = variable_get('current_delivery_status');
     $bill_status = array('' => '-Select-') + get_bill_status_from_api_table() + array('delivery_pending' => $dp_status);
+    $bill_status = array_unique($bill_status);
     $form['bill_status'] = array(
         '#title' => t('Bill Status'),
         '#type' => 'select',
@@ -315,22 +316,14 @@ function bill_wise_dispatch_no_attempt_report_callback() {
         $query->condition('ad.party_code', $party_code, '=');
     }
     if (!empty($bill_status)) {
-//        if (($key = array_search('delivery_pending', $bill_status)) !== false) {
-//            if (count($bill_status) == 1) {
-//                $query->condition('ad.delivery_pending_flag', 1, '=');
-//            } else if (count($bill_status) > 1) {
-//                unset($bill_status[$key]);
-//                $query->condition('ad.delivery_pending_flag', 1, '=');
-//                $query->condition('ad.res_status', $bill_status, 'IN');
-//            }
-//        } else {
-//            $query->condition('ad.res_status', $bill_status, 'IN');
-//        }
+        $combined_bill_status = explode(',',variable_get('combined_res_status'));
         if ($bill_status == 'delivery_pending') {
             $query->condition('ad.delivery_pending_flag', 1, '=');
-        }else{
-          $query->condition('ad.res_status', $bill_status, '=');  
+        }else if (in_array($bill_status,$combined_bill_status)) {           
+          $query->condition('ad.res_status', $combined_bill_status, 'IN');  
           $query->condition('ad.delivery_pending_flag', 0, '=');
+        }else{
+            $query->condition('ad.res_status', $bill_status, '=');  
         }
     }
     if (!empty($from_dispatch_date) && !empty($to_dispatch_date)) {
