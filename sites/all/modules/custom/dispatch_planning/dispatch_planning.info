@@ -47,3 +47,4 @@ files[] =  views/handler/proof_of_undelivery_handler.inc
 files[] =  views/handler/field_photo_signed_bill_handler.inc
 files[] =  views/handler/field_photo_cheque_handler.inc
 files[] =  views/handler/field_corrected_images_handler.inc
+files[] =  views/handler/bill_vs_trip_report.inc

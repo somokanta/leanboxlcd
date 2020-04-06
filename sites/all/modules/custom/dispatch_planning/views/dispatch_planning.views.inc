@@ -6360,6 +6360,33 @@ $data['views']['global_facility_name'] = array(
       'handler' => 'field_corrected_images_handler',
     ),
   );
+    
+    $data['views']['billtrip_net_sales_value'] = array(
+        'title' => t('Bill vs Trip Net sales Value'),
+        'help' => t('Bill vs Trip Net sales Value'),
+        'real field' => 'id',
+        'field' => array(
+            'handler' => 'bill_vs_trip_report',
+        ),
+    );
+   
+    $data['views']['billtrip_return_value'] = array(
+        'title' => t('Bill vs Trip Return Value'),
+        'help' => t('Bill vs Trip Return Value'),
+        'real field' => 'id',
+        'field' => array(
+            'handler' => 'bill_vs_trip_report',
+        ),
+    );
+    
+    $data['views']['billtrip_reason_for_failure'] = array(
+        'title' => t('Bill vs Trip Reason for failure'),
+        'help' => t('Bill vs Trip Reason for failure'),
+        'real field' => 'id',
+        'field' => array(
+            'handler' => 'bill_vs_trip_report',
+        ),
+    );
   
   // ========= Van Planning API to SDR App START ============
 
