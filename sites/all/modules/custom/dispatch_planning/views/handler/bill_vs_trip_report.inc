@@ -41,16 +41,19 @@ class bill_vs_trip_report extends views_handler_field {
             $query->addExpression('(SUM(dpi.sum_net_sales_value))', 'sum_net_sales_value');
             $query->addExpression('(CASE WHEN (ad.res_status = \'undeliver\') THEN ad.res_reason_for_failure END)', 'reason_for_failure');
             $bill_trip_report = $query->execute()->fetch(PDO::FETCH_ASSOC);
+            dpm($bill_trip_report);
 
             //print_r($to_be_collected);die;
             if (!empty($views_current_field)) {
                 switch ($views_current_field) {
                   
                     case 'billtrip_return_value';
-                        return round($bill_trip_report['returned_value'],2);
+                        $return_value = $bill_trip_report['returned_value'] ? round($bill_trip_report['returned_value'],2) : 0;
+                        return $return_value;
                         break;
                     case 'billtrip_net_sales_value';
-                        return round($bill_trip_report['sum_net_sales_value'],2);
+                        $sum_net_sales_value = $bill_trip_report['sum_net_sales_value'] ? round($bill_trip_report['sum_net_sales_value'],2) : 0;
+                        return $sum_net_sales_value;
                         break;
                      case 'billtrip_reason_for_failure';
                          return $bill_trip_report['reason_for_failure'];
