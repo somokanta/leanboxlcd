@@ -3241,24 +3241,63 @@ function dispatch_planning_form_views_exposed_form_alter(&$form, &$form_state) {
 
     $form_ids = array('views-exposed-form-bill-return-report-page');
     if (in_array($form['#id'], $form_ids)) {
-        $select = array('' => '- Select All -');
+        $select = array('All' => '- Select All -');
         $delivered = variable_get('deliver_status'); //'Delivered';
         $partial_delivered = variable_get('partial_deliver_status'); //'Partial Delivered';
         $un_delivered = variable_get('undeliver_status');
         $delivery_pending = variable_get('current_delivery_status');
+        $combined_bill_status = explode(',',variable_get('combined_res_status'));
+        if (!in_array('deliver',$combined_bill_status) && !empty($combined_bill_status[0])) {
+            $derived_outcome['deliver'] = $delivered;
+        }
+        else{
+            $combined_status_deliver = 1;
+        }
+        if (!in_array('partial_deliver',$combined_bill_status) && !empty($combined_bill_status[0])) {
+            $derived_outcome['partial_deliver'] = $partial_delivered;
+        }
+        else{
+            $combined_status_partial_deliver = 1;
+        }
+        if (!in_array('undeliver',$combined_bill_status) && !empty($combined_bill_status[0])) {
+            $derived_outcome['undeliver'] = $un_delivered;
+        }
+        else{
+            $combined_status_undeliver = 1;
+        }
+        if (!in_array('delivery_pending',$combined_bill_status) && !empty($combined_bill_status[0])) {
+            $derived_outcome['delivery_pending'] = $delivery_pending;
+        }
+        else{
+            $combined_status_delivery_pending = 1;
+        }
+        if ($combined_status_deliver == 1) {
+            $derived_outcome['deliver'] = $delivered;
+        }
+        else if($combined_status_partial_deliver == 1) {
+             $derived_outcome['partial_deliver'] = $partial_delivered;
+        }
+        else if($combined_status_undeliver == 1) {
+             $derived_outcome['undeliver'] = $un_delivered;
+        }
+        else if($combined_status_delivery_pending == 1) {
+             $derived_outcome['delivery_pending'] = $delivery_pending;
+        }
+            
         //$derived_outcome['select_all'] = t('Select All');
         // global config pe deliver and partial deliver are same
-        if ($delivered == $partial_delivered) {
+        /*if ($delivered == $partial_delivered) {
             $derived_outcome['deliver'] = $delivered;
         }
         else {
             $derived_outcome['deliver'] = $delivered;
             $derived_outcome['partial_deliver'] = $partial_delivered;
-        }
+        }*/
 
-        $derived_outcome['undeliver'] = $un_delivered;
-        $derived_outcome['delivery_pending'] = $delivery_pending;
-        $form['res_status_1']['#attributes'] = array('style' => 'height:100px');
+       // $derived_outcome['undeliver'] = $un_delivered;
+       // $derived_outcome['delivery_pending'] = $delivery_pending;
+        asort($derived_outcome);
+        $form['res_status_1']['#attributes'] = array('style' => 'height:40px');
         $form['res_status_1']['#type'] = 'select';
         $form['res_status_1']['#size'] = 1;
         $form['res_status_1']['#options'] = $select + $derived_outcome;
@@ -4332,50 +4371,49 @@ function dispatch_planning_views_query_alter(&$view, &$query) {
     if ($view->name == 'bill_return_report') {
         // this is an array
         $bill_status = $view->exposed_input['res_status_1'];
-        $delivered = variable_get('deliver_status'); //'Delivered';
+        $operator = $view->exposed_input['res_status_1_op'];
+        /*$delivered = variable_get('deliver_status'); //'Delivered';
         $partial_delivered = variable_get('partial_deliver_status'); //'Partial Delivered';
         $un_delivered = variable_get('undeliver_status');
-        $delivery_pending = variable_get('current_delivery_status');
-        // global config pe deliver and partial deliver are same
-        if ($delivered == $partial_delivered && in_array('deliver', $bill_status)) {
-            $view->exposed_input['res_status_1'] = $bill_status;
-            foreach ($query->where[1]['conditions'] as $key => &$val) {
-                if ($val['field'] == 'dispatch_planning_api_data.res_status') {
-                    $val['value'][] = 'partial_deliver';
+        $delivery_pending = variable_get('current_delivery_status');*/
+        $combined_bill_status = explode(',',variable_get('combined_res_status'));
+        if (!empty($combined_bill_status[0])) {
+            //foreach ($bill_status as $key => $res_status_value) {
+            if (in_array($bill_status, $combined_bill_status)) {
+                foreach ($query->where[1]['conditions'] as $key => &$val) {
+                    if ($val['field'] == 'dispatch_planning_api_data.res_status') {
+                        foreach ($combined_bill_status as $combined_res_status) {
+                            if (!in_array($combined_res_status, $val['value'])) {
+                                $val['value'][] = $combined_res_status;
+                            }
+                        }
+                    }
                 }
             }
-            
+            //}
         }
-        if (!in_array('delivery_pending', $bill_status) && !empty($bill_status[0])) {
-            $query->add_where(0,"dispatch_planning_api_data.delivery_pending_flag", 0, '=');
-        }
+
+        // Select All
         if (empty($bill_status[0])) { 
-                foreach ($query->where[1]['conditions'] as $key => &$val) {
+                /*foreach ($query->where[1]['conditions'] as $key => &$val) {
                    if ($val['field'] == 'dispatch_planning_api_data.res_status') {
                     $val['value'][] = 'deliver';
                     $val['value'][] = 'partial_deliver';
                     $val['value'][] = 'undeliver';
+                    $val['value'][] = '';
                 }
-            }
-            $query->add_where(0,"dispatch_planning_api_data.delivery_pending_flag", array(1,0), 'IN');
+            }*/
+            
         }
-        $count_bill_status = count($bill_status);
-        // User selected only Delivery Pending
-        if (in_array('delivery_pending', $bill_status) && $count_bill_status == 1) {
+        //print_r($operator);
+      // print_r($view->exposed_input['res_status_1']);
+        if (in_array('delivery_pending', $bill_status) && $operator!= 'not in') {
                 foreach ($query->where[1]['conditions'] as $key => &$val) {
                 if ($val['field'] == 'dispatch_planning_api_data.res_status') {
                     $val['value'][] = 'undeliver';
                 }
-            }
-            $query->add_where(0,"dispatch_planning_api_data.delivery_pending_flag", array(1), 'IN');
+                $query->add_where(0,"dispatch_planning_api_data.delivery_pending_flag", 1, '=');
         }
-        if (in_array('delivery_pending', $bill_status) && $count_bill_status >1) {
-                foreach ($query->where[1]['conditions'] as $key => &$val) {
-                if ($val['field'] == 'dispatch_planning_api_data.res_status') {
-                    $val['value'][] = 'undeliver';
-                }
-                $query->add_where(0,"dispatch_planning_api_data.delivery_pending_flag", array(1,0), 'IN');
-            }
             //$query->add_where(0,"dispatch_planning_api_data.delivery_pending_flag = 1 && dispatch_planning_api_data.res_status = 'undeliver'");
             //$query->add_where(0, 'dispatch_planning_api_data.res_status', 'undeliver');
             //$query->group_operator = 'OR';
@@ -5325,6 +5363,12 @@ function global_config_form($form, $form_state) {
       '#title' => t('Undeliver Status'),
       '#description' => t('Bill wise Delivery status report(Current Delivery Status is undeliver)'),
       '#default_value' => variable_get('undeliver_status'),
+    );
+    $form['combined_res_status'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Combined Bill Status'),
+      '#description' => t('Combined Bill Status in Query Display.Eg.deliver,partial_deliver,undeliver)'),
+      '#default_value' => variable_get('combined_res_status'),
     );
     $form['no_thread'] = array(
       '#type' => 'textfield',
