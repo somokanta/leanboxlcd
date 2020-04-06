@@ -289,28 +289,6 @@ function download_order_packing_slip($from_bill_date,$to_bill_date, $distributor
     pdf_using_mpdf_api($table);
   }
 }
-
-
-function get_html_table($headers, $datas) {
-  if (!empty($headers) && !empty($datas)) {
-    $border_class = " style='border:0.1pt solid black;border-collapse: collapse;'";
-    $table = '<table ' . $border_class . ' cellspadding="0" cellspacing="0"><tr>';
-    foreach ($headers as $key => $value) {
-      $table .= '<th' . $border_class . '>' . $value . '</th>';
-    }
-    $table .= '</tr>';
-    foreach ($datas as $key => $row) {
-      $table .= '<tr>';
-      foreach ($row as $row_id => $row_value) {
-        $table .= '<td' . $border_class . '>' . $row_value . '</td>';
-      }
-      $table .= '</tr>';
-    }
-
-    $table .= '</table>';
-  }
-  return $table;
- }
  
  function order_packing_slip_ajax($form, &$form_state) {
    return $form;
