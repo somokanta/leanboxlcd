@@ -4613,7 +4613,6 @@ function get_lat_long_and_area_code($nid) {
     $query->condition('n.type', 'hul_code_master');
     $query->condition('n.nid', $nid);
     $query->fields('n', array('title'));
-    $query->addTag('node_distributor_access');
     $query->leftjoin('field_data_field_hul_updated_lat', 'lat', 'n.nid = lat.entity_id');
     $query->leftjoin('field_data_field_hul_updated_long', 'long1', 'n.nid = long1.entity_id');
     $query->leftjoin('field_data_field_area_code', 'area', 'n.nid = area.entity_id');

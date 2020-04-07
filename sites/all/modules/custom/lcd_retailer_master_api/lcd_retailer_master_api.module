@@ -52,11 +52,26 @@ function lcd_retailer_master_api_node_presave($node) {
   }
   if (in_array($node->type, $retailer_masters)) {
       $hul_code = $node->field_hul_code[LANGUAGE_NONE][0]['value'];
+      $api_data = array();
     if ($node->type == 'outlet_master') {
-      $api_data['type'] = 'outlet_master';
-      $api_data['title'] = $node->title;
-      $api_data['distributor_id'] = $node->uid;
-      $sql_ins_id = insert_mobility_server_api_retailer_cron($api_data);//mobility_server_api_retailer_cron
+        $party_code = $node->field_party_code['und'][0]['value'];
+        $og_party_code = $node->original->field_party_code['und'][0]['value'];
+        $hul_code = $node->field_hul_code['und'][0]['value'];
+        $og_hul_code = $node->original->field_hul_code['und'][0]['value'];
+        $party_name = $node->field_party_name['und'][0]['value'];
+        $og_party_name = $node->original->field_party_name['und'][0]['value'];
+        $payment_term = $node->field_payment_terms['und'][0]['value'];
+        $og_payment_term = $node->original->field_payment_terms['und'][0]['value'];
+        $credit_days = $node->field_credit_days['und'][0]['value'];
+        $og_credit_days = $node->original->field_credit_days['und'][0]['value'];
+        $nid = $node->field_hul_code_reference['und'][0]['nid'];
+        $og_nid = $node->original->field_hul_code_reference['und'][0]['nid'];
+        if (!empty($party_code) && ($party_code != $og_party_code || $hul_code != $og_hul_code || $party_name != $og_party_name || $payment_term != $og_payment_term || $credit_days != $og_credit_days || $nid != $og_nid)) {
+            $api_data['type'] = 'outlet_master';
+            $api_data['title'] = $party_code;
+            $api_data['distributor_id'] = $node->uid;
+            $sql_ins_id = insert_mobility_server_api_retailer_cron($api_data);
+        }
     }
     if ($node->type == 'hul_code_master') {
       if (!empty($node->changetype )) {
@@ -228,48 +243,41 @@ function moblity_outlet_api_cron() {
       }
       $location_type = 'Retailer';
       $party_code = $node->field_party_code['und'][0]['value'];
-      $og_party_code = $node->original->field_party_code['und'][0]['value'];
       $hul_code = $node->field_hul_code['und'][0]['value'];
-      $og_hul_code = $node->original->field_hul_code['und'][0]['value'];
       $party_name = $node->field_party_name['und'][0]['value'];
-      $og_party_name = $node->original->field_party_name['und'][0]['value'];
       $payment_term = $node->field_payment_terms['und'][0]['value'];
-      $og_payment_term = $node->original->field_payment_terms['und'][0]['value'];
       $credit_days = $node->field_credit_days['und'][0]['value'];
-      $og_credit_days = $node->original->field_credit_days['und'][0]['value'];
       $nid = $node->field_hul_code_reference['und'][0]['nid'];
-      $og_nid = $node->original->field_hul_code_reference['und'][0]['nid'];
       $dis_id = $node->uid;
       $api_type = 'location_master';
       $merchant_code = variable_get('merchant_code_conf', 'lakme');
-      if (!empty($party_code) && !empty($party_name) && ($party_code != $og_party_code || $hul_code != $og_hul_code || $party_name != $og_party_name || $payment_term != $og_payment_term || $credit_days != $og_credit_days || $nid != $og_nid)) {
-        $res = get_lat_long_and_area_code($nid);
-        $lat = $res[0]['field_hul_updated_lat_value'];
-        $long = $res[0]['field_hul_updated_long_value'];
-        $area_code = $res[0]['n1_title'];
+      $res = get_lat_long_and_area_code($nid);
+      $lat = $res[0]['field_hul_updated_lat_value'];
+      $long = $res[0]['field_hul_updated_long_value'];
+      $area_code = $res[0]['n1_title'];
 
-        $location_arr = array(array('party_code' => $party_code, 'party_name' => $party_name, 'location_type' => $location_type, 'merchant' => array(array('name' => $merchant_code))));
-        if (!empty($hul_code)) {
+      $location_arr = array(array('party_code' => $party_code, 'party_name' => $party_name, 'location_type' => $location_type, 'merchant' => array(array('name' => $merchant_code))));
+      if (!empty($hul_code)) {
           $location_arr[0]['hul_code'] = $hul_code;
-        }
-        if (!empty($lat)) {
+      }
+      if (!empty($lat)) {
           $location_arr[0]['latitude'] = $lat;
-        }
-        if (!empty($long)) {
+      }
+      if (!empty($long)) {
           $location_arr[0]['longitude'] = $long;
-        }
-        if (!empty($area_code)) {
+      }
+      if (!empty($area_code)) {
           $location_arr[0]['area_code'] = $area_code;
-        }
-        if (!empty($payment_term)) {
+      }
+      if (!empty($payment_term)) {
           $location_arr[0]['payment_term'] = $payment_term;
-        }
-        if (!empty($credit_days)) {
+      }
+      if (!empty($credit_days)) {
           $location_arr[0]['credit_days'] = $credit_days;
-        }
-        $location_json = json_encode($location_arr);
+      }
+      $location_json = json_encode($location_arr);
 
-        $sql_ins_id = outlet_master_api_log($party_code, $location_json, $api_type, $dis_id);
+      $sql_ins_id = outlet_master_api_log($party_code, $location_json, $api_type, $dis_id);
 
         $request_headers = array('Content-Type' => 'application/json', 'Authorization' => 'Token 2972f506c41448cb3456c1c074aed6102183aff9');
         $order_api_url = variable_get('outlet_master_api_url');
@@ -288,7 +296,6 @@ function moblity_outlet_api_cron() {
             ->condition('id', $val['id'], '=')
             ->execute();
         }
-      }
     }    
   }
 
