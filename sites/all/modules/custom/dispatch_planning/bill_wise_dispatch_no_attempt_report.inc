@@ -323,7 +323,8 @@ function bill_wise_dispatch_no_attempt_report_callback() {
           $query->condition('ad.res_status', $combined_bill_status, 'IN');  
           $query->condition('ad.delivery_pending_flag', 0, '=');
         }else{
-            $query->condition('ad.res_status', $bill_status, '=');  
+            $query->condition('ad.res_status', $bill_status, '='); 
+            $query->condition('ad.delivery_pending_flag', 0, '=');
         }
     }
     if (!empty($from_dispatch_date) && !empty($to_dispatch_date)) {
