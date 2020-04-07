@@ -23,10 +23,10 @@ class user_hierarchy_handler_term_hierarchy extends views_handler_field {
     function can_expose() {
         global $user;
         if (in_array("administrator", $user->roles) || in_array("central_distributor", $user->roles) || in_array("super_central_distributor", $user->roles) || in_array("sibling_central_distributor", $user->roles)) {
-            if (empty($_GET['facility_code']) && in_array("super_central_distributor", $user->roles)) {
+            /*if (empty($_GET['facility_code']) && in_array("super_central_distributor", $user->roles)) {
                 return FALSE;
             }
-
+            */
             return TRUE;
         }
         else {
@@ -95,19 +95,32 @@ class user_hierarchy_handler_term_hierarchy extends views_handler_field {
     // required for expose form  
     function exposed_form(&$form, &$form_state) {
         global $user;
-        if (in_array("administrator", $user->roles) || in_array("central_distributor", $user->roles) || in_array("super_central_distributor", $user->roles) || in_array("sibling_central_distributor", $user->roles)) {
-            //$distributor_ids = get_distributor_ids();
-            $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+        /*if (in_array("administrator", $user->roles) || in_array("central_distributor", $user->roles) || in_array("super_central_distributor", $user->roles) || in_array("sibling_central_distributor", $user->roles)) {
+            $distributor_ids = get_distributor_ids();
+            //$distributor_id = change_feeds_import_get_distributor_id($user->uid);
             //unset($distributor_ids[$distributor_id]);
             //$distributor_ids = array(''=>'All') + $distributor_ids;
-            if (in_array("super_central_distributor", $user->roles)) {
+            /*if (in_array("super_central_distributor", $user->roles)) {
                 $facility_code = $_GET['facility_code'];
                 // central Distributor ID of facility Code
                 $distributor_id = get_central_distributor_id_of_facility_code($facility_code);
             }
             $child_distributors = get_child_distributor_rsname($distributor_id);
-            $distributor_ids = array('0' => 'Select') + $child_distributors;
+            $distributor_ids = array('0' => 'Select') + $child_distributors;*/
+            //$distributor_ids = array('0' => 'Select') + $distributor_ids;
+        //}
+        if (in_array("administrator", $user->roles) || in_array("central_distributor", $user->roles) || in_array("super_central_distributor", $user->roles)|| in_array("sibling_central_distributor", $user->roles)) {
+            //$distributor_ids = get_distributor_ids();
+            $distributor_id = change_feeds_import_get_distributor_id($user->uid);
+            //unset($distributor_ids[$distributor_id]);
+            //$distributor_ids = array(''=>'All') + $distributor_ids;
+            $child_distributors = get_child_distributor_rsname();
+            $distributor_ids = array('' => 'Select') + $child_distributors;
         }
+        if (isset($_GET['user_hierarchy_values'])) {
+            $default_value = $_GET['user_hierarchy_values'];
+        }
+
         if (isset($_GET['user_hierarchy_values'])) {
             $default_value = $_GET['user_hierarchy_values'];
         }
