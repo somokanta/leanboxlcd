@@ -194,6 +194,7 @@ function bill_wise_delivery_attempt_report_form($form, &$form_state) {
     );
     
     $bill_status = array('' => '-Select-') + get_bill_status_from_api_table();
+    $bill_status = array_unique($bill_status);
     $form['bill_status'] = array(
         '#title' => t('Bill Status'),
         '#type' => 'select',
@@ -337,7 +338,13 @@ function bill_wise_delivery_attempt_report_callback() {
             $query->condition('ad.bill_number', $bill_numbers, 'IN');
         }
         if (!empty($bill_status)) {
-            $query->condition('ad.res_status', $bill_status, '=');
+            $combined_bill_status = explode(',',variable_get('combined_res_status'));
+            if (in_array($bill_status,$combined_bill_status)) {
+                $query->condition('ad.res_status', $combined_bill_status, 'IN');
+            }
+            else{
+                $query->condition('ad.res_status', $bill_status, '=');
+            }
         }
         $query->condition('ad.res_reason_for_failure', 'Outlet not attempted', '!=');
         $query->fields('ad', array('runsheet_number', 'dispatch_date', 'bill_number', 'bill_date', 'beat_name', 'party_name', 'fieldExecutiveName', 'res_status', 'res_reason_for_failure'));
