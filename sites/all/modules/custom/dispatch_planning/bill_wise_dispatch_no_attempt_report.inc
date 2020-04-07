@@ -373,6 +373,10 @@ function bill_wise_dispatch_no_attempt_report_callback() {
     $query->groupBy('ad.delivery_pending_flag');
     $result = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
 
+     //order by bill date
+     $bill_date = array_column($result, 'bill_date');
+     array_multisort($bill_date, SORT_DESC, $result);
+     
     $row = array();
 
     foreach ($result as $val) {
