@@ -45,7 +45,9 @@ class facility_code_filter_handler_term_hierarchy extends views_handler_field {
             $query->condition('facility_code.field_facility_code_tid', $selected_facility_code, '=');
             $query->fields('distributor', array('field_distributor_value'));
             $facility_distributor_ids = $query->execute()->fetchAllKeyed(0, 0); // will get child uids=>rs_name
-            if (!empty($facility_distributor_ids)) {
+            $facility_distributor_ids = $facility_distributor_ids?$facility_distributor_ids:array('');
+           // print_r($facility_distributor_ids);
+            //if (!empty($facility_distributor_ids)) {
                 $custom_tables = explode(',', variable_get('custom_tables'));
                 if (!empty($custom_tables)) {
                     if (false !== $table_key = array_search($view->base_table, $custom_tables)) {
@@ -56,7 +58,7 @@ class facility_code_filter_handler_term_hierarchy extends views_handler_field {
                     $this->query->add_where(0, 'node.uid', $facility_distributor_ids);
                 }
             }
-        }
+        //}
     }
 
     function render($values) {
