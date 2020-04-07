@@ -3247,25 +3247,25 @@ function dispatch_planning_form_views_exposed_form_alter(&$form, &$form_state) {
         $un_delivered = variable_get('undeliver_status');
         $delivery_pending = variable_get('current_delivery_status');
         $combined_bill_status = explode(',',variable_get('combined_res_status'));
-        if (!in_array('deliver',$combined_bill_status) && !empty($combined_bill_status[0])) {
+        if (!in_array('deliver',$combined_bill_status)) {
             $derived_outcome['deliver'] = $delivered;
         }
         else{
             $combined_status_deliver = 1;
         }
-        if (!in_array('partial_deliver',$combined_bill_status) && !empty($combined_bill_status[0])) {
+        if (!in_array('partial_deliver',$combined_bill_status)) {
             $derived_outcome['partial_deliver'] = $partial_delivered;
         }
         else{
             $combined_status_partial_deliver = 1;
         }
-        if (!in_array('undeliver',$combined_bill_status) && !empty($combined_bill_status[0])) {
+        if (!in_array('undeliver',$combined_bill_status) ) {
             $derived_outcome['undeliver'] = $un_delivered;
         }
         else{
             $combined_status_undeliver = 1;
         }
-        if (!in_array('delivery_pending',$combined_bill_status) && !empty($combined_bill_status[0])) {
+        if (!in_array('delivery_pending',$combined_bill_status)) {
             $derived_outcome['delivery_pending'] = $delivery_pending;
         }
         else{
