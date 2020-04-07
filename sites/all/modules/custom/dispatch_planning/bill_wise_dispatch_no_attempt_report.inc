@@ -27,8 +27,8 @@ function bill_wise_dispatch_no_attempt_report_form($form, &$form_state) {
     if (isset($_GET['party_code'])) {
         $party_code = $_GET['party_code'];
     }
-    if (!empty($_GET['bill_status'])) {
-        $bill_status_default = explode(",", $_GET['bill_status']);
+    if (isset($_GET['bill_status'])) {
+        $bill_status_default = $_GET['bill_status'];
     }
     if (isset($_GET['facility_code'])) {
         $default_facility_code = $_GET['facility_code'];
@@ -195,10 +195,11 @@ function bill_wise_dispatch_no_attempt_report_form($form, &$form_state) {
 
     $dp_status = variable_get('current_delivery_status');
     $bill_status = array('' => '-Select-') + get_bill_status_from_api_table() + array('delivery_pending' => $dp_status);
+    $bill_status = array_unique($bill_status);
     $form['bill_status'] = array(
         '#title' => t('Bill Status'),
         '#type' => 'select',
-        '#multiple' => true,
+//        '#multiple' => true,
         '#options' => $bill_status,
         '#default_value' => $bill_status_default,
         '#prefix' => '<div class="bill-status" style="display:inline-block;margin: 20px 101px 0 50px;">',
@@ -224,7 +225,7 @@ function bill_wise_dispatch_no_attempt_report_submit($form, &$form_state) {
     $bill_number = $form_state['values']['bill_number'];
     $party_code = $form_state['values']['party_code'];
     $bill_status = $form_state['values']['bill_status'];
-    $bill_status = implode(",", $bill_status);
+//    $bill_status = implode(",", $bill_status);
     $distributor_id = $form_state['values']['distributor_id'];
     $central_distributor_id = $form_state['values']['central_distributor_id'];
     $facility_code = $form_state['values']['facility_code'];
@@ -256,8 +257,8 @@ function bill_wise_dispatch_no_attempt_report_callback() {
     if (isset($_GET['party_code'])) {
         $party_code = $_GET['party_code'];
     }
-    if (!empty($_GET['bill_status'])) {
-        $bill_status = explode(",", $_GET['bill_status']);
+    if (isset($_GET['bill_status'])) {
+        $bill_status = $_GET['bill_status'];
     }
     if (arg(1) != 'export') {
         $form = drupal_render(drupal_get_form('bill_wise_dispatch_no_attempt_report_form'));
@@ -315,16 +316,14 @@ function bill_wise_dispatch_no_attempt_report_callback() {
         $query->condition('ad.party_code', $party_code, '=');
     }
     if (!empty($bill_status)) {
-        if (($key = array_search('delivery_pending', $bill_status)) !== false) {
-            if (count($bill_status) == 1) {
-                $query->condition('ad.delivery_pending_flag', 1, '=');
-            } else if (count($bill_status) > 1) {
-                unset($bill_status[$key]);
-                $query->condition('ad.delivery_pending_flag', 1, '=');
-                $query->condition('ad.res_status', $bill_status, 'IN');
-            }
-        } else {
-            $query->condition('ad.res_status', $bill_status, 'IN');
+        $combined_bill_status = explode(',',variable_get('combined_res_status'));
+        if ($bill_status == 'delivery_pending') {
+            $query->condition('ad.delivery_pending_flag', 1, '=');
+        }else if (in_array($bill_status,$combined_bill_status)) {           
+          $query->condition('ad.res_status', $combined_bill_status, 'IN');  
+          $query->condition('ad.delivery_pending_flag', 0, '=');
+        }else{
+            $query->condition('ad.res_status', $bill_status, '=');  
         }
     }
     if (!empty($from_dispatch_date) && !empty($to_dispatch_date)) {
@@ -334,11 +333,11 @@ function bill_wise_dispatch_no_attempt_report_callback() {
         $query->condition('ad.bill_date', array($from_bill_date, $to_bill_date), 'BETWEEN');
     }
     $query->condition('ad.attempted_status', 'No', '=');
-    $query->fields('ad', array('bill_number', 'bill_date', 'beat_name', 'party_name', 'dispatch_date'));
+    $query->fields('ad', array('bill_number', 'bill_date', 'beat_name', 'party_name', 'dispatch_date', 'party_code'));
     $query->addexpression("MAX((ad.runsheet_number))", 'runsheet_number');
     $query->addexpression("COUNT(DISTINCT(ad.runsheet_number))", 'count_dispatch_date');
     $query->addexpression("MAX(ad.res_status)", 'current_bill_status');
-    $query->addexpression("(CASE WHEN (ad.id = MAX(ad.id)) THEN ad.delivery_pending_flag END)", 'delivery_pending_flag');
+    $query->addexpression("(ad.delivery_pending_flag)", 'delivery_pending_flag');
 
     $query->join('node', 'n', 'n.title = ad.runsheet_number');
     $query->condition('n.type', 'dispatch_data', '=');
@@ -370,21 +369,25 @@ function bill_wise_dispatch_no_attempt_report_callback() {
     $query->fields('fc', array('field_facility_code_tid'));
     $query->groupBy('ad.bill_number');
     $query->groupBy('ad.distributor_id');
+    $query->groupBy('ad.delivery_pending_flag');
     $result = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
 
     $row = array();
 
     foreach ($result as $val) {
-
-        if ($val['current_bill_status'] == 'deliver' && $val['delivery_pending_flag'] == 0) {
-            $final_bill_status = variable_get('deliver_status'); //'Delivered';
-        } elseif ($val['current_bill_status'] == 'partial_deliver' && $val['delivery_pending_flag'] == 0) {
-            $final_bill_status = variable_get('partial_deliver_status'); //'Partial Delivered';
-        } elseif ($val['current_bill_status'] == 'undeliver' && !in_array('delivery_pending', $bill_status)) {
-            $final_bill_status = variable_get('undeliver_status'); //'Full Returned';
-        } else if ($val['delivery_pending_flag'] == 1 && in_array('delivery_pending', $bill_status)) {
+         if ($val['delivery_pending_flag'] == 1) {
             $final_bill_status = variable_get('current_delivery_status');
         }
+        if ($val['current_bill_status'] == 'deliver' && empty($val['delivery_pending_flag'])) {
+            $final_bill_status = variable_get('deliver_status'); //'Delivered';
+        }
+        if ($val['current_bill_status'] == 'partial_deliver' && empty($val['delivery_pending_flag'])) {
+            $final_bill_status = variable_get('partial_deliver_status'); //'Partial Delivered';
+        }
+        if ($val['current_bill_status'] == 'undeliver' && empty($val['delivery_pending_flag'])) {
+            $final_bill_status = variable_get('undeliver_status'); //'Full Returned';
+        }
+       
 
         $facility_code = get_facility_code_from_tid($val['field_facility_code_tid']);
         $row['order_date'] = date('d-M-y', $val['field_sr_new_bill_date_value']);
@@ -392,6 +395,7 @@ function bill_wise_dispatch_no_attempt_report_callback() {
         $row['bill_date'] = date('d-M-y', $val['bill_date']);
         $row['bill_number'] = $val['bill_number'];
         $row['beat_name'] = $val['beat_name'];
+        $row['party_code'] = $val['party_code'];
         $row['party_name'] = $val['party_name'];
         $row['runsheet_number'] = $val['runsheet_number'];
         $row['area_code'] = $val['title'];
@@ -402,7 +406,7 @@ function bill_wise_dispatch_no_attempt_report_callback() {
         $row['facility_code'] = $facility_code;
         $rows[] = $row;
     }
-    $header = array('Order date', 'Order Number', 'Bill Date', 'Bill No.', 'Beat name', 'Party name', 'Trip Id', 'Area code', 'Dispatch Date', 'Delivery Status', 'Count of dispatches', 'Distributor Name', 'Facility Code');
+    $header = array('Order date', 'Order Number', 'Bill Date', 'Bill No.', 'Beat name', 'Party Code','Party name', 'Trip Id', 'Area code', 'Dispatch Date', 'Delivery Status', 'Count of dispatches', 'Distributor Name', 'Facility Code');
 
     $per_page = 10;
     // Initialize the pager

@@ -4392,45 +4392,21 @@ function dispatch_planning_views_query_alter(&$view, &$query) {
             }
             //}
         }
-
-        // Select All
-        if (empty($bill_status[0])) { 
-                /*foreach ($query->where[1]['conditions'] as $key => &$val) {
-                   if ($val['field'] == 'dispatch_planning_api_data.res_status') {
-                    $val['value'][] = 'deliver';
-                    $val['value'][] = 'partial_deliver';
-                    $val['value'][] = 'undeliver';
-                    $val['value'][] = '';
-                }
-            }*/
-            
-        }
-        //print_r($operator);
-      // print_r($view->exposed_input['res_status_1']);
-        if (in_array('delivery_pending', $bill_status) && $operator!= 'not in') {
-                foreach ($query->where[1]['conditions'] as $key => &$val) {
+        if ($bill_status == 'delivery_pending') {
+            foreach ($query->where[1]['conditions'] as $key => &$val) {
                 if ($val['field'] == 'dispatch_planning_api_data.res_status') {
                     $val['value'][] = 'undeliver';
                 }
-                $query->add_where(0,"dispatch_planning_api_data.delivery_pending_flag", 1, '=');
+                $query->add_where(0, "dispatch_planning_api_data.delivery_pending_flag", 1, '=');
+            }
         }
-            //$query->add_where(0,"dispatch_planning_api_data.delivery_pending_flag = 1 && dispatch_planning_api_data.res_status = 'undeliver'");
-            //$query->add_where(0, 'dispatch_planning_api_data.res_status', 'undeliver');
-            //$query->group_operator = 'OR';
-           // $query->add_where(0, 'dispatch_planning_api_data.delivery_pending_flag', '1');
-           // $query->add_where(1, 'dispatch_planning_api_data.res_status', 'undeliver');
-            //$query->add_where(1, 'dispatch_planning_api_data.delivery_pending_flag','1');
-            //$meme_banners = array(13);
-            //$or_statement = db_or()->condition('dispatch_planning_api_data.delivery_pending_flag',1, '=');
-           /* $or = db_and()
-            ->condition('dispatch_planning_api_data.delivery_pending_flag', '1', '=')
-            ->condition('dispatch_planning_api_data.res_status', 'undeliver', '=');
-            $query->add_where(1,$or);*/
-           //$query->add_where(1, $or_statement);
+        // Will load delivery pending also need to fetch only undeliver+delivery_pending =0
+        if ($bill_status == 'undeliver') {
+            $query->add_where(0, "dispatch_planning_api_data.delivery_pending_flag", 0, '=');
         }
     }
 
-    // trip_bill_sku_return_report is not used currently use trip_bill_sku_return_report2.
+            // trip_bill_sku_return_report is not used currently use trip_bill_sku_return_report2.
 //  if (($view->name == 'trip_bill_sku_return_report') || ($view->name == 'trip_bill_sku_return_report' && $view->current_display == 'views_data_export_1')) {
 //    $join = new views_join();
 //    //$join->definition = array('table formula' => $query1, 'left_field' => 'bill_number', 'field' => 'bill_number', 'left_table' => 'dispatch_planning_api_data');
