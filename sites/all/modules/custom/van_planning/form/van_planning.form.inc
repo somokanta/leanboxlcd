@@ -2746,6 +2746,8 @@ function _create_van_submit($form, &$form_state) {
           }
           //$node->field_prevan_reference[LANGUAGE_NONE][0]['nid'] = $prevan_nid;
           $node->field_trip_id_reference[LANGUAGE_NONE][0]['nid'] = $trip_nid;
+          $node->field_parkstop_distance[LANGUAGE_NONE][0]['value'] = $_SESSION['park_stop'][$van]['parkstop_dist'] ? $_SESSION['park_stop'][$van]['parkstop_dist'] : '';
+          $node->field_parkstop_travel_time[LANGUAGE_NONE][0]['value'] = $_SESSION['park_stop'][$van]['parkstop_travel_time'] ? $_SESSION['park_stop'][$van]['parkstop_travel_time'] : '';
           node_save($node);
         }
         $all_area_codes = $disp_planning[$van]['area_codes'];
