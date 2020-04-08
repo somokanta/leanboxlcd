@@ -374,6 +374,8 @@ function save_parkstop_time_distance($res_decode, $van, $del_boy_actual = NULL) 
 
   $in_area = $res_decode->VanInAreaKMs;
   $vantime = $res_decode->VanInAreaTime;
+//  $Parkstop_distance = $res_decode->ParkstopDistance;
+//  $Parkstop_travel_time = $res_decode->ParkstopTravelTime;
 
   if (is_null($del_boy_actual)) {
     foreach ($vantime as $key => $val) {
@@ -389,6 +391,8 @@ function save_parkstop_time_distance($res_decode, $van, $del_boy_actual = NULL) 
   $_SESSION['park_stop'][$van]['del_boy'] = (int) $del_boy_actual;
   $_SESSION['park_stop'][$van]['time'] = round($time / 60, 2);
   $_SESSION['park_stop'][$van]['dist'] = round($in_area, 2);
+//  $_SESSION['park_stop'][$van]['parkstop_dist'] = $Parkstop_distance;
+//  $_SESSION['park_stop'][$van]['parkstop_travel_time'] = $Parkstop_travel_time;
 }
 
 function get_drs_bill_sequence_by_parkstop($res_decode, $van) {
@@ -402,10 +406,14 @@ function get_drs_bill_sequence_by_parkstop($res_decode, $van) {
 
   foreach ($stops as $key => $value) {
     $bills = $value->OptimalStop;
+    $parkstop_distance = $value->ParkstopDistance;
+    $parkstop_travel_time = $value->ParkstopTravelTime;
     $c = 0;
     if (array_key_exists($bills, $seq) === FALSE) {//ignor if present at other place
       $seq[$bills]['park_seq'] = ++$p . '.' . str_pad($c, 2, 0, STR_PAD_LEFT); //handle till .99
       $seq[$bills]['sequence'] = ++$n;
+      $seq[$bills]['ParkstopDistance'] = $parkstop_distance;
+      $seq[$bills]['ParkstopTravelTime'] = $parkstop_travel_time;
     }
     $completion_time = $value->ApproxCompletionTime;
     $clusterStops = $completion_time[$delivery_boy - 2]->ClusterStops;
