@@ -335,9 +335,9 @@ function bill_wise_dispatch_no_attempt_report_callback() {
     }
     $query->condition('ad.attempted_status', 'No', '=');
     $query->fields('ad', array('bill_number', 'bill_date', 'beat_name', 'party_name', 'dispatch_date', 'party_code'));
-    $query->addexpression("MAX((ad.runsheet_number))", 'runsheet_number');
+    $query->addexpression("MIN((ad.runsheet_number))", 'runsheet_number');
     $query->addexpression("COUNT(DISTINCT(ad.runsheet_number))", 'count_dispatch_date');
-    $query->addexpression("MAX(ad.res_status)", 'current_bill_status');
+    $query->addexpression("(ad.res_status)", 'current_bill_status');
     $query->addexpression("(ad.delivery_pending_flag)", 'delivery_pending_flag');
 
     $query->join('node', 'n', 'n.title = ad.runsheet_number');
@@ -373,6 +373,10 @@ function bill_wise_dispatch_no_attempt_report_callback() {
     $query->groupBy('ad.delivery_pending_flag');
     $result = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
 
+     //order by bill date
+     $bill_date = array_column($result, 'bill_date');
+     array_multisort($bill_date, SORT_DESC, $result);
+     
     $row = array();
 
     foreach ($result as $val) {
