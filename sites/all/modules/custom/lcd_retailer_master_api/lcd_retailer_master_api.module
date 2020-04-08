@@ -66,6 +66,8 @@ function lcd_retailer_master_api_node_presave($node) {
         $og_credit_days = $node->original->field_credit_days['und'][0]['value'];
         $nid = $node->field_hul_code_reference['und'][0]['nid'];
         $og_nid = $node->original->field_hul_code_reference['und'][0]['nid'];
+        $api_data['type'] = 'outlet_master';
+        $api_data['title'] = $party_code;        
         if (!empty($party_code) && ($party_code != $og_party_code || $hul_code != $og_hul_code || $party_name != $og_party_name || $payment_term != $og_payment_term || $credit_days != $og_credit_days || $nid != $og_nid)) {
             $api_data['type'] = 'outlet_master';
             $api_data['title'] = $party_code;
