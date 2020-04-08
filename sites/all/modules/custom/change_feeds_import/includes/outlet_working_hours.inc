@@ -716,6 +716,17 @@ function outlet_working_hours_submit($form, &$form_state) {
                     'distributor_id' => $distributor_id,
                 ));
                 $insert->execute();
+                $party_codes = get_party_code_of_hul_code ($hul_code, $distributor_id);
+                if(!empty($party_codes)) {
+                    db_update('mobility_server_api_retailer_cron')
+                        ->fields(array(
+                        'response_flag' => 0,
+                        'response_remarks' => '',
+                    ))
+                    ->condition('title', $party_codes, 'IN')
+                    ->execute();                   
+                }
+                
             } else if ($form_state['input']['field_container_' . $key]['outlet_checkbox'] == 0) {
                 $insert = db_insert('outlet_working_hours')
                         ->fields(array(
@@ -727,6 +738,16 @@ function outlet_working_hours_submit($form, &$form_state) {
                     'distributor_id' => $distributor_id,
                 ));
                 $insert->execute();
+                $party_codes = get_party_code_of_hul_code ($hul_code, $distributor_id);
+                if(!empty($party_codes)) {
+                    db_update('mobility_server_api_retailer_cron')
+                        ->fields(array(
+                        'response_flag' => 0,
+                        'response_remarks' => '',
+                    ))
+                    ->condition('title', $party_codes, 'IN')
+                    ->execute();                   
+                }                
             }
         }
     }
@@ -825,4 +846,27 @@ function get_special_working_hours($hul_code, $special_days) {
     $query->fields('wh', array('from_time', 'to_time'));
     $result = $query->execute()->fetchAll();
     return $result;
+}
+
+function get_party_code_of_hul_code($hul_code, $distributor_id) {
+    if (!empty($hul_code)) {
+        $party_codes = array();
+        $query = db_select('node', 'hul_master');
+        $query->condition('hul_master.type', 'hul_code_master');
+        $query->condition('hul_master.title', $hul_code);
+        $query->condition('hul_master.uid', $distributor_id);
+        $query->addfield('hul_master', 'nid', 'hul_code_nid');
+        $hul_code_nid = $query->execute()->fetchField();
+        if (!empty($hul_code_nid)) {
+            $party_codes = array();
+            $query = db_select('node', 'outlet_master');
+            $query->condition('outlet_master.type', 'outlet_master');
+            $query->condition('outlet_master.uid', $distributor_id);
+            $query->join('field_data_field_hul_code_reference', 'hul_code_ref', 'hul_code_ref.entity_id = outlet_master.nid');
+            $query->condition('hul_code_ref.field_hul_code_reference_nid', $hul_code_nid);
+            $query->fields('outlet_master', array('title'));
+            $party_codes = $query->execute()->fetchAllKeyed(0, 0);
+        }
+    }
+    return $party_codes;
 }
