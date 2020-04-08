@@ -255,10 +255,23 @@ function moblity_outlet_api_cron() {
       $lat = $res[0]['field_hul_updated_lat_value'];
       $long = $res[0]['field_hul_updated_long_value'];
       $area_code = $res[0]['n1_title'];
-
       $location_arr = array(array('party_code' => $party_code, 'party_name' => $party_name, 'location_type' => $location_type, 'merchant' => array(array('name' => $merchant_code))));
       if (!empty($hul_code)) {
           $location_arr[0]['hul_code'] = $hul_code;
+          $weekly_time = get_outlet_weekly_hours ($hul_code ,$dis_id);
+          if(!empty($weekly_time)) {
+              $daywise_time = [];
+              foreach ($weekly_time as $key => $hul_time_value) {
+                  $daywise_time['Mon'] = $hul_time_value['Monday'];
+                  $daywise_time['Tue'] = $hul_time_value['Tuesday'];
+                  $daywise_time['Wed'] = $hul_time_value['Wednesday'];
+                  $daywise_time['Thu'] = $hul_time_value['Thursday'];
+                  $daywise_time['Fri'] = $hul_time_value['Friday'];
+                  $daywise_time['Sat'] = $hul_time_value['Saturday'];
+                  $daywise_time['Sun'] = $hul_time_value['Sunday'];                  
+              }
+             $location_arr[0]['Outlet_working_hours'][] = $daywise_time;
+          }   
       }
       if (!empty($lat)) {
           $location_arr[0]['latitude'] = $lat;
@@ -310,3 +323,31 @@ function get_retailer_node_nid($node_type,$node_title,$distributor_id){
   $nid = $query->execute()->fetchField();
   return $nid;
 }
+
+function get_outlet_weekly_hours ($hul_code ,$dis_id) {
+     $outlet_weekly_time = [];
+    if(!empty($hul_code) && !empty($dis_id)) {
+        $query = db_select('outlet_working_hours', 'wh');
+        $query->condition('wh.hul_code', $hul_code, '=');
+        $query->condition('wh.distributor_id', $dis_id, '=');
+        $query->fields('wh', array('hul_code', 'days', 'from_time', 'to_time'));
+        $result_days = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+        
+        if(!empty($result_days)) {
+            foreach ($result_days as $key_days => $val_days) {
+              $days_time_value = $val_days['from_time'] . '-' . $val_days['to_time'];
+              if (!empty($val_days['days'])) {
+                if ($days_time_value == 'Closed-Closed') {
+                  $outlet_weekly_time[$val_days['hul_code']][$val_days['days']] = 'Closed';
+                }
+                else {
+                  $outlet_weekly_time[$val_days['hul_code']][$val_days['days']] = ltrim($outlet_weekly_time[$val_days['hul_code']][$val_days['days']] . ',' . $days_time_value, ',');
+                }
+              }
+            } 
+        }            
+    
+   }
+   return $outlet_weekly_time;
+}
+

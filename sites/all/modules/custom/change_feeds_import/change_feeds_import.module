@@ -4616,7 +4616,7 @@ function get_lat_long_and_area_code($nid) {
     $query->leftjoin('field_data_field_hul_updated_lat', 'lat', 'n.nid = lat.entity_id');
     $query->leftjoin('field_data_field_hul_updated_long', 'long1', 'n.nid = long1.entity_id');
     $query->leftjoin('field_data_field_area_code', 'area', 'n.nid = area.entity_id');
-    $query->join('node', 'n1', 'n1.nid = area.field_area_code_nid');
+    $query->leftjoin('node', 'n1', 'n1.nid = area.field_area_code_nid');
     $query->fields('lat', array('field_hul_updated_lat_value'));
     $query->fields('long1', array('field_hul_updated_long_value'));
     $query->fields('n1', array('title'));
