@@ -695,7 +695,7 @@ function outlet_working_hours_submit($form, &$form_state) {
     db_delete('outlet_working_hours')
             ->condition('hul_code', $hul_code)
             ->execute();
-
+    $party_codes = get_party_code_of_hul_code ($hul_code, $distributor_id);
     foreach ($days as $key => $value) {
         $field_container_value = $form_state['input']['field_container_' . $key];
         unset($field_container_value['outlet_checkbox']);
@@ -716,15 +716,21 @@ function outlet_working_hours_submit($form, &$form_state) {
                     'distributor_id' => $distributor_id,
                 ));
                 $insert->execute();
-                $party_codes = get_party_code_of_hul_code ($hul_code, $distributor_id);
                 if(!empty($party_codes)) {
-                    db_update('mobility_server_api_retailer_cron')
-                        ->fields(array(
-                        'response_flag' => 0,
-                        'response_remarks' => '',
-                    ))
-                    ->condition('title', $party_codes, 'IN')
-                    ->execute();                   
+                    $type = 'outlet_master';
+                    foreach ($party_codes as $key => $party_code) {
+                        $insert = db_insert('mobility_server_api_retailer_cron')
+                                ->fields(array(
+                                'title' => $party_code,
+                                'node_type' => $type,
+                                'distributor_id' => $distributor_id,
+                                'response_flag' => 0,
+                                'response_remarks' => '',
+                                'created_time' => REQUEST_TIME,  
+                        ));
+                        $insert->execute();   
+                    }
+                    unset($party_codes);
                 }
                 
             } else if ($form_state['input']['field_container_' . $key]['outlet_checkbox'] == 0) {
@@ -738,15 +744,23 @@ function outlet_working_hours_submit($form, &$form_state) {
                     'distributor_id' => $distributor_id,
                 ));
                 $insert->execute();
-                $party_codes = get_party_code_of_hul_code ($hul_code, $distributor_id);
+                
                 if(!empty($party_codes)) {
-                    db_update('mobility_server_api_retailer_cron')
-                        ->fields(array(
-                        'response_flag' => 0,
-                        'response_remarks' => '',
-                    ))
-                    ->condition('title', $party_codes, 'IN')
-                    ->execute();                   
+                    $type = 'outlet_master';
+                    foreach ($party_codes as $key => $party_code) {
+                        $insert = db_insert('mobility_server_api_retailer_cron')
+                                ->fields(array(
+                                'title' => $party_code,
+                                'node_type' => $type,
+                                'distributor_id' => $distributor_id,
+                                'response_flag' => 0,
+                                'response_remarks' => '',
+                                'created_time' => REQUEST_TIME, 
+                        ));
+                        $insert->execute();   
+                    }
+                    unset($party_codes);                    
+                    
                 }                
             }
         }
