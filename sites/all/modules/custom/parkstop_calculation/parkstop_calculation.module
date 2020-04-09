@@ -402,10 +402,14 @@ function get_drs_bill_sequence_by_parkstop($res_decode, $van) {
 
   foreach ($stops as $key => $value) {
     $bills = $value->OptimalStop;
+    $parkstop_distance = $value->ParkstopDistance;
+    $parkstop_travel_time = $value->ParkstopTravelTime;
     $c = 0;
     if (array_key_exists($bills, $seq) === FALSE) {//ignor if present at other place
       $seq[$bills]['park_seq'] = ++$p . '.' . str_pad($c, 2, 0, STR_PAD_LEFT); //handle till .99
       $seq[$bills]['sequence'] = ++$n;
+      $seq[$bills]['ParkstopDistance'] = $parkstop_distance;
+      $seq[$bills]['ParkstopTravelTime'] = $parkstop_travel_time;
     }
     $completion_time = $value->ApproxCompletionTime;
     $clusterStops = $completion_time[$delivery_boy - 2]->ClusterStops;

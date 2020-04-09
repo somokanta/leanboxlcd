@@ -61,6 +61,10 @@ function fetch_dispatch_planning_api_data($data) {
             }
       }
       
+      //attempted status
+      $not_attempted_status = variable_get('not_attempted_bill_status');
+      $not_attempted_reason_for_failure = variable_get('not_attempted_reason_for_failure');
+      
       $updated_bill_row_id = db_update('dispatch_planning_api_data') // Table name no longer needs {}
           ->fields(array(
             'res_runsheetNo' => isset($data['runsheetNo']) ? $data['runsheetNo'] : '',
@@ -111,6 +115,7 @@ function fetch_dispatch_planning_api_data($data) {
             'corrected_longitude' =>  isset($data['OutletDetail']['longitude']) ? $data['OutletDetail']['longitude'] : '',
             'corrected_latlong_timestamp' => isset($data['OutletDetail']['update_time']) ? ($data['OutletDetail']['update_time']) : 0,
             'corrected_latlong_images' => !empty($corrected_latlong_images) ? $corrected_latlong_images : '',
+            'attempted_status' => ($data['status'] == $not_attempted_status && strtolower($data['fieldData']['reason_for_failure']) == strtolower($not_attempted_reason_for_failure)) ? 'No' : 'Yes', //attempted_status
 
           ))
           ->condition('referenceNo', $data['referenceNumber'], '=')

@@ -23,7 +23,7 @@ function change_feeds_import_permission() {
         'title' => t('Delete Billing Data'),
         'description' => t('Delete Billing Data')
       ),
-     'Sibling Central Sales Register Upload' => array(
+      'Sibling Central Sales Register Upload' => array(
         'title' => t('Sibling Central Sales Register Upload'),
         'description' => t('Sibling Central Sales Register Upload')
       ),
@@ -31,7 +31,6 @@ function change_feeds_import_permission() {
         'title' => t('Sibling Central Custom Billing Upload'),
         'description' => t('Sibling Central Custom Billing Upload')
       ),
-   
     );
 }
 
@@ -496,8 +495,8 @@ function change_feeds_import_menu() {
       'page arguments' => array('master_api_config_form'),
       'access callback' => 'check_if_fr_role_user_admin',
     );
-    
-      $items['sibling/sales-register/import'] = array(
+
+    $items['sibling/sales-register/import'] = array(
       'title' => 'Import Sales Register Data',
       'description' => 'Import Sales Register Data Node',
       'page callback' => 'drupal_get_form',
@@ -505,7 +504,7 @@ function change_feeds_import_menu() {
       'access arguments' => array('Sibling Central Sales Register Upload'),
       'file' => 'form/sales_register_data_sibling.inc',
     );
-      // Upload form for billing data
+    // Upload form for billing data
     $items['sibling/billing_data/import'] = array(
       'title' => 'Import Billing Data',
       'description' => 'Import Billing Data Node',
@@ -513,7 +512,7 @@ function change_feeds_import_menu() {
       'page arguments' => array('change_feeds_import_billing_data_sibling_form'),
       'access arguments' => array('Sibling Central Custom Billing Upload'),
       'file' => 'form/upload_billing_data_sibling.inc',
-    );  
+    );
     return $items;
 }
 
@@ -639,12 +638,44 @@ function download_pdf2($args) {
                 $view->set_display('drs_report2');
                 $view->set_arguments(array($args));
                 $rendered_html = $view->render();
+                $outlet_table_row_data = outlet_daily_opearting_time_table($args,$distributor_id);
+                $below_header_array = array(
+                'Sr No' => 'Sr No',
+                'Trip Id' => 'Trip Id',
+                'Bill No' => 'Bill No',
+                'Party Name' => 'Party Name',
+                'Mon' => 'Mon',
+                'Tue' => 'Tue',
+                'Wed' => 'Wed',
+                'Thu' => 'Thu',
+                'Fri' => 'Fri',
+                'Sat' => 'Sat',
+                'Sun' => 'Sun'
+                );               
+                $outlet_time_table_header .= '<table class = "preview_table" width = "100%" cellspacing = "0" style = "font-family:arial; font-size: 13px; color:#000;" cellpadding = "5" border = "0" align = "center">
+                <thead>
+                <tr>
+                  <th align = "center"><h1><b>Outlet Daily Operating Timings  For :'.$args.'</b></h1></th>
+                </tr>
+                <tr>
+                  <td align = "left">Trip Id : '.$args.'</td>
+                  <td align = "right">Bill Count : '.count($outlet_table_row_data['row']).'</td>
+                </tr>
+                <tr>
+                  <td align = "left">Cashier Name: '.$outlet_table_row_data['cashier_name'].'</td>
+                </tr>         
+                </thead>
+                </table><br>';
+                $render .= $rendered_html;
+                $render .= "<pagebreak />";
+                $outlet_time_table .= get_html_table($below_header_array,$outlet_table_row_data['row']);
+                $render .= $outlet_time_table_header.$outlet_time_table;
                 $trip_id = $args;
 
                 // Remove xls image from pdf.
                 $xls_string = '<div class="feed-icon">
       <a href="/drs2-download/' . $trip_id . '"><img typeof="foaf:Image" class="img-responsive" src="' . $base_url . '/sites/all/modules/contrib/views_data_export/images/xls.png" alt="XLS" title="XLS" /></a>    </div>';
-                $render = str_replace($xls_string, "", $rendered_html);
+                $render = str_replace($xls_string, "", $render);
                 pdf_using_mpdf_api($render);
             }
             else {
@@ -1012,8 +1043,39 @@ function trip_2_form_submit($form, &$form_state) {
     }
     $view->set_display('drs_report2');
     $view->set_arguments(array($trip_id));
-    $rendered_html = $view->render();
-    $form_state['views_data'] = $rendered_html;
+    $rendered_html = $view->render();  
+    $outlet_table_row_data = outlet_daily_opearting_time_table($trip_id,$distributor_id);
+    // header outlet table
+    $below_header_array = array(
+    'Sr No' => array('data' => t('Sr No')),
+    'Trip Id' => array('data' => t('Trip Id')),
+    'Bill No' => array('data' => t('Bill No')),
+    'Party Name' => array('data' => t('Party Name')),
+    'Mon' => array('data' => t('Mon')),
+    'Tue' => array('data' => t('Tue')),
+    'Wed' => array('data' => t('Wed')),
+    'Thu' => array('data' => t('Thu')),
+    'Fri' => array('data' => t('Fri')),
+    'Sat' => array('data' => t('Sat')),
+    'Sun' => array('data' => t('Sun'))
+    );
+    $outlet_table_html = theme('table', array('header' => $below_header_array, 'rows' => $outlet_table_row_data['row'], 'attributes' => array('width' => '100%')));
+    $outlet_table_header = '<table class = "preview_table" width = "100%" cellspacing = "0" style = "font-family:arial; font-size: 13px; color:#000;" cellpadding = "5" border = "0" align = "center">
+        <thead>
+        <tr>
+          <h1 align = "center"><b>Outlet Daily Operating Timings  For :'.$trip_id.'</b></h1>
+        </tr>
+        <tr>
+          <h4 align = "left">Trip Id : '.$trip_id.'</h4>
+          <h4 align = "right">Bill Count : '.count($outlet_table_row_data['row']).'</h4>
+        </tr>
+        <tr>
+          <h4 align = "right">Cashier Name: '.$outlet_table_row_data['cashier_name'].'</h4>
+        </tr>         
+        </thead>
+        </table><br>';
+    $data  = $rendered_html.'<br><br>'.$outlet_table_header.$outlet_table_html;
+    $form_state['views_data'] = $data;
     $form_state['rebuild'] = TRUE;
 }
 
@@ -1649,7 +1711,7 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
         }
     }
     global $user;
-   //     watchdog('hul_code_area_code', '<pre>' . print_r($item, TRUE) . '</pre>');
+    //     watchdog('hul_code_area_code', '<pre>' . print_r($item, TRUE) . '</pre>');
     // Store distributor id in author in each node
     $distributor_id = change_feeds_import_get_distributor_id($user->uid);
     $logged_in_distributor_id = $distributor_id;
@@ -1663,7 +1725,7 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
                 return;
             }
             else {
-              
+
                 $distributor_id = validate_distributor_name(trim($item['distributor name']));
                 if (empty($distributor_id)) {
                     drupal_set_message("Invalid Distributor Name:" . $item['distributor name'], 'error');
@@ -2363,13 +2425,13 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
     }
 
     if ($entity->feeds_item->id == 'outlet_master') {
-        $party_code =  $entity->title;
+        $party_code = $entity->title;
         $entity->field_party_code[LANGUAGE_NONE][0]['value'] = $party_code;
         $sibling_distributor_ids = get_sibling_distributor_id($distributor_id);
-        $distributor_id_of_party_code = get_distributor_id_of_party_code($party_code,$sibling_distributor_ids);
-        if (!empty($distributor_id_of_party_code) && $distributor_id_of_party_code!=$distributor_id) {
-             drupal_set_message("Party Code:$party_code already exist.", 'error');
-             $entity->feeds_item->skip = TRUE;    
+        $distributor_id_of_party_code = get_distributor_id_of_party_code($party_code, $sibling_distributor_ids);
+        if (!empty($distributor_id_of_party_code) && $distributor_id_of_party_code != $distributor_id) {
+            drupal_set_message("Party Code:$party_code already exist.", 'error');
+            $entity->feeds_item->skip = TRUE;
         }
         $sales_day = strtolower($entity->field_sales_day[LANGUAGE_NONE][0]['value']);
         $delivery_day = strtolower($entity->field_delivery_day[LANGUAGE_NONE][0]['value']);
@@ -2509,16 +2571,15 @@ function change_feeds_import_feeds_presave($source, $entity, $item, $entity_id) 
             drupal_set_message("Payment Term field is required for Party code: $entity->title.", 'error');
             $entity->feeds_item->skip = TRUE;
         }
-        
         else {
-          $payment_term_exist = check_payment_term_exist($payment_term);
-          if (empty($payment_term_exist)) {
-            drupal_set_message("Please enter correct Payment Terms for Party Code: $entity->title.", 'error');
-            $entity->feeds_item->skip = TRUE;
-          }
+            $payment_term_exist = check_payment_term_exist($payment_term);
+            if (empty($payment_term_exist)) {
+                drupal_set_message("Please enter correct Payment Terms for Party Code: $entity->title.", 'error');
+                $entity->feeds_item->skip = TRUE;
+            }
         }
         $updated_by_name = $item['updated by'];
-        $updated_by_name_nid = get_nid_of_resource($updated_by_name,$central_distributor_id);
+        $updated_by_name_nid = get_nid_of_resource($updated_by_name, $central_distributor_id);
         $entity->field_updated_by['und'][0]['nid'] = $updated_by_name_nid;
     }
     //dispatch planning reason master
@@ -2777,7 +2838,6 @@ function change_feeds_import_node_presave($node) {
                 if (!empty($node->distributorid)) {
                     $node->uid = $node->distributorid;
                 }
-
             }
         }
     }
@@ -2966,15 +3026,15 @@ function change_feeds_import_form_alter(&$form, &$form_state, $form_id) {
             $list_help_text = t('Column <strong>SKU7 CODE</strong> is considered unique: only one item per SKU7 CODE value will be created.');
             $form['feeds']['FeedsCSVParser']['help']['list']['#items'][0] = $list_help_text;
         }
-        
+
         if ($form['#importer_id'] == 'payment_terms') {
-          $payment_terms_list = get_allowed_payment_terms(); //get allowed payment terms values
-          $payment_str .= implode(',', $payment_terms_list);
-          $form['actions']['#type'] = 'actions';
-          $form['actions']['message-field'] = array(
-            '#markup' => t('<br><br><div style="font-size:14px;">&nbsp Allowed Payment Terms Values : </div>' . '<b>' . $payment_str . '</b>'),
-          );
-        }        
+            $payment_terms_list = get_allowed_payment_terms(); //get allowed payment terms values
+            $payment_str .= implode(',', $payment_terms_list);
+            $form['actions']['#type'] = 'actions';
+            $form['actions']['message-field'] = array(
+              '#markup' => t('<br><br><div style="font-size:14px;">&nbsp Allowed Payment Terms Values : </div>' . '<b>' . $payment_str . '</b>'),
+            );
+        }
     }
     if ($form_id == 'user_register_form' || $form_id == 'user_profile_form') {
         $form['#validate'][] = 'registration_validate';
@@ -3155,7 +3215,7 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
         $distributor_ids[] = $central_distributor_id;
     }
     if (in_array($view->name, $central_distributor_master_views)) {
-       // $distributor_ids = array();
+        // $distributor_ids = array();
         $distributor_ids[] = $central_distributor_id;
     }
     $subadmin_uid = get_uid_by_role('sub_admin');
@@ -3183,9 +3243,9 @@ function change_feeds_import_views_query_alter(&$view, &$query) {
             }
         }
     }
-    
+
     // Subadmin Uid for sku7,lb product master views etc..
-    
+
     if (in_array($view->name, $admin_views) && !empty($distributor_id)) {
         $subadmin_distributor_id = get_uid_by_role('sub_admin');
         foreach ($query->table_queue as $key => $val) {
@@ -4093,11 +4153,11 @@ function hul_code_address_confirmation($form, &$form_state) {
                 }
                 $pt_ct_status = check_exsiting_record_for_party_code($party_code, $distributor_id);
                 $sibling_distributor_ids = get_sibling_distributor_id($distributor_id);
-                $party_code_distributor_id = get_distributor_id_of_party_code($party_code,$sibling_distributor_ids);
+                $party_code_distributor_id = get_distributor_id_of_party_code($party_code, $sibling_distributor_ids);
                 //watchdog('$party_code_distributor_id',print_r($party_code_distributor_id,TRUE));
-               // watchdog('$distributor_id',print_r($distributor_id,TRUE));
-                $pc_ct_flag =0;
-                if (empty($party_code_distributor_id)|| $party_code_distributor_id == $distributor_id) {
+                // watchdog('$distributor_id',print_r($distributor_id,TRUE));
+                $pc_ct_flag = 0;
+                if (empty($party_code_distributor_id) || $party_code_distributor_id == $distributor_id) {
                     $pc_ct_flag = 1;
                 }
                 if (empty($pt_ct_status) && !empty($pc_ct_flag)) {
@@ -4553,11 +4613,10 @@ function get_lat_long_and_area_code($nid) {
     $query->condition('n.type', 'hul_code_master');
     $query->condition('n.nid', $nid);
     $query->fields('n', array('title'));
-    $query->addTag('node_distributor_access');
     $query->leftjoin('field_data_field_hul_updated_lat', 'lat', 'n.nid = lat.entity_id');
     $query->leftjoin('field_data_field_hul_updated_long', 'long1', 'n.nid = long1.entity_id');
     $query->leftjoin('field_data_field_area_code', 'area', 'n.nid = area.entity_id');
-    $query->join('node', 'n1', 'n1.nid = area.field_area_code_nid');
+    $query->leftjoin('node', 'n1', 'n1.nid = area.field_area_code_nid');
     $query->fields('lat', array('field_hul_updated_lat_value'));
     $query->fields('long1', array('field_hul_updated_long_value'));
     $query->fields('n1', array('title'));
@@ -4565,7 +4624,7 @@ function get_lat_long_and_area_code($nid) {
     return $result;
 }
 
-function get_nid_of_resource($updated_by_name,$central_distributor_id) {
+function get_nid_of_resource($updated_by_name, $central_distributor_id) {
     $query = db_select('node', 'n');
     $query->condition('n.type', 'resource_master');
     $query->condition('n.uid', $central_distributor_id);
@@ -4902,61 +4961,59 @@ function master_api_config_form($form, $form_state) {
 }
 
 function validate_distributor_names($distributor_names) {
-    $distributor_id = $central_login = $sibling_central_login =0;
+    $distributor_id = $central_login = $sibling_central_login = 0;
     global $table_name;
     global $table_column;
     global $user;
     $logged_in_distributor_id = change_feeds_import_get_distributor_id($user->uid);
     if (in_array('central_distributor', $user->roles)) {
         $central_distributor_id = $logged_in_distributor_id;
-        $child_distributor_ids  = get_child_distributor_ids($central_distributor_id);
+        $child_distributor_ids = get_child_distributor_ids($central_distributor_id);
         $central_login = 1;
     }
     if (in_array('sibling_central_distributor', $user->roles)) {
         $sibling_central_distributor_id = $logged_in_distributor_id;
-        $sibling_child_distributor_ids  = get_sibling_child_distributor_ids($sibling_central_distributor_id);
+        $sibling_child_distributor_ids = get_sibling_child_distributor_ids($sibling_central_distributor_id);
         $sibling_central_login = 1;
     }
     if (!empty($distributor_names)) {
         $query = db_select($table_name, 'dn');
         $query->join('field_data_field_distributor', 'distributor_id', 'distributor_id.entity_id=dn.entity_id');
-        $query->condition("dn.$table_column", $distributor_names,'IN');
+        $query->condition("dn.$table_column", $distributor_names, 'IN');
         // Fetching central logged user's child
         if (!empty($central_login)) {
-            $query->condition("dn.entity_id", $child_distributor_ids,'IN');
+            $query->condition("dn.entity_id", $child_distributor_ids, 'IN');
         }
         if (!empty($sibling_central_login)) {
-            $query->condition("dn.entity_id", $sibling_child_distributor_ids,'IN');
+            $query->condition("dn.entity_id", $sibling_child_distributor_ids, 'IN');
         }
         //$query->fields('distributor_id', array('field_distributor_value'));
         //$query->fields('dn', array($table_column));
         $query->addExpression("LOWER(dn.$table_column)", 'distributor_name');
         if ($sibling_central_login) {
             // Will return multiple child distributorids 
-            $distributor_id = $query->execute()->fetchAllKeyed(0,0);
+            $distributor_id = $query->execute()->fetchAllKeyed(0, 0);
         }
         else {
             $distributor_id = $query->execute()->fetchField();
         }
-        
     }
     return $distributor_id;
 }
 
-
 function validate_distributor_name($distributor_name) {
-    $distributor_id = $central_login = $sibling_central_login =0;
+    $distributor_id = $central_login = $sibling_central_login = 0;
     global $table_name;
     global $table_column;
     global $user;
     if (in_array('central_distributor', $user->roles)) {
         $central_distributor_id = change_feeds_import_get_distributor_id($user->uid);
-        $child_distributor_ids  = get_child_distributor_ids($central_distributor_id);
+        $child_distributor_ids = get_child_distributor_ids($central_distributor_id);
         $central_login = 1;
     }
     if (in_array('sibling_central_distributor', $user->roles)) {
         $sibling_central_distributor_id = change_feeds_import_get_distributor_id($user->uid);
-        $sibling_child_distributor_ids  = get_sibling_child_distributor_ids($sibling_central_distributor_id);
+        $sibling_child_distributor_ids = get_sibling_child_distributor_ids($sibling_central_distributor_id);
         $sibling_central_login = 1;
     }
     if (!empty($distributor_name)) {
@@ -4965,20 +5022,19 @@ function validate_distributor_name($distributor_name) {
         $query->condition("dn.$table_column", $distributor_name);
         // Fetching central logged user's child
         if (!empty($central_login)) {
-            $query->condition("dn.entity_id", $child_distributor_ids,'IN');
+            $query->condition("dn.entity_id", $child_distributor_ids, 'IN');
         }
         if (!empty($sibling_central_login)) {
-            $query->condition("dn.entity_id", $sibling_child_distributor_ids,'IN');
+            $query->condition("dn.entity_id", $sibling_child_distributor_ids, 'IN');
         }
         $query->fields('distributor_id', array('field_distributor_value'));
         if ($sibling_central_login) {
             // Will return multiple child distributorids 
-            $distributor_id = $query->execute()->fetchAllKeyed(0,0);
+            $distributor_id = $query->execute()->fetchAllKeyed(0, 0);
         }
         else {
             $distributor_id = $query->execute()->fetchField();
         }
-        
     }
     return $distributor_id;
 }
@@ -5158,7 +5214,7 @@ function get_distributor_id_of_bills($bill_numbers, $sibling_distributor_ids) {
         $query->condition('n.title', $bill_numbers, 'IN');
         $query->fields('n', array('title'));
         $query->fields('n', array('uid'));
-        $res = $query->execute()->fetchAllKeyed(0,1);
+        $res = $query->execute()->fetchAllKeyed(0, 1);
     }
     return $res;
 }
@@ -5172,10 +5228,11 @@ function get_distributor_id_of_hul_codes($hul_codes, $sibling_distributor_ids) {
         $query->condition('n.title', $hul_codes, 'IN');
         $query->fields('n', array('title'));
         $query->fields('n', array('uid'));
-        $res = $query->execute()->fetchAllKeyed(0,1);
+        $res = $query->execute()->fetchAllKeyed(0, 1);
     }
     return $res;
 }
+
 function get_distributor_id_of_party_code($party_code, $sibling_distributor_ids) {
     $distributor_id = 0;
     if (!empty($party_code) && !empty($sibling_distributor_ids)) {
@@ -5196,10 +5253,11 @@ function check_same_party_code_exist_for_sibling($party_code, $sibling_distribut
         $query->condition('n.uid', $sibling_distributor_ids, 'IN');
         $query->condition('n.title', $party_code, '=');
         $query->fields('n', array('uid'));
-        $distributor_ids = $query->execute()->fetchAllKeyed(0,0);
+        $distributor_ids = $query->execute()->fetchAllKeyed(0, 0);
     }
     return count($distributor_ids);
 }
+
 function check_same_bill_number_exist_for_sibling($bill_number, $sibling_distributor_ids) {
     if (!empty($bill_number) && !empty($sibling_distributor_ids)) {
         $query = db_select('node', 'n');
@@ -5207,7 +5265,7 @@ function check_same_bill_number_exist_for_sibling($bill_number, $sibling_distrib
         $query->condition('n.uid', $sibling_distributor_ids, 'IN');
         $query->condition('n.title', $bill_number, '=');
         $query->fields('n', array('uid'));
-        $distributor_ids = $query->execute()->fetchAllKeyed(0,0);
+        $distributor_ids = $query->execute()->fetchAllKeyed(0, 0);
     }
     return count($distributor_ids);
 }
@@ -5221,27 +5279,27 @@ function get_all_facility_codes() {
     return $facility_codes;
 }
 
-function check_payment_term_exist($pay_term){
-  $res = '';
-  if(!empty($pay_term)){
-    $type = 'payment_terms';
-    $query = db_select('node','n');
-    $query->join('field_data_field_payment_term','pay_terms','n.nid = pay_terms.entity_id');
-    $query->fields('pay_terms',array('field_payment_term_value'));
-    $query->condition('pay_terms.field_payment_term_value' ,$pay_term, '=');
-    $query->condition('pay_terms.bundle' ,$type, '=');
-    $res = $query->execute()->fetchField();
-  }
-  return $res; 
+function check_payment_term_exist($pay_term) {
+    $res = '';
+    if (!empty($pay_term)) {
+        $type = 'payment_terms';
+        $query = db_select('node', 'n');
+        $query->join('field_data_field_payment_term', 'pay_terms', 'n.nid = pay_terms.entity_id');
+        $query->fields('pay_terms', array('field_payment_term_value'));
+        $query->condition('pay_terms.field_payment_term_value', $pay_term, '=');
+        $query->condition('pay_terms.bundle', $type, '=');
+        $res = $query->execute()->fetchField();
+    }
+    return $res;
 }
 
-function get_allowed_payment_terms(){
+function get_allowed_payment_terms() {
     $res = '';
     $type = 'payment_terms';
-    $query = db_select('node','n');
-    $query->join('field_data_field_payment_term','pay_terms','n.nid = pay_terms.entity_id');
-    $query->fields('pay_terms',array('field_payment_term_value'));
-    $query->condition('pay_terms.bundle' ,$type, '=');
+    $query = db_select('node', 'n');
+    $query->join('field_data_field_payment_term', 'pay_terms', 'n.nid = pay_terms.entity_id');
+    $query->fields('pay_terms', array('field_payment_term_value'));
+    $query->condition('pay_terms.bundle', $type, '=');
     $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC | PDO::FETCH_UNIQUE);
     return array_keys($res);
 }
@@ -5254,3 +5312,91 @@ function get_facility_code_from_tid($facility_tid) {
     
     return $facility_code;
 }
+
+function outlet_daily_opearting_time_table ($trip_id,$distributor_id) {
+    $outlet_table_data = [];
+    if(!empty($trip_id) && !empty($distributor_id)) {
+        $query = db_select('node', 'n');
+        $query->condition('n.type','sales_register_data');
+        $query->join('field_data_field_trip_id_reference', 'trip_id_ref', 'trip_id_ref.entity_id = n.nid');
+        $query->condition('n.uid', $distributor_id);
+            // trip id
+        $query->join('node', 'dispatch_data', 'trip_id_ref.field_trip_id_reference_nid = dispatch_data.nid');
+        $query->condition('dispatch_data.uid', $distributor_id);
+        $query->condition('dispatch_data.title', $trip_id);
+        // cashier name
+        $query->join('field_data_field_cashier_name', 'cashier_name', 'cashier_name.entity_id = dispatch_data.nid');
+
+
+        // party code
+        $query->leftjoin('field_data_field_party_code_reference', 'party_code_ref', 'party_code_ref.entity_id = n.nid');
+        $query->leftjoin('node', 'outlet_data', 'outlet_data.nid = party_code_ref.field_party_code_reference_nid');//outlet data join
+
+        //party name
+        $query->leftjoin('field_data_field_party_name', 'party_name', 'party_name.entity_id = outlet_data.nid');//outlet data join
+        $query->condition('outlet_data.uid', $distributor_id);
+
+        // hul code
+        $query->leftjoin('field_data_field_hul_code_reference', 'hul_code_ref', 'hul_code_ref.entity_id = outlet_data.nid');
+        $query->leftjoin('node', 'hul_data', 'hul_data.nid = hul_code_ref.field_hul_code_reference_nid');
+        $query->condition('hul_data.uid', $distributor_id);
+        // days 
+        $query->join('outlet_working_hours', 'working_hours', 'working_hours.hul_code = hul_data.title'); // hul code
+        $query->condition('working_hours.distributor_id', $distributor_id);
+        $query->addfield('n', 'title', 'bill_number');
+        $query->addfield('dispatch_data', 'title', 'trip_id');
+        $query->addfield('party_name', 'field_party_name_value', 'party_name');
+        $query->addfield('hul_data', 'title', 'hul_code');
+        $query->addfield('cashier_name', 'field_cashier_name_value', 'cashier_name');
+        $query->addfield('working_hours', 'days', 'days');
+        $query->addfield('working_hours', 'from_time', 'from_time');
+        $query->addfield('working_hours', 'to_time', 'to_time');//updated_time
+        $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+        $row = [];
+        if(!empty($res)) {
+            $sr_no = 0;
+            foreach ($res as $key => $val_days) {
+                $days_time_value = $val_days['from_time'] . '-' . $val_days['to_time'];
+                if (!empty($val_days['days'])) {
+                    if(empty($row[$val_days['bill_number']]['sr_no'])) {
+                        $row[$val_days['bill_number']]['sr_no'] = ++$sr_no;  
+                    }
+                    $row[$val_days['bill_number']]['trip_id'] = $val_days['trip_id'];
+                    $row[$val_days['bill_number']]['bill_number'] = $val_days['bill_number'];
+                    $row[$val_days['bill_number']]['party_name'] = $val_days['party_name'];
+                    if ($days_time_value == 'Closed-Closed') {
+                      $row[$val_days['bill_number']][$val_days['days']] = 'Closed';
+                    }
+                    else {
+                      $row[$val_days['bill_number']][$val_days['days']] = ltrim($row[$val_days['bill_number']][$val_days['days']] . ',' . $days_time_value, ',');
+                    }
+                       
+                }
+            }
+        }
+        $outlet_table_data['row'] = $row;
+        $outlet_table_data['cashier_name'] = $val_days['cashier_name'];
+        return $outlet_table_data;
+    }
+}
+
+function get_html_table($headers, $datas) {
+  if (!empty($headers) && !empty($datas)) {
+    $border_class = " style='border:0.1pt solid black;border-collapse: collapse;'";
+    $table = '<table ' . $border_class . ' cellspadding="0" cellspacing="0"><tr>';
+    foreach ($headers as $key => $value) {
+      $table .= '<th' . $border_class . '>' . $value . '</th>';
+    }
+    $table .= '</tr>';
+    foreach ($datas as $key => $row) {
+      $table .= '<tr>';
+      foreach ($row as $row_id => $row_value) {
+        $table .= '<td' . $border_class . '>' . $row_value . '</td>';
+      }
+      $table .= '</tr>';
+    }
+
+    $table .= '</table>';
+  }
+  return $table;
+ }

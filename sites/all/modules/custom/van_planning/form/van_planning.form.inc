@@ -583,6 +583,8 @@ function _van_planning_callback_form($form, &$form_state) {
             $vanwise_all_latlong_array[$bill]['sequence'] = $bill_sequencing_array[$bill]['sequence'];
             $total_bill_array[$bill]['sequence'] = $bill_sequencing_array[$bill]['sequence'];
             $total_bill_array[$bill]['park_seq'] = $bill_sequencing_array[$bill]['park_seq'];
+            $total_bill_array[$bill]['ParkstopDistance'] = $bill_sequencing_array[$bill]['ParkstopDistance'];
+            $total_bill_array[$bill]['ParkstopTravelTime'] = $bill_sequencing_array[$bill]['ParkstopTravelTime'];
             //$total_bill_array[$bill]['prev_travel_time'] = $bill_sequencing_array[$bill]['prev_travel_time'];
             //$total_bill_array[$bill]['prev_distance'] = $bill_sequencing_array[$bill]['prev_distance'];
           }
@@ -2731,6 +2733,8 @@ function _create_van_submit($form, &$form_state) {
           if (!empty($form_state['time_dist'][$van]['dist']) || !empty($form_state['time_dist'][$van]['time'])) {
             $node->field_bill_sequence[LANGUAGE_NONE][0]['value'] = $value2['park_seq'] ? $value2['park_seq'] : $count; // $count has no use. kept for safety
             $node->field_drs_sequence[LANGUAGE_NONE][0]['value'] = $value2['sequence'] ? $value2['sequence'] : $count++; //Increament the counter once
+            $node->field_parkstop_distance[LANGUAGE_NONE][0]['value'] = $value2['ParkstopDistance'] ? $value2['ParkstopDistance'] : '0';
+            $node->field_parkstop_travel_time[LANGUAGE_NONE][0]['value'] = $value2['ParkstopTravelTime'] ? $value2['ParkstopTravelTime'] : '0';
             // calculate time and distance
             //$node->field_prev_arrival_time[LANGUAGE_NONE][0]['value'] = $value2['prev_travel_time'];
             //$node->field_prev_distance[LANGUAGE_NONE][0]['value'] = $value2['prev_distance'];

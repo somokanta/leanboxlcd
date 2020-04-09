@@ -861,7 +861,6 @@ function hul_code_form($form, &$form_state, $type) {
   }
   return $form;
 }
-
 function reverse_geocode_trip_wise_form($form, &$form_state) {
 
   $header_array = array(
@@ -949,6 +948,7 @@ function reverse_geocode_trip_wise_form($form, &$form_state) {
 
   return $form;
 }
+
 
 function trip_filter_validate($form, &$form_state) {
   $trip_id = $form_state['values']['trip_id'];

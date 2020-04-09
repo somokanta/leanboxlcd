@@ -270,7 +270,7 @@ function dispatch_planning_menu() {
    $items['bill/pending/autocomplete/%/%'] = array(
     'title' => 'bill_pending_autocomplete',
     'page callback' => 'bill_pending_autocomplete',
-    'page arguments' => array(3,4),
+      'page arguments' => array(3, 4),
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
@@ -316,12 +316,13 @@ function dispatch_planning_menu() {
     'file' => 'delete_fareye_dp_id_form.inc',
   );
 
-// $items['dispatch-planning-cron'] = array(
-//    'title' => '',
-//    'page callback' => 'dispatch_planning_cron_callback',
-//    'access callback' => TRUE,
-//    'type' => MENU_NORMAL_ITEM,
-//  );
+    $items['dispatch-planning-cron'] = array(
+      'title' => '',
+      'page callback' => 'dispatch_planning_cron_callback',
+      'access callback' => TRUE,
+      'type' => MENU_NORMAL_ITEM,
+    );
+
   $items['loose-picking-sheet'] = array(
     'title' => 'Loose PICKING SHEET',
     'page callback' => 'drupal_get_form',
@@ -618,20 +619,19 @@ function dispatch_planning_menu() {
     'access arguments' => array('Distributor Upload File'),
   );
   
-  // prashans code
-//  $items['admin/config/van-planning-to-sdr-config'] = array(
-//      'title' => 'Setting Form For Van Planning APIs to SDR App Config',
-//      'page callback' => 'drupal_get_form',
-//      'page arguments' => array('van_planning_api_to_sdr_config_form'),
-//      'access callback' => 'check_if_fr_role_user_admin',
-//    );
+    $items['admin/config/van-planning-to-sdr-config'] = array(
+      'title' => 'Setting Form For Van Planning APIs to SDR App Config',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('van_planning_api_to_sdr_config_form'),
+      'access callback' => 'check_if_fr_role_user_admin',
+    );
   
-//  $items['van-planning-sdr-cron'] = array(
-//    'title' => 'Van Planning APIs to SDR App Cron',
-//    'page callback' => 'sdr_api_cron',
-//    'access callback' => TRUE,
-//    'type' => MENU_CALLBACK,
-//  );
+    $items['van-planning-sdr-cron'] = array(
+      'title' => 'Van Planning APIs to SDR App Cron',
+      'page callback' => 'sdr_api_cron',
+      'access callback' => TRUE,
+      'type' => MENU_CALLBACK,
+    );
 
   $items['bill-wise-delivery-status-report'] = array(
     'title' => 'Bill wise Delivery Status report',
@@ -655,6 +655,39 @@ function dispatch_planning_menu() {
       'page arguments' => array('global_config_form'),
       'access callback' => 'check_if_fr_role_user_admin',
     );
+
+    $items['bill-wise-dispatch-no-attempt-report'] = array(
+      'title' => 'Bill-wise Dispatch with No Attempt report',
+      'page callback' => array('bill_wise_dispatch_no_attempt_report_callback'),
+      'access callback' => TRUE,
+      'type' => MENU_CALLBACK,
+      'file' => 'bill_wise_dispatch_no_attempt_report.inc',
+    );
+
+    $items['bill-wise-dispatch-no-attempt-report/export'] = array(
+      'title' => 'Bill-wise Dispatch with No Attempt report Export',
+      'description' => 'Bill-wise Dispatch with No Attempt report Export',
+      'page callback' => array('bill_wise_dispatch_no_attempt_report_export'),
+      'file' => 'bill_wise_dispatch_no_attempt_report.inc',
+      'access callback' => TRUE,
+    );
+
+    $items['bill-wise-delivery-attempt-report'] = array(
+      'title' => 'Bill wise Delivery Attempt report',
+      'page callback' => array('bill_wise_delivery_attempt_report_callback'),
+      'access callback' => TRUE,
+      'type' => MENU_CALLBACK,
+      'file' => 'bill_wise_delivery_attempt_report.inc',
+    );
+
+    $items['bill-wise-delivery-attempt-report/export'] = array(
+      'title' => 'Bill wise Delivery Attempt report Export',
+      'description' => 'Bill wise Delivery Attempt report Export',
+      'page callback' => array('bill_wise_delivery_attempt_report_export'),
+      'file' => 'bill_wise_delivery_attempt_report.inc',
+      'access callback' => TRUE,
+    );
+
   return $items;
 }
 
@@ -1286,43 +1319,71 @@ function dispatch_planning_views_api() {
   );
 }
 
-/**
- * dispatch planning cron page callback function
- */
 function dispatch_planning_cron_callback() {
+  $thread = variable_get('dispatch_thread', '3'); // number of thread 
+  $length = variable_get('dispatch_bill_per_thread', '50');
+  $total = $thread * $length;
+    
   $query = db_select('dispatch_planning_api_log', 'a');
-  $query->fields('a', array('request_data', 'id'));
+  $query->fields('a', array('id'));
   $query->condition('a.request_flag', 0);
   $query->condition('a.api_type', 'dispatch_planning');
+  $res = $query->range(0,$total)->execute()->fetchCol();
 
-  $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+  //Multi thread
+    $script_name = '/leanbox_dispatch_planning_cron_process.php';
+    $php_script = getcwd() . $script_name;
 
+    /* * **** Script for push order to dispatch APP */
+    if ($res) {
+        watchdog('test_abhi_multithread dispatch cron', '<pre>' . print_r($res, TRUE) . '</pre>');
+        $chunk = array_chunk($res, $length);
+        foreach ($chunk as $value) {
+            $param = implode(',', $value);
+            $str = "nohup nice php -f '$php_script' '$param' > /dev/null &";
+            shell_exec($str);
+        }
+    }
+   //End
+
+  return "1";
+}
+
+function dispatch_planning_cron_process($res){
   if (!empty($res)) {
     foreach ($res as $key => $val) {
-
 // Write logic to hit API Here
       $json_api_data = $val['request_data'];
       $sql_ins_id = $val['id'];
+      $trip_id = $val['trip_id'];
+        //Delivery App changes as per trips from conf
+        $trips = variable_get('new_trip_ids');
+        $trip_ids = explode(',', $trips);
 
+        if (!in_array($trip_id, $trip_ids)) { 
+          $request_headers = array('Content-Type' => 'application/json', 'Authorization' => 'Token 2972f506c41448cb3456c1c074aed6102183aff9');
+          $order_api_url = variable_get('new_dispatch_uri_settings', 'http://13.127.160.72:8080/api/order/v1/manifest/');
+        }
+        else {
       $request_headers = array('Content-Type' => 'application/json');
-      $order_api_url = variable_get('dispatch_uri_settings');
-      $options = array('headers' => $request_headers, 'method' => 'POST', 'data' => $json_api_data);
-      $response = drupal_http_request($order_api_url, $options);
+          $order_api_url = variable_get('dispatch_uri_settings', 'https://staging.fareye.co/api/v1/job?api_key=l1S6xa5mnxUXDuqv12q7lerLBL9l1ICq');
+        }
+        //$request_headers = array('Content-Type' => 'application/json');
+        //$order_api_url = 'https://staging.fareye.co/api/v1/job?api_key=l1S6xa5mnxUXDuqv12q7lerLBL9l1ICq';
+        //$order_api_url = variable_get('dispatch_uri_settings', 'https://staging.fareye.co/api/v1/job?api_key=l1S6xa5mnxUXDuqv12q7lerLBL9l1ICq');
+        $options = array('headers' => $request_headers, 'method' => 'POST', 'data' => $json_api_data, 'timeout'=> 300);
+        $response_data = drupal_http_request($order_api_url, $options);
 
-      $response_data = $response->data;
+        $response_data = $response_data->data;
       if ($response_data) {
         $api_success = json_decode($response_data);
-        $api_success = (isset($api_success->failCount) && $api_success->failCount == 0) ? 1 : 0;
+            $api_success = ($api_success->failCount == 0) ? 1 : 0;
         // create response log entry
         dispatch_planning_api_log_update($response_data, $sql_ins_id, $api_success);
       }
-      else {
-        //dpm($response);
       }
     }
   }
-  return "1";
-}
 
 /**
  * @param type $form
@@ -1333,10 +1394,9 @@ function dispatch_planning_form($form, &$form_state) {
   global $user;
   $distributor_id = change_feeds_import_get_distributor_id($user->uid); 
   $logged_in_distributor_id = $distributor_id;
-  if(empty(strpos(request_uri(),'system/ajax'))) {
-   $request_uri = ltrim(request_uri(),'/');
+    if (empty(strpos(request_uri(), 'system/ajax'))) {
+        $request_uri = ltrim(request_uri(), '/');
    $form_state['request_uri'] = $request_uri;
-   
   } 
   $form['#prefix'] = '<div id="itemlist-div">';
   $form['#suffix'] = '</div>';
@@ -1362,7 +1422,7 @@ function dispatch_planning_form($form, &$form_state) {
       '#title' => t('Select Distributor Name'),
       '#type' => 'select',
       '#options' => $distributor_ids,
-      '#default_value'=>$distributor_id_from_url?$distributor_id_from_url:$default_distributor_id,
+          '#default_value' => $distributor_id_from_url ? $distributor_id_from_url : $default_distributor_id,
       '#required' => TRUE,
       '#ajax' => array(
       'wrapper' => 'itemlist-div',
@@ -1371,7 +1431,7 @@ function dispatch_planning_form($form, &$form_state) {
       'effect' => 'fade',
     ),
     );
-    $distributor_id = $form_state['input']['distributor_id']?$form_state['input']['distributor_id']:$distributor_id_from_url;
+        $distributor_id = $form_state['input']['distributor_id'] ? $form_state['input']['distributor_id'] : $distributor_id_from_url;
   }
   // Child distributor logged in
   else {
@@ -1423,13 +1483,13 @@ function dispatch_planning_form($form, &$form_state) {
   );
   if (isset($form_state['triggering_element']) && ($form_state['triggering_element']['#name'] == 'loading_date')) {
     if (!empty($form_state['values']['loading_date']) && is_string($form_state['values']['loading_date'])) {
-      $form['van']['#options'] = get_modified_van_from_loading_date(strtotime($form_state['values']['loading_date']),$form_state['values']['distributor_id']);
+            $form['van']['#options'] = get_modified_van_from_loading_date(strtotime($form_state['values']['loading_date']), $form_state['values']['distributor_id']);
     }
   }
 
   if (isset($form_state['triggering_element']) && ($form_state['triggering_element']['#name'] == 'van')) {
     if (!empty($form_state['values']['van'])) {
-      $form['beat_name']['#options'] = array('' => 'All') + get_beat_name_from_loading_date_and_van(strtotime($form_state['values']['loading_date']), $form_state['values']['van'],$form_state['values']['distributor_id']);
+            $form['beat_name']['#options'] = array('' => 'All') + get_beat_name_from_loading_date_and_van(strtotime($form_state['values']['loading_date']), $form_state['values']['van'], $form_state['values']['distributor_id']);
     }
   }
   $form['van_submit'] = array(
@@ -1458,7 +1518,7 @@ function dispatch_planning_form($form, &$form_state) {
     '#title' => t('Bill number'),
     '#required' => TRUE,
    // '#autocomplete_path' => 'bill/autocomplete'
-   '#autocomplete_path' => 'bill/autocomplete/'.$distributor_id,   
+      '#autocomplete_path' => 'bill/autocomplete/' . $distributor_id,
   );
 
   $form['bill_number_submit'] = array(
@@ -1684,7 +1744,7 @@ if ($form_state['triggering_element']['#value'] != 'Save' && $form_state['trigge
     $form['submit'] = array(
       '#type' => 'submit',
       '#value' => 'Save',
-      '#limit_validation_errors' => array(array('trip_execution_date'), array('hht_id'), array('vehicle_number'), array('cashier'), array('list_form_items'), array('skip_sequencing'),array('distributor_id')),
+          '#limit_validation_errors' => array(array('trip_execution_date'), array('hht_id'), array('vehicle_number'), array('cashier'), array('list_form_items'), array('skip_sequencing'), array('distributor_id')),
       '#submit' => array('dispatch_planning_form_save_submit'),
       '#validate' => array('dispatch_planning_form_save_validate')
     );
@@ -1712,14 +1772,13 @@ function custom_ajax_callback($form, &$form_state) {
 }
 
 function distributor_callback($form, &$form_state) {
-    $path_segment = explode('/',$form_state['request_uri']);
-    $path = '/'.$path_segment[0].'/'.$path_segment[1];
+    $path_segment = explode('/', $form_state['request_uri']);
+    $path = '/' . $path_segment[0] . '/' . $path_segment[1];
    // $path = '/'.$path_segment[1].'/'.$path_segment[2];
     $distributor_id = $form_state['values']['distributor_id'];
-    ajax_redirect($path.'/'.$distributor_id);
+    ajax_redirect($path . '/' . $distributor_id);
     return $form;
 }
-
 
 function van_ajax_validate($form, &$form_state) {
 
@@ -1740,10 +1799,10 @@ function van_ajax_submit(&$form, &$form_state) {
   unset($form_state['input']['van']);
   $form['van']['#options'] = array();
   if (!empty($beat_name)) {
-    $bills = get_bill_info(NULL, $van, $loading_date, $beat_name,NULL,NULL,NULL,$distributor_id);
+        $bills = get_bill_info(NULL, $van, $loading_date, $beat_name, NULL, NULL, NULL, $distributor_id);
   }
   else {
-    $bills = get_bill_info(NULL, $van, $loading_date,NULL,NULL,NULL,NULL,$distributor_id);
+        $bills = get_bill_info(NULL, $van, $loading_date, NULL, NULL, NULL, NULL, $distributor_id);
   }
   $form_state['dispatch_planning']['bills'] += $bills;
   $form_state['rebuild'] = TRUE;
@@ -1757,14 +1816,15 @@ function bill_number_ajax_validate($form, &$form_state) {
   $query->condition('n.type', 'sales_register_data');
   $query->fields('n', array('title'));
   //$query->addTag('node_distributor_access');
-  $query->condition('n.uid',$distributor_id);
+    $query->condition('n.uid', $distributor_id);
   $result = $query->execute()->fetchField();
 
   if (empty($result)) {
     form_set_error('bill_number', 'Bill number does not exist');
-  }else{
+    }
+    else {
     $res = is_bill_cancelled_discarded($bill_number);
-    if(!empty($res)){
+        if (!empty($res)) {
       form_set_error('bill_number', 'This Bill Number got cancelled/discarded.');
     }
   }
@@ -1775,7 +1835,7 @@ function bill_number_ajax_submit($form, &$form_state) {
   $distributor_id = $form_state['input']['distributor_id'];
   unset($form_state['input']['bill_number']);
 
-  $bill_info = get_bill_info($bill_number,NULL, NULL,  NULL,  NULL,  NULL,NULL,$distributor_id);
+    $bill_info = get_bill_info($bill_number, NULL, NULL, NULL, NULL, NULL, NULL, $distributor_id);
   if (!empty($bill_info)) {
     $form_state['dispatch_planning']['bills'] += $bill_info;
   }
@@ -1841,7 +1901,7 @@ function get_trip_cashiers($trip_ids, $bills_numbers) {
     $query->fields('ad', array('runsheet_number', 'bill_number', 'fieldExecutiveName'));
     $query->condition('ad.runsheet_number', $trip_ids, 'IN');
     $query->condition('ad.bill_number', $bills_numbers, 'IN');
-    $query->condition('ad.distributor_id', $distributor_ids,'IN');
+        $query->condition('ad.distributor_id', $distributor_ids, 'IN');
     $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
   }
   return $res;
@@ -1916,15 +1976,15 @@ function dispatch_planning_form_save_validate($form, &$form_state) {
   }
 
   if ($hht_id && $trip_execution_date) {
-    if (empty(validate_hht_id($trip_execution_date, $hht_id,$central_distributor_id))) {
+        if (empty(validate_hht_id($trip_execution_date, $hht_id, $central_distributor_id))) {
       form_set_error('hht_id', 'HHT id invalid or HHT id already exists for this date');
     }
   }
 
-  if (!empty($cashier) && empty(validate_cashier($cashier,$central_distributor_id))) {
+    if (!empty($cashier) && empty(validate_cashier($cashier, $central_distributor_id))) {
     form_set_error('cashier', 'Please enter a valid cashier');
   }
-  if (!empty($vehicle_number) && empty(validate_vehicle_number($vehicle_number,$central_distributor_id))) {
+    if (!empty($vehicle_number) && empty(validate_vehicle_number($vehicle_number, $central_distributor_id))) {
     form_set_error('vehicle_number', 'Please enter a valid vehicle number');
   }
 
@@ -2023,7 +2083,7 @@ function dispatch_planning_form_save_validate($form, &$form_state) {
   }
 
   $form_state['dispatch_planning']['sequence_array'] = $sequence_array;
-  $conf_nid = $form_state['leanbox_misc']['nid'] = check_node_title_exists($central_distributor_id, 'van_stop_master',false,$central_distributor_id);
+    $conf_nid = $form_state['leanbox_misc']['nid'] = check_node_title_exists($central_distributor_id, 'van_stop_master', false, $central_distributor_id);
   if ($conf_nid) {
     $node = node_load($conf_nid);
     $origin_lat = $node->field_distributor_latitude[LANGUAGE_NONE][0]['value'];
@@ -2078,12 +2138,12 @@ function dispatch_planning_form_save_validate($form, &$form_state) {
 
 
 
-    /*****
+        /*         * ***
       ################################ PYTHON API CALLING START ################################
-    *****/
+         * *** */
 
     //dpm($bill_nids, 'bill_nids: ');
-    $python_api_response_data = parkstop_calculation_api($bill_nids, array($distributor_id), 'dispatch',$central_distributor_id);
+        $python_api_response_data = parkstop_calculation_api($bill_nids, array($distributor_id), 'dispatch', $central_distributor_id);
     //dpm($python_api_response_data, 'python_api_response_data: ');
 
     if (!empty($python_api_response_data->error)) {
@@ -2092,7 +2152,7 @@ function dispatch_planning_form_save_validate($form, &$form_state) {
         global $base_url;
         $params['subject'] = "Dispatch Planning Python API Error on $base_url for van: $hht_id";
         $params['body'] = $python_api_response_data->error;
-        $mail_to = variable_get('parkstop_api_error_email',"shylaja.r@iksula.com"); //kusha@leanbox.in abhishek.r@iksula.com,
+            $mail_to = variable_get('parkstop_api_error_email', "shylaja.r@iksula.com"); //kusha@leanbox.in abhishek.r@iksula.com,
         $from = "MIS.HELPDESK@leanbox.in";
         drupal_mail('adhoc_task', 'bill_date_missing', $mail_to, LANGUAGE_NONE, $params, $from);
         //emailer for notification end
@@ -2103,11 +2163,11 @@ function dispatch_planning_form_save_validate($form, &$form_state) {
       $python_api_response_data = $form_state['python_api_tim_dist_response'][$hht_id];
     }
     
-       watchdog('bill_sequencing_array: ',print_r($python_api_response_data,1));
-    if($python_api_response_data->status_message === 'OK') { 
+        watchdog('bill_sequencing_array: ', print_r($python_api_response_data, 1));
+        if ($python_api_response_data->status_message === 'OK') {
       $bill_sequencing_array = get_drs_bill_sequence_by_parkstop(json_decode($python_api_response_data->data), $hht_id);
       $form_state['dispatch_planning']['total_travel_time'] = $_SESSION['park_stop'][$hht_id]['time']; // $total_time
-      $form_state['dispatch_planning']['total_distance'] = $_SESSION['park_stop'][$hht_id]['dist'];//newly // $total_dist
+            $form_state['dispatch_planning']['total_distance'] = $_SESSION['park_stop'][$hht_id]['dist']; //newly // $total_dist
       $form_state['dispatch_planning']['van_total_time'] = $_SESSION['park_stop'][$hht_id]['van_total_time'];
       $form_state['dispatch_planning']['van_total_dist'] = $_SESSION['park_stop'][$hht_id]['van_total_dist'];
       foreach ($bill_sequencing_array as $key => $value) {
@@ -2129,10 +2189,10 @@ function dispatch_planning_form_save_validate($form, &$form_state) {
           $python_bill_sequence_array[$sequence_no]['prev_distance'] = round(($v->distance) / 1000, 2);
         */
       }
-    
-    }else{
+        }
+        else {
         if (!empty($python_api_response_data->error)) {// if error exist then sequencing is clicked
-          $_SESSION['park_stop'][$hht_id] = array();//empty previous store data for same van
+                $_SESSION['park_stop'][$hht_id] = array(); //empty previous store data for same van
         }
     }
 
@@ -2145,9 +2205,9 @@ function dispatch_planning_form_save_validate($form, &$form_state) {
       form_set_error('list_form_items', 'Python API Error' . $python_api_response_data->error);
     }
 
-    /*****
+        /*         * ***
       ################################ PYTHON API CALLING END ################################
-    *****/
+         * *** */
 
     /*
       COMMENTED on 27 OCT, 2019 AS WE ARE USING PYTHON API INSTEAD OF ROUTIFIC
@@ -2272,7 +2332,7 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
       ->fields(array(
      // 'distributor_id' => $distributor_id,
       //'distributor_id' => $distributor_id,
-      'facility_code'=> $distributor_facility_code,   
+          'facility_code' => $distributor_facility_code,
       'next_id' => $trip_id + 1
     ));
     $insert->execute();
@@ -2294,7 +2354,7 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
   $node->field_trip_id[$node->language][0]['value'] = $trip_id;
   $node->field_trip_creation_date[$node->language][0]['value'] = strtotime(date('Y/m/d 00:00:00'));
   $node->field_trip_executon_date[$node->language][0]['value'] = $trip_execution_date;
-  $node->field_hht_id[$node->language][0]['nid'] = get_nid_from_hht_id($hht_id,$central_distributor_id);
+    $node->field_hht_id[$node->language][0]['nid'] = get_nid_from_hht_id($hht_id, $central_distributor_id);
 
   if ($seq_flag) {
     $node->field_sequence_method[$node->language][0]['value'] = 1;
@@ -2309,7 +2369,7 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
   }
   
     //Now for Lakme we have to bypass all the trip
-    if(variable_get('dispatch_bypass', 1)){
+    if (variable_get('dispatch_bypass', 1)) {
         $node->field_loose_confirmation['und'][0]['value'] = 1;
         $node->field_cld_confirmation['und'][0]['value'] = 1;
         $node->field_confirm_bill_edit_status['und'][0]['value'] = 1;
@@ -2320,7 +2380,7 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
   node_save($node);
 
   if (!empty($total_distance) && !empty($total_travel_time)) {
-    update_parkstop_plotting_log('dispatch', $trip_id, $distributor_id,$logged_in_distributor_id);
+        update_parkstop_plotting_log('dispatch', $trip_id, $distributor_id, $logged_in_distributor_id);
   }
 
   $nid = $node->nid;
@@ -2384,7 +2444,7 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
   drupal_set_message('Successfully updated. Trip id ' . $trip_id);
 }
 
-function get_bill_info($bill_number, $van = NULL, $loading_date = NULL, $beat_name = NULL, $trip_id = NULL, $delivery_pending = NULL, $res_status = NULL,$distributor_id) {
+function get_bill_info($bill_number, $van = NULL, $loading_date = NULL, $beat_name = NULL, $trip_id = NULL, $delivery_pending = NULL, $res_status = NULL, $distributor_id) {
 
   //global $user;
   //$user_id = $user->uid;
@@ -2484,12 +2544,11 @@ function get_bill_info($bill_number, $van = NULL, $loading_date = NULL, $beat_na
 
   $query->condition('n.type', 'sales_register_data');
  // $query->addTag('node_distributor_access');
-  $query->condition('n.uid',$distributor_id);
- $query->condition('oun.uid',$distributor_id);
+    $query->condition('n.uid', $distributor_id);
+    $query->condition('oun.uid', $distributor_id);
 
   $res = $query->execute()->fetchAll(PDO::FETCH_GROUP | PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
 //watchdog('bill_info', '<pre>' . print_r(array($distributor_id), TRUE) . '</pre>');
-
 //  foreach ($res as $key => $value) {
 //    $res[$key]['sequence']['data'] = array(
 //      '#type' => 'textfield',
@@ -2502,7 +2561,7 @@ function get_bill_info($bill_number, $van = NULL, $loading_date = NULL, $beat_na
   return $res;
 }
 
-function get_modified_van_from_loading_date($date,$distributor_id) {
+function get_modified_van_from_loading_date($date, $distributor_id) {
      //  watchdog('distid', '<pre>' . print_r(array($distributor_id,$date), TRUE) . '</pre>');
   $result = array();
 //  if (!empty($date) && !empty($string)) {
@@ -2538,7 +2597,7 @@ function get_modified_van_from_loading_date($date,$distributor_id) {
   return $result;
 }
 
-function get_beat_name_from_loading_date_and_van($date, $van,$distributor_id) {
+function get_beat_name_from_loading_date_and_van($date, $van, $distributor_id) {
   $result = array();
   if (!empty($date)) {
 
@@ -2574,9 +2633,9 @@ function get_beat_name_from_loading_date_and_van($date, $van,$distributor_id) {
   return $result;
 }
 
-function bill_autocomplete($string = '',$distributor_id) {
+function bill_autocomplete($string = '', $distributor_id) {
   $result = array();
-    watchdog('cron1', '<pre>' . print_r(array($distributor_id,$string), TRUE) . '</pre>');
+    watchdog('cron1', '<pre>' . print_r(array($distributor_id, $string), TRUE) . '</pre>');
   if ($string) {
     $query = db_select('node', 'n');
     $query->join('field_data_field_billing_loading_date', 'ld', 'n.nid = ld.entity_id');
@@ -2585,7 +2644,7 @@ function bill_autocomplete($string = '',$distributor_id) {
     $query->condition('n.title', db_like($string) . '%', 'LIKE');
     $query->condition('n.type', 'sales_register_data');
     $query->leftjoin('field_data_field_bill_status', 'bs', 'n.nid = bs.entity_id');
-    /*if (is_null($delivery_pending)) {
+        /* if (is_null($delivery_pending)) {
       $db_or = db_or();
       $db_or->isNull('ft.field_trip_id_reference_nid');
       $db_or->condition('dp.field_delivery_pending_value', 1);
@@ -2593,7 +2652,7 @@ function bill_autocomplete($string = '',$distributor_id) {
     }
     else {
       $query->isNotNull('ft.field_trip_id_reference_nid');
-    }*/
+          } */
     $query->isNull('ft.field_trip_id_reference_nid');
     $query->isNull('bs.field_bill_status_value'); //new condition added
     $query->fields('n', array('title'));
@@ -2606,7 +2665,7 @@ function bill_autocomplete($string = '',$distributor_id) {
   drupal_json_output($result);
 }
 
-function bill_pending_autocomplete($trip_id, $distributor_id,$string = '') {
+function bill_pending_autocomplete($trip_id, $distributor_id, $string = '') {
   $result = array();
   //global $user;
   //$distributor_id = change_feeds_import_get_distributor_id($user->uid);
@@ -2616,7 +2675,7 @@ function bill_pending_autocomplete($trip_id, $distributor_id,$string = '') {
     $node_obj = node_load_multiple(NULL, array('title' => $trip_id, 'type' => 'dispatch_data', 'uid' => $distributor_id));
     $trip_nid = key($node_obj);
   }
-    watchdog('bill_pending_auto_complete', '<pre>' . print_r(array($string,$trip_nid), TRUE) . '</pre>');
+    watchdog('bill_pending_auto_complete', '<pre>' . print_r(array($string, $trip_nid), TRUE) . '</pre>');
   if (!empty($string) && !empty($trip_nid)) {
     $query = db_select('node', 'n');
     $query->join('field_data_field_billing_loading_date', 'ld', 'n.nid = ld.entity_id');
@@ -2653,7 +2712,7 @@ function trip_id_autocomplete($string = '') {
     $query->fields('n', array('title'));
     $query->range(0, 15);
     //$query->addTag('node_distributor_access');
-    $query->condition('n.uid',$distributor_id);
+        $query->condition('n.uid', $distributor_id);
     $result = $query->execute()->fetchAllKeyed(0, 0);
   }
   drupal_json_output($result);
@@ -2677,12 +2736,12 @@ function vrswise_trip_id_autocomplete($string = '') {
   drupal_json_output($result);
 }
 
-function dp_trip_id_autocomplete($string = '',$rs_code) {
+function dp_trip_id_autocomplete($string = '', $rs_code) {
   $result = array();
   //global $user;
   //$distributor_id = change_feeds_import_get_distributor_id($user->uid);
-  watchdog('form_state_values', '<pre>' . print_r(array($rs_code,$string), TRUE) . '</pre>');
-  if (!empty($string) && !empty($rs_code)){
+    watchdog('form_state_values', '<pre>' . print_r(array($rs_code, $string), TRUE) . '</pre>');
+    if (!empty($string) && !empty($rs_code)) {
     $query = db_select('node', 'n');
     $query->condition('n.title', db_like($string) . '%', 'LIKE');
     $query->condition('n.type', 'dispatch_data');
@@ -2696,7 +2755,6 @@ function dp_trip_id_autocomplete($string = '',$rs_code) {
   }
   drupal_json_output($result);
 }
-
 
 function _get_header_sort($array, $field_name, $order) {
   if ($order == 'asc') {
@@ -2757,7 +2815,7 @@ function cashier_names_autocomplete($string = '') {
     $query->condition('field_resource_type_value', 'CASHIER');
     $query->fields('rn', array('field_resource_name_value'));
     //$query->addTag('node_distributor_access');
-    $query->condition('n.uid',$central_distributor_id);
+        $query->condition('n.uid', $central_distributor_id);
     $result = $query->execute()->fetchAllKeyed(0, 0);
   }
 
@@ -2778,7 +2836,7 @@ function vehicle_names_autocomplete($string = '') {
     $query->condition('title', db_like($string) . '%', 'LIKE');
     $query->range(0, 15);
     //$query->addTag('node_distributor_access');
-    $query->condition('n.uid',$distributor_id);
+        $query->condition('n.uid', $distributor_id);
     $result = $query->execute()->fetchAllKeyed(0, 0);
   }
 
@@ -2795,9 +2853,9 @@ function hht_id_autocomplete($date, $string) {
    else {
        $central_distributor_id = $distributor_id;
    }
-/*watchdog('hht_id_autocomplete_date', '<pre>' . print_r(array($date), TRUE) . '</pre>');
+    /* watchdog('hht_id_autocomplete_date', '<pre>' . print_r(array($date), TRUE) . '</pre>');
 watchdog('hht_id_autocomplete_central_distributor_id', '<pre>' . print_r(array($central_distributor_id), TRUE) . '</pre>');
-watchdog('hht_id_autocomplete_date_string', '<pre>' . print_r(array($string), TRUE) . '</pre>');*/
+      watchdog('hht_id_autocomplete_date_string', '<pre>' . print_r(array($string), TRUE) . '</pre>'); */
 //  if ($string) {
 //    $query = db_select('node', 'n');
 //    $query->condition('type', 'hht_master');
@@ -2842,7 +2900,7 @@ watchdog('hht_id_autocomplete_date_string', '<pre>' . print_r(array($string), TR
   $query->leftJoin('field_data_field_trip_executon_date', 'fd', 'fh.entity_id = fd.entity_id');
   $query->groupBy('n.title');
   //$query->addTag('node_distributor_access');
-  $query->condition('n.uid',$central_distributor_id);
+    $query->condition('n.uid', $central_distributor_id);
   $res = $query->execute()->fetchAll();
 
   $date_string = date('m/d/Y', $date);
@@ -2858,7 +2916,7 @@ watchdog('hht_id_autocomplete_date_string', '<pre>' . print_r(array($string), TR
   drupal_json_output($result);
 }
 
-function validate_hht_id($date, $hht_id,$central_distributor_id) {
+function validate_hht_id($date, $hht_id, $central_distributor_id) {
 
   $query = db_select('node', 'n');
   $query->condition('n.type', 'hht_master');
@@ -2878,7 +2936,7 @@ function validate_hht_id($date, $hht_id,$central_distributor_id) {
 
   $query->condition('n.title', $hht_id);
   //$query->addTag('node_distributor_access');
-  $query->condition('n.uid',$central_distributor_id);
+    $query->condition('n.uid', $central_distributor_id);
   $result = $query->execute()->fetchAllKeyed(0, 0);
   if (empty($result) || isset($result[$date])) {
     return FALSE;
@@ -2888,20 +2946,20 @@ function validate_hht_id($date, $hht_id,$central_distributor_id) {
   }
 }
 
-function get_nid_from_hht_id($hht_id,$distributor_id) {
+function get_nid_from_hht_id($hht_id, $distributor_id) {
 
   $query = db_select('node', 'n');
   $query->fields('n', array('nid'));
   $query->condition('type', 'hht_master');
   $query->condition('title', $hht_id);
   //$query->addTag('node_distributor_access');
-  $query->condition('uid',$distributor_id);
+    $query->condition('uid', $distributor_id);
   $result = $query->execute()->fetchField();
 
   return $result;
 }
 
-function validate_cashier($cashier,$central_distributor_id) {
+function validate_cashier($cashier, $central_distributor_id) {
   $query = db_select('node', 'n');
   $query->join('field_data_field_resource_type', 'rt', 'rt.entity_id = n.nid');
   $query->join('field_data_field_resource_name', 'rn', 'rn.entity_id = n.nid');
@@ -2917,7 +2975,7 @@ function validate_cashier($cashier,$central_distributor_id) {
   return $result;
 }
 
-function validate_vehicle_number($vehicle_number,$central_distributor_id) {
+function validate_vehicle_number($vehicle_number, $central_distributor_id) {
   $query = db_select('node', 'n');
   $query->condition('type', 'vehicle_master');
   $query->fields('n', array('title'));
@@ -3010,7 +3068,7 @@ function trip_id_ajax_validate($form, &$form_state) {
   if (empty($distributor_id)) {
       form_set_error('trip_id', 'Trip ID does not exist or is already deleted');
   }
-   if(!empty($distributor_id)) {
+    if (!empty($distributor_id)) {
         $query = db_select('node', 'n');
         $query->leftJoin('field_data_field_dispatch_status', 'fs', 'fs.entity_id = n.nid');
         $db_or = db_or();
@@ -3029,7 +3087,6 @@ function trip_id_ajax_validate($form, &$form_state) {
           form_set_error('trip_id', 'Trip ID does not exist or is already deleted or is already dispatched');
         }
    }
-  
 }
 
 function trip_id_ajax_submit($form, &$form_state) {
@@ -3037,7 +3094,7 @@ function trip_id_ajax_submit($form, &$form_state) {
   $distributor_id = get_distributorid_of_trip($trip_id);
   //unset($form_state['input']['trip_id']);
   //get_bill_info($bill_number, $van = NULL, $loading_date = NULL, $beat_name = NULL, $trip_id = NULL, $delivery_pending = NULL, $res_status = NULL,$distributor_id)
-  $bill_info = get_bill_info(NULL, NULL, NULL, NULL, $trip_id,NULL,NULL,$distributor_id);
+    $bill_info = get_bill_info(NULL, NULL, NULL, NULL, $trip_id, NULL, NULL, $distributor_id);
 
   if (!empty($bill_info)) {
     $form_state['dispatch_planning']['bills'] = $bill_info;
@@ -3271,7 +3328,7 @@ function get_delivery_boy_names($node_nid) {
  * @param type $trip_id
  * @return array
  */
-function dispatch_planning_sales_reg_api($node, $trip_execution_date, $vehicle_no, $cashier, $trip_id) {
+function dispatch_planning_sales_reg_api($node, $trip_execution_date, $vehicle_no, $cashier, $trip_id, $total_bill) {
 
   $api_data = array();
   // get billing data details
@@ -3285,14 +3342,14 @@ function dispatch_planning_sales_reg_api($node, $trip_execution_date, $vehicle_n
   $bill_value = $node->field_bill_value[LANGUAGE_NONE][0]['value'];
   $party_code = $node->field_sales_party_code[LANGUAGE_NONE][0]['value'];
 //  $store_sequence = $node->field_drs_sequence[LANGUAGE_NONE][0]['value'];
-  $store_sequence = number_format((float)$node->field_bill_sequence[LANGUAGE_NONE][0]['value'], 2, '.', '');
+    $store_sequence = number_format((float) $node->field_bill_sequence[LANGUAGE_NONE][0]['value'], 2, '.', '');
 
   $billing_data_details = $billing_data_details_insert = dispatch_planning_get_billing_data($node_uid, $bill_number);
   $outlet_data_details = dispatch_planning_get_outlet_data($node_uid, $party_code);
   /// comma separated values
   $delivery_boy_names = get_delivery_boy_names($node_nid);
   $delivery_boy_arr = explode(",", $delivery_boy_names);
-  $merchant_code = variable_get('merchant_code_conf','lakme');
+    $merchant_code = variable_get('merchant_code_conf', 'lakme');
   foreach ($billing_data_details as $key => $val) {
     $query = db_select('godown_data', 'ga');
     $query->fields('ga', array('godown_short'));
@@ -3321,14 +3378,14 @@ function dispatch_planning_sales_reg_api($node, $trip_execution_date, $vehicle_n
 
   if (!in_array($trip_id, $trip_ids)) {
     $job_type = variable_get('new_dispatch_job_type', 'delivery');
-  }else{
+    }
+    else {
     $job_type = variable_get('dispatch_job_type', 'delivery1');
   } 
   //Delivery App changes as per trips from configuration  
   
   $api_data['jobType'] = $job_type;  // delivery1 for hul
   $api_data['merchantCode'] = $merchant_code;  // hul for Merchant code
-
   //$reference_no = $trip_id . '_' . $rs_code . '_' . $bill_number;
   $reference_no = $trip_id . '_' . $facility_code . '_' . $bill_number;
   $api_data['referenceNo'] = $reference_no;
@@ -3336,9 +3393,10 @@ function dispatch_planning_sales_reg_api($node, $trip_execution_date, $vehicle_n
   $api_data['city'] = 'Mumbai';
   // $api_data['hub'] = $rs_code;
   //$api_data['hub'] = $rs_code; // need to remove when moving to HUL
-  $api_data['hub'] =  $facility_code;
+    $api_data['hub'] = $facility_code;
   $api_data['fieldExecutive'] = $facility_code . '_' . $cashier;
   $api_data['fieldExecutiveName'] = $cashier;
+    $api_data['totalBillCount'] = $total_bill;
 
   $api_data['jobData']['vehicle'] = $vehicle_no;
   $api_data['jobData']['party_hll_code'] = $outlet_data_details['field_hul_code_value']; // hul code in outlet
@@ -3375,7 +3433,18 @@ function dispatch_planning_sales_reg_api($node, $trip_execution_date, $vehicle_n
    * Insert data into dispatch_planning_item_details table
    */
   dispatch_planning_item_details($billing_data_details_insert, $id);
-  return $api_data;
+
+    //Accoring to the new development
+    $apidata = array();
+    $apidata[] = $api_data;
+    $dis_id = $node_uid;
+    if (!empty($apidata)) {
+        $json_api_data = json_encode($apidata);
+        // request log
+        $api_type = 'dispatch_planning';
+        $sql_ins_id = dispatch_planning_api_log($json_api_data, $trip_id, $api_type, $dis_id);
+}
+    return 1;
 }
 
 /*
@@ -3650,6 +3719,7 @@ function _update_dispatch_planning_api($node) {
       $res = _dispatch_planning_get_all_sales_nid($nid);
 
       if (!empty($res)) {
+                $total_bill = count($res);
         foreach ($res as $key => $val) {
           $sales_nid = $val['nid'];
           $sales_node = node_load($sales_nid);
@@ -3657,45 +3727,45 @@ function _update_dispatch_planning_api($node) {
           //TP IMPORTANT: Send only those bills which sum(Sum_of_TOTAL_SALES_QTY) is > 0
           $total_sales_qty = get_total_sales_qty_from_custom_billing($sales_node->title, $dis_id);
           if ($total_sales_qty > 0) {
-            $api_data[] = dispatch_planning_sales_reg_api($sales_node, $trip_dispatch_date, $vehicle_no, $cashier, $trip_id);
+                        $api_data[] = dispatch_planning_sales_reg_api($sales_node, $trip_dispatch_date, $vehicle_no, $cashier, $trip_id, $total_bill);
           }
         }
       }
       // call api here
       // Call Dispatch API Here
-      if (!empty($api_data)) {
-        $json_api_data = json_encode($api_data);
-        // request log
-        $api_type = 'dispatch_planning';
-        $sql_ins_id = dispatch_planning_api_log($json_api_data, $trip_id, $api_type, $dis_id);
-         
-        //$order_api_url = 'https://staging.fareye.co/api/v1/job?api_key=l1S6xa5mnxUXDuqv12q7lerLBL9l1ICq';
-          
-       //Delivery App changes as per trips from conf
-        $trips = variable_get('new_trip_ids');
-        $trip_ids = explode(',', $trips);
-
-        if (!in_array($trip_id, $trip_ids)) {
-          $request_headers = array('Content-Type' => 'application/json','Authorization' => 'Token 2972f506c41448cb3456c1c074aed6102183aff9');
-          $order_api_url = variable_get('new_dispatch_uri_settings', 'http://13.127.160.72:8080/api/order/v1/manifest/');
-        }else{
-          $request_headers = array('Content-Type' => 'application/json');
-          $order_api_url = variable_get('dispatch_uri_settings', 'https://staging.fareye.co/api/v1/job?api_key=l1S6xa5mnxUXDuqv12q7lerLBL9l1ICq');
+//      if (!empty($api_data)) {
+//        $json_api_data = json_encode($api_data);
+//        // request log
+//        $api_type = 'dispatch_planning';
+//        $sql_ins_id = dispatch_planning_api_log($json_api_data, $trip_id, $api_type, $dis_id);
+//         
+//        //$order_api_url = 'https://staging.fareye.co/api/v1/job?api_key=l1S6xa5mnxUXDuqv12q7lerLBL9l1ICq';
+//          
+//       //Delivery App changes as per trips from conf
+//        $trips = variable_get('new_trip_ids');
+//        $trip_ids = explode(',', $trips);
+//
+//        if (!in_array($trip_id, $trip_ids)) {
+//          $request_headers = array('Content-Type' => 'application/json','Authorization' => 'Token 2972f506c41448cb3456c1c074aed6102183aff9');
+//          $order_api_url = variable_get('new_dispatch_uri_settings', 'http://13.127.160.72:8080/api/order/v1/manifest/');
+//        }else{
+//          $request_headers = array('Content-Type' => 'application/json');
+//          $order_api_url = variable_get('dispatch_uri_settings', 'https://staging.fareye.co/api/v1/job?api_key=l1S6xa5mnxUXDuqv12q7lerLBL9l1ICq');
+//        }
+//        //Delivery App changes as per trips from configuration
+//        
+//        $options = array('headers' => $request_headers, 'method' => 'POST', 'data' => $json_api_data, 'timeout'=> 300);
+//        $response_data = drupal_http_request($order_api_url, $options);
+//
+//        $response_data = $response_data->data;
+//        $api_success = json_decode($response_data);
+//        $api_success = ($api_success->failCount == 0) ? 1 : 0;
+//        // create response log entry
+//        dispatch_planning_api_log_update($response_data, $sql_ins_id, $api_success);
+//      }
         }
-        //Delivery App changes as per trips from configuration
-        
-        $options = array('headers' => $request_headers, 'method' => 'POST', 'data' => $json_api_data, 'timeout'=> 300);
-        $response_data = drupal_http_request($order_api_url, $options);
-
-        $response_data = $response_data->data;
-        $api_success = json_decode($response_data);
-        $api_success = ($api_success->failCount == 0) ? 1 : 0;
-        // create response log entry
-        dispatch_planning_api_log_update($response_data, $sql_ins_id, $api_success);
       }
     }
-  }
-}
 
 /**
  * 
@@ -3917,7 +3987,7 @@ function _get_van_loading_combination_by_trip($dispatch_data_nid) {
  * @param type $ref_no
  * @return type
  */
-function _get_bill_row_id_using_reference_no($ref_no,$distributor_id) {
+function _get_bill_row_id_using_reference_no($ref_no, $distributor_id) {
   $query = db_select('dispatch_planning_api_data', 'dp');
   $query->fields('dp', array('id'));
   $query->condition('dp.distributor_id', $distributor_id);
@@ -3941,16 +4011,16 @@ function _get_bill_row_id_manual_using_reference_no($ref_no) {
  * @param type $trip_id
  */
 function _get_all_tripsbill($trip_id, $string = '') {
-  watchdog('cron1', '<pre>' . print_r(array($trip_id,$string), TRUE) . '</pre>');
+    watchdog('cron1', '<pre>' . print_r(array($trip_id, $string), TRUE) . '</pre>');
   $result = array();
   $dis_id = get_distributorid_of_trip($trip_id);
 
   if (!empty($trip_id) && !empty($string)) {
     $query = db_select('dispatch_planning_api_data', 'ad');
-    $query->condition('ad.runsheet_number' , $trip_id);
-    $query->condition('ad.bill_number' ,  '%' . db_like($string) . '%', 'LIKE');
+        $query->condition('ad.runsheet_number', $trip_id);
+        $query->condition('ad.bill_number', '%' . db_like($string) . '%', 'LIKE');
     $query->condition('ad.distributor_id', $dis_id, '=');
-		$query->condition('ad.delivery_pending_flag',1, '!=');
+        $query->condition('ad.delivery_pending_flag', 1, '!=');
     $query->fields('ad', array('bill_number'));
     $query->range(0, 15);
     $result = $query->execute()->fetchAllKeyed(0, 0);
@@ -3965,7 +4035,6 @@ function _get_all_tripsbill($trip_id, $string = '') {
 //    $query->range(0, 15);
 //    $query->addTag('node_distributor_access');
 //    $result = $query->execute()->fetchAllKeyed(0, 0);
-      
   }
 
   drupal_json_output($result);
@@ -3992,7 +4061,7 @@ function _get_all_tripsbill_from_sales_register($trip_id, $string = '') {
   drupal_json_output($result);
 }
 
-function check_bill_status($trip_id,$distributor_id) {
+function check_bill_status($trip_id, $distributor_id) {
   $query = db_select('dispatch_planning_api_data', 'ad');
   $query->condition('ad.runsheet_number', $trip_id);
   $query->condition('ad.distributor_id', $distributor_id);
@@ -4002,12 +4071,12 @@ function check_bill_status($trip_id,$distributor_id) {
   return $res;
 }
 
-function get_trip_exec_date_from_trip_id($trip_id,$distributor_id) {
+function get_trip_exec_date_from_trip_id($trip_id, $distributor_id) {
     
   $query = db_select('node', 'n');
   $query->condition('n.title', $trip_id, "=");
   $query->condition('n.status', 1);
-  $query->condition('n.uid',$distributor_id);
+    $query->condition('n.uid', $distributor_id);
   $query->join('field_data_field_trip_executon_date', 'trip_exe', 'trip_exe.entity_id = n.nid');
   $query->fields('trip_exe', array('field_trip_executon_date_value'));
   $trip_id_result = $query->execute()->fetchAssoc();
@@ -4015,7 +4084,7 @@ function get_trip_exec_date_from_trip_id($trip_id,$distributor_id) {
   return $trip_id_result;
 }
 
-function get_full_return_data_from_trip_id($trip_id,$distributor_id) {
+function get_full_return_data_from_trip_id($trip_id, $distributor_id) {
   //$user_id = $GLOBALS['user']->uid;
  // $rs_code = dispatch_planning_get_rscode_using_uid($user_id);
   $query1 = db_select('dispatch_planning_api_data', 'ad');
@@ -4030,7 +4099,7 @@ function get_full_return_data_from_trip_id($trip_id,$distributor_id) {
   return $trip_id_result;
 }
 
-function get_partial_return_data_from_trip_id($trip_id,$distributor_id) {
+function get_partial_return_data_from_trip_id($trip_id, $distributor_id) {
   //$user_id = $GLOBALS['user']->uid;
   //$rs_code = dispatch_planning_get_rscode_using_uid($user_id);
   $query1 = db_select('dispatch_planning_api_data', 'ad');
@@ -4046,7 +4115,7 @@ function get_partial_return_data_from_trip_id($trip_id,$distributor_id) {
   return $trip_id_result;
 }
 
-function get_partial_popup_return_data_from_trip_id($trip_id,$distributor_id) {
+function get_partial_popup_return_data_from_trip_id($trip_id, $distributor_id) {
   //$user_id = $GLOBALS['user']->uid;
   //$rs_code = dispatch_planning_get_rscode_using_uid($user_id);
   $query1 = db_select('dispatch_planning_api_data', 'ad');
@@ -4076,7 +4145,7 @@ function get_partial_popup_return_data_from_trip_id($trip_id,$distributor_id) {
   return $trip_id_result;
 }
 
-function get_delivery_summary_full_return_reason_header($trip_id,$distributor_id) {
+function get_delivery_summary_full_return_reason_header($trip_id, $distributor_id) {
  // global $user;
   $trip_id_result = array();
   //$user_id = $user->uid;
@@ -4098,7 +4167,7 @@ function get_delivery_summary_full_return_reason_header($trip_id,$distributor_id
 }
 
 // Function to return VAN type of a trip
-function get_van_type($trip_id,$distributor_id) {
+function get_van_type($trip_id, $distributor_id) {
   if (!empty($trip_id)) {
     $node_obj = node_load_multiple(NULL, array('title' => $trip_id, 'type' => 'dispatch_data', 'uid' => $distributor_id));
     $trip_nid = key($node_obj);
@@ -4110,7 +4179,7 @@ function get_van_type($trip_id,$distributor_id) {
   return $allowed_values[$selected_option];
 }
 
-function get_delivery_pending_data($trip_id,$distributor_id) {
+function get_delivery_pending_data($trip_id, $distributor_id) {
   $trip_id_result = array();
   if (!empty($trip_id) && !empty($distributor_id)) {
     $query = db_select('dispatch_planning_api_data', 'ad');
@@ -4129,7 +4198,7 @@ function get_delivery_pending_data($trip_id,$distributor_id) {
 }
 
 // get delivery_pending data dispatch date and cashier name
-function get_delivery_pending_header_data($trip_id,$distributor_id) {
+function get_delivery_pending_header_data($trip_id, $distributor_id) {
   $result = array();
   if (!empty($trip_id) && !empty($distributor_id)) {
     $query = db_select('dispatch_planning_api_data', 'ad');
@@ -4169,7 +4238,7 @@ function _get_bank_names($string) {
   exit();
 }
 
-function get_cashier_name($trip_id,$distributor_id) {
+function get_cashier_name($trip_id, $distributor_id) {
   $query1 = db_select('dispatch_planning_api_data', 'ad');
   $query1->condition('ad.runsheet_number', $trip_id, "=");
   $query1->condition('ad.distributor_id', $distributor_id, "=");
@@ -4183,10 +4252,10 @@ function get_cashier_name($trip_id,$distributor_id) {
  * @param type $trip_id
  * @return type
  */
-function get_tp_van_by_trip_id($trip_id,$distributor_id) {
+function get_tp_van_by_trip_id($trip_id, $distributor_id) {
   $query = db_select('node', 'n');
   $query->condition('n.type', 'dispatch_data');
-  $query->condition('n.uid',$distributor_id);
+    $query->condition('n.uid', $distributor_id);
   $query->condition('n.title', $trip_id);
   $query->join('field_data_field_entered_prevan', 'ep', 'ep.entity_id = n.nid');
   $query->fields('ep', array('field_entered_prevan_value'));
@@ -4236,7 +4305,6 @@ function dispatch_planning_views_query_alter(&$view, &$query) {
   }
 
   // trip_bill_sku_return_report is not used currently use trip_bill_sku_return_report2.
-
 //  if (($view->name == 'trip_bill_sku_return_report') || ($view->name == 'trip_bill_sku_return_report' && $view->current_display == 'views_data_export_1')) {
 //    $join = new views_join();
 //    //$join->definition = array('table formula' => $query1, 'left_field' => 'bill_number', 'field' => 'bill_number', 'left_table' => 'dispatch_planning_api_data');
@@ -4375,7 +4443,7 @@ function dispatch_planning_views_query_alter(&$view, &$query) {
     $query->add_field('', 'claimed_godown_short', 'claimed_godown_short');
     $query->add_field('', 'return_qty', 'return_qty');
     $query->add_field('', 'res_cashier_short', 'res_cashier_short');
-    $query->add_where_expression(0,'(CASE WHEN dispatch_planning_item_details.res_godown_short IS NULL THEN 0 ELSE dispatch_planning_item_details.res_godown_short END)+(CASE WHEN dispatch_planning_item_details.res_cashier_short IS NULL THEN 0 ELSE dispatch_planning_item_details.res_cashier_short END)+(CASE WHEN dispatch_planning_item_details.claimed_godown_short IS NULL THEN 0 ELSE dispatch_planning_item_details.claimed_godown_short END)+(CASE WHEN dispatch_planning_item_details.return_qty IS NULL THEN 0 ELSE dispatch_planning_item_details.return_qty END) <> 0') ;
+        $query->add_where_expression(0, '(CASE WHEN dispatch_planning_item_details.res_godown_short IS NULL THEN 0 ELSE dispatch_planning_item_details.res_godown_short END)+(CASE WHEN dispatch_planning_item_details.res_cashier_short IS NULL THEN 0 ELSE dispatch_planning_item_details.res_cashier_short END)+(CASE WHEN dispatch_planning_item_details.claimed_godown_short IS NULL THEN 0 ELSE dispatch_planning_item_details.claimed_godown_short END)+(CASE WHEN dispatch_planning_item_details.return_qty IS NULL THEN 0 ELSE dispatch_planning_item_details.return_qty END) <> 0');
     //$query->add_where_expression(0, '(((CASE WHEN dispatch_planning_item_details.res_godown_short IS NULL THEN 0 ELSE dispatch_planning_item_details.res_godown_short END)+(CASE WHEN dispatch_planning_item_details.res_cashier_short IS NULL THEN 0 ELSE dispatch_planning_item_details.res_cashier_short END) + (CASE WHEN dispatch_planning_item_details.claimed_godown_short IS NULL THEN 0 ELSE dispatch_planning_item_details.claimed_godown_short END) + (CASE WHEN dispatch_planning_item_details.return_qty IS NULL THEN 0 ELSE dispatch_planning_item_details.return_qty END)) <> 0) OR ((CASE WHEN(custom_billing_data.revised_host_quantity IS NULL) THEN ((0 - custom_billing_data.sum_of_total_sales_qty) + ((CASE WHEN dispatch_planning_item_details.res_godown_short IS NULL THEN 0 ELSE dispatch_planning_item_details.res_godown_short END)+(CASE WHEN dispatch_planning_item_details.res_cashier_short IS NULL THEN 0 ELSE dispatch_planning_item_details.res_cashier_short END) + (CASE WHEN dispatch_planning_item_details.claimed_godown_short IS NULL THEN 0 ELSE dispatch_planning_item_details.claimed_godown_short END) + (CASE WHEN dispatch_planning_item_details.return_qty IS NULL THEN 0 ELSE dispatch_planning_item_details.return_qty END))) ELSE ((custom_billing_data.revised_host_quantity - custom_billing_data.sum_of_total_sales_qty)+ ((CASE WHEN dispatch_planning_item_details.res_godown_short IS NULL THEN 0 ELSE dispatch_planning_item_details.res_godown_short END) +(CASE WHEN dispatch_planning_item_details.res_cashier_short IS NULL THEN 0 ELSE dispatch_planning_item_details.res_cashier_short END)+ (CASE WHEN dispatch_planning_item_details.claimed_godown_short IS NULL THEN 0 ELSE dispatch_planning_item_details.claimed_godown_short END) + (CASE WHEN dispatch_planning_item_details.return_qty IS NULL THEN 0 ELSE dispatch_planning_item_details.return_qty END))) END) <> 0)');
     // AND dispatch_planning_item_details.trip_bill_reference IS NULL
   }
@@ -4600,9 +4668,9 @@ function sms_config_form($form, $form_state) {
   return system_settings_form($form);
 }
 
-function bill_number_exist($bill_number){
+function bill_number_exist($bill_number) {
   $result = array();
-  if(!empty($bill_number)){
+    if (!empty($bill_number)) {
     $query = db_select('node', 'n');
     
     $query->condition('n.title', $bill_number);
@@ -4614,12 +4682,12 @@ function bill_number_exist($bill_number){
   return $result;
 }
 
-function check_bill_not_attached_to_trip($bill_number){
+function check_bill_not_attached_to_trip($bill_number) {
   global $user;
   $distributor_id = change_feeds_import_get_distributor_id($user->uid);
   $result = array();
 
-  if($bill_number){
+    if ($bill_number) {
     $query = db_select('node', 'n');
 
     $query->leftJoin('field_data_field_trip_id_reference', 't', 'n.nid = t.entity_id');
@@ -4637,12 +4705,12 @@ function check_bill_not_attached_to_trip($bill_number){
   return $result;
 }
 
-function get_bills_data($bill_number = NULL, $bill_date_from = NULL, $bill_date_to = NULL){
+function get_bills_data($bill_number = NULL, $bill_date_from = NULL, $bill_date_to = NULL) {
   global $user;
   $distributor_id = change_feeds_import_get_distributor_id($user->uid);
   $result = array();
 
-  if(!empty($bill_number) || (!empty($bill_date_from) && !empty($bill_date_to))){
+    if (!empty($bill_number) || (!empty($bill_date_from) && !empty($bill_date_to))) {
     $bill_date_from = strtotime($bill_date_from);
     $bill_date_to = strtotime($bill_date_to);
     $query = db_select('node', 'n');
@@ -4660,10 +4728,10 @@ function get_bills_data($bill_number = NULL, $bill_date_from = NULL, $bill_date_
     $query->isNull('t.field_trip_id_reference_nid');
     $query->isNull('bs.field_bill_status_value');
     
-    if(!empty($bill_number)){
+        if (!empty($bill_number)) {
       $query->condition('n.title', $bill_number);
     }
-    if(!empty($bill_date_from) && !empty($bill_date_to)){
+        if (!empty($bill_date_from) && !empty($bill_date_to)) {
       $query->condition('bd.field_sr_bill_date_value', array($bill_date_from, $bill_date_to), 'BETWEEN');
     }
 
@@ -4680,11 +4748,11 @@ function get_bills_data($bill_number = NULL, $bill_date_from = NULL, $bill_date_
   return $result;
 }
 
-function get_bill_reasons_as_per_action($action_selected){
+function get_bill_reasons_as_per_action($action_selected) {
   $result = array();
   global $user;
   $distributor_id = change_feeds_import_get_distributor_id($user->uid);
-  if(!empty($action_selected)){
+    if (!empty($action_selected)) {
     $query = db_select('node', 'n');
     $query->join('field_data_field_type', 't', 'n.nid = t.entity_id');
     $query->condition('t.field_type_value', $action_selected);
@@ -4697,12 +4765,12 @@ function get_bill_reasons_as_per_action($action_selected){
   return $result;
 }
 
-function bill_not_attached_to_trip_autocomplete($string = ''){
+function bill_not_attached_to_trip_autocomplete($string = '') {
   $result = array();
   global $user;
   $distributor_id = change_feeds_import_get_distributor_id($user->uid);
   
-  if($string){
+    if ($string) {
     $query = db_select('node', 'n');
     
     $query->leftjoin('field_data_field_bill_status', 'bs', 'bs.entity_id = n.nid');
@@ -4711,7 +4779,7 @@ function bill_not_attached_to_trip_autocomplete($string = ''){
     $query->isNull('ft.field_trip_id_reference_nid');
     $query->isNull('bs.field_bill_status_value');
     $query->condition('n.type', 'sales_register_data');
-    $query->condition('n.title', db_like($string).'%', 'LIKE');
+        $query->condition('n.title', db_like($string) . '%', 'LIKE');
     $query->condition('n.status', 1, '=');
     $query->condition('n.uid', $distributor_id);
     $query->fields('n', array('title'));
@@ -4728,19 +4796,18 @@ function message_re_triggered($title) {
   $trip_id = $node->title;
   $distributor_id = $node->uid;
   $preprocess_flag = sms_preprocess_flag($trip_id, $distributor_id);
-  $trip_exist = check_tripid_exist_in_farery_table($trip_id, $distributor_id);// if trip id exist return 0.
-  if($preprocess_flag != 1 && $trip_exist == 0) {
+    $trip_exist = check_tripid_exist_in_farery_table($trip_id, $distributor_id); // if trip id exist return 0.
+    if ($preprocess_flag != 1 && $trip_exist == 0) {
     _update_sms_integration_api($node);
   }
-  else if($trip_exist == 1) {
+    else if ($trip_exist == 1) {
     $sms = 'Trip ID does not exist in Delivery App.';
   }
-  else{
-    $sms = 'Message already sent for Trip ID : '.$trip_id;
+    else {
+        $sms = 'Message already sent for Trip ID : ' . $trip_id;
   } 
   return $sms;
 }
-
 
 function message_triggered_cron() {
   $time = time() - 60 * 1;
@@ -4766,8 +4833,8 @@ function message_triggered_cron() {
     
     $node = node_load($nid);
 
-    $trip_exist = check_tripid_exist_in_farery_table($trip_id, $distributor_id);// if trip id exist return 0.
-    if($trip_exist == 0) {
+        $trip_exist = check_tripid_exist_in_farery_table($trip_id, $distributor_id); // if trip id exist return 0.
+        if ($trip_exist == 0) {
       _update_sms_integration_api($node);
     }
   }
@@ -4775,7 +4842,7 @@ function message_triggered_cron() {
 
 function bill_message_re_triggered($sql_ins_id) {
   $query = db_select('sms_integration_api_log', 'sms');
-  $query->fields('sms', array('message', 'mobile_no', 'distributor_id', 'trip_id', 'response_data', 'dispatch_date', 'hul_code', 'bill_number', 'response_time'));//all column
+    $query->fields('sms', array('message', 'mobile_no', 'distributor_id', 'trip_id', 'response_data', 'dispatch_date', 'hul_code', 'bill_number', 'response_time')); //all column
   $query->condition('sms.id', $sql_ins_id);
   $res = $query->execute()->fetchAll();
 
@@ -4791,7 +4858,7 @@ function bill_message_re_triggered($sql_ins_id) {
     
     $sql_ins_id_new = sms_integration_api_log($trip_id, $msg, $mobile_no, $distributor_id, $dispatch_date, $bill_number, $hul_code_value);
     
-    $message = urlencode($msg);//urlencode to send the message
+        $message = urlencode($msg); //urlencode to send the message
     $sms_api_url = variable_get('sms_api_url');
     $username = variable_get('username');
     $msg_token = variable_get('msg_token');
@@ -4814,12 +4881,12 @@ function bill_message_re_triggered($sql_ins_id) {
   return " ";
 }
 
-function cancel_discard_bills_autocomplete($string = ''){
+function cancel_discard_bills_autocomplete($string = '') {
   $result = array();
   global $user;
   $distributor_id = change_feeds_import_get_distributor_id($user->uid);
 
-  if($string){
+    if ($string) {
     $query = db_select('node', 'n');
 
     $query->join('field_data_field_bill_status', 'bs', 'bs.entity_id = n.nid');
@@ -4828,7 +4895,7 @@ function cancel_discard_bills_autocomplete($string = ''){
     $query->isNull('ft.field_trip_id_reference_nid');
 
     $query->condition('n.type', 'sales_register_data');
-    $query->condition('n.title', db_like($string).'%', 'LIKE');
+        $query->condition('n.title', db_like($string) . '%', 'LIKE');
     $query->condition('n.status', 1, '=');
     $query->condition('n.uid', $distributor_id);
     $query->condition('bs.field_bill_status_value', array('cancel', 'discard'), 'IN');
@@ -4840,12 +4907,12 @@ function cancel_discard_bills_autocomplete($string = ''){
   drupal_json_output($result); 
 }
 
-function get_cancel_discard_bills_data($bill_number = NULL, $bill_date_from = NULL, $bill_date_to = NULL){
+function get_cancel_discard_bills_data($bill_number = NULL, $bill_date_from = NULL, $bill_date_to = NULL) {
   global $user;
   $distributor_id = change_feeds_import_get_distributor_id($user->uid);
   $result = array();
 
-  if(!empty($bill_number) || (!empty($bill_date_from) && !empty($bill_date_to))){
+    if (!empty($bill_number) || (!empty($bill_date_from) && !empty($bill_date_to))) {
     $bill_date_from = strtotime($bill_date_from);
     $bill_date_to = strtotime($bill_date_to);
     
@@ -4866,10 +4933,10 @@ function get_cancel_discard_bills_data($bill_number = NULL, $bill_date_from = NU
     $query->condition('n2.type', 'resource_master ');
     $query->condition('n3.type', 'sales_register_data ');
     
-    if(!empty($bill_number)){
+        if (!empty($bill_number)) {
       $query->condition('n.title', $bill_number);
     }
-    else if(!empty($bill_date_from) && !empty($bill_date_to)){
+        else if (!empty($bill_date_from) && !empty($bill_date_to)) {
       $query->condition('bd.field_sr_bill_date_value', array($bill_date_from, $bill_date_to), 'BETWEEN');
     }
     $query->addField('n', 'nid', 'nid');
@@ -4884,12 +4951,12 @@ function get_cancel_discard_bills_data($bill_number = NULL, $bill_date_from = NU
   return $result;
 }
 
-function check_bill_cancel_status($bill_number){
+function check_bill_cancel_status($bill_number) {
   global $user;
   $distributor_id = change_feeds_import_get_distributor_id($user->uid);
   $result = array();
   
-  if($bill_number){
+    if ($bill_number) {
     $query = db_select('node', 'n');
     $query->leftjoin('field_data_field_bill_status', 'bs', 'bs.entity_id = n.nid');
     $query->condition('n.title', $bill_number);
@@ -4905,7 +4972,7 @@ function check_bill_cancel_status($bill_number){
 
 function get_sku_nid($sku7_code, $distributor_id) {
   $res = array();
-  if(!empty($sku7_code) && !empty($distributor_id)) {
+    if (!empty($sku7_code) && !empty($distributor_id)) {
     $query = db_select('node', 'n');
     $query->leftjoin('field_data_field_exclude_from_ptl', 'ex', 'ex.entity_id = n.nid');
     $query->condition('n.type', 'sku7_code_master');
@@ -4918,9 +4985,9 @@ function get_sku_nid($sku7_code, $distributor_id) {
   return $res;
 }
 
-function is_bill_cancelled_discarded($bill_number){
+function is_bill_cancelled_discarded($bill_number) {
   $res = array();
-  if(!empty($bill_number)){
+    if (!empty($bill_number)) {
     $query = db_select('node', 'n');
     $query->leftjoin('field_data_field_bill_status', 'bs', 'bs.entity_id = n.nid');
     $query->condition('n.title', $bill_number);
@@ -4933,9 +5000,10 @@ function is_bill_cancelled_discarded($bill_number){
   }
   return $res;
 }
+
 function get_facility_code_of_distributor($distributor_id) {
    $facility_code = '';
-  if (!empty($distributor_id))  {
+    if (!empty($distributor_id)) {
     $query = db_select('users', 'u');
     $query->innerjoin('field_data_field_distributor', 'd', 'd.entity_id = u.uid');
     $query->condition('d.field_distributor_value', $distributor_id, '=');
@@ -4950,159 +5018,185 @@ function get_facility_code_of_distributor($distributor_id) {
   return $facility_code;
 }
 
-//function van_planning_api_to_sdr_config_form($form, $form_state) {
-//  $form['van_planning_api_to_sdr_url'] = array(
-//      '#type' => 'textfield',
-//      '#title' => t('Van Planning API to SDR App URL'),
-//      '#description' => t('Van Planning API to SDR App URL'),
-//      '#default_value' => variable_get('van_planning_api_to_sdr_url'),
-//      '#required' => TRUE,
-//    );
-//  return system_settings_form($form);
-//}
-    // prashants code 
-//function dispatch_planning_node_presave($node) {
-//  if ($node->type == 'dispatch_data' && ($node->is_new)) {
-//        $distributor_id = $node->uid;
-//
-//    db_insert('sdr_app_log_preprocess') // Table name no longer needs {}
-//      ->fields(array(
-//        'trip_id' => $node->title,
-//        'distributor_id' => $distributor_id,
-//        'flag' => 0,
-//        'created_date' => REQUEST_TIME,
-//      ))
-//      ->execute();
-//  }
-//}
+function van_planning_api_to_sdr_config_form($form, $form_state) {
+    $form['van_planning_api_to_sdr_url'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Van Planning API to SDR App URL'),
+      '#description' => t('Van Planning API to SDR App URL'),
+      '#default_value' => variable_get('van_planning_api_to_sdr_url'),
+      '#required' => TRUE,
+    );
+    return system_settings_form($form);
+}
 
-//function sdr_api_cron() {
-//    $query = db_select('sdr_app_log_preprocess', 'sdr');
-//    $query->fields('sdr', array('trip_id', 'distributor_id'));
-//    $query->orderBy('sdr.created_date');
-//    $query->condition('sdr.flag', 0);
-//    $query->range(0, 1);
-//    $trip_id_result = $query->execute()->fetchAll();
-//
-//    foreach($trip_id_result as $trip_value){
-//        $trip = $trip_value->trip_id;
-//        $distributor_id = $trip_value->distributor_id;
-//
-//        $query = db_select('node', 'n');
-//        $query->condition('n.type', 'dispatch_data');
-//        $query->leftjoin('field_data_field_cashier_name', 'cashier', 'cashier.entity_id = n.nid');
-//        $query->leftjoin('field_data_field_entered_prevan', 'ep', 'ep.entity_id = n.nid');
-//        $query->leftjoin('field_data_field_trip_id_reference', 'trip_ref', 'trip_ref.field_trip_id_reference_nid = n.nid');
-//        $query->leftjoin('node', 'n1', 'trip_ref.entity_id = n1.nid');
-//        $query->condition('n1.type', 'sales_register_data');
-//        $query->leftjoin('field_data_field_outlet_order_no', 'order_no', 'order_no.entity_id = n1.nid');
-//        $query->leftjoin('field_data_field_crate_id', 'crate_id', 'crate_id.entity_id = n1.nid');
-//        $query->leftjoin('field_data_field_party_code_reference', 'party_code', 'party_code.entity_id = n1.nid');
-//        $query->leftjoin('node', 'n2', 'party_code.field_party_code_reference_nid = n2.nid');
-//        $query->condition('n2.type', 'outlet_master');
-//        $query->leftjoin('field_data_field_party_name', 'party_name', 'party_name.entity_id = n2.nid');
-//        $query->leftjoin('field_data_field_hul_code_reference', 'hul_code_ref', 'hul_code_ref.entity_id = n2.nid');
-//        $query->leftjoin('node', 'n3', 'hul_code_ref.field_hul_code_reference_nid = n3.nid');
-//        $query->condition('n3.type', 'hul_code_master');
-//        $query->condition('n.title', $trip, '=');
-//        $query->condition('n.uid', $distributor_id);
-//        $query->fields('n', array('title', 'uid'));
-//        $query->fields('cashier', array('field_cashier_name_value'));
-//        $query->fields('ep', array('field_entered_prevan_value'));
-//        $query->fields('n1', array('title'));
-//        $query->fields('order_no', array('field_outlet_order_no_value'));
-//        $query->fields('crate_id', array('field_crate_id_value'));
-//        $query->fields('n2', array('title'));
-//        $query->fields('party_name', array('field_party_name_value'));
-//        $query->fields('n3', array('title'));
-//        $query->groupBy('order_no.field_outlet_order_no_value');
-//        $result = $query->execute()->fetchAll();
-//
-//        $facility_code = get_facility_code_of_distributor($distributor_id);
-//
-//        foreach($result as $key => $value){
-//             $trip_id = $value->title;
-//             $crossdock_distributor_id = $value->uid;
-//             $cashier_name = $value->field_cashier_name_value;
-//             $van_id = $value->field_entered_prevan_value;
-//             $bill_number = $value->n1_title;
-//             $order_number = $value->field_outlet_order_no_value;
-//             $box_id = $value->field_crate_id_value;
-//             $party_code = $value->n2_title;
-//             $party_name = $value->field_party_name_value;
-//             $parent_party_code = $value->n3_title;
-//
-//            // Trip_Details_Crossdock
-//             $results['Trip_Details_Crossdock'][$trip_id]['Crossdock_Facility_code'] = $facility_code;
-//             $results['Trip_Details_Crossdock'][$trip_id]['Crossdock_Trip_ID'] = $trip_id;
-//             $results['Trip_Details_Crossdock'][$trip_id]['Cashier_Name'] = $cashier_name;
-//             $results['Trip_Details_Crossdock'][$trip_id]['Van_ID'] = $van_id;
-//
-//            // Order_Box_Details
-//             $order_box_details[$trip_id]['Order_Box_Details'][$order_number]['Order_Number'] = $order_number;
-//             $order_box_details[$trip_id]['Order_Box_Details'][$order_number]['Bill_Number'] = $bill_number;
-//             $order_box_details[$trip_id]['Order_Box_Details'][$order_number]['Box_ID'] = $box_id;
-//             $order_box_details[$trip_id]['Order_Box_Details'][$order_number]['Party_Code'] = $party_code;
-//             $order_box_details[$trip_id]['Order_Box_Details'][$order_number]['Party_Name'] = $party_name;
-//             $order_box_details[$trip_id]['Order_Box_Details'][$order_number]['Parent_Party_Code'] = $parent_party_code;
-//             $order_box_details[$trip_id]['Order_Box_Details'][$order_number]['Crossdock_Distributor_ID'] = $crossdock_distributor_id;
-//        }
-//
-//
-//        foreach ($order_box_details as $trip_id => $order_box_details_value) {
-//            foreach ($order_box_details_value['Order_Box_Details'] as $order_box_details_value) {
-//                $results['Trip_Details_Crossdock'][$trip_id]['Order_Box_Details'][] = $order_box_details_value;
-//            }
-//        }
-//
-//        foreach ($results as $res) {
-//            foreach ($res as $res1) {
-//                $res_main['Trip_Details_Crossdock'][] = $res1;
-//            }
-//        }
-//        $trip_json = json_encode($res_main);
-//
-//        $sql_ins_id = insert_sdr_app_log($trip, $distributor_id, $trip_json);
-//        $request_headers = array('Content-Type' => 'application/json', 'Authorization' => 'Token 2972f506c41448cb3456c1c074aed6102183aff9');
-//        $sdr_api_url = variable_get('van_planning_api_to_sdr_url');
-//        $options = array('headers' => $request_headers, 'method' => 'POST', 'data' => $trip_json);
-//        $response_data = drupal_http_request($sdr_api_url, $options);
-//        $response = $response_data->data;
-//        $log_data = $response ? $response : $response_data;
-//        update_sdr_app_log($log_data, $sql_ins_id);
-//
-//        db_update('sdr_app_log_preprocess')
-//            ->fields(array(
-//              'flag' => 1
-//            ))
-//            ->condition('trip_id', $trip, '=')
-//            ->execute();
-//    }
-//
-//  return " ";
-//}
+function dispatch_planning_node_presave($node) {
+    if ($node->type == 'dispatch_data' && ($node->is_new)) {
+        $distributor_id = $node->uid;
 
-//function insert_sdr_app_log($trip, $distributor_id, $trip_json) {
-//    $sql_ins_id = db_insert('sdr_app_log')
-//      ->fields(array(
-//        'trip_id' => $trip,
-//        'distributor_id' => $distributor_id,
-//        'request_data' => $trip_json,
-//        'request_time' => time(),
-//      ))
-//      ->execute();
-//    return $sql_ins_id;
-//}
-//
-//function update_sdr_app_log($response, $sql_ins_id) {
-//    db_update('sdr_app_log')
-//      ->fields(array(
-//        'response_data' => $response,
-//        'response_time' => time(),
-//      ))
-//      ->condition('id', $sql_ins_id, '=')
-//      ->execute();
-//}
+        db_insert('sdr_app_log_preprocess') // Table name no longer needs {}
+          ->fields(array(
+            'trip_id' => $node->title,
+            'distributor_id' => $distributor_id,
+            'flag' => 0,
+            'created_date' => REQUEST_TIME,
+            'bills' => ''
+          ))
+          ->execute();
+    }
+}
+
+function sdr_api_cron() {
+    $query = db_select('sdr_app_log_preprocess', 'sdr');
+    $query->fields('sdr', array('id', 'trip_id', 'distributor_id', 'bills'));
+    $query->orderBy('sdr.created_date');
+    $query->condition('sdr.flag', 0);
+    $query->range(0, 4);
+    $trip_id_result = $query->execute()->fetchAll();
+
+    sdr_api_process($trip_id_result);
+
+    return " ";
+}
+
+function sdr_api_process($trip_id_result) {
+
+    foreach ($trip_id_result as $trip_value) {
+        //Abhishek unset all array inside this foreach so that for next trip i won't concate.
+        $results = $res_main = $order_box_details = [];
+
+        $trip = $trip_value->trip_id;
+        $distributor_id = $trip_value->distributor_id;
+        $bills = array_filter(explode(', ', $trip_value->bills));
+        $id = $trip_value->id;
+
+        $query = db_select('node', 'n');
+        $query->condition('n.type', 'dispatch_data');
+        $query->leftjoin('field_data_field_cashier_name', 'cashier', 'cashier.entity_id = n.nid');
+        $query->leftjoin('field_data_field_entered_prevan', 'ep', 'ep.entity_id = n.nid');
+        $query->leftjoin('field_data_field_trip_id_reference', 'trip_ref', 'trip_ref.field_trip_id_reference_nid = n.nid');
+        $query->leftjoin('node', 'n1', 'trip_ref.entity_id = n1.nid');
+        $query->condition('n1.type', 'sales_register_data');
+        $query->leftjoin('field_data_field_outlet_order_no', 'order_no', 'order_no.entity_id = n1.nid');
+        $query->leftjoin('field_data_field_crate_id', 'crate_id', 'crate_id.entity_id = n1.nid');
+        $query->leftjoin('field_data_field_party_code_reference', 'party_code', 'party_code.entity_id = n1.nid');
+        $query->leftjoin('field_data_field_bill_sequence', 'bs', 'bs.entity_id = n1.nid');
+        $query->leftjoin('node', 'n2', 'party_code.field_party_code_reference_nid = n2.nid');
+        $query->condition('n2.type', 'outlet_master');
+        $query->leftjoin('field_data_field_party_name', 'party_name', 'party_name.entity_id = n2.nid');
+        $query->leftjoin('field_data_field_hul_code_reference', 'hul_code_ref', 'hul_code_ref.entity_id = n2.nid');
+        $query->leftjoin('node', 'n3', 'hul_code_ref.field_hul_code_reference_nid = n3.nid');
+        $query->condition('n3.type', 'hul_code_master');
+        $query->condition('n.title', $trip, '=');
+        $query->condition('n.uid', $distributor_id);
+        if (!empty($bills)) {
+            $query->condition('n1.title', $bills, 'IN');
+        }
+        $query->condition('crate_id.field_crate_id_value', '', '!=');
+        $query->isNotNull('crate_id.field_crate_id_value');
+        $query->fields('n', array('title', 'uid'));
+        $query->fields('cashier', array('field_cashier_name_value'));
+        $query->fields('ep', array('field_entered_prevan_value'));
+        $query->fields('n1', array('title'));
+        $query->fields('order_no', array('field_outlet_order_no_value'));
+        $query->fields('crate_id', array('field_crate_id_value'));
+        $query->fields('n2', array('title'));
+        $query->fields('party_name', array('field_party_name_value'));
+        $query->fields('n3', array('title'));
+        $query->addexpression("FLOOR(bs.field_bill_sequence_value)", 'parkstop_id');
+        $query->groupBy('order_no.field_outlet_order_no_value');
+        $result = $query->execute()->fetchAll();
+
+        $facility_code = get_facility_code_of_distributor($distributor_id);
+        if (!empty($result)) {
+            foreach ($result as $key => $value) {
+                $trip_id = $value->title;
+                $crossdock_distributor_id = $value->uid;
+                $cashier_name = $value->field_cashier_name_value;
+                $van_id = $value->field_entered_prevan_value;
+                $bill_number = $value->n1_title;
+                $order_number = $value->field_outlet_order_no_value;
+                $box_ids = $value->field_crate_id_value;
+                $string = str_replace(' ', '', $box_ids);
+                $box_id = implode(',', array_unique(explode(',', $string)));
+                $party_code = $value->n2_title;
+                $party_name = $value->field_party_name_value;
+                $parent_party_code = $value->n3_title;
+                $parkstop_id = $value->parkstop_id;
+
+                // Trip_Details_Crossdock
+                $results['Trip_Details_Crossdock'][$trip_id]['Crossdock_Facility_code'] = $facility_code ? $facility_code : '';
+                $results['Trip_Details_Crossdock'][$trip_id]['Crossdock_Trip_ID'] = $trip_id ? $trip_id : '';
+                $results['Trip_Details_Crossdock'][$trip_id]['Cashier_Name'] = $cashier_name ? $cashier_name : '';
+                $results['Trip_Details_Crossdock'][$trip_id]['Van_ID'] = $van_id ? $van_id : '';
+
+                // Order_Box_Details
+                $order_box_details[$trip_id]['Order_Box_Details'][$order_number]['Order_Number'] = $order_number ? $order_number : '';
+                $order_box_details[$trip_id]['Order_Box_Details'][$order_number]['Bill_Number'] = $bill_number ? $bill_number : '';
+                $order_box_details[$trip_id]['Order_Box_Details'][$order_number]['Box_ID'] = $box_id ? explode(",", $box_id) : '';
+                $order_box_details[$trip_id]['Order_Box_Details'][$order_number]['Party_Code'] = $party_code ? $party_code : '';
+                $order_box_details[$trip_id]['Order_Box_Details'][$order_number]['Party_Name'] = $party_name ? $party_name : '';
+                $order_box_details[$trip_id]['Order_Box_Details'][$order_number]['Parent_Party_Code'] = $parent_party_code ? $parent_party_code : '';
+                $order_box_details[$trip_id]['Order_Box_Details'][$order_number]['Parkstop_ID'] = $parkstop_id ? $parkstop_id : '';
+                $order_box_details[$trip_id]['Order_Box_Details'][$order_number]['Crossdock_Distributor_ID'] = $crossdock_distributor_id ? $crossdock_distributor_id : '';
+            }
+            foreach ($order_box_details as $trip_id => $order_box_details_value) {
+                foreach ($order_box_details_value['Order_Box_Details'] as $order_box_details_value) {
+                    $results['Trip_Details_Crossdock'][$trip_id]['Order_Box_Details'][] = $order_box_details_value;
+                }
+            }
+
+            foreach ($results as $res) {
+                foreach ($res as $res1) {
+                    $res_main['Trip_Details_Crossdock'][] = $res1;
+                }
+            }
+
+            $trip_json = json_encode($res_main);
+
+            $sql_ins_id = insert_sdr_app_log($trip, $distributor_id, $trip_json);
+
+            $request_headers = array('Content-Type' => 'application/json', 'Authorization' => 'Token 2972f506c41448cb3456c1c074aed6102183aff9');
+            $sdr_api_url = variable_get('van_planning_api_to_sdr_url');
+            $options = array('headers' => $request_headers, 'method' => 'POST', 'data' => $trip_json);
+            $response_data = drupal_http_request($sdr_api_url, $options);
+            $response = $response_data->data;
+            $log_data = $response ? $response : $response_data;
+            update_sdr_app_log($log_data, $sql_ins_id);
+        }
+        db_update('sdr_app_log_preprocess')
+          ->fields(array(
+            'flag' => 1
+          ))
+          ->condition('trip_id', $trip, '=')
+          ->condition('id', $id, '=')
+          ->execute();
+        watchdog('test_abhi_multithread', '<pre>' . print_r($trip . ' ' . time(), TRUE) . '</pre>');
+    }
+
+    return " ";
+}
+
+function insert_sdr_app_log($trip, $distributor_id, $trip_json) {
+    $sql_ins_id = db_insert('sdr_app_log')
+      ->fields(array(
+        'trip_id' => $trip,
+        'distributor_id' => $distributor_id,
+        'request_data' => $trip_json,
+        'request_time' => time(),
+      ))
+      ->execute();
+    return $sql_ins_id;
+}
+
+function update_sdr_app_log($response, $sql_ins_id) {
+    db_update('sdr_app_log')
+      ->fields(array(
+        'response_data' => $response,
+        'response_time' => time(),
+      ))
+      ->condition('id', $sql_ins_id, '=')
+      ->execute();
+}
 
 function get_node_created_time($title, $type, $distributor_id) {
     if (!empty($title) && !empty($type) && !empty($distributor_id)) {
@@ -5122,7 +5216,7 @@ function get_node_created_time($title, $type, $distributor_id) {
 function global_config_form($form, $form_state) {
   $form['current_delivery_status'] = array(
       '#type' => 'textfield',
-      '#title' => t('Current Delivery Status'),
+      '#title' => t('Delivery Pending Status'),
       '#description' => t('Bill wise Delivery status report(Current Delivery Status if Bill is declared as Delivery Pending)'),
       '#default_value' => variable_get('current_delivery_status'),
     );
@@ -5144,5 +5238,81 @@ function global_config_form($form, $form_state) {
       '#description' => t('Bill wise Delivery status report(Current Delivery Status is undeliver)'),
       '#default_value' => variable_get('undeliver_status'),
     );
+    $form['combined_res_status'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Combined Bill Status'),
+      '#description' => t('Combined Bill Status in Query Display.Eg.deliver,partial_deliver,undeliver)'),
+      '#default_value' => variable_get('combined_res_status'),
+    );
+    $form['no_thread'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Number Of Thread To Run For SDR App'),
+      '#description' => t('No of thread for Van planning to SDR App integration'),
+      '#default_value' => variable_get('no_thread', 2),
+    );
+    $form['no_trip_per_thread'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Trip Per Thread'),
+      '#description' => t('Number of trips to process in one thread for Van planning to SDR app integration'),
+      '#default_value' => variable_get('no_trip_per_thread', 3),
+    );
+    
+    $form['dispatch_thread'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Number Of Thread To Run For Dispatch Planning'),
+      '#description' => t('No of thread for Dispatch planning to Delivery App integration'),
+      '#default_value' => variable_get('dispatch_thread', 3),
+    );
+    $form['dispatch_bill_per_thread'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Bills Per Thread'),
+      '#description' => t('Number of Bills to process in one thread for Dispatch planning to Delivery app integration'),
+      '#default_value' => variable_get('dispatch_bill_per_thread', 50),
+    );  
+    
+    $form['not_attempted_bill_status'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Not attempted Bill Status'),
+      '#description' => t('Not attempted Bill Status'),
+      '#default_value' => variable_get('not_attempted_bill_status'),
+    );
+
+    $form['not_attempted_reason_for_failure'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Not attempted Reason for Failure'),
+      '#description' => t('Not attempted Reason for Failure'),
+      '#default_value' => variable_get('not_attempted_reason_for_failure'),
+    );
   return system_settings_form($form);
+}
+
+function get_bill_status_from_api_table() {
+  $query = db_select('dispatch_planning_api_data', 'ad');
+  $query->fields('ad', array('res_status'));
+  $res = $query->distinct()->execute()->fetchAllKeyed(0,0);
+  if ($res['deliver'] == 'deliver') {
+         $res['deliver'] = variable_get('deliver_status'); //'Delivered';
+  } 
+  if ($res['partial_deliver'] == 'partial_deliver') {
+         $res['partial_deliver'] = variable_get('partial_deliver_status'); //'Partial Delivered';
+  }
+  if ($res['undeliver'] == 'undeliver') {
+         $res['undeliver'] = variable_get('undeliver_status'); //'Full Returned';
+  }
+  
+  return $res;
+}
+// this function returns res_status value from global configuration
+function get_res_status_value($res_status) {
+    $result = array();
+    $delivered = variable_get('deliver_status'); //'Delivered';
+    $partial_delivered = variable_get('partial_deliver_status'); //'Partial Delivered';
+    $un_delivered = variable_get('undeliver_status');
+    $delivery_pending = variable_get('current_delivery_status');
+    
+    $derived_outcome['deliver'] = $delivered;
+    $derived_outcome['partial_deliver'] = $partial_delivered;
+    $derived_outcome['undeliver'] = $un_delivered;
+    $derived_outcome['delivery_pending'] = $delivery_pending;
+    return  $derived_outcome[$res_status];
 }

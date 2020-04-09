@@ -1,0 +1,113 @@
+<?php
+
+function tester_invoice_memo_menu(){
+    $items = array();
+    $items['tester-invoice-memo-report'] =array(
+        'title' => 'Tester Invoice Memo Report',
+        'page callback' => 'drupal_get_form',
+        'page arguments' => array('tester_invoice_memo_form'),
+        'access arguments' => array('tester_invoice_memo_api'),
+        'type' => MENU_CALLBACK,
+        'file' => 'form/tester_invoice_memo.form.inc',
+    );
+    
+    $items['download-tester-invoice-data/%/%/%/%'] = array(
+    'title' => 'Download Tester Invoice Memo Report',
+    'page callback' => 'download_tester_invoice_slip',
+    'page arguments' => array(1, 2, 3, 4),
+    'access arguments' => array('tester_invoice_memo_api'),
+    'type' => MENU_CALLBACK,
+    'file' => 'form/tester_invoice_memo.form.inc',
+    );
+    return $items;
+}
+/**
+ * permission
+ */
+function tester_invoice_memo_permission() {
+
+  return array(
+     'tester_invoice_memo_api' => array(
+        'title' => t('Tester Invoice Memo Api'),
+        'description' => t('Tester Invoice Memo Api')
+    )
+  );
+}
+
+function tester_invoice_memo_services_resources(){
+  $tester_invoice_resource = array(
+    '#api_version' => 3002,
+  );
+
+  $tester_invoice_resource = [
+        'tester-invoice-data' => [
+            'actions' => [
+                'tester-invoice-api' => [
+                    'help' => 'Retrieves Tester Invoice data',
+                    'callback' => 'fetch_tester_invoice_api_data',
+                    'args' => array(
+                        array(
+                            'name' => 'data',
+                            'type' => 'array',
+                            'description' => 'Post data',
+                            'source' => 'data',
+                            'optional' => TRUE,
+                        ),
+                    ),
+                    'access arguments' => array('tester_invoice_memo_api'),
+                ]
+            ]
+        ],
+  ];
+
+  return $tester_invoice_resource;
+}
+
+
+function fetch_tester_invoice_api_data($tester_invoice_api_data){
+  watchdog('tester-invoice-data', '<pre>' . print_r($tester_invoice_api_data, TRUE) . '</pre>');
+  $results = [];
+  $results['flag'] = '0';
+  $results['result'] = "0 Row Updated";
+
+  if(!empty($tester_invoice_api_data)) {
+    foreach ($tester_invoice_api_data as $key => $val) {
+        $result = db_merge('tester_invoice_memo')
+                ->key(array('order_no' => $val['order_number'], 'distributor_id' => $val['lcd_distributor_id'],'facility_code' => $val['lcd_facility_code']))
+                ->fields(array(
+                    'order_no' => $val['order_number'],
+                    'order_date' => strtotime($val['order_date']),
+                    'party_code' => $val['party_code'],
+                    'party_name' => $val['party_name'],
+                    'beat_name' => $val['beat_name'],
+                    'box_id' => $val['box_id'],
+                    'distributor_name' => $val['distributor_name'],
+                    'distributor_address' => $val['distributor_address'],
+                    'total_picked_qty' => $val['total_picked_qty'],
+                    'facility_code' => $val['lcd_facility_code'],
+                    'distributor_id' => $val['lcd_distributor_id'],
+                    'header_data' => json_encode($val['headar_data']),
+                    'row_data' => json_encode($val['row_data']),
+                    'ptl_id' => $val['ptl_id'],
+                    'request_time' => REQUEST_TIME
+                ))
+                ->execute();
+      $results['flag'] = '1';
+      $results['result'] = "Updated Successfully";   
+    }
+  }
+return $results;
+   
+}
+
+
+/**
+ * Implements of hook_views_api().
+ */
+function tester_invoice_memo_views_api() {
+    return array(
+        'api' => 3,
+        'path' => drupal_get_path('module', 'tester_invoice_memo') . '/views'
+    );
+}
+

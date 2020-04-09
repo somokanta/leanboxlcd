@@ -1,0 +1,112 @@
+<?php 
+/* 
+ * Implement Hook schema
+ */
+function tester_invoice_memo_schema() {
+  $schema = [];
+  $schema['tester_invoice_memo'] = array(
+    'description' => 'tester invoice memo api data',
+    'fields' => array(
+      'id' => array(
+        'description' => t('The primary identifier for a data'),
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'order_no' => array(
+        'description' => t('Order No'),
+        'type' => 'varchar',
+        'length' => 100,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'order_date' => array(
+        'description' => t('Order Date'),
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'party_code' => array(
+       'description' => t('Party code'),
+       'type' => 'varchar',
+       'length' => 100,
+       'not null' => TRUE,
+       'default' => '',
+      ),
+      'party_name' => array(
+       'description' => t('Party name'),
+       'type' => 'varchar',
+       'length' => 255,
+       'not null' => TRUE,
+       'default' => '',
+      ),
+      'beat_name' => array(
+       'description' => t('Beat name'),
+       'type' => 'varchar',
+       'length' => 255,
+       'not null' => TRUE,
+       'default' => '',
+      ),
+      'box_id' => array(
+        'description' => t('Box id'),
+        'type' => 'varchar',
+        'length' => 4000,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+
+      'distributor_name' => array(
+        'description' => 'Distributor NAME',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'distributor_address' => array(
+        'description' => 'Distributor Address',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'total_picked_qty' => array(
+        'description' => 'Total qty',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'facility_code' => array(
+        'description' => 'Facility Code.',
+        'type' => 'varchar',
+        'length' => 100,
+        'default' => '',
+      ),
+      'distributor_id' => array(
+        'description' => 'Distributor Id',
+        'type' => 'int',
+        'default' => 0,
+      ),
+      'ptl_id' => array(
+         'description' => 'PTL Id.',
+         'type' => 'varchar',
+         'length' => 100,
+         'default' => '',
+      ),
+      'header_data' => array(
+        'description' => t('Header API Received Data'),
+        'type' => 'text',
+      ),
+      'row_data' => array(
+        'description' => t('Row API Received Data'),
+        'type' => 'text',
+      ),
+      'request_time' => array(
+        'description' => t('API Request Time'),
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    ),
+    'primary key' => array('id'),
+  );
+  return $schema;
+}

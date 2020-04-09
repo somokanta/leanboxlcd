@@ -493,8 +493,13 @@ function delivery_confirm_submit($form, $form_state) {
       $node->field_delivery_incharge_name['und'][0]['value'] = $delivery_incharge_name;
       node_save($node);
       
+      //attempted status
+//      $not_attempted_status = variable_get('not_attempted_bill_status');
+//      $not_attempted_reason_for_failure = variable_get('not_attempted_reason_for_failure');
+      
       // Insert the Delivery Incharge Name in Fareye Table
       db_update('dispatch_planning_api_data') // Table name no longer needs {}
+          //->expression('attempted_status', "(CASE WHEN (res_status = $not_attempted_status AND res_reason_for_failure = $not_attempted_reason_for_failure) THEN No ELSE Yes END)") //attempted status
           ->fields(array(
             'delivery_incharge_name' => $delivery_incharge_name,
           ))
