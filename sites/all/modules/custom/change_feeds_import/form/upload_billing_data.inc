@@ -351,14 +351,14 @@ function change_feeds_import_batch_fix_process($max, $data, $distributor_id, $fi
                         }
                         break;
 
-                    case 'BEAT_NAME':
-                        if (!empty($party_code)) {
-                            if ($context['results']['party_code_result'][$distributor_id][$party_code] != $v) {
-                                $error_text = $v . " BEAT_NAME does not match with OUTLET_MASTER";
-                                $flag = 1;
-                            }
-                        }
-                        break;
+//                    case 'BEAT_NAME':
+//                        if (!empty($party_code)) {
+//                            if ($context['results']['party_code_result'][$distributor_id][$party_code] != $v) {
+//                                $error_text = $v . " BEAT_NAME does not match with OUTLET_MASTER";
+//                                $flag = 1;
+//                            }
+//                        }
+//                        break;
                     case 'SKU7_CODE':
                         if (!array_key_exists($v, $context['results']['sku_code_result'])) {
                             $error_text = $v . " SKU7_CODE is not present in SKU7_CODE Master";
