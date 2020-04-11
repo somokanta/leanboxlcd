@@ -1,0 +1,253 @@
+<?php
+
+function user_hierarchy_views_api() {
+  return array(
+    'api' => 3,
+    'path' => drupal_get_path('module', 'user_hierarchy') . '/views',
+  );
+}
+
+function user_hierarchy_preprocess_page(&$vars) {
+  $arg0 = arg(0);
+  $arg1 = arg(1);
+  $arg2 = arg(2);
+  global $user;
+  $roles = $user->roles;
+  
+  if ($arg0 == 'admin' && $arg1 == 'people' && $arg2 == 'create' && !(in_array("administrator", $roles))) {
+    user_hierarchy_removetab('List', $vars);
+  }
+  
+  if ($arg0 == 'user' && $arg2 == 'edit' && !(in_array("administrator", $roles))) {
+    user_hierarchy_removetab('Edit', $vars);
+  }
+}
+
+function user_hierarchy_removetab($label, &$vars) {
+  $tabs = explode("\n", $vars['tabs']);
+  $vars['tabs'] = '';
+
+  foreach ($tabs as $tab) {
+    if (strpos($tab, '>' . $label . '<') === FALSE) {
+      $vars['tabs'] .= $tab . "\n";
+    }
+  }
+}
+
+
+
+/**
+ * Implements hook_user_insert
+ * @global type $user
+ * @param type $edit
+ * @param type $account
+ * @param type $category
+ */
+function user_hierarchy_user_insert(&$edit, $account, $category) {
+  $roles = $account->roles;
+  $role_id = get_role_by_name('Operations');
+  if (in_array($role_id, $roles)) {
+    $uid = $account->uid;
+    $account->field_distributor['und'][0]['value'] = $uid;
+    field_attach_update('user', $account);
+    entity_get_controller('user')->resetCache(array($account->uid));
+  }
+}
+
+function user_hierarchy_user_presave(&$edit, $account, $category) {
+  $roles = $account->roles;
+  $ops_admin_role_id = get_role_by_name('OPS Admin');
+  $ops_manager_role_id = get_role_by_name('OPS Manager');
+  $dis_id = $edit['field_distributor']['und'][0]['value'];
+  $user_details = user_hierarchy_get_username_and_rs_code($dis_id);
+  if (!empty($roles[$ops_admin_role_id]) || !empty($roles[$ops_manager_role_id])) {
+    if (empty($edit['field_name']['und'][0]['value'])) {
+      $edit['field_name']['und'][0]['value'] = $user_details['field_name_value'];
+    }
+    $rs_code_default = $edit['field_third_party_username']['und'][0]['value'];
+    if (empty($rs_code_default)) {
+      $edit['field_third_party_username']['und'][0]['value'] = $user_details['field_third_party_username_value'];
+    }
+    $user_hierarchy_default = $edit['field_user_hierarchy']['und'][0]['tid'];
+    if (empty($user_hierarchy_default)) {
+      $edit['field_user_hierarchy']['und'][0]['tid'] = $user_details['field_user_hierarchy_tid'];
+    }
+  }
+  //$uid = $account->uid;
+  $central_distributor_role = 'central_distributor';
+  if(!empty($user_details['field_third_party_username_value'])) {
+    $query = db_select('field_data_field_third_party_username', 'rs');
+    $query->condition('rs.field_third_party_username_value', $user_details['field_third_party_username_value']);
+    $query->fields('rs', array('entity_id'));
+    $uids = $query->execute()->fetchCol();
+    if (!empty($uids)) {
+      $query = db_select('users_roles', 'ur');
+      $query->condition('ur.uid', $uids, 'IN');
+      $query->join('role', 'role', 'role.rid = ur.rid');
+      $query->condition('role.name', $central_distributor_role, '=');
+      $query->fields('ur', array('uid'));
+      $central_distributor_uid = $query->execute()->fetchField();
+      if (!empty($central_distributor_uid) && $dis_id!= $central_distributor_uid) {
+       $edit['field_central_distributorid_ref']['und'][0]['uid']  = $central_distributor_uid;
+      }
+     
+    }
+  }
+  
+}
+function user_hierarchy_user_update(&$edit, $account, $category) {
+  $dis_id = $edit['field_distributor']['und'][0]['value'];
+  $user_details = user_hierarchy_get_username_and_rs_code($dis_id);
+  $central_distributor_role = 'central_distributor';
+  if (!empty($user_details['field_third_party_username_value'])) {
+    $query = db_select('field_data_field_third_party_username', 'rs');
+    $query->condition('rs.field_third_party_username_value', $user_details['field_third_party_username_value']);
+    $query->fields('rs', array('entity_id'));
+    $uids = $query->execute()->fetchCol();
+
+    if (!empty($uids)) {
+      $query = db_select('users_roles', 'ur');
+      $query->condition('ur.uid', $uids, 'IN');
+      $query->join('role', 'role', 'role.rid = ur.rid');
+      $query->condition('role.name', $central_distributor_role, '=');
+      $query->fields('ur', array('uid'));
+      $central_distributor_uid = $query->execute()->fetchField(); 
+      if (!empty($central_distributor_uid) && $dis_id != $central_distributor_uid) {
+        $edit['field_central_distributorid_ref']['und'][0]['uid'] = $central_distributor_uid;
+      }
+    }
+  }
+}
+
+function user_hierarchy_get_username_and_rs_code($dis_id) {
+  $query = db_select('field_data_field_distributor', 'ds');
+  $query->condition('ds.field_distributor_value', $dis_id);
+  $query->leftjoin('field_data_field_name', 'na', 'na.entity_id = ds.entity_id');
+  $query->leftjoin('field_data_field_third_party_username', 'rs', 'rs.entity_id = ds.entity_id');
+  //$query->leftjoin('field_data_field_user_hierarchy', 'uh', 'uh.entity_id = ds.entity_id');
+  $query->fields('na', array('field_name_value'));
+  $query->fields('rs', array('field_third_party_username_value'));
+  $query->isNotNull('rs.field_third_party_username_value');
+  $res = $query->execute()->fetch(PDO::FETCH_ASSOC);
+  return $res;
+}
+
+function user_hierarchy_get_all_distributor() {
+  $query = db_select('users', 'u');
+  $query->join('users_roles', 'uro', 'uro.uid = u.uid');
+  $query->join('role', 'ro', 'ro.rid = uro.rid');
+  $query->fields('u', array('uid'));
+  $query->leftjoin('field_data_field_name', 'fna', 'fna.entity_id = u.uid');
+  $query->addExpression("concat(u.name ,' (', fna.field_name_value,')')", 'sum');
+  $query->condition('ro.name', 'Operations');
+  $res = $query->execute()->fetchAllKeyed(0, 1);
+  return $res;
+}
+
+function user_hierarchy_form_alter(&$form, &$form_state, $form_id) {
+  global $user;
+  $roles = $user->roles;
+  $operator_role_id = get_role_by_name('Operations');
+  $ops_admin_role_id = get_role_by_name('OPS Admin');
+  $ops_manager_role_id = get_role_by_name('OPS Manager');
+
+
+  if ($form_id == 'user_register_form' || $form_id == 'user_profile_form') {
+
+    if (in_array("sdm_admin", $roles)) {
+      $form['#validate'][] = 'user_hierarchy_user_register_validate';
+
+      $role_names = array('Operations', 'OPS Admin', 'OPS Manager');
+      foreach ($form['account']['roles']['#options'] as $rid => $rname) {
+        if (!in_array($rname, $role_names)) {
+          unset($form['account']['roles']['#options'][$rid]);
+        }
+      }
+      $form['field_name']['#states'] = array(
+        'visible' => array(
+          ':input[name="roles[' . $operator_role_id . ']"]' => array('checked' => TRUE),
+        ),
+      );
+      $form['field_third_party_username']['#states'] = array(
+        'visible' => array(
+          ':input[name="roles[' . $operator_role_id . ']"]' => array('checked' => TRUE),
+        ),
+      );
+      $form['field_user_hierarchy']['#states'] = array(
+        'visible' => array(
+          ':input[name="roles[' . $operator_role_id . ']"]' => array('checked' => TRUE),
+        ),
+      );
+
+      $all_distributor_list = user_hierarchy_get_all_distributor();
+      $all_distributor_list['none'] = 'select';
+      $form['field_distributor']['und'][0]['value']['#type'] = 'hidden';
+      $form['field_distributor_custom']['#type'] = 'select';
+      $form['field_distributor_custom']['#title'] = t('Distributor');
+      $form['field_distributor_custom']['#required'] = TRUE;
+      $form['field_distributor_custom']['#options'] = $all_distributor_list;
+      $form['field_distributor_custom']['#default_value'] = isset($form['#user']->field_distributor['und'][0]['safe_value']) ? $form['#user']->field_distributor['und'][0]['safe_value'] : 'none';
+      $form['field_distributor_custom']['#states'] = array(
+        'visible' =>
+        array(
+          array(
+            ':input[name="roles[' . $ops_admin_role_id . ']"]' => array('checked' => TRUE),
+          ),
+          array(
+            ':input[name="roles[' . $ops_manager_role_id . ']"]' => array('checked' => TRUE),
+          )
+        )
+      );
+    }
+
+    // This should be at the end of if condition As it will also hide your custom added field then
+    if (!in_array("administrator", $roles) && $form_id == 'user_profile_form') {
+      foreach ($form as $key => $val) {
+        if (preg_match('/field_/', $key)) {
+          unset($form[$key]);
+        }
+      }
+      $form['account']['name']['#attributes'] = array('readonly' => 'readonly');
+      $form['account']['mail']['#attributes'] = array('readonly' => 'readonly');
+      $form['account']['status']['#attributes'] = array('style' => 'display:none');
+      $form['account']['roles']['#attributes'] = array('style' => 'display:none');
+    }
+  }
+}
+
+function user_hierarchy_user_register_validate($form, &$form_state) {
+  $roles = isset($form_state['values']['roles']) ? $form_state['values']['roles'] : '';
+  $role_id = get_role_by_name('Operations');
+
+  if (!empty($roles) && !empty($roles[$role_id])) {
+    if (isset($form_state['values']['field_name']['und'][0]['value']) && empty($form_state['values']['field_name']['und'][0]['value'])) {
+      form_set_error('field_name', t('kindly Enter RS Name'));
+    }
+    else {
+      if (isset($form_state['values']['field_name']['und'][0]['value']) && (!preg_match('/^[a-zA-Z\s]+$/', $form_state['values']['field_name']['und'][0]['value']))) {
+        form_set_error('field_name', t('Alphanumeri or Integer values not allowed in RS Name'));
+      }
+    }
+    if (empty($form_state['values']['field_user_hierarchy']['und'][0]['tid'])) {
+      form_set_error('field_user_hierarchy', t('Kindly Select User Hierarchy'));
+    }
+  }
+  if (isset($form_state['values']['field_distributor_custom'])) {
+    $form_state['values']['field_distributor']['und'][0]['value'] = $form_state['values']['field_distributor_custom'];
+  }
+}
+
+function get_central_distributor_id_of_facility_code($facility_code) {
+    if (!empty($facility_code)) {
+        $query = db_select('field_data_field_central_distributorid_ref', 'cdr');
+        $query->join('field_data_field_distributor', 'distributor', 'cdr.entity_id = distributor.entity_id');
+        $query->join('field_data_field_facility_code', 'facility_code', 'facility_code.entity_id = distributor.entity_id');
+        $query->condition('facility_code.field_facility_code_tid', $facility_code, '=');
+        $query->fields('distributor', array('field_distributor_value'));
+        $query->join('users_roles', 'users_roles', 'users_roles.uid = distributor.entity_id');
+        $query->join('role', 'role', 'role.rid = users_roles.rid');
+        $query->condition('role.name', 'central_distributor', '=');
+        $facility_central_distributor_ids = $query->execute()->fetchAllKeyed(0, 0);
+    }
+    return $facility_central_distributor_ids;
+}
