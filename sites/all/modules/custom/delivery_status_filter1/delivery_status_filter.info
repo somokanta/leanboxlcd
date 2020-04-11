@@ -1,5 +1,0 @@
-name = User Hierarchy
-description = Build User Hierarchy for building user levels.
-package = Custom
-core = 7.x
-files[] = views/user_hierarchy_handler_term_hierarchy.inc
