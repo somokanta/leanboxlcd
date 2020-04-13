@@ -3239,7 +3239,7 @@ function dispatch_planning_form_views_exposed_form_alter(&$form, &$form_state) {
         $form['derived_payment_outcome']['#validated'] = TRUE;
     }
 
-    $form_ids = array('views-exposed-form-bill-return-report-page');
+    $form_ids = array('views-exposed-form-bill-return-report-page','views-exposed-form-dispatch-planning-delivery-data-page','views-exposed-form-dispatch-planning-inventory-return-sheet-page');
     if (in_array($form['#id'], $form_ids)) {
         $select = array('All' => '- Select All -');
         $delivered = variable_get('deliver_status'); //'Delivered';
@@ -3296,14 +3296,17 @@ function dispatch_planning_form_views_exposed_form_alter(&$form, &$form_state) {
 
        // $derived_outcome['undeliver'] = $un_delivered;
        // $derived_outcome['delivery_pending'] = $delivery_pending;
+        $derived_outcome['empty_bill_status'] = t('Null');
         asort($derived_outcome);
-        $form['res_status_1']['#attributes'] = array('style' => 'height:40px');
-        $form['res_status_1']['#type'] = 'select';
-        $form['res_status_1']['#size'] = 1;
-        $form['res_status_1']['#options'] = $select + $derived_outcome;
-        $form['res_status_1']['#validated'] = TRUE;
+        //$form['res_status']['#attributes'] = array('style' => 'height:40px');
+        $form['res_status']['#type'] = 'select';
+        $form['res_status']['#size'] = 1;
+       //$form['res_status']['#weight'] = -15;
+        $form['res_status']['#options'] = $select + $derived_outcome;
+   
     }
 }
+
 
 function received_assets_validation_callback($form, &$form_state) {
     $trip_id = $form_state['values']['title'];
@@ -4371,43 +4374,8 @@ function dispatch_planning_views_query_alter(&$view, &$query) {
           array('field' => 'distributor_id', 'left_field' => 'distributor_id'),
         );
     }
-    if ($view->name == 'bill_return_report') {
-        // this is an array
-        $bill_status = $view->exposed_input['res_status_1'];
-        $operator = $view->exposed_input['res_status_1_op'];
-        /*$delivered = variable_get('deliver_status'); //'Delivered';
-        $partial_delivered = variable_get('partial_deliver_status'); //'Partial Delivered';
-        $un_delivered = variable_get('undeliver_status');
-        $delivery_pending = variable_get('current_delivery_status');*/
-        $combined_bill_status = explode(',',variable_get('combined_res_status'));
-        if (!empty($combined_bill_status[0])) {
-            //foreach ($bill_status as $key => $res_status_value) {
-            if (in_array($bill_status, $combined_bill_status)) {
-                foreach ($query->where[1]['conditions'] as $key => &$val) {
-                    if ($val['field'] == 'dispatch_planning_api_data.res_status') {
-                        foreach ($combined_bill_status as $combined_res_status) {
-                            if (!in_array($combined_res_status, $val['value'])) {
-                                $val['value'][] = $combined_res_status;
-                            }
-                        }
-                    }
-                }
-            }
-            //}
-        }
-        if ($bill_status == 'delivery_pending') {
-            foreach ($query->where[1]['conditions'] as $key => &$val) {
-                if ($val['field'] == 'dispatch_planning_api_data.res_status') {
-                    $val['value'][] = 'undeliver';
-                }
-                $query->add_where(0, "dispatch_planning_api_data.delivery_pending_flag", 1, '=');
-            }
-        }
-        // Will load delivery pending also need to fetch only undeliver+delivery_pending =0
-        if ($bill_status == 'undeliver') {
-            $query->add_where(0, "dispatch_planning_api_data.delivery_pending_flag", 0, '=');
-        }
-    }
+   
+   
 
             // trip_bill_sku_return_report is not used currently use trip_bill_sku_return_report2.
 //  if (($view->name == 'trip_bill_sku_return_report') || ($view->name == 'trip_bill_sku_return_report' && $view->current_display == 'views_data_export_1')) {
