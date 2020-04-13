@@ -3412,7 +3412,7 @@ function dispatch_planning_sales_reg_api($node, $trip_execution_date, $vehicle_n
 //  $store_sequence = $node->field_drs_sequence[LANGUAGE_NONE][0]['value'];
     $store_sequence = number_format((float) $node->field_bill_sequence[LANGUAGE_NONE][0]['value'], 2, '.', '');
     $box_ids = $node->field_crate_id[LANGUAGE_NONE][0]['value'];// New added 12-Apr-20
-    $box_id = explode(",", $box_ids);// New added 12-Apr-20
+    $box_id = explode(", ", $box_ids);// New added 12-Apr-20
 
     $billing_data_details = $billing_data_details_insert = dispatch_planning_get_billing_data($node_uid, $bill_number);
     $outlet_data_details = dispatch_planning_get_outlet_data($node_uid, $party_code);
