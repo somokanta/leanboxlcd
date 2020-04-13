@@ -3296,7 +3296,7 @@ function dispatch_planning_form_views_exposed_form_alter(&$form, &$form_state) {
 
        // $derived_outcome['undeliver'] = $un_delivered;
        // $derived_outcome['delivery_pending'] = $delivery_pending;
-        $derived_outcome['empty_bill_status'] = t('Empty Delivery Status');
+        $derived_outcome['empty_bill_status'] = t('Null');
         asort($derived_outcome);
         //$form['res_status']['#attributes'] = array('style' => 'height:40px');
         $form['res_status']['#type'] = 'select';
