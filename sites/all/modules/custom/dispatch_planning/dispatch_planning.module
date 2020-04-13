@@ -3411,6 +3411,8 @@ function dispatch_planning_sales_reg_api($node, $trip_execution_date, $vehicle_n
     $party_code = $node->field_sales_party_code[LANGUAGE_NONE][0]['value'];
 //  $store_sequence = $node->field_drs_sequence[LANGUAGE_NONE][0]['value'];
     $store_sequence = number_format((float) $node->field_bill_sequence[LANGUAGE_NONE][0]['value'], 2, '.', '');
+    $box_ids = $node->field_crate_id[LANGUAGE_NONE][0]['value'];// New added 12-Apr-20
+    $box_id = explode(",", $box_ids);// New added 12-Apr-20
 
     $billing_data_details = $billing_data_details_insert = dispatch_planning_get_billing_data($node_uid, $bill_number);
     $outlet_data_details = dispatch_planning_get_outlet_data($node_uid, $party_code);
@@ -3483,6 +3485,7 @@ function dispatch_planning_sales_reg_api($node, $trip_execution_date, $vehicle_n
     $api_data['jobData']['beat_name'] = $outlet_data_details['field_beat_name_value'];  // beat name in outlet
     $api_data['jobData']['party_code'] = $party_code;
     $api_data['jobData']['bill_number'] = $bill_number;
+    $api_data['jobData']['box_id'] = $box_id;
     $api_data['jobData']['runsheet_number'] = $trip_id;
     // adding the salesman in array to insert in dispatch_planning_api_data table
     $api_data['jobData']['salesman'] = $outlet_data_details['field_salesman_value'];  // salesman in outlet
@@ -3493,7 +3496,7 @@ function dispatch_planning_sales_reg_api($node, $trip_execution_date, $vehicle_n
     /**
      * Insert data into dispatch_planning_api_data table
      */
-    $id = dispatch_planning_api_data($api_data, $node_uid, $delivery_boy_names);
+    $id = dispatch_planning_api_data($api_data, $node_uid, $delivery_boy_names, $box_ids);
     // Don't send the salesman in API
     unset($api_data['jobData']['salesman']);
     //unset($api_data['jobData']['delivery_boy']);
@@ -3519,7 +3522,7 @@ function dispatch_planning_sales_reg_api($node, $trip_execution_date, $vehicle_n
  * Insert data into dispatch_planning_api_data table
  */
 
-function dispatch_planning_api_data($api_data, $node_uid = 0, $delivery_boy_names) {
+function dispatch_planning_api_data($api_data, $node_uid = 0, $delivery_boy_names, $box_ids) {
     if (!empty($api_data)) {
         $query = db_insert('dispatch_planning_api_data');
         $fields = array(
@@ -3547,7 +3550,8 @@ function dispatch_planning_api_data($api_data, $node_uid = 0, $delivery_boy_name
           'runsheet_number' => $api_data['jobData']['runsheet_number'],
           'salesman' => $api_data['jobData']['salesman'],
           'delivery_boy' => $delivery_boy_names,
-          'created_time' => REQUEST_TIME
+          'created_time' => REQUEST_TIME,
+          'box_id' => $box_ids
           //'updated_time' => REQUEST_TIME //updated time should enter from response and manual edit.
         );
         $query->fields($fields);
