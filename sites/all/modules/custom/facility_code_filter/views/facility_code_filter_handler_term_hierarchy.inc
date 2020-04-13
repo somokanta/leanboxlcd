@@ -37,7 +37,7 @@ class facility_code_filter_handler_term_hierarchy extends views_handler_field {
         $view = $this->view;
         $selected_distributor_id = $view->exposed_input['user_hierarchy_values'];
         $selected_facility_code = $view->exposed_input['facility_code'];
-        if (!empty($view) && !empty($selected_facility_code)) {
+        if (!empty($view) && !empty($selected_facility_code) && $selected_facility_code!= 'All') {
             // Fetch all distributor ids of selected facility code
             $query = db_select('field_data_field_central_distributorid_ref', 'cdr');
             $query->join('field_data_field_distributor', 'distributor', 'cdr.entity_id = distributor.entity_id');
@@ -89,7 +89,7 @@ class facility_code_filter_handler_term_hierarchy extends views_handler_field {
                    //$facility[$value->tid] = $value->name;
                     $facility[$value->tid] = $value->field_facility_name[LANGUAGE_NONE][0]['value'];
                 }
-                $facility = array('' => 'Select') + $facility;
+                $facility = array('All' => 'Select') + $facility;
             }
             $form['expose']['facility_code'] = array(
                 '#title' => t('Select Facility Code'),

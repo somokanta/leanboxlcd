@@ -42,7 +42,7 @@ class user_hierarchy_handler_term_hierarchy extends views_handler_field {
         $view = $this->view;
         $selected_distributor_id = $view->exposed_input['user_hierarchy_values'];
         $selected_facility_code = $view->exposed_input['facility_code'];
-        if (!empty($view) && !empty($selected_distributor_id)) {
+        if (!empty($view) && !empty($selected_distributor_id) && $selected_distributor_id!= 'All') {
             //Custom Table join query 
             $custom_tables = explode(',', variable_get('custom_tables'));
             if (!empty($custom_tables)) {
@@ -115,7 +115,7 @@ class user_hierarchy_handler_term_hierarchy extends views_handler_field {
             //unset($distributor_ids[$distributor_id]);
             //$distributor_ids = array(''=>'All') + $distributor_ids;
             $child_distributors = get_child_distributor_rsname();
-            $distributor_ids = array('' => 'Select') + $child_distributors;
+            $distributor_ids = array('All' => 'Select') + $child_distributors;
         }
         if (isset($_GET['user_hierarchy_values'])) {
             $default_value = $_GET['user_hierarchy_values'];
