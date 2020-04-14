@@ -8,12 +8,14 @@
 
 function bill_wise_dispatch_no_attempt_report_form($form, &$form_state) {
 
-//    if (isset($_GET['from_bill_date'])) {
-//        $from_bill_date = $_GET['from_bill_date'];
-//    }
-//    if (isset($_GET['to_bill_date'])) {
-//        $to_bill_date = $_GET['to_bill_date'];
-//    }
+    $from_bill_date = date('Y-m-d', strtotime('-2 day', strtotime(date('Y-m-d'))));
+    if (isset($_GET['from_bill_date'])) {
+        $from_bill_date = $_GET['from_bill_date'];
+    }
+    $to_bill_date = date('Y-m-d');
+    if (isset($_GET['to_bill_date'])) {
+        $to_bill_date = $_GET['to_bill_date'];
+    }
     if (isset($_GET['from_dispatch_date'])) {
         $from_dispatch_date = $_GET['from_dispatch_date'];
     }
@@ -38,15 +40,6 @@ function bill_wise_dispatch_no_attempt_report_form($form, &$form_state) {
     }
     if (isset($_GET['central_distributor_id'])) {
         $default_central_distributor_id = $_GET['central_distributor_id'];
-    }
-    
-    $from_bill_date = date('Y-m-d', strtotime('-2 day', strtotime(date('Y-m-d'))));
-    if (isset($_GET['from_bill_date'])) {
-        $from_bill_date = $_GET['from_bill_date'];
-    }
-    $to_bill_date = date('Y-m-d');
-    if (isset($_GET['to_bill_date'])) {
-        $to_bill_date = $_GET['to_bill_date'];
     }
 
     global $user;
@@ -246,9 +239,11 @@ function bill_wise_dispatch_no_attempt_report_submit($form, &$form_state) {
 
 function bill_wise_dispatch_no_attempt_report_callback() {
     global $user;
+    $from_bill_date = strtotime(date('Y-m-d', strtotime('-2 day', strtotime(date('Y-m-d')))));
     if (isset($_GET['from_bill_date'])) {
         $from_bill_date = strtotime($_GET['from_bill_date']);
     }
+    $to_bill_date = strtotime(date('Y-m-d'));
     if (isset($_GET['to_bill_date'])) {
         $to_bill_date = strtotime($_GET['to_bill_date']);
     }
