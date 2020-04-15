@@ -3551,7 +3551,7 @@ function dispatch_planning_api_data($api_data, $node_uid = 0, $delivery_boy_name
           'salesman' => $api_data['jobData']['salesman'],
           'delivery_boy' => $delivery_boy_names,
           'created_time' => REQUEST_TIME,
-          'box_id' => $box_ids
+          'box_id' => $box_ids ? $box_ids : ''
           //'updated_time' => REQUEST_TIME //updated time should enter from response and manual edit.
         );
         $query->fields($fields);
