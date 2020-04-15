@@ -337,12 +337,25 @@ function bill_wise_dispatch_no_attempt_report_callback() {
     if (!empty($from_bill_date) && !empty($to_bill_date)) {
         $query->condition('ad.bill_date', array($from_bill_date, $to_bill_date), 'BETWEEN');
     }
-    $query->condition('ad.attempted_status', 'No', '=');
-    $query->fields('ad', array('bill_number', 'bill_date', 'beat_name', 'party_name', 'dispatch_date', 'party_code'));
-    $query->addexpression("MIN((ad.runsheet_number))", 'runsheet_number');
-    $query->addexpression("COUNT(DISTINCT(ad.runsheet_number))", 'count_dispatch_date');
-    $query->addexpression("(ad.res_status)", 'current_bill_status');
-    $query->addexpression("(ad.delivery_pending_flag)", 'delivery_pending_flag');
+    //$query->condition('ad.attempted_status', 'No', '=');
+    //$query->fields('ad', array('bill_number', 'bill_date', 'beat_name', 'party_name', 'dispatch_date', 'party_code'));
+    
+    $query->addexpression("(CASE WHEN ad.attempted_status = 'No' THEN ad.bill_number END)", 'bill_number');
+    $query->addexpression("(CASE WHEN ad.attempted_status = 'No' THEN ad.bill_date END)", 'bill_date');
+    $query->addexpression("(CASE WHEN ad.attempted_status = 'No' THEN ad.beat_name END)", 'beat_name');
+    $query->addexpression("(CASE WHEN ad.attempted_status = 'No' THEN ad.party_name END)", 'party_name');
+    $query->addexpression("(CASE WHEN ad.attempted_status = 'No' THEN ad.dispatch_date END)", 'dispatch_date');
+    $query->addexpression("(CASE WHEN ad.attempted_status = 'No' THEN ad.party_code END)", 'party_code');
+    $query->addexpression("(CASE WHEN ad.attempted_status = 'No' THEN ad.runsheet_number END)", 'runsheet_number');
+    
+//    $query->addexpression("MIN((ad.runsheet_number))", 'runsheet_number');
+//    $query->addexpression("COUNT(DISTINCT(ad.runsheet_number))", 'count_dispatch_date');
+//    $query->addexpression("(ad.res_status)", 'current_bill_status');
+//    $query->addexpression("(ad.delivery_pending_flag)", 'delivery_pending_flag');
+
+    $query->addexpression("COUNT((ad.dispatch_date))", 'count_dispatch_date');
+    $query->addexpression("MAX(CASE WHEN ad.delivery_pending_flag = 0 THEN ad.res_status END)", 'current_bill_status');
+    $query->addexpression("(CASE WHEN (ad.id = MAX(ad.id)) THEN ad.delivery_pending_flag END)", 'delivery_pending_flag');
 
     $query->join('node', 'n', 'n.title = ad.runsheet_number');
     $query->condition('n.type', 'dispatch_data', '=');
@@ -374,7 +387,7 @@ function bill_wise_dispatch_no_attempt_report_callback() {
     $query->fields('fc', array('field_facility_code_tid'));
     $query->groupBy('ad.bill_number');
     $query->groupBy('ad.distributor_id');
-    $query->groupBy('ad.delivery_pending_flag');
+//    $query->groupBy('ad.delivery_pending_flag');
     $result = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
 
      //order by bill date
@@ -387,15 +400,18 @@ function bill_wise_dispatch_no_attempt_report_callback() {
          if ($val['delivery_pending_flag'] == 1) {
             $final_bill_status = variable_get('current_delivery_status');
         }
-        if ($val['current_bill_status'] == 'deliver' && empty($val['delivery_pending_flag'])) {
+        else {
+            if ($val['current_bill_status'] == 'deliver' && empty($val['delivery_pending_flag'])) {
             $final_bill_status = variable_get('deliver_status'); //'Delivered';
+            }
+            if ($val['current_bill_status'] == 'partial_deliver' && empty($val['delivery_pending_flag'])) {
+                $final_bill_status = variable_get('partial_deliver_status'); //'Partial Delivered';
+            }
+            if ($val['current_bill_status'] == 'undeliver' && empty($val['delivery_pending_flag'])) {
+                $final_bill_status = variable_get('undeliver_status'); //'Full Returned';
+            }
         }
-        if ($val['current_bill_status'] == 'partial_deliver' && empty($val['delivery_pending_flag'])) {
-            $final_bill_status = variable_get('partial_deliver_status'); //'Partial Delivered';
-        }
-        if ($val['current_bill_status'] == 'undeliver' && empty($val['delivery_pending_flag'])) {
-            $final_bill_status = variable_get('undeliver_status'); //'Full Returned';
-        }
+        
        
 
         $facility_code = get_facility_code_from_tid($val['field_facility_code_tid']);
