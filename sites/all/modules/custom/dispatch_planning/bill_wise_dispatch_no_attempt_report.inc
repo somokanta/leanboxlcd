@@ -343,6 +343,34 @@ function bill_wise_dispatch_no_attempt_report_callback() {
 //    $query->addexpression("COUNT(DISTINCT(ad.runsheet_number))", 'count_dispatch_date');
 //    $query->addexpression("(ad.res_status)", 'current_bill_status');
 //    $query->addexpression("(ad.delivery_pending_flag)", 'delivery_pending_flag');
+    $query->join('node', 'n', 'n.title = ad.runsheet_number');
+    $query->condition('n.type', 'dispatch_data', '=');
+    $query->condition('n.uid', $distributor_ids, 'IN');
+    $query->join('node', 'n1', 'n1.title = ad.bill_number');
+    $query->condition('n1.type', 'sales_register_data', '=');
+    $query->condition('n1.uid', $distributor_ids, 'IN');
+
+    $query->leftjoin('field_data_field_sr_new_bill_date', 'bill_date', 'bill_date.entity_id = n1.nid');
+    $query->leftjoin('field_data_field_outlet_order_no', 'order_no', 'order_no.entity_id = n1.nid');
+    $query->leftjoin('field_data_field_bill_area_codes', 'bill_area', 'bill_area.entity_id = n.nid');
+
+    $query->join('node', 'n2', 'n2.title = ad.party_hll_code');
+    $query->condition('n2.type', 'hul_code_master', '=');
+    $query->condition('n2.uid', $distributor_ids, 'IN');
+    $query->leftjoin('field_data_field_area_code', 'ac', 'ac.entity_id = n2.nid');
+
+    $query->leftjoin('node', 'n3', 'ac.field_area_code_nid = n3.nid');
+//    $query->condition('n3.type', 'area_code_master', '=');
+    $query->join('users', 'u', 'u.uid = ad.distributor_id');
+    $query->join('field_data_field_distributor_name', 'dn', 'u.uid = dn.entity_id');
+    $query->join('field_data_field_facility_code', 'fc', 'u.uid = fc.entity_id');
+
+    $query->fields('bill_date', array('field_sr_new_bill_date_value'));
+    $query->fields('order_no', array('field_outlet_order_no_value'));
+    $query->fields('dn', array('field_distributor_name_value'));
+    $query->fields('bill_area', array('field_bill_area_codes_value'));
+    $query->fields('n3', array('title'));
+    $query->fields('fc', array('field_facility_code_tid'));
 
     $query->groupBy('ad.runsheet_number');
     $query->groupBy('ad.bill_number');
