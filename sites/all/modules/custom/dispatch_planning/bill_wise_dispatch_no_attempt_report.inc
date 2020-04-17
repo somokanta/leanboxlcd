@@ -418,7 +418,7 @@ function bill_wise_dispatch_no_attempt_report_callback() {
         $row['facility_code'] = $facility_code;
         $rows[] = $row;
     }
-    $header = array('Order date', 'Order Number', 'Bill Date', 'Bill No.', 'Beat name', 'Party Code', 'Party name', 'Trip Id', 'Area code', 'Dispatch Date', 'Delivery Status', 'Count of dispatches', 'Distributor Name', 'Facility Code');
+    $header = array('Order date', 'Order Number', 'Bill Date', 'Bill No.', 'Beat name', 'Party Code', 'Party name', 'Trip Id', 'Area code', 'Dispatch Date', 'Current Delivery Status', 'Count of dispatches', 'Distributor Name', 'Facility Code');
 
     $per_page = 10;
     // Initialize the pager
@@ -460,7 +460,7 @@ function get_current_status_and_count_bills($bill_num, $dis_id){
     $query->condition('ad.bill_number', $bill_num, '=');
     $query->addexpression("COUNT((ad.res_status))", 'count_dispatch_date');
     $query->addexpression("MIN(ad.res_status)", 'current_bill_status');
-    $query->addexpression("MIN(ad.delivery_pending_flag)", 'delivery_pending_flag');
+    $query->addexpression("MIN(CASE WHEN (ad.res_status IS NOT NULL AND ad.res_status != '') THEN ad.delivery_pending_flag END)", 'delivery_pending_flag');
     $bill_result = $query->execute()->fetch(PDO::FETCH_ASSOC);        
     return $bill_result;
 }
