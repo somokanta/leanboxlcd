@@ -11,20 +11,42 @@ function update_crate_id_data($outlet_order_ref, $crate_id, $order_date, $party_
     if (empty($distributor_id)) {
         $distributor_id = 0;
     }
-    $result = db_merge('outlet_order_crate')
-            ->key(array('outlet_order_no' => $outlet_order_ref,'distributor_id'=>$distributor_id))
-            ->fields(array(
-                'outlet_order_no' => $outlet_order_ref,
-                'crate_id' => $crate_id ? $crate_id : '',
-                'order_date' => $order_date ? $order_date : '',
-                'party_name' => $party_name ? $party_name : '',
-                'distributor_id' => $distributor_id ? $distributor_id : 0,
-                'facility_code' => $facility_code ? $facility_code : '',
-                'party_code' => $party_code ? $party_code : '',
-                'hul_code' => $hul_code ? $hul_code : '',
-                'created_time' => REQUEST_TIME,
-            ))
-            ->execute();
+    $query = db_select('outlet_order_crate', 'ooc');
+    $query->fields('ooc', array('id','crate_id'));
+    $query->condition('ooc.outlet_order_no', $outlet_order_ref);
+    $query->condition('ooc.distributor_id',$distributor_id);
+    $exist_id_crate = $query->execute()->fetchAllKeyed(0,1);
+        
+    if ($exist_id_crate) {
+        foreach($exist_id_crate as $id => $crate_exist){
+            $combine_crate = "$crate_exist, $crate_id";
+            $box_id_res = array_map('trim',array_filter(explode(',',$combine_crate)));
+            $box_id_arr = array_unique($box_id_res);
+            natsort($box_id_arr);
+            $box_id_final = implode($box_id_arr,', ');
+
+            $result = db_update('outlet_order_crate')
+                ->fields(array(
+                    'crate_id' => $box_id_final ? $box_id_final : '',
+                ))
+                ->condition('id', $id)
+                ->execute();
+        }
+    } else {
+        $result = db_insert('outlet_order_crate')
+                ->fields(array(
+                    'outlet_order_no' => $outlet_order_ref,
+                    'crate_id' => $crate_id ? $crate_id : '',
+                    'order_date' => $order_date ? $order_date : '',
+                    'party_name' => $party_name ? $party_name : '',
+                    'distributor_id' => $distributor_id ? $distributor_id : 0,
+                    'facility_code' => $facility_code ? $facility_code : '',
+                    'party_code' => $party_code ? $party_code : '',
+                    'hul_code' => $hul_code ? $hul_code : '',
+                    'created_time' => REQUEST_TIME,
+                ))
+                ->execute();
+    }
 
     $results['flag'] = '1';
     $results['result'] = 'Updated Successfully';
