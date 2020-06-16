@@ -4072,7 +4072,7 @@ function _get_bill_row_id_manual_using_reference_no($ref_no) {
     $query = db_select('dispatch_planning_api_data', 'dp');
     $query->fields('dp', array('id'));
     $query->condition('dp.referenceNo', $ref_no);
-    $query->condition('dp.updated_flag', 1, '>=');
+    $query->condition('dp.updated_flag', 0);
     $res = $query->execute()->fetchField();
     return $res;
 }
