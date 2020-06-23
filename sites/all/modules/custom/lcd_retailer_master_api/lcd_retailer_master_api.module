@@ -301,6 +301,7 @@ function moblity_outlet_api_cron() {
         $response = $response_data->data;
         masters_api_log_update($response, $sql_ins_id);
         $response_data = json_decode($response) ;
+        watchdog('moblity_outlet_api_cron', '<pre>' . print_r($response_data, TRUE) . '</pre>');
         $response_flag = ($response_data[0]->success == 1) ? 1 : 0;
         if (!empty($response_flag)) {
           $status_updated = db_update('mobility_server_api_retailer_cron') // Table name no longer needs {}
