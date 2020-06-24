@@ -148,8 +148,12 @@ function new_sku_wise_returns_form($form, &$form_state) {
       '#suffix' => '</div>',
       '#submit' => array('new_sku_wise_return_submit'),
     );
-
-    $header = array('SKU Code', 'Product Name', 'Loose EAN', 'MRP', 'To Be Returned Qty', 'Actual Returned Qty');
+    
+    if ($form_state['bill-wise'] == 1) {
+        $header = array('SKU Code', 'Product Name', 'MRP', 'To Be Returned Qty', 'Actual Returned Qty');
+    } else {
+        $header = array('SKU Code', 'Product Name', 'Loose EAN', 'MRP', 'To Be Returned Qty', 'Actual Returned Qty');
+    }
 
     if (!isset($form_state['sku_wise_return_confirm']['SKUs'])) {
       $form_state['sku_wise_return_confirm']['SKUs'] = array();
@@ -183,7 +187,9 @@ function new_sku_wise_returns_form($form, &$form_state) {
       }
       $form['bill_details']['#rows'][$key]['data'][] = $key;
       $form['bill_details']['#rows'][$key]['data'][] = $val['product_name'];
-      $form['bill_details']['#rows'][$key]['data'][] = $val['field_lb_ean_value'];
+      if ($form_state['bill-wise'] != 1) {
+       $form['bill_details']['#rows'][$key]['data'][] = $val['field_lb_ean_value'];
+      }
       $form['bill_details']['#rows'][$key]['data'][] = $val['mrp'];
 
       $form['bill_details']['#rows'][$key]['data'][] = array('data' => $val['to_be_return_qty'], 'class' => 'to_be_return_qty');
