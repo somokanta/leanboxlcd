@@ -149,7 +149,7 @@ function new_sku_wise_returns_form($form, &$form_state) {
       '#submit' => array('new_sku_wise_return_submit'),
     );
 
-    $header = array('SKU Code', 'Product Name', 'MRP', 'To Be Returned Qty', 'Actual Returned Qty');
+    $header = array('SKU Code', 'Product Name', 'Loose EAN', 'MRP', 'To Be Returned Qty', 'Actual Returned Qty');
 
     if (!isset($form_state['sku_wise_return_confirm']['SKUs'])) {
       $form_state['sku_wise_return_confirm']['SKUs'] = array();
@@ -183,6 +183,7 @@ function new_sku_wise_returns_form($form, &$form_state) {
       }
       $form['bill_details']['#rows'][$key]['data'][] = $key;
       $form['bill_details']['#rows'][$key]['data'][] = $val['product_name'];
+      $form['bill_details']['#rows'][$key]['data'][] = $val['field_lb_ean_value'];
       $form['bill_details']['#rows'][$key]['data'][] = $val['mrp'];
 
       $form['bill_details']['#rows'][$key]['data'][] = array('data' => $val['to_be_return_qty'], 'class' => 'to_be_return_qty');
@@ -780,6 +781,8 @@ function new_sku_wise_return_submit($form, &$form_state) {
     $putaway_group = $form_state['values']['putaway_group'];
     $query = db_select('dispatch_planning_item_details', 'dpi');
     $query->join('dispatch_planning_api_data', 'ad', 'dpi.trip_bill_reference = ad.id');
+    $query->leftjoin('field_data_field_lb_sku7_code', 'sku', 'dpi.sku_code = sku.field_lb_sku7_code_value');
+    $query->leftjoin('field_data_field_lb_ean', 'lb_ean', 'lb_ean.entity_id = sku.entity_id');
     //$query->join('node', 'dispatch_data', 'dispatch_data.title = ad.runsheet_number and dispatch_data.uid = ad.distributor_id');
    // $query->leftjoin('field_data_field_vrs_status', 'vs', 'vs.entity_id = dispatch_data.nid');
     //$query->condition('vs.field_vrs_status_value', $vrs_status);
@@ -816,6 +819,7 @@ function new_sku_wise_return_submit($form, &$form_state) {
     $query->fields('dpi', array('mrp'));
     $query->fields('ad', array('updated_flag'));
     $query->fields('ad', array('bill_number'));
+    $query->fields('lb_ean', array('field_lb_ean_value'));
     // net sales qty
     //$query->fields('dpi', array('sum_net_sales_quantity'));
     // farey delivered qty
@@ -823,9 +827,9 @@ function new_sku_wise_return_submit($form, &$form_state) {
     // Actual delivered qty both from farey or from manual edit screen.
     //$query->fields('dpi', array('res_sku_actual_quantity1'));
 
-    $query->addExpression('SUM(dpi.res_sku_actual_quantity1)', 'res_sku_actual_quantity1');
-    $query->addExpression('SUM(dpi.farey_delivered_qty)', 'farey_delivered_qty');
-    $query->addExpression('SUM(dpi.sum_net_sales_quantity)', 'sum_net_sales_quantity');
+    $query->addExpression('SUM(DISTINCT dpi.res_sku_actual_quantity1)', 'res_sku_actual_quantity1');
+    $query->addExpression('SUM(DISTINCT dpi.farey_delivered_qty)', 'farey_delivered_qty');
+    $query->addExpression('SUM(DISTINCT dpi.sum_net_sales_quantity)', 'sum_net_sales_quantity');
 
 //changed it to actual deliverd qty
 //$query->addExpression('SUM(dpi.sum_net_sales_quantity - dpi.farey_delivered_qty)', 'to_be_return_qty');
@@ -867,6 +871,7 @@ function new_sku_wise_return_submit($form, &$form_state) {
         $val['to_be_return_qty'] = $val['sum_net_sales_quantity'] - $val['farey_delivered_qty'];
       }
       $sku_result[$val['sku_code']]['product_name'] = $val['product_name'];
+      $sku_result[$val['sku_code']]['field_lb_ean_value'] = $val['field_lb_ean_value'];
       $sku_result[$val['sku_code']]['mrp'] = $val['mrp'];
       $sku_result[$val['sku_code']]['updated_flag'] = $val['updated_flag'];
       $sku_result[$val['sku_code']]['res_sku_actual_quantity1'] = $val['res_sku_actual_quantity1'];
