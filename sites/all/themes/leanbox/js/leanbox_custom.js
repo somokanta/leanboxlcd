@@ -17,6 +17,13 @@ jQuery(document).ready(function($){
     	$(".menu_dropdown").stop(true,true).slideUp();
     });
     
+    jQuery(".search_test").on("click", function() {
+        var e = jQuery.Event("keydown");
+        e.altKey = true; 
+        e.keyCode = 68;      
+        jQuery(document).trigger(e);
+    });
+
     $('.print-pdf').click(function (event){
         console.log("print");
         event.preventDefault();
