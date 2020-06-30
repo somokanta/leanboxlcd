@@ -1,0 +1,61 @@
+<?php
+
+
+function reverse_logistic_services_resources() {
+  $reverse_logistic_resource = array(
+    '#api_version' => 3002,
+  );
+    $reverse_logistic_resource = array(
+    'reverse-order' => array(
+      'actions' => array(
+        'reverse-order-api' => array(
+          'help' => 'Reverse order',
+          'callback' => 'reverse_order_data_callback',
+          'args' => array(
+            array(
+              'name' => 'data',
+              'type' => 'array',
+              'description' => 'Post data',
+              'source' => 'data',
+              'optional' => TRUE,
+            )
+           ),
+            'file' => array(
+              'type' => 'inc',
+              'module' => 'reverse_logistic',
+              'name' => 'includes/reverse_order_data'
+            ),
+            'access arguments' => array('reverse_order_api'),
+          ),
+        ),
+      ),
+  );
+  return $reverse_logistic_resource;
+}
+
+
+
+/**
+ * permission
+ */
+function reverse_logistic_permission() {
+
+  return array(
+    'reverse_order_api' => array(
+      'title' => t('Reverse Order Api'),
+      'description' => t('Reverse Order Api')
+    )
+  );
+}
+
+
+
+/**
+ * Implements of hook_views_api().
+ */
+function reverse_logistic_views_api() {
+   return array(
+     'api' => 3,
+     'path' => drupal_get_path('module', 'reverse_logistic') . '/views'
+   );
+}

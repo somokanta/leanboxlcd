@@ -1,0 +1,4 @@
+name = Reverse Logistic
+description = Reverse Logistic Module
+package = Custom
+core = 7.x
