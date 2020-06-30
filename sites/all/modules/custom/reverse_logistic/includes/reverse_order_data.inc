@@ -10,6 +10,7 @@ function reverse_order_data_callback($data) {
     $results['result'] = "0 Row Updated";
     watchdog('reverse_order', '<pre>' . print_r($data, TRUE) . '</pre>');
     foreach ($data as $value) {
+        watchdog('reverse_order inside', '<pre>' . print_r($value, TRUE) . '</pre>');
         $result = db_merge('reverse_order_data')
                 ->key(array('transaction_id' => $value['transaction_id'], 'transaction_line_id' => $value['transaction_line_id']))
                 ->fields(array(
