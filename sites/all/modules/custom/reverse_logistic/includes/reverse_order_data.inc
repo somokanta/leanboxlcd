@@ -22,6 +22,7 @@ function reverse_order_data_callback($data) {
                     'to_be_returned_qty' => $value['to_be_returned_qty'] ? $value['to_be_returned_qty'] : 0,
                     'pkm' => $value['pkm'] ? $value['pkm'] : '',
                     'reverse_order_date' => $value['reverse_order_date'] ? $value['reverse_order_date'] : 0,
+                    'order_type' => $value['order_type'] ? $value['order_type'] : '',
 
                     'distributor_id' => 0,
                     'received_through' => 0, //API
