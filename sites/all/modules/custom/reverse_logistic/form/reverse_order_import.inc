@@ -69,7 +69,7 @@ function reverse_order_import_form_validate($form, &$form_state) {
                 form_set_error('file_upload', t($message));
             } else {
                 foreach ($data as $key => $value) {
-
+dpm($value);
                     $bill_no = $value[0];
                     $party_code = $value[1];
                     $parent_party_code = $value[2];
