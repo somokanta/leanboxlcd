@@ -86,11 +86,11 @@ function reverse_order_import_form_validate($form, &$form_state) {
                         } else {
                             $bill_number = validate_content_title($bill_no, 'sales_register_data');
                             if (empty($bill_number)) {
-                                $error_message .= "Bill Number does not exist in Sale Register" . ($key + 2) . '<br>';
+                                $error_message .= "Bill Number does not exist in Sale Register at line" . ($key + 2) . '<br>';
                             } else {
                                 $nid = check_bill_exists_with_party($bill_number, 'sales_register_data', $party_code);
                                 if (empty($nid)) {
-                                    $error_msg = "Bill Number should belong to the same Parent Party Code";
+                                    $error_msg = "Bill Number and Parent Party Code is different in system for line" . ($key + 2) . '<br>';
                                 }
                             }
                         }
@@ -103,21 +103,21 @@ function reverse_order_import_form_validate($form, &$form_state) {
                     } else {
                         $hul_code = validate_content_title($parent_party_code, 'hul_code_master');
                         if (empty($hul_code)) {
-                            $error_message .= "Parent party Code does not exist in HUL Code Master" . ($key + 2) . '<br>';
+                            $error_message .= "Parent party Code does not exist in HUL Code Master at line" . ($key + 2) . '<br>';
                         }
                     }
                     if (empty($sku7_code)) {
                         $error_message .= "Sku7 code should not be empty at line " . ($key + 2) . '<br>';
                     }
                     if ($to_be_return_qty < 1) {
-                        $error_message .= "To be return qty should not be greater than zero " . ($key + 2) . '<br>';
+                        $error_message .= "To be return qty should not be greater than zero at line " . ($key + 2) . '<br>';
                     }else{
                         $delivered_qty = get_delivered_qty_from_bill_sku($bill_no, $sku7_code);
                         if($delivered_qty === FALSE){
-                            $error_msg .= 'Bill SKu combination is not present in System';
+                            $error_msg .= "Bill SKu combination is not present in System at line " . ($key + 2) . '<br>';
                         }else{
                             if($to_be_return_qty > $delivered_qty){
-                                $error_msg .= 'To be return Quantity can not be grater than Actual Delivered Quantity';
+                                $error_msg .= "To be return Quantity can not be grater than Actual Delivered Quantity at line " . ($key + 2) . '<br>';
                             }
                         }
                     }
