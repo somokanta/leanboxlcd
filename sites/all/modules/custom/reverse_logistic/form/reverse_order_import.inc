@@ -88,7 +88,9 @@ dpm($value);
                             if (empty($bill_number)) {
                                 $error_message .= "Bill Number does not exist in Sale Register at line" . ($key + 2) . '<br>';
                             } else {
-                                $nid = check_bill_exists_with_party($bill_number, 'sales_register_data', $party_code);
+                                $nid = check_bill_exists_with_party($bill_no, 'sales_register_data', $party_code);
+                                dpm($nid,$party_code);
+                                $error_message = 1;
                                 if (empty($nid)) {
                                     $error_msg = "Bill Number and Parent Party Code is different in system for line" . ($key + 2) . '<br>';
                                 }
