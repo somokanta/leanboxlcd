@@ -69,7 +69,6 @@ function reverse_order_import_form_validate($form, &$form_state) {
                 form_set_error('file_upload', t($message));
             } else {
                 foreach ($data as $key => $value) {
-dpm($value);
                     $bill_no = $value[0];
                     $party_code = $value[1];
                     $parent_party_code = $value[2];
@@ -89,10 +88,8 @@ dpm($value);
                                 $error_message .= "Bill Number does not exist in Sale Register at line" . ($key + 2) . '<br>';
                             } else {
                                 $nid = check_bill_exists_with_party($bill_no, 'sales_register_data', $party_code);
-                                dpm($nid,$party_code);
-                                $error_message = 1;
                                 if (empty($nid)) {
-                                    $error_msg = "Bill Number and Parent Party Code is different in system for line" . ($key + 2) . '<br>';
+                                    $error_message .= "Bill Number and Parent Party Code is different in system for line" . ($key + 2) . '<br>';
                                 }
                             }
                         }
@@ -116,10 +113,10 @@ dpm($value);
                     }else{
                         $delivered_qty = get_delivered_qty_from_bill_sku($bill_no, $sku7_code);
                         if($delivered_qty === FALSE){
-                            $error_msg .= "Bill SKu combination is not present in System at line " . ($key + 2) . '<br>';
+                            $error_message .= "Bill SKu combination is not present in System at line " . ($key + 2) . '<br>';
                         }else{
                             if($to_be_return_qty > $delivered_qty){
-                                $error_msg .= "To be return Quantity can not be grater than Actual Delivered Quantity at line " . ($key + 2) . '<br>';
+                                $error_message .= "To be return Quantity can not be grater than Actual Delivered Quantity at line " . ($key + 2) . '<br>';
                             }
                         }
                     }
