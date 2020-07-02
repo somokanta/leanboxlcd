@@ -1,6 +1,5 @@
 <?php
 
-
 function reverse_logistic_services_resources() {
   $reverse_logistic_resource = array(
     '#api_version' => 3002,
@@ -44,7 +43,11 @@ function reverse_logistic_permission() {
     'reverse_order_api' => array(
       'title' => t('Reverse Order Api'),
       'description' => t('Reverse Order Api')
-    )
+    ),
+    'Reverse Order Import' => array(
+      'title' => t('Reverse Order Import'),
+      'description' => t('Reverse Order Import')
+    )   
   );
 }
 
@@ -59,3 +62,60 @@ function reverse_logistic_views_api() {
      'path' => drupal_get_path('module', 'reverse_logistic') . '/views'
    );
 }
+
+
+function reverse_logistic_menu() {
+  $items = array();
+
+  $items['reverse-order-import'] = array(
+    'title' => 'Reverse Order Importer',
+    'description' => 'Reverse Order Importer',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('reverse_order_import_form'),
+    'access arguments' => array('Reverse Order Import'),
+    'file' => 'form/reverse_order_import.inc',
+  );
+  return $items;
+}
+
+function get_distributor_by_title($title,$type){
+  $query = db_select('node', 'n');
+  $query->condition('n.type', $type);
+  $query->condition('n.title', $hul_code);
+  $query->fields('n', array('uid'));
+  $result = $query->execute()->fetchField();
+  return $result;
+}
+
+function check_bill_exists_with_party($title, $type, $party) {
+    $query1 = db_select('node', 'n');
+    $query1->condition('n.type', $type);
+    $query1->condition('n.title', $title);
+    $query1->fields('n', array('nid'));
+    if ($party) {
+        $query1->join('field_data_field_sales_party_code', 'd', 'd.entity_id = n.nid');
+        $query1->condition('d.field_sales_party_code_value', $party);
+    }
+    $nid = $query1->execute()->fetchField();
+    return $nid;
+}
+
+function validate_content_title($title,$type){
+  $query = db_select('node', 'n');
+  $query->condition('n.type', $type);
+  $query->condition('n.title', $title);
+  $query->fields('n', array('title'));
+  $result = $query->execute()->fetchField();
+  return $result;
+}
+
+function get_delivered_qty_from_bill_sku($bill_no, $sku) {
+    $query = db_select('dispatch_planning_api_data', 'ad');
+    $query->join('dispatch_planning_item_details', 'itd', 'itd.trip_bill_reference = ad.id');
+    $query->condition('ad.bill_number', $bill_no, '=');
+    $query->condition('itd.sku_code', $sku, '=');
+    $query->fields('itd', array('farey_delivered_qty'));
+    $delivered_qty = $query->execute()->fetchField();
+  return $delivered_qty;
+}
+
