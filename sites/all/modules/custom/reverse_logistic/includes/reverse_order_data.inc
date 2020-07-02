@@ -13,18 +13,18 @@ function reverse_order_data_callback($data) {
         if ($value['order_type'] == 'Regular') {
             $nid = check_bill_exists_with_party($value['bill_number'], 'sales_register_data', '');
             if (empty($nid)) {
-                $error_msg .= "Bill Number is not present in System";
+                $error_msg .= "Bill Number is not present in System:".$value['bill_number'].'<br>';
             } else {
                 $nid = check_bill_exists_with_party($value['bill_number'], 'sales_register_data', $value['party_code']);
                 if (empty($nid)) {
-                    $error_msg .= "Bill Number should belong to the same Parent Party Code";
+                    $error_msg .= "Bill Number should belong to the same Parent Party Code".$value['bill_number'].'<br>';
                 }else{
-                    $delivered_qty = get_delivered_qty_from_bill_sku($bill_no, $sku);
+                    $delivered_qty = get_delivered_qty_from_bill_sku($value['bill_number'], $value['sku7_code']);
                     if($delivered_qty === FALSE){
-                        $error_msg .= 'Bill SKu combination is not present in System';
+                        $error_msg .= "Bill:".$value['bill_number']. " SKu:".$value['sku7_code']." combination is not present in System <br>";
                     }else{
                         if($value['to_be_returned_qty'] > $delivered_qty){
-                            $error_msg .= 'To be return Quantity can not be grater than Actual Delivered Quantity';
+                            $error_msg .= 'To be return Quantity can not be grater than Actual Delivered Quantity for '."Bill:".$value['bill_number']. " SKu:".$value['sku7_code']."<br>";
                         }
                     }
                 }
@@ -32,7 +32,7 @@ function reverse_order_data_callback($data) {
         }
         $hul = validate_content_title($value['parent_party_code'],'hul_code_master');
         if(empty($hul)){
-            $error_msg .= 'Parent party Code does not exist in HUL Code Master';
+            $error_msg .= 'Parent party Code'.$value['parent_party_code']. 'does not exist in HUL Code Master <br>';
         }
         
     }
