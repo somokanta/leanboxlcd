@@ -57,6 +57,16 @@ class bill_vs_trip_report extends views_handler_field {
                     case 'billtrip_reason_for_failure';
                         return $bill_trip_report['reason_for_failure'];
                         break;
+                    case 'first_attempt_date';
+                        $query = db_select('dispatch_planning_api_data', 'ad');
+                        $query->condition('ad.distributor_id', $distributor_id, '=');
+                        $query->condition('ad.bill_number', $bill_number, '=');
+                        $query->addExpression('MIN(ad.dispatch_date)', 'first_dispatch_date');
+                        $query->groupBy('ad.bill_number');
+                        $first_dispatch_date = $query->execute()->fetchField();
+                        $first_dispatch_date = !empty($first_dispatch_date) ? date('d-M-y', $first_dispatch_date) : '';
+                        return $first_dispatch_date;                      
+                        break;
 
                     default:
                         return '';
