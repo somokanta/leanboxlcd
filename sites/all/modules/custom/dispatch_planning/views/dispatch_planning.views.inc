@@ -6387,6 +6387,15 @@ $data['views']['global_facility_name'] = array(
             'handler' => 'bill_vs_trip_report',
         ),
     );
+    
+     $data['views']['first_attempt_date'] = array(
+        'title' => t('Bill vs Trip 1st attempt date'),
+        'help' => t('Bill vs Trip 1st attempt date'),
+        'real field' => 'id',
+        'field' => array(
+            'handler' => 'bill_vs_trip_report',
+        ),
+    );
   
   // ========= Van Planning API to SDR App START ============
 
