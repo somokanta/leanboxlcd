@@ -2691,6 +2691,9 @@ function _create_van_submit($form, &$form_state) {
           $node1->field_total_travel_time[LANGUAGE_NONE][0]['value'] = $_SESSION['park_stop'][$van]['time'] ? $_SESSION['park_stop'][$van]['time'] : $form_state['time_dist'][$van]['time'];
           $node1->field_total_distance[LANGUAGE_NONE][0]['value'] = $_SESSION['park_stop'][$van]['dist'] ? $_SESSION['park_stop'][$van]['dist'] : $form_state['time_dist'][$van]['dist'];
           $node1->field_delivery_boy_count[LANGUAGE_NONE][0]['value'] = $_SESSION['park_stop'][$van]['del_boy'] ? $_SESSION['park_stop'][$van]['del_boy'] :$form_state['time_dist'][$van]['del_boy'];
+          //New added
+          $node1->field_van_total_travel_time[LANGUAGE_NONE][0]['value'] = $_SESSION['park_stop'][$van]['van_total_time'] ? $_SESSION['park_stop'][$van]['van_total_time'] : $form_state['time_dist'][$van]['van_total_time'];
+          $node1->field_van_total_distance[LANGUAGE_NONE][0]['value'] = $_SESSION['park_stop'][$van]['van_total_dist'] ? $_SESSION['park_stop'][$van]['van_total_dist'] : $form_state['time_dist'][$van]['van_total_dist'];
         }
         else {
           $node1->field_sequence_method[LANGUAGE_NONE][0]['value'] = 0;

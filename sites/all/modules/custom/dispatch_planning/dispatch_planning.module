@@ -2300,6 +2300,7 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
         //$bill_sequence = $form_state['dispatch_planning']['bill_sequence_array'];
         $bill_sequence = $python_bill_sequence = $form_state['dispatch_planning']['python_bill_sequence_array'];
         //dpm($bill_sequence, 'bill_sequence: ');
+        $parkstop_count = (int) max(array_column($bill_sequence,'bill_seq_from_python'));
         $total_travel_time = $form_state['dispatch_planning']['total_travel_time'];
         $total_distance = $form_state['dispatch_planning']['total_distance'];
         $van_total_dist = $form_state['dispatch_planning']['van_total_dist'];
@@ -2355,6 +2356,7 @@ function dispatch_planning_form_save_submit($form, &$form_state) {
     $node->field_trip_creation_date[$node->language][0]['value'] = strtotime(date('Y/m/d 00:00:00'));
     $node->field_trip_executon_date[$node->language][0]['value'] = $trip_execution_date;
     $node->field_hht_id[$node->language][0]['nid'] = get_nid_from_hht_id($hht_id, $central_distributor_id);
+    $node->field_parkstop_count[LANGUAGE_NONE][0]['value'] = $parkstop_count;
 
     if ($seq_flag) {
         $node->field_sequence_method[$node->language][0]['value'] = 1;
