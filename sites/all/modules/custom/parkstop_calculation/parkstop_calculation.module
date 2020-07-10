@@ -374,6 +374,9 @@ function save_parkstop_time_distance($res_decode, $van, $del_boy_actual = NULL) 
 
   $in_area = $res_decode->VanInAreaKMs;
   $vantime = $res_decode->VanInAreaTime;
+    //New added  
+  $van_total_area = $res_decode->VanTotalKMs;
+  $van_total_times = $res_decode->VanTime;
 
   if (is_null($del_boy_actual)) {
     foreach ($vantime as $key => $val) {
@@ -386,9 +389,14 @@ function save_parkstop_time_distance($res_decode, $van, $del_boy_actual = NULL) 
     $time = $vantime->{$del_boy_actual . DeliveryBoysInAreaTime};
   }
 
+   $van_total_time = $van_total_times->{$del_boy_actual . DeliveryBoysTotalTime}; //new added
+  
   $_SESSION['park_stop'][$van]['del_boy'] = (int) $del_boy_actual;
   $_SESSION['park_stop'][$van]['time'] = round($time / 60, 2);
   $_SESSION['park_stop'][$van]['dist'] = round($in_area, 2);
+    //NEW added
+  $_SESSION['park_stop'][$van]['van_total_time'] = round($van_total_time / 60, 2);
+  $_SESSION['park_stop'][$van]['van_total_dist'] = round($van_total_area, 2);
 }
 
 function get_drs_bill_sequence_by_parkstop($res_decode, $van) {
