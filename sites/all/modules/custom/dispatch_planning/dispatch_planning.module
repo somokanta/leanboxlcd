@@ -1374,12 +1374,13 @@ function dispatch_planning_cron_process($res){
         $options = array('headers' => $request_headers, 'method' => 'POST', 'data' => $json_api_data, 'timeout'=> 300);
         $response_data = drupal_http_request($order_api_url, $options);
 
-        $response_data = $response_data->data;
-        if ($response_data) {
-            $api_success = json_decode($response_data);
-            $api_success = ($api_success->failCount == 0) ? 1 : 0;
+        $response = $response_data->data;
+        if ($response) {
+            $response_arr = json_decode($response);
+            $api_success = ($response_arr[0]->success === true) ? 1 : 0;
+            $request_flag = isset($response_arr[0]->success) ? 1: 0;
             // create response log entry
-            dispatch_planning_api_log_update($response_data, $sql_ins_id, $api_success);
+            dispatch_planning_api_log_update(json_encode($response_data), $sql_ins_id, $api_success, $request_flag);
         }
     }
   }
@@ -3692,15 +3693,17 @@ function dispatch_planning_api_log($json_api_data, $trip_id, $api_type, $dis_id,
  * 
  * @param $response_data (json_decode), $sql_ins_id (serial id)
  */
-function dispatch_planning_api_log_update($response_data, $sql_ins_id, $api_success) {
-    db_update('dispatch_planning_api_log')
-      ->fields(array(
-        'response_data' => $response_data,
-        'api_success' => $api_success,
-        'request_flag' => 1
-      ))
-      ->condition('id', $sql_ins_id, '=')
-      ->execute();
+function dispatch_planning_api_log_update($response_data, $sql_ins_id, $api_success,$request_flag) {
+  db_update('dispatch_planning_api_log')
+    ->fields(array(
+      'response_data' => $response_data,
+      'api_success' => $api_success,
+      'response_time' => time(),
+      'request_flag' => $request_flag
+    ))
+    ->expression('attempt', 'attempt + :no', array(':no' => 1))
+    ->condition('id', $sql_ins_id, '=')
+    ->execute();
 }
 
 /**
