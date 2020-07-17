@@ -1382,6 +1382,14 @@ function dispatch_planning_cron_process($res){
             // create response log entry
             dispatch_planning_api_log_update(json_encode($response_data), $sql_ins_id, $api_success, $request_flag);
         }
+        if(($response_data->code != 200) || ($response_data->code == 200 && $response_arr[0]->success !== TRUE)){
+            $msg .= t('Error: @err ', array('@err' => print_r($response_data, TRUE)));
+            $params['subject'] = variable_get('dispatch_api_failure_subject', 'Trip Dispatch Data is not send successfully');
+            $params['body'] = $msg;
+            $mail_to = variable_get('dispatch_api_failure_subject', 'abhishek.r@iksula.com');
+            $from = "MIS.HELPDESK@leanbox.in";
+            drupal_mail('adhoc_task', 'bill_date_missing', $mail_to, LANGUAGE_NONE, $params, $from);
+        }
     }
   }
 }

@@ -113,6 +113,18 @@ function dispatch_related_config_form($form, $form_state) {
     '#default_value' => variable_get('party_code_check', ''),
     //'#required' => TRUE,
   );
+  $form['dispatch_api_failure_subject'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Subject of Dispatch API Failure Email'),
+    '#description' => t('If Dispatch API fail, Email will be send with this Subject Line'),
+    '#default_value' => variable_get('dispatch_api_failure_subject', 'Trip Dispatch Data is not send successfully'),
+  ); 
+  $form['dispatch_api_failure_email'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Email IDs of Dispatch API Failure Email'),
+    '#description' => t('This email ids will be notified in case of failure'),
+    '#default_value' => variable_get('dispatch_api_failure_subject', 'abhishek.r@iksula.com'),
+  );
   return system_settings_form($form);
 }
 /**
