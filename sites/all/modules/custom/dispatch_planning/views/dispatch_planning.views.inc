@@ -377,7 +377,26 @@ function dispatch_planning_views_data() {
     'help' => t("unique identifiers."),
     // 'weight' => -10,
   );
-
+  
+//id
+  $data['dispatch_planning_api_log']['id'] = array(
+    'title' => t('ID'),
+    'help' => t('ID'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_numeric',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_numeric',
+    ),
+  );
+    
 
   // Order ID
   $data['dispatch_planning_api_log']['trip_id'] = array(
@@ -520,6 +539,43 @@ function dispatch_planning_views_data() {
     ),
   );
 
+      // loading_date
+  $data['dispatch_planning_api_log']['response_time'] = array(
+    'title' => t('Response Time'),
+    'help' => t('Response Time'),
+    'field' => array(
+      'handler' => 'views_handler_field_date',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort_date',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_date',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_filter_date',
+    ),
+  );
+
+  $data['dispatch_planning_api_log']['attempt'] = array(
+    'title' => t('Attempt'),
+    'help' => t('Attempt'),
+    'field' => array(
+      'handler' => 'views_handler_field_numeric',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_numberic',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_numeric',
+    ),
+  );
+  
   // Adding custom handler for PTL Report data
   $data['ptl_data_configuration']['table'] = array(
     'group' => t('PTL data configuration'),

@@ -2597,3 +2597,26 @@ function dispatch_planning_update_7151() {
     }
   }
 }
+
+
+function dispatch_planning_update_7152() {
+  $fields = array(
+      'response_time' => array(
+        'description' => t('Response time'),
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'attempt' => array(
+        'description' => t('No of Attempt'),
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+  );
+  foreach ($fields as $key => $field) {
+    if (!db_field_exists('dispatch_planning_api_log', $key)) {
+      db_add_field('dispatch_planning_api_log', $key, $field);
+    }
+  }
+}
