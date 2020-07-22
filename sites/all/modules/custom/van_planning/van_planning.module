@@ -132,7 +132,7 @@ function dispatch_related_config_form($form, $form_state) {
     '#type' => 'textarea',
     '#title' => t('Email IDs of Dispatch API Failure Email'),
     '#description' => t('This email ids will be notified in case of failure'),
-    '#default_value' => variable_get('dispatch_api_failure_subject', 'abhishek.r@iksula.com'),
+    '#default_value' => variable_get('dispatch_api_failure_email', 'abhishek.r@iksula.com'),
   );
   return system_settings_form($form);
 }
