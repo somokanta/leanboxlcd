@@ -1392,7 +1392,7 @@ function dispatch_planning_cron_process($res){
                     $msg .= t('Error: @err ', array('@err' => print_r($response_data, TRUE)));
                     $params['subject'] = variable_get('dispatch_api_failure_subject', 'Trip Dispatch Data is not send successfully');
                     $params['body'] = $msg;
-                    $mail_to = variable_get('dispatch_api_failure_subject', 'abhishek.r@iksula.com');
+                    $mail_to = variable_get('dispatch_api_failure_email', 'abhishek.r@iksula.com');
                     $from = "MIS.HELPDESK@leanbox.in";
                     drupal_mail('adhoc_task', 'bill_date_missing', $mail_to, LANGUAGE_NONE, $params, $from);
                 }
