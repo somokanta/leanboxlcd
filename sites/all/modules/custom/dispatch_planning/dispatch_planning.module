@@ -1390,7 +1390,9 @@ function dispatch_planning_cron_process($res){
                 $res = $query->execute()->fetchField();
                 if($res == 1){//Email send only first time
                     $msg .= t('Error: @err ', array('@err' => print_r($response_data, TRUE)));
-                    $params['subject'] = variable_get('dispatch_api_failure_subject', 'Trip Dispatch Data is not send successfully');
+                    $ref_no = json_decode($json_api_data)[0]->referenceNo;
+                    $subject_concate = " Reference No: $ref_no and Status Code: ".$response_data->code;
+                    $params['subject'] = variable_get('dispatch_api_failure_subject', 'Trip Dispatch Data is not send successfully'). $subject_concate;
                     $params['body'] = $msg;
                     $mail_to = variable_get('dispatch_api_failure_email', 'abhishek.r@iksula.com');
                     $from = "MIS.HELPDESK@leanbox.in";
