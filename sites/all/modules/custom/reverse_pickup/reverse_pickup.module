@@ -1,0 +1,28 @@
+<?php
+
+function reverse_pickup_menu() {
+  $items = array();
+
+  $items['reverse-pickup-import'] = array(
+    'title' => 'Reverse Pickup Importer',
+    'description' => 'Reverse Pickup Importer',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('reverse_pickup_import_form'),
+    'access arguments' => array('Reverse Pickup'),
+    'file' => 'form/reverse_pickup_import.inc',
+  );
+  return $items;
+}
+
+/**
+ * permission
+ */
+function reverse_pickup_permission() {
+
+  return array(
+    'Reverse Pickup' => array(
+      'title' => t('Reverse Pickup'),
+      'description' => t('Reverse Pickup')
+    )   
+  );
+}
