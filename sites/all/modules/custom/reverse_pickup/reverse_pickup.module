@@ -9,7 +9,7 @@ function reverse_pickup_menu() {
     'page callback' => 'drupal_get_form',
     'page arguments' => array('order_receive_import_form'),
     'access arguments' => array('Reverse Pickup'),
-    'file' => 'form/reverse_pickup_import.inc',
+    'file' => 'form/order_receive_import.inc',
   );
   return $items;
 }
