@@ -6,7 +6,7 @@
 
 function reverse_pickup_schema() {
 
-  $schema['reverse_pickup_data'] = array(
+  $schema['order_receive_data'] = array(
     'description' => 'Landing table for Reverse Pickup Data',
     'fields' => array(
       'id' => array(
