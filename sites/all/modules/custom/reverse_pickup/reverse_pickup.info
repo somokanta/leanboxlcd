@@ -1,0 +1,4 @@
+name = Reverse Pickup
+description = Reverse Pickup Module
+package = Custom
+core = 7.x

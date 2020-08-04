@@ -1,0 +1,120 @@
+<?php
+
+/*
+ * Implement hook_schema.
+ */
+
+function reverse_pickup_schema() {
+
+  $schema['reverse_pickup_data'] = array(
+    'description' => 'Landing table for Reverse Pickup Data',
+    'fields' => array(
+      'id' => array(
+        'description' => 'The primary identifier for a data',
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'order_creation_date' => array(
+       'description' => 'Order Creation Date',
+       'type' => 'int',
+       'not null' => TRUE,
+       'default' => 0,
+      ),
+      'parent_bill_number' => array(
+        'description' => t('Parent Bill Number'),
+        'type' => 'varchar',
+        'length' => 100,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'child_order_id' => array(
+        'description' => t('Child Order ID'),
+        'type' => 'varchar',
+        'length' => 100,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'order_type' => array(
+       'description' => t('Order Type'),
+       'type' => 'varchar',
+       'length' => 50,
+       'not null' => TRUE,
+       'default' => '',
+      ), 
+      'parent_party_code' => array(
+        'description' => t('Parent Party Code'),
+        'type' => 'varchar',
+        'length' => 100,
+        'not null' => TRUE,
+        'default' => '',
+      ), 
+     'party_code' => array(
+        'description' => t('Party Code'),
+        'type' => 'varchar',
+        'length' => 100,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+     'distributor_id' => array(
+        'description' => 'Distributor ID',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+     'lb_sku_id' => array(
+        'description' => 'LB SKU ID',
+        'type' => 'varchar',
+        'length' => 100,
+        'not null' => FALSE,
+        'default' => '',
+      ),  
+      'pkd' => array(
+        'description' => 'PKD',
+        'type' => 'int',
+        'not null' => FALSE,
+        'default' => 0,
+      ),
+      'sku7_code' => array(
+        'description' => t('SKU7 Code'),
+        'type' => 'varchar',
+        'length' => 100,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'product_name' => array(
+        'description' => 'PRODUCT NAME',
+        'type' => 'varchar',
+        'length' => 255,
+      ),
+      'mrp' => array(
+        'description' => t('MRP'),
+        'type' => 'varchar',
+        'length' => 25,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'return_qty' => array(
+        'description' => t('Return Qty'),
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'created_time' => array(
+       'description' => 'Created Time',
+       'type' => 'int',
+       'not null' => TRUE,
+       'default' => 0,
+      ), 
+     'type' => array(
+       'description' => '0 API 1 Uploader',
+       'type' => 'int',
+       'size' => 'tiny',
+       'not null' => TRUE,
+       'default' => 0,
+     ),  
+    ),
+    'primary key' => array('id'),
+  );
+
+  return $schema;
+}
