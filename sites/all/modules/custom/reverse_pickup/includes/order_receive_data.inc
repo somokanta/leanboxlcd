@@ -14,7 +14,7 @@ function order_receive_data_callback($data) {
         //if ($value['Order Type'] == 'Forward') {
             $bill_number = validate_content_title($value['Parent Bill No.'], 'sales_register_data');;
             if (empty($bill_number)) {
-                $error_msg .= "Bill Number is not present in System:".$value['Parent Bill No.'].'<br>';
+                $error_msg .= "Bill Number is not present in System:".$value['Parent Bill No.']."<br>";
             } else {
                 $nid = check_bill_exists_with_party($value['Parent Bill No.'], 'sales_register_data', $value['Party Code']);
                 if (empty($nid)) {
@@ -22,10 +22,10 @@ function order_receive_data_callback($data) {
                 }else{
                     $delivered_qty = get_order_qty_from_bill_sku($value['Parent Bill No.'], $value['SKU7'],$distributor_id);
                     if($delivered_qty === FALSE){
-                        $error_msg .= "Bill:".$value['Parent Bill No.']. " SKu:".$value['SKU7']." combination is not present in System <br>";
+                        $error_msg .= "Bill: ".$value['Parent Bill No.']. " SKu: ".$value['SKU7']." combination is not present in System <br>";
                     }else{
                         if($value['to_be_returned_qty'] > $delivered_qty){
-                            $error_msg .= 'To be return Quantity can not be grater than Actual Delivered Quantity for '."Bill:".$value['Parent Bill No.']. " SKu:".$value['SKU7']."<br>";
+                            $error_msg .= "To be return Quantity can not be grater than Actual Delivered Quantity for Bill: ".$value['Parent Bill No.']. " SKu: ".$value['SKU7']."<br>";
                         }
                     }
                 }
@@ -33,7 +33,7 @@ function order_receive_data_callback($data) {
         //}
         $hul = validate_content_title($value['Parent Party Code/ HUL Code'],'hul_code_master');
         if(empty($hul)){
-            $error_msg .= 'Parent party Code'.$value['Parent Party Code/ HUL Code']. 'does not exist in HUL Code Master <br>';
+            $error_msg .= "Parent party Code ".$value['Parent Party Code/ HUL Code']. " does not exist in HUL Code Master <br>";
         }
         
     }
@@ -69,7 +69,7 @@ function order_receive_data_callback($data) {
                         'mrp' => $mrp ? $mrp : '',                    
                         'return_qty' => $return_qty ? $return_qty : '',                    
                         'distributor_id' => $distributor_id,
-                        'type' => 1, //Uploader
+                        'type' => 0, //API
                         'created_time' => REQUEST_TIME
                     ))
                     ->execute();
