@@ -15,6 +15,41 @@ function reverse_pickup_menu() {
 }
 
 /**
+ * Service for reverse pickup
+ */
+function reverse_pickup_services_resources() {
+  $reverse_pickup_resource = array(
+    '#api_version' => 3002,
+  );
+    $reverse_pickup_resource = array(
+    'order-receive' => array(
+      'actions' => array(
+        'order-receive-api' => array(
+          'help' => 'Order',
+          'callback' => 'order_receive_data_callback',
+          'args' => array(
+            array(
+              'name' => 'data',
+              'type' => 'array',
+              'description' => 'Post data',
+              'source' => 'data',
+              'optional' => TRUE,
+            )
+           ),
+            'file' => array(
+              'type' => 'inc',
+              'module' => 'reverse_pickup',
+              'name' => 'includes/order_receive_data'
+            ),
+            'access arguments' => array('Order Receive API'),
+          ),
+        ),
+      ),
+  );
+  return $reverse_pickup_resource;
+}
+
+/**
  * permission
  */
 function reverse_pickup_permission() {
@@ -23,6 +58,10 @@ function reverse_pickup_permission() {
     'Reverse Pickup' => array(
       'title' => t('Reverse Pickup'),
       'description' => t('Reverse Pickup')
+    ),
+    'Order Receive API' => array(
+      'title' => t('Order Receive API'),
+      'description' => t('Order Receive API')
     )   
   );
 }
@@ -78,4 +117,15 @@ function check_bill_exists_with_party($title, $type, $party) {
     }
     $nid = $query1->execute()->fetchField();
     return $nid;
+}
+
+//will use this function if we have to check delivered qty
+function get_delivered_qty_from_bill_sku($bill_no, $sku) {
+    $query = db_select('dispatch_planning_api_data', 'ad');
+    $query->join('dispatch_planning_item_details', 'itd', 'itd.trip_bill_reference = ad.id');
+    $query->condition('ad.bill_number', $bill_no, '=');
+    $query->condition('itd.sku_code', $sku, '=');
+    $query->fields('itd', array('farey_delivered_qty'));
+    $delivered_qty = $query->execute()->fetchField();
+  return $delivered_qty;
 }
