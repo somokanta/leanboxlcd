@@ -12,6 +12,9 @@ function order_receive_data_callback($data) {
     foreach ($data as $value) {
         $distributor_id = get_distributor_by_title($value['Parent Party Code/ HUL Code'], 'hul_code_master');
         //if ($value['Order Type'] == 'Forward') {
+            if(!($value['Order Type'] == 'Forward' || $value['Order Type'] == 'Reverse')){
+                $error_msg .= "Order type value should be Forward or Reverse <br>";
+            }
             $bill_number = validate_content_title($value['Parent Bill No.'], 'sales_register_data');;
             if (empty($bill_number)) {
                 $error_msg .= "Bill Number is not present in System:".$value['Parent Bill No.']."<br>";
