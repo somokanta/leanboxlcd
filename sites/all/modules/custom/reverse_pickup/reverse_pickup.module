@@ -26,3 +26,56 @@ function reverse_pickup_permission() {
     )   
   );
 }
+
+
+/**
+ * Implements of hook_views_api().
+ */
+function reverse_pickup_views_api() {
+   return array(
+     'api' => 3,
+     'path' => drupal_get_path('module', 'reverse_pickup') . '/views'
+   );
+}
+
+function get_order_qty_from_bill_sku($bill_no, $sku, $distributor_id) {
+    $query = db_select('custom_billing_data', 'cb');
+    $query->condition('cb.bill_number', $bill_no, '=');
+    $query->condition('cb.sku7_code', $sku, '=');
+    $query->condition('cb.distributor_id', $distributor_id, '=');
+    $query->fields('cb', array('Sum_of_TOTAL_SALES_QTY'));
+    $delivered_qty = $query->execute()->fetchField();
+    return $delivered_qty;
+}
+
+function get_distributor_by_title($title,$type){
+  $query = db_select('node', 'n');
+  $query->condition('n.type', $type);
+  $query->condition('n.title', $title);
+  $query->fields('n', array('uid'));
+  $result = $query->execute()->fetchField();
+  return $result;
+}
+
+
+function validate_content_title($title,$type){
+  $query = db_select('node', 'n');
+  $query->condition('n.type', $type);
+  $query->condition('n.title', $title);
+  $query->fields('n', array('title'));
+  $result = $query->execute()->fetchField();
+  return $result;
+}
+
+function check_bill_exists_with_party($title, $type, $party) {
+    $query1 = db_select('node', 'n');
+    $query1->condition('n.type', $type);
+    $query1->condition('n.title', $title);
+    $query1->fields('n', array('nid'));
+    if ($party) {
+        $query1->join('field_data_field_sales_party_code', 'd', 'd.entity_id = n.nid');
+        $query1->condition('d.field_sales_party_code_value', $party);
+    }
+    $nid = $query1->execute()->fetchField();
+    return $nid;
+}
