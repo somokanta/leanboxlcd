@@ -74,6 +74,7 @@ function order_receive_import_form_validate($form, &$form_state) {
             } else {
                 foreach ($data as $key => $value) {
                     $parent_bill_no = $value[1];
+                    $child_order_id = $value[2];
                     $party_code = $value[5];
                     $parent_party_code = $value[4];
                     $sku7_code = $value[8];
@@ -115,7 +116,7 @@ function order_receive_import_form_validate($form, &$form_state) {
                     if ($return_qty < 1) {
                         $error_message .= "Return qty should not be greater than zero at line " . ($key + 2) . '<br>';
                     }else{
-                        $delivered_qty = get_order_qty_from_bill_sku($parent_bill_no, $sku7_code, $distributor_id);
+                        $delivered_qty = get_delivered_qty_from_bill_sku($parent_bill_no, $sku7_code, $distributor_id);
                         if($delivered_qty === FALSE){
                             $error_message .= "Bill SKU combination is not present in System at line " . ($key + 2) . '<br>';
                         }else{
@@ -134,6 +135,22 @@ function order_receive_import_form_validate($form, &$form_state) {
                     if (empty($order_type)) {
                         $error_message .= "Order Type should not be empty at line " . ($key + 2) . '<br>';
                     }
+                    
+                    if (empty($child_order_id)) {
+                        $error_message .= "Child Order should not be empty at line " . ($key + 2) . '<br>';
+                    }
+                    
+                    $child_order_res = check_child_order_in_order_receive($child_order_id, $distributor_id);
+                    if ($child_order_res) {
+                        $error_message .= "Child Order $child_order_id already uploaded  at line" . ($key + 2) . '<br>';
+                    }
+                    
+                    $child_order_sales_register = check_child_order_in_sales_register($child_order_id, $distributor_id);
+                    if ($child_order_sales_register) {
+                        $error_message .= "Child Order $child_order_id already present in sales register  at line" . ($key + 2) . '<br>';
+                    }
+                    
+                    
 
 //                    $unique_comb = $bill_no . $parent_party_code . $sku7_code . $pkm . $order_type;
 //                    if (array_key_exists($unique_comb, $res['unique_combination'])) {

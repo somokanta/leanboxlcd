@@ -120,12 +120,33 @@ function check_bill_exists_with_party($title, $type, $party) {
 }
 
 //will use this function if we have to check delivered qty
-function get_delivered_qty_from_bill_sku($bill_no, $sku) {
+function get_delivered_qty_from_bill_sku($bill_no, $sku, $distributor_id) {
     $query = db_select('dispatch_planning_api_data', 'ad');
     $query->join('dispatch_planning_item_details', 'itd', 'itd.trip_bill_reference = ad.id');
     $query->condition('ad.bill_number', $bill_no, '=');
+    $query->condition('ad.distributor_id', $distributor_id, '=');
     $query->condition('itd.sku_code', $sku, '=');
     $query->fields('itd', array('farey_delivered_qty'));
     $delivered_qty = $query->execute()->fetchField();
   return $delivered_qty;
+}
+
+function check_child_order_in_order_receive($child_order_id, $distributor_id) {
+    $query = db_select('order_receive_data', 'ord');
+    $query->condition('ord.child_order_id', $child_order_id, '=');
+    $query->condition('ord.distributor_id', $distributor_id, '=');
+    $query->fields('ord', array('child_order_id'));
+    $res = $query->execute()->fetchField();
+  return $res;
+}
+
+function check_child_order_in_sales_register($child_order_id, $distributor_id) {
+    $query = db_select('field_data_field_child_order_id', 'fco');
+    $query->join('node', 'n', 'fco.entity_id = n.nid');
+    $query->condition('fco.bundle', 'sales_register_data', '=');
+    $query->condition('fco.field_child_order_id_value', $child_order_id, '=');
+    $query->condition('n.uid', $distributor_id, '=');
+    $query->fields('fco', array('field_child_order_id_value'));
+    $res = $query->execute()->fetchField();
+  return $res;
 }
