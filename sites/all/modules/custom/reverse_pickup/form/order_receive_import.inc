@@ -41,10 +41,10 @@ function order_receive_import_form_validate($form, &$form_state) {
 
     $header_array_from_xsd = array(
         'Order Creation Date',
-        'Parent Bill No.', 
+        'Parent Bill No', 
         'Child Order ID', 
         'Order Type', 
-        'Parent Party Code/ HUL Code',
+        'Parent Party Code',
         'Party Code',
         'LBSKUID',
         'PKD',
@@ -224,11 +224,11 @@ function order_receive_process($data, $file_name, &$context) {
 
     foreach ($data as $key => &$value) {
         $order_creation_date = trim($value['Order Creation Date']);
-        $parent_bill_number = trim($value['Parent Bill No.']);
+        $parent_bill_number = trim($value['Parent Bill No']);
         $child_order_id = trim($value['Child Order ID']);
         $order_type = trim($value['Order Type']);
         $party_code = trim($value['Party Code']);
-        $parent_party_code = trim($value['Parent Party Code/ HUL Code']);
+        $parent_party_code = trim($value['Parent Party Code']);
         $lb_sku_id = trim($value['LBSKUID']);
         $pkd = trim($value['PKD']); 
         $sku7_code = trim($value['SKU7']); 
