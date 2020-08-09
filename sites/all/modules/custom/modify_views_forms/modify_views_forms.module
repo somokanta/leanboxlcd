@@ -637,7 +637,10 @@ function validate_working_day($form, &$form_state) {
                 }
             }
             $type = 'vehicle_master';
-            $master_nid = get_nid_from_title($vehicle_number,$type);
+            //newly added
+            global $user;
+            $dis_id = change_feeds_import_get_distributor_id($user->uid);
+            $master_nid = get_nid_from_title($vehicle_number,$type, $dis_id);
             $type = 'vehicle_extra_working';
             $start_period = strtotime($dispatch_date);
             // checking already added this date in extra working
