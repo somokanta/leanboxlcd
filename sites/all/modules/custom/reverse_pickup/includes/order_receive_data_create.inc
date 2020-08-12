@@ -128,6 +128,7 @@ function insert_tester_order_data_in_custom_billing_table($new_bill_number, $ord
     if($bill_value){
         $node = node_load($nid);
         $node->field_bill_value[LANGUAGE_NONE][0]['value'] = $bill_value;
+        $node->field_bill_net_sales[LANGUAGE_NONE][0]['value'] = $bill_value;
         node_save($node);
     }
 
