@@ -48,7 +48,7 @@ function insert_tester_order_data_in_sales_register($data) {
     $node->field_sales_party_code[LANGUAGE_NONE][0]['value'] = $data['party_code'];
     $node->field_sales_updated_date[LANGUAGE_NONE][0]['value'] = time();
     //$node->field_crate_id['und'][0]['value'] = $data['box_id'] ? $data['box_id'] : '';
-    //$node->field_outlet_order_no['und'][0]['value'] = $data['tester_order_number']; //Pending //If required we can fetch from parent order
+    $node->field_outlet_order_no['und'][0]['value'] = $data['child_order_id'];
     $node->field_billing_van[LANGUAGE_NONE][0]['value'] = 'Van - 1';
     $node->field_bill_net_sales[LANGUAGE_NONE][0]['value'] = 0;
 
@@ -59,12 +59,12 @@ function insert_tester_order_data_in_sales_register($data) {
     node_save($node);
 
     //Now insert Custom Billing Detailss
-    insert_tester_order_data_in_custom_billing_table($new_bill_number, $data);
+    insert_tester_order_data_in_custom_billing_table($new_bill_number, $data, $node->nid);
 }
 
-function insert_tester_order_data_in_custom_billing_table($new_bill_number, $order_data) {
+function insert_tester_order_data_in_custom_billing_table($new_bill_number, $order_data, $nid) {
     $distributor_id = get_distributor_by_title($order_data['parent_party_code'], 'hul_code_master');
-
+    $bill_value = 0;
     $query = db_select('order_receive_data', 'a');
     $query->fields('a');
     $query->condition('a.parent_bill_number', $order_data['parent_bill_number'], '=');
@@ -84,6 +84,7 @@ function insert_tester_order_data_in_custom_billing_table($new_bill_number, $ord
 //                 (1+($data['Sum_of_TAX_PERCENTAGE']/100)))) / $data['Sum_of_TOTAL_SALES_QTY'])
 //              ,10);
         try {
+            $bill_value = $bill_value + ($previous_details['tur'] * $data['return_qty']);
             db_insert('custom_billing_data')
                     ->fields(array(
                         'vehicle' => 'Van - 1',
@@ -123,6 +124,11 @@ function insert_tester_order_data_in_custom_billing_table($new_bill_number, $ord
         } catch (Exception $ex) {
             //you can trigger an email if required
         }
+    }
+    if($bill_value){
+        $node = node_load($nid);
+        $node->field_bill_value[LANGUAGE_NONE][0]['value'] = $bill_value;
+        node_save($node);
     }
 
     db_delete('order_receive_data')
