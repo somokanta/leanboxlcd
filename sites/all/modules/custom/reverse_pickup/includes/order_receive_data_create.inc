@@ -26,8 +26,8 @@ function insert_tester_order_data_in_sales_register($data) {
     $query->condition('pb.field_parent_bill_number_value', $data['parent_bill_number']);
     $query->condition('n.uid', $distributor_id);
     $query->fields('n', array('nid'));
-
     $seq_result = $query->execute()->fetchCol();
+    
     $seq_num = $seq_record ? (count($seq_result) + 1) : 1;
     $seq = str_pad($seq_num, 2, '0', STR_PAD_LEFT);
     $new_bill_number = "R" . $data['parent_bill_number'] . $data['parent_party_code'] . $seq;
