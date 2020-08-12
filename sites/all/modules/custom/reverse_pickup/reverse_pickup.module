@@ -11,6 +11,13 @@ function reverse_pickup_menu() {
     'access arguments' => array('Reverse Pickup'),
     'file' => 'form/order_receive_import.inc',
   );
+  $items['order-receive-data-create'] = array(
+    'title' => '',
+    'page callback' => 'order_receive_data_create_callback',
+    'access callback' => TRUE,
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'includes/order_receive_data_create.inc',
+  );
   return $items;
 }
 
