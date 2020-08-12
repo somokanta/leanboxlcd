@@ -148,12 +148,12 @@ function check_child_order_in_order_receive($child_order_id, $distributor_id) {
 }
 
 function check_child_order_in_sales_register($child_order_id, $distributor_id) {
-    $query = db_select('field_data_field_child_order_id', 'fco');
+    $query = db_select('field_data_field_outlet_order_no', 'fco');
     $query->join('node', 'n', 'fco.entity_id = n.nid');
     $query->condition('fco.bundle', 'sales_register_data', '=');
-    $query->condition('fco.field_child_order_id_value', $child_order_id, '=');
+    $query->condition('fco.field_outlet_order_no_value', $child_order_id, '=');
     $query->condition('n.uid', $distributor_id, '=');
-    $query->fields('fco', array('field_child_order_id_value'));
+    $query->fields('fco', array('field_outlet_order_no_value'));
     $res = $query->execute()->fetchField();
   return $res;
 }
