@@ -215,6 +215,37 @@ function reverse_pickup_views_data() {
             'handler' => 'views_handler_filter_date',
         ),
     );
+    
+    $data['order_receive_data']['beat_name'] = array(
+        'title' => t('Beat Name'),
+        'help' => t('Beat Name'),
+        'field' => array(
+            'handler' => 'views_handler_field',
+        ),
+        'sort' => array(
+            'handler' => 'views_handler_sort',
+        ),
+        'filter' => array(
+            'handler' => 'views_handler_filter_string',
+        ),
+    );
+
+
+    $data['order_receive_data']['flag'] = array(
+        'title' => t('Flag'),
+        'help' => t('Flag'),
+        'field' => array(
+            'handler' => 'views_handler_field',
+        ),
+        'sort' => array(
+            'handler' => 'views_handler_sort',
+        ),
+        'filter' => array(
+            'handler' => 'views_handler_filter_string',
+        ),
+    );
+    
+    
     $data['order_receive_data']['date_filter'] = array(
         'group' => t('Date'),
         'title' => t('Date (!base_table)', array('!base_table' => 'order_receive_data')),
