@@ -1,0 +1,121 @@
+<?php
+
+/**
+ * @file
+ * Module file for services_request_token_auth module.
+ */
+
+/**
+ * Implements hook_services_authentication().
+ */
+function services_request_token_auth_services_authentication_info() {
+  return array(
+    'title' => t('Request-specific token authorisation'),
+    'description' => t('Request-specific token is sent in each request.'),
+    'authenticate_call' => '_services_request_token_auth_authenticate_call',
+    'security_settings' => '_services_request_token_auth_security_settings',
+    'default_security_settings' => '_services_request_token_auth_default_security_settings',
+  );
+}
+
+/**
+ * Authorises a call using request-specific token to verify the request.
+ *
+ * @param array $settings
+ *   The settings for the authorisation module.
+ * @param array $method
+ *   The method that's being called.
+ * @param array $args
+ *   The arguments that are being used to call the method.
+ *
+ * @return void|string
+ *   Returns nothing, or a error message if authorisation fails.
+ *
+ * @see services_request_token_auth_services_authentication_info()
+ */
+function _services_request_token_auth_authenticate_call($settings, $method, $args) {
+  // Get the original request body.
+  $endpoint_path = services_get_server_info('endpoint_path', '');
+  $context = new ServicesContext($endpoint_path);
+  $context->buildFromGlobals();
+  $request_body = $context->getRequestBody();
+
+  // Get the token value received in the request.
+  $token_header_name = _services_request_token_auth_header_name($settings['token_header']);
+  $received_token = $context->getServerVariable($token_header_name);
+  if (!$received_token) {
+    return t('Missing token value.');
+  }
+
+  // Calculate local token from the received request body.
+  $local_token = sha1($settings['token_key']);
+
+  // If received token value does not match the value calculated
+  // from the request body, return an error.
+  if ($received_token != $local_token) {
+    return t('Invalid token value.');
+  }
+}
+
+/**
+ * Returns a processed name of the HTTP header field returned by the server.
+ *
+ * @param string $token_header_name
+ *   A header name sent in the request.
+ *
+ * @return string
+ *   A processed header name returned by the server.
+ */
+function _services_request_token_auth_header_name($token_header_name) {
+  return strtoupper(str_replace('-', '_', 'http-' . $token_header_name));
+}
+
+/**
+ * Returns an associative array of Form API elements for a settings form.
+ *
+ * @see services_request_token_auth_services_authentication_info()
+ */
+function _services_request_token_auth_default_security_settings() {
+  return array(
+    'token_header' => 'X-Services-Token',
+    'token_key' => '',
+  );
+}
+
+/**
+ * Returns an array with the default settings for the auth module.
+ *
+ * @see services_request_token_auth_services_authentication_info()
+ */
+function _services_request_token_auth_security_settings($settings, &$form_state) {
+  $form = array();
+  $token_value = sha1($settings['token_key']);
+
+  $form['token_header'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Token header name'),
+    '#description' => t('The HTTP header field name which the token should be sent in.'),
+    '#required' => TRUE,
+    '#default_value' => $settings['token_header'],
+  );
+
+  $form['token_key'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Token key'),
+    '#description' => t('The token key value used together with request body to generate its SHA signature. The longer the key the more secure the token will be.'),
+    '#required' => TRUE,
+    '#default_value' => $settings['token_key'],
+  );
+  
+  $form['token_value'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Token value'),
+    '#description' => t('The token value of the generated SHA signature'),
+//    '#required' => TRUE,
+    '#attributes' => array('readonly' => 'readonly'),  
+    '#default_value' => $token_value,
+  );
+  
+
+  return $form;
+}
