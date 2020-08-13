@@ -123,7 +123,7 @@ function order_receive_import_form_validate($form, &$form_state) {
                             $error_message .= "Bill SKU combination is not present in System at line " . ($key + 2) . '<br>';
                         }else{
                             if($return_qty > $delivered_qty){
-                               // $error_message .= "Return Quantity can not be greater than Actual Delivered Quantity at line " . ($key + 2) . '<br>';
+                                $error_message .= "Return Quantity can not be greater than Actual Delivered Quantity at line " . ($key + 2) . '<br>';
                             }
                         }
                     }
