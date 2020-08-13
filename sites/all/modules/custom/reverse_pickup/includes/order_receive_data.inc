@@ -26,11 +26,11 @@ function order_receive_data_callback($data) {
                     $child_order_id = trim($value['Child Order ID']);
                     $child_order_res = check_child_order_in_order_receive($child_order_id, $distributor_id);
                     if ($child_order_res) {
-                        $error_message .= "Child Order $child_order_id already exist<br>";
+                        $error_msg .= "Child Order $child_order_id already exist<br>";
                     }else{
                         $child_order_sales_register = check_child_order_in_sales_register($child_order_id, $distributor_id);
                         if ($child_order_sales_register) {
-                            $error_message .= "Child Order $child_order_id already exist<br>";
+                            $error_msg .= "Child Order $child_order_id already exist<br>";
                         }
                     }
                     //Child level Validation
