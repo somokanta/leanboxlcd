@@ -73,11 +73,13 @@ function insert_tester_order_data_in_custom_billing_table($new_bill_number, $ord
     $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
 
     foreach ($res as $key => $data) {
-        $previous_data = db_query("select tur,BASEPACK_CODE,PRICELIST_GROUP,PRODUCT_DIVISION,PRODUCT_CATEGORY,PRODUCT_SUB_CATEGORY,line_level_value from custom_billing_data where distributor_id = $distributor_id and  bill_number = '" . $data['parent_bill_number'] . "' and  sku7_code = '" . $data['sku7_code'] . "' limit 1")->fetchAll(PDO::FETCH_ASSOC);
+        $previous_data = db_query("select tur,BASEPACK_CODE,PRICELIST_GROUP,PRODUCT_DIVISION,PRODUCT_CATEGORY,PRODUCT_SUB_CATEGORY,Derived_NET_SALES_KGS,Derived_NET_SALES_VOLUME,Sum_of_TOTAL_SALES_QTY,line_level_value from custom_billing_data where distributor_id = $distributor_id and  bill_number = '" . $data['parent_bill_number'] . "' and  sku7_code = '" . $data['sku7_code'] . "' limit 1")->fetchAll(PDO::FETCH_ASSOC);
         $previous_details = $previous_data[0];
         // For weight and volume calculation
-        $sku_wt = 0;
-        $sku_vl = 0;
+
+        $sku_wt = ($previous_details['Derived_NET_SALES_KGS'] / $previous_details['Sum_of_TOTAL_SALES_QTY']) * $data['return_qty'];
+        $sku_vl = ($previous_details['Derived_NET_SALES_VOLUME'] / $previous_details['Sum_of_TOTAL_SALES_QTY']) * $data['return_qty'];
+
         //TP to host calculation for line level value
 //            $line_level_value = round(
 //              (($data['Sum_of_NET_SALES_VALUE'] - 
@@ -108,12 +110,12 @@ function insert_tester_order_data_in_custom_billing_table($new_bill_number, $ord
                         'Sum_of_SALES_FREE_QTY' => 0,
                         'Sum_of_NET_SALES_VALUE' => ($previous_details['tur'] * $data['return_qty']),
                         'Sum_of_NET_SALES_CASES' => 0, //Pending
-                        'Sum_of_NET_SALES_KGS' => 0, //Pending
+                        'Sum_of_NET_SALES_KGS' => $sku_wt ? round($sku_wt, 2) : 0,
                         'Sum_of_SCHEME_DISCOUNT' => 0,
                         'Sum_of_OTHER_DISCOUNT' => 0,
                         //'Sum_of_TAX_PERCENTAGE' => $data['Sum_of_TAX_PERCENTAGE'],
-                        'Derived_NET_SALES_KGS' => 0,//Pending $sku_wt ? round($sku_wt,2) : 0,
-                        'Derived_NET_SALES_VOLUME' => 0,//Pending $sku_vl ? round($sku_vl,2) : 0,
+                        'Derived_NET_SALES_KGS' => $sku_wt ? round($sku_wt, 2) : 0,
+                        'Derived_NET_SALES_VOLUME' => $sku_vl ? round($sku_vl, 2) : 0,
                         'distributor_id' => $distributor_id,
                         'created_date' => REQUEST_TIME,
                         //TP to HOST entry fields
@@ -134,8 +136,8 @@ function insert_tester_order_data_in_custom_billing_table($new_bill_number, $ord
     }
 
     db_update('order_receive_data')
-    ->fields(array('flag' => 1))
-    ->condition('parent_bill_number', $order_data['parent_bill_number'], '=')
-    ->condition('parent_party_code', $order_data['parent_party_code'], '=')
-    ->execute();
+            ->fields(array('flag' => 1))
+            ->condition('parent_bill_number', $order_data['parent_bill_number'], '=')
+            ->condition('parent_party_code', $order_data['parent_party_code'], '=')
+            ->execute();
 }
