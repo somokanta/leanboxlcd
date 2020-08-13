@@ -51,7 +51,8 @@ function order_receive_import_form_validate($form, &$form_state) {
         'SKU7',
         'Product Name',
         'MRP',
-        'Return Quantity'
+        'Return Quantity',
+        'Beat Name'
     );
 
     if ($file) {
@@ -82,6 +83,7 @@ function order_receive_import_form_validate($form, &$form_state) {
                     $pkd = $value[7];
                     $order_date = $value[0];
                     $order_type = $value[3];
+                    $beat_name = $value[12];
                     $distributor_id = get_distributor_by_title($parent_party_code, 'hul_code_master');
 
                    // if ($order_type == 'Regular') {
@@ -234,7 +236,8 @@ function order_receive_process($data, $file_name, &$context) {
         $sku7_code = trim($value['SKU7']); 
         $product_name = trim($value['Product Name']); 
         $mrp = trim($value['MRP']); 
-        $return_qty = trim($value['Return Quantity']); 
+        $return_qty = trim($value['Return Quantity']);
+        $beat_name = trim($value['Beat Name']);
 
         $distributor_id = get_distributor_by_title($parent_party_code, 'hul_code_master');
         $result = db_insert('order_receive_data')
@@ -251,6 +254,7 @@ function order_receive_process($data, $file_name, &$context) {
                     'product_name' => $product_name ? $product_name : '',                    
                     'mrp' => $mrp ? $mrp : '',                    
                     'return_qty' => $return_qty ? $return_qty : '',                    
+                    'beat_name' => $beat_name ? $beat_name : '',                    
                     'distributor_id' => $distributor_id,
                     'type' => 1, //Uploader
                     'created_time' => REQUEST_TIME
