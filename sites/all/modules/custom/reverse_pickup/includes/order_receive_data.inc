@@ -61,6 +61,7 @@ function order_receive_data_callback($data) {
             $child_order_id = trim($value['Child Order ID']);
             $order_type = trim($value['Order Type']);
             $party_code = trim($value['Party Code']);
+            $beat_name = trim($value['Beat Name']);
             $parent_party_code = trim($value['Parent Party Code']);
             foreach ($value['Order Line'] as $val) {
                 $lb_sku_id = trim($val['LBSKUID']);
@@ -79,6 +80,7 @@ function order_receive_data_callback($data) {
                             'order_type' => $order_type ? $order_type : '',
                             'parent_party_code' => $parent_party_code ? $parent_party_code : '',
                             'party_code' => $party_code ? $party_code : '',
+                            'beat_name' => $beat_name ? $beat_name : '',
                             'lb_sku_id' => $lb_sku_id ? $lb_sku_id : '',
                             'pkd' => $pkd ? $pkd : '',
                             'sku7_code' => $sku7_code ? $sku7_code : '',                    
