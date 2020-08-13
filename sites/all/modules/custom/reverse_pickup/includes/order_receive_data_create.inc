@@ -79,7 +79,8 @@ function insert_tester_order_data_in_custom_billing_table($new_bill_number, $ord
 
         $sku_wt = ($previous_details['Derived_NET_SALES_KGS'] / $previous_details['Sum_of_TOTAL_SALES_QTY']) * $data['return_qty'];
         $sku_vl = ($previous_details['Derived_NET_SALES_VOLUME'] / $previous_details['Sum_of_TOTAL_SALES_QTY']) * $data['return_qty'];
-
+        $upc = get_upc_by_skus($data['sku7_code']);
+        $cases = $data['return_qty']/$upc;
         //TP to host calculation for line level value
 //            $line_level_value = round(
 //              (($data['Sum_of_NET_SALES_VALUE'] - 
@@ -109,7 +110,7 @@ function insert_tester_order_data_in_custom_billing_table($new_bill_number, $ord
                         'Sum_of_NET_SALES_QTY' => $data['return_qty'],
                         'Sum_of_SALES_FREE_QTY' => 0,
                         'Sum_of_NET_SALES_VALUE' => ($previous_details['tur'] * $data['return_qty']),
-                        'Sum_of_NET_SALES_CASES' => 0, //Pending
+                        'Sum_of_NET_SALES_CASES' => $cases ? $cases : 0,
                         'Sum_of_NET_SALES_KGS' => $sku_wt ? round($sku_wt, 2) : 0,
                         'Sum_of_SCHEME_DISCOUNT' => 0,
                         'Sum_of_OTHER_DISCOUNT' => 0,

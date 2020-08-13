@@ -157,3 +157,13 @@ function check_child_order_in_sales_register($child_order_id, $distributor_id) {
     $res = $query->execute()->fetchField();
   return $res;
 }
+
+function get_upc_by_skus($sku7_code) {
+    $query = db_select('node', 'n');
+    $query->condition('n.type', 'sku7_code_master');
+    $query->condition('n.title', $sku7_code);
+    $query->leftjoin('field_data_field_unit_case_units_', 'uc', 'uc.entity_id = n.nid');
+    $query->addField('uc', 'field_unit_case_units__value', 'upc');
+    $res = $query->execute()->fetchField();
+    return $res;
+}
