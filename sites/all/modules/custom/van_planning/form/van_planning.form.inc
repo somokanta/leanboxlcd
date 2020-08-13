@@ -264,6 +264,18 @@ function _van_planning_callback_form($form, &$form_state) {
     ),
     //'#suffix' => '</div>',// Because of reset
   );
+  $form['editable_vp']['vp']['pb_order_type'] = array(
+    '#type' => 'select',
+    '#title' => t('Order Type'),
+    '#options' => list_allowed_values(field_info_field('field_order_type')),
+    '#ajax' => array(
+      'wrapper' => 'van-itemlist-div',
+      'callback' => 'van_planning_filter_ajax_callback',
+      'method' => 'replace',
+      'effect' => 'fade',
+    ),
+    '#name' => 'pb_order_type',
+  );
   $form['editable_vp']['vp']['pb_reset'] = array(
     '#type' => 'submit',
     '#value' => 'Reset',
@@ -822,6 +834,18 @@ function _van_planning_callback_form($form, &$form_state) {
           '#name' => 'bill_wise_rs_cft',
           //'#suffix' => '</div>',// Because of reset 
         );
+        $form['editable_vp']['vp_pop'][$selected_modify_bill]['bill_wise_order_type'] = array(
+          '#type' => 'select',
+          '#title' => t('Order Type'),
+          '#options' => list_allowed_values(field_info_field('field_order_type')),
+          '#ajax' => array(
+            'wrapper' => 'van-itemlist-div',
+            'callback' => 'van_planning_filter_ajax_callback',
+            'method' => 'replace',
+            'effect' => 'fade',
+          ),
+          '#name' => 'bill_wise_order_type',
+        );
         $form['editable_vp']['vp_pop'][$selected_modify_bill]['bill_wise_reset'] = array(
           '#type' => 'submit',
           '#value' => 'Reset',
@@ -1018,6 +1042,18 @@ function _van_planning_callback_form($form, &$form_state) {
             '#name' => 'child_bill_wise_rs_cft',
             //'#suffix' => '</div>',// Because of reset
           );
+          $form['editable_vp']['vp_pop']['child_bills'][$selected_modify_bill]['child_bill_wise_order_type'] = array(
+          '#type' => 'select',
+          '#title' => t('Order Type'),
+          '#options' => list_allowed_values(field_info_field('field_order_type')),
+          '#ajax' => array(
+            'wrapper' => 'van-itemlist-div',
+            'callback' => 'van_planning_filter_ajax_callback',
+            'method' => 'replace',
+            'effect' => 'fade',
+          ),
+          '#name' => 'child_bill_wise_order_type',
+        );
           $form['editable_vp']['vp_pop']['child_bills'][$selected_modify_bill]['child_bill_wise_reset'] = array(
             '#type' => 'submit',
             '#value' => 'Reset',
