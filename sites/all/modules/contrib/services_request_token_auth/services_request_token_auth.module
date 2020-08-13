@@ -89,7 +89,6 @@ function _services_request_token_auth_default_security_settings() {
  */
 function _services_request_token_auth_security_settings($settings, &$form_state) {
   $form = array();
-  $token_value = sha1($settings['token_key']);
 
   $form['token_header'] = array(
     '#type' => 'textfield',
@@ -113,7 +112,7 @@ function _services_request_token_auth_security_settings($settings, &$form_state)
     '#description' => t('The token value of the generated SHA signature'),
 //    '#required' => TRUE,
     '#attributes' => array('readonly' => 'readonly'),  
-    '#default_value' => $token_value,
+    '#default_value' => $settings['token_key'] ? sha1($settings['token_key']) : '',
   );
   
 
