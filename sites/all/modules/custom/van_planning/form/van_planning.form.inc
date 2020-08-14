@@ -70,6 +70,7 @@ function _van_planning_callback_form($form, &$form_state) {
     unset($form_state['input']['outlet_area_hook_grp']);
     unset($form_state['input']['pb_from_date']['date']);
     unset($form_state['input']['pb_to_date']['date']);
+    unset($form_state['input']['pb_order_type']);
   }
   // For reset in modify van table- popup
   if($form_state['clicked_button']['#name'] == 'bill_wise_reset'){
@@ -81,6 +82,7 @@ function _van_planning_callback_form($form, &$form_state) {
     unset($form_state['input']['bill_wise_volume']);
     unset($form_state['input']['bill_wise_rs_kg']);
     unset($form_state['input']['bill_wise_rs_cft']);
+    unset($form_state['input']['bill_wise_order_type']);
   }
   //For reset in add bill table- popup
   if($form_state['clicked_button']['#name'] == 'child_bill_wise_reset'){
@@ -93,6 +95,7 @@ function _van_planning_callback_form($form, &$form_state) {
     unset($form_state['input']['child_bill_wise_volume']);
     unset($form_state['input']['child_bill_wise_rs_kg']);
     unset($form_state['input']['child_bill_wise_rs_cft']);
+    unset($form_state['input']['child_bill_wise_order_type']);
   }
   if (empty($form_state['rs_distributor_ids'])) {
     $form_state['rs_distributor_ids'] = get_distributor_ids();
@@ -267,7 +270,7 @@ function _van_planning_callback_form($form, &$form_state) {
   $form['editable_vp']['vp']['pb_order_type'] = array(
     '#type' => 'select',
     '#title' => t('Order Type'),
-    '#options' => list_allowed_values(field_info_field('field_order_type')),
+    '#options' => array(''=> 'Select') + list_allowed_values(field_info_field('field_order_type')),
     '#ajax' => array(
       'wrapper' => 'van-itemlist-div',
       'callback' => 'van_planning_filter_ajax_callback',
@@ -356,6 +359,7 @@ function _van_planning_callback_form($form, &$form_state) {
   $weight = $form_state['input']['pb_weight'];
   $volume = $form_state['input']['pb_volume'];
   $outlet_area_hook_grp = $form_state['input']['outlet_area_hook_grp'];
+  $order_type = $form_state['input']['pb_order_type'];
   $user_selected_distributor_id = $form_state['input']['distributor_id'];
   if (!empty($area_code) ||
     !empty($van_pl_group) ||
@@ -367,6 +371,7 @@ function _van_planning_callback_form($form, &$form_state) {
     !empty($bill_value) ||
     !empty($outlet_area_hook_grp) ||
     !empty($weight) ||
+    ($order_type != "") ||
     !empty($volume)) {
     if(!empty($user_selected_distributor_id)) {  
          $input_data = TRUE;
@@ -381,7 +386,7 @@ function _van_planning_callback_form($form, &$form_state) {
     if (isset($form_state['bill_array'])) {
       $bill_array = $form_state['bill_array'];
     }
-    $options = van_planning_ajax_submit($area_codes, $van_pl_group, $pl_group, $bill_from_date, $bill_to_date, $bill_range_op, $bill_value, $weight, $volume, $bill_array, $outlet_area_hook_grp, $user_selected_distributor_id, $central_distributor_id, $form_state['rs_distributor_ids']);
+    $options = van_planning_ajax_submit($area_codes, $van_pl_group, $pl_group, $bill_from_date, $bill_to_date, $bill_range_op, $bill_value, $weight, $volume, $bill_array, $outlet_area_hook_grp, $order_type,$user_selected_distributor_id, $central_distributor_id, $form_state['rs_distributor_ids']);
     $form['editable_vp']['vp']['list_form_items'] = array(
       '#type' => 'tableselect',
       '#header' => $header_array,
@@ -702,6 +707,7 @@ function _van_planning_callback_form($form, &$form_state) {
       'rs_per_sum_cft' => array('data' => t('Rs/Cft')),
       'party_code_val'=>array('data'=>t('Party Code')),//NEWFIELD
       'party_name_val'=>array('data'=>t('Party Name')),
+      'order_type'=>array('data'=>t('Order Type')),
       'rs_name' => array('data' => t('Distributor Name'))
     );
 
@@ -837,7 +843,7 @@ function _van_planning_callback_form($form, &$form_state) {
         $form['editable_vp']['vp_pop'][$selected_modify_bill]['bill_wise_order_type'] = array(
           '#type' => 'select',
           '#title' => t('Order Type'),
-          '#options' => list_allowed_values(field_info_field('field_order_type')),
+          '#options' => array(''=> 'Select') + list_allowed_values(field_info_field('field_order_type')),
           '#ajax' => array(
             'wrapper' => 'van-itemlist-div',
             'callback' => 'van_planning_filter_ajax_callback',
@@ -870,6 +876,7 @@ function _van_planning_callback_form($form, &$form_state) {
         $bill_wise_volume = $form_state['input']['bill_wise_volume'];
         $bill_wise_rs_kg = $form_state['input']['bill_wise_rs_kg'];
         $bill_wise_rs_cft = $form_state['input']['bill_wise_rs_cft'];
+        $bill_wise_order_type = $form_state['input']['bill_wise_order_type'];
         $bil_distributor_id = $form_state['input']['bill_distributor_id'];
         if (!empty($bill_area_code) ||
           !empty($bill_pl_group) ||
@@ -879,19 +886,21 @@ function _van_planning_callback_form($form, &$form_state) {
           !empty($bill_wise_volume) ||
           !empty($bill_wise_rs_kg) ||
           !empty($bil_distributor_id) ||
+          ($bill_wise_order_type != "") ||
           !empty($bill_wise_rs_cft)) {
           $bill_wise_input_data = TRUE;
         }
 
         $all_bill_options = $form_state['selected_modify_bill_array'][$selected_modify_bill];
-
+        $order_type_list = list_allowed_values(field_info_field('field_order_type')); 
         foreach ($all_bill_options as $key => $val) {
           $all_bill_options[$key]['bill_value'] = number_format($val['bill_value']);
+          $all_bill_options[$key]['order_type'] = $order_type_list[$val['order_type']];
           $bill_wise_array[] = $val['bill_no'];
         }
         if ($bill_wise_input_data) {
 
-          $all_bill_options = _get_van_planning_bill_wise_data($bill_area_code, $bill_pl_group, $bill_wise_range_op, $bill_wise_value, $bill_wise_weight, $bill_wise_volume, $bill_wise_rs_kg, $bill_wise_rs_cft, $bill_wise_array,$user_selected_distributor_id, $central_distributor_id, $form_state['rs_distributor_ids']);
+          $all_bill_options = _get_van_planning_bill_wise_data($bill_area_code, $bill_pl_group, $bill_wise_range_op, $bill_wise_value, $bill_wise_weight, $bill_wise_volume, $bill_wise_rs_kg, $bill_wise_rs_cft, $bill_wise_order_type,$bill_wise_array,$user_selected_distributor_id, $central_distributor_id, $form_state['rs_distributor_ids']);
         }
 
         // show result in pop up form
@@ -1045,7 +1054,7 @@ function _van_planning_callback_form($form, &$form_state) {
           $form['editable_vp']['vp_pop']['child_bills'][$selected_modify_bill]['child_bill_wise_order_type'] = array(
           '#type' => 'select',
           '#title' => t('Order Type'),
-          '#options' => list_allowed_values(field_info_field('field_order_type')),
+          '#options' => array(''=> 'Select') + list_allowed_values(field_info_field('field_order_type')),
           '#ajax' => array(
             'wrapper' => 'van-itemlist-div',
             'callback' => 'van_planning_filter_ajax_callback',
@@ -1079,6 +1088,7 @@ function _van_planning_callback_form($form, &$form_state) {
           $bill_wise_volume = $form_state['input']['child_bill_wise_volume'];
           $bill_wise_rs_kg = $form_state['input']['child_bill_wise_rs_kg'];
           $bill_wise_rs_cft = $form_state['input']['child_bill_wise_rs_cft'];
+          $bill_wise_order_type = $form_state['input']['child_bill_wise_order_type'];
           $add_bill_child_distributor_id = $form_state['input']['child_bill_distributor_id'];
           $bill_wise_input_data = FALSE;
           if (!empty($bill_area_code) ||
@@ -1089,6 +1099,7 @@ function _van_planning_callback_form($form, &$form_state) {
             !empty($bill_wise_weight) ||
             !empty($bill_wise_volume) ||
             !empty($bill_wise_rs_kg) ||
+            ($bill_wise_order_type != "") ||
             !empty($add_bill_child_distributor_id) ||
             !empty($bill_wise_rs_cft)) {
             $bill_wise_input_data = TRUE;
@@ -1097,7 +1108,7 @@ function _van_planning_callback_form($form, &$form_state) {
           // Without filter don't show the value. Show commented below codes
           //$constant_bill_array1 = _get_van_planning_bill_wise_data1($bill_area_code, $bill_pl_group, $bill_wise_range_op, $bill_wise_value, $bill_wise_weight, $bill_wise_volume, $bill_wise_rs_kg, $bill_wise_rs_cft, $bill_wise_array);
           if ($bill_wise_input_data) {
-            $constant_bill_array1 = _get_van_planning_bill_wise_data1($bill_area_code, $bill_pl_group, $bill_wise_range_op, $bill_wise_value, $bill_wise_weight, $bill_wise_volume, $bill_wise_rs_kg, $bill_wise_rs_cft, $bill_wise_array, $child_bill_wise_date, $user_selected_distributor_id, $central_distributor_id, $form_state['rs_distributor_ids']);
+            $constant_bill_array1 = _get_van_planning_bill_wise_data1($bill_area_code, $bill_pl_group, $bill_wise_range_op, $bill_wise_value, $bill_wise_weight, $bill_wise_volume, $bill_wise_rs_kg, $bill_wise_rs_cft, $bill_wise_order_type, $bill_wise_array, $child_bill_wise_date, $user_selected_distributor_id, $central_distributor_id, $form_state['rs_distributor_ids']);
           }
           // New group created element 
           $child_bill_header_array = array(
@@ -1111,6 +1122,7 @@ function _van_planning_callback_form($form, &$form_state) {
             'rs_per_sum_cft' => array('data' => t('Rs/Cft')),
             'party_code_val'=>array('data'=>t('Party Code')),//NEWFIELD
             'party_name_val'=>array('data'=>t('Party Name')),
+            'order_type'=>array('data'=>t('Order Type')),
             'rs_name' => array('data' => t('Distributor Name')),
             'bill_group' => array('data' => t('bill_group'), 'class' => array('bill_no_val')),
           );
@@ -1701,7 +1713,7 @@ function show_move_to_ajax($form, &$form_state) {
  * @param type $form
  * @param type $form_state
  */
-function van_planning_ajax_submit($area_codes, $van_pl_group, $pl_group, $bill_from_date, $bill_to_date, $bill_range_op, $bill_value, $weight, $volume, $bill_array, $outlet_area_hook_grp,$user_selected_distributor_id = null, $central_distributor_id = null, $rs_distributor_ids = null) {
+function van_planning_ajax_submit($area_codes, $van_pl_group, $pl_group, $bill_from_date, $bill_to_date, $bill_range_op, $bill_value, $weight, $volume, $bill_array, $outlet_area_hook_grp, $order_type,$user_selected_distributor_id = null, $central_distributor_id = null, $rs_distributor_ids = null) {
   global $table_name,$table_column;
     if (!empty($user_selected_distributor_id)) {
     $dis_ids = array($user_selected_distributor_id);
@@ -1785,6 +1797,7 @@ function van_planning_ajax_submit($area_codes, $van_pl_group, $pl_group, $bill_f
   $query->join('field_data_field_sr_bill_date', 'sbd', 'sbd.entity_id = n3.nid');
   $query->condition('sbd.field_sr_bill_date_value', array($billing_start_date, $billing_end_date), 'BETWEEN');
 
+  $query->join('field_data_field_order_type', 'ot', 'ot.entity_id = n3.nid');
  /* if (!empty($bill_date)) {
     $query->condition('sbd.field_sr_bill_date_value', $bill_date);
   }*/
@@ -1793,6 +1806,9 @@ function van_planning_ajax_submit($area_codes, $van_pl_group, $pl_group, $bill_f
   }
   if (!empty($bill_array)) {
     $query->condition('n3.title', $bill_array, 'NOT IN');
+  }
+  if ($order_type != "") {
+    $query->condition('ot.field_order_type_value', $order_type);
   }
   $query->join('field_data_field_bill_net_sales', 'bv', 'bv.entity_id = n3.nid');
   $query->addField('n3', 'title', 'bill_no');
@@ -1820,6 +1836,7 @@ function van_planning_ajax_submit($area_codes, $van_pl_group, $pl_group, $bill_f
   // Party code and party Name NEWFIELD
   $query->addExpression('fpc.field_party_code_value', 'party_code_val');
   $query->addExpression('fpn.field_party_name_value', 'party_name_val');
+  $query->addExpression('ot.field_order_type_value', 'order_type');
 
   // condition according to operator selected
   if (!empty($bill_range_op)) {
@@ -1867,6 +1884,7 @@ function van_planning_ajax_submit($area_codes, $van_pl_group, $pl_group, $bill_f
       'rs_per_sum_cft' => round($val['bill_value'] / $val['sum_cft'], 2),
       'party_code_val'=>$val['party_code_val'],//NEWFIELD
       'party_name_val'=>$val['party_name_val'],
+      'order_type'=>$val['order_type'],
       'rs_name' => $val['rs_name'],
       'bill_distributor_id'=>$val['bill_distributor_id'],  
     );
@@ -1887,6 +1905,7 @@ function van_planning_ajax_submit($area_codes, $van_pl_group, $pl_group, $bill_f
     $res1[$array_key]['bill_value'] = array('data' => $array_value['bill_value'],'class' => array("van_bill_value"));
     $res1[$array_key]['sum_kg'] = array('data' => $array_value['sum_kg'],'class' => array("van_bill_sumkg"));
     $res1[$array_key]['sum_cft'] = array('data' => $array_value['sum_cft'],'class' => array("van_bill_sumcft"));
+    $res1[$array_key]['order_type'] = array('data' => $array_value['order_type'],'class' => array("van_order_type"));
 
     // bill_no , bill_value, area_code, pl_grp, weight, volume
     $res2[$array_key] = array(
@@ -1898,7 +1917,8 @@ function van_planning_ajax_submit($area_codes, $van_pl_group, $pl_group, $bill_f
       'sum_cft' => round($array_value['sum_cft']),
       'rs_per_sum_kg' => round($res1[$array_key]['rs_per_sum_kg'], 2),
       'rs_per_sum_cft' => round($res1[$array_key]['rs_per_sum_cft'], 2),
-      'bill_no' => $array_value['bill_no']);
+      'bill_no' => $array_value['bill_no'],
+      'order_type' => $array_value['order_type']);
 
     $res1[$array_key]['bill_group'] = array('data' => '', 'class' => array('bill_group_data'), 'data-value' => json_encode($res2));
 
@@ -1941,7 +1961,7 @@ function van_planning_ajax_submit($area_codes, $van_pl_group, $pl_group, $bill_f
  * @param type $bill_wise_rs_cft
  * @param type $selected_modify_bill_array
  */
-function _get_van_planning_bill_wise_data($bill_area_code, $bill_pl_group, $bill_wise_range_op, $bill_wise_value, $bill_wise_weight, $bill_wise_volume, $bill_wise_rs_kg, $bill_wise_rs_cft, $bill_wise_array, $user_selected_distributor_id = null, $central_distributor_id = null, $rs_distributor_ids) {
+function _get_van_planning_bill_wise_data($bill_area_code, $bill_pl_group, $bill_wise_range_op, $bill_wise_value, $bill_wise_weight, $bill_wise_volume, $bill_wise_rs_kg, $bill_wise_rs_cft, $bill_wise_order_type, $bill_wise_array, $user_selected_distributor_id = null, $central_distributor_id = null, $rs_distributor_ids) {
   $user_id = $GLOBALS['user']->uid;
   //$dis_id = change_feeds_import_get_distributor_id($user_id);
   global $table_name;
@@ -2004,7 +2024,7 @@ function _get_van_planning_bill_wise_data($bill_area_code, $bill_pl_group, $bill
   
   if (!empty($bill_wise_array)) {
     $query->condition('n3.title', $bill_wise_array, 'IN');
-  }
+  }  
   $query->join('field_data_field_bill_net_sales', 'bv', 'bv.entity_id = n3.nid');
   $query->addExpression('n3.nid', 'sales_nid');
   $query->addExpression('n3.uid', 'bill_distributor_id');
@@ -2014,7 +2034,14 @@ function _get_van_planning_bill_wise_data($bill_area_code, $bill_pl_group, $bill
 
   $query->addExpression('n3.title', 'bill_no');
   $query->addExpression('ROUND(bv.field_bill_net_sales_value)', 'bill_value');
-
+  
+    //order type 
+  $query->join('field_data_field_order_type', 'ot', 'ot.entity_id = n3.nid');
+  if ($bill_wise_order_type != "") {
+    $query->condition('ot.field_order_type_value', $bill_wise_order_type);   
+  }
+ 
+  $query->addExpression('ot.field_order_type_value', 'order_type');
 
   // custom billing data
   $query->join('custom_billing_data', 'cb', 'cb.bill_number = n3.title');
@@ -2051,6 +2078,7 @@ function _get_van_planning_bill_wise_data($bill_area_code, $bill_pl_group, $bill
   }
   $res = $query->execute()->fetchAll(PDO::FETCH_GROUP | PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
 
+  $order_type_list = list_allowed_values(field_info_field('field_order_type')); 
   foreach ($res as $key => $val) {
     if (isset($val['bill_value'])) {
 
@@ -2062,6 +2090,7 @@ function _get_van_planning_bill_wise_data($bill_area_code, $bill_pl_group, $bill
     else {
       $res[$key]['#attributes'] = array('class' => array($val['bill_no']));
     }
+     $res[$key]['order_type'] = $order_type_list[$val['order_type']];
   }
   return $res;
 }
@@ -2078,7 +2107,7 @@ function _get_van_planning_bill_wise_data($bill_area_code, $bill_pl_group, $bill
  * @param type $bill_wise_rs_cft
  * @param type $selected_modify_bill_array
  */
-function _get_van_planning_bill_wise_data1($bill_area_code, $bill_pl_group, $bill_wise_range_op, $bill_wise_value, $bill_wise_weight, $bill_wise_volume, $bill_wise_rs_kg, $bill_wise_rs_cft, $bill_wise_array, $child_bill_wise_date = '', $user_selected_distributor_id, $central_distributor_id, $rs_distributor_id = array()) {
+function _get_van_planning_bill_wise_data1($bill_area_code, $bill_pl_group, $bill_wise_range_op, $bill_wise_value, $bill_wise_weight, $bill_wise_volume, $bill_wise_rs_kg, $bill_wise_rs_cft, $bill_wise_order_type, $bill_wise_array, $child_bill_wise_date = '', $user_selected_distributor_id, $central_distributor_id, $rs_distributor_id = array()) {
   global $table_name;
   global $table_column;
   //$table_name = 'field_data_field_distributor_name';
@@ -2157,7 +2186,7 @@ function _get_van_planning_bill_wise_data1($bill_area_code, $bill_pl_group, $bil
   else {
     $query->condition('sbd.field_sr_bill_date_value', array($billing_start_date, $billing_end_date), 'BETWEEN');
   }
-
+  
   if (!empty($bill_wise_array)) {
     $query->condition('n3.title', $bill_wise_array, 'NOT IN');
   }
@@ -2172,6 +2201,14 @@ function _get_van_planning_bill_wise_data1($bill_area_code, $bill_pl_group, $bil
 
   $query->addExpression('ROUND(bv.field_bill_net_sales_value)', 'bill_value');
   $query->addExpression("rs.$table_column", 'rs_name');
+  
+  //order type
+  $query->join('field_data_field_order_type', 'ot', 'ot.entity_id = n3.nid');
+  if ($bill_wise_order_type != "") {
+   $query->condition('ot.field_order_type_value', $bill_wise_order_type);   
+  }
+
+  $query->addExpression('ot.field_order_type_value', 'order_type');
 
   // custom billing data
   $query->join('custom_billing_data', 'cb', 'cb.bill_number = n3.title');
@@ -2207,6 +2244,8 @@ function _get_van_planning_bill_wise_data1($bill_area_code, $bill_pl_group, $bil
     }
   }
   $res = $query->execute()->fetchAll(PDO::FETCH_GROUP | PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
+  
+  $order_type_list = list_allowed_values(field_info_field('field_order_type')); 
   foreach ($res as $key => $val) {
     if (isset($val['bill_value'])) {
 
@@ -2218,7 +2257,8 @@ function _get_van_planning_bill_wise_data1($bill_area_code, $bill_pl_group, $bil
     else {
       $res[$key]['#attributes'] = array('class' => array($val['bill_no']));
     }
-
+    
+    $res[$key]['order_type'] = $order_type_list[$val['order_type']];
 
     // bill_no , bill_value, area_code, pl_grp, weight, volume
     $res_1[$key][$key] = array(
@@ -2232,6 +2272,7 @@ function _get_van_planning_bill_wise_data1($bill_area_code, $bill_pl_group, $bil
       'rs_per_sum_cft' => round($val['bill_value'] / $val['sum_cft'], 2),
       'party_code_val'=>$val['party_code_val'],//NEWFIELD
       'party_name_val'=>$val['party_name_val'],
+      'order_type'=> $val['order_type'],
       'rs_name' => $val['rs_name'],
       'bill_distributor_id'=>$val['bill_distributor_id'],
       );
