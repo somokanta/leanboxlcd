@@ -92,7 +92,7 @@ function delivery_confirmation_form($form, &$form_state) {
     '#submit' => array('delivery_confirmation_form_submit'),
   );
 
-  $header = array('Trip ID', 'Dispatch Date', 'Cashier Name', 'Bill Count', 'Full Delivered Bill Count', 'Full Returned Bill Count', 'Partial Delivered Bill Count','Reattempt Bill Count','Pending Bill Count', 'Vehicle Arrival Date', 'Vehicle Arrival Time', 'Delivery Incharge Name','Asset Summary','Delivery Summary','Action');
+  $header = array('Trip ID', 'Dispatch Date', 'Cashier Name', 'Bill Count', 'Full Delivered Bill Count', 'Full Returned Bill Count', 'Partial Delivered Bill Count','Reattempt Bill Count','Pending Bill Count','Return Bill Count', 'Partial Return Bill Count', 'No Return Bill Count', 'Vehicle Arrival Date', 'Vehicle Arrival Time', 'Delivery Incharge Name','Asset Summary','Delivery Summary','Action');
 
   if (!isset($form_state['delivery_confirmation']['bills'])) {
     $form_state['delivery_confirmation']['bills'] = array();
@@ -117,6 +117,9 @@ function delivery_confirmation_form($form, &$form_state) {
     $full_returned_bill_count = $val['full_returned_bill_count'];
     $partial_delivered_bill_count = $val['partial_delivered_bill_count'];
     $delivery_pending_bill_count = $val['delivery_pending_bill_count'];
+    $return_bill_count = $val['return_bill_count'];
+    $partial_return_bill_count = $val['partial_return_bill_count'];
+    $no_return_bill_count = $val['no_return_bill_count'];
     $vehicle_arrival_date_value = $val['vehicle_arrival_date'];
     $vehicle_arrival_time_value = $val['vehicle_arrival_time'];
     $delivery_incharge_name_value = $val['delivery_incharge_name'];
@@ -124,7 +127,7 @@ function delivery_confirmation_form($form, &$form_state) {
 //      '#markup' => $bill_count - ($full_delivered_bill_count + $full_returned_bill_count + $partial_delivered_bill_count + $delivery_pending_bill_count),
 //      '#name' => "pending_bill_count_$key"
 //    );
-    $pending_bill_count = $bill_count - ($full_delivered_bill_count + $full_returned_bill_count + $partial_delivered_bill_count + $delivery_pending_bill_count);
+    $pending_bill_count = $bill_count - ($full_delivered_bill_count + $full_returned_bill_count + $partial_delivered_bill_count + $delivery_pending_bill_count + $return_bill_count + $partial_return_bill_count + $no_return_bill_count);
    
     $vehicle_arrival_date = array(
       '#type' => 'date_popup',
@@ -184,6 +187,9 @@ function delivery_confirmation_form($form, &$form_state) {
     $form['bill_details']['#rows'][$key][] = $val['partial_delivered_bill_count'];
     $form['bill_details']['#rows'][$key][] = $val['delivery_pending_bill_count'];
     $form['bill_details']['#rows'][$key][] = $pending_bill_count;
+    $form['bill_details']['#rows'][$key][] = $val['return_bill_count'];
+    $form['bill_details']['#rows'][$key][] = $val['partial_return_bill_count'];
+    $form['bill_details']['#rows'][$key][] = $val['no_return_bill_count'];
 
     //$form['bill_details'][$key]["pending_bill_count_{$key}"] = &$pending_bill_count;
     $form['bill_details'][$key]["vehicle_arrival_date"] = &$vehicle_arrival_date;
@@ -327,6 +333,9 @@ function delivery_confirmation_form_submit($form, &$form_state) {
     $query->addExpression("SUM(CASE WHEN (dpi.res_status = 'undeliver' and dpi.delivery_pending_flag != 1) THEN 1 ELSE 0 END)", 'full_returned_bill_count');
     $query->addExpression("SUM(CASE WHEN (dpi.res_status = 'partial_deliver') THEN 1 ELSE 0 END)", 'partial_delivered_bill_count');
     $query->addExpression("SUM(CASE WHEN (dpi.delivery_pending_flag = 1) THEN 1 ELSE 0 END)", 'delivery_pending_bill_count');
+    $query->addExpression("SUM(CASE WHEN (dpi.res_status = 'return') THEN 1 ELSE 0 END)", 'return_bill_count');
+    $query->addExpression("SUM(CASE WHEN (dpi.res_status = 'partial_return') THEN 1 ELSE 0 END)", 'partial_return_bill_count');
+    $query->addExpression("SUM(CASE WHEN (dpi.res_status = 'no_return') THEN 1 ELSE 0 END)", 'no_return_bill_count');
     $query->addExpression('vad.field_vehicle_arrival_date_value', 'vehicle_arrival_date');
     $query->addExpression('vat.field_vehicle_arrival_time_value', 'vehicle_arrival_time');
     $query->addExpression('din.field_delivery_incharge_name_value', 'delivery_incharge_name');
@@ -355,7 +364,7 @@ function delivery_confirm_validate(&$form, &$form_state) {
   $validation_on_bill_count = get_bill_count_validation($trip_id, $dis_id);
 
   $total_bill_count = $validation_on_bill_count['bill_count'];
-  $sum_of_delivered_bills_count = ($validation_on_bill_count['full_delivered_bill_count'] + $validation_on_bill_count['full_returned_bill_count'] + $validation_on_bill_count['partial_delivered_bill_count'] + $validation_on_bill_count['delivery_pending_bill_count']);
+  $sum_of_delivered_bills_count = ($validation_on_bill_count['full_delivered_bill_count'] + $validation_on_bill_count['full_returned_bill_count'] + $validation_on_bill_count['partial_delivered_bill_count'] + $validation_on_bill_count['delivery_pending_bill_count'] + $validation_on_bill_count['return_bill_count'] + $validation_on_bill_count['partial_return_bill_count'] + $validation_on_bill_count['no_return_bill_count']);
 
   if ($total_bill_count != $sum_of_delivered_bills_count) {
     $form_state['rebuild']  = TRUE;
