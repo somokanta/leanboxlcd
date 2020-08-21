@@ -27,7 +27,7 @@
                     //$(".form-submit").show();
                 } else {
                     //  alert('hi2');
-                    if (order_status == 'partial_deliver') {
+                    if (order_status == 'partial_deliver' || order_status == 'partial_return') {
                        // $("div.error-msg").hide();
                         //$(".form-submit").show();
                         $(this).parent().parent('td').next().find('select').removeAttr('disabled');
@@ -36,7 +36,7 @@
 
             });
 
-            if (order_status == 'partial_deliver') {
+            if (order_status == 'partial_deliver' || order_status == 'partial_return') {
                 $(".actual_qty_value").on('change', function () {
                     var actual_qty = $(this).val();
                     var net_qty = $(this).closest('td').prev().attr('data-value');

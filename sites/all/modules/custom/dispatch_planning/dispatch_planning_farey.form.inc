@@ -204,7 +204,7 @@ function _edit_trip_delivered_callback_form($form, &$form_state) {
       // order status
       $form['order_status'] = array(
         '#type' => 'select',
-        '#options' => array('' => '-select-', 'undeliver' => 'undeliver', 'deliver' => 'deliver', 'partial_deliver' => 'partial deliver'),
+        '#options' => array('' => '-select-', 'undeliver' => 'undeliver', 'deliver' => 'deliver', 'partial_deliver' => 'partial deliver', 'no_return' => 'no_return', 'return' => 'return', 'partial_return' => 'partial_return'),
         '#title' => t('Order Status'),
         '#required' => TRUE,
         '#ajax' => array(
@@ -273,7 +273,7 @@ function _edit_trip_delivered_callback_form($form, &$form_state) {
           
          $form['order_status'] = array(
            '#type' => 'select',
-           '#options' => array('' => '-select-', 'undeliver' => 'undeliver', 'deliver' => 'deliver', 'partial_deliver' => 'partial deliver'),
+          '#options' => array('' => '-select-', 'undeliver' => 'undeliver', 'deliver' => 'deliver', 'partial_deliver' => 'partial deliver', 'no_return' => 'no_return', 'return' => 'return', 'partial_return' => 'partial_return'),
            '#title' => t('Order Status'),
            '#required' => TRUE,
            '#ajax' => array(
@@ -415,21 +415,26 @@ function _edit_trip_delivered_callback_form($form, &$form_state) {
 //            );
 //            
 //            $order_status = $form_state['input']['order_status'];
-//            
+            if ($order_status == 'undeliver' || $order_status == 'no_return') {
                $undeliver_reason_list = _get_dispatch_planning_reason_master_list('undeliver');
                $form['undeliver_reason'] = array(
                  '#type' => 'select',
                  '#options' => $undeliver_reason_list,
-                 '#title' => t('Undeliver reason'),
+                 '#title' => t('Undeliver/No Return reason'),
                  '#states' => array(
-                   'visible' => array(
-                     ':input[name="order_status"]' => array('value' => 'undeliver'),
-                   ),
-                 ),
+//                   'visible' => array(
+//                     ':input[name="order_status"]' => array('value' => 'undeliver'),
+//                   ),
+                   ),  
                  '#default_value' => !empty($reason_for_failure) ? $reason_for_failure : '',
                );
+            }
                // collection mode
-               $lists = array('' => '-select-', 'signed' => 'Signed', 'cheque' => 'Cheque', 'cash' => 'Cash', 'cash,cheque' => 'Cash,Cheque');
+               if ($order_status == 'partial_return' || $order_status == 'return') {
+                   $lists = array('' => '-select-', 'signed' => 'Signed');
+               }else{
+                  $lists = array('' => '-select-', 'signed' => 'Signed', 'cheque' => 'Cheque', 'cash' => 'Cash', 'cash,cheque' => 'Cash,Cheque');   
+               }
 
               // ================ Delivery Boy Change Start =================== 
               $query = db_select('dispatch_planning_api_data', 'ad');
@@ -459,7 +464,7 @@ function _edit_trip_delivered_callback_form($form, &$form_state) {
               );
               // ================ Delivery Boy Change End =================
 
-               if (!empty($order_status) && $order_status == 'undeliver') {
+               if (!empty($order_status) && ($order_status == 'undeliver' || $order_status == 'no_return')) {
                   $form['collection_mode'] = array(
                     '#type' => 'value',
                     '#value' => '',
@@ -792,17 +797,17 @@ function _edit_trip_delivered_callback_form($form, &$form_state) {
                     '#required' => TRUE,
                       //  '#value' => !empty($key['Actual_qty']) ? $key['Actual_qty'] : '',
                   );
-                  if (!empty($order_status) && $order_status == 'deliver') {
+                  if (!empty($order_status) && ($order_status == 'deliver' || $order_status == 'no_return')) {
                      // $item_details[$key]['actual_qty']['data']['#value'] = $item_details[$key]['dispatch_qty'];
                      $item_details[$key]['actual_qty']['data']['#value'] = 0;
                      $item_details[$key]['actual_qty']['data']['#attributes']['readonly'] = 'readonly';
                   }
-                  if (!empty($order_status) && $order_status == 'partial_deliver') {
+                  if (!empty($order_status) && ($order_status == 'partial_deliver'|| $order_status == 'partial_return')) {
                      $item_details[$key]['actual_qty']['data']['#value'] = 0;
                      // $item_details[$key]['actual_qty']['data']['#attributes'] = array('readonly' => 'readonly');
                   }
 
-                  if (!empty($order_status) && $order_status == 'undeliver') {
+                  if (!empty($order_status) && ($order_status == 'undeliver'|| $order_status == 'return')) {
                      $item_details[$key]['actual_qty']['data']['#value'] = $item_details[$key]['dispatch_qty'];
                      $item_details[$key]['actual_qty']['data']['#attributes']['readonly'] = 'readonly';
                   }
@@ -1008,14 +1013,14 @@ function _edit_trip_delivered_callback_form_validate($form, &$form_state) {
       if ($user_input_qty > $dispatch_qty) {
          form_set_error('actual_qty', t('Sum of cashier short and return Qty can not be greater than dispatch Qty.'));
       }
-      if ($order_status == 'partial_deliver') {
+      if ($order_status == 'partial_deliver' || $order_status == 'partial_return') {
          if (($actual_qty_array[$key] != 0) && (empty($sku_reason[$key]))) {
             form_set_error('actual_qty', t('Kindly select the reason for partial delivery.'));
          }
       }
    }
    
-   if ($order_status == 'partial_deliver') {
+   if ($order_status == 'partial_deliver'|| $order_status == 'partial_return') {
       if ((array_sum($actual_qty_array) + array_sum($cash_short)) < 1) {
          form_set_error('actual_qty', t('Sum of return qty and cashier short cannot be zero for status partial delivered.'));
       }
@@ -1025,7 +1030,7 @@ function _edit_trip_delivered_callback_form_validate($form, &$form_state) {
     if(empty($delivery_boy)) {
       form_set_error('delivery_boy', t('Delivery boy field can not be empty.'));
     }
-    if ($order_status != 'undeliver') {
+    if ($order_status != 'undeliver' && $order_status != 'no_return') {
       $collc_mode = $form_state['values']['collection_mode'];
       if(empty($collc_mode)) {
         form_set_error('collection_mode', t('Collection mode can not be empty.'));
@@ -1246,11 +1251,11 @@ function _edit_trip_delivered_callback_form_submit($form, &$form_state) {
             'res_cheque_date_edit' => ($collc_mode == 'cheque') ? $form_state['values']['cheque_date'] : (($collc_mode == 'cash,cheque') ? $form_state['values']['cash_cheque_cheque_date'] : ''),
             'res_photo_of_cheque_edit' => ($collc_mode == 'cheque' && !empty($cheque_file_uri)) ? $cheque_file_uri : (($collc_mode == 'cash,cheque' && !empty($cash_cheque_file_uri)) ? $cash_cheque_file_uri : $cash_cheque_bill_file_url),   
             'res_confirm_signed_bill_amount_edit' => ($collc_mode == 'signed') ? $form_state['values']['sb_amt'] : '',
-            'res_photo_of_signed_bill_delivery_edit' => ($collc_mode == 'signed' && $order_status == 'deliver' && !empty($sb_file_uri)) ? $sb_file_uri : $signed_bill_deliver_url,
-            'photo_of_signed_bill_partial_edit' => ($collc_mode == 'signed'&& $order_status == 'partial_deliver' && !empty($sb_file_uri)) ? $sb_file_uri : $signed_bill_partial_url,
-            'res_signed_bill_delivery_edit' => ($collc_mode == 'signed' && $order_status == 'deliver') ? 'Yes' : '',
-            'res_signed_bill_partial_edit' => ($collc_mode == 'signed' && $order_status == 'partial_deliver') ? 'Yes' : '',
-            'res_reason_for_failure' => ($order_status == 'undeliver') ? $reason_for_failure : '',
+            'res_photo_of_signed_bill_delivery_edit' => ($collc_mode == 'signed' && ($order_status == 'deliver'|| $order_status == 'return') && !empty($sb_file_uri)) ? $sb_file_uri : $signed_bill_deliver_url,
+            'photo_of_signed_bill_partial_edit' => ($collc_mode == 'signed'&& ($order_status == 'partial_deliver' || $order_status == 'partial_return') && !empty($sb_file_uri)) ? $sb_file_uri : $signed_bill_partial_url,
+            'res_signed_bill_delivery_edit' => ($collc_mode == 'signed' && ($order_status == 'deliver'|| $order_status == 'return')) ? 'Yes' : '',
+            'res_signed_bill_partial_edit' => ($collc_mode == 'signed' && ($order_status == 'partial_deliver'|| $order_status == 'partial_return')) ? 'Yes' : '',
+            'res_reason_for_failure' => ($order_status == 'undeliver' || $order_status == 'no_return') ? $reason_for_failure : '',
             'updated_flag' => 1,
             'updated_time' => REQUEST_TIME,  
             'res_money_collect2_edit' =>  isset($form_state['values']['collection_mode']) ? $form_state['values']['collection_mode'] : '',
@@ -1318,6 +1323,68 @@ function _edit_trip_delivered_callback_form_submit($form, &$form_state) {
              $line_status = 'line_partial_deliver';
            }else if ($ret_cash_godown == 0) {
              $line_status = 'line_deliver';
+           }
+            db_update('dispatch_planning_item_details') // Table name no longer needs {}
+                ->fields(array(
+                  'res_sku_actual_quantity1' => $og_array[$key] - $value - $form_state['values']['cashier_short'][$key],
+                  'return_qty' => $value ? $value : 0,
+                  'res_sku_reason' => $form_state['values']['sku_reason'][$key],
+                  'res_cashier_short' => $form_state['values']['cashier_short'][$key],
+                  'line_level_status' => $line_status, // line level status
+                ))
+                ->condition('trip_bill_reference', $bill_row_id, '=')
+                ->condition('id', $key, '=')
+                ->execute();
+         }
+      }else if ($order_status == 'no_return') {
+         foreach ($form_state['values']['actual_qty'] as $key => $value) {
+
+            db_update('dispatch_planning_item_details') // Table name no longer needs {}
+                ->fields(array(
+                  'res_sku_actual_quantity1' => $og_array[$key],
+                  'return_qty' => $value,
+                  'res_sku_reason' => $form_state['values']['sku_reason'][$key],
+                  'res_cashier_short' => $form_state['values']['cashier_short'][$key],
+                  'line_level_status'=> 'line_no_return', // line level status
+                ))
+                ->condition('trip_bill_reference', $bill_row_id, '=')
+                ->condition('id', $key, '=')
+                ->execute();
+         }
+      }
+      else if ($order_status == 'return') {
+         foreach ($form_state['values']['actual_qty'] as $key => $value) {
+
+            db_update('dispatch_planning_item_details') // Table name no longer needs {}
+                ->fields(array(
+                  'res_sku_actual_quantity1' => 0,
+                  'return_qty' => $value,
+                  'res_sku_reason' => $form_state['values']['sku_reason'][$key],
+                  'res_cashier_short' => $form_state['values']['cashier_short'][$key],
+                  'line_level_status'=> 'line_return', // line level status
+                ))
+                ->condition('trip_bill_reference', $bill_row_id, '=')
+                ->condition('id', $key, '=')
+                ->execute();
+         }
+      }
+      else if ($order_status == 'partial_return') {
+         foreach ($form_state['values']['actual_qty'] as $key => $value) {
+          $query = db_select('dispatch_planning_item_details','it')
+           ->fields('it',array('res_godown_short'))
+             ->condition('trip_bill_reference', $bill_row_id, '=')
+             ->condition('id', $key, '='); 
+           $godown_short = $query->execute()->fetchField();   
+           
+           $ret_cash = $value + $form_state['values']['cashier_short'][$key]; //Return Qty + Cashier Short  
+           $ret_cash_godown = $ret_cash + $godown_short; //Return Qty + Cashier Short + Godown Short
+           $line_status = '';
+           if ($ret_cash == $og_array[$key] ) {
+             $line_status = 'line_return';
+           }else if ($ret_cash_godown > 0) {
+             $line_status = 'line_partial_return';
+           }else if ($ret_cash_godown == 0) {
+             $line_status = 'line_no_return';
            }
             db_update('dispatch_planning_item_details') // Table name no longer needs {}
                 ->fields(array(
