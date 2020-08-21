@@ -1006,6 +1006,12 @@ function _edit_trip_delivered_callback_form_validate($form, &$form_state) {
          form_set_error('undeliver_reason', t('Undeliver reason can not be empty'));
       }
    }
+   
+   $job_type = get_jobtype_from_trip_bill($trip_number, $bill_number, $dis_id);
+   $reverse_order_status = array('return', 'partial_return', 'no_return');
+   if ($job_type == 'Reverse' && !in_array($order_status, $reverse_order_status)) {
+       form_set_error('order_status', t("Order status $order_status cannot be selected for reverse order"));
+   }
 
    foreach ($og_array as $key => $val) {
       $dispatch_qty = $og_array[$key];
@@ -1445,4 +1451,14 @@ function check_bank_name_exist($bank_name) {
   $query->fields('n', array('title'));
   $bank_names = $query->execute()->fetchField();
   return $bank_names;
+}
+
+function get_jobtype_from_trip_bill($trip_number, $bill_number, $dis_id){
+    $query = db_select('dispatch_planning_api_data', 'ad');
+    $query->condition('ad.runsheet_number', $trip_number, '=');
+    $query->condition('ad.bill_number', $bill_number, '=');
+    $query->condition('ad.distributor_id', $dis_id, '=');
+    $query->fields('ad', array('jobType'));
+    $res = $query->execute()->fetchField();
+    return $res;
 }
