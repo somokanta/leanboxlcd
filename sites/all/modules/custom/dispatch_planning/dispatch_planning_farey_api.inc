@@ -153,17 +153,38 @@ function fetch_dispatch_planning_api_data($data) {
 
 
          foreach ($data['fieldData']['item_details'] as $key => $value) {
-
-            // ignore if value is not in form of array
+           $res_data = _get_dispatch_qty_item_details($bill_row_id, $value['sku_code']);
+           $return_qty = $res_data['dispatch_qty'] - $value['sku_actual_quantity'] - $res_data['res_cashier_short'];
+           $line_status = '';
+           $ret_cash = $return_qty + $res_data['res_cashier_short']; //Return Qty + Cashier Short  
+           $ret_cash_godown = $ret_cash + $res_data['res_godown_short']; //Return Qty + Cashier Short + Godown Short
+            
+           // ignore if value is not in form of array
             if (!is_array($value)) {
                continue;
             }
-            
-            $res_data = _get_dispatch_qty_item_details($bill_row_id, $value['sku_code']);
-            $return_qty = $res_data['dispatch_qty'] - $value['sku_actual_quantity'] - $res_data['res_cashier_short'];
-            $line_status = '';
-            $ret_cash = $return_qty + $res_data['res_cashier_short']; //Return Qty + Cashier Short  
-            $ret_cash_godown = $ret_cash + $res_data['res_godown_short']; //Return Qty + Cashier Short + Godown Short
+           
+           if($data['jobType'] == 'Reverse'){
+              if ($ret_cash == $res_data['dispatch_qty'] ) {
+                 $line_status = 'line_return';
+              }else if ($ret_cash_godown > 0) {
+                $line_status = 'line_partial_return';
+              }else if ($ret_cash_godown == 0) {
+                $line_status = 'line_no_return';
+              }
+              db_update('dispatch_planning_item_details') // Table name no longer needs {}
+                ->fields(array(
+                  'res_sku_actual_quantity1' => isset($value['sku_actual_quantity']) ? $value['sku_actual_quantity'] : 0,
+                  'farey_delivered_qty' => isset($value['sku_actual_quantity']) ? $value['sku_actual_quantity'] : 0,
+                  'res_sku_reason' => isset($value['sku_reason']) ? $value['sku_reason'] : '',
+                  'return_qty' => $return_qty,
+                  'app_return_qty' => isset($value['sku_actual_ret_quantity']) ? $value['sku_actual_ret_quantity'] : 0, //app return qty
+                  'line_level_status' => $line_status, // line level status
+                ))
+                ->condition('trip_bill_reference', $bill_row_id, '=')
+                ->condition('sku_code', $value['sku_code'], '=')
+                ->execute();
+           }else{           
             if ($ret_cash == $res_data['dispatch_qty'] ) {
              $line_status = 'line_undeliver';
             }else if ($ret_cash_godown > 0) {
@@ -184,8 +205,23 @@ function fetch_dispatch_planning_api_data($data) {
                 ->condition('trip_bill_reference', $bill_row_id, '=')
                 ->condition('sku_code', $value['sku_code'], '=')
                 ->execute();
+           }
          }
       }
+      
+      if ($data['status'] == 'return' && !empty($updated_bill_row_id)) {
+          db_update('dispatch_planning_item_details')
+          ->expression('return_qty', 'dispatch_qty')
+          ->fields(array(
+            'res_sku_actual_quantity1' => 0,
+            'farey_delivered_qty' => 0,
+            'line_level_status' => 'line_return',
+          ))
+          ->condition('trip_bill_reference', $bill_row_id, '=')
+          ->execute();
+      }
+      
+      
       if ($data['status'] == 'undeliver' && !empty($updated_bill_row_id)) {
         watchdog('farey data undeliver', '<pre>' . print_r($data['fieldData']['item_details'], TRUE) . '</pre>');
         db_update('dispatch_planning_item_details')
