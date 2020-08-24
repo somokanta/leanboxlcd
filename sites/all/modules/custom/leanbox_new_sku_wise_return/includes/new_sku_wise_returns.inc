@@ -1374,7 +1374,7 @@ function save_sku_wise_return_submit($form, &$form_state) {
                 'claimed_godown_short' => 0,
                 'claimed_godown_short_reason' => '',
                 // 'line_level_status' => $line_status, // line level status
-                'declared_claimed_godown_short' => (int) $val['claimed_godown_short']
+                'declared_claimed_godown_short' => 0
               ))
               ->condition('sku_code', $sku, '=')
               ->condition('id', $itdata->id, '=')
@@ -1931,10 +1931,10 @@ function sku_wise_return_submit($form, &$form_state) {
               //'dispatch_qty' => $val['dispatch_qty'],
               'res_sku_reason' => $val['reason_code'],
               'res_cashier_short' => (int) $val['cashier_short'],
-              'claimed_godown_short' => (int) $val['claimed_godown_short'],
-              'claimed_godown_short_reason' => $val['reason_for_claim'],
+              'claimed_godown_short' => 0,
+              'claimed_godown_short_reason' => '',
               //'line_level_status' => $line_status, // line level status
-              'declared_claimed_godown_short' => (int) $val['claimed_godown_short']
+              'declared_claimed_godown_short' => 0
             ))
             ->condition('sku_code', $sku, '=')
             ->condition('id', $itdata->id, '=')
