@@ -153,16 +153,18 @@ function fetch_dispatch_planning_api_data($data) {
 
 
          foreach ($data['fieldData']['item_details'] as $key => $value) {
+             
+           // ignore if value is not in form of array
+            if (!is_array($value)) {
+               continue;
+            }             
+             
            $res_data = _get_dispatch_qty_item_details($bill_row_id, $value['sku_code']);
            $return_qty = $res_data['dispatch_qty'] - $value['sku_actual_quantity'] - $res_data['res_cashier_short'];
            $line_status = '';
            $ret_cash = $return_qty + $res_data['res_cashier_short']; //Return Qty + Cashier Short  
            $ret_cash_godown = $ret_cash + $res_data['res_godown_short']; //Return Qty + Cashier Short + Godown Short
             
-           // ignore if value is not in form of array
-            if (!is_array($value)) {
-               continue;
-            }
            
            if($data['jobType'] == 'Reverse'){
               if ($ret_cash == $res_data['dispatch_qty'] ) {

@@ -103,7 +103,7 @@ function new_sku_wise_returns_form($form, &$form_state) {
       '#attributes' => array('class' => array('sub-putaway_list')),
     );
 
-    $radio_options = array('partial_deliver' => 'Partial Delivered Bills', 'undeliver' => 'Full Returned Bills', 'both' => 'Both');
+    $radio_options = array('partial_deliver' => 'Partial Delivered Bills', 'undeliver' => 'Full Returned Bills', 'return' => 'Returned Bills', 'partial_return'=> 'Partial Returned Bills', 'both' => 'All');
 
     $form['bill_status'] = array(
       '#title' => t('Bill Status'),
@@ -309,11 +309,14 @@ function new_sku_wise_returns_form($form, &$form_state) {
             '#default_value' => $val1['res_cashier_short'],
             '#attributes' => array('class' => array('allownumericwithoutdecimal', 'cashier-qty')),
           );
-
+          
+          if ($val1['res_status'] == 'partial_return' || $val1['res_status'] == 'return') {
+              $readonly = 'readonly';
+          }
           $claimed_godown_short = array(
             '#type' => 'textfield',
             '#size' => 10,
-            '#attributes' => array('class' => array('allownumericwithoutdecimal', 'claim-godown-short')),
+            '#attributes' => array('class' => array('allownumericwithoutdecimal', 'claim-godown-short'), $readonly => $readonly),
             '#default_value' => $val1['claimed_godown_short'],
           );
 
@@ -322,10 +325,14 @@ function new_sku_wise_returns_form($form, &$form_state) {
           if (!empty($claim_reason_options)) {
             $claim_reason_intial_option = $claim_reason_intial_option + $claim_reason_options;
           }
+          if ($val1['res_status'] == 'partial_return' || $val1['res_status'] == 'return') {
+              $claim_reason_intial_option = array('' => 'Select');
+              $readonly1 = 'readonly';
+          }
           $reason_for_claim = array(
             '#type' => 'select',
             '#options' => $claim_reason_intial_option,
-            '#attributes' => array('class' => array('claim-godown-short-reason')),
+            '#attributes' => array('class' => array('claim-godown-short-reason'), $readonly1 => $readonly1),
             '#default_value' => $val1['claimed_godown_short_reason'],
           );
 
@@ -804,6 +811,12 @@ function new_sku_wise_return_submit($form, &$form_state) {
     }
     elseif ($selected_bill_status == 'undeliver') {
       $query->condition('ad.res_status', 'undeliver', '=');
+    }
+    elseif ($selected_bill_status == 'return') {
+      $query->condition('ad.res_status', 'return', '=');
+    }
+    elseif ($selected_bill_status == 'partial_return') {
+      $query->condition('ad.res_status', 'partial_return', '=');
     }
     if (!empty($sub_putaway_group)) {
       $query->join('node', 'n', 'n.title = dpi.sku_code');
@@ -1351,6 +1364,21 @@ function save_sku_wise_return_submit($form, &$form_state) {
               ->condition('sku_code', $sku, '=')
               ->condition('id', $itdata->id, '=')
               ->execute();
+          }else{
+             db_update('dispatch_planning_item_details') // Table name no longer needs {}
+              ->fields(array(
+                'return_qty' => (int) $val['actual_returned_qty1'],
+                // 'dispatch_qty' => $val['dispatch_qty'],
+                'res_sku_reason' => $val['reason_code'],
+                'res_cashier_short' => (int) $val['cashier_short'],
+                'claimed_godown_short' => 0,
+                'claimed_godown_short_reason' => '',
+                // 'line_level_status' => $line_status, // line level status
+                'declared_claimed_godown_short' => (int) $val['claimed_godown_short']
+              ))
+              ->condition('sku_code', $sku, '=')
+              ->condition('id', $itdata->id, '=')
+              ->execute(); 
           }
         }
       }
@@ -1884,6 +1912,21 @@ function sku_wise_return_submit($form, &$form_state) {
           db_update('dispatch_planning_item_details') // Table name no longer needs {}
             ->fields(array(
 // 'res_sku_actual_quantity1' => (int) $val['dispatch_qty'] - $val['actual_returned_qty1'] - $val['cashier_short'] - $val['claimed_godown_short'],
+              'return_qty' => (int) $val['actual_returned_qty1'],
+              //'dispatch_qty' => $val['dispatch_qty'],
+              'res_sku_reason' => $val['reason_code'],
+              'res_cashier_short' => (int) $val['cashier_short'],
+              'claimed_godown_short' => (int) $val['claimed_godown_short'],
+              'claimed_godown_short_reason' => $val['reason_for_claim'],
+              //'line_level_status' => $line_status, // line level status
+              'declared_claimed_godown_short' => (int) $val['claimed_godown_short']
+            ))
+            ->condition('sku_code', $sku, '=')
+            ->condition('id', $itdata->id, '=')
+            ->execute();
+        }else{
+          db_update('dispatch_planning_item_details') // Table name no longer needs {}
+            ->fields(array(
               'return_qty' => (int) $val['actual_returned_qty1'],
               //'dispatch_qty' => $val['dispatch_qty'],
               'res_sku_reason' => $val['reason_code'],
