@@ -50,8 +50,14 @@ function api_dispatch_uri_setting_form($form, &$form_state) {
   
   $form['del_app']['new_dispatch_job_type'] = array(
     '#type' => 'textfield',
-    '#title' => t('Delivery App Job Type'),
+    '#title' => t('Delivery App Job Type Forward order'),
     '#default_value' => variable_get('new_dispatch_job_type'),
+    //'#size' => 10,
+  );
+  $form['del_app']['new_dispatch_job_type_reverse'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Delivery App Job Type Reverse order'),
+    '#default_value' => variable_get('new_dispatch_job_type_reverse'),
     //'#size' => 10,
   );
   
