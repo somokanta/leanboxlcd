@@ -2691,7 +2691,7 @@ function bill_pending_autocomplete($trip_id, $distributor_id, $string = '') {
     //global $user;
     //$distributor_id = change_feeds_import_get_distributor_id($user->uid);
     $distributor_id = get_distributorid_of_trip($trip_id);
-    $res_status = array('undeliver', '');
+    $res_status = array('undeliver','no_return', '');
     if (!empty($trip_id)) {
         $node_obj = node_load_multiple(NULL, array('title' => $trip_id, 'type' => 'dispatch_data', 'uid' => $distributor_id));
         $trip_nid = key($node_obj);
@@ -3469,6 +3469,10 @@ function dispatch_planning_sales_reg_api($node, $trip_execution_date, $vehicle_n
 
     if (!in_array($trip_id, $trip_ids)) {
         $job_type = variable_get('new_dispatch_job_type', 'delivery');
+
+        if($node->field_order_type[LANGUAGE_NONE][0]['value'] == 1){//reverse
+            $job_type = variable_get('new_dispatch_job_type_reverse', 'reverse');
+        }
     }
     else {
         $job_type = variable_get('dispatch_job_type', 'delivery1');
