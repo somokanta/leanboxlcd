@@ -118,6 +118,8 @@ function vrs_confirmation_form($form, &$form_state) {
 
   $bill_status_options = array('deliver' => 'Delivered'
     , 'partial_deliver' => 'Partial Delivered'
+    , 'partial_return' => 'Partial Returned'
+    , 'return' => 'Returned'
     // , 'delivery_pending' => 'Delivery Pending'
   );
 
@@ -672,6 +674,14 @@ function vrs_confirmation_form($form, &$form_state) {
         case 'deliver';
           $bill_status = t('Delivered');
           break;
+      
+       case 'partial_return';
+          $bill_status = t('Partial Returned');
+          break;
+      
+       case 'return';
+          $bill_status = t('Returned');
+          break;
 
         case 'undeliver';
           $undeliver = 1;
@@ -740,10 +750,14 @@ function vrs_confirmation_form($form, &$form_state) {
      if(strtolower($val['photo_of_signed_bill_partial']) == 'na') {
          unset($val['photo_of_signed_bill_partial']);
      }
+     
+     if ($val['res_status'] == 'partial_return' || $val['res_status'] == 'return') {
+          $readonly = 'readonly';
+      }
                
       $bank_name = array(
         //'#id' => 'bill_details-' . $key . '-bank_name',
-        '#attributes' => array('class' => array('bank_name'), 'title' => t('Bank Name')),
+        '#attributes' => array('class' => array('bank_name'), 'title' => t('Bank Name'), $readonly => $readonly),
         '#type' => 'textfield',
         '#autocomplete_path' => 'get_bank_names/autocomplete',
         '#size' => $text_box_size,
@@ -751,7 +765,7 @@ function vrs_confirmation_form($form, &$form_state) {
       );
       $cheque_number = array(
         //'#id' => 'bill_details-' . $key . '-cheque_number',
-        '#attributes' => array('class' => array('cheque_number'), 'title' => t('Cheque Number')),
+        '#attributes' => array('class' => array('cheque_number'), 'title' => t('Cheque Number'), $readonly => $readonly),
         '#type' => 'textfield',
         '#size' => $text_box_size,
         '#default_value' => $vrs_total_id ? $bills[$key]['cheque_number'] : $val['res_cheque_no']
@@ -768,7 +782,7 @@ function vrs_confirmation_form($form, &$form_state) {
         }
         $cheque_date = array(
         //'#id' => 'bill_details-' . $key . '-cheque_date',
-        '#attributes' => array('class' => array('cheque_date'), 'title' => t('Cheque Date')),
+        '#attributes' => array('class' => array('cheque_date'), 'title' => t('Cheque Date'), $readonly => $readonly),
         '#type' => 'date_popup',
         '#date_format' => 'Y-m-d',
         '#date_label_position' => '',
@@ -791,10 +805,10 @@ function vrs_confirmation_form($form, &$form_state) {
         '#default_value' => round($val['field_bill_value_value']),
       );
 
-
+      
       $actual_cash_collected = array(
         //'#id' => 'bill_details-' . $key . '-actual_cash_collected',
-        '#attributes' => array('class' => array('short_cal','calculate_short_without_cash', 'actual_cash_collected', 'allownumericwithoutdecimal'), 'title' => t('Actual Cash Collected')),
+        '#attributes' => array('class' => array('short_cal','calculate_short_without_cash', 'actual_cash_collected', 'allownumericwithoutdecimal'), 'title' => t('Actual Cash Collected'), $readonly => $readonly),
         '#type' => 'textfield',
         '#size' => $text_box_size,
         '#default_value' => $vrs_total_id ? round($bills[$key]['actual_cash_amount']) : round($val['res_cash_amount']),
@@ -802,7 +816,7 @@ function vrs_confirmation_form($form, &$form_state) {
       $actual_cheque_collected = array(
         // '#id' => 'bill_details-' . $key . '-actual_cheque_collected',
         '#type' => 'textfield',
-        '#attributes' => array('class' => array('short_cal', 'actual_cheque_amt_collected', 'allownumericwithoutdecimal'), 'title' => t('Actual Cheque Amount')),
+        '#attributes' => array('class' => array('short_cal', 'actual_cheque_amt_collected', 'allownumericwithoutdecimal'), 'title' => t('Actual Cheque Amount'), $readonly => $readonly),
         '#size' => $text_box_size,
         '#default_value' => $vrs_total_id ? round($bills[$key]['actual_cheque_amount']) : round($val['res_cheque_amount']),
       );
@@ -1380,7 +1394,7 @@ function display_vrs_trip_details($form, &$form_state) {
     $query = db_select('dispatch_planning_api_data', 'ad');
     $query->condition('ad.distributor_id', $dis_id, '=');
     $query->condition('ad.runsheet_number', $trip_id, '=');
-    $default_bill_status = array('partial_deliver', 'deliver', 'undeliver');
+    $default_bill_status = array('partial_deliver', 'deliver', 'undeliver', 'return', 'partial_return');
     if (!empty($dispatch_date)) {
       $query->condition('ad.date', $dispatch_date, '=');
     }
