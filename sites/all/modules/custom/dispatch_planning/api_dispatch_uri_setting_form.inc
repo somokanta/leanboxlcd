@@ -36,29 +36,25 @@ function api_dispatch_uri_setting_form($form, &$form_state) {
     '#type' => 'textfield',
     '#title' => t('TRIP IDs NOT SEND TO DELIVERY APP'),
     '#description' => t('Enter Trip IDs comma separated'),
-    '#default_value' => variable_get('new_trip_ids'),
-    //'#size' => 10,
+    '#default_value' => variable_get('new_trip_ids')
   );
   
   $form['del_app']['new_dispatch_uri_settings'] = array(
     '#type' => 'textarea',
     '#title' => t('API Url'),
     '#description' => t('Eg.https://uri.com/key=?=182'),
-    '#default_value' => variable_get('new_dispatch_uri_settings'),
-    //'#size' => 10,
+    '#default_value' => variable_get('new_dispatch_uri_settings')
   );
   
   $form['del_app']['new_dispatch_job_type'] = array(
     '#type' => 'textfield',
     '#title' => t('Delivery App Job Type Forward order'),
-    '#default_value' => variable_get('new_dispatch_job_type'),
-    //'#size' => 10,
+    '#default_value' => variable_get('new_dispatch_job_type')
   );
   $form['del_app']['new_dispatch_job_type_reverse'] = array(
     '#type' => 'textfield',
     '#title' => t('Delivery App Job Type Reverse order'),
-    '#default_value' => variable_get('new_dispatch_job_type_reverse'),
-    //'#size' => 10,
+    '#default_value' => variable_get('new_dispatch_job_type_reverse')
   );
   
   $form['dispatch_bypass'] = array(

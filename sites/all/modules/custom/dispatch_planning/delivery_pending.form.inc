@@ -267,61 +267,47 @@ function delivery_pending_form($form, &$form_state) {
 }
 
 function delivery_pending_bill_number_ajax_submit($form, &$form_state) {
-  $bill_number = $form_state['values']['bill_number'];
-  $trip_id = $form_state['values']['trip_id'];
-  $distributor_id = $form_state['input']['distributor_id'];
-  $central_disid = $form_state['input']['central_disid'];
-  unset($form_state['input']['bill_number']);
-  $rows = $form_state['input']['list_form_items'];
+    $bill_number = $form_state['values']['bill_number'];
+    $trip_id = $form_state['values']['trip_id'];
+    $distributor_id = $form_state['input']['distributor_id'];
+    $central_disid = $form_state['input']['central_disid'];
+    unset($form_state['input']['bill_number']);
+    $rows = $form_state['input']['list_form_items'];
     if (!empty($rows)) {
         foreach ($rows as $key => $value) {
             foreach ($form_state['dispatch_planning']['bills'][$key]['delivery_pending']['data'][$key] as $k => &$v) {
                 if ($v['#name'] == "delivery_pending[$key]") {
                     $v['#value'] = $form_state['input']['delivery_pending'][$key];
                 }
-                
             }
         }
-        //$form_state['complete form']['dp_pending_reason_all']['#value'] = $form_state['input']['dp_pending_reason_all'];
-        //$form_state['dp_pending_reason_all']['#value']= $form_state['input']['dp_pending_reason_all'];
     }
-  $res_status = array('undeliver','no_return','');
-  $bill_info = get_bill_info($bill_number, $van = NULL, $loading_date = NULL, $beat_name = NULL, $trip_id , $delivery_pending = TRUE,$res_status,$distributor_id);
-  $dp_reason_list = _get_dp_reasons('delivery_pending');
-  foreach ($bill_info as $key => $value) {
-    
-    unset($bill_info[$key]['field_delivery_pending_value']);
-    /*$bill_info[$key]['delivery_pending']['data'] = array(
-      '#type' => 'select',
-      '#title' => 'Delivery pending',
-      '#title_display' => 'invisible',
-      '#value' => $value['field_delivery_pending_value'],
-      '#name' => "delivery_pending[$key]",
-      '#options' => array('' => 'Select', 1 => 'Yes')
-    );*/
-        
-    //trip id display
-    $bill_info[$key]['trip_id'] = $trip_id; 
-    
-    $bill_info[$key]['delivery_pending']['data'][$key]['dp_pending'] = array(
-                    '#type' => 'select',
-                    '#title' => t('Delivery Pending Reason'),
-                    '#title_display' => 'invisible',
-                    '#attributes' => array('class' => array('dp_reason_bills')),
-                    '#name' => "delivery_pending[$key]",
-                    '#required' => TRUE,
-                    '#default_value' =>$form_state['input']['dp_pending_reason_all'],
-                    '#options' => $dp_reason_list,
-                    '#value' =>$form_state['input']['dp_pending_reason_all'],
-                  );
-    
-    
-  }
-   if (!empty($bill_info)) {
-    $form_state['dispatch_planning']['bills'] += $bill_info;
-  }
+    $res_status = array('undeliver', 'no_return', '');
+    $bill_info = get_bill_info($bill_number, $van = NULL, $loading_date = NULL, $beat_name = NULL, $trip_id, $delivery_pending = TRUE, $res_status, $distributor_id);
+    $dp_reason_list = _get_dp_reasons('delivery_pending');
+    foreach ($bill_info as $key => $value) {
 
-  $form_state['rebuild'] = TRUE;
+        unset($bill_info[$key]['field_delivery_pending_value']);
+        //trip id display
+        $bill_info[$key]['trip_id'] = $trip_id;
+
+        $bill_info[$key]['delivery_pending']['data'][$key]['dp_pending'] = array(
+            '#type' => 'select',
+            '#title' => t('Delivery Pending Reason'),
+            '#title_display' => 'invisible',
+            '#attributes' => array('class' => array('dp_reason_bills')),
+            '#name' => "delivery_pending[$key]",
+            '#required' => TRUE,
+            '#default_value' => $form_state['input']['dp_pending_reason_all'],
+            '#options' => $dp_reason_list,
+            '#value' => $form_state['input']['dp_pending_reason_all'],
+        );
+    }
+    if (!empty($bill_info)) {
+        $form_state['dispatch_planning']['bills'] += $bill_info;
+    }
+
+    $form_state['rebuild'] = TRUE;
 }
 
 function delivery_pending_form_save_validate(&$form, &$form_state) { 
