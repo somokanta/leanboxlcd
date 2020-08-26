@@ -3892,7 +3892,7 @@ function _dispatch_planning_get_all_sales_nid($nid) {
     if (!empty($nid)) {
         $query = db_select('node', 'n');
         $query->condition('n.type', 'sales_register_data');
-        $query->join('field_data_field_promised_date', 'pro_date', 'pro_date.entity_id = n.nid');
+        $query->leftjoin('field_data_field_promised_date', 'pro_date', 'pro_date.entity_id = n.nid');
         $query->join('field_data_field_trip_id_reference', 'ti', 'ti.entity_id = n.nid');
         $query->join('field_data_field_drs_sequence', 'ds', 'ds.entity_id = n.nid');
         $query->orderBy('ds.field_drs_sequence_value', 'ASC');
