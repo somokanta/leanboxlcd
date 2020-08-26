@@ -3757,6 +3757,7 @@ function dispatch_planning_node_update($node) {
 
         // dispatch_date is mandatory to push data to Fareye api
         $dispatch_date = $node->field_dispatch_date[LANGUAGE_NONE][0]['value'];
+        dpm($original_pre_start);
         if ($original_pre_start != $new_pre_start && empty($original_pre_start) && !empty($dispatch_date)) {
             // if empty farery table then hit api
             if (check_tripid_exist_in_farery_table($trip_id, $distributor_id) == 1) {
