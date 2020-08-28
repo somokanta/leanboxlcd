@@ -340,7 +340,14 @@
                 } else if (input == 'partial_deliver') {
                     filter = 'Partial Delivered';
                     check_all = 0;
-                } else {
+                } else if (input == 'partial_return') {
+                    filter = 'Partial Returned';
+                    check_all = 0;
+                }
+                 else if (input == 'return') {
+                    filter = 'Returned';
+                    check_all = 0;
+                }else {
                     check_all = 1;
                 }
 
