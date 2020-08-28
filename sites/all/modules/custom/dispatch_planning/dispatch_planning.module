@@ -2711,6 +2711,7 @@ function bill_pending_autocomplete($trip_id, $distributor_id, $string = '') {
         $db_or->condition('ad.res_status', NULL);
         $db_or->condition('ad.res_status', '');
         $db_or->condition('ad.res_status', 'undeliver');
+        $db_or->condition('ad.res_status', 'no_return');
         $query->condition($db_or);
         if (!empty($trip_nid)) {
             $query->condition('ft.field_trip_id_reference_nid', $trip_nid);
