@@ -310,32 +310,29 @@ function new_sku_wise_returns_form($form, &$form_state) {
             '#attributes' => array('class' => array('allownumericwithoutdecimal', 'cashier-qty')),
           );
           
-          $readonly = '';
-          if ($val1['res_status'] == 'partial_return' || $val1['res_status'] == 'return') {
-              $readonly = 'readonly';
-          }
-          $claimed_godown_short = array(
-            '#type' => 'textfield',
-            '#size' => 10,
-            '#attributes' => array('class' => array('allownumericwithoutdecimal', 'claim-godown-short'), $readonly => $readonly),
-            '#default_value' => $val1['claimed_godown_short'],
-          );
-
+          $readonly = '';    
           $claim_reason_intial_option = array('' => 'Select');
           $claim_reason_options = get_gs_claim_reason_list($distributor_id);
           if (!empty($claim_reason_options)) {
             $claim_reason_intial_option = $claim_reason_intial_option + $claim_reason_options;
           }
           
-          $readonly1 = '';
           if ($val1['res_status'] == 'partial_return' || $val1['res_status'] == 'return') {
+              $readonly = 'readonly';
               $claim_reason_intial_option = array('' => 'Select');
-              $readonly1 = 'readonly';
           }
+          
+          $claimed_godown_short = array(
+            '#type' => 'textfield',
+            '#size' => 10,
+            '#attributes' => array('class' => array('allownumericwithoutdecimal', 'claim-godown-short'), $readonly => $readonly),
+            '#default_value' => $val1['claimed_godown_short'],
+          );
+          
           $reason_for_claim = array(
             '#type' => 'select',
             '#options' => $claim_reason_intial_option,
-            '#attributes' => array('class' => array('claim-godown-short-reason'), $readonly1 => $readonly1),
+            '#attributes' => array('class' => array('claim-godown-short-reason'), $readonly => $readonly),
             '#default_value' => $val1['claimed_godown_short_reason'],
           );
 
