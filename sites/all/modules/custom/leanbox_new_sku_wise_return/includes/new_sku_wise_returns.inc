@@ -310,6 +310,7 @@ function new_sku_wise_returns_form($form, &$form_state) {
             '#attributes' => array('class' => array('allownumericwithoutdecimal', 'cashier-qty')),
           );
           
+          $readonly = '';
           if ($val1['res_status'] == 'partial_return' || $val1['res_status'] == 'return') {
               $readonly = 'readonly';
           }
@@ -325,6 +326,8 @@ function new_sku_wise_returns_form($form, &$form_state) {
           if (!empty($claim_reason_options)) {
             $claim_reason_intial_option = $claim_reason_intial_option + $claim_reason_options;
           }
+          
+          $readonly1 = '';
           if ($val1['res_status'] == 'partial_return' || $val1['res_status'] == 'return') {
               $claim_reason_intial_option = array('' => 'Select');
               $readonly1 = 'readonly';
