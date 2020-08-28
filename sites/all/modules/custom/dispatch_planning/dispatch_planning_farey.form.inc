@@ -1009,7 +1009,7 @@ function _edit_trip_delivered_callback_form_validate($form, &$form_state) {
    
    $job_type = get_jobtype_from_trip_bill($trip_number, $bill_number, $dis_id);
    $reverse_order_status = array('return', 'partial_return', 'no_return');
-   if ($job_type == 'Reverse' && !in_array($order_status, $reverse_order_status)) {
+   if (strtolower($job_type) == 'reverse' && !in_array($order_status, $reverse_order_status)) {
        form_set_error('order_status', t("Order status $order_status cannot be selected for reverse order"));
    }
 
