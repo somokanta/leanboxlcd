@@ -659,9 +659,15 @@ function _edit_trip_delivered_callback_form($form, &$form_state) {
                      );
                }
               }
+              $readonly = '';
+              if ($order_status == 'return') {
+                  $res_confirm_signed_bill_amount_edit = 0;
+                  $readonly = 'readonly';
+              }
               $form['sb_amt'] = array(
                     '#type' => 'textfield',
                     '#title' => t('Signed bill Amt'),
+                    '#attributes' => array($readonly => $readonly),
                     '#states' => array(
                       'visible' => array(
                         ':input[name="collection_mode"]' => array('value' => 'signed'),
