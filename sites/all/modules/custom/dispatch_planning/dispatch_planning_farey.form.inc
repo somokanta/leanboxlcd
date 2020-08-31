@@ -1066,7 +1066,7 @@ function _edit_trip_delivered_callback_form_validate($form, &$form_state) {
    }
    if ($collc_mode == 'signed') {
       $sb_amt = $form_state['values']['sb_amt'];
-      if (empty($sb_amt) || !is_numeric($sb_amt)) {
+      if ((empty($sb_amt) || !is_numeric($sb_amt)) && ($order_status != 'return')) {
           form_set_error('sb_amt', t('Signed bill amount can not be empty'));
       }
    }
