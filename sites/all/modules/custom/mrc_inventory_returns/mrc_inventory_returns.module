@@ -706,7 +706,7 @@ function get_bill_count_validation($trip_id, $dis_id) {
   $query->addExpression("SUM(CASE WHEN (ad.delivery_pending_flag = 1) THEN 1 ELSE 0 END)", 'delivery_pending_bill_count');
   $query->addExpression("SUM(CASE WHEN (ad.res_status = 'return') THEN 1 ELSE 0 END)", 'return_bill_count');
   $query->addExpression("SUM(CASE WHEN (ad.res_status = 'partial_return') THEN 1 ELSE 0 END)", 'partial_return_bill_count');
-  $query->addExpression("SUM(CASE WHEN (ad.res_status = 'no_return') THEN 1 ELSE 0 END)", 'no_return_bill_count');
+  $query->addExpression("SUM(CASE WHEN (ad.res_status = 'no_return' and ad.delivery_pending_flag != 1) THEN 1 ELSE 0 END)", 'no_return_bill_count');
   $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
 
   return $res[0];

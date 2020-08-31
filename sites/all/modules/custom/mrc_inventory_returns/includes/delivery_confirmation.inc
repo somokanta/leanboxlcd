@@ -335,7 +335,7 @@ function delivery_confirmation_form_submit($form, &$form_state) {
     $query->addExpression("SUM(CASE WHEN (dpi.delivery_pending_flag = 1) THEN 1 ELSE 0 END)", 'delivery_pending_bill_count');
     $query->addExpression("SUM(CASE WHEN (dpi.res_status = 'return') THEN 1 ELSE 0 END)", 'return_bill_count');
     $query->addExpression("SUM(CASE WHEN (dpi.res_status = 'partial_return') THEN 1 ELSE 0 END)", 'partial_return_bill_count');
-    $query->addExpression("SUM(CASE WHEN (dpi.res_status = 'no_return') THEN 1 ELSE 0 END)", 'no_return_bill_count');
+    $query->addExpression("SUM(CASE WHEN (dpi.res_status = 'no_return' and dpi.delivery_pending_flag != 1) THEN 1 ELSE 0 END)", 'no_return_bill_count');
     $query->addExpression('vad.field_vehicle_arrival_date_value', 'vehicle_arrival_date');
     $query->addExpression('vat.field_vehicle_arrival_time_value', 'vehicle_arrival_time');
     $query->addExpression('din.field_delivery_incharge_name_value', 'delivery_incharge_name');
