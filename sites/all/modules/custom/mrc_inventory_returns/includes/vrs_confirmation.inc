@@ -757,7 +757,7 @@ function vrs_confirmation_form($form, &$form_state) {
      if ($val['res_status'] == 'partial_return' || $val['res_status'] == 'return') {
           $readonly = 'readonly';
       }
-               
+      
       $bank_name = array(
         //'#id' => 'bill_details-' . $key . '-bank_name',
         '#attributes' => array('class' => array('bank_name'), 'title' => t('Bank Name'), $readonly => $readonly),
@@ -823,10 +823,15 @@ function vrs_confirmation_form($form, &$form_state) {
         '#size' => $text_box_size,
         '#default_value' => $vrs_total_id ? round($bills[$key]['actual_cheque_amount']) : round($val['res_cheque_amount']),
       );
+      
+      $readonly1 = '';
+      if ($val['res_status'] == 'return') {
+          $readonly1= 'readonly';
+      }
       $signed_bill_collected = array(
         // '#id' => 'bill_details-' . $key . '-signed_bill_collected',
         '#type' => 'textfield',
-        '#attributes' => array('class' => array('signed_bill_collected', 'short_cal', 'allownumericwithoutdecimal'), 'title' => t('Signed Bill Amount')),
+        '#attributes' => array('class' => array('signed_bill_collected', 'short_cal', 'allownumericwithoutdecimal'), 'title' => t('Signed Bill Amount'), $readonly1 => $readonly1),
         '#size' => $text_box_size,
         '#default_value' => $vrs_total_id ? round($bills[$key]['actual_signed_bill_amount']) : round($val['res_confirm_signed_bill_amount']),
       );
