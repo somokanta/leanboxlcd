@@ -642,12 +642,11 @@ function vrs_confirmation_form($form, &$form_state) {
       }
       else {
         $val['sales_register_to_be_collected_amt'] = round($val['sales_register_to_be_collected_amt']);
+        if($val['sales_register_to_be_collected_amt'] < 0) {
+            $val['sales_register_to_be_collected_amt'] = 0;
+        }
       }
       $val['to_be_collected_amt'] = round($val['to_be_collected_amt']);
-      if($val['to_be_collected_amt'] < 0) {
-        $val['to_be_collected_amt'] = 0;
-      }
-            dpm($val['to_be_collected_amt']);
 
       if ($val['sales_register_to_be_collected_amt'] !== $bills[$key]['to_be_collected_amt_sales_register']) {
         
