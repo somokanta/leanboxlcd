@@ -827,6 +827,8 @@ function vrs_confirmation_form($form, &$form_state) {
       $readonly1 = '';
       if ($val['res_status'] == 'return') {
           $readonly1= 'readonly';
+          $bills[$key]['actual_signed_bill_amount'] = 0;
+          $val['res_confirm_signed_bill_amount'] = 0;
       }
       $signed_bill_collected = array(
         // '#id' => 'bill_details-' . $key . '-signed_bill_collected',
