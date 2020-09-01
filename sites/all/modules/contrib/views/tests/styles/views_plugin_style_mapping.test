@@ -18,11 +18,8 @@ class ViewsPluginStyleMappingTest extends ViewsPluginStyleTestBase {
     );
   }
 
-  /**
-   * {@inheritdoc}
-   */
-  public function setUp(array $modules = array()) {
-    parent::setUp($modules);
+  public function setUp() {
+    parent::setUp();
 
     // Reset the plugin data.
     views_fetch_plugin_data(NULL, NULL, TRUE);
@@ -30,7 +27,7 @@ class ViewsPluginStyleMappingTest extends ViewsPluginStyleTestBase {
 
   protected function viewsPlugins() {
     return array(
-      'style' => array(
+      'style' =>  array(
         'test_mapping' => array(
           'title' => t('Field mapping'),
           'help' => t('Maps specific fields to specific purposes.'),
