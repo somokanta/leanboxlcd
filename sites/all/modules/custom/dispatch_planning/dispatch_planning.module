@@ -5252,7 +5252,7 @@ function sdr_api_process($trip_id_result) {
 
             $request_headers = array('Content-Type' => 'application/json', 'Authorization' => 'Token 2972f506c41448cb3456c1c074aed6102183aff9');
             $sdr_api_url = variable_get('van_planning_api_to_sdr_url');
-            $options = array('headers' => $request_headers, 'method' => 'POST', 'data' => $trip_json, 'timeout'=> 300);
+            $options = array('headers' => $request_headers, 'method' => 'POST', 'data' => $trip_json, 'timeout'=> 60);
             $response_data = drupal_http_request($sdr_api_url, $options);
             $response = $response_data->data;
             $log_data = $response ? $response : $response_data;
