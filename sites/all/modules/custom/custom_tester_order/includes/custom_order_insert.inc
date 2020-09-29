@@ -44,11 +44,16 @@ function update_tester_order_data($data) {
 
 
 function insert_tester_order_data_in_sales_register($tester_order_data) {
-    $test_order_arr = array();
+    $test_order_arr = $order_box_arr = array();
+    foreach ($tester_order_data as $key => $data) {
+        $order_box_arr[$data['lcd_distributor_id']][$data['tester_order_number']][$data['box_id']] = $data['box_id'];
+    }
     foreach ($tester_order_data as $key => $data) {
         if(!empty($data['tester_order_number'])){
             if (!array_key_exists($data['tester_order_number'], $test_order_arr)) {
                 $test_order_arr[$data['tester_order_number']] = $data['tester_order_number'];
+                $order_box = $order_box_arr[$data['lcd_distributor_id']][$data['tester_order_number']];
+                $box_id = $order_box ? implode(', ' , $order_box) : $data['box_id'];
                 watchdog('tester order data sales register', '<pre>' . print_r($data, TRUE) . '</pre>');
                 $distributor_id = $data['lcd_distributor_id'];
 
@@ -77,7 +82,7 @@ function insert_tester_order_data_in_sales_register($tester_order_data) {
                     $node->field_bill_value[LANGUAGE_NONE][0]['value'] = 0;
                     $node->field_sales_party_code[LANGUAGE_NONE][0]['value'] = $data['party_code'];
                     $node->field_sales_updated_date[LANGUAGE_NONE][0]['value'] = time();
-                    $node->field_crate_id['und'][0]['value'] = $data['box_id'] ? $data['box_id'] : '';
+                    $node->field_crate_id['und'][0]['value'] = $box_id ? $box_id : '';
                     $node->field_outlet_order_no['und'][0]['value'] = $data['tester_order_number'];
                     $node->field_billing_van[LANGUAGE_NONE][0]['value'] = 'Van - 1';
                     $node->field_bill_net_sales[LANGUAGE_NONE][0]['value'] = 0;
@@ -94,7 +99,7 @@ function insert_tester_order_data_in_sales_register($tester_order_data) {
                     $node->field_bill_value[LANGUAGE_NONE][0]['value'] = 0;
                     $node->field_sales_party_code[LANGUAGE_NONE][0]['value'] = $data['party_code'];
                     $node->field_sales_updated_date[LANGUAGE_NONE][0]['value'] = time();
-                    $node->field_crate_id['und'][0]['value'] = $data['box_id'] ? $data['box_id'] : '';
+                    $node->field_crate_id['und'][0]['value'] = $box_id ? $box_id : '';
                     $node->field_outlet_order_no['und'][0]['value'] = $data['tester_order_number'];
                     $node->field_billing_van[LANGUAGE_NONE][0]['value'] = 'Van - 1';
                     $node->field_bill_net_sales[LANGUAGE_NONE][0]['value'] = 0;
