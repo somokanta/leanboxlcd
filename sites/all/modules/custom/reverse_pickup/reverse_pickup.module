@@ -133,7 +133,7 @@ function get_delivered_qty_from_bill_sku($bill_no, $sku, $distributor_id) {
     $query->condition('ad.bill_number', $bill_no, '=');
     $query->condition('ad.distributor_id', $distributor_id, '=');
     $query->condition('itd.sku_code', $sku, '=');
-    $query->fields('itd', array('farey_delivered_qty'));
+    $query->fields('itd', array('res_sku_actual_quantity1'));
     $delivered_qty = $query->execute()->fetchField();
   return $delivered_qty;
 }
