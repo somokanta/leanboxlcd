@@ -167,3 +167,102 @@ function get_upc_by_skus($sku7_code) {
     $res = $query->execute()->fetchField();
     return $res;
 }
+
+
+//Call the Forward Order API when return confirmed
+function reverse_pickup_node_presave($node) {
+    if ($node->type == 'dispatch_data') {
+
+        $status = $node->field_vrs_status[LANGUAGE_NONE][0]['value'];
+        $prev_status = $node->original->field_vrs_status[LANGUAGE_NONE][0]['value'];
+
+        if ($status == 1 &&  $prev_status != $status) {
+            $data = $api_data = array();
+            $nid = $node->nid;
+            $trip_id = $node->title;
+            $distributor_id = $node->uid;
+            $sales_data = reverse_pickup_get_all_bill_parentbill($nid);
+            foreach ($sales_data as $sales_info) {
+                $bill = $sales_info['bill'];
+                $parent_bill = $sales_info['parent_bill'];
+                $child_bill = $sales_info['child_bill'];
+                $dispatch_info = reverse_pickup_get_delivered_sku_details($bill, $trip_id, $distributor_id);
+                $counter = 0;
+                foreach ($dispatch_info as $value) {
+                    $sku = $value['sku_code'];
+                    $order_info = reverse_pickup_get_lb_details($child_bill, $parent_bill, $sku, $distributor_id);
+                    $data[$bill]['parent_order_no'] = $child_bill;
+                    $data[$bill]['parent_bill_no'] = $parent_bill;
+                    $data[$bill]['details'][$bill][$counter]['lbsku_id'] = $order_info['lb_sku_id'];
+                    $data[$bill]['details'][$bill][$counter]['packed_qty'] = $value['packed_qty'];
+                    $data[$bill]['details'][$bill][$counter]['delivered_qty'] = $value['delivered_qty'];
+                    $data[$bill]['details'][$bill][$counter]['pkd'] = $order_info['pkd'];
+                
+                    $counter++;
+                }
+            }//End of all data create
+            foreach($data as $key => $value){
+                $data_arr = array();
+                $data_arr['parent_order_no'] = $value['parent_order_no'];
+                $data_arr['parent_bill_no'] = $value['parent_bill_no'];
+                $data_arr['details'] = array();
+                foreach($value['details'][$key] as $val){
+                    $data_arr['details'][] = $val;
+                }
+                $api_data['data'][] = $data_arr;
+            }
+            if($api_data){
+                $json_api_data = json_encode($api_data);
+                $request_headers = array('Content-Type' => 'application/json');
+                $api_url = 'http://15.206.34.41:8094/order_management/orderUpdate/';
+                $options = array('headers' => $request_headers, 'method' => 'POST', 'data' => $json_api_data);
+                //$response = drupal_http_request($api_url, $options);
+                watchdog('orderUpdateREQ', '<pre>' . print_r($options, TRUE) . '</pre>');     
+                watchdog('orderUpdateRES', '<pre>' . print_r($response, TRUE) . '</pre>');     
+            }
+        }
+    }
+}
+
+function reverse_pickup_get_lb_details($child_bill, $parent_bill, $sku7_code, $distributor_id) {
+    $query = db_select('order_receive_data', 'ord');
+    $query->condition('ord.child_order_id', $child_bill, '=');
+    $query->condition('ord.parent_bill_number', $parent_bill, '=');
+    $query->condition('ord.sku7_code', $sku7_code, '=');
+    $query->condition('ord.distributor_id', $distributor_id, '=');
+    $query->fields('ord', array('lb_sku_id', 'pkd'));
+    $res = $query->execute()->fetch(PDO::FETCH_ASSOC);
+    return $res;
+}
+
+function reverse_pickup_get_delivered_sku_details($bill_number, $trip_id, $distributor_id) {
+    $query = db_select('dispatch_planning_api_data', 'ad');
+    $query->condition('ad.distributor_id', $distributor_id, '=');
+    $query->condition('ad.runsheet_number', $trip_id, '=');
+    $query->condition('ad.bill_number', $bill_number, '=');
+    $query->join('dispatch_planning_item_details', 'dpi', 'dpi.trip_bill_reference = ad.id');
+    $query->addExpression('ad.bill_number', 'bill_number');
+    $query->addExpression('dpi.res_sku_actual_quantity1', 'delivered_qty');
+    $query->addExpression('dpi.dispatch_qty', 'packed_qty');
+    $query->addExpression('dpi.sku_code', 'sku_code');
+    $res = $query->execute()->fetchAll(PDO::FETCH_GROUP | PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
+    return $res;
+}
+
+function reverse_pickup_get_all_bill_parentbill($nid) {
+    $res = array();
+    if (!empty($nid)) {
+        $query = db_select('node', 'n');
+        $query->condition('n.type', 'sales_register_data');
+        $query->join('field_data_field_trip_id_reference', 'ti', 'ti.entity_id = n.nid');
+        $query->join('field_data_field_parent_bill_number', 'pb', 'pb.entity_id = n.nid');
+        $query->join('field_data_field_outlet_order_no', 'oo', 'oo.entity_id = n.nid');
+        $query->condition('ti.field_trip_id_reference_nid', $nid);
+        $query->addExpression('n.title', 'title');
+        $query->addExpression('n.title', 'bill');
+        $query->addExpression('pb.field_parent_bill_number_value', 'parent_bill');
+        $query->addExpression('oo.field_outlet_order_no_value', 'child_bill');
+        $res = $query->execute()->fetchAll(PDO::FETCH_GROUP | PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
+    }
+    return $res;
+}
