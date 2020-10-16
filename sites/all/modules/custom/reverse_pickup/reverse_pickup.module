@@ -187,16 +187,18 @@ function reverse_pickup_node_presave($node) {
                 $parent_bill = $sales_info['parent_bill'];
                 $child_bill = $sales_info['child_bill'];
                 $dispatch_info = reverse_pickup_get_delivered_sku_details($bill, $trip_id, $distributor_id);
-
+                $counter = 0;
                 foreach ($dispatch_info as $value) {
                     $sku = $value['sku_code'];
                     $order_info = reverse_pickup_get_lb_details($child_bill, $parent_bill, $sku, $distributor_id);
                     $data[$bill]['parent_order_no'] = $child_bill;
                     $data[$bill]['parent_bill_no'] = $parent_bill;
-                    $data[$bill]['details'][$bill][$sku]['lbsku_id'] = $order_info['lb_sku_id'];
-                    $data[$bill]['details'][$bill][$sku]['packed_qty'] = $value['packed_qty'];
-                    $data[$bill]['details'][$bill][$sku]['delivered_qty'] = $value['delivered_qty'];
-                    $data[$bill]['details'][$bill][$sku]['pkd'] = $order_info['pkd'];
+                    $data[$bill]['details'][$bill][$counter]['lbsku_id'] = $order_info['lb_sku_id'];
+                    $data[$bill]['details'][$bill][$counter]['packed_qty'] = $value['packed_qty'];
+                    $data[$bill]['details'][$bill][$counter]['delivered_qty'] = $value['delivered_qty'];
+                    $data[$bill]['details'][$bill][$counter]['pkd'] = $order_info['pkd'];
+                
+                    $counter++;
                 }
             }//End of all data create
             foreach($data as $key => $value){
@@ -205,16 +207,16 @@ function reverse_pickup_node_presave($node) {
                 $data_arr['parent_bill_no'] = $value['parent_bill_no'];
                 $data_arr['details'] = array();
                 foreach($value['details'][$key] as $val){
-                    $data_arr['details'][] = $val[$key];
+                    $data_arr['details'][] = $val;
                 }
-                $api_data[] = $data_arr;
+                $api_data['data'][] = $data_arr;
             }
             if($api_data){
                 $json_api_data = json_encode($api_data);
                 $request_headers = array('Content-Type' => 'application/json');
                 $api_url = 'http://15.206.34.41:8094/order_management/orderUpdate/';
                 $options = array('headers' => $request_headers, 'method' => 'POST', 'data' => $json_api_data);
-                $response = drupal_http_request($api_url, $options);
+                //$response = drupal_http_request($api_url, $options);
                 watchdog('orderUpdateREQ', '<pre>' . print_r($options, TRUE) . '</pre>');     
                 watchdog('orderUpdateRES', '<pre>' . print_r($response, TRUE) . '</pre>');     
             }
@@ -239,10 +241,11 @@ function reverse_pickup_get_delivered_sku_details($bill_number, $trip_id, $distr
     $query->condition('ad.runsheet_number', $trip_id, '=');
     $query->condition('ad.bill_number', $bill_number, '=');
     $query->join('dispatch_planning_item_details', 'dpi', 'dpi.trip_bill_reference = ad.id');
+    $query->addExpression('ad.bill_number', 'bill_number');
     $query->addExpression('dpi.res_sku_actual_quantity1', 'delivered_qty');
     $query->addExpression('dpi.dispatch_qty', 'packed_qty');
     $query->addExpression('dpi.sku_code', 'sku_code');
-    $res = $query->execute()->fetch(PDO::FETCH_ASSOC);
+    $res = $query->execute()->fetchAll(PDO::FETCH_GROUP | PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
     return $res;
 }
 
@@ -255,10 +258,11 @@ function reverse_pickup_get_all_bill_parentbill($nid) {
         $query->join('field_data_field_parent_bill_number', 'pb', 'pb.entity_id = n.nid');
         $query->join('field_data_field_outlet_order_no', 'oo', 'oo.entity_id = n.nid');
         $query->condition('ti.field_trip_id_reference_nid', $nid);
+        $query->addExpression('n.title', 'title');
         $query->addExpression('n.title', 'bill');
         $query->addExpression('pb.field_parent_bill_number_value', 'parent_bill');
         $query->addExpression('oo.field_outlet_order_no_value', 'child_bill');
-        $res = $query->execute()->fetch(PDO::FETCH_ASSOC);
+        $res = $query->execute()->fetchAll(PDO::FETCH_GROUP | PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
     }
     return $res;
 }
