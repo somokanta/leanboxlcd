@@ -216,7 +216,7 @@ function reverse_pickup_node_presave($node) {
                 $request_headers = array('Content-Type' => 'application/json');
                 $api_url = 'http://15.206.34.41:8094/order_management/orderUpdate/';
                 $options = array('headers' => $request_headers, 'method' => 'POST', 'data' => $json_api_data);
-                //$response = drupal_http_request($api_url, $options);
+                $response = drupal_http_request($api_url, $options);
                 watchdog('orderUpdateREQ', '<pre>' . print_r($options, TRUE) . '</pre>');     
                 watchdog('orderUpdateRES', '<pre>' . print_r($response, TRUE) . '</pre>');     
             }
