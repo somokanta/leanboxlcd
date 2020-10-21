@@ -193,6 +193,7 @@ function reverse_pickup_node_presave($node) {
                     $order_info = reverse_pickup_get_lb_details($child_bill, $parent_bill, $sku, $distributor_id);
                     $data[$bill]['parent_order_no'] = $child_bill;
                     $data[$bill]['parent_bill_no'] = $parent_bill;
+                    $data[$bill]['distributor_code'] = $distributor_id;
                     $data[$bill]['details'][$bill][$counter]['lbsku_id'] = $order_info['lb_sku_id'];
                     $data[$bill]['details'][$bill][$counter]['packed_qty'] = $value['packed_qty'];
                     $data[$bill]['details'][$bill][$counter]['delivered_qty'] = $value['delivered_qty'];
@@ -205,6 +206,7 @@ function reverse_pickup_node_presave($node) {
                 $data_arr = array();
                 $data_arr['parent_order_no'] = $value['parent_order_no'];
                 $data_arr['parent_bill_no'] = $value['parent_bill_no'];
+                $data_arr['distributor_code'] = $value['distributor_code'];
                 $data_arr['details'] = array();
                 foreach($value['details'][$key] as $val){
                     $data_arr['details'][] = $val;
