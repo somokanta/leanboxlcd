@@ -10,6 +10,7 @@ function order_receive_data_create_callback() {
     $query = db_select('order_receive_data', 'a');
     $query->fields('a');
     $query->condition('flag', 0);
+    $query->condition('order_type', 'Reverse');
     $res = $query->groupBy('parent_bill_number')->range(0, 5)->execute()->fetchAll(PDO::FETCH_ASSOC);
 
     foreach ($res as $data) {

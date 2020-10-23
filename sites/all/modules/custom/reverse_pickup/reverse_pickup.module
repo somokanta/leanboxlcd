@@ -185,6 +185,7 @@ function reverse_pickup_node_presave($node) {
             foreach ($sales_data as $sales_info) {
                 $bill = $sales_info['bill'];
                 $parent_bill = $sales_info['parent_bill'];
+                $parent_bill = $parent_bill ? $parent_bill : $bill;
                 $child_bill = $sales_info['child_bill'];
                 $dispatch_info = reverse_pickup_get_delivered_sku_details($bill, $trip_id, $distributor_id);
                 $counter = 0;
@@ -257,7 +258,7 @@ function reverse_pickup_get_all_bill_parentbill($nid) {
         $query = db_select('node', 'n');
         $query->condition('n.type', 'sales_register_data');
         $query->join('field_data_field_trip_id_reference', 'ti', 'ti.entity_id = n.nid');
-        $query->join('field_data_field_parent_bill_number', 'pb', 'pb.entity_id = n.nid');
+        $query->leftjoin('field_data_field_parent_bill_number', 'pb', 'pb.entity_id = n.nid');
         $query->join('field_data_field_outlet_order_no', 'oo', 'oo.entity_id = n.nid');
         $query->condition('ti.field_trip_id_reference_nid', $nid);
         $query->addExpression('n.title', 'title');
