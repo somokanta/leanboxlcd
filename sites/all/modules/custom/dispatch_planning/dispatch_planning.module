@@ -1373,11 +1373,13 @@ function dispatch_planning_cron_process($res){
         //$order_api_url = variable_get('dispatch_uri_settings', 'https://staging.fareye.co/api/v1/job?api_key=l1S6xa5mnxUXDuqv12q7lerLBL9l1ICq');
         $options = array('headers' => $request_headers, 'method' => 'POST', 'data' => $json_api_data, 'timeout'=> 180);
         $response_data = drupal_http_request($order_api_url, $options);
-        watchdog('dispatch cron response', '<pre>' . print_r($response_data, TRUE) . '</pre>');
+        
         if ($response_data) {
             watchdog('inside dispatch cron response', '<pre>' . print_r($response_data, TRUE) . '</pre>');
             $response = $response_data->data;
+            watchdog('dispatch cron response data', '<pre>' . print_r($response, TRUE) . '</pre>');
             $response_arr = json_decode($response);
+            watchdog('dispatch cron response data arr', '<pre>' . print_r($response_arr, TRUE) . '</pre>');
             $api_success = ($response_arr[0]->success === true) ? 1 : 0;
             $request_flag = isset($response_arr[0]->success) ? 1: 0;
             // create response log entry
