@@ -1375,15 +1375,11 @@ function dispatch_planning_cron_process($res){
         $response_data = drupal_http_request($order_api_url, $options);
         
         if ($response_data) {
-            watchdog('inside dispatch cron response', '<pre>' . print_r($response_data, TRUE) . '</pre>');
             $response = $response_data->data;
-            watchdog('dispatch cron response data', '<pre>' . print_r($response, TRUE) . '</pre>');
             $response_arr = json_decode($response);
-            watchdog('dispatch cron response data arr', '<pre>' . print_r($response_arr, TRUE) . '</pre>');
             $api_success = ($response_arr[0]->success === true) ? 1 : 0;
             $request_flag = isset($response_arr[0]->success) ? 1: 0;
             // create response log entry
-            watchdog('dispatch cron response data arr 2 ', '<pre>' . print_r($sql_ins_id, TRUE) . '</pre>');
             dispatch_planning_api_log_update(json_encode($response_data), $sql_ins_id, $api_success, $request_flag);
         }
         if(variable_get('dispatch_api_email_send') == 'on'){
@@ -1392,7 +1388,6 @@ function dispatch_planning_cron_process($res){
                 $query->fields('a', array('attempt'));
                 $query->condition('a.id', $sql_ins_id);
                 $res = $query->execute()->fetchField();
-                watchdog('inside mail dispatch cron response', '<pre>' . print_r($response_data, TRUE) . '</pre>');
                 if($res == 1){//Email send only first time
                     $msg .= t('Error: @err ', array('@err' => print_r($response_data, TRUE)));
                     $ref_no = json_decode($json_api_data)[0]->referenceNo;
@@ -3723,7 +3718,6 @@ function dispatch_planning_api_log($json_api_data, $trip_id, $api_type, $dis_id,
  * @param $response_data (json_decode), $sql_ins_id (serial id)
  */
 function dispatch_planning_api_log_update($response_data, $sql_ins_id, $api_success,$request_flag) {
-  watchdog('dispatch cron response data arr update ', '<pre>' . print_r($sql_ins_id, TRUE) . '</pre>');
     db_update('dispatch_planning_api_log')
     ->fields(array(
       'response_data' => $response_data,
