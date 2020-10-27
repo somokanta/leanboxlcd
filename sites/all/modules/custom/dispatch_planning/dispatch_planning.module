@@ -1373,8 +1373,9 @@ function dispatch_planning_cron_process($res){
         //$order_api_url = variable_get('dispatch_uri_settings', 'https://staging.fareye.co/api/v1/job?api_key=l1S6xa5mnxUXDuqv12q7lerLBL9l1ICq');
         $options = array('headers' => $request_headers, 'method' => 'POST', 'data' => $json_api_data, 'timeout'=> 180);
         $response_data = drupal_http_request($order_api_url, $options);
-
+        watchdog('dispatch cron response', '<pre>' . print_r($response_data, TRUE) . '</pre>');
         if ($response_data) {
+            watchdog('inside dispatch cron response', '<pre>' . print_r($response_data, TRUE) . '</pre>');
             $response = $response_data->data;
             $response_arr = json_decode($response);
             $api_success = ($response_arr[0]->success === true) ? 1 : 0;
@@ -1388,6 +1389,7 @@ function dispatch_planning_cron_process($res){
                 $query->fields('a', array('attempt'));
                 $query->condition('a.id', $sql_ins_id);
                 $res = $query->execute()->fetchField();
+                watchdog('inside mail dispatch cron response', '<pre>' . print_r($response_data, TRUE) . '</pre>');
                 if($res == 1){//Email send only first time
                     $msg .= t('Error: @err ', array('@err' => print_r($response_data, TRUE)));
                     $ref_no = json_decode($json_api_data)[0]->referenceNo;
