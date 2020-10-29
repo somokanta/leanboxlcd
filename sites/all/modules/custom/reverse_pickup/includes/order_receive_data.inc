@@ -111,7 +111,7 @@ function order_receive_data_callback($data) {
             if ($res[$k]['flag'] != '0') {
                 $result = db_insert('order_receive_data')
                         ->fields(array(
-                            // 'order_creation_date' => $order_creation_date ? strtotime($order_creation_date) : 0,
+                             'order_creation_date' => $order_creation_date ? strtotime($order_creation_date) : 0,
                             'parent_bill_number' => $parent_bill_number ? $parent_bill_number : '',
                             'child_order_id' => $child_order_id ? $child_order_id : '',
                             'order_type' => $order_type ? $order_type : '',
@@ -119,12 +119,12 @@ function order_receive_data_callback($data) {
                             'party_code' => $party_code ? $party_code : '',
                             'beat_name' => $beat_name ? $beat_name : '',
                             'lb_sku_id' => $lb_sku_id ? $lb_sku_id : '',
-                            //'pkd' => $pkd ? $pkd : '',
+                            'pkd' => $pkd ? $pkd : '',
                             'sku7_code' => $sku7_code ? $sku7_code : '',
                             'product_name' => $product_name ? $product_name : '',
                             'mrp' => $mrp ? $mrp : '',
                             'return_qty' => $return_qty ? $return_qty : '',
-                            // 'distributor_id' => $distributor_id,
+                             'distributor_id' => $distributor_id,
                             'type' => 0, //API
                             'created_time' => REQUEST_TIME
                         ))
