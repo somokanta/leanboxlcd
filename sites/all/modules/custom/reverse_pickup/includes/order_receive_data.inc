@@ -19,6 +19,8 @@ function order_receive_data_callback($data) {
         $party_code = trim($value['Party Code']);
         $beat_name = trim($value['Beat Name']);
         $parent_party_code = trim($value['Parent Party Code']);
+        $ean_code = trim($value['EAN Code']);
+        $crate_id = trim($value['Crate ID']);
         foreach ($value['Order Line'] as $k => $val) {
             $lb_sku_id = trim($val['LBSKUID']);
             $pkd = trim($val['PKD']);
@@ -124,7 +126,9 @@ function order_receive_data_callback($data) {
                             'product_name' => $product_name ? $product_name : '',
                             'mrp' => $mrp ? $mrp : '',
                             'return_qty' => $return_qty ? $return_qty : '',
-                             'distributor_id' => $distributor_id,
+                            'ean_code' => $ean_code ? $ean_code : '',
+                            'crate_id' => $crate_id ? $crate_id : '',
+                            'distributor_id' => $distributor_id,
                             'type' => 0, //API
                             'created_time' => REQUEST_TIME
                         ))
