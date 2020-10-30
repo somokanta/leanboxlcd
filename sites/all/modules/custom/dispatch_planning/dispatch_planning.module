@@ -3461,25 +3461,26 @@ function dispatch_planning_sales_reg_api($node, $trip_execution_date, $vehicle_n
         unset($billing_data_details[$key]['Sum_of_TOTAL_SALES_QTY']); // dont send Sum_of_TOTAL_SALES_QTY in API
         
         //scan code
-        $parent_bill = $node->parent_bill_number;
+        $parent_bill = $node->field_parent_bill_number[LANGUAGE_NONE][0]['value'];
         $parent_bill = $parent_bill ? $parent_bill : $bill_number;
-        $child_bill= $node->outlet_order_no;
-        
-        $order_info = reverse_pickup_get_lb_details($child_bill, $parent_bill, $val['sku_code'], $node_uid);
-        $billing_data_details_insert[$key]['lbskuid'] = $order_info['lb_sku_id'];
+        $child_bill= $node->field_outlet_order_no[LANGUAGE_NONE][0]['value'];
         
         $query = db_select('order_receive_data', 'od');
-        $query->fields('od', array('ean_code','pkd'));
+        $query->fields('od', array('ean_code','pkd', 'lb_sku_id'));
         $query->condition('od.distributor_id', $node_uid);
         $query->condition('od.parent_bill_number', $parent_bill);
         $query->condition('od.child_order_id', $child_bill, '=');
         $query->condition('od.sku7_code', $val['sku_code']);
         $order = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
         foreach ($order as $key1 => $val1) {
-            $val1['qty'] = $dispath_qty;
-            $res[$key1] = $val1;
+            $billing_data_details_insert[$key]['lbskuid'] = $val1['lb_sku_id'];
+            $billing_data_details[$key]['lbskuid'] = $val1['lb_sku_id'];
+            $res[$key1]['ean_code'] = $val1['ean_code'];
+            $res[$key1]['pkd'] = $val1['pkd'];
+            $res[$key1]['qty'] = $dispath_qty;
         }
         $billing_data_details_insert[$key]['scan_code'] = $res;
+        $billing_data_details[$key]['scan_code'] = $res;
     }
     if (empty($outlet_data_details['field_hul_updated_lat_value'])) {
         $outlet_data_details['field_hul_updated_lat_value'] = 0;
@@ -3642,7 +3643,7 @@ function dispatch_planning_item_details($billing_data_details, $id) {
                 $pkd = $val['pkd'];
                 $qty = $val['qty'];
                 
-                $query = db_insert('dispatch_planning_item_details');
+                $query = db_insert('scan_code');
                 $fields = array(
                   'ean_code' => $ean,
                   'pkd' => $pkd,
