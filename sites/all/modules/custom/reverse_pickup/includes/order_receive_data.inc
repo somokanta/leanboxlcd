@@ -19,8 +19,7 @@ function order_receive_data_callback($data) {
         $party_code = trim($value['Party Code']);
         $beat_name = trim($value['Beat Name']);
         $parent_party_code = trim($value['Parent Party Code']);
-        $ean_code = trim($value['EAN Code']);
-        $crate_id = trim($value['Crate ID']);
+
         foreach ($value['Order Line'] as $k => $val) {
             $lb_sku_id = trim($val['LBSKUID']);
             $pkd = trim($val['PKD']);
@@ -28,6 +27,8 @@ function order_receive_data_callback($data) {
             $product_name = trim($val['Product Name']);
             $mrp = trim($val['MRP']);
             $return_qty = trim($val['Return Quantity']);
+            $ean_code = trim($val['EAN Code']);
+            $crate_id = trim($val['Crate ID']);
 
             $distributor_id = get_distributor_by_title($parent_party_code, 'hul_code_master');
 
@@ -113,7 +114,7 @@ function order_receive_data_callback($data) {
             if ($res[$k]['flag'] != '0') {
                 $result = db_insert('order_receive_data')
                         ->fields(array(
-                             'order_creation_date' => $order_creation_date ? strtotime($order_creation_date) : 0,
+                            'order_creation_date' => $order_creation_date ? strtotime($order_creation_date) : 0,
                             'parent_bill_number' => $parent_bill_number ? $parent_bill_number : '',
                             'child_order_id' => $child_order_id ? $child_order_id : '',
                             'order_type' => $order_type ? $order_type : '',
