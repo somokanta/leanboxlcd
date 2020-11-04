@@ -195,10 +195,19 @@ function reverse_pickup_node_presave($node) {
                     $data[$bill]['parent_order_no'] = $child_bill;
                     $data[$bill]['parent_bill_no'] = $parent_bill;
                     $data[$bill]['distributor_code'] = $distributor_id;
-                    $data[$bill]['details'][$bill][$counter]['lbsku_id'] = $order_info['lb_sku_id'];
+                    $data[$bill]['details'][$bill][$counter]['lbsku_id'] = $order_info[0]['lb_sku_id'];
                     $data[$bill]['details'][$bill][$counter]['packed_qty'] = $value['packed_qty'];
                     $data[$bill]['details'][$bill][$counter]['delivered_qty'] = $value['delivered_qty'];
-                    $data[$bill]['details'][$bill][$counter]['pkd'] = $order_info['pkd'];
+                    $data[$bill]['details'][$bill][$counter]['pkd'] = $order_info[0]['pkd'];
+                    
+                    //scan_code
+                    foreach ($order_info as $key1 => $val1) {
+                        $res[$key1]['ean_code'] = $val1['ean_code'];
+                        $res[$key1]['packed_qty'] = $value['packed_qty'];
+                        $res[$key1]['delivered_qty'] = $value['delivered_qty'];
+                        $res[$key1]['crate_id'] = $val1['crate_id'];
+                    }
+                    $data[$bill]['details'][$bill][$counter]['scan_code'] = $res;
                 
                     $counter++;
                 }
@@ -233,8 +242,8 @@ function reverse_pickup_get_lb_details($child_bill, $parent_bill, $sku7_code, $d
     $query->condition('ord.parent_bill_number', $parent_bill, '=');
     $query->condition('ord.sku7_code', $sku7_code, '=');
     $query->condition('ord.distributor_id', $distributor_id, '=');
-    $query->fields('ord', array('lb_sku_id', 'pkd'));
-    $res = $query->execute()->fetch(PDO::FETCH_ASSOC);
+    $query->fields('ord', array('lb_sku_id', 'pkd','ean_code','crate_id'));
+    $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
     return $res;
 }
 
