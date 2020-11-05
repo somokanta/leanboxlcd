@@ -295,8 +295,8 @@ function reverse_pickup_views_data() {
     );
     
     $data['order_receive_data']['ean_code'] = array(
-        'title' => t('Type'),
-        'help' => t('Type'),
+        'title' => t('EAN Code'),
+        'help' => t('EAN Code'),
         'field' => array(
             'handler' => 'views_handler_field',
         ),
@@ -309,8 +309,8 @@ function reverse_pickup_views_data() {
     );    
         
     $data['order_receive_data']['crate_id'] = array(
-        'title' => t('Type'),
-        'help' => t('Type'),
+        'title' => t('Crate ID'),
+        'help' => t('Crate ID'),
         'field' => array(
             'handler' => 'views_handler_field',
         ),
