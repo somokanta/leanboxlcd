@@ -293,6 +293,34 @@ function reverse_pickup_views_data() {
             'handler' => 'views_handler_filter_numeric',
         ),
     );
+    
+    $data['order_receive_data']['ean_code'] = array(
+        'title' => t('Type'),
+        'help' => t('Type'),
+        'field' => array(
+            'handler' => 'views_handler_field',
+        ),
+        'sort' => array(
+            'handler' => 'views_handler_sort',
+        ),
+        'filter' => array(
+            'handler' => 'views_handler_filter_string',
+        ),
+    );    
+        
+    $data['order_receive_data']['crate_id'] = array(
+        'title' => t('Type'),
+        'help' => t('Type'),
+        'field' => array(
+            'handler' => 'views_handler_field',
+        ),
+        'sort' => array(
+            'handler' => 'views_handler_sort',
+        ),
+        'filter' => array(
+            'handler' => 'views_handler_filter_string',
+        ),
+    );
 
     return $data;
 }
