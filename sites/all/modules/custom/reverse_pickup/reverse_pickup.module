@@ -225,10 +225,26 @@ function reverse_pickup_node_presave($node) {
             }
             if($api_data){
                 $json_api_data = json_encode($api_data);
+                
+                $sql_ins_id = db_insert('oms_api_log')
+                    ->fields(array(
+                        'received_data' => $json_api_data,
+                        'request_time' => time(),
+                    ))
+                    ->execute();
+                
                 $request_headers = array('Content-Type' => 'application/json');
                 $api_url = 'http://15.206.34.41:8094/order_management/orderUpdate/';
                 $options = array('headers' => $request_headers, 'method' => 'POST', 'data' => $json_api_data);
                 $response = drupal_http_request($api_url, $options);
+                
+                db_update('oms_api_log')
+                    ->fields(array(
+                        'response_data' => json_encode($response),
+                    ))
+                    ->condition('id', $sql_ins_id, '=')
+                    ->execute();
+                
                 watchdog('orderUpdateREQ', '<pre>' . print_r($json_api_data, TRUE) . '</pre>');     
                 watchdog('orderUpdateRES', '<pre>' . print_r($response, TRUE) . '</pre>');     
             }

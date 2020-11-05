@@ -321,6 +321,84 @@ function reverse_pickup_views_data() {
             'handler' => 'views_handler_filter_string',
         ),
     );
+    
+    $data['oms_api_log']['table'] = array(
+        'group' => t('OMS API LOG'),
+        'title' => t('OMS API LOG'),
+        'help' => t('OMS API LOG.'),
+    );
+    
+    $data['oms_api_log']['id'] = array(
+        'title' => t('ID'),
+        'help' => t('The record ID.'),
+        'field' => array(
+            'handler' => 'views_handler_field_numeric',
+        ),
+        'sort' => array(
+            'handler' => 'views_handler_sort',
+        ),
+        'filter' => array(
+            'handler' => 'views_handler_filter_numeric',
+        ),
+    );
+
+    $data['oms_api_log']['received_data'] = array(
+        'title' => t('Received Data'),
+        'help' => t('Received Data'),
+        'field' => array(
+            'handler' => 'views_handler_field',
+        ),
+        'sort' => array(
+            'handler' => 'views_handler_sort',
+        ),
+        'filter' => array(
+            'handler' => 'views_handler_filter_string',
+        ),
+    );
+
+    $data['oms_api_log']['response_data'] = array(
+        'title' => t('Response Data'),
+        'help' => t('Response Data'),
+        'field' => array(
+            'handler' => 'views_handler_field',
+        ),
+        'sort' => array(
+            'handler' => 'views_handler_sort',
+        ),
+        'filter' => array(
+            'handler' => 'views_handler_filter_string',
+        ),
+    );
+
+    $data['oms_api_log']['request_time'] = array(
+        'title' => t('Request Time'),
+        'help' => t('Request Time'),
+        'field' => array(
+            'handler' => 'views_handler_field_date',
+            'click sortable' => TRUE,
+        ),
+        'sort' => array(
+            'handler' => 'views_handler_sort_date',
+        ),
+        'filter' => array(
+            'handler' => 'views_handler_filter_date',
+        ),
+        'argument' => array(
+            'handler' => 'views_handler_filter_date',
+        ),
+    );    
+
+    $data['oms_api_log']['date_filter'] = array(
+        'group' => t('Date'),
+        'title' => t('Date (!base_table)', array('!base_table' => 'oms_api_log')),
+        'help' => t('Filter any Views !base_table date field.', array('!base_table' => 'oms_api_log')),
+        'filter' => array(
+            'handler' => 'date_views_filter_handler',
+            'empty field name' => t('Undated'),
+            'is date' => TRUE,
+        //'skip base' => $base_table,
+        ),
+    );    
 
     return $data;
 }

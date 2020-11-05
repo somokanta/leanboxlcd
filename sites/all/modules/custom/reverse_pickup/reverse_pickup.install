@@ -218,3 +218,35 @@ function reverse_pickup_update_7002() {
  
   db_create_table('scan_code', $schema['scan_code']);
 }
+
+function reverse_pickup_update_7003() {
+    $schema['oms_api_log'] = array(
+    'description' => 'Describes Api log for OMS API',
+    'fields' => array(
+      'id' => array(
+        'description' => 'Id Primary Key',
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'received_data' => array(
+        'description' => 'Received Data',
+        'type' => 'text',
+        'size'=> 'medium',
+      ),
+      'response_data' => array(
+        'description' => 'API Response',
+        'type' => 'text',
+        'size'=> 'medium',
+      ),
+      'request_time' => array(
+        'description' => 'API Request time',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    ),
+    'primary key' => array('id'),
+  );
+ 
+  db_create_table('oms_api_log', $schema['oms_api_log']);
+}
