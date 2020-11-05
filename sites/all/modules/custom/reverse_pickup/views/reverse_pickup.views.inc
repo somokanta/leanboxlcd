@@ -328,6 +328,14 @@ function reverse_pickup_views_data() {
         'help' => t('OMS API LOG.'),
     );
     
+    // Define this as a base table.
+    $data['oms_api_log']['table']['base'] = array(
+        'field' => 'id',
+        'title' => t('OMS API Log'),
+        'help' => t("OMS API Log"),
+            // 'weight' => -10,
+    );
+    
     $data['oms_api_log']['id'] = array(
         'title' => t('ID'),
         'help' => t('The record ID.'),
