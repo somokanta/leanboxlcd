@@ -176,7 +176,7 @@ function reverse_pickup_node_presave($node) {
         $status = $node->field_vrs_status[LANGUAGE_NONE][0]['value'];
         $prev_status = $node->original->field_vrs_status[LANGUAGE_NONE][0]['value'];
 
-        if ($status == 1 &&  $prev_status != $status) {
+        if ($status == 2 &&  $prev_status != $status) {
             $data = $api_data = array();
             $nid = $node->nid;
             $trip_id = $node->title;
@@ -229,7 +229,7 @@ function reverse_pickup_node_presave($node) {
                 $api_url = 'http://15.206.34.41:8094/order_management/orderUpdate/';
                 $options = array('headers' => $request_headers, 'method' => 'POST', 'data' => $json_api_data);
                 $response = drupal_http_request($api_url, $options);
-                watchdog('orderUpdateREQ', '<pre>' . print_r($options, TRUE) . '</pre>');     
+                watchdog('orderUpdateREQ', '<pre>' . print_r($json_api_data, TRUE) . '</pre>');     
                 watchdog('orderUpdateRES', '<pre>' . print_r($response, TRUE) . '</pre>');     
             }
         }
