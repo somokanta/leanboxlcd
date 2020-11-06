@@ -5145,7 +5145,7 @@ function sdr_api_cron() {
     $query->fields('sdr', array('id', 'trip_id', 'distributor_id', 'bills'));
     $query->orderBy('sdr.created_date');
     $query->condition('sdr.flag', 0);
-    $query->range(0, 4);
+    $query->range(0, 10);
     $trip_id_result = $query->execute()->fetchAll();
 
     sdr_api_process($trip_id_result);
