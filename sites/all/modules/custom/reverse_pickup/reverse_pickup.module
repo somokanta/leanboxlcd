@@ -197,7 +197,8 @@ function reverse_pickup_node_presave($node) {
                     $data[$bill]['input_type'] = '1';
                     $data[$bill]['distributor_code'] = $distributor_id;
                     $data[$bill]['details'][$bill][$counter]['lbsku_id'] = $order_info[0]['lb_sku_id'];
-                    $data[$bill]['details'][$bill][$counter]['packed_qty'] = $value['packed_qty'];
+//                    $data[$bill]['details'][$bill][$counter]['packed_qty'] = $value['packed_qty'];
+                    $data[$bill]['details'][$bill][$counter]['packed_qty'] = "";
                     $data[$bill]['details'][$bill][$counter]['delivered_qty'] = $value['delivered_qty'];
                     $data[$bill]['details'][$bill][$counter]['pkd'] = $order_info[0]['pkd'];
                     
