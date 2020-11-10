@@ -221,7 +221,7 @@ function reverse_pickup_node_presave($node) {
                 $data_arr['input_type'] = '1';
                 $data_arr['distributor_code'] = $value['distributor_code'];
                 $data_arr['details'] = array();
-                foreach($value['details'][$key] as $val){
+                foreach($value['details'] as $val){
                    // foreach ($val['scan_code'] as $k => $v) {
                         $val['scan_code'] = array_values($val['scan_code']);
                     //}
