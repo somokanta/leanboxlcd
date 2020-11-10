@@ -204,11 +204,11 @@ function reverse_pickup_node_presave($node) {
                     
                     //scan_code
                     foreach ($order_info as $key1 => $val1) {
-                        $res[$key1]['ean_code'] = $val1['ean_code'];
+                        $res[$val1['lb_sku_id'].'#'.$val1['pkd']]['ean_code'] = $val1['ean_code'];
 //                        $res[$key1]['packed_qty'] = $value['packed_qty'];
-                        $res[$key1]['packed_qty'] = '';
-                        $res[$key1]['delivered_qty'] = $value['delivered_qty'];
-                        $res[$key1]['crate_id'] = $val1['crate_id'];
+                        $res[$val1['lb_sku_id'].'#'.$val1['pkd']]['packed_qty'] = '';
+                        $res[$val1['lb_sku_id'].'#'.$val1['pkd']]['delivered_qty'] = $value['delivered_qty'];
+                        $res[$val1['lb_sku_id'].'#'.$val1['pkd']]['crate_id'] = $val1['crate_id'];
                     }
                     $data[$bill]['details'][$bill][$counter]['scan_code'] = $res;
                 
