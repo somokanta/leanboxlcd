@@ -201,7 +201,7 @@ function reverse_pickup_node_presave($node) {
                         $data[$bill]['details'][$val1['lb_sku_id'].'#'.$val1['pkd']]['lbsku_id'] = $val1['lb_sku_id'];
 //                    $data[$bill]['details'][$bill][$counter]['packed_qty'] = $value['packed_qty'];
                         $data[$bill]['details'][$val1['lb_sku_id'].'#'.$val1['pkd']]['packed_qty'] = "";
-                        $data[$bill]['details'][$val1['lb_sku_id'].'#'.$val1['pkd']]['delivered_qty'] = $val1['pkd'];
+                        $data[$bill]['details'][$val1['lb_sku_id'].'#'.$val1['pkd']]['delivered_qty'] = $value['delivered_qty'];
                         $data[$bill]['details'][$val1['lb_sku_id'].'#'.$val1['pkd']]['pkd'] = $val1['pkd'];
                         $data[$bill]['details'][$val1['lb_sku_id'].'#'.$val1['pkd']]['scan_code'][$val1['lb_sku_id'].'#'.$val1['pkd']]['ean_code'] = $val1['ean_code'];
                         $data[$bill]['details'][$val1['lb_sku_id'].'#'.$val1['pkd']]['scan_code'][$val1['lb_sku_id'].'#'.$val1['pkd']]['pkd'] = $val1['pkd'];
