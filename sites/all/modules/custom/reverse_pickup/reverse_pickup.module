@@ -204,13 +204,14 @@ function reverse_pickup_node_presave($node) {
                     
                     //scan_code
                     foreach ($order_info as $key1 => $val1) {
-                        $res[$val1['lb_sku_id'].'#'.$val1['pkd']]['ean_code'] = $val1['ean_code'];
+                        $data[$bill]['details'][$bill][$counter]['scan_code'][$val1['lb_sku_id'].'#'.$val1['pkd']]['ean_code'] = $val1['ean_code'];
 //                        $res[$key1]['packed_qty'] = $value['packed_qty'];
-                        $res[$val1['lb_sku_id'].'#'.$val1['pkd']]['packed_qty'] = '';
-                        $res[$val1['lb_sku_id'].'#'.$val1['pkd']]['delivered_qty'] = $value['delivered_qty'];
-                        $res[$val1['lb_sku_id'].'#'.$val1['pkd']]['crate_id'] = $val1['crate_id'];
+                        $data[$bill]['details'][$bill][$counter]['scan_code'][$val1['lb_sku_id'].'#'.$val1['pkd']]['pkd'] = '';
+                        $data[$bill]['details'][$bill][$counter]['scan_code'][$val1['lb_sku_id'].'#'.$val1['pkd']]['packed_qty'] = $val1['pkd'];
+                        $data[$bill]['details'][$bill][$counter]['scan_code'][$val1['lb_sku_id'].'#'.$val1['pkd']]['delivered_qty'] = $value['delivered_qty'];
+                        $data[$bill]['details'][$bill][$counter]['scan_code'][$val1['lb_sku_id'].'#'.$val1['pkd']]['crate_id'] = $val1['crate_id'];
                     }
-                    $data[$bill]['details'][$bill][$counter]['scan_code'] = $res;
+//                    $data[$bill]['details'][$bill][$counter]['scan_code'] = $res;
                 
                     $counter++;
                 }
@@ -223,6 +224,9 @@ function reverse_pickup_node_presave($node) {
                 $data_arr['distributor_code'] = $value['distributor_code'];
                 $data_arr['details'] = array();
                 foreach($value['details'][$key] as $val){
+                   // foreach ($val['scan_code'] as $k => $v) {
+                        $val['scan_code'] = array_values($val['scan_code']);
+                    //}
                     $data_arr['details'][] = $val;
                 }
                 $api_data['data'][] = $data_arr;
