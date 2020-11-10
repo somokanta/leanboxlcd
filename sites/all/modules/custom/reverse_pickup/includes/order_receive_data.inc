@@ -43,73 +43,75 @@ function order_receive_data_callback($data) {
             }
             $bill_number = validate_content_title($value['Parent Bill No'], 'sales_register_data');
 
-            if (empty($bill_number)) {
-                $res[$k]['flag'] = '0';
-                $res[$k]['message'] .= "Bill Number is not present in System:" . $value['Parent Bill No'] . "<br>";
-                $res[$k]['Child Order ID'] = $child_order_id;
-                $res[$k]['Parent Bill No'] = $parent_bill_number;
-                $res[$k]['LBSKUID'] = $lb_sku_id;
-                $res[$k]['PKD'] = $pkd;
-            } else {
-                $nid = check_bill_exists_with_party($value['Parent Bill No'], 'sales_register_data', $value['Party Code']);
-                if (empty($nid)) {
+            if (($value['Order Type'] == 'Reverse')) {
+                if (empty($bill_number)) {
                     $res[$k]['flag'] = '0';
-                    $res[$k]['message'] .= "Bill Number: " . $value['Parent Bill No'] . " Parent Party Code is different in the system <br>";
+                    $res[$k]['message'] .= "Bill Number is not present in System:" . $value['Parent Bill No'] . "<br>";
                     $res[$k]['Child Order ID'] = $child_order_id;
                     $res[$k]['Parent Bill No'] = $parent_bill_number;
                     $res[$k]['LBSKUID'] = $lb_sku_id;
                     $res[$k]['PKD'] = $pkd;
                 } else {
-                    $child_order_id = trim($value['Child Order ID']);
-                    $child_order_res = check_child_order_in_order_receive($child_order_id, $distributor_id);
-                    if ($child_order_res) {
+                    $nid = check_bill_exists_with_party($value['Parent Bill No'], 'sales_register_data', $value['Party Code']);
+                    if (empty($nid)) {
                         $res[$k]['flag'] = '0';
-                        $res[$k]['message'] .= "Child Order $child_order_id already exist<br>";
+                        $res[$k]['message'] .= "Bill Number: " . $value['Parent Bill No'] . " Parent Party Code is different in the system <br>";
                         $res[$k]['Child Order ID'] = $child_order_id;
                         $res[$k]['Parent Bill No'] = $parent_bill_number;
                         $res[$k]['LBSKUID'] = $lb_sku_id;
                         $res[$k]['PKD'] = $pkd;
                     } else {
-                        $child_order_sales_register = check_child_order_in_sales_register($child_order_id, $distributor_id);
-                        if ($child_order_sales_register) {
+                        $child_order_id = trim($value['Child Order ID']);
+                        $child_order_res = check_child_order_in_order_receive($child_order_id, $distributor_id);
+                        if ($child_order_res) {
                             $res[$k]['flag'] = '0';
                             $res[$k]['message'] .= "Child Order $child_order_id already exist<br>";
                             $res[$k]['Child Order ID'] = $child_order_id;
                             $res[$k]['Parent Bill No'] = $parent_bill_number;
                             $res[$k]['LBSKUID'] = $lb_sku_id;
                             $res[$k]['PKD'] = $pkd;
+                        } else {
+                            $child_order_sales_register = check_child_order_in_sales_register($child_order_id, $distributor_id);
+                            if ($child_order_sales_register) {
+                                $res[$k]['flag'] = '0';
+                                $res[$k]['message'] .= "Child Order $child_order_id already exist<br>";
+                                $res[$k]['Child Order ID'] = $child_order_id;
+                                $res[$k]['Parent Bill No'] = $parent_bill_number;
+                                $res[$k]['LBSKUID'] = $lb_sku_id;
+                                $res[$k]['PKD'] = $pkd;
+                            }
                         }
-                    }
 
-                    $delivered_qty = get_delivered_qty_from_bill_sku($value['Parent Bill No'], $val['SKU7'], $distributor_id);
-                    if ($delivered_qty === FALSE) {
-                        $res[$k]['flag'] = '0';
-                        $res[$k]['message'] .= "Bill: " . $value['Parent Bill No'] . " SKu: " . $val['SKU7'] . " combination is not present in System <br>";
-                        $res[$k]['Child Order ID'] = $child_order_id;
-                        $res[$k]['Parent Bill No'] = $parent_bill_number;
-                        $res[$k]['LBSKUID'] = $lb_sku_id;
-                        $res[$k]['PKD'] = $pkd;
-                    } else {
-                        if ($val['Return Quantity'] > $delivered_qty) {
+                        $delivered_qty = get_delivered_qty_from_bill_sku($value['Parent Bill No'], $val['SKU7'], $distributor_id);
+                        if ($delivered_qty === FALSE) {
                             $res[$k]['flag'] = '0';
-                            $res[$k]['message'] .= "Return Quantity can not be grater than Actual Delivered Quantity for Bill: " . $value['Parent Bill No'] . " SKu: " . $val['SKU7'] . "<br>";
+                            $res[$k]['message'] .= "Bill: " . $value['Parent Bill No'] . " SKu: " . $val['SKU7'] . " combination is not present in System <br>";
                             $res[$k]['Child Order ID'] = $child_order_id;
                             $res[$k]['Parent Bill No'] = $parent_bill_number;
                             $res[$k]['LBSKUID'] = $lb_sku_id;
                             $res[$k]['PKD'] = $pkd;
+                        } else {
+                            if ($val['Return Quantity'] > $delivered_qty) {
+                                $res[$k]['flag'] = '0';
+                                $res[$k]['message'] .= "Return Quantity can not be grater than Actual Delivered Quantity for Bill: " . $value['Parent Bill No'] . " SKu: " . $val['SKU7'] . "<br>";
+                                $res[$k]['Child Order ID'] = $child_order_id;
+                                $res[$k]['Parent Bill No'] = $parent_bill_number;
+                                $res[$k]['LBSKUID'] = $lb_sku_id;
+                                $res[$k]['PKD'] = $pkd;
+                            }
                         }
                     }
                 }
-            }
-            //}
-            $hul = validate_content_title($value['Parent Party Code'], 'hul_code_master');
-            if (empty($hul)) {
-                $res[$k]['flag'] = '0';
-                $res[$k]['message'] .= "Parent party Code " . $value['Parent Party Code'] . " does not exist in HUL Code Master <br>";
-                $res[$k]['Child Order ID'] = $child_order_id;
-                $res[$k]['Parent Bill No'] = $parent_bill_number;
-                $res[$k]['LBSKUID'] = $lb_sku_id;
-                $res[$k]['PKD'] = $pkd;
+                //}
+                $hul = validate_content_title($value['Parent Party Code'], 'hul_code_master');
+                if (empty($hul)) {
+                    $res[$k]['flag'] = '0';
+                    $res[$k]['message'] .= "Parent party Code " . $value['Parent Party Code'] . " does not exist in HUL Code Master <br>";
+                    $res[$k]['Child Order ID'] = $child_order_id;
+                    $res[$k]['Parent Bill No'] = $parent_bill_number;
+                    $res[$k]['LBSKUID'] = $lb_sku_id;
+                    $res[$k]['PKD'] = $pkd;
+                }
             }
             if ($res[$k]['flag'] != '0') {
                 $result = db_insert('order_receive_data')
@@ -139,7 +141,7 @@ function order_receive_data_callback($data) {
             }
 
             $res[$k]['Child Order ID'] = $child_order_id;
-            $res[$k]['Parent Bill No'] = $parent_bill_number;
+            $res[$k]['Parent Bill No'] = $parent_bill_number ? $parent_bill_number : '';
             $res[$k]['LBSKUID'] = $lb_sku_id;
             $res[$k]['PKD'] = $pkd;
             $results[] = $res[$k];
