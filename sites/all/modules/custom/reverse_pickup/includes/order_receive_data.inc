@@ -19,6 +19,7 @@ function order_receive_data_callback($data) {
         $party_code = trim($value['Party Code']);
         $beat_name = trim($value['Beat Name']);
         $parent_party_code = trim($value['Parent Party Code']);
+        $external_dis_code = trim($value['External Distributor Code']);
 
         foreach ($value['Order Line'] as $k => $val) {
             $lb_sku_id = trim($val['LBSKUID']);
@@ -112,6 +113,16 @@ function order_receive_data_callback($data) {
                     $res[$k]['LBSKUID'] = $lb_sku_id;
                     $res[$k]['PKD'] = $pkd;
                 }
+            } else {
+                $child_order_res = check_child_order_in_order_receive($child_order_id, $distributor_id);
+                if ($child_order_res) {
+                    $res[$k]['flag'] = '0';
+                    $res[$k]['message'] .= "Child Order $child_order_id already exist in order receive table<br>";
+                    $res[$k]['Child Order ID'] = $child_order_id;
+                    $res[$k]['Parent Bill No'] = $parent_bill_number;
+                    $res[$k]['LBSKUID'] = $lb_sku_id;
+                    $res[$k]['PKD'] = $pkd;
+                }
             }
             if ($res[$k]['flag'] != '0') {
                 $result = db_insert('order_receive_data')
@@ -132,6 +143,7 @@ function order_receive_data_callback($data) {
                             'ean_code' => $ean_code ? $ean_code : '',
                             'crate_id' => $crate_id ? $crate_id : '',
                             'distributor_id' => $distributor_id,
+                            'external_dis_id' => $external_dis_code ? $external_dis_code : 0,
                             'type' => 0, //API
                             'created_time' => REQUEST_TIME
                         ))

@@ -194,10 +194,10 @@ function reverse_pickup_node_presave($node) {
                     $order_info = reverse_pickup_get_lb_details($child_bill, $parent_bill, $sku, $distributor_id);
                     $data[$bill]['parent_order_no'] = $child_bill;
                     $data[$bill]['parent_bill_no'] = $parent_bill;
-                    $data[$bill]['input_type'] = '1';
-                    $data[$bill]['distributor_code'] = $distributor_id;                    
+                    $data[$bill]['input_type'] = '1';                  
                     //scan_code
                     foreach ($order_info as $key1 => $val1) {
+                        $data[$bill]['distributor_code'] = $val1['external_dis_id'];  
                         $data[$bill]['details'][$val1['lb_sku_id'].'#'.$val1['pkd']]['lbsku_id'] = $val1['lb_sku_id'];
 //                    $data[$bill]['details'][$bill][$counter]['packed_qty'] = $value['packed_qty'];
                         $data[$bill]['details'][$val1['lb_sku_id'].'#'.$val1['pkd']]['packed_qty'] = "";
@@ -264,7 +264,7 @@ function reverse_pickup_get_lb_details($child_bill, $parent_bill, $sku7_code, $d
     //$query->condition('ord.parent_bill_number', $parent_bill, '=');
 //    $query->condition('ord.sku7_code', $sku7_code, '=');
     $query->condition('ord.distributor_id', $distributor_id, '=');
-    $query->fields('ord', array('lb_sku_id', 'pkd','ean_code','crate_id'));
+    $query->fields('ord', array('lb_sku_id', 'pkd','ean_code','crate_id','external_dis_id'));
     $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
     return $res;
 }
