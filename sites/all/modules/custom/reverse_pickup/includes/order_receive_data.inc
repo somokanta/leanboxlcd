@@ -63,7 +63,7 @@ function order_receive_data_callback($data) {
                         $res[$k]['PKD'] = $pkd;
                     } else {
                         $child_order_id = trim($value['Child Order ID']);
-                        $child_order_res = check_child_order_in_order_receive($child_order_id, $value['Order Type'], $distributor_id);
+                        $child_order_res = check_child_order_in_order_receive($child_order_id, $sku7_code, strtotime($order_creation_date),$value['Order Type'], $distributor_id);
                         if ($child_order_res) {
                             $res[$k]['flag'] = '0';
                             $res[$k]['message'] .= "Child Order $child_order_id already exist<br>";
@@ -114,7 +114,7 @@ function order_receive_data_callback($data) {
                     $res[$k]['PKD'] = $pkd;
                 }
             } else {
-                $child_order_res = check_child_order_in_order_receive($child_order_id, $value['Order Type'], $distributor_id);
+                $child_order_res = check_child_order_in_order_receive($child_order_id, $sku7_code, strtotime($order_creation_date),$value['Order Type'], $distributor_id);
                 if ($child_order_res) {
                     $res[$k]['flag'] = '0';
                     $res[$k]['message'] .= "Child Order $child_order_id already exist in order receive table<br>";
