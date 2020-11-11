@@ -322,6 +322,20 @@ function reverse_pickup_views_data() {
         ),
     );
     
+    $data['order_receive_data']['external_dis_id'] = array(
+        'title' => t('External Distributor ID'),
+        'help' => t('External Distributor ID'),
+        'field' => array(
+            'handler' => 'views_handler_field',
+        ),
+        'sort' => array(
+            'handler' => 'views_handler_sort',
+        ),
+        'filter' => array(
+            'handler' => 'views_handler_filter_string',
+        ),
+    );
+    
     $data['oms_api_log']['table'] = array(
         'group' => t('OMS API LOG'),
         'title' => t('OMS API LOG'),
