@@ -264,8 +264,10 @@ function reverse_pickup_node_presave($node) {
 function reverse_pickup_get_lb_details($child_bill, $parent_bill, $sku7_code, $distributor_id) {
     $query = db_select('order_receive_data', 'ord');
     $query->condition('ord.child_order_id', $child_bill, '=');
-    //$query->condition('ord.parent_bill_number', $parent_bill, '=');
-//    $query->condition('ord.sku7_code', $sku7_code, '=');
+    if ($parent_bill) {
+       $query->condition('ord.parent_bill_number', $parent_bill, '=');
+    }
+    $query->condition('ord.sku7_code', $sku7_code, '=');
     $query->condition('ord.distributor_id', $distributor_id, '=');
     $query->fields('ord', array('lb_sku_id', 'pkd','ean_code','crate_id','external_dis_id'));
     $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
@@ -282,7 +284,7 @@ function reverse_pickup_get_delivered_sku_details($bill_number, $trip_id, $distr
     $query->addExpression('dpi.res_sku_actual_quantity1', 'delivered_qty');
     $query->addExpression('dpi.dispatch_qty', 'packed_qty');
     $query->addExpression('dpi.sku_code', 'sku_code');
-    $res = $query->execute()->fetchAll(PDO::FETCH_GROUP | PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
+    $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
     return $res;
 }
 
