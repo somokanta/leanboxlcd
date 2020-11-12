@@ -1619,6 +1619,11 @@ function vrs_confirmation_validate($form, &$form_state) {
     if (empty($sum_actual_cash) && !empty($coins)) {
       $messages[] = t('Error:Total Cash Collected is zero,please remove denominations entry.');
     }
+    
+    if ($total_actual_cash != $sum_denominations) {
+        $messages[] = t("Please re-verify cash denomination and then submit");
+        $form_state['complete form']['footer_details']['#rows'][$key_footer][3]['data']['total_actual_cash_collected']['#value'] = $sum_denominations;
+    }
     // Not required this Change on 12-7-2017 
     /*if ($sum_actual_cash!==$sum_denominations) {
         $messages[] = t("Error:Sum of Bill's Actual Cash Collected should be equal to Sum of denominations + RTO charges.");
