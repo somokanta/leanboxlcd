@@ -3477,9 +3477,9 @@ function dispatch_planning_sales_reg_api($node, $trip_execution_date, $vehicle_n
         foreach ($order as $key1 => $val1) {
             $billing_data_details_insert[$key]['lbskuid'] = $val1['lb_sku_id'];
             $billing_data_details[$key]['lbskuid'] = $val1['lb_sku_id'];
-            $res[[$val1['lb_sku_id'].'#'.$val1['pkd']]]['ean_code'] = $val1['ean_code'];
-            $res[[$val1['lb_sku_id'].'#'.$val1['pkd']]]['pkd'] = $val1['pkd'];
-            $res[[$val1['lb_sku_id'].'#'.$val1['pkd']]]['qty'] = $dispath_qty;
+            $res[$val1['lb_sku_id'].'#'.$val1['pkd']]['ean_code'] = $val1['ean_code'];
+            $res[$val1['lb_sku_id'].'#'.$val1['pkd']]['pkd'] = $val1['pkd'];
+            $res[$val1['lb_sku_id'].'#'.$val1['pkd']]['qty'] = $dispath_qty;
         }
         $billing_data_details_insert[$key]['scan_code'] = array_values($res);
         $billing_data_details[$key]['scan_code'] = array_values($res);
