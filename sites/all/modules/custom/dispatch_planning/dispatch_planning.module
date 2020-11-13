@@ -3468,9 +3468,9 @@ function dispatch_planning_sales_reg_api($node, $trip_execution_date, $vehicle_n
         $query = db_select('order_receive_data', 'od');
         $query->fields('od', array('ean_code','pkd', 'lb_sku_id'));
         $query->condition('od.distributor_id', $node_uid);
-        if ($parent_bill) {
-          $query->condition('od.parent_bill_number', $parent_bill);
-        }
+//        if ($parent_bill) {
+//          $query->condition('od.parent_bill_number', $parent_bill);
+//        }
         $query->condition('od.child_order_id', $child_bill, '=');
         $query->condition('od.sku7_code', $val['sku_code']);
         $order = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
