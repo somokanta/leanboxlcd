@@ -744,6 +744,31 @@ function get_vrs_print($trip_id) {
             $table1.='<td colspan="2">'.'</td>';
             $table1.='</tr>';
             $table1.='</table>';
+            
+            //pod details
+            $table_pod= '<table border="1" cellpadding="5" cellspacing="0" width="100%" style="color:#000; font-size: 13px;" class="views-table cols-13 table table-hover table-striped;float:right;margin-left:20px;">';
+//            $table_pod.='<tr><td colspan="4" style="text-align:center">'.'<h4 >'.t('POD Details').'</h4>'.'</td></tr>';
+            $table_pod.='<tr>';
+            $table_pod.= '<td><b>'.t('POD Details').'</b></td>';
+            $table_pod.= '<td><b>'.t('Count').'</b></td>';
+            $table_pod.='</tr>';
+            $table_pod.='<tr>';
+            $table_pod.= '<td>Cheque Count</td>';
+            $table_pod.= '<td>'.count($cheque_details).'</td>';
+            $table_pod.='</tr>';
+            $table_pod.='<tr>';
+            $table_pod.= '<td>Signed Bill Count</td>';
+            $table_pod.= '<td>'.count($signed_bill_details).'</td>';
+            $table_pod.='</tr>';
+      
+            $table_pod.='<tr>';
+            $table_pod.= '<td><b>'.t('Total Count').'</b></td>';
+            $table_pod.= '<td><b>'.(count($cheque_details) + count($signed_bill_details)).'</b></td>';
+            $table_pod.='</tr>';
+            $table_pod.='</table>';
+//            $table_pod.='</table>';
+            
+            
             if (!empty($note_denominations)) {
                 $table2= '<table border="1" cellpadding="5" cellspacing="0" width="100%" style="color:#000; font-size: 13px;" class="views-table cols-13 table table-hover table-striped">';
                 $table2.='<tr><td colspan="4" style="text-align:center">'.'<h4 >'.t('CASH Details').'</h4>'.'</td></tr>';
@@ -949,7 +974,7 @@ function get_vrs_print($trip_id) {
             
             $table4 = '<table "width=100%" style ="margin-top:10px;">';
             $table4.='<tr>';
-            $table4.= '<td>'.$table2.'</td>';
+            $table4.= '<td>'.$table_pod.'<br>'.$table2.'</td>';
             $table4.= '<td>'.$table3.'</td>';
             $table4.='</tr>';
             $table4.= '</table>';
