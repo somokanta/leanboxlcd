@@ -54,7 +54,7 @@
 
                 //var coins_value = parseFloat($(".coins").val());
                 //calculated_total_sum = calculated_total_sum + coins_value;
-                //$(".total_actual_cash_collected").val(calculated_total_sum);
+                $(".total_actual_cash_collected").val(calculated_total_sum);
                 $("#deno_total").html('Total: ' + calculated_total_sum);
                 calc_footer_total();
                 // $('#note_denomination_popup').hide();
