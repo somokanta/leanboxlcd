@@ -3444,8 +3444,9 @@ function dispatch_planning_sales_reg_api($node, $trip_execution_date, $vehicle_n
     $delivery_boy_arr = explode(",", $delivery_boy_names);
     $merchant_code = variable_get('merchant_code_conf', 'lakme');
     
-    $res = array();
     foreach ($billing_data_details as $key => $val) {
+        $res = array();
+        
         $query = db_select('godown_data', 'ga');
         $query->fields('ga', array('godown_short'));
         $query->condition('ga.trip_id', $trip_id);
