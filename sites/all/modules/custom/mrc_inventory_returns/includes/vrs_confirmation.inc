@@ -1607,9 +1607,10 @@ function vrs_confirmation_validate($form, &$form_state) {
       }
       $sum_denominations += (int)$value['title'] * $no_notes;
     }
-    if (!empty($sum_denominations)) {
-        $sum_denominations = $sum_denominations + $rto_charges;
-    }
+    
+//    if (!empty($sum_denominations)) {
+//        $sum_denominations = $sum_denominations + $rto_charges;
+//    }
     if (empty($denominations) && !empty($sum_actual_cash) && empty($coins)) {
       $messages[] = t('Error:Please enter the cash denomination');
     }
