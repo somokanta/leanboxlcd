@@ -138,13 +138,15 @@ function get_delivered_qty_from_bill_sku($bill_no, $sku, $distributor_id) {
   return $delivered_qty;
 }
 
-function check_child_order_in_order_receive($child_order_id, $sku7_code, $order_creation_date, $type, $distributor_id) {
+function check_child_order_in_order_receive($child_order_id, $sku7_code, $order_creation_date, $type, $lb_sku_id, $pkd, $distributor_id) {
     $query = db_select('order_receive_data', 'ord');
     $query->condition('ord.child_order_id', $child_order_id, '=');
     $query->condition('ord.distributor_id', $distributor_id, '=');
     $query->condition('ord.order_type', $type, '=');
     $query->condition('ord.sku7_code', $sku7_code, '=');
     $query->condition('ord.order_creation_date', $order_creation_date, '=');
+    $query->condition('ord.lb_sku_id', $lb_sku_id, '=');
+    $query->condition('ord.pkd', $pkd, '=');
     $query->fields('ord', array('child_order_id'));
     $res = $query->execute()->fetchField();
   return $res;
