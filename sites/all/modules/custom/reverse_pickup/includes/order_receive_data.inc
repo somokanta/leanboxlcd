@@ -139,7 +139,7 @@ function order_receive_data_callback($data) {
                             'sku7_code' => $sku7_code ? $sku7_code : '',
                             'product_name' => $product_name ? $product_name : '',
                             'mrp' => $mrp ? $mrp : '',
-                            'return_qty' => $return_qty ? $return_qty : '',
+                            'return_qty' => $return_qty ? $return_qty : 0,
                             'ean_code' => $ean_code ? $ean_code : '',
                             'crate_id' => $crate_id ? $crate_id : '',
                             'distributor_id' => $distributor_id,
