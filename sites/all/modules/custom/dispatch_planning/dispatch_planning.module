@@ -3467,20 +3467,30 @@ function dispatch_planning_sales_reg_api($node, $trip_execution_date, $vehicle_n
         $child_bill= $node->field_outlet_order_no[LANGUAGE_NONE][0]['value'];
         
         $query = db_select('order_receive_data', 'od');
-        $query->fields('od', array('ean_code','pkd', 'lb_sku_id'));
+        $query->fields('od', array('ean_code','pkd', 'lb_sku_id','return_qty'));
         $query->condition('od.distributor_id', $node_uid);
 //        if ($parent_bill) {
 //          $query->condition('od.parent_bill_number', $parent_bill);
 //        }
+        $query->orderBy('ord.return_qty', 'DESC');
         $query->condition('od.child_order_id', $child_bill, '=');
         $query->condition('od.sku7_code', $val['sku_code']);
         $order = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
         foreach ($order as $key1 => $val1) {
+            
+            if ($dispath_qty >= $val1['return_qty']) {
+                $del[$val1['lb_sku_id'].'#'.$val1['pkd']]['qty'] = $val1['return_qty'];
+                $dispath_qty -= $val1['return_qty'];
+            }else{
+                $del[$val1['lb_sku_id'].'#'.$val1['pkd']]['qty'] = $dispath_qty;
+                $dispath_qty = 0;
+            }
+            
             $billing_data_details_insert[$key]['lbskuid'] = $val1['lb_sku_id'];
             $billing_data_details[$key]['lbskuid'] = $val1['lb_sku_id'];
             $res[$val1['lb_sku_id'].'#'.$val1['pkd']]['ean_code'] = $val1['ean_code'];
             $res[$val1['lb_sku_id'].'#'.$val1['pkd']]['pkd'] = $val1['pkd'];
-            $res[$val1['lb_sku_id'].'#'.$val1['pkd']]['qty'] = $dispath_qty;
+            $res[$val1['lb_sku_id'].'#'.$val1['pkd']]['qty'] = $del[$val1['lb_sku_id'].'#'.$val1['pkd']]['qty'];
         }
         $billing_data_details_insert[$key]['scan_code'] = array_values($res);
         $billing_data_details[$key]['scan_code'] = array_values($res);
