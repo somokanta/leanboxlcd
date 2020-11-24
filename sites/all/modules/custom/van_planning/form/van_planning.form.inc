@@ -1723,7 +1723,7 @@ function van_planning_ajax_submit($area_codes, $van_pl_group, $pl_group, $bill_f
   }
   $no_of_days = variable_get('van_planning_dates', 15);
   $billing_start_date = strtotime(date('Y-m-d') . "- $no_of_days days"); // @todo replace 15 this line
-  $billing_end_date = strtotime(date("Y-m-d"));
+  $billing_end_date = strtotime(date("Y-m-d") + 86399);
 
   $query = db_select('node', 'n');
   $query->condition('n.type', 'hul_code_master');
