@@ -1802,6 +1802,7 @@ function van_planning_ajax_submit($area_codes, $van_pl_group, $pl_group, $bill_f
     $query->condition('sbd.field_sr_bill_date_value', $bill_date);
   }*/
   if (!empty($bill_from_date) && !empty($bill_to_date)) {
+      $bill_to_date = $bill_to_date + 86399;
       $query->condition('sbd.field_sr_bill_date_value', array($bill_from_date, $bill_to_date), 'BETWEEN');
   }
   if (!empty($bill_array)) {
