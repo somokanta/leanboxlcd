@@ -430,11 +430,7 @@ function _edit_trip_delivered_callback_form($form, &$form_state) {
                );
             }
                // collection mode
-               if ($order_status == 'partial_return' || $order_status == 'return') {
-                   $lists = array('' => '-select-', 'signed' => 'Signed');
-               }else{
                   $lists = array('' => '-select-', 'signed' => 'Signed', 'cheque' => 'Cheque', 'cash' => 'Cash', 'cash,cheque' => 'Cash,Cheque');   
-               }
 
               // ================ Delivery Boy Change Start =================== 
               $query = db_select('dispatch_planning_api_data', 'ad');
@@ -464,7 +460,7 @@ function _edit_trip_delivered_callback_form($form, &$form_state) {
               );
               // ================ Delivery Boy Change End =================
 
-               if (!empty($order_status) && ($order_status == 'undeliver' || $order_status == 'no_return')) {
+               if (!empty($order_status) && ($order_status == 'undeliver' || $order_status == 'no_return' || $order_status == 'return' || $order_status == 'partial_return')) {
                   $form['collection_mode'] = array(
                     '#type' => 'value',
                     '#value' => '',
@@ -1028,9 +1024,14 @@ function _edit_trip_delivered_callback_form_validate($form, &$form_state) {
       if ($user_input_qty > $dispatch_qty) {
          form_set_error('actual_qty', t('Sum of cashier short and return Qty can not be greater than dispatch Qty.'));
       }
-      if ($order_status == 'partial_deliver' || $order_status == 'partial_return') {
+      if ($order_status == 'partial_deliver') {
          if (($actual_qty_array[$key] != 0) && (empty($sku_reason[$key]))) {
             form_set_error('actual_qty', t('Kindly select the reason for partial delivery.'));
+         }
+      }
+      if ($order_status == 'partial_return') {
+         if (($actual_qty_array[$key] != 0) && ($dispatch_qty != $actual_qty_array[$key]) && (empty($sku_reason[$key]))) {
+            form_set_error('actual_qty', t('Kindly select the reason for partial return.'));
          }
       }
    }
@@ -1045,7 +1046,7 @@ function _edit_trip_delivered_callback_form_validate($form, &$form_state) {
     if(empty($delivery_boy)) {
       form_set_error('delivery_boy', t('Delivery boy field can not be empty.'));
     }
-    if ($order_status != 'undeliver' && $order_status != 'no_return') {
+    if ($order_status != 'undeliver' && $order_status != 'no_return' && $order_status != 'return' && $order_status != 'partial_return') {
       $collc_mode = $form_state['values']['collection_mode'];
       if(empty($collc_mode)) {
         form_set_error('collection_mode', t('Collection mode can not be empty.'));

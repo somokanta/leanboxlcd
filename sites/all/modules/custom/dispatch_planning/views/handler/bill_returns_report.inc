@@ -61,7 +61,7 @@ class bill_returns_report extends views_handler_field {
                   $to_be_collected = 0;
                 }
                 
-                if ($data->dispatch_planning_api_data_res_status !== 'undeliver') {
+                if ($data->dispatch_planning_api_data_res_status !== 'undeliver' && $data->dispatch_planning_api_data_res_status !== 'partial_return'  && $data->dispatch_planning_api_data_res_status !== 'return'  && $data->dispatch_planning_api_data_res_status !== 'no_return') {
                     $data->sales_to_be_collected = $to_be_collected;
                 }
                 else {

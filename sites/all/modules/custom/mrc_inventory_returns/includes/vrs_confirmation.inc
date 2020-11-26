@@ -669,6 +669,8 @@ function vrs_confirmation_form($form, &$form_state) {
       
       $form['bill_details']['#rows'][$key][] = $val['bill_number'];
       $undeliver = 0;
+      $return = 0;
+      $partial_return = 0;
       switch ($val['res_status']) {
         case 'partial_deliver';
           $bill_status = t('Partial Delivered');
@@ -679,10 +681,12 @@ function vrs_confirmation_form($form, &$form_state) {
           break;
       
        case 'partial_return';
+          $partial_return = 1;
           $bill_status = t('Partial Returned');
           break;
       
        case 'return';
+          $return = 1;
           $bill_status = t('Returned');
           break;
 
@@ -712,7 +716,7 @@ function vrs_confirmation_form($form, &$form_state) {
           $payments_terms = implode(',', $payment_term);
       }
       // payment terms will be zero in the case of undeliver
-      if ($undeliver == 1) {
+      if ($undeliver == 1 || $return == 1 || $partial_return == 1) {
         $payments_terms = 'NA';
       }
       $form['bill_details']['#rows'][$key][] = $bill_status;
@@ -720,7 +724,7 @@ function vrs_confirmation_form($form, &$form_state) {
       $form['bill_details']['#rows'][$key][] = $payments_terms;
       $form['bill_details']['#rows'][$key][] = $val['bill_value'];
       $form['bill_details']['#rows'][$key][] = $val['to_be_collected_amt'];
-      $total_sales_register += $val['sales_register_to_be_collected_amt'];
+
       // Farery bill value
       $total_to_be_collected += round($val['to_be_collected_amt']);
       $total_signed_bill_value += round($val['res_confirm_signed_bill_amount']);
@@ -754,9 +758,11 @@ function vrs_confirmation_form($form, &$form_state) {
          unset($val['photo_of_signed_bill_partial']);
      }
      
-     if ($val['res_status'] == 'partial_return' || $val['res_status'] == 'return') {
-          $readonly = 'readonly';
-      }
+    if ($val['res_status'] == 'partial_return' || $val['res_status'] == 'return') {
+        $readonly = 'readonly';
+        $val['sales_register_to_be_collected_amt'] = 0;
+    }
+    $total_sales_register += $val['sales_register_to_be_collected_amt'];  
       
       $bank_name = array(
         //'#id' => 'bill_details-' . $key . '-bank_name',
@@ -824,16 +830,10 @@ function vrs_confirmation_form($form, &$form_state) {
         '#default_value' => $vrs_total_id ? round($bills[$key]['actual_cheque_amount']) : round($val['res_cheque_amount']),
       );
       
-      $readonly1 = '';
-      if ($val['res_status'] == 'return') {
-          $readonly1= 'readonly';
-          $bills[$key]['actual_signed_bill_amount'] = 0;
-          $val['res_confirm_signed_bill_amount'] = 0;
-      }
       $signed_bill_collected = array(
         // '#id' => 'bill_details-' . $key . '-signed_bill_collected',
         '#type' => 'textfield',
-        '#attributes' => array('class' => array('signed_bill_collected', 'short_cal', 'allownumericwithoutdecimal'), 'title' => t('Signed Bill Amount'), $readonly1 => $readonly1),
+        '#attributes' => array('class' => array('signed_bill_collected', 'short_cal', 'allownumericwithoutdecimal'), 'title' => t('Signed Bill Amount'), $readonly => $readonly),
         '#size' => $text_box_size,
         '#default_value' => $vrs_total_id ? round($bills[$key]['actual_signed_bill_amount']) : round($val['res_confirm_signed_bill_amount']),
       );
@@ -887,6 +887,7 @@ function vrs_confirmation_form($form, &$form_state) {
       // 'res_photo_of_cheque', 'res_photo_of_signed_bill_delivery', 'photo_of_signed_bill_partial'
       global $base_url;
       // Fetching it from farey table
+    if ($val['res_status'] != 'partial_return' && $val['res_status'] != 'return') {
       $ph_cheque = '<div class ="vrs_signed_bill_image">';
       $ph_flag = 0;
       $span_class = '<span style = "margin-left:18px;"></span>';
@@ -1008,6 +1009,7 @@ function vrs_confirmation_form($form, &$form_state) {
         '#suffix' => '</div>',
         '#attributes' => array('class' => array('photo_signed_bill'), 'title' => t('Signed Bill Image')),
       );
+    }
       $form['bill_details'][$key]["short_reason_code"] = &$short_reason_code;
       $form['bill_details'][$key]["sales_register_tobe_collected"] = &$sales_register_tobe_collected;
       $form['bill_details'][$key]["s_register_bill_value"] = &$s_register_bill_value;
