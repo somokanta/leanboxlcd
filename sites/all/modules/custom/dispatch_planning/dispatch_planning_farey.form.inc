@@ -773,7 +773,7 @@ function _edit_trip_delivered_callback_form($form, &$form_state) {
                  'Description' => 'Description',
                  //'Batch Code' => 'Batch Code',
                  'MRP' => 'MRP',
-                 'sum_net_sales_quantity' => 'Total Sales Qty',
+                 'sum_net_sales_quantity' => 'Total Sales/Order Qty',
                  'res_godown_short' => 'Godown Short',
                  'dispatch_qty' => 'Dispatch Qty',
                  'Actual_qty' => 'Return qty',
@@ -804,8 +804,12 @@ function _edit_trip_delivered_callback_form($form, &$form_state) {
                      $item_details[$key]['actual_qty']['data']['#value'] = 0;
                      $item_details[$key]['actual_qty']['data']['#attributes']['readonly'] = 'readonly';
                   }
-                  if (!empty($order_status) && ($order_status == 'partial_deliver'|| $order_status == 'partial_return')) {
+                  if (!empty($order_status) && ($order_status == 'partial_deliver')) {
                      $item_details[$key]['actual_qty']['data']['#value'] = 0;
+                     // $item_details[$key]['actual_qty']['data']['#attributes'] = array('readonly' => 'readonly');
+                  }
+                  if (!empty($order_status) && ($order_status == 'partial_return')) {
+                     $item_details[$key]['actual_qty']['data']['#value'] = $item_details[$key]['dispatch_qty'];
                      // $item_details[$key]['actual_qty']['data']['#attributes'] = array('readonly' => 'readonly');
                   }
 
@@ -863,11 +867,23 @@ function _edit_trip_delivered_callback_form($form, &$form_state) {
                   }
                }
                $og_total = 0;
+               $og_array = array();
                foreach ($item_details as $key => $val) {
                   foreach ($val as $key1 => $val1) {
                      if ($key1 == 'dispatch_qty') {
-                        $og_total = $og_total + $val1;
-                        $og_array[$key] = $val1;
+                         if  ($order_status == 'partial_return' || $order_status == 'no_return' || $order_status == 'return') {
+                             $val1 = 0;
+                             //$og_array = array();
+                         }else{
+                            $og_total = $og_total + $val1;
+                            $og_array[$key] = $val1;
+                         } 
+                     }
+                     if ($key1 == 'sum_net_sales_quantity') {
+                         if  ($order_status == 'partial_return' || $order_status == 'no_return' || $order_status == 'return') {
+                            $og_total = $og_total + $val1;
+                            $og_array[$key] = $val1;
+                         } 
                      }
                      $form['og_array'] = array(
                        '#type' => 'value',
