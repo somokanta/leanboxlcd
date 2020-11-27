@@ -336,6 +336,20 @@ function reverse_pickup_views_data() {
         ),
     );
     
+    $data['order_receive_data']['scan_qty'] = array(
+        'title' => t('Scan Qty'),
+        'help' => t('Scan Qty'),
+        'field' => array(
+            'handler' => 'views_handler_field_numeric',
+        ),
+        'sort' => array(
+            'handler' => 'views_handler_sort',
+        ),
+        'filter' => array(
+            'handler' => 'views_handler_filter_numeric',
+        ),
+    );
+    
     $data['oms_api_log']['table'] = array(
         'group' => t('OMS API LOG'),
         'title' => t('OMS API LOG'),

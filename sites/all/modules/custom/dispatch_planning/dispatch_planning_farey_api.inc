@@ -120,6 +120,9 @@ function fetch_dispatch_planning_api_data($data) {
           ))
           ->condition('referenceNo', $data['referenceNumber'], '=')
           ->execute();
+      
+        $bill_number = $data['jobData']['bill_number']; 
+        $bill_det = get_parent_and_child_bill($bill_number);
 
       if (!empty($bill_row_id) && isset($data['fieldData']['item_details1']) && !empty($data['fieldData']['item_details1'])) {
          watchdog('farey data 1', '<pre>' . print_r($data['fieldData']['item_details1'], TRUE) . '</pre>');
@@ -167,6 +170,7 @@ function fetch_dispatch_planning_api_data($data) {
             
            
            if($data['jobType'] == 'Reverse'){
+              $return_qty = $value['sku_actual_ret_quantity'] - $res_data['res_cashier_short']; 
               if ($ret_cash == $res_data['dispatch_qty'] ) {
                  $line_status = 'line_return';
               }else if ($ret_cash_godown > 0) {
@@ -186,6 +190,22 @@ function fetch_dispatch_planning_api_data($data) {
                 ->condition('trip_bill_reference', $bill_row_id, '=')
                 ->condition('sku_code', $value['sku_code'], '=')
                 ->execute();
+              
+            //scan qty in order receive table
+            foreach($value['scan_code'] as $v){
+              db_update('order_receive_data') // Table name no longer needs {}
+                ->fields(array(
+                  'scan_qty' => isset($v['scan_qty']) ? $v['scan_qty'] : 0,
+                ))
+                ->condition('parent_bill_number', $bill_det['parent_bill'], '=')
+                ->condition('child_order_id', $bill_det['child_bill'], '=')
+                ->condition('sku7_code', $value['sku_code'], '=')
+                ->condition('pkd', $v['pkd'], '=')
+                ->condition('lb_sku_id', $value['lbskuid'], '=')
+                ->condition('distributor_id', $dis_id, '=')
+                ->execute();
+            }   
+               
            }else{           
             if ($ret_cash == $res_data['dispatch_qty'] ) {
              $line_status = 'line_undeliver';

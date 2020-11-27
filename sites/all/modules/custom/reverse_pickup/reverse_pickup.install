@@ -266,3 +266,20 @@ function reverse_pickup_update_7004() {
     }
   }
 }
+
+function reverse_pickup_update_7005() {
+    $fields = array(
+       'scan_qty' => array(
+        'description' => t('Scan Qty'),
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+       ),  
+    );
+  foreach ($fields as $key => $field) {
+    if (!db_field_exists('order_receive_data', $key)) {
+      db_add_field('order_receive_data', $key, $field);
+    }
+  }
+}
+

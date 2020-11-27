@@ -1431,7 +1431,47 @@ function _edit_trip_delivered_callback_form_submit($form, &$form_state) {
                 ->execute();
          }
       }
-          
+      
+          //scan_qty in order receive
+      if ($order_status == 'partial_return' || $order_status == 'no_return' || $order_status == 'return') {
+            $bill_det = get_parent_and_child_bill($bill_number);
+            $parent_bill = $bill_det['parent_bill'];
+            $child_bill = $bill_det['child_bill'];
+            $item_details = _get_editable_delivered_trip_details($trip_number, $rs_code, $bill_number,$dis_id);
+            foreach($item_details as $val){
+                $order_info = reverse_pickup_get_lb_pkd_wise($child_bill, $parent_bill, $val['sku_code'], $dis_id);
+                foreach($order_info as $key1 => $val1){
+                    if ($val['return_qty'] >= $val1['return_qty']) {
+                        db_update('order_receive_data') // Table name no longer needs {}
+                            ->fields(array(
+                            'scan_qty' => $val1['return_qty'] ? $val1['return_qty'] : 0,
+                            ))
+                            ->condition('parent_bill_number', $parent_bill, '=')
+                            ->condition('child_order_id', $child_bill, '=')
+                            ->condition('sku7_code', $val['sku_code'], '=')
+                            ->condition('pkd', $val1['pkd'], '=')
+                            ->condition('lb_sku_id', $val1['lb_sku_id'], '=')
+                            ->condition('distributor_id', $dis_id, '=')
+                            ->execute();
+                        $val['return_qty'] -= $val1['return_qty'];
+                    } else {
+                        db_update('order_receive_data') // Table name no longer needs {}
+                        ->fields(array(
+                        'scan_qty' => $val['return_qty'] ? $val['return_qty'] : 0,
+                        ))
+                        ->condition('parent_bill_number', $parent_bill, '=')
+                        ->condition('child_order_id', $child_bill, '=')
+                        ->condition('sku7_code', $val['sku_code'], '=')
+                        ->condition('pkd', $val1['pkd'], '=')
+                        ->condition('lb_sku_id', $val1['lb_sku_id'], '=')
+                        ->condition('distributor_id', $dis_id, '=')
+                        ->execute();
+                        $val['return_qty'] = 0;
+                    }                   
+                }
+            }  
+        }
+
       $query = db_select('node', 'n');
       $query->condition('n.title', $bill_number);
       $query->condition('n.type', 'sales_register_data');
