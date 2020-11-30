@@ -150,9 +150,9 @@ function new_sku_wise_returns_form($form, &$form_state) {
     );
     
     if ($form_state['bill-wise'] == 1) {
-        $header = array('SKU Code', 'Product Name', 'MRP', 'To Be Returned Qty', 'Actual Returned Qty');
+        $header = array('SKU Code', 'Product Name', 'MRP', 'Scan Images','To Be Returned Qty', 'Actual Returned Qty');
     } else {
-        $header = array('SKU Code', 'Product Name', 'Loose EAN', 'MRP', 'To Be Returned Qty', 'Actual Returned Qty');
+        $header = array('SKU Code', 'Product Name', 'Loose EAN', 'MRP', 'Scan Images', 'To Be Returned Qty', 'Actual Returned Qty');
     }
 
     if (!isset($form_state['sku_wise_return_confirm']['SKUs'])) {
@@ -191,6 +191,14 @@ function new_sku_wise_returns_form($form, &$form_state) {
        $form['bill_details']['#rows'][$key]['data'][] = $val['field_lb_ean_value'];
       }
       $form['bill_details']['#rows'][$key]['data'][] = $val['mrp'];
+        
+      $image= array();
+      $scan_images = explode(",", $val['scan_images']);
+      foreach($scan_images as $v){
+         $image[] =  '<a href='.$v." target=_blank>".$v."</a>";
+      }
+      $final_image = implode("<br>",$image);
+      $form['bill_details']['#rows'][$key]['data'][] = $final_image;
 
       $form['bill_details']['#rows'][$key]['data'][] = array('data' => $val['to_be_return_qty'], 'class' => 'to_be_return_qty');
       $actual_return_qty_sku_class = 'actual_return_qty_' . $key;
@@ -839,6 +847,7 @@ function new_sku_wise_return_submit($form, &$form_state) {
     $query->fields('ad', array('updated_flag'));
     $query->fields('ad', array('bill_number'));
     $query->fields('lb_ean', array('field_lb_ean_value'));
+    $query->fields('dpi', array('scan_images'));
     // net sales qty
     //$query->fields('dpi', array('sum_net_sales_quantity'));
     // farey delivered qty
@@ -892,6 +901,7 @@ function new_sku_wise_return_submit($form, &$form_state) {
       $sku_result[$val['sku_code']]['product_name'] = $val['product_name'];
       $sku_result[$val['sku_code']]['field_lb_ean_value'] = $val['field_lb_ean_value'];
       $sku_result[$val['sku_code']]['mrp'] = $val['mrp'];
+      $sku_result[$val['sku_code']]['scan_images'] = $val['scan_images'];
       $sku_result[$val['sku_code']]['updated_flag'] = $val['updated_flag'];
       $sku_result[$val['sku_code']]['res_sku_actual_quantity1'] = $val['res_sku_actual_quantity1'];
       $sku_result[$val['sku_code']]['farey_delivered_qty'] = $val['farey_delivered_qty'];

@@ -2621,3 +2621,21 @@ function dispatch_planning_update_7152() {
     }
   }
 }
+
+function dispatch_planning_update_7153() {
+  $fields = array(
+      'scan_images' => array(
+        'description' => t('Scan Images'),
+        'type' => 'text',
+      ),
+
+  );
+  foreach ($fields as $key => $field) {
+    if (!db_field_exists('dispatch_planning_item_details', $key)) {
+      db_add_field('dispatch_planning_item_details', $key, $field);
+    }
+    if (!db_field_exists('inventory_versioning_item_details', $key)) {
+      db_add_field('inventory_versioning_item_details', $key, $field);
+    }
+  }
+}

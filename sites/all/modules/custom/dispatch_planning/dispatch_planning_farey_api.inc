@@ -193,6 +193,16 @@ function fetch_dispatch_planning_api_data($data) {
               
             //scan qty in order receive table
             foreach($value['scan_code'] as $v){
+              //scan_images
+                db_update('dispatch_planning_item_details') // Table name no longer needs {}
+                ->fields(array(
+                  'scan_images' => isset($v['images']) ? implode(",",$v['images']) : '',
+                ))
+                ->condition('trip_bill_reference', $bill_row_id, '=')
+                ->condition('sku_code', $value['sku_code'], '=')
+                ->execute();  
+                
+                
               db_update('order_receive_data') // Table name no longer needs {}
                 ->fields(array(
                   'scan_qty' => isset($v['scan_qty']) ? $v['scan_qty'] : 0,

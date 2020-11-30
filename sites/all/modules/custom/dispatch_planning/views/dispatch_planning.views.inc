@@ -4823,6 +4823,24 @@ $data['views']['global_facility_name'] = array(
       'handler' => 'views_handler_argument_string',
     ),
   );
+  
+  $data['dispatch_planning_item_details']['scan_images'] = array(
+    'title' => t('DP scan_images'),
+    'help' => t('DP scan_images'),
+    'field' => array(
+      'handler' => 'views_handler_field',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
 
   $base_table = 'dispatch_planning_api_data';
   $data[$base_table]['date_filter'] = array(
