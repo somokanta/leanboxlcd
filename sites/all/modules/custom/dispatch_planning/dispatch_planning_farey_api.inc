@@ -170,7 +170,7 @@ function fetch_dispatch_planning_api_data($data) {
             
            
            if($data['jobType'] == 'Reverse'){
-              $return_qty = $value['sku_actual_ret_quantity'] - $res_data['res_cashier_short']; 
+              $return_qty = $value['sku_actual_ret_quantity']; 
               if ($ret_cash == $res_data['dispatch_qty'] ) {
                  $line_status = 'line_return';
               }else if ($ret_cash_godown > 0) {
