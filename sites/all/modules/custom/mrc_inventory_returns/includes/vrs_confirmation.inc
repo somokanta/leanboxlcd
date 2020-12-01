@@ -1406,7 +1406,7 @@ function display_vrs_trip_details($form, &$form_state) {
     $query = db_select('dispatch_planning_api_data', 'ad');
     $query->condition('ad.distributor_id', $dis_id, '=');
     $query->condition('ad.runsheet_number', $trip_id, '=');
-    $default_bill_status = array('partial_deliver', 'deliver', 'undeliver', 'return', 'partial_return');
+    $default_bill_status = array('partial_deliver', 'deliver', 'undeliver', 'return', 'partial_return', 'no_return');
     if (!empty($dispatch_date)) {
       $query->condition('ad.date', $dispatch_date, '=');
     }
