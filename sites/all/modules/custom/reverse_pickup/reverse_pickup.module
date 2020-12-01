@@ -196,12 +196,12 @@ function reverse_pickup_node_presave($node) {
                 $counter = 0;
                 foreach ($dispatch_info as $value) {
                     $sku = $value['sku_code'];
-                    $order_info = reverse_pickup_get_lb_details($child_bill, $parent_bill, $sku, $distributor_id);
-                    $data[$bill]['parent_order_no'] = $child_bill;
-                    $data[$bill]['parent_bill_no'] = $parent_bill;
-                    $data[$bill]['input_type'] = '1';                  
+                    $order_info = reverse_pickup_get_lb_details($child_bill, $parent_bill, $sku, $distributor_id);                
                     //scan_code
                     foreach ($order_info as $key1 => $val1) {
+                        $data[$bill]['parent_order_no'] = $child_bill;
+                        $data[$bill]['parent_bill_no'] = $parent_bill;
+                        $data[$bill]['input_type'] = '1';  
                         if ($val1['order_type'] == 'Forward') {
                             if ($value['delivered_qty'] >= $val1['return_qty']) {
                                 $del[$bill]['details'][$val1['lb_sku_id'].'#'.$val1['pkd']]['delivered_qty'] = $val1['return_qty'];
