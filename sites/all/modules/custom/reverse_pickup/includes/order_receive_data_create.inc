@@ -11,7 +11,7 @@ function order_receive_data_create_callback() {
     $query->fields('a');
     $query->condition('flag', 0);
     $query->condition('order_type', 'Reverse');
-    $res = $query->groupBy('parent_bill_number')->range(0, 5)->execute()->fetchAll(PDO::FETCH_ASSOC);
+    $res = $query->groupBy('parent_bill_number,child_order_id')->range(0, 5)->execute()->fetchAll(PDO::FETCH_ASSOC);
 
     foreach ($res as $data) {
         insert_tester_order_data_in_sales_register($data);
@@ -25,7 +25,9 @@ function insert_tester_order_data_in_sales_register($data) {
     $query = db_select('node', 'n');
     $query->condition('n.type', 'sales_register_data');
     $query->leftJoin('field_data_field_parent_bill_number', 'pb', 'n.nid = pb.entity_id');
+    $query->leftJoin('field_data_field_outlet_order_no', 'co', 'n.nid = co.entity_id');
     $query->condition('pb.field_parent_bill_number_value', $data['parent_bill_number']);
+    $query->condition('co.field_outlet_order_no_value', $data['child_order_id']);
     $query->condition('n.uid', $distributor_id);
     $query->fields('n', array('nid'));
     $seq_result = $query->execute()->fetchCol();
@@ -71,6 +73,7 @@ function insert_tester_order_data_in_custom_billing_table($new_bill_number, $ord
     $query->fields('a');
     $query->condition('a.parent_bill_number', $order_data['parent_bill_number'], '=');
     $query->condition('a.parent_party_code', $order_data['parent_party_code'], '=');
+    $query->condition('a.child_order_id', $order_data['child_order_id'], '=');
     $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
 
     foreach ($res as $key => $data) {
@@ -141,5 +144,6 @@ function insert_tester_order_data_in_custom_billing_table($new_bill_number, $ord
             ->fields(array('flag' => 1))
             ->condition('parent_bill_number', $order_data['parent_bill_number'], '=')
             ->condition('parent_party_code', $order_data['parent_party_code'], '=')
+            ->condition('child_order_id', $order_data['child_order_id'], '=')
             ->execute();
 }
