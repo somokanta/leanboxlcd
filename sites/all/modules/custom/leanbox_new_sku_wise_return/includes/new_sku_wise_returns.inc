@@ -195,7 +195,8 @@ function new_sku_wise_returns_form($form, &$form_state) {
       $image= array();
       $scan_images = explode(",", $val['scan_images']);
       foreach($scan_images as $v){
-         $image[] =  '<a href='.$v." target=_blank>".$v."</a>";
+         $v_link = str_replace(' ', '%20', $v); 
+         $image[] =  '<a href='.$v_link." target=_blank>".$v."</a>";
       }
       $final_image = implode("<br>",$image);
       $form['bill_details']['#rows'][$key]['data'][] = $final_image;
