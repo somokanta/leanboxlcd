@@ -27,7 +27,7 @@ function insert_tester_order_data_in_sales_register($data) {
     $query->leftJoin('field_data_field_parent_bill_number', 'pb', 'n.nid = pb.entity_id');
     $query->leftJoin('field_data_field_outlet_order_no', 'co', 'n.nid = co.entity_id');
     $query->condition('pb.field_parent_bill_number_value', $data['parent_bill_number']);
-    $query->condition('co.field_outlet_order_no_value', $data['child_order_id']);
+//    $query->condition('co.field_outlet_order_no_value', $data['child_order_id']);
     $query->condition('n.uid', $distributor_id);
     $query->fields('n', array('nid'));
     $seq_result = $query->execute()->fetchCol();
