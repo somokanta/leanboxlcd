@@ -513,6 +513,23 @@ function change_feeds_import_menu() {
       'access arguments' => array('Sibling Central Custom Billing Upload'),
       'file' => 'form/upload_billing_data_sibling.inc',
     );
+    $items['block-party-billing'] = array(
+      'title' => 'Blocking Party from Billing',
+      'description' => 'Blocking Party from Billing',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('block_party_billing_form'),
+      'access arguments' => array('Distributor Upload File'),
+      'file' => 'form/block_party_billing.inc',
+    );
+    
+    $items['party-name/autocomplete/%'] = array(
+      'title' => 'trip_autocomplete',
+      'page callback' => '_get_party_name_autocomplete',
+      'access callback' => TRUE,
+      'page arguments' => array(2),
+      'type' => MENU_CALLBACK,
+    );
+    
     return $items;
 }
 
@@ -5419,4 +5436,22 @@ function get_html_table($headers, $datas) {
         }
         return $res;
 
+ }
+ 
+ function _get_party_name_autocomplete($distributor_id, $string = ''){
+    $result = array();
+
+    if ($string) {
+        $query = db_select('node', 'n');
+        $query->condition('n.type', 'outlet_master');
+        $query->condition('n.uid', $distributor_id);
+        $query->join('field_data_field_party_name', 'pn', 'pn.entity_id = n.nid');
+        $query->condition('pn.field_party_name_value', db_like($string) . '%', 'LIKE');
+        $query->fields('pn', array('field_party_name_value'));
+        $query->range(0, 15);
+        //$query->addTag('node_distributor_access');
+        $result = $query->execute()->fetchAllKeyed(0, 0);
+    }
+
+    drupal_json_output($result);
  }

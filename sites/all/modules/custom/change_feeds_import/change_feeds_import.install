@@ -1565,3 +1565,49 @@ function change_feeds_import_update_7128() {
 function change_feeds_import_update_7129() {
     db_change_field('outlet_order_crate', 'outlet_order_no', 'outlet_order_no', array('type' => 'varchar','length'=>100,'not null'=>TRUE));
 }
+
+function change_feeds_import_update_7130() {
+  $schema['block_party_history'] = array(
+    'description' => 'describes the history table for block party',
+    'fields' => array(
+      'id' => array(
+        'description' => t('Unique id'),
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'hul_nid' => array(
+        'description' => 'Hul Nid',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,  
+      ),
+     'status' => array(
+        'description' => t('status'),
+        'type' => 'varchar',
+        'length' => 25,
+        'default' => '',
+      ),
+     'reason' => array(
+        'description' => t('reason'),
+        'type' => 'varchar',
+        'length' => 100,
+        'default' => '',
+      ),
+      'remarks' => array(
+        'description' => t('remarks'),
+        'type' => 'varchar',
+        'length' => 255,
+        'default' => '',
+      ),
+      'created_time' => array(
+        'description' => t('Created time'),
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    ),
+    'primary key' => array('id'),
+  );
+
+  db_create_table('block_party_history', $schema['block_party_history']);
+}
