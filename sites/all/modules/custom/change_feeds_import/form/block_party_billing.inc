@@ -324,7 +324,7 @@ function get_hul_code_from_party_name($party_name, $distributor_id) {
     $query->join('node', 'n', 'ref.field_hul_code_reference_nid = n.nid');
     $query->condition('n.uid', $distributor_id);
     $query->fields('n', array('title'));
-    $result = $query->execute()->fetchCol();
+    $result = $query->execute()->fetchField();
     return $result;
 }
 
