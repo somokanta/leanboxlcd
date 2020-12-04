@@ -54,6 +54,13 @@ function block_party_billing_form($form, &$form_state) {
         '#suffix' => '</div>',
     );
 
+    $form['hul_or_party'] = array(
+        '#type' => 'markup',
+        '#title' => t('OR'),
+        '#prefix' => '<div id="after_trip_id" class="text-center font-weight-bold or_txt or_txt1"> OR',
+        '#suffix' => '</div>'
+    );
+
     $form['party_name'] = array(
         '#type' => 'textfield',
         '#title' => t('Party Name'),
@@ -192,8 +199,10 @@ function block_party_billing_submit($form, &$form_state) {
     $form_state['modify_status'] = 0;
 
     $party_name = $form_state['values']['party_name'];
-    $hul_code = get_hul_code_from_party_name($party_name, $distributor_id);
-    
+    if ($party_name) {
+        $hul_code = get_hul_code_from_party_name($party_name, $distributor_id);
+    }
+
     $nid = get_nid_from_title($hul_code, 'hul_code_master', $distributor_id);
 
     $query = db_select('node', 'n');
@@ -279,9 +288,11 @@ function modify_final_submit($form, &$form_state) {
     $reason_code = $form_state['values']['reason_code'];
     $remarks = $form_state['values']['remarks'];
     $distributor_id = $form_state['values']['distributor_id'];
-    
+
     $party_name = $form_state['values']['party_name'];
-    $hul_code = get_hul_code_from_party_name($party_name, $distributor_id);
+    if ($party_name) {
+        $hul_code = get_hul_code_from_party_name($party_name, $distributor_id);
+    }
 
     $nid = get_nid_from_title($hul_code, 'hul_code_master', $distributor_id);
     $node = node_load($nid);
@@ -312,7 +323,7 @@ function get_hul_code_from_party_name($party_name, $distributor_id) {
     $query->condition('n.uid', $distributor_id);
     $query->fields('n', array('title'));
     $result = $query->execute()->fetchField();
-    return $result; 
+    return $result;
 }
 
 function block_party_billing_callback($form, &$form_state) {
