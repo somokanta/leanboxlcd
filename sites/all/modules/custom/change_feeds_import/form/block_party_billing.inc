@@ -166,9 +166,11 @@ function block_party_billing_form($form, &$form_state) {
             '#options' => array('' => 'Select') + $allowed_values,
             '#title' => t('Block/Unblock Status'),
         );
-
+        
+        $reason_codes = array('Payment Outstanding' => 'Payment Outstanding','Others' => 'Others');
         $form['reason_code'] = array(
-            '#type' => 'textfield',
+            '#type' => 'select',
+             '#options' => array('' => 'Select') + $reason_codes,
             '#title' => t('Block/Unblock Reason'),
         );
 
