@@ -167,7 +167,7 @@ function block_party_billing_form($form, &$form_state) {
             '#title' => t('Block/Unblock Status'),
         );
         
-        $reason_codes = array('Payment Outstanding' => 'Payment Outstanding','Others' => 'Others');
+        $reason_codes = _get_bill_status_wise_reason_master_list('block_unblock');
         $form['reason_code'] = array(
             '#type' => 'select',
              '#options' => array('' => 'Select') + $reason_codes,
@@ -299,8 +299,8 @@ function modify_final_submit($form, &$form_state) {
     $nid = get_nid_from_title($hul_code, 'hul_code_master', $distributor_id);
     $node = node_load($nid);
     $node->field_block_status[$node->language][0]['value'] = $status;
-    $node->field_block_remarks[$node->language][0]['value'] = $reason_code;
-    $node->field_block_reason[$node->language][0]['value'] = $remarks;
+    $node->field_block_reason[$node->language][0]['value'] = $reason_code;
+    $node->field_block_remarks[$node->language][0]['value'] = $remarks;
     node_save($node);
 
     db_insert('block_party_history')

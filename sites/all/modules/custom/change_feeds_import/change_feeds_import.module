@@ -5455,3 +5455,19 @@ function get_html_table($headers, $datas) {
 
     drupal_json_output($result);
  }
+ 
+ function get_blocked_hul_code_from_party_code($party_code, $distributor_id) {
+    $query = db_select('field_data_field_party_code', 'pn');
+    $query->condition('pn.bundle', 'outlet_master');
+    $query->condition('pn.field_party_code_value', $party_code);
+    $query->join('field_data_field_hul_code_reference', 'ref', 'ref.entity_id = pn.entity_id');
+    $query->join('node', 'n', 'ref.field_hul_code_reference_nid = n.nid');
+    $query->join('field_data_field_block_status', 'bs', 'bs.entity_id = n.nid');
+    $query->join('field_data_field_block_reason', 'br', 'br.entity_id = n.nid');
+    $query->condition('bs.field_block_status_value', 1);
+    $query->condition('n.uid', $distributor_id);
+    $query->addField('n', 'title', 'hul_code');
+    $query->addField('br', 'field_block_reason_value', 'block_reason');
+    $result = $query->execute()->fetch(PDO::FETCH_ASSOC);
+    return $result;
+}
