@@ -135,7 +135,9 @@ function block_party_billing_form($form, &$form_state) {
             '#prefix' => '<div class="custom_middle_table">',
             '#suffix' => '</div>',
         );
+    }
 
+    if (!empty($options) || !empty($options1)) {
         $form['modify'] = array(
             '#type' => 'submit',
             '#value' => 'Modify',
@@ -148,46 +150,45 @@ function block_party_billing_form($form, &$form_state) {
             '#submit' => array('block_party_modify_submit'),
 //        '#validate' => array('block_party_billing_validate'),
         );
+
+
+        $modify = $form_state['modify_status'];
+        if ($modify == 1) {
+            $form['data'] = array(
+                '#type' => 'markup',
+                '#prefix' => '<div id ="pop_up_bill_" class="pop-up_table" style="display:none;"><div class="popup_overlay"></div><div class="popup_wrap"><div class="pop_content"><div class="popup_border">'
+                . '<img sku_key="" class="close-pop-up-button" id="close_pop_up_bill_" src="sites/all/modules/custom/mrc_inventory_returns/images/close_btn.png">',
+            );
+
+            $field = field_info_field('field_block_status');
+            $allowed_values = list_allowed_values($field);
+            $form['status'] = array(
+                '#type' => 'select',
+                '#options' => array('' => 'Select') + $allowed_values,
+                '#title' => t('Block/Unblock Status'),
+            );
+
+            $reason_codes = _get_bill_status_wise_reason_master_list('block_unblock');
+            $form['reason_code'] = array(
+                '#type' => 'select',
+                '#options' => array('' => 'Select') + $reason_codes,
+                '#title' => t('Block/Unblock Reason'),
+            );
+
+            $form['remarks'] = array(
+                '#type' => 'textfield',
+                '#title' => t('Block/Unblock Remarks'),
+            );
+
+            $form['modify_submit'] = array(
+                '#type' => 'submit',
+                '#value' => 'Submit',
+                '#validate' => array('modify_final_validate'),
+                '#submit' => array('modify_final_submit'),
+                '#suffix' => '</div></div></div></div></div>'
+            );
+        }
     }
-
-
-    $modify = $form_state['modify_status'];
-    if ($modify == 1) {
-        $form['data'] = array(
-            '#type' => 'markup',
-            '#prefix' => '<div id ="pop_up_bill_" class="pop-up_table" style="display:none;"><div class="popup_overlay"></div><div class="popup_wrap"><div class="pop_content"><div class="popup_border">'
-            . '<img sku_key="" class="close-pop-up-button" id="close_pop_up_bill_" src="sites/all/modules/custom/mrc_inventory_returns/images/close_btn.png">',
-        );
-
-        $field = field_info_field('field_block_status');
-        $allowed_values = list_allowed_values($field);
-        $form['status'] = array(
-            '#type' => 'select',
-            '#options' => array('' => 'Select') + $allowed_values,
-            '#title' => t('Block/Unblock Status'),
-        );
-        
-        $reason_codes = _get_bill_status_wise_reason_master_list('block_unblock');
-        $form['reason_code'] = array(
-            '#type' => 'select',
-             '#options' => array('' => 'Select') + $reason_codes,
-            '#title' => t('Block/Unblock Reason'),
-        );
-
-        $form['remarks'] = array(
-            '#type' => 'textfield',
-            '#title' => t('Block/Unblock Remarks'),
-        );
-
-        $form['modify_submit'] = array(
-            '#type' => 'submit',
-            '#value' => 'Submit',
-            '#validate' => array('modify_final_validate'),
-            '#submit' => array('modify_final_submit'),
-            '#suffix' => '</div></div></div></div></div>'
-        );
-    }
-
     return $form;
 }
 
@@ -215,7 +216,7 @@ function block_party_billing_submit($form, &$form_state) {
     $query->join('field_data_field_hul_code_reference', 'ref', 'ref.field_hul_code_reference_nid = n.nid');
     $query->join('field_data_field_party_name', 'pn', 'pn.entity_id = ref.entity_id');
     $query->fields('pn', array('field_party_name_value'));
-    $query->join('field_data_field_block_status', 'bs', 'bs.entity_id = n.nid');
+    $query->leftjoin('field_data_field_block_status', 'bs', 'bs.entity_id = n.nid');
     $query->addexpression("(CASE WHEN bs.field_block_status_value = 1 THEN 'Block' ELSE 'Unblock' END)", 'block_status');
     $result = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
     $form_state['block_party_billing']['hul_data'] = $result;
@@ -234,6 +235,8 @@ function block_party_billing_submit($form, &$form_state) {
     $query->fields('bd', array('field_sr_bill_date_value'));
     $query->fields('n2', array('title'));
     $query->fields('bs', array('field_bill_status_value'));
+    $query->orderBy('bd.field_sr_bill_date_value', 'DESC');
+    $query->range(0, 10);
     $result1 = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
 
     foreach ($result1 as $v) {
