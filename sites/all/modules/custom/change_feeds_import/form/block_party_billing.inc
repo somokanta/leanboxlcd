@@ -218,7 +218,7 @@ function block_party_billing_submit($form, &$form_state) {
     $query->fields('pn', array('field_party_name_value'));
     $query->leftjoin('field_data_field_block_status', 'bs', 'bs.entity_id = n.nid');
     $query->addexpression("(CASE WHEN bs.field_block_status_value = 1 THEN 'Block' ELSE 'Unblock' END)", 'block_status');
-    $result = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
+    $result = $query->distinct()->execute()->fetchAll(PDO::FETCH_ASSOC);
     $form_state['block_party_billing']['hul_data'] = $result;
 
     $res = array();
