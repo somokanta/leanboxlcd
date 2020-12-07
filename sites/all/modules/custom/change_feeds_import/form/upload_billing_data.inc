@@ -349,6 +349,11 @@ function change_feeds_import_batch_fix_process($max, $data, $distributor_id, $fi
                             $error_text = $v . " PARTY_CODE is not present in PARTY_CODE Master";
                             $flag = 1;
                         }
+                        $hul_code = get_blocked_hul_code_from_party_code($v, $distributor_id);
+                        if ($hul_code) {
+                            $error_text = " Party code " . $v . " consist of HUL Code ".$hul_code['hul_code']." is blocked due to ".$hul_code['block_reason'];
+                            $flag = 1;
+                        }
                         break;
 
 //                    case 'BEAT_NAME':
