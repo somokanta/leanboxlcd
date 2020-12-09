@@ -300,7 +300,8 @@ function modify_final_validate($form, &$form_state) {
     $query->addexpression("bs.field_block_status_value", 'block_status');
     $result = $query->execute()->fetchField();
     if (($status!="" && $status == $result)) {
-        form_set_error('status', 'Cannot select same status again');
+        $res_status = $result == 1 ? 'Blocked' : 'Unblocked';
+        form_set_error('status', "HUL Code $hul_code is already $res_status");
     }
 }
 
