@@ -216,7 +216,7 @@ function block_party_billing_submit($form, &$form_state) {
     $query->join('field_data_field_hul_code_reference', 'ref', 'ref.field_hul_code_reference_nid = n.nid');
     $query->join('field_data_field_party_name', 'pn', 'pn.entity_id = ref.entity_id');
     $query->fields('pn', array('field_party_name_value'));
-    $query->leftjoin('field_data_field_block_status', 'bs', 'bs.entity_id = n.nid');
+    $query->join('field_data_field_block_status', 'bs', 'bs.entity_id = n.nid');
     $query->addexpression("(CASE WHEN bs.field_block_status_value = 1 THEN 'Block' ELSE 'Unblock' END)", 'block_status');
     $result = $query->distinct()->execute()->fetchAll(PDO::FETCH_ASSOC);
     $form_state['block_party_billing']['hul_data'] = $result;
@@ -276,6 +276,11 @@ function modify_final_validate($form, &$form_state) {
     $remarks = $form_state['values']['remarks'];
     $distributor_id = $form_state['values']['distributor_id'];
 
+    $party_name = $form_state['values']['party_name'];
+    if ($party_name) {
+        $hul_code = get_hul_code_from_party_name($party_name, $distributor_id);
+    }
+
     if ($status == "") {
         form_set_error('status', 'Status cannot be empty');
     }
@@ -284,6 +289,18 @@ function modify_final_validate($form, &$form_state) {
     }
     if (empty($remarks)) {
         form_set_error('remarks', 'Reamrks cannot be empty');
+    }
+
+    $query = db_select('node', 'n');
+    $query->condition('n.type', 'hul_code_master');
+    $query->condition('n.title', $hul_code);
+    $query->condition('n.uid', $distributor_id);
+    $query->join('field_data_field_hul_code_reference', 'ref', 'ref.field_hul_code_reference_nid = n.nid');
+    $query->join('field_data_field_block_status', 'bs', 'bs.entity_id = n.nid');
+    $query->addexpression("bs.field_block_status_value", 'block_status');
+    $result = $query->execute()->fetchField();
+    if (($status!="" && $status == $result)) {
+        form_set_error('status', 'Cannot select same status again');
     }
 }
 
