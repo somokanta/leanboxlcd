@@ -86,11 +86,10 @@ function custom_order_box_id_upload_sibling_form_validate($form, &$form_state) {
                 $bill_distributor_ids = get_distributor_id_of_bills($bills_array, $sibling_child_distributor_ids);
                 $hul_code_distributor_ids = get_distributor_id_of_hul_codes($hul_code_array, $sibling_child_distributor_ids);
                 $distributor_names = validate_distributor_names($distributor_names_array);
-                $crate_ids = check_crate_id_exist_sibling($outlet_order_numbers, $bills_array, $sibling_child_distributor_ids, $hul_code_array);
                 $form_state['unique_distributor_ids'][] = $sibling_child_distributor_ids;
                 $form_state['distributor_data']['bills_data'] = $bill_distributor_ids;
                 $form_state['distributor_data']['hulcode_data'] = $hul_code_distributor_ids;
-                $form_state['distributor_data']['crate_ids'] = $crate_ids;
+                $crate_ids = array();
                 foreach ($data as $key => $value) {
                     $outlet_order_no = $value[0];
                     $order_date = $value[1];
@@ -120,7 +119,8 @@ function custom_order_box_id_upload_sibling_form_validate($form, &$form_state) {
                         form_set_error('duplicate_data', t('Duplicate Data Found , Please Remove Duplicate Data and Upload Again.'));
                     }
                     $res['unique_combination'][$unique_comb] = $unique_comb;
-                  
+                    
+                    $crate_ids[$bill_no] = check_crate_id_exist_sibling($outlet_order_no, $bill_no, $sibling_child_distributor_ids, $hul_code);
                     if (empty($crate_ids[$bill_no])) {
                         $error_message .= "Invalid Order Number/Bill Number mapping Or Invalid Hul code Or Crate Id for Bill Number: $bill_no does not exist at line " . ($key + 2) . '<br>';
                     }
@@ -140,6 +140,7 @@ function custom_order_box_id_upload_sibling_form_validate($form, &$form_state) {
                        $mess .= t('Bill Number : ' . $bill_no. ' exist for multiple Sibling Distributor Location.') . '<br>';  
                     }
                 }
+                    $form_state['distributor_data']['crate_ids'] = $crate_ids;
             }
         }
         else {
@@ -255,7 +256,7 @@ function check_crate_id_exist_sibling($outlet_order_nos, $bill_numbers, $sibling
     $results = array();
     if (!empty($outlet_order_nos) && !empty($sibling_distributor_ids) && !empty($bill_numbers) && !empty($hul_codes)) {
         $query = db_select('outlet_order_crate', 'ooc');
-        $query->condition('ooc.outlet_order_no', $outlet_order_nos, 'IN');
+        $query->condition('ooc.outlet_order_no', $outlet_order_nos, '=');
         $query->join('node', 'outlet_master', 'outlet_master.title = ooc.party_code AND outlet_master.uid = ooc.distributor_id'); //outlet node
         $query->join('field_data_field_party_code_reference', 'party_ref', 'party_ref.field_party_code_reference_nid = outlet_master.nid');
         $query->join('field_data_field_hul_code_reference', 'hul_code_ref', 'outlet_master.nid = hul_code_ref.entity_id');
@@ -265,12 +266,12 @@ function check_crate_id_exist_sibling($outlet_order_nos, $bill_numbers, $sibling
         $query->condition('sales_register.uid', $sibling_distributor_ids, 'IN');
         $query->condition('ooc.distributor_id', $sibling_distributor_ids, 'IN');
         $query->condition('hul_code.uid', $sibling_distributor_ids, 'IN');
-        $query->condition('ooc.hul_code', $hul_codes, 'IN');
-        $query->condition('hul_code.title', $hul_codes, 'IN');
-        $query->condition('sales_register.title', $bill_numbers, 'IN');
-        $query->fields('sales_register', array('title'));
+        $query->condition('ooc.hul_code', $hul_codes, '=');
+        $query->condition('hul_code.title', $hul_codes, '=');
+        $query->condition('sales_register.title', $bill_numbers, '=');
+//        $query->fields('sales_register', array('title'));
         $query->fields('ooc', array('crate_id'));
-        $results = $query->execute()->fetchAllKeyed(0, 1);
+        $results = $query->execute()->fetchField();
     }
     return $results;
 }
