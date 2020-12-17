@@ -166,9 +166,21 @@ function block_party_billing_form($form, &$form_state) {
                 '#type' => 'select',
                 '#options' => array('' => 'Select') + $allowed_values,
                 '#title' => t('Block/Unblock Status'),
+                '#ajax' => array(
+                    'callback' => 'block_party_billing_callback',
+                    'wrapper' => 'itemlist-div',
+                    'method' => 'replace',
+                    'effect' => 'fade',
+                ),
             );
-
-            $reason_codes = _get_bill_status_wise_reason_master_list('block_unblock');
+            
+            $status = $form_state['input']['status'];
+            if ($status == '0') {
+                $status_reason = 'unblock';
+            }else if($status == '1'){
+                $status_reason = 'block';
+            }
+            $reason_codes = _get_bill_status_wise_reason_master_list($status_reason);
             $form['reason_code'] = array(
                 '#type' => 'select',
                 '#options' => array('' => 'Select') + $reason_codes,
@@ -216,7 +228,7 @@ function block_party_billing_submit($form, &$form_state) {
     $query->join('field_data_field_hul_code_reference', 'ref', 'ref.field_hul_code_reference_nid = n.nid');
     $query->join('field_data_field_party_name', 'pn', 'pn.entity_id = ref.entity_id');
     $query->fields('pn', array('field_party_name_value'));
-    $query->join('field_data_field_block_status', 'bs', 'bs.entity_id = n.nid');
+    $query->leftjoin('field_data_field_block_status', 'bs', 'bs.entity_id = n.nid');
     $query->addexpression("(CASE WHEN bs.field_block_status_value = 1 THEN 'Block' ELSE 'Unblock' END)", 'block_status');
     $result = $query->distinct()->execute()->fetchAll(PDO::FETCH_ASSOC);
     $form_state['block_party_billing']['hul_data'] = $result;
@@ -284,7 +296,7 @@ function modify_final_validate($form, &$form_state) {
     if ($status == "") {
         form_set_error('status', 'Status cannot be empty');
     }
-    if (empty($reason_code)) {
+    if (empty($reason_code) && $status != '0') {
         form_set_error('reason_code', 'Reason cannot be empty');
     }
     if (empty($remarks)) {
@@ -296,10 +308,10 @@ function modify_final_validate($form, &$form_state) {
     $query->condition('n.title', $hul_code);
     $query->condition('n.uid', $distributor_id);
     $query->join('field_data_field_hul_code_reference', 'ref', 'ref.field_hul_code_reference_nid = n.nid');
-    $query->join('field_data_field_block_status', 'bs', 'bs.entity_id = n.nid');
+    $query->leftjoin('field_data_field_block_status', 'bs', 'bs.entity_id = n.nid');
     $query->addexpression("bs.field_block_status_value", 'block_status');
     $result = $query->execute()->fetchField();
-    if (($status!="" && $status == $result)) {
+    if ($status != "" && ($status == $result || (empty($result) && $status == "0"))) {
         $res_status = $result == 1 ? 'Blocked' : 'Unblocked';
         form_set_error('status', "HUL Code $hul_code is already $res_status");
     }
