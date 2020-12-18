@@ -311,7 +311,7 @@ function modify_final_validate($form, &$form_state) {
     $query->leftjoin('field_data_field_block_status', 'bs', 'bs.entity_id = n.nid');
     $query->addexpression("bs.field_block_status_value", 'block_status');
     $result = $query->execute()->fetchField();
-    if ($status != "" && ($status == $result || (empty($result) && $status == "0"))) {
+    if (($status == $result) || (empty($result) && empty($status))) {
         $res_status = $result == 1 ? 'Blocked' : 'Unblocked';
         form_set_error('status', "HUL Code $hul_code is already $res_status");
     }
