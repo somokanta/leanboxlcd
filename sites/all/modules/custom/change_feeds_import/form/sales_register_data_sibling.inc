@@ -308,6 +308,12 @@ function change_feeds_import_sales_register_sibling_batch_fix_process($data, $di
                     }
                 }
             }
+            
+             //check party blocked or not    
+            $hul_code = get_blocked_hul_code_from_party_code($value['PARTY_CODE'], $dis_id);
+            if ($hul_code) {
+                $value['error_message'] .= " Party code " . $value['PARTY_CODE'] . " consist of HUL Code ".$hul_code['hul_code']." is blocked due to ".$hul_code['block_reason'];
+            }
         }
         /* if (empty($distributor_id)) {
           $value['error_message'] .= " Please check your Distributor code";
