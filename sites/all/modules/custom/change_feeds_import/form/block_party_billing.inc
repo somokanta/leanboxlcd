@@ -82,6 +82,24 @@ function block_party_billing_form($form, &$form_state) {
 //        '#validate' => array('block_party_billing_validate'),
     );
 
+    if (!isset($form_state['block_party_billing']['hul_data'])) {
+        $form_state['block_party_billing']['hul_data'] = array();
+    }
+    $options = $form_state['block_party_billing']['hul_data'];
+    $header = array('HUL Code', 'Party Name', 'Blocked/Open');
+
+    if (!empty($options)) {
+        $form['hul_details'] = array(
+            '#theme' => 'table',
+            '#tree' => TRUE,
+            '#caption' => "<b>HUL Party Details: </b>",
+            '#header' => $header,
+            '#rows' => $options,
+            '#prefix' => '<div class="custom_middle_table1">',
+            '#suffix' => '</div>',
+        );
+    }
+
     if (!isset($form_state['block_party_billing']['block_data'])) {
         $form_state['block_party_billing']['block_data'] = array();
     }
@@ -92,29 +110,10 @@ function block_party_billing_form($form, &$form_state) {
         $form['block_details'] = array(
             '#theme' => 'table',
             '#tree' => TRUE,
-            '#caption' => "<b>Block/Unblock History: </b>",
+            '#caption' => "<b>Blocked/Open History: </b>",
             '#header' => $header_block,
             '#rows' => $options_block,
             '#prefix' => '<div class="custom_middle_table_block">',
-            '#suffix' => '</div>',
-        );
-    }
-
-
-    if (!isset($form_state['block_party_billing']['hul_data'])) {
-        $form_state['block_party_billing']['hul_data'] = array();
-    }
-    $options = $form_state['block_party_billing']['hul_data'];
-    $header = array('HUL Code', 'Party Name', 'Block/ Unblock');
-
-    if (!empty($options)) {
-        $form['hul_details'] = array(
-            '#theme' => 'table',
-            '#tree' => TRUE,
-            '#caption' => "<b>HUL Party Details: </b>",
-            '#header' => $header,
-            '#rows' => $options,
-            '#prefix' => '<div class="custom_middle_table1">',
             '#suffix' => '</div>',
         );
     }
@@ -165,7 +164,7 @@ function block_party_billing_form($form, &$form_state) {
             $form['status'] = array(
                 '#type' => 'select',
                 '#options' => array('' => 'Select') + $allowed_values,
-                '#title' => t('Block/Unblock Status'),
+                '#title' => t('Blocked/Open Status'),
                 '#ajax' => array(
                     'callback' => 'block_party_billing_callback',
                     'wrapper' => 'itemlist-div',
@@ -173,23 +172,23 @@ function block_party_billing_form($form, &$form_state) {
                     'effect' => 'fade',
                 ),
             );
-            
+
             $status = $form_state['input']['status'];
             if ($status == '0') {
-                $status_reason = 'unblock';
-            }else if($status == '1'){
-                $status_reason = 'block';
+                $status_reason = 'open';
+            } else if ($status == '1') {
+                $status_reason = 'blocked';
             }
             $reason_codes = _get_bill_status_wise_reason_master_list($status_reason);
             $form['reason_code'] = array(
                 '#type' => 'select',
                 '#options' => array('' => 'Select') + $reason_codes,
-                '#title' => t('Block/Unblock Reason'),
+                '#title' => t('Blocked/Open Reason'),
             );
 
             $form['remarks'] = array(
                 '#type' => 'textfield',
-                '#title' => t('Block/Unblock Remarks'),
+                '#title' => t('Blocked/Open Remarks'),
             );
 
             $form['modify_submit'] = array(
@@ -229,7 +228,7 @@ function block_party_billing_submit($form, &$form_state) {
     $query->join('field_data_field_party_name', 'pn', 'pn.entity_id = ref.entity_id');
     $query->fields('pn', array('field_party_name_value'));
     $query->leftjoin('field_data_field_block_status', 'bs', 'bs.entity_id = n.nid');
-    $query->addexpression("(CASE WHEN bs.field_block_status_value = 1 THEN 'Block' ELSE 'Unblock' END)", 'block_status');
+    $query->addexpression("(CASE WHEN bs.field_block_status_value = 1 THEN 'Blocked' ELSE 'Open' END)", 'block_status');
     $result = $query->distinct()->execute()->fetchAll(PDO::FETCH_ASSOC);
     $form_state['block_party_billing']['hul_data'] = $result;
 
@@ -312,7 +311,7 @@ function modify_final_validate($form, &$form_state) {
     $query->addexpression("bs.field_block_status_value", 'block_status');
     $result = $query->execute()->fetchField();
     if (($status == $result) || (empty($result) && empty($status))) {
-        $res_status = $result == 1 ? 'Blocked' : 'Unblocked';
+        $res_status = $result == 1 ? 'Blocked' : 'Open';
         form_set_error('status', "HUL Code $hul_code is already $res_status");
     }
 }
@@ -339,7 +338,7 @@ function modify_final_submit($form, &$form_state) {
     db_insert('block_party_history')
             ->fields(array(
                 'hul_nid' => $nid,
-                'status' => ($status == 1) ? 'Block' : 'Unblock',
+                'status' => ($status == 1) ? 'Blocked' : 'Open',
                 'remarks' => $remarks,
                 'reason' => $reason_code,
                 'created_time' => REQUEST_TIME,
