@@ -283,3 +283,18 @@ function reverse_pickup_update_7005() {
   }
 }
 
+function reverse_pickup_update_7006() {
+  $fields = array(
+     'expiry_date' => array(
+        'description' => 'Expiry Date',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),  
+  );
+  foreach ($fields as $key => $field) {
+    if (!db_field_exists('order_receive_data', $key)) {
+      db_add_field('order_receive_data', $key, $field);
+    }
+  }
+}
