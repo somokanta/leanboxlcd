@@ -3467,7 +3467,7 @@ function dispatch_planning_sales_reg_api($node, $trip_execution_date, $vehicle_n
         $child_bill= $node->field_outlet_order_no[LANGUAGE_NONE][0]['value'];
         
         $query = db_select('order_receive_data', 'od');
-        $query->fields('od', array('ean_code','pkd', 'lb_sku_id','return_qty'));
+        $query->fields('od', array('ean_code','pkd', 'lb_sku_id','return_qty', 'expiry_date'));
         $query->condition('od.distributor_id', $node_uid);
 //        if ($parent_bill) {
 //          $query->condition('od.parent_bill_number', $parent_bill);
@@ -3491,6 +3491,7 @@ function dispatch_planning_sales_reg_api($node, $trip_execution_date, $vehicle_n
             $res[$val1['lb_sku_id'].'#'.$val1['pkd']]['ean_code'] = $val1['ean_code'];
             $res[$val1['lb_sku_id'].'#'.$val1['pkd']]['pkd'] = $val1['pkd'];
             $res[$val1['lb_sku_id'].'#'.$val1['pkd']]['qty'] = $del[$val1['lb_sku_id'].'#'.$val1['pkd']]['qty'];
+            $res[$val1['lb_sku_id'].'#'.$val1['pkd']]['expiry_date'] = $val1['expiry_date'];
         }
         $billing_data_details_insert[$key]['scan_code'] = array_values($res);
         $billing_data_details[$key]['scan_code'] = array_values($res);

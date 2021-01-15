@@ -350,6 +350,20 @@ function reverse_pickup_views_data() {
         ),
     );
     
+    $data['order_receive_data']['expiry_date'] = array(
+        'title' => t('Expiry Date'),
+        'help' => t('Expiry Date'),
+        'field' => array(
+            'handler' => 'views_handler_field_numeric',
+        ),
+        'sort' => array(
+            'handler' => 'views_handler_sort',
+        ),
+        'filter' => array(
+            'handler' => 'views_handler_filter_numeric',
+        ),
+    );
+    
     $data['oms_api_log']['table'] = array(
         'group' => t('OMS API LOG'),
         'title' => t('OMS API LOG'),
