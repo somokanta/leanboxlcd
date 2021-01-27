@@ -27,7 +27,7 @@ class footer_inventory_returns_collection_mode_discrepancy extends views_handler
     $trip_number = $this->view->args[0];
     //$user_id = $GLOBALS['user']->uid;
     $distributor_id = get_distributorid_of_trip($trip_number);
-    $payment_terms_not_allowed = array('sign bill','cash/chq/sb','cash/sb');
+    $payment_terms_not_allowed = array('sign bill','cash/cheque/signed bill','cash/signed bill');
     $query = db_select('dispatch_planning_api_data', 'ad');
     $query->condition('ad.delivery_pending_flag', 1, '!=');
     $query->condition('ad.distributor_id', $distributor_id, '=');
