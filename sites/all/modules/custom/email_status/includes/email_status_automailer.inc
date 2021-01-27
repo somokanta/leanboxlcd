@@ -1069,16 +1069,16 @@ function send_email_pt_compliance() {
     $query->condition('n.uid', $distributor_id, '=');
     $query->join('field_data_field_payment_terms', 'pt', 'pt.entity_id = n.nid ');
 
-//Cash/Chq
-    $query->addexpression("COUNT(CASE WHEN  pt.field_payment_terms_value = 'Cash/Chq' AND (CASE WHEN ad.res_money_collect2_edit IN ($cash_chq_lower) THEN 1 ELSE  ad.res_money_collect2 IN ($cash_chq) END) THEN ad.bill_number END)", 'count_cash_chq');
-    $query->addexpression("count(CASE WHEN  pt.field_payment_terms_value = 'Cash/Chq' AND (CASE WHEN ad.res_money_collect2_edit NOT IN ($cash_chq_lower) THEN 1 ELSE ((ad.res_money_collect2 NOT IN ($cash_chq) and ad.res_money_collect2 !='') or (ad.res_money_collect2 ='' and ad.derived_payment_outcome = 'Signed')) END) THEN ad.bill_number END)", 'not_count_cash_chq');
-  //$query->addexpression("COUNT(CASE WHEN  pt.field_payment_terms_value = 'Cash/Chq' AND (CASE WHEN ad.res_money_collect2_edit NOT IN ($cash_chq_lower) THEN 1 ELSE  ad.res_money_collect2  NOT IN ($cash_chq) and  (ad.res_money_collect2 =''  and ad.res_signed_bill_delivery <> 'No'   and ad.res_signed_bill_partial <> 'No') END) THEN ad.bill_number END)", 'not_count_cash_chq');
-    $query->addexpression("COUNT(CASE WHEN  pt.field_payment_terms_value = 'Cash/Chq' AND ((ad.res_money_collect2 is null  and ad.res_money_collect2_edit is null) or (ad.res_money_collect2 is null  and ad.res_money_collect2_edit ='') or (ad.res_money_collect2 ='' and  ad.derived_payment_outcome <> 'Signed') )  THEN ad.bill_number END)", 'count_cash_blank');
+//Cash/Cheque
+    $query->addexpression("COUNT(CASE WHEN  pt.field_payment_terms_value = 'Cash/Cheque' AND (CASE WHEN ad.res_money_collect2_edit IN ($cash_chq_lower) THEN 1 ELSE  ad.res_money_collect2 IN ($cash_chq) END) THEN ad.bill_number END)", 'count_cash_chq');
+    $query->addexpression("count(CASE WHEN  pt.field_payment_terms_value = 'Cash/Cheque' AND (CASE WHEN ad.res_money_collect2_edit NOT IN ($cash_chq_lower) THEN 1 ELSE ((ad.res_money_collect2 NOT IN ($cash_chq) and ad.res_money_collect2 !='') or (ad.res_money_collect2 ='' and ad.derived_payment_outcome = 'Signed')) END) THEN ad.bill_number END)", 'not_count_cash_chq');
+  //$query->addexpression("COUNT(CASE WHEN  pt.field_payment_terms_value = 'Cash/Cheque' AND (CASE WHEN ad.res_money_collect2_edit NOT IN ($cash_chq_lower) THEN 1 ELSE  ad.res_money_collect2  NOT IN ($cash_chq) and  (ad.res_money_collect2 =''  and ad.res_signed_bill_delivery <> 'No'   and ad.res_signed_bill_partial <> 'No') END) THEN ad.bill_number END)", 'not_count_cash_chq');
+    $query->addexpression("COUNT(CASE WHEN  pt.field_payment_terms_value = 'Cash/Cheque' AND ((ad.res_money_collect2 is null  and ad.res_money_collect2_edit is null) or (ad.res_money_collect2 is null  and ad.res_money_collect2_edit ='') or (ad.res_money_collect2 ='' and  ad.derived_payment_outcome <> 'Signed') )  THEN ad.bill_number END)", 'count_cash_blank');
 
-//Cash/Chq/SB
-    $query->addexpression("COUNT(CASE WHEN  pt.field_payment_terms_value = 'Cash/Chq/SB'  AND (CASE WHEN ad.res_money_collect2_edit IN ($cash_chq_sb_lower) THEN 1 ELSE  (ad.res_money_collect2 IN ($cash_chq_sb) OR ad.derived_payment_outcome = 'Signed'  ) END) THEN ad.bill_number END)", 'count_cash_chq_sb');
-    $query->addexpression("COUNT(CASE WHEN  pt.field_payment_terms_value = 'Cash/Chq/SB' AND (CASE WHEN ad.res_money_collect2_edit NOT IN ($cash_chq_sb_lower) THEN 1 ELSE  (ad.res_money_collect2  NOT IN ($cash_chq_sb) AND ad.derived_payment_outcome != 'Signed' ) END) THEN ad.bill_number END)", 'not_count_cash_chq_sb');
-    $query->addexpression("COUNT(CASE WHEN  pt.field_payment_terms_value = 'Cash/Chq/SB' AND ((ad.res_money_collect2 is null  and ad.res_money_collect2_edit is null) or (ad.res_money_collect2 is null  and ad.res_money_collect2_edit ='') or (ad.res_money_collect2 ='' and  ad.derived_payment_outcome <> 'Signed') ) THEN ad.bill_number END)", 'count_cash_sb_blank');
+//Cash/Cheque/Signed Bill
+    $query->addexpression("COUNT(CASE WHEN  pt.field_payment_terms_value = 'Cash/Cheque/Signed Bill'  AND (CASE WHEN ad.res_money_collect2_edit IN ($cash_chq_sb_lower) THEN 1 ELSE  (ad.res_money_collect2 IN ($cash_chq_sb) OR ad.derived_payment_outcome = 'Signed'  ) END) THEN ad.bill_number END)", 'count_cash_chq_sb');
+    $query->addexpression("COUNT(CASE WHEN  pt.field_payment_terms_value = 'Cash/Cheque/Signed Bill' AND (CASE WHEN ad.res_money_collect2_edit NOT IN ($cash_chq_sb_lower) THEN 1 ELSE  (ad.res_money_collect2  NOT IN ($cash_chq_sb) AND ad.derived_payment_outcome != 'Signed' ) END) THEN ad.bill_number END)", 'not_count_cash_chq_sb');
+    $query->addexpression("COUNT(CASE WHEN  pt.field_payment_terms_value = 'Cash/Cheque/Signed Bill' AND ((ad.res_money_collect2 is null  and ad.res_money_collect2_edit is null) or (ad.res_money_collect2 is null  and ad.res_money_collect2_edit ='') or (ad.res_money_collect2 ='' and  ad.derived_payment_outcome <> 'Signed') ) THEN ad.bill_number END)", 'count_cash_sb_blank');
 
 //Only Cash
     $query->addexpression("COUNT(CASE WHEN  pt.field_payment_terms_value = 'Only Cash' AND (CASE WHEN ad.res_money_collect2_edit IN ('cash') THEN 1 ELSE  ad.res_money_collect2 IN ('Cash','Cash,Cash')  END) THEN ad.bill_number END)", 'count_only_cash');
@@ -1099,14 +1099,14 @@ function send_email_pt_compliance() {
       $payment['pt']['not_count_cash_chq' . $i] = 'Not Compliant';
       $payment['pt']['count_cash_blank' . $i] = 'Not Entered';
 
-      //Cash/Chq
-      $payment['cash_chq']['payment_terms_chq'] = 'Cash/Chq';
+      //Cash/Cheque
+      $payment['cash_chq']['payment_terms_chq'] = 'Cash/Cheque';
       $payment['cash_chq']['count_cash_chq' . $i] = $val['count_cash_chq'];
       $payment['cash_chq']['not_count_cash_chq' . $i] = $val['not_count_cash_chq'];
       $payment['cash_chq']['count_cash_blank' . $i] = $val['count_cash_blank'];
 
-      //Cash/Chq/Sb
-      $payment['cash_chq_sb']['payment_terms_cash_chq_sb'] = 'Cash/Chq/SB';
+      //Cash/Cheque/Sb
+      $payment['cash_chq_sb']['payment_terms_cash_chq_sb'] = 'Cash/Cheque/Signed Bill';
       $payment['cash_chq_sb']['count_cash_chq_sb' . $i] = $val['count_cash_chq_sb'];
       $payment['cash_chq_sb']['not_count_cash_chq_sb' . $i] = $val['not_count_cash_chq_sb'];
       $payment['cash_chq_sb']['count_cash_sb_blank' . $i] = $val['count_cash_sb_blank'];
