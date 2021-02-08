@@ -364,7 +364,7 @@ function reverse_pickup_views_data() {
         ),
     );
     
-    $data['order_receive_data']['accpeted_isl'] = array(
+    $data['order_receive_data']['accepted_isl'] = array(
         'title' => t('Accepted ISL'),
         'help' => t('Accepted ISL'),
         'field' => array(
