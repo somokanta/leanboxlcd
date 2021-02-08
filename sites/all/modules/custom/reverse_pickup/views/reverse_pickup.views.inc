@@ -364,6 +364,20 @@ function reverse_pickup_views_data() {
         ),
     );
     
+    $data['order_receive_data']['accpeted_isl'] = array(
+        'title' => t('Accepted ISL'),
+        'help' => t('Accepted ISL'),
+        'field' => array(
+            'handler' => 'views_handler_field_numeric',
+        ),
+        'sort' => array(
+            'handler' => 'views_handler_sort',
+        ),
+        'filter' => array(
+            'handler' => 'views_handler_filter_numeric',
+        ),
+    );
+    
     $data['oms_api_log']['table'] = array(
         'group' => t('OMS API LOG'),
         'title' => t('OMS API LOG'),

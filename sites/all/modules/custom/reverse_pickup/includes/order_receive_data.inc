@@ -31,6 +31,7 @@ function order_receive_data_callback($data) {
             $ean_code = trim($val['EAN Code']);
             $crate_id = trim($val['Crate ID']);
             $expiry_date = trim($val['Expiry Date']);            
+            $accepted_isl = trim($val['Accepted ISL']);            
 
             $distributor_id = get_distributor_by_title($parent_party_code, 'hul_code_master');
 
@@ -43,6 +44,7 @@ function order_receive_data_callback($data) {
                 $res[$k]['LBSKUID'] = $lb_sku_id;
                 $res[$k]['PKD'] = $pkd;
                 $res[$k]['Expiry Date'] = $expiry_date;
+                $res[$k]['Accepted ISL'] = $accepted_isl;
             }
             $bill_number = validate_content_title($value['Parent Bill No'], 'sales_register_data');
 
@@ -55,6 +57,7 @@ function order_receive_data_callback($data) {
                     $res[$k]['LBSKUID'] = $lb_sku_id;
                     $res[$k]['PKD'] = $pkd;
                     $res[$k]['Expiry Date'] = $expiry_date;
+                    $res[$k]['Accepted ISL'] = $accepted_isl;
                 } else {
                     $nid = check_bill_exists_with_party($value['Parent Bill No'], 'sales_register_data', $value['Party Code']);
                     if (empty($nid)) {
@@ -65,6 +68,7 @@ function order_receive_data_callback($data) {
                         $res[$k]['LBSKUID'] = $lb_sku_id;
                         $res[$k]['PKD'] = $pkd;
                         $res[$k]['Expiry Date'] = $expiry_date;
+                        $res[$k]['Accepted ISL'] = $accepted_isl;
                     } else {
                         $child_order_id = trim($value['Child Order ID']);
                         $child_order_res = check_child_order_in_order_receive($child_order_id, $sku7_code, strtotime($order_creation_date),$value['Order Type'], $lb_sku_id, $pkd, $distributor_id);
@@ -76,6 +80,7 @@ function order_receive_data_callback($data) {
                             $res[$k]['LBSKUID'] = $lb_sku_id;
                             $res[$k]['PKD'] = $pkd;
                             $res[$k]['Expiry Date'] = $expiry_date;
+                            $res[$k]['Accepted ISL'] = $accepted_isl;
                         } else {
                             $child_order_sales_register = check_child_order_in_sales_register($child_order_id, $distributor_id);
                             if ($child_order_sales_register) {
@@ -86,6 +91,7 @@ function order_receive_data_callback($data) {
                                 $res[$k]['LBSKUID'] = $lb_sku_id;
                                 $res[$k]['PKD'] = $pkd;
                                 $res[$k]['Expiry Date'] = $expiry_date;
+                                $res[$k]['Accepted ISL'] = $accepted_isl;
                             }
                         }
 
@@ -98,6 +104,7 @@ function order_receive_data_callback($data) {
                             $res[$k]['LBSKUID'] = $lb_sku_id;
                             $res[$k]['PKD'] = $pkd;
                             $res[$k]['Expiry Date'] = $expiry_date;
+                            $res[$k]['Accepted ISL'] = $accepted_isl;
                         } else {
                             if ($val['Return Quantity'] > $delivered_qty) {
                                 $res[$k]['flag'] = '0';
@@ -107,6 +114,7 @@ function order_receive_data_callback($data) {
                                 $res[$k]['LBSKUID'] = $lb_sku_id;
                                 $res[$k]['PKD'] = $pkd;
                                 $res[$k]['Expiry Date'] = $expiry_date;
+                                $res[$k]['Accepted ISL'] = $accepted_isl;
                             }
                         }
                     }
@@ -121,6 +129,7 @@ function order_receive_data_callback($data) {
                     $res[$k]['LBSKUID'] = $lb_sku_id;
                     $res[$k]['PKD'] = $pkd;
                     $res[$k]['Expiry Date'] = $expiry_date;
+                    $res[$k]['Accepted ISL'] = $accepted_isl;
                 }
             } else {
                 $child_order_res = check_child_order_in_order_receive($child_order_id, $sku7_code, strtotime($order_creation_date),$value['Order Type'], $lb_sku_id, $pkd,$distributor_id);
@@ -132,6 +141,7 @@ function order_receive_data_callback($data) {
                     $res[$k]['LBSKUID'] = $lb_sku_id;
                     $res[$k]['PKD'] = $pkd;
                     $res[$k]['Expiry Date'] = $expiry_date;
+                    $res[$k]['Accepted ISL'] = $accepted_isl;
                 }
             }
             if ($res[$k]['flag'] != '0') {
@@ -156,6 +166,7 @@ function order_receive_data_callback($data) {
                             'external_dis_id' => $external_dis_code ? $external_dis_code : 0,
                             'type' => 0, //API
                             'expiry_date' => $expiry_date ? $expiry_date : 0,
+                            'accepted_isl' => $accepted_isl ? $accepted_isl : 0,
                             'created_time' => REQUEST_TIME
                         ))
                         ->execute();
@@ -168,6 +179,7 @@ function order_receive_data_callback($data) {
             $res[$k]['LBSKUID'] = $lb_sku_id;
             $res[$k]['PKD'] = $pkd;
             $res[$k]['Expiry Date'] = $expiry_date;
+            $res[$k]['Accepted ISL'] = $accepted_isl;
             $results[] = $res[$k];
         }
     }

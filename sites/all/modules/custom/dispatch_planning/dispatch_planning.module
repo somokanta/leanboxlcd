@@ -3467,7 +3467,7 @@ function dispatch_planning_sales_reg_api($node, $trip_execution_date, $vehicle_n
         $child_bill= $node->field_outlet_order_no[LANGUAGE_NONE][0]['value'];
         
         $query = db_select('order_receive_data', 'od');
-        $query->fields('od', array('ean_code','pkd', 'lb_sku_id','return_qty', 'expiry_date'));
+        $query->fields('od', array('ean_code','pkd', 'lb_sku_id','return_qty', 'expiry_date', 'accepted_isl'));
         $query->condition('od.distributor_id', $node_uid);
 //        if ($parent_bill) {
 //          $query->condition('od.parent_bill_number', $parent_bill);
@@ -3488,6 +3488,9 @@ function dispatch_planning_sales_reg_api($node, $trip_execution_date, $vehicle_n
             
             $billing_data_details_insert[$key]['lbskuid'] = $val1['lb_sku_id'];
             $billing_data_details[$key]['lbskuid'] = $val1['lb_sku_id'];
+            $billing_data_details_insert[$key]['accepted_isl'] = $val1['accepted_isl'];
+            $billing_data_details[$key]['accepted_isl'] = $val1['accepted_isl']; 
+            
             $res[$val1['lb_sku_id'].'#'.$val1['pkd']]['ean_code'] = $val1['ean_code'];
             $res[$val1['lb_sku_id'].'#'.$val1['pkd']]['pkd'] = $val1['pkd'];
             $res[$val1['lb_sku_id'].'#'.$val1['pkd']]['qty'] = $del[$val1['lb_sku_id'].'#'.$val1['pkd']]['qty'];
@@ -3647,6 +3650,7 @@ function dispatch_planning_item_details($billing_data_details, $id) {
               'trip_bill_reference' => $id,
               'res_godown_short' => $data['Sum_of_TOTAL_SALES_QTY'] - $data['sum_net_sales_quantity'],
               'lb_sku_id' => $data['lbskuid'],
+              'accepted_isl' => $data['accepted_isl']
             );
             $query->fields($fields);
             $result_id = $query->execute();
