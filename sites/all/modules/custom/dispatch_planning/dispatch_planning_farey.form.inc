@@ -1273,6 +1273,11 @@ function _edit_trip_delivered_callback_form_submit($form, &$form_state) {
       $not_attempted_status = variable_get('not_attempted_bill_status');
       $not_attempted_reason_for_failure = variable_get('not_attempted_reason_for_failure');
       
+      dpm($collc_mode,'mode');
+      dpm($cheque_file_uri, 'cheque_file_uri');
+      dpm($cash_cheque_file_uri, 'cash_cheque_file_uri');
+      dpm($cash_cheque_bill_file_url, 'cash_cheque_bill_file_url');
+      
       $updated_bill_rows = db_update('dispatch_planning_api_data') // Table name no longer needs {}
           ->fields(array(
             'res_status' => $order_status,
