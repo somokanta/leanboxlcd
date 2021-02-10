@@ -1208,29 +1208,32 @@ function _edit_trip_delivered_callback_form_submit($form, &$form_state) {
         }
       }
       
-      if($collc_mode == 'cheque' && empty($cheque_file_uri)) {
+      if($collc_mode == 'cheque' && empty($cheque_file_uri) || ($collc_mode == 'cash,cheque' && empty($cash_cheque_file_uri))) {
         $query = db_select('dispatch_planning_api_data', 'dpi');
         $query->condition('dpi.distributor_id', $dis_id, '=');
         $query->condition('dpi.runsheet_number', $trip_number, '=');
         $query->condition('dpi.bill_number', $bill_number, '=');
         $query->fields('dpi', array('res_photo_of_cheque'));
-        $cheque_bill_url = $query->execute()->fetchField();
-        if(!empty($cheque_bill_url)) {
-          $cheque_bill_file_url = $cheque_bill_url;
+        $query->fields('dpi', array('res_photo_of_cheque_edit'));
+        $cheque_bill_url = $query->execute()->fetch(PDO::FETCH_ASSOC);
+        if(!empty($cheque_bill_url['res_photo_of_cheque_edit'])) {
+          $cash_cheque_bill_file_url = $cheque_bill_url['res_photo_of_cheque_edit'];
+        }else{
+          $cash_cheque_bill_file_url = $cheque_bill_url['res_photo_of_cheque']; 
         }
       }
       
-      if($collc_mode == 'cash,cheque' && empty($cash_cheque_file_uri)) {
-        $query = db_select('dispatch_planning_api_data', 'dpi');
-        $query->condition('dpi.distributor_id', $dis_id, '=');
-        $query->condition('dpi.runsheet_number', $trip_number, '=');
-        $query->condition('dpi.bill_number', $bill_number, '=');
-        $query->fields('dpi', array('res_photo_of_cheque'));
-        $cash_cheque_bill_url = $query->execute()->fetchField();
-        if(!empty($cash_cheque_bill_url)) {
-          $cash_cheque_bill_file_url = $cash_cheque_bill_url;
-        }
-      }
+//      if($collc_mode == 'cash,cheque' && empty($cash_cheque_file_uri)) {
+//        $query = db_select('dispatch_planning_api_data', 'dpi');
+//        $query->condition('dpi.distributor_id', $dis_id, '=');
+//        $query->condition('dpi.runsheet_number', $trip_number, '=');
+//        $query->condition('dpi.bill_number', $bill_number, '=');
+//        $query->fields('dpi', array('res_photo_of_cheque'));
+//        $cash_cheque_bill_url = $query->execute()->fetchField();
+//        if(!empty($cash_cheque_bill_url)) {
+//          $cash_cheque_bill_file_url = $cash_cheque_bill_url;
+//        }
+//      }
       
       //attempted status
       $not_attempted_status = variable_get('not_attempted_bill_status');
