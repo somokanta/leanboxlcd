@@ -3649,8 +3649,8 @@ function dispatch_planning_item_details($billing_data_details, $id) {
               'sku_description' => $data['sku_description'],
               'trip_bill_reference' => $id,
               'res_godown_short' => $data['Sum_of_TOTAL_SALES_QTY'] - $data['sum_net_sales_quantity'],
-              'lb_sku_id' => $data['lbskuid'],
-              'accepted_isl' => $data['accepted_isl']
+              'lb_sku_id' => $data['lbskuid'] ? $data['lbskuid'] : '',
+              'accepted_isl' => $data['accepted_isl'] ? $data['accepted_isl'] : 0
             );
             $query->fields($fields);
             $result_id = $query->execute();
