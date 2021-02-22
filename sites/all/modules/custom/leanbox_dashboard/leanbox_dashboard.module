@@ -1594,13 +1594,13 @@ function leanbox_dashboard_user_presave(&$edit, $account, $category) {
    }
    
     //New for API
-    $api_data['lcd_distributor_id'] = $edit['field_third_party_username']['und'][0]['value'];
-    $api_data['distributor_name'] = $edit['field_third_party_username']['und'][0]['value'];
-    $api_data['email_id'] = $edit['field_third_party_username']['und'][0]['value'];
-    $api_data['cross_dock_email_id'] = $edit['field_third_party_username']['und'][0]['value'];
-    $api_data['distributor_indentification_code'] = $edit['field_third_party_username']['und'][0]['value'];
-    $api_data['phone_number'] = $edit['field_third_party_username']['und'][0]['value'];
-    $api_data['address'] = $edit['field_third_party_username']['und'][0]['value'];
+    $api_data['lcd_distributor_id'] = $account->uid;
+    $api_data['distributor_name'] = $edit['field_distributor_name']['und'][0]['value'];
+    $api_data['email_id'] = $account->email;
+    $api_data['cross_dock_email_id'] = $edit['field_cross_dock_email_id']['und'][0]['value'];
+    $api_data['distributor_indentification_code'] = $edit['field_distributor_id_code']['und'][0]['value'];
+    $api_data['phone_number'] = $edit['field_mobile_no']['und'][0]['value'];
+    $api_data['address'] = $edit['field_distributor_address']['und'][0]['value'];
     global $base_url;
     watchdog('user data sent', '<pre>' . print_r($api_data, TRUE) . '</pre>');
     $data = json_encode($api_data);
