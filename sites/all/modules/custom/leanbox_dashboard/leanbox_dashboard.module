@@ -1610,7 +1610,7 @@ function leanbox_dashboard_user_presave(&$edit, $account, $category) {
     $api_options = array('headers' => $request_headers, 'method' => 'POST', 'data' => $data);
     $response_data = drupal_http_request($api_url, $api_options);
     $response_data = json_decode($response_data->data);
-    watchdog('user data response', '<pre>' . print_r($api_data, TRUE) . '</pre>');
+    watchdog('user data response', '<pre>' . print_r($response_data, TRUE) . '</pre>');
     //$response_flag = ($response_data->response == 'success') ? 1 : 0;
 }
 
