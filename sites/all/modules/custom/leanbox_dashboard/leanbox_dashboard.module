@@ -1592,7 +1592,7 @@ function leanbox_dashboard_user_presave(&$edit, $account, $category) {
       $edit['field_third_party_username']['und'][0]['value'] = $user_details['field_third_party_username_value'];
       }
    }
-   
+   dpm($account);
     //New for API
     $api_data['lcd_distributor_id'] = $account->uid;
     $api_data['distributor_name'] = $edit['field_distributor_name']['und'][0]['value'];
