@@ -807,7 +807,7 @@ function dispatch_planning_permission() {
 }
 
 /**
- * 
+ *
  * @return array API for PTL data
  */
 function dispatch_planning_services_resources() {
@@ -1320,16 +1320,16 @@ function dispatch_planning_views_api() {
 }
 
 function dispatch_planning_cron_callback() {
-  $thread = variable_get('dispatch_thread', '3'); // number of thread 
+  $thread = variable_get('dispatch_thread', '3'); // number of thread
   $length = variable_get('dispatch_bill_per_thread', '50');
   $total = $thread * $length;
-    
+
   $query = db_select('dispatch_planning_api_log', 'a');
   $query->fields('a', array('id'));
   $query->condition('a.request_flag', 0);
   $query->condition('a.api_type', 'dispatch_planning');
   $res = $query->range(0,$total)->execute()->fetchCol();
-  
+
   //Multi thread
     $script_name = '/leanbox_dispatch_planning_cron_process.php';
     $php_script = getcwd() . $script_name;
@@ -1360,7 +1360,7 @@ function dispatch_planning_cron_process($res){
         $trips = variable_get('new_trip_ids');
         $trip_ids = explode(',', $trips);
 
-        if (!in_array($trip_id, $trip_ids)) { 
+        if (!in_array($trip_id, $trip_ids)) {
           $request_headers = array('Content-Type' => 'application/json', 'Authorization' => 'Token 2972f506c41448cb3456c1c074aed6102183aff9');
           $order_api_url = variable_get('new_dispatch_uri_settings', 'http://13.127.160.72:8080/api/order/v1/manifest/');
         }
@@ -1373,7 +1373,7 @@ function dispatch_planning_cron_process($res){
         //$order_api_url = variable_get('dispatch_uri_settings', 'https://staging.fareye.co/api/v1/job?api_key=l1S6xa5mnxUXDuqv12q7lerLBL9l1ICq');
         $options = array('headers' => $request_headers, 'method' => 'POST', 'data' => $json_api_data, 'timeout'=> 120);
         $response_data = drupal_http_request($order_api_url, $options);
-        
+
         if ($response_data) {
             $response = $response_data->data;
             $response_arr = json_decode($response);
@@ -2121,7 +2121,7 @@ function dispatch_planning_form_save_validate($form, &$form_state) {
           "id" => 'origin',
           "name" => 'origin',
           "lat" => $origin_lat, //'19.1817531000', //
-          "lng" => $origin_long //'72.9972678000',// 
+          "lng" => $origin_long //'72.9972678000',//
         );
         $speed = 0.3;
         $Locations['fleet']['origin']['speed'] = $speed; // speed of the driver
@@ -3306,7 +3306,7 @@ function dispatch_planning_form_views_exposed_form_alter(&$form, &$form_state) {
         else if($combined_status_delivery_pending == 1) {
              $derived_outcome['delivery_pending'] = $delivery_pending;
         }
-            
+
         //$derived_outcome['select_all'] = t('Select All');
         // global config pe deliver and partial deliver are same
         /*if ($delivered == $partial_delivered) {
@@ -3326,7 +3326,7 @@ function dispatch_planning_form_views_exposed_form_alter(&$form, &$form_state) {
         $form['res_status']['#size'] = 1;
        //$form['res_status']['#weight'] = -15;
         $form['res_status']['#options'] = $select + $derived_outcome;
-   
+
     }
 }
 
@@ -3443,10 +3443,10 @@ function dispatch_planning_sales_reg_api($node, $trip_execution_date, $vehicle_n
     $delivery_boy_names = get_delivery_boy_names($node_nid);
     $delivery_boy_arr = explode(",", $delivery_boy_names);
     $merchant_code = variable_get('merchant_code_conf', 'lakme');
-    
+
     foreach ($billing_data_details as $key => $val) {
         $res = array();
-        
+
         $query = db_select('godown_data', 'ga');
         $query->fields('ga', array('godown_short'));
         $query->condition('ga.trip_id', $trip_id);
@@ -3460,12 +3460,12 @@ function dispatch_planning_sales_reg_api($node, $trip_execution_date, $vehicle_n
         $billing_data_details_insert[$key]['sum_net_sales_quantity'] = $dispath_qty; // send dispath_qty in API as well insert in farey table
         unset($billing_data_details[$key]['og_Sum_of_NET_SALES_QTY']); // dont send og_Sum_of_NET_SALES_QTY in API
         unset($billing_data_details[$key]['Sum_of_TOTAL_SALES_QTY']); // dont send Sum_of_TOTAL_SALES_QTY in API
-        
+
         //scan code
         $parent_bill = $node->field_parent_bill_number[LANGUAGE_NONE][0]['value'];
         $parent_bill = $parent_bill ? $parent_bill : $bill_number;
         $child_bill= $node->field_outlet_order_no[LANGUAGE_NONE][0]['value'];
-        
+
         $query = db_select('order_receive_data', 'od');
         $query->fields('od', array('ean_code','pkd', 'lb_sku_id','return_qty', 'expiry_date', 'accepted_isl'));
         $query->condition('od.distributor_id', $node_uid);
@@ -3477,7 +3477,7 @@ function dispatch_planning_sales_reg_api($node, $trip_execution_date, $vehicle_n
         $query->condition('od.sku7_code', $val['sku_code']);
         $order = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
         foreach ($order as $key1 => $val1) {
-            
+
             if ($dispath_qty >= $val1['return_qty']) {
                 $del[$val1['lb_sku_id'].'#'.$val1['pkd']]['qty'] = $val1['return_qty'];
                 $dispath_qty -= $val1['return_qty'];
@@ -3485,12 +3485,12 @@ function dispatch_planning_sales_reg_api($node, $trip_execution_date, $vehicle_n
                 $del[$val1['lb_sku_id'].'#'.$val1['pkd']]['qty'] = $dispath_qty;
                 $dispath_qty = 0;
             }
-            
+
             $billing_data_details_insert[$key]['lbskuid'] = $val1['lb_sku_id'];
             $billing_data_details[$key]['lbskuid'] = $val1['lb_sku_id'];
             $billing_data_details_insert[$key]['accepted_isl'] = $val1['accepted_isl'];
-            $billing_data_details[$key]['accepted_isl'] = $val1['accepted_isl']; 
-            
+            $billing_data_details[$key]['accepted_isl'] = $val1['accepted_isl'];
+
             $res[$val1['lb_sku_id'].'#'.$val1['pkd']]['ean_code'] = $val1['ean_code'];
             $res[$val1['lb_sku_id'].'#'.$val1['pkd']]['pkd'] = $val1['pkd'];
             $res[$val1['lb_sku_id'].'#'.$val1['pkd']]['qty'] = $del[$val1['lb_sku_id'].'#'.$val1['pkd']]['qty'];
@@ -3520,7 +3520,7 @@ function dispatch_planning_sales_reg_api($node, $trip_execution_date, $vehicle_n
     else {
         $job_type = variable_get('dispatch_job_type', 'delivery1');
     }
-    //Delivery App changes as per trips from configuration  
+    //Delivery App changes as per trips from configuration
 
     $api_data['jobType'] = $job_type;  // delivery1 for hul
     $api_data['merchantCode'] = $merchant_code;  // hul for Merchant code
@@ -3547,7 +3547,7 @@ function dispatch_planning_sales_reg_api($node, $trip_execution_date, $vehicle_n
     $api_data['jobData']['bill_value'] = (int) $bill_value;
     $api_data['jobData']['item_details'] = $billing_data_details; // array
     $api_data['jobData']['bill_date'] = $bill_date;
-    $api_data['jobData']['locality'] = 'ABCD_locality';  // Hardcoded as suggested by gaurav  
+    $api_data['jobData']['locality'] = 'ABCD_locality';  // Hardcoded as suggested by gaurav
     $api_data['jobData']['store_sequence_no'] = $store_sequence;  // drs sequence
     $api_data['jobData']['party_name'] = $outlet_data_details['field_party_name_value']; // party name in outlet
     $api_data['jobData']['beat_name'] = $outlet_data_details['field_beat_name_value'];  // beat name in outlet
@@ -3654,13 +3654,13 @@ function dispatch_planning_item_details($billing_data_details, $id) {
             );
             $query->fields($fields);
             $result_id = $query->execute();
-            
+
             //scan_code
             foreach($data['scan_code'] as $key => $val){
                 $ean = $val['ean_code'];
                 $pkd = $val['pkd'];
                 $qty = $val['qty'];
-                
+
                 $query = db_insert('scan_code');
                 $fields = array(
                   'ean_code' => $ean,
@@ -3677,7 +3677,7 @@ function dispatch_planning_item_details($billing_data_details, $id) {
 }
 
 /**
- * 
+ *
  * @param type $node_uid
  * @param type $bill_number
  * @return array
@@ -3709,7 +3709,7 @@ function dispatch_planning_get_billing_data($node_uid, $bill_number) {
 }
 
 /**
- * 
+ *
  * @param type $node_uid
  * @param type $party_code
  * @return array
@@ -3743,7 +3743,7 @@ function dispatch_planning_get_outlet_data($node_uid, $party_code) {
 }
 
 /**
- * 
+ *
  * @param type $node_uid
  * @return string
  */
@@ -3757,7 +3757,7 @@ function dispatch_planning_check_api_authentication($node_uid) {
 }
 
 /**
- * 
+ *
  * @param type $json_api_data
  */
 function dispatch_planning_api_log($json_api_data, $trip_id, $api_type, $dis_id, $api_flag = 0) {
@@ -3775,7 +3775,7 @@ function dispatch_planning_api_log($json_api_data, $trip_id, $api_type, $dis_id,
 }
 
 /**
- * 
+ *
  * @param $response_data (json_decode), $sql_ins_id (serial id)
  */
 function dispatch_planning_api_log_update($response_data, $sql_ins_id, $api_success,$request_flag) {
@@ -3792,7 +3792,7 @@ function dispatch_planning_api_log_update($response_data, $sql_ins_id, $api_succ
 }
 
 /**
- * 
+ *
  * @param type $distributor_id
  * @return type bool false when configuration is not set
  */
@@ -3859,7 +3859,7 @@ function check_tripid_exist_in_farery_table($trip_id, $distributor_id) {
 }
 
 /**
- * function to update dispatch_planning_api table 
+ * function to update dispatch_planning_api table
  *   and call api using drupal_http_request
  * $node type dispatch_data
  * @param object $node
@@ -3901,9 +3901,9 @@ function _update_dispatch_planning_api($node) {
 //        // request log
 //        $api_type = 'dispatch_planning';
 //        $sql_ins_id = dispatch_planning_api_log($json_api_data, $trip_id, $api_type, $dis_id);
-//         
+//
 //        //$order_api_url = 'https://staging.fareye.co/api/v1/job?api_key=l1S6xa5mnxUXDuqv12q7lerLBL9l1ICq';
-//          
+//
 //       //Delivery App changes as per trips from conf
 //        $trips = variable_get('new_trip_ids');
 //        $trip_ids = explode(',', $trips);
@@ -3916,7 +3916,7 @@ function _update_dispatch_planning_api($node) {
 //          $order_api_url = variable_get('dispatch_uri_settings', 'https://staging.fareye.co/api/v1/job?api_key=l1S6xa5mnxUXDuqv12q7lerLBL9l1ICq');
 //        }
 //        //Delivery App changes as per trips from configuration
-//        
+//
 //        $options = array('headers' => $request_headers, 'method' => 'POST', 'data' => $json_api_data, 'timeout'=> 300);
 //        $response_data = drupal_http_request($order_api_url, $options);
 //
@@ -3931,7 +3931,7 @@ function _update_dispatch_planning_api($node) {
 }
 
 /**
- * 
+ *
  * @param type $nid
  * @return type
  */
@@ -3969,7 +3969,7 @@ function _dispatch_planning_get_all_sales_nid($nid) {
 }
 
 /**
- * 
+ *
  * @param type $node_uid
  * @return string
  */
@@ -3983,7 +3983,7 @@ function ptl_check_api_authentication($node_uid) {
 }
 
 /**
- * 
+ *
  * @param type $uid
  * @return string
  */
@@ -3996,7 +3996,7 @@ function dispatch_planning_get_rscode_using_uid($uid) {
 }
 
 /**
- * 
+ *
  * @param type $sku7_code
  * @param type $distributor_id
  * @return type qty for sku in one unit case
@@ -4014,7 +4014,7 @@ function get_sku_unit_case($sku7_code, $distributor_id) {
 }
 
 /**
- * 
+ *
  * @param type $sku7_code
  * @param type $rs_code
  * @return ean
@@ -4119,7 +4119,7 @@ function master_ptl_no_of_bill_lines_by_trip_id($trip_id, $rs_code) {
 }
 
 /**
- * 
+ *
  * @param type $dispatch_data_nid
  * @return type
  */
@@ -4146,7 +4146,7 @@ function _get_van_loading_combination_by_trip($dispatch_data_nid) {
 }
 
 /**
- * 
+ *
  * @param type $ref_no
  * @return type
  */
@@ -4163,13 +4163,13 @@ function _get_bill_row_id_manual_using_reference_no($ref_no) {
     $query = db_select('dispatch_planning_api_data', 'dp');
     $query->fields('dp', array('id'));
     $query->condition('dp.referenceNo', $ref_no);
-    $query->condition('dp.updated_flag', 0);
+    $query->condition('dp.updated_flag', 1, '!=');
     $res = $query->execute()->fetchField();
     return $res;
 }
 
 /**
- * 
+ *
  * @param type $string
  * @param type $trip_id
  */
@@ -4313,7 +4313,7 @@ function get_delivery_summary_full_return_reason_header($trip_id, $distributor_i
     $trip_id_result = array();
     //$user_id = $user->uid;
     if (!empty($trip_id) && !empty($distributor_id)) {
-        //$distributor_id = get_distributorid_of_trip($trip_id);  
+        //$distributor_id = get_distributorid_of_trip($trip_id);
         //$rs_code = dispatch_planning_get_rscode_using_uid($user_id);
         $query = db_select('dispatch_planning_api_data', 'ad');
         $query->condition('ad.delivery_pending_flag', 1, "!=");
@@ -4411,7 +4411,7 @@ function get_cashier_name($trip_id, $distributor_id) {
 }
 
 /**
- * 
+ *
  * @param type $trip_id
  * @return type
  */
@@ -4466,8 +4466,8 @@ function dispatch_planning_views_query_alter(&$view, &$query) {
           array('field' => 'distributor_id', 'left_field' => 'distributor_id'),
         );
     }
-   
-   
+
+
 
             // trip_bill_sku_return_report is not used currently use trip_bill_sku_return_report2.
 //  if (($view->name == 'trip_bill_sku_return_report') || ($view->name == 'trip_bill_sku_return_report' && $view->current_display == 'views_data_export_1')) {
@@ -5421,7 +5421,7 @@ function global_config_form($form, $form_state) {
       '#description' => t('Number of trips to process in one thread for Van planning to SDR app integration'),
       '#default_value' => variable_get('no_trip_per_thread', 3),
     );
-    
+
     $form['dispatch_thread'] = array(
       '#type' => 'textfield',
       '#title' => t('Number Of Thread To Run For Dispatch Planning'),
@@ -5433,8 +5433,8 @@ function global_config_form($form, $form_state) {
       '#title' => t('Bills Per Thread'),
       '#description' => t('Number of Bills to process in one thread for Dispatch planning to Delivery app integration'),
       '#default_value' => variable_get('dispatch_bill_per_thread', 50),
-    );  
-    
+    );
+
     $form['not_attempted_bill_status'] = array(
       '#type' => 'textfield',
       '#title' => t('Not attempted Bill Status'),
@@ -5457,14 +5457,14 @@ function get_bill_status_from_api_table() {
   $res = $query->distinct()->execute()->fetchAllKeyed(0,0);
   if ($res['deliver'] == 'deliver') {
          $res['deliver'] = variable_get('deliver_status'); //'Delivered';
-  } 
+  }
   if ($res['partial_deliver'] == 'partial_deliver') {
          $res['partial_deliver'] = variable_get('partial_deliver_status'); //'Partial Delivered';
   }
   if ($res['undeliver'] == 'undeliver') {
          $res['undeliver'] = variable_get('undeliver_status'); //'Full Returned';
   }
-  
+
   return $res;
 }
 // this function returns res_status value from global configuration
@@ -5474,7 +5474,7 @@ function get_res_status_value($res_status) {
     $partial_delivered = variable_get('partial_deliver_status'); //'Partial Delivered';
     $un_delivered = variable_get('undeliver_status');
     $delivery_pending = variable_get('current_delivery_status');
-    
+
     $derived_outcome['deliver'] = $delivered;
     $derived_outcome['partial_deliver'] = $partial_delivered;
     $derived_outcome['undeliver'] = $un_delivered;
