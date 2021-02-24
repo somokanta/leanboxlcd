@@ -1580,6 +1580,7 @@ function leanbox_dashboard_user_presave(&$edit, $account, $category) {
   $roles = $account->roles;
   $dfe_role_id = get_role_by_name('DFE');
   $rs_role_id = get_role_by_name('RS Admin');
+  $rsop_role_id = get_role_by_name('RS Operator');
 
   if (!empty($roles[$dfe_role_id]) || !empty($roles[$rs_role_id])) {
     $dis_id = $account->field_distributor['und'][0]['value'];
@@ -1594,24 +1595,27 @@ function leanbox_dashboard_user_presave(&$edit, $account, $category) {
    }
 
     //New for API
-    $api_data['lcd_distributor_id'] = $account->uid;
-    $api_data['distributor_name'] = $edit['field_distributor_name']['und'][0]['value'];
-    $api_data['email_id'] = $account->mail;
-    $api_data['cross_dock_email_id'] = $edit['field_cross_dock_email_id']['und'][0]['value'];
-    $api_data['distributor_indentification_code'] = $edit['field_distributor_id_code']['und'][0]['value'];
-    $api_data['phone_number'] = $edit['field_mobile_no']['und'][0]['value'];
-    $api_data['address'] = $edit['field_distributor_address']['und'][0]['value'];
-    global $base_url;
-    watchdog('user data sent', '<pre>' . print_r($api_data, TRUE) . '</pre>');
-    $data = json_encode($api_data);
-    $request_headers = array('Content-Type' => 'application/json', 'Authorization' => $authorization);
-    $calling_url = str_replace("lcd", "lak", $base_url); //call drupal 7 URL
-    $api_url = $calling_url. '/distributor_mapping/distributor_mapping_data';
-    $api_options = array('headers' => $request_headers, 'method' => 'POST', 'data' => $data);
-    $response_data = drupal_http_request($api_url, $api_options);
-    $response_data = json_decode($response_data->data);
-    watchdog('user data response', '<pre>' . print_r($response_data, TRUE) . '</pre>');
-    //$response_flag = ($response_data->response == 'success') ? 1 : 0;
+   if($edit['field_distributor']['und'][0]['value'] == $account->uid && !empty($roles[$rsop_role_id])){
+        $api_data['lcd_distributor_id'] = $account->uid;
+        $api_data['distributor_name'] = $edit['field_distributor_name']['und'][0]['value'];
+        $api_data['email_id'] = $account->mail;
+        $api_data['cross_dock_email_id'] = $edit['field_cross_dock_email_id']['und'][0]['value'];
+        $api_data['distributor_indentification_code'] = $edit['field_distributor_id_code']['und'][0]['value'];
+        $api_data['external_distributor_code'] = $edit['field_external_distributor_code']['und'][0]['value'];
+        $api_data['phone_number'] = $edit['field_mobile_no']['und'][0]['value'];
+        $api_data['address'] = $edit['field_distributor_address']['und'][0]['value'];
+        global $base_url;
+        watchdog('user data sent', '<pre>' . print_r($api_data, TRUE) . '</pre>');
+        $data = json_encode($api_data);
+        $request_headers = array('Content-Type' => 'application/json', 'Authorization' => $authorization);
+        $calling_url = str_replace("lcd", "lak", $base_url); //call drupal 7 URL
+        $api_url = $calling_url. '/distributor_mapping/distributor_mapping_data';
+        $api_options = array('headers' => $request_headers, 'method' => 'POST', 'data' => $data);
+        $response_data = drupal_http_request($api_url, $api_options);
+        $response_data = json_decode($response_data->data);
+        watchdog('user data response', '<pre>' . print_r($response_data, TRUE) . '</pre>');
+        //$response_flag = ($response_data->response == 'success') ? 1 : 0;
+   }
 }
 
 /**
