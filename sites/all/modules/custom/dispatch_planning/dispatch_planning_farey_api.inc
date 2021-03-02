@@ -218,7 +218,7 @@ function fetch_dispatch_planning_api_data($data) {
 
             //if pkd does not match then insert in order receive table
             $query = db_select('order_receive_data', 'od');
-            $query->fields('od', array('order_creation_date', 'parent_party_code', 'party_code', 'product_name', 'beat_name'));
+            $query->fields('od', array('order_creation_date', 'parent_party_code', 'party_code', 'mrp','product_name', 'beat_name','external_dis_id'));
             $query->condition('od.parent_bill_number', $bill_det['parent_bill'], '=');
             $query->condition('od.child_order_id', $bill_det['child_bill'], '=');
             $query->condition('od.sku7_code', $value['sku_code'], '=');
@@ -239,7 +239,7 @@ function fetch_dispatch_planning_api_data($data) {
                   'pkd' => $v['pkd'] ? $v['pkd'] : '',
                   'sku7_code' => $value['sku_code'] ? $value['sku_code'] : '',                    
                   'product_name' => $res['party_code'] ? $res['party_code'] : '',                 
-                  'mrp' => $res['party_code'] ? $res['party_code'] : '',                  
+                  'mrp' => $res['mrp'] ? $res['mrp'] : 0,                  
                   'return_qty' => 0,                    
                   'beat_name' => $res['beat_name'] ? $res['beat_name'] : '',                    
                   'distributor_id' => $dis_id,
@@ -247,7 +247,7 @@ function fetch_dispatch_planning_api_data($data) {
                   'flag' => 1,
                   'ean_code' => $v['ean_code'] ? $v['ean_code'] : '',
                   'crate_id' => '',
-                  'external_dis_id' => '' ? '' : 0,
+                  'external_dis_id' => $res['external_dis_id'] ? $res['external_dis_id'] : 0,
                   'scan_qty' => $v['scan_qty'],
                   'expiry_date' => $v['expiry_date'] ? $v['expiry_date'] : 0,
                   'accepted_isl' => 0,
