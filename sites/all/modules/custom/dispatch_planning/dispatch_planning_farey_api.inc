@@ -215,6 +215,46 @@ function fetch_dispatch_planning_api_data($data) {
                 ->condition('distributor_id', $dis_id, '=')
                 ->execute();
             }   
+
+            //if pkd does not match then insert in order receive table
+            $query = db_select('order_receive_data', 'od');
+            $query->fields('od', array('order_creation_date', 'parent_party_code', 'party_code', 'product_name', 'beat_name'));
+            $query->condition('od.parent_bill_number', $bill_det['parent_bill'], '=');
+            $query->condition('od.child_order_id', $bill_det['child_bill'], '=');
+            $query->condition('od.sku7_code', $value['sku_code'], '=');
+            $query->condition('od.pkd', $v['pkd'], '!=');
+            $query->condition('od.lb_sku_id', $value['lbskuid'], '=');
+            $query->condition('od.distributor_id', $dis_id, '=');
+            $res = $query->execute()->fetch(PDO::FETCH_ASSOC);
+            if($res){
+              $result = db_insert('order_receive_data')
+              ->fields(array(
+                  'order_creation_date' => $res['order_creation_date'] ? $res['order_creation_date'] : 0,
+                  'parent_bill_number' => $bill_det['parent_bill'] ? $bill_det['parent_bill'] : '',
+                  'child_order_id' => $bill_det['child_bill'] ? $bill_det['child_bill'] : '',
+                  'order_type' => $data['jobType'] ? $data['jobType'] : '',
+                  'parent_party_code' => $res['parent_party_code'] ? $res['parent_party_code'] : '',
+                  'party_code' => $res['party_code'] ? $res['party_code'] : '',
+                  'lb_sku_id' => $value['lbskuid'] ? $value['lbskuid'] : '',
+                  'pkd' => $v['pkd'] ? $v['pkd'] : '',
+                  'sku7_code' => $value['sku_code'] ? $value['sku_code'] : '',                    
+                  'product_name' => $res['party_code'] ? $res['party_code'] : '',                 
+                  'mrp' => $res['party_code'] ? $res['party_code'] : '',                  
+                  'return_qty' => 0,                    
+                  'beat_name' => $res['beat_name'] ? $res['beat_name'] : '',                    
+                  'distributor_id' => $dis_id,
+                  'type' => 0, //API
+                  'flag' => 1,
+                  'ean_code' => $v['ean_code'] ? $v['ean_code'] : '',
+                  'crate_id' => '',
+                  'external_dis_id' => '' ? '' : 0,
+                  'scan_qty' => $v['scan_qty'],
+                  'expiry_date' => $v['expiry_date'] ? $v['expiry_date'] : 0,
+                  'accepted_isl' => 0,
+                  'created_time' => REQUEST_TIME
+              ))
+              ->execute();
+            }
                
            }else{           
             if ($ret_cash == $res_data['dispatch_qty'] ) {
