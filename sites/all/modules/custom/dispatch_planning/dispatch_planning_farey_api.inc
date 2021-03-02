@@ -203,7 +203,7 @@ function fetch_dispatch_planning_api_data($data) {
                 ->execute();  
                 
                 
-              db_update('order_receive_data') // Table name no longer needs {}
+              $row_update = db_update('order_receive_data') // Table name no longer needs {}
                 ->fields(array(
                   'scan_qty' => isset($v['scan_qty']) ? $v['scan_qty'] : 0,
                 ))
@@ -214,7 +214,49 @@ function fetch_dispatch_planning_api_data($data) {
                 ->condition('lb_sku_id', $value['lbskuid'], '=')
                 ->condition('distributor_id', $dis_id, '=')
                 ->execute();
-            }   
+            
+              if(empty($row_update)){   
+                //if pkd does not match then insert in order receive table
+                $query = db_select('order_receive_data', 'od');
+                $query->fields('od', array('order_creation_date', 'parent_party_code', 'party_code', 'mrp','product_name', 'beat_name','external_dis_id'));
+                $query->condition('od.parent_bill_number', $bill_det['parent_bill'], '=');
+                $query->condition('od.child_order_id', $bill_det['child_bill'], '=');
+                $query->condition('od.sku7_code', $value['sku_code'], '=');
+                $query->condition('od.pkd', $v['pkd'], '!=');
+                $query->condition('od.lb_sku_id', $value['lbskuid'], '=');
+                $query->condition('od.distributor_id', $dis_id, '=');
+                $order_data = $query->execute()->fetch(PDO::FETCH_ASSOC);
+                if($order_data){
+                  $result = db_insert('order_receive_data')
+                  ->fields(array(
+                      'order_creation_date' => $order_data['order_creation_date'] ? $order_data['order_creation_date'] : 0,
+                      'parent_bill_number' => $bill_det['parent_bill'] ? $bill_det['parent_bill'] : '',
+                      'child_order_id' => $bill_det['child_bill'] ? $bill_det['child_bill'] : '',
+                      'order_type' => $data['jobType'] ? $data['jobType'] : '',
+                      'parent_party_code' => $order_data['parent_party_code'] ? $order_data['parent_party_code'] : '',
+                      'party_code' => $order_data['party_code'] ? $order_data['party_code'] : '',
+                      'lb_sku_id' => $value['lbskuid'] ? $value['lbskuid'] : '',
+                      'pkd' => $v['pkd'] ? $v['pkd'] : '',
+                      'sku7_code' => $value['sku_code'] ? $value['sku_code'] : '',                    
+                      'product_name' => $order_data['party_code'] ? $order_data['party_code'] : '',                 
+                      'mrp' => $order_data['mrp'] ? $order_data['mrp'] : '',                  
+                      'return_qty' => 0,                    
+                      'beat_name' => $order_data['beat_name'] ? $order_data['beat_name'] : '',                    
+                      'distributor_id' => $dis_id,
+                      'type' => 0, //API
+                      'flag' => 1,
+                      'ean_code' => $v['ean_code'] ? $v['ean_code'] : '',
+                      'crate_id' => '',
+                      'external_dis_id' => $order_data['external_dis_id'] ? $order_data['external_dis_id'] : 0,
+                      'scan_qty' => $v['scan_qty'],
+                      'expiry_date' => $v['expiry_date'] ? $v['expiry_date'] : 0,
+                      'accepted_isl' => 0,
+                      'created_time' => REQUEST_TIME
+                  ))
+                  ->execute();
+                }
+              }   
+            }
                
            }else{           
             if ($ret_cash == $res_data['dispatch_qty'] ) {
