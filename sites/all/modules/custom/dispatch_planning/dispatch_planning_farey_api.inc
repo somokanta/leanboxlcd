@@ -190,7 +190,9 @@ function fetch_dispatch_planning_api_data($data) {
                 ->condition('trip_bill_reference', $bill_row_id, '=')
                 ->condition('sku_code', $value['sku_code'], '=')
                 ->execute();
-              
+
+              $order_receive_id = get_order_receive_data($bill_det['parent_bill'], $bill_det['child_bill'], $value['sku_code'], $value['pkd'], $value['lbskuid'], $dis_id);
+
             //scan qty in order receive table
             foreach($value['scan_code'] as $v){
               //scan_images
@@ -201,61 +203,18 @@ function fetch_dispatch_planning_api_data($data) {
                 ->condition('trip_bill_reference', $bill_row_id, '=')
                 ->condition('sku_code', $value['sku_code'], '=')
                 ->execute();  
-                
-                
-              $row_update = db_update('order_receive_data') // Table name no longer needs {}
-                ->fields(array(
-                  'scan_qty' => isset($v['scan_qty']) ? $v['scan_qty'] : 0,
-                ))
-                ->condition('parent_bill_number', $bill_det['parent_bill'], '=')
-                ->condition('child_order_id', $bill_det['child_bill'], '=')
-                ->condition('sku7_code', $value['sku_code'], '=')
-                ->condition('pkd', $v['pkd'], '=')
-                ->condition('lb_sku_id', $value['lbskuid'], '=')
-                ->condition('distributor_id', $dis_id, '=')
-                ->execute();
-            
-              if(empty($row_update)){   
-                //if pkd does not match then insert in order receive table
-                $query = db_select('order_receive_data', 'od');
-                $query->fields('od', array('order_creation_date', 'parent_party_code', 'party_code', 'mrp','product_name', 'beat_name','external_dis_id'));
-                $query->condition('od.parent_bill_number', $bill_det['parent_bill'], '=');
-                $query->condition('od.child_order_id', $bill_det['child_bill'], '=');
-                $query->condition('od.sku7_code', $value['sku_code'], '=');
-                $query->condition('od.pkd', $v['pkd'], '!=');
-                $query->condition('od.lb_sku_id', $value['lbskuid'], '=');
-                $query->condition('od.distributor_id', $dis_id, '=');
-                $order_data = $query->execute()->fetch(PDO::FETCH_ASSOC);
-                if($order_data){
-                  $result = db_insert('order_receive_data')
+
+                if($order_receive_id){
+                  $result = db_insert('order_receive_scanned_details')
                   ->fields(array(
-                      'order_creation_date' => $order_data['order_creation_date'] ? $order_data['order_creation_date'] : 0,
-                      'parent_bill_number' => $bill_det['parent_bill'] ? $bill_det['parent_bill'] : '',
-                      'child_order_id' => $bill_det['child_bill'] ? $bill_det['child_bill'] : '',
-                      'order_type' => $data['jobType'] ? $data['jobType'] : '',
-                      'parent_party_code' => $order_data['parent_party_code'] ? $order_data['parent_party_code'] : '',
-                      'party_code' => $order_data['party_code'] ? $order_data['party_code'] : '',
-                      'lb_sku_id' => $value['lbskuid'] ? $value['lbskuid'] : '',
-                      'pkd' => $v['pkd'] ? $v['pkd'] : '',
-                      'sku7_code' => $value['sku_code'] ? $value['sku_code'] : '',                    
-                      'product_name' => $order_data['party_code'] ? $order_data['party_code'] : '',                 
-                      'mrp' => $order_data['mrp'] ? $order_data['mrp'] : '',                  
-                      'return_qty' => 0,                    
-                      'beat_name' => $order_data['beat_name'] ? $order_data['beat_name'] : '',                    
-                      'distributor_id' => $dis_id,
-                      'type' => 0, //API
-                      'flag' => 1,
-                      'ean_code' => $v['ean_code'] ? $v['ean_code'] : '',
-                      'crate_id' => '',
-                      'external_dis_id' => $order_data['external_dis_id'] ? $order_data['external_dis_id'] : 0,
-                      'scan_qty' => $v['scan_qty'],
-                      'expiry_date' => $v['expiry_date'] ? $v['expiry_date'] : 0,
-                      'accepted_isl' => 0,
+                      'scanned_pkd' => $v['pkd'] ? $v['pkd'] : 0,
+                      'scanned_qty' => $v['scan_qty'] ? $v['scan_qty'] : 0,
+                      'scanned_expiry_date' => $v['expiry_date'] ? $v['expiry_date'] : 0,
+                      'unique_id' => $order_receive_id ? $order_receive_id : 0,
                       'created_time' => REQUEST_TIME
-                  ))
-                  ->execute();
-                }
-              }   
+                      ))
+                      ->execute();
+                } 
             }
                
            }else{           
@@ -491,4 +450,17 @@ function get_distributor_id_from_reference_number($reference_no) {
      $distributor_id = $query->execute()->fetchField();
   }  
   return $distributor_id;
+}
+
+function get_order_receive_data($parent_bill, $child_bill, $sku_code, $pkd, $lbskuid, $dis_id){
+    $query = db_select('order_receive_data','od'); // Table name no longer needs {}
+    $query->fields('od', array('id'));
+    $query->condition('od.parent_bill_number', $parent_bill, '=');
+    $query->condition('od.child_order_id', $child_bill, '=');
+    $query->condition('od.sku7_code', $sku_code, '=');
+    $query->condition('od.pkd', $pkd, '=');
+    $query->condition('od.lb_sku_id', $lbskuid, '=');
+    $query->condition('od.distributor_id', $dis_id, '=');
+    $id = $query->execute()->fetchField();
+    return $id;
 }
