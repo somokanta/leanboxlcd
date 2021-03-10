@@ -317,3 +317,49 @@ function reverse_pickup_update_7007() {
     }
   }
 }
+
+function reverse_pickup_update_7008() {
+  $schema['order_receive_scanned_details'] = array(
+    'description' => 'order receive scanned details',
+    'fields' => array(
+      'id' => array(
+        'description' => t('Unique id'),
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'scanned_pkd' => array(
+        'description' => 'Scanned PKD',
+        'type' => 'int',
+        'not null' => FALSE,
+        'default' => 0,
+      ),
+      'scanned_qty' => array(
+        'description' => 'Scanned Qty',
+        'type' => 'int',
+        'not null' => FALSE,
+        'default' => 0,
+      ),
+      'scanned_expiry_date' => array(
+        'description' => 'Scanned Expiry Date',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'unique_id' => array(
+        'description' => t('Order Receive Unqiue ID'),
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'created_time' => array(
+        'description' => 'Created Time',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+       ),
+    ),
+    'primary key' => array('id'),
+  );
+
+  db_create_table('order_receive_scanned_details', $schema['order_receive_scanned_details']);
+}
