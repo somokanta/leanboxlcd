@@ -71,9 +71,11 @@ function insert_tester_order_data_in_custom_billing_table($new_bill_number, $ord
     $bill_value = 0;
     $query = db_select('order_receive_data', 'a');
     $query->fields('a');
+    $query->addExpression('SUM(a.return_qty)', 'return_qty');
     $query->condition('a.parent_bill_number', $order_data['parent_bill_number'], '=');
     $query->condition('a.parent_party_code', $order_data['parent_party_code'], '=');
     $query->condition('a.child_order_id', $order_data['child_order_id'], '=');
+    $query->groupBy('a.parent_bill_number,a.parent_party_code,a.child_order_id,a.sku7_code');
     $res = $query->execute()->fetchAll(PDO::FETCH_ASSOC);
 
     foreach ($res as $key => $data) {
